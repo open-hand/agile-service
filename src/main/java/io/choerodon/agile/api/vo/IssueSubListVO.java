@@ -23,6 +23,7 @@ public class IssueSubListVO {
     private Long statusId;
 
     @ApiModelProperty(value = "经办人id")
+    @Encrypt
     private Long assigneeId;
 
     @ApiModelProperty(value = "项目id")
@@ -69,6 +70,7 @@ public class IssueSubListVO {
     private Long objectVersionNumber;
 
     @ApiModelProperty(value = "创建人")
+    @Encrypt
     private Long createdBy;
 
     @ApiModelProperty(value = "星标")
