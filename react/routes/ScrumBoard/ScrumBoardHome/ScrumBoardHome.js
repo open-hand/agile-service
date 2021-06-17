@@ -87,6 +87,9 @@ class ScrumBoardHome extends Component {
   componentWillUnmount() {
     this.dataConverter = null;
     ScrumBoardStore.resetDataBeforeUnmount();
+    // 退出全屏
+    screenfull.exit();
+    document.body.classList.remove('c7n-scrumboard-fullScreen');
   }
 
   getBoard = async (noRefresh) => {
@@ -345,9 +348,7 @@ class ScrumBoardHome extends Component {
                 name: '更多操作',
                 groupBtnItems: [{
                   name: '配置看板',
-                  handler: async () => {
-                    await screenfull.exit();
-                    document.body.classList.remove('c7n-scrumboard-fullScreen');
+                  handler: () => {
                     to(LINK_URL.scrumboardSetting, {
                       params: {
                         boardId: ScrumBoardStore.getSelectedBoard,
