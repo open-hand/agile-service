@@ -21,7 +21,7 @@ function getSearchObj(values = {}) {
         && values.status && values.status.length > 0 ? values.status : [],
     },
     searchArgs,
-    contents: values.params || [],
+    contents: values.params ? [values.params] : [],
   };
 }
 function ReleaseHomeHoc() {
