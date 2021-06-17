@@ -2,8 +2,9 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { asyncRouter, nomatch, Charts } from '@choerodon/boot';
 import { PermissionRoute } from '@choerodon/master';
+import { get } from '@choerodon/inject';
 
-const ReportHostHome = asyncRouter(() => (import('./Home')));
+const ReportRoutes = get('agile:ProgramReportRoutes');
 const BurndownChart = asyncRouter(() => (import('./BurndownChart')));
 const sprintReport = asyncRouter(() => (import('./SprintReport')));
 const Accumulation = asyncRouter(() => (import('./Accumulation')));
@@ -62,6 +63,7 @@ const ReportHostIndex = ({ match }) => (
       path={`${match.url}/versionBurndown`}
       component={VersionBurndown}
     />
+    {ReportRoutes && ReportRoutes({ match })}
     <Route path="*" component={nomatch} />
   </Switch>
 );
