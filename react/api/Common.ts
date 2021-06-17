@@ -34,7 +34,6 @@ class CommonApi extends Api<CommonApi> {
     return this.request({
       method: 'get',
       url: `${this.prefix}/art/isArtDoding`,
-      cache: true,
     });
   }
 
@@ -61,7 +60,7 @@ class CommonApi extends Api<CommonApi> {
     return this.request({
       method: 'get',
       url: `iam/choerodon/v1/organizations/${getOrganizationId()}/projects/${projectId || getProjectId()}/program`,
-      cache: true,
+      // cache: true,
     });
   }
 
