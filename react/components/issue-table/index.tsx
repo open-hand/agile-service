@@ -122,6 +122,10 @@ const IssueTable: React.FC<IssueTableProps> = ({
           page={pagination.current}
           pageSize={pagination.pageSize}
           onChange={pagination.onChange}
+          showSizeChangerLabel={false}
+          showTotal={(total, range) => `显示${range[0]}-${range[1]} 共 ${total}条`}
+          showPager
+          showQuickJumper
         />
       </div>
 

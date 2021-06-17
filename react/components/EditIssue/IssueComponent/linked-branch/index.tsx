@@ -78,9 +78,9 @@ const LinkedBranch: React.ForwardRefRenderFunction<{
     const record = r.toData();
     switch (key) {
       case 'delete': {
-        Modal.confirm({
+        Modal.open({
           title: '移除关联分支',
-          content: '确定要移除此关联分支吗？',
+          children: `确认删除“${record.branchName}”分支与问题的关联？删除后，问题和此分支的commit信息将一并被移除`,
           okText: '移除',
           onOk: async () => {
             await devOpsApi.project(record.projectId).removeLinkBranch(record.appServiceId, record.branchName, issueId);

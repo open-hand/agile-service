@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Button, Icon } from 'choerodon-ui/pro';
-import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
+import { FuncType } from 'choerodon-ui/pro/lib/button/interface';
 import classNames from 'classnames';
 import FileSaver from 'file-saver';
 import FilePreview from '@/components/Preview/FilePreview';
@@ -26,17 +26,15 @@ const PreviewIssueFile = () => {
     >
       <div className={styles.header}>
         <Button
-          // color={'primary' as ButtonColor}
+          funcType={'flat' as FuncType}
           onClick={handleDownLoadFile}
         >
           {filePreview.name}
           <Icon type="get_app" style={{ marginLeft: 4 }} />
         </Button>
         <Button
-          // color={'primary' as ButtonColor}
           style={{
             marginLeft: 'auto',
-            // background: 'rgba(151, 167, 255, 0.2)',
             borderRadius: '4px',
           }}
           onClick={() => {
@@ -46,9 +44,7 @@ const PreviewIssueFile = () => {
           查看问题详情
         </Button>
         <Button
-          // color={'primary' as ButtonColor}
           style={{
-            // background: 'rgba(151, 167, 255, 0.2)',
             borderRadius: '4px',
             marginLeft: 16,
           }}

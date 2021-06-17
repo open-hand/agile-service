@@ -76,7 +76,7 @@ export default function useTable(getData: TableRequest, options: Options) {
       setCheckValues([]);
     }
   });
-  const { run: query } = useDebounceFn(async (newPage?: number) => {
+  const query = usePersistFn(async (newPage?: number) => {
     setLoading(true);
     const res = await getData({
       page: newPage ?? 1,
@@ -89,7 +89,7 @@ export default function useTable(getData: TableRequest, options: Options) {
       setCurrent(res.number + 1);
       setLoading(false);
     });
-  }, { wait: 500 });
+  });
 
   useMount(() => {
     if (autoQuery) {
