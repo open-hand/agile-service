@@ -20,6 +20,7 @@ import PublicRelease from '../ReleaseComponent/PublicRelease';
 import DeleteReleaseWithIssues from '../ReleaseComponent/DeleteReleaseWithIssues';
 import { openLinkVersionModal } from '../ReleaseComponent/link-program-vesion';
 import { openCreatReleaseVersionModal, openEditReleaseVersionModal } from '../components/create-edit-release-version';
+import openDeleteReleaseVersionModal from '../components/delete-release-version';
 
 const { Column } = Table;
 const { AppState } = stores;
@@ -65,13 +66,20 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
       }
       case 'del': {
         versionApi.loadNamesAndIssueBeforeDel(recordData.versionId).then((res: any) => {
-          setVersionDelInfo({
-            versionName: recordData.name,
-            versionId: recordData.versionId,
-            ...res,
+          // setVersionDelInfo({
+          //   versionName: recordData.name,
+          //   versionId: recordData.versionId,
+          //   ...res,
+          // });
+          openDeleteReleaseVersionModal({
+            handleOk: handleRefresh,
+            versionDelInfo: {
+              versionName: recordData.name,
+              versionId: recordData.versionId,
+              ...res,
+            },
           });
-
-          ReleaseStore.setDeleteReleaseVisible(true);
+          // ReleaseStore.setDeleteReleaseVisible(true);
         }).catch(() => {
         });
         break;
@@ -255,16 +263,7 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
             ) : null)}
           />
         </Table>
-        {createVisible
-          ? (
-            <AddRelease
-              visible={createVisible}
-              onCancel={() => {
-                setCreateVisible(false);
-              }}
-              refresh={handleRefresh}
-            />
-          ) : null}
+
         {versionDelInfo ? (
           <DeleteReleaseWithIssues
             visible={versionDelInfo}
@@ -276,16 +275,7 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
             refresh={handleRefresh}
           />
         ) : null}
-        {editVersionData ? (
-          <EditRelease
-            visible={editVersionData}
-            onCancel={() => {
-              setEditVersionData(undefined);
-            }}
-            refresh={handleRefresh}
-            data={editVersionData}
-          />
-        ) : ''}
+
         {publicVersionVisible ? (
           <PublicRelease
             visible={publicVersionVisible}

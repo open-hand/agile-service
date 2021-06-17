@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   DataSet, DatePicker, Form, Modal, TextField,
 } from 'choerodon-ui/pro';
+import { FieldTrim } from 'choerodon-ui/pro/lib/data-set/enum';
 import TextArea from '@/components/TextArea';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { IModalProps } from '@/common/types';
@@ -37,7 +38,7 @@ const CreatePublishVersion: React.FC<{ modal?: IModalProps } & Partial<PublishVe
     paging: false,
     fields: [
       {
-        name: 'name', label: '版本名称', required: true, validator: handleCheckName,
+        name: 'name', label: '版本名称', required: true, validator: handleCheckName, maxLength: 15, trim: 'both' as FieldTrim,
       },
       {
         name: 'startDate', label: '开始日期', max: 'expectReleaseDate', defaultValue: moment().format('YYYY-MM-DD'),
@@ -78,7 +79,7 @@ const CreatePublishVersion: React.FC<{ modal?: IModalProps } & Partial<PublishVe
   }, [handleSubmit, modal]);
   return (
     <Form dataSet={ds}>
-      <TextField name="name" />
+      <TextField name="name" showLengthInfo />
       <DatePicker name="startDate" />
       <DatePicker name="expectReleaseDate" />
       <TextArea name="description" rows={3} maxLength={30} />

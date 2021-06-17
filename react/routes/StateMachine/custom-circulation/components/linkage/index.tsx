@@ -134,6 +134,7 @@ const Linkage = ({
                   name={typeName}
                   onChange={() => {
                     getField(statusName)?.reset();
+                    linkageDataSet.current?.init(statusName, undefined);
                   }}
                 >
                   {issueTypes?.filter((type: IIssueType) => (issueTypeId && type.id === issueTypeId) || !selectedIssueTypes.includes(type.id)).map((type: IIssueType) => (
