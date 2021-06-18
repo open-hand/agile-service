@@ -2,6 +2,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { asyncRouter, nomatch, Charts } from '@choerodon/boot';
 import { PermissionRoute } from '@choerodon/master';
+import { useTabActiveKey } from '@choerodon/components';
 import { get } from '@choerodon/inject';
 
 const ReportRoutes = get('agile:ProgramReportRoutes');
@@ -14,10 +15,13 @@ const PieChartReport = asyncRouter(() => (import('./pieChart')));
 const VersionReport = asyncRouter(() => (import('./VersionReport')));
 const EpicBurndown = asyncRouter(() => (import('./EpicBurndown')));
 const VersionBurndown = asyncRouter(() => (import('./VersionBurndown')));
-
+const Main = () => {
+  useTabActiveKey(ReportRoutes ? 'program' : 'agile');
+  return <Charts reportType="agile" />;
+};
 const ReportHostIndex = ({ match }) => (
   <Switch>
-    <Route exact path={match.url} component={() => <Charts reportType="agile" />} />
+    <Route exact path={match.url} component={Main} />
     <PermissionRoute
       service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.burndown']}
       path={`${match.url}/burndownchart`}
