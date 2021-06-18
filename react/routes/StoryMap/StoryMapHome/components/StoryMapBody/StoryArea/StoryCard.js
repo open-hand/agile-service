@@ -50,7 +50,7 @@ class StoryCard extends Component {
   handlRemoveStory = (e) => {
     const { story, version, sprint } = this.props;
     e.stopPropagation();
-    Modal.confirm({
+    Modal.open({
       title: '提示',
       children: (
         <div>

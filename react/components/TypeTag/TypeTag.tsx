@@ -11,7 +11,7 @@ interface Props {
   iconSize?: number
 }
 const TypeTag: React.FC<Props> = ({
-  data, showName, style, featureType, iconSize = 26,
+  data, showName, style, featureType, iconSize = 24,
 }) => {
   let {
     colour, name = '', icon,
@@ -49,7 +49,7 @@ const TypeTag: React.FC<Props> = ({
           <Icon
             style={{
               transition: 'none',
-              fontSize: iconSize || '26px',
+              fontSize: iconSize || '24px',
               color: colour || '#fab614',
             }}
             type={icon || 'help'}

@@ -178,7 +178,7 @@ class QuickCreateIssue extends Component {
     const {
       create, loading, currentTypeId, summary,
     } = this.state;
-    const { issueTypes, buttonShowText } = this.props;
+    const { issueTypes, buttonShowText, buttonShow = true } = this.props;
     const currentType = issueTypes.find((t) => t.id === currentTypeId);
 
     const typeList = (
@@ -219,17 +219,21 @@ class QuickCreateIssue extends Component {
           create ? (
             <div style={{ display: 'block', width: '100%' }}>
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <Dropdown overlay={typeList} trigger={['click']}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <TypeTag
-                      data={currentType}
-                    />
-                    <Icon
-                      type="arrow_drop_down"
-                      style={{ fontSize: 16 }}
-                    />
-                  </div>
-                </Dropdown>
+                {
+                  buttonShow && (
+                  <Dropdown overlay={typeList} trigger={['click']}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <TypeTag
+                        data={currentType}
+                      />
+                      <Icon
+                        type="arrow_drop_down"
+                        style={{ fontSize: 16 }}
+                      />
+                    </div>
+                  </Dropdown>
+                  )
+                }
                 <UserDropdown userDropDownRef={this.userDropDownRef} defaultAssignee={this.props.defaultAssignee} key={this.props.defaultAssignee?.id || 'null'} />
                 <Input
                   className="hidden-label"

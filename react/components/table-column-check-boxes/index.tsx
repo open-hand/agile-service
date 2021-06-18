@@ -182,7 +182,7 @@ const TableColumnCheckBoxes: React.FC<Props> = ({
 
   const filteredOptions = options.filter((option) => option.label.indexOf(filter || '') > -1);
   return (
-    <Form dataSet={dataSet} {...formProps} labelLayout={'none' as LabelLayout}>
+    <Form dataSet={dataSet} {...formProps} labelLayout={'none' as LabelLayout} style={{ marginLeft: -5 }}>
       <TextField prefix={<Icon type="search" />} placeholder="请输入搜索内容" style={{ height: 34 }} onChange={handleSearch} clearButton />
       {
         filter && !filteredOptions.length ? (
