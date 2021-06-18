@@ -29,7 +29,6 @@ const ExportIssueContextProvider = injectIntl(observer(
     } = props;
 
     const store = useMemo(() => {
-      console.log('...visibleColumns', visibleColumns);
       if (props.store) {
         // 设置默认选项
         props.store.setDefaultCheckedExportFields(uniq(visibleColumns.concat(props.store.defaultCheckedExportFields)));

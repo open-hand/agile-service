@@ -105,6 +105,7 @@ interface IExportSearch {
     environment?: string[]
     creatorIds?: string
     updatorIds?: string[]
+    tags?:any[]
   },
   searchArgs?: {
     estimatedStartTimeScopeStart?: string,
