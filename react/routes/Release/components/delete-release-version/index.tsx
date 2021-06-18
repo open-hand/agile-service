@@ -68,7 +68,8 @@ const DeletePublishVersion: React.FC<{ modal?: IModalProps } & PublishVersionMod
                                       </span>
                                     ) : ''
                                 }
-                          。相关的问题将移动到下面选择的版本中。
+                          。
+                          {Object.keys(versionDelInfo).length && versionDelInfo.versionNames.length && versionDelInfo.agileIssueCount ? '相关的问题将移动到下面选择的版本中。' : ''}
                         </p>
                       </div>
                     ) : ''
