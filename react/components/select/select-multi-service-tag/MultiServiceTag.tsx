@@ -196,7 +196,7 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = ({
                 getPopupContainer={() => document.getElementById(componentId) as any}
               />
 
-              {record.index !== 0 && <Icon type="delete_sweep-o" className={`${prefixCls}-content-del`} onClick={() => { ds.delete(record, false); }} />}
+              {ds.length > 1 && <Icon type="delete_sweep-o" className={`${prefixCls}-content-del`} onClick={() => { ds.delete(record, false); }} />}
             </div>
           );
         })}
@@ -204,7 +204,7 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = ({
 
       </div>
       <div className={`${prefixCls}-footer`}>
-        <Button funcType={'raised' as any} color={'primary' as any} onClick={handleSave}>确定</Button>
+        <Button funcType={'raised' as any} color={'primary' as any} onClick={handleSave} disabled={disabledAddButton && ds.length <= 1}>确定</Button>
         <Button funcType={'raised' as any} onClick={handleCancel}>取消</Button>
 
       </div>
