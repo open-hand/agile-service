@@ -402,9 +402,6 @@ class ScrumBoardHome extends Component {
             <Loading loading={ScrumBoardStore.getSpinIf} />
             <div className="c7n-scrumboard">
               <div style={{ display: 'table', minWidth: '100%' }}>
-                <div className="c7n-scrumboard-header">
-                  <StatusColumn />
-                </div>
                 {(!ScrumBoardStore.didCurrentSprintExist
                   || ((!ScrumBoardStore.otherIssue || ScrumBoardStore.otherIssue.length === 0)
                     && (!ScrumBoardStore.interconnectedData
@@ -416,19 +413,24 @@ class ScrumBoardHome extends Component {
                         />
                   )
                   : (
-                    <div
-                      className="c7n-scrumboard-content"
-                    >
-                      <div className="c7n-scrumboard-container">
-                        <SwimLane
-                          mode={ScrumBoardStore.getSwimLaneCode}
-                          allDataMap={this.dataConverter.getAllDataMap()}
-                          mapStructure={ScrumBoardStore.getMapStructure}
-                          onDragEnd={this.onDragEnd}
-                          onDragStart={this.onDragStart}
-                        />
+                    <>
+                      <div className="c7n-scrumboard-header">
+                        <StatusColumn />
                       </div>
-                    </div>
+                      <div
+                        className="c7n-scrumboard-content"
+                      >
+                        <div className="c7n-scrumboard-container">
+                          <SwimLane
+                            mode={ScrumBoardStore.getSwimLaneCode}
+                            allDataMap={this.dataConverter.getAllDataMap()}
+                            mapStructure={ScrumBoardStore.getMapStructure}
+                            onDragEnd={this.onDragEnd}
+                            onDragStart={this.onDragStart}
+                          />
+                        </div>
+                      </div>
+                    </>
                   )}
               </div>
             </div>

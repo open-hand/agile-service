@@ -62,7 +62,10 @@ class QuickCreateIssue extends Component {
   };
 
   handleCreate = debounce(async () => {
-    const { currentTypeId } = this.state;
+    const { currentTypeId, loading } = this.state;
+    if (loading) {
+      return;
+    }
     const {
       issueTypes, relateIssueId, sprintId, epicId, versionIssueRelVOList: propsVersionIssueRelVOList, chosenFeatureId, isInProgram, cantCreateEvent,
     } = this.props;
