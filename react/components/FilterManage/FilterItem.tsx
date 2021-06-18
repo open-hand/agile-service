@@ -43,14 +43,12 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
     });
   }, [filterId, objectVersionNumber, onSubmit]);
   const handleDelete = useCallback(() => {
-    Modal.confirm({
+    Modal.open({
       title: '删除筛选',
       children: (
         <div>
           <p style={{ marginBottom: 10 }}>
-            {'确认要删除筛选 '}
-            {name}
-            {' ？'}
+            {`确认要删除筛选“${name}”？`}
           </p>
         </div>
       ),
