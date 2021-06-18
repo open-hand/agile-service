@@ -99,8 +99,8 @@ public class EncryptionUtils {
             if (!ObjectUtils.isEmpty(value) && !value.isEmpty()) {
                 filterOptions.add(customValue);
             }
-        } else if ("data".equals(key)) {
-            if (!ObjectUtils.isEmpty(jsonObject.get("startTime")) && !ObjectUtils.isEmpty(jsonObject.get("endTime"))) {
+        } else if (StringUtils.contains(key, "date")) {
+            if (!ObjectUtils.isEmpty(jsonObject.get("startDate")) && !ObjectUtils.isEmpty(jsonObject.get("endDate"))) {
                 filterOptions.add(customValue);
             }
         } else {
@@ -677,7 +677,7 @@ public class EncryptionUtils {
                         }
                         nodeObjValue.put("value", list);
                     } else if (StringUtils.contains(next.getKey(), "date")){
-                        if (ObjectUtils.isEmpty(node.get("startDate")) || ObjectUtils.isEmpty(node.get("endDate"))) {
+                        if (isNull(node.get("startDate")) || isNull(node.get("endDate"))) {
                             continue;
                         }
                         try {
@@ -712,6 +712,10 @@ public class EncryptionUtils {
             LOGGER.error("jackson io error: {}", e);
         }
         return null;
+    }
+
+    private static boolean isNull(JsonNode jsonNode) {
+        return ObjectUtils.isEmpty(jsonNode) || jsonNode.isNull();
     }
 
     public static <T> Map<String, Map<String, List>> encryptMapValueMap(Map<Long, Map<Long, List<T>>> map) {
