@@ -3,6 +3,7 @@ import { Route, Switch } from 'react-router-dom';
 import { asyncRouter, nomatch, Charts } from '@choerodon/boot';
 import { PermissionRoute } from '@choerodon/master';
 import { useTabActiveKey } from '@choerodon/components';
+import useIsProgram from '@/hooks/useIsProgram';
 import { get } from '@choerodon/inject';
 
 const ReportRoutes = get('agile:ProgramReportRoutes');
@@ -16,7 +17,8 @@ const VersionReport = asyncRouter(() => (import('./VersionReport')));
 const EpicBurndown = asyncRouter(() => (import('./EpicBurndown')));
 const VersionBurndown = asyncRouter(() => (import('./VersionBurndown')));
 const Main = () => {
-  useTabActiveKey(ReportRoutes ? 'program' : 'agile');
+  const { isProgram } = useIsProgram();
+  useTabActiveKey(isProgram ? 'program' : 'agile');
   return <Charts reportType="agile" />;
 };
 const ReportHostIndex = ({ match }) => (
