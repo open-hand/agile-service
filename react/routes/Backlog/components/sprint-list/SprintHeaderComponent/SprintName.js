@@ -7,6 +7,7 @@ import { sprintApi } from '@/api';
 import TextEditToggle from '@/components/TextEditToggle';
 import { MAX_LENGTH_SPRINT } from '@/constants/MAX_LENGTH';
 import { getProjectId } from '@/utils/common';
+import './SprintName.less';
 
 const { Text, Edit } = TextEditToggle;
 
@@ -38,7 +39,7 @@ class SprintName extends Component {
       };
       sprintApi.updateSprint(req).then((res) => {
         if (res.failed) {
-          Choerodon.prompt('冲刺名称已存在');          
+          Choerodon.prompt('冲刺名称已存在');
           return;
         }
         BacklogStore.updateSprint(sprintId, {
@@ -56,7 +57,7 @@ class SprintName extends Component {
     } = this.props;
 
     return (
-      <div className="c7n-backlog-sprintName">        
+      <div className="c7n-backlog-sprintName">
         <TextEditToggle
           disabled={type === 'backlog' || noPermission}
           formKey="sprint"

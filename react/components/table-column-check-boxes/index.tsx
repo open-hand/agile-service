@@ -165,10 +165,10 @@ const TableColumnCheckBoxes: React.FC<Props> = ({
     return newDataSet;
   }, [defaultValue, formProps, name, propsDataSet]);
   function renderOptionLabel(label: string) {
-    let newLabel = label;
-    if (label.length > 5) {
-      newLabel = `${label.substring(0, 5)}...`;
-    }
+    const newLabel = label;
+    // if (label.length > 5) {
+    //   newLabel = `${label.substring(0, 5)}...`;
+    // }
     return (
       <Tooltip title={label}>
         {newLabel}
