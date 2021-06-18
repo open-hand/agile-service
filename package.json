@@ -1,7 +1,7 @@
 {
   "name": "@choerodon/agile",
   "routeName": "agile",
-  "version": "0.26.0",
+  "version": "1.0.0",
   "description": "",
   "main": "./lib/index.js",
   "install": "./lib/install.js",
@@ -56,8 +56,8 @@
   "devDependencies": {
     "@choerodon/boot": "0.23.2",
     "@choerodon/compiler": "^0.0.1",
-    "@choerodon/master": "0.26.0",
-    "@choerodon/testmanager": "0.26.0",
+    "@choerodon/master": "1.0.0",
+    "@choerodon/testmanager": "1.0.0",
     "@types/classnames": "^2.2.10",
     "@types/echarts": "^4.6.5",
     "@types/file-saver": "^2.0.1",
