@@ -10,7 +10,6 @@ export default function useParentProgram(config?: ParentProgramConfig, options?:
 
   const key = useProjectKey({ key: ['parent-program'], projectId });
   return useQuery(key, () => commonApi.getProjectsInProgram(projectId), {
-    staleTime: 10000,
     ...options,
   });
 }
