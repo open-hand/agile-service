@@ -74,6 +74,7 @@ public class IssueLinkDTO extends AuditDomain {
 
     private Long projectId;
 
+    @Transient
     private Long keyIssueId;
 
     public Long getKeyIssueId() {
