@@ -63,6 +63,16 @@ public class IssueTypeVO {
 
     private Boolean copyCustomField;
 
+    private String rank;
+
+    public String getRank() {
+        return rank;
+    }
+
+    public void setRank(String rank) {
+        this.rank = rank;
+    }
+
     public IssueTypeVO getReferenceIssueType() {
         return referenceIssueType;
     }
