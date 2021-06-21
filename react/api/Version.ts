@@ -225,7 +225,7 @@ class VersionApi extends Api<VersionApi> {
    * @param versionId
    * @param targetVersionId 要移动到的目标版本id
    */
-  delete(versionId: number, targetVersionId?: number) {
+  delete(versionId: number|string, targetVersionId?: number|string) {
     return axios({
       method: 'delete',
       url: `${this.prefix}/product_version/delete/${versionId}`,

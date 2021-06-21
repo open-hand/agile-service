@@ -163,7 +163,7 @@ const OptionItem: React.FC<OptionItemProps> = ({
               okText="删除"
               cancelText="取消"
             >
-              <Button icon="delete" funcType={'flat' as any} />
+              <Button icon="delete_sweep-o" funcType={'flat' as any} />
             </Popconfirm>
           </div>
         </>

@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
-import { Modal, Form, Select } from 'choerodon-ui';
-import { Tooltip } from 'choerodon-ui/pro';
+import {
+  Modal, Form, Select, Tooltip,
+} from 'choerodon-ui';
 import { issueApi } from '@/api';
 import TypeTag from '../TypeTag';
 import './ChangeParent.less';

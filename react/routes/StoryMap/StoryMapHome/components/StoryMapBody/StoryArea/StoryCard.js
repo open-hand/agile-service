@@ -50,7 +50,7 @@ class StoryCard extends Component {
   handlRemoveStory = (e) => {
     const { story, version, sprint } = this.props;
     e.stopPropagation();
-    Modal.confirm({
+    Modal.open({
       title: '提示',
       children: (
         <div>
@@ -214,7 +214,7 @@ export default DragSource(
           storyMapDragVO.epicId = targetEpicId;
           storyMapDragVO.epicIssueIds = [issueId];
           storyMapDragVO.featureId = 0;
-          storyMapDragVO.featureIssueIds = [];
+          storyMapDragVO.featureIssueIds = [issueId];
         } else {
           storyMapDragVO.featureId = targetFeatureId;
           storyMapDragVO.featureIssueIds = [issueId];

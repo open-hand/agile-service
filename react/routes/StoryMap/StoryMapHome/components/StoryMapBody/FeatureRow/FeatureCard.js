@@ -22,7 +22,7 @@ class FeatureCard extends Component {
     } = feature;
     const { selectedIssueMap } = StoryMapStore;
     return (
-      <Card className={`c7nagile-StoryMap-FeatureCard minimapCard ${featureType || 'none'} ${statusVO && statusVO.completed ? 'completedCard' : undefined} ${selectedIssueMap.has(issueId) ? 'selected' : ''}`} onClick={this.handleClick}>
+      <Card className={`c7nagile-StoryMap-FeatureCard minimapCard ${issueId && issueId !== 'none' ? (featureType ?? 'business') : 'none'} ${statusVO && statusVO.completed ? 'completedCard' : undefined} ${selectedIssueMap.has(issueId) ? 'selected' : ''}`} onClick={this.handleClick}>
         <div className="summary">
           <Tooltip title={`${summary || '无特性'}`}>
             {summary || '无特性'}

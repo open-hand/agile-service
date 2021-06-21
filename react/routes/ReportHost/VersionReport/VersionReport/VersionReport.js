@@ -5,12 +5,14 @@ import {
   Page, Header, Content, stores, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import {
-  Tabs, Table, Select, Icon, Tooltip, Spin,
+  Tabs, Table, Icon, Tooltip, Spin,
 } from 'choerodon-ui';
+import { Form, Select } from 'choerodon-ui/pro';
 import STATUS from '@/constants/STATUS';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 import to from '@/utils/to';
-import pic from '../../../../assets/image/emptyChart.svg';
+import { EmptyPage } from '@choerodon/components';
+import pic from '../../../../assets/image/NoData.svg';
 import finish from './legend/finish.svg';
 import total from './legend/total.svg';
 import noEstimated from './legend/noEstimated.svg';
@@ -19,7 +21,6 @@ import StatusTag from '../../../../components/StatusTag';
 import PriorityTag from '../../../../components/PriorityTag';
 import TypeTag from '../../../../components/TypeTag';
 import VS from '../../../../stores/project/versionReportNew';
-import EmptyBlock from '../../../../components/EmptyBlock';
 import BackBtn from '../../back-btn';
 import './VersionReport.less';
 
@@ -609,13 +610,14 @@ class EpicReport extends Component {
             !(!VS.versions.length && VS.versionFinishLoading) ? (
               <div>
                 <div style={{ display: 'flex' }}>
-                  <Select
-                    style={{ width: 244 }}
-                    label="版本"
-                    value={VS.currentVersionId}
-                    onChange={(versionId) => this.handleChangeCurrentVersion(versionId)}
-                  >
-                    {
+                  <Form style={{ width: 244 }}>
+                    <Select
+                      label="版本"
+                      value={VS.currentVersionId}
+                      onChange={(versionId) => this.handleChangeCurrentVersion(versionId)}
+                      clearButton={false}
+                    >
+                      {
                       VS.versions.map((version) => (
                         <Option
                           key={version.versionId}
@@ -625,20 +627,23 @@ class EpicReport extends Component {
                         </Option>
                       ))
                     }
-                  </Select>
-                  <Select
-                    style={{ width: 244, marginLeft: 24 }}
-                    label="单位"
-                    value={VS.currentUnit}
-                    onChange={(unit) => this.handleChangeCurrentUnit(unit)}
-                  >
-                    <Option key="story_point" value="story_point">故事点</Option>
-                    <Option key="issue_count" value="issue_count">问题计数</Option>
-                    <Option key="remain_time" value="remain_time">剩余时间</Option>
-                  </Select>
+                    </Select>
+                  </Form>
+                  <Form style={{ width: 244, marginLeft: 24 }}>
+                    <Select
+                      label="单位"
+                      value={VS.currentUnit}
+                      onChange={(unit) => this.handleChangeCurrentUnit(unit)}
+                      clearButton={false}
+                    >
+                      <Option key="story_point" value="story_point">故事点</Option>
+                      <Option key="issue_count" value="issue_count">问题计数</Option>
+                      <Option key="remain_time" value="remain_time">剩余时间</Option>
+                    </Select>
+                  </Form>
                 </div>
                 <div style={{ marginTop: 10, display: 'flex', justifyContent: 'space-between' }}>
-                  <p style={{ marginBottom: 0 }}>{VS.getCurrentVersion.versionId && VS.getCurrentVersion.statusCode === 'released' ? `发布于 ${VS.getCurrentVersion.releaseDate ? VS.getCurrentVersion.releaseDate.split(' ')[0] : '未指定发布日期'}` : '未发布'}</p>
+                  <p style={{ marginBottom: 0, marginTop: -20, color: 'var(--text-color)' }}>{VS.getCurrentVersion.versionId && VS.getCurrentVersion.statusCode === 'released' ? `发布于 ${VS.getCurrentVersion.releaseDate ? VS.getCurrentVersion.releaseDate.split(' ')[0] : '未指定发布日期'}` : '未发布'}</p>
                   <p
                     className="primary"
                     style={{
@@ -674,7 +679,10 @@ class EpicReport extends Component {
                           }
                         </div>
                       ) : (
-                        <div style={{ padding: '20px 0', textAlign: 'center', width: '100%' }}>
+                        <div style={{
+                          padding: '20px 0', textAlign: 'center', width: '100%', color: 'var(--text-color)',
+                        }}
+                        >
                           {VS.tableData.length ? '当前单位下问题均未预估，切换单位或从下方问题列表进行预估。' : '当前版本下没有问题。'}
                         </div>
                       )
@@ -698,27 +706,21 @@ class EpicReport extends Component {
                 </Tabs>
               </div>
             ) : (
-              <EmptyBlock
-                style={{ marginTop: 40 }}
-                textWidth="auto"
-                pic={pic}
-                title="当前项目无可用版本"
-                des={(
+              <EmptyPage
+                image={pic}
+                description={(
                   <div>
-                    <span>请在</span>
-                    <span
-                      className="primary"
-                      style={{ margin: '0 5px', cursor: 'pointer' }}
-                      role="none"
+                    <span>当前项目无可用版本，请在</span>
+                    <EmptyPage.Button
                       onClick={() => {
                         to(LINK_URL.workListVersion);
                       }}
                     >
-                      发布版本
-                    </span>
+                      【版本列表】
+                    </EmptyPage.Button>
                     <span>中创建一个版本</span>
                   </div>
-                  )}
+          )}
               />
             )
           }

@@ -3,15 +3,14 @@ import {
   DraggingStyle, NotDraggingStyle,
 } from 'react-beautiful-dnd';
 import classnames from 'classnames';
-import { Menu, Modal } from 'choerodon-ui';
 import {
-  Button, Icon, Tooltip, DataSet, Select,
+  Icon, Tooltip, DataSet, Modal, Button,
 } from 'choerodon-ui/pro';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 
 import { Observer, observer } from 'mobx-react-lite';
-import TableDropMenu from '@/common/TableDropMenu';
+import TableDropMenu from '@/components/table-drop-menu';
 import CheckBox from '@/components/check-box';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { usePageIssueTypeStore } from '../../stores';
@@ -45,26 +44,21 @@ const DraggableItem: React.FC<Props> = ({
     createdFieldCanNotEdit = false,
     editedFieldCanNotEdit = false,
   } = pageConfigFieldEdited;
-  // 是否禁止删除此字段 1.系统字段不可删除  2. 项目层下组织层字段不可删除 禁用问题类型字段不可操作
-  const disabledDel = !pageIssueTypeStore.currentIssueType.enabled && !!data?.get('pageConfigFieldEdited') || data.get('createdLevel') === 'system';
+  // 是否禁止删除此字段 1.系统字段不可删除  2. 项目层下组织层字段不可删除 3.禁用问题类型字段不可操作
+  const disabledDel = !pageIssueTypeStore.currentIssueType.enabled || !!data?.get('pageConfigFieldEdited') || data.get('createdLevel') === 'system';
   const textEditToggleProps = useTextEditTogglePropsWithPage(data, !showSplitLine, { className: `${prefixCls}-item-defaultValue`, disabled: !pageIssueTypeStore.currentIssueType.enabled });
 
   const renderFieldName = ({ value, record, dataSet }: RenderProps) => (
     <div className={classnames(`${prefixCls}-text`, { [`${prefixCls}-text-edit`]: !textEditToggleProps.disabled })}>
-
       <TableDropMenu
-        menu={(
-          <Menu onClick={() => onClickDel(record!, dataSet!)}>
-            <Menu.Item>删除</Menu.Item>
-          </Menu>
-        )}
+        menuData={[{ action: () => onClickDel(record!, dataSet!), text: '删除' }]}
         text={(
           <>
             {!isDragDisabled && <Icon type="baseline-drag_indicator" className={`${prefixCls}-text-icon`} />}
             <span>{value}</span>
           </>
         )}
-        isHasMenu={false}
+        showMenu={false}
       />
     </div>
   );
@@ -97,10 +91,10 @@ const DraggableItem: React.FC<Props> = ({
     dataSet?.remove(record!);
   };
   function onClickDel(record: Record, dataSet: DataSet) {
-    Modal.confirm({
+    Modal.open({
       title: '确认删除？',
-      content: `确认删除【${record?.get('fieldName')}】字段吗？这里仅删除字段和当前问题类型的关联关系，不会删除这个字段的数据或值。`,
-      onOk: handleDelete.bind(this, record, dataSet),
+      children: `确认删除【${record?.get('fieldName')}】字段吗？这里仅删除字段和当前问题类型的关联关系，不会删除这个字段的数据或值。`,
+      onOk: () => handleDelete(record, dataSet),
     });
   }
   const renderAction = ({
@@ -111,14 +105,18 @@ const DraggableItem: React.FC<Props> = ({
         name, record, dataSet,
       }, editDisabled)}
       {
-        (!disabledDel && (!showSplitLine || record?.get('createdLevel') === 'organization'))
+        (!disabledDel)
         && (
-        <Icon
-          className={classnames(`${prefixCls}-action-button`, { [`${prefixCls}-action-button-disabled`]: isDragDisabled })}
-          style={{ opacity: showSplitLine ? 1 : undefined }}
-          type="delete_sweep-o"
-          onClick={() => onClickDel(record!, dataSet!)}
-        />
+          <div className={`${prefixCls}-action-button-wrap`}>
+            <span />
+            <Button
+              className={classnames(`${prefixCls}-action-button`, { [`${prefixCls}-action-button-disabled`]: isDragDisabled })}
+              style={{ opacity: showSplitLine ? 1 : undefined }}
+              icon="delete_sweep-o"
+              size={'small' as any}
+              onClick={() => onClickDel(record!, dataSet!)}
+            />
+          </div>
         )
       }
 

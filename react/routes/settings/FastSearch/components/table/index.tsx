@@ -9,7 +9,7 @@ import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
 import { TableProps } from 'choerodon-ui/pro/lib/table/interface';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { quickFilterApi, quickFilterApiConfig } from '@/api';
-import TableAction from '@/components/TableAction';
+import TableDropMenu from '@/components/table-drop-menu';
 import { transformOperation } from './utils';
 import styles from './index.less';
 
@@ -81,18 +81,21 @@ const FastSearchTable: React.ForwardRefRenderFunction<any, FastSearchTableProps>
         name="name"
         tooltip={'overflow' as TableColumnTooltip}
         renderer={({ record, text }) => (
-          <TableAction
-            onEditClick={() => record && onEditClick(record)}
+          <TableDropMenu
             onMenuClick={({ key }: { key: string }) => record && onMenuClick(key, record)}
-            menus={[{
-              key: 'delete',
-              text: '删除',
-            }]}
+            menuData={[
+              { action: () => record && onEditClick(record), text: '编辑' },
+              {
+                key: 'delete',
+                text: '删除',
+              }]}
             text={text}
           />
         )}
       />
+      {/* @ts-ignore */}
       <Column tooltip={'overflow' as TableColumnTooltip} className="c7n-agile-table-cell" name="expressQuery" renderer={({ text }) => text && transformOperation(text)} />
+      {/* @ts-ignore */}
       <Column tooltip={'overflow' as TableColumnTooltip} className="c7n-agile-table-cell" name="description" renderer={({ text }) => text && text.split('+++')[0]} />
     </Table>
   );

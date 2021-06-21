@@ -5,9 +5,10 @@ import {
   map, trim, fill, sum, floor, last,
 } from 'lodash';
 import LINK_URL from '@/constants/LINK_URL';
-import pic from '@/assets/image/emptyChart.svg';
+import pic from '@/assets/image/NoData.svg';
 import to from '@/utils/to';
 import { Spin } from 'choerodon-ui';
+import { EmptyPage } from '@choerodon/components';
 import { EChartOption } from 'echarts';
 import completed from './image/completed.svg';
 import sprintIcon from './image/sprintIcon.svg';
@@ -31,14 +32,14 @@ export interface VersionBurnDownChartProps {
   checked: 'checked' | undefined,
   data: OriginData[],
   chartData: ChartData,
-  animation?:boolean
+  animation?: boolean
 }
 
 const EpicBurnDown: React.FC<VersionBurnDownChartProps> = ({
   checked, chartData, data, loading, animation = false,
 }) => {
   const getFontSize = useFontSize();
-  const transformPlaceholder2Zero = (arr:any[]) => arr.map((v) => (v === '-' ? 0 : v));
+  const transformPlaceholder2Zero = (arr: any[]) => arr.map((v) => (v === '-' ? 0 : v));
 
   const getStoryPoints = () => {
     const lastRemain = last(transformPlaceholder2Zero(chartData[2]));
@@ -49,7 +50,7 @@ const EpicBurnDown: React.FC<VersionBurnDownChartProps> = ({
   const getSprintSpeed = () => {
     if (data.length > 3) {
       const lastThree = data.slice(data.length - 3, data.length);
-      const lastThreeDone:number[] = [];
+      const lastThreeDone: number[] = [];
       lastThree.forEach((item) => {
         lastThreeDone.push(item.done);
       });
@@ -116,7 +117,7 @@ const EpicBurnDown: React.FC<VersionBurnDownChartProps> = ({
 
   const getLegendData = () => {
     const arr = ['工作已完成', '工作剩余', '工作增加'];
-    const legendData:{name: string, textStyle: object}[] = [];
+    const legendData: { name: string, textStyle: object }[] = [];
     arr.forEach((item) => {
       legendData.push({
         name: item,
@@ -126,9 +127,9 @@ const EpicBurnDown: React.FC<VersionBurnDownChartProps> = ({
     return legendData;
   };
 
-  const getOption = ():EChartOption => {
+  const getOption = (): EChartOption => {
     const inverse = !checked;
-    const option:EChartOption = {
+    const option: EChartOption = {
       animation,
       textStyle: {
         fontSize: getFontSize(12),
@@ -159,7 +160,7 @@ const EpicBurnDown: React.FC<VersionBurnDownChartProps> = ({
             align: 'right',
             // @ts-ignore
             textStyle: {
-              color: 'rgba(0,0,0,0.65)',
+              color: 'var(--text-color3)',
               fontSize: getFontSize(12),
             },
             formatter(value: string) {
@@ -249,7 +250,7 @@ const EpicBurnDown: React.FC<VersionBurnDownChartProps> = ({
         borderColor: '#ddd',
         borderWidth: 1,
         extraCssText: 'box-shadow: 0 2px 4px 0 rgba(0,0,0,0.20);',
-        formatter(params:any[]) {
+        formatter(params: any[]) {
           // eslint-disable-next-line no-param-reassign
           params[0].name = trim(params[0].name, '\n\n');
           const sprint = data.filter((item) => item.name === params[0].name)[0];
@@ -414,14 +415,10 @@ const EpicBurnDown: React.FC<VersionBurnDownChartProps> = ({
   const renderChart = () => {
     if (!data.length) {
       return (
-        <div style={{
-          display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '50px 0', textAlign: 'center',
-        }}
-        >
-          <img src={pic} alt="没有预估故事点" />
-          <div style={{ textAlign: 'left', marginLeft: '50px' }}>
-            <span style={{ fontSize: 12, color: 'var(--text-color3)' }}>报表不能显示</span>
-            <p style={{ marginTop: 10, fontSize: 20 }}>
+        <EmptyPage
+          image={pic}
+          description={(
+            <>
               在此史诗中没有预估的故事，请在
               <span
                 style={{
@@ -436,9 +433,9 @@ const EpicBurnDown: React.FC<VersionBurnDownChartProps> = ({
                 待办事项
               </span>
               中创建故事并预估故事点。
-            </p>
-          </div>
-        </div>
+            </>
+          )}
+        />
       );
     }
     return (
@@ -469,8 +466,8 @@ const EpicBurnDown: React.FC<VersionBurnDownChartProps> = ({
     <Spin spinning={loading}>
       <div className={styles.epicBurnDown_chart}>
         {
-        renderChart()
-      }
+          renderChart()
+        }
       </div>
     </Spin>
 

@@ -80,26 +80,16 @@ function IssueLinkHome() {
       children: <DeleteModal {...values} />,
       cancelText: formatMessage({ id: 'cancel' }),
       okText: formatMessage({ id: 'delete' }),
-      okProps: { color: 'red' },
-      cancelProps: { color: 'dark' },
       className: 'c7n-deleteLink-modal',
     });
   }
 
-  function renderLinkName({ text }) {
-    return (
-      <ClickText
-        value={text}
-        onClick={() => openCreateEditModal(true)}
-        clickAble
-        showToolTip
-        permissionCode={['choerodon.code.project.setting.issue.ps.updatelink']}
-      />
-    );
-  }
-
   function renderAction() {
     const actionData = [
+      {
+        text: formatMessage({ id: 'edit' }),
+        action: () => openCreateEditModal(true),
+      },
       {
         service: ['choerodon.code.project.setting.issue.ps.deletelink'],
         text: formatMessage({ id: 'delete' }),
@@ -132,7 +122,7 @@ function IssueLinkHome() {
       <Breadcrumb />
       <Content>
         <Table dataSet={issueLinkTableDs} pristine>
-          <Column name="linkName" renderer={renderLinkName} />
+          <Column name="linkName" />
           <Column renderer={renderAction} width="0.7rem" />
           <Column name="outWard" />
           <Column name="inWard" />

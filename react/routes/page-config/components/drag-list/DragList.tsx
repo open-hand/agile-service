@@ -33,7 +33,7 @@ interface Props {
   onDelete?: (key: any) => void,
   formatMessage: InjectedIntl['formatMessage'],
   title?: string,
-  tips: string,
+  tips: React.ReactNode,
 }
 interface StateProps {
   addItemVisible: boolean,
@@ -396,7 +396,7 @@ class DragList extends Component<Props, StateProps> {
                       okText="删除"
                       cancelText="取消"
                     >
-                      <Button size={'small' as Size} shape="circle" icon="delete" />
+                      <Button size={'small' as Size} shape="circle" icon="delete_sweep-o" />
                     </Popconfirm>
                   </Tooltip>
                 </div>

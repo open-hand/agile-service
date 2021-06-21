@@ -13,16 +13,13 @@ import { some } from 'lodash';
 import Moment from 'moment';
 import { extendMoment } from 'moment-range';
 import { sprintApi, reportApi } from '@/api';
-import { linkUrl } from '@/utils/to';
-import { configTheme } from '@/utils/common';
 import LINK_URL from '@/constants/LINK_URL';
-import HeaderLine from '@/components/HeaderLine';
 import BurnDownChart from '@/components/charts/burn-down';
 import IssueSearch, { IssueSearchStore } from '@/components/issue-search';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import BurndownChartStore from '@/stores/project/burndownChart/BurndownChartStore';
-import epicSvg from '@/assets/image/emptyChart.svg';
+import epicSvg from '@/assets/image/NoData.svg';
 import NoDataComponent from '../../Component/noData';
 import SwithChart from '../../Component/switchChart';
 import BurndownTable from './components/burndown-table';
@@ -290,9 +287,9 @@ class BurndownChartHome extends Component {
         <Content>
           {
             sprints.length > 0 ? (
-              <div>
+              <div style={{ width: '100%' }}>
                 <div style={{
-                  display: 'flex', alignItems: 'flex-start',
+                  display: 'flex', alignItems: 'flex-start', width: '100%',
                 }}
                 >
                   <Select
@@ -343,11 +340,15 @@ class BurndownChartHome extends Component {
                     <Option value="storyPoints">故事点</Option>
                     <Option value="issueCount">问题计数</Option>
                   </Select>
-                  <IssueSearch
-                    store={this.issueSearchStore}
-                    onClear={this.refresh}
-                    onChange={this.refresh}
-                  />
+                  <div
+                    style={{ flexShrink: 1 }}
+                  >
+                    <IssueSearch
+                      store={this.issueSearchStore}
+                      onClear={this.refresh}
+                      onChange={this.refresh}
+                    />
+                  </div>
                 </div>
                 <BurnDownChart
                   type={select}

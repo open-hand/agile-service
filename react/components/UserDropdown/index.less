@@ -1,12 +1,13 @@
 .tip {
   cursor: pointer;
-  color: #bfbfbf;
+  color: var(--text-color3);
   white-space: nowrap;
 }
 .overlay {
+  background-color: #ffffff;
   .searchDiv {
     padding: 0.05rem 0.12rem;
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: #fafafa;
   }
   .dropdown_menu {
     max-height: 400px;
@@ -19,6 +20,9 @@
         padding: 0.05rem 0.12rem;
         line-height: 0.22rem;
         height: unset;
+        &:hover {
+          background-color: rgba(15, 19, 88, 0.03);
+        }
       }
     }
     &_noContentTipItem {

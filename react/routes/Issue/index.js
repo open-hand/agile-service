@@ -245,8 +245,7 @@ const Issue = observer(({ cached, updateCache }) => {
     if (paramOpenIssueId || paramIssueId || paramChoose || paramType) {
       history.replace(linkUrl(LINK_URL.workListIssue));
     }
-    query();
-  }, [history, params, query]);
+  }, [history, params]);
 
   const handleClickSaveFilter = () => {
     openSaveFilterModal({ searchVO: issueSearchStore.getCustomFieldFilters(), onOk: issueSearchStore.loadMyFilterList });
@@ -302,6 +301,12 @@ const Issue = observer(({ cached, updateCache }) => {
           },
           {
             display: true,
+            icon: 'refresh',
+            // funcType: 'flat',
+            handler: refresh,
+          },
+          {
+            display: true,
             element: <TableModeSwitch
               data={tableListMode ? 'list' : 'tree'}
               onChange={(mode) => {
@@ -337,9 +342,13 @@ const Issue = observer(({ cached, updateCache }) => {
           store={issueSearchStore}
           urlFilter={urlFilter}
           onClear={handleClear}
-          onChange={() => {
+          onChange={async () => {
             localPageCacheStore.setItem('issues', issueSearchStore.currentFilter);
-            query();
+            await query();
+            // 有筛选，自动展开
+            if (issueSearchStore.isHasFilter) {
+              tableProps.expandAll(true);
+            }
           }}
           onClickSaveFilter={handleClickSaveFilter}
         />

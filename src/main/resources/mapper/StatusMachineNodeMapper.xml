@@ -238,6 +238,7 @@
         where fsmn.organization_id = #{organizationId}
         and fsmn.state_machine_id = #{statusMachineId}
         and fsmn.rank &lt; #{rank}
+        order by rank desc
         limit 1
     </select>
 

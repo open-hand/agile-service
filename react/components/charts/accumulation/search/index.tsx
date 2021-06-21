@@ -26,8 +26,8 @@ const AccumulationSearch: React.FC<AccumulationSearchProps> = ({
   float,
 }) => (
   <Form labelLayout={float ? 'float' as any : 'none'}>
-    <div style={{ display: 'flex', marginLeft: -6 }}>
-      <div style={{ width: 493 }}>
+    <div style={{ display: 'flex' }}>
+      <div style={{ width: 500 }}>
         <DatePicker
           style={{ width: '100%' }}
           range
@@ -35,6 +35,7 @@ const AccumulationSearch: React.FC<AccumulationSearchProps> = ({
           onChange={onRangeChange}
           clearButton={false}
           labelLayout={'float' as LabelLayout}
+          label="范围"
         />
       </div>
       <SelectBoard

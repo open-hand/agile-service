@@ -1,6 +1,45 @@
 # Changelog
 All notable changes about agile-service will be documented in this file.
 
+## [1.0.0] - 2021-06-18
+
+### Added
+
+- Add input prompt.
+- Subtasks support issue type conversion.
+- Add daily workload per person chart.
+- Add personal workload statistics.
+- All issues support custom list field display, order, and column width.
+- Optional replication of fields is supported when adding replication problems.
+- The assignee can be selected when adding quick creation questions
+- Add one click collapse to project report.
+- Issue detail support rapid defect creation.
+- New test execution status change triggers issue status change.
+- New branch merging triggers associated issue status change.
+- Adding order of module list.
+- Compatible with Safari browser.
+
+### Changed
+
+- Support to switch Kanban when configuring Kanban.
+- Optimization issue detail association issue.
+- Optimize the display of comments in reverse order by default.
+- Prompt optimization for creating required items quickly.
+- Optimize quick creation of subtasks and automatically open details.
+- Optimization issue details more button order.
+- Optimization issue comment send message.
+- Optimize state machine page.
+- Optimize time display format.
+- Load slowly when there are too many optimization custom issue type value sets.
+
+### Fixed
+
+- Fix the problem that UI / UX files cannot be previewed after uploading.
+- Fix the problem of moving left and right time period side length of Gantt chart.
+- Fix the problem of accidental disorder in state custom sorting.
+
+
+
 ## [0.25.0] - 2021-04-09
 
 ### Added

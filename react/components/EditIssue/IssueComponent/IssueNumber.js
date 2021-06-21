@@ -46,7 +46,7 @@ const IssueNumber = ({
 
   return (
     <div style={{
-      fontSize: 16, lineHeight: '28px', fontWeight: 500, whiteSpace: 'nowrap',
+      fontSize: 16, lineHeight: '28px', fontWeight: 500, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center',
     }}
     >
       {

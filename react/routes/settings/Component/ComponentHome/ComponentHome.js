@@ -4,20 +4,17 @@ import { Button, Tooltip, Icon } from 'choerodon-ui';
 import { Modal, Table } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import {
-  TabPage as Page, Header, Content, stores, Permission, Breadcrumb,
+  TabPage as Page, Header, Content, stores, Breadcrumb,
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
 import './ComponentHome.less';
-import TableAction from '@/components/TableAction';
+import TableDropMenu from '@/components/table-drop-menu';
 import UserTag from '@/components/tag/user-tag';
-import CreateComponent from '../ComponentComponent/AddComponent';
-import EditComponent from '../ComponentComponent/EditComponent';
 import DeleteComponent from '../ComponentComponent/DeleteComponent';
 import Store from './stores';
+import openComponentModal from '../ComponentComponent/CreateModal';
 
 const { AppState } = stores;
-const createKey = Modal.key();
-const editKey = Modal.key();
 const deleteKey = Modal.key();
 const { Column } = Table;
 
@@ -32,39 +29,7 @@ function ComponentHome() {
   const handleOk = () => {
     dataSet.query();
   };
-  const openCreateModal = () => {
-    Modal.open({
-      key: createKey,
-      title: '创建模块',
-      style: {
-        width: 380,
-      },
-      drawer: true,
-      children: (
-        <CreateComponent
-          onOk={handleOk}
-        />
-      ),
-    });
-  };
 
-  const openEditModal = (record) => {
-    const currentComponentId = record.get('componentId');
-    Modal.open({
-      key: editKey,
-      title: '修改模块',
-      style: {
-        width: 380,
-      },
-      drawer: true,
-      children: (
-        <EditComponent
-          componentId={currentComponentId}
-          onOk={handleOk}
-        />
-      ),
-    });
-  };
   const openDeleteModal = (component) => {
     Modal.open({
       key: deleteKey,
@@ -84,13 +49,19 @@ function ComponentHome() {
   };
 
   const renderMenu = (text, record) => (
-    <TableAction
-      menus={[{
-        key: 'delete',
-        text: '删除',
-      }]}
-      onEditClick={() => openEditModal(record)}
+    <TableDropMenu
+      menuData={[
+        {
+          action: () => { openComponentModal({ componentId: record?.get('componentId'), name: record?.get('name'), onOk: handleOk }); },
+          text: '编辑',
+        },
+        {
+          key: 'delete',
+          text: '删除',
+          service: ['choerodon.code.project.setting.issue.ps.deletecomponent'],
+        }]}
       onMenuClick={() => openDeleteModal(record)}
+      tooltip={false}
       text={(
         <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={text}>
           <p
@@ -106,10 +77,8 @@ function ComponentHome() {
           </p>
         </Tooltip>
       )}
-      type={type}
-      projectId={id}
-      organizationId={orgId}
-      service={['choerodon.code.project.setting.issue.ps.deletecomponent']}
+      permissionType={type}
+      permission={{ projectId: id, organizationId: orgId }}
     />
   );
   const renderTable = () => (
@@ -169,7 +138,7 @@ function ComponentHome() {
         <HeaderButtons items={[{
           name: '创建模块',
           icon: 'playlist_add',
-          handler: openCreateModal,
+          handler: () => { openComponentModal({ onOk: handleOk }); },
           display: true,
           permissions: ['choerodon.code.project.setting.issue.ps.createcomponent'],
         }]}

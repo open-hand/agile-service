@@ -7,13 +7,13 @@ import './Modal.less';
 const prefix = 'c7nagile-modal';
 const map = new Map();
 function Modal({
-  header, content, footer,
+  header, content, footer, zIndex,
 }) {
   return (
     <Draggable handle=".handle">
-      <div className="c7nagile-modal">
+      <div className="c7nagile-modal" style={{ zIndex: zIndex || 1000 }}>
         <div className={`${prefix}-header handle`}>
-          {header}          
+          {header}
         </div>
         <div>
           {content}
@@ -44,7 +44,7 @@ Modal.open = (props) => {
     document.body.appendChild(div);
 
     ReactDOM.render(<Modal {...props} />, div);
-  }  
+  }
   return {
     close: () => {
       Modal.close(key);

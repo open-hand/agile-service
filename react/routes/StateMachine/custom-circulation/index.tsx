@@ -248,7 +248,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     },
     feedback: {
       // @ts-ignore
-      loadFailed() {},
+      loadFailed() { },
     },
     selection: false,
     fields: [
@@ -396,6 +396,8 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           type="settings-o"
           style={{
             fontSize: 18,
+            cursor: 'pointer',
+            color: 'var(--primary-color)',
           }}
         />
       </Dropdown>
@@ -565,12 +567,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         // @ts-ignore
         value, text, name, record, dataSet,
       }) => (
-        <span style={{
-          // @ts-ignore
-          color: 'rgba(0,0,0,.87)',
-          // color: STATUS[record.get('type')],
-        }}
-        >
+        <span>
           {text}
         </span>
       ),
@@ -600,16 +597,19 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           </>
         )
       }
-      <Content style={{ borderTop: 'none' }}>
-        <IssueTypeTab
-          selectedType={selectedType}
-          setSelectedType={setSelectedType}
-          excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
-          brighter={readOnly}
-          visibleIssueTypeCategory={visibleIssueTypeCategory}
-        />
+      <Content style={{ borderTop: 'none', overflow: 'hidden' }}>
         {tab}
+
         <div className={`${styles.customCirculation}`}>
+          <div style={{ marginLeft: 1 }}>
+            <IssueTypeTab
+              selectedType={selectedType}
+              setSelectedType={setSelectedType}
+              excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
+              brighter={readOnly}
+              visibleIssueTypeCategory={visibleIssueTypeCategory}
+            />
+          </div>
           <Table
             className={styles.table}
             dataSet={customCirculationDataSet}

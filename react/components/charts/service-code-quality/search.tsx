@@ -52,7 +52,7 @@ const ServiceCodeQualityVarySearch: React.FC<ServiceCodeQualitySearchProps> = ({
     />
     <Select
       label="对象类型"
-      style={{ marginLeft: 24, width: 230 }}
+      style={{ marginLeft: 20, width: 240 }}
       value={type}
       onChange={setType}
       labelLayout={'float' as LabelLayout}

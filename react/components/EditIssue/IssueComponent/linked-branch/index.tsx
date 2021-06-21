@@ -10,7 +10,7 @@ import {
 } from 'choerodon-ui';
 import { TableColumnTooltip, TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
 import { devOpsApi, devOpsApiConfig } from '@/api';
-import TableAction from '@/components/TableAction';
+import TableDropMenu from '@/components/table-drop-menu';
 import { map } from 'lodash';
 
 const { Column } = Table;
@@ -78,9 +78,9 @@ const LinkedBranch: React.ForwardRefRenderFunction<{
     const record = r.toData();
     switch (key) {
       case 'delete': {
-        Modal.confirm({
+        Modal.open({
           title: '移除关联分支',
-          content: '确定要移除此关联分支吗？',
+          children: `确认删除“${record.branchName}”分支与问题的关联？删除后，问题和此分支的commit信息将一并被移除`,
           okText: '移除',
           onOk: async () => {
             await devOpsApi.project(record.projectId).removeLinkBranch(record.appServiceId, record.branchName, issueId);
@@ -107,9 +107,9 @@ const LinkedBranch: React.ForwardRefRenderFunction<{
         name="branchName"
         tooltip={'overflow' as TableColumnTooltip}
         renderer={({ record, text }) => (
-          <TableAction
+          <TableDropMenu
             onMenuClick={({ key }: { key: string }) => handleMenuClick(key, record)}
-            menus={[{
+            menuData={[{
               key: 'delete',
               text: '移除关联分支',
             }, {

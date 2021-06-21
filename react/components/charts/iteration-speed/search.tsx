@@ -22,7 +22,7 @@ const IterationSpeedSearch: React.FC<IterationSpeedSearchProps> = ({ unit, setUn
       <Select
         labelLayout={'float' as LabelLayout}
         clearButton={false}
-        style={{ width: 493, marginBottom: 20 }}
+        style={{ width: 500, marginBottom: 20 }}
         label="单位选择"
         value={unit}
         onChange={handleChangeCurrentUnit}

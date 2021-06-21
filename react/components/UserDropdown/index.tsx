@@ -4,7 +4,9 @@ import React, {
 import { observer } from 'mobx-react-lite';
 import { filter, find } from 'lodash';
 import { DataSet, TextField } from 'choerodon-ui/pro';
-import { Dropdown, Icon, Menu } from 'choerodon-ui';
+import {
+  Dropdown, Icon, Menu,
+} from 'choerodon-ui';
 import UserTag from '@/components/tag/user-tag';
 
 import { User } from '@/common/types';
@@ -66,7 +68,6 @@ const Overlay: React.FC<OverlayProps> = ({
           <TextField clearButton placeholder="输入文字以进行过滤" value={filterStr} onChange={handleSearchUser} />
         </div>
       </div>
-
       <Menu
         style={{
           background: '#fff',
@@ -78,7 +79,7 @@ const Overlay: React.FC<OverlayProps> = ({
         selectable={false}
       >
         {
-          filterStr && !userListDs.toData().length && (
+          !filter(userListDs.toData(), (user: User) => user.id !== selectedUser?.id).length && (
             <Menu.Item key="noContentTip" className={styles.dropdown_menu_noContentTipItem}>
               <div className={styles.dropdown_menu_noContentTipItem_tip}>无匹配结果</div>
             </Menu.Item>

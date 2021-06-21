@@ -11,15 +11,16 @@ import { Table, DataSet } from 'choerodon-ui/pro';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { versionApi } from '@/api';
+import TableDropMenu from '@/components/table-drop-menu';
 import AddRelease from '../ReleaseComponent/AddRelease';
 import ReleaseStore from '../../../stores/project/release/ReleaseStore';
 import './ReleaseHome.less';
 import EditRelease from '../ReleaseComponent/EditRelease';
 import PublicRelease from '../ReleaseComponent/PublicRelease';
-import TableDropMenu from '../../../common/TableDropMenu';
 import DeleteReleaseWithIssues from '../ReleaseComponent/DeleteReleaseWithIssues';
 import { openLinkVersionModal } from '../ReleaseComponent/link-program-vesion';
 import { openCreatReleaseVersionModal, openEditReleaseVersionModal } from '../components/create-edit-release-version';
+import openDeleteReleaseVersionModal from '../components/delete-release-version';
 
 const { Column } = Table;
 const { AppState } = stores;
@@ -65,13 +66,20 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
       }
       case 'del': {
         versionApi.loadNamesAndIssueBeforeDel(recordData.versionId).then((res: any) => {
-          setVersionDelInfo({
-            versionName: recordData.name,
-            versionId: recordData.versionId,
-            ...res,
+          // setVersionDelInfo({
+          //   versionName: recordData.name,
+          //   versionId: recordData.versionId,
+          //   ...res,
+          // });
+          openDeleteReleaseVersionModal({
+            handleOk: handleRefresh,
+            versionDelInfo: {
+              versionName: recordData.name,
+              versionId: recordData.versionId,
+              ...res,
+            },
           });
-
-          ReleaseStore.setDeleteReleaseVisible(true);
+          // ReleaseStore.setDeleteReleaseVisible(true);
         }).catch(() => {
         });
         break;
@@ -112,81 +120,41 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
   function renderMenu({ text, record }: RenderProps) {
     const { type, id, organizationId } = AppState.currentMenuType;
     const statusCode = record?.get('statusCode');
-    const menu = (
-      <Menu onClick={(e) => handleClickMenu(record!, e.key)}>
-        {statusCode === 'archived'
-          ? null
-          : (
-            <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus']} key="releaseStatus">
-              <Menu.Item key="releaseStatus">
-                <Tooltip placement="top" title={statusCode === 'version_planning' ? '发布' : '撤销发布'}>
-                  <span>
-                    {statusCode === 'version_planning' ? '发布' : '撤销发布'}
-                  </span>
-                </Tooltip>
-              </Menu.Item>
-            </Permission>
-          )}
-
-        <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus']} key="archivedStatus">
-          <Menu.Item key="archivedStatus">
-            <Tooltip placement="top" title={statusCode === 'archived' ? '撤销归档' : '归档'}>
-              <span>
-                {statusCode === 'archived' ? '撤销归档' : '归档'}
-              </span>
-            </Tooltip>
-          </Menu.Item>
-        </Permission>
-        {isInProgram
-          && (
-            <Permission service={['choerodon.code.project.cooperation.work-list.ps.version.link.program.version']} key="linkProgramVersion">
-              <Menu.Item key="linkProgramVersion">
-                <Tooltip placement="top" title="关联项目群版本">
-                  <span>
-                    关联项目群版本
-                  </span>
-                </Tooltip>
-              </Menu.Item>
-            </Permission>
-          )}
-        {statusCode === 'archived'
-          ? null
-          : (
-            <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.deleteversion']} key="del">
-              <Menu.Item key="del">
-                <Tooltip placement="top" title="删除">
-                  <span>
-                    删除
-                  </span>
-                </Tooltip>
-              </Menu.Item>
-            </Permission>
-          )}
-      </Menu>
-    );
 
     return (
       <TableDropMenu
-        menu={menu}
         text={text}
         style={{ lineHeight: 'inherit' }}
-        onClickEdit={() => handleClickMenu(record!, 'edit')}
-        type={type}
-        tooltip
-        projectId={id}
-        menuPermissionProps={{
-          service:
-            [
-              'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.deleteversion',
-              'choerodon.code.project.cooperation.work-list.ps.version.link.program.version',
-              'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus',
-            ],
-        }}
-        organizationId={organizationId}
-        service={[
-          'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus',
-          'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.deleteversion',
+        menuData={[
+          { action: () => handleClickMenu(record!, 'edit'), text: '编辑' },
+          {
+            action: () => handleClickMenu(record!, 'releaseStatus'),
+            text: statusCode === 'version_planning' ? '发布' : '撤销发布',
+            display: statusCode !== 'archived',
+            service: ['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus'],
+          },
+          {
+            action: () => handleClickMenu(record!, 'archivedStatus'),
+            text: statusCode === 'archived' ? '撤销归档' : '归档',
+            service: ['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus'],
+          },
+          {
+            action: () => handleClickMenu(record!, 'del'),
+            text: '删除',
+            display: statusCode !== 'archived',
+            service: ['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.deleteversion'],
+          },
         ]}
+        permissionType={type}
+        organizationId={organizationId}
+        tooltip
+        permissionMenu={{
+          service: [
+            'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.deleteversion',
+            'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus',
+          ],
+        }}
+
       />
     );
   }
@@ -257,7 +225,6 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
           }}
         >
           <Column name="name" renderer={renderMenu} width={180} />
-          {isInProgram ? <Column name="programVersionInfoVOS" width={180} renderer={renderProgramVersion} /> : null}
           <Column
             name="status"
             width={100}
@@ -280,9 +247,12 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
               </div>
             )}
           />
-          <Column name="startDate" className="c7n-agile-table-cell" width={100} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
-          <Column name="expectReleaseDate" className="c7n-agile-table-cell" width={120} tooltip={'always' as any} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
-          <Column name="releaseDate" className="c7n-agile-table-cell" width={120} tooltip={'always' as any} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
+          {/* @ts-ignore */}
+          <Column name="startDate" className="c7n-agile-table-cell" width={100} tooltip={'overflow' as any} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
+          {/* @ts-ignore */}
+          <Column name="expectReleaseDate" className="c7n-agile-table-cell" width={120} tooltip={'overflow' as any} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
+          {/* @ts-ignore */}
+          <Column name="releaseDate" className="c7n-agile-table-cell" width={120} tooltip={'overflow' as any} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
           <Column
             name="description"
             className="c7n-agile-table-cell"
@@ -293,16 +263,7 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
             ) : null)}
           />
         </Table>
-        {createVisible
-          ? (
-            <AddRelease
-              visible={createVisible}
-              onCancel={() => {
-                setCreateVisible(false);
-              }}
-              refresh={handleRefresh}
-            />
-          ) : null}
+
         {versionDelInfo ? (
           <DeleteReleaseWithIssues
             visible={versionDelInfo}
@@ -314,16 +275,7 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
             refresh={handleRefresh}
           />
         ) : null}
-        {editVersionData ? (
-          <EditRelease
-            visible={editVersionData}
-            onCancel={() => {
-              setEditVersionData(undefined);
-            }}
-            refresh={handleRefresh}
-            data={editVersionData}
-          />
-        ) : ''}
+
         {publicVersionVisible ? (
           <PublicRelease
             visible={publicVersionVisible}

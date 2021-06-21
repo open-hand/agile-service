@@ -1,11 +1,13 @@
 import React, {
-  useMemo, forwardRef, useEffect, useRef, useCallback, useState,
+  useMemo, forwardRef, useEffect, useRef, useCallback, useState, useLayoutEffect,
 } from 'react';
 import {
-  Select,
+  Select, DataSet,
 } from 'choerodon-ui/pro';
 import { toJS } from 'mobx';
-import { debounce, groupBy, pick } from 'lodash';
+import {
+  debounce, groupBy, isEmpty, pick,
+} from 'lodash';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { ILabel } from '@/common/types';
 import { FlatSelect } from '@choerodon/components';
@@ -27,7 +29,7 @@ interface Props extends Partial<SelectProps> {
 }
 
 const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
-  dataRef, valueField, afterLoad, flat, applicationId, projectId, mode, onBlur, onChange, onPopupHidden, value: propsValue, ...otherProps
+  dataRef, valueField, afterLoad, flat, applicationId, projectId, mode, onBlur, onChange, onPopupHidden, value: propsValue, defaultValue, ...otherProps
 }, ref: React.Ref<Select>) => {
   const innerRef = useRef<Select | null>();
   const handleBindRef = useCallback((newRef) => {
@@ -43,6 +45,17 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
       ref && Object.assign(ref, { current: innerRef.current });
     }
   }, [ref]);
+  const rendererSelectTag = (data: IMultiServiceTagItemProps) => (data && data.appServiceCode ? `${data.appServiceCode}:${data.tagName}` : data.tagName);
+  const handleProcessPropsValue = (data?: any[]) => {
+    if (isEmpty(toJS(data)) || !Array.isArray(toJS(data))) {
+      return undefined;
+    }
+    return data!.filter(Boolean).map((item: any) => ({
+      meaning: rendererSelectTag(item.value || item),
+      value: item,
+      uniqValue: `${item.projectId} ${item.appServiceCode} ${item.tagName}`,
+    }));
+  };
   const handlePopupHidden = debounce((hidden) => {
     hidden ? setEditValue(undefined) : setEditValue(handleProcessValue());
     hidden && onBlur && onBlur();
@@ -53,19 +66,28 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
     innerRef.current?.trigger?.delaySetPopupHidden(true, 0); // 关闭下拉框
     // handlePopupHidden(true);
   }
-  useEffect(() => {
-    console.log('tag. come');
-    return () => {
-      console.log('tag.. leave');
-      onPopupHidden && onPopupHidden(true);
-    };
+  useEffect(() => () => {
+    onPopupHidden && onPopupHidden(true);
   }, []);
+  const [value, setValue] = useState(handleProcessPropsValue(propsValue) || handleProcessPropsValue(defaultValue));
   function handleSave(data: IMultiServiceTagItemProps[]) {
     onChange && onChange(data);
+    setValue(handleProcessPropsValue(data));
+    otherProps.name && innerRef.current?.record?.set(otherProps.name, data);
     setEditValue(undefined); // 置空编辑值 隐藏下拉框
     innerRef.current?.trigger?.delaySetPopupHidden(true, 0); // 关闭下拉框
   }
-  const value = useMemo(() => toJS(propsValue)?.map((item: any) => ({ meaning: (item.appServiceCode ? `${item.appServiceCode}:${item.tagName}` : item.tagName), value: item })), [propsValue]);
+  const optionsDataSet = useMemo(() => new DataSet({ autoCreate: false, autoQuery: false, paging: false }), []);
+  useEffect(() => {
+    // 重新加载optionsDataSet数据  以显示值
+    // innerRef.current?.choose()
+    optionsDataSet.loadData(value?.map((i) => ({ meaning: i.meaning, value: i?.uniqValue })));
+    // innerRef.current?.choose(optionsDataSet.loadData(value).map((i) => i));
+  }, [optionsDataSet, otherProps.name, value]);
+  useEffect(() => {
+    setValue(handleProcessPropsValue(innerRef.current?.record ? innerRef.current.getValue() : propsValue));
+  }, [propsValue]);
+
   const handleProcessValue = useCallback(() => {
     // 合并相同code的tag选项
     if (value && value.length > 0) {
@@ -83,20 +105,26 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
   const componentId = useMemo(() => `select-multi-service-tag-${randomString(5)}`, []);
 
   const wrapProps = useMemo(() => pick(otherProps, ['style', 'className']), [otherProps]);
+  console.log('value...', value, value?.map((i) => i.uniqValue));
   return (
-  // <div id={componentId} {...wrapProps}>
+    // <div id={componentId} {...wrapProps}>
     <Component
       ref={handleBindRef}
-      value={value}
+      value={value?.map((i) => i.uniqValue)}
       multiple
       primitiveValue={false}
+      renderer={({ text, value: renderValue }) => {
+        console.log('render..', text, renderValue);
+        return text || rendererSelectTag(renderValue);
+      }}
+      options={optionsDataSet}
       onPopupHiddenChange={(hidden) => {
         console.log('onPopupHiddenChange..', hidden);
         // onChange();
         handlePopupHidden(hidden);
       }}
-        // getPopupContainer={(node) => document.getElementById(componentId) as HTMLElement}
-        // getPopupContainer={() => document.body}
+      // getPopupContainer={(node) => document.getElementById(componentId) as HTMLElement}
+      // getPopupContainer={() => document.body}
       trigger={['click'] as any}
       onChange={(v) => {
         let newValue = v;
@@ -104,13 +132,12 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
           newValue = v.map((i: any) => i.value);
         }
         onChange && onChange(newValue);
-        console.log('onChange', v);
       }}
       {...otherProps}
       dropdownMatchSelectWidth={false}
       popupContent={editValue ? <MultiServiceTag mode={mode} onOK={handleSave} data={editValue} onCancel={handleCancel} projectId={projectId} /> : <div />}
     />
-  // </div>
+    // </div>
   );
 });
 

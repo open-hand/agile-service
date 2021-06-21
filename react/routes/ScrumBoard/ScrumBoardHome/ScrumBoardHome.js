@@ -1,13 +1,13 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import {
-  Page, Header, Content, stores, Breadcrumb, Choerodon, Permission,
+  Page, Header, Content, stores, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 import {
-  Button, Spin, Select, Icon, Modal, Form, Tooltip,
+  Select, Icon, Modal, Form,
 } from 'choerodon-ui';
+import screenfull from 'screenfull';
 import { HeaderButtons } from '@choerodon/master';
-import { FlatSelect } from '@choerodon/components';
 import Loading from '@/components/Loading';
 import { set } from 'lodash';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
@@ -28,7 +28,6 @@ import NoneSprint from '../ScrumBoardComponent/NoneSprint/NoneSprint';
 import '../ScrumBoardComponent/RenderSwimLaneContext/RenderSwimLaneContext.less';
 import SwimLane from '../ScrumBoardComponent/RenderSwimLaneContext/SwimLane';
 import CSSBlackMagic from '../../../components/CSSBlackMagic/CSSBlackMagic';
-import HeaderLine from '../../../components/HeaderLine';
 import ScrumBoardFullScreen from '../ScrumBoardComponent/ScrumBoardFullScreen';
 import CreateBoard from '../ScrumBoardComponent/CreateBoard';
 import CreateIssue from '../ScrumBoardComponent/create-issue';
@@ -36,7 +35,6 @@ import ExpandAllButton from '../ScrumBoardComponent/expand-all-button';
 import BoardSearch from '../ScrumBoardComponent/board-search';
 import SelectBoard from '../ScrumBoardComponent/select-board';
 
-const { Option } = FlatSelect;
 const { AppState } = stores;
 
 const style = (swimLaneId) => `
@@ -89,6 +87,9 @@ class ScrumBoardHome extends Component {
   componentWillUnmount() {
     this.dataConverter = null;
     ScrumBoardStore.resetDataBeforeUnmount();
+    // 退出全屏
+    screenfull.exit();
+    document.body.classList.remove('c7n-scrumboard-fullScreen');
   }
 
   getBoard = async (noRefresh) => {
@@ -364,14 +365,21 @@ class ScrumBoardHome extends Component {
                 element: <ScrumBoardFullScreen />,
               },
               {
+                display: true,
+                icon: 'refresh',
+                // funcType: 'flat',
+                handler: () => this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard)),
+              },
+              {
                 name: '完成冲刺',
                 icon: 'alarm_on',
                 // funcType: 'flat',
                 handler: this.handleFinishSprint,
-                display: currentSprintIsDoing,
+                display: !!currentSprintIsDoing,
                 permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.sprint.finish'],
                 preElement: this.renderRemainDate(),
               },
+
             ]}
           />
         </Header>
@@ -394,9 +402,6 @@ class ScrumBoardHome extends Component {
             <Loading loading={ScrumBoardStore.getSpinIf} />
             <div className="c7n-scrumboard">
               <div style={{ display: 'table', minWidth: '100%' }}>
-                <div className="c7n-scrumboard-header">
-                  <StatusColumn />
-                </div>
                 {(!ScrumBoardStore.didCurrentSprintExist
                   || ((!ScrumBoardStore.otherIssue || ScrumBoardStore.otherIssue.length === 0)
                     && (!ScrumBoardStore.interconnectedData
@@ -408,19 +413,24 @@ class ScrumBoardHome extends Component {
                         />
                   )
                   : (
-                    <div
-                      className="c7n-scrumboard-content"
-                    >
-                      <div className="c7n-scrumboard-container">
-                        <SwimLane
-                          mode={ScrumBoardStore.getSwimLaneCode}
-                          allDataMap={this.dataConverter.getAllDataMap()}
-                          mapStructure={ScrumBoardStore.getMapStructure}
-                          onDragEnd={this.onDragEnd}
-                          onDragStart={this.onDragStart}
-                        />
+                    <>
+                      <div className="c7n-scrumboard-header">
+                        <StatusColumn />
                       </div>
-                    </div>
+                      <div
+                        className="c7n-scrumboard-content"
+                      >
+                        <div className="c7n-scrumboard-container">
+                          <SwimLane
+                            mode={ScrumBoardStore.getSwimLaneCode}
+                            allDataMap={this.dataConverter.getAllDataMap()}
+                            mapStructure={ScrumBoardStore.getMapStructure}
+                            onDragEnd={this.onDragEnd}
+                            onDragStart={this.onDragStart}
+                          />
+                        </div>
+                      </div>
+                    </>
                   )}
               </div>
             </div>

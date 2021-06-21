@@ -6,12 +6,17 @@
     justify-content: space-between;
     align-items: center;
     padding: 0 10px;
-    height: 36px;
+    height: 50px;
     border: 1px solid var(--divider);
     border-radius: 5px;
+    .iconPicker {
+      color: rgb(171, 188, 207);
+    }
     &:focus {
       outline: 0;
-      border: 1px solid #5365EA;
+      border-bottom: 2px solid #5365EA;
+      border-bottom-right-radius: 0;
+      border-bottom-left-radius: 0;
     }
     &:focus-within {
       .iconPicker {
@@ -28,11 +33,16 @@
       position: absolute;
       color: #9EADBE;
       pointer-events: none;
-      top: 0;
       padding: 0 4px;
-      background: #FFF;
-    }
+      -webkit-transform-origin: 0.1rem -230%;
+      -ms-transform-origin: 0.1rem -230%;
+      transform-origin: 0.1rem -230%;
+      -webkit-transition: all 0.2s cubic-bezier(0.215, 0.61, 0.355, 1);
+      transition: all 0.2s cubic-bezier(0.215, 0.61, 0.355, 1);
+    } 
     .selected {
+      position: relative;
+      top: 9px;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;

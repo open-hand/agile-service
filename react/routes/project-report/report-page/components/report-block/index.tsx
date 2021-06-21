@@ -94,7 +94,7 @@ const ReportBlock: React.FC<Props> = (props) => {
         {!isPreview && (
           <div className={styles.operation}>
             <Button icon="edit-o" funcType={'flat' as FuncType} onClick={handleEdit} />
-            <Button icon="delete" funcType={'flat' as FuncType} onClick={handleDelete} />
+            <Button icon="delete_sweep-o" funcType={'flat' as FuncType} onClick={handleDelete} />
           </div>
         )}
       </div>

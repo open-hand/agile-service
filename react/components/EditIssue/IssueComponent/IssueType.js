@@ -158,7 +158,12 @@ const IssueType = observer(({
           />
         </div>
       ) : (
-        <Dropdown overlay={typeList} trigger={['click']} disabled={disabled}>
+        <Dropdown
+          overlay={typeList}
+          trigger={['click']}
+          disabled={disabled}
+          getPopupContainer={((triggerNode) => triggerNode.parentNode)}
+        >
           <div
             className="issue-nav-narrow"
           >

@@ -117,14 +117,14 @@ export function transformFilter(chosenFields) {
       case 'input': {
         customField.string.push({
           fieldId: id,
-          value,
+          value: value || null,
         });
         break;
       }
       case 'text': {
         customField.text.push({
           fieldId: id,
-          value,
+          value: value || null,
         });
         break;
       }

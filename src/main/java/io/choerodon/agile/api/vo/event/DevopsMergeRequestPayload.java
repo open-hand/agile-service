@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo.event;
 
+import java.util.List;
+
 /**
  * @author superlee
  * @since 2021-04-19
@@ -12,7 +14,7 @@ public class DevopsMergeRequestPayload {
 
     private String targetBranchName;
 
-    private Long issueId;
+    private List<Long> issueIds;
 
     private Long projectId;
 
@@ -40,12 +42,12 @@ public class DevopsMergeRequestPayload {
         this.targetBranchName = targetBranchName;
     }
 
-    public Long getIssueId() {
-        return issueId;
+    public List<Long> getIssueIds() {
+        return issueIds;
     }
 
-    public void setIssueId(Long issueId) {
-        this.issueId = issueId;
+    public void setIssueIds(List<Long> issueIds) {
+        this.issueIds = issueIds;
     }
 
     public Long getProjectId() {

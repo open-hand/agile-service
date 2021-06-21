@@ -2,8 +2,8 @@ import React, { useMemo, useCallback, useImperativeHandle } from 'react';
 import EpicBurnDown from '@/components/charts/epic-burnDown';
 import EpicBurnDownSearch from '@/components/charts/epic-burnDown/search';
 import useEpicBurnDownReport, { EpicBurnConfig } from '@/components/charts/epic-burnDown/useEpicBurnDownReport';
-import pic from '@/assets/image/emptyChart.svg';
-import EmptyBlock from '@/components/EmptyBlock';
+import pic from '@/assets/image/NoData.svg';
+import { EmptyPage } from '@choerodon/components';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
 import { IReportChartBlock, EpicBurndownSearchVO } from '@/routes/project-report/report-page/store';
@@ -54,34 +54,26 @@ const EpicBurnDownComponent:React.FC<Props> = ({ innerRef, projectId, data }) =>
             <EpicBurnDown {...props} />
           </>
         ) : (
-          <EmptyBlock
-            textWidth="auto"
-            pic={pic}
-            title="当前项目无可用史诗"
-            des={(
+          <EmptyPage
+            image={pic}
+            description={(
               <div>
-                <span>请在</span>
-                <span
-                  className="primary"
-                  style={{ margin: '0 5px', cursor: 'pointer' }}
-                  role="none"
+                <span>当前项目无可用史诗，请在</span>
+                <EmptyPage.Button
                   onClick={() => {
                     to(LINK_URL.workListBacklog);
                   }}
                 >
-                  待办事项
-                </span>
+                  【待办事项】
+                </EmptyPage.Button>
                 <span>或</span>
-                <span
-                  className="primary"
-                  style={{ margin: '0 5px', cursor: 'pointer' }}
-                  role="none"
+                <EmptyPage.Button
                   onClick={() => {
                     to(LINK_URL.workListIssue);
                   }}
                 >
-                  问题管理
-                </span>
+                  【问题管理】
+                </EmptyPage.Button>
                 <span>中创建一个史诗</span>
               </div>
             )}

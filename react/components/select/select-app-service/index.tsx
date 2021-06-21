@@ -18,6 +18,7 @@ interface Props extends Partial<SelectProps> {
   request?: SelectConfig['request'],
   mode?: 'other' | 'self'/** @default 'self' self 本项目模式 other 其他项目模式 */
   projectId?: string
+  checkMember?:boolean
 }
 const renderService = (appService: any) => {
   if (appService) {
@@ -32,7 +33,7 @@ const renderService = (appService: any) => {
   return null;
 };
 const SelectSelfAppService: React.FC<Props> = forwardRef(({
-  dataRef, valueField, afterLoad, flat, projectId, request, className, ...otherProps
+  dataRef, valueField, afterLoad, flat, projectId, request, className, checkMember, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'appService',
@@ -43,7 +44,7 @@ const SelectSelfAppService: React.FC<Props> = forwardRef(({
         {renderService(appService)}
       </FragmentForSearch>
     ),
-    request: request || (() => devOpsApi.project(projectId).loadActiveService()),
+    request: request || (() => devOpsApi.project(projectId).loadActiveService(checkMember)),
     middleWare: (data: any) => {
       if (dataRef) {
         Object.assign(dataRef, {
@@ -56,7 +57,7 @@ const SelectSelfAppService: React.FC<Props> = forwardRef(({
       return data;
     },
     paging: false,
-  }), [projectId]);
+  }), [checkMember, projectId]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
 

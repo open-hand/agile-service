@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent } from 'react';
 import { TextArea } from 'choerodon-ui/pro';
-import { TextAreaProps } from 'choerodon-ui/pro/lib/text-area/TextArea';
+import { TextAreaProps } from 'choerodon-ui/pro/lib/text-area/interface';
 import styles from './index.less';
 
 const TextAreaWithLengthInfo: React.ForwardRefRenderFunction<TextArea<{}>, TextAreaProps> = (props, ref) => {
@@ -17,6 +17,7 @@ const TextAreaWithLengthInfo: React.ForwardRefRenderFunction<TextArea<{}>, TextA
   };
   return (
     <div className={styles.container}>
+      {/* @ts-ignore */}
       <TextArea ref={ref} defaultValue={propsValue || defaultValue} onInput={handleInput} {...restProps} />
       {props.maxLength && <span className={styles.length_info}>{`${value.length}/${props.maxLength}`}</span>}
     </div>

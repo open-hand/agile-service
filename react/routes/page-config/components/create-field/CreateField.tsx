@@ -8,9 +8,11 @@ import {
 } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
 import SelectUser from '@/components/select/select-user';
-import { User } from '@/common/types';
+import { FieldOption, User } from '@/common/types';
 import { toJS } from 'mobx';
-import { set, uniq, isEmpty } from 'lodash';
+import {
+  set, uniq, isEmpty, find,
+} from 'lodash';
 import SelectCustomField from '@/components/select/select-custom-field';
 import { randomString } from '@/utils/random';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
@@ -168,7 +170,22 @@ function CreateField() {
         tempKey: randomString(5),
       }]);
   };
-
+  const ensureDefaultValue = (options: FieldOption[]) => {
+    const { current } = formDataSet;
+    const newDefaultValue = current?.get('defaultValue');
+    if (!newDefaultValue) {
+      return;
+    }
+    const fieldType = current?.get('fieldType');
+    if (multipleList.indexOf(fieldType) !== -1) {
+      const newValue = newDefaultValue.filter((v: string) => find(options, { id: v, enabled: true }));
+      current?.set('defaultValue', newValue);
+    } else if (singleList.indexOf(fieldType) !== -1) {
+      if (!find(options, { id: newDefaultValue, enabled: true })) {
+        current?.set('defaultValue', undefined);
+      }
+    }
+  };
   const onTreeDelete = (tempKey: string) => {
     const { current } = formDataSet;
     const newDefaultValue = current?.get('defaultValue');
@@ -281,35 +298,40 @@ function CreateField() {
               disabled={isEdit ?? false}
               title={formatMessage({ id: `field.${fieldType}` })}
               data={fieldOptions}
-              tips={formatMessage({ id: 'field.dragList.tips' })}
+              tips={(
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  {formatMessage({ id: 'field.dragList.tips' })}
+                  {isEdit && (
+                    <Button
+                      onClick={() => {
+                        openEditFieldOptionsModal({
+                          fieldOptions,
+                          fieldId,
+                          onClose: (newData) => {
+                            setFieldOptions(newData);
+                            ensureDefaultValue(newData);
+                          },
+                        });
+                      }}
+                    >
+                      调整选项
+                    </Button>
+                  )}
+                </div>
+              )}
               formatMessage={formatMessage}
               onChange={onTreeChange}
               onCreate={onTreeCreate}
               onDelete={onTreeDelete}
               onInvalid={onTreeDelete}
             />
-            {isEdit && (
-              <Button
-                onClick={() => {
-                  openEditFieldOptionsModal({
-                    fieldOptions,
-                    fieldId,
-                    onClose: (newData) => {
-                      setFieldOptions(newData);
-                    },
-                  });
-                }}
-                style={{ marginTop: 15 }}
-              >
-                调整选项
-              </Button>
-            )}
             <SelectCustomField
               name="defaultValue"
-              key={`${singleList.indexOf(fieldType) !== -1 ? 'single' : 'multiple'}-defaultValue-select`}
+              // 防止fieldOptions变了之后选项没更新
+              key={JSON.stringify(fieldOptions.filter((f) => f.enabled))}
               style={{ width: '100%', marginTop: '20px' }}
               multiple={!(singleList.indexOf(fieldType) !== -1)}
-              fieldOptions={fieldOptions}
+              fieldOptions={fieldOptions.filter((f) => f.enabled).map((f) => ({ ...f, id: f.id ?? f.tempKey }))}
               selected={toJS(current?.get('defaultValue'))}
             />
           </>
@@ -353,6 +375,7 @@ function CreateField() {
           <TextField
             name="name"
             valueChangeAction={'input' as any}
+            placeholder="问题的属性字段，例如：实际完成时间"
           />
           <div>
             <Select

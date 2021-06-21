@@ -40,6 +40,7 @@ const Field: React.FC<IFieldProps> = ({
   }, [fieldType, onChange]);
   if (element) {
     return React.cloneElement(element as React.ReactElement, {
+      field,
       label: title,
       multiple: isMultiple,
       range: shouldRangeOnFilter,

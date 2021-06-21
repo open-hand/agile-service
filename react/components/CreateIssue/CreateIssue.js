@@ -1368,7 +1368,7 @@ class CreateIssue extends Component {
                 <Button
                   shape="circle"
                   style={{ marginLeft: 10 }}
-                  icon="delete"
+                  icon="delete_sweep-o"
                   onClick={() => this.remove(k)}
                 />
               ) : null

@@ -9,6 +9,7 @@ import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
+import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.asgard.saga.annotation.SagaTask;
 import org.slf4j.Logger;
@@ -169,6 +170,8 @@ public class AgileEventHandler {
         } else {
             LOGGER.info("项目{}已初始化，跳过项目初始化", projectEvent.getProjectCode());
         }
+        // 删除redis的缓存
+        SpringBeanUtil.getBean(RedisUtil.class).delete("projectInfo:"+projectId);
         return message;
     }
 
@@ -178,8 +181,10 @@ public class AgileEventHandler {
         DevopsMergeRequestPayload devopsMergeRequestPayload = JSON.parseObject(message, DevopsMergeRequestPayload.class);
         LOGGER.info("分支合并变更issue状态，{}", message);
         Long projectId = devopsMergeRequestPayload.getProjectId();
-        Long issueId = devopsMergeRequestPayload.getIssueId();
-        statusBranchMergeSettingService.handleBranchMergeEvent(projectId, issueId);
+        List<Long> issueIds = devopsMergeRequestPayload.getIssueIds();
+        if (!ObjectUtils.isEmpty(issueIds)) {
+            issueIds.forEach(x -> statusBranchMergeSettingService.handleBranchMergeEvent(projectId, x));
+        }
         return message;
     }
 

@@ -1,10 +1,9 @@
 import React, {
   useState, useCallback, useRef, useEffect,
 } from 'react';
-import { Button } from 'choerodon-ui/pro';
-import { Dropdown } from 'choerodon-ui';
+import { Button, Dropdown } from 'choerodon-ui/pro';
+
 import { pull, uniq } from 'lodash';
-import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import FieldList from './FieldList';
 
 function useClickOut(onClickOut: (e?: any) => void) {
@@ -82,13 +81,12 @@ const SelectField: React.FC<SelectFieldProps> = ({
   return (
     <div>
       <Dropdown
-        getPopupContainer={(trigger) => trigger.parentNode as HTMLElement}
         visible={!hidden}
         overlay={(
           <div
             role="none"
             ref={ref}
-            onClick={(e) => {
+            onMouseDown={(e) => {
               e.stopPropagation();
             }}
           >
@@ -101,7 +99,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
             />
           </div>
         )}
-        trigger={['click']}
+        trigger={['click'] as any}
       >
         {triggerElement ? React.cloneElement(triggerElement, {
           onClick: (e: any) => {
@@ -110,7 +108,6 @@ const SelectField: React.FC<SelectFieldProps> = ({
           },
         }) : (
           <Button
-            color={'primary' as ButtonColor}
             icon="add"
             onClick={(e) => {
               e.nativeEvent.stopImmediatePropagation();

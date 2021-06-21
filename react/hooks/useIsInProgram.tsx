@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
-import { commonApi } from '@/api';
+import React from 'react';
 import { stores } from '@choerodon/boot';
 import { AppStateProps } from '@/common/types';
+import { usePersistFn } from 'ahooks';
 import useIsProgram from './useIsProgram';
+import useParentProgram from './data/useParentProgram';
+import useParentArtDoing from './data/useParentArtDoing';
 
 const { AppState }: { AppState: AppStateProps } = stores;
 const isDEV = process.env.NODE_ENV === 'development';
@@ -23,42 +24,27 @@ interface Props {
 }
 
 const useIsInProgram = (): ChildrenProps => {
-  const [isInProgram, setIsInProgram] = useState<boolean>(false);
-  const [program, setProgram] = useState<object | boolean>(false);
-  const [isShowFeature, setIsShowFeature] = useState<boolean>(false);
-  const [artInfo, setArtInfo] = useState<object | boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
   const { isProgram } = useIsProgram();
   const isProject = AppState.currentMenuType.type === 'project';
-  const refresh = useCallback(async () => {
-    if (!isProgram) {
-      setLoading(true);
-      const projectProgram = shouldRequest && isProject ? await commonApi.getProjectsInProgram() : false;
-      const hasProgram = Boolean(projectProgram);
-      let art = false;
-      let showFeature = false;
-      if (shouldRequest && isProject && hasProgram) {
-        art = await commonApi.getIsShowFeature();
-        showFeature = Boolean(art);
-      }
-      batchedUpdates(() => {
-        setIsInProgram(hasProgram);
-        setProgram(projectProgram);
-        setArtInfo(art);
-        setIsShowFeature(showFeature);
-        setLoading(false);
-      });
-    } else {
-      setLoading(false);
-    }
-  }, [isProgram, isProject]);
+  const { data: program, isLoading: loading1, refetch: refresh1 } = useParentProgram(undefined, {
+    enabled: shouldRequest && isProject && !isProgram,
+  });
+  const isInProgram = Boolean(program);
+  const { data: parentArtDoing, isLoading: loading2, refetch: refresh2 } = useParentArtDoing(undefined, {
+    enabled: shouldRequest && isInProgram,
+  });
 
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
-
+  const refresh = usePersistFn(async () => {
+    await refresh1();
+    await refresh2();
+  });
   return {
-    isInProgram, program, isShowFeature, artInfo, loading, refresh,
+    isInProgram,
+    program,
+    isShowFeature: Boolean(parentArtDoing),
+    artInfo: parentArtDoing,
+    loading: loading1 || loading2,
+    refresh,
   };
 };
 

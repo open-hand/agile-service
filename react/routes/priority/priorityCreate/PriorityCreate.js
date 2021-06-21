@@ -131,6 +131,7 @@ class PriorityCreate extends Component {
         ]}
         confirmLoading={loading}
         width={MODAL_WIDTH.small}
+        className="c7n-createPriority-modal"
       >
         <Form>
           <FormItem
@@ -170,6 +171,7 @@ class PriorityCreate extends Component {
                   label={<FormattedMessage id="priority.des" />}
                   placeholder={intl.formatMessage({ id: 'priority.create.des.placeholder' })}
                   maxLength={45}
+                  autosize
                 />,
               )
             }

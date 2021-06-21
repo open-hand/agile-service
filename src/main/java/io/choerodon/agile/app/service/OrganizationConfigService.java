@@ -115,4 +115,6 @@ public interface OrganizationConfigService {
     StatusBranchMergeSettingVO queryStatusBranchMergeSetting(Long organizationId, Long issueTypeId, Long statusId);
 
     void updateAutoTransform(Long organizationId, Long issueTypeId, Long statusId, Boolean autoTransform);
+
+    NodeSortVO updateSort(Long organizationId, Long statusMachineId, NodeSortVO nodeSortVO);
 }

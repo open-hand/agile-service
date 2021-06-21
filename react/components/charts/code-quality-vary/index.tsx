@@ -207,7 +207,7 @@ const CodeQualityVary: React.FC<CodeQualityVaryProps> = ({
         },
         name: '数量',
         type: 'value',
-        axisLabel: { color: 'rgba(0,0,0,0.65)' },
+        axisLabel: { color: 'var(--text-color3)' },
         axisLine: {
           lineStyle: {
             color: '#EEEEEE',

@@ -18,12 +18,12 @@ const clearIdMap = new Map([
   ['label', 'labelId'],
   ['component', 'componentId'],
   ['fixVersion', 'versionId'],
-  ['version', 'versionId'],
+  ['influenceVersion', 'versionId'],
 ]);
 
 const extraOptionsMap = new Map();
 export default function renderField({
-  code, fieldType, fieldOptions, required,
+  code, fieldType, fieldOptions, required, system,
 }, data, selectUserMap, isProgram, isOrganization) {
   switch (code) {
     case 'component': {
@@ -301,7 +301,7 @@ export default function renderField({
     case 'radio': case 'single': case 'checkbox': case 'multiple': {
       const options = [...(!required ? [{ id: 'clear', value: '清空', enabled: true }] : []), ...(fieldOptions || [])];
       const isMultiple = !(singleList.indexOf(fieldType) !== -1);
-      if (fieldOptions) {
+      if (fieldOptions?.length && !system) {
         return (
           <SelectCustomField
             searchable
@@ -329,6 +329,7 @@ export default function renderField({
           multiple={isMultiple}
           maxTagCount={2}
           maxTagTextLength={10}
+          key={code}
           onOption={({ record }) => ({
             disabled: isMultiple && data[code].value && ((data[code].value.indexOf('clear') > -1 && record.get(clearIdMap.get(code) || 'value') !== 'clear') || (data[code].value.indexOf('clear') === -1 && record.get(clearIdMap.get(code) || 'value') === 'clear')),
           })}

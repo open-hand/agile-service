@@ -36,7 +36,7 @@ class StatusApi extends Api<StatusApi> {
     * 根据状态id加载状态
     * @param statusId
     */
-  load(statusId: number) {
+  load(statusId: string) {
     return axios.get(`${this.orgPrefix}/status/${statusId}`);
   }
 
@@ -149,7 +149,7 @@ class StatusApi extends Api<StatusApi> {
      * 删除状态
      * @param statusId
      */
-  delete(statusId: number) {
+  delete(statusId: string) {
     return axios.delete(`${this.orgPrefix}/status/${statusId}`);
   }
 
@@ -158,7 +158,7 @@ class StatusApi extends Api<StatusApi> {
    * @param statusId
    * @param updateData
    */
-  update(statusId: number, updateData: UpdateData) {
+  update(statusId: string, updateData: UpdateData) {
     return axios.put(`${this.orgPrefix}/status/${statusId}`, updateData);
   }
 

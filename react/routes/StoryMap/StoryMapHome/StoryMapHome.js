@@ -1,12 +1,11 @@
 /* eslint-disable no-nested-ternary */
 import React, {
-  Fragment, useEffect, useRef, useCallback,
+  useEffect, useRef, useCallback,
 } from 'react';
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
-import { Button } from 'choerodon-ui';
 import {
   CheckBox,
 } from 'choerodon-ui/pro';
@@ -14,17 +13,16 @@ import { DragDropContextProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { observer } from 'mobx-react-lite';
 import useIsInProgram from '@/hooks/useIsInProgram';
-import HeaderLine from '@/components/HeaderLine';
 import FilterManage from '@/components/FilterManage';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
 import { useIssueSearchStore } from '@/components/issue-search';
 import { getSystemFieldsInStoryMap } from '@/stores/project/issue/IssueStore';
 import { transformFilter } from '@/routes/Issue/stores/utils';
+import { EmptyPage } from '@choerodon/components';
+import NoData from '@/assets/image/NoData.svg';
 import Minimap from './components/MiniMap';
-import Empty from '../../../components/Empty';
 import epicPic from './emptyStory.svg';
-import emptyPic from './emptyData.svg';
 import Loading from '../../../components/Loading';
 import StoryMapBody from './components/StoryMapBody';
 import SideIssueList from './components/SideIssueList';
@@ -165,7 +163,7 @@ const StoryMapHome = observer(() => {
             display: !isInProgram && isEmpty && !loading,
           },
           {
-            name: '需求池',
+            name: '未规划列表',
             icon: 'work_log',
             handler: handleOpenIssueList,
             display: !StoryMapStore.isFullScreen,
@@ -200,9 +198,8 @@ const StoryMapHome = observer(() => {
 
         {!isEmpty ? (
           hiddenColumnNoStory && Object.values(storyData).every((item) => !item.storys.length) ? (
-            <Empty
-              pic={emptyPic}
-              title="暂无数据"
+            <EmptyPage
+              image={NoData}
               description="隐藏无故事的列后无史诗数据"
             />
           ) : (
@@ -213,10 +210,8 @@ const StoryMapHome = observer(() => {
         ) : (
           loading ? null : (
               // eslint-disable-next-line react/jsx-indent
-              <Empty
-                style={{ background: 'white', height: 'calc(100% + 120px)', marginTop: -120 }}
-                pic={epicPic}
-                title="欢迎使用敏捷用户故事地图"
+              <EmptyPage
+                image={epicPic}
                 description="用户故事地图是以史诗为基础，根据版本控制进行管理规划"
               />
           )

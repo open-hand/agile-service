@@ -199,8 +199,8 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
     @Override
     public StatusMachineNodeVO linkStatus(Long organizationId, Long issueTypeId, Long statusId, Boolean defaultStatus, Boolean transferAll) {
         StatusVO statusVO = statusService.queryStatusById(organizationId, statusId);
-        stateMachineNodeService.handlerNullRankNode(organizationId, statusId, "");
         Long stateMachineId = queryStatusMachineId(organizationId, issueTypeId);
+        stateMachineNodeService.handlerNullRankNode(organizationId, stateMachineId, "");
         StatusMachineNodeDTO stateMachineNode = new StatusMachineNodeDTO();
         stateMachineNode.setStatusId(statusId);
         stateMachineNode.setOrganizationId(organizationId);
@@ -512,6 +512,23 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
     @Override
     public void updateAutoTransform(Long organizationId, Long issueTypeId, Long statusId, Boolean autoTransform) {
         statusBranchMergeSettingService.updateAutoTransform(0L, organizationId, issueTypeId, statusId, autoTransform);
+    }
+
+    @Override
+    public NodeSortVO updateSort(Long organizationId, Long statusMachineId, NodeSortVO nodeSortVO) {
+        if (ObjectUtils.isEmpty(nodeSortVO.getNodeId())) {
+            throw new CommonException("error.sort.node.null");
+        }
+        if (ObjectUtils.isEmpty(nodeSortVO.getOutSetId())) {
+            throw new CommonException("error.outSetId.null");
+        }
+        // 对rank值为空的node进行处理
+        stateMachineNodeService.handlerNullRankNode(organizationId, statusMachineId, null);
+        // 进行排序
+        stateMachineNodeService.sortNode(organizationId, statusMachineId, nodeSortVO, null);
+        // 清除状态机实例
+        instanceCache.cleanStateMachine(statusMachineId);
+        return nodeSortVO;
     }
 
     private OrganizationConfigDTO initOrganizationConfig(Long organizationId){

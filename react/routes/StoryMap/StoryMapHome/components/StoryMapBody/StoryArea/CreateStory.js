@@ -248,7 +248,7 @@ class CreateStory extends Component {
                 {' '}
                 或
                 {' '}
-                <span role="none" className="primary" style={{ cursor: 'pointer' }} onClick={this.handleSourceClick}>从需求池引入</span>
+                <span role="none" className="primary" style={{ cursor: 'pointer' }} onClick={this.handleSourceClick}>从未规划列表引入</span>
               </div>
             )
         }

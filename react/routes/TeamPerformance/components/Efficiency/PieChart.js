@@ -173,7 +173,7 @@ const PieChart = observer(() => {
           center: ['50%', '47%'],
           data: nextPieData,
           label: {
-            color: 'rgba(0,0,0,0.65)',
+            color: 'var(--text-color3)',
             position: 'outside',
             formatter: (value) => {
               if (value.data.name === null) {

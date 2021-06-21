@@ -1,0 +1,16 @@
+import { commonApi } from '@/api';
+import { useQuery, UseQueryOptions } from 'react-query';
+import useProjectKey from './useProjectKey';
+
+export interface ParentProgramConfig {
+  projectId?: string
+}
+export default function useParentProgram(config?: ParentProgramConfig, options?: UseQueryOptions<any>) {
+  const { projectId } = config || {};
+
+  const key = useProjectKey({ key: ['parent-program'], projectId });
+  return useQuery(key, () => commonApi.getProjectsInProgram(projectId), {
+    staleTime: 10000,
+    ...options,
+  });
+}

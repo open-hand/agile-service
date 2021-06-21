@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Tabs from '@/components/tabs';
 import { kanbanTemplateApi } from '@/api';
-import Empty from '@/components/Empty';
+import { EmptyPage } from '@choerodon/components';
 import Detail from './detail';
 import empty from './empty.svg';
 
@@ -42,11 +42,9 @@ const KanbanTemplates = () => {
                 </div>
               </>
             ) : (
-              <Empty
-                pic={empty}
-                title="未设置看板模板"
+              <EmptyPage
+                image={empty}
                 description="未设置看板模板，将为您预设为系统看板"
-                imgStyle={{ width: 175 }}
               />
             )
           }

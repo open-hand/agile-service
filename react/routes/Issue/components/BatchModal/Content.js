@@ -4,6 +4,7 @@ import React, {
 import {
   Form, Button, Select, DataSet, Row, Col, Progress,
 } from 'choerodon-ui/pro';
+import { Icon } from 'choerodon-ui';
 import { WSHandler, Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import { find, pick } from 'lodash';
@@ -367,12 +368,16 @@ function BatchModal({
                 </Col>
               )}
               <Col span={2}>
-                <Button
+                <Icon
                   onClick={() => {
                     Field.remove(key);
                     dataSet.current.init(f.code);
                   }}
-                  icon="delete_sweep-o"
+                  type="delete_sweep-o"
+                  style={{
+                    cursor: 'pointer',
+                    color: 'var(--primary-color)',
+                  }}
                 />
               </Col>
             </Row>

@@ -8,7 +8,7 @@ import { DataSet } from 'choerodon-ui/pro';
 import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import { Observer } from 'mobx-react-lite';
 import { CheckBoxProps } from 'choerodon-ui/pro/lib/check-box/CheckBox';
-import { ITableColumnCheckBoxesDataProps } from '@/components/table-column-check-boxes';
+import { ITableColumnCheckBoxesDataProps, ITableColumnCheckBoxesOptionData } from '@/components/table-column-check-boxes';
 import { OptionProps } from 'choerodon-ui/lib/select';
 
 interface EventsProps extends IChosenFieldFieldEvents {
@@ -26,7 +26,7 @@ interface IDownLoadInfo {
 interface IssueExportStoreProps {
   dataSetSystemFields?: FieldProps[], /** dataSet 数据管理 系统字段配置 */
   defaultCheckedExportFields?: string[], /** 默认选中导出字段 */
-  defaultInitOptions?: (data: { options: Array<{ label: string, value: string, checkBoxProps?: CheckBoxProps }>, checkedOptions: string[], dataSet: DataSet }) => Array<{ label: string, value: string, checkBoxProps?: CheckBoxProps }> | void /** 初始化选择字段的字段选项时调用 当返回空时则不进行选项覆盖 */
+  defaultInitOptions?: (data: { options: Array<ITableColumnCheckBoxesOptionData>, checkedOptions: string[], dataSet: DataSet }) => Array<{ label: string, value: string, checkBoxProps?: CheckBoxProps }> | void /** 初始化选择字段的字段选项时调用 当返回空时则不进行选项覆盖 */
   defaultInitFieldAction?: (data: IChosenFieldField, store: IssueExportStore) => IChosenFieldField | false | undefined | void, /** 初始化字段时调用，当返回值不为IChosenFieldField 则跳过此字段 */
   defaultInitFieldFinishAction?: (data: { customFields: IChosenFieldField[], systemFields: IChosenFieldField[], currentChosenField: Map<string, IChosenFieldField> }, store: IssueExportStore) => void, /** 初始化字段完成时调用 */
   transformSystemFilter?: (data: any) => any, /** 提交数据前 对系统筛选字段数据转换 */

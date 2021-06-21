@@ -572,8 +572,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             issueStatusDTO.setEnable(false);
             issueStatusService.insertIssueStatus(issueStatusDTO);
         }
-        stateMachineNodeService.handlerNullRankNode(organizationId, statusId, applyType);
         Long stateMachineId = queryStateMachineIdAndCheck(projectId, applyType, issueTypeId);
+        stateMachineNodeService.handlerNullRankNode(organizationId, stateMachineId, applyType);
         StatusMachineNodeDTO stateMachineNode = new StatusMachineNodeDTO();
         stateMachineNode.setStatusId(statusId);
         stateMachineNode.setOrganizationId(organizationId);
@@ -584,7 +584,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             List<StatusMachineNodeVO> statusMachineNodeVOS = stateMachineNodeService.queryByStateMachineId(organizationId, stateMachineId, false);
             stateMachineNode.setType(NodeType.CUSTOM);
             String maxRank = statusMachineNodeMapper.queryMaxRank(organizationId, stateMachineId);
-            stateMachineNode.setRank(maxRank);
+            stateMachineNode.setRank(ObjectUtils.isEmpty(maxRank) ? RankUtil.mid() : RankUtil.genNext(maxRank));
             stateMachineNodeService.baseCreate(stateMachineNode);
             if (Boolean.TRUE.equals(defaultStatus)) {
                 defaultStatus(projectId, issueTypeId, stateMachineId, statusId);
@@ -711,7 +711,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         // 对rank值为空的node进行处理
         stateMachineNodeService.handlerNullRankNode(projectVO.getOrganizationId(), statusMachineId, applyType);
         // 进行排序
-        stateMachineNodeService.sortNode(projectId, statusMachineId, nodeSortVO, applyType);
+        stateMachineNodeService.sortNode(projectVO.getOrganizationId(), statusMachineId, nodeSortVO, applyType);
         // 清除状态机实例
         instanceCache.cleanStateMachine(statusMachineId);
         return null;

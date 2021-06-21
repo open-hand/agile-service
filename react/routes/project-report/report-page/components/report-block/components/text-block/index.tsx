@@ -15,9 +15,16 @@ const TextBlock: React.FC<Props> = ({ data: { content, key } }) => {
   }, [finish, key]);
   useEffect(() => {
     const imgList: NodeListOf<HTMLImageElement> | undefined = ref.current?.querySelectorAll('img');
+
     if (imgList && imgList.length > 0) {
       let count = 0;
       imgList.forEach((img) => {
+        if (!img.src) {
+          count += 1;
+          if (count === imgList.length) {
+            onFinish();
+          }
+        }
         // eslint-disable-next-line no-param-reassign
         img.onload = () => {
           count += 1;

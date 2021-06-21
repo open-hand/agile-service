@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite';
 import {
   DataSet, Select, Form, Button, Row, Col,
 } from 'choerodon-ui/pro';
+import { Icon } from 'choerodon-ui';
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
 import { getProjectId, getIsOrganization, getOrganizationId } from '@/utils/common';
 import { find, includes } from 'lodash';
@@ -363,7 +364,7 @@ const UpdateField = ({
     valueField: 'versionId',
     textField: 'name',
   }, {
-    name: 'version',
+    name: 'influenceVersion',
     type: 'array' as FieldType,
     label: '影响的版本',
     lookupAxiosConfig: () => ({
@@ -388,9 +389,13 @@ const UpdateField = ({
           // @ts-ignore
           transformResponse: (response) => {
             try {
-              const data = JSON.parse(response);
-              return data.filter((v: Priority) => v.enable);
+              if (typeof response === 'string') {
+                const data = JSON.parse(response);
+                return data.filter((v: Priority) => v.enable);
+              }
+              return response;
             } catch (error) {
+              console.log(error);
               return response;
             }
           },
@@ -564,14 +569,18 @@ const UpdateField = ({
                 </Col>
               )}
               <Col span={2}>
-                <Button
+                <Icon
                   onClick={() => {
                     // @ts-ignore
                     Field.remove(key);
                     // @ts-ignore
                     dataSet.current.init(f.code);
                   }}
-                  icon="delete_sweep-o"
+                  type="delete_sweep-o"
+                  style={{
+                    cursor: 'pointer',
+                    color: 'var(--primary-color)',
+                  }}
                 />
               </Col>
             </Row>
@@ -583,7 +592,6 @@ const UpdateField = ({
           // @ts-ignore
           onClick={Field.add}
           icon="add"
-          color={'primary' as ButtonColor}
         >
           添加字段
         </Button>

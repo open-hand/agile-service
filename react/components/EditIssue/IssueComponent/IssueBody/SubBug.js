@@ -85,7 +85,7 @@ const SubBug = observer(({
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
             <Tooltip placement="topRight" title="创建缺陷" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-              <Button onClick={() => store.setCreateSubBugShow(true)}>
+              <Button onClick={() => store.setCreateSubBugShow(true)} disabled={(issueTypeData || []).length === 0}>
                 <Icon type="playlist_add icon" />
               </Button>
             </Tooltip>
@@ -94,27 +94,31 @@ const SubBug = observer(({
       </div>
       {renderSubIssues()}
       {!disableCreate && (
-      <QuickCreateIssue
-        sprintId={activeSprint?.sprintId}
-        defaultPriority={{ id: priorityId }}
-        issueTypes={issueTypeData || []}
-        relateIssueId={relateIssueId}
-        buttonShowText="快速创建缺陷"
-        onCreate={handleCreateSubIssue}
-        cantCreateEvent={() => { store.setCreateSubBugShow(true); }}
-        typeIdChange={(id) => {
-          store.setDefaultTypeId(id);
-        }}
-        summaryChange={(issueSummary) => {
-          store.setDefaultSummary(issueSummary);
-        }}
-        assigneeChange={(assigneeId) => {
-          store.setDefaultAssignee(assigneeId);
-        }}
-        setDefaultSprint={(value) => {
-          store.setDefaultSprint(value);
-        }}
-      />
+        <div style={{ marginTop: 15 }}>
+          <QuickCreateIssue
+            sprintId={activeSprint?.sprintId}
+            defaultPriority={{ id: priorityId }}
+            issueTypes={issueTypeData || []}
+            relateIssueId={relateIssueId}
+            buttonShow={(issueTypeData || []).length > 1}
+            buttonShowText="快速创建缺陷"
+            onCreate={handleCreateSubIssue}
+            cantCreateEvent={() => { store.setCreateSubBugShow(true); }}
+            typeIdChange={(id) => {
+              store.setDefaultTypeId(id);
+            }}
+            summaryChange={(issueSummary) => {
+              store.setDefaultSummary(issueSummary);
+            }}
+            assigneeChange={(assigneeId) => {
+              store.setDefaultAssignee(assigneeId);
+            }}
+            setDefaultSprint={(value) => {
+              store.setDefaultSprint(value);
+            }}
+          />
+        </div>
+
       )}
       {
         createSubBugShow ? (

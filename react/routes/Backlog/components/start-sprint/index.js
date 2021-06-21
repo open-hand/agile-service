@@ -5,13 +5,18 @@ import {
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import { stores } from '@choerodon/boot';
-import _ from 'lodash';
-import moment from 'moment';
+import { isNull, find } from 'lodash';
+import originMoment from 'moment';
+import { extendMoment } from 'moment-range';
+
+// @ts-ignore
+
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import { sprintApi } from '@/api';
 import WorkCalendar from '@/components/WorkCalendar';
 import useIsInProgram from '@/hooks/useIsInProgram';
 
+const moment = extendMoment(originMoment);
 const FormItem = Form.Item;
 const { TextArea } = Input;
 const { Option } = Select;
@@ -87,61 +92,51 @@ class StartSprint extends Component {
       workHolidayCalendarDTOS: holidayRefs,
     } = workSetting;
     const { workDates } = this.state;
-    const weekdays = [
-      saturdayWork ? null : '六',
-      sundayWork ? null : '日',
-    ];
-    const result = [];
-    const beginDay = moment(startDate).format(format).split('-');
-    const endDay = moment(endDate).format(format).split('-');
-    const diffDay = new Date();
-    const dateList = [];
-    let i = 0;
-    diffDay.setDate(beginDay[2]);
-    diffDay.setMonth(beginDay[1] - 1);
-    diffDay.setFullYear(beginDay[0]);
-    while (i === 0) {
-      const localData = moment.localeData();
-      // 周六日
-      const isWeekDay = weekdays.includes(localData.weekdaysMin(moment(diffDay)));
-      // 冲刺自定义设置
-      const workDate = workDates.filter((date) => date.workDay === moment(diffDay).format('YYYY-MM-DD'));
-      // 工作日历自定义设置
-      const selectDay = selectDays.filter((date) => date.workDay === moment(diffDay).format('YYYY-MM-DD'));
-      // 法定假期
-      let holiday = false;
-      if (useHoliday && holidayRefs.length) {
-        holiday = holidayRefs.filter((date) => date.holiday === moment(diffDay).format('YYYY-MM-DD'));
-      }
-      if (workDate.length) {
-        if (workDate[0].status === 1) {
-          result.push(workDate.workDay);
+    // 判断日期是否是休息日
+    // 优先级如下：
+    // 冲刺自定义设置
+    // 组织自定义设置
+    // 法定工作日
+    // 周六周日是否工作
+
+    const isRestDay = (date) => {
+      // status为0代表放假，为1代表上班。
+      const sprintSetting = find(workDates, (c) => c.workDay === date.format('YYYY-MM-DD'));
+      if (sprintSetting) {
+        if (sprintSetting.status === 0) {
+          return true;
         }
-      } else if (selectDay.length) {
-        if (selectDay[0].status === 1) {
-          result.push(selectDay.workDay);
-        }
-      } else if (holiday && holiday.length) {
-        if (holiday[0].status === 1) {
-          result.push(holiday.holiday);
-        }
-      } else if (!isWeekDay) {
-        result.push(moment(diffDay).format('YYYY-MM-DD'));
+        return false;
       }
-      dateList[2] = diffDay.getDate();
-      dateList[1] = diffDay.getMonth() + 1;
-      dateList[0] = diffDay.getFullYear();
-      if (String(dateList[1]).length === 1) { dateList[1] = `0${dateList[1]}`; }
-      if (String(dateList[2]).length === 1) { dateList[2] = `0${dateList[2]}`; }
-      if (String(dateList[0]) === endDay[0]
-        && String(dateList[1]) === endDay[1]
-        && String(dateList[2]) === endDay[2]) {
-        i = 1;
+      const orgSetting = find(selectDays, (c) => c.workDay === date.format('YYYY-MM-DD'));
+      if (orgSetting) {
+        if (orgSetting.status === 0) {
+          return true;
+        }
+        return false;
       }
-      const countDay = diffDay.getTime() + 24 * 60 * 60 * 1000;
-      diffDay.setTime(countDay);
-    }
-    return result.length;
+      // 法定节假日
+      const holidayConfig = find(holidayRefs, (c) => c.holiday === date.format('YYYY-MM-DD'));
+      if (holidayConfig) {
+        if (holidayConfig.status === 0) {
+          return true;
+        }
+        return false;
+      }
+      const isSaturday = date.weekday() === 5;
+      const isSunday = date.weekday() === 6;
+      if (isSaturday) {
+        return !saturdayWork;
+      }
+      if (isSunday) {
+        return !sundayWork;
+      }
+
+      return false;
+    };
+    const range = moment.range(startDate, endDate);
+    const days = Array.from(range.by('day'));
+    return days.filter((date) => !isRestDay(date)).length;
   };
 
   onWorkDateChange = (workDates) => {
@@ -192,12 +187,12 @@ class StartSprint extends Component {
     return (
       <div>
         <p className="c7n-closeSprint-message">
-          {`该冲刺中包含了${!_.isNull(sprintDetail) ? sprintDetail.issueCount : 0}个问题`}
+          {`该冲刺中包含了${!isNull(sprintDetail) ? sprintDetail.issueCount : 0}个问题`}
         </p>
         <Form style={{ width: 512, marginTop: 24 }}>
           <FormItem>
             {getFieldDecorator('name', {
-              initialValue: !_.isNull(sprintDetail) ? sprintDetail.sprintName : null,
+              initialValue: !isNull(sprintDetail) ? sprintDetail.sprintName : null,
               rules: [{
                 required: true,
                 message: '冲刺名称是必填的',
@@ -208,9 +203,9 @@ class StartSprint extends Component {
           </FormItem>
           <FormItem>
             {getFieldDecorator('goal', {
-              initialValue: !_.isNull(sprintDetail) ? sprintDetail.sprintGoal : null,
+              initialValue: !isNull(sprintDetail) ? sprintDetail.sprintGoal : null,
             })(
-              <TextArea label="目标" autoSize maxLength={30} />,
+              <TextArea label="目标" autosize maxLength={30} />,
             )}
           </FormItem>
           <FormItem>
@@ -393,8 +388,8 @@ class StartSprint extends Component {
                 <span style={{ marginRight: 20 }}>
                   {`此Sprint中有${this.getWorkDays(startDate, endDate)}个工作日`}
                 </span>
-                <Icon type="settings-o" style={{ verticalAlign: 'top', color: '#5365EA' }} />
-                <a onClick={this.showWorkCalendar} role="none" style={{ color: '#5365EA' }}>
+                <a onClick={this.showWorkCalendar} role="none">
+                  <Icon type="settings" style={{ verticalAlign: 'top' }} />
                   设置当前冲刺工作日
                 </a>
               </div>
@@ -421,8 +416,8 @@ class StartSprint extends Component {
                 <span style={{ marginRight: 20 }}>
                   {`此Sprint中有${this.getWorkDays(moment(), endDate)}个工作日`}
                 </span>
-                <Icon type="settings-o" style={{ verticalAlign: 'top', color: '#5365EA' }} />
-                <a onClick={this.showWorkCalendar} role="none" style={{ color: '#5365EA' }}>
+                <a onClick={this.showWorkCalendar} role="none">
+                  <Icon type="settings" style={{ verticalAlign: 'top' }} />
                   设置当前冲刺工作日
                 </a>
               </div>

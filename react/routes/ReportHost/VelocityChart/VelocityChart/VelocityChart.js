@@ -6,14 +6,15 @@ import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import {
-  Table, Select, Spin,
+  Table, Spin,
 } from 'choerodon-ui';
+import { Form, Select } from 'choerodon-ui/pro';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
-import pic from '../../../../assets/image/emptyChart.svg';
+import { EmptyPage } from '@choerodon/components';
+import pic from '../../../../assets/image/NoData.svg';
 import SwithChart from '../../Component/switchChart';
 import VS from '../../../../stores/project/velocityChart';
-import EmptyBlock from '../../../../components/EmptyBlock';
 import BackBtn from '../../back-btn';
 import './VelocityChart.less';
 
@@ -189,7 +190,7 @@ class VelocityChart extends Component {
           data: VS.getChartDataYCommitted,
           emphasis: {
             itemStyle: {
-              color: '#e0e0e0',
+              color: 'var(--divider)',
             },
           },
         },
@@ -367,22 +368,24 @@ class VelocityChart extends Component {
         <Content style={{ paddingTop: 20 }}>
           {!(!VS.chartLoading && !VS.getChartDataX.length) ? (
             <div>
-              <Select
-                style={{ width: 512 }}
-                label="单位选择"
-                value={VS.currentUnit}
-                onChange={(unit) => this.handleChangeCurrentUnit(unit)}
-              >
-                <Option key="story_point" value="story_point">
-                  故事点
-                </Option>
-                <Option key="issue_count" value="issue_count">
-                  问题计数
-                </Option>
-                <Option key="remain_time" value="remain_time">
-                  剩余时间
-                </Option>
-              </Select>
+              <Form style={{ marginBottom: -20, width: 512 }}>
+                <Select
+                  label="单位选择"
+                  value={VS.currentUnit}
+                  onChange={(unit) => this.handleChangeCurrentUnit(unit)}
+                  clearButton={false}
+                >
+                  <Option key="story_point" value="story_point">
+                    故事点
+                  </Option>
+                  <Option key="issue_count" value="issue_count">
+                    问题计数
+                  </Option>
+                  <Option key="remain_time" value="remain_time">
+                    剩余时间
+                  </Option>
+                </Select>
+              </Form>
               <Spin spinning={VS.chartLoading}>
                 <ReactEcharts
                   className="c7n-chart"
@@ -392,27 +395,21 @@ class VelocityChart extends Component {
               {this.renderTable()}
             </div>
           ) : (
-            <EmptyBlock
-              style={{ marginTop: 40 }}
-              textWidth="auto"
-              pic={pic}
-              title="当前项目无可用冲刺"
-              des={(
+            <EmptyPage
+              image={pic}
+              description={(
                 <div>
-                  <span>请在</span>
-                  <span
-                    className="primary"
-                    style={{ margin: '0 5px', cursor: 'pointer' }}
-                    role="none"
+                  <span>当前项目无可用冲刺，请在</span>
+                  <EmptyPage.Button
                     onClick={() => {
                       to(LINK_URL.workListBacklog);
                     }}
                   >
-                    待办事项
-                  </span>
+                    【待办事项】
+                  </EmptyPage.Button>
                   <span>中创建一个冲刺</span>
                 </div>
-                )}
+            )}
             />
           )}
         </Content>

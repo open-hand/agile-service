@@ -1,5 +1,6 @@
 import React from 'react';
-import { Form, Button, Icon } from 'choerodon-ui';
+import { Form, Icon } from 'choerodon-ui';
+import { Button } from 'choerodon-ui/pro';
 import SelectFocusLoad from '../SelectFocusLoad';
 
 let id = 0;
@@ -91,6 +92,7 @@ function FieldIssueLinks({ form, projectId }) {
         {/* {keys.length > 1 && ( */}
         <div style={{ marginTop: 8, width: 60 }}>
           <Button
+            funcType="flat"
             shape="circle"
             style={{ marginLeft: 10, fontSize: 20 }}
             icon="delete_sweep-o"
@@ -110,12 +112,10 @@ function FieldIssueLinks({ form, projectId }) {
     <div className="c7nagile-issue-link">
       {renderIssueLink()}
       <Button
+        icon="add"
         onClick={add}
         disabled={adding}
-        type="primary"
-        funcType="flat"
       >
-        <Icon type="add icon" />
         添加问题链接
       </Button>
     </div>

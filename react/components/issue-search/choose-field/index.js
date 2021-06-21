@@ -2,9 +2,8 @@ import React, {
   useState, useCallback, useRef, useEffect,
 } from 'react';
 import {
-  Button, Icon,
+  Button, Icon, Dropdown,
 } from 'choerodon-ui/pro';
-import { Dropdown } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import FieldList from './FieldList';
 
@@ -36,13 +35,12 @@ function ChooseField() {
       style={{ marginLeft: 5, display: 'flex', alignItems: 'center' }}
     >
       <Dropdown
-        getPopupContainer={(trigger) => trigger.parentNode}
         visible={!hidden}
         overlay={(
           <div
             role="none"
             ref={ref}
-            onClick={(e) => {
+            onMouseDown={(e) => {
               e.stopPropagation();
             }}
           >

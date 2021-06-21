@@ -119,12 +119,12 @@ const LinkedTable: React.FC<Props> = ({ issueId, linkedTableRef }) => {
       className={styles.linkedTable}
       dataSet={dataSet}
       queryBar={() => (
-        <Form dataSet={queryDataSet} columns={5}>
-          <TextField name="content" prefix={<Icon type="search" />} valueChangeAction={'input' as any} />
-          <SelectIssueType name="issueType" />
-          <SelectStatus name="status" request={() => statusApi.loadByProject('agile')} />
-          <SelectPriority name="priority" clearButton />
-          <SelectUser name="assignee" clearButton />
+        <Form dataSet={queryDataSet} columns={6} style={{ margin: 0 }}>
+          <TextField name="content" prefix={<Icon type="search" />} colSpan={2} valueChangeAction={'input' as any} />
+          <SelectIssueType name="issueType" filterList={['issue_epic', 'sub_task', 'feature']} dropdownMatchSelectWidth={false} />
+          <SelectStatus name="status" request={() => statusApi.loadByProject('agile')} dropdownMatchSelectWidth={false} />
+          <SelectPriority name="priority" clearButton dropdownMatchSelectWidth={false} />
+          <SelectUser name="assignee" clearButton dropdownMatchSelectWidth={false} />
         </Form>
       )}
     >

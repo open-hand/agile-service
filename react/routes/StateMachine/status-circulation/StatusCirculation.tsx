@@ -105,25 +105,27 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         )
       }
       <Content style={{ display: 'flex', flexDirection: 'column', paddingBottom: 0 }}>
-        <IssueTypeTab
-          selectedType={selectedType}
-          setSelectedType={(newType) => {
-            if (store.hasAction) {
-              openConfirmLeave({
-                onOk: async () => {
-                  store.clearActions();
-                  setSelectedType(newType);
-                },
-              });
-            } else {
-              setSelectedType(newType);
-            }
-          }}
-          excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
-          brighter={readOnly}
-          visibleIssueTypeCategory={visibleIssueTypeCategory}
-        />
         {tab}
+        <div style={{ marginLeft: 1 }}>
+          <IssueTypeTab
+            selectedType={selectedType}
+            setSelectedType={(newType) => {
+              if (store.hasAction) {
+                openConfirmLeave({
+                  onOk: async () => {
+                    store.clearActions();
+                    setSelectedType(newType);
+                  },
+                });
+              } else {
+                setSelectedType(newType);
+              }
+            }}
+            excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
+            brighter={readOnly}
+            visibleIssueTypeCategory={visibleIssueTypeCategory}
+          />
+        </div>
         <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
           <StatusCirculationTable />
         </div>
@@ -133,12 +135,12 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   return (
     <>
       {
-      noContainer ? content : (
-        <Page>
-          {content}
-        </Page>
-      )
-    }
+        noContainer ? content : (
+          <Page>
+            {content}
+          </Page>
+        )
+      }
     </>
   );
 };

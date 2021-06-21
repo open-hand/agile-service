@@ -117,7 +117,7 @@ const CreateLink: React.FC<Props> = ({ modal, issueId, onOk }) => {
 
   return (
     <>
-      <Form>
+      <Form style={{ margin: 0 }}>
         <Select
           dataSet={linkedDataSet}
           name="linkType"

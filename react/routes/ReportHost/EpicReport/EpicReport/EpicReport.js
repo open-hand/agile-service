@@ -6,21 +6,22 @@ import {
   Page, Header, Content, stores, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import {
-  Tabs, Table, Select, Icon, Tooltip, Spin,
+  Tabs, Table, Icon, Tooltip, Spin,
 } from 'choerodon-ui';
+import { Form, Select } from 'choerodon-ui/pro';
 // import pic from './no_epic.svg';
 import STATUS from '@/constants/STATUS';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 import to from '@/utils/to';
 
-import pic from '../../../../assets/image/emptyChart.svg';
+import { EmptyPage } from '@choerodon/components';
+import pic from '../../../../assets/image/NoData.svg';
 import finish from './legend/finish.svg';
 import SwithChart from '../../Component/switchChart';
 import StatusTag from '../../../../components/StatusTag';
 import PriorityTag from '../../../../components/PriorityTag';
 import TypeTag from '../../../../components/TypeTag';
 import ES from '../../../../stores/project/epicReport';
-import EmptyBlock from '../../../../components/EmptyBlock';
 import BackBtn from '../../back-btn';
 import './EpicReport.less';
 
@@ -621,28 +622,32 @@ class EpicReport extends Component {
             !(!ES.epics.length && ES.epicFinishLoading) ? (
               <div>
                 <div style={{ display: 'flex' }}>
-                  <Select
-                    style={{ width: 244 }}
-                    label="史诗选择"
-                    value={ES.currentEpicId}
-                    onChange={(epicId) => this.handleChangeCurrentEpic(epicId)}
-                  >
-                    {
+                  <Form style={{ width: 244 }}>
+                    <Select
+                      label="史诗选择"
+                      value={ES.currentEpicId}
+                      onChange={(epicId) => this.handleChangeCurrentEpic(epicId)}
+                      clearButton={false}
+                    >
+                      {
                       ES.epics.map((epic) => (
                         <Option key={epic.issueId} value={epic.issueId}>{epic.epicName}</Option>
                       ))
                     }
-                  </Select>
-                  <Select
-                    style={{ width: 244, marginLeft: 24 }}
-                    label="单位选择"
-                    value={ES.currentUnit}
-                    onChange={(unit) => this.handleChangeCurrentUnit(unit)}
-                  >
-                    <Option key="story_point" value="story_point">故事点</Option>
-                    <Option key="issue_count" value="issue_count">问题计数</Option>
-                    <Option key="remain_time" value="remain_time">剩余时间</Option>
-                  </Select>
+                    </Select>
+                  </Form>
+                  <Form style={{ width: 244, marginLeft: 24 }}>
+                    <Select
+                      label="单位选择"
+                      value={ES.currentUnit}
+                      onChange={(unit) => this.handleChangeCurrentUnit(unit)}
+                      clearButton={false}
+                    >
+                      <Option key="story_point" value="story_point">故事点</Option>
+                      <Option key="issue_count" value="issue_count">问题计数</Option>
+                      <Option key="remain_time" value="remain_time">剩余时间</Option>
+                    </Select>
+                  </Form>
                 </div>
                 <Spin spinning={ES.chartLoading}>
                   <div>
@@ -757,38 +762,29 @@ class EpicReport extends Component {
                 </Tabs>
               </div>
             ) : (
-              <EmptyBlock
-                style={{ marginTop: 40 }}
-                textWidth="auto"
-                pic={pic}
-                title="当前项目无可用史诗"
-                des={(
+              <EmptyPage
+                image={pic}
+                description={(
                   <div>
-                    <span>请在</span>
-                    <span
-                      className="primary"
-                      style={{ margin: '0 5px', cursor: 'pointer' }}
-                      role="none"
+                    <span>当前项目无可用史诗，请在</span>
+                    <EmptyPage.Button
                       onClick={() => {
                         to(LINK_URL.workListBacklog);
                       }}
                     >
-                      待办事项
-                    </span>
+                      【待办事项】
+                    </EmptyPage.Button>
                     <span>或</span>
-                    <span
-                      className="primary"
-                      style={{ margin: '0 5px', cursor: 'pointer' }}
-                      role="none"
+                    <EmptyPage.Button
                       onClick={() => {
                         to(LINK_URL.workListIssue);
                       }}
                     >
-                      问题管理
-                    </span>
+                      【问题管理】
+                    </EmptyPage.Button>
                     <span>中创建一个史诗</span>
                   </div>
-                  )}
+              )}
               />
             )
           }

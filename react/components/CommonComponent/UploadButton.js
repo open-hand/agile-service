@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { Upload, Button } from 'choerodon-ui';
+import { Upload } from 'choerodon-ui';
+import { Button } from 'choerodon-ui/pro';
 import { randomWord } from '@/utils/random';
 import './UploadButton.less';
 

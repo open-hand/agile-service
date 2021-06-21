@@ -158,7 +158,7 @@ const TemplateSelect: React.FC<Props> = (props) => {
           <span
             className={styles.trigger_label}
             style={{
-              top: selected ? '-12px' : '7px',
+              top: selected ? '3px' : '14px',
               left: '6px',
               fontSize: selected ? '12px' : '13px',
             }}
@@ -168,7 +168,7 @@ const TemplateSelect: React.FC<Props> = (props) => {
           <span className={styles.selected}>
             {selected?.name}
           </span>
-          <Icon type="arrow_drop_down" className={styles.iconPicker} />
+          <Icon type="expand_more" className={styles.iconPicker} />
         </div>
       </Dropdown>
     </div>

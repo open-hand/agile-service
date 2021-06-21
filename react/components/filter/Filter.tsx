@@ -137,7 +137,8 @@ const Filter: React.FC<FilterProps> = ({
     if (removeButton === true) {
       return (
         <Button
-          icon="delete"
+          funcType={'flat' as any}
+          icon="delete_sweep-o"
           style={{ marginLeft: 10, flexShrink: 0 }}
           onClick={() => {
             handleSelectChange([field.code], false);
@@ -284,7 +285,7 @@ const Filter: React.FC<FilterProps> = ({
     <>
       {
         (overflowLine || folded === true) && (
-          <Button className={`${styles.btn} ${folded === true ? styles.foldedBtn : ''}`} funcType={'flat' as FuncType} onClick={expandFilter}>
+          <Button className={`${styles.btn} ${folded === true ? styles.foldedBtn : ''}`} onClick={expandFilter}>
             <Icon type={folded ? 'expand_more' : 'expand_less'} />
           </Button>
         )

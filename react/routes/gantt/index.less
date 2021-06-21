@@ -15,6 +15,28 @@ body.c7n-gantt-fullScreen {
 
 .gantt-body {
   flex: 1;
+  border: 1px solid var(--divider);
+
+  * {
+    border-color: var(--divider) !important;
+    stroke: var(--divider) !important;
+  }
+}
+
+.gantt-time-axis-minor {
+  color: var(--text-color3);
+}
+
+.gantt-table-body {
+  & > div {
+    color: var(--text-color3) !important;
+  }
+}
+
+.gantt-today,
+.gantt-today_line,
+.gantt-divider:hover hr {
+  background: var(--primary-color) !important;
 }
 
 .gantt-table-body-cell {

@@ -148,11 +148,16 @@ class BacklogHome extends Component {
               display: isShowFeature,
               disabled: !BacklogStore.getPiInfo.id,
               tooltipsConfig: {
-                hidden: BacklogStore.getPiInfo.id,
-                title: '无活跃的PI',
+                title: !BacklogStore.getPiInfo.id ? '无活跃的PI' : undefined,
               },
               permissions: ['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint'],
-            }]}
+            },
+            {
+              display: true,
+              icon: 'refresh',
+              handler: () => this.refresh(),
+            },
+            ]}
           />
         </Header>
         <Breadcrumb />

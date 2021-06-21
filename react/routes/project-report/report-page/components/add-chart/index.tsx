@@ -161,7 +161,7 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
         </Select>
         {isSubProjectChart && chart && <SelectTeam label="子项目" name="subProjectId" />}
       </Form>
-      <div className="c7n-pro-form-float" style={{ marginLeft: '6px' }}>
+      <div className="c7n-pro-form-float">
         {(ChartComponent && (isSubProjectChart ? subProjectId : true)) ? (
           <ChartComponent
             key={subProjectId}

@@ -23,7 +23,7 @@ const PersonalWorkload = () => {
   const renderTitle = () => (
     <div className={`${clsPrefix}-title`}>
       <span>个人工作量统计</span>
-      {startedRecord && workloadChartDs.length ? <OverviewWrap.Switch defaultValue="issueCount" onChange={setChartOption} options={options} /> : ''}
+      {/* {startedRecord && workloadChartDs.length ? <OverviewWrap.Switch defaultValue="issueCount" onChange={setChartOption} options={options} /> : ''} */}
     </div>
   );
   const getCategoryAndCategoryCount = useCallback(() => {
@@ -115,7 +115,7 @@ const PersonalWorkload = () => {
         name: chartOption === 'issueCount' ? '问题计数' : '工时',
         minInterval: 1,
         nameTextStyle: {
-          color: 'rgba(0,0,0,0.65)',
+          color: 'var(--text-color3)',
         },
         type: 'value',
         splitLine: {

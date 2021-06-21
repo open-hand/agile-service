@@ -3,21 +3,19 @@ import {
   DataSet,
   Table,
   Modal,
-  Button,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
 import { projectReportApiConfig, projectReportApi } from '@/api';
-import TableAction from '@/components/TableAction';
+import TableDropMenu from '@/components/table-drop-menu';
 import Users from '@/components/tag/users';
 import { User } from '@/common/types';
 import to from '@/utils/to';
-import Empty from '@/components/Empty';
-import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
+import { EmptyPage } from '@choerodon/components';
 import Loading from '@/components/Loading';
 import UserTag from '@/components/tag/user-tag';
-import NoReport from './no-report.svg';
+import NoReport from './NoReport.svg';
 
 const { Column } = Table;
 
@@ -59,8 +57,9 @@ const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
   const handleMenuClick = useCallback(async (key, record) => {
     switch (key) {
       case 'delete': {
-        Modal.confirm({
-          title: `确认删除报告“${record.get('title')}”`,
+        Modal.open({
+          title: '确认删除',
+          children: `确认删除报告“${record.get('title')}”`,
           onOk: async () => {
             await projectReportApi.delete(record.get('id'));
             dataSet.query();
@@ -83,13 +82,13 @@ const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
         name="title"
         tooltip={'overflow' as TableColumnTooltip}
         renderer={({ record }) => (
-          <TableAction
-            onEditClick={() => to(`/agile/project-report/edit/${record?.get('id')}`)}
+          <TableDropMenu
+            menuData={[{ action: () => to(`/agile/project-report/edit/${record?.get('id')}`), text: '编辑' },
+              {
+                key: 'delete',
+                text: '删除',
+              }]}
             onMenuClick={({ key }: { key: string }) => handleMenuClick(key, record)}
-            menus={[{
-              key: 'delete',
-              text: '删除',
-            }]}
             text={record?.get('title')}
           />
         )}
@@ -114,23 +113,18 @@ const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
       />
     </Table>
   ) : (
-    <Empty
-      title="暂无项目报告"
+    <EmptyPage
       description={(
         <>
-          当前项目下无项目报告，请创建
-          <br />
-          <Button
-            style={{ fontSize: '14px', marginTop: 15 }}
-            color={'primary' as ButtonColor}
-            funcType={'raised' as FuncType}
+          当前项目下无项目报告，请
+          <EmptyPage.Button
             onClick={onClick}
           >
-            创建项目报告
-          </Button>
+            【创建项目报告】
+          </EmptyPage.Button>
         </>
-        )}
-      pic={NoReport}
+      )}
+      image={NoReport}
     />
   )
   );

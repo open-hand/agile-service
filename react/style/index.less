@@ -3,6 +3,12 @@
 
 :root {
   --guide-space: 70px;
+  --table-header-background: rgb(243, 246, 254);
+  --table-cell-even-background: rgb(250, 250, 252);
+  // 详情，比如issue详情
+  --z-index-detail: 998;
+  // 侧边，比如个人筛选
+  --z-index-side: 901;
 }
 
 // 表格样式覆盖
@@ -21,7 +27,7 @@
 
 .c7n-performance-table-cell-header {
   .c7n-performance-table-cell {
-    background: rgb(243, 246, 254) !important;
+    background: var(--table-header-background) !important;
     color: rgb(15, 19, 88) !important;
     font-weight: 5 !important;
     line-height: 33px !important;
@@ -31,7 +37,39 @@
 .c7n-performance-table-body-row-wrapper {
   .c7n-performance-table-row:nth-child(even) {
     .c7n-performance-table-cell {
-      background-color: rgb(250, 250, 252) !important;
+      background-color: var(--table-cell-even-background) !important;
+    }
+  }
+}
+
+.c7n-performance-table-body-info {
+  color: #9EADBE;
+  border-bottom: 1px solid #EEF4F9;
+  margin-top: -17px !important;
+  line-height: 29px !important;
+}
+
+.c7n-performance-table-scrollbar-horizontal {
+  bottom: 0 !important;
+}
+
+.ant-table {
+  .ant-table-header {
+    .ant-table-cell {
+      background: var(--table-header-background) !important;
+      font-weight: 5 !important;
+    }
+  }
+
+  .ant-table-body {
+    .ant-table-row:nth-child(odd) {
+      .ant-table-cell {
+        background-color: var(--table-cell-even-background) !important;
+      }
+    }
+
+    .ant-table-cell {
+      border-color: rgb(238, 244, 249);
     }
   }
 }
@@ -392,49 +430,6 @@ body:not([data-theme="theme4"]) {
 }
 
 
-.flat-mixin(@type) {
-  input.c7n-pro-@{type} {
-    width: 100px;
-  }
-
-  .c7n-pro-@{type} {
-    display: flex;
-    align-items: center;
-    border: none;
-
-    // padding-right: 15px !important;
-    &::placeholder {
-      // color: rgba(0, 0, 0, 0.6);
-    }
-  }
-
-  & > input {
-    width: 100px;
-  }
-
-  .c7n-pro-@{type}-multiple-value {
-    width: 100px;
-  }
-
-  .c7n-pro-@{type}-placeholder {
-    // color: rgba(0, 0, 0, 0.6);
-  }
-
-  .c7n-@{type}-has-border.c7n-@{type}::before {
-    border: none;
-  }
-
-  .c7n-@{type}-search__field__placeholder {
-    color: var(--text-color2);
-  }
-
-  .c7n-@{type}-open {
-    .c7n-@{type}-search__field__placeholder {
-      color: rgba(0, 0, 0, 0.3);
-    }
-  }
-
-}
 
 .c7n-agile-table-cell {}
 

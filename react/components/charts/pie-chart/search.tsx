@@ -120,7 +120,7 @@ const PieSearch: React.FC<PieSearchProps> = ({
       <Select
         className={styles.c7n_pieChart_filter_item}
         labelLayout={'float' as LabelLayout}
-        style={{ width: 241 }}
+        style={{ width: 240, marginLeft: 20 }}
         label="选择维度"
         defaultValue={chooseDimensionType[0].name}
         value={chooseDimension}

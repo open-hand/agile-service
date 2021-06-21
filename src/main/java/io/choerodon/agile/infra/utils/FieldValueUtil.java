@@ -386,7 +386,7 @@ public class FieldValueUtil {
                         break;
                 }
             } catch (Exception e) {
-                throw new CommonException("error.date.parse", e);
+                throw new CommonException("error.defaultValue.parse", e);
             }
         }
     }

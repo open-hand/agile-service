@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Icon, Tooltip } from 'choerodon-ui/pro';
+import { Icon, Tooltip } from 'choerodon-ui';
 import './TypeTag.less';
 import { IIssueType, IFeatureType } from '@/common/types';
 
@@ -11,7 +11,7 @@ interface Props {
   iconSize?: number
 }
 const TypeTag: React.FC<Props> = ({
-  data, showName, style, featureType, iconSize = 26,
+  data, showName, style, featureType, iconSize = 24,
 }) => {
   let {
     colour, name = '', icon,
@@ -30,7 +30,9 @@ const TypeTag: React.FC<Props> = ({
   }
   const reverse = ['agile_epic', 'agile_story', 'agile_fault', 'agile_task', 'agile_subtask', 'test-case', 'test-automation', 'agile-feature'].includes(icon);
   return (
-    <Tooltip title={name}>
+    <Tooltip
+      title={name}
+    >
       <div className="c7n-typeTag" style={style}>
         {!reverse ? (
           <Icon
@@ -47,7 +49,7 @@ const TypeTag: React.FC<Props> = ({
           <Icon
             style={{
               transition: 'none',
-              fontSize: iconSize || '26px',
+              fontSize: iconSize || '24px',
               color: colour || '#fab614',
             }}
             type={icon || 'help'}

@@ -59,7 +59,7 @@ const getCustomFieldFilters = (chosenFields: Array<IChosenFieldField>, record: R
         if (value && value.length > 0) {
           customField.string.push({
             fieldId: id,
-            value,
+            value: value || null,
           });
         }
         break;
@@ -68,7 +68,7 @@ const getCustomFieldFilters = (chosenFields: Array<IChosenFieldField>, record: R
         if (value && value.length > 0) {
           customField.text.push({
             fieldId: id,
-            value,
+            value: value || null,
           });
         }
         break;

@@ -303,7 +303,7 @@ const NotifySetting = ({
           trigger={['click'] as Action[]}
         >
           <div
-            className={`${styles.dropDown_trigger} ${selected && selected.length ? styles.dropDown_trigger_hasSelected : styles.dropDown_trigger_hasNoSelected}`}
+            className={`${styles.dropDown_trigger} ${memberIsRequired ? styles.dropDown_trigger_isRequired : styles.dropDown_trigger_isNotRequired} ${selected && selected.length ? styles.dropDown_trigger_hasSelected : styles.dropDown_trigger_hasNoSelected}`}
             role="none"
             onClick={(e) => {
               e.nativeEvent.stopImmediatePropagation();
@@ -315,7 +315,7 @@ const NotifySetting = ({
             <span
               className={`${styles.trigger_label}  ${memberIsRequired ? styles.dropDown_member_isRequired : styles.dropDown_member_isNotRequired}`}
               style={{
-                top: selected.length ? '-12px' : '7px',
+                top: selected.length ? '3px' : '12px',
                 left: '6px',
                 fontSize: selected.length ? '12px' : '13px',
                 lineHeight: '23px',
@@ -326,8 +326,8 @@ const NotifySetting = ({
             <span className={styles.selected}>
               {selected.join(',')}
             </span>
-            <span className={`${styles.trigger_tip} ${memberIsRequired && !selected.length ? styles.trigger_tip_visible : styles.trigger_tip_hidden}`}>请输入通知人员</span>
-            <Icon type="arrow_drop_down" />
+            <span className={`${styles.trigger_tip} ${memberIsRequired && !selected.length ? styles.trigger_tip_visible : styles.trigger_tip_hidden}`}>请输入通知人员。</span>
+            <Icon type="expand_more" className={styles.iconPicker} />
           </div>
         </Dropdown>
         {

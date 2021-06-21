@@ -45,7 +45,6 @@ export function getRoutes(match) {
     <Route path={`${match.url}/scrumboard`} component={ScrumBoard} />,
     <Route path={`${match.url}/gantt`} component={GanttPage} />,
     <Route path={`${match.url}/project-version`} component={VersionList} />,
-    <Route path={`${match.url}/reporthost`} component={ReportHost} />,
     <PermissionRoute
       service={(type) => (
         type === 'project' ? [
@@ -65,12 +64,12 @@ export function getRoutes(match) {
     <PermissionRoute service={['choerodon.code.project.setting.issue.ps.issuelink']} path={`${match.url}/issuelink`} component={IssueLink} />,
     <PermissionRoute
       service={[]}
-      path={`${match.url}/kanban-template/detail/:templateId`}
+      path={`${match.url}/states/kanban-template/detail/:templateId`}
       component={KanbanTemplateDetail}
     />,
     <Route path={`${match.url}/states`} component={State} />,
     <Route path={`${match.url}/priorities`} component={Priority} />,
-    <Route path={`${match.url}/charts`} component={() => <Charts reportType="agile" />} />,
+    <Route path={`${match.url}/charts`} component={ReportHost} />,
     <PermissionRoute
       service={['choerodon.code.project.setting.state.ps.default',
         'choerodon.code.project.setting.state.ps.master']}

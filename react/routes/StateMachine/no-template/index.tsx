@@ -5,14 +5,13 @@ import {
 } from '@choerodon/boot';
 import { Button } from 'choerodon-ui/pro';
 import { Tooltip } from 'choerodon-ui';
-import Empty from '@/components/Empty';
-import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
+import { ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
+import { EmptyPage } from '@choerodon/components';
 import { getIsOrganization } from '@/utils/common';
 import { statusTransformApi } from '@/api';
+import NoData from '@/assets/image/NoData.svg';
 import IssueTypeTab from '../components/issue-type-tab';
 import { useStateMachineContext } from '../context';
-// @ts-ignore
-import empty from './empty.png';
 
 const NoTemplate: React.FC<{ activeKey: string }> = ({ activeKey }) => {
   const {
@@ -48,6 +47,7 @@ const NoTemplate: React.FC<{ activeKey: string }> = ({ activeKey }) => {
                   <Button
                     icon="playlist_add"
                     disabled
+                    style={{ marginLeft: 16 }}
                   >
                     创建新的状态
                   </Button>
@@ -56,6 +56,8 @@ const NoTemplate: React.FC<{ activeKey: string }> = ({ activeKey }) => {
                   <Button
                     icon="settings-o"
                     disabled
+                    color={'primary' as ButtonColor}
+                    style={{ marginLeft: 16 }}
                   >
                     设置初始状态
                   </Button>
@@ -75,30 +77,24 @@ const NoTemplate: React.FC<{ activeKey: string }> = ({ activeKey }) => {
           brighter={readOnly}
           visibleIssueTypeCategory={visibleIssueTypeCategory}
         />
-        <Empty
-          pic={empty}
-          title="暂无模板"
+        <EmptyPage
+          image={NoData}
           description={(
             <>
-              {`当前问题类型暂未配置状态机模板${readOnly ? '请到组织层状态机页面配置模板' : '点击下方按钮配置模板'}。`}
+              {`当前问题类型暂未配置状态机模板${readOnly ? '请到组织层状态机页面配置模板' : '点击按钮配置模板'}。`}
               {
                 !readOnly && (
                   <>
-                    <br />
-                    <Button
-                      style={{ fontSize: '14px', marginTop: 15 }}
-                      color={'primary' as ButtonColor}
-                      funcType={'raised' as FuncType}
+                    <EmptyPage.Button
                       onClick={initTemplate}
                     >
-                      配置模板
-                    </Button>
+                      【配置模板】
+                    </EmptyPage.Button>
                   </>
                 )
               }
             </>
           )}
-          imgStyle={{ width: readOnly ? 175 : 300 }}
         />
       </Content>
     </Page>

@@ -1,9 +1,12 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { asyncRouter, nomatch } from '@choerodon/boot';
+import { asyncRouter, nomatch, Charts } from '@choerodon/boot';
 import { PermissionRoute } from '@choerodon/master';
+import { useTabActiveKey } from '@choerodon/components';
+import useIsProgram from '@/hooks/useIsProgram';
+import { get } from '@choerodon/inject';
 
-const ReportHostHome = asyncRouter(() => (import('./Home')));
+const ReportRoutes = get('agile:ProgramReportRoutes');
 const BurndownChart = asyncRouter(() => (import('./BurndownChart')));
 const sprintReport = asyncRouter(() => (import('./SprintReport')));
 const Accumulation = asyncRouter(() => (import('./Accumulation')));
@@ -13,10 +16,14 @@ const PieChartReport = asyncRouter(() => (import('./pieChart')));
 const VersionReport = asyncRouter(() => (import('./VersionReport')));
 const EpicBurndown = asyncRouter(() => (import('./EpicBurndown')));
 const VersionBurndown = asyncRouter(() => (import('./VersionBurndown')));
-
+const Main = () => {
+  const { isProgram } = useIsProgram();
+  useTabActiveKey(isProgram ? 'program' : 'agile');
+  return <Charts reportType="agile" />;
+};
 const ReportHostIndex = ({ match }) => (
   <Switch>
-    <Route exact path={match.url} component={ReportHostHome} />
+    <Route exact path={match.url} component={Main} />
     <PermissionRoute
       service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.burndown']}
       path={`${match.url}/burndownchart`}
@@ -62,6 +69,7 @@ const ReportHostIndex = ({ match }) => (
       path={`${match.url}/versionBurndown`}
       component={VersionBurndown}
     />
+    {ReportRoutes && ReportRoutes({ match })}
     <Route path="*" component={nomatch} />
   </Switch>
 );

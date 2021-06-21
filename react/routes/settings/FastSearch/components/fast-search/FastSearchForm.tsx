@@ -1,9 +1,10 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import {
-  DataSet, Form, Select, Button, Row, Col, Tooltip,
+  DataSet, Form, Select, Button, Row, Col, Tooltip, Icon,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
+import classNames from 'classnames';
 import FastSearchFormItemField from './FastSearchFormItemField';
 import styles from './FastSearchForm.less';
 
@@ -46,7 +47,8 @@ function FastSearchFormItemOrigin({ record, onDelete }: FastSearchFormItemProps)
           </Col>
         </Row>
       </Form>
-      <Button icon="delete" onClick={() => onDelete(record)} disabled={!record.index} className={styles.form_item_del_btn} />
+      <Icon type="delete_sweep-o" onClick={() => onDelete(record)} className={classNames(styles.form_item_del_btn, { [styles.form_item_del_btn_disabled]: !record.index })} />
+      {/* <Button icon="delete_sweep-o" onClick={() => onDelete(record)} disabled={!record.index} className={styles.form_item_del_btn} /> */}
     </div>
   );
 }
@@ -58,7 +60,7 @@ function FastSearchForm({ dataSet }: { dataSet: DataSet }) {
   return (
     <div className={styles.form}>
       {dataSet.map((record) => <FastSearchFormItem record={record} onDelete={handleDelete} key={`FastSearchFormItem-${record.id}`} />)}
-      <Button icon="add" onClick={() => dataSet.create()} color={'primary' as any} style={{ width: 'max-content' }}>添加筛选</Button>
+      <Button icon="add" onClick={() => dataSet.create()} style={{ width: 'max-content' }}>添加筛选</Button>
     </div>
   );
 }

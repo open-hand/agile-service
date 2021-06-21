@@ -30,6 +30,8 @@ export function flat2tree<T extends { [key: string]: any }>(flattered: T[], {
       const parent = map.get(item[parentKey]);
       if (parent) {
         parent.children.push(map.get(item[idKey]) as TreeShapeData<T>);
+      } else {
+        result.push(map.get(item[idKey]) as TreeShapeData<T>);
       }
     }
   }

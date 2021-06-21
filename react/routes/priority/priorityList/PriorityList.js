@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { HeaderButtons } from '@choerodon/master';
 import {
-  Table, Button, Modal, Select, Icon, message, Menu,
+  Table, Icon, message, Menu,
 } from 'choerodon-ui';
+import { Modal, Form, Select } from 'choerodon-ui/pro';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import {
   Content, Header, TabPage as Page, stores, Breadcrumb,
@@ -12,16 +13,15 @@ import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
 import { priorityApi } from '@/api';
+import TableDropMenu from '@/components/table-drop-menu';
 import PriorityCreate from '../priorityCreate';
 import PriorityEdit from '../priorityEdit';
 import BodyRow from './bodyRow';
-import TableDropMenu from '../../../common/TableDropMenu';
 
 import './PriorityList.less';
 
 const { Option } = Select;
 const { AppState } = stores;
-const { confirm } = Modal;
 
 const ColorBlock = ({ color }) => (
   <div
@@ -121,11 +121,11 @@ class PriorityList extends Component {
     );
     return (
       <TableDropMenu
-        menu={menu}
+        oldMenuData={menu}
+        menuData={[{ action: () => this.handleEdit(record.id), text: '编辑' }]}
         text={name}
-        isHasMenu={!(record.enable && enableList && enableList.length === 1)}
-        // eslint-disable-next-line react/jsx-no-bind
-        onClickEdit={this.handleEdit.bind(this, record.id)}
+        showMenu={!(record.enable && enableList && enableList.length === 1)}
+
       />
     );
   };
@@ -182,9 +182,9 @@ class PriorityList extends Component {
     const that = this;
     const count = await priorityApi.checkBeforeDel(priority.id);
     const priorityList = PriorityStore.getPriorityList.filter((item) => item.id !== priority.id);
-    confirm({
+    Modal.open({
       title: intl.formatMessage({ id: 'priority.delete.title' }),
-      content: (
+      children: (
         <div>
           <div style={{ marginBottom: 10 }}>
             {`${intl.formatMessage({ id: 'priority.delete.title' })}：${priority.name}`}
@@ -211,19 +211,20 @@ class PriorityList extends Component {
           </div>
           {count !== 0
             && (
-              <div>
+              <Form style={{ marginBottom: -20 }}>
                 <Select
                   label={intl.formatMessage({ id: 'priority.title' })}
                   placeholder={intl.formatMessage({ id: 'priority.delete.chooseNewPriority.placeholder' })}
                   onChange={this.handleSelectChange}
                   style={{ width: 470 }}
                   defaultValue={priorityList[0].id}
+                  clearButton={false}
                 >
                   {priorityList.map(
                     (item) => <Option value={item.id} key={String(item.id)}>{item.name}</Option>,
                   )}
                 </Select>
-              </div>
+              </Form>
             )}
         </div>),
       width: 520,
@@ -259,9 +260,9 @@ class PriorityList extends Component {
     const { intl } = this.props;
     if (priority.enable) {
       const that = this;
-      confirm({
+      Modal.open({
         title: intl.formatMessage({ id: 'priority.disable.title' }),
-        content: (
+        children: (
           <div>
             <div style={{ marginBottom: 10 }}>
               {intl.formatMessage({ id: 'priority.disable.title' })}
