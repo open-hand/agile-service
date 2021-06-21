@@ -21,7 +21,7 @@ const CreateIssueModal: React.FC<Props> = ({ refresh }) => {
       <CreateIssue
         visible={createIssueVisible}
         onCancel={handleCancel}
-        chosenSprint={store.sprintId === '0' ? undefined : store.sprintId}
+        // chosenSprint={store.sprintId === '0' ? undefined : store.sprintId}
         onOk={handleOk}
       />
     ) : null

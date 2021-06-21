@@ -111,16 +111,16 @@ const GanttPage: React.FC = () => {
     transformFilter,
   });
   const store = useMemo(() => new GanttStore(), []);
-  const { sprintId } = store;
+  const { sprintIds } = store;
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
   const loadData = useCallback(() => {
     (async () => {
       const year = dayjs().year();
       const filter = issueSearchStore.getCustomFieldFilters();
-      if (sprintId === null) {
+      if (sprintIds === null) {
         return;
       }
-      filter.otherArgs.sprint = [sprintId];
+      filter.otherArgs.sprint = sprintIds;
       setLoading(true);
       const [workCalendarRes, projectWorkCalendarRes, res] = await Promise.all([
         workCalendarApi.getWorkSetting(year),
@@ -140,7 +140,7 @@ const GanttPage: React.FC = () => {
         setLoading(false);
       });
     })();
-  }, [issueSearchStore, sprintId, type]);
+  }, [issueSearchStore, sprintIds, type]);
   useEffect(() => {
     loadData();
   }, [issueSearchStore, loadData]);
@@ -160,24 +160,24 @@ const GanttPage: React.FC = () => {
       return false;
     }
   }, []);
-  const handleSprintChange = useCallback((value: string) => {
-    store.setSprintId(value);
+  const handleSprintChange = useCallback((value: string[]) => {
+    store.setSprintIds(value);
   }, [store]);
   const afterSprintLoad = useCallback((sprints) => {
-    if (!sprintId) {
-      const cachedSprintId = localPageCacheStore.getItem('gantt.search.sprint');
+    if (!sprintIds) {
+      const cachedSprintId = localPageCacheStore.getItem('gantt.search.sprints');
       if (cachedSprintId) {
-        store.setSprintId(cachedSprintId);
+        store.setSprintIds(cachedSprintId);
       } else {
         const currentSprint = find(sprints, { statusCode: 'started' });
         if (currentSprint) {
-          store.setSprintId(currentSprint.sprintId);
+          store.setSprintIds([currentSprint.sprintId]);
         } else {
-          store.setSprintId(sprints[0]?.sprintId || '0');
+          store.setSprintIds([sprints[0]?.sprintId || '0']);
         }
       }
     }
-  }, [sprintId, store]);
+  }, [sprintIds, store]);
   const handleTypeChange = useCallback((newType) => {
     setType(newType);
     localPageCacheStore.setItem('gantt.search.type', newType);
@@ -248,7 +248,8 @@ const GanttPage: React.FC = () => {
         <SelectSprint
           flat
           placeholder="冲刺"
-          value={sprintId}
+          value={sprintIds}
+          multiple
           onChange={handleSprintChange}
           clearButton={false}
           afterLoad={afterSprintLoad}
