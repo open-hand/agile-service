@@ -8,6 +8,7 @@ import { ColumnManage } from '@/components/issue-table/Component';
 import { getTableColumns } from '@/components/issue-table/columns';
 import AutoSize from '@/components/auto-size';
 import getListLayoutColumns from './utils/getListLayoutColumns';
+import getVisibleCount from './utils/getVisibleCount';
 
 export interface IssueTableMainProps extends IssueTableProps {
 
@@ -62,7 +63,8 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
     listLayoutColumns, fields, onSummaryClick, handleColumnResize: () => { },
   }), [fields, listLayoutColumns, onSummaryClick]);
   const getHeight = usePersistFn((availableHeight:number) => {
-    const heightFromData = tableProps.data.length * ROW_HEIGHT + HEADER_HEIGHT;
+    const visibleCount = getVisibleCount(tableProps.data, tableProps.expandedRowKeys);
+    const heightFromData = visibleCount * ROW_HEIGHT + HEADER_HEIGHT;
     return Math.min(Math.max(heightFromData, MIN_HEIGHT), Math.max(10 * ROW_HEIGHT + HEADER_HEIGHT, availableHeight - FOOTER_HEIGHT));
   });
 
