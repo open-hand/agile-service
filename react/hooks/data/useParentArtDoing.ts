@@ -10,7 +10,6 @@ export default function useParentArtDoing(config?: ParentArtDoingConfig, options
 
   const key = useProjectKey({ key: ['parent-art-doing'], projectId });
   return useQuery(key, () => commonApi.getIsShowFeature(), {
-    staleTime: 10000,
     ...options,
   });
 }
