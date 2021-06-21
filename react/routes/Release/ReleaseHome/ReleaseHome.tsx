@@ -1,26 +1,19 @@
-import React, { Component, useState } from 'react';
+import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   TabPage as Page, Header, Content, stores, Permission, Breadcrumb,
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
-import {
-  Menu, Icon, Spin, Tooltip,
-} from 'choerodon-ui';
-import { Table, DataSet } from 'choerodon-ui/pro';
+import { Table, DataSet, Tooltip } from 'choerodon-ui/pro';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { versionApi } from '@/api';
 import TableDropMenu from '@/components/table-drop-menu';
-import AddRelease from '../ReleaseComponent/AddRelease';
-import ReleaseStore from '../../../stores/project/release/ReleaseStore';
 import './ReleaseHome.less';
-import EditRelease from '../ReleaseComponent/EditRelease';
-import PublicRelease from '../ReleaseComponent/PublicRelease';
-import DeleteReleaseWithIssues from '../ReleaseComponent/DeleteReleaseWithIssues';
 import { openLinkVersionModal } from '../ReleaseComponent/link-program-vesion';
-import { openCreatReleaseVersionModal, openEditReleaseVersionModal } from '../components/create-edit-release-version';
+import { openCreateReleaseVersionModal, openEditReleaseVersionModal } from '../components/create-edit-release-version';
 import openDeleteReleaseVersionModal from '../components/delete-release-version';
+import openPublishReleaseVersionModal from '../components/publish-release-version';
 
 const { Column } = Table;
 const { AppState } = stores;
@@ -35,10 +28,6 @@ interface ReleaseHomeProps {
   program?: { id: string }
 }
 const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, program }) => {
-  const [createVisible, setCreateVisible] = useState(false);
-  const [editVersionData, setEditVersionData] = useState<any>();
-  const [versionDelInfo, setVersionDelInfo] = useState<any>();
-  const [publicVersionVisible, setPublicVersionVisible] = useState(false);
   function handleRefresh() {
     tableDataSet.query(tableDataSet.currentPage);
   }
@@ -49,9 +38,10 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
         if (recordData.statusCode === 'version_planning') {
           versionApi.loadPublicVersionDetail(recordData.versionId)
             .then((res: any) => {
-              ReleaseStore.setPublicVersionDetail(res);
-              ReleaseStore.setVersionDetail(recordData);
-              setPublicVersionVisible(true);
+              // ReleaseStore.setPublicVersionDetail(res);
+              // ReleaseStore.setVersionDetail(recordData);
+              openPublishReleaseVersionModal({ publishDetailData: res, data: recordData, handleOk: handleRefresh });
+              // setPublicVersionVisible(true);
             }).catch(() => {
             });
         } else {
@@ -159,16 +149,6 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
     );
   }
 
-  function renderProgramVersion({ value }: RenderProps) {
-    if (value && [...(value || undefined)].length > 0) {
-      const versionTags = [
-        <Tooltip title={value[0].name}><div className="c7n-release-progress-version">{value[0].name}</div></Tooltip>,
-      ];
-      value.length > 1 && versionTags.push(<Tooltip title={value.slice(1).map((item: any) => item.name).join(',')}><div className="c7n-release-progress-version">...</div></Tooltip>);
-      return versionTags;
-    }
-    return '';
-  }
   return (
     <Page>
       <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion']}>
@@ -180,7 +160,7 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
                 icon: 'playlist_add',
                 handler: () => {
                   // setCreateVisible(true);
-                  openCreatReleaseVersionModal({ handleOk: () => tableDataSet.query() });
+                  openCreateReleaseVersionModal({ handleOk: () => tableDataSet.query() });
                 },
                 display: true,
               },
@@ -247,11 +227,8 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
               </div>
             )}
           />
-          {/* @ts-ignore */}
           <Column name="startDate" className="c7n-agile-table-cell" width={100} tooltip={'overflow' as any} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
-          {/* @ts-ignore */}
           <Column name="expectReleaseDate" className="c7n-agile-table-cell" width={120} tooltip={'overflow' as any} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
-          {/* @ts-ignore */}
           <Column name="releaseDate" className="c7n-agile-table-cell" width={120} tooltip={'overflow' as any} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
           <Column
             name="description"
@@ -264,28 +241,6 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
           />
         </Table>
 
-        {versionDelInfo ? (
-          <DeleteReleaseWithIssues
-            visible={versionDelInfo}
-            versionDelInfo={versionDelInfo}
-            onCancel={() => {
-              setVersionDelInfo(undefined);
-              ReleaseStore.setDeleteReleaseVisible(false);
-            }}
-            refresh={handleRefresh}
-          />
-        ) : null}
-
-        {publicVersionVisible ? (
-          <PublicRelease
-            visible={publicVersionVisible}
-            release={tableDataSet.current?.toData()}
-            onCancel={() => {
-              setPublicVersionVisible(false);
-            }}
-            refresh={handleRefresh}
-          />
-        ) : null}
       </Content>
     </Page>
   );
