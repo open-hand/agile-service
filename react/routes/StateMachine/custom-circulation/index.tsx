@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   Page, Content, Breadcrumb,
@@ -111,6 +111,23 @@ interface IStatusLinkageVOS {
     id: string
     name: string
   },
+}
+
+interface ILinkIssueLinkageVOS {
+  linkTypeId: string
+  linkIssueTypeId: string
+  linkIssueStatusId: string
+  linkIssueStatus: {
+    name: string
+  }
+  linkIssueType: {
+    name: string
+    typeCode: string
+  }
+  linkTypeVO: {
+    linkName: string
+    linkTypeId: string
+  }
 }
 
 const transformedMember = {
@@ -487,12 +504,14 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     return '';
   };
 
+  const renderLinkIssueLinkageSetting = (linkIssueStatusLinkageVOS: ILinkIssueLinkageVOS[]) => linkIssueStatusLinkageVOS.map((item) => `关联关系为【${item.linkTypeVO.linkName}】，且问题类型为【${item.linkIssueType.name}】的关联问题将自动流转到【${item.linkIssueStatus.name}】状态`).join('；');
+
   const renderSetting = ({
     // @ts-ignore
     value, text, name, record, dataSet,
   }) => {
     const {
-      statusTransferSettingVOS, statusNoticeSettingVOS, statusFieldSettingVOS, statusLinkageVOS,
+      statusTransferSettingVOS, statusNoticeSettingVOS, statusFieldSettingVOS, statusLinkageVOS, linkIssueStatusLinkageVOS,
     } = record.data;
     const selectedTypeCode = find(issueTypes, (
       item: IIssueType,
@@ -530,6 +549,15 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
             <div className={`${styles.settingItem} ${styles.linkageSettingItem}`}>
               <Tooltip title={renderStatusLinkageSetting(statusLinkageVOS, record)}>
                 {renderStatusLinkageSetting(statusLinkageVOS, record)}
+              </Tooltip>
+            </div>
+          )
+        }
+        {
+          !isOrganization && selectedTypeCode && ['story', 'task', 'bug'].includes(selectedTypeCode) && linkIssueStatusLinkageVOS && linkIssueStatusLinkageVOS.length > 0 && (
+            <div className={styles.settingItem}>
+              <Tooltip title={renderLinkIssueLinkageSetting(linkIssueStatusLinkageVOS)}>
+                {renderLinkIssueLinkageSetting(linkIssueStatusLinkageVOS)}
               </Tooltip>
             </div>
           )
