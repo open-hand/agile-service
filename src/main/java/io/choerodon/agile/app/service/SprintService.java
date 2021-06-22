@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListVO;
+import io.choerodon.agile.api.vo.business.IssueSearchVO;
 import io.choerodon.agile.api.vo.business.SprintDetailVO;
 import io.choerodon.agile.infra.dto.business.SprintConvertDTO;
 import io.choerodon.agile.infra.dto.SprintDTO;
@@ -65,4 +66,10 @@ public interface SprintService {
     SprintConvertDTO update(SprintConvertDTO sprintConvertDTO);
 
     Boolean delete(SprintConvertDTO sprintConvertDTO);
+
+    List<SprintSearchVO> unCloseSprint(Long projectId);
+
+    Page<IssueSearchVO> issuePageBySprint(Long projectId, Long sprintId, PageRequest pageRequest, Map<String, Object> searchParamMap);
+
+    Page<IssueSearchVO> todoIssuePage(Long projectId, PageRequest pageRequest, Map<String, Object> searchParamMap);
 }

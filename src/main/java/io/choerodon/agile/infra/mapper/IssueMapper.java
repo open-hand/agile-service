@@ -591,4 +591,12 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
             @Param("selectSql") String selectSql,
             @Param("groupSql") String groupSql,
             @Param("linkSql") String linkSql);
+
+    /**
+     * 查询代办的问题
+     * @param projectId
+     * @param advancedSearchArgs
+     * @return
+     */
+    List<Long> queryUnDoneIssues(@Param("projectId") Long projectId, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
 }

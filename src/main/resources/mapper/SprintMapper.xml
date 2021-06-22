@@ -53,6 +53,7 @@
         <id property="estimatedStartTime" column="estimated_start_time"/>
         <id property="estimatedEndTime" column="estimated_end_time"/>
         <id property="epicName" column="issue_epic_name"/>
+        <id property="parentId" column="parent_id"/>
         <id property="color" column="color"/>
         <!--<id property="featureName" column="feature_name"/>-->
         <collection property="versionIds" autoMapping="true" ofType="java.lang.Long">
@@ -103,6 +104,9 @@
         ai.estimated_start_time,
         ai.estimated_end_time,
         alv2.name AS color,
+        IF(ai.parent_issue_id IS NULL OR ai.parent_issue_id = 0,
+        (IF(ai.relate_issue_id IS NULL OR ai.relate_issue_id = 0, null, ai.relate_issue_id)),
+        ai.parent_issue_id) as parent_id,
 --         feature_info.feature_name AS feature_name,
         apv1.version_id AS version_id,
         apv1.name AS version_name
@@ -135,7 +139,7 @@
         WHERE avir.version_id = apv.version_id AND avir.relation_type = 'fix'
         ) apv1 ON apv1.issue_id = ai.issue_id
         WHERE asp1.sprint_id is null and ais.is_completed != 1
-            and ai.type_code in ('story', 'task', 'bug')
+            and ai.type_code in ('story', 'task', 'bug','sub_task')
             and ai.apply_type = 'agile'
             and ai.project_id = #{projectId}
         ORDER BY ai.rank asc
@@ -539,6 +543,9 @@
         ai2.priority_code,
         ai2.estimated_start_time,
         ai2.estimated_end_time,
+        IF(ai2.parent_issue_id IS NULL OR ai2.parent_issue_id = 0,
+            (IF(ai2.relate_issue_id IS NULL OR ai2.relate_issue_id = 0, null, ai2.relate_issue_id)),
+             ai2.parent_issue_id) as parent_id,
 --         ai2.feature_id,
         ai1.epic_name AS issue_epic_name,
         alv2.name AS color,
@@ -1089,6 +1096,51 @@
             #{projectId}
         </foreach>
         AND status_code = 'started'
+    </select>
+
+    <select id="querySprintIssue" resultType="java.lang.Long">
+      SELECT
+        ai.issue_id
+      FROM agile_issue ai
+      LEFT JOIN agile_issue_sprint_rel aisr ON aisr.issue_id = ai.issue_id
+      LEFT JOIN agile_sprint asp on asp.sprint_id = aisr.sprint_id
+      WHERE ai.project_id = #{projectId}
+      AND ai.type_code in ('story', 'bug', 'task')
+      AND asp.sprint_id = #{sprintId}
+      AND (ai.relate_issue_id IS NULL OR ai.relate_issue_id = 0)
+        <if test='advancedSearchArgs != null'>
+            <if test='advancedSearchArgs.versionId != null'>
+                AND ai.issue_id IN (SELECT issue_id FROM agile_version_issue_rel WHERE version_id =
+                #{advancedSearchArgs.versionId} AND relation_type = 'fix')
+            </if>
+            <if test='advancedSearchArgs.epicId != null'>
+                AND ai.epic_id = #{advancedSearchArgs.epicId}
+            </if>
+            <if test='advancedSearchArgs.noVersion != "" and advancedSearchArgs.noVersion == "true"'>
+                AND ai.issue_id NOT IN (SELECT issue_id FROM agile_version_issue_rel WHERE version_id != 0 AND
+                relation_type = 'fix')
+            </if>
+            <if test='advancedSearchArgs.noEpic != "" and advancedSearchArgs.noEpic == "true"'>
+                AND (ai.epic_id IS NULL OR ai.epic_id = 0)
+            </if>
+            <if test='advancedSearchArgs.featureId != null'>
+                and ai.type_code = 'story' AND ai.feature_id = #{advancedSearchArgs.featureId}
+            </if>
+            <if test='advancedSearchArgs.noFeature != "" and advancedSearchArgs.noFeature == "true"'>
+                and ai.type_code = 'story' AND (ai.feature_id IS NULL OR ai.feature_id = 0)
+            </if>
+            <if test='advancedSearchArgs.onlyStory != "" and advancedSearchArgs.onlyStory == "true"'>
+                AND ai.type_code = 'story'
+            </if>
+            <if test='advancedSearchArgs.assigneeFilterIds != null and advancedSearchArgs.assigneeFilterIds.size > 0 '>
+                AND ai.assignee_id IN
+                <foreach collection="advancedSearchArgs.assigneeFilterIds" item="assigneeFilterId"
+                         open="(" close=")" separator=",">
+                    #{assigneeFilterId}
+                </foreach>
+            </if>
+        </if>
+        order by ai.rank ASC
     </select>
 
 </mapper>

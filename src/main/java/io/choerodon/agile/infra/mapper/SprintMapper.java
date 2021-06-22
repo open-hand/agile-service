@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Param;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -154,4 +155,6 @@ public interface SprintMapper extends BaseMapper<SprintDTO> {
     Long queryOutIssueId(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId);
 
     List<SprintDTO> selectActiveSprintsByProjectIds(@Param("projectIds") Set<Long> projectIds);
+
+    List querySprintIssue(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
 }

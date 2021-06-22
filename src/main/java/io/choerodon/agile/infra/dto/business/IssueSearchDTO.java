@@ -47,6 +47,8 @@ public class IssueSearchDTO {
     private String assigneeLoginName;
     private String assigneeRealName;
 
+    private Long parentId;
+
     public Long getFeatureId() {
         return featureId;
     }
@@ -293,5 +295,13 @@ public class IssueSearchDTO {
 
     public void setEstimatedEndTime(Date estimatedEndTime) {
         this.estimatedEndTime = estimatedEndTime;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
     }
 }
