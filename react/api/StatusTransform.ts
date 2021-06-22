@@ -743,6 +743,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
       params: {
         issueTypeId,
         statusId,
+        organizationId: getOrganizationId(),
       },
       data,
     });
