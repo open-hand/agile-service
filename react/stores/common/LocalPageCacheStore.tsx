@@ -30,13 +30,9 @@ class LocalPageCacheStore {
 
   getItem = (pageKey: string) => this.pages.get(`${getProjectId()}-${pageKey}`)
 
-  remove = (pageKey: string) => {
+  removeItem = (pageKey: string) => {
     this.pageKeys.get(getProjectId())?.delete(pageKey);
     this.pages.delete(`${getProjectId()}-${pageKey}`);
-  }
-
-  removeItem = (code: string) => {
-    this.remove(code);
   }
 
   has = (pageKey: string | RegExp) => {
@@ -56,5 +52,10 @@ class LocalPageCacheStore {
     this.pageKeys.clear();
   }
 }
-const testLocalPageCacheStore = new CacheBaseStore<string>(new LocalPageCacheStore(), { openProjectPrefix: false });
+interface CacheBaseStoreExtension extends CacheBaseStore<string> {
+  mergeSetItem: (code: string, data: any) => void
+  has: (pageKey: string | RegExp) => boolean
+  cacheStore: LocalPageCacheStore
+}
+const testLocalPageCacheStore = new CacheBaseStore<string>(new LocalPageCacheStore(), { openProjectPrefix: false }) as CacheBaseStoreExtension;
 export { testLocalPageCacheStore as localPageCacheStore };

@@ -20,7 +20,7 @@ const SelectSubProject: React.FC<Props> = forwardRef(({
     name: 'subProject',
     textField: 'projName',
     valueField: 'projectId',
-    request: () => commonApi.getSubProjects(true),
+    request: () => commonApi.getSubProjects(true).then((res: any) => (Array.isArray(res) ? res.map((i) => ({ ...i, projectId: String(i.projectId) })) : [])),
     middleWare: (data) => {
       let newData = data;
       if (dataRef) {

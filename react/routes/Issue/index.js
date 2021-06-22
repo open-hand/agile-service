@@ -93,7 +93,7 @@ const Issue = observer(({ cached, updateCache }) => {
       : tableProps.curren,
   ), [query, tableProps]);
   const hasUrlFilter = useCallback((obj) => {
-    const whiteList = ['type', 'category', 'id', 'name', 'organizationId'];
+    const whiteList = ['type', 'category', 'id', 'name', 'organizationId', 'activeKey'];
     return Object.keys(obj).some((key) => !whiteList.includes(key));
   }, []);
   const initFilter = usePersistFn(async () => {
