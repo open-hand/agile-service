@@ -1,36 +1,58 @@
 /* eslint-disable no-restricted-globals */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
+import { Pagination } from 'choerodon-ui/pro';
 import { Droppable, Draggable } from 'react-beautiful-dnd';
 import { WindowScroller, List, AutoSizer } from 'react-virtualized';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
+import { usePersistFn } from 'ahooks';
+import { ISSUE_HEIGHT } from './constant';
 import IssueItem from './IssueItem';
 import NoneIssue from './NoneIssue';
 
-function IssueList({ data, sprintId }) {
+function IssueList({ dataSet, sprintId }) {
+  const listRef = useRef();
+  const data = dataSet.treeData;
   const issueMap = useMemo(() => new Map(data.map((issue) => [String(issue.issueId), true])), [data.length]);
   const shouldIncreaseHeight = useCallback((snapshot) => {
     const { isUsingPlaceholder, draggingOverWith, draggingFromThisWith } = snapshot;
     const issueId = draggingFromThisWith || draggingOverWith;
     return isUsingPlaceholder && !issueMap.has(issueId);
   }, [issueMap]);
+  const handleExpandChange = usePersistFn((index) => {
+    listRef.current.recomputeRowHeights(index);
+  });
+
   const renderIssueItem = useCallback(({ index, style }) => {
-    const issue = data[index];
-    if (!issue) {
+    const record = dataSet.getFromTree(index);
+    if (!record) {
       return null;
     }
     return (
-      <Draggable draggableId={String(issue.issueId)} index={index} key={issue.issueId}>
-        {(provided) => <IssueItem provided={provided} issue={issue} style={{ margin: 0, ...style }} index={index} sprintId={sprintId} />}
+      <Draggable draggableId={String(record.get('issueId'))} index={index} key={record.get('issueId')}>
+        {(provided) => (
+          <IssueItem
+            onExpandChange={handleExpandChange}
+            provided={provided}
+            record={record}
+            style={{ margin: 0, ...style }}
+            index={index}
+            sprintId={sprintId}
+          />
+        )}
       </Draggable>
     );
-  }, [data]);
+  }, [dataSet, handleExpandChange, sprintId]);
 
   const handleOpenCreateIssue = useCallback(() => {
     BacklogStore.setNewIssueVisible(true);
   }, []);
-
+  const getRowHeight = usePersistFn(({ index }) => {
+    const record = dataSet.getFromTree(index);
+    const isExpand = record.isExpanded;
+    return isExpand ? ISSUE_HEIGHT * 2 : ISSUE_HEIGHT;
+  });
   return (
     <Droppable
       droppableId={String(sprintId)}
@@ -40,7 +62,7 @@ function IssueList({ data, sprintId }) {
         <IssueItem
           provided={provided}
           isDragging={snapshot.isDragging}
-          issue={data[rubric.source.index]}
+          record={dataSet.getFromTree(rubric.source.index)}
           sprintId={sprintId}
           style={{ margin: 0 }}
         />
@@ -63,10 +85,11 @@ function IssueList({ data, sprintId }) {
                       {({ width }) => (
                         <div ref={(el) => registerChild(el)} style={{ width: '100%' }}>
                           <List
+                            ref={listRef}
                             autoHeight
                             height={height}
                             rowCount={rowCount}
-                            rowHeight={48}
+                            rowHeight={getRowHeight}
                             rowRenderer={renderIssueItem}
                             scrollTop={scrollTop}
                             width={width}
@@ -111,6 +134,17 @@ function IssueList({ data, sprintId }) {
                 }}
               />
             </div>
+            <Pagination
+              dataSet={dataSet}
+              // total={10}
+              // page={1}
+              // pageSize={300}
+              // onChange={pagination.onChange}
+              showSizeChangerLabel={false}
+              showTotal={(total, range) => `显示${range[0]}-${range[1]} 共 ${total}条`}
+              showPager
+              showQuickJumper
+            />
           </div>
         );
       }}

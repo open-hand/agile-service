@@ -1,6 +1,7 @@
-import React, { memo, Fragment } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react';
-import { Tooltip } from 'choerodon-ui';
+import { usePersistFn } from 'ahooks';
+import { Tooltip, Icon } from 'choerodon-ui/pro';
 import classnames from 'classnames';
 import moment from 'moment';
 import useIsInProgram from '@/hooks/useIsInProgram';
@@ -8,9 +9,9 @@ import TypeTag from '@/components/TypeTag';
 import StatusTag from '@/components/StatusTag';
 import PriorityTag from '@/components/PriorityTag';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
-
-import './IssueItem.less';
 import UserTag from '@/components/tag/user-tag';
+import { ISSUE_HEIGHT } from './constant';
+import './IssueItem.less';
 
 const prefix = 'c7n-backlog-issue';
 function DraggingNum({ num }) {
@@ -38,16 +39,39 @@ function getStyle({ draggableStyle, virtualStyle, isDragging }) {
   };
   return combined;
 }
-const Item = memo(({ issue, draggingNum }) => {
+const Item = observer(({
+  record, draggingNum, selected, sprintId, onExpandChange, index,
+}) => {
+  const issue = record.toData();
   const { isShowFeature } = useIsInProgram(); // 由后端判断是否显示特性
-  const { estimatedEndTime, statusVO } = issue;
+  const { estimatedEndTime, statusVO, children } = issue;
   let delayDays = 0;
   if (estimatedEndTime) {
     delayDays = moment().diff(moment(estimatedEndTime), 'days', true);
   }
+  const isExpand = record.isExpanded;
+  const handleClick = usePersistFn((e) => {
+    e.stopPropagation();
+    record.isExpanded = !isExpand;
+    onExpandChange && onExpandChange(index);
+  });
   return (
-    <>
+    <div
+      role="none"
+      style={{
+        height: ISSUE_HEIGHT,
+      }}
+      className={`${prefix} ${selected ? `${prefix}-selected` : ''}`}
+      onClick={(e) => { BacklogStore.handleIssueClick(e, issue, String(sprintId)); }}
+    >
       {draggingNum && (<DraggingNum num={draggingNum} />)}
+      {record.children && record.children.length > 0 ? (
+        <Icon
+          type={isExpand ? 'baseline-arrow_drop_down' : 'baseline-arrow_right'}
+          onClick={handleClick}
+          style={{ cursor: 'pointer' }}
+        />
+      ) : null}
       <div
         className={`${prefix}-left`}
       >
@@ -70,8 +94,8 @@ const Item = memo(({ issue, draggingNum }) => {
             delayDays > 0 || (delayDays >= -1 && delayDays < 0)) && (
             <div className={`${prefix}-${delayDays > 0 ? 'delay' : 'soonDelay'}`}>
               {
-              delayDays > 0 ? `延期${Math.ceil(delayDays)}天` : '即将到期'
-            }
+                delayDays > 0 ? `延期${Math.ceil(delayDays)}天` : '即将到期'
+              }
             </div>
           )
         }
@@ -139,18 +163,18 @@ const Item = memo(({ issue, draggingNum }) => {
           </div>
         </Tooltip>
       </div>
-    </>
+    </div>
   );
 });
 
 function IssueItem({
-  provided, style, issue = {}, isDragging, sprintId,
+  provided, style, record, isDragging, sprintId, onExpandChange, index,
 }) {
-  const selected = BacklogStore.getMultiSelected && BacklogStore.getMultiSelected.get(issue.issueId);
-  const draggingNum = BacklogStore.getIsDragging === issue.issueId && BacklogStore.getMultiSelected.size > 0 ? BacklogStore.getMultiSelected.size : undefined;
+  const selected = BacklogStore.getMultiSelected && BacklogStore.getMultiSelected.get(record.get('issueId'));
+  const draggingNum = BacklogStore.getIsDragging === record.get('issueId') && BacklogStore.getMultiSelected.size > 0 ? BacklogStore.getMultiSelected.size : undefined;
+  const isExpand = record.isExpanded;
   return (
     <div
-      role="none"
       ref={provided.innerRef}
       {...provided.draggableProps}
       {...provided.dragHandleProps}
@@ -159,10 +183,26 @@ function IssueItem({
         virtualStyle: style,
         isDragging,
       })}
-      className={`${prefix} ${selected ? `${prefix}-selected` : ''}`}
-      onClick={(e) => { BacklogStore.handleIssueClick(e, issue, String(sprintId)); }}
     >
-      <Item issue={issue} draggingNum={draggingNum} />
+      <Item
+        index={index}
+        onExpandChange={onExpandChange}
+        record={record}
+        selected={selected}
+        sprintId={sprintId}
+        draggingNum={draggingNum}
+      />
+      {isExpand && !isDragging && (
+        record.children.map((child) => (
+          <Item
+            key={child.get('issueId')}
+            record={child}
+            selected={selected}
+            sprintId={sprintId}
+            draggingNum={draggingNum}
+          />
+        ))
+      )}
     </div>
   );
 }

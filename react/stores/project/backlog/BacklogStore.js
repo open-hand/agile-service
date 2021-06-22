@@ -6,10 +6,10 @@ import {
   sortBy, find, uniq, intersection,
 } from 'lodash';
 import { store } from '@choerodon/boot';
-import { Modal } from 'choerodon-ui/pro';
+import { Modal, DataSet } from 'choerodon-ui/pro';
 import Moment from 'moment';
 import {
-  featureApi, sprintApi, piApi, storyMapApi, epicApi, priorityApi, issueTypeApi, commonApi, versionApi, quickFilterApi,
+  featureApi, sprintApi, piApi, storyMapApi, epicApi, priorityApi, issueTypeApi, commonApi, versionApi, quickFilterApi, issueApiConfig,
 } from '@/api';
 import { getProjectId } from '@/utils/common';
 import { extendMoment } from 'moment-range';
@@ -337,7 +337,22 @@ class BacklogStore {
       issueCount: backlogIssueCount,
       issueSearchVOList: backLogIssue,
     });
+    this.initDataSetMap(sprintData);
     this.spinIf = false;
+  }
+
+  @observable expandedIssueMap = observable.map();
+
+  @action
+  toggle(issueId) {
+    const isExpand = this.isExpand(issueId);
+    // console.log(isExpand);
+    this.expandedIssueMap.set(issueId, !isExpand);
+  }
+
+  @action
+  isExpand(issueId) {
+    return this.expandedIssueMap.get(issueId);
   }
 
   @observable assigneeFilterIds = [];
@@ -1283,6 +1298,47 @@ class BacklogStore {
 
   @action setDefaultEpicName = (data) => {
     this.defaultEpicName = data;
+  }
+
+  dataSetMap = observable.map();
+
+  @action
+  initDataSetMap(sprintData) {
+    sprintData.forEach((sprint) => {
+      const { issueSearchVOList } = sprint;
+      this.dataSetMap.set(sprint.sprintId, new DataSet({
+        autoQuery: true,
+        primaryKey: 'issueId',
+        modifiedCheck: false,
+        parentField: 'parentId',
+        expandField: 'expand',
+        idField: 'issueId',
+        paging: 'server',
+        // data: issueSearchVOList,
+        pageSize: 300,
+        transport: {
+          read: ({ params, data }) => issueApiConfig.loadIssues(params.page, params.size, undefined, {
+            contents: data.content ? [data.content] : undefined,
+            advancedSearchArgs: {
+              statusId: data.status,
+              priorityId: data.priority,
+              issueTypeId: data.issueType,
+            },
+            otherArgs: {
+              assigneeId: data.assignee,
+              sprint: data.sprint,
+            },
+            searchArgs: {
+              tree: true,
+            },
+          }),
+        },
+      }));
+    });
+  }
+
+  getDataSet(sprintId) {
+    return this.dataSetMap.get(sprintId);
   }
 }
 
