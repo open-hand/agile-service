@@ -1,4 +1,5 @@
 import { getProjectId } from '@/utils/common';
+import { omit, set } from 'lodash';
 
 export interface CacheStoreInterface {
   getItem: (code: string) => any
@@ -14,13 +15,16 @@ export interface CacheStoreInterface {
 interface CacheBaseStoreConfigProps {
   openProjectPrefix?: boolean /** 是否启用项目前缀 */
 }
+
 /**
  * 缓存store
  */
 class CacheBaseStore<T extends string> implements CacheStoreInterface {
   cacheStore: CacheStoreInterface
 
-  openProjectPrefix=true;
+  openProjectPrefix = true;
+
+  [propsName: string]: any;
 
   get project() {
     return this.openProjectPrefix ? `${getProjectId()} ` : '';
@@ -28,7 +32,14 @@ class CacheBaseStore<T extends string> implements CacheStoreInterface {
 
   constructor(cacheStore: CacheStoreInterface, config?: CacheBaseStoreConfigProps) {
     this.cacheStore = cacheStore;
+
     this.openProjectPrefix = config?.openProjectPrefix ?? true;
+    const otherProps = omit(cacheStore, 'getItem', 'setItem', 'removeItem', 'clear', 'has', 'remove');
+    Object.entries(otherProps).forEach(([key, value]) => {
+      if (value instanceof Function) {
+        set(this, key, (...args:any[]) => this.cacheStore[key](...args));
+      }
+    });
   }
 
   getItem = (code: T) => this.cacheStore.getItem(`${this.project}${code}`)
@@ -43,4 +54,5 @@ class CacheBaseStore<T extends string> implements CacheStoreInterface {
 
   clear = () => this.cacheStore.clear()
 }
+
 export default CacheBaseStore;
