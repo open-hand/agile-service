@@ -27,8 +27,6 @@ import java.util.*;
 public class UserServiceImpl implements UserService {
 
     private final BaseFeignClient baseFeignClient;
-    @Autowired(required = false)
-    private AgilePluginService agilePluginService;
 
     @Autowired
     public UserServiceImpl(BaseFeignClient baseFeignClient) {
@@ -143,11 +141,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ProjectVO getGroupInfoByEnableProject(Long organizationId, Long projectId) {
-        if (agilePluginService != null) {
-            return agilePluginService.getGroupInfoByEnableProject(organizationId, projectId);
-        } else {
-            return null;
-        }
+        ResponseEntity<ProjectVO> projectDTOResponseEntity = baseFeignClient.getGroupInfoByEnableProject(ConvertUtil.getOrganizationId(projectId), projectId);
+        return projectDTOResponseEntity != null ? projectDTOResponseEntity.getBody() : null;
     }
 
     @Override

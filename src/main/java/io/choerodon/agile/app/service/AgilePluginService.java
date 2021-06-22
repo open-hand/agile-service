@@ -466,6 +466,4 @@ public interface AgilePluginService {
     void createTagIssueRel(List<TagVO> tags, Long projectId, Long issueId);
 
     void updateTagIssueRel(List<TagVO> tags, Long projectId, Long issueId);
-
-    ProjectVO getGroupInfoByEnableProject(Long organizationId, Long projectId);
 }
