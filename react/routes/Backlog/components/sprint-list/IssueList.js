@@ -11,9 +11,8 @@ import { ISSUE_HEIGHT } from './constant';
 import IssueItem from './IssueItem';
 import NoneIssue from './NoneIssue';
 
-function IssueList({ dataSet, sprintId }) {
+function IssueList({ data, sprintId }) {
   const listRef = useRef();
-  const data = dataSet.treeData;
   const issueMap = useMemo(() => new Map(data.map((issue) => [String(issue.issueId), true])), [data.length]);
   const shouldIncreaseHeight = useCallback((snapshot) => {
     const { isUsingPlaceholder, draggingOverWith, draggingFromThisWith } = snapshot;
@@ -23,36 +22,28 @@ function IssueList({ dataSet, sprintId }) {
   const handleExpandChange = usePersistFn((index) => {
     listRef.current.recomputeRowHeights(index);
   });
-
   const renderIssueItem = useCallback(({ index, style }) => {
-    const record = dataSet.getFromTree(index);
-    if (!record) {
+    const issue = data[index];
+    if (!issue) {
       return null;
     }
     return (
-      <Draggable draggableId={String(record.get('issueId'))} index={index} key={record.get('issueId')}>
-        {(provided) => (
-          <IssueItem
-            onExpandChange={handleExpandChange}
-            provided={provided}
-            record={record}
-            style={{ margin: 0, ...style }}
-            index={index}
-            sprintId={sprintId}
-          />
-        )}
+      <Draggable draggableId={String(issue.issueId)} index={index} key={issue.issueId}>
+        {(provided) => <IssueItem onExpandChange={handleExpandChange} provided={provided} issue={issue} style={{ margin: 0, ...style }} index={index} sprintId={sprintId} />}
       </Draggable>
     );
-  }, [dataSet, handleExpandChange, sprintId]);
+  }, [data, handleExpandChange, sprintId]);
 
   const handleOpenCreateIssue = useCallback(() => {
     BacklogStore.setNewIssueVisible(true);
   }, []);
   const getRowHeight = usePersistFn(({ index }) => {
-    const record = dataSet.getFromTree(index);
-    const isExpand = record.isExpanded;
+    const issue = data[index];
+    const isExpand = BacklogStore.isExpand(issue.issueId);
     return isExpand ? ISSUE_HEIGHT * 2 : ISSUE_HEIGHT;
   });
+  const dataSet = BacklogStore.getDataSet(sprintId);
+  console.log(dataSet);
   return (
     <Droppable
       droppableId={String(sprintId)}
@@ -62,7 +53,7 @@ function IssueList({ dataSet, sprintId }) {
         <IssueItem
           provided={provided}
           isDragging={snapshot.isDragging}
-          record={dataSet.getFromTree(rubric.source.index)}
+          issue={data[rubric.source.index]}
           sprintId={sprintId}
           style={{ margin: 0 }}
         />
