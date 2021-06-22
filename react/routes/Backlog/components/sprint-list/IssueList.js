@@ -11,7 +11,7 @@ import { ISSUE_HEIGHT } from './constant';
 import IssueItem from './IssueItem';
 import NoneIssue from './NoneIssue';
 
-function IssueList({ data, sprintId }) {
+function IssueList({ data, sprintId, sprintData }) {
   const listRef = useRef();
   const issueMap = useMemo(() => new Map(data.map((issue) => [String(issue.issueId), true])), [data.length]);
   const shouldIncreaseHeight = useCallback((snapshot) => {
@@ -42,8 +42,14 @@ function IssueList({ data, sprintId }) {
     const isExpand = BacklogStore.isExpand(issue.issueId);
     return isExpand ? ISSUE_HEIGHT * 2 : ISSUE_HEIGHT;
   });
+  const { pagination } = sprintData;
+  const handlePaginationChange = usePersistFn((page, size) => {
+    BacklogStore.updatePagination(sprintId, {
+      page,
+      size,
+    });
+  });
   const dataSet = BacklogStore.getDataSet(sprintId);
-  console.log(dataSet);
   return (
     <Droppable
       droppableId={String(sprintId)}
@@ -126,11 +132,10 @@ function IssueList({ data, sprintId }) {
               />
             </div>
             <Pagination
-              dataSet={dataSet}
-              // total={10}
-              // page={1}
-              // pageSize={300}
-              // onChange={pagination.onChange}
+              total={pagination.total}
+              page={pagination.page}
+              pageSize={pagination.size}
+              onChange={handlePaginationChange}
               showSizeChangerLabel={false}
               showTotal={(total, range) => `显示${range[0]}-${range[1]} 共 ${total}条`}
               showPager

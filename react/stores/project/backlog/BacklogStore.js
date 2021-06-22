@@ -328,6 +328,12 @@ class BacklogStore {
         type: 'sprint',
         sprintType: sprint.type, // 冲刺类型 用于辨别ip冲刺
         expand: previousExpand.get(sprint.sprintId.toString()) ?? true,
+        pagination: {
+          page: 1,
+          size: 10,
+          total: 100,
+        },
+        filter: {},
       };
     }).concat({
       type: 'backlog',
@@ -336,6 +342,11 @@ class BacklogStore {
       expand: previousExpand.get('0') ?? true,
       issueCount: backlogIssueCount,
       issueSearchVOList: backLogIssue,
+      pagination: {
+        page: 1,
+        size: 10,
+      },
+      filter: {},
     });
     this.initDataSetMap(sprintData);
     this.spinIf = false;
@@ -1307,7 +1318,7 @@ class BacklogStore {
     sprintData.forEach((sprint) => {
       const { issueSearchVOList } = sprint;
       this.dataSetMap.set(sprint.sprintId, new DataSet({
-        autoQuery: true,
+        autoQuery: false,
         primaryKey: 'issueId',
         modifiedCheck: false,
         parentField: 'parentId',
@@ -1339,6 +1350,15 @@ class BacklogStore {
 
   getDataSet(sprintId) {
     return this.dataSetMap.get(sprintId);
+  }
+
+  @action updatePagination(sprintId, pagination) {
+    const sprint = find(this.sprintData, { sprintId });
+    Object.assign(sprint.pagination, pagination);
+  }
+
+  @action getPagination(sprintId, pagination) {
+    return this.sprintPageFilterMap.get(sprintId).pagination;
   }
 }
 
