@@ -27,6 +27,7 @@ import { IsInProgram } from '@/hooks/useIsInProgram';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import SelectUser from '@/components/select/select-user-old';
 import { MAX_LENGTH_LABEL } from '@/constants/MAX_LENGTH';
+import localCacheStore from '@/stores/common/LocalCacheStore';
 import { UploadButton } from '../CommonComponent';
 import SelectNumber from '../SelectNumber';
 import WYSIWYGEditor from '../CKEditor';
@@ -168,7 +169,8 @@ class CreateIssue extends Component {
     if (this.props.defaultTypeId) {
       return find(issueTypes, { id: this.props.defaultTypeId }) || issueTypes[0];
     }
-    return find(issueTypes, { typeCode: defaultTypeCode }) || issueTypes[0];
+    const localTypeId = localCacheStore.getItem('agile.issue.type.common.selected');
+    return find(issueTypes, { id: localTypeId }) || find(issueTypes, { typeCode: defaultTypeCode }) || issueTypes[0];
   }
 
   handleSave = (data, fileList) => {

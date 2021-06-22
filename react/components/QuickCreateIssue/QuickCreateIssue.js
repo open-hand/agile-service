@@ -11,6 +11,7 @@ import { debounce } from 'lodash';
 import { issueApi, fieldApi } from '@/api';
 import { checkCanQuickCreate, getQuickCreateDefaultObj } from '@/utils/quickCreate';
 import { fields2Map } from '@/utils/defaultValue';
+import localCacheStore from '@/stores/common/LocalCacheStore';
 import TypeTag from '../TypeTag';
 import './QuickCreateIssue.less';
 import UserDropdown from '../UserDropdown';
@@ -36,8 +37,10 @@ class QuickCreateIssue extends Component {
 
   static getDerivedStateFromProps(nextProps, prevState) {
     if (!prevState.currentTypeId && nextProps.issueTypes.length > 0) {
+      const localTypeId = localCacheStore.getItem('agile.issue.type.common.selected');
+      const newCurrentType = nextProps.issueTypes.find((issueType) => issueType.id === localTypeId) || nextProps.issueTypes[0];
       return {
-        currentTypeId: nextProps.issueTypes[0]?.id,
+        currentTypeId: newCurrentType?.id,
       };
     }
     return null;
@@ -148,6 +151,7 @@ class QuickCreateIssue extends Component {
           if (onCreate) {
             onCreate(res);
           }
+          localCacheStore.setItem('agile.issue.type.common.selected', currentType.id);
         }).catch(() => {
           this.setState({
             loading: false,
@@ -221,17 +225,17 @@ class QuickCreateIssue extends Component {
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 {
                   buttonShow && (
-                  <Dropdown overlay={typeList} trigger={['click']}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <TypeTag
-                        data={currentType}
-                      />
-                      <Icon
-                        type="arrow_drop_down"
-                        style={{ fontSize: 16 }}
-                      />
-                    </div>
-                  </Dropdown>
+                    <Dropdown overlay={typeList} trigger={['click']}>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <TypeTag
+                          data={currentType}
+                        />
+                        <Icon
+                          type="arrow_drop_down"
+                          style={{ fontSize: 16 }}
+                        />
+                      </div>
+                    </Dropdown>
                   )
                 }
                 <UserDropdown userDropDownRef={this.userDropDownRef} defaultAssignee={this.props.defaultAssignee} key={this.props.defaultAssignee?.id || 'null'} />
