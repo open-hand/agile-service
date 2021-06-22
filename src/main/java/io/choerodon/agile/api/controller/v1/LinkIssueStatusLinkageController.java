@@ -48,7 +48,7 @@ public class LinkIssueStatusLinkageController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询状态")
-    @GetMapping("/status")
+    @PostMapping("/status")
     public ResponseEntity<List<StatusVO>> queryStatus(@PathVariable("project_id") Long projectId,
                                                                      @RequestParam  Long organizationId,
                                                                      @RequestBody LinkIssueStatusLinkageVO linkageVO) {
