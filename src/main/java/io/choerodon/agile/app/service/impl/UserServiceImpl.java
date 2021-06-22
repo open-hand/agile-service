@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.UserService;
@@ -25,8 +26,9 @@ import java.util.*;
 @Component
 public class UserServiceImpl implements UserService {
 
-
     private final BaseFeignClient baseFeignClient;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     @Autowired
     public UserServiceImpl(BaseFeignClient baseFeignClient) {
@@ -141,8 +143,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ProjectVO getGroupInfoByEnableProject(Long organizationId, Long projectId) {
-        ResponseEntity<ProjectVO> projectDTOResponseEntity = baseFeignClient.getGroupInfoByEnableProject(ConvertUtil.getOrganizationId(projectId), projectId);
-        return projectDTOResponseEntity != null ? projectDTOResponseEntity.getBody() : null;
+        if (agilePluginService != null) {
+            return agilePluginService.getGroupInfoByEnableProject(organizationId, projectId);
+        } else {
+            return null;
+        }
     }
 
     @Override
