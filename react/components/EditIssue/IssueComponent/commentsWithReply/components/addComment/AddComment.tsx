@@ -20,9 +20,10 @@ interface Props {
     setReplying:(replying: boolean) => void
     setReplyValue: (v: string) => void
       } | null>
+  commentsHeight: number | undefined
 }
 const Comments: React.FC<Props> = ({
-  onSubmit, addingRef, editingRef, replyingRef,
+  onSubmit, addingRef, editingRef, replyingRef, commentsHeight,
 }) => {
   const [adding, setAdding] = useState(false);
   const [value, setValue] = useState<string>('');
@@ -74,7 +75,7 @@ const Comments: React.FC<Props> = ({
       <WYSIWYGEditor
         autoFocus
         footer
-        style={{ minHeight: 300, maxHeight: 500, width: '100%' }}
+        style={{ minHeight: 300, maxHeight: (commentsHeight || 500) - 70, width: '100%' }}
         onCancel={() => {
           cancel();
         }}
