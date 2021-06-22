@@ -294,6 +294,23 @@ class IssueTypeApi extends Api<IssueTypeApi> {
       data,
     });
   }
+
+  /**
+   * 问题类型排序更新
+   * @param typeId
+   * @param data
+   * @returns
+   */
+  updateRank(typeId: string, data: { frontId:string, backId?:string} | { frontId?:string, backId:string}) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/issue_type/${typeId}/update_rank`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+      data,
+    });
+  }
 }
 
 const issueTypeApi = new IssueTypeApi();

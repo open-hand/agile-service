@@ -1,63 +1,60 @@
 import { getProjectId } from '@/utils/common';
 import { toJS } from 'mobx';
 import { merge, omit } from 'lodash';
+import CacheBaseStore from './CacheBaseStore';
 
-interface LocalPageCacheStoreInterface {
-  getItem: (code: string) => any,
-  setItem: (code: string, data: any) => void,
-  remove: (code: string) => void,
-  clear: () => void,
-}
-const pages = new Map<string, any>();
-const pageKeys = new Map<string, Set<string>>();
-class LocalPageCacheStore implements LocalPageCacheStoreInterface {
-  pageKeyList = ['scrumboard', 'issues']; //
+class LocalPageCacheStore {
+  pages = new Map<string, any>();
 
-  setItem(pageKey: string, data: any) {
-   pageKeys.get(getProjectId())?.add(pageKey) || pageKeys.set(getProjectId(), new Set([pageKey]));
-   pages.set(`${getProjectId()}-${pageKey}`, data);
+  pageKeys = new Map<string, Set<string>>();
+
+  setItem = (pageKey: string, data: any) => {
+    this.pageKeys.get(getProjectId())?.add(pageKey) || this.pageKeys.set(getProjectId(), new Set([pageKey]));
+    this.pages.set(`${getProjectId()}-${pageKey}`, data);
   }
 
-  mergeSetItem<T extends object>(pageKey: string, data: T) {
-    pageKeys.get(getProjectId())?.add(pageKey) || pageKeys.set(getProjectId(), new Set([pageKey]));
-    const oldData = pages.get(`${getProjectId()}-${pageKey}`);
+  mergeSetItem = (pageKey: string, data: any) => {
+    this.pageKeys.get(getProjectId())?.add(pageKey) || this.pageKeys.set(getProjectId(), new Set([pageKey]));
+    const oldData = this.pages.get(`${getProjectId()}-${pageKey}`);
     const omitKeys = [];
     if (typeof (oldData) === 'object' && typeof (data) === 'object') {
       for (const [key, value] of Object.entries(data)) {
-        if (typeof (value) === 'undefined' || (Array.isArray(toJS(value)) && value.length === 0)) {
+        if (typeof (value) === 'undefined' || (Array.isArray(toJS(value)) && (value as any).length === 0)) {
           omitKeys.push(key);
         }
       }
     }
     const newData = merge(omit(oldData, omitKeys), data);
-    pages.set(`${getProjectId()}-${pageKey}`, newData);
+    this.pages.set(`${getProjectId()}-${pageKey}`, newData);
   }
 
-  getItem(pageKey: string) {
-    return pages.get(`${getProjectId()}-${pageKey}`);
+  getItem = (pageKey: string) => this.pages.get(`${getProjectId()}-${pageKey}`)
+
+  remove = (pageKey: string) => {
+    this.pageKeys.get(getProjectId())?.delete(pageKey);
+    this.pages.delete(`${getProjectId()}-${pageKey}`);
   }
 
-  remove(pageKey: string) {
-    pageKeys.get(getProjectId())?.delete(pageKey);
-    pages.delete(`${getProjectId()}-${pageKey}`);
+  removeItem = (code: string) => {
+    this.remove(code);
   }
 
-  has(pageKey: string | RegExp) {
+  has = (pageKey: string | RegExp) => {
     const projectId = getProjectId();
-    if (typeof (pageKey) === 'string' && pages.has(`${projectId}-${pageKey}`)) {
+    if (typeof (pageKey) === 'string' && this.pages.has(`${projectId}-${pageKey}`)) {
       return true;
     }
-    if (Object.prototype.toString.call(pageKey) === '[object RegExp]' && !!pageKeys.get(getProjectId())?.size) {
-      const pageKeyList = Array.from(pageKeys.get(getProjectId())!);
+    if (Object.prototype.toString.call(pageKey) === '[object RegExp]' && !!this.pageKeys.get(getProjectId())?.size) {
+      const pageKeyList = Array.from(this.pageKeys.get(getProjectId())!);
       return pageKeyList.some((key) => (pageKey as RegExp).test(key));
     }
     return false;
   }
 
   clear = () => {
-    pages.clear();
-    pageKeys.clear();
+    this.pages.clear();
+    this.pageKeys.clear();
   }
 }
-const testLocalPageCacheStore = new LocalPageCacheStore();
+const testLocalPageCacheStore = new CacheBaseStore<string>(new LocalPageCacheStore(), { openProjectPrefix: false });
 export { testLocalPageCacheStore as localPageCacheStore };
