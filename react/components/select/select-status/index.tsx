@@ -18,11 +18,12 @@ interface Props extends Partial<SelectProps> {
   issueTypeIds?: string[]
   selectedIds?: string[]
   isOrganization?: boolean
+  extraStatus?: IStatusCirculation[]
 }
 
 const SelectStatus: React.FC<Props> = forwardRef(
   ({
-    request, issueTypeId, expectStatusId, dataRef, afterLoad, flat, projectId, applyType, issueTypeIds, selectedIds, isOrganization = false, ...otherProps
+    request, issueTypeId, expectStatusId, dataRef, afterLoad, flat, projectId, applyType, issueTypeIds, selectedIds, isOrganization = false, extraStatus = [], ...otherProps
   }, ref: React.Ref<Select>) => {
     const config = useMemo((): SelectConfig<IStatusCirculation> => ({
       name: 'status',
@@ -39,8 +40,8 @@ const SelectStatus: React.FC<Props> = forwardRef(
       },
       middleWare: (statusList) => {
         let data = expectStatusId
-          ? statusList.filter(({ id }) => id !== expectStatusId)
-          : statusList;
+          ? [...(statusList.filter(({ id }) => id !== expectStatusId) || []), ...extraStatus]
+          : [...(statusList || []), ...extraStatus];
         if (issueTypeIds) {
           data = data.filter((item) => {
             if (includes(selectedIds, item.id)) {
@@ -63,7 +64,7 @@ const SelectStatus: React.FC<Props> = forwardRef(
         return data;
       },
       paging: false,
-    }), [issueTypeId, request, isOrganization, projectId, applyType, expectStatusId, issueTypeIds, dataRef, afterLoad, selectedIds]);
+    }), [issueTypeId, request, isOrganization, projectId, applyType, expectStatusId, extraStatus, issueTypeIds, dataRef, afterLoad, selectedIds]);
     const props = useSelect(config);
     const Component = flat ? FlatSelect : Select;
     return (

@@ -30,6 +30,7 @@ interface ILinkIssueStatusSetting {
   linkTypeId: string
   linkIssueTypeId: string
   linkIssueStatusId: string
+  linkIssueStatus: any
 }
 
 interface ILinkType {
@@ -38,6 +39,8 @@ interface ILinkType {
 }
 
 const { Option } = Select;
+const linkTypeHasIssueTypeMap = new Map([]); // 存储关联类型都选择了哪些问题类型，避免重复选择
+
 const Linkage = ({
   // @ts-ignore
   modal, record, selectedType, customCirculationDataSet, linkageType,
@@ -49,11 +52,15 @@ const Linkage = ({
   const [loading, setLoading] = useState(false);
   const [activeKey, setActiveKey] = useState<'subIssue' | 'linkIssue'>(linkageType[0]);
   const [linkTypes, setLinkTypes] = useState<ILinkType[]>([]);
+  const [linkIssueStatusSettings, setLinkIssueStatusSettings] = useState<ILinkIssueStatusSetting[]>([]);
 
   useEffect(() => {
     if (linkageType.includes('linkIssue')) {
       issueLinkTypeApi.getAll().then((res: { content: ILinkType[]}) => {
         setLinkTypes(res.content || []);
+        (res.content || []).forEach((item) => {
+          linkTypeHasIssueTypeMap.set(item.linkTypeId.toString(), []);
+        });
       });
     }
   }, [linkageType]);
@@ -104,10 +111,10 @@ const Linkage = ({
       current.set(name, value);
     }
   }, []);
-  const removeField = useCallback((name) => {
-    linkageDataSet.fields.delete(name);
-    linkageDataSet.current?.fields.delete(name);
-  }, [linkageDataSet]);
+  const removeField = useCallback((ds: DataSet, name: string) => {
+    ds.fields.delete(name);
+    ds.current?.fields.delete(name);
+  }, []);
   useEffect(() => {
     const getLinkages = async () => {
       setLoading(true);
@@ -117,18 +124,26 @@ const Linkage = ({
           const initFields = Field.init(new Array(Math.max(res.length, 1)).fill({}));
           initFields.forEach((item: { key: number }, i: number) => {
             addFieldRule(item.key);
-            setFieldValue(linkageDataSet, `${item.key}-type`, res[i]?.parentIssueTypeId);
-            setFieldValue(linkageDataSet, `${item.key}-status`, res[i]?.parentIssueStatusSetting);
+            if (res.length > 0) {
+              setFieldValue(linkageDataSet, `${item.key}-type`, res[i]?.parentIssueTypeId);
+              setFieldValue(linkageDataSet, `${item.key}-status`, res[i]?.parentIssueStatusSetting);
+            }
           });
         }
         if (linkageType.includes('linkIssue')) {
           const res: ILinkIssueStatusSetting[] = await statusTransformApi.getLinkIssueLinkage(selectedType, record.get('id'));
+          setLinkIssueStatusSettings(res || []);
           const initFields = LinkField.init(new Array(Math.max(res.length, 1)).fill({}));
           initFields.forEach((item: { key: number }, i: number) => {
             linkIssueAddFieldRule(item.key);
-            setFieldValue(linkIssueLinkageDataSet, `${item.key}-linkTypeId`, res[i]?.linkTypeId);
-            setFieldValue(linkIssueLinkageDataSet, `${item.key}-linkIssueTypeId`, res[i]?.linkIssueTypeId);
-            setFieldValue(linkIssueLinkageDataSet, `${item.key}-linkIssueStatusId`, res[i]?.linkIssueStatusId);
+            if (res.length) {
+              if (res[i]?.linkTypeId && res[i]?.linkIssueTypeId) {
+                (linkTypeHasIssueTypeMap.get(res[i].linkTypeId.toString()) as string[]).push(res[i].linkIssueTypeId);
+              }
+              setFieldValue(linkIssueLinkageDataSet, `${item.key}-linkTypeId`, res[i]?.linkTypeId);
+              setFieldValue(linkIssueLinkageDataSet, `${item.key}-linkIssueTypeId`, res[i]?.linkIssueTypeId);
+              setFieldValue(linkIssueLinkageDataSet, `${item.key}-linkIssueStatusId`, res[i]?.linkIssueStatusId);
+            }
           });
         }
         setLoading(false);
@@ -203,20 +218,10 @@ const Linkage = ({
     }, []);
   })();
 
-  const selectedLinkTypes = (() => {
-    const data: any = linkIssueLinkageDataSet.toData()[0];
-    return Object.keys(data).reduce((result: string[], key) => {
-      const [k, code] = key.split('-');
-      if (code === 'linkTypeId') {
-        result.push(data[key]);
-      }
-      return result;
-    }, []);
-  })();
-
   const handleActiveKeyChange = useCallback((key) => {
     setActiveKey(key);
   }, []);
+
   return (
     <div className={styles.linkage}>
       <Loading loading={loading} />
@@ -229,7 +234,7 @@ const Linkage = ({
         linkageType.length === 2 && (
           <div className={styles.typePick}>
             <HostPick
-              defaultActiveKey="subIssue"
+              defaultActiveKey={activeKey}
               onChange={handleActiveKeyChange}
               hostTabKeys={[{
                 key: 'subIssue',
@@ -259,8 +264,8 @@ const Linkage = ({
                         label="父任务类型"
                         name={typeName}
                         onChange={() => {
-                    getField(linkageDataSet, statusName)?.reset();
-                    linkageDataSet.current?.init(statusName, undefined);
+                          getField(linkageDataSet, statusName)?.reset();
+                          linkageDataSet.current?.init(statusName, undefined);
                         }}
                       >
                         {issueTypes?.filter((type: IIssueType) => (issueTypeId && type.id === issueTypeId) || !selectedIssueTypes.includes(type.id)).map((type: IIssueType) => (
@@ -288,8 +293,8 @@ const Linkage = ({
                         }}
                         onClick={() => {
                           Field.remove(key);
-                          removeField(typeName);
-                          removeField(statusName);
+                          removeField(linkageDataSet, typeName);
+                          removeField(linkageDataSet, statusName);
                         }}
                       />
                     </Col>
@@ -321,20 +326,24 @@ const Linkage = ({
                 const statusName = `${key}-linkIssueStatusId`;
                 const linkTypeId = getFieldValue(linkIssueLinkageDataSet, linkTypeName);
                 const issueTypeId = getFieldValue(linkIssueLinkageDataSet, typeName);
+                const extraStatus = selectedType && issueTypeId && linkTypeId ? linkIssueStatusSettings.find((item: ILinkIssueStatusSetting) => item.linkTypeId === linkTypeId && item.linkIssueTypeId === issueTypeId)?.linkIssueStatus : undefined;
                 return (
                   <Row key={key} gutter={20} type="flex" align="middle">
                     <Col span={8}>
                       <Select
                         label="关联类型"
                         name={linkTypeName}
-                        onChange={() => {
+                        onChange={(value, oldValue) => {
                           getField(linkIssueLinkageDataSet, typeName)?.reset();
                           getField(linkIssueLinkageDataSet, statusName)?.reset();
+                          if (oldValue && linkTypeHasIssueTypeMap.get(oldValue.toString()) && issueTypeId) {
+                            linkTypeHasIssueTypeMap.set(oldValue.toString(), (linkTypeHasIssueTypeMap.get(oldValue.toString()) as string[]).filter((item: string) => item !== issueTypeId));
+                          }
                           linkIssueLinkageDataSet.current?.init(typeName, undefined);
                           linkIssueLinkageDataSet.current?.init(statusName, undefined);
                         }}
                       >
-                        {linkTypes?.filter((type: ILinkType) => (linkTypeId && type.linkTypeId === linkTypeId) || !selectedLinkTypes.includes(type.linkTypeId)).map((type: ILinkType) => (
+                        {(linkTypes || []).map((type: ILinkType) => (
                           <Option value={type.linkTypeId}>
                             {type.linkName}
                           </Option>
@@ -345,12 +354,19 @@ const Linkage = ({
                       <Select
                         label="问题类型"
                         name={typeName}
-                        onChange={() => {
+                        disabled={!linkTypeId}
+                        onChange={(value, oldValue) => {
+                          if (value && linkTypeHasIssueTypeMap.get(linkTypeId.toString())) {
+                            (linkTypeHasIssueTypeMap.get(linkTypeId.toString()) as string[]).push(value);
+                          }
+                          if (oldValue && linkTypeHasIssueTypeMap.get(linkTypeId.toString())) {
+                            linkTypeHasIssueTypeMap.set(linkTypeId.toString(), (linkTypeHasIssueTypeMap.get(linkTypeId.toString()) as string[]).filter((item: string) => item !== oldValue));
+                          }
                           getField(linkIssueLinkageDataSet, statusName)?.reset();
                           linkIssueLinkageDataSet.current?.init(statusName, undefined);
                         }}
                       >
-                        {issueTypes?.filter((type: IIssueType) => ['story', 'task', 'bug'].includes(type.typeCode)).map((type: IIssueType) => (
+                        {issueTypes?.filter((type: IIssueType) => ['story', 'task', 'bug'].includes(type.typeCode)).filter((issueType: IIssueType) => issueType.id === issueTypeId || !(linkTypeId ? linkTypeHasIssueTypeMap.get(linkTypeId.toString()) as string[] : []).includes(issueType.id)).map((type: IIssueType) => (
                           <Option value={type.id}>
                             {type.name}
                           </Option>
@@ -362,7 +378,10 @@ const Linkage = ({
                         label="指定状态"
                         key={`${key}-${selectedType}-${issueTypeId}`}
                         name={statusName}
+                        disabled={!issueTypeId}
                         request={selectedType && issueTypeId ? () => statusTransformApi.getLinkageStatus(selectedType, issueTypeId) : () => {}}
+                        // @ts-ignore
+                        extraStatus={extraStatus ? [extraStatus] : undefined}
                       />
                     </Col>
                     <Col span={2}>
@@ -374,9 +393,12 @@ const Linkage = ({
                         }}
                         onClick={() => {
                           LinkField.remove(key);
-                          removeField(linkTypeName);
-                          removeField(typeName);
-                          removeField(statusName);
+                          if (linkTypeId && issueTypeId) {
+                            linkTypeHasIssueTypeMap.set(linkTypeId.toString(), (linkTypeHasIssueTypeMap.get(linkTypeId.toString()) as string[]).filter((item: string) => item !== issueTypeId));
+                          }
+                          removeField(linkIssueLinkageDataSet, linkTypeName);
+                          removeField(linkIssueLinkageDataSet, typeName);
+                          removeField(linkIssueLinkageDataSet, statusName);
                         }}
                       />
                     </Col>
