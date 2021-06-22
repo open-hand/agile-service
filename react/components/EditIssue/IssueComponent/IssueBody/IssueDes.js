@@ -66,7 +66,6 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
               }}
               onChange={(value) => {
                 setEditDes(value);
-                store.setIssue({ ...store.getIssue, hasChanged: true, newDes: value });
                 setDescriptionChanged(value !== description);
               }}
               onCancel={() => {
