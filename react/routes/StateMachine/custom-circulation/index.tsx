@@ -305,7 +305,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         />,
       },
       linkage: {
-        width: selectedTypeCode === 'feature' ? MODAL_WIDTH.middle : MODAL_WIDTH.small,
+        width: (selectedTypeCode === 'feature' || (!isOrganization && selectedTypeCode && ['story', 'bug', 'task'].includes(selectedTypeCode))) ? MODAL_WIDTH.middle : MODAL_WIDTH.small,
         title: '状态联动',
         children: selectedTypeCode === 'feature' ? (
           // @ts-ignore
@@ -320,6 +320,10 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
             record={record}
             selectedType={selectedType}
             customCirculationDataSet={customCirculationDataSet}
+            // eslint-disable-next-line no-nested-ternary
+            linkageType={!isOrganization && selectedTypeCode === 'bug' ? ['subIssue', 'linkIssue'] : (
+              selectedTypeCode && ['sub_task', 'bug'].includes(selectedTypeCode) ? ['subIssue'] : ['linkIssue']
+            )}
           />
         ),
       },
@@ -378,7 +382,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         }
         <Menu.Item key="condition">流转条件</Menu.Item>
         {
-          (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug' || selectedTypeCode === 'feature') && (
+          ((selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug' || selectedTypeCode === 'feature') || (!isOrganization && selectedTypeCode && ['story', 'task'].includes(selectedTypeCode))) && (
             <Menu.Item key="linkage">状态联动</Menu.Item>
           )
         }
