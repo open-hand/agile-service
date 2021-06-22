@@ -47,9 +47,10 @@ public interface FieldOptionMapper extends BaseMapper<FieldOptionDTO> {
      * @param fieldId        field id
      * @param searchValue    搜索参数
      * @param selected       已选择的选项
+     * @param enabled        是否启用
      * @return option
      */
-    List<FieldOptionDTO> selectByFieldIdAndValue(@Param("organizationId") Long organizationId, @Param("fieldId") Long fieldId, @Param("searchValue") String searchValue, @Param("selected") List<Long> selected);
+    List<FieldOptionDTO> selectByFieldIdAndValue(@Param("organizationId") Long organizationId, @Param("fieldId") Long fieldId, @Param("searchValue") String searchValue, @Param("selected") List<Long> selected, @Param("enabled") Boolean enabled);
 
     /**
      * 获取通过code或value获取选项
