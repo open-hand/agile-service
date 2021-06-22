@@ -75,6 +75,11 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     }
 
     @Override
+    public ResponseEntity<ProjectVO> getGroupInfoByEnableProject(Long organizationId, Long projectId) {
+        throw new CommonException("error.groupInfo.get");
+    }
+
+    @Override
     public ResponseEntity<Page<UserWithRoleVO>> pagingQueryUsersWithProjectLevelRoles(int page, int size, Long sourceId, @Valid RoleAssignmentSearchVO roleAssignmentSearchVO, boolean doPage) {
         throw new CommonException("error.usersWithRoles.get");
     }
