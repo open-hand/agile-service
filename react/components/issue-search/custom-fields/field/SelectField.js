@@ -18,6 +18,7 @@ function SelectField({ field, value, onChange }) {
       maxTagCount={3}
       maxTagTextLength={10}
       getPopupContainer={(triggerNode) => triggerNode.parentNode}
+      onlyEnabled={false}
     />
   );
 }

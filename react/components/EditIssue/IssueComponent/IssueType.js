@@ -11,10 +11,10 @@ import './IssueComponent.less';
 import openRequiredFieldsModal from './required-fields';
 
 const IssueType = observer(({
-  reloadIssue, onUpdate,
+  reloadIssue, onUpdate, applyType,
 }) => {
   const { store, disabled } = useContext(EditIssueContext);
-  let { data: issueTypeData } = useProjectIssueTypes({ onlyEnabled: true }, { enabled: !disabled });
+  let { data: issueTypeData } = useProjectIssueTypes({ onlyEnabled: true, applyType }, { enabled: !disabled });
   const handleChangeType = async (type) => {
     const issue = store.getIssue;
     const {
