@@ -1607,9 +1607,13 @@ public class ReportServiceImpl implements ReportService {
         points.forEach(point -> {
             setPointUser(point, userMap, analysisFieldSql, comparedFieldSql);
             setPointProject(point, projectMap, analysisFieldSql, comparedFieldSql);
-            point.setPercentage(new BigDecimal(point.getValue())
-                    .multiply(new BigDecimal(100))
-                    .divide(total, 2, RoundingMode.HALF_UP));
+            if (BigDecimal.ZERO.compareTo(total) == 0) {
+                point.setPercentage(BigDecimal.ZERO);
+            } else {
+                point.setPercentage(new BigDecimal(point.getValue())
+                        .multiply(new BigDecimal(100))
+                        .divide(total, 2, RoundingMode.HALF_UP));
+            }
         });
     }
 
