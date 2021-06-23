@@ -118,7 +118,7 @@ export function getFieldElement(field: IFilterField, flat?: boolean): React.Reac
       );
     case 'single': case 'multiple': {
       return (
-        <SelectCustomField fieldId={(field as ICustomField).id} flat={flat} onlyEnabled={flat} />
+        <SelectCustomField fieldId={(field as ICustomField).id} flat={flat} onlyEnabled={false} />
       );
     }
     case 'radio': case 'checkbox': {
