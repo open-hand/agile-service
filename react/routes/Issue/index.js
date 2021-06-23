@@ -1,5 +1,5 @@
 import React, {
-  useContext, useEffect, useState, useCallback,
+  useContext, useEffect, useState, useCallback, useMemo,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useHistory } from 'react-router-dom';
@@ -7,7 +7,9 @@ import {
   Header, Content, Page, Breadcrumb, Choerodon, useTheme,
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
-import { map, set, get } from 'lodash';
+import {
+  map, set, get, pick,
+} from 'lodash';
 import { useUnmount, usePersistFn } from 'ahooks';
 import CreateIssue from '@/components/CreateIssue';
 import Loading from '@/components/Loading';
@@ -90,8 +92,13 @@ const Issue = observer(({ cached, updateCache }) => {
       && tableProps.data.length === 1
       && tableProps.total > 1
       ? tableProps.current - 1
-      : tableProps.curren,
+      : tableProps.current,
   ), [query, tableProps]);
+  const filterParams = useMemo(() => {
+    const filterParamKeys = ['paramChoose', 'paramCurrentVersion', 'paramCurrentSprint', 'paramId',
+      'paramType', 'paramIssueId', 'paramName', 'paramOpenIssueId', 'detailTab', 'statusId', 'sprint', 'issueTypeId', 'assigneeId'];
+    return pick(params, filterParamKeys);
+  }, [params]);
   const hasUrlFilter = useCallback((obj) => {
     const whiteList = ['type', 'category', 'id', 'name', 'organizationId'];
     return Object.keys(obj).some((key) => !whiteList.includes(key));
@@ -101,7 +108,7 @@ const Issue = observer(({ cached, updateCache }) => {
       paramChoose, paramCurrentVersion, paramCurrentSprint, paramId,
       paramType, paramIssueId, paramName, paramOpenIssueId, detailTab, ...searchArgs
     } = params;
-    if (hasUrlFilter(params)) {
+    if (hasUrlFilter(filterParams)) {
       issueSearchStore.clearAllFilter();
       localPageCacheStore.clear();
     }
@@ -198,10 +205,10 @@ const Issue = observer(({ cached, updateCache }) => {
   }, []);
   // 退出时若有url筛选 则清空缓存内筛选
   useEffect(() => () => {
-    if (hasUrlFilter(params)) {
+    if (hasUrlFilter(filterParams)) {
       localPageCacheStore.remove('issues');
     }
-  }, [hasUrlFilter, params]);
+  }, [filterParams, hasUrlFilter]);
   const handleCreateIssue = useCallback((issue) => {
     IssueStore.createQuestion(false);
     IssueStore.setDefaultSummary(undefined);
