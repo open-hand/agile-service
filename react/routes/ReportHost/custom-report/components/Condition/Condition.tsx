@@ -1,5 +1,5 @@
 import React, {
-  ReactElement, useCallback, useEffect, useState,
+  ReactElement, useCallback, useEffect, useImperativeHandle, useState,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
@@ -27,13 +27,18 @@ const Part: React.FC<{
 );
 const Condition: React.FC<{
   addReportDs: DataSet,
-}> = ({ addReportDs }) => {
+  conditionRef: React.MutableRefObject<null | { rowColumnOptions: IField[] }>
+}> = ({ addReportDs, conditionRef }) => {
   const [dimension, setDimension] = useState<IField[]>([]);
   useEffect(() => {
     pageConfigApi.load().then((res: { content: IField[]}) => {
       setDimension(res.content.filter((item) => ['single', 'checkbox', 'multiple', 'radio', 'member', 'multiMember'].includes(item.fieldType)));
     });
   }, []);
+
+  useImperativeHandle(conditionRef, () => ({
+    rowColumnOptions: dimension,
+  }));
   return (
     <div className={styles.condition}>
       <Part title="图表说明">
@@ -68,8 +73,8 @@ const Condition: React.FC<{
           )
         }
           <Select name="unit" clearButton={false}>
-            <Option value="storyPoint">故事点</Option>
-            <Option value="issueCount">问题计数</Option>
+            <Option value="storyPoints">故事点</Option>
+            <Option value="quantity">问题计数</Option>
           </Select>
         </Form>
       </Part>

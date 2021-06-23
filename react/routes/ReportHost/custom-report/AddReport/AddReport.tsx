@@ -1,4 +1,6 @@
-import React, { useMemo, useCallback, useState } from 'react';
+import React, {
+  useMemo, useCallback, useState, useRef,
+} from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
@@ -11,11 +13,17 @@ import { Icon } from 'choerodon-ui';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { customReportApi } from '@/api';
+import { IField } from '@/common/types';
 import pic from './NoData.svg';
 import styles from './AddReport.less';
 import Condition from '../components/Condition';
+import useReport from '../components/Chart/useReport';
+import Chart from '../components/Chart';
 
 const AddReport = () => {
+  const conditionRef = useRef<{
+    rowColumnOptions: IField[]
+  } | null>(null);
   const [expand, setExpand] = useState<boolean>(true);
   const checkTitle = useCallback(async (value, name, record) => {
     const res = await customReportApi.checkName(value);
@@ -57,7 +65,7 @@ const AddReport = () => {
       },
     }, {
       name: 'unit',
-      label: '汇总项(图表单位)',
+      label: '图表单位',
       type: 'string' as FieldType,
       required: true,
     }],
@@ -66,6 +74,20 @@ const AddReport = () => {
   const handleExpandChange = useCallback(() => {
     setExpand(!expand);
   }, [expand]);
+
+  const analysisField = addReportDs.current?.get('row');
+  const comparedField = addReportDs.current?.get('column');
+  const [, chartProps] = useReport({
+    chartType: addReportDs.current?.get('type'),
+    statisticsType: addReportDs.current?.get('unit'),
+    analysisField,
+    comparedField,
+    searchVO: undefined,
+    analysisFieldPredefined: analysisField && conditionRef.current?.rowColumnOptions.find((item) => item.id === analysisField)?.system,
+    comparedFieldPredefined: comparedField && conditionRef.current?.rowColumnOptions.find((item) => item.id === comparedField)?.system,
+  });
+  const { loading, data } = chartProps;
+
   return (
     <Page>
       <Header />
@@ -80,29 +102,36 @@ const AddReport = () => {
           </div>
           <div className={styles.main}>
             <div className={styles.left}>
-              <EmptyPage
-                image={pic}
-                description={(
-                  <>
-                    当前暂无自定义图表，您可以通过
-                    <span
-                      style={{
-                        color: '#5365EA',
-                        cursor: 'pointer',
-                      }}
-                      role="none"
-                      onClick={() => {
-                        if (!expand) {
-                          setExpand(true);
-                        }
-                      }}
-                    >
-                      数据设置
-                    </span>
-                    添加默认筛选项来创建图表。
-                  </>
+              {
+                loading || !data?.length ? (
+                  <EmptyPage
+                    image={pic}
+                    description={(
+                      <>
+                        当前暂无自定义图表，您可以通过
+                        <span
+                          style={{
+                            color: '#5365EA',
+                            cursor: 'pointer',
+                          }}
+                          role="none"
+                          onClick={() => {
+                            if (!expand) {
+                              setExpand(true);
+                            }
+                          }}
+                        >
+                          数据设置
+                        </span>
+                        添加默认筛选项来创建图表。
+                      </>
                 )}
-              />
+                  />
+                ) : (
+                  <Chart {...chartProps} />
+                )
+              }
+
             </div>
             <div
               className={styles.right}
@@ -116,7 +145,7 @@ const AddReport = () => {
                 onClick={handleExpandChange}
               />
               {
-                expand && <Condition addReportDs={addReportDs} />
+                expand && <Condition addReportDs={addReportDs} conditionRef={conditionRef} />
               }
             </div>
           </div>
