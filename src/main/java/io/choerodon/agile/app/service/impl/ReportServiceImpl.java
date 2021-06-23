@@ -1529,7 +1529,6 @@ public class ReportServiceImpl implements ReportService {
         FieldSql analysisFieldSql = null;
         FieldSql comparedFieldSql = null;
 
-        EncryptionUtils.decryptSearchVO(customChartSearchVO.getSearchVO());
         Boolean condition = Boolean.TRUE;
         if (customChartSearchVO.getSearchVO() != null) {
             condition = issueService.handleSearchUser(customChartSearchVO.getSearchVO(), projectId);
@@ -1577,9 +1576,9 @@ public class ReportServiceImpl implements ReportService {
             } else if (FieldSql.PROJECT.equals(analysisFieldSql.getValueType())) {
                 projectIds.add(point.getAnalysisId());
             }
-            if (FieldSql.USER.equals(comparedFieldSql.getValueType())) {
+            if (comparedFieldSql != null && FieldSql.USER.equals(comparedFieldSql.getValueType())) {
                 userIds.add(point.getComparedId());
-            } else if (FieldSql.PROJECT.equals(comparedFieldSql.getValueType())) {
+            } else if (comparedFieldSql != null && FieldSql.PROJECT.equals(comparedFieldSql.getValueType())) {
                 projectIds.add(point.getComparedId());
             }
             total = total.add(new BigDecimal(point.getValue()));
@@ -1621,7 +1620,7 @@ public class ReportServiceImpl implements ReportService {
                 point.setAnalysisValue(project.getName());
             }
         }
-        if (FieldSql.PROJECT.equals(comparedFieldSql.getValueType())) {
+        if (comparedFieldSql != null && FieldSql.PROJECT.equals(comparedFieldSql.getValueType())) {
             ProjectVO project = projectMap.get(point.getComparedId());
             if (project != null) {
                 point.setComparedValue(project.getName());
@@ -1640,7 +1639,7 @@ public class ReportServiceImpl implements ReportService {
             }
         }
 
-        if (FieldSql.USER.equals(comparedFieldSql.getValueType())) {
+        if (comparedFieldSql != null && FieldSql.USER.equals(comparedFieldSql.getValueType())) {
             UserMessageDTO user = userMap.get(point.getComparedId());
             if (user == null) {
                 point.setComparedId(-1L);
