@@ -21,26 +21,29 @@ interface BasicProps extends Partial<SelectProps> {
 type SelectCustomFieldProps = BasicProps & ({
   fieldId: string
   fieldOptions?: never
+  onlyEnabled?: boolean
 } | {
   fieldId?: never
   // 把所有options传进来，前端假分页
   fieldOptions: {
     id: string
     value: string
+    enabled: boolean
   }[]
+  onlyEnabled?: boolean
 })
 const SIZE = 50;
 const SelectCustomField: React.FC<SelectCustomFieldProps> = forwardRef(({
-  fieldId, fieldOptions, flat, projectId, organizationId, selected, extraOptions, outside = false, ...otherProps
+  fieldId, fieldOptions, flat, projectId, organizationId, selected, extraOptions, outside = false, onlyEnabled = true, ...otherProps
 },
 ref: React.Ref<Select>) => {
   const needOptions = useMemo(() => [...castArray(otherProps.value), ...castArray(selected)].filter(Boolean), [selected, otherProps.value]);
-  const fakePageRequest = usePersistFn((filter: string = '', page: number = 1, size: number, ensureOptions: string[]) => {
+  const fakePageRequest = usePersistFn((filter: string = '', page: number = 1, size: number, ensureOptions: string[], enabled: boolean = true) => {
     if (!fieldOptions) {
       return [];
     }
     const [ensuredOptions, restOptions] = partition(fieldOptions, (item) => ensureOptions.includes(item.id));
-    const list = restOptions.filter((item) => item.value && item.value?.indexOf(filter) > -1).slice(Math.max((page - 1) * size, 0), (page) * size);
+    const list = restOptions.filter((item) => (enabled ? item.enabled : true)).filter((item) => item.value && item.value?.indexOf(filter) > -1).slice(Math.max((page - 1) * size, 0), (page) * size);
     return {
       // 第一页包含已选的选项
       list: page === 1 ? [...ensuredOptions, ...list] : list,
@@ -50,7 +53,7 @@ ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     textField: 'value',
     valueField: 'id',
-    request: ({ page, filter }) => (fieldOptions ? fakePageRequest(filter, page, SIZE, needOptions) : fieldApi.outside(outside).org(organizationId).project(projectId).getFieldOptions(fieldId!, filter, page, SIZE, needOptions)),
+    request: ({ page, filter }) => (fieldOptions ? fakePageRequest(filter, page, SIZE, needOptions, onlyEnabled) : fieldApi.outside(outside).org(organizationId).project(projectId).getFieldOptions(fieldId!, filter, page, SIZE, needOptions, onlyEnabled)),
     middleWare: (data) => {
       if (!extraOptions) {
         return data;
