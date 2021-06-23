@@ -34,6 +34,7 @@ const LINK_URL = {
   stateMachine: '/agile/state-machine',
   pageConfig: '/agile/page/config',
   status: '/agile/state-machine',
+  addCustomReport: '/agile/charts/add',
 };
 
 const LINK_URL_TO: IRouterToList = {
