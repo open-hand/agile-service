@@ -1,3 +1,4 @@
+import { getOrganizationId } from '@/utils/common';
 import { axios } from '@choerodon/boot';
 import Api from './Api';
 
@@ -13,6 +14,17 @@ class CustomReportApi extends Api<CustomReportApi> {
       params: {
         name,
       },
+    });
+  }
+
+  getData(data: any) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/reports/custom_chart`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+      data,
     });
   }
 }
