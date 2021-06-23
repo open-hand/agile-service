@@ -2,18 +2,24 @@ package io.choerodon.agile.app.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.business.IssueListVO;
+import io.choerodon.agile.api.vo.report.CustomChartDimensionVO;
+import io.choerodon.agile.api.vo.report.CustomChartPointVO;
+import io.choerodon.agile.api.vo.report.CustomChartSearchVO;
+import io.choerodon.agile.api.vo.report.CustomChartDataVO;
+import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.infra.dto.GroupDataChartDTO;
 import io.choerodon.agile.infra.dto.business.GroupDataChartListDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.SprintConvertDTO;
-import io.choerodon.agile.infra.enums.InitIssueType;
+import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.IssueAssembler;
 import io.choerodon.agile.app.assembler.ReportAssembler;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
@@ -34,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -43,6 +50,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.annotation.Resource;
 
 /**
  * @author dinghuang123@gmail.com
@@ -85,6 +93,16 @@ public class ReportServiceImpl implements ReportService {
     private StatusService statusService;
     @Autowired
     private BoardService boardService;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
+    @Autowired
+    private BaseFeignClient baseFeignClient;
+    @Autowired
+    private IssueService issueService;
+    @Autowired
+    private BoardAssembler boardAssembler;
+    @Resource
+    private ObjectSchemeFieldMapper objectSchemeFieldMapper;
 
     public static final String STORY_POINTS = "storyPoints";
     public static final String REMAINING_ESTIMATED_TIME = "remainingEstimatedTime";
@@ -125,7 +143,10 @@ public class ReportServiceImpl implements ReportService {
     private static final ExecutorService pool = Executors.newFixedThreadPool(3);
     private static final String START_SPRINT= "startSprint";
     private static final String END_SPRINT= "endSprint";
+    private static final String V_PROJECT = "v-project";
+    private static final String V_USERNAME = "v-username";
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportServiceImpl.class);
+
     @Autowired
     private ModelMapper modelMapper;
 
@@ -1463,6 +1484,225 @@ public class ReportServiceImpl implements ReportService {
             }
         }));
         return issueCount;
+    }
+
+    @Override
+    public CustomChartDataVO queryCustomChartData(CustomChartSearchVO customChartSearchVO, Long projectId, Long organizationId) {
+        List<CustomChartPointVO> pointList = queryPoint(customChartSearchVO, projectId, organizationId);
+        CustomChartDataVO customChartDataVO = new CustomChartDataVO();
+        customChartDataVO.setChartType(customChartSearchVO.getChartType());
+        if (CollectionUtils.isEmpty(pointList)) {
+            customChartDataVO.setDimensionList(new ArrayList<>());
+            return customChartDataVO;
+        }
+
+        Map<String, CustomChartDimensionVO> comparedMap = new HashMap<>(pointList.size());
+        pointList.stream()
+                .sorted(Comparator.comparing(CustomChartPointVO::getAnalysisId, Comparator.nullsFirst(Comparator.naturalOrder()))
+                        .thenComparing(CustomChartPointVO::getAnalysisValue, Comparator.nullsFirst(Comparator.naturalOrder())))
+                .forEach(point -> {
+                    String key = point.getComparedId() + point.getComparedValue();
+                    comparedMap.computeIfAbsent(key, value -> {
+                        CustomChartDimensionVO dimension = new CustomChartDimensionVO();
+                        dimension.setComparedId(point.getComparedId());
+                        dimension.setComparedValue(point.getComparedValue());
+                        dimension.setPointList(new ArrayList<>());
+                        return dimension;
+                    });
+                    CustomChartDimensionVO dimension = comparedMap.get(key);
+                    dimension.getPointList().add(point);
+                });
+
+        customChartDataVO.setDimensionList(comparedMap.values().stream()
+                .sorted(Comparator.comparing(CustomChartDimensionVO::getComparedId, Comparator.nullsFirst(Comparator.naturalOrder()))
+                        .thenComparing(CustomChartDimensionVO::getComparedValue, Comparator.nullsFirst(Comparator.naturalOrder())))
+                .collect(Collectors.toList()));
+        return customChartDataVO;
+    }
+
+    private List<CustomChartPointVO> queryPoint(CustomChartSearchVO customChartSearchVO, Long projectId, Long organizationId) {
+        String filterSql;
+        List<Long> assigneeFilterIds = null;
+        StringBuilder selectSql = new StringBuilder();
+        StringBuilder groupSql = new StringBuilder();
+        StringBuilder linkSql = new StringBuilder();
+        FieldSql analysisFieldSql = null;
+        FieldSql comparedFieldSql = null;
+
+        EncryptionUtils.decryptSearchVO(customChartSearchVO.getSearchVO());
+        Boolean condition = Boolean.TRUE;
+        if (customChartSearchVO.getSearchVO() != null) {
+            condition = issueService.handleSearchUser(customChartSearchVO.getSearchVO(), projectId);
+            assigneeFilterIds = customChartSearchVO.getSearchVO().getAssigneeFilterIds();
+        }
+        if (!Boolean.TRUE.equals(condition)) {
+            return new ArrayList<>();
+        }
+
+        String valueSql = StatisticsType.getSqlByType(customChartSearchVO.getStatisticsType());
+        if (valueSql == null) {
+            throw new CommonException("error.statisticsType.not.exists");
+        }
+        selectSql.append(valueSql);
+        analysisFieldSql = dealFieldSql(customChartSearchVO.getAnalysisField(), customChartSearchVO.getAnalysisFieldPredefined(), "analysis", selectSql, groupSql, linkSql, organizationId, projectId);
+        if (customChartSearchVO.getComparedField() != null) {
+            if (customChartSearchVO.getComparedFieldPredefined() == null) {
+                throw new CommonException("error.customChart.comparedFieldPredefinedNotNull");
+            }
+            comparedFieldSql = dealFieldSql(customChartSearchVO.getComparedField(), customChartSearchVO.getComparedFieldPredefined(), "compared", selectSql, groupSql, linkSql, organizationId, projectId);
+        }
+        filterSql = dealSearchVO(customChartSearchVO.getSearchVO());
+        List<CustomChartPointVO> result = issueMapper.selectCustomChartPointVO(
+                projectId,
+                customChartSearchVO.getSearchVO(),
+                filterSql,
+                assigneeFilterIds,
+                selectSql.toString(),
+                groupSql.toString(),
+                linkSql.toString());
+        dealCustomChartIdDataAndPercent(result, analysisFieldSql, comparedFieldSql);
+        return result;
+    }
+
+    private void dealCustomChartIdDataAndPercent(List<CustomChartPointVO> result, FieldSql analysisFieldSql, FieldSql comparedFieldSql) {
+        if (CollectionUtils.isEmpty(result)) {
+            return;
+        }
+        List<Long> userIds = new ArrayList<>();
+        Set<Long> projectIds = new HashSet<>();
+        BigDecimal total = BigDecimal.ZERO;
+        for (CustomChartPointVO point : result) {
+            if (FieldSql.USER.equals(analysisFieldSql.getValueType())) {
+                userIds.add(point.getAnalysisId());
+            } else if (FieldSql.PROJECT.equals(analysisFieldSql.getValueType())) {
+                projectIds.add(point.getAnalysisId());
+            }
+            if (FieldSql.USER.equals(comparedFieldSql.getValueType())) {
+                userIds.add(point.getComparedId());
+            } else if (FieldSql.PROJECT.equals(comparedFieldSql.getValueType())) {
+                projectIds.add(point.getComparedId());
+            }
+            total = total.add(new BigDecimal(point.getValue()));
+        }
+
+        Map<Long, ProjectVO> projectMap = new HashMap<>(projectIds.size());
+        Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(userIds, true);
+        UserMessageDTO nullUser = new UserMessageDTO("无", null, null);
+        userMap.put(0L, nullUser);
+        List<ProjectVO> projectList = baseFeignClient.queryByIds(projectIds).getBody();
+        if (!CollectionUtils.isEmpty(projectList)) {
+            projectList.forEach(projectVO -> {
+                projectMap.put(projectVO.getId(), projectVO);
+            });
+        }
+        ProjectVO nullProject = new ProjectVO();
+        nullProject.setName("无");
+        projectMap.put(0L, nullProject);
+        setPointUserInfoAndPercentage(result, userMap, projectMap, total, analysisFieldSql, comparedFieldSql);
+    }
+
+    private void setPointUserInfoAndPercentage(List<CustomChartPointVO> points, Map<Long, UserMessageDTO> userMap, Map<Long, ProjectVO> projectMap, BigDecimal total, FieldSql analysisFieldSql, FieldSql comparedFieldSql) {
+        if (CollectionUtils.isEmpty(points)) {
+            return;
+        }
+        points.forEach(point -> {
+            setPointUser(point, userMap, analysisFieldSql, comparedFieldSql);
+            setPointProject(point, projectMap, analysisFieldSql, comparedFieldSql);
+            point.setPercentage(new BigDecimal(point.getValue())
+                    .multiply(new BigDecimal(100))
+                    .divide(total, 2, RoundingMode.HALF_UP));
+        });
+    }
+
+    private void setPointProject(CustomChartPointVO point, Map<Long, ProjectVO> projectMap, FieldSql analysisFieldSql, FieldSql comparedFieldSql) {
+        if (FieldSql.PROJECT.equals(analysisFieldSql.getValueType())) {
+            ProjectVO project = projectMap.get(point.getAnalysisId());
+            if (project != null) {
+                point.setAnalysisValue(project.getName());
+            }
+        }
+        if (FieldSql.PROJECT.equals(comparedFieldSql.getValueType())) {
+            ProjectVO project = projectMap.get(point.getComparedId());
+            if (project != null) {
+                point.setComparedValue(project.getName());
+            }
+        }
+    }
+
+    private void setPointUser(CustomChartPointVO point, Map<Long, UserMessageDTO> userMap, FieldSql analysisFieldSql, FieldSql comparedFieldSql) {
+        if (FieldSql.USER.equals(analysisFieldSql.getValueType())) {
+            UserMessageDTO user = userMap.get(point.getAnalysisId());
+            if (user == null) {
+                point.setAnalysisId(-1L);
+                point.setAnalysisValue("未知用户");
+            } else {
+                point.setAnalysisValue(user.getName());
+            }
+        }
+
+        if (FieldSql.USER.equals(comparedFieldSql.getValueType())) {
+            UserMessageDTO user = userMap.get(point.getComparedId());
+            if (user == null) {
+                point.setComparedId(-1L);
+                point.setComparedValue("未知用户");
+            } else {
+                point.setComparedValue(user.getName());
+            }
+        }
+    }
+
+    private FieldSql dealFieldSql(
+            String fieldCode,
+            Boolean predefined,
+            String type,
+            StringBuilder selectSql,
+            StringBuilder groupSql,
+            StringBuilder linkSql,
+            Long organizationId,
+            Long projectId) {
+        FieldSql fieldSql;
+        if (Boolean.TRUE.equals(predefined)) {
+            fieldSql = SystemBaseFieldSql.get(fieldCode);
+            if (fieldSql == null && agilePluginService != null) {
+                fieldSql = agilePluginService.getSystemPluginFieldSql(fieldCode);
+            }
+            if (fieldSql == null) {
+                throw new CommonException("error.customReport.systemField.not.support");
+            }
+        } else {
+            ObjectSchemeFieldDTO objectSchemeField = objectSchemeFieldMapper.queryByFieldCode(organizationId, projectId, fieldCode);
+            fieldSql = CustomFieldSql.get(objectSchemeField == null ? null : objectSchemeField.getFieldType());
+            if (fieldSql == null) {
+                throw new CommonException("error.customReport.field.not.support");
+            }
+            linkSql.append("\n")
+                    .append(String.format(FieldSql.CUSTOM_DEFAULT_JOIN, fieldCode));
+        }
+        selectSql.append(", ")
+                .append(fieldSql.getValueSql())
+                .append(" AS ").append(type).append("_value, ")
+                .append(fieldSql.getIdSql())
+                .append(" AS ").append(type).append("_id");
+        if (groupSql.length() > 0) {
+            groupSql.append(", ");
+        }
+        groupSql.append(fieldSql.getGroupSql());
+        linkSql.append("\n").append(fieldSql.getLinkSql());
+        return fieldSql;
+    }
+
+    private String dealSearchVO(SearchVO searchVO) {
+        if (searchVO == null) {
+            return null;
+        }
+        String filterSql = null;
+        boardAssembler.handleAdvanceSearch(searchVO);
+        boardAssembler.handleOtherArgs(searchVO);
+        List<Long> quickFilterIds = searchVO.getQuickFilterIds();
+        if (!ObjectUtils.isEmpty(quickFilterIds)) {
+            filterSql = issueService.getQuickFilter(quickFilterIds);
+        }
+        return filterSql;
     }
 
     private List<ReportIssueConvertDTO> queryBugCount(Long projectId, Long sprintId) {
