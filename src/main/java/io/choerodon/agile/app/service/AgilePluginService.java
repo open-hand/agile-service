@@ -6,6 +6,7 @@ import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.*;
+import io.choerodon.agile.infra.enums.FieldSql;
 
 import java.util.List;
 import java.util.Map;
@@ -466,4 +467,11 @@ public interface AgilePluginService {
     void createTagIssueRel(List<TagVO> tags, Long projectId, Long issueId);
 
     void updateTagIssueRel(List<TagVO> tags, Long projectId, Long issueId);
+
+    /**
+     * 获取商业版字段sql
+     * @param fieldCode 字段code
+     * @return 商业版字段sql
+     */
+    FieldSql getSystemPluginFieldSql(String fieldCode);
 }

@@ -3804,4 +3804,36 @@
         and ai.estimated_end_time is not null
         and date(ai.estimated_end_time) &lt; date(#{date})
     </select>
+
+    <select id="selectCustomChartPointVO" resultType="io.choerodon.agile.api.vo.report.CustomChartPointVO">
+        SELECT ${selectSql}
+        FROM agile_issue ai
+        <if test="linkSql != null and linkSql != ''">
+            ${linkSql}
+        </if>
+        WHERE ai.project_id = #{projectId}
+        <if test="searchVO != null">
+        AND ai.issue_id IN (
+            SELECT
+            ai.issue_id
+            FROM agile_issue ai
+            WHERE ai.project_id = #{projectId}
+            <include refid="io.choerodon.agile.infra.mapper.IssueMapper.explainSearchVO"/>
+            <include refid="io.choerodon.agile.infra.mapper.IssueMapper.filterSqlAndAssigneeIds"/>
+            <if test='searchVO.searchArgs != null'>
+                <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
+                    AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+                </if>
+            </if>
+            <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+                <foreach collection="searchVO.contents" item="content" index="index">
+                    AND (ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR ai.summary LIKE
+                    CONCAT(CONCAT('%',
+                    #{content}), '%'))
+                </foreach>
+            </if>
+        )
+        </if>
+        GROUP BY ${groupSql}
+    </select>
 </mapper>
