@@ -474,4 +474,8 @@ public interface AgilePluginService {
      * @return 商业版字段sql
      */
     FieldSql getSystemPluginFieldSql(String fieldCode);
+
+    void setIssueProgramAttr(Long projectId, List<IssueSearchVO> searchVOList, List<Long> allIssueIds);
+
+    void handlerSprintProgramAttr(List<Long> sprintIds, Long projectId, List<SprintSearchVO> sprintSearches);
 }

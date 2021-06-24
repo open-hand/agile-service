@@ -123,6 +123,11 @@ public class IssueSearchVO {
 
     private Date estimatedEndTime;
 
+    @Encrypt
+    private Long parentId;
+
+    private List<IssueSearchVO> children;
+
     public Long getIssueId() {
         return issueId;
     }
@@ -394,5 +399,21 @@ public class IssueSearchVO {
 
     public void setEstimatedEndTime(Date estimatedEndTime) {
         this.estimatedEndTime = estimatedEndTime;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
+    public List<IssueSearchVO> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<IssueSearchVO> children) {
+        this.children = children;
     }
 }

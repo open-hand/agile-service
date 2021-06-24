@@ -2,6 +2,7 @@ package io.choerodon.agile.api.controller.v1;
 
 
 import io.choerodon.agile.api.vo.business.IssueListVO;
+import io.choerodon.agile.api.vo.business.IssueSearchVO;
 import io.choerodon.agile.api.vo.business.SprintDetailVO;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.domain.Page;
@@ -240,4 +241,42 @@ public class SprintController {
                 .orElseThrow(() -> new CommonException("error.sprintName.check"));
     }
 
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("代办事项-查询未完成的冲刺")
+    @PostMapping(value = "/unclose_sprint")
+    public ResponseEntity<List<SprintSearchVO>> unCloseSprint(@ApiParam(value = "项目id", required = true)
+                                                              @PathVariable(name = "project_id") Long projectId,
+                                                              @RequestBody Map<String, Object> searchParamMap) {
+        EncryptionUtils.decryptSearchParamMap(searchParamMap);
+        return Optional.ofNullable(sprintService.unCloseSprint(projectId,searchParamMap))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.sprint.query"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("代办事项-查询冲刺下的issue")
+    @PostMapping(value = "/sprint_issue_page")
+    public ResponseEntity<Page<IssueSearchVO>> issuePageBySprint(@ApiParam(value = "项目id", required = true)
+                                                                 @PathVariable(name = "project_id") Long projectId,
+                                                                 @RequestParam @Encrypt Long sprintId,
+                                                                 PageRequest pageRequest,
+                                                                 @RequestBody Map<String, Object> searchParamMap) {
+        EncryptionUtils.decryptSearchParamMap(searchParamMap);
+        return Optional.ofNullable(sprintService.issuePageBySprint(projectId, sprintId, pageRequest, searchParamMap))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.sprint.issue.search"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("代办事项-分页查询代办的问题")
+    @PostMapping(value = "/todo_issue_page")
+    public ResponseEntity<Page<IssueSearchVO>> todoIssuePage(@ApiParam(value = "项目id", required = true)
+                                                                 @PathVariable(name = "project_id") Long projectId,
+                                                                 PageRequest pageRequest,
+                                                                 @RequestBody Map<String, Object> searchParamMap) {
+        EncryptionUtils.decryptSearchParamMap(searchParamMap);
+        return Optional.ofNullable(sprintService.todoIssuePage(projectId, pageRequest, searchParamMap))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.sprint.issue.search"));
+    }
 }
