@@ -1495,28 +1495,47 @@ public class ReportServiceImpl implements ReportService {
             customChartDataVO.setDimensionList(new ArrayList<>());
             return customChartDataVO;
         }
+        Map<String, CustomChartDimensionVO> comparedDimensionMap = new HashMap<>(pointList.size());
+        Map<String, CustomChartPointVO> analysisDimensionMap = new HashMap<>(pointList.size());
+        Map<String, CustomChartPointVO> emptyPointMap = new HashMap<>(pointList.size());
 
-        Map<String, CustomChartDimensionVO> comparedMap = new HashMap<>(pointList.size());
+        pointList.forEach(point -> {
+            String comparedKey = point.getComparedId() + point.getComparedValue();
+            String analysisKey = point.getAnalysisId() + point.getAnalysisValue();
+            comparedDimensionMap.computeIfAbsent(comparedKey, value -> {
+                analysisDimensionMap.forEach((key, analysisPoint) -> {
+                    emptyPointMap.put(comparedKey + key, new CustomChartPointVO(
+                            analysisPoint.getAnalysisValue(), analysisPoint.getAnalysisId(),
+                            point.getComparedValue(), point.getComparedId()));
+                });
+                CustomChartDimensionVO dimension = new CustomChartDimensionVO();
+                dimension.setComparedId(point.getComparedId());
+                dimension.setComparedValue(point.getComparedValue());
+                dimension.setPointList(new ArrayList<>());
+                return dimension;
+            });
+            analysisDimensionMap.computeIfAbsent(analysisKey, value -> {
+                comparedDimensionMap.forEach((key, comparedPoint) -> emptyPointMap.put(key + analysisKey, new CustomChartPointVO(
+                        point.getAnalysisValue(), point.getAnalysisId(),
+                        comparedPoint.getComparedValue(), comparedPoint.getComparedId())));
+                return point;
+            });
+            emptyPointMap.remove(comparedKey + analysisKey);
+        });
+
+        pointList.addAll(emptyPointMap.values());
         pointList.stream()
                 .sorted(Comparator.comparing(CustomChartPointVO::getAnalysisId, Comparator.nullsFirst(Comparator.naturalOrder()))
                         .thenComparing(CustomChartPointVO::getAnalysisValue, Comparator.nullsFirst(Comparator.naturalOrder())))
                 .forEach(point -> {
                     String key = point.getComparedId() + point.getComparedValue();
-                    comparedMap.computeIfAbsent(key, value -> {
-                        CustomChartDimensionVO dimension = new CustomChartDimensionVO();
-                        dimension.setComparedId(point.getComparedId());
-                        dimension.setComparedValue(point.getComparedValue());
-                        dimension.setPointList(new ArrayList<>());
-                        return dimension;
-                    });
-                    CustomChartDimensionVO dimension = comparedMap.get(key);
+                    CustomChartDimensionVO dimension = comparedDimensionMap.get(key);
                     dimension.getPointList().add(point);
                 });
 
-        customChartDataVO.setDimensionList(comparedMap.values().stream()
-                .sorted(Comparator.comparing(CustomChartDimensionVO::getComparedId, Comparator.nullsFirst(Comparator.naturalOrder()))
-                        .thenComparing(CustomChartDimensionVO::getComparedValue, Comparator.nullsFirst(Comparator.naturalOrder())))
-                .collect(Collectors.toList()));
+        customChartDataVO.setDimensionList(new ArrayList<>(comparedDimensionMap.values()));
+        customChartDataVO.getDimensionList().sort((Comparator.comparing(CustomChartDimensionVO::getComparedId, Comparator.nullsFirst(Comparator.naturalOrder()))
+                        .thenComparing(CustomChartDimensionVO::getComparedValue, Comparator.nullsFirst(Comparator.naturalOrder()))));
         return customChartDataVO;
     }
 
