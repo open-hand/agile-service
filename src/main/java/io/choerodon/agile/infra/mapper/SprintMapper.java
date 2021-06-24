@@ -133,7 +133,7 @@ public interface SprintMapper extends BaseMapper<SprintDTO> {
 
     List<SprintDTO> selectNotDoneByProjectId(@Param("projectId") Long projectId);
 
-    List<AssigneeIssueDTO> queryAssigneeIssueByPlanSprintId(@Param("sprintIds") Set<Long> sprintIds, @Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
+    List<AssigneeIssueDTO> queryAssigneeIssueByPlanSprintId(@Param("sprintIds") Set<Long> sprintIds, @Param("projectId") Long projectId, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
 
     /**
      * 根据对冲刺下面的用户进行分组统计
@@ -157,4 +157,12 @@ public interface SprintMapper extends BaseMapper<SprintDTO> {
     List<SprintDTO> selectActiveSprintsByProjectIds(@Param("projectIds") Set<Long> projectIds);
 
     List querySprintIssue(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
+
+    List<SprintSearchDTO> queryPlanSprints(@Param("projectId") Long projectId);
+
+    List<IssueCountDTO> querySprintIssueStoryPoints(@Param("projectId") Long projectId, @Param("sprintIds") List<Long> sprintIds, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
+
+    Set<Long> queryAssigneeIdsBySprintIds(@Param("projectId") Long projectId, @Param("sprintIds") List<Long> sprintIds, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
+
+    List<IssueCountDTO> selectCountBySprintIds(@Param("projectId") Long projectId, @Param("sprintIds") List<Long> sprintIds, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
 }

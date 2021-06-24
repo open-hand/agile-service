@@ -67,7 +67,7 @@ public interface SprintService {
 
     Boolean delete(SprintConvertDTO sprintConvertDTO);
 
-    List<SprintSearchVO> unCloseSprint(Long projectId);
+    List<SprintSearchVO> unCloseSprint(Long projectId, Map<String, Object> searchParamMap);
 
     Page<IssueSearchVO> issuePageBySprint(Long projectId, Long sprintId, PageRequest pageRequest, Map<String, Object> searchParamMap);
 

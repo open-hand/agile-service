@@ -295,7 +295,7 @@ public class SprintServiceImpl implements SprintService {
                 }
             }
         }
-        queryAssigneeIssue(sprintSearchDTOS, projectId,issueIds);
+        queryAssigneeIssue(sprintSearchDTOS, projectId, null);
         List<SprintSearchVO> planSprints = sprintSearchAssembler.dtoListToVO(sprintSearchDTOS, usersMap, null, null, null);
         if (planSprints != null && !planSprints.isEmpty()) {
             sprintSearches.addAll(planSprints);
@@ -328,7 +328,7 @@ public class SprintServiceImpl implements SprintService {
             sprintSearches.add(activeSprint);
         }
         List<SprintSearchDTO> sprintSearchDTOS = sprintMapper.queryPlanSprint(projectId, new HashSet<>(!allIssueIds.isEmpty() ? allIssueIds : Arrays.asList(0L)));
-        queryAssigneeIssue(sprintSearchDTOS, projectId,allIssue);
+        queryAssigneeIssue(sprintSearchDTOS, projectId, null);
         if (sprintSearchDTOS != null && !sprintSearchDTOS.isEmpty()) {
             List<SprintSearchVO> planSprints = sprintSearchAssembler.dtoListToVO(sprintSearchDTOS, usersMap, priorityMap, statusMapDTOMap, issueTypeDTOMap);
             planSprints.parallelStream().forEachOrdered(planSprint -> planSprint.setIssueCount(planSprint.getIssueSearchVOList() == null ? 0 : planSprint.getIssueSearchVOList().size()));
@@ -341,11 +341,11 @@ public class SprintServiceImpl implements SprintService {
         }
     }
 
-    protected void queryAssigneeIssue(List<? extends SprintSearchDTO> sprintSearch, Long projectId,List<Long> issueIds) {
+    protected void queryAssigneeIssue(List<? extends SprintSearchDTO> sprintSearch, Long projectId, Map<String, Object> advancedSearchArgs) {
         Set<Long> sprintIds = sprintSearch.stream().map(SprintSearchDTO::getSprintId).collect(Collectors.toSet());
         List<AssigneeIssueDTO> assigneeIssueList = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(sprintIds) && !CollectionUtils.isEmpty(issueIds)) {
-            assigneeIssueList = sprintMapper.queryAssigneeIssueByPlanSprintId(sprintIds, projectId, issueIds);
+        if (!CollectionUtils.isEmpty(sprintIds)) {
+            assigneeIssueList = sprintMapper.queryAssigneeIssueByPlanSprintId(sprintIds, projectId, advancedSearchArgs);
         }
 
         for (SprintSearchDTO ss : sprintSearch) {
@@ -703,54 +703,62 @@ public class SprintServiceImpl implements SprintService {
     }
 
     @Override
-    public List<SprintSearchVO> unCloseSprint(Long projectId) {
-        //待办事项查询相关issue的issueIds，包含已完成的issue
-        List<IssueIdSprintIdVO> issueIdSprintIdVOS = issueMapper.querySprintAllIssueIdsByCondition(projectId, null, null, null, null);
-        List<SprintSearchVO> sprintSearches = new ArrayList<>();
-        List<Long> allIssueId = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(issueIdSprintIdVOS)) {
-            Set<Long> sprintIssueIds = issueIdSprintIdVOS.stream().map(IssueIdSprintIdVO::getIssueId).collect(Collectors.toSet());
-            allIssueId.addAll(sprintIssueIds);
-        }
-
-        Map<Long, UserMessageDTO> usersMap = new HashMap<>();
-        if (!CollectionUtils.isEmpty(allIssueId)) {
-            Set<Long> assigneeIds = sprintMapper.queryAssigneeIdsByIssueIds(projectId, new HashSet<>(allIssueId));
-            usersMap = userService.queryUsersMap(new ArrayList<>(assigneeIds), true);
-        }
-
+    public List<SprintSearchVO> unCloseSprint(Long projectId, Map<String, Object> searchParamMap) {
+        List<SprintSearchDTO> sprintSearchDTOS = new ArrayList<>();
         SprintSearchDTO sprintSearchDTO = sprintMapper.queryActiveSprintNoIssueIds(projectId);
         if (sprintSearchDTO != null) {
-            List<Long> activeSprintIssueIds = issueIdSprintIdVOS.stream().filter(x -> sprintSearchDTO.getSprintId().equals(x.getSprintId()) && !"sub_task".equals(x.getTypeCode())).map(IssueIdSprintIdVO::getIssueId).collect(Collectors.toList());
-            SprintSearchVO activeSprint = modelMapper.map(sprintSearchDTO, SprintSearchVO.class);
-            activeSprint.setAssigneeIssues(issueSearchAssembler.dtoListToAssigneeIssueVO(sprintMapper.queryAssigneeIssueByActiveSprintIdAndIssueIds(projectId, sprintSearchDTO.getSprintId(),allIssueId), usersMap));
-            activeSprint.setIssueCount(activeSprintIssueIds == null ? 0 : activeSprintIssueIds.size());
-            Map<String, List<Long>> statusMap = projectConfigService.queryStatusByProjectId(projectId, SchemeApplyType.AGILE)
-                    .stream().collect(Collectors.groupingBy(StatusVO::getType, Collectors.mapping(StatusVO::getId, Collectors.toList())));
-            BigDecimal zero = new BigDecimal(0);
-            activeSprint.setTodoStoryPoint(statusMap.get(CATEGORY_TODO_CODE) != null && !statusMap.get(CATEGORY_TODO_CODE).isEmpty() && !activeSprintIssueIds.isEmpty() ? sprintMapper.queryStoryPoint(statusMap.get(CATEGORY_TODO_CODE), activeSprintIssueIds, projectId) : zero);
-            activeSprint.setDoingStoryPoint(statusMap.get(CATEGORY_DOING_CODE) != null && !statusMap.get(CATEGORY_DOING_CODE).isEmpty() && !activeSprintIssueIds.isEmpty() ? sprintMapper.queryStoryPoint(statusMap.get(CATEGORY_DOING_CODE), activeSprintIssueIds, projectId) : zero);
-            activeSprint.setDoneStoryPoint(statusMap.get(CATEGORY_DONE_CODE) != null && !statusMap.get(CATEGORY_DONE_CODE).isEmpty() && !activeSprintIssueIds.isEmpty() ? sprintMapper.queryStoryPoint(statusMap.get(CATEGORY_DONE_CODE), activeSprintIssueIds, projectId) : zero);
-            sprintSearches.add(activeSprint);
+            sprintSearchDTOS.add(sprintSearchDTO);
         }
-        List<SprintSearchDTO> sprintSearchDTOS = sprintMapper.queryPlanSprint(projectId, new HashSet<>(!allIssueId.isEmpty() ? allIssueId : Arrays.asList(0L)));
-        queryAssigneeIssue(sprintSearchDTOS, projectId,allIssueId);
-        if (sprintSearchDTOS != null && !sprintSearchDTOS.isEmpty()) {
-            List<SprintSearchVO> planSprints = new ArrayList<>();
-            for (SprintSearchDTO searchDTO : sprintSearchDTOS) {
-                SprintSearchVO sprintSearchVO = new SprintSearchVO();
-                BeanUtils.copyProperties(searchDTO, sprintSearchVO);
-                sprintSearchVO.setAssigneeIssues(issueSearchAssembler.dtoListToAssigneeIssueVO(searchDTO.getAssigneeIssueDTOList(), usersMap));
-                sprintSearchVO.setIssueCount(searchDTO.getIssueSearchDTOList() == null ? 0 : searchDTO.getIssueSearchDTOList().size());
-                planSprints.add(sprintSearchVO);
+        List<SprintSearchDTO> planSprints = sprintMapper.queryPlanSprints(projectId);
+        if (!CollectionUtils.isEmpty(planSprints)) {
+            sprintSearchDTOS.addAll(planSprints);
+        }
+        List<Long> sprintIds = sprintSearchDTOS.stream().map(SprintSearchDTO::getSprintId).collect(Collectors.toList());
+        // 查询冲刺的todo/doing/done的状态汇总
+        queryAssigneeIssue(sprintSearchDTOS, projectId, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
+        List<SprintSearchVO> sprintSearches = new ArrayList();
+        if (!CollectionUtils.isEmpty(sprintSearchDTOS)) {
+            handlerSprint(sprintSearchDTOS, sprintSearches, sprintIds, searchParamMap, projectId);
+        }
+        if (agilePluginService != null) {
+            agilePluginService.handlerSprintProgramAttr(sprintIds, projectId, sprintSearches);
+        }
+        return sprintSearches;
+    }
+
+    private void handlerSprint(List<SprintSearchDTO> sprintSearchDTOS, List<SprintSearchVO> sprintSearches, List<Long> sprintIds, Map<String, Object> searchParamMap, Long projectId) {
+        //查询经办人信息
+        Set<Long> assigneeIds = sprintMapper.queryAssigneeIdsBySprintIds(projectId, sprintIds, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
+        Map<Long, UserMessageDTO> usersMap = new HashMap<>();
+        if (!CollectionUtils.isEmpty(assigneeIds)) {
+            usersMap = userService.queryUsersMap(new ArrayList<>(assigneeIds), true);
+        }
+        // 统计冲刺的总问题数
+        Map<Long, Integer> issueCountMap = new HashMap<>();
+        List<IssueCountDTO> issueCountDTOList = sprintMapper.selectCountBySprintIds(projectId, sprintIds, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
+        if (!CollectionUtils.isEmpty(assigneeIds)) {
+            issueCountMap.putAll(issueCountDTOList.stream().collect(Collectors.toMap(IssueCountDTO::getId, IssueCountDTO::getIssueCount)));
+        }
+        // 查询冲刺中issue的统计数量
+        List<IssueCountDTO> storyPoints = sprintMapper.querySprintIssueStoryPoints(projectId, sprintIds, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
+        Map<Long, IssueCountDTO> storyPointsMap = new HashMap<>();
+        if (!CollectionUtils.isEmpty(storyPoints)) {
+            storyPointsMap.putAll(storyPoints.stream().collect(Collectors.toMap(IssueCountDTO::getId, Function.identity())));
+        }
+        for (SprintSearchDTO searchDTO : sprintSearchDTOS) {
+            SprintSearchVO sprintSearchVO = new SprintSearchVO();
+            BeanUtils.copyProperties(searchDTO, sprintSearchVO);
+            sprintSearchVO.setAssigneeIssues(issueSearchAssembler.dtoListToAssigneeIssueVO(searchDTO.getAssigneeIssueDTOList(), usersMap));
+            sprintSearchVO.setIssueCount(issueCountMap.getOrDefault(searchDTO.getSprintId(),0));
+            if ("started".equals(searchDTO.getStatusCode())) {
+                IssueCountDTO issueCountDTO = storyPointsMap.getOrDefault(searchDTO.getSprintId(), new IssueCountDTO());
+                BigDecimal zero = new BigDecimal(0);
+                sprintSearchVO.setTodoStoryPoint(issueCountDTO.getTodoStoryPoint() != null ? issueCountDTO.getTodoStoryPoint() : zero);
+                sprintSearchVO.setDoingStoryPoint(issueCountDTO.getDoingStoryPoint() != null ? issueCountDTO.getDoingStoryPoint() : zero);
+                sprintSearchVO.setDoneStoryPoint(issueCountDTO.getDoneStoryPoint() != null ? issueCountDTO.getDoneStoryPoint() : zero);
             }
-            sprintSearches.addAll(planSprints);
+            sprintSearches.add(sprintSearchVO);
         }
-        if(agilePluginService != null){
-            List<Long> sprintIds = sprintSearches.stream().map(SprintSearchVO::getSprintId).collect(Collectors.toList());
-            agilePluginService.handlerSprintProgramAttr(sprintIds,projectId, sprintSearches);
-        }
-        return  sprintSearches;
     }
 
     @Override

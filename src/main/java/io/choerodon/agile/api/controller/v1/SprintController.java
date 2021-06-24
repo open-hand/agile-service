@@ -243,10 +243,12 @@ public class SprintController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("代办事项-查询未完成的冲刺")
-    @GetMapping(value = "/unclose_sprint")
+    @PostMapping(value = "/unclose_sprint")
     public ResponseEntity<List<SprintSearchVO>> unCloseSprint(@ApiParam(value = "项目id", required = true)
-                                                              @PathVariable(name = "project_id") Long projectId) {
-        return Optional.ofNullable(sprintService.unCloseSprint(projectId))
+                                                              @PathVariable(name = "project_id") Long projectId,
+                                                              @RequestBody Map<String, Object> searchParamMap) {
+        EncryptionUtils.decryptSearchParamMap(searchParamMap);
+        return Optional.ofNullable(sprintService.unCloseSprint(projectId,searchParamMap))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.sprint.query"));
     }

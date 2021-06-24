@@ -1839,6 +1839,7 @@
         SELECT
         ai.issue_id,
         ai.type_code,
+        ai.assignee_id,
         aisr.sprint_id
         FROM agile_issue ai
         LEFT JOIN agile_issue_sprint_rel aisr ON aisr.issue_id = ai.issue_id
@@ -1872,6 +1873,13 @@
             </if>
             <if test='advancedSearchArgs.onlyStory != "" and advancedSearchArgs.onlyStory == "true"'>
                 AND ai.type_code = 'story'
+            </if>
+            <if test='advancedSearchArgs.assigneeFilterIds != null and advancedSearchArgs.assigneeFilterIds.size > 0'>
+                AND ai.assignee_id IN
+                <foreach collection="advancedSearchArgs.assigneeFilterIds" item="assigneeFilterId"
+                         open="(" close=")" separator=",">
+                    #{assigneeFilterId}
+                </foreach>
             </if>
         </if>
         <if test='filterSql != null'>
