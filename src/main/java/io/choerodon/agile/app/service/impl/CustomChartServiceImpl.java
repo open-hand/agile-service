@@ -132,6 +132,17 @@ public class CustomChartServiceImpl implements CustomChartService {
         return validNameRepeat(customChart);
     }
 
+    @Override
+    public void deleteCustomChartById(Long customChartId, Long projectId) {
+        CustomChartDTO customChartDTO = new CustomChartDTO();
+        customChartDTO.setProjectId(projectId);
+        customChartDTO.setId(customChartId);
+        int isDelete = customChartMapper.delete(customChartDTO);
+        if (isDelete != 1) {
+            throw new CommonException("error.customChart.deleteById");
+        }
+    }
+
     private boolean validNameRepeat(CustomChartDTO customChartDTO) {
         CustomChartDTO customChartRecord = new CustomChartDTO();
         customChartRecord.setName(customChartDTO.getName());

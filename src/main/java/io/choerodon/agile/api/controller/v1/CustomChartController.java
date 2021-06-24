@@ -80,6 +80,16 @@ public class CustomChartController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "删除自定义报表")
+    @DeleteMapping("/{custom_chart_id}")
+    public ResponseEntity<Void> deleteCustomChart(
+            @PathVariable("project_id") Long projectId,
+            @PathVariable("custom_chart_id") Long customChartId) {
+        customChartService.deleteCustomChartById(customChartId, projectId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("自定义报表重名校验")
     @GetMapping(value = "/check_name")
     public ResponseEntity<Boolean> checkName(@ApiParam(value = "项目id", required = true)
