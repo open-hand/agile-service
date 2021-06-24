@@ -27,10 +27,10 @@ function useReport(config: ChartConfig, maxShow = 12, onFinish?: Function): [{},
     onFinish && setTimeout(onFinish);
   }, [onFinish]);
   const {
-    chartType, statisticsType, analysisField, comparedField,
+    chartType, statisticsType, analysisField, analysisFieldPredefined, comparedField, comparedFieldPredefined,
   } = config;
   const loadData = useCallback(async () => {
-    if (!statisticsType || !chartType || !analysisField || (chartType === 'stackedBar' && !comparedField)) {
+    if (!statisticsType || !chartType || !analysisField || analysisFieldPredefined === undefined || (chartType === 'stackedBar' && (!comparedField || comparedFieldPredefined === undefined))) {
       batchedUpdates(() => {
         setData(null);
         setLoading(false);
