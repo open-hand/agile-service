@@ -40,7 +40,7 @@ public enum SystemBaseFieldSql implements FieldSql {
             "IFNULL(ail.label_name, '无')", "ail.label_id", DEFAULT),
     //影响版本
     INFLUENCE_VERSION("influenceVersion",
-            "LEFT JOIN agile_version_issue_rel lai ON la.issue_id = ai.issue_id AND lai.relation_type = 'influence'" +
+            "LEFT JOIN agile_version_issue_rel lai ON lai.issue_id = ai.issue_id AND lai.relation_type = 'influence'" +
                     "LEFT JOIN agile_product_version api ON api.version_id = lai.version_id",
             "api.version_id, api.`name`",
             "IFNULL(api.`name`,'无')", "api.version_id", DEFAULT),
