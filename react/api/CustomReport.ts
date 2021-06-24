@@ -1,7 +1,20 @@
+import { IChartType, IChartUnit } from '@/routes/ReportHost/custom-report/components/Chart/utils';
 import { getOrganizationId } from '@/utils/common';
 import { axios } from '@choerodon/boot';
 import Api from './Api';
 
+export interface ICreateData {
+  searchJson: string
+  name: string
+  description?: string
+  chartType: IChartType
+  statisticsType: IChartUnit
+  analysisField: string
+  analysisFieldPredefined: boolean,
+  comparedField?: string,
+  comparedFieldPredefined?: boolean,
+  objectVersionNumber?:number
+}
 class CustomReportApi extends Api<CustomReportApi> {
   get prefix() {
     return `/agile/v1/projects/${this.projectId}`;
@@ -35,7 +48,7 @@ class CustomReportApi extends Api<CustomReportApi> {
     });
   }
 
-  createChart(data: any) {
+  createChart(data: ICreateData) {
     return axios({
       method: 'post',
       url: `${this.prefix}/custom_chart`,
@@ -43,7 +56,7 @@ class CustomReportApi extends Api<CustomReportApi> {
     });
   }
 
-  updateChart(chartId: string, data: any) {
+  updateChart(chartId: string, data: ICreateData) {
     return axios({
       method: 'put',
       url: `${this.prefix}/custom_chart/${chartId}`,
@@ -54,6 +67,13 @@ class CustomReportApi extends Api<CustomReportApi> {
   getChartAllDataById(chartId: string) {
     return axios({
       method: 'get',
+      url: `${this.prefix}/custom_chart/${chartId}`,
+    });
+  }
+
+  deleteChart(chartId: string) {
+    return axios({
+      method: 'delete',
       url: `${this.prefix}/custom_chart/${chartId}`,
     });
   }
