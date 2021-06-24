@@ -14,6 +14,7 @@ import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { customReportApi } from '@/api';
 import { IField } from '@/common/types';
+import { useWhyDidYouUpdate } from 'ahooks';
 import pic from './NoData.svg';
 import styles from './AddReport.less';
 import Condition from '../components/Condition';
@@ -69,25 +70,40 @@ const AddReport = () => {
       type: 'string' as FieldType,
       required: true,
     }],
+    events: {
+      update: ({
+        // @ts-ignore
+        name, value, oldValue, record,
+      }) => {
+        if (name === 'type' && oldValue === 'stackedBar') {
+          record?.set('column', undefined);
+        }
+      },
+    },
   }), [checkTitle]);
 
   const handleExpandChange = useCallback(() => {
     setExpand(!expand);
   }, [expand]);
 
+  const chartType = addReportDs.current?.get('type');
   const analysisField = addReportDs.current?.get('row');
   const comparedField = addReportDs.current?.get('column');
-  const [, chartProps] = useReport({
-    chartType: addReportDs.current?.get('type'),
-    statisticsType: addReportDs.current?.get('unit'),
+  const statisticsType = addReportDs.current?.get('unit');
+  const maxShow = expand ? 18 : 12;
+  const configMemo = useMemo(() => ({
+    chartType,
+    statisticsType,
     analysisField,
     comparedField,
     searchVO: undefined,
-    analysisFieldPredefined: analysisField && conditionRef.current?.rowColumnOptions.find((item) => item.id === analysisField)?.system,
-    comparedFieldPredefined: comparedField && conditionRef.current?.rowColumnOptions.find((item) => item.id === comparedField)?.system,
-  });
-  const { loading, data } = chartProps;
-
+    analysisFieldPredefined: analysisField && conditionRef.current?.rowColumnOptions.find((item) => item.code === analysisField)?.system,
+    comparedFieldPredefined: comparedField && conditionRef.current?.rowColumnOptions.find((item) => item.code === comparedField)?.system,
+  }), [analysisField, chartType, comparedField, statisticsType]);
+  const [, chartProps] = useReport(configMemo, maxShow);
+  const { data } = chartProps;
+  useWhyDidYouUpdate('useWhyDidYouUpdateComponent', chartProps);
+  // console.log(chartProps);
   return (
     <Page>
       <Header />
@@ -103,7 +119,7 @@ const AddReport = () => {
           <div className={styles.main}>
             <div className={styles.left}>
               {
-                loading || !data?.length ? (
+                !data?.length ? (
                   <EmptyPage
                     image={pic}
                     description={(
@@ -128,10 +144,9 @@ const AddReport = () => {
                 )}
                   />
                 ) : (
-                  <Chart {...chartProps} />
+                  <Chart {...chartProps} key={`${chartType}-${statisticsType}-${analysisField}-${comparedField}`} />
                 )
               }
-
             </div>
             <div
               className={styles.right}

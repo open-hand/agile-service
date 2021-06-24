@@ -195,6 +195,7 @@ export interface IField {
   projectId?: string | number
   required: boolean
   defaultValue: any
+  contexts: string[]
 }
 
 export interface IFieldWidthValue extends IField {
