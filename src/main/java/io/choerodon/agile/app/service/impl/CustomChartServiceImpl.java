@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,7 +111,7 @@ public class CustomChartServiceImpl implements CustomChartService {
 
         CustomChartVO result = modelMapper.map(customChart, CustomChartVO.class);
         CustomChartSearchVO customChartSearchVO = modelMapper.map(customChart, CustomChartSearchVO.class);
-        if (result.getSearchJson() != null){
+        if (!StringUtils.isBlank(result.getSearchJson())) {
             try {
                 SearchVO searchVO = objectMapper.readValue(result.getSearchJson(), SearchVO.class);
                 customChartSearchVO.setSearchVO(searchVO);
