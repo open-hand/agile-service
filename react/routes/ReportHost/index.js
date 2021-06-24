@@ -1,21 +1,22 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { asyncRouter, nomatch, Charts } from '@choerodon/boot';
+import { nomatch, Charts } from '@choerodon/boot';
 import { PermissionRoute } from '@choerodon/master';
 import { useTabActiveKey } from '@choerodon/components';
 import useIsProgram from '@/hooks/useIsProgram';
 import { get } from '@choerodon/inject';
 
 const ReportRoutes = get('agile:ProgramReportRoutes');
-const BurndownChart = asyncRouter(() => (import('./BurndownChart')));
-const sprintReport = asyncRouter(() => (import('./SprintReport')));
-const Accumulation = asyncRouter(() => (import('./Accumulation')));
-const VelocityReport = asyncRouter(() => (import('./VelocityChart')));
-const EpicReport = asyncRouter(() => (import('./EpicReport')));
-const PieChartReport = asyncRouter(() => (import('./pieChart')));
-const VersionReport = asyncRouter(() => (import('./VersionReport')));
-const EpicBurndown = asyncRouter(() => (import('./EpicBurndown')));
-const VersionBurndown = asyncRouter(() => (import('./VersionBurndown')));
+const ReportAdd = React.lazy(() => import('./custom-report/AddReport'));
+const BurndownChart = React.lazy(() => (import('./BurndownChart')));
+const sprintReport = React.lazy(() => (import('./SprintReport')));
+const Accumulation = React.lazy(() => (import('./Accumulation')));
+const VelocityReport = React.lazy(() => (import('./VelocityChart')));
+const EpicReport = React.lazy(() => (import('./EpicReport')));
+const PieChartReport = React.lazy(() => (import('./pieChart')));
+const VersionReport = React.lazy(() => (import('./VersionReport')));
+const EpicBurndown = React.lazy(() => (import('./EpicBurndown')));
+const VersionBurndown = React.lazy(() => (import('./VersionBurndown')));
 const Main = () => {
   const { isProgram } = useIsProgram();
   useTabActiveKey(isProgram ? 'program' : 'agile');
@@ -24,6 +25,11 @@ const Main = () => {
 const ReportHostIndex = ({ match }) => (
   <Switch>
     <Route exact path={match.url} component={Main} />
+    <PermissionRoute
+      service={[]}
+      path={`${match.url}/add`}
+      component={ReportAdd}
+    />
     <PermissionRoute
       service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.burndown']}
       path={`${match.url}/burndownchart`}

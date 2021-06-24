@@ -3,6 +3,8 @@ package io.choerodon.agile.app.service;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListVO;
+import io.choerodon.agile.api.vo.report.CustomChartSearchVO;
+import io.choerodon.agile.api.vo.report.CustomChartDataVO;
 import io.choerodon.agile.infra.dto.GroupDataChartDTO;
 import io.choerodon.agile.infra.dto.business.GroupDataChartListDTO;
 import io.choerodon.agile.infra.mapper.ReportMapper;
@@ -135,4 +137,13 @@ public interface ReportService {
      * @return 趋势
      */
     IssueCountVO selectBugBysprint(Long projectId, Long sprintId);
+
+    /**
+     * 查询自定义报表
+     * @param customChartSearchVO 查询参数
+     * @param projectId 项目id
+     * @param organizationId 组织id
+     * @return 自定义报表数据
+     */
+    CustomChartDataVO queryCustomChartData(CustomChartSearchVO customChartSearchVO, Long projectId, Long organizationId);
 }

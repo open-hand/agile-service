@@ -2,6 +2,7 @@ package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.api.vo.report.CustomChartPointVO;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
@@ -345,7 +346,8 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                                    @Param("isExcelExported") boolean isExcelExported,
                                                    @Param("withSubIssues") boolean withSubIssues);
 
-    List<IssueDTO> selectWithSubByIssueIds(@Param("issueIds") List<Long> issueIds,
+    List<IssueDTO> selectWithSubByIssueIds(@Param("projectId") Long projectId,
+                                           @Param("issueIds") List<Long> issueIds,
                                            @Param("childrenIds") Set<Long> childrenIds);
 
 
@@ -568,4 +570,25 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      */
     List<IssueDTO> selectDelayIssues(@Param("projectIds") Set<Long> projectIds,
                                      @Param("date") Date date);
+
+    /**
+     * 查询自定义报表数据点
+     *
+     * @param projectId            项目id
+     * @param searchVO             问题id
+     * @param filterSql            filterSql
+     * @param assigneeFilterIds    assigneeFilterIds
+     * @param selectSql            查询sql
+     * @param groupSql             分组sql
+     * @param linkSql              表连接sql
+     * @return 自定义报表数据点
+     */
+    List<CustomChartPointVO> selectCustomChartPointVO(
+            @Param("projectId") Long projectId,
+            @Param("searchVO") SearchVO searchVO,
+            @Param("filterSql") String filterSql,
+            @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
+            @Param("selectSql") String selectSql,
+            @Param("groupSql") String groupSql,
+            @Param("linkSql") String linkSql);
 }

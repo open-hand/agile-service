@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.controller.v1;
 
+import io.choerodon.agile.api.vo.IssueTypeRankVO;
 import io.choerodon.agile.api.vo.IssueTypeSearchVO;
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.app.service.IssueTypeService;
@@ -162,4 +163,17 @@ public class ProjectIssueTypeController {
                                              @RequestParam Long organizationId) {
         return new ResponseEntity<>(issueTypeService.checkIcon(organizationId, projectId, icon, id), HttpStatus.OK);
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "项目层更新问题类型排序")
+    @PostMapping("/{id}/update_rank")
+    public ResponseEntity<Page<IssueTypeVO>> updateRank(@ApiParam(value = "项目id", required = true)
+                                                        @PathVariable("project_id") Long projectId,
+                                                        @PathVariable("id") @Encrypt Long issueTypeId,
+                                                        @RequestParam Long organizationId,
+                                                        @RequestBody IssueTypeRankVO issueTypeRankVO) {
+        issueTypeService.updateRank(projectId, organizationId, issueTypeId, issueTypeRankVO);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 }

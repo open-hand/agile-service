@@ -75,7 +75,8 @@ public class IssueLinkServiceImpl implements IssueLinkService {
 
     @Override
     public List<IssueLinkVO> listIssueLinkByIssueId(Long issueId, Long projectId, Boolean noIssueTest) {
-        return issueLinkAssembler.issueLinkDTOToVO(projectId, issueLinkMapper.queryIssueLinkByIssueId(issueId, projectId, noIssueTest));
+        return issueLinkAssembler.issueLinkDTOToVO(projectId,
+                issueLinkMapper.queryIssueLinkByIssueId(new HashSet<>(Arrays.asList(issueId)), new HashSet<>(Arrays.asList(projectId)), noIssueTest));
     }
 
     @Override
@@ -136,7 +137,7 @@ public class IssueLinkServiceImpl implements IssueLinkService {
         }
         Set<Long> issueIds = new HashSet<>();
         issueIds.add(issueId);
-        List<IssueLinkDTO> issueLinks = issueLinkMapper.queryIssueLinkByIssueId(issueId, projectId, false);
+        List<IssueLinkDTO> issueLinks = issueLinkMapper.queryIssueLinkByIssueId(new HashSet<>(Arrays.asList(issueId)), new HashSet<>(Arrays.asList(projectId)), false);
         if (!CollectionUtils.isEmpty(issueLinks)) {
             issueLinks.forEach(issueLink -> {
                 issueIds.add(issueLink.getIssueId());

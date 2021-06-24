@@ -35,4 +35,10 @@ databaseChangeLog(logicalFilePath: 'fd_issue_type_extend.groovy') {
             column(name: 'colour', type: 'VARCHAR(20)', remarks: '颜色，用于系统问题类型更改颜色', afterColumn: 'icon')
         }
     }
+
+    changeSet(id: '2021-06-08-fd-issue-type-extend-add-column', author: 'kaiwen.li@hand-china.com') {
+        addColumn(tableName: 'fd_issue_type_extend') {
+            column(name: 'rank', type: 'VARCHAR(255)', remarks: 'rank', afterColumn: 'colour')
+        }
+    }
 }

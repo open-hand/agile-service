@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { DataSet } from 'choerodon-ui/pro';
-import useIsInProgram from '@/hooks/useIsInProgram';
 import { useDetail } from '@/components/detail-container';
 import { versionApiConfig } from '@/api';
 import ReleaseHome from './ReleaseHome';
@@ -25,7 +24,6 @@ function getSearchObj(values = {}) {
   };
 }
 function ReleaseHomeHoc() {
-  const { loading, ...restData } = useIsInProgram();
   const [detailProps] = useDetail();
   const tableDataSet = useMemo(() => new DataSet({
     autoQuery: true,
@@ -73,6 +71,6 @@ function ReleaseHomeHoc() {
       read: ({ data, params }) => ({ ...versionApiConfig.loadVersionList(undefined, undefined, getSearchObj(data)), params }),
     },
   }), []);
-  return !loading && <ReleaseHome {...restData} tableDataSet={tableDataSet} detailProps={detailProps} />;
+  return <ReleaseHome tableDataSet={tableDataSet} detailProps={detailProps} />;
 }
 export default ReleaseHomeHoc;

@@ -74,6 +74,17 @@ public class IssueLinkDTO extends AuditDomain {
 
     private Long projectId;
 
+    @Transient
+    private Long keyIssueId;
+
+    public Long getKeyIssueId() {
+        return keyIssueId;
+    }
+
+    public void setKeyIssueId(Long keyIssueId) {
+        this.keyIssueId = keyIssueId;
+    }
+
     public Long getProjectId() {
         return projectId;
     }

@@ -3,6 +3,8 @@ package io.choerodon.agile.api.controller.v1;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListVO;
+import io.choerodon.agile.api.vo.report.CustomChartSearchVO;
+import io.choerodon.agile.api.vo.report.CustomChartDataVO;
 import io.choerodon.agile.app.service.ReportService;
 
 import io.choerodon.agile.infra.dto.GroupDataChartDTO;
@@ -281,5 +283,19 @@ public class ReportController {
         return Optional.ofNullable(reportService.queryIssuePriorityDistributionChart(projectId, organizationId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.report.queryIssuePriorityDistributionChart"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询自定义报表数据")
+    @PostMapping(value = "/custom_chart")
+    public ResponseEntity<CustomChartDataVO> queryCustomChartData(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "组织id", required = true)
+            @RequestParam Long organizationId,
+            @Validated @RequestBody CustomChartSearchVO customChartSearchVO) {
+        return Optional.ofNullable(reportService.queryCustomChartData(customChartSearchVO, projectId, organizationId))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.report.queryCustomChart"));
     }
 }

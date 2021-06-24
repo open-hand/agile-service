@@ -32,6 +32,8 @@ public class StatusSettingVO {
 
     private ExecutionCaseStatusChangeSettingVO executionCaseStatusChangeSettingVO;
 
+    private List<LinkIssueStatusLinkageVO> linkIssueStatusLinkageVOS;
+
     public StatusBranchMergeSettingVO getStatusBranchMergeSettingVO() {
         return statusBranchMergeSettingVO;
     }
@@ -118,5 +120,13 @@ public class StatusSettingVO {
 
     public void setExecutionCaseStatusChangeSettingVO(ExecutionCaseStatusChangeSettingVO executionCaseStatusChangeSettingVO) {
         this.executionCaseStatusChangeSettingVO = executionCaseStatusChangeSettingVO;
+    }
+
+    public List<LinkIssueStatusLinkageVO> getLinkIssueStatusLinkageVOS() {
+        return linkIssueStatusLinkageVOS;
+    }
+
+    public void setLinkIssueStatusLinkageVOS(List<LinkIssueStatusLinkageVO> linkIssueStatusLinkageVOS) {
+        this.linkIssueStatusLinkageVOS = linkIssueStatusLinkageVOS;
     }
 }

@@ -103,6 +103,7 @@ const Issue = observer(({ cached, updateCache }) => {
     const whiteList = ['type', 'category', 'id', 'name', 'organizationId'];
     return Object.keys(obj).some((key) => !whiteList.includes(key));
   }, []);
+
   const initFilter = usePersistFn(async () => {
     const {
       paramChoose, paramCurrentVersion, paramCurrentSprint, paramId,
