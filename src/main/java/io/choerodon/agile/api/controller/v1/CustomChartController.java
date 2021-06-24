@@ -72,11 +72,25 @@ public class CustomChartController {
     @ApiOperation(value = "查询自定义报表详情页")
     @GetMapping("/{custom_chart_id}")
     public ResponseEntity<CustomChartVO> queryCustomChartDetail(
+            @ApiParam(value = "项目id", required = true)
             @PathVariable("project_id") Long projectId,
+            @ApiParam(value = "报表id", required = true)
             @PathVariable("custom_chart_id") Long customChartId) {
         return Optional.ofNullable(customChartService.queryCustomChartDetail(projectId, customChartId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.custom.query"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "删除自定义报表")
+    @DeleteMapping("/{custom_chart_id}")
+    public ResponseEntity<Void> deleteCustomChart(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable("project_id") Long projectId,
+            @ApiParam(value = "报表id", required = true)
+            @PathVariable("custom_chart_id") Long customChartId) {
+        customChartService.deleteCustomChartById(customChartId, projectId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

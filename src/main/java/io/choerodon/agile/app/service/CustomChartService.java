@@ -50,4 +50,11 @@ public interface CustomChartService {
      * @return 校验自定义报表名称是否重复
      */
     Boolean checkName(Long projectId, String name);
+
+    /**
+     * 删除自定义报表
+     * @param customChartId id
+     * @param projectId 项目id
+     */
+    void deleteCustomChartById(Long customChartId, Long projectId);
 }
