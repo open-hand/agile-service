@@ -9,9 +9,6 @@ databaseChangeLog(logicalFilePath: 'script/db/fd_custom_chart.groovy') {
             column(name: "name", type: "VARCHAR(255)", remarks: "自定义报表名称") {
                 constraints(nullable:"false")
             }
-            column(name: "code", type: "VARCHAR(255)", remarks: "自定义报表编码（生成uuid）") {
-                constraints(nullable:"false")
-            }
             column(name: "description", type: "VARCHAR(255)", remarks: "自定义报表描述")   
             column(name: "analysis_field", type: "VARCHAR(255)", remarks: "分析维度参数") {
                 constraints(nullable:"false")
