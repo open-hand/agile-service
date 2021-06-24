@@ -18,6 +18,18 @@ public class CustomChartPointVO {
     private Long comparedId;
     private BigDecimal percentage;
 
+    public CustomChartPointVO() {
+    }
+
+    public CustomChartPointVO(String analysisValue, Long analysisId, String comparedValue, Long comparedId) {
+        this.analysisValue = analysisValue;
+        this.analysisId = analysisId;
+        this.comparedId = comparedId;
+        this.comparedValue = comparedValue;
+        this.value = "0";
+        this.percentage = BigDecimal.ZERO;
+    }
+
     public String getAnalysisValue() {
         return analysisValue;
     }
