@@ -9,7 +9,6 @@ import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.core.utils.PageUtils;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -100,8 +99,6 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     private StatusMachineNodeMapper nodeDeployMapper;
     @Autowired
     private StatusService statusService;
-    @Autowired
-    private IssueService issueService;
 
     private static final List<String> AGILE_CREATE_ISSUE_TYPES =
             Arrays.asList(
@@ -1127,29 +1124,6 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         example.setIssueTypeId(issueTypeId);
         IssueTypeExtendDTO extend = issueTypeExtendMapper.selectOne(example);
         insertOrUpdateRank(issueTypeVO, extend, rank, projectId);
-    }
-
-    @Override
-    public Page<IssueTypeVO> queryUserProjectIssueTypes(PageRequest pageRequest, Long organizationId, String name, String type) {
-        List<Long> projectIds = new ArrayList<>();
-        List<ProjectVO> projects = new ArrayList<>();
-        Long userId = DetailsHelper.getUserDetails().getUserId();
-        issueService.queryUserProjects(organizationId, null, projectIds, projects, userId, type);
-        if (CollectionUtils.isEmpty(projectIds)) {
-            return new Page<>();
-        }
-        List<String> typeCodes = new ArrayList<>(AGILE_CREATE_ISSUE_TYPES);
-        if (Objects.equals(type, "myStarBeacon")) {
-            typeCodes.add(IssueTypeCode.FEATURE.value());
-        }
-        Page<IssueTypeVO> issueTypeVOPage = PageHelper.doPage(pageRequest, () -> issueTypeMapper.queryUserProjectIssueTypes(organizationId, projectIds, typeCodes, name));
-        Map<Long, ProjectVO> projectVOMap = projects.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
-        issueTypeVOPage.forEach(v -> {
-            if (!Objects.equals(0L, v.getProjectId()) && !Objects.isNull(projectVOMap.get(v.getProjectId()))) {
-                v.setProjectName(projectVOMap.get(v.getProjectId()).getName());
-            }
-        });
-        return issueTypeVOPage;
     }
 
     private String getMaxBackRankIfExisted(String frontRank,

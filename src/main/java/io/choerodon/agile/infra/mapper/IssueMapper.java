@@ -487,8 +487,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     List<IssueDTO> listIssuesByParentIssueIdsAndUserId(@Param("projectIds") List<Long> projectIds,
                                                        @Param("parentIssues") List<Long> parentIssues,
                                                        @Param("userId") Long userId,
-                                                       @Param("searchType") String searchType,
-                                                       @Param("searchVO") SearchVO searchVO);
+                                                       @Param("searchType") String searchType);
 
     List<IssueOverviewVO> selectIssueBysprint(@Param("projectId") Long projectId,
                                               @Param("sprintId") Long sprintId,

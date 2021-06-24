@@ -2543,7 +2543,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (Objects.equals(searchType, MY_START_BEACON)) {
             allIssue = issueMapper.listMyStarIssuesByProjectIdsAndUserId(projectIds, parentIssues, userId, workBenchIssueSearchVO.getSearchVO());
         } else {
-            allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId, searchType, workBenchIssueSearchVO.getSearchVO());
+            allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId, searchType);
         }
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
         Map<Long, List<IssueTypeVO>> issueTypeDTOMap = issueTypeService.listIssueTypeMapByProjectIds(organizationId, projectIds);

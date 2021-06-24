@@ -1386,11 +1386,11 @@
                     </when>
                 </choose>
                 <if test='searchVO.advancedSearchArgs != null'>
-                    <if test='searchVO.advancedSearchArgs.issueTypeId != null and searchVO.advancedSearchArgs.issueTypeId.size > 0'>
-                        AND ai.issue_type_id IN
-                        <foreach collection="searchVO.advancedSearchArgs.issueTypeId" item="issueTypeId" open="(" separator=","
+                    <if test='searchVO.advancedSearchArgs.typeCodes != null and searchVO.advancedSearchArgs.typeCodes.size > 0'>
+                        AND ai.type_code IN
+                        <foreach collection="searchVO.advancedSearchArgs.typeCodes" item="typeCode" open="(" separator=","
                                  close=")">
-                            #{issueTypeId}
+                            #{typeCode}
                         </foreach>
                     </if>
                     <if test='searchVO.advancedSearchArgs.priorityId != null and searchVO.advancedSearchArgs.priorityId.size > 0'>
@@ -1524,11 +1524,11 @@
                         </choose>
                         AND ai.type_code in ('sub_task','bug')
                         <if test='searchVO.advancedSearchArgs != null'>
-                            <if test='searchVO.advancedSearchArgs.issueTypeId != null and searchVO.advancedSearchArgs.issueTypeId.size > 0'>
-                                AND ai.issue_type_id IN
-                                <foreach collection="searchVO.advancedSearchArgs.issueTypeId" item="issueTypeId" open="(" separator=","
+                            <if test='searchVO.advancedSearchArgs.typeCodes != null and searchVO.advancedSearchArgs.typeCodes.size > 0'>
+                                AND ai.type_code IN
+                                <foreach collection="searchVO.advancedSearchArgs.typeCodes" item="typeCode" open="(" separator=","
                                          close=")">
-                                    #{issueTypeId}
+                                    #{typeCode}
                                 </foreach>
                             </if>
                             <if test='searchVO.advancedSearchArgs.priorityId != null and searchVO.advancedSearchArgs.priorityId.size > 0'>
@@ -3724,11 +3724,11 @@
                     )
                 )
                 <if test='searchVO.advancedSearchArgs != null'>
-                    <if test='searchVO.advancedSearchArgs.issueTypeId != null and searchVO.advancedSearchArgs.issueTypeId.size > 0'>
-                        AND ai.issue_type_id IN
-                        <foreach collection="searchVO.advancedSearchArgs.issueTypeId" item="issueTypeId" open="(" separator=","
+                    <if test='searchVO.advancedSearchArgs.typeCodes != null and searchVO.advancedSearchArgs.typeCodes.size > 0'>
+                        AND ai.type_code IN
+                        <foreach collection="searchVO.advancedSearchArgs.typeCodes" item="typeCode" open="(" separator=","
                                  close=")">
-                            #{issueTypeId}
+                            #{typeCode}
                         </foreach>
                     </if>
                     <if test='searchVO.advancedSearchArgs.priorityId != null and searchVO.advancedSearchArgs.priorityId.size > 0'>

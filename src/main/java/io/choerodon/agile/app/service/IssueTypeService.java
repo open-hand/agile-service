@@ -153,6 +153,4 @@ public interface IssueTypeService {
      * @param issueTypeRankVO
      */
     void updateRank(Long projectId, Long organizationId, Long issueTypeId, IssueTypeRankVO issueTypeRankVO);
-
-    Page<IssueTypeVO> queryUserProjectIssueTypes(PageRequest pageRequest, Long organizationId, String name, String type);
 }
