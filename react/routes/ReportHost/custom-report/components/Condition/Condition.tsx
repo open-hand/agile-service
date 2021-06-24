@@ -32,7 +32,7 @@ const Condition: React.FC<{
   const [dimension, setDimension] = useState<IField[]>([]);
   useEffect(() => {
     pageConfigApi.load().then((res: { content: IField[]}) => {
-      setDimension(res.content.filter((item) => ['single', 'checkbox', 'multiple', 'radio', 'member', 'multiMember'].includes(item.fieldType)));
+      setDimension(res.content.filter((item) => ['single', 'checkbox', 'multiple', 'radio', 'member', 'multiMember'].includes(item.fieldType) && !(item.contexts.length === 1 && item.contexts[0] === 'backlog')));
     });
   }, []);
 
@@ -56,8 +56,8 @@ const Condition: React.FC<{
           </Select>
           <Select name="row" clearButton={false}>
             {
-              dimension.filter((item) => item.id !== addReportDs.current?.get('column')).map((item) => (
-                <Option value={item.id}>{item.name}</Option>
+              dimension.filter((item) => item.code !== addReportDs.current?.get('column')).map((item) => (
+                <Option value={item.code}>{item.name}</Option>
               ))
             }
           </Select>
@@ -65,8 +65,8 @@ const Condition: React.FC<{
           addReportDs.current?.get('type') === 'stackedBar' && (
             <Select name="column" clearButton={false}>
               {
-              dimension.filter((item) => item.id !== addReportDs.current?.get('row')).map((item) => (
-                <Option value={item.id}>{item.name}</Option>
+              dimension.filter((item) => item.code !== addReportDs.current?.get('row')).map((item) => (
+                <Option value={item.code}>{item.name}</Option>
               ))
             }
             </Select>

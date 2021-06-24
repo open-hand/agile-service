@@ -1,12 +1,12 @@
-import { useEffect, useState, useCallback } from 'react';
+import {
+  useEffect, useState, useCallback, useMemo,
+} from 'react';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import { customReportApi } from '@/api';
 import { getProjectId } from '@/utils/common';
 import { ISearchVO } from '@/common/types';
 import { ChartProps } from './index';
-
-export type IChartType = 'line' | 'bar' | 'pie' | 'stackedBar';
-export type IChartUnit = 'storyPoints' | 'quantity';
+import getOptions, { IChartData, IChartType, IChartUnit } from './utils';
 
 export interface ChartConfig {
   projectId?: undefined
@@ -19,9 +19,9 @@ export interface ChartConfig {
   comparedFieldPredefined?: boolean,
 }
 
-function useReport(config: ChartConfig, onFinish?: Function): [{}, ChartProps] {
+function useReport(config: ChartConfig, maxShow = 12, onFinish?: Function): [{}, ChartProps] {
   const projectId = config?.projectId || getProjectId();
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<IChartData[] | null>(null);
   const [loading, setLoading] = useState(false);
   const handleEmpty = useCallback(() => {
     onFinish && setTimeout(onFinish);
@@ -31,15 +31,18 @@ function useReport(config: ChartConfig, onFinish?: Function): [{}, ChartProps] {
   } = config;
   const loadData = useCallback(async () => {
     if (!statisticsType || !chartType || !analysisField || (chartType === 'stackedBar' && !comparedField)) {
+      batchedUpdates(() => {
+        setData(null);
+        setLoading(false);
+      });
+    } else {
       setLoading(true);
       const res = await customReportApi.project(projectId).getData(config);
       batchedUpdates(() => {
-        setData(res);
         setLoading(false);
+        setData(res.dimensionList || []);
         onFinish && setTimeout(onFinish);
       });
-    } else {
-      setData(null);
     }
   }, [analysisField, chartType, comparedField, config, onFinish, projectId, statisticsType]);
   useEffect(() => {
@@ -52,6 +55,7 @@ function useReport(config: ChartConfig, onFinish?: Function): [{}, ChartProps] {
     data,
     chartType,
     type: statisticsType,
+    option: data?.length ? getOptions(chartType as IChartType, statisticsType as IChartUnit, data as IChartData[], maxShow) : undefined,
   };
   return [searchProps, props];
 }

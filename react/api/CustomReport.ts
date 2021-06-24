@@ -10,7 +10,7 @@ class CustomReportApi extends Api<CustomReportApi> {
   checkName(name: string) {
     return axios({
       method: 'get',
-      url: `${this.prefix}/project_invoke_program/datalog`,
+      url: `${this.prefix}/custom_chart/check_name`,
       params: {
         name,
       },
@@ -25,6 +25,36 @@ class CustomReportApi extends Api<CustomReportApi> {
         organizationId: getOrganizationId(),
       },
       data,
+    });
+  }
+
+  getCustomReports() {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/custom_chart`,
+    });
+  }
+
+  createChart(data: any) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/custom_chart`,
+      data,
+    });
+  }
+
+  updateChart(chartId: string, data: any) {
+    return axios({
+      method: 'put',
+      url: `${this.prefix}/custom_chart/${chartId}`,
+      data,
+    });
+  }
+
+  getChartAllDataById(chartId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/custom_chart/${chartId}`,
     });
   }
 }
