@@ -10,7 +10,8 @@ import EndDateTimePicker from '@/components/date-time-picker';
 import SelectEnvironment from '@/components/select/select-environment';
 import SelectCustomField from '@/components/select/select-custom-field';
 // eslint-disable-next-line import/no-cycle
-import { systemFields } from './Content';
+import SelectMultiServiceTag from '@/components/select/select-multi-service-tag';
+import { systemFields } from './utils';
 
 const singleList = ['radio', 'single'];
 
@@ -42,6 +43,9 @@ export default function renderField({
           label="环境"
         />
       );
+    }
+    case 'tags': {
+      return <SelectMultiServiceTag name={code} style={{ width: '100%' }} label="Tag" />;
     }
     default: break;
   }
