@@ -1,11 +1,11 @@
 import {
-  useUpdateEffect, usePersistFn, useMount, useDebounceFn,
+  useUpdateEffect, usePersistFn, useMount,
 } from 'ahooks';
 import { intersection, get } from 'lodash';
 import { useCallback, useMemo, useState } from 'react';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 
-interface TreeShape {
+export interface TreeShape {
   children?: TreeShape[]
   [key: string]: any
 }
@@ -54,7 +54,6 @@ export default function useTable(getData: TableRequest, options: Options) {
   } = options ?? {};
   const [pageSize, setPageSize] = useState(defaultPageSize ?? 10);
   const [current, setCurrent] = useState(defaultPage ?? 1);
-  // const [visibleColumns, setVisibleColumns] = useControlledDefaultValue(defaultVisibleColumns ?? []);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);

@@ -205,8 +205,9 @@ public class FieldValueController {
             @RequestParam(required = false) String searchValue,
             @ApiParam(value = "已选择的选项id", required = true)
             @Encrypt @RequestParam(required = false) List<Long> selected,
+            @RequestParam(required = false, defaultValue = "false") Boolean enabled,
             @ApiParam(value = "分页信息", required = true)
             @ApiIgnore PageRequest pageRequest) {
-        return new ResponseEntity<>(fieldOptionService.getOptionsPageByFieldId(organizationId, fieldId, searchValue, selected, pageRequest), HttpStatus.OK);
+        return new ResponseEntity<>(fieldOptionService.getOptionsPageByFieldId(organizationId, fieldId, searchValue, selected, enabled, pageRequest), HttpStatus.OK);
     }
 }

@@ -74,10 +74,11 @@ public interface FieldOptionService {
      * @param filedId 自定义字段id
      * @param searchValue 搜索参数值
      * @param selected 已选择选项
+     * @param enabled 是否启用
      * @param pageRequest 分页参数
      * @return 自定义字段下的选项
      */
-    Page<FieldOptionVO> getOptionsPageByFieldId(Long organizationId, Long filedId, String searchValue, List<Long> selected, PageRequest pageRequest);
+    Page<FieldOptionVO> getOptionsPageByFieldId(Long organizationId, Long filedId, String searchValue, List<Long> selected, Boolean enabled, PageRequest pageRequest);
 
     /**
      * 创建自定义字段下的选项

@@ -1,6 +1,7 @@
 import React, { useContext, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { issueCommentApi, IComment } from '@/api/IssueComment';
+import { useSize } from 'ahooks';
 import Comment from './components/comment';
 import AddComment from './components/addComment';
 import EditIssueContext from '../../stores';
@@ -17,6 +18,8 @@ interface Props {
 const Comments: React.FC<Props> = ({
   projectId, reloadIssue, disabled, outside,
 }) => {
+  const commentsRef = useRef<HTMLDivElement | null>(null);
+  const commentsSize = useSize(commentsRef);
   const addingRef = useRef<{
     adding: boolean,
     setAdding:(adding: boolean) => void
@@ -60,8 +63,9 @@ const Comments: React.FC<Props> = ({
   };
 
   const readonly = !(!disabled || (disabled && applyType === 'agile' && !outside));
+
   return (
-    <div className={styles.comments}>
+    <div className={styles.comments} ref={commentsRef}>
       <div className={styles.list}>
         {
           comments.map((comment: any) => (
@@ -81,7 +85,7 @@ const Comments: React.FC<Props> = ({
       {
         (!disabled || !readonly) && (
           <div className={styles.add}>
-            <AddComment onSubmit={handleCreateCommit} addingRef={addingRef} editingRef={editingRef} replyingRef={replyingRef} />
+            <AddComment onSubmit={handleCreateCommit} addingRef={addingRef} editingRef={editingRef} replyingRef={replyingRef} commentsHeight={commentsSize.height} />
           </div>
         )
       }

@@ -229,7 +229,7 @@ class FieldApi extends Api<FieldApi> {
     });
   }
 
-  getFieldOptions(fieldId: string, searchValue: string | undefined = '', page: number | undefined, size: number, selected?: string | string[]) {
+  getFieldOptions(fieldId: string, searchValue: string | undefined = '', page: number | undefined, size: number, selected?: string | string[], onlyEnabled = true) {
     return axios({
       method: 'get',
       url: this.isOutside ? `${this.outPrefix}/field_value/${fieldId}/options` : `${this.prefixOrgOrPro}/field_value/${fieldId}/options`,
@@ -239,6 +239,7 @@ class FieldApi extends Api<FieldApi> {
         size,
         organizationId: this.orgId,
         selected: selected ? castArray(selected).join(',') || undefined : undefined,
+        enabled: onlyEnabled,
       },
     });
   }

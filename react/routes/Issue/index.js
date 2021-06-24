@@ -90,9 +90,9 @@ const Issue = observer(({ cached, updateCache }) => {
   const refresh = useCallback((isDelete = false) => query(
     isDelete
       && tableProps.data.length === 1
-      && tableProps.total > 1
-      ? tableProps.current - 1
-      : tableProps.current,
+      && tableProps.pagination.total > 1
+      ? tableProps.pagination.current - 1
+      : tableProps.pagination.current,
   ), [query, tableProps]);
   const filterParams = useMemo(() => {
     const filterParamKeys = ['paramChoose', 'paramCurrentVersion', 'paramCurrentSprint', 'paramId',
@@ -209,7 +209,7 @@ const Issue = observer(({ cached, updateCache }) => {
     if (hasUrlFilter(filterParams)) {
       localPageCacheStore.remove('issues');
     }
-  }, [filterParams, hasUrlFilter, params]);
+  }, [filterParams, hasUrlFilter]);
   const handleCreateIssue = useCallback((issue) => {
     IssueStore.createQuestion(false);
     IssueStore.setDefaultSummary(undefined);

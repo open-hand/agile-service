@@ -220,6 +220,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
           label={name}
           style={{ width: '100%' }}
           multiple
+          onlyEnabled={false}
           {...otherComponentProps}
         />
       );

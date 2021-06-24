@@ -738,8 +738,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                         fieldIds.add(fieldId);
                     }
                 });
-        boolean belongToProgram =
-                baseFeignClient.getGroupInfoByEnableProject(organizationId, projectId).getBody() != null;
+        boolean belongToProgram;
+        if (agilePluginService == null) {
+            belongToProgram = false;
+        } else {
+            belongToProgram = baseFeignClient.getGroupInfoByEnableProject(organizationId, projectId).getBody() != null;
+        }
         List<PageFieldViewVO> requiredSystemFields = new ArrayList<>();
         List<PageFieldViewVO> requiredCustomFields = new ArrayList<>();
         createPageFields.forEach(x -> {

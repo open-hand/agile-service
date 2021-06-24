@@ -5,7 +5,8 @@ import {
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import { stores } from '@choerodon/boot';
-import { isNull, find } from 'lodash';
+import { isNull } from 'lodash';
+import isHoliday from '@/utils/holiday';
 import originMoment from 'moment';
 import { extendMoment } from 'moment-range';
 
@@ -84,13 +85,6 @@ class StartSprint extends Component {
     }
     // 是否显示非工作日
     const { workSetting } = this.props;
-    const {
-      saturdayWork,
-      sundayWork,
-      useHoliday,
-      timeZoneWorkCalendarDTOS: selectDays,
-      workHolidayCalendarDTOS: holidayRefs,
-    } = workSetting;
     const { workDates } = this.state;
     // 判断日期是否是休息日
     // 优先级如下：
@@ -99,41 +93,10 @@ class StartSprint extends Component {
     // 法定工作日
     // 周六周日是否工作
 
-    const isRestDay = (date) => {
-      // status为0代表放假，为1代表上班。
-      const sprintSetting = find(workDates, (c) => c.workDay === date.format('YYYY-MM-DD'));
-      if (sprintSetting) {
-        if (sprintSetting.status === 0) {
-          return true;
-        }
-        return false;
-      }
-      const orgSetting = find(selectDays, (c) => c.workDay === date.format('YYYY-MM-DD'));
-      if (orgSetting) {
-        if (orgSetting.status === 0) {
-          return true;
-        }
-        return false;
-      }
-      // 法定节假日
-      const holidayConfig = find(holidayRefs, (c) => c.holiday === date.format('YYYY-MM-DD'));
-      if (holidayConfig) {
-        if (holidayConfig.status === 0) {
-          return true;
-        }
-        return false;
-      }
-      const isSaturday = date.weekday() === 5;
-      const isSunday = date.weekday() === 6;
-      if (isSaturday) {
-        return !saturdayWork;
-      }
-      if (isSunday) {
-        return !sundayWork;
-      }
-
-      return false;
-    };
+    const isRestDay = (date) => isHoliday({
+      sprintSetting: workDates,
+      orgWorkCalendar: workSetting,
+    }, date);
     const range = moment.range(startDate, endDate);
     const days = Array.from(range.by('day'));
     return days.filter((date) => !isRestDay(date)).length;

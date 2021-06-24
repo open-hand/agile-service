@@ -10,6 +10,7 @@ import { find } from 'lodash';
 import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 import classNames from 'classnames';
+import moment from 'moment';
 import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
@@ -27,6 +28,7 @@ import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { useIssueSearchStore } from '@/components/issue-search';
 import FilterManage from '@/components/FilterManage';
 import { Issue, User } from '@/common/types';
+import isHoliday from '@/utils/holiday';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 import Search from './components/search';
 import GanttBar from './components/gantt-bar';
@@ -180,29 +182,10 @@ const GanttPage: React.FC = () => {
     setType(newType);
     localPageCacheStore.setItem('gantt.search.type', newType);
   }, []);
-  const isRestDay = useCallback((date: string) => {
-    if (!workCalendar) {
-      return false;
-    }
-    const weekDay = dayjs(date).weekday();
-    const day = dayjs(date).format('YYYY-MM-DD');
-    const { saturdayWork, sundayWork, timeZoneWorkCalendarDTOS } = workCalendar;
-    const unWorkDays = timeZoneWorkCalendarDTOS.map((w: any) => w.workDay);
-    const projectSetting = find(projectWorkCalendar, { workDay: day });
-    if (projectSetting) {
-      return projectSetting.status === 0;
-    }
-    if (!saturdayWork && weekDay === 6) {
-      return true;
-    }
-    if (!sundayWork && weekDay === 0) {
-      return true;
-    }
-    if (unWorkDays.includes(dayjs(date).format('YYYY-MM-DD'))) {
-      return true;
-    }
-    return false;
-  }, [projectWorkCalendar, workCalendar]);
+  const isRestDay = useCallback((date: string) => isHoliday({
+    sprintSetting: projectWorkCalendar,
+    orgWorkCalendar: workCalendar,
+  }, moment(date)), [projectWorkCalendar, workCalendar]);
   const handleClickFilterManage = () => {
     setFilterManageVisible(true);
   };

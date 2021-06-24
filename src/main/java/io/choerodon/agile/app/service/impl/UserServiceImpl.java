@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.UserService;
@@ -24,7 +25,6 @@ import java.util.*;
  */
 @Component
 public class UserServiceImpl implements UserService {
-
 
     private final BaseFeignClient baseFeignClient;
 
