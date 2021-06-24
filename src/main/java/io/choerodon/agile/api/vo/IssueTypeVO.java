@@ -65,6 +65,16 @@ public class IssueTypeVO {
 
     private String rank;
 
+    private String projectName;
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
     public String getRank() {
         return rank;
     }

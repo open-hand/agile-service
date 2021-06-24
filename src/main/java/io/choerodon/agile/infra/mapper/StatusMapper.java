@@ -1,9 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
-import io.choerodon.agile.api.vo.ProjectStatusVO;
-import io.choerodon.agile.api.vo.StatusAndTransformVO;
-import io.choerodon.agile.api.vo.StatusSearchVO;
-import io.choerodon.agile.api.vo.StatusSettingVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.StatusDTO;
 import io.choerodon.agile.infra.dto.StatusWithInfoDTO;
 import io.choerodon.mybatis.common.BaseMapper;

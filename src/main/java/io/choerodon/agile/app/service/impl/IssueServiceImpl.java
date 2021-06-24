@@ -2508,8 +2508,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public Page<IssueListFieldKVVO> pagedQueryMyReported(Long organizationId,
                                                          Long projectId,
-                                                         PageRequest pageRequest) {
-        WorkBenchIssueSearchVO workBenchIssueSearchVO = new WorkBenchIssueSearchVO();
+                                                         PageRequest pageRequest,
+                                                         WorkBenchIssueSearchVO workBenchIssueSearchVO) {
         workBenchIssueSearchVO.setType("myReported");
         return queryBackLogIssuesByPersonal(organizationId, projectId, pageRequest, workBenchIssueSearchVO);
     }
@@ -2519,6 +2519,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                                                                  Long projectId,
                                                                  PageRequest pageRequest,
                                                                  WorkBenchIssueSearchVO workBenchIssueSearchVO) {
+        EncryptionUtils.decryptSearchVO(workBenchIssueSearchVO.getSearchVO());
         if (ObjectUtils.isEmpty(organizationId)) {
             throw new CommonException("error.organizationId.iss.null");
         }
@@ -2532,7 +2533,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (CollectionUtils.isEmpty(projectIds)) {
             return new Page<>();
         }
-        Page<IssueDTO> parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryParentIssueByProjectIdsAndUserId(projectIds, userId, searchType));
+        Page<IssueDTO> parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryParentIssueByProjectIdsAndUserId(projectIds, userId, searchType, workBenchIssueSearchVO.getSearchVO()));
         List<IssueDTO> parentIssuesDTOS = parentPage.getContent();
         if (CollectionUtils.isEmpty(parentIssuesDTOS)) {
             return new Page<>();
@@ -2540,9 +2541,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         List<Long> parentIssues = parentIssuesDTOS.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
         List<IssueDTO> allIssue;
         if (Objects.equals(searchType, MY_START_BEACON)) {
-            allIssue = issueMapper.listMyStarIssuesByProjectIdsAndUserId(projectIds, parentIssues, userId);
+            allIssue = issueMapper.listMyStarIssuesByProjectIdsAndUserId(projectIds, parentIssues, userId, workBenchIssueSearchVO.getSearchVO());
         } else {
-            allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId, searchType);
+            allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId, searchType, workBenchIssueSearchVO.getSearchVO());
         }
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
         Map<Long, List<IssueTypeVO>> issueTypeDTOMap = issueTypeService.listIssueTypeMapByProjectIds(organizationId, projectIds);
@@ -2640,7 +2641,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         });
     }
 
-    private void queryUserProjects(Long organizationId, Long projectId, List<Long> projectIds, List<ProjectVO> projects, Long userId, String type) {
+    @Override
+    public void queryUserProjects(Long organizationId, Long projectId, List<Long> projectIds, List<ProjectVO> projects, Long userId, String type) {
         if (ObjectUtils.isEmpty(projectId)) {
             List<ProjectVO> projectVOS = baseFeignClient.queryOrgProjects(organizationId,userId).getBody();
             if (!CollectionUtils.isEmpty(projectVOS)) {
@@ -2665,6 +2667,24 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
+    public Page<UserDTO> pagingUserProjectUsers(PageRequest pageRequest, Long organizationId, String param) {
+        List<Long> projectIds = new ArrayList<>();
+        List<ProjectVO> projects = new ArrayList<>();
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        queryUserProjects(organizationId, null, projectIds, projects, userId, null);
+        if (CollectionUtils.isEmpty(projectIds)) {
+            return new Page<>();
+        }
+        Set<Long> userIds = issueMapper.selectUserIdsByProjectIds(projectIds);
+        AgileUserVO agileUserVO = new AgileUserVO();
+        agileUserVO.setProjectIds(new HashSet<>(projectIds));
+        agileUserVO.setUserIds(userIds);
+        agileUserVO.setOrganizationId(organizationId);
+        agileUserVO.setParam(param);
+        return baseFeignClient.agileUsersByProjectIds(0L, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
+    }
+
+    @Override
     public Page<IssueVO> pagingQueryAvailableParents(PageRequest pageRequest,
                                                      Long projectId,
                                                      String issueType,
@@ -2684,8 +2704,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public Page<IssueListFieldKVVO> pagedQueryMyAssigned(Long organizationId, Long projectId, PageRequest pageRequest) {
-        WorkBenchIssueSearchVO workBenchIssueSearchVO = new WorkBenchIssueSearchVO();
+    public Page<IssueListFieldKVVO> pagedQueryMyAssigned(Long organizationId, Long projectId, PageRequest pageRequest, WorkBenchIssueSearchVO workBenchIssueSearchVO) {
         workBenchIssueSearchVO.setType("myAssigned");
         return queryBackLogIssuesByPersonal(organizationId, projectId, pageRequest, workBenchIssueSearchVO);
     }

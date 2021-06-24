@@ -92,4 +92,8 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
     List<IssueTypeVO> selectByProjectIds(@Param("organizationId") Long organizationId,
                                          @Param("projectIds") List<Long> projectIds);
 
+    List<IssueTypeVO> queryUserProjectIssueTypes(@Param("organizationId") Long organizationId,
+                                                 @Param("projectIds") List<Long> projectIds,
+                                                 @Param("typeCodes") List<String> typeCodes,
+                                                 @Param("name") String name);
 }

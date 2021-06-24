@@ -338,4 +338,40 @@
                 AND t1.source = 'system'
         )
     </select>
+
+    <select id="queryUserProjectIssueTypes" resultType="io.choerodon.agile.api.vo.IssueTypeVO">
+        select
+            t1.id,
+            t1.name,
+            t1.organization_id,
+            t1.object_version_number,
+            t1.type_code,
+            t1.project_id,
+            t1.is_initialize as initialize,
+            t1.source
+        from fd_issue_type t1
+        where t1.organization_id = #{organizationId}
+        and t1.id in (
+            select t2.id
+            from fd_issue_type t2
+            where t2.organization_id = #{organizationId}
+            and t2.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            union
+            select t3.id
+            from fd_issue_type t3
+            where t3.organization_id = #{organizationId}
+            and t3.project_id = 0
+            and t3.source = 'system'
+        )
+        <if test="name != null and name != ''">
+            and t1.name like concat('%',#{name},'%')
+        </if>
+        and t1.type_code in
+        <foreach collection="typeCodes" item="typeCode" open="(" separator="," close=")">
+            #{typeCode}
+        </foreach>
+    </select>
 </mapper>
