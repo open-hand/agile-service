@@ -10,7 +10,6 @@ import io.choerodon.agile.api.vo.report.CustomChartDataVO;
  * 2021/06/21 16:40
  */
 public class CustomChartVO {
-    @Encrypt
     @ApiModelProperty(value = "主键id")
     private Long id;
     @ApiModelProperty(value = "自定义报表名称")

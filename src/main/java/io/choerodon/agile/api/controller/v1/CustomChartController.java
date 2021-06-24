@@ -2,7 +2,6 @@ package io.choerodon.agile.api.controller.v1;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -61,7 +60,7 @@ public class CustomChartController {
             @ApiParam(value = "项目id", required = true)
             @PathVariable("project_id") Long projectId,
             @ApiParam(value = "自定义报表id", required = true)
-            @PathVariable("custom_chart_id") @Encrypt Long customChartId,
+            @PathVariable("custom_chart_id") Long customChartId,
             @ApiParam(value = "更新参数", required = true)
             @RequestBody @Validated CustomChartUpdateVO customChartUpdate) {
         return Optional.ofNullable(customChartService.updateCustomChart(projectId, customChartId, customChartUpdate))
@@ -74,7 +73,7 @@ public class CustomChartController {
     @GetMapping("/{custom_chart_id}")
     public ResponseEntity<CustomChartVO> queryCustomChartDetail(
             @PathVariable("project_id") Long projectId,
-            @PathVariable("custom_chart_id") @Encrypt Long customChartId) {
+            @PathVariable("custom_chart_id") Long customChartId) {
         return Optional.ofNullable(customChartService.queryCustomChartDetail(projectId, customChartId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.custom.query"));
