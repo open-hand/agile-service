@@ -1224,8 +1224,8 @@ public class DataLogAspect {
             }
         }
         if (issueConvertDTO != null && field != null && !field.isEmpty()) {
-            dataLogRedisUtil.deleteByUpdateIssue(issueConvertDTO.getProjectId());
             IssueDTO originIssueDTO = issueMapper.selectByPrimaryKey(issueConvertDTO.getIssueId());
+            dataLogRedisUtil.deleteByUpdateIssue(originIssueDTO.getProjectId());
             handleIssueEpicName(field, originIssueDTO, issueConvertDTO);
             handleIssueSummary(field, originIssueDTO, issueConvertDTO);
             handleDescription(field, originIssueDTO, issueConvertDTO);
