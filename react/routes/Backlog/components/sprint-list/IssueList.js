@@ -144,16 +144,18 @@ function IssueList({ data, sprintId, sprintData }) {
               />
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0' }}>
-              <Pagination
-                total={pagination.total}
-                page={pagination.page}
-                pageSize={pagination.size}
-                onChange={handlePaginationChange}
-                showSizeChangerLabel={false}
-                showTotal={(total, range) => `显示${range[0]}-${range[1]} 共 ${total}条`}
-                showPager
-                showQuickJumper
-              />
+              {pagination.total > pagination.size ? (
+                <Pagination
+                  total={pagination.total}
+                  page={pagination.page}
+                  pageSize={pagination.size}
+                  onChange={handlePaginationChange}
+                  showSizeChangerLabel={false}
+                  showTotal={(total, range) => `显示${range[0]}-${range[1]} 共 ${total}条`}
+                  showPager
+                  showQuickJumper
+                />
+              ) : null}
             </div>
           </div>
         );
