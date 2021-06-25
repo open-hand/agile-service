@@ -77,6 +77,10 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
         label: '描述',
         value: 'description',
       });
+      options.splice(12, 0, {
+        label: '关联问题',
+        value: 'relatedIssue',
+      });
       return !isInProgram() ? options.filter((item) => item.value !== 'feature') : options;
     },
   });
