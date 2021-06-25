@@ -49,6 +49,8 @@ public class DataLogRedisUtil {
     private static final String EPIC_FIELD = "epic";
     private static final String CUSTOM_CHART = AGILE + "CustomChart";
     private static final String COMPONENT = "component";
+    private static final String FIELD_ASSIGNEE = "assignee";
+    private static final String FIELD_PRIORITY = "priority";
 
     @Autowired
     private RedisUtil redisUtil;
@@ -124,7 +126,8 @@ public class DataLogRedisUtil {
     public void deleteByHandleStatus(IssueConvertDTO issueConvertDTO, IssueDTO originIssueDTO, Boolean condition) {
         redisUtil.deleteRedisCache(new String[]{
                 CUMULATIVE_FLOW_DIAGRAM + originIssueDTO.getProjectId() + COLON + POINTER,
-                PIE_CHART + originIssueDTO.getProjectId() + COLON + FIELD_STATUS + POINTER
+                PIE_CHART + originIssueDTO.getProjectId() + COLON + FIELD_STATUS + POINTER,
+                CUSTOM_CHART + originIssueDTO.getProjectId() + COLON + POINTER
         });
         if (condition) {
             deleteEpicChartCache(issueConvertDTO.getEpicId(), originIssueDTO.getProjectId(), issueConvertDTO.getIssueId(), POINTER);
@@ -156,8 +159,11 @@ public class DataLogRedisUtil {
     public void deleteByHandleStoryPoints(IssueConvertDTO issueConvertDTO, IssueDTO originIssueDTO) {
         deleteEpicChartCache(issueConvertDTO.getEpicId(), originIssueDTO.getProjectId(), issueConvertDTO.getIssueId(), STORY_POINT);
         deleteBurnDownCache(issueConvertDTO.getSprintId(), originIssueDTO.getProjectId(), issueConvertDTO.getIssueId(), STORY_POINTS_FIELD + POINTER);
-        redisUtil.deleteRedisCache(new String[]{VELOCITY_CHART + originIssueDTO.getProjectId() + COLON + STORY_POINT,
-                BURN_DOWN_COORDINATE_BY_TYPE + originIssueDTO.getProjectId() + COLON + POINTER});
+        redisUtil.deleteRedisCache(new String[]{
+                VELOCITY_CHART + originIssueDTO.getProjectId() + COLON + STORY_POINT,
+                BURN_DOWN_COORDINATE_BY_TYPE + originIssueDTO.getProjectId() + COLON + POINTER,
+                CUSTOM_CHART + originIssueDTO.getProjectId() + COLON + POINTER
+        });
         deleteVersionCache(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), STORY_POINT);
     }
 
@@ -181,7 +187,8 @@ public class DataLogRedisUtil {
                 VELOCITY_CHART + originIssueDTO.getProjectId() + COLON + POINTER,
                 PIE_CHART + issueConvertDTO.getProjectId() + COLON + ISSUE_TYPE + POINTER,
                 PIE_CHART + issueConvertDTO.getProjectId() + COLON + FIELD_STATUS + POINTER,
-                PIE_CHART + issueConvertDTO.getProjectId() + COLON + EPIC_FIELD + POINTER
+                PIE_CHART + issueConvertDTO.getProjectId() + COLON + EPIC_FIELD + POINTER,
+                CUSTOM_CHART + issueConvertDTO.getProjectId() + COLON + POINTER
         });
     }
 
@@ -306,12 +313,12 @@ public class DataLogRedisUtil {
 
     @Async(REDIS_TASK_EXECUTOR)
     public void deleteByUpdateIssue(Long projectId) {
-        redisUtil.deleteRedisCache(new String[]{CUSTOM_CHART + projectId + COLON + POINTER});
+        deleteCustomChart(projectId);
     }
 
     @Async(REDIS_TASK_EXECUTOR)
     public void deleteByLabelDataLog(Long projectId) {
-        redisUtil.deleteRedisCache(new String[]{CUSTOM_CHART + projectId + COLON + POINTER});
+        deleteCustomChart(projectId);
     }
 
     @Async(REDIS_TASK_EXECUTOR)
@@ -323,6 +330,27 @@ public class DataLogRedisUtil {
 
     @Async(REDIS_TASK_EXECUTOR)
     public void deleteByCustomField(Long projectId) {
+        deleteCustomChart(projectId);
+    }
+
+    @Async(REDIS_TASK_EXECUTOR)
+    public void deleteCustomChart(Long projectId) {
         redisUtil.deleteRedisCache(new String[]{CUSTOM_CHART + projectId + COLON + POINTER});
+    }
+
+    @Async(REDIS_TASK_EXECUTOR)
+    public void deleteByHandleAssignee(Long projectId) {
+        redisUtil.deleteRedisCache(new String[]{
+                PIE_CHART + projectId + ':' + FIELD_ASSIGNEE + "*",
+                CUSTOM_CHART + projectId + COLON + POINTER
+        });
+    }
+
+    @Async(REDIS_TASK_EXECUTOR)
+    public void deleteByHandlePriority(Long projectId) {
+        redisUtil.deleteRedisCache(new String[]{
+                PIE_CHART + projectId + ':' + FIELD_PRIORITY + "*",
+                CUSTOM_CHART + projectId + COLON + POINTER
+        });
     }
 }

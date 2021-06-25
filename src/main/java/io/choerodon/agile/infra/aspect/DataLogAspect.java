@@ -9,6 +9,7 @@ import io.choerodon.agile.infra.annotation.DataLog;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -1225,7 +1226,6 @@ public class DataLogAspect {
         }
         if (issueConvertDTO != null && field != null && !field.isEmpty()) {
             IssueDTO originIssueDTO = issueMapper.selectByPrimaryKey(issueConvertDTO.getIssueId());
-            dataLogRedisUtil.deleteByUpdateIssue(originIssueDTO.getProjectId());
             handleIssueEpicName(field, originIssueDTO, issueConvertDTO);
             handleIssueSummary(field, originIssueDTO, issueConvertDTO);
             handleDescription(field, originIssueDTO, issueConvertDTO);
@@ -1369,6 +1369,7 @@ public class DataLogAspect {
             }
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_REPORTER, oldString, newString, oldValue, newValue);
+            dataLogRedisUtil.deleteCustomChart(originIssueDTO.getProjectId());
         }
     }
 
@@ -1389,7 +1390,7 @@ public class DataLogAspect {
             DataLogDTO dataLog = createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_ASSIGNEE, oldString, newString, oldValue, newValue);
             processRuleLogRel(issueConvertDTO, originIssueDTO, dataLog);
-            redisUtil.deleteRedisCache(new String[]{PIECHART + originIssueDTO.getProjectId() + ':' + FIELD_ASSIGNEE + "*"});
+            dataLogRedisUtil.deleteByHandleAssignee(originIssueDTO.getProjectId());
         }
     }
 
@@ -1416,7 +1417,7 @@ public class DataLogAspect {
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_PRIORITY, originPriorityVO.getName()
                     , currentPriorityVO.getName(), originIssueDTO.getPriorityId().toString(), issueConvertDTO.getPriorityId().toString());
-            redisUtil.deleteRedisCache(new String[]{PIECHART + originIssueDTO.getProjectId() + ':' + FIELD_PRIORITY + "*"});
+            dataLogRedisUtil.deleteByHandlePriority(originIssueDTO.getProjectId());
         }
     }
 
@@ -1467,6 +1468,9 @@ public class DataLogAspect {
 
     private void handleIssueSummary(List<String> field, IssueDTO originIssueDTO, IssueConvertDTO issueConvertDTO) {
         if (field.contains(SUMMARY_FIELD) && !Objects.equals(originIssueDTO.getSummary(), issueConvertDTO.getSummary())) {
+            if (IssueTypeCode.FEATURE.value().equals(originIssueDTO.getTypeCode())) {
+                dataLogRedisUtil.deleteCustomChart(originIssueDTO.getProjectId());
+            }
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     SUMMARY_FIELD, originIssueDTO.getSummary(), issueConvertDTO.getSummary(), null, null);
         }
@@ -1474,6 +1478,7 @@ public class DataLogAspect {
 
     private void handleIssueEpicName(List<String> field, IssueDTO originIssueDTO, IssueConvertDTO issueConvertDTO) {
         if (field.contains(EPIC_NAME_FIELD) && !Objects.equals(originIssueDTO.getEpicName(), issueConvertDTO.getEpicName())) {
+            dataLogRedisUtil.deleteCustomChart(originIssueDTO.getProjectId());
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_EPIC_NAME, originIssueDTO.getEpicName(), issueConvertDTO.getEpicName(), null, null);
         }

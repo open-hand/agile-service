@@ -26,6 +26,7 @@ import io.choerodon.agile.infra.dto.CustomChartDTO;
 import io.choerodon.agile.infra.mapper.CustomChartMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
+import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.core.exception.CommonException;
 
 /**
@@ -36,6 +37,10 @@ import io.choerodon.core.exception.CommonException;
 @Transactional(rollbackFor = Exception.class)
 public class CustomChartServiceImpl implements CustomChartService {
 
+    private static final String AGILE = "Agile::";
+    private static final String CUSTOM_CHART = AGILE + "CustomChart";
+    private static final String COLON = ":";
+
     @Resource
     private CustomChartMapper customChartMapper;
     @Autowired
@@ -44,6 +49,8 @@ public class CustomChartServiceImpl implements CustomChartService {
     private ModelMapper modelMapper;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private RedisUtil redisUtil;
 
     @Override
     public List<CustomChartVO> queryListByProject(Long projectId) {
@@ -79,6 +86,7 @@ public class CustomChartServiceImpl implements CustomChartService {
     public CustomChartVO updateCustomChart(Long projectId, Long customChartId, CustomChartUpdateVO customChartUpdate) {
         CustomChartDTO customChartDTO = modelMapper.map(customChartUpdate, CustomChartDTO.class);
         customChartDTO.setId(customChartId);
+        deleteCustomChartRedisById(projectId, customChartId);
         if (customChartDTO.getAnalysisField() != null && customChartDTO.getAnalysisFieldPredefined() == null) {
             throw new CommonException("error.customChart.analysisFieldPredefinedNotNull");
         }
@@ -87,6 +95,31 @@ public class CustomChartServiceImpl implements CustomChartService {
             throw new CommonException("error.CustomChart.update");
         }
         return queryById(customChartId);
+    }
+
+    private void deleteCustomChartRedisById(Long projectId, Long customChartId) {
+        CustomChartDTO customChart = queryCustomChartByProjectAndId(projectId, customChartId);
+        CustomChartSearchVO customChartSearchVO = customChartToDataSearch(customChart);
+        if (customChartSearchVO == null){
+            return;
+        }
+        redisUtil.delete(CUSTOM_CHART + projectId + COLON + customChartSearchVO);
+    }
+
+    private CustomChartSearchVO customChartToDataSearch(CustomChartDTO customChart) {
+        if (customChart == null) {
+            return null;
+        }
+        CustomChartSearchVO customChartSearchVO = modelMapper.map(customChart, CustomChartSearchVO.class);
+        if (!StringUtils.isBlank(customChart.getSearchJson())) {
+            try {
+                SearchVO searchVO = objectMapper.readValue(customChart.getSearchJson(), SearchVO.class);
+                customChartSearchVO.setSearchVO(searchVO);
+            } catch (IOException ioException) {
+                throw new CommonException("error.customChart.searchJson.failed");
+            }
+        }
+        return customChartSearchVO;
     }
 
     private void validAndSetJson(CustomChartDTO customChartDTO) {
@@ -108,20 +141,13 @@ public class CustomChartServiceImpl implements CustomChartService {
         if (customChart == null) {
             return null;
         }
-
+        CustomChartSearchVO customChartSearchVO = customChartToDataSearch(customChart);
+        CustomChartDataVO customChartData = reportService.queryCustomChartData(customChartSearchVO, projectId, organizationId);
         CustomChartVO result = modelMapper.map(customChart, CustomChartVO.class);
-        CustomChartSearchVO customChartSearchVO = modelMapper.map(customChart, CustomChartSearchVO.class);
+        result.setCustomChartData(customChartData);
         if (!StringUtils.isBlank(result.getSearchJson())) {
-            try {
-                SearchVO searchVO = objectMapper.readValue(result.getSearchJson(), SearchVO.class);
-                customChartSearchVO.setSearchVO(searchVO);
-            } catch (IOException ioException) {
-                throw new CommonException("error.customChart.searchJson.failed");
-            }
             result.setSearchJson(EncryptionUtils.handlerPersonFilterJson(result.getSearchJson(), true));
         }
-        CustomChartDataVO customChartData = reportService.queryCustomChartData(customChartSearchVO, projectId, organizationId);
-        result.setCustomChartData(customChartData);
         return result;
     }
 
@@ -135,6 +161,7 @@ public class CustomChartServiceImpl implements CustomChartService {
 
     @Override
     public void deleteCustomChartById(Long customChartId, Long projectId) {
+        deleteCustomChartRedisById(projectId, customChartId);
         CustomChartDTO customChartDTO = new CustomChartDTO();
         customChartDTO.setProjectId(projectId);
         customChartDTO.setId(customChartId);
