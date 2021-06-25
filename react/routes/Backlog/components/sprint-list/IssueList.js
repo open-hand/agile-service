@@ -50,7 +50,7 @@ function IssueList({ data, sprintId, sprintData }) {
       return ISSUE_HEIGHT;
     }
     const isExpand = BacklogStore.isExpand(issue.issueId);
-    return isExpand ? ISSUE_HEIGHT * 2 : ISSUE_HEIGHT;
+    return issue.children && isExpand ? ISSUE_HEIGHT * (issue.children.length + 1) : ISSUE_HEIGHT;
   });
   const { pagination, loading } = sprintData;
   const handlePaginationChange = usePersistFn((page, size) => {

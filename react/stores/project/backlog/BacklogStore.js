@@ -339,7 +339,7 @@ class BacklogStore {
         expand: !!(previousExpand.get(sprint.sprintId.toString()) ?? index === 0),
         pagination: previousPagination.get(sprint.sprintId.toString()) ?? {
           page: 1,
-          size: 10,
+          size: 300,
           total: 0,
         },
         // 是否加载过第一次，用了判断展开需不需要加载
@@ -1331,41 +1331,6 @@ class BacklogStore {
     this.defaultEpicName = data;
   }
 
-  dataSetMap = observable.map();
-
-  @action
-  initDataSetMap(sprintData) {
-    sprintData.forEach((sprint) => {
-      this.dataSetMap.set(sprint.sprintId, new DataSet({
-        autoQuery: false,
-        primaryKey: 'issueId',
-        modifiedCheck: false,
-        parentField: 'parentId',
-        expandField: 'expand',
-        idField: 'issueId',
-        paging: 'server',
-        pageSize: 300,
-        transport: {
-          read: ({ params, data }) => issueApiConfig.loadIssues(params.page, params.size, undefined, {
-            contents: data.content ? [data.content] : undefined,
-            advancedSearchArgs: {
-              statusId: data.status,
-              priorityId: data.priority,
-              issueTypeId: data.issueType,
-            },
-            otherArgs: {
-              assigneeId: data.assignee,
-              sprint: data.sprint,
-            },
-            searchArgs: {
-              tree: true,
-            },
-          }),
-        },
-      }));
-    });
-  }
-
   initSingleSprint(sprintData) {
     sprintData.forEach((sprint) => {
       if (sprint.expand) {
@@ -1396,10 +1361,6 @@ class BacklogStore {
     sprint.loaded = true;
   }
 
-  getDataSet(sprintId) {
-    return this.dataSetMap.get(sprintId);
-  }
-
   getTargetSprint(sprintId) {
     const sprint = find(this.sprintData, { sprintId });
     return sprint;
@@ -1407,7 +1368,9 @@ class BacklogStore {
 
   @action updatePagination(sprintId, pagination) {
     const sprint = find(this.sprintData, { sprintId });
-    Object.assign(sprint.pagination, pagination);
+    if (sprint) {
+      Object.assign(sprint.pagination, pagination);
+    }
   }
 
   @action getPagination(sprintId, pagination) {
