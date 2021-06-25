@@ -199,7 +199,7 @@ public class StatusServiceImpl implements StatusService {
     }
 
     @Override
-    public Page<StatusVO> queryUserProjectStatus(PageRequest pageRequest, Long organizationId, String type, String name) {
+    public Page<StatusVO> queryUserProjectStatus(PageRequest pageRequest, Long organizationId, String type) {
         List<Long> projectIds = new ArrayList<>();
         List<ProjectVO> projects = new ArrayList<>();
         Long userId = DetailsHelper.getUserDetails().getUserId();
