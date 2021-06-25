@@ -18,7 +18,7 @@ const GanttOperation: React.FC = () => {
   }, [store]);
   return (
     <div style={{
-      display: 'flex', flexShrink: 0, alignItems: 'flex-end', paddingBottom: 20, marginLeft: 'auto',
+      display: 'flex', flexShrink: 0, alignItems: 'flex-end', paddingBottom: 17, marginLeft: 'auto',
     }}
     >
       <Button
@@ -60,6 +60,46 @@ const GanttOperation: React.FC = () => {
           <Icon type="arrow_drop_down" style={{ marginTop: -4 }} />
         </Button>
       </Dropdown>
+      <div style={{
+        marginLeft: 18, display: 'flex', alignItems: 'center', marginBottom: 5,
+      }}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          version="1.1"
+          width={36}
+          height={16}
+        >
+          <defs>
+            <pattern
+              id="repeat"
+              width="4.5"
+              height="10"
+              patternUnits="userSpaceOnUse"
+              patternTransform="rotate(70 50 50)"
+            >
+              <line stroke="#D9E6F2" strokeWidth="1px" y2="10" />
+            </pattern>
+          </defs>
+          <g stroke="#D9E6F2">
+            <rect
+              fill="url(#repeat)"
+              opacity="0.5"
+              strokeWidth="2"
+              x={0}
+              y={0}
+              width={36}
+              height={16}
+            />
+          </g>
+        </svg>
+        <span style={{
+          color: 'var(--text-color3)', fontSize: '12px', marginLeft: 4,
+        }}
+        >
+          节假日
+        </span>
+      </div>
     </div>
   );
 };
