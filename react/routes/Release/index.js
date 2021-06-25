@@ -3,10 +3,10 @@ import {
   Route,
   Switch,
 } from 'react-router-dom';
-import { asyncRouter, nomatch } from '@choerodon/boot';
+import { nomatch } from '@choerodon/boot';
 import { PermissionRoute } from '@choerodon/master';
 
-const ReleaseHome = asyncRouter(() => (import('./ReleaseHome')));
+const ReleaseHome = React.lazy(() => (import('./ReleaseHome')));
 
 const ReleaseIndex = ({ match }) => (
   <Switch>

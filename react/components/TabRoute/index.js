@@ -4,7 +4,7 @@ import {
 } from 'react-router-dom';
 import queryString from 'query-string';
 import { Tabs } from 'choerodon-ui';
-import { Content, nomatch } from '@choerodon/boot';
+import { Contentnomatch } from '@choerodon/boot';
 
 const { TabPane } = Tabs;
 const RouteContext = createContext();

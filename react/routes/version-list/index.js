@@ -3,13 +3,13 @@ import {
   withRouter,
 } from 'react-router-dom';
 import {
-  asyncRouter, PageWrap, PageTab, Permission,
+  PageWrap, PageTab, Permission,
 } from '@choerodon/boot';
 import LINK_URL from '@/constants/LINK_URL';
 import { mount, has } from '@choerodon/inject';
 import useHasDevops from '@/hooks/useHasDevops';
 
-const Release = withRouter(asyncRouter(() => import('../Release')));
+const Release = withRouter(React.lazy(() => import('../Release')));
 const Publish = mount('agile:PublishVersion');
 const VersionList = ({ match }) => {
   const hasDevops = useHasDevops();
