@@ -71,7 +71,7 @@ public class WorkBenchController {
         return ResponseEntity.ok(issueService.pagedQueryMyAssigned(organizationId, projectId, pageRequest, workBenchIssueSearchVO));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation(value = "分页查询权限项目下状态列表")
     @GetMapping("/status")
     public ResponseEntity<Page<StatusVO>> queryUserProjectStatus(@ApiIgnore
@@ -85,7 +85,7 @@ public class WorkBenchController {
                 .orElseThrow(() -> new CommonException("error.statusList.get"));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("查询项目所有经办人")
     @GetMapping(value = "/users")
     public ResponseEntity<Page<UserDTO>> pagingUserProjectUsers(@ApiIgnore
