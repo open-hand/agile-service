@@ -1407,7 +1407,9 @@ class BacklogStore {
 
   @action updatePagination(sprintId, pagination) {
     const sprint = find(this.sprintData, { sprintId });
-    Object.assign(sprint.pagination, pagination);
+    if (sprint) {
+      Object.assign(sprint.pagination, pagination);
+    }
   }
 
   @action getPagination(sprintId, pagination) {
