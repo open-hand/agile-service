@@ -1,12 +1,9 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import BacklogStore from '@/stores/project/backlog/BacklogStore';
 
 function SprintVisibleIssue({
-  data: { sprintId },
+  data: { issueCount },
 }) {
-  const issueList = BacklogStore.getIssueListBySprintId(sprintId);
-  const issueCount = issueList.length || 0;
   return (
     <div style={{ color: 'var(--text-color3)', marginLeft: '0.26rem' }}>
       {`${issueCount}个问题可见`}

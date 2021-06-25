@@ -7,13 +7,12 @@ import SprintHeader from './SprintHeader';
 function Sprint({ data }) {
   const { sprintId, expand } = data;
   const issueList = BacklogStore.getIssueListBySprintId(sprintId);
-  const dataSet = BacklogStore.getDataSet(sprintId);
   return (
     <div style={{ width: '100%' }}>
       <SprintHeader data={data} />
       {expand && (
         <>
-          {dataSet && <IssueList sprintData={data} dataSet={dataSet} data={issueList} sprintId={sprintId} />}
+          <IssueList sprintData={data} data={issueList} sprintId={sprintId} />
         </>
       )}
     </div>

@@ -3,7 +3,7 @@ import {
   observable, action, computed, toJS,
 } from 'mobx';
 import {
-  sortBy, find, uniq, intersection,
+  sortBy, find, uniq, intersection, pick,
 } from 'lodash';
 import { store } from '@choerodon/boot';
 import { Modal, DataSet } from 'choerodon-ui/pro';
@@ -314,41 +314,48 @@ class BacklogStore {
     this.selectedSprintId = data;
   }
 
-  @action setSprintData({ backlogData, sprintData }) {
-    this.issueMap.set('0', backlogData.backLogIssue ? backlogData.backLogIssue : []);
-    const { backLogIssue, backlogIssueCount } = backlogData;
+  @action
+  async updateSprintInfo() {
+    const sprintData = await this.axiosGetSprint();
+    this.sprintData.forEach(((s) => {
+      const sprint = find(sprintData, (a) => String(a.sprintId) === String(s.sprintId));
+      if (sprint) {
+        Object.assign(s, pick(sprint, ['issueCount', 'assigneeIssues']));
+      }
+    }));
+  }
+
+  @action setSprintData(sprintData) {
     const previousExpand = new Map(this.sprintData.map((s) => ([s.sprintId.toString(), s.expand])));
-    this.sprintData = sprintData.map((sprint) => {
-      const { issueSearchVOList } = sprint;
-      this.issueMap.set(sprint.sprintId.toString(), issueSearchVOList);
+    const previousPagination = new Map(this.sprintData.map((s) => ([s.sprintId.toString(), s.pagination])));
+    this.sprintData = sprintData.map((sprint, index) => {
+      if (!this.issueMap.has(sprint.sprintId.toString())) {
+        this.issueMap.set(sprint.sprintId.toString(), []);
+      }
+      const isBacklog = String(sprint.sprintId) === '0';
       // 这里只保留几个字段，省内存
       return {
         ...sprint,
-        // issueSearchVOList: null,
-        type: 'sprint',
-        sprintType: sprint.type, // 冲刺类型 用于辨别ip冲刺
-        expand: previousExpand.get(sprint.sprintId.toString()) ?? true,
-        pagination: {
+        expand: !!(previousExpand.get(sprint.sprintId.toString()) ?? index === 0),
+        pagination: previousPagination.get(sprint.sprintId.toString()) ?? {
           page: 1,
           size: 10,
-          total: 100,
+          total: 0,
         },
-        filter: {},
+        // 是否加载过第一次，用了判断展开需不需要加载
+        loaded: false,
+        loading: false,
+        ...isBacklog ? {
+          type: 'backlog',
+          sprintName: '待办事项',
+          sprintId: 0,
+        } : {
+          type: 'sprint',
+          sprintType: sprint.type, // 冲刺类型 用于辨别ip冲刺
+        },
       };
-    }).concat({
-      type: 'backlog',
-      sprintId: 0,
-      sprintName: '待办事项',
-      expand: previousExpand.get('0') ?? true,
-      issueCount: backlogIssueCount,
-      issueSearchVOList: backLogIssue,
-      pagination: {
-        page: 1,
-        size: 10,
-      },
-      filter: {},
     });
-    this.initDataSetMap(sprintData);
+    this.initSingleSprint(this.sprintData);
     this.spinIf = false;
   }
 
@@ -387,6 +394,7 @@ class BacklogStore {
 
   @action setFilterSprintAssign(sprintId, assigneeId) {
     this.filterSprintAssign.set(sprintId, assigneeId);
+    this.refreshSprint(sprintId);
   }
 
   @observable filterSprintAssignUser = observable.map();
@@ -398,9 +406,10 @@ class BacklogStore {
   @action clearFilterSprintAssign(sprintId) {
     this.filterSprintAssign.delete(sprintId);
     this.filterSprintAssignUser.delete(sprintId);
+    this.refreshSprint(sprintId);
   }
 
-  axiosGetSprint = () => sprintApi.getSprintAndIssues(this.quickFilters, this.assigneeFilterIds, this.filter)
+  axiosGetSprint = () => sprintApi.getBacklogSprintsInfo(this.filter)
 
   @computed get getIssueTypes() {
     return this.issueTypes;
@@ -422,7 +431,7 @@ class BacklogStore {
     return this.spinIf;
   }
 
-  @action initBacklogData(issueTypesData, priorityArrData, { backlogData, sprintData }) {
+  @action initBacklogData(issueTypesData, priorityArrData, sprintData) {
     this.issueCantDrag = false;
     this.onBlurClick();
     if (issueTypesData && !issueTypesData.failed) {
@@ -431,7 +440,7 @@ class BacklogStore {
     if (priorityArrData && !priorityArrData.failed) {
       this.defaultPriority = priorityArrData;
     }
-    this.setSprintData({ backlogData, sprintData });
+    this.setSprintData(sprintData);
 
     this.hasActiveSprint = Boolean(sprintData.find((element) => element.statusCode === 'started'));
     this.spinIf = false;
@@ -480,17 +489,13 @@ class BacklogStore {
   @action dealWithShift(data, currentIndex, sprintId) {
     const [startIndex, endIndex] = this.checkStartAndEnd(this.prevClickedIssue.index, currentIndex);
 
-    const filterAssignId = this.filterSprintAssign.get(sprintId);
-
     for (let i = startIndex; i <= endIndex; i += 1) {
       // if (this.whichVisible === 'feature' && data[i].issueTypeVO.typeCode === 'story') {
       // this.multiSelected.set(data[i].issueId, data[i]);
       // } else {
       // (issue) => String(issue.assigneeId) === String(filterAssignId)
       // 有过滤，则只选过滤后的问题
-      if (!filterAssignId || String(data[i].assigneeId) === String(filterAssignId)) {
-        this.multiSelected.set(data[i].issueId, data[i]);
-      }
+      this.multiSelected.set(data[i].issueId, data[i]);
       // }
     }
   }
@@ -595,16 +600,7 @@ class BacklogStore {
   }
 
   @computed get getIssueMap() {
-    const that = this;
-    return {
-      get(sprintId) {
-        const filterAssignId = that.filterSprintAssign.get(sprintId);
-        if (filterAssignId) {
-          return that.issueMap.get(sprintId) ? that.issueMap.get(sprintId).filter((issue) => issue.assigneeId === filterAssignId) : [];
-        }
-        return that.issueMap.get(sprintId);
-      },
-    };
+    return this.issueMap;
   }
 
   getModifiedArr = (dragItem, type) => {
@@ -670,9 +666,28 @@ class BacklogStore {
       issueIds: modifiedArr,
       outsetIssueId: prevIssue ? prevIssue.issueId : 0,
       rankIndex: destinationId * 1 === 0 || (destinationId === sourceId && destinationId !== 0),
-    }).then(this.axiosGetSprint).then((res) => {
-      this.setSprintData(res);
-      this.spinIf = false;
+    }).then((res) => {
+      // 先刷新冲刺信息
+      this.updateSprintInfo().then(() => {
+        // 拖动完刷新
+        // 如果是同一个冲刺，当前页刷新就行
+        if (sourceId === destinationId) {
+          this.refreshSprint(sourceId, false);
+        } else {
+          // 如果是不同冲刺，那么有两种情况
+          const sourceCount = this.issueMap.get(sourceId).length;
+          // 如果空了，分页减一
+          if (sourceCount === 0) {
+            const pagination = this.getPagination(sourceId);
+            this.updatePagination(sourceId, {
+              // 最小为1
+              page: Math.max(pagination.page - 1, 1),
+            });
+            this.refreshSprint(sourceId, false);
+          }
+        }
+        this.spinIf = false;
+      });
     });
   }
 
@@ -965,19 +980,22 @@ class BacklogStore {
   @action expandSprint(sprintId, expand) {
     const sprint = find(this.sprintData, { sprintId });
     sprint.expand = expand;
+    if (expand && !sprint.loaded) {
+      this.refreshSprint(sprintId);
+    }
   }
 
   /**
    * 加载选择快速搜索的冲刺数据
    */
   getSprint = async (setPiIdIf) => {
-    const [issueTypes, priorityArr, backlogData] = await Promise.all([
+    const [issueTypes, priorityArr, sprintData] = await Promise.all([
       issueTypeApi.loadAllWithStateMachineId(),
       priorityApi.getDefaultByProject(),
       this.axiosGetSprint(),
     ]);
-    await this.getPlanPi(backlogData.sprintData, setPiIdIf);
-    this.initBacklogData(issueTypes, priorityArr, backlogData);
+    await this.getPlanPi(sprintData, setPiIdIf);
+    this.initBacklogData(issueTypes, priorityArr, sprintData);
   };
 
   getPlanPi = async (sprintData = this.sprintData, setPiIdIf = true) => {
@@ -1160,8 +1178,7 @@ class BacklogStore {
 
   getIssueListBySprintId(sprintId) {
     const issueList = this.issueMap.get(String(sprintId));
-    const filterAssignId = this.filterSprintAssign.get(sprintId);
-    return filterAssignId ? issueList.filter((issue) => String(issue.assigneeId) === String(filterAssignId)) : issueList;
+    return issueList;
   }
 
   @observable showPlanSprint = true;
@@ -1316,7 +1333,6 @@ class BacklogStore {
   @action
   initDataSetMap(sprintData) {
     sprintData.forEach((sprint) => {
-      const { issueSearchVOList } = sprint;
       this.dataSetMap.set(sprint.sprintId, new DataSet({
         autoQuery: false,
         primaryKey: 'issueId',
@@ -1325,7 +1341,6 @@ class BacklogStore {
         expandField: 'expand',
         idField: 'issueId',
         paging: 'server',
-        // data: issueSearchVOList,
         pageSize: 300,
         transport: {
           read: ({ params, data }) => issueApiConfig.loadIssues(params.page, params.size, undefined, {
@@ -1348,8 +1363,43 @@ class BacklogStore {
     });
   }
 
+  initSingleSprint(sprintData) {
+    sprintData.forEach((sprint) => {
+      if (sprint.expand) {
+        this.refreshSprint(sprint.sprintId);
+      }
+    });
+  }
+
+  @action
+  async refreshSprint(sprintId, resetPage = true) {
+    const pagination = this.getPagination(sprintId);
+    const sprint = this.getTargetSprint(sprintId);
+    sprint.loading = true;
+    const { list: issueSearchVOList, number, total } = await sprintApi.getIssuesBySprintId(sprintId, {
+      advancedSearchArgs: {
+        ...this.filter.advancedSearchArgs,
+        assigneeFilterIds: [this.filterSprintAssign.get(sprintId)].filter(Boolean),
+      },
+    },
+    resetPage ? 1 : pagination.page,
+    pagination.size);
+    this.updatePagination(sprintId, {
+      total,
+      page: number + 1,
+    });
+    this.issueMap.set(sprintId.toString(), issueSearchVOList);
+    sprint.loading = false;
+    sprint.loaded = true;
+  }
+
   getDataSet(sprintId) {
     return this.dataSetMap.get(sprintId);
+  }
+
+  getTargetSprint(sprintId) {
+    const sprint = find(this.sprintData, { sprintId });
+    return sprint;
   }
 
   @action updatePagination(sprintId, pagination) {
@@ -1358,7 +1408,8 @@ class BacklogStore {
   }
 
   @action getPagination(sprintId, pagination) {
-    return this.sprintPageFilterMap.get(sprintId).pagination;
+    const sprint = find(this.sprintData, { sprintId });
+    return sprint.pagination;
   }
 }
 

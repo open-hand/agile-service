@@ -40,36 +40,46 @@ function getStyle({ draggableStyle, virtualStyle, isDragging }) {
   return combined;
 }
 const Item = observer(({
-  issue, draggingNum, selected, sprintId, onExpandChange, index,
+  issue,
+  isDragging,
+  isExpand,
+  draggingNum,
+  sprintId,
+  onExpandClick,
+  index,
+  level = 0,
+  ...otherProps
 }) => {
   const { isShowFeature } = useIsInProgram(); // 由后端判断是否显示特性
-  const { estimatedEndTime, statusVO, children } = issue;
+  const {
+    estimatedEndTime, statusVO, children, issueId,
+  } = issue;
   let delayDays = 0;
   if (estimatedEndTime) {
     delayDays = moment().diff(moment(estimatedEndTime), 'days', true);
   }
-  const isExpand = BacklogStore.isExpand(issue.issueId);
-  const handleClick = usePersistFn((e) => {
-    e.stopPropagation();
-    BacklogStore.toggle(issue.issueId);
-    onExpandChange && onExpandChange(index);
-  });
+  const selected = BacklogStore.getMultiSelected && BacklogStore.getMultiSelected.get(issueId);
   return (
     <div
       role="none"
       style={{
         height: ISSUE_HEIGHT,
+        paddingLeft: 30 + level * 15,
       }}
       className={`${prefix} ${selected ? `${prefix}-selected` : ''}`}
       onClick={(e) => { BacklogStore.handleIssueClick(e, issue, String(sprintId)); }}
+      {...otherProps}
     >
       {draggingNum && (<DraggingNum num={draggingNum} />)}
-      {/* {children && children.length > 0 ? <Icon type="baseline-arrow_right" /> : null} */}
-      {<Icon
-        type={isExpand ? 'baseline-arrow_drop_down' : 'baseline-arrow_right'}
-        onClick={handleClick}
-        style={{ cursor: 'pointer' }}
-      />}
+      {!isDragging && children && children.length > 0 ? (
+        <Icon
+          type={isExpand ? 'baseline-arrow_drop_down' : 'baseline-arrow_right'}
+          onClick={onExpandClick}
+          style={{
+            cursor: 'pointer', position: 'absolute', left: 7, fontSize: 25,
+          }}
+        />
+      ) : null}
       <div
         className={`${prefix}-left`}
       >
@@ -166,11 +176,15 @@ const Item = observer(({
 });
 
 function IssueItem({
-  provided, style, issue = {}, isDragging, sprintId, onExpandChange, index,
+  provided, style, issue, isDragging, sprintId, onExpandChange, index,
 }) {
-  const selected = BacklogStore.getMultiSelected && BacklogStore.getMultiSelected.get(issue.issueId);
   const draggingNum = BacklogStore.getIsDragging === issue.issueId && BacklogStore.getMultiSelected.size > 0 ? BacklogStore.getMultiSelected.size : undefined;
   const isExpand = BacklogStore.isExpand(issue.issueId);
+  const handleExpandClick = usePersistFn((e) => {
+    e.stopPropagation();
+    BacklogStore.toggle(issue.issueId);
+    onExpandChange && onExpandChange(index);
+  });
   return (
     <div
       ref={provided.innerRef}
@@ -182,21 +196,25 @@ function IssueItem({
         isDragging,
       })}
     >
+
       <Item
         index={index}
-        onExpandChange={onExpandChange}
         issue={issue}
-        selected={selected}
+        isDragging={isDragging}
+        isExpand={isExpand}
+        onExpandClick={handleExpandClick}
         sprintId={sprintId}
         draggingNum={draggingNum}
       />
       {isExpand && !isDragging && (
-      <Item
-        issue={issue}
-        selected={selected}
-        sprintId={sprintId}
-        draggingNum={draggingNum}
-      />
+        issue.children.map((child) => (
+          <Item
+            key={child.issueId}
+            issue={child}
+            sprintId={sprintId}
+            level={1}
+          />
+        ))
       )}
     </div>
   );
