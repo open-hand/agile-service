@@ -73,7 +73,6 @@ public class WorkBenchController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "分页查询权限项目下状态列表")
-    @CustomPageRequest
     @GetMapping("/status")
     public ResponseEntity<Page<StatusVO>> queryUserProjectStatus(@ApiIgnore
                                                                  @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
@@ -86,7 +85,6 @@ public class WorkBenchController {
                 .orElseThrow(() -> new CommonException("error.statusList.get"));
     }
 
-    @CustomPageRequest
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询项目所有经办人")
     @GetMapping(value = "/users")
