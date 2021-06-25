@@ -6,10 +6,10 @@ import {
   Route,
   Switch,
 } from 'react-router-dom';
-import { asyncRouter, nomatch } from '@choerodon/boot';
+import { nomatch } from '@choerodon/boot';
 import { PermissionRoute } from '@choerodon/master';
 
-const issueHome = asyncRouter(() => (import('./index')));
+const issueHome = React.lazy(() => (import('./index')));
 
 const IssueIndex = ({ match }) => (
   <Switch>

@@ -4,9 +4,9 @@ import {
   Switch,
 } from 'react-router-dom';
 import { PermissionRoute } from '@choerodon/master';
-import { asyncRouter, nomatch } from '@choerodon/boot';
+import { nomatch } from '@choerodon/boot';
 
-const IssueTypeList = asyncRouter(() => import('./issueTypeList'));
+const IssueTypeList = React.lazy(() => import('./issueTypeList'));
 
 const IssueTypeIndex = ({ match }) => (
   <Switch>

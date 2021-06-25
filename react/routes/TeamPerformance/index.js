@@ -3,9 +3,9 @@ import {
   Route,
   Switch,
 } from 'react-router-dom';
-import { asyncRouter, nomatch } from '@choerodon/boot';
+import { nomatch } from '@choerodon/boot';
 
-const TeamPerformanceIndex = asyncRouter(() => (import('./TeamPerformanceIndex')));
+const TeamPerformanceIndex = React.lazy(() => (import('./TeamPerformanceIndex')));
 
 const ReleaseIndex = ({ match }) => (
   <Switch>

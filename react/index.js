@@ -5,7 +5,7 @@ import {
 } from 'react-router-dom';
 import { ModalContainer } from 'choerodon-ui/pro';
 import {
-  asyncLocaleProvider, stores, nomatch, Charts,
+  asyncLocaleProvider, storesnomatch, Charts,
 } from '@choerodon/boot';
 import 'moment/locale/zh-cn';
 import 'moment/locale/en-nz';

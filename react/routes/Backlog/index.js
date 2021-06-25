@@ -3,10 +3,10 @@ import {
   Route,
   Switch,
 } from 'react-router-dom';
-import { asyncRouter, nomatch } from '@choerodon/boot';
+import { nomatch } from '@choerodon/boot';
 import { PermissionRoute } from '@choerodon/master';
 
-const BacklogHome = asyncRouter(() => (import('./BacklogHome')), () => import('../../stores/project/backlog/BacklogStore'));
+const BacklogHome = React.lazy(() => (import('./BacklogHome')));
 
 const BacklogIndex = ({ match }) => (
   <Switch>

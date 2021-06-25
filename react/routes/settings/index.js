@@ -3,9 +3,9 @@ import {
   Route,
   Switch,
 } from 'react-router-dom';
-import { asyncRouter, nomatch } from '@choerodon/boot';
+import { nomatch } from '@choerodon/boot';
 
-const SettingsIndex = asyncRouter(() => import('./SettingsIndex'));
+const SettingsIndex = React.lazy(() => import('./SettingsIndex'));
 
 class ProjectIndex extends React.Component {
   render() {

@@ -3,11 +3,11 @@ import {
   Route,
   Switch,
 } from 'react-router-dom';
-import { asyncRouter, nomatch } from '@choerodon/boot';
+import { nomatch } from '@choerodon/boot';
 import { PermissionRoute } from '@choerodon/master';
 
-const StoryMapHome = asyncRouter(() => (import('./StoryMapHome')));
-// const StoryMapSetting = asyncRouter(() => (import('./StoryMapSetting')));
+const StoryMapHome = React.lazy(() => (import('./StoryMapHome')));
+// const StoryMapSetting = React.lazy(() => (import('./StoryMapSetting')));
 
 const StoryMapIndex = ({ match }) => (
   <Switch>
