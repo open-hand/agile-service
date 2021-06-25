@@ -103,6 +103,8 @@ public class BoardServiceImpl implements BoardService {
     private StarBeaconMapper starBeaconMapper;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private LinkIssueStatusLinkageService linkIssueStatusLinkageService;
 
     @Override
     public void create(Long projectId, String boardName) {
@@ -571,6 +573,7 @@ public class BoardServiceImpl implements BoardService {
         try {
             statusFieldSettingService.handlerSettingToUpdateIssue(projectId,issueId);
             transformFlag = statusLinkageService.updateParentStatus(projectId,issueId,SchemeApplyType.AGILE);
+            linkIssueStatusLinkageService.updateLinkIssueStatus(projectId, issueId, SchemeApplyType.AGILE);
         }
         catch (Exception e) {
             stateMachineClientService.cleanInstanceCache(projectId,issueId,SchemeApplyType.AGILE);
