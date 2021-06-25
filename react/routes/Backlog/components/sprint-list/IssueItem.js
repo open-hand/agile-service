@@ -59,6 +59,7 @@ const Item = observer(({
     delayDays = moment().diff(moment(estimatedEndTime), 'days', true);
   }
   const selected = BacklogStore.getMultiSelected && BacklogStore.getMultiSelected.get(issueId);
+  const isSubIssue = level > 0;
   return (
     <div
       role="none"
@@ -67,7 +68,7 @@ const Item = observer(({
         paddingLeft: 30 + level * 15,
       }}
       className={`${prefix} ${selected ? `${prefix}-selected` : ''}`}
-      onClick={(e) => { BacklogStore.handleIssueClick(e, issue, String(sprintId)); }}
+      onClick={(e) => { BacklogStore.handleIssueClick(e, issue, String(sprintId), isSubIssue); }}
       {...otherProps}
     >
       {draggingNum && (<DraggingNum num={draggingNum} />)}

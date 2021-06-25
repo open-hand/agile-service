@@ -521,15 +521,18 @@ class BacklogStore {
     };
   }
 
-  @action clickedOnce(sprintId, currentClick, hasExtraKey) {
+  @action clickedOnce(sprintId, currentClick, hasExtraKey, isSubIssue) {
     const setData = () => {
-      const index = this.issueMap.get(sprintId.toString()).findIndex((issue) => issue.issueId === currentClick.issueId);
-      this.multiSelected = observable.map();
-      this.multiSelected.set(currentClick.issueId, currentClick);
-      this.prevClickedIssue = {
-        ...currentClick,
-        index,
-      };
+      if (!isSubIssue) {
+        const index = this.issueMap.get(sprintId.toString()).findIndex((issue) => issue.issueId === currentClick.issueId);
+        this.multiSelected = observable.map();
+        this.multiSelected.set(currentClick.issueId, currentClick);
+        this.prevClickedIssue = {
+          ...currentClick,
+          index,
+        };
+      }
+
       if (!hasExtraKey) {
         this.setClickIssueDetail(currentClick, false);
       }
@@ -1108,15 +1111,19 @@ class BacklogStore {
     }, sprintId);
   }
 
-  handleIssueClick(e, item, sprintId) {
+  handleIssueClick(e, item, sprintId, isSubIssue) {
     e.stopPropagation();
     if (!(e.shiftKey && (e.ctrlKey || e.metaKey))) {
       if (e.shiftKey) {
-        this.dealWithMultiSelect(sprintId, item, 'shift');
+        if (!isSubIssue) {
+          this.dealWithMultiSelect(sprintId, item, 'shift');
+        }
       } else if (e.ctrlKey || e.metaKey) {
-        this.dealWithMultiSelect(sprintId, item, 'ctrl');
+        if (!isSubIssue) {
+          this.dealWithMultiSelect(sprintId, item, 'ctrl');
+        }
       } else {
-        this.clickedOnce(sprintId, item, e.shiftKey || e.ctrlKey || e.metaKey);
+        this.clickedOnce(sprintId, item, e.shiftKey || e.ctrlKey || e.metaKey, isSubIssue);
       }
     }
   }
