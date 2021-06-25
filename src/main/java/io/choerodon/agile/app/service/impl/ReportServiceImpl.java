@@ -1487,6 +1487,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    @Cacheable(cacheNames = AGILE, key = "'CustomChart' + #projectId + ':' + #customChartSearchVO.toString()")
     public CustomChartDataVO queryCustomChartData(CustomChartSearchVO customChartSearchVO, Long projectId, Long organizationId) {
         List<CustomChartPointVO> pointList = queryPoint(customChartSearchVO, projectId, organizationId);
         CustomChartDataVO customChartDataVO = new CustomChartDataVO();

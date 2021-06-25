@@ -43,6 +43,7 @@ public class IssueComponentServiceImpl implements IssueComponentService {
 
     private static final String AGILE = "Agile:";
     private static final String PIECHART = AGILE + "PieChart";
+    private static final String CUSTOM_CHART = AGILE + "CustomChart";
     private static final String CPMPONENT = "component";
 
     @Autowired
@@ -249,7 +250,10 @@ public class IssueComponentServiceImpl implements IssueComponentService {
         if (issueComponentMapper.updateByPrimaryKeySelective(issueComponentDTO) != 1) {
             throw new CommonException("error.scrum_issue_component.update");
         }
-        redisUtil.deleteRedisCache(new String[]{PIECHART + issueComponentDTO.getProjectId() + ':' + CPMPONENT + "*"});
+        redisUtil.deleteRedisCache(new String[]{
+                PIECHART + issueComponentDTO.getProjectId() + ':' + CPMPONENT + "*",
+                CUSTOM_CHART + issueComponentDTO.getProjectId() + ":" + "*"
+        });
         return modelMapper.map(issueComponentMapper.selectByPrimaryKey(issueComponentDTO.getComponentId()), IssueComponentDTO.class);
     }
 
