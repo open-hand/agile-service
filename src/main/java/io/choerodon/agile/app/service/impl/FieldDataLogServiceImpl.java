@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.infra.aspect.DataLogRedisUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.api.vo.FieldDataLogCreateVO;
 import io.choerodon.agile.api.vo.FieldDataLogVO;
@@ -29,6 +30,8 @@ public class FieldDataLogServiceImpl implements FieldDataLogService {
     @Autowired
     private FieldDataLogMapper fieldDataLogMapper;
     @Autowired
+    private DataLogRedisUtil dataLogRedisUtil;
+    @Autowired
     private ModelMapper modelMapper;
 
     @Override
@@ -36,6 +39,7 @@ public class FieldDataLogServiceImpl implements FieldDataLogService {
         if (fieldDataLogMapper.insert(create) != 1) {
             throw new CommonException(ERROR_DATALOG_CREATE);
         }
+        dataLogRedisUtil.deleteByCustomField(create.getProjectId());
         return fieldDataLogMapper.selectByPrimaryKey(create.getId());
     }
 
@@ -53,6 +57,7 @@ public class FieldDataLogServiceImpl implements FieldDataLogService {
         delete.setFieldId(fieldId);
         delete.setProjectId(projectId);
         fieldDataLogMapper.delete(delete);
+        dataLogRedisUtil.deleteByCustomField(projectId);
     }
 
     @Override

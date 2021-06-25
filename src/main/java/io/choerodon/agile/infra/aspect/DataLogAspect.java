@@ -126,7 +126,6 @@ public class DataLogAspect {
     private static final String AGILE = "Agile::";
     private static final String VERSION_CHART = AGILE + "VersionChart";
     private static final String PIECHART = AGILE + "PieChart";
-    private static final String COMPONENT = "component";
     private static final String BURN_DOWN_COORDINATE_BY_TYPE = AGILE + "BurnDownCoordinateByType";
     private static final String VERSION = "Version";
     private static final String EPIC = "Epic";
@@ -700,6 +699,7 @@ public class DataLogAspect {
         }
         if (issueComment != null) {
             IssueCommentDTO issueCommentDTO = issueCommentMapper.selectByPrimaryKey(issueComment.getCommentId());
+            dataLogRedisUtil.deleteByComponentChange(issueCommentDTO.getProjectId());
             createDataLog(issueCommentDTO.getProjectId(), issueCommentDTO.getIssueId(), FIELD_COMMENT,
                     issueCommentDTO.getCommentText(), issueComment.getCommentText(), issueComment.getCommentId().toString(),
                     issueComment.getCommentId().toString());
@@ -885,6 +885,7 @@ public class DataLogAspect {
             List<IssueLabelDTO> curLabels = issueMapper.selectLabelNameByIssueId(issueId);
             createDataLog(projectId, issueId, FIELD_LABELS, getOriginLabelNames(originLabels),
                     getOriginLabelNames(curLabels), null, null);
+            dataLogRedisUtil.deleteByLabelDataLog(projectId);
         } catch (Throwable e) {
             throw new CommonException(ERROR_METHOD_EXECUTE, e);
         }
@@ -918,6 +919,7 @@ public class DataLogAspect {
             List<IssueLabelDTO> originLabels = issueMapper.selectLabelNameByIssueId(issueId);
             createDataLog(issueDTO.getProjectId(), issueId, FIELD_LABELS, getOriginLabelNames(originLabels),
                     null, null, null);
+            dataLogRedisUtil.deleteByLabelDataLog(issueDTO.getProjectId());
         }
     }
 
@@ -1016,7 +1018,7 @@ public class DataLogAspect {
             createDataLog(componentIssueRelDTO.getProjectId(), componentIssueRelDTO.getIssueId(),
                     FIELD_COMPONENT, issueComponentMapper.selectByPrimaryKey(componentIssueRelDTO.getComponentId()).getName(), null,
                     componentIssueRelDTO.getComponentId().toString(), null);
-            redisUtil.deleteRedisCache(new String[]{PIECHART + componentIssueRelDTO.getProjectId() + ':' + COMPONENT + "*"});
+            dataLogRedisUtil.deleteByComponentChange(componentIssueRelDTO.getProjectId());
         }
     }
 
@@ -1035,7 +1037,7 @@ public class DataLogAspect {
                 componentIssueRelDTOList.forEach(componentIssueRel -> createDataLog(componentIssueRel.getProjectId(), componentIssueRel.getIssueId(),
                         FIELD_COMPONENT, issueComponentMapper.selectByPrimaryKey(componentIssueRel.getComponentId()).getName(), null,
                         componentIssueRel.getComponentId().toString(), null));
-                redisUtil.deleteRedisCache(new String[]{PIECHART + componentIssueRelDTOList.get(0).getProjectId() + ':' + COMPONENT + "*"});
+                dataLogRedisUtil.deleteByComponentChange(componentIssueRelDTOList.get(0).getProjectId());
             }
         }
     }
@@ -1051,7 +1053,7 @@ public class DataLogAspect {
             createDataLog(componentIssueRelDTO.getProjectId(), componentIssueRelDTO.getIssueId(), FIELD_COMPONENT,
                     null, issueComponentMapper.selectByPrimaryKey(componentIssueRelDTO.getComponentId()).getName(),
                     null, componentIssueRelDTO.getComponentId().toString());
-            redisUtil.deleteRedisCache(new String[]{PIECHART + componentIssueRelDTO.getProjectId() + ':' + COMPONENT + "*"});
+            dataLogRedisUtil.deleteByComponentChange(componentIssueRelDTO.getProjectId());
         }
     }
 
@@ -1222,6 +1224,7 @@ public class DataLogAspect {
             }
         }
         if (issueConvertDTO != null && field != null && !field.isEmpty()) {
+            dataLogRedisUtil.deleteByUpdateIssue(issueConvertDTO.getProjectId());
             IssueDTO originIssueDTO = issueMapper.selectByPrimaryKey(issueConvertDTO.getIssueId());
             handleIssueEpicName(field, originIssueDTO, issueConvertDTO);
             handleIssueSummary(field, originIssueDTO, issueConvertDTO);

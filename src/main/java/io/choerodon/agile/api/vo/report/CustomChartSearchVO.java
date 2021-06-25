@@ -4,6 +4,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.infra.utils.StringUtil;
 
 /**
  * @author chihao.ran@hand-china.com
@@ -80,5 +81,10 @@ public class CustomChartSearchVO {
 
     public void setComparedFieldPredefined(Boolean comparedFieldPredefined) {
         this.comparedFieldPredefined = comparedFieldPredefined;
+    }
+
+    @Override
+    public String toString() {
+        return StringUtil.getToString(this);
     }
 }

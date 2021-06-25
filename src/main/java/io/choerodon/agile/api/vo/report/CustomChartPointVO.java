@@ -2,13 +2,15 @@ package io.choerodon.agile.api.vo.report;
 
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
  * @author chihao.ran@hand-china.com
  * 2021/06/11 11:30
  */
-public class CustomChartPointVO {
+public class CustomChartPointVO implements Serializable {
+    private static final long serialVersionUID = -2096291259245233816L;
     private String analysisValue;
     @Encrypt
     private Long analysisId;
