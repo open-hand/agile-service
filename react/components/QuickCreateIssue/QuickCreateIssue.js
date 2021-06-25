@@ -7,7 +7,7 @@ import {
   Icon, Dropdown, Input, Menu,
 } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
-import { debounce } from 'lodash';
+import { debounce, find } from 'lodash';
 import { issueApi, fieldApi } from '@/api';
 import { checkCanQuickCreate, getQuickCreateDefaultObj } from '@/utils/quickCreate';
 import { fields2Map } from '@/utils/defaultValue';
@@ -23,13 +23,19 @@ const propTypes = {
 };
 
 class QuickCreateIssue extends Component {
+  static getIssueTypeCacheAvailableId(issueTypes) {
+    const localTypeId = localCacheStore.getItem('agile.issue.type.common.selected');
+    const newCurrentType = localTypeId ? find((issueTypes || []), { id: localTypeId })?.id : undefined;
+    return newCurrentType;
+  }
+
   constructor(props) {
     super(props);
     this.currentTemplate = undefined;
     this.state = {
       create: false,
       loading: false,
-      currentTypeId: props.issueTypes[0]?.id,
+      currentTypeId: QuickCreateIssue.getIssueTypeCacheAvailableId(props.issueTypes) || props.issueTypes[0]?.id,
       summary: '',
     };
     this.userDropDownRef = createRef();
@@ -37,10 +43,8 @@ class QuickCreateIssue extends Component {
 
   static getDerivedStateFromProps(nextProps, prevState) {
     if (!prevState.currentTypeId && nextProps.issueTypes.length > 0) {
-      const localTypeId = localCacheStore.getItem('agile.issue.type.common.selected');
-      const newCurrentType = nextProps.issueTypes.find((issueType) => issueType.id === localTypeId) || nextProps.issueTypes[0];
       return {
-        currentTypeId: newCurrentType?.id,
+        currentTypeId: QuickCreateIssue.getIssueTypeCacheAvailableId(nextProps.issueTypes) || nextProps.issueTypes[0]?.id,
       };
     }
     return null;
