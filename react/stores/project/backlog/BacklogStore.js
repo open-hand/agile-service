@@ -687,6 +687,9 @@ class BacklogStore {
           }
         }
         this.spinIf = false;
+      }).catch(() => {
+        this.refreshSprint(sourceId, false);
+        this.refreshSprint(destinationId, false);
       });
     });
   }
