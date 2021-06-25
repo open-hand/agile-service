@@ -3,20 +3,18 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.enums.ProjectCategory;
-import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.infra.cache.InstanceCache;
-import io.choerodon.agile.infra.enums.NodeType;
-import io.choerodon.agile.infra.enums.StatusType;
 import io.choerodon.agile.infra.exception.RemoveStatusException;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.core.domain.PageInfo;
+import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
@@ -68,6 +66,12 @@ public class StatusServiceImpl implements StatusService {
     private IssueStatusMapper issueStatusMapper;
     @Autowired
     private IssueTypeMapper issueTypeMapper;
+    @Autowired
+    private IssueService issueService;
+    @Autowired
+    private ProjectConfigMapper projectConfigMapper;
+    @Autowired
+    private StateMachineSchemeConfigService stateMachineSchemeConfigService;
 
     @Override
     public Page<StatusWithInfoVO> queryStatusList(PageRequest pageRequest, Long organizationId, StatusSearchVO statusSearchVO) {
@@ -192,6 +196,33 @@ public class StatusServiceImpl implements StatusService {
         statusVO.setCompleted(completed);
         statusVO.setIssueStatusObjectVersionNumberId(issueStatusObjectVersionNumber);
         return statusVO;
+    }
+
+    @Override
+    public Page<StatusVO> queryUserProjectStatus(PageRequest pageRequest, Long organizationId, String type) {
+        List<Long> projectIds = new ArrayList<>();
+        List<ProjectVO> projects = new ArrayList<>();
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        issueService.queryUserProjects(organizationId, null, projectIds, projects, userId, type);
+        if (CollectionUtils.isEmpty(projectIds)) {
+            return new Page<>();
+        }
+        List<ProjectConfigDTO> projectConfigs =
+                projectConfigMapper.queryByProjectIdsAndOptions(new ArrayList<>(projectIds), SchemeType.STATE_MACHINE, "agile");
+        if (Objects.equals(type, "myStarBeacon")) {
+            projectConfigs.addAll(projectConfigMapper.queryByProjectIdsAndOptions(new ArrayList<>(projectIds), SchemeType.STATE_MACHINE, "program"));
+        }
+        if (projectConfigs.isEmpty()) {
+            return new Page<>();
+        }
+        Set<Long> stateMachineSchemeIds =
+                projectConfigs
+                        .stream()
+                        .map(ProjectConfigDTO::getSchemeId)
+                        .collect(Collectors.toSet());
+        List<Long> stateMachineIds = stateMachineSchemeConfigService.queryBySchemeIds(false, organizationId, stateMachineSchemeIds)
+                .stream().map(StatusMachineSchemeConfigVO::getStateMachineId).collect(Collectors.toList());
+        return pagedQueryByStateMachineIds(pageRequest, organizationId, stateMachineIds);
     }
 
     @Override

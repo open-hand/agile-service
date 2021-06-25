@@ -472,7 +472,8 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      */
     List<IssueDTO> queryParentIssueByProjectIdsAndUserId(@Param("projectIds") List<Long> projectIds,
                                                          @Param("userId") Long userId,
-                                                         @Param("searchType") String searchType);
+                                                         @Param("searchType") String searchType,
+                                                         @Param("searchVO") SearchVO searchVO);
 
     /**
      * 查询个人在所有子项目中未完成的问题
@@ -518,7 +519,10 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                        @Param("issueType") String issueType,
                                        @Param("param") String param);
 
-    List<IssueDTO> listMyStarIssuesByProjectIdsAndUserId(@Param("projectIds") List<Long> projectIds, @Param("parentIssues") List<Long> parentIssues, @Param("userId") Long userId);
+    List<IssueDTO> listMyStarIssuesByProjectIdsAndUserId(@Param("projectIds") List<Long> projectIds,
+                                                         @Param("parentIssues") List<Long> parentIssues,
+                                                         @Param("userId") Long userId,
+                                                         @Param("searchVO") SearchVO searchVO);
 
     /**
      * 查询项目下未完成的issue，包含story, task和bug(不包含子缺陷)
