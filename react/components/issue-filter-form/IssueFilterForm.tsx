@@ -10,6 +10,7 @@ import {
   DataSet, Form, Button,
 } from 'choerodon-ui/pro';
 import { IChosenFieldField } from '@/components/chose-field/types';
+import { usePersistFn } from 'ahooks';
 import renderField from './components/renderField';
 import IssueFilterFormDataSet from './IssueFilterFormDataSet';
 import './index.less';
@@ -62,6 +63,7 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
     }
     return [...localSystemDataSetFieldConfig.values()];
   }, [config?.systemDataSetField]);
+  // 只创建一次
   const events = useMemo(() => {
     let { afterDelete }: IConfig['events'] = defaultIssueFilterFormEvents;
     if (config?.events) {
@@ -71,20 +73,20 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
     }
     return { afterDelete };
   }, [config?.events]);
-  const handleAdd = (value: IChosenFieldField) => {
+  const handleAdd = usePersistFn((value: IChosenFieldField) => {
     currentFormItems.set(value.code, value);
-  };
+  });
 
   useEffect(() => {
     if (config?.fields && Array.isArray(config?.fields)) { setFields(config.fields); }
   }, [config?.fields]);
   const dataSet = useMemo(() => new DataSet(IssueFilterFormDataSet({ fields, systemFields: systemDataSetFieldConfig })), [fields, systemDataSetFieldConfig]);
-  const handleDelete = (value: IChosenFieldField) => {
+  const handleDelete = useCallback((value: IChosenFieldField) => {
     const result = events.afterDelete(value);
     if (typeof (result) === 'undefined' || result) {
       currentFormItems.delete(value.code);
     }
-  };
+  }, [currentFormItems, events]);
   const initField = useCallback((field: IChosenFieldField) => {
     let values = toJS(field.value);
     const dateIndex = ['time', 'datetime', 'date'].indexOf(field.fieldType ?? '');
@@ -99,10 +101,10 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
       !dataSet.current?.get(field.code) && dataSet.current?.set(field.code, values);
     }
   }, [dataSet]);
-    // 初始化额外form项
+  // 初始化额外form项
   useEffect(() => {
     if (config?.extraFormItems && Array.isArray(config.extraFormItems)) {
-        config?.extraFormItems.forEach((item) => !extraFormItems.has(item.code) && extraFormItems.set(item.code, item) && initField(item));
+      config?.extraFormItems.forEach((item) => !extraFormItems.has(item.code) && extraFormItems.set(item.code, item) && initField(item));
     }
   }, [config?.extraFormItems, extraFormItems, initField]);
   useEffect(() => {
@@ -117,29 +119,32 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
     }
   }, [initField]);
   useEffect(() => {
-  // 初始化value
+    // 初始化value
     if (config?.value && Array.isArray(toJS(config?.value))) {
       config.value.forEach((item) => {
         initField(item);
       });
     }
   }, [config?.value, initField]);
+  const actions = useMemo(() => ({ onAdd: handleAdd }), [handleAdd]);
   const dataProps = {
     currentFormItems,
     fields,
     dataSet,
-    actions: { onAdd: handleAdd },
+    actions,
   };
+  const componentExtraFormItems = useMemo(() => [...extraFormItems.values()], [extraFormItems]);
   const componentProps = {
     fields,
     dataSet,
     currentFormItems,
-    extraFormItems: [...extraFormItems.values()],
+    extraFormItems: componentExtraFormItems,
     chosenFields: config?.value ?? [...currentFormItems.values()],
     extraRenderFields: config?.extraRenderFields,
     onDelete: handleDelete,
     defaultVisibleFooterAddBtn: config?.defaultVisibleFooterAddBtn,
   };
+
   return [dataProps, componentProps];
 }
 
@@ -174,14 +179,14 @@ const IssueFilterForm: React.FC = () => {
   useEffect(() => {
     props.extraFormItems?.forEach((field) => {
       !currentFormCode.get('extraFormItems')?.has(field.code)
-      && currentFormCode.get('extraFormItems')?.add(field.code) && initField(field);
+        && currentFormCode.get('extraFormItems')?.add(field.code) && initField(field);
     });
   }, [currentFormCode, initField, props.extraFormItems]);
   useEffect(() => {
     // 初始化值
     props.chosenFields?.forEach((field) => {
       !currentFormCode.get('chosenFields')?.has(field.code)
-      && currentFormCode.get('chosenFields')?.add(field.code) && initField(field);
+        && currentFormCode.get('chosenFields')?.add(field.code) && initField(field);
     });
   }, [currentFormCode, initField]);
   const render = (item: IChosenFieldField) => (props.extraRenderFields && props.extraRenderFields(item, {
