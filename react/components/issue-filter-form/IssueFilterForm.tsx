@@ -106,13 +106,24 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
     }
   }, [config?.extraFormItems, extraFormItems, initField]);
   useEffect(() => {
-    // 初始化
-    if (config?.defaultValue && Array.isArray(config?.defaultValue)) {
+    // 初始化 defaultValue
+    if (config?.defaultValue && Array.isArray(toJS(config?.defaultValue))) {
       config.defaultValue.forEach((item) => {
-        initField(item);
+        if (!currentFormItems.has(item.code)) {
+          initField(item);
+          handleAdd(item);
+        }
       });
     }
   }, [initField]);
+  useEffect(() => {
+  // 初始化value
+    if (config?.value && Array.isArray(toJS(config?.value))) {
+      config.value.forEach((item) => {
+        initField(item);
+      });
+    }
+  }, [config?.value, initField]);
   const dataProps = {
     currentFormItems,
     fields,
@@ -159,7 +170,7 @@ const IssueFilterForm: React.FC = () => {
       }
       !dataSet.current?.get(field.code) && dataSet.current?.set(field.code, values);
     }
-  }, [dataSet, dateFormatArr]);
+  }, [dataSet]);
   useEffect(() => {
     props.extraFormItems?.forEach((field) => {
       !currentFormCode.get('extraFormItems')?.has(field.code)
