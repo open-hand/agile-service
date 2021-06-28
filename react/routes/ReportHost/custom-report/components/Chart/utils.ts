@@ -1,4 +1,4 @@
-import { EChartOption } from 'echarts';
+import echarts from 'echarts';
 import { map } from 'lodash';
 
 export type IChartUnit = 'storyPoints' | 'quantity';
@@ -18,15 +18,15 @@ export interface IChartData {
 
 const xAxis = {
   type: 'category',
-  boundaryGap: false,
+  boundaryGap: true,
   axisTick: { show: false },
   axisLine: {
-    show: true,
-    lineStyle: {
-      color: '#eee',
-      type: 'solid',
-      width: 2,
-    },
+    show: false,
+    // lineStyle: {
+    //   color: '#eee',
+    //   type: 'solid',
+    //   width: 2,
+    // },
   },
   axisLabel: {
     show: true,
@@ -34,13 +34,13 @@ const xAxis = {
     fontStyle: 'normal',
   },
   splitLine: {
-    show: true,
-    interval: 0,
-    lineStyle: {
-      color: '#eee',
-      width: 1,
-      type: 'solid',
-    },
+    show: false,
+    // interval: 0,
+    // lineStyle: {
+    //   color: '#eee',
+    //   width: 1,
+    //   type: 'solid',
+    // },
   },
 };
 
@@ -52,12 +52,12 @@ const yAxis = {
   // nameGap: 22,
   axisTick: { show: false },
   axisLine: {
-    show: true,
-    lineStyle: {
-      color: '#eee',
-      type: 'solid',
-      // width: 2,
-    },
+    show: false,
+    // lineStyle: {
+    //   color: '#eee',
+    //   type: 'solid',
+    //   // width: 2,
+    // },
   },
   axisLabel: {
     show: true,
@@ -97,18 +97,49 @@ const dataZoom = {
   },
 };
 
-const legendPageStyle = {
+const legend = {
+  formatter(name: string) {
+    return `${name.slice(0, 10)}${name.length > 10 ? '...' : ''}`;
+  },
+  tooltip: {
+    show: true,
+  },
+  textStyle: {
+    color: '#0F1358',
+  },
+  pageIconSize: [10, 12],
   pageIconColor: '#5365EA',
   pageIconInactiveColor: 'rgba(83, 101, 234, 0.5)',
   pageTextStyle: {
     color: 'rgba(15, 19, 88, 0.65)',
   },
 };
+
+const grid = {
+  top: 40,
+  left: 15,
+  right: 10,
+  containLabel: true,
+};
+
+const tooltip = {
+  confine: true,
+  enterable: true,
+  extraCssText: 'max-height: 600px; overflow-y: auto',
+};
+
 const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[], maxShow: number): any => {
+  const unitZ = unit === 'quantity' ? '个' : '点';
   const xAxisData = map((data && data[0].pointList) || [], 'analysisValue');
   if (chartType === 'line' || chartType === 'bar') {
     return ({
-      tooltip: {},
+      tooltip: {
+        ...tooltip,
+        formatter(params: any) {
+          const content = `${params.marker}${params.name}: ${(params.value || params.value === 0) ? parseFloat(params.value) : '-'}${unitZ}`;
+          return content;
+        },
+      },
       xAxis: {
         ...xAxis,
         data: xAxisData,
@@ -122,23 +153,32 @@ const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[],
         data: map((data && data[0].pointList) || [], 'value'),
       },
       dataZoom: [{ ...dataZoom, show: xAxisData.length > maxShow }],
+      grid: {
+        ...grid,
+        bottom: xAxisData.length > maxShow ? 20 : 0,
+      },
     });
   } if (chartType === 'pie') {
     return {
       tooltip: {
+        ...tooltip,
         trigger: 'item',
+        formatter(params: any) {
+          const content = `${params.marker}${params.name}: ${(params.value || params.value === 0) ? parseFloat(params.value) : '-'}${unitZ}`;
+          return content;
+        },
       },
       legend: {
         type: 'scroll',
         orient: 'vertical',
         right: 10,
         top: 'middle',
-        ...legendPageStyle,
+        ...legend,
       },
       series: [
         {
           type: 'pie',
-          radius: '75%',
+          radius: '100%',
           emphasis: {
             itemStyle: {
               shadowBlur: 10,
@@ -146,6 +186,9 @@ const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[],
               shadowColor: 'rgba(0, 0, 0, 0.5)',
             },
           },
+          minShowLabelAngle: 5,
+          top: 20,
+          bottom: 10,
           data: map((data && data[0].pointList) || [], (point) => ({
             name: point.analysisValue,
             value: point.value,
@@ -156,15 +199,27 @@ const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[],
   } if (chartType === 'stackedBar') {
     return {
       tooltip: {
+        ...tooltip,
         trigger: 'axis',
         axisPointer: {
           type: 'shadow',
+        },
+        formatter(params: any[]) {
+          let content = '';
+          content += `${params[0].axisValue}<br/>`;
+          for (let i = 0; i < params.length; i += 1) {
+            content += `${params[i].marker}${params[i].seriesName}: ${(params[i].value || params[i].value === 0) ? parseFloat(params[i].value) : '-'}${unitZ}`;
+            if (i !== params[i].length - 1) {
+              content += '<br/ >';
+            }
+          }
+          return content;
         },
       },
       legend: {
         type: 'scroll',
         top: 10,
-        ...legendPageStyle,
+        ...legend,
       },
       xAxis: {
         ...xAxis,
@@ -187,6 +242,10 @@ const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[],
         data: map((item.pointList || []), 'value'),
       })),
       dataZoom: [{ ...dataZoom, show: xAxisData.length > maxShow }],
+      grid: {
+        ...grid,
+        bottom: xAxisData.length > maxShow ? 20 : 0,
+      },
     };
   }
   return {};

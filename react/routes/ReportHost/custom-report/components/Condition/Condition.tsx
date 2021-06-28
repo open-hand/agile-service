@@ -6,8 +6,10 @@ import {
   Select, Form, DataSet, TextArea,
 } from 'choerodon-ui/pro';
 import { Icon, Tooltip } from 'choerodon-ui';
-import { IField } from '@/common/types';
+import { IField, ISearchVO } from '@/common/types';
+import Search from './Search';
 import styles from './Condition.less';
+import { ChartProps } from '../Chart';
 
 const { Option } = Select;
 
@@ -27,7 +29,8 @@ const Part: React.FC<{
 const Condition: React.FC<{
   reportDs: DataSet,
   dimension: IField[]
-}> = ({ reportDs, dimension }) => (
+  chartProps: ChartProps
+}> = ({ reportDs, dimension, chartProps }) => (
   <div className={styles.condition}>
     <Part title="图表说明">
       <Form dataSet={reportDs} className={styles.form}>
@@ -66,7 +69,11 @@ const Condition: React.FC<{
         </Select>
       </Form>
     </Part>
-    <Part title="数据筛选" tip="设置图表的数据范围。例如：您可以选择一部分迭代的问题进行分析">描述</Part>
+    <Part title="数据筛选" tip="设置图表的数据范围。例如：您可以选择一部分迭代的问题进行分析">
+      <div className={styles.search}>
+        <Search chartProps={chartProps} />
+      </div>
+    </Part>
   </div>
 );
 

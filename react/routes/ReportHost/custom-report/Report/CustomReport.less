@@ -1,48 +1,67 @@
-.addReport {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow-y: hidden;
-  .header {
-    height: 50px;
-    flex-shrink: 0;
-    border-bottom: 1px solid var(--divider);
-    padding: 0 20px;
-    display: flex;
-    align-items: center;
-  }
-  .main {
-    flex: 1;
-    display: flex;
-    justify-content: space-between;
-    overflow-y: hidden;
-    .left {
-      flex: 1;
-      overflow: auto;
-    }
-    .right {
-      flex-shrink: 0;
-      position: relative;
-      min-width: 42px;
-      border-left: 1px solid var(--divider);
-      padding: 12px 0 12px 12px;
-      .expand_btn {
-        z-index: 2;
-        width: 20px !important;
-        height: 20px !important;
-        position: absolute;
-        right: 12px;
-        top: 12px;
-        cursor: pointer;
+.content {
+  :global {
+    .c7n-spin-nested-loading {
+      height: 100%;
+      .c7n-spin-container {
+        height: 100%;
       }
     }
   }
-  .footer {
-    flex-shrink: 0;
-    height: 68px;
-    border-top: 1px solid var(--divider);
-    padding: 0 20px;
+  .addReport {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: hidden;
+    .header {
+      height: 50px;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--divider);
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      .header_text {
+        font-size: 16px;
+        color: #0F1358;
+        line-height: 22px;
+      }
+    }
+    .main {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      overflow-y: hidden;
+      .left {
+        flex: 1;
+        overflow: auto;
+      }
+      .right {
+        flex-shrink: 0;
+        position: relative;
+        min-width: 42px;
+        border-left: 1px solid var(--divider);
+        padding: 12px 0 12px 12px;
+        .expand_btn_container {
+          z-index: 2;
+          position: absolute;
+          background-color: #fff;
+          right: 12px;
+          top: 12px;
+          .expand_btn {
+            width: 20px !important;
+            height: 20px !important;
+            cursor: pointer;
+          }
+        }
+      }
+    }
+    .footer {
+      flex-shrink: 0;
+      height: 68px;
+      border-top: 1px solid var(--divider);
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+    }
   }
+  
 }

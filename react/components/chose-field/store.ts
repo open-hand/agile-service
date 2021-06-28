@@ -72,8 +72,8 @@ class ChoseFieldStore {
     return this.currentOptionStatus;
   }
 
-  @action('增添选择字段') addChosenFields(key: string, data: IChosenFieldField) {
-    this.chosenFields.set(key, { ...data, value: undefined });
+  @action('增添选择字段') addChosenFields(key: string, data: IChosenFieldField, value?: any) {
+    this.chosenFields.set(key, { ...data, value: value || undefined });
     if (this.chosenFields.size === (this.fields.get('system')!.length + this.fields.get('custom')!.length)) {
       this.currentOptionStatus = 'ALL';
     } else {

@@ -3,11 +3,12 @@ import React, {
 } from 'react';
 import { Button } from 'choerodon-ui/pro';
 import { Dropdown } from 'choerodon-ui';
-import { omit } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import { DropDownProps } from 'choerodon-ui/lib/dropdown';
 import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import { observer } from 'mobx-react-lite';
 import { IFiledListItemProps, pageConfigApi } from '@/api';
+import { useWhyDidYouUpdate, useDebounce } from 'ahooks';
 import FieldList from './FieldList';
 import ChoseFieldStore from './store';
 import { IChosenFieldField, IChosenFieldFieldEvents } from './types';
@@ -36,7 +37,7 @@ interface IChoseFieldDataProps {
   store: ChoseFieldStore,
   fields: IChosenFieldField[],
 }
-interface IChoseFieldComponentProps {
+export interface IChoseFieldComponentProps {
   store: ChoseFieldStore,
   choseField?: (data: IChosenFieldField | IChosenFieldField[], status: 'add' | 'del') => void,
   dropDownProps?: Partial<DropDownProps>,
@@ -56,13 +57,15 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
     const { content } = await pageConfigApi.load(); //
     setFields(content.map((item: IFiledListItemProps) => (item.system ? omit(item, 'id') : item)));
   };
+  const debounceFields = useDebounce(fields, { wait: 1000 });
   useEffect(() => {
     if (typeof (config?.fields) === 'undefined') {
       loadData();
     } else {
-      setFields(config?.fields);
+      setFields((oldFiled) => (isEqual(config?.fields, oldFiled) ? oldFiled : (config?.fields || [])));
     }
   }, [config?.fields]);
+
   // 操作函数只初始化一次  防止方法多次创建 多次更改
   const events = useMemo(() => {
     let {
@@ -88,9 +91,9 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
     const systemFields: Array<IChosenFieldField> = [];
     const customFields: Array<IChosenFieldField> = [];
     const currentChosenFields: Map<string, IChosenFieldField> = new Map();
-    if (fields.length > 0) {
-      events.initFieldStart(fields, currentChosenFields);
-      fields.forEach((field) => {
+    if (debounceFields.length > 0) {
+      events.initFieldStart(debounceFields, currentChosenFields);
+      debounceFields.forEach((field) => {
         let newField = field;
         if (['time', 'datetime', 'date'].indexOf(field.fieldType ?? '') !== -1) {
           newField = { ...field, otherComponentProps: { range: true } };
@@ -117,18 +120,18 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
     }
 
     return new ChoseFieldStore({ systemFields, customFields, chosenFields: [...currentChosenFields.values()] });
-  }, [config?.defaultValue, events, fields]);
+  }, [config?.defaultValue, events, debounceFields]);
   const dataProps = {
     store,
-    fields,
+    fields: debounceFields,
   };
-  const componentProps: IChoseFieldComponentProps = {
+  const componentProps: IChoseFieldComponentProps = useMemo(() => ({
     store,
     choseField: config?.events?.choseField,
     dropDownBtnChildren: config?.dropDownBtnChildren || '添加筛选',
     dropDownBtnProps: config?.dropDownBtnProps,
     dropDownProps: config?.dropDownProps,
-  };
+  }), [config?.dropDownBtnChildren, config?.dropDownBtnProps, config?.dropDownProps, config?.events?.choseField, store]);
   return [dataProps, componentProps];
 }
 function useClickOut(onClickOut: (e?: any) => void) {

@@ -17,6 +17,7 @@ interface IIssueFilterFormProps {
   defaultVisibleFooterAddBtn?: boolean, // 是否显示默认的添加筛选按钮
   extraRenderFields?: (field: IChosenFieldField, otherComponentProps: Partial<SelectProps> | Partial<DatePickerProps>, { dataSet }: { dataSet: DataSet, useSelectUserForceRefreshHook?: (...other: any) => [any, React.Dispatch<React.SetStateAction<any>>] }) => React.ReactElement | false | null,
   extraFormItems?: IChosenFieldField[],
+  formColumns?: number
 }
 function DefaultChooseField(chooseConfig: any) {
   const [data, componentProps] = useChoseField({

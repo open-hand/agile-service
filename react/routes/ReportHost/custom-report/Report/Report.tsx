@@ -1,6 +1,7 @@
 import React, {
   useMemo, useCallback, useState, useRef, useEffect,
 } from 'react';
+import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
@@ -13,11 +14,13 @@ import { Spin } from 'choerodon-ui';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { customReportApi, ICreateData, pageConfigApi } from '@/api';
-import { IField } from '@/common/types';
+import { IField, ISearchVO } from '@/common/types';
 import { useWhyDidYouUpdate } from 'ahooks';
 
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
+import { SearchVOToFilter } from '@/components/issue-search/utils';
+import emptyPic from '@/assets/image/NoData.svg';
 import pic from './NoData.svg';
 import styles from './CustomReport.less';
 import Condition from '../components/Condition';
@@ -44,6 +47,7 @@ const CustomReport: React.FC<Props> = (props) => {
   const [chartRes, setChartRes] = useState<null | IChartRes>(null);
   const [dimension, setDimension] = useState<IField[]>([]);
   const [customChartList, setCustomChartList] = useState<{title: string, path: string }[]>([]);
+  const searchRef = useRef<{searchVO: ISearchVO} | null>(null);
 
   useEffect(() => {
     pageConfigApi.load().then((res: { content: IField[]}) => {
@@ -128,29 +132,6 @@ const CustomReport: React.FC<Props> = (props) => {
     setExpand(!expand);
   }, [expand]);
 
-  const refresh = useCallback(async () => {
-    if (chartId && dimension.length) {
-      setLoading(true);
-      const res: IChartRes = await customReportApi.getChartAllDataById(chartId);
-      setLoading(false);
-      if (!dimension.find((item) => item.code === res.analysisField) || (res.comparedField && !dimension.find((item) => item.code === res.comparedField))) {
-        setLost(true);
-      } else {
-        setChartRes(res);
-        reportDs.current?.set('title', res.name);
-        reportDs.current?.set('description', res.description);
-        reportDs.current?.set('type', res.chartType);
-        reportDs.current?.set('row', res.analysisField);
-        reportDs.current?.set('column', res.comparedField);
-        reportDs.current?.set('unit', res.statisticsType);
-      }
-    }
-  }, [chartId, dimension, reportDs]);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
-
   const handleClickEdit = useCallback(() => {
     setMode('edit');
   }, []);
@@ -176,18 +157,55 @@ const CustomReport: React.FC<Props> = (props) => {
     statisticsType,
     analysisField,
     comparedField,
-    searchVO: undefined,
     analysisFieldPredefined: (analysisField && dimension.find((item) => item.code === analysisField)?.system),
     comparedFieldPredefined: comparedField && dimension.find((item) => item.code === comparedField)?.system,
   }), [analysisField, chartType, comparedField, dimension, statisticsType]);
   const [, chartProps] = useReport(configMemo, maxShow);
-  const { data } = chartProps;
+  const {
+    data, searchVO, choseFieldStore, fields, hasGetCustomFields,
+  } = chartProps;
+
+  const refresh = useCallback(async () => {
+    if (chartId && dimension.length && hasGetCustomFields) {
+      setLoading(true);
+      const res: IChartRes = await customReportApi.getChartAllDataById(chartId);
+      setLoading(false);
+      if (!dimension.find((item) => item.code === res.analysisField) || (res.comparedField && !dimension.find((item) => item.code === res.comparedField))) {
+        setLost(true);
+      } else {
+        setChartRes(res);
+        runInAction(() => {
+          if (res.searchJson && JSON.parse(res.searchJson)) {
+            const searchVOFiltered = SearchVOToFilter(JSON.parse(res.searchJson));
+            for (const [key, value] of Object.entries(searchVOFiltered)) {
+              const field = fields.find((item) => item.code === key || item.id === key);
+              if (field && value) {
+                if ((Array.isArray(value) && value.length) || !Array.isArray(value)) {
+                  choseFieldStore.addChosenFields(key, field, value);
+                }
+              }
+            }
+          }
+          reportDs.current?.set('title', res.name);
+          reportDs.current?.set('description', res.description);
+          reportDs.current?.set('type', res.chartType);
+          reportDs.current?.set('row', res.analysisField);
+          reportDs.current?.set('column', res.comparedField);
+          reportDs.current?.set('unit', res.statisticsType);
+        });
+      }
+    }
+  }, [chartId, choseFieldStore, dimension, fields, hasGetCustomFields, reportDs]);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   const handleSave = useCallback(async () => {
     const validate = await reportDs.validate();
     if (validate) {
       const submitData: ICreateData = {
-        searchJson: '',
+        searchJson: searchVO ? JSON.stringify(searchVO) : undefined,
         name: reportDs.current?.get('title'),
         description: reportDs.current?.get('description'),
         chartType,
@@ -198,16 +216,16 @@ const CustomReport: React.FC<Props> = (props) => {
         comparedFieldPredefined: comparedField && dimension.find((item) => item.code === comparedField)?.system,
         objectVersionNumber: chartRes?.objectVersionNumber,
       };
-      mode === 'create' ? await customReportApi.createChart(submitData) : await customReportApi.updateChart(chartId as string, submitData);
+      const res = mode === 'create' ? await customReportApi.createChart(submitData) : await customReportApi.updateChart(chartId as string, submitData);
       if (mode === 'create') {
-        back();
+        to(`/agile/charts/${res.id}`);
       } else {
         setMode('read');
         refresh();
       }
     }
     setExpand(true);
-  }, [reportDs, chartType, statisticsType, analysisField, comparedField, dimension, chartRes?.objectVersionNumber, mode, chartId, back, refresh]);
+  }, [reportDs, searchVO, chartType, statisticsType, analysisField, comparedField, dimension, chartRes?.objectVersionNumber, mode, chartId, refresh]);
 
   const handleCancel = useCallback(() => {
     if (mode === 'create') {
@@ -230,8 +248,9 @@ const CustomReport: React.FC<Props> = (props) => {
     }
     setExpand(true);
   }, [chartId, lost]);
-  useWhyDidYouUpdate('useWhyDidYouUpdateComponent', chartProps);
-  // console.log(chartProps);
+
+  // useWhyDidYouUpdate('useWhyDidYouUpdateComponent', { ...chartProps });
+  // console.log(data);
   return (
     <Page>
       <Header>
@@ -271,87 +290,111 @@ const CustomReport: React.FC<Props> = (props) => {
         />
       </Header>
       <Breadcrumb />
-      <Content style={{ padding: 0 }}>
-        <Spin spinning={loading}>
+      <Content style={{ padding: 0 }} className={styles.content}>
+        <Spin spinning={loading} style={{ height: '100%' }}>
           <div className={styles.addReport}>
-            {
-            mode !== 'read' && (
-              <div className={styles.header}>
-                {/* <Form dataSet={reportDs}>
-                <TextField name="title" placeholder="图表标题" />
-              </Form> */}
-                <TextField dataSet={reportDs} name="title" placeholder="图表标题" />
-              </div>
-            )
-          }
+            <div className={styles.header}>
+              {
+                  mode === 'read' ? (
+                    <span className={styles.header_text}>{chartRes?.name}</span>
+                  ) : (
+                    <TextField dataSet={reportDs} name="title" placeholder="图表标题" style={{ width: 400 }} />
+                  )
+                }
+            </div>
             <div className={styles.main}>
               <div className={styles.left}>
                 {
-                (!data?.length || lost) ? (
-                  <EmptyPage
-                    image={pic}
-                    description={lost ? (
-                      <>
-                        暂无分析维度，请进行
-                        <span
-                          style={{
-                            color: '#5365EA',
-                            cursor: 'pointer',
-                          }}
-                          role="none"
-                          onClick={handleClickSetting}
-                        >
-                          数据设置
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        当前暂无自定义图表，您可以通过
-                        <span
-                          style={{
-                            color: '#5365EA',
-                            cursor: 'pointer',
-                          }}
-                          role="none"
-                          onClick={() => {
-                            if (!expand) {
-                              setExpand(true);
-                            }
-                          }}
-                        >
-                          数据设置
-                        </span>
-                        添加默认筛选项来创建图表。
-                      </>
-                    )}
-                  />
-                ) : (
-                  <>
-                    <Chart {...chartProps} key={`${chartType}-${statisticsType}-${analysisField}-${comparedField}`} />
-                    <Table {...chartProps} />
-                  </>
-                )
-              }
+                  !loading && (
+                    <>
+                      {
+                        ((!statisticsType || !chartType || !analysisField || (chartType === 'stackedBar' && !comparedField)) || lost) ? (
+                          <EmptyPage
+                            image={pic}
+                            description={lost ? (
+                              <>
+                                暂无分析维度，请进行
+                                <span
+                                  style={{
+                                    color: '#5365EA',
+                                    cursor: 'pointer',
+                                  }}
+                                  role="none"
+                                  onClick={handleClickSetting}
+                                >
+                                  数据设置
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                当前暂无自定义图表，您可以通过
+                                <span
+                                  style={{
+                                    color: '#5365EA',
+                                    cursor: 'pointer',
+                                  }}
+                                  role="none"
+                                  onClick={() => {
+                                    if (!expand) {
+                                      setExpand(true);
+                                    }
+                                  }}
+                                >
+                                  数据设置
+                                </span>
+                                添加默认筛选项来创建图表。
+                              </>
+                            )}
+                          />
+                        ) : (
+                          <>
+                            {
+                            (data || []).length > 0 ? (
+                              <>
+                                <Chart {...chartProps} key={`${chartType}-${statisticsType}-${analysisField}-${comparedField}`} />
+                                <Table {...chartProps} />
+                              </>
+                            ) : (
+                              <>
+                                {
+                                  data !== null && (
+                                  <EmptyPage
+                                    image={emptyPic}
+                                    description="当前暂无数据"
+                                  />
+                                  )
+                                }
+                              </>
+                            )
+                          }
+                          </>
+                        )
+                      }
+                    </>
+                  )
+                }
               </div>
               {
-              mode !== 'read' && (
-              <div
-                className={styles.right}
-                style={{
-                  width: expand ? 320 : 'unset',
-                }}
-              >
-                <Button
-                  icon={expand ? 'last_page' : 'first_page'}
-                  className={styles.expand_btn}
-                  onClick={handleExpandChange}
-                />
-                {
-                expand && <Condition reportDs={reportDs} dimension={dimension} />
+                mode !== 'read' && (
+                <div
+                  className={styles.right}
+                  style={{
+                    width: expand ? 320 : 'unset',
+                  }}
+                >
+                  <div className={styles.expand_btn_container}>
+                    <Button
+                      icon={expand ? 'last_page' : 'first_page'}
+                      className={styles.expand_btn}
+                      onClick={handleExpandChange}
+                    />
+                  </div>
+                  {
+                    expand && <Condition chartProps={chartProps} reportDs={reportDs} dimension={dimension} />
+                  }
+                </div>
+                )
               }
-              </div>
-              )
-            }
             </div>
             {
             mode !== 'read' && (
@@ -363,7 +406,6 @@ const CustomReport: React.FC<Props> = (props) => {
           }
           </div>
         </Spin>
-
       </Content>
     </Page>
   );
