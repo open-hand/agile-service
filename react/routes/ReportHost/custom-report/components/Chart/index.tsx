@@ -24,10 +24,7 @@ export interface ChartProps {
   filterComponentProps: IIssueFilterFormProps,
   fields: IChosenFieldField[],
   filterData: IIssueFilterFormDataProps,
-<<<<<<< HEAD
   hasGetCustomFields: boolean,
-=======
->>>>>>> e9278396794b2452ce6358dc81439885bde2d54c
 }
 
 const Chart: React.FC<ChartProps> = ({
