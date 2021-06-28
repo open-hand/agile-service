@@ -10,7 +10,7 @@ const Search: React.FC<{
   const { filterComponentProps, choseComponentProps } = chartProps;
   return (
     <div>
-      <IssueFilterForm {...filterComponentProps}>
+      <IssueFilterForm {...filterComponentProps} formColumns={1}>
         <div>
           <ChooseField {...choseComponentProps} dropDownBtnProps={{ icon: 'add', style: { marginLeft: 6, marginTop: 10 } }} />
         </div>

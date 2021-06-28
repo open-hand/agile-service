@@ -30,7 +30,7 @@ interface IConfig {
   },
   extraFormItems?: IChosenFieldField[],
   extraRenderFields?: IIssueFilterFormProps['extraRenderFields'],
-
+  formColumns?: number
 }
 export interface IIssueFilterFormDataProps {
   currentFormItems: Map<string, IChosenFieldField>,
@@ -191,7 +191,7 @@ const IssueFilterForm: React.FC = () => {
   }, { dataSet });
   return (
     <>
-      <Form dataSet={dataSet} columns={2}>
+      <Form dataSet={dataSet} columns={props.formColumns || 2}>
         {props.extraFormItems?.map((item) => render(item))}
         {props.chosenFields?.map((item, index) => (typeof (item.immutableCheck) === 'boolean' || typeof (props.onDelete) === 'undefined'
           ? render(item)

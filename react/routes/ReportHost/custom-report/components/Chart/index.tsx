@@ -24,6 +24,7 @@ export interface ChartProps {
   filterComponentProps: IIssueFilterFormProps,
   fields: IChosenFieldField[],
   filterData: IIssueFilterFormDataProps,
+  hasGetCustomFields: boolean,
 }
 
 const Chart: React.FC<ChartProps> = ({
@@ -36,17 +37,10 @@ const Chart: React.FC<ChartProps> = ({
     textStyle: {
       fontSize: FontSize,
     },
-    // grid: {
-    //   top: 60,
-    //   bottom: 30,
-    //   left: 0,
-    //   right: 40,
-    //   containLabel: true,
-    // },
     ...(option || {}),
   });
   return (
-    <div style={{ padding: '0 20px 20px 10px' }}>
+    <div style={{ padding: '0 20px 5px 10px' }}>
       <Spin spinning={loading}>
         <ReactEcharts option={getOption()} />
       </Spin>
