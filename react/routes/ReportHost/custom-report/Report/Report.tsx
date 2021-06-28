@@ -24,6 +24,7 @@ import Condition from '../components/Condition';
 import useReport from '../components/Chart/useReport';
 import Chart from '../components/Chart';
 import { IChartData } from '../components/Chart/utils';
+import Table from '../components/Table';
 
 interface Props {
   chartId?: string
@@ -325,7 +326,10 @@ const CustomReport: React.FC<Props> = (props) => {
                     )}
                   />
                 ) : (
-                  <Chart {...chartProps} key={`${chartType}-${statisticsType}-${analysisField}-${comparedField}`} />
+                  <>
+                    <Chart {...chartProps} key={`${chartType}-${statisticsType}-${analysisField}-${comparedField}`} />
+                    <Table {...chartProps} />
+                  </>
                 )
               }
               </div>
