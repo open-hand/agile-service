@@ -20,7 +20,10 @@ import { useWhyDidYouUpdate } from 'ahooks';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
 import { SearchVOToFilter } from '@/components/issue-search/utils';
+<<<<<<< HEAD
 import emptyPic from '@/assets/image/NoData.svg';
+=======
+>>>>>>> e9278396794b2452ce6358dc81439885bde2d54c
 import pic from './NoData.svg';
 import styles from './CustomReport.less';
 import Condition from '../components/Condition';
@@ -249,8 +252,8 @@ const CustomReport: React.FC<Props> = (props) => {
     setExpand(true);
   }, [chartId, lost]);
 
-  useWhyDidYouUpdate('useWhyDidYouUpdateComponent', { ...chartProps });
-  console.log(data);
+  // useWhyDidYouUpdate('useWhyDidYouUpdateComponent', { ...chartProps });
+  // console.log(data);
   return (
     <Page>
       <Header>
