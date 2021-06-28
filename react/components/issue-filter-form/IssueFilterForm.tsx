@@ -32,13 +32,13 @@ interface IConfig {
   extraRenderFields?: IIssueFilterFormProps['extraRenderFields'],
 
 }
-interface IIssueFilterFormDataProps {
+export interface IIssueFilterFormDataProps {
   currentFormItems: Map<string, IChosenFieldField>,
   fields: IChosenFieldField[],
   dataSet: DataSet,
   actions: Required<IConfig['actions']>,
 }
-interface IIssueFilterComponentProps {
+export interface IIssueFilterComponentProps {
   dataSet: DataSet, // 传入外部dataSet 将放弃组件内创建
   fields: IChosenFieldField[], // 全部字段 用以保证dataSet内值能正常接收
   chosenFields: IChosenFieldField[], // 可控已选字段

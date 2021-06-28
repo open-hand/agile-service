@@ -1,6 +1,7 @@
 import React, {
   useMemo, useCallback, useState, useRef, useEffect,
 } from 'react';
+import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
@@ -13,11 +14,12 @@ import { Spin } from 'choerodon-ui';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { customReportApi, ICreateData, pageConfigApi } from '@/api';
-import { IField } from '@/common/types';
+import { IField, ISearchVO } from '@/common/types';
 import { useWhyDidYouUpdate } from 'ahooks';
 
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
+import { SearchVOToFilter } from '@/components/issue-search/utils';
 import pic from './NoData.svg';
 import styles from './CustomReport.less';
 import Condition from '../components/Condition';
@@ -44,6 +46,7 @@ const CustomReport: React.FC<Props> = (props) => {
   const [chartRes, setChartRes] = useState<null | IChartRes>(null);
   const [dimension, setDimension] = useState<IField[]>([]);
   const [customChartList, setCustomChartList] = useState<{title: string, path: string }[]>([]);
+  const searchRef = useRef<{searchVO: ISearchVO} | null>(null);
 
   useEffect(() => {
     pageConfigApi.load().then((res: { content: IField[]}) => {
@@ -128,29 +131,6 @@ const CustomReport: React.FC<Props> = (props) => {
     setExpand(!expand);
   }, [expand]);
 
-  const refresh = useCallback(async () => {
-    if (chartId && dimension.length) {
-      setLoading(true);
-      const res: IChartRes = await customReportApi.getChartAllDataById(chartId);
-      setLoading(false);
-      if (!dimension.find((item) => item.code === res.analysisField) || (res.comparedField && !dimension.find((item) => item.code === res.comparedField))) {
-        setLost(true);
-      } else {
-        setChartRes(res);
-        reportDs.current?.set('title', res.name);
-        reportDs.current?.set('description', res.description);
-        reportDs.current?.set('type', res.chartType);
-        reportDs.current?.set('row', res.analysisField);
-        reportDs.current?.set('column', res.comparedField);
-        reportDs.current?.set('unit', res.statisticsType);
-      }
-    }
-  }, [chartId, dimension, reportDs]);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
-
   const handleClickEdit = useCallback(() => {
     setMode('edit');
   }, []);
@@ -176,18 +156,56 @@ const CustomReport: React.FC<Props> = (props) => {
     statisticsType,
     analysisField,
     comparedField,
-    searchVO: undefined,
     analysisFieldPredefined: (analysisField && dimension.find((item) => item.code === analysisField)?.system),
     comparedFieldPredefined: comparedField && dimension.find((item) => item.code === comparedField)?.system,
   }), [analysisField, chartType, comparedField, dimension, statisticsType]);
   const [, chartProps] = useReport(configMemo, maxShow);
-  const { data } = chartProps;
+  const {
+    data, searchVO, choseFieldStore, fields,
+  } = chartProps;
+
+  const refresh = useCallback(async () => {
+    if (chartId && dimension.length) {
+      setLoading(true);
+      const res: IChartRes = await customReportApi.getChartAllDataById(chartId);
+      setLoading(false);
+      if (!dimension.find((item) => item.code === res.analysisField) || (res.comparedField && !dimension.find((item) => item.code === res.comparedField))) {
+        setLost(true);
+      } else {
+        setChartRes(res);
+        runInAction(() => {
+          if (res.searchJson && JSON.parse(res.searchJson)) {
+            const searchVOFiltered = SearchVOToFilter(JSON.parse(res.searchJson));
+            for (const [key, value] of Object.entries(searchVOFiltered)) {
+              const field = fields.find((item) => item.code === key || item.id === key);
+              if (field && value) {
+                if ((Array.isArray(value) && value.length) || !Array.isArray(value)) {
+                  choseFieldStore.addChosenFields(key, field, value);
+                }
+              }
+            }
+          }
+          console.log(1);
+          reportDs.current?.set('title', res.name);
+          reportDs.current?.set('description', res.description);
+          reportDs.current?.set('type', res.chartType);
+          reportDs.current?.set('row', res.analysisField);
+          reportDs.current?.set('column', res.comparedField);
+          reportDs.current?.set('unit', res.statisticsType);
+        });
+      }
+    }
+  }, [chartId, choseFieldStore, dimension, fields, reportDs]);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   const handleSave = useCallback(async () => {
     const validate = await reportDs.validate();
     if (validate) {
       const submitData: ICreateData = {
-        searchJson: '',
+        searchJson: searchVO ? JSON.stringify(searchVO) : undefined,
         name: reportDs.current?.get('title'),
         description: reportDs.current?.get('description'),
         chartType,
@@ -207,7 +225,7 @@ const CustomReport: React.FC<Props> = (props) => {
       }
     }
     setExpand(true);
-  }, [reportDs, chartType, statisticsType, analysisField, comparedField, dimension, chartRes?.objectVersionNumber, mode, chartId, back, refresh]);
+  }, [reportDs, searchVO, chartType, statisticsType, analysisField, comparedField, dimension, chartRes?.objectVersionNumber, mode, chartId, back, refresh]);
 
   const handleCancel = useCallback(() => {
     if (mode === 'create') {
@@ -230,7 +248,10 @@ const CustomReport: React.FC<Props> = (props) => {
     }
     setExpand(true);
   }, [chartId, lost]);
-  useWhyDidYouUpdate('useWhyDidYouUpdateComponent', chartProps);
+
+  console.log('report render');
+
+  // useWhyDidYouUpdate('useWhyDidYouUpdateComponent', { ...chartProps, ...(searchRef.current?.searchVO || {}) });
   // console.log(chartProps);
   return (
     <Page>
@@ -347,8 +368,8 @@ const CustomReport: React.FC<Props> = (props) => {
                   onClick={handleExpandChange}
                 />
                 {
-                expand && <Condition reportDs={reportDs} dimension={dimension} />
-              }
+                  expand && <Condition chartProps={chartProps} reportDs={reportDs} dimension={dimension} />
+                }
               </div>
               )
             }
