@@ -4,6 +4,12 @@ import { EChartOption } from 'echarts';
 import ReactEcharts from 'echarts-for-react';
 import { map } from 'lodash';
 import { useFontSize } from '@/components/charts/context';
+import { IIssueFilterFormProps } from '@/components/issue-filter-form';
+import { IChoseFieldComponentProps } from '@/components/chose-field';
+import { ISearchVO } from '@/common/types';
+import ChoseFieldStore from '@/components/chose-field/store';
+import { IChosenFieldField } from '@/components/chose-field/types';
+import { IIssueFilterFormDataProps } from '@/components/issue-filter-form/IssueFilterForm';
 import { IChartData, IChartType, IChartUnit } from './utils';
 
 export interface ChartProps {
@@ -12,6 +18,12 @@ export interface ChartProps {
   chartType?: IChartType,
   type?: IChartUnit,
   option?: EChartOption
+  searchVO?: ISearchVO,
+  choseFieldStore: ChoseFieldStore,
+  choseComponentProps: IChoseFieldComponentProps,
+  filterComponentProps: IIssueFilterFormProps,
+  fields: IChosenFieldField[],
+  filterData: IIssueFilterFormDataProps,
 }
 
 const Chart: React.FC<ChartProps> = ({

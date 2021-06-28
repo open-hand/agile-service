@@ -4,7 +4,7 @@ import { axios } from '@choerodon/boot';
 import Api from './Api';
 
 export interface ICreateData {
-  searchJson: string
+  searchJson?: string
   name: string
   description?: string
   chartType: IChartType

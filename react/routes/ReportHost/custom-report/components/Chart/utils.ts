@@ -105,10 +105,16 @@ const legendPageStyle = {
   },
 };
 const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[], maxShow: number): any => {
+  const unitZ = unit === 'quantity' ? '个' : '点';
   const xAxisData = map((data && data[0].pointList) || [], 'analysisValue');
   if (chartType === 'line' || chartType === 'bar') {
     return ({
-      tooltip: {},
+      tooltip: {
+        formatter(params: any) {
+          const content = `${params.marker}${params.name} : ${(params.value || params.value === 0) ? parseFloat(params.value) : '-'}${unitZ}`;
+          return content;
+        },
+      },
       xAxis: {
         ...xAxis,
         data: xAxisData,

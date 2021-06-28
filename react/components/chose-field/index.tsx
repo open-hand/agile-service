@@ -36,7 +36,7 @@ interface IChoseFieldDataProps {
   store: ChoseFieldStore,
   fields: IChosenFieldField[],
 }
-interface IChoseFieldComponentProps {
+export interface IChoseFieldComponentProps {
   store: ChoseFieldStore,
   choseField?: (data: IChosenFieldField | IChosenFieldField[], status: 'add' | 'del') => void,
   dropDownProps?: Partial<DropDownProps>,
