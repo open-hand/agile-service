@@ -48,16 +48,12 @@ interface IIssueFilterComponentProps {
 const defaultIssueFilterFormEvents = {
   afterDelete: () => { },
 };
+const dateFormatArr = ['HH:mm:ss', 'YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DD'];
 export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps, IIssueFilterComponentProps] {
   const [fields, setFields] = useState<IChosenFieldField[]>([]);
   const extraFormItems = useObservable<Map<string, IChosenFieldField>>(new Map());
   const currentFormItems = useObservable<Map<string, IChosenFieldField>>(new Map());
-  // 初始化额外form项
-  useEffect(() => {
-    if (config?.extraFormItems && Array.isArray(config.extraFormItems)) {
-      config?.extraFormItems.forEach((item) => !extraFormItems.has(item.code) && extraFormItems.set(item.code, item));
-    }
-  }, [config?.extraFormItems, extraFormItems]);
+
   // const chosenFields = useObservable<IChosenFieldField[]>([]);
   const systemDataSetFieldConfig = useMemo(() => {
     const localSystemDataSetFieldConfig: Map<string, FieldProps> = new Map();
@@ -89,6 +85,34 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
       currentFormItems.delete(value.code);
     }
   };
+  const initField = useCallback((field: IChosenFieldField) => {
+    let values = toJS(field.value);
+    const dateIndex = ['time', 'datetime', 'date'].indexOf(field.fieldType ?? '');
+    if (dateIndex !== -1) {
+      values = Array.isArray(values) ? values.map((item) => moment(item, dateFormatArr[dateIndex]))
+        : moment(values, dateFormatArr);
+    }
+    if (values) {
+      if (field.fieldType === 'member') {
+        values = Array.isArray(values) ? values.map((item) => String(item)) : String(values);
+      }
+      !dataSet.current?.get(field.code) && dataSet.current?.set(field.code, values);
+    }
+  }, [dataSet]);
+    // 初始化额外form项
+  useEffect(() => {
+    if (config?.extraFormItems && Array.isArray(config.extraFormItems)) {
+        config?.extraFormItems.forEach((item) => !extraFormItems.has(item.code) && extraFormItems.set(item.code, item) && initField(item));
+    }
+  }, [config?.extraFormItems, extraFormItems, initField]);
+  useEffect(() => {
+    // 初始化
+    if (config?.defaultValue && Array.isArray(config?.defaultValue)) {
+      config.defaultValue.forEach((item) => {
+        initField(item);
+      });
+    }
+  }, [initField]);
   const dataProps = {
     currentFormItems,
     fields,
@@ -114,7 +138,6 @@ export function useIssueFilterFormDataSet(props: { fields: IChosenFieldField[], 
 const IssueFilterForm: React.FC = () => {
   const props = useIssueFilterFormStore();
   const prefixCls = 'c7n-agile-issue-filter-form';
-  const dateFormatArr = useMemo(() => ['HH:mm:ss', 'YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DD'], []);
   const currentFormCode = useMemo(() => new Map<'chosenFields' | 'extraFormItems', Set<string>>([['chosenFields', new Set()], ['extraFormItems', new Set()]]), []);
   const dataSet = useMemo(() => {
     if (props.dataSet) {
