@@ -8,10 +8,7 @@ import io.choerodon.agile.infra.dto.IssueTypeExtendDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.StatusLinkageDTO;
 import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
-import io.choerodon.agile.infra.mapper.IssueMapper;
-import io.choerodon.agile.infra.mapper.IssueTypeMapper;
-import io.choerodon.agile.infra.mapper.StatusLinkageMapper;
-import io.choerodon.agile.infra.mapper.StatusMachineTransformMapper;
+import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.core.exception.CommonException;
@@ -64,6 +61,9 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
 
     @Autowired
     private IssueTypeService issueTypeService;
+
+    @Autowired
+    private LinkIssueStatusLinkageMapper linkIssueStatusLinkageMapper;
 
     @Override
     public List<StatusLinkageVO> createOrUpdate(Long projectId, Long issueTypeId, Long statusId, Long objectVersionNumber, String applyType, List<StatusLinkageVO> linkageVOS) {
@@ -225,7 +225,25 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
 
     @Override
     public List<StatusLinkageVO> listStatusLinkageByProjectId(Long projectId) {
-        return statusLinkageMapper.selectWithStatusByProjectId(projectId);
+        List<StatusLinkageVO> allStatusLinkage = new ArrayList<>();
+        List<StatusLinkageVO> linkageVOS = statusLinkageMapper.selectWithStatusByProjectId(projectId);
+        Map<Long, List<Long>> map = new HashMap<>();
+        if (!CollectionUtils.isEmpty(linkageVOS)) {
+            allStatusLinkage.addAll(linkageVOS);
+            map.putAll(linkageVOS.stream().collect(Collectors.groupingBy(StatusLinkageVO::getIssueTypeId, Collectors.mapping(StatusLinkageVO::getStatusId, Collectors.toList()))));
+        }
+        List<StatusLinkageVO> statusLinkageVOS = linkIssueStatusLinkageMapper.selectWithStatusByProjectId(projectId);
+        if (!CollectionUtils.isEmpty(statusLinkageVOS)) {
+            for (StatusLinkageVO statusLinkageVO : statusLinkageVOS) {
+                List<Long> existStatusIds = map.getOrDefault(statusLinkageVO.getIssueTypeId(), new ArrayList<>());
+                if (!existStatusIds.contains(statusLinkageVO.getStatusId())) {
+                    existStatusIds.add(statusLinkageVO.getStatusId());
+                    map.put(statusLinkageVO.getIssueTypeId(), existStatusIds);
+                    allStatusLinkage.add(statusLinkageVO);
+                }
+            }
+        }
+        return allStatusLinkage;
     }
 
     @Override
