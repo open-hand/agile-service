@@ -174,12 +174,19 @@ class QuickCreateIssue extends Component {
     }
   };
 
+  getCurrentType() {
+    const { currentTypeId } = this.state;
+    const { issueTypes } = this.props;
+    const currentType = issueTypes.find((t) => t.id === currentTypeId);
+    return currentType || issueTypes[0] || {};
+  }
+
   render() {
     const {
       create, loading, currentTypeId, summary,
     } = this.state;
     const { issueTypes, buttonShowText, buttonShow = true } = this.props;
-    const currentType = issueTypes.find((t) => t.id === currentTypeId);
+    const currentType = this.getCurrentType();
 
     const typeList = (
       <Menu
