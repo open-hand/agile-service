@@ -249,8 +249,8 @@ const CustomReport: React.FC<Props> = (props) => {
     setExpand(true);
   }, [chartId, lost]);
 
-  // useWhyDidYouUpdate('useWhyDidYouUpdateComponent', { ...chartProps });
-  // console.log(data);
+  useWhyDidYouUpdate('useWhyDidYouUpdateComponent', { ...chartProps });
+  console.log(data);
   return (
     <Page>
       <Header>

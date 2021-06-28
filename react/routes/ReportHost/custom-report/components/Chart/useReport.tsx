@@ -52,7 +52,7 @@ function useReport(config: ChartConfig, maxShow = 12, onFinish?: Function): [{},
     value: choseFieldStore.getAllChosenField,
     events: {
       afterDelete: (item) => {
-        choseFieldStore.delChosenFields(item.code);
+        choseFieldStore.delChosenFields(item.id || item.code);
       },
     },
   });
