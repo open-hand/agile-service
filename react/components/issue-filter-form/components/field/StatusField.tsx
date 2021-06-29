@@ -10,7 +10,6 @@ import { includes, intersection } from 'lodash';
 
 interface Props extends Partial<SelectProps> {
   issueTypeId?: string
-  expectStatusId?: string
   isProgram?: boolean,
   dataRef?: React.MutableRefObject<any>,
   afterLoad?: (statusList: IStatus[]) => void
@@ -19,7 +18,7 @@ interface Props extends Partial<SelectProps> {
   isBacklog?: boolean
 }
 const SelectStatus: React.FC<Props> = forwardRef(({
-  issueTypeId, expectStatusId, dataRef, isProgram, afterLoad, issueTypeIds, selectedIds, isBacklog = false, ...otherProps
+  issueTypeId, dataRef, isProgram, afterLoad, issueTypeIds, selectedIds, isBacklog = false, ...otherProps
 }, ref: React.Ref<Select>) => {
   let applyType = 'agile';
   if (isProgram) {
