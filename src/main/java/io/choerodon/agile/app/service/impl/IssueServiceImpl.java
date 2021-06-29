@@ -2675,10 +2675,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (CollectionUtils.isEmpty(projectIds)) {
             return new Page<>();
         }
-        Set<Long> userIds = issueMapper.selectUserIdsByProjectIds(projectIds);
         AgileUserVO agileUserVO = new AgileUserVO();
         agileUserVO.setProjectIds(new HashSet<>(projectIds));
-        agileUserVO.setUserIds(userIds);
         agileUserVO.setOrganizationId(organizationId);
         agileUserVO.setParam(param);
         return baseFeignClient.agileUsersByProjectIds(0L, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
