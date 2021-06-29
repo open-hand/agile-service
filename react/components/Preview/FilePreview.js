@@ -12,7 +12,7 @@ const FilePreview = ({
     if (officeSuffix.includes(getFileSuffix(url))) {
       return (
         <div className={`${prefixCls}-content-iframeWrap`}>
-          <iframe title="附件预览" width="100%" height="100%" src={`https://view.officeapps.live.com/op/view.aspx?src=${url}${encodeURIComponent(url)}`} />
+          <iframe title="附件预览" width="100%" height="100%" src={`https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}`} />
         </div>
       );
     } if (getFileSuffix(url) === 'pdf') {
