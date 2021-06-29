@@ -100,12 +100,12 @@ const ReportHostIndex = ({ match }) => (
     />
     {ReportRoutes && ReportRoutes({ match })}
     <PermissionRoute
-      service={[]}
+      service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.customAdd']}
       path={`${match.url}/add`}
       component={ReportAdd}
     />
     <PermissionRoute
-      service={[]}
+      service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.custom']}
       path={`${match.url}/:id`}
       component={ReportAdd}
     />
