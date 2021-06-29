@@ -82,13 +82,15 @@ function SingleFileUplaod(props) {
   return (
     <div className="c7n-agile-singleFileUpload-container">
       <div className="c7n-agile-singleFileUpload">
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', maxWidth: 'calc(100% - 105px)' }}>
           <img src={suffixImgMap.get(suffix) || obj} alt="doc" className="c7n-agile-singleFileUpload-img" />
-          <span
-            className="c7n-agile-singleFileUpload-fileName"
-          >
-            {fileName}
-          </span>
+          <Tooltip title={fileName}>
+            <span
+              className="c7n-agile-singleFileUpload-fileName"
+            >
+              {fileName}
+            </span>
+          </Tooltip>
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {
