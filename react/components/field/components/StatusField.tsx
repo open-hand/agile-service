@@ -7,13 +7,12 @@ import { IStatus } from '@/common/types';
 
 interface Props extends Partial<SelectProps> {
   issueTypeId?: string
-  expectStatusId?: string
   isProgram?: boolean,
   dataRef?: React.MutableRefObject<any>,
   afterLoad?: (statusList: IStatus[]) => void
 }
 const SelectStatus: React.FC<Props> = ({
-  issueTypeId, expectStatusId, dataRef, isProgram, afterLoad, ...otherProps
+  issueTypeId, dataRef, isProgram, afterLoad, ...otherProps
 }) => {
   const config = useMemo((): SelectConfig<IStatus> => ({
     name: 'statusId',
