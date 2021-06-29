@@ -351,7 +351,7 @@ const CustomReport: React.FC<Props> = (props) => {
                             (data || []).length > 0 ? (
                               <>
                                 <Chart {...chartProps} key={`${chartType}-${statisticsType}-${analysisField}-${comparedField}`} />
-                                <Table {...chartProps} />
+                                <Table {...chartProps} analysisField={analysisField} dimension={dimension} />
                               </>
                             ) : (
                               <>
