@@ -2,8 +2,8 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.GanttChartVO;
 import io.choerodon.agile.api.vo.SearchVO;
-
-import java.util.List;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * @author superlee
@@ -18,7 +18,7 @@ public interface GanttChartService {
      * @param searchVO
      * @return
      */
-    List<GanttChartVO> pagedQuery(Long projectId, SearchVO searchVO, Long lastIssueId, Integer size);
+    Page<GanttChartVO> pagedQuery(Long projectId, SearchVO searchVO, PageRequest pageRequest);
 
     /**
      * 查询甘特图列表数据(用户视图)

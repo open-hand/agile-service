@@ -341,15 +341,6 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                             @Param("orderStr") String orderStr,
                                             @Param("isTreeView") Boolean isTreeView);
 
-    List<IssueDTO> pagedSelectIssueParent(@Param("projectId") Long projectId,
-                                          @Param("searchVO") SearchVO searchVO,
-                                          @Param("filterSql") String filterSql,
-                                          @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
-                                          @Param("orderStr") String orderStr,
-                                          @Param("isTreeView") Boolean isTreeView,
-                                          @Param("lastIssueId") Long lastIssueId,
-                                          @Param("limit") Integer limit);
-
     List<IssueDTO> queryIssueListWithSubByIssueIds(@Param("issueIds") List<Long> issueIds,
                                                    @Param("childrenIds") Set<Long> childrenIds,
                                                    @Param("isExcelExported") boolean isExcelExported,

@@ -9,7 +9,12 @@ import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.PageUtil;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.utils.PageUtils;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,28 +48,23 @@ public class GanttChartServiceImpl implements GanttChartService {
     private ObjectMapper objectMapper;
 
     @Override
-    public List<GanttChartVO> pagedQuery(Long projectId,
+    public Page<GanttChartVO> pagedQuery(Long projectId,
                                          SearchVO searchVO,
-                                         Long lastIssueId,
-                                         Integer size) {
+                                         PageRequest pageRequest) {
         if (isSprintEmpty(searchVO)) {
             throw new CommonException("error.otherArgs.sprint.empty");
         }
-        if (size <= 0) {
-            throw new CommonException("error.illegal.limit");
-        }
-        List<GanttChartVO> result = listByProjectIdAndSearch(projectId, searchVO, lastIssueId, size);
-        return toTree(result);
+        return listByProjectIdAndSearch(projectId, searchVO, pageRequest);
     }
 
-    private List<GanttChartVO> listByProjectIdAndSearch(Long projectId,
+    private Page<GanttChartVO> listByProjectIdAndSearch(Long projectId,
                                                         SearchVO searchVO,
-                                                        Long lastIssueId,
-                                                        Integer size) {
+                                                        PageRequest pageRequest) {
+        Page<GanttChartVO> emptyPage = PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
         //设置不查询史诗
         boolean illegalIssueTypeId = buildIssueType(searchVO, projectId);
         if (illegalIssueTypeId) {
-            return new ArrayList<>();
+            return emptyPage;
         }
         Boolean condition = issueService.handleSearchUser(searchVO, projectId);
         if (Boolean.TRUE.equals(condition)) {
@@ -76,9 +76,9 @@ public class GanttChartServiceImpl implements GanttChartService {
                 filterSql = null;
             }
             boardAssembler.handleOtherArgs(searchVO);
-            String orderStr = "issue_id desc";
-            List<IssueDTO> issues = issueMapper.pagedSelectIssueParent(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), orderStr, true, lastIssueId, size);
-            List<Long> issueIds = issues.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+            Page<IssueDTO> page =
+                    PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), null, true));
+            List<Long> issueIds = page.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
             if (!ObjectUtils.isEmpty(issueIds)) {
                 Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds());
                 List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(projectId, issueIds, childrenIds);
@@ -87,12 +87,14 @@ public class GanttChartServiceImpl implements GanttChartService {
                         issueMapper.selectActuatorCompletedDateByIssueIds(issueIds, projectId)
                                 .stream()
                                 .collect(Collectors.toMap(GanttChartVO::getIssueId, GanttChartVO::getActualCompletedDate));
-                return buildFromIssueDto(issueDTOList, projectId, completedDateMap);
+                List<GanttChartVO> result = buildFromIssueDto(issueDTOList, projectId, completedDateMap);
+                result = toTree(result);
+                return PageUtils.copyPropertiesAndResetContent(page, result);
             } else {
-                return new ArrayList<>();
+                return emptyPage;
             }
         } else {
-            return new ArrayList<>();
+            return emptyPage;
         }
     }
 
