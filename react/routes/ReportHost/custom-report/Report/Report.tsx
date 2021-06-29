@@ -22,7 +22,7 @@ import LINK_URL from '@/constants/LINK_URL';
 import { SearchVOToFilter } from '@/components/issue-search/utils';
 import emptyPic from '@/assets/image/NoData.svg';
 import pic from './NoData.svg';
-import styles from './CustomReport.less';
+import styles from './Report.less';
 import Condition from '../components/Condition';
 import useReport from '../components/Chart/useReport';
 import Chart from '../components/Chart';
@@ -47,7 +47,6 @@ const CustomReport: React.FC<Props> = (props) => {
   const [chartRes, setChartRes] = useState<null | IChartRes>(null);
   const [dimension, setDimension] = useState<IField[]>([]);
   const [customChartList, setCustomChartList] = useState<{title: string, path: string }[]>([]);
-  const searchRef = useRef<{searchVO: ISearchVO} | null>(null);
 
   useEffect(() => {
     pageConfigApi.load().then((res: { content: IField[]}) => {
