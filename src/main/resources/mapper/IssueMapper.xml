@@ -625,6 +625,78 @@
         ) ai1
     </select>
 
+    <select id="pagedSelectIssueParent" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        select
+        ai1.issue_id ,
+        ai1.priority_id,
+        ai1.reporter_id,
+        ai1.status_id,
+        ai1.assignee_id,
+        ai1.last_update_date,
+        ai1.issue_num1 as issue_num,
+        ai1.issue_type_id
+        from (
+        select
+        t1.issue_issue_id as issue_id,
+        ai.priority_id,
+        ai.reporter_id,
+        ai.status_id,
+        ai.assignee_id,
+        ai.last_update_date,
+        concat(api.project_code,'-', ai.issue_num) as issue_num1,
+        CONVERT(ai.issue_num,SIGNED) as issue_num_convert,
+        ai.issue_type_id
+        from (
+            select
+            <choose>
+                <when test="isTreeView">
+                    distinct case
+                    when search.type_code = 'sub_task' then search.parent_issue_id
+                    when search.type_code = 'bug' and search.relate_issue_id is not null and search.relate_issue_id != 0 then search.relate_issue_id
+                    else search.issue_issue_id
+                    end as issue_issue_id
+                </when>
+                <otherwise>
+                    distinct search.issue_issue_id
+                </otherwise>
+            </choose>
+            from (
+                <include refid="queryIssueIdsListWithSubSql"/>
+            )search
+            where 1=1
+            and (
+                search.type_code != 'sub_task'
+                or search.parent_type_code != 'bug'
+                or search.parent_relate_issue_id is null
+                or search.parent_relate_issue_id = 0
+            )
+            <if test='searchVO.searchArgs != null'>
+                <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
+                    AND search.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+                </if>
+            </if>
+            <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+                <foreach collection="searchVO.contents" item="content" index="index">
+                    AND (search.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR search.summary LIKE
+                    CONCAT(CONCAT('%',
+                    #{content}), '%'))
+                </foreach>
+            </if>
+        ) t1
+        join agile_issue ai
+        on t1.issue_issue_id = ai.issue_id
+        left join agile_project_info api on ai.project_id = api.project_id
+        where 1=1
+        <if test="lastIssueId != null">
+            and issue_id &lt; #{lastIssueId}
+        </if>
+        <if test="orderStr != null">
+            order by ${orderStr}
+        </if>
+        limit #{limit}
+        ) ai1
+    </select>
+
     <select id="queryChildrenIdByParentId" resultType="java.lang.Long">
         SELECT search.issue_issue_id
         from (

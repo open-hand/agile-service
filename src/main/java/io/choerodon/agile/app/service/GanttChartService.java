@@ -2,7 +2,6 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.GanttChartVO;
 import io.choerodon.agile.api.vo.SearchVO;
-import io.choerodon.agile.api.vo.GanttChartTreeVO;
 
 import java.util.List;
 
@@ -19,7 +18,7 @@ public interface GanttChartService {
      * @param searchVO
      * @return
      */
-    List<GanttChartVO> listByTask(Long projectId, SearchVO searchVO);
+    List<GanttChartVO> pagedQuery(Long projectId, SearchVO searchVO, Long lastIssueId, Integer size);
 
     /**
      * 查询甘特图列表数据(用户视图)
@@ -28,5 +27,5 @@ public interface GanttChartService {
      * @param searchVO
      * @return
      */
-    List<GanttChartTreeVO> listByUser(Long projectId, SearchVO searchVO);
+//    List<GanttChartTreeVO> listByUser(Long projectId, SearchVO searchVO);
 }

@@ -43,15 +43,24 @@ public class GanttChartServiceImpl implements GanttChartService {
     private ObjectMapper objectMapper;
 
     @Override
-    public List<GanttChartVO> listByTask(Long projectId, SearchVO searchVO) {
+    public List<GanttChartVO> pagedQuery(Long projectId,
+                                         SearchVO searchVO,
+                                         Long lastIssueId,
+                                         Integer size) {
         if (isSprintEmpty(searchVO)) {
             throw new CommonException("error.otherArgs.sprint.empty");
         }
-        List<GanttChartVO> result = listByProjectIdAndSearch(projectId, searchVO);
+        if (size <= 0) {
+            throw new CommonException("error.illegal.limit");
+        }
+        List<GanttChartVO> result = listByProjectIdAndSearch(projectId, searchVO, lastIssueId, size);
         return toTree(result);
     }
 
-    private List<GanttChartVO> listByProjectIdAndSearch(Long projectId, SearchVO searchVO) {
+    private List<GanttChartVO> listByProjectIdAndSearch(Long projectId,
+                                                        SearchVO searchVO,
+                                                        Long lastIssueId,
+                                                        Integer size) {
         //设置不查询史诗
         boolean illegalIssueTypeId = buildIssueType(searchVO, projectId);
         if (illegalIssueTypeId) {
@@ -67,8 +76,8 @@ public class GanttChartServiceImpl implements GanttChartService {
                 filterSql = null;
             }
             boardAssembler.handleOtherArgs(searchVO);
-            String orderStr = "issue_num_convert desc";
-            List<IssueDTO> issues = issueMapper.queryIssueIdsListWithSub(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), orderStr, true);
+            String orderStr = "issue_id desc";
+            List<IssueDTO> issues = issueMapper.pagedSelectIssueParent(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), orderStr, true, lastIssueId, size);
             List<Long> issueIds = issues.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
             if (!ObjectUtils.isEmpty(issueIds)) {
                 Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds());
@@ -129,42 +138,42 @@ public class GanttChartServiceImpl implements GanttChartService {
         return true;
     }
 
-    @Override
-    public List<GanttChartTreeVO> listByUser(Long projectId, SearchVO searchVO) {
-        List<GanttChartVO> ganttChartList = listByProjectIdAndSearch(projectId, searchVO);
-        List<GanttChartVO> unassigned = new ArrayList<>();
-        Map<String, List<GanttChartVO>> map = new HashMap<>();
-        ganttChartList.forEach(g -> {
-            UserMessageDTO user = g.getAssignee();
-            if (ObjectUtils.isEmpty(user)) {
-                unassigned.add(g);
-            } else {
-                String name = user.getName();
-                List<GanttChartVO> ganttCharts = map.get(name);
-                if (ganttCharts == null) {
-                    ganttCharts = new ArrayList<>();
-                    map.put(name, ganttCharts);
-                }
-                ganttCharts.add(g);
-            }
-        });
-        List<GanttChartTreeVO> result = new ArrayList<>();
-        map.forEach((k, v) -> {
-            GanttChartTreeVO ganttChartTreeVO = new GanttChartTreeVO();
-            ganttChartTreeVO.setSummary(k);
-            ganttChartTreeVO.setGroup(true);
-            ganttChartTreeVO.setChildren(toTree(v));
-            result.add(ganttChartTreeVO);
-        });
-        if (!unassigned.isEmpty()) {
-            GanttChartTreeVO unassignedVO = new GanttChartTreeVO();
-            unassignedVO.setSummary("未分配");
-            unassignedVO.setGroup(true);
-            unassignedVO.setChildren(toTree(unassigned));
-            result.add(unassignedVO);
-        }
-        return result;
-    }
+//    @Override
+//    public List<GanttChartTreeVO> listByUser(Long projectId, SearchVO searchVO) {
+//        List<GanttChartVO> ganttChartList = listByProjectIdAndSearch(projectId, searchVO);
+//        List<GanttChartVO> unassigned = new ArrayList<>();
+//        Map<String, List<GanttChartVO>> map = new HashMap<>();
+//        ganttChartList.forEach(g -> {
+//            UserMessageDTO user = g.getAssignee();
+//            if (ObjectUtils.isEmpty(user)) {
+//                unassigned.add(g);
+//            } else {
+//                String name = user.getName();
+//                List<GanttChartVO> ganttCharts = map.get(name);
+//                if (ganttCharts == null) {
+//                    ganttCharts = new ArrayList<>();
+//                    map.put(name, ganttCharts);
+//                }
+//                ganttCharts.add(g);
+//            }
+//        });
+//        List<GanttChartTreeVO> result = new ArrayList<>();
+//        map.forEach((k, v) -> {
+//            GanttChartTreeVO ganttChartTreeVO = new GanttChartTreeVO();
+//            ganttChartTreeVO.setSummary(k);
+//            ganttChartTreeVO.setGroup(true);
+//            ganttChartTreeVO.setChildren(toTree(v));
+//            result.add(ganttChartTreeVO);
+//        });
+//        if (!unassigned.isEmpty()) {
+//            GanttChartTreeVO unassignedVO = new GanttChartTreeVO();
+//            unassignedVO.setSummary("未分配");
+//            unassignedVO.setGroup(true);
+//            unassignedVO.setChildren(toTree(unassigned));
+//            result.add(unassignedVO);
+//        }
+//        return result;
+//    }
 
     private List<GanttChartVO> toTree(List<GanttChartVO> ganttChartList) {
         List<GanttChartVO> result = new ArrayList<>();
