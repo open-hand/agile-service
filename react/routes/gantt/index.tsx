@@ -282,6 +282,7 @@ const GanttPage: React.FC = () => {
     summary: issue.summary,
     assignee: issue.assigneeId ? {
       name: issue.assigneeName,
+      realName: issue.assigneeRealName,
     } : null,
   });
   const addSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {
