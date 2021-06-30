@@ -1,22 +1,19 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import IssueFilterForm from '@/components/issue-filter-form';
-import ChooseField from '@/components/chose-field';
-import { ChartProps } from '../../Chart';
+import IssueFilterForm, { IIssueFilterFormProps } from '@/components/issue-filter-form';
+import ChooseField, { IChoseFieldComponentProps } from '@/components/chose-field';
 
 const Search: React.FC<{
-  chartProps: ChartProps
-}> = ({ chartProps }) => {
-  const { filterComponentProps, choseComponentProps } = chartProps;
-  return (
-    <div>
-      <IssueFilterForm {...filterComponentProps} formColumns={1}>
-        <div>
-          <ChooseField {...choseComponentProps} dropDownBtnProps={{ icon: 'add', style: { marginLeft: 6 } }} />
-        </div>
-      </IssueFilterForm>
-    </div>
-  );
-};
+  choseComponentProps: IChoseFieldComponentProps,
+  filterComponentProps: IIssueFilterFormProps,
+}> = ({ filterComponentProps, choseComponentProps }) => (
+  <div>
+    <IssueFilterForm {...filterComponentProps} formColumns={1}>
+      <div>
+        <ChooseField {...choseComponentProps} dropDownBtnProps={{ icon: 'add', style: { marginLeft: 6 } }} />
+      </div>
+    </IssueFilterForm>
+  </div>
+);
 
 export default observer(Search);

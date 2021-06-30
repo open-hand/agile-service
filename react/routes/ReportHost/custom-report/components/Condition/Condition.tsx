@@ -1,15 +1,16 @@
 import React, {
-  ReactElement, useCallback, useEffect, useImperativeHandle, useState,
+  ReactElement,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   Select, Form, DataSet, TextArea,
 } from 'choerodon-ui/pro';
 import { Icon, Tooltip } from 'choerodon-ui';
-import { IField, ISearchVO } from '@/common/types';
+import { IField } from '@/common/types';
+import { IChoseFieldComponentProps } from '@/components/chose-field';
+import { IIssueFilterFormProps } from '@/components/issue-filter-form';
 import Search from './Search';
 import styles from './Condition.less';
-import { ChartProps } from '../Chart';
 
 const { Option } = Select;
 
@@ -28,9 +29,12 @@ const Part: React.FC<{
 );
 const Condition: React.FC<{
   reportDs: DataSet,
-  dimension: IField[]
-  chartProps: ChartProps
-}> = ({ reportDs, dimension, chartProps }) => (
+  dimension: IField[],
+  choseComponentProps: IChoseFieldComponentProps,
+  filterComponentProps: IIssueFilterFormProps,
+}> = ({
+  reportDs, dimension, filterComponentProps, choseComponentProps,
+}) => (
   <div className={styles.condition}>
     <Part title="图表说明">
       <Form dataSet={reportDs} className={styles.form}>
@@ -71,7 +75,7 @@ const Condition: React.FC<{
     </Part>
     <Part title="数据筛选" tip="设置图表的数据范围。例如：您可以选择一部分迭代的问题进行分析">
       <div className={styles.search}>
-        <Search chartProps={chartProps} />
+        <Search filterComponentProps={filterComponentProps} choseComponentProps={choseComponentProps} />
       </div>
     </Part>
   </div>

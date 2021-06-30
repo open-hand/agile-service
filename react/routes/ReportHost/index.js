@@ -19,7 +19,7 @@ const customIconMap = new Map([
 ]);
 
 const ReportRoutes = get('agile:ProgramReportRoutes');
-const ReportAdd = React.lazy(() => import('./custom-report/Report'));
+const ReportAdd = React.lazy(() => import('./custom-report'));
 const BurndownChart = React.lazy(() => (import('./BurndownChart')));
 const sprintReport = React.lazy(() => (import('./SprintReport')));
 const Accumulation = React.lazy(() => (import('./Accumulation')));
