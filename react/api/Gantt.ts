@@ -25,17 +25,9 @@ class GanttApi {
       url: `${this.prefix}/gantt/list`,
       data,
       params: {
-        size: 500,
+        size: 1000,
         page,
       },
-    });
-  }
-
-  loadByUser(data: any) {
-    return axios({
-      method: 'post',
-      url: `${this.prefix}/gantt/list/by_user`,
-      data,
     });
   }
 

@@ -6,7 +6,9 @@ import React, {
 import { unstable_batchedUpdates } from 'react-dom';
 import { Tooltip, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import { find } from 'lodash';
+import {
+  add, find, findIndex, remove,
+} from 'lodash';
 import produce from 'immer';
 import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
@@ -52,6 +54,29 @@ const typeOptions = [{
 }] as const;
 const typeValues = typeOptions.map((t) => t.value);
 type TypeValue = (typeof typeValues)[number];
+const groupByUser = (data: any[]) => {
+  const map = new Map<string, any[]>();
+  const noAssigneeData: any[] = [];
+  data.forEach((issue) => {
+    if (issue.assignee) {
+      if (map.has(issue.assignee.name)) {
+        map.get(issue.assignee.name)?.push(issue);
+      } else {
+        map.set(issue.assignee.name, [issue]);
+      }
+    } else {
+      noAssigneeData.push(issue);
+    }
+  });
+  if (noAssigneeData.length > 0) {
+    map.set('未分配', noAssigneeData);
+  }
+  return [...map.entries()].map(([name, children]) => ({
+    summary: name,
+    group: true,
+    children,
+  }));
+};
 const renderTooltip = (user: User) => {
   const {
     loginName, realName, email, ldap,
@@ -65,14 +90,18 @@ const tableColumns: GanttProps<Issue>['columns'] = [{
   name: 'summary',
   label: '名称',
   render: (record) => (
-    <Tooltip title={record.summary}>
-      {!record.group ? (
-        <span style={{ cursor: 'pointer', color: 'var(--table-click-color)' }}>
-          <TypeTag iconSize={22} data={record.issueTypeVO} style={{ marginRight: 5 }} />
+    !record.group ? (
+      <span style={{ cursor: 'pointer', color: 'var(--table-click-color)' }}>
+        <TypeTag iconSize={22} data={record.issueTypeVO} style={{ marginRight: 5 }} />
+        <Tooltip title={record.summary}>
           <span style={{ verticalAlign: 'middle' }}>{record.summary}</span>
-        </span>
-      ) : <span style={{ color: 'var(--table-click-color)' }}>{record.summary}</span>}
-    </Tooltip>
+        </Tooltip>
+      </span>
+    ) : (
+      <Tooltip title={record.summary}>
+        <span style={{ color: 'var(--table-click-color)' }}>{record.summary}</span>
+      </Tooltip>
+    )
   ),
 },
 {
@@ -127,7 +156,7 @@ const GanttPage: React.FC = () => {
       const [workCalendarRes, projectWorkCalendarRes, res] = await Promise.all([
         workCalendarApi.getWorkSetting(year),
         workCalendarApi.getYearCalendar(year),
-        type === 'task' ? ganttApi.loadByTask(filter) : ganttApi.loadByUser(filter),
+        ganttApi.loadByTask(filter),
       ]);
       // setColumns(headers.map((h: any) => ({
       //   width: 100,
@@ -142,7 +171,7 @@ const GanttPage: React.FC = () => {
         setLoading(false);
       });
     })();
-  }, [issueSearchStore, sprintIds, type]);
+  }, [issueSearchStore, sprintIds]);
   useEffect(() => {
     loadData();
   }, [issueSearchStore, loadData]);
@@ -244,55 +273,99 @@ const GanttPage: React.FC = () => {
       {t === 'left' ? <Icon type="navigate_before" /> : <Icon type="navigate_next" />}
     </div>
   ), []);
-  const normalizeIssue = (issue:Issue, source:any = {}) => Object.assign(source, {
+  const normalizeIssue = (issue: Issue, source: any = {}) => Object.assign(source, {
     estimatedEndTime: issue.estimatedEndTime,
     estimatedStartTime: issue.estimatedStartTime,
     issueTypeVO: issue.issueTypeVO,
     objectVersionNumber: issue.objectVersionNumber,
     statusVO: issue.statusVO,
     summary: issue.summary,
+    assignee: issue.assigneeId ? {
+      name: issue.assigneeName,
+    } : null,
   });
-  const handleIssueUpdate = usePersistFn((issue:Issue) => {
-    setData(produce(data, (draft) => {
-      const target = find(draft, { issueId: issue.issueId });
-      if (target) {
-        // 更新属性
-        normalizeIssue(issue, target);
-      }
-    }));
-  });
-
-  const handleAddIssue = usePersistFn((issue:Issue) => {
-    setData(produce(data, (draft) => {
-      const target = find(draft, { issueId: issue.issueId });
-      if (target) {
-        // 更新属性
-        Object.assign(target, {
-          estimatedEndTime: issue.estimatedEndTime,
-          estimatedStartTime: issue.estimatedStartTime,
-          issueTypeVO: issue.issueTypeVO,
-          objectVersionNumber: issue.objectVersionNumber,
-          statusVO: issue.statusVO,
-          summary: issue.summary,
-        });
-      }
-    }));
-  });
-  const handleCreateIssue = usePersistFn((issue:Issue) => {
-    const parentIssueId = issue.parentIssueId ?? issue.relateIssueId;
+  const addSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {
     if (parentIssueId) {
       setData(produce(data, (draft) => {
         const parent = find(draft, { issueId: parentIssueId });
         if (parent) {
-          parent.children.unshift(normalizeIssue(issue));
+          parent.children.unshift(normalizeIssue(subIssue));
         }
       }));
+    }
+  });
+  const updateSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {
+    if (parentIssueId) {
+      setData(produce(data, (draft) => {
+        const parent = find(draft, { issueId: parentIssueId });
+        if (parent) {
+          const child = find(parent.children, { issueId: subIssue.issueId });
+          if (child) {
+            normalizeIssue(subIssue, child);
+          }
+        }
+      }));
+    }
+  });
+  const removeSubIssue = usePersistFn((parentIssueId: string, subIssueId: string) => {
+    setData(produce(data, (draft) => {
+      if (parentIssueId) {
+        const parent = find(draft, { issueId: parentIssueId });
+        if (parent) {
+          remove(parent.children, { issueId: subIssueId });
+        }
+      }
+    }));
+  });
+
+  const handleCreateIssue = usePersistFn((issue: Issue) => {
+    const parentIssueId = issue.relateIssueId || issue.parentIssueId;
+    if (parentIssueId) {
+      addSubIssue(issue, parentIssueId);
     } else {
       setData(produce(data, (draft) => {
         draft.unshift(normalizeIssue(issue));
       }));
     }
   });
+  const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId) => {
+    addSubIssue(subIssue, parentIssueId);
+  });
+  const handleIssueUpdate = usePersistFn((issue: Issue | null) => {
+    if (issue) {
+      const parentIssueId = issue.relateIssueId || issue.parentIssueId;
+      if (parentIssueId) {
+        updateSubIssue(issue, parentIssueId);
+      } else {
+        setData(produce(data, (draft) => {
+          const target = find(draft, { issueId: issue.issueId });
+          if (target) {
+          // 更新属性
+            normalizeIssue(issue, target);
+          }
+        }));
+      }
+    }
+  });
+
+  const handleIssueDelete = usePersistFn((issue: Issue | null) => {
+    if (issue) {
+      const parentIssueId = issue.relateIssueId || issue.parentIssueId;
+      if (parentIssueId) {
+        removeSubIssue(parentIssueId, issue.issueId);
+      } else {
+        setData(produce(data, (draft) => {
+          remove(draft, { issueId: issue.issueId });
+        }));
+      }
+    }
+  });
+
+  const handleDeleteSubIssue = usePersistFn((issue: Issue, subIssueId: string) => {
+    removeSubIssue(issue.issueId, subIssueId);
+  });
+
+  const ganttData = useMemo(() => (type === 'assignee' ? groupByUser(data) : data), [data, type]);
   return (
     <Page>
       <Header>
@@ -306,7 +379,9 @@ const GanttPage: React.FC = () => {
           afterLoad={afterSprintLoad}
           hasUnassign
           style={{ marginRight: 16 }}
+          maxTagCount={3}
           searchable={false}
+          selectAllButton={false}
         />
         <FlatSelect value={type} onChange={handleTypeChange} clearButton={false} style={{ marginRight: 8 }}>
           {typeOptions.map((o) => (
@@ -373,7 +448,7 @@ const GanttPage: React.FC = () => {
           {columns.length > 0 && workCalendar && (
             <GanttComponent
               innerRef={store.ganttRef as React.MutableRefObject<GanttRef>}
-              data={data}
+              data={ganttData}
               columns={columns}
               onUpdate={handleUpdate}
               startDateKey="estimatedStartTime"
@@ -398,7 +473,13 @@ const GanttPage: React.FC = () => {
               rowHeight={34}
             />
           )}
-          <IssueDetail refresh={loadData} onUpdate={handleIssueUpdate} />
+          <IssueDetail
+            refresh={loadData}
+            onUpdate={handleIssueUpdate}
+            onDelete={handleIssueDelete}
+            onDeleteSubIssue={handleDeleteSubIssue}
+            onCreateSubIssue={handleCreateSubIssue}
+          />
           <CreateIssue onCreate={handleCreateIssue} />
           <FilterManage
             visible={filterManageVisible!}

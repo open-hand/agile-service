@@ -33,7 +33,7 @@ class IssueList extends Component {
     } else {
       issueApi.update(data).then(() => {
         if (onRefresh) {
-          onRefresh();
+          onRefresh(issueId);
         }
       });
     }

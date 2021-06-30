@@ -41,7 +41,6 @@ function EditIssue() {
     programId,
     backUrl,
     style,
-    onDeleteSubIssue,
     disabled,
     prefixCls,
     issueStore,
@@ -66,20 +65,27 @@ function EditIssue() {
       callback(issue);
     }
   }, [issueEvents]);
-  const onCreateSubIssue = useCallback((issue) => {
-    const callback = issueEvents?.createSubIssue || issueEvents?.update;
+  const onCreateSubIssue = useCallback((subIssue, parentIssueId) => {
+    if (issueEvents?.createSubIssue) {
+      issueEvents?.createSubIssue(subIssue, parentIssueId);
+    } else if (issueEvents?.update) {
+      issueEvents?.update(issue);
+    }
+  }, [issue, issueEvents]);
+  const onDeleteIssue = useCallback((issue) => {
+    const callback = issueEvents?.delete || issueEvents?.update;
     if (callback) {
       callback(issue);
     }
-  }, [issueEvents]);
-  const onDeleteIssue = useCallback(() => {
-    const callback = issueEvents?.delete || issueEvents?.update;
+    close();
+  }, [close, issueEvents]);
+  const onDeleteSubIssue = useCallback((issue, subIssueId) => {
+    const callback = issueEvents?.deleteSubIssue;
     if (callback) {
-      callback();
+      callback(issue, subIssueId);
     }
     close();
   }, [close, issueEvents]);
-
   const loadIssueDetail = async (paramIssueId, callback) => {
     const id = paramIssueId || idRef.current || currentIssueId;
     if (idRef.current !== id && descriptionEditRef.current) {
@@ -302,8 +308,8 @@ function EditIssue() {
           programId={programId}
           reloadIssue={loadIssueDetail}
           onUpdate={onUpdate}
-          onUpdate={onUpdate}
           onIssueCopy={onIssueCopy}
+          onCreateSubIssue={onCreateSubIssue}
           onDeleteSubIssue={onDeleteSubIssue}
           loginUserId={AppState.userInfo.id}
           applyType={applyType}
