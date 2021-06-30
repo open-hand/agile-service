@@ -6,7 +6,7 @@ import React, {
 import { unstable_batchedUpdates } from 'react-dom';
 import { Tooltip, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import { find } from 'lodash';
+import { find, findIndex, remove } from 'lodash';
 import produce from 'immer';
 import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
@@ -66,7 +66,9 @@ const groupByUser = (data: any[]) => {
       noAssigneeData.push(issue);
     }
   });
-  map.set('未分配', noAssigneeData);
+  if (noAssigneeData.length > 0) {
+    map.set('未分配', noAssigneeData);
+  }
   return [...map.entries()].map(([name, children]) => ({
     summary: name,
     group: true,
@@ -272,6 +274,9 @@ const GanttPage: React.FC = () => {
     objectVersionNumber: issue.objectVersionNumber,
     statusVO: issue.statusVO,
     summary: issue.summary,
+    assignee: issue.assigneeId ? {
+      name: issue.assigneeName,
+    } : null,
   });
   const handleIssueUpdate = usePersistFn((issue: Issue) => {
     setData(produce(data, (draft) => {
@@ -282,22 +287,21 @@ const GanttPage: React.FC = () => {
       }
     }));
   });
-
-  const handleAddIssue = usePersistFn((issue: Issue) => {
-    setData(produce(data, (draft) => {
-      const target = find(draft, { issueId: issue.issueId });
-      if (target) {
-        // 更新属性
-        Object.assign(target, {
-          estimatedEndTime: issue.estimatedEndTime,
-          estimatedStartTime: issue.estimatedStartTime,
-          issueTypeVO: issue.issueTypeVO,
-          objectVersionNumber: issue.objectVersionNumber,
-          statusVO: issue.statusVO,
-          summary: issue.summary,
-        });
-      }
-    }));
+  const handleIssueDelete = usePersistFn((issue: Issue | null) => {
+    if (issue) {
+      setData(produce(data, (draft) => {
+        // 判断是否是子issue
+        const parentIssueId = issue.parentIssueId ?? issue.relateIssueId;
+        if (parentIssueId) {
+          const parent = find(draft, { issueId: parentIssueId });
+          if (parent) {
+            remove(parent.children, { issueId: issue.issueId });
+          }
+        } else {
+          remove(draft, { issueId: issue.issueId });
+        }
+      }));
+    }
   });
   const handleCreateIssue = usePersistFn((issue: Issue) => {
     const parentIssueId = issue.parentIssueId ?? issue.relateIssueId;
@@ -328,7 +332,9 @@ const GanttPage: React.FC = () => {
           afterLoad={afterSprintLoad}
           hasUnassign
           style={{ marginRight: 16 }}
+          maxTagCount={3}
           searchable={false}
+          selectAllButton={false}
         />
         <FlatSelect value={type} onChange={handleTypeChange} clearButton={false} style={{ marginRight: 8 }}>
           {typeOptions.map((o) => (
@@ -420,7 +426,11 @@ const GanttPage: React.FC = () => {
               rowHeight={34}
             />
           )}
-          <IssueDetail refresh={loadData} onUpdate={handleIssueUpdate} />
+          <IssueDetail
+            refresh={loadData}
+            onUpdate={handleIssueUpdate}
+            onDelete={handleIssueDelete}
+          />
           <CreateIssue onCreate={handleCreateIssue} />
           <FilterManage
             visible={filterManageVisible!}

@@ -72,10 +72,10 @@ function EditIssue() {
       callback(issue);
     }
   }, [issueEvents]);
-  const onDeleteIssue = useCallback(() => {
+  const onDeleteIssue = useCallback((issue) => {
     const callback = issueEvents?.delete || issueEvents?.update;
     if (callback) {
-      callback();
+      callback(issue);
     }
     close();
   }, [close, issueEvents]);
@@ -301,7 +301,6 @@ function EditIssue() {
           issueId={idRef.current}
           programId={programId}
           reloadIssue={loadIssueDetail}
-          onUpdate={onUpdate}
           onUpdate={onUpdate}
           onIssueCopy={onIssueCopy}
           onDeleteSubIssue={onDeleteSubIssue}

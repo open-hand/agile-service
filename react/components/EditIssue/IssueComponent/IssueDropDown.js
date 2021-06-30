@@ -61,7 +61,7 @@ const IssueDropDown = ({
         return issueApi.delete(issueId, createdBy)
           .then((res) => {
             if (onDeleteIssue) {
-              onDeleteIssue();
+              onDeleteIssue(issue);
             }
           });
       },

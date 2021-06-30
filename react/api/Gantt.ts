@@ -1,5 +1,4 @@
 import { axios } from '@choerodon/boot';
-import { groupBy } from 'lodash';
 import { getProjectId } from '@/utils/common';
 
 class GanttApi {
