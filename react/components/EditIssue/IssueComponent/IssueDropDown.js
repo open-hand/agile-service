@@ -1,8 +1,5 @@
 import React, { useContext } from 'react';
 import {
-  Modal,
-} from 'choerodon-ui';
-import {
   Button,
   Modal as ModalPro, Dropdown, Menu,
 } from 'choerodon-ui/pro';
@@ -18,12 +15,11 @@ import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
 import openIssueMove from './issue-move';
 
-const { confirm } = Modal;
 const IssueDropDown = ({
-  onDeleteIssue, loginUserId, reloadIssue, testLinkStoreRef, onIssueCopy,
+  onDeleteIssue, loginUserId, reloadIssue, testLinkStoreRef, onIssueCopy, onUpdate,
 }) => {
   const {
-    store, onUpdate, applyType,
+    store, applyType,
   } = useContext(EditIssueContext);
   const docs = store.getDoc;
   const hasDevops = useHasDevops();
@@ -99,9 +95,9 @@ const IssueDropDown = ({
           issueId={issueId}
           assigneeId={assigneeId}
           objectVersionNumber={objectVersionNumber}
-          onOk={() => {
+          onOk={(res) => {
             if (onUpdate) {
-              onUpdate();
+              onUpdate(res);
             }
             reloadIssue(issueId);
           }}

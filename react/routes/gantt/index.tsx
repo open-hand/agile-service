@@ -348,7 +348,19 @@ const GanttPage: React.FC = () => {
       }
     }
   });
-
+  const handleTransformType = usePersistFn((newIssue: Issue, oldIssue: Issue) => {
+    const parentTypes = ['story', 'task'];
+    const oldType = oldIssue.issueTypeVO.typeCode;
+    const newType = newIssue.issueTypeVO.typeCode;
+    // 父任务类型之间相互转换，当做更新
+    if (parentTypes.includes(oldType) && parentTypes.includes(newType)) {
+      handleIssueUpdate(newIssue);
+    } else {
+      // 其他的，当做删除再创建
+      handleIssueDelete(oldIssue);
+      handleCreateIssue(newIssue);
+    }
+  });
   const handleIssueDelete = usePersistFn((issue: Issue | null) => {
     if (issue) {
       const parentIssueId = issue.relateIssueId || issue.parentIssueId;
@@ -480,6 +492,8 @@ const GanttPage: React.FC = () => {
             onDelete={handleIssueDelete}
             onDeleteSubIssue={handleDeleteSubIssue}
             onCreateSubIssue={handleCreateSubIssue}
+            onCopyIssue={handleCreateIssue}
+            onTransformType={handleTransformType}
           />
           <CreateIssue onCreate={handleCreateIssue} />
           <FilterManage

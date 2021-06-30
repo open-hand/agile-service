@@ -374,12 +374,12 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
         typeCode: find(issueTypeData, { id: issueTypeIdDataSet.current?.get('issueTypeId') })?.typeCode as string,
         issueTypeId: issueTypeIdDataSet.current?.get('issueTypeId') as string,
       };
-      await issueApi.updateType(submitData);
+      const res = await issueApi.updateType(submitData);
       if (reloadIssue) {
         reloadIssue(issueVO.issueId);
       }
       if (onUpdate) {
-        onUpdate();
+        onUpdate(res);
       }
       return true;
     }

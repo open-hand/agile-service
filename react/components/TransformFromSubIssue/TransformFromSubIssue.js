@@ -104,11 +104,11 @@ class TransformFromSubIssue extends Component {
           });
           // issueApi.subtaskTransformTask(issueUpdateTypeVO)
           issueApi.updateType(issueUpdateTypeVO)
-            .then(() => {
+            .then((newIssue) => {
               this.setState({
                 loading: false,
               });
-              onOk();
+              onOk(newIssue);
             });
         }
       }

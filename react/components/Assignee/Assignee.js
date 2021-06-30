@@ -35,8 +35,8 @@ const Assignee = (props) => {
         objectVersionNumber,
         assigneeId: assigneeId || null,
       };
-      await issueApi.update(obj);
-      onOk && onOk();
+      const res = await issueApi.update(obj);
+      onOk && onOk(res);
       return true;
     }
     return false;
