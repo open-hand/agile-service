@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import React, {
-  useMemo, useCallback, useState, useRef, useEffect,
+  useMemo, useCallback, useState, useEffect,
 } from 'react';
 import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
@@ -8,20 +8,26 @@ import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import {
-  Button, DataSet, TextField, Form, Modal,
+  Button, DataSet, TextField, Modal,
 } from 'choerodon-ui/pro';
 import { EmptyPage } from '@choerodon/components';
 import { Spin } from 'choerodon-ui';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { customReportApi, ICreateData, pageConfigApi } from '@/api';
-import { IField, ISearchVO } from '@/common/types';
-import { useWhyDidYouUpdate } from 'ahooks';
+import {
+  customReportApi, fieldApi, ICreateData, pageConfigApi,
+} from '@/api';
+import { IField } from '@/common/types';
 
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
 import { SearchVOToFilter } from '@/components/issue-search/utils';
 import emptyPic from '@/assets/image/NoData.svg';
+import { useIssueFilterForm } from '@/components/issue-filter-form';
+import { getCustomFieldFilters } from '@/components/issue-export/utils';
+import { getSystemFields } from '@/stores/project/issue/IssueStore';
+import { useChoseField } from '@/components/chose-field';
+import { getTransformSystemFilter } from '@/routes/Issue/components/ExportIssue/utils';
 import pic from './NoData.svg';
 import styles from './Report.less';
 import Condition from '../components/Condition';
@@ -48,6 +54,9 @@ const CustomReport: React.FC<Props> = (props) => {
   const [chartRes, setChartRes] = useState<null | IChartRes>(null);
   const [dimension, setDimension] = useState<IField[]>([]);
   const [customChartList, setCustomChartList] = useState<{title: string, path: string }[]>([]);
+  const [customFields, setCustomFields] = useState<IField[]>([]);
+  const [hasGetCustomFields, setHasGetCustomFields] = useState<boolean>(false);
+  const [expand, setExpand] = useState<boolean>(true);
 
   useEffect(() => {
     pageConfigApi.load().then((res: { content: IField[]}) => {
@@ -68,7 +77,6 @@ const CustomReport: React.FC<Props> = (props) => {
     }
   }, [chartId]);
 
-  const [expand, setExpand] = useState<boolean>(true);
   const checkTitle = useCallback(async (value, name, record) => {
     if (!value || value === chartRes?.name) {
       return true;
@@ -159,6 +167,37 @@ const CustomReport: React.FC<Props> = (props) => {
     to(LINK_URL.report);
   }, []);
 
+  useEffect(() => {
+    const getCustomFields = async () => {
+      const fields = await fieldApi.getCustomFields();
+      setCustomFields(fields);
+      setHasGetCustomFields(true);
+    };
+    getCustomFields();
+  }, []);
+
+  const fields = useMemo(() => [...customFields, ...getSystemFields()], [customFields]);
+
+  const [choseDataProps, choseComponentProps] = useChoseField({
+    fields,
+  });
+
+  const { store: choseFieldStore } = choseDataProps;
+
+  const [filterData, filterComponentProps] = useIssueFilterForm({
+    fields,
+    value: choseFieldStore.getAllChosenField,
+    events: {
+      afterDelete: (item) => {
+        choseFieldStore.delChosenFields(item.id || item.code);
+      },
+    },
+  });
+
+  const search = hasGetCustomFields ? getCustomFieldFilters(choseFieldStore.getAllChosenField, filterData.dataSet.current!, getTransformSystemFilter) : undefined;
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const searchVO = useMemo(() => search, [JSON.stringify(search)]);
   const chartType = reportDs.current?.get('type');
   const analysisField = reportDs.current?.get('row');
   const comparedField = reportDs.current?.get('column');
@@ -171,11 +210,34 @@ const CustomReport: React.FC<Props> = (props) => {
     comparedField,
     analysisFieldPredefined: (analysisField && dimension.find((item) => item.code === analysisField)?.system),
     comparedFieldPredefined: comparedField && dimension.find((item) => item.code === comparedField)?.system,
-  }), [analysisField, chartType, comparedField, dimension, statisticsType]);
+    searchVO,
+  }), [analysisField, chartType, comparedField, dimension, searchVO, statisticsType]);
   const [, chartProps] = useReport(configMemo, maxShow);
   const {
-    data, searchVO, choseFieldStore, fields, hasGetCustomFields,
+    data,
   } = chartProps;
+
+  const initSetting = useCallback((res) => {
+    runInAction(() => {
+      if (res?.searchJson && JSON.parse(res?.searchJson)) {
+        const searchVOFiltered = SearchVOToFilter(JSON.parse(res?.searchJson || {}));
+        for (const [key, value] of Object.entries(searchVOFiltered)) {
+          const field = fields.find((item: IField) => item.code === key || item.id === key);
+          if (field && value) {
+            if ((Array.isArray(value) && value.length) || !Array.isArray(value)) {
+              choseFieldStore.addChosenFields(key, field, value);
+            }
+          }
+        }
+      }
+      reportDs.current?.set('title', res?.name);
+      reportDs.current?.set('description', res?.description);
+      reportDs.current?.set('type', res?.chartType);
+      reportDs.current?.set('row', res?.analysisField);
+      reportDs.current?.set('column', res?.comparedField);
+      reportDs.current?.set('unit', res?.statisticsType);
+    });
+  }, [choseFieldStore, fields, reportDs]);
 
   const refresh = useCallback(async () => {
     if (chartId && dimension.length && hasGetCustomFields) {
@@ -186,28 +248,10 @@ const CustomReport: React.FC<Props> = (props) => {
         setLost(true);
       } else {
         setChartRes(res);
-        runInAction(() => {
-          if (res.searchJson && JSON.parse(res.searchJson)) {
-            const searchVOFiltered = SearchVOToFilter(JSON.parse(res.searchJson));
-            for (const [key, value] of Object.entries(searchVOFiltered)) {
-              const field = fields.find((item) => item.code === key || item.id === key);
-              if (field && value) {
-                if ((Array.isArray(value) && value.length) || !Array.isArray(value)) {
-                  choseFieldStore.addChosenFields(key, field, value);
-                }
-              }
-            }
-          }
-          reportDs.current?.set('title', res.name);
-          reportDs.current?.set('description', res.description);
-          reportDs.current?.set('type', res.chartType);
-          reportDs.current?.set('row', res.analysisField);
-          reportDs.current?.set('column', res.comparedField);
-          reportDs.current?.set('unit', res.statisticsType);
-        });
+        initSetting(res);
       }
     }
-  }, [chartId, choseFieldStore, dimension, fields, hasGetCustomFields, reportDs]);
+  }, [chartId, dimension, hasGetCustomFields, initSetting]);
 
   useEffect(() => {
     refresh();
@@ -244,15 +288,10 @@ const CustomReport: React.FC<Props> = (props) => {
       reportDs.current?.reset();
       back();
     } else {
-      reportDs.current?.set('title', chartRes?.name);
-      reportDs.current?.set('description', chartRes?.description);
-      reportDs.current?.set('type', chartRes?.chartType);
-      reportDs.current?.set('row', chartRes?.analysisField);
-      reportDs.current?.set('column', chartRes?.comparedField);
-      reportDs.current?.set('unit', chartRes?.statisticsType);
+      initSetting(chartRes);
       setMode('read');
     }
-  }, [back, chartRes?.analysisField, chartRes?.chartType, chartRes?.comparedField, chartRes?.description, chartRes?.name, chartRes?.statisticsType, mode, reportDs]);
+  }, [back, chartRes, initSetting, mode, reportDs]);
 
   const handleClickSetting = useCallback(() => {
     if (chartId && lost) {
@@ -302,7 +341,7 @@ const CustomReport: React.FC<Props> = (props) => {
       <Breadcrumb title={chartId ? (mode === 'read' ? chartRes?.name : '编辑自定义报表') : '创建自定义报表'} />
       <Content style={{ padding: 0 }} className={styles.content}>
         <Spin spinning={loading} style={{ height: '100%' }}>
-          <div className={styles.addReport}>
+          <div className={styles.report}>
             {mode !== 'read' && (
               <div className={styles.header}>
                 <TextField dataSet={reportDs} name="title" placeholder="图表标题" style={{ width: 400 }} />
@@ -396,7 +435,7 @@ const CustomReport: React.FC<Props> = (props) => {
                     />
                   </div>
                   {
-                    expand && <Condition chartProps={chartProps} reportDs={reportDs} dimension={dimension} />
+                    expand && <Condition filterComponentProps={filterComponentProps} choseComponentProps={choseComponentProps} reportDs={reportDs} dimension={dimension} />
                   }
                 </div>
                 )

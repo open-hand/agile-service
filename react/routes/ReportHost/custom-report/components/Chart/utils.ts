@@ -1,4 +1,3 @@
-import echarts from 'echarts';
 import { map } from 'lodash';
 
 export type IChartUnit = 'storyPoints' | 'quantity';
