@@ -284,13 +284,25 @@ const GanttPage: React.FC = () => {
       name: issue.assigneeName,
     } : null,
   });
-  const handleIssueUpdate = usePersistFn((issue: Issue|null) => {
-    if (issue) {
+  const addSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {
+    if (parentIssueId) {
       setData(produce(data, (draft) => {
-        const target = find(draft, { issueId: issue.issueId });
-        if (target) {
-          // 更新属性
-          normalizeIssue(issue, target);
+        const parent = find(draft, { issueId: parentIssueId });
+        if (parent) {
+          parent.children.unshift(normalizeIssue(subIssue));
+        }
+      }));
+    }
+  });
+  const updateSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {
+    if (parentIssueId) {
+      setData(produce(data, (draft) => {
+        const parent = find(draft, { issueId: parentIssueId });
+        if (parent) {
+          const child = find(parent.children, { issueId: subIssue.issueId });
+          if (child) {
+            normalizeIssue(subIssue, child);
+          }
         }
       }));
     }
@@ -305,19 +317,40 @@ const GanttPage: React.FC = () => {
       }
     }));
   });
-  const addSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {
+
+  const handleCreateIssue = usePersistFn((issue: Issue) => {
+    const parentIssueId = issue.relateIssueId || issue.parentIssueId;
     if (parentIssueId) {
+      addSubIssue(issue, parentIssueId);
+    } else {
       setData(produce(data, (draft) => {
-        const parent = find(draft, { issueId: parentIssueId });
-        if (parent) {
-          parent.children.unshift(normalizeIssue(subIssue));
-        }
+        draft.unshift(normalizeIssue(issue));
       }));
     }
   });
+  const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId) => {
+    addSubIssue(subIssue, parentIssueId);
+  });
+  const handleIssueUpdate = usePersistFn((issue: Issue | null) => {
+    if (issue) {
+      const parentIssueId = issue.relateIssueId || issue.parentIssueId;
+      if (parentIssueId) {
+        updateSubIssue(issue, parentIssueId);
+      } else {
+        setData(produce(data, (draft) => {
+          const target = find(draft, { issueId: issue.issueId });
+          if (target) {
+          // 更新属性
+            normalizeIssue(issue, target);
+          }
+        }));
+      }
+    }
+  });
+
   const handleIssueDelete = usePersistFn((issue: Issue | null) => {
     if (issue) {
-      const parentIssueId = issue.parentIssueId ?? issue.relateIssueId;
+      const parentIssueId = issue.relateIssueId || issue.parentIssueId;
       if (parentIssueId) {
         removeSubIssue(parentIssueId, issue.issueId);
       } else {
@@ -331,19 +364,7 @@ const GanttPage: React.FC = () => {
   const handleDeleteSubIssue = usePersistFn((issue: Issue, subIssueId: string) => {
     removeSubIssue(issue.issueId, subIssueId);
   });
-  const handleCreateIssue = usePersistFn((issue: Issue) => {
-    const parentIssueId = issue.parentIssueId ?? issue.relateIssueId;
-    if (parentIssueId) {
-      addSubIssue(issue, parentIssueId);
-    } else {
-      setData(produce(data, (draft) => {
-        draft.unshift(normalizeIssue(issue));
-      }));
-    }
-  });
-  const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId) => {
-    addSubIssue(subIssue, parentIssueId);
-  });
+
   const ganttData = useMemo(() => (type === 'assignee' ? groupByUser(data) : data), [data, type]);
   return (
     <Page>
