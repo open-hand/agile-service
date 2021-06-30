@@ -33,7 +33,7 @@ const Logs: React.FC<Props> = ({ datalogs, expand, fieldsMap }) => (
   <div className="c7n-Logs">
     {
       (datalogs || []).map((log: ILog, i: number, arr: ILog[]) => ((i >= 4 && expand) || i < 5) && (
-        <div key={log.logId} className="c7n-Logs-log">
+        <div className="c7n-Logs-log">
           <div
             className="c7n-Logs-log-user"
           >
