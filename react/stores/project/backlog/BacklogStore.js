@@ -7,6 +7,7 @@ import {
 } from 'lodash';
 import { store } from '@choerodon/boot';
 import { Modal, DataSet } from 'choerodon-ui/pro';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import Moment from 'moment';
 import {
   featureApi, sprintApi, piApi, storyMapApi, epicApi, priorityApi, issueTypeApi, commonApi, versionApi, quickFilterApi, issueApiConfig,
@@ -325,7 +326,12 @@ class BacklogStore {
     }));
   }
 
+  @computed get getExpandSprint() {
+    return this.sprintData.filter((s) => s.expand).map((s) => (s.sprintId.toString()));
+  }
+
   @action setSprintData(sprintData) {
+    const cached = localPageCacheStore.getItem('backlogSprintExpand');
     const previousExpand = new Map(this.sprintData.map((s) => ([s.sprintId.toString(), s.expand])));
     const previousPagination = new Map(this.sprintData.map((s) => ([s.sprintId.toString(), s.pagination])));
     this.sprintData = sprintData.map((sprint, index) => {
@@ -336,7 +342,7 @@ class BacklogStore {
       // 这里只保留几个字段，省内存
       return {
         ...sprint,
-        expand: !!(previousExpand.get(sprint.sprintId.toString()) ?? index === 0),
+        expand: cached ? cached.includes(sprint.sprintId.toString()) : !!(previousExpand.get(sprint.sprintId.toString()) ?? index === 0),
         pagination: previousPagination.get(sprint.sprintId.toString()) ?? {
           page: 1,
           size: 300,

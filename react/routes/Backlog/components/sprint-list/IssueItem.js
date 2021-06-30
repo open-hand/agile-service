@@ -77,7 +77,7 @@ const Item = observer(({
           type={isExpand ? 'baseline-arrow_drop_down' : 'baseline-arrow_right'}
           onClick={onExpandClick}
           style={{
-            cursor: 'pointer', position: 'absolute', left: 7, fontSize: 25,
+            cursor: 'pointer', position: 'absolute', left: 7, fontSize: 20,
           }}
         />
       ) : null}
@@ -189,24 +189,30 @@ function IssueItem({
   return (
     <div
       ref={provided.innerRef}
-      {...provided.draggableProps}
-      {...provided.dragHandleProps}
       style={getStyle({
-        draggableStyle: provided.draggableProps.style,
         virtualStyle: style,
         isDragging,
       })}
     >
+      <div
+        {...provided.draggableProps}
+        {...provided.dragHandleProps}
+        style={{
+          ...provided.draggableProps.style,
+          cursor: 'move',
+        }}
+      >
+        <Item
+          index={index}
+          issue={issue}
+          isDragging={isDragging}
+          isExpand={isExpand}
+          onExpandClick={handleExpandClick}
+          sprintId={sprintId}
+          draggingNum={draggingNum}
+        />
+      </div>
 
-      <Item
-        index={index}
-        issue={issue}
-        isDragging={isDragging}
-        isExpand={isExpand}
-        onExpandClick={handleExpandClick}
-        sprintId={sprintId}
-        draggingNum={draggingNum}
-      />
       {isExpand && !isDragging && (
         issue.children.map((child) => (
           <Item

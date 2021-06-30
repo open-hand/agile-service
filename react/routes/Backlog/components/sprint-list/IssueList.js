@@ -143,8 +143,8 @@ function IssueList({ data, sprintId, sprintData }) {
                 }}
               />
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0' }}>
-              {pagination.total > pagination.size ? (
+            {pagination.total > pagination.size ? (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0' }}>
                 <Pagination
                   total={pagination.total}
                   page={pagination.page}
@@ -155,8 +155,8 @@ function IssueList({ data, sprintId, sprintData }) {
                   showPager
                   showQuickJumper
                 />
-              ) : null}
-            </div>
+              </div>
+            ) : null}
           </div>
         );
       }}

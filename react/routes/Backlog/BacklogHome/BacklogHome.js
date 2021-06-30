@@ -9,6 +9,7 @@ import {
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import SideNav from '@/components/side-nav';
 import { HeaderButtons } from '@choerodon/master';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
@@ -39,6 +40,7 @@ class BacklogHome extends Component {
   }
 
   componentWillUnmount() {
+    localPageCacheStore.setItem('backlogSprintExpand', BacklogStore.getExpandSprint);
     BacklogStore.resetData();
     BacklogStore.clearMultiSelected();
     BacklogStore.resetFilter();
