@@ -1694,12 +1694,12 @@ public class ReportServiceImpl implements ReportService {
             }
         } else {
             ObjectSchemeFieldDTO objectSchemeField = objectSchemeFieldMapper.queryByFieldCode(organizationId, projectId, fieldCode);
-            fieldSql = CustomFieldSql.get(objectSchemeField == null ? null : objectSchemeField.getFieldType());
+            fieldSql = CustomFieldSql.get(objectSchemeField == null ? null : objectSchemeField.getFieldType(), type);
             if (fieldSql == null) {
                 throw new CommonException("error.customReport.field.not.support");
             }
             linkSql.append("\n")
-                    .append(String.format(FieldSql.CUSTOM_DEFAULT_JOIN, fieldCode));
+                    .append(CustomFieldSql.getDefaultSql(fieldCode, type));
         }
         selectSql.append(", ")
                 .append(fieldSql.getValueSql())

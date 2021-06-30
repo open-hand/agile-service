@@ -6,11 +6,15 @@ package io.choerodon.agile.infra.enums;
  */
 public interface FieldSql {
 
-    String CUSTOM_DEFAULT_JOIN = "LEFT JOIN fd_object_scheme_field fosf ON fosf.CODE = '%s' AND fosf.project_id = ai.project_id\n" +
-            "LEFT JOIN fd_field_value ffv ON ffv.instance_id = ai.issue_id AND ffv.field_id = fosf.id";
+    String CUSTOM_DEFAULT_ANALYSIS_JOIN = "LEFT JOIN fd_object_scheme_field afosf ON afosf.CODE = '%s' AND afosf.project_id = ai.project_id\n" +
+            "LEFT JOIN fd_field_value affv ON affv.instance_id = ai.issue_id AND affv.field_id = afosf.id";
+    String CUSTOM_DEFAULT_COMPARED_JOIN = "LEFT JOIN fd_object_scheme_field cfosf ON cfosf.CODE = '%s' AND cfosf.project_id = ai.project_id\n" +
+            "LEFT JOIN fd_field_value cffv ON cffv.instance_id = ai.issue_id AND cffv.field_id = cfosf.id";
     String DEFAULT = "default";
     String USER = "user";
     String PROJECT = "project";
+    String ANALYSIS = "analysis";
+    String COMPARED = "compared";
 
     /**
      * 获取表连接sql
