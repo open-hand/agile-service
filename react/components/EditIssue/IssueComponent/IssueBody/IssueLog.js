@@ -1,6 +1,9 @@
 import React, { useContext } from 'react';
-import { filter, chunk, reverse } from 'lodash';
+import {
+  filter, pick,
+} from 'lodash';
 import { FormattedMessage } from 'react-intl';
+import { randomString } from '@/utils/random';
 import DataLogs from '../../Component/DataLogs';
 import EditIssueContext from '../../stores';
 
@@ -15,7 +18,7 @@ const IssueLog = () => {
     } = issue;
     const stateDatalogs = store.getDataLogs;
     // 过滤掉影响的版本(bug)
-    const datalogs = reverse(filter(stateDatalogs, (v) => v.field !== 'Version'));
+    const datalogs = filter(stateDatalogs, (v) => v.field !== 'Version');
     const newDataLogs = [];
     let autoTemp = [];
     let initialIssueType = issueTypeVO; // 最初的issue类型  在日志中无任务类型更改则是issueTypeVO
@@ -24,17 +27,23 @@ const IssueLog = () => {
         newDataLogs.push(log);
       }
       if (log.field === 'Auto Status' || log.field === 'Auto Trigger' || log.field === 'Auto Resolution') {
-        autoTemp.push(log);
-        if (i + 1 === logs.length || (i + 1 < logs.length && ((logs[i + 1].field !== 'Auto Resolution' && logs[i + 1].field !== 'Auto Trigger' && logs[i + 1].field !== 'Auto Status') || logs[i + 1].field === 'Auto Status'))) {
-          newDataLogs.push({
-            ...autoTemp[0],
-            logId: 'autoUpdate',
-            field: 'autoUpdate',
-            newStatus: autoTemp[0].newString,
-            trigger: autoTemp[1].newString,
-            resolutionChanged: autoTemp.length === 3,
-            removeResolution: autoTemp.length === 3 && autoTemp[2].oldValue && !autoTemp[2].newValue,
-          });
+        if (log.field === 'Auto Trigger' || log.field === 'Auto Resolution') {
+          autoTemp.push(log);
+        } else if (log.field === 'Auto Status') {
+          if (autoTemp.length > 0) {
+            autoTemp.push(log);
+            autoTemp = autoTemp.reverse();
+            newDataLogs.push({
+              ...autoTemp[0],
+              ...pick(autoTemp[1], ['lastUpdateDate', 'creationDate']),
+              logId: `autoUpdate-${randomString(10)}`, // 加入随机数 避免更改详情，增加日志时重复
+              field: 'autoUpdate',
+              newStatus: autoTemp[0].newString,
+              trigger: autoTemp[1].newString,
+              resolutionChanged: autoTemp.length === 3,
+              removeResolution: autoTemp.length === 3 && autoTemp[2].oldValue && !autoTemp[2].newValue,
+            });
+          }
           autoTemp = [];
         }
       }
@@ -59,7 +68,7 @@ const IssueLog = () => {
     };
     return (
       <DataLogs
-        datalogs={[...reverse(newDataLogs), createLog]}
+        datalogs={[...newDataLogs, createLog]}
         typeCode={typeCode}
         createdById={createdBy}
         creationDate={creationDate}
