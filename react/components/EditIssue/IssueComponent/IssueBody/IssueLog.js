@@ -1,6 +1,9 @@
 import React, { useContext } from 'react';
-import { filter, chunk, reverse } from 'lodash';
+import {
+  filter, chunk, reverse, pick,
+} from 'lodash';
 import { FormattedMessage } from 'react-intl';
+import { randomString } from '@/utils/random';
 import DataLogs from '../../Component/DataLogs';
 import EditIssueContext from '../../stores';
 
@@ -25,10 +28,11 @@ const IssueLog = () => {
       }
       if (log.field === 'Auto Status' || log.field === 'Auto Trigger' || log.field === 'Auto Resolution') {
         autoTemp.push(log);
-        if (i + 1 === logs.length || (i + 1 < logs.length && ((logs[i + 1].field !== 'Auto Resolution' && logs[i + 1].field !== 'Auto Trigger' && logs[i + 1].field !== 'Auto Status') || logs[i + 1].field === 'Auto Status'))) {
+        if (autoTemp[1] && (i + 1 === logs.length || (i + 1 < logs.length && ((logs[i + 1].field !== 'Auto Resolution' && logs[i + 1].field !== 'Auto Trigger' && logs[i + 1].field !== 'Auto Status') || logs[i + 1].field === 'Auto Status')))) {
           newDataLogs.push({
             ...autoTemp[0],
-            logId: 'autoUpdate',
+            ...pick(autoTemp[1], ['lastUpdateDate', 'creationDate']),
+            logId: `autoUpdate-${randomString(10)}`, // 加入随机数 避免更改详情，增加日志时重复
             field: 'autoUpdate',
             newStatus: autoTemp[0].newString,
             trigger: autoTemp[1].newString,
