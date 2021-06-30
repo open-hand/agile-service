@@ -209,8 +209,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                                                                                             String applyType,
                                                                                             Boolean onlyEnabled) {
         //根据项目id判断applyType，处理前端切换项目传错误applyType报错的问题
-        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
-        AssertUtilsForCommonException.notNull(projectVO, "error.project.not.existed");
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
         boolean contains =
                 ProjectCategory.checkContainProjectCategory(projectVO.getCategories(), ProjectCategory.MODULE_PROGRAM);
         if(contains) {
