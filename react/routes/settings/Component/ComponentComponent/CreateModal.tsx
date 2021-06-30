@@ -129,7 +129,7 @@ const CreateComponent: React.FC<Props> = ({
   }, [componentId, ds]);
   return (
     <Form dataSet={ds} className={styles.component}>
-      <TextField name="name" placeholder="将问题分成比史诗更小的分组，例如：前端模块" />
+      <TextField name="name" placeholder="请输入模块名称，例如：前端模块" />
       <TextField name="description" />
       <NumberField name="sequence" help="顺序值越大，越靠前。无序列值排在最后，顺序值相同时，按照创建时间倒序排列" />
       <Select name="defaultAssigneeRole">
