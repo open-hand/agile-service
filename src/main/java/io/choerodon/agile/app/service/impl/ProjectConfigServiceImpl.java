@@ -205,8 +205,15 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     public List<IssueTypeWithStateMachineIdVO> queryIssueTypesWithStateMachineIdByProjectId(Long projectId,
                                                                                             String applyType,
                                                                                             Boolean onlyEnabled) {
-        if (Boolean.FALSE.equals(EnumUtil.contain(SchemeApplyType.class, applyType))) {
-            throw new CommonException(ERROR_APPLYTYPE_ILLEGAL);
+        //根据项目id判断applyType，处理前端切换项目传错误applyType报错的问题
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        AssertUtilsForCommonException.notNull(projectVO, "error.project.not.existed");
+        boolean contains =
+                ProjectCategory.checkContainProjectCategory(projectVO.getCategories(), ProjectCategory.MODULE_PROGRAM);
+        if(contains) {
+            applyType = SchemeApplyType.PROGRAM;
+        } else {
+            applyType = SchemeApplyType.AGILE;
         }
         Long organizationId = projectUtil.getOrganizationId(projectId);
         Long issueTypeSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.ISSUE_TYPE, applyType).getSchemeId();
