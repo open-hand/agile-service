@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import React, {
   useMemo, useCallback, useState, useRef, useEffect,
 } from 'react';
@@ -7,7 +8,7 @@ import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import {
-  Button, DataSet, TextField, Form,
+  Button, DataSet, TextField, Form, Modal,
 } from 'choerodon-ui/pro';
 import { EmptyPage } from '@choerodon/components';
 import { Spin } from 'choerodon-ui';
@@ -41,8 +42,8 @@ export interface IChartRes extends ICreateData {
 const CustomReport: React.FC<Props> = (props) => {
   // @ts-ignore
   const chartId = props.match.params.id;
-  const [loading, setLoading] = useState<boolean>(false);
   const [mode, setMode] = useState<'create' | 'edit' | 'read'>(chartId ? 'read' : 'create');
+  const [loading, setLoading] = useState<boolean>(chartId || false); // 编辑时默认loading
   const [lost, setLost] = useState<boolean>(false);
   const [chartRes, setChartRes] = useState<null | IChartRes>(null);
   const [dimension, setDimension] = useState<IField[]>([]);
@@ -137,10 +138,22 @@ const CustomReport: React.FC<Props> = (props) => {
 
   const handleClickDelete = useCallback(async () => {
     if (chartId) {
-      await customReportApi.deleteChart(chartId);
-      to(LINK_URL.report);
+      Modal.open({
+        key: Modal.key(),
+        title: '确认删除',
+        children: (
+          <div>
+            {`您确定要删除“${chartRes?.name}”吗？`}
+          </div>
+        ),
+        onOk: async () => {
+          await customReportApi.deleteChart(chartId);
+          to(LINK_URL.report);
+          return true;
+        },
+      });
     }
-  }, [chartId]);
+  }, [chartId, chartRes?.name]);
 
   const back = useCallback(() => {
     to(LINK_URL.report);
@@ -248,12 +261,10 @@ const CustomReport: React.FC<Props> = (props) => {
     setExpand(true);
   }, [chartId, lost]);
 
-  useWhyDidYouUpdate('useWhyDidYouUpdateComponent', { ...chartProps });
-  console.log(data);
   return (
     <Page>
       <Header>
-        <HeaderButtons items={mode !== 'read' ? [] : [...(customChartList.length ? [{
+        <HeaderButtons items={(mode !== 'read' || !chartRes?.id) ? [] : [...(customChartList.length ? [{
           display: true,
           name: '切换报表',
           groupBtnItems: customChartList.map((item) => ({
@@ -288,19 +299,15 @@ const CustomReport: React.FC<Props> = (props) => {
         }]}
         />
       </Header>
-      <Breadcrumb />
+      <Breadcrumb title={chartId ? (mode === 'read' ? chartRes?.name : '编辑自定义报表') : '创建自定义报表'} />
       <Content style={{ padding: 0 }} className={styles.content}>
         <Spin spinning={loading} style={{ height: '100%' }}>
           <div className={styles.addReport}>
-            <div className={styles.header}>
-              {
-                  mode === 'read' ? (
-                    <span className={styles.header_text}>{chartRes?.name}</span>
-                  ) : (
-                    <TextField dataSet={reportDs} name="title" placeholder="图表标题" style={{ width: 400 }} />
-                  )
-                }
-            </div>
+            {mode !== 'read' && (
+              <div className={styles.header}>
+                <TextField dataSet={reportDs} name="title" placeholder="图表标题" style={{ width: 400 }} />
+              </div>
+            )}
             <div className={styles.main}>
               <div className={styles.left}>
                 {

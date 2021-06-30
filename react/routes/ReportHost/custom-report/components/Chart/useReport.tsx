@@ -75,7 +75,7 @@ function useReport(config: ChartConfig, maxShow = 12, onFinish?: Function): [{},
       const res = await customReportApi.project(projectId).getData({ ...config, searchVO });
       batchedUpdates(() => {
         setLoading(false);
-        setData(res.dimensionList || []);
+        setData((res.dimensionList || []).map((item: IChartData) => ({ ...item, pointList: item.pointList.map((point) => ({ ...point, value: parseFloat(point.value.toString()) })) })));
         onFinish && setTimeout(onFinish);
       });
     }
