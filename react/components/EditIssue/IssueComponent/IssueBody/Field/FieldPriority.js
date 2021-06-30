@@ -9,7 +9,7 @@ import { issueApi } from '@/api';
 @inject('AppState')
 @observer class FieldPriority extends Component {
   updateIssuePriority = (newPriorityId) => {
-    const { store, onUpdate, reloadIssue } = this.props;
+    const { store } = this.props;
     const issue = store.getIssue;
     const { issueId, objectVersionNumber } = issue;
     const obj = {

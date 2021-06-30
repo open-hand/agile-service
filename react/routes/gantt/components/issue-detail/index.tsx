@@ -1,12 +1,14 @@
 import React, { useContext, useCallback, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import DetailContainer, { useDetail } from '@/components/detail-container';
+import { Issue } from '@/common/types';
 import Context from '../../context';
 
 interface Props {
   refresh: () => void
+  onUpdate: (issue: Issue)=> void
 }
-const IssueDetail: React.FC<Props> = ({ refresh }) => {
+const IssueDetail: React.FC<Props> = ({ refresh, onUpdate }) => {
   const { store } = useContext(Context);
   const { issueId } = store;
   const handleResetIssue = useCallback((newIssueId) => {
@@ -28,9 +30,7 @@ const IssueDetail: React.FC<Props> = ({ refresh }) => {
           issueId,
         },
         events: {
-          update: () => {
-            refresh();
-          },
+          update: onUpdate,
           delete: () => {
             handleResetIssue(null);
             refresh();

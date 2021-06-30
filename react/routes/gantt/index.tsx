@@ -7,9 +7,11 @@ import { unstable_batchedUpdates } from 'react-dom';
 import { Tooltip, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { find } from 'lodash';
+import produce from 'immer';
 import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 import classNames from 'classnames';
+import { usePersistFn } from 'ahooks';
 import moment from 'moment';
 import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
@@ -242,6 +244,55 @@ const GanttPage: React.FC = () => {
       {t === 'left' ? <Icon type="navigate_before" /> : <Icon type="navigate_next" />}
     </div>
   ), []);
+  const normalizeIssue = (issue:Issue, source:any = {}) => Object.assign(source, {
+    estimatedEndTime: issue.estimatedEndTime,
+    estimatedStartTime: issue.estimatedStartTime,
+    issueTypeVO: issue.issueTypeVO,
+    objectVersionNumber: issue.objectVersionNumber,
+    statusVO: issue.statusVO,
+    summary: issue.summary,
+  });
+  const handleIssueUpdate = usePersistFn((issue:Issue) => {
+    setData(produce(data, (draft) => {
+      const target = find(draft, { issueId: issue.issueId });
+      if (target) {
+        // 更新属性
+        normalizeIssue(issue, target);
+      }
+    }));
+  });
+
+  const handleAddIssue = usePersistFn((issue:Issue) => {
+    setData(produce(data, (draft) => {
+      const target = find(draft, { issueId: issue.issueId });
+      if (target) {
+        // 更新属性
+        Object.assign(target, {
+          estimatedEndTime: issue.estimatedEndTime,
+          estimatedStartTime: issue.estimatedStartTime,
+          issueTypeVO: issue.issueTypeVO,
+          objectVersionNumber: issue.objectVersionNumber,
+          statusVO: issue.statusVO,
+          summary: issue.summary,
+        });
+      }
+    }));
+  });
+  const handleCreateIssue = usePersistFn((issue:Issue) => {
+    const parentIssueId = issue.parentIssueId ?? issue.relateIssueId;
+    if (parentIssueId) {
+      setData(produce(data, (draft) => {
+        const parent = find(draft, { issueId: parentIssueId });
+        if (parent) {
+          parent.children.unshift(normalizeIssue(issue));
+        }
+      }));
+    } else {
+      setData(produce(data, (draft) => {
+        draft.unshift(normalizeIssue(issue));
+      }));
+    }
+  });
   return (
     <Page>
       <Header>
@@ -347,8 +398,8 @@ const GanttPage: React.FC = () => {
               rowHeight={34}
             />
           )}
-          <IssueDetail refresh={loadData} />
-          <CreateIssue refresh={loadData} />
+          <IssueDetail refresh={loadData} onUpdate={handleIssueUpdate} />
+          <CreateIssue onCreate={handleCreateIssue} />
           <FilterManage
             visible={filterManageVisible!}
             setVisible={setFilterManageVisible}

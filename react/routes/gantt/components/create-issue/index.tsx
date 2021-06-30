@@ -1,21 +1,22 @@
 import React, { useContext, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import CreateIssue from '@/components/CreateIssue';
+import { Issue } from '@/common/types';
 import Context from '../../context';
 
 interface Props {
-  refresh: () => void
+  onCreate: (issue:Issue) => void
 }
-const CreateIssueModal: React.FC<Props> = ({ refresh }) => {
+const CreateIssueModal: React.FC<Props> = ({ onCreate }) => {
   const { store } = useContext(Context);
   const { createIssueVisible } = store;
   const handleCancel = useCallback(() => {
     store.setCreateIssueVisible(false);
   }, [store]);
-  const handleOk = useCallback(() => {
+  const handleOk = useCallback((issue) => {
     store.setCreateIssueVisible(false);
-    refresh();
-  }, [refresh, store]);
+    onCreate(issue);
+  }, [onCreate, store]);
   return (
     createIssueVisible ? (
       <CreateIssue

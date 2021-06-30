@@ -24,7 +24,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
   updateIssueVersion = (newVersion) => {
     const originVersions = this.dataRef.current;
     const {
-      store, onUpdate, reloadIssue, AppState, onCreateVersion,
+      store, AppState, onCreateVersion,
     } = this.props;
     const issue = store.getIssue;
     const { versionIssueRelVOList = [], issueId, objectVersionNumber } = issue;

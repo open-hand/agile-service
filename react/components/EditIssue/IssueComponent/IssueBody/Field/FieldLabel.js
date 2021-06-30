@@ -24,7 +24,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
     const newLabelIssueRelVOList = labels || [];
     const originLabels = this.dataRef.current;
     const {
-      store, onUpdate, reloadIssue, AppState,
+      store, AppState,
     } = this.props;
     const issue = store.getIssue;
     const { labelIssueRelVOList = [], issueId, objectVersionNumber } = issue;

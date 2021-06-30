@@ -23,7 +23,7 @@ import { Tooltip } from 'choerodon-ui';
 
   updateIssueComponents = (newComponents) => {
     const {
-      store, onUpdate, reloadIssue, AppState,
+      store, AppState,
     } = this.props;
     const issue = store.getIssue;
     const { issueId, objectVersionNumber, componentIssueRelVOList } = issue;

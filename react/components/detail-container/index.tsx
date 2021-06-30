@@ -13,7 +13,7 @@ import openDescriptionConfirm from './openDescriptionConfirm';
 const { HeaderStore } = stores;
 export { registerPath };
 export interface DetailEvents {
-  [type: string]: () => void
+  [type: string]: (...args: any[]) => void
 }
 export const useDetail = (): [DetailContainerProps] => {
   const [routes, setRoutes] = useState<IRouteWithKey[]>([]);

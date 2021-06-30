@@ -6,15 +6,32 @@ class GanttApi {
     return `/agile/v1/projects/${getProjectId()}`;
   }
 
-  loadByTask(data:any) {
+  async loadByTask(data: any) {
+    let result: any = [];
+    let hasNextPage = true;
+    let page = 0;
+    while (hasNextPage) {
+      // eslint-disable-next-line no-await-in-loop
+      const res = await this.loadByTaskPage(data, page += 1);
+      hasNextPage = res.hasNextPage;
+      result = [...result, ...res.list];
+    }
+    return result;
+  }
+
+  loadByTaskPage(data: any, page:number) {
     return axios({
       method: 'post',
-      url: `${this.prefix}/gantt/list/by_task`,
+      url: `${this.prefix}/gantt/list`,
       data,
+      params: {
+        size: 500,
+        page,
+      },
     });
   }
 
-  loadByUser(data:any) {
+  loadByUser(data: any) {
     return axios({
       method: 'post',
       url: `${this.prefix}/gantt/list/by_user`,

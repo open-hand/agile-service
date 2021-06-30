@@ -11,7 +11,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
 @observer class FieldStoryPoint extends Component {
   updateIssueField = (value) => {
     const {
-      store, onUpdate, reloadIssue, field,
+      store, field,
     } = this.props;
     const issue = store.getIssue;
     const { fieldCode } = field;

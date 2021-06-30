@@ -54,14 +54,20 @@ function EditIssue() {
   const idRef = useRef();
   const { push, close, eventsMap } = useDetailContainerContext();
   const issueEvents = eventsMap.get(applyType === 'program' ? 'program_issue' : 'issue');
-  const onUpdate = useCallback(() => {
-    issueEvents?.update();
+  const onUpdate = useCallback((issue) => {
+    issueEvents?.update(issue);
   }, [issueEvents]);
   const onCancel = useCallback(() => {
     close();
   }, [close]);
   const onIssueCopy = useCallback((issue) => {
     const callback = issueEvents?.copy || issueEvents?.update;
+    if (callback) {
+      callback(issue);
+    }
+  }, [issueEvents]);
+  const onCreateSubIssue = useCallback((issue) => {
+    const callback = issueEvents?.createSubIssue || issueEvents?.update;
     if (callback) {
       callback(issue);
     }
@@ -239,7 +245,7 @@ function EditIssue() {
         throw result;
       }
       if (onUpdate) {
-        onUpdate();
+        onUpdate(result);
       }
       if (loadIssueDetail) {
         loadIssueDetail(issueId);
@@ -295,6 +301,7 @@ function EditIssue() {
           issueId={idRef.current}
           programId={programId}
           reloadIssue={loadIssueDetail}
+          onUpdate={onUpdate}
           onUpdate={onUpdate}
           onIssueCopy={onIssueCopy}
           onDeleteSubIssue={onDeleteSubIssue}

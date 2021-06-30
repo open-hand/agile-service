@@ -15,7 +15,7 @@ import styles from './FieldEpic.less';
   ref = React.createRef();
 
   updateIssueEpic = async (newEpicId, done) => {
-    const { store, onUpdate, reloadIssue } = this.props;
+    const { store } = this.props;
     const issue = store.getIssue;
     const {
       epicId, issueId, objectVersionNumber, typeCode,
@@ -39,7 +39,7 @@ import styles from './FieldEpic.less';
   };
 
   updateIssueFeature = (newFeatureId) => {
-    const { store, onUpdate, reloadIssue } = this.props;
+    const { store } = this.props;
     const issue = store.getIssue;
     const { featureId = 1, issueId, objectVersionNumber } = issue;
     if (featureId !== newFeatureId) {
@@ -48,15 +48,7 @@ import styles from './FieldEpic.less';
         objectVersionNumber,
         featureId: newFeatureId || 0,
       };
-      issueApi.update(obj)
-        .then(() => {
-          if (onUpdate) {
-            onUpdate();
-          }
-          if (reloadIssue) {
-            reloadIssue(issueId);
-          }
-        });
+      store.update(obj);
     }
   };
 
