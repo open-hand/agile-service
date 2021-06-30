@@ -25,7 +25,7 @@ class GanttApi {
       url: `${this.prefix}/gantt/list`,
       data,
       params: {
-        size: 500,
+        size: 1000,
         page,
       },
     });
