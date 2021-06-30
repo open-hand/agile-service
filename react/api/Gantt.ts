@@ -1,4 +1,5 @@
 import { axios } from '@choerodon/boot';
+import { groupBy } from 'lodash';
 import { getProjectId } from '@/utils/common';
 
 class GanttApi {
@@ -28,14 +29,6 @@ class GanttApi {
         size: 1000,
         page,
       },
-    });
-  }
-
-  loadByUser(data: any) {
-    return axios({
-      method: 'post',
-      url: `${this.prefix}/gantt/list/by_user`,
-      data,
     });
   }
 

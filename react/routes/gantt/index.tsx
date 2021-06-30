@@ -52,6 +52,27 @@ const typeOptions = [{
 }] as const;
 const typeValues = typeOptions.map((t) => t.value);
 type TypeValue = (typeof typeValues)[number];
+const groupByUser = (data: any[]) => {
+  const map = new Map<string, any[]>();
+  const noAssigneeData: any[] = [];
+  data.forEach((issue) => {
+    if (issue.assignee) {
+      if (map.has(issue.assignee.name)) {
+        map.get(issue.assignee.name)?.push(issue);
+      } else {
+        map.set(issue.assignee.name, [issue]);
+      }
+    } else {
+      noAssigneeData.push(issue);
+    }
+  });
+  map.set('未分配', noAssigneeData);
+  return [...map.entries()].map(([name, children]) => ({
+    summary: name,
+    group: true,
+    children,
+  }));
+};
 const renderTooltip = (user: User) => {
   const {
     loginName, realName, email, ldap,
@@ -127,7 +148,7 @@ const GanttPage: React.FC = () => {
       const [workCalendarRes, projectWorkCalendarRes, res] = await Promise.all([
         workCalendarApi.getWorkSetting(year),
         workCalendarApi.getYearCalendar(year),
-        type === 'task' ? ganttApi.loadByTask(filter) : ganttApi.loadByUser(filter),
+        ganttApi.loadByTask(filter),
       ]);
       // setColumns(headers.map((h: any) => ({
       //   width: 100,
@@ -142,7 +163,7 @@ const GanttPage: React.FC = () => {
         setLoading(false);
       });
     })();
-  }, [issueSearchStore, sprintIds, type]);
+  }, [issueSearchStore, sprintIds]);
   useEffect(() => {
     loadData();
   }, [issueSearchStore, loadData]);
@@ -244,7 +265,7 @@ const GanttPage: React.FC = () => {
       {t === 'left' ? <Icon type="navigate_before" /> : <Icon type="navigate_next" />}
     </div>
   ), []);
-  const normalizeIssue = (issue:Issue, source:any = {}) => Object.assign(source, {
+  const normalizeIssue = (issue: Issue, source: any = {}) => Object.assign(source, {
     estimatedEndTime: issue.estimatedEndTime,
     estimatedStartTime: issue.estimatedStartTime,
     issueTypeVO: issue.issueTypeVO,
@@ -252,7 +273,7 @@ const GanttPage: React.FC = () => {
     statusVO: issue.statusVO,
     summary: issue.summary,
   });
-  const handleIssueUpdate = usePersistFn((issue:Issue) => {
+  const handleIssueUpdate = usePersistFn((issue: Issue) => {
     setData(produce(data, (draft) => {
       const target = find(draft, { issueId: issue.issueId });
       if (target) {
@@ -262,7 +283,7 @@ const GanttPage: React.FC = () => {
     }));
   });
 
-  const handleAddIssue = usePersistFn((issue:Issue) => {
+  const handleAddIssue = usePersistFn((issue: Issue) => {
     setData(produce(data, (draft) => {
       const target = find(draft, { issueId: issue.issueId });
       if (target) {
@@ -278,7 +299,7 @@ const GanttPage: React.FC = () => {
       }
     }));
   });
-  const handleCreateIssue = usePersistFn((issue:Issue) => {
+  const handleCreateIssue = usePersistFn((issue: Issue) => {
     const parentIssueId = issue.parentIssueId ?? issue.relateIssueId;
     if (parentIssueId) {
       setData(produce(data, (draft) => {
@@ -293,6 +314,7 @@ const GanttPage: React.FC = () => {
       }));
     }
   });
+  const ganttData = useMemo(() => (type === 'assignee' ? groupByUser(data) : data), [data, type]);
   return (
     <Page>
       <Header>
@@ -373,7 +395,7 @@ const GanttPage: React.FC = () => {
           {columns.length > 0 && workCalendar && (
             <GanttComponent
               innerRef={store.ganttRef as React.MutableRefObject<GanttRef>}
-              data={data}
+              data={ganttData}
               columns={columns}
               onUpdate={handleUpdate}
               startDateKey="estimatedStartTime"
