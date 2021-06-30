@@ -9,9 +9,10 @@ interface Props {
   onUpdate: (issue: Issue) => void
   onDelete: (issue: Issue) => void
   onDeleteSubIssue: (issue: Issue, subIssueId: string) => void
+  onCreateSubIssue: (subIssue: Issue, parentIssueId: string) => void
 }
 const IssueDetail: React.FC<Props> = ({
-  refresh, onUpdate, onDelete, onDeleteSubIssue,
+  refresh, onUpdate, onDelete, onDeleteSubIssue, onCreateSubIssue,
 }) => {
   const { store } = useContext(Context);
   const { issueId } = store;
@@ -40,6 +41,7 @@ const IssueDetail: React.FC<Props> = ({
             handleResetIssue(null);
           },
           deleteSubIssue: onDeleteSubIssue,
+          createSubIssue: onCreateSubIssue,
           close: () => {
             handleResetIssue(null);
           },
@@ -51,7 +53,7 @@ const IssueDetail: React.FC<Props> = ({
     } else {
       close();
     }
-  }, [visible, issueId, open, refresh, handleResetIssue, close, onUpdate, onDelete]);
+  }, [visible, issueId, open, refresh, handleResetIssue, close, onUpdate, onDelete, onDeleteSubIssue, onCreateSubIssue]);
   return (
     <DetailContainer {...detailProps} />
   );

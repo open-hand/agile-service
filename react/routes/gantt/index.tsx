@@ -6,7 +6,9 @@ import React, {
 import { unstable_batchedUpdates } from 'react-dom';
 import { Tooltip, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import { find, findIndex, remove } from 'lodash';
+import {
+  add, find, findIndex, remove,
+} from 'lodash';
 import produce from 'immer';
 import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
@@ -299,6 +301,16 @@ const GanttPage: React.FC = () => {
       }
     }));
   });
+  const addSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {
+    if (parentIssueId) {
+      setData(produce(data, (draft) => {
+        const parent = find(draft, { issueId: parentIssueId });
+        if (parent) {
+          parent.children.unshift(normalizeIssue(subIssue));
+        }
+      }));
+    }
+  });
   const handleIssueDelete = usePersistFn((issue: Issue | null) => {
     if (issue) {
       const parentIssueId = issue.parentIssueId ?? issue.relateIssueId;
@@ -318,17 +330,15 @@ const GanttPage: React.FC = () => {
   const handleCreateIssue = usePersistFn((issue: Issue) => {
     const parentIssueId = issue.parentIssueId ?? issue.relateIssueId;
     if (parentIssueId) {
-      setData(produce(data, (draft) => {
-        const parent = find(draft, { issueId: parentIssueId });
-        if (parent) {
-          parent.children.unshift(normalizeIssue(issue));
-        }
-      }));
+      addSubIssue(issue, parentIssueId);
     } else {
       setData(produce(data, (draft) => {
         draft.unshift(normalizeIssue(issue));
       }));
     }
+  });
+  const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId) => {
+    addSubIssue(subIssue, parentIssueId);
   });
   const ganttData = useMemo(() => (type === 'assignee' ? groupByUser(data) : data), [data, type]);
   return (
@@ -443,6 +453,7 @@ const GanttPage: React.FC = () => {
             onUpdate={handleIssueUpdate}
             onDelete={handleIssueDelete}
             onDeleteSubIssue={handleDeleteSubIssue}
+            onCreateSubIssue={handleCreateSubIssue}
           />
           <CreateIssue onCreate={handleCreateIssue} />
           <FilterManage

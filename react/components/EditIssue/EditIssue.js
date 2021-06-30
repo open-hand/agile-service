@@ -65,12 +65,13 @@ function EditIssue() {
       callback(issue);
     }
   }, [issueEvents]);
-  const onCreateSubIssue = useCallback((issue) => {
-    const callback = issueEvents?.createSubIssue || issueEvents?.update;
-    if (callback) {
-      callback(issue);
+  const onCreateSubIssue = useCallback((subIssue, parentIssueId) => {
+    if (issueEvents?.createSubIssue) {
+      issueEvents?.createSubIssue(subIssue, parentIssueId);
+    } else if (issueEvents?.update) {
+      issueEvents?.update(issue);
     }
-  }, [issueEvents]);
+  }, [issue, issueEvents]);
   const onDeleteIssue = useCallback((issue) => {
     const callback = issueEvents?.delete || issueEvents?.update;
     if (callback) {
@@ -308,6 +309,7 @@ function EditIssue() {
           reloadIssue={loadIssueDetail}
           onUpdate={onUpdate}
           onIssueCopy={onIssueCopy}
+          onCreateSubIssue={onCreateSubIssue}
           onDeleteSubIssue={onDeleteSubIssue}
           loginUserId={AppState.userInfo.id}
           applyType={applyType}

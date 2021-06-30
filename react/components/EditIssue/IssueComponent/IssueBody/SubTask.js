@@ -15,7 +15,7 @@ import './SubTask.less';
 import Divider from './Divider';
 
 const SubTask = observer(({
-  onDeleteSubIssue, reloadIssue, onUpdate, parentSummary,
+  onDeleteSubIssue, reloadIssue, onUpdate, parentSummary, onCreateSubIssue,
 }) => {
   const { store, disabled } = useContext(EditIssueContext);
   const {
@@ -71,8 +71,8 @@ const SubTask = observer(({
   const handleCreateSubIssue = (issue) => {
     store.setCreateSubTaskShow(false);
     resetDefault();
-    if (onUpdate) {
-      onUpdate();
+    if (onCreateSubIssue) {
+      onCreateSubIssue(issue, parentIssueId);
     }
     if (reloadIssue) {
       reloadIssue(issue.issueId);
