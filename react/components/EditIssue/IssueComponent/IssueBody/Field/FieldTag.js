@@ -9,7 +9,7 @@ import SelectMultiServiceTag from '@/components/select/select-multi-service-tag'
 @inject('AppState')
 @observer class FieldTag extends Component {
   updateIssueTag = (newTags) => {
-    const { store, onUpdate, reloadIssue } = this.props;
+    const { store } = this.props;
     const issue = store.getIssue;
     const { issueId, tags, objectVersionNumber } = issue;
 

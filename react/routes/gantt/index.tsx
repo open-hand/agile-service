@@ -7,9 +7,11 @@ import { unstable_batchedUpdates } from 'react-dom';
 import { Tooltip, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { find } from 'lodash';
+import produce from 'immer';
 import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 import classNames from 'classnames';
+import { usePersistFn } from 'ahooks';
 import moment from 'moment';
 import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
@@ -111,16 +113,16 @@ const GanttPage: React.FC = () => {
     transformFilter,
   });
   const store = useMemo(() => new GanttStore(), []);
-  const { sprintId } = store;
+  const { sprintIds } = store;
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
   const loadData = useCallback(() => {
     (async () => {
       const year = dayjs().year();
       const filter = issueSearchStore.getCustomFieldFilters();
-      if (sprintId === null) {
+      if (sprintIds === null) {
         return;
       }
-      filter.otherArgs.sprint = [sprintId];
+      filter.otherArgs.sprint = sprintIds;
       setLoading(true);
       const [workCalendarRes, projectWorkCalendarRes, res] = await Promise.all([
         workCalendarApi.getWorkSetting(year),
@@ -140,7 +142,7 @@ const GanttPage: React.FC = () => {
         setLoading(false);
       });
     })();
-  }, [issueSearchStore, sprintId, type]);
+  }, [issueSearchStore, sprintIds, type]);
   useEffect(() => {
     loadData();
   }, [issueSearchStore, loadData]);
@@ -160,24 +162,24 @@ const GanttPage: React.FC = () => {
       return false;
     }
   }, []);
-  const handleSprintChange = useCallback((value: string) => {
-    store.setSprintId(value);
+  const handleSprintChange = useCallback((value: string[]) => {
+    store.setSprintIds(value);
   }, [store]);
   const afterSprintLoad = useCallback((sprints) => {
-    if (!sprintId) {
-      const cachedSprintId = localPageCacheStore.getItem('gantt.search.sprint');
+    if (!sprintIds) {
+      const cachedSprintId = localPageCacheStore.getItem('gantt.search.sprints');
       if (cachedSprintId) {
-        store.setSprintId(cachedSprintId);
+        store.setSprintIds(cachedSprintId);
       } else {
         const currentSprint = find(sprints, { statusCode: 'started' });
         if (currentSprint) {
-          store.setSprintId(currentSprint.sprintId);
+          store.setSprintIds([currentSprint.sprintId]);
         } else {
-          store.setSprintId(sprints[0]?.sprintId || '0');
+          store.setSprintIds([sprints[0]?.sprintId || '0']);
         }
       }
     }
-  }, [sprintId, store]);
+  }, [sprintIds, store]);
   const handleTypeChange = useCallback((newType) => {
     setType(newType);
     localPageCacheStore.setItem('gantt.search.type', newType);
@@ -242,13 +244,63 @@ const GanttPage: React.FC = () => {
       {t === 'left' ? <Icon type="navigate_before" /> : <Icon type="navigate_next" />}
     </div>
   ), []);
+  const normalizeIssue = (issue:Issue, source:any = {}) => Object.assign(source, {
+    estimatedEndTime: issue.estimatedEndTime,
+    estimatedStartTime: issue.estimatedStartTime,
+    issueTypeVO: issue.issueTypeVO,
+    objectVersionNumber: issue.objectVersionNumber,
+    statusVO: issue.statusVO,
+    summary: issue.summary,
+  });
+  const handleIssueUpdate = usePersistFn((issue:Issue) => {
+    setData(produce(data, (draft) => {
+      const target = find(draft, { issueId: issue.issueId });
+      if (target) {
+        // 更新属性
+        normalizeIssue(issue, target);
+      }
+    }));
+  });
+
+  const handleAddIssue = usePersistFn((issue:Issue) => {
+    setData(produce(data, (draft) => {
+      const target = find(draft, { issueId: issue.issueId });
+      if (target) {
+        // 更新属性
+        Object.assign(target, {
+          estimatedEndTime: issue.estimatedEndTime,
+          estimatedStartTime: issue.estimatedStartTime,
+          issueTypeVO: issue.issueTypeVO,
+          objectVersionNumber: issue.objectVersionNumber,
+          statusVO: issue.statusVO,
+          summary: issue.summary,
+        });
+      }
+    }));
+  });
+  const handleCreateIssue = usePersistFn((issue:Issue) => {
+    const parentIssueId = issue.parentIssueId ?? issue.relateIssueId;
+    if (parentIssueId) {
+      setData(produce(data, (draft) => {
+        const parent = find(draft, { issueId: parentIssueId });
+        if (parent) {
+          parent.children.unshift(normalizeIssue(issue));
+        }
+      }));
+    } else {
+      setData(produce(data, (draft) => {
+        draft.unshift(normalizeIssue(issue));
+      }));
+    }
+  });
   return (
     <Page>
       <Header>
         <SelectSprint
           flat
           placeholder="冲刺"
-          value={sprintId}
+          value={sprintIds}
+          multiple
           onChange={handleSprintChange}
           clearButton={false}
           afterLoad={afterSprintLoad}
@@ -346,8 +398,8 @@ const GanttPage: React.FC = () => {
               rowHeight={34}
             />
           )}
-          <IssueDetail refresh={loadData} />
-          <CreateIssue refresh={loadData} />
+          <IssueDetail refresh={loadData} onUpdate={handleIssueUpdate} />
+          <CreateIssue onCreate={handleCreateIssue} />
           <FilterManage
             visible={filterManageVisible!}
             setVisible={setFilterManageVisible}

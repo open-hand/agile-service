@@ -66,9 +66,9 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
       if (transformId) {
         setIssueLoading(true);
         issueApi.updateStatus(transformId, issueId, objectVersionNumber, applyType)
-          .then(() => {
+          .then((res) => {
             if (onUpdate) {
-              onUpdate();
+              onUpdate(res);
             }
             if (reloadIssue) {
               reloadIssue(issueId);
