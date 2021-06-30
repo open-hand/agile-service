@@ -11,20 +11,38 @@ public enum CustomFieldSql implements FieldSql {
     /**
      * 单选框，复选框，选择器(单选)，选择器(多选)，人员
      */
-    OPTION("LEFT JOIN fd_field_option ffo ON ffv.option_id = ffo.id",
-            "ffo.`value`, ffo.id",
-            "IFNULL(ffo.`value`,'无')",
-            "ffo.id",
+    ANALYSIS_OPTION("LEFT JOIN fd_field_option affo ON affv.option_id = affo.id",
+            "affo.`value`, affo.id",
+            "IFNULL(affo.`value`,'无')",
+            "affo.id",
             FieldSql.DEFAULT),
 
     /**
      * 人员
      */
-    MEMBER("",
-            "ffv.option_id",
-            "null", "IFNULL(ffv.option_id, 0)",
+    ANALYSIS_MEMBER("",
+            "affv.option_id",
+            "null", "IFNULL(affv.option_id, 0)",
+            FieldSql.USER),
+
+    /**
+     * 单选框，复选框，选择器(单选)，选择器(多选)，人员
+     */
+    COMPARED_OPTION("LEFT JOIN fd_field_option cffo ON cffv.option_id = cffo.id",
+            "cffo.`value`, cffo.id",
+            "IFNULL(cffo.`value`,'无')",
+            "cffo.id",
+            FieldSql.DEFAULT),
+
+    /**
+     * 人员
+     */
+    COMPARED_MEMBER("",
+            "cffv.option_id",
+            "null", "IFNULL(cffv.option_id, 0)",
             FieldSql.USER),
     ;
+
 
     String linkSql;
     String groupSql;
@@ -38,6 +56,15 @@ public enum CustomFieldSql implements FieldSql {
         this.valueSql = valueSql;
         this.idSql = idSql;
         this.valueType = valueType;
+    }
+
+    public static String getDefaultSql(String fieldCode, String type) {
+        if (ANALYSIS.equals(type)){
+            return CUSTOM_DEFAULT_ANALYSIS_JOIN;
+        } else if (COMPARED.equals(type)){
+            return CUSTOM_DEFAULT_COMPARED_JOIN;
+        }
+        return "";
     }
 
     @Override
@@ -62,19 +89,43 @@ public enum CustomFieldSql implements FieldSql {
         return valueType;
     }
 
-    public static FieldSql get(String fieldType) {
+    public static FieldSql get(String fieldType, String type) {
         if (StringUtils.isBlank(fieldType)) {
             return null;
         }
+        if (ANALYSIS.equals(type)){
+            return getAnalysisFieldSql(fieldType);
+        } else if (COMPARED.equals(type)){
+            return getComparedFieldSql(fieldType);
+        }
+        return null;
+    }
+
+    private static FieldSql getComparedFieldSql(String fieldType) {
         switch (fieldType) {
             case FieldType.RADIO:
             case FieldType.CHECKBOX:
             case FieldType.SINGLE:
             case FieldType.MULTIPLE:
-                return OPTION;
+                return COMPARED_OPTION;
             case FieldType.MEMBER:
             case FieldType.MULTI_MEMBER:
-                return MEMBER;
+                return COMPARED_MEMBER;
+            default:
+                return null;
+        }
+    }
+
+    private static FieldSql getAnalysisFieldSql(String fieldType) {
+        switch (fieldType) {
+            case FieldType.RADIO:
+            case FieldType.CHECKBOX:
+            case FieldType.SINGLE:
+            case FieldType.MULTIPLE:
+                return ANALYSIS_OPTION;
+            case FieldType.MEMBER:
+            case FieldType.MULTI_MEMBER:
+                return ANALYSIS_MEMBER;
             default:
                 return null;
         }
