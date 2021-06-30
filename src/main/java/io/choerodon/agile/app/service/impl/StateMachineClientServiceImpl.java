@@ -238,6 +238,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         StateMachineTransformDTO initTransform = modelMapper.map(instanceService.queryInitTransform(organizationId, stateMachineId), StateMachineTransformDTO.class);
         stateMachineClient.createInstance(initTransform, inputDTO);
         issueService.afterCreateSubIssue(issueId, subIssueConvertDTO, issueSubCreateVO, projectInfo);
+        issueService.doStateMachineCustomFlow(projectId, issueId, SchemeApplyType.AGILE);
         return issueService.queryIssueSubByCreate(subIssueConvertDTO.getProjectId(), issueId);
     }
 
