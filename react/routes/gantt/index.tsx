@@ -480,6 +480,7 @@ const GanttPage: React.FC = () => {
             onDelete={handleIssueDelete}
             onDeleteSubIssue={handleDeleteSubIssue}
             onCreateSubIssue={handleCreateSubIssue}
+            onCopyIssue={handleCreateIssue}
           />
           <CreateIssue onCreate={handleCreateIssue} />
           <FilterManage
