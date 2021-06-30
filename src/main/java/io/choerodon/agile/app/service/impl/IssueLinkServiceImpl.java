@@ -6,8 +6,10 @@ import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.app.assembler.IssueLinkAssembler;
 import io.choerodon.agile.app.service.IssueLinkService;
 import io.choerodon.agile.app.service.IssueService;
+import io.choerodon.agile.app.service.LinkIssueStatusLinkageService;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.IssueLinkDTO;
+import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.IssueLinkMapper;
 import io.choerodon.agile.infra.mapper.IssueTypeMapper;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
@@ -50,6 +52,8 @@ public class IssueLinkServiceImpl implements IssueLinkService {
     private IssueTypeMapper issueTypeMapper;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private LinkIssueStatusLinkageService linkIssueStatusLinkageService;
 
     @Override
     public List<IssueLinkVO> createIssueLinkList(List<IssueLinkCreateVO> issueLinkCreateVOList, Long issueId, Long projectId) {
@@ -62,6 +66,8 @@ public class IssueLinkServiceImpl implements IssueLinkService {
                 BaseFieldUtil.updateIssueLastUpdateInfoForIssueLink(issueLinkDTO.getProjectId(), issueLinkDTO);
             }
         });
+        // 创建链接时候触发关联问题联动
+        linkIssueStatusLinkageService.updateLinkIssueStatus(projectId, issueId, SchemeApplyType.AGILE);
         return listIssueLinkByIssueId(issueId, projectId, false);
     }
 

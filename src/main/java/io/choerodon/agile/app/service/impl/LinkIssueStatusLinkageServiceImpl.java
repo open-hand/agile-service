@@ -198,9 +198,10 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
             Long statusId = issueTypeMap.getOrDefault(linkVO.getIssueTypeVO().getId(), null);
             if (!ObjectUtils.isEmpty(statusId) && allStatusId.contains(statusId) && !ObjectUtils.isEmpty(linkVO.getLinkedIssueId())) {
                 Map<Long, Long> issueMap = issueChangeMap.getOrDefault(issueTypeId, new HashMap<>());
-                issueMap.put(linkVO.getLinkedIssueId(), statusId);
+                Long linkIssue = Objects.equals(issueId, linkVO.getLinkedIssueId()) ? linkVO.getIssueId() : linkVO.getLinkedIssueId();
+                issueMap.put(linkIssue , statusId);
                 issueChangeMap.put(issueTypeId, issueMap);
-                issueIds.add(linkVO.getLinkedIssueId());
+                issueIds.add(linkIssue);
             }
         }
 
