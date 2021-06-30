@@ -76,12 +76,12 @@ const BaseInfo: React.FC = () => {
     <>
       <Prompt message={edit ? '项目报告保存__@.@__项目报告有更改，放弃更改？' : '项目报告保存__@.@__项目报告未保存，放弃更改？'} when={store.dirty} />
       <Form style={{ width: 600, marginLeft: 18 }} dataSet={dataSet}>
-        <TextField name="title" placeholder="例如：XXX冲刺项目汇报" />
+        <TextField name="title" placeholder="请输入报告主题，例如：XXX冲刺项目汇报" />
         <TextArea
           name="description"
         // @ts-ignore
           resize="vertical"
-          placeholder="报告的的进一步说明，相当于报告的摘要信息"
+          placeholder="请输入报告描述，报告的进一步说明，相当于报告的摘要信息"
         />
         <SelectUser name="receiverList" selectedUser={selectedReceiverList} />
         <SelectUser name="ccList" selectedUser={selectedCCList} clearButton />
