@@ -97,6 +97,10 @@ const dataZoom = {
   },
 };
 
+const color = ['#4E70F0', '#07C5D1', '#97F4F1', '#FF812C', '#F9513E', '#FF71D9', '#9928FC', '#7C83FF',
+  '#028390', '#FDDD39', '#8BC34A', '#4CAF50', '#029688', '#4050B5', '#3D7ADB', '#03A9F4',
+  '#871984', '#BC0F6A', '#FD634E', '#F8A1AC', '#FFBF33', '#FC9A4D', '#02AECD', '#5AD5E0'];
+
 const legend = {
   formatter(name: string) {
     return `${name.slice(0, 10)}${name.length > 10 ? '...' : ''}`;
@@ -136,7 +140,7 @@ const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[],
       tooltip: {
         ...tooltip,
         formatter(params: any) {
-          const content = `${params.marker}${params.name}: ${(params.value || params.value === 0) ? parseFloat(params.value) : '-'}${unitZ}`;
+          const content = `${params.marker}${params.name}: ${(params.value || params.value === 0) ? params.value : '-'}${unitZ}`;
           return content;
         },
       },
@@ -157,6 +161,7 @@ const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[],
         ...grid,
         bottom: xAxisData.length > maxShow ? 20 : 0,
       },
+      color,
     });
   } if (chartType === 'pie') {
     return {
@@ -164,7 +169,7 @@ const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[],
         ...tooltip,
         trigger: 'item',
         formatter(params: any) {
-          const content = `${params.marker}${params.name}: ${(params.value || params.value === 0) ? parseFloat(params.value) : '-'}${unitZ}`;
+          const content = `${params.marker}${params.name}: ${(params.value || params.value === 0) ? params.value : '-'}${unitZ}（${parseFloat(params.percent)}%）`;
           return content;
         },
       },
@@ -195,6 +200,7 @@ const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[],
           })),
         },
       ],
+      color,
     };
   } if (chartType === 'stackedBar') {
     return {
@@ -208,7 +214,7 @@ const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[],
           let content = '';
           content += `${params[0].axisValue}<br/>`;
           for (let i = 0; i < params.length; i += 1) {
-            content += `${params[i].marker}${params[i].seriesName}: ${(params[i].value || params[i].value === 0) ? parseFloat(params[i].value) : '-'}${unitZ}`;
+            content += `${params[i].marker}${params[i].seriesName}: ${(params[i].value || params[i].value === 0) ? params[i].value : '-'}${unitZ}`;
             if (i !== params[i].length - 1) {
               content += '<br/ >';
             }
@@ -218,7 +224,7 @@ const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[],
       },
       legend: {
         type: 'scroll',
-        top: 10,
+        top: 0,
         ...legend,
       },
       xAxis: {
@@ -244,8 +250,10 @@ const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[],
       dataZoom: [{ ...dataZoom, show: xAxisData.length > maxShow }],
       grid: {
         ...grid,
+        top: xAxisData.length > maxShow ? 60 : 40,
         bottom: xAxisData.length > maxShow ? 20 : 0,
       },
+      color,
     };
   }
   return {};

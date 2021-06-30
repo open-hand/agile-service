@@ -40,7 +40,7 @@ const Chart: React.FC<ChartProps> = ({
     ...(option || {}),
   });
   return (
-    <div style={{ padding: '0 20px 5px 10px' }}>
+    <div style={{ padding: '10px 20px 5px 10px' }}>
       <Spin spinning={loading}>
         <ReactEcharts option={getOption()} />
       </Spin>
