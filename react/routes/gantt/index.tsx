@@ -90,14 +90,18 @@ const tableColumns: GanttProps<Issue>['columns'] = [{
   name: 'summary',
   label: '名称',
   render: (record) => (
-    <Tooltip title={record.summary}>
-      {!record.group ? (
-        <span style={{ cursor: 'pointer', color: 'var(--table-click-color)' }}>
-          <TypeTag iconSize={22} data={record.issueTypeVO} style={{ marginRight: 5 }} />
+    !record.group ? (
+      <span style={{ cursor: 'pointer', color: 'var(--table-click-color)' }}>
+        <TypeTag iconSize={22} data={record.issueTypeVO} style={{ marginRight: 5 }} />
+        <Tooltip title={record.summary}>
           <span style={{ verticalAlign: 'middle' }}>{record.summary}</span>
-        </span>
-      ) : <span style={{ color: 'var(--table-click-color)' }}>{record.summary}</span>}
-    </Tooltip>
+        </Tooltip>
+      </span>
+    ) : (
+      <Tooltip title={record.summary}>
+        <span style={{ color: 'var(--table-click-color)' }}>{record.summary}</span>
+      </Tooltip>
+    )
   ),
 },
 {
