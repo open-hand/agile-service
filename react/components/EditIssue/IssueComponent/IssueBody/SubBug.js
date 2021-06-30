@@ -38,12 +38,12 @@ const SubBug = observer(({
           reloadIssue(issue.issueId);
         }
       }}
-      onRefresh={() => {
+      onRefresh={(subIssueId) => {
         if (reloadIssue) {
           reloadIssue(issueId);
         }
         if (onDeleteSubIssue) {
-          onDeleteSubIssue();
+          onDeleteSubIssue(issue, subIssueId);
         }
       }}
     />

@@ -278,30 +278,42 @@ const GanttPage: React.FC = () => {
       name: issue.assigneeName,
     } : null,
   });
-  const handleIssueUpdate = usePersistFn((issue: Issue) => {
+  const handleIssueUpdate = usePersistFn((issue: Issue|null) => {
+    if (issue) {
+      setData(produce(data, (draft) => {
+        const target = find(draft, { issueId: issue.issueId });
+        if (target) {
+          // 更新属性
+          normalizeIssue(issue, target);
+        }
+      }));
+    }
+  });
+  const removeSubIssue = usePersistFn((parentIssueId: string, subIssueId: string) => {
     setData(produce(data, (draft) => {
-      const target = find(draft, { issueId: issue.issueId });
-      if (target) {
-        // 更新属性
-        normalizeIssue(issue, target);
+      if (parentIssueId) {
+        const parent = find(draft, { issueId: parentIssueId });
+        if (parent) {
+          remove(parent.children, { issueId: subIssueId });
+        }
       }
     }));
   });
   const handleIssueDelete = usePersistFn((issue: Issue | null) => {
     if (issue) {
-      setData(produce(data, (draft) => {
-        // 判断是否是子issue
-        const parentIssueId = issue.parentIssueId ?? issue.relateIssueId;
-        if (parentIssueId) {
-          const parent = find(draft, { issueId: parentIssueId });
-          if (parent) {
-            remove(parent.children, { issueId: issue.issueId });
-          }
-        } else {
+      const parentIssueId = issue.parentIssueId ?? issue.relateIssueId;
+      if (parentIssueId) {
+        removeSubIssue(parentIssueId, issue.issueId);
+      } else {
+        setData(produce(data, (draft) => {
           remove(draft, { issueId: issue.issueId });
-        }
-      }));
+        }));
+      }
     }
+  });
+
+  const handleDeleteSubIssue = usePersistFn((issue: Issue, subIssueId: string) => {
+    removeSubIssue(issue.issueId, subIssueId);
   });
   const handleCreateIssue = usePersistFn((issue: Issue) => {
     const parentIssueId = issue.parentIssueId ?? issue.relateIssueId;
@@ -430,6 +442,7 @@ const GanttPage: React.FC = () => {
             refresh={loadData}
             onUpdate={handleIssueUpdate}
             onDelete={handleIssueDelete}
+            onDeleteSubIssue={handleDeleteSubIssue}
           />
           <CreateIssue onCreate={handleCreateIssue} />
           <FilterManage

@@ -41,7 +41,6 @@ function EditIssue() {
     programId,
     backUrl,
     style,
-    onDeleteSubIssue,
     disabled,
     prefixCls,
     issueStore,
@@ -79,7 +78,13 @@ function EditIssue() {
     }
     close();
   }, [close, issueEvents]);
-
+  const onDeleteSubIssue = useCallback((issue, subIssueId) => {
+    const callback = issueEvents?.deleteSubIssue;
+    if (callback) {
+      callback(issue, subIssueId);
+    }
+    close();
+  }, [close, issueEvents]);
   const loadIssueDetail = async (paramIssueId, callback) => {
     const id = paramIssueId || idRef.current || currentIssueId;
     if (idRef.current !== id && descriptionEditRef.current) {

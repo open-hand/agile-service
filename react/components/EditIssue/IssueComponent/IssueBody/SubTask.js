@@ -39,7 +39,7 @@ const SubTask = observer(({
           reloadIssue(issue.issueId);
         }
       }}
-      onRefresh={() => {
+      onRefresh={(subIssueId) => {
         if (reloadIssue) {
           reloadIssue(parentIssueId);
         }
@@ -47,7 +47,7 @@ const SubTask = observer(({
           onUpdate();
         }
         if (onDeleteSubIssue) {
-          onDeleteSubIssue();
+          onDeleteSubIssue(issue, subIssueId);
         }
       }}
     />

@@ -6,10 +6,13 @@ import Context from '../../context';
 
 interface Props {
   refresh: () => void
-  onUpdate: (issue: Issue)=> void
-  onDelete: (issue: Issue)=> void
+  onUpdate: (issue: Issue) => void
+  onDelete: (issue: Issue) => void
+  onDeleteSubIssue: (issue: Issue, subIssueId: string) => void
 }
-const IssueDetail: React.FC<Props> = ({ refresh, onUpdate, onDelete }) => {
+const IssueDetail: React.FC<Props> = ({
+  refresh, onUpdate, onDelete, onDeleteSubIssue,
+}) => {
   const { store } = useContext(Context);
   const { issueId } = store;
   const handleResetIssue = useCallback((newIssueId) => {
@@ -36,6 +39,7 @@ const IssueDetail: React.FC<Props> = ({ refresh, onUpdate, onDelete }) => {
             onDelete(issue);
             handleResetIssue(null);
           },
+          deleteSubIssue: onDeleteSubIssue,
           close: () => {
             handleResetIssue(null);
           },
