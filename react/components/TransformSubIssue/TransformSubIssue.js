@@ -111,7 +111,7 @@ class TransformSubIssue extends Component {
             this.setState({
               loading: false,
             });
-            onOk();
+            onOk(res);
           });
       }
     });

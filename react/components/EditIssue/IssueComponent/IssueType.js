@@ -11,7 +11,7 @@ import './IssueComponent.less';
 import openRequiredFieldsModal from './required-fields';
 
 const IssueType = observer(({
-  reloadIssue, onUpdate, applyType,
+  reloadIssue, applyType, onTransformType,
 }) => {
   const { store, disabled } = useContext(EditIssueContext);
   let { data: issueTypeData } = useProjectIssueTypes({ onlyEnabled: true, applyType }, { enabled: !disabled });
@@ -35,12 +35,12 @@ const IssueType = observer(({
         },
       };
       issueApi.update(issueUpdateVO)
-        .then(() => {
+        .then((newIssue) => {
           if (reloadIssue) {
             reloadIssue(issueId);
           }
-          if (onUpdate) {
-            onUpdate();
+          if (onTransformType) {
+            onTransformType(newIssue, issue);
           }
         });
     } else {
@@ -57,7 +57,14 @@ const IssueType = observer(({
             issueTypeId: value,
           },
           reloadIssue,
-          onUpdate,
+          onUpdate: (newIssue) => {
+            if (reloadIssue) {
+              reloadIssue(issueId);
+            }
+            if (onTransformType) {
+              onTransformType(newIssue, issue);
+            }
+          },
         });
       } else {
         const issueUpdateTypeVO = {
@@ -69,12 +76,12 @@ const IssueType = observer(({
           featureType,
         };
         issueApi.updateType(issueUpdateTypeVO)
-          .then(() => {
+          .then((newIssue) => {
             if (reloadIssue) {
               reloadIssue(issueId);
             }
-            if (onUpdate) {
-              onUpdate();
+            if (onTransformType) {
+              onTransformType(newIssue, issue);
             }
           });
       }

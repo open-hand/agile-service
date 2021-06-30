@@ -11,9 +11,10 @@ interface Props {
   onDeleteSubIssue: (issue: Issue, subIssueId: string) => void
   onCreateSubIssue: (subIssue: Issue, parentIssueId: string) => void
   onCopyIssue: (issue: Issue) => void
+  onTransformType: (newIssue: Issue, oldIssue: Issue) => void
 }
 const IssueDetail: React.FC<Props> = ({
-  refresh, onUpdate, onDelete, onDeleteSubIssue, onCreateSubIssue, onCopyIssue,
+  refresh, onUpdate, onDelete, onDeleteSubIssue, onCreateSubIssue, onCopyIssue, onTransformType,
 }) => {
   const { store } = useContext(Context);
   const { issueId } = store;
@@ -47,12 +48,13 @@ const IssueDetail: React.FC<Props> = ({
             handleResetIssue(null);
           },
           copy: onCopyIssue,
+          transformType: onTransformType,
         },
       });
     } else {
       close();
     }
-  }, [visible, issueId, open, refresh, handleResetIssue, close, onUpdate, onDelete, onDeleteSubIssue, onCreateSubIssue, onCopyIssue]);
+  }, [visible, issueId, open, refresh, handleResetIssue, close, onUpdate, onDelete, onDeleteSubIssue, onCreateSubIssue, onCopyIssue, onTransformType]);
   return (
     <DetailContainer {...detailProps} />
   );

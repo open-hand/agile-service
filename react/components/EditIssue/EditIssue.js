@@ -69,9 +69,9 @@ function EditIssue() {
     if (issueEvents?.createSubIssue) {
       issueEvents?.createSubIssue(subIssue, parentIssueId);
     } else if (issueEvents?.update) {
-      issueEvents?.update(issue);
+      issueEvents?.update();
     }
-  }, [issue, issueEvents]);
+  }, [issueEvents]);
   const onDeleteIssue = useCallback((issue) => {
     const callback = issueEvents?.delete || issueEvents?.update;
     if (callback) {
@@ -86,6 +86,13 @@ function EditIssue() {
     }
     close();
   }, [close, issueEvents]);
+  const onTransformType = useCallback((newIssue, oldIssue) => {
+    if (issueEvents?.transformType) {
+      issueEvents?.transformType(newIssue, oldIssue);
+    } else if (issueEvents?.update) {
+      issueEvents?.update(newIssue);
+    }
+  }, [issueEvents]);
   const loadIssueDetail = async (paramIssueId, callback) => {
     const id = paramIssueId || idRef.current || currentIssueId;
     if (idRef.current !== id && descriptionEditRef.current) {
@@ -191,19 +198,15 @@ function EditIssue() {
     loadIssueDetail();
   };
 
-  const handleTransformSubIssue = () => {
+  const handleTransformSubIssue = (newIssue) => {
     store.setTransformSubIssueShow(false);
-    if (onUpdate) {
-      onUpdate();
-    }
+    onTransformType(newIssue, store.getIssue);
     loadIssueDetail();
   };
 
-  const handleTransformFromSubIssue = () => {
+  const handleTransformFromSubIssue = (newIssue) => {
     store.setTransformFromSubIssueShow(false);
-    if (onUpdate) {
-      onUpdate();
-    }
+    onTransformType(newIssue, store.getIssue);
     loadIssueDetail();
   };
 
@@ -295,6 +298,7 @@ function EditIssue() {
           onUpdate={onUpdate}
           otherProject={otherProject}
           outside={outside}
+          onTransformType={onTransformType}
         />
         <IssueBody
           setIssueLoading={setIssueLoading}
