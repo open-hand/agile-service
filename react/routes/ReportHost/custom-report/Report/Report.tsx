@@ -348,7 +348,7 @@ const CustomReport: React.FC<Props> = (props) => {
               </div>
             )}
             <div className={styles.main}>
-              <div className={styles.left}>
+              <div className={styles.left} key={`${chartType}-${statisticsType}-${analysisField}-${comparedField}`}>
                 {
                   !loading && (
                     <>

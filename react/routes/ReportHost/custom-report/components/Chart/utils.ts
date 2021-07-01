@@ -110,6 +110,7 @@ const legend = {
   textStyle: {
     color: '#0F1358',
   },
+  pageButtonItemGap: 10,
   pageIconSize: [10, 12],
   pageIconColor: '#5365EA',
   pageIconInactiveColor: 'rgba(83, 101, 234, 0.5)',
@@ -249,8 +250,8 @@ const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[],
       dataZoom: [{ ...dataZoom, show: xAxisData.length > maxShow }],
       grid: {
         ...grid,
-        top: xAxisData.length > maxShow ? 60 : 40,
-        bottom: xAxisData.length > maxShow ? 20 : 0,
+        top: data.length > maxShow ? 60 : 40, // 图例过长，留足空间
+        bottom: xAxisData.length > maxShow ? 20 : 0, // x轴过长，留横向滚动条的位置
       },
       color,
     };
