@@ -603,4 +603,6 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      * @return
      */
     List<Long> queryUnDoneIssues(@Param("projectId") Long projectId, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
+
+    Set<Long> queryChildrenIds(@Param("projectId") Long projectId, @Param("parentIssueIds") List<Long> parentIssueIds, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
 }
