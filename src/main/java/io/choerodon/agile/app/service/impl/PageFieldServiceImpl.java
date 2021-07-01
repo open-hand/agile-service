@@ -412,8 +412,6 @@ public class PageFieldServiceImpl implements PageFieldService {
         List<PageFieldDTO> pageFields = queryPageField(organizationId, projectId, pageCode, issueTypeId);
         List<PageFieldViewVO> pageFieldViews = modelMapper.map(pageFields, new TypeToken<List<PageFieldViewVO>>() {
         }.getType());
-        //填充option
-        optionService.fillOptions(organizationId, projectId, pageFieldViews);
         objectSchemeFieldService.setDefaultValueObjs(pageFieldViews, projectId, organizationId);
         FieldValueUtil.handleDefaultValue(pageFieldViews);
         return pageFieldViews;
