@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import java.util.List;
+import java.util.Set;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -90,9 +91,10 @@ public interface IssueService {
      * @param projectId
      * @param issueId
      * @param applyType
+     * @param influenceIssueIds
      * @return
      */
-    IssueVO doStateMachineCustomFlow(Long projectId, Long issueId, String applyType);
+    IssueVO doStateMachineCustomFlow(Long projectId, Long issueId, String applyType, Set<Long> influenceIssueIds);
 
     /**
      * 更新issue自己的字段

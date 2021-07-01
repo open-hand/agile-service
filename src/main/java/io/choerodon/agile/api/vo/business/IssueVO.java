@@ -268,6 +268,37 @@ public class IssueVO {
 
     private List<TagVO> tags;
 
+    private Boolean completed;
+
+    private Date actualCompletedDate;
+
+    @Encrypt
+    private List<Long> influenceIssueIds;
+
+    public List<Long> getInfluenceIssueIds() {
+        return influenceIssueIds;
+    }
+
+    public void setInfluenceIssueIds(List<Long> influenceIssueIds) {
+        this.influenceIssueIds = influenceIssueIds;
+    }
+
+    public Boolean getCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(Boolean completed) {
+        this.completed = completed;
+    }
+
+    public Date getActualCompletedDate() {
+        return actualCompletedDate;
+    }
+
+    public void setActualCompletedDate(Date actualCompletedDate) {
+        this.actualCompletedDate = actualCompletedDate;
+    }
+
     public List<TagVO> getTags() {
         return tags;
     }

@@ -5,6 +5,7 @@ import io.choerodon.agile.api.vo.StatusVO;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author zhaotianxin
@@ -18,7 +19,7 @@ public interface LinkIssueStatusLinkageService {
 
     Map<Long,List<LinkIssueStatusLinkageVO>> listByIssueTypeAndStatusIds(Long projectId, Long organizationId, Long issueTypeId, List<Long> statusIds);
 
-    void updateLinkIssueStatus(Long projectId, Long issueId, String applyType);
+    void updateLinkIssueStatus(Long projectId, Long issueId, String applyType, Set<Long> influenceIssueIds);
 
     void deleteByStatusId(Long projectId, Long organizationId, Long statusId, Long issueTypeId);
 

@@ -56,7 +56,7 @@ public class IssueLinkServiceImpl implements IssueLinkService {
     private LinkIssueStatusLinkageService linkIssueStatusLinkageService;
 
     @Override
-    public List<IssueLinkVO> createIssueLinkList(List<IssueLinkCreateVO> issueLinkCreateVOList, Long issueId, Long projectId) {
+    public IssueLinkResponseVO createIssueLinkList(List<IssueLinkCreateVO> issueLinkCreateVOList, Long issueId, Long projectId) {
         List<IssueLinkDTO> issueLinkDTOList = issueLinkAssembler.toTargetList(issueLinkCreateVOList, IssueLinkDTO.class);
         issueLinkDTOList.forEach(issueLinkDTO -> {
             issueLinkDTO.setProjectId(projectId);
@@ -67,8 +67,12 @@ public class IssueLinkServiceImpl implements IssueLinkService {
             }
         });
         // 创建链接时候触发关联问题联动
-        linkIssueStatusLinkageService.updateLinkIssueStatus(projectId, issueId, SchemeApplyType.AGILE);
-        return listIssueLinkByIssueId(issueId, projectId, false);
+        Set<Long> influenceIssueIds = new HashSet<>();
+        linkIssueStatusLinkageService.updateLinkIssueStatus(projectId, issueId, SchemeApplyType.AGILE, influenceIssueIds);
+        IssueLinkResponseVO response = new IssueLinkResponseVO();
+        response.setIssueLinks(listIssueLinkByIssueId(issueId, projectId, false));
+        response.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
+        return response;
     }
 
 

@@ -427,6 +427,8 @@ public class IssueAssembler extends AbstractAssembler {
      * @return IssueSubVO
      */
     public IssueSubVO issueDetailDoToIssueSubDto(IssueDetailDTO issueDetailDTO) {
+        Long projectId = issueDetailDTO.getProjectId();
+        String applyType = issueDetailDTO.getApplyType();
         IssueSubVO issueSubVO = new IssueSubVO();
         BeanUtils.copyProperties(issueDetailDTO, issueSubVO);
         issueSubVO.setComponentIssueRelVOList(modelMapper.map(issueDetailDTO.getComponentIssueRelDTOList(), new TypeToken<List<ComponentIssueRelVO>>(){}.getType()));
@@ -490,6 +492,8 @@ public class IssueAssembler extends AbstractAssembler {
                 }
             }
         }
+        Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, applyType);
+        issueSubVO.setIssueTypeVO(issueTypeDTOMap.get(issueDetailDTO.getIssueTypeId()));
         return issueSubVO;
     }
 
