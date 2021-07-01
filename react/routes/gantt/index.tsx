@@ -280,6 +280,9 @@ const GanttPage: React.FC = () => {
     objectVersionNumber: issue.objectVersionNumber,
     statusVO: issue.statusVO,
     summary: issue.summary,
+    actualCompletedDate: issue.actualCompletedDate,
+    completed: issue.completed,
+    issueId: issue.issueId,
     assignee: issue.assigneeId ? {
       name: issue.assigneeName,
       realName: issue.assigneeRealName,
@@ -352,14 +355,17 @@ const GanttPage: React.FC = () => {
     const parentTypes = ['story', 'task'];
     const oldType = oldIssue.issueTypeVO.typeCode;
     const newType = newIssue.issueTypeVO.typeCode;
-    // 父任务类型之间相互转换，当做更新
-    if (parentTypes.includes(oldType) && parentTypes.includes(newType)) {
+    // 同类型或者父任务类型之间相互转换，当做更新
+    if (oldType === newType || (parentTypes.includes(oldType) && parentTypes.includes(newType))) {
       handleIssueUpdate(newIssue);
     } else {
       // 其他的，当做删除再创建
       handleIssueDelete(oldIssue);
       handleCreateIssue(newIssue);
     }
+  });
+  const handleChangeParent = usePersistFn((newIssue: Issue, oldIssue: Issue) => {
+    handleTransformType(newIssue, oldIssue);
   });
   const handleIssueDelete = usePersistFn((issue: Issue | null) => {
     if (issue) {
@@ -494,6 +500,7 @@ const GanttPage: React.FC = () => {
             onCreateSubIssue={handleCreateSubIssue}
             onCopyIssue={handleCreateIssue}
             onTransformType={handleTransformType}
+            onChangeParent={handleChangeParent}
           />
           <CreateIssue onCreate={handleCreateIssue} />
           <FilterManage
