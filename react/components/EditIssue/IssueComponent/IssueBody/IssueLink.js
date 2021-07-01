@@ -14,11 +14,12 @@ import openCreateLink from './create-link/CreateLink';
   componentDidMount() {
   }
 
-  onCreateLinkIssue() {
-    const { reloadIssue } = this.props;
+  onCreateLinkIssue = (res) => {
+    const { reloadIssue, onLinkIssue } = this.props;
     if (reloadIssue) {
       reloadIssue();
     }
+    onLinkIssue(res);
   }
 
   renderLinkList(link, i) {
@@ -87,13 +88,13 @@ import openCreateLink from './create-link/CreateLink';
             <span>{typeCode === 'feature' ? '关联Feature' : '关联问题'}</span>
           </div>
           {!disabled && (
-          <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
-            <Tooltip placement="topRight" title={typeCode === 'feature' ? '创建关联Feature' : '创建关联问题'} getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-              <Button onClick={() => { openCreateLink({ issueId, onOk: () => { this.onCreateLinkIssue(); } }); }}>
-                <Icon type="playlist_add icon" />
-              </Button>
-            </Tooltip>
-          </div>
+            <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
+              <Tooltip placement="topRight" title={typeCode === 'feature' ? '创建关联Feature' : '创建关联问题'} getPopupContainer={(triggerNode) => triggerNode.parentNode}>
+                <Button onClick={() => { openCreateLink({ issueId, onOk: this.onCreateLinkIssue }); }}>
+                  <Icon type="playlist_add icon" />
+                </Button>
+              </Tooltip>
+            </div>
           )}
         </div>
         {this.renderLinkIssues()}

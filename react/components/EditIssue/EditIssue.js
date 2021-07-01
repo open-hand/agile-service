@@ -100,6 +100,14 @@ function EditIssue() {
       issueEvents?.update(newIssue);
     }
   }, [issueEvents, store.getIssue]);
+  const onLinkIssue = useCallback((res) => {
+    if (issueEvents?.linkIssue) {
+      issueEvents?.linkIssue(res);
+    } else if (issueEvents?.update) {
+      issueEvents?.update(store.getIssue);
+    }
+  }, [issueEvents, store.getIssue]);
+
   const loadIssueDetail = async (paramIssueId, callback) => {
     const id = paramIssueId || idRef.current || currentIssueId;
     if (idRef.current !== id && descriptionEditRef.current) {
@@ -322,6 +330,7 @@ function EditIssue() {
           onIssueCopy={onIssueCopy}
           onCreateSubIssue={onCreateSubIssue}
           onDeleteSubIssue={onDeleteSubIssue}
+          onLinkIssue={onLinkIssue}
           loginUserId={AppState.userInfo.id}
           applyType={applyType}
           onDeleteIssue={onDeleteIssue}
