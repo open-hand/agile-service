@@ -775,7 +775,14 @@ class ScrumBoardStore {
       this.issueTypes = [];
     }
     this.stateMachineMap = stateMachineMap;
+    const oldData = toJS(this.canDragOn) ?? {};
     this.canDragOn = observable.map(canDragOn);
+    // 处理子任务设置了状态联动并在拖动后，立马拖动父级的问题
+    Object.keys(oldData).forEach((status) => {
+      if (this.canDragOn.has(status)) {
+        this.canDragOn.set(status, oldData[status]);
+      }
+    });
     this.statusColumnMap = statusColumnMap;
     const { unInterConnectedDataMap, interConnectedDataMap, swimLaneData } = renderData;
     this.otherIssue = unInterConnectedDataMap;
