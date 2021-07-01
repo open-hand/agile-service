@@ -544,7 +544,7 @@
          </foreach>
     </select>
 
-    <select id="selectCustomFieldListWithOutOption" resultMap="objectSchemeFieldDetailMap">
+    <select id="selectCustomFieldListWithOutOption" resultType="io.choerodon.agile.api.vo.ObjectSchemeFieldDetailVO">
         SELECT
             osf.id,
             osf.code,
