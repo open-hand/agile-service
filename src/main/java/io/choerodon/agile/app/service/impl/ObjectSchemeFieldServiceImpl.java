@@ -1575,6 +1575,16 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         return objectSchemeFieldVOS;
     }
 
+    @Override
+    public List<ObjectSchemeFieldDetailVO> queryCustomFieldListWithOutOption(Long projectId, String issueTypeList) {
+        List<ObjectSchemeFieldDetailVO> objectSchemeFieldDetailVOList = objectSchemeFieldMapper.selectCustomFieldListWithOutOption(ConvertUtil.getOrganizationId(projectId), projectId, issueTypeList);
+        if (objectSchemeFieldDetailVOList != null && !objectSchemeFieldDetailVOList.isEmpty()) {
+            return objectSchemeFieldDetailVOList;
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
     private List<ObjectSchemeFieldVO> filterByIssueTypeList(List<ObjectSchemeFieldVO> objectSchemeFieldVOS, String issueTypeList) {
         if (CollectionUtils.isEmpty(objectSchemeFieldVOS)) {
             return new ArrayList<>();

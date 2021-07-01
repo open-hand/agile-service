@@ -140,7 +140,7 @@ public class FieldValueController {
     public ResponseEntity<List<ObjectSchemeFieldDetailVO>> queryCustomFieldList(@ApiParam(value = "项目id", required = true)
                                                                                 @PathVariable("project_id") Long projectId,
                                                                                 @RequestParam(defaultValue = "null") String issueTypeList) {
-        return new ResponseEntity<>(objectSchemeFieldService.queryCustomFieldList(projectId, issueTypeList), HttpStatus.OK);
+        return new ResponseEntity<>(objectSchemeFieldService.queryCustomFieldListWithOutOption(projectId, issueTypeList), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

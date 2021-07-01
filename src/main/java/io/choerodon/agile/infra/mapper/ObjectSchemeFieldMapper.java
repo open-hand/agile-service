@@ -111,4 +111,16 @@ public interface ObjectSchemeFieldMapper extends BaseMapper<ObjectSchemeFieldDTO
                                                                @Param("issueTypeId") Long issueTypeId);
 
     List<Long> filterNotExistFields(@Param("fieldIds") List<Long> fieldIds);
+
+    /**
+     * 查询项目下自定义字段，不包含option值
+     * @param organizationId  组织id
+     * @param projectId 项目id
+     * @param issueTypeList 问题类型列表
+     * @return 项目下自定义字段
+     */
+    List<ObjectSchemeFieldDetailVO> selectCustomFieldListWithOutOption(
+            @Param("organizationId") Long organizationId,
+            @Param("projectId") Long projectId,
+            @Param("issueTypeList") String issueTypeList);
 }
