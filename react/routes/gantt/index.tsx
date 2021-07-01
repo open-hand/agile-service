@@ -352,8 +352,8 @@ const GanttPage: React.FC = () => {
     const parentTypes = ['story', 'task'];
     const oldType = oldIssue.issueTypeVO.typeCode;
     const newType = newIssue.issueTypeVO.typeCode;
-    // 父任务类型之间相互转换，当做更新
-    if (parentTypes.includes(oldType) && parentTypes.includes(newType)) {
+    // 同类型或者父任务类型之间相互转换，当做更新
+    if (oldType === newType || (parentTypes.includes(oldType) && parentTypes.includes(newType))) {
       handleIssueUpdate(newIssue);
     } else {
       // 其他的，当做删除再创建
