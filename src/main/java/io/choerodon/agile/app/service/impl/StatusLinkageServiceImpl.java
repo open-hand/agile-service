@@ -172,7 +172,10 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
     }
 
     @Override
-    public boolean updateParentStatus(Long projectId, Long issueId, String applyType) {
+    public boolean updateParentStatus(Long projectId,
+                                      Long issueId,
+                                      String applyType,
+                                      Set<Long> influenceIssueIds) {
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         if (ObjectUtils.isEmpty(issueDTO)) {
             throw new CommonException("error.issue.null");
@@ -218,6 +221,8 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         }
         // 判断是否改变父任务的状态
         if (Boolean.TRUE.equals(isChange)) {
+            //收集受影响的issueId
+            influenceIssueIds.add(parentIssueId);
             return changeParentStatus(projectId, applyType, parentIssue, changeStatus, issueDTO);
         }
         return true;

@@ -1,9 +1,6 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.api.vo.IssueLinkCreateVO;
-import io.choerodon.agile.api.vo.IssueLinkFixVO;
-import io.choerodon.agile.api.vo.IssueLinkVO;
-import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.IssueLinkDTO;
@@ -26,7 +23,7 @@ public interface IssueLinkService {
      * @param projectId              projectId
      * @return IssueLinkVO
      */
-    List<IssueLinkVO> createIssueLinkList(List<IssueLinkCreateVO> issueLinkCreateVOList, Long issueId, Long projectId);
+    IssueLinkResponseVO createIssueLinkList(List<IssueLinkCreateVO> issueLinkCreateVOList, Long issueId, Long projectId);
 
     /**
      * 根据issueLinkId删除issueLink

@@ -5,6 +5,9 @@ import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
+import java.util.List;
+import java.util.Set;
+
 /**
  * @author superlee
  * @since 2020-11-24
@@ -19,6 +22,8 @@ public interface GanttChartService {
      * @return
      */
     Page<GanttChartVO> pagedQuery(Long projectId, SearchVO searchVO, PageRequest pageRequest);
+
+    List<GanttChartVO> listByIds(Long projectId, Set<Long> issueIds);
 
     /**
      * 查询甘特图列表数据(用户视图)

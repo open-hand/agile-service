@@ -167,7 +167,10 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
     }
 
     @Override
-    public void updateLinkIssueStatus(Long projectId, Long issueId, String applyType) {
+    public void updateLinkIssueStatus(Long projectId,
+                                      Long issueId,
+                                      String applyType,
+                                      Set<Long> influenceIssueIds) {
         IssueDetailDTO issueDetailDTO = issueMapper.queryIssueDetail(projectId, issueId);
         if (ObjectUtils.isEmpty(issueDetailDTO)) {
             return;
@@ -206,7 +209,7 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
         }
 
         if (!CollectionUtils.isEmpty(issueChangeMap) && !CollectionUtils.isEmpty(issueIds)) {
-            changeStatus(projectId, organizationId, applyType, issueChangeMap, issueIds);
+            influenceIssueIds.addAll(changeStatus(projectId, organizationId, applyType, issueChangeMap, issueIds));
         }
     }
 
@@ -258,7 +261,8 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
         return statusVOS;
     }
 
-    private void changeStatus(Long projectId, Long organizationId, String applyType, Map<Long, Map<Long, Long>> issueChangeMap, List<Long> issueIds) {
+    private Set<Long> changeStatus(Long projectId, Long organizationId, String applyType, Map<Long, Map<Long, Long>> issueChangeMap, List<Long> issueIds) {
+        Set<Long> updatedIssueIds = new HashSet<>();
         List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds, null);
         Map<Long, IssueDTO> issueDTOMap = issueDTOS.stream().collect(Collectors.toMap(IssueDTO::getIssueId, Function.identity()));
         for (Map.Entry<Long, Map<Long, Long>> entry : issueChangeMap.entrySet()) {
@@ -284,7 +288,9 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
                 StatusMachineTransformDTO statusTransform = statusMachineTransformDTOS.get(0);
                 issueService.updateIssueStatus(projectId, issueId, statusTransform.getId(),
                         issueDTO.getObjectVersionNumber(), applyType, issueDTO, false);
+                updatedIssueIds.add(issueId);
             }
         }
+        return updatedIssueIds;
     }
 }

@@ -57,6 +57,20 @@ public class GanttChartServiceImpl implements GanttChartService {
         return listByProjectIdAndSearch(projectId, searchVO, pageRequest);
     }
 
+    @Override
+    public List<GanttChartVO> listByIds(Long projectId, Set<Long> issueIds) {
+        if (ObjectUtils.isEmpty(issueIds)) {
+            return new ArrayList<>();
+        }
+        List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(projectId, new ArrayList<>(issueIds), null);
+        Map<Long, Date> completedDateMap =
+                issueMapper.selectActuatorCompletedDateByIssueIds(new ArrayList<>(issueIds), projectId)
+                        .stream()
+                        .collect(Collectors.toMap(GanttChartVO::getIssueId, GanttChartVO::getActualCompletedDate));
+        List<GanttChartVO> result = buildFromIssueDto(issueDTOList, projectId, completedDateMap);
+        return result;
+    }
+
     private Page<GanttChartVO> listByProjectIdAndSearch(Long projectId,
                                                         SearchVO searchVO,
                                                         PageRequest pageRequest) {

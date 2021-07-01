@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.IssueLinkCreateVO;
+import io.choerodon.agile.api.vo.IssueLinkResponseVO;
 import io.choerodon.agile.api.vo.IssueLinkVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
@@ -42,12 +43,12 @@ public class IssueLinkController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建issueLink")
     @PostMapping(value = "/{issueId}")
-    public ResponseEntity<List<IssueLinkVO>> createIssueLinkList(@ApiParam(value = "项目id", required = true)
-                                                                  @PathVariable(name = "project_id") Long projectId,
-                                                                 @ApiParam(value = "issueId", required = true)
-                                                                  @PathVariable @Encrypt Long issueId,
-                                                                 @ApiParam(value = "issueLink创建对象", required = true)
-                                                                  @RequestBody List<IssueLinkCreateVO> issueLinkCreateVOList) {
+    public ResponseEntity<IssueLinkResponseVO> createIssueLinkList(@ApiParam(value = "项目id", required = true)
+                                                                   @PathVariable(name = "project_id") Long projectId,
+                                                                   @ApiParam(value = "issueId", required = true)
+                                                                   @PathVariable @Encrypt Long issueId,
+                                                                   @ApiParam(value = "issueLink创建对象", required = true)
+                                                                   @RequestBody List<IssueLinkCreateVO> issueLinkCreateVOList) {
         return Optional.ofNullable(issueLinkService.createIssueLinkList(issueLinkCreateVOList, issueId, projectId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.IssueLink.createIssueLink"));

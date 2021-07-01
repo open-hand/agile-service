@@ -378,7 +378,48 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
         IssueVO result = issueAssembler.issueDetailDTOToVO(issue, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
         sendMsgUtil.sendMsgByIssueCreate(projectId, result, DetailsHelper.getUserDetails().getUserId());
+        setCompletedAndActualCompletedDate(result);
         return result;
+    }
+
+    private void setCompletedAndActualCompletedDate(Object result) {
+        Long issueId;
+        Long projectId;
+        Long statusId;
+        IssueVO issueVO = null;
+        IssueSubVO issueSubVO = null;
+        if (result instanceof IssueVO) {
+            issueVO = (IssueVO) result;
+            issueId = issueVO.getIssueId();
+            projectId = issueVO.getProjectId();
+            statusId = issueVO.getStatusId();
+        } else if (result instanceof IssueSubVO) {
+            issueSubVO = (IssueSubVO) result;
+            issueId = issueSubVO.getIssueId();
+            projectId = issueSubVO.getProjectId();
+            statusId = issueSubVO.getStatusId();
+        } else {
+            return;
+        }
+        IssueStatusDTO issueStatus = issueStatusMapper.selectByStatusId(projectId, statusId);
+        boolean completed = Boolean.TRUE.equals(issueStatus.getCompleted());
+        if (issueVO != null) {
+            issueVO.setCompleted(completed);
+        } else if (issueSubVO != null) {
+            issueSubVO.setCompleted(completed);
+        }
+        Map<Long, Date> completedDateMap =
+                issueMapper.selectActuatorCompletedDateByIssueIds(Arrays.asList(issueId), projectId)
+                        .stream()
+                        .collect(Collectors.toMap(GanttChartVO::getIssueId, GanttChartVO::getActualCompletedDate));
+        Date completedDate = completedDateMap.get(issueId);
+        if (completedDate != null) {
+            if (issueVO != null) {
+                issueVO.setActualCompletedDate(completedDate);
+            } else if (issueSubVO != null) {
+                issueSubVO.setActualCompletedDate(completedDate);
+            }
+        }
     }
 
     @Override
@@ -900,26 +941,32 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             issueConvertDTO.setObjectVersionNumber(issueMapper.selectByPrimaryKey(issueId).getObjectVersionNumber());
             issueAccessDataService.updateSelective(issueConvertDTO);
         }
-        IssueVO result = doStateMachineCustomFlow(projectId, issueId, applyType);
+        Set<Long> influenceIssueIds = new HashSet<>();
+        IssueVO result = doStateMachineCustomFlow(projectId, issueId, applyType, influenceIssueIds);
         if (result != null) {
             return result;
         }
         if (backlogExpandService != null) {
             backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
         }
-        return queryIssueByUpdate(projectId, issueId, Collections.singletonList(STATUS_ID));
+        IssueVO issueVO = queryIssueByUpdate(projectId, issueId, Collections.singletonList(STATUS_ID));
+        issueVO.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
+        return issueVO;
     }
 
     @Override
-    public IssueVO doStateMachineCustomFlow(Long projectId, Long issueId, String applyType) {
+    public IssueVO doStateMachineCustomFlow(Long projectId,
+                                            Long issueId,
+                                            String applyType,
+                                            Set<Long> influenceIssueIds) {
         /**
          * 修改属性报错，导致数据回滚但是状态机实例已经完成状态变更，导致issue无论变更什么状态都无效
          * 抛异常并清空当前实例的状态机的状态信息
          */
         try {
             statusFieldSettingService.handlerSettingToUpdateIssue(projectId, issueId);
-            boolean transformFlag = statusLinkageService.updateParentStatus(projectId, issueId, applyType);
-            linkIssueStatusLinkageService.updateLinkIssueStatus(projectId, issueId, applyType);
+            boolean transformFlag = statusLinkageService.updateParentStatus(projectId, issueId, applyType, influenceIssueIds);
+            linkIssueStatusLinkageService.updateLinkIssueStatus(projectId, issueId, applyType, influenceIssueIds);
             if (transformFlag) {
                 return null;
             } else {
@@ -1356,6 +1403,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         IssueSubVO result = issueAssembler.issueDetailDoToIssueSubDto(issue);
         sendMsgUtil.sendMsgBySubIssueCreate(projectId, result, DetailsHelper.getUserDetails().getUserId());
+        setCompletedAndActualCompletedDate(result);
         return result;
     }
 
@@ -2309,7 +2357,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         updateIssue.setParentIssueId(issueUpdateParentIdVO.getParentIssueId());
         // update sprint
         updateSubTaskSprint(projectId, issueUpdateParentIdVO);
-        return modelMapper.map(issueAccessDataService.updateSelective(updateIssue), IssueVO.class);
+        issueAccessDataService.updateSelective(updateIssue);
+        return queryIssueCreate(projectId, issueId);
     }
 
     private void updateSubTaskSprint(Long projectId, IssueUpdateParentIdVO issueUpdateParentIdVO) {

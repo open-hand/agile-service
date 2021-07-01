@@ -136,6 +136,36 @@ public class IssueSubVO {
     @ApiModelProperty(value = "创建人邮箱")
     private String createrEmail;
 
+    private Boolean completed;
+
+    private Date actualCompletedDate;
+
+    private List<Long> influenceIssueIds;
+
+    public List<Long> getInfluenceIssueIds() {
+        return influenceIssueIds;
+    }
+
+    public void setInfluenceIssueIds(List<Long> influenceIssueIds) {
+        this.influenceIssueIds = influenceIssueIds;
+    }
+
+    public Boolean getCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(Boolean completed) {
+        this.completed = completed;
+    }
+
+    public Date getActualCompletedDate() {
+        return actualCompletedDate;
+    }
+
+    public void setActualCompletedDate(Date actualCompletedDate) {
+        this.actualCompletedDate = actualCompletedDate;
+    }
+
     public String getCreaterEmail() {
         return createrEmail;
     }

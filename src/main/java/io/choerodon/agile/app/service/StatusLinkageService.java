@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service;
 import io.choerodon.agile.api.vo.StatusLinkageVO;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author zhaotianxin
@@ -15,7 +16,7 @@ public interface StatusLinkageService {
 
     List<StatusLinkageVO> listByStatusIds(Long projectId, Long issueTypeId, List<Long> statusIds,String applyType);
 
-    boolean updateParentStatus(Long projectId, Long issueId, String applyType);
+    boolean updateParentStatus(Long projectId, Long issueId, String applyType, Set<Long> influenceIssueIds);
 
     List<StatusLinkageVO> listStatusLinkageByProjectId(Long projectId);
 
