@@ -81,6 +81,9 @@ public class IssueSubCreateVO {
 
     private List<TagVO> tags;
 
+    @Encrypt
+    private Long statusId;
+
     public List<TagVO> getTags() {
         return tags;
     }
@@ -253,5 +256,13 @@ public class IssueSubCreateVO {
 
     public void setEnvironment(String environment) {
         this.environment = environment;
+    }
+
+    public Long getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(Long statusId) {
+        this.statusId = statusId;
     }
 }
