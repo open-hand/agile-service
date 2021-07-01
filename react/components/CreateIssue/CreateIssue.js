@@ -811,7 +811,7 @@ class CreateIssue extends Component {
                 label="报告人"
                 style={{ flex: 1 }}
                 allowClear
-                extraOption={field.defaultValueObj}
+                extraOption={form.getFieldValue('reporterId') === AppState.userInfo.id ? [AppState.userInfo, field.defaultValueObj].filter((o) => typeof (o) !== 'string' && o) : [field.defaultValueObj]}
                 getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
               />,
             )}
