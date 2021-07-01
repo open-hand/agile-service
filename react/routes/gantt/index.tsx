@@ -293,7 +293,11 @@ const GanttPage: React.FC = () => {
       setData(produce(data, (draft) => {
         const parent = find(draft, { issueId: parentIssueId });
         if (parent) {
-          parent.children.unshift(normalizeIssue(subIssue));
+          if (!parent.children) {
+            parent.children = [normalizeIssue(subIssue)];
+          } else {
+            parent.children.unshift(normalizeIssue(subIssue));
+          }
         }
       }));
     }
