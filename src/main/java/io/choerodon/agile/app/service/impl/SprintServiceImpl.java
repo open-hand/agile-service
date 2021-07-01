@@ -778,7 +778,7 @@ public class SprintServiceImpl implements SprintService {
         List<Long> allIssueIds = new ArrayList<>();
         allIssueIds.addAll(parentIssueIds);
         // 查询子任务issueId
-        Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(parentIssueIds, projectId, new SearchVO(), null, null);
+        Set<Long> childrenIds = issueMapper.queryChildrenIds(projectId,parentIssueIds, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
         if(!CollectionUtils.isEmpty(childrenIds)){
             allIssueIds.addAll(childrenIds);
         }
@@ -797,7 +797,7 @@ public class SprintServiceImpl implements SprintService {
         List<Long> allIssueIds = new ArrayList<>();
         allIssueIds.addAll(parentIssueIds);
         // 查询子任务issueId
-        Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(parentIssueIds, projectId, new SearchVO(), null, null);
+        Set<Long> childrenIds = issueMapper.queryChildrenIds(projectId,parentIssueIds, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
         if(!CollectionUtils.isEmpty(childrenIds)){
             allIssueIds.addAll(childrenIds);
         }
