@@ -19,7 +19,7 @@ class GanttApi {
     return result;
   }
 
-  loadByTaskPage(data: any, page:number) {
+  loadByTaskPage(data: any, page: number) {
     return axios({
       method: 'post',
       url: `${this.prefix}/gantt/list`,
@@ -35,6 +35,14 @@ class GanttApi {
     return axios({
       method: 'get',
       url: `${this.prefix}/headers/gantt_chart`,
+    });
+  }
+
+  loadInfluenceIssues(issueIds: string[]) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/gantt/list_by_ids`,
+      data: issueIds,
     });
   }
 }
