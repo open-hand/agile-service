@@ -335,6 +335,7 @@ const GanttPage: React.FC = () => {
         draft.unshift(normalizeIssue(issue));
       }));
     }
+    updateInfluenceIssues(issue);
   });
   const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId) => {
     addSubIssue(subIssue, parentIssueId);
@@ -353,13 +354,16 @@ const GanttPage: React.FC = () => {
           }
         }));
       }
-      // @ts-ignore
-      const { influenceIssueIds } = issue;
-      if (influenceIssueIds && influenceIssueIds.length > 0) {
-        ganttApi.loadInfluenceIssues(influenceIssueIds).then((issues: any[]) => {
-          updateIssues(issues);
-        });
-      }
+      updateInfluenceIssues(issue);
+    }
+  });
+  const updateInfluenceIssues = usePersistFn((res: { influenceIssueIds?: string[], [key: string]: any }) => {
+    // @ts-ignore
+    const { influenceIssueIds } = res;
+    if (influenceIssueIds && influenceIssueIds.length > 0) {
+      ganttApi.loadInfluenceIssues(influenceIssueIds).then((issues: any[]) => {
+        updateIssues(issues);
+      });
     }
   });
   const updateIssues = usePersistFn((issues: Issue[]) => {
@@ -389,6 +393,9 @@ const GanttPage: React.FC = () => {
   const handleChangeParent = usePersistFn((newIssue: Issue, oldIssue: Issue) => {
     handleIssueDelete(oldIssue);
     handleCreateIssue(newIssue);
+  });
+  const handleLinkIssue = usePersistFn((res) => {
+    updateInfluenceIssues(res);
   });
   const handleIssueDelete = usePersistFn((issue: Issue | null) => {
     if (issue) {
@@ -524,6 +531,7 @@ const GanttPage: React.FC = () => {
             onCopyIssue={handleCreateIssue}
             onTransformType={handleTransformType}
             onChangeParent={handleChangeParent}
+            onLinkIssue={handleLinkIssue}
           />
           <CreateIssue onCreate={handleCreateIssue} />
           <FilterManage
