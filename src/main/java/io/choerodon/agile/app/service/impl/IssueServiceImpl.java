@@ -522,6 +522,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Long operatorId = DetailsHelper.getUserDetails().getUserId();
         sendMsgUtil.sendMsgByIssueAssignee(projectId, fieldList, result, operatorId);
         sendMsgUtil.sendMsgByIssueComplete(projectId, fieldList, result, operatorId);
+        setCompletedAndActualCompletedDate(result);
         return result;
     }
 
