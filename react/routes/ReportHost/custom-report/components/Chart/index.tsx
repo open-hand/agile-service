@@ -16,6 +16,7 @@ export interface ChartProps {
 const Chart: React.FC<ChartProps> = ({
   loading,
   option,
+  data,
 }) => {
   const getFontSize = useFontSize();
   const FontSize = getFontSize(12);
@@ -28,7 +29,7 @@ const Chart: React.FC<ChartProps> = ({
   return (
     <div style={{ padding: '10px 20px 5px 10px' }}>
       <Spin spinning={loading}>
-        <ReactEcharts option={getOption()} />
+        <ReactEcharts option={getOption()} key={JSON.stringify(data)} />
       </Spin>
     </div>
   );
