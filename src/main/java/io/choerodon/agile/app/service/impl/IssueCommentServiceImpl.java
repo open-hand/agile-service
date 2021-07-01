@@ -78,9 +78,9 @@ public class IssueCommentServiceImpl implements IssueCommentService {
 
             IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueCommentVO.getIssueId());
             Long operatorId = DetailsHelper.getUserDetails().getUserId();
-            if (issueCommentVO.getReplyToUserId() == null){
+            if (issueCommentVO.getReplyToUserId() == null || issueCommentVO.getReplyToUserId() == 0L) {
                 sendMsgUtil.sendMsgByIssueComment(projectId, issue, issueCommentVO, operatorId);
-            } else if(!issueCommentVO.getReplyToUserId().equals(operatorId)){
+            } else if (!issueCommentVO.getReplyToUserId().equals(operatorId)) {
                 sendMsgUtil.sendMsgByIssueCommentReply(projectId, issue, issueCommentVO, operatorId);
             }
             return issueCommentVO;
