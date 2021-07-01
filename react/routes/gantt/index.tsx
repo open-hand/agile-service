@@ -280,6 +280,9 @@ const GanttPage: React.FC = () => {
     objectVersionNumber: issue.objectVersionNumber,
     statusVO: issue.statusVO,
     summary: issue.summary,
+    actualCompletedDate: issue.actualCompletedDate,
+    completed: issue.completed,
+    issueId: issue.issueId,
     assignee: issue.assigneeId ? {
       name: issue.assigneeName,
       realName: issue.assigneeRealName,
