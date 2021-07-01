@@ -7,7 +7,7 @@ import { unstable_batchedUpdates } from 'react-dom';
 import { Tooltip, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import {
-  add, find, findIndex, remove,
+  find, omit, remove,
 } from 'lodash';
 import produce from 'immer';
 import dayjs from 'dayjs';
@@ -348,12 +348,30 @@ const GanttPage: React.FC = () => {
         setData(produce(data, (draft) => {
           const target = find(draft, { issueId: issue.issueId });
           if (target) {
-          // 更新属性
+            // 更新属性
             normalizeIssue(issue, target);
           }
         }));
       }
+      // @ts-ignore
+      const { influenceIssueIds } = issue;
+      if (influenceIssueIds && influenceIssueIds.length > 0) {
+        ganttApi.loadInfluenceIssues(influenceIssueIds).then((issues: any[]) => {
+          updateIssues(issues);
+        });
+      }
     }
+  });
+  const updateIssues = usePersistFn((issues: Issue[]) => {
+    issues.forEach((issue) => {
+      setData(produce(data, (draft) => {
+        const target = find(draft, { issueId: issue.issueId });
+        if (target) {
+          // 更新属性
+          Object.assign(target, omit(issue, 'children'));
+        }
+      }));
+    });
   });
   const handleTransformType = usePersistFn((newIssue: Issue, oldIssue: Issue) => {
     const parentTypes = ['story', 'task'];
