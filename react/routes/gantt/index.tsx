@@ -387,7 +387,8 @@ const GanttPage: React.FC = () => {
     }
   });
   const handleChangeParent = usePersistFn((newIssue: Issue, oldIssue: Issue) => {
-    handleTransformType(newIssue, oldIssue);
+    handleIssueDelete(oldIssue);
+    handleCreateIssue(newIssue);
   });
   const handleIssueDelete = usePersistFn((issue: Issue | null) => {
     if (issue) {
