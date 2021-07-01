@@ -6,6 +6,9 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.message.entity.MessageSender;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -54,6 +57,7 @@ public class SendMsgUtil {
     private static final String STATUS_ID = "statusId";
     private static final String INSERT = "insert";
     private static final String IMAGE = "image";
+    private static final String IMG = "img";
 
     private static final String FEATURE_URL_TEMPLATE1 = "#/agile/feature?type=project&id=";
     private static final String FEATURE_URL_TEMPLATE2 = "&name=";
@@ -431,7 +435,7 @@ public class SendMsgUtil {
     }
 
     public static String getText(String rawText) {
-        if (StringUtils.isEmpty(rawText)){
+        if (StringUtils.isEmpty(rawText)) {
             return null;
         }
         StringBuilder result = new StringBuilder();
@@ -446,12 +450,25 @@ public class SendMsgUtil {
                 }
             }
         } catch (Exception e) {
-            return rawText;
+            Document doc = Jsoup.parse(rawText);
+            doc.body().children().forEach(SendMsgUtil::setImgSize);
+            return doc.body().html();
         }
         if (result.length() == 0) {
             return null;
         }
         StringUtils.replace(rawText, "\n", "<br >");
         return result.toString();
+    }
+
+    private static void setImgSize(Element element) {
+        String tagName = element.tag().getName();
+        if (IMG.equals(tagName)) {
+            element.removeAttr("style");
+            element.attr("style", "width: auto; height: auto; max-width: 650px; text-align:center;");
+        }
+        if (element.childrenSize() > 0) {
+            element.children().forEach(SendMsgUtil::setImgSize);
+        }
     }
 }
