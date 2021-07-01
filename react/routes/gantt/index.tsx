@@ -361,6 +361,9 @@ const GanttPage: React.FC = () => {
       handleCreateIssue(newIssue);
     }
   });
+  const handleChangeParent = usePersistFn((newIssue: Issue, oldIssue: Issue) => {
+    handleTransformType(newIssue, oldIssue);
+  });
   const handleIssueDelete = usePersistFn((issue: Issue | null) => {
     if (issue) {
       const parentIssueId = issue.relateIssueId || issue.parentIssueId;
@@ -494,6 +497,7 @@ const GanttPage: React.FC = () => {
             onCreateSubIssue={handleCreateSubIssue}
             onCopyIssue={handleCreateIssue}
             onTransformType={handleTransformType}
+            onChangeParent={handleChangeParent}
           />
           <CreateIssue onCreate={handleCreateIssue} />
           <FilterManage

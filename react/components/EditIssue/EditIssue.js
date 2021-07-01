@@ -93,6 +93,13 @@ function EditIssue() {
       issueEvents?.update(newIssue);
     }
   }, [issueEvents]);
+  const onChangeParent = useCallback((newIssue) => {
+    if (issueEvents?.changeParent) {
+      issueEvents?.changeParent(newIssue, store.getIssue);
+    } else if (issueEvents?.update) {
+      issueEvents?.update(newIssue);
+    }
+  }, [issueEvents, store.getIssue]);
   const loadIssueDetail = async (paramIssueId, callback) => {
     const id = paramIssueId || idRef.current || currentIssueId;
     if (idRef.current !== id && descriptionEditRef.current) {
@@ -366,11 +373,9 @@ function EditIssue() {
             issueNum={issueNum}
             visible={changeParentShow}
             objectVersionNumber={objectVersionNumber}
-            onOk={() => {
+            onOk={(res) => {
               store.setChangeParentShow(false);
-              if (onUpdate) {
-                onUpdate();
-              }
+              onChangeParent(res);
               loadIssueDetail(issueId);
             }}
             onCancel={() => {

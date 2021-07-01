@@ -47,7 +47,7 @@ class ChangeParent extends Component {
         this.setState({ loading: true });
         issueApi.subTaskChangeParent(issueUpdateParentIdVO).then((res) => {
           this.setState({ loading: false });
-          onOk();
+          onOk(res);
         });
       }
     });
