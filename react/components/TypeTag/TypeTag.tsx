@@ -40,6 +40,9 @@ const TypeTag: React.FC<Props> = ({
             style={{
               transition: 'none',
               fontSize: iconSize * 15 / 24 || '15px',
+              width: ((iconSize + 5) * 15 / 24) || '20px',
+              height: ((iconSize + 5) * 15 / 24) || '20px',
+              lineHeight: `${((iconSize + 5) * 15 / 24)}px` || '20px',
               background: colour || '#fab614',
               color: 'white',
             }}
