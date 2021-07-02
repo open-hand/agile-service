@@ -3,7 +3,7 @@ import {
   observable, action, computed, toJS,
 } from 'mobx';
 import {
-  sortBy, find, uniq, intersection, pick,
+  sortBy, find, uniq, intersection, pick, isObject,
 } from 'lodash';
 import { store } from '@choerodon/boot';
 import { Modal, DataSet } from 'choerodon-ui/pro';
@@ -332,6 +332,7 @@ class BacklogStore {
 
   @action setSprintData(sprintData) {
     const cached = localPageCacheStore.getItem('backlogSprintExpand');
+    const cachedPageSize = localPageCacheStore.getItem('backlogSprintPageSize');
     const previousExpand = new Map(this.sprintData.map((s) => ([s.sprintId.toString(), s.expand])));
     const previousPagination = new Map(this.sprintData.map((s) => ([s.sprintId.toString(), s.pagination])));
     this.sprintData = sprintData.map((sprint, index) => {
@@ -345,7 +346,7 @@ class BacklogStore {
         expand: cached ? cached.includes(sprint.sprintId.toString()) : !!(previousExpand.get(sprint.sprintId.toString()) ?? index === 0),
         pagination: previousPagination.get(sprint.sprintId.toString()) ?? {
           page: 1,
-          size: 300,
+          size: isObject(cachedPageSize) && cachedPageSize[sprint.sprintId.toString()] ? cachedPageSize[sprint.sprintId.toString()] : 300,
           total: 0,
         },
         // 是否加载过第一次，用了判断展开需不需要加载
@@ -363,6 +364,14 @@ class BacklogStore {
     });
     this.initSingleSprint(this.sprintData);
     this.spinIf = false;
+  }
+
+  @computed get getSprintPageSize() {
+    const data = {};
+    this.sprintData.forEach((sprint) => {
+      data[sprint.sprintId.toString()] = sprint.pagination.size;
+    });
+    return data;
   }
 
   @observable expandedIssueMap = observable.map();
