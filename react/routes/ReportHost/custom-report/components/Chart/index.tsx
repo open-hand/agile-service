@@ -27,9 +27,9 @@ const Chart: React.FC<ChartProps> = ({
     ...(option || {}),
   });
   return (
-    <div style={{ padding: '10px 20px 5px 10px' }}>
+    <div style={{ padding: '10px 20px 20px 10px' }}>
       <Spin spinning={loading}>
-        <ReactEcharts option={getOption()} key={JSON.stringify(data)} />
+        <ReactEcharts option={getOption()} key={`${JSON.stringify(data)}-${JSON.stringify(option)}`} />
       </Spin>
     </div>
   );
