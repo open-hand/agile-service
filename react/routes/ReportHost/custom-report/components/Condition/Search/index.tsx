@@ -10,7 +10,7 @@ const Search: React.FC<{
   <div>
     <IssueFilterForm {...filterComponentProps} formColumns={1}>
       <div>
-        <ChooseField {...choseComponentProps} dropDownBtnProps={{ icon: 'add', style: { marginLeft: 6 } }} />
+        <ChooseField {...choseComponentProps} dropDownBtnProps={{ icon: 'add', style: { marginLeft: 0 } }} />
       </div>
     </IssueFilterForm>
   </div>

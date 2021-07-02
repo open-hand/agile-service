@@ -21,11 +21,6 @@ const xAxis = {
   axisTick: { show: false },
   axisLine: {
     show: false,
-    // lineStyle: {
-    //   color: '#eee',
-    //   type: 'solid',
-    //   width: 2,
-    // },
   },
   axisLabel: {
     show: true,
@@ -34,29 +29,18 @@ const xAxis = {
   },
   splitLine: {
     show: false,
-    // interval: 0,
-    // lineStyle: {
-    //   color: '#eee',
-    //   width: 1,
-    //   type: 'solid',
-    // },
   },
 };
 
 const yAxis = {
+  nameGap: 24,
   type: 'value',
   nameTextStyle: {
     color: 'rgba(15, 19, 88, 0.65)',
   },
-  // nameGap: 22,
   axisTick: { show: false },
   axisLine: {
     show: false,
-    // lineStyle: {
-    //   color: '#eee',
-    //   type: 'solid',
-    //   // width: 2,
-    // },
   },
   axisLabel: {
     show: true,
@@ -96,9 +80,7 @@ const dataZoom = {
   },
 };
 
-const color = ['#4E70F0', '#07C5D1', '#97F4F1', '#FF812C', '#F9513E', '#FF71D9', '#9928FC', '#7C83FF',
-  '#028390', '#FDDD39', '#8BC34A', '#4CAF50', '#029688', '#4050B5', '#3D7ADB', '#03A9F4',
-  '#871984', '#BC0F6A', '#FD634E', '#F8A1AC', '#FFBF33', '#FC9A4D', '#02AECD', '#5AD5E0'];
+const color = ['#9665E2', '#F0657D', '#FAD352', '#FF9915', '#45A3FC', '#5365EA', '#47CBCA', '#59CB79', '#F953BA', '#D3D3D3'];
 
 const legend = {
   formatter(name: string) {
@@ -130,11 +112,19 @@ const tooltip = {
   confine: true,
   enterable: true,
   extraCssText: 'max-height: 600px; overflow-y: auto',
+  backgroundColor: '#0f1358',
 };
 
 const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[], maxShow: number): any => {
   const unitZ = unit === 'quantity' ? '个' : '点';
   const xAxisData = map((data && data[0].pointList) || [], 'analysisValue');
+  const len = xAxisData.length;
+  if (len > 10) {
+    for (let i = 10; i < len; i += 1) {
+      // eslint-disable-next-line no-bitwise
+      color.push(`#${(`00000${((Math.random() * 16777215 + 0.5) >> 0).toString(16)}`).slice(-6)}`);
+    }
+  }
   if (chartType === 'line' || chartType === 'bar') {
     return ({
       tooltip: {
@@ -159,7 +149,7 @@ const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[],
       dataZoom: [{ ...dataZoom, show: xAxisData.length > maxShow }],
       grid: {
         ...grid,
-        bottom: xAxisData.length > maxShow ? 20 : 0,
+        bottom: xAxisData.length > maxShow ? 30 : 0,
       },
       color,
     });
@@ -184,11 +174,10 @@ const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[],
         {
           type: 'pie',
           radius: '100%',
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.5)',
+          itemStyle: {
+            normal: {
+              borderWidth: 2,
+              borderColor: '#ffffff',
             },
           },
           minShowLabelAngle: 5,
@@ -239,9 +228,6 @@ const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[],
         name: item.comparedValue,
         type: 'bar',
         stack: 'total',
-        label: {
-          show: true,
-        },
         emphasis: {
           focus: 'series',
         },
@@ -250,8 +236,8 @@ const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[],
       dataZoom: [{ ...dataZoom, show: xAxisData.length > maxShow }],
       grid: {
         ...grid,
-        top: data.length > maxShow ? 60 : 40, // 图例过长，留足空间
-        bottom: xAxisData.length > maxShow ? 20 : 0, // x轴过长，留横向滚动条的位置
+        top: data.length > maxShow ? 70 : 50, // 图例过长，留足空间
+        bottom: xAxisData.length > maxShow ? 30 : 0, // x轴过长，留横向滚动条的位置
       },
       color,
     };
