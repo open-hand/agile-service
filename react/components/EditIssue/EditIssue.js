@@ -13,7 +13,6 @@ import {
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { useDetailContainerContext } from '@/components/detail-container/context';
 import { sameProject } from '@/utils/detail';
-import RelateStory from '../RelateStory';
 import TransformSubIssue from '../TransformSubIssue';
 import TransformFromSubIssue from '../TransformFromSubIssue';
 import IssueHeader from './IssueComponent/IssueHeader';
