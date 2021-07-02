@@ -77,7 +77,7 @@ const Item = observer(({
           type={isExpand ? 'baseline-arrow_drop_down' : 'baseline-arrow_right'}
           onClick={onExpandClick}
           style={{
-            cursor: 'pointer', position: 'absolute', left: 7, fontSize: 20,
+            cursor: 'pointer', position: 'absolute', left: 7, top: 13, fontSize: 20,
           }}
         />
       ) : null}

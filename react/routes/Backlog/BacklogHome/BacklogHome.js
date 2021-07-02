@@ -41,6 +41,7 @@ class BacklogHome extends Component {
 
   componentWillUnmount() {
     localPageCacheStore.setItem('backlogSprintExpand', BacklogStore.getExpandSprint);
+    localPageCacheStore.setItem('backlogSprintPageSize', BacklogStore.getSprintPageSize);
     BacklogStore.resetData();
     BacklogStore.clearMultiSelected();
     BacklogStore.resetFilter();
