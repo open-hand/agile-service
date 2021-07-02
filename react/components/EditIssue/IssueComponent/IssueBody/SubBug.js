@@ -9,14 +9,14 @@ import EditIssueContext from '../../stores';
 import Divider from './Divider';
 
 const SubBug = observer(({
-  reloadIssue, onDeleteSubIssue, onUpdate, onCreateSubIssue,
+  reloadIssue, onDeleteSubIssue, onUpdate, applyType, onCreateSubIssue,
 }) => {
   const { store, disabled } = useContext(EditIssueContext);
   const {
     issueId: relateIssueId, priorityId,
   } = store.getIssue;
   const disableCreate = disabled;
-  const { data: issueTypeData } = useProjectIssueTypes({ onlyEnabled: true, typeCode: 'bug' }, { enabled: !disabled });
+  const { data: issueTypeData } = useProjectIssueTypes({ onlyEnabled: true, typeCode: 'bug', applyType }, { enabled: !disabled });
 
   const {
     issueId, summary, subBugVOList = [], activeSprint,

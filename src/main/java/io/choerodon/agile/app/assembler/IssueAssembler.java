@@ -883,7 +883,7 @@ public class IssueAssembler extends AbstractAssembler {
                                     DataLogDTO assignee = assigneeMap.getOrDefault(entry.getKey(), Collections.emptyMap())
                                             .getOrDefault(log.getIssueId(), new DataLogDTO());
                                     if (Objects.isNull(assignee.getNewValue())){
-                                        log.setCreatedBy(issueTypeMap.get(log.getIssueId()).getCreatedBy());
+                                        log.setCreatedBy(issueTypeMap.get(log.getIssueId()).getAssigneeId());
                                     }else {
                                         log.setCreatedBy(Long.parseLong(assignee.getNewValue()));
                                     }
@@ -937,15 +937,22 @@ public class IssueAssembler extends AbstractAssembler {
                                          Map<Long, UserMessageDTO> userMessageDOMap){
         // 根据日期取日志集合然后按照创建人分组
         Map<Long, List<DataLogDTO>> creationGroup = creationMap.getOrDefault(workDate, Collections.emptyList())
-                .stream().collect(Collectors.groupingBy(DataLogDTO::getCreatedBy));
+                .stream().filter(v -> !ObjectUtils.isEmpty(v.getCreatedBy()))
+                .collect(Collectors.groupingBy(DataLogDTO::getCreatedBy));
         List<JobVO> jobList = new ArrayList<>(creationGroup.size());
-        for (Long userId : userSet) {
+        List<Long> userIds = new ArrayList(userSet);
+        Collections.sort(userIds);
+        for (Long userId : userIds) {
             // 取当前用户对应的解决issue集合，将集合按照issueType分组
             Map<String, List<DataLogDTO>> typeMap =
                     creationGroup.getOrDefault(userId, Collections.emptyList())
                             .stream().collect(Collectors.groupingBy(log -> issueTypeMap.get(log.getIssueId()).getTypeCode()));
+            UserMessageDTO userMessageDTO = userMessageDOMap.get(userId);
+            if (ObjectUtils.isEmpty(userMessageDTO)){
+                continue;
+            }
             JobVO job = new JobVO();
-            job.setWorker(userMessageDOMap.get(userId).getRealName());
+            job.setWorker(userMessageDTO.getRealName());
             job.setTaskCount(typeMap.getOrDefault(IssueTypeCode.TASK.value(), Collections.emptyList()).size()
                     + typeMap.getOrDefault(IssueTypeCode.SUB_TASK.value(), Collections.emptyList()).size());
             job.setStoryCount(typeMap.getOrDefault(IssueTypeCode.STORY.value(), Collections.emptyList()).size());

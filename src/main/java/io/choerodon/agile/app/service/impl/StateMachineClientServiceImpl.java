@@ -217,10 +217,13 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         if (stateMachineId == null) {
             throw new CommonException(ERROR_ISSUE_STATE_MACHINE_NOT_FOUND);
         }
-        //获取初始状态
-        Long initStatusId = instanceService.queryInitStatusId(organizationId, stateMachineId);
-        if (initStatusId == null) {
-            throw new CommonException(ERROR_ISSUE_STATUS_NOT_FOUND);
+        Long initStatusId = issueSubCreateVO.getStatusId();
+        if (ObjectUtils.isEmpty(initStatusId)) {
+            //获取初始状态
+            initStatusId = instanceService.queryInitStatusId(organizationId, stateMachineId);
+            if (initStatusId == null) {
+                throw new CommonException(ERROR_ISSUE_STATUS_NOT_FOUND);
+            }
         }
         //获取项目信息
         ProjectInfoDTO projectInfoDTO = new ProjectInfoDTO();
