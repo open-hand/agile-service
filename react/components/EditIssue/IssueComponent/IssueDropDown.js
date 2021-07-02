@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import {
   Button,
   Modal as ModalPro, Dropdown, Menu,
@@ -14,9 +14,10 @@ import { isInProgram } from '@/utils/program';
 import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
 import openIssueMove from './issue-move';
+import openChangeParentModal from './ChangeParent';
 
 const IssueDropDown = ({
-  onDeleteIssue, loginUserId, reloadIssue, testLinkStoreRef, onIssueCopy, onUpdate,
+  onDeleteIssue, loginUserId, reloadIssue, testLinkStoreRef, onIssueCopy, onUpdate, onChangeParent,
 }) => {
   const {
     store, applyType,
@@ -64,6 +65,7 @@ const IssueDropDown = ({
       okText: '删除',
     });
   };
+
   const handleClickMenu = async (e) => {
     if (e.key === '0') {
       store.setWorkLogShow(true);
@@ -104,7 +106,9 @@ const IssueDropDown = ({
         />,
       });
     } else if (e.key === '8') {
-      store.setChangeParentShow(true);
+      openChangeParentModal({
+        issueId, issueNum, objectVersionNumber, onOk: onChangeParent,
+      });
     } else if (e.key === '9') {
       store.setCreateSubBugShow(true);
     } else if (e.key === '10') {
