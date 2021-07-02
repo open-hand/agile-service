@@ -205,8 +205,7 @@ function EditIssue() {
     setQuery();
   }, [currentIssueId]);
 
-  const handleRelateStory = () => {
-    store.setRelateStoryShow(false);
+  const onRelateIssue = () => {
     if (onUpdate) {
       onUpdate();
     }
@@ -253,7 +252,6 @@ function EditIssue() {
     getCopyIssueShow: copyIssueShow,
     getTransformSubIssueShow: transformSubIssueShow,
     getTransformFromSubIssueShow: transformFromSubIssueShow,
-    getRelateStoryShow: relateStoryShow,
   } = store;
   const { isInProgram } = useIsInProgram();
   const rightDisabled = disabled || (isInProgram && (typeCode === 'issue_epic' || typeCode === 'feature'));
@@ -337,18 +335,9 @@ function EditIssue() {
           push={push}
           otherProject={otherProject}
           onChangeParent={onChangeParent}
+          onRelateIssue={onRelateIssue}
         />
       </div>
-      {
-        relateStoryShow ? (
-          <RelateStory
-            issue={issue}
-            visible={relateStoryShow}
-            onCancel={() => store.setRelateStoryShow(false)}
-            onOk={handleRelateStory.bind(this)}
-          />
-        ) : null
-      }
       {
         transformSubIssueShow ? (
           <TransformSubIssue

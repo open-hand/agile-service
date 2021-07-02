@@ -15,9 +15,10 @@ import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
 import openIssueMove from './issue-move';
 import openChangeParentModal from './ChangeParent';
+import openRelateIssueModal from './RelateIssue/RelateIssue';
 
 const IssueDropDown = ({
-  onDeleteIssue, loginUserId, reloadIssue, testLinkStoreRef, onIssueCopy, onUpdate, onChangeParent,
+  onDeleteIssue, loginUserId, reloadIssue, testLinkStoreRef, onIssueCopy, onUpdate, onChangeParent, onRelateIssue,
 }) => {
   const {
     store, applyType,
@@ -112,7 +113,7 @@ const IssueDropDown = ({
     } else if (e.key === '9') {
       store.setCreateSubBugShow(true);
     } else if (e.key === '10') {
-      store.setRelateStoryShow(true);
+      openRelateIssueModal({ issue, onOk: onRelateIssue });
     } else if (e.key === 'item_10') {
       openIssueMove({
         issue,

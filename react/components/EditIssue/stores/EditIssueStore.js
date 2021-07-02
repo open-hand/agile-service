@@ -126,8 +126,6 @@ class EditIssueStore {
 
   @observable transformFromSubIssueShow = false;
 
-  @observable relateStoryShow = false;
-
   @observable assigneeShow = false;
 
   @observable detailShow = false;
@@ -219,14 +217,6 @@ class EditIssueStore {
 
   @computed get getTransformFromSubIssueShow() {
     return this.transformFromSubIssueShow;
-  }
-
-  @action setRelateStoryShow(data) {
-    this.relateStoryShow = data;
-  }
-
-  @computed get getRelateStoryShow() {
-    return this.relateStoryShow;
   }
 
   @action setAssigneeShow(data) {
