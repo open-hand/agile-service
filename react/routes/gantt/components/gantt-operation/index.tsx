@@ -67,13 +67,13 @@ const GanttOperation: React.FC = () => {
         <svg
           xmlns="http://www.w3.org/2000/svg"
           version="1.1"
-          width={36}
-          height={16}
+          width={38}
+          height={18}
         >
           <defs>
             <pattern
               id="repeat"
-              width="4.5"
+              width="2.5"
               height="10"
               patternUnits="userSpaceOnUse"
               patternTransform="rotate(70 50 50)"
@@ -84,10 +84,11 @@ const GanttOperation: React.FC = () => {
           <g stroke="#D9E6F2">
             <rect
               fill="url(#repeat)"
-              opacity="0.5"
-              strokeWidth="2"
-              x={0}
-              y={0}
+              strokeWidth="1"
+              x={1}
+              y={1}
+              rx={2}
+              ry={2}
               width={36}
               height={16}
             />
