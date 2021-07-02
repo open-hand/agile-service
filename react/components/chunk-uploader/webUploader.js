@@ -3,6 +3,7 @@
 import webUploader from 'webuploader';
 import $, { type } from 'jquery';
 import Cookies from 'universal-cookie';
+import { isObject } from 'lodash';
 
 const cookies = new Cookies();
 
@@ -69,6 +70,18 @@ class WebUploader {
 
     this._uploader.on('all', this.onAll.bind(this));
     this._uploader.on('uploadProgress', this.onUploadProgress.bind(this));
+    this._uploader.on('uploadAccept', this.onUploadAccept.bind(this));
+
+  }
+  onUploadAccept(object, ret) {
+    if (ret && isObject(ret) && ret.failed) {
+      this.emitUploadResult({
+        success: false,
+        msg: ret.message,
+      });
+      return false
+    }
+    return true;
   }
 
   async upload(file, onProgress) {
