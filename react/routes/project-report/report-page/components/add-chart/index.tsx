@@ -21,9 +21,6 @@ import { IReportChartBlock, ChartSearchVO } from '../../store';
 import IterationSpeedComponent from './components/iteration-speed';
 import VersionReportComponent from './components/version-report';
 import EpicReportComponent from './components/epic-report';
-import CodeQualityReportComponent from './components/code-quality';
-import CodeQualityVaryReportComponent from './components/code-quality-vary';
-import ServiceCodeQualityReportComponent from './components/service-code-quality';
 
 const { Option } = Select;
 
@@ -38,9 +35,6 @@ export const defaultCharts = new Map<string, ChartMap>([
   ['velocity_chart', { component: IterationSpeedComponent, name: '迭代速度图', group: '敏捷' }],
   ['version_chart', { component: VersionReportComponent, name: '版本报告图', group: '敏捷' }],
   ['epic_chart', { component: EpicReportComponent, name: '史诗报告图', group: '敏捷' }],
-  ['code_quality', { component: CodeQualityReportComponent, name: '代码质量图', group: '质量' }],
-  ['code_quality_vary', { component: CodeQualityVaryReportComponent, name: '代码质量变化图', group: '质量' }],
-  ['service_code_quality', { component: ServiceCodeQualityReportComponent, name: '应用服务代码质量图', group: '质量' }],
 ]);
 let charts = defaultCharts;
 type GetOptionalCharts = () => Promise<Map<string, ChartMap>>
