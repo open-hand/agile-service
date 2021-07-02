@@ -5,7 +5,6 @@ import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { IModalProps, Issue } from '@/common/types';
 import { issueApi } from '@/api';
 import SelectParentIssue from './SelectParentIssue';
-import styles from './ChangeParent.less';
 
 interface Props {
   issueId: string
@@ -61,9 +60,8 @@ const ObserverChangeParent = observer(ChangeParent);
 
 const openChangeParentModal = (props: Props) => {
   Modal.open({
-    key: 'BatchDeleteModal',
+    key: Modal.key(),
     title: `修改${props.issueNum}的父级问题`,
-    className: styles.changeParentModal,
     children: <ObserverChangeParent {...props} />,
   });
 };
