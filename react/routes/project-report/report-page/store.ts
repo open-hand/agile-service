@@ -8,7 +8,6 @@ import {
 import { IBurndownChartType } from '@/components/charts/burn-down';
 import { IPieChartType } from '@/components/charts/pie-chart';
 import { IUnit } from '@/components/charts/version-report/search';
-import { ServiceCodeQualityType } from '@/components/charts/service-code-quality/search';
 
 export type IChartCode = 'burn_down_report' | 'sprint_report' | 'cumulative_flow_diagram'
   | 'pie_chart' | 'version_chart' | 'epic_chart' | 'version_burn_down_report'
