@@ -16,7 +16,6 @@ import { sameProject } from '@/utils/detail';
 import RelateStory from '../RelateStory';
 import TransformSubIssue from '../TransformSubIssue';
 import TransformFromSubIssue from '../TransformFromSubIssue';
-import ChangeParent from '../ChangeParent';
 import IssueHeader from './IssueComponent/IssueHeader';
 import IssueBody from './IssueComponent/IssueBody/IssueBody';
 import EditIssueContext from './stores';
@@ -99,6 +98,7 @@ function EditIssue() {
     } else if (issueEvents?.update) {
       issueEvents?.update(newIssue);
     }
+    loadIssueDetail(issueId);
   }, [issueEvents, store.getIssue]);
   const onLinkIssue = useCallback((res) => {
     if (issueEvents?.linkIssue) {
@@ -249,7 +249,6 @@ function EditIssue() {
   const linkIssues = store.getLinkIssues;
 
   const {
-    getChangeParentShow: changeParentShow,
     getAssigneeShow: assigneeShow,
     getCopyIssueShow: copyIssueShow,
     getTransformSubIssueShow: transformSubIssueShow,
@@ -337,6 +336,7 @@ function EditIssue() {
           parentSummary={summary}
           push={push}
           otherProject={otherProject}
+          onChangeParent={onChangeParent}
         />
       </div>
       {
@@ -372,24 +372,6 @@ function EditIssue() {
             onCancel={() => store.setTransformFromSubIssueShow(false)}
             onOk={handleTransformFromSubIssue.bind(this)}
             store={store}
-          />
-        ) : null
-      }
-      {
-        changeParentShow ? (
-          <ChangeParent
-            issueId={issueId}
-            issueNum={issueNum}
-            visible={changeParentShow}
-            objectVersionNumber={objectVersionNumber}
-            onOk={(res) => {
-              store.setChangeParentShow(false);
-              onChangeParent(res);
-              loadIssueDetail(issueId);
-            }}
-            onCancel={() => {
-              store.setChangeParentShow(false);
-            }}
           />
         ) : null
       }

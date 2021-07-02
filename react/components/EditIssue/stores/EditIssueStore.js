@@ -130,8 +130,6 @@ class EditIssueStore {
 
   @observable assigneeShow = false;
 
-  @observable changeParentShow = false;
-
   @observable detailShow = false;
 
   @observable wsjfDTOShow = true;
@@ -237,14 +235,6 @@ class EditIssueStore {
 
   @computed get getAssigneeShow() {
     return this.assigneeShow;
-  }
-
-  @action setChangeParentShow(data) {
-    this.changeParentShow = data;
-  }
-
-  @computed get getChangeParentShow() {
-    return this.changeParentShow;
   }
 
   @action setDetailShow(detailShow) {

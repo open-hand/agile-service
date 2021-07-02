@@ -54,8 +54,8 @@ interface UTypeAndStatus {
   }
 }
 interface UIssueParent {
-  issueId: number,
-  parentIssueId: number,
+  issueId: string,
+  parentIssueId: string,
   objectVersionNumber: number
 }
 interface SearchVO {
@@ -490,7 +490,7 @@ class IssueApi extends Api<IssueApi> {
     * @param issueId
     * @param content
     */
-  loadIssuesInLink(page: number = 1, size: number = 10, issueId?: number, content?: string, excludeIssueIds?:string[]) {
+  loadIssuesInLink(page: number = 1, size: number = 10, issueId?: string, content?: string, excludeIssueIds?:string[]) {
     return axios({
       method: 'post',
       url: `/agile/v1/projects/${this.projectId}/issues/agile/summary`,
