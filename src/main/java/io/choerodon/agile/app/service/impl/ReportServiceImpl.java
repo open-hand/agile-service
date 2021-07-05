@@ -1501,8 +1501,8 @@ public class ReportServiceImpl implements ReportService {
         Map<String, CustomChartPointVO> emptyPointMap = new HashMap<>(pointList.size());
 
         pointList.forEach(point -> {
-            String comparedKey = point.getComparedId() + point.getComparedValue();
-            String analysisKey = point.getAnalysisId() + point.getAnalysisValue();
+            String comparedKey = EncryptionUtils.encrypt(point.getComparedId()) + point.getComparedValue();
+            String analysisKey = EncryptionUtils.encrypt(point.getAnalysisId()) + point.getAnalysisValue();
             comparedDimensionMap.computeIfAbsent(comparedKey, value -> {
                 analysisDimensionMap.forEach((key, analysisPoint) -> {
                     emptyPointMap.put(comparedKey + key, new CustomChartPointVO(
@@ -1513,6 +1513,7 @@ public class ReportServiceImpl implements ReportService {
                 dimension.setComparedId(point.getComparedId());
                 dimension.setComparedValue(point.getComparedValue());
                 dimension.setPointList(new ArrayList<>());
+                dimension.setComparedKey(comparedKey);
                 return dimension;
             });
             analysisDimensionMap.computeIfAbsent(analysisKey, value -> {
@@ -1521,6 +1522,8 @@ public class ReportServiceImpl implements ReportService {
                         comparedPoint.getComparedValue(), comparedPoint.getComparedId())));
                 return point;
             });
+            point.setComparedKey(comparedKey);
+            point.setAnalysisKey(analysisKey);
             emptyPointMap.remove(comparedKey + analysisKey);
         });
 
