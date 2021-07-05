@@ -54,7 +54,7 @@
     "wolfy87-eventemitter": "^5.2.8"
   },
   "devDependencies": {
-    "@choerodon/boot": "0.23.2",
+    "@choerodon/boot": "0.23.3",
     "@choerodon/compiler": "^0.0.1",
     "@choerodon/master": "1.1.0",
     "@choerodon/testmanager": "1.0.0",
