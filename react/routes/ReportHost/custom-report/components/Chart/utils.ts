@@ -236,7 +236,7 @@ const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[],
       dataZoom: [{ ...dataZoom, show: xAxisData.length > maxShow }],
       grid: {
         ...grid,
-        top: data.length > maxShow ? 70 : 50, // 图例过长，留足空间
+        top: data.length > 6 ? 70 : 50, // 图例过长，留足空间
         bottom: xAxisData.length > maxShow ? 30 : 0, // x轴过长，留横向滚动条的位置
       },
       color,
