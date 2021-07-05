@@ -19,6 +19,8 @@ public class CustomChartPointVO implements Serializable {
     @Encrypt
     private Long comparedId;
     private BigDecimal percentage;
+    private String comparedKey;
+    private String analysisKey;
 
     public CustomChartPointVO() {
     }
@@ -78,5 +80,25 @@ public class CustomChartPointVO implements Serializable {
 
     public void setPercentage(BigDecimal percentage) {
         this.percentage = percentage;
+    }
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    public String getComparedKey() {
+        return comparedKey;
+    }
+
+    public void setComparedKey(String comparedKey) {
+        this.comparedKey = comparedKey;
+    }
+
+    public String getAnalysisKey() {
+        return analysisKey;
+    }
+
+    public void setAnalysisKey(String analysisKey) {
+        this.analysisKey = analysisKey;
     }
 }

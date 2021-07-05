@@ -16,6 +16,7 @@ public class CustomChartDimensionVO implements Serializable {
     private Long comparedId;
     private List<CustomChartPointVO> pointList;
     private String comparedValue;
+    private String comparedKey;
 
     public String getComparedValue() {
         return comparedValue;
@@ -39,5 +40,17 @@ public class CustomChartDimensionVO implements Serializable {
 
     public void setPointList(List<CustomChartPointVO> pointList) {
         this.pointList = pointList;
+    }
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    public String getComparedKey() {
+        return comparedKey;
+    }
+
+    public void setComparedKey(String comparedKey) {
+        this.comparedKey = comparedKey;
     }
 }
