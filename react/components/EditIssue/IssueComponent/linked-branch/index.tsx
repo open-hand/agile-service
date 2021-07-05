@@ -83,7 +83,7 @@ const LinkedBranch: React.ForwardRefRenderFunction<{
           children: `确认删除“${record.branchName}”分支与问题的关联？删除后，问题和此分支的commit信息将一并被移除`,
           okText: '移除',
           onOk: async () => {
-            await devOpsApi.project(record.projectId).removeLinkBranch(record.appServiceId, record.branchName, issueId);
+            await devOpsApi.project(record.projectId).removeLinkBranch(record.appServiceId, record.id, issueId);
             dataSet.query();
           },
         });

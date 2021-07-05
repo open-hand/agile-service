@@ -156,12 +156,12 @@ class DevOpsApi extends Api<DevOpsApi> {
     });
   }
 
-  removeLinkBranch(applicationId: number, branchName: string, issueId: string) {
+  removeLinkBranch(applicationId: number, branchId: string, issueId: string) {
     return axios({
       method: 'delete',
       url: `${this.prefix}/app_service/${applicationId}/git/branch/issue/remove_association`,
       params: {
-        branch_name: branchName,
+        branch_id: branchId,
         issue_id: issueId,
       },
     });
