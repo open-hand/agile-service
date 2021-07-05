@@ -1,7 +1,9 @@
 import {
   useUpdateEffect, usePersistFn, useMount,
 } from 'ahooks';
-import { intersection, get } from 'lodash';
+import {
+  intersection, get, uniq, find,
+} from 'lodash';
 import { useCallback, useMemo, useState } from 'react';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 
@@ -70,9 +72,9 @@ export default function useTable(getData: TableRequest, options: Options) {
   });
   const handleCheckAllChange = usePersistFn((value) => {
     if (value) {
-      setCheckValues(data.map((i) => get(i, rowKey)));
+      setCheckValues(uniq([...checkValues, ...data.map((i) => get(i, rowKey))]));
     } else {
-      setCheckValues([]);
+      setCheckValues(checkValues.filter((key) => !find(data, { [rowKey]: key })));
     }
   });
   const query = usePersistFn(async (newPage?: number) => {
