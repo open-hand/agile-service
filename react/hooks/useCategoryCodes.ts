@@ -1,4 +1,5 @@
 import { stores } from '@choerodon/boot';
+import { useObserver } from 'mobx-react-lite';
 
 const { AppState } = stores;
 export type ICategoryCode =
@@ -19,8 +20,8 @@ export type ICategoryCode =
   // 运维项目
   'N_OPERATIONS'
 const useCategoryCodes = (): ICategoryCode[] => (
-  AppState.menuType.categories
+  useObserver(() => (AppState.menuType.categories
     ? AppState.menuType.categories.map((c: any) => c.code)
-    : []);
+    : [])));
 
 export default useCategoryCodes;
