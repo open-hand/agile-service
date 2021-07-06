@@ -385,6 +385,28 @@ class EpicBurndown extends Component {
           data: inverse ? ES.chartData[6] : ES.chartData[7],
         },
       ],
+      dataZoom: [{
+        bottom: 30,
+        show: ES.chartData[4].length > 7,
+        type: 'slider',
+        height: 15,
+        width: '80%',
+        left: 60,
+        startValue: 0,
+        endValue: 7,
+        zoomLock: true,
+        handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+        handleSize: '100%',
+        handleStyle: {
+          color: '#fff',
+          borderType: 'dashed',
+          shadowBlur: 4,
+          shadowColor: 'rgba(0, 0, 0, 0.6)',
+          shadowOffsetX: 2,
+          shadowOffsetY: 2,
+        },
+
+      }],
     };
     return option;
   }
@@ -593,14 +615,11 @@ class EpicBurndown extends Component {
   renderChart = () => {
     if (!ES.chartDataOrigin.length) {
       return (
-        <div style={{
-          display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '50px 0', textAlign: 'center',
-        }}
-        >
-          <img src={pic} alt="没有预估故事点" />
-          <div style={{ textAlign: 'left', marginLeft: '50px' }}>
-            <span style={{ fontSize: 12, color: 'var(--text-color3)' }}>报表不能显示</span>
-            <p style={{ marginTop: 10, fontSize: 20 }}>
+        <EmptyPage
+          image={pic}
+          style={{ paddingTop: '.2rem' }}
+          description={(
+            <div style={{ textAlign: 'left' }}>
               在此史诗中没有预估的故事，请在
               <a
                 role="none"
@@ -611,9 +630,9 @@ class EpicBurndown extends Component {
                 待办事项
               </a>
               中创建故事并预估故事点。
-            </p>
-          </div>
-        </div>
+            </div>
+          )}
+        />
       );
     }
     return (
@@ -859,10 +878,10 @@ class EpicBurndown extends Component {
                       clearButton={false}
                     >
                       {
-                      ES.epics.map((epic) => (
-                        <Option key={epic.issueId} value={epic.issueId}>{epic.epicName}</Option>
-                      ))
-                    }
+                        ES.epics.map((epic) => (
+                          <Option key={epic.issueId} value={epic.issueId}>{epic.epicName}</Option>
+                        ))
+                      }
                     </Select>
                   </Form>
                   <div className="c7n-epicSelectHeader" style={{ marginTop: 5 }}>
@@ -949,7 +968,7 @@ class EpicBurndown extends Component {
                     </EmptyPage.Button>
                     <span>中创建一个史诗</span>
                   </div>
-            )}
+                )}
               />
             )
           }
