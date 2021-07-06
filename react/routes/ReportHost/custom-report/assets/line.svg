@@ -1,46 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="208px" height="122px" viewBox="0 0 208 122" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="210px" height="122px" viewBox="0 0 210 122" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <title>基础折线图</title>
     <defs>
         <linearGradient x1="-0.32115869%" y1="49.852278%" x2="96.1473525%" y2="49.852278%" id="linearGradient-1">
             <stop stop-color="#4E98F0" offset="0%"></stop>
             <stop stop-color="#5B8FF9" offset="100%"></stop>
         </linearGradient>
-        <linearGradient x1="15.7926057%" y1="60.3571429%" x2="3158.03547%" y2="-891.25%" id="linearGradient-2">
+        <linearGradient x1="14.6428571%" y1="60.3571429%" x2="3262.5%" y2="-891.25%" id="linearGradient-2">
             <stop stop-color="#4E98F0" offset="0%"></stop>
             <stop stop-color="#5B8FF9" offset="100%"></stop>
         </linearGradient>
     </defs>
     <g id="自定义敏捷报表" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="基础折线图" transform="translate(-18.000000, -24.000000)">
-            <g transform="translate(18.000000, 24.000000)">
-                <line x1="0.25" y1="0.508333333" x2="0.75" y2="0.508333333" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
-                <line x1="2" y1="0.508333333" x2="207" y2="0.508333333" id="路径" stroke="#D9E6F2"></line>
-                <line x1="207.25" y1="0.508333333" x2="207.75" y2="0.508333333" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
-                <line x1="0.25" y1="24.9083333" x2="0.75" y2="24.9083333" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
-                <line x1="2" y1="24.9083333" x2="207" y2="24.9083333" id="路径" stroke="#D9E6F2"></line>
-                <line x1="207.25" y1="24.9083333" x2="207.75" y2="24.9083333" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
-                <line x1="0.25" y1="49.3083333" x2="0.75" y2="49.3083333" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
-                <line x1="2" y1="49.3083333" x2="207" y2="49.3083333" id="路径" stroke="#D9E6F2"></line>
-                <line x1="207.25" y1="49.3083333" x2="207.75" y2="49.3083333" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
-                <line x1="0.25" y1="72.6916667" x2="0.75" y2="72.6916667" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
-                <line x1="2" y1="72.6916667" x2="207" y2="72.6916667" id="路径" stroke="#D9E6F2"></line>
-                <line x1="207.25" y1="72.6916667" x2="207.75" y2="72.6916667" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
-                <line x1="0.25" y1="97.0916667" x2="0.75" y2="97.0916667" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
-                <line x1="2" y1="97.0916667" x2="207" y2="97.0916667" id="路径" stroke="#D9E6F2"></line>
-                <line x1="207.25" y1="97.0916667" x2="207.75" y2="97.0916667" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
-                <line x1="0.25" y1="121.491667" x2="0.75" y2="121.491667" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
-                <line x1="2" y1="121.491667" x2="207" y2="121.491667" id="路径" stroke="#D9E6F2"></line>
-                <line x1="207.25" y1="121.491667" x2="207.75" y2="121.491667" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
-                <polyline id="路径" stroke="url(#linearGradient-1)" stroke-width="1.5" points="15 91.2 41.147796 67.7179353 67.284068 55.9769029 93.431864 57.4332425 119.568136 37.0219093 145.715932 35.2833333 171.863728 44.9809745 198 35.5655697"></polyline>
-                <ellipse id="椭圆形" stroke="#FCFCFC" stroke-width="1.5" fill="url(#linearGradient-2)" fill-rule="nonzero" cx="14" cy="91.2" rx="3" ry="3.05"></ellipse>
-                <ellipse id="椭圆形" stroke="#FCFCFC" stroke-width="1.5" fill="url(#linearGradient-2)" fill-rule="nonzero" cx="67" cy="57.65" rx="3" ry="3.05"></ellipse>
-                <ellipse id="椭圆形" stroke="#FCFCFC" stroke-width="1.5" fill="url(#linearGradient-2)" fill-rule="nonzero" cx="41" cy="67.8166667" rx="3" ry="3.05"></ellipse>
-                <ellipse id="椭圆形" stroke="#FCFCFC" stroke-width="1.5" fill="url(#linearGradient-2)" fill-rule="nonzero" cx="93" cy="58.6666667" rx="3" ry="3.05"></ellipse>
-                <ellipse id="椭圆形" stroke="#FCFCFC" stroke-width="1.5" fill="url(#linearGradient-2)" fill-rule="nonzero" cx="119" cy="37.3166667" rx="3" ry="3.05"></ellipse>
-                <ellipse id="椭圆形" stroke="#FCFCFC" stroke-width="1.5" fill="url(#linearGradient-2)" fill-rule="nonzero" cx="145" cy="36.3" rx="3" ry="3.05"></ellipse>
-                <ellipse id="椭圆形" stroke="#FCFCFC" stroke-width="1.5" fill="url(#linearGradient-2)" fill-rule="nonzero" cx="172" cy="45.45" rx="3" ry="3.05"></ellipse>
-                <ellipse id="椭圆形" stroke="#FCFCFC" stroke-width="1.5" fill="url(#linearGradient-2)" fill-rule="nonzero" cx="198" cy="36.3" rx="3" ry="3.05"></ellipse>
+        <g id="基础折线图" transform="translate(1.000000, 0.000000)">
+            <line x1="0.25" y1="0.5" x2="0.75" y2="0.5" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
+            <line x1="2" y1="0.5" x2="207" y2="0.5" id="路径" stroke="#D9E6F2"></line>
+            <line x1="207.25" y1="0.5" x2="207.75" y2="0.5" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
+            <line x1="0.25" y1="24.5" x2="0.75" y2="24.5" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
+            <line x1="2" y1="24.5" x2="207" y2="24.5" id="路径" stroke="#D9E6F2"></line>
+            <line x1="207.25" y1="24.5" x2="207.75" y2="24.5" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
+            <line x1="0.25" y1="48.5" x2="0.75" y2="48.5" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
+            <line x1="2" y1="48.5" x2="207" y2="48.5" id="路径" stroke="#D9E6F2"></line>
+            <line x1="207.25" y1="48.5" x2="207.75" y2="48.5" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
+            <line x1="0.25" y1="73.5" x2="0.75" y2="73.5" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
+            <line x1="2" y1="73.5" x2="207" y2="73.5" id="路径" stroke="#D9E6F2"></line>
+            <line x1="207.25" y1="73.5" x2="207.75" y2="73.5" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
+            <line x1="0.25" y1="97.5" x2="0.75" y2="97.5" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
+            <line x1="2" y1="97.5" x2="207" y2="97.5" id="路径" stroke="#D9E6F2"></line>
+            <line x1="207.25" y1="97.5" x2="207.75" y2="97.5" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
+            <line x1="0.25" y1="121.5" x2="0.75" y2="121.5" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
+            <line x1="2" y1="121.5" x2="207" y2="121.5" id="路径" stroke="#D9E6F2"></line>
+            <line x1="207.25" y1="121.5" x2="207.75" y2="121.5" id="路径" stroke="#C9CACA" stroke-width="0.25"></line>
+            <g id="编组-5备份" transform="translate(0.000000, 10.000000)" stroke-width="1.5">
+                <polyline id="路径" stroke="url(#linearGradient-1)" points="3 87 32 67.7836715 61 38.4363317 90 43.5697396 119 2 148 11.845822 177 52.0167758 206 41.4240294"></polyline>
+                <circle id="椭圆形" stroke="#FCFCFC" fill="url(#linearGradient-2)" fill-rule="nonzero" cx="3" cy="86" r="3"></circle>
+                <circle id="椭圆形" stroke="#FCFCFC" fill="url(#linearGradient-2)" fill-rule="nonzero" cx="32" cy="65" r="3"></circle>
+                <circle id="椭圆形" stroke="#FCFCFC" fill="url(#linearGradient-2)" fill-rule="nonzero" cx="60" cy="38" r="3"></circle>
+                <circle id="椭圆形" stroke="#FCFCFC" fill="url(#linearGradient-2)" fill-rule="nonzero" cx="89" cy="41" r="3"></circle>
+                <circle id="椭圆形" stroke="#FCFCFC" fill="url(#linearGradient-2)" fill-rule="nonzero" cx="119" cy="3" r="3"></circle>
+                <circle id="椭圆形" stroke="#FCFCFC" fill="url(#linearGradient-2)" fill-rule="nonzero" cx="148" cy="12" r="3"></circle>
+                <circle id="椭圆形" stroke="#FCFCFC" fill="url(#linearGradient-2)" fill-rule="nonzero" cx="176" cy="50" r="3"></circle>
+                <circle id="椭圆形" stroke="#FCFCFC" fill="url(#linearGradient-2)" fill-rule="nonzero" cx="205" cy="41" r="3"></circle>
             </g>
         </g>
     </g>
