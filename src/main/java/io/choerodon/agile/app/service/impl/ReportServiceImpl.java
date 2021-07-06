@@ -1507,7 +1507,8 @@ public class ReportServiceImpl implements ReportService {
                 analysisDimensionMap.forEach((key, analysisPoint) -> {
                     emptyPointMap.put(comparedKey + key, new CustomChartPointVO(
                             analysisPoint.getAnalysisValue(), analysisPoint.getAnalysisId(),
-                            point.getComparedValue(), point.getComparedId()));
+                            point.getComparedValue(), point.getComparedId(),
+                            comparedKey, analysisKey));
                 });
                 CustomChartDimensionVO dimension = new CustomChartDimensionVO();
                 dimension.setComparedId(point.getComparedId());
@@ -1519,7 +1520,8 @@ public class ReportServiceImpl implements ReportService {
             analysisDimensionMap.computeIfAbsent(analysisKey, value -> {
                 comparedDimensionMap.forEach((key, comparedPoint) -> emptyPointMap.put(key + analysisKey, new CustomChartPointVO(
                         point.getAnalysisValue(), point.getAnalysisId(),
-                        comparedPoint.getComparedValue(), comparedPoint.getComparedId())));
+                        comparedPoint.getComparedValue(), comparedPoint.getComparedId(),
+                        comparedKey, analysisKey)));
                 return point;
             });
             point.setComparedKey(comparedKey);

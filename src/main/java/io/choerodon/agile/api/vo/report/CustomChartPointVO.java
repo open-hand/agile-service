@@ -25,13 +25,15 @@ public class CustomChartPointVO implements Serializable {
     public CustomChartPointVO() {
     }
 
-    public CustomChartPointVO(String analysisValue, Long analysisId, String comparedValue, Long comparedId) {
+    public CustomChartPointVO(String analysisValue, Long analysisId, String comparedValue, Long comparedId, String comparedKey, String analysisKey) {
         this.analysisValue = analysisValue;
         this.analysisId = analysisId;
         this.comparedId = comparedId;
         this.comparedValue = comparedValue;
         this.value = "0";
         this.percentage = BigDecimal.ZERO;
+        this.comparedKey = comparedKey;
+        this.analysisKey = analysisKey;
     }
 
     public String getAnalysisValue() {
