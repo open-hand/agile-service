@@ -31,7 +31,7 @@ const CustomReportTable: React.FC<CustomReportTableProps> = ({
   const tableData = useMemo(() => {
     const newData = data
       ?.reduce((preValue, currentValue) => {
-        const newValue = currentValue.pointList.reduce((pre, v) => ({ ...pre, [`analysisId-${v.analysisId}`]: { ...v, [`value-${currentValue.comparedId}`]: v.value } }), {} as any);
+        const newValue = currentValue.pointList.reduce((pre, v) => ({ ...pre, [`analysisId-${v.analysisId}-${v.analysisValue}`]: { ...v, [`value-${currentValue.comparedId}`]: v.value } }), {} as any);
 
         return merge(preValue, newValue);
       }, {} as any);
