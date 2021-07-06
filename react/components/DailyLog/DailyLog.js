@@ -261,10 +261,10 @@ class DailyLog extends Component {
         visible={visible || false}
         cancelText="取消"
         footer={[
+          <Button key="back" onClick={onCancel} funcType="raised">取消</Button>,
           <Button key="submit" color="primary" funcType="raised" loading={loading} disabled={loading} onClick={this.handleCreateDailyLog}>
             确定
           </Button>,
-          <Button key="back" onClick={onCancel} funcType="raised">取消</Button>,
         ]}
         width={MODAL_WIDTH.middle}
       >
