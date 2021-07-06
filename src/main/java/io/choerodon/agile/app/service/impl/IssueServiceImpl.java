@@ -1459,7 +1459,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         handlerStatus(issueConvertDTO.getProjectId(),issueUpdateTypeVO);
         //更新字段值
         updateIssueFieldValue(issueUpdateTypeVO, issueUpdateTypeVO.getIssueId(), projectId, organizationId);
-        return queryIssue(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId(), organizationId);
+        IssueVO result = queryIssue(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId(), organizationId);
+        setCompletedAndActualCompletedDate(result);
+        return result;
     }
 
     private void updateIssueFieldValue(IssueUpdateTypeVO issueUpdateTypeVO,
@@ -2110,7 +2112,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                         issueAccessDataService.removeIssueFromSprintByIssueIds(batchRemoveSprintDTO);
                     }
                 }
-                return queryIssueSub(projectId, organizationId, issueConvertDTO.getIssueId());
+                IssueSubVO result = queryIssueSub(projectId, organizationId, issueConvertDTO.getIssueId());
+                setCompletedAndActualCompletedDate(result);
+                return result;
             } else {
                 throw new CommonException("error.issueValidator.subTaskError");
             }
