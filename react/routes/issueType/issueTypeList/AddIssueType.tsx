@@ -359,7 +359,7 @@ const AddIssueType: React.FC<Props> = ({
         {
           !typeId ? (
             <>
-              <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} loading={addLoading} onClick={handleSave}>保存</Button>
+              <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} loading={addLoading} onClick={handleSave} style={{ marginLeft: 10 }}>保存</Button>
               <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToPage} loading={addLoading}>保存并配置页面</Button>
               {
                 !isOrganization && (
@@ -372,7 +372,7 @@ const AddIssueType: React.FC<Props> = ({
             <>
               {
                 !(isOrganization && isSystemType) && (
-                  <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} loading={editLoading} onClick={handleSave}>保存</Button>
+                  <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} loading={editLoading} onClick={handleSave} style={{ marginLeft: 10 }}>保存</Button>
                 )
               }
               <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToPage} disabled={editLoading}>跳转配置页面</Button>
