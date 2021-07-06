@@ -144,6 +144,7 @@ export default function useTable(getData: TableRequest, options: Options) {
     checkValues,
     handleCheckChange,
     handleCheckAllChange,
+    setCheckValues,
     expandAbleKeys,
     expandAll,
     isExpandAll,
