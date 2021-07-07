@@ -61,6 +61,7 @@ function IssueList({ data, sprintId, sprintData }) {
     });
     BacklogStore.refreshSprint(sprintId, false);
   });
+  const { total, page, size } = pagination;
   return (
     <Droppable
       droppableId={String(sprintId)}
@@ -143,15 +144,16 @@ function IssueList({ data, sprintId, sprintData }) {
                 }}
               />
             </div>
-            {pagination.total > pagination.size ? (
+            {total > size ? (
               <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0' }}>
                 <Pagination
-                  total={pagination.total}
-                  page={pagination.page}
-                  pageSize={pagination.size}
+                  total={total}
+                  page={page}
+                  pageSize={size}
                   onChange={handlePaginationChange}
                   showSizeChangerLabel={false}
-                  showTotal={(total, range) => `显示${range[0]}-${range[1]} 共 ${total}条`}
+                  // pageSizeOptions={[10, 50, 100, 200, 300]}
+                  showTotal={(t, range) => `显示${range[0]}-${range[1]} 共 ${t}条`}
                   showPager
                   showQuickJumper
                 />
