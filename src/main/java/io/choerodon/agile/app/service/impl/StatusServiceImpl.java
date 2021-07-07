@@ -349,7 +349,7 @@ public class StatusServiceImpl implements StatusService {
     @Override
     public List<StatusVO> queryByStateMachineIds(Long organizationId, List<Long> stateMachineIds) {
         if (!stateMachineIds.isEmpty()) {
-            List<StatusDTO> statuses = statusMapper.queryByStateMachineIds(organizationId, stateMachineIds, null);
+            List<StatusDTO> statuses = statusMapper.queryByStateMachineIds(organizationId, stateMachineIds);
             return modelMapper.map(statuses, new TypeToken<List<StatusVO>>() {
             }.getType());
         }
@@ -365,7 +365,7 @@ public class StatusServiceImpl implements StatusService {
             return PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
         }
         Page<StatusDTO> status =
-                PageHelper.doPageAndSort(pageRequest, () -> statusMapper.queryByStateMachineIds(organizationId, stateMachineIds, param));
+                PageHelper.doPageAndSort(pageRequest, () -> statusMapper.queryByStateMachineIdsAndParam(organizationId, stateMachineIds, param));
         List<StatusVO> statusList =
                 modelMapper.map(status.getContent(), new TypeToken<List<StatusVO>>() {
         }.getType());
