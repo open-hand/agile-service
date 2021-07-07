@@ -116,6 +116,9 @@ const Linkage = ({
       return result;
     }, []);
   })();
+
+  const selectedTypeItem = issueTypes?.find((item: IIssueType) => item.id === selectedType);
+
   return (
     <div className={styles.linkage}>
       <Loading loading={loading} />
@@ -137,7 +140,7 @@ const Linkage = ({
                     linkageDataSet.current?.init(statusName, undefined);
                   }}
                 >
-                  {issueTypes?.filter((type: IIssueType) => (issueTypeId && type.id === issueTypeId) || !selectedIssueTypes.includes(type.id)).map((type: IIssueType) => (
+                  {issueTypes?.filter((type: IIssueType) => selectedTypeItem?.typeCode !== type.typeCode && ((issueTypeId && type.id === issueTypeId) || !selectedIssueTypes.includes(type.id))).map((type: IIssueType) => (
                     <Option value={type.id}>
                       {type.name}
                     </Option>
