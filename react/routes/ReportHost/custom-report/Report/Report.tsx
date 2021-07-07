@@ -100,7 +100,7 @@ const CustomReport: React.FC<Props> = (props) => {
       name: 'description',
       label: '图表描述',
       type: 'string' as FieldType,
-      maxLength: 100,
+      maxLength: 50,
     }, {
       name: 'type',
       label: '图表类型',

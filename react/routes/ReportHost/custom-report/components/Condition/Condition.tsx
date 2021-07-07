@@ -38,7 +38,10 @@ const Condition: React.FC<{
   <div className={styles.condition}>
     <Part title="图表说明">
       <Form dataSet={reportDs} className={styles.form}>
-        <TextArea name="description" autoSize />
+        <TextArea
+          name="description"
+          autoSize
+        />
       </Form>
     </Part>
     <Part title="数据设置" tip="您可以在此设置图表的分析维度、对比维度，以及统计单位。例如：分析维度为优先级，对比维度为迭代，统计单位为问题计数。那么图表展示的就是各个优先级在各个迭代的问题数量。">
