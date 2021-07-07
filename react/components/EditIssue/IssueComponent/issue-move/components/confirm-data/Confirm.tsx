@@ -52,22 +52,31 @@ const Confirm: React.FC<Props> = ({
   if (store.loading) {
     return <Loading loading />;
   }
+
+  console.log(issueMapValues, loseItems);
   return (
     <div className={styles.confirm}>
-      <div className={styles.tip}>
-        <Icon type="report" />
-        <p className={styles.tipText}>
-          {issueMapValues.map(({ issue, lostFields }) => (
-            <LostFields
-              key={issue.issueId}
-              lostFields={lostFields}
-              loseItems={loseItems}
-              targetProject={targetProject}
-              issue={issue}
-            />
-          ))}
-        </p>
-      </div>
+      {
+        (issueMapValues.length > 0 && (
+          issueMapValues.some((item) => !!item.lostFields?.length) || !!(
+            [...Object.entries(loseItems)].filter(([, v]) => !!v).length
+          ))) && (
+          <div className={styles.tip}>
+            <Icon type="report" />
+            <p className={styles.tipText}>
+              {issueMapValues.map(({ issue, lostFields }) => (
+                <LostFields
+                  key={issue.issueId}
+                  lostFields={lostFields}
+                  loseItems={loseItems}
+                  targetProject={targetProject}
+                  issue={issue}
+                />
+              ))}
+            </p>
+          </div>
+        )
+      }
       <div className={styles.content}>
         <div className={styles.contentTip}>
           系统将保留兼容的字段值，您可以根据需要更新以下不兼容的字段值：
