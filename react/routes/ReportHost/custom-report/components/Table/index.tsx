@@ -4,9 +4,9 @@ import React, {
 import {
   DataSet, Table, Tooltip,
 } from 'choerodon-ui/pro';
-import { runInAction } from 'mobx';
+import { runInAction, toJS } from 'mobx';
 import {
-  find, isEmpty, merge, pick,
+  find, isEmpty, merge, mergeWith, pick,
 } from 'lodash';
 import { IField } from '@/common/types';
 import { IChartData } from '../Chart/utils';
@@ -22,6 +22,7 @@ interface CustomReportTableProps extends ChartProps {
 }
 type IChartDataPointListItem = IChartData['pointList'][0]
 interface TableDataItem extends IChartDataPointListItem {
+  total?: any
   [key: string]: any
 }
 const { Column } = Table;
@@ -29,11 +30,16 @@ const CustomReportTable: React.FC<CustomReportTableProps> = ({
   data, dimension, analysisField, type, chartType, ...otherProps
 }) => {
   const tableData = useMemo(() => {
-    const newData = data
+    const newData = toJS(data)
       ?.reduce((preValue, currentValue) => {
-        const newValue = currentValue.pointList.reduce((pre, v) => ({ ...pre, [`analysisId-${v.analysisId}-${v.analysisValue}`]: { ...v, [`value-${currentValue.comparedId}`]: v.value } }), {} as any);
+        const newValue = currentValue.pointList.reduce((pre, v) => ({ ...pre, [`analysisId-${v.analysisId}-${v.analysisValue}`]: { ...v, total: v.value || 0, [`value-${currentValue.comparedId}`]: v.value } }), {} as any);
 
-        return merge(preValue, newValue);
+        return mergeWith(preValue, newValue, (aValue: any, bValue: any, key) => {
+          if (key === 'total') {
+            return aValue || 0 + bValue || 0;
+          }
+          return undefined;
+        });
       }, {} as any);
     return Object.values<TableDataItem>(newData);
   },
@@ -102,12 +108,15 @@ const CustomReportTable: React.FC<CustomReportTableProps> = ({
         <Column
           name={`value-${i.comparedId}`}
           header={<Tooltip title={i.comparedValue}>{i.comparedValue}</Tooltip>}
-          hidden={index > 10}
+          hidden={index > 100}
         />
       )));
     }
     if (chartType === 'pie') {
       columns.push(<Column name="percentage" header="占比" />);
+    }
+    if (chartType === 'stackedBar') {
+      columns.push(<Column name="total" header="总计" lock={'right' as any} />);
     }
     return columns;
   }, [chartType, data, type]);
