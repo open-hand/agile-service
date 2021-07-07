@@ -3116,7 +3116,7 @@ public class ExcelServiceImpl implements ExcelService {
     private void setRelatedIssue(ExportIssuesVO exportIssuesVO, Map<Long, List<IssueLinkDTO>> relatedIssueMap) {
         Long issueId = exportIssuesVO.getIssueId();
         List<IssueLinkDTO> issueLinkList = relatedIssueMap.get(issueId);
-        StringBuilder builder = new StringBuilder();
+        Map<String, List<String>> relMap = new LinkedHashMap<>();
         if(!ObjectUtils.isEmpty(issueLinkList)) {
             int size = issueLinkList.size();
             exportIssuesVO.setRelatedIssueCount(size);
@@ -3132,10 +3132,19 @@ public class ExcelServiceImpl implements ExcelService {
                 }
                 String issueNum = dto.getIssueNum();
                 String summary = dto.getSummary();
-                builder.append(action).append(COLON_CN).append(issueNum).append(COLON_CN).append(summary);
-                if (iterator.hasNext()) {
-                    builder.append("\n");
-                }
+                List<String> rowList = relMap.computeIfAbsent(action, x -> new ArrayList<>());
+                String row = action + COLON_CN + issueNum + COLON_CN + summary;
+                rowList.add(row);
+            }
+        }
+        List<String> rows = new ArrayList<>();
+        relMap.forEach((k, v) -> rows.addAll(v));
+        Iterator<String> rowIterator = rows.iterator();
+        StringBuilder builder = new StringBuilder();
+        while (rowIterator.hasNext()) {
+            builder.append(rowIterator.next());
+            if (rowIterator.hasNext()) {
+                builder.append("\n");
             }
         }
         exportIssuesVO.setRelatedIssue(builder.toString());
