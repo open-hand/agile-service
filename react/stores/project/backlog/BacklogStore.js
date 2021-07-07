@@ -654,6 +654,7 @@ class BacklogStore {
     // const revertDestinationArr = destinationArr.slice();
     const prevIssue = this.findOutsetIssue(sourceIndex, destinationIndex, sourceId, destinationId, destinationArr);
     const modifiedArr = this.getModifiedArr(issueItem, type);
+    const count = modifiedArr.length;
 
     if (type === 'single') {
       sourceArr.splice(sourceIndex, 1);
@@ -702,10 +703,15 @@ class BacklogStore {
               page: Math.max(pagination.page - 1, 1),
             });
           }
+          const destinationPagination = this.getPagination(destinationId);
+          this.updatePagination(destinationId, {
+            total: destinationPagination.total + count,
+          });
           this.refreshSprint(sourceId, false);
         }
         this.spinIf = false;
-      }).catch(() => {
+      }).catch((err) => {
+        console.log(err);
         this.refreshSprint(sourceId, false);
         this.refreshSprint(destinationId, false);
       });
