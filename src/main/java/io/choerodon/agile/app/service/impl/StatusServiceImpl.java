@@ -199,7 +199,7 @@ public class StatusServiceImpl implements StatusService {
     }
 
     @Override
-    public Page<StatusVO> queryUserProjectStatus(PageRequest pageRequest, Long organizationId, String type) {
+    public Page<StatusVO> queryUserProjectStatus(PageRequest pageRequest, Long organizationId, String type, String param) {
         List<Long> projectIds = new ArrayList<>();
         List<ProjectVO> projects = new ArrayList<>();
         Long userId = DetailsHelper.getUserDetails().getUserId();
@@ -222,7 +222,7 @@ public class StatusServiceImpl implements StatusService {
                         .collect(Collectors.toSet());
         List<Long> stateMachineIds = stateMachineSchemeConfigService.queryBySchemeIds(false, organizationId, stateMachineSchemeIds)
                 .stream().map(StatusMachineSchemeConfigVO::getStateMachineId).collect(Collectors.toList());
-        return pagedQueryByStateMachineIds(pageRequest, organizationId, stateMachineIds);
+        return pagedQueryByStateMachineIds(pageRequest, organizationId, stateMachineIds, param);
     }
 
     @Override
@@ -359,12 +359,13 @@ public class StatusServiceImpl implements StatusService {
     @Override
     public Page<StatusVO> pagedQueryByStateMachineIds(PageRequest pageRequest,
                                                       Long organizationId,
-                                                      List<Long> stateMachineIds) {
+                                                      List<Long> stateMachineIds,
+                                                      String param) {
         if (ObjectUtils.isEmpty(stateMachineIds)) {
             return PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
         }
         Page<StatusDTO> status =
-                PageHelper.doPageAndSort(pageRequest, () -> statusMapper.queryByStateMachineIds(organizationId, stateMachineIds));
+                PageHelper.doPageAndSort(pageRequest, () -> statusMapper.queryByStateMachineIdsAndParam(organizationId, stateMachineIds, param));
         List<StatusVO> statusList =
                 modelMapper.map(status.getContent(), new TypeToken<List<StatusVO>>() {
         }.getType());

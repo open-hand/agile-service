@@ -37,4 +37,7 @@ public interface StatusMapper extends BaseMapper<StatusDTO> {
     List<StatusSettingVO> listStatusTransferByStateMachineId(@Param("organizationId") Long organizationId,@Param("stateMachineId") Long stateMachineId,@Param("param") String param);
 
     List<ProjectStatusVO> listStatusByProjectId(@Param("projectId") Long projectId,@Param("organizationId") Long organizationId,@Param("statusSearchVO") StatusSearchVO statusSearchVO);
+
+    List<StatusDTO> queryByStateMachineIdsAndParam(@Param("organizationId") Long organizationId, @Param("stateMachineIds") List<Long> stateMachineIds, @Param("param") String param);
+
 }
