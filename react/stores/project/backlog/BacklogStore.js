@@ -701,8 +701,8 @@ class BacklogStore {
               // 最小为1
               page: Math.max(pagination.page - 1, 1),
             });
-            this.refreshSprint(sourceId, false);
           }
+          this.refreshSprint(sourceId, false);
         }
         this.spinIf = false;
       }).catch(() => {
