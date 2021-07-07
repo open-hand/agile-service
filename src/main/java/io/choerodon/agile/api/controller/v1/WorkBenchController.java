@@ -77,9 +77,9 @@ public class WorkBenchController {
                                                                  @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
                                                                  @ApiParam(value = "组织id", required = true)
                                                                  @PathVariable("organization_id") Long organizationId,
-                                                                 @ApiParam(value = "type")
+                                                                 @ApiParam(value = "卡片类型")
                                                                  @RequestParam(required = false) String type,
-                                                                 @ApiParam(value = "param")
+                                                                 @ApiParam(value = "状态名称")
                                                                  @RequestParam(required = false) String param) {
         return Optional.ofNullable(statusService.queryUserProjectStatus(pageRequest, organizationId, type, param))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
