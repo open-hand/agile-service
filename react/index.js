@@ -50,6 +50,8 @@ export function getRoutes(match) {
         type === 'project' ? [
           'choerodon.code.project.setting.page.ps.field',
           'choerodon.code.project.setting.page.ps.scheme',
+          'choerodon.code.program.setting.page.ps.field',
+          'choerodon.code.program.setting.page.ps.scheme',
         ] : [
           'choerodon.code.organization.setting.issue.page.ps.scheme',
           'choerodon.code.organization.setting.issue.page.ps.filed',
@@ -71,12 +73,23 @@ export function getRoutes(match) {
     <Route path={`${match.url}/priorities`} component={Priority} />,
     <Route path={`${match.url}/charts`} component={ReportHost} />,
     <PermissionRoute
-      service={['choerodon.code.project.setting.state.ps.default',
-        'choerodon.code.project.setting.state.ps.master']}
+      service={[
+        'choerodon.code.project.setting.state.ps.default',
+        'choerodon.code.project.setting.state.ps.master',
+        'choerodon.code.program.setting.state.ps.default',
+        'choerodon.code.program.setting.state.ps.master',
+      ]}
       path={`${match.url}/state-machine`}
       component={StateMachine}
     />,
-    <Route path={`${match.url}/project-report`} component={ProjectReport} />,
+    <PermissionRoute
+      service={[
+        'choerodon.code.project.operation.project-report.ps.default',
+        'choerodon.code.program.operation.project-report.ps.default',
+      ]}
+      path={`${match.url}/project-report`}
+      component={ProjectReport}
+    />,
     <Route path={`${match.url}/ui-preview/:uuid`} component={UiPreview} />,
     <Route path={`${match.url}/outside/ui-preview/:uuid`} component={UiPreview} />,
   ];
