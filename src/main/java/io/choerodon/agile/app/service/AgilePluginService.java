@@ -478,4 +478,6 @@ public interface AgilePluginService {
     void setIssueProgramAttr(Long projectId, List<IssueSearchVO> searchVOList, List<Long> allIssueIds);
 
     void handlerSprintProgramAttr(List<Long> sprintIds, Long projectId, List<SprintSearchVO> sprintSearches);
+
+    void deleteTagByBranch(Long projectId, IssueWithBranchVO issueWithBranchVO);
 }
