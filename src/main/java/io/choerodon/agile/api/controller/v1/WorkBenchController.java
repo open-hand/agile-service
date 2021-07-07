@@ -78,8 +78,10 @@ public class WorkBenchController {
                                                                  @ApiParam(value = "组织id", required = true)
                                                                  @PathVariable("organization_id") Long organizationId,
                                                                  @ApiParam(value = "type")
-                                                                 @RequestParam(required = false) String type) {
-        return Optional.ofNullable(statusService.queryUserProjectStatus(pageRequest, organizationId, type))
+                                                                 @RequestParam(required = false) String type,
+                                                                 @ApiParam(value = "param")
+                                                                 @RequestParam(required = false) String param) {
+        return Optional.ofNullable(statusService.queryUserProjectStatus(pageRequest, organizationId, type, param))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.statusList.get"));
     }
