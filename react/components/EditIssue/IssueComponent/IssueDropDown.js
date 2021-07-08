@@ -11,6 +11,7 @@ import useHasDevops from '@/hooks/useHasDevops';
 import useHasTest from '@/hooks/useHasTest';
 import { openEditIssueCopyIssue } from '@/components/CopyIssue';
 import { isInProgram } from '@/utils/program';
+import openRecordWorkLogModal from '@/components/DailyLog/DailyLogPro';
 import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
 import openIssueMove from './issue-move';
@@ -69,7 +70,8 @@ const IssueDropDown = ({
 
   const handleClickMenu = async (e) => {
     if (e.key === '0') {
-      store.setWorkLogShow(true);
+      // store.setWorkLogShow(true);
+      openRecordWorkLogModal({ issueId, onOk: () => reloadIssue(issueId) });
     } else if (e.key === 'item_11') {
       handleDeleteIssue();
     } else if (e.key === '2') {

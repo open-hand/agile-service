@@ -4,7 +4,7 @@ import { Select } from 'choerodon-ui/pro';
 
 const { Option } = Select;
 
-interface Props extends SelectProps {
+interface Props extends Partial<SelectProps> {
   selectNumbers?: string[],
 }
 
