@@ -337,6 +337,15 @@ const GanttPage: React.FC = () => {
     }
     updateInfluenceIssues(issue);
   });
+  const handleCopyIssue = usePersistFn((issue: Issue) => {
+    handleCreateIssue(issue);
+    const subIssues = [...(issue.subIssueVOList ?? []), ...(issue.subBugVOList ?? [])];
+    if (subIssues.length > 0) {
+      subIssues.forEach((child) => {
+        addSubIssue(child, issue.issueId);
+      });
+    }
+  });
   const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId) => {
     addSubIssue(subIssue, parentIssueId);
   });
@@ -528,7 +537,7 @@ const GanttPage: React.FC = () => {
             onDelete={handleIssueDelete}
             onDeleteSubIssue={handleDeleteSubIssue}
             onCreateSubIssue={handleCreateSubIssue}
-            onCopyIssue={handleCreateIssue}
+            onCopyIssue={handleCopyIssue}
             onTransformType={handleTransformType}
             onChangeParent={handleChangeParent}
             onLinkIssue={handleLinkIssue}
