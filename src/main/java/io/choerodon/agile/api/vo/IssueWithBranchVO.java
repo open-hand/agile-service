@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * @author superlee
@@ -10,7 +10,7 @@ public class IssueWithBranchVO {
 
     private Long issueId;
 
-    private Set<Long> branchIds;
+    private List<BranchVO> branches;
 
     public Long getIssueId() {
         return issueId;
@@ -20,11 +20,11 @@ public class IssueWithBranchVO {
         this.issueId = issueId;
     }
 
-    public Set<Long> getBranchIds() {
-        return branchIds;
+    public List<BranchVO> getBranches() {
+        return branches;
     }
 
-    public void setBranchIds(Set<Long> branchIds) {
-        this.branchIds = branchIds;
+    public void setBranches(List<BranchVO> branches) {
+        this.branches = branches;
     }
 }
