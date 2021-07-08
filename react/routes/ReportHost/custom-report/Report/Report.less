@@ -10,19 +10,35 @@
   .report {
     display: flex;
     flex-direction: column;
-    height: 100%;
-    overflow-y: hidden;
     .header {
-      height: 50px;
       flex-shrink: 0;
       border-bottom: 1px solid var(--divider);
-      padding: 0 20px;
+      padding: 9px 20px;
       display: flex;
       align-items: center;
       .header_text {
         font-size: 16px;
         color: #0F1358;
         line-height: 22px;
+      }
+      .titleForm {
+        :global {
+          .c7n-pro-field-wrapper {
+            margin: 0;
+            .c7n-pro-input-wrapper {
+              .c7n-pro-input {
+                height: 32px;
+                padding-top: 0;
+              }
+              .c7n-pro-field-label-wrapper {
+                display: none;
+              }
+            }
+            .c7n-pro-validation-message {
+              margin-bottom: -5px;
+            }
+          }
+        }
       }
     }
     .main {

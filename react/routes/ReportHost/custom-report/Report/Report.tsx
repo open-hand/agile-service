@@ -8,7 +8,7 @@ import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import {
-  Button, DataSet, TextField, Modal,
+  Button, DataSet, TextField, Modal, Form,
 } from 'choerodon-ui/pro';
 import { EmptyPage } from '@choerodon/components';
 import { Spin } from 'choerodon-ui';
@@ -35,6 +35,7 @@ import useReport from '../components/Chart/useReport';
 import Chart from '../components/Chart';
 import { IChartData } from '../components/Chart/utils';
 import Table from '../components/Table';
+import ChartSearch from '../components/ChartSearch';
 
 interface Props {
   chartId?: string
@@ -85,7 +86,7 @@ const CustomReport: React.FC<Props> = (props) => {
     if (!res) {
       return true;
     }
-    return '报表标题重复';
+    return '图表标题重复';
   }, [chartRes?.name]);
   const reportDs = useMemo(() => new DataSet({
     autoCreate: true,
@@ -96,6 +97,7 @@ const CustomReport: React.FC<Props> = (props) => {
       maxLength: 16,
       required: true,
       validator: checkTitle,
+      defaultValue: '未命名自定义图表',
     }, {
       name: 'description',
       label: '图表描述',
@@ -212,7 +214,7 @@ const CustomReport: React.FC<Props> = (props) => {
     comparedFieldPredefined: comparedField && dimension.find((item) => item.code === comparedField)?.system,
     searchVO,
   }), [analysisField, chartType, comparedField, dimension, searchVO, statisticsType]);
-  const [, chartProps] = useReport(configMemo, maxShow);
+  const [searchProps, chartProps] = useReport(configMemo, maxShow);
   const {
     data,
   } = chartProps;
@@ -305,7 +307,7 @@ const CustomReport: React.FC<Props> = (props) => {
       <Header>
         <HeaderButtons items={(mode !== 'read' || !chartRes?.id) ? [] : [...(customChartList.length ? [{
           display: true,
-          name: '切换报表',
+          name: '切换图表',
           groupBtnItems: customChartList.map((item) => ({
             display: true,
             name: item.title,
@@ -315,12 +317,12 @@ const CustomReport: React.FC<Props> = (props) => {
           })),
         }] : []), {
           display: true,
-          name: '编辑报表',
+          name: '编辑图表',
           icon: 'edit-o',
           handler: handleClickEdit,
         }, {
           display: true,
-          name: '删除报表',
+          name: '删除图表',
           icon: 'delete_sweep-o',
           handler: handleClickDelete,
         }, {
@@ -338,15 +340,28 @@ const CustomReport: React.FC<Props> = (props) => {
         }]}
         />
       </Header>
-      <Breadcrumb title={chartId ? (mode === 'read' ? chartRes?.name : '编辑自定义报表') : '创建自定义报表'} />
+      <Breadcrumb title={chartId ? (mode === 'read' ? chartRes?.name : '编辑自定义图表') : '创建自定义图表'} />
       <Content style={{ padding: 0 }} className={styles.content}>
         <Spin spinning={loading} style={{ height: '100%' }}>
-          <div className={styles.report}>
+          <div
+            className={styles.report}
+            style={{
+              height: mode === 'read' ? 'auto' : '100%',
+              overflowY: mode === 'read' ? 'auto' : 'hidden',
+            }}
+          >
             {mode !== 'read' && (
               <div className={styles.header}>
-                <TextField dataSet={reportDs} name="title" placeholder="图表标题" style={{ width: 400 }} />
+                <Form className={styles.titleForm}>
+                  <TextField dataSet={reportDs} name="title" placeholder="请输入图表标题" style={{ width: 400 }} />
+                </Form>
               </div>
             )}
+            {
+              mode === 'read' && (
+                <ChartSearch {...searchProps} />
+              )
+            }
             <div className={styles.main}>
               <div className={styles.left} key={`${chartType}-${statisticsType}-${analysisField}-${comparedField}`}>
                 {

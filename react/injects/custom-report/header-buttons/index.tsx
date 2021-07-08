@@ -10,7 +10,7 @@ const ChartsButtons = () => {
   }, []);
   return (
     <HeaderButtons items={[{
-      name: '自定义报表',
+      name: '自定义图表',
       icon: 'playlist_add',
       handler: handleClickBtn,
       display: true,
