@@ -1726,12 +1726,16 @@ public class ReportServiceImpl implements ReportService {
         if (customChartSearchVO.getSearchVO() != null) {
             boardAssembler.handleAdvanceSearch(customChartSearchVO.getSearchVO());
             boardAssembler.handleOtherArgs(customChartSearchVO.getSearchVO());
-            quickFilterIds.addAll(customChartSearchVO.getSearchVO().getQuickFilterIds());
+            if (!CollectionUtils.isEmpty(customChartSearchVO.getSearchVO().getQuickFilterIds())) {
+                quickFilterIds.addAll(customChartSearchVO.getSearchVO().getQuickFilterIds());
+            }
         }
         if (customChartSearchVO.getExtendSearchVO() != null) {
             boardAssembler.handleAdvanceSearch(customChartSearchVO.getExtendSearchVO());
             boardAssembler.handleOtherArgs(customChartSearchVO.getExtendSearchVO());
-            quickFilterIds.addAll(customChartSearchVO.getExtendSearchVO().getQuickFilterIds());
+            if (!CollectionUtils.isEmpty(customChartSearchVO.getExtendSearchVO().getQuickFilterIds())) {
+                quickFilterIds.addAll(customChartSearchVO.getExtendSearchVO().getQuickFilterIds());
+            }
         }
         if (!ObjectUtils.isEmpty(quickFilterIds)) {
             filterSql = issueService.getQuickFilter(quickFilterIds);
