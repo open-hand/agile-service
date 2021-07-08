@@ -11,6 +11,7 @@ import io.choerodon.agile.infra.utils.StringUtil;
  * 2021/06/11 10:34
  */
 public class CustomChartSearchVO {
+    private SearchVO extendSearchVO;
     private SearchVO searchVO;
     @NotBlank(message = "error.customChart.statisticsTypeNotNull")
     private String statisticsType;
@@ -81,6 +82,14 @@ public class CustomChartSearchVO {
 
     public void setComparedFieldPredefined(Boolean comparedFieldPredefined) {
         this.comparedFieldPredefined = comparedFieldPredefined;
+    }
+
+    public SearchVO getExtendSearchVO() {
+        return extendSearchVO;
+    }
+
+    public void setExtendSearchVO(SearchVO extendSearchVO) {
+        this.extendSearchVO = extendSearchVO;
     }
 
     @Override

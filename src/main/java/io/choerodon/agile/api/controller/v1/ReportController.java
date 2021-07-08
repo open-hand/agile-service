@@ -294,6 +294,7 @@ public class ReportController {
             @ApiParam(value = "组织id", required = true)
             @RequestParam Long organizationId,
             @Validated @RequestBody CustomChartSearchVO customChartSearchVO) {
+        EncryptionUtils.decryptSearchVO(customChartSearchVO.getExtendSearchVO());
         EncryptionUtils.decryptSearchVO(customChartSearchVO.getSearchVO());
         return Optional.ofNullable(reportService.queryCustomChartData(customChartSearchVO, projectId, organizationId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))

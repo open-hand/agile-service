@@ -3963,27 +3963,13 @@
         </if>
         WHERE ai.project_id = #{projectId}
         <if test="searchVO != null">
-        AND ai.issue_id IN (
-            SELECT
-            ai.issue_id
-            FROM agile_issue ai
-            WHERE ai.project_id = #{projectId}
             <include refid="io.choerodon.agile.infra.mapper.IssueMapper.explainSearchVO"/>
-            <include refid="io.choerodon.agile.infra.mapper.IssueMapper.filterSqlAndAssigneeIds"/>
-            <if test='searchVO.searchArgs != null'>
-                <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
-                    AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
-                </if>
-            </if>
-            <if test='searchVO.contents != null and searchVO.contents.size != 0'>
-                <foreach collection="searchVO.contents" item="content" index="index">
-                    AND (ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR ai.summary LIKE
-                    CONCAT(CONCAT('%',
-                    #{content}), '%'))
-                </foreach>
-            </if>
-        )
         </if>
+        <if test="extendSearchVO != null">
+            <bind name="searchVO" value="extendSearchVO"/>
+            <include refid="io.choerodon.agile.infra.mapper.IssueMapper.explainSearchVO"/>
+        </if>
+        <include refid="io.choerodon.agile.infra.mapper.IssueMapper.filterSqlAndAssigneeIds"/>
         GROUP BY ${groupSql}
     </select>
 

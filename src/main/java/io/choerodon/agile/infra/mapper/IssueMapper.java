@@ -580,6 +580,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      *
      * @param projectId            项目id
      * @param searchVO             问题id
+     * @param extendSearchVO
      * @param filterSql            filterSql
      * @param assigneeFilterIds    assigneeFilterIds
      * @param selectSql            查询sql
@@ -590,6 +591,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     List<CustomChartPointVO> selectCustomChartPointVO(
             @Param("projectId") Long projectId,
             @Param("searchVO") SearchVO searchVO,
+            @Param("extendSearchVO") SearchVO extendSearchVO,
             @Param("filterSql") String filterSql,
             @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
             @Param("selectSql") String selectSql,
