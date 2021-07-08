@@ -3966,6 +3966,7 @@
             <include refid="io.choerodon.agile.infra.mapper.IssueMapper.explainSearchVO"/>
         </if>
         <if test="extendSearchVO != null">
+            <bind name="searchVO" value="extendSearchVO"/>
             <include refid="io.choerodon.agile.infra.mapper.IssueMapper.explainSearchVO"/>
         </if>
         <include refid="io.choerodon.agile.infra.mapper.IssueMapper.filterSqlAndAssigneeIds"/>
