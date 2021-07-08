@@ -3,7 +3,7 @@ import { getProjectId } from '@/utils/common';
 import Api from './Api';
 
 interface IWorkLog {
-    issueId: number,
+    issueId: number|string,
     projectId: number,
     workTime: number,
     startDate: string,

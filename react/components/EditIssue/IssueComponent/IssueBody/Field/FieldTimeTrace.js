@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import _ from 'lodash';
+import openRecordWorkLogModal from '@/components/DailyLog/DailyLogPro';
 /**
  * 精确加法
  */
@@ -21,7 +22,9 @@ function add(num1, num2) {
   };
 
   render() {
-    const { store, disabled } = this.props;
+    const {
+      store, disabled, issueId, reloadIssue,
+    } = this.props;
     const issue = store.getIssue;
     const { remainingTime } = issue;
     const workloads = this.getWorkloads();
@@ -49,7 +52,8 @@ function add(num1, num2) {
                   cursor: 'pointer',
                 }}
                 onClick={() => {
-                  store.setWorkLogShow(true);
+                  openRecordWorkLogModal({ issueId, onOk: () => reloadIssue(issueId) });
+                  // store.setWorkLogShow(true);
                 }}
               >
                 登记工作

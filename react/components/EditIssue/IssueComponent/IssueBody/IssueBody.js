@@ -157,20 +157,7 @@ function IssueBody(props) {
           />
         ) : null
       }
-      {
-        workLogShow ? (
-          <DailyLog
-            issueId={issueId}
-            issueNum={issueNum}
-            visible={workLogShow}
-            onCancel={() => store.setWorkLogShow(false)}
-            onOk={() => {
-              reloadIssue(issueId);
-              store.setWorkLogShow(false);
-            }}
-          />
-        ) : null
-      }
+
     </section>
   );
 }
