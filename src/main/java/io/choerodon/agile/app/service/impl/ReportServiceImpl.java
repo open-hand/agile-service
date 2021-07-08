@@ -1575,10 +1575,11 @@ public class ReportServiceImpl implements ReportService {
             }
             comparedFieldSql = dealFieldSql(customChartSearchVO.getComparedField(), customChartSearchVO.getComparedFieldPredefined(), "compared", selectSql, groupSql, linkSql, organizationId, projectId);
         }
-        filterSql = dealSearchVO(customChartSearchVO.getSearchVO());
+        filterSql = dealSearchVO(customChartSearchVO);
         List<CustomChartPointVO> result = issueMapper.selectCustomChartPointVO(
                 projectId,
                 customChartSearchVO.getSearchVO(),
+                customChartSearchVO.getExtendSearchVO(),
                 filterSql,
                 assigneeFilterIds,
                 selectSql.toString(),
@@ -1719,14 +1720,19 @@ public class ReportServiceImpl implements ReportService {
         return fieldSql;
     }
 
-    private String dealSearchVO(SearchVO searchVO) {
-        if (searchVO == null) {
-            return null;
-        }
+    private String dealSearchVO(CustomChartSearchVO customChartSearchVO) {
         String filterSql = null;
-        boardAssembler.handleAdvanceSearch(searchVO);
-        boardAssembler.handleOtherArgs(searchVO);
-        List<Long> quickFilterIds = searchVO.getQuickFilterIds();
+        List<Long> quickFilterIds = new ArrayList<>();
+        if (customChartSearchVO.getSearchVO() != null) {
+            boardAssembler.handleAdvanceSearch(customChartSearchVO.getSearchVO());
+            boardAssembler.handleOtherArgs(customChartSearchVO.getSearchVO());
+            quickFilterIds.addAll(customChartSearchVO.getSearchVO().getQuickFilterIds());
+        }
+        if (customChartSearchVO.getExtendSearchVO() != null) {
+            boardAssembler.handleAdvanceSearch(customChartSearchVO.getExtendSearchVO());
+            boardAssembler.handleOtherArgs(customChartSearchVO.getExtendSearchVO());
+            quickFilterIds.addAll(customChartSearchVO.getExtendSearchVO().getQuickFilterIds());
+        }
         if (!ObjectUtils.isEmpty(quickFilterIds)) {
             filterSql = issueService.getQuickFilter(quickFilterIds);
         }
