@@ -13,7 +13,7 @@ import produce from 'immer';
 import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 import classNames from 'classnames';
-import { usePersistFn } from 'ahooks';
+import { usePersistFn, useDebounceFn } from 'ahooks';
 import moment from 'moment';
 import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
@@ -144,7 +144,7 @@ const GanttPage: React.FC = () => {
   const store = useMemo(() => new GanttStore(), []);
   const { sprintIds } = store;
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
-  const loadData = useCallback(() => {
+  const { run, cancel } = useDebounceFn(() => {
     (async () => {
       const year = dayjs().year();
       const filter = issueSearchStore.getCustomFieldFilters();
@@ -171,10 +171,10 @@ const GanttPage: React.FC = () => {
         setLoading(false);
       });
     })();
-  }, [issueSearchStore, sprintIds]);
+  });
   useEffect(() => {
-    loadData();
-  }, [issueSearchStore, loadData]);
+    run();
+  }, [issueSearchStore, sprintIds, run]);
   const handleUpdate = useCallback<GanttProps<Issue>['onUpdate']>(async (issue, startDate, endDate) => {
     try {
       await issueApi.update({
@@ -481,7 +481,7 @@ const GanttPage: React.FC = () => {
               display: true,
               icon: 'refresh',
               // funcType: 'flat',
-              handler: loadData,
+              handler: run,
             },
           ]}
         />
@@ -499,7 +499,7 @@ const GanttPage: React.FC = () => {
       >
         <Context.Provider value={{ store }}>
           <div style={{ display: 'flex' }}>
-            <Search issueSearchStore={issueSearchStore} loadData={loadData} />
+            <Search issueSearchStore={issueSearchStore} loadData={run} />
             <GanttOperation />
           </div>
           <Loading loading={loading} />
@@ -532,7 +532,7 @@ const GanttPage: React.FC = () => {
             />
           )}
           <IssueDetail
-            refresh={loadData}
+            refresh={run}
             onUpdate={handleIssueUpdate}
             onDelete={handleIssueDelete}
             onDeleteSubIssue={handleDeleteSubIssue}
