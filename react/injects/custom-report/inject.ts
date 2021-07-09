@@ -24,7 +24,7 @@ interface ICustomChartConfig {
   type: string
   groupId: 'agile'
   title: string,
-  customData: Partial<Pick<IChartRes, 'customChartData'>> & Omit<IChartRes, 'customChartData'>
+  customData: { extendSearchVO?: any } & Partial<Pick<IChartRes, 'customChartData'>> & Omit<IChartRes, 'customChartData'>
   describe: string
   img: any
 }
@@ -40,9 +40,10 @@ export async function loadCustomReportData(customChartConfig: ICustomChartConfig
     analysisFieldPredefined: !['pro', 'org'].includes(String(customData.analysisField).split('_')[0]), //
     comparedFieldPredefined: !['pro', 'org'].includes(String(customData.comparedField).split('_')[0]),
     searchVO: isEmpty(customData.searchJson) ? undefined : JSONbigString.parse(customData.searchJson),
+    extendSearchVO: customData.extendSearchVO,
   };
   const res = await customReportApi.getData(config);
-  const data = (res.dimensionList || []).map((item:any) => ({ ...item, pointList: item.pointList.map((point:any) => ({ ...point, value: parseFloat(point.value.toString()) })) }));
+  const data = (res.dimensionList || []).map((item: any) => ({ ...item, pointList: item.pointList.map((point: any) => ({ ...point, value: parseFloat(point.value.toString()) })) }));
   const newOptions = isEmpty(data) ? undefined : getOptions(customData.chartType, customData.statisticsType, data, 12);
   return newOptions;
 }
