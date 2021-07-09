@@ -6,6 +6,7 @@ import { observer } from 'mobx-react-lite';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
 import { find } from 'lodash';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
+import SprintIcon from './SprintIcon';
 import Context from '../../context';
 import { units } from '../../store';
 
@@ -18,7 +19,7 @@ const GanttOperation: React.FC = () => {
   }, [store]);
   return (
     <div style={{
-      display: 'flex', flexShrink: 0, alignItems: 'flex-end', paddingBottom: 17, marginLeft: 'auto',
+      display: 'flex', flexShrink: 0, alignItems: 'flex-end', paddingBottom: 19, marginLeft: 'auto',
     }}
     >
       <Button
@@ -29,7 +30,7 @@ const GanttOperation: React.FC = () => {
         style={{
           borderRadius: '16px',
           boxShadow: '0px 0px 7px 0px rgba(0, 0, 0, 0.1)',
-          height: 30,
+          height: 26,
         }}
       >
         返回今日
@@ -53,7 +54,8 @@ const GanttOperation: React.FC = () => {
           style={{
             borderRadius: '16px',
             boxShadow: '0px 0px 7px 0px rgba(0, 0, 0, 0.1)',
-            height: 30,
+            height: 26,
+            lineHeight: '1.25',
           }}
         >
           {text?.label}
@@ -61,10 +63,18 @@ const GanttOperation: React.FC = () => {
         </Button>
       </Dropdown>
       <div style={{
-        marginLeft: 18, display: 'flex', alignItems: 'center', marginBottom: 5,
+        marginLeft: 18, display: 'flex', alignItems: 'center', marginBottom: 2,
       }}
       >
+        <SprintIcon />
+        <span style={{
+          color: 'var(--text-color3)', fontSize: '12px', marginLeft: 4,
+        }}
+        >
+          冲刺时间范围
+        </span>
         <svg
+          style={{ marginLeft: 10 }}
           xmlns="http://www.w3.org/2000/svg"
           version="1.1"
           width={38}

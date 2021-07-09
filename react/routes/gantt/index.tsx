@@ -51,6 +51,9 @@ const typeOptions = [{
 }, {
   value: 'assignee',
   label: '按经办人查看',
+}, {
+  value: 'sprint',
+  label: '按冲刺查看',
 }] as const;
 const typeValues = typeOptions.map((t) => t.value);
 type TypeValue = (typeof typeValues)[number];
@@ -138,7 +141,7 @@ const GanttPage: React.FC = () => {
   const [filterManageVisible, setFilterManageVisible] = useState<boolean>();
   const [loading, setLoading] = useState(false);
   const issueSearchStore = useIssueSearchStore({
-    getSystemFields: () => getSystemFields().filter((item) => item.code !== 'sprint') as ILocalField[],
+    getSystemFields: () => getSystemFields().map((item) => (item.code === 'feature' || item.code === 'epic' ? { ...item, defaultShow: false } : item)).filter((item) => item.code !== 'sprint') as ILocalField[],
     transformFilter,
   });
   const store = useMemo(() => new GanttStore(), []);
