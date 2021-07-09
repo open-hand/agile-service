@@ -13,7 +13,6 @@ import {
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { useDetailContainerContext } from '@/components/detail-container/context';
 import { sameProject } from '@/utils/detail';
-import TransformFromSubIssue from '../TransformFromSubIssue';
 import IssueHeader from './IssueComponent/IssueHeader';
 import IssueBody from './IssueComponent/IssueBody/IssueBody';
 import EditIssueContext from './stores';
@@ -214,27 +213,9 @@ function EditIssue() {
     loadIssueDetail();
   };
 
-  const handleTransformFromSubIssue = (newIssue) => {
-    store.setTransformFromSubIssueShow(false);
-    onTransformType(newIssue, store.getIssue);
-    loadIssueDetail();
-  };
-
   useImperativeHandle(forwardedRef, () => ({
     loadIssueDetail,
   }));
-  // 更改loading状态 增加异常处理
-  const changeLoading = async (data) => {
-    if (typeof (data) === 'function') {
-      try {
-        await data();
-      } finally {
-        setIssueLoading(false);
-      }
-    } else {
-      setIssueLoading(data);
-    }
-  };
 
   const issue = store.getIssue;
   const {
@@ -242,9 +223,6 @@ function EditIssue() {
     assigneeId, objectVersionNumber, createdBy, typeCode, issueTypeId,
   } = issue;
 
-  const {
-    getTransformFromSubIssueShow: transformFromSubIssueShow,
-  } = store;
   const { isInProgram } = useIsInProgram();
   const rightDisabled = disabled || (isInProgram && (typeCode === 'issue_epic' || typeCode === 'feature'));
   useEffect(() => {
@@ -331,20 +309,6 @@ function EditIssue() {
           onTransformSubIssue={handleTransformSubIssue}
         />
       </div>
-      {
-        transformFromSubIssueShow ? (
-          <TransformFromSubIssue
-            visible={transformFromSubIssueShow}
-            issueId={issueId}
-            issueNum={issueNum}
-            originIssueTypeId={issueTypeId}
-            ovn={objectVersionNumber}
-            onCancel={() => store.setTransformFromSubIssueShow(false)}
-            onOk={handleTransformFromSubIssue.bind(this)}
-            store={store}
-          />
-        ) : null
-      }
     </div>
   );
 }

@@ -111,7 +111,7 @@ export default function renderField<T extends Partial<SelectProps>>({
       return (
         <TextField
           name={fieldCode}
-          maxLength={100}
+          maxLength={fieldCode === 'epicName' ? 44 : 100}
           valueChangeAction={'input' as any}
           style={{ width: '100%' }}
           {...otherComponentProps}
@@ -183,6 +183,7 @@ export default function renderField<T extends Partial<SelectProps>>({
       );
     }
     default:
+    {
       return (
         <TextField
           name={fieldCode}
@@ -192,5 +193,6 @@ export default function renderField<T extends Partial<SelectProps>>({
           {...otherComponentProps}
         />
       );
+    }
   }
 }
