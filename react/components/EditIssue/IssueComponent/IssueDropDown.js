@@ -19,6 +19,7 @@ import openIssueMove from './issue-move';
 import openChangeParentModal from './ChangeParent';
 import openRelateIssueModal from './RelateIssue/RelateIssue';
 import openTransformSubIssue from './TransformSubIssue/TransformSubIssue';
+import openTransformFromSubIssue from './IssueBody/TransformFromSubIssue';
 
 const IssueDropDown = ({
   onDeleteIssue, loginUserId, reloadIssue, testLinkStoreRef, onIssueCopy, onUpdate, onChangeParent, onRelateIssue, onTransformSubIssue,
@@ -92,7 +93,9 @@ const IssueDropDown = ({
     } else if (e.key === '4') {
       openTransformSubIssue({ issueId, objectVersionNumber, onOk: onTransformSubIssue });
     } else if (e.key === '5') {
-      store.setTransformFromSubIssueShow(true);
+      openTransformFromSubIssue({
+        issueId, objectVersionNumber, onOk: onTransformSubIssue, store,
+      });
     } else if (e.key === '6') {
       openCreateBranchModal({
         issueId, onOk: () => store.refreshBranch(), typeCode, defaultBranchSuffixName: issueNum,

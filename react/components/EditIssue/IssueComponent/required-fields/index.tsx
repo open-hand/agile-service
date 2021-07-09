@@ -35,7 +35,8 @@ export interface ChangeTypeModalProps {
     issueTypeId: string,
   }
   reloadIssue: Function,
-  onUpdate: Function,
+  onUpdate?: Function,
+  epicName?: string
 }
 
 const systemFields = new Map([
@@ -395,9 +396,9 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
       changeTypeDataSet.current?.set(fieldCode as string, defaultValue);
     });
     if (requiredFields.filter((item) => item.fieldCode === 'epicName')) {
-      changeTypeDataSet.current?.set('epicName', issueVO.summary);
+      changeTypeDataSet.current?.set('epicName', props.epicName || issueVO.summary);
     }
-  }, [changeTypeDataSet, issueVO.summary, requiredFields]);
+  }, [changeTypeDataSet, issueVO.summary, props.epicName, requiredFields]);
 
   const { stateMachineId } = find(issueTypeData, { id: issueVO.issueTypeVO?.id }) || {};
   issueTypeData = issueTypeData.filter((item) => item.stateMachineId !== stateMachineId).filter((item) => !['feature', ...(issueVO.typeCode === 'sub_task' ? [] : ['sub_task'])].includes(item.typeCode));

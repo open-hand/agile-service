@@ -122,8 +122,6 @@ class EditIssueStore {
 
   @observable copyIssueShow = false;
 
-  @observable transformFromSubIssueShow = false;
-
   @observable assigneeShow = false;
 
   @observable detailShow = false;
@@ -199,14 +197,6 @@ class EditIssueStore {
 
   @computed get getCopyIssueShow() {
     return this.copyIssueShow;
-  }
-
-  @action setTransformFromSubIssueShow(data) {
-    this.transformFromSubIssueShow = data;
-  }
-
-  @computed get getTransformFromSubIssueShow() {
-    return this.transformFromSubIssueShow;
   }
 
   @action setAssigneeShow(data) {
