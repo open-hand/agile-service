@@ -204,10 +204,9 @@ function EditIssue() {
     setQuery();
   }, [currentIssueId]);
 
-  const onRelateIssue = () => {
-    if (onUpdate) {
-      onUpdate();
-    }
+  // 缺陷转子缺陷
+  const onRelateIssue = (issue) => {
+    onTransformType(issue, store.getIssue);
     loadIssueDetail();
   };
 

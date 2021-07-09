@@ -13,7 +13,7 @@ import SelectRelateIssue from './SelectRelateIssue';
 interface Props {
   issue: Issue
   modal?: IModalProps
-  onOk: () => void
+  onOk: (issue: Issue) => void
 }
 
 const RelateIssue: React.FC<Props> = ({
@@ -43,8 +43,8 @@ const RelateIssue: React.FC<Props> = ({
         relateIssueId: relateIssueDs.current?.get('relateIssueId'),
       };
 
-      await issueApi.update(data);
-      onOk();
+      const res = await issueApi.update(data);
+      onOk(res);
       return true;
     }
     return false;
