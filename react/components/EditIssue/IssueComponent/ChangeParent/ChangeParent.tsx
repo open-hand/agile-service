@@ -4,7 +4,7 @@ import { Modal, DataSet, Form } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { IModalProps, Issue } from '@/common/types';
 import { issueApi } from '@/api';
-import SelectParentIssue from './SelectParentIssue';
+import SelectParentIssue from '@/components/SelectParentIssue';
 
 interface Props {
   issueId: string

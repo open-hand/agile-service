@@ -17,9 +17,10 @@ import Assignee from '../../Assignee';
 import openIssueMove from './issue-move';
 import openChangeParentModal from './ChangeParent';
 import openRelateIssueModal from './RelateIssue/RelateIssue';
+import openTransformSubIssue from './TransformSubIssue/TransformSubIssue';
 
 const IssueDropDown = ({
-  onDeleteIssue, loginUserId, reloadIssue, testLinkStoreRef, onIssueCopy, onUpdate, onChangeParent, onRelateIssue,
+  onDeleteIssue, loginUserId, reloadIssue, testLinkStoreRef, onIssueCopy, onUpdate, onChangeParent, onRelateIssue, onTransformSubIssue,
 }) => {
   const {
     store, applyType,
@@ -88,7 +89,7 @@ const IssueDropDown = ({
       });
       store.setCopyIssueShow(true);
     } else if (e.key === '4') {
-      store.setTransformSubIssueShow(true);
+      openTransformSubIssue({ issueId, objectVersionNumber, onOk: onTransformSubIssue });
     } else if (e.key === '5') {
       store.setTransformFromSubIssueShow(true);
     } else if (e.key === '6') {

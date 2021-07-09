@@ -13,7 +13,6 @@ import {
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { useDetailContainerContext } from '@/components/detail-container/context';
 import { sameProject } from '@/utils/detail';
-import TransformSubIssue from '../TransformSubIssue';
 import TransformFromSubIssue from '../TransformFromSubIssue';
 import IssueHeader from './IssueComponent/IssueHeader';
 import IssueBody from './IssueComponent/IssueBody/IssueBody';
@@ -211,7 +210,6 @@ function EditIssue() {
   };
 
   const handleTransformSubIssue = (newIssue) => {
-    store.setTransformSubIssueShow(false);
     onTransformType(newIssue, store.getIssue);
     loadIssueDetail();
   };
@@ -243,12 +241,8 @@ function EditIssue() {
     issueId, issueNum, summary,
     assigneeId, objectVersionNumber, createdBy, typeCode, issueTypeId,
   } = issue;
-  const linkIssues = store.getLinkIssues;
 
   const {
-    getAssigneeShow: assigneeShow,
-    getCopyIssueShow: copyIssueShow,
-    getTransformSubIssueShow: transformSubIssueShow,
     getTransformFromSubIssueShow: transformFromSubIssueShow,
   } = store;
   const { isInProgram } = useIsInProgram();
@@ -334,20 +328,9 @@ function EditIssue() {
           otherProject={otherProject}
           onChangeParent={onChangeParent}
           onRelateIssue={onRelateIssue}
+          onTransformSubIssue={handleTransformSubIssue}
         />
       </div>
-      {
-        transformSubIssueShow ? (
-          <TransformSubIssue
-            visible={transformSubIssueShow}
-            issueId={issueId}
-            issueNum={issueNum}
-            ovn={objectVersionNumber}
-            onCancel={() => store.setTransformSubIssueShow(false)}
-            onOk={handleTransformSubIssue.bind(this)}
-          />
-        ) : null
-      }
       {
         transformFromSubIssueShow ? (
           <TransformFromSubIssue
