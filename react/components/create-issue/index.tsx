@@ -8,8 +8,6 @@ import { observer } from 'mobx-react-lite';
 import { usePersistFn } from 'ahooks';
 import { merge } from 'lodash';
 import { UploadFile } from 'choerodon-ui/lib/upload/interface';
-import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-// @ts-ignore
 import UploadButton from '@/components/CommonComponent/UploadButton';
 import validateFile from '@/utils/File';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
@@ -37,14 +35,7 @@ const presets = new Map([
 ]);
 const lineField = ['summary', 'description'];
 const reuseFields = ['issueType', 'summary', 'description'];
-function convert(fields: IssueCreateFields[]) {
-  return fields.map((field) => ({
-    ...field,
-    title: field.fieldName,
-    code: field.fieldCode,
-    colSpan: lineField.includes(field.fieldCode) ? 2 : 1,
-  }));
-}
+
 function transformSubmitFieldValue(field: IssueCreateFields, value: any) {
   switch (field.fieldType) {
     case 'time':
@@ -87,21 +78,15 @@ const CreateIssue = observer(({
     const newDataSet = new DataSet({
       autoCreate: true,
       fields: fields ? fields.map((field) => {
-        if (presets.has(field.fieldCode)) {
-          const preset = presets.get(field.fieldCode);
-          return merge(preset, {
-            label: field.fieldName,
-            required: field.required,
-          });
-        }
-        return {
+        const preset = presets.get(field.fieldCode) ?? {};
+        return merge(preset, {
           name: field.fieldCode,
-          type: 'string' as FieldType,
           label: field.fieldName,
           required: field.required,
-        };
+        });
       }) : [],
     });
+    // 保留之前的值
     reuseFields.forEach((name) => {
       const oldValue = oldDataSet.current?.get(name);
       if (oldValue) {

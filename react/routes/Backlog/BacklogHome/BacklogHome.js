@@ -94,10 +94,7 @@ class BacklogHome extends Component {
   };
 
   handleClickCBtn = () => {
-    // BacklogStore.setNewIssueVisible(true);
-    openCreateIssue({
-
-    });
+    BacklogStore.setNewIssueVisible(true);
   }
 
   toggleCurrentVisible = (type) => {
@@ -141,6 +138,13 @@ class BacklogHome extends Component {
               name: '创建问题',
               icon: 'playlist_add',
               handler: this.handleClickCBtn,
+              display: true,
+            }, {
+              name: '新创建问题',
+              icon: 'playlist_add',
+              handler: () => openCreateIssue({
+
+              }),
               display: true,
             }, {
               name: '创建冲刺',
