@@ -3966,8 +3966,7 @@
             <include refid="io.choerodon.agile.infra.mapper.IssueMapper.explainSearchVO"/>
         </if>
         <if test="extendSearchVO != null">
-            <bind name="searchVO" value="extendSearchVO"/>
-            <include refid="io.choerodon.agile.infra.mapper.IssueMapper.explainSearchVO"/>
+            <include refid="io.choerodon.agile.infra.mapper.IssueMapper.extendExplainSearchVO"/>
         </if>
         <include refid="io.choerodon.agile.infra.mapper.IssueMapper.filterSqlAndAssigneeIds"/>
         GROUP BY ${groupSql}
@@ -4120,4 +4119,480 @@
             </if>
         </if>
     </select>
+
+    <sql id="extendExplainSearchVO">
+        <include refid="io.choerodon.agile.infra.mapper.IssueMapper.extendExplainSearchVOSql"/>
+        <if test='extendSearchVO.otherArgs != null'>
+            <include refid="io.choerodon.agile.infra.mapper.IssueMapper.extendOtherArgsSql1"/>
+            <include refid="io.choerodon.agile.infra.mapper.IssueMapper.extendOtherArgsSql2"/>
+            <include refid="io.choerodon.agile.infra.mapper.StarBeaconMapper.extendFilterStarBeaconSql"/>
+        </if>
+    </sql>
+
+    <sql id="extendExplainSearchVOSql">
+        <if test='extendSearchVO.searchArgs != null'>
+            <if test='extendSearchVO.searchArgs.summary != null and extendSearchVO.searchArgs.summary != "" '>
+                AND ai.summary LIKE concat(concat('%',#{extendSearchVO.searchArgs.summary}),'%')
+            </if>
+            <if test='extendSearchVO.searchArgs.storyPoints != null and extendSearchVO.searchArgs.storyPoints != "" '>
+                AND ai.story_points LIKE concat(concat('%',#{extendSearchVO.searchArgs.storyPoints}),'%')
+            </if>
+            <if test='extendSearchVO.searchArgs.remainingTime != null and extendSearchVO.searchArgs.remainingTime != "" '>
+                AND ai.remaining_time LIKE concat(concat('%',#{extendSearchVO.searchArgs.remainingTime}),'%')
+            </if>
+        </if>
+        <if test='extendSearchVO.onlyStory != null and extendSearchVO.onlyStory'>
+            and ai.type_code = 'story'
+        </if>
+        <if test='extendSearchVO.advancedSearchArgs != null'>
+            <if test='extendSearchVO.advancedSearchArgs.issueTypeId != null and extendSearchVO.advancedSearchArgs.issueTypeId.size > 0'>
+                AND ai.issue_type_id IN
+                <foreach collection="extendSearchVO.advancedSearchArgs.issueTypeId" item="issueTypeId" open="(" separator=","
+                         close=")">
+                    #{issueTypeId}
+                </foreach>
+            </if>
+            <if test='extendSearchVO.advancedSearchArgs.assigneeIds != null and extendSearchVO.advancedSearchArgs.assigneeIds.size > 0'>
+                AND ai.assignee_id IN
+                <foreach collection="extendSearchVO.advancedSearchArgs.assigneeIds" item="assigneeId" open="(" separator=","
+                         close=")">
+                    #{assigneeId}
+                </foreach>
+            </if>
+            <if test='extendSearchVO.advancedSearchArgs.reporterIds != null and extendSearchVO.advancedSearchArgs.reporterIds.size > 0'>
+                AND ai.reporter_id IN
+                <foreach collection="extendSearchVO.advancedSearchArgs.reporterIds" item="reporterId" open="(" separator=","
+                         close=")">
+                    #{reporterId}
+                </foreach>
+            </if>
+            <if test='extendSearchVO.advancedSearchArgs.priorityId != null and extendSearchVO.advancedSearchArgs.priorityId.size > 0'>
+                AND ai.priority_id IN
+                <foreach collection="extendSearchVO.advancedSearchArgs.priorityId" item="priorityId" open="(" separator=","
+                         close=")">
+                    #{priorityId}
+                </foreach>
+            </if>
+            <if test='extendSearchVO.advancedSearchArgs.statusId != null and extendSearchVO.advancedSearchArgs.statusId.size > 0'>
+                and ai.status_id in
+                <foreach collection="extendSearchVO.advancedSearchArgs.statusId" item="statusId" open="(" separator=","
+                         close=")">
+                    #{statusId}
+                </foreach>
+            </if>
+        </if>
+        <if test='extendSearchVO.searchArgs != null'>
+            <if test='extendSearchVO.searchArgs.updateStartDate != null and extendSearchVO.searchArgs.updateStartDate != "" and extendSearchVO.searchArgs.updateEndDate != null and extendSearchVO.searchArgs.updateEndDate != "" '>
+                and ai.last_update_date &gt;= #{extendSearchVO.searchArgs.updateStartDate} and ai.last_update_date &lt;=
+                #{extendSearchVO.searchArgs.updateEndDate}
+            </if>
+            <if test='extendSearchVO.searchArgs.createStartDate != null and extendSearchVO.searchArgs.createStartDate != "" and extendSearchVO.searchArgs.createEndDate != null and extendSearchVO.searchArgs.createEndDate != "" '>
+                and ai.creation_date &gt;= #{extendSearchVO.searchArgs.createStartDate} and ai.creation_date &lt;=
+                #{extendSearchVO.searchArgs.createEndDate}
+            </if>
+            <if test='extendSearchVO.searchArgs.component != null and extendSearchVO.searchArgs.component != "" '>
+                AND ai.issue_id in (
+                SELECT acir.issue_id FROM agile_component_issue_rel acir,agile_issue_component aic
+                where acir.component_id = aic.component_id
+                AND aic.name LIKE CONCAT(CONCAT('%' ,#{extendSearchVO.searchArgs.component}) ,'%') )
+            </if>
+            <if test='extendSearchVO.searchArgs.epic != null and extendSearchVO.searchArgs.epic != "" '>
+                AND ai.issue_id in (
+                SELECT ai3.issue_id FROM agile_issue ai3 ,agile_issue ai4
+                where ai3.epic_id = ai4.issue_id
+                AND ai4.epic_name LIKE CONCAT(CONCAT('%' ,#{extendSearchVO.searchArgs.epic}) ,'%') )
+            </if>
+            <if test='extendSearchVO.searchArgs.version != null and extendSearchVO.searchArgs.version != "" '>
+                AND ai.issue_id in (
+                SELECT avir.issue_id FROM agile_version_issue_rel avir,agile_product_version apv
+                where avir.version_id = apv.version_id
+                AND apv.name LIKE CONCAT(CONCAT('%' ,#{extendSearchVO.searchArgs.version}) ,'%') )
+            </if>
+            <if test='extendSearchVO.searchArgs.sprint != null and extendSearchVO.searchArgs.sprint != "" '>
+                AND ai.issue_id in (
+                SELECT aisr.issue_id FROM agile_issue_sprint_rel aisr,agile_sprint as2
+                where aisr.sprint_id = as2.sprint_id
+                AND as2.sprint_name LIKE CONCAT(CONCAT('%' ,#{extendSearchVO.searchArgs.sprint}) ,'%') )
+            </if>
+            <if test='extendSearchVO.searchArgs.label != null and extendSearchVO.searchArgs.label != "" '>
+                AND ai.issue_id in (
+                SELECT alir.issue_id FROM agile_label_issue_rel alir,agile_issue_label ail
+                where alir.label_id = ail.label_id
+                AND ail.label_name LIKE CONCAT(CONCAT('%' ,#{extendSearchVO.searchArgs.label}) ,'%') )
+            </if>
+            <if test='extendSearchVO.searchArgs.estimatedStartTimeScopeStart != null and extendSearchVO.searchArgs.estimatedStartTimeScopeStart != "" and extendSearchVO.searchArgs.estimatedStartTimeScopeEnd != null and extendSearchVO.searchArgs.estimatedStartTimeScopeEnd != ""'>
+                and ai.estimated_start_time &gt;= #{extendSearchVO.searchArgs.estimatedStartTimeScopeStart} and ai.estimated_start_time &lt;=
+                #{extendSearchVO.searchArgs.estimatedStartTimeScopeEnd}
+            </if>
+
+            <if test='extendSearchVO.searchArgs.estimatedEndTimeScopeStart != null and extendSearchVO.searchArgs.estimatedEndTimeScopeStart != "" and extendSearchVO.searchArgs.estimatedEndTimeScopeEnd != null and extendSearchVO.searchArgs.estimatedEndTimeScopeEnd != ""'>
+                and ai.estimated_end_time &gt;= #{extendSearchVO.searchArgs.estimatedEndTimeScopeStart} and ai.estimated_end_time &lt;=
+                #{extendSearchVO.searchArgs.estimatedEndTimeScopeEnd}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="extendOtherArgsSql1">
+        <if test='extendSearchVO.otherArgs.assigneeId != null and extendSearchVO.otherArgs.assigneeId.size > 0'>
+            AND (
+            <if test='extendSearchVO.otherArgs.assigneeIdNull != null and extendSearchVO.otherArgs.assigneeIdNull == true'>
+                (ai.assignee_id = 0 or ai.assignee_id is null) OR
+            </if>
+            ai.assignee_id in
+            <foreach collection="extendSearchVO.otherArgs.assigneeId" item="aId" open="(" separator=","
+                     close=")">
+                #{aId}
+            </foreach>
+            )
+        </if>
+        <if test='extendSearchVO.otherArgs.statusId != null and extendSearchVO.otherArgs.statusId.size > 0'>
+            AND ai.status_id in
+            <foreach collection="extendSearchVO.otherArgs.statusId" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>
+        </if>
+        <if test='extendSearchVO.otherArgs.resolution !=null'>
+            AND ai.status_id in (
+            select ais.status_id from agile_issue_status ais where ais.status_id = ai.status_id and ais.project_id =
+            ai.project_id
+            <choose>
+                <when test="extendSearchVO.otherArgs.resolution == 'true'">
+                    and ais.is_completed = 1
+                </when>
+                <otherwise>
+                    and ais.is_completed = 0
+                </otherwise>
+            </choose>
+            )
+        </if>
+        <if test='extendSearchVO.otherArgs.component != null and extendSearchVO.otherArgs.component.size > 0'>
+            AND (
+            <if test='extendSearchVO.otherArgs.componentNull != null and extendSearchVO.otherArgs.componentNull == true'>
+                ai.issue_id in (SELECT ai12.issue_id from agile_issue ai12 left join
+                agile_component_issue_rel acir2
+                on ai12.issue_id = acir2.issue_id WHERE
+                acir2.component_id is null ) OR
+            </if>
+            ai.issue_id in
+            (SELECT acir2.issue_id FROM agile_component_issue_rel acir2 WHERE
+            acir2.component_id in
+            <foreach collection="extendSearchVO.otherArgs.component" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>
+            ))
+        </if>
+
+        <if test='extendSearchVO.otherArgs.epic != null and extendSearchVO.otherArgs.epic.size > 0'>
+            AND (
+            <if test='extendSearchVO.otherArgs.epicNull != null and extendSearchVO.otherArgs.epicNull == true'>
+                (((ai.epic_id is null or ai.epic_id = 0) and ai.type_code in ('story', 'task', 'bug', 'feature'))
+                or (ai.parent_issue_id in (select ai7.issue_id from agile_issue ai7 where ai7.issue_id =
+                ai.parent_issue_id and
+                (ai7.epic_id is null or ai7.epic_id = 0) and ai.type_code = 'sub_task' ))) OR
+            </if>
+            ((ai.epic_id in
+            <foreach collection="extendSearchVO.otherArgs.epic" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>
+            and ai.type_code in ('story', 'task', 'bug', 'feature'))
+            or (ai.parent_issue_id in (select ai7.issue_id from agile_issue ai7 where ai7.issue_id =
+            ai.parent_issue_id and
+            ai7.epic_id in
+            <foreach collection="extendSearchVO.otherArgs.epic" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>
+            ) and ai.type_code = 'sub_task'))
+            )
+        </if>
+        <if test='extendSearchVO.otherArgs.feature != null and extendSearchVO.otherArgs.feature.size > 0'>
+            AND (
+            <if test='extendSearchVO.otherArgs.featureNull != null and extendSearchVO.otherArgs.featureNull == true'>
+                ((ai.feature_id is null or ai.feature_id = 0) and ai.type_code in ('story'))
+                OR
+            </if>
+            (ai.feature_id in
+            <foreach collection="extendSearchVO.otherArgs.feature" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>
+            and ai.type_code in ('story'))
+            )
+        </if>
+        <if test='extendSearchVO.otherArgs.version != null and extendSearchVO.otherArgs.version.size > 0'>
+            AND (
+            <if test='extendSearchVO.otherArgs.versionNull != null and extendSearchVO.otherArgs.versionNull == true'>
+                ai.issue_id in (SELECT ai31.issue_id from agile_issue ai31
+                left join agile_version_issue_rel avir44
+                on ai31.issue_id = avir44.issue_id
+                WHERE avir44.version_id is null ) OR
+            </if>
+            ai.issue_id in ( SELECT avir3.issue_id FROM
+            agile_version_issue_rel avir3 WHERE avir3.version_id in
+            <foreach collection="extendSearchVO.otherArgs.version" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>)
+            )
+        </if>
+
+        <if test='extendSearchVO.otherArgs.fixVersion != null and extendSearchVO.otherArgs.fixVersion.size > 0'>
+            AND (
+            <if test='extendSearchVO.otherArgs.fixVersionNull != null and extendSearchVO.otherArgs.fixVersionNull == true'>
+                ai.issue_id in (SELECT ai31.issue_id from agile_issue ai31
+                left join agile_version_issue_rel avir44
+                on ai31.issue_id = avir44.issue_id
+                WHERE avir44.version_id is null ) OR
+            </if>
+            ai.issue_id in ( SELECT avir3.issue_id FROM
+            agile_version_issue_rel avir3 WHERE avir3.version_id in
+            <foreach collection="extendSearchVO.otherArgs.fixVersion" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>
+            and relation_type = 'fix'
+            )
+            )
+        </if>
+        <if test='extendSearchVO.otherArgs.influenceVersion != null and extendSearchVO.otherArgs.influenceVersion.size > 0'>
+            AND (
+            <if test='extendSearchVO.otherArgs.influenceVersionNull != null and extendSearchVO.otherArgs.influenceVersionNull == true'>
+                ai.issue_id in (SELECT ai31.issue_id from agile_issue ai31
+                left join agile_version_issue_rel avir44
+                on ai31.issue_id = avir44.issue_id
+                WHERE avir44.version_id is null ) OR
+            </if>
+            ai.issue_id in ( SELECT avir3.issue_id FROM
+            agile_version_issue_rel avir3 WHERE avir3.version_id in
+            <foreach collection="extendSearchVO.otherArgs.influenceVersion" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>
+            AND relation_type = 'influence'
+            )
+            )
+        </if>
+        <if test='extendSearchVO.otherArgs.label != null and extendSearchVO.otherArgs.label.size > 0'>
+            AND (
+            <if test='extendSearchVO.otherArgs.labelNull != null and extendSearchVO.otherArgs.labelNull == true'>
+                ai.issue_id in (SELECT ai13.issue_id from agile_issue ai13 left join
+                agile_label_issue_rel alir2 on ai13.issue_id = alir2.issue_id WHERE
+                alir2.label_id is null ) OR
+            </if>
+            ai.issue_id in ( SELECT alir2.issue_id FROM
+            agile_label_issue_rel alir2 WHERE alir2.label_id in
+            <foreach collection="extendSearchVO.otherArgs.label" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>)
+            )
+        </if>
+        <if test='extendSearchVO.otherArgs.issueIds != null and extendSearchVO.otherArgs.issueIds.size > 0'>
+            AND ai.issue_id in
+            <foreach collection="extendSearchVO.otherArgs.issueIds" item="issueId" open="(" separator=","
+                     close=")">
+                #{issueId}
+            </foreach>
+        </if>
+
+        <if test="extendSearchVO.otherArgs.mainResponsibleIds != null and extendSearchVO.otherArgs.mainResponsibleIds.size > 0">
+            and ai.main_responsible_id in
+            <foreach collection="extendSearchVO.otherArgs.mainResponsibleIds" item="mainResponsibleId" open="(" close=")" separator=",">
+                #{mainResponsibleId}
+            </foreach>
+        </if>
+
+        <if test="extendSearchVO.otherArgs.environment != null and extendSearchVO.otherArgs.environment.size > 0 ">
+            and ai.environment in
+            <foreach collection="extendSearchVO.otherArgs.environment" item="evm" open="(" close=")" separator=",">
+                #{evm}
+            </foreach>
+        </if>
+        <if test='extendSearchVO.otherArgs.excludeIssueIds != null and extendSearchVO.otherArgs.excludeIssueIds.size > 0'>
+            AND ai.issue_id not in
+            <foreach collection="extendSearchVO.otherArgs.excludeIssueIds" item="issueId" open="(" separator=","
+                     close=")">
+                #{issueId}
+            </foreach>
+        </if>
+
+        <if test='extendSearchVO.otherArgs.creatorIds != null and extendSearchVO.otherArgs.creatorIds.size > 0'>
+            AND ai.created_by in
+            <foreach collection="extendSearchVO.otherArgs.creatorIds" item="userId" open="(" separator=","
+                     close=")">
+                #{userId}
+            </foreach>
+        </if>
+
+        <if test='extendSearchVO.otherArgs.updatorIds != null and extendSearchVO.otherArgs.updatorIds.size > 0'>
+            AND ai.last_updated_by in
+            <foreach collection="extendSearchVO.otherArgs.updatorIds" item="userId" open="(" separator=","
+                     close=")">
+                #{userId}
+            </foreach>
+        </if>
+        <if test='extendSearchVO.otherArgs.tags != null and extendSearchVO.otherArgs.tags.size > 0'>
+            AND (
+            ai.issue_id in (
+            SELECT atir.issue_id
+            FROM agile_tag_issue_rel atir
+            WHERE atir.project_id = #{projectId}
+            and atir.tag_project_id in
+            <foreach collection="extendSearchVO.otherArgs.tags" item="tag" open="(" separator="," close=")">
+                #{tag.projectId}
+            </foreach>
+            and atir.app_service_code in
+            <foreach collection="extendSearchVO.otherArgs.tags" item="tag" open="(" separator="," close=")">
+                #{tag.appServiceCode}
+            </foreach>
+            and atir.tag_name in
+            <foreach collection="extendSearchVO.otherArgs.tags" item="tag" open="(" separator="," close=")">
+                #{tag.tagName}
+            </foreach>
+            )
+            )
+        </if>
+    </sql>
+
+    <sql id="extendOtherArgsSql2">
+        <if test='extendSearchVO.otherArgs.sprint != null and extendSearchVO.otherArgs.sprint.size > 0'>
+            AND (
+            <if test='extendSearchVO.otherArgs.sprintNull != null and extendSearchVO.otherArgs.sprintNull == true'>
+                ai.issue_id in (SELECT ai10.issue_id from agile_issue ai10 left join
+                agile_issue_sprint_rel aisr2
+                on ai10.issue_id = aisr2.issue_id WHERE
+                aisr2.sprint_id is null ) OR
+            </if>
+            <foreach collection="extendSearchVO.otherArgs.sprint" item="id"  separator="or">
+                <if test="id==0">
+                    ai.issue_id not in
+                    (
+                    SELECT issue_id
+                    FROM agile_issue_sprint_rel aisr
+                    WHERE project_id = #{projectId}
+                    )
+                </if>
+                <if test="id != 0 ">
+                    ai.issue_id in
+                    (
+                    SELECT aisr2.issue_id
+                    FROM agile_issue_sprint_rel aisr2
+                    WHERE aisr2.sprint_id = #{id}
+                    )
+                </if>
+            </foreach>
+            )
+        </if>
+        <if test="extendSearchVO.otherArgs.customField != null and extendSearchVO.otherArgs.customField.size > 0">
+            <if test="extendSearchVO.otherArgs.customField.option != null and extendSearchVO.otherArgs.customField.option.size > 0">
+                and
+                <foreach collection="extendSearchVO.otherArgs.customField.option" item="item" open="(" separator="and"
+                         close=")">
+                    ai.issue_id in
+                    (
+                    SELECT
+                    ffv.instance_id
+                    FROM
+                    fd_field_value ffv
+                    WHERE
+                    ffv.project_id = #{projectId}
+                    AND ffv.field_id = #{item.fieldId}
+                    AND ffv.option_id IN
+                    <foreach collection="item.value" item="value" open="(" separator=","
+                             close=")">
+                        #{value}
+                    </foreach>
+                    )
+                </foreach>
+            </if>
+            <if test="extendSearchVO.otherArgs.customField.date != null and extendSearchVO.otherArgs.customField.date.size > 0">
+                and
+                <foreach collection="extendSearchVO.otherArgs.customField.date" item="item" open="(" separator="and"
+                         close=")">
+                    ai.issue_id in
+                    (
+                    SELECT
+                    ffv.instance_id
+                    FROM
+                    fd_field_value ffv
+                    WHERE
+                    ffv.project_id = #{projectId}
+                    AND ffv.field_id = #{item.fieldId}
+                    AND ffv.date_value &gt;= #{item.startDate} AND ffv.date_value &lt;= #{item.endDate}
+                    )
+                </foreach>
+            </if>
+            <if test="extendSearchVO.otherArgs.customField.date_hms != null and extendSearchVO.otherArgs.customField.date_hms.size > 0">
+                and
+                <foreach collection="extendSearchVO.otherArgs.customField.date_hms" item="item" open="(" separator="and"
+                         close=")">
+                    ai.issue_id in
+                    (
+                    SELECT
+                    ffv.instance_id
+                    FROM
+                    fd_field_value ffv
+                    WHERE
+                    ffv.project_id = #{projectId}
+                    AND ffv.field_id = #{item.fieldId}
+                    AND DATE_FORMAT(ffv.date_value, '%H:%i:%s') &gt;= #{item.startDate} AND DATE_FORMAT(ffv.date_value, '%H:%i:%s') &lt;= #{item.endDate}
+                    )
+                </foreach>
+            </if>
+            <if test="extendSearchVO.otherArgs.customField.number != null and extendSearchVO.otherArgs.customField.number.size > 0">
+                and
+                <foreach collection="extendSearchVO.otherArgs.customField.number" item="item" open="(" separator="and"
+                         close=")">
+                    ai.issue_id in
+                    (
+                    SELECT
+                    ffv.instance_id
+                    FROM
+                    fd_field_value ffv
+                    WHERE
+                    ffv.project_id = #{projectId}
+                    AND ffv.field_id = #{item.fieldId}
+                    AND ffv.number_value = #{item.value}
+                    )
+                </foreach>
+            </if>
+            <if test="extendSearchVO.otherArgs.customField.string != null and extendSearchVO.otherArgs.customField.string.size > 0">
+                and
+                <foreach collection="extendSearchVO.otherArgs.customField.string" item="item" open="(" separator="and"
+                         close=")">
+                    ai.issue_id in
+                    (
+                    SELECT
+                    ffv.instance_id
+                    FROM
+                    fd_field_value ffv
+                    WHERE
+                    ffv.project_id = #{projectId}
+                    AND ffv.field_id = #{item.fieldId}
+                    AND ffv.string_value LIKE CONCAT(CONCAT('%' ,#{item.value}) ,'%')
+                    )
+                </foreach>
+            </if>
+            <if test="extendSearchVO.otherArgs.customField.text != null and extendSearchVO.otherArgs.customField.text.size > 0">
+                and
+                <foreach collection="extendSearchVO.otherArgs.customField.text" item="item" open="(" separator="and"
+                         close=")">
+                    ai.issue_id in
+                    (
+                    SELECT
+                    ffv.instance_id
+                    FROM
+                    fd_field_value ffv
+                    WHERE
+                    ffv.project_id = #{projectId}
+                    AND ffv.field_id = #{item.fieldId}
+                    AND ffv.text_value LIKE CONCAT(CONCAT('%' ,#{item.value}) ,'%')
+                    )
+                </foreach>
+            </if>
+        </if>
+    </sql>
 </mapper>

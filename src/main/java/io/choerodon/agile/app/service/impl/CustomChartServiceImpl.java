@@ -73,9 +73,9 @@ public class CustomChartServiceImpl implements CustomChartService {
     @Override
     public CustomChartVO createCustomChart(Long projectId, CustomChartCreateVO customChartCreate) {
         CustomChartDTO customChartDTO = modelMapper.map(customChartCreate, CustomChartDTO.class);
-        validAndSetJson(customChartDTO);
         customChartDTO.setProjectId(projectId);
         customChartDTO.setOrganizationId(ConvertUtil.getOrganizationId(projectId));
+        validAndSetJson(customChartDTO);
         if (customChartMapper.insertSelective(customChartDTO) != 1) {
             throw new CommonException("error.customChart.insert");
         }
