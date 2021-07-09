@@ -19,7 +19,9 @@ const renderIssue = (issue: Issue) => {
           />
         </div>
         <div className={styles.issueNum}>
-          {issue.issueNum}
+          <Tooltip title={issue.issueNum}>
+            {issue.issueNum}
+          </Tooltip>
         </div>
         <div className={styles.summary_wrap}>
           <Tooltip title={issue.summary}>

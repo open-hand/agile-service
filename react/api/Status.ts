@@ -104,7 +104,7 @@ class StatusApi extends Api<StatusApi> {
    * @param issueTypeId
    * @param applyType
    */
-  loadAllForIssueType(issueTypeId: number, applyType: string = 'agile') {
+  loadAllForIssueType(issueTypeId: string, applyType: string = 'agile') {
     return axios({
       method: 'get',
       url: `${this.prefix}/schemes/query_status_by_issue_type_id`,
