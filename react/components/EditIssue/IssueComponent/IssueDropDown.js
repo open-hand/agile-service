@@ -12,6 +12,7 @@ import useHasTest from '@/hooks/useHasTest';
 import { openEditIssueCopyIssue } from '@/components/CopyIssue';
 import { isInProgram } from '@/utils/program';
 import openRecordWorkLogModal from '@/components/DailyLog/DailyLogPro';
+import openCreateBranchModal from '@/components/CreateBranch/CreateBranchPro';
 import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
 import openIssueMove from './issue-move';
@@ -93,6 +94,9 @@ const IssueDropDown = ({
     } else if (e.key === '5') {
       store.setTransformFromSubIssueShow(true);
     } else if (e.key === '6') {
+      openCreateBranchModal({
+        issueId, onOk: () => store.refreshBranch(), typeCode, defaultBranchSuffixName: issueNum,
+      });
       store.setCreateBranchShow(true);
     } else if (e.key === '7') {
       ModalPro.open({

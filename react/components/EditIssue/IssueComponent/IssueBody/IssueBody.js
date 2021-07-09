@@ -44,9 +44,6 @@ function IssueBody(props) {
   } = issue;
   const { reloadIssue, otherProject, outside } = props;
   const hasDevops = useHasDevops();
-  const createBranchShow = store.getCreateBranchShow;
-  const { linkBranchShow } = store;
-  const workLogShow = store.getWorkLogShow;
   const hasTest = useHasTest();
   const testLinkStoreRef = useRef();
   return (
@@ -142,21 +139,6 @@ function IssueBody(props) {
         {applyType !== 'program' && hasDevops
           ? <TabPane tab="开发" key="development"><IssueBranch {...props} /></TabPane> : ''}
       </Tabs>
-      {
-        createBranchShow ? (
-          <CreateBranch
-            issueId={issueId}
-            typeCode={typeCode}
-            issueNum={issueNum}
-            onOk={() => {
-              store.setCreateBranchShow(false);
-              store.refreshBranch();
-            }}
-            onCancel={() => store.setCreateBranchShow(false)}
-            visible={createBranchShow}
-          />
-        ) : null
-      }
 
     </section>
   );
