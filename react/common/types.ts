@@ -180,6 +180,22 @@ export interface FieldOption {
   sequence: number
   enabled: boolean
 }
+export interface IssueCreateFields {
+  defaultValue: any
+  defaultValueObj: any
+  defaultValueObjs: any[]
+  display: boolean
+  // extraConfig: false
+  fieldCode: string
+  fieldId: string
+  fieldName: string
+  fieldType: IFieldType
+  id: string
+  organizationId: string
+  projectId: string
+  required: boolean
+  system: boolean
+}
 export interface IField {
   code: string,
   fieldId: string,

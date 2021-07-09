@@ -1,192 +1,227 @@
-// import React, {
-//   useEffect, useRef, useState, useCallback,
-// } from 'react';
-// import {
-//   Form, TextField, DataSet, Modal,
-// } from 'choerodon-ui/pro';
-// import { observer } from 'mobx-react-lite';
-// import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-// // @ts-ignore
-// import UploadButton from '@/components/CommonComponent/UploadButton';
-// import validateFile from '@/utils/File';
-// import CustomField, { IField } from '@/components/custom-field';
+import React, {
+  useEffect, useRef, useState, useMemo, useReducer,
+} from 'react';
+import {
+  DataSet, Modal, Row, Col, Spin, Form,
+} from 'choerodon-ui/pro';
+import { observer } from 'mobx-react-lite';
+import { usePersistFn } from 'ahooks';
+import { merge, isEmpty } from 'lodash';
+import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+// @ts-ignore
+import UploadButton from '@/components/CommonComponent/UploadButton';
+import validateFile from '@/utils/File';
+import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
+import { IModalProps, IssueCreateFields } from '@/common/types';
+import useIssueCreateFields from '@/hooks/data/useIssueCreateFields';
+import valueTypeMap from './fields';
 
-// interface Props {
-//   onCreate: (demand: Demand) => void,
-//   organizationId: number,
-//   modal: Modal,
-//   project?: IAMProject,
-// }
-// const defaultDataSet = new DataSet({
-//   autoCreate: true,
-//   fields: [{
-//     name: 'projectId',
-//     type: 'number' as FieldType,
-//     textField: 'name',
-//     valueField: 'id',
-//     label: '所属需求池',
-//     required: true,
-//   }],
-// });
-// const presets = new Map([
-//   ['summary', {
-//     name: 'summary',
-//     type: 'string' as FieldType,
-//   }],
-//   ['urgent', {
-//     name: 'priorityId',
-//     type: 'string' as FieldType,
-//     label: '紧急程度',
-//     textField: 'name',
-//     valueField: 'id',
-//   }],
-//   ['backlogClassification', {
-//     name: 'classificationId',
-//     type: 'string' as FieldType,
-//     label: '需求分类',
-//     textField: 'name',
-//     valueField: 'id',
-//     // @ts-ignore
-//     dynamicProps: {
-//       // @ts-ignore
-//       disabled: ({ record }) => {
-//         if (record.get('projectId')) {
-//           return false;
-//         }
-//         return true;
-//       },
-//     },
-//   }],
-//   ['backlogType', {
-//     name: 'typeId',
-//     type: 'string' as FieldType,
-//     label: '需求类型',
-//     textField: 'name',
-//     valueField: 'id',
-//     dynamicProps: {
-//       // @ts-ignore
-//       disabled: ({ record }) => {
-//         if (record.get('projectId')) {
-//           return false;
-//         }
-//         return true;
-//       },
-//     },
-//   }],
-//   ['description', {
-//     name: 'description',
-//     type: 'array' as FieldType,
-//     label: '描述',
-//   }],
-//   ['belongToBacklog', {
-//     name: 'projectId',
-//     type: 'number' as FieldType,
-//     textField: 'name',
-//     valueField: 'id',
-//     label: '所属需求池',
-//     required: true,
-//   }],
-//   ['progressFeedback', {
-//     name: 'feedBack',
-//     type: 'boolean' as FieldType,
-//     label: '需求反馈进度',
-//   }],
-//   ['estimatedStartTime', {
-//     name: 'estimatedStartTime',
-//     type: 'string' as FieldType,
-//     label: '预计开始时间',
-//     max: 'estimatedEndTime',
-//   }],
-//   ['estimatedEndTime', {
-//     name: 'estimatedEndTime',
-//     type: 'string' as FieldType,
-//     label: '预计结束时间',
-//     min: 'estimatedStartTime',
-//   }],
-//   ['feedbackFrequency', {
-//     name: 'feedbackFrequency',
-//     type: 'number' as FieldType,
-//     label: '',
-//     min: 1,
-//     defaultValue: 7,
-//   }],
-// ]);
-// // @ts-ignore
-// const CreateIssue: React.FC<Props> = observer(({
-//   onCreate, organizationId, modal, project,
-// }) => {
-//   const [fileList, setFileList] = useState<FileList>();
-//   const [fields, setFields] = useState<IField[]>([{
-//     fieldCode: 'belongToBacklog',
-//   } as IField]);
-//   const firstRef = useRef<Form>(null);
-//   const dataSetRef = useRef(defaultDataSet);
-//   const dataSet = dataSetRef.current;
+interface CreateIssueProps {
+  // onCreate: (demand: Demand) => void,
+  modal: IModalProps,
+  // project?: IAMProject,
+}
+const defaultDataSet = new DataSet({
+  autoCreate: true,
+  fields: [],
+});
+const presets = new Map([
+  ['estimatedStartTime', {
+    max: 'estimatedEndTime',
+  }],
+  ['estimatedEndTime', {
+    min: 'estimatedStartTime',
+  }],
+]);
+const lineField = ['summary', 'description'];
+const reuseFields = ['issueType', 'summary', 'description'];
+function convert(fields: IssueCreateFields[]) {
+  return fields.map((field) => ({
+    ...field,
+    title: field.fieldName,
+    code: field.fieldCode,
+    colSpan: lineField.includes(field.fieldCode) ? 2 : 1,
+  }));
+}
+function transformSubmitFieldValue(field: IssueCreateFields, value: any) {
+  switch (field.fieldType) {
+    case 'time':
+    case 'date':
+    case 'datetime': {
+      return value ? value.format('YYYY-MM-DD HH:mm:ss') : value;
+    }
+    default: return value;
+  }
+}
+const CreateIssue = observer(({
+  modal,
+}: CreateIssueProps) => {
+  const [fileList, setFileList] = useState<FileList>();
+  const dataSetRef = useRef(defaultDataSet);
+  const [dataSet, setDataSet] = useState(defaultDataSet);
+  dataSetRef.current = dataSet;
+  const setFieldValue = usePersistFn((name, value) => {
+    dataSet.current?.set(name, value);
+  });
+  const { isLoading } = useProjectIssueTypes({
 
-//   const renderField = (field: IField) => {
-//     switch (field.fieldCode) {
-//       case 'summary': {
-//         return <TextField colSpan={2} name="summary" autoFocus />;
-//       }
-//       // case 'description': {
-//       //   return <Editor name="description" colSpan={2} placeholder="需求描述" />;
-//       // }
-//       case 'estimatedStartTime': {
-//         return (
-//           <CustomField
-//             field={field}
-//             name={field.fieldCode}
-//           />
-//         );
-//       }
-//       case 'estimatedEndTime': {
-//         return (
-//           <CustomField
-//             field={field}
-//             name={field.fieldCode}
-//           />
-//         );
-//       }
-//       default: {
-//         return (
-//           <CustomField
-//             field={field}
-//             name={field.fieldId}
-//           />
-//         );
-//       }
-//     }
-//   };
-//   return (
-//     <Form dataSet={dataSet} style={{ width: 688 }} columns={2} ref={firstRef}>
-//       {fields.map(renderField)}
-//       <UploadButton
-//         // @ts-ignore
-//         fileList={fileList}
-//         colSpan={2}
-//         // @ts-ignore
-//         onChange={({ fileList: files }) => {
-//           if (validateFile(files)) {
-//             setFileList(files);
-//           }
-//         }}
-//       />
-//     </Form>
-//   );
-// });
+  }, {
+    onSuccess: ((issueTypes) => {
+      setFieldValue('issueType', issueTypes[0].id);
+    }),
+  });
+  const issueTypeId = dataSet.current && dataSet.current.get('issueType');
+  const handleUpdate = usePersistFn(({ name, value }) => {
+    switch (name) {
+      case 'issueType': {
+        break;
+      }
+      default: break;
+    }
+  });
+  const { data: fields } = useIssueCreateFields({ issueTypeId });
+  useEffect(() => {
+    const oldDataSet = dataSetRef.current;
+    const newDataSet = new DataSet({
+      autoCreate: true,
+      fields: fields ? fields.map((field) => {
+        if (presets.has(field.fieldCode)) {
+          const preset = presets.get(field.fieldCode);
+          return merge(preset, {
+            label: field.fieldName,
+            required: field.required,
+          });
+        }
+        return {
+          name: field.fieldCode,
+          type: 'string' as FieldType,
+          label: field.fieldName,
+          required: field.required,
+        };
+      }) : [],
+    });
+    reuseFields.forEach((name) => {
+      const oldValue = oldDataSet.current?.get(name);
+      if (oldValue) {
+        newDataSet?.current?.set(name, oldValue);
+      }
+    });
+    setDataSet(newDataSet);
+  }, [fields]);
+  const handleSubmit = usePersistFn(async () => {
+    if (await dataSet.validate()) {
+      const data = dataSet.current?.toData();
+      const customFields = fields?.filter((f) => !f.system);
+      const fieldList = customFields?.map((field) => ({
+        fieldType: field.fieldType,
+        value: transformSubmitFieldValue(field, data[field.fieldCode]),
+        fieldId: field.fieldId,
+        fieldCode: field.fieldCode,
+      }));
+      const {
+        typeId,
+        reporterId,
+        summary,
+        description,
+        // storyPoints,
+        // estimatedTime,
+        // sprintId,
+        // statusId,
+        // epicId,
+        // pi,
+        // epicName,
+        // assigneedId,
+        // benfitHypothesis,
+        // acceptanceCritera,
+        // featureType,
+        // componentIssueRel,
+        // priorityId,
+        // issueLabel,
+        // fixVersionIssueRel,
+        // influenceVersion,
+        // linkTypes,
+        // linkIssues,
+        // keys,
+        // fileList,
+        // userBusinessValue,
+        // timeCriticality,
+        // rrOeValue,
+        // jobSize,
+        // featureId,
+        // teamProjectIds,
+        // estimatedEndTime,
+        // estimatedStartTime,
+        // subBugParent,
+        // subTaskParent,
+        // programVersion,
+        // environment,
+        // appVersions,
+        // tags,
+        // subProjectSprintId,
+        // mainResponsibleId,
+        // testResponsibleId,
+      } = data;
+      console.log(data, fieldList);
+    }
+    return false;
+  });
+  useEffect(() => {
+    modal.handleOk(handleSubmit);
+  }, [handleSubmit, modal]);
+  const renderFields = usePersistFn(() => (
+    <Row gutter={24}>
+      {fields?.map((field) => {
+        const config = valueTypeMap[field.fieldCode] ?? valueTypeMap[field.fieldType] ?? valueTypeMap.default;
+        return config ? (
+          <Col
+            key={field.fieldCode}
+            style={{ marginBottom: 24 }}
+            span={lineField.includes(field.fieldCode) ? 24 : 12}
+          >
+            {config.renderFormItem({
+              name: field.fieldCode,
+              style: {
+                width: '100%',
+              },
+            })}
+          </Col>
+        ) : null;
+      })}
+    </Row>
+  ));
+  return (
+    <Spin spinning={isLoading}>
+      <Form
+        dataSet={dataSet}
+      >
+        {renderFields()}
+        <UploadButton
+          fileList={fileList}
+          colSpan={2}
+          // @ts-ignore
+          onChange={({ fileList: files }) => {
+            if (validateFile(files)) {
+              setFileList(files);
+            }
+          }}
+        />
+      </Form>
+    </Spin>
+  );
+});
 
-// const openModal = () => {
-//   Modal.open({
-//     drawer: true,
-//     style: {
-//       width: 1088,
-//     },
-//     key: 'outsideDemand',
-//     title: '创建问题',
-//     okText: '提交',
-//     // @ts-ignore
-//     children: <CreateIssue onCreate={onCreate} />,
-//     footer: null,
-//   });
-// };
-// export default openModal;
+const openModal = () => {
+  Modal.open({
+    drawer: true,
+    style: {
+      width: MODAL_WIDTH.middle,
+    },
+    key: 'create-issue',
+    title: '创建问题',
+    okText: '创建',
+    // @ts-ignore
+    children: <CreateIssue />,
+  });
+};
+export default openModal;

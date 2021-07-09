@@ -13,6 +13,7 @@ import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import SideNav from '@/components/side-nav';
 import { HeaderButtons } from '@choerodon/master';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
+import openCreateIssue from '@/components/create-issue';
 import Version from '../components/VersionComponent/Version';
 import Epic from '../components/EpicComponent/Epic';
 import Feature from '../components/FeatureComponent/Feature';
@@ -93,7 +94,10 @@ class BacklogHome extends Component {
   };
 
   handleClickCBtn = () => {
-    BacklogStore.setNewIssueVisible(true);
+    // BacklogStore.setNewIssueVisible(true);
+    openCreateIssue({
+
+    });
   }
 
   toggleCurrentVisible = (type) => {
