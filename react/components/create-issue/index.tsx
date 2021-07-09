@@ -1,12 +1,13 @@
 import React, {
-  useEffect, useRef, useState, useMemo, useReducer,
+  useEffect, useRef, useState,
 } from 'react';
 import {
   DataSet, Modal, Row, Col, Spin, Form,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { usePersistFn } from 'ahooks';
-import { merge, isEmpty } from 'lodash';
+import { merge } from 'lodash';
+import { UploadFile } from 'choerodon-ui/lib/upload/interface';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 // @ts-ignore
 import UploadButton from '@/components/CommonComponent/UploadButton';
@@ -20,7 +21,7 @@ import valueTypeMap from './fields';
 interface CreateIssueProps {
   // onCreate: (demand: Demand) => void,
   modal: IModalProps,
-  // project?: IAMProject,
+  projectId?: string,
 }
 const defaultDataSet = new DataSet({
   autoCreate: true,
@@ -55,16 +56,16 @@ function transformSubmitFieldValue(field: IssueCreateFields, value: any) {
   }
 }
 const CreateIssue = observer(({
-  modal,
+  modal, projectId,
 }: CreateIssueProps) => {
-  const [fileList, setFileList] = useState<FileList>();
+  const [fileList, setFileList] = useState<UploadFile[]>();
   const dataSetRef = useRef(defaultDataSet);
   const [dataSet, setDataSet] = useState(defaultDataSet);
   dataSetRef.current = dataSet;
   const setFieldValue = usePersistFn((name, value) => {
     dataSet.current?.set(name, value);
   });
-  const { isLoading } = useProjectIssueTypes({
+  const { isFetching: isLoading } = useProjectIssueTypes({
 
   }, {
     onSuccess: ((issueTypes) => {
@@ -80,7 +81,7 @@ const CreateIssue = observer(({
       default: break;
     }
   });
-  const { data: fields } = useIssueCreateFields({ issueTypeId });
+  const { data: fields, isFetching: isFieldsLoading } = useIssueCreateFields({ issueTypeId });
   useEffect(() => {
     const oldDataSet = dataSetRef.current;
     const newDataSet = new DataSet({
@@ -172,6 +173,7 @@ const CreateIssue = observer(({
   const renderFields = usePersistFn(() => (
     <Row gutter={24}>
       {fields?.map((field) => {
+        // @ts-ignore
         const config = valueTypeMap[field.fieldCode] ?? valueTypeMap[field.fieldType] ?? valueTypeMap.default;
         return config ? (
           <Col
@@ -181,6 +183,8 @@ const CreateIssue = observer(({
           >
             {config.renderFormItem({
               name: field.fieldCode,
+              fieldId: field.fieldId,
+              projectId,
               style: {
                 width: '100%',
               },
@@ -191,15 +195,13 @@ const CreateIssue = observer(({
     </Row>
   ));
   return (
-    <Spin spinning={isLoading}>
+    <Spin spinning={isLoading || isFieldsLoading}>
       <Form
         dataSet={dataSet}
       >
         {renderFields()}
         <UploadButton
           fileList={fileList}
-          colSpan={2}
-          // @ts-ignore
           onChange={({ fileList: files }) => {
             if (validateFile(files)) {
               setFileList(files);

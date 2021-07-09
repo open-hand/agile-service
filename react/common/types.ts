@@ -382,6 +382,29 @@ export type IFieldType =
   'text' | 'input' | 'member' | 'multiMember' | 'single' | 'multiple' | 'radio' | 'checkbox' |
   'number' | 'time' | 'date' | 'datetime'
 
+export type ISystemFieldCodeMap =
+  'summary' |
+  'issueType' |
+  'description' |
+  'priority' |
+  'sprint' |
+  'reporter' |
+  'assignee' |
+  'status' |
+  'remainingTime' |
+  'fixVersion' |
+  'storyPoints' |
+  'estimatedStartTime' |
+  'estimatedEndTime' |
+  'label' |
+  'component' |
+  'storyPoints' |
+  'version' |
+  'epic' |
+  'feature' |
+  'mainResponsible' |
+  'tag';
+
 export type ISystemFieldCode =
   'summary' |
   'issueTypeId' |
