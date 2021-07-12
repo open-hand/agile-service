@@ -259,7 +259,7 @@ const Issue = observer(({ cached, updateCache }) => {
     openSaveFilterModal({ searchVO: issueSearchStore.getCustomFieldFilters(), onOk: issueSearchStore.loadMyFilterList });
   };
   const closeBatchModal = useCallback(() => {
-    tableProps.handleCheckAllChange(false);
+    tableProps.setCheckValues([]);
   }, [tableProps]);
   return (
     <Page

@@ -209,13 +209,17 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                                                                                             String applyType,
                                                                                             Boolean onlyEnabled) {
         //根据项目id判断applyType，处理前端切换项目传错误applyType报错的问题
-        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
-        boolean contains =
-                ProjectCategory.checkContainProjectCategory(projectVO.getCategories(), ProjectCategory.MODULE_PROGRAM);
-        if(contains) {
-            applyType = SchemeApplyType.PROGRAM;
-        } else {
-            applyType = SchemeApplyType.AGILE;
+        if(SchemeApplyType.PROGRAM.equals(applyType)
+                || SchemeApplyType.AGILE.equals(applyType)
+                || StringUtils.isEmpty(applyType)) {
+            ProjectVO projectVO = ConvertUtil.queryProject(projectId);
+            boolean contains =
+                    ProjectCategory.checkContainProjectCategory(projectVO.getCategories(), ProjectCategory.MODULE_PROGRAM);
+            if(contains) {
+                applyType = SchemeApplyType.PROGRAM;
+            } else {
+                applyType = SchemeApplyType.AGILE;
+            }
         }
         Long organizationId = projectUtil.getOrganizationId(projectId);
         Long issueTypeSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.ISSUE_TYPE, applyType).getSchemeId();

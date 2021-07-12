@@ -1,5 +1,6 @@
 import { issueTypeApi } from '@/api';
 import { IIssueType } from '@/common/types';
+import { useEffect } from 'react';
 import { useQuery, UseQueryOptions } from 'react-query';
 import useIsProgram from '../useIsProgram';
 import useProjectKey from './useProjectKey';
@@ -15,9 +16,8 @@ export interface ProjectIssueTypesConfig {
 }
 export default function useProjectIssueTypes(config?: ProjectIssueTypesConfig, options?: UseQueryOptions<IIssueType[]>) {
   const { isProgram } = useIsProgram();
-  const applyType = isProgram ? 'program' : 'agile';
   const key = useProjectKey({ key: ['issueTypes', { onlyEnabled: config?.onlyEnabled }], projectId: config?.projectId });
-  return useQuery(key, () => issueTypeApi.loadAllWithStateMachineId(config?.applyType ?? applyType, config?.projectId, config?.onlyEnabled, config?.programId), {
+  return useQuery(key, () => issueTypeApi.loadAllWithStateMachineId('agile', config?.projectId, config?.onlyEnabled, config?.programId), {
     select: (data) => {
       const issueTypes = (!isProgram ? data.filter((item: IIssueType) => item.typeCode !== 'feature') : data);
       // eslint-disable-next-line no-nested-ternary

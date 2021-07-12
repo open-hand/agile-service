@@ -1090,17 +1090,13 @@
             SELECT atir.issue_id
             FROM agile_tag_issue_rel atir
             WHERE atir.project_id = #{projectId}
-            and atir.tag_project_id in
-            <foreach collection="searchVO.otherArgs.tags" item="tag" open="(" separator="," close=")">
-                #{tag.projectId}
-            </foreach>
-            and atir.app_service_code in
-            <foreach collection="searchVO.otherArgs.tags" item="tag" open="(" separator="," close=")">
-                #{tag.appServiceCode}
-            </foreach>
-            and atir.tag_name in
-            <foreach collection="searchVO.otherArgs.tags" item="tag" open="(" separator="," close=")">
-                #{tag.tagName}
+            AND
+            <foreach collection="searchVO.otherArgs.tags" item="tag" open="(" separator="OR" close=")">
+                (
+                    atir.tag_project_id = #{tag.projectId}
+                    AND atir.app_service_code = #{tag.appServiceCode}
+                    AND atir.tag_name = #{tag.tagName}
+                )
             </foreach>
             )
             )

@@ -225,6 +225,7 @@ const Linkage = ({
     }, []);
   })();
 
+  const selectedTypeItem = issueTypes?.find((item: IIssueType) => item.id === selectedType);
   const handleActiveKeyChange = useCallback((key) => {
     setActiveKey(key);
   }, []);
