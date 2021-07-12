@@ -108,7 +108,7 @@ class Column extends Component {
       data, index, isDragDisabled,
     } = this.props;
     const { type, id: projectId, organizationId: orgId } = menu;
-
+    const deleteAble = ScrumBoardStore.getColumnDeleteAble(data.columnId);
     return (
       <Draggable
         isDragDisabled={isDragDisabled}
@@ -140,17 +140,19 @@ class Column extends Component {
                       }}
                       {...provided.dragHandleProps}
                     />
-                    <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.column.create']}>
-                      <Icon
-                        type="delete_sweep-o"
-                        style={{
-                          cursor: 'pointer',
-                          display: isDragDisabled && 'none',
-                        }}
-                        role="none"
-                        onClick={this.handleDeleteColumn}
-                      />
-                    </Permission>
+                    {deleteAble && (
+                      <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.column.create']}>
+                        <Icon
+                          type="delete_sweep-o"
+                          style={{
+                            cursor: 'pointer',
+                            display: isDragDisabled && 'none',
+                          }}
+                          role="none"
+                          onClick={this.handleDeleteColumn}
+                        />
+                      </Permission>
+                    )}
                   </div>
                 </div>
                 {this.renderColumnName()}
