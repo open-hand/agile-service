@@ -599,6 +599,12 @@ class ScrumBoardStore {
     return toJS(this.boardData);
   }
 
+  getColumnDeleteAble(columnId) {
+    const { boardData } = this;
+    const otherColumn = boardData.filter((c) => c.columnId !== '0' && c.columnId !== columnId);
+    return otherColumn.some((c) => c.subStatusDTOS && c.subStatusDTOS.length > 0);
+  }
+
   @action setBoardData(data) {
     this.boardData = data;
   }
