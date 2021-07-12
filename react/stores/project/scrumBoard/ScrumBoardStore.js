@@ -162,7 +162,7 @@ class ScrumBoardStore {
   }
 
   needRefresh(issue, destinationStatus) {
-    if ((issue.issueTypeVO.typeCode === 'bug' && issue.relateIssueId) || issue.issueTypeVO.typeCode === 'sub_task') {
+    if ((issue.issueTypeVO.typeCode === 'bug' && issue.relateIssueId) || issue.issueTypeVO.typeCode === 'sub_task' || ['story', 'bug', 'task'].includes(issue.issueTypeVO.typeCode)) {
       const hasLinkage = this.statusLinkages.find((link) => link.issueTypeId === issue.issueTypeVO.id && link.statusId === destinationStatus);
       return hasLinkage;
     }

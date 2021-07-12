@@ -82,6 +82,12 @@ export interface IFeatureLinkage {
   statusId: string
   projectId: string
 }
+
+export interface ILinkIssueData {
+  linkTypeId:string,
+   linkIssueTypeId:string,
+   linkIssueStatusId:string
+}
 class StatusTransformApi extends Api<StatusTransformApi> {
   get prefix() {
     return `/agile/v1/projects/${this.projectId}`;
@@ -694,6 +700,51 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     return axios({
       method: 'put',
       url: `${this.prefix}/status_linkages/list`,
+      data,
+    });
+  }
+
+  /**
+   * 获取关联问题状态联动设置
+   * @param issueTypeId
+   * @param statusId
+   */
+
+  getLinkIssueLinkage(issueTypeId: string, statusId: string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/link_issue_status_linkage`,
+      params: {
+        issueTypeId,
+        statusId,
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  getLinkageStatus(issueTypeId: string, linkIssueTypeId: string) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/link_issue_status_linkage/status`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+      data: {
+        issueTypeId,
+        linkIssueTypeId,
+      },
+    });
+  }
+
+  updateLinkIssueLinkage(issueTypeId: string, statusId: string, data: ILinkIssueData) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/link_issue_status_linkage`,
+      params: {
+        issueTypeId,
+        statusId,
+        organizationId: getOrganizationId(),
+      },
       data,
     });
   }

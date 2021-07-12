@@ -117,7 +117,7 @@ function IssueTypeList() {
       });
     };
 
-    const handleMenuClick = (e: { key: 'edit' | 'delete' | 'start' | 'stop' | 'referenced' | 'dontReferenced'}) => {
+    const handleMenuClick = (e: { key: 'edit' | 'delete' | 'start' | 'stop' | 'referenced' | 'dontReferenced' }) => {
       switch (e.key) {
         case 'edit': {
           handleEdit({ record, dataSet });
@@ -231,6 +231,9 @@ function IssueTypeList() {
     ]);
     return sourceMap.get(record?.get('source'));
   }, []);
+  const handleRefresh = () => {
+    issueTypeDataSet.query(issueTypeDataSet.currentPage);
+  };
 
   const renderStatus = useCallback(({ value }) => (
     <div className={`${styles.status} ${styles[`status_${value}`]}`}>
@@ -288,7 +291,29 @@ function IssueTypeList() {
       </Header>
       <Breadcrumb />
       <Content>
-        <Table dataSet={issueTypeDataSet} className={styles.issueTypeTable}>
+        <Table
+          dataSet={issueTypeDataSet}
+          className={styles.issueTypeTable}
+          rowDraggable
+          onDragEnd={async (ds, columns, resultDrag) => {
+            const { draggableId, destination, source: { index: sourceIndex } } = resultDrag;
+            if (!destination) {
+              return;
+            }
+            const { index: destinationIndex } = destination;
+            if (destinationIndex === sourceIndex) {
+              return;
+            }
+            const dragIssueTypeId = ds.findRecordById(draggableId)?.get('id');
+            const frontId = ds.get(destinationIndex - 1)?.get('id');
+            const backId = ds.get(destinationIndex + 1)?.get('id');
+            if (!dragIssueTypeId || (!frontId && !backId)) {
+              return;
+            }
+            await issueTypeApi.updateRank(dragIssueTypeId, { frontId, backId });
+            handleRefresh();
+          }}
+        >
           <Column name="name" width={150} renderer={renderName} />
           <Column name="action" width={50} renderer={renderAction} />
           <Column name="description" />

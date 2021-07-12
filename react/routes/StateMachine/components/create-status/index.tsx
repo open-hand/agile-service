@@ -173,7 +173,7 @@ const CreateStatus: React.FC<Props> = ({
           name="name"
           maxLength={MAX_LENGTH_STATUS}
           valueChangeAction={'input' as any}
-          placeholder="用于标识问题所处的阶段，例如：测试中"
+          placeholder="请输入状态名称，例如：测试中"
           onInput={(e) => {
             // @ts-ignore
             const { value } = e.target;

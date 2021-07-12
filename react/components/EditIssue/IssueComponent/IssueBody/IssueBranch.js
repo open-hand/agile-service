@@ -5,12 +5,17 @@ import {
 import { observer } from 'mobx-react-lite';
 import MergeRequest from '@/components/MergeRequest';
 import openLinkBranchModal from '@/components/LinkBranch/LinkBranchPro';
+import openCreateBranchModal from '@/components/CreateBranch/CreateBranchPro';
 import LinkedBranch from '../linked-branch';
 
 const IssueBranch = observer(({
   store, disabled, projectId, reloadIssue, otherProject, outside, programId, applyType, issueId,
 }) => {
   const commitsRef = useRef();
+  const issue = store.getIssue;
+  const {
+    issueNum, typeCode,
+  } = issue;
   const mergeRequestRef = useRef();
   const refresh = useCallback(() => {
     commitsRef.current?.query();
@@ -34,7 +39,10 @@ const IssueBranch = observer(({
               </Button>
             </Tooltip>
             <Tooltip placement="topRight" title="创建分支" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-              <Button onClick={() => store.setCreateBranchShow(true)}>
+              <Button onClick={() => openCreateBranchModal({
+                issueId, onOk: () => store.refreshBranch(), typeCode, defaultBranchSuffixName: issueNum,
+              })}
+              >
                 <Icon type="playlist_add icon" />
               </Button>
             </Tooltip>

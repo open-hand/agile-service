@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
-import { issueApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { IsProjectMember } from '@/hooks/useIsProjectMember';
 import SelectUser from '@/components/select/select-user';
@@ -11,7 +10,7 @@ import UserTag from '@/components/tag/user-tag';
 @inject('AppState')
 @observer class FieldStatus extends Component {
   updateIssueAssignee = (assigneeId) => {
-    const { store, onUpdate, reloadIssue } = this.props;
+    const { store } = this.props;
     const issue = store.getIssue;
     const { issueId, objectVersionNumber } = issue;
 

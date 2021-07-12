@@ -7,10 +7,11 @@ import {
   Icon, Dropdown, Input, Menu,
 } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
-import { debounce } from 'lodash';
+import { debounce, find } from 'lodash';
 import { issueApi, fieldApi } from '@/api';
 import { checkCanQuickCreate, getQuickCreateDefaultObj } from '@/utils/quickCreate';
 import { fields2Map } from '@/utils/defaultValue';
+import localCacheStore from '@/stores/common/LocalCacheStore';
 import TypeTag from '../TypeTag';
 import './QuickCreateIssue.less';
 import UserDropdown from '../UserDropdown';
@@ -22,13 +23,32 @@ const propTypes = {
 };
 
 class QuickCreateIssue extends Component {
+  /**
+   * 得到一个可用的issueTypeId
+   * @param {*} issueTypes
+   * @param {*} issueTypeId
+   * @returns {issueTypeId|undefined}
+   */
+  static getCacheAvailableIssueType(issueTypes, issueTypeId) {
+    if (!issueTypes || !issueTypes.length) {
+      return undefined;
+    }
+    let newCurrentType = issueTypeId ? find((issueTypes), { id: issueTypeId }) : undefined;
+    if (!newCurrentType) {
+      const localTypeId = localCacheStore.getItem('agile.issue.type.common.selected');
+      newCurrentType = localTypeId ? find((issueTypes), { id: localTypeId }) : undefined;
+      newCurrentType = newCurrentType || issueTypes[0];
+    }
+    return newCurrentType;
+  }
+
   constructor(props) {
     super(props);
     this.currentTemplate = undefined;
     this.state = {
       create: false,
       loading: false,
-      currentTypeId: props.issueTypes[0]?.id,
+      currentTypeId: QuickCreateIssue.getCacheAvailableIssueType(props.issueTypes)?.id,
       summary: '',
     };
     this.userDropDownRef = createRef();
@@ -37,7 +57,7 @@ class QuickCreateIssue extends Component {
   static getDerivedStateFromProps(nextProps, prevState) {
     if (!prevState.currentTypeId && nextProps.issueTypes.length > 0) {
       return {
-        currentTypeId: nextProps.issueTypes[0]?.id,
+        currentTypeId: QuickCreateIssue.getCacheAvailableIssueType(nextProps.issueTypes)?.id,
       };
     }
     return null;
@@ -148,6 +168,7 @@ class QuickCreateIssue extends Component {
           if (onCreate) {
             onCreate(res);
           }
+          localCacheStore.setItem('agile.issue.type.common.selected', currentType.id);
         }).catch(() => {
           this.setState({
             loading: false,
@@ -174,11 +195,14 @@ class QuickCreateIssue extends Component {
     }
   };
 
+  /**
+   * 获取一个issueType 以做展示
+   * @returns
+   */
   getCurrentType() {
-    const { currentTypeId } = this.state;
     const { issueTypes } = this.props;
-    const currentType = issueTypes.find((t) => t.id === currentTypeId);
-    return currentType || issueTypes[0] || {};
+    const { currentTypeId } = this.state;
+    return QuickCreateIssue.getCacheAvailableIssueType(issueTypes, currentTypeId) || {};
   }
 
   render() {
@@ -186,7 +210,6 @@ class QuickCreateIssue extends Component {
       create, loading, currentTypeId, summary,
     } = this.state;
     const { issueTypes, buttonShowText, buttonShow = true } = this.props;
-    const currentType = this.getCurrentType();
 
     const typeList = (
       <Menu
@@ -228,17 +251,17 @@ class QuickCreateIssue extends Component {
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 {
                   buttonShow && (
-                  <Dropdown overlay={typeList} trigger={['click']}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <TypeTag
-                        data={currentType}
-                      />
-                      <Icon
-                        type="arrow_drop_down"
-                        style={{ fontSize: 16 }}
-                      />
-                    </div>
-                  </Dropdown>
+                    <Dropdown overlay={typeList} trigger={['click']}>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <TypeTag
+                          data={this.getCurrentType()}
+                        />
+                        <Icon
+                          type="arrow_drop_down"
+                          style={{ fontSize: 16 }}
+                        />
+                      </div>
+                    </Dropdown>
                   )
                 }
                 <UserDropdown userDropDownRef={this.userDropDownRef} defaultAssignee={this.props.defaultAssignee} key={this.props.defaultAssignee?.id || 'null'} />
@@ -283,7 +306,7 @@ class QuickCreateIssue extends Component {
                 this.setState({
                   create: true,
                 }, () => {
-                  this.loadInitValue(currentType.id);
+                  this.loadInitValue(this.getCurrentType().id);
                 });
               }}
               style={this.props.btnStyle || {}}

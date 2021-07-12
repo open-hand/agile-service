@@ -109,34 +109,51 @@ public class ExcelServiceImpl implements ExcelService {
     private static  final String DATE_CHECK_MSG = "请输入正确的日期格式";
 
     protected static final String EPIC_CN = "史诗";
-    private static final String SUMMARY = "summary";
+    protected static final String SUMMARY = "summary";
     protected static final String ISSUE_NUM = "issueNum";
-    private static final String EPIC_NAME = "epicName";
-    private static final String TYPE_NAME = "typeName";
-    private static final String DESCRIPTION = "description";
-    private static final String PRIORITY_NAME = "priorityName";
-    private static final String STATUS_NAME = "statusName";
-    private static final String RESOLUTION = "resolution";
-    private static final String SPRINT_NAME = "sprintName";
-    private static final String ASSIGNEE_NAME = "assigneeName";
-    private static final String REPORTER_NAME = "reporterName";
-    private static final String STORY_POINTS = "storyPoints";
-    private static final String REMAINING_TIME = "remainingTime";
-    private static final String VERSION_NAME = "versionName";
-    private static final String FIX_VERSION_NAME = "fixVersionName";
-    private static final String INFLUENCE_VERSION_NAME = "influenceVersionName";
-    private static final String LABEL_NAME = "labelName";
-    private static final String COMPONENT_NAME = "componentName";
-    private static final String CREATION_DATE = "creationDate";
-    private static final String LAST_UPDATE_DATE = "lastUpdateDate";
-    private static final String ESTIMATED_START_TIME = "estimatedStartTime";
-    private static final String ESTIMATED_END_TIME = "estimatedEndTime";
-    private static final String CREATED_USER_NAME = "createdUserName";
-    private static final String LAST_UPDATE_USER_NAME = "lastUpdatedUserName";
-    private static final String MAIN_RESPONSIBLE_NAME = "mainResponsibleName";
-    private static final String ENVIRONMENT_NAME = "environmentName";
-    private static final String SPENT_WORK_TIME = "spentWorkTime";
-    private static final String ALL_ESTIMATE_TIME = "allEstimateTime";
+    protected static final String EPIC_NAME = "epicName";
+    protected static final String TYPE_NAME = "typeName";
+    protected static final String DESCRIPTION = "description";
+    protected static final String PRIORITY_NAME = "priorityName";
+    protected static final String STATUS_NAME = "statusName";
+    protected static final String RESOLUTION = "resolution";
+    protected static final String SPRINT_NAME = "sprintName";
+    protected static final String ASSIGNEE_NAME = "assigneeName";
+    protected static final String REPORTER_NAME = "reporterName";
+    protected static final String STORY_POINTS = "storyPoints";
+    protected static final String REMAINING_TIME = "remainingTime";
+    protected static final String VERSION_NAME = "versionName";
+    protected static final String FIX_VERSION_NAME = "fixVersionName";
+    protected static final String INFLUENCE_VERSION_NAME = "influenceVersionName";
+    protected static final String LABEL_NAME = "labelName";
+    protected static final String COMPONENT_NAME = "componentName";
+    protected static final String CREATION_DATE = "creationDate";
+    protected static final String LAST_UPDATE_DATE = "lastUpdateDate";
+    protected static final String ESTIMATED_START_TIME = "estimatedStartTime";
+    protected static final String ESTIMATED_END_TIME = "estimatedEndTime";
+    protected static final String CREATED_USER_NAME = "createdUserName";
+    protected static final String LAST_UPDATE_USER_NAME = "lastUpdatedUserName";
+    protected static final String MAIN_RESPONSIBLE_NAME = "mainResponsibleName";
+    protected static final String ENVIRONMENT_NAME = "environmentName";
+    protected static final String SPENT_WORK_TIME = "spentWorkTime";
+    protected static final String ALL_ESTIMATE_TIME = "allEstimateTime";
+    protected static final String TAGS = "tags";
+    protected static final String RELATED_ISSUE = "relatedIssue";
+
+    protected static final String USER_MAP = "userMap";
+    protected static final String ISSUE_TYPE_MAP = "issueTypeMap";
+    protected static final String STATUS_MAP = "statusMap";
+    protected static final String PRIORITY_MAP = "priorityMap";
+    protected static final String CLOSE_SPRINT_MAP = "closeSprintMap";
+    protected static final String FIX_VERSION_MAP = "fixVersionMap";
+    protected static final String INFLUENCE_VERSION_MAP = "influenceVersionMap";
+    protected static final String LABEL_MAP = "labelMap";
+    protected static final String COMPONENT_MAP = "componentMap";
+    protected static final String FOUNDATION_CODE_VALUE_MAP = "foundationCodeValueMap";
+    protected static final String ENV_MAP = "envMap";
+    protected static final String WORK_LOG_MAP = "workLogMap";
+    protected static final String TAG_MAP = "tagMap";
+    protected static final String RELATED_ISSUE_MAP = "relatedIssueMap";
 
     private static final String SUB_BUG_CN = "子缺陷";
 
@@ -212,13 +229,14 @@ public class ExcelServiceImpl implements ExcelService {
     protected WorkLogMapper workLogMapper;
     @Autowired
     private StatusMapper statusMapper;
+    @Autowired
+    private LookupValueService lookupValueService;
+    @Autowired
+    protected IssueLinkMapper issueLinkMapper;
 
     private static final String[] FIELDS_NAMES;
 
     private static final String[] FIELDS;
-
-    @Autowired
-    private LookupValueService lookupValueService;
 
     protected static Map<String, String> FIELD_MAP = new LinkedHashMap<>();
 
@@ -254,7 +272,8 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put(ENVIRONMENT_NAME, "环境");
         FIELD_MAP.put(SPENT_WORK_TIME, "已耗费时间");
         FIELD_MAP.put(ALL_ESTIMATE_TIME, "总预估时间");
-        FIELD_MAP.put("tags", "Tag");
+        FIELD_MAP.put(TAGS, "Tag");
+        FIELD_MAP.put(RELATED_ISSUE, "关联问题");
         FIELDS = new ArrayList<>(FIELD_MAP.keySet()).toArray(new String[FIELD_MAP.keySet().size()]);
         FIELDS_NAMES = new ArrayList<>(FIELD_MAP.values()).toArray(new String[FIELD_MAP.values().size()]);
     }
@@ -2989,38 +3008,33 @@ public class ExcelServiceImpl implements ExcelService {
                     if (agilePluginService != null) {
                         tagMap.putAll(agilePluginService.listTagMap(ConvertUtil.getOrganizationId(projectId), new HashSet<>(Arrays.asList(projectId)), issueIds));
                     }
-                    cursor
-                            .addCollections(userIds)
-                            .addCollections(usersMap)
-                            .addCollections(issueTypeDTOMap)
-                            .addCollections(statusMapDTOMap)
-                            .addCollections(priorityDTOMap)
-                            .addCollections(closeSprintNames)
-                            .addCollections(fixVersionNames)
-                            .addCollections(influenceVersionNames)
-                            .addCollections(labelNames)
-                            .addCollections(componentMap)
-                            .addCollections(foundationCodeValue)
-                            .addCollections(workLogVOMap)
-                            .addCollections(tagMap);
+                    Map<Long, List<IssueLinkDTO>> relatedIssueMap =
+                            issueLinkMapper.queryIssueLinkByIssueId(new HashSet<>(issueIds), new HashSet<>(Arrays.asList(projectId)), false)
+                                    .stream()
+                                    .collect(Collectors.groupingBy(IssueLinkDTO::getKeyIssueId));
+                    cursor.addCollections(userIds);
+                    Map<String, Object> issueValueMap = new HashMap<>();
+                    issueValueMap.put(USER_MAP, usersMap);
+                    issueValueMap.put(ISSUE_TYPE_MAP, issueTypeDTOMap);
+                    issueValueMap.put(STATUS_MAP, statusMapDTOMap);
+                    issueValueMap.put(PRIORITY_MAP, priorityDTOMap);
+                    issueValueMap.put(CLOSE_SPRINT_MAP, closeSprintNames);
+                    issueValueMap.put(FIX_VERSION_MAP, fixVersionNames);
+                    issueValueMap.put(INFLUENCE_VERSION_MAP, influenceVersionNames);
+                    issueValueMap.put(LABEL_MAP, labelNames);
+                    issueValueMap.put(COMPONENT_MAP, componentMap);
+                    issueValueMap.put(FOUNDATION_CODE_VALUE_MAP, foundationCodeValue);
+                    issueValueMap.put(ENV_MAP, envMap);
+                    issueValueMap.put(WORK_LOG_MAP, workLogVOMap);
+                    issueValueMap.put(TAG_MAP, tagMap);
+                    issueValueMap.put(RELATED_ISSUE_MAP, relatedIssueMap);
+                    issueValueMap.forEach((k, v) -> cursor.addCollections(v));
                     issues.forEach(issue ->
                             buildExcelIssueFromIssue(
                                     project.getName(),
                                     parentSonMap,
                                     issueMap,
-                                    usersMap,
-                                    issueTypeDTOMap,
-                                    statusMapDTOMap,
-                                    priorityDTOMap,
-                                    closeSprintNames,
-                                    fixVersionNames,
-                                    influenceVersionNames,
-                                    labelNames,
-                                    componentMap,
-                                    foundationCodeValue,
-                                    envMap,
-                                    workLogVOMap,
-                                    tagMap,
+                                    issueValueMap,
                                     issue));
                 }
                 if (!isTreeView) {
@@ -3049,20 +3063,23 @@ public class ExcelServiceImpl implements ExcelService {
     protected ExportIssuesVO buildExcelIssueFromIssue(String projectName,
                                                       Map<Long, Set<Long>> parentSonMap,
                                                       Map<Long, ExportIssuesVO> issueMap,
-                                                      Map<Long, UserMessageDTO> usersMap,
-                                                      Map<Long, IssueTypeVO> issueTypeDTOMap,
-                                                      Map<Long, StatusVO> statusMapDTOMap,
-                                                      Map<Long, PriorityVO> priorityDTOMap,
-                                                      Map<Long, List<SprintNameDTO>> closeSprintNames,
-                                                      Map<Long, List<VersionIssueRelDTO>> fixVersionNames,
-                                                      Map<Long, List<VersionIssueRelDTO>> influenceVersionNames,
-                                                      Map<Long, List<LabelIssueRelDTO>> labelNames,
-                                                      Map<Long, List<ComponentIssueRelDTO>> componentMap,
-                                                      Map<Long, Map<String, Object>> foundationCodeValue,
-                                                      Map<String, String> envMap,
-                                                      Map<Long, List<WorkLogVO>> workLogVOMap,
-                                                      Map<Long, Set<TagVO>> tagMap,
+                                                      Map<String, Object> issueValueMap,
                                                       IssueDTO issue) {
+        Map<Long, UserMessageDTO> usersMap = (Map<Long, UserMessageDTO>) issueValueMap.get(USER_MAP);
+        Map<Long, IssueTypeVO> issueTypeDTOMap = (Map<Long, IssueTypeVO>) issueValueMap.get(ISSUE_TYPE_MAP);
+        Map<Long, StatusVO> statusMapDTOMap = (Map<Long, StatusVO>) issueValueMap.get(STATUS_MAP);
+        Map<Long, PriorityVO> priorityDTOMap = (Map<Long, PriorityVO>) issueValueMap.get(PRIORITY_MAP);
+        Map<Long, List<SprintNameDTO>> closeSprintNames = (Map<Long, List<SprintNameDTO>>) issueValueMap.get(CLOSE_SPRINT_MAP);
+        Map<Long, List<VersionIssueRelDTO>> fixVersionNames = (Map<Long, List<VersionIssueRelDTO>>) issueValueMap.get(FIX_VERSION_MAP);
+        Map<Long, List<VersionIssueRelDTO>> influenceVersionNames = (Map<Long, List<VersionIssueRelDTO>>) issueValueMap.get(INFLUENCE_VERSION_MAP);
+        Map<Long, List<LabelIssueRelDTO>> labelNames = (Map<Long, List<LabelIssueRelDTO>>) issueValueMap.get(LABEL_MAP);
+        Map<Long, List<ComponentIssueRelDTO>> componentMap = (Map<Long, List<ComponentIssueRelDTO>>) issueValueMap.get(COMPONENT_MAP);
+        Map<Long, Map<String, Object>> foundationCodeValue = (Map<Long, Map<String, Object>>) issueValueMap.get(FOUNDATION_CODE_VALUE_MAP);
+        Map<String, String> envMap = (Map<String, String>) issueValueMap.get(ENV_MAP);
+        Map<Long, List<WorkLogVO>> workLogVOMap = (Map<Long, List<WorkLogVO>>) issueValueMap.get(WORK_LOG_MAP);
+        Map<Long, Set<TagVO>> tagMap = (Map<Long, Set<TagVO>>) issueValueMap.get(TAG_MAP);
+        Map<Long, List<IssueLinkDTO>> relatedIssueMap = (Map<Long, List<IssueLinkDTO>>) issueValueMap.get(RELATED_ISSUE_MAP);
+
         Long issueId = issue.getIssueId();
         ExportIssuesVO exportIssuesVO = new ExportIssuesVO();
         BeanUtils.copyProperties(issue, exportIssuesVO);
@@ -3092,7 +3109,45 @@ public class ExcelServiceImpl implements ExcelService {
         processParentSonRelation(parentSonMap, issue);
         setSpentWorkTimeAndAllEstimateTime(workLogVOMap, exportIssuesVO);
         setTag(tagMap, exportIssuesVO);
+        setRelatedIssue(exportIssuesVO, relatedIssueMap);
         return exportIssuesVO;
+    }
+
+    private void setRelatedIssue(ExportIssuesVO exportIssuesVO, Map<Long, List<IssueLinkDTO>> relatedIssueMap) {
+        Long issueId = exportIssuesVO.getIssueId();
+        List<IssueLinkDTO> issueLinkList = relatedIssueMap.get(issueId);
+        Map<String, List<String>> relMap = new LinkedHashMap<>();
+        if(!ObjectUtils.isEmpty(issueLinkList)) {
+            int size = issueLinkList.size();
+            exportIssuesVO.setRelatedIssueCount(size);
+            Iterator<IssueLinkDTO> iterator = issueLinkList.iterator();
+            while (iterator.hasNext()) {
+                IssueLinkDTO dto = iterator.next();
+                String action;
+                Long linkedIssueId = dto.getLinkedIssueId();
+                if (issueId.equals(linkedIssueId)) {
+                    action = dto.getWard();
+                } else {
+                    action = dto.getLinkTypeName();
+                }
+                String issueNum = dto.getIssueNum();
+                String summary = dto.getSummary();
+                List<String> rowList = relMap.computeIfAbsent(action, x -> new ArrayList<>());
+                String row = action + COLON_CN + issueNum + COLON_CN + summary;
+                rowList.add(row);
+            }
+        }
+        List<String> rows = new ArrayList<>();
+        relMap.forEach((k, v) -> rows.addAll(v));
+        Iterator<String> rowIterator = rows.iterator();
+        StringBuilder builder = new StringBuilder();
+        while (rowIterator.hasNext()) {
+            builder.append(rowIterator.next());
+            if (rowIterator.hasNext()) {
+                builder.append("\n");
+            }
+        }
+        exportIssuesVO.setRelatedIssue(builder.toString());
     }
 
     private void setTag(Map<Long, Set<TagVO>> tagMap, ExportIssuesVO exportIssuesVO) {

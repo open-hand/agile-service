@@ -1,12 +1,12 @@
 import React, {
-  useMemo, forwardRef, useEffect, useRef, useCallback, useState, useLayoutEffect,
+  useMemo, forwardRef, useEffect, useRef, useCallback, useState,
 } from 'react';
 import {
   Select, DataSet,
 } from 'choerodon-ui/pro';
 import { toJS } from 'mobx';
 import {
-  debounce, groupBy, isEmpty, pick,
+  debounce, groupBy, isEmpty, pick, set,
 } from 'lodash';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { ILabel } from '@/common/types';
@@ -37,7 +37,10 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
       Object.assign(innerRef, {
         current: Object.assign(newRef, {
           focus: () => {
-            console.log('binRef...focus');
+            // 重新实现focus，将time置为非空  避免click事件随后触发
+            set((innerRef.current?.trigger || {}), 'focusTime', 1);
+            set((innerRef.current?.trigger || {}), 'preClickTime', 1);
+            innerRef.current?.trigger?.popupTask.cancel();
             innerRef.current?.trigger?.delaySetPopupHidden(false, 150);
           },
         }),
@@ -69,7 +72,7 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
   useEffect(() => () => {
     onPopupHidden && onPopupHidden(true);
   }, []);
-  const [value, setValue] = useState(handleProcessPropsValue(propsValue) || handleProcessPropsValue(defaultValue));
+  const [value, setValue] = useState(() => handleProcessPropsValue(propsValue) || handleProcessPropsValue(defaultValue));
   function handleSave(data: IMultiServiceTagItemProps[]) {
     onChange && onChange(data);
     setValue(handleProcessPropsValue(data));
@@ -105,7 +108,6 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
   const componentId = useMemo(() => `select-multi-service-tag-${randomString(5)}`, []);
 
   const wrapProps = useMemo(() => pick(otherProps, ['style', 'className']), [otherProps]);
-  console.log('value...', value, value?.map((i) => i.uniqValue));
   return (
     // <div id={componentId} {...wrapProps}>
     <Component
@@ -113,14 +115,9 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
       value={value?.map((i) => i.uniqValue)}
       multiple
       primitiveValue={false}
-      renderer={({ text, value: renderValue }) => {
-        console.log('render..', text, renderValue);
-        return text || rendererSelectTag(renderValue);
-      }}
+      renderer={({ text, value: renderValue }) => text || rendererSelectTag(renderValue)}
       options={optionsDataSet}
       onPopupHiddenChange={(hidden) => {
-        console.log('onPopupHiddenChange..', hidden);
-        // onChange();
         handlePopupHidden(hidden);
       }}
       // getPopupContainer={(node) => document.getElementById(componentId) as HTMLElement}

@@ -6,8 +6,10 @@ import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.app.assembler.IssueLinkAssembler;
 import io.choerodon.agile.app.service.IssueLinkService;
 import io.choerodon.agile.app.service.IssueService;
+import io.choerodon.agile.app.service.LinkIssueStatusLinkageService;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.IssueLinkDTO;
+import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.IssueLinkMapper;
 import io.choerodon.agile.infra.mapper.IssueTypeMapper;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
@@ -50,9 +52,11 @@ public class IssueLinkServiceImpl implements IssueLinkService {
     private IssueTypeMapper issueTypeMapper;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private LinkIssueStatusLinkageService linkIssueStatusLinkageService;
 
     @Override
-    public List<IssueLinkVO> createIssueLinkList(List<IssueLinkCreateVO> issueLinkCreateVOList, Long issueId, Long projectId) {
+    public IssueLinkResponseVO createIssueLinkList(List<IssueLinkCreateVO> issueLinkCreateVOList, Long issueId, Long projectId) {
         List<IssueLinkDTO> issueLinkDTOList = issueLinkAssembler.toTargetList(issueLinkCreateVOList, IssueLinkDTO.class);
         issueLinkDTOList.forEach(issueLinkDTO -> {
             issueLinkDTO.setProjectId(projectId);
@@ -62,7 +66,13 @@ public class IssueLinkServiceImpl implements IssueLinkService {
                 BaseFieldUtil.updateIssueLastUpdateInfoForIssueLink(issueLinkDTO.getProjectId(), issueLinkDTO);
             }
         });
-        return listIssueLinkByIssueId(issueId, projectId, false);
+        // 创建链接时候触发关联问题联动
+        Set<Long> influenceIssueIds = new HashSet<>();
+        linkIssueStatusLinkageService.updateLinkIssueStatus(projectId, issueId, SchemeApplyType.AGILE, influenceIssueIds);
+        IssueLinkResponseVO response = new IssueLinkResponseVO();
+        response.setIssueLinks(listIssueLinkByIssueId(issueId, projectId, false));
+        response.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
+        return response;
     }
 
 
@@ -75,7 +85,8 @@ public class IssueLinkServiceImpl implements IssueLinkService {
 
     @Override
     public List<IssueLinkVO> listIssueLinkByIssueId(Long issueId, Long projectId, Boolean noIssueTest) {
-        return issueLinkAssembler.issueLinkDTOToVO(projectId, issueLinkMapper.queryIssueLinkByIssueId(issueId, projectId, noIssueTest));
+        return issueLinkAssembler.issueLinkDTOToVO(projectId,
+                issueLinkMapper.queryIssueLinkByIssueId(new HashSet<>(Arrays.asList(issueId)), new HashSet<>(Arrays.asList(projectId)), noIssueTest));
     }
 
     @Override
@@ -136,7 +147,7 @@ public class IssueLinkServiceImpl implements IssueLinkService {
         }
         Set<Long> issueIds = new HashSet<>();
         issueIds.add(issueId);
-        List<IssueLinkDTO> issueLinks = issueLinkMapper.queryIssueLinkByIssueId(issueId, projectId, false);
+        List<IssueLinkDTO> issueLinks = issueLinkMapper.queryIssueLinkByIssueId(new HashSet<>(Arrays.asList(issueId)), new HashSet<>(Arrays.asList(projectId)), false);
         if (!CollectionUtils.isEmpty(issueLinks)) {
             issueLinks.forEach(issueLink -> {
                 issueIds.add(issueLink.getIssueId());

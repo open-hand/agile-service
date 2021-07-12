@@ -543,4 +543,37 @@
              #{fieldId}
          </foreach>
     </select>
+
+    <select id="selectCustomFieldListWithOutOption" resultType="io.choerodon.agile.api.vo.ObjectSchemeFieldDetailVO">
+        SELECT
+            osf.id,
+            osf.code,
+            osf.name,
+            osf.field_type,
+            osf.extra_config,
+            flv.name as field_type_name
+        FROM fd_object_scheme_field osf
+        LEFT JOIN lookup_value flv ON flv.value_code = osf.field_type and flv.type_code = 'field_type'
+        WHERE
+            osf.organization_id = #{organizationId}
+        AND
+            (osf.project_id = #{projectId} OR osf.project_id IS NULL)
+            <if test='issueTypeList != null and issueTypeList != ""'>
+                AND osf.id in (
+                SELECT osfe.field_id
+                FROM fd_object_scheme_field_extend osfe
+                WHERE osfe.field_id = osf.id
+                <if test='issueTypeList == "agileIssueType"'>
+                    AND osfe.issue_type IN ('issue_epic', 'story', 'bug', 'task', 'sub_task')
+                </if>
+                <if test='issueTypeList == "programIssueType" '>
+                    AND osfe.issue_type IN ('issue_epic', 'feature')
+                </if>
+                <if test='issueTypeList == "backlogIssueType" '>
+                    AND osfe.issue_type IN ('backlog')
+                </if>
+                )
+            </if>
+        ORDER BY osf.id DESC
+    </select>
 </mapper>

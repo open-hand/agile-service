@@ -2,6 +2,7 @@ import {
   observable, action, computed, toJS,
 } from 'mobx';
 import { find } from 'lodash';
+import { Choerodon } from '@choerodon/boot';
 import { issueApi, uiApi } from '@/api';
 
 const hiddenFields = ['issueType', 'summary', 'description', 'remainingTime', 'storyPoints'];
@@ -121,15 +122,7 @@ class EditIssueStore {
 
   @observable copyIssueShow = false;
 
-  @observable transformSubIssueShow = false;
-
-  @observable transformFromSubIssueShow = false;
-
-  @observable relateStoryShow = false;
-
   @observable assigneeShow = false;
-
-  @observable changeParentShow = false;
 
   @observable detailShow = false;
 
@@ -206,44 +199,12 @@ class EditIssueStore {
     return this.copyIssueShow;
   }
 
-  @action setTransformSubIssueShow(data) {
-    this.transformSubIssueShow = data;
-  }
-
-  @computed get getTransformSubIssueShow() {
-    return this.transformSubIssueShow;
-  }
-
-  @action setTransformFromSubIssueShow(data) {
-    this.transformFromSubIssueShow = data;
-  }
-
-  @computed get getTransformFromSubIssueShow() {
-    return this.transformFromSubIssueShow;
-  }
-
-  @action setRelateStoryShow(data) {
-    this.relateStoryShow = data;
-  }
-
-  @computed get getRelateStoryShow() {
-    return this.relateStoryShow;
-  }
-
   @action setAssigneeShow(data) {
     this.assigneeShow = data;
   }
 
   @computed get getAssigneeShow() {
     return this.assigneeShow;
-  }
-
-  @action setChangeParentShow(data) {
-    this.changeParentShow = data;
-  }
-
-  @computed get getChangeParentShow() {
-    return this.changeParentShow;
   }
 
   @action setDetailShow(detailShow) {
@@ -327,6 +288,9 @@ class EditIssueStore {
       res = await issueApi.update(data);
     } catch (error) {
       res = { failed: true, ...error };
+      if (res.failed && res.code === 'error.epic.duplicate.feature.summary') {
+        Choerodon.prompt('史诗下有相同的特性概要');
+      }
     }
     ignoreEvents.includes('updateAfter') || await this.events.updateAfter(res);
     return res;

@@ -1,5 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.api.vo.IssueWithBranchVO;
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.InnerFeignService;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
@@ -24,6 +26,8 @@ public class InnerFeignServiceImpl implements InnerFeignService {
 
     @Autowired
     private IssueMapper issueMapper;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     @Override
     public List<IssueDTO> listIssueByIds(List<Long> issueIds) {
@@ -32,5 +36,12 @@ public class InnerFeignServiceImpl implements InnerFeignService {
         }
         Set<Long> issueIdSet = new HashSet<>(issueIds);
         return issueMapper.selectByIds(StringUtils.join(issueIdSet, ","));
+    }
+
+    @Override
+    public void deleteTagByBranch(Long projectId, IssueWithBranchVO issueWithBranchVO) {
+        if (agilePluginService != null) {
+            agilePluginService.deleteTagByBranch(projectId, issueWithBranchVO);
+        }
     }
 }

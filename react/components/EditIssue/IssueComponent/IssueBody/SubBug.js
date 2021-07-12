@@ -9,7 +9,7 @@ import EditIssueContext from '../../stores';
 import Divider from './Divider';
 
 const SubBug = observer(({
-  reloadIssue, onDeleteSubIssue, onUpdate, applyType,
+  reloadIssue, onDeleteSubIssue, onUpdate, applyType, onCreateSubIssue,
 }) => {
   const { store, disabled } = useContext(EditIssueContext);
   const {
@@ -38,12 +38,12 @@ const SubBug = observer(({
           reloadIssue(issue.issueId);
         }
       }}
-      onRefresh={() => {
+      onRefresh={(subIssueId) => {
         if (reloadIssue) {
           reloadIssue(issueId);
         }
         if (onDeleteSubIssue) {
-          onDeleteSubIssue();
+          onDeleteSubIssue(issue, subIssueId);
         }
       }}
     />
@@ -67,8 +67,8 @@ const SubBug = observer(({
   const handleCreateSubIssue = (issue) => {
     store.setCreateSubBugShow(false);
     resetDefault();
-    if (onUpdate) {
-      onUpdate();
+    if (onCreateSubIssue) {
+      onCreateSubIssue(issue, relateIssueId);
     }
     if (reloadIssue) {
       reloadIssue(issue.issueId);

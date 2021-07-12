@@ -1,7 +1,4 @@
-import React, { useContext } from 'react';
-import {
-  Modal,
-} from 'choerodon-ui';
+import React, { useCallback, useContext } from 'react';
 import {
   Button,
   Modal as ModalPro, Dropdown, Menu,
@@ -14,16 +11,21 @@ import useHasDevops from '@/hooks/useHasDevops';
 import useHasTest from '@/hooks/useHasTest';
 import { openEditIssueCopyIssue } from '@/components/CopyIssue';
 import { isInProgram } from '@/utils/program';
+import openRecordWorkLogModal from '@/components/DailyLog/DailyLogPro';
+import openCreateBranchModal from '@/components/CreateBranch/CreateBranchPro';
 import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
 import openIssueMove from './issue-move';
+import openChangeParentModal from './ChangeParent';
+import openRelateIssueModal from './RelateIssue/RelateIssue';
+import openTransformSubIssue from './TransformSubIssue/TransformSubIssue';
+import openTransformFromSubIssue from './IssueBody/TransformFromSubIssue';
 
-const { confirm } = Modal;
 const IssueDropDown = ({
-  onDeleteIssue, loginUserId, reloadIssue, testLinkStoreRef, onIssueCopy,
+  onDeleteIssue, loginUserId, reloadIssue, testLinkStoreRef, onIssueCopy, onUpdate, onChangeParent, onRelateIssue, onTransformSubIssue,
 }) => {
   const {
-    store, onUpdate, applyType,
+    store, applyType,
   } = useContext(EditIssueContext);
   const docs = store.getDoc;
   const hasDevops = useHasDevops();
@@ -61,16 +63,18 @@ const IssueDropDown = ({
         return issueApi.delete(issueId, createdBy)
           .then((res) => {
             if (onDeleteIssue) {
-              onDeleteIssue();
+              onDeleteIssue(issue);
             }
           });
       },
       okText: '删除',
     });
   };
+
   const handleClickMenu = async (e) => {
     if (e.key === '0') {
-      store.setWorkLogShow(true);
+      // store.setWorkLogShow(true);
+      openRecordWorkLogModal({ issueId, onOk: () => reloadIssue(issueId) });
     } else if (e.key === 'item_11') {
       handleDeleteIssue();
     } else if (e.key === '2') {
@@ -87,10 +91,15 @@ const IssueDropDown = ({
       });
       store.setCopyIssueShow(true);
     } else if (e.key === '4') {
-      store.setTransformSubIssueShow(true);
+      openTransformSubIssue({ issueId, objectVersionNumber, onOk: onTransformSubIssue });
     } else if (e.key === '5') {
-      store.setTransformFromSubIssueShow(true);
+      openTransformFromSubIssue({
+        issueId, objectVersionNumber, onOk: onTransformSubIssue, store,
+      });
     } else if (e.key === '6') {
+      openCreateBranchModal({
+        issueId, onOk: () => store.refreshBranch(), typeCode, defaultBranchSuffixName: issueNum,
+      });
       store.setCreateBranchShow(true);
     } else if (e.key === '7') {
       ModalPro.open({
@@ -99,20 +108,22 @@ const IssueDropDown = ({
           issueId={issueId}
           assigneeId={assigneeId}
           objectVersionNumber={objectVersionNumber}
-          onOk={() => {
+          onOk={(res) => {
             if (onUpdate) {
-              onUpdate();
+              onUpdate(res);
             }
             reloadIssue(issueId);
           }}
         />,
       });
     } else if (e.key === '8') {
-      store.setChangeParentShow(true);
+      openChangeParentModal({
+        issueId, issueNum, objectVersionNumber, onOk: onChangeParent,
+      });
     } else if (e.key === '9') {
       store.setCreateSubBugShow(true);
     } else if (e.key === '10') {
-      store.setRelateStoryShow(true);
+      openRelateIssueModal({ issue, onOk: onRelateIssue });
     } else if (e.key === 'item_10') {
       openIssueMove({
         issue,

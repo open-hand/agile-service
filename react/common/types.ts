@@ -180,6 +180,22 @@ export interface FieldOption {
   sequence: number
   enabled: boolean
 }
+export interface IssueCreateFields {
+  defaultValue: any
+  defaultValueObj: any
+  defaultValueObjs: any[]
+  display: boolean
+  // extraConfig: false
+  fieldCode: string
+  fieldId: string
+  fieldName: string
+  fieldType: IFieldType
+  id: string
+  organizationId: string
+  projectId: string
+  required: boolean
+  system: boolean
+}
 export interface IField {
   code: string,
   fieldId: string,
@@ -195,6 +211,7 @@ export interface IField {
   projectId?: string | number
   required: boolean
   defaultValue: any
+  contexts: string[]
 }
 
 export interface IFieldWidthValue extends IField {
@@ -364,6 +381,29 @@ export type IIssueColumnName =
 export type IFieldType =
   'text' | 'input' | 'member' | 'multiMember' | 'single' | 'multiple' | 'radio' | 'checkbox' |
   'number' | 'time' | 'date' | 'datetime'
+
+export type ISystemFieldCodeMap =
+  'summary' |
+  'issueType' |
+  'description' |
+  'priority' |
+  'sprint' |
+  'reporter' |
+  'assignee' |
+  'status' |
+  'remainingTime' |
+  'fixVersion' |
+  'storyPoints' |
+  'estimatedStartTime' |
+  'estimatedEndTime' |
+  'label' |
+  'component' |
+  'storyPoints' |
+  'version' |
+  'epic' |
+  'feature' |
+  'mainResponsible' |
+  'tag';
 
 export type ISystemFieldCode =
   'summary' |

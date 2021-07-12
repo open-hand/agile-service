@@ -59,7 +59,7 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = ({
     dataToJSON: 'normal' as any,
     data,
     fields: [
-      { name: 'projectId', label: '子项目' },
+      { name: 'projectId', label: '子项目', type: 'string' as any },
       {
         name: 'appService', label: '应用服务', textField: 'meaning', valueField: 'code', type: 'object' as any, ignore: 'always' as any,
       },

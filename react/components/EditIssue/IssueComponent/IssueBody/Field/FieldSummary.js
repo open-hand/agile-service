@@ -20,7 +20,7 @@ import styles from './FieldSummary.less';
       return;
     }
     const {
-      store, onUpdate, reloadIssue, field, feature,
+      store, field, feature,
     } = this.props;
     const { fieldCode } = field;
     const issue = store.getIssue;
@@ -49,18 +49,7 @@ import styles from './FieldSummary.less';
         };
       }
       if (obj) {
-        issueApi.update(obj)
-          .then((res) => {
-            if (res.failed && res.code === 'error.epic.duplicate.feature.summary') {
-              Choerodon.prompt('史诗下有相同的特性概要');
-            }
-            if (onUpdate) {
-              onUpdate();
-            }
-            if (reloadIssue) {
-              reloadIssue(issueId);
-            }
-          });
+        store.update(obj);
       }
     }
   };

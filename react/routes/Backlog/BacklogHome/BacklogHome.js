@@ -9,9 +9,11 @@ import {
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import SideNav from '@/components/side-nav';
 import { HeaderButtons } from '@choerodon/master';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
+import openCreateIssue from '@/components/create-issue';
 import Version from '../components/VersionComponent/Version';
 import Epic from '../components/EpicComponent/Epic';
 import Feature from '../components/FeatureComponent/Feature';
@@ -39,6 +41,8 @@ class BacklogHome extends Component {
   }
 
   componentWillUnmount() {
+    localPageCacheStore.setItem('backlogSprintExpand', BacklogStore.getExpandSprint);
+    localPageCacheStore.setItem('backlogSprintPageSize', BacklogStore.getSprintPageSize);
     BacklogStore.resetData();
     BacklogStore.clearMultiSelected();
     BacklogStore.resetFilter();
@@ -134,6 +138,13 @@ class BacklogHome extends Component {
               name: '创建问题',
               icon: 'playlist_add',
               handler: this.handleClickCBtn,
+              display: true,
+            }, {
+              name: '新创建问题',
+              icon: 'playlist_add',
+              handler: () => openCreateIssue({
+
+              }),
               display: true,
             }, {
               name: '创建冲刺',

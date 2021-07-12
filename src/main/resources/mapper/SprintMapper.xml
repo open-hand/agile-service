@@ -53,6 +53,7 @@
         <id property="estimatedStartTime" column="estimated_start_time"/>
         <id property="estimatedEndTime" column="estimated_end_time"/>
         <id property="epicName" column="issue_epic_name"/>
+        <id property="parentId" column="parent_id"/>
         <id property="color" column="color"/>
         <!--<id property="featureName" column="feature_name"/>-->
         <collection property="versionIds" autoMapping="true" ofType="java.lang.Long">
@@ -103,6 +104,9 @@
         ai.estimated_start_time,
         ai.estimated_end_time,
         alv2.name AS color,
+        IF(ai.parent_issue_id IS NULL OR ai.parent_issue_id = 0,
+        (IF(ai.relate_issue_id IS NULL OR ai.relate_issue_id = 0, null, ai.relate_issue_id)),
+        ai.parent_issue_id) as parent_id,
 --         feature_info.feature_name AS feature_name,
         apv1.version_id AS version_id,
         apv1.name AS version_name
@@ -135,7 +139,7 @@
         WHERE avir.version_id = apv.version_id AND avir.relation_type = 'fix'
         ) apv1 ON apv1.issue_id = ai.issue_id
         WHERE asp1.sprint_id is null and ais.is_completed != 1
-            and ai.type_code in ('story', 'task', 'bug')
+            and ai.type_code in ('story', 'task', 'bug','sub_task')
             and ai.apply_type = 'agile'
             and ai.project_id = #{projectId}
         ORDER BY ai.rank asc
@@ -203,7 +207,7 @@
         FROM
         (
             SELECT
-            aisr.sprint_id,
+            aii.sprint_id,
             CASE
               WHEN ai.assignee_id IS NULL THEN 0 ELSE ai.assignee_id
             END AS assignee_id,
@@ -211,28 +215,22 @@
             (ai.remaining_time + IFNULL(wl.work_time,0)) as remaining_time
             FROM
             agile_issue ai
-            JOIN agile_issue_sprint_rel aisr ON aisr.issue_id = ai.issue_id
+            JOIN (<include refid="selectSprintIssue"/>) aii on ai.issue_id = aii.issue_id
             LEFT JOIN (
                 select
                     wl1.issue_id,
                     SUM(wl1.work_time) as work_time
-                from agile_work_log wl1
+                from agile_work_log wl1,
+                (
+                    <include refid="selectSprintIssue"/>
+                  ) aii
                 where
-                    wl1.issue_id in
-                    <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
-                        #{issueId}
-                    </foreach>
+                    wl1.project_id = #{projectId}
+                    and wl1.issue_id = aii.issue_id
                 group by wl1.issue_id
             ) wl ON ai.issue_id = wl.issue_id
         WHERE
-            aisr.sprint_id in
-            <foreach collection="sprintIds" item="sprintId" open="(" separator="," close=")">
-                #{sprintId}
-            </foreach>
-            AND ai.issue_id in
-            <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
-                #{issueId}
-            </foreach>
+            ai.project_id = #{projectId}
         ) a
         GROUP BY
         a.sprint_id,
@@ -248,32 +246,75 @@
         FROM
         (
             SELECT
-            aisr.sprint_id,
+            aii.sprint_id,
             CASE WHEN
             ai2.assignee_id IS NULL THEN 0 ELSE ai2.assignee_id
             END AS assignee_id,
             ai2.story_points,
             ai2.remaining_time
             FROM
-            agile_issue ai2,
-            agile_issue_sprint_rel aisr
+            agile_issue ai2
+            JOIN agile_issue_status ais  on ai2.project_id = ais.project_id AND ai2.status_id = ais.status_id,
+            (<include refid="selectSprintIssue"/>) aii
             WHERE
-            aisr.issue_id = ai2.issue_id
-            AND aisr.sprint_id in
-            <foreach collection="sprintIds" item="sprintId" open="(" separator="," close=")">
-                #{sprintId}
-            </foreach>
-            AND ai2.issue_id in
-            <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
-                #{issueId}
-            </foreach>
-            AND ai2.status_id IN ( SELECT ais.status_id FROM agile_issue_status ais WHERE ais.project_id = #{projectId} AND ais.is_completed != 1 )
+            aii.issue_id = ai2.issue_id
+            AND ais.is_completed != 1
         ) a2
         GROUP BY
         a2.sprint_id,
         a2.assignee_id
         ) bb ON cc.asi_assignee_id = bb.asi_assignee_id and cc.asi_sprint_id = bb.asi_sprint_id order by cc.asi_assignee_id
     </select>
+
+    <sql id="selectSprintIssue">
+        SELECT
+        ai.issue_id,
+        ai.assignee_id,
+        aisr.sprint_id
+        FROM agile_issue ai,agile_issue_sprint_rel aisr
+        WHERE ai.issue_id = aisr.issue_id
+        AND ai.project_id = #{projectId}
+        AND ai.type_code in ('story', 'task', 'bug','sub_task')
+        AND aisr.sprint_id in
+        <foreach collection="sprintIds" item="sprintId" open="(" separator="," close=")">
+            #{sprintId}
+        </foreach>
+        <if test='advancedSearchArgs != null'>
+            <if test='advancedSearchArgs.versionId != null'>
+                AND ai.issue_id IN (SELECT issue_id FROM agile_version_issue_rel WHERE version_id =
+                #{advancedSearchArgs.versionId} AND relation_type = 'fix')
+            </if>
+            <if test='advancedSearchArgs.epicId != null'>
+                AND ai.epic_id = #{advancedSearchArgs.epicId}
+            </if>
+            <if test='advancedSearchArgs.noVersion != "" and advancedSearchArgs.noVersion == "true"'>
+                AND ai.issue_id NOT IN (SELECT issue_id FROM agile_version_issue_rel WHERE version_id != 0 AND
+                relation_type = 'fix')
+            </if>
+            <if test='advancedSearchArgs.noEpic != "" and advancedSearchArgs.noEpic == "true"'>
+                AND (ai.epic_id IS NULL OR ai.epic_id = 0)
+            </if>
+            <if test='advancedSearchArgs.featureId != null'>
+                and ai.type_code = 'story' AND ai.feature_id = #{advancedSearchArgs.featureId}
+            </if>
+            <if test='advancedSearchArgs.noFeature != "" and advancedSearchArgs.noFeature == "true"'>
+                and ai.type_code = 'story' AND (ai.feature_id IS NULL OR ai.feature_id = 0)
+            </if>
+            <if test='advancedSearchArgs.ownIssue != "" and advancedSearchArgs.ownIssue == "true"'>
+                AND ai.assignee_id = #{userId}
+            </if>
+            <if test='advancedSearchArgs.onlyStory != "" and advancedSearchArgs.onlyStory == "true"'>
+                AND ai.type_code = 'story'
+            </if>
+            <if test='advancedSearchArgs.assigneeFilterIds != null and advancedSearchArgs.assigneeFilterIds.size > 0'>
+                AND ai.assignee_id IN
+                <foreach collection="advancedSearchArgs.assigneeFilterIds" item="assigneeFilterId"
+                         open="(" close=")" separator=",">
+                    #{assigneeFilterId}
+                </foreach>
+            </if>
+        </if>
+    </sql>
 
     <select id="queryAssigneeIssueByActiveSprintId" resultType="io.choerodon.agile.infra.dto.AssigneeIssueDTO">
       SELECT
@@ -539,6 +580,9 @@
         ai2.priority_code,
         ai2.estimated_start_time,
         ai2.estimated_end_time,
+        IF(ai2.parent_issue_id IS NULL OR ai2.parent_issue_id = 0,
+            (IF(ai2.relate_issue_id IS NULL OR ai2.relate_issue_id = 0, null, ai2.relate_issue_id)),
+             ai2.parent_issue_id) as parent_id,
 --         ai2.feature_id,
         ai1.epic_name AS issue_epic_name,
         alv2.name AS color,
@@ -1089,6 +1133,107 @@
             #{projectId}
         </foreach>
         AND status_code = 'started'
+    </select>
+
+    <select id="querySprintIssue" resultType="java.lang.Long">
+       select
+        ai1.issue_id
+        from (
+            SELECT
+            distinct case
+            when ai.type_code = 'sub_task' then ai.parent_issue_id
+            when ai.type_code = 'bug' and ai.relate_issue_id is not null and ai.relate_issue_id != 0 then ai.relate_issue_id
+            else ai.issue_id
+            end as issue_id
+            FROM agile_issue ai
+            LEFT JOIN agile_issue_sprint_rel aisr ON aisr.issue_id = ai.issue_id
+            LEFT JOIN agile_sprint asp on asp.sprint_id = aisr.sprint_id
+            WHERE ai.project_id = #{projectId}
+            AND asp.sprint_id = #{sprintId}
+            <if test='advancedSearchArgs != null'>
+                <if test='advancedSearchArgs.versionId != null'>
+                    AND ai.issue_id IN (SELECT issue_id FROM agile_version_issue_rel WHERE version_id =
+                    #{advancedSearchArgs.versionId} AND relation_type = 'fix')
+                </if>
+                <if test='advancedSearchArgs.epicId != null'>
+                    AND ai.epic_id = #{advancedSearchArgs.epicId}
+                </if>
+                <if test='advancedSearchArgs.noVersion != "" and advancedSearchArgs.noVersion == "true"'>
+                    AND ai.issue_id NOT IN (SELECT issue_id FROM agile_version_issue_rel WHERE version_id != 0 AND
+                    relation_type = 'fix')
+                </if>
+                <if test='advancedSearchArgs.noEpic != "" and advancedSearchArgs.noEpic == "true"'>
+                    AND (ai.epic_id IS NULL OR ai.epic_id = 0)
+                </if>
+                <if test='advancedSearchArgs.featureId != null'>
+                    and ai.type_code = 'story' AND ai.feature_id = #{advancedSearchArgs.featureId}
+                </if>
+                <if test='advancedSearchArgs.noFeature != "" and advancedSearchArgs.noFeature == "true"'>
+                    and ai.type_code = 'story' AND (ai.feature_id IS NULL OR ai.feature_id = 0)
+                </if>
+                <if test='advancedSearchArgs.onlyStory != "" and advancedSearchArgs.onlyStory == "true"'>
+                    AND ai.type_code = 'story'
+                </if>
+                <if test='advancedSearchArgs.assigneeFilterIds != null and advancedSearchArgs.assigneeFilterIds.size > 0 '>
+                    AND ai.assignee_id IN
+                    <foreach collection="advancedSearchArgs.assigneeFilterIds" item="assigneeFilterId"
+                             open="(" close=")" separator=",">
+                        #{assigneeFilterId}
+                    </foreach>
+                </if>
+            </if>
+        ) aii
+        JOIN agile_issue ai1 on aii.issue_id = ai1.issue_id
+        where ai1.project_id = #{projectId}
+        AND ai1.type_code in ('story', 'task', 'bug')
+        order by ai1.rank ASC
+    </select>
+
+    <select id="queryPlanSprints" resultType="io.choerodon.agile.infra.dto.SprintSearchDTO">
+        SELECT
+        sp.sprint_id, sp.sprint_name,
+        sp.sprint_goal, start_date,
+        sp.end_date, status_code,
+        sp.object_version_number
+        FROM agile_sprint sp
+        WHERE sp.project_id = #{projectId} AND sp.status_code = 'sprint_planning'
+        order by sp.sprint_id DESC
+    </select>
+
+    <select id="querySprintIssueStoryPoints" resultType="io.choerodon.agile.infra.dto.IssueCountDTO">
+        SELECT
+          aii.sprint_id as id,
+          SUM(CASE WHEN fs.type = 'done' then IFNULL(ai.story_points,0) ELSE 0 END) as doneStoryPoint,
+          SUM(CASE WHEN fs.type = 'doing' then IFNULL(ai.story_points,0) ELSE 0 END) as doingStoryPoint,
+          SUM(CASE WHEN fs.type = 'todo' then IFNULL(ai.story_points,0) ELSE 0 END) as todoStoryPoint
+        FROM agile_issue ai
+        JOIN (
+        <include refid="selectSprintIssue"/>
+        ) aii on ai.issue_id = aii.issue_id
+        LEFT JOIN agile_issue_status ais on ais.project_id = ai.project_id and ais.status_id = ai.status_id
+        LEFT JOIN fd_status fs on fs.id = ais.status_id
+        WHERE
+         ai.type_code = 'story'
+        group by aii.sprint_id
+    </select>
+
+    <select id="queryAssigneeIdsBySprintIds" resultType="java.lang.Long">
+        SELECT aii.assignee_id FROM (
+          <include refid="selectSprintIssue"/>
+        )  aii
+        WHERE
+        aii.assignee_id IS NOT NULL
+        AND aii.assignee_id != 0
+    </select>
+
+    <select id="selectCountBySprintIds" resultType="io.choerodon.agile.infra.dto.IssueCountDTO">
+        select
+        aii.sprint_id as id,
+        SUM(1) as issueCount
+         from (
+             <include refid="selectSprintIssue"/>
+        )  aii
+        group by aii.sprint_id
     </select>
 
 </mapper>

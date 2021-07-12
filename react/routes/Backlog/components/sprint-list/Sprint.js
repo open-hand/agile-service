@@ -12,7 +12,7 @@ function Sprint({ data }) {
       <SprintHeader data={data} />
       {expand && (
         <>
-          <IssueList data={issueList} sprintId={sprintId} />
+          <IssueList sprintData={data} data={issueList} sprintId={sprintId} />
         </>
       )}
     </div>

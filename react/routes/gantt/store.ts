@@ -39,7 +39,7 @@ class GanttStore {
 
   @observable issueId: string | null = null
 
-  @observable sprintId: string | null = null
+  @observable sprintIds: string[] | null = null
 
   @observable createIssueVisible: boolean = false
 
@@ -68,9 +68,9 @@ class GanttStore {
   }
 
   @action
-  setSprintId(sprintId: string | null) {
-    this.sprintId = sprintId;
-    localPageCacheStore.setItem('gantt.search.sprint', sprintId);
+  setSprintIds(sprintIds: string[] | null) {
+    this.sprintIds = sprintIds;
+    localPageCacheStore.setItem('gantt.search.sprints', sprintIds);
   }
 
   @action

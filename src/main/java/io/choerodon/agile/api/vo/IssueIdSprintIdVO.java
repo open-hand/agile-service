@@ -11,6 +11,8 @@ public class IssueIdSprintIdVO {
     private Long issueId;
     private String typeCode;
     @Encrypt
+    private Long assigneeId;
+    @Encrypt
     private Long sprintId;
 
     public Long getIssueId() {
@@ -35,6 +37,14 @@ public class IssueIdSprintIdVO {
 
     public void setTypeCode(String typeCode) {
         this.typeCode = typeCode;
+    }
+
+    public Long getAssigneeId() {
+        return assigneeId;
+    }
+
+    public void setAssigneeId(Long assigneeId) {
+        this.assigneeId = assigneeId;
     }
 }
 

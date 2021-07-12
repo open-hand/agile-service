@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.IssueTypeRankVO;
 import io.choerodon.agile.api.vo.ProjectIssueTypeVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.infra.dto.IssueTypeDTO;
@@ -142,4 +143,14 @@ public interface IssueTypeService {
      * @return
      */
     Map<Long, List<IssueTypeVO>> listIssueTypeMapByProjectIds(Long organizationId, List<Long> projectIds);
+
+    /**
+     * 更新rank值
+     *
+     * @param projectId
+     * @param organizationId
+     * @param issueTypeId
+     * @param issueTypeRankVO
+     */
+    void updateRank(Long projectId, Long organizationId, Long issueTypeId, IssueTypeRankVO issueTypeRankVO);
 }

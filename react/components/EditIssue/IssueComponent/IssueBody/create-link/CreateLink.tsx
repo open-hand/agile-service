@@ -29,7 +29,7 @@ interface ILink {
 interface Props {
   modal?: IModalProps,
   issueId: string,
-  onOk: () => void,
+  onOk: (res: any) => void,
 }
 const CreateLink: React.FC<Props> = ({ modal, issueId, onOk }) => {
   const [originLinks, setOriginLinks] = useState<IOriginLink[]>([]);
@@ -56,7 +56,7 @@ const CreateLink: React.FC<Props> = ({ modal, issueId, onOk }) => {
   }, []);
 
   const getLinks = useCallback(() => {
-    issueLinkTypeApi.getAll().then((res: { list: IOriginLink[]}) => {
+    issueLinkTypeApi.getAll().then((res: { list: IOriginLink[] }) => {
       setOriginLinks(res.list);
       transform(res.list);
     });
@@ -103,8 +103,8 @@ const CreateLink: React.FC<Props> = ({ modal, issueId, onOk }) => {
         });
       });
       return issueLinkApi.create(issueId, labelIssueRelVOList)
-        .then(() => {
-          onOk();
+        .then((r: any) => {
+          onOk(r);
           return true;
         });
     }

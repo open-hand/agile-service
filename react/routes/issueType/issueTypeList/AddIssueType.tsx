@@ -287,8 +287,8 @@ const AddIssueType: React.FC<Props> = ({
     <div className={styles.addIssueType}>
       <div className={styles.addIssueType_content}>
         <Form dataSet={addDataSet} disabled={isOrganization && isSystemType} className={styles.addIssueType_form}>
-          <TextField name="name" placeholder="例如：故事、工单" />
-          <TextArea name="description" placeholder="例如：故事是用户的需求，是从用户的角度来描述用户渴望得到的功能。" />
+          <TextField name="name" placeholder="请输入问题类型名称，例如：故事、工单" />
+          <TextArea name="description" placeholder="请输入描述，例如：故事是用户的需求，是从用户的角度来描述用户渴望得到的功能。" />
           {
             !isSystemType && (
               <Select name="typeCode" />
@@ -359,7 +359,7 @@ const AddIssueType: React.FC<Props> = ({
         {
           !typeId ? (
             <>
-              <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} loading={addLoading} onClick={handleSave}>保存</Button>
+              <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} loading={addLoading} onClick={handleSave} style={{ marginLeft: 10 }}>保存</Button>
               <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToPage} loading={addLoading}>保存并配置页面</Button>
               {
                 !isOrganization && (
@@ -372,7 +372,7 @@ const AddIssueType: React.FC<Props> = ({
             <>
               {
                 !(isOrganization && isSystemType) && (
-                  <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} loading={editLoading} onClick={handleSave}>保存</Button>
+                  <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} loading={editLoading} onClick={handleSave} style={{ marginLeft: 10 }}>保存</Button>
                 )
               }
               <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToPage} disabled={editLoading}>跳转配置页面</Button>

@@ -34,7 +34,7 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
         objectVersionNumber,
         description: text,
       };
-      await issueApi.update(obj);
+      await store.update(obj);
       setDescriptionChanged(false);
       setEditDesShow(false);
       if (reloadIssue) {

@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import java.util.List;
+import java.util.Set;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -90,9 +91,10 @@ public interface IssueService {
      * @param projectId
      * @param issueId
      * @param applyType
+     * @param influenceIssueIds
      * @return
      */
-    IssueVO doStateMachineCustomFlow(Long projectId, Long issueId, String applyType);
+    IssueVO doStateMachineCustomFlow(Long projectId, Long issueId, String applyType, Set<Long> influenceIssueIds);
 
     /**
      * 更新issue自己的字段
@@ -366,7 +368,8 @@ public interface IssueService {
      */
     Page<IssueListFieldKVVO> pagedQueryMyReported(Long organizationId,
                                                   Long projectId,
-                                                  PageRequest pageRequest);
+                                                  PageRequest pageRequest,
+                                                  WorkBenchIssueSearchVO workBenchIssueSearchVO);
 
     /**
      * 工作台查询我经手的
@@ -376,7 +379,7 @@ public interface IssueService {
      * @param pageRequest
      * @return
      */
-    Page<IssueListFieldKVVO> pagedQueryMyAssigned(Long organizationId, Long projectId, PageRequest pageRequest);
+    Page<IssueListFieldKVVO> pagedQueryMyAssigned(Long organizationId, Long projectId, PageRequest pageRequest, WorkBenchIssueSearchVO workBenchIssueSearchVO);
 
     /**
      * 处理更新tag
@@ -403,4 +406,7 @@ public interface IssueService {
 
     void executionUpdateStatus(Long projectId, Long issueId, ExecutionUpdateIssueVO executionUpdateIssueVO);
 
+    void queryUserProjects(Long organizationId, Long projectId, List<Long> projectIds, List<ProjectVO> projects, Long userId, String type);
+
+    Page<UserDTO> pagingUserProjectUsers(PageRequest pageRequest, Long organizationId, String param);
 }
