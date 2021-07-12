@@ -105,7 +105,7 @@ interface IExportSearch {
     environment?: string[]
     creatorIds?: string
     updatorIds?: string[]
-    tags?:any[]
+    tags?: any[]
   },
   searchArgs?: {
     estimatedStartTimeScopeStart?: string,
@@ -119,7 +119,7 @@ interface IExportSearch {
   },
   exportFieldCodes: Array<string>, // 导出的字段列表
   quickFilterIds?: Array<number>,
-  contents?: string,
+  contents?: string | string[],
 }
 interface IImportOrExportRecord {
   action: null | string
@@ -490,7 +490,7 @@ class IssueApi extends Api<IssueApi> {
     * @param issueId
     * @param content
     */
-  loadIssuesInLink(page: number = 1, size: number = 10, issueId?: string, content?: string, excludeIssueIds?:string[]) {
+  loadIssuesInLink(page: number = 1, size: number = 10, issueId?: string, content?: string, excludeIssueIds?: string[]) {
     return axios({
       method: 'post',
       url: `/agile/v1/projects/${this.projectId}/issues/agile/summary`,

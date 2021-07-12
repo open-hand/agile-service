@@ -1,5 +1,5 @@
 import { IExportSearch } from '@/api';
-import { findIndex } from 'lodash';
+import { findIndex, flatMap, isEmpty } from 'lodash';
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
 import { stores } from '@choerodon/boot';
 
@@ -79,7 +79,7 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
 
     },
     quickFilterIds,
-    contents,
+    contents: !isEmpty(contents) ? flatMap([contents]) : undefined,
   };
 }
 

@@ -292,7 +292,7 @@ const Issue = observer(({ cached, updateCache }) => {
               const visibleColumns = (cached?.listLayoutColumns || defaultListLayoutColumns).filter((item) => item.display).map((item) => item.columnCode);
               openExportIssueModal(
                 issueSearchStore.getAllFields,
-                issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()].filter(((c) => !['issueIds', 'contents', 'userId'].includes(c.code))) : [],
+                issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()].filter(((c) => !['issueIds', 'userId'].includes(c.code))) : [],
                 tableFields || [],
                 visibleColumns,
                 tableListMode,
