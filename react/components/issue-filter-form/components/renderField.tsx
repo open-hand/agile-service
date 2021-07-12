@@ -128,6 +128,9 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
       case 'tags': {
         return <SelectMultiServiceTag name={code} multiple clearButton {...otherComponentProps} defaultValue={defaultValue} />;
       }
+      case 'contents': {
+        return <TextField name={code} clearButton {...otherComponentProps} />;
+      }
       default:
         break;
     }

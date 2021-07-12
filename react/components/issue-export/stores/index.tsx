@@ -45,6 +45,8 @@ const ExportIssueContextProvider = injectIntl(observer(
 
     const value = {
       ...props,
+      // 有概要 则置为显示
+      fields: fields.map((item) => (item.code === 'contents' ? { ...item, noDisplay: false } : item)),
       store,
       prefixCls: 'c7n-agile-export-issue-modal',
     };
