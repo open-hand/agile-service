@@ -26,6 +26,7 @@ function transformSystemFilter(data) {
     fixVersion,
     influenceVersion,
     starBeacon,
+    myAssigned,
     userId,
     testResponsibleIds,
     mainResponsibleIds,
@@ -45,6 +46,7 @@ function transformSystemFilter(data) {
     otherArgs: {
       userId,
       starBeacon,
+      myAssigned,
       assigneeId,
       issueIds,
       component,
