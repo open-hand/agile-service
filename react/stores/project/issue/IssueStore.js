@@ -18,6 +18,11 @@ export function getSystemFields(excludeCodes = []) {
     defaultShow: true,
     noDisplay: true, // 不需要展示，仅作为一个筛选项
   }, {
+    code: 'myAssigned',
+    name: 'myAssigned',
+    defaultShow: true,
+    noDisplay: true, // 不需要展示，仅作为一个筛选项
+  }, {
     code: 'userId',
     name: 'userId',
     defaultShow: true,
@@ -161,6 +166,11 @@ export function getSystemFieldsInStoryMap(excludeCodes = []) {
   }, {
     code: 'starBeacon',
     name: 'starBeacon',
+    defaultShow: true,
+    noDisplay: true, // 不需要展示，仅作为一个筛选项
+  }, {
+    code: 'myAssigned',
+    name: 'myAssigned',
     defaultShow: true,
     noDisplay: true, // 不需要展示，仅作为一个筛选项
   }, {
