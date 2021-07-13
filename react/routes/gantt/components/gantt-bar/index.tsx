@@ -2,7 +2,7 @@ import React, { useContext, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import dayjs, { Dayjs } from 'dayjs';
 import { Tooltip } from 'choerodon-ui';
-import { GanttProps, Gantt } from 'react-gantt-component';
+import { GanttProps, Gantt } from '@choerodon/gantt';
 import STATUS_COLOR from '@/constants/STATUS_COLOR';
 import { Issue } from '@/common/types';
 import Context from '../../context';

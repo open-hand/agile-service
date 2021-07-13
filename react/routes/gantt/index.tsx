@@ -18,8 +18,8 @@ import moment from 'moment';
 import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
-import GanttComponent, { GanttProps, Gantt, GanttRef } from 'react-gantt-component';
-import 'react-gantt-component/dist/react-gantt-component.cjs.production.min.css';
+import GanttComponent, { GanttProps, Gantt, GanttRef } from '@choerodon/gantt';
+import '@choerodon/gantt/dist/gantt.cjs.production.min.css';
 import { ganttApi, issueApi, workCalendarApi } from '@/api';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import TypeTag from '@/components/TypeTag';
