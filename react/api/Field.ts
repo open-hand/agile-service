@@ -3,7 +3,7 @@ import {
   getProjectId, getOrganizationId, getApplyType, getMenuType,
 } from '@/utils/common';
 import { sameProject } from '@/utils/detail';
-import { FieldOption, IField } from '@/common/types';
+import { FieldOption, IField, IssueCreateFields } from '@/common/types';
 import { castArray } from 'lodash';
 import Api from './Api';
 

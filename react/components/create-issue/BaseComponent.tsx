@@ -101,7 +101,9 @@ const CreateIssueBase = observer(({
       default: break;
     }
   });
-  const { data: fields, isFetching: isFieldsLoading } = useIssueCreateFields({ issueTypeId });
+  const [{ data: fields, isFetching: isFieldsLoading }, {
+    data: templateData,
+  }] = useIssueCreateFields({ issueTypeId });
   useEffect(() => {
     const oldDataSet = dataSetRef.current;
     const newDataSet = new DataSet({
@@ -133,8 +135,22 @@ const CreateIssueBase = observer(({
         newDataSet?.current?.set(name, oldValue);
       }
     });
+    const setValue = (name:string, value:any) => {
+      if (newDataSet?.current?.get(name) === null || newDataSet?.current?.get(name) === undefined) { newDataSet?.current?.set(name, value); }
+    };
+    // 设置默认值
+    fields?.forEach((field) => {
+      if (field.defaultValue !== null && field.defaultValue !== undefined) {
+        // 没有值的时候再设置
+        setValue(field.fieldCode, field.defaultValue);
+      }
+    });
+    // 设置描述默认值
+    if (templateData && templateData.template) {
+      setValue('description', templateData.template);
+    }
     setDataSet(newDataSet);
-  }, [fields, isSubIssue]);
+  }, [fields, isSubIssue, templateData]);
   const handleSubmit = usePersistFn(async () => {
     if (await dataSet.validate()) {
       const data = dataSet.current?.toData();
