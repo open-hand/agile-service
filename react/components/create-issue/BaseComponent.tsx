@@ -1,5 +1,5 @@
 import React, {
-  useEffect, useRef, useState,
+  useEffect, useMemo, useRef, useState,
 } from 'react';
 import {
   DataSet, Row, Col, Spin, Form,
@@ -31,6 +31,8 @@ export interface CreateIssueBaseProps {
   }) => void,
   modal?: IModalProps,
   projectId?: string,
+  defaultTypeCode?: string
+  defaultTypeId?: string
 }
 const defaultDataSet = new DataSet({
   autoCreate: true,
@@ -58,7 +60,7 @@ function transformSubmitFieldValue(field: IssueCreateFields, value: any) {
   }
 }
 const CreateIssueBase = observer(({
-  modal, projectId, onSubmit,
+  modal, projectId, onSubmit, defaultTypeCode = 'story', defaultTypeId,
 }: CreateIssueBaseProps) => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
@@ -71,9 +73,21 @@ const CreateIssueBase = observer(({
 
   }, {
     onSuccess: ((issueTypes) => {
-      setFieldValue('issueType', issueTypes[0].id);
+      setFieldValue('issueType', getDefaultIssueType(issueTypes));
     }),
   });
+  const getDefaultIssueType = (issueTypes: IIssueType[]) => {
+    if (defaultTypeId && find(issueTypes, { id: defaultTypeId })) {
+      return find(issueTypes, { id: defaultTypeId })?.id;
+    }
+    if (defaultTypeCode && find(issueTypes, { typeCode: defaultTypeCode })) {
+      return find(issueTypes, { typeCode: defaultTypeCode })?.id;
+    }
+    if (issueTypes && issueTypes.length > 0) {
+      return issueTypes[0].id;
+    }
+    return undefined;
+  };
   const issueTypeId = dataSet.current && dataSet.current.get('issueType');
   const issueTypeCode = find(issueTypeList, {
     id: issueTypeId,
@@ -159,6 +173,11 @@ const CreateIssueBase = observer(({
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [handleSubmit, modal]);
+  const fieldProps = useMemo((): { [key: string]: Object } => ({
+    parentIssueId: {
+      issueType: issueTypeCode,
+    },
+  }), [issueTypeCode]);
   const renderFields = usePersistFn(() => (
     <Row gutter={24}>
       {[...dataSet.fields.values()].filter((f) => f.get('display') !== false).map((dataSetField) => {
@@ -183,6 +202,7 @@ const CreateIssueBase = observer(({
                 style: {
                   width: '100%',
                 },
+                ...fieldProps[name] ?? {},
               })}
             </Col>
           )
