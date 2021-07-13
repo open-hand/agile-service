@@ -14,6 +14,7 @@ import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { IIssueType, IModalProps, IssueCreateFields } from '@/common/types';
 import useIssueCreateFields from '@/hooks/data/useIssueCreateFields';
 import getFieldConfig from './fields';
+import SelectParentIssue from '../select/select-parent-issue';
 
 export interface CreateIssueBaseProps {
   onSubmit: ({ data, fieldList }: {
@@ -26,6 +27,7 @@ export interface CreateIssueBaseProps {
       fieldId: string,
       fieldCode: string,
     }[]
+    fileList: UploadFile[]
   }) => void,
   modal?: IModalProps,
   projectId?: string,
@@ -58,7 +60,7 @@ function transformSubmitFieldValue(field: IssueCreateFields, value: any) {
 const CreateIssueBase = observer(({
   modal, projectId, onSubmit,
 }: CreateIssueBaseProps) => {
-  const [fileList, setFileList] = useState<UploadFile[]>();
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
   const [dataSet, setDataSet] = useState(defaultDataSet);
   dataSetRef.current = dataSet;
@@ -73,6 +75,9 @@ const CreateIssueBase = observer(({
     }),
   });
   const issueTypeId = dataSet.current && dataSet.current.get('issueType');
+  const issueTypeCode = find(issueTypeList, {
+    id: issueTypeId,
+  })?.typeCode;
   const handleUpdate = usePersistFn(({ name, value }) => {
     switch (name) {
       case 'issueType': {
@@ -86,14 +91,27 @@ const CreateIssueBase = observer(({
     const oldDataSet = dataSetRef.current;
     const newDataSet = new DataSet({
       autoCreate: true,
-      fields: fields ? fields.map((field) => {
+      fields: fields ? [...fields.map((field) => {
         const preset = presets.get(field.fieldCode) ?? {};
         return merge(preset, {
           name: field.fieldCode,
           label: field.fieldName,
           required: field.required,
         });
-      }) : [],
+      }), {
+        name: 'parentIssueId',
+        label: '关联父级任务',
+        dynamicProps: ({ record }) => {
+          const typeCode = find(issueTypeList, {
+            id: record.get('issueType'),
+          })?.typeCode;
+          const isSubIssue = typeCode && ['sub_task'].includes(typeCode);
+          return {
+            required: !!isSubIssue,
+            ignore: isSubIssue ? undefined : 'always' as any,
+          };
+        },
+      }] : [],
     });
     // 保留之前的值
     reuseFields.forEach((name) => {
@@ -103,7 +121,25 @@ const CreateIssueBase = observer(({
       }
     });
     setDataSet(newDataSet);
-  }, [fields]);
+  }, [fields, issueTypeList]);
+  const getExtraComponent = usePersistFn((fieldCode: string) => {
+    switch (fieldCode) {
+      case 'issueType': {
+        const isSubIssue = issueTypeCode && ['sub_task'].includes(issueTypeCode);
+        if (isSubIssue) {
+          return (
+            <SelectParentIssue
+              name="parentIssueId"
+              projectId={projectId}
+              style={{ width: '100%' }}
+            />
+          );
+        }
+        return null;
+      }
+      default: return null;
+    }
+  });
   const handleSubmit = usePersistFn(async () => {
     if (await dataSet.validate()) {
       const data = dataSet.current?.toData();
@@ -130,9 +166,10 @@ const CreateIssueBase = observer(({
       Object.assign(values, {
         typeCode: (issueType as IIssueType)?.typeCode,
         priorityCode: `priority-${data.priority || 0}`,
+        parentIssueId: data.parentIssueId,
       });
       await onSubmit({
-        data: values, fieldList,
+        data: values, fieldList, fileList,
       });
       return true;
     }
@@ -145,21 +182,33 @@ const CreateIssueBase = observer(({
     <Row gutter={24}>
       {fields?.map((field) => {
         const config = getFieldConfig(field);
+        const extraComponent = getExtraComponent(field.fieldCode);
         return config ? (
-          <Col
-            key={field.fieldCode}
-            style={{ marginBottom: 24 }}
-            span={lineField.includes(field.fieldCode) ? 24 : 12}
-          >
-            {config.renderFormItem({
-              name: field.fieldCode,
-              fieldId: field.fieldId,
-              projectId,
-              style: {
-                width: '100%',
-              },
-            })}
-          </Col>
+          [
+            <Col
+              key={field.fieldCode}
+              style={{ marginBottom: 24 }}
+              span={lineField.includes(field.fieldCode) ? 24 : 12}
+            >
+              {config.renderFormItem({
+                name: field.fieldCode,
+                fieldId: field.fieldId,
+                projectId,
+                style: {
+                  width: '100%',
+                },
+              })}
+            </Col>,
+            extraComponent ? (
+              <Col
+                key={`${field.fieldCode}-extra`}
+                style={{ marginBottom: 24 }}
+                span={12}
+              >
+                {extraComponent}
+              </Col>
+            ) : null,
+          ]
         ) : null;
       })}
     </Row>

@@ -70,6 +70,7 @@ ref: React.Ref<SelectBox>) => {
       // @ts-ignore
       textField={null}
       valueField={null}
+      searchable={false}
     />
   );
 });

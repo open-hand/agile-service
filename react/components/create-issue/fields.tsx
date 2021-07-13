@@ -9,8 +9,9 @@ import { IFieldType, ISystemFieldCodeMap } from '@/common/types';
 import UserTag from '../tag/user-tag';
 import SelectIssueType from '../select/select-issue-type';
 // import DateTimePicker from '../date-time-picker';
-import Editor from '../CKEditor';
+import Editor from '../Editor';
 import SelectCustomField from '../select/select-custom-field';
+import SelectCustomFieldBox from '../select/select-custom-field-box';
 import SelectSprint from '../select/select-sprint';
 import SelectComponent from '../select/select-component';
 import SelectLabel from '../select/select-label';
@@ -78,13 +79,13 @@ const valueTypeMap: Record<IFieldType | 'default', ProRenderFieldPropsType> = {
   radio: {
     render: (text) => <UserTag data={text} />,
     renderFormItem: (props) => (
-      <SelectBox {...props} />
+      <SelectCustomFieldBox {...props} />
     ),
   },
   checkbox: {
     render: (text) => <UserTag data={text} />,
     renderFormItem: (props) => (
-      <SelectBox {...props} />
+      <SelectCustomFieldBox {...props} />
     ),
   },
   number: {
