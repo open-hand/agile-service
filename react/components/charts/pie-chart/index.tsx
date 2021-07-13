@@ -151,7 +151,7 @@ const PieChart: React.FC<PieChartProps> = ({
         paramId: typeName === null ? '0' : typeName,
         ...queryObj,
       },
-    });
+    }, { blank: true });
   };
 
   const getOption = (): EChartOption => {

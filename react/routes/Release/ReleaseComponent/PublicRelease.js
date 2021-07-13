@@ -56,7 +56,7 @@ class PublicRelease extends Component {
         paramId: ReleaseStore.getVersionDetail.versionId,
         paramName: `版本${ReleaseStore.getVersionDetail.name}中的问题`,
       },
-    });
+    }, { blank: true });
   }
 
   renderRadioDisabled() {

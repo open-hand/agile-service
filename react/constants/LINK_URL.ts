@@ -12,7 +12,7 @@ function issueLinkTo(issueId: string, issueName: string | null = null, otherPara
       paramName: issueName,
       ...otherParams,
     },
-  });
+  }, { blank: true });
 }
 
 const LINK_URL = {

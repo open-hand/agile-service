@@ -729,7 +729,7 @@ class EpicReport extends Component {
                                     paramId: ES.currentEpicId,
                                     paramName: `${ES.epics.find((x) => x.issueId === ES.currentEpicId).epicName}下的问题`,
                                   },
-                                });
+                                }, { blank: true });
                               }}
                             >
                               在“问题管理”中查看

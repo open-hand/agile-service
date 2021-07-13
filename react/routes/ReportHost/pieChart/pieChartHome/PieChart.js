@@ -224,7 +224,7 @@ class PieChart extends Component {
         paramId: typeName === null ? '0' : typeName,
         ...queryObj,
       },
-    });
+    }, { blank: true });
   }
 
   renderOtherTooltip = () => {
