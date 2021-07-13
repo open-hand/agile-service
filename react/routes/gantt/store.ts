@@ -5,7 +5,7 @@ import { createRef } from 'react';
 import {
   observable, action,
 } from 'mobx';
-import { GanttRef, Gantt } from 'react-gantt-component';
+import { GanttRef, Gantt } from '@choerodon/gantt';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { DetailContainerProps } from '@/components/detail-container';
 import openDescriptionConfirm from '@/components/detail-container/openDescriptionConfirm';
