@@ -388,6 +388,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Long statusId;
         IssueVO issueVO = null;
         IssueSubVO issueSubVO = null;
+        IssueSubListVO issueSubListVO = null;
         if (result instanceof IssueVO) {
             issueVO = (IssueVO) result;
             issueId = issueVO.getIssueId();
@@ -398,6 +399,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             issueId = issueSubVO.getIssueId();
             projectId = issueSubVO.getProjectId();
             statusId = issueSubVO.getStatusId();
+        } else if (result instanceof IssueSubListVO) {
+            issueSubListVO = (IssueSubListVO) result;
+            issueId = issueSubListVO.getIssueId();
+            projectId = issueSubListVO.getProjectId();
+            statusId = issueSubListVO.getStatusId();
         } else {
             return;
         }
@@ -407,6 +413,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             issueVO.setCompleted(completed);
         } else if (issueSubVO != null) {
             issueSubVO.setCompleted(completed);
+        } else if (issueSubListVO != null) {
+            issueSubListVO.setCompleted(completed);
         }
         Map<Long, Date> completedDateMap =
                 issueMapper.selectActuatorCompletedDateByIssueIds(Arrays.asList(issueId), projectId)
@@ -418,6 +426,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 issueVO.setActualCompletedDate(completedDate);
             } else if (issueSubVO != null) {
                 issueSubVO.setActualCompletedDate(completedDate);
+            } else if (issueSubListVO != null) {
+                issueSubListVO.setActualCompletedDate(completedDate);
             }
         }
     }
@@ -1896,7 +1906,17 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             copyStoryPointAndRemainingTimeData(issueDetailDTO, projectId, newIssueId, objectVersionNumber);
             // 处理冲刺、子任务、自定义字段的值
             handlerOtherFields(projectId, predefinedFieldNames, issueDetailDTO, newIssueId, copyConditionVO);
-            return queryIssue(projectId, newIssueId, organizationId);
+            IssueVO result = queryIssue(projectId, newIssueId, organizationId);
+            setCompletedAndActualCompletedDate(result);
+            List<IssueSubListVO> subTasks = result.getSubIssueVOList();
+            if (!ObjectUtils.isEmpty(subTasks)) {
+                subTasks.forEach(x -> setCompletedAndActualCompletedDate(x));
+            }
+            List<IssueSubListVO> subBugs = result.getSubBugVOList();
+            if (!ObjectUtils.isEmpty(subBugs)) {
+                subBugs.forEach(x -> setCompletedAndActualCompletedDate(x));
+            }
+            return result;
         } else {
             throw new CommonException("error.issue.copyIssueByIssueId");
         }

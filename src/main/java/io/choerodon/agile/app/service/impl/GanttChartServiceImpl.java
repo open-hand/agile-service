@@ -154,43 +154,6 @@ public class GanttChartServiceImpl implements GanttChartService {
         return true;
     }
 
-//    @Override
-//    public List<GanttChartTreeVO> listByUser(Long projectId, SearchVO searchVO) {
-//        List<GanttChartVO> ganttChartList = listByProjectIdAndSearch(projectId, searchVO);
-//        List<GanttChartVO> unassigned = new ArrayList<>();
-//        Map<String, List<GanttChartVO>> map = new HashMap<>();
-//        ganttChartList.forEach(g -> {
-//            UserMessageDTO user = g.getAssignee();
-//            if (ObjectUtils.isEmpty(user)) {
-//                unassigned.add(g);
-//            } else {
-//                String name = user.getName();
-//                List<GanttChartVO> ganttCharts = map.get(name);
-//                if (ganttCharts == null) {
-//                    ganttCharts = new ArrayList<>();
-//                    map.put(name, ganttCharts);
-//                }
-//                ganttCharts.add(g);
-//            }
-//        });
-//        List<GanttChartTreeVO> result = new ArrayList<>();
-//        map.forEach((k, v) -> {
-//            GanttChartTreeVO ganttChartTreeVO = new GanttChartTreeVO();
-//            ganttChartTreeVO.setSummary(k);
-//            ganttChartTreeVO.setGroup(true);
-//            ganttChartTreeVO.setChildren(toTree(v));
-//            result.add(ganttChartTreeVO);
-//        });
-//        if (!unassigned.isEmpty()) {
-//            GanttChartTreeVO unassignedVO = new GanttChartTreeVO();
-//            unassignedVO.setSummary("未分配");
-//            unassignedVO.setGroup(true);
-//            unassignedVO.setChildren(toTree(unassigned));
-//            result.add(unassignedVO);
-//        }
-//        return result;
-//    }
-
     private List<GanttChartVO> toTree(List<GanttChartVO> ganttChartList) {
         List<GanttChartVO> result = new ArrayList<>();
         Map<Long, GanttChartVO> map = new HashMap<>();
@@ -238,6 +201,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             BeanUtils.copyProperties(i, ganttChart);
             ganttChart.setIssueTypeVO(issueTypeDTOMap.get(i.getIssueTypeId()));
             ganttChart.setStatusVO(statusMap.get(i.getStatusId()));
+            ganttChart.setSprints(i.getIssueSprintDTOS());
             Long assigneeId = i.getAssigneeId();
             if (!ObjectUtils.isEmpty(assigneeId)) {
                 UserMessageDTO assignee = usersMap.get(assigneeId);
