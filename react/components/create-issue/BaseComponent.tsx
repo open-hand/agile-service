@@ -27,6 +27,7 @@ export interface CreateIssueBaseProps {
       fieldId: string,
       fieldCode: string,
     }[]
+    fileList: UploadFile[]
   }) => void,
   modal?: IModalProps,
   projectId?: string,
@@ -59,7 +60,7 @@ function transformSubmitFieldValue(field: IssueCreateFields, value: any) {
 const CreateIssueBase = observer(({
   modal, projectId, onSubmit,
 }: CreateIssueBaseProps) => {
-  const [fileList, setFileList] = useState<UploadFile[]>();
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
   const [dataSet, setDataSet] = useState(defaultDataSet);
   dataSetRef.current = dataSet;
@@ -168,7 +169,7 @@ const CreateIssueBase = observer(({
         parentIssueId: data.parentIssueId,
       });
       await onSubmit({
-        data: values, fieldList,
+        data: values, fieldList, fileList,
       });
       return true;
     }

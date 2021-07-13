@@ -9,7 +9,7 @@ import { IFieldType, ISystemFieldCodeMap } from '@/common/types';
 import UserTag from '../tag/user-tag';
 import SelectIssueType from '../select/select-issue-type';
 // import DateTimePicker from '../date-time-picker';
-import Editor from '../CKEditor';
+import Editor from '../Editor';
 import SelectCustomField from '../select/select-custom-field';
 import SelectCustomFieldBox from '../select/select-custom-field-box';
 import SelectSprint from '../select/select-sprint';

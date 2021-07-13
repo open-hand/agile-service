@@ -82,6 +82,14 @@ export async function uploadAndReplaceImg(delta) {
   }
   return text;
 }
+export async function uploadAttachment(propFileList, issueId, projectId) {
+  const fileList = propFileList.filter((i) => !i.url);
+  const formData = new FormData();
+  fileList.forEach((file) => {
+    formData.append('file', file);
+  });
+  await fileApi.uploadFile(formData, issueId, projectId);
+}
 /**
  * 适用于富文本附件上传以及回调
  * @param {any []} propFileList 文件列表
