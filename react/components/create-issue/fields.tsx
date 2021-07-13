@@ -22,6 +22,7 @@ import SelectNumber from '../select/select-number';
 import SelectPriority from '../select/select-priority';
 import SelectStatus from '../select/select-status';
 import SelectMultiServiceTag from '../select/select-multi-service-tag';
+import SelectParentIssue from '../select/select-parent-issue';
 
 type ProRenderFieldPropsType = {
   render: ((
@@ -222,6 +223,12 @@ const systemFieldMap: Record<ISystemFieldCodeMap, ProRenderFieldPropsType> = {
     render: (text) => text,
     renderFormItem: (props) => (
       <SelectMultiServiceTag {...props} />
+    ),
+  },
+  parentIssueId: {
+    render: (text) => text,
+    renderFormItem: (props) => (
+      <SelectParentIssue {...props} />
     ),
   },
 };

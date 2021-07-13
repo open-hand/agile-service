@@ -7,17 +7,13 @@ import { FlatSelect } from '@choerodon/components';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 
 interface Props extends Partial<SelectProps> {
-  featureId?: string,
-  featureName?: string,
-  dataRef?: React.MutableRefObject<any>
-  afterLoad?: (epics: (Issue | { issueId: string, summary: string })[]) => void
+  issueType: 'sub_task' | 'bug'
   flat?: boolean
-  request?: SelectConfig<Issue>['request']
   projectId?: string
 }
 
 const SelectParentIssue: React.FC<Props> = forwardRef(({
-  dataRef, featureId, featureName, afterLoad, request, flat, projectId, ...otherProps
+  flat, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<Issue> => ({
     textField: 'summary',

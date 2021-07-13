@@ -1,23 +1,31 @@
-import { fieldApi } from '@/api';
+import { fieldApi, pageConfigApi } from '@/api';
 import { IssueCreateFields } from '@/common/types';
-import { useQuery, UseQueryOptions } from 'react-query';
+import { UseQueryOptions, useQueries, UseQueryResult } from 'react-query';
 import useProjectKey from './useProjectKey';
 
 export interface IssueCreateFieldsConfig {
   issueTypeId: string
   projectId?: string
 }
-export default function useIssueCreateFields(config: IssueCreateFieldsConfig, options?: UseQueryOptions<IssueCreateFields[]>) {
+export default function useIssueCreateFields(config: IssueCreateFieldsConfig): [UseQueryResult<IssueCreateFields[]>, UseQueryResult<{ template?: string }>] {
   const { projectId, issueTypeId } = config;
-  const key = useProjectKey({ key: ['issue-create-fields', { issueTypeId }], projectId });
-  return useQuery(key, () => fieldApi.getFields({
-    schemeCode: 'agile_issue',
-    issueTypeId,
-    pageCode: 'agile_issue_create',
-  }), {
+  const fieldsKey = useProjectKey({ key: ['issue-create-fields', { issueTypeId }], projectId });
+  const templateKey = useProjectKey({ key: ['issue-create description-template', { issueTypeId }], projectId });
+  // @ts-ignore
+  return useQueries([{
+    queryKey: fieldsKey,
+    queryFn: () => fieldApi.getFields({
+      schemeCode: 'agile_issue',
+      issueTypeId,
+      pageCode: 'agile_issue_create',
+    }),
     initialData: [] as IssueCreateFields[],
     keepPreviousData: true,
     enabled: !!issueTypeId,
-    ...options,
-  });
+  }, {
+    queryKey: templateKey,
+    queryFn: () => pageConfigApi.loadTemplateByType(issueTypeId),
+    keepPreviousData: true,
+    enabled: !!issueTypeId,
+  }]);
 }
