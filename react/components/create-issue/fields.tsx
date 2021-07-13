@@ -29,6 +29,8 @@ type ProRenderFieldPropsType = {
     dom: JSX.Element,
   ) => JSX.Element)
   renderFormItem: ((props: any) => JSX.Element)
+  /** 创建时提交至服务端的值和field的code的对应 */
+  valueKey?: string
 };
 const valueTypeMap: Record<IFieldType | 'default', ProRenderFieldPropsType> = {
   default: {
@@ -123,6 +125,7 @@ const systemFieldMap: Record<ISystemFieldCodeMap, ProRenderFieldPropsType> = {
     renderFormItem: (props) => (
       <SelectIssueType {...props} />
     ),
+    valueKey: 'issueTypeId',
   },
   description: {
     render: (text) => text,
@@ -135,6 +138,7 @@ const systemFieldMap: Record<ISystemFieldCodeMap, ProRenderFieldPropsType> = {
     renderFormItem: (props) => (
       <SelectSprint {...props} />
     ),
+    valueKey: 'sprintId',
   },
   estimatedStartTime: {
     render: (text) => text,
@@ -166,8 +170,14 @@ const systemFieldMap: Record<ISystemFieldCodeMap, ProRenderFieldPropsType> = {
       <SelectEpic {...props} />
     ),
   },
-  assignee: valueTypeMap.member,
-  reporter: valueTypeMap.member,
+  assignee: {
+    ...valueTypeMap.member,
+    valueKey: 'assigneeId',
+  },
+  reporter: {
+    ...valueTypeMap.member,
+    valueKey: 'reporterId',
+  },
   feature: {
     render: (text) => text,
     renderFormItem: (props) => (
@@ -198,6 +208,7 @@ const systemFieldMap: Record<ISystemFieldCodeMap, ProRenderFieldPropsType> = {
     renderFormItem: (props) => (
       <SelectPriority {...props} />
     ),
+    valueKey: 'priorityId',
   },
   status: {
     render: (text) => text,
@@ -217,4 +228,7 @@ const fieldMap = {
   ...valueTypeMap,
   ...systemFieldMap,
 };
-export default fieldMap;
+export { fieldMap };
+// @ts-ignore
+const getFieldConfig = (field: { fieldCode: string, fieldType: string }) => fieldMap[field.fieldCode] ?? fieldMap[field.fieldType] ?? fieldMap.default;
+export default getFieldConfig;
