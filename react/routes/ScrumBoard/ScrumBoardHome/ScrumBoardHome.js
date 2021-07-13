@@ -17,6 +17,7 @@ import {
 } from '@/api';
 import LINK_URL from '@/constants/LINK_URL';
 import to from '@/utils/to';
+import queryString from 'query-string';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import FilterManage from '@/components/FilterManage';
 import ScrumBoardDataController from './ScrumBoardDataController';
@@ -79,8 +80,9 @@ class ScrumBoardHome extends Component {
     });
     // eslint-disable-next-line react/destructuring-assignment
     const { state } = this.props.location;
-    if (state && state.issueId) {
-      ScrumBoardStore.setClickedIssue(state.issueId);
+    const { paramIssueId } = queryString.parse(this.props.location.search);
+    if (paramIssueId || (state && state.issueId)) {
+      ScrumBoardStore.setClickedIssue(paramIssueId || state.issueId);
     }
   }
 
