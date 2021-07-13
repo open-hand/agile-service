@@ -403,7 +403,8 @@ export type ISystemFieldCodeMap =
   'epic' |
   'feature' |
   'mainResponsible' |
-  'tag';
+  'tag' |
+  'parentIssueId';
 
 export type ISystemFieldCode =
   'summary' |
