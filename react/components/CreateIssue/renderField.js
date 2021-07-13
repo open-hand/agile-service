@@ -1,79 +1,35 @@
 import React from 'react';
-
 import {
-  Select, Input, InputNumber,
-  Checkbox, TimePicker, Row, Col, Radio, DatePicker,
+  Input, InputNumber,
+  TimePicker, DatePicker,
 } from 'choerodon-ui';
 import moment from 'moment';
 import SelectUser from '@/components/select/select-user-old';
 import { MAX_NUMBER_VALUE, MAX_FLOAT_BITE } from '@/constants/MAX_VALUE';
+import SelectRadioOld from '@/components/select/select-radio-old';
+import SelectCheckBoxOld from '@/components/select/select-checkbox-old';
 import SelectFocusLoad from '../SelectFocusLoad';
 
 const { TextArea } = Input;
-const { Option } = Select;
 export default function renderField(field, projectId) {
   const {
-    fieldOptions, fieldType, required, fieldName,
+    fieldType, required, fieldName,
   } = field;
   if (fieldType === 'radio') {
-    if (fieldOptions && fieldOptions.length > 0) {
-      return (
-        <Radio.Group
-          label={fieldName}
-        >
-          {fieldOptions && fieldOptions.length > 0
-            && fieldOptions.filter((option) => option.enabled).map((item) => (
-              <Radio
-                className="radioStyle"
-                value={item.id}
-                key={item.id}
-              >
-                {item.value}
-              </Radio>
-            ))}
-        </Radio.Group>
-      );
-    }
     return (
-      <Radio.Group
+      <SelectRadioOld
         label={fieldName}
-      >
-        <span style={{ color: '#D50000' }}>暂无选项，请联系管理员</span>
-      </Radio.Group>
+        fieldId={field.fieldId}
+        projectId={projectId}
+      />
     );
   } if (field.fieldType === 'checkbox') {
-    if (fieldOptions && fieldOptions.length > 0) {
-      return (
-        <Checkbox.Group
-          label={fieldName}
-        >
-          <Row className>
-            {fieldOptions && fieldOptions.length > 0
-              && fieldOptions.filter((option) => option.enabled).map((item) => (
-                <Col
-                  span={24}
-                  key={item.id}
-                  style={{ width: 'auto' }}
-                >
-                  <Checkbox
-                    value={item.id}
-                    key={item.id}
-                    className="checkboxStyle"
-                  >
-                    {item.value}
-                  </Checkbox>
-                </Col>
-              ))}
-          </Row>
-        </Checkbox.Group>
-      );
-    }
     return (
-      <Checkbox.Group
+      <SelectCheckBoxOld
         label={fieldName}
-      >
-        <span style={{ color: '#D50000' }}>暂无选项，请联系管理员</span>
-      </Checkbox.Group>
+        fieldId={field.fieldId}
+        projectId={projectId}
+      />
     );
   } if (field.fieldType === 'time') {
     return (
@@ -122,23 +78,18 @@ export default function renderField(field, projectId) {
     );
   } if (field.fieldType === 'multiple') {
     return (
-      <Select
-        filter
-        filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+      <SelectFocusLoad
+        type="custom_field"
         label={fieldName}
-        mode="multiple"
+        allowClear={!required}
         getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
-      >
-        {field.fieldOptions && field.fieldOptions.length > 0
-          && field.fieldOptions.filter((option) => option.enabled).map((item) => (
-            <Option
-              value={item.id}
-              key={item.id}
-            >
-              {item.value}
-            </Option>
-          ))}
-      </Select>
+        requestArgs={{
+          fieldId: field.fieldId,
+          selected: field.defaultValue,
+          projectId,
+        }}
+        mode="multiple"
+      />
     );
   } if (field.fieldType === 'number') {
     return (
