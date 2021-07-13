@@ -285,7 +285,7 @@ class VelocityChart extends Component {
                   paramId: record.sprintId,
                   paramName: `${sprintName}下的问题`,
                 },
-              });
+              }, { blank: true });
             }}
           >
             {sprintName}

@@ -96,7 +96,7 @@ const VersionReportSearch:React.FC<VersionReportSearchProps> = ({
                 paramId: versionId,
                 paramName: `${currentVersion && currentVersion.name}下的问题`,
               },
-            });
+            }, { blank: true });
           }}
         >
           在“问题管理中”查看

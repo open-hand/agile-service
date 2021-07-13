@@ -79,7 +79,7 @@ const PublishVersion: React.FC<{ modal?: IModalProps } & PublishVersionModalWith
         paramId: data.versionId,
         paramName: `版本${data.name}中的问题`,
       },
-    });
+    }, { blank: true });
   };
   return (
     <div>

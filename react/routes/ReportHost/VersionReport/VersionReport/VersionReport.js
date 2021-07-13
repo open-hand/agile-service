@@ -660,7 +660,7 @@ class EpicReport extends Component {
                           paramId: VS.currentVersionId,
                           paramName: `${VS.getCurrentVersion.name}下的问题`,
                         },
-                      });
+                      }, { blank: true });
                     }}
                   >
                     在“问题管理中”查看
