@@ -1103,9 +1103,9 @@
         </if>
         <if test="searchVO.otherArgs.myAssigned != null and searchVO.otherArgs.myAssigned == true">
             <bind name="audit" value="@io.choerodon.mybatis.helper.AuditHelper@audit()"/>
-            AND ai.issue_id in (
+            AND (ai.assignee_id = #{audit.user} OR ai.issue_id in (
             SELECT issue_id FROM agile_data_log adl WHERE adl.field = 'assignee' AND adl.project_id = #{projectId} AND adl.new_value = #{audit.user}
-            )
+            ))
         </if>
     </sql>
 
