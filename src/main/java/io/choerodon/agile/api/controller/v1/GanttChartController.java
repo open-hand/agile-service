@@ -56,15 +56,4 @@ public class GanttChartController {
                                                         @RequestBody @Encrypt Set<Long> issueIds) {
         return ResponseEntity.ok(ganttChartService.listByIds(projectId, issueIds));
     }
-
-//    @Permission(level = ResourceLevel.ORGANIZATION)
-//    @ApiOperation("查询甘特图列表数据")
-//    @PostMapping(value = "/list/by_user")
-//    public ResponseEntity<List<GanttChartTreeVO>> listByUser(@ApiParam(value = "项目id", required = true)
-//                                                             @PathVariable(name = "project_id") Long projectId,
-//                                                             @ApiParam(value = "查询参数", required = true)
-//                                                                 @RequestBody(required = false) SearchVO searchVO) {
-//        EncryptionUtils.decryptSearchVO(searchVO);
-//        return ResponseEntity.ok(ganttChartService.listByUser(projectId, searchVO));
-//    }
 }

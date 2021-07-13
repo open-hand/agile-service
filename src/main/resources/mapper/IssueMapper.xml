@@ -376,6 +376,9 @@
             <id property="sprintId" column="sprint_id"/>
             <result property="sprintName" column="sprint_name"/>
             <result property="statusCode" column="sp_status_code"/>
+            <result property="startDate" column="sprint_start_date"/>
+            <result property="endDate" column="sprint_end_date"/>
+            <result property="actualEndDate" column="sprint_actual_end_date"/>
         </collection>
         <collection property="issueComponentBriefDTOS"
                     ofType="io.choerodon.agile.infra.dto.IssueComponentBriefDTO">
@@ -541,9 +544,17 @@
         ai.relate_issue_id,
         ai.status_id,
         CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert,
-        ais.is_completed as completed
+        ais.is_completed as completed,
+        asp.sprint_id,
+        asp.sprint_name,
+        asp.start_date as sprint_start_date,
+        asp.end_date as sprint_end_date,
+        asp.actual_end_date as sprint_actual_end_date,
+        asp.status_code as sp_status_code
         from agile_issue ai
         left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
+        left join agile_issue_sprint_rel aisr on aisr.issue_id = ai.issue_id
+        left join agile_sprint asp on aisr.sprint_id = asp.sprint_id
         where ai.project_id = #{projectId}
         and ai.issue_id in
         <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">

@@ -5,6 +5,8 @@ import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import java.util.Date;
+
 /**
  * @author dinghuang123@gmail.com
  * @since 2018/5/24
@@ -75,6 +77,16 @@ public class IssueSubListVO {
 
     @ApiModelProperty(value = "星标")
     private Boolean starBeacon;
+
+    private Date actualCompletedDate;
+
+    public Date getActualCompletedDate() {
+        return actualCompletedDate;
+    }
+
+    public void setActualCompletedDate(Date actualCompletedDate) {
+        this.actualCompletedDate = actualCompletedDate;
+    }
 
     public Boolean getStarBeacon() {
         return starBeacon;

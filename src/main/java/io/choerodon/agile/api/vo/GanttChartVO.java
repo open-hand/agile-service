@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.infra.dto.IssueSprintDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -46,6 +47,16 @@ public class GanttChartVO {
     private Boolean completed;
 
     private Date actualCompletedDate;
+
+    private List<IssueSprintDTO> sprints;
+
+    public List<IssueSprintDTO> getSprints() {
+        return sprints;
+    }
+
+    public void setSprints(List<IssueSprintDTO> sprints) {
+        this.sprints = sprints;
+    }
 
     public Date getActualCompletedDate() {
         return actualCompletedDate;

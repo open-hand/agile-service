@@ -25,12 +25,4 @@ public interface GanttChartService {
 
     List<GanttChartVO> listByIds(Long projectId, Set<Long> issueIds);
 
-    /**
-     * 查询甘特图列表数据(用户视图)
-     *
-     * @param projectId
-     * @param searchVO
-     * @return
-     */
-//    List<GanttChartTreeVO> listByUser(Long projectId, SearchVO searchVO);
 }
