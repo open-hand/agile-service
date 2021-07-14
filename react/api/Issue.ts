@@ -99,6 +99,7 @@ interface IExportSearch {
     fixVersion?: any,
     influenceVersion?: any,
     starBeacon?: boolean
+    myAssigned?: boolean
     userId?: string
     testResponsibleIds?: string[]
     mainResponsibleIds?: string[]
