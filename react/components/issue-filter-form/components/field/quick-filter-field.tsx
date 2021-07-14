@@ -35,6 +35,7 @@ const QuickFilterField: React.FC<Props> = ({
     >
       <OptGroup label="常用选项">
         <Option value="myStarBeacon">我的关注</Option>
+        <Option value="myAssigned">我经手的</Option>
       </OptGroup>
       {data.length > 0
         && (

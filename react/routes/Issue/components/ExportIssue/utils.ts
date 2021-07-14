@@ -37,8 +37,15 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
   const starBeaconIndex = findIndex(quickFilterIds, (item) => item === 'myStarBeacon');
   let starBeacon;
 
+  const myAssignedIndex = findIndex(quickFilterIds, (item) => item === 'myAssigned');
+  let myAssigned;
+
   if (starBeaconIndex !== -1 && quickFilterIds.splice(starBeaconIndex, 1)) {
     starBeacon = true;
+  }
+
+  if (myAssignedIndex !== -1 && quickFilterIds.splice(myAssignedIndex, 1)) {
+    myAssigned = true;
   }
   return {
     advancedSearchArgs: {
@@ -59,7 +66,8 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
       fixVersion,
       influenceVersion,
       starBeacon,
-      userId: starBeacon ? userId : undefined,
+      myAssigned,
+      userId: starBeacon || myAssigned ? userId : undefined,
       testResponsibleIds,
       mainResponsibleIds,
       environment,

@@ -38,7 +38,7 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
       if (data.code === 'sprint') {
         return ({ ...data, immutableCheck: true });
       }
-      if (data.code === 'quickFilterIds' || data.code === 'starBeacon') {
+      if (data.code === 'quickFilterIds' || data.code === 'starBeacon' || data.code === 'myAssigned') {
         data.value && self.setState(data.code, data);
         // self.addExtraField(data);
         return false;
@@ -54,8 +54,10 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     defaultInitFieldFinishAction: (data, self) => {
       const quickFilterIds = self.getState('quickFilterIds');
       const starBeacon = self.getState('starBeacon');
+      const myAssigned = self.getState('myAssigned');
       const value = [];
       starBeacon && value.push('myStarBeacon');
+      myAssigned && value.push('myAssigned');
       quickFilterIds && value.push(...quickFilterIds.value);
       self.addExtraField({ name: '快速筛选', code: 'quickFilterIds', value });
     },
