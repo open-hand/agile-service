@@ -3406,8 +3406,8 @@ public class ExcelServiceImpl implements ExcelService {
     protected String[] sortFieldNames(String[] fieldNames) {
         List<String> result = new ArrayList<>();
         result.add("问题类型");
-        result.add("问题编号");
         result.add("概要");
+        result.add("问题编号");
         for (String str : fieldNames) {
             if (result.get(0).equals(str)
                     || result.get(1).equals(str)
@@ -3422,8 +3422,8 @@ public class ExcelServiceImpl implements ExcelService {
     protected String[] sortFieldCodes(String[] fieldCodes) {
         List<String> result = new ArrayList<>();
         result.add(TYPE_NAME);
-        result.add(ISSUE_NUM);
         result.add(SUMMARY);
+        result.add(ISSUE_NUM);
         for (String str : fieldCodes) {
             if (result.get(0).equals(str)
                     || result.get(1).equals(str)
