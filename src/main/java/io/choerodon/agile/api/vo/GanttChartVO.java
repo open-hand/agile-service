@@ -48,14 +48,14 @@ public class GanttChartVO {
 
     private Date actualCompletedDate;
 
-    private List<IssueSprintDTO> sprints;
+    private IssueSprintDTO sprint;
 
-    public List<IssueSprintDTO> getSprints() {
-        return sprints;
+    public IssueSprintDTO getSprint() {
+        return sprint;
     }
 
-    public void setSprints(List<IssueSprintDTO> sprints) {
-        this.sprints = sprints;
+    public void setSprint(IssueSprintDTO sprint) {
+        this.sprint = sprint;
     }
 
     public Date getActualCompletedDate() {

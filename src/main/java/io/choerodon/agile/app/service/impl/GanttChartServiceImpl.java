@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.dto.IssueSprintDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
@@ -201,7 +202,10 @@ public class GanttChartServiceImpl implements GanttChartService {
             BeanUtils.copyProperties(i, ganttChart);
             ganttChart.setIssueTypeVO(issueTypeDTOMap.get(i.getIssueTypeId()));
             ganttChart.setStatusVO(statusMap.get(i.getStatusId()));
-            ganttChart.setSprints(i.getIssueSprintDTOS());
+            List<IssueSprintDTO> sprints = i.getIssueSprintDTOS();
+            if (!ObjectUtils.isEmpty(sprints)) {
+                ganttChart.setSprint(sprints.get(0));
+            }
             Long assigneeId = i.getAssigneeId();
             if (!ObjectUtils.isEmpty(assigneeId)) {
                 UserMessageDTO assignee = usersMap.get(assigneeId);
