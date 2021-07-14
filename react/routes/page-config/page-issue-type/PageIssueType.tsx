@@ -33,6 +33,7 @@ import { PageIssueTypeStoreStatusCode } from './stores/PageIssueTypeStore';
 import { IFieldPostDataProps } from '../components/create-field/CreateField';
 import PageDescription from './components/page-description';
 import { transformDefaultValue, beforeSubmitTransform } from './utils';
+import openLinkage from '../components/setting-linkage/Linkage';
 
 const TooltipButton: React.FC<{ title?: string, buttonIcon: string, buttonDisabled: boolean, clickEvent?: () => void } & Omit<ButtonProps, 'title'>> = ({
   title, children, buttonIcon, buttonDisabled, clickEvent, ...otherProps
@@ -224,6 +225,27 @@ function PageIssueType() {
     <Page>
       <Prompt message={`是否放弃更改 ${Choerodon.STRING_DEVIDER}页面有未保存的内容,是否放弃更改？`} when={pageIssueTypeStore.getDirty} />
       <Header>
+        <Button onClick={() => openLinkage({
+          // @ts-ignore
+          field: {
+            id: '185419989275267072',
+            code: '185419989275267072',
+            fieldCode: '185419989275267072',
+            name: '优先级',
+            fieldType: 'single',
+            fieldTypeName: '选择器（单选）',
+            system: false,
+            required: true,
+            defaultValue: null,
+            projectId: 0,
+            contexts: [
+            ],
+            extraConfig: false,
+          },
+        })}
+        >
+        打开级联配置
+        </Button>
         <HeaderButtons items={[
           {
             display: true,
