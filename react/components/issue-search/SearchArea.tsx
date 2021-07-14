@@ -67,6 +67,10 @@ const SearchArea: React.FC = () => {
           store.handleFilterChange('createDate', [filterObject.createStartDate, filterObject.createEndDate]);
         } else if (key === 'updateEndDate' || key === 'updateStartDate') {
           store.handleFilterChange('updateDate', [filterObject.updateStartDate, filterObject.updateEndDate]);
+        } else if (key === 'estimatedStartTimeScopeStart' || key === 'estimatedStartTimeScopeEnd') {
+          store.handleFilterChange('estimatedStartTime', [filterObject.estimatedStartTimeScopeStart, filterObject.estimatedStartTimeScopeEnd]);
+        } else if (key === 'estimatedEndTimeScopeStart' || key === 'estimatedEndTimeScopeEnd') {
+          store.handleFilterChange('estimatedEndTime', [filterObject.estimatedEndTimeScopeStart, filterObject.estimatedEndTimeScopeEnd]);
         } else {
           store.handleFilterChange(key, value);
         }
