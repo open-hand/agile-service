@@ -19,12 +19,13 @@ import styles from './TransformFromSubIssue.less';
 interface Props {
   modal?: IModalProps
   issueId: string
+  issueTypeId: string
   objectVersionNumber: number
   onOk: (issue: Issue) => void
   store: EditIssueStore
 }
 const TransformFromSubIssue: React.FC<Props> = ({
-  modal, issueId, objectVersionNumber, store, onOk,
+  modal, issueId, issueTypeId, objectVersionNumber, store, onOk,
 }) => {
   const [isEpicType, setIsEpicType] = useState<boolean>(false);
   const issueTypesRef = useRef<IIssueType[]>([]);
@@ -124,6 +125,7 @@ const TransformFromSubIssue: React.FC<Props> = ({
               filterList={isInProgram ? ['issue_epic', 'feature'] : ['feature']}
               dataRef={issueTypesRef}
               clearButton={false}
+              excludeTypeIds={[issueTypeId]}
             />
             {
               isEpicType && (

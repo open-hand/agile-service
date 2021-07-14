@@ -94,7 +94,7 @@ const IssueDropDown = ({
       openTransformSubIssue({ issueId, objectVersionNumber, onOk: onTransformSubIssue });
     } else if (e.key === '5') {
       openTransformFromSubIssue({
-        issueId, objectVersionNumber, onOk: onTransformSubIssue, store,
+        issueId, objectVersionNumber, issueTypeId: issueTypeVO.id, onOk: onTransformSubIssue, store,
       });
     } else if (e.key === '6') {
       openCreateBranchModal({
