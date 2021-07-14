@@ -37,6 +37,7 @@ import { transformFilter } from '@/routes/Issue/stores/utils';
 import Search from './components/search';
 import GanttBar from './components/gantt-bar';
 import GanttGroupBar from './components/gantt-group-bar';
+import GanttGroupBarSprint from './components/gantt-group-bar-sprint';
 import IssueDetail from './components/issue-detail';
 import CreateIssue from './components/create-issue';
 import Context from './context';
@@ -77,6 +78,34 @@ const groupByUser = (data: any[]) => {
   return [...map.entries()].map(([name, children]) => ({
     summary: name,
     group: true,
+    groupType: 'assignee',
+    children,
+  }));
+};
+const groupBySprint = (data: any[]) => {
+  const map = new Map<string, { sprint: any, children: any[] }>();
+  const noSprintData: any[] = [];
+  data.forEach((issue) => {
+    if (issue.sprint) {
+      if (map.has(issue.sprint.sprintName)) {
+        map.get(issue.sprint.sprintName)?.children.push(issue);
+      } else {
+        map.set(issue.sprint.sprintName, { sprint: issue.sprint, children: [issue] });
+      }
+    } else {
+      noSprintData.push(issue);
+    }
+  });
+  if (noSprintData.length > 0) {
+    map.set('无冲刺', { sprint: {}, children: noSprintData });
+  }
+  return [...map.entries()].map(([name, { sprint, children }]) => ({
+    summary: name,
+    group: true,
+    groupType: 'sprint',
+    groupWidthSelf: true,
+    estimatedStartTime: sprint.startDate,
+    estimatedEndTime: sprint.endDate,
     children,
   }));
 };
@@ -249,13 +278,25 @@ const GanttPage: React.FC = () => {
       onClick={onRow.onClick}
     />
   ), [onRow.onClick, type]);
-  const renderGroupBar: GanttProps['renderBar'] = useCallback((bar, { width, height }) => (
-    <GanttGroupBar
-      bar={bar}
-      width={width}
-      height={height}
-    />
-  ), []);
+  const renderGroupBar: GanttProps['renderBar'] = useCallback((bar, { width, height }) => {
+    const { record } = bar;
+    if (record.groupType === 'sprint') {
+      return (
+        <GanttGroupBarSprint
+          bar={bar}
+          width={width}
+          height={height}
+        />
+      );
+    }
+    return (
+      <GanttGroupBar
+        bar={bar}
+        width={width}
+        height={height}
+      />
+    );
+  }, []);
   const renderInvalidBar: GanttProps['renderInvalidBar'] = useCallback((element, barInfo) => (
     <Tooltip
       // @ts-ignore
@@ -290,6 +331,7 @@ const GanttPage: React.FC = () => {
       name: issue.assigneeName,
       realName: issue.assigneeRealName,
     } : null,
+    sprint: issue.activeSprint,
   });
   const addSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {
     if (parentIssueId) {
@@ -430,7 +472,14 @@ const GanttPage: React.FC = () => {
     removeSubIssue(issue.issueId, subIssueId);
   });
 
-  const ganttData = useMemo(() => (type === 'assignee' ? groupByUser(data) : data), [data, type]);
+  const ganttData = useMemo(() => {
+    if (type === 'assignee') {
+      return groupByUser(data);
+    } if (type === 'sprint') {
+      return groupBySprint(data);
+    }
+    return data;
+  }, [data, type]);
   return (
     <Page>
       <Header>
