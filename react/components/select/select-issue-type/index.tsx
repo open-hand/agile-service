@@ -1,7 +1,7 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { Tooltip } from 'choerodon-ui';
-import { find } from 'lodash';
+import { find, includes } from 'lodash';
 import { issueTypeApi, sprintApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
@@ -18,10 +18,11 @@ interface Props extends Partial<SelectProps> {
   flat?: boolean
   projectId?:string
   applyType?:string
+  excludeTypeIds?: string[]
 }
 
 const SelectIssueType: React.FC<Props> = forwardRef(({
-  filterList = ['feature'], isProgram, request, valueField, dataRef, flat,
+  filterList = ['feature'], isProgram, request, valueField, dataRef, flat, excludeTypeIds = [],
   afterLoad, projectId, applyType, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<IIssueType> => ({
@@ -56,18 +57,19 @@ const SelectIssueType: React.FC<Props> = forwardRef(({
       return issueTypes;
     })),
     middleWare: (issueTypes) => {
+      const newData = issueTypes.filter((item) => !includes(excludeTypeIds, item.id));
       if (afterLoad) {
-        afterLoad(issueTypes);
+        afterLoad(newData);
       }
       if (dataRef) {
         Object.assign(dataRef, {
-          current: issueTypes,
+          current: newData,
         });
       }
-      return issueTypes;
+      return newData;
     },
     paging: false,
-  }), []);
+  }), [afterLoad, applyType, dataRef, excludeTypeIds, filterList, isProgram, projectId, request, valueField]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
 
