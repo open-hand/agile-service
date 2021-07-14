@@ -346,7 +346,8 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                                    @Param("withSubIssues") boolean withSubIssues);
 
     List<IssueDTO> selectWithSubByIssueIds(@Param("issueIds") List<Long> issueIds,
-                                           @Param("childrenIds") Set<Long> childrenIds);
+                                           @Param("childrenIds") Set<Long> childrenIds,
+                                           @Param("projectId") Long projectId);
 
 
     /**
