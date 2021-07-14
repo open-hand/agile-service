@@ -1,11 +1,12 @@
 import React, {
-  useMemo, useCallback, useEffect, useState,
+  useMemo, useCallback, useEffect, useState, useRef,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import {
   Form, DataSet, Select, TextField, CheckBox,
 } from 'choerodon-ui/pro';
+import { Spin } from 'choerodon-ui';
 import { find, map } from 'lodash';
 import { epicApi, issueApi } from '@/api';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
@@ -13,7 +14,9 @@ import {
   IFieldWidthValue, IModalProps, Issue,
 } from '@/common/types';
 import useIsInProgram from '@/hooks/useIsInProgram';
+import CopyRequired from './copy-required';
 import styles from './CopyIssue.less';
+import { RequiredFieldDs } from '../required-field/useRequiredFieldDataSet';
 
 const { Option } = Select;
 const systemFieldsMap = new Map([
@@ -54,6 +57,8 @@ const CopyIssue: React.FC<Props> = ({
 }) => {
   const [finalFields, setFinalFields] = useState<IFieldWidthValue[]>([]);
   const { isInProgram } = useIsInProgram();
+  const [loading, setLoading] = useState<boolean>(false);
+  const requiredFieldsVOArrRef = useRef<RequiredFieldDs[] | null>(null);
   const checkEpicName = useCallback(async (value: string) => {
     if (value && value.trim()) {
       return epicApi.checkName(value)
@@ -112,36 +117,43 @@ const CopyIssue: React.FC<Props> = ({
       epicNameValidate = await copyIssueDataSet.current?.getField('epicName')?.checkValidity();
     }
     if (validate && epicNameValidate) {
-      const fields = copyIssueDataSet.current?.get('fields') || [];
-      const copyfs: {
-        customFieldIds: string[],
-        predefinedFieldNames: string[],
-      } = { customFieldIds: [], predefinedFieldNames: [] };
-      fields.forEach((item: string) => {
-        const field = finalFields.find((f: IFieldWidthValue) => f.fieldCode === item);
-        if (field) {
-          const { fieldCode, fieldId, system } = field;
-          if (!system) {
-            copyfs.customFieldIds.push(fieldId);
-          } else {
-            copyfs.predefinedFieldNames.push(predefinedFieldsMap.get(fieldCode as string) || fieldCode as string);
+      return Promise.all((requiredFieldsVOArrRef.current || []).map((item) => item.dataSet.validate())).then(async (validateRes) => {
+        console.log(validateRes);
+        if (validateRes.every((item) => !!item)) {
+          const fields = copyIssueDataSet.current?.get('fields') || [];
+          const copyfs: {
+            customFieldIds: string[],
+            predefinedFieldNames: string[],
+          } = { customFieldIds: [], predefinedFieldNames: [] };
+          fields.forEach((item: string) => {
+            const field = finalFields.find((f: IFieldWidthValue) => f.fieldCode === item);
+            if (field) {
+              const { fieldCode, fieldId, system } = field;
+              if (!system) {
+                copyfs.customFieldIds.push(fieldId);
+              } else {
+                copyfs.predefinedFieldNames.push(predefinedFieldsMap.get(fieldCode as string) || fieldCode as string);
+              }
+            }
+          });
+          if (isInProgram && find(copyfs.predefinedFieldNames, (code) => code === 'epicId')) {
+            copyfs.predefinedFieldNames.push('featureId');
           }
-        }
-      });
-      if (isInProgram && find(copyfs.predefinedFieldNames, (code) => code === 'epicId')) {
-        copyfs.predefinedFieldNames.push('featureId');
-      }
-      const copyConditionVO = {
-        issueLink: copyIssueDataSet.current?.get('copyLinkIssue') || false,
-        subTask: copyIssueDataSet.current?.get('copySubIssue') || false,
-        summary: copyIssueDataSet.current?.get('summary') || false,
-        epicName: issue.typeCode === 'issue_epic' && copyIssueDataSet.current?.get('epicName'),
-        ...copyfs,
-      };
 
-      const res = await issueApi.clone(issue.issueId, applyType, copyConditionVO);
-      onOk(res);
-      return true;
+          console.log((requiredFieldsVOArrRef.current || []).map((item) => item.getData()));
+          const copyConditionVO = {
+            issueLink: copyIssueDataSet.current?.get('copyLinkIssue') || false,
+            subTask: copyIssueDataSet.current?.get('copySubIssue') || false,
+            summary: copyIssueDataSet.current?.get('summary') || false,
+            epicName: issue.typeCode === 'issue_epic' && copyIssueDataSet.current?.get('epicName'),
+            ...copyfs,
+          };
+
+          const res = await issueApi.clone(issue.issueId, applyType, copyConditionVO);
+          onOk(res);
+        }
+        return false;
+      });
     }
     return false;
   }, [applyType, copyIssueDataSet, finalFields, isInProgram, issue.issueId, issue.typeCode, onOk]);
@@ -194,34 +206,46 @@ const CopyIssue: React.FC<Props> = ({
     setFinalFields(arr);
   }, [copyFields, isInProgram, issue]);
 
+  useEffect(() => {
+    modal.update({
+      okProps: {
+        disabled: loading,
+      },
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
+
   return (
-    <Form style={styles.copyIssue} dataSet={copyIssueDataSet}>
-      <TextField name="summary" />
-      {
+    <Spin spinning={loading}>
+      <Form style={styles.copyIssue} dataSet={copyIssueDataSet}>
+        <TextField name="summary" />
+        {
         issue.typeCode === 'issue_epic' && (
           <TextField name="epicName" />
         )
       }
-      <Select name="fields">
-        {
+        <Select name="fields">
+          {
           finalFields.map((item) => (
             <Option value={item.fieldCode} key={item.fieldCode}>{item.fieldName}</Option>
           ))
         }
-      </Select>
-      <div>
-        {
+        </Select>
+        <div>
+          {
           !!issue.subIssueVOList.length && (
             <CheckBox name="copySubIssue" style={{ marginRight: 10 }} />
           )
         }
-        {
+          {
           !!issueLink.length && (
             <CheckBox name="copyLinkIssue" />
           )
         }
-      </div>
-    </Form>
+        </div>
+      </Form>
+      <CopyRequired issue={issue} copySubIssueChecked={copyIssueDataSet.current?.get('copySubIssue') || false} requiredFieldsVOArrRef={requiredFieldsVOArrRef} setLoading={setLoading} />
+    </Spin>
   );
 };
 
