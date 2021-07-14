@@ -64,6 +64,13 @@ const Issue = observer(({ cached, updateCache }) => {
   const [props] = useDetail();
   const { open } = props;
   const { data: tableFields } = useIssueTableFields();
+
+  const handleCheckBefore = useCallback(() => {
+    if (!issueSearchStore.batchAction && !hasBatchDeletePermission) {
+      issueSearchStore.setBatchAction('edit');
+    }
+  }, [hasBatchDeletePermission, issueSearchStore]);
+
   const getTableData = useCallback(({ page, sort, size }) => {
     const search = issueSearchStore.getCustomFieldFilters();
     set(search, 'searchArgs.tree', !tableListMode);
@@ -76,6 +83,7 @@ const Issue = observer(({ cached, updateCache }) => {
     defaultPageSize: cached?.pagination?.pageSize,
     // defaultVisibleColumns: cached?.visibleColumns ?? defaultVisibleColumns,
     autoQuery: false,
+    checkBefore: handleCheckBefore,
   });
   useUnmount(() => updateCache({
     pagination: tableProps.pagination,
