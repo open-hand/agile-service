@@ -50,7 +50,11 @@ const valueTypeMap: Record<IFieldType | 'default', ProRenderFieldPropsType> = {
   text: {
     render: (text) => text,
     renderFormItem: (props) => (
-      <TextArea {...props} />
+      <TextArea
+        // rows={1}
+        autoSize
+        {...props}
+      />
     ),
   },
   member: {
