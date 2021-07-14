@@ -24,7 +24,7 @@ export interface RequiredFieldDs {
 const useRequiredFieldDataSet = (issuesFieldRequired: Props[]) : RequiredFieldDs[] => {
   const { isInProgram } = useIsInProgram();
 
-  const getLookupFields = useCallback((issueTypeId) => [{
+  const getLookupFields = useCallback((issueTypeId) => !issueTypeId ? [] : [{
     name: 'statusId',
     label: '状态',
     lookupAxiosConfig: () => ({

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   Form, DataSet,
@@ -32,7 +32,11 @@ const RequiredField: React.FC<Props> = ({
   requiredFields, requiredFieldDataSet,
 }) => {
   const { isInProgram } = useIsInProgram();
-
+  useEffect(() => {
+    requiredFields.filter((item) => item.defaultValue).forEach(({ fieldCode, defaultValue }) => {
+      requiredFieldDataSet.current?.set(fieldCode as string, defaultValue);
+    });
+  }, [requiredFieldDataSet, requiredFields]);
   return (
     <Form dataSet={requiredFieldDataSet} columns={2} style={{ marginLeft: -5 }}>
       {
