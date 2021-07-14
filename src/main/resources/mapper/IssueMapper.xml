@@ -554,7 +554,7 @@
         from agile_issue ai
         left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
         left join agile_issue_sprint_rel aisr on aisr.issue_id = ai.issue_id
-        left join agile_sprint asp on aisr.sprint_id = asp.sprint_id
+        left join agile_sprint asp on (aisr.sprint_id = asp.sprint_id and asp.status_code in ('started','sprint_planning'))
         where ai.project_id = #{projectId}
         and ai.issue_id in
         <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
