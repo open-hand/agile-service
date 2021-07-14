@@ -36,14 +36,11 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
   } = data;
   const starBeaconIndex = findIndex(quickFilterIds, (item) => item === 'myStarBeacon');
   let starBeacon;
-
-  const myAssignedIndex = findIndex(quickFilterIds, (item) => item === 'myAssigned');
-  let myAssigned;
-
   if (starBeaconIndex !== -1 && quickFilterIds.splice(starBeaconIndex, 1)) {
     starBeacon = true;
   }
-
+  const myAssignedIndex = findIndex(quickFilterIds, (item) => item === 'myAssigned');
+  let myAssigned;
   if (myAssignedIndex !== -1 && quickFilterIds.splice(myAssignedIndex, 1)) {
     myAssigned = true;
   }
