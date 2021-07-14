@@ -72,7 +72,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             List<Long> issueIds = issues.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
             if (!ObjectUtils.isEmpty(issueIds)) {
                 Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds());
-                List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(issueIds, childrenIds);
+                List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(issueIds, childrenIds, projectId);
                 issueIds.addAll(childrenIds);
                 Map<Long, Date> completedDateMap =
                         issueMapper.selectActuatorCompletedDateByIssueIds(issueIds, projectId)

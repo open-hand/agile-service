@@ -544,16 +544,39 @@
         ais.is_completed as completed
         from agile_issue ai
         left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
-        where ai.issue_id in
+        where ai.project_id = #{projectId}
+        and ai.issue_id in
         <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
             #{issueId}
         </foreach>
-        <if test="childrenIds != null and childrenIds.size > 0">
-            or ai.issue_id in
-            <foreach collection="childrenIds" item="child" open="(" separator="," close=")">
-                #{child}
-            </foreach>
-        </if>
+        <choose>
+            <when test="childrenIds != null and childrenIds.size() > 0">
+                or ai.issue_id in
+                <foreach collection="childrenIds" item="child" open="(" separator="," close=")">
+                    #{child}
+                </foreach>
+            </when>
+            <otherwise>
+                or (
+                    ai.parent_issue_id is not null
+                    and ai.parent_issue_id != 0
+                    and ai.parent_issue_id in
+                    <foreach collection="issueIds" item="issueId" open="(" separator=","
+                             close=")">
+                        #{issueId}
+                    </foreach>
+                )
+                or (
+                    ai.relate_issue_id is not null
+                    and ai.relate_issue_id != 0
+                    and ai.relate_issue_id in
+                    <foreach collection="issueIds" item="issueId" open="(" separator=","
+                             close=")">
+                        #{issueId}
+                    </foreach>
+                )
+            </otherwise>
+        </choose>
         order by issue_num_convert desc
     </select>
 
