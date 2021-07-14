@@ -313,7 +313,7 @@ const GanttPage: React.FC = () => {
         }}
       >
         <Context.Provider value={{ store }}>
-          <div style={{ display: 'flex' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap' }}>
             <Search issueSearchStore={issueSearchStore} loadData={loadData} />
             <GanttOperation />
           </div>
