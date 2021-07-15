@@ -65,6 +65,9 @@ function getDefaultValue(field: IssueCreateFields) {
       return isMultiple ? field.defaultValueObjs : field.defaultValueObj;
     }
   }
+  if (field.defaultValue === '') {
+    return undefined;
+  }
   return field.defaultValue;
 }
 function transformSubmitFieldValue(field: IssueCreateFields, value: any) {
