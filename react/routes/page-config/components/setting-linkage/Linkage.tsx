@@ -6,8 +6,8 @@ import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import Loading from '@/components/Loading';
 import { IField } from '@/common/types';
 import styles from './Linkage.less';
-import FieldOption from './components/FieldOption';
-import ChosenOption from './components/ChosenOption';
+import FieldOptions from './components/field-options';
+import ChosenFields from './components/chosen-fields';
 import Rule from './components/Rule';
 
 interface ColumnProps {
@@ -52,17 +52,28 @@ const Linkage: React.FC<Props> = ({ field }) => {
   const [currentOptionId, setCurrentOptionId] = useState<string | undefined>(undefined);
   const [linkagesMap, setLinkagesMap] = useState<Map<string, IFeatureLinkageSetting[]>>(new Map());
   const [dataSet, setDataSet] = useState<DataSet>();
+  const [currentSelected, setCurrentSelected] = useState<string | undefined>();
 
-  const switchProject = useCallback((id: string) => {
+  const switchOption = useCallback((id: string) => {
     setCurrentOptionId(id);
     setDataSet(new DataSet({
-      autoCreate: true,
       fields: [{
-        name: 'chosenFieldCode',
-        label: '选择问题类型',
+        name: 'chosenOption',
+        label: '被关联字段',
       }, {
-        name: 'statusId',
-        label: '指定状态',
+        name: 'fieldRelOptionList',
+        label: '可见选项',
+        textField: 'value',
+        valueField: 'id',
+      }, {
+        name: 'defaultValue',
+        label: '默认值',
+      }, {
+        name: 'hidden',
+        label: '隐藏优先级字段',
+      }, {
+        name: 'required',
+        label: '设置为必填字段',
       }],
       events: {
         update: ({ name, record: current }: { name: string, record: Record }) => {
@@ -79,7 +90,7 @@ const Linkage: React.FC<Props> = ({ field }) => {
       return false;
     }
     const data: any = dataSet?.toData();
-    linkagesMap.set(currentOptionId as string, hasValue ? data.map((item: any) => ({ projectId: currentOptionId, ...item })) : []);
+    linkagesMap.set(currentOptionId as string, hasValue ? data.map((item: any) => ({ optionId: currentOptionId, ...item })) : []);
     return true;
   }, [currentOptionId, dataSet, linkagesMap]);
 
@@ -87,8 +98,10 @@ const Linkage: React.FC<Props> = ({ field }) => {
     if (needPrepareData && !await prepareData()) {
       return;
     }
-    switchProject(id);
-  }, [prepareData, switchProject]);
+    switchOption(id);
+  }, [prepareData, switchOption]);
+
+  const currentRecord: Record | undefined = currentSelected ? dataSet?.find((record) => record.get('chosenOption')?.code === currentSelected) : undefined;
 
   return (
     <div className={styles.linkage}>
@@ -102,13 +115,13 @@ const Linkage: React.FC<Props> = ({ field }) => {
             width={175}
             contentStyle={{ marginLeft: -20, overflowY: 'hidden' }}
           >
-            <FieldOption field={field} onChange={handleOptionChange} currentOptionId={currentOptionId} />
+            <FieldOptions field={field} onChange={handleOptionChange} currentOptionId={currentOptionId} />
           </LinkageColumn>
-          <LinkageColumn key="chosenOption" title="被关联字段" width={223}>
-            <ChosenOption />
+          <LinkageColumn key="chosenOption" title="被关联字段" width={223} columnStyle={{ position: 'relative', paddingRight: 20 }}>
+            <ChosenFields dataSet={dataSet} currentSelected={currentSelected} setCurrentSelected={setCurrentSelected} />
           </LinkageColumn>
-          <LinkageColumn key="rule" title="设置级联规则" bordered={false} columnStyle={{ flex: 1 }}>
-            <Rule />
+          <LinkageColumn key="rule" title="设置级联规则" bordered={false} columnStyle={{ flex: 1, paddingRight: 20 }}>
+            {currentRecord ? <Rule record={currentRecord} /> : null}
           </LinkageColumn>
         </div>
       </div>

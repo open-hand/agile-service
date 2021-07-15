@@ -5,7 +5,9 @@ import { IChosenFieldField, IUseChoseFieldProps } from './types';
 
 type IChosenSpecialFieldField = IChosenFieldField & Required<Pick<IChosenFieldField, 'immutableCheck'>>
 class ChoseFieldStore {
-  constructor({ systemFields, customFields, chosenFields }: IUseChoseFieldProps) {
+  constructor({
+    systemFields, customFields, chosenFields, addFieldCallback,
+  }: IUseChoseFieldProps) {
     this.fields = observable.map();
     this.fields.set('system', systemFields);
     this.fields.set('custom', customFields);
@@ -19,7 +21,10 @@ class ChoseFieldStore {
         this.addSpecialFields(field.code, field as IChosenSpecialFieldField);
       }
     });
+    this.addFieldCallback = addFieldCallback;
   }
+
+  addFieldCallback: undefined | ((key: string) => void)
 
   @observable currentOptionStatus: 'ALL' | 'PART' | 'NONE' = 'NONE';
 
@@ -74,6 +79,9 @@ class ChoseFieldStore {
 
   @action('增添选择字段') addChosenFields(key: string, data: IChosenFieldField, value?: any) {
     this.chosenFields.set(key, { ...data, value: value || undefined });
+    if (this.addFieldCallback) {
+      this.addFieldCallback(key);
+    }
     if (this.chosenFields.size === (this.fields.get('system')!.length + this.fields.get('custom')!.length)) {
       this.currentOptionStatus = 'ALL';
     } else {
@@ -96,6 +104,9 @@ class ChoseFieldStore {
     [...systemFiled, ...customFiled].forEach((field) => {
       if (!this.chosenFields.has(field.code) && !this.specialFields.has(field.code)) {
         this.chosenFields.set(field.code, { ...field, value: undefined });
+        if (this.addFieldCallback) {
+          this.addFieldCallback(field.code);
+        }
         currentChosenFields.push(field);
       }
     });

@@ -6,7 +6,7 @@ import { axios } from '@choerodon/boot';
 import { IField, IPriority, IVersion } from '@/common/types';
 import classNames from 'classnames';
 import { getProjectId, getOrganizationId } from '@/utils/common';
-import styles from './FieldOption.less';
+import styles from './FieldOptions.less';
 
 interface Props {
   field: IField
@@ -90,13 +90,12 @@ const getOptionsConfig = ({
   }
 };
 
-const FieldOption: React.FC<Props> = ({ field, onChange, currentOptionId }) => {
+const FieldOptions: React.FC<Props> = ({ field, onChange, currentOptionId }) => {
   const [options, setOptions] = useState<IOption[]>([]);
   const [search, setSearch] = useState('');
   const [totalPage, setTotalPage] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
   const { system } = field;
-
   const getOptions = useCallback((filter?: string, p?: number) => {
     const newPage = p || page;
     axios(getOptionsConfig({
@@ -130,7 +129,6 @@ const FieldOption: React.FC<Props> = ({ field, onChange, currentOptionId }) => {
   }, [currentOptionId, onChange, options]);
 
   const handleSearch = useCallback((s) => {
-    console.log(s);
     setSearch(s);
     setPage(1);
     setTotalPage(0);
@@ -143,7 +141,6 @@ const FieldOption: React.FC<Props> = ({ field, onChange, currentOptionId }) => {
     getOptions(undefined, page + 1);
   }, [getOptions, page]);
 
-  console.log(page, totalPage, !system && page + 1 < totalPage, options, options?.filter((option) => option.value.indexOf(search) > -1));
   return (
     <div className={styles['option-list']}>
       <TextField
@@ -189,4 +186,4 @@ const FieldOption: React.FC<Props> = ({ field, onChange, currentOptionId }) => {
   );
 };
 
-export default observer(FieldOption);
+export default observer(FieldOptions);
