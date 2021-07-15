@@ -28,6 +28,7 @@ interface IChoseFieldConfig {
   fields?: IChosenFieldField[],
   defaultValue?: IChosenFieldField[],
   events?: IChosenFieldFieldEvents,
+  addFieldCallback?: (key: string) => void,
   dropDownProps?: Partial<DropDownProps>,
   dropDownBtnChildren?: ReactElement | ReactElement[] | string | null,
   dropDownBtnProps?: Partial<ButtonProps>,
@@ -116,8 +117,10 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
       events.initFieldFinish(customFields, systemFields, currentChosenFields);
     }
 
-    return new ChoseFieldStore({ systemFields, customFields, chosenFields: [...currentChosenFields.values()] });
-  }, [config?.defaultValue, events, fields]);
+    return new ChoseFieldStore({
+      systemFields, customFields, chosenFields: [...currentChosenFields.values()], addFieldCallback: config?.addFieldCallback,
+    });
+  }, [config?.addFieldCallback, config?.defaultValue, events, fields]);
   const dataProps = {
     store,
     fields,
@@ -158,7 +161,7 @@ const ChooseField: React.FC<Props> = (props) => {
   return (
     <div>
       <Dropdown
-        getPopupContainer={(trigger) => trigger.parentNode as HTMLElement}
+        getPopupContainer={(trigger) => document.body}
         visible={!hidden}
         overlay={(
           <div
