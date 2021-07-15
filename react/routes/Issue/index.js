@@ -358,7 +358,7 @@ const Issue = observer(({ cached, updateCache }) => {
           urlFilter={urlFilter}
           onClear={handleClear}
           onChange={async () => {
-            localPageCacheStore.setItem('issues', issueSearchStore.currentFilter);
+            localPageCacheStore.setItem('issues', issueSearchStore.getCustomFieldFilters());
             await query();
             // 有筛选，自动展开
             if (issueSearchStore.isHasFilter) {

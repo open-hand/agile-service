@@ -93,12 +93,10 @@ const BoardSearch: React.FC<Props> = ({ onRefresh, saveStore }) => {
     getSystemFields,
     transformFilter,
     renderField,
-    // @ts-ignore
-    defaultChosenFields: Array.isArray(localPageCacheStore.getItem('scrumBoard.search')) ? new Map(localPageCacheStore.getItem('scrumBoard.search').map((item) => [item.code, item])) : undefined,
+    defaultSearchVO: localPageCacheStore.getItem('scrumBoard.searchVO'),
   });
   const handleClear = () => {
     scrumBoardStore.clearFilter();
-    localPageCacheStore.remove('scrumBoard.search');
     localPageCacheStore.remove('scrumBoard.searchVO');
     onRefresh();
     // StoryMapStore.clearData();
@@ -122,7 +120,6 @@ const BoardSearch: React.FC<Props> = ({ onRefresh, saveStore }) => {
         onClickSaveFilter={handleClickSaveFilter}
         onChange={() => {
           const newSearch = issueSearchStore.getCustomFieldFilters();
-          localPageCacheStore.setItem('scrumBoard.search', issueSearchStore.currentFilter);
           localPageCacheStore.setItem('scrumBoard.searchVO', newSearch);
           scrumBoardStore.setSearchVO(newSearch);
           onRefresh();
