@@ -549,15 +549,16 @@
         <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
             #{issueId}
         </foreach>
-        <choose>
-            <when test="childrenIds != null and childrenIds.size() > 0">
-                or ai.issue_id in
-                <foreach collection="childrenIds" item="child" open="(" separator="," close=")">
-                    #{child}
-                </foreach>
-            </when>
-            <otherwise>
-                or (
+        <if test="withSubIssues">
+            <choose>
+                <when test="childrenIds != null and childrenIds.size() > 0">
+                    or ai.issue_id in
+                    <foreach collection="childrenIds" item="child" open="(" separator="," close=")">
+                        #{child}
+                    </foreach>
+                </when>
+                <otherwise>
+                    or (
                     ai.parent_issue_id is not null
                     and ai.parent_issue_id != 0
                     and ai.parent_issue_id in
@@ -565,8 +566,8 @@
                              close=")">
                         #{issueId}
                     </foreach>
-                )
-                or (
+                    )
+                    or (
                     ai.relate_issue_id is not null
                     and ai.relate_issue_id != 0
                     and ai.relate_issue_id in
@@ -574,9 +575,10 @@
                              close=")">
                         #{issueId}
                     </foreach>
-                )
-            </otherwise>
-        </choose>
+                    )
+                </otherwise>
+            </choose>
+        </if>
         order by issue_num_convert desc
     </select>
 

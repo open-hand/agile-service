@@ -47,11 +47,13 @@ public class GanttChartServiceImpl implements GanttChartService {
         if (isSprintEmpty(searchVO)) {
             throw new CommonException("error.otherArgs.sprint.empty");
         }
-        List<GanttChartVO> result = listByProjectIdAndSearch(projectId, searchVO);
+        List<GanttChartVO> result = listByProjectIdAndSearch(projectId, searchVO, true);
         return toTree(result);
     }
 
-    private List<GanttChartVO> listByProjectIdAndSearch(Long projectId, SearchVO searchVO) {
+    private List<GanttChartVO> listByProjectIdAndSearch(Long projectId,
+                                                        SearchVO searchVO,
+                                                        Boolean isTreeView) {
         //设置不查询史诗
         boolean illegalIssueTypeId = buildIssueType(searchVO, projectId);
         if (illegalIssueTypeId) {
@@ -68,11 +70,14 @@ public class GanttChartServiceImpl implements GanttChartService {
             }
             boardAssembler.handleOtherArgs(searchVO);
             String orderStr = "issue_num_convert desc";
-            List<IssueDTO> issues = issueMapper.queryIssueIdsListWithSub(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), orderStr, true);
+            List<IssueDTO> issues = issueMapper.queryIssueIdsListWithSub(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), orderStr, isTreeView);
             List<Long> issueIds = issues.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
             if (!ObjectUtils.isEmpty(issueIds)) {
-                Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds());
-                List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(issueIds, childrenIds, projectId);
+                Set<Long> childrenIds = new HashSet<>();
+                if (isTreeView) {
+                    childrenIds.addAll(issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds()));
+                }
+                List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(issueIds, childrenIds, projectId, isTreeView);
                 issueIds.addAll(childrenIds);
                 Map<Long, Date> completedDateMap =
                         issueMapper.selectActuatorCompletedDateByIssueIds(issueIds, projectId)
@@ -131,7 +136,7 @@ public class GanttChartServiceImpl implements GanttChartService {
 
     @Override
     public List<GanttChartTreeVO> listByUser(Long projectId, SearchVO searchVO) {
-        List<GanttChartVO> ganttChartList = listByProjectIdAndSearch(projectId, searchVO);
+        List<GanttChartVO> ganttChartList = listByProjectIdAndSearch(projectId, searchVO, false);
         List<GanttChartVO> unassigned = new ArrayList<>();
         Map<String, List<GanttChartVO>> map = new HashMap<>();
         ganttChartList.forEach(g -> {
