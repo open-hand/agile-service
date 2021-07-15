@@ -1,10 +1,11 @@
 import React, { useRef } from 'react';
 import { Permission } from '@choerodon/boot';
-import { Button } from 'choerodon-ui/pro';
+import { Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { FlatSelect } from '@choerodon/components';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import useSelectFooter from '@/hooks/useSelectFooter';
+import styles from './index.less';
 
 const { Option } = FlatSelect;
 export interface SelectBoardProps {
@@ -21,14 +22,9 @@ const SelectBoard: React.FC<SelectBoardProps> = ({
       <Permission
         service={['choerodon.code.project.cooperation.iteration-plan.ps.board.create']}
       >
-        <li className="c7n-pro-select-dropdown-menu-item" style={{ marginTop: -8 }}>
-          <span
-            role="none"
-            onClick={onFooterClick}
-          >
-            创建看板
-          </span>
-        </li>
+        <div role="none" onClick={onFooterClick} className={styles.footer}>
+          创建看板
+        </div>
       </Permission>
     ) : null);
   return (
