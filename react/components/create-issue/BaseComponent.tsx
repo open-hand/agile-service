@@ -39,6 +39,12 @@ const defaultDataSet = new DataSet({
   fields: [],
 });
 const presets = new Map([
+  ['component', {
+    type: 'object',
+  }],
+  ['label', {
+    type: 'object',
+  }],
   ['estimatedStartTime', {
     max: 'estimatedEndTime',
   }],

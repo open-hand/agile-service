@@ -163,12 +163,14 @@ const systemFieldMap: Record<ISystemFieldCodeMap, ProRenderFieldPropsType> = {
     renderFormItem: (props) => (
       <SelectComponent {...props} />
     ),
+    valueKey: 'componentIssueRelVOList',
   },
   label: {
     render: (text) => text,
     renderFormItem: (props) => (
       <SelectLabel {...props} />
     ),
+    valueKey: 'labelIssueRelVOList',
   },
   epic: {
     render: (text) => text,
