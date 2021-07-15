@@ -125,7 +125,7 @@ const CreateIssueBase = observer(({
   useEffect(() => {
     const oldDataSet = dataSetRef.current;
     const newDataSet = new DataSet({
-      autoCreate: true,
+      autoCreate: false,
       fields: fields ? insertField([...fields.map((field) => {
         const preset = presets.get(field.fieldCode) ?? {};
         return merge(preset, {
@@ -146,16 +146,21 @@ const CreateIssueBase = observer(({
         },
       }]) : [],
     });
-    // 保留之前的值
+
+    const newValue: { [key: string]: any } = {};
+    // 优先保留之前的值
     reuseFields.forEach((name) => {
       const oldValue = oldDataSet.current?.get(name);
       if (oldValue) {
-        newDataSet?.current?.set(name, oldValue);
+        newValue[name] = oldValue;
       }
     });
     const setValue = (name: string, value: any) => {
-      if (newDataSet?.current?.get(name) === null || newDataSet?.current?.get(name) === undefined) { newDataSet?.current?.set(name, value); }
+      if (newValue[name] === null || newValue[name] === undefined) {
+        newValue[name] = value;
+      }
     };
+
     // 设置默认值
     fields?.forEach((field) => {
       const defaultValue = getDefaultValue(field);
@@ -168,6 +173,8 @@ const CreateIssueBase = observer(({
     if (templateData && templateData.template) {
       setValue('description', templateData.template);
     }
+    // 创建一个新的
+    newDataSet.create(newValue);
     setDataSet(newDataSet);
   }, [fields, isSubIssue, templateData]);
   const handleSubmit = usePersistFn(async () => {
@@ -201,6 +208,8 @@ const CreateIssueBase = observer(({
           ...(data.fixVersion ?? []).map((versionId: string) => ({ versionId, relationType: 'fix' })),
           ...(data.influenceVersion ?? []).map((versionId: string) => ({ versionId, relationType: 'influence' })),
         ],
+        fixVersion: undefined,
+        influenceVersion: undefined,
       });
       await onSubmit({
         data: values, fieldList, fileList,
