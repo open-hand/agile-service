@@ -13,6 +13,7 @@ import validateFile from '@/utils/File';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { IIssueType, IModalProps, IssueCreateFields } from '@/common/types';
 import useIssueCreateFields from '@/hooks/data/useIssueCreateFields';
+import moment from 'moment';
 import getFieldConfig from './fields';
 import { insertField } from './utils';
 
@@ -41,9 +42,11 @@ const defaultDataSet = new DataSet({
 const presets = new Map([
   ['component', {
     type: 'object',
+    valueField: 'componentId',
   }],
   ['label', {
     type: 'object',
+    valueField: 'labelId',
   }],
   ['estimatedStartTime', {
     max: 'estimatedEndTime',
@@ -54,13 +57,22 @@ const presets = new Map([
 ]);
 const lineField = ['summary', 'description'];
 const reuseFields = ['issueType', 'summary', 'description'];
-
+function getDefaultValue(field: IssueCreateFields) {
+  const preset = presets.get(field.fieldCode);
+  if (preset) {
+    if (preset.type === 'object') {
+      const isMultiple = field.fieldType === 'multiple' || field.fieldType === 'checkbox';
+      return isMultiple ? field.defaultValueObjs : field.defaultValueObj;
+    }
+  }
+  return field.defaultValue;
+}
 function transformSubmitFieldValue(field: IssueCreateFields, value: any) {
   switch (field.fieldType) {
     case 'time':
     case 'date':
     case 'datetime': {
-      return value ? value.format('YYYY-MM-DD HH:mm:ss') : value;
+      return value && moment.isMoment(value) ? value.format('YYYY-MM-DD HH:mm:ss') : value;
     }
     default: return value;
   }
@@ -141,14 +153,15 @@ const CreateIssueBase = observer(({
         newDataSet?.current?.set(name, oldValue);
       }
     });
-    const setValue = (name:string, value:any) => {
+    const setValue = (name: string, value: any) => {
       if (newDataSet?.current?.get(name) === null || newDataSet?.current?.get(name) === undefined) { newDataSet?.current?.set(name, value); }
     };
     // 设置默认值
     fields?.forEach((field) => {
-      if (field.defaultValue !== null && field.defaultValue !== undefined) {
+      const defaultValue = getDefaultValue(field);
+      if (defaultValue !== null && defaultValue !== undefined) {
         // 没有值的时候再设置
-        setValue(field.fieldCode, field.defaultValue);
+        setValue(field.fieldCode, defaultValue);
       }
     });
     // 设置描述默认值
@@ -184,6 +197,10 @@ const CreateIssueBase = observer(({
         typeCode: (issueType as IIssueType)?.typeCode,
         priorityCode: `priority-${data.priority || 0}`,
         parentIssueId: data.parentIssueId,
+        versionIssueRelVOList: [
+          ...(data.fixVersion ?? []).map((versionId: string) => ({ versionId, relationType: 'fix' })),
+          ...(data.influenceVersion ?? []).map((versionId: string) => ({ versionId, relationType: 'influence' })),
+        ],
       });
       await onSubmit({
         data: values, fieldList, fileList,
@@ -195,11 +212,32 @@ const CreateIssueBase = observer(({
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [handleSubmit, modal]);
-  const fieldProps = useMemo((): { [key: string]: Object } => ({
-    parentIssueId: {
-      issueType: issueTypeCode,
-    },
-  }), [issueTypeCode]);
+  const getFieldProps = usePersistFn((field?: IssueCreateFields): { [key: string]: any } => {
+    if (!field) {
+      return {};
+    }
+    switch (field.fieldCode) {
+      case 'parentIssueId': {
+        return {
+          issueType: issueTypeCode,
+        };
+      }
+      default: break;
+    }
+    switch (field.fieldType) {
+      case 'member': {
+        return {
+          extraOptions: field.defaultValueObj,
+        };
+      }
+      case 'multiMember': {
+        return {
+          extraOptions: field.defaultValueObjs,
+        };
+      }
+      default: return {};
+    }
+  });
   const renderFields = usePersistFn(() => (
     <Row gutter={24}>
       {[...dataSet.fields.values()].filter((f) => f.get('display') !== false).map((dataSetField) => {
@@ -210,6 +248,8 @@ const CreateIssueBase = observer(({
           fieldCode: name,
           fieldType,
         });
+        const field = find(fields, { fieldCode: name });
+        const extraProps = getFieldProps(field);
         return config
           ? (
             <Col
@@ -224,7 +264,7 @@ const CreateIssueBase = observer(({
                 style: {
                   width: '100%',
                 },
-                ...fieldProps[name] ?? {},
+                ...extraProps,
               })}
             </Col>
           )
