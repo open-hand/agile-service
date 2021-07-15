@@ -99,32 +99,14 @@
       line-height: 24px;
       // background: rgb(232, 240, 253);
       border-radius: 12px;
-      padding: 0px 0.04rem;
+      padding: 0 0.04rem;
     }
   }
 
   &-hidden_my_filter {
-    & > div:first-child {
-      display: none;
-    }
-
-    & > div:nth-child(2) > div {
-
-      & > ul > li > ul > li {
-        padding-left: .12rem;
-      }
-
-      & > ul {
-        & > li:nth-child(3) {
-          .c7n-checkbox {
-            // 隐藏CheckBox
-            display: none;
-          }
-
-          & > ul > li {
-            padding-left: .1rem;
-          }
-        }
+    &-option {
+      .c7n-checkbox-wrapper {
+        display: none;
       }
     }
   }
