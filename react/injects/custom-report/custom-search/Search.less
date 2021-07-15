@@ -1,0 +1,27 @@
+@prefixCls: c7n-agile-inject-custom-search-fields;
+
+.@{prefixCls} {
+  &-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+
+    &-label {
+      min-width: 1rem;
+      padding-right: .1rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &-field {
+      // width: ~"calc(100% - 1rem)";
+      flex-shrink: 0;
+      // border: none;
+    }
+  }
+
+  &-item +&-item {
+    margin-top: .1rem;
+  }
+}
