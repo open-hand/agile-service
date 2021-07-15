@@ -16,7 +16,7 @@ public class FieldCascadeUpdateVO {
     private Boolean required;
     private String defaultValue;
     private Long objectVersionNumber;
-    private List<FieldCascadeRuleOptionVO> cascadeFieldOptionList;
+    private List<FieldCascadeRuleOptionVO> fieldCascadeRuleOptionList;
 
     public Boolean getHidden() {
         return hidden;
@@ -50,11 +50,11 @@ public class FieldCascadeUpdateVO {
         this.objectVersionNumber = objectVersionNumber;
     }
 
-    public List<FieldCascadeRuleOptionVO> getCascadeFieldOptionList() {
-        return cascadeFieldOptionList;
+    public List<FieldCascadeRuleOptionVO> getFieldCascadeRuleOptionList() {
+        return fieldCascadeRuleOptionList;
     }
 
-    public void setCascadeFieldOptionList(List<FieldCascadeRuleOptionVO> cascadeFieldOptionList) {
-        this.cascadeFieldOptionList = cascadeFieldOptionList;
+    public void setFieldCascadeRuleOptionList(List<FieldCascadeRuleOptionVO> fieldCascadeRuleOptionList) {
+        this.fieldCascadeRuleOptionList = fieldCascadeRuleOptionList;
     }
 }

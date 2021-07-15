@@ -28,7 +28,7 @@ public class FieldCascadeCreateVO {
     @Column(name = "is_required")
     private Boolean required;
     private String defaultValue;
-    private List<FieldCascadeRuleOptionVO> cascadeFieldOptionList;
+    private List<FieldCascadeRuleOptionVO> fieldCascadeRuleOptionList;
 
     public Long getIssueTypeId() {
         return issueTypeId;
@@ -86,11 +86,11 @@ public class FieldCascadeCreateVO {
         this.defaultValue = defaultValue;
     }
 
-    public List<FieldCascadeRuleOptionVO> getCascadeFieldOptionList() {
-        return cascadeFieldOptionList;
+    public List<FieldCascadeRuleOptionVO> getFieldCascadeRuleOptionList() {
+        return fieldCascadeRuleOptionList;
     }
 
-    public void setCascadeFieldOptionList(List<FieldCascadeRuleOptionVO> cascadeFieldOptionList) {
-        this.cascadeFieldOptionList = cascadeFieldOptionList;
+    public void setFieldCascadeRuleOptionList(List<FieldCascadeRuleOptionVO> fieldCascadeRuleOptionList) {
+        this.fieldCascadeRuleOptionList = fieldCascadeRuleOptionList;
     }
 }

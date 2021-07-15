@@ -80,14 +80,15 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
     @Override
     public FieldCascadeRuleVO createFieldCascadeRule(Long projectId, FieldCascadeCreateVO fieldCascadeCreate) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
-
+        validExit(fieldCascadeCreate, projectId);
+        
         FieldCascadeRuleDTO fieldCascadeRule = modelMapper.map(fieldCascadeCreate, FieldCascadeRuleDTO.class);
         fieldCascadeRule.setProjectId(projectId);
         fieldCascadeRule.setOrganizationId(organizationId);
         validLoop(fieldCascadeRule);
         fieldCascadeRuleMapper.insertSelective(fieldCascadeRule);
-        if (!CollectionUtils.isEmpty(fieldCascadeCreate.getCascadeFieldOptionList())) {
-            fieldCascadeCreate.getCascadeFieldOptionList().forEach(fieldCascadeRuleOptionVO -> {
+        if (!CollectionUtils.isEmpty(fieldCascadeCreate.getFieldCascadeRuleOptionList())) {
+            fieldCascadeCreate.getFieldCascadeRuleOptionList().forEach(fieldCascadeRuleOptionVO -> {
                 FieldCascadeRuleOptionDTO fieldCascadeRuleOptionDTO = modelMapper.map(fieldCascadeRuleOptionVO, FieldCascadeRuleOptionDTO.class);
                 fieldCascadeRuleOptionDTO.setFieldCascadeRuleId(fieldCascadeRule.getId());
                 fieldCascadeRuleOptionDTO.setProjectId(projectId);
@@ -96,6 +97,17 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
             });
         }
         return modelMapper.map(fieldCascadeRule, FieldCascadeRuleVO.class);
+    }
+
+    private void validExit(FieldCascadeCreateVO fieldCascadeCreate, Long projectId) {
+        FieldCascadeRuleDTO fieldCascadeRuleRecord = new FieldCascadeRuleDTO();
+        fieldCascadeRuleRecord.setFieldId(fieldCascadeCreate.getFieldId());
+        fieldCascadeRuleRecord.setFieldOptionId(fieldCascadeCreate.getFieldOptionId());
+        fieldCascadeRuleRecord.setCascadeFieldId(fieldCascadeCreate.getCascadeFieldId());
+        fieldCascadeRuleRecord.setProjectId(projectId);
+        if (fieldCascadeRuleMapper.selectCount(fieldCascadeRuleRecord) > 0){
+            throw new CommonException("error.fieldCascadeRule.exist");
+        }
     }
 
     private void baseCreateFieldCascadeRuleOption(FieldCascadeRuleOptionDTO fieldCascadeRuleOptionDTO) {
@@ -126,7 +138,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
             throw new CommonException("error.fieldCascadeRule.update");
         }
         updateAndDeleteFieldCascadeRuleOption(
-                fieldCascadeUpdate.getCascadeFieldOptionList(),
+                fieldCascadeUpdate.getFieldCascadeRuleOptionList(),
                 fieldCascadeRuleId,
                 projectId);
         return modelMapper.map(fieldCascadeRuleDTO, FieldCascadeRuleVO.class);
@@ -156,7 +168,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         fieldCascadeRuleOptionRecord.setProjectId(projectId);
         List<FieldCascadeRuleOptionDTO> fieldCascadeRuleOptionList = fieldCascadeRuleOptionMapper.select(fieldCascadeRuleOptionRecord);
         if (!CollectionUtils.isEmpty(fieldCascadeRuleOptionList)) {
-            fieldCascadeRuleVO.setCascadeFieldOptionList(modelMapper.map(fieldCascadeRuleOptionList, new TypeToken<List<FieldCascadeRuleOptionVO>>() {
+            fieldCascadeRuleVO.setFieldCascadeRuleOptionList(modelMapper.map(fieldCascadeRuleOptionList, new TypeToken<List<FieldCascadeRuleOptionVO>>() {
             }.getType()));
             fieldCascadeRuleVO.setDefaultIds(fieldCascadeRuleOptionList.stream().map(FieldCascadeRuleOptionDTO::getCascadeOptionId).collect(Collectors.toList()));
         }

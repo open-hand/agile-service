@@ -59,7 +59,7 @@ public class FieldCascadeRuleVO extends AuditDomain {
     @Encrypt
     private List<Long> defaultIds;
     @ApiModelProperty(value = "字段可见选项list")
-    private List<FieldCascadeRuleOptionVO> cascadeFieldOptionList;
+    private List<FieldCascadeRuleOptionVO> fieldCascadeRuleOptionList;
 
     public Long getId() {
         return id;
@@ -133,12 +133,12 @@ public class FieldCascadeRuleVO extends AuditDomain {
         this.projectId = projectId;
     }
 
-    public List<FieldCascadeRuleOptionVO> getCascadeFieldOptionList() {
-        return cascadeFieldOptionList;
+    public List<FieldCascadeRuleOptionVO> getFieldCascadeRuleOptionList() {
+        return fieldCascadeRuleOptionList;
     }
 
-    public void setCascadeFieldOptionList(List<FieldCascadeRuleOptionVO> cascadeFieldOptionList) {
-        this.cascadeFieldOptionList = cascadeFieldOptionList;
+    public void setFieldCascadeRuleOptionList(List<FieldCascadeRuleOptionVO> fieldCascadeRuleOptionList) {
+        this.fieldCascadeRuleOptionList = fieldCascadeRuleOptionList;
     }
 
     public String getCascadeFieldName() {
