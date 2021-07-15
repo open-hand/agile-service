@@ -4,20 +4,36 @@
   &-item {
     display: flex;
     align-items: center;
+    position: relative;
     width: 100%;
 
     &-label {
-      min-width: 1rem;
+      width: .7rem;
       padding-right: .1rem;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      // overflow: hidden;
+      // text-overflow: ellipsis;
       white-space: nowrap;
     }
 
     &-field {
       // width: ~"calc(100% - 1rem)";
       flex-shrink: 0;
+
       // border: none;
+      ::placeholder {
+        color: #9EADBE;
+      }
+    }
+
+    &-del-btn {
+      position: absolute;
+      color: #5365EA;
+      // bottom: 2
+      right: -.06rem;
+
+      &:hover {
+        cursor: pointer;
+      }
     }
   }
 
