@@ -270,6 +270,7 @@ const CreateIssueBase = observer(({
                 name,
                 fieldId,
                 projectId,
+                clearButton: !field?.required,
                 style: {
                   width: '100%',
                 },
