@@ -34,6 +34,9 @@ export interface CreateIssueBaseProps {
   projectId?: string,
   defaultTypeCode?: string
   defaultTypeId?: string
+  defaultValues?: {
+    [key: string]: any
+  }
 }
 const defaultDataSet = new DataSet({
   autoCreate: true,
@@ -57,19 +60,7 @@ const presets = new Map([
 ]);
 const lineField = ['summary', 'description'];
 const reuseFields = ['issueType', 'summary', 'description'];
-function getDefaultValue(field: IssueCreateFields) {
-  const preset = presets.get(field.fieldCode);
-  if (preset) {
-    if (preset.type === 'object') {
-      const isMultiple = field.fieldType === 'multiple' || field.fieldType === 'checkbox';
-      return isMultiple ? field.defaultValueObjs : field.defaultValueObj;
-    }
-  }
-  if (field.defaultValue === '') {
-    return undefined;
-  }
-  return field.defaultValue;
-}
+
 function transformSubmitFieldValue(field: IssueCreateFields, value: any) {
   switch (field.fieldType) {
     case 'time':
@@ -81,7 +72,7 @@ function transformSubmitFieldValue(field: IssueCreateFields, value: any) {
   }
 }
 const CreateIssueBase = observer(({
-  modal, projectId, onSubmit, defaultTypeCode = 'story', defaultTypeId,
+  modal, projectId, onSubmit, defaultTypeCode = 'story', defaultTypeId, defaultValues,
 }: CreateIssueBaseProps) => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
@@ -91,7 +82,7 @@ const CreateIssueBase = observer(({
     dataSet.current?.set(name, value);
   });
   const { isFetching: isLoading, data: issueTypeList } = useProjectIssueTypes({
-
+    projectId,
   }, {
     onSuccess: ((issueTypes) => {
       setFieldValue('issueType', getDefaultIssueType(issueTypes));
@@ -124,7 +115,24 @@ const CreateIssueBase = observer(({
   });
   const [{ data: fields, isFetching: isFieldsLoading }, {
     data: templateData,
-  }] = useIssueCreateFields({ issueTypeId });
+  }] = useIssueCreateFields({ issueTypeId, projectId });
+  const getDefaultValue = usePersistFn((field: IssueCreateFields) => {
+    const preset = presets.get(field.fieldCode);
+    // 通过外部设置的默认值优先
+    if (defaultValues && defaultValues[field.fieldCode]) {
+      return defaultValues[field.fieldCode];
+    }
+    if (preset) {
+      if (preset.type === 'object') {
+        const isMultiple = field.fieldType === 'multiple' || field.fieldType === 'checkbox';
+        return isMultiple ? field.defaultValueObjs : field.defaultValueObj;
+      }
+    }
+    if (field.defaultValue === '') {
+      return undefined;
+    }
+    return field.defaultValue;
+  });
   useEffect(() => {
     const oldDataSet = dataSetRef.current;
     const newDataSet = new DataSet({
@@ -172,6 +180,7 @@ const CreateIssueBase = observer(({
         setValue(field.fieldCode, defaultValue);
       }
     });
+    // TODO: 将各种默认值的获取和设置逻辑合并
     // 设置描述默认值
     if (templateData && templateData.template) {
       setValue('description', templateData.template);
@@ -179,7 +188,7 @@ const CreateIssueBase = observer(({
     // 创建一个新的
     newDataSet.create(newValue);
     setDataSet(newDataSet);
-  }, [fields, isSubIssue, templateData]);
+  }, [fields, getDefaultValue, isSubIssue, templateData]);
   const handleSubmit = usePersistFn(async () => {
     if (await dataSet.validate()) {
       const data = dataSet.current?.toData();

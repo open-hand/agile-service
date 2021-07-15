@@ -1,6 +1,6 @@
 import { fieldApi, pageConfigApi } from '@/api';
 import { IssueCreateFields } from '@/common/types';
-import { UseQueryOptions, useQueries, UseQueryResult } from 'react-query';
+import { useQueries, UseQueryResult } from 'react-query';
 import useProjectKey from './useProjectKey';
 
 export interface IssueCreateFieldsConfig {
@@ -18,13 +18,13 @@ export default function useIssueCreateFields(config: IssueCreateFieldsConfig): [
       schemeCode: 'agile_issue',
       issueTypeId,
       pageCode: 'agile_issue_create',
-    }),
+    }, projectId),
     initialData: [] as IssueCreateFields[],
     keepPreviousData: true,
     enabled: !!issueTypeId,
   }, {
     queryKey: templateKey,
-    queryFn: () => pageConfigApi.loadTemplateByType(issueTypeId),
+    queryFn: () => pageConfigApi.loadTemplateByType(issueTypeId, projectId),
     keepPreviousData: true,
     enabled: !!issueTypeId,
   }]);
