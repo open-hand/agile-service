@@ -194,7 +194,7 @@ const SearchArea: React.FC = () => {
                 <OptGroup key="my" label="个人筛选">
                   {
                     myFilters.map((filter) => (
-                      <Option value={`my|${filter.filterId}`}>{filter.name}</Option>
+                      <Option value={`my|${filter.filterId}`} className={`${prefixCls}-search-hidden_my_filter-option`}>{filter.name}</Option>
                     ))
                   }
                 </OptGroup>
