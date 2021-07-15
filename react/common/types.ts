@@ -184,6 +184,7 @@ export interface IssueCreateFields {
   defaultValue: any
   defaultValueObj: any
   defaultValueObjs: any[]
+  multiple: boolean
   display: boolean
   // extraConfig: false
   fieldCode: string
@@ -392,6 +393,7 @@ export type ISystemFieldCodeMap =
   'assignee' |
   'status' |
   'remainingTime' |
+  'influenceVersion' |
   'fixVersion' |
   'storyPoints' |
   'estimatedStartTime' |
@@ -399,10 +401,10 @@ export type ISystemFieldCodeMap =
   'label' |
   'component' |
   'storyPoints' |
-  'version' |
   'epic' |
   'feature' |
   'mainResponsible' |
+  'environment' |
   'tag' |
   'parentIssueId';
 

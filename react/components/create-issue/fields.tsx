@@ -1,10 +1,10 @@
 import React from 'react';
 import {
-  TextField, SelectBox,
+  TextField,
   TextArea, NumberField, DatePicker, DateTimePicker, TimePicker,
 } from 'choerodon-ui/pro';
 
-import SelectUser from '@/components/select/select-user';
+import SelectUser from '@/components/select/pro/select-user';
 import { IFieldType, ISystemFieldCodeMap } from '@/common/types';
 import UserTag from '../tag/user-tag';
 import SelectIssueType from '../select/select-issue-type';
@@ -23,6 +23,7 @@ import SelectPriority from '../select/select-priority';
 import SelectStatus from '../select/select-status';
 import SelectMultiServiceTag from '../select/select-multi-service-tag';
 import SelectParentIssue from '../select/select-parent-issue';
+import SelectEnvironment from '../select/select-environment';
 
 type ProRenderFieldPropsType = {
   render: ((
@@ -163,18 +164,21 @@ const systemFieldMap: Record<ISystemFieldCodeMap, ProRenderFieldPropsType> = {
     renderFormItem: (props) => (
       <SelectComponent {...props} />
     ),
+    valueKey: 'componentIssueRelVOList',
   },
   label: {
     render: (text) => text,
     renderFormItem: (props) => (
       <SelectLabel {...props} />
     ),
+    valueKey: 'labelIssueRelVOList',
   },
   epic: {
     render: (text) => text,
     renderFormItem: (props) => (
       <SelectEpic {...props} />
     ),
+    valueKey: 'epicId',
   },
   assignee: {
     ...valueTypeMap.member,
@@ -190,16 +194,16 @@ const systemFieldMap: Record<ISystemFieldCodeMap, ProRenderFieldPropsType> = {
       <SelectFeature {...props} />
     ),
   },
-  version: {
+  influenceVersion: {
     render: (text) => text,
     renderFormItem: (props) => (
-      <SelectVersion {...props} />
+      <SelectVersion valueField="versionId" {...props} />
     ),
   },
   fixVersion: {
     render: (text) => text,
     renderFormItem: (props) => (
-      <SelectVersion {...props} />
+      <SelectVersion valueField="versionId" statusArr={['version_planning']} {...props} />
     ),
   },
   mainResponsible: valueTypeMap.member,
@@ -223,6 +227,12 @@ const systemFieldMap: Record<ISystemFieldCodeMap, ProRenderFieldPropsType> = {
     ),
   },
   remainingTime: valueTypeMap.datetime,
+  environment: {
+    render: (text) => text,
+    renderFormItem: (props) => (
+      <SelectEnvironment {...props} />
+    ),
+  },
   tag: {
     render: (text) => text,
     renderFormItem: (props) => (
