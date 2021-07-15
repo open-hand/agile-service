@@ -3,13 +3,15 @@ import {
   Button, Dropdown,
 } from 'choerodon-ui/pro';
 import classNames from 'classnames';
-import { observer } from 'mobx-react-lite';
-import { find } from 'lodash';
+import { flatten } from 'lodash';
 import { runInAction } from 'mobx';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 import { CustomReportSearchProps } from '@/routes/ReportHost/custom-report/components/ChartSearch/ChartSearch';
 import ChoseField, { useChoseField } from '@/components/chose-field';
-import React, { useState, useCallback, useEffect } from 'react';
+import { IChosenFieldField } from '@/components/chose-field/types';
+import React, {
+  useState, useCallback, useEffect, useMemo,
+} from 'react';
 import useClickOut from '@/hooks/useClickOut';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import useGetIssueSearchData from './useGetIssueSearchData';
@@ -19,15 +21,28 @@ import './index.less';
 const InjectCustomSearch: React.FC<CustomReportSearchProps> = ({ searchVO, setSearchVO, projectId }) => {
   const prefixCls = 'c7n-agile-inject-custom-search';
   const [fields, setFields] = useState([] as any[]);
-  const [{ store: chosenStore }, choseFiledProps] = useChoseField({
-    fields,
-  });
+
   const issueSearchStore = useIssueSearchStore({
     projectId,
     transformFilter,
     defaultSearchVO: searchVO,
     // @ts-ignore
     getSystemFields: () => getSystemFields().filter((f) => !['contents'].includes(f.code)),
+  });
+  const handleChoseField = useCallback((data: IChosenFieldField | IChosenFieldField[], status: 'add' | 'del') => {
+    runInAction(() => {
+      const isSelect = status === 'add';
+      const newChoseFields = flatten([data]);
+      newChoseFields.forEach((item) => {
+        issueSearchStore.handleChosenFieldChange(isSelect, item as any);
+      });
+    });
+  }, [issueSearchStore]);
+  const [{ store: chosenStore }, choseFiledProps] = useChoseField({
+    fields,
+    events: {
+      choseField: handleChoseField,
+    },
   });
 
   useEffect(() => {
@@ -45,11 +60,7 @@ const InjectCustomSearch: React.FC<CustomReportSearchProps> = ({ searchVO, setSe
   }, []);
   const containerRef = useClickOut(handleClickOut);
 
-  const handleChoseField = useCallback((key: string) => {
-    const field = find(fields, { code: key });
-    field && chosenStore.addChosenFields(key, field);
-  }, [chosenStore, fields]);
-  const { onChange, onClear } = useGetIssueSearchData({ store: issueSearchStore, onChoseField: handleChoseField, chosenStore });
+  const { onChange, onClear } = useGetIssueSearchData({ store: issueSearchStore, chosenStore });
   const handleChange = useCallback(({ code }: any, value: any) => {
     onChange(code, value);
   }, [onChange]);
@@ -61,6 +72,8 @@ const InjectCustomSearch: React.FC<CustomReportSearchProps> = ({ searchVO, setSe
     onClear();
     setSearchVO(undefined as unknown as any);
   };
+
+  const isDoneSearch = useMemo(() => issueSearchStore.isHasFilter && searchVO, [issueSearchStore.isHasFilter, searchVO]);
   return (
     <div className={prefixCls}>
       <Dropdown
@@ -86,7 +99,9 @@ const InjectCustomSearch: React.FC<CustomReportSearchProps> = ({ searchVO, setSe
                 查询
               </Button>
               <Button onClick={handleClear}>重置</Button>
-              <ChoseField {...choseFiledProps} />
+              <ChoseField
+                {...choseFiledProps}
+              />
             </div>
           </div>
         )}
@@ -95,7 +110,7 @@ const InjectCustomSearch: React.FC<CustomReportSearchProps> = ({ searchVO, setSe
 
         <Button
           icon="filter2"
-          className={classNames(`${prefixCls}-search-btn`, { [`${prefixCls}-search-btn-active`]: issueSearchStore.isHasFilter })}
+          className={classNames(`${prefixCls}-search-btn`, { [`${prefixCls}-search-btn-active`]: isDoneSearch })}
           onClick={(e) => {
             e.nativeEvent.stopImmediatePropagation();
             setHidden((old) => !old);
@@ -105,4 +120,4 @@ const InjectCustomSearch: React.FC<CustomReportSearchProps> = ({ searchVO, setSe
     </div>
   );
 };
-export default observer(InjectCustomSearch);
+export default InjectCustomSearch;

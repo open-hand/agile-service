@@ -192,13 +192,15 @@ function useGetIssueSearchData(config: IGetIssueSearchDataConfigProps): IGetIssu
   const handleChange = useCallback((key: string, v: any) => {
     handleFilterChange(key, v);
   }, [handleFilterChange]);
-  const onChange = useCallback((key: string, value: any, option?: any) => {
+  const onChange = useMemo(() => (key: string, value: any, option?: any) => {
     if (key === 'quickFilterIds') {
       handlePersonalFilterChange(value);
       return;
     }
     handleChange(key, value);
-  }, [handleChange, handlePersonalFilterChange]);
+    // onChange 不需要进行依赖更新
+  }, []);
+
   return {
     onChange,
     onClear: handleClearFilter,
