@@ -8,4 +8,4 @@ set('agile:SelectVersion', () => import('@/components/select/select-version'));
 set('agile:PersonalWorkload', () => import('@/injects/personal-workload'));
 set('agile:AgileChartHeaderButtons', () => import('@/injects/custom-report/header-buttons'));
 set('agile:AgileCustomChartLoadData', loadCustomReportData);
-set('agile:CustomChartSearch', () => import('@/routes/ReportHost/custom-report/components/ChartSearch'));
+set('agile:CustomChartSearch', () => import('@/injects/custom-report/custom-search'));
