@@ -735,7 +735,7 @@ public class EncryptionUtils {
                         if (value1.isArray()) {
                             value1.forEach(v -> list.add(v.isNumber() ? v.textValue() : (encrypt ? encryptionService.encrypt(v.textValue(), BLANK_KEY) : encryptionService.decrypt(v.textValue(), BLANK_KEY))));
                         }
-                        nodeObjValue.put("value", list);
+                        nodeObjValue.put("value", isNull(value1) ? null : list);
                     } else if (StringUtils.contains(next.getKey(), "date")){
                         if (isNull(node.get("startDate")) || isNull(node.get("endDate"))) {
                             nodeObjValue.put("startDate", isNull(node.get("startDate")) ? null : node.get("startDate").textValue());
