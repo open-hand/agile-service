@@ -237,7 +237,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
     }
 
     private void batchUpdateFieldCascadeRule(List<FieldCascadeRuleVO> updateList, Long projectId) {
-        if (CollectionUtils.isEmpty(updateList)){
+        if (!CollectionUtils.isEmpty(updateList)){
             updateList.forEach(updateFieldCascadeRule -> {
                 FieldCascadeUpdateVO fieldCascadeUpdateVO = modelMapper.map(updateFieldCascadeRule, FieldCascadeUpdateVO.class);
                 updateFieldCascadeRule(projectId, updateFieldCascadeRule.getId(), fieldCascadeUpdateVO);
