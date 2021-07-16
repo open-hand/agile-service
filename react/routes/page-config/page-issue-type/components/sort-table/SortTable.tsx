@@ -27,9 +27,14 @@ function renderLabelRequire(value: string | ReactElement) {
     </div>
   );
 }
+function renderOperate() {
+  return <span style={{ position: 'absolute' }}>操作</span>;
+}
 const columns = [
   { name: 'fieldName', label: '字段名称', type: 'common' },
-  { name: 'defaultValue', label: '默认值', type: 'common' },
+  { name: 'fieldOrigin', label: '字段来源', type: 'project' },
+  { name: 'defaultValue', label: '默认值', type: 'organization' },
+
   {
     name: 'required', label: '必填', type: 'project', render: renderLabelRequire,
   },
@@ -38,13 +43,16 @@ const columns = [
   },
   { name: 'edited', label: '加入到编辑页', type: 'common' },
   { name: 'created', label: '加入到创建页', type: 'common' },
+  // {
+  //   name: 'operate', label: '操作', type: 'project', render: renderOperate,
+  // },
 
 ];
 
 const SortTable: React.FC = () => {
   const { sortTableDataSet, pageIssueTypeStore } = usePageIssueTypeStore();
-  const { showSplitLine, prefixCls } = useSortTableContext();
-  const type = showSplitLine ? 'organization' : 'project';
+  const { isProject, prefixCls } = useSortTableContext();
+  const type = !isProject ? 'organization' : 'project';
   // @ts-ignore
   const onDragStart = (initial: DragStart, provided: ResponderProvided) => {
 
@@ -81,7 +89,7 @@ const SortTable: React.FC = () => {
   };
   return (
     <div className={prefixCls}>
-      <div className={classnames(`${prefixCls}-header `, { [`${prefixCls}-header-split`]: showSplitLine })}>
+      <div className={classnames(`${prefixCls}-header `, { [`${prefixCls}-header-split`]: true })}>
         {columns.filter((item) => item.type === 'common' || item.type === type).map((itemProps) => <span className={`${prefixCls}-header-item`}>{itemProps.render ? itemProps.render(itemProps.label) : itemProps.label}</span>)}
       </div>
       <div className={`${prefixCls}-content`}>
