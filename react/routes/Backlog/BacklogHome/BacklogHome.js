@@ -143,7 +143,18 @@ class BacklogHome extends Component {
               name: '新创建问题',
               icon: 'playlist_add',
               handler: () => openCreateIssue({
-
+                onCreate: (res) => {
+                  BacklogStore.setNewIssueVisible(false);
+                  BacklogStore.setDefaultSummary(undefined);
+                  BacklogStore.setDefaultTypeId(undefined);
+                  BacklogStore.setDefaultSprint(undefined);
+                  BacklogStore.setDefaultAssignee(undefined);
+                  BacklogStore.setDefaultEpicName(undefined);
+                  // 创建issue后刷新
+                  if (res) {
+                    BacklogStore.refresh(false, false);
+                  }
+                },
               }),
               display: true,
             }, {

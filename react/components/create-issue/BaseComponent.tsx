@@ -9,6 +9,7 @@ import { usePersistFn } from 'ahooks';
 import { find, merge } from 'lodash';
 import { UploadFile } from 'choerodon-ui/lib/upload/interface';
 import UploadButton from '@/components/CommonComponent/UploadButton';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import validateFile from '@/utils/File';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { IIssueType, IModalProps, IssueCreateFields } from '@/common/types';
@@ -17,6 +18,7 @@ import moment from 'moment';
 
 import { getProjectId } from '@/utils/common';
 import WSJF from './components/wsjf';
+import IssueLink from './components/issue-link';
 import hooks from './hooks';
 import getFieldConfig from './fields';
 import { insertField } from './utils';
@@ -68,7 +70,9 @@ const presets = new Map([
 ]);
 const lineField = ['summary', 'description'];
 const reuseFields = ['issueType', 'summary', 'description'];
-
+function isMultiple(field: IssueCreateFields) {
+  return field.fieldType === 'multiple' || field.fieldType === 'checkbox' || field.fieldType === 'multiMember';
+}
 function transformSubmitFieldValue(field: IssueCreateFields, value: any) {
   switch (field.fieldType) {
     case 'time':
@@ -86,6 +90,7 @@ const CreateIssueBase = observer(({
   const dataSetRef = useRef(defaultDataSet);
   const [dataSet, setDataSet] = useState(defaultDataSet);
   dataSetRef.current = dataSet;
+  const issueTypeId = dataSet.current && dataSet.current.get('issueType');
   const setFieldValue = usePersistFn((name, value) => {
     dataSet.current?.set(name, value);
   });
@@ -95,7 +100,9 @@ const CreateIssueBase = observer(({
     isProgram,
   }, {
     onSuccess: ((issueTypes) => {
-      setFieldValue('issueType', getDefaultIssueType(issueTypes));
+      if (!issueTypeId) {
+        setFieldValue('issueType', getDefaultIssueType(issueTypes));
+      }
     }),
   });
   const getDefaultIssueType = (issueTypes: IIssueType[]) => {
@@ -110,10 +117,11 @@ const CreateIssueBase = observer(({
     }
     return undefined;
   };
-  const issueTypeId = dataSet.current && dataSet.current.get('issueType');
+
   const issueTypeCode = find(issueTypeList, {
     id: issueTypeId,
   })?.typeCode;
+  const enableIssueLinks = issueTypeCode && !['sub_task', 'issue_epic', 'feature'].includes(issueTypeCode);
   const isSubIssue = issueTypeCode && ['sub_task'].includes(issueTypeCode);
   const handleUpdate = usePersistFn(({ name, value }) => {
     switch (name) {
@@ -134,8 +142,7 @@ const CreateIssueBase = observer(({
     }
     if (preset) {
       if (preset.type === 'object') {
-        const isMultiple = field.fieldType === 'multiple' || field.fieldType === 'checkbox';
-        return isMultiple ? field.defaultValueObjs : field.defaultValueObj;
+        return isMultiple(field) ? field.defaultValueObjs : field.defaultValueObj;
       }
     }
     if (field.defaultValue === '') {
@@ -149,7 +156,6 @@ const CreateIssueBase = observer(({
       autoCreate: false,
       fields: fields ? insertField([...fields.map((field) => {
         const preset = presets.get(field.fieldCode) ?? {};
-        const isMultiple = field.fieldType === 'multiple' || field.fieldType === 'checkbox';
         return merge(preset, {
           name: field.fieldCode,
           fieldId: field.fieldId,
@@ -157,7 +163,7 @@ const CreateIssueBase = observer(({
           fieldCode: field.fieldCode,
           label: field.fieldName,
           required: field.required,
-          multiple: isMultiple,
+          multiple: isMultiple(field),
         });
       })], [{
         insert: !!isSubIssue,
@@ -201,8 +207,36 @@ const CreateIssueBase = observer(({
     newDataSet.create(newValue);
     setDataSet(newDataSet);
   }, [fields, getDefaultValue, isSubIssue, templateData]);
+  const getIssueLinks = usePersistFn(() => {
+    const links = issueLinkDataSet.toData() as {
+      issueIds: string[]
+      linkType: string
+    }[];
+    const issueLinkCreateVOList: {
+      linkTypeId: string,
+      linkedIssueId: string,
+      in: boolean
+    }[] = [];
+    links.forEach((link) => {
+      const [linkTypeId, isIn] = link.linkType.split('+');
+      const issueIds = link.issueIds as string[];
+      if (issueIds) {
+        issueIds.forEach((issueId) => {
+          issueLinkCreateVOList.push({
+            linkTypeId,
+            linkedIssueId: issueId,
+            in: isIn === 'true',
+          });
+        });
+      }
+    });
+    return issueLinkCreateVOList;
+  });
   const handleSubmit = usePersistFn(async () => {
     if (await dataSet.validate()) {
+      if (enableIssueLinks && !await issueLinkDataSet.validate()) {
+        return false;
+      }
       const data = dataSet.current?.toData();
       const customFields = fields?.filter((f) => !f.system);
       const systemFields = fields?.filter((f) => f.system);
@@ -231,6 +265,7 @@ const CreateIssueBase = observer(({
         parentIssueId: data.parentIssueId,
         programId: projectId ?? getProjectId(),
         projectId: projectId ?? getProjectId(),
+        issueLinkCreateVOList: enableIssueLinks ? getIssueLinks() : undefined,
       });
       await onSubmit({
         data: values, fieldList, fileList,
@@ -300,6 +335,7 @@ const CreateIssueBase = observer(({
                 fieldId,
                 projectId,
                 clearButton: !field?.required,
+                multiple: dataSetField.get('multiple'),
                 style: {
                   width: '100%',
                 },
@@ -311,6 +347,26 @@ const CreateIssueBase = observer(({
       })}
     </Row>
   ));
+  const issueLinkDataSet = useMemo(() => new DataSet({
+    // autoCreate: true,
+    fields: [{
+      name: 'linkType',
+      label: '关系',
+      required: true,
+    }, {
+      name: 'issueIds',
+      label: '问题',
+      required: true,
+      multiLine: true,
+    }],
+    events: {
+      update: ({ name, record: current }: { name: string, record: Record }) => {
+        if (name === 'linkType') {
+          current.init('issueIds');
+        }
+      },
+    },
+  }), []);
   return (
     <Spin spinning={isLoading || isFieldsLoading}>
       <Form
@@ -327,6 +383,7 @@ const CreateIssueBase = observer(({
         />
         {issueTypeCode === 'feature' ? <WSJF /> : null}
       </Form>
+      {enableIssueLinks ? <IssueLink projectId={projectId} dataSet={issueLinkDataSet} /> : null}
     </Spin>
   );
 });
