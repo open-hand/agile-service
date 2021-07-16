@@ -39,8 +39,11 @@ interface PaginatedParams {
   page: number
   size: number
   sort?: string
+  isTree: boolean
 }
-type TableRequest = ({ page, size, sort }: PaginatedParams) => Promise<any>
+type TableRequest = ({
+  page, size, sort, isTree,
+}: PaginatedParams) => Promise<any>
 interface Options {
   rowKey: string
   autoQuery?: boolean
@@ -90,6 +93,7 @@ export default function useTable(getData: TableRequest, options: Options) {
       page: newPage ?? 1,
       size: pageSize,
       sort: sort.sortColumn && sort.sortType ? `${sort.sortColumn},${sort.sortType}` : undefined,
+      isTree,
     });
     batchedUpdates(() => {
       setData(res.list);
@@ -106,7 +110,7 @@ export default function useTable(getData: TableRequest, options: Options) {
   });
   useUpdateEffect(() => {
     query(current);
-  }, [current, pageSize, sort]);
+  }, [current, pageSize, sort, isTree]);
   const onPaginationChange = useCallback((page: number, size: number) => {
     setCurrent(page);
     setPageSize(size);

@@ -71,11 +71,13 @@ const Issue = observer(({ cached, updateCache }) => {
     }
   }, [hasBatchDeletePermission, issueSearchStore]);
 
-  const getTableData = useCallback(({ page, sort, size }) => {
+  const getTableData = useCallback(({
+    page, sort, size, isTree,
+  }) => {
     const search = issueSearchStore.getCustomFieldFilters();
-    set(search, 'searchArgs.tree', !tableListMode);
+    set(search, 'searchArgs.tree', !isTree);
     return issueApi.loadIssues(page, size, sort, search);
-  }, [issueSearchStore, tableListMode]);
+  }, [issueSearchStore]);
   const tableProps = useTable(getTableData, {
     rowKey: 'issueId',
     isTree: !tableListMode,
@@ -352,7 +354,7 @@ const Issue = observer(({ cached, updateCache }) => {
         /> */}
       </Header>
       <Breadcrumb />
-      <Content style={theme === 'theme4' ? { } : { paddingTop: 0 }} className="c7nagile-issue-content">
+      <Content style={theme === 'theme4' ? {} : { paddingTop: 0 }} className="c7nagile-issue-content">
         <IssueSearch
           store={issueSearchStore}
           urlFilter={urlFilter}
