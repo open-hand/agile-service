@@ -428,9 +428,11 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     }
 
     @Override
-    public void copyCustomFieldValue(Long projectId, IssueDetailDTO issueDetailDTO, Long newIssueId, List<Long> customFieldIds) {
+    public void copyCustomFieldValue(Long projectId, IssueDetailDTO issueDetailDTO, Long newIssueId, List<Long> customFieldIds, List<PageFieldViewCreateVO> copyRequireFields) {
         // 查询原来的值
         Long issueId = issueDetailDTO.getIssueId();
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        List<PageFieldViewCreateVO> createDTOs = new ArrayList<>();
         List<FieldValueDTO> fieldValueDTOS = fieldValueMapper.queryListByInstanceIds(Arrays.asList(projectId), Arrays.asList(issueId), SCHEME_CODE, null);
         if (!CollectionUtils.isEmpty(fieldValueDTOS)) {
             Map<Long, List<FieldValueDTO>> listMap;
@@ -441,10 +443,22 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             } else {
                 listMap = fieldValueDTOS.stream().filter(v -> customFieldIds.contains(v.getFieldId())).collect(Collectors.groupingBy(FieldValueDTO::getFieldId));
             }
-            Long organizationId = ConvertUtil.getOrganizationId(projectId);
-            List<PageFieldViewCreateVO> createDTOs = new ArrayList<>();
             handlerFieldValue(listMap, createDTOs);
+        }
+        if (!CollectionUtils.isEmpty(copyRequireFields)) {
+            createDTOs.addAll(copyRequireFields);
+        }
+        if (!CollectionUtils.isEmpty(createDTOs)) {
             createFieldValues(organizationId, projectId, newIssueId, SCHEME_CODE, createDTOs);
+            List<FieldDataLogCreateVO> list = new ArrayList<>();
+            for (PageFieldViewCreateVO createDTO : createDTOs) {
+                List<FieldValueDTO> addFieldValue = fieldValueMapper.listByInstanceIdsAndFieldId(projectId, Arrays.asList(newIssueId), SCHEME_CODE, createDTO.getFieldId());
+                list.addAll(FieldValueUtil.batchHandlerFiledLog(projectId, newIssueId, new ArrayList<>(), addFieldValue));
+            }
+            if (!CollectionUtils.isEmpty(list) ) {
+                CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
+                fieldDataLogMapper.batchInsert(projectId, SCHEME_CODE, list, customUserDetails.getUserId());
+            }
         }
     }
 

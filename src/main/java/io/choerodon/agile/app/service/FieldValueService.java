@@ -113,5 +113,5 @@ public interface FieldValueService {
                                  String applyType,
                                  boolean sendMsg);
 
-    void copyCustomFieldValue(Long projectId, IssueDetailDTO issueDetailDTO, Long newIssueId, List<Long> customFieldIds);
+    void copyCustomFieldValue(Long projectId, IssueDetailDTO issueDetailDTO, Long newIssueId, List<Long> customFieldIds, List<PageFieldViewCreateVO> copyRequireFields);
 }
