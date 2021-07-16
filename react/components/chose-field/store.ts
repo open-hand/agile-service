@@ -77,16 +77,21 @@ class ChoseFieldStore {
     return this.currentOptionStatus;
   }
 
+  @action('状态值自更新')
+  selfUpdateCurrentOptionStatus() {
+    let nextOptionStatus:any = this.chosenFields.size ? 'PART' : 'NONE';
+    if (this.chosenFields.size === (this.fields.get('system')!.length + this.fields.get('custom')!.length)) {
+      nextOptionStatus = 'ALL';
+    }
+    this.currentOptionStatus = nextOptionStatus;
+  }
+
   @action('增添选择字段') addChosenFields(key: string, data: IChosenFieldField, value?: any) {
     this.chosenFields.set(key, { ...data, value: value || undefined });
     if (this.addFieldCallback) {
       this.addFieldCallback(key);
     }
-    if (this.chosenFields.size === (this.fields.get('system')!.length + this.fields.get('custom')!.length)) {
-      this.currentOptionStatus = 'ALL';
-    } else {
-      this.currentOptionStatus = 'PART';
-    }
+    this.selfUpdateCurrentOptionStatus();
   }
 
   @action('增添特殊选择字段') addSpecialFields(key: string, data: IChosenSpecialFieldField) {
