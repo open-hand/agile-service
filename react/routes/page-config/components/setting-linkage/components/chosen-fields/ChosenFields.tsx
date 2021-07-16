@@ -1,133 +1,57 @@
 import React, {
-  useCallback, useEffect, useMemo, useState,
+  useCallback, useEffect, useMemo, useState, useImperativeHandle,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import { DataSet } from 'choerodon-ui/pro';
 import { Icon } from 'choerodon-ui';
 import ChooseField, { useChoseField } from '@/components/chose-field';
-import useIsProgram from '@/hooks/useIsProgram';
-import { IField } from '@/common/types';
-import { fieldApi } from '@/api';
+import { pageConfigApi } from '@/api';
 import classNames from 'classnames';
 import styles from './ChosenFields.less';
-
-const programSystemFields = [
-  {
-    code: 'teamProjectList',
-    name: '负责团队',
-    defaultShow: true,
-    fieldType: 'multiple',
-  },
-  {
-    code: 'reporterList',
-    name: '报告人',
-    defaultShow: false,
-    fieldType: 'member',
-  }, {
-    code: 'createDate',
-    name: '创建时间',
-    defaultShow: false,
-    fieldType: 'datetime',
-  },
-  {
-    code: 'estimatedStartTime',
-    name: '预计开始时间',
-    defaultShow: false,
-    fieldType: 'datetime',
-  },
-  {
-    code: 'acceptanceCritera',
-    name: '验收标准',
-    defaultShow: false,
-    fieldType: 'text',
-  },
-  {
-    code: 'benfitHypothesis',
-    name: '特性价值',
-    defaultShow: false,
-    fieldType: 'text',
-  },
-];
-
-const systemFields = [{
-  code: 'assigneeId',
-  name: '经办人',
-  defaultShow: true,
-  fieldType: 'member',
-}, {
-  code: 'reporterIds',
-  name: '报告人',
-  defaultShow: false,
-  fieldType: 'member',
-}, {
-  code: 'component',
-  name: '模块',
-  defaultShow: false,
-  fieldType: 'multiple',
-}, {
-  code: 'priorityId',
-  name: '优先级',
-  defaultShow: true,
-  fieldType: 'multiple',
-}, {
-  code: 'fixVersion',
-  name: '修复的版本',
-  fieldType: 'multiple',
-}, {
-  code: 'influenceVersion',
-  name: '影响的版本',
-  fieldType: 'multiple',
-},
-{
-  code: 'estimatedStartTime',
-  name: '预计开始时间',
-  defaultShow: false,
-  fieldType: 'datetime',
-},
-{
-  code: 'estimatedEndTime',
-  name: '预计结束时间',
-  defaultShow: false,
-  fieldType: 'datetime',
-},
-{
-  code: 'mainResponsibleIds',
-  name: '主要负责人',
-  defaultShow: false,
-  fieldType: 'member',
-}, {
-  code: 'environment',
-  name: '环境',
-  defaultShow: false,
-  fieldType: 'multiple',
-}];
+import { IChosenField } from '../Rule/utils';
+import useDeepMemo from './useDeepMemo';
 
 interface Props {
+  issueTypeId: string
+  fieldId: string
   dataSet: DataSet | undefined,
   currentSelected: undefined | string
   setCurrentSelected: (selected: string | undefined) => void
+  chosenFieldsRef: React.MutableRefObject<{chosenFieldCodes: string[]} | null>
 }
 
-const ChosenFields: React.FC<Props> = ({ dataSet, currentSelected, setCurrentSelected }) => {
-  const [customFields, setCustomFields] = useState<IField[]>([]);
-  const { isProgram } = useIsProgram();
-  const fields = useMemo(() => [...customFields, ...(isProgram ? programSystemFields : systemFields)], [customFields, isProgram]);
+const ChosenFields: React.FC<Props> = ({
+  dataSet, currentSelected, setCurrentSelected, issueTypeId, fieldId, chosenFieldsRef,
+}) => {
+  const [chosenFields, setChosenFields] = useState<IChosenField[]>([]);
+  const defaultValue = useDeepMemo(() => dataSet?.map((record) => record.get('chosenField')?.id));
   useEffect(() => {
-    const getCustomFields = async () => {
-      const res = await fieldApi.getCustomFields();
-      setCustomFields(res);
+    const getChosenFields = async () => {
+      const res = await pageConfigApi.getCascadeFields(issueTypeId, fieldId);
+      setChosenFields(res.map((item: any) => ({
+        name: item.fieldName,
+        id: item.fieldId,
+        code: item.fieldId,
+        system: item.createdLevel === 'system',
+        fieldType: item.fieldType,
+        fieldCode: item.fieldCode,
+      })));
     };
-    getCustomFields();
-  }, []);
+    getChosenFields();
+  }, [fieldId, issueTypeId]);
   const addRecord = useCallback((key) => {
     const newRecord = dataSet?.create();
-    newRecord && newRecord.set('chosenOption', fields.find((field) => field.code === key));
-  }, [dataSet, fields]);
+    newRecord && newRecord.set('chosenField', chosenFields.find((field) => field.code === key));
+  }, [dataSet, chosenFields]);
+
   const [choseDataProps, choseComponentProps] = useChoseField({
-    fields,
+    fields: chosenFields,
     addFieldCallback: addRecord,
+    // defaultValue,
   });
+
+  // console.log('renderChosenFields', defaultValue);
   const { store: choseFieldStore } = choseDataProps;
   useEffect(() => {
     if (!currentSelected && choseFieldStore.getAllChosenField.length) {
@@ -135,60 +59,56 @@ const ChosenFields: React.FC<Props> = ({ dataSet, currentSelected, setCurrentSel
     }
   }, [choseFieldStore.getAllChosenField, currentSelected, setCurrentSelected]);
 
-  const handleChangeSelected = useCallback((code) => {
-    setCurrentSelected(code);
+  const handleChangeSelected = useCallback((key) => {
+    setCurrentSelected(key);
   }, [setCurrentSelected]);
 
-  const handleCancelChosen = useCallback((e, code, record) => {
+  const handleCancelChosen = useCallback((e, key, record) => {
     e.stopPropagation();
     dataSet?.remove(record);
-    choseFieldStore.delChosenFields(code);
-    if ((currentSelected === code || !currentSelected) && choseFieldStore.getAllChosenField.length) {
-      setCurrentSelected(choseFieldStore.getAllChosenField[0].code);
+    choseFieldStore.delChosenFields(key);
+    if ((currentSelected === key || !currentSelected) && choseFieldStore.getAllChosenField.length) {
+      setCurrentSelected(choseFieldStore.getAllChosenField[0].id);
     }
-    if (currentSelected === code && !choseFieldStore.getAllChosenField.length) {
+    if (currentSelected === key && !choseFieldStore.getAllChosenField.length) {
       setCurrentSelected(undefined);
     }
     // 添加清楚相关rule的逻辑
   }, [choseFieldStore, currentSelected, dataSet, setCurrentSelected]);
 
-  console.log(toJS(choseFieldStore.getAllChosenField), dataSet, currentSelected);
+  // useEffect(() => {
+  //   if (dataSet?.length) {
+  //     dataSet.forEach((record) => {
+  //       const chosenField = record.get('chosenField');
+  //       choseFieldStore.addChosenFields(chosenField?.id, chosenField);
+  //     }, []);
+  //   }
+  // }, [choseFieldStore, dataSet]);
+
+  useImperativeHandle(chosenFieldsRef, () => ({
+    chosenFieldCodes: choseFieldStore.getAllChosenField?.map((item) => item.code),
+  }));
+
   return (
-    <div className={styles.chosenOption}>
+    <div className={styles.chosenField}>
       <div className={styles.chosen_btn}>
         <ChooseField {...choseComponentProps} dropDownBtnProps={{ icon: 'add', style: { marginLeft: 6, marginTop: 10 } }} />
       </div>
       <div className={styles['option-list']}>
-        {/* {
-          choseFieldStore.getAllChosenField.map((field) => (
-            <div
-              className={classNames(styles['option-item'], {
-                [styles['option-item-selected']]: field.code === currentSelected,
-              })}
-              role="none"
-              onClick={() => { handleChangeSelected(field.code); }}
-            >
-              <span className={styles['option-item-name']}>{field.name}</span>
-              <span className={styles['option-item-clear']}>
-                <Icon type="close" onClick={(e) => { handleCancelChosen(e, field.code); }} />
-              </span>
-            </div>
-          ))
-        } */}
         {
           dataSet && dataSet.map((record) => {
-            const chosenField = record.get('chosenOption');
+            const chosenField = record.get('chosenField');
             return (
               <div
                 className={classNames(styles['option-item'], {
-                  [styles['option-item-selected']]: chosenField?.code === currentSelected,
+                  [styles['option-item-selected']]: chosenField?.id === currentSelected,
                 })}
                 role="none"
-                onClick={() => { handleChangeSelected(chosenField?.code); }}
+                onClick={() => { handleChangeSelected(chosenField?.id); }}
               >
                 <span className={styles['option-item-name']}>{chosenField?.name}</span>
                 <span className={styles['option-item-clear']}>
-                  <Icon type="close" onClick={(e) => { handleCancelChosen(e, chosenField?.code, record); }} />
+                  <Icon type="close" onClick={(e) => { handleCancelChosen(e, chosenField?.id, record); }} />
                 </span>
               </div>
             );

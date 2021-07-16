@@ -93,7 +93,28 @@ export interface UIssueTypeConfig {
   createdFields?: Array<any>,
 
 }
+export interface ICascadeRule {
+  issueTypeId: string,
+  fieldId: string,
+  fieldOptionId: string,
+  cascadeFieldId: string,
+  defaultValue?: any,
+  hidden?: boolean,
+  required?: boolean,
+  fieldCascadeRuleOptionList?: {
+    cascadeOptionId: string,
+    defaultOption?: boolean
+  }[]
+  _status: 'create' | 'update' | 'delete'
+  objectVersionNumber?: number
+  id?: number
+}
+
 class PageConfigApi extends Api<PageConfigApi> {
+  get prefix() {
+    return `/agile/v1/projects/${this.projectId}`;
+  }
+
   get prefixOrgOrPro() {
     return `/agile/v1/${getMenuType() === 'project' ? `projects/${this.projectId}` : `organizations/${this.projectId}`}`;
   }
@@ -338,6 +359,46 @@ class PageConfigApi extends Api<PageConfigApi> {
       params: {
         organizationId: getOrganizationId(),
         action,
+      },
+    });
+  }
+
+  /**
+   * 创建级联规则
+   */
+  createCascadeRule(data: ICascadeRule[]) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/field_cascade_rule`,
+      data,
+    });
+  }
+
+  getCascadeRuleList(issueTypeId: string, fieldId?: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/field_cascade_rule`,
+      params: {
+        issue_type_id: issueTypeId,
+        field_id: fieldId,
+      },
+    });
+  }
+
+  getCascadeRule(ruleId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/field_cascade_rule/${ruleId}`,
+    });
+  }
+
+  getCascadeFields(issueTypeId: string, fieldId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/field_cascade_rule/no_loop_filed`,
+      params: {
+        issue_type_id: issueTypeId,
+        field_id: fieldId,
       },
     });
   }

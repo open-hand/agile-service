@@ -228,9 +228,9 @@ function PageIssueType() {
         <Button onClick={() => openLinkage({
           // @ts-ignore
           field: {
-            id: '185419989275267072',
-            code: '185419989275267072',
-            fieldCode: '185419989275267072',
+            id: '203839906898952192',
+            code: 'pro_customSelect',
+            fieldCode: 'pro_customSelect',
             name: '优先级',
             fieldType: 'single',
             fieldTypeName: '选择器（单选）',
@@ -242,6 +242,7 @@ function PageIssueType() {
             ],
             extraConfig: false,
           },
+          issueTypeId: '195917548854870016',
         })}
         >
         打开级联配置
