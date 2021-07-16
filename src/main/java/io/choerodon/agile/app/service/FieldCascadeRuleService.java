@@ -40,13 +40,6 @@ public interface FieldCascadeRuleService {
     FieldCascadeRuleVO updateFieldCascadeRule(Long projectId, Long fieldCascadeRuleId, FieldCascadeUpdateVO fieldCascadeUpdate);
 
     /**
-     * 删除级联规则
-     * @param projectId 项目id
-     * @param fieldCascadeRuleId 要删除的规则id
-     */
-    void deleteFieldCascadeRule(Long projectId, Long fieldCascadeRuleId);
-
-    /**
      * 查询级联规则详情
      * @param projectId 项目id
      * @param fieldCascadeRuleId 级联规则id
@@ -62,4 +55,12 @@ public interface FieldCascadeRuleService {
      * @return 可级联字段
      */
     List<PageConfigFieldVO> listCascadePageFieldView(Long projectId, Long issueTypeId, Long fieldId);
+
+    /**
+     * 批量创建/更新/修改级联规则
+     * @param projectId 项目id
+     * @param fieldCascadeRuleList 要变动的级联规则
+     * @return 变动的级联规则
+     */
+    List<FieldCascadeRuleVO> batchMutationFieldCascadeRule(Long projectId, List<FieldCascadeRuleVO> fieldCascadeRuleList);
 }

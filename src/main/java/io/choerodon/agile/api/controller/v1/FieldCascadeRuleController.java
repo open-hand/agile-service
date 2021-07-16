@@ -61,37 +61,13 @@ public class FieldCascadeRuleController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("创建级联规则")
+    @ApiOperation("级联规则批量更新、删除、创建")
     @PostMapping
-    public ResponseEntity<FieldCascadeRuleVO> createFieldCascadeRule(
+    public ResponseEntity<List<FieldCascadeRuleVO>> batchMutationFieldCascadeRule(
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
-            @Validated @RequestBody FieldCascadeCreateVO fieldCascadeCreate) {
-        return new ResponseEntity<>(fieldCascadeRuleService.createFieldCascadeRule(projectId, fieldCascadeCreate), HttpStatus.CREATED);
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("更新级联规则")
-    @PutMapping("/{field_cascade_rule_id}")
-    public ResponseEntity<FieldCascadeRuleVO> updateFieldCascadeRule(
-            @ApiParam(value = "项目id", required = true)
-            @PathVariable(name = "project_id") Long projectId,
-            @ApiParam(value = "级联规则id", required = true)
-            @Encrypt @PathVariable(name = "field_cascade_rule_id") Long fieldCascadeRuleId,
-            @RequestBody FieldCascadeUpdateVO fieldCascadeUpdate) {
-        return new ResponseEntity<>(fieldCascadeRuleService.updateFieldCascadeRule(projectId, fieldCascadeRuleId, fieldCascadeUpdate), HttpStatus.CREATED);
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("删除级联规则")
-    @DeleteMapping("/{field_cascade_rule_id}")
-    public ResponseEntity<Void> deleteFieldCascadeRule(
-            @ApiParam(value = "项目id", required = true)
-            @PathVariable(name = "project_id") Long projectId,
-            @ApiParam(value = "级联规则id", required = true)
-            @Encrypt @PathVariable(name = "field_cascade_rule_id") Long fieldCascadeRuleId) {
-        fieldCascadeRuleService.deleteFieldCascadeRule(projectId, fieldCascadeRuleId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            @RequestBody List<FieldCascadeRuleVO> fieldCascadeRuleList) {
+        return new ResponseEntity<>(fieldCascadeRuleService.batchMutationFieldCascadeRule(projectId, fieldCascadeRuleList), HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

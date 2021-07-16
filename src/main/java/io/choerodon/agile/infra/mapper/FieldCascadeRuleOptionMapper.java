@@ -13,9 +13,17 @@ import io.choerodon.mybatis.common.BaseMapper;
  */
 public interface FieldCascadeRuleOptionMapper extends BaseMapper<FieldCascadeRuleOptionDTO> {
     /**
-     * 批量删除联规则选项
+     * 批量删除级联规则选项
      *
      * @param ids 要删除的id
      */
     void batchDeleteFieldCascadeRuleOptionByIds(@Param("ids") List<Long> ids);
+
+    /**
+     * 通过级联规则id批量删除级联规则选项
+     *
+     * @param ruleIds   要删除的id
+     * @param projectId 项目id
+     */
+    void batchDeleteByFieldCascadeRuleIds(@Param("ruleIds") List<Long> ruleIds, @Param("projectId") Long projectId);
 }

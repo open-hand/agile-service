@@ -27,9 +27,17 @@ public interface FieldCascadeRuleMapper extends BaseMapper<FieldCascadeRuleDTO> 
     /**
      * 查询级联规则的详情
      *
-     * @param projectId      项目id
+     * @param projectId          项目id
      * @param fieldCascadeRuleId 级联规则id
      * @return 级联规则的详情
      */
     FieldCascadeRuleVO selectFieldCascadeRuleDetail(@Param("projectId") Long projectId, @Param("fieldCascadeRuleId") Long fieldCascadeRuleId);
+
+    /**
+     * 按ruleId批量删除规则
+     *
+     * @param ids       ruleId
+     * @param projectId 项目id
+     */
+    void batchDeleteByIds(@Param("ids") List<Long> ids, @Param("projectId") Long projectId);
 }
