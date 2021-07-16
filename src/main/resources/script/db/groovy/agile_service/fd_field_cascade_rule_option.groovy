@@ -12,7 +12,7 @@ databaseChangeLog(logicalFilePath: 'script/db/fd_field_cascade_rule_option.groov
             column(name: "cascade_option_id", type: "BIGINT UNSIGNED", remarks: "级联字段选项") {
                 constraints(nullable: "false")
             }
-            column(name: "is_default", type: "TINYINT(1)", defaultValue: "0", remarks: "是否默认")
+            column(name: "is_default", type: "TINYINT UNSIGNED(1)", defaultValue: "0", remarks: "是否默认")
             column(name: "project_id", type: "BIGINT UNSIGNED", remarks: "项目id") {
                 constraints(nullable: "false")
             }

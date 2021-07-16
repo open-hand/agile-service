@@ -18,8 +18,8 @@ databaseChangeLog(logicalFilePath: 'script/db/fd_field_cascade_rule.groovy') {
             column(name: "cascade_field_id", type: "BIGINT UNSIGNED", remarks: "级联的字段id") {
                 constraints(nullable: "false")
             }
-            column(name: "is_hidden", type: "TINYINT(1)", defaultValue: "0", remarks: "是否隐藏")
-            column(name: "is_required", type: "TINYINT(1)", defaultValue: "0", remarks: "是否必输")
+            column(name: "is_hidden", type: "TINYINT UNSIGNED(1)", defaultValue: "0", remarks: "是否隐藏")
+            column(name: "is_required", type: "TINYINT UNSIGNED(1)", defaultValue: "0", remarks: "是否必输")
             column(name: "default_value", type: "VARCHAR(255)", remarks: "默认值")
             column(name: "project_id", type: "BIGINT UNSIGNED", remarks: "项目id") {
                 constraints(nullable: "false")
