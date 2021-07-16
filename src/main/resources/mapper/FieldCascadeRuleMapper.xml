@@ -97,4 +97,13 @@
         WHERE ffrr.project_id = #{projectId}
         AND ffrr.id = #{fieldCascadeRuleId}
     </select>
+
+    <delete id="batchDeleteByIds">
+        DELETE FROM fd_field_cascade_rule
+        WHERE id IN
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+        AND project_id = #{projectId}
+    </delete>
 </mapper>

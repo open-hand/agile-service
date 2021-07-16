@@ -80,8 +80,9 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
     @Override
     public FieldCascadeRuleVO createFieldCascadeRule(Long projectId, FieldCascadeCreateVO fieldCascadeCreate) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        validCreateField(fieldCascadeCreate);
         validExit(fieldCascadeCreate, projectId);
-        
+
         FieldCascadeRuleDTO fieldCascadeRule = modelMapper.map(fieldCascadeCreate, FieldCascadeRuleDTO.class);
         fieldCascadeRule.setProjectId(projectId);
         fieldCascadeRule.setOrganizationId(organizationId);
@@ -97,6 +98,21 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
             });
         }
         return modelMapper.map(fieldCascadeRule, FieldCascadeRuleVO.class);
+    }
+
+    private void validCreateField(FieldCascadeCreateVO fieldCascadeCreate) {
+        if (fieldCascadeCreate.getIssueTypeId() == null){
+            throw new CommonException("error.fieldCascadeCreate.issueType.null");
+        }
+        if (fieldCascadeCreate.getFieldId() == null){
+            throw new CommonException("error.fieldCascadeCreate.fieldId.null");
+        }
+        if (fieldCascadeCreate.getCascadeFieldId() == null){
+            throw new CommonException("error.fieldCascadeCreate.cascadeFieldId.null");
+        }
+        if (fieldCascadeCreate.getFieldOptionId() == null){
+            throw new CommonException("error.fieldCascadeCreate.fieldOption.null");
+        }
     }
 
     private void validExit(FieldCascadeCreateVO fieldCascadeCreate, Long projectId) {
@@ -145,18 +161,6 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
     }
 
     @Override
-    public void deleteFieldCascadeRule(Long projectId, Long fieldCascadeRuleId) {
-        FieldCascadeRuleDTO fieldCascadeRuleRecord = new FieldCascadeRuleDTO();
-        FieldCascadeRuleOptionDTO fieldCascadeRuleOptionRecord = new FieldCascadeRuleOptionDTO();
-        fieldCascadeRuleOptionRecord.setFieldCascadeRuleId(fieldCascadeRuleId);
-        fieldCascadeRuleOptionRecord.setProjectId(projectId);
-        fieldCascadeRuleOptionMapper.delete(fieldCascadeRuleOptionRecord);
-        fieldCascadeRuleRecord.setId(fieldCascadeRuleId);
-        fieldCascadeRuleRecord.setProjectId(projectId);
-        fieldCascadeRuleMapper.delete(fieldCascadeRuleRecord);
-    }
-
-    @Override
     public FieldCascadeRuleVO fieldCascadeRuleDetail(Long projectId, Long fieldCascadeRuleId) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         FieldCascadeRuleVO fieldCascadeRuleVO = fieldCascadeRuleMapper.selectFieldCascadeRuleDetail(projectId, fieldCascadeRuleId);
@@ -187,6 +191,64 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                         !previousFieldIds.contains(pageConfigFieldVO.getFieldId())
                                 && !CANT_CASCADE_FIELD_CODE.contains(pageConfigFieldVO.getFieldCode()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<FieldCascadeRuleVO> batchMutationFieldCascadeRule(Long projectId, List<FieldCascadeRuleVO> fieldCascadeRuleList) {
+        if (CollectionUtils.isEmpty(fieldCascadeRuleList)){
+            return new ArrayList<>();
+        }
+
+        List<FieldCascadeCreateVO> createList = new ArrayList<>();
+        List<FieldCascadeRuleVO> updateList = new ArrayList<>();
+        List<Long> deleteIdList = new ArrayList<>();
+
+        fieldCascadeRuleList.forEach(fieldCascadeRule -> {
+               if (fieldCascadeRule.get_status() == null){
+                   return;
+               }
+               switch (fieldCascadeRule.get_status()){
+                   case create:
+                       FieldCascadeCreateVO fieldCascadeCreateVO = modelMapper.map(fieldCascadeRule, FieldCascadeCreateVO.class);
+                       createList.add(fieldCascadeCreateVO);
+                       break;
+                   case update:
+                       updateList.add(fieldCascadeRule);
+                       break;
+                   case delete:
+                       deleteIdList.add(fieldCascadeRule.getId());
+                       break;
+                   default:break;
+               }
+        });
+
+        batchDeleteFieldCascadeRule(deleteIdList, projectId);
+        batchUpdateFieldCascadeRule(updateList, projectId);
+        batchCreateFieldCascadeRule(createList, projectId);
+        return fieldCascadeRuleList;
+    }
+
+    private void batchDeleteFieldCascadeRule(List<Long> deleteIdList, Long projectId) {
+        if (CollectionUtils.isEmpty(deleteIdList)) {
+            return;
+        }
+        fieldCascadeRuleOptionMapper.batchDeleteByFieldCascadeRuleIds(deleteIdList, projectId);
+        fieldCascadeRuleMapper.batchDeleteByIds(deleteIdList, projectId);
+    }
+
+    private void batchUpdateFieldCascadeRule(List<FieldCascadeRuleVO> updateList, Long projectId) {
+        if (CollectionUtils.isEmpty(updateList)){
+            updateList.forEach(updateFieldCascadeRule -> {
+                FieldCascadeUpdateVO fieldCascadeUpdateVO = modelMapper.map(updateFieldCascadeRule, FieldCascadeUpdateVO.class);
+                updateFieldCascadeRule(projectId, updateFieldCascadeRule.getId(), fieldCascadeUpdateVO);
+            });
+        }
+    }
+
+    private void batchCreateFieldCascadeRule(List<FieldCascadeCreateVO> createList, Long projectId) {
+        if (!CollectionUtils.isEmpty(createList)){
+            createList.forEach(fieldCascadeCreateVO -> createFieldCascadeRule(projectId, fieldCascadeCreateVO));
+        }
     }
 
     private void processDefaultValue(Long projectId, Long organizationId, List<FieldCascadeRuleVO> fieldCascadeRuleList) {

@@ -8,4 +8,13 @@
             #{id}
         </foreach>
     </delete>
+
+    <delete id="batchDeleteByFieldCascadeRuleIds">
+        DELETE FROM fd_field_cascade_rule_option
+        WHERE field_cascade_rule_id IN
+        <foreach collection="ruleIds" item="ruleId" separator="," open="(" close=")">
+            #{ruleId}
+        </foreach>
+        AND project_id = #{projectId}
+    </delete>
 </mapper>
