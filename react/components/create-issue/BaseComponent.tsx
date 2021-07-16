@@ -68,7 +68,9 @@ const presets = new Map([
 ]);
 const lineField = ['summary', 'description'];
 const reuseFields = ['issueType', 'summary', 'description'];
-
+function isMultiple(field: IssueCreateFields) {
+  return field.fieldType === 'multiple' || field.fieldType === 'checkbox' || field.fieldType === 'multiMember';
+}
 function transformSubmitFieldValue(field: IssueCreateFields, value: any) {
   switch (field.fieldType) {
     case 'time':
@@ -86,6 +88,7 @@ const CreateIssueBase = observer(({
   const dataSetRef = useRef(defaultDataSet);
   const [dataSet, setDataSet] = useState(defaultDataSet);
   dataSetRef.current = dataSet;
+  const issueTypeId = dataSet.current && dataSet.current.get('issueType');
   const setFieldValue = usePersistFn((name, value) => {
     dataSet.current?.set(name, value);
   });
@@ -95,7 +98,9 @@ const CreateIssueBase = observer(({
     isProgram,
   }, {
     onSuccess: ((issueTypes) => {
-      setFieldValue('issueType', getDefaultIssueType(issueTypes));
+      if (!issueTypeId) {
+        setFieldValue('issueType', getDefaultIssueType(issueTypes));
+      }
     }),
   });
   const getDefaultIssueType = (issueTypes: IIssueType[]) => {
@@ -110,7 +115,7 @@ const CreateIssueBase = observer(({
     }
     return undefined;
   };
-  const issueTypeId = dataSet.current && dataSet.current.get('issueType');
+
   const issueTypeCode = find(issueTypeList, {
     id: issueTypeId,
   })?.typeCode;
@@ -134,8 +139,7 @@ const CreateIssueBase = observer(({
     }
     if (preset) {
       if (preset.type === 'object') {
-        const isMultiple = field.fieldType === 'multiple' || field.fieldType === 'checkbox';
-        return isMultiple ? field.defaultValueObjs : field.defaultValueObj;
+        return isMultiple(field) ? field.defaultValueObjs : field.defaultValueObj;
       }
     }
     if (field.defaultValue === '') {
@@ -149,7 +153,6 @@ const CreateIssueBase = observer(({
       autoCreate: false,
       fields: fields ? insertField([...fields.map((field) => {
         const preset = presets.get(field.fieldCode) ?? {};
-        const isMultiple = field.fieldType === 'multiple' || field.fieldType === 'checkbox';
         return merge(preset, {
           name: field.fieldCode,
           fieldId: field.fieldId,
@@ -157,7 +160,7 @@ const CreateIssueBase = observer(({
           fieldCode: field.fieldCode,
           label: field.fieldName,
           required: field.required,
-          multiple: isMultiple,
+          multiple: isMultiple(field),
         });
       })], [{
         insert: !!isSubIssue,
@@ -300,6 +303,7 @@ const CreateIssueBase = observer(({
                 fieldId,
                 projectId,
                 clearButton: !field?.required,
+                multiple: dataSetField.get('multiple'),
                 style: {
                   width: '100%',
                 },
