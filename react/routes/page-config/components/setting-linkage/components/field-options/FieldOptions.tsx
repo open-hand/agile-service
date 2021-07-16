@@ -90,7 +90,9 @@ const getOptionsConfig = ({
   }
 };
 
-const FieldOptions: React.FC<Props> = ({ field, onChange, currentOptionId }) => {
+const FieldOptions: React.FC<Props> = ({
+  field, onChange, currentOptionId,
+}) => {
   const [options, setOptions] = useState<IOption[]>([]);
   const [search, setSearch] = useState('');
   const [totalPage, setTotalPage] = useState<number>(0);

@@ -98,10 +98,10 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
         }
         const result = events.initField(newField, currentChosenFields);
         const { immutableCheck } = result || {};
-        if (field.id) {
+        if (field.id && !field.system) {
           result && customFields.push(result);
           immutableCheck && currentChosenFields.set(field.code, result as IChosenFieldField);
-        } else if (!field.noDisplay) {
+        } else if (!field.noDisplay || field.system) {
           result && systemFields.push(result);
           immutableCheck && currentChosenFields.set(field.code, result as IChosenFieldField);
         }
