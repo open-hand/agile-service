@@ -634,12 +634,12 @@ public class EncryptionUtils {
                 } catch (IOException e) {
                     LOGGER.error("string to object error: {}", e);
                 }
-                if (!CollectionUtils.isEmpty(value)) {
+                if (!ObjectUtils.isEmpty(next.getValue()) && !CollectionUtils.isEmpty(value)) {
                     object = value.stream().map(v -> encrypt ? encrypt(v, IGNORE_VALUES) : decrypt(v, IGNORE_VALUES)).collect(Collectors.toList());
 
                 }
                 else {
-                    object = new ArrayList<>();
+                    object = next.getValue();
                 }
             } else if ("customField".equals(next.getKey())) {
                 object = personalFilterHandlerCustomField(next.getValue(), encrypt);
