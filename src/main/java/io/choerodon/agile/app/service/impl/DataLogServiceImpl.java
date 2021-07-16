@@ -90,7 +90,7 @@ public class DataLogServiceImpl implements DataLogService {
     }
 
     private void appendSummary(List<DataLogVO> dataLogs) {
-        List<String> specialFields = Arrays.asList("Feature Link", "Epic Link");
+        List<String> specialFields = Arrays.asList("Feature Link", "Epic Link", "Epic Child");
         Set<Long> issueIds = new HashSet<>();
         List<DataLogVO> dataLogList = new ArrayList<>();
         dataLogs.forEach(x -> {
