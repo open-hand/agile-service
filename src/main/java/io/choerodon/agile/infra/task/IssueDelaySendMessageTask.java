@@ -11,6 +11,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.agile.infra.mapper.StarBeaconMapper;
 import io.choerodon.asgard.schedule.annotation.JobTask;
 import io.choerodon.asgard.schedule.annotation.TimedTask;
 import io.choerodon.asgard.schedule.enums.TriggerTypeEnum;
@@ -50,6 +51,8 @@ public class IssueDelaySendMessageTask {
     private static final String PROJECT_OWNER = "projectOwner";
     private static final String ASSIGNEE = "assignee";
     private static final String REPORTER = "reporter";
+    private static final String SPECIFIER = "specifier";
+    private static final String STAR_USER = "starUser";
     private static final String DELAY_COUNT = "delayCount";
 
     private static final String BACKSLASH_TR = "</tr>";
@@ -71,6 +74,8 @@ public class IssueDelaySendMessageTask {
     private PriorityService priorityService;
     @Autowired
     private StatusService statusService;
+    @Autowired
+    private StarBeaconMapper starBeaconMapper;
 
     @Value("${services.domain.url}")
     private String domainUrl;
@@ -262,7 +267,7 @@ public class IssueDelaySendMessageTask {
                 userIds.addAll(x.getUserIds());
                 x.getUserIds().forEach(y -> {
                     List<IssueDTO> issueList = issueGroupByProject.get(projectId);
-                    if (ObjectUtils.isEmpty(issueList)) {
+                    if (!CollectionUtils.isEmpty(issueList)) {
                         issueList.forEach(z -> {
                             Long organizationId = projectMap.get(projectId).getOrganizationId();
                             LocalDateTime estimatedEndDate = z.getEstimatedEndTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
@@ -304,47 +309,51 @@ public class IssueDelaySendMessageTask {
                 LocalDateTime estimatedEndDate = estimatedEndTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
                 long delayDay = estimatedEndDate.isBefore(localDateTime) ?
                         Duration.between(estimatedEndDate, localDateTime).toDays() + 1 : 0;
-                Long assigneeId = x.getAssigneeId();
-                if (assigneeId != null && !Objects.equals(0L, assigneeId)) {
-                    userIds.add(assigneeId);
-                    if (receiverTypes != null && receiverTypes.contains(ASSIGNEE)) {
-                        addValueToMultiKeyMap(
-                                multiKeyMap,
-                                projectId,
-                                assigneeId,
-                                new IssueDelayCarrierVO(x, x.getIssueId(), delayDay, organizationId));
+                Map<String, Set<Long>> userTypeMap = new HashMap<>();
+                if (receiverTypes != null) {
+                    addAssigneeAndReporter(ASSIGNEE, x.getAssigneeId(), userTypeMap, userIds);
+                    addAssigneeAndReporter(REPORTER, x.getReporterId(), userTypeMap, userIds);
+                    userTypeMap.put(SPECIFIER, projectMessageVO.getUserIds());
+                    if (receiverTypes.contains(PROJECT_OWNER)) {
+                        projectIdForProjectOwner.add(projectId);
                     }
-                }
-                Long reporterId = x.getReporterId();
-                if (reporterId != null && !Objects.equals(0L, reporterId)) {
-                    userIds.add(reporterId);
-                    if (receiverTypes != null && receiverTypes.contains(REPORTER)) {
-                        addValueToMultiKeyMap(
-                                multiKeyMap,
-                                projectId,
-                                reporterId,
-                                new IssueDelayCarrierVO(x, x.getIssueId(), delayDay, organizationId));
-                    }
-                }
-                if (receiverTypes != null && receiverTypes.contains(PROJECT_OWNER)) {
-                    projectIdForProjectOwner.add(projectId);
-                }
-                Set<Long> projectUserIds = projectMessageVO.getUserIds();
-                if (!CollectionUtils.isEmpty(projectUserIds)) {
-                    projectMessageVO.getUserIds().forEach(y -> {
-                                addValueToMultiKeyMap(
-                                        multiKeyMap,
-                                        projectId,
-                                        y,
-                                        new IssueDelayCarrierVO(x, x.getIssueId(), delayDay, organizationId));
-                                userIds.add(y);
-                            }
-                    );
+                    //问题逾期通知增加关注人
+                    userTypeMap.put(STAR_USER, new HashSet<>(starBeaconMapper.selectUsersByInstanceId(projectId, x.getIssueId())));
+                    addToMultiKeyMap(x, projectMessageVO, delayDay, multiKeyMap, userIds, userTypeMap);
                 }
             });
         });
         priorityMap.forEach((k, v) -> v.forEach(priorityNameMap::put));
         statusMap.forEach((k, v) -> v.forEach(statusNameMap::put));
+    }
+
+    private void addAssigneeAndReporter(String userType, Long userId, Map<String, Set<Long>> userTypeMap, Set<Long> userIds) {
+        if (userId != null && !Objects.equals(0L, userId)) {
+            userIds.add(userId);
+            userTypeMap.put(userType, Collections.singleton(userId));
+        }
+    }
+
+    private void addToMultiKeyMap(IssueDTO issueDTO,
+                                  ProjectMessageVO projectMessageVO,
+                                  long delayDay,
+                                  MultiKeyMap multiKeyMap,
+                                  Set<Long> userIds,
+                                  Map<String,Set<Long>> userTypeMap) {
+        Set<String> receiverTypes = projectMessageVO.getReceiverTypes();
+        Long organizationId = projectMessageVO.getOrganizationId();
+
+        userTypeMap.forEach((userType, userIdList) -> {
+            if (receiverTypes.contains(userType) && !CollectionUtils.isEmpty(userIdList)) {
+                userIdList.forEach(userId -> {
+                    userIds.add(userId);
+                    addValueToMultiKeyMap(multiKeyMap,
+                            issueDTO.getProjectId(),
+                            userId,
+                            new IssueDelayCarrierVO(issueDTO, issueDTO.getIssueId(), delayDay, organizationId));
+                });
+            }
+        });
     }
 
     private void queryOrganizationStatusMap(Long organizationId,

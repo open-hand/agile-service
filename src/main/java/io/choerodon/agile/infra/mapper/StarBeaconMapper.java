@@ -20,5 +20,7 @@ public interface StarBeaconMapper extends BaseMapper<StarBeaconDTO> {
      * @return
      */
     List<Long> selectStarIssuesByIds(@Param("issueIds") List<Long> issueIds, @Param("projectIds") List<Long> projectIds, @Param("userId") Long userId);
+
+    List<Long> selectUsersByInstanceId(@Param("projectId") Long projectId, @Param("instanceId") Long instanceId);
 }
 
