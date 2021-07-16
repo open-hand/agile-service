@@ -6,6 +6,7 @@ import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.DataLogDTO;
 import io.choerodon.agile.infra.dto.DataLogStatusChangeDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.mapper.DataLogMapper;
 import io.choerodon.agile.infra.mapper.FieldDataLogMapper;
@@ -13,6 +14,7 @@ import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.exception.CommonException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +76,7 @@ public class DataLogServiceImpl implements DataLogService {
             List<RuleLogRelVO> ruleLogRelList = agileTriggerService.queryRuleLogRelList(ruleLogRelVO);
             ruleLogRelMap = ruleLogRelList.stream().collect(Collectors.toMap(RuleLogRelVO::getLogId, Function.identity()));
         }
+        appendSummary(dataLogVOS);
         List<FieldDataLogVO> fieldDataLogVOS = fieldDataLogService.queryByInstanceId(projectId, issueId, ObjectSchemeCode.AGILE_ISSUE);
         for (FieldDataLogVO fieldDataLogVO : fieldDataLogVOS) {
             DataLogVO dataLogVO = modelMapper.map(fieldDataLogVO, DataLogVO.class);
@@ -84,6 +87,54 @@ public class DataLogServiceImpl implements DataLogService {
         }
         fillUserAndStatus(projectId, dataLogVOS, ruleLogRelMap);
         return dataLogVOS.stream().sorted(Comparator.comparing(DataLogVO::getCreationDate).reversed()).collect(Collectors.toList());
+    }
+
+    private void appendSummary(List<DataLogVO> dataLogs) {
+        List<String> specialFields = Arrays.asList("Feature Link", "Epic Link", "Epic Child", "Feature Child");
+        Set<Long> issueIds = new HashSet<>();
+        List<DataLogVO> dataLogList = new ArrayList<>();
+        dataLogs.forEach(x -> {
+            if (specialFields.contains(x.getField())) {
+                dataLogList.add(x);
+                String oldValue = x.getOldValue();
+                String newValue = x.getNewValue();
+                if (oldValue != null) {
+                    issueIds.add(Long.valueOf(oldValue));
+                }
+                if (newValue != null) {
+                    issueIds.add(Long.valueOf(newValue));
+                }
+            }
+        });
+        Map<Long, String> summaryMap = new HashMap<>();
+        if (!issueIds.isEmpty()) {
+            summaryMap.putAll(
+                    issueMapper.selectByIds(StringUtils.join(issueIds, ","))
+                            .stream()
+                            .collect(Collectors.toMap(IssueDTO::getIssueId, IssueDTO::getSummary)));
+        }
+        dataLogList.forEach(x -> {
+            String oldValue = x.getOldValue();
+            String newValue = x.getNewValue();
+            if (oldValue != null) {
+                Long issueId = Long.valueOf(oldValue);
+                String summary = summaryMap.get(issueId);
+                if (summary != null) {
+                    String oldString = x.getOldString();
+                    oldString = oldString + ":" + summary;
+                    x.setOldString(oldString);
+                }
+            }
+            if (newValue != null) {
+                Long issueId = Long.valueOf(newValue);
+                String summary = summaryMap.get(issueId);
+                if (summary != null) {
+                    String newString = x.getNewString();
+                    newString = newString + ":" + summary;
+                    x.setOldString(newString);
+                }
+            }
+        });
     }
 
     /**
