@@ -181,6 +181,7 @@ const GanttPage: React.FC = () => {
       const year = dayjs().year();
       const filter = issueSearchStore.getCustomFieldFilters();
       if (sprintIds === null) {
+        setData([]);
         return;
       }
       filter.otherArgs.sprint = sprintIds;
@@ -480,6 +481,12 @@ const GanttPage: React.FC = () => {
     }
     return data;
   }, [data, type]);
+  const renderEmpty = usePersistFn(() => {
+    if (!sprintIds || sprintIds?.length === 0) {
+      return <span>暂无数据，请选择冲刺</span>;
+    }
+    return <span>暂无数据</span>;
+  });
   return (
     <Page>
       <Header>
@@ -585,6 +592,8 @@ const GanttPage: React.FC = () => {
                 bottom: 8,
               }}
               rowHeight={34}
+              // @ts-ignore
+              renderEmpty={renderEmpty}
             />
           )}
           <IssueDetail
