@@ -3,6 +3,7 @@ package io.choerodon.agile.infra.utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import io.choerodon.agile.infra.mapper.StarBeaconMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.message.entity.MessageSender;
@@ -82,6 +83,8 @@ public class SendMsgUtil {
     private ProjectInfoMapper projectInfoMapper;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private StarBeaconMapper starBeaconMapper;
 
     private String convertProjectName(ProjectVO projectVO) {
         String projectName = projectVO.getName();
@@ -256,7 +259,7 @@ public class SendMsgUtil {
         ids[2] = issueDTO.getReporterId();
         List<UserDTO> userDTOList = userService.listUsersByIds(ids);
         Boolean isProgram = Objects.equals(issueDTO.getApplyType(), "program");
-        String memberType = Boolean.TRUE.equals(isProgram) ? "报告人" : "经办人";
+        String actionType = Boolean.TRUE.equals(isProgram) ? "报告的" : "经办的";
         String assigneeName = userDTOList.stream().filter(user -> Objects.equals(user.getId(), Boolean.TRUE.equals(isProgram) ? issueDTO.getReporterId(): issueDTO.getAssigneeId()))
                 .findFirst().map(UserDTO::getRealName).orElse("");
         // 设置概要
@@ -266,7 +269,7 @@ public class SendMsgUtil {
                 .findFirst().map(UserDTO::getRealName).orElse("");
         // 设置状态
         String status = ConvertUtil.getIssueStatusMap(projectId).get(issueDTO.getStatusId()).getName();
-        templateArgsMap.put("memberType", memberType);
+        templateArgsMap.put("actionType", Objects.equals("", assigneeName) ? "" : actionType);
         templateArgsMap.put("assigneeName", assigneeName);
         templateArgsMap.put("summary", summary);
         templateArgsMap.put("operatorName", operatorName);
@@ -398,14 +401,22 @@ public class SendMsgUtil {
     }
 
     private void setIssueCommentMessageActionAndUser(Map<Long, String> actionMap, Long userId, IssueVO issueVO, ProjectVO projectVO, List<Long> userIds) {
-        Map<Long, String> map = new HashMap<>(2);
-        map.put(issueVO.getAssigneeId(), "处理的");
+        Map<Long, String> map = new HashMap<>();
+        List<Long> starUsers = starBeaconMapper.selectUsersByInstanceId(projectVO.getId(), issueVO.getIssueId());
+        if (!CollectionUtils.isEmpty(starUsers)) {
+            starUsers.forEach(starUserId -> {
+                if (userIds.contains(starUserId)) {
+                    map.put(starUserId, "关注的");
+                }
+            });
+        }
         map.put(issueVO.getReporterId(), "负责的");
+        map.put(issueVO.getAssigneeId(), "处理的");
         userIds.forEach(sendUserId -> {
             if(sendUserId.equals(userId)){
                 return;
             }
-            actionMap.put(sendUserId, map.getOrDefault(userId, "管理的"));
+            actionMap.put(sendUserId, map.getOrDefault(sendUserId, "管理的"));
         });
     }
 

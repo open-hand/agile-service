@@ -44,4 +44,11 @@
         and fsb.user_id = #{userId}
     </select>
 
+    <select id="selectUsersByInstanceId" resultType="java.lang.Long">
+        select user_id
+        from fd_star_beacon
+        where instance_id = #{instanceId}
+        and project_id = #{projectId}
+    </select>
+
 </mapper>

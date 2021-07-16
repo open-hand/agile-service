@@ -11,6 +11,7 @@ import io.choerodon.agile.infra.dto.MessageDetailDTO;
 import io.choerodon.agile.infra.feign.vo.MessageSettingVO;
 import io.choerodon.agile.infra.mapper.NoticeDetailMapper;
 import io.choerodon.agile.infra.mapper.NoticeMapper;
+import io.choerodon.agile.infra.mapper.StarBeaconMapper;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -32,6 +30,8 @@ import java.util.stream.Collectors;
 public class NoticeServiceImpl implements NoticeService {
 
     private static final String USERS = "specifier";
+    private static final String ISSUE_CREATE = "ISSUECREATE";
+    private static final String STAR_USER = "starUser";
 
     @Autowired
     private NoticeMapper noticeMapper;
@@ -47,6 +47,9 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Autowired
     private NotifyFeignClient notifyFeignClient;
+
+    @Autowired
+    private StarBeaconMapper starBeaconMapper;
 
     private void getIds(List<MessageDTO> result, List<Long> ids) {
         for (MessageDTO messageDTO : result) {
@@ -143,6 +146,19 @@ public class NoticeServiceImpl implements NoticeService {
             }
         }
     }
+    
+    private void addUsersByStarUsers(Long projectId, List<String> res, String code, List<Long> result, IssueVO issueVO) {
+        if (!Objects.equals(ISSUE_CREATE, code) && res.contains(STAR_USER)) {
+            List<Long> userIds = starBeaconMapper.selectUsersByInstanceId(projectId, issueVO.getIssueId());
+            if (!CollectionUtils.isEmpty(userIds)) {
+                userIds.forEach(userId -> {
+                    if (!result.contains(userId)) {
+                        result.add(userId);
+                    }
+                });
+            }
+        }
+    }
 
     @Override
     public List<Long> queryUserIdsByProjectId(Long projectId, String code, IssueVO issueVO) {
@@ -165,6 +181,8 @@ public class NoticeServiceImpl implements NoticeService {
         addUsersByAssigneer(res, result, issueVO);
         addUsersByProjectOwner(projectId, res, result);
         addUsersByUsers(res, result, users);
+        //通知增加关注人
+        addUsersByStarUsers(projectId, res, code, result, issueVO);
         return result;
     }
 

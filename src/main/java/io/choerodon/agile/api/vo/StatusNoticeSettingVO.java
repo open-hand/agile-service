@@ -44,7 +44,7 @@ public class StatusNoticeSettingVO extends AuditDomain {
     @Encrypt
     private Long statusId;
 
-    @ApiModelProperty(value = "用户类型，projectOwner, assignee, reporter, specifier")
+    @ApiModelProperty(value = "用户类型，projectOwner, assignee, reporter, specifier, starUser")
     private Set<String> userTypeList = new HashSet<>();
 
     @ApiModelProperty(value = "用户id")

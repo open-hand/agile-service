@@ -74,7 +74,7 @@ public class StatusNoticeSettingDTO extends AuditDomain {
     @ApiModelProperty(value = "状态id",required = true)
     private Long statusId;
 
-    @ApiModelProperty(value = "用户类型，基本类型projectOwner, assignee, reporter, specifier",required = true)
+    @ApiModelProperty(value = "用户类型，基本类型projectOwner, assignee, reporter, specifier, starUser",required = true)
     private String userType;
 
     @ApiModelProperty(value = "用户id")
