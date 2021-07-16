@@ -1,6 +1,10 @@
 /* eslint-disable camelcase */
 import { ModalProps } from 'choerodon-ui/pro/lib/modal/Modal';
 
+export type Paged<T> = {
+  list: T[]
+  content: T[]
+}
 export interface User {
   email: string
   enabled?: boolean

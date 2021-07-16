@@ -1,3 +1,4 @@
+import { Paged } from '@/common/types';
 import { getProjectId } from '@/utils/common';
 import Api from './Api';
 
@@ -10,7 +11,15 @@ interface ILinkTypeQuery {
     linkName: string,
   },
 }
-
+export interface IssueLinkType {
+  inWard: string
+  issueCount: number
+  linkName: string
+  linkTypeId: string
+  objectVersionNumber: number
+  outWard: string
+  projectId: string
+}
 class IssueLinkTypeApi extends Api<IssueLinkTypeApi> {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
@@ -21,7 +30,7 @@ class IssueLinkTypeApi extends Api<IssueLinkTypeApi> {
     size = 999,
     issueLinkTypeId,
     filter,
-  }: ILinkTypeQuery = {}, projectId?: number) {
+  }: ILinkTypeQuery = {}, projectId?: number): Promise<Paged<IssueLinkType>> {
     return this.request({
       url: `/agile/v1/projects/${projectId || getProjectId()}/issue_link_types/query_all`,
       method: 'POST',
@@ -42,7 +51,7 @@ class IssueLinkTypeApi extends Api<IssueLinkTypeApi> {
    * @param issueLinkTypeName
    * @param issueLinkTypeId
    */
-  checkName(issueLinkTypeName:string, issueLinkTypeId?:number) {
+  checkName(issueLinkTypeName: string, issueLinkTypeId?: number) {
     return this.request({
       method: 'get',
       url: `${this.prefix}/issue_link_types/check_name`,
