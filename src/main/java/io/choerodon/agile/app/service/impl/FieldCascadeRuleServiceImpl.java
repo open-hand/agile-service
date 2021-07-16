@@ -149,7 +149,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
     public FieldCascadeRuleVO updateFieldCascadeRule(Long projectId, Long fieldCascadeRuleId, FieldCascadeUpdateVO fieldCascadeUpdate) {
         FieldCascadeRuleDTO fieldCascadeRuleDTO = modelMapper.map(fieldCascadeUpdate, FieldCascadeRuleDTO.class);
         fieldCascadeRuleDTO.setProjectId(projectId);
-        fieldCascadeRuleDTO.setFieldId(fieldCascadeRuleId);
+        fieldCascadeRuleDTO.setId(fieldCascadeRuleId);
         if (fieldCascadeRuleMapper.updateByPrimaryKeySelective(fieldCascadeRuleDTO) != 1) {
             throw new CommonException("error.fieldCascadeRule.update");
         }
@@ -314,8 +314,8 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
 
         fieldOptionList.forEach(fieldCascadeRuleOption -> {
             if (oldOptionIdMap.get(fieldCascadeRuleOption.getCascadeOptionId()) != null) {
-                oldOptionIdMap.remove(fieldCascadeRuleOption.getCascadeOptionId());
                 FieldCascadeRuleOptionDTO oldOption = oldOptionIdMap.get(fieldCascadeRuleOption.getCascadeOptionId());
+                oldOptionIdMap.remove(fieldCascadeRuleOption.getCascadeOptionId());
                 Boolean nowOptionDefault = Boolean.TRUE.equals(fieldCascadeRuleOption.getDefaultOption());
                 if (!nowOptionDefault.equals(oldOption.getDefaultOption())) {
                     oldOption.setDefaultOption(nowOptionDefault);
