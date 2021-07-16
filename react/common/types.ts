@@ -406,8 +406,10 @@ export type ISystemFieldCodeMap =
   'mainResponsible' |
   'environment' |
   'tag' |
-  'parentIssueId';
-
+  'parentIssueId' |
+  // 项目群字段
+  'featureType' |
+  'subProject';
 export type ISystemFieldCode =
   'summary' |
   'issueTypeId' |
