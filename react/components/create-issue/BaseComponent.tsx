@@ -14,6 +14,10 @@ import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { IIssueType, IModalProps, IssueCreateFields } from '@/common/types';
 import useIssueCreateFields from '@/hooks/data/useIssueCreateFields';
 import moment from 'moment';
+
+import { getProjectId } from '@/utils/common';
+import WSJF from './components/wsjf';
+import hooks from './hooks';
 import getFieldConfig from './fields';
 import { insertField } from './utils';
 
@@ -37,6 +41,10 @@ export interface CreateIssueBaseProps {
   defaultValues?: {
     [key: string]: any
   }
+  /** 限定可选问题类型 */
+  typeCode?: string | string[]
+  /** 是否在项目群创建 */
+  isProgram?: boolean
 }
 const defaultDataSet = new DataSet({
   autoCreate: true,
@@ -72,7 +80,7 @@ function transformSubmitFieldValue(field: IssueCreateFields, value: any) {
   }
 }
 const CreateIssueBase = observer(({
-  modal, projectId, onSubmit, defaultTypeCode = 'story', defaultTypeId, defaultValues,
+  modal, projectId, onSubmit, defaultTypeCode = 'story', defaultTypeId, defaultValues, typeCode, isProgram,
 }: CreateIssueBaseProps) => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
@@ -83,6 +91,8 @@ const CreateIssueBase = observer(({
   });
   const { isFetching: isLoading, data: issueTypeList } = useProjectIssueTypes({
     projectId,
+    typeCode,
+    isProgram,
   }, {
     onSuccess: ((issueTypes) => {
       setFieldValue('issueType', getDefaultIssueType(issueTypes));
@@ -139,6 +149,7 @@ const CreateIssueBase = observer(({
       autoCreate: false,
       fields: fields ? insertField([...fields.map((field) => {
         const preset = presets.get(field.fieldCode) ?? {};
+        const isMultiple = field.fieldType === 'multiple' || field.fieldType === 'checkbox';
         return merge(preset, {
           name: field.fieldCode,
           fieldId: field.fieldId,
@@ -146,6 +157,7 @@ const CreateIssueBase = observer(({
           fieldCode: field.fieldCode,
           label: field.fieldName,
           required: field.required,
+          multiple: isMultiple,
         });
       })], [{
         insert: !!isSubIssue,
@@ -200,7 +212,7 @@ const CreateIssueBase = observer(({
         fieldId: field.fieldId,
         fieldCode: field.fieldCode,
       })) ?? [];
-      const values = systemFields?.reduce((res, field) => {
+      let values = systemFields?.reduce((res, field) => {
         const config = getFieldConfig(field);
         return {
           ...res,
@@ -212,16 +224,13 @@ const CreateIssueBase = observer(({
       const issueType = find(issueTypeList, {
         id: data.issueType,
       });
+      values = hooks.reduce((result, hook) => hook(result, data), values);
       Object.assign(values, {
         typeCode: (issueType as IIssueType)?.typeCode,
         priorityCode: `priority-${data.priority || 0}`,
         parentIssueId: data.parentIssueId,
-        versionIssueRelVOList: [
-          ...(data.fixVersion ?? []).map((versionId: string) => ({ versionId, relationType: 'fix' })),
-          ...(data.influenceVersion ?? []).map((versionId: string) => ({ versionId, relationType: 'influence' })),
-        ],
-        fixVersion: undefined,
-        influenceVersion: undefined,
+        programId: projectId ?? getProjectId(),
+        projectId: projectId ?? getProjectId(),
       });
       await onSubmit({
         data: values, fieldList, fileList,
@@ -241,6 +250,14 @@ const CreateIssueBase = observer(({
       case 'parentIssueId': {
         return {
           issueType: issueTypeCode,
+        };
+      }
+      case 'issueType': {
+        return {
+          isProgram,
+          config: {
+            typeCode,
+          },
         };
       }
       default: break;
@@ -308,6 +325,7 @@ const CreateIssueBase = observer(({
             }
           }}
         />
+        {issueTypeCode === 'feature' ? <WSJF /> : null}
       </Form>
     </Spin>
   );

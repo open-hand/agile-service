@@ -7,7 +7,7 @@ import {
 import SelectUser from '@/components/select/pro/select-user';
 import { IFieldType, ISystemFieldCodeMap } from '@/common/types';
 import UserTag from '../tag/user-tag';
-import SelectIssueType from '../select/select-issue-type';
+import SelectIssueType from '../select/pro/select-issue-type';
 // import DateTimePicker from '../date-time-picker';
 import Editor from '../Editor';
 import SelectCustomField from '../select/select-custom-field';
@@ -24,6 +24,8 @@ import SelectStatus from '../select/select-status';
 import SelectMultiServiceTag from '../select/select-multi-service-tag';
 import SelectParentIssue from '../select/select-parent-issue';
 import SelectEnvironment from '../select/select-environment';
+import SelectFeatureType from '../select/select-feature-type';
+import SelectTeam from '../select/select-team';
 
 type ProRenderFieldPropsType = {
   render: ((
@@ -244,6 +246,20 @@ const systemFieldMap: Record<ISystemFieldCodeMap, ProRenderFieldPropsType> = {
     renderFormItem: (props) => (
       <SelectParentIssue {...props} />
     ),
+  },
+  // 项目群字段
+  featureType: {
+    render: (text) => text,
+    renderFormItem: (props) => (
+      <SelectFeatureType {...props} />
+    ),
+  },
+  subProject: {
+    render: (text) => text,
+    renderFormItem: (props) => (
+      <SelectTeam {...props} />
+    ),
+    valueKey: 'teamProjectIds',
   },
 };
 const fieldMap = {

@@ -13,13 +13,14 @@ export interface ProjectIssueTypesConfig {
   /** 只查询启用的 */
   onlyEnabled?: boolean
   programId?: string | number
+  isProgram?: boolean
 }
 export default function useProjectIssueTypes(config?: ProjectIssueTypesConfig, options?: UseQueryOptions<IIssueType[]>) {
   const { isProgram } = useIsProgram();
-  const key = useProjectKey({ key: ['issueTypes', { onlyEnabled: config?.onlyEnabled }], projectId: config?.projectId });
+  const key = useProjectKey({ key: ['issueTypes', { onlyEnabled: config?.onlyEnabled, isProgram: config?.isProgram ?? isProgram }], projectId: config?.projectId });
   return useQuery(key, () => issueTypeApi.loadAllWithStateMachineId('agile', config?.projectId, config?.onlyEnabled, config?.programId), {
     select: (data) => {
-      const issueTypes = (!isProgram ? data.filter((item: IIssueType) => item.typeCode !== 'feature') : data);
+      const issueTypes = (!(config?.isProgram ?? isProgram) ? data.filter((item: IIssueType) => item.typeCode !== 'feature') : data);
       // eslint-disable-next-line no-nested-ternary
       const typeCodes = Array.isArray(config?.typeCode) ? config?.typeCode : (config?.typeCode ? [config?.typeCode] : null);
       return typeCodes ? issueTypes.filter((type) => typeCodes.includes(type.typeCode)) : issueTypes;
