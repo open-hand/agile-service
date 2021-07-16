@@ -43,6 +43,7 @@ const InjectCustomSearch: React.FC<CustomReportSearchProps> = ({ searchVO, setSe
     events: {
       choseField: handleChoseField,
     },
+    dropDownProps: { getPopupContainer: (node) => node.parentNode as any },
   });
 
   useEffect(() => {
