@@ -285,7 +285,6 @@ const CreateIssueBase = observer(({
       const issueType = find(issueTypeList, {
         id: data.issueType,
       });
-      values = hooks.reduce((result, hook) => hook(result, data), values);
       Object.assign(values, {
         typeCode: (issueType as IIssueType)?.typeCode,
         priorityCode: `priority-${data.priority || 0}`,
@@ -294,6 +293,7 @@ const CreateIssueBase = observer(({
         projectId: projectId ?? getProjectId(),
         issueLinkCreateVOList: enableIssueLinks ? getIssueLinks() : undefined,
       });
+      values = hooks.reduce((result, hook) => hook(result, data), values);
       await onSubmit({
         data: values, fieldList, fileList,
       });
