@@ -116,7 +116,7 @@ class QuickCreateIssue extends Component {
             this.props.setDefaultSprint(sprintId);
           }
           if (this.props.assigneeChange) {
-            this.props.assigneeChange(assigneeId);
+            this.props.assigneeChange(assigneeId, this.userDropDownRef?.current?.selectedUser);
           }
           this.setState({
             loading: false,

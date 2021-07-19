@@ -12,6 +12,7 @@ import {
 } from 'lodash';
 import { useUnmount, usePersistFn } from 'ahooks';
 import CreateIssue from '@/components/CreateIssue';
+import openCreateIssue from '@/components/create-issue';
 import Loading from '@/components/Loading';
 import { projectApi } from '@/api/Project';
 import useIssueTableFields from '@/hooks/data/useIssueTableFields';
@@ -261,6 +262,17 @@ const Issue = observer(({ cached, updateCache }) => {
   const closeBatchModal = useCallback(() => {
     tableProps.setCheckValues([]);
   }, [tableProps]);
+  const handleOpenCreateIssue = usePersistFn(() => {
+    openCreateIssue({
+      onCreate: handleCreateIssue,
+      defaultValues: {
+        summary: IssueStore.defaultSummary,
+      },
+      defaultAssignee: IssueStore.defaultAssignee,
+      defaultTypeId: IssueStore.defaultTypeId,
+      // chosenSprint={IssueStore.defaultSprint}
+    });
+  });
   return (
     <Page
       className="c7nagile-issue"
@@ -269,6 +281,12 @@ const Issue = observer(({ cached, updateCache }) => {
         title="问题管理"
       >
         <HeaderButtons items={[
+          {
+            name: '新创建问题',
+            icon: 'playlist_add',
+            handler: handleOpenCreateIssue,
+            display: true,
+          },
           {
             name: '创建问题',
             icon: 'playlist_add',
@@ -373,6 +391,7 @@ const Issue = observer(({ cached, updateCache }) => {
           setDefaultSprint={IssueStore.setDefaultSprint}
           IssueStore={IssueStore}
           onSummaryClick={handleSummaryClick}
+          onOpenCreateIssue={handleOpenCreateIssue}
         />
         <FilterManage
           visible={IssueStore.filterListVisible}

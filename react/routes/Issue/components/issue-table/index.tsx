@@ -23,13 +23,13 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
   onSummaryClick,
   tableProps,
   onCreateIssue,
+  onOpenCreateIssue,
   onRowClick,
   tableRef,
   typeIdChange,
   summaryChange,
   assigneeChange,
   setDefaultSprint,
-  IssueStore,
   isTree,
 }) => {
   const props = tableProps;
@@ -96,12 +96,12 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
             fields={fields}
             tableRef={tableRef}
             onCreateIssue={onCreateIssue}
+            onOpenCreateIssue={onOpenCreateIssue}
             onRowClick={onRowClick}
             typeIdChange={typeIdChange}
             summaryChange={summaryChange}
             assigneeChange={assigneeChange}
             setDefaultSprint={setDefaultSprint}
-            IssueStore={IssueStore}
             onSummaryClick={onSummaryClick}
             onColumnResize={handleColumnResize}
           />
