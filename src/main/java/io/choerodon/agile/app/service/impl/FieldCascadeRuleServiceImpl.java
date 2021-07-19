@@ -14,20 +14,23 @@ import java.util.stream.Stream;
 import javax.annotation.Resource;
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.app.service.FieldCascadeRuleService;
-import io.choerodon.agile.app.service.ObjectSchemeFieldService;
-import io.choerodon.agile.app.service.PriorityService;
-import io.choerodon.agile.app.service.UserService;
-import io.choerodon.agile.infra.dto.FieldCascadeRuleDTO;
-import io.choerodon.agile.infra.dto.FieldCascadeRuleOptionDTO;
-import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.FieldType;
-import io.choerodon.agile.infra.mapper.FieldCascadeRuleMapper;
-import io.choerodon.agile.infra.mapper.FieldCascadeRuleOptionMapper;
-import io.choerodon.agile.infra.mapper.IssueComponentMapper;
+import io.choerodon.agile.infra.enums.ObjectSchemeCode;
+import io.choerodon.agile.infra.enums.PageCode;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
+import io.choerodon.agile.infra.utils.PageUtil;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * @author chihao.ran@hand-china.com
@@ -36,6 +39,12 @@ import io.choerodon.core.exception.CommonException;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
+
+    private static final String MEMBER = "member";
+    private static final String PRIORITY = "priority";
+    private static final String COMPONENT = "component";
+    private static final String CUSTOM = "custom";
+    private static final String OTHER = "other";
 
     @Resource
     private FieldCascadeRuleMapper fieldCascadeRuleMapper;
@@ -51,6 +60,14 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
     private ObjectSchemeFieldService objectSchemeFieldService;
     @Autowired
     private UserService userService;
+    @Resource
+    private ObjectSchemeFieldMapper objectSchemeFieldMapper;
+    @Autowired
+    private BaseFeignClient baseFeignClient;
+    @Resource
+    private IssueMapper issueMapper;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     private static final Set<String> CANT_CASCADE_FIELD_CODE = Stream.of(
             FieldCode.ISSUE_TYPE,
@@ -140,8 +157,9 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
 
     @Override
     public List<FieldCascadeRuleVO> listFieldCascadeRuleByIssueType(Long projectId, Long issueTypeId, Long fieldId) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
         List<FieldCascadeRuleVO> result = fieldCascadeRuleMapper.listFieldCascadeRuleByIssueType(projectId, issueTypeId, fieldId);
-        processDefaultValue(projectId, projectId, result);
+        processDefaultValue(projectId, organizationId, result);
         return result;
     }
 
@@ -226,6 +244,246 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         batchUpdateFieldCascadeRule(updateList, projectId);
         batchCreateFieldCascadeRule(createList, projectId);
         return fieldCascadeRuleList;
+    }
+
+    @Override
+    public Object listCascadeFieldOption(Long projectId, Long cascadeFieldId, CascadeFieldOptionSearchVO cascadeFieldOptionSearchVO, PageRequest pageRequest) {
+        ObjectSchemeFieldDTO objectSchemeField = objectSchemeFieldMapper.selectByPrimaryKey(cascadeFieldId);
+        if (objectSchemeField == null) {
+            throw new CommonException("error.field.null");
+        }
+        Object result = null;
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+
+        String optionType = getOptionType(objectSchemeField);
+        switch (optionType) {
+            case PRIORITY:
+                result = PageHelper.doPage(
+                        pageRequest, () -> fieldCascadeRuleOptionMapper.selectCascadeFieldComponent(
+                                projectId,
+                                cascadeFieldOptionSearchVO.getFieldCascadeRuleIds(),
+                                cascadeFieldOptionSearchVO.getSearchParam()
+                        ));
+                break;
+            case COMPONENT:
+                result = PageHelper.doPage(
+                        pageRequest, () -> fieldCascadeRuleOptionMapper.selectCascadeFieldPriority(
+                                projectId,
+                                organizationId,
+                                cascadeFieldOptionSearchVO.getFieldCascadeRuleIds(),
+                                cascadeFieldOptionSearchVO.getSearchParam()
+                        ));
+                break;
+            case MEMBER:
+                result = listMemberCascadeFieldOption(projectId, cascadeFieldOptionSearchVO, pageRequest);
+                break;
+            case CUSTOM:
+                result = listCustomFieldOption(projectId, organizationId, objectSchemeField, cascadeFieldOptionSearchVO, pageRequest);
+                break;
+            default:
+                break;
+        }
+
+        if (result == null) {
+            return PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
+        }
+        return result;
+    }
+
+    @Override
+    public void filterPageFieldView(Long organizationId, Long projectId, PageFieldViewParamVO paramDTO, Long instanceId, List<PageFieldViewVO> pageFieldViews) {
+        if (!ObjectSchemeCode.AGILE_ISSUE.equals(paramDTO.getSchemeCode())
+                || PageCode.AGILE_ISSUE_CREATE.equals(paramDTO.getPageCode())
+                || instanceId == null) {
+            return;
+        }
+        List<FieldCascadeRuleVO> fieldCascadeRuleList = fieldCascadeRuleMapper.selectFieldCascadeRequiredOrHiddenRule(projectId, paramDTO.getIssueTypeId());
+        if (CollectionUtils.isEmpty(fieldCascadeRuleList)) {
+            return;
+        }
+        Set<Long> hiddenFieldIds = new HashSet<>();
+        Set<Long> requiredIds = new HashSet<>();
+        Set<Long> influenceVersionIds = new HashSet<>();
+        Set<Long> fixVersionIds = new HashSet<>();
+        Set<Long> componentIds = new HashSet<>();
+        Set<Long> programVersionIds = new HashSet<>();
+
+        IssueDetailDTO issueDetailDTO = getIssueDetail(projectId, instanceId, componentIds, influenceVersionIds, fixVersionIds, programVersionIds);
+        Map<Long, PageFieldViewVO> pageFieldViewMap = pageFieldViews
+                .stream()
+                .filter(pageFieldViewVO -> !Boolean.TRUE.equals(pageFieldViewVO.getSystem())
+                        && Boolean.TRUE.equals(FieldType.hasOption(pageFieldViewVO.getFieldType())))
+                .collect(Collectors.toMap(PageFieldViewVO::getFieldId, Function.identity()));
+
+        fieldCascadeRuleList.forEach(fieldCascadeRuleVO -> {
+            switch (fieldCascadeRuleVO.getFieldCode()) {
+                case FieldCode.PRIORITY:
+                    processHiddenAndRequiredById(
+                            issueDetailDTO.getPriorityVO().getId(),
+                            fieldCascadeRuleVO,
+                            hiddenFieldIds, requiredIds);
+                    break;
+                case FieldCode.COMPONENT:
+                    processHiddenAndRequiredByIds(
+                            componentIds,
+                            fieldCascadeRuleVO,
+                            hiddenFieldIds, requiredIds);
+                    break;
+                case FieldCode.INFLUENCE_VERSION:
+                    processHiddenAndRequiredByIds(
+                            influenceVersionIds,
+                            fieldCascadeRuleVO,
+                            hiddenFieldIds, requiredIds);
+                    break;
+                case FieldCode.FIX_VERSION:
+                    processHiddenAndRequiredByIds(
+                            fixVersionIds,
+                            fieldCascadeRuleVO,
+                            hiddenFieldIds, requiredIds);
+                    break;
+                case FieldCode.PROGRAM_VERSION:
+                    processHiddenAndRequiredByIds(
+                            programVersionIds,
+                            fieldCascadeRuleVO,
+                            hiddenFieldIds, requiredIds);
+                    break;
+                default:
+                    processHiddenAndRequiredByCustomValue(pageFieldViewMap, fieldCascadeRuleVO, hiddenFieldIds, requiredIds);
+                    break;
+            }
+        });
+        removeHiddenFieldAndSetRequired(hiddenFieldIds, requiredIds, pageFieldViews);
+    }
+
+    private void removeHiddenFieldAndSetRequired(Set<Long> hiddenFieldIds, Set<Long> requiredIds, List<PageFieldViewVO> pageFieldViews) {
+        Iterator<PageFieldViewVO> pageFieldViewIterator = pageFieldViews.iterator();
+        while (pageFieldViewIterator.hasNext()) {
+            PageFieldViewVO pageFieldViewVO = pageFieldViewIterator.next();
+            if (requiredIds.contains(pageFieldViewVO.getFieldId())) {
+                pageFieldViewVO.setRequired(true);
+            }
+            if (!Boolean.TRUE.equals(pageFieldViewVO.getRequired())
+                    && hiddenFieldIds.contains(pageFieldViewVO.getFieldId())) {
+                pageFieldViewIterator.remove();
+            }
+        }
+    }
+
+    private void processHiddenAndRequiredByCustomValue(Map<Long, PageFieldViewVO> pageFieldViewMap, FieldCascadeRuleVO fieldCascadeRuleVO, Set<Long> hiddenFieldIds, Set<Long> requiredIds) {
+        PageFieldViewVO pageFieldView = pageFieldViewMap.get(fieldCascadeRuleVO.getFieldId());
+        if (pageFieldView == null || pageFieldView.getValue() == null) {
+            return;
+        }
+
+        if (pageFieldView.getValue() instanceof List) {
+            Set<Long> ids = new HashSet<>(EncryptionUtils.decryptList((List<String>) pageFieldView.getValue(), null, null));
+            processHiddenAndRequiredByIds(ids, fieldCascadeRuleVO, hiddenFieldIds, requiredIds);
+        } else {
+            Long id = EncryptionUtils.decrypt((String) pageFieldView.getValue(), "");
+            processHiddenAndRequiredById(id, fieldCascadeRuleVO, hiddenFieldIds, requiredIds);
+        }
+    }
+
+    private IssueDetailDTO getIssueDetail(Long projectId, Long instanceId, Set<Long> componentIds, Set<Long> influenceVersionIds, Set<Long> fixVersionIds, Set<Long> programVersionIds) {
+        IssueDetailDTO issueDetailDTO = issueMapper.queryIssueDetail(projectId, instanceId);
+        Optional.ofNullable(issueDetailDTO.getComponentIssueRelDTOList())
+                .ifPresent(componentList -> componentList.forEach(component -> componentIds.add(component.getId())));
+        Optional.ofNullable(issueDetailDTO.getVersionIssueRelDTOList())
+                .ifPresent(versionList -> versionList.forEach(version -> {
+                    if ("fix".equals(version.getRelationType())) {
+                        fixVersionIds.add(version.getVersionId());
+                    } else if ("influence".equals(version.getRelationType())) {
+                        influenceVersionIds.add(version.getVersionId());
+                    }
+                }));
+        if (agilePluginService != null) {
+            agilePluginService.setBusinessAttributes(issueDetailDTO);
+            IssueVO issueVO = modelMapper.map(issueDetailDTO, IssueVO.class);
+            agilePluginService.programIssueDetailDTOToVO(issueVO, issueDetailDTO);
+            Optional.ofNullable(issueVO.getProgramVersionFeatureRelVOS())
+                    .ifPresent(programVersionList -> programVersionList.forEach(
+                            programVersion -> programVersionIds.add(programVersion.getProgramVersionId())));
+        }
+        return issueDetailDTO;
+    }
+
+    private void processHiddenAndRequiredByIds(Set<Long> issueOptionIds, FieldCascadeRuleVO fieldCascadeRule, Set<Long> hiddenFieldIds, Set<Long> requiredIds) {
+        if (!issueOptionIds.contains(fieldCascadeRule.getFieldOptionId())) {
+            return;
+        }
+
+        if (Boolean.TRUE.equals(fieldCascadeRule.getRequired())) {
+            requiredIds.add(fieldCascadeRule.getCascadeFieldId());
+        } else if (Boolean.TRUE.equals(fieldCascadeRule.getHidden())) {
+            hiddenFieldIds.add(fieldCascadeRule.getCascadeFieldId());
+        }
+    }
+
+    private void processHiddenAndRequiredById(Long issueOptionId, FieldCascadeRuleVO fieldCascadeRule, Set<Long> hiddenFieldIds, Set<Long> requiredIds) {
+        if (!fieldCascadeRule.getFieldOptionId().equals(issueOptionId)) {
+            return;
+        }
+
+        if (Boolean.TRUE.equals(fieldCascadeRule.getRequired())) {
+            requiredIds.add(fieldCascadeRule.getCascadeFieldId());
+        } else if (Boolean.TRUE.equals(fieldCascadeRule.getHidden())) {
+            hiddenFieldIds.add(fieldCascadeRule.getCascadeFieldId());
+        }
+    }
+
+    private String getOptionType(ObjectSchemeFieldDTO objectSchemeField) {
+        if (FieldType.MEMBER.equals(objectSchemeField.getFieldType())
+                || FieldType.MULTI_MEMBER.equals(objectSchemeField.getFieldType())) {
+            return MEMBER;
+        }
+        switch (objectSchemeField.getCode()) {
+            case FieldCode.COMPONENT:
+                return COMPONENT;
+            case FieldCode.PRIORITY:
+                return PRIORITY;
+            default:
+                break;
+        }
+        if (!Boolean.TRUE.equals(objectSchemeField.getSystem())
+                && Boolean.TRUE.equals(FieldType.hasOption(objectSchemeField.getFieldType()))) {
+            return CUSTOM;
+        }
+        return OTHER;
+    }
+
+    private Object listCustomFieldOption(Long projectId, Long organizationId, ObjectSchemeFieldDTO objectSchemeField, CascadeFieldOptionSearchVO cascadeFieldOptionSearchVO, PageRequest pageRequest) {
+        Set<Long> selected = Optional.ofNullable(cascadeFieldOptionSearchVO.getSelected()).map(HashSet::new).orElse(new HashSet<>());
+        List<Long> fieldCascadeRuleIds = cascadeFieldOptionSearchVO.getFieldCascadeRuleIds();
+
+        Page<FieldOptionVO> optionPage = PageHelper.doPage(
+                pageRequest, () -> fieldCascadeRuleOptionMapper.selectCascadeFieldCustom(organizationId, projectId, objectSchemeField.getId(), cascadeFieldOptionSearchVO.getSearchParam(), selected, fieldCascadeRuleIds));
+
+        if (CollectionUtils.isNotEmpty(selected) && pageRequest.getPage() == 0) {
+            List<FieldOptionVO> selectedOption = fieldCascadeRuleOptionMapper.selectCascadeFieldCustomByOptionIds(organizationId, projectId, selected, fieldCascadeRuleIds);
+            if (CollectionUtils.isNotEmpty(selectedOption)) {
+                selectedOption.addAll(optionPage.getContent());
+                optionPage.setContent(selectedOption);
+            }
+        }
+        return optionPage;
+    }
+
+    private Page<UserDTO> listMemberCascadeFieldOption(Long projectId, CascadeFieldOptionSearchVO cascadeFieldOptionSearchVO, PageRequest pageRequest) {
+        Page<UserDTO> result;
+        if (CollectionUtils.isEmpty(cascadeFieldOptionSearchVO.getFieldCascadeRuleIds())) {
+            Set<Long> visibleOptionIds = fieldCascadeRuleOptionMapper.selectVisibleOptionIds(projectId, cascadeFieldOptionSearchVO.getFieldCascadeRuleIds());
+            result = baseFeignClient.agileUsers(
+                    projectId,
+                    pageRequest.getPage(), pageRequest.getSize(),
+                    cascadeFieldOptionSearchVO.getSearchParam(),
+                    visibleOptionIds).getBody();
+        } else {
+            result = baseFeignClient.listUsersByProjectId(
+                    projectId,
+                    pageRequest.getPage(), pageRequest.getSize(),
+                    cascadeFieldOptionSearchVO.getSearchParam()).getBody();
+        }
+        return result;
     }
 
     private void batchDeleteFieldCascadeRule(List<Long> deleteIdList, Long projectId) {

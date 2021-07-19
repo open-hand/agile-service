@@ -106,4 +106,27 @@
         </foreach>
         AND project_id = #{projectId}
     </delete>
+
+    <select id="selectFieldCascadeRequiredOrHiddenRule" resultType="io.choerodon.agile.api.vo.FieldCascadeRuleVO">
+        SELECT
+            ffrr.id,
+            ffrr.issue_type_id,
+            ffrr.field_id,
+            ffrr.field_option_id,
+            ffrr.cascade_field_id,
+            ffrr.is_hidden AS hidden,
+            ffrr.is_required AS required,
+            ffrr.default_value,
+            ffrr.project_id,
+            ffrr.organization_id,
+            fosf.name field_name,
+            fosf.code field_code,
+            fosf.field_type,
+            fosf.is_system field_system
+        FROM fd_field_cascade_rule ffrr
+        LEFT JOIN fd_object_scheme_field fosf ON ffrr.field_id = fosf.id
+        WHERE ffrr.project_id = #{projectId}
+        AND ffrr.issue_type_id = #{issueTypeId}
+        AND (is_hidden = 1 OR ffrr.is_required = 1)
+    </select>
 </mapper>
