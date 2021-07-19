@@ -228,7 +228,12 @@ const systemFieldMap: Record<ISystemFieldCodeMap, ProRenderFieldPropsType> = {
       <SelectStatus {...props} />
     ),
   },
-  remainingTime: valueTypeMap.datetime,
+  remainingTime: {
+    render: (text) => text,
+    renderFormItem: (props) => (
+      <SelectNumber {...props} />
+    ),
+  },
   environment: {
     render: (text) => text,
     renderFormItem: (props) => (

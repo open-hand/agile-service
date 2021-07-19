@@ -7,7 +7,9 @@ import {
 import {
   Button, Icon, Tooltip,
 } from 'choerodon-ui/pro';
+import { usePersistFn } from 'ahooks';
 import QuickCreateSubIssue from '@/components/QuickCreateSubIssue';
+import openCreateSubTask from '@/components/create-sub-task';
 import CreateSubTask from '../../../CreateIssue/CreateSubTask';
 import IssueList from '../../Component/IssueList';
 import EditIssueContext from '../../stores';
@@ -88,7 +90,21 @@ const SubTask = observer(({
     }
     return parseInt(completeLength / allLength * 100, 10);
   };
-
+  const handleOpenCreateIssue = usePersistFn(() => {
+    openCreateSubTask({
+      onCreate: handleCreateSubIssue,
+      parentIssue: {
+        summary: parentSummary,
+        issueId: parentIssueId,
+      },
+      defaultValues: {
+        summary: store.defaultSummary,
+      },
+      defaultAssignee: store.defaultAssignee,
+      defaultTypeId: store.defaultTypeId,
+      // chosenSprint={IssueStore.defaultSprint}
+    });
+  });
   return (
     disableCreate && subIssueVOList.length === 0 ? null : (
       <div id="sub_task">
@@ -101,6 +117,11 @@ const SubTask = observer(({
             <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
               <Tooltip placement="topRight" title="创建子任务" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
                 <Button onClick={() => store.setCreateSubTaskShow(true)}>
+                  <Icon type="playlist_add icon" />
+                </Button>
+              </Tooltip>
+              <Tooltip placement="topRight" title="新创建子任务" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
+                <Button onClick={handleOpenCreateIssue}>
                   <Icon type="playlist_add icon" />
                 </Button>
               </Tooltip>
