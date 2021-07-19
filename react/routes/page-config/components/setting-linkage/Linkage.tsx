@@ -8,7 +8,8 @@ import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import Loading from '@/components/Loading';
 import { IField, IModalProps } from '@/common/types';
 import { ICascadeRule, pageConfigApi } from '@/api';
-import { includes, map } from 'lodash';
+import { includes, map, find } from 'lodash';
+import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import styles from './Linkage.less';
 import FieldOptions from './components/field-options';
 import ChosenFields from './components/chosen-fields';
@@ -55,7 +56,31 @@ export interface ICascadeLinkageSetting {
   required?: boolean
 }
 
+export interface ICascadeLinkage {
+  objectVersionNumber: number,
+  id: string,
+  issueTypeId: string,
+  fieldId: string,
+  fieldCode: string,
+  fieldName: string,
+  fieldType: string,
+  fieldSystem: boolean,
+  fieldOptionId: string,
+  cascadeFieldId: string,
+  hidden: boolean,
+  required: boolean,
+  cascadeFieldName: string
+  cascadeFieldCode: string,
+  cascadeFieldType: string,
+  cascadeFieldSystem: boolean,
+  defaultValue: any,
+  defaultValueObjs: any[],
+  defaultIds: any[], // Select、人员(单选、多选)
+  fieldCascadeRuleOptionList: any
+}
+
 const selectTypes = ['radio', 'checkbox', 'single', 'multiple'];
+const singleSelectTypes = ['radio', 'single', 'member'];
 
 const Linkage: React.FC<Props> = ({ field, issueTypeId, modal }) => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -68,15 +93,41 @@ const Linkage: React.FC<Props> = ({ field, issueTypeId, modal }) => {
 
   useEffect(() => {
     const getCascadeRuleList = async () => {
-      const res = pageConfigApi.getCascadeRuleList(issueTypeId, field.id);
-      setCascadeRuleList(res);
+      const res: ICascadeLinkage[] = await pageConfigApi.getCascadeRuleList(issueTypeId, field.id);
+      batchedUpdates(() => {
+        // @ts-ignore
+        setCascadeRuleList(res);
+        const cascadeLinkageMap = new Map();
+        res.forEach((item) => {
+          if (!cascadeLinkageMap.has(item.fieldOptionId)) {
+            cascadeLinkageMap.set(item.fieldOptionId, []);
+          }
+          cascadeLinkageMap.get(item.fieldOptionId).push({
+            chosenField: {
+              name: item.cascadeFieldName,
+              id: item.cascadeFieldId,
+              code: item.cascadeFieldId,
+              system: item.cascadeFieldSystem,
+              fieldType: item.cascadeFieldType,
+              fieldCode: item.cascadeFieldCode,
+            },
+            fieldRelOptionList: item.fieldCascadeRuleOptionList || [],
+            defaultValue: item.defaultValue || find(singleSelectTypes, item.cascadeFieldType) ? item.defaultIds && item.defaultIds[0] : item.defaultIds,
+            hidden: item.hidden,
+            required: item.required,
+          });
+        });
+        console.log('map:');
+        console.log(cascadeLinkageMap);
+        setLinkagesMap(cascadeLinkageMap);
+        setLoading(false);
+      });
     };
     getCascadeRuleList();
   }, [field.id, issueTypeId]);
 
   const switchOption = useCallback((id: string) => {
     setCurrentOptionId(id);
-    console.log(chosenFieldsRef?.current?.chosenFieldCodes);
     setCurrentSelected(chosenFieldsRef?.current?.chosenFieldCodes && chosenFieldsRef?.current?.chosenFieldCodes[0]);
     setDataSet(new DataSet({
       fields: [{
@@ -97,13 +148,6 @@ const Linkage: React.FC<Props> = ({ field, issueTypeId, modal }) => {
         name: 'required',
         label: '设置为必填字段',
       }],
-      events: {
-        update: ({ name, record: current }: { name: string, record: Record }) => {
-          if (name === 'chosenField') {
-            current.init('statusId');
-          }
-        },
-      },
     }));
   }, []);
   const prepareData = useCallback(async () => {
@@ -121,14 +165,14 @@ const Linkage: React.FC<Props> = ({ field, issueTypeId, modal }) => {
       if (!await prepareData()) {
         return false;
       }
-      const baseData: ICascadeRule[] = [];
+      const cascadeRuleData: ICascadeRule[] = [];
       for (const [key, values] of linkagesMap.entries()) {
         values.forEach((value) => {
           const {
             chosenField, defaultValue, fieldRelOptionList, required, hidden,
           } = value;
           const originCascadeRule = cascadeRuleList.find((item) => item.fieldOptionId === key && item.cascadeFieldId === chosenField?.id) || { id: undefined };
-          baseData.push({
+          cascadeRuleData.push({
             ...originCascadeRule,
             _status: !originCascadeRule.id ? 'create' : 'update',
             issueTypeId,
@@ -145,11 +189,12 @@ const Linkage: React.FC<Props> = ({ field, issueTypeId, modal }) => {
           });
         });
       }
-      const deleteCascadeRuleList = cascadeRuleList.filter((item) => !includes(map(baseData, 'id'), item.id));
+      const deleteCascadeRuleList = cascadeRuleList.filter((item) => !includes(map(cascadeRuleData, 'id'), item.id));
       deleteCascadeRuleList.forEach((item) => {
-        baseData.push({ ...item, _status: 'delete' });
+        cascadeRuleData.push({ ...item, _status: 'delete' });
       });
-      console.log(baseData);
+      await pageConfigApi.createCascadeRule(cascadeRuleData);
+      console.log(cascadeRuleData);
       // 刷新外边的表格
       return false;
     };
@@ -167,6 +212,7 @@ const Linkage: React.FC<Props> = ({ field, issueTypeId, modal }) => {
 
   useEffect(() => {
     if (currentOptionId && linkagesMap.get(currentOptionId)?.length) {
+      console.log('loadData', linkagesMap.get(currentOptionId));
       dataSet?.loadData(linkagesMap.get(currentOptionId));
     }
   }, [currentOptionId, dataSet, linkagesMap]);
