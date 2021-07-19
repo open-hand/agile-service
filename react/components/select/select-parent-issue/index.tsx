@@ -5,6 +5,7 @@ import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import type { Issue } from '@/common/types';
 import { FlatSelect } from '@choerodon/components';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import InlineIssueTag from '@/components/tag/inline-issue-tag';
 
 interface Props extends Partial<SelectProps> {
   issueType: 'sub_task' | 'bug'
@@ -18,10 +19,10 @@ const SelectParentIssue: React.FC<Props> = forwardRef(({
   const config = useMemo((): SelectConfig<Issue> => ({
     textField: 'summary',
     valueField: 'issueId',
-    tooltip: true,
     request: ({ filter, page }) => issueApi.project(projectId).loadParentIssues(page ?? 0, 20, 'sub_task', filter), // 故事、任务、缺陷（不能是子缺陷
-
     paging: true,
+    optionRenderer: InlineIssueTag.optionRenderer,
+    renderer: InlineIssueTag.renderer,
   }), [projectId]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
