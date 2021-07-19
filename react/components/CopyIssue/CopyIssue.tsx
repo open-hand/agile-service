@@ -118,7 +118,6 @@ const CopyIssue: React.FC<Props> = ({
     }
     if (validate && epicNameValidate) {
       return Promise.all((requiredFieldsVOArrRef.current || []).map((item) => item.dataSet.validate())).then(async (validateRes) => {
-        console.log(validateRes);
         if (validateRes.every((item) => !!item)) {
           const fields = copyIssueDataSet.current?.get('fields') || [];
           const copyfs: {
@@ -139,20 +138,24 @@ const CopyIssue: React.FC<Props> = ({
           if (isInProgram && find(copyfs.predefinedFieldNames, (code) => code === 'epicId')) {
             copyfs.predefinedFieldNames.push('featureId');
           }
-
-          console.log((requiredFieldsVOArrRef.current || []).map((item) => item.getData()));
+          const copyIssueRequiredFieldVOS = (requiredFieldsVOArrRef.current || []).map((item) => item.getData()).map((item) => ({
+            customFields: item.customFields,
+            predefinedFields: item.predefinedFields,
+            issueId: item.issueIds[0],
+          }));
           const copyConditionVO = {
             issueLink: copyIssueDataSet.current?.get('copyLinkIssue') || false,
             subTask: copyIssueDataSet.current?.get('copySubIssue') || false,
             summary: copyIssueDataSet.current?.get('summary') || false,
             epicName: issue.typeCode === 'issue_epic' && copyIssueDataSet.current?.get('epicName'),
+            copyIssueRequiredFieldVOS,
             ...copyfs,
           };
 
           const res = await issueApi.clone(issue.issueId, applyType, copyConditionVO);
           onOk(res);
         }
-        return false;
+        return true;
       });
     }
     return false;

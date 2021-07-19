@@ -24,7 +24,7 @@ export interface RequiredFieldDs {
 const useRequiredFieldDataSet = (issuesFieldRequired: Props[]) : RequiredFieldDs[] => {
   const { isInProgram } = useIsInProgram();
 
-  const getLookupFields = useCallback((issueTypeId) => !issueTypeId ? [] : [{
+  const getLookupFields = useCallback((issueTypeId) => (!issueTypeId ? [] : [{
     name: 'statusId',
     label: '状态',
     lookupAxiosConfig: () => ({
@@ -129,7 +129,7 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[]) : RequiredFieldDs
     }),
     valueField: 'versionId',
     textField: 'name',
-  }], [isInProgram]);
+  }]), [isInProgram]);
 
   const getRequiredFieldDataSet = useCallback((issue: Props) => new DataSet({
     autoCreate: true,
