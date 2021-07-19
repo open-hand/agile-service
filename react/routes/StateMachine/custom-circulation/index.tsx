@@ -136,6 +136,7 @@ const transformedMember = {
   creator: '创建人',
   operator: '当前操作人',
   assignee: '经办人',
+  starUser: '关注人',
   projectOwner: '项目所有者',
   clear: '清空',
   mainResponsible: '主要负责人',

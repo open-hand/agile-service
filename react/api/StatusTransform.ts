@@ -84,9 +84,9 @@ export interface IFeatureLinkage {
 }
 
 export interface ILinkIssueData {
-  linkTypeId:string,
-   linkIssueTypeId:string,
-   linkIssueStatusId:string
+  linkTypeId: string,
+  linkIssueTypeId: string,
+  linkIssueStatusId: string
 }
 class StatusTransformApi extends Api<StatusTransformApi> {
   get prefix() {
@@ -441,7 +441,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
    * @param statusId
    * @param data
    */
-  updateFeatureLinkage(statusId: string, data: IFeatureLinkage[], parentIssueTypeId:string) {
+  updateFeatureLinkage(statusId: string, data: IFeatureLinkage[], parentIssueTypeId: string) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/status_linkages/pro/setting_story_status`,
@@ -472,6 +472,8 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     const arr = [
       { code: 'projectOwner', name: '项目所有者' },
       { code: 'reporter', name: '报告人' },
+      { code: 'starUser', name: '关注人' },
+
     ];
     if (getApplyType() === 'agile') {
       arr.push({ code: 'assignee', name: '经办人' });
@@ -498,6 +500,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     const arr = [
       { code: 'projectOwner', name: '项目所有者' },
       { code: 'reporter', name: '报告人' },
+      { code: 'starUser', name: '关注人' },
     ];
     if (getApplyType() === 'agile') {
       arr.push({ code: 'assignee', name: '经办人' });
