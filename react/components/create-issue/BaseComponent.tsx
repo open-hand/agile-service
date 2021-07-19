@@ -2,7 +2,7 @@ import React, {
   useEffect, useMemo, useRef, useState,
 } from 'react';
 import {
-  DataSet, Row, Col, Spin, Form,
+  DataSet, Row, Col, Spin, Form, TextField,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { usePersistFn } from 'ahooks';
@@ -12,7 +12,9 @@ import UploadButton from '@/components/CommonComponent/UploadButton';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import validateFile from '@/utils/File';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
-import { IIssueType, IModalProps, IssueCreateFields } from '@/common/types';
+import {
+  IFieldType, IIssueType, IModalProps, IssueCreateFields,
+} from '@/common/types';
 import useIssueCreateFields from '@/hooks/data/useIssueCreateFields';
 import moment from 'moment';
 
@@ -44,6 +46,10 @@ export interface CreateIssueBaseProps {
   defaultAssignee?: {
     id: string,
     realName: string,
+  }
+  parentIssue?: {
+    summary: string
+    issueId: string
   }
   defaultValues?: {
     [key: string]: any
@@ -95,6 +101,7 @@ const CreateIssueBase = observer(({
   defaultTypeCode = 'story',
   defaultTypeId,
   defaultAssignee,
+  parentIssue,
   defaultValues,
   typeCode,
   isProgram,
@@ -220,10 +227,13 @@ const CreateIssueBase = observer(({
     if (templateData && templateData.template) {
       setValue('description', templateData.template);
     }
+    if (parentIssue) {
+      setValue('parentIssueId', parentIssue.issueId);
+    }
     // 创建一个新的
     newDataSet.create(newValue);
     setDataSet(newDataSet);
-  }, [fields, getDefaultValue, isSubIssue, templateData]);
+  }, [fields, getDefaultValue, isSubIssue, parentIssue, templateData]);
   const getIssueLinks = usePersistFn(() => {
     const links = issueLinkDataSet.toData() as {
       issueIds: string[]
@@ -294,7 +304,7 @@ const CreateIssueBase = observer(({
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [handleSubmit, modal]);
-  const getFieldProps = usePersistFn((field?: IssueCreateFields): { [key: string]: any } => {
+  const getFieldProps = usePersistFn((field?: Pick<IssueCreateFields, 'fieldType' | 'fieldCode' | 'defaultValueObj' | 'defaultValueObjs'>): { [key: string]: any } => {
     if (!field) {
       return {};
     }
@@ -302,6 +312,7 @@ const CreateIssueBase = observer(({
       case 'parentIssueId': {
         return {
           issueType: issueTypeCode,
+          hidden: !!parentIssue,
         };
       }
       case 'assignee': {
@@ -344,7 +355,16 @@ const CreateIssueBase = observer(({
           fieldType,
         });
         const field = find(fields, { fieldCode: name });
-        const extraProps = getFieldProps(field);
+
+        const extraProps = getFieldProps({
+          fieldCode: name,
+          fieldType,
+          defaultValueObj: field?.defaultValueObj,
+          defaultValueObjs: field?.defaultValueObjs,
+        });
+        if (extraProps.hidden) {
+          return null;
+        }
         return config
           ? (
             <Col
@@ -394,6 +414,7 @@ const CreateIssueBase = observer(({
       <Form
         dataSet={dataSet}
       >
+        {parentIssue ? <TextField label="父任务概要" value={parentIssue.summary} disabled /> : null}
         {renderFields()}
         <UploadButton
           fileList={fileList}

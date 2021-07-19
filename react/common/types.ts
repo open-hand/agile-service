@@ -186,8 +186,8 @@ export interface FieldOption {
 }
 export interface IssueCreateFields {
   defaultValue: any
-  defaultValueObj: any
-  defaultValueObjs: any[]
+  defaultValueObj?: any
+  defaultValueObjs?: any[]
   multiple: boolean
   display: boolean
   // extraConfig: false
