@@ -22,15 +22,18 @@ interface ChildrenProps {
 interface Props {
   children: (data: ChildrenProps) => React.ReactElement,
 }
-
-const useIsInProgram = (): ChildrenProps => {
+interface useIsInProgramConfig {
+  projectId?: string
+}
+const useIsInProgram = (config?: useIsInProgramConfig): ChildrenProps => {
+  const { projectId } = config ?? {};
   const { isProgram } = useIsProgram();
   const isProject = AppState.currentMenuType.type === 'project';
-  const { data: program, isLoading: loading1, refetch: refresh1 } = useParentProgram(undefined, {
+  const { data: program, isLoading: loading1, refetch: refresh1 } = useParentProgram({ projectId }, {
     enabled: shouldRequest && isProject && !isProgram,
   });
   const isInProgram = Boolean(program);
-  const { data: parentArtDoing, isLoading: loading2, refetch: refresh2 } = useParentArtDoing(undefined, {
+  const { data: parentArtDoing, isLoading: loading2, refetch: refresh2 } = useParentArtDoing({ projectId }, {
     enabled: shouldRequest && isInProgram,
   });
 

@@ -10,7 +10,6 @@ import {
 import { usePersistFn } from 'ahooks';
 import QuickCreateSubIssue from '@/components/QuickCreateSubIssue';
 import openCreateSubTask from '@/components/create-sub-task';
-import CreateSubTask from '../../../CreateIssue/CreateSubTask';
 import IssueList from '../../Component/IssueList';
 import EditIssueContext from '../../stores';
 import './SubTask.less';
@@ -23,7 +22,6 @@ const SubTask = observer(({
   const {
     issueId: parentIssueId, subIssueVOList = [], priorityId, sprintId, typeCode, relateIssueId, activeSprint,
   } = store.getIssue;
-  const { getCreateSubTaskShow: createSubTaskShow } = store;
   const disableCreate = disabled || (typeCode === 'bug' && relateIssueId);
   const renderIssueList = (issue, i) => (
     <IssueList
@@ -157,22 +155,6 @@ const SubTask = observer(({
             }}
           />
         )}
-        {
-          createSubTaskShow ? (
-            <CreateSubTask
-              parentIssueId={parentIssueId}
-              parentSummary={parentSummary}
-              visible={createSubTaskShow}
-              onCancel={() => { store.setCreateSubTaskShow(false); resetDefault(); }}
-              onOk={handleCreateSubIssue}
-              store={store}
-              chosenSprint={store.defaultSprint}
-              chosenAssignee={store.defaultAssignee}
-              defaultTypeId={store.defaultTypeId}
-              defaultSummary={store.defaultSummary}
-            />
-          ) : null
-        }
       </div>
     )
   );

@@ -195,6 +195,7 @@ const systemFieldMap: Record<ISystemFieldCodeMap, ProRenderFieldPropsType> = {
     renderFormItem: (props) => (
       <SelectFeature {...props} />
     ),
+    valueKey: 'featureId',
   },
   influenceVersion: {
     render: (text) => text,

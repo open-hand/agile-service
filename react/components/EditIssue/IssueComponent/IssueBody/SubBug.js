@@ -5,7 +5,6 @@ import QuickCreateIssue from '@/components/QuickCreateIssue/QuickCreateIssue';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { usePersistFn } from 'ahooks';
 import openCreateSubTask from '@/components/create-sub-task';
-import CreateSubBug from '../../../CreateIssue/CreateSubBug';
 import IssueList from '../../Component/IssueList';
 import EditIssueContext from '../../stores';
 import Divider from './Divider';
@@ -23,7 +22,6 @@ const SubBug = observer(({
   const {
     issueId, summary, subBugVOList = [], activeSprint,
   } = store.getIssue;
-  const { getCreateSubBugShow: createSubBugShow } = store;
   const renderIssueList = (issue, i) => (
     <IssueList
       showAssignee
@@ -140,23 +138,7 @@ const SubBug = observer(({
             }}
           />
         </div>
-
       )}
-      {
-        createSubBugShow ? (
-          <CreateSubBug
-            relateIssueId={issueId}
-            parentSummary={summary}
-            visible={createSubBugShow}
-            onCancel={() => { store.setCreateSubBugShow(false); resetDefault(); }}
-            onOk={handleCreateSubIssue}
-            chosenSprint={store.defaultSprint}
-            chosenAssignee={store.defaultAssignee}
-            defaultTypeId={store.defaultTypeId}
-            defaultSummary={store.defaultSummary}
-          />
-        ) : null
-      }
     </div>
   );
 });

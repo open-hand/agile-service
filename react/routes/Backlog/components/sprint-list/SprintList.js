@@ -5,13 +5,13 @@ import 'react-virtualized/styles.css';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import Sprint from './Sprint';
 
-function SprintList() {
+function SprintList({ openCreateIssueModal }) {
   const { showPlanSprint } = BacklogStore;
-  const sprintList = showPlanSprint ? BacklogStore.getSprintData : BacklogStore.getSprintData.filter(sprint => sprint.statusCode !== 'sprint_planning');
-  
+  const sprintList = showPlanSprint ? BacklogStore.getSprintData : BacklogStore.getSprintData.filter((sprint) => sprint.statusCode !== 'sprint_planning');
+
   return (
     <DragDropContext onDragEnd={BacklogStore.onDragEnd} onDragStart={BacklogStore.onDragStart}>
-      {sprintList.map(sprint => <Sprint data={sprint} key={sprint.sprintId} />)}
+      {sprintList.map((sprint) => <Sprint data={sprint} key={sprint.sprintId} openCreateIssueModal={openCreateIssueModal} />)}
     </DragDropContext>
   );
 }

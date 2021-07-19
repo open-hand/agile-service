@@ -125,6 +125,37 @@ class BacklogHome extends Component {
     );
   }
 
+  openCreateIssueModal=() => {
+    const {
+      chosenEpic, chosenFeature, chosenVersion, featureList, defaultTypeId, defaultSummary, defaultSprint, defaultAssignee, defaultEpicName,
+    } = BacklogStore;
+    const chosenFeatureItem = featureList.find((feature) => feature.issueId === chosenFeature) || {};
+    openCreateIssue({
+      defaultValues: {
+        summary: defaultSummary,
+        epicName: defaultEpicName,
+        epic: chosenEpic !== 'all' && chosenEpic !== 'unset' ? chosenEpic : undefined,
+        fixVersion: chosenVersion !== 'all' && chosenVersion !== 'unset' ? chosenVersion : undefined,
+        sprint: defaultSprint,
+      },
+      defaultTypeId,
+      defaultAssignee,
+      defaultFeature: chosenFeature !== 'all' && chosenFeature !== 'unset' ? chosenFeatureItem : undefined,
+      onCreate: (res) => {
+        BacklogStore.setNewIssueVisible(false);
+        BacklogStore.setDefaultSummary(undefined);
+        BacklogStore.setDefaultTypeId(undefined);
+        BacklogStore.setDefaultSprint(undefined);
+        BacklogStore.setDefaultAssignee(undefined);
+        BacklogStore.setDefaultEpicName(undefined);
+        // 创建issue后刷新
+        if (res) {
+          BacklogStore.refresh(false, false);
+        }
+      },
+    });
+  }
+
   render() {
     const arr = BacklogStore.getSprintData;
     const { isInProgram, isShowFeature, theme } = this.props;
@@ -142,20 +173,7 @@ class BacklogHome extends Component {
             }, {
               name: '新创建问题',
               icon: 'playlist_add',
-              handler: () => openCreateIssue({
-                onCreate: (res) => {
-                  BacklogStore.setNewIssueVisible(false);
-                  BacklogStore.setDefaultSummary(undefined);
-                  BacklogStore.setDefaultTypeId(undefined);
-                  BacklogStore.setDefaultSprint(undefined);
-                  BacklogStore.setDefaultAssignee(undefined);
-                  BacklogStore.setDefaultEpicName(undefined);
-                  // 创建issue后刷新
-                  if (res) {
-                    BacklogStore.refresh(false, false);
-                  }
-                },
-              }),
+              handler: this.openCreateIssueModal,
               display: true,
             }, {
               name: '创建冲刺',
@@ -283,7 +301,7 @@ class BacklogHome extends Component {
             </SideNav>
             <Spin spinning={BacklogStore.getSpinIf}>
               <div className="c7n-backlog-content">
-                <SprintList />
+                <SprintList openCreateIssueModal={this.openCreateIssueModal} />
               </div>
             </Spin>
             <CreateIssue />
