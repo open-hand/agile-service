@@ -21,7 +21,7 @@ const SubTask = observer(({
 }) => {
   const { store, disabled } = useContext(EditIssueContext);
   const {
-    issueId: parentIssueId, subIssueVOList = [], priorityId, sprintId, typeCode, relateIssueId,
+    issueId: parentIssueId, subIssueVOList = [], priorityId, sprintId, typeCode, relateIssueId, activeSprint,
   } = store.getIssue;
   const { getCreateSubTaskShow: createSubTaskShow } = store;
   const disableCreate = disabled || (typeCode === 'bug' && relateIssueId);
@@ -99,10 +99,10 @@ const SubTask = observer(({
       },
       defaultValues: {
         summary: store.defaultSummary,
+        sprint: activeSprint ? activeSprint.sprintId : undefined,
       },
       defaultAssignee: store.defaultAssignee,
       defaultTypeId: store.defaultTypeId,
-      // chosenSprint={IssueStore.defaultSprint}
     });
   });
   return (
