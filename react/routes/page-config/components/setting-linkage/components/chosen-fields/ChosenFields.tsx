@@ -25,7 +25,7 @@ const ChosenFields: React.FC<Props> = ({
   dataSet, currentSelected, setCurrentSelected, issueTypeId, fieldId, chosenFieldsRef,
 }) => {
   const [chosenFields, setChosenFields] = useState<IChosenField[]>([]);
-  const defaultValue = useDeepMemo(() => dataSet?.map((record) => record.get('chosenField')?.id));
+  const chosenFieldIds = useDeepMemo(() => dataSet?.map((record) => record.get('chosenField')?.id));
   useEffect(() => {
     const getChosenFields = async () => {
       const res = await pageConfigApi.getCascadeFields(issueTypeId, fieldId);
@@ -48,7 +48,7 @@ const ChosenFields: React.FC<Props> = ({
   const [choseDataProps, choseComponentProps] = useChoseField({
     fields: chosenFields,
     addFieldCallback: addRecord,
-    // defaultValue,
+    value: chosenFieldIds,
   });
 
   // console.log('renderChosenFields', defaultValue);
@@ -75,15 +75,6 @@ const ChosenFields: React.FC<Props> = ({
     }
     // 添加清楚相关rule的逻辑
   }, [choseFieldStore, currentSelected, dataSet, setCurrentSelected]);
-
-  // useEffect(() => {
-  //   if (dataSet?.length) {
-  //     dataSet.forEach((record) => {
-  //       const chosenField = record.get('chosenField');
-  //       choseFieldStore.addChosenFields(chosenField?.id, chosenField);
-  //     }, []);
-  //   }
-  // }, [choseFieldStore, dataSet]);
 
   useImperativeHandle(chosenFieldsRef, () => ({
     chosenFieldCodes: choseFieldStore.getAllChosenField?.map((item) => item.code),
