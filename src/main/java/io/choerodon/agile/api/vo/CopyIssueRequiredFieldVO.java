@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import com.alibaba.fastjson.JSONObject;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
 
@@ -10,6 +11,7 @@ import java.util.List;
  */
 public class CopyIssueRequiredFieldVO {
 
+    @Encrypt
     private Long issueId;
 
     private JSONObject predefinedFields;
