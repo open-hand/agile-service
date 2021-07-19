@@ -129,7 +129,7 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
       };
       const res = await issueApi.updateType(submitData);
       if (reloadIssue) {
-        reloadIssue(issueVO.issueId);
+        reloadIssue(res);
       }
       if (onUpdate) {
         onUpdate(res);
