@@ -13,7 +13,7 @@ import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import validateFile from '@/utils/File';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import {
-  IFieldType, IIssueType, IModalProps, IssueCreateFields,
+  IIssueType, IModalProps, IssueCreateFields,
 } from '@/common/types';
 import useIssueCreateFields from '@/hooks/data/useIssueCreateFields';
 import moment from 'moment';
@@ -24,7 +24,6 @@ import IssueLink from './components/issue-link';
 import hooks from './hooks';
 import getFieldConfig from './fields';
 import { insertField } from './utils';
-import { SelectUserProps } from '../select/pro/select-user';
 
 export interface CreateIssueBaseProps {
   onSubmit: ({ data, fieldList }: {

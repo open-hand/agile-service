@@ -34,12 +34,12 @@ import FilterManage from '@/components/FilterManage';
 import { Issue, User } from '@/common/types';
 import isHoliday from '@/utils/holiday';
 import { transformFilter } from '@/routes/Issue/stores/utils';
+import openCreateIssue from '@/components/create-issue';
 import Search from './components/search';
 import GanttBar from './components/gantt-bar';
 import GanttGroupBar from './components/gantt-group-bar';
 import GanttGroupBarSprint from './components/gantt-group-bar-sprint';
 import IssueDetail from './components/issue-detail';
-import CreateIssue from './components/create-issue';
 import Context from './context';
 import GanttStore from './store';
 import GanttOperation from './components/gantt-operation';
@@ -519,7 +519,9 @@ const GanttPage: React.FC = () => {
               icon: 'playlist_add',
               display: true,
               handler: () => {
-                store.setCreateIssueVisible(true);
+                openCreateIssue({
+                  onCreate: handleCreateIssue,
+                });
               },
             },
             {
@@ -607,7 +609,6 @@ const GanttPage: React.FC = () => {
             onChangeParent={handleChangeParent}
             onLinkIssue={handleLinkIssue}
           />
-          <CreateIssue onCreate={handleCreateIssue} />
           <FilterManage
             visible={filterManageVisible!}
             setVisible={setFilterManageVisible}

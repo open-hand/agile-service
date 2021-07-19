@@ -41,8 +41,6 @@ class GanttStore {
 
   @observable sprintIds: string[] | null = null
 
-  @observable createIssueVisible: boolean = false
-
   @action
   switchUnit(unit: Gantt.Sight) {
     this.unit = unit;
@@ -71,11 +69,6 @@ class GanttStore {
   setSprintIds(sprintIds: string[] | null) {
     this.sprintIds = sprintIds;
     localPageCacheStore.setItem('gantt.search.sprints', sprintIds);
-  }
-
-  @action
-  setCreateIssueVisible(createIssueVisible: boolean) {
-    this.createIssueVisible = createIssueVisible;
   }
 
   @observable detailProps = {} as DetailContainerProps;
