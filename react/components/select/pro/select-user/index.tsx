@@ -4,6 +4,7 @@ import useSelect from '@/hooks/useSelectPro';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
 import useProjectUsers from '@/hooks/data/useProjectUsers';
+import UserTag from '@/components/tag/user-tag';
 
 export interface SelectUserProps extends Partial<SelectProps> {
   extraOptions?: {
@@ -31,6 +32,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     fetchNextPage,
     onSearch: setText,
     paging: true,
+    optionRenderer: (user) => <UserTag data={user as any} />,
   });
   const Component = flat ? FlatSelect : Select;
   return (
