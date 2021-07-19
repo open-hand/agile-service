@@ -241,6 +241,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                     FEATURE_ID, ENVIRONMENT, MAIN_RESPONSIBLE_ID, REMAIN_TIME_FIELD,
                     ESTIMATED_START_TIME, ESTIMATED_END_TIME, REPORTER_ID, PRIORITY_ID
             };
+    private static final String FIX_VERSION = "fixVersion";
+    private static final String INFLUENCE_VERSION = "influenceVersion";
+
     @Value("${services.attachment.url}")
     private String attachmentUrl;
 
@@ -278,6 +281,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private AgilePluginService agilePluginService;
     @Autowired
     private WorkLogMapper workLogMapper;
+    @Autowired
+    private VerifyUpdateUtil verifyUpdateUtil;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -1876,13 +1881,21 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             predefinedFieldNames = new ArrayList<>();
         }
         handleCopyPredefinedFields(organizationId, issueDetailDTO, predefinedFieldNames);
+        List<CopyIssueRequiredFieldVO> copyIssueRequiredFieldVOS = copyConditionVO.getCopyIssueRequiredFieldVOS();
+        Map<Long, CopyIssueRequiredFieldVO> copyIssueRequiredFieldVOMap = new HashMap<>();
+        if(!CollectionUtils.isEmpty(copyIssueRequiredFieldVOS)){
+            copyIssueRequiredFieldVOMap.putAll(copyIssueRequiredFieldVOS.stream().collect(Collectors.toMap(CopyIssueRequiredFieldVO::getIssueId, Function.identity())));
+        }
+        CopyIssueRequiredFieldVO copyIssueRequiredFieldVO = copyIssueRequiredFieldVOMap.getOrDefault(issueId, new CopyIssueRequiredFieldVO());
         if (issueDetailDTO != null) {
             Long newIssueId;
             Long objectVersionNumber;
             issueDetailDTO.setSummary(copyConditionVO.getSummary());
             IssueTypeVO issueTypeVO = issueTypeService.queryById(issueDetailDTO.getIssueTypeId(), projectId);
+            List<String> handlerRequireFiled = new ArrayList<>();
             if (issueTypeVO.getTypeCode().equals(SUB_TASK)) {
                 IssueSubCreateVO issueSubCreateVO = issueAssembler.issueDtoToIssueSubCreateDto(issueDetailDTO, predefinedFieldNames);
+                handlerRequireFiled = handlerCopyRequirePredefinedField(issueSubCreateVO, copyIssueRequiredFieldVO.getPredefinedFields());
                 IssueSubVO newIssue = stateMachineClientService.createSubIssue(issueSubCreateVO);
                 newIssueId = newIssue.getIssueId();
                 objectVersionNumber = newIssue.getObjectVersionNumber();
@@ -1891,6 +1904,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 if (ISSUE_EPIC.equals(issueCreateVO.getTypeCode())) {
                     setEpicName(projectId, copyConditionVO, issueCreateVO);
                 }
+                handlerRequireFiled = handlerCopyRequirePredefinedField(issueCreateVO, copyIssueRequiredFieldVO.getPredefinedFields());
                 IssueVO newIssue = stateMachineClientService.createIssue(issueCreateVO, applyType);
                 newIssueId = newIssue.getIssueId();
                 objectVersionNumber = newIssue.getObjectVersionNumber();
@@ -1902,10 +1916,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 //生成一条复制的关联
                 createCopyIssueLink(issueDetailDTO.getIssueId(), newIssueId, projectId);
             }
+            // 如果故事点和剩余工作量必填,就不需要在复制原issue的了
+            setCopyRequireField(issueDetailDTO, handlerRequireFiled);
             //复制故事点和剩余工作量并记录日志
             copyStoryPointAndRemainingTimeData(issueDetailDTO, projectId, newIssueId, objectVersionNumber);
             // 处理冲刺、子任务、自定义字段的值
-            handlerOtherFields(projectId, predefinedFieldNames, issueDetailDTO, newIssueId, copyConditionVO);
+            handlerOtherFields(projectId, predefinedFieldNames, issueDetailDTO, newIssueId, copyConditionVO, copyIssueRequiredFieldVOMap);
             IssueVO result = queryIssue(projectId, newIssueId, organizationId);
             setCompletedAndActualCompletedDate(result);
             List<IssueSubListVO> subTasks = result.getSubIssueVOList();
@@ -1922,19 +1938,99 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
     }
 
-    private void handlerOtherFields(Long projectId, List<String> predefinedFieldNames, IssueDetailDTO issueDetailDTO, Long newIssueId, CopyConditionVO copyConditionVO) {
+    private void setCopyRequireField(IssueDetailDTO issueDetailDTO, List<String> handlerRequireFiled) {
+        if (handlerRequireFiled.contains(STORY_POINTS_FIELD)) {
+            issueDetailDTO.setStoryPoints(null);
+        }
+
+        if (handlerRequireFiled.contains(REMAIN_TIME_FIELD)) {
+            issueDetailDTO.setRemainingTime(null);
+        }
+    }
+
+    private List<String> handlerCopyRequirePredefinedField(Object object, JSONObject predefinedFields) {
+        if (ObjectUtils.isEmpty(predefinedFields)) {
+            return new ArrayList<>();
+        }
+        List<VersionIssueRelVO> fixVersion = buildVersionData(predefinedFields.get(FIX_VERSION));
+        List<VersionIssueRelVO> influenceVersion = buildVersionData(predefinedFields.get(INFLUENCE_VERSION));
+        predefinedFields.remove(FIX_VERSION);
+        predefinedFields.remove(INFLUENCE_VERSION);
+        IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
+        List<String> fieldList = verifyUpdateUtil.verifyUpdateData(predefinedFields, issueUpdateVO);
+        Set<String> fields = predefinedFields.keySet();
+        for (String field : fields) {
+            setValue(field, object, getValue(field, issueUpdateVO));
+        }
+        if (!CollectionUtils.isEmpty(fixVersion)) {
+            handlerIssueVersionVO(fixVersion, "fix");
+            setValue("versionIssueRelVOList", object, getValue("versionIssueRelVOList", issueUpdateVO));
+        }
+        if (!CollectionUtils.isEmpty(influenceVersion)) {
+            handlerIssueVersionVO(influenceVersion, "influence");
+            setValue("versionIssueRelVOList", object, influenceVersion);
+        }
+        return fieldList;
+    }
+
+    private void handlerIssueVersionVO(List<VersionIssueRelVO> influenceVersion, String relationType) {
+        for (VersionIssueRelVO versionIssueRelVO : influenceVersion) {
+            versionIssueRelVO.setRelationType(relationType);
+        }
+    }
+
+    private Object getValue(String fieldName, IssueUpdateVO issueUpdateVO) {
+        Method method;
+        try {
+            PropertyDescriptor pd = new PropertyDescriptor(fieldName, issueUpdateVO.getClass());
+            method = pd.getReadMethod();//获得读方法
+        } catch (IntrospectionException e) {
+            throw new CommonException("error.copy.issue.getFiledValueEmpty");
+        }
+        Object result = null;
+        if (!ObjectUtils.isEmpty(method)) {
+            try {
+                result = method.invoke(issueUpdateVO);
+            } catch (InvocationTargetException | IllegalAccessException e) {
+                throw new CommonException("error.copy.issue.getFiledValueEmpty");
+            }
+        }
+        return result;
+    }
+
+    private void setValue(String fieldName, Object object, Object value){
+        Method method;
+        try {
+            PropertyDescriptor pd = new PropertyDescriptor(fieldName, object.getClass());
+            method = pd.getWriteMethod();//获得写方法
+        } catch (IntrospectionException e) {
+            throw new CommonException("error.copy.issue.setFiledValueEmpty");
+        }
+        if (!ObjectUtils.isEmpty(method)) {
+            try {
+               method.invoke(object, value);
+            } catch (InvocationTargetException | IllegalAccessException e) {
+                throw new CommonException("error.copy.issue.setFiledValueEmpty");
+            }
+        }
+    }
+
+    private List<VersionIssueRelVO> buildVersionData(Object object) {
+        return ObjectUtils.isEmpty(object) ? null : EncryptionUtils.jsonToList(object,VersionIssueRelVO.class);
+    }
+
+    private void handlerOtherFields(Long projectId, List<String> predefinedFieldNames, IssueDetailDTO issueDetailDTO, Long newIssueId, CopyConditionVO copyConditionVO, Map<Long, CopyIssueRequiredFieldVO> copyIssueRequiredFieldVOMap) {
         //复制冲刺
         if (predefinedFieldNames.contains(SPRINT_ID_FIELD)) {
             handleCreateCopyIssueSprintRel(issueDetailDTO, newIssueId);
         }
         if (copyConditionVO.getSubTask() && !CollectionUtils.isEmpty(issueDetailDTO.getSubIssueDTOList())) {
             List<IssueDTO> subIssueDTOList = issueDetailDTO.getSubIssueDTOList();
-            subIssueDTOList.forEach(issueDO -> copySubIssue(issueDO, newIssueId, projectId,copyConditionVO));
+            subIssueDTOList.forEach(issueDO -> copySubIssue(issueDO, newIssueId, projectId,copyConditionVO, copyIssueRequiredFieldVOMap));
         }
-        if (!CollectionUtils.isEmpty(copyConditionVO.getCustomFieldIds())) {
-            // 复制自定义字段的值
-            fieldValueService.copyCustomFieldValue(projectId, issueDetailDTO, newIssueId, copyConditionVO.getCustomFieldIds());
-        }
+        CopyIssueRequiredFieldVO copyIssueRequiredFieldVO = copyIssueRequiredFieldVOMap.getOrDefault(issueDetailDTO.getIssueId(), new CopyIssueRequiredFieldVO());
+        // 复制自定义字段的值
+        fieldValueService.copyCustomFieldValue(projectId, issueDetailDTO, newIssueId, copyConditionVO.getCustomFieldIds(), copyIssueRequiredFieldVO.getCustomFields());
     }
 
     private void handleCopyPredefinedFields(Long origanizationId, IssueDetailDTO issueDetailDTO, List<String> predefinedFieldNames) {
@@ -2012,10 +2108,13 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         updateIssue(projectId, issueUpdateVO, fieldList);
     }
 
-    protected void copySubIssue(IssueDTO issueDTO, Long newIssueId, Long projectId, CopyConditionVO copyConditionVO) {
+    protected void copySubIssue(IssueDTO issueDTO, Long newIssueId, Long projectId, CopyConditionVO copyConditionVO, Map<Long, CopyIssueRequiredFieldVO> copyIssueRequiredFieldVOMap) {
         IssueDetailDTO subIssueDetailDTO = issueMapper.queryIssueDetail(issueDTO.getProjectId(), issueDTO.getIssueId());
         IssueSubCreateVO issueSubCreateVO = issueAssembler.issueDtoToSubIssueCreateDto(subIssueDetailDTO, newIssueId);
+        CopyIssueRequiredFieldVO copyIssueRequiredFieldVO = copyIssueRequiredFieldVOMap.getOrDefault(issueDTO.getIssueId(), new CopyIssueRequiredFieldVO());
+        List<String> requireFieldList = handlerCopyRequirePredefinedField(issueSubCreateVO, copyIssueRequiredFieldVO.getPredefinedFields());
         IssueSubVO newSubIssue = stateMachineClientService.createSubIssue(issueSubCreateVO);
+        setCopyRequireField(subIssueDetailDTO, requireFieldList);
         //复制剩余工作量并记录日志
         if (issueDTO.getRemainingTime() != null) {
             IssueUpdateVO subIssueUpdateVO = new IssueUpdateVO();
@@ -2024,7 +2123,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             subIssueUpdateVO.setObjectVersionNumber(newSubIssue.getObjectVersionNumber());
             updateIssue(projectId, subIssueUpdateVO, Lists.newArrayList(REMAIN_TIME_FIELD));
         }
-        fieldValueService.copyCustomFieldValue(projectId, subIssueDetailDTO, newSubIssue.getIssueId(), null);
+        fieldValueService.copyCustomFieldValue(projectId, subIssueDetailDTO, newSubIssue.getIssueId(), null, copyIssueRequiredFieldVO.getCustomFields());
     }
 
     protected void handleCreateCopyIssueSprintRel(IssueDetailDTO issueDetailDTO, Long newIssueId) {
