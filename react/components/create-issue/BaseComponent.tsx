@@ -13,18 +13,18 @@ import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import validateFile from '@/utils/File';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import {
-  IFieldType, IIssueType, IModalProps, IssueCreateFields,
+  IIssueType, IModalProps, IssueCreateFields,
 } from '@/common/types';
 import useIssueCreateFields from '@/hooks/data/useIssueCreateFields';
 import moment from 'moment';
 
 import { getProjectId } from '@/utils/common';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import WSJF from './components/wsjf';
 import IssueLink from './components/issue-link';
 import hooks from './hooks';
 import getFieldConfig from './fields';
 import { insertField } from './utils';
-import { SelectUserProps } from '../select/pro/select-user';
 
 export interface CreateIssueBaseProps {
   onSubmit: ({ data, fieldList }: {
@@ -46,6 +46,10 @@ export interface CreateIssueBaseProps {
   defaultAssignee?: {
     id: string,
     realName: string,
+  }
+  defaultFeature?: {
+    summary: string
+    issueId: string
   }
   parentIssue?: {
     summary: string
@@ -101,6 +105,7 @@ const CreateIssueBase = observer(({
   defaultTypeCode = 'story',
   defaultTypeId,
   defaultAssignee,
+  defaultFeature,
   parentIssue,
   defaultValues,
   typeCode,
@@ -154,6 +159,11 @@ const CreateIssueBase = observer(({
   const [{ data: fields, isFetching: isFieldsLoading }, {
     data: templateData,
   }] = useIssueCreateFields({ issueTypeId, projectId });
+  const {
+    isInProgram,
+    isShowFeature,
+  } = useIsInProgram({ projectId });
+  const showFeature = !!issueTypeCode && issueTypeCode === 'story' && !!isShowFeature;
   const getDefaultValue = usePersistFn((field: IssueCreateFields) => {
     const preset = presets.get(field.fieldCode);
     // defaultAssignee优先级更高
@@ -197,6 +207,14 @@ const CreateIssueBase = observer(({
           label: '关联父级任务',
           required: true,
         },
+      }, {
+        insert: showFeature,
+        after: 'issueType',
+        field: {
+          name: 'feature',
+          label: '特性',
+          required: false,
+        },
       }]) : [],
     });
 
@@ -230,10 +248,13 @@ const CreateIssueBase = observer(({
     if (parentIssue) {
       setValue('parentIssueId', parentIssue.issueId);
     }
+    if (showFeature && defaultFeature) {
+      setValue('feature', defaultFeature.issueId);
+    }
     // 创建一个新的
     newDataSet.create(newValue);
     setDataSet(newDataSet);
-  }, [fields, getDefaultValue, isSubIssue, parentIssue, templateData]);
+  }, [defaultFeature, fields, getDefaultValue, isShowFeature, isSubIssue, issueTypeCode, parentIssue, showFeature, templateData]);
   const getIssueLinks = usePersistFn(() => {
     const links = issueLinkDataSet.toData() as {
       issueIds: string[]
@@ -291,8 +312,10 @@ const CreateIssueBase = observer(({
         parentIssueId: data.parentIssueId,
         programId: projectId ?? getProjectId(),
         projectId: projectId ?? getProjectId(),
+        featureId: data.feature,
         issueLinkCreateVOList: enableIssueLinks ? getIssueLinks() : undefined,
       });
+
       values = hooks.reduce((result, hook) => hook(result, data), values);
       await onSubmit({
         data: values, fieldList, fileList,
@@ -327,6 +350,12 @@ const CreateIssueBase = observer(({
             typeCode,
           },
         };
+      }
+      case 'feature': {
+        return defaultFeature ? {
+          featureId: defaultFeature.issueId,
+          featureName: defaultFeature.summary,
+        } : {};
       }
       default: break;
     }

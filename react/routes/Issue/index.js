@@ -11,7 +11,6 @@ import {
   map, set, get, pick,
 } from 'lodash';
 import { useUnmount, usePersistFn } from 'ahooks';
-import CreateIssue from '@/components/CreateIssue';
 import openCreateIssue from '@/components/create-issue';
 import Loading from '@/components/Loading';
 import { projectApi } from '@/api/Project';
@@ -398,23 +397,6 @@ const Issue = observer(({ cached, updateCache }) => {
           setVisible={IssueStore.setFilterListVisible}
           issueSearchStore={issueSearchStore}
         />
-        {IssueStore.getCreateQuestion && (
-          <CreateIssue
-            visible={IssueStore.getCreateQuestion}
-            onCancel={() => {
-              IssueStore.createQuestion(false);
-              IssueStore.setDefaultSummary(undefined);
-              IssueStore.setDefaultTypeId(undefined);
-              IssueStore.setDefaultSprint(undefined);
-              IssueStore.setDefaultAssignee(undefined);
-            }}
-            onOk={handleCreateIssue}
-            defaultTypeId={IssueStore.defaultTypeId}
-            defaultSummary={IssueStore.defaultSummary}
-            chosenSprint={IssueStore.defaultSprint}
-            chosenAssignee={IssueStore.defaultAssignee}
-          />
-        )}
         {tableProps.checkValues.length > 0 && (
           <BatchModal
             issueSearchStore={issueSearchStore}

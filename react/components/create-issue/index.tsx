@@ -9,8 +9,6 @@ import BaseComponent, { CreateIssueBaseProps } from './BaseComponent';
 
 export interface CreateIssueProps extends Omit<CreateIssueBaseProps, 'onSubmit'> {
   onCreate: (issue: Issue) => void,
-  modal: IModalProps,
-  projectId?: string,
   applyType?: 'agile' | 'program'
 }
 

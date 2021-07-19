@@ -14,7 +14,9 @@ import { ISSUE_HEIGHT } from './constant';
 import IssueItem from './IssueItem';
 import NoneIssue from './NoneIssue';
 
-function IssueList({ data, sprintId, sprintData }) {
+function IssueList({
+  data, sprintId, sprintData, openCreateIssueModal,
+}) {
   const listRef = useRef();
   const shouldIncreaseHeight = usePersistFn((snapshot) => {
     const { isUsingPlaceholder, draggingOverWith, draggingFromThisWith } = snapshot;
@@ -41,9 +43,6 @@ function IssueList({ data, sprintId, sprintData }) {
     );
   }, [data, handleExpandChange, sprintId]);
 
-  const handleOpenCreateIssue = useCallback(() => {
-    BacklogStore.setNewIssueVisible(true);
-  }, []);
   const getRowHeight = usePersistFn(({ index }) => {
     const issue = data[index];
     if (!issue) {
@@ -129,15 +128,15 @@ function IssueList({ data, sprintId, sprintData }) {
                   BacklogStore.handleCreateIssue(res, String(sprintId));
                   BacklogStore.refresh(false, false); // 更新侧边框
                 }}
-                cantCreateEvent={handleOpenCreateIssue}
+                cantCreateEvent={openCreateIssueModal}
                 typeIdChange={(id) => {
                   BacklogStore.setDefaultTypeId(id);
                 }}
                 summaryChange={(summary) => {
                   BacklogStore.setDefaultSummary(summary);
                 }}
-                assigneeChange={(assigneeId) => {
-                  BacklogStore.setDefaultAssignee(assigneeId);
+                assigneeChange={(assigneeId, assignee) => {
+                  BacklogStore.setDefaultAssignee(assignee);
                 }}
                 setDefaultSprint={(value) => {
                   BacklogStore.setDefaultSprint(value);
