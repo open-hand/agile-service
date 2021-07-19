@@ -9,15 +9,16 @@ import useProjectIssueTypes, { ProjectIssueTypesConfig } from '@/hooks/data/useP
 interface Props extends Partial<SelectProps> {
   valueField?: string
   flat?: boolean
+  projectId?: string
   config?: ProjectIssueTypesConfig
   queryOptions?: Parameters<typeof useProjectIssueTypes>[1]
 }
 
 const SelectIssueType: React.FC<Props> = forwardRef(({
-  valueField, flat, config, queryOptions,
+  valueField, flat, projectId, config, queryOptions,
   ...otherProps
 }, ref: React.Ref<Select>) => {
-  const { data: issueTypes } = useProjectIssueTypes(config, queryOptions);
+  const { data: issueTypes } = useProjectIssueTypes({ projectId, ...config }, queryOptions);
   const [props] = useSelectPro<IIssueType>({
     textField: 'name',
     valueField: valueField || 'id',
