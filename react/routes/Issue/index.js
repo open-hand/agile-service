@@ -75,7 +75,7 @@ const Issue = observer(({ cached, updateCache }) => {
     page, sort, size, isTree,
   }) => {
     const search = issueSearchStore.getCustomFieldFilters();
-    set(search, 'searchArgs.tree', !isTree);
+    set(search, 'searchArgs.tree', isTree);
     return issueApi.loadIssues(page, size, sort, search);
   }, [issueSearchStore]);
   const tableProps = useTable(getTableData, {
