@@ -33,7 +33,7 @@ function SpanPlaceholder({ fieldType }: { fieldType: string }) {
   }
   return <span style={{ color: 'rgba(0,0,0,0.6)', fontStyle: 'italic' }}>{placeholder}</span>;
 }
-const DraggableOrgEditItem: React.FC<Pick<Props, 'data'>> = ({
+export const DraggableOrgEditItem: React.FC<Pick<Props, 'data'>> = ({
   data,
 }) => {
   const { pageIssueTypeStore } = usePageIssueTypeStore();
