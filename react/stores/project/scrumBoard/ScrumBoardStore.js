@@ -19,8 +19,6 @@ class ScrumBoardStore {
 
   @observable calanderCouldUse = false;
 
-  @observable createIssueVisible = false;
-
   @observable currentSprintExist = true;
 
   @observable currentDrag = null;
@@ -949,14 +947,6 @@ class ScrumBoardStore {
 
   @action setEditRef(ref) {
     this.editRef = ref;
-  }
-
-  @action setCreateIssueVisible(data) {
-    this.createIssueVisible = data;
-  }
-
-  @computed get getCreateIssueVisible() {
-    return this.createIssueVisible;
   }
 }
 
