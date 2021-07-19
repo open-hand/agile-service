@@ -22,6 +22,7 @@ import IssueLink from './components/issue-link';
 import hooks from './hooks';
 import getFieldConfig from './fields';
 import { insertField } from './utils';
+import { SelectUserProps } from '../select/pro/select-user';
 
 export interface CreateIssueBaseProps {
   onSubmit: ({ data, fieldList }: {
@@ -40,6 +41,10 @@ export interface CreateIssueBaseProps {
   projectId?: string,
   defaultTypeCode?: string
   defaultTypeId?: string
+  defaultAssignee?: {
+    id: string,
+    realName: string,
+  }
   defaultValues?: {
     [key: string]: any
   }
@@ -84,7 +89,15 @@ function transformSubmitFieldValue(field: IssueCreateFields, value: any) {
   }
 }
 const CreateIssueBase = observer(({
-  modal, projectId, onSubmit, defaultTypeCode = 'story', defaultTypeId, defaultValues, typeCode, isProgram,
+  modal,
+  projectId,
+  onSubmit,
+  defaultTypeCode = 'story',
+  defaultTypeId,
+  defaultAssignee,
+  defaultValues,
+  typeCode,
+  isProgram,
 }: CreateIssueBaseProps) => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
@@ -136,6 +149,10 @@ const CreateIssueBase = observer(({
   }] = useIssueCreateFields({ issueTypeId, projectId });
   const getDefaultValue = usePersistFn((field: IssueCreateFields) => {
     const preset = presets.get(field.fieldCode);
+    // defaultAssignee优先级更高
+    if (field.fieldCode === 'assignee' && defaultAssignee) {
+      return defaultAssignee.id;
+    }
     // 通过外部设置的默认值优先
     if (defaultValues && defaultValues[field.fieldCode]) {
       return defaultValues[field.fieldCode];
@@ -285,6 +302,11 @@ const CreateIssueBase = observer(({
       case 'parentIssueId': {
         return {
           issueType: issueTypeCode,
+        };
+      }
+      case 'assignee': {
+        return {
+          extraOptions: defaultAssignee,
         };
       }
       case 'issueType': {

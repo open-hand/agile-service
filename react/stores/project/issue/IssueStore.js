@@ -405,7 +405,7 @@ class IssueStore {
 
   @observable defaultAssignee;
 
-  @action setDefaultAssignee = (data) => {
+  @action setDefaultAssignee = (id, data) => {
     this.defaultAssignee = data;
   }
 }

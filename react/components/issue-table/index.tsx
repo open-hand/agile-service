@@ -14,6 +14,7 @@ import { checkBoxColumn, expandColumn, getTableColumns } from './columns';
 export interface IssueTableProps extends Partial<TableProps> {
   tableRef?: React.RefObject<any>
   onCreateIssue?: () => void
+  onOpenCreateIssue?: () => void
   // dataSet: DataSet
   fields: IFoundationHeader[]
   onRowClick?: (record: any) => void
@@ -26,7 +27,6 @@ export interface IssueTableProps extends Partial<TableProps> {
   summaryChange?: (summary: string) => void
   setDefaultSprint?: (sprintId: string | undefined) => void,
   assigneeChange?: (assigneeId: string | undefined) => void
-  IssueStore?: any
   tableProps: ReturnType<typeof useTable>
   onColumnResize?: (columnWidth: number, dataKey: string) => void
   isTree?: boolean
@@ -56,6 +56,7 @@ export interface IssueTableProps extends Partial<TableProps> {
 const IssueTable: React.FC<IssueTableProps> = ({
   tableRef,
   onCreateIssue,
+  onOpenCreateIssue,
   dataSet,
   fields,
   listLayoutColumns,
@@ -64,9 +65,8 @@ const IssueTable: React.FC<IssueTableProps> = ({
   createIssue = true,
   typeIdChange = () => { },
   summaryChange = () => { },
-  assigneeChange = () => {},
-  setDefaultSprint = () => {},
-  IssueStore,
+  assigneeChange = () => { },
+  setDefaultSprint = () => { },
   tableProps,
   onColumnResize,
   isTree = true,
@@ -74,8 +74,8 @@ const IssueTable: React.FC<IssueTableProps> = ({
   ...otherProps
 }) => {
   const handleOpenCreateIssue = useCallback(() => {
-    IssueStore?.createQuestion(true);
-  }, [IssueStore]);
+    onOpenCreateIssue && onOpenCreateIssue();
+  }, [onOpenCreateIssue]);
   const props = tableProps;
   const {
     pagination,
