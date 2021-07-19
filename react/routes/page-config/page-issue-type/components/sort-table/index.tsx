@@ -27,7 +27,7 @@ function Index() {
   }, [pageIssueTypeStore.addFields.length, pageIssueTypeStore.createdFields.length]);
 
   return (
-    <SortTableProvider showSplitLine={!isProject} onDelete={handleDeleteFiled}>
+    <SortTableProvider showSplitLine onDelete={handleDeleteFiled} isProject={isProject}>
       <SortTable />
     </SortTableProvider>
   );

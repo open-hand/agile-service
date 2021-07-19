@@ -7,6 +7,7 @@ import { IFiledProps } from '@/api';
 interface Context {
   disabled: boolean | undefined,
   showSplitLine?: boolean,
+  isProject: boolean,
   onDelete?: (data: IFiledProps) => void,
   prefixCls: 'c7n-page-issue-detail',
 }

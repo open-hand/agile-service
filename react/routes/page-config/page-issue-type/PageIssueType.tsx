@@ -245,7 +245,7 @@ function PageIssueType() {
           issueTypeId: '195917548854870016',
         })}
         >
-        打开级联配置
+          打开级联配置
         </Button>
         <HeaderButtons items={[
           {
@@ -271,7 +271,8 @@ function PageIssueType() {
         <Switch />
         <Loading loading={pageIssueTypeStore.getLoading} />
         <div className={styles.top}>
-          {
+          <SortTable />
+          {/* {
             !isProject ? <SortTable />
               : [
                 <IssueTypeWrap title="字段配置">
@@ -280,7 +281,7 @@ function PageIssueType() {
                 <IssueTypeWrap title="描述信息格式">
                   <PageDescription />
                 </IssueTypeWrap>]
-          }
+          } */}
         </div>
         <div className={styles.bottom}>
           <Button funcType={'raised' as FuncType} color={'primary' as ButtonColor} disabled={!pageIssueTypeStore.getDirty} loading={btnLoading} onClick={handleSubmit}>
