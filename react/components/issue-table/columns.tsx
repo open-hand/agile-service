@@ -190,7 +190,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
   }],
   ['createUser', {
     title: <Tooltip title="创建人">创建人</Tooltip>,
-    dataIndex: 'createUser',
+    dataIndex: 'createdBy',
     render: ({ rowData }) => (
       <div style={{ display: 'inline-flex', height: 40 }}>
         {
@@ -202,10 +202,11 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
         }
       </div>
     ),
+    sortable: true,
   }],
   ['updateUser', {
     title: <Tooltip title="更新人">更新人</Tooltip>,
-    dataIndex: 'updateUser',
+    dataIndex: 'lastUpdatedBy',
     render: ({ rowData }) => (
       <div style={{ display: 'inline-flex', height: 40 }}>
         {
@@ -217,6 +218,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
         }
       </div>
     ),
+    sortable: true,
   }],
   ['status', {
     title: <Tooltip title="状态">状态</Tooltip>,
@@ -291,13 +293,11 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     title: <Tooltip title="已耗费时间">已耗费时间</Tooltip>,
     width: 170,
     dataIndex: 'spentWorkTime',
-    sortable: true,
   }],
   ['allEstimateTime', {
     title: <Tooltip title="总预估时间">总预估时间</Tooltip>,
     width: 170,
     dataIndex: 'allEstimateTime',
-    sortable: true,
   }],
   ['label', {
     title: <Tooltip title="标签">标签</Tooltip>,
@@ -332,13 +332,13 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
   }],
   ['feature', {
     title: <Tooltip title="特性">特性</Tooltip>,
-    dataIndex: 'feature',
+    dataIndex: 'featureId',
     render: renderEpicOrFeature,
     sortable: true,
   }],
   ['epic', {
     title: <Tooltip title="史诗">史诗</Tooltip>,
-    dataIndex: 'epic',
+    dataIndex: 'epicId',
     render: renderEpicOrFeature,
     sortable: true,
   }],
