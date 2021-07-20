@@ -87,6 +87,8 @@
         SELECT fv.instance_id
         FROM fd_field_value fv
         WHERE fv.field_id = #{fieldId}
+        AND fv.project_id = #{projectId}
+        AND fv.scheme_code = #{schemeCode}
         <if test='sortSql != null and sortSql != ""'>
             ORDER BY ${sortSql}
         </if>

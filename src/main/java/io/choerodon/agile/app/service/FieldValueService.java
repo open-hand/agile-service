@@ -86,9 +86,10 @@ public interface FieldValueService {
      * @param organizationId
      * @param projectId
      * @param pageRequest
+     * @param schemeCode
      * @return
      */
-    List<Long> sortIssueIdsByFieldValue(Long organizationId, Long projectId, PageRequest pageRequest);
+    List<Long> sortIssueIdsByFieldValue(Long organizationId, Long projectId, PageRequest pageRequest, String schemeCode);
 
 
     /**

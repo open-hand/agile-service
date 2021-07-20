@@ -21,7 +21,7 @@ public interface FieldValueMapper extends BaseMapper<FieldValueDTO> {
 
     void deleteList(@Param("projectId") Long projectId, @Param("instanceId") Long instanceId, @Param("schemeCode") String schemeCode, @Param("fieldId") Long fieldId);
 
-    List<Long> sortIssueIdsByFieldValue(@Param("organizationId") Long organizationId, @Param("projectId") Long projectId, @Param("fieldId") Long fieldId, @Param("sortSql") String sortSql);
+    List<Long> sortIssueIdsByFieldValue(@Param("organizationId") Long organizationId, @Param("projectId") Long projectId, @Param("fieldId") Long fieldId, @Param("sortSql") String sortSql, @Param("schemeCode") String schemeCode);
 
     List<FieldValueDTO> listByInstanceIdsAndFieldId(@Param("projectId")Long projectId,@Param("instanceIds") List<Long> instanceIds, @Param("schemeCode") String schemeCode,@Param("fieldId") Long fieldId);
 
