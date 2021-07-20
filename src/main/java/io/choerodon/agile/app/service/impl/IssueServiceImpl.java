@@ -1964,7 +1964,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         if (!CollectionUtils.isEmpty(fixVersion)) {
             handlerIssueVersionVO(fixVersion, "fix");
-            setValue("versionIssueRelVOList", object, getValue("versionIssueRelVOList", issueUpdateVO));
+            setValue("versionIssueRelVOList", object, fixVersion);
         }
         if (!CollectionUtils.isEmpty(influenceVersion)) {
             handlerIssueVersionVO(influenceVersion, "influence");
