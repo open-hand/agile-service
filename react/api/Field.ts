@@ -275,6 +275,22 @@ class FieldApi extends Api<FieldApi> {
       },
     });
   }
+
+  getCascadeOptions(fieldId: string, selected: string[], fieldCascadeRuleIds: string[], searchParam: string, page: number, size: number) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/field_cascade_rule/cascade_field/${fieldId}/option`,
+      params: {
+        page,
+        size,
+      },
+      data: {
+        selected,
+        fieldCascadeRuleIds,
+        searchParam,
+      },
+    });
+  }
 }
 const fieldApi = new FieldApi();
 export default FieldApi;
