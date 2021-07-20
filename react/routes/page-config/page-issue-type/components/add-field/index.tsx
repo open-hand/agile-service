@@ -34,6 +34,7 @@ const AddFiled: React.FC<Props> = observer(({
       if (addFiledData) {
         onSubmitLocal({
           ...addFiledData,
+          createdLevel: addFiledData.projectId ? 'project' : 'organization',
           defaultValue: !isEmpty(addFiledData.defaultValue) && defaultValueFieldType.includes(addFiledData.fieldType) ? String(addFiledData.defaultValue).split(',') : addFiledData.defaultValue,
           fieldOptions: addFiledData.fieldOptions || addFiledData.defaultValueObj,
           localRecordIndexId: dataSet.current?.index,

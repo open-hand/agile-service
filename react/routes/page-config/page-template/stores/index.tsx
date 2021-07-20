@@ -17,7 +17,7 @@ interface Context {
   isInProgram: boolean,
   isProject: boolean,
   intl: InjectedIntl,
-  prefixCls: 'c7n-agile-page-config-page-issue-type',
+  prefixCls: 'c7n-agile-page-config-page-template',
 }
 
 const PageTemplateContext = createContext({} as Context);
@@ -39,7 +39,7 @@ const PageTemplateProvider = injectIntl(observer(
       sortTableDataSet,
       addUnselectedDataSet,
       pageTemplateStore,
-      prefixCls: 'c7n-agile-page-config-page-issue-type',
+      prefixCls: 'c7n-agile-page-config-page-template',
       isProject: getMenuType() === 'project',
     };
     return (

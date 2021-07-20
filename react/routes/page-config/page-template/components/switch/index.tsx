@@ -22,7 +22,7 @@ function PageSwitch() {
     if (pageTemplateStore.getDirty) {
       Modal.open({
         title: '是否放弃更改',
-        className: 'c7n-agile-page-config-page-issue-type-switch-modal',
+        className: 'c7n-agile-page-config-page-template-switch-modal',
         children: (
           <div>
             页面有未保存的内容,是否放弃更改？
