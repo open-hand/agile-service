@@ -25,8 +25,18 @@
         <result column="last_update_date" property="lastUpdateDate"/>
         <result column="last_updated_by" property="lastUpdatedBy"/>
         <result column="object_version_number" property="objectVersionNumber"/>
-        <collection property="defaultIds" ofType="java.lang.Long">
-            <result column="cascade_option_id"/>
+        <collection property="fieldCascadeRuleOptionList" ofType="io.choerodon.agile.api.vo.FieldCascadeRuleOptionVO">
+            <id column="option_id" property="id"/>
+            <result column="field_cascade_rule_id" property="fieldCascadeRuleId"/>
+            <result column="is_default" property="defaultOption" />
+            <result column="cascade_option_id" property="cascadeOptionId"/>
+            <result column="option_project_id" property="projectId"/>
+            <result column="option_organization_id" property="organizationId"/>
+            <result column="option_creation_date" property="creationDate"/>
+            <result column="option_created_by" property="createdBy"/>
+            <result column="option_last_update_date" property="lastUpdateDate"/>
+            <result column="option_last_updated_by" property="lastUpdatedBy"/>
+            <result column="option_object_version_number" property="objectVersionNumber"/>
         </collection>
     </resultMap>
 
@@ -55,11 +65,21 @@
             rfosf.code cascade_field_code,
             rfosf.field_type cascade_field_type,
             rfosf.is_system cascade_field_system,
-            ffcro.cascade_option_id
+            ffcro.id option_id,
+            ffcro.is_default,
+            ffcro.field_cascade_rule_id,
+            ffcro.cascade_option_id,
+            ffcro.project_id option_project_id,
+            ffcro.organization_id option_organization_id,
+            ffcro.object_version_number option_object_version_number,
+            ffcro.created_by option_created_by,
+            ffcro.creation_date option_creation_date,
+            ffcro.last_updated_by option_last_updated_by,
+            ffcro.last_update_date option_last_update_date
         FROM fd_field_cascade_rule ffrr
         LEFT JOIN fd_object_scheme_field fosf ON ffrr.field_id = fosf.id
         LEFT JOIN fd_object_scheme_field rfosf ON ffrr.cascade_field_id = rfosf.id
-        LEFT JOIN fd_field_cascade_rule_option ffcro ON ffrr.id = ffcro.field_cascade_rule_id AND ffcro.is_default = 1
+        LEFT JOIN fd_field_cascade_rule_option ffcro ON ffrr.id = ffcro.field_cascade_rule_id
         WHERE ffrr.project_id = #{projectId}
         AND ffrr.issue_type_id = #{issueTypeId}
         <if test="fieldId != null">
