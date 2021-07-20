@@ -4,7 +4,7 @@ import React, {
 import { Button } from 'choerodon-ui/pro';
 import { Dropdown } from 'choerodon-ui';
 import {
-  find, isEqual, omit,
+  find, isEmpty, isEqualWith, omit,
 } from 'lodash';
 import { DropDownProps } from 'choerodon-ui/lib/dropdown';
 import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
@@ -55,6 +55,18 @@ const defaultInitFieldAction = {
   initChosenField: (data: any) => data,
 
 };
+/**
+ * 自定义比较两个值是否一致比较器
+ * @param aValue
+ * @param bValue
+ * @returns
+ */
+function valueIsEqualCustomizer(aValue: any, bValue: any) {
+  if (isEmpty(aValue) && isEmpty(bValue)) {
+    return true;
+  }
+  return undefined;
+}
 export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps, IChoseFieldComponentProps] {
   const [fields, setFields] = useState<IChosenFieldField[]>([]);
   const [value, setValue] = useState<string[] | undefined>(undefined);
@@ -124,7 +136,6 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
       });
       events.initFieldFinish(customFields, systemFields, currentChosenFields);
     }
-
     return new ChoseFieldStore({
       systemFields, customFields, chosenFields: [...currentChosenFields.values()], addFieldCallback: config?.addFieldCallback,
     });
@@ -133,13 +144,12 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
     if (fields.length !== 0) {
       const nextValue = toJS(config?.value)?.map((item) => (typeof (item) === 'string' ? item : item.code)) || [];
       setValue((oldValue) => {
-        if (!isEqual(nextValue, oldValue)) {
+        if (!isEqualWith(nextValue, oldValue, valueIsEqualCustomizer)) {
           runInAction(() => {
             store.chosenFields = observable.map(nextValue.map((item) => {
               const temp = find(fields, { code: item })!;
               return [item, temp];
             }));
-
             store.selfUpdateCurrentOptionStatus();
           });
           return nextValue;
