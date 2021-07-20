@@ -131,7 +131,7 @@ public class DataLogServiceImpl implements DataLogService {
                 if (summary != null) {
                     String newString = x.getNewString();
                     newString = newString + ":" + summary;
-                    x.setOldString(newString);
+                    x.setNewString(newString);
                 }
             }
         });
