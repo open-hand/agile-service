@@ -225,28 +225,6 @@ function PageIssueType() {
     <Page>
       <Prompt message={`是否放弃更改 ${Choerodon.STRING_DEVIDER}页面有未保存的内容,是否放弃更改？`} when={pageIssueTypeStore.getDirty} />
       <Header>
-        <Button onClick={() => openLinkage({
-          // @ts-ignore
-          field: {
-            id: '203839906898952192',
-            code: 'pro_customSelect',
-            fieldCode: 'pro_customSelect',
-            name: '优先级',
-            fieldType: 'single',
-            fieldTypeName: '选择器（单选）',
-            system: false,
-            required: true,
-            defaultValue: null,
-            projectId: 0,
-            contexts: [
-            ],
-            extraConfig: false,
-          },
-          issueTypeId: '195917548854870016',
-        })}
-        >
-          打开级联配置
-        </Button>
         <HeaderButtons items={[
           {
             display: true,

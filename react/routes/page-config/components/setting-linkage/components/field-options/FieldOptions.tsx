@@ -3,15 +3,21 @@ import { TextField, Button } from 'choerodon-ui/pro';
 import { Icon } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import { axios } from '@choerodon/boot';
-import { IField, IPriority, IVersion } from '@/common/types';
+import { IPriority, IVersion } from '@/common/types';
 import classNames from 'classnames';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import styles from './FieldOptions.less';
 
 interface Props {
-  field: IField
+  field: {
+    id: string,
+    name: string,
+    fieldCode: string,
+    system: boolean
+  }
   onChange: (id: string, needPrepare?: boolean) => void
   currentOptionId: string | undefined
+  setHasOptions: (has: boolean) => void
 }
 interface IOption {
   id: string
@@ -22,7 +28,7 @@ const getOptionsConfig = ({
   fieldCode, fieldId, search, page = 0, size = 20,
 }: {fieldCode: string, fieldId?: string, search?: string, page?: number, size?: number}) => {
   switch (fieldCode) {
-    case 'priorityId': {
+    case 'priority': {
       return ({
         url: `/agile/v1/projects/${getProjectId()}/priority/list_by_org`,
         method: 'get',
@@ -91,12 +97,13 @@ const getOptionsConfig = ({
 };
 
 const FieldOptions: React.FC<Props> = ({
-  field, onChange, currentOptionId,
+  field, onChange, currentOptionId, setHasOptions,
 }) => {
   const [options, setOptions] = useState<IOption[]>([]);
   const [search, setSearch] = useState('');
   const [totalPage, setTotalPage] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
+  const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true);
   const { system } = field;
   const getOptions = useCallback((filter?: string, p?: number) => {
     const newPage = p || page;
@@ -110,15 +117,22 @@ const FieldOptions: React.FC<Props> = ({
         if (newPage > 1) { // 大于第一页
           setOptions((preOptions) => [...preOptions, ...res.content]);
         } else {
+          if (isFirstLoad) {
+            setHasOptions(res.content?.length);
+          }
           setOptions(res.content);
         }
         setPage(res.number + 1);
         setTotalPage(res.totalPages);
       } else {
+        if (isFirstLoad) {
+          setHasOptions(res?.length);
+        }
         setOptions(res);
       }
+      setIsFirstLoad(false);
     });
-  }, [field.fieldCode, field.id, page, search]);
+  }, [field.fieldCode, field.id, isFirstLoad, page, search, setHasOptions]);
 
   useEffect(() => {
     getOptions();

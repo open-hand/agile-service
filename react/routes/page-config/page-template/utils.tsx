@@ -5,8 +5,9 @@ import {
 } from 'choerodon-ui/pro';
 import TableDropMenu from '@/components/table-drop-menu';
 import ToggleFieldValue from '../components/toggle-field-value';
+import openLinkage from '../components/setting-linkage/Linkage';
 
-const columns = [
+const getColumns = ({ issueTypeId }: { issueTypeId: string }) => ([
 
   {
     title: '字段名称',
@@ -44,8 +45,28 @@ const columns = [
     dataIndex: 'action',
     key: 'action',
     width: 80,
-    render: () => <TableDropMenu menuData={[{ text: '权限配置' }, { text: '设置级联规则' }]} defaultMenuIcon="settings-o" showText={false} />,
+    render: ({ rowData }: any) => (
+      <TableDropMenu
+        menuData={[{ text: '权限配置' }, {
+          text: '设置级联规则',
+          action: () => {
+            openLinkage({
+              issueTypeId,
+              field: {
+                id: rowData.get('fieldId'),
+                name: rowData.get('fieldName'),
+                fieldCode: rowData.get('fieldCode'),
+                system: rowData.get('createdLevel') === 'system',
+              },
+              onOk: () => {},
+            });
+          },
+        }]}
+        defaultMenuIcon="settings-o"
+        showText={false}
+      />
+    ),
   },
-];
+]);
 
-export { columns };
+export { getColumns };

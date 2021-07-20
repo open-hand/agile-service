@@ -7,14 +7,17 @@ import { observer } from 'mobx-react-lite';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import Loading from '@/components/Loading';
 import { IField, IModalProps } from '@/common/types';
+import noData from '@/assets/image/NoData.svg';
 import { ICascadeRule, pageConfigApi } from '@/api';
 import { includes, map, find } from 'lodash';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
+import { EmptyPage } from '@choerodon/components';
+import LINK_URL from '@/constants/LINK_URL';
+import to from '@/utils/to';
 import styles from './Linkage.less';
 import FieldOptions from './components/field-options';
 import ChosenFields from './components/chosen-fields';
 import Rule from './components/Rule';
-import { IChosenField } from './components/Rule/utils';
 
 interface ColumnProps {
   title: string | ReactElement,
@@ -43,9 +46,15 @@ const LinkageColumn:React.FC<ColumnProps> = ({
 );
 
 interface Props {
-  field: IField
+  field: {
+    id: string,
+    name: string,
+    fieldCode: string,
+    system: boolean
+  }
   modal?: IModalProps
   issueTypeId: string
+  onOk: () => void
 }
 
 export interface ICascadeLinkageSetting {
@@ -82,7 +91,9 @@ export interface ICascadeLinkage {
 const selectTypes = ['radio', 'checkbox', 'single', 'multiple'];
 const singleSelectTypes = ['radio', 'single', 'member'];
 
-const Linkage: React.FC<Props> = ({ field, issueTypeId, modal }) => {
+const Linkage: React.FC<Props> = ({
+  field, issueTypeId, modal, onOk,
+}) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [currentOptionId, setCurrentOptionId] = useState<string | undefined>(undefined);
   const [linkagesMap, setLinkagesMap] = useState<Map<string, ICascadeLinkageSetting[]>>(new Map());
@@ -90,9 +101,11 @@ const Linkage: React.FC<Props> = ({ field, issueTypeId, modal }) => {
   const [currentSelected, setCurrentSelected] = useState<string | undefined>();
   const chosenFieldsRef = useRef<{ chosenFieldCodes: string[] } | null>(null);
   const [cascadeRuleList, setCascadeRuleList] = useState<ICascadeRule[]>([]);
+  const [hasOptions, setHasOptions] = useState<boolean>(true);
 
   useEffect(() => {
     const getCascadeRuleList = async () => {
+      setLoading(true);
       const res: ICascadeLinkage[] = await pageConfigApi.getCascadeRuleList(issueTypeId, field.id);
       batchedUpdates(() => {
         // @ts-ignore
@@ -111,14 +124,12 @@ const Linkage: React.FC<Props> = ({ field, issueTypeId, modal }) => {
               fieldType: item.cascadeFieldType,
               fieldCode: item.cascadeFieldCode,
             },
-            fieldRelOptionList: item.fieldCascadeRuleOptionList || [],
+            fieldRelOptionList: (item.fieldCascadeRuleOptionList || [])?.map((option: { cascadeOptionId: string }) => ({ value: option.cascadeOptionId, meaning: 'mokuao' })),
             defaultValue: item.defaultValue || find(singleSelectTypes, item.cascadeFieldType) ? item.defaultIds && item.defaultIds[0] : item.defaultIds,
             hidden: item.hidden,
             required: item.required,
           });
         });
-        console.log('map:');
-        console.log(cascadeLinkageMap);
         setLinkagesMap(cascadeLinkageMap);
         setLoading(false);
       });
@@ -194,14 +205,15 @@ const Linkage: React.FC<Props> = ({ field, issueTypeId, modal }) => {
         cascadeRuleData.push({ ...item, _status: 'delete' });
       });
       await pageConfigApi.createCascadeRule(cascadeRuleData);
-      console.log(cascadeRuleData);
-      // 刷新外边的表格
-      return false;
+      if (onOk) {
+        onOk();
+      }
+      return true;
     };
     if (modal) {
       modal.handleOk(handleOk);
     }
-  }, [cascadeRuleList, dataSet, field.id, issueTypeId, linkagesMap, modal, prepareData]);
+  }, [cascadeRuleList, dataSet, field.id, issueTypeId, linkagesMap, modal, onOk, prepareData]);
 
   const handleOptionChange = useCallback(async (id: string, needPrepareData = true) => {
     if (needPrepareData && !await prepareData()) {
@@ -212,42 +224,73 @@ const Linkage: React.FC<Props> = ({ field, issueTypeId, modal }) => {
 
   useEffect(() => {
     if (currentOptionId && linkagesMap.get(currentOptionId)?.length) {
-      console.log('loadData', linkagesMap.get(currentOptionId));
       dataSet?.loadData(linkagesMap.get(currentOptionId));
     }
   }, [currentOptionId, dataSet, linkagesMap]);
 
+  const linkToPageField = useCallback(() => {
+    modal?.close();
+    to(LINK_URL.pageField, {
+      type: 'project',
+    });
+  }, [modal]);
+
   const currentRecord: Record | undefined = currentSelected ? dataSet?.find((record) => record.get('chosenField')?.id === currentSelected) : undefined;
 
-  console.log('render linkage', dataSet?.data, linkagesMap);
   return (
     <div className={styles.linkage}>
       <Loading loading={loading} />
       <div className={styles.content}>
         <div className={styles.tip}>当前字段选择特定选项后，对应被联动的字段根据规则隐藏、或要求必填，变更为指定值。</div>
         <div className={styles.settings}>
-          <LinkageColumn
-            key="fieldOption"
-            title={`${field.name}字段选项`}
-            width={175}
-            contentStyle={{ marginLeft: -20, overflowY: 'hidden' }}
-          >
-            <FieldOptions field={field} onChange={handleOptionChange} currentOptionId={currentOptionId} />
-          </LinkageColumn>
-          <LinkageColumn key="chosenField" title="被关联字段" width={223} columnStyle={{ position: 'relative', paddingRight: 20 }}>
-            <ChosenFields
-              key={currentOptionId}
-              dataSet={dataSet}
-              currentSelected={currentSelected}
-              setCurrentSelected={setCurrentSelected}
-              issueTypeId={issueTypeId}
-              fieldId={field.id}
-              chosenFieldsRef={chosenFieldsRef}
-            />
-          </LinkageColumn>
-          <LinkageColumn key="rule" title="设置级联规则" bordered={false} columnStyle={{ flex: 1, paddingRight: 20 }}>
-            {currentRecord ? <Rule record={currentRecord} /> : null}
-          </LinkageColumn>
+          {
+            hasOptions ? (
+              <>
+                <LinkageColumn
+                  key="fieldOption"
+                  title={`${field.name}字段选项`}
+                  width={175}
+                  contentStyle={{ marginLeft: -20, overflowY: 'hidden' }}
+                >
+                  <FieldOptions
+                    field={field}
+                    onChange={handleOptionChange}
+                    currentOptionId={currentOptionId}
+                    setHasOptions={setHasOptions}
+                  />
+                </LinkageColumn>
+                <LinkageColumn key="chosenField" title="被关联字段" width={223} columnStyle={{ position: 'relative', paddingRight: 20 }}>
+                  <ChosenFields
+                    key={currentOptionId}
+                    currentOptionId={currentOptionId}
+                    dataSet={dataSet}
+                    currentSelected={currentSelected}
+                    setCurrentSelected={setCurrentSelected}
+                    issueTypeId={issueTypeId}
+                    fieldId={field.id}
+                    chosenFieldsRef={chosenFieldsRef}
+                  />
+                </LinkageColumn>
+                <LinkageColumn key="rule" title="设置级联规则" bordered={false} columnStyle={{ flex: 1, paddingRight: 20 }}>
+                  {currentRecord ? <Rule record={currentRecord} /> : null}
+                </LinkageColumn>
+              </>
+            ) : (
+              <EmptyPage
+                description={(
+                  <>
+                    {`${field.name}字段尚未添加选项，请`}
+                    <EmptyPage.Button
+                      onClick={linkToPageField}
+                    >
+                      【设置选项】
+                    </EmptyPage.Button>
+                  </>
+                  )}
+                image={noData}
+              />
+            )
+          }
         </div>
       </div>
     </div>

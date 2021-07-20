@@ -19,10 +19,11 @@ interface Props {
   currentSelected: undefined | string
   setCurrentSelected: (selected: string | undefined) => void
   chosenFieldsRef: React.MutableRefObject<{chosenFieldCodes: string[]} | null>
+  currentOptionId: string | undefined
 }
 
 const ChosenFields: React.FC<Props> = ({
-  dataSet, currentSelected, setCurrentSelected, issueTypeId, fieldId, chosenFieldsRef,
+  dataSet, currentSelected, setCurrentSelected, issueTypeId, fieldId, chosenFieldsRef, currentOptionId,
 }) => {
   const [chosenFields, setChosenFields] = useState<IChosenField[]>([]);
   const chosenFieldIds = useDeepMemo(() => dataSet?.map((record) => record.get('chosenField')?.id));
@@ -83,7 +84,7 @@ const ChosenFields: React.FC<Props> = ({
   return (
     <div className={styles.chosenField}>
       <div className={styles.chosen_btn}>
-        <ChooseField {...choseComponentProps} dropDownBtnProps={{ icon: 'add', style: { marginLeft: 6, marginTop: 10 } }} />
+        <ChooseField {...choseComponentProps} dropDownProps={{ disabled: !currentOptionId }} dropDownBtnProps={{ icon: 'add', style: { marginLeft: 6, marginTop: 10 } }} />
       </div>
       <div className={styles['option-list']}>
         {
