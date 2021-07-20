@@ -4,6 +4,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+import io.choerodon.agile.api.vo.FieldCascadeRuleDesVO;
 import io.choerodon.agile.api.vo.FieldCascadeRuleVO;
 import io.choerodon.agile.infra.dto.FieldCascadeRuleDTO;
 import io.choerodon.mybatis.common.BaseMapper;
@@ -49,4 +50,13 @@ public interface FieldCascadeRuleMapper extends BaseMapper<FieldCascadeRuleDTO> 
      * @return 问题类型下所有更改必输或更改隐藏的规则
      */
     List<FieldCascadeRuleVO> selectFieldCascadeRequiredOrHiddenRule(@Param("projectId") Long projectId, @Param("issueTypeId") Long issueTypeId);
+
+    /**
+     * 查询问题类型下所有级联规则的说明
+     *
+     * @param issueTypeId 问题类型
+     * @param projectId   项目id
+     * @return 问题类型下所有级联规则的说明
+     */
+    List<FieldCascadeRuleDesVO> selectFieldCascadeRuleDesByIssueTypeId(@Param("issueTypeId") Long issueTypeId, @Param("projectId") Long projectId);
 }
