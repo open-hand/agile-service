@@ -8,7 +8,7 @@ import { FlatSelect } from '@choerodon/components';
 
 interface Props extends Partial<SelectProps> {
   priorityId?: number
-  fieldId: string
+  fieldId?: string
   dataRef?: React.MutableRefObject<any>
   afterLoad?: (prioritys: Priority[]) => void
   flat?: boolean
@@ -28,7 +28,7 @@ ref: React.Ref<Select>) => {
     textField: 'name',
     valueField: 'id',
     requestArgs: args,
-    request: hasRule
+    request: hasRule && fieldId
       ? ({ requestArgs, filter, page }) => fieldApi.getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, 0)
       : priorityApi.loadByProject(projectId, [String(priorityId)]),
     middleWare: (data: Priority[]) => {
