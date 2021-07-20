@@ -6,19 +6,19 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 import java.util.Optional;
 
-import io.choerodon.agile.api.vo.FieldCascadeCreateVO;
+import io.choerodon.agile.api.vo.CascadeFieldOptionSearchVO;
 import io.choerodon.agile.api.vo.FieldCascadeRuleVO;
-import io.choerodon.agile.api.vo.FieldCascadeUpdateVO;
 import io.choerodon.agile.api.vo.PageConfigFieldVO;
 import io.choerodon.agile.app.service.FieldCascadeRuleService;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.Permission;
 
 /**
@@ -81,6 +81,24 @@ public class FieldCascadeRuleController {
             @ApiParam(value = "字段id", required = true)
             @Encrypt @RequestParam(name = "field_id") Long fieldId) {
         return Optional.ofNullable(fieldCascadeRuleService.listCascadePageFieldView(projectId, issueTypeId, fieldId))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.relPageFieldView.list"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询级联字段下的可见选项")
+    @PostMapping("/cascade_field/{cascade_field_id}/option")
+    public ResponseEntity<Object> listCascadeFieldOption(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "级联字段id", required = true)
+            @Encrypt @PathVariable(name = "cascade_field_id") Long cascadeFieldId,
+            @ApiParam(value = "分页信息", required = true)
+            @ApiIgnore PageRequest pageRequest,
+            @ApiParam(value = "查询参数")
+            @RequestBody CascadeFieldOptionSearchVO cascadeFieldOptionSearchVO) {
+        return Optional.ofNullable(fieldCascadeRuleService.listCascadeFieldOption(
+                projectId, cascadeFieldId, cascadeFieldOptionSearchVO, pageRequest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.relPageFieldView.list"));
     }

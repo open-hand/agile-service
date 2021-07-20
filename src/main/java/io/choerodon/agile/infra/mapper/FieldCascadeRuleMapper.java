@@ -40,4 +40,13 @@ public interface FieldCascadeRuleMapper extends BaseMapper<FieldCascadeRuleDTO> 
      * @param projectId 项目id
      */
     void batchDeleteByIds(@Param("ids") List<Long> ids, @Param("projectId") Long projectId);
+
+    /**
+     * 查询问题类型下所有更改必输或更改隐藏的规则
+     *
+     * @param projectId   项目id
+     * @param issueTypeId 问题类型id
+     * @return 问题类型下所有更改必输或更改隐藏的规则
+     */
+    List<FieldCascadeRuleVO> selectFieldCascadeRequiredOrHiddenRule(@Param("projectId") Long projectId, @Param("issueTypeId") Long issueTypeId);
 }

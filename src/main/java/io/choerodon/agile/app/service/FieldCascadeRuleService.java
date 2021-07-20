@@ -2,10 +2,8 @@ package io.choerodon.agile.app.service;
 
 import java.util.List;
 
-import io.choerodon.agile.api.vo.FieldCascadeCreateVO;
-import io.choerodon.agile.api.vo.FieldCascadeRuleVO;
-import io.choerodon.agile.api.vo.FieldCascadeUpdateVO;
-import io.choerodon.agile.api.vo.PageConfigFieldVO;
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * @author chihao.ran@hand-china.com
@@ -63,4 +61,24 @@ public interface FieldCascadeRuleService {
      * @return 变动的级联规则
      */
     List<FieldCascadeRuleVO> batchMutationFieldCascadeRule(Long projectId, List<FieldCascadeRuleVO> fieldCascadeRuleList);
+
+    /**
+     * 仅查询级联字段可见选项
+     * @param projectId 项目id
+     * @param cascadeFieldId 级联字段
+     * @param cascadeFieldOptionSearchVO 查询参数
+     * @param pageRequest 分页参数
+     * @return 级联字段可见选项
+     */
+    Object listCascadeFieldOption(Long projectId, Long cascadeFieldId, CascadeFieldOptionSearchVO cascadeFieldOptionSearchVO, PageRequest pageRequest);
+
+    /**
+     * 根据级联规则处理字段可见、必输
+     * @param organizationId 组织id
+     * @param projectId 项目id
+     * @param paramDTO 字段参数id
+     * @param instanceId 问题id
+     * @param pageFieldViews 字段
+     */
+    void filterPageFieldView(Long organizationId, Long projectId, PageFieldViewParamVO paramDTO, Long instanceId, List<PageFieldViewVO> pageFieldViews);
 }
