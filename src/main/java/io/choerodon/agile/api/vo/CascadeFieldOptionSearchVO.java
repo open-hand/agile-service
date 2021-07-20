@@ -14,6 +14,7 @@ public class CascadeFieldOptionSearchVO {
     @Encrypt
     private List<Long> selected;
     private String searchParam;
+    private List<String> extendParams;
 
     public List<Long> getFieldCascadeRuleIds() {
         return fieldCascadeRuleIds;
@@ -37,5 +38,13 @@ public class CascadeFieldOptionSearchVO {
 
     public void setSearchParam(String searchParam) {
         this.searchParam = searchParam;
+    }
+
+    public List<String> getExtendParams() {
+        return extendParams;
+    }
+
+    public void setExtendParams(List<String> extendParams) {
+        this.extendParams = extendParams;
     }
 }

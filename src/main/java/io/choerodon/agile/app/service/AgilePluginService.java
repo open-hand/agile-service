@@ -480,4 +480,14 @@ public interface AgilePluginService {
     void handlerSprintProgramAttr(List<Long> sprintIds, Long projectId, List<SprintSearchVO> sprintSearches);
 
     void deleteTagByBranch(Long projectId, IssueWithBranchVO issueWithBranchVO);
+
+    /**
+     * 获取商业版项目关联信息
+     * @param organizationId 组织id
+     * @param projectId 项目id
+     * @param parentId 父级id
+     * @param onlySelectEnable 是否启用
+     * @return 项目关联信息
+     */
+    List<ProjectRelationshipInfoVO> getProjUnderGroup(Long organizationId, Long projectId, Long parentId, boolean onlySelectEnable);
 }
