@@ -1,9 +1,5 @@
 package io.choerodon.agile.app.service;
 
-import java.util.List;
-
-import io.choerodon.agile.api.vo.PageConfigFieldVO;
-import io.choerodon.agile.api.vo.PageConfigVO;
 import io.choerodon.agile.api.vo.PageTemplateVO;
 
 /**

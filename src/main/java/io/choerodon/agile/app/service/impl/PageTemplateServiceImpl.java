@@ -48,17 +48,16 @@ public class PageTemplateServiceImpl implements PageTemplateService {
         if (ObjectUtils.isEmpty(issueTypeId)) {
             throw new CommonException("error.issue.type.not.existed");
         }
+        PageConfigVO pageConfigVO = objectSchemeFieldService.listConfigs(organizationId, projectId, issueTypeId);
         PageTemplateVO result = new PageTemplateVO();
-        List<PageConfigFieldVO> pageConfigFields = objectSchemeFieldService.queryPageConfigFields(organizationId, projectId, issueTypeId);
-        //处理默认值
-        processDefaultValue(pageConfigFields, organizationId, projectId);
-        List<PageTemplateFieldVO> pageTemplateFieldList = modelMapper.map(pageConfigFields, new TypeToken<List<PageTemplateFieldVO>>(){}.getType());
+        //设置IssueTypeField
+        pageConfigVO.setIssueTypeFieldVO(pageConfigVO.getIssueTypeFieldVO());
+        //设置fields
+        List<PageTemplateFieldVO> pageTemplateFieldList = modelMapper.map(pageConfigVO.getFields(), new TypeToken<List<PageTemplateFieldVO>>(){}.getType());
         result.setFields(pageTemplateFieldList);
-
+        
         //设置级联说明
         setPageTemplateFieldCascadeRuleDes(issueTypeId, projectId, pageTemplateFieldList);
-        //设置IssueTypeField
-        setIssueTypeField(projectId, issueTypeId, result);
         return result;
     }
 
@@ -66,45 +65,5 @@ public class PageTemplateServiceImpl implements PageTemplateService {
         List<FieldCascadeRuleDesVO> fieldCascadeRuleDesList = fieldCascadeRuleMapper.selectFieldCascadeRuleDesByIssueTypeId(issueTypeId, projectId);
         Map<Long, List<FieldCascadeRuleDesVO>> cascadeRuleMap = fieldCascadeRuleDesList.stream().collect(Collectors.groupingBy(FieldCascadeRuleDesVO::getFieldId));
         pageTemplateFieldList.forEach(pageTemplateFieldVO -> pageTemplateFieldVO.setFieldCascadeRuleDesList(cascadeRuleMap.get(pageTemplateFieldVO.getFieldId())));
-    }
-
-    private void setIssueTypeField(Long projectId, Long issueTypeId, PageTemplateVO result) {
-        IssueTypeFieldDTO dto = new IssueTypeFieldDTO();
-        dto.setIssueTypeId(issueTypeId);
-        dto.setProjectId(projectId);
-        List<IssueTypeFieldDTO> list = issueTypeFieldMapper.select(dto);
-        if (!list.isEmpty()) {
-            result.setIssueTypeFieldVO(modelMapper.map(list.get(0), IssueTypeFieldVO.class));
-        }
-    }
-
-    private void processDefaultValue(List<PageConfigFieldVO> pageConfigFields,
-                                     Long organizationId,
-                                     Long projectId) {
-        List<PageFieldViewVO> pageFieldViews = new ArrayList<>();
-        pageConfigFields.forEach(p -> {
-            PageFieldViewVO vo = new PageFieldViewVO();
-            vo.setFieldId(p.getFieldId());
-            vo.setDefaultValue(p.getDefaultValue());
-            vo.setFieldType(p.getFieldType());
-            vo.setExtraConfig(p.getExtraConfig());
-            vo.setFieldCode(p.getFieldCode());
-            pageFieldViews.add(vo);
-        });
-        optionService.fillOptions(organizationId, null, pageFieldViews);
-        objectSchemeFieldService.setDefaultValueObjs(pageFieldViews, projectId, organizationId);
-        FieldValueUtil.handleDefaultValue(pageFieldViews);
-        Map<Long, PageFieldViewVO> pageFieldViewMap =
-                pageFieldViews.stream().collect(Collectors.toMap(PageFieldViewVO::getFieldId, x -> x));
-        pageConfigFields.forEach(p -> {
-            Long fieldId = p.getFieldId();
-            PageFieldViewVO vo = pageFieldViewMap.get(fieldId);
-            if (!ObjectUtils.isEmpty(vo)) {
-                p.setDefaultValue(vo.getDefaultValue());
-                p.setDefaultValueObj(vo.getDefaultValueObj());
-                p.setFieldOptions(vo.getFieldOptions());
-                p.setDefaultValueObjs(vo.getDefaultValueObjs());
-            }
-        });
     }
 }

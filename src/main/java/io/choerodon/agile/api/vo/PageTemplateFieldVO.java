@@ -23,11 +23,21 @@ public class PageTemplateFieldVO {
 
     private String fieldType;
 
+    private Boolean required;
+
+    private Boolean created;
+
+    private Boolean edited;
+
     private String issueType;
 
     private String rank;
 
+    private String createdLevel;
+
     private Long objectVersionNumber;
+
+    private PageConfigFieldEditedVO pageConfigFieldEdited;
 
     private String fieldCode;
 
@@ -72,6 +82,14 @@ public class PageTemplateFieldVO {
 
     public void setFieldCode(String fieldCode) {
         this.fieldCode = fieldCode;
+    }
+
+    public PageConfigFieldEditedVO getPageConfigFieldEdited() {
+        return pageConfigFieldEdited;
+    }
+
+    public void setPageConfigFieldEdited(PageConfigFieldEditedVO pageConfigFieldEdited) {
+        this.pageConfigFieldEdited = pageConfigFieldEdited;
     }
 
     public String getFieldType() {
@@ -122,6 +140,30 @@ public class PageTemplateFieldVO {
         this.defaultValue = defaultValue;
     }
 
+    public Boolean getRequired() {
+        return required;
+    }
+
+    public void setRequired(Boolean required) {
+        this.required = required;
+    }
+
+    public Boolean getCreated() {
+        return created;
+    }
+
+    public void setCreated(Boolean created) {
+        this.created = created;
+    }
+
+    public Boolean getEdited() {
+        return edited;
+    }
+
+    public void setEdited(Boolean edited) {
+        this.edited = edited;
+    }
+
     public String getIssueType() {
         return issueType;
     }
@@ -136,6 +178,14 @@ public class PageTemplateFieldVO {
 
     public void setRank(String rank) {
         this.rank = rank;
+    }
+
+    public String getCreatedLevel() {
+        return createdLevel;
+    }
+
+    public void setCreatedLevel(String createdLevel) {
+        this.createdLevel = createdLevel;
     }
 
     public List<Object> getDefaultValueObjs() {
