@@ -124,7 +124,7 @@ const Linkage: React.FC<Props> = ({
               fieldType: item.cascadeFieldType,
               fieldCode: item.cascadeFieldCode,
             },
-            fieldRelOptionList: (item.fieldCascadeRuleOptionList || [])?.map((option: { cascadeOptionId: string }) => ({ value: option.cascadeOptionId, meaning: 'mokuao' })),
+            fieldRelOptionList: (item.fieldCascadeRuleOptionList || [])?.map((option: { cascadeOptionId: string }) => ({ value: option.cascadeOptionId })),
             defaultValue: item.defaultValue || find(singleSelectTypes, item.cascadeFieldType) ? item.defaultIds && item.defaultIds[0] : item.defaultIds,
             hidden: item.hidden,
             required: item.required,
