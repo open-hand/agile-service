@@ -143,6 +143,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
 
     private void validExit(FieldCascadeCreateVO fieldCascadeCreate, Long projectId) {
         FieldCascadeRuleDTO fieldCascadeRuleRecord = new FieldCascadeRuleDTO();
+        fieldCascadeRuleRecord.setIssueTypeId(fieldCascadeCreate.getIssueTypeId());
         fieldCascadeRuleRecord.setFieldId(fieldCascadeCreate.getFieldId());
         fieldCascadeRuleRecord.setFieldOptionId(fieldCascadeCreate.getFieldOptionId());
         fieldCascadeRuleRecord.setCascadeFieldId(fieldCascadeCreate.getCascadeFieldId());
