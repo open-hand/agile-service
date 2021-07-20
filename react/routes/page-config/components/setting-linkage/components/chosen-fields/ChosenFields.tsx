@@ -18,12 +18,11 @@ interface Props {
   dataSet: DataSet | undefined,
   currentSelected: undefined | string
   setCurrentSelected: (selected: string | undefined) => void
-  chosenFieldsRef: React.MutableRefObject<{chosenFieldCodes: string[]} | null>
   currentOptionId: string | undefined
 }
 
 const ChosenFields: React.FC<Props> = ({
-  dataSet, currentSelected, setCurrentSelected, issueTypeId, fieldId, chosenFieldsRef, currentOptionId,
+  dataSet, currentSelected, setCurrentSelected, issueTypeId, fieldId, currentOptionId,
 }) => {
   const [chosenFields, setChosenFields] = useState<IChosenField[]>([]);
   const chosenFieldIds = useDeepMemo(() => dataSet?.map((record) => record.get('chosenField')?.id));
@@ -74,12 +73,7 @@ const ChosenFields: React.FC<Props> = ({
     if (currentSelected === key && !choseFieldStore.getAllChosenField.length) {
       setCurrentSelected(undefined);
     }
-    // 添加清楚相关rule的逻辑
   }, [choseFieldStore, currentSelected, dataSet, setCurrentSelected]);
-
-  useImperativeHandle(chosenFieldsRef, () => ({
-    chosenFieldCodes: choseFieldStore.getAllChosenField?.map((item) => item.code),
-  }));
 
   return (
     <div className={styles.chosenField}>

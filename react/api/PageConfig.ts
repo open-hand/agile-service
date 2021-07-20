@@ -402,6 +402,16 @@ class PageConfigApi extends Api<PageConfigApi> {
       },
     });
   }
+
+  getCascadeRelOptionList(ruleId: string, extendParams?: any) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/field_cascade_rule/${ruleId}/option`,
+      params: {
+        extendParams,
+      },
+    });
+  }
 }
 
 const pageConfigApi = new PageConfigApi();

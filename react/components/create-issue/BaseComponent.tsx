@@ -6,7 +6,9 @@ import {
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { usePersistFn } from 'ahooks';
-import { find, merge } from 'lodash';
+import {
+  find, groupBy, includes, merge,
+} from 'lodash';
 import { UploadFile } from 'choerodon-ui/lib/upload/interface';
 import UploadButton from '@/components/CommonComponent/UploadButton';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
@@ -20,6 +22,8 @@ import moment from 'moment';
 
 import { getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
+import { pageConfigApi } from '@/api';
+import { ICascadeLinkage } from '@/routes/page-config/components/setting-linkage/Linkage';
 import WSJF from './components/wsjf';
 import IssueLink from './components/issue-link';
 import hooks from './hooks';
@@ -85,7 +89,11 @@ const presets = new Map([
 ]);
 const lineField = ['summary', 'description'];
 const reuseFields = ['issueType', 'summary', 'description'];
-function isMultiple(field: IssueCreateFields) {
+const pageCascadeFields = ['component', 'priority', 'fixVersion', 'influenceVersion'];
+const selectTypes = ['radio', 'multiple', 'checkbox', 'single'];
+const singleSelectTypes = ['radio', 'single', 'member'];
+const multipleSelectTypes = ['checkbox', 'multiple', 'multiMember'];
+function isMultiple(field: IssueCreateFields | { fieldType: string}) {
   return field.fieldType === 'multiple' || field.fieldType === 'checkbox' || field.fieldType === 'multiMember';
 }
 function transformSubmitFieldValue(field: IssueCreateFields, value: any) {
@@ -148,17 +156,11 @@ const CreateIssueBase = observer(({
   })?.typeCode;
   const enableIssueLinks = issueTypeCode && !['sub_task', 'issue_epic', 'feature'].includes(issueTypeCode);
   const isSubIssue = issueTypeCode && ['sub_task'].includes(issueTypeCode);
-  const handleUpdate = usePersistFn(({ name, value }) => {
-    switch (name) {
-      case 'issueType': {
-        break;
-      }
-      default: break;
-    }
-  });
+
   const [{ data: fields, isFetching: isFieldsLoading }, {
     data: templateData,
-  }] = useIssueCreateFields({ issueTypeId, projectId });
+  }, { data: cascadeRuleList = [] }] = useIssueCreateFields({ issueTypeId, projectId });
+
   const {
     isInProgram,
     isShowFeature,
@@ -184,6 +186,57 @@ const CreateIssueBase = observer(({
     }
     return field.defaultValue;
   });
+
+  const handleUpdate = usePersistFn(({ name, value, record }) => {
+    switch (name) {
+      case 'issueType': {
+        break;
+      }
+      default: {
+        const field = find(fields, { fieldCode: name });
+        console.log(name, fields?.find((item) => item.fieldCode === name), value);
+        if ((value && field && includes(pageCascadeFields, name)) || (field && !field.system && includes(selectTypes, field.fieldType))) {
+          const optionRules = cascadeRuleList.filter((item) => item.fieldId === field.fieldId && (!Array.isArray(value) ? item.fieldOptionId === value?.toString() : includes(value, item.fieldOptionId)));
+          console.log('cascadeLinkageList:', cascadeRuleList, '符合规则的rule', optionRules);
+          if (optionRules.length) {
+            optionRules.forEach((rule, i, arr) => {
+              const originField = record.getField(rule.cascadeFieldCode);
+              const cascadeHasValue = isMultiple({ fieldType: rule.cascadeFieldType }) ? record.get(rule.cascadeFieldCode)?.length : record.get(rule.cascadeFieldCode);
+              if (!isMultiple(field)) { // 如果是单选，直接将required设为true
+                if (rule.required && !originField.get('required')) {
+                  originField.set('required', true);
+                }
+                if ((rule.defaultValue || rule.defaultIds?.length)) {
+                  const defaultValue = rule.defaultValue || find(singleSelectTypes, rule.cascadeFieldType) ? rule.defaultIds && rule.defaultIds[0] : rule.defaultIds;
+                  originField.set('defaultValue', defaultValue);
+                  if (!cascadeHasValue) {
+                    record.set(rule.cascadeFieldCode, defaultValue);
+                  }
+                }
+              } else {
+                const allThisFieldRules = arr.filter((item) => item.cascadeFieldCode === rule.cascadeFieldCode); // 如果是多选，找到所有关联这个字段的rule
+                if (allThisFieldRules.find((item) => item.required) && !originField.get('required')) { // 只要关联这个字段的rule中有一个required，就设为required
+                  originField.set('required', true);
+                }
+                if (allThisFieldRules.filter((item) => item.defaultValue || item.defaultIds?.length)?.length === 1) { // 如果是多选，只有一条Rule设置了默认值是才设置默认值
+                  const defaultValueRule = allThisFieldRules.find((item) => item.defaultValue || item.defaultIds?.length);
+                  const defaultValue = rule.defaultValue || find(singleSelectTypes, rule.cascadeFieldType) ? rule.defaultIds && rule.defaultIds[0] : rule.defaultIds;
+                  originField.set('defaultValue', defaultValue);
+                  if (!cascadeHasValue) {
+                    record.set(defaultValueRule?.cascadeFieldCode, defaultValue);
+                  }
+                }
+              }
+            });
+          } else {
+            // 恢复原来的设置
+          }
+          break;
+        }
+      }
+    }
+  });
+
   useEffect(() => {
     const oldDataSet = dataSetRef.current;
     const newDataSet = new DataSet({
@@ -216,8 +269,10 @@ const CreateIssueBase = observer(({
           required: false,
         },
       }]) : [],
+      events: {
+        update: handleUpdate,
+      },
     });
-
     const newValue: { [key: string]: any } = {};
     // 优先保留之前的值
     reuseFields.forEach((name) => {
@@ -254,7 +309,7 @@ const CreateIssueBase = observer(({
     // 创建一个新的
     newDataSet.create(newValue);
     setDataSet(newDataSet);
-  }, [defaultFeature, fields, getDefaultValue, isShowFeature, isSubIssue, issueTypeCode, parentIssue, showFeature, templateData]);
+  }, [defaultFeature, fields, getDefaultValue, handleUpdate, isShowFeature, isSubIssue, issueTypeCode, parentIssue, showFeature, templateData]);
   const getIssueLinks = usePersistFn(() => {
     const links = issueLinkDataSet.toData() as {
       issueIds: string[]
