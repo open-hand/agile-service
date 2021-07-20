@@ -13,7 +13,7 @@ import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import validateFile from '@/utils/File';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import {
-  IIssueType, IModalProps, IssueCreateFields, Priority,
+  IIssueType, IModalProps, IssueCreateFields, Priority, User,
 } from '@/common/types';
 import useIssueCreateFields from '@/hooks/data/useIssueCreateFields';
 import moment from 'moment';
@@ -341,6 +341,9 @@ const CreateIssueBase = observer(({
       case 'assignee': {
         return {
           extraOptions: defaultAssignee,
+          onAssigneeMe: (userInfo: User) => {
+            setFieldValue('assignee', userInfo.id);
+          },
         };
       }
       case 'priority': {

@@ -26,6 +26,7 @@ import SelectParentIssue from '../select/select-parent-issue';
 import SelectEnvironment from '../select/select-environment';
 import SelectFeatureType from '../select/select-feature-type';
 import SelectTeam from '../select/select-team';
+import SelectUserWithAssigneeMe from '../select/pro/select-user-with-assigneeme';
 
 type ProRenderFieldPropsType = {
   render: ((
@@ -184,6 +185,9 @@ const systemFieldMap: Record<ISystemFieldCodeMap, ProRenderFieldPropsType> = {
   },
   assignee: {
     ...valueTypeMap.member,
+    renderFormItem: (props) => (
+      <SelectUserWithAssigneeMe {...props} />
+    ),
     valueKey: 'assigneeId',
   },
   reporter: {
