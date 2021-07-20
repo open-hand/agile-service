@@ -30,6 +30,7 @@ import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.utils.PageUtils;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
@@ -574,7 +575,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         return optionPage;
     }
 
-    private Object listProjectCascadeFieldOption(Long projectId, Long organizationId, ObjectSchemeFieldDTO objectSchemeField, CascadeFieldOptionSearchVO cascadeFieldOptionSearchVO, PageRequest pageRequest) {
+    private Page<ProjectRelationshipInfoVO> listProjectCascadeFieldOption(Long projectId, Long organizationId, ObjectSchemeFieldDTO objectSchemeField, CascadeFieldOptionSearchVO cascadeFieldOptionSearchVO, PageRequest pageRequest) {
         if (agilePluginService == null) {
             return null;
         }
@@ -584,10 +585,11 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         }
 
         Set<Long> visibleOptionIds = new HashSet<>();
-        if (CollectionUtils.isEmpty(cascadeFieldOptionSearchVO.getFieldCascadeRuleIds())){
+        if (!CollectionUtils.isEmpty(cascadeFieldOptionSearchVO.getFieldCascadeRuleIds())){
             visibleOptionIds.addAll(fieldCascadeRuleOptionMapper.selectVisibleOptionIds(projectId, cascadeFieldOptionSearchVO.getFieldCascadeRuleIds()));
         }
-        return projectRelationshipInfoVOS.stream().filter(projectRelationshipInfoVO -> visibleOptionIds.contains(projectRelationshipInfoVO.getProjectId())).collect(Collectors.toList());
+        List<ProjectRelationshipInfoVO> result = projectRelationshipInfoVOS.stream().filter(projectRelationshipInfoVO -> visibleOptionIds.contains(projectRelationshipInfoVO.getProjectId())).collect(Collectors.toList());
+        return PageUtils.createPageFromList(result, pageRequest);
     }
 
     private Page<UserDTO> listMemberCascadeFieldOption(Long projectId, CascadeFieldOptionSearchVO cascadeFieldOptionSearchVO, PageRequest pageRequest) {
@@ -668,8 +670,8 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                     break;
                 case FieldCode.SUB_PROJECT:
                     if (agilePluginService != null){
-                        List<ProjectRelationshipInfoVO> projectRelationshipInfoVOS = agilePluginService.getProjUnderGroup(organizationId, projectId, projectId, true);
-                        Map<Long, Object> projectMap = projectRelationshipInfoVOS.stream().collect(Collectors.toMap(ProjectRelationshipInfoVO::getProjectId, Function.identity()));
+                        List<ProjectRelationshipInfoVO> projectRelationshipInfoList= agilePluginService.getProjUnderGroup(organizationId, projectId, projectId, true);
+                        Map<Long, Object> projectMap = projectRelationshipInfoList.stream().collect(Collectors.toMap(ProjectRelationshipInfoVO::getProjectId, Function.identity()));
                         setDefaultValueObjsOfMultiple(projectMap, fieldCascadeRuleVO);
                     }
                     break;
