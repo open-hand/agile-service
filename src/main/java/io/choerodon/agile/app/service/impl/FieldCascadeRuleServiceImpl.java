@@ -737,7 +737,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                 FieldCascadeRuleOptionDTO fieldCascadeRuleOptionDTO = new FieldCascadeRuleOptionDTO();
                 fieldCascadeRuleOptionDTO.setProjectId(projectId);
                 fieldCascadeRuleOptionDTO.setOrganizationId(organizationId);
-                fieldCascadeRuleOptionDTO.setFieldCascadeRuleId(fieldCascadeRuleOption.getFieldCascadeRuleId());
+                fieldCascadeRuleOptionDTO.setFieldCascadeRuleId(fieldCascadeRuleId);
                 fieldCascadeRuleOptionDTO.setCascadeOptionId(fieldCascadeRuleOption.getCascadeOptionId());
                 insertOptionList.add(fieldCascadeRuleOptionDTO);
             }
