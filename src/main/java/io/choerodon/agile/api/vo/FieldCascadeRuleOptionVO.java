@@ -20,6 +20,7 @@ public class FieldCascadeRuleOptionVO extends AuditDomain {
     @Encrypt
     @NotNull(message = "选项id不能为空")
     private Long cascadeOptionId;
+    private String cascadeOptionName;
     private Long projectId;
     private Boolean defaultOption;
     private Long organizationId;
@@ -70,5 +71,13 @@ public class FieldCascadeRuleOptionVO extends AuditDomain {
 
     public void setDefaultOption(Boolean defaultOption) {
         this.defaultOption = defaultOption;
+    }
+
+    public String getCascadeOptionName() {
+        return cascadeOptionName;
+    }
+
+    public void setCascadeOptionName(String cascadeOptionName) {
+        this.cascadeOptionName = cascadeOptionName;
     }
 }

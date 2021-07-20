@@ -81,4 +81,12 @@ public interface FieldCascadeRuleService {
      * @param pageFieldViews 字段
      */
     void filterPageFieldView(Long organizationId, Long projectId, PageFieldViewParamVO paramDTO, Long instanceId, List<PageFieldViewVO> pageFieldViews);
+
+    /**
+     * 查询规则下可见选项
+     * @param projectId 项目id
+     * @param fieldCascadeRuleId 规则id
+     * @return 规则下可见选项
+     */
+    List<FieldCascadeRuleOptionVO> listFieldCascadeRuleOptionByRule(Long projectId, Long fieldCascadeRuleId);
 }

@@ -15,6 +15,7 @@ import javax.annotation.Resource;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.api.vo.business.ProjectRelationshipInfoVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
@@ -43,8 +44,11 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
     private static final String MEMBER = "member";
     private static final String PRIORITY = "priority";
     private static final String COMPONENT = "component";
+    private static final String VERSION = "version";
     private static final String CUSTOM = "custom";
     private static final String OTHER = "other";
+    private static final String SUB_PROJECT = "subProject";
+    private static final String ENVIRONMENT = "environment";
 
     @Resource
     private FieldCascadeRuleMapper fieldCascadeRuleMapper;
@@ -54,12 +58,16 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
     private IssueComponentMapper issueComponentMapper;
     @Autowired
     private PriorityService priorityService;
+    @Resource
+    private ProductVersionMapper productVersionMapper;
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
     private ObjectSchemeFieldService objectSchemeFieldService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private FieldOptionMapper fieldOptionMapper;
     @Resource
     private ObjectSchemeFieldMapper objectSchemeFieldMapper;
     @Autowired
@@ -257,7 +265,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
 
         String optionType = getOptionType(objectSchemeField);
         switch (optionType) {
-            case PRIORITY:
+            case COMPONENT:
                 result = PageHelper.doPage(
                         pageRequest, () -> fieldCascadeRuleOptionMapper.selectCascadeFieldComponent(
                                 projectId,
@@ -265,7 +273,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                                 cascadeFieldOptionSearchVO.getSearchParam()
                         ));
                 break;
-            case COMPONENT:
+            case PRIORITY:
                 result = PageHelper.doPage(
                         pageRequest, () -> fieldCascadeRuleOptionMapper.selectCascadeFieldPriority(
                                 projectId,
@@ -279,6 +287,18 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                 break;
             case CUSTOM:
                 result = listCustomFieldOption(projectId, organizationId, objectSchemeField, cascadeFieldOptionSearchVO, pageRequest);
+                break;
+            case VERSION:
+                result = PageHelper.doPage(
+                        pageRequest, () -> fieldCascadeRuleOptionMapper.selectCascadeFieldVersion(
+                                projectId,
+                                organizationId,
+                                cascadeFieldOptionSearchVO.getFieldCascadeRuleIds(),
+                                cascadeFieldOptionSearchVO.getExtendParams()
+                        ));
+                break;
+            case SUB_PROJECT:
+                result = listProjectCascadeFieldOption(projectId, organizationId, objectSchemeField, cascadeFieldOptionSearchVO, pageRequest);
                 break;
             default:
                 break;
@@ -353,6 +373,77 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
             }
         });
         removeHiddenFieldAndSetRequired(hiddenFieldIds, requiredIds, pageFieldViews);
+    }
+
+    @Override
+    public List<FieldCascadeRuleOptionVO> listFieldCascadeRuleOptionByRule(Long projectId, Long fieldCascadeRuleId) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        FieldCascadeRuleVO fieldCascadeRuleVO = fieldCascadeRuleMapper.selectFieldCascadeRuleDetail(projectId, fieldCascadeRuleId);
+
+        FieldCascadeRuleOptionDTO fieldCascadeRuleOptionRecord = new FieldCascadeRuleOptionDTO();
+        fieldCascadeRuleOptionRecord.setFieldCascadeRuleId(fieldCascadeRuleId);
+        fieldCascadeRuleOptionRecord.setProjectId(projectId);
+        List<FieldCascadeRuleOptionDTO> fieldCascadeRuleOptionList = fieldCascadeRuleOptionMapper.select(fieldCascadeRuleOptionRecord);
+        if (CollectionUtils.isEmpty(fieldCascadeRuleOptionList)) {
+            return new ArrayList<>();
+        }
+        List<FieldCascadeRuleOptionVO> result = modelMapper.map(fieldCascadeRuleOptionList, new TypeToken<List<FieldCascadeRuleOptionVO>>() {
+        }.getType());
+
+        String optionType = getOptionType(fieldCascadeRuleVO);
+        Map<Long, String> optionNameMap = getOptionNameMapByOptionType(result, optionType, projectId, organizationId, fieldCascadeRuleVO.getCascadeFieldId());
+
+        if (optionNameMap == null) {
+            return new ArrayList<>();
+        }
+        Iterator<FieldCascadeRuleOptionVO> optionIterator = result.iterator();
+        while (optionIterator.hasNext()) {
+            FieldCascadeRuleOptionVO fieldCascadeRuleOption = optionIterator.next();
+            Long optionId = fieldCascadeRuleOption.getCascadeOptionId();
+            if (optionNameMap.get(optionId) == null) {
+                optionIterator.remove();
+            } else {
+                fieldCascadeRuleOption.setCascadeOptionName(optionNameMap.get(optionId));
+            }
+        }
+        return result;
+    }
+
+    private Map<Long, String> getOptionNameMapByOptionType(List<FieldCascadeRuleOptionVO> result, String optionType, Long projectId, Long organizationId, Long fieldId) {
+        Map<Long, String> optionNameMap = null;
+        switch (optionType) {
+            case PRIORITY:
+                List<PriorityVO> priorityList = priorityService.queryByOrganizationIdList(organizationId);
+                optionNameMap = priorityList.stream().collect(Collectors.toMap(PriorityVO::getId, PriorityVO::getName));
+                break;
+            case COMPONENT:
+                List<ComponentForListDTO> componentList = issueComponentMapper.queryComponentWithIssueNum(projectId, null, true);
+                optionNameMap = componentList.stream().collect(Collectors.toMap(ComponentForListDTO::getComponentId, ComponentForListDTO::getName));
+                break;
+            case MEMBER:
+                List<UserDTO> userDTOS = baseFeignClient.listUsersByIds(result.stream().map(FieldCascadeRuleOptionVO::getCascadeOptionId).toArray(Long[]::new), false).getBody();
+                if (!CollectionUtils.isEmpty(userDTOS)){
+                    optionNameMap = userDTOS.stream().collect(Collectors.toMap(UserDTO::getId, UserDTO::getRealName));
+                }
+                break;
+            case CUSTOM:
+                List<FieldOptionDTO> fieldOptionList = fieldOptionMapper.selectByFieldId(organizationId, fieldId);
+                optionNameMap = fieldOptionList.stream().collect(Collectors.toMap(FieldOptionDTO::getId, FieldOptionDTO::getValue));
+                break;
+            case VERSION:
+                List<ProductVersionNameDTO> productVersionNameList = productVersionMapper.queryNameByOptions(projectId, null);
+                optionNameMap = productVersionNameList.stream().collect(Collectors.toMap(ProductVersionNameDTO::getVersionId, ProductVersionNameDTO::getName));
+                break;
+            case SUB_PROJECT:
+                List<ProjectVO> projectVOList = baseFeignClient.queryByIds(result.stream().map(FieldCascadeRuleOptionVO::getCascadeOptionId).collect(Collectors.toSet())).getBody();
+                if (!CollectionUtils.isEmpty(projectVOList)){
+                    optionNameMap = projectVOList.stream().collect(Collectors.toMap(ProjectVO::getId, ProjectVO::getName));
+                }
+                break;
+            default:
+                break;
+        }
+        return optionNameMap;
     }
 
     private void removeHiddenFieldAndSetRequired(Set<Long> hiddenFieldIds, Set<Long> requiredIds, List<PageFieldViewVO> pageFieldViews) {
@@ -431,6 +522,14 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         }
     }
 
+    private String getOptionType(FieldCascadeRuleVO fieldCascadeRuleVO) {
+        ObjectSchemeFieldDTO objectSchemeFieldDTO = new ObjectSchemeFieldDTO();
+        objectSchemeFieldDTO.setFieldType(fieldCascadeRuleVO.getCascadeFieldType());
+        objectSchemeFieldDTO.setCode(fieldCascadeRuleVO.getCascadeFieldCode());
+        objectSchemeFieldDTO.setSystem(fieldCascadeRuleVO.getCascadeFieldSystem());
+        return getOptionType(objectSchemeFieldDTO);
+    }
+
     private String getOptionType(ObjectSchemeFieldDTO objectSchemeField) {
         if (FieldType.MEMBER.equals(objectSchemeField.getFieldType())
                 || FieldType.MULTI_MEMBER.equals(objectSchemeField.getFieldType())) {
@@ -441,6 +540,13 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                 return COMPONENT;
             case FieldCode.PRIORITY:
                 return PRIORITY;
+            case FieldCode.FIX_VERSION:
+            case FieldCode.INFLUENCE_VERSION:
+                return VERSION;
+            case FieldCode.SUB_PROJECT:
+                return SUB_PROJECT;
+            case FieldCode.ENVIRONMENT:
+                return ENVIRONMENT;
             default:
                 break;
         }
@@ -468,7 +574,24 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         return optionPage;
     }
 
+    private Object listProjectCascadeFieldOption(Long projectId, Long organizationId, ObjectSchemeFieldDTO objectSchemeField, CascadeFieldOptionSearchVO cascadeFieldOptionSearchVO, PageRequest pageRequest) {
+        if (agilePluginService == null) {
+            return null;
+        }
+        List<ProjectRelationshipInfoVO> projectRelationshipInfoVOS = agilePluginService.getProjUnderGroup(organizationId, projectId, projectId, true);
+        if (CollectionUtils.isEmpty(projectRelationshipInfoVOS)) {
+            return null;
+        }
+
+        Set<Long> visibleOptionIds = new HashSet<>();
+        if (CollectionUtils.isEmpty(cascadeFieldOptionSearchVO.getFieldCascadeRuleIds())){
+            visibleOptionIds.addAll(fieldCascadeRuleOptionMapper.selectVisibleOptionIds(projectId, cascadeFieldOptionSearchVO.getFieldCascadeRuleIds()));
+        }
+        return projectRelationshipInfoVOS.stream().filter(projectRelationshipInfoVO -> visibleOptionIds.contains(projectRelationshipInfoVO.getProjectId())).collect(Collectors.toList());
+    }
+
     private Page<UserDTO> listMemberCascadeFieldOption(Long projectId, CascadeFieldOptionSearchVO cascadeFieldOptionSearchVO, PageRequest pageRequest) {
+
         Page<UserDTO> result;
         if (CollectionUtils.isEmpty(cascadeFieldOptionSearchVO.getFieldCascadeRuleIds())) {
             Set<Long> visibleOptionIds = fieldCascadeRuleOptionMapper.selectVisibleOptionIds(projectId, cascadeFieldOptionSearchVO.getFieldCascadeRuleIds());
@@ -531,6 +654,24 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                     List<PriorityVO> priorityList = priorityService.queryByOrganizationIdList(organizationId);
                     Map<Long, Object> priorityMap = priorityList.stream().collect(Collectors.toMap(PriorityVO::getId, Function.identity()));
                     setDefaultValueObjsOfMultiple(priorityMap, fieldCascadeRuleVO);
+                    break;
+                case FieldCode.INFLUENCE_VERSION:
+                    List<ProductVersionNameVO> influenceVersionList = modelMapper.map(productVersionMapper.queryNameByOptions(projectId, null), new TypeToken<List<ProductVersionNameVO>>(){}.getType());
+                    Map<Long, Object> influenceVersionMap = influenceVersionList.stream().collect(Collectors.toMap(ProductVersionNameVO::getVersionId, Function.identity()));
+                    setDefaultValueObjsOfMultiple(influenceVersionMap, fieldCascadeRuleVO);
+                    break;
+                //多选
+                case FieldCode.FIX_VERSION:
+                    List<ProductVersionNameVO> fixVersionList = modelMapper.map(productVersionMapper.queryNameByOptions(projectId, Collections.singletonList("version_planning")), new TypeToken<List<ProductVersionNameVO>>(){}.getType());
+                    Map<Long, Object> fixVersionMap = fixVersionList.stream().collect(Collectors.toMap(ProductVersionNameVO::getVersionId, Function.identity()));
+                    setDefaultValueObjsOfMultiple(fixVersionMap, fieldCascadeRuleVO);
+                    break;
+                case FieldCode.SUB_PROJECT:
+                    if (agilePluginService != null){
+                        List<ProjectRelationshipInfoVO> projectRelationshipInfoVOS = agilePluginService.getProjUnderGroup(organizationId, projectId, projectId, true);
+                        Map<Long, Object> projectMap = projectRelationshipInfoVOS.stream().collect(Collectors.toMap(ProjectRelationshipInfoVO::getProjectId, Function.identity()));
+                        setDefaultValueObjsOfMultiple(projectMap, fieldCascadeRuleVO);
+                    }
                     break;
                 default:
                     break;

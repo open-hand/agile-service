@@ -8,8 +8,8 @@ import java.util.Set;
 import io.choerodon.agile.api.vo.ComponentForListVO;
 import io.choerodon.agile.api.vo.FieldOptionVO;
 import io.choerodon.agile.api.vo.PriorityVO;
+import io.choerodon.agile.api.vo.ProductVersionNameVO;
 import io.choerodon.agile.infra.dto.FieldCascadeRuleOptionDTO;
-import io.choerodon.agile.infra.dto.FieldOptionDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 
 /**
@@ -97,4 +97,19 @@ public interface FieldCascadeRuleOptionMapper extends BaseMapper<FieldCascadeRul
             @Param("projectId") Long projectId,
             @Param("optionIds") Set<Long> optionIds,
             @Param("fieldCascadeRuleIds") List<Long> fieldCascadeRuleIds);
+
+    /**
+     * 查询级联规则可见版本选项
+     *
+     * @param projectId 组织id
+     * @param organizationId 项目id
+     * @param fieldCascadeRuleIds 级联规则id
+     * @param statusCodes 状态code
+     * @return 可见版本选项
+     */
+    List<ProductVersionNameVO> selectCascadeFieldVersion(
+            @Param("projectId") Long projectId,
+            @Param("organizationId") Long organizationId,
+            @Param("fieldCascadeRuleIds") List<Long> fieldCascadeRuleIds,
+            @Param("statusCodes") List<String> statusCodes);
 }

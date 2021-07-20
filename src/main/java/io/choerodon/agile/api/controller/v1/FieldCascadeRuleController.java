@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import io.choerodon.agile.api.vo.CascadeFieldOptionSearchVO;
+import io.choerodon.agile.api.vo.FieldCascadeRuleOptionVO;
 import io.choerodon.agile.api.vo.FieldCascadeRuleVO;
 import io.choerodon.agile.api.vo.PageConfigFieldVO;
 import io.choerodon.agile.app.service.FieldCascadeRuleService;
@@ -58,6 +59,19 @@ public class FieldCascadeRuleController {
         return Optional.ofNullable(fieldCascadeRuleService.fieldCascadeRuleDetail(projectId, fieldCascadeRuleId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.fieldCascadeRule.detail"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询级联规则可见选项")
+    @GetMapping("/{field_cascade_rule_id}/option")
+    public ResponseEntity<List<FieldCascadeRuleOptionVO>> listFieldCascadeRuleOptionByRule(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "级联规则id", required = true)
+            @Encrypt @PathVariable(name = "field_cascade_rule_id") Long fieldCascadeRuleId) {
+        return Optional.ofNullable(fieldCascadeRuleService.listFieldCascadeRuleOptionByRule(projectId, fieldCascadeRuleId))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.fieldCascadeRuleOption.list"));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
