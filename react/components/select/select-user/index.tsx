@@ -31,7 +31,7 @@ export interface SelectUserProps extends Partial<SelectProps> {
   }[],
   dataRef?: React.MutableRefObject<any>
   request?: SelectConfig<User>['request']
-  afterLoad?: (users: User[]) => void
+  afterLoad?: (users: User[]) => void | User[]
   flat?: boolean
   projectId?: string
 }
@@ -211,7 +211,8 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
         });
       }
       if (afterLoad) {
-        afterLoad(newData);
+        const afterData = afterLoad(newData);
+        newData = Array.isArray(afterData) ? afterData : newData;
       }
       return newData;
     },

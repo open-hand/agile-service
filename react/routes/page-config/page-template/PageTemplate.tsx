@@ -34,6 +34,7 @@ import PageDescription from './components/page-description';
 import { transformDefaultValue, beforeSubmitTransform } from '../page-issue-type/utils';
 import openLinkage from '../components/setting-linkage/Linkage';
 import PageTemplateTable from './components/template-table';
+import openPageRoleConfigModal from './components/role-config';
 
 const TooltipButton: React.FC<{ title?: string, buttonIcon: string, buttonDisabled: boolean, clickEvent?: () => void } & Omit<ButtonProps, 'title'>> = ({
   title, children, buttonIcon, buttonDisabled, clickEvent, ...otherProps
@@ -228,7 +229,7 @@ function PageTemplate() {
         <HeaderButtons items={[
           {
             display: true,
-            element: <TooltipButton title="该问题类型已停用，无法批量权限配置" buttonDisabled={!pageTemplateStore.currentIssueType.enabled} buttonIcon="playlist_add" clickEvent={openCreateFieldModal}>批量权限配置</TooltipButton>,
+            element: <TooltipButton title="该问题类型已停用，无法批量权限配置" buttonDisabled={!pageTemplateStore.currentIssueType.enabled} buttonIcon="playlist_add" clickEvent={openPageRoleConfigModal}>批量权限配置</TooltipButton>,
           },
         ]}
         />

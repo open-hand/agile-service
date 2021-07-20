@@ -7,6 +7,47 @@ import TableDropMenu from '@/components/table-drop-menu';
 import ToggleFieldValue from '../components/toggle-field-value';
 import openLinkage from '../components/setting-linkage/Linkage';
 
+import openPageRoleConfigModal from './components/role-config';
+
+interface LinkPagePermission {
+  include: string[]
+  ignoreOtherInclude?: boolean
+}
+interface LinkPagePermissionWithKey extends LinkPagePermission {
+  key: string
+}
+/**
+ * include  通过所有include 即显示
+ * ignoreOtherInclude 是否忽略其他include  @default false
+ */
+const LinkPagePermissionMap = new Map<string, LinkPagePermission>([
+  ['fieldType', { include: ['radio', 'single', 'multiple', 'checkbox'] }],
+  ['createdLevel', { include: ['project'] }],
+  ['fieldCode', { include: ['priority', 'fixVersion', 'component', 'influenceVersion'], ignoreOtherInclude: true }],
+
+]);
+/**
+ * 检查级联权限
+ * @param data
+ * @returns
+ */
+function checkPermissionLinkage(data: any) {
+  const keyFilters = Object.keys(data).filter((key) => LinkPagePermissionMap.has(key)).map((key) => ({ key, ...LinkPagePermissionMap.get(key) })) as LinkPagePermissionWithKey[];
+  if (keyFilters.length === 0) {
+    return true;
+  }
+  const res = keyFilters.filter((filter) => !filter?.ignoreOtherInclude).every((filter) => filter?.include?.includes(data[filter.key]));
+  return res || keyFilters.filter((filter) => filter?.ignoreOtherInclude).some((filter) => filter?.include?.includes(data[filter.key]));
+}
+/**
+ * 检查权限配置权限
+ * @param data
+ */
+function checkPermissionRole(data: { createdLevel: string }) {
+  const { createdLevel } = data;
+  return createdLevel === 'project';
+}
+
 const getColumns = ({ issueTypeId }: { issueTypeId: string }) => ([
 
   {
@@ -47,7 +88,11 @@ const getColumns = ({ issueTypeId }: { issueTypeId: string }) => ([
     width: 80,
     render: ({ rowData }: any) => (
       <TableDropMenu
-        menuData={[{ text: '权限配置' }, {
+        menuData={[{
+          text: '权限配置',
+          action: openPageRoleConfigModal,
+          display: checkPermissionRole({ createdLevel: rowData.get('createdLevel') }),
+        }, {
           text: '设置级联规则',
           action: () => {
             openLinkage({
@@ -58,9 +103,10 @@ const getColumns = ({ issueTypeId }: { issueTypeId: string }) => ([
                 fieldCode: rowData.get('fieldCode'),
                 system: rowData.get('createdLevel') === 'system',
               },
-              onOk: () => {},
+              onOk: () => { },
             });
           },
+          display: checkPermissionLinkage(rowData.toData()),
         }]}
         defaultMenuIcon="settings-o"
         showText={false}

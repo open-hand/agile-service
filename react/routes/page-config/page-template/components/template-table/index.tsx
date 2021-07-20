@@ -15,7 +15,7 @@ const PageTemplateTable: React.FC<IPageTemplateTableProps> = () => {
   const { sortTableDataSet, pageTemplateStore } = usePageTemplateStore();
   const currentIssueTypeId = pageTemplateStore.currentIssueType.id;
   const handleCheckChange = useCallback((val: any, index: number) => {
-    val ? sortTableDataSet.select(index) : sortTableDataSet.unSelect(index);
+    typeof (val) === 'number' ? sortTableDataSet.select(index) : sortTableDataSet.unSelect(index);
   }, [sortTableDataSet]);
   const handleCheckAllChange = useCallback((val: any) => {
     val ? sortTableDataSet.selectAll() : sortTableDataSet.unSelectAll();
