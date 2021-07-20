@@ -149,4 +149,19 @@
         AND ffrr.issue_type_id = #{issueTypeId}
         AND (is_hidden = 1 OR ffrr.is_required = 1)
     </select>
+
+    <select id="selectFieldCascadeRuleDesByIssueTypeId" resultType="io.choerodon.agile.api.vo.FieldCascadeRuleDesVO">
+        SELECT
+            ffrr.field_id,
+            fosf.name field_name,
+            fosf.code field_code,
+            ffrr.cascade_field_id,
+            rfosf.name cascade_field_name,
+            rfosf.code cascade_field_code
+        FROM fd_field_cascade_rule ffrr
+        LEFT JOIN fd_object_scheme_field fosf ON ffrr.field_id = fosf.id
+        LEFT JOIN fd_object_scheme_field rfosf ON ffrr.cascade_field_id = rfosf.id
+        WHERE ffrr.project_id = #{projectId}
+        AND ffrr.issue_type_id = #{issueTypeId}
+    </select>
 </mapper>
