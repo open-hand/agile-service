@@ -6,13 +6,14 @@ import AutoSize from '@/components/auto-size';
 import {
   Observer,
 } from 'mobx-react-lite';
-import { columns } from '../../utils';
+import { getColumns } from '../../utils';
 import { usePageTemplateStore } from '../../stores';
 
 interface IPageTemplateTableProps {
 }
 const PageTemplateTable: React.FC<IPageTemplateTableProps> = () => {
   const { sortTableDataSet, pageTemplateStore } = usePageTemplateStore();
+  const currentIssueTypeId = pageTemplateStore.currentIssueType.id;
   const handleCheckChange = useCallback((val: any, index: number) => {
     val ? sortTableDataSet.select(index) : sortTableDataSet.unSelect(index);
   }, [sortTableDataSet]);
@@ -51,7 +52,7 @@ const PageTemplateTable: React.FC<IPageTemplateTableProps> = () => {
     ,
   }), [handleCheckAllChange, handleCheckChange, sortTableDataSet]);
 
-  const visibleColumns = useMemo(() => [checkBoxColumn, ...columns], [checkBoxColumn]);
+  const visibleColumns = useMemo(() => [checkBoxColumn, ...getColumns({ issueTypeId: currentIssueTypeId })], [checkBoxColumn, currentIssueTypeId]);
   return (
     <AutoSize>
       {({ height }) => (
