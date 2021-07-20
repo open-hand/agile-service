@@ -589,7 +589,16 @@
                 ai.last_update_date,
                 concat(api.project_code,'-', ai.issue_num) as issue_num1,
                 CONVERT(ai.issue_num,SIGNED) as issue_num_convert,
-                ai.issue_type_id
+                ai.issue_type_id,
+                ai.created_by,
+                ai.last_updated_by,
+                ai.creation_date,
+                ai.story_points,
+                ai.estimated_start_time,
+                ai.estimated_end_time,
+                ai.main_responsible_id,
+                ai.environment,
+                ai.remaining_time
             from (
                 select
                 <choose>

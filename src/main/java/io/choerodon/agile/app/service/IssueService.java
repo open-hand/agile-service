@@ -409,4 +409,8 @@ public interface IssueService {
     void queryUserProjects(Long organizationId, Long projectId, List<Long> projectIds, List<ProjectVO> projects, Long userId, String type);
 
     Page<UserDTO> pagingUserProjectUsers(PageRequest pageRequest, Long organizationId, String param);
+
+    List<Long> handlerSortFieldInstance(PageRequest pageRequest, List<Long> allIssueIds, List<Long> foundationIssueIds);
+
+    String handleSortField(PageRequest pageRequest);
 }

@@ -591,28 +591,20 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     private Page<Long> getIssueIdPage(PageRequest pageRequest, Long projectId, SearchVO searchVO, String searchSql, Long organizationId, Boolean isTreeView) {
-        Page<Long>issueIdPage = new Page<>();
+        Page<Long> issueIdPage = new Page<>();
         if (!handleSortField(pageRequest).equals("")) {
+            List<Long> issueIdsWithSub =
+                    issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null, isTreeView)
+                            .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
             String fieldCode = handleSortField(pageRequest);
             Map<String, String> order = new HashMap<>(1);
             String sortCode = fieldCode.split("\\.")[1];
             order.put(fieldCode, sortCode);
-            order.put(ISSUE_NUM, ISSUE_NUM_CONVERT);
-            PageUtil.sortResetOrder(pageRequest.getSort(), null, order);
-            List<Long> issueIdsWithSub =
-                    issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null, isTreeView)
-                            .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-            List<Long> foundationIssueIds = fieldValueService.sortIssueIdsByFieldValue(organizationId, projectId, pageRequest);
-
-            List<Long> foundationIssueIdsWithSub = foundationIssueIds.stream().filter(issueIdsWithSub::contains).collect(Collectors.toList());
-            List<Long> issueIdsWithSubWithoutFoundation = issueIdsWithSub.stream().filter(t -> !foundationIssueIdsWithSub.contains(t)).collect(Collectors.toList());
-
-
-            issueIdPage.setNumber(pageRequest.getPage());
-            issueIdPage.setSize(pageRequest.getSize());
-            issueIdPage.setTotalElements(issueIdsWithSub.size());
-            issueIdPage.addAll(handleIssueLists(foundationIssueIdsWithSub, issueIdsWithSubWithoutFoundation, pageRequest)
-                    .subList((pageRequest.getPage() - 1) * pageRequest.getSize(), pageRequest.getPage() * pageRequest.getSize()));
+            PageUtil.sortResetOrder(pageRequest.getSort(), "fv", order);
+            List<Long> foundationIssueIds = fieldValueService.sortIssueIdsByFieldValue(organizationId, projectId, pageRequest, AGILE_SCHEME_CODE);
+            List<Long> list = handlerSortFieldInstance(pageRequest, issueIdsWithSub, foundationIssueIds);
+            PageUtil.buildPage(issueIdPage, pageRequest, issueIdsWithSub);
+            issueIdPage.setContent(list);
         } else {
             String orderStr = getOrderStrOfQueryingIssuesWithSub(pageRequest.getSort());
             Page<IssueDTO> issues = PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr, isTreeView));
@@ -620,6 +612,30 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             issueIdPage = PageUtil.buildPageInfoWithPageInfoList(issues, issueIds);
         }
         return issueIdPage;
+    }
+
+    @Override
+    public List<Long> handlerSortFieldInstance(PageRequest pageRequest, List<Long> allIssueIds, List<Long> foundationIssueIds) {
+        List<Long> foundationIssueIdsWithSub = foundationIssueIds.stream().filter(allIssueIds::contains).collect(Collectors.toList());
+        List<Long> issueIdsWithSubWithoutFoundation = allIssueIds.stream().filter(t -> !foundationIssueIdsWithSub.contains(t)).collect(Collectors.toList());
+        List<Long> allIssueList = handleIssueLists(foundationIssueIdsWithSub, issueIdsWithSubWithoutFoundation, pageRequest);
+        if (CollectionUtils.isEmpty(allIssueList)) {
+            return new ArrayList<>();
+        }
+        boolean queryAll = pageRequest.getPage() < 0 || pageRequest.getSize() == 0;
+        int startIndex = (pageRequest.getPage()) * pageRequest.getSize();
+
+        if (allIssueList.size() >= startIndex) {
+            int endSize = 0;
+            if (allIssueList.size() <= startIndex + pageRequest.getSize()) {
+                endSize = allIssueList.size() - startIndex;
+            } else {
+                endSize = pageRequest.getSize();
+            }
+            return queryAll ? allIssueList : allIssueList.subList(startIndex, startIndex + endSize);
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     protected String getOrderStrOfQueryingIssuesWithSub(Sort sort) {
@@ -647,7 +663,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         } else return new ArrayList<>();
     }
 
-    protected String handleSortField(PageRequest pageRequest) {
+    @Override
+    public String handleSortField(PageRequest pageRequest) {
         if (!ObjectUtils.isEmpty(pageRequest.getSort())) {
             Iterator<Sort.Order> iterator = pageRequest.getSort().iterator();
             String fieldCode = "";

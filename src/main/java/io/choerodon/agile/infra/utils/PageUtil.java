@@ -3,6 +3,7 @@ package io.choerodon.agile.infra.utils;
 import java.util.*;
 
 import io.choerodon.core.domain.PageInfo;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.util.StringUtil;
 
 import io.choerodon.core.domain.Page;
@@ -68,6 +69,14 @@ public class PageUtil {
         result.setTotalElements(total);
         result.setContent(Arrays.asList(list.toArray()));
         return result;
+    }
+
+    public static void buildPage(Page page, PageRequest pageRequest, List<Long> all){
+        boolean queryAll = pageRequest.getPage() < 0 || pageRequest.getSize() == 0;
+        page.setSize(queryAll ? all.size() : pageRequest.getSize());
+        page.setNumber(pageRequest.getPage());
+        page.setTotalElements(all.size());
+        page.setTotalPages(queryAll ? (all.isEmpty() ? 0 : 1) : ((int) (Math.ceil(all.size() / (pageRequest.getSize() * 1.0)))));
     }
 
 }

@@ -236,7 +236,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     }
 
     @Override
-    public List<Long> sortIssueIdsByFieldValue(Long organizationId, Long projectId, PageRequest pageRequest) {
+    public List<Long> sortIssueIdsByFieldValue(Long organizationId, Long projectId, PageRequest pageRequest, String schemeCode) {
         if (!ObjectUtils.isEmpty(pageRequest.getSort())) {
             Iterator<Sort.Order> iterator = pageRequest.getSort().iterator();
             String fieldCode = "";
@@ -247,7 +247,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             ObjectSchemeFieldDTO objectSchemeField = objectSchemeFieldService.queryByFieldCode(organizationId, projectId, fieldCode);
             String fieldType = objectSchemeField.getFieldType();
             FieldValueUtil.handleAgileSortPageRequest(fieldCode, fieldType, pageRequest);
-            return fieldValueMapper.sortIssueIdsByFieldValue(organizationId, projectId, objectSchemeField.getId(), PageableHelper.getSortSql(pageRequest.getSort()));
+            return fieldValueMapper.sortIssueIdsByFieldValue(organizationId, projectId, objectSchemeField.getId(), PageableHelper.getSortSql(pageRequest.getSort()), schemeCode);
         } else {
             return new ArrayList<>();
         }
