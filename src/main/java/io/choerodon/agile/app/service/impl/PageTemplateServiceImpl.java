@@ -34,12 +34,8 @@ public class PageTemplateServiceImpl implements PageTemplateService {
 
     @Autowired
     private ObjectSchemeFieldService objectSchemeFieldService;
-    @Autowired
-    private FieldOptionService optionService;
     @Resource
     private FieldCascadeRuleMapper fieldCascadeRuleMapper;
-    @Resource
-    private IssueTypeFieldMapper issueTypeFieldMapper;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -55,7 +51,7 @@ public class PageTemplateServiceImpl implements PageTemplateService {
         //设置fields
         List<PageTemplateFieldVO> pageTemplateFieldList = modelMapper.map(pageConfigVO.getFields(), new TypeToken<List<PageTemplateFieldVO>>(){}.getType());
         result.setFields(pageTemplateFieldList);
-        
+
         //设置级联说明
         setPageTemplateFieldCascadeRuleDes(issueTypeId, projectId, pageTemplateFieldList);
         return result;
