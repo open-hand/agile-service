@@ -626,6 +626,7 @@ public class FieldValueUtil {
                     break;
                 case FieldType.RADIO:
                 case FieldType.SINGLE:
+                case FieldType.MEMBER:
                     order.put(fieldCode, "option_id");
                     break;
                 case FieldType.INPUT:
