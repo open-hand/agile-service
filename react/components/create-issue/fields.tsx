@@ -6,9 +6,10 @@ import {
 
 import SelectUser from '@/components/select/pro/select-user';
 import { IFieldType, ISystemFieldCodeMap } from '@/common/types';
+import moment from 'moment';
 import UserTag from '../tag/user-tag';
 import SelectIssueType from '../select/pro/select-issue-type';
-// import DateTimePicker from '../date-time-picker';
+import DateTimePickerWithDefault from '../date-time-picker';
 import Editor from '../Editor';
 import SelectCustomField from '../select/select-custom-field';
 import SelectCustomFieldBox from '../select/select-custom-field-box';
@@ -153,13 +154,13 @@ const systemFieldMap: Record<ISystemFieldCodeMap, ProRenderFieldPropsType> = {
   estimatedStartTime: {
     render: (text) => text,
     renderFormItem: (props) => (
-      <DateTimePicker {...props} />
+      <DateTimePickerWithDefault {...props} />
     ),
   },
   estimatedEndTime: {
     render: (text) => text,
     renderFormItem: (props) => (
-      <DateTimePicker {...props} />
+      <DateTimePickerWithDefault defaultPickerValue={moment().endOf('d')} {...props} />
     ),
   },
   component: {
