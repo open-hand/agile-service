@@ -3,9 +3,11 @@ import { TextField, Button } from 'choerodon-ui/pro';
 import { Icon } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import { axios } from '@choerodon/boot';
-import { IPriority, IVersion } from '@/common/types';
+import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
+import { IComponent, IPriority, IVersion } from '@/common/types';
 import classNames from 'classnames';
 import { getProjectId, getOrganizationId } from '@/utils/common';
+import { uniqBy } from 'lodash';
 import styles from './FieldOptions.less';
 
 interface Props {
@@ -81,6 +83,22 @@ const getOptionsConfig = ({
         },
       });
     }
+    case 'component': {
+      return ({
+        url: `/agile/v1/projects/${getProjectId()}/component/query_all`,
+        method: 'post',
+        params: {
+          page,
+          size,
+          organizationId: getOrganizationId(),
+        },
+        data: {
+          advancedSearchArgs: {},
+          searchArgs: {},
+          contents: search && search !== '' ? [search] : undefined,
+        },
+      });
+    }
     default: {
       return ({
         method: 'get',
@@ -113,24 +131,42 @@ const FieldOptions: React.FC<Props> = ({
       search: (filter || filter === null) ? filter : search,
       page: newPage,
     })).then((res: any) => {
-      if (res.content) {
-        if (newPage > 1) { // 大于第一页
-          setOptions((preOptions) => [...preOptions, ...res.content]);
+      batchedUpdates(() => {
+        if (res.content) {
+          if (newPage > 1) { // 大于第一页
+            if (field.fieldCode === 'component') {
+              setOptions((preOptions) => (
+                uniqBy([...preOptions, ...res.content.map((item: { componentId: string, name: string}) => ({
+                  id: item.componentId,
+                  value: item.name,
+                }))], 'id')
+              ));
+            } else {
+              setOptions((preOptions) => uniqBy([...preOptions, ...res.content], 'id'));
+            }
+          } else {
+            if (isFirstLoad) {
+              setHasOptions(res.content?.length);
+            }
+            if (field.fieldCode === 'component') {
+              setOptions(res.content.map((item: { componentId: string, name: string}) => ({
+                id: item.componentId,
+                value: item.name,
+              })));
+            } else {
+              setOptions(res.content);
+            }
+          }
+          setPage(res.number + 1);
+          setTotalPage(res.totalPages);
         } else {
           if (isFirstLoad) {
-            setHasOptions(res.content?.length);
+            setHasOptions(res?.length);
           }
-          setOptions(res.content);
+          setOptions(res);
         }
-        setPage(res.number + 1);
-        setTotalPage(res.totalPages);
-      } else {
-        if (isFirstLoad) {
-          setHasOptions(res?.length);
-        }
-        setOptions(res);
-      }
-      setIsFirstLoad(false);
+        setIsFirstLoad(false);
+      });
     });
   }, [field.fieldCode, field.id, isFirstLoad, page, search, setHasOptions]);
 
@@ -182,7 +218,7 @@ const FieldOptions: React.FC<Props> = ({
           </div>
         ))}
         {
-        !system && page < totalPage && (
+        (!system || field.fieldCode === 'component') && page < totalPage && (
           <Button
             onClick={handleLoadMore}
             className={styles.loadMoreBtn}

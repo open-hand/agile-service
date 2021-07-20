@@ -3,6 +3,8 @@ import { Form, Select, CheckBox } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { includes } from 'lodash';
+import { toJS } from 'mobx';
+import { pageConfigApi } from '@/api';
 import styles from './Rule.less';
 import { renderFieldRelSelect, renderDefaultValue } from './utils';
 
@@ -13,21 +15,25 @@ interface Props {
 
 const Rule: React.FC<Props> = ({ record }) => {
   useEffect(() => {
-    const currentFieldRelOptionList = [...(record?.get('fieldRelOptionList') || [])];
-    console.log('请求可见选项', currentFieldRelOptionList);
-    if (currentFieldRelOptionList.find((item: { value: string, meaning?: string}) => !item.meaning)) {
-      const res: {id: string, name: string }[] = []; // 请求结果
-      currentFieldRelOptionList.map((item) => {
-        if (item.value && item.meaning) {
-          return item;
-        }
-        return { value: item.value, meaning: res?.find((option) => option.id === item.value)?.name };
-      });
-      record.set('fieldRelOptionList', currentFieldRelOptionList);
+    const getRelOptionList = async () => {
+      const currentFieldRelOptionList = [...(toJS(record?.get('fieldRelOptionList')) || [])];
+      if (currentFieldRelOptionList.find((item: { value: string, meaning?: string}) => !item.meaning)) {
+        const res: {cascadeOptionName: string, cascadeOptionId: string }[] = await pageConfigApi.getCascadeRelOptionList(record.get('id')); // 请求结果
+        const newRelOptionList = currentFieldRelOptionList.map((item) => {
+          if (item.value && item.meaning) {
+            return item;
+          }
+          const meaning = res?.find((option) => option.cascadeOptionId === item.value)?.cascadeOptionName;
+          return ({ value: item.value, meaning });
+        });
+        record.set('fieldRelOptionList', newRelOptionList);
+      }
+    };
+    if (record.get('id')) {
+      getRelOptionList();
     }
   }, [record]);
 
-  console.log(record?.get('fieldRelOptionList'));
   return (
     <div className={styles.rule}>
       <Form record={record}>

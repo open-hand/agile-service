@@ -58,6 +58,7 @@ interface Props {
 }
 
 export interface ICascadeLinkageSetting {
+  id?: string
   chosenField: IField
   fieldRelOptionList?: {meaning: string, value: string}[]
   defaultValue?: any
@@ -99,7 +100,6 @@ const Linkage: React.FC<Props> = ({
   const [linkagesMap, setLinkagesMap] = useState<Map<string, ICascadeLinkageSetting[]>>(new Map());
   const [dataSet, setDataSet] = useState<DataSet>();
   const [currentSelected, setCurrentSelected] = useState<string | undefined>();
-  const chosenFieldsRef = useRef<{ chosenFieldCodes: string[] } | null>(null);
   const [cascadeRuleList, setCascadeRuleList] = useState<ICascadeRule[]>([]);
   const [hasOptions, setHasOptions] = useState<boolean>(true);
 
@@ -116,6 +116,7 @@ const Linkage: React.FC<Props> = ({
             cascadeLinkageMap.set(item.fieldOptionId, []);
           }
           cascadeLinkageMap.get(item.fieldOptionId).push({
+            id: item.id,
             chosenField: {
               name: item.cascadeFieldName,
               id: item.cascadeFieldId,
@@ -139,7 +140,6 @@ const Linkage: React.FC<Props> = ({
 
   const switchOption = useCallback((id: string) => {
     setCurrentOptionId(id);
-    setCurrentSelected(chosenFieldsRef?.current?.chosenFieldCodes && chosenFieldsRef?.current?.chosenFieldCodes[0]);
     setDataSet(new DataSet({
       fields: [{
         name: 'chosenField',
@@ -154,10 +154,16 @@ const Linkage: React.FC<Props> = ({
         label: '默认值',
       }, {
         name: 'hidden',
-        label: '隐藏优先级字段',
+        label: '隐藏字段',
+        dynamicProps: {
+          disabled: ({ record }) => record.get('required'),
+        },
       }, {
         name: 'required',
         label: '设置为必填字段',
+        dynamicProps: {
+          disabled: ({ record }) => record.get('hidden'),
+        },
       }],
     }));
   }, []);
@@ -268,7 +274,6 @@ const Linkage: React.FC<Props> = ({
                     setCurrentSelected={setCurrentSelected}
                     issueTypeId={issueTypeId}
                     fieldId={field.id}
-                    chosenFieldsRef={chosenFieldsRef}
                   />
                 </LinkageColumn>
                 <LinkageColumn key="rule" title="设置级联规则" bordered={false} columnStyle={{ flex: 1, paddingRight: 20 }}>
