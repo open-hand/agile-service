@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.app.service.FieldPermissionService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,13 +15,9 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.app.service.FieldOptionService;
 import io.choerodon.agile.app.service.PageTemplateService;
 import io.choerodon.agile.app.service.ObjectSchemeFieldService;
-import io.choerodon.agile.infra.dto.IssueTypeFieldDTO;
 import io.choerodon.agile.infra.mapper.FieldCascadeRuleMapper;
-import io.choerodon.agile.infra.mapper.IssueTypeFieldMapper;
-import io.choerodon.agile.infra.utils.FieldValueUtil;
 import io.choerodon.core.exception.CommonException;
 
 /**
@@ -38,6 +34,8 @@ public class PageTemplateServiceImpl implements PageTemplateService {
     private FieldCascadeRuleMapper fieldCascadeRuleMapper;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private FieldPermissionService fieldPermissionService;
 
     @Override
     public PageTemplateVO queryPageTemplate(Long organizationId, Long projectId, Long issueTypeId) {
@@ -54,6 +52,7 @@ public class PageTemplateServiceImpl implements PageTemplateService {
 
         //设置级联说明
         setPageTemplateFieldCascadeRuleDes(issueTypeId, projectId, pageTemplateFieldList);
+        fieldPermissionService.setFieldPermissionList(issueTypeId, projectId, organizationId, pageTemplateFieldList);
         return result;
     }
 

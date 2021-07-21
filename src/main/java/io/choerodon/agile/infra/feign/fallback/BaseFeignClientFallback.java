@@ -179,4 +179,9 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     public ResponseEntity<Page<UserDTO>> agileUsersByProjectIds(Long projectId, int page, int size, AgileUserVO agileUserVO) {
         throw new CommonException("error.agile.user.by.projects");
     }
+
+    @Override
+    public ResponseEntity<List<RoleVO>> listRolesByIds(Long tenantId, List<Long> roleIds) {
+        throw new CommonException("error.listRolesByIds");
+    }
 }

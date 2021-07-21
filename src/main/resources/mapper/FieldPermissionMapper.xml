@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.choerodon.agile.infra.mapper.FieldPermissionMapper">
+    <delete id="deleteByIds">
+        delete from fd_field_permission
+        where id in
+        <foreach collection="fieldPermissionIds" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectByFieldIds" resultType="io.choerodon.agile.infra.dto.FieldPermissionDTO">
+        select * from fd_field_permission
+        where organization_id = #{organizationId}
+        and project_id = #{projectId}
+        and field_id in
+        <foreach collection="fieldIds" item="fieldId" index="index" open="(" close=")" separator=",">
+            #{fieldId}
+        </foreach>
+        <if test="issueTypeIds != null and issueTypeIds.size() > 0">
+            and issue_type_id in
+            <foreach collection="issueTypeIds" item="issueTypeId" index="index" open="(" close=")" separator=",">
+                #{issueTypeId}
+            </foreach>
+        </if>
+    </select>
+</mapper>

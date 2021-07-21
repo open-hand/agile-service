@@ -221,5 +221,9 @@ public interface BaseFeignClient {
                                                          @RequestParam("page") int page,
                                                          @RequestParam("size") int size,
                                                          @RequestBody AgileUserVO agileUserVO);
+
+    @PostMapping(value = "/choerodon/v1/list_roles")
+    ResponseEntity<List<RoleVO>> listRolesByIds(@RequestParam("tenantId") Long  tenantId,
+                                                @RequestBody List<Long> roleIds);
 }
 
