@@ -342,13 +342,13 @@ public class IssueDelaySendMessageTask {
         List<String> customUserTypes = new ArrayList<>(receiverTypes);
         customUserTypes.removeAll(Arrays.asList(StatusNoticeUserType.BASE_USER_TYPE_LIST));
         if (!CollectionUtils.isEmpty(customUserTypes)) {
-            List<Long> userOptionIds = fieldValueMapper.selectUserIdByField(issueDTO.getProjectId(), customUserTypes, issueDTO.getIssueId());
-            if (!CollectionUtils.isEmpty(userOptionIds)) {
-                userOptionIds.forEach(userOptionId -> {
-                    userIds.add(userOptionId);
+            List<Long> customFieldUserIds = fieldValueMapper.selectUserIdByField(issueDTO.getProjectId(), customUserTypes, issueDTO.getIssueId());
+            if (!CollectionUtils.isEmpty(customFieldUserIds)) {
+                customFieldUserIds.forEach(userId -> {
+                    userIds.add(userId);
                     addValueToMultiKeyMap(multiKeyMap,
                             issueDTO.getProjectId(),
-                            userOptionId,
+                            userId,
                             new IssueDelayCarrierVO(issueDTO, issueDTO.getIssueId(), delayDay, organizationId));
                 });
             }

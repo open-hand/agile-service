@@ -170,11 +170,11 @@ public class NoticeServiceImpl implements NoticeService {
         List<String> customUserTypes = new ArrayList<>(res);
         customUserTypes.removeAll(Arrays.asList(StatusNoticeUserType.BASE_USER_TYPE_LIST));
         //添加字段人员值
-        List<Long> userOptionIds = fieldValueMapper.selectUserIdByField(projectId, customUserTypes, issueVO.getIssueId());
-        if (!CollectionUtils.isEmpty(userOptionIds)) {
-            userOptionIds.forEach(userOptionId -> {
-                if (!result.contains(userOptionId)) {
-                    result.add(userOptionId);
+        List<Long> customFieldUserIds = fieldValueMapper.selectUserIdByField(projectId, customUserTypes, issueVO.getIssueId());
+        if (!CollectionUtils.isEmpty(customFieldUserIds)) {
+            customFieldUserIds.forEach(userId -> {
+                if (!result.contains(userId)) {
+                    result.add(userId);
                 }
             });
         }
