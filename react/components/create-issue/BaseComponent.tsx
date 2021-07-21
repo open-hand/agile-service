@@ -78,7 +78,7 @@ const defaultDataSet = new DataSet({
 });
 const presets = new Map([
   ['component', {
-    type: 'object',
+    // type: 'object',
     valueField: 'componentId',
   }],
   ['label', {
@@ -409,6 +409,7 @@ const CreateIssueBase = observer(({
         projectId: projectId ?? getProjectId(),
         featureId: data.feature,
         issueLinkCreateVOList: enableIssueLinks ? getIssueLinks() : undefined,
+        componentIssueRelVOList: data.component ? data.component.map((id: string) => ({ componentId: id })) : [],
       });
 
       values = hooks.reduce((result, hook) => hook(result, data), values);
