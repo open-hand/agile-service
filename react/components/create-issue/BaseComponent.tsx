@@ -10,7 +10,7 @@ import {
   castArray,
   every,
   filter,
-  find, get, groupBy, includes, map, merge,
+  find, get, includes, map, merge, some, uniq,
 } from 'lodash';
 import { toJS } from 'mobx';
 import { UploadFile } from 'choerodon-ui/lib/upload/interface';
@@ -26,7 +26,6 @@ import moment from 'moment';
 
 import { getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
-import { pageConfigApi } from '@/api';
 import { ICascadeLinkage } from '@/routes/page-config/components/setting-linkage/Linkage';
 import useDeepMemo from '@/hooks/useDeepMemo';
 import WSJF from './components/wsjf';
@@ -92,6 +91,15 @@ const presets = new Map([
     min: 'estimatedStartTime',
   }],
 ]);
+const afterLoadKeyMap = new Map([
+  ['component', 'componentId'],
+  ['priority', 'id'],
+  ['environment', 'valueCode'],
+  ['fixVersion', 'versionId'],
+  ['influceVersion', 'versionId'],
+  ['subProject', 'projectId'],
+]);
+
 const lineField = ['summary', 'description'];
 const reuseFields = ['issueType', 'summary', 'description'];
 const pageCascadeFields = ['component', 'priority', 'fixVersion', 'influenceVersion'];
@@ -117,8 +125,9 @@ function getRuleDefaultValue(field: IssueCreateFields, rules: ICascadeLinkage[] 
 }
 
 function getRuleHidden(field?: Pick<IssueCreateFields, 'fieldType' | 'fieldCode' | 'defaultValueObj' | 'defaultValueObjs' | 'required'>, rules: ICascadeLinkage[] = []) {
+  const fieldRules = filter(rules, { cascadeFieldCode: field?.fieldCode });
   if (field) {
-    if (field.required || find(rules, { required: true }) || every(rules, (rule) => !rule.hidden)) {
+    if (field.required || find(fieldRules, { required: true }) || every(fieldRules, (rule) => !rule.hidden)) {
       return false;
     }
     return true;
@@ -126,18 +135,37 @@ function getRuleHidden(field?: Pick<IssueCreateFields, 'fieldType' | 'fieldCode'
   return true;
 }
 
-function getRuleRequired(rules: ICascadeLinkage[] = []) {
-  return !!find(rules, { required: true });
+function getRuleRequired(field: IssueCreateFields, rules: ICascadeLinkage[] = []) {
+  const fieldRules = filter(rules, { cascadeFieldCode: field.fieldCode });
+  return !!find(fieldRules, { required: true });
 }
 
 function getOptionsData(rules: ICascadeLinkage[] = [], dataSet: DataSet, field: Pick<IssueCreateFields, 'fieldType' | 'fieldCode' | 'defaultValueObj' | 'defaultValueObjs' | 'required'>) {
-  const ruleIds = rules.length ? map(rules, 'id') : undefined;
+  const fieldRules = filter(rules, { cascadeFieldCode: field.fieldCode });
+  const ruleIds = fieldRules.length ? map(fieldRules, 'id') : undefined;
   return ({
     ruleIds,
     // eslint-disable-next-line no-nested-ternary
     selected: ruleIds?.length ? (isMultiple(field) ? dataSet.current?.get(field.fieldCode) : [dataSet.current?.get(field.fieldCode)]) : undefined,
   });
 }
+
+const hasValue = (dataSet: DataSet, field: IssueCreateFields) => (isMultiple(field) ? dataSet.current?.get(field.fieldCode)?.length : dataSet.current?.get(field.fieldCode));
+
+function cascadeFieldAfterLoad(dataSet: DataSet, list: any[], field: IssueCreateFields, rules: ICascadeLinkage[] = []) {
+  const key = afterLoadKeyMap.get(field.fieldId) || 'id';
+  const fieldCurrentValue = dataSet.current?.get(field.fieldCode);
+  const currentValueIsArr = Array.isArray(fieldCurrentValue);
+  if (!hasValue || (!currentValueIsArr ? !find(list, { [key]: fieldCurrentValue }) : some(fieldCurrentValue, (id) => !find(list, { [key]: id })))) {
+    const defaultValue = getRuleDefaultValue(field as IssueCreateFields, rules);
+    if (defaultValue) {
+      dataSet.current?.set(field.fieldCode, isSingle(field) ? defaultValue : uniq([...filter(fieldCurrentValue, (id) => find(list, { [key]: id })), ...defaultValue]));
+    } else {
+      dataSet.current?.set(field.fieldCode, undefined);
+    }
+  }
+}
+
 function transformSubmitFieldValue(field: IssueCreateFields, value: any) {
   switch (field.fieldType) {
     case 'time':
@@ -203,7 +231,6 @@ const CreateIssueBase = observer(({
     data: templateData,
   }, { data: cascadeRuleList = [] }] = useIssueCreateFields({ issueTypeId, projectId });
 
-  const hasValue = usePersistFn((field: IssueCreateFields) => (isMultiple(field) ? dataSet.current?.get(field.fieldCode)?.length : dataSet.current?.get(field.fieldCode)));
   const fieldValueArr = usePersistFn((field: IssueCreateFields) => {
     let value = castArray(toJS(dataSet.current?.get(field.fieldCode)));
     const preset = presets.get(field.fieldCode);
@@ -217,7 +244,7 @@ const CreateIssueBase = observer(({
   const getAllRules = usePersistFn(() => {
     let allRules: ICascadeLinkage[] = [];
     fields?.forEach((field) => {
-      if (((field.system && includes(pageCascadeFields, field.fieldCode)) || (!field.system && isSelect(field))) && hasValue(field)) {
+      if (((field.system && includes(pageCascadeFields, field.fieldCode)) || (!field.system && isSelect(field))) && hasValue(dataSet, field)) {
         allRules = [...allRules, ...filter(cascadeRuleList, (rule) => rule.fieldId === field.fieldId && includes(fieldValueArr(field), rule.fieldOptionId))];
       }
     });
@@ -280,7 +307,7 @@ const CreateIssueBase = observer(({
           fieldType: field.fieldType,
           fieldCode: field.fieldCode,
           label: field.fieldName,
-          required: field.required || getRuleRequired(rules),
+          required: field.required || getRuleRequired(field, rules),
           multiple: isMultiple(field),
         });
       })], [{
@@ -426,7 +453,6 @@ const CreateIssueBase = observer(({
     if (!field) {
       return {};
     }
-    console.log(rules, getOptionsData(rules, dataSet, field));
     switch (field.fieldCode) {
       case 'parentIssueId': {
         return {
@@ -445,17 +471,23 @@ const CreateIssueBase = observer(({
       }
       case 'reporter':
       case 'mainResponsible':
+      case 'estimatedStartTime':
+      case 'estimatedEndTime':
+      case 'benfitHypothesis':
+      case 'acceptanceCritera': {
+        return {
+          hidden: getRuleHidden(field, rules),
+        };
+      }
       case 'environment':
       case 'component':
       case 'fixVersion':
       case 'influenceVersion':
-      case 'estimatedStartTime':
-      case 'estimatedEndTime':
-      case 'benfitHypothesis':
-      case 'acceptanceCritera':
       case 'subProject': {
         return {
+          afterLoad: (res:any) => cascadeFieldAfterLoad(dataSet, res, field as IssueCreateFields, rules),
           hidden: getRuleHidden(field, rules),
+          ...getOptionsData(rules, dataSet, field),
         };
       }
       case 'priority': {
@@ -465,6 +497,7 @@ const CreateIssueBase = observer(({
             if (defaultPriority) {
               dataSet.current?.set('priority', defaultPriority.id);
             }
+            cascadeFieldAfterLoad(dataSet, priorities, field as IssueCreateFields, rules);
           },
           hidden: getRuleHidden(field, rules),
           ...getOptionsData(rules, dataSet, field),
@@ -497,6 +530,12 @@ const CreateIssueBase = observer(({
         return {
           extraOptions: field.defaultValueObjs,
           hidden: getRuleHidden(field, rules),
+        };
+      }
+      case 'single': case 'multiple': case 'checkbox': case 'radio': {
+        return {
+          hidden: getRuleHidden(field, rules),
+          afterLoad: (res:any) => cascadeFieldAfterLoad(dataSet, res, field as IssueCreateFields, rules),
         };
       }
       default: return {
