@@ -106,9 +106,10 @@ function isSingle(field: IssueCreateFields | { fieldType: string}) {
   return includes(['radio', 'single', 'member'], field.fieldType);
 }
 
-function getRuleDefaultValue(rules: ICascadeLinkage[] = []) {
-  if (filter(rules, (rule) => rule.defaultValue || rule.defaultIds?.length).length === 1) { // 所有规则中只有1条设置了默认值
-    const defaultValueRule = find(rules, (rule) => rule.defaultValue || rule.defaultIds?.length) as ICascadeLinkage;
+function getRuleDefaultValue(field: IssueCreateFields, rules: ICascadeLinkage[] = []) {
+  const fieldRules = filter(rules, { cascadeFieldCode: field.fieldCode });
+  if (filter(fieldRules, (rule) => rule.defaultValue || rule.defaultIds?.length).length === 1) { // 所有规则中只有1条设置了默认值
+    const defaultValueRule = find(fieldRules, (rule) => rule.defaultValue || rule.defaultIds?.length) as ICascadeLinkage;
     return defaultValueRule.defaultValue || isSingle({ fieldType: defaultValueRule.cascadeFieldType }) ? defaultValueRule.defaultIds?.length && defaultValueRule.defaultIds[0] : defaultValueRule.defaultIds;
   }
   return undefined;
@@ -214,8 +215,6 @@ const CreateIssueBase = observer(({
   });
 
   const rules = useDeepMemo(() => getAllRules());
-  // console.log('optionRules：');
-  // console.log(rules);
 
   const {
     isInProgram,
@@ -233,7 +232,7 @@ const CreateIssueBase = observer(({
       return defaultValues[field.fieldCode];
     }
     // 页面字段级联rule的默认值
-    const ruleDefaultValue = getRuleDefaultValue(rules);
+    const ruleDefaultValue = getRuleDefaultValue(field, rules);
     if (Array.isArray(ruleDefaultValue) ? ruleDefaultValue.length : ruleDefaultValue) {
       return ruleDefaultValue;
     }
@@ -261,7 +260,6 @@ const CreateIssueBase = observer(({
 
   useEffect(() => {
     const oldDataSet = dataSetRef.current;
-    console.log('new DataSet');
     const newDataSet = new DataSet({
       autoCreate: false,
       fields: fields ? insertField([...fields.map((field) => {
@@ -298,10 +296,10 @@ const CreateIssueBase = observer(({
     });
     const newValue: { [key: string]: any } = {};
     // 优先保留之前的值
-    newDataSet.fields.forEach((field) => {
-      const oldValue = oldDataSet.current?.get(field.name);
+    reuseFields.forEach((name) => {
+      const oldValue = oldDataSet.current?.get(name);
       if (oldValue) {
-        newValue[field.name] = oldValue;
+        newValue[name] = oldValue;
       }
     });
     newDataSet.fields.forEach(({ name }) => {
@@ -335,7 +333,6 @@ const CreateIssueBase = observer(({
     if (showFeature && defaultFeature) {
       setValue('feature', defaultFeature.issueId);
     }
-    console.log(newValue);
     // 创建一个新的
     newDataSet.create(newValue);
     setDataSet(newDataSet);
@@ -561,7 +558,6 @@ const CreateIssueBase = observer(({
       },
     },
   }), []);
-  // console.log('render');
   return (
     <Spin spinning={isLoading || isFieldsLoading}>
       <Form
