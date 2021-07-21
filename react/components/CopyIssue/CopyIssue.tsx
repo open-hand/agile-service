@@ -154,8 +154,9 @@ const CopyIssue: React.FC<Props> = ({
 
           const res = await issueApi.clone(issue.issueId, applyType, copyConditionVO);
           onOk(res);
+          return true;
         }
-        return true;
+        return false;
       });
     }
     return false;

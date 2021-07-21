@@ -298,10 +298,10 @@ const CreateIssueBase = observer(({
     });
     const newValue: { [key: string]: any } = {};
     // 优先保留之前的值
-    reuseFields.forEach((name) => {
-      const oldValue = oldDataSet.current?.get(name);
+    newDataSet.fields.forEach((field) => {
+      const oldValue = oldDataSet.current?.get(field.name);
       if (oldValue) {
-        newValue[name] = oldValue;
+        newValue[field.name] = oldValue;
       }
     });
     newDataSet.fields.forEach(({ name }) => {
