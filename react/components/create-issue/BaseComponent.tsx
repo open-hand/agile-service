@@ -26,6 +26,7 @@ import { getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { pageConfigApi } from '@/api';
 import { ICascadeLinkage } from '@/routes/page-config/components/setting-linkage/Linkage';
+import useDeepMemo from '@/hooks/useDeepMemo';
 import WSJF from './components/wsjf';
 import IssueLink from './components/issue-link';
 import hooks from './hooks';
@@ -104,7 +105,7 @@ function isSingle(field: IssueCreateFields | { fieldType: string}) {
   return includes(['radio', 'single', 'member'], field.fieldType);
 }
 
-function getRuleDefaultValue(rules: ICascadeLinkage[]) {
+function getRuleDefaultValue(rules: ICascadeLinkage[] = []) {
   if (filter(rules, (rule) => rule.defaultValue || rule.defaultIds?.length).length === 1) { // 所有规则中只有1条设置了默认值
     const defaultValueRule = find(rules, (rule) => rule.defaultValue || rule.defaultIds?.length) as ICascadeLinkage;
     return defaultValueRule.defaultValue || isSingle({ fieldType: defaultValueRule.cascadeFieldType }) ? defaultValueRule.defaultIds?.length && defaultValueRule.defaultIds[0] : defaultValueRule.defaultIds;
@@ -112,7 +113,7 @@ function getRuleDefaultValue(rules: ICascadeLinkage[]) {
   return undefined;
 }
 
-function getRuleHidden(field?: Pick<IssueCreateFields, 'fieldType' | 'fieldCode' | 'defaultValueObj' | 'defaultValueObjs' | 'required'>, rules: ICascadeLinkage[]) {
+function getRuleHidden(field?: Pick<IssueCreateFields, 'fieldType' | 'fieldCode' | 'defaultValueObj' | 'defaultValueObjs' | 'required'>, rules: ICascadeLinkage[] = []) {
   if (field) {
     if (field.required || find(rules, { required: true }) || every(rules, (rule) => !rule.hidden)) {
       return false;
@@ -122,11 +123,11 @@ function getRuleHidden(field?: Pick<IssueCreateFields, 'fieldType' | 'fieldCode'
   return true;
 }
 
-function getRuleRequired(rules: ICascadeLinkage[]) {
+function getRuleRequired(rules: ICascadeLinkage[] = []) {
   return !!find(rules, { required: true });
 }
 
-function getOptionsData(rules: ICascadeLinkage[], dataSet: DataSet, field: Pick<IssueCreateFields, 'fieldType' | 'fieldCode' | 'defaultValueObj' | 'defaultValueObjs' | 'required'>) {
+function getOptionsData(rules: ICascadeLinkage[] = [], dataSet: DataSet, field: Pick<IssueCreateFields, 'fieldType' | 'fieldCode' | 'defaultValueObj' | 'defaultValueObjs' | 'required'>) {
   const ruleId = rules.length ? map(rules, 'id') : undefined;
   return ({
     ruleId,
@@ -211,7 +212,7 @@ const CreateIssueBase = observer(({
     return allRules;
   });
 
-  const rules = getAllRules();
+  const rules = useDeepMemo(() => getAllRules());
   console.log('optionRules：');
   console.log(rules);
 
@@ -220,7 +221,7 @@ const CreateIssueBase = observer(({
     isShowFeature,
   } = useIsInProgram({ projectId });
   const showFeature = !!issueTypeCode && issueTypeCode === 'story' && !!isShowFeature;
-  const getDefaultValue = usePersistFn((field: IssueCreateFields, rules: ICascadeLinkage[]) => {
+  const getDefaultValue = usePersistFn((field: IssueCreateFields) => {
     const preset = presets.get(field.fieldCode);
     // defaultAssignee优先级更高
     if (field.fieldCode === 'assignee' && defaultAssignee) {
@@ -259,6 +260,7 @@ const CreateIssueBase = observer(({
 
   useEffect(() => {
     const oldDataSet = dataSetRef.current;
+    console.log('new DataSet');
     const newDataSet = new DataSet({
       autoCreate: false,
       fields: fields ? insertField([...fields.map((field) => {
@@ -309,7 +311,7 @@ const CreateIssueBase = observer(({
 
     // 设置默认值
     fields?.forEach((field) => {
-      const defaultValue = getDefaultValue(field, rules);
+      const defaultValue = getDefaultValue(field);
       if (defaultValue !== null && defaultValue !== undefined) {
         // 没有值的时候再设置
         setValue(field.fieldCode, defaultValue);

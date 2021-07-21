@@ -1,36 +1,29 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
-import { fieldApi, priorityApi } from '@/api';
+import { priorityApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { Priority } from '@/common/types';
 import { FlatSelect } from '@choerodon/components';
 
 interface Props extends Partial<SelectProps> {
   priorityId?: number
-  fieldId?: string
   dataRef?: React.MutableRefObject<any>
   afterLoad?: (prioritys: Priority[]) => void
   flat?: boolean
   projectId?: string
-  ruleIds?: string[]
-  selected?: string[]
 }
 
 const SelectPriority: React.FC<Props> = forwardRef(({
-  priorityId, fieldId, ruleIds, selected, dataRef, afterLoad, flat, projectId, ...otherProps
+  priorityId, dataRef, afterLoad, flat, projectId, ...otherProps
 },
 ref: React.Ref<Select>) => {
-  const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
-  const hasRule = Object.keys(args).filter((key: keyof typeof args) => Boolean(args[key])).length > 0;
   const config = useMemo((): SelectConfig => ({
     name: 'priority',
     textField: 'name',
     valueField: 'id',
-    requestArgs: args,
-    request: hasRule && fieldId
-      ? ({ requestArgs, filter, page }) => fieldApi.getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, 0)
-      : () => priorityApi.loadByProject(projectId, [String(priorityId)]),
+    // @ts-ignore
+    request: () => priorityApi.loadByProject(projectId, [String(priorityId)]),
     middleWare: (data: Priority[]) => {
       if (dataRef) {
         Object.assign(dataRef, {
@@ -42,8 +35,8 @@ ref: React.Ref<Select>) => {
       }
       return data;
     },
-    paging: hasRule,
-  }), [afterLoad, args, dataRef, fieldId, hasRule, priorityId, projectId]);
+    paging: false,
+  }), [priorityId]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
   return (
