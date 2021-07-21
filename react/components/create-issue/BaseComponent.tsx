@@ -7,10 +7,12 @@ import {
 import { observer } from 'mobx-react-lite';
 import { usePersistFn } from 'ahooks';
 import {
+  castArray,
   every,
   filter,
-  find, groupBy, includes, map, merge,
+  find, get, groupBy, includes, map, merge,
 } from 'lodash';
+import { toJS } from 'mobx';
 import { UploadFile } from 'choerodon-ui/lib/upload/interface';
 import UploadButton from '@/components/CommonComponent/UploadButton';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
@@ -76,7 +78,7 @@ const defaultDataSet = new DataSet({
 });
 const presets = new Map([
   ['component', {
-    type: 'object',
+    // type: 'object',
     valueField: 'componentId',
   }],
   ['label', {
@@ -94,20 +96,21 @@ const lineField = ['summary', 'description'];
 const reuseFields = ['issueType', 'summary', 'description'];
 const pageCascadeFields = ['component', 'priority', 'fixVersion', 'influenceVersion'];
 
-function isSelect(field: IssueCreateFields | { fieldType: string}) {
+function isSelect(field: IssueCreateFields | { fieldType: string }) {
   return includes(['radio', 'multiple', 'checkbox', 'single'], field.fieldType);
 }
-function isMultiple(field: IssueCreateFields | { fieldType: string}) {
+function isMultiple(field: IssueCreateFields | { fieldType: string }) {
   return field.fieldType === 'multiple' || field.fieldType === 'checkbox' || field.fieldType === 'multiMember';
 }
 
-function isSingle(field: IssueCreateFields | { fieldType: string}) {
+function isSingle(field: IssueCreateFields | { fieldType: string }) {
   return includes(['radio', 'single', 'member'], field.fieldType);
 }
 
-function getRuleDefaultValue(rules: ICascadeLinkage[] = []) {
-  if (filter(rules, (rule) => rule.defaultValue || rule.defaultIds?.length).length === 1) { // 所有规则中只有1条设置了默认值
-    const defaultValueRule = find(rules, (rule) => rule.defaultValue || rule.defaultIds?.length) as ICascadeLinkage;
+function getRuleDefaultValue(field: IssueCreateFields, rules: ICascadeLinkage[] = []) {
+  const fieldRules = filter(rules, { cascadeFieldCode: field.fieldCode });
+  if (filter(fieldRules, (rule) => rule.defaultValue || rule.defaultIds?.length).length === 1) { // 所有规则中只有1条设置了默认值
+    const defaultValueRule = find(fieldRules, (rule) => rule.defaultValue || rule.defaultIds?.length) as ICascadeLinkage;
     return defaultValueRule.defaultValue || isSingle({ fieldType: defaultValueRule.cascadeFieldType }) ? defaultValueRule.defaultIds?.length && defaultValueRule.defaultIds[0] : defaultValueRule.defaultIds;
   }
   return undefined;
@@ -128,11 +131,11 @@ function getRuleRequired(rules: ICascadeLinkage[] = []) {
 }
 
 function getOptionsData(rules: ICascadeLinkage[] = [], dataSet: DataSet, field: Pick<IssueCreateFields, 'fieldType' | 'fieldCode' | 'defaultValueObj' | 'defaultValueObjs' | 'required'>) {
-  const ruleId = rules.length ? map(rules, 'id') : undefined;
+  const ruleIds = rules.length ? map(rules, 'id') : undefined;
   return ({
-    ruleId,
+    ruleIds,
     // eslint-disable-next-line no-nested-ternary
-    selected: ruleId?.length ? (isMultiple(field) ? dataSet.current?.get(field.fieldCode) : [dataSet.current?.get(field.fieldCode)]) : undefined,
+    selected: ruleIds?.length ? (isMultiple(field) ? dataSet.current?.get(field.fieldCode) : [dataSet.current?.get(field.fieldCode)]) : undefined,
   });
 }
 function transformSubmitFieldValue(field: IssueCreateFields, value: any) {
@@ -201,7 +204,16 @@ const CreateIssueBase = observer(({
   }, { data: cascadeRuleList = [] }] = useIssueCreateFields({ issueTypeId, projectId });
 
   const hasValue = usePersistFn((field: IssueCreateFields) => (isMultiple(field) ? dataSet.current?.get(field.fieldCode)?.length : dataSet.current?.get(field.fieldCode)));
-  const fieldValueArr = usePersistFn((field: IssueCreateFields) => (isMultiple(field) ? dataSet.current?.get(field.fieldCode) : [dataSet.current?.get(field.fieldCode)]));
+  const fieldValueArr = usePersistFn((field: IssueCreateFields) => {
+    let value = castArray(toJS(dataSet.current?.get(field.fieldCode)));
+    const preset = presets.get(field.fieldCode);
+    if (preset) {
+      if (preset.type === 'object') {
+        value = value.map((v) => get(v, preset.valueField));
+      }
+    }
+    return value;
+  });
   const getAllRules = usePersistFn(() => {
     let allRules: ICascadeLinkage[] = [];
     fields?.forEach((field) => {
@@ -213,8 +225,6 @@ const CreateIssueBase = observer(({
   });
 
   const rules = useDeepMemo(() => getAllRules());
-  console.log('optionRules：');
-  console.log(rules);
 
   const {
     isInProgram,
@@ -232,7 +242,7 @@ const CreateIssueBase = observer(({
       return defaultValues[field.fieldCode];
     }
     // 页面字段级联rule的默认值
-    const ruleDefaultValue = getRuleDefaultValue(rules);
+    const ruleDefaultValue = getRuleDefaultValue(field, rules);
     if (Array.isArray(ruleDefaultValue) ? ruleDefaultValue.length : ruleDefaultValue) {
       return ruleDefaultValue;
     }
@@ -260,7 +270,6 @@ const CreateIssueBase = observer(({
 
   useEffect(() => {
     const oldDataSet = dataSetRef.current;
-    console.log('new DataSet');
     const newDataSet = new DataSet({
       autoCreate: false,
       fields: fields ? insertField([...fields.map((field) => {
@@ -297,10 +306,16 @@ const CreateIssueBase = observer(({
     });
     const newValue: { [key: string]: any } = {};
     // 优先保留之前的值
-    newDataSet.fields.forEach((field) => {
-      const oldValue = oldDataSet.current?.get(field.name);
+    reuseFields.forEach((name) => {
+      const oldValue = oldDataSet.current?.get(name);
       if (oldValue) {
-        newValue[field.name] = oldValue;
+        newValue[name] = oldValue;
+      }
+    });
+    newDataSet.fields.forEach(({ name }) => {
+      const oldValue = toJS(oldDataSet.current?.get(name));
+      if (oldValue) {
+        newValue[name] = oldValue;
       }
     });
     const setValue = (name: string, value: any) => {
@@ -391,6 +406,7 @@ const CreateIssueBase = observer(({
         projectId: projectId ?? getProjectId(),
         featureId: data.feature,
         issueLinkCreateVOList: enableIssueLinks ? getIssueLinks() : undefined,
+        componentIssueRelVOList: data.component ? data.component.map((id: string) => ({ componentId: id })) : [],
       });
 
       values = hooks.reduce((result, hook) => hook(result, data), values);
@@ -410,6 +426,7 @@ const CreateIssueBase = observer(({
     if (!field) {
       return {};
     }
+    console.log(rules, getOptionsData(rules, dataSet, field));
     switch (field.fieldCode) {
       case 'parentIssueId': {
         return {
@@ -553,7 +570,6 @@ const CreateIssueBase = observer(({
       },
     },
   }), []);
-  console.log('render');
   return (
     <Spin spinning={isLoading || isFieldsLoading}>
       <Form

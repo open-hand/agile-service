@@ -89,7 +89,7 @@ export interface ICascadeLinkage {
   fieldCascadeRuleOptionList: any
 }
 
-const selectTypes = ['radio', 'checkbox', 'single', 'multiple'];
+const selectTypes = ['radio', 'checkbox', 'single', 'multiple', 'member', 'multiMember'];
 const singleSelectTypes = ['radio', 'single', 'member'];
 
 const Linkage: React.FC<Props> = ({
@@ -178,6 +178,27 @@ const Linkage: React.FC<Props> = ({
   }, [currentOptionId, dataSet, linkagesMap]);
 
   useEffect(() => {
+    const getFieldCascadeRuleOptionList = (fieldType: string, fieldRelOptionList: {meaning: string, value: string}[] | undefined, defaultValue: any) => {
+      if (includes(['radio', 'checkbox', 'single', 'multiple'], fieldType) && fieldRelOptionList?.length) {
+        return fieldRelOptionList.map((option) => ({
+          cascadeOptionId: option.value,
+          defaultOption: Array.isArray(defaultValue) ? includes(defaultValue, option.value) : option.value === defaultValue,
+        }));
+      }
+      if (fieldType === 'member' && defaultValue) {
+        return ([{
+          cascadeOptionId: defaultValue,
+          defaultOption: true,
+        }]);
+      }
+      if (fieldType === 'multiMember' && defaultValue?.length) {
+        return defaultValue.map((value: string) => ({
+          cascadeOptionId: value,
+          defaultOption: true,
+        }));
+      }
+      return undefined;
+    };
     const handleOk = async () => {
       if (!await prepareData()) {
         return false;
@@ -199,10 +220,7 @@ const Linkage: React.FC<Props> = ({
             defaultValue: !includes(selectTypes, chosenField?.fieldType) ? defaultValue : undefined,
             hidden,
             required,
-            fieldCascadeRuleOptionList: (includes(selectTypes, chosenField?.fieldType) && fieldRelOptionList?.length) ? fieldRelOptionList.map((option) => ({
-              cascadeOptionId: option.value,
-              defaultOption: Array.isArray(defaultValue) ? includes(defaultValue, option.value) : option.value === defaultValue,
-            })) : undefined,
+            fieldCascadeRuleOptionList: getFieldCascadeRuleOptionList(chosenField?.fieldType, fieldRelOptionList, defaultValue),
           });
         });
       }
