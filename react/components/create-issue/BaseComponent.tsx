@@ -11,6 +11,7 @@ import {
   filter,
   find, groupBy, includes, map, merge,
 } from 'lodash';
+import { toJS } from 'mobx';
 import { UploadFile } from 'choerodon-ui/lib/upload/interface';
 import UploadButton from '@/components/CommonComponent/UploadButton';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
@@ -213,8 +214,8 @@ const CreateIssueBase = observer(({
   });
 
   const rules = useDeepMemo(() => getAllRules());
-  console.log('optionRules：');
-  console.log(rules);
+  // console.log('optionRules：');
+  // console.log(rules);
 
   const {
     isInProgram,
@@ -303,6 +304,12 @@ const CreateIssueBase = observer(({
         newValue[field.name] = oldValue;
       }
     });
+    newDataSet.fields.forEach(({ name }) => {
+      const oldValue = toJS(oldDataSet.current?.get(name));
+      if (oldValue) {
+        newValue[name] = oldValue;
+      }
+    });
     const setValue = (name: string, value: any) => {
       if (newValue[name] === null || newValue[name] === undefined) {
         newValue[name] = value;
@@ -328,6 +335,7 @@ const CreateIssueBase = observer(({
     if (showFeature && defaultFeature) {
       setValue('feature', defaultFeature.issueId);
     }
+    console.log(newValue);
     // 创建一个新的
     newDataSet.create(newValue);
     setDataSet(newDataSet);
@@ -553,7 +561,7 @@ const CreateIssueBase = observer(({
       },
     },
   }), []);
-  console.log('render');
+  // console.log('render');
   return (
     <Spin spinning={isLoading || isFieldsLoading}>
       <Form
