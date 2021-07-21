@@ -65,6 +65,9 @@ export const systemFields = new Map([
   ['environment', {
     id: 'environment',
   }],
+  ['tag', {
+    id: 'tags',
+  }],
 ]);
 
 export function transformValue(dataSet: DataSet, key: string, value: any, format: (v: any, lookup: any) => any) {

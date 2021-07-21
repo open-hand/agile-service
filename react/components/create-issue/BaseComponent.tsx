@@ -297,10 +297,10 @@ const CreateIssueBase = observer(({
     });
     const newValue: { [key: string]: any } = {};
     // 优先保留之前的值
-    reuseFields.forEach((name) => {
-      const oldValue = oldDataSet.current?.get(name);
+    newDataSet.fields.forEach((field) => {
+      const oldValue = oldDataSet.current?.get(field.name);
       if (oldValue) {
-        newValue[name] = oldValue;
+        newValue[field.name] = oldValue;
       }
     });
     const setValue = (name: string, value: any) => {
@@ -331,9 +331,7 @@ const CreateIssueBase = observer(({
     // 创建一个新的
     newDataSet.create(newValue);
     setDataSet(newDataSet);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultFeature, fields, getDefaultValue, handleUpdate, isShowFeature, isSubIssue, issueTypeCode, parentIssue, showFeature, templateData]);
+  }, [defaultFeature, fields, getDefaultValue, handleUpdate, isShowFeature, isSubIssue, issueTypeCode, parentIssue, rules, showFeature, templateData]);
   const getIssueLinks = usePersistFn(() => {
     const links = issueLinkDataSet.toData() as {
       issueIds: string[]

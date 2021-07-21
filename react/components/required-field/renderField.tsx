@@ -15,12 +15,7 @@ import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 import SelectEnvironment from '@/components/select/select-environment';
 import SelectFeature from '@/components/select/select-feature';
 import SelectCustomField from '@/components/select/select-custom-field';
-
-const { Option } = Select;
-const forceUpdate = observable.box(false);
-function noticeForceUpdate() {
-  forceUpdate.set(true);
-}
+import SelectMultiServiceTag from '@/components/select/select-multi-service-tag';
 
 const multipleCodes = ['label', 'component', 'fixVersion', 'influenceVersion'];
 export default function renderField<T extends Partial<SelectProps>>({
@@ -60,6 +55,9 @@ export default function renderField<T extends Partial<SelectProps>>({
       }
       case 'description': {
         return <Editor name={fieldCode} placeholder={fieldName} colSpan={2} style={{ height: 280 }} />;
+      }
+      case 'tag': {
+        return <SelectMultiServiceTag name={fieldCode} multiple clearButton {...otherComponentProps} defaultValue={defaultValue} />;
       }
       default:
         break;
@@ -136,36 +134,16 @@ export default function renderField<T extends Partial<SelectProps>>({
           {...otherComponentProps}
         />
       );
-    case 'single': case 'multiple':
+    case 'single': case 'multiple': case 'radio': case 'checkbox':
       return (
         <SelectCustomField
           name={fieldCode}
           style={{ width: '100%' }}
-          multiple={fieldType === 'multiple'}
+          multiple={fieldType === 'multiple' || fieldType === 'checkbox'}
           fieldId={fieldId as string}
           selected={defaultValue}
           {...otherComponentProps}
         />
-      );
-    case 'radio': case 'checkbox':
-      return (
-        <Select
-          name={fieldCode}
-          style={{ width: '100%' }}
-          multiple={fieldType === 'checkbox'}
-          {...otherComponentProps}
-        >
-          {fieldOptions
-            && fieldOptions.length > 0
-            && fieldOptions.map((item) => (
-              <Option
-                value={item.id}
-                key={item.id}
-              >
-                {item.value}
-              </Option>
-            ))}
-        </Select>
       );
     case 'multiMember':
     case 'member':
