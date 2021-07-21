@@ -7,9 +7,10 @@ import {
 import { observer } from 'mobx-react-lite';
 import { usePersistFn } from 'ahooks';
 import {
+  castArray,
   every,
   filter,
-  find, groupBy, includes, map, merge,
+  find, get, groupBy, includes, map, merge,
 } from 'lodash';
 import { toJS } from 'mobx';
 import { UploadFile } from 'choerodon-ui/lib/upload/interface';
@@ -95,14 +96,14 @@ const lineField = ['summary', 'description'];
 const reuseFields = ['issueType', 'summary', 'description'];
 const pageCascadeFields = ['component', 'priority', 'fixVersion', 'influenceVersion'];
 
-function isSelect(field: IssueCreateFields | { fieldType: string}) {
+function isSelect(field: IssueCreateFields | { fieldType: string }) {
   return includes(['radio', 'multiple', 'checkbox', 'single'], field.fieldType);
 }
-function isMultiple(field: IssueCreateFields | { fieldType: string}) {
+function isMultiple(field: IssueCreateFields | { fieldType: string }) {
   return field.fieldType === 'multiple' || field.fieldType === 'checkbox' || field.fieldType === 'multiMember';
 }
 
-function isSingle(field: IssueCreateFields | { fieldType: string}) {
+function isSingle(field: IssueCreateFields | { fieldType: string }) {
   return includes(['radio', 'single', 'member'], field.fieldType);
 }
 
@@ -129,11 +130,11 @@ function getRuleRequired(rules: ICascadeLinkage[] = []) {
 }
 
 function getOptionsData(rules: ICascadeLinkage[] = [], dataSet: DataSet, field: Pick<IssueCreateFields, 'fieldType' | 'fieldCode' | 'defaultValueObj' | 'defaultValueObjs' | 'required'>) {
-  const ruleId = rules.length ? map(rules, 'id') : undefined;
+  const ruleIds = rules.length ? map(rules, 'id') : undefined;
   return ({
-    ruleId,
+    ruleIds,
     // eslint-disable-next-line no-nested-ternary
-    selected: ruleId?.length ? (isMultiple(field) ? dataSet.current?.get(field.fieldCode) : [dataSet.current?.get(field.fieldCode)]) : undefined,
+    selected: ruleIds?.length ? (isMultiple(field) ? dataSet.current?.get(field.fieldCode) : [dataSet.current?.get(field.fieldCode)]) : undefined,
   });
 }
 function transformSubmitFieldValue(field: IssueCreateFields, value: any) {
@@ -202,7 +203,16 @@ const CreateIssueBase = observer(({
   }, { data: cascadeRuleList = [] }] = useIssueCreateFields({ issueTypeId, projectId });
 
   const hasValue = usePersistFn((field: IssueCreateFields) => (isMultiple(field) ? dataSet.current?.get(field.fieldCode)?.length : dataSet.current?.get(field.fieldCode)));
-  const fieldValueArr = usePersistFn((field: IssueCreateFields) => (isMultiple(field) ? dataSet.current?.get(field.fieldCode) : [dataSet.current?.get(field.fieldCode)]));
+  const fieldValueArr = usePersistFn((field: IssueCreateFields) => {
+    let value = castArray(toJS(dataSet.current?.get(field.fieldCode)));
+    const preset = presets.get(field.fieldCode);
+    if (preset) {
+      if (preset.type === 'object') {
+        value = value.map((v) => get(v, preset.valueField));
+      }
+    }
+    return value;
+  });
   const getAllRules = usePersistFn(() => {
     let allRules: ICascadeLinkage[] = [];
     fields?.forEach((field) => {
@@ -298,10 +308,10 @@ const CreateIssueBase = observer(({
     });
     const newValue: { [key: string]: any } = {};
     // 优先保留之前的值
-    newDataSet.fields.forEach((field) => {
-      const oldValue = oldDataSet.current?.get(field.name);
+    reuseFields.forEach((name) => {
+      const oldValue = oldDataSet.current?.get(name);
       if (oldValue) {
-        newValue[field.name] = oldValue;
+        newValue[name] = oldValue;
       }
     });
     newDataSet.fields.forEach(({ name }) => {
@@ -418,6 +428,7 @@ const CreateIssueBase = observer(({
     if (!field) {
       return {};
     }
+    console.log(rules, getOptionsData(rules, dataSet, field));
     switch (field.fieldCode) {
       case 'parentIssueId': {
         return {
