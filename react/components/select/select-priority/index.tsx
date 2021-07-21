@@ -22,7 +22,7 @@ const SelectPriority: React.FC<Props> = forwardRef(({
 },
 ref: React.Ref<Select>) => {
   const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
-  const hasRule = Boolean(args);
+  const hasRule = Object.keys(args).filter((key: keyof typeof args) => Boolean(args[key])).length > 0;
   const config = useMemo((): SelectConfig => ({
     name: 'priority',
     textField: 'name',
@@ -30,7 +30,7 @@ ref: React.Ref<Select>) => {
     requestArgs: args,
     request: hasRule && fieldId
       ? ({ requestArgs, filter, page }) => fieldApi.getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, 0)
-      : priorityApi.loadByProject(projectId, [String(priorityId)]),
+      : () => priorityApi.loadByProject(projectId, [String(priorityId)]),
     middleWare: (data: Priority[]) => {
       if (dataRef) {
         Object.assign(dataRef, {
