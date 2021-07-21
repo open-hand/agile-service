@@ -5,6 +5,8 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { stores, Choerodon } from '@choerodon/boot';
+import openCreateSubTask from '@/components/create-sub-task';
+import { usePersistFn } from 'ahooks';
 import { Spin } from 'choerodon-ui';
 import './EditIssue.less';
 import {
@@ -245,6 +247,64 @@ function EditIssue() {
     }
     store.events = { updateAfter, updateBefore };
   }, [issueId, loadIssueDetail, onUpdate, store]);
+  const resetDefault = useCallback(() => {
+    store.setDefaultSummary(undefined);
+    store.setDefaultTypeId(undefined);
+    store.setDefaultSprint(undefined);
+    store.setDefaultAssignee(undefined);
+  }, [store]);
+
+  const handleOpenCreateSubTask = usePersistFn(() => {
+    const {
+      issueId: parentIssueId, summary: parentSummary, activeSprint,
+    } = store.getIssue;
+    openCreateSubTask({
+      onCreate: () => {
+        store.setCreateSubTaskShow(false);
+        resetDefault();
+        if (onCreateSubIssue) {
+          onCreateSubIssue(issue, parentIssueId);
+        }
+        loadIssueDetail(issue.issueId);
+      },
+      parentIssue: {
+        summary: parentSummary,
+        issueId: parentIssueId,
+      },
+      defaultValues: {
+        summary: store.defaultSummary,
+        sprint: activeSprint ? activeSprint.sprintId : undefined,
+      },
+      defaultAssignee: store.defaultAssignee,
+      defaultTypeId: store.defaultTypeId,
+    });
+  });
+  const handleOpenCreateSubBug = usePersistFn(() => {
+    const {
+      issueId: parentIssueId, summary: parentSummary, activeSprint,
+    } = store.getIssue;
+    openCreateSubTask({
+      typeCode: 'bug',
+      onCreate: () => {
+        store.setCreateSubTaskShow(false);
+        resetDefault();
+        if (onCreateSubIssue) {
+          onCreateSubIssue(issue, parentIssueId);
+        }
+        loadIssueDetail(issue.issueId);
+      },
+      parentIssue: {
+        summary: parentSummary,
+        issueId: parentIssueId,
+      },
+      defaultValues: {
+        summary: store.defaultSummary,
+        sprint: activeSprint ? activeSprint.sprintId : undefined,
+      },
+      defaultAssignee: store.defaultAssignee,
+      defaultTypeId: store.defaultTypeId,
+    });
+  });
   return (
 
     <div className={`${prefixCls}`} style={style} ref={container}>
@@ -281,6 +341,8 @@ function EditIssue() {
           otherProject={otherProject}
           outside={outside}
           onTransformType={onTransformType}
+          onOpenCreateSubTask={handleOpenCreateSubTask}
+          onOpenCreateSubBug={handleOpenCreateSubBug}
         />
         <IssueBody
           setIssueLoading={setIssueLoading}
@@ -307,6 +369,8 @@ function EditIssue() {
           onChangeParent={onChangeParent}
           onRelateIssue={onRelateIssue}
           onTransformSubIssue={handleTransformSubIssue}
+          onOpenCreateSubTask={handleOpenCreateSubTask}
+          onOpenCreateSubBug={handleOpenCreateSubBug}
         />
       </div>
     </div>

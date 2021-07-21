@@ -22,7 +22,7 @@ import openTransformSubIssue from './TransformSubIssue/TransformSubIssue';
 import openTransformFromSubIssue from './IssueBody/TransformFromSubIssue';
 
 const IssueDropDown = ({
-  onDeleteIssue, loginUserId, reloadIssue, testLinkStoreRef, onIssueCopy, onUpdate, onChangeParent, onRelateIssue, onTransformSubIssue,
+  onDeleteIssue, loginUserId, reloadIssue, testLinkStoreRef, onIssueCopy, onUpdate, onChangeParent, onRelateIssue, onTransformSubIssue, onOpenCreateSubTask, onOpenCreateSubBug,
 }) => {
   const {
     store, applyType,
@@ -78,7 +78,8 @@ const IssueDropDown = ({
     } else if (e.key === 'item_11') {
       handleDeleteIssue();
     } else if (e.key === '2') {
-      store.setCreateSubTaskShow(true);
+      // store.setCreateSubTaskShow(true);
+      onOpenCreateSubTask();
     } else if (e.key === '3') {
       openEditIssueCopyIssue({
         issue,
@@ -121,7 +122,8 @@ const IssueDropDown = ({
         issueId, issueNum, objectVersionNumber, onOk: onChangeParent,
       });
     } else if (e.key === '9') {
-      store.setCreateSubBugShow(true);
+      // store.setCreateSubBugShow(true);
+      onOpenCreateSubBug();
     } else if (e.key === '10') {
       openRelateIssueModal({ issue, onOk: onRelateIssue });
     } else if (e.key === 'item_10') {

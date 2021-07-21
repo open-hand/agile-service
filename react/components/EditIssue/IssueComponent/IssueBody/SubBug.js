@@ -3,14 +3,12 @@ import { Button, Icon, Tooltip } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import QuickCreateIssue from '@/components/QuickCreateIssue/QuickCreateIssue';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
-import { usePersistFn } from 'ahooks';
-import openCreateSubTask from '@/components/create-sub-task';
 import IssueList from '../../Component/IssueList';
 import EditIssueContext from '../../stores';
 import Divider from './Divider';
 
 const SubBug = observer(({
-  reloadIssue, onDeleteSubIssue, onUpdate, applyType, onCreateSubIssue,
+  reloadIssue, onDeleteSubIssue, onUpdate, applyType, onCreateSubIssue, onOpenCreateSubBug,
 }) => {
   const { store, disabled } = useContext(EditIssueContext);
   const {
@@ -74,22 +72,7 @@ const SubBug = observer(({
       reloadIssue(issue.issueId);
     }
   };
-  const handleOpenCreateIssue = usePersistFn(() => {
-    openCreateSubTask({
-      typeCode: 'bug',
-      onCreate: handleCreateSubIssue,
-      parentIssue: {
-        summary,
-        issueId,
-      },
-      defaultValues: {
-        summary: store.defaultSummary,
-        sprint: activeSprint ? activeSprint.sprintId : undefined,
-      },
-      defaultAssignee: store.defaultAssignee,
-      defaultTypeId: store.defaultTypeId,
-    });
-  });
+
   return (
     <div id="bug">
       <Divider />
@@ -99,13 +82,8 @@ const SubBug = observer(({
         </div>
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
-            <Tooltip placement="topRight" title="创建缺陷" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-              <Button onClick={() => store.setCreateSubBugShow(true)} disabled={(issueTypeData || []).length === 0}>
-                <Icon type="playlist_add icon" />
-              </Button>
-            </Tooltip>
             <Tooltip placement="topRight" title="新创建缺陷" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-              <Button onClick={handleOpenCreateIssue} disabled={(issueTypeData || []).length === 0}>
+              <Button onClick={onOpenCreateSubBug} disabled={(issueTypeData || []).length === 0}>
                 <Icon type="playlist_add icon" />
               </Button>
             </Tooltip>

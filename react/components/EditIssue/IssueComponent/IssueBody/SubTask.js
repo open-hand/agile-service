@@ -7,16 +7,14 @@ import {
 import {
   Button, Icon, Tooltip,
 } from 'choerodon-ui/pro';
-import { usePersistFn } from 'ahooks';
 import QuickCreateSubIssue from '@/components/QuickCreateSubIssue';
-import openCreateSubTask from '@/components/create-sub-task';
 import IssueList from '../../Component/IssueList';
 import EditIssueContext from '../../stores';
 import './SubTask.less';
 import Divider from './Divider';
 
 const SubTask = observer(({
-  onDeleteSubIssue, reloadIssue, onUpdate, parentSummary, onCreateSubIssue,
+  onDeleteSubIssue, reloadIssue, onUpdate, parentSummary, onCreateSubIssue, onOpenCreateSubTask,
 }) => {
   const { store, disabled } = useContext(EditIssueContext);
   const {
@@ -88,21 +86,7 @@ const SubTask = observer(({
     }
     return parseInt(completeLength / allLength * 100, 10);
   };
-  const handleOpenCreateIssue = usePersistFn(() => {
-    openCreateSubTask({
-      onCreate: handleCreateSubIssue,
-      parentIssue: {
-        summary: parentSummary,
-        issueId: parentIssueId,
-      },
-      defaultValues: {
-        summary: store.defaultSummary,
-        sprint: activeSprint ? activeSprint.sprintId : undefined,
-      },
-      defaultAssignee: store.defaultAssignee,
-      defaultTypeId: store.defaultTypeId,
-    });
-  });
+
   return (
     disableCreate && subIssueVOList.length === 0 ? null : (
       <div id="sub_task">
@@ -114,12 +98,7 @@ const SubTask = observer(({
           {!disableCreate && (
             <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
               <Tooltip placement="topRight" title="创建子任务" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-                <Button onClick={() => store.setCreateSubTaskShow(true)}>
-                  <Icon type="playlist_add icon" />
-                </Button>
-              </Tooltip>
-              <Tooltip placement="topRight" title="新创建子任务" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-                <Button onClick={handleOpenCreateIssue}>
+                <Button onClick={onOpenCreateSubTask}>
                   <Icon type="playlist_add icon" />
                 </Button>
               </Tooltip>
