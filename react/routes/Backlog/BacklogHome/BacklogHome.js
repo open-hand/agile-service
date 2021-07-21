@@ -18,7 +18,6 @@ import Version from '../components/VersionComponent/Version';
 import Epic from '../components/EpicComponent/Epic';
 import Feature from '../components/FeatureComponent/Feature';
 import IssueDetail from '../components/issue-detail';
-import CreateIssue from '../components/create-issue';
 import CreateSprint, { CreateCurrentPiSprint } from '../components/create-sprint';
 import SprintList from '../components/sprint-list';
 import ShowPlanSprint from '../components/show-plan-sprint';
@@ -93,10 +92,6 @@ class BacklogHome extends Component {
     });
   };
 
-  handleClickCBtn = () => {
-    BacklogStore.setNewIssueVisible(true);
-  }
-
   toggleCurrentVisible = (type) => {
     BacklogStore.toggleVisible(type);
     if (type === 'feature') {
@@ -167,11 +162,6 @@ class BacklogHome extends Component {
           <HeaderButtons
             items={[{
               name: '创建问题',
-              icon: 'playlist_add',
-              handler: this.handleClickCBtn,
-              display: true,
-            }, {
-              name: '新创建问题',
               icon: 'playlist_add',
               handler: this.openCreateIssueModal,
               display: true,
@@ -304,7 +294,6 @@ class BacklogHome extends Component {
                 <SprintList openCreateIssueModal={this.openCreateIssueModal} />
               </div>
             </Spin>
-            <CreateIssue />
           </div>
         </Content>
         <IssueDetail

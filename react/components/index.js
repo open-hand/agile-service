@@ -1,5 +1,4 @@
 export { default as AgileProvider } from './AgileProvider';
-export { default as CreateIssue } from './CreateIssue';
 export { default as CSSBlackMagic } from './CSSBlackMagic';
 export { default as EasyEdit } from './EasyEdit';
 export { default as EditIssue } from './EditIssue';
