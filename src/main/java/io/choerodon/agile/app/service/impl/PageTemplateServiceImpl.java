@@ -47,7 +47,7 @@ public class PageTemplateServiceImpl implements PageTemplateService {
         PageConfigVO pageConfigVO = objectSchemeFieldService.listConfigs(organizationId, projectId, issueTypeId);
         PageTemplateVO result = new PageTemplateVO();
         //设置IssueTypeField
-        pageConfigVO.setIssueTypeFieldVO(pageConfigVO.getIssueTypeFieldVO());
+        result.setIssueTypeFieldVO(pageConfigVO.getIssueTypeFieldVO());
         //设置fields
         List<PageTemplateFieldVO> pageTemplateFieldList = modelMapper.map(pageConfigVO.getFields(), new TypeToken<List<PageTemplateFieldVO>>(){}.getType());
         result.setFields(pageTemplateFieldList);
