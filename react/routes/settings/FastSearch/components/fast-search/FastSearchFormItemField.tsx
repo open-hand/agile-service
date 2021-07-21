@@ -50,9 +50,12 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
   }, [editDefaultValue, optionDataSet.options, record]);
   const selectUserAutoQueryConfig = useMemo(() => {
     function onFinish() {
+      record.setState('init_edit_data', false).init('_editData', true);
       // 用户，多用户类型的字段 在额外用户加载完毕后再绑定 并且重新初始化
-      optionDataSet.options = componentRef.current?.options;
-      record.setState('init_edit_data', false);
+      optionDataSet.options = undefined; // 先置空 再赋值 触发useEffect
+      setTimeout(() => {
+        optionDataSet.options = componentRef.current?.options;
+      });
     }
     return {
       selectedUserIds: editDefaultValue.defaultValueArr,
@@ -73,7 +76,7 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
     primitiveValue: false,
     // selectAllButton: false,
     // reverse: false,
-    autoQueryConfig: record.get('_editData') && record.get('_editDataCode') === record.get('fieldCode') ? selectUserAutoQueryConfig : undefined,
+    autoQueryConfig: record.get('_editDataCode') === record.get('fieldCode') ? selectUserAutoQueryConfig : undefined,
     style: { width: '100%' },
     afterLoad: record.get('_editData') && record.get('_editDataCode') === record.get('fieldCode') ? handleBindOptions : undefined,
     ...otherProps,
