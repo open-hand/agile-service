@@ -340,7 +340,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
             switch (fieldCascadeRuleVO.getFieldCode()) {
                 case FieldCode.PRIORITY:
                     processHiddenAndRequiredById(
-                            issueDetailDTO.getPriorityVO().getId(),
+                            issueDetailDTO.getPriorityId(),
                             fieldCascadeRuleVO,
                             hiddenFieldIds, requiredIds);
                     break;
