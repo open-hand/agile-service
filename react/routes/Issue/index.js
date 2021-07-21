@@ -281,17 +281,9 @@ const Issue = observer(({ cached, updateCache }) => {
       >
         <HeaderButtons items={[
           {
-            name: '新创建问题',
-            icon: 'playlist_add',
-            handler: handleOpenCreateIssue,
-            display: true,
-          },
-          {
             name: '创建问题',
             icon: 'playlist_add',
-            handler: () => {
-              IssueStore.createQuestion(true);
-            },
+            handler: handleOpenCreateIssue,
             display: true,
           },
           {
