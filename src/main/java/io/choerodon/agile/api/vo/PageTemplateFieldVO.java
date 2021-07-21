@@ -49,8 +49,28 @@ public class PageTemplateFieldVO {
 
     private List<FieldCascadeRuleDesVO> fieldCascadeRuleDesList;
 
+    private List<PermissionVO> permissionList;
+
     @Encrypt
     private Long issueTypeId;
+
+    private Boolean allowedEditPermission;
+
+    public List<PermissionVO> getPermissionList() {
+        return permissionList;
+    }
+
+    public void setPermissionList(List<PermissionVO> permissionList) {
+        this.permissionList = permissionList;
+    }
+
+    public Boolean getAllowedEditPermission() {
+        return allowedEditPermission;
+    }
+
+    public void setAllowedEditPermission(Boolean allowedEditPermission) {
+        this.allowedEditPermission = allowedEditPermission;
+    }
 
     public Object getDefaultValueObj() {
         return defaultValueObj;
