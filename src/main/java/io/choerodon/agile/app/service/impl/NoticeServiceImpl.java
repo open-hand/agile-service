@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.infra.enums.StatusNoticeUserType;
 import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.NoticeMessageAssembler;
@@ -9,6 +10,7 @@ import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.MessageDTO;
 import io.choerodon.agile.infra.dto.MessageDetailDTO;
 import io.choerodon.agile.infra.feign.vo.MessageSettingVO;
+import io.choerodon.agile.infra.mapper.FieldValueMapper;
 import io.choerodon.agile.infra.mapper.NoticeDetailMapper;
 import io.choerodon.agile.infra.mapper.NoticeMapper;
 import io.choerodon.agile.infra.mapper.StarBeaconMapper;
@@ -50,6 +52,9 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Autowired
     private StarBeaconMapper starBeaconMapper;
+
+    @Autowired
+    private FieldValueMapper fieldValueMapper;
 
     private void getIds(List<MessageDTO> result, List<Long> ids) {
         for (MessageDTO messageDTO : result) {
@@ -160,6 +165,21 @@ public class NoticeServiceImpl implements NoticeService {
         }
     }
 
+    private void addUsersByCustomUserTypes(Long projectId, List<String> res, List<Long> result, IssueVO issueVO) {
+        //获取自定义人员字段编码
+        List<String> customUserTypes = new ArrayList<>(res);
+        customUserTypes.removeAll(Arrays.asList(StatusNoticeUserType.BASE_USER_TYPE_LIST));
+        //添加字段人员值
+        List<Long> customFieldUserIds = fieldValueMapper.selectUserIdByField(projectId, customUserTypes, issueVO.getIssueId());
+        if (!CollectionUtils.isEmpty(customFieldUserIds)) {
+            customFieldUserIds.forEach(userId -> {
+                if (!result.contains(userId)) {
+                    result.add(userId);
+                }
+            });
+        }
+    }
+
     @Override
     public List<Long> queryUserIdsByProjectId(Long projectId, String code, IssueVO issueVO) {
         ResponseEntity<MessageSettingVO> messageSetting = notifyFeignClient.getMessageSetting(projectId,"agile", code,null,null);
@@ -183,6 +203,8 @@ public class NoticeServiceImpl implements NoticeService {
         addUsersByUsers(res, result, users);
         //通知增加关注人
         addUsersByStarUsers(projectId, res, code, result, issueVO);
+        //通知增加自定义人员字段选项
+        addUsersByCustomUserTypes(projectId, res, result, issueVO);
         return result;
     }
 

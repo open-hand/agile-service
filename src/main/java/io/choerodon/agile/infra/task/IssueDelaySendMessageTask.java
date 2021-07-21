@@ -8,8 +8,10 @@ import io.choerodon.agile.app.service.PriorityService;
 import io.choerodon.agile.app.service.StatusService;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.StatusNoticeUserType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.NotifyFeignClient;
+import io.choerodon.agile.infra.mapper.FieldValueMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.StarBeaconMapper;
 import io.choerodon.asgard.schedule.annotation.JobTask;
@@ -76,6 +78,8 @@ public class IssueDelaySendMessageTask {
     private StatusService statusService;
     @Autowired
     private StarBeaconMapper starBeaconMapper;
+    @Autowired
+    private FieldValueMapper fieldValueMapper;
 
     @Value("${services.domain.url}")
     private String domainUrl;
@@ -320,11 +324,35 @@ public class IssueDelaySendMessageTask {
                     //问题逾期通知增加关注人
                     userTypeMap.put(STAR_USER, new HashSet<>(starBeaconMapper.selectUsersByInstanceId(projectId, x.getIssueId())));
                     addToMultiKeyMap(x, projectMessageVO, delayDay, multiKeyMap, userIds, userTypeMap);
+                    //问题逾期通知增加自定义人员字段选项
+                    addCustomUserType(organizationId, x, delayDay, receiverTypes, multiKeyMap, userIds);
                 }
             });
         });
         priorityMap.forEach((k, v) -> v.forEach(priorityNameMap::put));
         statusMap.forEach((k, v) -> v.forEach(statusNameMap::put));
+    }
+
+    private void addCustomUserType(Long organizationId,
+                                   IssueDTO issueDTO,
+                                   long delayDay,
+                                   Set<String> receiverTypes,
+                                   MultiKeyMap multiKeyMap,
+                                   Set<Long> userIds) {
+        List<String> customUserTypes = new ArrayList<>(receiverTypes);
+        customUserTypes.removeAll(Arrays.asList(StatusNoticeUserType.BASE_USER_TYPE_LIST));
+        if (!CollectionUtils.isEmpty(customUserTypes)) {
+            List<Long> customFieldUserIds = fieldValueMapper.selectUserIdByField(issueDTO.getProjectId(), customUserTypes, issueDTO.getIssueId());
+            if (!CollectionUtils.isEmpty(customFieldUserIds)) {
+                customFieldUserIds.forEach(userId -> {
+                    userIds.add(userId);
+                    addValueToMultiKeyMap(multiKeyMap,
+                            issueDTO.getProjectId(),
+                            userId,
+                            new IssueDelayCarrierVO(issueDTO, issueDTO.getIssueId(), delayDay, organizationId));
+                });
+            }
+        }
     }
 
     private void addAssigneeAndReporter(String userType, Long userId, Map<String, Set<Long>> userTypeMap, Set<Long> userIds) {
