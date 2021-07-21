@@ -645,12 +645,6 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                 fieldCascadeRuleVO.setFieldCascadeRuleOptionList(new ArrayList<>());
                 return;
             }
-            List<Long> defaultIds = fieldCascadeRuleVO.getFieldCascadeRuleOptionList()
-                    .stream()
-                    .filter(fieldCascadeRuleOptionVO -> Boolean.TRUE.equals(fieldCascadeRuleOptionVO.getDefaultOption()))
-                    .map(FieldCascadeRuleOptionVO::getCascadeOptionId)
-                    .collect(Collectors.toList());
-            fieldCascadeRuleVO.setDefaultIds(defaultIds);
 
             if (FieldType.MEMBER.equals(fieldCascadeRuleVO.getCascadeFieldType())
                     || FieldType.MULTI_MEMBER.equals(fieldCascadeRuleVO.getCascadeFieldType())) {
@@ -703,10 +697,16 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
 
     private Map<Long, UserMessageDTO> getDefaultUserMap(List<FieldCascadeRuleVO> fieldCascadeRuleList) {
         List<Long> userIds = new ArrayList<>();
-        fieldCascadeRuleList.stream().filter(fieldCascadeRuleVO ->
-                (fieldCascadeRuleVO.getCascadeFieldType().equals(FieldType.MEMBER) || fieldCascadeRuleVO.getCascadeFieldType().equals(FieldType.MULTI_MEMBER))
-                        && !CollectionUtils.isEmpty(fieldCascadeRuleVO.getDefaultIds()))
-                .forEach(fieldCascadeRuleVO -> userIds.addAll(fieldCascadeRuleVO.getDefaultIds()));
+        fieldCascadeRuleList.stream().filter(fieldCascadeRuleVO -> {
+            List<Long> defaultIds = fieldCascadeRuleVO.getFieldCascadeRuleOptionList()
+                    .stream()
+                    .filter(fieldCascadeRuleOptionVO -> Boolean.TRUE.equals(fieldCascadeRuleOptionVO.getDefaultOption()))
+                    .map(FieldCascadeRuleOptionVO::getCascadeOptionId)
+                    .collect(Collectors.toList());
+            fieldCascadeRuleVO.setDefaultIds(defaultIds);
+            return (fieldCascadeRuleVO.getCascadeFieldType().equals(FieldType.MEMBER) || fieldCascadeRuleVO.getCascadeFieldType().equals(FieldType.MULTI_MEMBER))
+                    && !CollectionUtils.isEmpty(fieldCascadeRuleVO.getDefaultIds());
+        }).forEach(fieldCascadeRuleVO -> userIds.addAll(fieldCascadeRuleVO.getDefaultIds()));
         if (CollectionUtils.isEmpty(userIds)) {
             return new HashMap<>(0);
         }
@@ -738,6 +738,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                 fieldCascadeRuleOptionDTO.setProjectId(projectId);
                 fieldCascadeRuleOptionDTO.setOrganizationId(organizationId);
                 fieldCascadeRuleOptionDTO.setFieldCascadeRuleId(fieldCascadeRuleId);
+                fieldCascadeRuleOptionDTO.setDefaultOption(fieldCascadeRuleOption.getDefaultOption());
                 fieldCascadeRuleOptionDTO.setCascadeOptionId(fieldCascadeRuleOption.getCascadeOptionId());
                 insertOptionList.add(fieldCascadeRuleOptionDTO);
             }
