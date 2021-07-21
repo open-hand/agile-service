@@ -125,7 +125,10 @@
             fd_field_value ffv
         JOIN fd_object_scheme_field fosf ON ffv.field_id = fosf.id
         WHERE
-            fosf.CODE = #{userType}
+            fosf.CODE IN
+            <foreach collection="userTypeList" item="userType" open="(" separator="," close=")">
+                #{userType}
+            </foreach>
           AND ffv.project_id = #{projectId}
           AND ffv.instance_id = #{issueId}
     </select>
