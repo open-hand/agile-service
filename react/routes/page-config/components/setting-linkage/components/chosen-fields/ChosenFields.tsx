@@ -1,16 +1,15 @@
 import React, {
-  useCallback, useEffect, useMemo, useState, useImperativeHandle,
+  useCallback, useEffect, useState,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { toJS } from 'mobx';
 import { DataSet } from 'choerodon-ui/pro';
 import { Icon } from 'choerodon-ui';
 import ChooseField, { useChoseField } from '@/components/chose-field';
 import { pageConfigApi } from '@/api';
 import classNames from 'classnames';
+import useDeepMemo from '@/hooks/useDeepMemo';
 import styles from './ChosenFields.less';
 import { IChosenField } from '../Rule/utils';
-import useDeepMemo from './useDeepMemo';
 
 interface Props {
   issueTypeId: string
