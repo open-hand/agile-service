@@ -114,6 +114,10 @@ function isSingle(field: IssueCreateFields | { fieldType: string }) {
   return includes(['radio', 'single', 'member'], field.fieldType);
 }
 
+function getValue(dataSet: DataSet, fieldCode: string) {
+  return toJS(dataSet.current?.get(fieldCode));
+}
+
 function getRuleDefaultValue(field: IssueCreateFields, rules: ICascadeLinkage[] = []) {
   const fieldRules = filter(rules, { cascadeFieldCode: field.fieldCode });
   if (filter(fieldRules, (rule) => rule.defaultValue || rule.defaultIds?.length).length === 1) { // 所有规则中只有1条设置了默认值
@@ -145,17 +149,17 @@ function getOptionsData(rules: ICascadeLinkage[] = [], dataSet: DataSet, field: 
   return ({
     ruleIds,
     // eslint-disable-next-line no-nested-ternary
-    selected: ruleIds?.length ? (isMultiple(field) ? dataSet.current?.get(field.fieldCode) : [dataSet.current?.get(field.fieldCode)]) : undefined,
+    selected: ruleIds?.length ? (isMultiple(field) ? getValue(dataSet, field.fieldCode) : [getValue(dataSet, field.fieldCode)]) : undefined,
   });
 }
 
-const hasValue = (dataSet: DataSet, field: IssueCreateFields) => (isMultiple(field) ? dataSet.current?.get(field.fieldCode)?.length : dataSet.current?.get(field.fieldCode));
+const hasValue = (dataSet: DataSet, field: IssueCreateFields) => (isMultiple(field) ? getValue(dataSet, field.fieldCode)?.length : getValue(dataSet, field.fieldCode));
 
 function cascadeFieldAfterLoad(dataSet: DataSet, list: any[], field: IssueCreateFields, rules: ICascadeLinkage[] = []) {
-  const key = afterLoadKeyMap.get(field.fieldId) || 'id';
-  const fieldCurrentValue = dataSet.current?.get(field.fieldCode);
+  const key = afterLoadKeyMap.get(field.fieldCode) || 'id';
+  const fieldCurrentValue = getValue(dataSet, field.fieldCode);
   const currentValueIsArr = Array.isArray(fieldCurrentValue);
-  if (!hasValue || (!currentValueIsArr ? !find(list, { [key]: fieldCurrentValue }) : some(fieldCurrentValue, (id) => !find(list, { [key]: id })))) {
+  if (!hasValue(dataSet, field) || (!currentValueIsArr ? !find(list, { [key]: fieldCurrentValue }) : some(fieldCurrentValue, (id) => !find(list, { [key]: id })))) {
     const defaultValue = getRuleDefaultValue(field as IssueCreateFields, rules);
     if (defaultValue) {
       dataSet.current?.set(field.fieldCode, isSingle(field) ? defaultValue : uniq([...filter(fieldCurrentValue, (id) => find(list, { [key]: id })), ...defaultValue]));
@@ -231,7 +235,7 @@ const CreateIssueBase = observer(({
   }, { data: cascadeRuleList = [] }] = useIssueCreateFields({ issueTypeId, projectId });
 
   const fieldValueArr = usePersistFn((field: IssueCreateFields) => {
-    let value = castArray(toJS(dataSet.current?.get(field.fieldCode)));
+    let value = castArray(getValue(dataSet, field.fieldCode));
     const preset = presets.get(field.fieldCode);
     if (preset) {
       if (preset.type === 'object') {
