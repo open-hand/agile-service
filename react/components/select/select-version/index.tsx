@@ -35,7 +35,7 @@ const SelectVersion: React.FC<Props> = forwardRef(({
         return request();
       }
       if (hasRule && fieldId) {
-        return fieldApi.project(projectId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, 0);
+        return fieldApi.project(projectId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, 0, statusArr);
       }
       return versionApi.project(projectId || getProjectId()).loadNamesByStatus(statusArr);
     },
