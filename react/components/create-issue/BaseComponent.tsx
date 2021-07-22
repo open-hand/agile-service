@@ -118,7 +118,7 @@ function getRuleDefaultValue(field: IssueCreateFields, rules: ICascadeLinkage[] 
   const fieldRules = filter(rules, { cascadeFieldCode: field.fieldCode });
   if (filter(fieldRules, (rule) => rule.defaultValue || rule.defaultIds?.length).length === 1) { // 所有规则中只有1条设置了默认值
     const defaultValueRule = find(fieldRules, (rule) => rule.defaultValue || rule.defaultIds?.length) as ICascadeLinkage;
-    return defaultValueRule.defaultValue || isSingle({ fieldType: defaultValueRule.cascadeFieldType }) ? defaultValueRule.defaultIds?.length && defaultValueRule.defaultIds[0] : defaultValueRule.defaultIds;
+    return defaultValueRule.defaultValue || (isSingle({ fieldType: defaultValueRule.cascadeFieldType }) ? defaultValueRule.defaultIds?.length && defaultValueRule.defaultIds[0] : defaultValueRule.defaultIds);
   }
   return undefined;
 }
