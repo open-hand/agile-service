@@ -100,7 +100,8 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
             FieldCode.SPRINT,
             FieldCode.LABEL,
             FieldCode.FEATURE,
-            FieldCode.PI
+            FieldCode.PI,
+            FieldCode.ENVIRONMENT
     ).collect(Collectors.toSet());
 
     @Override
