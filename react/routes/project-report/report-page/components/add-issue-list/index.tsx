@@ -191,7 +191,6 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
         store={issueSearchStore}
         onClear={refresh}
         onChange={refresh}
-        onClickSaveFilter={() => { }}
       />
       {/* @ts-ignore */}
       <IssueTable

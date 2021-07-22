@@ -1,4 +1,6 @@
-import React, { useMemo, forwardRef } from 'react';
+import React, {
+  useMemo, forwardRef, useImperativeHandle, Ref,
+} from 'react';
 import { Select, Tooltip } from 'choerodon-ui/pro';
 import { featureApi } from '@/api';
 import { find } from 'lodash';
@@ -15,10 +17,11 @@ interface Props extends Partial<SelectProps> {
   flat?: boolean
   request?: SelectConfig<Issue>['request']
   projectId?: string
+  useSelectRef?: Ref<SelectProps>
 }
 
 const SelectFeature: React.FC<Props> = forwardRef(({
-  dataRef, featureId, featureName, afterLoad, request, flat, projectId, ...otherProps
+  dataRef, featureId, featureName, afterLoad, request, flat, projectId, useSelectRef, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<Issue> => ({
     name: 'feature',
@@ -61,6 +64,7 @@ const SelectFeature: React.FC<Props> = forwardRef(({
     paging: true,
   }), [featureId, request, featureName]);
   const props = useSelect(config);
+  useImperativeHandle(useSelectRef, () => props);
   const Component = flat ? FlatSelect : Select;
 
   return (

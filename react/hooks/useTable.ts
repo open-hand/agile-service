@@ -39,8 +39,11 @@ interface PaginatedParams {
   page: number
   size: number
   sort?: string
+  isTree: boolean
 }
-type TableRequest = ({ page, size, sort }: PaginatedParams) => Promise<any>
+type TableRequest = ({
+  page, size, sort, isTree,
+}: PaginatedParams) => Promise<any>
 interface Options {
   rowKey: string
   autoQuery?: boolean
@@ -49,10 +52,11 @@ interface Options {
   defaultVisibleColumns?: string[]
   defaultChecked?: string[]
   isTree?: boolean
+  checkBefore?: () => void
 }
 export default function useTable(getData: TableRequest, options: Options) {
   const {
-    autoQuery = true, defaultPage, defaultPageSize, defaultChecked, defaultVisibleColumns, isTree = true, rowKey,
+    autoQuery = true, defaultPage, defaultPageSize, defaultChecked, defaultVisibleColumns, isTree = true, rowKey, checkBefore,
   } = options ?? {};
   const [pageSize, setPageSize] = useState(defaultPageSize ?? 10);
   const [current, setCurrent] = useState(defaultPage ?? 1);
@@ -64,6 +68,9 @@ export default function useTable(getData: TableRequest, options: Options) {
   const [sort, setSort] = useState({ sortType: undefined, sortColumn: undefined });
   const handleCheckChange = usePersistFn((value, key) => {
     if (value) {
+      if (checkBefore) {
+        checkBefore();
+      }
       checkValues.push(key);
     } else {
       checkValues.splice(checkValues.indexOf(key), 1);
@@ -72,6 +79,9 @@ export default function useTable(getData: TableRequest, options: Options) {
   });
   const handleCheckAllChange = usePersistFn((value) => {
     if (value) {
+      if (checkBefore) {
+        checkBefore();
+      }
       setCheckValues(uniq([...checkValues, ...data.map((i) => get(i, rowKey))]));
     } else {
       setCheckValues(checkValues.filter((key) => !find(data, { [rowKey]: key })));
@@ -83,6 +93,7 @@ export default function useTable(getData: TableRequest, options: Options) {
       page: newPage ?? 1,
       size: pageSize,
       sort: sort.sortColumn && sort.sortType ? `${sort.sortColumn},${sort.sortType}` : undefined,
+      isTree,
     });
     batchedUpdates(() => {
       setData(res.list);
@@ -99,7 +110,7 @@ export default function useTable(getData: TableRequest, options: Options) {
   });
   useUpdateEffect(() => {
     query(current);
-  }, [current, pageSize, sort]);
+  }, [current, pageSize, sort, isTree]);
   const onPaginationChange = useCallback((page: number, size: number) => {
     setCurrent(page);
     setPageSize(size);

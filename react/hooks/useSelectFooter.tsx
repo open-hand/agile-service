@@ -8,7 +8,7 @@ export default function useSelectFooter(ref: RefObject<Select>, footer: React.Re
     ...menu,
     footer,
   ]);
-  return {
+  return footer ? {
     popupContent,
-  };
+  } : {};
 }

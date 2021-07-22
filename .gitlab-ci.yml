@@ -12,7 +12,7 @@ include: https://api.choerodon.com.cn/devops/v1/projects/1528/ci_contents/pipeli
 #    - npm config set "//${NPM_REPO}:_authToken" "${NPM_TOKEN}"
 #    - npm config set "//${NPM_REGISTRY}:_authToken" "${NPM_TOKEN}"
 #    - npm config set always-auth true
-#    - yarn install --registry "https://${NPM_REPO}" --sass-binary-site=http://npm.taobao.org/mirrors/node-sass
+#  - npm install --registry "https://${NPM_REPO}"
 #    - chmod -R 755 node_modules
 #    - npm run compile
 #    - npm publish --registry "https://${NPM_REGISTRY}"
