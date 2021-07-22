@@ -116,12 +116,6 @@ const DraggableIBaseItem: React.FC<Props> = ({
       style={getStyle(provided.draggableProps.style)}
       className={classnames(`${prefixCls}`, { [`${prefixCls}-split`]: showSplitLine }, draggingClassName)}
     >
-      {/* <div
-        role="none"
-        className={`${prefixCls}-item ${prefixCls}-item-text`}
-      >
-        {renderDefaultValue()}
-      </div> */}
       {renderColumns([
         <div className={`${prefixCls}-item`} {...provided.dragHandleProps}>
           {renderFieldName()}

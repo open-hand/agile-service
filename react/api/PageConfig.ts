@@ -110,6 +110,29 @@ export interface ICascadeRule {
   id?: number
 }
 
+type IPageFieldCreatePermissionScope = 'read' | 'write'
+export interface IPageFieldCreatePermissionItem {
+  scope: IPageFieldCreatePermissionScope
+  userIds: string[]
+}
+export interface IPageFieldCreatePermissionRoleItem {
+  scope: IPageFieldCreatePermissionScope
+  roleIds: string[]
+}
+interface IPageFieldCreatePermission {
+  fields: Array<{ id: string, code: string }>
+  permissions: Array<IPageFieldCreatePermissionItem>
+  issueTypeIds: string[]
+}
+
+export interface IPageFieldPermissionItem {
+  roleIds: string[]
+  roleList: null
+  scope: IPageFieldCreatePermissionScope
+  userList: null
+  userIds: string[]
+}
+
 class PageConfigApi extends Api<PageConfigApi> {
   get prefix() {
     return `/agile/v1/projects/${this.projectId}`;
@@ -200,6 +223,21 @@ class PageConfigApi extends Api<PageConfigApi> {
     return axios({
       method: 'get',
       url: `${this.prefixOrgOrPro}/object_scheme_field/configs`,
+      params: {
+        issueTypeId,
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  /**
+   * 根据问题类型加载页面模板
+   * @param issueTypeId
+   */
+  loadTemplateByIssueType(issueTypeId: string): Promise<PageIssueType> {
+    return axios({
+      method: 'get',
+      url: `${this.prefixOrgOrPro}/object_scheme_field/page_template`,
       params: {
         issueTypeId,
         organizationId: getOrganizationId(),
@@ -352,7 +390,7 @@ class PageConfigApi extends Api<PageConfigApi> {
   /**
    * 查询最近导入记录
    */
-  loadLastImportRecord(action = 'upload_file_customer_field'):Promise<IImportOrExportRecord> {
+  loadLastImportRecord(action = 'upload_file_customer_field'): Promise<IImportOrExportRecord> {
     return axios({
       method: 'get',
       url: `${this.prefixOrgOrPro}/excel/latest`,
@@ -409,6 +447,54 @@ class PageConfigApi extends Api<PageConfigApi> {
       url: `${this.prefix}/field_cascade_rule/${ruleId}/option`,
       params: {
         extendParams,
+      },
+    });
+  }
+
+  /**
+   * 创建权限
+   * @param data
+   * @returns
+   */
+  createPermission(data: IPageFieldCreatePermission) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/field_permission/create`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+      data,
+    });
+  }
+
+  /**
+     * 批量创建权限
+     * @param data
+     * @returns
+     */
+  batchCreatePermission(data: IPageFieldCreatePermission) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/field_permission/batch_create`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+      data,
+    });
+  }
+
+  /**
+     * 根据字段id查询权限
+     * @param data
+     * @returns
+     */
+  loadFieldPermission(field: string, issueTypeId: string): Promise<IPageFieldPermissionItem[]> {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/field_permission/filed_Id/${field}`,
+      params: {
+        organizationId: getOrganizationId(),
+        issueTypeId,
       },
     });
   }
