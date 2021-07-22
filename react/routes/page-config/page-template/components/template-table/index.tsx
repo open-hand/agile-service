@@ -52,7 +52,7 @@ const PageTemplateTable: React.FC<IPageTemplateTableProps> = () => {
     ,
   }), [handleCheckAllChange, handleCheckChange, sortTableDataSet]);
 
-  const visibleColumns = useMemo(() => [checkBoxColumn, ...getColumns({ issueTypeId: currentIssueTypeId })], [checkBoxColumn, currentIssueTypeId]);
+  const visibleColumns = useMemo(() => [checkBoxColumn, ...getColumns({ issueTypeId: currentIssueTypeId, loadData: pageTemplateStore.loadData })], [checkBoxColumn, currentIssueTypeId]);
   return (
     <AutoSize>
       {({ height }) => (

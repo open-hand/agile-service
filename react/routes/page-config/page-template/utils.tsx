@@ -1,8 +1,9 @@
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import React from 'react';
 import {
-  Button, Modal, Spin, message, Select, Tooltip, PerformanceTable, Icon, Dropdown, CheckBox,
+  Button, Modal, Spin, message, Select, PerformanceTable, Icon, Dropdown, CheckBox,
 } from 'choerodon-ui/pro';
+import { Tooltip } from 'choerodon-ui';
 import TableDropMenu from '@/components/table-drop-menu';
 import { pageConfigApi } from '@/api';
 import ToggleFieldValue from '../components/toggle-field-value';
@@ -49,7 +50,7 @@ function checkPermissionRole(data: { createdLevel: string }) {
   return createdLevel === 'project';
 }
 
-const getColumns = ({ issueTypeId }: { issueTypeId: string }) => ([
+const getColumns = ({ issueTypeId, loadData }: { issueTypeId: string, loadData: () => void }) => ([
 
   {
     title: '字段名称',
@@ -81,6 +82,11 @@ const getColumns = ({ issueTypeId }: { issueTypeId: string }) => ([
     key: 'cascadeInfo',
     flexGrow: 1,
     // width: 120,
+    render: ({ rowData }: any) => (rowData.get('fieldCascadeRuleDesList')?.length ? (
+      <Tooltip title={`设置级联${rowData.get('fieldCascadeRuleDesList').map((item: { cascadeFieldName: string }) => item.cascadeFieldName).join('、')}`}>
+        <span>{`设置级联${rowData.get('fieldCascadeRuleDesList').map((item: { cascadeFieldName: string }) => item.cascadeFieldName).join('、')}`}</span>
+      </Tooltip>
+    ) : ''),
   },
   {
     title: '操作',
@@ -93,7 +99,6 @@ const getColumns = ({ issueTypeId }: { issueTypeId: string }) => ([
           text: '权限配置',
           action: async () => {
             const res = await pageConfigApi.loadFieldPermission(rowData.get('fieldId'), issueTypeId);
-            console.log('res', res);
             openPageRoleConfigModal({ fields: [{ id: rowData.get('fieldId'), code: rowData.get('fieldCode') }], data: res, issueTypeId });
           },
           display: checkPermissionRole({ createdLevel: rowData.get('createdLevel') }),
@@ -108,7 +113,7 @@ const getColumns = ({ issueTypeId }: { issueTypeId: string }) => ([
                 fieldCode: rowData.get('fieldCode'),
                 system: rowData.get('createdLevel') === 'system',
               },
-              onOk: () => { },
+              onOk: loadData,
             });
           },
           display: checkPermissionLinkage(rowData.toData()),
