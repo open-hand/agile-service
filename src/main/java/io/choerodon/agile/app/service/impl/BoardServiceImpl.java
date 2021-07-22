@@ -105,6 +105,8 @@ public class BoardServiceImpl implements BoardService {
     private ObjectMapper objectMapper;
     @Autowired
     private LinkIssueStatusLinkageService linkIssueStatusLinkageService;
+    @Autowired
+    private IssueService issueService;
 
     @Override
     public void create(Long projectId, String boardName) {
@@ -573,8 +575,7 @@ public class BoardServiceImpl implements BoardService {
          */
         try {
             statusFieldSettingService.handlerSettingToUpdateIssue(projectId,issueId);
-            transformFlag = statusLinkageService.updateParentStatus(projectId,issueId,SchemeApplyType.AGILE, influenceIssueIds);
-            linkIssueStatusLinkageService.updateLinkIssueStatus(projectId, issueId, SchemeApplyType.AGILE, influenceIssueIds);
+            transformFlag = issueService.updateInfluenceIssueStatus(projectId, issueId, SchemeApplyType.AGILE, influenceIssueIds);
         }
         catch (Exception e) {
             stateMachineClientService.cleanInstanceCache(projectId,issueId,SchemeApplyType.AGILE);

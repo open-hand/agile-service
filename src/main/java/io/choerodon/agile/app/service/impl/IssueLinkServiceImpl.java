@@ -7,11 +7,15 @@ import io.choerodon.agile.app.assembler.IssueLinkAssembler;
 import io.choerodon.agile.app.service.IssueLinkService;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.LinkIssueStatusLinkageService;
+import io.choerodon.agile.infra.dto.LinkIssueStatusLinkageDTO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.IssueLinkDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.IssueLinkMapper;
+import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.IssueTypeMapper;
+import io.choerodon.agile.infra.mapper.LinkIssueStatusLinkageMapper;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.domain.Page;
@@ -26,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -54,6 +59,10 @@ public class IssueLinkServiceImpl implements IssueLinkService {
     private ModelMapper modelMapper;
     @Autowired
     private LinkIssueStatusLinkageService linkIssueStatusLinkageService;
+    @Autowired
+    private LinkIssueStatusLinkageMapper linkIssueStatusLinkageMapper;
+    @Autowired
+    private IssueMapper issueMapper;
 
     @Override
     public IssueLinkResponseVO createIssueLinkList(List<IssueLinkCreateVO> issueLinkCreateVOList, Long issueId, Long projectId) {
@@ -68,7 +77,7 @@ public class IssueLinkServiceImpl implements IssueLinkService {
         });
         // 创建链接时候触发关联问题联动
         Set<Long> influenceIssueIds = new HashSet<>();
-        linkIssueStatusLinkageService.updateLinkIssueStatus(projectId, issueId, SchemeApplyType.AGILE, influenceIssueIds);
+        issueService.updateInfluenceIssueStatus(projectId, issueId, SchemeApplyType.AGILE, influenceIssueIds);
         IssueLinkResponseVO response = new IssueLinkResponseVO();
         response.setIssueLinks(listIssueLinkByIssueId(issueId, projectId, false));
         response.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
@@ -165,5 +174,70 @@ public class IssueLinkServiceImpl implements IssueLinkService {
             searchVO.getAdvancedSearchArgs().put(ISSUE_TYPE_ID, issueTypeIds);
         }
         return issueService.listIssueWithSub(projectId, searchVO, pageRequest, organizationId);
+    }
+
+    @Override
+    public List<Long> checkLinkIssueCycle(Long projectId, Long issueId, Long linkTypeId, List<Long> linkIssueIds) {
+        if (CollectionUtils.isEmpty(linkIssueIds)) {
+            return new ArrayList<>();
+        }
+        IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
+        List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, linkIssueIds, null);
+        if (CollectionUtils.isEmpty(issueDTOS)) {
+            return new ArrayList<>();
+        }
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        List<IssueLinkChangeVO> issueLinkChangeVOS = issueLinkMapper.issueLinkChangeByProjectId(projectId);
+        if (CollectionUtils.isEmpty(issueLinkChangeVOS)) {
+            issueLinkChangeVOS = new ArrayList<>();
+        }
+        Map<Long, IssueDTO> linkIssueMap = issueDTOS.stream().collect(Collectors.toMap(IssueDTO::getIssueId, Function.identity()));
+        List<Long> illegalLinkIssueIds = new ArrayList<>();
+        LinkIssueStatusLinkageDTO linkIssueStatusLinkageDTO = new LinkIssueStatusLinkageDTO(null, null, projectId, organizationId);
+        linkIssueStatusLinkageDTO.setLinkTypeId(linkTypeId);
+        List<LinkIssueStatusLinkageDTO> linkageDTOS = linkIssueStatusLinkageMapper.select(linkIssueStatusLinkageDTO);
+        Map<Long, List<LinkIssueStatusLinkageDTO>> linkageGroupMap = new HashMap<>();
+        if (!CollectionUtils.isEmpty(linkageDTOS)) {
+            linkageGroupMap.putAll(linkageDTOS.stream().collect(Collectors.groupingBy(LinkIssueStatusLinkageDTO::getIssueTypeId)));
+        }
+        for (Long linkIssueId : linkIssueIds) {
+            Map<Long, List<Long>> influenceMap = new HashMap<>();
+            IssueDTO linkIssue = linkIssueMap.getOrDefault(linkIssueId, null);
+            List<LinkIssueStatusLinkageDTO> linkages = linkageGroupMap.getOrDefault(issueDTO.getIssueTypeId(), new ArrayList<>());
+            // 构造issue和关联issue的关系
+            List<IssueLinkChangeVO> list = new ArrayList<>();
+            Long linkIssueStatusId = handlerIssueLinkChangeVOS(issueDTO, linkIssue, linkages, list);
+            List<LinkIssueStatusLinkageDTO> linkIssueStatusLinkageDTOS = linkageGroupMap.getOrDefault(linkIssue.getIssueTypeId(), new ArrayList<>());
+            handlerIssueLinkChangeVOS(linkIssue, issueDTO, linkIssueStatusLinkageDTOS, list);
+            list.addAll(issueLinkChangeVOS);
+            Map<Long, List<IssueLinkChangeVO>> issueLinkChangeGroup = list.stream().collect(Collectors.groupingBy(IssueLinkChangeVO::getIssueId));
+            InfluenceIssueVO influenceIssueVO = new InfluenceIssueVO();
+
+            issueService.handlerInfluenceMap(influenceMap, linkIssueId, linkIssueStatusId, issueLinkChangeGroup, null, influenceIssueVO);
+            // 判断是否出现环
+            List<Long> statusIds = influenceMap.getOrDefault(linkIssueId, new ArrayList<>());
+            if (statusIds.contains(issueDTO.getStatusId())) {
+                illegalLinkIssueIds.add(linkIssueId);
+            }
+        }
+        return illegalLinkIssueIds;
+    }
+
+    private Long  handlerIssueLinkChangeVOS(IssueDTO issueDTO, IssueDTO linkIssue, List<LinkIssueStatusLinkageDTO> linkages, List<IssueLinkChangeVO> list){
+        Long statusId = null;
+        for (LinkIssueStatusLinkageDTO linkageDTO : linkages) {
+            Boolean issueStatusEqual = Objects.equals(issueDTO.getStatusId(), linkIssue.getStatusId());
+            Boolean issueTypeEqual = Objects.equals(linkageDTO.getLinkIssueTypeId(), linkIssue.getIssueTypeId());
+            if (issueStatusEqual && issueTypeEqual ) {
+                IssueLinkChangeVO issueLinkChangeVO = new IssueLinkChangeVO();
+                issueLinkChangeVO.setIssueId(issueDTO.getIssueId());
+                issueLinkChangeVO.setStatusId(linkageDTO.getStatusId());
+                issueLinkChangeVO.setLinkedIssueId(linkIssue.getIssueId());
+                issueLinkChangeVO.setLinkIssueStatusId(linkageDTO.getLinkIssueStatusId());
+                list.add(issueLinkChangeVO);
+                statusId = linkageDTO.getLinkIssueStatusId();
+            }
+        }
+        return statusId;
     }
 }

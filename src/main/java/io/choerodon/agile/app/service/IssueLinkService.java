@@ -66,4 +66,14 @@ public interface IssueLinkService {
      * @return 测试用例未关联的问题
      */
     Page<IssueListFieldKVVO> listUnLinkIssue(Long issueId, Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId);
+
+    /**
+     * 校验关联问题时状态联动是否会出现死循环
+     * @param projectId
+     * @param issueId
+     * @param linkTypeId
+     * @param linkIssueIds
+     * @return
+     */
+    List<Long> checkLinkIssueCycle(Long projectId, Long issueId,  Long linkTypeId, List<Long> linkIssueIds);
 }

@@ -44,6 +44,8 @@ import org.hzero.core.base.AopProxy;
 import org.hzero.core.message.MessageAccessor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -71,6 +73,8 @@ import java.util.stream.Stream;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(IssueServiceImpl.class);
     @Autowired
     private IssueAccessDataService issueAccessDataService;
     @Autowired
@@ -283,6 +287,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private WorkLogMapper workLogMapper;
     @Autowired
     private VerifyUpdateUtil verifyUpdateUtil;
+    @Autowired
+    private StatusMachineTransformMapper statusMachineTransformMapper;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -998,8 +1004,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
          */
         try {
             statusFieldSettingService.handlerSettingToUpdateIssue(projectId, issueId);
-            boolean transformFlag = statusLinkageService.updateParentStatus(projectId, issueId, applyType, influenceIssueIds);
-            linkIssueStatusLinkageService.updateLinkIssueStatus(projectId, issueId, applyType, influenceIssueIds);
+            boolean transformFlag = updateInfluenceIssueStatus(projectId, issueId, applyType, influenceIssueIds);
             if (transformFlag) {
                 return null;
             } else {
@@ -1010,6 +1015,145 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         } catch (Exception e) {
             stateMachineClientService.cleanInstanceCache(projectId, issueId, applyType);
             throw new CommonException("error.update.status.transform.setting", e);
+        }
+    }
+
+    @Override
+    public Boolean updateInfluenceIssueStatus(Long projectId, Long issueId, String applyType, Set<Long> influenceIssueIds) {
+        Map<Long, List<Long>> allInfluenceMap = new HashMap<>();
+        IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
+        InfluenceIssueVO influenceIssueVO = new InfluenceIssueVO();
+        List<IssueLinkChangeVO> issueLinkChangeVOS = issueLinkMapper.issueLinkChangeByProjectId(projectId);
+        if (CollectionUtils.isEmpty(issueLinkChangeVOS)) {
+            issueLinkChangeVOS = new ArrayList<>();
+        }
+        Map<Long, List<IssueLinkChangeVO>> issueLinkChangeGroup = issueLinkChangeVOS.stream().collect(Collectors.groupingBy(IssueLinkChangeVO::getIssueId));
+        // 查询issue的联动路径
+        statusLinkageService.getUpdateParentStatusIssue(projectId, issueDTO, issueDTO.getStatusId(), applyType, influenceIssueVO, allInfluenceMap, issueLinkChangeGroup);
+        handlerInfluenceMap(allInfluenceMap, issueId, issueDTO.getStatusId(), issueLinkChangeGroup, null, influenceIssueVO);
+        if (CollectionUtils.isEmpty(allInfluenceMap)) {
+            return true;
+        }
+        Set<Long> linkIssueIds = allInfluenceMap.keySet();
+        List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, new ArrayList<>(linkIssueIds), null);
+        Map<Long, IssueDTO> issueDTOMap = new HashMap<>();
+        if (CollectionUtils.isEmpty(issueDTOS)) {
+            return true;
+        }
+        issueDTOMap.putAll(issueDTOS.stream().collect(Collectors.toMap(IssueDTO::getIssueId, Function.identity())));
+        List<InfluenceIssueVO> childrenVO = influenceIssueVO.getChildrenVO();
+        Boolean transformFlag = true;
+        if (!CollectionUtils.isEmpty(childrenVO)) {
+            // 处理需要联动的issue
+            for (InfluenceIssueVO influenceVO : childrenVO) {
+                Boolean transformFlag1 = handlerInfluenceIssue(projectId, applyType, influenceVO, issueDTOMap, issueId);
+                if (transformFlag && !transformFlag1) {
+                    transformFlag = transformFlag1;
+                }
+            }
+        }
+        // 返回受影响的issue
+        influenceIssueIds.addAll(allInfluenceMap.keySet());
+        return transformFlag;
+    }
+
+    private Boolean handlerInfluenceIssue(Long projectId, String applyType, InfluenceIssueVO influenceIssueVO, Map<Long, IssueDTO> issueDTOMap, Long linkIssueId) {
+        Long issueId = influenceIssueVO.getIssueId();
+        Long statusId = influenceIssueVO.getStatusId();
+        IssueDTO influenceIssue = issueMapper.selectByPrimaryKey(linkIssueId);
+        IssueDTO issue = issueMapper.selectByPrimaryKey(issueId);
+        if (Objects.equals("bug", issue.getTypeCode()) && !ObjectUtils.isEmpty(issue.getRelateIssueId()) && !Objects.equals(issue.getRelateIssueId(), 0L)) {
+            return true;
+        }
+        if (Objects.equals(issue.getStatusId(), statusId)) {
+            return true;
+        }
+        // 变更issue的状态和更新属性
+        Boolean transformFlag = executionUpdateInfluenceIssue(issue, statusId, influenceIssue, projectId, applyType);
+        Boolean isSub = Objects.equals("sub_task",influenceIssue.getTypeCode()) || (Objects.equals("bug",influenceIssue.getTypeCode()) && !ObjectUtils.isEmpty(influenceIssue.getRelateIssueId()) && Objects.equals(influenceIssue.getRelateIssueId(), 0L));
+        if (!transformFlag && isSub) {
+            return transformFlag;
+        }
+        LOGGER.info("项目{}下状态联动触发问题编号为{}的issue状态变更",issue.getProjectId(),issue.getIssueNum());
+        // 处理当前issue会影响的issue
+        List<InfluenceIssueVO> childrenVO = influenceIssueVO.getChildrenVO();
+        if (!CollectionUtils.isEmpty(childrenVO)) {
+            for (InfluenceIssueVO issueVO : childrenVO) {
+                Boolean transformFlag1 = handlerInfluenceIssue(projectId, applyType, issueVO, issueDTOMap, issueId);
+                if (transformFlag && !transformFlag1) {
+                    transformFlag = transformFlag1;
+                }
+            }
+        }
+        return transformFlag;
+    }
+
+    private Boolean executionUpdateInfluenceIssue(IssueDTO issue, Long executionStatusId, IssueDTO influenceIssue, Long projectId, String applyType) {
+        Boolean transFormFlag = true;
+        Long issueId = issue.getIssueId();
+        // 获取当前状态对应的transformId
+        Long stateMachineId = projectConfigService.queryStateMachineId(projectId, applyType, issue.getIssueTypeId());
+        // 获取开始状态和结束状态查询转换Id
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        List<StatusMachineTransformDTO> statusMachineTransformDTOS = statusMachineTransformMapper
+                .selectTransformByStatusId(organizationId, stateMachineId, issue.getStatusId(), executionStatusId, false);
+        if (CollectionUtils.isEmpty(statusMachineTransformDTOS)){
+            statusMachineTransformDTOS = statusMachineTransformMapper
+                    .selectTransformByStatusId(organizationId, stateMachineId, issue.getStatusId(),  executionStatusId, true);
+        }
+        if (CollectionUtils.isEmpty(statusMachineTransformDTOS)) {
+            return !Objects.equals("agile", applyType);
+        }
+        StatusMachineTransformDTO statusTransform = statusMachineTransformDTOS.get(0);
+        stateMachineClientService.executeTransform(projectId, issueId, statusTransform.getId(), issue.getObjectVersionNumber(), applyType, new InputDTO(issueId, "updateStatus", updateTrigger(true, influenceIssue)));
+        if (SchemeApplyType.AGILE.equals(applyType)) {
+            IssueConvertDTO issueConvertDTO = new IssueConvertDTO();
+            issueConvertDTO.setIssueId(issueId);
+            issueConvertDTO.setStayDate(new Date());
+            issueConvertDTO.setObjectVersionNumber(issueMapper.selectByPrimaryKey(issueId).getObjectVersionNumber());
+            issueAccessDataService.updateSelective(issueConvertDTO);
+        }
+        // 更新属性
+        statusFieldSettingService.handlerSettingToUpdateIssue(projectId, issueId);
+        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        if (agilePluginService != null) {
+            agilePluginService.storyLinkageFeature(projectId, issue,applyType);
+        }
+        return transFormFlag;
+    }
+
+    @Override
+    public void handlerInfluenceMap(Map<Long, List<Long>> influenceMap, Long issueId, Long statusId, Map<Long, List<IssueLinkChangeVO>> issueLinkChangeGroup, Long influenceId, InfluenceIssueVO influenceIssueVO) {
+        if (ObjectUtils.isEmpty(issueId)) {
+            return;
+        }
+        List<Long> statusIds = influenceMap.getOrDefault(issueId, new ArrayList<>());
+        if (!statusIds.contains(statusId)) {
+            statusIds.add(statusId);
+            influenceMap.put(issueId, statusIds);
+        } else {
+            return;
+        }
+        influenceIssueVO.setIssueId(issueId);
+        influenceIssueVO.setStatusId(statusId);
+        List<IssueLinkChangeVO> issueLinkChangeVOS = issueLinkChangeGroup.get(issueId);
+        if (CollectionUtils.isEmpty(issueLinkChangeVOS)) {
+            return;
+        }
+        Map<Long, List<IssueLinkChangeVO>> issueLinkChangeGroupByStatus = issueLinkChangeVOS.stream().collect(Collectors.groupingBy(IssueLinkChangeVO::getStatusId));
+        List<IssueLinkChangeVO> linkChangeVOS = issueLinkChangeGroupByStatus.get(statusId);
+        if (!CollectionUtils.isEmpty(linkChangeVOS)) {
+            List<InfluenceIssueVO> influenceIssueVOS = new ArrayList<>();
+            for (IssueLinkChangeVO linkChangeVO : linkChangeVOS) {
+                List<Long> linkIssueStatusIds = influenceMap.getOrDefault(linkChangeVO.getLinkedIssueId(), new ArrayList<>());
+                if (linkIssueStatusIds.contains(linkChangeVO.getLinkIssueStatusId())) {
+                    continue;
+                }
+                InfluenceIssueVO influenceIssue = new InfluenceIssueVO();
+                handlerInfluenceMap(influenceMap, linkChangeVO.getLinkedIssueId(), linkChangeVO.getLinkIssueStatusId(), issueLinkChangeGroup, issueId, influenceIssue);
+                influenceIssueVOS.add(influenceIssue);
+            }
+            influenceIssueVO.setChildrenVO(influenceIssueVOS);
         }
     }
 

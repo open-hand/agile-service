@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.IssueLinkChangeVO;
 import io.choerodon.mybatis.common.BaseMapper;
 import io.choerodon.agile.infra.dto.*;
 import org.apache.ibatis.annotations.Param;
@@ -48,4 +49,6 @@ public interface IssueLinkMapper extends BaseMapper<IssueLinkDTO> {
     List<IssueLinkDTO> listIssueLinkByBatch(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
 
     List<IssueLinkDTO> listIssueLinkByIssueIds(@Param("projectId") Long projectId);
+
+    List<IssueLinkChangeVO> issueLinkChangeByProjectId(@Param("projectId") Long projectId);
 }
