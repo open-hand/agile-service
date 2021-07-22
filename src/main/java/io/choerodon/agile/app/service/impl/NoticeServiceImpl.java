@@ -169,6 +169,9 @@ public class NoticeServiceImpl implements NoticeService {
         //获取自定义人员字段编码
         List<String> customUserTypes = new ArrayList<>(res);
         customUserTypes.removeAll(Arrays.asList(StatusNoticeUserType.BASE_USER_TYPE_LIST));
+        if (CollectionUtils.isEmpty(customUserTypes)) {
+            return;
+        }
         //添加字段人员值
         List<Long> customFieldUserIds = fieldValueMapper.selectUserIdByField(projectId, customUserTypes, issueVO.getIssueId());
         if (!CollectionUtils.isEmpty(customFieldUserIds)) {
