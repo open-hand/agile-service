@@ -1,6 +1,6 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select, Tooltip } from 'choerodon-ui/pro';
-import { versionApi } from '@/api';
+import { fieldApi, versionApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IVersion } from '@/common/types';
@@ -16,17 +16,26 @@ interface Props extends Partial<SelectProps> {
   request?: Function
   flat?:boolean
   hasUnassign?: boolean
+  ruleIds?: string[]
+  selected?: string[]
+  fieldId?: string
 }
 const SelectVersion: React.FC<Props> = forwardRef(({
-  request, projectId, valueField, dataRef = { current: null }, afterLoad, statusArr = [], flat, hasUnassign, ...otherProps
+  request, projectId, valueField, ruleIds, selected, fieldId, dataRef = { current: null }, afterLoad, statusArr = [], flat, hasUnassign, ...otherProps
 }, ref: React.Ref<Select>) => {
+  const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
+  const hasRule = Object.keys(args).filter((key: keyof typeof args) => Boolean(args[key])).length > 0;
   const config = useMemo((): SelectConfig<IVersion> => ({
     name: 'version',
     textField: 'name',
     valueField: valueField || 'name',
-    request: () => {
+    requestArgs: args,
+    request: ({ requestArgs, filter, page }) => {
       if (request) {
         return request();
+      }
+      if (hasRule && fieldId) {
+        return fieldApi.project(projectId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, 0);
       }
       return versionApi.project(projectId || getProjectId()).loadNamesByStatus(statusArr);
     },
@@ -46,8 +55,8 @@ const SelectVersion: React.FC<Props> = forwardRef(({
       return newVersion;
     },
     tooltip: true,
-    paging: false,
-  }), [projectId]);
+    paging: hasRule,
+  }), [afterLoad, args, dataRef, fieldId, hasRule, hasUnassign, projectId, request, statusArr, valueField]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
 

@@ -152,15 +152,15 @@ function getOptionsData(rules: ICascadeLinkage[] = [], dataSet: DataSet, field: 
 const hasValue = (dataSet: DataSet, field: IssueCreateFields) => (isMultiple(field) ? dataSet.current?.get(field.fieldCode)?.length : dataSet.current?.get(field.fieldCode));
 
 function cascadeFieldAfterLoad(dataSet: DataSet, list: any[], field: IssueCreateFields, rules: ICascadeLinkage[] = []) {
-  const key = afterLoadKeyMap.get(field.fieldId) || 'id';
-  const fieldCurrentValue = dataSet.current?.get(field.fieldCode);
+  const key = afterLoadKeyMap.get(field.fieldCode) || 'id';
+  const fieldCurrentValue = toJS(dataSet.current?.get(field.fieldCode));
   const currentValueIsArr = Array.isArray(fieldCurrentValue);
-  if (!hasValue || (!currentValueIsArr ? !find(list, { [key]: fieldCurrentValue }) : some(fieldCurrentValue, (id) => !find(list, { [key]: id })))) {
+  if (!hasValue(dataSet, field) || (!currentValueIsArr ? !find(list, { [key]: fieldCurrentValue }) : some(fieldCurrentValue, (id) => !find(list, { [key]: id })))) {
     const defaultValue = getRuleDefaultValue(field as IssueCreateFields, rules);
     if (defaultValue) {
       dataSet.current?.set(field.fieldCode, isSingle(field) ? defaultValue : uniq([...filter(fieldCurrentValue, (id) => find(list, { [key]: id })), ...defaultValue]));
     } else {
-      dataSet.current?.set(field.fieldCode, undefined);
+      // dataSet.current?.set(field.fieldCode, undefined);
     }
   }
 }

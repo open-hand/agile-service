@@ -1,11 +1,11 @@
 import React, { useMemo, forwardRef } from 'react';
-import { Select, Tooltip } from 'choerodon-ui/pro';
-import { componentApi } from '@/api';
+import { Select } from 'choerodon-ui/pro';
+import { componentApi, fieldApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IComponent } from '@/common/types';
 import { FlatSelect } from '@choerodon/components';
-import { find, toArray, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 
 interface Props extends Partial<SelectProps> {
   dataRef?: React.MutableRefObject<any>
@@ -13,17 +13,25 @@ interface Props extends Partial<SelectProps> {
   afterLoad?: (components: IComponent[]) => void
   flat?: boolean
   projectId?: string
-  selected?: IComponent[]
+  extraOptions?: IComponent[]
+  ruleIds?: string[]
+  selected?: string[]
+  fieldId?: string
 }
 
 const SelectComponent: React.FC<Props> = forwardRef(({
-  dataRef, afterLoad, valueField, flat, projectId, selected, ...otherProps
+  dataRef, afterLoad, valueField, flat, projectId, extraOptions, ruleIds, selected, fieldId, ...otherProps
 }, ref: React.Ref<Select>) => {
+  const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
+  const hasRule = Object.keys(args).filter((key: keyof typeof args) => Boolean(args[key])).length > 0;
   const config = useMemo((): SelectConfig<IComponent> => ({
     name: 'component',
     textField: 'name',
     valueField: valueField || 'componentId',
-    request: ({ page, filter }) => componentApi.loadAllComponents(filter, projectId, page, 50),
+    requestArgs: args,
+    request: hasRule && fieldId
+      ? ({ requestArgs, filter, page }) => fieldApi.project(projectId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, 50)
+      : ({ page, filter }) => componentApi.loadAllComponents(filter, projectId, page, 50),
     middleWare: (components) => {
       // @ts-ignore
       let data = components || [];
@@ -32,8 +40,8 @@ const SelectComponent: React.FC<Props> = forwardRef(({
           current: data,
         });
       }
-      if (selected) {
-        selected.forEach((item) => {
+      if (extraOptions) {
+        extraOptions.forEach((item) => {
           data.push(item);
         });
       }
@@ -45,7 +53,7 @@ const SelectComponent: React.FC<Props> = forwardRef(({
     },
     paging: true,
     tooltip: true,
-  }), [dataRef, projectId, selected, valueField, flat]);
+  }), [valueField, args, hasRule, fieldId, projectId, dataRef, extraOptions, afterLoad]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
 
