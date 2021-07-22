@@ -1,7 +1,7 @@
 import { axios } from '@choerodon/boot';
-import { AxiosRequestConfig } from 'axios';
 import { IFieldType } from '@/common/types';
 import { getProjectId, getOrganizationId, getMenuType } from '@/utils/common';
+import { sameProject } from '@/utils/detail';
 import Api from './Api';
 import { IImportOrExportRecord } from './Issue';
 
@@ -413,7 +413,7 @@ class PageConfigApi extends Api<PageConfigApi> {
   }
 
   getCascadeRuleList(issueTypeId: string, fieldId?: string) {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/field_cascade_rule`,
       params: {
@@ -445,9 +445,6 @@ class PageConfigApi extends Api<PageConfigApi> {
     return axios({
       method: 'get',
       url: `${this.prefix}/field_cascade_rule/${ruleId}/option`,
-      params: {
-        extendParams,
-      },
     });
   }
 

@@ -8,7 +8,7 @@ import { usePersistFn } from 'ahooks';
 
 interface BasicProps extends Partial<SelectProps> {
 
-  selected?: string[]
+  selected?: string[] | string
   extraOptions?: any[]
   flat?: boolean
   projectId?: string

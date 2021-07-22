@@ -147,9 +147,10 @@ function getOptionsData(rules: ICascadeLinkage[] = [], dataSet: DataSet, field: 
   const fieldRules = filter(rules, { cascadeFieldCode: field.fieldCode });
   const ruleIds = fieldRules.length ? map(fieldRules, 'id') : undefined;
   return ({
+    extendParams: field.fieldCode === 'fixVersion' ? ['sprint_planning', 'started'] : undefined,
     ruleIds,
     // eslint-disable-next-line no-nested-ternary
-    selected: ruleIds?.length ? (isMultiple(field) ? getValue(dataSet, field.fieldCode) : [getValue(dataSet, field.fieldCode)]) : undefined,
+    selected: ruleIds?.length && getValue(dataSet, field.fieldCode) ? (isMultiple(field) ? getValue(dataSet, field.fieldCode) : [getValue(dataSet, field.fieldCode)]) : undefined,
   });
 }
 
@@ -163,8 +164,6 @@ function cascadeFieldAfterLoad(dataSet: DataSet, list: any[], field: IssueCreate
     const defaultValue = getRuleDefaultValue(field as IssueCreateFields, rules);
     if (defaultValue) {
       dataSet.current?.set(field.fieldCode, isSingle(field) ? defaultValue : uniq([...filter(fieldCurrentValue, (id) => find(list, { [key]: id })), ...defaultValue]));
-    } else {
-      // dataSet.current?.set(field.fieldCode, undefined);
     }
   }
 }

@@ -51,7 +51,7 @@ import TextArea from '@/components/TextArea';
     const { fieldCode, fieldName, textStyle } = field;
     const issue = store.getIssue;
     const { featureVO = {} } = issue;
-
+    const required = field?.required || store.getRuleRequired(field);
     const value = feature ? featureVO && featureVO[fieldCode] : issue[fieldCode];
     return (
       <div className="line-start mt-10">
@@ -70,6 +70,7 @@ import TextArea from '@/components/TextArea';
             initValue={value}
             editor={(
               <TextArea
+                required={required}
                 autoSize
                 maxLength={feature ? 100 : 44}
               />

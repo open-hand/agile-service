@@ -32,7 +32,7 @@ import { withRouter } from 'react-router-dom';
       reporterRealName, reporterLoginName,
     } = issue;
     const field = store.getFieldByCode('reporter');
-    const required = field?.required;
+    const required = field?.required || store.getRuleRequired(field);
 
     return (
       <div className="line-start mt-10">

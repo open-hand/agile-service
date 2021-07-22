@@ -148,6 +148,13 @@ function EditIssue() {
         pageCode: 'agile_issue_edit',
       };
       const fields = await fieldApi.project(programId ?? projectId).org(organizationId).outside(outside).getFieldAndValue(id, param);
+
+      // 根据问题类型查询rules
+      if (!outside && !otherProject) {
+        const rules = await pageConfigApi.project(programId ?? projectId).org(organizationId).getCascadeRuleList(issue.issueTypeId);
+        store.setIssueTypeRules(rules);
+      }
+
       const { description, issueTypeVO: { typeCode, id: typeId } } = issue;
       if (!disabled && (!description || description === JSON.stringify([{ insert: '\n' }]))) { // 加载默认模板
         const issueTemplateInfo = await pageConfigApi.project(projectId).loadTemplateByType(issue.issueTypeId) || {};

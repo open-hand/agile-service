@@ -2,6 +2,7 @@ import React, { useContext, Fragment } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import useIsInProgram from '@/hooks/useIsInProgram';
+import { includes } from 'lodash';
 import {
   FieldAssignee, FieldVersion, FieldStatus, FieldSprint, FieldText,
   FieldReporter, FieldPriority, FieldLabel, FieldFixVersion, FieldPI,
@@ -121,9 +122,11 @@ const IssueField = observer((props) => {
     const isFeatureVisible = isShowFeature && typeCode === 'story';
     fields = fields.slice(0, isFeatureVisible ? 9 : 10);
   }
+
+  const ruleHiddenFields = store.getRuleHiddenFields();
   return (
     <div className="c7n-content-wrapper IssueField">
-      {issueId ? fields.map((field) => <Fragment key={field.id}>{getFieldComponent(field)}</Fragment>) : ''}
+      {issueId ? fields.filter((field) => !includes(ruleHiddenFields, field.fieldCode)).map((field) => <Fragment key={field.id}>{getFieldComponent(field)}</Fragment>) : ''}
     </div>
   );
 });

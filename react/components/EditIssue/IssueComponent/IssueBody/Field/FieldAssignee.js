@@ -30,7 +30,7 @@ import UserTag from '@/components/tag/user-tag';
       assigneeLoginName, assigneeName, assigneeRealName,
     } = issue;
     const field = store.getFieldByCode('assignee');
-    const required = field?.required;
+    const required = field?.required || store.getRuleRequired(field);
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">

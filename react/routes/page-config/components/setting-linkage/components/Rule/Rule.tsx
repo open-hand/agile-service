@@ -18,7 +18,7 @@ const Rule: React.FC<Props> = ({ record }) => {
     const getRelOptionList = async () => {
       const currentFieldRelOptionList = [...(toJS(record?.get('fieldRelOptionList')) || [])];
       if (currentFieldRelOptionList.find((item: { value: string, meaning?: string}) => !item.meaning)) {
-        const res: {cascadeOptionName: string, cascadeOptionId: string }[] = await pageConfigApi.getCascadeRelOptionList(record.get('id')); // 请求结果
+        const res: {cascadeOptionName: string, cascadeOptionId: string }[] = await pageConfigApi.getCascadeRelOptionList(record.get('id'));
         const newRelOptionList = currentFieldRelOptionList.map((item) => {
           if (item.value && item.meaning) {
             return item;
