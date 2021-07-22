@@ -94,7 +94,6 @@ const presets = new Map([
 const afterLoadKeyMap = new Map([
   ['component', 'componentId'],
   ['priority', 'id'],
-  ['environment', 'valueCode'],
   ['fixVersion', 'versionId'],
   ['influceVersion', 'versionId'],
   ['subProject', 'projectId'],
@@ -479,7 +478,6 @@ const CreateIssueBase = observer(({
           hidden: getRuleHidden(field, rules),
         };
       }
-      case 'environment':
       case 'component':
       case 'fixVersion':
       case 'influenceVersion':
@@ -494,7 +492,7 @@ const CreateIssueBase = observer(({
         return {
           afterLoad: (priorities: Priority[]) => {
             const defaultPriority = find(priorities, { default: true });
-            if (defaultPriority) {
+            if (defaultPriority && !hasValue(dataSet, field as IssueCreateFields)) {
               dataSet.current?.set('priority', defaultPriority.id);
             }
             cascadeFieldAfterLoad(dataSet, priorities, field as IssueCreateFields, rules);
