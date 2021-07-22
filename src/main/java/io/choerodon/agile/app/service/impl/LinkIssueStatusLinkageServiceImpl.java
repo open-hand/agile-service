@@ -233,13 +233,10 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
         }
         LinkIssueStatusLinkageDTO linkIssueStatusLinkageDTO = new LinkIssueStatusLinkageDTO(projectId, organizationId);
         linkIssueStatusLinkageDTO.setIssueTypeId(linkageVO.getIssueTypeId());
+        linkIssueStatusLinkageDTO.setStatusId(linkageVO.getStatusId());
+        linkIssueStatusLinkageDTO.setLinkTypeId(linkageVO.getLinkTypeId());
         linkIssueStatusLinkageDTO.setLinkIssueTypeId(linkageVO.getLinkIssueTypeId());
         List<LinkIssueStatusLinkageDTO> dtos = linkIssueStatusLinkageMapper.select(linkIssueStatusLinkageDTO);
-
-        LinkIssueStatusLinkageDTO linkIssueStatusLinkage = new LinkIssueStatusLinkageDTO(projectId, organizationId);
-        linkIssueStatusLinkage.setIssueTypeId(linkageVO.getLinkIssueTypeId());
-        linkIssueStatusLinkage.setLinkIssueTypeId(linkageVO.getIssueTypeId());
-        List<LinkIssueStatusLinkageDTO> linkIssueStatusLinkageDTOS = linkIssueStatusLinkageMapper.select(linkIssueStatusLinkage);
         // 获取项目的状态
         ProjectVO projectVO = ConvertUtil.queryProject(projectId);
         String applyType = ProjectCategory.checkContainProjectCategory(projectVO.getCategories(), ProjectCategory.MODULE_PROGRAM) ? SchemeApplyType.PROGRAM : SchemeApplyType.AGILE;
@@ -250,11 +247,6 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
         if (!CollectionUtils.isEmpty(dtos) ) {
             filterStatusIds.addAll(dtos.stream().map(LinkIssueStatusLinkageDTO::getLinkIssueStatusId).collect(Collectors.toList()));
         }
-
-        if (!CollectionUtils.isEmpty(linkIssueStatusLinkageDTOS) ) {
-            filterStatusIds.addAll(linkIssueStatusLinkageDTOS.stream().map(LinkIssueStatusLinkageDTO::getStatusId).collect(Collectors.toList()));
-        }
-
         if(!CollectionUtils.isEmpty(filterStatusIds)){
             statusVOS = statusVOS.stream().filter(v -> !filterStatusIds.contains(v.getId())).collect(Collectors.toList());
         }

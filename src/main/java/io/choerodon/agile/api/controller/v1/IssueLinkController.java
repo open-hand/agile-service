@@ -116,4 +116,16 @@ public class IssueLinkController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.Issue.listUnLinkIssue"));
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("关联issue判断是否会形成环")
+    @PostMapping(value = "/check_link_issue_cycle")
+    public ResponseEntity<List<Long>> checkLinkIssueCycle(@ApiParam(value = "项目id", required = true)
+                                                          @PathVariable(name = "project_id") Long projectId,
+                                                          @ApiParam(value = "项目id", required = true)
+                                                          @RequestParam @Encrypt Long issueId,
+                                                          @RequestParam @Encrypt Long linkTypeId,
+                                                          @RequestBody List<Long> linkIssueIds) {
+        return new ResponseEntity<>(issueLinkService.checkLinkIssueCycle(projectId, issueId, linkTypeId, linkIssueIds), HttpStatus.OK);
+    }
 }

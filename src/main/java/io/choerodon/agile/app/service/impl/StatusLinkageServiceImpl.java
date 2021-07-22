@@ -1,8 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.IssueTypeVO;
-import io.choerodon.agile.api.vo.StatusLinkageVO;
-import io.choerodon.agile.api.vo.StatusVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.IssueTypeExtendDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
@@ -226,6 +224,74 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
             return changeParentStatus(projectId, applyType, parentIssue, changeStatus, issueDTO);
         }
         return true;
+    }
+
+    @Override
+    public void getUpdateParentStatusIssue(Long projectId, IssueDTO issue, Long statusId, String applyType, InfluenceIssueVO influenceIssueVO, Map<Long, List<Long>> allInfluenceMap, Map<Long, List<IssueLinkChangeVO>> issueLinkChangeGroup) {
+        if (ObjectUtils.isEmpty(issue)) {
+            throw new CommonException("error.issue.null");
+        }
+        Long issueId = issue.getIssueId();
+        // 判断issue是不是子任务或者子bug
+        Boolean checkBugOrSubTask = checkIsSubBugOrSubTask(issue);
+        if (Boolean.FALSE.equals(checkBugOrSubTask)) {
+            return;
+        }
+
+        List<StatusLinkageDTO> statusLinkageDTOS = queryByStatusIdAndIssueTypeId(projectId, issue.getIssueTypeId(), issue.getStatusId());
+        if (CollectionUtils.isEmpty(statusLinkageDTOS)) {
+            return;
+        }
+        Map<Long, StatusLinkageDTO> statusLinkageDTOMap = statusLinkageDTOS.stream().collect(Collectors.toMap(StatusLinkageDTO::getParentIssueTypeId, Function.identity()));
+        Long parentIssueId = getParentIssueId(issue);
+        IssueDTO parentIssue = issueMapper.selectByPrimaryKey(parentIssueId);
+        StatusLinkageDTO statusLinkageDTO = statusLinkageDTOMap.get(parentIssue.getIssueTypeId());
+        if (ObjectUtils.isEmpty(statusLinkageDTO)) {
+            return;
+        }
+        // 统计子任务的状态
+        Boolean isChange = false;
+        Long changeStatus = null;
+        // 查询父任务的子任务
+        List<IssueDTO> issueDTOS = issueMapper.querySubIssueByParentIssueId(projectId, parentIssueId);
+        for (IssueDTO dto : issueDTOS) {
+            List<Long> influenceStatusIds = allInfluenceMap.getOrDefault(dto.getIssueId(), new ArrayList<>());
+            if (!CollectionUtils.isEmpty(influenceStatusIds)) {
+                dto.setStatusId(influenceStatusIds.get(influenceStatusIds.size() -1));
+            }
+        }
+        List<Long> issueTypeIds = issueDTOS.stream().map(IssueDTO::getIssueTypeId).collect(Collectors.toList());
+        List<StatusLinkageDTO> select = statusLinkageMapper.listByIssueTypeIdsParentTypeId(projectId,parentIssue.getIssueTypeId(),issueTypeIds,statusLinkageDTO.getParentIssueStatusSetting());
+        Map<Long, List<StatusLinkageDTO>> linkageDTOMap = select.stream().collect(Collectors.groupingBy(StatusLinkageDTO::getIssueTypeId));
+        Map<String, List<IssueDTO>> issueMap = issueDTOS.stream().collect(Collectors.groupingBy(IssueDTO::getTypeCode));
+        if (select.size() == 1 && statusLinkageDTO.getIssueTypeId().equals(issue.getIssueTypeId())) {
+            isChange = handlerSingleIssueType(Arrays.asList(statusLinkageDTO), issueMap, issue.getTypeCode());
+            changeStatus = getChangeStatus(isChange, statusLinkageDTO);
+        } else {
+            Map<String, Object> variables = new HashMap<>();
+            handlerMultiSetting(variables, select, issue, issueMap, linkageDTOMap, issueDTOS);
+            isChange = BooleanUtils.toBoolean(variables.get("isChange").toString());
+            Object changeStatus1 = variables.get("changeStatus");
+            changeStatus = !ObjectUtils.isEmpty(changeStatus1) ? Long.valueOf(changeStatus1.toString()) : null;
+        }
+        if (isChange) {
+            List<Long> statusIds = allInfluenceMap.getOrDefault(parentIssueId, new ArrayList<>());
+            if(statusIds.contains(changeStatus)){
+                allInfluenceMap.put(0L, new ArrayList<>());
+                return;
+            }
+            InfluenceIssueVO influenceIssue = new InfluenceIssueVO();
+            influenceIssue.setIssueId(parentIssueId);
+            influenceIssue.setStatusId(changeStatus);
+            issueService.handlerInfluenceMap(allInfluenceMap, parentIssueId, changeStatus, issueLinkChangeGroup, issueId, influenceIssueVO);
+            List<InfluenceIssueVO> childrenVOS = influenceIssueVO.getChildrenVO();
+            if(CollectionUtils.isEmpty(childrenVOS)){
+                childrenVOS = new ArrayList<>();
+            }
+            childrenVOS.add(influenceIssue);
+            influenceIssueVO.setChildrenVO(childrenVOS);
+        }
+
     }
 
     @Override
