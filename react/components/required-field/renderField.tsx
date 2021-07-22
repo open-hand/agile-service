@@ -119,7 +119,7 @@ export default function renderField<T extends Partial<SelectProps>>({
       return (
         <TextArea
           name={fieldCode}
-          rows={3}
+          autoSize
           maxLength={255}
           valueChangeAction={'input' as any}
           style={{ width: '100%' }}
