@@ -536,6 +536,7 @@ const CreateIssueBase = observer(({
       }
       case 'single': case 'multiple': case 'checkbox': case 'radio': {
         return {
+          ...getOptionsData(rules, dataSet, field),
           hidden: getRuleHidden(field, rules),
           afterLoad: (res:any) => cascadeFieldAfterLoad(dataSet, res, field as IssueCreateFields, rules),
         };
