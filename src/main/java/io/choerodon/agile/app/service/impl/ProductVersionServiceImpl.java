@@ -47,6 +47,7 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     private static final String PIECHART = AGILE + "PieChart";
     private static final String FIX_VERSION = "fixVersion";
     private static final String VERSION_STATUS_PLAN_CODE = "version_planning";
+    private static final String CUSTOM_CHART = AGILE + "CustomChart";
 
     @Autowired
     private ProductVersionCreateAssembler productVersionCreateAssembler;
@@ -463,7 +464,10 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         if (productVersionMapper.updateOptional(versionDTO, fieldList.toArray(new String[0])) != 1) {
             throw new CommonException(UPDATE_ERROR);
         }
-        redisUtil.deleteRedisCache(new String[]{PIECHART + versionDTO.getProjectId() + ':' + FIX_VERSION + "*"});
+        redisUtil.deleteRedisCache(new String[]{
+                PIECHART + versionDTO.getProjectId() + ':' + FIX_VERSION + "*",
+                CUSTOM_CHART + versionDTO.getProjectId() + ":" + "*"
+        });
         return productVersionMapper.selectByPrimaryKey(versionDTO.getVersionId());
     }
 
@@ -478,7 +482,10 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         if (productVersionMapper.updateByPrimaryKeySelective(versionDTO) != 1) {
             throw new CommonException(UPDATE_ERROR);
         }
-        redisUtil.deleteRedisCache(new String[]{PIECHART + versionDTO.getProjectId() + ':' + FIX_VERSION + "*"});
+        redisUtil.deleteRedisCache(new String[]{
+                PIECHART + versionDTO.getProjectId() + ':' + FIX_VERSION + "*",
+                CUSTOM_CHART + versionDTO.getProjectId() + ":" + "*"
+        });
         return productVersionMapper.selectByPrimaryKey(versionDTO.getVersionId());
     }
 

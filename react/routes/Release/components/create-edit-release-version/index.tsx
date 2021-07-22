@@ -86,7 +86,7 @@ const CreatePublishVersion: React.FC<{ modal?: IModalProps } & Partial<PublishVe
     </Form>
   );
 };
-function openCreatReleaseVersionModal(props: PublishVersionModalProps) {
+function openCreateReleaseVersionModal(props: PublishVersionModalProps) {
   const key = Modal.key();
   Modal.open({
     key,
@@ -112,4 +112,4 @@ function openEditReleaseVersionModal(props: PublishVersionModalWithEditProps) {
 
   });
 }
-export { openCreatReleaseVersionModal, openEditReleaseVersionModal };
+export { openCreateReleaseVersionModal, openEditReleaseVersionModal };

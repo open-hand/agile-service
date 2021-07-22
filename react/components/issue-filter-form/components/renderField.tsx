@@ -35,7 +35,7 @@ function noticeForceUpdate() {
 }
 export default function renderField<T extends Partial<SelectProps>>(field: IChosenFieldField, otherComponentProps: T | Partial<DatePickerProps> | any,
   { dataSet, useSelectUserForceRefreshHook }: {
-    dataSet: DataSet, useSelectUserForceRefreshHook?: [any, React.Dispatch<React.SetStateAction<any>>]
+    dataSet?: DataSet, useSelectUserForceRefreshHook?: [any, React.Dispatch<React.SetStateAction<any>>]
   }) {
   const {
     code, fieldType, name, fieldOptions, value, id,
@@ -63,8 +63,8 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
             name={code}
             isProgram={code === 'statusList'}
             multiple
-            issueTypeIds={(dataSet.current?.get('issueTypeList') ?? dataSet.current?.get('issueTypeId')) ?? undefined}
-            selectedIds={dataSet.current?.get('statusList') ?? dataSet.current?.get('statusId')}
+            issueTypeIds={(dataSet?.current?.get('issueTypeList') ?? dataSet?.current?.get('issueTypeId')) ?? undefined}
+            selectedIds={dataSet?.current?.get('statusList') ?? dataSet?.current?.get('statusId')}
             {...otherComponentProps}
           />
         );
@@ -102,10 +102,10 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
             name={code}
             multiple
             afterLoad={(piList) => {
-              if (!dataSet.current?.getState(`init_${code}`) && !defaultValue && Array.isArray(piList) && piList.length > 0) {
+              if (!dataSet?.current?.getState(`init_${code}`) && !defaultValue && Array.isArray(piList) && piList.length > 0) {
                 const data = find(piList, { statusCode: 'doing' }) ?? piList[0];
-                dataSet.current?.set(field.code, [data.id]);
-                dataSet.current?.setState(`init_${code}`, true);
+                dataSet?.current?.set(field.code, [data.id]);
+                dataSet?.current?.setState(`init_${code}`, true);
               }
             }}
             {...otherComponentProps}
@@ -115,6 +115,9 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
       case 'quickFilterIds':
       case 'myStarBeacon': {
         return <QuickFilterField name={code} multiple disabledRequest={code === 'myStarBeacon'} {...otherComponentProps} />;
+      }
+      case 'myAssigned': {
+        return <QuickFilterField name={code} multiple disabledRequest={code === 'myAssigned'} {...otherComponentProps} />;
       }
       case 'starBeacon': {
         return <CheckBox label="我的关注" name={code} />;
@@ -127,6 +130,9 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
       }
       case 'tags': {
         return <SelectMultiServiceTag name={code} multiple clearButton {...otherComponentProps} defaultValue={defaultValue} />;
+      }
+      case 'contents': {
+        return <TextField name={code} clearButton {...otherComponentProps} />;
       }
       default:
         break;
@@ -167,16 +173,13 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
       );
     case 'number':
       return (
-        <div>
-          <NumberField
-            name={code}
-            label={name}
-            style={{ width: '100%' }}
+        <NumberField
+          name={code}
+          label={name}
+          style={{ width: '100%' }}
             // @ts-ignore
-            {...otherComponentProps}
-          // step={isCheck ? 0.1 : 1}
-          />
-        </div>
+          {...otherComponentProps}
+        />
       );
     case 'input':
       return (

@@ -42,6 +42,7 @@ interface IFieldPostData extends FiledOptions {
   objectVersionNumber?: number,
   issueTypeIds: string[] // 问题类型id
   extraConfig: any,
+  createdLevel: string // 创建层级
   syncIssueType?: string[] // 同步主默认值的问题类型
 }
 export type IFieldPostDataProps = IFieldPostData;
@@ -81,9 +82,6 @@ function CreateField() {
     const contextValue = formDataSet.current?.get('context');
     const currentValue = record?.get('valueCode');
     return { disabled: !record?.get('enabled') || disabledContextArr?.includes(record?.get('id')) };
-    return {
-      disabled: currentValue === 'global' ? contextValue.length > 0 && contextValue.indexOf('global') < 0 : contextValue.indexOf('global') >= 0,
-    };
   };
 
   // 创建或者编辑的提交操作
@@ -115,7 +113,7 @@ function CreateField() {
         const userIds = Array.isArray(originDefaultValue) ? originDefaultValue : [originDefaultValue];
         set(postData, 'localDefaultObj', userDataRef.current?.filter((item) => userIds.includes(item.id)) || {});
       }
-      return validResult && onSubmitLocal({ ...postData, defaultValue: originDefaultValue });
+      return validResult && onSubmitLocal({ ...postData, createdLevel: type, defaultValue: originDefaultValue });
     }
     const fieldId = formDataSet.current?.get('id');
     const url = isEdit ? `/agile/v1/${type}s/${id}/object_scheme_field/${fieldId}?organizationId=${organizationId}` : `/agile/v1/${type}s/${id}/object_scheme_field?organizationId=${organizationId}`;
@@ -375,7 +373,7 @@ function CreateField() {
           <TextField
             name="name"
             valueChangeAction={'input' as any}
-            placeholder="问题的属性字段，例如：实际完成时间"
+            placeholder="请输入字段名称，例如：实际完成时间"
           />
           <div>
             <Select

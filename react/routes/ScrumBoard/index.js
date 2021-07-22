@@ -3,11 +3,11 @@ import {
   Route,
   Switch,
 } from 'react-router-dom';
-import { asyncRouter, nomatch } from '@choerodon/boot';
+import { nomatch } from '@choerodon/boot';
 import { PermissionRoute } from '@choerodon/master';
 
-const ScrumBoardHome = asyncRouter(() => (import('./ScrumBoardHome')));
-const Setting = asyncRouter(() => (import('./setting')));
+const ScrumBoardHome = React.lazy(() => (import('./ScrumBoardHome')));
+const Setting = React.lazy(() => (import('./setting')));
 
 const ScrumBoardIndex = ({ match }) => (
   <Switch>

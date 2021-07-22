@@ -5,7 +5,7 @@ import {
 } from 'react-router-dom';
 import { ModalContainer } from 'choerodon-ui/pro';
 import {
-  asyncLocaleProvider, stores, nomatch, Charts,
+  asyncLocaleProvider, stores, nomatch,
 } from '@choerodon/boot';
 import 'moment/locale/zh-cn';
 import 'moment/locale/en-nz';
@@ -33,6 +33,7 @@ const ProjectReport = React.lazy(() => import('./routes/project-report'));
 const GanttPage = React.lazy(() => import('./routes/gantt'));
 const UiPreview = React.lazy(() => import('./routes/ui-preview'));
 const KanbanTemplateDetail = React.lazy(() => import('./routes/kanban-template/detail'));
+
 const { AppState } = stores;
 export function getRoutes(match) {
   return [

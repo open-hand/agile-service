@@ -11,7 +11,7 @@ import {
   map, set, get, pick,
 } from 'lodash';
 import { useUnmount, usePersistFn } from 'ahooks';
-import CreateIssue from '@/components/CreateIssue';
+import openCreateIssue from '@/components/create-issue';
 import Loading from '@/components/Loading';
 import { projectApi } from '@/api/Project';
 import useIssueTableFields from '@/hooks/data/useIssueTableFields';
@@ -113,6 +113,7 @@ const Issue = observer(({ cached, updateCache }) => {
     const whiteList = ['type', 'category', 'id', 'name', 'organizationId'];
     return Object.keys(obj).some((key) => !whiteList.includes(key));
   }, []);
+
   const initFilter = usePersistFn(async () => {
     const {
       paramChoose, paramCurrentVersion, paramCurrentSprint, paramId,
@@ -270,6 +271,17 @@ const Issue = observer(({ cached, updateCache }) => {
   const closeBatchModal = useCallback(() => {
     tableProps.setCheckValues([]);
   }, [tableProps]);
+  const handleOpenCreateIssue = usePersistFn(() => {
+    openCreateIssue({
+      onCreate: handleCreateIssue,
+      defaultValues: {
+        summary: IssueStore.defaultSummary,
+      },
+      defaultAssignee: IssueStore.defaultAssignee,
+      defaultTypeId: IssueStore.defaultTypeId,
+      // chosenSprint={IssueStore.defaultSprint}
+    });
+  });
   return (
     <Page
       className="c7nagile-issue"
@@ -281,9 +293,7 @@ const Issue = observer(({ cached, updateCache }) => {
           {
             name: '创建问题',
             icon: 'playlist_add',
-            handler: () => {
-              IssueStore.createQuestion(true);
-            },
+            handler: handleOpenCreateIssue,
             display: true,
           },
           {
@@ -301,7 +311,7 @@ const Issue = observer(({ cached, updateCache }) => {
               const visibleColumns = (cached?.listLayoutColumns || defaultListLayoutColumns).filter((item) => item.display).map((item) => item.columnCode);
               openExportIssueModal(
                 issueSearchStore.getAllFields,
-                issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()].filter(((c) => !['issueIds', 'contents', 'userId'].includes(c.code))) : [],
+                issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()].filter(((c) => !['issueIds', 'userId'].includes(c.code))) : [],
                 tableFields || [],
                 visibleColumns,
                 tableListMode,
@@ -382,29 +392,13 @@ const Issue = observer(({ cached, updateCache }) => {
           setDefaultSprint={IssueStore.setDefaultSprint}
           IssueStore={IssueStore}
           onSummaryClick={handleSummaryClick}
+          onOpenCreateIssue={handleOpenCreateIssue}
         />
         <FilterManage
           visible={IssueStore.filterListVisible}
           setVisible={IssueStore.setFilterListVisible}
           issueSearchStore={issueSearchStore}
         />
-        {IssueStore.getCreateQuestion && (
-          <CreateIssue
-            visible={IssueStore.getCreateQuestion}
-            onCancel={() => {
-              IssueStore.createQuestion(false);
-              IssueStore.setDefaultSummary(undefined);
-              IssueStore.setDefaultTypeId(undefined);
-              IssueStore.setDefaultSprint(undefined);
-              IssueStore.setDefaultAssignee(undefined);
-            }}
-            onOk={handleCreateIssue}
-            defaultTypeId={IssueStore.defaultTypeId}
-            defaultSummary={IssueStore.defaultSummary}
-            chosenSprint={IssueStore.defaultSprint}
-            chosenAssignee={IssueStore.defaultAssignee}
-          />
-        )}
         {tableProps.checkValues.length > 0 && (
           <BatchModal
             issueSearchStore={issueSearchStore}

@@ -5,11 +5,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.dto.IssueSprintDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.PageUtil;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.utils.PageUtils;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,21 +49,37 @@ public class GanttChartServiceImpl implements GanttChartService {
     private ObjectMapper objectMapper;
 
     @Override
-    public List<GanttChartVO> listByTask(Long projectId, SearchVO searchVO) {
+    public Page<GanttChartVO> pagedQuery(Long projectId,
+                                         SearchVO searchVO,
+                                         PageRequest pageRequest) {
         if (isSprintEmpty(searchVO)) {
             throw new CommonException("error.otherArgs.sprint.empty");
         }
-        List<GanttChartVO> result = listByProjectIdAndSearch(projectId, searchVO, true);
-        return toTree(result);
+        return listByProjectIdAndSearch(projectId, searchVO, pageRequest);
     }
 
-    private List<GanttChartVO> listByProjectIdAndSearch(Long projectId,
+    @Override
+    public List<GanttChartVO> listByIds(Long projectId, Set<Long> issueIds) {
+        if (ObjectUtils.isEmpty(issueIds)) {
+            return new ArrayList<>();
+        }
+        List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(projectId, new ArrayList<>(issueIds), null, false);
+        Map<Long, Date> completedDateMap =
+                issueMapper.selectActuatorCompletedDateByIssueIds(new ArrayList<>(issueIds), projectId)
+                        .stream()
+                        .collect(Collectors.toMap(GanttChartVO::getIssueId, GanttChartVO::getActualCompletedDate));
+        List<GanttChartVO> result = buildFromIssueDto(issueDTOList, projectId, completedDateMap);
+        return result;
+    }
+
+    private Page<GanttChartVO> listByProjectIdAndSearch(Long projectId,
                                                         SearchVO searchVO,
-                                                        Boolean isTreeView) {
+                                                        PageRequest pageRequest) {
+        Page<GanttChartVO> emptyPage = PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
         //设置不查询史诗
         boolean illegalIssueTypeId = buildIssueType(searchVO, projectId);
         if (illegalIssueTypeId) {
-            return new ArrayList<>();
+            return emptyPage;
         }
         Boolean condition = issueService.handleSearchUser(searchVO, projectId);
         if (Boolean.TRUE.equals(condition)) {
@@ -70,25 +92,33 @@ public class GanttChartServiceImpl implements GanttChartService {
             }
             boardAssembler.handleOtherArgs(searchVO);
             String orderStr = "issue_num_convert desc";
-            List<IssueDTO> issues = issueMapper.queryIssueIdsListWithSub(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), orderStr, isTreeView);
-            List<Long> issueIds = issues.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+            boolean isTreeView =
+                    !Boolean.FALSE.equals(
+                            Optional.ofNullable(searchVO.getSearchArgs())
+                                    .map(x -> x.get("tree"))
+                                    .orElse(false));
+            Page<IssueDTO> page =
+                    PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), orderStr, isTreeView));
+            List<Long> issueIds = page.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
             if (!ObjectUtils.isEmpty(issueIds)) {
                 Set<Long> childrenIds = new HashSet<>();
                 if (isTreeView) {
                     childrenIds.addAll(issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds()));
                 }
-                List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(issueIds, childrenIds, projectId, isTreeView);
+                List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(projectId, issueIds, childrenIds, isTreeView);
                 issueIds.addAll(childrenIds);
                 Map<Long, Date> completedDateMap =
                         issueMapper.selectActuatorCompletedDateByIssueIds(issueIds, projectId)
                                 .stream()
                                 .collect(Collectors.toMap(GanttChartVO::getIssueId, GanttChartVO::getActualCompletedDate));
-                return buildFromIssueDto(issueDTOList, projectId, completedDateMap);
+                List<GanttChartVO> result = buildFromIssueDto(issueDTOList, projectId, completedDateMap);
+                result = toTree(result);
+                return PageUtils.copyPropertiesAndResetContent(page, result);
             } else {
-                return new ArrayList<>();
+                return emptyPage;
             }
         } else {
-            return new ArrayList<>();
+            return emptyPage;
         }
     }
 
@@ -132,43 +162,6 @@ public class GanttChartServiceImpl implements GanttChartService {
             return ObjectUtils.isEmpty(otherArgs.get("sprint"));
         }
         return true;
-    }
-
-    @Override
-    public List<GanttChartTreeVO> listByUser(Long projectId, SearchVO searchVO) {
-        List<GanttChartVO> ganttChartList = listByProjectIdAndSearch(projectId, searchVO, false);
-        List<GanttChartVO> unassigned = new ArrayList<>();
-        Map<String, List<GanttChartVO>> map = new HashMap<>();
-        ganttChartList.forEach(g -> {
-            UserMessageDTO user = g.getAssignee();
-            if (ObjectUtils.isEmpty(user)) {
-                unassigned.add(g);
-            } else {
-                String name = user.getName();
-                List<GanttChartVO> ganttCharts = map.get(name);
-                if (ganttCharts == null) {
-                    ganttCharts = new ArrayList<>();
-                    map.put(name, ganttCharts);
-                }
-                ganttCharts.add(g);
-            }
-        });
-        List<GanttChartTreeVO> result = new ArrayList<>();
-        map.forEach((k, v) -> {
-            GanttChartTreeVO ganttChartTreeVO = new GanttChartTreeVO();
-            ganttChartTreeVO.setSummary(k);
-            ganttChartTreeVO.setGroup(true);
-            ganttChartTreeVO.setChildren(toTree(v));
-            result.add(ganttChartTreeVO);
-        });
-        if (!unassigned.isEmpty()) {
-            GanttChartTreeVO unassignedVO = new GanttChartTreeVO();
-            unassignedVO.setSummary("未分配");
-            unassignedVO.setGroup(true);
-            unassignedVO.setChildren(toTree(unassigned));
-            result.add(unassignedVO);
-        }
-        return result;
     }
 
     private List<GanttChartVO> toTree(List<GanttChartVO> ganttChartList) {
@@ -218,6 +211,10 @@ public class GanttChartServiceImpl implements GanttChartService {
             BeanUtils.copyProperties(i, ganttChart);
             ganttChart.setIssueTypeVO(issueTypeDTOMap.get(i.getIssueTypeId()));
             ganttChart.setStatusVO(statusMap.get(i.getStatusId()));
+            List<IssueSprintDTO> sprints = i.getIssueSprintDTOS();
+            if (!ObjectUtils.isEmpty(sprints)) {
+                ganttChart.setSprint(sprints.get(0));
+            }
             Long assigneeId = i.getAssigneeId();
             if (!ObjectUtils.isEmpty(assigneeId)) {
                 UserMessageDTO assignee = usersMap.get(assigneeId);

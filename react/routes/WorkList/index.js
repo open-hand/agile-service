@@ -1,13 +1,13 @@
 import React from 'react';
 import { useLocation, withRouter } from 'react-router-dom';
 import {
-  asyncRouter, PageWrap, PageTab,
+  PageWrap, PageTab,
 } from '@choerodon/boot';
 import { useTabActiveKey } from '@choerodon/components';
 import LINK_URL from '@/constants/LINK_URL';
 
-const Backlog = withRouter(asyncRouter(() => import('../Backlog')));
-const Issue = withRouter(asyncRouter(() => (import('../Issue/IssueIndex'))));
+const Backlog = withRouter(React.lazy(() => import('../Backlog')));
+const Issue = withRouter(React.lazy(() => (import('../Issue/IssueIndex'))));
 
 const WorkList = ({ match }) => {
   const location = useLocation();

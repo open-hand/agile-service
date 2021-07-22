@@ -22,7 +22,7 @@ const { Option, OptGroup } = FlatSelect;
 const SearchArea: React.FC = () => {
   const prefixCls = 'c7n-issue';
   const {
-    store, onClear, urlFilter, onClickSaveFilter, projectId, foldedHeight,
+    store, onClear, urlFilter, onClickSaveFilter, projectId, foldedHeight, hasMyAssigned,
   } = useContext(IssueSearchContext);
   const { data: quickFilters } = useQuickFilters({ projectId });
   const {
@@ -64,6 +64,9 @@ const SearchArea: React.FC = () => {
       } else if (id === 'starBeacon') {
         store.handleFilterChange('starBeacon', true);
         store.handleFilterChange('userId', userId);
+      } else if (id === 'myAssigned') {
+        store.handleFilterChange('myAssigned', true);
+        store.handleFilterChange('userId', userId);
       }
     }
   };
@@ -79,6 +82,9 @@ const SearchArea: React.FC = () => {
         store.handleFilterChange('assigneeId', []);
       } else if (id === 'starBeacon') {
         store.handleFilterChange('starBeacon', undefined);
+        store.handleFilterChange('userId', undefined);
+      } else if (id === 'myAssigned') {
+        store.handleFilterChange('myAssigned', undefined);
         store.handleFilterChange('userId', undefined);
       }
     }
@@ -133,7 +139,7 @@ const SearchArea: React.FC = () => {
 
     const currentFilterDTO = store.getCustomFieldFilters();
     const onlyMe = currentFilterDTO.otherArgs.assigneeId && currentFilterDTO.otherArgs.assigneeId.length === 1 && currentFilterDTO.otherArgs.assigneeId[0] === userId;
-    const { starBeacon } = currentFilterDTO.otherArgs;
+    const { starBeacon, myAssigned } = currentFilterDTO.otherArgs;
     const result = [...selectedQuickFilters];
     if (targetMyFilter) {
       result.push(`my|${targetMyFilter.filterId}`);
@@ -143,6 +149,9 @@ const SearchArea: React.FC = () => {
     }
     if (starBeacon) {
       result.push('commonly|starBeacon');
+    }
+    if (myAssigned) {
+      result.push('commonly|myAssigned');
     }
     return result;
   };
@@ -185,6 +194,11 @@ const SearchArea: React.FC = () => {
                 <OptGroup key="commonly" label="常用选项">
                   <Option value="commonly|onlyMe">仅我的问题</Option>
                   <Option value="commonly|starBeacon">我的关注</Option>
+                  {
+                    hasMyAssigned && (
+                      <Option value="commonly|myAssigned">我经手的</Option>
+                    )
+                  }
                 </OptGroup>
                 <OptGroup key="quick" label="快速筛选">
                   {quickFilters.map((filter) => (

@@ -4,7 +4,7 @@ import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import IssueList from './IssueList';
 import SprintHeader from './SprintHeader';
 
-function Sprint({ data }) {
+function Sprint({ data, openCreateIssueModal }) {
   const { sprintId, expand } = data;
   const issueList = BacklogStore.getIssueListBySprintId(sprintId);
   return (
@@ -12,7 +12,7 @@ function Sprint({ data }) {
       <SprintHeader data={data} />
       {expand && (
         <>
-          <IssueList data={issueList} sprintId={sprintId} />
+          <IssueList sprintData={data} data={issueList} sprintId={sprintId} openCreateIssueModal={openCreateIssueModal} />
         </>
       )}
     </div>

@@ -17,8 +17,10 @@ import {
 } from '@/api';
 import LINK_URL from '@/constants/LINK_URL';
 import to from '@/utils/to';
+import queryString from 'query-string';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import FilterManage from '@/components/FilterManage';
+import openCreateIssue from '@/components/create-issue';
 import ScrumBoardDataController from './ScrumBoardDataController';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import StatusColumn from '../ScrumBoardComponent/StatusColumn/StatusColumn';
@@ -30,7 +32,6 @@ import SwimLane from '../ScrumBoardComponent/RenderSwimLaneContext/SwimLane';
 import CSSBlackMagic from '../../../components/CSSBlackMagic/CSSBlackMagic';
 import ScrumBoardFullScreen from '../ScrumBoardComponent/ScrumBoardFullScreen';
 import CreateBoard from '../ScrumBoardComponent/CreateBoard';
-import CreateIssue from '../ScrumBoardComponent/create-issue';
 import ExpandAllButton from '../ScrumBoardComponent/expand-all-button';
 import BoardSearch from '../ScrumBoardComponent/board-search';
 import SelectBoard from '../ScrumBoardComponent/select-board';
@@ -79,8 +80,9 @@ class ScrumBoardHome extends Component {
     });
     // eslint-disable-next-line react/destructuring-assignment
     const { state } = this.props.location;
-    if (state && state.issueId) {
-      ScrumBoardStore.setClickedIssue(state.issueId);
+    const { paramIssueId } = queryString.parse(this.props.location.search);
+    if (paramIssueId || (state && state.issueId)) {
+      ScrumBoardStore.setClickedIssue(paramIssueId || state.issueId);
     }
   }
 
@@ -304,7 +306,18 @@ class ScrumBoardHome extends Component {
   }
 
   handleCreateIssue = () => {
-    ScrumBoardStore.setCreateIssueVisible(true);
+    const doingSprint = ScrumBoardStore.didCurrentSprintExist ? ScrumBoardStore.sprintNotClosedArray.find((item) => item.statusCode === 'started') : {};
+    openCreateIssue({
+      defaultValues: {
+        sprint: ScrumBoardStore.quickSearchObj?.sprintId || doingSprint?.sprintId,
+      },
+      onCreate: (res) => {
+        const { sprintId } = res.activeSprint || {};
+        if (ScrumBoardStore.getSprintId && String(sprintId) === String(ScrumBoardStore.getSprintId)) {
+          this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
+        }
+      },
+    });
   };
 
   handleSaveSearchStore = (data) => {
@@ -440,7 +453,6 @@ class ScrumBoardHome extends Component {
             <IssueDetail
               refresh={this.refresh}
             />
-            <CreateIssue refresh={this.refresh} />
             {this.issueSearchStore ? (
               <FilterManage
                 visible={ScrumBoardStore.getFilterManageVisible}

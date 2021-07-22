@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.FieldCascadeRuleOptionMapper">
+    <delete id="batchDeleteFieldCascadeRuleOptionByIds">
+        DELETE FROM fd_field_cascade_rule_option
+        WHERE id IN
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="batchDeleteByFieldCascadeRuleIds">
+        DELETE FROM fd_field_cascade_rule_option
+        WHERE field_cascade_rule_id IN
+        <foreach collection="ruleIds" item="ruleId" separator="," open="(" close=")">
+            #{ruleId}
+        </foreach>
+        AND project_id = #{projectId}
+    </delete>
+
+    <select id="selectCascadeFieldComponent" resultType="io.choerodon.agile.api.vo.ComponentForListVO">
+        SELECT
+        aic.component_id,
+        aic.project_id,
+        aic.`name`,
+        aic.description,
+        aic.manager_id,
+        aic.default_assignee_role,
+        aic.object_version_number,
+        aic.sequence,
+        CASE when aa.issue_count is null THEN 0 ELSE aa.issue_count END AS issue_count
+        FROM agile_issue_component aic
+        LEFT JOIN (
+        SELECT acir.component_id,count(*) AS issue_count
+        FROM agile_component_issue_rel acir
+        LEFT JOIN agile_issue ai ON ai.issue_id = acir.issue_id
+        WHERE acir.project_id = #{projectId}
+        GROUP BY
+        acir.component_id
+        )aa ON aic.component_id = aa.component_id
+        WHERE aic.project_id = #{projectId}
+        <if test='content != null and !"".equals(content)'>
+            AND (aic.name LIKE CONCAT(CONCAT('%', #{content}), '%') OR aic.description LIKE CONCAT(CONCAT('%',#{content}), '%'))
+        </if>
+        <if test="fieldCascadeRuleIds != null and fieldCascadeRuleIds.size() != 0">
+            <foreach collection="fieldCascadeRuleIds" item="fieldCascadeRuleId">
+                AND aic.component_id IN (
+                SELECT ffcro.cascade_option_id
+                FROM fd_field_cascade_rule_option ffcro
+                WHERE ffcro.field_cascade_rule_id = #{fieldCascadeRuleId} AND ffcro.project_id = #{projectId}
+                )
+            </foreach>
+        </if>
+    </select>
+
+    <select id="selectCascadeFieldPriority" resultType="io.choerodon.agile.api.vo.PriorityVO">
+        SELECT fp.*,
+        fp.is_enable as enable
+        FROM fd_priority fp
+        WHERE fp.organization_id = #{organizationId}
+        AND fp.is_enable = 1
+        <if test="priorityName != null">
+            AND fp.name LIKE concat('%',#{priorityName},'%')
+        </if>
+        <if test="fieldCascadeRuleIds != null and fieldCascadeRuleIds.size() != 0">
+            <foreach collection="fieldCascadeRuleIds" item="fieldCascadeRuleId">
+                AND fp.id IN (
+                SELECT ffcro.cascade_option_id
+                FROM fd_field_cascade_rule_option ffcro
+                WHERE ffcro.field_cascade_rule_id = #{fieldCascadeRuleId} AND ffcro.project_id = #{projectId}
+                )
+            </foreach>
+        </if>
+        ORDER BY fp.sequence
+    </select>
+
+    <select id="selectVisibleOptionIds" resultType="java.lang.Long">
+        <include refid="visibleSelectedOptionIds"/>
+    </select>
+
+    <sql id="visibleSelectedOptionIds">
+        (SELECT
+            t1.cascade_option_id
+        FROM (
+            SELECT
+                COUNT(1) repeat_times,
+                ffcro.cascade_option_id
+            FROM fd_field_cascade_rule_option ffcro
+            WHERE ffcro.field_cascade_rule_id IN
+            <foreach collection="fieldCascadeRuleIds" item="fieldCascadeRuleId" separator="," open="(" close=")">
+                #{fieldCascadeRuleId}
+            </foreach>
+            AND project_id = #{projectId}
+            GROUP BY cascade_option_id
+            ) t1
+        <bind name="size" value="fieldCascadeRuleIds.size()"/>
+        WHERE t1.repeat_times = #{size})
+    </sql>
+
+    <select id="selectCascadeFieldCustom" resultType="io.choerodon.agile.api.vo.FieldOptionVO">
+        SELECT * FROM fd_field_option
+        WHERE organization_id = #{organizationId}
+        AND field_id = #{fieldId}
+        AND is_enabled = 1
+        <if test="searchParam != null and searchParam != ''">
+            <bind name="searchValueLike" value="'%' + searchParam + '%'"/>
+            AND value LIKE #{searchValueLike}
+        </if>
+        <if test="selected != null and selected.size() != 0">
+            AND id NOT IN
+            <foreach collection="selected" item="optionId" index="index" open="(" close=")" separator=",">
+                #{optionId}
+            </foreach>
+        </if>
+        <if test="fieldCascadeRuleIds != null and fieldCascadeRuleIds.size() != 0">
+            AND id IN
+            <include refid="visibleSelectedOptionIds" />
+        </if>
+        ORDER BY sequence ASC
+    </select>
+
+    <select id="selectCascadeFieldCustomByOptionIds" resultType="io.choerodon.agile.api.vo.FieldOptionVO">
+        SELECT * FROM fd_field_option
+        WHERE organization_id = #{organizationId}
+        AND id IN
+        <foreach collection="optionIds" item="optionId" index="index" open="(" close=")" separator=",">
+            #{optionId}
+        </foreach>
+        <if test="fieldCascadeRuleIds != null and fieldCascadeRuleIds.size() != 0">
+            AND id IN
+            <include refid="visibleSelectedOptionIds" />
+        </if>
+    </select>
+
+    <select id="selectCascadeFieldVersion" resultType="io.choerodon.agile.api.vo.ProductVersionNameVO">
+        SELECT version_id, name, status_code,release_date, expect_release_date
+        FROM agile_product_version
+        WHERE project_id = #{projectId}
+        <if test="statusCodes != null and statusCodes.size > 0">
+            AND status_code IN
+            <foreach collection="statusCodes" item="statusCode"
+                     open="(" close=")" separator=",">
+                #{statusCode}
+            </foreach>
+        </if>
+        <if test="fieldCascadeRuleIds != null and fieldCascadeRuleIds.size() != 0">
+            AND version_id IN
+            <include refid="visibleSelectedOptionIds" />
+        </if>
+        ORDER BY version_id DESC
+    </select>
+</mapper>

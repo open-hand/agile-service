@@ -6,9 +6,7 @@ import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.PageUtil;
-import io.choerodon.agile.infra.utils.ProjectCategoryUtil;
-import io.choerodon.agile.infra.utils.RankUtil;
+import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.core.utils.PageUtils;
@@ -321,6 +319,11 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         List<IssueTypeExtendDTO> list = issueTypeExtendMapper.select(dto);
         if (list.isEmpty()) {
             dto.setEnabled(enabled);
+            String rank = issueTypeExtendMapper.selectMaxRank(organizationId, projectId, null);
+            if (!StringUtils.hasText(rank)) {
+                rank = RankUtil.mid();
+            }
+            dto.setRank(rank);
             issueTypeExtendMapper.insert(dto);
         } else {
             dto = list.get(0);
@@ -748,7 +751,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                     issueTypeMapper.selectByReferenceId(new HashSet<>(Arrays.asList(issueTypeId)), organizationId)
                             .stream().map(IssueTypeDTO::getId).collect(Collectors.toSet());
             Page<IssueTypeExtendDTO> page =
-                    PageHelper.doPageAndSort(pageRequest, () -> issueTypeExtendMapper.selectByIssueTypeIds(issueTypeIds, organizationId));
+                    PageHelper.doPageAndSort(pageRequest, () -> issueTypeExtendMapper.selectByIssueTypeIds(issueTypeIds, null, organizationId));
             List<IssueTypeExtendDTO> list = page.getContent();
             if (list.isEmpty()) {
                 return emptyPage;
@@ -1087,6 +1090,132 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     public Map<Long, List<IssueTypeVO>> listIssueTypeMapByProjectIds(Long organizationId, List<Long> projectIds) {
         return issueTypeMapper.selectByProjectIds(organizationId, projectIds)
                 .stream().collect(Collectors.groupingBy(IssueTypeVO::getId));
+    }
+
+    @Override
+    public void updateRank(Long projectId,
+                           Long organizationId,
+                           Long issueTypeId,
+                           IssueTypeRankVO issueTypeRankVO) {
+        Map<Long, IssueTypeVO> issueTypeMap = initRankIfNull(organizationId, projectId);
+        IssueTypeVO issueTypeVO = issueTypeMap.get(issueTypeId);
+        AssertUtilsForCommonException.notNull(issueTypeVO, "error.issue.type.null");
+        Long frontId = issueTypeRankVO.getFrontId();
+        Long backId = issueTypeRankVO.getBackId();
+        if (ObjectUtils.isEmpty(frontId)
+                && ObjectUtils.isEmpty(backId)) {
+            throw new CommonException("error.update.issue.type.rank.all.null");
+        }
+        IssueTypeVO frontIssueType = issueTypeMap.get(frontId);
+        IssueTypeVO backIssueType = issueTypeMap.get(backId);
+        String frontRank = null;
+        String backRank = null;
+        if (frontIssueType != null) {
+            frontRank = frontIssueType.getRank();
+        }
+        if (backIssueType != null) {
+            backRank = backIssueType.getRank();
+        }
+        backRank = getMaxBackRankIfExisted(frontRank, backRank, organizationId, projectId);
+        String rank = between(frontRank, backRank);
+        IssueTypeExtendDTO example = new IssueTypeExtendDTO();
+        example.setProjectId(projectId);
+        example.setOrganizationId(organizationId);
+        example.setIssueTypeId(issueTypeId);
+        IssueTypeExtendDTO extend = issueTypeExtendMapper.selectOne(example);
+        insertOrUpdateRank(issueTypeVO, extend, rank, projectId);
+    }
+
+    private String getMaxBackRankIfExisted(String frontRank,
+                                           String backRank,
+                                           Long organizationId,
+                                           Long projectId) {
+        //处理分页的情况拖动到最后的情况
+        if (StringUtils.hasText(frontRank) && !StringUtils.hasText(backRank)) {
+            return issueTypeExtendMapper.selectMaxRank(organizationId, projectId, frontRank);
+        } else {
+            return backRank;
+        }
+    }
+
+    private String between(String frontRank, String backRank) {
+        if (!StringUtils.hasText(frontRank) && StringUtils.hasText(backRank)) {
+            return RankUtil.genNext(backRank);
+        } else if (StringUtils.hasText(frontRank) && !StringUtils.hasText(backRank)) {
+            return RankUtil.genPre(frontRank);
+        } else {
+            return RankUtil.between(frontRank, backRank);
+        }
+    }
+
+
+    private Map<Long, IssueTypeVO> initRankIfNull(Long organizationId, Long projectId) {
+        IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
+        issueTypeSearchVO.setOrganizationId(organizationId);
+        issueTypeSearchVO.setProjectId(projectId);
+        issueTypeSearchVO.setTypeCodes(AGILE_ISSUE_TYPES);
+        List<IssueTypeVO> issueTypes =
+                issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO);
+        int size = issueTypes.size();
+        if (size == 0) {
+            return new HashMap<>();
+        }
+        Map<Long, IssueTypeVO> issueTypeMap =
+                issueTypes
+                        .stream()
+                        .collect(Collectors.toMap(IssueTypeVO::getId, Function.identity()));
+        Set<Long> issueTypeIds = issueTypeMap.keySet();
+        Map<Long, IssueTypeExtendDTO> issueTypeExtendMap =
+                issueTypeExtendMapper.selectByIssueTypeIds(issueTypeIds, projectId, organizationId)
+                        .stream()
+                        .collect(Collectors.toMap(IssueTypeExtendDTO::getIssueTypeId, Function.identity()));
+        for (int i = 0; i < size; i++) {
+            IssueTypeVO issueType = issueTypes.get(i);
+            Long issueTypeId = issueType.getId();
+            if (StringUtils.hasText(issueType.getRank())) {
+                continue;
+            }
+            IssueTypeVO previous = getPreviousIssueType(i, issueTypes);
+            String rank;
+            if (ObjectUtils.isEmpty(previous)) {
+                rank = RankUtil.mid();
+            } else {
+                String previousRank = previous.getRank();
+                if (previousRank == null) {
+                    previousRank = RankUtil.mid();
+                    insertOrUpdateRank(previous, issueTypeExtendMap.get(previous.getId()), previousRank, projectId);
+                }
+                rank = RankUtil.genPre(previousRank);
+            }
+            insertOrUpdateRank(issueType, issueTypeExtendMap.get(issueTypeId), rank, projectId);
+            issueType.setRank(rank);
+        }
+        return issueTypeMap;
+    }
+
+    private void insertOrUpdateRank(IssueTypeVO issueType,
+                                    IssueTypeExtendDTO issueTypeExtendDTO,
+                                    String rank,
+                                    Long projectId) {
+        if (ObjectUtils.isEmpty(issueTypeExtendDTO)) {
+            IssueTypeExtendDTO dto = new IssueTypeExtendDTO();
+            dto.setIssueTypeId(issueType.getId());
+            dto.setProjectId(projectId);
+            dto.setOrganizationId(issueType.getOrganizationId());
+            dto.setEnabled(true);
+            dto.setRank(rank);
+            issueTypeExtendMapper.insertSelective(dto);
+        } else {
+            issueTypeExtendDTO.setRank(rank);
+            issueTypeExtendMapper.updateByPrimaryKeySelective(issueTypeExtendDTO);
+        }
+    }
+
+    private IssueTypeVO getPreviousIssueType(int current, List<IssueTypeVO> issueTypes) {
+        if (current == 0) {
+            return null;
+        }
+        return issueTypes.get(current - 1);
     }
 
     @Override

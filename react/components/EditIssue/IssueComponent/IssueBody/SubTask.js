@@ -8,20 +8,18 @@ import {
   Button, Icon, Tooltip,
 } from 'choerodon-ui/pro';
 import QuickCreateSubIssue from '@/components/QuickCreateSubIssue';
-import CreateSubTask from '../../../CreateIssue/CreateSubTask';
 import IssueList from '../../Component/IssueList';
 import EditIssueContext from '../../stores';
 import './SubTask.less';
 import Divider from './Divider';
 
 const SubTask = observer(({
-  onDeleteSubIssue, reloadIssue, onUpdate, parentSummary,
+  onDeleteSubIssue, reloadIssue, onUpdate, parentSummary, onCreateSubIssue, onOpenCreateSubTask,
 }) => {
   const { store, disabled } = useContext(EditIssueContext);
   const {
-    issueId: parentIssueId, subIssueVOList = [], priorityId, sprintId, typeCode, relateIssueId,
+    issueId: parentIssueId, subIssueVOList = [], priorityId, sprintId, typeCode, relateIssueId, activeSprint,
   } = store.getIssue;
-  const { getCreateSubTaskShow: createSubTaskShow } = store;
   const disableCreate = disabled || (typeCode === 'bug' && relateIssueId);
   const renderIssueList = (issue, i) => (
     <IssueList
@@ -39,7 +37,7 @@ const SubTask = observer(({
           reloadIssue(issue.issueId);
         }
       }}
-      onRefresh={() => {
+      onRefresh={(subIssueId) => {
         if (reloadIssue) {
           reloadIssue(parentIssueId);
         }
@@ -47,7 +45,7 @@ const SubTask = observer(({
           onUpdate();
         }
         if (onDeleteSubIssue) {
-          onDeleteSubIssue();
+          onDeleteSubIssue(issue, subIssueId);
         }
       }}
     />
@@ -71,8 +69,8 @@ const SubTask = observer(({
   const handleCreateSubIssue = (issue) => {
     store.setCreateSubTaskShow(false);
     resetDefault();
-    if (onUpdate) {
-      onUpdate();
+    if (onCreateSubIssue) {
+      onCreateSubIssue(issue, parentIssueId);
     }
     if (reloadIssue) {
       reloadIssue(issue.issueId);
@@ -100,7 +98,7 @@ const SubTask = observer(({
           {!disableCreate && (
             <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
               <Tooltip placement="topRight" title="创建子任务" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-                <Button onClick={() => store.setCreateSubTaskShow(true)}>
+                <Button onClick={onOpenCreateSubTask}>
                   <Icon type="playlist_add icon" />
                 </Button>
               </Tooltip>
@@ -136,22 +134,6 @@ const SubTask = observer(({
             }}
           />
         )}
-        {
-          createSubTaskShow ? (
-            <CreateSubTask
-              parentIssueId={parentIssueId}
-              parentSummary={parentSummary}
-              visible={createSubTaskShow}
-              onCancel={() => { store.setCreateSubTaskShow(false); resetDefault(); }}
-              onOk={handleCreateSubIssue}
-              store={store}
-              chosenSprint={store.defaultSprint}
-              chosenAssignee={store.defaultAssignee}
-              defaultTypeId={store.defaultTypeId}
-              defaultSummary={store.defaultSummary}
-            />
-          ) : null
-        }
       </div>
     )
   );

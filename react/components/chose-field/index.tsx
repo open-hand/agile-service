@@ -3,10 +3,13 @@ import React, {
 } from 'react';
 import { Button } from 'choerodon-ui/pro';
 import { Dropdown } from 'choerodon-ui';
-import { omit } from 'lodash';
+import {
+  find, isEmpty, isEqualWith, omit,
+} from 'lodash';
 import { DropDownProps } from 'choerodon-ui/lib/dropdown';
 import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import { observer } from 'mobx-react-lite';
+import { toJS, runInAction, observable } from 'mobx';
 import { IFiledListItemProps, pageConfigApi } from '@/api';
 import FieldList from './FieldList';
 import ChoseFieldStore from './store';
@@ -27,7 +30,9 @@ interface Props {
 interface IChoseFieldConfig {
   fields?: IChosenFieldField[],
   defaultValue?: IChosenFieldField[],
+  value?: Array<IChosenFieldField | string>, /** 可控value */
   events?: IChosenFieldFieldEvents,
+  addFieldCallback?: (key: string) => void,
   dropDownProps?: Partial<DropDownProps>,
   dropDownBtnChildren?: ReactElement | ReactElement[] | string | null,
   dropDownBtnProps?: Partial<ButtonProps>,
@@ -36,7 +41,7 @@ interface IChoseFieldDataProps {
   store: ChoseFieldStore,
   fields: IChosenFieldField[],
 }
-interface IChoseFieldComponentProps {
+export interface IChoseFieldComponentProps {
   store: ChoseFieldStore,
   choseField?: (data: IChosenFieldField | IChosenFieldField[], status: 'add' | 'del') => void,
   dropDownProps?: Partial<DropDownProps>,
@@ -50,8 +55,22 @@ const defaultInitFieldAction = {
   initChosenField: (data: any) => data,
 
 };
+/**
+ * 自定义比较两个值是否一致比较器
+ * @param aValue
+ * @param bValue
+ * @returns
+ */
+function valueIsEqualCustomizer(aValue: any, bValue: any) {
+  if (isEmpty(aValue) && isEmpty(bValue)) {
+    return true;
+  }
+  return undefined;
+}
 export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps, IChoseFieldComponentProps] {
   const [fields, setFields] = useState<IChosenFieldField[]>([]);
+  const [value, setValue] = useState<string[] | undefined>(undefined);
+
   const loadData = async () => {
     const { content } = await pageConfigApi.load(); //
     setFields(content.map((item: IFiledListItemProps) => (item.system ? omit(item, 'id') : item)));
@@ -84,6 +103,8 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
       initField, initChosenField, initFieldFinish, initFieldStart,
     };
   }, []);
+  // 默认值只保存第一次传入
+  const defaultValue = useMemo(() => config?.defaultValue, []);
   const store = useMemo(() => {
     const systemFields: Array<IChosenFieldField> = [];
     const customFields: Array<IChosenFieldField> = [];
@@ -97,15 +118,15 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
         }
         const result = events.initField(newField, currentChosenFields);
         const { immutableCheck } = result || {};
-        if (field.id) {
+        if (field.id && !field.system) {
           result && customFields.push(result);
           immutableCheck && currentChosenFields.set(field.code, result as IChosenFieldField);
-        } else if (!field.noDisplay) {
+        } else if (!field.noDisplay || field.system) {
           result && systemFields.push(result);
           immutableCheck && currentChosenFields.set(field.code, result as IChosenFieldField);
         }
       });
-      config?.defaultValue?.forEach((field) => {
+      defaultValue?.forEach((field) => {
         let newField = field;
         if (['time', 'datetime', 'date'].indexOf(field.fieldType ?? '') !== -1) {
           newField = { ...field, otherComponentProps: { range: true } };
@@ -115,9 +136,28 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
       });
       events.initFieldFinish(customFields, systemFields, currentChosenFields);
     }
-
-    return new ChoseFieldStore({ systemFields, customFields, chosenFields: [...currentChosenFields.values()] });
-  }, [config?.defaultValue, events, fields]);
+    return new ChoseFieldStore({
+      systemFields, customFields, chosenFields: [...currentChosenFields.values()], addFieldCallback: config?.addFieldCallback,
+    });
+  }, [config?.addFieldCallback, defaultValue, events, fields]);
+  useEffect(() => {
+    if (fields.length !== 0) {
+      const nextValue = toJS(config?.value)?.map((item) => (typeof (item) === 'string' ? item : item.code)) || [];
+      setValue((oldValue) => {
+        if (!isEqualWith(nextValue, oldValue, valueIsEqualCustomizer)) {
+          runInAction(() => {
+            store.chosenFields = observable.map(nextValue.map((item) => {
+              const temp = find(fields, { code: item })!;
+              return [item, temp];
+            }));
+            store.selfUpdateCurrentOptionStatus();
+          });
+          return nextValue;
+        }
+        return oldValue;
+      });
+    }
+  }, [config?.value, fields, fields.length, store]);
   const dataProps = {
     store,
     fields,
@@ -158,7 +198,7 @@ const ChooseField: React.FC<Props> = (props) => {
   return (
     <div>
       <Dropdown
-        getPopupContainer={(trigger) => trigger.parentNode as HTMLElement}
+        getPopupContainer={(trigger) => document.body}
         visible={!hidden}
         overlay={(
           <div

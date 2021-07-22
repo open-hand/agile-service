@@ -8,7 +8,7 @@ import { issueApi } from '@/api';
 class FieldEndTime extends Component {
   updateIssueField = (value) => {
     const {
-      store, onUpdate, reloadIssue, field,
+      store,
     } = this.props;
     const issue = store.getIssue;
     const { issueId, objectVersionNumber } = issue;

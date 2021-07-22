@@ -33,6 +33,7 @@ import { PageIssueTypeStoreStatusCode } from './stores/PageIssueTypeStore';
 import { IFieldPostDataProps } from '../components/create-field/CreateField';
 import PageDescription from './components/page-description';
 import { transformDefaultValue, beforeSubmitTransform } from './utils';
+import openLinkage from '../components/setting-linkage/Linkage';
 
 const TooltipButton: React.FC<{ title?: string, buttonIcon: string, buttonDisabled: boolean, clickEvent?: () => void } & Omit<ButtonProps, 'title'>> = ({
   title, children, buttonIcon, buttonDisabled, clickEvent, ...otherProps
@@ -248,7 +249,8 @@ function PageIssueType() {
         <Switch />
         <Loading loading={pageIssueTypeStore.getLoading} />
         <div className={styles.top}>
-          {
+          <SortTable />
+          {/* {
             !isProject ? <SortTable />
               : [
                 <IssueTypeWrap title="字段配置">
@@ -257,7 +259,7 @@ function PageIssueType() {
                 <IssueTypeWrap title="描述信息格式">
                   <PageDescription />
                 </IssueTypeWrap>]
-          }
+          } */}
         </div>
         <div className={styles.bottom}>
           <Button funcType={'raised' as FuncType} color={'primary' as ButtonColor} disabled={!pageIssueTypeStore.getDirty} loading={btnLoading} onClick={handleSubmit}>

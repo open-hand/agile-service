@@ -3,13 +3,12 @@ import { Button, Icon, Tooltip } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import QuickCreateIssue from '@/components/QuickCreateIssue/QuickCreateIssue';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
-import CreateSubBug from '../../../CreateIssue/CreateSubBug';
 import IssueList from '../../Component/IssueList';
 import EditIssueContext from '../../stores';
 import Divider from './Divider';
 
 const SubBug = observer(({
-  reloadIssue, onDeleteSubIssue, onUpdate, applyType,
+  reloadIssue, onDeleteSubIssue, onUpdate, applyType, onCreateSubIssue, onOpenCreateSubBug,
 }) => {
   const { store, disabled } = useContext(EditIssueContext);
   const {
@@ -21,7 +20,6 @@ const SubBug = observer(({
   const {
     issueId, summary, subBugVOList = [], activeSprint,
   } = store.getIssue;
-  const { getCreateSubBugShow: createSubBugShow } = store;
   const renderIssueList = (issue, i) => (
     <IssueList
       showAssignee
@@ -38,12 +36,12 @@ const SubBug = observer(({
           reloadIssue(issue.issueId);
         }
       }}
-      onRefresh={() => {
+      onRefresh={(subIssueId) => {
         if (reloadIssue) {
           reloadIssue(issueId);
         }
         if (onDeleteSubIssue) {
-          onDeleteSubIssue();
+          onDeleteSubIssue(issue, subIssueId);
         }
       }}
     />
@@ -67,8 +65,8 @@ const SubBug = observer(({
   const handleCreateSubIssue = (issue) => {
     store.setCreateSubBugShow(false);
     resetDefault();
-    if (onUpdate) {
-      onUpdate();
+    if (onCreateSubIssue) {
+      onCreateSubIssue(issue, relateIssueId);
     }
     if (reloadIssue) {
       reloadIssue(issue.issueId);
@@ -84,8 +82,8 @@ const SubBug = observer(({
         </div>
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
-            <Tooltip placement="topRight" title="创建缺陷" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-              <Button onClick={() => store.setCreateSubBugShow(true)} disabled={(issueTypeData || []).length === 0}>
+            <Tooltip placement="topRight" title="新创建缺陷" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
+              <Button onClick={onOpenCreateSubBug} disabled={(issueTypeData || []).length === 0}>
                 <Icon type="playlist_add icon" />
               </Button>
             </Tooltip>
@@ -118,23 +116,7 @@ const SubBug = observer(({
             }}
           />
         </div>
-
       )}
-      {
-        createSubBugShow ? (
-          <CreateSubBug
-            relateIssueId={issueId}
-            parentSummary={summary}
-            visible={createSubBugShow}
-            onCancel={() => { store.setCreateSubBugShow(false); resetDefault(); }}
-            onOk={handleCreateSubIssue}
-            chosenSprint={store.defaultSprint}
-            chosenAssignee={store.defaultAssignee}
-            defaultTypeId={store.defaultTypeId}
-            defaultSummary={store.defaultSummary}
-          />
-        ) : null
-      }
     </div>
   );
 });

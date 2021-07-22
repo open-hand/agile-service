@@ -8,7 +8,7 @@ import React, { Component } from 'react';
 @observer class FieldMember extends Component {
   updateIssueField = (value) => {
     const {
-      store, onUpdate, field, reloadIssue,
+      store, field, reloadIssue,
     } = this.props;
     const issue = store.getIssue;
 

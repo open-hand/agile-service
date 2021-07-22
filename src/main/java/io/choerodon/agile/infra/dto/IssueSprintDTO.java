@@ -1,6 +1,9 @@
 package io.choerodon.agile.infra.dto;
 
 import io.choerodon.agile.infra.utils.StringUtil;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
+import java.util.Date;
 
 /**
  * @author dinghuang123@gmail.com
@@ -12,7 +15,38 @@ public class IssueSprintDTO {
 
     private String statusCode;
 
+    @Encrypt
     private Long sprintId;
+
+    private Date startDate;
+
+    private Date endDate;
+
+    private Date actualEndDate;
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
+    public Date getActualEndDate() {
+        return actualEndDate;
+    }
+
+    public void setActualEndDate(Date actualEndDate) {
+        this.actualEndDate = actualEndDate;
+    }
 
     public String getSprintName() {
         return sprintName;

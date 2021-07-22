@@ -16,6 +16,7 @@ export interface IssueSearchProps {
   projectId?: string
   applyType?: string
   foldedHeight?: number
+  hasMyAssigned?: boolean
 }
 export function useIssueSearchStore(props: IssueSearchStoreProps) {
   const store = useMemo(() => new IssueSearchStore(props), []);
@@ -23,7 +24,7 @@ export function useIssueSearchStore(props: IssueSearchStoreProps) {
 }
 export { IssueSearchStore };
 const IssueSearch: React.FC<IssueSearchProps> = ({
-  urlFilter, onClear, onClickSaveFilter, store, onChange, projectId, applyType, foldedHeight = 43,
+  urlFilter, onClear, onClickSaveFilter, store, onChange, projectId, applyType, foldedHeight = 43, hasMyAssigned = true,
 }) => {
   store.setQuery(onChange);
   useEffect(() => {
@@ -42,6 +43,7 @@ const IssueSearch: React.FC<IssueSearchProps> = ({
         projectId,
         applyType,
         foldedHeight,
+        hasMyAssigned,
       }}
     >
       <SearchArea />

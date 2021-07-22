@@ -11,7 +11,7 @@ import { withRouter } from 'react-router-dom';
 @inject('AppState')
 @observer class FieldStatus extends Component {
   updateIssueReporter = (reporterId) => {
-    const { store, onUpdate, reloadIssue } = this.props;
+    const { store } = this.props;
     const issue = store.getIssue;
     const { issueId, objectVersionNumber } = issue;
     const obj = {

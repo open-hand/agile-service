@@ -8,7 +8,7 @@ import ENVIRONMENT_TYPE from '@/constants/ENVIRONMENT_TYPE';
 @observer class FieldEnvironment extends Component {
   updateIssueField = (value) => {
     const {
-      store, onUpdate, field, reloadIssue,
+      store,
     } = this.props;
     const issue = store.getIssue;
 

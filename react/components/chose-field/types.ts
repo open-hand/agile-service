@@ -18,6 +18,7 @@ interface IUseChoseFieldProps {
     systemFields: IChosenFieldField[]
     customFields: IChosenFieldField[],
     chosenFields?: IChosenFieldField[],
+    addFieldCallback?: (key: string) => void
 }
 /**
  * @param initField 初始化fields字段时的操作 返回false | undefined | void 则跳过此字段

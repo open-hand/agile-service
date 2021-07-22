@@ -215,5 +215,15 @@ public interface BaseFeignClient {
 
     @GetMapping(value = "/choerodon/v1/organizations/{organization_id}")
     ResponseEntity<OrganizationInfoVO> query(@PathVariable(name = "organization_id") Long id);
+
+    @PostMapping(value = "/choerodon/v1/projects/{project_id}/agile_users_by_projects")
+    ResponseEntity<Page<UserDTO>> agileUsersByProjectIds(@PathVariable(name = "project_id") Long projectId,
+                                                         @RequestParam("page") int page,
+                                                         @RequestParam("size") int size,
+                                                         @RequestBody AgileUserVO agileUserVO);
+
+    @PostMapping(value = "/choerodon/v1/list_roles")
+    ResponseEntity<List<RoleVO>> listRolesByIds(@RequestParam("tenantId") Long  tenantId,
+                                                @RequestBody List<Long> roleIds);
 }
 

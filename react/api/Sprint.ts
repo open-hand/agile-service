@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId, getOrganizationId } from '@/utils/common';
+import { getOrganizationId } from '@/utils/common';
+import { ISearchVO } from '@/common/types';
 import Api from './Api';
 
 interface ISprint {
@@ -340,7 +341,7 @@ class SprintApi extends Api<SprintApi> {
    * 改变（删除、完成）冲刺前检查默认值是否为｛sprintId｝冲刺
    * @param sprintId
    */
-  beforeChangeCheck(sprintId: string):Promise<boolean> {
+  beforeChangeCheck(sprintId: string): Promise<boolean> {
     return axios({
       method: 'get',
       url: `${this.prefix}/sprint/check_default_value`,
@@ -350,8 +351,34 @@ class SprintApi extends Api<SprintApi> {
 
     });
   }
+
+  getBacklogSprintsInfo(searchVO: ISearchVO): Promise<any> {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/sprint/unclose_sprint`,
+      params: {
+        organizationId: this.orgId,
+      },
+      data: searchVO,
+    });
+  }
+
+  getIssuesBySprintId(sprintId: string, searchVO: ISearchVO, page: number, size: number): Promise<any> {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/sprint/${String(sprintId) === '0' ? 'todo_issue_page' : 'sprint_issue_page'}`,
+      params: {
+        sprintId,
+        organizationId: this.orgId,
+        page,
+        size,
+      },
+      data: searchVO,
+    });
+  }
 }
 
 const sprintApi = new SprintApi();
+const sprintApiConfig = new SprintApi(true);
 
-export { sprintApi };
+export { sprintApi, sprintApiConfig };

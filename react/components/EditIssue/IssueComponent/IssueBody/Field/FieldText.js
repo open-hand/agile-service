@@ -10,7 +10,7 @@ import TextArea from '@/components/TextArea';
 @observer class FieldText extends Component {
   updateIssueField = (newValue) => {
     const {
-      store, onUpdate, reloadIssue, field, feature,
+      store, field, feature,
     } = this.props;
     const { fieldCode } = field;
     const issue = store.getIssue;

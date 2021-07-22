@@ -3,13 +3,14 @@ import SelectUser from '@/components/select/select-user';
 import UserTag from '@/components/tag/user-tag';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import {
-  DatePicker, DateTimePicker, NumberField, Select, SelectBox, TextArea, TextField, TimePicker,
+  DatePicker, DateTimePicker, NumberField, TextArea, TextField, TimePicker,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react';
 import moment from 'moment';
 import { MAX_NUMBER_VALUE, MAX_NUMBER_STEP } from '@/constants/MAX_VALUE';
 import React, { Component } from 'react';
 import SelectCustomField from '@/components/select/select-custom-field';
+import SelectCustomFieldBox from '@/components/select/select-custom-field-box';
 
 const EditorMap = new Map([
   ['text', TextArea],
@@ -17,8 +18,8 @@ const EditorMap = new Map([
   ['member', SelectUser],
   ['single', SelectCustomField],
   ['multiple', SelectCustomField],
-  ['radio', SelectBox],
-  ['checkbox', SelectBox],
+  ['radio', SelectCustomFieldBox],
+  ['checkbox', SelectCustomFieldBox],
   ['number', NumberField],
   ['time', TimePicker],
   ['date', DatePicker],
@@ -77,6 +78,8 @@ const EditorMap = new Map([
       switch (fieldType) {
         case 'single':
         case 'multiple':
+        case 'radio':
+        case 'checkbox':
         {
           return (
             <Editor
@@ -84,32 +87,8 @@ const EditorMap = new Map([
               selected={value}
               required={required}
               fieldId={fieldId}
-              multiple={fieldType === 'multiple'}
-            />
-          );
-        }
-        case 'radio':
-        case 'checkbox':
-        {
-          const options = field.fieldOptions && field.fieldOptions.length > 0
-              && field.fieldOptions.filter((option) => option.enabled
-                || (value && value.indexOf(option.id) !== -1)).map((item) => (
-                  <Editor.Option
-                    value={item.id}
-                    key={item.id}
-                  >
-                    {item.value}
-                  </Editor.Option>
-              ));
-          return (
-            <Editor
-              vertical
-              searchable={fieldType === 'multiple' || fieldType === 'single'}
-              required={required}
               multiple={fieldType === 'multiple' || fieldType === 'checkbox'}
-            >
-              {options}
-            </Editor>
+            />
           );
         }
         case 'text': {

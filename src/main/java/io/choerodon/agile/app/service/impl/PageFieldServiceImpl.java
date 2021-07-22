@@ -80,6 +80,9 @@ public class PageFieldServiceImpl implements PageFieldService {
     @Autowired
     private BaseFeignClient baseFeignClient;
 
+    @Autowired
+    private FieldCascadeRuleService fieldCascadeRuleService;
+
     @Override
     public PageFieldDTO baseCreate(PageFieldDTO field) {
         if (pageFieldMapper.insert(field) != 1) {
@@ -412,8 +415,6 @@ public class PageFieldServiceImpl implements PageFieldService {
         List<PageFieldDTO> pageFields = queryPageField(organizationId, projectId, pageCode, issueTypeId);
         List<PageFieldViewVO> pageFieldViews = modelMapper.map(pageFields, new TypeToken<List<PageFieldViewVO>>() {
         }.getType());
-        //填充option
-        optionService.fillOptions(organizationId, projectId, pageFieldViews);
         objectSchemeFieldService.setDefaultValueObjs(pageFieldViews, projectId, organizationId);
         FieldValueUtil.handleDefaultValue(pageFieldViews);
         return pageFieldViews;
@@ -424,6 +425,7 @@ public class PageFieldServiceImpl implements PageFieldService {
         List<PageFieldViewVO> pageFieldViews = queryPageFieldViewList(organizationId, projectId, paramDTO);
         //填充value
         fieldValueService.fillValues(organizationId, projectId, instanceId, paramDTO.getSchemeCode(), pageFieldViews);
+        fieldCascadeRuleService.filterPageFieldView(organizationId, projectId, paramDTO, instanceId, pageFieldViews);
         return pageFieldViews;
     }
 

@@ -189,13 +189,16 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         if (agilePluginService != null) {
             agilePluginService.handlerBusinessAfterCreateIssue(issueConvertDTO,projectId,issueId,issueCreateVO);
         }
+        Set<Long> influenceIssueIds = new HashSet<>();
         //创建问题执行工作流自定义流转
-        IssueVO execResult = issueService.doStateMachineCustomFlow(projectId, issueId, applyType);
+        IssueVO execResult = issueService.doStateMachineCustomFlow(projectId, issueId, applyType, influenceIssueIds);
         statusNoticeSettingService.noticeByChangeStatus(projectId, issueId);
         if (execResult != null) {
             return execResult;
         }
-        return issueService.queryIssueCreate(issueCreateVO.getProjectId(), issueId);
+        IssueVO result = issueService.queryIssueCreate(issueCreateVO.getProjectId(), issueId);
+        result.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
+        return result;
     }
 
     /**
@@ -241,7 +244,11 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         StateMachineTransformDTO initTransform = modelMapper.map(instanceService.queryInitTransform(organizationId, stateMachineId), StateMachineTransformDTO.class);
         stateMachineClient.createInstance(initTransform, inputDTO);
         issueService.afterCreateSubIssue(issueId, subIssueConvertDTO, issueSubCreateVO, projectInfo);
-        return issueService.queryIssueSubByCreate(subIssueConvertDTO.getProjectId(), issueId);
+        Set<Long> influenceIssueIds = new HashSet<>();
+        issueService.doStateMachineCustomFlow(projectId, issueId, SchemeApplyType.AGILE, influenceIssueIds);
+        IssueSubVO issueSubVO = issueService.queryIssueSubByCreate(subIssueConvertDTO.getProjectId(), issueId);
+        issueSubVO.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
+        return issueSubVO;
     }
 
     /**

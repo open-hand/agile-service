@@ -12,7 +12,7 @@ function issueLinkTo(issueId: string, issueName: string | null = null, otherPara
       paramName: issueName,
       ...otherParams,
     },
-  });
+  }, { blank: true });
 }
 
 const LINK_URL = {
@@ -33,7 +33,9 @@ const LINK_URL = {
   iterationBoard: (sprintId: string) => `/agile/iterationBoard/${sprintId}`,
   stateMachine: '/agile/state-machine',
   pageConfig: '/agile/page/config',
+  pageField: '/agile/page/field',
   status: '/agile/state-machine',
+  addCustomReport: '/agile/charts/add',
 };
 
 const LINK_URL_TO: IRouterToList = {

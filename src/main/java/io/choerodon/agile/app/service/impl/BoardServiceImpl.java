@@ -103,6 +103,8 @@ public class BoardServiceImpl implements BoardService {
     private StarBeaconMapper starBeaconMapper;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private LinkIssueStatusLinkageService linkIssueStatusLinkageService;
 
     @Override
     public void create(Long projectId, String boardName) {
@@ -564,13 +566,15 @@ public class BoardServiceImpl implements BoardService {
                     SchemeApplyType.AGILE, new InputDTO(issueId, UPDATE_STATUS_MOVE, JSON.toJSONString(handleIssueMoveRank(projectId, issueMoveVO))));
         }
         boolean transformFlag;
+        Set<Long> influenceIssueIds = new HashSet<>();
         /**
          * 修改属性报错，导致数据回滚但是状态机实例已经完成状态变更，导致issue无论变更什么状态都无效
          * 抛异常并清空当前实例的状态机的状态信息
          */
         try {
             statusFieldSettingService.handlerSettingToUpdateIssue(projectId,issueId);
-            transformFlag = statusLinkageService.updateParentStatus(projectId,issueId,SchemeApplyType.AGILE);
+            transformFlag = statusLinkageService.updateParentStatus(projectId,issueId,SchemeApplyType.AGILE, influenceIssueIds);
+            linkIssueStatusLinkageService.updateLinkIssueStatus(projectId, issueId, SchemeApplyType.AGILE, influenceIssueIds);
         }
         catch (Exception e) {
             stateMachineClientService.cleanInstanceCache(projectId,issueId,SchemeApplyType.AGILE);

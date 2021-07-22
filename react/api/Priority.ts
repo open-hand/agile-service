@@ -1,20 +1,21 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
+import Api from './Api';
 
-interface IPriority {
+export interface IPriority {
   name: string
   description: string,
   default: boolean, // 是否设置为默认优先级
   colour: string,
 }
-interface UPriority extends IPriority {
+export interface UPriority extends IPriority {
   objectVersionNumber: number,
 }
-interface ISequence {
+export interface ISequence {
   id: number,
   sequence: number,
 }
-class PriorityApi {
+class PriorityApi extends Api<PriorityApi> {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
   }
@@ -27,7 +28,10 @@ class PriorityApi {
    * 加载优先级列表
    */
   load() {
-    return axios.get(`${this.orgPrefix}/priority`);
+    return this.request({
+      method: 'get',
+      url: `${this.orgPrefix}/priority`,
+    });
   }
 
   /**
@@ -40,7 +44,7 @@ class PriorityApi {
   /**
      * 根据项目id查询组织优先级
      */
-  loadByProject(projectId?: number, priorityIds?: string[]) {
+  loadByProject(projectId?: string, priorityIds?: string[]) {
     // 进行一层处理，过滤掉禁用的优先级
     return axios.get(`/agile/v1/projects/${projectId || getProjectId()}/priority/list_by_org`)
       .then((data: any) => Array.isArray(data)
@@ -61,7 +65,7 @@ class PriorityApi {
    * @param priorityId
    * @param priority
    */
-  update(priorityId: number, priority: UPriority) {
+  update(priorityId: string, priority: UPriority) {
     return axios.put(`${this.orgPrefix}/priority/${priorityId}`, priority);
   }
 
@@ -85,7 +89,7 @@ class PriorityApi {
    * @param priorityId
    * @param changePriorityId
    */
-  delete(priorityId: number, changePriorityId: number) {
+  delete(priorityId: string, changePriorityId: string) {
     return axios({
       method: 'delete',
       url: `${this.orgPrefix}/priority/delete/${priorityId}`,
@@ -143,4 +147,5 @@ class PriorityApi {
 }
 
 const priorityApi = new PriorityApi();
-export { priorityApi };
+const priorityApiConfig = new PriorityApi(true);
+export { priorityApi, priorityApiConfig };

@@ -24,7 +24,7 @@ const { Text, Edit } = TextEditToggle;
   updateIssueField = () => {
     const { newValue } = this.state;
     const {
-      store, onUpdate, reloadIssue, field, feature,
+      store, field, feature,
     } = this.props;
     const { fieldCode } = field;
     const issue = store.getIssue;

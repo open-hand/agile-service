@@ -5,7 +5,7 @@ import { createRef } from 'react';
 import {
   observable, action,
 } from 'mobx';
-import { GanttRef, Gantt } from 'react-gantt-component';
+import { GanttRef, Gantt } from '@choerodon/gantt';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { DetailContainerProps } from '@/components/detail-container';
 import openDescriptionConfirm from '@/components/detail-container/openDescriptionConfirm';
@@ -39,9 +39,7 @@ class GanttStore {
 
   @observable issueId: string | null = null
 
-  @observable sprintId: string | null = null
-
-  @observable createIssueVisible: boolean = false
+  @observable sprintIds: string[] | null = null
 
   @action
   switchUnit(unit: Gantt.Sight) {
@@ -68,14 +66,9 @@ class GanttStore {
   }
 
   @action
-  setSprintId(sprintId: string | null) {
-    this.sprintId = sprintId;
-    localPageCacheStore.setItem('gantt.search.sprint', sprintId);
-  }
-
-  @action
-  setCreateIssueVisible(createIssueVisible: boolean) {
-    this.createIssueVisible = createIssueVisible;
+  setSprintIds(sprintIds: string[] | null) {
+    this.sprintIds = sprintIds;
+    localPageCacheStore.setItem('gantt.search.sprints', sprintIds);
   }
 
   @observable detailProps = {} as DetailContainerProps;

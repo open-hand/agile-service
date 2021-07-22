@@ -6,19 +6,28 @@ class GanttApi {
     return `/agile/v1/projects/${getProjectId()}`;
   }
 
-  loadByTask(data:any) {
-    return axios({
-      method: 'post',
-      url: `${this.prefix}/gantt/list/by_task`,
-      data,
-    });
+  async loadByTask(data: any) {
+    let result: any = [];
+    let hasNextPage = true;
+    let page = 0;
+    while (hasNextPage) {
+      // eslint-disable-next-line no-await-in-loop
+      const res = await this.loadByTaskPage(data, page += 1);
+      hasNextPage = res.hasNextPage;
+      result = [...result, ...res.list];
+    }
+    return result;
   }
 
-  loadByUser(data:any) {
+  loadByTaskPage(data: any, page: number) {
     return axios({
       method: 'post',
-      url: `${this.prefix}/gantt/list/by_user`,
+      url: `${this.prefix}/gantt/list`,
       data,
+      params: {
+        size: 1000,
+        page,
+      },
     });
   }
 
@@ -26,6 +35,14 @@ class GanttApi {
     return axios({
       method: 'get',
       url: `${this.prefix}/headers/gantt_chart`,
+    });
+  }
+
+  loadInfluenceIssues(issueIds: string[]) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/gantt/list_by_ids`,
+      data: issueIds,
     });
   }
 }

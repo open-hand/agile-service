@@ -9,6 +9,7 @@ import io.choerodon.agile.infra.annotation.DataLog;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -126,7 +127,6 @@ public class DataLogAspect {
     private static final String AGILE = "Agile::";
     private static final String VERSION_CHART = AGILE + "VersionChart";
     private static final String PIECHART = AGILE + "PieChart";
-    private static final String COMPONENT = "component";
     private static final String BURN_DOWN_COORDINATE_BY_TYPE = AGILE + "BurnDownCoordinateByType";
     private static final String VERSION = "Version";
     private static final String EPIC = "Epic";
@@ -700,6 +700,7 @@ public class DataLogAspect {
         }
         if (issueComment != null) {
             IssueCommentDTO issueCommentDTO = issueCommentMapper.selectByPrimaryKey(issueComment.getCommentId());
+            dataLogRedisUtil.deleteByComponentChange(issueCommentDTO.getProjectId());
             createDataLog(issueCommentDTO.getProjectId(), issueCommentDTO.getIssueId(), FIELD_COMMENT,
                     issueCommentDTO.getCommentText(), issueComment.getCommentText(), issueComment.getCommentId().toString(),
                     issueComment.getCommentId().toString());
@@ -885,6 +886,7 @@ public class DataLogAspect {
             List<IssueLabelDTO> curLabels = issueMapper.selectLabelNameByIssueId(issueId);
             createDataLog(projectId, issueId, FIELD_LABELS, getOriginLabelNames(originLabels),
                     getOriginLabelNames(curLabels), null, null);
+            dataLogRedisUtil.deleteByLabelDataLog(projectId);
         } catch (Throwable e) {
             throw new CommonException(ERROR_METHOD_EXECUTE, e);
         }
@@ -918,6 +920,7 @@ public class DataLogAspect {
             List<IssueLabelDTO> originLabels = issueMapper.selectLabelNameByIssueId(issueId);
             createDataLog(issueDTO.getProjectId(), issueId, FIELD_LABELS, getOriginLabelNames(originLabels),
                     null, null, null);
+            dataLogRedisUtil.deleteByLabelDataLog(issueDTO.getProjectId());
         }
     }
 
@@ -1016,7 +1019,7 @@ public class DataLogAspect {
             createDataLog(componentIssueRelDTO.getProjectId(), componentIssueRelDTO.getIssueId(),
                     FIELD_COMPONENT, issueComponentMapper.selectByPrimaryKey(componentIssueRelDTO.getComponentId()).getName(), null,
                     componentIssueRelDTO.getComponentId().toString(), null);
-            redisUtil.deleteRedisCache(new String[]{PIECHART + componentIssueRelDTO.getProjectId() + ':' + COMPONENT + "*"});
+            dataLogRedisUtil.deleteByComponentChange(componentIssueRelDTO.getProjectId());
         }
     }
 
@@ -1035,7 +1038,7 @@ public class DataLogAspect {
                 componentIssueRelDTOList.forEach(componentIssueRel -> createDataLog(componentIssueRel.getProjectId(), componentIssueRel.getIssueId(),
                         FIELD_COMPONENT, issueComponentMapper.selectByPrimaryKey(componentIssueRel.getComponentId()).getName(), null,
                         componentIssueRel.getComponentId().toString(), null));
-                redisUtil.deleteRedisCache(new String[]{PIECHART + componentIssueRelDTOList.get(0).getProjectId() + ':' + COMPONENT + "*"});
+                dataLogRedisUtil.deleteByComponentChange(componentIssueRelDTOList.get(0).getProjectId());
             }
         }
     }
@@ -1051,7 +1054,7 @@ public class DataLogAspect {
             createDataLog(componentIssueRelDTO.getProjectId(), componentIssueRelDTO.getIssueId(), FIELD_COMPONENT,
                     null, issueComponentMapper.selectByPrimaryKey(componentIssueRelDTO.getComponentId()).getName(),
                     null, componentIssueRelDTO.getComponentId().toString());
-            redisUtil.deleteRedisCache(new String[]{PIECHART + componentIssueRelDTO.getProjectId() + ':' + COMPONENT + "*"});
+            dataLogRedisUtil.deleteByComponentChange(componentIssueRelDTO.getProjectId());
         }
     }
 
@@ -1366,6 +1369,7 @@ public class DataLogAspect {
             }
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_REPORTER, oldString, newString, oldValue, newValue);
+            dataLogRedisUtil.deleteCustomChart(originIssueDTO.getProjectId());
         }
     }
 
@@ -1386,7 +1390,7 @@ public class DataLogAspect {
             DataLogDTO dataLog = createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_ASSIGNEE, oldString, newString, oldValue, newValue);
             processRuleLogRel(issueConvertDTO, originIssueDTO, dataLog);
-            redisUtil.deleteRedisCache(new String[]{PIECHART + originIssueDTO.getProjectId() + ':' + FIELD_ASSIGNEE + "*"});
+            dataLogRedisUtil.deleteByHandleAssignee(originIssueDTO.getProjectId());
         }
     }
 
@@ -1413,7 +1417,7 @@ public class DataLogAspect {
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_PRIORITY, originPriorityVO.getName()
                     , currentPriorityVO.getName(), originIssueDTO.getPriorityId().toString(), issueConvertDTO.getPriorityId().toString());
-            redisUtil.deleteRedisCache(new String[]{PIECHART + originIssueDTO.getProjectId() + ':' + FIELD_PRIORITY + "*"});
+            dataLogRedisUtil.deleteByHandlePriority(originIssueDTO.getProjectId());
         }
     }
 
@@ -1464,6 +1468,9 @@ public class DataLogAspect {
 
     private void handleIssueSummary(List<String> field, IssueDTO originIssueDTO, IssueConvertDTO issueConvertDTO) {
         if (field.contains(SUMMARY_FIELD) && !Objects.equals(originIssueDTO.getSummary(), issueConvertDTO.getSummary())) {
+            if (IssueTypeCode.FEATURE.value().equals(originIssueDTO.getTypeCode())) {
+                dataLogRedisUtil.deleteCustomChart(originIssueDTO.getProjectId());
+            }
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     SUMMARY_FIELD, originIssueDTO.getSummary(), issueConvertDTO.getSummary(), null, null);
         }
@@ -1471,6 +1478,7 @@ public class DataLogAspect {
 
     private void handleIssueEpicName(List<String> field, IssueDTO originIssueDTO, IssueConvertDTO issueConvertDTO) {
         if (field.contains(EPIC_NAME_FIELD) && !Objects.equals(originIssueDTO.getEpicName(), issueConvertDTO.getEpicName())) {
+            dataLogRedisUtil.deleteCustomChart(originIssueDTO.getProjectId());
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_EPIC_NAME, originIssueDTO.getEpicName(), issueConvertDTO.getEpicName(), null, null);
         }

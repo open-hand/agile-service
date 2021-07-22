@@ -1,5 +1,5 @@
 import { IExportSearch } from '@/api';
-import { findIndex } from 'lodash';
+import { findIndex, flatMap, isEmpty } from 'lodash';
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
 import { stores } from '@choerodon/boot';
 
@@ -36,9 +36,13 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
   } = data;
   const starBeaconIndex = findIndex(quickFilterIds, (item) => item === 'myStarBeacon');
   let starBeacon;
-
   if (starBeaconIndex !== -1 && quickFilterIds.splice(starBeaconIndex, 1)) {
     starBeacon = true;
+  }
+  const myAssignedIndex = findIndex(quickFilterIds, (item) => item === 'myAssigned');
+  let myAssigned;
+  if (myAssignedIndex !== -1 && quickFilterIds.splice(myAssignedIndex, 1)) {
+    myAssigned = true;
   }
   return {
     advancedSearchArgs: {
@@ -59,7 +63,8 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
       fixVersion,
       influenceVersion,
       starBeacon,
-      userId: starBeacon ? userId : undefined,
+      myAssigned,
+      userId: starBeacon || myAssigned ? userId : undefined,
       testResponsibleIds,
       mainResponsibleIds,
       environment,
@@ -79,7 +84,7 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
 
     },
     quickFilterIds,
-    contents,
+    contents: !isEmpty(contents) ? flatMap([contents]) : undefined,
   };
 }
 

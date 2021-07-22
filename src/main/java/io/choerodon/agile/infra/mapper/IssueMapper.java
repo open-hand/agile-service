@@ -2,6 +2,7 @@ package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.api.vo.report.CustomChartPointVO;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
@@ -345,9 +346,9 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                                    @Param("isExcelExported") boolean isExcelExported,
                                                    @Param("withSubIssues") boolean withSubIssues);
 
-    List<IssueDTO> selectWithSubByIssueIds(@Param("issueIds") List<Long> issueIds,
+    List<IssueDTO> selectWithSubByIssueIds(@Param("projectId") Long projectId,
+                                           @Param("issueIds") List<Long> issueIds,
                                            @Param("childrenIds") Set<Long> childrenIds,
-                                           @Param("projectId") Long projectId,
                                            @Param("withSubIssues") boolean withSubIssues);
 
 
@@ -472,7 +473,8 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      */
     List<IssueDTO> queryParentIssueByProjectIdsAndUserId(@Param("projectIds") List<Long> projectIds,
                                                          @Param("userId") Long userId,
-                                                         @Param("searchType") String searchType);
+                                                         @Param("searchType") String searchType,
+                                                         @Param("searchVO") SearchVO searchVO);
 
     /**
      * 查询个人在所有子项目中未完成的问题
@@ -518,7 +520,10 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                        @Param("issueType") String issueType,
                                        @Param("param") String param);
 
-    List<IssueDTO> listMyStarIssuesByProjectIdsAndUserId(@Param("projectIds") List<Long> projectIds, @Param("parentIssues") List<Long> parentIssues, @Param("userId") Long userId);
+    List<IssueDTO> listMyStarIssuesByProjectIdsAndUserId(@Param("projectIds") List<Long> projectIds,
+                                                         @Param("parentIssues") List<Long> parentIssues,
+                                                         @Param("userId") Long userId,
+                                                         @Param("searchVO") SearchVO searchVO);
 
     /**
      * 查询项目下未完成的issue，包含story, task和bug(不包含子缺陷)
@@ -570,4 +575,37 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      */
     List<IssueDTO> selectDelayIssues(@Param("projectIds") Set<Long> projectIds,
                                      @Param("date") Date date);
+
+    /**
+     * 查询自定义报表数据点
+     *
+     * @param projectId            项目id
+     * @param searchVO             问题id
+     * @param extendSearchVO
+     * @param filterSql            filterSql
+     * @param assigneeFilterIds    assigneeFilterIds
+     * @param selectSql            查询sql
+     * @param groupSql             分组sql
+     * @param linkSql              表连接sql
+     * @return 自定义报表数据点
+     */
+    List<CustomChartPointVO> selectCustomChartPointVO(
+            @Param("projectId") Long projectId,
+            @Param("searchVO") SearchVO searchVO,
+            @Param("extendSearchVO") SearchVO extendSearchVO,
+            @Param("filterSql") String filterSql,
+            @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
+            @Param("selectSql") String selectSql,
+            @Param("groupSql") String groupSql,
+            @Param("linkSql") String linkSql);
+
+    /**
+     * 查询代办的问题
+     * @param projectId
+     * @param advancedSearchArgs
+     * @return
+     */
+    List<Long> queryUnDoneIssues(@Param("projectId") Long projectId, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
+
+    Set<Long> queryChildrenIds(@Param("projectId") Long projectId, @Param("parentIssueIds") List<Long> parentIssueIds, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
 }

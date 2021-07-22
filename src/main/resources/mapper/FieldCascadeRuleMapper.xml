@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.FieldCascadeRuleMapper">
+
+    <resultMap id="fieldCascadeRuleMap" type="io.choerodon.agile.api.vo.FieldCascadeRuleVO">
+        <id column="id" property="id"/>
+        <result column="issue_type_id" property="issueTypeId"/>
+        <result column="field_id" property="fieldId"/>
+        <result column="field_name" property="fieldName"/>
+        <result column="field_code" property="fieldCode"/>
+        <result column="field_type" property="fieldType"/>
+        <result column="field_system" property="fieldSystem"/>
+        <result column="field_option_id" property="fieldOptionId"/>
+        <result column="cascade_field_id" property="cascadeFieldId"/>
+        <result column="hidden" property="hidden"/>
+        <result column="required" property="required"/>
+        <result column="organization_id" property="organizationId"/>
+        <result column="project_id" property="projectId"/>
+        <result column="cascade_field_name" property="cascadeFieldName"/>
+        <result column="cascade_field_code" property="cascadeFieldCode"/>
+        <result column="cascade_field_type" property="cascadeFieldType"/>
+        <result column="cascade_field_system" property="cascadeFieldSystem"/>
+        <result column="default_value" property="defaultValue"/>
+        <result column="creation_date" property="creationDate"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="last_update_date" property="lastUpdateDate"/>
+        <result column="last_updated_by" property="lastUpdatedBy"/>
+        <result column="object_version_number" property="objectVersionNumber"/>
+        <collection property="fieldCascadeRuleOptionList" ofType="io.choerodon.agile.api.vo.FieldCascadeRuleOptionVO">
+            <id column="option_id" property="id"/>
+            <result column="field_cascade_rule_id" property="fieldCascadeRuleId"/>
+            <result column="is_default" property="defaultOption" />
+            <result column="cascade_option_id" property="cascadeOptionId"/>
+            <result column="option_project_id" property="projectId"/>
+            <result column="option_organization_id" property="organizationId"/>
+            <result column="option_creation_date" property="creationDate"/>
+            <result column="option_created_by" property="createdBy"/>
+            <result column="option_last_update_date" property="lastUpdateDate"/>
+            <result column="option_last_updated_by" property="lastUpdatedBy"/>
+            <result column="option_object_version_number" property="objectVersionNumber"/>
+        </collection>
+    </resultMap>
+
+    <select id="listFieldCascadeRuleByIssueType" resultMap="fieldCascadeRuleMap">
+        SELECT
+            ffrr.id,
+            ffrr.issue_type_id,
+            ffrr.field_id,
+            fosf.name field_name,
+            fosf.code field_code,
+            fosf.field_type,
+            fosf.is_system field_system,
+            ffrr.field_option_id,
+            ffrr.cascade_field_id,
+            ffrr.is_hidden AS hidden,
+            ffrr.is_required AS required,
+            ffrr.default_value,
+            ffrr.project_id,
+            ffrr.organization_id,
+            ffrr.object_version_number,
+            ffrr.created_by,
+            ffrr.creation_date,
+            ffrr.last_updated_by,
+            ffrr.last_update_date,
+            rfosf.name cascade_field_name,
+            rfosf.code cascade_field_code,
+            rfosf.field_type cascade_field_type,
+            rfosf.is_system cascade_field_system,
+            ffcro.id option_id,
+            ffcro.is_default,
+            ffcro.field_cascade_rule_id,
+            ffcro.cascade_option_id,
+            ffcro.project_id option_project_id,
+            ffcro.organization_id option_organization_id,
+            ffcro.object_version_number option_object_version_number,
+            ffcro.created_by option_created_by,
+            ffcro.creation_date option_creation_date,
+            ffcro.last_updated_by option_last_updated_by,
+            ffcro.last_update_date option_last_update_date
+        FROM fd_field_cascade_rule ffrr
+        LEFT JOIN fd_object_scheme_field fosf ON ffrr.field_id = fosf.id
+        LEFT JOIN fd_object_scheme_field rfosf ON ffrr.cascade_field_id = rfosf.id
+        LEFT JOIN fd_field_cascade_rule_option ffcro ON ffrr.id = ffcro.field_cascade_rule_id
+        WHERE ffrr.project_id = #{projectId}
+        AND ffrr.issue_type_id = #{issueTypeId}
+        <if test="fieldId != null">
+            AND ffrr.field_id = #{fieldId}
+        </if>
+    </select>
+
+    <select id="selectFieldCascadeRuleDetail" resultType="io.choerodon.agile.api.vo.FieldCascadeRuleVO">
+        SELECT
+            ffrr.id,
+            ffrr.issue_type_id,
+            ffrr.field_id,
+            fosf.name field_name,
+            fosf.code field_code,
+            fosf.field_type,
+            fosf.is_system field_system,
+            ffrr.field_option_id,
+            ffrr.cascade_field_id,
+            ffrr.is_hidden AS hidden,
+            ffrr.is_required AS required,
+            ffrr.default_value,
+            ffrr.project_id,
+            ffrr.organization_id,
+            ffrr.object_version_number,
+            ffrr.created_by,
+            ffrr.creation_date,
+            ffrr.last_updated_by,
+            ffrr.last_update_date,
+            rfosf.name cascade_field_name,
+            rfosf.code cascade_field_code,
+            rfosf.field_type cascade_field_type
+        FROM fd_field_cascade_rule ffrr
+        LEFT JOIN fd_object_scheme_field fosf ON ffrr.field_id = fosf.id
+        LEFT JOIN fd_object_scheme_field rfosf ON ffrr.cascade_field_id = rfosf.id
+        WHERE ffrr.project_id = #{projectId}
+        AND ffrr.id = #{fieldCascadeRuleId}
+    </select>
+
+    <delete id="batchDeleteByIds">
+        DELETE FROM fd_field_cascade_rule
+        WHERE id IN
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+        AND project_id = #{projectId}
+    </delete>
+
+    <select id="selectFieldCascadeRequiredOrHiddenRule" resultType="io.choerodon.agile.api.vo.FieldCascadeRuleVO">
+        SELECT
+            ffrr.id,
+            ffrr.issue_type_id,
+            ffrr.field_id,
+            ffrr.field_option_id,
+            ffrr.cascade_field_id,
+            ffrr.is_hidden AS hidden,
+            ffrr.is_required AS required,
+            ffrr.default_value,
+            ffrr.project_id,
+            ffrr.organization_id,
+            fosf.name field_name,
+            fosf.code field_code,
+            fosf.field_type,
+            fosf.is_system field_system
+        FROM fd_field_cascade_rule ffrr
+        LEFT JOIN fd_object_scheme_field fosf ON ffrr.field_id = fosf.id
+        WHERE ffrr.project_id = #{projectId}
+        AND ffrr.issue_type_id = #{issueTypeId}
+        AND (is_hidden = 1 OR ffrr.is_required = 1)
+    </select>
+
+    <select id="selectFieldCascadeRuleDesByIssueTypeId" resultType="io.choerodon.agile.api.vo.FieldCascadeRuleDesVO">
+        SELECT
+            ffrr.field_id,
+            fosf.name field_name,
+            fosf.code field_code,
+            ffrr.cascade_field_id,
+            rfosf.name cascade_field_name,
+            rfosf.code cascade_field_code
+        FROM fd_field_cascade_rule ffrr
+        LEFT JOIN fd_object_scheme_field fosf ON ffrr.field_id = fosf.id
+        LEFT JOIN fd_object_scheme_field rfosf ON ffrr.cascade_field_id = rfosf.id
+        WHERE ffrr.project_id = #{projectId}
+        AND ffrr.issue_type_id = #{issueTypeId}
+    </select>
+</mapper>

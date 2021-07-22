@@ -98,7 +98,7 @@ public interface StatusService {
      */
     List<StatusVO> queryByStateMachineIds(Long organizationId, List<Long> stateMachineIds);
 
-    Page<StatusVO> pagedQueryByStateMachineIds(PageRequest pageRequest, Long organizationId, List<Long> stateMachineIds);
+    Page<StatusVO> pagedQueryByStateMachineIds(PageRequest pageRequest, Long organizationId, List<Long> stateMachineIds, String name);
 
     List<StatusAndTransformVO> queryStatusByStateMachineId(Long organizationId, Long projectId, Long stateMachineId);
 
@@ -129,4 +129,5 @@ public interface StatusService {
      */
     StatusVO queryProjectStatusById(Long projectId, Long statusId);
 
+    Page<StatusVO> queryUserProjectStatus(PageRequest pageRequest, Long organizationId, String type, String param);
 }

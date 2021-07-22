@@ -13,6 +13,8 @@ import { IIssueType, Issue, User } from '@/common/types';
 import { checkCanQuickCreate, getQuickCreateDefaultObj } from '@/utils/quickCreate';
 import { fieldApi, issueApi } from '@/api';
 import { fields2Map } from '@/utils/defaultValue';
+import localCacheStore from '@/stores/common/LocalCacheStore';
+import { find } from 'lodash';
 import TypeTag from '../TypeTag';
 import UserDropdown from '../UserDropdown';
 
@@ -41,7 +43,9 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   const userDropDownRef = useRef<{ selectedUser: User | undefined }>(null);
   useEffect(() => {
     if (issueTypes && issueTypes.length > 0) {
-      setId(issueTypes[0].id);
+      const localIssueTypeId = localCacheStore.getItem('agile.issue.type.sub.selected');
+      const newIssueType = find(issueTypes, { id: localIssueTypeId }) || issueTypes[0];
+      setId(newIssueType.id);
     }
   }, [issueTypes]);
   const handleMenuClick = useCallback(({ key }) => {
@@ -103,6 +107,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
       setSummary('');
       handleCancel();
       onCreate && onCreate(res);
+      localCacheStore.setItem('agile.issue.type.sub.selected', currentType.id);
     }
   });
   useEffect(() => {
@@ -125,42 +130,42 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
           <div style={{ display: 'block', width: '100%' }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
               {issueTypes.length > 1 && (
-              <Dropdown
-                overlay={(
-                  <Menu
-                    style={{
-                      background: '#fff',
-                      boxShadow: '0 5px 5px -3px rgba(0, 0, 0, 0.20), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px var(--divider)',
-                      borderRadius: '2px',
-                    }}
-                    onClick={handleMenuClick}
-                  >
-                    {
-                          issueTypes.map((type) => (
-                            <Menu.Item key={type.id}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <TypeTag
-                                  data={type}
-                                  showName
-                                />
-                              </div>
-                            </Menu.Item>
-                          ))
-                        }
-                  </Menu>
-                    )}
-                trigger={['click']}
-              >
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <TypeTag
-                    data={currentType as IIssueType}
-                  />
-                  <Icon
-                    type="arrow_drop_down"
-                    style={{ fontSize: 16 }}
-                  />
-                </div>
-              </Dropdown>
+                <Dropdown
+                  overlay={(
+                    <Menu
+                      style={{
+                        background: '#fff',
+                        boxShadow: '0 5px 5px -3px rgba(0, 0, 0, 0.20), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px var(--divider)',
+                        borderRadius: '2px',
+                      }}
+                      onClick={handleMenuClick}
+                    >
+                      {
+                        issueTypes.map((type) => (
+                          <Menu.Item key={type.id}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <TypeTag
+                                data={type}
+                                showName
+                              />
+                            </div>
+                          </Menu.Item>
+                        ))
+                      }
+                    </Menu>
+                  )}
+                  trigger={['click']}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <TypeTag
+                      data={currentType as IIssueType}
+                    />
+                    <Icon
+                      type="arrow_drop_down"
+                      style={{ fontSize: 16 }}
+                    />
+                  </div>
+                </Dropdown>
               )}
               <UserDropdown userDropDownRef={userDropDownRef} defaultAssignee={defaultAssignee} key={defaultAssignee?.id} />
 

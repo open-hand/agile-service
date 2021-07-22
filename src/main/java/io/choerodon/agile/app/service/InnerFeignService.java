@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.IssueWithBranchVO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 
 import java.util.List;
@@ -11,4 +12,6 @@ import java.util.List;
 public interface InnerFeignService {
 
     List<IssueDTO> listIssueByIds(List<Long> issueIds);
+
+    void deleteTagByBranch(Long projectId, IssueWithBranchVO issueWithBranchVO);
 }

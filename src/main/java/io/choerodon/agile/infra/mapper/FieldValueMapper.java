@@ -21,7 +21,7 @@ public interface FieldValueMapper extends BaseMapper<FieldValueDTO> {
 
     void deleteList(@Param("projectId") Long projectId, @Param("instanceId") Long instanceId, @Param("schemeCode") String schemeCode, @Param("fieldId") Long fieldId);
 
-    List<Long> sortIssueIdsByFieldValue(@Param("organizationId") Long organizationId, @Param("projectId") Long projectId, @Param("fieldId") Long fieldId, @Param("sortSql") String sortSql);
+    List<Long> sortIssueIdsByFieldValue(@Param("organizationId") Long organizationId, @Param("projectId") Long projectId, @Param("fieldId") Long fieldId, @Param("sortSql") String sortSql, @Param("schemeCode") String schemeCode);
 
     List<FieldValueDTO> listByInstanceIdsAndFieldId(@Param("projectId")Long projectId,@Param("instanceIds") List<Long> instanceIds, @Param("schemeCode") String schemeCode,@Param("fieldId") Long fieldId);
 
@@ -29,7 +29,7 @@ public interface FieldValueMapper extends BaseMapper<FieldValueDTO> {
 
     void batchInsertField(@Param("projectId") Long projectId,  @Param("schemeCode") String schemeCode, @Param("fieldValues") List<FieldValueDTO> fieldValues);
 
-    List<Long> selectUserIdByField(@Param("projectId") Long projectId, @Param("userType") String userType, @Param("issueId") Long issueId);
+    List<Long> selectUserIdByField(@Param("projectId") Long projectId, @Param("userTypeList") List<String> userTypeList, @Param("issueId") Long issueId);
 
     List<FieldValueDTO> queryListByInstanceIds(@Param("projectIds") List<Long> projectIds, @Param("instanceIds") List<Long> instanceIds, @Param("schemeCode") String schemeCode, @Param("fieldId") Long fieldId);
 

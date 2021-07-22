@@ -6,16 +6,20 @@ import React, {
 import { unstable_batchedUpdates } from 'react-dom';
 import { Tooltip, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import { find } from 'lodash';
+import {
+  find, omit, remove,
+} from 'lodash';
+import produce from 'immer';
 import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 import classNames from 'classnames';
+import { usePersistFn, useDebounceFn } from 'ahooks';
 import moment from 'moment';
 import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
-import GanttComponent, { GanttProps, Gantt, GanttRef } from 'react-gantt-component';
-import 'react-gantt-component/dist/react-gantt-component.cjs.production.min.css';
+import GanttComponent, { GanttProps, Gantt, GanttRef } from '@choerodon/gantt';
+import '@choerodon/gantt/dist/gantt.cjs.production.min.css';
 import { ganttApi, issueApi, workCalendarApi } from '@/api';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import TypeTag from '@/components/TypeTag';
@@ -30,11 +34,12 @@ import FilterManage from '@/components/FilterManage';
 import { Issue, User } from '@/common/types';
 import isHoliday from '@/utils/holiday';
 import { transformFilter } from '@/routes/Issue/stores/utils';
+import openCreateIssue from '@/components/create-issue';
 import Search from './components/search';
 import GanttBar from './components/gantt-bar';
 import GanttGroupBar from './components/gantt-group-bar';
+import GanttGroupBarSprint from './components/gantt-group-bar-sprint';
 import IssueDetail from './components/issue-detail';
-import CreateIssue from './components/create-issue';
 import Context from './context';
 import GanttStore from './store';
 import GanttOperation from './components/gantt-operation';
@@ -47,9 +52,63 @@ const typeOptions = [{
 }, {
   value: 'assignee',
   label: '按经办人查看',
+}, {
+  value: 'sprint',
+  label: '按冲刺查看',
 }] as const;
 const typeValues = typeOptions.map((t) => t.value);
 type TypeValue = (typeof typeValues)[number];
+const groupByUser = (data: any[]) => {
+  const map = new Map<string, any[]>();
+  const noAssigneeData: any[] = [];
+  data.forEach((issue) => {
+    if (issue.assignee) {
+      if (map.has(issue.assignee.name)) {
+        map.get(issue.assignee.name)?.push(issue);
+      } else {
+        map.set(issue.assignee.name, [issue]);
+      }
+    } else {
+      noAssigneeData.push(issue);
+    }
+  });
+  if (noAssigneeData.length > 0) {
+    map.set('未分配', noAssigneeData);
+  }
+  return [...map.entries()].map(([name, children]) => ({
+    summary: name,
+    group: true,
+    groupType: 'assignee',
+    children,
+  }));
+};
+const groupBySprint = (data: any[]) => {
+  const map = new Map<string, { sprint: any, children: any[] }>();
+  const noSprintData: any[] = [];
+  data.forEach((issue) => {
+    if (issue.sprint) {
+      if (map.has(issue.sprint.sprintName)) {
+        map.get(issue.sprint.sprintName)?.children.push(issue);
+      } else {
+        map.set(issue.sprint.sprintName, { sprint: issue.sprint, children: [issue] });
+      }
+    } else {
+      noSprintData.push(issue);
+    }
+  });
+  if (noSprintData.length > 0) {
+    map.set('无冲刺', { sprint: {}, children: noSprintData });
+  }
+  return [...map.entries()].map(([name, { sprint, children }]) => ({
+    summary: name,
+    group: true,
+    groupType: 'sprint',
+    groupWidthSelf: true,
+    estimatedStartTime: sprint.startDate,
+    estimatedEndTime: sprint.endDate,
+    children,
+  }));
+};
 const renderTooltip = (user: User) => {
   const {
     loginName, realName, email, ldap,
@@ -63,14 +122,18 @@ const tableColumns: GanttProps<Issue>['columns'] = [{
   name: 'summary',
   label: '名称',
   render: (record) => (
-    <Tooltip title={record.summary}>
-      {!record.group ? (
-        <span style={{ cursor: 'pointer', color: 'var(--table-click-color)' }}>
-          <TypeTag iconSize={22} data={record.issueTypeVO} style={{ marginRight: 5 }} />
+    !record.group ? (
+      <span style={{ cursor: 'pointer', color: 'var(--table-click-color)' }}>
+        <TypeTag iconSize={22} data={record.issueTypeVO} style={{ marginRight: 5 }} />
+        <Tooltip title={record.summary}>
           <span style={{ verticalAlign: 'middle' }}>{record.summary}</span>
-        </span>
-      ) : <span style={{ color: 'var(--table-click-color)' }}>{record.summary}</span>}
-    </Tooltip>
+        </Tooltip>
+      </span>
+    ) : (
+      <Tooltip title={record.summary}>
+        <span style={{ color: 'var(--table-click-color)' }}>{record.summary}</span>
+      </Tooltip>
+    )
   ),
 },
 {
@@ -107,25 +170,26 @@ const GanttPage: React.FC = () => {
   const [filterManageVisible, setFilterManageVisible] = useState<boolean>();
   const [loading, setLoading] = useState(false);
   const issueSearchStore = useIssueSearchStore({
-    getSystemFields: () => getSystemFields().filter((item) => item.code !== 'sprint') as ILocalField[],
+    getSystemFields: () => getSystemFields().map((item) => (item.code === 'feature' || item.code === 'epic' ? { ...item, defaultShow: false } : item)).filter((item) => item.code !== 'sprint') as ILocalField[],
     transformFilter,
   });
   const store = useMemo(() => new GanttStore(), []);
-  const { sprintId } = store;
+  const { sprintIds } = store;
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
-  const loadData = useCallback(() => {
+  const { run, cancel } = useDebounceFn(() => {
     (async () => {
       const year = dayjs().year();
       const filter = issueSearchStore.getCustomFieldFilters();
-      if (sprintId === null) {
+      if (sprintIds === null) {
+        setData([]);
         return;
       }
-      filter.otherArgs.sprint = [sprintId];
+      filter.otherArgs.sprint = sprintIds;
       setLoading(true);
       const [workCalendarRes, projectWorkCalendarRes, res] = await Promise.all([
         workCalendarApi.getWorkSetting(year),
         workCalendarApi.getYearCalendar(year),
-        type === 'task' ? ganttApi.loadByTask(filter) : ganttApi.loadByUser(filter),
+        ganttApi.loadByTask(filter),
       ]);
       // setColumns(headers.map((h: any) => ({
       //   width: 100,
@@ -140,10 +204,10 @@ const GanttPage: React.FC = () => {
         setLoading(false);
       });
     })();
-  }, [issueSearchStore, sprintId, type]);
+  });
   useEffect(() => {
-    loadData();
-  }, [issueSearchStore, loadData]);
+    run();
+  }, [issueSearchStore, sprintIds, run]);
   const handleUpdate = useCallback<GanttProps<Issue>['onUpdate']>(async (issue, startDate, endDate) => {
     try {
       await issueApi.update({
@@ -160,24 +224,24 @@ const GanttPage: React.FC = () => {
       return false;
     }
   }, []);
-  const handleSprintChange = useCallback((value: string) => {
-    store.setSprintId(value);
+  const handleSprintChange = useCallback((value: string[]) => {
+    store.setSprintIds(value);
   }, [store]);
   const afterSprintLoad = useCallback((sprints) => {
-    if (!sprintId) {
-      const cachedSprintId = localPageCacheStore.getItem('gantt.search.sprint');
+    if (!sprintIds) {
+      const cachedSprintId = localPageCacheStore.getItem('gantt.search.sprints');
       if (cachedSprintId) {
-        store.setSprintId(cachedSprintId);
+        store.setSprintIds(cachedSprintId);
       } else {
         const currentSprint = find(sprints, { statusCode: 'started' });
         if (currentSprint) {
-          store.setSprintId(currentSprint.sprintId);
+          store.setSprintIds([currentSprint.sprintId]);
         } else {
-          store.setSprintId(sprints[0]?.sprintId || '0');
+          store.setSprintIds([sprints[0]?.sprintId || '0']);
         }
       }
     }
-  }, [sprintId, store]);
+  }, [sprintIds, store]);
   const handleTypeChange = useCallback((newType) => {
     setType(newType);
     localPageCacheStore.setItem('gantt.search.type', newType);
@@ -215,13 +279,25 @@ const GanttPage: React.FC = () => {
       onClick={onRow.onClick}
     />
   ), [onRow.onClick, type]);
-  const renderGroupBar: GanttProps['renderBar'] = useCallback((bar, { width, height }) => (
-    <GanttGroupBar
-      bar={bar}
-      width={width}
-      height={height}
-    />
-  ), []);
+  const renderGroupBar: GanttProps['renderBar'] = useCallback((bar, { width, height }) => {
+    const { record } = bar;
+    if (record.groupType === 'sprint') {
+      return (
+        <GanttGroupBarSprint
+          bar={bar}
+          width={width}
+          height={height}
+        />
+      );
+    }
+    return (
+      <GanttGroupBar
+        bar={bar}
+        width={width}
+        height={height}
+      />
+    );
+  }, []);
   const renderInvalidBar: GanttProps['renderInvalidBar'] = useCallback((element, barInfo) => (
     <Tooltip
       // @ts-ignore
@@ -242,19 +318,191 @@ const GanttPage: React.FC = () => {
       {t === 'left' ? <Icon type="navigate_before" /> : <Icon type="navigate_next" />}
     </div>
   ), []);
+  const normalizeIssue = (issue: Issue, source: any = {}) => Object.assign(source, {
+    estimatedEndTime: issue.estimatedEndTime,
+    estimatedStartTime: issue.estimatedStartTime,
+    issueTypeVO: issue.issueTypeVO,
+    objectVersionNumber: issue.objectVersionNumber,
+    statusVO: issue.statusVO,
+    summary: issue.summary,
+    actualCompletedDate: issue.actualCompletedDate,
+    completed: issue.completed,
+    issueId: issue.issueId,
+    assignee: issue.assigneeId ? {
+      name: issue.assigneeName,
+      realName: issue.assigneeRealName,
+    } : null,
+    sprint: issue.activeSprint,
+  });
+  const addSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {
+    if (parentIssueId) {
+      setData(produce(data, (draft) => {
+        const parent = find(draft, { issueId: parentIssueId });
+        if (parent) {
+          if (!parent.children) {
+            parent.children = [normalizeIssue(subIssue)];
+          } else {
+            parent.children.unshift(normalizeIssue(subIssue));
+          }
+        }
+      }));
+    }
+  });
+  const updateSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {
+    if (parentIssueId) {
+      setData(produce(data, (draft) => {
+        const parent = find(draft, { issueId: parentIssueId });
+        if (parent) {
+          const child = find(parent.children, { issueId: subIssue.issueId });
+          if (child) {
+            normalizeIssue(subIssue, child);
+          }
+        }
+      }));
+    }
+  });
+  const removeSubIssue = usePersistFn((parentIssueId: string, subIssueId: string) => {
+    setData(produce(data, (draft) => {
+      if (parentIssueId) {
+        const parent = find(draft, { issueId: parentIssueId });
+        if (parent) {
+          remove(parent.children, { issueId: subIssueId });
+        }
+      }
+    }));
+  });
+
+  const handleCreateIssue = usePersistFn((issue: Issue) => {
+    const parentIssueId = issue.relateIssueId || issue.parentIssueId;
+    if (parentIssueId) {
+      addSubIssue(issue, parentIssueId);
+    } else {
+      setData(produce(data, (draft) => {
+        draft.unshift(normalizeIssue(issue));
+      }));
+    }
+    updateInfluenceIssues(issue);
+  });
+  const handleCopyIssue = usePersistFn((issue: Issue) => {
+    handleCreateIssue(issue);
+    const subIssues = [...(issue.subIssueVOList ?? []), ...(issue.subBugVOList ?? [])];
+    if (subIssues.length > 0) {
+      subIssues.forEach((child) => {
+        addSubIssue(child, issue.issueId);
+      });
+    }
+  });
+  const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId) => {
+    addSubIssue(subIssue, parentIssueId);
+  });
+  const handleIssueUpdate = usePersistFn((issue: Issue | null) => {
+    if (issue) {
+      const parentIssueId = issue.relateIssueId || issue.parentIssueId;
+      if (parentIssueId) {
+        updateSubIssue(issue, parentIssueId);
+      } else {
+        setData(produce(data, (draft) => {
+          const target = find(draft, { issueId: issue.issueId });
+          if (target) {
+            // 更新属性
+            normalizeIssue(issue, target);
+          }
+        }));
+      }
+      updateInfluenceIssues(issue);
+    }
+  });
+  const updateInfluenceIssues = usePersistFn((res: { influenceIssueIds?: string[], [key: string]: any }) => {
+    // @ts-ignore
+    const { influenceIssueIds } = res;
+    if (influenceIssueIds && influenceIssueIds.length > 0) {
+      ganttApi.loadInfluenceIssues(influenceIssueIds).then((issues: any[]) => {
+        updateIssues(issues);
+      });
+    }
+  });
+  const updateIssues = usePersistFn((issues: Issue[]) => {
+    issues.forEach((issue) => {
+      setData(produce(data, (draft) => {
+        const target = find(draft, { issueId: issue.issueId });
+        if (target) {
+          // 更新属性
+          Object.assign(target, omit(issue, 'children'));
+        }
+      }));
+    });
+  });
+  const handleTransformType = usePersistFn((newIssue: Issue, oldIssue: Issue) => {
+    const parentTypes = ['story', 'task'];
+    const oldType = oldIssue.issueTypeVO.typeCode;
+    const newType = newIssue.issueTypeVO.typeCode;
+    // 缺陷转子缺陷
+    if (oldType === 'bug' && newType === 'bug' && newIssue.relateIssueId && !oldIssue.relateIssueId) {
+      handleIssueDelete(oldIssue);
+      handleCreateIssue(newIssue);
+    } else if (oldType === newType || (parentTypes.includes(oldType) && parentTypes.includes(newType))) {
+      // 同类型或者父任务类型之间相互转换，当做更新
+      handleIssueUpdate(newIssue);
+    } else {
+      // 其他的，当做删除再创建
+      handleIssueDelete(oldIssue);
+      handleCreateIssue(newIssue);
+    }
+  });
+  const handleChangeParent = usePersistFn((newIssue: Issue, oldIssue: Issue) => {
+    handleIssueDelete(oldIssue);
+    handleCreateIssue(newIssue);
+  });
+  const handleLinkIssue = usePersistFn((res) => {
+    updateInfluenceIssues(res);
+  });
+  const handleIssueDelete = usePersistFn((issue: Issue | null) => {
+    if (issue) {
+      const parentIssueId = issue.relateIssueId || issue.parentIssueId;
+      if (parentIssueId) {
+        removeSubIssue(parentIssueId, issue.issueId);
+      } else {
+        setData(produce(data, (draft) => {
+          remove(draft, { issueId: issue.issueId });
+        }));
+      }
+    }
+  });
+
+  const handleDeleteSubIssue = usePersistFn((issue: Issue, subIssueId: string) => {
+    removeSubIssue(issue.issueId, subIssueId);
+  });
+
+  const ganttData = useMemo(() => {
+    if (type === 'assignee') {
+      return groupByUser(data);
+    } if (type === 'sprint') {
+      return groupBySprint(data);
+    }
+    return data;
+  }, [data, type]);
+  const renderEmpty = usePersistFn(() => {
+    if (!sprintIds || sprintIds?.length === 0) {
+      return <span>暂无数据，请选择冲刺</span>;
+    }
+    return <span>暂无数据</span>;
+  });
   return (
     <Page>
       <Header>
         <SelectSprint
           flat
           placeholder="冲刺"
-          value={sprintId}
+          value={sprintIds}
+          multiple
           onChange={handleSprintChange}
           clearButton={false}
           afterLoad={afterSprintLoad}
           hasUnassign
           style={{ marginRight: 16 }}
+          maxTagCount={3}
           searchable={false}
+          selectAllButton={false}
         />
         <FlatSelect value={type} onChange={handleTypeChange} clearButton={false} style={{ marginRight: 8 }}>
           {typeOptions.map((o) => (
@@ -271,7 +519,9 @@ const GanttPage: React.FC = () => {
               icon: 'playlist_add',
               display: true,
               handler: () => {
-                store.setCreateIssueVisible(true);
+                openCreateIssue({
+                  onCreate: handleCreateIssue,
+                });
               },
             },
             {
@@ -296,7 +546,7 @@ const GanttPage: React.FC = () => {
               display: true,
               icon: 'refresh',
               // funcType: 'flat',
-              handler: loadData,
+              handler: run,
             },
           ]}
         />
@@ -314,14 +564,14 @@ const GanttPage: React.FC = () => {
       >
         <Context.Provider value={{ store }}>
           <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-            <Search issueSearchStore={issueSearchStore} loadData={loadData} />
+            <Search issueSearchStore={issueSearchStore} loadData={run} />
             <GanttOperation />
           </div>
           <Loading loading={loading} />
           {columns.length > 0 && workCalendar && (
             <GanttComponent
               innerRef={store.ganttRef as React.MutableRefObject<GanttRef>}
-              data={data}
+              data={ganttData}
               columns={columns}
               onUpdate={handleUpdate}
               startDateKey="estimatedStartTime"
@@ -344,10 +594,21 @@ const GanttPage: React.FC = () => {
                 bottom: 8,
               }}
               rowHeight={34}
+              // @ts-ignore
+              renderEmpty={renderEmpty}
             />
           )}
-          <IssueDetail refresh={loadData} />
-          <CreateIssue refresh={loadData} />
+          <IssueDetail
+            refresh={run}
+            onUpdate={handleIssueUpdate}
+            onDelete={handleIssueDelete}
+            onDeleteSubIssue={handleDeleteSubIssue}
+            onCreateSubIssue={handleCreateSubIssue}
+            onCopyIssue={handleCopyIssue}
+            onTransformType={handleTransformType}
+            onChangeParent={handleChangeParent}
+            onLinkIssue={handleLinkIssue}
+          />
           <FilterManage
             visible={filterManageVisible!}
             setVisible={setFilterManageVisible}

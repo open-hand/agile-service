@@ -10,6 +10,7 @@ import { ButtonProps, ButtonColor } from 'choerodon-ui/pro/lib/button/interface'
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
 import useIsProgram from '@/hooks/useIsProgram';
 import openAddModal from './components/add-modal';
+import openAutoSendModal from './components/auto-send';
 import BlockList from './components/block-list';
 import BaseInfo from './components/base-info';
 import Operation from './components/operation';
@@ -76,6 +77,13 @@ const ReportPage: React.FC<Props> = ({
             <HeaderButtons items={[{
               display: true,
               element: renderAddButton({ color: 'primary' as ButtonColor }),
+            }, {
+              display: true,
+              name: '设置定时发报',
+              icon: 'settings',
+              handler: () => {
+                openAutoSendModal({});
+              },
             }, {
               display: true,
               element: <CollapseAll />,

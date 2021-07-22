@@ -109,7 +109,27 @@ public class ExportIssuesVO {
 
     private String tags;
 
+    private String relatedIssue;
+
+    private Integer relatedIssueCount = 1;
+
     public ExportIssuesVO() {
+    }
+
+    public Integer getRelatedIssueCount() {
+        return relatedIssueCount;
+    }
+
+    public void setRelatedIssueCount(Integer relatedIssueCount) {
+        this.relatedIssueCount = relatedIssueCount;
+    }
+
+    public String getRelatedIssue() {
+        return relatedIssue;
+    }
+
+    public void setRelatedIssue(String relatedIssue) {
+        this.relatedIssue = relatedIssue;
     }
 
     public String getTags() {

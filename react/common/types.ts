@@ -1,6 +1,10 @@
 /* eslint-disable camelcase */
 import { ModalProps } from 'choerodon-ui/pro/lib/modal/Modal';
 
+export type Paged<T> = {
+  list: T[]
+  content: T[]
+}
 export interface User {
   email: string
   enabled?: boolean
@@ -180,6 +184,23 @@ export interface FieldOption {
   sequence: number
   enabled: boolean
 }
+export interface IssueCreateFields {
+  defaultValue: any
+  defaultValueObj?: any
+  defaultValueObjs?: any[]
+  multiple: boolean
+  display: boolean
+  // extraConfig: false
+  fieldCode: string
+  fieldId: string
+  fieldName: string
+  fieldType: IFieldType
+  id: string
+  organizationId: string
+  projectId: string
+  required: boolean
+  system: boolean
+}
 export interface IField {
   code: string,
   fieldId: string,
@@ -195,6 +216,7 @@ export interface IField {
   projectId?: string | number
   required: boolean
   defaultValue: any
+  contexts: string[]
 }
 
 export interface IFieldWidthValue extends IField {
@@ -365,6 +387,33 @@ export type IFieldType =
   'text' | 'input' | 'member' | 'multiMember' | 'single' | 'multiple' | 'radio' | 'checkbox' |
   'number' | 'time' | 'date' | 'datetime'
 
+export type ISystemFieldCodeMap =
+  'summary' |
+  'issueType' |
+  'description' |
+  'priority' |
+  'sprint' |
+  'reporter' |
+  'assignee' |
+  'status' |
+  'remainingTime' |
+  'influenceVersion' |
+  'fixVersion' |
+  'storyPoints' |
+  'estimatedStartTime' |
+  'estimatedEndTime' |
+  'label' |
+  'component' |
+  'storyPoints' |
+  'epic' |
+  'feature' |
+  'mainResponsible' |
+  'environment' |
+  'tag' |
+  'parentIssueId' |
+  // 项目群字段
+  'featureType' |
+  'subProject';
 export type ISystemFieldCode =
   'summary' |
   'issueTypeId' |

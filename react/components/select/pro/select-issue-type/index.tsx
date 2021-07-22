@@ -5,24 +5,27 @@ import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IIssueType } from '@/common/types';
 import { FlatSelect } from '@choerodon/components';
 import useProjectIssueTypes, { ProjectIssueTypesConfig } from '@/hooks/data/useProjectIssueTypes';
+import TypeTag from '@/components/TypeTag';
 
 interface Props extends Partial<SelectProps> {
   valueField?: string
   flat?: boolean
+  projectId?: string
   config?: ProjectIssueTypesConfig
   queryOptions?: Parameters<typeof useProjectIssueTypes>[1]
 }
 
 const SelectIssueType: React.FC<Props> = forwardRef(({
-  valueField, flat, config, queryOptions,
+  valueField, flat, projectId, config, queryOptions,
   ...otherProps
 }, ref: React.Ref<Select>) => {
-  const { data: issueTypes } = useProjectIssueTypes(config, queryOptions);
+  const { data: issueTypes } = useProjectIssueTypes({ projectId, ...config }, queryOptions);
   const [props] = useSelectPro<IIssueType>({
     textField: 'name',
     valueField: valueField || 'id',
     data: issueTypes || [],
     paging: false,
+    optionRenderer: (issueType) => <TypeTag data={issueType} showName />,
   });
   const Component = flat ? FlatSelect : Select;
 

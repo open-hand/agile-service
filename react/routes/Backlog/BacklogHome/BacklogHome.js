@@ -9,14 +9,15 @@ import {
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import SideNav from '@/components/side-nav';
 import { HeaderButtons } from '@choerodon/master';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
+import openCreateIssue from '@/components/create-issue';
 import Version from '../components/VersionComponent/Version';
 import Epic from '../components/EpicComponent/Epic';
 import Feature from '../components/FeatureComponent/Feature';
 import IssueDetail from '../components/issue-detail';
-import CreateIssue from '../components/create-issue';
 import CreateSprint, { CreateCurrentPiSprint } from '../components/create-sprint';
 import SprintList from '../components/sprint-list';
 import ShowPlanSprint from '../components/show-plan-sprint';
@@ -39,6 +40,8 @@ class BacklogHome extends Component {
   }
 
   componentWillUnmount() {
+    localPageCacheStore.setItem('backlogSprintExpand', BacklogStore.getExpandSprint);
+    localPageCacheStore.setItem('backlogSprintPageSize', BacklogStore.getSprintPageSize);
     BacklogStore.resetData();
     BacklogStore.clearMultiSelected();
     BacklogStore.resetFilter();
@@ -89,10 +92,6 @@ class BacklogHome extends Component {
     });
   };
 
-  handleClickCBtn = () => {
-    BacklogStore.setNewIssueVisible(true);
-  }
-
   toggleCurrentVisible = (type) => {
     BacklogStore.toggleVisible(type);
     if (type === 'feature') {
@@ -121,6 +120,37 @@ class BacklogHome extends Component {
     );
   }
 
+  openCreateIssueModal=() => {
+    const {
+      chosenEpic, chosenFeature, chosenVersion, featureList, defaultTypeId, defaultSummary, defaultSprint, defaultAssignee, defaultEpicName,
+    } = BacklogStore;
+    const chosenFeatureItem = featureList.find((feature) => feature.issueId === chosenFeature) || {};
+    openCreateIssue({
+      defaultValues: {
+        summary: defaultSummary,
+        epicName: defaultEpicName,
+        epic: chosenEpic !== 'all' && chosenEpic !== 'unset' ? chosenEpic : undefined,
+        fixVersion: chosenVersion !== 'all' && chosenVersion !== 'unset' ? chosenVersion : undefined,
+        sprint: defaultSprint,
+      },
+      defaultTypeId,
+      defaultAssignee,
+      defaultFeature: chosenFeature !== 'all' && chosenFeature !== 'unset' ? chosenFeatureItem : undefined,
+      onCreate: (res) => {
+        BacklogStore.setNewIssueVisible(false);
+        BacklogStore.setDefaultSummary(undefined);
+        BacklogStore.setDefaultTypeId(undefined);
+        BacklogStore.setDefaultSprint(undefined);
+        BacklogStore.setDefaultAssignee(undefined);
+        BacklogStore.setDefaultEpicName(undefined);
+        // 创建issue后刷新
+        if (res) {
+          BacklogStore.refresh(false, false);
+        }
+      },
+    });
+  }
+
   render() {
     const arr = BacklogStore.getSprintData;
     const { isInProgram, isShowFeature, theme } = this.props;
@@ -133,7 +163,7 @@ class BacklogHome extends Component {
             items={[{
               name: '创建问题',
               icon: 'playlist_add',
-              handler: this.handleClickCBtn,
+              handler: this.openCreateIssueModal,
               display: true,
             }, {
               name: '创建冲刺',
@@ -261,10 +291,9 @@ class BacklogHome extends Component {
             </SideNav>
             <Spin spinning={BacklogStore.getSpinIf}>
               <div className="c7n-backlog-content">
-                <SprintList />
+                <SprintList openCreateIssueModal={this.openCreateIssueModal} />
               </div>
             </Spin>
-            <CreateIssue />
           </div>
         </Content>
         <IssueDetail

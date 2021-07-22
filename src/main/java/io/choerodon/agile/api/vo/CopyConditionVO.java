@@ -30,6 +30,8 @@ public class CopyConditionVO {
 
     private String epicName;
 
+    private List<CopyIssueRequiredFieldVO> copyIssueRequiredFieldVOS;
+
     public String getEpicName() {
         return epicName;
     }
@@ -81,5 +83,13 @@ public class CopyConditionVO {
 
     public void setPredefinedFieldNames(List<String> predefinedFieldNames) {
         this.predefinedFieldNames = predefinedFieldNames;
+    }
+
+    public List<CopyIssueRequiredFieldVO> getCopyIssueRequiredFieldVOS() {
+        return copyIssueRequiredFieldVOS;
+    }
+
+    public void setCopyIssueRequiredFieldVOS(List<CopyIssueRequiredFieldVO> copyIssueRequiredFieldVOS) {
+        this.copyIssueRequiredFieldVOS = copyIssueRequiredFieldVOS;
     }
 }

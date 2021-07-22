@@ -3,6 +3,7 @@ package io.choerodon.agile.infra.feign.operator;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.choerodon.agile.api.vo.AppServiceRepVO;
 import io.choerodon.agile.api.vo.AppServiceSimpleVO;
+import io.choerodon.agile.api.vo.IssueWithBranchVO;
 import io.choerodon.agile.infra.feign.DevopsFeignClient;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.ServiceUnavailableException;
@@ -12,9 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author superlee
@@ -48,16 +47,16 @@ public class DevopsClientOperator {
         }
     }
 
-    public Set<Long> getIssueIdsBetweenTags(Long projectId, Long appServiceId, String source, String target) {
+    public List<IssueWithBranchVO> getIssueIdsBetweenTags(Long projectId, Long appServiceId, String source, String target) {
         try {
             return
                     ResponseUtils.getResponse(
                             devopsFeignClient.getIssueIdsBetweenTags(projectId, appServiceId, target, source),
-                            new TypeReference<Set<Long>>() {
+                            new TypeReference<List<IssueWithBranchVO>>() {
                             }
                     );
         } catch (ServiceUnavailableException e) {
-            return new HashSet<>();
+            return new ArrayList<>();
         }
     }
 

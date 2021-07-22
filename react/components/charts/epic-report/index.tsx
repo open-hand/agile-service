@@ -566,7 +566,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
                           paramId: epicId,
                           paramName: `${epics.find((x: IEpic) => x.issueId === epicId)?.epicName}下的问题`,
                         },
-                      });
+                      }, { blank: true });
                     }}
                   >
                     在“问题管理”中查看

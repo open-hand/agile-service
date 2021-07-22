@@ -56,6 +56,8 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
     private ProjectConfigService projectConfigService;
     @Autowired
     private OrganizationConfigService organizationConfigService;
+    @Autowired
+    private StarBeaconMapper starBeaconMapper;
 
     @Override
     public StatusNoticeSettingVO detail(Long projectId, Long issueTypeId, Long statusId, String schemeCode) {
@@ -244,11 +246,15 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
             case StatusNoticeUserType.SPECIFIER:
                 userSet.add(noticeDTO.getUserId());
                 break;
+            case StatusNoticeUserType.STAR_USER:
+                //状态机通知增加关注人
+                userSet.addAll(starBeaconMapper.selectUsersByInstanceId(projectId, issue.getIssueId()));
+                break;
             case StatusNoticeUserType.ONLY_WEB_HOOK:
                 break;
             default:
                 // 不在默认配置里，则检索自定义字段，有则加入，没有则忽略
-                userSet.addAll(fieldValueMapper.selectUserIdByField(projectId, noticeDTO.getUserType(), issue.getIssueId()));
+                userSet.addAll(fieldValueMapper.selectUserIdByField(projectId, Collections.singletonList(noticeDTO.getUserType()), issue.getIssueId()));
                 break;
         }
     }

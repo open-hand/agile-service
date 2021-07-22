@@ -1,14 +1,12 @@
 package io.choerodon.agile.app.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -16,11 +14,13 @@ import io.choerodon.agile.api.vo.DataLogQueryVO;
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.business.AllDataLogVO;
+import io.choerodon.agile.api.vo.business.DataLogVO;
 import io.choerodon.agile.app.service.BacklogExpandService;
 import io.choerodon.agile.app.service.DynamicService;
 import io.choerodon.agile.app.service.IssueTypeService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.mapper.DataLogMapper;
 import io.choerodon.agile.infra.mapper.FieldDataLogMapper;
@@ -89,7 +89,56 @@ public class DynamicServiceImpl implements DynamicService {
             backlogExpandService.setDataLogBacklogInfo(result);
         }
         setDataLogUserAndProjectInfo(result, projectId);
+        appendSummary(result);
         return result;
+    }
+
+    private void appendSummary(Page<AllDataLogVO> result) {
+        List<String> specialFields = Arrays.asList("Feature Link", "Epic Link", "Epic Child", "Feature Child");
+        Set<Long> issueIds = new HashSet<>();
+        List<AllDataLogVO> dataLogList = new ArrayList<>();
+        result.forEach(x -> {
+            if (specialFields.contains(x.getField())) {
+                dataLogList.add(x);
+                String oldValue = x.getOldValue();
+                String newValue = x.getNewValue();
+                if (oldValue != null) {
+                    issueIds.add(Long.valueOf(oldValue));
+                }
+                if (newValue != null) {
+                    issueIds.add(Long.valueOf(newValue));
+                }
+            }
+        });
+        Map<Long, String> summaryMap = new HashMap<>();
+        if (!issueIds.isEmpty()) {
+            summaryMap.putAll(
+                    issueMapper.selectByIds(StringUtils.join(issueIds, ","))
+                            .stream()
+                            .collect(Collectors.toMap(IssueDTO::getIssueId, IssueDTO::getSummary)));
+        }
+        dataLogList.forEach(x -> {
+            String oldValue = x.getOldValue();
+            String newValue = x.getNewValue();
+            if (oldValue != null) {
+                Long issueId = Long.valueOf(oldValue);
+                String summary = summaryMap.get(issueId);
+                if (summary != null) {
+                    String oldString = x.getOldString();
+                    oldString = oldString + ":" + summary;
+                    x.setOldString(oldString);
+                }
+            }
+            if (newValue != null) {
+                Long issueId = Long.valueOf(newValue);
+                String summary = summaryMap.get(issueId);
+                if (summary != null) {
+                    String newString = x.getNewString();
+                    newString = newString + ":" + summary;
+                    x.setNewString(newString);
+                }
+            }
+        });
     }
 
     private void setDataLogUserAndProjectInfo(List<AllDataLogVO> dataLogList, Long projectId) {

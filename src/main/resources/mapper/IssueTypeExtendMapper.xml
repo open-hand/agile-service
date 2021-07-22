@@ -8,9 +8,24 @@
         select *
         from fd_issue_type_extend t1
         where t1.organization_id = #{organizationId}
+        <if test="projectId != null">
+            and t1.project_id = #{projectId}
+        </if>
         and t1.issue_type_id in
         <foreach collection="issueTypeIds" item="item" open="(" close=")" separator=",">
             #{item}
         </foreach>
+    </select>
+
+    <select id="selectMaxRank" resultType="java.lang.String">
+        select fite.rank
+        from fd_issue_type_extend fite
+        where fite.organization_id = #{organizationId}
+        and fite.project_id = #{projectId}
+        <if test="rank != null">
+            and fite.rank &lt; #{rank}
+        </if>
+        order by fite.rank desc
+        limit 1
     </select>
 </mapper>

@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 
 import React, {
-  FC, memo, useMemo, useState,
+  FC, memo, useEffect, useState,
 } from 'react';
 import './index.less';
 
@@ -20,6 +20,10 @@ const HostPick: FC<Props> = memo(({
   hostTabKeys,
 }) => {
   const [activeKey, setActiveKey] = useState(defaultActiveKey);
+
+  useEffect(() => {
+    setActiveKey(defaultActiveKey);
+  }, [defaultActiveKey]);
 
   const handleClick = (value: string) => {
     if (value !== activeKey) {

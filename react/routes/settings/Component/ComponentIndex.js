@@ -1,8 +1,8 @@
 import React from 'react';
 import { Route, Switch, withRouter } from 'react-router-dom';
-import { asyncRouter, nomatch } from '@choerodon/boot';
+import { nomatch } from '@choerodon/boot';
 
-const ComponentHome = asyncRouter(() => import('./ComponentHome'));
+const ComponentHome = React.lazy(() => import('./ComponentHome'));
 
 const ComponentIndex = ({ match }) => (
   <Switch>

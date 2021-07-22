@@ -249,4 +249,12 @@ public interface ObjectSchemeFieldService {
     List<PageConfigFieldVO> queryPageConfigFields(Long organizationId, Long projectId, Long issueTypeId);
 
     List<ObjectSchemeFieldVO> getAllField(Long organizationId, Long projectId, String schemeCode, String issueTypeList);
+
+    /**
+     * 查询项目下自定义字段，不包含option值
+     * @param projectId 项目id
+     * @param issueTypeList 问题类型列表
+     * @return 项目下自定义字段
+     */
+    List<ObjectSchemeFieldDetailVO> queryCustomFieldListWithOutOption(Long projectId, String issueTypeList);
 }

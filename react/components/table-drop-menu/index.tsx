@@ -19,7 +19,9 @@ interface ITableDropMenuProps {
   textStyle?: React.CSSProperties
   tooltip?: boolean | React.ReactNode /** 文字部分tooltip */
   // clickableText?: boolean
+  showText?: boolean /** @default 'true' */
   showMenu?: boolean /** @default 'true' */
+  defaultMenuIcon?: string /** @default 'more_vert' */
   menuData?: ITableDropMenuItem[]
   onMenuClick?: (data: ITableDropMenuItem) => void /** 点击没有action菜单项会触发此事件 */
   oldMenuData?: React.ReactElement /** @deprecated 后续将废弃此接口  旧的TableDropMenu 传入内容将自动拼接到menuData上 */
@@ -36,8 +38,8 @@ interface ITableDropMenuProps {
  * @returns
  */
 const TableDropMenu: React.FC<ITableDropMenuProps> = ({
-  text, className, style, menuData: propsMenuData, oldMenuData, showMenu: propsShowMenu, organizationId,
-  permissionType, tooltip, permissionText, textClassName, textStyle, permission, permissionMenu, onMenuClick,
+  text, className, style, menuData: propsMenuData, oldMenuData, showMenu: propsShowMenu, organizationId, showText = true,
+  permissionType, tooltip, permissionText, textClassName, textStyle, permission, permissionMenu, onMenuClick, defaultMenuIcon = 'more_vert',
 }) => {
   const prefixCls = 'c7n-agile-table-drop-menu';
   // 渲染文本
@@ -75,20 +77,22 @@ const TableDropMenu: React.FC<ITableDropMenuProps> = ({
       className={classNames(prefixCls, className)}
       style={style}
     >
-      <span className={classNames(`${prefixCls}-text`, textClassName)} style={textStyle}>
-        {permissionText
-          ? (
-            <Permission
-              type={permissionType}
-              organizationId={organizationId}
-              {...permission}
-              {...permissionText}
-            >
-              {renderText()}
-            </Permission>
-          )
-          : renderText()}
-      </span>
+      {showText && (
+        <span className={classNames(`${prefixCls}-text`, textClassName)} style={textStyle}>
+          {permissionText
+            ? (
+              <Permission
+                type={permissionType}
+                organizationId={organizationId}
+                {...permission}
+                {...permissionText}
+              >
+                {renderText()}
+              </Permission>
+            )
+            : renderText()}
+        </span>
+      )}
       {showMenu && (
         <Permission
           type={permissionType}
@@ -100,6 +104,7 @@ const TableDropMenu: React.FC<ITableDropMenuProps> = ({
             data={menuData}
             type={permissionType}
             organizationId={organizationId}
+            icon={defaultMenuIcon}
           />
         </Permission>
       )}

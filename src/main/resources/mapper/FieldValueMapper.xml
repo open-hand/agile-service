@@ -87,6 +87,8 @@
         SELECT fv.instance_id
         FROM fd_field_value fv
         WHERE fv.field_id = #{fieldId}
+        AND fv.project_id = #{projectId}
+        AND fv.scheme_code = #{schemeCode}
         <if test='sortSql != null and sortSql != ""'>
             ORDER BY ${sortSql}
         </if>
@@ -123,7 +125,10 @@
             fd_field_value ffv
         JOIN fd_object_scheme_field fosf ON ffv.field_id = fosf.id
         WHERE
-            fosf.CODE = #{userType}
+            fosf.CODE IN
+            <foreach collection="userTypeList" item="userType" open="(" separator="," close=")">
+                #{userType}
+            </foreach>
           AND ffv.project_id = #{projectId}
           AND ffv.instance_id = #{issueId}
     </select>

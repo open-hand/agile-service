@@ -71,7 +71,7 @@ const LinkBranch: React.FC<{ modal?: IModalProps } & ILinkBranchModalProps> = ob
         <Option value="self">本项目</Option>
         <Option value="other">其他项目</Option>
       </Select>
-      <SelectAppService name="app" mode={formDs.current?.get('source')} />
+      <SelectAppService name="app" mode={formDs.current?.get('source')} autoFocus />
       <SelectBranch name="branch" issueId={issueId} projectId={formDs.current?.get('projectId')} applicationId={formDs.current?.get('appServiceId')} enabledTag={false} />
     </Form>
   );

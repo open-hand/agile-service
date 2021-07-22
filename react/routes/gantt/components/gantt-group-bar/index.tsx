@@ -3,7 +3,7 @@ import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import dayjs, { Dayjs } from 'dayjs';
 import minMax from 'dayjs/plugin/minMax';
-import { Gantt } from 'react-gantt-component';
+import { Gantt } from '@choerodon/gantt';
 import { Issue } from '@/common/types';
 import Context from '../../context';
 

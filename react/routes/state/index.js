@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { PageWrap, PageTab, asyncRouter } from '@choerodon/boot';
+import { PageWrap, PageTab,  } from '@choerodon/boot';
 import './index.less';
 import { usePersistFn } from 'ahooks';
 
-const KanbanTemplate = asyncRouter(() => import('../kanban-template/list'));
-const StateList = asyncRouter(() => import('./state-list'));
-const StatusMachineTemplate = asyncRouter(() => import('../statusMachine-template'));
+const KanbanTemplate = React.lazy(() => import('../kanban-template/list'));
+const StateList = React.lazy(() => import('./state-list'));
+const StatusMachineTemplate = React.lazy(() => import('../statusMachine-template'));
 const TemplateManage = () => {
   const [activeKey, setActiveKey] = useState('status_change');
   const component = usePersistFn(() => (

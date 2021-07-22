@@ -10,7 +10,7 @@ import {
   includes, map, compact, uniq,
 } from 'lodash';
 import {
-  IModalProps, IIssueType,
+  IModalProps, IIssueType, Issue,
 } from '@/common/types';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
@@ -38,7 +38,7 @@ interface Props {
   issue: IssueWithSubIssueVOList,
   modal?: IModalProps
   fieldsWithValue: FieldWithValue[]
-  onMoveIssue: () => void,
+  onMoveIssue: (issue: Issue) => void,
   loseItems: ILoseItems,
 }
 
@@ -222,7 +222,7 @@ const IssueMove: React.FC<Props> = ({
       subIssues: [...issue.subIssueVOList, ...issue.subBugVOList].map((i) => result.get(i.issueId)),
     };
     moveIssueApi.moveIssueToProject(issue.issueId, targetProjectId, submitData).then(() => {
-      onMoveIssue();
+      onMoveIssue(issue as any);
       Choerodon.prompt('移动成功');
       setBtnLoading(false);
       modal?.close();
@@ -297,7 +297,7 @@ const ObserverIssueMove = observer(IssueMove);
 
 const openIssueMove = ({
   issue, customFields, onMoveIssue, loseItems,
-}: { issue: IssueWithSubIssueVOList, customFields: FieldWithValue[], onMoveIssue: () => void, loseItems: ILoseItems }) => {
+}: { issue: IssueWithSubIssueVOList, customFields: FieldWithValue[], onMoveIssue: (issue: Issue) => void, loseItems: ILoseItems }) => {
   Modal.open({
     key: 'issueMoveModal',
     drawer: true,

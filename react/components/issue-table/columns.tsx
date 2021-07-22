@@ -53,7 +53,8 @@ export const expandColumn = {
 };
 export const getCustomColumn = (field) => (field && {
   title: <Tooltip title={field.title}>{field.title}</Tooltip>,
-  dataIndex: field.code,
+  dataIndex: `foundation.${field.code}`,
+  sortable: !(field.fieldType === 'multiple' || field.fieldType === 'checkbox' || field.fieldType === 'multiMember'),
   render: ({ rowData, dataIndex, rowIndex }) => {
     const { fieldType, code } = field;
     const value = get(rowData, 'foundationFieldValue')[code];
@@ -132,7 +133,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     dataIndex: 'summary',
     width: 400,
     fixed: true,
-
+    sortable: true,
     render: ({ rowData }) => (
       <>
         <TypeTag data={get(rowData, 'issueTypeVO')} style={{ marginRight: 5, marginTop: -2 }} />
@@ -189,7 +190,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
   }],
   ['createUser', {
     title: <Tooltip title="创建人">创建人</Tooltip>,
-    dataIndex: 'createUser',
+    dataIndex: 'createdBy',
     render: ({ rowData }) => (
       <div style={{ display: 'inline-flex', height: 40 }}>
         {
@@ -201,10 +202,11 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
         }
       </div>
     ),
+    sortable: true,
   }],
   ['updateUser', {
     title: <Tooltip title="更新人">更新人</Tooltip>,
-    dataIndex: 'updateUser',
+    dataIndex: 'lastUpdatedBy',
     render: ({ rowData }) => (
       <div style={{ display: 'inline-flex', height: 40 }}>
         {
@@ -216,6 +218,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
         }
       </div>
     ),
+    sortable: true,
   }],
   ['status', {
     title: <Tooltip title="状态">状态</Tooltip>,
@@ -266,21 +269,25 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     title: <Tooltip title="创建时间">创建时间</Tooltip>,
     width: 170,
     dataIndex: 'creationDate',
+    sortable: true,
   }],
   ['estimatedStartTime', {
     title: <Tooltip title="预计开始时间">预计开始时间</Tooltip>,
     width: 170,
     dataIndex: 'estimatedStartTime',
+    sortable: true,
   }],
   ['estimatedEndTime', {
     title: <Tooltip title="预计结束时间">预计结束时间</Tooltip>,
     width: 170,
     dataIndex: 'estimatedEndTime',
+    sortable: true,
   }],
   ['remainingTime', {
     title: <Tooltip title="剩余预估时间">剩余预估时间</Tooltip>,
     width: 170,
     dataIndex: 'remainingTime',
+    sortable: true,
   }],
   ['spentWorkTime', {
     title: <Tooltip title="已耗费时间">已耗费时间</Tooltip>,
@@ -321,25 +328,30 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     title: <Tooltip title="故事点">故事点</Tooltip>,
     dataIndex: 'storyPoints',
     render: ({ rowData, dataIndex }) => rowData[dataIndex] ?? '-',
+    sortable: true,
   }],
   ['feature', {
     title: <Tooltip title="特性">特性</Tooltip>,
-    dataIndex: 'feature',
+    dataIndex: 'featureId',
     render: renderEpicOrFeature,
+    sortable: true,
   }],
   ['epic', {
     title: <Tooltip title="史诗">史诗</Tooltip>,
-    dataIndex: 'epic',
+    dataIndex: 'epicId',
     render: renderEpicOrFeature,
+    sortable: true,
   }],
   ['mainResponsibleUser', {
     title: <Tooltip title="主要负责人">主要负责人</Tooltip>,
     dataIndex: 'mainResponsibleUser',
     render: ({ rowData, dataIndex }) => rowData[dataIndex] && <UserTag data={rowData[dataIndex]} />,
+    sortable: true,
   }],
   ['environmentName', {
     title: <Tooltip title="环境">环境</Tooltip>,
     dataIndex: 'environmentName',
+    sortable: true,
   }],
   ['tags', {
     title: <Tooltip title="Tag">Tag</Tooltip>,

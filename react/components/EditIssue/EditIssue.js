@@ -5,6 +5,8 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { stores, Choerodon } from '@choerodon/boot';
+import openCreateSubTask from '@/components/create-sub-task';
+import { usePersistFn } from 'ahooks';
 import { Spin } from 'choerodon-ui';
 import './EditIssue.less';
 import {
@@ -13,10 +15,6 @@ import {
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { useDetailContainerContext } from '@/components/detail-container/context';
 import { sameProject } from '@/utils/detail';
-import RelateStory from '../RelateStory';
-import TransformSubIssue from '../TransformSubIssue';
-import TransformFromSubIssue from '../TransformFromSubIssue';
-import ChangeParent from '../ChangeParent';
 import IssueHeader from './IssueComponent/IssueHeader';
 import IssueBody from './IssueComponent/IssueBody/IssueBody';
 import EditIssueContext from './stores';
@@ -41,7 +39,6 @@ function EditIssue() {
     programId,
     backUrl,
     style,
-    onDeleteSubIssue,
     disabled,
     prefixCls,
     issueStore,
@@ -54,8 +51,8 @@ function EditIssue() {
   const idRef = useRef();
   const { push, close, eventsMap } = useDetailContainerContext();
   const issueEvents = eventsMap.get(applyType === 'program' ? 'program_issue' : 'issue');
-  const onUpdate = useCallback(() => {
-    issueEvents?.update();
+  const onUpdate = useCallback((issue) => {
+    issueEvents?.update(issue);
   }, [issueEvents]);
   const onCancel = useCallback(() => {
     close();
@@ -66,13 +63,49 @@ function EditIssue() {
       callback(issue);
     }
   }, [issueEvents]);
-  const onDeleteIssue = useCallback(() => {
+  const onCreateSubIssue = useCallback((subIssue, parentIssueId) => {
+    if (issueEvents?.createSubIssue) {
+      issueEvents?.createSubIssue(subIssue, parentIssueId);
+    } else if (issueEvents?.update) {
+      issueEvents?.update();
+    }
+  }, [issueEvents]);
+  const onDeleteIssue = useCallback((issue) => {
     const callback = issueEvents?.delete || issueEvents?.update;
     if (callback) {
-      callback();
+      callback(issue);
     }
     close();
   }, [close, issueEvents]);
+  const onDeleteSubIssue = useCallback((issue, subIssueId) => {
+    const callback = issueEvents?.deleteSubIssue;
+    if (callback) {
+      callback(issue, subIssueId);
+    }
+    close();
+  }, [close, issueEvents]);
+  const onTransformType = useCallback((newIssue, oldIssue) => {
+    if (issueEvents?.transformType) {
+      issueEvents?.transformType(newIssue, oldIssue);
+    } else if (issueEvents?.update) {
+      issueEvents?.update(newIssue);
+    }
+  }, [issueEvents]);
+  const onChangeParent = useCallback((newIssue) => {
+    if (issueEvents?.changeParent) {
+      issueEvents?.changeParent(newIssue, store.getIssue);
+    } else if (issueEvents?.update) {
+      issueEvents?.update(newIssue);
+    }
+    loadIssueDetail(issueId);
+  }, [issueEvents, store.getIssue]);
+  const onLinkIssue = useCallback((res) => {
+    if (issueEvents?.linkIssue) {
+      issueEvents?.linkIssue(res);
+    } else if (issueEvents?.update) {
+      issueEvents?.update(store.getIssue);
+    }
+  }, [issueEvents, store.getIssue]);
 
   const loadIssueDetail = async (paramIssueId, callback) => {
     const id = paramIssueId || idRef.current || currentIssueId;
@@ -171,61 +204,27 @@ function EditIssue() {
     setQuery();
   }, [currentIssueId]);
 
-  const handleRelateStory = () => {
-    store.setRelateStoryShow(false);
-    if (onUpdate) {
-      onUpdate();
-    }
+  // 缺陷转子缺陷
+  const onRelateIssue = (issue) => {
+    onTransformType(issue, store.getIssue);
     loadIssueDetail();
   };
 
-  const handleTransformSubIssue = () => {
-    store.setTransformSubIssueShow(false);
-    if (onUpdate) {
-      onUpdate();
-    }
-    loadIssueDetail();
-  };
-
-  const handleTransformFromSubIssue = () => {
-    store.setTransformFromSubIssueShow(false);
-    if (onUpdate) {
-      onUpdate();
-    }
+  const handleTransformSubIssue = (newIssue) => {
+    onTransformType(newIssue, store.getIssue);
     loadIssueDetail();
   };
 
   useImperativeHandle(forwardedRef, () => ({
     loadIssueDetail,
   }));
-  // 更改loading状态 增加异常处理
-  const changeLoading = async (data) => {
-    if (typeof (data) === 'function') {
-      try {
-        await data();
-      } finally {
-        setIssueLoading(false);
-      }
-    } else {
-      setIssueLoading(data);
-    }
-  };
 
   const issue = store.getIssue;
   const {
     issueId, issueNum, summary,
     assigneeId, objectVersionNumber, createdBy, typeCode, issueTypeId,
   } = issue;
-  const linkIssues = store.getLinkIssues;
 
-  const {
-    getChangeParentShow: changeParentShow,
-    getAssigneeShow: assigneeShow,
-    getCopyIssueShow: copyIssueShow,
-    getTransformSubIssueShow: transformSubIssueShow,
-    getTransformFromSubIssueShow: transformFromSubIssueShow,
-    getRelateStoryShow: relateStoryShow,
-  } = store;
   const { isInProgram } = useIsInProgram();
   const rightDisabled = disabled || (isInProgram && (typeCode === 'issue_epic' || typeCode === 'feature'));
   useEffect(() => {
@@ -239,7 +238,7 @@ function EditIssue() {
         throw result;
       }
       if (onUpdate) {
-        onUpdate();
+        onUpdate(result);
       }
       if (loadIssueDetail) {
         loadIssueDetail(issueId);
@@ -248,6 +247,64 @@ function EditIssue() {
     }
     store.events = { updateAfter, updateBefore };
   }, [issueId, loadIssueDetail, onUpdate, store]);
+  const resetDefault = useCallback(() => {
+    store.setDefaultSummary(undefined);
+    store.setDefaultTypeId(undefined);
+    store.setDefaultSprint(undefined);
+    store.setDefaultAssignee(undefined);
+  }, [store]);
+
+  const handleOpenCreateSubTask = usePersistFn(() => {
+    const {
+      issueId: parentIssueId, summary: parentSummary, activeSprint,
+    } = store.getIssue;
+    openCreateSubTask({
+      onCreate: () => {
+        store.setCreateSubTaskShow(false);
+        resetDefault();
+        if (onCreateSubIssue) {
+          onCreateSubIssue(issue, parentIssueId);
+        }
+        loadIssueDetail(issue.issueId);
+      },
+      parentIssue: {
+        summary: parentSummary,
+        issueId: parentIssueId,
+      },
+      defaultValues: {
+        summary: store.defaultSummary,
+        sprint: activeSprint ? activeSprint.sprintId : undefined,
+      },
+      defaultAssignee: store.defaultAssignee,
+      defaultTypeId: store.defaultTypeId,
+    });
+  });
+  const handleOpenCreateSubBug = usePersistFn(() => {
+    const {
+      issueId: parentIssueId, summary: parentSummary, activeSprint,
+    } = store.getIssue;
+    openCreateSubTask({
+      typeCode: 'bug',
+      onCreate: () => {
+        store.setCreateSubTaskShow(false);
+        resetDefault();
+        if (onCreateSubIssue) {
+          onCreateSubIssue(issue, parentIssueId);
+        }
+        loadIssueDetail(issue.issueId);
+      },
+      parentIssue: {
+        summary: parentSummary,
+        issueId: parentIssueId,
+      },
+      defaultValues: {
+        summary: store.defaultSummary,
+        sprint: activeSprint ? activeSprint.sprintId : undefined,
+      },
+      defaultAssignee: store.defaultAssignee,
+      defaultTypeId: store.defaultTypeId,
+    });
+  });
   return (
 
     <div className={`${prefixCls}`} style={style} ref={container}>
@@ -283,6 +340,9 @@ function EditIssue() {
           onUpdate={onUpdate}
           otherProject={otherProject}
           outside={outside}
+          onTransformType={onTransformType}
+          onOpenCreateSubTask={handleOpenCreateSubTask}
+          onOpenCreateSubBug={handleOpenCreateSubBug}
         />
         <IssueBody
           setIssueLoading={setIssueLoading}
@@ -297,71 +357,22 @@ function EditIssue() {
           reloadIssue={loadIssueDetail}
           onUpdate={onUpdate}
           onIssueCopy={onIssueCopy}
+          onCreateSubIssue={onCreateSubIssue}
           onDeleteSubIssue={onDeleteSubIssue}
+          onLinkIssue={onLinkIssue}
           loginUserId={AppState.userInfo.id}
           applyType={applyType}
           onDeleteIssue={onDeleteIssue}
           parentSummary={summary}
           push={push}
           otherProject={otherProject}
+          onChangeParent={onChangeParent}
+          onRelateIssue={onRelateIssue}
+          onTransformSubIssue={handleTransformSubIssue}
+          onOpenCreateSubTask={handleOpenCreateSubTask}
+          onOpenCreateSubBug={handleOpenCreateSubBug}
         />
       </div>
-      {
-        relateStoryShow ? (
-          <RelateStory
-            issue={issue}
-            visible={relateStoryShow}
-            onCancel={() => store.setRelateStoryShow(false)}
-            onOk={handleRelateStory.bind(this)}
-          />
-        ) : null
-      }
-      {
-        transformSubIssueShow ? (
-          <TransformSubIssue
-            visible={transformSubIssueShow}
-            issueId={issueId}
-            issueNum={issueNum}
-            ovn={objectVersionNumber}
-            onCancel={() => store.setTransformSubIssueShow(false)}
-            onOk={handleTransformSubIssue.bind(this)}
-          />
-        ) : null
-      }
-      {
-        transformFromSubIssueShow ? (
-          <TransformFromSubIssue
-            visible={transformFromSubIssueShow}
-            issueId={issueId}
-            issueNum={issueNum}
-            originIssueTypeId={issueTypeId}
-            ovn={objectVersionNumber}
-            onCancel={() => store.setTransformFromSubIssueShow(false)}
-            onOk={handleTransformFromSubIssue.bind(this)}
-            store={store}
-          />
-        ) : null
-      }
-      {
-        changeParentShow ? (
-          <ChangeParent
-            issueId={issueId}
-            issueNum={issueNum}
-            visible={changeParentShow}
-            objectVersionNumber={objectVersionNumber}
-            onOk={() => {
-              store.setChangeParentShow(false);
-              if (onUpdate) {
-                onUpdate();
-              }
-              loadIssueDetail(issueId);
-            }}
-            onCancel={() => {
-              store.setChangeParentShow(false);
-            }}
-          />
-        ) : null
-      }
     </div>
   );
 }

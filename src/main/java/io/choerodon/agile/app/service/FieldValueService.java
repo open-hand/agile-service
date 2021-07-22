@@ -86,9 +86,10 @@ public interface FieldValueService {
      * @param organizationId
      * @param projectId
      * @param pageRequest
+     * @param schemeCode
      * @return
      */
-    List<Long> sortIssueIdsByFieldValue(Long organizationId, Long projectId, PageRequest pageRequest);
+    List<Long> sortIssueIdsByFieldValue(Long organizationId, Long projectId, PageRequest pageRequest, String schemeCode);
 
 
     /**
@@ -113,5 +114,5 @@ public interface FieldValueService {
                                  String applyType,
                                  boolean sendMsg);
 
-    void copyCustomFieldValue(Long projectId, IssueDetailDTO issueDetailDTO, Long newIssueId, List<Long> customFieldIds);
+    void copyCustomFieldValue(Long projectId, IssueDetailDTO issueDetailDTO, Long newIssueId, List<Long> customFieldIds, List<PageFieldViewCreateVO> copyRequireFields);
 }

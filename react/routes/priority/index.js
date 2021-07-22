@@ -1,3 +1,3 @@
-import PriorityIndex from './PriorityIndex';
+import Priority from './Priority';
 
-export default PriorityIndex;
+export default Priority;

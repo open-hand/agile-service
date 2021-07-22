@@ -19,8 +19,6 @@ class ScrumBoardStore {
 
   @observable calanderCouldUse = false;
 
-  @observable createIssueVisible = false;
-
   @observable currentSprintExist = true;
 
   @observable currentDrag = null;
@@ -162,7 +160,7 @@ class ScrumBoardStore {
   }
 
   needRefresh(issue, destinationStatus) {
-    if ((issue.issueTypeVO.typeCode === 'bug' && issue.relateIssueId) || issue.issueTypeVO.typeCode === 'sub_task') {
+    if ((issue.issueTypeVO.typeCode === 'bug' && issue.relateIssueId) || issue.issueTypeVO.typeCode === 'sub_task' || ['story', 'bug', 'task'].includes(issue.issueTypeVO.typeCode)) {
       const hasLinkage = this.statusLinkages.find((link) => link.issueTypeId === issue.issueTypeVO.id && link.statusId === destinationStatus);
       return hasLinkage;
     }
@@ -955,14 +953,6 @@ class ScrumBoardStore {
 
   @action setEditRef(ref) {
     this.editRef = ref;
-  }
-
-  @action setCreateIssueVisible(data) {
-    this.createIssueVisible = data;
-  }
-
-  @computed get getCreateIssueVisible() {
-    return this.createIssueVisible;
   }
 }
 

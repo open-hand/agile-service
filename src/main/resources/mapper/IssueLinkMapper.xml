@@ -22,15 +22,22 @@
                     ai.issue_type_id,
                     ai.assignee_id,
                     ai.apply_type,
-                    ai.type_code
+                    ai.type_code,
+                    ail.issue_id as key_issue_id
                 FROM
                     agile_issue_link ail
                     LEFT JOIN agile_issue_link_type ailt ON ailt.link_type_id = ail.link_type_id
                     LEFT JOIN agile_issue ai ON ail.linked_issue_id = ai.issue_id
                     LEFT JOIN agile_project_info api ON api.project_id = ai.project_id
                 WHERE
-                    ail.issue_id = #{issueId}
-                    AND ai.project_id = #{projectId}
+                    ail.issue_id in
+                    <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+                        #{issueId}
+                    </foreach>
+                    AND ai.project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+                        #{projectId}
+                    </foreach>
                     <if test="noIssueTest">
                         AND ai.apply_type = 'agile'
                     </if>
@@ -47,7 +54,8 @@
                     ai1.issue_type_id,
                     ai1.assignee_id,
                     ai1.apply_type,
-                    ai1.type_code
+                    ai1.type_code,
+                    ail1.linked_issue_id as key_issue_id
                 FROM
                     agile_issue_link ail1
                     LEFT JOIN agile_issue_link_type ailt1 ON ailt1.link_type_id = ail1.link_type_id
@@ -55,8 +63,14 @@
                     LEFT JOIN agile_project_info api1 ON api1.project_id = ai1.project_id
                     LEFT JOIN agile_issue_link ail2 ON ail1.issue_id = ail2.linked_issue_id AND ail1.linked_issue_id = ail2.issue_id AND ail1.link_type_id = ail2.link_type_id
                 WHERE
-                    ail1.linked_issue_id = #{issueId}
-                    AND ai1.project_id = #{projectId}
+                    ail1.linked_issue_id in
+                    <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+                        #{issueId}
+                    </foreach>
+                    AND ai1.project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+                        #{projectId}
+                    </foreach>
                     <if test="noIssueTest">
                         AND ai1.apply_type = 'agile'
                     </if>

@@ -6,6 +6,7 @@ import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.*;
+import io.choerodon.agile.infra.enums.FieldSql;
 
 import java.util.List;
 import java.util.Map;
@@ -466,4 +467,27 @@ public interface AgilePluginService {
     void createTagIssueRel(List<TagVO> tags, Long projectId, Long issueId);
 
     void updateTagIssueRel(List<TagVO> tags, Long projectId, Long issueId);
+
+    /**
+     * 获取商业版字段sql
+     * @param fieldCode 字段code
+     * @return 商业版字段sql
+     */
+    FieldSql getSystemPluginFieldSql(String fieldCode);
+
+    void setIssueProgramAttr(Long projectId, List<IssueSearchVO> searchVOList, List<Long> allIssueIds);
+
+    void handlerSprintProgramAttr(List<Long> sprintIds, Long projectId, List<SprintSearchVO> sprintSearches);
+
+    void deleteTagByBranch(Long projectId, IssueWithBranchVO issueWithBranchVO);
+
+    /**
+     * 获取商业版项目关联信息
+     * @param organizationId 组织id
+     * @param projectId 项目id
+     * @param parentId 父级id
+     * @param onlySelectEnable 是否启用
+     * @return 项目关联信息
+     */
+    List<ProjectRelationshipInfoVO> getProjUnderGroup(Long organizationId, Long projectId, Long parentId, boolean onlySelectEnable);
 }

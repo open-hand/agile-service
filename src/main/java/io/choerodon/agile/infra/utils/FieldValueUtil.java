@@ -617,17 +617,31 @@ public class FieldValueUtil {
 
     public static void handleAgileSortPageRequest(String fieldCode, String fieldType, PageRequest pageRequest) {
         try {
+            Map<String, String> order = new HashMap<>(1);
             switch (fieldType) {
                 case FieldType.DATETIME:
                 case FieldType.DATE:
                 case FieldType.TIME:
-                    Map<String, String> order = new HashMap<>(1);
                     order.put(fieldCode, DATE_VALUE);
-                    PageUtil.sortResetOrder(pageRequest.getSort(), "fv", order);
+                    break;
+                case FieldType.RADIO:
+                case FieldType.SINGLE:
+                case FieldType.MEMBER:
+                    order.put(fieldCode, "option_id");
+                    break;
+                case FieldType.INPUT:
+                    order.put(fieldCode, "string_value");
+                    break;
+                case FieldType.TEXT:
+                    order.put(fieldCode, "text_value");
+                    break;
+                case FieldType.NUMBER:
+                    order.put(fieldCode, "number_value");
                     break;
                 default:
                     break;
             }
+            PageUtil.sortResetOrder(pageRequest.getSort(), "fv", order);
         } catch (Exception e) {
             throw new CommonException("error", e);
         }

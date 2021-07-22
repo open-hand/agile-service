@@ -107,7 +107,7 @@ const CreateState: React.FC<Props> = ({
   }, [statusId, ds]);
   return (
     <Form dataSet={ds} className={styles.statusModal}>
-      <TextField name="name" placeholder="用于标识问题所处的阶段，例如：测试中" help={disabledEditName ? '状态被需求池使用，不可更改名称' : ''} />
+      <TextField name="name" placeholder="请输入状态名称，例如：测试中" help={disabledEditName ? '状态被需求池使用，不可更改名称' : ''} />
       <TextArea
         maxLength={45}
         name="description"
