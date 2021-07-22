@@ -579,7 +579,7 @@ const CreateIssueBase = observer(({
                 name,
                 fieldId,
                 projectId,
-                clearButton: !field?.required,
+                clearButton: !required,
                 multiple: dataSetField.get('multiple'),
                 style: {
                   width: '100%',
