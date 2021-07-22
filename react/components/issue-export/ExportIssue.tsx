@@ -298,7 +298,6 @@ const ExportIssue: React.FC = () => {
           )
         }
       </div>
-      <Divider />
       <WsProgress
         className={`${prefixCls}-wsProgress-area`}
         messageKey={`agile-export-issue-${getProjectId()}`}
