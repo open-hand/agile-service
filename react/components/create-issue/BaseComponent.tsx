@@ -164,7 +164,7 @@ function cascadeFieldAfterLoad(dataSet: DataSet, list: any[], field: IssueCreate
     if (defaultValue) {
       dataSet.current?.set(field.fieldCode, isSingle(field) ? defaultValue : uniq([...filter(fieldCurrentValue, (id) => find(list, { [key]: id })), ...defaultValue]));
     } else {
-      dataSet.current?.set(field.fieldCode, undefined);
+      // dataSet.current?.set(field.fieldCode, undefined);
     }
   }
 }
@@ -536,6 +536,7 @@ const CreateIssueBase = observer(({
       }
       case 'single': case 'multiple': case 'checkbox': case 'radio': {
         return {
+          ...getOptionsData(rules, dataSet, field),
           hidden: getRuleHidden(field, rules),
           afterLoad: (res:any) => cascadeFieldAfterLoad(dataSet, res, field as IssueCreateFields, rules),
         };

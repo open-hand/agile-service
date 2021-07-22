@@ -29,7 +29,7 @@ ref: React.Ref<Select>) => {
     valueField: 'id',
     requestArgs: args,
     request: hasRule && fieldId
-      ? ({ requestArgs, filter, page }) => fieldApi.getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, 0)
+      ? ({ requestArgs, filter, page }) => fieldApi.project(projectId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, 0)
       : () => priorityApi.loadByProject(projectId, [String(priorityId)]),
     middleWare: (data: Priority[]) => {
       if (dataRef) {
