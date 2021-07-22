@@ -63,7 +63,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         if (ObjectUtils.isEmpty(issueIds)) {
             return new ArrayList<>();
         }
-        List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(projectId, new ArrayList<>(issueIds), null);
+        List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(projectId, new ArrayList<>(issueIds), null, false);
         Map<Long, Date> completedDateMap =
                 issueMapper.selectActuatorCompletedDateByIssueIds(new ArrayList<>(issueIds), projectId)
                         .stream()
@@ -91,12 +91,21 @@ public class GanttChartServiceImpl implements GanttChartService {
                 filterSql = null;
             }
             boardAssembler.handleOtherArgs(searchVO);
+            String orderStr = "issue_num_convert desc";
+            boolean isTreeView =
+                    !Boolean.FALSE.equals(
+                            Optional.ofNullable(searchVO.getSearchArgs())
+                                    .map(x -> x.get("tree"))
+                                    .orElse(false));
             Page<IssueDTO> page =
-                    PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), null, true));
+                    PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), orderStr, isTreeView));
             List<Long> issueIds = page.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
             if (!ObjectUtils.isEmpty(issueIds)) {
-                Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds());
-                List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(projectId, issueIds, childrenIds);
+                Set<Long> childrenIds = new HashSet<>();
+                if (isTreeView) {
+                    childrenIds.addAll(issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds()));
+                }
+                List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(projectId, issueIds, childrenIds, isTreeView);
                 issueIds.addAll(childrenIds);
                 Map<Long, Date> completedDateMap =
                         issueMapper.selectActuatorCompletedDateByIssueIds(issueIds, projectId)

@@ -64,11 +64,20 @@ const Issue = observer(({ cached, updateCache }) => {
   const [props] = useDetail();
   const { open } = props;
   const { data: tableFields } = useIssueTableFields();
-  const getTableData = useCallback(({ page, sort, size }) => {
+
+  const handleCheckBefore = useCallback(() => {
+    if (!issueSearchStore.batchAction && !hasBatchDeletePermission) {
+      issueSearchStore.setBatchAction('edit');
+    }
+  }, [hasBatchDeletePermission, issueSearchStore]);
+
+  const getTableData = useCallback(({
+    page, sort, size, isTree,
+  }) => {
     const search = issueSearchStore.getCustomFieldFilters();
-    set(search, 'searchArgs.tree', !tableListMode);
+    set(search, 'searchArgs.tree', isTree);
     return issueApi.loadIssues(page, size, sort, search);
-  }, [issueSearchStore, tableListMode]);
+  }, [issueSearchStore]);
   const tableProps = useTable(getTableData, {
     rowKey: 'issueId',
     isTree: !tableListMode,
@@ -76,6 +85,7 @@ const Issue = observer(({ cached, updateCache }) => {
     defaultPageSize: cached?.pagination?.pageSize,
     // defaultVisibleColumns: cached?.visibleColumns ?? defaultVisibleColumns,
     autoQuery: false,
+    checkBefore: handleCheckBefore,
   });
   useUnmount(() => updateCache({
     pagination: tableProps.pagination,
@@ -354,13 +364,13 @@ const Issue = observer(({ cached, updateCache }) => {
         /> */}
       </Header>
       <Breadcrumb />
-      <Content style={theme === 'theme4' ? { } : { paddingTop: 0 }} className="c7nagile-issue-content">
+      <Content style={theme === 'theme4' ? {} : { paddingTop: 0 }} className="c7nagile-issue-content">
         <IssueSearch
           store={issueSearchStore}
           urlFilter={urlFilter}
           onClear={handleClear}
           onChange={async () => {
-            localPageCacheStore.setItem('issues', issueSearchStore.currentFilter);
+            localPageCacheStore.setItem('issues', issueSearchStore.getCustomFieldFilters());
             await query();
             // 有筛选，自动展开
             if (issueSearchStore.isHasFilter) {

@@ -4,7 +4,6 @@ import { toJS } from 'mobx';
 import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
 import StoryCell from './StoryCell';
 import TitleCell from './TitleCell';
-import ListenRowInViewport from '../ListenRowlInViewport';
 
 @observer
 class StoryRow extends Component {
@@ -69,7 +68,6 @@ class StoryRow extends Component {
             ) : '';
           })}
         </tr>
-        <ListenRowInViewport id={versionId || sprintId} />
       </>
     );
   }

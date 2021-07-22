@@ -9,7 +9,7 @@ import Field from '@/components/field';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import { FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { BasicTarget } from 'ahooks/lib/utils/dom';
-import { useSize } from 'ahooks';
+import { usePersistFn, useSize } from 'ahooks';
 import { ISystemField, ICustomField, IFilterField } from '.';
 import { getFlatElement, renderGroupedFields, renderFields } from './utils';
 import styles from './Filter.less';
@@ -62,23 +62,25 @@ const Filter: React.FC<FilterProps> = ({
   const [folded, setFolded] = useState<boolean | undefined>();
   const [overflowLine, setOverflowLine] = useState<boolean>(false);
   const filterRef = useRef<HTMLDivElement | null>(null);
-
-  const handleFilterChange = useCallback((code: string, v: any) => {
+  const getNewFilter = usePersistFn((preFilter: IFilter, code: string, v: any) => {
     // 保证默认显示的字段在值清空时不会出现保存筛选
     const value = alwaysRenderFields.includes(code) ? v ?? undefined : v ?? null;
-    const clonedFilter = { ...filter };
+    const clonedFilter = { ...preFilter };
     if (value === undefined) {
       delete clonedFilter[code];
     } else {
       clonedFilter[code] = value;
     }
-    onFilterChange(clonedFilter);
-  }, [alwaysRenderFields, filter, onFilterChange]);
+    return clonedFilter;
+  });
+  const handleFilterChange = usePersistFn((code: string, v: any) => {
+    onFilterChange(getNewFilter(filter, code, v));
+  });
   const handleSelect = useCallback((select: string[]) => {
     const newValue = uniq([...selected, ...select]);
     onSelectChange(newValue);
-    select.forEach((code) => handleFilterChange(code, null));
-  }, [handleFilterChange, onSelectChange, selected]);
+    onFilterChange(select.reduce((res, current) => getNewFilter(res, current, null), filter));
+  }, [filter, getNewFilter, onFilterChange, onSelectChange, selected]);
   const handleUnSelect = useCallback((unselect: string[]) => {
     const newValue = [...selected];
     const clonedFilter = { ...filter };

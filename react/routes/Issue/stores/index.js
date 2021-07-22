@@ -43,8 +43,7 @@ export const StoreProvider = inject('AppState')(injectIntl(
     const issueSearchStore = useIssueSearchStore({
       getSystemFields,
       transformFilter,
-      defaultSearchVO: !cachedFilter && defaultMyFilter ? JSON.parse(defaultMyFilter.filterJson) : undefined,
-      defaultChosenFields: Array.isArray(cachedFilter) ? new Map(cachedFilter.map((item) => [item.code, item])) : undefined,
+      defaultSearchVO: (cachedFilter) ?? (defaultMyFilter && defaultMyFilter.filterJson ? JSON.parse(defaultMyFilter.filterJson) : undefined) ?? undefined,
     });
 
     /**

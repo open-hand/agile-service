@@ -42,7 +42,18 @@ const columns = [
     name: 'required', label: '必填（控制项目）', type: 'organization', render: renderLabelRequire,
   },
   { name: 'edited', label: '加入到编辑页', type: 'common' },
-  { name: 'created', label: '加入到创建页', type: 'common' },
+  {
+    name: 'created',
+    label: '加入到创建页',
+    type: 'common',
+    render: (value: any) => (
+      <div>
+        {value}
+        <span style={{ float: 'right', paddingRight: '.3rem' }}>操作</span>
+      </div>
+    ),
+  },
+
   // {
   //   name: 'operate', label: '操作', type: 'project', render: renderOperate,
   // },

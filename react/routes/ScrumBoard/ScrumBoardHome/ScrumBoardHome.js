@@ -264,6 +264,9 @@ class ScrumBoardHome extends Component {
   )
 
   refresh = (defaultBoard, url, boardListData) => {
+    if (!defaultBoard) {
+      return;
+    }
     ScrumBoardStore.setSpinIf(true);
     Promise.all([issueTypeApi.loadAllWithStateMachineId(),
       statusApi.loadAllTransformForAllIssueType(defaultBoard.boardId),

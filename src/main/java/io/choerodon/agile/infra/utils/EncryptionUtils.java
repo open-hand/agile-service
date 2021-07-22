@@ -634,15 +634,15 @@ public class EncryptionUtils {
                 } catch (IOException e) {
                     LOGGER.error("string to object error: {}", e);
                 }
-                if (!CollectionUtils.isEmpty(value)) {
+                if (!ObjectUtils.isEmpty(next.getValue()) && !CollectionUtils.isEmpty(value)) {
                     object = value.stream().map(v -> encrypt ? encrypt(v, IGNORE_VALUES) : decrypt(v, IGNORE_VALUES)).collect(Collectors.toList());
 
                 }
                 else {
-                    object = new ArrayList<>();
+                    object = next.getValue();
                 }
             } else if ("customField".equals(next.getKey())) {
-                object = handlerCustomField(next.getValue(), encrypt);
+                object = personalFilterHandlerCustomField(next.getValue(), encrypt);
             } else {
                 object = next.getValue();
             }
@@ -701,6 +701,65 @@ public class EncryptionUtils {
                         if (ObjectUtils.isEmpty(value1) || value1.isNull()) {
                             continue;
                         }
+                        nodeObjValue.put("value", value1.isNumber() ? value1.numberValue() : value1.textValue());
+                    }
+                    objects.add(nodeObjValue);
+                }
+                map.put(next.getKey(), objects);
+            }
+            return map;
+        } catch (IOException e) {
+            LOGGER.error("jackson io error: {}", e);
+        }
+        return null;
+    }
+
+    protected static Object personalFilterHandlerCustomField(Object value, Boolean encrypt) {
+        try {
+            JsonNode jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(value));
+            ObjectNode objectNode = (ObjectNode) jsonNode;
+            Iterator<Map.Entry<String, JsonNode>> fields = objectNode.fields();
+            Map<String, Object> map = new HashMap<>();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> next = fields.next();
+                JsonNode nextValue = next.getValue();
+                List<Object> objects = new ArrayList<>();
+                for (JsonNode node : nextValue) {
+                    Map<String, Object> nodeObjValue = new HashMap<>();
+                    String fieldId = node.get("fieldId").textValue();
+                    nodeObjValue.put("fieldId", encrypt ? encryptionService.encrypt(fieldId, BLANK_KEY) : encryptionService.decrypt(fieldId, BLANK_KEY));
+                    JsonNode value1 = node.get("value");
+                    if ("option".equals(next.getKey())) {
+                        List<String> list = new ArrayList<>();
+                        if (value1.isArray()) {
+                            value1.forEach(v -> list.add(v.isNumber() ? v.textValue() : (encrypt ? encryptionService.encrypt(v.textValue(), BLANK_KEY) : encryptionService.decrypt(v.textValue(), BLANK_KEY))));
+                        }
+                        nodeObjValue.put("value", isNull(value1) ? null : list);
+                    } else if (StringUtils.contains(next.getKey(), "date")){
+                        if (isNull(node.get("startDate")) || isNull(node.get("endDate"))) {
+                            nodeObjValue.put("startDate", isNull(node.get("startDate")) ? null : node.get("startDate").textValue());
+                            nodeObjValue.put("endDate", isNull(node.get("endDate")) ? null : node.get("endDate").textValue());
+                        } else {
+                            try {
+                                String startTime = null;
+                                String endTime = null;
+                                if (encrypt) {
+                                    String startDate = node.get("startDate").asText();
+                                    String endDate = node.get("endDate").asText();
+                                    startTime = StringUtils.containsAny(startDate, "-", ":")? startDate : sdf.format(new Date(Long.parseLong(startDate)));
+                                    endTime = StringUtils.containsAny(endDate, "-", ":")? endDate : sdf.format(new Date(Long.parseLong(endDate)));
+                                } else {
+                                    startTime = node.get("startDate").textValue();
+                                    endTime = node.get("endDate").textValue();
+                                }
+                                nodeObjValue.put("startDate", startTime);
+                                nodeObjValue.put("endDate", endTime);
+                            } catch (Exception e) {
+                                throw new CommonException(e);
+                            }
+                        }
+                    } else {
                         nodeObjValue.put("value", value1.isNumber() ? value1.numberValue() : value1.textValue());
                     }
                     objects.add(nodeObjValue);

@@ -230,7 +230,7 @@ class PageTemplateStore {
   loadData = () => {
     this.clear();
     this.setLoading(true);
-    pageConfigApi.loadByIssueType(this.getCurrentIssueType).then((res) => {
+    pageConfigApi.loadTemplateByIssueType(this.getCurrentIssueType).then((res) => {
       this.sortTableDataSet.loadData(res.fields.map((field) => ({
         ...field,
         showDefaultValueText: transformDefaultValue({ ...field, defaultValue: !field.defaultValueObjs || (field.defaultValueObjs && field.defaultValueObjs.length > 0) ? field.defaultValue : undefined, fieldOptions: field.fieldOptions || field.defaultValueObjs || [field.defaultValueObj].filter((item) => item) }),

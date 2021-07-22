@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.alibaba.fastjson.JSONObject;
@@ -413,4 +414,8 @@ public interface IssueService {
     List<Long> handlerSortFieldInstance(PageRequest pageRequest, List<Long> allIssueIds, List<Long> foundationIssueIds);
 
     String handleSortField(PageRequest pageRequest);
+
+    void handlerInfluenceMap(Map<Long, List<Long>> influenceMap, Long issueId, Long statusId, Map<Long, List<IssueLinkChangeVO>> issueLinkChangeGroup, Long influenceId, InfluenceIssueVO influenceIssueVO);
+
+    Boolean updateInfluenceIssueStatus(Long projectId, Long issueId, String applyType, Set<Long> influenceIssueIds);
 }

@@ -3,7 +3,7 @@ import {
   Icon, Tooltip,
 } from 'choerodon-ui';
 import { stores } from '@choerodon/boot';
-import { find, isObject } from 'lodash';
+import { find } from 'lodash';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'choerodon-ui/pro';
@@ -54,23 +54,7 @@ const SearchArea: React.FC = () => {
       const filterObject = flattenObject(JSON.parse(targetMyFilter?.filterJson || '{}'));
       // 先清除筛选
       store.clearAllFilter();
-      for (const [key, value] of Object.entries(filterObject)) {
-        // 自定义字段保存的时候只保存了id，这里要找到code
-        // @ts-ignore
-        if (value && isObject(value) && value.isCustom) {
-          const code = store.getFieldCodeById(key);
-          if (code) {
-            // @ts-ignore
-            store.handleFilterChange(code, value.value);
-          }
-        } else if (key === 'createEndDate' || key === 'createStartDate') {
-          store.handleFilterChange('createDate', [filterObject.createStartDate, filterObject.createEndDate]);
-        } else if (key === 'updateEndDate' || key === 'updateStartDate') {
-          store.handleFilterChange('updateDate', [filterObject.updateStartDate, filterObject.updateEndDate]);
-        } else {
-          store.handleFilterChange(key, value);
-        }
-      }
+      store.updateFilter(filterObject);
       if (folded) {
         store.setFolded(false);
       }
@@ -224,7 +208,7 @@ const SearchArea: React.FC = () => {
                 <OptGroup key="my" label="个人筛选">
                   {
                     myFilters.map((filter) => (
-                      <Option value={`my|${filter.filterId}`}>{filter.name}</Option>
+                      <Option value={`my|${filter.filterId}`} className={`${prefixCls}-search-hidden_my_filter-option`}>{filter.name}</Option>
                     ))
                   }
                 </OptGroup>

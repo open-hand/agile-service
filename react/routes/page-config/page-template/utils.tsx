@@ -4,6 +4,7 @@ import {
   Button, Modal, Spin, message, Select, Tooltip, PerformanceTable, Icon, Dropdown, CheckBox,
 } from 'choerodon-ui/pro';
 import TableDropMenu from '@/components/table-drop-menu';
+import { pageConfigApi } from '@/api';
 import ToggleFieldValue from '../components/toggle-field-value';
 import openLinkage from '../components/setting-linkage/Linkage';
 
@@ -90,7 +91,11 @@ const getColumns = ({ issueTypeId }: { issueTypeId: string }) => ([
       <TableDropMenu
         menuData={[{
           text: '权限配置',
-          action: openPageRoleConfigModal,
+          action: async () => {
+            const res = await pageConfigApi.loadFieldPermission(rowData.get('fieldId'), issueTypeId);
+            console.log('res', res);
+            openPageRoleConfigModal({ fields: [{ id: rowData.get('fieldId'), code: rowData.get('fieldCode') }], data: res, issueTypeId });
+          },
           display: checkPermissionRole({ createdLevel: rowData.get('createdLevel') }),
         }, {
           text: '设置级联规则',

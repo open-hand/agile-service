@@ -1,13 +1,15 @@
 import {
   observable, action, computed, toJS,
 } from 'mobx';
-import { debounce, find, isEmpty } from 'lodash';
+import {
+  debounce, find, isEmpty, isObject,
+} from 'lodash';
 import { fieldApi, personalFilterApi } from '@/api';
 import { IField, ISearchVO } from '@/common/types';
 import { getProjectId } from '@/utils/common';
 import { IPersonalFilter } from '../quick-search';
 import {
-  flattenObject, isFilterSame, SearchVOToFilter, filterInvalidAttribute, getEmptyValue,
+  flattenObject, isFilterSame, filterInvalidAttribute, getEmptyValue,
 } from './utils';
 
 export type ILocalField = {
@@ -100,17 +102,34 @@ class IssueSearchStore {
 
   @action
   transformChosenFields() {
-    const filter = SearchVOToFilter(this.defaultSearchVO || {});
-    Object.keys(filter).filter((key) => filter[key] !== undefined).forEach((key) => {
-      const systemFields = this.getSystemFields();
-      const isSystemField = find(systemFields, { code: key });
-      const field = isSystemField || find(this.fields, { id: key });
+    const filter = flattenObject(this.defaultSearchVO || {});
+    this.updateFilter(filter);
+  }
 
-      if (!field) {
-        return;
+  @action updateFilter(filter: { [key: string]: any }) {
+    for (const [key, value] of Object.entries(filter)) {
+      if (value !== undefined) {
+        // 自定义字段保存的时候只保存了id，这里要找到code
+        // @ts-ignore
+        if (value && isObject(value) && value.isCustom) {
+          const code = this.getFieldCodeById(key);
+          if (code) {
+          // @ts-ignore
+            this.handleFilterChange(code, value.value);
+          }
+        } else if (key === 'createEndDate' || key === 'createStartDate') {
+          this.handleFilterChange('createDate', [filter.createStartDate, filter.createEndDate]);
+        } else if (key === 'updateEndDate' || key === 'updateStartDate') {
+          this.handleFilterChange('updateDate', [filter.updateStartDate, filter.updateEndDate]);
+        } else if (key === 'estimatedStartTimeScopeStart' || key === 'estimatedStartTimeScopeEnd') {
+          this.handleFilterChange('estimatedStartTime', [filter.estimatedStartTimeScopeStart, filter.estimatedStartTimeScopeEnd]);
+        } else if (key === 'estimatedEndTimeScopeStart' || key === 'estimatedEndTimeScopeEnd') {
+          this.handleFilterChange('estimatedEndTime', [filter.estimatedEndTimeScopeStart, filter.estimatedEndTimeScopeEnd]);
+        } else {
+          this.handleFilterChange(key, value);
+        }
       }
-      this.chosenFields.set(isSystemField ? key : field.code, { ...field, value: filter[key] });
-    });
+    }
   }
 
   @action setFields(fields: IField[]) {

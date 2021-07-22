@@ -7,7 +7,9 @@ export function useStoryMapContext() {
   return useContext(Context);
 }
 function Index(props) {
-  const { data: issueTypes } = useProjectIssueTypes({ onlyEnabled: true, typeCode: 'story' });
+  const { data: issueTypes } = useProjectIssueTypes({ onlyEnabled: true, typeCode: 'story' }, {
+    notifyOnChangeProps: ['data'],
+  });
   return (
     <Context.Provider value={{ issueTypes: issueTypes || [] }}>
       <StoryMapHome {...props} />
