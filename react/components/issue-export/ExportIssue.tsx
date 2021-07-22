@@ -13,14 +13,13 @@ import ChooseField, { useChoseField } from '@/components/chose-field';
 import TableColumnCheckBoxes, { ITableColumnCheckBoxesDataProps, useTableColumnCheckBoxes } from '@/components/table-column-check-boxes';
 import WsProgress from '@/components/ws-progress';
 import { getProjectName, getProjectId } from '@/utils/common';
-import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
+import { FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { useExportIssueStore } from './stores';
 import { getCustomFieldFilters } from './utils';
 import { IChosenFieldField } from '../chose-field/types';
 import TemplateSelect from '../template-select/TemplateSelect';
 import openSaveTemplate from '../template-select/components/save/SaveTemplate';
 import { ITemplate } from '../template-select/components/edit/EditTemplate';
-import Divider from '../EditIssue/IssueComponent/IssueBody/Divider';
 
 interface FormPartProps {
   title: string | ReactElement,

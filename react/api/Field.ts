@@ -276,7 +276,7 @@ class FieldApi extends Api<FieldApi> {
     });
   }
 
-  getCascadeOptions(fieldId: string, selected: string[], fieldCascadeRuleIds: string[], searchParam: string, page: number, size: number) {
+  getCascadeOptions(fieldId: string, selected: string[], fieldCascadeRuleIds: string[], searchParam: string, page: number, size: number, extendParams?: string[]) {
     return axios({
       method: 'post',
       url: `${this.prefix}/field_cascade_rule/cascade_field/${fieldId}/option`,
@@ -288,6 +288,7 @@ class FieldApi extends Api<FieldApi> {
         selected,
         fieldCascadeRuleIds,
         searchParam,
+        extendParams,
       },
     });
   }
