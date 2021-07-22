@@ -37,8 +37,6 @@ export const renderFieldRelSelect = ({ field, name = 'fieldRelOptionList' }: Pro
         return <SelectVersion valueField="versionId" multiple statusArr={['version_planning']} name={name} />;
       case 'influenceVersion':
         return <SelectVersion valueField="versionId" multiple name={name} />;
-      case 'environment':
-        return <SelectEnvironment multiple name={name} />;
       case 'subProject': {
         return <SelectSubProject multiple name={name} />;
       }
