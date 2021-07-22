@@ -93,8 +93,6 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
             FieldCode.EPIC_NAME,
             FieldCode.TIME_TRACE,
             FieldCode.FEATURE_TYPE,
-            FieldCode.FIX_VERSION,
-            FieldCode.INFLUENCE_VERSION,
             FieldCode.PROGRAM_VERSION,
             FieldCode.EPIC,
             FieldCode.SPRINT,
