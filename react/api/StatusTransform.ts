@@ -725,17 +725,19 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     });
   }
 
-  getLinkageStatus(issueTypeId: string, linkIssueTypeId: string) {
+  getLinkageStatus(data: {
+    issueTypeId: string,
+    linkIssueTypeId: string,
+    linkTypeId: string,
+    statusId: string,
+  }) {
     return axios({
       method: 'post',
       url: `${this.prefix}/link_issue_status_linkage/status`,
       params: {
         organizationId: getOrganizationId(),
       },
-      data: {
-        issueTypeId,
-        linkIssueTypeId,
-      },
+      data,
     });
   }
 

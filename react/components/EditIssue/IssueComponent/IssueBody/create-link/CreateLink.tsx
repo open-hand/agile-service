@@ -140,7 +140,7 @@ const ObserverCreateLink = observer(CreateLink);
 const openCreateLink = (props: Props) => {
   Modal.open({
     key: Modal.key(),
-    title: '创建链接',
+    title: '创建问题链接',
     drawer: true,
     style: {
       width: MODAL_WIDTH.middle + 100,

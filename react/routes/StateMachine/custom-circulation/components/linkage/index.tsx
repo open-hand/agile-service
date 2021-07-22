@@ -392,7 +392,12 @@ const Linkage = ({
                         key={`${key}-${selectedType}-${issueTypeId}`}
                         name={statusName}
                         disabled={!issueTypeId}
-                        request={selectedType && issueTypeId ? () => statusTransformApi.getLinkageStatus(selectedType, issueTypeId) : () => {}}
+                        request={selectedType && issueTypeId ? () => statusTransformApi.getLinkageStatus({
+                          issueTypeId: selectedType,
+                          linkIssueTypeId: issueTypeId,
+                          linkTypeId,
+                          statusId: record.get('id'),
+                        }) : () => {}}
                         // @ts-ignore
                         extraStatus={extraStatus ? [extraStatus] : undefined}
                         excludeStatus={((issueTypeHasStatusMap.get(issueTypeId) || []) as string[]).filter((item) => item !== statusId)}
