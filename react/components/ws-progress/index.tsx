@@ -5,14 +5,14 @@ import { WSHandler } from '@choerodon/boot';
 import fileSever, { FileSaverOptions } from 'file-saver';
 import moment from 'moment';
 import { usePersistFn } from 'ahooks';
-import { Button, Progress } from 'choerodon-ui/pro';
+import { Button, Progress, Icon } from 'choerodon-ui/pro';
 import { ProgressStatus, ProgressType } from 'choerodon-ui/lib/progress/enum';
 import { humanizeDuration } from '@/utils/common';
 import { observer } from 'mobx-react-lite';
 import classnames from 'classnames';
 import './index.less';
-import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
-
+import DownLoad from '@/assets/icons/Download';
+import Divider from '../EditIssue/IssueComponent/IssueBody/Divider';
 /**
  * @param fieldKey websocket传输信息下载url的key  默认fileUrl
  * @param fileName 下载文件名  默认为url 最后一个‘/’后的名
@@ -161,22 +161,29 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
     }
     const fileName = downLoadProps?.fileName ?? downloadInfo?.url?.substring(downloadInfo.url.lastIndexOf('/') + 1);
     return downloadInfo ? (
-      <div className="c7n-agile-ws-finish">
-        {downloadInfo.children ?? (
-          downloadInfo.url
-            ? (
-              <>
-                <span>{downloadInfo.timeLine ?? `${doingTextTemplate}完成时间${downloadInfo.lastUpdateDate}（耗时${onHumanizeDuration(downloadInfo.createDate, downloadInfo.lastUpdateDate, downloadInfo.timeFormat)}）`}</span>
-                {
-                  downloadBtn ? (
-                    <Button icon="archive" className="c7n-agile-ws-progress-download-btn" onClick={() => downloadInfo.url && fileSever.saveAs(downloadInfo.url, fileName, downLoadProps?.fileSaverOptions)}>点击下载</Button>
-                  ) : (
-                    <span role="none" className="c7n-agile-ws-finish-url" onClick={() => downloadInfo.url && fileSever.saveAs(downloadInfo.url, fileName, downLoadProps?.fileSaverOptions)}>点击下载</span>
-                  )
-                }
-              </>
-            ) : ''
-        )}
+      <div>
+        <Divider />
+        <div style={{ fontWeight: 500, fontSize: '14px', marginBottom: 14 }}>历史记录</div>
+        <div className="c7n-agile-ws-finish">
+          {downloadInfo.children ?? (
+            downloadInfo.url
+              ? (
+                <>
+                  <span>{downloadInfo.timeLine ?? `${doingTextTemplate}完成时间${downloadInfo.lastUpdateDate}（耗时${onHumanizeDuration(downloadInfo.createDate, downloadInfo.lastUpdateDate, downloadInfo.timeFormat)}）`}</span>
+                  {
+                    downloadBtn ? (
+                      <Button icon="archive" className="c7n-agile-ws-progress-download-btn" onClick={() => downloadInfo.url && fileSever.saveAs(downloadInfo.url, fileName, downLoadProps?.fileSaverOptions)}>下载历史</Button>
+                    ) : (
+                      <span role="none" className="c7n-agile-ws-finish-url" onClick={() => downloadInfo.url && fileSever.saveAs(downloadInfo.url, fileName, downLoadProps?.fileSaverOptions)}>
+                        下载历史
+                        <DownLoad style={{ marginLeft: 6 }} />
+                      </span>
+                    )
+                  }
+                </>
+              ) : ''
+          )}
+        </div>
       </div>
     ) : <></>;
   }, [doingTextTemplate, downLoadProps?.fileName, downLoadProps?.fileSaverOptions, downloadBtn, props, stateProgress.data]);

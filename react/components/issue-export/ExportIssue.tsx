@@ -20,16 +20,18 @@ import { IChosenFieldField } from '../chose-field/types';
 import TemplateSelect from '../template-select/TemplateSelect';
 import openSaveTemplate from '../template-select/components/save/SaveTemplate';
 import { ITemplate } from '../template-select/components/edit/EditTemplate';
+import Divider from '../EditIssue/IssueComponent/IssueBody/Divider';
 
 interface FormPartProps {
   title: string | ReactElement,
   className?: string,
   children: ReactElement | ReactElement[] | null | Array<ReactElement | null>,
   btnOnClick?: (nextBtnStatusCode: 'ALL' | 'NONE') => boolean,
+  titleLine?: boolean
 }
-const FormPart: React.FC<FormPartProps> = memo((props) => {
+export const FormPart: React.FC<FormPartProps> = memo((props) => {
   const {
-    title, children, btnOnClick,
+    title, children, btnOnClick, titleLine = true,
   } = props;
   const { prefixCls } = useExportIssueStore();
   const [btnStatus, setBtnStatus] = useState<'ALL' | 'NONE'>();
@@ -44,7 +46,7 @@ const FormPart: React.FC<FormPartProps> = memo((props) => {
   return (
     <div className={classnames(`${prefixCls}-form`, props.className)}>
       <div className={`${prefixCls}-form-title`}>
-        <div className={`${prefixCls}-form-block`} />
+        {titleLine ? <div className={`${prefixCls}-form-block`} /> : null}
         <span>{title}</span>
         {!!btnOnClick && (
           <Button
@@ -273,16 +275,22 @@ const ExportIssue: React.FC = () => {
         {renderExport()}
       </FormPart>
       <div className={`${prefixCls}-btns`}>
+        <Button
+          icon="unarchive-o"
+          onClick={exportExcel}
+          className="c7n-exportIssue-btn"
+          loading={store.exportButtonConfig?.buttonProps?.loading}
+        >
+          导出
+        </Button>
         {
           !templateIsExist && (
             <Button
               icon="unarchive"
-              // funcType={'flat' as FuncType}
               onClick={handleSaveTemplate}
-              // color={'primary' as ButtonColor}
               className="c7n-exportIssue-btn"
               style={{
-                // marginLeft: 16,
+                marginLeft: 20,
               }}
             >
               保存为常用模板
@@ -290,13 +298,14 @@ const ExportIssue: React.FC = () => {
           )
         }
       </div>
+      <Divider />
       <WsProgress
         className={`${prefixCls}-wsProgress-area`}
         messageKey={`agile-export-issue-${getProjectId()}`}
         onFinish={handleFinish}
         onStart={() => {
-          modal?.update({ okProps: { loading: true } });
-          store.setExportBtnHidden(true);
+            modal?.update({ okProps: { loading: true } });
+            store.setExportBtnHidden(true);
         }}
         autoDownload={{ fileName: `${getProjectName()}.xlsx` }}
         downloadInfo={store.downloadInfo.id ? {
