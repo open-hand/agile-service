@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   withRouter,
 } from 'react-router-dom';
@@ -6,8 +6,9 @@ import {
   asyncRouter, PageWrap, PageTab, Permission,
 } from '@choerodon/boot';
 import LINK_URL from '@/constants/LINK_URL';
-import { mount, has } from '@choerodon/inject';
+import { mount, has, get } from '@choerodon/inject';
 import useHasDevops from '@/hooks/useHasDevops';
+import useCheckCurrentService from './useCheckServerVerison';
 
 const Release = withRouter(asyncRouter(() => import('../Release')));
 const Publish = mount('agile:PublishVersion');
@@ -33,5 +34,10 @@ const VersionList = ({ match }) => {
     </Permission>
   );
 };
-const Index = ({ match }) => (has('agile:PublishVersion') ? <VersionList /> : <Release />);
+
+const Index = ({ match }) => {
+  const { loading, version } = useCheckCurrentService();
+  const isShowPublish = has('agile:PublishVersion') && !loading && version !== 'sass-normal';
+  return isShowPublish ? <VersionList /> : <Release />;
+};
 export default Index;
