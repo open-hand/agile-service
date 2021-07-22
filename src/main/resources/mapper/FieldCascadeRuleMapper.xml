@@ -20,6 +20,7 @@
         <result column="cascade_field_code" property="cascadeFieldCode"/>
         <result column="cascade_field_type" property="cascadeFieldType"/>
         <result column="cascade_field_system" property="cascadeFieldSystem"/>
+        <result column="default_value" property="defaultValue"/>
         <result column="creation_date" property="creationDate"/>
         <result column="created_by" property="createdBy"/>
         <result column="last_update_date" property="lastUpdateDate"/>
