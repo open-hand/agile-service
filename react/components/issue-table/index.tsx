@@ -103,6 +103,7 @@ const IssueTable: React.FC<IssueTableProps> = ({
         columns={[checkboxColumn, ...isTree ? [expandColumn] : [], ...visibleColumns]}
         height={height ?? 400}
         rowHeight={40}
+        shouldUpdateScroll={false}
       />
       {createIssue && (
         <div style={{ paddingTop: 5 }}>
