@@ -22,10 +22,11 @@ import React, { Component } from 'react';
   };
 
   renderEditor = () => {
-    const { field } = this.props;
+    const { field, store } = this.props;
     const {
-      value, fieldType, required, valueStr,
+      value, fieldType, valueStr,
     } = field;
+    const required = field?.required || store.getRuleRequired(field);
     return <SelectUser required={required} clearButton selectedUser={valueStr} />;
   }
 

@@ -38,7 +38,7 @@ class FieldTeam extends Component {
     const activePiTeams = issue.activePiTeams || [];
     const teamIds = activePiTeams.map((team) => team.id);
     const field = store.getFieldByCode('sprint');
-    const required = field?.required;
+    const required = field?.required || store.getRuleRequired(field);
 
     return (
       <div className="line-start mt-10">
@@ -61,6 +61,9 @@ class FieldTeam extends Component {
                   width: '100%',
                   minWidth: 150,
                 }}
+                {
+                  ...store.getOptionsData(field, teamIds)
+                }
               />
             )}
           >

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
-import _ from 'lodash';
+import { map, find } from 'lodash';
 import { issueApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectComponent from '@/components/select/select-component';
@@ -16,7 +16,7 @@ import { Tooltip } from 'choerodon-ui';
     if (!arr.length) {
       return type === 'string' ? '无' : [];
     } if (typeof arr[0] === 'object') {
-      return type === 'string' ? _.map(arr, pro).join() : _.map(arr, pro);
+      return type === 'string' ? map(arr, pro).join() : map(arr, pro);
     }
     return type === 'string' ? arr.join() : arr;
   };
@@ -33,7 +33,7 @@ import { Tooltip } from 'choerodon-ui';
     if (JSON.stringify(componentIssueRelVOList) !== JSON.stringify(newComponentIssueRelVOList)) {
       const componentList = [];
       newComponentIssueRelVOList.forEach((component) => {
-        const target = _.find(originComponents, { name: component });
+        const target = find(originComponents, { name: component });
         if (target) {
           componentList.push(target);
         } else {
@@ -77,7 +77,7 @@ import { Tooltip } from 'choerodon-ui';
     const issue = store.getIssue;
     const { componentIssueRelVOList = [] } = issue;
     const field = store.getFieldByCode('component');
-    const required = field?.required;
+    const required = field?.required || store.getRuleRequired(field);
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -102,6 +102,9 @@ import { Tooltip } from 'choerodon-ui';
                 dropdownMenuStyle={{
                   maxWidth: 400,
                 }}
+                {
+                  ...store.getOptionsData(field, map(componentIssueRelVOList, 'componentId'))
+                }
               />
             )}
           >

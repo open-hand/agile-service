@@ -69,10 +69,11 @@ const EditorMap = new Map([
   };
 
   renderEditor = () => {
-    const { field } = this.props;
+    const { field, store } = this.props;
     const {
-      value, fieldType, required, valueStr, extraConfig, fieldId,
+      value, fieldType, valueStr, extraConfig, fieldId,
     } = field;
+    const required = field?.required || store.getRuleRequired(field);
     const Editor = EditorMap.get(fieldType);
     if (Editor) {
       switch (fieldType) {
@@ -88,6 +89,9 @@ const EditorMap = new Map([
               required={required}
               fieldId={fieldId}
               multiple={fieldType === 'multiple' || fieldType === 'checkbox'}
+              {
+                ...store.getOptionsData(field, value)
+              }
             />
           );
         }

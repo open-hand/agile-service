@@ -25,6 +25,8 @@ import { issueApi } from '@/api';
     const issue = store.getIssue;
     const { priorityId, priorityVO = {} } = issue;
     const { colour, name } = priorityVO || {}; // 防止优先级为空时 出错
+    const field = store.getFieldByCode('priority');
+    const required = field?.required || store.getRuleRequired(field);
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -35,7 +37,16 @@ import { issueApi } from '@/api';
         <div className="c7n-value-wrapper">
           <TextEditToggle
             disabled={disabled}
-            editor={({ submit }) => <SelectPriority priorityId={priorityId} onChange={submit} />}
+            editor={({ submit }) => (
+              <SelectPriority
+                required={required}
+                priorityId={priorityId}
+                onChange={submit}
+                {
+                  ...store.getOptionsData(field, priorityId)
+                }
+              />
+            )}
             initValue={priorityId}
             onSubmit={this.updateIssuePriority}
           >

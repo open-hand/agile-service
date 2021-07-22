@@ -3,7 +3,7 @@ import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { Tooltip } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
-import _ from 'lodash';
+import _, { map } from 'lodash';
 import { issueApi } from '@/api';
 import SelectVersion from '@/components/select/select-version';
 import TextEditToggle from '@/components/TextEditTogglePro';
@@ -72,7 +72,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
     const influenceVersions = _.filter(versionIssueRelVOList, { relationType: 'influence' }) || [];
 
     const field = store.getFieldByCode('influenceVersion');
-    const required = field?.required;
+    const required = field?.required || store.getRuleRequired(field);
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -88,7 +88,16 @@ import TextEditToggle from '@/components/TextEditTogglePro';
             style={{ width: '100%', maxWidth: '200px' }}
             onSubmit={this.updateIssueVersion}
             initValue={this.transToArr(influenceVersions, 'name', 'array')}
-            editor={<SelectVersion required={required} dataRef={this.dataRef} statusArr={[]} />}
+            editor={(
+              <SelectVersion
+                required={required}
+                dataRef={this.dataRef}
+                statusArr={[]}
+                {
+                  ...store.getOptionsData(field, map(influenceVersions, 'versionId'))
+                }
+              />
+          )}
           >
             {
                 influenceVersions.length ? (

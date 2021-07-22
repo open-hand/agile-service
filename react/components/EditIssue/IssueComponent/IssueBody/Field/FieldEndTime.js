@@ -25,7 +25,7 @@ class FieldEndTime extends Component {
     const issue = store.getIssue;
     const { estimatedEndTime, estimatedStartTime } = issue;
     const field = store.getFieldByCode('estimatedEndTime');
-    const required = field?.required;
+    const required = field?.required || store.getRuleRequired(field);
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">

@@ -1,12 +1,51 @@
 import {
   observable, action, computed, toJS,
 } from 'mobx';
-import { find } from 'lodash';
+import {
+  every,
+  filter, find, includes, map, castArray,
+} from 'lodash';
 import { Choerodon } from '@choerodon/boot';
 import { issueApi, uiApi } from '@/api';
 
 const hiddenFields = ['issueType', 'summary', 'description', 'remainingTime', 'storyPoints'];
 const copyHiddenFields = ['issueType', 'summary', 'description', 'timeTrace', 'creationDate', 'lastUpdateDate', 'created_user', 'last_updated_user', 'epicName'];
+const pageCascadeFields = ['component', 'priority', 'fixVersion', 'influenceVersion'];
+const ruleControlSystemFields = ['component', 'priority', 'fixVersion', 'influenceVersion', 'assignee', 'reporter', 'mainResponsible', 'estimatedStartTime', 'estimatedEndTime', 'benfitHypothesis', 'acceptanceCritera', 'subProject'];
+function isMultiple(field) {
+  return field.fieldType === 'multiple' || field.fieldType === 'checkbox' || field.fieldType === 'multiMember';
+}
+function isSelect(field) {
+  return includes(['radio', 'multiple', 'checkbox', 'single'], field.fieldType);
+}
+
+function getValue(issue, field) {
+  switch (field.fieldCode) {
+    case 'influenceVersion': {
+      const { versionIssueRelVOList = [] } = issue;
+      const influenceVersions = filter(versionIssueRelVOList, { relationType: 'influence' }) || [];
+      return map(toJS(influenceVersions), 'versionId');
+    }
+    case 'fixVersion': {
+      const { versionIssueRelVOList = [] } = issue;
+      const fixVersionsTotal = filter(versionIssueRelVOList, { relationType: 'fix' }) || [];
+      const fixVersions = filter(fixVersionsTotal, (v) => v.statusCode !== 'archived') || [];
+      return map(toJS(fixVersions), 'versionId');
+    }
+    case 'priority': {
+      return toJS(issue.priorityId);
+    }
+    case 'component': {
+      return map(toJS(issue.componentIssueRelVOList) || [], 'componentId');
+    }
+    default: {
+      return toJS(field.value);
+    }
+  }
+}
+
+const hasValue = (issue, field) => (isMultiple(field) ? getValue(issue, field)?.length : getValue(issue, field));
+
 class EditIssueStore {
   events = { updateAfter: () => { }, updateBefore: () => { } };
 
@@ -34,7 +73,7 @@ class EditIssueStore {
   }
 
   @computed get customFields() {
-    return this.fields.filter((field) => !hiddenFields.includes(field.fieldCode));
+    return this.fields.filter((field) => !hiddenFields.includes(field?.fieldCode));
   }
 
   @computed get copyFields() {
@@ -42,7 +81,7 @@ class EditIssueStore {
       system: true, fieldCode: 'storyPoints', fieldName: '故事点', fieldType: 'number',
     }] : []), ...(this.issue.typeCode === 'task' || this.issue.typeCode === 'sub_task' || this.issue.typeCode === 'bug' ? [{
       system: true, fieldCode: 'remainingTime', fieldName: '剩余预估时间', fieldType: 'number',
-    }] : []), ...this.fields.filter((field) => !copyHiddenFields.includes(field.fieldCode))];
+    }] : []), ...this.fields.filter((field) => !copyHiddenFields.includes(field?.fieldCode))];
   }
 
   @observable doc = {};
@@ -318,6 +357,60 @@ class EditIssueStore {
 
   @action setDefaultAssignee = (data) => {
     this.defaultAssignee = data;
+  }
+
+  @observable issueTypeRules = [];
+
+  @action setIssueTypeRules = (rules) => {
+    this.issueTypeRules = rules;
+  }
+
+  @computed get getAllRules() {
+    let allRules = [];
+    this.fields?.forEach((field) => {
+      if (((field.system && includes(pageCascadeFields, field.fieldCode)) || (!field.system && isSelect(field))) && hasValue(this.issue, field)) {
+        allRules = [...allRules, ...filter(this.issueTypeRules, (rule) => rule.fieldId === field.fieldId && includes(castArray(getValue(this.issue, field)), rule.fieldOptionId))];
+      }
+    });
+    return allRules;
+  }
+
+  @action getRuleRequired(field) {
+    const fieldRules = filter(this.getAllRules, { cascadeFieldCode: field?.fieldCode });
+    return !!find(fieldRules, { required: true });
+  }
+
+  @action getOptionsData(field, currentValue) {
+    const fieldRules = filter(this.getAllRules, { cascadeFieldCode: field?.fieldCode });
+    const ruleIds = fieldRules.length ? map(fieldRules, 'id') : undefined;
+    return ({
+      fieldId: field.fieldId,
+      extendParams: field?.fieldCode === 'fixVersion' ? ['sprint_planning', 'started'] : undefined,
+      ruleIds,
+      // eslint-disable-next-line no-nested-ternary
+      selected: ruleIds?.length && currentValue ? (isMultiple(field) ? currentValue : [currentValue]) : undefined,
+    });
+  }
+
+  @action getRuleHidden(field) {
+    const fieldRules = filter(this.getAllRules, { cascadeFieldCode: field?.fieldCode });
+    if (field) {
+      if (field.required || find(fieldRules, { required: true }) || every(fieldRules, (rule) => !rule.hidden)) {
+        return false;
+      }
+      return true;
+    }
+    return true;
+  }
+
+  @action getRuleHiddenFields() {
+    const ruleHiddenFields = [];
+    const ruleControlFields = this.customFields.filter((item) => ((item.system && includes(ruleControlSystemFields, item.fieldCode)) || !item.system));
+    ruleControlFields.forEach((field) => {
+      if (this.getRuleHidden(field)) {
+        ruleHiddenFields.push(field?.fieldCode);
+      }
+    });
   }
 }
 export default EditIssueStore;

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
-import _ from 'lodash';
+import _, { map } from 'lodash';
 import { issueApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectVersion from '@/components/select/select-version';
@@ -73,7 +73,7 @@ import SelectVersion from '@/components/select/select-version';
     const fixVersions = _.filter(fixVersionsTotal, (v) => v.statusCode !== 'archived') || [];
 
     const field = store.getFieldByCode('fixVersion');
-    const required = field?.required;
+    const required = field?.required || store.getRuleRequired(field);
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -96,7 +96,16 @@ import SelectVersion from '@/components/select/select-version';
                 </div>
               ) : null
             }
-            editor={<SelectVersion required={required} dataRef={this.dataRef} statusArr={['version_planning']} />}
+            editor={(
+              <SelectVersion
+                required={required}
+                dataRef={this.dataRef}
+                statusArr={['version_planning']}
+                {
+                  ...store.getOptionsData(field, map(fixVersions, 'versionId'))
+                }
+              />
+            )}
           >
             {
                 fixVersionsFixed.length || fixVersions.length ? (
