@@ -45,7 +45,7 @@ export const renderFieldRelSelect = ({ field, name = 'fieldRelOptionList' }: Pro
     }
   }
   if (!system) {
-    return <SelectCustomField name={name} fieldId={id} onlyEnabled={false} />;
+    return <SelectCustomField name={name} fieldId={id} />;
   }
   return <Select name={name} />;
 };
