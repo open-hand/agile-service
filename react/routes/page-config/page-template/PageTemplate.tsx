@@ -229,7 +229,19 @@ function PageTemplate() {
         <HeaderButtons items={[
           {
             display: true,
-            element: <TooltipButton title="该问题类型已停用，无法批量权限配置" buttonDisabled={!pageTemplateStore.currentIssueType.enabled} buttonIcon="playlist_add" clickEvent={() => {}}>批量权限配置</TooltipButton>,
+            element: (
+              <TooltipButton
+                title="该问题类型已停用，无法批量权限配置"
+                buttonDisabled={!pageTemplateStore.currentIssueType.enabled}
+                buttonIcon="playlist_add"
+                clickEvent={() => {
+                  const configFields = sortTableDataSet.selected.filter((record) => record.get('allowedEditPermission')).map((r) => ({ id: r.get('fieldId'), code: r.get('fieldCode') }));
+                  console.log('........configFields,', configFields);
+                  openPageRoleConfigModal({ fields: configFields, issueTypeId: pageTemplateStore.getCurrentIssueType, onOk: () => pageTemplateStore.loadData() });
+                }}
+              >
+                批量权限配
+              </TooltipButton>),
           },
         ]}
         />

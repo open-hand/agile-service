@@ -1,5 +1,6 @@
 import { axios, stores } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
+import { IRole } from '@/common/types';
 import Api from './Api';
 
 const { AppState } = stores;
@@ -86,6 +87,24 @@ class CommonApi extends Api<CommonApi> {
    */
   checkProjectViewPermission(projectId: string | number) {
     return axios.get(`iam/choerodon/v1/projects/check-permission/${projectId}`);
+  }
+
+  /**
+ * 获取角色列表
+ * @param {boolean} enable 是否启用 @default true
+ * @param {string} roleName 角色名
+ * @param {string|number} projectId 项目 @default 当前项目
+ * @returns {Array} 角色列表数据
+ */
+  getRoles(roleName: string = '', enable = true, projectId?: string | number):Promise<IRole[]> {
+    return this.request({
+      method: 'get',
+      url: `iam/choerodon/v1/projects/${projectId || getProjectId()}/roles`,
+      params: {
+        only_select_enable: enable,
+        role_name: roleName || '',
+      },
+    });
   }
 }
 
