@@ -173,6 +173,7 @@
         <foreach collection="fieldCascadeRuleIds" item="fieldCascadeRuleId" separator="," open="(" close=")">
             #{fieldCascadeRuleId}
         </foreach>
+        AND project_id = #{projectId}
         GROUP BY field_cascade_rule_id
     </select>
 </mapper>
