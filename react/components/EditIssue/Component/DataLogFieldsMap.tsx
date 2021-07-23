@@ -422,7 +422,12 @@ const fieldsMap = new Map([
         transform: ({ newString, oldString }: { newString: string, oldString: string }) => difference(newString && newString.split(','), oldString && oldString.split(',')).join(','),
       },
       update: {
-        condition: ({ newString, oldString }: { newString: string, oldString: string }) => difference(newString && newString.split(','), oldString && oldString.split(',')).length === 0,
+        condition: ({ newString, oldString }: { newString: string, oldString: string }) => {
+          if (!newString || !oldString) {
+            return false;
+          }
+          return difference(newString && newString.split(','), oldString && oldString.split(',')).length === 0;
+        },
       },
       delete: {
         condition: ({ newString, oldString }: { newString: string, oldString: string }) => difference(oldString && oldString.split(','), newString && newString.split(',')).length > 0,
