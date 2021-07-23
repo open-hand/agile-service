@@ -20,12 +20,16 @@ const PageTemplateTable: React.FC<IPageTemplateTableProps> = () => {
   const handleCheckAllChange = useCallback((val: any) => {
     val ? sortTableDataSet.selectAll() : sortTableDataSet.unSelectAll();
   }, [sortTableDataSet]);
+
+  const handleRefresh = useCallback(() => {
+    pageTemplateStore.loadData();
+  }, [pageTemplateStore]);
   const checkBoxColumn = useMemo(() => ({
     title: (
       <Observer>
         {() => (
           <CheckBox
-            indeterminate={sortTableDataSet.selected.length > 0 && (sortTableDataSet.length !== sortTableDataSet.selected.length)}
+            indeterminate={sortTableDataSet.selected.length > 0 && (sortTableDataSet.filter((record) => record.get('allowedEditPermission')).length !== sortTableDataSet.selected.filter((record) => record.get('allowedEditPermission')).length)}
             checked={sortTableDataSet.selected.length > 0}
             onChange={handleCheckAllChange}
           />
@@ -42,8 +46,9 @@ const PageTemplateTable: React.FC<IPageTemplateTableProps> = () => {
           <CheckBox
             key={rowIndex}
             value={rowData.index}
-            checked={rowData.isSelected}
-                            //   checked={checkValues.includes(rowData.issueId)}
+            disabled={!rowData.get('allowedEditPermission')}
+            checked={rowData.get('allowedEditPermission') ? rowData.isSelected : false}
+            //   checked={checkValues.includes(rowData.issueId)}
             onChange={(value) => handleCheckChange(value, rowData.index)}
           />
         )}
@@ -52,7 +57,7 @@ const PageTemplateTable: React.FC<IPageTemplateTableProps> = () => {
     ,
   }), [handleCheckAllChange, handleCheckChange, sortTableDataSet]);
 
-  const visibleColumns = useMemo(() => [checkBoxColumn, ...getColumns({ issueTypeId: currentIssueTypeId, loadData: pageTemplateStore.loadData })], [checkBoxColumn, currentIssueTypeId]);
+  const visibleColumns = useMemo(() => [checkBoxColumn, ...getColumns({ issueTypeId: currentIssueTypeId, loadData: handleRefresh })], [checkBoxColumn, currentIssueTypeId, handleRefresh]);
   return (
     <AutoSize>
       {({ height }) => (

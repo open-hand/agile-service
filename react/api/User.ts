@@ -42,7 +42,7 @@ class UserApi extends Api<UserApi> {
         param,
         id: userId,
         page: page || 1,
-        size: size || 20,
+        size: size ?? 20,
       },
       // cache: true,
     });

@@ -99,9 +99,12 @@ const getColumns = ({ issueTypeId, loadData }: { issueTypeId: string, loadData: 
           text: '权限配置',
           action: async () => {
             const res = await pageConfigApi.loadFieldPermission(rowData.get('fieldId'), issueTypeId);
-            openPageRoleConfigModal({ fields: [{ id: rowData.get('fieldId'), code: rowData.get('fieldCode') }], data: res, issueTypeId });
+            console.log('res', res);
+            openPageRoleConfigModal({
+              fields: [{ id: rowData.get('fieldId'), code: rowData.get('fieldCode') }], data: res, issueTypeId, onOk: loadData,
+            });
           },
-          display: checkPermissionRole({ createdLevel: rowData.get('createdLevel') }),
+          display: rowData.get('allowedEditPermission'), // checkPermissionRole({ createdLevel: rowData.get('createdLevel') }),
         }, {
           text: '设置级联规则',
           action: () => {

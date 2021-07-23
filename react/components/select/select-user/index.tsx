@@ -9,6 +9,7 @@ import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import type { User } from '@/common/types';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
+import UserTag from '@/components/tag/user-tag';
 
 const toArray = (something: any) => (Array.isArray(something) ? something : [something]);
 export interface SelectUserProps extends Partial<SelectProps> {
@@ -34,6 +35,7 @@ export interface SelectUserProps extends Partial<SelectProps> {
   afterLoad?: (users: User[]) => void | User[]
   flat?: boolean
   projectId?: string
+  optionRenderer?: (item: User, tooltip?: boolean) => React.ReactElement
 }
 interface MemberLocalMapConfig {
   userMaps?: Map<string, User>,
@@ -147,7 +149,7 @@ function useMemberLocalStoreMap(config?: MemberLocalMapConfig, projectId?: strin
   return [dataProp, methods];
 }
 const SelectUser: React.FC<SelectUserProps> = forwardRef(({
-  selectedUser, extraOptions, dataRef, request, afterLoad, autoQueryConfig, flat, projectId, ...otherProps
+  selectedUser, extraOptions, dataRef, request, afterLoad, autoQueryConfig, flat, projectId, optionRenderer, ...otherProps
 }, ref: React.Ref<Select>) => {
   const selectedUserIds = useMemo(() => {
     const ids: string[] | string | undefined = toJS(autoQueryConfig?.selectedUserIds);
@@ -183,6 +185,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
       res.list = res.list.filter((user: User) => user.enabled);
       return res;
     }),
+    optionRenderer,
     middleWare: (data) => {
       let newData = [];
       const temp: User[] = [];

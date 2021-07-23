@@ -499,3 +499,18 @@ export interface IBootPermissionProps {
   projectId?: string | number
   type?: string
 }
+
+export interface IRole {
+  assignable: boolean
+  builtIn: boolean
+  code: string
+  createdBy: string
+  description: string | null
+  enableForbidden: boolean
+  enableRolePermission: boolean
+  enabled: boolean
+  id: string
+  lastUpdatedBy: string
+  modified: true
+  name: string
+}

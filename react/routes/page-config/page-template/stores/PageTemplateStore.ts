@@ -246,6 +246,7 @@ class PageTemplateStore {
           showDefaultValueText: '',
         } : {},
       })));
+
       if (res.issueTypeFieldVO) {
         this.setDescriptionObj({
           ...res.issueTypeFieldVO,

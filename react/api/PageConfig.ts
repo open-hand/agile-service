@@ -113,7 +113,8 @@ export interface ICascadeRule {
 type IPageFieldCreatePermissionScope = 'read' | 'write'
 export interface IPageFieldCreatePermissionItem {
   scope: IPageFieldCreatePermissionScope
-  userIds: string[]
+  userIds?: string[]
+  roleIds?: string[]
 }
 export interface IPageFieldCreatePermissionRoleItem {
   scope: IPageFieldCreatePermissionScope
