@@ -33,12 +33,12 @@ const FragmentUpload = inject('AppState')(observer((props) => {
     showUploadList,
     disabled = false,
     beforeUploadCallback = () => {},
-    AppState: { currentMenuType: { organizationId, id } },
     cRef,
     children,
     ...others
   } = props;
-
+  const organizationId = props.organizationId ?? props.AppState.currentMenuType.organizationId;
+  const id = props.projectId ?? props.AppState.currentMenuType.id;
   const { fileList, setFileList, combine } = others;
   const [dealUploadList, setDealUploadList] = useState();
   const webUploaderRef = useRef(null);
