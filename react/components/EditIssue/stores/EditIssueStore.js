@@ -155,10 +155,6 @@ class EditIssueStore {
 
   @observable workLogShow = false;
 
-  @observable createSubTaskShow = false;
-
-  @observable createSubBugShow = false;
-
   @observable copyIssueShow = false;
 
   @observable assigneeShow = false;
@@ -212,22 +208,6 @@ class EditIssueStore {
 
   @computed get getWorkLogShow() {
     return this.workLogShow;
-  }
-
-  @action setCreateSubTaskShow(data) {
-    this.createSubTaskShow = data;
-  }
-
-  @computed get getCreateSubTaskShow() {
-    return this.createSubTaskShow;
-  }
-
-  @action setCreateSubBugShow(data) {
-    this.createSubBugShow = data;
-  }
-
-  @computed get getCreateSubBugShow() {
-    return this.createSubBugShow;
   }
 
   @action setCopyIssueShow(data) {

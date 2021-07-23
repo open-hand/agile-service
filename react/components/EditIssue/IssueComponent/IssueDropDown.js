@@ -78,7 +78,6 @@ const IssueDropDown = ({
     } else if (e.key === 'item_11') {
       handleDeleteIssue();
     } else if (e.key === '2') {
-      // store.setCreateSubTaskShow(true);
       onOpenCreateSubTask();
     } else if (e.key === '3') {
       openEditIssueCopyIssue({
@@ -122,7 +121,6 @@ const IssueDropDown = ({
         issueId, issueNum, objectVersionNumber, onOk: onChangeParent,
       });
     } else if (e.key === '9') {
-      // store.setCreateSubBugShow(true);
       onOpenCreateSubBug();
     } else if (e.key === '10') {
       openRelateIssueModal({ issue, onOk: onRelateIssue });

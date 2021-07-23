@@ -63,7 +63,6 @@ const SubBug = observer(({
   }, [store]);
 
   const handleCreateSubIssue = (issue) => {
-    store.setCreateSubBugShow(false);
     resetDefault();
     if (onCreateSubIssue) {
       onCreateSubIssue(issue, relateIssueId);
@@ -101,7 +100,7 @@ const SubBug = observer(({
             buttonShow={(issueTypeData || []).length > 1}
             buttonShowText="快速创建缺陷"
             onCreate={handleCreateSubIssue}
-            cantCreateEvent={() => { store.setCreateSubBugShow(true); }}
+            cantCreateEvent={() => { onOpenCreateSubBug(); }}
             typeIdChange={(id) => {
               store.setDefaultTypeId(id);
             }}
