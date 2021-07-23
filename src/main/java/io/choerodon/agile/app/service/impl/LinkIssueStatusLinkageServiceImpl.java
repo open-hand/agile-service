@@ -70,6 +70,7 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
         }
         if (!CollectionUtils.isEmpty(linkIssueStatusLinkageVOS)) {
             linkIssueStatusLinkageVOS.forEach(v -> {
+                v.setStatusId(statusId);
                 checkData(v, projectId, organizationId, issueTypeId);
                 LinkIssueStatusLinkageDTO linkageDTO = modelMapper.map(v, LinkIssueStatusLinkageDTO.class);
                 linkageDTO.setIssueTypeId(issueTypeId);
@@ -83,16 +84,12 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
     }
 
     private void checkData(LinkIssueStatusLinkageVO statusLinkageVO, Long projectId, Long organizationId, Long issueTypeId) {
-        LinkIssueStatusLinkageDTO linkage = new LinkIssueStatusLinkageDTO(issueTypeId, null, projectId, organizationId);
+        LinkIssueStatusLinkageDTO linkage = new LinkIssueStatusLinkageDTO(issueTypeId, statusLinkageVO.getStatusId(), projectId, organizationId);
+        linkage.setLinkTypeId(statusLinkageVO.getLinkTypeId());
         linkage.setLinkIssueTypeId(statusLinkageVO.getLinkIssueTypeId());
         linkage.setLinkIssueStatusId(statusLinkageVO.getLinkIssueStatusId());
         List<LinkIssueStatusLinkageDTO> statusLinkageDTOS = linkIssueStatusLinkageMapper.select(linkage);
-
-        LinkIssueStatusLinkageDTO linkageDTO = new LinkIssueStatusLinkageDTO(statusLinkageVO.getLinkIssueTypeId(), null, projectId, organizationId);
-        linkageDTO.setLinkIssueTypeId(issueTypeId);
-        linkageDTO.setStatusId(statusLinkageVO.getLinkIssueStatusId());
-        List<LinkIssueStatusLinkageDTO> linkIssueStatusLinkageDTOS = linkIssueStatusLinkageMapper.select(linkageDTO);
-        if (!CollectionUtils.isEmpty(statusLinkageDTOS) || !CollectionUtils.isEmpty(linkIssueStatusLinkageDTOS)) {
+        if (!CollectionUtils.isEmpty(statusLinkageDTOS)) {
             throw new CommonException("error.link.issue.status.repeat");
         }
     }
