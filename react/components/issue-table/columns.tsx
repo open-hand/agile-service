@@ -345,13 +345,14 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
   }],
   ['mainResponsibleUser', {
     title: <Tooltip title="主要负责人">主要负责人</Tooltip>,
-    dataIndex: 'mainResponsibleUser',
-    render: ({ rowData, dataIndex }) => rowData[dataIndex] && <UserTag data={rowData[dataIndex]} />,
+    dataIndex: 'mainResponsibleId',
+    render: ({ rowData }) => rowData.mainResponsibleUser && <UserTag data={rowData.mainResponsibleUser} />,
     sortable: true,
   }],
   ['environmentName', {
     title: <Tooltip title="环境">环境</Tooltip>,
-    dataIndex: 'environmentName',
+    dataIndex: 'environment',
+    render: ({ rowData }) => rowData.environmentName,
     sortable: true,
   }],
   ['tags', {
