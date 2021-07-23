@@ -267,7 +267,6 @@ function EditIssue() {
     } = store.getIssue;
     openCreateSubTask({
       onCreate: () => {
-        store.setCreateSubTaskShow(false);
         resetDefault();
         if (onCreateSubIssue) {
           onCreateSubIssue(issue, parentIssueId);
@@ -293,7 +292,6 @@ function EditIssue() {
     openCreateSubTask({
       typeCode: 'bug',
       onCreate: () => {
-        store.setCreateSubTaskShow(false);
         resetDefault();
         if (onCreateSubIssue) {
           onCreateSubIssue(issue, parentIssueId);
