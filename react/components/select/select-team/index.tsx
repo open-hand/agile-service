@@ -41,20 +41,24 @@ const SelectTeam: React.FC<Props> = forwardRef(({
       return request();
     },
     paging: false,
-    // @ts-ignore
-    afterLoad: afterLoadRef.current,
     middleWare: (projects) => {
       if (Array.isArray(projects)) {
         // @ts-ignore
+        const newProjects = projects.map((item) => ({ ...item, projectId: item.projectId?.toString() }));
+        // @ts-ignore
         // eslint-disable-next-line
-        projectDataRef.current = projects;
-        return noAssign ? [{ projName: '未分配', projectId: '0' }, ...projects] : projects || [];
+        projectDataRef.current = newProjects;
+        return noAssign ? [{ projName: '未分配', projectId: '0' }, ...newProjects] : newProjects || [];
       }
       // @ts-ignore
-
+      const newProjects = (projects as any).content?.map((item) => ({ ...item, projectId: item.projectId?.toString() })) || [];
+      // @ts-ignore
       // eslint-disable-next-line no-param-reassign
-      projectDataRef.current = (projects as any).content || [];
-      return (projects as any).content || [];
+      projectDataRef.current = newProjects;
+      if (afterLoadRef.current) {
+        afterLoadRef.current(newProjects);
+      }
+      return newProjects;
     },
   }), [args, fieldId, hasRule, noAssign, projectDataRef, projectId, request, textField, valueField]);
   const props = useSelect(config);

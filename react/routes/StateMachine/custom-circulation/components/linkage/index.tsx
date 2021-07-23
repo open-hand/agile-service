@@ -40,7 +40,6 @@ interface ILinkType {
 
 const { Option } = Select;
 const linkTypeHasIssueTypeMap = new Map([]); // 存储关联类型都选择了哪些问题类型，避免重复选择
-const issueTypeHasStatusMap = new Map([]); // 存储已经选过的问题类型对应的状态，避免重复选择
 const Linkage = ({
   // @ts-ignore
   modal, record, selectedType, customCirculationDataSet, linkageType,
@@ -140,13 +139,6 @@ const Linkage = ({
               if (res[i]?.linkTypeId && res[i]?.linkIssueTypeId) {
                 (linkTypeHasIssueTypeMap.get(res[i].linkTypeId.toString()) as string[]).push(res[i].linkIssueTypeId);
               }
-              if (res[i]?.linkIssueTypeId && res[i]?.linkIssueStatusId) {
-                if (issueTypeHasStatusMap.get(res[i].linkIssueTypeId.toString())) {
-                  (issueTypeHasStatusMap.get(res[i].linkIssueTypeId.toString()) as string[]).push(res[i].linkIssueStatusId);
-                } else {
-                  issueTypeHasStatusMap.set(res[i].linkIssueTypeId.toString(), [res[i]?.linkIssueStatusId]);
-                }
-              }
               setFieldValue(linkIssueLinkageDataSet, `${item.key}-linkTypeId`, res[i]?.linkTypeId);
               setFieldValue(linkIssueLinkageDataSet, `${item.key}-linkIssueTypeId`, res[i]?.linkIssueTypeId);
               setFieldValue(linkIssueLinkageDataSet, `${item.key}-linkIssueStatusId`, res[i]?.linkIssueStatusId);
@@ -225,7 +217,6 @@ const Linkage = ({
     }, []);
   })();
 
-  const selectedTypeItem = issueTypes?.find((item: IIssueType) => item.id === selectedType);
   const handleActiveKeyChange = useCallback((key) => {
     setActiveKey(key);
   }, []);
@@ -372,9 +363,6 @@ const Linkage = ({
                             linkTypeHasIssueTypeMap.set(linkTypeId.toString(), (linkTypeHasIssueTypeMap.get(linkTypeId.toString()) as string[]).filter((item: string) => item !== oldValue));
                           }
 
-                          if (oldValue && issueTypeHasStatusMap.get(oldValue.toString()) && statusId) {
-                            issueTypeHasStatusMap.set(oldValue.toString(), (issueTypeHasStatusMap.get(oldValue.toString()) as string[]).filter((item: string) => item !== statusId));
-                          }
                           getField(linkIssueLinkageDataSet, statusName)?.reset();
                           linkIssueLinkageDataSet.current?.init(statusName, undefined);
                         }}
@@ -400,19 +388,6 @@ const Linkage = ({
                         }) : () => {}}
                         // @ts-ignore
                         extraStatus={extraStatus ? [extraStatus] : undefined}
-                        excludeStatus={((issueTypeHasStatusMap.get(issueTypeId) || []) as string[]).filter((item) => item !== statusId)}
-                        onChange={(value, oldValue) => {
-                          if (value) {
-                            if (issueTypeHasStatusMap.get(issueTypeId.toString())) {
-                              (issueTypeHasStatusMap.get(issueTypeId.toString()) as string[]).push(value);
-                            } else {
-                              issueTypeHasStatusMap.set(issueTypeId.toString(), [value]);
-                            }
-                          }
-                          if (oldValue && issueTypeHasStatusMap.get(issueTypeId.toString())) {
-                            issueTypeHasStatusMap.set(issueTypeId.toString(), (issueTypeHasStatusMap.get(issueTypeId.toString()) as string[]).filter((item: string) => item !== oldValue));
-                          }
-                        }}
                       />
                     </Col>
                     <Col span={2}>
@@ -426,10 +401,6 @@ const Linkage = ({
                           LinkField.remove(key);
                           if (linkTypeId && issueTypeId) {
                             linkTypeHasIssueTypeMap.set(linkTypeId.toString(), (linkTypeHasIssueTypeMap.get(linkTypeId.toString()) as string[]).filter((item: string) => item !== issueTypeId));
-                          }
-
-                          if (issueTypeId && statusId) {
-                            issueTypeHasStatusMap.set(issueTypeId.toString(), (issueTypeHasStatusMap.get(issueTypeId.toString()) as string[]).filter((item: string) => item !== statusId));
                           }
                           removeField(linkIssueLinkageDataSet, linkTypeName);
                           removeField(linkIssueLinkageDataSet, typeName);

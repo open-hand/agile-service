@@ -17,18 +17,19 @@ interface FormPartProps {
   className?: string,
   children: ReactElement | ReactElement[] | null | Array<ReactElement | null>,
   btnOnClick?: (nextBtnStatusCode: 'ALL' | 'NONE') => boolean,
+  partStyle?: React.CSSProperties
 }
 
 const FormPart: React.FC<FormPartProps> = memo((props) => {
   const {
-    title, children, className, ...otherProps
+    title, children, className, partStyle, ...otherProps
   } = props;
 
   return (
-    <div className={classnames(styles.form, className)} {...otherProps}>
+    <div className={classnames(styles.form, className)} style={{ ...(partStyle || {}) }} {...otherProps}>
       <div className={styles.form_title}>
         <div className={styles.form_block} />
-        <span>{title}</span>
+        <div>{title}</div>
       </div>
       <div className={styles.form_content}>
         {children}
@@ -121,7 +122,7 @@ const CopyRequired: React.FC<Props> = ({
     <>
       {
         !!selfRequiredFields.length && (
-          <FormPart title="补全必填字段">
+          <FormPart title="补全必填字段" partStyle={{ marginBottom: 10 }}>
             <RequiredField
               requiredFields={selfRequiredFields}
               requiredFieldDataSet={requiredFieldDsArr.find((item) => item.issueId === issue.issueId)?.dataSet as DataSet}
