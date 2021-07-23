@@ -424,13 +424,6 @@ class PageConfigApi extends Api<PageConfigApi> {
     });
   }
 
-  getCascadeRule(ruleId: string) {
-    return axios({
-      method: 'get',
-      url: `${this.prefix}/field_cascade_rule/${ruleId}`,
-    });
-  }
-
   getCascadeFields(issueTypeId: string, fieldId: string) {
     return axios({
       method: 'get',
@@ -442,7 +435,7 @@ class PageConfigApi extends Api<PageConfigApi> {
     });
   }
 
-  getCascadeRelOptionList(ruleId: string, extendParams?: any) {
+  getCascadeRelOptionList(ruleId: string) {
     return axios({
       method: 'get',
       url: `${this.prefix}/field_cascade_rule/${ruleId}/option`,

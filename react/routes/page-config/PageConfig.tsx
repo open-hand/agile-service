@@ -25,7 +25,7 @@ function PageConfig() {
   if (getMenuType() === 'project') {
     tabs.push(<PageTab
       title="页面模板"
-      tabKey={`choerodon.code.${getMenuType() === 'project' ? '' : 'organization.'}setting.page.template`}
+      tabKey="choerodon.code.project.setting.page.ps.template"
       component={withRouter(PageTemplate)}
       route="/agile/page/template"
       alwaysShow
