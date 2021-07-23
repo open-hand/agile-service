@@ -102,8 +102,8 @@ const renderTag = (listField, nameField) => ({ rowData }) => {
   return null;
 };
 function renderEpicOrFeature({ rowData, dataIndex: fieldName }) {
-  const color = fieldName === 'epic' ? get(rowData, 'epicColor') : get(rowData, 'featureColor');
-  const name = fieldName === 'epic' ? get(rowData, 'epicName') : get(rowData, 'featureName');
+  const color = fieldName === 'epicId' ? get(rowData, 'epicColor') : get(rowData, 'featureColor');
+  const name = fieldName === 'epicId' ? get(rowData, 'epicName') : get(rowData, 'featureName');
   return name ? (
     <Tooltip title={name}>
       <span style={{
@@ -115,8 +115,9 @@ function renderEpicOrFeature({ rowData, dataIndex: fieldName }) {
         borderRadius: '2px',
         fontSize: '13px',
         lineHeight: '20px',
+        verticalAlign: 'middle',
         padding: '0 4px',
-        display: 'inline-flex',
+        display: 'inline-block',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
