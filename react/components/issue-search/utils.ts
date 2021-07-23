@@ -26,10 +26,12 @@ export const filterInvalidAttribute = (obj: { [key: string]: any }): { [key: str
 export function flattenObject(object: Object): { [key: string]: any } {
   const result: { [key: string]: any } = {};
   for (const [key, value] of Object.entries(object)) {
-    if (Object.prototype.toString.call(value) === '[object Object]') {
-      Object.assign(result, flattenObject(value));
-    } else {
-      result[key] = value;
+    if (value !== undefined) {
+      if (Object.prototype.toString.call(value) === '[object Object]') {
+        Object.assign(result, flattenObject(value));
+      } else {
+        result[key] = value;
+      }
     }
   }
   const {
