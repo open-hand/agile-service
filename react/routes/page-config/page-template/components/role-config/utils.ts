@@ -4,10 +4,10 @@ import { groupBy } from 'lodash';
  * @param value
  * @returns
  */
-export function mainValueTransformUserAndRole(value: any) {
+export function mainValueTransformUserAndRole(value: any, submitProcess: boolean = false) {
   const { newUserIds = [], newRoles = [] } = groupBy(value || [], (item) => (String(item).indexOf('role-') === 0 ? 'newRoles' : 'newUserIds'));
   const processNewRoles = newRoles.map((item) => String(item).split('role-')[1]);
-  if (newUserIds.length > 0) {
+  if (newUserIds.length > 0 && !submitProcess) {
     processNewRoles.push('specificUser');
   }
   return { userIds: newUserIds, roles: processNewRoles };

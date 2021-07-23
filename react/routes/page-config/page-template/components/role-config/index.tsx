@@ -110,8 +110,8 @@ const RoleConfigModal: React.FC<{ modal?: IModalProps } & Props> = observer(({
           data: roles,
         }),
       },
-      { name: 'onlyView', label: '仅查看', multiple: true },
-      { name: 'onlyView_UserIds', label: '仅查看', multiple: true },
+      { name: 'onlyView', label: '可见', multiple: true },
+      { name: 'onlyView_UserIds', label: '指定用户', multiple: true },
       {
         name: 'onlyView_Roles',
         label: '',
@@ -149,8 +149,8 @@ const RoleConfigModal: React.FC<{ modal?: IModalProps } & Props> = observer(({
 
   const handleSubmit = useCallback(async () => {
     const { edit = [], onlyView = [] } = dataset.current?.toData();
-    const { userIds: editUserIds, roles: editRoles } = mainValueTransformUserAndRole(edit);
-    const { userIds: onlyViewUserIds, roles: onlyViewRoles } = mainValueTransformUserAndRole(onlyView);
+    const { userIds: editUserIds, roles: editRoles } = mainValueTransformUserAndRole(edit, true);
+    const { userIds: onlyViewUserIds, roles: onlyViewRoles } = mainValueTransformUserAndRole(onlyView, true);
 
     const writePermission: IPageFieldCreatePermissionItem = { scope: 'write', userIds: editUserIds, roleIds: editRoles };
     const readPermission: IPageFieldCreatePermissionItem = {
@@ -195,7 +195,7 @@ const RoleConfigModal: React.FC<{ modal?: IModalProps } & Props> = observer(({
   useEffect(() => { modal?.handleOk(handleSubmit); });
   return (
     <div>
-      <span style={{ display: 'inline-block', marginBottom: 16 }}>设置哪些成员或角色可以查看或编辑当前字段</span>
+      <span style={{ display: 'inline-block', marginBottom: 16 }}>设置哪些成员或角色当前字段可见</span>
       <Form dataSet={dataset}>
         {/* {roles ? (
           <SelectUserWithRole

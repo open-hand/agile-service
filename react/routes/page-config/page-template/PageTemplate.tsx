@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-indent */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   TabPage as Page, Header, Content, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
@@ -9,7 +9,7 @@ import {
 } from 'choerodon-ui/pro';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { observer } from 'mobx-react-lite';
+import { observer, useComputed } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import { Prompt } from 'react-router-dom';
 import {
@@ -58,7 +58,7 @@ function PageTemplate() {
   const {
     sortTableDataSet, addUnselectedDataSet, intl, pageTemplateStore, isProject, prefixCls,
   } = usePageTemplateStore();
-
+  const selectedAllowedEditPermissionFields = useMemo(() => (sortTableDataSet.selected.filter((record) => record.get('allowedEditPermission'))), [sortTableDataSet.selected, sortTableDataSet.selected.length]);
   const [btnLoading, setBtnLoading] = useState<boolean>();
   const handleRequest = (data: UIssueTypeConfig) => {
     pageConfigApi.updateConfig(data).then(() => {
@@ -231,16 +231,15 @@ function PageTemplate() {
             display: true,
             element: (
               <TooltipButton
-                title="该问题类型已停用，无法批量权限配置"
-                buttonDisabled={!pageTemplateStore.currentIssueType.enabled}
+                title={selectedAllowedEditPermissionFields.length === 0 ? '请选择批量权限配置的字段' : '该问题类型已停用，无法批量权限配置'}
+                buttonDisabled={selectedAllowedEditPermissionFields.length === 0 || !pageTemplateStore.currentIssueType.enabled}
                 buttonIcon="playlist_add"
                 clickEvent={() => {
-                  const configFields = sortTableDataSet.selected.filter((record) => record.get('allowedEditPermission')).map((r) => ({ id: r.get('fieldId'), code: r.get('fieldCode') }));
-                  console.log('........configFields,', configFields);
+                  const configFields = selectedAllowedEditPermissionFields.map((r) => ({ id: r.get('fieldId'), code: r.get('fieldCode') }));
                   openPageRoleConfigModal({ fields: configFields, issueTypeId: pageTemplateStore.getCurrentIssueType, onOk: () => pageTemplateStore.loadData() });
                 }}
               >
-                批量权限配
+                批量权限配置
               </TooltipButton>),
           },
         ]}

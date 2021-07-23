@@ -75,6 +75,15 @@ const getColumns = ({ issueTypeId, loadData }: { issueTypeId: string, loadData: 
     key: 'roleInfo',
     flexGrow: 1,
     // width: 120,
+    render: ({ rowData }: any) => {
+      const permissionList = rowData.get('permissionList') || [];
+      const readPermission = permissionList.find((i: any) => i.scope === 'read');
+      return (readPermission ? (
+        <Tooltip title={`【${[...readPermission.roleList, ...readPermission.userList].map((i) => i.name).join('、')}】可见`}>
+          <span>{`【${[...readPermission.roleList, ...readPermission.userList].map((i) => i.name).join('、')}】可见`}</span>
+        </Tooltip>
+      ) : '');
+    },
   },
   {
     title: '级联说明',
