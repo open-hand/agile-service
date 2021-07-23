@@ -73,4 +73,15 @@ public interface FieldPermissionService {
                                                 Long organizationId,
                                                 Long issueTypeId,
                                                 List<PageFieldViewVO> pageFieldViews);
+
+    /**
+     * 筛选没有权限的字段
+     *
+     * @param result
+     * @return
+     */
+    List<PageFieldViewVO> filterNoPermissionFields(Long projectId,
+                                                   Long organizationId,
+                                                   Long issueTypeId,
+                                                   List<PageFieldViewVO> result);
 }

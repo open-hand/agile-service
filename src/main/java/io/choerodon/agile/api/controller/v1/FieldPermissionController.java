@@ -1,7 +1,10 @@
 package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.FieldPermissionVO;
+import io.choerodon.agile.api.vo.PageFieldViewParamVO;
+import io.choerodon.agile.api.vo.PageFieldViewVO;
 import io.choerodon.agile.api.vo.PermissionVO;
+import io.choerodon.agile.app.service.FieldPermissionIssueService;
 import io.choerodon.agile.app.service.FieldPermissionService;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
@@ -27,6 +30,9 @@ public class FieldPermissionController {
 
     @Autowired
     private FieldPermissionService fieldPermissionService;
+
+    @Autowired
+    private FieldPermissionIssueService fieldPermissionIssueService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "字段分配权限")
@@ -54,7 +60,7 @@ public class FieldPermissionController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据字段id查询权限")
-    @GetMapping("/filed_Id/{filed_id}")
+    @GetMapping("/filed_id/{filed_id}")
     public ResponseEntity<List<PermissionVO>> queryByFieldId(@ApiParam(value = "项目id", required = true)
                                                              @PathVariable("project_id") Long projectId,
                                                              @PathVariable("filed_id") Long fieldId,
@@ -62,6 +68,19 @@ public class FieldPermissionController {
                                                              @RequestParam Long organizationId,
                                                              @RequestParam @Encrypt Long issueTypeId) {
         return ResponseEntity.ok(fieldPermissionService.queryByFieldId(projectId, organizationId, fieldId, issueTypeId));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "查询必填但没有权限的字段")
+    @PostMapping("/required_fields/no_permission")
+    public ResponseEntity<List<PageFieldViewVO>> listNoPermissionRequiredFields(@ApiParam(value = "项目id", required = true)
+                                                                                @PathVariable("project_id") Long projectId,
+                                                                                @ApiParam(value = "组织id", required = true)
+                                                                                @RequestParam Long organizationId,
+                                                                                @RequestParam(required = false) @Encrypt Long issueId,
+                                                                                @ApiParam(value = "参数对象", required = true)
+                                                                                @RequestBody PageFieldViewParamVO paramDTO) {
+        return new ResponseEntity<>(fieldPermissionIssueService.listNoPermissionRequiredFields(organizationId, projectId, paramDTO, issueId), HttpStatus.OK);
     }
 
 }

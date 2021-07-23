@@ -197,7 +197,22 @@ public class FieldPermissionServiceImpl implements FieldPermissionService {
                 allowedEditPermissionList.add(x);
             }
         });
-        if(!fieldIds.isEmpty()) {
+        Set<Long> hasPermissionFieldIds =
+                filterHavingPermissionFieldIds(projectId, organizationId, issueTypeIds, fieldIds);
+        allowedEditPermissionList.forEach(x -> {
+            if (hasPermissionFieldIds.contains(x.getFieldId())) {
+                result.add(x);
+            }
+        });
+        return result;
+    }
+
+    private Set<Long> filterHavingPermissionFieldIds(Long projectId,
+                                                     Long organizationId,
+                                                     Set<Long> issueTypeIds,
+                                                     Set<Long> fieldIds) {
+        Set<Long> hasPermissionFieldIds = new HashSet<>();
+        if (!fieldIds.isEmpty()) {
             CustomUserDetails userDetails = DetailsHelper.getUserDetails();
             Long userId = userDetails.getUserId();
             List<Long> roleIdList = userDetails.getRoleIds();
@@ -210,14 +225,38 @@ public class FieldPermissionServiceImpl implements FieldPermissionService {
             permissionVO.setScope(FieldPermissionScope.READ.value());
             permissionVO.setUserIds(userIds);
             permissionVO.setRoleIds(roleIds);
-            Set<Long> hasPermissionFieldIds =
-                    fieldPermissionMapper.filterHasPermissionFields(projectId, organizationId, issueTypeIds, permissionVO, fieldIds);
-            allowedEditPermissionList.forEach(x -> {
-                if (hasPermissionFieldIds.contains(x.getFieldId())) {
-                    result.add(x);
-                }
-            });
+            hasPermissionFieldIds.addAll(
+                    fieldPermissionMapper.filterHasPermissionFields(projectId, organizationId, issueTypeIds, permissionVO, fieldIds));
         }
+        return hasPermissionFieldIds;
+    }
+
+    @Override
+    public List<PageFieldViewVO> filterNoPermissionFields(Long projectId,
+                                                          Long organizationId,
+                                                          Long issueTypeId,
+                                                          List<PageFieldViewVO> pageFieldViews) {
+        Set<Long> issueTypeIds = new HashSet<>(Arrays.asList(issueTypeId));
+        boolean isPermissionsConfigured = fieldPermissionMapper.isPermissionsConfigured(projectId, organizationId, issueTypeIds);
+        if (!isPermissionsConfigured) {
+            return new ArrayList<>();
+        }
+        Set<Long> fieldIds = new HashSet<>();
+        List<PageFieldViewVO> allowedEditPermissionList = new ArrayList<>();
+        pageFieldViews.forEach(x -> {
+            if (!IGNORED_FIELDS.contains(x.getFieldCode())) {
+                allowedEditPermissionList.add(x);
+                fieldIds.add(x.getFieldId());
+            }
+        });
+        Set<Long> hasPermissionFieldIds =
+                filterHavingPermissionFieldIds(projectId, organizationId, issueTypeIds, fieldIds);
+        List<PageFieldViewVO> result = new ArrayList<>();
+        allowedEditPermissionList.forEach(x -> {
+            if (!hasPermissionFieldIds.contains(x.getFieldId())) {
+                result.add(x);
+            }
+        });
         return result;
     }
 
