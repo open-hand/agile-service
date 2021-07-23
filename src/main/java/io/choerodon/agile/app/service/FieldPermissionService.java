@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.FieldPermissionVO;
+import io.choerodon.agile.api.vo.PageFieldViewVO;
 import io.choerodon.agile.api.vo.PageTemplateFieldVO;
 import io.choerodon.agile.api.vo.PermissionVO;
 
@@ -67,4 +68,9 @@ public interface FieldPermissionService {
                                 Long projectId,
                                 Long organizationId,
                                 List<PageTemplateFieldVO> pageTemplateFieldList);
+
+    List<PageFieldViewVO> filterPageFieldViewVO(Long projectId,
+                                                Long organizationId,
+                                                Long issueTypeId,
+                                                List<PageFieldViewVO> pageFieldViews);
 }
