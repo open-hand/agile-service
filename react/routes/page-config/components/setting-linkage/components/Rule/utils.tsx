@@ -71,7 +71,7 @@ export const renderDefaultValue = ({ field, name = 'defaultValue', fieldOptions 
       );
     case 'date':
       return (
-        <DatePicker />
+        <DatePicker name={name} />
       );
     case 'number':
       return <NumberField name={name} />;
