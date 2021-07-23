@@ -262,7 +262,10 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         }
         Object result = null;
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
-
+        if (!CollectionUtils.isEmpty(cascadeFieldOptionSearchVO.getFieldCascadeRuleIds())){
+            cascadeFieldOptionSearchVO.setFieldCascadeRuleIds(
+                    fieldCascadeRuleMapper.selectFieldCascadeRuleIdsHasOption(cascadeFieldOptionSearchVO.getFieldCascadeRuleIds(), projectId));
+        }
         String optionType = getOptionType(objectSchemeField);
         switch (optionType) {
             case COMPONENT:

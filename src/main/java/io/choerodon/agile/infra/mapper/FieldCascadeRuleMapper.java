@@ -59,4 +59,13 @@ public interface FieldCascadeRuleMapper extends BaseMapper<FieldCascadeRuleDTO> 
      * @return 问题类型下所有级联规则的说明
      */
     List<FieldCascadeRuleDesVO> selectFieldCascadeRuleDesByIssueTypeId(@Param("issueTypeId") Long issueTypeId, @Param("projectId") Long projectId);
+
+    /**
+     * 筛选有选项值的级联规则
+     *
+     * @param fieldCascadeRuleIds 级联规则id
+     * @param projectId 项目id
+     * @return 筛选后的级联规则id
+     */
+    List<Long> selectFieldCascadeRuleIdsHasOption(@Param("fieldCascadeRuleIds") List<Long> fieldCascadeRuleIds, @Param("projectId") Long projectId);
 }
