@@ -405,6 +405,11 @@ public interface IssueService {
                                                        Long issueId,
                                                        Long issueTypeId);
 
+    List<PageFieldViewVO> listRequiredFieldByIssueTypeNoFilter(Long projectId,
+                                                               Long organizationId,
+                                                               Long issueId,
+                                                               Long issueTypeId);
+
     void executionUpdateStatus(Long projectId, Long issueId, ExecutionUpdateIssueVO executionUpdateIssueVO);
 
     void queryUserProjects(Long organizationId, Long projectId, List<Long> projectIds, List<ProjectVO> projects, Long userId, String type);

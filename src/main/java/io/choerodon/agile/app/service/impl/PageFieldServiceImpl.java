@@ -408,6 +408,12 @@ public class PageFieldServiceImpl implements PageFieldService {
     public List<PageFieldViewVO> queryPageFieldViewList(Long organizationId, Long projectId, PageFieldViewParamVO paramDTO) {
         Long issueTypeId = paramDTO.getIssueTypeId();
         String pageCode = paramDTO.getPageCode();
+        List<PageFieldViewVO> pageFieldViews = queryPageFieldViewsNoPermissionFilter(organizationId, projectId, paramDTO, issueTypeId, pageCode);
+        return fieldPermissionService.filterPageFieldViewVO(projectId, organizationId, issueTypeId, pageFieldViews);
+    }
+
+    @Override
+    public List<PageFieldViewVO> queryPageFieldViewsNoPermissionFilter(Long organizationId, Long projectId, PageFieldViewParamVO paramDTO, Long issueTypeId, String pageCode) {
         if (Boolean.FALSE.equals(EnumUtil.contain(PageCode.class, pageCode))) {
             throw new CommonException(ERROR_PAGECODE_ILLEGAL);
         }
@@ -419,7 +425,6 @@ public class PageFieldServiceImpl implements PageFieldService {
         }.getType());
         objectSchemeFieldService.setDefaultValueObjs(pageFieldViews, projectId, organizationId);
         FieldValueUtil.handleDefaultValue(pageFieldViews);
-        pageFieldViews = fieldPermissionService.filterPageFieldViewVO(projectId, organizationId, issueTypeId, pageFieldViews);
         return pageFieldViews;
     }
 

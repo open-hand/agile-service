@@ -104,6 +104,12 @@ public interface PageFieldService {
      */
     List<PageFieldViewVO> queryPageFieldViewList(Long organizationId, Long projectId, PageFieldViewParamVO paramDTO);
 
+    List<PageFieldViewVO> queryPageFieldViewsNoPermissionFilter(Long organizationId,
+                                                                Long projectId,
+                                                                PageFieldViewParamVO paramDTO,
+                                                                Long issueTypeId,
+                                                                String pageCode);
+
     /**
      * 根据实例id从界面上获取字段列表，带有字段值、字段选项
      *

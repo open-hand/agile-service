@@ -794,6 +794,15 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                                                               Long organizationId,
                                                               Long issueId,
                                                               Long issueTypeId) {
+        List<PageFieldViewVO> requiredSystemFields = listRequiredFieldByIssueTypeNoFilter(projectId, organizationId, issueId, issueTypeId);
+        return fieldPermissionService.filterPageFieldViewVO(projectId, organizationId, issueTypeId, requiredSystemFields);
+    }
+
+    @Override
+    public List<PageFieldViewVO> listRequiredFieldByIssueTypeNoFilter(Long projectId,
+                                                                      Long organizationId,
+                                                                      Long issueId,
+                                                                      Long issueTypeId) {
         String schemeCode = AGILE_SCHEME_CODE;
         IssueVO issue = queryIssue(projectId, issueId, organizationId);
         Map<String, Object> customFieldMap =
@@ -834,7 +843,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             }
         });
         requiredSystemFields.addAll(requiredCustomFields);
-        return fieldPermissionService.filterPageFieldViewVO(projectId, organizationId, issueTypeId, requiredSystemFields);
+        return requiredSystemFields;
     }
 
     private void handlerSystemAndCustomRequiredField(Map<String, Object> customFieldMap, boolean belongToProgram, PageFieldViewVO x, List<PageFieldViewVO> requiredSystemFields, List<PageFieldViewVO> requiredCustomFields, IssueVO issue) {
