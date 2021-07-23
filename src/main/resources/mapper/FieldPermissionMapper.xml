@@ -24,4 +24,96 @@
             </foreach>
         </if>
     </select>
+
+    <select id="filterHasPermissionFields" resultType="java.lang.Long">
+        select
+        ffp.field_id
+        from
+        fd_field_permission ffp
+        where ffp.organization_id = #{organizationId}
+        and ffp.project_id = #{projectId}
+        and ffp.permission = #{permissionVO.scope}
+        and ffp.issue_type_id in
+        <foreach collection="issueTypeIds" item="issueTypeId" index="index" open="(" close=")" separator=",">
+            #{issueTypeId}
+        </foreach>
+        and ffp.field_id in
+        <foreach collection="fieldIds" item="fieldId" index="index" open="(" close=")" separator=",">
+            #{fieldId}
+        </foreach>
+        and (
+            (
+                ffp.type = 'user'
+                and ffp.role_member_id in
+                <foreach collection="permissionVO.userIds" item="userId" index="index" open="(" close=")" separator=",">
+                    #{userId}
+                </foreach>
+            )
+            or (
+                ffp.type = 'role'
+                and ffp.role_member_id in
+                <foreach collection="permissionVO.roleIds" item="roleId" index="index" open="(" close=")" separator=",">
+                    #{roleId}
+                </foreach>
+            )
+        )
+        union
+        select fosf.id
+        from fd_object_scheme_field fosf
+        left join fd_field_permission ffp on (
+            ffp.organization_id = #{organizationId}
+            and ffp.project_id = #{projectId}
+            and fosf.id = ffp.field_id
+            and ffp.permission = #{permissionVO.scope}
+            and ffp.issue_type_id in
+            <foreach collection="issueTypeIds" item="issueTypeId" index="index" open="(" close=")" separator=",">
+                #{issueTypeId}
+            </foreach>
+        )
+        where fosf.id in
+        <foreach collection="fieldIds" item="fieldId" index="index" open="(" close=")" separator=",">
+            #{fieldId}
+        </foreach>
+        and ffp.id is null
+    </select>
+
+    <select id="isPermissionsConfigured" resultType="java.lang.Boolean">
+        select
+        count(ffp.id) != 0 as configured
+        from fd_field_permission ffp
+        where ffp.organization_id = #{organizationId}
+        and ffp.project_id = #{projectId}
+        <if test="issueTypeIds != null and issueTypeIds.size() > 0">
+            and ffp.issue_type_id in
+            <foreach collection="issueTypeIds" item="issueTypeId" index="index" open="(" close=")" separator=",">
+                #{issueTypeId}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="selectFieldsWithPermissions" resultType="io.choerodon.agile.infra.dto.FieldPermissionDTO">
+        select
+        fosf.id as field_id,
+        ffp.issue_type_id,
+        ffp.role_member_id,
+        ffp.type,
+        ffp.permission
+        from fd_object_scheme_field fosf
+        left join fd_field_permission ffp on (
+            ffp.organization_id = #{organizationId}
+            and ffp.project_id = #{projectId}
+            and fosf.id = ffp.field_id
+            <if test="permissionVO != null and permissionVO.scope != null">
+                and ffp.permission = #{permissionVO.scope}
+            </if>
+            and ffp.issue_type_id in
+            <foreach collection="issueTypeIds" item="issueTypeId" index="index" open="(" close=")" separator=",">
+                #{issueTypeId}
+            </foreach>
+        )
+        where fosf.id in
+        <foreach collection="fieldIds" item="fieldId" index="index" open="(" close=")" separator=",">
+            #{fieldId}
+        </foreach>
+    </select>
 </mapper>

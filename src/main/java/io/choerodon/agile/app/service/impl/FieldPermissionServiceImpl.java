@@ -11,6 +11,8 @@ import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.FieldPermissionMapper;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.CustomUserDetails;
+import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -172,6 +174,51 @@ public class FieldPermissionServiceImpl implements FieldPermissionService {
                 setPermissionList(allowedEditPermissionFields, permissionMap);
             }
         }
+    }
+
+    @Override
+    public List<PageFieldViewVO> filterPageFieldViewVO(Long projectId,
+                                                       Long organizationId,
+                                                       Long issueTypeId,
+                                                       List<PageFieldViewVO> pageFieldViews) {
+        Set<Long> issueTypeIds = new HashSet<>(Arrays.asList(issueTypeId));
+        boolean isPermissionsConfigured = fieldPermissionMapper.isPermissionsConfigured(projectId, organizationId, issueTypeIds);
+        if (!isPermissionsConfigured) {
+            return pageFieldViews;
+        }
+        List<PageFieldViewVO> result = new ArrayList<>();
+        List<PageFieldViewVO> allowedEditPermissionList = new ArrayList<>();
+        Set<Long> fieldIds = new HashSet<>();
+        pageFieldViews.forEach(x -> {
+            if (IGNORED_FIELDS.contains(x.getFieldCode())) {
+                result.add(x);
+            } else {
+                fieldIds.add(x.getFieldId());
+                allowedEditPermissionList.add(x);
+            }
+        });
+        if(!fieldIds.isEmpty()) {
+            CustomUserDetails userDetails = DetailsHelper.getUserDetails();
+            Long userId = userDetails.getUserId();
+            List<Long> roleIdList = userDetails.getRoleIds();
+            Set<Long> userIds = new HashSet<>(Arrays.asList(userId));
+            Set<Long> roleIds = new HashSet<>();
+            if (!ObjectUtils.isEmpty(roleIdList)) {
+                roleIds.addAll(roleIdList);
+            }
+            PermissionVO permissionVO = new PermissionVO();
+            permissionVO.setScope(FieldPermissionScope.READ.value());
+            permissionVO.setUserIds(userIds);
+            permissionVO.setRoleIds(roleIds);
+            Set<Long> hasPermissionFieldIds =
+                    fieldPermissionMapper.filterHasPermissionFields(projectId, organizationId, issueTypeIds, permissionVO, fieldIds);
+            allowedEditPermissionList.forEach(x -> {
+                if (hasPermissionFieldIds.contains(x.getFieldId())) {
+                    result.add(x);
+                }
+            });
+        }
+        return result;
     }
 
     private void setPermissionList(List<PageTemplateFieldVO> allowedEditPermissionFields, Map<Long, List<PermissionVO>> permissionMap) {

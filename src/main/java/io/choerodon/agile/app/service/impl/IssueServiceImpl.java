@@ -289,6 +289,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private VerifyUpdateUtil verifyUpdateUtil;
     @Autowired
     private StatusMachineTransformMapper statusMachineTransformMapper;
+    @Autowired
+    private FieldPermissionService fieldPermissionService;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -832,7 +834,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             }
         });
         requiredSystemFields.addAll(requiredCustomFields);
-        return requiredSystemFields;
+        return fieldPermissionService.filterPageFieldViewVO(projectId, organizationId, issueTypeId, requiredSystemFields);
     }
 
     private void handlerSystemAndCustomRequiredField(Map<String, Object> customFieldMap, boolean belongToProgram, PageFieldViewVO x, List<PageFieldViewVO> requiredSystemFields, List<PageFieldViewVO> requiredCustomFields, IssueVO issue) {

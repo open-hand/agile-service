@@ -82,6 +82,8 @@ public class PageFieldServiceImpl implements PageFieldService {
 
     @Autowired
     private FieldCascadeRuleService fieldCascadeRuleService;
+    @Autowired
+    private FieldPermissionService fieldPermissionService;
 
     @Override
     public PageFieldDTO baseCreate(PageFieldDTO field) {
@@ -417,6 +419,7 @@ public class PageFieldServiceImpl implements PageFieldService {
         }.getType());
         objectSchemeFieldService.setDefaultValueObjs(pageFieldViews, projectId, organizationId);
         FieldValueUtil.handleDefaultValue(pageFieldViews);
+        pageFieldViews = fieldPermissionService.filterPageFieldViewVO(projectId, organizationId, issueTypeId, pageFieldViews);
         return pageFieldViews;
     }
 
@@ -426,6 +429,7 @@ public class PageFieldServiceImpl implements PageFieldService {
         //填充value
         fieldValueService.fillValues(organizationId, projectId, instanceId, paramDTO.getSchemeCode(), pageFieldViews);
         fieldCascadeRuleService.filterPageFieldView(organizationId, projectId, paramDTO, instanceId, pageFieldViews);
+        pageFieldViews = fieldPermissionService.filterPageFieldViewVO(projectId, organizationId, paramDTO.getIssueTypeId(), pageFieldViews);
         return pageFieldViews;
     }
 

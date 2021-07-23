@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.PermissionVO;
 import io.choerodon.agile.infra.dto.FieldPermissionDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
@@ -19,4 +20,20 @@ public interface FieldPermissionMapper extends BaseMapper<FieldPermissionDTO> {
                                               @Param("issueTypeIds") Set<Long> issueTypeIds);
 
     void deleteByIds(@Param("fieldPermissionIds") Set<Long> fieldPermissionIds);
+
+    Set<Long> filterHasPermissionFields(@Param("projectId") Long projectId,
+                                        @Param("organizationId") Long organizationId,
+                                        @Param("issueTypeIds") Set<Long> issueTypeIds,
+                                        @Param("permissionVO") PermissionVO permissionVO,
+                                        @Param("fieldIds") Set<Long> fieldIds);
+
+    boolean isPermissionsConfigured(@Param("projectId") Long projectId,
+                                    @Param("organizationId") Long organizationId,
+                                    @Param("issueTypeIds") Set<Long> issueTypeIds);
+
+    List<FieldPermissionDTO> selectFieldsWithPermissions(@Param("projectId") Long projectId,
+                                                         @Param("organizationId") Long organizationId,
+                                                         @Param("issueTypeIds") Set<Long> issueTypeIds,
+                                                         @Param("permissionVO") PermissionVO permissionVO,
+                                                         @Param("fieldIds") Set<Long> fieldIds);
 }
