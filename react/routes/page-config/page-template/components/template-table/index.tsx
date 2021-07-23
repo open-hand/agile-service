@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import {
-  PerformanceTable, CheckBox,
+  PerformanceTable, CheckBox, Modal,
 } from 'choerodon-ui/pro';
 import AutoSize from '@/components/auto-size';
 import {
