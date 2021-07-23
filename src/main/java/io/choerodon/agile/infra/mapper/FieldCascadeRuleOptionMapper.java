@@ -112,4 +112,6 @@ public interface FieldCascadeRuleOptionMapper extends BaseMapper<FieldCascadeRul
             @Param("organizationId") Long organizationId,
             @Param("fieldCascadeRuleIds") List<Long> fieldCascadeRuleIds,
             @Param("statusCodes") List<String> statusCodes);
+
+
 }

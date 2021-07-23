@@ -165,4 +165,14 @@
         WHERE ffrr.project_id = #{projectId}
         AND ffrr.issue_type_id = #{issueTypeId}
     </select>
+
+    <select id="selectFieldCascadeRuleIdsHasOption" resultType="java.lang.Long">
+        SELECT field_cascade_rule_id
+        FROM fd_field_cascade_rule_option
+        WHERE field_cascade_rule_id IN
+        <foreach collection="fieldCascadeRuleIds" item="fieldCascadeRuleId" separator="," open="(" close=")">
+            #{fieldCascadeRuleId}
+        </foreach>
+        GROUP BY field_cascade_rule_id
+    </select>
 </mapper>
