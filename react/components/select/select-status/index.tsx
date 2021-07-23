@@ -23,7 +23,7 @@ interface Props extends Partial<SelectProps> {
 
 const SelectStatus: React.FC<Props> = forwardRef(
   ({
-    request, issueTypeId, excludeStatus, dataRef, afterLoad, flat, projectId, applyType, issueTypeIds, selectedIds, isOrganization = false, extraStatus = [], ...otherProps
+    request, issueTypeId, excludeStatus = [], dataRef, afterLoad, flat, projectId, applyType, issueTypeIds, selectedIds, isOrganization = false, extraStatus = [], ...otherProps
   }, ref: React.Ref<Select>) => {
     const config = useMemo((): SelectConfig<IStatusCirculation> => ({
       name: 'status',

@@ -228,25 +228,34 @@ const CopyIssue: React.FC<Props> = ({
           <TextField name="epicName" />
         )
       }
-        <Select name="fields">
+        <Select name="fields" style={{ marginBottom: !(!!issue.subIssueVOList.length || !!issueLink.length) ? 10 : 0 }}>
           {
           finalFields.map((item) => (
             <Option value={item.fieldCode} key={item.fieldCode}>{item.fieldName}</Option>
           ))
         }
         </Select>
-        <div>
-          {
-          !!issue.subIssueVOList.length && (
-            <CheckBox name="copySubIssue" style={{ marginRight: 10 }} />
+        {
+          (!!issue.subIssueVOList.length || !!issueLink.length) && (
+          <div style={{
+            position: 'relative',
+            top: -6,
+            marginBottom: 4,
+          }}
+          >
+            {
+              !!issue.subIssueVOList.length && (
+                <CheckBox name="copySubIssue" style={{ marginRight: 10 }} />
+              )
+            }
+            {
+              !!issueLink.length && (
+                <CheckBox name="copyLinkIssue" />
+              )
+            }
+          </div>
           )
         }
-          {
-          !!issueLink.length && (
-            <CheckBox name="copyLinkIssue" />
-          )
-        }
-        </div>
       </Form>
       <CopyRequired issue={issue} copySubIssueChecked={copyIssueDataSet.current?.get('copySubIssue') || false} requiredFieldsVOArrRef={requiredFieldsVOArrRef} setLoading={setLoading} />
     </Spin>
