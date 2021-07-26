@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import React, { useMemo } from 'react';
 import {
   Modal, Form, Select, DataSet,
@@ -66,7 +65,7 @@ const LinkBranch: React.FC<{ modal?: IModalProps } & ILinkBranchModalProps> = ob
   };
   modal?.handleOk(handleSubmit);
   return (
-    <Form dataSet={formDs} style={{ width: '5.12rem' }}>
+    <Form dataSet={formDs}>
       <Select name="source">
         <Option value="self">本项目</Option>
         <Option value="other">其他项目</Option>
@@ -81,7 +80,7 @@ const openLinkBranchModal = (props: ILinkBranchModalProps) => {
     key: Modal.key(),
     title: '添加关联分支',
     style: {
-      width: MODAL_WIDTH.middle,
+      width: MODAL_WIDTH.small,
     },
     drawer: true,
     okText: '添加',
