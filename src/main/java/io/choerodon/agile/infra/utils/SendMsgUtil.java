@@ -269,11 +269,21 @@ public class SendMsgUtil {
                 .findFirst().map(UserDTO::getRealName).orElse("");
         // 设置状态
         String status = ConvertUtil.getIssueStatusMap(projectId).get(issueDTO.getStatusId()).getName();
+        // 设置url
+        ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
+        String url;
+        IssueVO issueVO = modelMapper.map(issueDTO, IssueVO.class);
+        if (isProgram) {
+            url = getFeatureUrl(issueVO, projectVO, issueDTO.getIssueId());
+        } else {
+            url = getIssueCreateUrl(issueVO, projectVO, issueDTO.getIssueId());
+        }
         templateArgsMap.put("actionType", Objects.equals("", assigneeName) ? "" : actionType);
         templateArgsMap.put("assigneeName", assigneeName);
         templateArgsMap.put("summary", summary);
         templateArgsMap.put("operatorName", operatorName);
         templateArgsMap.put("status", status);
+        templateArgsMap.put("url", url);
         siteMsgUtil.sendChangeIssueStatus(projectId, userSet, noticeTypeList, templateArgsMap, userDetails.getUserId(), onlyWebHook);
     }
 
