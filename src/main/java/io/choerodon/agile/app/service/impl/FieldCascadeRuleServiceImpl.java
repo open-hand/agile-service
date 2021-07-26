@@ -126,16 +126,16 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
     }
 
     private void validCreateField(FieldCascadeCreateVO fieldCascadeCreate) {
-        if (fieldCascadeCreate.getIssueTypeId() == null){
+        if (fieldCascadeCreate.getIssueTypeId() == null) {
             throw new CommonException("error.fieldCascadeCreate.issueType.null");
         }
-        if (fieldCascadeCreate.getFieldId() == null){
+        if (fieldCascadeCreate.getFieldId() == null) {
             throw new CommonException("error.fieldCascadeCreate.fieldId.null");
         }
-        if (fieldCascadeCreate.getCascadeFieldId() == null){
+        if (fieldCascadeCreate.getCascadeFieldId() == null) {
             throw new CommonException("error.fieldCascadeCreate.cascadeFieldId.null");
         }
-        if (fieldCascadeCreate.getFieldOptionId() == null){
+        if (fieldCascadeCreate.getFieldOptionId() == null) {
             throw new CommonException("error.fieldCascadeCreate.fieldOption.null");
         }
     }
@@ -147,7 +147,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         fieldCascadeRuleRecord.setFieldOptionId(fieldCascadeCreate.getFieldOptionId());
         fieldCascadeRuleRecord.setCascadeFieldId(fieldCascadeCreate.getCascadeFieldId());
         fieldCascadeRuleRecord.setProjectId(projectId);
-        if (fieldCascadeRuleMapper.selectCount(fieldCascadeRuleRecord) > 0){
+        if (fieldCascadeRuleMapper.selectCount(fieldCascadeRuleRecord) > 0) {
             throw new CommonException("error.fieldCascadeRule.exist");
         }
     }
@@ -177,7 +177,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         FieldCascadeRuleDTO fieldCascadeRuleDTO = modelMapper.map(fieldCascadeUpdate, FieldCascadeRuleDTO.class);
         fieldCascadeRuleDTO.setProjectId(projectId);
         fieldCascadeRuleDTO.setId(fieldCascadeRuleId);
-        if (fieldCascadeRuleMapper.updateByPrimaryKeySelective(fieldCascadeRuleDTO) != 1) {
+        if (fieldCascadeRuleMapper.updateOptional(fieldCascadeRuleDTO, "hidden", "required", "defaultValue") != 1) {
             throw new CommonException("error.fieldCascadeRule.update");
         }
         updateAndDeleteFieldCascadeRuleOption(
@@ -221,7 +221,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
 
     @Override
     public List<FieldCascadeRuleVO> batchMutationFieldCascadeRule(Long projectId, List<FieldCascadeRuleVO> fieldCascadeRuleList) {
-        if (CollectionUtils.isEmpty(fieldCascadeRuleList)){
+        if (CollectionUtils.isEmpty(fieldCascadeRuleList)) {
             return new ArrayList<>();
         }
 
@@ -230,22 +230,23 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         List<Long> deleteIdList = new ArrayList<>();
 
         fieldCascadeRuleList.forEach(fieldCascadeRule -> {
-               if (fieldCascadeRule.get_status() == null){
-                   return;
-               }
-               switch (fieldCascadeRule.get_status()){
-                   case create:
-                       FieldCascadeCreateVO fieldCascadeCreateVO = modelMapper.map(fieldCascadeRule, FieldCascadeCreateVO.class);
-                       createList.add(fieldCascadeCreateVO);
-                       break;
-                   case update:
-                       updateList.add(fieldCascadeRule);
-                       break;
-                   case delete:
-                       deleteIdList.add(fieldCascadeRule.getId());
-                       break;
-                   default:break;
-               }
+            if (fieldCascadeRule.get_status() == null) {
+                return;
+            }
+            switch (fieldCascadeRule.get_status()) {
+                case create:
+                    FieldCascadeCreateVO fieldCascadeCreateVO = modelMapper.map(fieldCascadeRule, FieldCascadeCreateVO.class);
+                    createList.add(fieldCascadeCreateVO);
+                    break;
+                case update:
+                    updateList.add(fieldCascadeRule);
+                    break;
+                case delete:
+                    deleteIdList.add(fieldCascadeRule.getId());
+                    break;
+                default:
+                    break;
+            }
         });
 
         batchDeleteFieldCascadeRule(deleteIdList, projectId);
@@ -262,7 +263,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         }
         Object result = null;
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        if (!CollectionUtils.isEmpty(cascadeFieldOptionSearchVO.getFieldCascadeRuleIds())){
+        if (!CollectionUtils.isEmpty(cascadeFieldOptionSearchVO.getFieldCascadeRuleIds())) {
             cascadeFieldOptionSearchVO.setFieldCascadeRuleIds(
                     fieldCascadeRuleMapper.selectFieldCascadeRuleIdsHasOption(cascadeFieldOptionSearchVO.getFieldCascadeRuleIds(), projectId));
         }
@@ -425,7 +426,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                 break;
             case MEMBER:
                 List<UserDTO> userDTOS = baseFeignClient.listUsersByIds(result.stream().map(FieldCascadeRuleOptionVO::getCascadeOptionId).toArray(Long[]::new), false).getBody();
-                if (!CollectionUtils.isEmpty(userDTOS)){
+                if (!CollectionUtils.isEmpty(userDTOS)) {
                     optionNameMap = userDTOS.stream().collect(Collectors.toMap(UserDTO::getId, UserDTO::getRealName));
                 }
                 break;
@@ -439,7 +440,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                 break;
             case SUB_PROJECT:
                 List<ProjectVO> projectVOList = baseFeignClient.queryByIds(result.stream().map(FieldCascadeRuleOptionVO::getCascadeOptionId).collect(Collectors.toSet())).getBody();
-                if (!CollectionUtils.isEmpty(projectVOList)){
+                if (!CollectionUtils.isEmpty(projectVOList)) {
                     optionNameMap = projectVOList.stream().collect(Collectors.toMap(ProjectVO::getId, ProjectVO::getName));
                 }
                 break;
@@ -587,7 +588,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         }
 
         Set<Long> visibleOptionIds = new HashSet<>();
-        if (!CollectionUtils.isEmpty(cascadeFieldOptionSearchVO.getFieldCascadeRuleIds())){
+        if (!CollectionUtils.isEmpty(cascadeFieldOptionSearchVO.getFieldCascadeRuleIds())) {
             visibleOptionIds.addAll(fieldCascadeRuleOptionMapper.selectVisibleOptionIds(projectId, cascadeFieldOptionSearchVO.getFieldCascadeRuleIds()));
         }
         List<ProjectRelationshipInfoVO> result = projectRelationshipInfoVOS.stream().filter(projectRelationshipInfoVO -> visibleOptionIds.contains(projectRelationshipInfoVO.getProjectId())).collect(Collectors.toList());
@@ -622,7 +623,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
     }
 
     private void batchUpdateFieldCascadeRule(List<FieldCascadeRuleVO> updateList, Long projectId) {
-        if (!CollectionUtils.isEmpty(updateList)){
+        if (!CollectionUtils.isEmpty(updateList)) {
             updateList.forEach(updateFieldCascadeRule -> {
                 FieldCascadeUpdateVO fieldCascadeUpdateVO = modelMapper.map(updateFieldCascadeRule, FieldCascadeUpdateVO.class);
                 updateFieldCascadeRule(projectId, updateFieldCascadeRule.getId(), fieldCascadeUpdateVO);
@@ -631,7 +632,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
     }
 
     private void batchCreateFieldCascadeRule(List<FieldCascadeCreateVO> createList, Long projectId) {
-        if (!CollectionUtils.isEmpty(createList)){
+        if (!CollectionUtils.isEmpty(createList)) {
             createList.forEach(fieldCascadeCreateVO -> createFieldCascadeRule(projectId, fieldCascadeCreateVO));
         }
     }
@@ -643,7 +644,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         Map<Long, UserMessageDTO> userMap = getDefaultUserMap(fieldCascadeRuleList);
         fieldCascadeRuleList.forEach(fieldCascadeRuleVO -> {
             if (CollectionUtils.isEmpty(fieldCascadeRuleVO.getFieldCascadeRuleOptionList())
-                    || fieldCascadeRuleVO.getFieldCascadeRuleOptionList().get(0).getId() == null){
+                    || fieldCascadeRuleVO.getFieldCascadeRuleOptionList().get(0).getId() == null) {
                 fieldCascadeRuleVO.setFieldCascadeRuleOptionList(new ArrayList<>());
                 return;
             }
@@ -666,19 +667,21 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                     setDefaultValueObjsOfMultiple(priorityMap, fieldCascadeRuleVO);
                     break;
                 case FieldCode.INFLUENCE_VERSION:
-                    List<ProductVersionNameVO> influenceVersionList = modelMapper.map(productVersionMapper.queryNameByOptions(projectId, null), new TypeToken<List<ProductVersionNameVO>>(){}.getType());
+                    List<ProductVersionNameVO> influenceVersionList = modelMapper.map(productVersionMapper.queryNameByOptions(projectId, null), new TypeToken<List<ProductVersionNameVO>>() {
+                    }.getType());
                     Map<Long, Object> influenceVersionMap = influenceVersionList.stream().collect(Collectors.toMap(ProductVersionNameVO::getVersionId, Function.identity()));
                     setDefaultValueObjsOfMultiple(influenceVersionMap, fieldCascadeRuleVO);
                     break;
                 //多选
                 case FieldCode.FIX_VERSION:
-                    List<ProductVersionNameVO> fixVersionList = modelMapper.map(productVersionMapper.queryNameByOptions(projectId, Collections.singletonList("version_planning")), new TypeToken<List<ProductVersionNameVO>>(){}.getType());
+                    List<ProductVersionNameVO> fixVersionList = modelMapper.map(productVersionMapper.queryNameByOptions(projectId, Collections.singletonList("version_planning")), new TypeToken<List<ProductVersionNameVO>>() {
+                    }.getType());
                     Map<Long, Object> fixVersionMap = fixVersionList.stream().collect(Collectors.toMap(ProductVersionNameVO::getVersionId, Function.identity()));
                     setDefaultValueObjsOfMultiple(fixVersionMap, fieldCascadeRuleVO);
                     break;
                 case FieldCode.SUB_PROJECT:
-                    if (agilePluginService != null){
-                        List<ProjectRelationshipInfoVO> projectRelationshipInfoList= agilePluginService.getProjUnderGroup(organizationId, projectId, projectId, true);
+                    if (agilePluginService != null) {
+                        List<ProjectRelationshipInfoVO> projectRelationshipInfoList = agilePluginService.getProjUnderGroup(organizationId, projectId, projectId, true);
                         Map<Long, Object> projectMap = projectRelationshipInfoList.stream().collect(Collectors.toMap(ProjectRelationshipInfoVO::getProjectId, Function.identity()));
                         setDefaultValueObjsOfMultiple(projectMap, fieldCascadeRuleVO);
                     }
