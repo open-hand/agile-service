@@ -111,12 +111,15 @@ const CopyRequired: React.FC<Props> = ({
     return map;
   }, [copySubIssueChecked, issue.subIssueVOList, subTaskRequiredFieldsArr]);
 
-  const requiredFields = useMemo(() => [...(selfRequiredFields || []), ...(selfExtraRequiredFields || [])], [selfExtraRequiredFields, selfRequiredFields]);
-  const requiredFieldDsArr = useRequiredFieldDataSet([{
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const requiredFields = useMemo(() => [...(selfRequiredFields || []), ...(selfExtraRequiredFields || [])], [JSON.stringify(selfExtraRequiredFields), JSON.stringify(selfRequiredFields)]);
+  const issuesFieldRequired = useMemo(() => ([{
     issueId: issue.issueId,
     issueTypeId: issue.issueTypeId,
     requiredFields,
-  }, ...subTaskRequiredFieldsMap.values()]);
+  }, ...subTaskRequiredFieldsMap.values()]), [issue.issueId, issue.issueTypeId, requiredFields, subTaskRequiredFieldsMap]);
+
+  const requiredFieldDsArr = useRequiredFieldDataSet(issuesFieldRequired);
 
   useImperativeHandle(requiredFieldsVOArrRef, () => requiredFieldDsArr);
 
