@@ -7,7 +7,7 @@ import {
   Form, DataSet, Select, TextField, CheckBox,
 } from 'choerodon-ui/pro';
 import { Spin } from 'choerodon-ui';
-import { find, map } from 'lodash';
+import { difference, find, map } from 'lodash';
 import { epicApi, issueApi } from '@/api';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import {
@@ -61,6 +61,7 @@ const CopyIssue: React.FC<Props> = ({
   const { isInProgram } = useIsInProgram();
   const [loading, setLoading] = useState<boolean>(false);
   const requiredFieldsVOArrRef = useRef<RequiredFieldDs[] | null>(null);
+  const [selfExtraRequiredFields, setSelfExtraRequiredFields] = useState([]);
   const checkEpicName = useCallback(async (value: string) => {
     if (value && value.trim()) {
       return epicApi.checkName(value)
@@ -74,6 +75,17 @@ const CopyIssue: React.FC<Props> = ({
     return true;
   }, []);
 
+  const handleUpdate = useCallback(async ({ name, oldValue, value }) => {
+    if (name === 'fields') {
+      const unCopyFieldCodes = difference(finalFields.map((item) => item.fieldCode), value) || [];
+      if (unCopyFieldCodes?.length) {
+        const res = await issueApi.checkRequiredFields(issue.issueTypeId, unCopyFieldCodes as string[]);
+        setSelfExtraRequiredFields(res);
+      } else {
+        setSelfExtraRequiredFields([]);
+      }
+    }
+  }, [finalFields, issue.issueTypeId]);
   const copyIssueDataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [{
@@ -109,7 +121,10 @@ const CopyIssue: React.FC<Props> = ({
       epicName: issue.typeCode === 'issue_epic' && issue.epicName,
       fields: map(finalFields, 'fieldCode'),
     }],
-  }), [checkEpicName, finalFields, issue.epicName, issue.summary, issue.typeCode]);
+    events: {
+      update: handleUpdate,
+    },
+  }), [checkEpicName, finalFields, handleUpdate, issue.epicName, issue.summary, issue.typeCode]);
 
   const handleSubmit = useCallback(async () => {
     const validate = await copyIssueDataSet.validate();
@@ -263,7 +278,13 @@ const CopyIssue: React.FC<Props> = ({
           )
         }
       </Form>
-      <CopyRequired issue={issue} copySubIssueChecked={copyIssueDataSet.current?.get('copySubIssue') || false} requiredFieldsVOArrRef={requiredFieldsVOArrRef} setLoading={setLoading} />
+      <CopyRequired
+        issue={issue}
+        copySubIssueChecked={copyIssueDataSet.current?.get('copySubIssue') || false}
+        selfExtraRequiredFields={selfExtraRequiredFields}
+        requiredFieldsVOArrRef={requiredFieldsVOArrRef}
+        setLoading={setLoading}
+      />
     </Spin>
   );
 };

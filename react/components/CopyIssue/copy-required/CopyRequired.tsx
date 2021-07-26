@@ -4,7 +4,7 @@ import React, {
 import { observer } from 'mobx-react-lite';
 import classnames from 'classnames';
 import { DataSet } from 'choerodon-ui/pro';
-import { IField, Issue } from '@/common/types';
+import { IField, IFieldWidthValue, Issue } from '@/common/types';
 import { issueApi } from '@/api';
 import RequiredField from '@/components/required-field';
 import useRequiredFieldDataSet, { RequiredFieldDs } from '@/components/required-field/useRequiredFieldDataSet';
@@ -54,10 +54,11 @@ interface Props {
   copySubIssueChecked: boolean
   requiredFieldsVOArrRef: React.MutableRefObject<RequiredFieldDs[] | null>
   setLoading: (loading: boolean) => void
+  selfExtraRequiredFields: IFieldWidthValue[]
 }
 
 const CopyRequired: React.FC<Props> = ({
-  issue, copySubIssueChecked, requiredFieldsVOArrRef, setLoading,
+  issue, copySubIssueChecked, requiredFieldsVOArrRef, setLoading, selfExtraRequiredFields,
 }) => {
   const [selfRequiredFields, setSelfRequiredFields] = useState<IField[]>([]);
   const [subTaskRequiredFieldsArr, setSubTaskRequiredFieldsArr] = useState<(IField[])[]>([]);
@@ -110,21 +111,25 @@ const CopyRequired: React.FC<Props> = ({
     return map;
   }, [copySubIssueChecked, issue.subIssueVOList, subTaskRequiredFieldsArr]);
 
-  const requiredFieldDsArr = useRequiredFieldDataSet([{
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const requiredFields = useMemo(() => [...(selfRequiredFields || []), ...(selfExtraRequiredFields || [])], [JSON.stringify(selfExtraRequiredFields), JSON.stringify(selfRequiredFields)]);
+  const issuesFieldRequired = useMemo(() => ([{
     issueId: issue.issueId,
     issueTypeId: issue.issueTypeId,
-    requiredFields: selfRequiredFields || [],
-  }, ...subTaskRequiredFieldsMap.values()]);
+    requiredFields,
+  }, ...subTaskRequiredFieldsMap.values()]), [issue.issueId, issue.issueTypeId, requiredFields, subTaskRequiredFieldsMap]);
+
+  const requiredFieldDsArr = useRequiredFieldDataSet(issuesFieldRequired);
 
   useImperativeHandle(requiredFieldsVOArrRef, () => requiredFieldDsArr);
 
   return (
     <>
       {
-        !!selfRequiredFields.length && (
+        !!requiredFields.length && (
           <FormPart title="补全必填字段" partStyle={{ marginBottom: 10 }}>
             <RequiredField
-              requiredFields={selfRequiredFields}
+              requiredFields={requiredFields}
               requiredFieldDataSet={requiredFieldDsArr.find((item) => item.issueId === issue.issueId)?.dataSet as DataSet}
             />
           </FormPart>

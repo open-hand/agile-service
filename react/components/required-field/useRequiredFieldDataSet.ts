@@ -1,7 +1,10 @@
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { getProjectId } from '@/utils/common';
-import { useCallback, useMemo } from 'react';
+import {
+  useCallback, useMemo, useRef,
+} from 'react';
 import { DataSet } from 'choerodon-ui/pro';
+import { toJS } from 'mobx';
 import {
   assign,
 } from 'lodash';
@@ -23,7 +26,10 @@ export interface RequiredFieldDs {
 
 const useRequiredFieldDataSet = (issuesFieldRequired: Props[]) : RequiredFieldDs[] => {
   const { isInProgram } = useIsInProgram();
-
+  const dataSetMapRef = useRef<Map<string, DataSet>>();
+  const dataSetMap = useMemo(() => new Map(), []);
+  // @ts-ignore
+  dataSetMapRef.current = dataSetMap;
   const getLookupFields = useCallback((issueTypeId) => (!issueTypeId ? [] : [{
     name: 'statusId',
     label: '状态',
@@ -131,24 +137,54 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[]) : RequiredFieldDs
     textField: 'name',
   }]), [isInProgram]);
 
-  const getRequiredFieldDataSet = useCallback((issue: Props) => new DataSet({
-    autoCreate: true,
-    fields: [
-      ...(issue.requiredFields.map((item) => {
-        const key = item.fieldCode === 'epic' && isInProgram ? 'featureId' : (systemFields.get(item.fieldCode as string)?.id || item?.fieldCode);
-        const lookupField = {};
-        const lookupFields = getLookupFields(issue.issueTypeId);
-        if (item.system && lookupFields.find((field) => field.name === key)) {
-          assign(lookupField, lookupFields.find((field) => field.name === key));
-        }
-        return ({
-          ...lookupField,
-          name: item.fieldCode === 'epic' && isInProgram ? 'featureId' : item.fieldCode,
-          label: item.fieldCode === 'epic' && isInProgram ? '特性' : item.fieldName,
-          required: true,
-        });
-      }))],
-  }), [getLookupFields, isInProgram]);
+  const getRequiredFieldDataSet = useCallback((issue: Props) => {
+    const newDataSet = new DataSet({
+      autoCreate: true,
+      fields: [
+        ...(issue.requiredFields.map((item) => {
+          const key = item.fieldCode === 'epic' && isInProgram ? 'featureId' : (systemFields.get(item.fieldCode as string)?.id || item?.fieldCode);
+          const lookupField = {};
+          const lookupFields = getLookupFields(issue.issueTypeId);
+          if (item.system && lookupFields.find((field) => field.name === key)) {
+            assign(lookupField, lookupFields.find((field) => field.name === key));
+          }
+          return ({
+            ...lookupField,
+            name: item.fieldCode === 'epic' && isInProgram ? 'featureId' : item.fieldCode,
+            label: item.fieldCode === 'epic' && isInProgram ? '特性' : item.fieldName,
+            required: true,
+          });
+        }))],
+    });
+
+    const oldDataSet = dataSetMapRef.current?.get(issue.issueId);
+    const newValue: { [key: string]: any } = {};
+    // 从旧的dataSet拿值
+    newDataSet.fields.forEach(({ name }) => {
+      const oldValue = toJS(oldDataSet?.current?.get(name));
+      if (oldValue) {
+        newValue[name] = oldValue;
+      }
+    });
+    const setValue = (name: string, value: any) => {
+      // 没有值的时候再设置
+      if (newValue[name] === null || newValue[name] === undefined) {
+        newValue[name] = value;
+      }
+    };
+
+    // 设置默认值
+    issue.requiredFields?.forEach((field) => {
+      const defaultValue = field.defaultValue === '' ? undefined : field.defaultValue;
+      if (defaultValue !== null && defaultValue !== undefined) {
+        setValue(field.fieldCode as string, defaultValue);
+      }
+    });
+
+    newDataSet.create(newValue);
+    dataSetMap.set(issue.issueId, newDataSet);
+    return newDataSet;
+  }, [dataSetMap, getLookupFields, isInProgram]);
 
   const getDsData = useCallback(({ requiredFields, ds }) => {
     const temp = ds.current ? ds.current.toData() : {};

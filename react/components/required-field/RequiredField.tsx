@@ -37,6 +37,7 @@ const RequiredField: React.FC<Props> = ({
       requiredFieldDataSet.current?.set(fieldCode as string, defaultValue);
     });
   }, [requiredFieldDataSet, requiredFields]);
+
   return (
     <Form dataSet={requiredFieldDataSet} columns={2} style={{ marginLeft: -5 }}>
       {

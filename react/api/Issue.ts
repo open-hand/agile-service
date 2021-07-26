@@ -589,6 +589,17 @@ class IssueApi extends Api<IssueApi> {
       data,
     });
   }
+
+  checkRequiredFields(issueTypeId: string, data: string[]) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/field_value/filter_require_field`,
+      params: {
+        issueTypeId,
+      },
+      data,
+    });
+  }
 }
 const issueApi = new IssueApi();
 const issueApiConfig = new IssueApi(true);
