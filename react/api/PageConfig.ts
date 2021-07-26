@@ -482,10 +482,32 @@ class PageConfigApi extends Api<PageConfigApi> {
   loadFieldPermission(field: string, issueTypeId: string): Promise<IPageFieldPermissionItem[]> {
     return this.request({
       method: 'get',
-      url: `${this.prefix}/field_permission/filed_Id/${field}`,
+      url: `${this.prefix}/field_permission/filed_id/${field}`,
       params: {
         organizationId: getOrganizationId(),
         issueTypeId,
+      },
+    });
+  }
+
+  /**
+   * 查询必填字段是否有查看的权限
+   * @param data  @default pageCode 默认为 agile_issue_create  非创建时需置为空
+   * @param issueId
+   * @returns
+   */
+  loadRequiredPermission(data: { issueTypeId: string, pageCode?: string }, issueId?: string) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/field_permission/required_fields/no_permission`,
+      params: {
+        organizationId: getOrganizationId(),
+        issueId,
+      },
+      data: {
+        pageCode: 'agile_issue_create',
+        schemeCode: 'agile_issue',
+        ...data,
       },
     });
   }

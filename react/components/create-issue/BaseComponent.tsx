@@ -33,6 +33,7 @@ import IssueLink from './components/issue-link';
 import hooks from './hooks';
 import getFieldConfig from './fields';
 import { insertField } from './utils';
+import WarnInfoBlock from '../warn-info-block';
 
 export interface CreateIssueBaseProps {
   onSubmit: ({ data, fieldList }: {
@@ -231,8 +232,8 @@ const CreateIssueBase = observer(({
 
   const [{ data: fields, isFetching: isFieldsLoading }, {
     data: templateData,
-  }, { data: cascadeRuleList = [] }] = useIssueCreateFields({ issueTypeId, projectId });
-
+  }, { data: cascadeRuleList = [] }, { data: requiredNoPermissionList = [] }] = useIssueCreateFields({ issueTypeId, projectId });
+  console.log('requiredNoPermissionList', requiredNoPermissionList);
   const fieldValueArr = usePersistFn((field: IssueCreateFields) => {
     let value = castArray(getValue(dataSet, field.fieldCode));
     const preset = presets.get(field.fieldCode);
@@ -486,7 +487,7 @@ const CreateIssueBase = observer(({
       case 'influenceVersion':
       case 'subProject': {
         return {
-          afterLoad: (res:any) => cascadeFieldAfterLoad(dataSet, res, field as IssueCreateFields, rules),
+          afterLoad: (res: any) => cascadeFieldAfterLoad(dataSet, res, field as IssueCreateFields, rules),
           hidden: getRuleHidden(field, rules),
           ...getOptionsData(rules, dataSet, field),
         };
@@ -518,6 +519,7 @@ const CreateIssueBase = observer(({
           featureName: defaultFeature.summary,
         } : {};
       }
+
       default: break;
     }
     switch (field.fieldType) {
@@ -537,7 +539,7 @@ const CreateIssueBase = observer(({
         return {
           ...getOptionsData(rules, dataSet, field),
           hidden: getRuleHidden(field, rules),
-          afterLoad: (res:any) => cascadeFieldAfterLoad(dataSet, res, field as IssueCreateFields, rules),
+          afterLoad: (res: any) => cascadeFieldAfterLoad(dataSet, res, field as IssueCreateFields, rules),
         };
       }
       default: return {
@@ -611,8 +613,16 @@ const CreateIssueBase = observer(({
       },
     },
   }), []);
+  useEffect(() => {
+    modal?.update({ okProps: { disabled: !!requiredNoPermissionList.length } });
+  }, [requiredNoPermissionList.length]);
   return (
     <Spin spinning={isLoading || isFieldsLoading}>
+      <WarnInfoBlock
+        visible={!!requiredNoPermissionList.length}
+        mode="simple"
+        predefineContent={{ type: 'requiredNoPermission', props: { fieldNames: requiredNoPermissionList.map((i) => i.fieldName) } }}
+      />
       <Form
         dataSet={dataSet}
       >

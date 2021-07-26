@@ -6,6 +6,8 @@ import { IModalProps, Issue } from '@/common/types';
 import SelectParentIssue from '@/components/SelectParentIssue';
 import { issueApi, statusApi } from '@/api';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
+import useFieldRequiredNoPermission from '@/hooks/data/useFieldRequiredNoPermission';
+import WarnInfoBlock from '@/components/warn-info-block';
 import styles from './TransformSubIssue.less';
 import SelectSubTask from './SelectSubTask';
 import SelectSubTaskStatus from './SelectSubTaskStatus';
@@ -43,6 +45,7 @@ const TransformSubIssue: React.FC<Props> = ({
       },
     },
   }), []);
+  const { data: requiredNoPermissionList = [] } = useFieldRequiredNoPermission({ issueTypeId: transformSubIssueDs.current?.get('issueTypeId'), issueId });
 
   const handleSubmit = useCallback(async () => {
     const validate = await transformSubIssueDs.validate();
@@ -70,8 +73,13 @@ const TransformSubIssue: React.FC<Props> = ({
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [handleSubmit, modal]);
+
+  useEffect(() => {
+    modal?.update({ okProps: { disabled: !!requiredNoPermissionList.length } });
+  }, [requiredNoPermissionList.length]);
   return (
     <div className={styles.transformSubIssue}>
+      <WarnInfoBlock visible={!!requiredNoPermissionList.length} mode="simple" predefineContent={{ type: 'requiredNoPermission', props: { fieldNames: requiredNoPermissionList.map((i) => i.fieldName!) } }} />
       <Form dataSet={transformSubIssueDs}>
         <SelectSubTask name="issueTypeId" />
         <SelectParentIssue name="issueId" issueId={issueId} clearButton={false} />
