@@ -72,4 +72,12 @@ public interface SprintService {
     Page<IssueSearchVO> issuePageBySprint(Long projectId, Long sprintId, PageRequest pageRequest, Map<String, Object> searchParamMap);
 
     Page<IssueSearchVO> todoIssuePage(Long projectId, PageRequest pageRequest, Map<String, Object> searchParamMap);
-}
+
+    /**
+     * 开启冲刺前提示未预估故事点的故事和与未预估工时的问题个数
+     * @param projectId
+     * @param sprintId
+     * @return
+     */
+    SprintStartMessageVO selectSprintStartMessage(Long projectId, Long sprintId);
+ }

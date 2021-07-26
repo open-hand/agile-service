@@ -1236,4 +1236,16 @@
         group by aii.sprint_id
     </select>
 
+    <select id="selectSprintStartMessage" resultType="io.choerodon.agile.api.vo.SprintStartMessageVO">
+        select
+           COUNT(case when (ai.type_code = 'story' and ai.story_points IS NULL) then  ai.issue_id end) as noStoryPointIssue,
+           COUNT(case when ai.remaining_time IS NULL then ai.issue_id end) as noRemainingTimeIssue
+        from
+        agile_issue_sprint_rel aisr, agile_issue ai
+        where
+            aisr.project_id = #{projectId}
+            and aisr.sprint_id = #{sprintId}
+            and aisr.issue_id = ai.issue_id
+    </select>
+
 </mapper>
