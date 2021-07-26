@@ -1,10 +1,10 @@
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { getProjectId } from '@/utils/common';
 import {
-  useCallback, useMemo, useRef, useState,
+  useCallback, useMemo, useRef,
 } from 'react';
 import { DataSet } from 'choerodon-ui/pro';
-import { observable, toJS } from 'mobx';
+import { toJS } from 'mobx';
 import {
   assign,
 } from 'lodash';
@@ -24,22 +24,12 @@ export interface RequiredFieldDs {
   getData: () => IFieldsValueVo,
 }
 
-const defaultDataSet = new DataSet({
-  autoCreate: true,
-  fields: [],
-});
-
 const useRequiredFieldDataSet = (issuesFieldRequired: Props[]) : RequiredFieldDs[] => {
   const { isInProgram } = useIsInProgram();
   const dataSetMapRef = useRef<Map<string, DataSet>>();
-  const defaultDataSetArr = useMemo(() => issuesFieldRequired.map((item) => ([item.issueId, defaultDataSet])), [issuesFieldRequired]);
-  // @ts-ignore
-  const dataSetMap = observable.map(defaultDataSetArr);
+  const dataSetMap = useMemo(() => new Map(), []);
   // @ts-ignore
   dataSetMapRef.current = dataSetMap;
-
-  console.log(toJS(dataSetMap), toJS(dataSetMapRef.current));
-
   const getLookupFields = useCallback((issueTypeId) => (!issueTypeId ? [] : [{
     name: 'statusId',
     label: '状态',
@@ -168,8 +158,6 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[]) : RequiredFieldDs
     });
 
     const oldDataSet = dataSetMapRef.current?.get(issue.issueId);
-    console.log('旧值：', toJS(oldDataSet?.current?.data));
-
     const newValue: { [key: string]: any } = {};
     // 从旧的dataSet拿值
     newDataSet.fields.forEach(({ name }) => {
@@ -193,7 +181,6 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[]) : RequiredFieldDs
       }
     });
 
-    console.log(issue.issueId, newValue);
     newDataSet.create(newValue);
     dataSetMap.set(issue.issueId, newDataSet);
     return newDataSet;

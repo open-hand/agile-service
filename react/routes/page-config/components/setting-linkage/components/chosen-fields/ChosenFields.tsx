@@ -77,7 +77,12 @@ const ChosenFields: React.FC<Props> = ({
   return (
     <div className={styles.chosenField}>
       <div className={styles.chosen_btn}>
-        <ChooseField {...choseComponentProps} dropDownProps={{ disabled: !currentOptionId }} dropDownBtnProps={{ icon: 'add', style: { marginLeft: 6, marginTop: 10 } }} />
+        <ChooseField
+          {...choseComponentProps}
+          dropDownProps={{ disabled: !currentOptionId }}
+          dropDownBtnProps={{ icon: 'add', style: { marginLeft: 6, marginTop: 10 } }}
+          dropDownBtnChildren="添加字段"
+        />
       </div>
       <div className={styles['option-list']}>
         {
