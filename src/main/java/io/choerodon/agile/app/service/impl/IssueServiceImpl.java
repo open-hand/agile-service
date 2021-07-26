@@ -814,14 +814,14 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         param.setSchemeCode(schemeCode);
         param.setPageCode(PageCode.AGILE_ISSUE_CREATE);
         List<PageFieldViewVO> createPageFields =
-                pageFieldService.queryPageFieldViewList(organizationId, projectId, param);
+                pageFieldService.queryPageFieldViewsNoPermissionFilter(organizationId, projectId, param);
         Set<Long> fieldIds =
                 createPageFields
                         .stream()
                         .map(PageFieldViewVO::getFieldId)
                         .collect(Collectors.toSet());
         param.setPageCode(PageCode.AGILE_ISSUE_EDIT);
-        pageFieldService.queryPageFieldViewList(organizationId, projectId, param)
+        pageFieldService.queryPageFieldViewsNoPermissionFilter(organizationId, projectId, param)
                 .forEach(x -> {
                     Long fieldId = x.getFieldId();
                     if (!fieldIds.contains(fieldId)) {

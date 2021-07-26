@@ -407,13 +407,16 @@ public class PageFieldServiceImpl implements PageFieldService {
     @Override
     public List<PageFieldViewVO> queryPageFieldViewList(Long organizationId, Long projectId, PageFieldViewParamVO paramDTO) {
         Long issueTypeId = paramDTO.getIssueTypeId();
-        String pageCode = paramDTO.getPageCode();
-        List<PageFieldViewVO> pageFieldViews = queryPageFieldViewsNoPermissionFilter(organizationId, projectId, paramDTO, issueTypeId, pageCode);
+        List<PageFieldViewVO> pageFieldViews = queryPageFieldViewsNoPermissionFilter(organizationId, projectId, paramDTO);
         return fieldPermissionService.filterPageFieldViewVO(projectId, organizationId, issueTypeId, pageFieldViews);
     }
 
     @Override
-    public List<PageFieldViewVO> queryPageFieldViewsNoPermissionFilter(Long organizationId, Long projectId, PageFieldViewParamVO paramDTO, Long issueTypeId, String pageCode) {
+    public List<PageFieldViewVO> queryPageFieldViewsNoPermissionFilter(Long organizationId,
+                                                                       Long projectId,
+                                                                       PageFieldViewParamVO paramDTO) {
+        Long issueTypeId = paramDTO.getIssueTypeId();
+        String pageCode = paramDTO.getPageCode();
         if (Boolean.FALSE.equals(EnumUtil.contain(PageCode.class, pageCode))) {
             throw new CommonException(ERROR_PAGECODE_ILLEGAL);
         }
