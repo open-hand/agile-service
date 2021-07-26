@@ -128,4 +128,13 @@ public interface PageFieldService {
      * @return
      */
     Map<Long, Map<String, Object>> queryFieldValueWithIssueIdsForAgileExport(Long organizationId, Long projectId, List<Long> instanceIds, Boolean isJustStr, String schemeCode);
+
+    /**
+     * 根据传入的fieldIds,过滤出必填的字段
+     * @param projectId
+     * @param issueTypeId
+     * @param fieldIds
+     * @return
+     */
+    List<PageFieldViewVO> filterRequireFieldByFieldCodes(Long projectId, Long issueTypeId, List<String> fieldIds);
 }

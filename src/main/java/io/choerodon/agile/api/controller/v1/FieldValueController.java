@@ -210,4 +210,14 @@ public class FieldValueController {
             @ApiIgnore PageRequest pageRequest) {
         return new ResponseEntity<>(fieldOptionService.getOptionsPageByFieldId(organizationId, fieldId, searchValue, selected, enabled, pageRequest), HttpStatus.OK);
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "根据传入的filedIds,返回其中必填的字段")
+    @PostMapping("/filter_require_field")
+    public ResponseEntity<List<PageFieldViewVO>> filterRequireFieldByFieldCodes(@ApiParam(value = "项目id", required = true)
+                                                                              @PathVariable("project_id") Long projectId,
+                                                                              @RequestParam @Encrypt Long issueTypeId,
+                                                                              @RequestBody List<String> fieldCodes) {
+        return new ResponseEntity<>(pageFieldService.filterRequireFieldByFieldCodes(projectId, issueTypeId, fieldCodes), HttpStatus.OK);
+    }
 }
