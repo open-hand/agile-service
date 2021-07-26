@@ -9,6 +9,7 @@ import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.FieldValueUtil;
 import io.choerodon.agile.infra.utils.RankUtil;
@@ -450,6 +451,21 @@ public class PageFieldServiceImpl implements PageFieldService {
         Map<Long, Map<String, Object>> fieldValueMap = getFieldValueMap(fieldDTOS, values, instanceIds, isJustStr);
         handlerFieldValueMap(organizationId, projectId, instanceIds, schemeCode, fieldValueMap);
         return fieldValueMap;
+    }
+
+    @Override
+    public List<PageFieldViewVO> filterRequireFieldByFieldCodes(Long projectId, Long issueTypeId, List<String> fieldCodes) {
+        if(CollectionUtils.isEmpty(fieldCodes)){
+            return new ArrayList<>();
+        }
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        // 查询该问题类型在创建页面显示的字段
+        PageFieldViewParamVO pageFieldViewParamVO = new PageFieldViewParamVO();
+        pageFieldViewParamVO.setSchemeCode("agile_issue");
+        pageFieldViewParamVO.setIssueTypeId(issueTypeId);
+        pageFieldViewParamVO.setPageCode("agile_issue_create");
+        List<PageFieldViewVO> pageFieldViewVOS = queryPageFieldViewList(organizationId, projectId, pageFieldViewParamVO);
+        return pageFieldViewVOS.stream().filter(v -> fieldCodes.contains(v.getFieldCode()) && Objects.equals( Boolean.TRUE, v.getRequired())).collect(Collectors.toList());
     }
 
     private void handlerFieldValueMap(Long organizationId, Long projectId, List<Long> instanceIds, String schemeCode, Map<Long, Map<String, Object>> fieldValueMap) {
