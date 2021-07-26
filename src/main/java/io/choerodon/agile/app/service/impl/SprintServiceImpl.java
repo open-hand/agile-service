@@ -824,7 +824,9 @@ public class SprintServiceImpl implements SprintService {
         for (Long parentIssueId : parentIssueIds) {
             IssueSearchVO issueSearchVO = issueMap.get(parentIssueId);
             if(!ObjectUtils.isEmpty(issueSearchVO)){
-                issueSearchVO.setChildren(childrenMap.getOrDefault(parentIssueId, new ArrayList<>()));
+                List<IssueSearchVO> subIssues = childrenMap.getOrDefault(parentIssueId, new ArrayList<>());
+                Collections.sort(subIssues, Comparator.comparing(IssueSearchVO::getIssueId));
+                issueSearchVO.setChildren(subIssues);
                 searchVOList.add(issueSearchVO);
             }
         }
