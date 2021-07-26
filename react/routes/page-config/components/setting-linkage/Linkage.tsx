@@ -10,6 +10,7 @@ import { IField, IModalProps } from '@/common/types';
 import noData from '@/assets/image/NoData.svg';
 import { ICascadeRule, pageConfigApi } from '@/api';
 import { includes, map, find } from 'lodash';
+import { toJS } from 'mobx';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import { EmptyPage } from '@choerodon/components';
 import LINK_URL from '@/constants/LINK_URL';
@@ -126,7 +127,8 @@ const Linkage: React.FC<Props> = ({
               fieldCode: item.cascadeFieldCode,
             },
             fieldRelOptionList: (item.fieldCascadeRuleOptionList || [])?.map((option: { cascadeOptionId: string }) => ({ value: option.cascadeOptionId })),
-            defaultValue: item.defaultValue || (includes(singleSelectTypes, item.cascadeFieldType) ? item.defaultIds && item.defaultIds[0] : item.defaultIds),
+            // eslint-disable-next-line no-nested-ternary
+            defaultValue: item.defaultValue || (includes(singleSelectTypes, item.cascadeFieldType) ? item.defaultIds && item.defaultIds[0] : (item.defaultIds?.length ? item.defaultIds : undefined)),
             hidden: item.hidden,
             required: item.required,
           });
@@ -217,7 +219,7 @@ const Linkage: React.FC<Props> = ({
             fieldId: field.id,
             fieldOptionId: key,
             cascadeFieldId: chosenField?.id,
-            defaultValue: !includes(selectTypes, chosenField?.fieldType) ? defaultValue : undefined,
+            defaultValue: !includes(selectTypes, chosenField?.fieldType) ? toJS(defaultValue) : undefined,
             hidden,
             required,
             fieldCascadeRuleOptionList: getFieldCascadeRuleOptionList(chosenField?.fieldType, fieldRelOptionList, defaultValue),
