@@ -80,15 +80,16 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
             int allCount = (ObjectUtils.isEmpty(predefinedFields) ? 0 : issueIds.size()) + customFieldSize;
             double incrementalValue = 1.0 / (allCount == 0 ? 1 : allCount);
             batchUpdateFieldStatusVO.setIncrementalValue(incrementalValue);
+            // 批量修改issue自定义字段值
+            if (!CollectionUtils.isEmpty(customFields)) {
+                fieldValueService.handlerCustomFields(projectId, customFields, schemeCode, issueIds,batchUpdateFieldStatusVO, true);
+            }
+
             //修改issue预定义字段值
             if (!CollectionUtils.isEmpty(batchUpdateFieldsValueVo.getPredefinedFields())) {
                 fieldValueService.handlerPredefinedFields(projectId, issueIds, predefinedFields,batchUpdateFieldStatusVO,applyType, true);
             }
 
-            // 批量修改issue自定义字段值
-            if (!CollectionUtils.isEmpty(customFields)) {
-                fieldValueService.handlerCustomFields(projectId, customFields, schemeCode, issueIds,batchUpdateFieldStatusVO, true);
-            }
              //发送websocket
             batchUpdateFieldStatusVO.setStatus("success");
             batchUpdateFieldStatusVO.setProcess(1.0);

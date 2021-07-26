@@ -19,4 +19,6 @@ public interface NoticeService {
     List<Long> queryUserIdsByProjectId(Long projectId, String event, IssueVO issueVO);
 
     List<MessageDetailDTO> migrateMessageDetail();
+
+    List<Long> queryCustomFieldUserIdsByProjectId(Long projectId, String event, IssueVO issueVO);
 }

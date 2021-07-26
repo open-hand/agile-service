@@ -6,6 +6,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.business.TagVO;
+import io.choerodon.agile.app.assembler.IssueAssembler;
+import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -233,6 +235,10 @@ public class ExcelServiceImpl implements ExcelService {
     private LookupValueService lookupValueService;
     @Autowired
     protected IssueLinkMapper issueLinkMapper;
+    @Autowired
+    private SendMsgUtil sendMsgUtil;
+    @Autowired
+    private IssueAssembler issueAssembler;
 
     private static final String[] FIELDS_NAMES;
 
@@ -1332,6 +1338,10 @@ public class ExcelServiceImpl implements ExcelService {
             batchUpdateFieldsValueVo.setIssueIds(Arrays.asList(issueId));
             batchUpdateFieldsValueVo.setPredefinedFields(new JSONObject());
             fieldValueService.handlerCustomFields(projectId, customFields, "agile_issue", batchUpdateFieldsValueVo.getIssueIds(), null, false);
+            //导入创建问题通知自定义字段人员
+            IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
+            IssueVO result = issueAssembler.issueDetailDTOToVO(issue, new HashMap<>(), new HashMap<>(), new HashMap<>());
+            sendMsgUtil.sendMsg2CustomFieldUsersByIssueCreate(projectId, result, DetailsHelper.getUserDetails().getUserId());
         }
     }
 
