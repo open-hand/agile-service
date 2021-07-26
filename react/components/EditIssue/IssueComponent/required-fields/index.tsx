@@ -18,6 +18,8 @@ import { issueApi } from '@/api';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import RequiredField from '@/components/required-field';
 import useRequiredFieldDataSet from '@/components/required-field/useRequiredFieldDataSet';
+import WarnInfoBlock from '@/components/warn-info-block';
+import useFieldRequiredNoPermission from '@/hooks/data/useFieldRequiredNoPermission';
 import styles from './index.less';
 
 const { Option } = Select;
@@ -48,7 +50,6 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
   const {
     modal, requiredFields: fields, issueVO, reloadIssue, onUpdate,
   } = props;
-
   const [requiredFields, setRequiredFields] = useState(fields.filter((item) => !includes(extraFields, item.fieldCode)) || []);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -87,13 +88,14 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
     issueTypeId: issueTypeIdDataSet.current?.get('issueTypeId'),
     requiredFields: requiredFields || [],
   }]);
+  const { data: requiredNoPermissionList = [] } = useFieldRequiredNoPermission({ issueTypeId: issueTypeIdDataSet.current?.get('issueTypeId'), issueId: issueVO.issueId });
 
   const removeField = useCallback((name: string) => {
     requiredFieldDsArr[0]?.dataSet?.fields?.delete(name);
     requiredFieldDsArr[0]?.dataSet?.current?.fields.delete(name);
   }, [requiredFieldDsArr]);
 
-  const resetDataRef = useRef<(excludeFieldsCode: string[]) => void>(() => {});
+  const resetDataRef = useRef<(excludeFieldsCode: string[]) => void>(() => { });
   const resetData = useCallback((excludeFieldsCode: string[]) => {
     const fieldNames: string[] = [];
     (requiredFieldDsArr[0]?.dataSet.current?.fields || []).forEach((field: Field) => {
@@ -154,20 +156,23 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
   if (isInProgram) {
     issueTypeData = issueTypeData.filter((item) => item.typeCode !== 'issue_epic');
   }
-
+  useEffect(() => {
+    modal?.update({ okProps: { disabled: !!requiredNoPermissionList.length } });
+  }, [requiredNoPermissionList.length]);
   return (
     <>
       <Loading loading={loading} />
+      <WarnInfoBlock visible={!!requiredNoPermissionList.length} mode="simple" predefineContent={{ type: 'requiredNoPermission', props: { fieldNames: requiredNoPermissionList.map((i) => i.fieldName!) } }} />
       <Form className={styles.changeType} dataSet={issueTypeIdDataSet} style={{ marginLeft: -5 }}>
         <div className={styles.part_title}>
           类型修改为
         </div>
         <Select name="issueTypeId">
           {
-          issueTypeData.map((type) => (
-            <Option value={type.id} key={type.id}>{type.name}</Option>
-          ))
-        }
+            issueTypeData.map((type) => (
+              <Option value={type.id} key={type.id}>{type.name}</Option>
+            ))
+          }
         </Select>
       </Form>
       {

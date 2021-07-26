@@ -8,11 +8,13 @@ export interface IssueCreateFieldsConfig {
   issueTypeId: string
   projectId?: string
 }
-export default function useIssueCreateFields(config: IssueCreateFieldsConfig): [UseQueryResult<IssueCreateFields[]>, UseQueryResult<{ template?: string }>, UseQueryResult<ICascadeLinkage[]>] {
+export default function useIssueCreateFields(config: IssueCreateFieldsConfig): [UseQueryResult<IssueCreateFields[]>, UseQueryResult<{ template?: string }>, UseQueryResult<ICascadeLinkage[]>, UseQueryResult<any[]>] {
   const { projectId, issueTypeId } = config;
   const fieldsKey = useProjectKey({ key: ['issue-create-fields', { issueTypeId }], projectId });
   const templateKey = useProjectKey({ key: ['issue-create description-template', { issueTypeId }], projectId });
   const pageCascadeRuleList = useProjectKey({ key: ['issue-create pageCascadeRuleList', { issueTypeId }], projectId });
+  const requiredNoPermissionList = useProjectKey({ key: ['issue-create requiredNoPermissionList', { issueTypeId }], projectId });
+
   // @ts-ignore
   return useQueries([{
     queryKey: fieldsKey,
@@ -34,5 +36,11 @@ export default function useIssueCreateFields(config: IssueCreateFieldsConfig): [
     queryFn: () => pageConfigApi.getCascadeRuleList(issueTypeId, projectId),
     keepPreviousData: true, // ?
     enabled: !!issueTypeId,
-  }]);
+  }, {
+    queryKey: requiredNoPermissionList,
+    queryFn: () => pageConfigApi.loadRequiredPermission({ issueTypeId }),
+    keepPreviousData: true, // ?
+    enabled: !!issueTypeId,
+  },
+  ]);
 }
