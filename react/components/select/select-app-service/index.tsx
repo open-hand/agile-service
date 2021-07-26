@@ -2,7 +2,6 @@ import React, { useMemo, forwardRef } from 'react';
 import { Select, Tooltip, DataSet } from 'choerodon-ui/pro';
 import { omit } from 'lodash';
 import classnames from 'classnames';
-import Tip from '@/components/Tip';
 import useSelect, { SelectConfig, FragmentForSearch } from '@/hooks/useSelect';
 import { devOpsApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
@@ -18,7 +17,7 @@ interface Props extends Partial<SelectProps> {
   request?: SelectConfig['request'],
   mode?: 'other' | 'self'/** @default 'self' self 本项目模式 other 其他项目模式 */
   projectId?: string
-  checkMember?:boolean
+  checkMember?: boolean
 }
 const renderService = (appService: any) => {
   if (appService) {
@@ -96,28 +95,25 @@ const SelectTestOtherAppService: React.FC<Props> = forwardRef(({
   const props = useSelect(config);
   const processProps = omit(props, ['options', 'onOption', 'optionRenderer']);
   return (
-    <div style={{ position: 'relative' }}>
-      <Component
-        ref={ref}
-        {...processProps}
-        {...otherProps}
-      >
-        {props.options.map((record) => {
-          const optionProps = props.onOption({ record });
-          if (record.get('loadMoreButton')) {
-            return <Option {...optionProps}>{props.optionRenderer({ record } as any)}</Option>;
-          }
-          return (
-            <OptGroup key={`OptGroup%${record.get('projectId')}`} label={record.get('meaning')}>
-              {record.get('appServices')?.map((i: any) => <Option value={{ projectId: record.get('projectId'), id: i.id }} {...optionProps}>{renderService(i)}</Option>)}
-            </OptGroup>
-          );
-        })}
-      </Component>
-      <div style={{ position: 'absolute', right: -25, top: 7 }}>
-        <Tip title="此处会展示出每个项目下最多5个应用服务，若想选择其他应用服务，需要手动输入服务名进行搜索" />
-      </div>
-    </div>
+    <Component
+      ref={ref}
+      {...processProps}
+      {...otherProps}
+      help="此处会展示出每个项目下最多5个应用服务，若想选择其他应用服务，需要手动输入服务名进行搜索"
+      showHelp={'tooltip' as any}
+    >
+      {props.options.map((record) => {
+        const optionProps = props.onOption({ record });
+        if (record.get('loadMoreButton')) {
+          return <Option {...optionProps}>{props.optionRenderer({ record } as any)}</Option>;
+        }
+        return (
+          <OptGroup key={`OptGroup%${record.get('projectId')}`} label={record.get('meaning')}>
+            {record.get('appServices')?.map((i: any) => <Option value={{ projectId: record.get('projectId'), id: i.id }} {...optionProps}>{renderService(i)}</Option>)}
+          </OptGroup>
+        );
+      })}
+    </Component>
   );
 });
 const SelectAppService: React.FC<Props> = forwardRef(({

@@ -133,7 +133,7 @@ const CreateBranch: React.FC<{ modal?: IModalProps } & ILinkBranchModalProps> = 
   };
   modal?.handleOk(handleSubmit);
   return (
-    <Form dataSet={formDs} style={{ width: '5.12rem' }}>
+    <Form dataSet={formDs}>
       <Select name="source">
         <Option value="self">本项目</Option>
         <Option value="other">其他项目</Option>
@@ -156,7 +156,7 @@ const openCreateBranchModal = (props: ILinkBranchModalProps) => {
     key: Modal.key(),
     title: '创建分支',
     style: {
-      width: MODAL_WIDTH.middle,
+      width: MODAL_WIDTH.small,
     },
     drawer: true,
     okText: '创建',
