@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author superlee
@@ -40,10 +41,13 @@ public class FieldPermissionIssueServiceImpl implements FieldPermissionIssueServ
         List<PageFieldViewVO> result;
         if (StringUtils.isEmpty(pageCode)) {
             //问题类型转换，查创建和编辑页的所有必填字段
-            AssertUtilsForCommonException.notNull(issueId, "error.issue.type.id.null");
+            AssertUtilsForCommonException.notNull(issueId, "error.issue.id.null");
             result = issueService.listRequiredFieldByIssueTypeNoFilter(projectId, organizationId, issueId, issueTypeId);
         } else {
-            result = pageFieldService.queryPageFieldViewsNoPermissionFilter(organizationId, projectId, paramDTO, issueTypeId, pageCode);
+            result = pageFieldService.queryPageFieldViewsNoPermissionFilter(organizationId, projectId, paramDTO, issueTypeId, pageCode)
+                    .stream()
+                    .filter(x -> Boolean.TRUE.equals(x.getRequired()))
+                    .collect(Collectors.toList());
         }
         return fieldPermissionService.filterNoPermissionFields(projectId, organizationId, issueTypeId, result);
     }
