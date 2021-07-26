@@ -587,6 +587,18 @@ const CreateIssueBase = observer(({
                 },
                 ...extraProps,
               })}
+              {name === 'description' ? (
+                <div style={{ marginTop: 14 }}>
+                  <UploadButton
+                    fileList={fileList}
+                    onChange={({ fileList: files }) => {
+                      if (validateFile(files)) {
+                        setFileList(files);
+                      }
+                    }}
+                  />
+                </div>
+              ) : null}
             </Col>
           )
           : null;
@@ -628,14 +640,6 @@ const CreateIssueBase = observer(({
       >
         {parentIssue ? <TextField label="父任务概要" value={parentIssue.summary} disabled /> : null}
         {renderFields()}
-        <UploadButton
-          fileList={fileList}
-          onChange={({ fileList: files }) => {
-            if (validateFile(files)) {
-              setFileList(files);
-            }
-          }}
-        />
         {issueTypeCode === 'feature' ? <WSJF /> : null}
       </Form>
       {enableIssueLinks ? <IssueLink projectId={projectId} dataSet={issueLinkDataSet} /> : null}
