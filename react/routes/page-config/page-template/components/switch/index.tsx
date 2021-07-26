@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite';
 import useQueryString from '@/hooks/useQueryString';
 import { IIssueType } from '@/common/types';
 import Switch from '@/components/switch';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { usePageTemplateStore } from '../../stores';
 
 interface IssueOption {
@@ -37,6 +38,7 @@ function PageSwitch() {
   };
   useEffect(() => {
     if (pageTemplateStore.currentIssueType.id) {
+      localPageCacheStore.setItem('agile.page-config.currentIssueType', pageTemplateStore.currentIssueType);
       pageTemplateStore.loadData();
     }
   }, [pageTemplateStore, pageTemplateStore.currentIssueType]);
@@ -48,6 +50,10 @@ function PageSwitch() {
       let currentType;
       if (issueTypeId) {
         currentType = res.find((t) => String(t.id) === issueTypeId);
+      }
+      if (!currentType) {
+        const { id } = localPageCacheStore.getItem('agile.page-config.currentIssueType');
+        currentType = res.find((t) => t.id === id);
       }
       pageTemplateStore.init((currentType ?? res[0]) as IIssueType);
       setSwitchOption(res.map((type) => ({

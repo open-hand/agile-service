@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite';
 import useQueryString from '@/hooks/useQueryString';
 import { IIssueType } from '@/common/types';
 import Switch from '@/components/switch';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { usePageIssueTypeStore } from '../../stores';
 
 interface IssueOption {
@@ -37,6 +38,8 @@ function PageSwitch() {
   };
   useEffect(() => {
     if (pageIssueTypeStore.currentIssueType.id) {
+      //  保存缓存，页面配置|页面模板 两个页面switch 初始化读取使用
+      localPageCacheStore.setItem('agile.page-config.currentIssueType', pageIssueTypeStore.currentIssueType);
       pageIssueTypeStore.loadData();
     }
   }, [pageIssueTypeStore, pageIssueTypeStore.currentIssueType]);
@@ -48,6 +51,10 @@ function PageSwitch() {
       let currentType;
       if (issueTypeId) {
         currentType = res.find((t) => String(t.id) === issueTypeId);
+      }
+      if (!currentType) {
+        const { id } = localPageCacheStore.getItem('agile.page-config.currentIssueType');
+        currentType = res.find((t) => t.id === id);
       }
       pageIssueTypeStore.init((currentType ?? res[0]) as IIssueType);
       setSwitchOption(res.map((type) => ({
