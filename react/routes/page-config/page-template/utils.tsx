@@ -108,7 +108,6 @@ const getColumns = ({ issueTypeId, loadData }: { issueTypeId: string, loadData: 
           text: '权限配置',
           action: async () => {
             const res = await pageConfigApi.loadFieldPermission(rowData.get('fieldId'), issueTypeId);
-            console.log('res', res);
             openPageRoleConfigModal({
               fields: [{ id: rowData.get('fieldId'), code: rowData.get('fieldCode') }], data: res, issueTypeId, onOk: loadData,
             });
