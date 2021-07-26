@@ -5,6 +5,7 @@ import {
 } from 'choerodon-ui/pro';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { IField } from '@/common/types';
+import { toJS } from 'mobx';
 import renderField from './renderField';
 
 export interface IFieldsValueVo {
@@ -37,6 +38,8 @@ const RequiredField: React.FC<Props> = ({
       requiredFieldDataSet.current?.set(fieldCode as string, defaultValue);
     });
   }, [requiredFieldDataSet, requiredFields]);
+
+  console.log(toJS(requiredFieldDataSet.current?.data));
   return (
     <Form dataSet={requiredFieldDataSet} columns={2} style={{ marginLeft: -5 }}>
       {
