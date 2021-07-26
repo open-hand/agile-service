@@ -44,7 +44,7 @@ public class FieldPermissionIssueServiceImpl implements FieldPermissionIssueServ
             AssertUtilsForCommonException.notNull(issueId, "error.issue.id.null");
             result = issueService.listRequiredFieldByIssueTypeNoFilter(projectId, organizationId, issueId, issueTypeId);
         } else {
-            result = pageFieldService.queryPageFieldViewsNoPermissionFilter(organizationId, projectId, paramDTO, issueTypeId, pageCode)
+            result = pageFieldService.queryPageFieldViewsNoPermissionFilter(organizationId, projectId, paramDTO)
                     .stream()
                     .filter(x -> Boolean.TRUE.equals(x.getRequired()))
                     .collect(Collectors.toList());
