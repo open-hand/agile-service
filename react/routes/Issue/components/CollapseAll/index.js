@@ -20,13 +20,13 @@ function CollapseAll({
       }}
     >
       <span>{isExpandAll ? '全部收起' : '全部展开' }</span>
-      <Icon
+      {/* <Icon
         type="baseline-arrow_drop_up"
         style={{
           transform: isExpandAll ? undefined : 'rotate(180deg)',
           transition: 'transform 0.3s',
         }}
-      />
+      /> */}
     </Button>
 
   );

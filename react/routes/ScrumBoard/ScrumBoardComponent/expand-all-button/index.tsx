@@ -38,10 +38,10 @@ function ExpandAllButton(props: any) {
           <span>全部展开</span>
         </Tooltip>
       )}
-      <Icon
+      {/* <Icon
         type="baseline-arrow_drop_up"
         className={classnames(expandStyles.icon, { [expandStyles.expand]: expandAll })}
-      />
+      /> */}
     </Button>
   ) : null;
 }
