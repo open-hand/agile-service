@@ -52,7 +52,7 @@ function PageSwitch() {
       if (issueTypeId) {
         currentType = res.find((t) => String(t.id) === issueTypeId);
       }
-      if (!currentType) {
+      if (!currentType && localPageCacheStore.has('agile.page-config.currentIssueType')) {
         const { id } = localPageCacheStore.getItem('agile.page-config.currentIssueType');
         currentType = res.find((t) => t.id === id);
       }

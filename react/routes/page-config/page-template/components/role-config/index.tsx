@@ -57,7 +57,7 @@ const SelectUserWithRole: React.FC<SelectUserProps & { roles: IRoleWithSelectOpt
             <SelectUser
               name={`${name}_UserIds`}
               hidden={!showSelectUser}
-              request={() => userApi.getAllInProject(undefined, 1, undefined, 0)}
+              request={({ filter }) => userApi.getAllInProject(filter, 1, undefined, 0)}
               style={{ marginTop: '.2rem', width: '100%' }}
               getPopupContainer={(node) => node.parentNode as any}
             />
@@ -86,7 +86,7 @@ const RoleConfigModal: React.FC<{ modal?: IModalProps } & Props> = observer(({
       const newRoles = res.map((item) => ({
         ...item, value: item.id, meaning: item.name, realName: item.name, isRole: true,
       }));
-      newRoles.push({ id: 'specificUser', value: 'specificUser', meaning: '指定人' } as any);
+      newRoles.push({ id: 'specificUser', value: 'specificUser', meaning: '指定用户' } as any);
       setRoles(newRoles);
     });
   }, []);
@@ -212,7 +212,7 @@ const RoleConfigModal: React.FC<{ modal?: IModalProps } & Props> = observer(({
             help="有编辑权限则一定有查看权限"
           />
         )} */}
-        {roles ? <SelectUserWithRole name="onlyView" record={dataset.current} roles={roles} /> : <Select name="edit" />}
+        {roles ? <SelectUserWithRole name="onlyView" record={dataset.current} roles={roles} /> : <Select name="onlyView" />}
 
         {/* <SelectUser
           name="edit"
