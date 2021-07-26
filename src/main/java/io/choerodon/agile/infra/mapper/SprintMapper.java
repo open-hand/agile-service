@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.api.vo.SprintSearchVO;
+import io.choerodon.agile.api.vo.SprintStartMessageVO;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.mybatis.common.BaseMapper;
@@ -165,4 +166,6 @@ public interface SprintMapper extends BaseMapper<SprintDTO> {
     Set<Long> queryAssigneeIdsBySprintIds(@Param("projectId") Long projectId, @Param("sprintIds") List<Long> sprintIds, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
 
     List<IssueCountDTO> selectCountBySprintIds(@Param("projectId") Long projectId, @Param("sprintIds") List<Long> sprintIds, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
+
+    SprintStartMessageVO selectSprintStartMessage(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId);
 }

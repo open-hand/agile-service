@@ -833,4 +833,9 @@ public class SprintServiceImpl implements SprintService {
         }
         return searchVOList;
     }
+
+    @Override
+    public SprintStartMessageVO selectSprintStartMessage(Long projectId, Long sprintId) {
+        return sprintMapper.selectSprintStartMessage(projectId, sprintId);
+    }
 }

@@ -279,4 +279,15 @@ public class SprintController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.sprint.issue.search"));
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("开启冲刺之前提示未规划故事点和工时的个数")
+    @GetMapping(value = "/sprint_start_message")
+    public ResponseEntity<SprintStartMessageVO> selectSprintStartMessage(@ApiParam(value = "项目id", required = true)
+                                                                         @PathVariable(name = "project_id") Long projectId,
+                                                                         @RequestParam @Encrypt Long sprintId){
+        return Optional.ofNullable(sprintService.selectSprintStartMessage(projectId, sprintId))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.sprint.issue.search"));
+    }
 }
