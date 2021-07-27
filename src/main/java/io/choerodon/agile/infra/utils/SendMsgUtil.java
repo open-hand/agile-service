@@ -492,4 +492,17 @@ public class SendMsgUtil {
             element.children().forEach(SendMsgUtil::setImgSize);
         }
     }
+
+    @Async
+    public void sendMsgToCustomFieldUsersByIssueCreate(Long projectId, IssueVO result, Long operatorId) {
+        //问题创建通知自定义字段人员（普通创建、快速创建、问题导入）
+        if (SchemeApplyType.AGILE.equals(result.getApplyType())) {
+            List<Long> userIds = noticeService.queryCustomFieldUserIdsByProjectId(projectId, "ISSUECREATE", result);
+            String summary = result.getIssueNum() + "-" + result.getSummary();
+            String reporterName = result.getReporterName();
+            ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
+            String url = getIssueCreateUrl(result, projectVO, result.getIssueId());
+            siteMsgUtil.issueCreate(userIds, reporterName, summary, url, operatorId, projectId);
+        }
+    }
 }

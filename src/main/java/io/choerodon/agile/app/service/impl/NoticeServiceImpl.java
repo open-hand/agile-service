@@ -219,4 +219,36 @@ public class NoticeServiceImpl implements NoticeService {
         }
         return messageDetailDTOS;
     }
+
+    @Override
+    public List<Long> queryCustomFieldUserIdsByProjectId(Long projectId, String code, IssueVO issueVO) {
+        ResponseEntity<MessageSettingVO> messageSetting = notifyFeignClient.getMessageSetting(projectId,"agile", code,null,null);
+        MessageSettingVO messageVO = messageSetting.getBody();
+        if(ObjectUtils.isEmpty(messageVO)){
+            throw new CommonException("error.message.setting.is.null");
+        }
+
+        Set<String> type = new HashSet<>();
+        Set<Long> users = new HashSet<>();
+        messageVO.getTargetUserDTOS().forEach(v -> {
+            type.add(v.getType());
+            if (!ObjectUtils.isEmpty(v.getUserId()) && !v.getUserId().equals(0L)) {
+                users.add(v.getUserId());
+            }
+        });
+        List<String> res = new ArrayList<>(type);
+        //获取已通知过的人员
+        List<Long> alreadySendUsers = new ArrayList<>();
+        addUsersByReporter(res, alreadySendUsers, issueVO);
+        addUsersByAssigneer(res, alreadySendUsers, issueVO);
+        addUsersByProjectOwner(projectId, res, alreadySendUsers);
+        addUsersByUsers(res, alreadySendUsers, users);
+
+        //获取自定义字段通知人员
+        List<Long> result = new ArrayList<>();
+        addUsersByCustomUserTypes(projectId, res, result, issueVO);
+        //移除重复通知人员
+        result.removeAll(alreadySendUsers);
+        return result;
+    }
 }

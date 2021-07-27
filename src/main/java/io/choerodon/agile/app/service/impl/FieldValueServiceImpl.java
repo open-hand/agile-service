@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueUpdateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.app.assembler.IssueAssembler;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.annotation.RuleNotice;
 import io.choerodon.agile.infra.dto.*;
@@ -83,6 +84,10 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     private ObjectSchemeFieldMapper objectSchemeFieldMapper;
     @Autowired
     private IssueTypeMapper issueTypeMapper;
+    @Autowired
+    private SendMsgUtil sendMsgUtil;
+    @Autowired
+    private IssueAssembler issueAssembler;
 
     @Override
     public void fillValues(Long organizationId, Long projectId, Long instanceId, String schemeCode, List<PageFieldViewVO> pageFieldViews) {
@@ -139,6 +144,10 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         if (!fieldValues.isEmpty()) {
             fieldValueMapper.batchInsert(projectId, id, schemeCode, fieldValues);
         }
+        //创建问题通知自定义字段人员
+        IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, id);
+        IssueVO result = issueAssembler.issueDetailDTOToVO(issue, new HashMap<>(), new HashMap<>(), new HashMap<>());
+        sendMsgUtil.sendMsgToCustomFieldUsersByIssueCreate(projectId, result, DetailsHelper.getUserDetails().getUserId());
     }
 
     @Override
