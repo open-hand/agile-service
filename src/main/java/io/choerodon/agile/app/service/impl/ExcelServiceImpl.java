@@ -1341,7 +1341,7 @@ public class ExcelServiceImpl implements ExcelService {
             //导入创建问题通知自定义字段人员
             IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
             IssueVO result = issueAssembler.issueDetailDTOToVO(issue, new HashMap<>(), new HashMap<>(), new HashMap<>());
-            sendMsgUtil.sendMsg2CustomFieldUsersByIssueCreate(projectId, result, DetailsHelper.getUserDetails().getUserId());
+            sendMsgUtil.sendMsgToCustomFieldUsersByIssueCreate(projectId, result, DetailsHelper.getUserDetails().getUserId());
         }
     }
 

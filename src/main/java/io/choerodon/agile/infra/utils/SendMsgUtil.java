@@ -494,7 +494,7 @@ public class SendMsgUtil {
     }
 
     @Async
-    public void sendMsg2CustomFieldUsersByIssueCreate(Long projectId, IssueVO result, Long operatorId) {
+    public void sendMsgToCustomFieldUsersByIssueCreate(Long projectId, IssueVO result, Long operatorId) {
         //问题创建通知自定义字段人员（普通创建、快速创建、问题导入）
         if (SchemeApplyType.AGILE.equals(result.getApplyType())) {
             List<Long> userIds = noticeService.queryCustomFieldUserIdsByProjectId(projectId, "ISSUECREATE", result);

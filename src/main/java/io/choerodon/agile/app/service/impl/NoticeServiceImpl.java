@@ -223,14 +223,14 @@ public class NoticeServiceImpl implements NoticeService {
     @Override
     public List<Long> queryCustomFieldUserIdsByProjectId(Long projectId, String code, IssueVO issueVO) {
         ResponseEntity<MessageSettingVO> messageSetting = notifyFeignClient.getMessageSetting(projectId,"agile", code,null,null);
-        MessageSettingVO messageVo = messageSetting.getBody();
-        if(ObjectUtils.isEmpty(messageVo)){
+        MessageSettingVO messageVO = messageSetting.getBody();
+        if(ObjectUtils.isEmpty(messageVO)){
             throw new CommonException("error.message.setting.is.null");
         }
 
         Set<String> type = new HashSet<>();
         Set<Long> users = new HashSet<>();
-        messageVo.getTargetUserDTOS().forEach(v -> {
+        messageVO.getTargetUserDTOS().forEach(v -> {
             type.add(v.getType());
             if (!ObjectUtils.isEmpty(v.getUserId()) && !v.getUserId().equals(0L)) {
                 users.add(v.getUserId());

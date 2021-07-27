@@ -147,7 +147,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         //创建问题通知自定义字段人员
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, id);
         IssueVO result = issueAssembler.issueDetailDTOToVO(issue, new HashMap<>(), new HashMap<>(), new HashMap<>());
-        sendMsgUtil.sendMsg2CustomFieldUsersByIssueCreate(projectId, result, DetailsHelper.getUserDetails().getUserId());
+        sendMsgUtil.sendMsgToCustomFieldUsersByIssueCreate(projectId, result, DetailsHelper.getUserDetails().getUserId());
     }
 
     @Override
