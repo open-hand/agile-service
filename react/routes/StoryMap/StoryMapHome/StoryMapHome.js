@@ -21,6 +21,7 @@ import { getSystemFieldsInStoryMap } from '@/stores/project/issue/IssueStore';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 import { EmptyPage } from '@choerodon/components';
 import NoData from '@/assets/image/NoData.svg';
+import AnimationLoading from '@/components/Loading/AnimationLoading';
 import Minimap from './components/MiniMap';
 import epicPic from './emptyStory.svg';
 import Loading from '../../../components/Loading';
@@ -192,29 +193,29 @@ const StoryMapHome = observer(() => {
         padding: 0, borderTop: '1px solid var(--divider)', overflow: 'hidden', height: '100%',
       }}
       >
-        <Loading loading={loading} />
         <StoryMapSearch issueSearchStore={issueSearchStore} />
-
-        {!isEmpty ? (
-          hiddenColumnNoStory && Object.values(storyData).every((item) => !item.storys.length) ? (
-            <EmptyPage
-              image={NoData}
-              description="隐藏无故事的列后无史诗数据"
-            />
+        <AnimationLoading loading={loading}>
+          {!isEmpty ? (
+            hiddenColumnNoStory && Object.values(storyData).every((item) => !item.storys.length) ? (
+              <EmptyPage
+                image={NoData}
+                description="隐藏无故事的列后无史诗数据"
+              />
+            ) : (
+              <Minimap ref={ref} disabledVertical width={300} height={40} showHeight={300} className="c7nagile-StoryMap-minimap" selector=".minimapCard" childComponent={renderChild}>
+                <StoryMapBody />
+              </Minimap>
+            )
           ) : (
-            <Minimap ref={ref} disabledVertical width={300} height={40} showHeight={300} className="c7nagile-StoryMap-minimap" selector=".minimapCard" childComponent={renderChild}>
-              <StoryMapBody />
-            </Minimap>
-          )
-        ) : (
-          loading ? null : (
+            loading ? null : (
               // eslint-disable-next-line react/jsx-indent
               <EmptyPage
                 image={epicPic}
                 description="用户故事地图是以史诗为基础，根据版本控制进行管理规划"
               />
-          )
-        )}
+            )
+          )}
+        </AnimationLoading>
         <FilterManage
           visible={StoryMapStore.filterListVisible}
           setVisible={StoryMapStore.setFilterListVisible}

@@ -14,6 +14,7 @@ import SideNav from '@/components/side-nav';
 import { HeaderButtons } from '@choerodon/master';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import openCreateIssue from '@/components/create-issue';
+import AnimationLoading from '@/components/Loading/AnimationLoading';
 import Version from '../components/VersionComponent/Version';
 import Epic from '../components/EpicComponent/Epic';
 import Feature from '../components/FeatureComponent/Feature';
@@ -289,11 +290,11 @@ class BacklogHome extends Component {
                 </Panel>
               )}
             </SideNav>
-            <Spin spinning={BacklogStore.getSpinIf}>
+            <AnimationLoading loading={BacklogStore.getSpinIf}>
               <div className="c7n-backlog-content">
                 <SprintList openCreateIssueModal={this.openCreateIssueModal} />
               </div>
-            </Spin>
+            </AnimationLoading>
           </div>
         </Content>
         <IssueDetail

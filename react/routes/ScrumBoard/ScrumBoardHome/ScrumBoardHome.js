@@ -19,6 +19,7 @@ import LINK_URL from '@/constants/LINK_URL';
 import to from '@/utils/to';
 import queryString from 'query-string';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
+import AnimationLoading from '@/components/Loading/AnimationLoading';
 import FilterManage from '@/components/FilterManage';
 import openCreateIssue from '@/components/create-issue';
 import ScrumBoardDataController from './ScrumBoardDataController';
@@ -415,41 +416,42 @@ class ScrumBoardHome extends Component {
           }}
           >
             <BoardSearch onRefresh={this.handleFilterChange} saveStore={this.handleSaveSearchStore} />
-            <Loading loading={ScrumBoardStore.getSpinIf} />
-            <div className="c7n-scrumboard">
-              <div style={{ display: 'table', minWidth: '100%' }}>
-                {(!ScrumBoardStore.didCurrentSprintExist
-                  || ((!ScrumBoardStore.otherIssue || ScrumBoardStore.otherIssue.length === 0)
-                    && (!ScrumBoardStore.interconnectedData
-                      || ScrumBoardStore.interconnectedData.size === 0))) ? (
-                        <NoneSprint
-                          doingSprintExist={ScrumBoardStore.didCurrentSprintExist}
-                          hasSetFilter={this.issueSearchStore?.isHasFilter}
-                          filterItems={this.issueSearchStore?.currentFlatFilter ?? {}}
-                        />
-                  )
-                  : (
-                    <>
-                      <div className="c7n-scrumboard-header">
-                        <StatusColumn />
-                      </div>
-                      <div
-                        className="c7n-scrumboard-content"
-                      >
-                        <div className="c7n-scrumboard-container">
-                          <SwimLane
-                            mode={ScrumBoardStore.getSwimLaneCode}
-                            allDataMap={this.dataConverter.getAllDataMap()}
-                            mapStructure={ScrumBoardStore.getMapStructure}
-                            onDragEnd={this.onDragEnd}
-                            onDragStart={this.onDragStart}
+            <AnimationLoading loading={ScrumBoardStore.getSpinIf}>
+              <div className="c7n-scrumboard">
+                <div style={{ display: 'table', minWidth: '100%' }}>
+                  {(!ScrumBoardStore.didCurrentSprintExist
+                    || ((!ScrumBoardStore.otherIssue || ScrumBoardStore.otherIssue.length === 0)
+                      && (!ScrumBoardStore.interconnectedData
+                        || ScrumBoardStore.interconnectedData.size === 0))) ? (
+                          <NoneSprint
+                            doingSprintExist={ScrumBoardStore.didCurrentSprintExist}
+                            hasSetFilter={this.issueSearchStore?.isHasFilter}
+                            filterItems={this.issueSearchStore?.currentFlatFilter ?? {}}
                           />
+                    )
+                    : (
+                      <>
+                        <div className="c7n-scrumboard-header">
+                          <StatusColumn />
                         </div>
-                      </div>
-                    </>
-                  )}
+                        <div
+                          className="c7n-scrumboard-content"
+                        >
+                          <div className="c7n-scrumboard-container">
+                            <SwimLane
+                              mode={ScrumBoardStore.getSwimLaneCode}
+                              allDataMap={this.dataConverter.getAllDataMap()}
+                              mapStructure={ScrumBoardStore.getMapStructure}
+                              onDragEnd={this.onDragEnd}
+                              onDragStart={this.onDragStart}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                </div>
               </div>
-            </div>
+            </AnimationLoading>
             <IssueDetail
               refresh={this.refresh}
             />
