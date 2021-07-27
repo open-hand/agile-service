@@ -15,6 +15,7 @@ interface BasicProps extends Partial<SelectProps> {
   organizationId?: string
   outside?: boolean
   ruleIds?: string[]
+  afterLoad?: (data: any) => void
 }
 // 参数互斥，要么传fieldId，要么传fieldOptions
 type SelectCustomFieldProps = BasicProps & ({
@@ -33,7 +34,7 @@ type SelectCustomFieldProps = BasicProps & ({
 })
 const SIZE = 0;
 const SelectCustomField: React.FC<SelectCustomFieldProps> = forwardRef(({
-  fieldId, fieldOptions, flat, projectId, organizationId, selected, extraOptions, ruleIds, outside = false, onlyEnabled = true, ...otherProps
+  fieldId, fieldOptions, flat, projectId, afterLoad, organizationId, selected, extraOptions, ruleIds, outside = false, onlyEnabled = true, ...otherProps
 },
 ref: React.Ref<SelectBox>) => {
   const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
@@ -63,12 +64,19 @@ ref: React.Ref<SelectBox>) => {
     },
     middleWare: (data) => {
       if (!extraOptions) {
+        if (afterLoad) {
+          afterLoad(data);
+        }
         return data;
       }
-      return unionBy([...extraOptions, ...data], 'id');
+      const res = unionBy([...extraOptions, ...data], 'id');
+      if (afterLoad) {
+        afterLoad(res);
+      }
+      return res;
     },
     paging: true,
-  }), [args, hasRule, fieldId, fieldOptions, fakePageRequest, needOptions, onlyEnabled, outside, organizationId, projectId, extraOptions]);
+  }), [args, hasRule, fieldId, fieldOptions, fakePageRequest, needOptions, onlyEnabled, outside, organizationId, projectId, extraOptions, afterLoad]);
   const props = useSelect(config);
   return (
     <SelectBox

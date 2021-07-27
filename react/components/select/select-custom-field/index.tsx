@@ -8,7 +8,6 @@ import { unionBy, castArray, partition } from 'lodash';
 import { usePersistFn } from 'ahooks';
 
 interface BasicProps extends Partial<SelectProps> {
-
   selected?: string[]
   extraOptions?: any[]
   flat?: boolean
@@ -16,6 +15,7 @@ interface BasicProps extends Partial<SelectProps> {
   organizationId?: string
   outside?: boolean
   ruleIds?: string[]
+  afterLoad?: (data: any) => void
 }
 // 参数互斥，要么传fieldId，要么传fieldOptions
 type SelectCustomFieldProps = BasicProps & ({
@@ -34,7 +34,7 @@ type SelectCustomFieldProps = BasicProps & ({
 })
 const SIZE = 50;
 const SelectCustomField: React.FC<SelectCustomFieldProps> = forwardRef(({
-  fieldId, fieldOptions, flat, projectId, organizationId, selected, extraOptions, ruleIds, outside = false, onlyEnabled = true, ...otherProps
+  fieldId, fieldOptions, flat, afterLoad, projectId, organizationId, selected, extraOptions, ruleIds, outside = false, onlyEnabled = true, ...otherProps
 },
 ref: React.Ref<Select>) => {
   const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
@@ -64,12 +64,19 @@ ref: React.Ref<Select>) => {
     },
     middleWare: (data) => {
       if (!extraOptions) {
+        if (afterLoad) {
+          afterLoad(data);
+        }
         return data;
       }
-      return unionBy([...extraOptions, ...data], 'id');
+      const res = unionBy([...extraOptions, ...data], 'id');
+      if (afterLoad) {
+        afterLoad(res);
+      }
+      return res;
     },
     paging: true,
-  }), [args, hasRule, fieldId, fieldOptions, fakePageRequest, needOptions, onlyEnabled, outside, organizationId, projectId, extraOptions]);
+  }), [args, hasRule, fieldId, fieldOptions, fakePageRequest, needOptions, onlyEnabled, outside, organizationId, projectId, extraOptions, afterLoad]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
   return (
