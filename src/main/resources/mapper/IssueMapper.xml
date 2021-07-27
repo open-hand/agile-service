@@ -528,7 +528,7 @@
         <foreach collection="issueIds" item="issueId" index="index">
             when #{issueId} then #{index}
         </foreach>
-        END
+        END, ai.issue_id
     </select>
 
     <select id="selectWithSubByIssueIds" resultMap="IssueWithSub">
