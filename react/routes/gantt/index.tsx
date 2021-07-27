@@ -29,6 +29,7 @@ import { FlatSelect } from '@choerodon/components';
 import useFullScreen from '@/common/useFullScreen';
 import { ILocalField } from '@/components/issue-search/store';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
+import AnimationLoading from '@/components/Loading/AnimationLoading';
 import { useIssueSearchStore } from '@/components/issue-search';
 import FilterManage from '@/components/FilterManage';
 import { Issue, User } from '@/common/types';
@@ -567,37 +568,38 @@ const GanttPage: React.FC = () => {
             <Search issueSearchStore={issueSearchStore} loadData={run} />
             <GanttOperation />
           </div>
-          <Loading loading={loading} />
-          {columns.length > 0 && workCalendar && (
-            <GanttComponent
-              innerRef={store.ganttRef as React.MutableRefObject<GanttRef>}
-              data={ganttData}
-              columns={columns}
-              onUpdate={handleUpdate}
-              startDateKey="estimatedStartTime"
-              endDateKey="estimatedEndTime"
-              isRestDay={isRestDay}
-              showBackToday={false}
-              showUnitSwitch={false}
-              unit={unit}
-              onRow={onRow}
-              onBarClick={onRow.onClick}
-              tableIndent={20}
-              expandIcon={getExpandIcon}
-              renderBar={renderBar}
-              renderInvalidBar={renderInvalidBar}
-              renderGroupBar={renderGroupBar}
-              renderBarThumb={renderBarThumb}
-              tableCollapseAble={false}
-              scrollTop={{
-                right: -4,
-                bottom: 8,
-              }}
-              rowHeight={34}
-              // @ts-ignore
-              renderEmpty={renderEmpty}
-            />
-          )}
+          <AnimationLoading loading={loading}>
+            {columns.length > 0 && workCalendar && (
+              <GanttComponent
+                innerRef={store.ganttRef as React.MutableRefObject<GanttRef>}
+                data={ganttData}
+                columns={columns}
+                onUpdate={handleUpdate}
+                startDateKey="estimatedStartTime"
+                endDateKey="estimatedEndTime"
+                isRestDay={isRestDay}
+                showBackToday={false}
+                showUnitSwitch={false}
+                unit={unit}
+                onRow={onRow}
+                onBarClick={onRow.onClick}
+                tableIndent={20}
+                expandIcon={getExpandIcon}
+                renderBar={renderBar}
+                renderInvalidBar={renderInvalidBar}
+                renderGroupBar={renderGroupBar}
+                renderBarThumb={renderBarThumb}
+                tableCollapseAble={false}
+                scrollTop={{
+                  right: -4,
+                  bottom: 8,
+                }}
+                rowHeight={34}
+                // @ts-ignore
+                renderEmpty={renderEmpty}
+              />
+            )}
+          </AnimationLoading>
           <IssueDetail
             refresh={run}
             onUpdate={handleIssueUpdate}
