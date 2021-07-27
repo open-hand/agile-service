@@ -4,6 +4,7 @@ import {
 } from 'choerodon-ui/pro';
 import AutoSize from '@/components/auto-size';
 import {
+  observer,
   Observer,
 } from 'mobx-react-lite';
 import { getColumns } from '../../utils';
@@ -70,4 +71,4 @@ const PageTemplateTable: React.FC<IPageTemplateTableProps> = () => {
 
   );
 };
-export default PageTemplateTable;
+export default observer(PageTemplateTable);
