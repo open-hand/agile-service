@@ -14,7 +14,7 @@ interface BasicProps extends Partial<SelectProps> {
   projectId?: string
   organizationId?: string
   outside?: boolean
-
+  ruleIds?: string[]
 }
 // 参数互斥，要么传fieldId，要么传fieldOptions
 type SelectCustomFieldProps = BasicProps & ({
@@ -33,9 +33,11 @@ type SelectCustomFieldProps = BasicProps & ({
 })
 const SIZE = 0;
 const SelectCustomField: React.FC<SelectCustomFieldProps> = forwardRef(({
-  fieldId, fieldOptions, flat, projectId, organizationId, selected, extraOptions, outside = false, onlyEnabled = true, ...otherProps
+  fieldId, fieldOptions, flat, projectId, organizationId, selected, extraOptions, ruleIds, outside = false, onlyEnabled = true, ...otherProps
 },
 ref: React.Ref<SelectBox>) => {
+  const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
+  const hasRule = Object.keys(args).filter((key: keyof typeof args) => Boolean(args[key])).length > 0;
   const needOptions = useMemo(() => [...castArray(otherProps.value), ...castArray(selected)].filter(Boolean), [selected, otherProps.value]);
   const fakePageRequest = usePersistFn((filter: string = '', page: number = 1, size: number, ensureOptions: string[], enabled: boolean = true) => {
     if (!fieldOptions) {
@@ -52,7 +54,13 @@ ref: React.Ref<SelectBox>) => {
   const config = useMemo((): SelectConfig => ({
     textField: 'value',
     valueField: 'id',
-    request: ({ page, filter }) => (fieldOptions ? fakePageRequest(filter, page, SIZE, needOptions, onlyEnabled) : fieldApi.outside(outside).org(organizationId).project(projectId).getFieldOptions(fieldId!, filter, page, SIZE, needOptions, onlyEnabled)),
+    requestArgs: args,
+    request: ({ page, filter, requestArgs }) => {
+      if (hasRule && fieldId) {
+        return fieldApi.project(projectId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, SIZE);
+      }
+      return fieldOptions ? fakePageRequest(filter, page, SIZE, needOptions, onlyEnabled) : fieldApi.outside(outside).org(organizationId).project(projectId).getFieldOptions(fieldId!, filter, page, SIZE, needOptions, onlyEnabled);
+    },
     middleWare: (data) => {
       if (!extraOptions) {
         return data;
@@ -60,7 +68,7 @@ ref: React.Ref<SelectBox>) => {
       return unionBy([...extraOptions, ...data], 'id');
     },
     paging: true,
-  }), [fieldOptions, fakePageRequest, needOptions, outside, organizationId, projectId, fieldId, extraOptions]);
+  }), [args, hasRule, fieldId, fieldOptions, fakePageRequest, needOptions, onlyEnabled, outside, organizationId, projectId, extraOptions]);
   const props = useSelect(config);
   return (
     <SelectBox
