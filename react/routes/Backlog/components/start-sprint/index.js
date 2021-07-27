@@ -34,12 +34,25 @@ class StartSprint extends Component {
       endDate: data.endDate,
       showCalendar: false,
       workDates: [], // 冲刺自定义设置
+      checkInfo: {
+        noRemainingTimeIssue: 0,
+        noStoryPointIssue: 0,
+      },
     };
   }
 
   componentDidMount() {
     const { modal } = this.props;
     modal.handleOk(this.handleStartSprint);
+    this.loadSprintData();
+  }
+
+  loadSprintData=async () => {
+    const { data } = this.props;
+    const res = await sprintApi.checkSprintBeforeStart(data.sprintId);
+    this.setState({
+      checkInfo: res,
+    });
   }
 
   /**
@@ -136,6 +149,7 @@ class StartSprint extends Component {
       showCalendar,
       startDate,
       endDate,
+      checkInfo,
     } = this.state;
     const {
       piId, startDate: start, endDate: end, sprintType,
@@ -150,7 +164,10 @@ class StartSprint extends Component {
     return (
       <div>
         <p className="c7n-closeSprint-message">
-          {`该冲刺中包含了${!isNull(sprintDetail) ? sprintDetail.issueCount : 0}个问题`}
+          {`该冲刺中包含了${!isNull(sprintDetail) ? sprintDetail.issueCount : 0}个问题。`}
+          {checkInfo.noRemainingTimeIssue > 0 || checkInfo.noStoryPointIssue > 0
+            ? `其中${checkInfo.noStoryPointIssue > 0 ? `，${checkInfo.noStoryPointIssue}个故事未预估故事点` : ''}${checkInfo.noRemainingTimeIssue > 0 ? `，${checkInfo.noRemainingTimeIssue}个问题未预估工时` : ''}。`
+            : ''}
         </p>
         <Form style={{ width: 512, marginTop: 24 }}>
           <FormItem>

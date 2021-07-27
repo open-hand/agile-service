@@ -42,6 +42,10 @@ interface MoveIssueCardsInfo {
   outsetIssueId: number, // 移动参照问题id 0代表无问题
   rankIndex: number, // 是否生成移动日志
 }
+export interface SprintStartCheckInfo {
+  noRemainingTimeIssue: number
+  noStoryPointIssue: number
+}
 class SprintApi extends Api<SprintApi> {
   get prefix() {
     return `/agile/v1/projects/${this.projectId}`;
@@ -208,6 +212,21 @@ class SprintApi extends Api<SprintApi> {
    */
   complete(data: CloseSprint) {
     return axios.post(`${this.prefix}/sprint/complete`, data);
+  }
+
+  /**
+   * 开启冲刺
+   * @param data
+   * @param isCurrentPi 开启的冲刺是否为项目群下的子项目
+   */
+  checkSprintBeforeStart(sprintId: string): Promise<SprintStartCheckInfo> {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/sprint/sprint_start_message`,
+      params: {
+        sprintId,
+      },
+    });
   }
 
   /**
