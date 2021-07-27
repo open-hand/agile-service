@@ -4,7 +4,7 @@ import React, {
 import { observer } from 'mobx-react-lite';
 import {
   Form, TextField, DatePicker, TimePicker, DateTimePicker,
-  CheckBox, NumberField, TextArea, UrlField, Spin, Button,
+  CheckBox, NumberField, TextArea, UrlField, Spin, Button, Select,
 } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
 import SelectUser from '@/components/select/select-user';
@@ -22,8 +22,8 @@ import DragList from '../drag-list';
 import './index.less';
 import * as images from '../../images';
 import beforeSubmitProcessData from './util';
-import Select from './SelectU';
 import openEditFieldOptionsModal from '../edit-field-options';
+import selectDisabledStyles from './select-disabled.less';
 
 const singleList = ['radio', 'single'];
 const multipleList = ['checkbox', 'multiple'];
@@ -395,6 +395,7 @@ function CreateField() {
           </div>
           <Select
             name="context"
+            className={selectDisabledStyles.agile}
             onChange={(val) => {
               formDataSet.current?.set('context', uniq([...store.eternalContext, ...(disabledContextArr || []), ...(val || [])]));
             }}
