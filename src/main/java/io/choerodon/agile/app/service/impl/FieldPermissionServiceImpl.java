@@ -215,11 +215,11 @@ public class FieldPermissionServiceImpl implements FieldPermissionService {
         if (!fieldIds.isEmpty()) {
             CustomUserDetails userDetails = DetailsHelper.getUserDetails();
             Long userId = userDetails.getUserId();
-            List<Long> roleIdList = userDetails.getRoleIds();
+            List<RoleVO> roles = baseFeignClient.getUserWithProjLevelRolesByUserId(projectId, userId).getBody();
             Set<Long> userIds = new HashSet<>(Arrays.asList(userId));
             Set<Long> roleIds = new HashSet<>();
-            if (!ObjectUtils.isEmpty(roleIdList)) {
-                roleIds.addAll(roleIdList);
+            if (!ObjectUtils.isEmpty(roles)) {
+                roleIds.addAll(roles.stream().map(RoleVO::getId).collect(Collectors.toSet()));
             }
             PermissionVO permissionVO = new PermissionVO();
             permissionVO.setScope(FieldPermissionScope.READ.value());
