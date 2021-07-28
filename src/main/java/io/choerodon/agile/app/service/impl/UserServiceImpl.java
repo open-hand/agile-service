@@ -10,7 +10,6 @@ import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -161,9 +160,5 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Override
-    public Page<UserVO> listPageUsersByIds(PageRequest pageRequest, Long[] ids) {
-        ResponseEntity<Page<UserVO>> users = baseFeignClient.listPageUsersByIds(ids, false, pageRequest.getPage(), pageRequest.getSize());
-        return users != null ? users.getBody() : new Page<>();
-    }
+
 }
