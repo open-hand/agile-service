@@ -50,7 +50,6 @@ const ChosenFields: React.FC<Props> = ({
     value: chosenFieldIds,
   });
 
-  // console.log('renderChosenFields', defaultValue);
   const { store: choseFieldStore } = choseDataProps;
   useEffect(() => {
     if (!currentSelected && choseFieldStore.getAllChosenField.length) {
