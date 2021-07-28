@@ -142,6 +142,7 @@ const Linkage: React.FC<Props> = ({
 
   const switchOption = useCallback((id: string) => {
     setCurrentOptionId(id);
+    setCurrentSelected(undefined);
     setDataSet(new DataSet({
       fields: [{
         name: 'chosenField',

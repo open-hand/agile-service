@@ -233,7 +233,6 @@ const CreateIssueBase = observer(({
   const [{ data: fields, isFetching: isFieldsLoading }, {
     data: templateData,
   }, { data: cascadeRuleList = [] }, { data: requiredNoPermissionList = [] }] = useIssueCreateFields({ issueTypeId, projectId });
-  console.log('requiredNoPermissionList', requiredNoPermissionList);
   const fieldValueArr = usePersistFn((field: IssueCreateFields) => {
     let value = castArray(getValue(dataSet, field.fieldCode));
     const preset = presets.get(field.fieldCode);
