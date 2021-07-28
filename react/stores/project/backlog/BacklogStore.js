@@ -1028,6 +1028,9 @@ class BacklogStore {
   getPlanPi = async (sprintData = this.sprintData, setPiIdIf = true) => {
     if (isInProgram()) {
       const program = await commonApi.getProjectsInProgram();
+      if (!program) {
+        return;
+      }
       const notDonePiList = await piApi.getPiByPiStatus(['todo', 'doing'], program?.id);
       // 为了可以对规划中的冲刺进行时间修改的限制，这里获取对应pi和冲刺
       const piIds = intersection(notDonePiList.map((pi) => pi.id), uniq(sprintData.filter((sprint) => sprint.planning).map((sprint) => sprint.piId)));
