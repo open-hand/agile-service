@@ -7,6 +7,7 @@ import io.choerodon.agile.api.vo.RoleVO;
 import io.choerodon.agile.api.vo.UserVO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -70,4 +71,6 @@ public interface UserService {
     List<UserVO> listAllUsersByProject(Long projectId);
 
     List<UserVO> listAllUsersByOrganization(Long organizationId);
+
+    Page<UserVO> listPageUsersByIds(PageRequest pageRequest, Long[] ids);
 }

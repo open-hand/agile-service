@@ -184,4 +184,9 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     public ResponseEntity<List<RoleVO>> listRolesByIds(Long tenantId, List<Long> roleIds) {
         throw new CommonException("error.listRolesByIds");
     }
+
+    @Override
+    public ResponseEntity<Page<UserVO>> listPageUsersByIds(Long[] ids, Boolean onlyEnabled, int page, int size) {
+        throw new CommonException("error.listPageUsersByIds");
+    }
 }

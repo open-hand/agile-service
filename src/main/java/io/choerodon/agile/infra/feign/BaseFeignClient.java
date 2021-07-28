@@ -225,5 +225,11 @@ public interface BaseFeignClient {
     @PostMapping(value = "/choerodon/v1/list_roles")
     ResponseEntity<List<RoleVO>> listRolesByIds(@RequestParam("tenantId") Long  tenantId,
                                                 @RequestBody List<Long> roleIds);
+
+    @PostMapping(value = "/choerodon/v1/users/ids/page")
+    ResponseEntity<Page<UserVO>> listPageUsersByIds(@RequestBody Long[] ids,
+                                                    @RequestParam(name = "only_enabled") Boolean onlyEnabled,
+                                                    @RequestParam("page") int page,
+                                                    @RequestParam("size") int size);
 }
 
