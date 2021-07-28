@@ -408,8 +408,8 @@ const CreateIssueBase = observer(({
         return false;
       }
       const data = dataSet.current?.toData();
-      const customFields = fields?.filter((f) => !f.system);
-      const systemFields = fields?.filter((f) => f.system);
+      const customFields = fields?.filter((f) => !f.system).filter((f) => !getRuleHidden(f, rules));
+      const systemFields = fields?.filter((f) => f.system).filter((f) => !getRuleHidden(f, rules));
       const fieldList = customFields?.map((field) => ({
         fieldType: field.fieldType,
         value: transformSubmitFieldValue(field, data[field.fieldCode]),
