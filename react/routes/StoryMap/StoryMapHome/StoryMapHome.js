@@ -21,10 +21,9 @@ import { getSystemFieldsInStoryMap } from '@/stores/project/issue/IssueStore';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 import { EmptyPage } from '@choerodon/components';
 import NoData from '@/assets/image/NoData.svg';
-import AnimationLoading from '@/components/Loading/AnimationLoading';
+import Loading from '@/components/Loading';
 import Minimap from './components/MiniMap';
 import epicPic from './emptyStory.svg';
-import Loading from '../../../components/Loading';
 import StoryMapBody from './components/StoryMapBody';
 import SideIssueList from './components/SideIssueList';
 import SwitchSwimLine from './components/SwitchSwimLine';
@@ -194,7 +193,7 @@ const StoryMapHome = observer(() => {
       }}
       >
         <StoryMapSearch issueSearchStore={issueSearchStore} />
-        <AnimationLoading loading={loading}>
+        <Loading loading={loading}>
           {!isEmpty ? (
             hiddenColumnNoStory && Object.values(storyData).every((item) => !item.storys.length) ? (
               <EmptyPage
@@ -215,7 +214,7 @@ const StoryMapHome = observer(() => {
               />
             )
           )}
-        </AnimationLoading>
+        </Loading>
         <FilterManage
           visible={StoryMapStore.filterListVisible}
           setVisible={StoryMapStore.setFilterListVisible}

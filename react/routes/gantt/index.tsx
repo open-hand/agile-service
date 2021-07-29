@@ -29,7 +29,6 @@ import { FlatSelect } from '@choerodon/components';
 import useFullScreen from '@/common/useFullScreen';
 import { ILocalField } from '@/components/issue-search/store';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
-import AnimationLoading from '@/components/Loading/AnimationLoading';
 import { useIssueSearchStore } from '@/components/issue-search';
 import FilterManage from '@/components/FilterManage';
 import { Issue, User } from '@/common/types';
@@ -568,7 +567,7 @@ const GanttPage: React.FC = () => {
             <Search issueSearchStore={issueSearchStore} loadData={run} />
             <GanttOperation />
           </div>
-          <AnimationLoading loading={loading}>
+          <Loading loading={loading}>
             {columns.length > 0 && workCalendar && (
               <GanttComponent
                 innerRef={store.ganttRef as React.MutableRefObject<GanttRef>}
@@ -599,7 +598,7 @@ const GanttPage: React.FC = () => {
                 renderEmpty={renderEmpty}
               />
             )}
-          </AnimationLoading>
+          </Loading>
           <IssueDetail
             refresh={run}
             onUpdate={handleIssueUpdate}

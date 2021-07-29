@@ -14,7 +14,7 @@ import SideNav from '@/components/side-nav';
 import { HeaderButtons } from '@choerodon/master';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import openCreateIssue from '@/components/create-issue';
-import AnimationLoading from '@/components/Loading/AnimationLoading';
+import { LoadingProvider } from '@/components/Loading';
 import Version from '../components/VersionComponent/Version';
 import Epic from '../components/EpicComponent/Epic';
 import Feature from '../components/FeatureComponent/Feature';
@@ -121,7 +121,7 @@ class BacklogHome extends Component {
     );
   }
 
-  openCreateIssueModal=() => {
+  openCreateIssueModal = () => {
     const {
       chosenEpic, chosenFeature, chosenVersion, featureList, defaultTypeId, defaultSummary, defaultSprint, defaultAssignee, defaultEpicName,
     } = BacklogStore;
@@ -290,11 +290,11 @@ class BacklogHome extends Component {
                 </Panel>
               )}
             </SideNav>
-            <AnimationLoading loading={BacklogStore.getSpinIf}>
+            <LoadingProvider loading={BacklogStore.getSpinIf} globalSingle>
               <div className="c7n-backlog-content">
                 <SprintList openCreateIssueModal={this.openCreateIssueModal} />
               </div>
-            </AnimationLoading>
+            </LoadingProvider>
           </div>
         </Content>
         <IssueDetail

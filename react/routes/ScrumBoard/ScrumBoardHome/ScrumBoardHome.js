@@ -19,7 +19,7 @@ import LINK_URL from '@/constants/LINK_URL';
 import to from '@/utils/to';
 import queryString from 'query-string';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
-import AnimationLoading from '@/components/Loading/AnimationLoading';
+
 import FilterManage from '@/components/FilterManage';
 import openCreateIssue from '@/components/create-issue';
 import ScrumBoardDataController from './ScrumBoardDataController';
@@ -416,7 +416,7 @@ class ScrumBoardHome extends Component {
           }}
           >
             <BoardSearch onRefresh={this.handleFilterChange} saveStore={this.handleSaveSearchStore} />
-            <AnimationLoading loading={ScrumBoardStore.getSpinIf}>
+            <Loading loading={ScrumBoardStore.getSpinIf}>
               <div className="c7n-scrumboard">
                 <div style={{ display: 'table', minWidth: '100%' }}>
                   {(!ScrumBoardStore.didCurrentSprintExist
@@ -451,7 +451,7 @@ class ScrumBoardHome extends Component {
                     )}
                 </div>
               </div>
-            </AnimationLoading>
+            </Loading>
             <IssueDetail
               refresh={this.refresh}
             />

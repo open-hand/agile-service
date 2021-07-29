@@ -112,7 +112,7 @@ function IssueList({
                   )}
                 </WindowScroller>
               )}
-            <Loading loading={loading} />
+            <Loading loading={loading} allowSelfLoading />
             <div style={{ padding: '10px 0px 10px 20px', borderBottom: '0.01rem solid var(--divider)' }}>
               <QuickCreateIssue
                 epicId={BacklogStore.getChosenEpic !== 'all' && BacklogStore.getChosenEpic !== 'unset' ? BacklogStore.getChosenEpic : undefined}
