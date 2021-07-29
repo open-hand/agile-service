@@ -7,13 +7,14 @@ import useLinkType from '@/hooks/data/useLinkType';
 interface Props extends Partial<SelectProps> {
   flat?: boolean
   projectId?: string
+  hasPassive?: boolean
 }
 const { Option } = Select;
 const SelectLinkType: React.FC<Props> = forwardRef(({
-  flat, projectId, ...otherProps
+  flat, projectId, hasPassive, ...otherProps
 },
 ref: React.Ref<Select>) => {
-  const { data } = useLinkType({ projectId });
+  const { data } = useLinkType({ projectId, hasPassive });
   const Component = flat ? FlatSelect : Select;
   return (
     <Component
