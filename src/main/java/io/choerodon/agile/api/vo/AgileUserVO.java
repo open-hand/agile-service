@@ -17,6 +17,18 @@ public class AgileUserVO {
 
     private Long organizationId;
 
+    private Set<Long> ignoredUserIds;
+
+    public AgileUserVO() {}
+
+    public AgileUserVO(Set<Long> userIds, Set<Long> projectIds, String param, Long organizationId, Set<Long> ignoredUserIds) {
+        this.userIds = userIds;
+        this.projectIds = projectIds;
+        this.param = param;
+        this.organizationId = organizationId;
+        this.ignoredUserIds = ignoredUserIds;
+    }
+
     public Long getOrganizationId() {
         return organizationId;
     }
@@ -47,5 +59,13 @@ public class AgileUserVO {
 
     public void setProjectIds(Set<Long> projectIds) {
         this.projectIds = projectIds;
+    }
+
+    public Set<Long> getIgnoredUserIds() {
+        return ignoredUserIds;
+    }
+
+    public void setIgnoredUserIds(Set<Long> ignoredUserIds) {
+        this.ignoredUserIds = ignoredUserIds;
     }
 }
