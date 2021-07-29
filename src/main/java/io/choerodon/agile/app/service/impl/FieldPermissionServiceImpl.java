@@ -63,7 +63,8 @@ public class FieldPermissionServiceImpl implements FieldPermissionService {
                     FieldCode.FEATURE_TYPE,
                     FieldCode.TAG,
                     FieldCode.PI,
-                    FieldCode.SUB_PROJECT
+                    FieldCode.SUB_PROJECT,
+                    FieldCode.REPORTER
             );
 
     @Autowired
