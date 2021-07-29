@@ -104,11 +104,9 @@ function renderEditor({
       const type = getMenuType();
       return (
         <SelectUser
+          level={type === 'project' ? 'project' : 'org'}
           selectedUser={typeof (defaultValue) === 'object' ? defaultValue : undefined}
-          autoQueryConfig={typeof (defaultValue) === 'string' ? {
-            selectedUserIds: defaultValue.split(','),
-            queryUserRequest: async (userId: string | number) => (type === 'project' ? userApi.getAllInProject('', undefined, userId as number) : userApi.getAllInOrg('', undefined, userId as number)),
-          } : undefined}
+          selected={typeof (defaultValue) === 'string' ? defaultValue.split(',') : undefined}
           multiple={fieldType === 'multiMember'}
           clearButton
           dataRef={dataRef}

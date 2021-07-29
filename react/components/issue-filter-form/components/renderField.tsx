@@ -241,14 +241,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
             //   if (res.list && Array.isArray(res.list)) {
             //   }
             // }))} value.map((item: string) => (String(item)))
-          autoQueryConfig={defaultValue ? {
-            selectedUserIds: defaultValue.map((item: any) => String(item)),
-            // userMaps,
-            // finishStack,
-            // taskStacks: stacks,
-            // forceRefresh: forceUpdate,
-            // events: { onFinish: () => { noticeForceUpdate(); console.log('usermm', forceUpdate, userMaps); } },
-          } : undefined}
+          selected={defaultValue ? defaultValue.map((item: any) => String(item)) : undefined}
           style={{ width: '100%' }}
           name={code}
           extraOptions={code === 'assigneeId' ? [{ id: '0', realName: '未分配' }] : undefined}

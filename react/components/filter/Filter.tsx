@@ -232,9 +232,7 @@ const Filter: React.FC<FilterProps> = ({
         } : {}}
         labelLayout={!flat || isText || isTime ? 'float' as LabelLayout : 'none' as LabelLayout}
         {...isUser ? {
-          autoQueryConfig: {
-            selectedUserIds: filter[field.code],
-          },
+          selected: filter[field.code],
         } : {}}
       />,
       removeButton: renderRemoveButton(field),

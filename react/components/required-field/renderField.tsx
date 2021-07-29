@@ -151,9 +151,8 @@ export default function renderField<T extends Partial<SelectProps>>({
       return (
         <SelectUser
           multiple={fieldType === 'multiMember'}
-          autoQueryConfig={defaultValue ? {
-            selectedUserIds: (typeof defaultValue === 'string' ? [defaultValue] : defaultValue).map((item: any) => String(item)),
-          } : undefined}
+          // eslint-disable-next-line no-nested-ternary
+          selected={defaultValue ? (typeof defaultValue === 'string' ? [defaultValue] : defaultValue.map((item: any) => String(item))) : undefined}
           style={{ width: '100%' }}
           name={fieldCode}
           {...otherComponentProps}

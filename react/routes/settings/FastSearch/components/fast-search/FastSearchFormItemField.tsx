@@ -48,20 +48,6 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
       record.setState('init_edit_data', true);
     }
   }, [editDefaultValue, optionDataSet.options, record]);
-  const selectUserAutoQueryConfig = useMemo(() => {
-    function onFinish() {
-      record.setState('init_edit_data', false).init('_editData', true);
-      // 用户，多用户类型的字段 在额外用户加载完毕后再绑定 并且重新初始化
-      optionDataSet.options = undefined; // 先置空 再赋值 触发useEffect
-      setTimeout(() => {
-        optionDataSet.options = componentRef.current?.options;
-      });
-    }
-    return {
-      selectedUserIds: editDefaultValue.defaultValueArr,
-      events: { onFinish },
-    };
-  }, [editDefaultValue.defaultValueArr, optionDataSet, record]);
   const selectStatusConfig = useMemo(() => ({
     issueTypeIds: undefined,
     selectedIds: record.get('_editData') && record.get('_editDataCode') === record.get('fieldCode') ? editDefaultValue.defaultValueArr : undefined,
@@ -76,11 +62,11 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
     primitiveValue: false,
     // selectAllButton: false,
     // reverse: false,
-    autoQueryConfig: record.get('_editDataCode') === record.get('fieldCode') ? selectUserAutoQueryConfig : undefined,
+    selected: record.get('_editDataCode') === record.get('fieldCode') ? editDefaultValue.defaultValueArr : undefined,
     style: { width: '100%' },
     afterLoad: record.get('_editData') && record.get('_editDataCode') === record.get('fieldCode') ? handleBindOptions : undefined,
     ...otherProps,
-  }), [handleBindOptions, otherProps, record, selectStatusConfig, selectUserAutoQueryConfig]);
+  }), [editDefaultValue.defaultValueArr, handleBindOptions, otherProps, record, selectStatusConfig]);
   const chosenField = useMemo(() => transformFieldToRenderProps(record.toData(), record.get('_editData') ? [] : undefined), [record, record.get('fieldCode')]);
   const render = useCallback(() => {
     if (isRenderNullSelect) {

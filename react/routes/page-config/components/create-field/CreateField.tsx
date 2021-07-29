@@ -342,11 +342,6 @@ function CreateField() {
             key={`page-config-create-or-edit-member-${fieldType}`}
             name="defaultValue"
             selectedUser={toJS(current?.get('defaultValueObj'))}
-            // autoQueryConfig={{
-            //   selectedUserIds: current?.get('defaultValue'),
-            //   // @ts-ignore
-            //   queryUserRequest: async (userId: number) => (type === 'project' ? userApi.getAllInProject('', undefined, userId) : userApi.getAllInOrg('', undefined, userId)),
-            // }}
             dataRef={userDataRef}
             multiple={fieldType === 'multiMember'}
             request={({ filter, page }) => (type === 'project' ? userApi.getAllInProject(filter, page) : userApi.getAllInOrg(filter, page))}
