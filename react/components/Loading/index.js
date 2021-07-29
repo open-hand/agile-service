@@ -1,3 +1,6 @@
 import Loading from './Loading';
+import AnimationLoading, { useLoading, LoadingProvider } from './AnimationLoading';
 
-export default Loading;
+export { useLoading, LoadingProvider };
+// export { AnimationLoading };
+export default AnimationLoading;
