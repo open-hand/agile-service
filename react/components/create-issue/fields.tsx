@@ -134,7 +134,7 @@ const systemFieldMap: Record<ISystemFieldCodeMap, ProRenderFieldPropsType> = {
   issueType: {
     render: (text) => <UserTag data={text} />,
     renderFormItem: (props) => (
-      <SelectIssueType {...props} />
+      <SelectIssueType showIcon {...props} />
     ),
     valueKey: 'issueTypeId',
   },

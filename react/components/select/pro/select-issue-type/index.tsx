@@ -13,10 +13,11 @@ interface Props extends Partial<SelectProps> {
   projectId?: string
   config?: ProjectIssueTypesConfig
   queryOptions?: Parameters<typeof useProjectIssueTypes>[1]
+  showIcon?: boolean
 }
 
 const SelectIssueType: React.FC<Props> = forwardRef(({
-  valueField, flat, projectId, config, queryOptions,
+  valueField, flat, projectId, config, queryOptions, showIcon = false,
   ...otherProps
 }, ref: React.Ref<Select>) => {
   const { data: issueTypes } = useProjectIssueTypes({ projectId, ...config }, queryOptions);
@@ -25,7 +26,7 @@ const SelectIssueType: React.FC<Props> = forwardRef(({
     valueField: valueField || 'id',
     data: issueTypes || [],
     paging: false,
-    optionRenderer: (issueType) => <TypeTag data={issueType} showName />,
+    optionRenderer: showIcon ? (issueType) => <TypeTag data={issueType} showName /> : undefined,
   });
   const Component = flat ? FlatSelect : Select;
 
