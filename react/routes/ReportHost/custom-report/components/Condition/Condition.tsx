@@ -76,7 +76,7 @@ const Condition: React.FC<{
         </Select>
       </Form>
     </Part>
-    <Part title="数据筛选" tip="设置图表的数据范围。例如：您可以选择一部分迭代的问题进行分析">
+    <Part title="数据过滤" tip="设置图表的数据范围。例如：您可以选择一部分迭代的问题进行分析">
       <div className={styles.search}>
         <Search filterComponentProps={filterComponentProps} choseComponentProps={choseComponentProps} />
       </div>
