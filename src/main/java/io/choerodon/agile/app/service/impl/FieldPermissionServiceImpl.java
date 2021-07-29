@@ -184,7 +184,9 @@ public class FieldPermissionServiceImpl implements FieldPermissionService {
                                                        List<PageFieldViewVO> pageFieldViews) {
         Set<Long> issueTypeIds = new HashSet<>(Arrays.asList(issueTypeId));
         boolean isPermissionsConfigured = fieldPermissionMapper.isPermissionsConfigured(projectId, organizationId, issueTypeIds);
-        if (!isPermissionsConfigured) {
+        CustomUserDetails userDetails = DetailsHelper.getUserDetails();
+        boolean admin = Boolean.TRUE.equals(userDetails.getAdmin());
+        if (!isPermissionsConfigured || admin) {
             return pageFieldViews;
         }
         List<PageFieldViewVO> result = new ArrayList<>();
