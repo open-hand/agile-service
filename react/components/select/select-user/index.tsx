@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { toJS } from 'mobx';
 import { Select, DataSet } from 'choerodon-ui/pro';
-import { unionBy } from 'lodash';
+import { unionBy, castArray, uniq } from 'lodash';
 import { userApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import type { User } from '@/common/types';
@@ -36,11 +36,8 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
 
   const selectedUserIds = useMemo(() => {
     const ids: string[] | string | undefined = toJS(selected);
-    if (Array.isArray(ids)) {
-      return ids.filter((i) => i !== '0');
-    }
-    return ids ? [ids].filter((i) => i !== '0') : undefined;
-  }, [JSON.stringify(selected)]);
+    return uniq(castArray(ids).concat(castArray(otherProps.value)).filter((i) => i && i !== '0'));
+  }, [JSON.stringify(selected), JSON.stringify(otherProps.value)]);
   const idsRef = useRef(selectedUserIds);
   const args = useMemo(() => {
     if (selectDataRef.current && selectedUserIds) {

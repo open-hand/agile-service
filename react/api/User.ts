@@ -9,7 +9,7 @@ async function getProjectUsersByIds(userIds?: string[], projectId?: string): Pro
   return axios({
     method: 'post',
     url: `/agile/v1/users/projects/${projectId ?? getProjectId()}/list_by_ids`,
-    data: userIds,
+    data: userIds ?? [],
   });
 }
 
@@ -17,7 +17,7 @@ async function getOrgUsersByIds(userIds?: string[], orgId?: string): Promise<Use
   return axios({
     method: 'post',
     url: `/agile/v1/users/projects/${orgId ?? getOrganizationId()}/list_by_ids`,
-    data: userIds,
+    data: userIds ?? [],
   });
 }
 export async function withSelectedUsers(promise: Promise<{
@@ -96,7 +96,7 @@ class UserApi extends Api<UserApi> {
         page: page || 1,
         size: size ?? 20,
       },
-      data: userIds,
+      data: userIds ?? [],
     }), {
       page: page || 1,
       userIds,
@@ -133,7 +133,7 @@ class UserApi extends Api<UserApi> {
         page: page || 1,
         size: size || 20,
       },
-      data: userIds,
+      data: userIds ?? [],
     }), {
       isOrg: true,
       page: page || 1,
