@@ -143,9 +143,7 @@ const CreateComponent: React.FC<Props> = ({
         ds?.current?.get('defaultAssigneeRole') === '模块负责人' && (
         <SelectUser
           name="managerId"
-          autoQueryConfig={{
-            selectedUserIds: component?.managerId ? [component.managerId as string] : [],
-          }}
+          selected={component?.managerId ? [component.managerId as string] : []}
         />
         )
       }

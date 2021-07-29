@@ -96,7 +96,7 @@ function CustomField({ field }) {
           field={field}
           value={value}
           onChange={handleChange}
-          request={({ filter, page }) => userApi.project(projectId).getAllInProjectIncludesLeaveUsers(filter, page)}
+          request={({ filter, page, requestArgs }) => userApi.project(projectId).getAllInProjectIncludesLeaveUsers(filter, page, requestArgs?.selectedUserIds)}
         />
       );
     case 'reporterIds':
@@ -106,7 +106,7 @@ function CustomField({ field }) {
           field={field}
           value={value}
           onChange={handleChange}
-          request={({ filter, page }) => commonApi.project(projectId).getIssueReports(page, filter, undefined)}
+          request={({ filter, page, requestArgs }) => commonApi.project(projectId).getIssueReports(page, filter, requestArgs?.selectedUserIds)}
         />
       );
     case 'sprint':

@@ -13,7 +13,7 @@ function MemberField({
       key={code}
       flat
       value={value || []}
-      autoQueryConfig={{ selectedUserIds: defaultValue }}
+      selected={defaultValue}
       placeholder={name}
       multiple
       maxTagCount={3}

@@ -2,6 +2,7 @@ import { axios, stores } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import { IRole } from '@/common/types';
 import Api from './Api';
+import { withSelectedUsers } from './User';
 
 const { AppState } = stores;
 class CommonApi extends Api<CommonApi> {
@@ -13,17 +14,20 @@ class CommonApi extends Api<CommonApi> {
    * 查询项目所有报告人
    * @param page
    * @param param  查询词
-   * @param userId  后端不处理
+   * @param userIds
    */
-  getIssueReports(page: number = 1, param: string, userId: number | undefined) {
-    return axios({
+  getIssueReports(page: number = 1, param: string, userIds?: string[]) {
+    return withSelectedUsers(axios({
       method: 'get',
       url: `${this.prefix}/issues/reporters`,
       params: {
         page,
-        // userId,
         param,
       },
+    }), {
+      userIds,
+      page,
+      projectId: this.projectId,
     });
   }
 
@@ -96,7 +100,7 @@ class CommonApi extends Api<CommonApi> {
  * @param {string|number} projectId 项目 @default 当前项目
  * @returns {Array} 角色列表数据
  */
-  getRoles(roleName: string = '', enable = true, projectId?: string | number):Promise<IRole[]> {
+  getRoles(roleName: string = '', enable = true, projectId?: string | number): Promise<IRole[]> {
     return this.request({
       method: 'get',
       url: `iam/choerodon/v1/projects/${projectId || getProjectId()}/roles`,
