@@ -282,7 +282,7 @@ public class IssueController {
     public ResponseEntity<List<IssueSearchVO>> batchIssueToVersion(@ApiParam(value = "项目id", required = true)
                                                                     @PathVariable(name = "project_id") Long projectId,
                                                                    @ApiParam(value = "versionId", required = true)
-                                                                    @PathVariable @Encrypt Long versionId,
+                                                                    @PathVariable @Encrypt(ignoreValue = {"0"}) Long versionId,
                                                                    @ApiParam(value = "issue id", required = true)
                                                                     @RequestBody @Encrypt List<Long> issueIds) {
         return Optional.ofNullable(issueService.batchIssueToVersion(projectId, versionId, issueIds))
