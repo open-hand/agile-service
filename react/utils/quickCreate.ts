@@ -69,7 +69,7 @@ export function getQuickCreateDefaultObj(defaultValues?: IQuickCreateDefaultValu
     priorityId: defaultValues.priorityId || 0,
     projectId: defaultValues.projectId || getProjectId(),
     programId: defaultValues.projectId || getProjectId(),
-    epicId: defaultValues.epicId || 0,
+    epicId: defaultValues.epicId || fieldsMap.get('epic')?.defaultValue || 0,
     parentIssueId: defaultValues.parentIssueId || 0,
     relateIssueId: defaultValues.relateIssueId || 0,
     sprintId: defaultValues.sprintId || fieldsMap.get('sprint')?.defaultValue || 0,
