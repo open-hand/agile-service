@@ -13,7 +13,6 @@ export default function useIssueCreateFields(config: IssueCreateFieldsConfig): [
   const fieldsKey = useProjectKey({ key: ['issue-create-fields', { issueTypeId }], projectId });
   const templateKey = useProjectKey({ key: ['issue-create description-template', { issueTypeId }], projectId });
   const pageCascadeRuleList = useProjectKey({ key: ['issue-create pageCascadeRuleList', { issueTypeId }], projectId });
-  const requiredNoPermissionList = useProjectKey({ key: ['issue-create requiredNoPermissionList', { issueTypeId }], projectId });
 
   // @ts-ignore
   return useQueries([{
@@ -34,11 +33,6 @@ export default function useIssueCreateFields(config: IssueCreateFieldsConfig): [
   }, {
     queryKey: pageCascadeRuleList,
     queryFn: () => pageConfigApi.getCascadeRuleList(issueTypeId, projectId),
-    keepPreviousData: true, // ?
-    enabled: !!issueTypeId,
-  }, {
-    queryKey: requiredNoPermissionList,
-    queryFn: () => pageConfigApi.loadRequiredPermission({ issueTypeId }),
     keepPreviousData: true, // ?
     enabled: !!issueTypeId,
   },
