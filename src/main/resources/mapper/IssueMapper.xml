@@ -590,9 +590,6 @@
                 </otherwise>
             </choose>
         </if>
-        <if test="orderStr != null">
-            order by ${orderStr}
-        </if>
     </select>
 
     <select id="queryIssueIdsListWithSub" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
@@ -604,7 +601,8 @@
             ai1.assignee_id,
             ai1.last_update_date,
             ai1.issue_num1 as issue_num,
-            ai1.issue_type_id
+            ai1.issue_type_id,
+            ai1.estimated_start_time
         from (
             select
                 t1.issue_issue_id as issue_id,

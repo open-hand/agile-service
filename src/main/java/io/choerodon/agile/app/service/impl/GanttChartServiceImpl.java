@@ -64,8 +64,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         if (ObjectUtils.isEmpty(issueIds)) {
             return new ArrayList<>();
         }
-        String orderStr = "issue_num_convert desc";
-        List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(projectId, new ArrayList<>(issueIds), null, orderStr, false);
+        List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(projectId, new ArrayList<>(issueIds), null, false);
         Map<Long, Date> completedDateMap =
                 issueMapper.selectActuatorCompletedDateByIssueIds(new ArrayList<>(issueIds), projectId)
                         .stream()
@@ -107,10 +106,10 @@ public class GanttChartServiceImpl implements GanttChartService {
                 if (isTreeView) {
                     childrenIds.addAll(issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds()));
                 }
-                HashMap<String, String> order = new HashMap<>();
+                HashMap<String, String> order = new HashMap<>(1);
                 order.put("issueNum", "issue_num_convert");
                 Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", order);
-                List<IssueDTO> issueDTOList = PageHelper.doSort(sort, () -> issueMapper.selectWithSubByIssueIds(projectId, issueIds, childrenIds, null, isTreeView));
+                List<IssueDTO> issueDTOList = PageHelper.doSort(sort, () -> issueMapper.selectWithSubByIssueIds(projectId, issueIds, childrenIds, isTreeView));
                 issueIds.addAll(childrenIds);
                 Map<Long, Date> completedDateMap =
                         issueMapper.selectActuatorCompletedDateByIssueIds(issueIds, projectId)
