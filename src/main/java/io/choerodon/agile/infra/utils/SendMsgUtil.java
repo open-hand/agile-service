@@ -26,7 +26,6 @@ import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.app.service.NoticeService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
-import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
@@ -64,6 +63,7 @@ public class SendMsgUtil {
     private static final String FEATURE_URL_TEMPLATE2 = "&name=";
     private static final String FEATURE_URL_TEMPLATE4 = "&organizationId=";
     private static final String ISSUE_SOLVE = "ISSUESOLVE";
+    private static final String ISSUE_CREATE = "ISSUECREATE";
     @Autowired
     private SiteMsgUtil siteMsgUtil;
 
@@ -95,7 +95,7 @@ public class SendMsgUtil {
     public void sendMsgByIssueCreate(Long projectId, IssueVO result, Long operatorId) {
         //发送消息
         if (SchemeApplyType.AGILE.equals(result.getApplyType())) {
-            List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUECREATE", result);
+            List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_CREATE, result);
             String summary = result.getIssueNum() + "-" + result.getSummary();
             String reporterName = result.getReporterName();
             ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
@@ -135,7 +135,7 @@ public class SendMsgUtil {
         if (SchemeApplyType.AGILE.equals(result.getApplyType())) {
             IssueVO issueVO = new IssueVO();
             issueVO.setReporterId(result.getReporterId());
-            List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUECREATE", issueVO);
+            List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_CREATE, issueVO);
             String summary = result.getIssueNum() + "-" + result.getSummary();
             String reporterName = result.getReporterName();
             ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
@@ -257,16 +257,16 @@ public class SendMsgUtil {
         ids[0] = issueDTO.getAssigneeId();
         ids[1] = userDetails.getUserId();
         ids[2] = issueDTO.getReporterId();
-        List<UserDTO> userDTOList = userService.listUsersByIds(ids);
+        Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(Arrays.asList(ids), true);
         Boolean isProgram = Objects.equals(issueDTO.getApplyType(), "program");
         String actionType = Boolean.TRUE.equals(isProgram) ? "报告的" : "经办的";
-        String assigneeName = userDTOList.stream().filter(user -> Objects.equals(user.getId(), Boolean.TRUE.equals(isProgram) ? issueDTO.getReporterId(): issueDTO.getAssigneeId()))
-                .findFirst().map(UserDTO::getRealName).orElse("");
+        UserMessageDTO assignee = Boolean.TRUE.equals(isProgram) ? usersMap.get(issueDTO.getReporterId()) : usersMap.get(issueDTO.getAssigneeId());
+        String assigneeName = !Objects.isNull(assignee) ? assignee.getName() : "";
         // 设置概要
         String summary = issueDTO.getIssueNum() + "-" + issueDTO.getSummary();
         // 设置操作人
-        String operatorName = userDTOList.stream().filter(user -> Objects.equals(user.getId(), userDetails.getUserId()))
-                .findFirst().map(UserDTO::getRealName).orElse("");
+        UserMessageDTO operator = usersMap.get(userDetails.getUserId());
+        String operatorName = !Objects.isNull(operator) ? operator.getName() : "";
         // 设置状态
         String status = ConvertUtil.getIssueStatusMap(projectId).get(issueDTO.getStatusId()).getName();
         // 设置url
@@ -497,7 +497,7 @@ public class SendMsgUtil {
     public void sendMsgToCustomFieldUsersByIssueCreate(Long projectId, IssueVO result, Long operatorId) {
         //问题创建通知自定义字段人员（普通创建、快速创建、问题导入）
         if (SchemeApplyType.AGILE.equals(result.getApplyType())) {
-            List<Long> userIds = noticeService.queryCustomFieldUserIdsByProjectId(projectId, "ISSUECREATE", result);
+            List<Long> userIds = noticeService.queryCustomFieldUserIdsByProjectId(projectId, ISSUE_CREATE, result);
             String summary = result.getIssueNum() + "-" + result.getSummary();
             String reporterName = result.getReporterName();
             ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);

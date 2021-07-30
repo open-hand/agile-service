@@ -350,7 +350,7 @@ public class SiteMsgUtil {
             argsMap.put(URL, url);
             argsMap.put(COMMENT, comment);
             argsMap.put(ACTION, action);
-            argsMap.put(COMMENT_USER, issueCommentVO.getUserRealName());
+            argsMap.put(COMMENT_USER, issueCommentVO.getUserName());
             argsMap.put(COMMENT_TYPE, replyAble ? "回复" : "评论");
             argsMap.put(ISSUE_TYPE, issueType);
             if (operator != null) {
