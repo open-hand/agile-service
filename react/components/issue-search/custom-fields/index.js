@@ -238,7 +238,6 @@ function CustomField({ field }) {
           field={field}
           value={value}
           onChange={handleChange}
-          request={({ filter, page }) => userApi.project(projectId).getAllInProject(filter, page).then((UserData) => ({ ...UserData, list: UserData.list.filter((user) => user.enabled) }))}
         />
       );
     case 'number':
