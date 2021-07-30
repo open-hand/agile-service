@@ -18,7 +18,6 @@ import useFieldRequiredNoPermission from '@/hooks/data/useFieldRequiredNoPermiss
 import CopyRequired from './copy-required';
 import styles from './CopyIssue.less';
 import { RequiredFieldDs } from '../required-field/useRequiredFieldDataSet';
-import WarnInfoBlock from '../warn-info-block';
 
 const { Option } = Select;
 const systemFieldsMap = new Map([
@@ -178,7 +177,6 @@ const CopyIssue: React.FC<Props> = ({
     }
     return false;
   }, [applyType, copyIssueDataSet, finalFields, isInProgram, issue.issueId, issue.typeCode, onOk]);
-  const { data: requiredNoPermissionList = [] } = useFieldRequiredNoPermission({ issueTypeId: issue.issueTypeId, issueId: issue.issueId });
   useEffect(() => {
     modal.handleOk(handleSubmit);
   }, [handleSubmit, modal]);
@@ -227,21 +225,9 @@ const CopyIssue: React.FC<Props> = ({
     setFinalFields(arr);
   }, [copyFields, isInProgram, issue]);
 
-  useEffect(() => {
-    modal.update({
-      okProps: {
-        disabled: loading || !!requiredNoPermissionList.length,
-      },
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, requiredNoPermissionList.length]);
-
   return (
     <Spin spinning={loading}>
-      <WarnInfoBlock
-        visible={!!requiredNoPermissionList.length}
-        predefineContent={{ type: 'requiredNoPermission', props: { fieldNames: requiredNoPermissionList.map((i) => i.fieldName!) } }}
-      />
+
       <Form style={styles.copyIssue} dataSet={copyIssueDataSet}>
         <TextField name="summary" />
         {

@@ -33,7 +33,6 @@ import IssueLink from './components/issue-link';
 import hooks from './hooks';
 import getFieldConfig from './fields';
 import { insertField } from './utils';
-import WarnInfoBlock from '../warn-info-block';
 
 export interface CreateIssueBaseProps {
   onSubmit: ({ data, fieldList }: {
@@ -232,7 +231,7 @@ const CreateIssueBase = observer(({
 
   const [{ data: fields, isFetching: isFieldsLoading }, {
     data: templateData,
-  }, { data: cascadeRuleList = [] }, { data: requiredNoPermissionList = [] }] = useIssueCreateFields({ issueTypeId, projectId });
+  }, { data: cascadeRuleList = [] }] = useIssueCreateFields({ issueTypeId, projectId });
   const fieldValueArr = usePersistFn((field: IssueCreateFields) => {
     let value = castArray(getValue(dataSet, field.fieldCode));
     const preset = presets.get(field.fieldCode);
@@ -624,16 +623,9 @@ const CreateIssueBase = observer(({
       },
     },
   }), []);
-  useEffect(() => {
-    modal?.update({ okProps: { disabled: !!requiredNoPermissionList.length } });
-  }, [requiredNoPermissionList.length]);
+
   return (
     <Spin spinning={isLoading || isFieldsLoading}>
-      <WarnInfoBlock
-        visible={!!requiredNoPermissionList.length}
-        mode="simple"
-        predefineContent={{ type: 'requiredNoPermission', props: { fieldNames: requiredNoPermissionList.map((i) => i.fieldName) } }}
-      />
       <Form
         dataSet={dataSet}
       >
