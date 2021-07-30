@@ -2828,15 +2828,17 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public Page<UserDTO> pagingQueryUsers(PageRequest pageRequest, Long projectId, String param) {
+    public Page<UserDTO> pagingQueryUsers(PageRequest pageRequest, Long projectId, String param, Set<Long> ignoredUserIds) {
         Set<Long> userIds = issueMapper.selectUserIdsByProjectIds(Arrays.asList(projectId));
-        return baseFeignClient.agileUsers(projectId, pageRequest.getPage(), pageRequest.getSize(), param, userIds).getBody();
+        AgileUserVO agileUserVO = new AgileUserVO(userIds, null,  param, null, ignoredUserIds);
+        return baseFeignClient.agileUsers(projectId, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
     }
 
     @Override
-    public Page<UserDTO> pagingQueryReporters(PageRequest pageRequest, Long projectId, String param) {
+    public Page<UserDTO> pagingQueryReporters(PageRequest pageRequest, Long projectId, String param, Set<Long> ignoredUserIds) {
         Set<Long> userIds = issueMapper.selectReporterIdsByProjectId(projectId);
-        return baseFeignClient.agileUsers(projectId, pageRequest.getPage(), pageRequest.getSize(), param, userIds).getBody();
+        AgileUserVO agileUserVO = new AgileUserVO(userIds, null,  param, null, ignoredUserIds);
+        return baseFeignClient.agileUsers(projectId, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
     }
 
     @Override

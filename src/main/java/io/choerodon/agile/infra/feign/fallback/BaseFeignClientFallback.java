@@ -50,7 +50,7 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     }
 
     @Override
-    public ResponseEntity<Page<UserDTO>> agileUsers(Long projectId, int page, int size, String param, Set<Long> userIds) {
+    public ResponseEntity<Page<UserDTO>> agileUsers(Long projectId, int page, int size, AgileUserVO agileUserVO) {
         throw new CommonException(QUERY_ERROR);
     }
 

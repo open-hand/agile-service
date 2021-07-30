@@ -67,10 +67,9 @@ public interface BaseFeignClient {
 
     @PostMapping(value = "/choerodon/v1/projects/{id}/agile_users")
     ResponseEntity<Page<UserDTO>> agileUsers(@PathVariable("id") Long projectId,
-                                                 @RequestParam("page") int page,
-                                                 @RequestParam("size") int size,
-                                                 @RequestParam("param") String param,
-                                                 @RequestBody Set<Long> userIds);
+                                             @RequestParam("page") int page,
+                                             @RequestParam("size") int size,
+                                             @RequestBody AgileUserVO agileUserVO);
 
     /**
      * 根据projectId和param模糊查询loginName和realName两列
