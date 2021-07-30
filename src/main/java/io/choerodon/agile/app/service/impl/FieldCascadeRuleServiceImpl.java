@@ -600,11 +600,11 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         Page<UserDTO> result;
         if (CollectionUtils.isEmpty(cascadeFieldOptionSearchVO.getFieldCascadeRuleIds())) {
             Set<Long> visibleOptionIds = fieldCascadeRuleOptionMapper.selectVisibleOptionIds(projectId, cascadeFieldOptionSearchVO.getFieldCascadeRuleIds());
+            AgileUserVO agileUserVO = new AgileUserVO(visibleOptionIds, null, cascadeFieldOptionSearchVO.getSearchParam(), null, null);
             result = baseFeignClient.agileUsers(
                     projectId,
                     pageRequest.getPage(), pageRequest.getSize(),
-                    cascadeFieldOptionSearchVO.getSearchParam(),
-                    visibleOptionIds).getBody();
+                    agileUserVO).getBody();
         } else {
             result = baseFeignClient.listUsersByProjectId(
                     projectId,

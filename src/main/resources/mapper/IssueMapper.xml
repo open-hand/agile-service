@@ -3980,6 +3980,7 @@
         ai.estimated_end_time,
         ai.assignee_id,
         ai.reporter_id,
+        ai.main_responsible_id,
         ai.project_id
         from agile_issue ai
         left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id

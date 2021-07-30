@@ -129,6 +129,13 @@ public class NoticeServiceImpl implements NoticeService {
         }
     }
 
+    private void addUsersByMainResponsible(List<String> res, List<Long> result, IssueVO issueVO) {
+        Long mainResponsibleId = issueVO.getMainResponsibleId();
+        if (res.contains("mainResponsible") && mainResponsibleId != null && !result.contains(mainResponsibleId)) {
+            result.add(mainResponsibleId);
+        }
+    }
+
     private void addUsersByProjectOwner(Long projectId, List<String> res, List<Long> result) {
         if (res.contains("projectOwner")) {
             List<UserVO> userDTOS = userService.listProjectAdminUsersByProjectId(projectId);
@@ -202,6 +209,7 @@ public class NoticeServiceImpl implements NoticeService {
         List<Long> result = new ArrayList<>();
         addUsersByReporter(res, result, issueVO);
         addUsersByAssigneer(res, result, issueVO);
+        addUsersByMainResponsible(res, result, issueVO);
         addUsersByProjectOwner(projectId, res, result);
         addUsersByUsers(res, result, users);
         //通知增加关注人

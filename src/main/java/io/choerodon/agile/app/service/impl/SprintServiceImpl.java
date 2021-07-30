@@ -742,7 +742,7 @@ public class SprintServiceImpl implements SprintService {
         // 统计冲刺的总问题数
         Map<Long, Integer> issueCountMap = new HashMap<>();
         List<IssueCountDTO> issueCountDTOList = sprintMapper.selectCountBySprintIds(projectId, sprintIds, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
-        if (!CollectionUtils.isEmpty(assigneeIds)) {
+        if (!CollectionUtils.isEmpty(issueCountDTOList)) {
             issueCountMap.putAll(issueCountDTOList.stream().collect(Collectors.toMap(IssueCountDTO::getId, IssueCountDTO::getIssueCount)));
         }
         // 查询冲刺中issue的统计数量

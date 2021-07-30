@@ -18,12 +18,13 @@ class CommonApi extends Api<CommonApi> {
    */
   getIssueReports(page: number = 1, param: string, userIds?: string[]) {
     return withSelectedUsers(axios({
-      method: 'get',
+      method: 'post',
       url: `${this.prefix}/issues/reporters`,
       params: {
         page,
         param,
       },
+      data: userIds,
     }), {
       userIds,
       page,

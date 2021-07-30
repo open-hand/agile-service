@@ -34,6 +34,7 @@ import io.choerodon.swagger.annotation.CustomPageRequest;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * 敏捷开发Issue
@@ -587,27 +588,29 @@ public class IssueController {
     @CustomPageRequest
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询项目所有经办人")
-    @GetMapping(value = "/users")
+    @PostMapping(value = "/users")
     public ResponseEntity<Page<UserDTO>> pagingQueryUsers(@ApiIgnore
-                                                              @ApiParam(value = "分页信息", required = true)
-                                                              PageRequest pageRequest,
-                                                              @ApiParam(value = "项目id", required = true)
-                                                              @PathVariable(name = "project_id") Long projectId,
-                                                              @RequestParam(value = "param", required = false) String param) {
-        return ResponseEntity.ok(issueService.pagingQueryUsers(pageRequest, projectId, param));
+                                                          @ApiParam(value = "分页信息", required = true)
+                                                          PageRequest pageRequest,
+                                                          @ApiParam(value = "项目id", required = true)
+                                                          @PathVariable(name = "project_id") Long projectId,
+                                                          @RequestParam(value = "param", required = false) String param,
+                                                          @RequestBody(required = false) @Encrypt Set<Long> ignoredUserIds) {
+        return ResponseEntity.ok(issueService.pagingQueryUsers(pageRequest, projectId, param, ignoredUserIds));
     }
 
     @CustomPageRequest
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询项目所有报告人")
-    @GetMapping(value = "/reporters")
+    @PostMapping(value = "/reporters")
     public ResponseEntity<Page<UserDTO>> pagingQueryReporters(@ApiIgnore
-                                                                  @ApiParam(value = "分页信息", required = true)
-                                                                  PageRequest pageRequest,
-                                                                  @ApiParam(value = "项目id", required = true)
-                                                                  @PathVariable(name = "project_id") Long projectId,
-                                                                  @RequestParam(value = "param", required = false) String param) {
-        return ResponseEntity.ok(issueService.pagingQueryReporters(pageRequest, projectId, param));
+                                                              @ApiParam(value = "分页信息", required = true)
+                                                              PageRequest pageRequest,
+                                                              @ApiParam(value = "项目id", required = true)
+                                                              @PathVariable(name = "project_id") Long projectId,
+                                                              @RequestParam(value = "param", required = false) String param,
+                                                              @RequestBody(required = false) @Encrypt Set<Long> ignoredUserIds) {
+        return ResponseEntity.ok(issueService.pagingQueryReporters(pageRequest, projectId, param, ignoredUserIds));
     }
 
     @CustomPageRequest

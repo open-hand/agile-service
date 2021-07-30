@@ -297,7 +297,7 @@ public interface IssueService {
      * @param param
      * @return
      */
-    Page<UserDTO> pagingQueryUsers(PageRequest pageRequest, Long projectId, String param);
+    Page<UserDTO> pagingQueryUsers(PageRequest pageRequest, Long projectId, String param, Set<Long> ignoredUserIds);
 
     /**
      * 分页查询项目下的项目成员和分配过问题的报告人
@@ -307,7 +307,7 @@ public interface IssueService {
      * @param param
      * @return
      */
-    Page<UserDTO> pagingQueryReporters(PageRequest pageRequest, Long projectId, String param);
+    Page<UserDTO> pagingQueryReporters(PageRequest pageRequest, Long projectId, String param, Set<Long> ignoredUserIds);
 
     /**
      * 删除自己的创建的Issue
