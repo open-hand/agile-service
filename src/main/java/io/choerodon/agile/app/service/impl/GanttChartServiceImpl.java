@@ -93,10 +93,10 @@ public class GanttChartServiceImpl implements GanttChartService {
             boardAssembler.handleOtherArgs(searchVO);
             String orderStr = "issue_num_convert desc";
             boolean isTreeView =
-                    !Boolean.FALSE.equals(
+                    Boolean.TRUE.equals(
                             Optional.ofNullable(searchVO.getSearchArgs())
                                     .map(x -> x.get("tree"))
-                                    .orElse(false));
+                                    .orElse(true));
             Page<IssueDTO> page =
                     PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), orderStr, isTreeView));
             List<Long> issueIds = page.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
