@@ -6,29 +6,37 @@
     height: .8rem;
   }
 
-  &-hidden {
-    position: absolute;
-    z-index: 999;
-    top: 0;
-
-    .c7n-agile-animation-loading-container {
-      display: none;
-    }
-  }
-
   &-no-children {
 
-    position: relative;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    clear: both;
+    overflow: hidden;
 
     .c7n-agile-animation-loading-container {
-      position: absolute;
+      position: relative;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
       z-index: 999;
+      background-color: rgba(255, 255, 255, .2);
+      // opacity: 0.2;
       // width: 100%;
       // height: 100%;
+    }
+  }
+
+  &-hidden {
+    position: absolute;
+    z-index: 999;
+    width: 0;
+    height: 0;
+    top: 0;
+
+    .c7n-agile-animation-loading-container {
+      display: none;
     }
   }
 
