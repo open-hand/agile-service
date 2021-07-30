@@ -53,6 +53,7 @@ public class IssueDelaySendMessageTask {
     private static final String PROJECT_OWNER = "projectOwner";
     private static final String ASSIGNEE = "assignee";
     private static final String REPORTER = "reporter";
+    private static final String MAIN_RESPONSIBLE = "mainResponsible";
     private static final String SPECIFIER = "specifier";
     private static final String STAR_USER = "starUser";
     private static final String DELAY_COUNT = "delayCount";
@@ -323,8 +324,9 @@ public class IssueDelaySendMessageTask {
                         Duration.between(estimatedEndDate, localDateTime).toDays() + 1 : 0;
                 Map<String, Set<Long>> userTypeMap = new HashMap<>();
                 if (receiverTypes != null) {
-                    addAssigneeAndReporter(ASSIGNEE, x.getAssigneeId(), userTypeMap, userIds);
-                    addAssigneeAndReporter(REPORTER, x.getReporterId(), userTypeMap, userIds);
+                    addSystemUserType(ASSIGNEE, x.getAssigneeId(), userTypeMap, userIds);
+                    addSystemUserType(REPORTER, x.getReporterId(), userTypeMap, userIds);
+                    addSystemUserType(MAIN_RESPONSIBLE, x.getMainResponsibleId(), userTypeMap, userIds);
                     userTypeMap.put(SPECIFIER, projectMessageVO.getUserIds());
                     if (receiverTypes.contains(PROJECT_OWNER)) {
                         projectIdForProjectOwner.add(projectId);
@@ -363,7 +365,7 @@ public class IssueDelaySendMessageTask {
         }
     }
 
-    private void addAssigneeAndReporter(String userType, Long userId, Map<String, Set<Long>> userTypeMap, Set<Long> userIds) {
+    private void addSystemUserType(String userType, Long userId, Map<String, Set<Long>> userTypeMap, Set<Long> userIds) {
         if (userId != null && !Objects.equals(0L, userId)) {
             userIds.add(userId);
             userTypeMap.put(userType, Collections.singleton(userId));

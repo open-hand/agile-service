@@ -420,6 +420,7 @@ public class SendMsgUtil {
                 }
             });
         }
+        map.put(issueVO.getMainResponsibleId(), "负责的");
         map.put(issueVO.getReporterId(), "负责的");
         map.put(issueVO.getAssigneeId(), "处理的");
         userIds.forEach(sendUserId -> {

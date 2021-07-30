@@ -275,6 +275,10 @@ public class IssueVO {
     @Encrypt
     private List<Long> influenceIssueIds;
 
+    @ApiModelProperty(value = "主要负责人id")
+    @Encrypt
+    private Long mainResponsibleId;
+
     public List<Long> getInfluenceIssueIds() {
         return influenceIssueIds;
     }
@@ -958,5 +962,13 @@ public class IssueVO {
 
     public void setUpdater(UserMessageDTO updater) {
         this.updater = updater;
+    }
+
+    public Long getMainResponsibleId() {
+        return mainResponsibleId;
+    }
+
+    public void setMainResponsibleId(Long mainResponsibleId) {
+        this.mainResponsibleId = mainResponsibleId;
     }
 }
