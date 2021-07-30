@@ -155,6 +155,7 @@ class BacklogHome extends Component {
   render() {
     const arr = BacklogStore.getSprintData;
     const { isInProgram, isShowFeature, theme } = this.props;
+    console.log('BacklogStore.getSpinIf', BacklogStore.getSpinIf);
     return (
       <>
         <Header title="待办事项">
@@ -218,40 +219,20 @@ class BacklogHome extends Component {
           },
         }}
         >
-          <div
-            className="c7n-backlog"
-            style={{
-              flex: 1,
-              overflow: 'hidden',
-            }}
-          >
-            <SideNav onChange={this.toggleCurrentVisible} activeKey={BacklogStore.whichVisible}>
-              <Panel
-                key="version"
-                title="版本"
-                nav={(title) => (BacklogStore.chosenVersion !== 'all'
-                  ? (
-                    <>
-                      {title}
-                      <span className="c7n-backlog-side-tip" />
-                    </>
-                  )
-                  : title)}
-              >
-                <Version
-                  store={BacklogStore}
-                  refresh={this.refresh}
-                  issueRefresh={() => {
-                    this.IssueDetailRef.current.refreshIssueDetail();
-                  }}
-                />
-              </Panel>
-              {!isShowFeature ? (
+          <LoadingProvider loading={BacklogStore.getSpinIf} globalSingle>
+
+            <div
+              className="c7n-backlog"
+              style={{
+                flex: 1,
+                overflow: 'hidden',
+              }}
+            >
+              <SideNav onChange={this.toggleCurrentVisible} activeKey={BacklogStore.whichVisible}>
                 <Panel
-                  key="epic"
-                  title="史诗"
-                  noHeader
-                  nav={(title) => (BacklogStore.chosenEpic !== 'all'
+                  key="version"
+                  title="版本"
+                  nav={(title) => (BacklogStore.chosenVersion !== 'all'
                     ? (
                       <>
                         {title}
@@ -260,42 +241,63 @@ class BacklogHome extends Component {
                     )
                     : title)}
                 >
-                  <Epic
+                  <Version
+                    store={BacklogStore}
                     refresh={this.refresh}
                     issueRefresh={() => {
                       this.IssueDetailRef.current.refreshIssueDetail();
                     }}
                   />
                 </Panel>
-              ) : (
-                <Panel
-                  key="feature"
-                  title="特性"
-                  nav={(title) => (BacklogStore.chosenFeature !== 'all'
-                    ? (
-                      <>
-                        {title}
-                        <span className="c7n-backlog-side-tip" />
-                      </>
-                    )
-                    : title)}
-                >
-                  <Feature
-                    refresh={this.refresh}
-                    isInProgram={isShowFeature}
-                    issueRefresh={() => {
-                      this.IssueDetailRef.current.refreshIssueDetail();
-                    }}
-                  />
-                </Panel>
-              )}
-            </SideNav>
-            <LoadingProvider loading={BacklogStore.getSpinIf} globalSingle>
+                {!isShowFeature ? (
+                  <Panel
+                    key="epic"
+                    title="史诗"
+                    noHeader
+                    nav={(title) => (BacklogStore.chosenEpic !== 'all'
+                      ? (
+                        <>
+                          {title}
+                          <span className="c7n-backlog-side-tip" />
+                        </>
+                      )
+                      : title)}
+                  >
+                    <Epic
+                      refresh={this.refresh}
+                      issueRefresh={() => {
+                        this.IssueDetailRef.current.refreshIssueDetail();
+                      }}
+                    />
+                  </Panel>
+                ) : (
+                  <Panel
+                    key="feature"
+                    title="特性"
+                    nav={(title) => (BacklogStore.chosenFeature !== 'all'
+                      ? (
+                        <>
+                          {title}
+                          <span className="c7n-backlog-side-tip" />
+                        </>
+                      )
+                      : title)}
+                  >
+                    <Feature
+                      refresh={this.refresh}
+                      isInProgram={isShowFeature}
+                      issueRefresh={() => {
+                        this.IssueDetailRef.current.refreshIssueDetail();
+                      }}
+                    />
+                  </Panel>
+                )}
+              </SideNav>
               <div className="c7n-backlog-content">
                 <SprintList openCreateIssueModal={this.openCreateIssueModal} />
               </div>
-            </LoadingProvider>
-          </div>
+            </div>
+          </LoadingProvider>
         </Content>
         <IssueDetail
           refresh={() => this.refresh(false)}

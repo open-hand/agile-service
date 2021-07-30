@@ -8,7 +8,7 @@ import { WindowScroller, List, AutoSizer } from 'react-virtualized';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
 import { usePersistFn } from 'ahooks';
-import Loading from '@/components/Loading';
+import Loading, { LoadingHiddenWrap } from '@/components/Loading';
 import useDeepCompareEffect from '@/hooks/useDeepCompareEffect';
 import { ISSUE_HEIGHT } from './constant';
 import IssueItem from './IssueItem';
@@ -85,7 +85,7 @@ function IssueList({
             ref={provided.innerRef}
           >
             {data.length === 0
-              ? <NoneIssue type={sprintId === 0 ? 'backlog' : 'sprint'} />
+              ? <LoadingHiddenWrap><NoneIssue type={sprintId === 0 ? 'backlog' : 'sprint'} /></LoadingHiddenWrap>
               : (
                 <WindowScroller scrollElement={document.getElementsByClassName('c7n-backlog-content')[0]}>
                   {({ height, scrollTop, registerChild }) => (

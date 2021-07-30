@@ -21,7 +21,6 @@ const LeftChildren: React.FC = () => {
         change('left', true, { allowSelfLoading: true });
 
         setTimeout(() => {
-          console.log('loading.....', false);
           change('left', false, { allowSelfLoading: true });
         }, 300);
       }}
