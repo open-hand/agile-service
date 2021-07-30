@@ -149,13 +149,14 @@ class UserApi extends Api<UserApi> {
    */
   async getAllInProjectIncludesLeaveUsers(param?: string, page?: number, userIds?: string[]) {
     return withSelectedUsers(this.request({
-      method: 'get',
+      method: 'post',
       url: `/agile/v1/projects/${this.projectId}/issues/users`,
       params: {
         param,
         page: page || 1,
         size: 20,
       },
+      data: userIds,
     }), {
       page: page || 1,
       userIds,
