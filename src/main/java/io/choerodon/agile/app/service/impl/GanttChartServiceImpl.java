@@ -16,6 +16,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.utils.PageUtils;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,7 +64,8 @@ public class GanttChartServiceImpl implements GanttChartService {
         if (ObjectUtils.isEmpty(issueIds)) {
             return new ArrayList<>();
         }
-        List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(projectId, new ArrayList<>(issueIds), null, false);
+        String orderStr = "issue_num_convert desc";
+        List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(projectId, new ArrayList<>(issueIds), null, orderStr, false);
         Map<Long, Date> completedDateMap =
                 issueMapper.selectActuatorCompletedDateByIssueIds(new ArrayList<>(issueIds), projectId)
                         .stream()
@@ -98,14 +100,17 @@ public class GanttChartServiceImpl implements GanttChartService {
                                     .map(x -> x.get("tree"))
                                     .orElse(false));
             Page<IssueDTO> page =
-                    PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), orderStr, isTreeView));
+                    PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), orderStr, isTreeView));
             List<Long> issueIds = page.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
             if (!ObjectUtils.isEmpty(issueIds)) {
                 Set<Long> childrenIds = new HashSet<>();
                 if (isTreeView) {
                     childrenIds.addAll(issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds()));
                 }
-                List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(projectId, issueIds, childrenIds, isTreeView);
+                HashMap<String, String> order = new HashMap<>();
+                order.put("issueNum", "issue_num_convert");
+                Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", order);
+                List<IssueDTO> issueDTOList = PageHelper.doSort(sort, () -> issueMapper.selectWithSubByIssueIds(projectId, issueIds, childrenIds, null, isTreeView));
                 issueIds.addAll(childrenIds);
                 Map<Long, Date> completedDateMap =
                         issueMapper.selectActuatorCompletedDateByIssueIds(issueIds, projectId)

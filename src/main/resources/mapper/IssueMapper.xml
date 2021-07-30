@@ -590,7 +590,9 @@
                 </otherwise>
             </choose>
         </if>
-        order by issue_num_convert desc
+        <if test="orderStr != null">
+            order by ${orderStr}
+        </if>
     </select>
 
     <select id="queryIssueIdsListWithSub" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
