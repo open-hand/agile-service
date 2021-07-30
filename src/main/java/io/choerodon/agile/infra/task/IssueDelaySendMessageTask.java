@@ -58,8 +58,8 @@ public class IssueDelaySendMessageTask {
     private static final String DELAY_COUNT = "delayCount";
 
     private static final String BACKSLASH_TR = "</tr>";
-    private static final String BACKSLASH_TH = "</th>";
-    private static final String TH = "<th>";
+    private static final String BACKSLASH_TD = "</td>";
+    private static final String TD = "<td>";
     private static final String TR = "<tr>";
 
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -235,31 +235,39 @@ public class IssueDelaySendMessageTask {
             if (dto.getAssigneeId() != null) {
                 UserDTO user = userMap.get(dto.getAssigneeId());
                 if (user != null) {
-                    assignee = user.getRealName();
+                    assignee = getNameByLdap(user);
                 }
             }
             String reporter = "";
             if (dto.getReporterId() != null) {
                 UserDTO user = userMap.get(dto.getReporterId());
                 if (user != null) {
-                    reporter = user.getRealName();
+                    reporter = getNameByLdap(user);
                 }
             }
             builder
                     .append(TR)
-                    .append(TH).append("<a href=\"").append(url).append("\" target=\"_blank\">").append(dto.getSummary()).append("</a>").append(BACKSLASH_TH)
-                    .append(TH).append(dto.getIssueNum()).append(BACKSLASH_TH)
-                    .append(TH).append(statusName).append(BACKSLASH_TH)
-                    .append(TH).append(priorityName).append(BACKSLASH_TH)
-                    .append(TH).append(startDate).append(BACKSLASH_TH)
-                    .append(TH).append(endDate).append(BACKSLASH_TH)
-                    .append(TH).append(assignee).append(BACKSLASH_TH)
-                    .append(TH).append(reporter).append(BACKSLASH_TH)
-                    .append(TH).append(vo.getDelayDay()).append(BACKSLASH_TH)
+                    .append(TD).append("<a href=\"").append(url).append("\" target=\"_blank\">").append(dto.getSummary()).append("</a>").append(BACKSLASH_TD)
+                    .append(TD).append(dto.getIssueNum()).append(BACKSLASH_TD)
+                    .append(TD).append(statusName).append(BACKSLASH_TD)
+                    .append(TD).append(priorityName).append(BACKSLASH_TD)
+                    .append(TD).append(startDate).append(BACKSLASH_TD)
+                    .append(TD).append(endDate).append(BACKSLASH_TD)
+                    .append(TD).append(assignee).append(BACKSLASH_TD)
+                    .append(TD).append(reporter).append(BACKSLASH_TD)
+                    .append(TD).append(vo.getDelayDay()).append(BACKSLASH_TD)
                     .append(BACKSLASH_TR);
         }
         builder.append("</table>");
         return builder.toString();
+    }
+
+    private String getNameByLdap(UserDTO userDTO) {
+        if (Boolean.TRUE.equals(userDTO.getLdap())) {
+            return userDTO.getRealName() + "（" + userDTO.getLoginName() + "）";
+        } else {
+            return userDTO.getRealName() + "（" + userDTO.getEmail() + "）";
+        }
     }
 
     private void processProjectOwner(Map<Long, ProjectMessageVO> projectMap, MultiKeyMap multiKeyMap, Map<Long, List<IssueDTO>> issueGroupByProject, Set<Long> userIds, Set<Long> projectIdForProjectOwner, LocalDateTime localDateTime) {
