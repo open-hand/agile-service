@@ -13,7 +13,9 @@ import produce from 'immer';
 import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 import classNames from 'classnames';
-import { usePersistFn, useDebounceFn } from 'ahooks';
+import {
+  usePersistFn, useDebounceFn, useUpdateEffect,
+} from 'ahooks';
 import moment from 'moment';
 import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
@@ -176,12 +178,12 @@ const GanttPage: React.FC = () => {
   const store = useMemo(() => new GanttStore(), []);
   const { sprintIds } = store;
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
-  const { run, cancel } = useDebounceFn(() => {
+  const { run, cancel, flush } = useDebounceFn(() => {
     (async () => {
       const year = dayjs().year();
       const filter = issueSearchStore.getCustomFieldFilters();
+      setData([]);
       if (sprintIds === null) {
-        setData([]);
         return;
       }
       filter.otherArgs.sprint = sprintIds;
@@ -189,7 +191,10 @@ const GanttPage: React.FC = () => {
       const [workCalendarRes, projectWorkCalendarRes, res] = await Promise.all([
         workCalendarApi.getWorkSetting(year),
         workCalendarApi.getYearCalendar(year),
-        ganttApi.loadByTask(filter),
+        ganttApi.loadByTask({
+          ...filter,
+          searchArgs: { tree: type === 'task' },
+        }),
       ]);
       // setColumns(headers.map((h: any) => ({
       //   width: 100,
@@ -208,6 +213,10 @@ const GanttPage: React.FC = () => {
   useEffect(() => {
     run();
   }, [issueSearchStore, sprintIds, run]);
+  useUpdateEffect(() => {
+    run();
+    flush();
+  }, [type]);
   const handleUpdate = useCallback<GanttProps<Issue>['onUpdate']>(async (issue, startDate, endDate) => {
     try {
       await issueApi.update({
