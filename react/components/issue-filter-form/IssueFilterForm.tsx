@@ -206,6 +206,7 @@ const IssueFilterForm: React.FC = () => {
                   style={{
                     color: 'var(--primary-color)',
                     cursor: 'pointer',
+                    fontSize: '20px',
                   }}
                   onClick={() => {
                     const { onDelete } = props;
