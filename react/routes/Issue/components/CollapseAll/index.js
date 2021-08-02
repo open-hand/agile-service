@@ -1,6 +1,6 @@
 import React from 'react';
-import { Icon } from 'choerodon-ui/pro';
-import { Button } from 'choerodon-ui/pro';
+import { Icon, Button } from 'choerodon-ui/pro';
+
 import { observer } from 'mobx-react-lite';
 
 function CollapseAll({
@@ -14,7 +14,7 @@ function CollapseAll({
   return (
     <Button
       {...otherProps}
-      funcType="flat"
+      // funcType="flat"
       onClick={() => {
         expandAll(!isExpandAll);
       }}

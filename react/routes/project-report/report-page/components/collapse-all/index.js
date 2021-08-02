@@ -14,19 +14,20 @@ function CollapseAll({ ...otherProps }) {
   return (
     <Button
       {...otherProps}
-      funcType="flat"
+      // color="primary"
+      // funcType="flat"
       onClick={() => {
         store.collapseAll(!hasCollapse);
       }}
     >
       <span>{!hasCollapse ? '全部收起' : '全部展开' }</span>
-      <Icon
+      {/* <Icon
         type="baseline-arrow_drop_up"
         style={{
           transform: !hasCollapse ? undefined : 'rotate(180deg)',
           transition: 'transform 0.3s',
         }}
-      />
+      /> */}
     </Button>
 
   );

@@ -4,8 +4,9 @@ import React, {
 import { observer } from 'mobx-react-lite';
 import {
   Form, DataSet, Table, TextField,
+  Icon,
 } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui/pro';
+
 import renderSummary from '@/components/column-renderer/summary';
 import renderStatus from '@/components/column-renderer/status';
 import renderPriority from '@/components/column-renderer/priority';
