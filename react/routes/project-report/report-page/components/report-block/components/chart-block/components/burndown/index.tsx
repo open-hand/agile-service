@@ -23,7 +23,7 @@ const BurnDownComponent: React.FC<Props> = ({ filter, onFinish }) => {
         option={{
           animation: false,
           grid: {
-            top: 40,
+            top: 60,
             bottom: 0,
             left: 0,
             right: 30,
