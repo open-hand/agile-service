@@ -111,7 +111,7 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
 
   const handleSubmit = usePersistFn(async () => {
     const issueTypeIdValidate = await issueTypeIdDataSet.validate();
-    const validate = requiredFieldDsArr[0]?.dataSet ? await requiredFieldDsArr[0]?.dataSet.validate() : true;
+    const validate = requiredFieldDsArr[0]?.dataSet ? await requiredFieldDsArr[0]?.dataSet.current?.validate() : true;
     if (issueTypeIdValidate && validate) {
       const submitData = requiredFields.length ? {
         issueId: issueVO.issueId,
@@ -182,14 +182,6 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
           />
         )
       }
-
-      {/* <Form dataSet={changeTypeDataSet} columns={2} style={{ marginLeft: -5 }}>
-        {
-        (loading ? [] : requiredFields).map((item) => (renderField({
-          field: item, otherComponentProps: {}, dataSet: changeTypeDataSet, isInProgram,
-        })))
-      }
-      </Form> */}
     </>
   );
 };
