@@ -16,6 +16,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.utils.PageUtils;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -105,7 +106,10 @@ public class GanttChartServiceImpl implements GanttChartService {
                 if (isTreeView) {
                     childrenIds.addAll(issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds()));
                 }
-                List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(projectId, issueIds, childrenIds, isTreeView);
+                HashMap<String, String> order = new HashMap<>(1);
+                order.put("issueNum", "issue_num_convert");
+                Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", order);
+                List<IssueDTO> issueDTOList = PageHelper.doSort(sort, () -> issueMapper.selectWithSubByIssueIds(projectId, issueIds, childrenIds, isTreeView));
                 issueIds.addAll(childrenIds);
                 Map<Long, Date> completedDateMap =
                         issueMapper.selectActuatorCompletedDateByIssueIds(issueIds, projectId)
