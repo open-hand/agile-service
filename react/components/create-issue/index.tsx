@@ -5,6 +5,7 @@ import { IModalProps, Issue } from '@/common/types';
 import { fieldApi, issueApi } from '@/api';
 import { uploadAttachment } from '@/utils/richText';
 import { omit } from 'lodash';
+import localCacheStore from '@/stores/common/LocalCacheStore';
 import BaseComponent, { CreateIssueBaseProps } from './BaseComponent';
 
 export interface CreateIssueProps extends Omit<CreateIssueBaseProps, 'onSubmit'> {
@@ -27,6 +28,7 @@ const openModal = (props: CreateIssueProps) => {
     }
     onCreate(res);
   };
+  const defaultIssueTypeId = localCacheStore.getItem('agile.issue.type.common.selected');
   Modal.open({
     drawer: true,
     style: {
@@ -35,7 +37,7 @@ const openModal = (props: CreateIssueProps) => {
     key: 'create-issue',
     title: '创建问题',
     okText: '创建',
-    children: <BaseComponent onSubmit={handleSubmit} {...omit(props, 'onSubmit')} />,
+    children: <BaseComponent onSubmit={handleSubmit} defaultTypeId={defaultIssueTypeId} {...omit(props, 'onSubmit')} />,
   });
 };
 export default openModal;

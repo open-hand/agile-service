@@ -155,7 +155,6 @@ class BacklogHome extends Component {
   render() {
     const arr = BacklogStore.getSprintData;
     const { isInProgram, isShowFeature, theme } = this.props;
-    console.log('BacklogStore.getSpinIf', BacklogStore.getSpinIf);
     return (
       <>
         <Header title="待办事项">
