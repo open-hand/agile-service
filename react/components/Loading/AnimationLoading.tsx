@@ -63,7 +63,7 @@ export function useLoading() {
 export const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
   const [loadMaps, { set: setMap, remove: removeMap, setAll }] = useMap<string, { status: 'init' | 'ready' | 'doing' } & ILoadingRegisterChildrenData>();
   const [globalLoading, setGlobalLoading] = useSafeState(false);
-  const currentLoadingTrigger = useRef<string>(); // 记录触发Loading层级
+  const globalLoadingTrigger = useRef<string>(); // 记录触发Loading层级
   const globalLoadId = useCreation(() => props.loadId || 'parent-provider', []);
   const handleChangeGlobal = useCallback((newLoading: boolean) => {
     setGlobalLoading(() => {
@@ -74,20 +74,25 @@ export const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
           value.changeLoading(false);
           return ([key, { ...value, status: 'init' }]);
         }));
-        currentLoadingTrigger.current = globalLoadId;
+        globalLoadingTrigger.current = globalLoadId;
         return true;
       }
-      currentLoadingTrigger.current = undefined;
+      globalLoadingTrigger.current = undefined;
       return false;
     });
   }, []);
   const handleChange = useCallback((loadId: string, newLoading: boolean, extraConfig?: ILoadingChangeExtraConfig) => {
+    console.log('----------------------start-----------------------------------');
     // 全局 Loading 状态更改调用全局方法
     if (loadId === globalLoadId) {
       handleChangeGlobal(newLoading);
+      console.log('----------------------end-----------------------------------');
+
       return;
     }
     const childrenLoad = loadMaps.get(loadId);
+    console.log(childrenLoad, 'start..handleChange', loadId, newLoading, extraConfig, loadMaps);
+
     if (childrenLoad) {
       // if (props.globalSingle) {
       //   childrenLoad.changeLoading(newLoading);
@@ -95,26 +100,27 @@ export const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
       // }
       const newStatus = newLoading ? 'doing' : 'ready';
       const newExtraConfig = merge(omit(childrenLoad, 'status'), extraConfig);
-      console.log(`change [${loadId}] status:${loadMaps.get(loadId)?.status}-->loading:[${newLoading}] lastLoadingTrigger:${currentLoadingTrigger.current}  `, newExtraConfig.allowSelfLoading);
+      console.log(`change [${loadId}] status:${loadMaps.get(loadId)?.status}-->loading:[${newLoading}] lastLoadingTrigger:${globalLoadingTrigger.current}  `, newExtraConfig.allowSelfLoading);
 
       loadMaps.set(loadId, { ...newExtraConfig, status: newStatus });
       // 当初始化完成后 有设置独立loading时  判断是否有正在加载的全局loading 有则跳过，否则
-      if (newExtraConfig.allowSelfLoading && ![...loadMaps.values()].filter((i) => i.loadId !== loadId).some((i) => ['doing', 'init'].includes(i.status))) {
+      if (newExtraConfig.allowSelfLoading && !globalLoadingTrigger.current) {
         console.log(`【self】 ${loadId} change loading ${newLoading}`);
-        childrenLoad?.changeLoading((old) => (old !== newLoading ? newLoading : old));
+        childrenLoad?.changeLoading(newLoading);
+        console.log('----------------------end-----------------------------------');
+
         return;
       }
-      if (newStatus) {
-        currentLoadingTrigger.current = newStatus;
-      }
+
       const newGlobalLoading = [...loadMaps.values()].some((i) => i.status === 'doing');
-      if (!newGlobalLoading) {
-        currentLoadingTrigger.current = undefined;
-      }
+      globalLoadingTrigger.current = newGlobalLoading ? loadId : undefined;
+      console.log(`setGlobalLoading:${newGlobalLoading}`, [...loadMaps.values()]);
       setGlobalLoading(() => newGlobalLoading);
+      console.log('----------------------end-----------------------------------');
+
       // setLoading(globalLoading);
     }
-  }, [globalLoadId, handleChangeGlobal, loadMaps]);
+  }, [globalLoadId, handleChangeGlobal, loadMaps, setGlobalLoading]);
   const handleRegister = usePersistFn((data: ILoadingRegisterChildrenData) => {
     setMap(data.loadId, { status: 'init', ...data });
   });
@@ -143,7 +149,7 @@ export const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
       change: handleChange,
     }}
     >
-      <Loading loading={globalLoading} loadId={globalLoadId} className={`${prefixCls}-global`} noDeliverLoading />
+      <Loading loading={globalLoading} loadId={globalLoadId} className={`${prefixCls}-global`} noDeliverLoading style={{ display: globalLoading ? 'unset' : 'none' }} />
       {props.children}
     </Context.Provider>
   );
@@ -151,15 +157,17 @@ export const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
 /**
  * 动画Loading
  */
-const AnimationLoading: React.FC<Pick<ILoadingProps, 'loading' | 'className'>> = ({
-  loading, className, children,
+const AnimationLoading: React.FC<Pick<ILoadingProps, 'loading' | 'className' | 'style'>> = ({
+  loading, className, children, style,
 }) => (
-  <div className={classNames(prefixCls, className, {
-    [`${prefixCls}-no-children`]: !children,
-    [`${prefixCls}-hidden`]: !loading,
-  })}
+  <div
+    className={classNames(prefixCls, {
+      [`${prefixCls}-no-children`]: !children,
+      [`${prefixCls}-no-children-hidden`]: !children && !loading,
+    }, className)}
+    style={style}
   >
-    <OriginAnimationLoading display={loading} className={`${prefixCls}-container`} />
+    <OriginAnimationLoading display={loading} className={classNames(`${prefixCls}-container`, { [`${prefixCls}-hidden`]: !loading })} />
     {children}
   </div>
 );
