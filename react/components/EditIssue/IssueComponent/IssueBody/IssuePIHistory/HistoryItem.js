@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import moment from 'moment';
 import './HistoryItem.less';
 

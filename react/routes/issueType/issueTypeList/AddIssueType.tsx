@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite';
 import {
   Form, Select, DataSet, TextField, TextArea, IconPicker, Modal, Button, CheckBox,
 } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import { debounce } from 'lodash';
 import { IModalProps } from '@/common/types';
 import { CompactPicker } from 'react-color';

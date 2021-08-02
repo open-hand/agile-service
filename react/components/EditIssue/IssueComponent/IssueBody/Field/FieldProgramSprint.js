@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import { map } from 'lodash';
 import { featureApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';

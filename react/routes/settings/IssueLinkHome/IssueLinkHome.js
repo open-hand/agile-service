@@ -1,13 +1,12 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  TabPage as Page, Header, Content, Action, Permission, Breadcrumb,
+  TabPage as Page, Header, Content, Action, Breadcrumb,
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
 import {
-  Button, Icon, Table, Modal,
+  Table, Modal,
 } from 'choerodon-ui/pro';
-import ClickText from '@/components/ClickText';
 
 import CreateEditForm from './create-edit-form';
 import DeleteModal from './delete-modal';

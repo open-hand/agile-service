@@ -1,5 +1,5 @@
 import React, { useMemo, memo } from 'react';
-import { Spin } from 'choerodon-ui';
+import { Spin } from 'choerodon-ui/pro';
 import { EChartOption } from 'echarts';
 import ReactEcharts from 'echarts-for-react';
 import { transformBurnDownChartData, IBurnDownData } from './utils';

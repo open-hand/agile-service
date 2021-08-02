@@ -3,8 +3,9 @@ import React, {
 } from 'react';
 import {
   Form, DataSet, Button, Select, Row, Col,
+  Icon,
 } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui';
+
 import { observer } from 'mobx-react-lite';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
 import SelectStatus from '@/components/select/select-status';

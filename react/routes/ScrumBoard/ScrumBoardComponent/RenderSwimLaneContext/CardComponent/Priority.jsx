@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 
 function Priority({ priorityVO }) {
   return (

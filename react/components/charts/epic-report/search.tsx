@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import { Select } from 'choerodon-ui/pro';
 import { find } from 'lodash';
 import to from '@/utils/to';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import classNames from 'classnames';
 import { IFilter } from '@/components/filter';
 import { find, map, castArray } from 'lodash';

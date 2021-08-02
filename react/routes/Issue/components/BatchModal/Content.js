@@ -4,7 +4,7 @@ import React, {
 import {
   Form, Button, Select, DataSet, Row, Col, Progress,
 } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import { WSHandler, Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import { find, pick } from 'lodash';

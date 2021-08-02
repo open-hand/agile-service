@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import { Issue, IIssueType } from '@/common/types';
 import { DataSet } from 'choerodon-ui/pro';
 import Loading from '@/components/Loading';

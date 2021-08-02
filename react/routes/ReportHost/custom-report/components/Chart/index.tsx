@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Spin } from 'choerodon-ui';
+import { Spin } from 'choerodon-ui/pro';
 import { EChartOption } from 'echarts';
 import ReactEcharts from 'echarts-for-react';
 import { useFontSize } from '@/components/charts/context';

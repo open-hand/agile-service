@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { WSHandler, Choerodon } from '@choerodon/boot';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import { Button } from 'choerodon-ui/pro';
 import { getProjectId } from '@/utils/common';
 import SingleFileUpload from '@/components/SingleFileUpload';

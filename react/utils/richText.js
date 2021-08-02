@@ -10,78 +10,7 @@ const QuillDeltaToHtmlConverter = require('quill-delta-to-html');
 function validateRichText(text) {
   return !text ? true : text.length < 4000;
 }
-/**
- * 将以base64的图片url数据转换为Blob
- * @param {string} urlData 用url方式表示的base64图片数据
- */
-export function convertBase64UrlToBlob(urlData) {
-  const bytes = window.atob(urlData.split(',')[1]); // 去掉url的头，并转换为byte
 
-  // 处理异常,将ascii码小于0的转换为大于0
-  const buffer = new ArrayBuffer(bytes.length);
-  const unit8Array = new Uint8Array(buffer);
-  for (let i = 0; i < bytes.length; i += 1) {
-    unit8Array[i] = bytes.charCodeAt(i);
-  }
-
-  return new Blob([buffer], { type: 'image/png' });
-}
-/**
- * 从deltaOps中获取图片数据
- * @param {DeltaOperation []} deltaOps
- */
-export function getImgInDelta(deltaOps) {
-  const imgBase = [];
-  const formData = new FormData();
-  deltaOps.forEach((item) => {
-    if (item.insert && item.insert.image) {
-      if (item.insert.image.split(':').length && item.insert.image.split(':')[0] === 'data') {
-        imgBase.push(item.insert.image);
-        formData.append('file', convertBase64UrlToBlob(item.insert.image), 'blob.png');
-      }
-    }
-  });
-  return { imgBase, formData };
-}
-
-/**
- * 将富文本中的base64图片替换为对应的url
- * @param {{url:string} []} imgUrlList 图标url对应的
- * @param {any []} imgBase base64图片数组
- * @param {*} text 富文本的文本结构
- */
-export function replaceBase64ToUrl(imgUrlList, imgBase, text) {
-  const deltaOps = text;
-  const imgMap = {};
-  imgUrlList.forEach((imgUrl, index) => {
-    imgMap[imgBase[index]] = `${imgUrl}`;
-  });
-  deltaOps.forEach((item, index) => {
-    if (item.insert && item.insert.image && imgBase.indexOf(item.insert.image) !== -1) {
-      deltaOps[index].insert.image = imgMap[item.insert.image];
-    }
-  });
-}
-
-export async function uploadAndReplaceImg(delta) {
-  if (!delta) {
-    return '';
-  }
-  const deltaOps = delta;
-  const { imgBase, formData } = getImgInDelta(deltaOps);
-  if (imgBase.length) {
-    const imgUrlList = await fileApi.uploadImage(formData);
-    replaceBase64ToUrl(imgUrlList, imgBase, deltaOps);
-  }
-  const converter = new QuillDeltaToHtmlConverter(deltaOps, {});
-  const html = converter.convert();
-  const text = JSON.stringify(deltaOps);
-  if (!validateRichText(text)) {
-    Choerodon.prompt('文字过长', 'error');
-    throw new Error('文字过长');
-  }
-  return text;
-}
 export async function uploadAttachment(propFileList, issueId, projectId) {
   const fileList = propFileList.filter((i) => !i.url);
   const formData = new FormData();

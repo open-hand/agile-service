@@ -1,8 +1,9 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import {
   Button, Modal, Spin, Tooltip,
+  Icon,
 } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui';
+
 import Measure from 'react-measure';
 import { observer, Observer, useComputed } from 'mobx-react-lite';
 import { DragDropContextProvider } from 'react-dnd';

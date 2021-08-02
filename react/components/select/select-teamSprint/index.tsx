@@ -4,7 +4,7 @@ import React, {
 import { find } from 'lodash';
 import { Select } from 'choerodon-ui/pro';
 import { sprintApi } from '@/api';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import { FlatSelect } from '@choerodon/components';
 
 const { OptGroup, Option } = Select;

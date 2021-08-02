@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { issueApi, epicApi } from '@/api';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';

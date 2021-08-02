@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { Spin } from 'choerodon-ui';
+import { Spin } from 'choerodon-ui/pro';
 import ReactEcharts from 'echarts-for-react';
 import { EChartOption } from 'echarts';
 import { map } from 'lodash';

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 
 class AddCard extends Component {
   render() {
@@ -11,10 +11,10 @@ class AddCard extends Component {
           width: 20,
           height: '100%',
           display: 'flex',
-          alignItems: 'center', 
+          alignItems: 'center',
           justifyContent: 'center',
           background: 'rgba(0,0,0,0.04)',
-          borderRadius: 2, 
+          borderRadius: 2,
           cursor: 'pointer',
           marginLeft: 4,
           ...style,
@@ -24,7 +24,7 @@ class AddCard extends Component {
         <Icon
           type="control_point"
           style={{
-            height: 14, width: 14, fontSize: '14px', color: 'rgba(0,0,0,0.3)', 
+            height: 14, width: 14, fontSize: '14px', color: 'rgba(0,0,0,0.3)',
           }}
         />
       </div>

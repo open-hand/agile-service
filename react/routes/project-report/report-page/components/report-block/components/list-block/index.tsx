@@ -1,7 +1,7 @@
 import React, {
   useEffect, useState, useMemo, useCallback, useRef,
 } from 'react';
-import { Spin } from 'choerodon-ui';
+import { Spin } from 'choerodon-ui/pro';
 import { axios } from '@choerodon/boot';
 import { find } from 'lodash';
 import { toJS } from 'mobx';

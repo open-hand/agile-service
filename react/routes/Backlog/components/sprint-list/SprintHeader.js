@@ -1,5 +1,5 @@
 import React from 'react';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { Permission } from '@choerodon/boot';
 import useIsInProgram from '@/hooks/useIsInProgram';

@@ -1,7 +1,7 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import dayjs, { Dayjs } from 'dayjs';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import { GanttProps, Gantt } from '@choerodon/gantt';
 import STATUS_COLOR from '@/constants/STATUS_COLOR';
 import { Issue } from '@/common/types';
@@ -64,6 +64,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
   return (
     <>
       <Tooltip
+        // @ts-ignore
         getPopupContainer={(t) => document.getElementsByClassName('gantt-chart')[0] as HTMLElement}
         title={(
           <div>

@@ -6,7 +6,7 @@ import { map, find } from 'lodash';
 import { issueApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectComponent from '@/components/select/select-component';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 
 @inject('AppState')
 @observer class FieldComponent extends Component {

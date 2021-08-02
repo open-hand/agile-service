@@ -11,7 +11,7 @@ import {
   Button, DataSet, TextField, Modal, Form,
 } from 'choerodon-ui/pro';
 import { EmptyPage } from '@choerodon/components';
-import { Spin } from 'choerodon-ui';
+import { Spin } from 'choerodon-ui/pro';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import {

@@ -3,7 +3,7 @@ import React from 'react';
 import {
   Button, Modal, Spin, message, Select, PerformanceTable, Icon, Dropdown, CheckBox,
 } from 'choerodon-ui/pro';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import TableDropMenu from '@/components/table-drop-menu';
 import { pageConfigApi } from '@/api';
 import ToggleFieldValue from '../components/toggle-field-value';

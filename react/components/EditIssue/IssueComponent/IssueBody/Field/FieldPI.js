@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import { Permission } from '@choerodon/boot';
 import SelectPI from '@/components/select/select-pi';
 import TextEditToggle from '@/components/TextEditTogglePro';

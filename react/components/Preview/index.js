@@ -1,5 +1,5 @@
 import React from 'react';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import { Button } from 'choerodon-ui/pro';
 import FileSaver from 'file-saver';
 import FilePreview from './FilePreview';

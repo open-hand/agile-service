@@ -1,6 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
 import 'intersection-observer';
-import { observable } from 'mobx';
 import { getTargetElement, BasicTarget } from '@/utils/dom';
 
 type InViewport = boolean | undefined;

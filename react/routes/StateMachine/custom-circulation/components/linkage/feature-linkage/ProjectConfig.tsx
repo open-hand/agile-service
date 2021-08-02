@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import {
   Form, DataSet, Button, Col, Row,
+  Icon,
 } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui';
+
 import { observer } from 'mobx-react-lite';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import SelectIssueType from '@/components/select/pro/select-issue-type';

@@ -1,5 +1,5 @@
 import React, { useMemo, forwardRef, useRef } from 'react';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import { Select } from 'choerodon-ui/pro';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import useSelect, { SelectConfig, FragmentForSearch } from '@/hooks/useSelect';

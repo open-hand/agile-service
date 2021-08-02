@@ -13,7 +13,7 @@ interface IssueLinkProps {
 const IssueLink: React.FC<IssueLinkProps> = ({
   projectId, dataSet,
 }) => (
-  <Form dataSet={dataSet}>
+  <Form dataSet={dataSet} style={{ marginTop: -20 }}>
     {dataSet.map((record) => (
       <Row gutter={20} type="flex" align="middle">
         <Col span={11}>
