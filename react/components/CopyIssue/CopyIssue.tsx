@@ -5,8 +5,9 @@ import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import {
   Form, DataSet, Select, TextField, CheckBox,
+  Spin,
 } from 'choerodon-ui/pro';
-import { Spin } from 'choerodon-ui/pro';
+
 import { difference, find, map } from 'lodash';
 import { epicApi, issueApi } from '@/api';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
@@ -62,17 +63,19 @@ const CopyIssue: React.FC<Props> = ({
   const requiredFieldsVOArrRef = useRef<RequiredFieldDs[] | null>(null);
   const [selfExtraRequiredFields, setSelfExtraRequiredFields] = useState([]);
   const checkEpicName = useCallback(async (value: string) => {
-    if (value && value.trim()) {
-      return epicApi.checkName(value)
-        .then((res: boolean) => {
-          if (res) {
-            return '史诗名称重复';
-          }
-          return true;
-        });
+    if (issue.typeCode === 'issue_epic') {
+      if (value && value.trim()) {
+        return epicApi.checkName(value)
+          .then((res: boolean) => {
+            if (res) {
+              return '史诗名称重复';
+            }
+            return true;
+          });
+      }
     }
     return true;
-  }, []);
+  }, [issue.typeCode]);
 
   const handleUpdate = useCallback(async ({ name, oldValue, value }) => {
     if (name === 'fields') {
@@ -133,7 +136,7 @@ const CopyIssue: React.FC<Props> = ({
       epicNameValidate = await copyIssueDataSet.current?.getField('epicName')?.checkValidity();
     }
     if (validate && epicNameValidate) {
-      return Promise.all((requiredFieldsVOArrRef.current || []).map((item) => item.dataSet.validate())).then(async (validateRes) => {
+      return Promise.all((requiredFieldsVOArrRef.current || []).map((item) => item.dataSet.current?.validate())).then(async (validateRes) => {
         if (validateRes.every((item) => !!item)) {
           const fields = copyIssueDataSet.current?.get('fields') || [];
           const copyfs: {
