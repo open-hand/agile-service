@@ -60,7 +60,7 @@ function FastSearchForm({ dataSet }: { dataSet: DataSet }) {
   return (
     <div className={styles.form}>
       {dataSet.map((record) => <FastSearchFormItem record={record} onDelete={handleDelete} key={`FastSearchFormItem-${record.id}`} />)}
-      <Button icon="add" onClick={() => dataSet.create()} style={{ width: 'max-content' }}>添加筛选</Button>
+      <Button icon="add" onClick={() => dataSet.create()} style={{ width: 'max-content', marginLeft: 6 }}>添加筛选</Button>
     </div>
   );
 }
