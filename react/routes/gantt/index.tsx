@@ -45,6 +45,7 @@ import IssueDetail from './components/issue-detail';
 import Context from './context';
 import GanttStore from './store';
 import GanttOperation from './components/gantt-operation';
+import GanttSortLabel, { useGanttSortLabel } from './components/gantt-sort-label';
 import './index.less';
 
 dayjs.extend(weekday);
@@ -118,55 +119,67 @@ const renderTooltip = (user: User) => {
   return ldap ? `${realName}(${loginName})` : `${realName}(${email})`;
 };
 const { Option } = FlatSelect;
-const tableColumns: GanttProps<Issue>['columns'] = [{
-  flex: 2,
-  minWidth: 200,
-  name: 'summary',
-  label: '名称',
-  render: (record) => (
-    !record.group ? (
-      <span style={{ cursor: 'pointer', color: 'var(--table-click-color)' }}>
-        <TypeTag iconSize={22} data={record.issueTypeVO} style={{ marginRight: 5 }} />
+
+const getTableColumns = ({ onSortChange }: any) => {
+  const tableColumns: GanttProps<Issue>['columns'] = [{
+    flex: 2,
+    minWidth: 200,
+    name: 'summary',
+    label: '名称',
+    render: (record) => (
+      !record.group ? (
+        <span style={{ cursor: 'pointer', color: 'var(--table-click-color)' }}>
+          <TypeTag iconSize={22} data={record.issueTypeVO} style={{ marginRight: 5 }} />
+          <Tooltip title={record.summary}>
+            <span style={{ verticalAlign: 'middle' }}>{record.summary}</span>
+          </Tooltip>
+        </span>
+      ) : (
         <Tooltip title={record.summary}>
-          <span style={{ verticalAlign: 'middle' }}>{record.summary}</span>
+          <span style={{ color: 'var(--table-click-color)' }}>{record.summary}</span>
         </Tooltip>
-      </span>
-    ) : (
-      <Tooltip title={record.summary}>
-        <span style={{ color: 'var(--table-click-color)' }}>{record.summary}</span>
+      )
+    ),
+  },
+  {
+    width: 80,
+    minWidth: 80,
+    name: 'assignee',
+    label: (
+      <GanttSortLabel dataKey="assigneeId" onChange={onSortChange}>
+        经办人
+      </GanttSortLabel>) as any,
+    render: (record) => (
+      <Tooltip title={renderTooltip(record.assignee)}>
+        <span>{record.assignee?.realName}</span>
       </Tooltip>
-    )
-  ),
-},
-{
-  width: 80,
-  minWidth: 80,
-  name: 'assignee',
-  label: '经办人',
-  render: (record) => (
-    <Tooltip title={renderTooltip(record.assignee)}>
-      <span>{record.assignee?.realName}</span>
-    </Tooltip>
-  ),
-},
-{
-  flex: 1,
-  minWidth: 100,
-  name: 'estimatedStartTime',
-  label: '预计开始',
-  render: (record) => record.estimatedStartTime && <Tooltip title={record.estimatedStartTime}><span>{dayjs(record.estimatedStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
-},
-{
-  flex: 1,
-  minWidth: 100,
-  name: 'estimatedEndTime',
-  label: '预计结束',
-  render: (record) => record.estimatedEndTime && <Tooltip title={record.estimatedEndTime}><span>{dayjs(record.estimatedEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
-}];
+    ),
+  },
+  {
+    flex: 1,
+    minWidth: 100,
+    name: 'estimatedStartTime',
+    label: (
+      <GanttSortLabel dataKey="estimatedStartTime" onChange={onSortChange}>
+        预计开始
+      </GanttSortLabel>) as any,
+    render: (record) => record.estimatedStartTime && <Tooltip title={record.estimatedStartTime}><span>{dayjs(record.estimatedStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
+  },
+  {
+    flex: 1,
+    minWidth: 100,
+    name: 'estimatedEndTime',
+    label: '预计结束',
+    render: (record) => record.estimatedEndTime && <Tooltip title={record.estimatedEndTime}><span>{dayjs(record.estimatedEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
+  }];
+  return tableColumns;
+};
 const GanttPage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
   const [type, setType] = useState<TypeValue>(localPageCacheStore.getItem('gantt.search.type') ?? typeValues[0]);
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
+  const [{ data: sortedList }, sortLabelProps] = useGanttSortLabel();
+  const tableWithSortedColumns = useMemo(() => getTableColumns(sortLabelProps), [sortLabelProps]);
   const [workCalendar, setWorkCalendar] = useState<any>();
   const [projectWorkCalendar, setProjectWorkCalendar] = useState<any>();
   const [filterManageVisible, setFilterManageVisible] = useState<boolean>();
@@ -194,7 +207,7 @@ const GanttPage: React.FC = () => {
         ganttApi.loadByTask({
           ...filter,
           searchArgs: { tree: type === 'task' },
-        }),
+        }, sortedList),
       ]);
       // setColumns(headers.map((h: any) => ({
       //   width: 100,
@@ -204,7 +217,7 @@ const GanttPage: React.FC = () => {
       unstable_batchedUpdates(() => {
         setWorkCalendar(workCalendarRes);
         setProjectWorkCalendar(projectWorkCalendarRes);
-        setColumns(tableColumns);
+        setColumns(tableWithSortedColumns);
         setData(res);
         setLoading(false);
       });
@@ -212,7 +225,7 @@ const GanttPage: React.FC = () => {
   });
   useEffect(() => {
     run();
-  }, [issueSearchStore, sprintIds, run]);
+  }, [issueSearchStore, sprintIds, run, sortedList]);
   useUpdateEffect(() => {
     run();
     flush();
@@ -578,34 +591,34 @@ const GanttPage: React.FC = () => {
           </div>
           <Loading loading={loading} />
           {columns.length > 0 && workCalendar && (
-          <GanttComponent
-            innerRef={store.ganttRef as React.MutableRefObject<GanttRef>}
-            data={ganttData}
-            columns={columns}
-            onUpdate={handleUpdate}
-            startDateKey="estimatedStartTime"
-            endDateKey="estimatedEndTime"
-            isRestDay={isRestDay}
-            showBackToday={false}
-            showUnitSwitch={false}
-            unit={unit}
-            onRow={onRow}
-            onBarClick={onRow.onClick}
-            tableIndent={20}
-            expandIcon={getExpandIcon}
-            renderBar={renderBar}
-            renderInvalidBar={renderInvalidBar}
-            renderGroupBar={renderGroupBar}
-            renderBarThumb={renderBarThumb}
-            tableCollapseAble={false}
-            scrollTop={{
-              right: -4,
-              bottom: 8,
-            }}
-            rowHeight={34}
-                // @ts-ignore
-            renderEmpty={renderEmpty}
-          />
+            <GanttComponent
+              innerRef={store.ganttRef as React.MutableRefObject<GanttRef>}
+              data={ganttData}
+              columns={columns}
+              onUpdate={handleUpdate}
+              startDateKey="estimatedStartTime"
+              endDateKey="estimatedEndTime"
+              isRestDay={isRestDay}
+              showBackToday={false}
+              showUnitSwitch={false}
+              unit={unit}
+              onRow={onRow}
+              onBarClick={onRow.onClick}
+              tableIndent={20}
+              expandIcon={getExpandIcon}
+              renderBar={renderBar}
+              renderInvalidBar={renderInvalidBar}
+              renderGroupBar={renderGroupBar}
+              renderBarThumb={renderBarThumb}
+              tableCollapseAble={false}
+              scrollTop={{
+                right: -4,
+                bottom: 8,
+              }}
+              rowHeight={34}
+              // @ts-ignore
+              renderEmpty={renderEmpty}
+            />
           )}
           <IssueDetail
             refresh={run}
