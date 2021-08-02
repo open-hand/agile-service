@@ -38,7 +38,7 @@ const RightChildren: React.FC = () => {
     change('right', true);
     setTimeout(() => {
       change('right', false);
-    }, 3000);
+    }, 2000);
   }, [change]);
   return (
     <div>

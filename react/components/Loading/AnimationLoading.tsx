@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import './AnimationLoading.less';
 
 import {
-  noop, omit, uniqueId, merge,
+  noop, uniqueId, merge, cloneDeep,
 } from 'lodash';
 import {
   useMap, useMount, usePersistFn, useUpdateEffect, useUnmount, useCreation, useSafeState,
@@ -43,6 +43,7 @@ interface ILoadingRegisterChildrenData extends Pick<ILoadingProps, 'allowSelfLoa
 interface ILoadingChangeExtraConfig extends Pick<ILoadingProps, 'allowSelfLoading'> {
 
 }
+type ILoadingChangeStatus = 'init' | 'ready' | 'doing'
 interface ContextProps {
   loading: boolean
   change: (key: string, loading: boolean, extraConfig?: ILoadingChangeExtraConfig) => void /** 改变loading  父级Loading每次变更为true时会关闭所有子Loading 并重置 */
@@ -59,21 +60,29 @@ export function useLoading() {
 }
 /**
  * 父级Loading
+ * 初始化时，所有子Loading状态会直接传递给父级
+ * 当直接操作父级Loading时，所有子Loading会自动关闭并重新注册
+ *
  */
 export const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
-  const [loadMaps, { set: setMap, remove: removeMap, setAll }] = useMap<string, { status: 'init' | 'ready' | 'doing' } & ILoadingRegisterChildrenData>();
+  // 正在进行的子Loading
+  const [loadMaps, {
+    set: setMap, remove: removeMap, setAll, reset,
+  }] = useMap<string, { status: ILoadingChangeStatus, loadId: string } & ILoadingChangeExtraConfig>();
   const [globalLoading, setGlobalLoading] = useSafeState(false);
+  // const
+  const childrenLoadMap = useCreation(() => new Map<string, { status: ILoadingChangeStatus } & ILoadingRegisterChildrenData>(), []);// 最新数据
   const globalLoadingTrigger = useRef<string>(); // 记录触发Loading层级
   const globalLoadId = useCreation(() => props.loadId || 'parent-provider', []);
   const handleChangeGlobal = useCallback((newLoading: boolean) => {
     setGlobalLoading(() => {
       console.log('loading....setGlobalLoading', newLoading);
       if (newLoading) {
-        // 关闭子Loading
-        setAll([...loadMaps.entries()].map(([key, value]) => {
+        // 重置所有子Loading
+        childrenLoadMap.forEach((value) => {
           value.changeLoading(false);
-          return ([key, { ...value, status: 'init' }]);
-        }));
+          childrenLoadMap.set(value.loadId, { ...value, status: 'init' });
+        });
         globalLoadingTrigger.current = globalLoadId;
         return true;
       }
@@ -81,58 +90,73 @@ export const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
       return false;
     });
   }, []);
+
   const handleChange = useCallback((loadId: string, newLoading: boolean, extraConfig?: ILoadingChangeExtraConfig) => {
-    console.log('----------------------start-----------------------------------');
+    console.log('----------------------start-----------------------');
     // 全局 Loading 状态更改调用全局方法
     if (loadId === globalLoadId) {
       handleChangeGlobal(newLoading);
       console.log('----------------------end-----------------------------------');
-
       return;
     }
-    const childrenLoad = loadMaps.get(loadId);
-    console.log(childrenLoad, 'start..handleChange', loadId, newLoading, extraConfig, loadMaps);
+    // 增加到状态更新队列中
+    const newStatus = newLoading ? 'doing' : 'ready';
+    setMap(loadId, { ...extraConfig, status: newStatus, loadId });
+    // statusStack.push({ ...extraConfig, status: newStatus, loadId });
+    console.log('childrenLoad', loadId, newLoading);
+  }, [globalLoadId, handleChangeGlobal, setMap]);
+  // 更新全局
+  useEffect(() => {
+    if (loadMaps.size > 0 && childrenLoadMap.size > 0) {
+      const statusStack = [...loadMaps.values()];
+      console.log('star....statusStack', cloneDeep(statusStack));
+      // 不是初始状态的子Loading 并且有配置允许使用自己的Loading 即可自更新
+      const selfLoadingStatus = statusStack.filter((i) => childrenLoadMap.get(i.loadId)?.status !== 'init' && (childrenLoadMap.get(i.loadId)!.allowSelfLoading || i.allowSelfLoading));
 
-    if (childrenLoad) {
-      // if (props.globalSingle) {
-      //   childrenLoad.changeLoading(newLoading);
-      //   return;
-      // }
-      const newStatus = newLoading ? 'doing' : 'ready';
-      const newExtraConfig = merge(omit(childrenLoad, 'status'), extraConfig);
-      console.log(`change [${loadId}] status:${loadMaps.get(loadId)?.status}-->loading:[${newLoading}] lastLoadingTrigger:${globalLoadingTrigger.current}  `, newExtraConfig.allowSelfLoading);
+      const selfLoadingStatusIds = selfLoadingStatus.map((i) => i.loadId);
+      const globalDoingStatus = statusStack.filter((i) => i.status === 'doing').filter((i) => !selfLoadingStatusIds.includes(i.loadId));
+      console.log('useUpdateEffect', selfLoadingStatus, [...childrenLoadMap.values()], globalDoingStatus);
 
-      loadMaps.set(loadId, { ...newExtraConfig, status: newStatus });
-      // 当初始化完成后 有设置独立loading时  判断是否有正在加载的全局loading 有则跳过，否则
-      if (newExtraConfig.allowSelfLoading && !globalLoadingTrigger.current) {
-        console.log(`【self】 ${loadId} change loading ${newLoading}`);
-        childrenLoad?.changeLoading(newLoading);
-        console.log('----------------------end-----------------------------------');
-
+      // 进行子Loading属性配置更新
+      statusStack.forEach((item) => {
+        const childrenLoadValue = merge(childrenLoadMap.get(item.loadId), item);
+        childrenLoadMap.set(item.loadId, childrenLoadValue);
+      });
+      // 如果有全局更新   则不允许其余子Loading出现
+      if (globalDoingStatus.length > 0) {
+        setGlobalLoading(true);
+        childrenLoadMap.forEach((children) => {
+          children.changeLoading(false);
+        });
         return;
       }
-
-      const newGlobalLoading = [...loadMaps.values()].some((i) => i.status === 'doing');
-      globalLoadingTrigger.current = newGlobalLoading ? loadId : undefined;
-      console.log(`setGlobalLoading:${newGlobalLoading}`, [...loadMaps.values()]);
-      setGlobalLoading(() => newGlobalLoading);
-      console.log('----------------------end-----------------------------------');
-
-      // setLoading(globalLoading);
+      setGlobalLoading(false);
+      // 子Loading 进行状态更新
+      selfLoadingStatus.forEach((item) => {
+        console.log('self..', item.loadId, item.status === 'doing');
+        childrenLoadMap.get(item.loadId)?.changeLoading(item.status === 'doing');
+      });
+      console.log('finish Update');
+      // statusStack.length = 0;
+      // setStatusStack(() => []);
     }
-  }, [globalLoadId, handleChangeGlobal, loadMaps, setGlobalLoading]);
+  }, [loadMaps, setGlobalLoading, childrenLoadMap.size, childrenLoadMap]);
   const handleRegister = usePersistFn((data: ILoadingRegisterChildrenData) => {
-    setMap(data.loadId, { status: 'init', ...data });
+    childrenLoadMap.set(data.loadId, { ...data, status: 'init' });
   });
   const handleCancelResigner = usePersistFn((loadId: string) => {
-    removeMap(loadId);
+    childrenLoadMap.delete(loadId);
+    // removeMap(loadId);
   });
   useEffect(() => {
     if (props.loading !== undefined) {
       handleChangeGlobal(props.loading);
     }
   }, [handleChangeGlobal, props.loading]);
-
+  useUnmount(() => {
+    reset();
+    childrenLoadMap.clear();
+  });
   useImperativeHandle(props.ref, () => ({
     loading: globalLoading,
     isHasProvider: true,
@@ -177,7 +201,7 @@ const AnimationLoading: React.FC<Pick<ILoadingProps, 'loading' | 'className' | '
 const Loading: React.FC<ILoadingProps> = ({
   children, loading: propsLoading, noDeliverLoading, loadId: propsLoadId, allowSelfLoading, ...otherProps
 }) => {
-  const [loading, setLoading] = useState<boolean | undefined>(() => propsLoading); /** 自身的loading */
+  const [loading, setLoading] = useState<boolean | undefined>(); /** 自身的loading */
   const {
     registerChildren, cancelRegisterChildren, isHasProvider, change,
   } = useContext(Context);
@@ -193,7 +217,7 @@ const Loading: React.FC<ILoadingProps> = ({
   useUpdateEffect(() => {
     // 兼容过往使用loading方法的 effect
     if (propsLoading !== undefined) {
-      console.log('useUpdateEffect', propsLoading);
+      console.log(`Loading:${loadId} USE:${isHasProvider && !noDeliverLoading ? 'change' : 'setLoading'}`, propsLoading);
       isHasProvider && !noDeliverLoading ? change(loadId, !!propsLoading) : setLoading(propsLoading);
     }
   }, [isHasProvider, loadId, propsLoading]);
