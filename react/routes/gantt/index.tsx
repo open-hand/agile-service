@@ -142,8 +142,8 @@ const getTableColumns = ({ onSortChange }: any) => {
     ),
   },
   {
-    width: 80,
-    minWidth: 80,
+    width: 85,
+    minWidth: 85,
     name: 'assignee',
     label: (
       <GanttSortLabel dataKey="assigneeId" onChange={onSortChange}>
