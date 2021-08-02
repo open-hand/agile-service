@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import { injectIntl } from 'react-intl';
 import _, { map } from 'lodash';
 import { issueApi } from '@/api';

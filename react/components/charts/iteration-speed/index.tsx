@@ -2,7 +2,7 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import ReactEcharts from 'echarts-for-react';
 import { map } from 'lodash';
-import { Spin } from 'choerodon-ui';
+import { Spin } from 'choerodon-ui/pro';
 import { EChartOption } from 'echarts';
 import { IUnit } from './search';
 import { useFontSize } from '../context';

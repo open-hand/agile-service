@@ -1,12 +1,13 @@
 import React, { useContext, useMemo, useCallback } from 'react';
 import {
   Icon, Tooltip,
-} from 'choerodon-ui';
+  Button,
+} from 'choerodon-ui/pro';
 import { stores } from '@choerodon/boot';
 import { find } from 'lodash';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { Button } from 'choerodon-ui/pro';
+
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { FlatSelect } from '@choerodon/components';
 import { flattenObject, isFilterSame } from './utils';

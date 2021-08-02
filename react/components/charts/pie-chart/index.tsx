@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import React, { useRef } from 'react';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import { EChartOption } from 'echarts/lib/echarts';
 import ReactEcharts from 'echarts-for-react';
 import { reduce, filter } from 'lodash';

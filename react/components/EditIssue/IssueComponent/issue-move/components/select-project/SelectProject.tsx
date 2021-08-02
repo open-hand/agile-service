@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Select, Form, DataSet } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import SelectTargetProject from '@/components/select/select-team';
 import TypeTag from '@/components/TypeTag';
 import { IIssueType } from '@/common/types';

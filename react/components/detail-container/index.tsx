@@ -2,7 +2,7 @@ import React, {
   useCallback, useState, useRef,
 } from 'react';
 
-import { Animate } from 'choerodon-ui';
+import { Animate } from 'choerodon-ui/pro';
 import { stores } from '@choerodon/boot';
 import { usePersistFn } from 'ahooks';
 import Container, { registerPath } from './Container';

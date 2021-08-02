@@ -1,7 +1,7 @@
 import React, {} from 'react';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'choerodon-ui/pro';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import useFullScreen from '@/common/useFullScreen';
 
 const BoardFullScreen = (props) => {

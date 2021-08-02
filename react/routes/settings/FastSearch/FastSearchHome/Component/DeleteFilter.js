@@ -1,7 +1,7 @@
 import React, {
   Component, useState, useEffect, useImperativeHandle,
 } from 'react';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import { stores } from '@choerodon/boot';
 import { quickFilterApi } from '@/api';
 
@@ -15,7 +15,6 @@ const DeleteComponent = (props) => {
   const init = () => {
     setFilter(props.filter || {});
   };
-
 
   const deleteFilter = () => {
     setLoading(true);

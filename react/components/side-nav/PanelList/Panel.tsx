@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import classNames from 'classnames';
 import styles from './index.less';
 

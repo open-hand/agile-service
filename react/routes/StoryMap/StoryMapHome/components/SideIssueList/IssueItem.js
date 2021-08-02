@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import { find } from 'lodash';
 import { DragSource } from 'react-dnd';
 import { storyMapApi } from '@/api';

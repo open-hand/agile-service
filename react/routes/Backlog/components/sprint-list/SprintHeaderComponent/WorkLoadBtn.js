@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import AssigneeModal from './AssigneeModal';
 import './WorkLoadBtn.less';
 

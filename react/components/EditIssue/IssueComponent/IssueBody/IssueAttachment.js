@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import { getProjectId } from '@/utils/common';
 import ChunkUploader from '@/components/chunk-uploader';
 import { UploadButtonNow } from '../../../CommonComponent';

@@ -4,7 +4,7 @@ import {
   Header, Page, Content, Breadcrumb,
 } from '@choerodon/boot';
 import { Button } from 'choerodon-ui/pro';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
 import { EmptyPage } from '@choerodon/components';
 import { getIsOrganization } from '@/utils/common';

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Icon } from 'choerodon-ui';
-import { Tooltip, Modal } from 'choerodon-ui/pro';
+import { Icon, Tooltip, Modal } from 'choerodon-ui/pro';
+
 import StatusTag from '@/components/StatusTag';
 import { DragSource } from 'react-dnd';
 import { find } from 'lodash';

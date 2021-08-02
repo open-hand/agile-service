@@ -7,7 +7,7 @@ import { observer } from 'mobx-react-lite';
 import { stores, Choerodon } from '@choerodon/boot';
 import openCreateSubTask from '@/components/create-sub-task';
 import { usePersistFn } from 'ahooks';
-import { Spin } from 'choerodon-ui';
+import { Spin } from 'choerodon-ui/pro';
 import './EditIssue.less';
 import {
   issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, pageConfigApi,

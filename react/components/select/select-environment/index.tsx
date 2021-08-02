@@ -1,9 +1,7 @@
 import React, {
   forwardRef, useEffect, useState,
 } from 'react';
-import { Select as OldSelect } from 'choerodon-ui';
 import { Select } from 'choerodon-ui/pro';
-import { SelectProps as OldSelectProps } from 'choerodon-ui/lib/select';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { usePersistFn } from 'ahooks';
 import { FlatSelect } from '@choerodon/components';
@@ -43,16 +41,5 @@ const SelectEnvironment: React.FC<Props> = forwardRef(({
     </Component>
   );
 });
-const OldSelectEnvironment: React.FC<Partial<OldSelectProps>> = (props) => {
-  const options = useEnvironmentData();
-  return (
-    <OldSelect
-      allowClear
-      {...props}
-    >
-      {options.map((option) => <OldSelect.Option value={option.valueCode}>{option.name}</OldSelect.Option>)}
-    </OldSelect>
-  );
-};
+
 export default SelectEnvironment;
-export { OldSelectEnvironment };

@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react';
 import { toJS } from 'mobx';
 import { DropTarget } from 'react-dnd';

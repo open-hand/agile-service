@@ -3,7 +3,7 @@
 import React, { useContext } from 'react';
 import { observer, Observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import { userApi, commonApi } from '@/api';
 import IssueTypeField from './field/IssueTypeField';
 import StatusField from './field/StatusField';

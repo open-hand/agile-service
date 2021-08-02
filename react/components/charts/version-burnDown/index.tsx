@@ -7,7 +7,7 @@ import {
 import LINK_URL from '@/constants/LINK_URL';
 import pic from '@/assets/image/NoData.svg';
 import to from '@/utils/to';
-import { Spin } from 'choerodon-ui';
+import { Spin } from 'choerodon-ui/pro';
 import { EmptyPage } from '@choerodon/components';
 import { EChartOption } from 'echarts';
 import completed from './image/completed.svg';

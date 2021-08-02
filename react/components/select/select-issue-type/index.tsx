@@ -1,6 +1,6 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import { find, includes } from 'lodash';
 import { issueTypeApi, sprintApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';

@@ -4,7 +4,7 @@ import React, {
   useState, useRef, useCallback, useEffect, useImperativeHandle,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import { Dropdown } from 'choerodon-ui/pro';
 
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';

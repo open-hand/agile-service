@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite';
 import {
   Modal, DataSet, Form, TextField, Button, IconPicker, CheckBox,
 } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
 import { IModalProps, IIssueType } from '@/common/types';
 import { issueTypeApi } from '@/api';

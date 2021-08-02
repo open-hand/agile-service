@@ -1,6 +1,6 @@
 import React from 'react';
 import { Select, CheckBox } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import seeChangeRange from './image/seeChangeRange.svg';

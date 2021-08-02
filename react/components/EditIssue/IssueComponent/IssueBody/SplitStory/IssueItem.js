@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { useHistory } from 'react-router';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import ProjectTag from '@/components/tag/project-tag';
 import PriorityTag from '@/components/PriorityTag';
 import StatusTag from '@/components/StatusTag';

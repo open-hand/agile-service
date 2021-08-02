@@ -1,7 +1,7 @@
 import React, {
   useCallback, useEffect, useState, useImperativeHandle,
 } from 'react';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import { stores } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import WYSIWYGEditor from '@/components/CKEditor';

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { TextField, Button } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { axios } from '@choerodon/boot';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';

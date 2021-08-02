@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 
 function getFirst(str: string) {
   if (!str) {

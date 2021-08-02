@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import styles from './Delay.less';
 
 interface Props {

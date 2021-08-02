@@ -3,8 +3,9 @@ import React, {
 } from 'react';
 import {
   DataSet, Form, Select, Dropdown, CheckBox,
+  Icon,
 } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui';
+
 import { stores } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';

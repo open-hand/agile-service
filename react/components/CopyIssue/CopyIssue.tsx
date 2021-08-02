@@ -6,7 +6,7 @@ import { toJS } from 'mobx';
 import {
   Form, DataSet, Select, TextField, CheckBox,
 } from 'choerodon-ui/pro';
-import { Spin } from 'choerodon-ui';
+import { Spin } from 'choerodon-ui/pro';
 import { difference, find, map } from 'lodash';
 import { epicApi, issueApi } from '@/api';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';

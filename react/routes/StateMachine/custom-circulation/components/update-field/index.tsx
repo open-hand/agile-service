@@ -4,8 +4,9 @@ import React, {
 import { observer } from 'mobx-react-lite';
 import {
   DataSet, Select, Form, Button, Row, Col,
+  Icon,
 } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui';
+
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
 import { getProjectId, getIsOrganization, getOrganizationId } from '@/utils/common';
 import { find, includes } from 'lodash';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Select, CheckBox } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import to, { linkUrl } from '@/utils/to';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';

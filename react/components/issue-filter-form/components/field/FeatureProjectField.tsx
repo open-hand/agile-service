@@ -1,6 +1,6 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import {
   featureApi, issueTypeApi, IStatusCirculation, statusTransformApi,
 } from '@/api';

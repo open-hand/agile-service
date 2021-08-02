@@ -1,11 +1,11 @@
 import React from 'react';
-import { Button } from 'choerodon-ui/pro';
+import { Button, Tooltip } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import IssueSearch, { IssueSearchStore } from '@/components/issue-search';
 import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import openSaveFilterModal from '@/components/SaveFilterModal';
-import { Tooltip } from 'choerodon-ui';
+
 import styles from './Search.less';
 
 interface Props {

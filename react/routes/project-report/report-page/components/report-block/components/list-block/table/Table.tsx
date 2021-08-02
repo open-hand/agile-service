@@ -1,5 +1,5 @@
 import React, { useCallback, ReactNode } from 'react';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import styles from './Table.less';
 
 export interface Column<T = {}> {

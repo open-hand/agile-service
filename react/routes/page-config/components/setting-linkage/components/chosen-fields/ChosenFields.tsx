@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { DataSet } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import ChooseField, { useChoseField } from '@/components/chose-field';
 import { pageConfigApi } from '@/api';
 import classNames from 'classnames';

@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import classNames from 'classnames';
 import styles from './index.less';
 

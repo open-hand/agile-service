@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 
 /**
  * 任务状态呈现
