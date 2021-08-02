@@ -1,4 +1,4 @@
-import { getProjectId, getApplyType } from './common';
+import { getProjectId } from './common';
 
 export function sameProject(projectId: string): boolean {
   if (!projectId) {
