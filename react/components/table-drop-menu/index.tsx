@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { Tooltip } from 'choerodon-ui/pro';
+import { ButtonProps } from 'choerodon-ui/lib/button';
 import { Action, Permission } from '@choerodon/boot';
 
 import './index.less';
@@ -22,6 +23,7 @@ interface ITableDropMenuProps {
   showText?: boolean /** @default 'true' */
   showMenu?: boolean /** @default 'true' */
   defaultMenuIcon?: string /** @default 'more_vert' */
+  defaultButtonProps?: Partial<Pick<ButtonProps, 'className'|'style'|'shape'|'size'|'disabled'|'icon'>>
   menuData?: ITableDropMenuItem[]
   onMenuClick?: (data: ITableDropMenuItem) => void /** 点击没有action菜单项会触发此事件 */
   oldMenuData?: React.ReactElement /** @deprecated 后续将废弃此接口  旧的TableDropMenu 传入内容将自动拼接到menuData上 */
@@ -38,7 +40,7 @@ interface ITableDropMenuProps {
  * @returns
  */
 const TableDropMenu: React.FC<ITableDropMenuProps> = ({
-  text, className, style, menuData: propsMenuData, oldMenuData, showMenu: propsShowMenu, organizationId, showText = true,
+  text, className, style, menuData: propsMenuData, oldMenuData, showMenu: propsShowMenu, organizationId, showText = true, defaultButtonProps,
   permissionType, tooltip, permissionText, textClassName, textStyle, permission, permissionMenu, onMenuClick, defaultMenuIcon = 'more_vert',
 }) => {
   const prefixCls = 'c7n-agile-table-drop-menu';
@@ -105,6 +107,7 @@ const TableDropMenu: React.FC<ITableDropMenuProps> = ({
             type={permissionType}
             organizationId={organizationId}
             icon={defaultMenuIcon}
+            {...defaultButtonProps}
           />
         </Permission>
       )}

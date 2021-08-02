@@ -67,7 +67,7 @@ const getColumns = ({ issueTypeId, loadData }: { issueTypeId: string, loadData: 
     dataIndex: 'defaultValue',
     key: 'defaultValue',
     width: 200,
-    render: ({ rowData }: any) => <ToggleFieldValue data={rowData} />,
+    render: ({ rowData }: any) => <div style={{ display: 'inline-flex', alignItems: 'center', width: '99%' }}><ToggleFieldValue data={rowData} /></div>,
   },
   {
     title: '角色权限说明',
@@ -130,6 +130,7 @@ const getColumns = ({ issueTypeId, loadData }: { issueTypeId: string, loadData: 
           display: checkPermissionLinkage(rowData.toData()),
         }]}
         defaultMenuIcon="settings-o"
+        defaultButtonProps={{ size: 'default' as any }}
         showText={false}
       />
     ),

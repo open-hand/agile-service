@@ -9,6 +9,7 @@ import {
 } from 'mobx-react-lite';
 import { getColumns } from '../../utils';
 import { usePageTemplateStore } from '../../stores';
+import styles from './index.less';
 
 interface IPageTemplateTableProps {
 }
@@ -63,7 +64,7 @@ const PageTemplateTable: React.FC<IPageTemplateTableProps> = () => {
     <AutoSize>
       {({ height }) => (
         <Observer>
-          {() => <PerformanceTable columns={visibleColumns} data={sortTableDataSet.records} height={height} style={{ border: 'none' }} />}
+          {() => <PerformanceTable className={styles.table} columns={visibleColumns} data={sortTableDataSet.records} height={height} rowHeight={40} style={{ border: 'none' }} />}
         </Observer>
 
       )}
