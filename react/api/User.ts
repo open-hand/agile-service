@@ -16,7 +16,7 @@ async function getProjectUsersByIds(userIds?: string[], projectId?: string): Pro
 async function getOrgUsersByIds(userIds?: string[], orgId?: string): Promise<User[]> {
   return axios({
     method: 'post',
-    url: `/agile/v1/users/projects/${orgId ?? getOrganizationId()}/list_by_ids`,
+    url: `/agile/v1/users/organizations/${orgId ?? getOrganizationId()}/list_by_ids`,
     data: userIds ?? [],
   });
 }
@@ -33,7 +33,7 @@ export async function withSelectedUsers(promise: Promise<{
   projectId?: string
 }) {
   const pageUsers = await promise;
-  if (userIds && page === 1) {
+  if (userIds && userIds.length > 0 && page === 1) {
     const users = await (isOrg ? getOrgUsersByIds : getProjectUsersByIds)(userIds, projectId);
     pageUsers.list = unionBy(users.concat(pageUsers.list), 'id');
   }
