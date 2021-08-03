@@ -36,7 +36,9 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
 
   const selectedUserIds = useMemo(() => {
     const ids: string[] | string | undefined = toJS(selected);
-    return uniq(castArray(ids).concat(castArray(otherProps.value)).filter((i) => i && i !== '0'));
+    // 避免value是对象的情况
+    const valueArray: string[] = castArray(otherProps.value).map((i) => (typeof (i) === 'object' ? i?.id : i)).filter(Boolean);
+    return uniq(castArray(ids).concat(valueArray).filter((i) => i && i !== '0'));
   }, [JSON.stringify(selected), JSON.stringify(otherProps.value)]);
   const idsRef = useRef(selectedUserIds);
   const args = useMemo(() => {
