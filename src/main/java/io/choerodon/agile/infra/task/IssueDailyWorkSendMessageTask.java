@@ -118,7 +118,7 @@ public class IssueDailyWorkSendMessageTask {
             oneExecution = false,
             params = {},
             triggerType = TriggerTypeEnum.CRON_TRIGGER,
-            cronExpression = "0 30 2 * * ? "
+            cronExpression = "0 0 4 * * ? "
     )
     public void run(Map<String, Object> map) {
         LOGGER.info("===> 开始执行每日工作提醒发送消息定时任务");
@@ -159,6 +159,7 @@ public class IssueDailyWorkSendMessageTask {
         Map<Long, UserDTO> userMap = getUserMap(userIds);
         Map<Long, IssueDailyWorkVO> issueMap = issueList.stream().collect(Collectors.toMap(IssueDailyWorkVO::getIssueId, Function.identity()));
 
+        //key1 projectId, key2 userId, value List<Long>保持排序
         MultiKeyMap multiKeyMap = getMultiKeyMap(issueList);
         MapIterator mapIterator = multiKeyMap.mapIterator();
         while(mapIterator.hasNext()) {
@@ -187,7 +188,6 @@ public class IssueDailyWorkSendMessageTask {
         }
         return issueMapper.selectDailyWorkIssues(projectIds);
     }
-
 
     private Map<Long, UserDTO> getUserMap(Set<Long> userIds) {
         Map<Long, UserDTO> userMap = new HashMap<>();
