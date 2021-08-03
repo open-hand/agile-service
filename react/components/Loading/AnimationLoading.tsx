@@ -217,13 +217,13 @@ const Loading: React.FC<ILoadingProps> = ({
     cancelRegisterChildren(loadId);
   });
 
-  useUpdateEffect(() => {
+  useEffect(() => {
     // 兼容过往使用loading方法的 effect
     if (propsLoading !== undefined) {
       console.log(`Loading:${loadId} USE:${isHasProvider && !noDeliverLoading ? 'change' : 'setLoading'}`, propsLoading);
       isHasProvider && !noDeliverLoading ? change(loadId, !!propsLoading) : setLoading(propsLoading);
     }
-  }, [isHasProvider, loadId, propsLoading]);
+  }, [change, isHasProvider, loadId, noDeliverLoading, propsLoading]);
 
   return (
     <AnimationLoading loading={!!loading} {...otherProps}>

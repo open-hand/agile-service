@@ -1,7 +1,7 @@
 import React from 'react';
 import { usePersistFn, useUnmount } from 'ahooks';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
-import Loading from '@/components/Loading';
+import { OldLoading as Loading } from '@/components/Loading';
 import useTableColumns from '@/hooks/data/useTableColumns';
 import { ListLayoutColumnVO } from '@/api';
 
