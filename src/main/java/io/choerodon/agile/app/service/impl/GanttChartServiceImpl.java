@@ -116,7 +116,6 @@ public class GanttChartServiceImpl implements GanttChartService {
                                 .stream()
                                 .collect(Collectors.toMap(GanttChartVO::getIssueId, GanttChartVO::getActualCompletedDate));
                 List<GanttChartVO> result = buildFromIssueDto(issueDTOList, projectId, completedDateMap);
-                result = toTree(result);
                 return PageUtils.copyPropertiesAndResetContent(page, result);
             } else {
                 return emptyPage;
@@ -166,30 +165,6 @@ public class GanttChartServiceImpl implements GanttChartService {
             return ObjectUtils.isEmpty(otherArgs.get("sprint"));
         }
         return true;
-    }
-
-    private List<GanttChartVO> toTree(List<GanttChartVO> ganttChartList) {
-        List<GanttChartVO> result = new ArrayList<>();
-        Map<Long, GanttChartVO> map = new HashMap<>();
-        List<GanttChartVO> rootNodes = new ArrayList<>();
-        ganttChartList.forEach(g -> map.put(g.getIssueId(), g));
-        ganttChartList.forEach(g -> {
-            Long parentId = g.getParentId();
-            if (parentId == null
-                    || map.get(parentId) == null) {
-                rootNodes.add(g);
-            } else {
-                GanttChartVO parent = map.get(parentId);
-                List<GanttChartVO> children = parent.getChildren();
-                if (children == null) {
-                    children = new ArrayList<>();
-                    parent.setChildren(children);
-                }
-                children.add(g);
-            }
-        });
-        result.addAll(rootNodes);
-        return result;
     }
 
     private List<GanttChartVO> buildFromIssueDto(List<IssueDTO> issueList,
