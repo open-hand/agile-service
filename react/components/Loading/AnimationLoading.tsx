@@ -111,7 +111,7 @@ export const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
       const statusStack = [...loadMaps.values()];
       console.log('star....statusStack', cloneDeep(statusStack));
       // 不是初始状态的子Loading 并且有配置允许使用自己的Loading 即可自更新
-      const selfLoadingStatus = statusStack.filter((i) => childrenLoadMap.get(i.loadId)?.status !== 'init' && (childrenLoadMap.get(i.loadId)!.allowSelfLoading || i.allowSelfLoading));
+      const selfLoadingStatus = statusStack.filter((i) => childrenLoadMap.get(i.loadId)?.status !== 'init' && (childrenLoadMap.get(i.loadId)?.allowSelfLoading || i.allowSelfLoading));
 
       const selfLoadingStatusIds = selfLoadingStatus.map((i) => i.loadId);
       const globalDoingStatus = statusStack.filter((i) => i.status === 'doing').filter((i) => !selfLoadingStatusIds.includes(i.loadId));
@@ -119,8 +119,11 @@ export const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
 
       // 进行子Loading属性配置更新
       statusStack.forEach((item) => {
-        const childrenLoadValue = merge(childrenLoadMap.get(item.loadId), item);
-        childrenLoadMap.set(item.loadId, childrenLoadValue);
+        // 未注册的子Loading不进行属性更新
+        if (childrenLoadMap.has(item.loadId)) {
+          const childrenLoadValue = merge(childrenLoadMap.get(item.loadId), item);
+          childrenLoadMap.set(item.loadId, childrenLoadValue);
+        }
       });
       // 如果有全局更新   则不允许其余子Loading出现
       if (globalDoingStatus.length > 0) {
