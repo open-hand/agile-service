@@ -38,9 +38,16 @@ const Rule: React.FC<Props> = ({ record }) => {
     <div className={styles.rule}>
       <Form record={record}>
         {record.get('chosenField')?.fieldType && includes(selectTypes, record.get('chosenField')?.fieldType) ? renderFieldRelSelect({ field: record.get('chosenField') }) : null}
-        {renderDefaultValue({ field: record.get('chosenField'), fieldOptions: record.get('fieldRelOptionList') })}
+        <div
+          className={styles.rule_default}
+          style={{
+            marginTop: record.get('chosenField')?.fieldType && includes(selectTypes, record.get('chosenField')?.fieldType) ? -6 : 0,
+          }}
+        >
+          {renderDefaultValue({ field: record.get('chosenField'), fieldOptions: record.get('fieldRelOptionList') })}
+        </div>
         <CheckBox name="hidden" />
-        <CheckBox name="required" />
+        <CheckBox name="required" style={{ marginTop: -13 }} />
       </Form>
     </div>
   );

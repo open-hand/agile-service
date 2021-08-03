@@ -2,9 +2,9 @@ import React, {
   useCallback, useEffect, useState,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { DataSet } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui/pro';
+import { DataSet, Icon } from 'choerodon-ui/pro';
 import ChooseField, { useChoseField } from '@/components/chose-field';
+import { FuncType } from 'choerodon-ui/pro/lib/button/interface';
 import { pageConfigApi } from '@/api';
 import classNames from 'classnames';
 import useDeepMemo from '@/hooks/useDeepMemo';
@@ -79,7 +79,7 @@ const ChosenFields: React.FC<Props> = ({
         <ChooseField
           {...choseComponentProps}
           dropDownProps={{ disabled: !currentOptionId }}
-          dropDownBtnProps={{ icon: 'add', style: { marginLeft: 6, marginTop: 10 } }}
+          dropDownBtnProps={{ icon: 'add', funcType: 'flat' as FuncType, style: { marginLeft: 6, marginTop: 10 } }}
           dropDownBtnChildren="添加字段"
         />
       </div>

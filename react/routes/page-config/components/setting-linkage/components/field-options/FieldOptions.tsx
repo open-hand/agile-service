@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { TextField, Button } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui/pro';
+import { TextField, Button, Icon } from 'choerodon-ui/pro';
+
 import { observer } from 'mobx-react-lite';
 import { axios } from '@choerodon/boot';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
-import { IComponent, IPriority, IVersion } from '@/common/types';
+import { IPriority, IVersion } from '@/common/types';
 import classNames from 'classnames';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import { uniqBy } from 'lodash';
@@ -201,7 +201,7 @@ const FieldOptions: React.FC<Props> = ({
         prefix={<Icon type="search" style={{ color: 'rgba(0, 0, 0, 0.45)', marginLeft: 2 }} />}
         placeholder="请输入搜索内容"
         className={styles.search}
-        style={{ display: 'block', margin: '0 20px 6px' }}
+        style={{ display: 'block', margin: '0 20px 10px' }}
       />
       <div className={styles.options}>
         {options?.filter((option) => option.value.indexOf(search || '') > -1).map((option) => (
