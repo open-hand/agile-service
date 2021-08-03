@@ -3,7 +3,9 @@ package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.FieldOptionService;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.agile.app.service.ObjectSchemeFieldService;
 import io.swagger.annotations.ApiOperation;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -209,5 +212,22 @@ public class ObjectSchemeFieldController {
             @PathVariable("option_id") @Encrypt Long optionId) {
         fieldOptionService.deleteOption(optionId, fieldId, organizationId);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "组织层分页获取自定义字段下的选项")
+    @GetMapping("/{field_id}/options")
+    public ResponseEntity<Page<FieldOptionVO>> getOrganizationOptionsPageByFieldId(
+            @ApiParam(value = "组织id", required = true)
+            @PathVariable("organization_id") Long organizationId,
+            @PathVariable("field_id") @Encrypt Long fieldId,
+            @ApiParam(value = "搜索参数，支持模糊查询", required = true)
+            @RequestParam(required = false) String searchValue,
+            @ApiParam(value = "已选择的选项id", required = true)
+            @Encrypt @RequestParam(required = false) List<Long> selected,
+            @RequestParam(required = false, defaultValue = "false") Boolean enabled,
+            @ApiParam(value = "分页信息", required = true)
+            @ApiIgnore PageRequest pageRequest) {
+        return new ResponseEntity<>(fieldOptionService.getOptionsPageByFieldId(organizationId, fieldId, searchValue, selected, enabled, pageRequest), HttpStatus.OK);
     }
 }
