@@ -9,3 +9,4 @@ set('agile:PersonalWorkload', () => import('@/injects/personal-workload'));
 set('agile:AgileChartHeaderButtons', () => import('@/injects/custom-report/header-buttons'));
 set('agile:AgileCustomChartLoadData', loadCustomReportData);
 set('agile:CustomChartSearch', () => import('@/injects/custom-report/custom-search'));
+set('agile:SelectUser', () => import('@/components/select/select-user'));
