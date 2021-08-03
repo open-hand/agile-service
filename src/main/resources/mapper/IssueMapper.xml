@@ -4642,4 +4642,47 @@
             </if>
         </if>
     </sql>
+
+    <select id="selectDailyWorkIssues" resultType="io.choerodon.agile.api.vo.IssueDailyWorkVO">
+        SELECT
+            ai.issue_id,
+            ai.summary,
+            ai.project_id,
+            ai.type_code,
+            CONCAT_WS('-', api.project_code, ai.issue_num) AS issue_num,
+            ai.reporter_id,
+            ai.assignee_id,
+            ai.priority_id,
+            fp.name AS priority_name,
+            fp.colour AS priority_colour,
+            ai.issue_type_id,
+            IFNULL(fite.name, fit.name) AS type_name,
+            ai.status_id,
+            ais.name AS status_name,
+            ais.category_code AS status_code,
+            IF(ai.parent_issue_id != 0, ai.parent_issue_id, NULL) AS parent_issue_id,
+            IF(ai.relate_issue_id != 0, ai.relate_issue_id, NULL) AS relate_issue_id,
+            ai.estimated_end_time
+        FROM
+            agile_issue ai
+            LEFT JOIN agile_issue_status ais ON ais.status_id = ai.status_id AND ais.project_id = ai.project_id
+            LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
+            LEFT JOIN fd_priority fp ON ai.priority_id = fp.id
+            LEFT JOIN fd_issue_type_extend fite ON ai.issue_type_id = fite.issue_type_id AND ai.project_id = fite.project_id
+            LEFT JOIN fd_issue_type fit ON ai.issue_type_id = fit.id
+        WHERE ai.type_code IN ('story', 'bug', 'task', 'sub_task')
+        AND ai.apply_type = 'agile'
+        AND ai.issue_id IN (
+            SELECT aisr.issue_id
+            FROM agile_sprint sprint
+            JOIN agile_issue_sprint_rel aisr ON sprint.sprint_id = aisr.sprint_id
+            WHERE sprint.project_id IN
+            <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+                #{projectId}
+            </foreach>
+            AND sprint.status_code = 'started'
+        )
+        AND ais.is_completed != 1
+        ORDER BY ai.issue_num DESC
+    </select>
 </mapper>
