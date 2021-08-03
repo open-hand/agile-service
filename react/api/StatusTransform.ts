@@ -468,12 +468,12 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     });
   }
 
-  getCustomMember(issueTypeId: string, schemeCode: string = 'agile_issue') {
+  getCustomMember(issueTypeId: string, extraOptions: { code: string, name: string }[] = [], schemeCode: string = 'agile_issue') {
     const arr = [
       { code: 'projectOwner', name: '项目所有者' },
       { code: 'reporter', name: '报告人' },
       { code: 'starUser', name: '关注人' },
-
+      ...extraOptions,
     ];
     if (getApplyType() === 'agile') {
       arr.push({ code: 'assignee', name: '经办人' });
@@ -496,11 +496,12 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     });
   }
 
-  orgGetCustomMember(issueTypeId: string, schemeCode: string = 'agile_issue') {
+  orgGetCustomMember(issueTypeId: string, extraOptions: { code: string, name: string }[] = [], schemeCode: string = 'agile_issue') {
     const arr = [
       { code: 'projectOwner', name: '项目所有者' },
       { code: 'reporter', name: '报告人' },
       { code: 'starUser', name: '关注人' },
+      ...extraOptions,
     ];
     if (getApplyType() === 'agile') {
       arr.push({ code: 'assignee', name: '经办人' });
