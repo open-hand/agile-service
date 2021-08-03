@@ -32,12 +32,12 @@ const NotifySelect: React.FC<NotifySelectProps> = (
       className={styles.notifyMember_select}
     >
       {
+        // @ts-ignore
+        memberOptionsDataSet.toData().map((item) => (
           // @ts-ignore
-          memberOptionsDataSet.toData().map((item) => (
-            // @ts-ignore
-            <CheckBox name={item.code}>{item.name}</CheckBox>
-          ))
-        }
+          <CheckBox name={item.code}>{item.name}</CheckBox>
+        ))
+      }
       {
         // @ts-ignore
         data.specifier && (
@@ -82,8 +82,8 @@ function useClickOut(onClickOut) {
 }
 
 const NotifySetting = ({
-// @ts-ignore
-  modal, record, selectedType, customCirculationDataSet,
+  // @ts-ignore
+  modal, record, selectedType, customCirculationDataSet, memberOptions = [] as Array<{code:string, name:string}>,
 }) => {
   const [loading, setLoading] = useState(false);
   const [hidden, setHidden] = useState(true);
@@ -109,13 +109,14 @@ const NotifySetting = ({
     autoQuery: true,
     paging: false,
     transport: {
-      read: () => statusTransformApiConfig[isOrganization ? 'orgGetCustomMember' : 'getCustomMember'](selectedType),
+      read: () => statusTransformApiConfig[isOrganization ? 'orgGetCustomMember' : 'getCustomMember'](selectedType, memberOptions),
+
     },
     fields: [
       { name: 'code', type: 'string' as FieldType },
       { name: 'name', type: 'string' as FieldType },
     ],
-  }), [isOrganization, selectedType]);
+  }), [isOrganization, memberOptions, selectedType]);
 
   const notifyMethodDataSet = useMemo(() => new DataSet({
     data: [
@@ -185,10 +186,10 @@ const NotifySetting = ({
       (res.userTypeList || []).forEach((usertype: string) => {
         current?.set(usertype, true);
       });
-      (res.memberList || []).forEach((item: { code: string, name: string}) => {
+      (res.memberList || []).forEach((item: { code: string, name: string }) => {
         current?.set(item.code, true);
       });
-      current?.set('userIdList', (res.userList || []).map((item: { id: string}) => item.id));
+      current?.set('userIdList', (res.userList || []).map((item: { id: string }) => item.id));
       current?.set('noticeTypeList', (res.noticeTypeList || []).filter((item: string) => item !== 'WEB_HOOK'));
       current?.set('webhook', Boolean((res.noticeTypeList || []).find((item: string) => item === 'WEB_HOOK')));
     });
@@ -198,7 +199,7 @@ const NotifySetting = ({
       const validate = await notifySettingDataSet.validate();
       const data = notifySettingDataSet.toData();
       const {
-      // @ts-ignore
+        // @ts-ignore
         specifier, userIdList, noticeTypeList, webhook,
       } = data && data[0];
 
@@ -250,7 +251,8 @@ const NotifySetting = ({
       if (key !== 'userIdList' && key !== 'noticeTypeList' && key !== 'specifier' && key !== 'webhook') {
         if (typeof value === 'boolean' && value) {
           const memberItem = memberOptionsDataSet.toData().find((item: {
-            code: string, name: string}) => item.code === key);
+            code: string, name: string
+          }) => item.code === key);
           if (memberItem) {
             // @ts-ignore
             selected.push(memberItem.name);
@@ -272,7 +274,7 @@ const NotifySetting = ({
     }
   }
   const memberIsRequired = data[0] && (
-  // @ts-ignore
+    // @ts-ignore
     data[0].noticeTypeList && data[0].noticeTypeList.length > 0
     // @ts-ignore
   );
@@ -288,7 +290,7 @@ const NotifySetting = ({
           visible={!hidden}
           overlay={(
             <div
-            // @ts-ignore
+              // @ts-ignore
               ref={ref}
               role="none"
               onClick={(e) => {

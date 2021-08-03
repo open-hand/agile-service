@@ -361,6 +361,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         // @ts-ignore
         children: <NotifySetting
           record={record}
+          memberOptions={selectedTypeCode && ['issue_epic', 'feature'].includes(selectedTypeCode) ? [] : [{ code: 'mainResponsible', name: '主要负责人' }]}
           selectedType={selectedType}
           customCirculationDataSet={customCirculationDataSet}
         />,
