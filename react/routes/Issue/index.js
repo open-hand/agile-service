@@ -12,7 +12,7 @@ import {
 } from 'lodash';
 import { useUnmount, usePersistFn } from 'ahooks';
 import openCreateIssue from '@/components/create-issue';
-import Loading from '@/components/Loading';
+import { OldLoading as Loading } from '@/components/Loading';
 import { projectApi } from '@/api/Project';
 import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 import { issueApi } from '@/api';

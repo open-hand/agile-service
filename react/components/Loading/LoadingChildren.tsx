@@ -59,14 +59,14 @@ const Loading: React.FC<ILoadingProps> = ({
  * 动画Loading
  */
 const AnimationLoading: React.FC<IAnimationLoadingProps> = ({
-  loading, className, children, style,
+  loading, className, children, style, loadingStyle,
 }) => (
   <div
     className={classNames(prefixCls, {
       [`${prefixCls}-no-children`]: !children,
       [`${prefixCls}-no-children-hidden`]: !children && !loading,
     }, className)}
-    style={style}
+    style={{ ...(loading ? loadingStyle : {}), ...style }}
   >
     <OriginAnimationLoading display={loading} className={classNames(`${prefixCls}-container`, { [`${prefixCls}-hidden`]: !loading })} />
     {children}

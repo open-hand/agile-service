@@ -8,6 +8,7 @@ import scrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import { observer } from 'mobx-react-lite';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { getProjectId } from '@/utils/common';
+import CustomIcon from '@/components/custom-icon';
 import expandStyles from './index.less';
 
 function ExpandAllButton(props: any) {
@@ -33,15 +34,12 @@ function ExpandAllButton(props: any) {
   useEffect(() => () => scrumBoardStore.removeBindFunction('expand-current-status'));
   return scrumBoardStore.currentBindFunctionMaps.get('expandOrUp') || scrumBoardStore.currentBindFunctionMaps.get('expandOrUp-epic') ? (
     <Button {...props} onClick={handleClick}>
+      <CustomIcon type="icon-indent" />
       {expandAll ? <span>全部收起</span> : (
         <Tooltip title="仅展开前15项">
           <span>全部展开</span>
         </Tooltip>
       )}
-      {/* <Icon
-        type="baseline-arrow_drop_up"
-        className={classnames(expandStyles.icon, { [expandStyles.expand]: expandAll })}
-      /> */}
     </Button>
   ) : null;
 }
