@@ -1,49 +1,24 @@
 import React, {
-  useState, useCallback,
-  useMemo,
-  useContext,
-  useEffect,
-  useImperativeHandle,
-  useRef,
+  useCallback, useContext, useEffect, useImperativeHandle,
 } from 'react';
-import { AnimationLoading as OriginAnimationLoading } from '@choerodon/components';
-import classNames from 'classnames';
-import './AnimationLoading.less';
-
 import {
-  noop, uniqueId, merge, cloneDeep,
+  noop, merge, cloneDeep,
 } from 'lodash';
 import {
-  useMap, useMount, usePersistFn, useUpdateEffect, useUnmount, useCreation, useSafeState,
+  useMap, usePersistFn, useUnmount, useCreation, useSafeState,
 } from 'ahooks';
+import Loading from './LoadingChildren';
+import {
+  ILoadingRegisterChildrenData, ILoadingChangeExtraConfig, ILoadingChangeItem, ILoadingChildren,
+} from './type';
+import { filterSelfLoading } from './utils';
 
-const prefixCls = 'c7n-agile-animation-loading';
-
-interface ILoadingProps {
-  loadId?: string /** 加载唯一id */
-  loading?: boolean
-  // loadedUnmount?: boolean /** @default 'true' 加载完成后是否卸载加载的loading */
-  noDeliverLoading?: boolean /**  不去向父级传递loading @default 'false' */
-  allowSelfLoading?: boolean /** 允许在父级Loading结束后调用自身的loading @default 'false'' */
-  className?: string
-  style?: React.CSSProperties
-  // contentClassName?: string
-  // contentStyle?: React.CSSProperties
-}
 interface ILoadingProviderProps {
   loadId?: string /** 全局加载Loading 唯一id  默认为 parent-provider */
   loading?: boolean /** 全局loading状态 */
   globalSingle?: boolean /** 启用全局单loading  @default 'true' 未对此配置进行处理 */
   ref?: React.Ref<ContextProps>
 }
-interface ILoadingRegisterChildrenData extends Pick<ILoadingProps, 'allowSelfLoading'> {
-  loadId: string
-  changeLoading: React.Dispatch<React.SetStateAction<boolean | undefined>>
-}
-interface ILoadingChangeExtraConfig extends Pick<ILoadingProps, 'allowSelfLoading'> {
-
-}
-type ILoadingChangeStatus = 'init' | 'ready' | 'doing'
 interface ContextProps {
   loading: boolean
   change: (key: string, loading: boolean, extraConfig?: ILoadingChangeExtraConfig) => void /** 改变loading  父级Loading每次变更为true时会关闭所有子Loading 并重置 */
@@ -59,20 +34,19 @@ export function useLoading() {
   return useContext(Context);
 }
 /**
- * 父级Loading
+ * 父级Loading 提供者，管理内部所有的子Loading 目前全局Loading使用的是吐泡泡Loading
  * 初始化时，所有子Loading状态会直接传递给父级
  * 当直接操作父级Loading时，所有子Loading会自动关闭并重新注册
  *
  */
-export const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
+const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
   // 正在进行的子Loading
   const [loadMaps, {
     set: setMap, remove: removeMap, setAll, reset,
-  }] = useMap<string, { status: ILoadingChangeStatus, loadId: string } & ILoadingChangeExtraConfig>();
+  }] = useMap<string, ILoadingChangeItem>();
   const [globalLoading, setGlobalLoading] = useSafeState(false);
-  // const
-  const childrenLoadMap = useCreation(() => new Map<string, { status: ILoadingChangeStatus } & ILoadingRegisterChildrenData>(), []);// 最新数据
-  const globalLoadingTrigger = useRef<string>(); // 记录触发Loading层级
+  // con3st
+  const childrenLoadMap = useCreation(() => new Map<string, ILoadingChildren>(), []);// 最新数据
   const globalLoadId = useCreation(() => props.loadId || 'parent-provider', []);
   const handleChangeGlobal = useCallback((newLoading: boolean) => {
     setGlobalLoading(() => {
@@ -81,41 +55,37 @@ export const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
         // 重置所有子Loading
         childrenLoadMap.forEach((value) => {
           value.changeLoading(false);
-          childrenLoadMap.set(value.loadId, { ...value, status: 'init' });
+          childrenLoadMap.set(value.loadId, { ...value, status: 'init', finishInit: false });
         });
-        globalLoadingTrigger.current = globalLoadId;
         return true;
       }
-      globalLoadingTrigger.current = undefined;
       return false;
     });
-  }, []);
+  }, [childrenLoadMap, setGlobalLoading]);
 
   const handleChange = useCallback((loadId: string, newLoading: boolean, extraConfig?: ILoadingChangeExtraConfig) => {
     console.log('----------------------start-----------------------');
     // 全局 Loading 状态更改调用全局方法
     if (loadId === globalLoadId) {
       handleChangeGlobal(newLoading);
-      console.log('----------------------end-----------------------------------');
       return;
     }
-    // 增加到状态更新队列中
+    // 增加到状态更新Map中
     const newStatus = newLoading ? 'doing' : 'ready';
     setMap(loadId, { ...extraConfig, status: newStatus, loadId });
-    // statusStack.push({ ...extraConfig, status: newStatus, loadId });
-    console.log('childrenLoad', loadId, newLoading);
   }, [globalLoadId, handleChangeGlobal, setMap]);
-  // 更新全局
+
+  // 响应更新maps
   useEffect(() => {
     if (loadMaps.size > 0 && childrenLoadMap.size > 0) {
       const statusStack = [...loadMaps.values()];
-      console.log('star....statusStack', cloneDeep(statusStack));
+      console.log('....statusStack', cloneDeep(statusStack));
       // 不是初始状态的子Loading 并且有配置允许使用自己的Loading 即可自更新
-      const selfLoadingStatus = statusStack.filter((i) => childrenLoadMap.get(i.loadId)?.status !== 'init' && (childrenLoadMap.get(i.loadId)?.allowSelfLoading || i.allowSelfLoading));
+      const selfLoadingStatus = statusStack.filter((i) => filterSelfLoading(i, childrenLoadMap.get(i.loadId)));
 
       const selfLoadingStatusIds = selfLoadingStatus.map((i) => i.loadId);
       const globalDoingStatus = statusStack.filter((i) => i.status === 'doing').filter((i) => !selfLoadingStatusIds.includes(i.loadId));
-      console.log('useUpdateEffect', selfLoadingStatus, [...childrenLoadMap.values()], globalDoingStatus);
+      console.log('self,children,globalDoing', selfLoadingStatus, cloneDeep([...childrenLoadMap.values()]), globalDoingStatus);
 
       // 进行子Loading属性配置更新
       statusStack.forEach((item) => {
@@ -140,16 +110,13 @@ export const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
         childrenLoadMap.get(item.loadId)?.changeLoading(item.status === 'doing');
       });
       console.log('finish Update');
-      // statusStack.length = 0;
-      // setStatusStack(() => []);
     }
   }, [loadMaps, setGlobalLoading, childrenLoadMap.size, childrenLoadMap]);
   const handleRegister = usePersistFn((data: ILoadingRegisterChildrenData) => {
-    childrenLoadMap.set(data.loadId, { ...data, status: 'init' });
+    childrenLoadMap.set(data.loadId, { ...data, status: 'init', initStatus: data.initStatus || 'init' });
   });
   const handleCancelResigner = usePersistFn((loadId: string) => {
     childrenLoadMap.delete(loadId);
-    // removeMap(loadId);
   });
   useEffect(() => {
     if (props.loading !== undefined) {
@@ -176,63 +143,14 @@ export const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
       change: handleChange,
     }}
     >
-      <Loading loading={globalLoading} loadId={globalLoadId} className={`${prefixCls}-global`} noDeliverLoading style={{ display: globalLoading ? 'unset' : 'none' }} />
+      <Loading loading={globalLoading} loadId={globalLoadId} noDeliverLoading globalLoading style={{ display: globalLoading ? 'unset' : 'none' }} />
       {props.children}
     </Context.Provider>
   );
 };
-/**
- * 动画Loading
- */
-const AnimationLoading: React.FC<Pick<ILoadingProps, 'loading' | 'className' | 'style'>> = ({
-  loading, className, children, style,
-}) => (
-  <div
-    className={classNames(prefixCls, {
-      [`${prefixCls}-no-children`]: !children,
-      [`${prefixCls}-no-children-hidden`]: !children && !loading,
-    }, className)}
-    style={style}
-  >
-    <OriginAnimationLoading display={loading} className={classNames(`${prefixCls}-container`, { [`${prefixCls}-hidden`]: !loading })} />
-    {children}
-  </div>
-);
-/**
- * 子Loading
- */
-const Loading: React.FC<ILoadingProps> = ({
-  children, loading: propsLoading, noDeliverLoading, loadId: propsLoadId, allowSelfLoading, ...otherProps
-}) => {
-  const [loading, setLoading] = useState<boolean | undefined>(); /** 自身的loading */
-  const {
-    registerChildren, cancelRegisterChildren, isHasProvider, change,
-  } = useContext(Context);
 
-  const loadId = useMemo(() => propsLoadId || uniqueId('loading'), [propsLoadId]);
-  useMount(() => {
-    !noDeliverLoading && registerChildren({ loadId, changeLoading: setLoading, allowSelfLoading });
-  });
-  useUnmount(() => {
-    cancelRegisterChildren(loadId);
-  });
-
-  useEffect(() => {
-    // 兼容过往使用loading方法的 effect
-    if (propsLoading !== undefined) {
-      console.log(`Loading:${loadId} USE:${isHasProvider && !noDeliverLoading ? 'change' : 'setLoading'}`, propsLoading);
-      isHasProvider && !noDeliverLoading ? change(loadId, !!propsLoading) : setLoading(propsLoading);
-    }
-  }, [change, isHasProvider, loadId, noDeliverLoading, propsLoading]);
-
-  return (
-    <AnimationLoading loading={!!loading} {...otherProps}>
-      {children}
-    </AnimationLoading>
-  );
-};
 /**
- * loading时隐藏节点
+ * loading进行中隐藏节点
  */
 export const LoadingHiddenWrap: React.FC = ({ children }) => {
   const { loading } = useLoading();
@@ -246,4 +164,4 @@ export const LoadingHiddenWrap: React.FC = ({ children }) => {
   return children as any;
 };
 
-export default Loading;
+export default LoadingProvider;

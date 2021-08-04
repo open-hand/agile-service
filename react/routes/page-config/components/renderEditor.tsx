@@ -111,7 +111,6 @@ function renderEditor({
           clearButton
           dataRef={dataRef}
           style={style}
-          request={({ filter, page }) => (type === 'project' ? userApi.getAllInProject(filter, page) : userApi.getAllInOrg(filter, page))}
           {...otherProps}
         />
       );

@@ -343,8 +343,8 @@ function CreateField() {
             name="defaultValue"
             selectedUser={toJS(current?.get('defaultValueObj'))}
             dataRef={userDataRef}
+            level={type === 'project' ? 'project' : 'org'}
             multiple={fieldType === 'multiMember'}
-            request={({ filter, page }) => (type === 'project' ? userApi.getAllInProject(filter, page) : userApi.getAllInOrg(filter, page))}
           />
         );
       default:

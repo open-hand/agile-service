@@ -1,8 +1,9 @@
-import Loading from './Loading';
-import AnimationLoading, { useLoading, LoadingProvider, LoadingHiddenWrap } from './AnimationLoading';
+import OldLoading from './Loading';
+import Loading from './LoadingChildren';
+import LoadingProvider, { useLoading, LoadingHiddenWrap } from './LoadingProvider';
 
 export {
-  useLoading, LoadingProvider, LoadingHiddenWrap, Loading as OldLoading,
+  useLoading, LoadingHiddenWrap, OldLoading, LoadingProvider,
 };
 // export { AnimationLoading };
-export default AnimationLoading;
+export default Loading;
