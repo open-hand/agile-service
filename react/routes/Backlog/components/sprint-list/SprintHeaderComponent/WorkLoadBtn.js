@@ -1,19 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { Icon } from 'choerodon-ui/pro';
-import AssigneeModal from './AssigneeModal';
+import openAssigneeModal from './AssigneeModal';
 import './WorkLoadBtn.less';
 
 const WorkLoadBtn = ({ data }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const handleClickBtn = () => {
-    setIsOpen(true);
+    openAssigneeModal({
+      data,
+    });
   };
-
-  const onCloseModal = () => {
-    setIsOpen(false);
-  };
-
   const { assigneeIssues } = data;
 
   return (
@@ -29,11 +25,6 @@ const WorkLoadBtn = ({ data }) => {
         <Icon type="find_in_page-o" />
         <span>查看经办人工作量</span>
       </span>
-      <AssigneeModal
-        visible={isOpen}
-        onCancel={onCloseModal}
-        data={data}
-      />
     </>
   );
 };
