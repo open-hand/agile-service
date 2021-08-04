@@ -71,7 +71,7 @@ const LogTable: React.FC<Props> = () => {
   ), []);
 
   const handleClickIssue = useCallback((issueId: string, issueNum: string) => {
-    LINK_URL_TO.issueLinkTo('206436126142103552', 'AG-11287');
+    LINK_URL_TO.issueLinkTo(issueId, issueNum);
   }, []);
 
   const renderIssue = useCallback(({ record }, issueType: 'pre' | 'cur') => {
