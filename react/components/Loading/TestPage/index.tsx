@@ -5,7 +5,7 @@ import {
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
 import { Table, Button } from 'choerodon-ui/pro';
-import AnimationLoading, { LoadingProvider, useLoading } from '@/components/Loading/AnimationLoading';
+import AnimationLoading, { LoadingProvider, useLoading } from '@/components/Loading';
 
 const LeftChildren: React.FC = () => {
   const { change } = useLoading();
@@ -47,7 +47,7 @@ const RightChildren: React.FC = () => {
         // actions?.change('provider', true);
         setTimeout(() => {
           change('right', false);
-        }, 8000);
+        }, 800);
       }}
       >
         触发更新
