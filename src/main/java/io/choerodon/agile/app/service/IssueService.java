@@ -420,7 +420,7 @@ public interface IssueService {
 
     String handleSortField(PageRequest pageRequest);
 
-    void handlerInfluenceMap(Map<Long, List<Long>> influenceMap, Long issueId, Long statusId, Map<Long, List<IssueLinkChangeVO>> issueLinkChangeGroup, Long influenceId, InfluenceIssueVO influenceIssueVO);
+    void handlerInfluenceMap(Map<Long, List<Long>> influenceMap, Long issueId, Long statusId, Map<Long, List<IssueLinkChangeVO>> issueLinkChangeGroup, Long influenceId, InfluenceIssueVO influenceIssueVO, Boolean autoTriggered);
 
     Boolean updateInfluenceIssueStatus(Long projectId, Long issueId, String applyType, Set<Long> influenceIssueIds);
 }

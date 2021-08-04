@@ -250,6 +250,47 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
         return statusVOS;
     }
 
+    @Override
+    public Map<Long, LinkIssueStatusLinkageVO> queryMapByProject(Long projectId, Long organizationId) {
+        LinkIssueStatusLinkageDTO linkageDTO = new LinkIssueStatusLinkageDTO();
+        linkageDTO.setProjectId(projectId);
+        linkageDTO.setOrganizationId(organizationId);
+        List<LinkIssueStatusLinkageDTO> linkageDTOS = linkIssueStatusLinkageMapper.select(linkageDTO);
+        if (CollectionUtils.isEmpty(linkageDTOS)) {
+            return new HashMap<>();
+        }
+        List<StatusVO> statusVOS = projectConfigService.queryStatusByProjectId(projectId, SchemeApplyType.AGILE);
+        Map<Long, StatusVO> statusMap = new HashMap<>();
+        if (!CollectionUtils.isEmpty(statusVOS)) {
+            statusMap.putAll(statusVOS.stream().collect(Collectors.toMap(StatusVO::getId, Function.identity())));
+        }
+        // 获取项目的问题类型
+        List<IssueTypeVO> issueTypeVOS = projectConfigService.queryIssueTypesByProjectId(projectId, SchemeApplyType.AGILE, false);
+        Map<Long, IssueTypeVO> typeVOMap = new HashMap<>();
+        if (!CollectionUtils.isEmpty(statusVOS)) {
+            typeVOMap.putAll(issueTypeVOS.stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity())));
+        }
+
+        List<IssueLinkTypeDTO> issueLinkTypeDTOS = issueLinkTypeMapper.queryIssueLinkTypeByProjectId(projectId, null, null, null);
+        Map<Long, IssueLinkTypeVO> issueLinkTypeVOMap = new HashMap<>();
+        if (!CollectionUtils.isEmpty(issueLinkTypeDTOS)) {
+            List<IssueLinkTypeVO> issueLinkTypeVOS = modelMapper.map(issueLinkTypeDTOS, new TypeToken<List<IssueLinkTypeVO>>() {
+            }.getType());
+            issueLinkTypeVOMap.putAll(issueLinkTypeVOS.stream().collect(Collectors.toMap(IssueLinkTypeVO::getLinkTypeId, Function.identity())));
+        }
+        Map<Long, LinkIssueStatusLinkageVO> map = new HashMap<>();
+        for (LinkIssueStatusLinkageDTO dto : linkageDTOS) {
+            LinkIssueStatusLinkageVO linkageVO = modelMapper.map(dto, LinkIssueStatusLinkageVO.class);
+            linkageVO.setLinkTypeVO(issueLinkTypeVOMap.getOrDefault(dto.getLinkTypeId(), null));
+            linkageVO.setLinkIssueType(typeVOMap.getOrDefault(dto.getLinkIssueTypeId(), null));
+            linkageVO.setIssueTypeVO(typeVOMap.getOrDefault(dto.getIssueTypeId(), null));
+            linkageVO.setStatusVO(statusMap.getOrDefault(dto.getStatusId(), null));
+            linkageVO.setLinkIssueStatus(statusMap.getOrDefault(dto.getLinkIssueStatusId(), null));
+            map.put(dto.getId(), linkageVO);
+        }
+        return map;
+    }
+
     private Set<Long> changeStatus(Long projectId, Long organizationId, String applyType, Map<Long, Map<Long, Long>> issueChangeMap, List<Long> issueIds) {
         Set<Long> updatedIssueIds = new HashSet<>();
         List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds, null);

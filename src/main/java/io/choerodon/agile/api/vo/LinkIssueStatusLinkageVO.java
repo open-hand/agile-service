@@ -31,9 +31,15 @@ public class LinkIssueStatusLinkageVO {
 
     private IssueLinkTypeVO linkTypeVO;
 
+    private StatusVO statusVO;
+
+    private IssueTypeVO issueTypeVO;
+
     private Long projectId;
 
     private Long organizationId;
+
+    private Boolean isTriggered;
 
     public Long getId() {
         return id;
@@ -121,5 +127,29 @@ public class LinkIssueStatusLinkageVO {
 
     public void setLinkTypeVO(IssueLinkTypeVO linkTypeVO) {
         this.linkTypeVO = linkTypeVO;
+    }
+
+    public Boolean getTriggered() {
+        return isTriggered;
+    }
+
+    public void setTriggered(Boolean triggered) {
+        isTriggered = triggered;
+    }
+
+    public StatusVO getStatusVO() {
+        return statusVO;
+    }
+
+    public void setStatusVO(StatusVO statusVO) {
+        this.statusVO = statusVO;
+    }
+
+    public IssueTypeVO getIssueTypeVO() {
+        return issueTypeVO;
+    }
+
+    public void setIssueTypeVO(IssueTypeVO issueTypeVO) {
+        this.issueTypeVO = issueTypeVO;
     }
 }

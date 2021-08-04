@@ -19,6 +19,10 @@ public class IssueLinkChangeVO {
 
     private Long linkIssueStatusId;
 
+    private Boolean isTriggered;
+
+    private Long linkSettingId;
+
     public Long getIssueId() {
         return issueId;
     }
@@ -73,5 +77,21 @@ public class IssueLinkChangeVO {
 
     public void setLinkIssueStatusId(Long linkIssueStatusId) {
         this.linkIssueStatusId = linkIssueStatusId;
+    }
+
+    public Boolean getTriggered() {
+        return isTriggered;
+    }
+
+    public void setTriggered(Boolean triggered) {
+        isTriggered = triggered;
+    }
+
+    public Long getLinkSettingId() {
+        return linkSettingId;
+    }
+
+    public void setLinkSettingId(Long linkSettingId) {
+        this.linkSettingId = linkSettingId;
     }
 }

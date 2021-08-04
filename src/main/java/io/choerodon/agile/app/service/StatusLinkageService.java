@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.InfluenceIssueVO;
 import io.choerodon.agile.api.vo.IssueLinkChangeVO;
+import io.choerodon.agile.api.vo.LinkIssueStatusLinkageVO;
 import io.choerodon.agile.api.vo.StatusLinkageVO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 
@@ -31,4 +32,6 @@ public interface StatusLinkageService {
     List<StatusLinkageVO> listByOptions(Long organizationId, Long issueTypeId, Long statusId);
 
     List<StatusLinkageVO> listStatusLinkage(Long projectId, Long issueTypeId, List<Long> statusIds);
+
+    LinkIssueStatusLinkageVO queryById(Long projectId, Long id);
 }

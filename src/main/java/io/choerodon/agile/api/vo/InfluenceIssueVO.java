@@ -11,6 +11,10 @@ public class InfluenceIssueVO {
 
     private Long statusId;
 
+    private Boolean loop;
+
+    private Long linkSettingId;
+
     private List<InfluenceIssueVO> childrenVO;
 
     public Long getIssueId() {
@@ -35,5 +39,21 @@ public class InfluenceIssueVO {
 
     public void setChildrenVO(List<InfluenceIssueVO> childrenVO) {
         this.childrenVO = childrenVO;
+    }
+
+    public Boolean getLoop() {
+        return loop;
+    }
+
+    public void setLoop(Boolean loop) {
+        this.loop = loop;
+    }
+
+    public Long getLinkSettingId() {
+        return linkSettingId;
+    }
+
+    public void setLinkSettingId(Long linkSettingId) {
+        this.linkSettingId = linkSettingId;
     }
 }

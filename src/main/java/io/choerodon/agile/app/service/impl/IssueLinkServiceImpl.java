@@ -213,7 +213,7 @@ public class IssueLinkServiceImpl implements IssueLinkService {
             Map<Long, List<IssueLinkChangeVO>> issueLinkChangeGroup = list.stream().collect(Collectors.groupingBy(IssueLinkChangeVO::getIssueId));
             InfluenceIssueVO influenceIssueVO = new InfluenceIssueVO();
 
-            issueService.handlerInfluenceMap(influenceMap, linkIssueId, linkIssueStatusId, issueLinkChangeGroup, null, influenceIssueVO);
+            issueService.handlerInfluenceMap(influenceMap, linkIssueId, linkIssueStatusId, issueLinkChangeGroup, null, influenceIssueVO, false);
             // 判断是否出现环
             List<Long> statusIds = influenceMap.getOrDefault(linkIssueId, new ArrayList<>());
             if (statusIds.contains(issueDTO.getStatusId())) {

@@ -34,6 +34,8 @@ public class LinkIssueStatusLinkageDTO extends AuditDomain {
 
     private Long organizationId;
 
+    private Boolean isTriggered;
+
     public LinkIssueStatusLinkageDTO() {
     }
 
@@ -111,5 +113,13 @@ public class LinkIssueStatusLinkageDTO extends AuditDomain {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Boolean getTriggered() {
+        return isTriggered;
+    }
+
+    public void setTriggered(Boolean triggered) {
+        isTriggered = triggered;
     }
 }
