@@ -276,14 +276,17 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         }
         if (isChange) {
             List<Long> statusIds = allInfluenceMap.getOrDefault(parentIssueId, new ArrayList<>());
-            if(statusIds.contains(changeStatus)){
-                allInfluenceMap.put(0L, new ArrayList<>());
-                return;
-            }
             InfluenceIssueVO influenceIssue = new InfluenceIssueVO();
             influenceIssue.setIssueId(parentIssueId);
             influenceIssue.setStatusId(changeStatus);
-            issueService.handlerInfluenceMap(allInfluenceMap, parentIssueId, changeStatus, issueLinkChangeGroup, issueId, influenceIssueVO);
+            influenceIssue.setLoop(false);
+            influenceIssue.setLinkSettingId(statusLinkageDTO.getId());
+            if(statusIds.contains(changeStatus)){
+                allInfluenceMap.put(0L, new ArrayList<>());
+                influenceIssue.setLoop(true);
+                return;
+            }
+            issueService.handlerInfluenceMap(allInfluenceMap, parentIssueId, changeStatus, issueLinkChangeGroup, issueId, influenceIssue, false);
             List<InfluenceIssueVO> childrenVOS = influenceIssueVO.getChildrenVO();
             if(CollectionUtils.isEmpty(childrenVOS)){
                 childrenVOS = new ArrayList<>();
@@ -385,6 +388,32 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
             statusLinkageVO.setIssueTypeVO(typeVOMap.get(statusLinkageVO.getParentIssueTypeId()));
         }
         return linkageVOS;
+    }
+
+    @Override
+    public LinkIssueStatusLinkageVO queryById(Long projectId, Long id) {
+        StatusLinkageDTO statusLinkageDTO = statusLinkageMapper.selectByPrimaryKey(id);
+        if (ObjectUtils.isEmpty(statusLinkageDTO)) {
+            return null;
+        }
+        LinkIssueStatusLinkageVO linkIssueStatusLinkageVO = new LinkIssueStatusLinkageVO();
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        // 获取项目的状态
+        Map<Long, StatusVO> statusVOMap = statusService.queryAllStatusMap(organizationId);
+        if (ObjectUtils.isEmpty(statusVOMap)) {
+            statusVOMap = new HashMap<>();
+        }
+        // 获取项目的问题类型
+        List<IssueTypeVO> issueTypeVOS = issueTypeService.queryByOrgId(organizationId, 0L);
+        Map<Long, IssueTypeVO> typeVOMap = new HashMap<>();
+        if (!CollectionUtils.isEmpty(statusVOMap)) {
+            typeVOMap.putAll(issueTypeVOS.stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity())));
+        }
+        linkIssueStatusLinkageVO.setIssueTypeVO(typeVOMap.getOrDefault(statusLinkageDTO.getIssueTypeId(), null));
+        linkIssueStatusLinkageVO.setStatusVO(statusVOMap.getOrDefault(statusLinkageDTO.getStatusId(), null));
+        linkIssueStatusLinkageVO.setLinkIssueType(typeVOMap.getOrDefault(statusLinkageDTO.getParentIssueTypeId(), null));
+        linkIssueStatusLinkageVO.setLinkIssueStatus(statusVOMap.getOrDefault(statusLinkageDTO.getParentIssueStatusSetting(), null));
+        return linkIssueStatusLinkageVO;
     }
 
     protected boolean changeParentStatus(Long projectId, String applyType, IssueDTO parentIssue, Long changeStatus, IssueDTO triggerIssue) {

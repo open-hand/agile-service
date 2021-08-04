@@ -165,8 +165,10 @@
 
             SELECT
                 aii.*,
+                flisl.id as linkSettingId,
                 flisl.status_id,
-                flisl.link_issue_status_id
+                flisl.link_issue_status_id,
+                flisl.is_triggered
             FROM
                 (
                 SELECT
@@ -193,8 +195,10 @@
         UNION ALL
               SELECT
                 aii.*,
+                flisl.id as linkSettingId,
                 flisl.status_id,
-                flisl.link_issue_status_id
+                flisl.link_issue_status_id,
+                flisl.is_triggered
             FROM
                 (
                 SELECT

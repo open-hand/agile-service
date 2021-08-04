@@ -189,6 +189,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private ModelMapper modelMapper;
     @Autowired
     private LinkIssueStatusLinkageService linkIssueStatusLinkageService;
+    @Autowired
+    private StatusLinkageExecutionLogService statusLinkageExecutionLogService;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -1034,6 +1036,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Map<Long, List<Long>> allInfluenceMap = new HashMap<>();
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         InfluenceIssueVO influenceIssueVO = new InfluenceIssueVO();
+        influenceIssueVO.setIssueId(issueId);
+        influenceIssueVO.setStatusId(issueDTO.getStatusId());
+        influenceIssueVO.setLoop(false);
         List<IssueLinkChangeVO> issueLinkChangeVOS = issueLinkMapper.issueLinkChangeByProjectId(projectId);
         if (CollectionUtils.isEmpty(issueLinkChangeVOS)) {
             issueLinkChangeVOS = new ArrayList<>();
@@ -1041,7 +1046,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Map<Long, List<IssueLinkChangeVO>> issueLinkChangeGroup = issueLinkChangeVOS.stream().collect(Collectors.groupingBy(IssueLinkChangeVO::getIssueId));
         // 查询issue的联动路径
         statusLinkageService.getUpdateParentStatusIssue(projectId, issueDTO, issueDTO.getStatusId(), applyType, influenceIssueVO, allInfluenceMap, issueLinkChangeGroup);
-        handlerInfluenceMap(allInfluenceMap, issueId, issueDTO.getStatusId(), issueLinkChangeGroup, null, influenceIssueVO);
+        handlerInfluenceMap(allInfluenceMap, issueId, issueDTO.getStatusId(), issueLinkChangeGroup, null, influenceIssueVO, false);
         if (CollectionUtils.isEmpty(allInfluenceMap)) {
             return true;
         }
@@ -1054,10 +1059,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         issueDTOMap.putAll(issueDTOS.stream().collect(Collectors.toMap(IssueDTO::getIssueId, Function.identity())));
         List<InfluenceIssueVO> childrenVO = influenceIssueVO.getChildrenVO();
         Boolean transformFlag = true;
+        Map<Long, LinkIssueStatusLinkageVO> linkIssueStatusMap = linkIssueStatusLinkageService.queryMapByProject(projectId, ConvertUtil.getOrganizationId(projectId));
         if (!CollectionUtils.isEmpty(childrenVO)) {
             // 处理需要联动的issue
             for (InfluenceIssueVO influenceVO : childrenVO) {
-                Boolean transformFlag1 = handlerInfluenceIssue(projectId, applyType, influenceVO, issueDTOMap, issueId);
+                Boolean transformFlag1 = handlerInfluenceIssue(projectId, applyType, influenceVO, issueId, linkIssueStatusMap);
                 if (transformFlag && !transformFlag1) {
                     transformFlag = transformFlag1;
                 }
@@ -1068,7 +1074,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         return transformFlag;
     }
 
-    private Boolean handlerInfluenceIssue(Long projectId, String applyType, InfluenceIssueVO influenceIssueVO, Map<Long, IssueDTO> issueDTOMap, Long linkIssueId) {
+    private Boolean handlerInfluenceIssue(Long projectId, String applyType, InfluenceIssueVO influenceIssueVO, Long linkIssueId,  Map<Long, LinkIssueStatusLinkageVO> linkIssueStatusMap) {
         Long issueId = influenceIssueVO.getIssueId();
         Long statusId = influenceIssueVO.getStatusId();
         IssueDTO influenceIssue = issueMapper.selectByPrimaryKey(linkIssueId);
@@ -1079,9 +1085,24 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (Objects.equals(issue.getStatusId(), statusId)) {
             return true;
         }
-        // 变更issue的状态和更新属性
-        Boolean transformFlag = executionUpdateInfluenceIssue(issue, statusId, influenceIssue, projectId, applyType);
         Boolean isSub = Objects.equals("sub_task",influenceIssue.getTypeCode()) || (Objects.equals("bug",influenceIssue.getTypeCode()) && !ObjectUtils.isEmpty(influenceIssue.getRelateIssueId()) && Objects.equals(influenceIssue.getRelateIssueId(), 0L));
+        // 变更issue的状态和更新属性
+        Boolean transformFlag = executionUpdateInfluenceIssue(issue, statusId, influenceIssue, projectId, applyType, influenceIssueVO);
+        // 记录联动的执行日志
+        if (!ObjectUtils.isEmpty(influenceIssueVO.getLinkSettingId())) {
+
+            LinkIssueStatusLinkageVO linkIssueStatusLinkageVO = isSub ? statusLinkageService.queryById(projectId, influenceIssueVO.getLinkSettingId()) : linkIssueStatusMap.getOrDefault(influenceIssueVO.getLinkSettingId(), null);
+            if (ObjectUtils.isEmpty(linkIssueStatusLinkageVO)) {
+                throw new CommonException("error.link.issue.status.linkage.empty");
+            }
+            String content = buildStatusLinkageContent(linkIssueStatusLinkageVO);
+            StatusLinkageExecutionLogDTO statusLinkageExecutionLogDTO = new StatusLinkageExecutionLogDTO();
+            statusLinkageExecutionLogDTO.setPreIssueId(influenceIssue.getIssueId());
+            statusLinkageExecutionLogDTO.setCurIssueId(issueId);
+            statusLinkageExecutionLogDTO.setContent(content);
+            statusLinkageExecutionLogDTO.setStatusCode(Boolean.TRUE.equals(influenceIssueVO.getLoop()) ? "LOOP" : "SUCCESS");
+            statusLinkageExecutionLogService.create(projectId, ConvertUtil.getOrganizationId(projectId), statusLinkageExecutionLogDTO);
+        }
         if (!transformFlag && isSub) {
             return transformFlag;
         }
@@ -1090,7 +1111,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         List<InfluenceIssueVO> childrenVO = influenceIssueVO.getChildrenVO();
         if (!CollectionUtils.isEmpty(childrenVO)) {
             for (InfluenceIssueVO issueVO : childrenVO) {
-                Boolean transformFlag1 = handlerInfluenceIssue(projectId, applyType, issueVO, issueDTOMap, issueId);
+                Boolean transformFlag1 = handlerInfluenceIssue(projectId, applyType, issueVO, issueId, linkIssueStatusMap);
                 if (transformFlag && !transformFlag1) {
                     transformFlag = transformFlag1;
                 }
@@ -1099,7 +1120,31 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         return transformFlag;
     }
 
-    private Boolean executionUpdateInfluenceIssue(IssueDTO issue, Long executionStatusId, IssueDTO influenceIssue, Long projectId, String applyType) {
+    private String buildStatusLinkageContent(LinkIssueStatusLinkageVO linkIssueStatusLinkageVO) {
+        StringBuilder stringBuilder = new StringBuilder();
+        IssueTypeVO issueTypeVO = linkIssueStatusLinkageVO.getIssueTypeVO();
+        StatusVO statusVO = linkIssueStatusLinkageVO.getStatusVO();
+        if (!ObjectUtils.isEmpty(statusVO) && !ObjectUtils.isEmpty(issueTypeVO)) {
+            stringBuilder.append(issueTypeVO.getName())
+                    .append(": 当前问题状态为")
+                    .append(statusVO.getName())
+                    .append("时 ");
+        }
+        IssueLinkTypeVO linkTypeVO = linkIssueStatusLinkageVO.getLinkTypeVO();
+        IssueTypeVO linkIssueType = linkIssueStatusLinkageVO.getLinkIssueType();
+        StatusVO linkIssueStatus = linkIssueStatusLinkageVO.getLinkIssueStatus();
+        stringBuilder.append("【")
+                .append(ObjectUtils.isEmpty(linkTypeVO) ? "关联" : linkTypeVO.getLinkName())
+                .append("】的");
+        if (!ObjectUtils.isEmpty(linkIssueType) && !ObjectUtils.isEmpty(linkIssueStatus)) {
+            stringBuilder.append("【" + linkIssueType.getName() + "】")
+                    .append("流转状态到")
+                    .append("【" + linkIssueStatus.getName() + "】");
+        }
+        return stringBuilder.toString();
+    }
+
+    private Boolean executionUpdateInfluenceIssue(IssueDTO issue, Long executionStatusId, IssueDTO influenceIssue, Long projectId, String applyType, InfluenceIssueVO influenceIssueVO) {
         Boolean transFormFlag = true;
         Long issueId = issue.getIssueId();
         // 获取当前状态对应的transformId
@@ -1134,7 +1179,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public void handlerInfluenceMap(Map<Long, List<Long>> influenceMap, Long issueId, Long statusId, Map<Long, List<IssueLinkChangeVO>> issueLinkChangeGroup, Long influenceId, InfluenceIssueVO influenceIssueVO) {
+    public void handlerInfluenceMap(Map<Long, List<Long>> influenceMap, Long issueId, Long statusId, Map<Long, List<IssueLinkChangeVO>> issueLinkChangeGroup, Long influenceId, InfluenceIssueVO influenceIssueVO, Boolean linkTriggered) {
         if (ObjectUtils.isEmpty(issueId)) {
             return;
         }
@@ -1143,10 +1188,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             statusIds.add(statusId);
             influenceMap.put(issueId, statusIds);
         } else {
+            influenceIssueVO.setLoop(true);
             return;
         }
-        influenceIssueVO.setIssueId(issueId);
-        influenceIssueVO.setStatusId(statusId);
         List<IssueLinkChangeVO> issueLinkChangeVOS = issueLinkChangeGroup.get(issueId);
         if (CollectionUtils.isEmpty(issueLinkChangeVOS)) {
             return;
@@ -1156,12 +1200,21 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (!CollectionUtils.isEmpty(linkChangeVOS)) {
             List<InfluenceIssueVO> influenceIssueVOS = new ArrayList<>();
             for (IssueLinkChangeVO linkChangeVO : linkChangeVOS) {
-                List<Long> linkIssueStatusIds = influenceMap.getOrDefault(linkChangeVO.getLinkedIssueId(), new ArrayList<>());
-                if (linkIssueStatusIds.contains(linkChangeVO.getLinkIssueStatusId())) {
-                    continue;
+                // 当前是联动触发，并且配置的是联动时不触发状态变更就停止
+                if (Boolean.TRUE.equals(linkTriggered) && Boolean.FALSE.equals(linkChangeVO.getTriggered())) {
+                   continue;
                 }
+                List<Long> linkIssueStatusIds = influenceMap.getOrDefault(linkChangeVO.getLinkedIssueId(), new ArrayList<>());
                 InfluenceIssueVO influenceIssue = new InfluenceIssueVO();
-                handlerInfluenceMap(influenceMap, linkChangeVO.getLinkedIssueId(), linkChangeVO.getLinkIssueStatusId(), issueLinkChangeGroup, issueId, influenceIssue);
+                influenceIssue.setIssueId(linkChangeVO.getLinkedIssueId());
+                influenceIssue.setStatusId(linkChangeVO.getLinkIssueStatusId());
+                influenceIssue.setLoop(false);
+                influenceIssue.setLinkSettingId(linkChangeVO.getLinkSettingId());
+                if (linkIssueStatusIds.contains(linkChangeVO.getLinkIssueStatusId())) {
+                    influenceIssue.setLoop(true);
+                } else {
+                    handlerInfluenceMap(influenceMap, linkChangeVO.getLinkedIssueId(), linkChangeVO.getLinkIssueStatusId(), issueLinkChangeGroup, issueId, influenceIssue, true);
+                }
                 influenceIssueVOS.add(influenceIssue);
             }
             influenceIssueVO.setChildrenVO(influenceIssueVOS);
@@ -1312,6 +1365,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (backlogExpandService != null) {
             backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
         }
+        // 删除当前issue相关的状态联动执行记录
+        statusLinkageExecutionLogService.deleteByIssueId(projectId, ConvertUtil.getOrganizationId(projectId), issueId);
     }
 
     private void deleteRuleLogRel(Long projectId, Long issueId) {

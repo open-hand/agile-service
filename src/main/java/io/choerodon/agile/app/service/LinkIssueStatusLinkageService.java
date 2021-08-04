@@ -24,4 +24,6 @@ public interface LinkIssueStatusLinkageService {
     void deleteByStatusId(Long projectId, Long organizationId, Long statusId, Long issueTypeId);
 
     List<StatusVO> queryStatus(Long projectId, Long organizationId, LinkIssueStatusLinkageVO linkageVO);
+
+    Map<Long, LinkIssueStatusLinkageVO> queryMapByProject(Long projectId, Long organizationId);
 }

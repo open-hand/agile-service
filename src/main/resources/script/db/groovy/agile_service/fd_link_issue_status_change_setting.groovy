@@ -35,4 +35,10 @@ databaseChangeLog(logicalFilePath: 'fd_link_issue_status_linkage.groovy') {
             column(name: "last_update_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
     }
+
+    changeSet(id: '2021-08-02-fd-link-issue-status-linkage-add-column', author: 'ztxemail@163.com') {
+        addColumn(tableName: 'fd_link_issue_status_linkage') {
+            column(name: 'is_triggered', type: 'TINYINT UNSIGNED', defaultValue: "0", remarks: '联动时是否触发关联的issue')
+        }
+    }
 }
