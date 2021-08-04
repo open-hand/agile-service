@@ -266,12 +266,12 @@ function EditIssue() {
       issueId: parentIssueId, summary: parentSummary, activeSprint,
     } = store.getIssue;
     openCreateSubTask({
-      onCreate: () => {
+      onCreate: (subIssue) => {
         resetDefault();
         if (onCreateSubIssue) {
-          onCreateSubIssue(issue, parentIssueId);
+          onCreateSubIssue(subIssue, parentIssueId);
         }
-        loadIssueDetail(issue.issueId);
+        loadIssueDetail(subIssue.issueId);
       },
       parentIssue: {
         summary: parentSummary,
@@ -291,12 +291,12 @@ function EditIssue() {
     } = store.getIssue;
     openCreateSubTask({
       typeCode: 'bug',
-      onCreate: () => {
+      onCreate: (subIssue) => {
         resetDefault();
         if (onCreateSubIssue) {
-          onCreateSubIssue(issue, parentIssueId);
+          onCreateSubIssue(subIssue, parentIssueId);
         }
-        loadIssueDetail(issue.issueId);
+        loadIssueDetail(subIssue.issueId);
       },
       parentIssue: {
         summary: parentSummary,

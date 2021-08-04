@@ -35,6 +35,7 @@ import { useIssueSearchStore } from '@/components/issue-search';
 import FilterManage from '@/components/FilterManage';
 import { Issue, User } from '@/common/types';
 import isHoliday from '@/utils/holiday';
+import { list2tree } from '@/utils/tree';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 import openCreateIssue from '@/components/create-issue';
 import Search from './components/search';
@@ -61,6 +62,8 @@ const typeOptions = [{
 }] as const;
 const typeValues = typeOptions.map((t) => t.value);
 type TypeValue = (typeof typeValues)[number];
+const ganttList2Tree = (data: any[]) => list2tree(data, { valueField: 'issueId', parentField: 'parentId' });
+const groupByTask = (data: any[]) => ganttList2Tree(data);
 const groupByUser = (data: any[]) => {
   const map = new Map<string, any[]>();
   const noAssigneeData: any[] = [];
@@ -82,7 +85,7 @@ const groupByUser = (data: any[]) => {
     summary: name,
     group: true,
     groupType: 'assignee',
-    children,
+    children: ganttList2Tree(children),
   }));
 };
 const groupBySprint = (data: any[]) => {
@@ -109,7 +112,7 @@ const groupBySprint = (data: any[]) => {
     groupWidthSelf: true,
     estimatedStartTime: sprint.startDate,
     estimatedEndTime: sprint.endDate,
-    children,
+    children: ganttList2Tree(children),
   }));
 };
 const renderTooltip = (user: User) => {
@@ -191,11 +194,10 @@ const GanttPage: React.FC = () => {
   const store = useMemo(() => new GanttStore(), []);
   const { sprintIds } = store;
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
-  const { run, cancel, flush } = useDebounceFn(() => {
+  const { run, flush } = useDebounceFn(() => {
     (async () => {
       const year = dayjs().year();
       const filter = issueSearchStore.getCustomFieldFilters();
-      setData([]);
       if (sprintIds === null) {
         return;
       }
@@ -206,7 +208,7 @@ const GanttPage: React.FC = () => {
         workCalendarApi.getYearCalendar(year),
         ganttApi.loadByTask({
           ...filter,
-          searchArgs: { tree: type === 'task' },
+          searchArgs: { tree: false },
         }, sortedList),
       ]);
       // setColumns(headers.map((h: any) => ({
@@ -225,11 +227,11 @@ const GanttPage: React.FC = () => {
   });
   useEffect(() => {
     run();
-  }, [issueSearchStore, sprintIds, run, sortedList]);
+  }, [issueSearchStore, sprintIds, run]);
   useUpdateEffect(() => {
     run();
     flush();
-  }, [type]);
+  }, [sortedList]);
   const handleUpdate = useCallback<GanttProps<Issue>['onUpdate']>(async (issue, startDate, endDate) => {
     try {
       await issueApi.update({
@@ -268,6 +270,7 @@ const GanttPage: React.FC = () => {
     setType(newType);
     localPageCacheStore.setItem('gantt.search.type', newType);
   }, []);
+
   const isRestDay = useCallback((date: string) => isHoliday({
     sprintSetting: projectWorkCalendar,
     orgWorkCalendar: workCalendar,
@@ -341,6 +344,7 @@ const GanttPage: React.FC = () => {
     </div>
   ), []);
   const normalizeIssue = (issue: Issue, source: any = {}) => Object.assign(source, {
+    parentId: issue.relateIssueId || issue.parentIssueId,
     estimatedEndTime: issue.estimatedEndTime,
     estimatedStartTime: issue.estimatedStartTime,
     issueTypeVO: issue.issueTypeVO,
@@ -356,81 +360,35 @@ const GanttPage: React.FC = () => {
     } : null,
     sprint: issue.activeSprint,
   });
-  const addSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {
-    if (parentIssueId) {
-      setData(produce(data, (draft) => {
-        const parent = find(draft, { issueId: parentIssueId });
-        if (parent) {
-          if (!parent.children) {
-            parent.children = [normalizeIssue(subIssue)];
-          } else {
-            parent.children.unshift(normalizeIssue(subIssue));
-          }
-        }
-      }));
-    }
-  });
-  const updateSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {
-    if (parentIssueId) {
-      setData(produce(data, (draft) => {
-        const parent = find(draft, { issueId: parentIssueId });
-        if (parent) {
-          const child = find(parent.children, { issueId: subIssue.issueId });
-          if (child) {
-            normalizeIssue(subIssue, child);
-          }
-        }
-      }));
-    }
-  });
-  const removeSubIssue = usePersistFn((parentIssueId: string, subIssueId: string) => {
-    setData(produce(data, (draft) => {
-      if (parentIssueId) {
-        const parent = find(draft, { issueId: parentIssueId });
-        if (parent) {
-          remove(parent.children, { issueId: subIssueId });
-        }
-      }
-    }));
-  });
 
   const handleCreateIssue = usePersistFn((issue: Issue) => {
-    const parentIssueId = issue.relateIssueId || issue.parentIssueId;
-    if (parentIssueId) {
-      addSubIssue(issue, parentIssueId);
-    } else {
-      setData(produce(data, (draft) => {
-        draft.unshift(normalizeIssue(issue));
-      }));
-    }
+    setData(produce(data, (draft) => {
+      draft.unshift(normalizeIssue(issue));
+    }));
     updateInfluenceIssues(issue);
+  });
+  const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId) => {
+    handleCreateIssue(subIssue);
   });
   const handleCopyIssue = usePersistFn((issue: Issue) => {
     handleCreateIssue(issue);
     const subIssues = [...(issue.subIssueVOList ?? []), ...(issue.subBugVOList ?? [])];
     if (subIssues.length > 0) {
       subIssues.forEach((child) => {
-        addSubIssue(child, issue.issueId);
+        handleCreateIssue(child);
       });
     }
   });
-  const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId) => {
-    addSubIssue(subIssue, parentIssueId);
-  });
+
   const handleIssueUpdate = usePersistFn((issue: Issue | null) => {
     if (issue) {
-      const parentIssueId = issue.relateIssueId || issue.parentIssueId;
-      if (parentIssueId) {
-        updateSubIssue(issue, parentIssueId);
-      } else {
-        setData(produce(data, (draft) => {
-          const target = find(draft, { issueId: issue.issueId });
-          if (target) {
-            // 更新属性
-            normalizeIssue(issue, target);
-          }
-        }));
-      }
+      setData(produce(data, (draft) => {
+        const target = find(draft, { issueId: issue.issueId });
+        if (target) {
+          // 更新属性
+          normalizeIssue(issue, target);
+        }
+      }));
       updateInfluenceIssues(issue);
     }
   });
@@ -480,26 +438,22 @@ const GanttPage: React.FC = () => {
   });
   const handleIssueDelete = usePersistFn((issue: Issue | null) => {
     if (issue) {
-      const parentIssueId = issue.relateIssueId || issue.parentIssueId;
-      if (parentIssueId) {
-        removeSubIssue(parentIssueId, issue.issueId);
-      } else {
-        setData(produce(data, (draft) => {
-          remove(draft, { issueId: issue.issueId });
-        }));
-      }
+      setData(produce(data, (draft) => {
+        remove(draft, { issueId: issue.issueId });
+      }));
     }
   });
 
   const handleDeleteSubIssue = usePersistFn((issue: Issue, subIssueId: string) => {
-    removeSubIssue(issue.issueId, subIssueId);
+    handleIssueDelete(issue);
   });
-
   const ganttData = useMemo(() => {
     if (type === 'assignee') {
       return groupByUser(data);
     } if (type === 'sprint') {
       return groupBySprint(data);
+    } if (type === 'task') {
+      return groupByTask(data);
     }
     return data;
   }, [data, type]);
