@@ -32,7 +32,10 @@
         ) ai
         <where>
             <if test='executionLogQueryVO.params != null and executionLogQueryVO.params != ""'>
-                AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{executionLogQueryVO.params}) ,'%')
+                AND (
+                ai.issue_num LIKE CONCAT(CONCAT('%' ,#{executionLogQueryVO.params}) ,'%')
+                OR ai.summary LIKE CONCAT(CONCAT('%',#{executionLogQueryVO.params}), '%')
+                )
             </if>
         </where>
     </sql>
