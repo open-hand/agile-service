@@ -1124,22 +1124,22 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         StringBuilder stringBuilder = new StringBuilder();
         IssueTypeVO issueTypeVO = linkIssueStatusLinkageVO.getIssueTypeVO();
         StatusVO statusVO = linkIssueStatusLinkageVO.getStatusVO();
-        if(!ObjectUtils.isEmpty(statusVO) && !ObjectUtils.isEmpty(issueTypeVO)){
+        if (!ObjectUtils.isEmpty(statusVO) && !ObjectUtils.isEmpty(issueTypeVO)) {
             stringBuilder.append(issueTypeVO.getName())
-                          .append(": 当前问题状态为")
-                          .append(statusVO.getName())
-                          .append("时 ");
+                    .append(": 当前问题状态为")
+                    .append(statusVO.getName())
+                    .append("时 ");
         }
         IssueLinkTypeVO linkTypeVO = linkIssueStatusLinkageVO.getLinkTypeVO();
         IssueTypeVO linkIssueType = linkIssueStatusLinkageVO.getLinkIssueType();
         StatusVO linkIssueStatus = linkIssueStatusLinkageVO.getLinkIssueStatus();
-        if(!ObjectUtils.isEmpty(linkTypeVO) && !ObjectUtils.isEmpty(linkIssueType) && !ObjectUtils.isEmpty(linkIssueStatus)){
-            stringBuilder.append("【")
-                    .append(linkTypeVO.getLinkName())
-                    .append("】的")
-                    .append("【"+ linkIssueType.getName()+"】")
+        stringBuilder.append("【")
+                .append(ObjectUtils.isEmpty(linkTypeVO) ? "关联" : linkTypeVO.getLinkName())
+                .append("】的");
+        if (!ObjectUtils.isEmpty(linkIssueType) && !ObjectUtils.isEmpty(linkIssueStatus)) {
+            stringBuilder.append("【" + linkIssueType.getName() + "】")
                     .append("流转状态到")
-                    .append("【"+linkIssueStatus.getName()+"】");
+                    .append("【" + linkIssueStatus.getName() + "】");
         }
         return stringBuilder.toString();
     }

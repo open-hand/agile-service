@@ -279,14 +279,14 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
             InfluenceIssueVO influenceIssue = new InfluenceIssueVO();
             influenceIssue.setIssueId(parentIssueId);
             influenceIssue.setStatusId(changeStatus);
-            influenceIssueVO.setLoop(false);
-            influenceIssueVO.setLinkSettingId(statusLinkageDTO.getId());
+            influenceIssue.setLoop(false);
+            influenceIssue.setLinkSettingId(statusLinkageDTO.getId());
             if(statusIds.contains(changeStatus)){
                 allInfluenceMap.put(0L, new ArrayList<>());
                 influenceIssue.setLoop(true);
                 return;
             }
-            issueService.handlerInfluenceMap(allInfluenceMap, parentIssueId, changeStatus, issueLinkChangeGroup, issueId, influenceIssueVO, false);
+            issueService.handlerInfluenceMap(allInfluenceMap, parentIssueId, changeStatus, issueLinkChangeGroup, issueId, influenceIssue, false);
             List<InfluenceIssueVO> childrenVOS = influenceIssueVO.getChildrenVO();
             if(CollectionUtils.isEmpty(childrenVOS)){
                 childrenVOS = new ArrayList<>();
