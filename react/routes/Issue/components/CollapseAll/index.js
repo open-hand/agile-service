@@ -1,7 +1,8 @@
 import React from 'react';
-import { Icon, Button } from 'choerodon-ui/pro';
+import { Button } from 'choerodon-ui/pro';
 
 import { observer } from 'mobx-react-lite';
+import CustomIcon from '@/components/custom-icon';
 
 function CollapseAll({
   expandAll, isExpandAll, expandAbleKeys, ...otherProps
@@ -19,14 +20,8 @@ function CollapseAll({
         expandAll(!isExpandAll);
       }}
     >
+      <CustomIcon type="icon-indent" />
       <span>{isExpandAll ? '全部收起' : '全部展开' }</span>
-      {/* <Icon
-        type="baseline-arrow_drop_up"
-        style={{
-          transform: isExpandAll ? undefined : 'rotate(180deg)',
-          transition: 'transform 0.3s',
-        }}
-      /> */}
     </Button>
 
   );

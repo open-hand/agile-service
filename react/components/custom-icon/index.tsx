@@ -38,12 +38,22 @@ const IconPom: React.FC<Pick<IconProps, 'height' | 'width' | 'className'> & { mu
     <path d="M921.6 937.216s-11.5712 3.9936-23.552-5.632c-16.2816-12.9024-58.7264-106.3424-179.9168-183.9616-110.2848-70.5024-161.6384-131.584-249.3952-243.3536 130.56 153.7024 143.0528 140.4416 283.0848 234.7008 71.168 47.9232 143.2064 121.7536 169.7792 164.5568v33.6896z" p-id="1086" />
   </svg>
 );
+const IconExpand: React.FC<Pick<IconProps, 'height' | 'width' | 'className'|'style'>> = ({
+  height = '1em', width = '1em', className, style,
+}) => <svg className={classnames('c7nicon', 'icon', className)} style={style} fill="currentcolor" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1088" width={height} height={width}><path d="M128 896h768v-85.333333H128v85.333333zM128 341.333333v341.333334l170.666667-170.666667-170.666667-170.666667z m341.333333 384h426.666667v-85.333333H469.333333v85.333333zM128 128v85.333333h768V128H128z m341.333333 256h426.666667V298.666667H469.333333v85.333333z m0 170.666667h426.666667v-85.333334H469.333333v85.333334z" p-id="1089" /></svg>;
 interface ICustomIconProps extends Omit<IconProps, 'scriptUrl'> {
 }
 // const iconList = { 'icon-pom': true };
-const CustomIcon: React.FC<ICustomIconProps> = ({ type, ...otherProps }) => {
-  if (type === 'icon-pom' || type === 'icon-pom-multiColor') {
-    return <IconPom {...otherProps} multicolor={type === 'icon-pom-multiColor'} />;
+type ICustomIonType = 'icon-pom' | 'icon-pom-multiColor' | 'icon-indent'
+const CustomIcon: React.FC<ICustomIconProps & { type: ICustomIonType | string }> = ({ type, ...otherProps }) => {
+  switch (type) {
+    case 'icon-pom':
+    case 'icon-pom-multiColor':
+      return <IconPom {...otherProps} multicolor={type === 'icon-pom-multiColor'} />;
+    case 'icon-indent':
+      return <IconExpand {...otherProps} />;
+    default:
+      break;
   }
   return <Icon type={type} {...otherProps} />;
 };

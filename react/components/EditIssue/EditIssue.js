@@ -18,6 +18,7 @@ import { sameProject } from '@/utils/detail';
 import IssueHeader from './IssueComponent/IssueHeader';
 import IssueBody from './IssueComponent/IssueBody/IssueBody';
 import EditIssueContext from './stores';
+import Loading from '../Loading';
 // 项目加入群之后，不关联自己的史诗和特性，只能关联项目群的，不能改关联的史诗
 const { AppState } = stores;
 
@@ -313,26 +314,22 @@ function EditIssue() {
   return (
 
     <div className={`${prefixCls}`} style={style} ref={container}>
-      {
-        issueLoading ? (
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              bottom: 0,
-              left: 0,
-              right: 0,
-              background: 'rgba(255, 255, 255, 0.65)',
-              zIndex: 9999,
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <Spin />
-          </div>
-        ) : null
-      }
+      <Loading
+        loading={issueLoading}
+        loadId="issueDetail"
+        loadingStyle={{
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          background: 'rgba(255, 255, 255, 0.65)',
+          zIndex: 9999,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      />
       <div className="c7n-content">
         <IssueHeader
           disabled={rightDisabled}
