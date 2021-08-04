@@ -621,20 +621,24 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
 
   const content = (
     <>
-      <Header>
-        <HeaderButtons
-          items={[
-            {
-              name: '查看执行日志',
-              icon: 'find_in_page',
-              handler: () => {
-                openLogModal({});
+      {
+      !isOrganization && (
+        <Header>
+          <HeaderButtons
+            items={[
+              {
+                name: '查看执行日志',
+                icon: 'find_in_page-o',
+                handler: () => {
+                  openLogModal({});
+                },
+                display: true,
               },
-              display: true,
-            },
-          ]}
-        />
-      </Header>
+            ]}
+          />
+        </Header>
+      )
+    }
       {
         !readOnly && (
           <>
