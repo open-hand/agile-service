@@ -249,7 +249,7 @@ class CreateBranch extends Component {
                       if (res && !res.failed) {
                         this.setState({
                           branchs: res.list,
-                          branchsSize: res.total,
+                          // branchsSize: res.total,
                           // branchsShowMore: res.totalPages !== 1,
                           branchsObj: res,
                           branchLoading: false,
@@ -296,7 +296,7 @@ class CreateBranch extends Component {
                             }}
                             onClick={(e) => {
                               e.stopPropagation();
-                              devOpsApi.loadBranchesByService(app, 1, branchsSize + 5, {
+                              devOpsApi.loadBranchesByService(app, branchsObj.number + 2, branchsSize, {
                                 searchParam: {
                                   branchName: branchsInput,
                                 },
@@ -304,8 +304,8 @@ class CreateBranch extends Component {
                               }).then((res) => {
                                 if (res && !res.failed) {
                                   this.setState({
-                                    branchs: res.list || [],
-                                    branchsSize: res.pageSize,
+                                    branchs: [...branchs, ...(res.list || [])],
+                                    // branchsSize: res.pageSize,
                                     branchsObj: res,
                                   });
                                 } else {
