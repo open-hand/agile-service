@@ -120,7 +120,7 @@ const LinkedBranch: React.ForwardRefRenderFunction<{
           />
         )}
       />
-      <Column tooltip className="c7n-agile-table-cell" name="appServiceName" />
+      <Column tooltip={'overflow' as TableColumnTooltip} className="c7n-agile-table-cell" name="appServiceName" />
       <Column tooltip={'overflow' as TableColumnTooltip} className="c7n-agile-table-cell" name="projectName" />
       <Column tooltip={'overflow' as TableColumnTooltip} className="c7n-agile-table-cell" name="originBranch" />
       <Column width={70} className="c7n-agile-table-cell" name="commits" renderer={({ record }) => record?.get('commits')?.length} />
