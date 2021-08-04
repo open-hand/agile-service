@@ -19,6 +19,7 @@ import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import {
   getIsOrganization, getOrganizationId, getProjectId, getApplyType,
 } from '@/utils/common';
+import { Header, HeaderButtons } from '@choerodon/master';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
 import Condition from './components/condition';
 import Linkage from './components/linkage';
@@ -30,6 +31,7 @@ import AutoTransform from './components/auto-transform';
 import { useStateMachineContext } from '../context';
 import styles from './index.less';
 import { TabComponentProps } from '../index';
+import openLogModal from './components/log-modal';
 
 interface ISetting {
   width: number,
@@ -619,6 +621,20 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
 
   const content = (
     <>
+      <Header>
+        <HeaderButtons
+          items={[
+            {
+              name: '查看执行日志',
+              icon: 'find_in_page',
+              handler: () => {
+                openLogModal({});
+              },
+              display: true,
+            },
+          ]}
+        />
+      </Header>
       {
         !readOnly && (
           <>
