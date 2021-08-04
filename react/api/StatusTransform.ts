@@ -754,6 +754,15 @@ class StatusTransformApi extends Api<StatusTransformApi> {
       data,
     });
   }
+
+  getLogList(params: {page: number, size: number}, data: { statusCode?: 'LOOP' | 'SUCCESS', params?: string }) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/status_linkage_execution_log/list`,
+      params,
+      data,
+    });
+  }
 }
 
 const statusTransformApi = new StatusTransformApi();
