@@ -32,22 +32,17 @@ const LinkedTable: React.FC<Props> = ({ issueId, linkedTableRef }) => {
   const queryDataSet = useMemo(() => new DataSet({
     fields: [{
       name: 'content',
-      label: '请输入搜索内容',
     }, {
       name: 'status',
-      label: '状态',
       multiple: true,
     }, {
       name: 'priority',
-      label: '优先级',
       multiple: true,
     }, {
       name: 'assignee',
-      label: '经办人',
       multiple: true,
     }, {
       name: 'issueType',
-      label: '问题类型',
       multiple: true,
     }],
     events: {
@@ -120,12 +115,20 @@ const LinkedTable: React.FC<Props> = ({ issueId, linkedTableRef }) => {
       className={styles.linkedTable}
       dataSet={dataSet}
       queryBar={() => (
-        <Form dataSet={queryDataSet} columns={6} style={{ margin: 0 }}>
-          <TextField name="content" prefix={<Icon type="search" />} colSpan={2} valueChangeAction={'input' as any} />
-          <SelectIssueType name="issueType" filterList={['issue_epic', 'sub_task', 'feature']} dropdownMatchSelectWidth={false} />
-          <SelectStatus name="status" request={() => statusApi.loadByProject('agile')} dropdownMatchSelectWidth={false} />
-          <SelectPriority name="priority" clearButton dropdownMatchSelectWidth={false} />
-          <SelectUser name="assignee" clearButton dropdownMatchSelectWidth={false} />
+        <Form dataSet={queryDataSet} style={{ marginTop: -10, marginBottom: -6 }} labelLayout={'none' as any}>
+          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+            <TextField
+              placeholder="请输入搜索内容"
+              name="content"
+              style={{ marginRight: 10, marginBottom: 10 }}
+              prefix={<Icon type="search" />}
+              valueChangeAction={'input' as any}
+            />
+            <SelectIssueType placeholder="问题类型" flat name="issueType" style={{ marginRight: 10, marginBottom: 10 }} filterList={['issue_epic', 'sub_task', 'feature']} dropdownMatchSelectWidth={false} />
+            <SelectStatus placeholder="状态" flat name="status" style={{ marginRight: 10, marginBottom: 10 }} request={() => statusApi.loadByProject('agile')} dropdownMatchSelectWidth={false} />
+            <SelectPriority placeholder="优先级" flat name="priority" style={{ marginRight: 10, marginBottom: 10 }} clearButton dropdownMatchSelectWidth={false} />
+            <SelectUser placeholder="经办人" flat name="assignee" style={{ marginRight: 10, marginBottom: 10 }} clearButton dropdownMatchSelectWidth={false} />
+          </div>
         </Form>
       )}
     >
