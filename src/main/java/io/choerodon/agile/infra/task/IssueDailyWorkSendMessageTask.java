@@ -47,14 +47,19 @@ public class IssueDailyWorkSendMessageTask {
     private static final String UNFINISHED_COUNT = "unfinishedCount";
     private static final String HTML_TABLE = "htmlTable";
     private static final String BACKSLASH_TR = "</tr>";
-    private static final String BACKSLASH_B = "</b>";
     private static final String BACKSLASH_TD = "</td>";
     private static final String BACKSLASH_SPAN = "</span>";
     private static final String BACKSLASH_TABLE = "</table>";
-    private static final String TR_TAG_SINGLE = "<tr style = \"background-color: #FFFFFF;\">";
-    private static final String TR_TAG_DOUBLE = "<tr style = \"background-color: #F5F5FC;\">";
-    private static final String B_TAG = "<b>";
-    private static final String RED_SPAN = "<span style=\"color: red; border: 1px solid red; padding: 1px 3px;\">";
+    private static final String TR_TAG_SINGLE = "<tr style = \"background-color: #FFFFFF; height: 40px; line-height: 25px;\">";
+    private static final String TR_TAG_DOUBLE = "<tr style = \"background-color: #F5F5FC; height: 40px; line-height: 25px;\">";
+    private static final String RED_SPAN = "<span style=\"" +
+            "color: #F5222D; " +
+            "font-size: 12px; " +
+            "font-family: PingFangSC-Regular; " +
+            "border: 1px solid red; " +
+            "border-radius: 2px; " +
+            "padding: 1px 3px; " +
+            "white-space:nowrap;\">";
     private static final String TABLE_TAG = "<table style=\"" +
             "width: 100%;" +
             "font-size: 10px;" +
@@ -63,19 +68,18 @@ public class IssueDailyWorkSendMessageTask {
             "border-spacing: 0;" +
             "empty-cells: show;\">";
     private static final String TABLE_HEAD = "<thead style=\"background-color: #F3F6FE;color: #000;text-align: left;vertical-align: bottom;\">" +
-            "<tr>" +
-            "<th style=\"word-break: break-all;color: #0F1358;border-width: 0 0 0 1px;font-size: inherit;margin: 0;overflow: visible;padding: 5px 5px;\" width=\"20%\">类型</th>" +
-            "<th style=\"word-break: break-all;color: #0F1358;border-width: 0 0 0 1px;font-size: inherit;margin: 0;overflow: visible;padding: 5px 5px;\" width=\"35%\">概要</th>" +
-            "<th style=\"word-break: break-all;color: #0F1358;border-width: 0 0 0 1px;font-size: inherit;margin: 0;overflow: visible;padding: 5px 5px;\" width=\"15%\">编号</th>" +
-            "<th style=\"word-break: break-all;color: #0F1358;border-width: 0 0 0 1px;font-size: inherit;margin: 0;overflow: visible;padding: 5px 5px;\" width=\"15%\">优先级</th>" +
-            "<th style=\"word-break: break-all;color: #0F1358;border-width: 0 0 0 1px;font-size: inherit;margin: 0;overflow: visible;padding: 5px 5px;\" width=\"15%\">状态</th>" +
+            "<tr style = \"height: 30px;\">" +
+            "<th style=\"word-break: break-all;color: #0F1358;border-width: 0 0 0 1px;font-size: 13px;line-height: 20px;margin: 0;overflow: visible;padding: 5px 5px;\" width=\"2%\"></th>" +
+            "<th style=\"word-break: break-all;color: #0F1358;border-width: 0 0 0 1px;font-size: 13px;line-height: 20px;margin: 0;overflow: visible;padding: 5px 5px;\" width=\"53%\">概要</th>" +
+            "<th style=\"word-break: break-all;color: #0F1358;border-width: 0 0 0 1px;font-size: 13px;line-height: 20px;margin: 0;overflow: visible;padding: 5px 5px;\" width=\"15%\">编号</th>" +
+            "<th style=\"word-break: break-all;color: #0F1358;border-width: 0 0 0 1px;font-size: 13px;line-height: 20px;margin: 0;overflow: visible;padding: 5px 5px;\" width=\"15%\">优先级</th>" +
+            "<th style=\"word-break: break-all;color: #0F1358;border-width: 0 0 0 1px;font-size: 13px;line-height: 20px;margin: 0;overflow: visible;padding: 5px 5px;\" width=\"15%\">状态</th>" +
             BACKSLASH_TR +
             "</thead>";
     private static final String TD_TAG = "<td style=\"" +
-            "color : #415BC9;" +
             "word-break: break-all;" +
             "border-width: 0 0 0 1px;" +
-            "font-size: inherit;" +
+            "font-size: 13px;" +
             "margin: 0;" +
             "overflow: visible;" +
             "padding: 5px 5px;\">";
@@ -175,7 +179,6 @@ public class IssueDailyWorkSendMessageTask {
                 if (ObjectUtils.isEmpty(user)) {
                     continue;
                 }
-                setChildIssues(list);
                 Map<String, String> paramMap = buildParamMap(list, projectMap.get(projectId), user);
                 messageSenders.add(getMessageSender(paramMap, user, projectId));
             }
@@ -218,11 +221,12 @@ public class IssueDailyWorkSendMessageTask {
 
     private void setChildIssues(List<IssueDailyWorkVO> list) {
         Map<Long, List<IssueDailyWorkVO>> childIssueMap = new HashMap<>();
+        Set<Long> issueIds = list.stream().map(IssueDailyWorkVO::getIssueId).collect(Collectors.toSet());
         Iterator<IssueDailyWorkVO> iterator = list.listIterator();
         while(iterator.hasNext()) {
             IssueDailyWorkVO issue = iterator.next();
-            if (!Objects.isNull(issue.getParentIssueId()) || !Objects.isNull(issue.getRelateIssueId())) {
-                Long parentId = !Objects.isNull(issue.getParentIssueId()) ? issue.getParentIssueId() : issue.getRelateIssueId();
+            Long parentId = !Objects.isNull(issue.getParentIssueId()) ? issue.getParentIssueId() : issue.getRelateIssueId();
+            if (!Objects.isNull(parentId) && issueIds.contains(parentId)) {
                 List<IssueDailyWorkVO> childIssues = childIssueMap.get(parentId);
                 if (CollectionUtils.isEmpty(childIssues)) {
                     childIssues = new ArrayList<>();
@@ -237,11 +241,12 @@ public class IssueDailyWorkSendMessageTask {
 
     private Map<String, String> buildParamMap(List<IssueDailyWorkVO> issueList, ProjectMessageVO projectMessageVO, UserDTO user) {
         Map<String, String> result = new HashMap<>();
-
         result.put(PROJECT_NAME, projectMessageVO.getName());
         result.put(USER_NAME, user.getRealName());
         result.put(DELAY_COUNT, getDelayCount(issueList) + "");
         result.put(UNFINISHED_COUNT, issueList.size() + "");
+        //统计未完成个数、逾期个数后，调整父子层级
+        setChildIssues(issueList);
         result.put(HTML_TABLE, buildHtmlTable(issueList, projectMessageVO));
         return result;
     }
@@ -311,18 +316,20 @@ public class IssueDailyWorkSendMessageTask {
             builder.append(TR_TAG_DOUBLE);
         }
 
-        builder.append(TD_TAG).append(getIssueTypeName(issue)).append(BACKSLASH_TD);
+        builder.append(TD_TAG).append(BACKSLASH_TD);
         if (isChild) {
             builder
-                    .append(TD_TAG).append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")
+                    .append(TD_TAG).append("<span style=\"padding-left: 25px; display: inline-block;\">")
+                    .append(getIssueTypeName(issue))
                     .append("<a href=\"").append(url).append("\" target=\"_blank\">")
                     .append(issue.getSummary()).append("</a>")
-                    .append(getDelayDays(localDateTime, issue.getEstimatedEndTime())).append(BACKSLASH_TD);
+                    .append(getDelayDays(localDateTime, issue.getEstimatedEndTime())).append(BACKSLASH_SPAN).append(BACKSLASH_TD);
         } else {
             builder
-                    .append(TD_TAG).append(B_TAG)
+                    .append(TD_TAG)
+                    .append(getIssueTypeName(issue))
                     .append("<a href=\"").append(url).append("\" target=\"_blank\">")
-                    .append(issue.getSummary()).append("</a>").append(BACKSLASH_B)
+                    .append(issue.getSummary()).append("</a>")
                     .append(getDelayDays(localDateTime, issue.getEstimatedEndTime())).append(BACKSLASH_TD);
         }
         builder
@@ -334,7 +341,7 @@ public class IssueDailyWorkSendMessageTask {
 
     private String getIssueTypeName(IssueDailyWorkVO issueDailyWorkVO) {
         String issueTypeName = issueDailyWorkVO.getTypeName();
-        return "<span style=\"color: #0F1358;\">"+ issueTypeName + BACKSLASH_SPAN;
+        return "<span style=\"color: #0F1358;\">"+ issueTypeName + "：" + BACKSLASH_SPAN;
     }
 
     private String getDelayDays(LocalDateTime localDateTime, Date estimatedEndTime) {
@@ -355,14 +362,14 @@ public class IssueDailyWorkSendMessageTask {
     private String getPriority(IssueDailyWorkVO issueDailyWorkVO) {
         String priorityColor = issueDailyWorkVO.getPriorityColour();
         String priorityName = issueDailyWorkVO.getPriorityName();
-        return "<span style=\"padding: 2px 3px; color: " + priorityColor + " ; background-color: " + priorityColor + "1F;\">"+ priorityName +BACKSLASH_SPAN;
+        return "<span style=\"padding: 2px 3px; font-size: 12px; height: 20px; border-radius: 2px; color: " + priorityColor + " ; background-color: " + priorityColor + "1F;\">"+ priorityName +BACKSLASH_SPAN;
     }
 
     private String getStatus(IssueDailyWorkVO issueDailyWorkVO) {
         String statusName = issueDailyWorkVO.getStatusName();
         String statusCode = issueDailyWorkVO.getStatusCode();
         String statusColor = STATUS_COLOR_MAP.get(statusCode);
-        return "<span style=\"padding: 2px 3px; color: #FFFFFF; background-color: " + statusColor +";\">"+ statusName +BACKSLASH_SPAN;
+        return "<span style=\"padding: 2px 3px; font-size: 12px; height: 20px; border-radius: 2px; color: #FFFFFF; background-color: " + statusColor +";\">"+ statusName +BACKSLASH_SPAN;
     }
 
     private MessageSender getMessageSender(Map<String, String> paramMap, UserDTO user, Long projectId) {
