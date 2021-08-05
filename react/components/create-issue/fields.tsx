@@ -214,7 +214,10 @@ const systemFieldMap: Record<ISystemFieldCodeMap, ProRenderFieldPropsType> = {
       <SelectVersion valueField="versionId" statusArr={['version_planning']} {...props} />
     ),
   },
-  mainResponsible: valueTypeMap.member,
+  mainResponsible: {
+    ...valueTypeMap.member,
+    valueKey: 'mainResponsibleId',
+  },
   storyPoints: {
     render: (text) => text,
     renderFormItem: (props) => (
