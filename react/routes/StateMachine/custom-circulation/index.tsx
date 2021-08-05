@@ -299,9 +299,11 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
 
   // @ts-ignore
   const getModalSetting = (key: 'autoTransform' | 'condition' | 'linkage' | 'updateField' | 'notifySetting', record) => {
-    const selectedTypeCode = find(issueTypes, (
+    const selectedTypeItem = find(issueTypes, (
       item: IIssueType,
-    ) => item.id === selectedType)?.typeCode;
+    ) => item.id === selectedType);
+    const selectedTypeCode = selectedTypeItem?.typeCode;
+    const selectedTypeName = selectedTypeItem?.name;
 
     const settings: ModalSettings = {
       autoTransform: {
@@ -339,6 +341,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           <Linkage
             record={record}
             selectedType={selectedType}
+            selectedTypeName={selectedTypeName}
             customCirculationDataSet={customCirculationDataSet}
             // eslint-disable-next-line no-nested-ternary
             linkageType={!isOrganization && selectedTypeCode === 'bug' ? ['subIssue', 'linkIssue'] : (

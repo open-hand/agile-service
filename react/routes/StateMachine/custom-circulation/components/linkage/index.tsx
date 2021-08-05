@@ -2,7 +2,7 @@ import React, {
   useMemo, useEffect, useCallback, useState,
 } from 'react';
 import {
-  Form, DataSet, Button, Select, Row, Col,
+  Form, DataSet, Button, Select, Row, Col, CheckBox,
   Icon,
 } from 'choerodon-ui/pro';
 
@@ -32,6 +32,7 @@ interface ILinkIssueStatusSetting {
   linkIssueTypeId: string
   linkIssueStatusId: string
   linkIssueStatus: any
+  triggered: boolean
 }
 
 interface ILinkType {
@@ -43,7 +44,7 @@ const { Option } = Select;
 const linkTypeHasIssueTypeMap = new Map([]); // 存储关联类型都选择了哪些问题类型，避免重复选择
 const Linkage = ({
   // @ts-ignore
-  modal, record, selectedType, customCirculationDataSet, linkageType,
+  modal, record, selectedType, customCirculationDataSet, linkageType, selectedTypeName,
 }) => {
   const isOrganization = getIsOrganization();
   const { data: issueTypes } = useIssueTypes({ typeCode: ['story', 'task', 'bug'] });
@@ -79,9 +80,12 @@ const Linkage = ({
   }, []);
   const getField = useCallback((ds, name) => ds.current?.getField(name), []);
 
-  const addField = useCallback((ds, name, props) => {
+  const addField = useCallback((ds, name, props, defaultValue?: any) => {
     const field = new DataSetField({ ...props, name }, ds, ds.current);
     ds?.current?.fields.set(name, field);
+    if (defaultValue) {
+      ds?.current?.set(name, defaultValue);
+    }
   }, []);
 
   const addFieldRule = useCallback((key) => {
@@ -102,6 +106,8 @@ const Linkage = ({
     });
     addField(linkIssueLinkageDataSet, `${key}-linkIssueStatusId`, {
       required: true,
+    });
+    addField(linkIssueLinkageDataSet, `${key}-triggered`, {
     });
   }, [addField, linkIssueLinkageDataSet]);
 
@@ -143,6 +149,7 @@ const Linkage = ({
               setFieldValue(linkIssueLinkageDataSet, `${item.key}-linkTypeId`, res[i]?.linkTypeId);
               setFieldValue(linkIssueLinkageDataSet, `${item.key}-linkIssueTypeId`, res[i]?.linkIssueTypeId);
               setFieldValue(linkIssueLinkageDataSet, `${item.key}-linkIssueStatusId`, res[i]?.linkIssueStatusId);
+              setFieldValue(linkIssueLinkageDataSet, `${item.key}-triggered`, res[i]?.triggered);
             }
           });
         }
@@ -181,6 +188,7 @@ const Linkage = ({
               linkTypeId: data[`${key}-linkTypeId`],
               linkIssueTypeId: data[`${key}-linkIssueTypeId`],
               linkIssueStatusId: data[`${key}-linkIssueStatusId`],
+              triggered: data[`${key}-triggered`],
             });
           });
           // @ts-ignore
@@ -324,17 +332,19 @@ const Linkage = ({
                 const linkTypeName = `${key}-linkTypeId`;
                 const typeName = `${key}-linkIssueTypeId`;
                 const statusName = `${key}-linkIssueStatusId`;
+                const triggeredName = `${key}-triggered`;
                 const linkTypeId = getFieldValue(linkIssueLinkageDataSet, linkTypeName);
                 const issueTypeId = getFieldValue(linkIssueLinkageDataSet, typeName);
                 const statusId = getFieldValue(linkIssueLinkageDataSet, statusName);
                 const extraStatus = selectedType && issueTypeId && linkTypeId ? linkIssueStatusSettings.find((item: ILinkIssueStatusSetting) => item.linkTypeId === linkTypeId && item.linkIssueTypeId === issueTypeId)?.linkIssueStatus : undefined;
                 return (
-                  <Row key={key} gutter={20} type="flex" align="middle">
-                    <Col span={8}>
-                      <Select
-                        label="关联类型"
-                        name={linkTypeName}
-                        onChange={(value, oldValue) => {
+                  <>
+                    <Row key={key} gutter={20} type="flex" align="middle">
+                      <Col span={8}>
+                        <Select
+                          label="关联类型"
+                          name={linkTypeName}
+                          onChange={(value, oldValue) => {
                           getField(linkIssueLinkageDataSet, typeName)?.reset();
                           getField(linkIssueLinkageDataSet, statusName)?.reset();
                           if (oldValue && linkTypeHasIssueTypeMap.get(oldValue.toString()) && issueTypeId) {
@@ -342,74 +352,83 @@ const Linkage = ({
                           }
                           linkIssueLinkageDataSet.current?.init(typeName, undefined);
                           linkIssueLinkageDataSet.current?.init(statusName, undefined);
-                        }}
-                      >
-                        {(linkTypes || []).map((type: ILinkType) => (
-                          <Option value={type.linkTypeId}>
-                            {type.linkName}
-                          </Option>
-                        ))}
-                      </Select>
-                    </Col>
-                    <Col span={7}>
-                      <Select
-                        label="问题类型"
-                        name={typeName}
-                        disabled={!linkTypeId}
-                        onChange={(value, oldValue) => {
-                          if (value && linkTypeHasIssueTypeMap.get(linkTypeId.toString())) {
-                            (linkTypeHasIssueTypeMap.get(linkTypeId.toString()) as string[]).push(value);
-                          }
-                          if (oldValue && linkTypeHasIssueTypeMap.get(linkTypeId.toString())) {
-                            linkTypeHasIssueTypeMap.set(linkTypeId.toString(), (linkTypeHasIssueTypeMap.get(linkTypeId.toString()) as string[]).filter((item: string) => item !== oldValue));
-                          }
+                          }}
+                        >
+                          {(linkTypes || []).map((type: ILinkType) => (
+                            <Option value={type.linkTypeId}>
+                              {type.linkName}
+                            </Option>
+                          ))}
+                        </Select>
+                      </Col>
+                      <Col span={7}>
+                        <Select
+                          label="问题类型"
+                          name={typeName}
+                          disabled={!linkTypeId}
+                          onChange={(value, oldValue) => {
+                            if (value && linkTypeHasIssueTypeMap.get(linkTypeId.toString())) {
+                              (linkTypeHasIssueTypeMap.get(linkTypeId.toString()) as string[]).push(value);
+                            }
+                            if (oldValue && linkTypeHasIssueTypeMap.get(linkTypeId.toString())) {
+                              linkTypeHasIssueTypeMap.set(linkTypeId.toString(), (linkTypeHasIssueTypeMap.get(linkTypeId.toString()) as string[]).filter((item: string) => item !== oldValue));
+                            }
 
                           getField(linkIssueLinkageDataSet, statusName)?.reset();
                           linkIssueLinkageDataSet.current?.init(statusName, undefined);
-                        }}
-                      >
-                        {issueTypes?.filter((type: IIssueType) => ['story', 'task', 'bug'].includes(type.typeCode)).filter((issueType: IIssueType) => issueType.id === issueTypeId || !(linkTypeId ? linkTypeHasIssueTypeMap.get(linkTypeId.toString()) as string[] : []).includes(issueType.id)).map((type: IIssueType) => (
-                          <Option value={type.id}>
-                            {type.name}
-                          </Option>
-                        ))}
-                      </Select>
-                    </Col>
-                    <Col span={7} key={id}>
-                      <SelectStatus
-                        label="指定状态"
-                        key={`${key}-${selectedType}-${issueTypeId}`}
-                        name={statusName}
-                        disabled={!issueTypeId}
-                        request={selectedType && issueTypeId ? () => statusTransformApi.getLinkageStatus({
-                          issueTypeId: selectedType,
-                          linkIssueTypeId: issueTypeId,
-                          linkTypeId,
-                          statusId: record.get('id'),
-                        }) : () => {}}
+                          }}
+                        >
+                          {issueTypes?.filter((type: IIssueType) => ['story', 'task', 'bug'].includes(type.typeCode)).filter((issueType: IIssueType) => issueType.id === issueTypeId || !(linkTypeId ? linkTypeHasIssueTypeMap.get(linkTypeId.toString()) as string[] : []).includes(issueType.id)).map((type: IIssueType) => (
+                            <Option value={type.id}>
+                              {type.name}
+                            </Option>
+                          ))}
+                        </Select>
+                      </Col>
+                      <Col span={7} key={id}>
+                        <SelectStatus
+                          label="指定状态"
+                          key={`${key}-${selectedType}-${issueTypeId}`}
+                          name={statusName}
+                          disabled={!issueTypeId}
+                          request={selectedType && issueTypeId ? () => statusTransformApi.getLinkageStatus({
+                            issueTypeId: selectedType,
+                            linkIssueTypeId: issueTypeId,
+                            linkTypeId,
+                            statusId: record.get('id'),
+                          }) : () => {}}
                         // @ts-ignore
-                        extraStatus={extraStatus ? [extraStatus] : undefined}
-                      />
-                    </Col>
-                    <Col span={2}>
-                      <Icon
-                        type="delete_sweep-o"
-                        style={{
-                          color: 'var(--primary-color)',
-                          cursor: 'pointer',
-                        }}
-                        onClick={() => {
-                          LinkField.remove(key);
-                          if (linkTypeId && issueTypeId) {
-                            linkTypeHasIssueTypeMap.set(linkTypeId.toString(), (linkTypeHasIssueTypeMap.get(linkTypeId.toString()) as string[]).filter((item: string) => item !== issueTypeId));
-                          }
-                          removeField(linkIssueLinkageDataSet, linkTypeName);
-                          removeField(linkIssueLinkageDataSet, typeName);
-                          removeField(linkIssueLinkageDataSet, statusName);
-                        }}
-                      />
-                    </Col>
-                  </Row>
+                          extraStatus={extraStatus ? [extraStatus] : undefined}
+                        />
+                      </Col>
+                      <Col span={2}>
+                        <Icon
+                          type="delete_sweep-o"
+                          style={{
+                            color: 'var(--primary-color)',
+                            cursor: 'pointer',
+                          }}
+                          onClick={() => {
+                            LinkField.remove(key);
+                            if (linkTypeId && issueTypeId) {
+                              linkTypeHasIssueTypeMap.set(linkTypeId.toString(), (linkTypeHasIssueTypeMap.get(linkTypeId.toString()) as string[]).filter((item: string) => item !== issueTypeId));
+                            }
+                            removeField(linkIssueLinkageDataSet, linkTypeName);
+                            removeField(linkIssueLinkageDataSet, typeName);
+                            removeField(linkIssueLinkageDataSet, statusName);
+                            removeField(linkIssueLinkageDataSet, triggeredName);
+                          }}
+                        />
+                      </Col>
+                    </Row>
+                    <Row style={{ marginTop: 8 }}>
+                      <Col span={24}>
+                        <CheckBox name={triggeredName}>
+                          {`允许其他联动配置触发${selectedTypeName}状态变更到${record.get('name')}时，执行此状态联动。`}
+                        </CheckBox>
+                      </Col>
+                    </Row>
+                  </>
                 );
               })}
               <div>
