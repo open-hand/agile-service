@@ -15,6 +15,7 @@ import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
 import { User } from '@/common/types';
 import Loading from '@/components/Loading';
 import useIsProgram from '@/hooks/useIsProgram';
+import SelectUser from '@/components/select/select-user';
 import styles from './index.less';
 
 const { AppState } = stores;
@@ -41,9 +42,10 @@ const NotifySelect: React.FC<NotifySelectProps> = (
       {
         // @ts-ignore
         data.specifier && (
-          <Select
-            name="userIdList"
+          <SelectUser
+            name="userList"
             maxTagCount={2}
+            selectedUser={notifySettingDataSet.current?.getState('defaultSelectUsers')}
             className={styles.notify_assigners}
             // @ts-ignore
             getPopupContainer={(trigger) => trigger.parentNode}
@@ -83,7 +85,7 @@ function useClickOut(onClickOut) {
 
 const NotifySetting = ({
   // @ts-ignore
-  modal, record, selectedType, customCirculationDataSet, memberOptions = [] as Array<{code:string, name:string}>,
+  modal, record, selectedType, customCirculationDataSet, memberOptions = [] as Array<{ code: string, name: string }>,
 }) => {
   const [loading, setLoading] = useState(false);
   const [hidden, setHidden] = useState(true);
@@ -93,17 +95,6 @@ const NotifySetting = ({
   const ref = useClickOut(handleClickOut);
   const { isProgram } = useIsProgram();
   const isOrganization = getIsOrganization();
-  const userDs = useMemo(() => new DataSet({
-    autoQuery: true,
-    selection: false,
-    paging: false,
-    transport: {
-      read: {
-        url: `/iam/choerodon/v1/projects/${getProjectId()}/users/search_by_name`,
-        method: 'get',
-      },
-    },
-  }), []);
 
   const memberOptionsDataSet = useMemo(() => new DataSet({
     autoQuery: true,
@@ -132,13 +123,13 @@ const NotifySetting = ({
     autoCreate: true,
     fields: [
       {
-        name: 'userIdList',
+        name: 'userList',
         label: '指定人',
+        type: 'object' as any,
         // type: 'array' as FieldType,
         multiple: true,
         textField: 'realName',
         valueField: 'id',
-        options: userDs,
         dynamicProps: {
           // eslint-disable-next-line no-shadow
           required: ({ record }) => record.get('specifier'),
@@ -172,7 +163,7 @@ const NotifySetting = ({
         type: 'boolean' as FieldType,
       },
     ],
-  }), [memberOptionsDataSet, notifyMethodDataSet, userDs]);
+  }), [memberOptionsDataSet, notifyMethodDataSet]);
 
   useEffect(() => {
     const { current } = notifySettingDataSet;
@@ -182,6 +173,8 @@ const NotifySetting = ({
       setLoading(false);
       if (res.userList && res.userList.length) {
         current?.set('specifier', true);
+        current?.set('userList', res.userList);
+        current?.setState('defaultSelectUsers', res.userList);
       }
       (res.userTypeList || []).forEach((usertype: string) => {
         current?.set(usertype, true);
@@ -189,7 +182,8 @@ const NotifySetting = ({
       (res.memberList || []).forEach((item: { code: string, name: string }) => {
         current?.set(item.code, true);
       });
-      current?.set('userIdList', (res.userList || []).map((item: { id: string }) => item.id));
+
+      // current?.set('userIdList', (res.userList || []).map((item: { id: string }) => item.id));
       current?.set('noticeTypeList', (res.noticeTypeList || []).filter((item: string) => item !== 'WEB_HOOK'));
       current?.set('webhook', Boolean((res.noticeTypeList || []).find((item: string) => item === 'WEB_HOOK')));
     });
@@ -200,9 +194,9 @@ const NotifySetting = ({
       const data = notifySettingDataSet.toData();
       const {
         // @ts-ignore
-        specifier, userIdList, noticeTypeList, webhook,
+        specifier, userList = [], noticeTypeList, webhook,
       } = data && data[0];
-
+      const userIdList = userList.map((i: User) => i.id);
       const userTypeList = [];
       if (validate) {
         for (const [key, value] of Object.entries(data[0])) {
@@ -244,7 +238,7 @@ const NotifySetting = ({
     }
   }, [customCirculationDataSet, isOrganization, modal, notifySettingDataSet, record, selectedType]);
 
-  const data = notifySettingDataSet.toData();
+  const data = notifySettingDataSet.toData() as any[];
   const selected = [];
   if (data[0]) {
     for (const [key, value] of Object.entries(data[0])) {
@@ -260,13 +254,8 @@ const NotifySetting = ({
         }
       }
     }
-    // @ts-ignore
     if (data[0].specifier) {
-      // @ts-ignore
-      (data[0].userIdList || []).forEach((userId: string) => {
-        const userItem = userDs.toData().find((
-          item: User,
-        ) => item.id.toString() === userId.toString()) as User;
+      (data[0].userList || []).forEach((userItem: User) => {
         if (userItem) {
           selected.push(userItem.realName);
         }
