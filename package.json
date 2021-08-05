@@ -90,32 +90,5 @@
     "lint-staged": "lint-staged",
     "lint-staged:es": "eslint"
   },
-  "author": "",
-  "license": "ISC",
-  "publishConfig": {
-    "access": "public"
-  },
-  "lint-staged": {
-    "react/**/*.{js,jsx,ts,tsx}": [
-      "npm run lint-staged:es"
-    ],
-    "react/**/*.scss": "stylelint --syntax scss"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+  "author": ""
 }
