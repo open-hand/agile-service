@@ -1,3 +1,4 @@
+import { User } from '@/common/types';
 import { groupBy } from 'lodash';
 /**
  *  主值转换为userId 和roleIds
@@ -5,10 +6,10 @@ import { groupBy } from 'lodash';
  * @returns
  */
 export function mainValueTransformUserAndRole(value: any, submitProcess: boolean = false) {
-  const { newUserIds = [], newRoles = [] } = groupBy(value || [], (item) => (String(item).indexOf('role-') === 0 ? 'newRoles' : 'newUserIds'));
+  const { newUsers = [], newRoles = [] } = groupBy(value || [], (item) => (String(item).indexOf('role-') === 0 ? 'newRoles' : 'newUsers'));
   const processNewRoles = newRoles.map((item) => String(item).split('role-')[1]);
-  if (newUserIds.length > 0 && !submitProcess) {
+  if (newUsers.length > 0 && !submitProcess) {
     processNewRoles.push('specificUser');
   }
-  return { userIds: newUserIds, roles: processNewRoles };
+  return { users: newUsers as User[], roles: processNewRoles };
 }

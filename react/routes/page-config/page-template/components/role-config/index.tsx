@@ -1,25 +1,26 @@
-import { IModalProps, IRole } from '@/common/types';
+import { IModalProps, IRole, User } from '@/common/types';
 import React, {
   useMemo, useCallback, useEffect, useState,
-  useRef,
 } from 'react';
 import {
   DataSet, Form, Select, Modal, SelectBox,
 } from 'choerodon-ui/pro';
-import { ShowHelp } from 'choerodon-ui/pro/lib/field/enum';
 import SelectUser, { SelectUserProps } from '@/components/select/select-user';
 import {
-  commonApi, IPageFieldCreatePermissionItem, IPageFieldPermissionItem, pageConfigApi, userApi,
+  commonApi, getProjectUsersByIds, IPageFieldCreatePermissionItem, IPageFieldPermissionItem, pageConfigApi,
 } from '@/api';
-import { groupBy, isEmpty, uniq } from 'lodash';
+import {
+  isEmpty, noop,
+} from 'lodash';
 import UserTag from '@/components/tag/user-tag';
 import { observer, useComputed } from 'mobx-react-lite';
+import { usePersistFn } from 'ahooks';
 import styles from './index.less';
 import { mainValueTransformUserAndRole } from './utils';
 
 interface Props {
   data?: IPageFieldPermissionItem[]
-  onOk?: Function
+  onOk?: () => void
   fields: any,
   issueTypeId: string
 }
@@ -30,34 +31,27 @@ interface IRoleWithSelectOption extends IRole {
 const SelectUserWithRole: React.FC<SelectUserProps & { roles: IRoleWithSelectOption[] }> = observer(({
   name, record, roles, ...otherProps
 }) => {
-  const ref = useRef<any>(null);
+  const rolesMap = useMemo(() => new Map(roles.map((item) => ([`role-${item.id}`, item]))), []);
   const showSelectUser = useComputed(() => {
     const selectedRoles = record?.get(`${name}_Roles`);
     return selectedRoles?.includes('specificUser');
   }, [record?.get(`${name}_Roles`)]);
 
   return (
-    <SelectUser
-      // @ts-ignore
-      ref={ref as any}
+    <Select
       name={name}
       style={{ width: '100%' }}
       multiple
-      request={() => userApi.getAllInProject(undefined, 1, undefined, 0)}
       trigger={['click'] as any}
-      afterLoad={(users) => {
-        users.splice(0, 0, ...(roles.map((item) => ({ ...item, id: `role-${item.id}` }))) as any);
-        return users;
-      }}
-      optionRenderer={(item: any) => (item.isRole ? item.name : <UserTag data={item} size={14} />)}
+      renderer={({ record: r, value: item }) => (typeof (item) === 'string' ? rolesMap.get(item)?.meaning : <UserTag data={item} size={14} />)}
       popupContent={(
         <div role="none" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} className={styles.select_content}>
           <SelectBox name={`${name}_Roles`} vertical getPopupContainer={(node) => node.parentNode as any} multiple />
           {true && (
             <SelectUser
-              name={`${name}_UserIds`}
+              name={`${name}_Users`}
               hidden={!showSelectUser}
-              request={({ filter }) => userApi.getAllInProject(filter, 1, undefined, 0)}
+              selectedUser={record?.getState(`${name}_defaultSelectUsers`)}
               style={{ marginTop: '.2rem', width: '100%' }}
               getPopupContainer={(node) => node.parentNode as any}
             />
@@ -66,19 +60,15 @@ const SelectUserWithRole: React.FC<SelectUserProps & { roles: IRoleWithSelectOpt
 
       )}
       onChange={(value) => {
-        console.log('change....', value);
-        const { userIds: newUserIds, roles: newRoles } = mainValueTransformUserAndRole(value);
-
-        record?.init({ [`${name}_UserIds`]: newUserIds, [`${name}_Roles`]: newRoles });
-
-        // record?.init({ [`${name}_UserIds`]: [], [`${name}_Roles`]: [] });
+        const { users: newUsers, roles: newRoles } = mainValueTransformUserAndRole(value);
+        record?.init({ [`${name}_Users`]: newUsers, [`${name}_Roles`]: newRoles });
       }}
       {...otherProps}
     />
   );
 });
 const RoleConfigModal: React.FC<{ modal?: IModalProps } & Props> = observer(({
-  modal, data, fields, issueTypeId, onOk,
+  modal, data, fields, issueTypeId, onOk: propsOnOk,
 }) => {
   const [roles, setRoles] = useState<IRoleWithSelectOption[]>();
   useEffect(() => {
@@ -97,7 +87,7 @@ const RoleConfigModal: React.FC<{ modal?: IModalProps } & Props> = observer(({
         name: 'edit', label: '可编辑', multiple: true,
       },
       {
-        name: 'edit_UserIds', label: '指定用户', multiple: true,
+        name: 'edit_Users', label: '指定用户', type: 'object' as any, multiple: true, textField: 'realName', valueField: 'id',
       },
       {
         name: 'edit_Roles',
@@ -111,9 +101,12 @@ const RoleConfigModal: React.FC<{ modal?: IModalProps } & Props> = observer(({
         }),
       },
       { name: 'onlyView', label: '可见', multiple: true },
-      { name: 'onlyView_UserIds', label: '指定用户', multiple: true },
+      {
+        name: 'onlyView_Users', label: '指定用户', textField: 'realName', valueField: 'id', type: 'object' as any, multiple: true,
+      },
       {
         name: 'onlyView_Roles',
+        type: 'object' as any,
         label: '',
         multiple: true,
         options: new DataSet({
@@ -128,70 +121,74 @@ const RoleConfigModal: React.FC<{ modal?: IModalProps } & Props> = observer(({
     events: {
       update: ({ value, name, record }: any) => {
         const [mainName, additionalName] = String(name).split('_');
-        if (!isEmpty(additionalName)) {
-          console.log('name :>> ', name, value, record?.getPristineValue(name));
-        } else {
+        if (isEmpty(additionalName)) {
           return;
         }
         const currentRoles = record.get(`${mainName}_Roles`).filter((item: any) => item !== 'specificUser')
           .map((item: any) => `role-${item}`);
         console.log('currentRoles...', currentRoles);
-        if (additionalName.includes('UserIds')) {
-          record.init(mainName, [...currentRoles, ...value]);
+        if (additionalName.includes('Users')) {
+          record.set(mainName, [...currentRoles, ...value]);
         } else if (additionalName.includes('Roles')) {
-          const currentUserIds: any[] = record.get(`${mainName}_Roles`).includes('specificUser') ? record.get(`${mainName}_UserIds`) : [];
-          currentUserIds.length === 0 && record.set(`${mainName}_UserIds`, undefined);
-          record.init(mainName, [...currentRoles, ...currentUserIds]);
+          const currentUsers: any[] = record.get(`${mainName}_Roles`).includes('specificUser') ? record.get(`${mainName}_Users`) : [];
+          currentUsers.length === 0 && record.init(`${mainName}_Users`, undefined);
+          record.set(mainName, [...currentRoles, ...currentUsers]);
         }
       },
     },
   }), [roles]);
-
+  const onOk = usePersistFn(propsOnOk || noop);
   const handleSubmit = useCallback(async () => {
     const { edit = [], onlyView = [] } = dataset.current?.toData();
-    const { userIds: editUserIds, roles: editRoles } = mainValueTransformUserAndRole(edit, true);
-    const { userIds: onlyViewUserIds, roles: onlyViewRoles } = mainValueTransformUserAndRole(onlyView, true);
+    const { users: editUsers, roles: editRoles } = mainValueTransformUserAndRole(edit, true);
+    const { users: onlyViewUsers, roles: onlyViewRoles } = mainValueTransformUserAndRole(onlyView, true);
 
-    const writePermission: IPageFieldCreatePermissionItem = { scope: 'write', userIds: editUserIds, roleIds: editRoles };
+    const writePermission: IPageFieldCreatePermissionItem = { scope: 'write', userIds: editUsers.map((i) => i.id), roleIds: editRoles };
     const readPermission: IPageFieldCreatePermissionItem = {
       scope: 'read',
-      userIds: [...editUserIds, ...onlyViewUserIds],
+      userIds: [...editUsers, ...onlyViewUsers].map((i) => i.id),
       roleIds: [...editRoles, ...onlyViewRoles],
     };
     console.log('writePermission :>> ', writePermission);
     console.log('readPermission :>> ', readPermission);
-    // return false;
     await pageConfigApi.createPermission({
       fields,
       permissions: [writePermission, readPermission],
       issueTypeIds: [issueTypeId],
     });
-    onOk && onOk();
+    onOk();
     return true;
-  }, [dataset, fields, issueTypeId]);
+  }, [dataset, fields, issueTypeId, onOk]);
   useEffect(() => {
-    if (data) {
+    async function initEditData() {
       const edit: string[] = [];
-      const onlyView: { userIds: string[], roles: string[], mainValues: string[] } = { userIds: [], roles: [], mainValues: [] };
+      const onlyView: { users: User[], userIds: string[], roles: string[], mainValues: Array<string | User> } = {
+        users: [], userIds: [], roles: [], mainValues: [],
+      };
 
-      data.forEach((item) => {
+      data?.forEach((item) => {
         if (item.scope === 'write') {
-          // edit.push(...item.userIds);
-          // onlyView.userIds.push(...item.userIds);
-          // onlyView.push(...item.userIds);
+          // edit.push(...item.users);
+          // onlyView.users.push(...item.users);
+          // onlyView.push(...item.users);
         } else if (item.scope === 'read') {
           onlyView.userIds.push(...(item.userIds || []));
           onlyView.roles.push(...(item.roleIds || []));
           onlyView.mainValues.push(...onlyView.roles.map((i) => `role-${i}`));
-          onlyView.mainValues.push(...onlyView.userIds);
-          onlyView.userIds.length > 0 && onlyView.roles.push('specificUser');
-
-          // onlyView.push(...item.userIds);
+          onlyView.users.length > 0 && onlyView.roles.push('specificUser');
         }
       });
-      dataset.current?.init({ onlyView: onlyView.mainValues, onlyView_UserIds: onlyView.userIds, onlyView_Roles: onlyView.roles });
+
+      const users = onlyView.users.length > 0 ? await getProjectUsersByIds(onlyView.userIds) : [];
+      onlyView.users.push(...users);
+      onlyView.mainValues.push(...users);
+      dataset.current?.setState('onlyView_defaultSelectUsers', users);
+      dataset.current?.init({ onlyView: onlyView.mainValues, onlyView_Users: users, onlyView_Roles: onlyView.roles });
     }
-  }, [data, dataset]);
+    if (data && roles) {
+      initEditData();
+    }
+  }, [data, dataset, roles]);
   useEffect(() => { modal?.handleOk(handleSubmit); });
   return (
     <div>
@@ -213,19 +210,6 @@ const RoleConfigModal: React.FC<{ modal?: IModalProps } & Props> = observer(({
           />
         )} */}
         {roles ? <SelectUserWithRole name="onlyView" record={dataset.current} roles={roles} /> : <Select name="onlyView" />}
-
-        {/* <SelectUser
-          name="edit"
-          showHelp={'tooltip' as ShowHelp}
-          help="有编辑权限则一定有查看权限"
-          afterLoad={(users) => {
-            users.splice(0, 0, ...[{ id: 'owner', realName: '项目所有者' }, { id: 'member', realName: '项目成员' }] as any[]);
-            return users;
-          }}
-        />
-        <SelectUser
-          name="onlyView"
-        /> */}
       </Form>
     </div>
   );
