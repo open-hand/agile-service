@@ -79,7 +79,7 @@ const ChosenFields: React.FC<Props> = ({
         <ChooseField
           {...choseComponentProps}
           dropDownProps={{ disabled: !currentOptionId }}
-          dropDownBtnProps={{ icon: 'add', funcType: 'flat' as FuncType, style: { marginLeft: 6, marginTop: 10 } }}
+          dropDownBtnProps={{ icon: 'add', funcType: 'flat' as FuncType, style: { marginLeft: 6, marginTop: 9 } }}
           dropDownBtnChildren="添加字段"
         />
       </div>
