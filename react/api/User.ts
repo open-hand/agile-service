@@ -5,7 +5,7 @@ import { User } from '@/common/types';
 import { unionBy } from 'lodash';
 import Api from './Api';
 
-async function getProjectUsersByIds(userIds?: string[], projectId?: string): Promise<User[]> {
+export async function getProjectUsersByIds(userIds?: string[], projectId?: string): Promise<User[]> {
   return axios({
     method: 'post',
     url: `/agile/v1/users/projects/${projectId ?? getProjectId()}/list_by_ids`,
