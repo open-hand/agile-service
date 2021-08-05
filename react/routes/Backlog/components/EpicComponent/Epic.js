@@ -2,11 +2,11 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Icon } from 'choerodon-ui/pro';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
-import { issueApi, epicApi } from '@/api';
+import { epicApi } from '@/api';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 import EpicItem from './EpicItem';
 import './Epic.less';
-import CreateEpic from './CreateEpic';
+import openCreateEpic from './CreateEpic';
 
 @observer
 class Epic extends Component {
@@ -60,8 +60,17 @@ class Epic extends Component {
                 style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}
                 role="none"
                 onClick={() => {
-                  this.setState({
-                    addEpic: true,
+                  openCreateEpic({
+                    store: BacklogStore,
+                    refresh: this.epicRefresh,
+                    cantCreateEvent: this.handleOpenCreateIssue,
+                    typeIdChange: (id) => {
+                      BacklogStore.setDefaultTypeId(id);
+                    },
+                    summaryChange: (summary) => {
+                      BacklogStore.setDefaultSummary(summary);
+                    },
+                    epicNameChange: BacklogStore.setDefaultEpicName,
                   });
                 }}
               >
@@ -152,24 +161,6 @@ class Epic extends Component {
               未指定史诗的问题
             </div>
           </div>
-          <CreateEpic
-            store={BacklogStore}
-            visible={addEpic}
-            onCancel={() => {
-              this.setState({
-                addEpic: false,
-              });
-            }}
-            refresh={this.epicRefresh}
-            cantCreateEvent={this.handleOpenCreateIssue}
-            typeIdChange={(id) => {
-              BacklogStore.setDefaultTypeId(id);
-            }}
-            summaryChange={(summary) => {
-              BacklogStore.setDefaultSummary(summary);
-            }}
-            epicNameChange={BacklogStore.setDefaultEpicName}
-          />
         </div>
       </div>
     );
