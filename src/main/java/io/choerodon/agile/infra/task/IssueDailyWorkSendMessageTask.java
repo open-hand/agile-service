@@ -69,20 +69,34 @@ public class IssueDailyWorkSendMessageTask {
             "empty-cells: show;\">";
     private static final String TABLE_HEAD = "<thead style=\"background-color: #F3F6FE;color: #000;text-align: left;vertical-align: bottom;\">" +
             "<tr style = \"height: 30px;\">" +
-            "<th style=\"word-break: break-all;color: #0F1358;border-width: 0 0 0 1px;font-size: 13px;line-height: 20px;margin: 0;overflow: visible;padding: 5px 5px;\" width=\"2%\"></th>" +
-            "<th style=\"word-break: break-all;color: #0F1358;border-width: 0 0 0 1px;font-size: 13px;line-height: 20px;margin: 0;overflow: visible;padding: 5px 5px;\" width=\"53%\">概要</th>" +
+            "<th style=\"word-break: break-all;color: #0F1358;border-width: 0 0 0 1px;font-size: 13px;line-height: 20px;margin: 0;overflow: visible;padding: 5px 5px;\" width=\"3%\"></th>" +
+            "<th style=\"word-break: break-all;color: #0F1358;border-width: 0 0 0 1px;font-size: 13px;line-height: 20px;margin: 0;overflow: visible;padding: 5px 5px;\" width=\"54%\">概要</th>" +
             "<th style=\"word-break: break-all;color: #0F1358;border-width: 0 0 0 1px;font-size: 13px;line-height: 20px;margin: 0;overflow: visible;padding: 5px 5px;\" width=\"15%\">编号</th>" +
-            "<th style=\"word-break: break-all;color: #0F1358;border-width: 0 0 0 1px;font-size: 13px;line-height: 20px;margin: 0;overflow: visible;padding: 5px 5px;\" width=\"15%\">优先级</th>" +
+            "<th style=\"word-break: break-all;color: #0F1358;border-width: 0 0 0 1px;font-size: 13px;line-height: 20px;margin: 0;overflow: visible;padding: 5px 5px;\" width=\"13%\">优先级</th>" +
             "<th style=\"word-break: break-all;color: #0F1358;border-width: 0 0 0 1px;font-size: 13px;line-height: 20px;margin: 0;overflow: visible;padding: 5px 5px;\" width=\"15%\">状态</th>" +
             BACKSLASH_TR +
             "</thead>";
     private static final String TD_TAG = "<td style=\"" +
             "word-break: break-all;" +
+            "padding-top: 8px;" +
+            "padding-bottom: 8px;" +
             "border-width: 0 0 0 1px;" +
             "font-size: 13px;" +
             "margin: 0;" +
-            "overflow: visible;" +
-            "padding: 5px 5px;\">";
+            "overflow: visible;\">";
+    private static final String TD_SVG_ARROW_DROP_DOWN = "<td style=\"" +
+            "word-break: break-all;" +
+            "padding-top: 8px;" +
+            "padding-right: 3px;" +
+            "vertical-align: top;" +
+            "border-width: 0 0 0 1px;" +
+            "font-size: 13px;" +
+            "margin: 0;" +
+            "overflow: visible;\">" +
+            "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"15\" height=\"15\" viewBox=\"-2 -3 26 26\">\n" +
+            "<title>arrow_drop_down</title>\n" +
+            "<path d=\"M6.984 9.984h10.031l-5.016 5.016z\"></path>\n" +
+            "</svg>\n";
 
     private static final String TODO_COLOR = "#FFB100";
     private static final String DOING_COLOR = "#4D90FE";
@@ -315,8 +329,11 @@ public class IssueDailyWorkSendMessageTask {
         } else {
             builder.append(TR_TAG_DOUBLE);
         }
-
-        builder.append(TD_TAG).append(BACKSLASH_TD);
+        if (!isChild && !CollectionUtils.isEmpty(issue.getChildIssues())) {
+            builder.append(TD_SVG_ARROW_DROP_DOWN).append(BACKSLASH_TD);
+        }else {
+            builder.append(TD_TAG).append(BACKSLASH_TD);
+        }
         if (isChild) {
             builder
                     .append(TD_TAG).append("<span style=\"padding-left: 25px; display: inline-block;\">")
