@@ -1085,7 +1085,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (Objects.equals(issue.getStatusId(), statusId)) {
             return true;
         }
-        Boolean isSub = Objects.equals("sub_task",influenceIssue.getTypeCode()) || (Objects.equals("bug",influenceIssue.getTypeCode()) && !ObjectUtils.isEmpty(influenceIssue.getRelateIssueId()) && Objects.equals(influenceIssue.getRelateIssueId(), 0L));
+        Boolean isSub = Objects.equals("sub_task",influenceIssue.getTypeCode()) || (Objects.equals("bug",influenceIssue.getTypeCode()) && !ObjectUtils.isEmpty(influenceIssue.getRelateIssueId()) && !Objects.equals(influenceIssue.getRelateIssueId(), 0L));
         // 变更issue的状态和更新属性
         Boolean transformFlag = executionUpdateInfluenceIssue(issue, statusId, influenceIssue, projectId, applyType, influenceIssueVO);
         // 记录联动的执行日志
