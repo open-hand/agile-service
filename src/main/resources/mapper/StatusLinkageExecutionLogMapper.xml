@@ -2,7 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="io.choerodon.agile.infra.mapper.StatusLinkageExecutionLogMapper">
     <delete id="deleteByIssueId">
-        delete * from fd_status_linkage_execution_log
+        delete
+        from fd_status_linkage_execution_log
         where project_id = #{projectId}
         and organization_id = #{organizationId}
         and (pre_issue_id = #{issueId} or cur_issue_id = #{issueId})
