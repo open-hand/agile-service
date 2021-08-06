@@ -421,7 +421,7 @@ const Linkage = ({
                         />
                       </Col>
                     </Row>
-                    <Row style={{ marginTop: 8 }}>
+                    <Row style={{ marginTop: -13 }}>
                       <Col span={24}>
                         <CheckBox name={triggeredName}>
                           {`允许其他联动配置触发${selectedTypeName}状态变更到${record.get('name')}时，执行此状态联动。`}
