@@ -33,6 +33,7 @@ const Context = React.createContext({
 export function useLoading() {
   return useContext(Context);
 }
+export { Context as LoadingContext };
 /**
  * 父级Loading 提供者，管理内部所有的子Loading 目前全局Loading使用的是吐泡泡Loading
  * 初始化时，所有子Loading状态会直接传递给父级
