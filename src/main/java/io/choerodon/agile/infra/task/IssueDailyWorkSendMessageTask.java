@@ -321,14 +321,14 @@ public class IssueDailyWorkSendMessageTask {
             builder
                     .append(TD_TAG).append("<span style=\"padding-left: 25px; display: inline-block;\">")
                     .append(getIssueTypeName(issue))
-                    .append("<a href=\"").append(url).append("\" target=\"_blank\">")
+                    .append("<a href=\"").append(url).append("\" target=\"_blank\" style=\" text-decoration: none; color: #5365EA\">")
                     .append(issue.getSummary()).append("</a>")
                     .append(getDelayDays(localDateTime, issue.getEstimatedEndTime())).append(BACKSLASH_SPAN).append(BACKSLASH_TD);
         } else {
             builder
                     .append(TD_TAG)
                     .append(getIssueTypeName(issue))
-                    .append("<a href=\"").append(url).append("\" target=\"_blank\">")
+                    .append("<a href=\"").append(url).append("\" target=\"_blank\" style=\" text-decoration: none; color: #5365EA\">")
                     .append(issue.getSummary()).append("</a>")
                     .append(getDelayDays(localDateTime, issue.getEstimatedEndTime())).append(BACKSLASH_TD);
         }
