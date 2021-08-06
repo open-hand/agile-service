@@ -79,7 +79,7 @@ const BaseInfo: React.FC = () => {
         <TextField name="title" placeholder="请输入报告主题，例如：XXX冲刺项目汇报" />
         <TextArea
           name="description"
-        // @ts-ignore
+          // @ts-ignore
           resize="vertical"
           placeholder="请输入报告描述，报告的进一步说明，相当于报告的摘要信息"
         />

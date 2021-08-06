@@ -2,6 +2,7 @@ import React, {
   useMemo, forwardRef, useRef,
 } from 'react';
 import { toJS } from 'mobx';
+import { useCreation } from 'ahooks';
 import { Select, DataSet } from 'choerodon-ui/pro';
 import { unionBy, castArray, uniq } from 'lodash';
 import { userApi } from '@/api';
@@ -33,7 +34,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
   selectedUser, extraOptions, dataRef, request, level = 'project', afterLoad, selected, flat, projectId, optionRenderer, ...otherProps
 }, ref: React.Ref<Select>) => {
   const selectDataRef = useRef<DataSet>();
-
+  const selectedUserLoadedIds = useCreation(() => toArray(selectedUser).map((i) => i.id), [selectedUser]); // 已经存在的用户查询接口会过滤，避免第二页恰好全是选中的数据，但页面无反应
   const selectedUserIds = useMemo(() => {
     const ids: string[] | string | undefined = toJS(selected);
     // 避免value是对象的情况
@@ -41,6 +42,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     return uniq(castArray(ids).concat(valueArray).filter((i) => i && i !== '0'));
   }, [JSON.stringify(selected), JSON.stringify(otherProps.value)]);
   const idsRef = useRef(selectedUserIds);
+
   const args = useMemo(() => {
     if (selectDataRef.current && selectedUserIds) {
       // 有新的未加载的值，就重新加载，以区分用户选择和自动选择（比如选中了个人筛选）
@@ -49,8 +51,8 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
         idsRef.current = selectedUserIds;
       }
     }
-    return { selectedUserIds: idsRef.current };
-  }, [selectedUserIds]);
+    return { selectedUserIds: idsRef.current, queryFilterIds: uniq([...idsRef.current, ...selectedUserLoadedIds]) };
+  }, [selectedUserLoadedIds, selectedUserIds]);
   const config = useMemo((): SelectConfig<User> => ({
     name: 'user',
     textField: 'realName',
@@ -58,7 +60,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     requestArgs: args,
     request: request || (async ({ filter, page, requestArgs }) => {
       const res = await (level === 'project'
-        ? userApi.project(projectId).getProjectUsers(filter, page, requestArgs?.selectedUserIds, undefined, projectId)
+        ? userApi.project(projectId).getProjectUsers(filter, page, requestArgs?.selectedUserIds, requestArgs?.queryFilterIds, undefined, projectId)
         : userApi.project(projectId).getOrgUsers(filter, page, requestArgs?.selectedUserIds, undefined));
       res.list = res.list.filter((user: User) => user.enabled);
       return res;

@@ -188,7 +188,7 @@ const TableColumnCheckBoxes: React.FC<Props> = ({
         filter && !filteredOptions.length ? (
           <div style={{ color: 'var(--text-color3)' }}>暂无搜索结果</div>
         ) : (
-          <SelectBox name={name} onChange={handleChange}>
+          <SelectBox name={name} onChange={handleChange} style={{ marginTop: -2 }}>
             {filteredOptions.map((option) => <SelectBox.Option value={option.value} {...option.optionConfig}>{renderOptionLabel(option.label)}</SelectBox.Option>)}
           </SelectBox>
         )
