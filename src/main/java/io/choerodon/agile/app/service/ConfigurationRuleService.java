@@ -1,6 +1,6 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.api.vo.ConfigurationRuleVO;
+import io.choerodon.agile.api.vo.business.ConfigurationRuleVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.UserTypeToReceiverParamDTO;
 import io.choerodon.core.domain.Page;
@@ -38,10 +38,10 @@ public interface ConfigurationRuleService {
 
     /**
      * 获取ruleList对应的接收人和抄送人
-     * @param ruleIdList ruleIdList
+     * @param ruleIds ruleIds
      * @return map
      */
-    Map<Long, ConfigurationRuleVO> selectRuleALLReceiver(List<Long> ruleIdList);
+    Map<Long, ConfigurationRuleVO> selectRuleSettingsById(List<Long> ruleIds, Long projectId);
     
     void changeRuleEnabled(Long projectId, Long ruleId, boolean enabled);
 
