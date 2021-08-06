@@ -1,8 +1,9 @@
-package io.choerodon.agile.api.vo;
+package io.choerodon.agile.api.vo.business;
 
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.choerodon.agile.api.vo.RuleExpressVO;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;

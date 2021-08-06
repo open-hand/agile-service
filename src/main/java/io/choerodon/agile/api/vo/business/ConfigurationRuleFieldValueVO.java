@@ -1,4 +1,4 @@
-package io.choerodon.agile.api.vo;
+package io.choerodon.agile.api.vo.business;
 
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
