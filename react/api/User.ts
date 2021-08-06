@@ -83,7 +83,7 @@ class UserApi extends Api<UserApi> {
     });
   }
 
-  async getProjectUsers(param?: string, page?: number, userIds?: string[], size?: number, projectId?: string): Promise<{
+  async getProjectUsers(param?: string, page?: number, userIds?: string[], queryFilterIds?: string[], size?: number, projectId?: string): Promise<{
     list: User[]
     hasNextPage: boolean
     number: number
@@ -96,7 +96,7 @@ class UserApi extends Api<UserApi> {
         page: page || 1,
         size: size ?? 20,
       },
-      data: userIds ?? [],
+      data: queryFilterIds ?? [],
     }), {
       page: page || 1,
       userIds,
