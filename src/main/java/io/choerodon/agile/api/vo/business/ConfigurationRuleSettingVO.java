@@ -2,6 +2,8 @@ package io.choerodon.agile.api.vo.business;
 
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import java.util.Set;
+
 /**
  * @author superlee
  * @since 2021-08-02
@@ -15,7 +17,7 @@ public class ConfigurationRuleSettingVO {
     private String target;
 
     @Encrypt
-    private Long linkTypeId;
+    private Set<Long> linkTypeIds;
 
     private String action;
 
@@ -63,12 +65,12 @@ public class ConfigurationRuleSettingVO {
         this.target = target;
     }
 
-    public Long getLinkTypeId() {
-        return linkTypeId;
+    public Set<Long> getLinkTypeIds() {
+        return linkTypeIds;
     }
 
-    public void setLinkTypeId(Long linkTypeId) {
-        this.linkTypeId = linkTypeId;
+    public void setLinkTypeIds(Set<Long> linkTypeIds) {
+        this.linkTypeIds = linkTypeIds;
     }
 
     public String getAction() {
