@@ -15,6 +15,8 @@ public class InfluenceIssueVO {
 
     private Long linkSettingId;
 
+    private Boolean childrenTriggered;
+
     private List<InfluenceIssueVO> childrenVO;
 
     public Long getIssueId() {
@@ -55,5 +57,13 @@ public class InfluenceIssueVO {
 
     public void setLinkSettingId(Long linkSettingId) {
         this.linkSettingId = linkSettingId;
+    }
+
+    public Boolean getChildrenTriggered() {
+        return childrenTriggered;
+    }
+
+    public void setChildrenTriggered(Boolean childrenTriggered) {
+        this.childrenTriggered = childrenTriggered;
     }
 }

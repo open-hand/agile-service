@@ -1090,8 +1090,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Boolean transformFlag = executionUpdateInfluenceIssue(issue, statusId, influenceIssue, projectId, applyType, influenceIssueVO);
         // 记录联动的执行日志
         if (!ObjectUtils.isEmpty(influenceIssueVO.getLinkSettingId())) {
-
-            LinkIssueStatusLinkageVO linkIssueStatusLinkageVO = isSub ? statusLinkageService.queryById(projectId, influenceIssueVO.getLinkSettingId()) : linkIssueStatusMap.getOrDefault(influenceIssueVO.getLinkSettingId(), null);
+            LinkIssueStatusLinkageVO linkIssueStatusLinkageVO = isSub && Boolean.TRUE.equals(influenceIssueVO.getChildrenTriggered()) ? statusLinkageService.queryById(projectId, influenceIssueVO.getLinkSettingId()) : linkIssueStatusMap.getOrDefault(influenceIssueVO.getLinkSettingId(), null);
             if (ObjectUtils.isEmpty(linkIssueStatusLinkageVO)) {
                 throw new CommonException("error.link.issue.status.linkage.empty");
             }
