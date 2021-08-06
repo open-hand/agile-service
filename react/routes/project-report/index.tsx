@@ -7,7 +7,6 @@ const ReportList = React.lazy(() => import('./report-list'));
 const CreateReport = React.lazy(() => import('./report-create'));
 const EditReport = React.lazy(() => import('./report-edit'));
 const PreviewReport = React.lazy(() => import('./report-preview'));
-const ExportReport = React.lazy(() => import('./report-export'));
 
 const ProjectReport: React.FC<RouteChildrenProps> = ({ match }) => (
   <Switch>
@@ -15,7 +14,6 @@ const ProjectReport: React.FC<RouteChildrenProps> = ({ match }) => (
     <Route exact path={`${match?.url}/create`} component={CreateReport} />
     <Route exact path={`${match?.url}/edit/:id`} component={EditReport} />
     <Route exact path={`${match?.url}/preview/:id`} component={PreviewReport} />
-    <Route exact path={`${match?.url}/export/:id`} component={ExportReport} />
     <Route path="*" component={nomatch} />
   </Switch>
 );
