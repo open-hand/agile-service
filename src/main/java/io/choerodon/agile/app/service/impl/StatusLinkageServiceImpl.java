@@ -281,6 +281,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
             influenceIssue.setStatusId(changeStatus);
             influenceIssue.setLoop(false);
             influenceIssue.setLinkSettingId(statusLinkageDTO.getId());
+            influenceIssue.setChildrenTriggered(true);
             if(statusIds.contains(changeStatus)){
                 allInfluenceMap.put(0L, new ArrayList<>());
                 influenceIssue.setLoop(true);
