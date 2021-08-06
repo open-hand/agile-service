@@ -1,4 +1,3 @@
-
 .c7n-agile-user-tag {
   &-text {
     line-height: normal;
@@ -21,15 +20,14 @@
       border: 2px solid white;
     }
   }
-  &-tooltip {
 
-    :global {
-      .c7n-pro-tooltip-popup-inner {
-        max-height: 3rem;
-        overflow-y: scroll;
-      }
+  &-tooltip {
+    &-content {
+      max-height: 3rem;
+      overflow-y: auto;
     }
   }
+
   &-no-user {
     display: none;
   }
