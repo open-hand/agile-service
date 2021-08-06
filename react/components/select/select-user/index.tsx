@@ -4,7 +4,9 @@ import React, {
 import { toJS } from 'mobx';
 import { useCreation } from 'ahooks';
 import { Select, DataSet } from 'choerodon-ui/pro';
-import { unionBy, castArray, uniq } from 'lodash';
+import {
+  unionBy, castArray, uniq, isEmpty,
+} from 'lodash';
 import { userApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import type { User } from '@/common/types';
@@ -34,7 +36,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
   selectedUser, extraOptions, dataRef, request, level = 'project', afterLoad, selected, flat, projectId, optionRenderer, ...otherProps
 }, ref: React.Ref<Select>) => {
   const selectDataRef = useRef<DataSet>();
-  const selectedUserLoadedIds = useCreation(() => toArray(selectedUser).map((i) => i.id), [selectedUser]); // 已经存在的用户查询接口会过滤，避免第二页恰好全是选中的数据，但页面无反应
+  const selectedUserLoadedIds = useCreation(() => toArray(selectedUser)?.filter((i) => i && typeof (i) === 'object' && i.id).map((i) => i.id), [selectedUser]); // 已经存在的用户查询接口会过滤，避免第二页恰好全是选中的数据，但页面无反应
   const selectedUserIds = useMemo(() => {
     const ids: string[] | string | undefined = toJS(selected);
     // 避免value是对象的情况
