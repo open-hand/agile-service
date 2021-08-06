@@ -35,7 +35,7 @@ public class StatusLinkageExecutionLogController {
     @PostMapping("/list")
     public ResponseEntity<Page<StatusLinkageExecutionLogVO>> pageExecutionLogS(@ApiParam(value = "项目id", required = true)
                                                                                @PathVariable(name = "project_id") Long projectId,
-                                                                               @SortDefault(value = "creationDate", direction = Sort.Direction.DESC)
+                                                                               @SortDefault(value = "id", direction = Sort.Direction.DESC)
                                                                                PageRequest pageRequest,
                                                                                @RequestBody ExecutionLogQueryVO executionLogQueryVO) {
         return Optional.ofNullable(statusLinkageExecutionLogService.pageExecutionLogS(projectId, pageRequest, executionLogQueryVO))
