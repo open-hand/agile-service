@@ -38,10 +38,10 @@ public interface ConfigurationRuleService {
 
     /**
      * 获取ruleList对应的接收人和抄送人
-     * @param ruleIdList ruleIdList
+     * @param ruleIds ruleIds
      * @return map
      */
-    Map<Long, ConfigurationRuleVO> selectRuleALLReceiver(List<Long> ruleIdList);
+    Map<Long, ConfigurationRuleVO> selectRuleSettingsById(List<Long> ruleIds, Long projectId);
     
     void changeRuleEnabled(Long projectId, Long ruleId, boolean enabled);
 

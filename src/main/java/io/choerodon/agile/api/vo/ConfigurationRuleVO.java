@@ -3,7 +3,6 @@ package io.choerodon.agile.api.vo;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -23,16 +22,8 @@ public class ConfigurationRuleVO extends AuditDomain {
     private String name;
     private Boolean enabled;
     private String source;
-    @ApiModelProperty("用户类型")
-    private List<String> userTypes;
     @ApiModelProperty("快速搜索创建传值")
     private List<RuleExpressVO> expressList;
-    @ApiModelProperty("通知对象")
-    private List<UserDTO> receiverList;
-    @ApiModelProperty("抄送人")
-    private List<UserDTO> ccList;
-    @ApiModelProperty("经办人")
-    private List<UserDTO> processerList;
     private Integer sequence;
     @Encrypt
     private List<Long> issueTypeIds;
@@ -41,46 +32,44 @@ public class ConfigurationRuleVO extends AuditDomain {
 
     private String issueTypeNames;
 
-    @Encrypt
-    private List<Long> receiverRoleIds;
+    private List<ConfigurationRuleCommentVO> configurationRuleComments;
 
-    @Encrypt
-    private List<Long> memberFieldIds;
+    private List<ConfigurationRuleUpdateIssueVO> configurationRuleUpdateIssue;
 
-    private List<String> receiverRoleNames;
+    private List<ConfigurationRuleNoticeVO> configurationRuleNotices;
 
-    private List<String> memberFieldNames;
+    private Boolean triggered;
 
-    public List<String> getReceiverRoleNames() {
-        return receiverRoleNames;
+    public List<ConfigurationRuleCommentVO> getConfigurationRuleComments() {
+        return configurationRuleComments;
     }
 
-    public void setReceiverRoleNames(List<String> receiverRoleNames) {
-        this.receiverRoleNames = receiverRoleNames;
+    public void setConfigurationRuleComments(List<ConfigurationRuleCommentVO> configurationRuleComments) {
+        this.configurationRuleComments = configurationRuleComments;
     }
 
-    public List<String> getMemberFieldNames() {
-        return memberFieldNames;
+    public List<ConfigurationRuleNoticeVO> getConfigurationRuleNotices() {
+        return configurationRuleNotices;
     }
 
-    public void setMemberFieldNames(List<String> memberFieldNames) {
-        this.memberFieldNames = memberFieldNames;
+    public void setConfigurationRuleNotices(List<ConfigurationRuleNoticeVO> configurationRuleNotices) {
+        this.configurationRuleNotices = configurationRuleNotices;
     }
 
-    public List<Long> getReceiverRoleIds() {
-        return receiverRoleIds;
+    public List<ConfigurationRuleUpdateIssueVO> getConfigurationRuleUpdateIssue() {
+        return configurationRuleUpdateIssue;
     }
 
-    public void setReceiverRoleIds(List<Long> receiverRoleIds) {
-        this.receiverRoleIds = receiverRoleIds;
+    public void setConfigurationRuleUpdateIssue(List<ConfigurationRuleUpdateIssueVO> configurationRuleUpdateIssue) {
+        this.configurationRuleUpdateIssue = configurationRuleUpdateIssue;
     }
 
-    public List<Long> getMemberFieldIds() {
-        return memberFieldIds;
+    public Boolean getTriggered() {
+        return triggered;
     }
 
-    public void setMemberFieldIds(List<Long> memberFieldIds) {
-        this.memberFieldIds = memberFieldIds;
+    public void setTriggered(Boolean triggered) {
+        this.triggered = triggered;
     }
 
     public Long getIssueTypeId() {
@@ -123,28 +112,12 @@ public class ConfigurationRuleVO extends AuditDomain {
         this.source = source;
     }
 
-    public List<String> getUserTypes() {
-        return userTypes;
-    }
-
-    public void setUserTypes(List<String> userTypes) {
-        this.userTypes = userTypes;
-    }
-
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public List<UserDTO> getProcesserList() {
-        return processerList;
-    }
-
-    public void setProcesserList(List<UserDTO> processerList) {
-        this.processerList = processerList;
     }
 
     public Boolean getEnabled() {
@@ -155,21 +128,6 @@ public class ConfigurationRuleVO extends AuditDomain {
         this.enabled = enabled;
     }
 
-    public List<UserDTO> getReceiverList() {
-        return receiverList;
-    }
-
-    public void setReceiverList(List<UserDTO> receiverList) {
-        this.receiverList = receiverList;
-    }
-
-    public List<UserDTO> getCcList() {
-        return ccList;
-    }
-
-    public void setCcList(List<UserDTO> ccList) {
-        this.ccList = ccList;
-    }
 
     public List<RuleExpressVO> getExpressList() {
         return expressList;
