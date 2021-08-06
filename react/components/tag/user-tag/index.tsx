@@ -74,7 +74,7 @@ const UserTag: React.FC<Props> = ({
           popupCls={`${prefixCls}-tooltip`}
           theme="light"
           title={(
-            <div>
+            <div className={`${prefixCls}-tooltip-content`}>
               {data.slice(maxTagCount).map((item) => (
                 <div key={item.realName} style={{ marginBottom: 5 }}>
                   <UserUniqueTag
