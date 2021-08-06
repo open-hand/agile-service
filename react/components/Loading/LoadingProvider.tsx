@@ -1,5 +1,6 @@
 import React, {
   useCallback, useContext, useEffect, useImperativeHandle,
+  useMemo, useState,
 } from 'react';
 import {
   noop, merge, cloneDeep,
@@ -9,7 +10,7 @@ import {
 } from 'ahooks';
 import Loading from './LoadingChildren';
 import {
-  ILoadingRegisterChildrenData, ILoadingChangeExtraConfig, ILoadingChangeItem, ILoadingChildren,
+  ILoadingRegisterChildrenData, ILoadingChangeExtraConfig, ILoadingChangeItem, ILoadingChildren, ILoadingChangeStatus,
 } from './type';
 import { filterSelfLoading } from './utils';
 
@@ -21,6 +22,7 @@ interface ILoadingProviderProps {
 }
 interface ContextProps {
   loading: boolean
+  childrenLoadMap: Map<string, ILoadingChildren>
   change: (key: string, loading: boolean, extraConfig?: ILoadingChangeExtraConfig) => void /** 改变loading  父级Loading每次变更为true时会关闭所有子Loading 并重置 */
   registerChildren: (data: ILoadingRegisterChildrenData) => void /** 注册子loading */
   cancelRegisterChildren: (loadId: string) => void /**  取消注册子loading */
@@ -28,7 +30,7 @@ interface ContextProps {
 
 }
 const Context = React.createContext({
-  loading: false, isHasProvider: false, cancelRegisterChildren: noop, registerChildren: noop, change: noop,
+  loading: false, isHasProvider: false, cancelRegisterChildren: noop, registerChildren: noop, change: noop, childrenLoadMap: new Map(),
 } as ContextProps);
 export function useLoading() {
   return useContext(Context);
@@ -47,6 +49,7 @@ const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
   }] = useMap<string, ILoadingChangeItem>();
   const [globalLoading, setGlobalLoading] = useSafeState(false);
   // con3st
+  const [childrenLoadingStatus, setChildrenLoadingStatus] = useState<Map<string, ILoadingChildren>>(new Map());
   const childrenLoadMap = useCreation(() => new Map<string, ILoadingChildren>(), []);// 最新数据
   const globalLoadId = useCreation(() => props.loadId || 'parent-provider', []);
   const handleChangeGlobal = useCallback((newLoading: boolean) => {
@@ -87,15 +90,17 @@ const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
       const selfLoadingStatusIds = selfLoadingStatus.map((i) => i.loadId);
       const globalDoingStatus = statusStack.filter((i) => i.status === 'doing').filter((i) => !selfLoadingStatusIds.includes(i.loadId));
       console.log('self,children,globalDoing', selfLoadingStatus, cloneDeep([...childrenLoadMap.values()]), globalDoingStatus);
-
+      const newChildrenLoadStatus = [] as any[];
       // 进行子Loading属性配置更新
       statusStack.forEach((item) => {
         // 未注册的子Loading不进行属性更新
         if (childrenLoadMap.has(item.loadId)) {
           const childrenLoadValue = merge(childrenLoadMap.get(item.loadId), item);
           childrenLoadMap.set(item.loadId, childrenLoadValue);
+          newChildrenLoadStatus.push({ loadId: item.loadId, status: childrenLoadValue.status });
         }
       });
+      setChildrenLoadingStatus(childrenLoadMap);
       // 如果有全局更新   则不允许其余子Loading出现
       if (globalDoingStatus.length > 0) {
         setGlobalLoading(true);
@@ -131,6 +136,7 @@ const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
   useImperativeHandle(props.ref, () => ({
     loading: globalLoading,
     isHasProvider: true,
+    childrenLoadMap: childrenLoadingStatus,
     registerChildren: handleRegister,
     cancelRegisterChildren: handleCancelResigner,
     change: handleChange,
@@ -139,6 +145,7 @@ const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
     <Context.Provider value={{
       loading: globalLoading,
       isHasProvider: true,
+      childrenLoadMap,
       registerChildren: handleRegister,
       cancelRegisterChildren: handleCancelResigner,
       change: handleChange,
@@ -153,9 +160,19 @@ const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
 /**
  * loading进行中隐藏节点
  */
-export const LoadingHiddenWrap: React.FC = ({ children }) => {
-  const { loading } = useLoading();
-  if (loading) {
+export const LoadingHiddenWrap: React.FC<{ loadIds?: string[] }> = ({ children, loadIds }) => {
+  const { loading, childrenLoadMap } = useLoading();
+  const isHidden = useMemo(() => {
+    if (loading) {
+      return true;
+    }
+    if (loadIds?.length) {
+      console.log('.....', loadIds.map((i) => childrenLoadMap.get(i)?.status));
+      return !!loadIds.map((i) => childrenLoadMap.get(i)?.status === 'doing').filter(Boolean).length;
+    }
+    return false;
+  }, [childrenLoadMap, loadIds, loading]);
+  if (isHidden) {
     return (
       <span style={{ visibility: 'hidden' }}>
         {children}
