@@ -1154,8 +1154,6 @@ class BacklogStore {
   }
 
   onDragEnd = (result) => {
-    console.log(result);
-    return;
     this.setIsDragging(null);
     const { destination, source, draggableId } = result;
     if (destination) {
