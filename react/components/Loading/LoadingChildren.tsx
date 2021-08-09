@@ -49,7 +49,14 @@ const Loading: React.FC<ILoadingProps> = ({
     }
   }, [change, isHasProvider, loadId, noDeliverLoading, propsLoading]);
   return (
-    <AnimationLoading loading={!!loading} className={classNames({ [`${prefixCls}-global`]: globalLoading }, propsClassName)} {...otherProps}>
+    <AnimationLoading
+      loading={!!loading}
+      className={classNames({
+        [`${prefixCls}-global-loading`]: globalLoading && loading,
+        // [`${prefixCls}-global-loaded`]: !globalLoading,
+      }, propsClassName)}
+      {...otherProps}
+    >
       {children}
     </AnimationLoading>
   );

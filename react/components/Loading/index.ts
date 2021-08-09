@@ -1,6 +1,7 @@
 import OldLoading from './Loading';
 import Loading from './LoadingChildren';
-import LoadingProvider, { useLoading, LoadingHiddenWrap, LoadingContext } from './LoadingProvider';
+import LoadingProvider, { useLoading, LoadingContext } from './LoadingProvider';
+import LoadingHiddenWrap from './LoadingHiddenWrap';
 
 export {
   useLoading, LoadingHiddenWrap, OldLoading, LoadingProvider, LoadingContext,

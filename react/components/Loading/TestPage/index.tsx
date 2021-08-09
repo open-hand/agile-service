@@ -6,15 +6,19 @@ import {
 import { HeaderButtons } from '@choerodon/master';
 import { Table, Button } from 'choerodon-ui/pro';
 import AnimationLoading, { LoadingProvider, useLoading } from '@/components/Loading';
+import { LoadingHiddenWrap } from '..';
 
 const LeftChildren: React.FC = () => {
   const { change } = useLoading();
+  // useEffect(() => {
+  //   change('left', true, { allowSelfLoading: false });
+  //   setTimeout(() => {
+  //     change('left', false, { allowSelfLoading: false });
+  //   }, 1200);
+  // }, [change]);
   useEffect(() => {
-    change('left', true, { allowSelfLoading: false });
-    setTimeout(() => {
-      change('left', false, { allowSelfLoading: false });
-    }, 1200);
-  }, [change]);
+    console.log('leftChildren render....');
+  }, []);
   return (
     <div>
       <Button onClick={() => {
@@ -38,7 +42,7 @@ const RightChildren: React.FC = () => {
     change('right', true);
     setTimeout(() => {
       change('right', false);
-    }, 2000);
+    }, 8000);
   }, [change]);
   return (
     <div>
@@ -58,6 +62,7 @@ const RightChildren: React.FC = () => {
   );
 };
 const ReleaseHome: React.FC = () => {
+  const [glLoading, setGlLoading] = useState(false);
   const [data, setData] = useState<number[]>([]);
   const [leftData, setLeftData] = useState<number[]>([]);
   const [rightData, setRightData] = useState<number[]>([]);
@@ -85,6 +90,12 @@ const ReleaseHome: React.FC = () => {
   };
   //   const [noDeliver, setNoDeliver] = useState<string>([]);
   useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    setGlLoading(true);
+    setTimeout(() => {
+      setGlLoading(false);
+    }, 2500);
+  }, []);
   return (
     <Page>
       <Header title="测试页面">
@@ -126,7 +137,7 @@ const ReleaseHome: React.FC = () => {
       </Header>
       <Breadcrumb />
       <Content className="c7n-release-content">
-        <LoadingProvider globalSingle>
+        <LoadingProvider loading={glLoading} globalSingle>
           <div style={{ height: '500px', width: '100%' }}>
             <div style={{
               float: 'left', width: '50%', height: '100%', borderRight: '1px solid red', position: 'relative',
@@ -134,7 +145,9 @@ const ReleaseHome: React.FC = () => {
             >
               <AnimationLoading loadId="left" allowSelfLoading>
                 <div>
-                  <LeftChildren />
+                  <LoadingHiddenWrap>
+                    <LeftChildren />
+                  </LoadingHiddenWrap>
                   左边
                   {leftData.map((i) => <span>{`left-${i}`}</span>)}
                 </div>
@@ -148,7 +161,7 @@ const ReleaseHome: React.FC = () => {
               <AnimationLoading loadId="right">
 
                 右边
-                <RightChildren />
+                {/* <RightChildren /> */}
                 {rightData.map((i) => <span>{`right-${i}`}</span>)}
               </AnimationLoading>
             </div>
