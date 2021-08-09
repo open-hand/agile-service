@@ -1,5 +1,5 @@
 import {
-  useUpdateEffect, usePersistFn, useMount,
+  useUpdateEffect, usePersistFn, useMount, useLockFn,
 } from 'ahooks';
 import {
   intersection, get, uniq, find,
@@ -87,7 +87,7 @@ export default function useTable(getData: TableRequest, options: Options) {
       setCheckValues(checkValues.filter((key) => !find(data, { [rowKey]: key })));
     }
   });
-  const query = usePersistFn(async (newPage?: number) => {
+  const query = useLockFn(async (newPage?: number) => {
     setLoading(true);
     const res = await getData({
       page: newPage ?? 1,
