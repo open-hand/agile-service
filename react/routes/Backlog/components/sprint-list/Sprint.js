@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Droppable, Draggable } from 'react-beautiful-dnd';
+import { Droppable } from 'react-beautiful-dnd';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import IssueList from './IssueList';
 import SprintHeader from './SprintHeader';
@@ -10,21 +10,18 @@ function Sprint({ data, openCreateIssueModal }) {
   const issueList = BacklogStore.getIssueListBySprintId(sprintId);
   return (
     <div style={{ width: '100%' }}>
-      <Droppable droppableId={`${sprintId}Trash`}>
+      {/* <Droppable droppableId={`${sprintId}Trash`}>
         {(provided, snapshot) => (
           <div
             ref={provided.innerRef}
             style={{
-              border: snapshot.isDraggingOver ? '1px solid red' : '1px solid green',
+              border: snapshot.isDraggingOver ? '1px solid green' : 'none',
             }}
-          >
-            {/* <FontIcon className="material-icons" style={styles.trashIcon}> */}
-            {snapshot.isDraggingOver ? 'delete_forever' : 'delete'}
-            {/* </FontIcon> */}
-            <SprintHeader data={data} />
-          </div>
+          > */}
+      <SprintHeader data={data} />
+      {/* </div>
         )}
-      </Droppable>
+      </Droppable> */}
 
       {expand && (
         <>
