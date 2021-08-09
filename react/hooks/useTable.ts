@@ -1,3 +1,4 @@
+import takeLast from '@/utils/takeLast';
 import {
   useUpdateEffect, usePersistFn, useMount, useLockFn,
 } from 'ahooks';
@@ -87,20 +88,25 @@ export default function useTable(getData: TableRequest, options: Options) {
       setCheckValues(checkValues.filter((key) => !find(data, { [rowKey]: key })));
     }
   });
-  const query = useLockFn(async (newPage?: number) => {
+  const request = useMemo(() => takeLast(getData), [getData]);
+  const query = usePersistFn(async (newPage?: number) => {
     setLoading(true);
-    const res = await getData({
-      page: newPage ?? 1,
-      size: pageSize,
-      sort: sort.sortColumn && sort.sortType ? `${sort.sortColumn},${sort.sortType}` : undefined,
-      isTree,
-    });
-    batchedUpdates(() => {
-      setData(res.list);
-      setTotal(res.total);
-      setCurrent(res.number + 1);
-      setLoading(false);
-    });
+    try {
+      const res = await request({
+        page: newPage ?? 1,
+        size: pageSize,
+        sort: sort.sortColumn && sort.sortType ? `${sort.sortColumn},${sort.sortType}` : undefined,
+        isTree,
+      });
+      batchedUpdates(() => {
+        setData(res.list);
+        setTotal(res.total);
+        setCurrent(res.number + 1);
+        setLoading(false);
+      });
+    } catch (error) {
+      //
+    }
   });
 
   useMount(() => {
