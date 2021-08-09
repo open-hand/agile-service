@@ -60,13 +60,29 @@ public class IssueDailyWorkSendMessageTask {
             "border-radius: 2px; " +
             "padding: 1px 3px; " +
             "white-space:nowrap;\">";
+    private static final String STYLE_ARROW_DROP_DOWN = "<span>" +
+            "<style type=\"text/css\">" +
+            "   .arrow_drop_down {" +
+            "       width: 0px;" +
+            "       height: 0px;" +
+            "       border-top: 4px solid black;" +
+            "       border-left: 4px solid transparent;" +
+            "       border-right: 4px solid transparent;" +
+            "       }" +
+            "     </style>";
+    private static final String DIV_ARROW_DROP_DOWN = "<div style=\"" +
+            "margin-top: 10px !important;" +
+            "margin-left: 40% !important;\"" +
+            "class=\"arrow_drop_down\">" +
+            "</div>";
     private static final String TABLE_TAG = "<table style=\"" +
             "width: 100%;" +
             "font-size: 10px;" +
             "table-layout: fixed;" +
             "border-collapse: collapse;" +
             "border-spacing: 0;" +
-            "empty-cells: show;\">";
+            "empty-cells: show;\">" +
+            STYLE_ARROW_DROP_DOWN;
     private static final String TABLE_HEAD = "<thead style=\"background-color: #F3F6FE;color: #000;text-align: left;vertical-align: bottom;\">" +
             "<tr style = \"height: 30px;\">" +
             "<th style=\"word-break: break-all;color: #0F1358;border-width: 0 0 0 1px;font-size: 13px;line-height: 20px;margin: 0;overflow: visible;padding: 5px 5px;\" width=\"3%\"></th>" +
@@ -80,11 +96,12 @@ public class IssueDailyWorkSendMessageTask {
             "word-break: break-all;" +
             "padding-top: 8px;" +
             "padding-bottom: 8px;" +
+            "padding-left: 5px;" +
             "border-width: 0 0 0 1px;" +
             "font-size: 13px;" +
             "margin: 0;" +
             "overflow: visible;\">";
-    private static final String TD_SVG_ARROW_DROP_DOWN = "<td style=\"" +
+    private static final String TD_ARROW_DROP_DOWN = "<td style=\"" +
             "word-break: break-all;" +
             "padding-top: 8px;" +
             "padding-right: 3px;" +
@@ -92,11 +109,7 @@ public class IssueDailyWorkSendMessageTask {
             "border-width: 0 0 0 1px;" +
             "font-size: 13px;" +
             "margin: 0;" +
-            "overflow: visible;\">" +
-            "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"15\" height=\"15\" viewBox=\"-2 -3 26 26\">\n" +
-            "<title>arrow_drop_down</title>\n" +
-            "<path d=\"M6.984 9.984h10.031l-5.016 5.016z\"></path>\n" +
-            "</svg>\n";
+            "overflow: visible;\">";
 
     private static final String TODO_COLOR = "#FFB100";
     private static final String DOING_COLOR = "#4D90FE";
@@ -330,7 +343,7 @@ public class IssueDailyWorkSendMessageTask {
             builder.append(TR_TAG_DOUBLE);
         }
         if (!isChild && !CollectionUtils.isEmpty(issue.getChildIssues())) {
-            builder.append(TD_SVG_ARROW_DROP_DOWN).append(BACKSLASH_TD);
+            builder.append(TD_ARROW_DROP_DOWN).append(DIV_ARROW_DROP_DOWN).append(BACKSLASH_TD);
         }else {
             builder.append(TD_TAG).append(BACKSLASH_TD);
         }
