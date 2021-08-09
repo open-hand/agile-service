@@ -1007,6 +1007,7 @@ class BacklogStore {
   @action expandSprint(sprintId, expand) {
     const sprint = find(this.sprintData, { sprintId });
     sprint.expand = expand;
+    localPageCacheStore.setItem('backlogSprintExpand', this.getExpandSprint);
     if (expand && !sprint.loaded) {
       this.refreshSprint(sprintId);
     }
