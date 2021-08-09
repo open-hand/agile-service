@@ -1,6 +1,6 @@
 import React, {
   useCallback, useContext, useEffect, useImperativeHandle,
-  useMemo, useState,
+  useState,
 } from 'react';
 import {
   noop, merge, cloneDeep,
@@ -10,14 +10,17 @@ import {
 } from 'ahooks';
 import Loading from './LoadingChildren';
 import {
-  ILoadingRegisterChildrenData, ILoadingChangeExtraConfig, ILoadingChangeItem, ILoadingChildren, ILoadingChangeStatus,
+  ILoadingRegisterChildrenData, ILoadingChangeExtraConfig, ILoadingChangeItem, ILoadingChildren, IAnimationLoadingProps,
 } from './type';
 import { filterSelfLoading } from './utils';
 
-interface ILoadingProviderProps {
-  loadId?: string /** 全局加载Loading 唯一id  默认为 parent-provider */
-  loading?: boolean /** 全局loading状态 */
-  globalSingle?: boolean /** 启用全局单loading  @default 'true' 未对此配置进行处理 */
+interface ILoadingProviderProps extends IAnimationLoadingProps {
+  /** 全局加载Loading 唯一id  默认为 parent-provider */
+  loadId?: string
+  /** 全局loading状态 */
+  loading?: boolean
+  /** 启用全局单loading  @default 'true' 未对此配置进行处理 */
+  globalSingle?: boolean
   ref?: React.Ref<ContextProps>
 }
 interface ContextProps {
@@ -52,6 +55,7 @@ const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
   const [childrenLoadingStatus, setChildrenLoadingStatus] = useState<Map<string, ILoadingChildren>>(new Map());
   const childrenLoadMap = useCreation(() => new Map<string, ILoadingChildren>(), []);// 最新数据
   const globalLoadId = useCreation(() => props.loadId || 'parent-provider', []);
+  const loadingProps = useCreation(() => ({ className: props.className, style: props.style, loadingStyle: props.loadingStyle }), [props.style, props.className, props.loadingStyle]);
   const handleChangeGlobal = useCallback((newLoading: boolean) => {
     setGlobalLoading(() => {
       console.log('loading....setGlobalLoading', newLoading);
@@ -141,6 +145,7 @@ const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
     cancelRegisterChildren: handleCancelResigner,
     change: handleChange,
   }));
+
   return (
     <Context.Provider value={{
       loading: globalLoading,
@@ -151,35 +156,19 @@ const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
       change: handleChange,
     }}
     >
-      <Loading loading={globalLoading} loadId={globalLoadId} noDeliverLoading globalLoading style={{ display: globalLoading ? 'unset' : 'none' }} />
-      {props.children}
+      {/* <span style={{ visibility: 'hidden' }} /> */}
+      <Loading
+        loading={globalLoading}
+        loadId={globalLoadId}
+        noDeliverLoading
+        globalLoading
+        {...loadingProps}
+      >
+
+        {props.children}
+      </Loading>
     </Context.Provider>
   );
-};
-
-/**
- * loading进行中隐藏节点
- */
-export const LoadingHiddenWrap: React.FC<{ loadIds?: string[] }> = ({ children, loadIds }) => {
-  const { loading, childrenLoadMap } = useLoading();
-  const isHidden = useMemo(() => {
-    if (loading) {
-      return true;
-    }
-    if (loadIds?.length) {
-      console.log('.....', loadIds.map((i) => childrenLoadMap.get(i)?.status));
-      return !!loadIds.map((i) => childrenLoadMap.get(i)?.status === 'doing').filter(Boolean).length;
-    }
-    return false;
-  }, [childrenLoadMap, loadIds, loading]);
-  if (isHidden) {
-    return (
-      <span style={{ visibility: 'hidden' }}>
-        {children}
-      </span>
-    );
-  }
-  return children as any;
 };
 
 export default LoadingProvider;
