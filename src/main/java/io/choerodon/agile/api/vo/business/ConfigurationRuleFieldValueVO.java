@@ -4,6 +4,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * @author superlee
@@ -170,5 +171,28 @@ public class ConfigurationRuleFieldValueVO {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ConfigurationRuleFieldValueVO)) return false;
+        ConfigurationRuleFieldValueVO that = (ConfigurationRuleFieldValueVO) o;
+        return Objects.equals(getFieldType(), that.getFieldType()) &&
+                Objects.equals(getOperateType(), that.getOperateType()) &&
+                Objects.equals(getOptionId(), that.getOptionId()) &&
+                Objects.equals(getStringValue(), that.getStringValue()) &&
+                Objects.equals(getNumberValue(), that.getNumberValue()) &&
+                Objects.equals(getNumberAddValue(), that.getNumberAddValue()) &&
+                Objects.equals(getTextValue(), that.getTextValue()) &&
+                Objects.equals(getDateValue(), that.getDateValue()) &&
+                Objects.equals(getDateAddValue(), that.getDateAddValue()) &&
+                Objects.equals(getUserId(), that.getUserId()) &&
+                Objects.equals(getCustomFieldId(), that.getCustomFieldId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getFieldType(), getOperateType(), getOptionId(), getStringValue(), getNumberValue(), getNumberAddValue(), getTextValue(), getDateValue(), getDateAddValue(), getUserId(), getCustomFieldId());
     }
 }

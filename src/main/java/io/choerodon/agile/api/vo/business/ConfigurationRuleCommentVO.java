@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo.business;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.Objects;
 
 /**
  * @author superlee
@@ -17,5 +18,18 @@ public class ConfigurationRuleCommentVO extends ConfigurationRuleSettingVO {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ConfigurationRuleCommentVO)) return false;
+        ConfigurationRuleCommentVO that = (ConfigurationRuleCommentVO) o;
+        return Objects.equals(getComment(), that.getComment());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getComment());
     }
 }

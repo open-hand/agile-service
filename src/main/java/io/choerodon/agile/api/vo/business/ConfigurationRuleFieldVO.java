@@ -3,6 +3,7 @@ package io.choerodon.agile.api.vo.business;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author superlee
@@ -29,5 +30,19 @@ public class ConfigurationRuleFieldVO {
 
     public void setFieldValues(List<ConfigurationRuleFieldValueVO> fieldValues) {
         this.fieldValues = fieldValues;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ConfigurationRuleFieldVO)) return false;
+        ConfigurationRuleFieldVO that = (ConfigurationRuleFieldVO) o;
+        return Objects.equals(getFieldId(), that.getFieldId()) &&
+                Objects.equals(getFieldValues(), that.getFieldValues());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getFieldId(), getFieldValues());
     }
 }

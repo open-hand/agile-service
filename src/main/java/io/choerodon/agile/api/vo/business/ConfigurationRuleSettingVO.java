@@ -25,6 +25,16 @@ public class ConfigurationRuleSettingVO {
 
     private Long organizationId;
 
+    private Integer sequence;
+
+    public Integer getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(Integer sequence) {
+        this.sequence = sequence;
+    }
+
     public Long getId() {
         return id;
     }
