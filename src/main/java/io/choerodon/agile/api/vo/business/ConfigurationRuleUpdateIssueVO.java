@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo.business;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author superlee
@@ -16,5 +17,18 @@ public class ConfigurationRuleUpdateIssueVO extends ConfigurationRuleSettingVO {
 
     public void setFields(List<ConfigurationRuleFieldVO> fields) {
         this.fields = fields;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ConfigurationRuleUpdateIssueVO)) return false;
+        ConfigurationRuleUpdateIssueVO that = (ConfigurationRuleUpdateIssueVO) o;
+        return Objects.equals(getFields(), that.getFields());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getFields());
     }
 }

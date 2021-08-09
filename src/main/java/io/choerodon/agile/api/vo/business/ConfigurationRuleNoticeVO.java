@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -87,5 +88,22 @@ public class ConfigurationRuleNoticeVO extends ConfigurationRuleSettingVO {
 
     public void setReceiverList(List<UserDTO> receiverList) {
         this.receiverList = receiverList;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ConfigurationRuleNoticeVO)) return false;
+        ConfigurationRuleNoticeVO that = (ConfigurationRuleNoticeVO) o;
+        return Objects.equals(getReceiverRoleIds(), that.getReceiverRoleIds()) &&
+                Objects.equals(getMemberFieldIds(), that.getMemberFieldIds()) &&
+                Objects.equals(getCcUserIds(), that.getCcUserIds()) &&
+                Objects.equals(getReceiverUserIds(), that.getReceiverUserIds()) &&
+                Objects.equals(getReceiverTypes(), that.getReceiverTypes());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getReceiverRoleIds(), getMemberFieldIds(), getCcUserIds(), getReceiverUserIds(), getReceiverTypes());
     }
 }
