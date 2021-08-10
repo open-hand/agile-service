@@ -126,7 +126,6 @@ const RoleConfigModal: React.FC<{ modal?: IModalProps } & Props> = observer(({
         }
         const currentRoles = record.get(`${mainName}_Roles`).filter((item: any) => item !== 'specificUser')
           .map((item: any) => `role-${item}`);
-        console.log('currentRoles...', currentRoles);
         if (additionalName.includes('Users')) {
           record.set(mainName, [...currentRoles, ...value]);
         } else if (additionalName.includes('Roles')) {
@@ -149,8 +148,7 @@ const RoleConfigModal: React.FC<{ modal?: IModalProps } & Props> = observer(({
       userIds: [...editUsers, ...onlyViewUsers].map((i) => i.id),
       roleIds: [...editRoles, ...onlyViewRoles],
     };
-    console.log('writePermission :>> ', writePermission);
-    console.log('readPermission :>> ', readPermission);
+
     await pageConfigApi.createPermission({
       fields,
       permissions: [writePermission, readPermission],
@@ -175,13 +173,15 @@ const RoleConfigModal: React.FC<{ modal?: IModalProps } & Props> = observer(({
           onlyView.userIds.push(...(item.userIds || []));
           onlyView.roles.push(...(item.roleIds || []));
           onlyView.mainValues.push(...onlyView.roles.map((i) => `role-${i}`));
-          onlyView.users.length > 0 && onlyView.roles.push('specificUser');
+          onlyView.userIds.length > 0 && onlyView.roles.push('specificUser');
         }
       });
 
-      const users = onlyView.users.length > 0 ? await getProjectUsersByIds(onlyView.userIds) : [];
+      const users = onlyView.userIds.length > 0 ? await getProjectUsersByIds(onlyView.userIds) : [];
       onlyView.users.push(...users);
       onlyView.mainValues.push(...users);
+      onlyView.users.length > 0 && onlyView.roles.push('specificUser');
+
       dataset.current?.setState('onlyView_defaultSelectUsers', users);
       dataset.current?.init({ onlyView: onlyView.mainValues, onlyView_Users: users, onlyView_Roles: onlyView.roles });
     }
