@@ -6,6 +6,7 @@ import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import SelectUser from '@/components/select/select-user';
 import { Prompt } from 'react-router-dom';
+import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { useProjectReportContext } from '../../context';
 
 const BaseInfo: React.FC = () => {
@@ -18,7 +19,7 @@ const BaseInfo: React.FC = () => {
       return [{
         ...store.baseInfo,
         ccList: ccList.map((user) => user.id),
-        receiverList: receiverList.map((user) => user.id),
+        receiverList: receiverList?.slice(),
       }];
     }
     return undefined;
@@ -37,6 +38,7 @@ const BaseInfo: React.FC = () => {
       maxLength: 255,
     }, {
       name: 'receiverList',
+      type: 'object' as FieldType,
       label: '收件人',
       required: true,
       textField: 'realName',
@@ -61,7 +63,7 @@ const BaseInfo: React.FC = () => {
       return {
         title: data.title,
         description: data.description,
-        receiverList: data.receiverList.map((id: string) => ({ id })),
+        receiverList: data.receiverList,
         ccList: data.ccList.map((id: string) => ({ id })),
       };
     }
