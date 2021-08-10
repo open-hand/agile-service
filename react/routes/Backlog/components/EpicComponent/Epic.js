@@ -17,7 +17,7 @@ class Epic extends Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.epicRefresh();
   }
 
@@ -43,7 +43,8 @@ class Epic extends Component {
   };
 
   handleOpenCreateIssue = () => {
-    BacklogStore.setNewIssueVisible(true);
+    const { openCreateIssueModal } = this.props;
+    openCreateIssueModal();
   };
 
   render() {

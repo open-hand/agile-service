@@ -268,6 +268,7 @@ class BacklogHome extends Component {
                     issueRefresh={() => {
                       this.IssueDetailRef.current.refreshIssueDetail();
                     }}
+                    openCreateIssueModal={this.openCreateIssueModal}
                   />
                 </Panel>
               ) : (
