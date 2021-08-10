@@ -8,7 +8,7 @@ import { ILoadingChangeItem, ILoadingChildren } from './type';
  */
 function filterSelfLoading(newStatusItem: ILoadingChangeItem, childrenLoad?: ILoadingChildren) {
   const allowSelfLoading = childrenLoad?.allowSelfLoading || newStatusItem.allowSelfLoading;
-  if (!childrenLoad) {
+  if (!childrenLoad || !childrenLoad.changeLoading) {
     return false;
   }
   if (childrenLoad.finishInit) {
@@ -18,6 +18,7 @@ function filterSelfLoading(newStatusItem: ILoadingChangeItem, childrenLoad?: ILo
     set(childrenLoad, 'finishInit', true);
     return false;
   }
+
   return false;
 }
 

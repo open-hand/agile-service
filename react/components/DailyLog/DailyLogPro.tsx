@@ -41,26 +41,18 @@ const SelectTimeWithUnit: React.FC<SelectTimeWithUnitProps> = observer(({ timeNa
       { meaning: '周', value: 'W' },
     ],
   }), []);
-  const disabled = useMemo(() => {
-    if (!record) {
-      return undefined;
-    }
-    return !timeName.includes(record.get('remain'));
-  }, [record?.get('remain'), record, timeName]);
-  useEffect(() => {
-    record?.getField(timeName)?.set('required', !disabled);
-  }, [disabled, record, timeName]);
+
   return (
     <Row>
       <Col span={15}>
-        <SelectNumber name={timeName} style={{ width: '100%' }} disabled={disabled} />
+        <SelectNumber name={timeName} style={{ width: '100%' }} />
       </Col>
       <Col span={9} style={{ paddingLeft: '.18rem' }}>
         <Select
           name={unitName}
           options={unitOptions}
           clearButton={false}
-          disabled={disabled}
+          // disabled={disabled}
           style={{ width: '100%' }}
         />
       </Col>
@@ -93,9 +85,28 @@ const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = 
       dataSet.current?.addField(`${item}_time`, {
         type: 'number' as FieldType,
         label: '时间',
+        computedProps: {
+          disabled: ({ record }) => {
+            if (record.get('remain') === item) {
+              return false;
+            }
+            return true;
+          },
+        },
       });
-      dataSet.current?.addField(`${item}_unit`, { type: 'string' as FieldType, label: '单位' });
-      dataSet.current?.set(`${item}_unit`, 'H');
+      dataSet.current?.addField(`${item}_unit`, {
+        type: 'string' as FieldType,
+        label: '单位',
+        defaultValue: 'H',
+        computedProps: {
+          disabled: ({ record }) => {
+            if (record.get('remain') === item) {
+              return false;
+            }
+            return true;
+          },
+        },
+      });
     });
   }, [dataSet]);
 
@@ -136,13 +147,13 @@ const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = 
         <Option value="direct">
           <span className={styles.remain_row}>
             <span>设置为</span>
-            <SelectTimeWithUnit timeName="direct_time" unitName="direct_unit" record={dataSet.current} />
+            <SelectTimeWithUnit timeName="direct_time" unitName="direct_unit" />
           </span>
         </Option>
         <Option value="reduce" className={styles.remain_row}>
           <span className={styles.remain_row}>
             <span>缩减</span>
-            <SelectTimeWithUnit timeName="reduce_time" unitName="reduce_unit" record={dataSet.current} />
+            <SelectTimeWithUnit timeName="reduce_time" unitName="reduce_unit" />
           </span>
         </Option>
       </SelectBox>

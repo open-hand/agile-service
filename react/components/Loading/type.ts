@@ -25,7 +25,8 @@ export interface ILoadingChildren extends Pick<ILoadingProps, 'allowSelfLoading'
     loadId: string
     status: ILoadingChangeStatus
     initStatus: ILoadingChangeStatus
-    changeLoading: React.Dispatch<React.SetStateAction<boolean | undefined>>
+    /**  不传入子Loading的操作方法，则无法调用自身Loading `allowSelfLoading` 参数则失效  */
+    changeLoading?: React.Dispatch<React.SetStateAction<boolean | undefined>>
     finishInit?: boolean
 }
 export interface ILoadingRegisterChildrenData extends Omit<ILoadingChildren, 'initStatus' | 'status'> {
