@@ -414,6 +414,9 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         linkIssueStatusLinkageVO.setStatusVO(statusVOMap.getOrDefault(statusLinkageDTO.getStatusId(), null));
         linkIssueStatusLinkageVO.setLinkIssueType(typeVOMap.getOrDefault(statusLinkageDTO.getParentIssueTypeId(), null));
         linkIssueStatusLinkageVO.setLinkIssueStatus(statusVOMap.getOrDefault(statusLinkageDTO.getParentIssueStatusSetting(), null));
+        IssueLinkTypeVO issueLinkTypeVO = new IssueLinkTypeVO();
+        issueLinkTypeVO.setLinkName("父级");
+        linkIssueStatusLinkageVO.setLinkTypeVO(issueLinkTypeVO);
         return linkIssueStatusLinkageVO;
     }
 

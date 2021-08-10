@@ -191,35 +191,5 @@
                 AND aii.link_issue_type_id = flisl.link_issue_type_id
             WHERE
                 flisl.status_id IS NOT NULL
-
-        UNION ALL
-              SELECT
-                aii.*,
-                flisl.id as linkSettingId,
-                flisl.status_id,
-                flisl.link_issue_status_id,
-                flisl.is_triggered
-            FROM
-                (
-                SELECT
-                    ail.linked_issue_id as issue_id,
-                    ail.issue_id as linked_issue_id,
-                    ail.link_type_id,
-                    ai1.issue_type_id,
-                    ai.issue_type_id as link_issue_type_id,
-                    ail.project_id
-                FROM
-                    agile_issue_link ail
-                    LEFT JOIN agile_issue ai ON ai.issue_id = ail.issue_id
-                    LEFT JOIN agile_issue ai1 ON ai1.issue_id = ail.linked_issue_id
-                WHERE
-                    ail.project_id = #{projectId}
-                ) aii
-                LEFT JOIN fd_link_issue_status_linkage flisl ON flisl.project_id = #{projectId}
-                AND flisl.link_type_id = aii.link_type_id
-                AND aii.issue_type_id = flisl.issue_type_id
-                AND aii.link_issue_type_id = flisl.link_issue_type_id
-            WHERE
-                flisl.status_id IS NOT NULL
     </select>
 </mapper>
