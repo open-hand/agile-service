@@ -10,5 +10,4 @@ export { default as StatusTag } from './StatusTag';
 export { default as TextEditToggle } from './TextEditToggle';
 export { default as TypeTag } from './TypeTag';
 export { default as UserHead } from './UserHead';
-export { default as HeaderLine } from './HeaderLine';
 export { default as SelectNumber } from './SelectNumber';

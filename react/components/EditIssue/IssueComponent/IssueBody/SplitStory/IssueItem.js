@@ -1,5 +1,4 @@
-import React, { useCallback } from 'react';
-import { useHistory } from 'react-router';
+import React from 'react';
 import { Tooltip } from 'choerodon-ui/pro';
 import ProjectTag from '@/components/tag/project-tag';
 import PriorityTag from '@/components/PriorityTag';
@@ -7,7 +6,6 @@ import StatusTag from '@/components/StatusTag';
 import TypeTag from '@/components/TypeTag';
 import styled from '@emotion/styled';
 import { disableIssueEdit } from '@/utils/detail';
-import { commonApi } from '@/api';
 import { useDetailContainerContext } from '@/components/detail-container/context';
 
 const Link = styled.a`
