@@ -1,4 +1,6 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, {
+  useState, useMemo, useCallback, useRef,
+} from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   PerformanceTable, Pagination,
@@ -9,6 +11,7 @@ import { TableProps } from 'choerodon-ui/pro/lib/table/Table';
 import './index.less';
 import { ListLayoutColumnVO } from '@/api';
 import useTable from '@/hooks/useTable';
+import { useCreation } from 'ahooks';
 import { checkBoxColumn, expandColumn, getTableColumns } from './columns';
 
 export interface IssueTableProps extends Partial<TableProps> {
@@ -86,10 +89,13 @@ const IssueTable: React.FC<IssueTableProps> = ({
     listLayoutColumns, fields, onSummaryClick, handleColumnResize: onColumnResize,
   }), [fields, listLayoutColumns, onColumnResize, onSummaryClick]);
   const visibleColumns = useMemo(() => columns.filter((column) => column.display), [columns]);
-
+  const checkValuesRef = useRef<string[]>();
+  checkValuesRef.current = props.checkValues;
   const checkboxColumn = useMemo(() => checkBoxColumn({
     data: props.flattenData,
     checkValues: props.checkValues,
+    // 引用最新的数据 确保表格 checked 可控值拿到的是最新数据
+    checkValuesRef,
     handleCheckChange: props.handleCheckChange,
     handleCheckAllChange: props.handleCheckAllChange,
   }), [props.checkValues, props.flattenData, props.handleCheckAllChange, props.handleCheckChange]);

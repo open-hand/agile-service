@@ -77,7 +77,6 @@ export default function useTable(getData: TableRequest, options: Options) {
       checkValues.splice(checkValues.indexOf(key), 1);
     }
     setCheckValues([...checkValues]);
-    return checkValues;
   });
   const handleCheckAllChange = usePersistFn((value) => {
     if (value) {
