@@ -246,7 +246,12 @@ class PageTemplateStore {
           showDefaultValueText: '',
         } : {},
       })));
-
+      this.sortTableDataSet.records.forEach((record) => {
+        if (!record.get('allowedEditPermission')) {
+          // eslint-disable-next-line no-param-reassign
+          record.selectable = false;
+        }
+      });
       if (res.issueTypeFieldVO) {
         this.setDescriptionObj({
           ...res.issueTypeFieldVO,

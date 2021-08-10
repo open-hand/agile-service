@@ -31,7 +31,7 @@ const PageTemplateTable: React.FC<IPageTemplateTableProps> = () => {
       <Observer>
         {() => (
           <CheckBox
-            indeterminate={sortTableDataSet.selected.length > 0 && (sortTableDataSet.filter((record) => record.get('allowedEditPermission')).length !== sortTableDataSet.selected.filter((record) => record.get('allowedEditPermission')).length)}
+            indeterminate={sortTableDataSet.selected.length > 0 && (sortTableDataSet.filter((record) => record.selectable).length !== sortTableDataSet.selected.length)}
             checked={sortTableDataSet.selected.length > 0}
             onChange={handleCheckAllChange}
           />
@@ -48,8 +48,8 @@ const PageTemplateTable: React.FC<IPageTemplateTableProps> = () => {
           <CheckBox
             key={rowIndex}
             value={rowData.index}
-            disabled={!rowData.get('allowedEditPermission')}
-            checked={rowData.get('allowedEditPermission') ? rowData.isSelected : false}
+            disabled={!rowData.selectable}
+            checked={rowData.isSelected}
             //   checked={checkValues.includes(rowData.issueId)}
             onChange={(value) => handleCheckChange(value, rowData.index)}
           />
