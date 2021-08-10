@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
-import { issueApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import TextArea from '@/components/TextArea';
 

@@ -1,30 +1,26 @@
 import React, { Component } from 'react';
-import { Input } from 'choerodon-ui';
+import { TextField } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react';
 import { Choerodon } from '@choerodon/boot';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import { sprintApi } from '@/api';
-import TextEditToggle from '@/components/TextEditToggle';
+import TextEditToggle from '@/components/TextEditTogglePro';
 import { MAX_LENGTH_SPRINT } from '@/constants/MAX_LENGTH';
 import { getProjectId } from '@/utils/common';
 import './SprintName.less';
 
-const { Text, Edit } = TextEditToggle;
-
 @observer
 class SprintName extends Component {
-  validateSprintName = async (rule, value, callback) => {
+  validateSprintName = async (value, callback) => {
     const { data: { sprintName } } = this.props;
     if (value === sprintName) {
-      callback();
-    } else {
-      const hasSame = await sprintApi.validate(value);
-      if (hasSame) {
-        callback('');
-      } else {
-        callback();
-      }
+      return true;
     }
+    const hasSame = await sprintApi.validate(value);
+    if (hasSame) {
+      return '已有同名冲刺';
+    }
+    return true;
   }
 
   handleBlurName=(value) => {
@@ -60,21 +56,17 @@ class SprintName extends Component {
       <div className="c7n-backlog-sprintName">
         <TextEditToggle
           disabled={type === 'backlog' || noPermission}
-          formKey="sprint"
           onSubmit={this.handleBlurName}
-          originData={sprintName}
+          initValue={sprintName}
           style={{ whiteSpace: 'nowrap' }}
-          rules={[{
-            validator: this.validateSprintName,
-          }]}
-          className="hidden-length-info"
+          editor={() => (
+            <TextField
+              maxLength={MAX_LENGTH_SPRINT}
+              validator={this.validateSprintName}
+            />
+          )}
         >
-          <Text>
-            {sprintName}
-          </Text>
-          <Edit>
-            {({ width }) => <Input size="small" style={{ width: Math.max(width, 200), fontSize: 13 }} autoFocus maxLength={MAX_LENGTH_SPRINT} showLengthInfo={false} />}
-          </Edit>
+          {sprintName}
         </TextEditToggle>
       </div>
     );
