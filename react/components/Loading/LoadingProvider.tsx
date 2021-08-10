@@ -62,7 +62,7 @@ const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
       if (newLoading) {
         // 重置所有子Loading
         childrenLoadMap.forEach((value) => {
-          value.changeLoading(false);
+          value.changeLoading && value.changeLoading(false);
           childrenLoadMap.set(value.loadId, { ...value, status: 'init', finishInit: false });
         });
         return true;
@@ -73,6 +73,7 @@ const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
 
   const handleChange = useCallback((loadId: string, newLoading: boolean, extraConfig?: ILoadingChangeExtraConfig) => {
     console.log('----------------------start-----------------------');
+    console.log(`loadId:${loadId} ${newLoading}`);
     // 全局 Loading 状态更改调用全局方法
     if (loadId === globalLoadId) {
       handleChangeGlobal(newLoading);
@@ -109,7 +110,7 @@ const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
       if (globalDoingStatus.length > 0) {
         setGlobalLoading(true);
         childrenLoadMap.forEach((children) => {
-          children.changeLoading(false);
+          children.changeLoading && children.changeLoading(false);
         });
         return;
       }
@@ -117,7 +118,7 @@ const LoadingProvider: React.FC<ILoadingProviderProps> = (props) => {
       // 子Loading 进行状态更新
       selfLoadingStatus.forEach((item) => {
         console.log('self..', item.loadId, item.status === 'doing');
-        childrenLoadMap.get(item.loadId)?.changeLoading(item.status === 'doing');
+        childrenLoadMap.get(item.loadId)?.changeLoading!(item.status === 'doing');
       });
       console.log('finish Update');
     }
