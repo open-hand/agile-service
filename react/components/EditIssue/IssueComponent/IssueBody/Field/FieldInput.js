@@ -1,28 +1,12 @@
 import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
-import { withRouter } from 'react-router-dom';
-import { Input } from 'choerodon-ui';
-import { injectIntl } from 'react-intl';
-import { issueApi } from '@/api';
-import TextEditToggle from '../../../../TextEditToggle';
+import { observer } from 'mobx-react';
+import { TextField } from 'choerodon-ui/pro';
+import TextEditToggle from '@/components/TextEditTogglePro';
 
 const { Text, Edit } = TextEditToggle;
 
-@inject('AppState')
 @observer class FieldInput extends Component {
-  constructor(props) {
-    super(props);
-    this.TextEditToggle = undefined;
-    this.state = {
-      newValue: undefined,
-    };
-  }
-
-  componentDidMount() {
-  }
-
-  updateIssueField = () => {
-    const { newValue } = this.state;
+  updateIssueField = (newValue) => {
     const {
       store, field, feature,
     } = this.props;
@@ -80,37 +64,17 @@ const { Text, Edit } = TextEditToggle;
         <div className="c7n-value-wrapper">
           <TextEditToggle
             disabled={disabled}
-            saveRef={(e) => {
-              this.TextEditToggle = e;
-            }}
-            formKey={fieldCode}
             onSubmit={this.updateIssueField}
-            originData={value}
-          >
-            <Text>
-              <div style={{ wordBreak: 'break-all' }}>
-                {value || '无'}
-              </div>
-            </Text>
-            <Edit>
-              <Input
-                autosize
-                autoFocus
-                maxLength="20"
-                size="small"
-                onChange={(e) => {
-                  this.setState({
-                    newValue: e.target.value,
-                  });
-                }}
-                onPressEnter={() => {
-                  if (this.TextEditToggle && this.TextEditToggle.leaveEditing) {
-                    this.updateIssueField();
-                    this.TextEditToggle.leaveEditing();
-                  }
-                }}
+            initValue={value}
+            editor={(
+              <TextField
+                maxLength={20}
               />
-            </Edit>
+            )}
+          >
+            <div style={{ wordBreak: 'break-all' }}>
+              {value || '无'}
+            </div>
           </TextEditToggle>
         </div>
       </div>
@@ -118,4 +82,4 @@ const { Text, Edit } = TextEditToggle;
   }
 }
 
-export default withRouter(injectIntl(FieldInput));
+export default FieldInput;
