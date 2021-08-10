@@ -1,5 +1,4 @@
 declare module '@/utils/common';
-declare module 'timeago-react';
 declare module '*.svg' {
   import * as React from 'react';
 
