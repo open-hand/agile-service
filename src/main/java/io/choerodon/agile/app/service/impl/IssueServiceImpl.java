@@ -1079,29 +1079,19 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Long statusId = influenceIssueVO.getStatusId();
         IssueDTO influenceIssue = issueMapper.selectByPrimaryKey(linkIssueId);
         IssueDTO issue = issueMapper.selectByPrimaryKey(issueId);
+        Boolean isSub = Objects.equals("sub_task",influenceIssue.getTypeCode()) || (Objects.equals("bug",influenceIssue.getTypeCode()) && !ObjectUtils.isEmpty(influenceIssue.getRelateIssueId()) && !Objects.equals(influenceIssue.getRelateIssueId(), 0L));
         if (Objects.equals("bug", issue.getTypeCode()) && !ObjectUtils.isEmpty(issue.getRelateIssueId()) && !Objects.equals(issue.getRelateIssueId(), 0L)) {
+            statusLinkageExecutionLog(influenceIssueVO, issueId, influenceIssue, isSub, linkIssueStatusMap, "STOP");
             return true;
         }
         if (Objects.equals(issue.getStatusId(), statusId)) {
+            statusLinkageExecutionLog(influenceIssueVO, issueId, influenceIssue, isSub, linkIssueStatusMap, "STOP");
             return true;
         }
-        Boolean isSub = Objects.equals("sub_task",influenceIssue.getTypeCode()) || (Objects.equals("bug",influenceIssue.getTypeCode()) && !ObjectUtils.isEmpty(influenceIssue.getRelateIssueId()) && !Objects.equals(influenceIssue.getRelateIssueId(), 0L));
         // 变更issue的状态和更新属性
         Boolean transformFlag = executionUpdateInfluenceIssue(issue, statusId, influenceIssue, projectId, applyType, influenceIssueVO);
         // 记录联动的执行日志
-        if (!ObjectUtils.isEmpty(influenceIssueVO.getLinkSettingId())) {
-            LinkIssueStatusLinkageVO linkIssueStatusLinkageVO = isSub && Boolean.TRUE.equals(influenceIssueVO.getChildrenTriggered()) ? statusLinkageService.queryById(projectId, influenceIssueVO.getLinkSettingId()) : linkIssueStatusMap.getOrDefault(influenceIssueVO.getLinkSettingId(), null);
-            if (ObjectUtils.isEmpty(linkIssueStatusLinkageVO)) {
-                throw new CommonException("error.link.issue.status.linkage.empty");
-            }
-            String content = buildStatusLinkageContent(linkIssueStatusLinkageVO);
-            StatusLinkageExecutionLogDTO statusLinkageExecutionLogDTO = new StatusLinkageExecutionLogDTO();
-            statusLinkageExecutionLogDTO.setPreIssueId(influenceIssue.getIssueId());
-            statusLinkageExecutionLogDTO.setCurIssueId(issueId);
-            statusLinkageExecutionLogDTO.setContent(content);
-            statusLinkageExecutionLogDTO.setStatusCode(Boolean.TRUE.equals(influenceIssueVO.getLoop()) ? "LOOP" : "SUCCESS");
-            statusLinkageExecutionLogService.create(projectId, ConvertUtil.getOrganizationId(projectId), statusLinkageExecutionLogDTO);
-        }
+        statusLinkageExecutionLog(influenceIssueVO, issueId, influenceIssue, isSub, linkIssueStatusMap, null);
         if (!transformFlag && isSub) {
             return transformFlag;
         }
@@ -1117,6 +1107,27 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             }
         }
         return transformFlag;
+    }
+
+    private void statusLinkageExecutionLog(InfluenceIssueVO influenceIssueVO, Long issueId, IssueDTO influenceIssue, Boolean isSub, Map<Long, LinkIssueStatusLinkageVO> linkIssueStatusMap, String statusCode) {
+        // 记录联动的执行日志
+        Long projectId = influenceIssue.getProjectId();
+        if (!ObjectUtils.isEmpty(influenceIssueVO.getLinkSettingId())) {
+            LinkIssueStatusLinkageVO linkIssueStatusLinkageVO = isSub && Boolean.TRUE.equals(influenceIssueVO.getChildrenTriggered()) ? statusLinkageService.queryById(projectId, influenceIssueVO.getLinkSettingId()) : linkIssueStatusMap.getOrDefault(influenceIssueVO.getLinkSettingId(), null);
+            if (ObjectUtils.isEmpty(linkIssueStatusLinkageVO)) {
+                throw new CommonException("error.link.issue.status.linkage.empty");
+            }
+            String content = buildStatusLinkageContent(linkIssueStatusLinkageVO);
+            StatusLinkageExecutionLogDTO statusLinkageExecutionLogDTO = new StatusLinkageExecutionLogDTO();
+            statusLinkageExecutionLogDTO.setPreIssueId(influenceIssue.getIssueId());
+            statusLinkageExecutionLogDTO.setCurIssueId(issueId);
+            statusLinkageExecutionLogDTO.setContent(content);
+            if (ObjectUtils.isEmpty(statusCode)) {
+                statusCode = Boolean.TRUE.equals(influenceIssueVO.getLoop()) ? "LOOP" : "SUCCESS";
+            }
+            statusLinkageExecutionLogDTO.setStatusCode(statusCode);
+            statusLinkageExecutionLogService.create(projectId, ConvertUtil.getOrganizationId(projectId), statusLinkageExecutionLogDTO);
+        }
     }
 
     private String buildStatusLinkageContent(LinkIssueStatusLinkageVO linkIssueStatusLinkageVO) {

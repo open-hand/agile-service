@@ -24,7 +24,7 @@ public class StatusLinkageExecutionLogDTO extends AuditDomain {
     @Encrypt
     private Long id;
 
-    @ApiModelProperty(value = "执行状态(LOOP/SUCCESS)")
+    @ApiModelProperty(value = "执行状态(LOOP/SUCCESS/STOP)")
     private String statusCode;
 
     @ApiModelProperty(value = "联动信息")
