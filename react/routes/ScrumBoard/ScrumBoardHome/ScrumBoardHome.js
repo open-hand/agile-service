@@ -411,7 +411,7 @@ class ScrumBoardHome extends Component {
             paddingTop: 16,
           }}
         >
-          <LoadingProvider loading={ScrumBoardStore.getSpinIf}>
+          <LoadingProvider loading={ScrumBoardStore.getSpinIf} loadingStyle={{ position: 'relative' }}>
 
             <div style={{
               flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column',

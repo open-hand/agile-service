@@ -328,6 +328,15 @@ const Issue = observer(({ cached, updateCache }) => {
           },
           {
             display: true,
+            element: <CollapseAll
+              expandAll={tableProps.expandAll}
+              isExpandAll={tableProps.isExpandAll}
+              expandAbleKeys={tableProps.expandAbleKeys}
+              style={{ marginRight: 16 }}
+            />,
+          },
+          {
+            display: true,
             icon: 'refresh',
             // funcType: 'flat',
             handler: refresh,
@@ -339,20 +348,9 @@ const Issue = observer(({ cached, updateCache }) => {
               onChange={(mode) => {
                 changeTableListMode(mode === 'list');
               }}
-              style={{
-                margin: '-4px 8px 0 0',
-              }}
             />,
           },
-          {
-            display: true,
-            element: <CollapseAll
-              expandAll={tableProps.expandAll}
-              isExpandAll={tableProps.isExpandAll}
-              expandAbleKeys={tableProps.expandAbleKeys}
-              style={{ marginRight: 16 }}
-            />,
-          },
+
         ]}
         />
         {/* <div style={{ flex: 1, visibility: 'hidden' }} />

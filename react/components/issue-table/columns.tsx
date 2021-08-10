@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   map, get, find, intersection,
 } from 'lodash';
@@ -11,6 +11,23 @@ import StatusTag from '@/components/StatusTag';
 import './index.less';
 import UserTag from '../tag/user-tag';
 
+function RenderCheckBox({
+  rowData, rowIndex, checkValues, onChange,
+}) {
+  const [checked, setChecked] = useState();
+  useEffect(() => { setChecked(checkValues.includes(rowData.issueId)); }, [checkValues, rowData.issueId]);
+  return (
+    <CheckBox
+      key={rowIndex}
+      value={rowData.issueId}
+      checked={checked}
+      onChange={(value) => {
+        const newCheckValues = onChange(value, rowData.issueId);
+        setChecked(newCheckValues.includes(rowData.issueId));
+      }}
+    />
+  );
+}
 export const checkBoxColumn = ({
   checkValues, data, handleCheckChange, handleCheckAllChange,
 }) => {
@@ -32,12 +49,7 @@ export const checkBoxColumn = ({
     width: 40,
     fixed: true,
     render: ({ rowData, dataIndex, rowIndex }) => (
-      <CheckBox
-        key={rowIndex}
-        value={rowData.issueId}
-        checked={checkValues.includes(rowData.issueId)}
-        onChange={(value) => handleCheckChange(value, rowData.issueId)}
-      />
+      <RenderCheckBox rowData={rowData} rowIndex={rowIndex} checkValues={checkValues} onChange={handleCheckChange} />
     ),
   });
 };
