@@ -16,6 +16,7 @@ import useFields from './useFields';
 import { systemFields, formatFields } from './utils';
 import renderField from './renderField';
 import styles from './Content.less';
+import STATUS_COLOR from '../../../../constants/STATUS';
 
 const { Option } = Select;
 
@@ -252,9 +253,9 @@ function BatchModal({
         </div>
       </Form>
       {loading && (
-      <div style={{ color: 'rgba(254,71,87,1)', textAlign: 'center' }}>
+      <div style={{ textAlign: 'center' }}>
         {loading === 'success' ? '修改成功' : ['正在修改，请稍等片刻', <span className={styles.dot}>…</span>]}
-        <Progress status="success" value={Math.round(progress * 100)} />
+        <Progress strokeColor={STATUS_COLOR.done} value={Math.round(progress * 100)} />
       </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
