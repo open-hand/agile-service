@@ -15,7 +15,7 @@ const PreviewReport: React.FC = () => {
   const params = useQueryString();
   const refresh = useCallback(async () => {
     setLoading(true);
-    const data = params.dataKey ? window.opener[params.dataKey] : null;
+    const data = window.opener && params.dataKey ? window.opener[params.dataKey] : null;
     const res = data || await projectReportApi.getById(id);
     store.setReportData(res);
     setLoading(false);
