@@ -2,16 +2,13 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.business.ConfigurationRuleVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
-import io.choerodon.agile.infra.dto.UserTypeToReceiverParamDTO;
 import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import org.hzero.boot.message.entity.MessageSender;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 
 /**
  * 服务接口
@@ -69,21 +66,12 @@ public interface ConfigurationRuleService {
 
     List<ConfigurationRuleVO> selectByProjectId(ConfigurationRuleVO configurationRuleVO);
 
-    List<MessageSender> generateAutoRuleTriggerSender(String url, String summary, Collection<ConfigurationRuleVO> values, Supplier<Boolean> operator);
-
     List<Long> selectReceiverByRuleIds(List<Long> ruleIdList, List<String> types);
 
-    /**
-     * 将rules的userTypes转化为receiverList
-     *
-     * @param rules
-     * @param projectId
-     * @param userTypeToReceiverParamDTO
-     * @param onlySendCustomFieldMember
-     */
-    void convertUserTypeToReceiver(List<ConfigurationRuleVO> rules,
-                                   Long projectId,
-                                   UserTypeToReceiverParamDTO userTypeToReceiverParamDTO,
-                                   boolean onlySendCustomFieldMember);
+    void doTrigger(boolean isCreatedEvent,
+                   AuditDomain auditDomain,
+                   ConfigurationRuleVO rule,
+                   Long projectId,
+                   boolean onlySendCustomFieldMember);
 }
 
