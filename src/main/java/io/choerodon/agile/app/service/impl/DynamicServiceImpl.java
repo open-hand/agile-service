@@ -80,7 +80,9 @@ public class DynamicServiceImpl implements DynamicService {
             return PageUtils.createPageFromList(allDataLogList, pageRequest);
         }
         Page<AllDataLogVO> result = PageUtils.createPageFromList(
-                allDataLogList.stream().sorted(Comparator.comparing(AllDataLogVO::getCreationDate).reversed()).collect(Collectors.toList()),
+                allDataLogList.stream().sorted(
+                        Comparator.comparing(AllDataLogVO::getCreationDate, Comparator.reverseOrder())
+                                .thenComparing(AllDataLogVO::getLogId, Comparator.reverseOrder())).collect(Collectors.toList()),
                 pageRequest
         );
 
