@@ -8,6 +8,7 @@ import io.choerodon.agile.api.vo.business.AllDataLogVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.StarBeaconDTO;
 
+import io.choerodon.mybatis.domain.AuditDomain;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -164,4 +165,6 @@ public interface BacklogExpandService {
      * @param backlogDataLog 需求操作记录
      */
     void setDataLogBacklogInfo(List<AllDataLogVO> backlogDataLog);
+
+    Map<String, String> getUrlAndSummary(AuditDomain auditDomain, Long projectId);
 }

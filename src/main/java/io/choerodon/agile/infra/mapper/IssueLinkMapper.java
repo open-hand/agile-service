@@ -51,4 +51,8 @@ public interface IssueLinkMapper extends BaseMapper<IssueLinkDTO> {
     List<IssueLinkDTO> listIssueLinkByIssueIds(@Param("projectId") Long projectId);
 
     List<IssueLinkChangeVO> issueLinkChangeByProjectId(@Param("projectId") Long projectId);
+
+    List<IssueLinkDTO> listByIssueIdAndLinkTypeId(@Param("projectId") Long projectId,
+                                                  @Param("issueId") Long issueId,
+                                                  @Param("linkTypeIds") Set<Long> linkTypeIds);
 }
