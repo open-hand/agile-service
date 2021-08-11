@@ -49,7 +49,7 @@ const Operation: React.FC<Props> = () => {
   const [dataKeySet] = useState(new Set());
   const exportRef = useRef<IExportProps>({} as IExportProps);
 
-  useEffect(() => clearDataKey(), []);
+  useEffect(() => clearDataKey, []);
 
   const clearDataKey = useCallback(() => {
     dataKeySet.forEach((value) => {

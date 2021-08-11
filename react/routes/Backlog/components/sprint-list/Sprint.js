@@ -4,30 +4,53 @@ import { Droppable } from 'react-beautiful-dnd';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import IssueList from './IssueList';
 import SprintHeader from './SprintHeader';
+import IssueItem from './IssueItem';
 
 function Sprint({ data, openCreateIssueModal }) {
   const { sprintId, expand } = data;
   const issueList = BacklogStore.getIssueListBySprintId(sprintId);
   return (
     <div style={{ width: '100%' }}>
-      {/* <Droppable droppableId={`${sprintId}Trash`}>
+      <Droppable
+        droppableId={String(sprintId)}
+        mode="virtual"
+        isDropDisabled={BacklogStore.getIssueCantDrag}
+        renderClone={(provided, snapshot, rubric) => (
+          <IssueItem
+            provided={provided}
+            isDragging={snapshot.isDragging}
+            issue={issueList[rubric.source.index]}
+            sprintId={sprintId}
+            style={{ margin: 0 }}
+          />
+        )}
+      >
         {(provided, snapshot) => (
           <div
             ref={provided.innerRef}
-            style={{
-              border: snapshot.isDraggingOver ? '1px solid green' : 'none',
-            }}
-          > */}
-      <SprintHeader data={data} />
-      {/* </div>
+          >
+            <div
+              style={{
+                border: !expand && snapshot.isDraggingOver ? '1px dashed green' : 'none',
+              }}
+            >
+              <SprintHeader data={data} />
+            </div>
+            {expand && (
+              <>
+                <IssueList
+                  sprintData={data}
+                  data={issueList}
+                  sprintId={sprintId}
+                  openCreateIssueModal={openCreateIssueModal}
+                  provided={provided}
+                  snapshot={snapshot}
+                />
+              </>
+            )}
+          </div>
         )}
-      </Droppable> */}
-
-      {expand && (
-        <>
-          <IssueList sprintData={data} data={issueList} sprintId={sprintId} openCreateIssueModal={openCreateIssueModal} />
-        </>
-      )}
+      </Droppable>
     </div>
   );
 }
