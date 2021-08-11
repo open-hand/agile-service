@@ -15,7 +15,7 @@ import IssueItem from './IssueItem';
 import NoneIssue from './NoneIssue';
 
 function IssueList({
-  data, sprintId, sprintData, openCreateIssueModal,
+  data, sprintId, sprintData, openCreateIssueModal, snapshot: dropSnapshot, provided: dropProvided,
 }) {
   const listRef = useRef();
   const shouldIncreaseHeight = usePersistFn((snapshot) => {
@@ -60,108 +60,87 @@ function IssueList({
     });
     BacklogStore.refreshSprint(sprintId, false);
   });
+  const rowCount = shouldIncreaseHeight(dropSnapshot)
+    ? data.length + 1
+    : data.length;
   const { total, page, size } = pagination;
   return (
-    <Droppable
-      droppableId={String(sprintId)}
-      mode="virtual"
-      isDropDisabled={BacklogStore.getIssueCantDrag}
-      renderClone={(provided, snapshot, rubric) => (
-        <IssueItem
-          provided={provided}
-          isDragging={snapshot.isDragging}
-          issue={data[rubric.source.index]}
+    <div>
+      {data.length === 0
+        ? <LoadingHiddenWrap><NoneIssue type={sprintId === 0 ? 'backlog' : 'sprint'} /></LoadingHiddenWrap>
+        : (
+          <WindowScroller scrollElement={document.getElementsByClassName('c7n-backlog-content')[0]}>
+            {({ height, scrollTop, registerChild }) => (
+              <AutoSizer disableHeight>
+                {({ width }) => (
+                  <div ref={(el) => registerChild(el)} style={{ width: '100%' }}>
+                    <List
+                      ref={listRef}
+                      autoHeight
+                      height={height}
+                      rowCount={rowCount}
+                      rowHeight={getRowHeight}
+                      rowRenderer={renderIssueItem}
+                      scrollTop={scrollTop}
+                      width={width}
+                      style={{
+                        background: dropSnapshot.isDraggingOver ? '#e9e9e9' : 'inherit',
+                        transition: 'background-color 0.2s ease',
+                      }}
+                    />
+                  </div>
+                )}
+              </AutoSizer>
+            )}
+          </WindowScroller>
+        )}
+      <Loading loading={loading} allowSelfLoading />
+      <div style={{ padding: '10px 0px 10px 20px', borderBottom: '0.01rem solid var(--divider)' }}>
+        <QuickCreateIssue
+          epicId={BacklogStore.getChosenEpic !== 'all' && BacklogStore.getChosenEpic !== 'unset' ? BacklogStore.getChosenEpic : undefined}
+          versionIssueRelVOList={BacklogStore.getChosenVersion !== 'all' && BacklogStore.getChosenVersion !== 'unset' ? [
+            {
+              versionId: BacklogStore.getChosenVersion,
+            },
+          ] : undefined}
           sprintId={sprintId}
-          style={{ margin: 0 }}
+          chosenFeatureId={BacklogStore.getChosenFeature !== 'all' && BacklogStore.getChosenFeature !== 'unset' ? BacklogStore.getChosenFeature : undefined}
+          defaultAssignee={BacklogStore.filterSprintAssignUser.get(sprintId)}
+          onCreate={(res) => {
+            BacklogStore.handleCreateIssue(res, String(sprintId));
+            BacklogStore.refresh(false, false); // 更新侧边框
+          }}
+          cantCreateEvent={openCreateIssueModal}
+          typeIdChange={(id) => {
+            BacklogStore.setDefaultTypeId(id);
+          }}
+          summaryChange={(summary) => {
+            BacklogStore.setDefaultSummary(summary);
+          }}
+          assigneeChange={(assigneeId, assignee) => {
+            BacklogStore.setDefaultAssignee(assignee);
+          }}
+          setDefaultSprint={(value) => {
+            BacklogStore.setDefaultSprint(value);
+          }}
         />
-      )}
-    >
-      {(provided, snapshot) => {
-        const rowCount = shouldIncreaseHeight(snapshot)
-          ? data.length + 1
-          : data.length;
-        return (
-          <div
-            ref={provided.innerRef}
-          >
-            {data.length === 0
-              ? <LoadingHiddenWrap><NoneIssue type={sprintId === 0 ? 'backlog' : 'sprint'} /></LoadingHiddenWrap>
-              : (
-                <WindowScroller scrollElement={document.getElementsByClassName('c7n-backlog-content')[0]}>
-                  {({ height, scrollTop, registerChild }) => (
-                    <AutoSizer disableHeight>
-                      {({ width }) => (
-                        <div ref={(el) => registerChild(el)} style={{ width: '100%' }}>
-                          <List
-                            ref={listRef}
-                            autoHeight
-                            height={height}
-                            rowCount={rowCount}
-                            rowHeight={getRowHeight}
-                            rowRenderer={renderIssueItem}
-                            scrollTop={scrollTop}
-                            width={width}
-                            style={{
-                              background: snapshot.isDraggingOver ? '#e9e9e9' : 'inherit',
-                              transition: 'background-color 0.2s ease',
-                            }}
-                          />
-                        </div>
-                      )}
-                    </AutoSizer>
-                  )}
-                </WindowScroller>
-              )}
-            <Loading loading={loading} allowSelfLoading />
-            <div style={{ padding: '10px 0px 10px 20px', borderBottom: '0.01rem solid var(--divider)' }}>
-              <QuickCreateIssue
-                epicId={BacklogStore.getChosenEpic !== 'all' && BacklogStore.getChosenEpic !== 'unset' ? BacklogStore.getChosenEpic : undefined}
-                versionIssueRelVOList={BacklogStore.getChosenVersion !== 'all' && BacklogStore.getChosenVersion !== 'unset' ? [
-                  {
-                    versionId: BacklogStore.getChosenVersion,
-                  },
-                ] : undefined}
-                sprintId={sprintId}
-                chosenFeatureId={BacklogStore.getChosenFeature !== 'all' && BacklogStore.getChosenFeature !== 'unset' ? BacklogStore.getChosenFeature : undefined}
-                defaultAssignee={BacklogStore.filterSprintAssignUser.get(sprintId)}
-                onCreate={(res) => {
-                  BacklogStore.handleCreateIssue(res, String(sprintId));
-                  BacklogStore.refresh(false, false); // 更新侧边框
-                }}
-                cantCreateEvent={openCreateIssueModal}
-                typeIdChange={(id) => {
-                  BacklogStore.setDefaultTypeId(id);
-                }}
-                summaryChange={(summary) => {
-                  BacklogStore.setDefaultSummary(summary);
-                }}
-                assigneeChange={(assigneeId, assignee) => {
-                  BacklogStore.setDefaultAssignee(assignee);
-                }}
-                setDefaultSprint={(value) => {
-                  BacklogStore.setDefaultSprint(value);
-                }}
-              />
-            </div>
-            {total > size ? (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0' }}>
-                <Pagination
-                  total={total}
-                  page={page}
-                  pageSize={size}
-                  onChange={handlePaginationChange}
-                  showSizeChangerLabel={false}
-                  // pageSizeOptions={[10, 50, 100, 200, 300]}
-                  showTotal={(t, range) => `显示${range[0]}-${range[1]} 共 ${t}条`}
-                  showPager
-                  showQuickJumper
-                />
-              </div>
-            ) : null}
-          </div>
-        );
-      }}
-    </Droppable>
+      </div>
+      {total > size ? (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0' }}>
+          <Pagination
+            total={total}
+            page={page}
+            pageSize={size}
+            onChange={handlePaginationChange}
+            showSizeChangerLabel={false}
+            // pageSizeOptions={[10, 50, 100, 200, 300]}
+            showTotal={(t, range) => `显示${range[0]}-${range[1]} 共 ${t}条`}
+            showPager
+            showQuickJumper
+          />
+        </div>
+      ) : null}
+    </div>
   );
 }
 
