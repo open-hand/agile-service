@@ -2,8 +2,10 @@ import React, {
   useCallback, useEffect, useMemo, useState,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Spin } from 'choerodon-ui/pro';
-import { Modal, DataSet, Form } from 'choerodon-ui/pro';
+import {
+  Spin, Modal, DataSet, Form,
+} from 'choerodon-ui/pro';
+
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { IModalProps, Issue } from '@/common/types';
 import { issueApi, issueTypeApi } from '@/api';
@@ -40,7 +42,7 @@ const RelateIssue: React.FC<Props> = ({
       const data = {
         issueId,
         objectVersionNumber,
-        relateIssueId: relateIssueDs.current?.get('relateIssueId'),
+        relateIssueId: relateIssueDs.current?.get('relateIssueId') || 0,
       };
 
       const res = await issueApi.update(data);
