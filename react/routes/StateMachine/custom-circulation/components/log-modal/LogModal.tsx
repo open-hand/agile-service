@@ -54,10 +54,10 @@ const LogTable: React.FC<Props> = () => {
       label: '状态',
     }, {
       name: 'preIssueId',
-      label: '源',
+      label: '源问题',
     }, {
       name: 'curIssueId',
-      label: '影响',
+      label: '联动的问题',
     }],
     queryDataSet,
   }), [queryDataSet]);
@@ -66,7 +66,10 @@ const LogTable: React.FC<Props> = () => {
 
   const renderStatus = useCallback(({ value }) => (
     <span className={styles.status} style={{ background: value === 'SUCCESS' ? '#00BFA5' : '#F76776' }}>
-      {value === 'SUCCESS' ? '已执行' : '循环终止'}
+      {
+      // eslint-disable-next-line no-nested-ternary
+      value === 'SUCCESS' ? '已执行' : (value === 'STOP' ? '中止' : '循环终止')
+      }
     </span>
   ), []);
 
@@ -85,6 +88,29 @@ const LogTable: React.FC<Props> = () => {
     );
   }, [handleClickIssue]);
 
+  const renderStatusHeader = useCallback(() => (
+    <div>
+      <span className={styles.header_span}>状态</span>
+      <Tooltip
+        title={(
+          <div>
+            <span>不同状态代表什么？</span>
+            <br />
+            <span>已执行：已按照状态机流动规则执行成功。</span>
+            <br />
+            <span>循环终止：检测到状态联动执行循环，这将会产生大量重复的状态变更，请检查状态机状态联动配置。</span>
+            <br />
+            <span>终止：您要联动的问题已处在目标状态，或关联的缺陷属于子缺陷。</span>
+            <br />
+          </div>
+        )}
+        placement="top"
+      >
+        <Icon type="help " className={styles.tipIcon} />
+      </Tooltip>
+    </div>
+  ), []);
+
   return (
     <div className={styles.logTable}>
       <Table
@@ -101,7 +127,7 @@ const LogTable: React.FC<Props> = () => {
       >
         <Column name="creationDate" width={160} tooltip={'overflow' as TableColumnTooltip} />
         <Column name="content" tooltip={'overflow' as TableColumnTooltip} />
-        <Column name="statusCode" width={130} renderer={renderStatus} tooltip={'overflow' as TableColumnTooltip} />
+        <Column name="statusCode" header={renderStatusHeader} width={130} renderer={renderStatus} tooltip={'overflow' as TableColumnTooltip} />
         <Column
           name="preIssueId"
           // @ts-ignore
