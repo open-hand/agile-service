@@ -839,6 +839,18 @@
             and ai.type_code = 'story'
         </if>
         <if test='searchVO.advancedSearchArgs != null'>
+            <if test='searchVO.advancedSearchArgs.storyPoints != null and searchVO.advancedSearchArgs.storyPoints != "" '>
+                AND ai.story_points = #{searchVO.searchArgs.storyPoints}
+            </if>
+            <if test='searchVO.advancedSearchArgs.remainingTime != null and searchVO.advancedSearchArgs.remainingTime != "" '>
+                AND ai.remaining_time = #{searchVO.searchArgs.remainingTime}
+            </if>
+            <if test="searchVO.advancedSearchArgs.storyPointsNull != null and searchVO.advancedSearchArgs.storyPointsNull == true">
+                AND ai.type_code = 'story' AND ai.story_points IS NULL
+            </if>
+            <if test="searchVO.advancedSearchArgs.remainingTimeNull != null and searchVO.advancedSearchArgs.remainingTimeNull == true">
+                AND ai.remaining_time IS NULL
+            </if>
             <if test='searchVO.advancedSearchArgs.issueTypeId != null and searchVO.advancedSearchArgs.issueTypeId.size > 0'>
                 AND ai.issue_type_id IN
                 <foreach collection="searchVO.advancedSearchArgs.issueTypeId" item="issueTypeId" open="(" separator=","
