@@ -167,4 +167,6 @@ public interface BacklogExpandService {
     void setDataLogBacklogInfo(List<AllDataLogVO> backlogDataLog);
 
     Map<String, String> getUrlAndSummary(AuditDomain auditDomain, Long projectId);
+
+    void addComment(AuditDomain auditDomain, String comment);
 }
