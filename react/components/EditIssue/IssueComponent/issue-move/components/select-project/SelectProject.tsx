@@ -1,10 +1,10 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { Select, Form, DataSet } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui/pro';
+import {
+  Select, Form, DataSet, Icon,
+} from 'choerodon-ui/pro';
+
 import SelectTargetProject from '@/components/select/select-team';
-import TypeTag from '@/components/TypeTag';
-import { IIssueType } from '@/common/types';
 import { moveIssueApi } from '@/api';
 import styles from './SelectProject.less';
 import { IssueWithSubIssueVOList } from '../confirm-data/Confirm';
@@ -23,7 +23,7 @@ const SelectProject: React.FC<Props> = ({ issue, dataSet, issueTypeDataSet }) =>
   return (
     <div className={styles.selectProject}>
       <div className={styles.tip}>
-        <Icon type="report" />
+        <Icon type="info-o" />
         <p className={styles.tipText}>
           由于目标项目与源项目的字段设置不同，在不同项目之间移动问题项，您可能会丢失部分数据信息。即使您移回源项目，也无法恢复这些数据。
         </p>

@@ -35,6 +35,10 @@ function transformSystemFilter(data) {
     environment,
     appVersion,
     tags,
+    storyPointsNull,
+    remainingTimeNull,
+    storyPoints,
+    remainingTime,
   } = data;
   return {
     advancedSearchArgs: {
@@ -42,6 +46,10 @@ function transformSystemFilter(data) {
       reporterIds,
       statusId,
       priorityId,
+      storyPointsNull,
+      remainingTimeNull,
+      storyPoints,
+      remainingTime,
     },
     otherArgs: {
       userId,

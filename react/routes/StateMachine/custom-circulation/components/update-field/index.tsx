@@ -12,7 +12,6 @@ import { getProjectId, getIsOrganization, getOrganizationId } from '@/utils/comm
 import { find, includes } from 'lodash';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
 import { pageConfigApi, statusTransformApi } from '@/api';
-import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { Priority, IField } from '@/common/types';
 import Loading from '@/components/Loading';
