@@ -20,7 +20,7 @@ function transform(links: IssueLinkType[], hasPassive: boolean) {
   // split active and passive
   const active = links.map((link) => ({
     name: link.outWard,
-    isIn: false,
+    isIn: true,
     linkTypeId: link.linkTypeId,
   }));
   const passive: TransformedIssueLinkType[] = [];
@@ -29,7 +29,7 @@ function transform(links: IssueLinkType[], hasPassive: boolean) {
       if (link.inWard !== link.outWard) {
         passive.push({
           name: link.inWard,
-          isIn: true,
+          isIn: false,
           linkTypeId: link.linkTypeId,
         });
       }
