@@ -4,9 +4,9 @@ import {
   TextArea, NumberField, DatePicker, DateTimePicker, TimePicker,
 } from 'choerodon-ui/pro';
 
+import moment from 'moment';
 import SelectUser from '@/components/select/pro/select-user';
 import { IFieldType, ISystemFieldCodeMap } from '@/common/types';
-import moment from 'moment';
 import UserTag from '../tag/user-tag';
 import SelectIssueType from '../select/pro/select-issue-type';
 import DateTimePickerWithDefault from '../date-time-picker';
@@ -173,7 +173,7 @@ const systemFieldMap: Record<ISystemFieldCodeMap, ProRenderFieldPropsType> = {
   label: {
     render: (text) => text,
     renderFormItem: (props) => (
-      <SelectLabel {...props} />
+      <SelectLabel combo {...props} />
     ),
     valueKey: 'labelIssueRelVOList',
   },
