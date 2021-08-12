@@ -14,15 +14,15 @@ import {
 } from 'lodash';
 import { toJS } from 'mobx';
 import { UploadFile } from 'choerodon-ui/lib/upload/interface';
-import UploadButton from '@/components/CommonComponent/UploadButton';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
+import moment from 'moment';
+import UploadButton from '@/components/CommonComponent/UploadButton';
 import validateFile from '@/utils/File';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import {
   IIssueType, IModalProps, IssueCreateFields, Priority, User,
 } from '@/common/types';
 import useIssueCreateFields from '@/hooks/data/useIssueCreateFields';
-import moment from 'moment';
 
 import { getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
