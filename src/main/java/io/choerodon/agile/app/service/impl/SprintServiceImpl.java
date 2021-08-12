@@ -724,7 +724,7 @@ public class SprintServiceImpl implements SprintService {
             agilePluginService.handlerSprintProgramAttr(sprintIds, projectId, sprintSearches);
         }
         // 添加代办问题的统计数
-        List<Long> todoIssues = issueMapper.queryUnDoneIssues(projectId, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
+        List<Long> todoIssues = issueMapper.queryUnDoneAllIssues(projectId, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
         SprintSearchVO sprintSearchVO = new SprintSearchVO();
         sprintSearchVO.setIssueCount(CollectionUtils.isEmpty(todoIssues) ? 0 : todoIssues.size());
         sprintSearchVO.setSprintId(0L);
