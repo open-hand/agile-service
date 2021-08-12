@@ -103,7 +103,6 @@ const CommentItem: React.FC<Props> = ({
   const updateComment = useCallback((ucomment: UComment) => {
     issueCommentApi.project(projectId).update(ucomment, isSelf).then(() => {
       setEditing(false);
-      setValue('');
       if (onUpdate) {
         onUpdate();
       }
