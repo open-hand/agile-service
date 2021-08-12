@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.NoticeEventVO;
 import io.choerodon.agile.api.vo.business.ConfigurationRuleVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.core.domain.Page;
@@ -73,5 +74,10 @@ public interface ConfigurationRuleService {
                    ConfigurationRuleVO rule,
                    Long projectId,
                    boolean onlySendCustomFieldMember);
+
+    ConfigurationRuleVO filterRuleByCondition(ConfigurationRuleVO rule,
+                                              Long instanceId,
+                                              NoticeEventVO noticeEvent,
+                                              Set<Long> ruleIdsFindByMemberFields);
 }
 
