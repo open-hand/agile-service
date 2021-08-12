@@ -175,6 +175,7 @@ function BatchModal({
       switch (status) {
         case 'success': {
           setLoading('success');
+          setProgress(Number(process));
           setTimeout(() => {
             onEdit();
           }, 2000);
