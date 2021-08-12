@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   Page, Content, Breadcrumb,
@@ -8,18 +8,18 @@ import {
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import {
-  find, filter, includes, map,
+  find, filter, includes,
 } from 'lodash';
 import moment from 'moment';
-import { IIssueType, User, IStatus } from '@/common/types';
-import { statusTransformApiConfig } from '@/api';
 import { ColumnProps } from 'choerodon-ui/pro/lib/table/Column';
 import { Divider, Tooltip } from 'choerodon-ui';
+import { Header, HeaderButtons } from '@choerodon/master';
+import { IIssueType, User, IStatus } from '@/common/types';
+import { statusTransformApiConfig } from '@/api';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import {
-  getIsOrganization, getOrganizationId, getProjectId, getApplyType,
+  getIsOrganization,
 } from '@/utils/common';
-import { Header, HeaderButtons } from '@choerodon/master';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
 import Condition from './components/condition';
 import Linkage from './components/linkage';
@@ -342,6 +342,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
             record={record}
             selectedType={selectedType}
             selectedTypeName={selectedTypeName}
+            selectedTypeCode={selectedTypeCode}
             customCirculationDataSet={customCirculationDataSet}
             // eslint-disable-next-line no-nested-ternary
             linkageType={!isOrganization && selectedTypeCode === 'bug' ? ['subIssue', 'linkIssue'] : (
