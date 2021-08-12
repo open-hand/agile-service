@@ -7,11 +7,11 @@ import {
 } from 'choerodon-ui/pro';
 
 import { observer } from 'mobx-react-lite';
+import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
 import SelectStatus from '@/components/select/select-status';
 import { issueLinkTypeApi, statusTransformApi } from '@/api';
 import Loading from '@/components/Loading';
-import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
 import { getIsOrganization } from '@/utils/common';
 import { IIssueType } from '@/common/types';
@@ -44,7 +44,7 @@ const { Option } = Select;
 const linkTypeHasIssueTypeMap = new Map([]); // 存储关联类型都选择了哪些问题类型，避免重复选择
 const Linkage = ({
   // @ts-ignore
-  modal, record, selectedType, customCirculationDataSet, linkageType, selectedTypeName,
+  modal, record, selectedType, customCirculationDataSet, linkageType, selectedTypeName, selectedTypeCode,
 }) => {
   const isOrganization = getIsOrganization();
   const { data: issueTypes } = useIssueTypes({ typeCode: ['story', 'task', 'bug'] });
@@ -127,7 +127,7 @@ const Linkage = ({
       try {
         if (linkageType.includes('subIssue')) {
           const res: IParentIssueStatusSetting[] = await statusTransformApi.getLinkage(selectedType, record.get('id'));
-          const initFields = Field.init(new Array(Math.max(res.length, 1)).fill({}));
+          const initFields = linkageType.length > 1 ? [] : Field.init(new Array(Math.max(res.length, 1)).fill({}));
           initFields.forEach((item: { key: number }, i: number) => {
             addFieldRule(item.key);
             if (res.length > 0) {
@@ -139,7 +139,7 @@ const Linkage = ({
         if (linkageType.includes('linkIssue')) {
           const res: ILinkIssueStatusSetting[] = await statusTransformApi.getLinkIssueLinkage(selectedType, record.get('id'));
           setLinkIssueStatusSettings(res || []);
-          const initFields = LinkField.init(new Array(Math.max(res.length, 1)).fill({}));
+          const initFields = linkageType.length > 1 ? [] : LinkField.init(new Array(Math.max(res.length, 1)).fill({}));
           initFields.forEach((item: { key: number }, i: number) => {
             linkIssueAddFieldRule(item.key);
             if (res.length) {
@@ -215,7 +215,7 @@ const Linkage = ({
       modal.handleOk(handleOk);
     }
   }, [activeKey, customCirculationDataSet, fields, isOrganization, linkFields, linkIssueLinkageDataSet, linkageDataSet, linkageType, modal, record, selectedType]);
-  const selectedIssueTypes = (() => {
+  const selectedIssueTypes: string[] = (() => {
     const data: any = linkageDataSet.toData()[0];
     return Object.keys(data).reduce((result: string[], key) => {
       const [k, code] = key.split('-');
@@ -276,11 +276,14 @@ const Linkage = ({
                           linkageDataSet.current?.init(statusName, undefined);
                         }}
                       >
-                        {issueTypes?.filter((type: IIssueType) => (issueTypeId && type.id === issueTypeId) || !selectedIssueTypes.includes(type.id)).map((type: IIssueType) => (
+                        {
+                          // @ts-ignore
+                        issueTypes?.filter((type) => (selectedTypeCode === 'bug' ? type.typeCode !== 'bug' : true)).filter((type: IIssueType) => (issueTypeId && type.id === issueTypeId) || !selectedIssueTypes.includes(type.id)).map((type: IIssueType) => (
                           <Option value={type.id}>
                             {type.name}
                           </Option>
-                        ))}
+                        ))
+                        }
                       </Select>
                     </Col>
                     <Col span={11} key={id}>
