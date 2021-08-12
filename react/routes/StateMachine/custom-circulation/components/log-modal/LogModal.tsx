@@ -68,7 +68,7 @@ const LogTable: React.FC<Props> = () => {
     <span className={styles.status} style={{ background: value === 'SUCCESS' ? '#00BFA5' : '#F76776' }}>
       {
       // eslint-disable-next-line no-nested-ternary
-      value === 'SUCCESS' ? '已执行' : (value === 'STOP' ? '中止' : '循环终止')
+      value === 'SUCCESS' ? '已执行' : (value === 'STOP' ? '终止' : '循环终止')
       }
     </span>
   ), []);
