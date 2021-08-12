@@ -4034,8 +4034,19 @@
     <select id="queryUnDoneIssues" resultType="java.lang.Long">
         select ai1.issue_id from (
            (<include refid="selectParentIssue"/>)
-           UNION
-           (<include refid="selectChildren"/>)
+        ) as aii
+        JOIN agile_issue ai1 ON ai1.issue_id = aii.issue_id
+        left join agile_issue_status ais on ais.status_id = ai1.status_id and ais.project_id = ai1.project_id
+        where (ais.is_completed != 1 or ais.is_completed is null)
+        AND ai1.project_id = #{projectId}
+        ORDER BY ai1.rank asc
+    </select>
+
+    <select id="queryUnDoneAllIssues" resultType="java.lang.Long">
+        select ai1.issue_id from (
+        (<include refid="selectParentIssue"/>)
+        UNION
+        (<include refid="selectChildren"/>)
         ) as aii
         JOIN agile_issue ai1 ON ai1.issue_id = aii.issue_id
         left join agile_issue_status ais on ais.status_id = ai1.status_id and ais.project_id = ai1.project_id
