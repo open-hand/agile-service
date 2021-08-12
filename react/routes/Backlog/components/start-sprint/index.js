@@ -6,9 +6,9 @@ import {
 import { Modal } from 'choerodon-ui/pro';
 import { stores } from '@choerodon/boot';
 import { isNull } from 'lodash';
-import isHoliday from '@/utils/holiday';
 import originMoment from 'moment';
 import { extendMoment } from 'moment-range';
+import isHoliday from '@/utils/holiday';
 
 // @ts-ignore
 
@@ -205,10 +205,9 @@ class StartSprint extends Component {
                         style={{ cursor: 'pointer', color: 'var(--primary-color)' }}
                         onClick={() => { this.handleLinkToIssue('storyPoints'); }}
                       >
-                        {checkInfo.noStoryPointIssue}
-
+                        {`${checkInfo.noStoryPointIssue}个故事`}
                       </span>
-                      <span>个故事未预估故事点</span>
+                      <span>未预估故事点</span>
                     </>
                   )
                 }
@@ -223,10 +222,9 @@ class StartSprint extends Component {
                         style={{ cursor: 'pointer', color: 'var(--primary-color)' }}
                         onClick={() => { this.handleLinkToIssue('remainingTime'); }}
                       >
-                        {checkInfo.noRemainingTimeIssue}
-
+                        {`${checkInfo.noRemainingTimeIssue}个问题`}
                       </span>
-                      <span>个问题未预估工时</span>
+                      <span>未预估工时</span>
                     </>
                   )
                 }
