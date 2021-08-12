@@ -16,6 +16,8 @@ import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import { sprintApi } from '@/api';
 import WorkCalendar from '@/components/WorkCalendar';
 import useIsInProgram from '@/hooks/useIsInProgram';
+import to from '@/utils/to';
+import LINK_URL from '@/constants/LINK_URL';
 
 const moment = extendMoment(originMoment);
 const FormItem = Form.Item;
@@ -134,6 +136,16 @@ class StartSprint extends Component {
     return false;
   }
 
+  handleLinkToIssue(paramType) {
+    to(LINK_URL.workListIssue, {
+      params: {
+        paramName: `${this.props.data.sprintName}冲刺下未预估${paramType === 'storyPoints' ? '故事点的故事' : '工时的问题'}`,
+        storyPointsNull: paramType === 'storyPoints',
+        remainingTimeNull: paramType === 'remainingTime',
+      },
+    }, { blank: true });
+  }
+
   render() {
     const {
       data,
@@ -164,9 +176,63 @@ class StartSprint extends Component {
     return (
       <div>
         <p className="c7n-closeSprint-message">
-          {`该冲刺中包含了${!isNull(sprintDetail) ? sprintDetail.issueCount : 0}个问题。`}
+          <Icon
+            type="info-o"
+            style={{
+              marginRight: 6,
+              marginTop: -3,
+            }}
+          />
+          <span>该冲刺中包含了</span>
+          {
+            !isNull(sprintDetail) && (
+              <span>{ sprintDetail.issueCount }</span>
+            )
+          }
+          {
+            isNull(sprintDetail) ? '0' : ''
+          }
+          <span>个问题。</span>
           {checkInfo.noRemainingTimeIssue > 0 || checkInfo.noStoryPointIssue > 0
-            ? `其中${checkInfo.noStoryPointIssue > 0 ? `，${checkInfo.noStoryPointIssue}个故事未预估故事点` : ''}${checkInfo.noRemainingTimeIssue > 0 ? `，${checkInfo.noRemainingTimeIssue}个问题未预估工时` : ''}。`
+            ? (
+              <>
+                <span>其中，</span>
+                {
+                  checkInfo.noStoryPointIssue > 0 && (
+                    <>
+                      <span
+                        role="none"
+                        style={{ cursor: 'pointer', color: 'var(--primary-color)' }}
+                        onClick={() => { this.handleLinkToIssue('storyPoints'); }}
+                      >
+                        {checkInfo.noStoryPointIssue}
+
+                      </span>
+                      <span>个故事未预估故事点</span>
+                    </>
+                  )
+                }
+                {
+                  checkInfo.noStoryPointIssue && checkInfo.noStoryPointIssue ? (<span>，</span>) : ''
+                }
+                {
+                  checkInfo.noRemainingTimeIssue > 0 && (
+                    <>
+                      <span
+                        role="none"
+                        style={{ cursor: 'pointer', color: 'var(--primary-color)' }}
+                        onClick={() => { this.handleLinkToIssue('remainingTime'); }}
+                      >
+                        {checkInfo.noRemainingTimeIssue}
+
+                      </span>
+                      <span>个问题未预估工时</span>
+                    </>
+                  )
+                }
+                <span>。</span>
+              </>
+            )
             : ''}
         </p>
         <Form style={{ width: 512, marginTop: 24 }}>

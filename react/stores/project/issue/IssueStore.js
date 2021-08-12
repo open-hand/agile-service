@@ -3,8 +3,8 @@ import {
   observable, action, computed, toJS,
 } from 'mobx';
 import { includes } from 'lodash';
-import { isInProgram } from '@/utils/program';
 import { has } from '@choerodon/inject';
+import { isInProgram } from '@/utils/program';
 
 export function getSystemFields(excludeCodes = []) {
   const systemFields = [{
@@ -146,6 +146,18 @@ export function getSystemFields(excludeCodes = []) {
     defaultShow: false,
     fieldType: 'member',
   },
+  {
+    code: 'storyPointsNull',
+    name: '故事点为空',
+    archive: true,
+    defaultShow: false,
+  },
+  {
+    code: 'remainingTimeNull',
+    name: '预估时间为空',
+    archive: true,
+    defaultShow: false,
+  },
   ];
   if (has('agile:PublishVersion')) {
     systemFields.push({
@@ -155,6 +167,18 @@ export function getSystemFields(excludeCodes = []) {
       fieldType: 'multiple',
     });
   }
+  systemFields.push({
+    code: 'storyPoints',
+    name: '故事点',
+    defaultShow: false,
+    fieldType: 'number',
+  });
+  systemFields.push({
+    code: 'remainingTime',
+    name: '预估时间',
+    defaultShow: false,
+    fieldType: 'number',
+  });
   return isInProgram() ? systemFields.filter((f) => !includes(excludeCodes, f.code)) : systemFields.filter((f) => f.code !== 'feature' && !includes(excludeCodes, f.code));
 }
 export function getSystemFieldsInStoryMap(excludeCodes = []) {

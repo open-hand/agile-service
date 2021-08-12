@@ -106,7 +106,9 @@ const Issue = observer(({ cached, updateCache }) => {
   ), [query, tableProps]);
   const filterParams = useMemo(() => {
     const filterParamKeys = ['paramChoose', 'paramCurrentVersion', 'paramCurrentSprint', 'paramId',
-      'paramType', 'paramIssueId', 'paramName', 'paramOpenIssueId', 'detailTab', 'statusId', 'sprint', 'issueTypeId', 'assigneeId'];
+      'paramType', 'paramIssueId', 'paramName', 'paramOpenIssueId', 'detailTab', 'statusId', 'sprint', 'issueTypeId', 'assigneeId',
+      'storyPointsNull', 'remainingTimeNull',
+    ];
     return pick(params, filterParamKeys);
   }, [params]);
   const hasUrlFilter = useCallback((obj) => {
@@ -117,7 +119,7 @@ const Issue = observer(({ cached, updateCache }) => {
   const initFilter = usePersistFn(async () => {
     const {
       paramChoose, paramCurrentVersion, paramCurrentSprint, paramId,
-      paramType, paramIssueId, paramName, paramOpenIssueId, detailTab, ...searchArgs
+      paramType, paramIssueId, paramName, paramOpenIssueId, detailTab, storyPointsNull, remainingTimeNull, ...searchArgs
     } = params;
     if (hasUrlFilter(filterParams)) {
       issueSearchStore.clearAllFilter();
@@ -161,6 +163,12 @@ const Issue = observer(({ cached, updateCache }) => {
     if (paramType) {
       prefix = prefixs[paramType];
       issueSearchStore.handleFilterChange(paramType, [paramId]);
+    }
+    if (storyPointsNull === 'true') {
+      issueSearchStore.handleFilterChange('storyPointsNull', true);
+    }
+    if (remainingTimeNull === 'true') {
+      issueSearchStore.handleFilterChange('remainingTimeNull', true);
     }
     setUrlFilter(`${prefix ? `${prefix}:` : ''}${paramName || ''}`);
     // this.paramName = decodeURI(paramName);
