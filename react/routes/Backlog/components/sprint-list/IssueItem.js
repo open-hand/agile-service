@@ -36,6 +36,9 @@ function getStyle({ draggableStyle, virtualStyle, isDragging }) {
   const combined = {
     ...virtualStyle,
     ...draggableStyle,
+    ...isDragging ? {
+      height: ISSUE_HEIGHT,
+    } : {},
   };
   return combined;
 }
@@ -179,8 +182,10 @@ const Item = observer(({
 function IssueItem({
   provided, style, issue, isDragging, sprintId, onExpandChange, index,
 }) {
-  const draggingNum = BacklogStore.getIsDragging === issue.issueId && BacklogStore.getMultiSelected.size > 0 ? BacklogStore.getMultiSelected.size : undefined;
+  const draggingIssue = BacklogStore.getIsDragging;
+  const draggingNum = draggingIssue === issue.issueId && BacklogStore.getMultiSelected.size > 0 ? BacklogStore.getMultiSelected.size : undefined;
   const isExpand = BacklogStore.isExpand(issue.issueId);
+
   const handleExpandClick = usePersistFn((e) => {
     e.stopPropagation();
     BacklogStore.toggle(issue.issueId);
@@ -191,7 +196,7 @@ function IssueItem({
       ref={provided.innerRef}
       style={getStyle({
         virtualStyle: style,
-        isDragging,
+        isDragging: isDragging || draggingIssue === issue.issueId,
       })}
     >
       <div
@@ -212,16 +217,21 @@ function IssueItem({
           draggingNum={draggingNum}
         />
       </div>
-
       {isExpand && !isDragging && (
-        issue.children.map((child) => (
-          <Item
-            key={child.issueId}
-            issue={child}
-            sprintId={sprintId}
-            level={1}
-          />
-        ))
+        <div style={{
+          ...provided.draggableProps.style,
+          // cursor: 'move',
+        }}
+        >
+          {issue.children.map((child) => (
+            <Item
+              key={child.issueId}
+              issue={child}
+              sprintId={sprintId}
+              level={1}
+            />
+          ))}
+        </div>
       )}
     </div>
   );
