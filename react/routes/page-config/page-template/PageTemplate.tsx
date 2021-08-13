@@ -1,29 +1,29 @@
 /* eslint-disable react/jsx-indent */
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   TabPage as Page, Header, Content, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
 import {
-  Button, Modal, Spin, message, Select, Tooltip, PerformanceTable,
+  Button, Modal, message, Tooltip,
+
+  PerformanceTable, CheckBox,
 } from 'choerodon-ui/pro';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { observer, useComputed } from 'mobx-react-lite';
-import { toJS } from 'mobx';
+import { observer } from 'mobx-react-lite';
 import { Prompt } from 'react-router-dom';
+import {
+  omit, isEmpty,
+} from 'lodash';
+import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
+
 import {
   pageConfigApi, UIssueTypeConfig,
 } from '@/api/PageConfig';
 import { validKeyReturnValue } from '@/common/commonValid';
-import {
-  omit, set, pick, isEmpty,
-} from 'lodash';
-import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import Loading from '@/components/Loading';
-import AutoSize from '@/components/auto-size';
 import styles from './index.less';
-import openAddField from './components/add-field';
 import { usePageTemplateStore } from './stores';
 import Switch from './components/switch';
 import './PageTemplate.less';
@@ -32,9 +32,9 @@ import { PageTemplateStoreStatusCode } from './stores/PageTemplateStore';
 import { IFieldPostDataProps } from '../components/create-field/CreateField';
 import PageDescription from './components/page-description';
 import { transformDefaultValue, beforeSubmitTransform } from '../page-issue-type/utils';
-import openLinkage from '../components/setting-linkage/Linkage';
 import PageTemplateTable from './components/template-table';
 import openPageRoleConfigModal from './components/role-config';
+import { useLayoutEffect } from 'react';
 
 const TooltipButton: React.FC<{ title?: string, buttonIcon: string, buttonDisabled: boolean, clickEvent?: () => void } & Omit<ButtonProps, 'title'>> = ({
   title, children, buttonIcon, buttonDisabled, clickEvent, ...otherProps
@@ -55,6 +55,8 @@ const TooltipButton: React.FC<{ title?: string, buttonIcon: string, buttonDisabl
 };
 type ILocalFieldPostDataProps = IFieldPostDataProps & { localRecordIndexId?: number, localDefaultObj: any, defaultValueObj: any, };
 function PageTemplate() {
+  const tableRef = useRef<PerformanceTable>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const {
     sortTableDataSet, addUnselectedDataSet, intl, pageTemplateStore, isProject, prefixCls,
   } = usePageTemplateStore();
@@ -222,6 +224,12 @@ function PageTemplate() {
       cancelText: intl.formatMessage({ id: 'cancel' }),
     });
   }
+  useLayoutEffect(() => {
+    if (pageTemplateStore.currentIssueType && scrollRef.current) {
+      // 回到顶部
+      // scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [pageTemplateStore.currentIssueType]);
   return (
     <Page>
       <Prompt message={`是否放弃更改 ${Choerodon.STRING_DEVIDER}页面有未保存的内容,是否放弃更改？`} when={pageTemplateStore.getDirty} />
@@ -249,10 +257,16 @@ function PageTemplate() {
       <Content className={`${prefixCls}-content`} style={{ overflowY: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <Switch />
         <Loading loading={pageTemplateStore.getLoading} />
-        <div className={styles.top}>
+        <div
+          role="none"
+          ref={scrollRef}
+          className={styles.top}
+          onScroll={(e) => {
+            (e.target as any).scrollTop !== undefined && tableRef.current?.scrollTop((e.target as any).scrollTop);
+          }}
+        >
           <PageDescription />
-          <PageTemplateTable />
-
+          <PageTemplateTable tableRef={tableRef} />
           {/* {
             !isProject ? <SortTable />
               : [
