@@ -176,4 +176,21 @@
         AND project_id = #{projectId}
         GROUP BY field_cascade_rule_id
     </select>
+
+    <delete id="deleteByFieldId">
+        DELETE t1.*, t2.*
+        FROM fd_field_cascade_rule t1
+        LEFT JOIN fd_field_cascade_rule_option t2 ON (
+        t1.id = t2.field_cascade_rule_id
+        AND t2.organization_id = #{organizationId}
+        <if test="projectId != null">
+            AND t2.project_id = #{projectId}
+        </if>
+        )
+        WHERE (t1.field_id = #{fieldId} OR t1.cascade_field_id = #{fieldId})
+        AND t1.organization_id = #{organizationId}
+        <if test="projectId != null">
+            AND t1.project_id = #{projectId}
+        </if>
+    </delete>
 </mapper>

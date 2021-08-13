@@ -64,8 +64,17 @@ public interface FieldCascadeRuleMapper extends BaseMapper<FieldCascadeRuleDTO> 
      * 筛选有选项值的级联规则
      *
      * @param fieldCascadeRuleIds 级联规则id
-     * @param projectId 项目id
+     * @param projectId           项目id
      * @return 筛选后的级联规则id
      */
     List<Long> selectFieldCascadeRuleIdsHasOption(@Param("fieldCascadeRuleIds") List<Long> fieldCascadeRuleIds, @Param("projectId") Long projectId);
+
+    /**
+     * 删除指定字段关联的所有规则
+     *
+     * @param organizationId 组织id
+     * @param projectId      项目id
+     * @param fieldId        字段id
+     */
+    void deleteByFieldId(@Param("organizationId") Long organizationId, @Param("projectId") Long projectId, @Param("fieldId") Long fieldId);
 }
