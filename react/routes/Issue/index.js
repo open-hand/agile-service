@@ -166,9 +166,11 @@ const Issue = observer(({ cached, updateCache }) => {
     }
     if (storyPointsNull === 'true') {
       issueSearchStore.handleFilterChange('storyPointsNull', true);
+      prefix = '';
     }
     if (remainingTimeNull === 'true') {
       issueSearchStore.handleFilterChange('remainingTimeNull', true);
+      prefix = '';
     }
     setUrlFilter(`${prefix ? `${prefix}:` : ''}${paramName || ''}`);
     // this.paramName = decodeURI(paramName);
