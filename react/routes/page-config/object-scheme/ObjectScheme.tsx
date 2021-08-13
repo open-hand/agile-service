@@ -49,7 +49,7 @@ function ObjectScheme() {
     const record = schemeTableDataSet.current;
     const modalProps = {
       title: formatMessage({ id: 'field.delete.title' }, { name: record?.get('name') }),
-      children: formatMessage({ id: 'field.delete.msg' }),
+      children: formatMessage({ id: 'field.delete.msg' }, { name: record?.get('name') }),
       okText: formatMessage({ id: 'delete' }),
       onOk: () => schemeTableDataSet.delete(record, false).then(() => handleRefresh()),
     };
