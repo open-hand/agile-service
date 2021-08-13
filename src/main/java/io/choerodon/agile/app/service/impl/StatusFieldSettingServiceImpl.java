@@ -202,33 +202,63 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         List<String> field = new ArrayList<>();
         field.add("objectVersionNumber");
         Map<String,List<VersionIssueRelVO>> versionMap = new HashMap<>();
-        Class aClass = issueUpdateVO.getClass();
         Map<String,Object> specifyMap = new HashMap<>();
-        list.forEach(v -> {
-            List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS = listFieldValueSetting(0L , projectId, v.getId(), v.getFieldId());
-            if (!CollectionUtils.isEmpty(statusFieldValueSettingDTOS)) {
-                if (Boolean.TRUE.equals(v.getSystem())) {
-                    Boolean isVersion = FieldCode.FIX_VERSION.equals(v.getFieldCode()) || FieldCode.INFLUENCE_VERSION.equals(v.getFieldCode());
-                    if (Boolean.TRUE.equals(isVersion)) {
-                        handlerVersion(versionMap, v, statusFieldValueSettingDTOS);
-                    } else if (Arrays.asList(FEATURE_FIELD).contains(v.getFieldCode())){
-                        if (agilePluginService != null) {
-                            agilePluginService.handlerFeatureFieldValue(v, issueUpdateVO, specifyMap, statusFieldValueSettingDTOS, issueDTO);
-                        }
-                    } else {
-                        handlerPredefinedValue(issueUpdateVO, aClass, field, issueDTO, v, statusFieldValueSettingDTOS);
-                    }
-                } else {
-                    PageFieldViewUpdateVO pageFieldViewUpdateVO = new PageFieldViewUpdateVO();
-                    pageFieldViewUpdateVO.setFieldType(v.getFieldType());
-                    pageFieldViewUpdateVO.setFieldId(v.getFieldId());
-                    setCustomFieldValue(issueDTO, v, pageFieldViewUpdateVO, statusFieldValueSettingDTOS);
-                    customField.add(pageFieldViewUpdateVO);
-                }
+        list.forEach(fieldSetting -> {
+            Long fieldSettingId = fieldSetting.getId();
+            Long fieldId = fieldSetting.getFieldId();
+            String fieldCode = fieldSetting.getFieldCode();
+            String fieldType = fieldSetting.getFieldType();
+            boolean isSystemField = Boolean.TRUE.equals(fieldSetting.getSystem());
+            List<StatusFieldValueSettingDTO> statusFieldValueSettings = listFieldValueSetting(0L, projectId, fieldSettingId, fieldId);
+            if (ObjectUtils.isEmpty(statusFieldValueSettings)) {
+                return;
+            }
+            if (isSystemField) {
+                processSystemFieldValues(issueDTO, issueUpdateVO, field, versionMap, specifyMap, fieldCode, statusFieldValueSettings);
+            } else {
+                processCustomFieldValues(issueDTO, customField, fieldId, fieldType, statusFieldValueSettings);
             }
         });
         // 执行更新
-        updateIssue(issueDTO,field,issueUpdateVO,customField,versionMap,specifyMap);
+        updateIssue(issueDTO,field,issueUpdateVO,customField,versionMap,specifyMap, true);
+    }
+
+    @Override
+    public void processCustomFieldValues(IssueDTO issueDTO,
+                                         List<PageFieldViewUpdateVO> customField,
+                                         Long fieldId, String fieldType,
+                                         List<StatusFieldValueSettingDTO> statusFieldValueSettings) {
+        if (ObjectUtils.isEmpty(statusFieldValueSettings)) {
+            return;
+        }
+        PageFieldViewUpdateVO pageFieldViewUpdateVO = new PageFieldViewUpdateVO();
+        pageFieldViewUpdateVO.setFieldType(fieldType);
+        pageFieldViewUpdateVO.setFieldId(fieldId);
+        setCustomFieldValue(issueDTO, fieldType, pageFieldViewUpdateVO, statusFieldValueSettings, fieldId);
+        customField.add(pageFieldViewUpdateVO);
+    }
+
+    @Override
+    public void processSystemFieldValues(IssueDTO issueDTO,
+                                         IssueUpdateVO issueUpdateVO,
+                                         List<String> field,
+                                         Map<String, List<VersionIssueRelVO>> versionMap,
+                                         Map<String, Object> specifyMap,
+                                         String fieldCode,
+                                         List<StatusFieldValueSettingDTO> statusFieldValueSettings) {
+        if (ObjectUtils.isEmpty(statusFieldValueSettings)) {
+            return;
+        }
+        Boolean isVersion = FieldCode.FIX_VERSION.equals(fieldCode) || FieldCode.INFLUENCE_VERSION.equals(fieldCode);
+        if (Boolean.TRUE.equals(isVersion)) {
+            handlerVersion(versionMap, fieldCode, statusFieldValueSettings);
+        } else if (Arrays.asList(FEATURE_FIELD).contains(fieldCode)) {
+            if (agilePluginService != null) {
+                agilePluginService.handlerFeatureFieldValue(fieldCode, issueUpdateVO, specifyMap, statusFieldValueSettings, issueDTO);
+            }
+        } else {
+            handlerPredefinedValue(issueUpdateVO, field, issueDTO, fieldCode, statusFieldValueSettings);
+        }
     }
 
     @Override
@@ -307,24 +337,39 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         return list;
     }
 
-    private void updateIssue(IssueDTO issueDTO, List<String> field, IssueUpdateVO issueUpdateVO, List<PageFieldViewUpdateVO> customField, Map<String,List<VersionIssueRelVO>> versionMap, Map<String, Object> specifyMap){
+    @Override
+    public void updateIssue(IssueDTO issueDTO,
+                            List<String> field,
+                            IssueUpdateVO issueUpdateVO,
+                            List<PageFieldViewUpdateVO> customField,
+                            Map<String, List<VersionIssueRelVO>> versionMap,
+                            Map<String, Object> specifyMap,
+                            boolean doRuleNotice) {
         Long organizationId = ConvertUtil.getOrganizationId(issueDTO.getProjectId());
         Long objectVersionNumber = issueDTO.getObjectVersionNumber();
         if (!CollectionUtils.isEmpty(field)) {
             issueUpdateVO.setIssueId(issueDTO.getIssueId());
             issueUpdateVO.setObjectVersionNumber(objectVersionNumber);
-            issueService.updateIssue(issueDTO.getProjectId(), issueUpdateVO, field);
+            if (doRuleNotice) {
+                issueService.updateIssue(issueDTO.getProjectId(), issueUpdateVO, field);
+            } else {
+                issueService.updateIssueWithoutRuleNotice(issueDTO.getProjectId(), issueUpdateVO, field);
+            }
             objectVersionNumber += 1;
         }
         // 单独更新版本
         if (!CollectionUtils.isEmpty(versionMap)) {
-            for (Map.Entry<String, List<VersionIssueRelVO>> entry :versionMap.entrySet()) {
+            for (Map.Entry<String, List<VersionIssueRelVO>> entry : versionMap.entrySet()) {
                 IssueUpdateVO issueUpdateVO1 = new IssueUpdateVO();
                 issueUpdateVO1.setIssueId(issueDTO.getIssueId());
                 issueUpdateVO1.setObjectVersionNumber(objectVersionNumber);
                 issueUpdateVO1.setVersionType(entry.getKey());
                 issueUpdateVO1.setVersionIssueRelVOList(entry.getValue());
-                issueService.updateIssue(issueDTO.getProjectId(), issueUpdateVO1, new ArrayList<>());
+                if (doRuleNotice) {
+                    issueService.updateIssue(issueDTO.getProjectId(), issueUpdateVO1, new ArrayList<>());
+                } else {
+                    issueService.updateIssueWithoutRuleNotice(issueDTO.getProjectId(), issueUpdateVO1, new ArrayList<>());
+                }
                 objectVersionNumber += 1;
             }
         }
@@ -335,12 +380,14 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         }
 
         if (agilePluginService != null) {
-           agilePluginService.handlerSpecifyProgramField(issueDTO,specifyMap);
+            agilePluginService.handlerSpecifyProgramField(issueDTO, specifyMap, doRuleNotice);
         }
     }
 
-    private void handlerVersion(Map<String, List<VersionIssueRelVO>> versionMap, StatusFieldSettingVO statusFieldSettingVO, List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS) {
-        Boolean isVersion = FieldCode.FIX_VERSION.equals(statusFieldSettingVO.getFieldCode()) || FieldCode.INFLUENCE_VERSION.equals(statusFieldSettingVO.getFieldCode());
+    private void handlerVersion(Map<String, List<VersionIssueRelVO>> versionMap,
+                                String fieldCode,
+                                List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS) {
+        Boolean isVersion = FieldCode.FIX_VERSION.equals(fieldCode) || FieldCode.INFLUENCE_VERSION.equals(fieldCode);
         if (Boolean.TRUE.equals(isVersion)) {
             List<VersionIssueRelVO> versionIssueRelVOS = new ArrayList<>();
             if (!CLEAR.equals(statusFieldValueSettingDTOS.get(0).getOperateType())) {
@@ -350,35 +397,44 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                     return versionIssueRelVO;
                 }).collect(Collectors.toList());
             }
-            String versionType = FieldCode.FIX_VERSION.equals(statusFieldSettingVO.getFieldCode()) ? "fix" : "influence";
+            String versionType = FieldCode.FIX_VERSION.equals(fieldCode) ? "fix" : "influence";
             versionMap.put(versionType,versionIssueRelVOS);
         }
     }
 
-    private void handlerPredefinedValue(IssueUpdateVO issueUpdateVO,Class aClass, List<String> fieldList, IssueDTO issueDTO, StatusFieldSettingVO v, List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS) {
-        String fieldCode = v.getFieldCode();
+    private void handlerPredefinedValue(IssueUpdateVO issueUpdateVO,
+                                        List<String> fieldList,
+                                        IssueDTO issueDTO,
+                                        String fieldCode,
+                                        List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS) {
         String fieldName = FIELD_CODE.get(fieldCode);
+        Class clazz = issueUpdateVO.getClass();
         try {
-            Field field = aClass.getDeclaredField(fieldName);
+            Field field = clazz.getDeclaredField(fieldName);
             field.setAccessible(true);
             StatusFieldValueSettingDTO statusFieldValueSettingDTO = statusFieldValueSettingDTOS.get(0);
             fieldList.add(fieldName);
             if (CLEAR.equals(statusFieldValueSettingDTO.getOperateType())) {
-                if (FieldCode.COMPONENT.equals(v.getFieldCode()) || FieldCode.LABEL.equals(v.getFieldCode()) || FieldCode.TAG.equals(v.getFieldCode())) {
+                if (FieldCode.COMPONENT.equals(fieldCode) || FieldCode.LABEL.equals(fieldCode) || FieldCode.TAG.equals(fieldCode)) {
                     field.set(issueUpdateVO, new ArrayList<>());
                 } else {
                     field.set(issueUpdateVO, null);
                 }
                 return;
             }
-            handlerFieldName(issueUpdateVO, statusFieldValueSettingDTOS, issueDTO, statusFieldValueSettingDTO, v, field);
+            handlerFieldName(issueUpdateVO, statusFieldValueSettingDTOS, issueDTO, statusFieldValueSettingDTO, fieldCode, field);
         } catch (Exception e) {
             throw new CommonException("error.transform.object", e);
         }
     }
 
-    private void handlerFieldName(IssueUpdateVO issueUpdateVO, List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS, IssueDTO issueDTO, StatusFieldValueSettingDTO fieldValueSettingDTO, StatusFieldSettingVO v, Field field) throws IllegalAccessException {
-        switch (v.getFieldCode()) {
+    private void handlerFieldName(IssueUpdateVO issueUpdateVO,
+                                  List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS,
+                                  IssueDTO issueDTO,
+                                  StatusFieldValueSettingDTO fieldValueSettingDTO,
+                                  String fieldCode,
+                                  Field field) throws IllegalAccessException {
+        switch (fieldCode) {
             case FieldCode.REPORTER:
                 Boolean canSetValue = ((MAIN_RESPONSIBLE.equals(fieldValueSettingDTO.getOperateType()) && !ObjectUtils.isEmpty(issueDTO.getMainResponsibleId()))
                         || !(ASSIGNEE.equals(fieldValueSettingDTO.getOperateType()) || MAIN_RESPONSIBLE.equals(fieldValueSettingDTO.getOperateType()))
@@ -473,12 +529,17 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         return bigDecimal;
     }
 
-    private void setCustomFieldValue(IssueDTO issueDTO, StatusFieldSettingVO v, PageFieldViewUpdateVO pageFieldViewUpdateVO, List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS) {
+    private void setCustomFieldValue(IssueDTO issueDTO,
+                                     String fieldType,
+                                     PageFieldViewUpdateVO pageFieldViewUpdateVO,
+                                     List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS,
+                                     Long fieldId) {
         if (CLEAR.equals(statusFieldValueSettingDTOS.get(0).getOperateType())) {
             return;
         }
+        Long projectId = issueDTO.getProjectId();
         StatusFieldValueSettingDTO statusFieldValueSettingDTO = statusFieldValueSettingDTOS.get(0);
-        switch (v.getFieldType()) {
+        switch (fieldType) {
             case FieldType.CHECKBOX:
             case FieldType.MULTIPLE:
                 pageFieldViewUpdateVO.setValue(statusFieldValueSettingDTOS.stream().map(settingDTO -> settingDTO.getOptionId().toString()).collect(Collectors.toList()));
@@ -502,7 +563,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                 pageFieldViewUpdateVO.setValue(statusFieldValueSettingDTO.getStringValue());
                 break;
             case FieldType.NUMBER:
-                pageFieldViewUpdateVO.setValue(handlerNumber(v, statusFieldValueSettingDTO, issueDTO));
+                pageFieldViewUpdateVO.setValue(handlerNumber(projectId, fieldId, statusFieldValueSettingDTO, issueDTO));
                 break;
             case FieldType.MULTI_MEMBER:
                 pageFieldViewUpdateVO.setValue(handlerMultiMember(statusFieldValueSettingDTOS, issueDTO));
@@ -533,10 +594,13 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         return userIds;
     }
 
-    private BigDecimal handlerNumber(StatusFieldSettingVO v, StatusFieldValueSettingDTO statusFieldValueSettingDTO, IssueDTO issueDTO) {
+    private BigDecimal handlerNumber(Long projectId,
+                                     Long fieldId,
+                                     StatusFieldValueSettingDTO statusFieldValueSettingDTO,
+                                     IssueDTO issueDTO) {
         BigDecimal bigDecimal = null;
         if ("add".equals(statusFieldValueSettingDTO.getOperateType())) {
-            List<FieldValueDTO> fieldValueDTOS = fieldValueMapper.queryList(v.getProjectId(), issueDTO.getIssueId(), "agile_issue", v.getFieldId());
+            List<FieldValueDTO> fieldValueDTOS = fieldValueMapper.queryList(projectId, issueDTO.getIssueId(), "agile_issue", fieldId);
             BigDecimal numberAddValue = statusFieldValueSettingDTO.getNumberAddValue();
             if (CollectionUtils.isEmpty(fieldValueDTOS)) {
                 return numberAddValue;

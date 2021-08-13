@@ -423,4 +423,12 @@ public interface IssueService {
     void handlerInfluenceMap(Map<Long, List<Long>> influenceMap, Long issueId, Long statusId, Map<Long, List<IssueLinkChangeVO>> issueLinkChangeGroup, Long influenceId, InfluenceIssueVO influenceIssueVO, Boolean autoTriggered);
 
     Boolean updateInfluenceIssueStatus(Long projectId, Long issueId, String applyType, Set<Long> influenceIssueIds);
+
+    IssueVO updateIssueWithoutRuleNotice(Long projectId,
+                                         IssueUpdateVO issueUpdateVO,
+                                         List<String> fieldList);
+
+    void handleUpdateIssueWithoutRuleNotice(IssueUpdateVO issueUpdateVO,
+                                            List<String> fieldList,
+                                            Long projectId);
 }

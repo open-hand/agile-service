@@ -367,7 +367,7 @@ public interface AgilePluginService {
      * @param issueDTO
      * @param specifyMap
      */
-    void handlerSpecifyProgramField(IssueDTO issueDTO, Map<String, Object> specifyMap);
+    void handlerSpecifyProgramField(IssueDTO issueDTO, Map<String, Object> specifyMap, boolean doRuleNotice);
 
     /**
      * 处理状态机自定义流转项目群字段属性
@@ -410,12 +410,12 @@ public interface AgilePluginService {
 
     /**
      * 变更属性时处理feature的特有的系统字段
-     * @param v
+     * @param fieldCode
      * @param issueUpdateVO
      * @param specifyMap
      * @param statusFieldValueSettingDTOS
      */
-    void handlerFeatureFieldValue(StatusFieldSettingVO v, IssueUpdateVO issueUpdateVO, Map<String, Object> specifyMap, List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS, IssueDTO issueDTO);
+    void handlerFeatureFieldValue(String fieldCode, IssueUpdateVO issueUpdateVO, Map<String, Object> specifyMap, List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS, IssueDTO issueDTO);
 
     /**
      * 如果是开源版升级到商业版，需要补充feature问题类型

@@ -73,11 +73,12 @@ public interface ConfigurationRuleService {
                    AuditDomain auditDomain,
                    ConfigurationRuleVO rule,
                    Long projectId,
-                   boolean onlySendCustomFieldMember);
+                   boolean createCustomFieldMember);
 
     ConfigurationRuleVO filterRuleByCondition(ConfigurationRuleVO rule,
                                               Long instanceId,
                                               NoticeEventVO noticeEvent,
-                                              Set<Long> ruleIdsFindByMemberFields);
+                                              Set<Long> ruleIdsFindByMemberFields,
+                                              boolean checkMode);
 }
 
