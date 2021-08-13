@@ -4,6 +4,8 @@ import {
 } from 'choerodon-ui/pro';
 import { toJS, observable } from 'mobx';
 import { find } from 'lodash';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 import SelectUser from '@/components/select/select-user';
 import SelectSprint from '@/components/select/select-sprint';
 import SelectIssueType from '@/components/select/select-issue-type';
@@ -12,10 +14,8 @@ import SelectPriority from '@/components/select/select-priority';
 import SelectLabel from '@/components/select/select-label';
 import SelectComponent from '@/components/select/select-component';
 import SelectVersion from '@/components/select/select-version';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import SelectSubProject from '@/components/select/select-sub-project';
-import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 import { ISprint, User } from '@/common/types';
 import { userApi } from '@/api';
 import SelectEnvironment from '@/components/select/select-environment';
@@ -26,6 +26,7 @@ import SelectStatus from './field/StatusField';
 import FeatureProjectField from './field/FeatureProjectField';
 import PIField from './field/pi-field';
 import QuickFilterField from './field/quick-filter-field';
+import getFilterFields from '@/components/field-pro/layouts/filter';
 
 const { Option } = Select;
 
@@ -33,7 +34,14 @@ const forceUpdate = observable.box(false);
 function noticeForceUpdate() {
   forceUpdate.set(true);
 }
-export default function renderField<T extends Partial<SelectProps>>(field: IChosenFieldField, otherComponentProps: T | Partial<DatePickerProps> | any,
+export default function renderFieldNEW<T extends Partial<SelectProps>>(field: IChosenFieldField, otherComponentProps: T | Partial<DatePickerProps> | any,
+  { dataSet, useSelectUserForceRefreshHook }: {
+    dataSet?: DataSet, useSelectUserForceRefreshHook?: [any, React.Dispatch<React.SetStateAction<any>>]
+  }) {
+  return getFilterFields([{ field, dataSet, otherComponentProps }])[0];
+}
+
+function renderField<T extends Partial<SelectProps>>(field: IChosenFieldField, otherComponentProps: T | Partial<DatePickerProps> | any,
   { dataSet, useSelectUserForceRefreshHook }: {
     dataSet?: DataSet, useSelectUserForceRefreshHook?: [any, React.Dispatch<React.SetStateAction<any>>]
   }) {
