@@ -1,8 +1,4 @@
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import React from 'react';
-import {
-  Button, Modal, Spin, message, Select, PerformanceTable, Icon, Dropdown, CheckBox,
-} from 'choerodon-ui/pro';
 import { Tooltip } from 'choerodon-ui/pro';
 import TableDropMenu from '@/components/table-drop-menu';
 import { pageConfigApi } from '@/api';
@@ -40,14 +36,6 @@ function checkPermissionLinkage(data: any) {
   }
   const res = keyFilters.filter((filter) => !filter?.ignoreOtherInclude).every((filter) => filter?.include?.includes(data[filter.key]));
   return res || keyFilters.filter((filter) => filter?.ignoreOtherInclude).some((filter) => filter?.include?.includes(data[filter.key]));
-}
-/**
- * 检查权限配置权限
- * @param data
- */
-function checkPermissionRole(data: { createdLevel: string }) {
-  const { createdLevel } = data;
-  return createdLevel === 'project';
 }
 
 const getColumns = ({ issueTypeId, loadData }: { issueTypeId: string, loadData: () => void }) => ([

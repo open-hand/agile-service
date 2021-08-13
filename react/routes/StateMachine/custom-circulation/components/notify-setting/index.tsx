@@ -9,11 +9,11 @@ import {
 import { stores } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
 import { statusTransformApi, IUpdateNotifySetting, statusTransformApiConfig } from '@/api';
 import { getProjectId, getIsOrganization } from '@/utils/common';
-import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
 import { User } from '@/common/types';
-import Loading from '@/components/Loading';
+import { OldLoading } from '@/components/Loading';
 import useIsProgram from '@/hooks/useIsProgram';
 import SelectUser from '@/components/select/select-user';
 import styles from './index.less';
@@ -269,7 +269,7 @@ const NotifySetting = ({
   );
   return (
     <div className={styles.notify_setting}>
-      <Loading loading={loading} />
+      <OldLoading loading={loading} />
       <div className={styles.tip}>问题流转到当前状态后，将按照下方设置通知相关方。</div>
       <Form dataSet={notifySettingDataSet} className={styles.form}>
         <Select name="noticeTypeList" />
