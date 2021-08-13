@@ -94,6 +94,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     private FieldValueMapper fieldValueMapper;
     @Autowired
     private FieldDataLogMapper fieldDataLogMapper;
+    @Autowired
+    private FieldCascadeRuleMapper fieldCascadeRuleMapper;
 
     @Override
     public ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field,
@@ -788,6 +790,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 isFieldDeleted(projectIds, fieldId, null);
             }
         }
+        fieldCascadeRuleMapper.deleteByFieldId(organizationId, projectId, fieldId);
         objectSchemeFieldMapper.cascadeDelete(organizationId, projectId, fieldId);
         //删除字段值
         fieldValueService.deleteByFieldId(fieldId);
