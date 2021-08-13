@@ -9,13 +9,13 @@ import {
   debounce, groupBy, isEmpty, pick, set,
 } from 'lodash';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import { ILabel } from '@/common/types';
 import { FlatSelect } from '@choerodon/components';
+import { ILabel } from '@/common/types';
 import { randomString } from '@/utils/random';
 import MultiServiceTag, { IMultiServiceTagItemProps, IMultiServiceTagProps } from './MultiServiceTag';
 import './index.less';
 
-interface Props extends Partial<SelectProps> {
+export interface SelectMultiServiceTagProps extends Partial<SelectProps> {
   dataRef?: React.RefObject<Array<any>>
   valueField?: string
   afterLoad?: (sprints: ILabel[]) => void
@@ -28,7 +28,7 @@ interface Props extends Partial<SelectProps> {
   projectId?: string
 }
 
-const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
+const SelectMultiServiceTag: React.FC<SelectMultiServiceTagProps> = forwardRef(({
   dataRef, valueField, afterLoad, flat, applicationId, projectId, mode, onBlur, onChange, onPopupHidden, value: propsValue, defaultValue, ...otherProps
 }, ref: React.Ref<Select>) => {
   const innerRef = useRef<Select | null>();

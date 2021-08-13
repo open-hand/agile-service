@@ -1,14 +1,14 @@
 import React, { useMemo, forwardRef } from 'react';
-import { Select } from 'choerodon-ui/pro';
-import { Tooltip } from 'choerodon-ui/pro';
+import { Select, Tooltip } from 'choerodon-ui/pro';
+
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import { FlatSelect } from '@choerodon/components';
 import { sprintApi } from '@/api';
 import useSelect, { SelectConfig, FragmentForSearch } from '@/hooks/useSelect';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { ISprint } from '@/common/types';
-import { FlatSelect } from '@choerodon/components';
 import './index.less';
 
-interface Props extends Partial<SelectProps> {
+export interface SelectSprintProps extends Partial<SelectProps> {
   hasUnassign?: boolean,
   isProgram?: boolean,
   statusList?: string[],
@@ -20,7 +20,7 @@ interface Props extends Partial<SelectProps> {
   flat?: boolean
 }
 
-const SelectSprint: React.FC<Props> = forwardRef(({
+const SelectSprint: React.FC<SelectSprintProps> = forwardRef(({
   statusList = ['sprint_planning', 'started'],
   isProgram,
   hasUnassign,

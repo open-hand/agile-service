@@ -3,15 +3,15 @@ import React, {
 } from 'react';
 import { Select as OldSelect } from 'choerodon-ui';
 import { Select, Tooltip } from 'choerodon-ui/pro';
-import useSelect, { SelectConfig } from '@/hooks/useSelect';
-import { versionApi } from '@/api';
 import { SelectProps as OldSelectProps } from 'choerodon-ui/lib/select';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
+import { versionApi } from '@/api';
+import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { IProgramVersion } from '@/common/types';
 import versionStyles from './index.less';
 
-interface Props extends Partial<SelectProps> {
+export interface SelectProgramVersionProps extends Partial<SelectProps> {
   teamProjectIds?: string[],
   dataRef?: React.MutableRefObject<any>
   afterLoad?: (versions: any[]) => void | Array<any>
@@ -89,7 +89,7 @@ function useGetVersionData({
   useEffect(() => { loadData(); }, [loadData]);
   return [versionData, { loadData, dispatch }];
 }
-const SelectProgramVersion: React.FC<Props> = forwardRef(({
+const SelectProgramVersion: React.FC<SelectProgramVersionProps> = forwardRef(({
   teamProjectIds, dataRef, afterLoad, flat, optionFlat, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const Component = flat ? FlatSelect : Select;

@@ -1,16 +1,16 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { issueTypeApi, statusApi } from '@/api';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IStatus } from '@/common/types';
 
-interface Props extends Partial<SelectProps> {
+export interface SelectStatusProps extends Partial<SelectProps> {
   expectStatusIds?: string[]
   isOrganization?: boolean
 }
 
-const SelectStatus: React.FC<Props> = forwardRef(({
+const SelectStatus: React.FC<SelectStatusProps> = forwardRef(({
   expectStatusIds,
   isOrganization = false,
   ...otherProps

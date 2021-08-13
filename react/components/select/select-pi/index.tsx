@@ -1,8 +1,8 @@
 import React, { useMemo, forwardRef, useRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import useSelect, { SelectConfig, FragmentForSearch, LoadConfig } from '@/hooks/useSelect';
 import { FlatSelect } from '@choerodon/components';
+import useSelect, { SelectConfig, FragmentForSearch, LoadConfig } from '@/hooks/useSelect';
 import { piApi } from '@/api';
 import type { PI } from '@/common/types';
 import styles from './index.less';
@@ -22,7 +22,7 @@ const renderPi = (pi: any) => {
   }
   return null;
 };
-interface Props extends Partial<SelectProps> {
+export interface SelectPIProps extends Partial<SelectProps> {
   statusList?: string[]
   afterLoad?: (piList: PI[]) => void
   request?: ({ filter, page }: LoadConfig) => Promise<PI[]>
@@ -34,10 +34,10 @@ interface Props extends Partial<SelectProps> {
   doingIsFirst?: boolean
   projectId?: string
 }
-const SelectPI: React.FC<Props> = forwardRef(({
+const SelectPI: React.FC<SelectPIProps> = forwardRef(({
   dataRef, statusList, disabledCurrentPI = false, afterLoad, request, flat, addPi0, doingIsFirst, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
-  const afterLoadRef = useRef<Props['afterLoad']>();
+  const afterLoadRef = useRef<SelectPIProps['afterLoad']>();
   afterLoadRef.current = afterLoad;
   const config = useMemo((): SelectConfig<PI & { piName?: string }> => ({
     name: 'all_pi',

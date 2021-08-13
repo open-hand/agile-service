@@ -7,12 +7,12 @@ import { usePersistFn } from 'ahooks';
 import { FlatSelect } from '@choerodon/components';
 import { commonApi } from '@/api';
 
-interface Props extends Partial<SelectProps> {
+export interface SelectEnvironmentProps extends Partial<SelectProps> {
   flat?: boolean
   afterLoad?: (data: any[]) => void
 }
 interface UseEnvironmentDataProps {
-  afterLoad?: Props['afterLoad']
+  afterLoad?: SelectEnvironmentProps['afterLoad']
 }
 function useEnvironmentData(props?: UseEnvironmentDataProps) {
   const [options, setOptions] = useState<{ valueCode: string, name: string }[]>([]);
@@ -26,7 +26,7 @@ function useEnvironmentData(props?: UseEnvironmentDataProps) {
   }, [callback]);
   return options;
 }
-const SelectEnvironment: React.FC<Props> = forwardRef(({
+const SelectEnvironment: React.FC<SelectEnvironmentProps> = forwardRef(({
   flat, afterLoad, ...otherProps
 }, ref: React.Ref<Select>) => {
   const Component = flat ? FlatSelect : Select;
