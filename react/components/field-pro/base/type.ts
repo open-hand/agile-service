@@ -11,7 +11,7 @@ export type IComponentFCWithClassObject = { [propsName: string]: React.FC | Reac
 
 type IFirstParameterFC<F extends React.FC> = Parameters<F>[0]
 
-type IComponentProps<C extends IComponentFCWithClass> = C extends React.FC ? IFirstParameterFC<C> : React.ComponentProps<C>
+type IComponentProps<C extends IComponentFCWithClass> = React.ComponentProps<C> // C extends React.FC ? IFirstParameterFC<C> :
 
 export type ICodeDistributeProps<T extends IComponentFCWithClassObject, K extends keyof T> = K extends string ? { code: K, props?: IComponentProps<T[K]>, fieldType: IFieldType } : never;
 
@@ -29,18 +29,6 @@ export interface IFieldRequiredConfig {
 export type IFieldConfig<T extends IComponentFCWithClassObject,
     F extends IComponentFCWithClassObject = IComponentFCWithClassObject> = (IFieldRequiredConfig & IFieldSystemComponentConfig<T>) | (IFieldRequiredConfig & IFieldCustomComponentConfig<F>)
 
-//   (IFieldRequiredConfig & IFieldCustomComponentConfig<F>)
-// export interface IFieldConfig<T extends IComponentFCObject, K extends keyof T> {
-//     code: K
-//     fieldType: IFieldType
-//     props?: T[K]
-//     outputs: Array<'element' | 'config' | 'function'>
-// }
-// interface IFieldProcessConfig<T exten > extends IFieldRequiredConfig {
-//     clearButton: boolean,
-//     name: string,
-//     [propsName: string]: any
-// }
 type IFieldProcessConfig<T extends IComponentFCWithClassObject, C extends IComponentFCWithClassObject = IComponentFCWithClassObject> = IFieldComponentConfig<T, C> // 需要补充处理过后类型
 export type IFieldOutput<T extends IComponentFCWithClassObject> = React.ReactElement | IFieldProcessConfig<T> | ((config: IFieldProcessConfig<T>) => React.ReactElement)
 export type { IFieldProcessConfig };

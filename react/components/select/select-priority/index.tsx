@@ -1,12 +1,12 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import { FlatSelect } from '@choerodon/components';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { fieldApi, priorityApi } from '@/api';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { Priority } from '@/common/types';
-import { FlatSelect } from '@choerodon/components';
 
-interface Props extends Partial<SelectProps> {
+export interface SelectPriorityProps extends Partial<SelectProps> {
   priorityId?: number
   fieldId?: string
   dataRef?: React.MutableRefObject<any>
@@ -17,7 +17,7 @@ interface Props extends Partial<SelectProps> {
   selected?: string[]
 }
 
-const SelectPriority: React.FC<Props> = forwardRef(({
+const SelectPriority: React.FC<SelectPriorityProps> = forwardRef(({
   priorityId, fieldId, ruleIds, selected, dataRef, afterLoad, flat, projectId, ...otherProps
 },
 ref: React.Ref<Select>) => {

@@ -12,14 +12,14 @@ interface IFeature {
   issueId: string
   summary: string
 }
-interface Props extends Partial<SelectProps> {
+export interface SelectSubFeatureProps extends Partial<SelectProps> {
   featureIds?: number[],
   afterLoad?: (features: any[]) => void
 }
 /**
  * 子项目查询项目群特性
  */
-const SelectSubFeature: React.FC<Props> = forwardRef(({ featureIds, afterLoad, ...otherProps }, ref: React.Ref<Select>) => {
+const SelectSubFeature: React.FC<SelectSubFeatureProps> = forwardRef(({ featureIds, afterLoad, ...otherProps }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<IFeature> => ({
     name: 'featureId',
     textField: 'summary',

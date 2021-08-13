@@ -47,7 +47,7 @@ function getB(field: IFieldCodeUnionFieldTypeComponentConfig<AgileComponentMapPr
 
 }
 // getB({
-//   code: 'mmm', fieldType: 'date', props: { mode: '' as any }, isCustom: true,
+//   // code: 'mmm', fieldType: 'date', props: { mode: '' as any }, isCustom: true,
 // });
 // getB({
 //   code: 'mmm', fieldType: 'multiMember', props: { selected: ['999'], selectedUser: {} as any }, isCustom: true,

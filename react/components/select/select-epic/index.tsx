@@ -1,12 +1,12 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import { FlatSelect } from '@choerodon/components';
 import { epicApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IEpic } from '@/components/charts/epic-report/search';
-import { FlatSelect } from '@choerodon/components';
 
-interface Props extends Partial<SelectProps> {
+export interface SelectEpicProps extends Partial<SelectProps> {
   isProgram?: boolean
   request?: SelectConfig<any>['request']
   dataRef?: React.MutableRefObject<any>
@@ -17,7 +17,7 @@ interface Props extends Partial<SelectProps> {
   projectId?: string
 }
 
-const SelectEpic: React.FC<Props> = forwardRef(({
+const SelectEpic: React.FC<SelectEpicProps> = forwardRef(({
   isProgram, afterLoad, dataRef, dontAddEpic0, unassignedEpic, request, flat, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({

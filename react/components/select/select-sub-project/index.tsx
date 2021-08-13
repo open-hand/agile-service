@@ -1,19 +1,18 @@
 import React, { useMemo, forwardRef } from 'react';
-import { Select } from 'choerodon-ui/pro';
-import { Tooltip } from 'choerodon-ui/pro';
-import { find } from 'lodash';
-import { commonApi, issueTypeApi, sprintApi } from '@/api';
-import useSelect, { SelectConfig } from '@/hooks/useSelect';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import { IIssueType, ISprint } from '@/common/types';
+import { Select, Tooltip } from 'choerodon-ui/pro';
 
-interface Props extends Partial<SelectProps> {
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import { commonApi } from '@/api';
+import useSelect, { SelectConfig } from '@/hooks/useSelect';
+import { IIssueType } from '@/common/types';
+
+export interface SelectSubProjectProps extends Partial<SelectProps> {
   dataRef?: React.MutableRefObject<any>
   hasUnassign?: boolean
   afterLoad?: (types: IIssueType[]) => void
 }
 
-const SelectSubProject: React.FC<Props> = forwardRef(({
+const SelectSubProject: React.FC<SelectSubProjectProps> = forwardRef(({
   dataRef, afterLoad, hasUnassign, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<IIssueType> => ({

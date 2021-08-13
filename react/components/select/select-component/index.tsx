@@ -1,13 +1,13 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
-import { componentApi, fieldApi } from '@/api';
-import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import { IComponent } from '@/common/types';
 import { FlatSelect } from '@choerodon/components';
 import { uniqBy } from 'lodash';
+import { componentApi, fieldApi } from '@/api';
+import useSelect, { SelectConfig } from '@/hooks/useSelect';
+import { IComponent } from '@/common/types';
 
-interface Props extends Partial<SelectProps> {
+export interface SelectComponentProps extends Partial<SelectProps> {
   dataRef?: React.MutableRefObject<any>
   valueField?: string
   afterLoad?: (components: IComponent[]) => void
@@ -19,7 +19,7 @@ interface Props extends Partial<SelectProps> {
   fieldId?: string
 }
 
-const SelectComponent: React.FC<Props> = forwardRef(({
+const SelectComponent: React.FC<SelectComponentProps> = forwardRef(({
   dataRef, afterLoad, valueField, flat, projectId, extraOptions, ruleIds, selected, fieldId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);

@@ -1,13 +1,13 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import { FlatSelect } from '@choerodon/components';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { issueLabelApi } from '@/api';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { ILabel } from '@/common/types';
-import { FlatSelect } from '@choerodon/components';
 import { MAX_LENGTH_LABEL } from '@/constants/MAX_LENGTH';
 
-interface Props extends Partial<SelectProps> {
+export interface SelectLabelProps extends Partial<SelectProps> {
   dataRef?: React.RefObject<Array<any>>
   valueField?: string
   afterLoad?: (sprints: ILabel[]) => void
@@ -16,7 +16,7 @@ interface Props extends Partial<SelectProps> {
   extraOptions?: any[]
 }
 
-const SelectLabel: React.FC<Props> = forwardRef(({
+const SelectLabel: React.FC<SelectLabelProps> = forwardRef(({
   dataRef, valueField, afterLoad, flat, projectId, extraOptions = [], ...otherProps
 }, ref: React.Ref<Select>) => {
   const { combo } = otherProps;

@@ -1,14 +1,14 @@
 import React, { useMemo, forwardRef } from 'react';
-import { Select } from 'choerodon-ui/pro';
-import { Tooltip } from 'choerodon-ui/pro';
+import { Select, Tooltip } from 'choerodon-ui/pro';
+
 import { find, includes } from 'lodash';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import { FlatSelect } from '@choerodon/components';
 import { issueTypeApi, sprintApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IIssueType, ISprint } from '@/common/types';
-import { FlatSelect } from '@choerodon/components';
 
-interface Props extends Partial<SelectProps> {
+export interface SelectIssueTypeProps extends Partial<SelectProps> {
   filterList?: string[]
   request?: SelectConfig<any>['request']
   isProgram?: boolean
@@ -21,7 +21,7 @@ interface Props extends Partial<SelectProps> {
   excludeTypeIds?: string[]
 }
 
-const SelectIssueType: React.FC<Props> = forwardRef(({
+const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
   filterList = ['feature'], isProgram, request, valueField, dataRef, flat, excludeTypeIds = [],
   afterLoad, projectId, applyType, ...otherProps
 }, ref: React.Ref<Select>) => {

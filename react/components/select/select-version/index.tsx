@@ -1,13 +1,13 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select, Tooltip } from 'choerodon-ui/pro';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import { FlatSelect } from '@choerodon/components';
 import { fieldApi, versionApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IVersion } from '@/common/types';
 import { getProjectId } from '@/utils/common';
-import { FlatSelect } from '@choerodon/components';
 
-interface Props extends Partial<SelectProps> {
+export interface SelectVersionProps extends Partial<SelectProps> {
   projectId?: string
   dataRef?: React.MutableRefObject<Array<any>>
   statusArr?: Array<string>
@@ -20,7 +20,7 @@ interface Props extends Partial<SelectProps> {
   selected?: string[]
   fieldId?: string
 }
-const SelectVersion: React.FC<Props> = forwardRef(({
+const SelectVersion: React.FC<SelectVersionProps> = forwardRef(({
   request, projectId, valueField, ruleIds, selected, fieldId, dataRef = { current: null }, afterLoad, statusArr = [], flat, hasUnassign, ...otherProps
 }, ref: React.Ref<Select>) => {
   const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);

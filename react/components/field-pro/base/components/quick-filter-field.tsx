@@ -7,7 +7,7 @@ import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { quickFilterApi } from '@/api';
 import type { PI } from '@/common/types';
 
-interface Props extends Partial<SelectProps> {
+export interface QuickFilterFieldProps extends Partial<SelectProps> {
   afterLoad?: (piList: PI[]) => void
   disabledRequest?: boolean
 }
@@ -16,7 +16,7 @@ interface Filter {
   name: string,
 }
 const { Option, OptGroup } = Select;
-const QuickFilterField: React.FC<Props> = ({
+const QuickFilterField: React.FC<QuickFilterFieldProps> = ({
   disabledRequest = false, afterLoad, ...otherProps
 }) => {
   const [data, setData] = useState<Array<{ filterId: string, name: string }>>([]);
