@@ -142,6 +142,8 @@ class StartSprint extends Component {
         paramName: `${this.props.data.sprintName}冲刺下未预估${paramType === 'storyPoints' ? '故事点的故事' : '工时的问题'}`,
         storyPointsNull: paramType === 'storyPoints',
         remainingTimeNull: paramType === 'remainingTime',
+        paramType: 'sprint',
+        paramId: this.props.data.sprintId,
       },
     }, { blank: true });
   }
