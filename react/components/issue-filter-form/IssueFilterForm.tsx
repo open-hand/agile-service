@@ -88,15 +88,15 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
   const initField = useCallback((field: IChosenFieldField) => {
     let values = toJS(field.value);
     const dateIndex = ['time', 'datetime', 'date'].indexOf(field.fieldType ?? '');
-    if (dateIndex !== -1) {
-      values = Array.isArray(values) ? values.map((item) => moment(item, dateFormatArr[dateIndex]))
-        : moment(values, dateFormatArr);
-    }
     if (values) {
       if (field.fieldType === 'member') {
         values = Array.isArray(values) ? values.map((item) => String(item)) : String(values);
       }
-      !dataSet.current?.get(field.code) && dataSet.current?.set(field.code, values);
+      if (dateIndex !== -1) {
+        values = Array.isArray(values) ? values.map((item) => moment(item, dateFormatArr[dateIndex]))
+          : moment(values, dateFormatArr);
+      }
+      !dataSet.current?.get(field.code) && dataSet.current?.init(field.code, values);
     }
   }, [dataSet]);
     // 初始化额外form项
