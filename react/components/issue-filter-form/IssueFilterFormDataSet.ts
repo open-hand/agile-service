@@ -1,7 +1,7 @@
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
-import { IChosenFieldField } from '@/components/chose-field/types';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
+import { IChosenFieldField } from '@/components/chose-field/types';
 
 interface Props {
   fields: IChosenFieldField[],
@@ -26,8 +26,9 @@ const IssueFilterFormDataSet = ({ fields, systemFields }: Props): DataSetProps =
         if (!v) {
           return true;
         }
-        if (!v[0] || !v[1]) {
-          record.set(name, undefined);
+        const value = v[0];
+        if (!value[0] || !value[1]) {
+          record.init(name, []);
         }
         return true;
       },

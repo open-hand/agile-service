@@ -6,7 +6,7 @@ import getDemoFields from '../base';
  * @param fieldCodeProps
  */
 function getFilterFields(fields: Parameters<typeof getDemoFields>[0]) {
-  return getDemoFields(fields).map((i) => i[0]);
+  // return getDemoFields(fields).map((i) => i[0]);
   //   const newFilters = fields.map((field) => {
 
   //   }) as any[];
@@ -17,16 +17,7 @@ const Page: React.FC = () => {
   const [fields, setFields] = useState([]);
   return (
     <div>
-      {getFilterFields([{
-        code: 'sprint', props: { hasUnassign: false, clearButton: false }, outputs: ['element'], fieldType: 'multiple',
-      }, {
-        code: 'sprint', props: { hasUnassign: true, multiple: true }, outputs: ['element'], fieldType: 'multiple',
-      }, {
-        code: 'label', props: {}, fieldType: 'multiple', outputs: ['element'],
-      }, {
-        fieldType: 'member', code: 'stm', props: {}, isCustom: true, outputs: ['element'],
-      },
-      ])}
+      {}
     </div>
   );
 };
