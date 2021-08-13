@@ -41,17 +41,21 @@ public class IssueDailyWorkSendMessageTask {
     private static final Logger LOGGER = getLogger(IssueDailyWorkSendMessageTask.class);
 
     private static final String ISSUE_DAILY_WORK = "ISSUE_DAILY_WORK";
-    private static final String PROJECT_NAME = "projectName";
     private static final String USER_NAME = "userName";
-    private static final String DELAY_COUNT = "delayCount";
-    private static final String UNFINISHED_COUNT = "unfinishedCount";
     private static final String HTML_TABLE = "htmlTable";
+    private static final String PM_HTML_TABLE = "pmHtmlTable";
+    private static final String EMAIL_HTML_TABLE = "emailHtmlTable";
     private static final String BACKSLASH_TR = "</tr>";
     private static final String BACKSLASH_TD = "</td>";
     private static final String BACKSLASH_SPAN = "</span>";
     private static final String BACKSLASH_TABLE = "</table>";
     private static final String TR_TAG_SINGLE = "<tr style = \"background-color: #FFFFFF; height: 40px; line-height: 25px;\">";
     private static final String TR_TAG_DOUBLE = "<tr style = \"background-color: #F5F5FC; height: 40px; line-height: 25px;\">";
+    private static final String P_PROJECT_STATISTICS = "<p style=\"color: #0F1358;font-family: PingFangSC-Regular;" +
+            "font-size: 14px;text-align: justify;margin-bottom: 0px;margin-top: 0px; line-height: 24px;\">" +
+            "您在“%s”项目有%s个未完成的问题，其中%s个问题已逾期。</p>";
+    private static final String P_PROJECT_TABLE = "<p style=\"color: rgb(0, 0, 0); font-family: Ubuntu, Helvetica, Arial, sans-serif; " +
+            "font-size: 14px; text-align: justify; margin-bottom: 0px; line-height: 24px;\">%s</p>";
     private static final String RED_SPAN = "<span style=\"" +
             "color: #F5222D; " +
             "font-size: 12px; " +
@@ -81,6 +85,9 @@ public class IssueDailyWorkSendMessageTask {
             "table-layout: fixed;" +
             "border-collapse: collapse;" +
             "border-spacing: 0;" +
+            "border: 1px solid #D9E6F2; " +
+            "margin-top: 16px;" +
+            "margin-bottom: 30px;" +
             "empty-cells: show;\">" +
             STYLE_ARROW_DROP_DOWN;
     private static final String TABLE_HEAD = "<thead style=\"background-color: #F3F6FE;color: #000;text-align: left;vertical-align: bottom;\">" +
@@ -189,27 +196,61 @@ public class IssueDailyWorkSendMessageTask {
 
         Map<Long, UserDTO> userMap = getUserMap(userIds);
         Map<Long, IssueDailyWorkVO> issueMap = issueList.stream().collect(Collectors.toMap(IssueDailyWorkVO::getIssueId, Function.identity()));
+        Map<Long, List<IssueDailyWorkVO>> userIssueMap = issueList.stream()
+                .collect(Collectors.groupingBy(IssueDailyWorkVO::getAssigneeId));
 
-        //key1 projectId, key2 userId, value List<Long>保持排序
-        MultiKeyMap multiKeyMap = getMultiKeyMap(issueList);
-        MapIterator mapIterator = multiKeyMap.mapIterator();
+        //key1 userId, key2 projectId, value issueIds保持排序
+        MultiKeyMap userProjectIssueIdsMap = getUserProjectIssueIdsMap(issueList);
+        //key1 userId, key2 organizationId, value projectIds
+        MultiKeyMap userOrgProjectIdsMap = getUserOrgProjectIdsMap(userIssueMap, projectMap);
+        MapIterator mapIterator = userOrgProjectIdsMap.mapIterator();
         while(mapIterator.hasNext()) {
             MultiKey multiKey = (MultiKey) mapIterator.next();
-            Long projectId = (Long) multiKey.getKey(0);
-            Long userId = (Long) multiKey.getKey(1);
+            Long userId = (Long) multiKey.getKey(0);
 
-            List<Long> issueIds = (List<Long>) mapIterator.getValue();
-            List<IssueDailyWorkVO> list = new ArrayList<>();
-            issueIds.forEach(v -> list.add(issueMap.get(v)));
-            if (!CollectionUtils.isEmpty(list)) {
-                UserDTO user = userMap.get(userId);
-                if (ObjectUtils.isEmpty(user)) {
-                    continue;
-                }
-                Map<String, String> paramMap = buildParamMap(list, projectMap.get(projectId), user);
-                messageSenders.add(getMessageSender(paramMap, user, projectId));
+            UserDTO user = userMap.get(userId);
+            if (ObjectUtils.isEmpty(user)) {
+                return;
             }
+
+            List<Long> userOrgProjectIds = (List<Long>) mapIterator.getValue();
+            //从小到大排序
+            Collections.sort(userOrgProjectIds);
+            if (CollectionUtils.isEmpty(userOrgProjectIds)) {
+                return;
+            }
+            Map<String, String> paramMap = buildParamMap(userOrgProjectIds, userProjectIssueIdsMap, issueMap, projectMap, user);
+
+            //获取当前用户下在当前组织下需要发送通知的项目
+            List<Long> senderProjectIds = getSenderProjectIds(projectMap, userOrgProjectIds);
+            senderProjectIds.forEach(senderProjectId -> messageSenders.add(getMessageSender(paramMap, user, senderProjectId)));
         }
+    }
+
+    private List<Long> getSenderProjectIds(Map<Long, ProjectMessageVO> projectMap, List<Long> userOrgProjectIds) {
+        List<ProjectMessageVO> filterProjects = projectMap.values().stream().filter(project -> userOrgProjectIds.contains(project.getId())).collect(Collectors.toList());
+        List<Long> pmEnableProjectIds = filterProjects.stream().filter(project -> Boolean.TRUE.equals(project.getPmEnable())).map(ProjectMessageVO::getId).collect(Collectors.toList());
+        List<Long> emailEnableProjectIds = filterProjects.stream().filter(project -> Boolean.TRUE.equals(project.getEmailEnable())).map(ProjectMessageVO::getId).collect(Collectors.toList());
+        List<Long> senderProjectIds = new ArrayList<>();
+
+        //取当前用户组织下需要发送站内信和邮件的交集项目
+        senderProjectIds.addAll(pmEnableProjectIds);
+        senderProjectIds.retainAll(emailEnableProjectIds);
+        //若没有交集项目，则邮件和站内信分开发送
+        if (CollectionUtils.isEmpty(senderProjectIds)) {
+            if (!CollectionUtils.isEmpty(pmEnableProjectIds)) {
+                senderProjectIds.add(pmEnableProjectIds.get(0));
+            }
+            if (!CollectionUtils.isEmpty(emailEnableProjectIds)) {
+                senderProjectIds.add(emailEnableProjectIds.get(0));
+            }
+        }else {
+            //若有交集项目，只发送一次
+            Long senderProjectId = senderProjectIds.get(0);
+            senderProjectIds.clear();
+            senderProjectIds.add(senderProjectId);
+        }
+        return senderProjectIds;
     }
 
     private List<IssueDailyWorkVO> selectDailyWorkIssues(Set<Long> projectIds) {
@@ -231,15 +272,35 @@ public class IssueDailyWorkSendMessageTask {
         return userMap;
     }
 
-    private MultiKeyMap getMultiKeyMap(List<IssueDailyWorkVO> issueList) {
+    private MultiKeyMap getUserOrgProjectIdsMap(Map<Long, List<IssueDailyWorkVO>> userIssueMap, Map<Long, ProjectMessageVO> projectMap) {
         MultiKeyMap multiKeyMap = new MultiKeyMap();
+        //获取用户待办问题的所有项目
+        userIssueMap.forEach((userId, issues) -> {
+            Set<Long> userProjectIds = issues.stream().map(IssueDailyWorkVO::getProjectId).collect(Collectors.toSet());
+            //将用户待办问题的所有项目按组织进行划分
+            userProjectIds.forEach(projectId -> {
+                Long organizationId = projectMap.get(projectId).getOrganizationId();
+                List<Long> userOrgProjectIds = (List<Long>) multiKeyMap.get(userId, organizationId);
+                if (CollectionUtils.isEmpty(userOrgProjectIds)) {
+                    userOrgProjectIds = new ArrayList<>();
+                    multiKeyMap.put(userId, organizationId, userOrgProjectIds);
+                }
+                userOrgProjectIds.add(projectId);
+            });
+        });
+        return multiKeyMap;
+    }
+
+    private MultiKeyMap getUserProjectIssueIdsMap(List<IssueDailyWorkVO> issueList) {
+        MultiKeyMap multiKeyMap = new MultiKeyMap();
+        //将用户的待办问题按项目划分
         issueList.forEach(issue -> {
             Long projectId = issue.getProjectId();
             Long assigneeId = issue.getAssigneeId();
-            List<Long> issueIds = (List<Long>) multiKeyMap.get(projectId, assigneeId);
+            List<Long> issueIds = (List<Long>) multiKeyMap.get(assigneeId, projectId);
             if (CollectionUtils.isEmpty(issueIds)) {
                 issueIds = new ArrayList<>();
-                multiKeyMap.put(projectId, assigneeId, issueIds);
+                multiKeyMap.put(assigneeId, projectId, issueIds);
             }
             issueIds.add(issue.getIssueId());
         });
@@ -266,16 +327,49 @@ public class IssueDailyWorkSendMessageTask {
         list.forEach(v -> v.setChildIssues(childIssueMap.get(v.getIssueId())));
     }
 
-    private Map<String, String> buildParamMap(List<IssueDailyWorkVO> issueList, ProjectMessageVO projectMessageVO, UserDTO user) {
+    private Map<String, String> buildParamMap(List<Long> userOrgProjectIds,
+                                              MultiKeyMap userProjectIssueIdsMap,
+                                              Map<Long, IssueDailyWorkVO> issueMap,
+                                              Map<Long, ProjectMessageVO> projectMap,
+                                              UserDTO user) {
         Map<String, String> result = new HashMap<>();
-        result.put(PROJECT_NAME, projectMessageVO.getName());
         result.put(USER_NAME, user.getRealName());
-        result.put(DELAY_COUNT, getDelayCount(issueList) + "");
-        result.put(UNFINISHED_COUNT, issueList.size() + "");
-        //统计未完成个数、逾期个数后，调整父子层级
-        setChildIssues(issueList);
-        result.put(HTML_TABLE, buildHtmlTable(issueList, projectMessageVO));
+        Map<Long, String> projectTableMap = buildProjectHtmlTableMap(userOrgProjectIds, userProjectIssueIdsMap, issueMap, projectMap, user);
+
+        //同一项目下每日工作提醒的邮件、站内信通知设置不一定全部开启，故分开拼接两种通知内容
+        Map<String, StringBuilder> htmlTableMap = new HashMap<>();
+        getHtmlTable(userOrgProjectIds, projectMap, projectTableMap, htmlTableMap);
+        //邮件、站内信外的通知内容
+        result.put(HTML_TABLE, htmlTableMap.get(HTML_TABLE).toString());
+        //站内信通知内容
+        result.put(PM_HTML_TABLE, htmlTableMap.get(PM_HTML_TABLE).toString());
+        //邮件通知内容
+        result.put(EMAIL_HTML_TABLE, htmlTableMap.get(EMAIL_HTML_TABLE).toString());
         return result;
+    }
+
+    private void getHtmlTable(List<Long> userOrgProjectIds,
+                              Map<Long, ProjectMessageVO> projectMap,
+                              Map<Long, String> projectTableMap,
+                              Map<String, StringBuilder> htmlTableMap) {
+        StringBuilder htmlTable = new StringBuilder();
+        StringBuilder pmHtmlTable = new StringBuilder();
+        StringBuilder emailHtmlTable = new StringBuilder();
+
+        userOrgProjectIds.forEach(projectId -> {
+            boolean pmEnable = projectMap.get(projectId).getPmEnable();
+            boolean emailEnable = projectMap.get(projectId).getEmailEnable();
+            if (pmEnable) {
+                pmHtmlTable.append(projectTableMap.get(projectId));
+            }
+            if (emailEnable) {
+                emailHtmlTable.append(projectTableMap.get(projectId));
+            }
+            htmlTable.append(projectTableMap.get(projectId));
+        });
+        htmlTableMap.put(HTML_TABLE, htmlTable);
+        htmlTableMap.put(PM_HTML_TABLE, pmHtmlTable);
+        htmlTableMap.put(EMAIL_HTML_TABLE, emailHtmlTable);
     }
 
     private int getDelayCount(List<IssueDailyWorkVO> issueList) {
@@ -289,7 +383,37 @@ public class IssueDailyWorkSendMessageTask {
         return delayCount;
     }
 
-    private String buildHtmlTable(List<IssueDailyWorkVO> issueList, ProjectMessageVO projectMessageVO) {
+    private Map<Long, String> buildProjectHtmlTableMap(List<Long> userOrgProjectIds,
+                                                       MultiKeyMap userProjectIssueIdsMap,
+                                                       Map<Long, IssueDailyWorkVO> issueMap,
+                                                       Map<Long, ProjectMessageVO> projectMap,
+                                                       UserDTO user) {
+        Map<Long, String> projectTableMap = new HashMap<>();
+        for (Long projectId : userOrgProjectIds) {
+            List<Long> issueIds = (List<Long>) userProjectIssueIdsMap.get(user.getId(), projectId);
+            List<IssueDailyWorkVO> issueList = new ArrayList<>();
+            issueIds.forEach(v -> issueList.add(issueMap.get(v)));
+            ProjectMessageVO projectMessageVO = projectMap.get(projectId);
+            StringBuilder projectTable = new StringBuilder();
+            if (!CollectionUtils.isEmpty(issueList)) {
+                //项目待办问题统计
+                projectTable.append(String.format(P_PROJECT_STATISTICS,
+                        projectMessageVO.getName(),
+                        issueList.size(),
+                        getDelayCount(issueList)
+                        ));
+                //统计未完成个数、逾期个数后，调整父子层级
+                setChildIssues(issueList);
+                //项目待办问题列表
+                projectTable.append(String.format(P_PROJECT_TABLE,
+                        buildProjectHtmlTable(issueList, projectMessageVO)));
+                projectTableMap.put(projectId, projectTable.toString());
+            }
+        }
+        return projectTableMap;
+    }
+
+    private String buildProjectHtmlTable(List<IssueDailyWorkVO> issueList, ProjectMessageVO projectMessageVO) {
         String prefix = getPrefix(projectMessageVO);
         StringBuilder builder = new StringBuilder();
         Date now = new Date();

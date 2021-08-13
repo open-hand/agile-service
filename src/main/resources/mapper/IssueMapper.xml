@@ -4706,6 +4706,7 @@
             AND sprint.status_code = 'started'
         )
         AND ais.is_completed != 1
+        AND ai.assignee_id IS NOT NULL AND ai.assignee_id != 0
         ORDER BY ai.issue_num DESC
     </select>
 </mapper>
