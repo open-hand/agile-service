@@ -10,7 +10,7 @@ function SprintList({ openCreateIssueModal }) {
   const sprintList = showPlanSprint ? BacklogStore.getSprintData : BacklogStore.getSprintData.filter((sprint) => sprint.statusCode !== 'sprint_planning');
 
   return (
-    <DragDropContext onDragEnd={BacklogStore.onDragEnd} onDragStart={BacklogStore.onDragStart}>
+    <DragDropContext onBeforeCapture={BacklogStore.onBeforeCapture} onDragEnd={BacklogStore.onDragEnd} onDragStart={BacklogStore.onDragStart}>
       {sprintList.map((sprint) => <Sprint data={sprint} key={sprint.sprintId} openCreateIssueModal={openCreateIssueModal} />)}
     </DragDropContext>
   );

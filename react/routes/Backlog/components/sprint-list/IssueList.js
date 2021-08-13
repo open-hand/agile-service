@@ -3,11 +3,11 @@ import React, { useCallback, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import { Pagination } from 'choerodon-ui/pro';
-import { Droppable, Draggable } from 'react-beautiful-dnd';
+import { Draggable } from 'react-beautiful-dnd';
 import { WindowScroller, List, AutoSizer } from 'react-virtualized';
+import { usePersistFn } from 'ahooks';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
-import { usePersistFn } from 'ahooks';
 import Loading, { LoadingHiddenWrap } from '@/components/Loading';
 import useDeepCompareEffect from '@/hooks/useDeepCompareEffect';
 import { ISSUE_HEIGHT } from './constant';
@@ -38,7 +38,16 @@ function IssueList({
     }
     return (
       <Draggable draggableId={String(issue.issueId)} index={index} key={issue.issueId}>
-        {(provided) => <IssueItem onExpandChange={handleExpandChange} provided={provided} issue={issue} style={{ margin: 0, ...style }} index={index} sprintId={sprintId} />}
+        {(provided) => (
+          <IssueItem
+            onExpandChange={handleExpandChange}
+            provided={provided}
+            issue={issue}
+            style={{ margin: 0, ...style }}
+            index={index}
+            sprintId={sprintId}
+          />
+        )}
       </Draggable>
     );
   }, [data, handleExpandChange, sprintId]);

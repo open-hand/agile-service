@@ -7,13 +7,13 @@ import {
 } from 'lodash';
 import { store } from '@choerodon/boot';
 import { Modal, DataSet } from 'choerodon-ui/pro';
-import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import Moment from 'moment';
+import { extendMoment } from 'moment-range';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import {
   featureApi, sprintApi, piApi, storyMapApi, epicApi, priorityApi, issueTypeApi, commonApi, versionApi, quickFilterApi, issueApiConfig,
 } from '@/api';
 import { getProjectId } from '@/utils/common';
-import { extendMoment } from 'moment-range';
 import { isInProgram } from '@/utils/program';
 import openDescriptionConfirm from '@/components/detail-container/openDescriptionConfirm';
 
@@ -1190,12 +1190,16 @@ class BacklogStore {
     }
   }
 
+  onBeforeCapture = ({ draggableId }) => {
+    this.setIsDragging(draggableId);
+  }
+
   onDragStart = (result) => {
     // console.log('onDragStart', result);
     const { source, draggableId } = result;
     const { droppableId: sourceId, index: sourceIndex } = source;
     const item = this.getIssueMap.get(sourceId)[sourceIndex];
-    this.setIsDragging(item.issueId);
+    // this.setIsDragging(item.issueId);
     this.setIssueWithEpicOrVersion(item);
   }
 
