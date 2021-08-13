@@ -756,18 +756,30 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public IssueVO updateIssue(Long projectId, IssueUpdateVO issueUpdateVO, List<String> fieldList) {
-        if (agilePluginService != null) {
-            agilePluginService.checkFeatureBeforeUpdateIssue(issueUpdateVO,projectId);
-        }
-        if (fieldList.contains(EPIC_NAME_FIELD)
-                && issueUpdateVO.getEpicName() != null
-                && checkEpicName(projectId, issueUpdateVO.getEpicName(), issueUpdateVO.getIssueId())) {
-            throw new CommonException("error.epicName.exist");
-        }
+        validateBeforeUpdate(projectId, issueUpdateVO, fieldList);
         if (!fieldList.isEmpty()) {
             //处理issue自己字段
             this.self().handleUpdateIssue(issueUpdateVO, fieldList, projectId, issueUpdateVO.getIssueId());
         }
+        Long issueId = postUpdateIssue(projectId, issueUpdateVO);
+        return queryIssueByUpdate(projectId, issueId, fieldList);
+    }
+
+    @Override
+    public IssueVO updateIssueWithoutRuleNotice(Long projectId,
+                                                IssueUpdateVO issueUpdateVO,
+                                                List<String> fieldList) {
+        validateBeforeUpdate(projectId, issueUpdateVO, fieldList);
+        if (!fieldList.isEmpty()) {
+            //处理issue自己字段
+            handleUpdateIssueWithoutRuleNotice(issueUpdateVO, fieldList, projectId);
+        }
+        Long issueId = postUpdateIssue(projectId, issueUpdateVO);
+        return queryIssueByUpdate(projectId, issueId, fieldList);
+    }
+
+
+    private Long postUpdateIssue(Long projectId, IssueUpdateVO issueUpdateVO) {
         Long issueId = issueUpdateVO.getIssueId();
         if (issueUpdateVO.getLabelIssueRelVOList() != null) {
             this.self().handleUpdateLabelIssue(issueUpdateVO.getLabelIssueRelVOList(), issueId, projectId);
@@ -781,7 +793,18 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (issueUpdateVO.getTags() != null) {
             this.self().handleUpdateTagIssueRel(issueUpdateVO.getTags(), projectId, issueId);
         }
-        return queryIssueByUpdate(projectId, issueId, fieldList);
+        return issueId;
+    }
+
+    private void validateBeforeUpdate(Long projectId, IssueUpdateVO issueUpdateVO, List<String> fieldList) {
+        if (agilePluginService != null) {
+            agilePluginService.checkFeatureBeforeUpdateIssue(issueUpdateVO,projectId);
+        }
+        if (fieldList.contains(EPIC_NAME_FIELD)
+                && issueUpdateVO.getEpicName() != null
+                && checkEpicName(projectId, issueUpdateVO.getEpicName(), issueUpdateVO.getIssueId())) {
+            throw new CommonException("error.epicName.exist");
+        }
     }
 
     @Override
@@ -1243,6 +1266,13 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldListName = "fieldList", instanceId = "issueId", idPosition = "arg")
     public void handleUpdateIssue(IssueUpdateVO issueUpdateVO, List<String> fieldList, Long projectId, Long issueId) {
+        handleUpdateIssueWithoutRuleNotice(issueUpdateVO, fieldList, projectId);
+    }
+
+    @Override
+    public void handleUpdateIssueWithoutRuleNotice(IssueUpdateVO issueUpdateVO,
+                                                   List<String> fieldList,
+                                                   Long projectId) {
         CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
         IssueDTO originIssue = issueMapper.queryIssueWithNoCloseSprint(issueUpdateVO.getIssueId());
         IssueConvertDTO issueConvertDTO = issueAssembler.toTarget(issueUpdateVO, IssueConvertDTO.class);
@@ -1278,7 +1308,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             }
         }
         if (agilePluginService != null) {
-            agilePluginService.handlerProgramUpdateIssue(issueType,fieldList,projectId,issueUpdateVO,originIssue);
+            agilePluginService.handlerProgramUpdateIssue(issueType, fieldList, projectId, issueUpdateVO, originIssue);
         }
         issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
     }
