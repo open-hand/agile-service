@@ -28,7 +28,7 @@ function getProcessFieldConfig<T extends IComponentFCWithClassObject, C extends 
     multiMember: {},
     member: {},
   };
-  return merge(filedTypeConfigObj[config.fieldType], config) as unknown as IFieldProcessConfig<T, CustomComponentMapProps>;
+  return merge(config.fieldType ? filedTypeConfigObj[config.fieldType] : {}, config) as unknown as IFieldProcessConfig<T, CustomComponentMapProps>;
 }
 // export type IFieldProcessConfigFn=ReturnType<(<T extends IFiledMapProps, K extends keyof T>(fieldConfig: IFieldConfig<T, K>) =>typeof getProcessFieldConfig)>
 export { getProcessFieldConfig };

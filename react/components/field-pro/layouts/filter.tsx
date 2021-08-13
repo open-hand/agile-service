@@ -2,8 +2,9 @@ import {
   DataSet,
 } from 'choerodon-ui/pro';
 import { toJS } from 'mobx';
-import { find } from 'lodash';
-import getFields from '../base';
+import { find, groupBy } from 'lodash';
+import { useCallback } from 'react';
+import { getAgileFields } from '../base';
 import { IChosenFieldField } from '@/components/chose-field/types';
 
 function renderField(field: IChosenFieldField, dataSet?: DataSet) {
@@ -166,6 +167,7 @@ function getFilterFields(fields: any[], fieldCodeProps?: Record<string, any>) {
     const config = renderField(field.field, field.dataSet);
     const { code = field.field.code, name = field.field.code, ...otherProps } = config;
     return {
+      system: !field.field.id,
       code,
       fieldType: field.field.fieldType,
       props: {
@@ -180,8 +182,10 @@ function getFilterFields(fields: any[], fieldCodeProps?: Record<string, any>) {
       outputs: ['element'],
     };
   }) as any[];
-  return getFields(newFilters).map((i) => i[0]);
+  const { system, custom } = groupBy(newFilters, (item) => (item.system ? 'system' : 'custom'));
+  return getAgileFields([], system, custom)[0];
   // return getFields(newFilters).map((i, index) => React.createElement(i[0] as any,
   //   { ...getProps(fields[index].code, fieldCodeProps) })) as JSX.Element[];
 }
+
 export default getFilterFields;

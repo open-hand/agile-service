@@ -15,6 +15,8 @@ import IssueFilterFormDataSet from './IssueFilterFormDataSet';
 import './index.less';
 import { useIssueFilterFormStore } from './stores';
 import { IIssueFilterFormProps } from '.';
+import { getAgileFields } from '../field-pro/base';
+import getFilterFields from '../field-pro/layouts/filter';
 
 interface IConfig {
   fields?: IChosenFieldField[],
@@ -99,10 +101,10 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
       !dataSet.current?.get(field.code) && dataSet.current?.init(field.code, values);
     }
   }, [dataSet]);
-    // 初始化额外form项
+  // 初始化额外form项
   useEffect(() => {
     if (config?.extraFormItems && Array.isArray(config.extraFormItems)) {
-        config?.extraFormItems.forEach((item) => !extraFormItems.has(item.code) && extraFormItems.set(item.code, item) && initField(item));
+      config?.extraFormItems.forEach((item) => !extraFormItems.has(item.code) && extraFormItems.set(item.code, item) && initField(item));
     }
   }, [config?.extraFormItems, extraFormItems, initField]);
   useEffect(() => {
@@ -117,7 +119,7 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
     }
   }, [initField]);
   useEffect(() => {
-  // 初始化value
+    // 初始化value
     if (config?.value && Array.isArray(toJS(config?.value))) {
       config.value.forEach((item) => {
         initField(item);
@@ -174,21 +176,25 @@ const IssueFilterForm: React.FC = () => {
   useEffect(() => {
     props.extraFormItems?.forEach((field) => {
       !currentFormCode.get('extraFormItems')?.has(field.code)
-      && currentFormCode.get('extraFormItems')?.add(field.code) && initField(field);
+        && currentFormCode.get('extraFormItems')?.add(field.code) && initField(field);
     });
   }, [currentFormCode, initField, props.extraFormItems]);
   useEffect(() => {
     // 初始化值
     props.chosenFields?.forEach((field) => {
       !currentFormCode.get('chosenFields')?.has(field.code)
-      && currentFormCode.get('chosenFields')?.add(field.code) && initField(field);
+        && currentFormCode.get('chosenFields')?.add(field.code) && initField(field);
     });
   }, [currentFormCode, initField]);
-  const render = (item: IChosenFieldField) => (props.extraRenderFields && props.extraRenderFields(item, {
+  const render = useCallback((item: IChosenFieldField) => (props.extraRenderFields && props.extraRenderFields(item, {
     style: { width: '100%' }, label: item.name, key: item.code, ...item.otherComponentProps,
-  }, { dataSet })) || renderField(item, {
-    style: { width: '100%' }, label: item.name, key: item.code, ...item.otherComponentProps,
-  }, { dataSet });
+  }, { dataSet })) || getFilterFields([{
+    field: item,
+    dataSet,
+    otherComponentProps: {
+      style: { width: '100%' }, label: item.name, key: item.code, ...item.otherComponentProps,
+    },
+  }]), [dataSet]);
   return (
     <>
       <Form dataSet={dataSet} columns={props.formColumns || 2}>

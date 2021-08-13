@@ -27,7 +27,7 @@ import { IFieldType } from '@/common/types';
 import { validKeyReturnValue } from '@/common/commonValid';
 import SelectSubFeature from '@/components/select/select-sub-feature';
 
-const AgileComponentMap = {
+export const AgileComponentMap = {
   sprint: SelectSprint,
   status: SelectStatus,
   epic: SelectEpic,
@@ -46,7 +46,7 @@ const AgileComponentMap = {
 };
 export type AgileComponentMapProps = typeof AgileComponentMap
 
-const CustomFieldMap = {
+export const CustomFieldMap = {
   time: TimePicker,
   datetime: DateTimePicker,
   date: DatePicker,
@@ -61,7 +61,7 @@ const CustomFieldMap = {
   member: SelectUser,
 };
 export type CustomFCComponentMapProps = Pick<typeof CustomFieldMap, 'radio' | 'checkbox' | 'single' | 'multiMember' | 'multiple' | 'member'>
-interface ClassType<T> extends Function {
+interface ClassType<T> extends React.ComponentClass {
   new(...args: any[]): T;
 }
 export interface CustomComponentMapProps extends CustomFCComponentMapProps {
@@ -72,6 +72,7 @@ export interface CustomComponentMapProps extends CustomFCComponentMapProps {
   input: ClassType<TextField>,
   text: ClassType<TextArea<any>>
 }
+
 /**
  *  获取默认空元素
  * @param processConfig
@@ -81,8 +82,8 @@ function getDefaultEmptyElement() {
   return TextField;
 }
 
-function getSystemsElement<T extends IComponentFCObject>(filedProcessConfig: IFieldSystemComponentConfig<T>, components: T) {
-  return validKeyReturnValue(filedProcessConfig.code, components) as React.FC;
+function getSystemsElement<T extends IComponentFCWithClassObject>(filedProcessConfig: IFieldSystemComponentConfig<T>, components: T) {
+  return validKeyReturnValue(filedProcessConfig.code, components) as IComponentFCWithClass;
 }
 function getCustomElement<T extends IComponentFCWithClassObject>(filedProcessConfig: IFieldCustomComponentConfig<T>, components: T) {
   return validKeyReturnValue(filedProcessConfig.fieldType, components) as IComponentFCWithClass;
@@ -92,17 +93,16 @@ function getCustomElement<T extends IComponentFCWithClassObject>(filedProcessCon
  * @param filed
  * @returns
  */
-function getElement(filedProcessConfig: IFieldProcessConfig<typeof AgileComponentMap, CustomComponentMapProps>) {
+function getElement<T extends IComponentFCWithClassObject,
+  C extends IComponentFCWithClassObject = IComponentFCWithClassObject>(filedProcessConfig: IFieldProcessConfig<T, C>,
+  systemComponents: T, customComponents: C) {
   let element: IComponentFCWithClass<any, any> = getDefaultEmptyElement();
-  if (filedProcessConfig.code && Object.keys(AgileComponentMap).includes(filedProcessConfig.code)) {
-    element = getSystemsElement(filedProcessConfig as IFieldSystemComponentConfig<typeof AgileComponentMap>, AgileComponentMap);
-  } else if (Object.keys(CustomFieldMap).includes(filedProcessConfig.fieldType)) {
-    element = getCustomElement(filedProcessConfig as IFieldCustomComponentConfig<typeof CustomFieldMap>, CustomFieldMap);
+  if (filedProcessConfig.code && Object.keys(systemComponents).includes(filedProcessConfig.code)) {
+    element = getSystemsElement(filedProcessConfig as IFieldSystemComponentConfig<T>, systemComponents);
+  } else if (Object.keys(customComponents).includes(filedProcessConfig.fieldType!)) {
+    element = getCustomElement<C>(filedProcessConfig as IFieldCustomComponentConfig<C>, customComponents);
   }
-  console.log('filedProcessConfig', filedProcessConfig);
   return React.createElement(element, { ...filedProcessConfig.props });
 }
-// getElement({ fieldType: 'member', code: 'label00', props: {} });
-// getElement({ fieldType: 'member', code: 'sprint', props: { hasUnassign: true } });
 
 export default getElement;
