@@ -1,8 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import {
-  PerformanceTable, CheckBox, Modal,
+  PerformanceTable, CheckBox,
 } from 'choerodon-ui/pro';
-import AutoSize from '@/components/auto-size';
 import {
   observer,
   Observer,
@@ -12,8 +11,10 @@ import { usePageTemplateStore } from '../../stores';
 import styles from './index.less';
 
 interface IPageTemplateTableProps {
+  // onScroll: (top: number) => void
+  tableRef: React.RefObject<PerformanceTable>
 }
-const PageTemplateTable: React.FC<IPageTemplateTableProps> = () => {
+const PageTemplateTable: React.FC<IPageTemplateTableProps> = ({ tableRef: propsTableRef }) => {
   const { sortTableDataSet, pageTemplateStore } = usePageTemplateStore();
   const currentIssueTypeId = pageTemplateStore.currentIssueType.id;
   const handleCheckChange = useCallback((val: any, index: number) => {
@@ -58,18 +59,21 @@ const PageTemplateTable: React.FC<IPageTemplateTableProps> = () => {
     )
     ,
   }), [handleCheckAllChange, handleCheckChange, sortTableDataSet]);
-
   const visibleColumns = useMemo(() => [checkBoxColumn, ...getColumns({ issueTypeId: currentIssueTypeId, loadData: handleRefresh })], [checkBoxColumn, currentIssueTypeId, handleRefresh]);
   return (
-    <AutoSize>
-      {({ height }) => (
-        <Observer>
-          {() => <PerformanceTable className={styles.table} columns={visibleColumns} data={sortTableDataSet.records} height={height} rowHeight={40} style={{ border: 'none' }} />}
-        </Observer>
-
-      )}
-    </AutoSize>
-
+    <PerformanceTable
+      ref={(r) => {
+        Object.assign(propsTableRef, { current: r });
+      }}
+      className={styles.table}
+      disabledScroll
+      columns={visibleColumns}
+      data={sortTableDataSet.records}
+      autoHeight
+      // height={height}
+      rowHeight={40}
+      style={{ border: 'none', flexShrink: 0 }}
+    />
   );
 };
 export default observer(PageTemplateTable);
