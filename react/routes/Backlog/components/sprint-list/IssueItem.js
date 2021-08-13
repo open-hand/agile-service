@@ -194,16 +194,16 @@ function IssueItem({
   return (
     <div
       ref={provided.innerRef}
+      {...provided.draggableProps}
       style={getStyle({
         virtualStyle: style,
         isDragging: isDragging || draggingIssue === issue.issueId,
+        draggableStyle: provided.draggableProps.style,
       })}
     >
       <div
-        {...provided.draggableProps}
         {...provided.dragHandleProps}
         style={{
-          ...provided.draggableProps.style,
           cursor: 'move',
         }}
       >
@@ -217,22 +217,14 @@ function IssueItem({
           draggingNum={draggingNum}
         />
       </div>
-      {isExpand && !isDragging && (
-        <div style={{
-          ...provided.draggableProps.style,
-          // cursor: 'move',
-        }}
-        >
-          {issue.children.map((child) => (
-            <Item
-              key={child.issueId}
-              issue={child}
-              sprintId={sprintId}
-              level={1}
-            />
-          ))}
-        </div>
-      )}
+      {isExpand && !isDragging && issue.children.map((child) => (
+        <Item
+          key={child.issueId}
+          issue={child}
+          sprintId={sprintId}
+          level={1}
+        />
+      ))}
     </div>
   );
 }
