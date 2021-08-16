@@ -34,6 +34,8 @@ public class StatusTransferSettingDTO extends AuditDomain {
 
     private Long organizationId;
 
+    private Boolean isVerifySubissueCompleted;
+
     public StatusTransferSettingDTO() {
     }
 
@@ -98,5 +100,13 @@ public class StatusTransferSettingDTO extends AuditDomain {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Boolean getVerifySubissueCompleted() {
+        return isVerifySubissueCompleted;
+    }
+
+    public void setVerifySubissueCompleted(Boolean verifySubissueCompleted) {
+        isVerifySubissueCompleted = verifySubissueCompleted;
     }
 }

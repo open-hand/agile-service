@@ -4055,6 +4055,16 @@
         ORDER BY ai1.rank asc
     </select>
 
+    <select id="querySubIssueCount" resultType="io.choerodon.agile.infra.dto.IssueCountDTO">
+        select
+         SUM(CASE WHEN ais.is_completed = 1 THEN 1 ELSE 0 end) as successIssueCount,
+         count(1) as issueCount
+         from agile_issue ai
+        LEFT JOIN agile_issue_status ais ON ai.project_id = ais.project_id AND ai.status_id = ais.status_id
+        where ai.project_id = #{projectId}
+        and (ai.parent_issue_id = #{parentIssueId} OR ai.relate_issue_id = #{parentIssueId})
+    </select>
+
     <sql id = "selectParentIssue">
         select aii.issue_id from (
             SELECT

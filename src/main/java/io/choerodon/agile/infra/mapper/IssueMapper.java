@@ -612,4 +612,6 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     List<IssueDailyWorkVO> selectDailyWorkIssues(@Param("projectIds") Set<Long> projectIds);
 
     List<Long> queryUnDoneAllIssues(@Param("projectId") Long projectId, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
+
+    IssueCountDTO querySubIssueCount(@Param("projectId") Long projectId, @Param("parentIssueId") Long parentIssueId);
 }

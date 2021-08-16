@@ -45,4 +45,10 @@ databaseChangeLog(logicalFilePath: 'fd_status_transfer_setting.groovy') {
             column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织Id', defaultValue: "0")
         }
     }
+
+    changeSet(author: 'ztxemail@163.com',id: '2021-08-16-fd-status-transfer-setting-add-column'){
+        addColumn(tableName: 'fd_status_transfer_setting') {
+            column(name: 'is_verify_subissue_completed', type: 'TINYINT UNSIGNED', remarks: '是否校验任务项子级全到已解决状态', defaultValue: "0")
+        }
+    }
 }
