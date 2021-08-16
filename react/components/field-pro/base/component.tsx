@@ -3,9 +3,11 @@ import React from 'react';
 import {
   TextField, Select, DatePicker, TimePicker, DateTimePicker, NumberField, TextArea, UrlField, DataSet, CheckBox,
 } from 'choerodon-ui/pro';
-
-import SelectStatus from '@/routes/StateMachine/components/select-status';
+import { TextAreaProps } from 'choerodon-ui/pro/lib/text-area/TextArea';
+import { FormFieldProps } from 'choerodon-ui/pro/lib/field/FormField';
+import SelectStatus from '@/components/select/select-status';
 import SelectPI from '@/components/select/select-pi';
+import DateTimePickerWithDefault from '@/components/date-time-picker';
 import SelectCustomField from '../../select/select-custom-field';
 import SelectEnvironment from '../../select/select-environment';
 import SelectIssueType from '../../select/select-issue-type';
@@ -15,7 +17,7 @@ import SelectSprint from '../../select/select-sprint';
 import SelectSubProject from '../../select/select-sub-project';
 import SelectUser from '../../select/select-user';
 import type {
-  IFieldOutput, IFieldProcessConfig, ICodeDistributeProps, IFieldTypeDistributeProps, IComponentFCWithClassObject, IFieldCustomComponentConfig, IComponentFCWithClass, IComponentFCObject, IFieldSystemComponentConfig, IFieldComponentConfig,
+  IFieldOutput, IFieldProcessConfig, IClassComponentType, ICodeDistributeProps, IFieldTypeDistributeProps, IComponentFCWithClassObject, IFieldCustomComponentConfig, IComponentFCWithClass, IComponentFCObject, IFieldSystemComponentConfig, IFieldComponentConfig, IFieldSystemConfig,
 } from './type';
 import SelectEpic from '../../select/select-epic';
 import SelectLabel from '../../select/select-label';
@@ -26,6 +28,7 @@ import QuickFilterField from './components/quick-filter-field';
 import { IFieldType } from '@/common/types';
 import { validKeyReturnValue } from '@/common/commonValid';
 import SelectSubFeature from '@/components/select/select-sub-feature';
+import Editor from '@/components/Editor';
 
 export const AgileComponentMap = {
   sprint: SelectSprint,
@@ -35,6 +38,8 @@ export const AgileComponentMap = {
   priority: SelectPriority,
   component: SelectComponent,
   version: SelectVersion,
+  fixVersion: SelectVersion,
+  influenceVersion: SelectVersion,
   environment: SelectEnvironment,
   issueType: SelectIssueType,
   feature: SelectSubFeature, // 子项目查询特征
@@ -43,7 +48,9 @@ export const AgileComponentMap = {
   programVersion: SelectProgramVersion,
   subProject: SelectSubProject,
   quickFilter: QuickFilterField,
+  description: Editor as IClassComponentType<Editor<FormFieldProps>>,
 };
+
 export type AgileComponentMapProps = typeof AgileComponentMap
 
 export const CustomFieldMap = {
@@ -61,18 +68,15 @@ export const CustomFieldMap = {
   member: SelectUser,
 };
 export type CustomFCComponentMapProps = Pick<typeof CustomFieldMap, 'radio' | 'checkbox' | 'single' | 'multiMember' | 'multiple' | 'member'>
-interface ClassType<T> extends React.ComponentClass {
-  new(...args: any[]): T;
-}
-export interface CustomComponentMapProps extends CustomFCComponentMapProps {
-  time: ClassType<TimePicker>
-  datetime: ClassType<DateTimePicker>
-  date: ClassType<DatePicker>
-  number: ClassType<NumberField>
-  input: ClassType<TextField>,
-  text: ClassType<TextArea<any>>
-}
 
+export interface CustomComponentMapProps extends CustomFCComponentMapProps {
+  time: IClassComponentType<TimePicker>
+  datetime: IClassComponentType<DateTimePicker>
+  date: IClassComponentType<DatePicker>
+  number: IClassComponentType<NumberField>
+  input: IClassComponentType<TextField>,
+  text: IClassComponentType<TextArea<any>>
+}
 /**
  *  获取默认空元素
  * @param processConfig

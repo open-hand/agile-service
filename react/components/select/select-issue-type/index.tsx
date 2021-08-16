@@ -7,6 +7,7 @@ import { FlatSelect } from '@choerodon/components';
 import { issueTypeApi, sprintApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { IIssueType, ISprint } from '@/common/types';
+import TypeTag from '@/components/TypeTag';
 
 export interface SelectIssueTypeProps extends Partial<SelectProps> {
   filterList?: string[]
@@ -19,10 +20,12 @@ export interface SelectIssueTypeProps extends Partial<SelectProps> {
   projectId?:string
   applyType?:string
   excludeTypeIds?: string[]
+  showIcon?: boolean
+
 }
 
 const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
-  filterList = ['feature'], isProgram, request, valueField, dataRef, flat, excludeTypeIds = [],
+  filterList = ['feature'], isProgram, request, valueField, dataRef, flat, excludeTypeIds = [], showIcon,
   afterLoad, projectId, applyType, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<IIssueType> => ({
@@ -56,6 +59,7 @@ const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
       }
       return issueTypes;
     })),
+    optionRenderer: showIcon ? (issueType) => <TypeTag data={issueType} showName /> : undefined,
     middleWare: (issueTypes) => {
       const newData = issueTypes.filter((item) => !includes(excludeTypeIds, item.id));
       if (afterLoad) {

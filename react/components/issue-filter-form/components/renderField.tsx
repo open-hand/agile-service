@@ -213,14 +213,14 @@ function renderField<T extends Partial<SelectProps>>(field: IChosenFieldField, o
           {...otherComponentProps}
         />
       );
-    case 'url':
-      return (
-        <UrlField
-          label={name}
-          name={code}
-          {...otherComponentProps}
-        />
-      );
+    // case 'url':
+    //   return (
+    //     <UrlField
+    //       label={name}
+    //       name={code}
+    //       {...otherComponentProps}
+    //     />
+    //   );
     case 'radio': case 'single': case 'checkbox': case 'multiple':
       return (
         <SelectCustomField

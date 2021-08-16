@@ -1,12 +1,12 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
-import { IStatusCirculation, statusTransformApi } from '@/api';
-import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
 import { includes, intersection } from 'lodash';
+import useSelect, { SelectConfig } from '@/hooks/useSelect';
+import { IStatusCirculation, statusTransformApi } from '@/api';
 
-interface Props extends Partial<SelectProps> {
+export interface SelectStatusProps extends Partial<SelectProps> {
   issueTypeId?: string
   excludeStatus?: string[]
   dataRef?: React.MutableRefObject<any>
@@ -21,7 +21,7 @@ interface Props extends Partial<SelectProps> {
   extraStatus?: IStatusCirculation[]
 }
 
-const SelectStatus: React.FC<Props> = forwardRef(
+const SelectStatus: React.FC<SelectStatusProps> = forwardRef(
   ({
     request, issueTypeId, excludeStatus = [], dataRef, afterLoad, flat, projectId, applyType, issueTypeIds, selectedIds, isOrganization = false, extraStatus = [], ...otherProps
   }, ref: React.Ref<Select>) => {

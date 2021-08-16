@@ -4,13 +4,13 @@ import {
 } from 'choerodon-ui/pro';
 import { observable } from 'mobx';
 import { includes } from 'lodash';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 import {
   IField,
 } from '@/common/types';
 import SelectUser from '@/components/select/select-user';
 import Editor from '@/components/Editor';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 
 import SelectEnvironment from '@/components/select/select-environment';
 import SelectFeature from '@/components/select/select-feature';
@@ -127,13 +127,13 @@ export default function renderField<T extends Partial<SelectProps>>({
           {...otherComponentProps}
         />
       );
-    case 'url':
-      return (
-        <UrlField
-          name={fieldCode}
-          {...otherComponentProps}
-        />
-      );
+    // case 'url':
+    //   return (
+    //     <UrlField
+    //       name={fieldCode}
+    //       {...otherComponentProps}
+    //     />
+    //   );
     case 'single': case 'multiple': case 'radio': case 'checkbox':
       return (
         <SelectCustomField

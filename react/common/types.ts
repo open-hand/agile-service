@@ -205,7 +205,7 @@ export interface IField {
   code: string,
   fieldId: string,
   fieldOptions?: FieldOption[],
-  fieldType: string,
+  fieldType: IFieldType,
   fieldTypeName?: string,
   id: string,
   name: string,

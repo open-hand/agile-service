@@ -1,6 +1,6 @@
 import { castArray } from 'lodash';
 import type {
-  IFieldConfig, IFieldOutput, IComponentFCWithClassObject, ISingleOrArray, IFieldCustomConfig, IFieldSystemConfig,
+  IFieldConfig, IFieldOutput, IComponentFCWithClassObject, ISingleOrArray, IFieldCustomConfig, IFieldSystemConfig, IFieldConfigOutputType,
 } from './type';
 import { getProcessFieldConfig } from './utils';
 import getElement, {
@@ -12,9 +12,11 @@ interface IFieldsInstanceConfig {
   SystemComponents?: IComponentFCWithClassObject
   CustomComponents?: IComponentFCWithClassObject
 }
-interface IFieldBase {
+export interface IFieldBaseConfig {
   code: string
   fieldType: IFieldType
+  outputs?:Array<IFieldConfigOutputType>
+  props?:any
 }
 
 /**
@@ -22,9 +24,10 @@ interface IFieldBase {
  * @param config @default 基础敏捷配置
  *
  */
-function getFieldsInstance<T extends IFieldBase = IFieldBase, S extends IComponentFCWithClassObject = AgileComponentMapProps,
+function getFieldsInstance<T extends IFieldBaseConfig = IFieldBaseConfig, S extends IComponentFCWithClassObject = AgileComponentMapProps,
   C extends IComponentFCWithClassObject = CustomComponentMapProps>(config: IFieldsInstanceConfig = {}) {
   const { SystemComponents = AgileComponentMap, CustomComponents = CustomFieldMap } = config;
+  console.log('config....', config);
   /**
  * 获取字段配置/元素/自定义配置渲染
  * @param fields
@@ -36,9 +39,10 @@ function getFieldsInstance<T extends IFieldBase = IFieldBase, S extends ICompone
     fields: ISingleOrArray<T> = [], systemFields: ISingleOrArray<IFieldSystemConfig<S>> = [], customFields: ISingleOrArray<IFieldCustomConfig<C>> = [],
   ): Array<Array<IFieldOutput<S | C>>> {
     const fieldsArray = castArray(fields).map((item) => ({
+      props: item.props ?? {},
       code: item.code,
       fieldType: item.fieldType,
-      outputs: ['element'],
+      outputs: item.outputs ?? ['element'],
     }) as IFieldConfig<S, C>);
     const systemFieldsArray = castArray(systemFields);
     const customFieldsArray = castArray(customFields);
@@ -53,7 +57,7 @@ function getFieldsInstance<T extends IFieldBase = IFieldBase, S extends ICompone
           return getElement(fieldConfig as any, SystemComponents, CustomComponents);
         }
         if (item === 'function') {
-          return (newFieldConfig: any) => getElement(newFieldConfig, SystemComponents, CustomComponents);
+          return (newFieldConfig: any, element?: any) => element || getElement(newFieldConfig, SystemComponents, CustomComponents);
         }
         return undefined;
       });
@@ -71,7 +75,7 @@ function getFieldsInstance<T extends IFieldBase = IFieldBase, S extends ICompone
  * @param customFields
  * @returns
  */
-const getAgileFields = getFieldsInstance<IFieldBase & { [x: string]: any }, AgileComponentMapProps, CustomComponentMapProps>();
+const getAgileFields = getFieldsInstance<IFieldBaseConfig & { [x: string]: any }, AgileComponentMapProps, CustomComponentMapProps>();
 // function getAgileFields<T extends IFieldBase = IFieldBase>(fields: ISingleOrArray<T> = [], systemFields: ISingleOrArray<IFieldSystemConfig<AgileComponentMapProps>> = [],
 //   customFields: ISingleOrArray<IFieldCustomConfig<CustomComponentMapProps>> = []) {
 //   return getFields(fields, systemFields, customFields);

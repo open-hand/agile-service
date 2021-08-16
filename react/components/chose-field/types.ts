@@ -1,8 +1,8 @@
-import { IField } from '@/common/types';
 import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import { IField } from '@/common/types';
 
-interface IChosenFieldField extends Partial<IField> {
+interface IChosenFieldField extends Omit<Partial<IField>, 'fieldType'> {
     id?: string,
     code: string,
     name: string,
