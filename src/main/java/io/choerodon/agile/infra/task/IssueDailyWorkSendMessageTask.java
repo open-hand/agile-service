@@ -6,6 +6,7 @@ import io.choerodon.agile.app.service.DelayTaskService;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.NotifyFeignClient;
+import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.asgard.schedule.annotation.JobTask;
 import io.choerodon.asgard.schedule.annotation.TimedTask;
@@ -42,6 +43,7 @@ public class IssueDailyWorkSendMessageTask {
 
     private static final String ISSUE_DAILY_WORK = "ISSUE_DAILY_WORK";
     private static final String USER_NAME = "userName";
+    private static final String ORGANIZATION_NAME = "organizationName";
     private static final String HTML_TABLE = "htmlTable";
     private static final String PM_HTML_TABLE = "pmHtmlTable";
     private static final String EMAIL_HTML_TABLE = "emailHtmlTable";
@@ -53,7 +55,9 @@ public class IssueDailyWorkSendMessageTask {
     private static final String TR_TAG_DOUBLE = "<tr style = \"background-color: #F5F5FC; height: 40px; line-height: 25px;\">";
     private static final String P_PROJECT_STATISTICS = "<p style=\"color: #0F1358;font-family: PingFangSC-Regular;" +
             "font-size: 14px;text-align: justify;margin-bottom: 0px;margin-top: 0px; line-height: 24px;\">" +
-            "您在“%s”项目有%s个未完成的问题，其中%s个问题已逾期。</p>";
+            "<span style=\"display: inline-block; margin-right: 6px;width: 3px; height: 15px; background: #798DFB; border-radius: 2px;" +
+            "vertical-align: middle;margin-bottom: 2px;\"></span>" +
+            "%s：%s个问题未完成，其中%s个问题已逾期。</p>";
     private static final String P_PROJECT_TABLE = "<p style=\"color: rgb(0, 0, 0); font-family: Ubuntu, Helvetica, Arial, sans-serif; " +
             "font-size: 14px; text-align: justify; margin-bottom: 0px; line-height: 24px;\">%s</p>";
     private static final String RED_SPAN = "<span style=\"" +
@@ -207,6 +211,7 @@ public class IssueDailyWorkSendMessageTask {
         while(mapIterator.hasNext()) {
             MultiKey multiKey = (MultiKey) mapIterator.next();
             Long userId = (Long) multiKey.getKey(0);
+            Long organizationId = (Long) multiKey.getKey(1);
 
             UserDTO user = userMap.get(userId);
             if (ObjectUtils.isEmpty(user)) {
@@ -219,7 +224,7 @@ public class IssueDailyWorkSendMessageTask {
             if (CollectionUtils.isEmpty(userOrgProjectIds)) {
                 return;
             }
-            Map<String, String> paramMap = buildParamMap(userOrgProjectIds, userProjectIssueIdsMap, issueMap, projectMap, user);
+            Map<String, String> paramMap = buildParamMap(organizationId, userOrgProjectIds, userProjectIssueIdsMap, issueMap, projectMap, user);
 
             //获取当前用户下在当前组织下需要发送通知的项目
             List<Long> senderProjectIds = getSenderProjectIds(projectMap, userOrgProjectIds);
@@ -327,13 +332,16 @@ public class IssueDailyWorkSendMessageTask {
         list.forEach(v -> v.setChildIssues(childIssueMap.get(v.getIssueId())));
     }
 
-    private Map<String, String> buildParamMap(List<Long> userOrgProjectIds,
+    private Map<String, String> buildParamMap(Long organizationId,
+                                              List<Long> userOrgProjectIds,
                                               MultiKeyMap userProjectIssueIdsMap,
                                               Map<Long, IssueDailyWorkVO> issueMap,
                                               Map<Long, ProjectMessageVO> projectMap,
                                               UserDTO user) {
+        OrganizationInfoVO organization = baseFeignClient.query(organizationId).getBody();
         Map<String, String> result = new HashMap<>();
         result.put(USER_NAME, user.getRealName());
+        result.put(ORGANIZATION_NAME, organization.getTenantName());
         Map<Long, String> projectTableMap = buildProjectHtmlTableMap(userOrgProjectIds, userProjectIssueIdsMap, issueMap, projectMap, user);
 
         //同一项目下每日工作提醒的邮件、站内信通知设置不一定全部开启，故分开拼接两种通知内容
