@@ -6,6 +6,7 @@ import {
 import {
   Table, DataSet, Menu, Dropdown, Icon, Modal,
 } from 'choerodon-ui/pro';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import {
   find, filter, includes,
@@ -54,6 +55,8 @@ interface IStatusTransferSettingVOS {
   user: null | User
   userId: null | string
   userType: 'projectOwner' | 'specifier'
+  type?: 'other',
+  subIssueCompleted?: boolean
 }
 
 interface IStatusNoticeSettingVOS {
@@ -130,6 +133,10 @@ interface ILinkIssueLinkageVOS {
     linkName: string
     linkTypeId: string
   }
+}
+
+interface IStatusConditionSetting {
+
 }
 
 const transformedMember = {
@@ -324,6 +331,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           record={record}
           selectedType={selectedType}
           customCirculationDataSet={customCirculationDataSet}
+          selectedTypeCode={selectedTypeCode}
         />,
       },
       linkage: {
@@ -514,6 +522,23 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
 
   const renderLinkIssueLinkageSetting = (linkIssueStatusLinkageVOS: ILinkIssueLinkageVOS[]) => linkIssueStatusLinkageVOS.map((item) => `关联关系为【${item.linkTypeVO.linkName}】，且问题类型为【${item.linkIssueType.name}】的关联问题将自动流转到【${item.linkIssueStatus.name}】状态`).join('；');
 
+  const renderConditionSetting = (statusTransferSettingVOS: IStatusTransferSettingVOS[], record: Record) => {
+    const subIssueCompleted = statusTransferSettingVOS && find(statusTransferSettingVOS, (item) => item.type === 'other' && item.subIssueCompleted);
+    const isProjectOwnerExist = statusTransferSettingVOS && find(statusTransferSettingVOS, (item: IStatusTransferSettingVOS) => item.userType === 'projectOwner');
+    const assigners = filter((statusTransferSettingVOS || []), (item: IStatusTransferSettingVOS) => item.userType === 'specifier')?.map((item: IStatusTransferSettingVOS) => item.user?.realName) || [];
+    let conditionStr = '';
+    if (subIssueCompleted) {
+      conditionStr += `子级任务需全部到已解决状态才能流转到${record.get('name')}`;
+    }
+    if (subIssueCompleted && (isProjectOwnerExist || (assigners && assigners.length > 0))) {
+      conditionStr += '，';
+    }
+    if (isProjectOwnerExist || (assigners && assigners.length > 0)) {
+      conditionStr += `移到工作项到此状态需为：${isProjectOwnerExist ? '项目所有者' : ''}${isProjectOwnerExist && assigners.length > 0 ? '、' : ''}${assigners.join('、')}`;
+    }
+    return conditionStr;
+  };
+
   const renderSetting = ({
     // @ts-ignore
     value, text, name, record, dataSet,
@@ -524,9 +549,9 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     const selectedTypeCode = find(issueTypes, (
       item: IIssueType,
     ) => item.id === selectedType)?.typeCode;
+    const subIssueCompleted = statusTransferSettingVOS && find(statusTransferSettingVOS, (item) => item.type === 'other' && item.subIssueCompleted);
     const isProjectOwnerExist = statusTransferSettingVOS && find(statusTransferSettingVOS, (item: IStatusTransferSettingVOS) => item.userType === 'projectOwner');
     const assigners = filter((statusTransferSettingVOS || []), (item: IStatusTransferSettingVOS) => item.userType === 'specifier')?.map((item: IStatusTransferSettingVOS) => item.user?.realName) || [];
-    const transferRender = (isProjectOwnerExist || (assigners && assigners.length > 0)) && `移到工作项到此状态需为：${isProjectOwnerExist ? '项目所有者' : ''}${isProjectOwnerExist && assigners.length > 0 ? '、' : ''}${assigners.join('、')}`;
     return (
       <div className={styles.setting}>
         {
@@ -544,10 +569,10 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           )
         }
         {
-          (isProjectOwnerExist || (assigners && assigners.length > 0)) && (
+          (subIssueCompleted || isProjectOwnerExist || (assigners && assigners.length > 0)) && (
             <div className={styles.settingItem}>
-              <Tooltip title={transferRender}>
-                {transferRender}
+              <Tooltip title={renderConditionSetting(statusTransferSettingVOS, record)}>
+                {renderConditionSetting(statusTransferSettingVOS, record)}
               </Tooltip>
             </div>
           )

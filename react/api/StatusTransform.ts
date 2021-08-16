@@ -40,8 +40,9 @@ export interface IStatusCreateLink {
 }
 
 export interface ICondition {
-  type: 'specifier' | 'projectOwner',
+  type: 'specifier' | 'projectOwner' | 'other',
   userIds?: string[],
+  subIssueCompleted?: boolean
 }
 
 export interface IUpdateNotifySetting {

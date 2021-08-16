@@ -6,11 +6,11 @@ import { HeaderButtons, Action } from '@choerodon/master';
 import { Table, DataSet } from 'choerodon-ui/pro';
 import { Divider, Icon } from 'choerodon-ui';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { TableAutoHeightType, ColumnAlign } from 'choerodon-ui/pro/lib/table/enum';
 import { statusTransformApiConfig, ITotalStatus } from '@/api';
 import StatusTypeTag from '@/components/tag/status-type-tag';
 import { IStatus } from '@/common/types';
 
-import { TableAutoHeightType, ColumnAlign } from 'choerodon-ui/pro/lib/table/enum';
 import { TabComponentProps } from '../index';
 import openCreateStatus from '../components/create-status';
 import openDeleteStatus from './DeleteStatus';
@@ -46,11 +46,6 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
         name: 'usage',
         type: 'string' as FieldType,
         label: '使用情况',
-      },
-      {
-        name: 'operate',
-        type: 'boolean' as FieldType,
-        label: '操作',
       },
     ],
     queryFields: [],
@@ -114,6 +109,17 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
                     handleEditStatus({ record });
                   },
                 },
+                {
+                  text: '删除',
+                  action: () => {
+                    openDeleteStatus({
+                      onSubmit: () => {
+                        dataSet.query();
+                      },
+                      data: record?.toData() as ITotalStatus,
+                    });
+                  },
+                },
               ]}
               />
             )}
@@ -129,23 +135,6 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
           />
           <Column name="completed" align={'left' as ColumnAlign} renderer={({ value }) => <span className={styles.gray}>{value ? '是' : '否'}</span>} />
           <Column name="usage" renderer={({ value }) => <span className={styles.gray}>{value}</span>} />
-          <Column
-            name="operate"
-            renderer={({ record }) => (
-              <Icon
-                type="delete_sweep-o"
-                onClick={() => {
-                  openDeleteStatus({
-                    onSubmit: () => {
-                      dataSet.query();
-                    },
-                    data: record?.toData() as ITotalStatus,
-                  });
-                }}
-                style={{ color: 'var(--primary-color)', cursor: 'pointer' }}
-              />
-            )}
-          />
         </Table>
       </Content>
     </Page>
