@@ -241,7 +241,7 @@ public class IssueCommentServiceImpl implements IssueCommentService {
             issueCommentVO.setUserImageUrl(commentUser != null ? commentUser.getImageUrl() : null);
             issueCommentVO.setUserRealName(commentUser != null ? commentUser.getRealName() : null);
             issueCommentVO.setUserLoginName(commentUser != null ? commentUser.getLoginName() : null);
-            if (CollectionUtils.isEmpty(issueCommentVO.getIssueCommentReplyList())){
+            if (!CollectionUtils.isEmpty(issueCommentVO.getIssueCommentReplyList())){
                 issueCommentVO.getIssueCommentReplyList().forEach(issueCommentReply -> {
                     setReplyUserInfo(issueCommentReply, userMessageMap);
                 });
