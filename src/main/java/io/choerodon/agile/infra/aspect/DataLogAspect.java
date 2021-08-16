@@ -1,9 +1,7 @@
 package io.choerodon.agile.infra.aspect;
 
-import io.choerodon.agile.api.vo.PriorityVO;
-import io.choerodon.agile.api.vo.ProjectVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.RuleLogRelVO;
-import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.annotation.DataLog;
 import io.choerodon.agile.infra.dto.*;
@@ -146,6 +144,7 @@ public class DataLogAspect {
     private static final String FIELD_STATIC_FILE = "Static File";
     private static final String FIELD_STATIC_FILE_REL = "Static File Rel";
     private static final String ISSUE_TYPE_ID = "issueTypeId";
+    private static final String FIELD_ENVIRONMENT = "environment";
 
 
     @Autowired
@@ -196,6 +195,8 @@ public class DataLogAspect {
     private StaticFileHeaderMapper staticFileHeaderMapper;
     @Autowired
     private StaticFileIssueRelMapper staticFileIssueRelMapper;
+    @Autowired
+    private LookupValueService lookupValueService;
 
     /**
      * 定义拦截规则：拦截Spring管理的后缀为ServiceImpl的bean中带有@DataLog注解的方法。
@@ -1239,6 +1240,7 @@ public class DataLogAspect {
             handleRank(field, originIssueDTO, issueConvertDTO);
             handleType(field, originIssueDTO, issueConvertDTO);
             handleEstimatedTime(field, originIssueDTO, issueConvertDTO);
+            handleEnvironment(field, originIssueDTO, issueConvertDTO);
         }
     }
 
@@ -1487,6 +1489,27 @@ public class DataLogAspect {
     private void handleIssueEpic(List<String> field, IssueDTO originIssueDTO, IssueConvertDTO issueConvertDTO) {
         if (field.contains(EPIC_ID_FIELD) && !Objects.equals(originIssueDTO.getEpicId(), issueConvertDTO.getEpicId())) {
             createIssueEpicLog(issueConvertDTO.getEpicId(), originIssueDTO);
+        }
+    }
+
+    private void handleEnvironment(List<String> field, IssueDTO originIssueDTO, IssueConvertDTO issueConvertDTO) {
+        if (field.contains(FIELD_ENVIRONMENT) && !Objects.equals(originIssueDTO.getEnvironment(), issueConvertDTO.getEnvironment())) {
+            LookupTypeWithValuesVO environmentValuesVO = lookupValueService.queryLookupValueByCode(FIELD_ENVIRONMENT, originIssueDTO.getProjectId());
+
+            String oldString = null;
+            String newString = null;
+            if (!Objects.isNull(originIssueDTO.getEnvironment()) && !Objects.equals("", originIssueDTO.getEnvironment())) {
+                oldString = environmentValuesVO.getLookupValues().stream()
+                        .filter(value -> Objects.equals(value.getValueCode(), originIssueDTO.getEnvironment()))
+                        .findFirst().map(LookupValueVO::getName).orElse(null);
+            }
+            if (!Objects.isNull(issueConvertDTO.getEnvironment()) && !Objects.equals("", issueConvertDTO.getEnvironment())) {
+                newString = environmentValuesVO.getLookupValues().stream()
+                        .filter(value -> Objects.equals(value.getValueCode(), issueConvertDTO.getEnvironment()))
+                        .findFirst().map(LookupValueVO::getName).orElse(null);
+            }
+            createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
+                    FIELD_ENVIRONMENT, oldString, newString, originIssueDTO.getEnvironment(), issueConvertDTO.getEnvironment());
         }
     }
 
