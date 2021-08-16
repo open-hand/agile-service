@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service;
 import io.choerodon.agile.api.vo.StatusTransferSettingCreateVO;
 import io.choerodon.agile.api.vo.StatusTransferSettingVO;
 import io.choerodon.agile.infra.dto.StatusTransferSettingDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public interface StatusTransferSettingService {
 
    List<StatusTransferSettingVO> listByStatusIds(Long projectId, Long issueTypeId, List<Long> statusIds);
 
-    void checkStatusTransferSetting(Long projectId, Long issueTypeId, Long endStatusId);
+    void checkStatusTransferSetting(Long projectId, IssueDTO issueDTO, Long endStatusId);
 
     List<Long> checkStatusTransform(Long projectId,Long issueTypeId, List<Long> statusIds);
 

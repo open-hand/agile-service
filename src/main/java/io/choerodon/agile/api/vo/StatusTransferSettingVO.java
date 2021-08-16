@@ -23,6 +23,8 @@ public class StatusTransferSettingVO {
 
     private UserDTO user;
 
+    private Boolean isVerifySubissueCompleted;
+
     public Long getId() {
         return id;
     }
@@ -77,5 +79,13 @@ public class StatusTransferSettingVO {
 
     public void setUser(UserDTO user) {
         this.user = user;
+    }
+
+    public Boolean getVerifySubissueCompleted() {
+        return isVerifySubissueCompleted;
+    }
+
+    public void setVerifySubissueCompleted(Boolean verifySubissueCompleted) {
+        isVerifySubissueCompleted = verifySubissueCompleted;
     }
 }

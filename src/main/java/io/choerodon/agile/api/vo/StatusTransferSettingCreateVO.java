@@ -15,6 +15,8 @@ public class StatusTransferSettingCreateVO {
     @Encrypt
     private List<Long> userIds;
 
+    private Boolean isVerifySubissueCompleted;
+
     public String getType() {
         return type;
     }
@@ -29,5 +31,13 @@ public class StatusTransferSettingCreateVO {
 
     public void setUserIds(List<Long> userIds) {
         this.userIds = userIds;
+    }
+
+    public Boolean getVerifySubissueCompleted() {
+        return isVerifySubissueCompleted;
+    }
+
+    public void setVerifySubissueCompleted(Boolean verifySubissueCompleted) {
+        isVerifySubissueCompleted = verifySubissueCompleted;
     }
 }

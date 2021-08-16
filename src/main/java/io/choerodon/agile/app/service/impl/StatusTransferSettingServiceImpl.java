@@ -8,14 +8,18 @@ import io.choerodon.agile.app.service.OrganizationConfigService;
 import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StatusTransferSettingService;
 import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.dto.IssueCountDTO;
 import io.choerodon.agile.infra.dto.StatusTransferSettingDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.StatusMapper;
 import io.choerodon.agile.infra.mapper.StatusTransferSettingMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections.CollectionUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +38,7 @@ import java.util.stream.Collectors;
 public class StatusTransferSettingServiceImpl implements StatusTransferSettingService {
     private static final String SPECIFIER = "specifier";
     private static final String PROJECT_OWNER = "projectOwner";
+    private static final String  OTHER = "other";
     @Autowired
     private StatusTransferSettingMapper statusTransferSettingMapper;
     @Autowired
@@ -48,6 +53,10 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
     private ProjectConfigService projectConfigService;
     @Autowired
     private OrganizationConfigService organizationConfigService;
+    @Autowired
+    private IssueMapper issueMapper;
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public void createOrUpdate(Long projectId, Long issueTypeId, Long statusId,Long objectVersionNumber,String applyType,List<StatusTransferSettingCreateVO> list) {
@@ -64,7 +73,11 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
                         baseInsert(statusTransferSettingDTO);
                     }
                 } else {
-                    StatusTransferSettingDTO statusTransferSettingDTO = new StatusTransferSettingDTO(issueTypeId, statusId, projectId, settingCreateVO.getType());
+                    StatusTransferSettingDTO statusTransferSettingDTO = modelMapper.map(settingCreateVO, StatusTransferSettingDTO.class);
+                    statusTransferSettingDTO.setIssueTypeId(issueTypeId);
+                    statusTransferSettingDTO.setStatusId(statusId);
+                    statusTransferSettingDTO.setProjectId(projectId);
+                    statusTransferSettingDTO.setUserType(settingCreateVO.getType());
                     baseInsert(statusTransferSettingDTO);
                 }
             }
@@ -119,26 +132,37 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
     }
 
     @Override
-    public void checkStatusTransferSetting(Long projectId, Long issueTypeId, Long endStatusId) {
-        List<StatusTransferSettingDTO> query = query(projectId, issueTypeId, endStatusId);
+    public void checkStatusTransferSetting(Long projectId, IssueDTO issueDTO, Long endStatusId) {
+        List<StatusTransferSettingDTO> query = query(projectId, issueDTO.getIssueTypeId(), endStatusId);
         if (CollectionUtils.isEmpty(query)) {
             return;
         }
         // 获取当前的用户
         Long userId = DetailsHelper.getUserDetails().getUserId();
         Set<Long> userIds = new HashSet<>();
+        Boolean verifySubIssueCompleted = false;
         for (StatusTransferSettingDTO statusTransferSettingDTO : query) {
             if (PROJECT_OWNER.equals(statusTransferSettingDTO.getUserType())) {
                 List<UserVO> body = baseFeignClient.listProjectOwnerById(projectId).getBody();
                 if (!CollectionUtils.isEmpty(body)) {
                     userIds.addAll(body.stream().map(UserVO::getId).collect(Collectors.toSet()));
                 }
-            } else {
+            } else if (SPECIFIER.equals(statusTransferSettingDTO.getUserType())) {
                 userIds.add(statusTransferSettingDTO.getUserId());
+            } else if (OTHER.equals(statusTransferSettingDTO.getUserType())) {
+                verifySubIssueCompleted = statusTransferSettingDTO.getVerifySubissueCompleted();
             }
         }
         if (!userIds.contains(userId)) {
             throw new CommonException("error.no.permission.to.switch");
+        }
+        // 校验当前问题的子级任务是否都是已解决状态
+        Boolean subIssue = ("sub_task".equals(issueDTO.getTypeCode())) || ("bug".equals(issueDTO.getTypeCode()) && !ObjectUtils.isEmpty(issueDTO.getRelateIssueId()) && !Objects.equals(0L, issueDTO.getRelateIssueId()));
+        if (Boolean.TRUE.equals(verifySubIssueCompleted) && !subIssue) {
+            IssueCountDTO issueCountDTO = issueMapper.querySubIssueCount(projectId, issueDTO.getIssueId());
+            if (!Objects.equals(issueCountDTO.getSuccessIssueCount(), issueCountDTO.getIssueCount())) {
+                throw new CommonException("error.no.permission.to.switch");
+            }
         }
     }
 
@@ -182,7 +206,11 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
                         baseInsert(statusTransferSettingDTO);
                     }
                 } else {
-                    StatusTransferSettingDTO statusTransferSettingDTO = new StatusTransferSettingDTO(issueTypeId, statusId, 0L, settingCreateVO.getType());
+                    StatusTransferSettingDTO statusTransferSettingDTO = modelMapper.map(settingCreateVO, StatusTransferSettingDTO.class);
+                    statusTransferSettingDTO.setIssueTypeId(issueTypeId);
+                    statusTransferSettingDTO.setStatusId(statusId);
+                    statusTransferSettingDTO.setProjectId(0L);
+                    statusTransferSettingDTO.setUserType(settingCreateVO.getType());
                     statusTransferSettingDTO.setOrganizationId(organizationId);
                     baseInsert(statusTransferSettingDTO);
                 }
@@ -226,7 +254,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
                 if (!CollectionUtils.isEmpty(body)) {
                     userIds.addAll(body.stream().map(UserVO::getId).collect(Collectors.toSet()));
                 }
-            } else {
+            } else if (SPECIFIER.equals(statusTransferSettingDTO.getUserType())) {
                 userIds.add(statusTransferSettingDTO.getUserId());
             }
         }

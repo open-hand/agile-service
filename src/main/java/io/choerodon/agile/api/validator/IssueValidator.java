@@ -153,7 +153,7 @@ public class IssueValidator {
         if (ObjectUtils.isEmpty(issueDTO)) {
             throw new CommonException(ERROR_ISSUE_ID_NOT_FOUND);
         }
-        statusTransferSettingService.checkStatusTransferSetting(projectId,issueDTO.getIssueTypeId(),endStatusId);
+        statusTransferSettingService.checkStatusTransferSetting(projectId,issueDTO,endStatusId);
     }
 
     public void verifyUpdateData(JSONObject issueUpdate, Long projectId) {

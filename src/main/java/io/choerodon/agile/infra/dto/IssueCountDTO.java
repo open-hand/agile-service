@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 public class IssueCountDTO {
     private Long id;
     private String name;
+    private Integer successIssueCount;
     private Integer issueCount;
     private BigDecimal storyPointCount;
     private BigDecimal successStoryPoint;
@@ -98,5 +99,13 @@ public class IssueCountDTO {
 
     public void setDoneStoryPoint(BigDecimal doneStoryPoint) {
         this.doneStoryPoint = doneStoryPoint;
+    }
+
+    public Integer getSuccessIssueCount() {
+        return successIssueCount;
+    }
+
+    public void setSuccessIssueCount(Integer successIssueCount) {
+        this.successIssueCount = successIssueCount;
     }
 }
