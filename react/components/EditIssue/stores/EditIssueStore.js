@@ -138,11 +138,12 @@ class EditIssueStore {
     this.branch = branch || {};
   }
 
-  @action initIssueAttribute(doc, workLogs, dataLogs, linkIssues) {
+  @action initIssueAttribute(doc, workLogs, dataLogs, linkIssues, branches, comments) {
     this.doc = doc;
     this.workLogs = workLogs || [];
     this.dataLogs = dataLogs || [];
     this.linkIssues = linkIssues || [];
+    this.comments = comments;
   }
 
   @observable createBranchShow = false;
@@ -246,6 +247,12 @@ class EditIssueStore {
 
   @action setBacklogLinks = (data) => {
     this.backlogLinks = data;
+  }
+
+  @observable comments;
+
+  @action setComments = (comments) => {
+    this.comments = comments;
   }
 
   commentExpandMap = observable.map();
