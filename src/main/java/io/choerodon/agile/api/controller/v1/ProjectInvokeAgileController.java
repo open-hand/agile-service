@@ -1,14 +1,13 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.agile.api.vo.IssueLinkVO;
-import io.choerodon.agile.api.vo.PageFieldViewParamVO;
-import io.choerodon.agile.api.vo.PageFieldViewVO;
-import io.choerodon.agile.api.vo.StaticFileHeaderVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.DataLogVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -17,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -43,6 +43,9 @@ public class ProjectInvokeAgileController {
 
     @Autowired
     private StaticFileService staticFileService;
+
+    @Autowired
+    private IssueCommentService issueCommentService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询单个issue")
@@ -120,5 +123,22 @@ public class ProjectInvokeAgileController {
         return Optional.ofNullable(staticFileService.selectFileListByIssue(instanceProjectId, issueId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.attachment.select.issue.list"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("分页查询issue下评论")
+    @GetMapping(value = "/issue_comment/issue/{issue_id}/page")
+    public ResponseEntity<Page<IssueCommentVO>> issueCommentPage(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "问题id", required = true)
+            @Encrypt @PathVariable(name = "issue_id") Long issueId,
+            @ApiParam(value = "所属项目id", required = true)
+            @RequestParam Long instanceProjectId,
+            @ApiParam(value = "分页参数")
+            @ApiIgnore PageRequest pageRequest) {
+        return Optional.ofNullable(issueCommentService.queryIssueCommentPage(pageRequest, issueId, instanceProjectId))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.issueComment.page"));
     }
 }

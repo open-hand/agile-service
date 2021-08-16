@@ -4,6 +4,8 @@ package io.choerodon.agile.app.service;
 import java.util.List;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * 敏捷开发Issue评论
@@ -84,4 +86,13 @@ public interface IssueCommentService {
      * @param self 是否是删除自己的评论
      */
     void deleteIssueCommentReply(Long projectId, Long commentId, boolean self);
+
+    /**
+     * 分页查询issue下的评论
+     * @param pageRequest 分页参数
+     * @param issueId issueId
+     * @param projectId 项目id
+     * @return 问题评论
+     */
+    Page<IssueCommentVO> queryIssueCommentPage(PageRequest pageRequest, Long issueId, Long projectId);
 }

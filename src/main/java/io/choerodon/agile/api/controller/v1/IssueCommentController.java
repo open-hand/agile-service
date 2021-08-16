@@ -6,7 +6,11 @@ import io.choerodon.agile.api.validator.IssueCommentValidator;
 import io.choerodon.agile.app.service.IssueCommentService;
 
 import io.choerodon.agile.infra.utils.VerifyUpdateUtil;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
 import io.swagger.annotations.ApiOperation;
@@ -17,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 import java.util.Optional;
@@ -160,6 +165,21 @@ public class IssueCommentController {
                                                   @PathVariable @Encrypt Long commentId) {
         issueCommentService.deleteIssueCommentReply(projectId, commentId, true);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("分页查询issue下评论")
+    @GetMapping(value = "/issue/{issue_id}/page")
+    public ResponseEntity<Page<IssueCommentVO>> issueCommentPage(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "问题id", required = true)
+            @Encrypt @PathVariable(name = "issue_id") Long issueId,
+            @ApiParam(value = "分页参数")
+            @ApiIgnore PageRequest pageRequest) {
+        return Optional.ofNullable(issueCommentService.queryIssueCommentPage(pageRequest, issueId, projectId))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.issueComment.page"));
     }
 
 }

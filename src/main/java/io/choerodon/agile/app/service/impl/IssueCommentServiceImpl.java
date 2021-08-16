@@ -9,10 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import io.choerodon.agile.api.vo.*;
@@ -25,10 +22,15 @@ import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.mapper.IssueCommentMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.agile.infra.utils.SendMsgUtil;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.core.utils.PageUtils;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * 敏捷开发Issue评论
@@ -39,6 +41,8 @@ import io.choerodon.core.oauth.DetailsHelper;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class IssueCommentServiceImpl implements IssueCommentService {
+
+    private static final int DISPALY_REPLY_SIZE = 2;
 
     @Autowired
     private IssueCommentAssembler issueCommentAssembler;
@@ -208,6 +212,86 @@ public class IssueCommentServiceImpl implements IssueCommentService {
             throw new CommonException("error.created.user.illegal");
         }
         iIssueCommentService.deleteBaseReply(issueCommentDTO);
+    }
+
+    @Override
+    public Page<IssueCommentVO> queryIssueCommentPage(PageRequest pageRequest, Long issueId, Long projectId) {
+        Page<IssueCommentDTO> issueCommentList = PageHelper.doPage(pageRequest, () -> issueCommentMapper.queryIssueCommentList(projectId, issueId));
+        if (CollectionUtils.isEmpty(issueCommentList)){
+            return PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
+        }
+        Page<IssueCommentVO> result = PageUtils.copyPropertiesAndResetContent(issueCommentList, modelMapper.map(issueCommentList.getContent(), new TypeToken<List<IssueCommentVO>>(){}.getType()));
+        setDefaultDisplayReply(result, issueId, projectId);
+
+        List<Long> userIds = new ArrayList<>();
+        result.forEach(issueCommentVO -> {
+            userIds.add(issueCommentVO.getUserId());
+            if (CollectionUtils.isEmpty(issueCommentVO.getIssueCommentReplyList())){
+                issueCommentVO.getIssueCommentReplyList().forEach(issueCommentReply -> {
+                    userIds.add(issueCommentReply.getUserId());
+                    userIds.add(issueCommentReply.getReplyToUserId());
+                });
+            }
+        });
+        Map<Long, UserMessageDTO> userMessageMap = userService.queryUsersMap(
+                userIds.stream().filter(Objects::nonNull).distinct().collect(Collectors.toList()), true);
+        result.forEach(issueCommentVO -> {
+            UserMessageDTO commentUser = userMessageMap.get(issueCommentVO.getUserId());
+            issueCommentVO.setUserName(commentUser != null ? commentUser.getName() : null);
+            issueCommentVO.setUserImageUrl(commentUser != null ? commentUser.getImageUrl() : null);
+            issueCommentVO.setUserRealName(commentUser != null ? commentUser.getRealName() : null);
+            issueCommentVO.setUserLoginName(commentUser != null ? commentUser.getLoginName() : null);
+            if (CollectionUtils.isEmpty(issueCommentVO.getIssueCommentReplyList())){
+                issueCommentVO.getIssueCommentReplyList().forEach(issueCommentReply -> {
+                    setReplyUserInfo(issueCommentReply, userMessageMap);
+                });
+            }
+        });
+
+        return result;
+    }
+
+    private void setReplyUserInfo(IssueCommentReplyVO issueCommentReply, Map<Long, UserMessageDTO> userMessageMap) {
+        UserMessageDTO replyToUser = userMessageMap.get(issueCommentReply.getReplyToUserId());
+        UserMessageDTO commentReplyUser = userMessageMap.get(issueCommentReply.getUserId());
+        if (!ObjectUtils.isEmpty(commentReplyUser)) {
+            issueCommentReply.setUserName(commentReplyUser.getName());
+            issueCommentReply.setUserImageUrl(commentReplyUser.getImageUrl());
+            issueCommentReply.setUserRealName(commentReplyUser.getRealName());
+            issueCommentReply.setUserLoginName(commentReplyUser.getLoginName());
+        }
+        if (!ObjectUtils.isEmpty(replyToUser)) {
+            issueCommentReply.setReplyToUserName(replyToUser.getName());
+            issueCommentReply.setReplyToUserLoginName(replyToUser.getLoginName());
+            issueCommentReply.setReplyToUserRealName(replyToUser.getRealName());
+            issueCommentReply.setReplyToUserImageUrl(replyToUser.getImageUrl());
+        }
+    }
+
+    private void setDefaultDisplayReply(Page<IssueCommentVO> result, Long issueId, Long projectId) {
+        if (CollectionUtils.isEmpty(result.getContent())){
+            return;
+        }
+        Map<Long, IssueCommentVO> commentMap = new HashMap<>(result.size());
+        Set<Long> commentIds = new HashSet<>();
+        result.forEach(issueCommentVO -> {
+            issueCommentVO.setIssueCommentReplyList(new ArrayList<>());
+            issueCommentVO.setReplySize(0);
+            commentMap.put(issueCommentVO.getCommentId(), issueCommentVO);
+            commentIds.add(issueCommentVO.getCommentId());
+        });
+        List<IssueCommentReplyVO> commentReplyList = issueCommentMapper.selectIssueCommentDesByParentIds(commentIds, issueId, projectId);
+        if (!CollectionUtils.isEmpty(commentReplyList)) {
+            commentReplyList.forEach(commentReply ->
+                    commentMap.computeIfPresent(commentReply.getParentId(), (commentId, issueCommentVO) -> {
+                        int size = issueCommentVO.getReplySize();
+                        if (size < DISPALY_REPLY_SIZE) {
+                            issueCommentVO.getIssueCommentReplyList().add(commentReply);
+                        }
+                        issueCommentVO.setReplySize(size + 1);
+                        return issueCommentVO;
+                    }));
+        }
     }
 
     private IssueCommentVO queryByProjectIdAndCommentId(Long projectId, Long commentId) {
