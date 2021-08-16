@@ -17,6 +17,7 @@
         SELECT *
         FROM agile_issue_comment
         WHERE issue_id = #{issueId} AND project_id = #{projectId} AND parent_id = 0
+        ORDER BY comment_id DESC
     </select>
 
     <select id="queryIssueAttachmentByCommentId" resultType="io.choerodon.agile.infra.dto.IssueAttachmentDTO">
@@ -62,4 +63,28 @@
         where project_id = #{projectId}
         and parent_id = #{oldCommentId}
     </update>
+
+    <select id="selectIssueCommentDesByParentIds" resultType="io.choerodon.agile.api.vo.IssueCommentReplyVO">
+        SELECT
+        comment_id,
+        user_id,
+        issue_id,
+        comment_text,
+        project_id,
+        parent_id,
+        reply_to_user_id,
+        object_version_number,
+        created_by,
+        creation_date,
+        last_updated_by,
+        last_update_date
+        FROM agile_issue_comment
+        WHERE project_id = #{projectId}
+        AND issue_id = #{issueId}
+        AND parent_id IN
+        <foreach collection="commentIds" item="commentId" open="(" separator="," close=")">
+            #{commentId}
+        </foreach>
+        ORDER BY comment_id DESC
+    </select>
 </mapper>

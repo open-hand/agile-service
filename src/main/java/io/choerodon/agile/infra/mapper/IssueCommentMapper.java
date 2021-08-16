@@ -1,11 +1,13 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.IssueCommentReplyVO;
 import io.choerodon.mybatis.common.BaseMapper;
 import io.choerodon.agile.infra.dto.*;
 
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -48,9 +50,19 @@ public interface IssueCommentMapper extends BaseMapper<IssueCommentDTO> {
     /**
      * 更新子评论的父id为新值
      *
-     * @param projectId 项目id
+     * @param projectId    项目id
      * @param oldCommentId 旧父评论id
      * @param newCommentId 新父评论id
      */
     void updateChildNewParent(@Param("projectId") Long projectId, @Param("oldCommentId") Long oldCommentId, @Param("newCommentId") Long newCommentId);
+
+    /**
+     * 查询评论下的回复
+     *
+     * @param commentIds 评论id
+     * @param issueId    问题id
+     * @param projectId  项目id
+     * @return 评论下的回复
+     */
+    List<IssueCommentReplyVO> selectIssueCommentDesByParentIds(@Param("commentIds") Set<Long> commentIds, @Param("issueId") Long issueId, @Param("projectId") Long projectId);
 }

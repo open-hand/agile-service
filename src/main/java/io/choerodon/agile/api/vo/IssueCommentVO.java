@@ -79,6 +79,9 @@ public class IssueCommentVO {
     @ApiModelProperty(value = "附件列表")
     private List<IssueAttachmentVO> issueAttachmentVOList;
 
+    @ApiModelProperty(value = "回复列表")
+    private List<IssueCommentReplyVO> issueCommentReplyList;
+
     public Long getCommentId() {
         return commentId;
     }
@@ -231,9 +234,16 @@ public class IssueCommentVO {
         this.replySize = replySize;
     }
 
+    public List<IssueCommentReplyVO> getIssueCommentReplyList() {
+        return issueCommentReplyList;
+    }
+
+    public void setIssueCommentReplyList(List<IssueCommentReplyVO> issueCommentReplyList) {
+        this.issueCommentReplyList = issueCommentReplyList;
+    }
+
     @Override
     public String toString() {
         return StringUtil.getToString(this);
     }
-
 }
