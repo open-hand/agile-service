@@ -3,14 +3,16 @@ import React, {
   useMemo, useEffect, useRef, useCallback, useState,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { find, filter, uniq } from 'lodash';
+import {
+  find, filter, includes,
+} from 'lodash';
 import {
   Select, CheckBox, Form, DataSet, Dropdown,
 } from 'choerodon-ui/pro';
 import { Divider, Icon } from 'choerodon-ui';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { statusTransformApi } from '@/api';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
+import { ICondition, statusTransformApi } from '@/api';
 import { getProjectId, getIsOrganization } from '@/utils/common';
 import { User } from '@/common/types';
 import styles from './index.less';
@@ -20,11 +22,7 @@ interface Props {
   record: any,
   selectedType: string,
   customCirculationDataSet: DataSet,
-}
-
-interface ICondition {
-  type: 'specifier' | 'projectOwner',
-  userIds?: string[],
+  selectedTypeCode?: string
 }
 
 interface IConditionInfo {
@@ -32,8 +30,9 @@ interface IConditionInfo {
   lastUpdateDate: string
   objectVersionNumber: number
   statusId: string
-  userId: null | number[]
+  userId?: null | number[]
   userType: 'projectOwner' | 'specifier',
+  subIssueCompleted?: boolean
 }
 
 interface ConditionSelectProps {
@@ -94,7 +93,7 @@ function useClickOut(onClickOut) {
 }
 
 const Condition:React.FC<Props> = ({
-  modal, record, selectedType, customCirculationDataSet,
+  modal, record, selectedType, customCirculationDataSet, selectedTypeCode,
 }) => {
   const [hidden, setHidden] = useState(true);
   const isOrganization = getIsOrganization();
@@ -132,11 +131,11 @@ const Condition:React.FC<Props> = ({
           required: ({ record }) => record.get('specifier'),
         },
       },
-      // {
-      //   name: 'needCompleted',
-      //   label: '任务项子级需全部到达已解决状态',
-      //   type: 'boolean' as FieldType,
-      // },
+      {
+        name: 'needCompleted',
+        label: '任务项子级需全部到达已解决状态',
+        type: 'boolean' as FieldType,
+      },
     ],
   }), [userDs]);
 
@@ -146,12 +145,16 @@ const Condition:React.FC<Props> = ({
       if (res) {
         const assigners = filter(res, (item: IConditionInfo) => item.userType === 'specifier');
         const projectOwnerItem = find(res, (item: IConditionInfo) => item.userType === 'projectOwner');
+        const subIssueCompletedItem = find(res, (item: IConditionInfo) => !!item.subIssueCompleted);
         if (assigners && assigners.length) {
           current?.set('specifier', true);
           current?.set('assigners', assigners.map((item: IConditionInfo) => item.userId));
         }
         if (projectOwnerItem) {
           current?.set('projectOwner', true);
+        }
+        if (subIssueCompletedItem) {
+          current?.set('subIssueCompleted', true);
         }
       }
     });
@@ -176,6 +179,12 @@ const Condition:React.FC<Props> = ({
           updateData.push({
             type: 'specifier',
             userIds: assigners,
+          });
+        }
+        if (needCompleted) {
+          updateData.push({
+            type: 'other',
+            subIssueCompleted: true,
           });
         }
         await statusTransformApi[isOrganization ? 'orgUpdateCondition' : 'updateCondition'](selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
@@ -258,10 +267,18 @@ const Condition:React.FC<Props> = ({
             <Icon type="expand_more" className={styles.iconPicker} />
           </div>
         </Dropdown>
-        {/* <Divider className={styles.divider} />
-          <div className={styles.completeSetting}>
-            <CheckBox name="needCompleted" />
-          </div> */}
+        {
+          includes(['story', 'task', 'bug'], selectedTypeCode) && (
+            <>
+              <Divider className={styles.divider} />
+              <Form dataSet={conditionDataSet}>
+                <div className={styles.completeSetting}>
+                  <CheckBox name="needCompleted" />
+                </div>
+              </Form>
+            </>
+          )
+        }
       </div>
     </div>
   );
