@@ -157,11 +157,13 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
             throw new CommonException("error.no.permission.to.switch");
         }
         // 校验当前问题的子级任务是否都是已解决状态
-        Boolean subIssue = ("sub_task".equals(issueDTO.getTypeCode())) || ("bug".equals(issueDTO.getTypeCode()) && !ObjectUtils.isEmpty(issueDTO.getRelateIssueId()) && !Objects.equals(0L, issueDTO.getRelateIssueId()));
-        if (Boolean.TRUE.equals(verifySubIssueCompleted) && !subIssue) {
-            IssueCountDTO issueCountDTO = issueMapper.querySubIssueCount(projectId, issueDTO.getIssueId());
-            if (!Objects.equals(issueCountDTO.getSuccessIssueCount(), issueCountDTO.getIssueCount())) {
-                throw new CommonException("error.no.permission.to.switch");
+        if (Boolean.TRUE.equals(verifySubIssueCompleted)) {
+            Boolean subIssue = ("sub_task".equals(issueDTO.getTypeCode())) || ("bug".equals(issueDTO.getTypeCode()) && !ObjectUtils.isEmpty(issueDTO.getRelateIssueId()) && !Objects.equals(0L, issueDTO.getRelateIssueId()));
+            if (Boolean.FALSE.equals(subIssue)) {
+                IssueCountDTO issueCountDTO = issueMapper.querySubIssueCount(projectId, issueDTO.getIssueId());
+                if (!Objects.equals(issueCountDTO.getSuccessIssueCount(), issueCountDTO.getIssueCount())) {
+                    throw new CommonException("error.no.permission.to.switch");
+                }
             }
         }
     }
