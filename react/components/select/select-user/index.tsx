@@ -7,11 +7,11 @@ import { Select, DataSet } from 'choerodon-ui/pro';
 import {
   unionBy, castArray, uniq, isEmpty,
 } from 'lodash';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import { FlatSelect } from '@choerodon/components';
 import { userApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import type { User } from '@/common/types';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import { FlatSelect } from '@choerodon/components';
 
 const toArray = (something: any) => (Array.isArray(something) ? something : [something]);
 export interface SelectUserProps extends Partial<SelectProps> {

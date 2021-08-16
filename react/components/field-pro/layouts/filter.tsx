@@ -4,7 +4,7 @@ import {
 import { toJS } from 'mobx';
 import { find, groupBy } from 'lodash';
 import { useCallback } from 'react';
-import { getAgileFields } from '../base';
+import getFieldsInstance, { getAgileFields } from '../base';
 import { IChosenFieldField } from '@/components/chose-field/types';
 
 function renderField(field: IChosenFieldField, dataSet?: DataSet) {
@@ -161,8 +161,9 @@ function renderField(field: IChosenFieldField, dataSet?: DataSet) {
  *  获取过滤的字段
  * @param fields
  * @param fieldCodeProps IFieldConfig<AgileComponentMapProps, CustomComponentMapProps>[]
+ * @param instance 获取字段实例
  */
-function getFilterFields(fields: any[], fieldCodeProps?: Record<string, any>) {
+function getFilterFields(fields: any[], fieldCodeProps?: Record<string, any>, instance = getAgileFields) {
   const newFilters = fields.map((field) => {
     const config = renderField(field.field, field.dataSet);
     const { code = field.field.code, name = field.field.code, ...otherProps } = config;
@@ -183,7 +184,7 @@ function getFilterFields(fields: any[], fieldCodeProps?: Record<string, any>) {
     };
   }) as any[];
   const { system, custom } = groupBy(newFilters, (item) => (item.system ? 'system' : 'custom'));
-  return getAgileFields([], system, custom)[0];
+  return instance([], system, custom).map((i) => i[0]);
   // return getFields(newFilters).map((i, index) => React.createElement(i[0] as any,
   //   { ...getProps(fields[index].code, fieldCodeProps) })) as JSX.Element[];
 }

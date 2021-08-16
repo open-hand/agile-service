@@ -2,7 +2,7 @@ import { IssueValueHook } from '../interface';
 
 const dealWithLabel: IssueValueHook = (values, data) => {
   const {
-    labelIssueRelVOList,
+    labelIssueRelVOList = [],
   } = values;
   return {
     ...values,

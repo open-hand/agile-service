@@ -31,7 +31,8 @@ import useDeepMemo from '@/hooks/useDeepMemo';
 import WSJF from './components/wsjf';
 import IssueLink from './components/issue-link';
 import hooks from './hooks';
-import getFieldConfig from './fields';
+// import getFieldConfig from './fields';
+import getFieldConfig from '@/components/field-pro/layouts/create';
 import { insertField } from './utils';
 
 export interface CreateIssueBaseProps {
@@ -523,7 +524,7 @@ const CreateIssueBase = observer(({
     switch (field.fieldType) {
       case 'member': {
         return {
-          extraOptions: field.defaultValueObj,
+          extraOptions: [field.defaultValueObj].filter(Boolean),
           hidden: getRuleHidden(field, rules),
         };
       }

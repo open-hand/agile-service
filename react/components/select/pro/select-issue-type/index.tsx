@@ -1,9 +1,9 @@
 import React, { forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
-import useSelectPro from '@/hooks/useSelectPro';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import { IIssueType } from '@/common/types';
 import { FlatSelect } from '@choerodon/components';
+import useSelectPro from '@/hooks/useSelectPro';
+import { IIssueType } from '@/common/types';
 import useProjectIssueTypes, { ProjectIssueTypesConfig } from '@/hooks/data/useProjectIssueTypes';
 import TypeTag from '@/components/TypeTag';
 
@@ -21,6 +21,7 @@ const SelectIssueType: React.FC<Props> = forwardRef(({
   ...otherProps
 }, ref: React.Ref<Select>) => {
   const { data: issueTypes } = useProjectIssueTypes({ projectId, ...config }, queryOptions);
+  console.log('SelectIssueType', showIcon);
   const [props] = useSelectPro<IIssueType>({
     textField: 'name',
     valueField: valueField || 'id',

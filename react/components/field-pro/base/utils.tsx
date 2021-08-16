@@ -19,7 +19,7 @@ function getProcessFieldConfig<T extends IComponentFCWithClassObject, C extends 
     date: {},
     number: {},
     input: {},
-    text: {},
+    text: { autoSize: true },
     url: {},
     radio: {},
     single: {},

@@ -19,10 +19,18 @@ export type IFieldTypeDistributeProps<T extends IComponentFCWithClassObject, K e
 export type IFieldSystemComponentConfig<T extends IComponentFCWithClassObject> = ICodeDistributeProps<T, keyof T> // & IFieldTypeDistributeProps<T, keyof T>
 export type IFieldCustomComponentConfig<F extends IComponentFCWithClassObject> = IFieldTypeDistributeProps<F, keyof F>
 export type IFieldComponentConfig<T extends IComponentFCWithClassObject, C extends IComponentFCWithClassObject = IComponentFCWithClassObject> = IFieldSystemComponentConfig<T> | IFieldCustomComponentConfig<C>
+export type IFieldConfigOutputType = 'element' | 'config' | 'function'
 export interface IFieldRequiredConfig {
     // code: string
     // fieldType: IFieldType
-    outputs: Array<'element' | 'config' | 'function'>
+    outputs: Array<IFieldConfigOutputType>
+}
+export interface IFieldPartialConfig {
+    render?: ((
+        text: any,
+        props: any,
+        dom: JSX.Element,
+    ) => JSX.Element)
 }
 export type IFieldSystemConfig<T extends IComponentFCWithClassObject> = (IFieldRequiredConfig & IFieldSystemComponentConfig<T>)
 export type IFieldCustomConfig<F extends IComponentFCWithClassObject> = (IFieldRequiredConfig & IFieldCustomComponentConfig<F>)
@@ -35,4 +43,7 @@ export type IFieldOutput<T extends IComponentFCWithClassObject> = React.ReactEle
 
 export type ISingleOrArray<T> = T | Array<T>
 
-export type { IFieldProcessConfig };
+interface IClassComponentType<T> extends Function {
+    new(...args: any[]): T;
+}
+export type { IFieldProcessConfig, IClassComponentType };
