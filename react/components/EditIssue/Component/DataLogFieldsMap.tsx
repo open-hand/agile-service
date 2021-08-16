@@ -1,6 +1,6 @@
 import React from 'react';
-import { ILog } from '@/common/types';
 import { difference } from 'lodash';
+import { ILog } from '@/common/types';
 
 const fieldsMap = new Map([
   ['Sprint', {
@@ -752,6 +752,9 @@ const fieldsMap = new Map([
   }],
   ['Tag', {
     name: 'Tag',
+  }],
+  ['environment', {
+    name: '环境',
   }],
 ]);
 
