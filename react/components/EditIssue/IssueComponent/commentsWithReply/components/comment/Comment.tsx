@@ -57,48 +57,7 @@ const Comment: React.FC<Props> = (props) => {
     reload(callback);
   }, [getReplys, reload]);
 
-  const replyShows = commentExpandMap.get(comment.commentId) ? (commentReplysMap.get(comment.commentId) || []).reverse() : [
-    {
-      commentId: '215128304464850944',
-      userId: '10635',
-      issueId: '212667191353585664',
-      commentText: '<p>1</p>',
-      objectVersionNumber: 1,
-      projectId: 1528,
-      userName: '李文斐（20615）',
-      userLoginName: '20615',
-      userRealName: '李文斐',
-      userImageUrl: 'https://minio.choerodon.com.cn/iam-service/file_219ce90e5973404ca351485453de2c8d_A63D7C242F3DAC79F718E11F56595B8F.jpg',
-      lastUpdateDate: '2021-08-16 15:23:05',
-      parentId: '215127955456815104',
-      replyToUserId: '10635',
-      replyToUserName: '李文斐（20615）',
-      replyToUserLoginName: '20615',
-      replyToUserRealName: '李文斐',
-      replyToUserImageUrl: 'https://minio.choerodon.com.cn/iam-service/file_219ce90e5973404ca351485453de2c8d_A63D7C242F3DAC79F718E11F56595B8F.jpg',
-      issueAttachmentVOList: null,
-    },
-    {
-      commentId: '215128322148036608',
-      userId: '10635',
-      issueId: '212667191353585664',
-      commentText: '<p>2</p>',
-      objectVersionNumber: 1,
-      projectId: 1528,
-      userName: '李文斐（20615）',
-      userLoginName: '20615',
-      userRealName: '李文斐',
-      userImageUrl: 'https://minio.choerodon.com.cn/iam-service/file_219ce90e5973404ca351485453de2c8d_A63D7C242F3DAC79F718E11F56595B8F.jpg',
-      lastUpdateDate: '2021-08-16 15:23:09',
-      parentId: '215127955456815104',
-      replyToUserId: '10635',
-      replyToUserName: '李文斐（20615）',
-      replyToUserLoginName: '20615',
-      replyToUserRealName: '李文斐',
-      replyToUserImageUrl: 'https://minio.choerodon.com.cn/iam-service/file_219ce90e5973404ca351485453de2c8d_A63D7C242F3DAC79F718E11F56595B8F.jpg',
-      issueAttachmentVOList: null,
-    },
-  ];
+  const replyShows = commentExpandMap.get(comment.commentId) ? (commentReplysMap.get(comment.commentId) || []).reverse() : (comment.issueCommentReplyList || []);
   return (
     <div
       className="c7n-comment"
@@ -143,7 +102,7 @@ const Comment: React.FC<Props> = (props) => {
                     {
                       commentExpandMap.get(comment.commentId) ? <span role="none" onClick={handleFold}>收起评论</span> : (
                         <span role="none" onClick={() => { getReplys(); }}>
-                          {`打开评论(${comment.replySize})`}
+                          {`打开评论(${comment.replySize - 2})`}
                         </span>
                       )
                     }

@@ -182,19 +182,18 @@ function EditIssue() {
         workLogs,
         dataLogs,
         linkIssues,
-        branches,
         comments,
       ] = await Promise.all([
         otherProject || outside ? null : knowledgeApi.project(projectId).loadByIssue(id),
         otherProject || outside || programId || applyType === 'program' ? null : workLogApi.project(projectId).loadByIssue(id),
         programId ? dataLogApi.loadUnderProgram(id, programId) : dataLogApi.org(organizationId).outside(outside).project(projectId).loadByIssue(id),
         programId || applyType === 'program' ? null : issueLinkApi.org(organizationId).outside(outside).project(projectId).loadByIssueAndApplyType(id),
-        programId ? issueApi.project(projectId).loadUnderProgram(id, programId) : issueApi.org(organizationId).outside(outside).project(projectId).load(id),
+        programId ? issueApi.project(projectId).getCommentsUnderProgram(id, programId) : issueApi.org(organizationId).outside(outside).project(projectId).getComments(id),
       ]);
       if (idRef.current !== id) {
         return;
       }
-      store.initIssueAttribute(doc, workLogs, dataLogs, linkIssues, branches, comments);
+      store.initIssueAttribute(doc, workLogs, dataLogs, linkIssues, comments);
     } catch (error) {
       Choerodon.prompt(error.message, 'error');
     }

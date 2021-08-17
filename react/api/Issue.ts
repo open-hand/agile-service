@@ -600,6 +600,42 @@ class IssueApi extends Api<IssueApi> {
       data,
     });
   }
+
+  getComments(issueId: string, page = 1, size = 10) {
+    return this.isOutside ? this.request({
+      method: 'get',
+      url: `${this.outPrefix}/issue_comment/issue/${issueId}/page`,
+      params: {
+        project_id: this.projectId,
+        organizationId: this.orgId,
+        page,
+        size,
+      },
+    }) : this.request({
+      method: 'get',
+      url: `${`/agile/v1/projects/${getProjectId()}`}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issue_comment/issue/${issueId}/page`,
+      params: {
+        organizationId: this.orgId,
+        instanceProjectId: this.projectId,
+        page,
+        size,
+      },
+    });
+  }
+
+  getCommentsUnderProgram(issueId: number, programId: number, page = 1, size = 10) {
+    const organizationId = getOrganizationId();
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/project_invoke_program/issue_comment/issue/${issueId}/page`,
+      params: {
+        programId,
+        organizationId,
+        page,
+        size,
+      },
+    });
+  }
 }
 const issueApi = new IssueApi();
 const issueApiConfig = new IssueApi(true);
