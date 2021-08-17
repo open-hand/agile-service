@@ -1,5 +1,7 @@
 /* eslint-disable no-nested-ternary */
-import React, { Fragment, useContext, useRef } from 'react';
+import React, {
+  Fragment, useContext, useRef, useState, useEffect,
+} from 'react';
 import { Tabs } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import { mount } from '@choerodon/inject';
@@ -22,14 +24,14 @@ import IssueBranch from './IssueBranch';
 import IssueDropDown from '../IssueDropDown';
 import IssuePIHistory from './IssuePIHistory';
 import { FieldStoryPoint, FieldSummary } from './Field';
-import CreateBranch from '../../../CreateBranch';
-import LinkBranch from '../../../LinkBranch';
-import DailyLog from '../../../DailyLog';
 import IssueWSJF from './IssueWSJF';
 import EditIssueContext from '../../stores';
 import { InjectedComponent } from '../../injectComponent';
 import './IssueBody.less';
 import IssueUI from './Issue-UI';
+
+import { featureApi } from '@/api';
+import { getProjectId } from '@/utils/common';
 
 const { TabPane } = Tabs;
 
@@ -38,14 +40,34 @@ function IssueBody(props) {
     prefixCls, disabled, store, applyType,
   } = useContext(EditIssueContext);
   const { match } = useDetailContainerContext();
+  const { comments } = store;
   const issue = store.getIssue;
   const {
-    issueId, issueNum, typeCode, issueTypeVO = {},
+    issueId, issueNum, typeCode, issueTypeVO = {}, projectId,
   } = issue;
-  const { reloadIssue, otherProject, outside } = props;
+  const { otherProject, outside } = props;
   const hasDevops = useHasDevops();
   const hasTest = useHasTest();
   const testLinkStoreRef = useRef();
+
+  const [splitStoryData, setSplitStorytData] = useState();
+
+  useEffect(() => {
+    const loadData = async () => {
+      let Data;
+      if (outside) {
+        Data = await await featureApi.getSplitStoryOutside(issueId, projectId);
+      } else {
+        Data = getProjectId().toString() !== projectId.toString() ? await featureApi.getSubProjectSplitStory(issueId, projectId) : await featureApi.getSplitStory(issueId);
+      }
+      setSplitStorytData(Data);
+    };
+
+    if (issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature') {
+      loadData();
+    }
+  }, [issueId, issueTypeVO.typeCode, outside, projectId]);
+
   return (
     <section className={`${prefixCls}-body`} id="scroll-area" style={{ position: 'relative' }}>
       <div style={{ paddingRight: 20 }}>
@@ -122,12 +144,12 @@ function IssueBody(props) {
         {
           issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
             ? (
-              <TabPane tab="拆分的Story" key="split_story">
-                <SplitStory {...props} />
+              <TabPane tab={`拆分的Story${splitStoryData?.storyList?.length ? `(${splitStoryData?.storyList?.length || 0})` : ''}`} key="split_story">
+                <SplitStory {...props} splitStoryData={splitStoryData} />
               </TabPane>
             ) : ''
         }
-        <TabPane tab="评论" key="comment">
+        <TabPane tab={`评论${comments ? `(${comments?.totalElements || 0})` : ''}`} key="comment">
           <Comments {...props} />
         </TabPane>
         <TabPane tab="记录" key="record">

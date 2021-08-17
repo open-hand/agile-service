@@ -16,6 +16,12 @@ interface Props {
 
 }
 
+const RemarkMap = new Map([
+  ['same_status', '联动的问题已处在目标状态'],
+  ['sub_bug', '关联的缺陷属于子缺陷'],
+  ['condition_limit', '受流转条件限制无法流转到目标状态'],
+]);
+
 const LogTable: React.FC<Props> = () => {
   const dataSetRef = useRef<DataSet>();
   const queryDataSet = useMemo(() => new DataSet({
@@ -58,6 +64,9 @@ const LogTable: React.FC<Props> = () => {
     }, {
       name: 'curIssueId',
       label: '联动的问题',
+    }, {
+      name: 'remark',
+      label: '备注',
     }],
     queryDataSet,
   }), [queryDataSet]);
@@ -111,6 +120,8 @@ const LogTable: React.FC<Props> = () => {
     </div>
   ), []);
 
+  const renderRemark = useCallback(({ value }) => RemarkMap.get(value), []);
+
   return (
     <div className={styles.logTable}>
       <Table
@@ -125,8 +136,8 @@ const LogTable: React.FC<Props> = () => {
           </Form>
         )}
       >
-        <Column name="creationDate" width={160} tooltip={'overflow' as TableColumnTooltip} />
-        <Column name="content" tooltip={'overflow' as TableColumnTooltip} />
+        <Column name="creationDate" lock width={150} tooltip={'overflow' as TableColumnTooltip} />
+        <Column name="content" lock width={480} tooltip={'overflow' as TableColumnTooltip} />
         <Column name="statusCode" header={renderStatusHeader} width={130} renderer={renderStatus} tooltip={'overflow' as TableColumnTooltip} />
         <Column
           name="preIssueId"
@@ -137,6 +148,11 @@ const LogTable: React.FC<Props> = () => {
           name="curIssueId"
           // @ts-ignore
           renderer={({ record }) => renderIssue({ record }, 'cur')}
+        />
+        <Column
+          name="remark"
+          // @ts-ignore
+          renderer={renderRemark}
         />
       </Table>
     </div>
