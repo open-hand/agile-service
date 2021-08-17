@@ -15,8 +15,8 @@ interface IFieldsInstanceConfig {
 export interface IFieldBaseConfig {
   code: string
   fieldType: IFieldType
-  outputs?:Array<IFieldConfigOutputType>
-  props?:any
+  outputs?: Array<IFieldConfigOutputType>
+  props?: any
 }
 
 /**
@@ -33,7 +33,7 @@ function getFieldsInstance<T extends IFieldBaseConfig = IFieldBaseConfig, S exte
  * @param fields
  * @param systemFields
  * @param customFields
- * @returns
+ * @returns {Array<Array<IFieldOutput<自定义|系统字段>>>}
  */
   function getFields(
     fields: ISingleOrArray<T> = [], systemFields: ISingleOrArray<IFieldSystemConfig<S>> = [], customFields: ISingleOrArray<IFieldCustomConfig<C>> = [],
