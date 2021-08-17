@@ -40,6 +40,7 @@ public class SystemFieldPageConfig {
         UPDATER(FieldCode.UPDATOR, false, true),
         TAG(FieldCode.TAG, true, true),
         FEATURE_TYPE(FieldCode.FEATURE_TYPE, true, false),
+        PROCESSOR(FieldCode.PROCESSOR, false, true),
         ;
 
 
