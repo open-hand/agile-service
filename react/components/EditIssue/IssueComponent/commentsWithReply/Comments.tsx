@@ -1,12 +1,18 @@
-import React, { useContext, useRef } from 'react';
+import React, {
+  useContext, useRef, useState, useCallback,
+} from 'react';
+import { Icon } from 'choerodon-ui';
+import { Button } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import { issueCommentApi, IComment } from '@/api/IssueComment';
 import { useSize } from 'ahooks';
+import { issueCommentApi, IComment } from '@/api/IssueComment';
+import Loading from '@/components/Loading';
 import Comment from './components/comment';
 import AddComment from './components/addComment';
 import EditIssueContext from '../../stores';
 
 import styles from './Comments.less';
+import { issueApi } from '@/api';
 
 interface Props {
   projectId: string
@@ -16,8 +22,10 @@ interface Props {
 }
 
 const Comments: React.FC<Props> = ({
-  projectId, reloadIssue, disabled, outside,
+  reloadIssue, disabled,
 }) => {
+  const [loading, setLoading] = useState<boolean>(false);
+  const [folded, setFolded] = useState<boolean>(true);
   const commentsRef = useRef<HTMLDivElement | null>(null);
   const commentsSize = useSize(commentsRef);
   const addingRef = useRef<{
@@ -39,9 +47,30 @@ const Comments: React.FC<Props> = ({
       setReplyValue: (v: string) => void
         } | null>(null);
 
-  const { store, applyType } = useContext(EditIssueContext);
-  const { issueId, issueCommentVOList = [] } = store.issue;
-  const comments = issueCommentVOList;
+  const {
+    store, outside,
+    projectId,
+    organizationId,
+    applyType,
+    programId,
+    issueId: id,
+  } = useContext(EditIssueContext);
+  const { comments } = store;
+  const { issueId } = store.issue;
+
+  const getMoreComments = useCallback(async (page) => {
+    if (page <= comments?.totalPages) {
+      setLoading(true);
+      const res = programId ? await issueApi.project(projectId).getCommentsUnderProgram(id, programId, page) : await issueApi.org(organizationId).outside(outside).project(projectId).getComments(id, page);
+      const newComments = {
+        ...res,
+        content: [...(comments?.content || []), ...(res.content || [])],
+      };
+      setLoading(false);
+      store.setComments(newComments);
+    }
+    setFolded(false);
+  }, [comments?.content, comments?.totalPages, id, organizationId, outside, programId, projectId, store]);
 
   const newCommit = (commit: IComment) => {
     issueCommentApi.project(projectId).create(commit).then(() => {
@@ -62,13 +91,18 @@ const Comments: React.FC<Props> = ({
     }
   };
 
+  const handleFold = useCallback(() => {
+    setFolded(true);
+  }, []);
+
   const readonly = !(!disabled || (disabled && applyType === 'agile' && !outside));
 
   return (
     <div className={styles.comments} ref={commentsRef}>
+      <Loading loading={loading} />
       <div className={styles.list}>
         {
-          comments.map((comment: any) => (
+          (comments?.content || []).slice(0, folded ? 10 : (comments?.content?.length || 10)).map((comment: any) => (
             <Comment
               projectId={projectId}
               key={comment.commentId}
@@ -81,6 +115,30 @@ const Comments: React.FC<Props> = ({
             />
           ))
         }
+        {
+            comments?.totalPages > 1 && (
+            <div style={{ marginTop: 5 }}>
+              {
+                comments?.totalPages === comments?.number + 1 && !folded ? (
+                  <Button className="leftBtn" onClick={handleFold}>
+                    <span>收起</span>
+                    <Icon type="baseline-arrow_drop_up icon" style={{ marginRight: 2 }} />
+                  </Button>
+                ) : (
+                  <Button
+                    className="leftBtn"
+                    onClick={() => {
+                      getMoreComments(comments.number + 2);
+                    }}
+                  >
+                    <span>展开</span>
+                    <Icon type="baseline-arrow_right icon" style={{ marginRight: 2 }} />
+                  </Button>
+                )
+              }
+            </div>
+            )
+        }
       </div>
       {
         (!disabled || !readonly) && (
@@ -90,7 +148,7 @@ const Comments: React.FC<Props> = ({
         )
       }
       {
-        readonly && !comments.length && (
+        readonly && !comments?.length && (
           <span style={{ textAlign: 'center', color: 'var(--text-color3)' }}>暂无评论</span>
         )
       }

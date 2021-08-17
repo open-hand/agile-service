@@ -236,6 +236,7 @@ export interface IComment {
   userName: string
   userRealName: string
   replySize: number
+  issueCommentReplyList?: IComment[]
 }
 interface Attachment {
   id: number

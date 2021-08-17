@@ -5,9 +5,9 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { stores, Choerodon } from '@choerodon/boot';
-import openCreateSubTask from '@/components/create-sub-task';
 import { usePersistFn } from 'ahooks';
 import { Spin } from 'choerodon-ui/pro';
+import openCreateSubTask from '@/components/create-sub-task';
 import './EditIssue.less';
 import {
   issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, pageConfigApi,
@@ -18,7 +18,6 @@ import { sameProject } from '@/utils/detail';
 import IssueHeader from './IssueComponent/IssueHeader';
 import IssueBody from './IssueComponent/IssueBody/IssueBody';
 import EditIssueContext from './stores';
-import Loading from '../Loading';
 // 项目加入群之后，不关联自己的史诗和特性，只能关联项目群的，不能改关联的史诗
 const { AppState } = stores;
 
@@ -183,17 +182,18 @@ function EditIssue() {
         workLogs,
         dataLogs,
         linkIssues,
-        branches,
+        comments,
       ] = await Promise.all([
         otherProject || outside ? null : knowledgeApi.project(projectId).loadByIssue(id),
         otherProject || outside || programId || applyType === 'program' ? null : workLogApi.project(projectId).loadByIssue(id),
         programId ? dataLogApi.loadUnderProgram(id, programId) : dataLogApi.org(organizationId).outside(outside).project(projectId).loadByIssue(id),
         programId || applyType === 'program' ? null : issueLinkApi.org(organizationId).outside(outside).project(projectId).loadByIssueAndApplyType(id),
+        programId ? issueApi.project(projectId).getCommentsUnderProgram(id, programId) : issueApi.org(organizationId).outside(outside).project(projectId).getComments(id),
       ]);
       if (idRef.current !== id) {
         return;
       }
-      store.initIssueAttribute(doc, workLogs, dataLogs, linkIssues, branches, []);
+      store.initIssueAttribute(doc, workLogs, dataLogs, linkIssues, comments);
     } catch (error) {
       Choerodon.prompt(error.message, 'error');
     }

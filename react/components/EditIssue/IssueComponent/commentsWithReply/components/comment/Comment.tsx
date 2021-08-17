@@ -1,9 +1,9 @@
-import React, { useCallback, useState, useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { stores, Permission } from '@choerodon/boot';
 import './Comment.less';
 import { IComment } from '@/common/types';
-import { issueCommentApi, UComment } from '@/api/IssueComment';
+import { issueCommentApi } from '@/api/IssueComment';
 import CommentItem, { ReplyComment } from './CommentItem';
 import EditIssueContext from '../../../../stores';
 
@@ -57,6 +57,7 @@ const Comment: React.FC<Props> = (props) => {
     reload(callback);
   }, [getReplys, reload]);
 
+  const replyShows = commentExpandMap.get(comment.commentId) ? (commentReplysMap.get(comment.commentId) || []).reverse() : (comment.issueCommentReplyList || []);
   return (
     <div
       className="c7n-comment"
@@ -77,35 +78,31 @@ const Comment: React.FC<Props> = (props) => {
                   hasPermission={hasPermission || String(comment.userId) === String(loginUserId)}
                   readonly={readonly}
                 />
+                <div className="c7n-comment-replys">
+                  {
+                    replyShows.map((item: IComment) => (
+                      <CommentItem
+                        isReply
+                        {...props}
+                        onReply={onReply}
+                        onDelete={onReply}
+                        onUpdate={onReply}
+                        reload={reload}
+                        comment={item}
+                        parentId={comment.commentId}
+                        hasPermission={hasPermission || String(item.userId) === String(loginUserId)}
+                        readonly={readonly}
+                      />
+                    ))
+                  }
+                </div>
                 {
-                  commentExpandMap.get(comment.commentId) && (
-                    <div className="c7n-comment-replys">
-                      {
-                        (commentReplysMap.get(comment.commentId) || []).reverse().map((item: IComment) => (
-                          <CommentItem
-                            isReply
-                            {...props}
-                            onReply={onReply}
-                            onDelete={onReply}
-                            onUpdate={onReply}
-                            reload={reload}
-                            comment={item}
-                            parentId={comment.commentId}
-                            hasPermission={hasPermission || String(item.userId) === String(loginUserId)}
-                            readonly={readonly}
-                          />
-                        ))
-                      }
-                    </div>
-                  )
-                }
-                {
-                  comment.replySize > 0 && (
+                  comment.replySize > 2 && (
                   <div className="c7n-comment-expand">
                     {
                       commentExpandMap.get(comment.commentId) ? <span role="none" onClick={handleFold}>收起评论</span> : (
                         <span role="none" onClick={() => { getReplys(); }}>
-                          {`打开评论(${comment.replySize})`}
+                          {`打开评论(${comment.replySize - 2})`}
                         </span>
                       )
                     }
