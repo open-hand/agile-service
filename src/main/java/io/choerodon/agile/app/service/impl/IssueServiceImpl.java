@@ -293,6 +293,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private StatusMachineTransformMapper statusMachineTransformMapper;
     @Autowired
     private FieldPermissionService fieldPermissionService;
+    @Autowired
+    private StatusTransferSettingService transferSettingService;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -1108,6 +1110,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             return true;
         }
         if (Objects.equals(issue.getStatusId(), statusId)) {
+            statusLinkageExecutionLog(influenceIssueVO, issueId, influenceIssue, isSub, linkIssueStatusMap, "STOP");
+            return true;
+        }
+        Boolean verifyStatusTransferSetting = transferSettingService.verifyStatusTransferSetting(projectId, issue, statusId);
+        if (Boolean.TRUE.equals(verifyStatusTransferSetting)) {
             statusLinkageExecutionLog(influenceIssueVO, issueId, influenceIssue, isSub, linkIssueStatusMap, "STOP");
             return true;
         }

@@ -133,9 +133,17 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
 
     @Override
     public void checkStatusTransferSetting(Long projectId, IssueDTO issueDTO, Long endStatusId) {
+        Boolean verifyStatusTransferSetting = verifyStatusTransferSetting(projectId, issueDTO, endStatusId);
+        if (Boolean.TRUE.equals(verifyStatusTransferSetting)) {
+            throw new CommonException("error.no.permission.to.switch");
+        }
+    }
+
+    @Override
+    public Boolean verifyStatusTransferSetting(Long projectId, IssueDTO issueDTO, Long endStatusId){
         List<StatusTransferSettingDTO> query = query(projectId, issueDTO.getIssueTypeId(), endStatusId);
         if (CollectionUtils.isEmpty(query)) {
-            return;
+            return Boolean.FALSE;
         }
         // 获取当前的用户
         Long userId = DetailsHelper.getUserDetails().getUserId();
@@ -154,7 +162,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
             }
         }
         if (!userIds.contains(userId)) {
-            throw new CommonException("error.no.permission.to.switch");
+            return Boolean.TRUE;
         }
         // 校验当前问题的子级任务是否都是已解决状态
         if (Boolean.TRUE.equals(verifySubIssueCompleted)) {
@@ -162,10 +170,11 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
             if (Boolean.FALSE.equals(subIssue)) {
                 IssueCountDTO issueCountDTO = issueMapper.querySubIssueCount(projectId, issueDTO.getIssueId());
                 if (!Objects.equals(issueCountDTO.getSuccessIssueCount(), issueCountDTO.getIssueCount())) {
-                    throw new CommonException("error.no.permission.to.switch");
+                    return Boolean.TRUE;
                 }
             }
         }
+        return Boolean.FALSE;
     }
 
     @Override
