@@ -36,4 +36,10 @@ databaseChangeLog(logicalFilePath:'fd_status_linkage_execution_log.groovy') {
             column(name: "last_update_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
     }
+
+    changeSet(author: 'ztxemail@163.com',id: '2021-08-17-fd-status-linkage-execution-log-add-column'){
+        addColumn(tableName: 'fd_status_linkage_execution_log') {
+            column(name: 'remark', type: 'VARCHAR(255)', remarks: '备注')
+        }
+    }
 }
