@@ -18,14 +18,18 @@ function getProcessFieldConfig<T extends IComponentFCWithClassObject, C extends 
     datetime: {},
     date: {},
     number: {},
-    input: {},
-    text: { autoSize: true },
+    input: { props: { maxLength: 100, valueChangeAction: 'input' } },
+    text: {
+      props: {
+        autoSize: true, rows: 3, maxLength: 255, valueChangeAction: 'input',
+      },
+    },
     url: {},
     radio: {},
     single: {},
-    checkbox: {},
-    multiple: {},
-    multiMember: {},
+    checkbox: { props: { multiple: true } },
+    multiple: { props: { multiple: true } },
+    multiMember: { props: { multiple: true } },
     member: {},
   };
   return merge(config.fieldType ? filedTypeConfigObj[config.fieldType] : {}, config) as unknown as IFieldProcessConfig<T, CustomComponentMapProps>;

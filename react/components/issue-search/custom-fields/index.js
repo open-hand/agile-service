@@ -24,7 +24,9 @@ import ChooseField from '../choose-field';
 import IssueSearchContext from '../context';
 import EnvironmentField from './field/EnvironmentField';
 import TagField from './field/TagField';
+import { FieldProLayout } from '@/components/field-pro';
 
+const { getSearchFields } = FieldProLayout;
 export const getValueByFieldType = (fieldType, value) => {
   switch (fieldType) {
     case 'text':
@@ -66,6 +68,34 @@ function CustomField({ field }) {
   } if (fieldElement === false) {
     return null;
   }
+  const element = getSearchFields([field], {
+    [field.code]: {
+      projectId,
+      applyType,
+      value,
+      onChange: handleChange,
+      ...field.code === 'statusId' ? {
+        issueTypeIds: chosenFields.get('issueTypeId') ? toJS(chosenFields.get('issueTypeId').value) : undefined,
+      } : {},
+    },
+  })[0];
+  return element;
+}
+function CustomFieldOld({ field }) {
+  const { store, projectId, applyType } = useContext(IssueSearchContext);
+  const { chosenFields } = store;
+  const { fieldType } = field;
+  const value = getValueByFieldType(fieldType, chosenFields.get(field.code) ? toJS(chosenFields.get(field.code).value) : undefined);
+  const handleChange = (v) => {
+    store.handleFilterChange(field.code, v);
+  };
+  const fieldElement = store.renderField(field, { onChange: handleChange, value, projectId });
+  if (fieldElement) {
+    return fieldElement;
+  } if (fieldElement === false) {
+    return null;
+  }
+
   // 系统自带字段
   switch (field.code) {
     case 'issueTypeId':

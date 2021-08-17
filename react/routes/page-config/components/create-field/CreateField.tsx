@@ -3,20 +3,17 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Form, TextField, DatePicker, TimePicker, DateTimePicker,
-  CheckBox, NumberField, TextArea, UrlField, Spin, Button, Select,
+  Form, TextField, CheckBox, Spin, Button, Select,
 } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
-import SelectUser from '@/components/select/select-user';
-import { FieldOption, User } from '@/common/types';
 import { toJS } from 'mobx';
 import {
   set, uniq, isEmpty, find,
 } from 'lodash';
-import SelectCustomField from '@/components/select/select-custom-field';
-import { randomString } from '@/utils/random';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
-import { pageConfigApi, userApi } from '@/api';
+import { FieldOption, User } from '@/common/types';
+import { randomString } from '@/utils/random';
+import { pageConfigApi } from '@/api';
 import Store from './stores';
 import DragList from '../drag-list';
 import './index.less';
@@ -24,6 +21,7 @@ import * as images from '../../images';
 import beforeSubmitProcessData from './util';
 import openEditFieldOptionsModal from '../edit-field-options';
 import selectDisabledStyles from './select-disabled.less';
+import { getAgileFields } from '@/components/field-pro';
 
 const singleList = ['radio', 'single'];
 const multipleList = ['checkbox', 'multiple'];
@@ -205,16 +203,26 @@ function CreateField() {
     const { current } = formDataSet;
     const isCheck = current?.get('check');
     const fieldType = current?.get('fieldType');
+    const commonProps = {
+      name: 'defaultValue',
+    };
+
     switch (fieldType) {
       case 'time':
         return (
           <>
-            <TimePicker
-              name="defaultValue"
-              disabled={isCheck}
-              format="HH:mm:ss"
-              className="form-field-full-row"
-            />
+            {getAgileFields([], [], {
+              code: 'defaultValue',
+              fieldType,
+              props: {
+                ...commonProps,
+                disabled: isCheck,
+                format: 'HH:mm:ss',
+                className: 'form-field-full-row',
+              },
+              outputs: ['element'],
+            })[0][0]}
+
             <CheckBox
               name="check"
             >
@@ -225,12 +233,17 @@ function CreateField() {
       case 'datetime':
         return (
           <>
-            <DateTimePicker
-              name="defaultValue"
-              disabled={isCheck}
-              format="YYYY-MM-DD HH:mm:ss"
-              className="form-field-full-row"
-            />
+            {getAgileFields([], [], {
+              code: 'defaultValue',
+              fieldType,
+              props: {
+                ...commonProps,
+                disabled: isCheck,
+                format: 'YYYY-MM-DD HH:mm:ss',
+                className: 'form-field-full-row',
+              },
+              outputs: ['element'],
+            })[0][0]}
             <CheckBox
               name="check"
             >
@@ -241,12 +254,17 @@ function CreateField() {
       case 'date':
         return (
           <>
-            <DatePicker
-              name="defaultValue"
-              disabled={isCheck}
-              format="YYYY-MM-DD"
-              className="form-field-full-row"
-            />
+            {getAgileFields([], [], {
+              code: 'defaultValue',
+              fieldType,
+              props: {
+                ...commonProps,
+                disabled: isCheck,
+                format: 'YYYY-MM-DD',
+                className: 'form-field-full-row',
+              },
+              outputs: ['element'],
+            })[0][0]}
             <CheckBox
               name="check"
             >
@@ -255,39 +273,40 @@ function CreateField() {
           </>
         );
       case 'number':
-        return (
-          <div>
-            <NumberField
-              name="defaultValue"
-              step={isCheck ? 0.1 : 1}
-              className="form-field-full-row"
-            />
-
-          </div>
-        );
+        return getAgileFields([], [], {
+          code: 'defaultValue',
+          fieldType,
+          props: {
+            ...commonProps,
+            step: isCheck ? 0.1 : 1,
+            className: 'form-field-full-row',
+          },
+          outputs: ['element'],
+        })[0][0];
       case 'input':
-        return (
-          <TextField
-            name="defaultValue"
-            maxLength={100}
-            valueChangeAction={'input' as any}
-          />
-        );
+        return getAgileFields([], [], {
+          code: 'defaultValue',
+          fieldType,
+          props: {
+            ...commonProps,
+          },
+          outputs: ['element'],
+        })[0][0];
       case 'text':
-        return (
-          <TextArea
-            name="defaultValue"
-            rows={3}
-            maxLength={255}
-            valueChangeAction={'input' as any}
-          />
-        );
-      case 'url':
-        return (
-          <UrlField
-            name="defaultValue"
-          />
-        );
+        return getAgileFields([], [], {
+          code: 'defaultValue',
+          fieldType,
+          props: {
+            ...commonProps,
+          },
+          outputs: ['element'],
+        })[0][0];
+      // case 'url':
+      //   return (
+      //     <UrlField
+      //       name="defaultValue"
+      //     />
+      //   );
       case 'radio': case 'single': case 'checkbox': case 'multiple': {
         const fieldId = formDataSet.current?.get('id');
         return (
@@ -323,30 +342,39 @@ function CreateField() {
               onDelete={onTreeDelete}
               onInvalid={onTreeDelete}
             />
-            <SelectCustomField
-              name="defaultValue"
-              // 防止fieldOptions变了之后选项没更新
-              key={JSON.stringify(fieldOptions.filter((f) => f.enabled))}
-              style={{ width: '100%', marginTop: '20px' }}
-              multiple={!(singleList.indexOf(fieldType) !== -1)}
-              fieldOptions={fieldOptions.filter((f) => f.enabled).map((f) => ({ ...f, id: f.id ?? f.tempKey }))}
-              selected={toJS(current?.get('defaultValue'))}
-            />
+            {getAgileFields([], [], {
+              code: 'defaultValue',
+              fieldType,
+              props: {
+                ...commonProps,
+                key: JSON.stringify(fieldOptions.filter((f) => f.enabled)),
+                style: { width: '100%', marginTop: '20px' },
+                fieldOptions: fieldOptions.filter((f) => f.enabled).map((f) => ({ ...f, id: f.id ?? f.tempKey })),
+                selected: toJS(current?.get('defaultValue')),
+              },
+              outputs: ['element'],
+            })[0][0]}
+
           </>
         );
       }
       case 'multiMember':
       case 'member':
-        return (
-          <SelectUser
-            key={`page-config-create-or-edit-member-${fieldType}`}
-            name="defaultValue"
-            selectedUser={toJS(current?.get('defaultValueObj'))}
-            dataRef={userDataRef}
-            level={type === 'project' ? 'project' : 'org'}
-            multiple={fieldType === 'multiMember'}
-          />
-        );
+        return getAgileFields([], [], {
+          code: 'defaultValue',
+          fieldType: fieldType as 'member' | 'multiMember',
+          props: {
+            ...commonProps,
+            key: `page-config-create-or-edit-member-${fieldType}`,
+            style: { width: '100%', marginTop: '20px' },
+            dataRef: userDataRef,
+            level: type === 'project' ? 'project' : 'org',
+            selectedUser: toJS(current?.get('defaultValueObj')),
+            selected: toJS(current?.get('defaultValue')),
+          },
+          outputs: ['element'],
+        })[0][0];
+
       default:
         return null;
     }
