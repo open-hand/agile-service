@@ -350,7 +350,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                             boolean doRuleNotice) {
         Long organizationId = ConvertUtil.getOrganizationId(issueDTO.getProjectId());
         Long objectVersionNumber = issueDTO.getObjectVersionNumber();
-        if (!CollectionUtils.isEmpty(field)) {
+        if (!ObjectUtils.isEmpty(field) && field.size() > 1) {
             issueUpdateVO.setIssueId(issueDTO.getIssueId());
             issueUpdateVO.setObjectVersionNumber(objectVersionNumber);
             if (doRuleNotice) {
