@@ -31,8 +31,8 @@ interface IConditionInfo {
   objectVersionNumber: number
   statusId: string
   userId?: null | number[]
-  userType: 'projectOwner' | 'specifier',
-  subIssueCompleted?: boolean
+  userType: 'projectOwner' | 'specifier' | 'other',
+  verifySubissueCompleted?: boolean
 }
 
 interface ConditionSelectProps {
@@ -132,7 +132,7 @@ const Condition:React.FC<Props> = ({
         },
       },
       {
-        name: 'needCompleted',
+        name: 'verifySubissueCompleted',
         label: '任务项子级需全部到达已解决状态',
         type: 'boolean' as FieldType,
       },
@@ -145,7 +145,7 @@ const Condition:React.FC<Props> = ({
       if (res) {
         const assigners = filter(res, (item: IConditionInfo) => item.userType === 'specifier');
         const projectOwnerItem = find(res, (item: IConditionInfo) => item.userType === 'projectOwner');
-        const subIssueCompletedItem = find(res, (item: IConditionInfo) => !!item.subIssueCompleted);
+        const subIssueCompletedItem = find(res, (item: IConditionInfo) => item.userType === 'other' && !!item.verifySubissueCompleted);
         if (assigners && assigners.length) {
           current?.set('specifier', true);
           current?.set('assigners', assigners.map((item: IConditionInfo) => item.userId));
@@ -154,7 +154,7 @@ const Condition:React.FC<Props> = ({
           current?.set('projectOwner', true);
         }
         if (subIssueCompletedItem) {
-          current?.set('subIssueCompleted', true);
+          current?.set('verifySubissueCompleted', true);
         }
       }
     });
@@ -166,7 +166,7 @@ const Condition:React.FC<Props> = ({
       const validate = await conditionDataSet.validate();
       const {
       // @ts-ignore
-        projectOwner, specifier, assigners, needCompleted,
+        projectOwner, specifier, assigners, verifySubissueCompleted,
       } = (data && data[0]) || {};
       if (validate) {
         const updateData: ICondition[] = [];
@@ -181,10 +181,10 @@ const Condition:React.FC<Props> = ({
             userIds: assigners,
           });
         }
-        if (needCompleted) {
+        if (verifySubissueCompleted) {
           updateData.push({
             type: 'other',
-            subIssueCompleted: true,
+            verifySubissueCompleted: true,
           });
         }
         await statusTransformApi[isOrganization ? 'orgUpdateCondition' : 'updateCondition'](selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
@@ -273,7 +273,7 @@ const Condition:React.FC<Props> = ({
               <Divider className={styles.divider} />
               <Form dataSet={conditionDataSet}>
                 <div className={styles.completeSetting}>
-                  <CheckBox name="needCompleted" />
+                  <CheckBox name="verifySubissueCompleted" />
                 </div>
               </Form>
             </>

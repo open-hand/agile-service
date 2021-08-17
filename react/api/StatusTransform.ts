@@ -42,7 +42,7 @@ export interface IStatusCreateLink {
 export interface ICondition {
   type: 'specifier' | 'projectOwner' | 'other',
   userIds?: string[],
-  subIssueCompleted?: boolean
+  verifySubissueCompleted?: boolean
 }
 
 export interface IUpdateNotifySetting {

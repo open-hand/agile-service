@@ -54,9 +54,8 @@ interface IStatusTransferSettingVOS {
   statusId: string
   user: null | User
   userId: null | string
-  userType: 'projectOwner' | 'specifier'
-  type?: 'other',
-  subIssueCompleted?: boolean
+  userType: 'projectOwner' | 'specifier' | 'other'
+  verifySubissueCompleted: boolean
 }
 
 interface IStatusNoticeSettingVOS {
@@ -133,10 +132,6 @@ interface ILinkIssueLinkageVOS {
     linkName: string
     linkTypeId: string
   }
-}
-
-interface IStatusConditionSetting {
-
 }
 
 const transformedMember = {
@@ -523,14 +518,14 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const renderLinkIssueLinkageSetting = (linkIssueStatusLinkageVOS: ILinkIssueLinkageVOS[]) => linkIssueStatusLinkageVOS.map((item) => `关联关系为【${item.linkTypeVO.linkName}】，且问题类型为【${item.linkIssueType.name}】的关联问题将自动流转到【${item.linkIssueStatus.name}】状态`).join('；');
 
   const renderConditionSetting = (statusTransferSettingVOS: IStatusTransferSettingVOS[], record: Record) => {
-    const subIssueCompleted = statusTransferSettingVOS && find(statusTransferSettingVOS, (item) => item.type === 'other' && item.subIssueCompleted);
+    const verifySubissueCompleted = statusTransferSettingVOS && find(statusTransferSettingVOS, (item) => item.userType === 'other' && item.verifySubissueCompleted);
     const isProjectOwnerExist = statusTransferSettingVOS && find(statusTransferSettingVOS, (item: IStatusTransferSettingVOS) => item.userType === 'projectOwner');
     const assigners = filter((statusTransferSettingVOS || []), (item: IStatusTransferSettingVOS) => item.userType === 'specifier')?.map((item: IStatusTransferSettingVOS) => item.user?.realName) || [];
     let conditionStr = '';
-    if (subIssueCompleted) {
+    if (verifySubissueCompleted) {
       conditionStr += `子级任务需全部到已解决状态才能流转到${record.get('name')}`;
     }
-    if (subIssueCompleted && (isProjectOwnerExist || (assigners && assigners.length > 0))) {
+    if (verifySubissueCompleted && (isProjectOwnerExist || (assigners && assigners.length > 0))) {
       conditionStr += '，';
     }
     if (isProjectOwnerExist || (assigners && assigners.length > 0)) {
@@ -549,7 +544,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     const selectedTypeCode = find(issueTypes, (
       item: IIssueType,
     ) => item.id === selectedType)?.typeCode;
-    const subIssueCompleted = statusTransferSettingVOS && find(statusTransferSettingVOS, (item) => item.type === 'other' && item.subIssueCompleted);
+    const verifySubissueCompleted = statusTransferSettingVOS && find(statusTransferSettingVOS, (item) => item.userType === 'other' && item.verifySubissueCompleted);
     const isProjectOwnerExist = statusTransferSettingVOS && find(statusTransferSettingVOS, (item: IStatusTransferSettingVOS) => item.userType === 'projectOwner');
     const assigners = filter((statusTransferSettingVOS || []), (item: IStatusTransferSettingVOS) => item.userType === 'specifier')?.map((item: IStatusTransferSettingVOS) => item.user?.realName) || [];
     return (
@@ -569,7 +564,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           )
         }
         {
-          (subIssueCompleted || isProjectOwnerExist || (assigners && assigners.length > 0)) && (
+          (verifySubissueCompleted || isProjectOwnerExist || (assigners && assigners.length > 0)) && (
             <div className={styles.settingItem}>
               <Tooltip title={renderConditionSetting(statusTransferSettingVOS, record)}>
                 {renderConditionSetting(statusTransferSettingVOS, record)}
