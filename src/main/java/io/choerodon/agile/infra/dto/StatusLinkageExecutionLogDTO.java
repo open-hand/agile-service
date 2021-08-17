@@ -42,6 +42,9 @@ public class StatusLinkageExecutionLogDTO extends AuditDomain {
 
     private Long organizationId;
 
+    @ApiModelProperty(value = "备注(same_status/sub_bug/condition_limit)")
+    private String remark;
+
     public Long getId() {
         return id;
     }
@@ -96,5 +99,13 @@ public class StatusLinkageExecutionLogDTO extends AuditDomain {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 }

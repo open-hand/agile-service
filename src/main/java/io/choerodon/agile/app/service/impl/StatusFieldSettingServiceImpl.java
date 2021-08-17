@@ -197,6 +197,9 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     public void handlerSettingToUpdateIssue(Long projectId, Long issueId) {
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         List<StatusFieldSettingVO> list = statusFieldSettingMapper.listByStatusIds(projectId, issueDTO.getIssueTypeId(), Arrays.asList(issueDTO.getStatusId()));
+        if (CollectionUtils.isEmpty(list)) {
+            return;
+        }
         IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
         List<PageFieldViewUpdateVO> customField = new ArrayList<>();
         List<String> field = new ArrayList<>();

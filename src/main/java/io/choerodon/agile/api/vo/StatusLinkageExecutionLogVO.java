@@ -41,6 +41,9 @@ public class StatusLinkageExecutionLogVO {
 
     private Date creationDate;
 
+    @ApiModelProperty(value = "备注(same_status/sub_bug/condition_limit)")
+    private String remark;
+
     public Long getId() {
         return id;
     }
@@ -127,5 +130,13 @@ public class StatusLinkageExecutionLogVO {
 
     public void setCurIssueInfo(IssueLinkVO curIssueInfo) {
         this.curIssueInfo = curIssueInfo;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 }

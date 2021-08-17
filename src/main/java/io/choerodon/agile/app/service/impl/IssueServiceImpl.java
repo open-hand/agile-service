@@ -293,6 +293,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private StatusMachineTransformMapper statusMachineTransformMapper;
     @Autowired
     private FieldPermissionService fieldPermissionService;
+    @Autowired
+    private StatusTransferSettingService transferSettingService;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -1070,7 +1072,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         // 查询issue的联动路径
         statusLinkageService.getUpdateParentStatusIssue(projectId, issueDTO, issueDTO.getStatusId(), applyType, influenceIssueVO, allInfluenceMap, issueLinkChangeGroup);
         handlerInfluenceMap(allInfluenceMap, issueId, issueDTO.getStatusId(), issueLinkChangeGroup, null, influenceIssueVO, false);
-        if (CollectionUtils.isEmpty(allInfluenceMap)) {
+        if (CollectionUtils.isEmpty(allInfluenceMap) && allInfluenceMap.size() <= 1) {
             return true;
         }
         Set<Long> linkIssueIds = allInfluenceMap.keySet();
@@ -1104,17 +1106,22 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         IssueDTO issue = issueMapper.selectByPrimaryKey(issueId);
         Boolean isSub = Objects.equals("sub_task",influenceIssue.getTypeCode()) || (Objects.equals("bug",influenceIssue.getTypeCode()) && !ObjectUtils.isEmpty(influenceIssue.getRelateIssueId()) && !Objects.equals(influenceIssue.getRelateIssueId(), 0L));
         if (Objects.equals("bug", issue.getTypeCode()) && !ObjectUtils.isEmpty(issue.getRelateIssueId()) && !Objects.equals(issue.getRelateIssueId(), 0L)) {
-            statusLinkageExecutionLog(influenceIssueVO, issueId, influenceIssue, isSub, linkIssueStatusMap, "STOP");
+            statusLinkageExecutionLog(influenceIssueVO, issueId, influenceIssue, isSub, linkIssueStatusMap, "STOP", "sub_bug");
             return true;
         }
         if (Objects.equals(issue.getStatusId(), statusId)) {
-            statusLinkageExecutionLog(influenceIssueVO, issueId, influenceIssue, isSub, linkIssueStatusMap, "STOP");
+            statusLinkageExecutionLog(influenceIssueVO, issueId, influenceIssue, isSub, linkIssueStatusMap, "STOP", "same_status");
+            return true;
+        }
+        Boolean verifyStatusTransferSetting = transferSettingService.verifyStatusTransferSetting(projectId, issue, statusId);
+        if (Boolean.TRUE.equals(verifyStatusTransferSetting)) {
+            statusLinkageExecutionLog(influenceIssueVO, issueId, influenceIssue, isSub, linkIssueStatusMap, "STOP", "condition_limit");
             return true;
         }
         // 变更issue的状态和更新属性
         Boolean transformFlag = executionUpdateInfluenceIssue(issue, statusId, influenceIssue, projectId, applyType, influenceIssueVO);
         // 记录联动的执行日志
-        statusLinkageExecutionLog(influenceIssueVO, issueId, influenceIssue, isSub, linkIssueStatusMap, null);
+        statusLinkageExecutionLog(influenceIssueVO, issueId, influenceIssue, isSub, linkIssueStatusMap, null, null);
         if (!transformFlag && isSub) {
             return transformFlag;
         }
@@ -1132,7 +1139,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         return transformFlag;
     }
 
-    private void statusLinkageExecutionLog(InfluenceIssueVO influenceIssueVO, Long issueId, IssueDTO influenceIssue, Boolean isSub, Map<Long, LinkIssueStatusLinkageVO> linkIssueStatusMap, String statusCode) {
+    private void statusLinkageExecutionLog(InfluenceIssueVO influenceIssueVO, Long issueId, IssueDTO influenceIssue, Boolean isSub, Map<Long, LinkIssueStatusLinkageVO> linkIssueStatusMap, String statusCode, String remark) {
         // 记录联动的执行日志
         Long projectId = influenceIssue.getProjectId();
         if (!ObjectUtils.isEmpty(influenceIssueVO.getLinkSettingId())) {
@@ -1145,6 +1152,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             statusLinkageExecutionLogDTO.setPreIssueId(influenceIssue.getIssueId());
             statusLinkageExecutionLogDTO.setCurIssueId(issueId);
             statusLinkageExecutionLogDTO.setContent(content);
+            statusLinkageExecutionLogDTO.setRemark(remark);
             if (ObjectUtils.isEmpty(statusCode)) {
                 statusCode = Boolean.TRUE.equals(influenceIssueVO.getLoop()) ? "LOOP" : "SUCCESS";
             }
