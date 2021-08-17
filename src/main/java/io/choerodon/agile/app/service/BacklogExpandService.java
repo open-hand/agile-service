@@ -1,10 +1,9 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.api.vo.DataLogQueryVO;
-import io.choerodon.agile.api.vo.FieldTableVO;
-import io.choerodon.agile.api.vo.PageConfigFieldEditedVO;
-import io.choerodon.agile.api.vo.PageFieldViewVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.AllDataLogVO;
+import io.choerodon.agile.api.vo.business.ConfigurationRuleFieldVO;
+import io.choerodon.agile.api.vo.business.ConfigurationRuleVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.StarBeaconDTO;
 
@@ -169,4 +168,12 @@ public interface BacklogExpandService {
     Map<String, String> getUrlAndSummary(AuditDomain auditDomain, Long projectId);
 
     void addComment(AuditDomain auditDomain, String comment);
+
+    boolean updateBacklogByField(List<ConfigurationRuleFieldVO> fields,
+                                 Map<Long, ObjectSchemeFieldDTO> fieldMap,
+                                 AuditDomain auditDomain,
+                                 List<String> fieldList,
+                                 List<PageFieldViewUpdateVO> customFields);
+
+    Map<String, Long> filterRuleBySqlQuery(Long instanceId, Long projectId, List<ConfigurationRuleVO> ruleList);
 }

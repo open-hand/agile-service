@@ -73,7 +73,8 @@ public interface ConfigurationRuleService {
                    AuditDomain auditDomain,
                    ConfigurationRuleVO rule,
                    Long projectId,
-                   boolean createCustomFieldMember);
+                   boolean createCustomFieldMember,
+                   List<Long> executedRuleIds);
 
     ConfigurationRuleVO filterRuleByCondition(ConfigurationRuleVO rule,
                                               Long instanceId,
