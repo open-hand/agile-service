@@ -196,6 +196,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String ISSUE_EPIC = "issue_epic";
     private static final String ISSUE_NUM = "issueNum";
     private static final String ISSUE_NUM_CONVERT = "issue_num_convert";
+    private static final String ISSUE_ID = "issueId";
+    private static final String ISSUE_ISSUE_ID = "issue_issue_id";
     private static final String ISSUE_MANAGER_TYPE = "模块负责人";
     private static final String TYPE_CODE_FIELD = "typeCode";
     private static final String EPIC_NAME_FIELD = "epicName";
@@ -605,8 +607,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private Page<Long> getIssueIdPage(PageRequest pageRequest, Long projectId, SearchVO searchVO, String searchSql, Long organizationId, Boolean isTreeView) {
         Page<Long> issueIdPage = new Page<>();
         if (!handleSortField(pageRequest).equals("")) {
+            Sort.Order issueIdOrder = new Sort.Order(Sort.Direction.DESC, ISSUE_ID);
+            String orderStr = getOrderStrOfQueryingIssuesWithSub(new Sort(issueIdOrder));
             List<Long> issueIdsWithSub =
-                    issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null, isTreeView)
+                    issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr, isTreeView)
                             .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
             String fieldCode = handleSortField(pageRequest);
             Map<String, String> order = new HashMap<>(1);
@@ -652,8 +656,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     protected String getOrderStrOfQueryingIssuesWithSub(Sort sort) {
         Map<String, String> order = new HashMap<>(1);
-        order.put("issueId", "issue_issue_id");
+        order.put(ISSUE_ID, ISSUE_ISSUE_ID);
         order.put(ISSUE_NUM, ISSUE_NUM_CONVERT);
+        if (Objects.isNull(sort.getOrderFor(ISSUE_ID))) {
+            Sort.Order issueIdOrder = new Sort.Order(Sort.Direction.DESC, ISSUE_ID);
+            sort = sort.and(new Sort(issueIdOrder));
+        }
         return PageableHelper.getSortSql(PageUtil.sortResetOrder(sort, null, order));
     }
 
