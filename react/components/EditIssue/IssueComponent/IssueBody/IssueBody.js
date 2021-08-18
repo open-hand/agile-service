@@ -144,7 +144,7 @@ function IssueBody(props) {
         {
           issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
             ? (
-              <TabPane tab={`拆分的Story${splitStoryData?.storyList?.length ? `(${splitStoryData?.storyList?.length || 0})` : ''}`} key="split_story">
+              <TabPane tab={`拆分的Story${splitStoryData?.storyList ? `(${splitStoryData?.storyList?.length || 0})` : ''}`} key="split_story">
                 <SplitStory {...props} splitStoryData={splitStoryData} />
               </TabPane>
             ) : ''
