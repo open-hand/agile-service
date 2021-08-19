@@ -2,15 +2,15 @@ import React, {
   useState, useEffect, forwardRef, useCallback, useMemo,
 } from 'react';
 import { find } from 'lodash';
-import { Select } from 'choerodon-ui/pro';
-import { sprintApi } from '@/api';
-import { Tooltip } from 'choerodon-ui/pro';
+import { Select, Tooltip } from 'choerodon-ui/pro';
 import { FlatSelect } from '@choerodon/components';
+import { sprintApi } from '@/api';
 
 const { OptGroup, Option } = Select;
 interface Props {
   teamIds: number[],
   piId: number
+  hasUnassign?: boolean
   afterLoad?: (data: any[]) => void
   flat?: boolean
   dataRef?: React.MutableRefObject<any>
@@ -27,7 +27,7 @@ interface Team {
   sprints: Sprint[]
 }
 const SelectSprint: React.FC<Props> = forwardRef(({
-  teamIds, piId, afterLoad, flat, dataRef,
+  teamIds, piId, hasUnassign, afterLoad, flat, dataRef,
   ...otherProps
 }, ref: React.Ref<Select>) => {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -43,9 +43,13 @@ const SelectSprint: React.FC<Props> = forwardRef(({
   const loadData = useCallback(async () => {
     if (piId && Array.isArray(teamIds) && teamIds.length > 0) {
       const res = await sprintApi.getTeamSprints(piId, teamIds);
-      setTeams(res);
+      const newRes = res.map((item: Team) => (hasUnassign ? {
+        ...item,
+        sprints: [{ sprintId: `${item.projectVO.id}-0`, sprintName: '未分配冲刺' }, ...item.sprints],
+      } : item));
+      setTeams(newRes);
       if (afterLoad) {
-        afterLoad(res);
+        afterLoad(newRes);
       }
     } else {
       setTeams([]);
