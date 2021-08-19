@@ -193,7 +193,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
                 Set<Long> userIds = new HashSet<>();
                 getUserIds(projectId, userIds, statusTransfer);
                 Long userId = DetailsHelper.getUserDetails().getUserId();
-                if (userIds.contains(userId)) {
+                if (CollectionUtils.isEmpty(userIds) || userIds.contains(userId)) {
                     list.add(statusId);
                 }
             }
