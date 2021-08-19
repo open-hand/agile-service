@@ -68,15 +68,23 @@ function CustomField({ field }) {
   } if (fieldElement === false) {
     return null;
   }
+
+  const props = {
+    projectId,
+    applyType,
+    value,
+    onChange: handleChange,
+  };
+
   const element = getSearchFields([field], {
-    [field.code]: {
-      projectId,
-      applyType,
-      value,
-      onChange: handleChange,
-      ...field.code === 'statusId' ? {
-        issueTypeIds: chosenFields.get('issueTypeId') ? toJS(chosenFields.get('issueTypeId').value) : undefined,
-      } : {},
+    [field.code]: props,
+    statusId: {
+      ...props,
+      issueTypeIds: chosenFields.get('issueTypeId') ? toJS(chosenFields.get('issueTypeId').value) : undefined,
+    },
+    feature: {
+      ...props,
+      featureIds: value,
     },
   })[0];
   return element;

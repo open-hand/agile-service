@@ -41,7 +41,7 @@ class FeatureApi extends Api<FeatureApi> {
    * @param param 搜索
    * @param page 第几页
    */
-  queryAllInSubProject(featureIds: number[], param: string, page: number = 1, size: number) {
+  queryAllInSubProject(featureIds: Array<string | number>, param: string, page: number = 1, size: number) {
     return axios.post(
       `${this.prefix}/issues/feature/all`,
       featureIds || [],
