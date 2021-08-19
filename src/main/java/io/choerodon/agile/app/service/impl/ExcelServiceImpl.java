@@ -2951,9 +2951,11 @@ public class ExcelServiceImpl implements ExcelService {
             String orderStr = getOrderStrOfQueryingIssuesWithSub(sort);
             double lastProcess = 0D;
             while (true) {
+                Map<String, Object> sortMap = new HashMap<>();
+                sortMap.put("orderStr", orderStr);
                 //查询所有父节点问题
                 Page<IssueDTO> page =
-                        PageHelper.doPage(cursor.getPage(), cursor.getSize(), () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr, isTreeView));
+                        PageHelper.doPage(cursor.getPage(), cursor.getSize(), () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap, isTreeView));
                 if (CollectionUtils.isEmpty(page.getContent())) {
                     break;
                 }

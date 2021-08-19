@@ -663,8 +663,28 @@
             join agile_issue ai
             on t1.issue_issue_id = ai.issue_id
             left join agile_project_info api on ai.project_id = api.project_id
-            <if test="orderStr != null">
-                order by ${orderStr}
+            <if test="sortMap != null and sortMap.sortFieldId != null ">
+                LEFT JOIN
+                (
+                    SELECT
+                        instance_id,
+                        date_value,
+                        option_id,
+                        string_value,
+                        text_value,
+                        number_value
+                    FROM fd_field_value
+                    JOIN agile_issue ai ON ai.issue_id = instance_id
+                    WHERE field_id = #{sortMap.sortFieldId}
+                    AND fd_field_value.project_id = #{projectId}
+                    AND ai.issue_type_id IN
+                    <foreach collection="sortMap.fieldExtendIssueTypeIds" item="issueTypeId" open="(" separator="," close=")">
+                        #{issueTypeId}
+                    </foreach>
+                ) fv ON ai.issue_id = fv.instance_id
+            </if>
+            <if test="sortMap != null and sortMap.orderStr != null">
+                ORDER BY ${sortMap.orderStr}
             </if>
         ) ai1
     </select>

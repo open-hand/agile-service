@@ -416,8 +416,6 @@ public interface IssueService {
 
     Page<UserDTO> pagingUserProjectUsers(PageRequest pageRequest, Long organizationId, String param);
 
-    List<Long> handlerSortFieldInstance(PageRequest pageRequest, List<Long> allIssueIds, List<Long> foundationIssueIds);
-
     String handleSortField(PageRequest pageRequest);
 
     void handlerInfluenceMap(Map<Long, List<Long>> influenceMap, Long issueId, Long statusId, Map<Long, List<IssueLinkChangeVO>> issueLinkChangeGroup, Long influenceId, InfluenceIssueVO influenceIssueVO, Boolean autoTriggered);

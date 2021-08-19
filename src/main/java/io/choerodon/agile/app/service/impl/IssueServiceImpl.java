@@ -297,6 +297,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private FieldPermissionService fieldPermissionService;
     @Autowired
     private StatusTransferSettingService transferSettingService;
+    @Autowired
+    private ObjectSchemeFieldService objectSchemeFieldService;
+    @Autowired
+    private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -605,53 +609,35 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     private Page<Long> getIssueIdPage(PageRequest pageRequest, Long projectId, SearchVO searchVO, String searchSql, Long organizationId, Boolean isTreeView) {
-        Page<Long> issueIdPage = new Page<>();
+        Page<Long> issueIdPage;
+        Map<String, Object> sortMap = new HashMap<>();
         if (!handleSortField(pageRequest).equals("")) {
-            Sort.Order issueIdOrder = new Sort.Order(Sort.Direction.DESC, ISSUE_ID);
-            String orderStr = getOrderStrOfQueryingIssuesWithSub(new Sort(issueIdOrder));
-            List<Long> issueIdsWithSub =
-                    issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr, isTreeView)
-                            .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-            String fieldCode = handleSortField(pageRequest);
-            Map<String, String> order = new HashMap<>(1);
-            String sortCode = fieldCode.split("\\.")[1];
-            order.put(fieldCode, sortCode);
-            PageUtil.sortResetOrder(pageRequest.getSort(), "fv", order);
-            List<Long> foundationIssueIds = fieldValueService.sortIssueIdsByFieldValue(organizationId, projectId, pageRequest, AGILE_SCHEME_CODE);
-            List<Long> list = handlerSortFieldInstance(pageRequest, issueIdsWithSub, foundationIssueIds);
-            PageUtil.buildPage(issueIdPage, pageRequest, issueIdsWithSub);
-            issueIdPage.setContent(list);
+            setSortMap(organizationId, projectId, pageRequest, sortMap);
         } else {
             String orderStr = getOrderStrOfQueryingIssuesWithSub(pageRequest.getSort());
-            Page<IssueDTO> issues = PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr, isTreeView));
-            List<Long> issueIds = issues.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-            issueIdPage = PageUtil.buildPageInfoWithPageInfoList(issues, issueIds);
+            sortMap.put("orderStr", orderStr);
         }
+        Page<IssueDTO> issues = PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap, isTreeView));
+        List<Long> issueIds = issues.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+        issueIdPage = PageUtil.buildPageInfoWithPageInfoList(issues, issueIds);
         return issueIdPage;
     }
 
-    @Override
-    public List<Long> handlerSortFieldInstance(PageRequest pageRequest, List<Long> allIssueIds, List<Long> foundationIssueIds) {
-        List<Long> foundationIssueIdsWithSub = foundationIssueIds.stream().filter(allIssueIds::contains).collect(Collectors.toList());
-        List<Long> issueIdsWithSubWithoutFoundation = allIssueIds.stream().filter(t -> !foundationIssueIdsWithSub.contains(t)).collect(Collectors.toList());
-        List<Long> allIssueList = handleIssueLists(foundationIssueIdsWithSub, issueIdsWithSubWithoutFoundation, pageRequest);
-        if (CollectionUtils.isEmpty(allIssueList)) {
-            return new ArrayList<>();
-        }
-        boolean queryAll = pageRequest.getPage() < 0 || pageRequest.getSize() == 0;
-        int startIndex = (pageRequest.getPage()) * pageRequest.getSize();
+    private void setSortMap(Long organizationId, Long projectId, PageRequest pageRequest, Map<String, Object> sortMap) {
+        String sortCode = handleSortField(pageRequest);
+        String fieldCode = sortCode.split("\\.")[1];
 
-        if (allIssueList.size() >= startIndex) {
-            int endSize = 0;
-            if (allIssueList.size() <= startIndex + pageRequest.getSize()) {
-                endSize = allIssueList.size() - startIndex;
-            } else {
-                endSize = pageRequest.getSize();
-            }
-            return queryAll ? allIssueList : allIssueList.subList(startIndex, startIndex + endSize);
-        } else {
-            return new ArrayList<>();
-        }
+        ObjectSchemeFieldDTO objectSchemeField = objectSchemeFieldService.queryByFieldCode(organizationId, projectId, fieldCode);
+        String fieldType = objectSchemeField.getFieldType();
+        FieldValueUtil.handleAgileSortPageRequest(sortCode, fieldType, pageRequest);
+        PageUtil.sortResetOrder(pageRequest.getSort(), "fv", new HashMap<>());
+        String orderStr = getOrderStrOfQueryingIssuesWithSub(pageRequest.getSort());
+
+        List<ObjectSchemeFieldExtendDTO> fieldExtendDTOList = objectSchemeFieldExtendMapper.selectExtendFields(organizationId, objectSchemeField.getId(), projectId, null);
+        List<Long> fieldExtendIssueTypeIds = fieldExtendDTOList.stream().map(ObjectSchemeFieldExtendDTO::getIssueTypeId).collect(Collectors.toList());
+        sortMap.put("sortFieldId", objectSchemeField.getId());
+        sortMap.put("fieldExtendIssueTypeIds", fieldExtendIssueTypeIds);
+        sortMap.put("orderStr", orderStr);
     }
 
     protected String getOrderStrOfQueryingIssuesWithSub(Sort sort) {
@@ -663,24 +649,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             sort = sort.and(new Sort(issueIdOrder));
         }
         return PageableHelper.getSortSql(PageUtil.sortResetOrder(sort, null, order));
-    }
-
-    protected List<Long> handleIssueLists(List<Long> foundationList, List<Long> agileList, PageRequest pageRequest) {
-        if (!ObjectUtils.isEmpty(pageRequest.getSort())) {
-            Iterator<Sort.Order> iterator = pageRequest.getSort().iterator();
-            Sort.Direction direction = Sort.Direction.ASC;
-            while (iterator.hasNext()) {
-                Sort.Order order = iterator.next();
-                direction = order.getDirection();
-            }
-            if (direction.isAscending()) {
-                agileList.addAll(foundationList);
-                return agileList;
-            } else {
-                foundationList.addAll(agileList);
-                return foundationList;
-            }
-        } else return new ArrayList<>();
     }
 
     @Override
