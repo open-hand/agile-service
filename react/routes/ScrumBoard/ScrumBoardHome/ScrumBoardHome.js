@@ -8,16 +8,16 @@ import {
 } from 'choerodon-ui';
 import screenfull from 'screenfull';
 import { HeaderButtons } from '@choerodon/master';
-import { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
 import { set } from 'lodash';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
+import queryString from 'query-string';
+import { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
 import CloseSprint from '@/components/close-sprint';
 import {
   sprintApi, issueApi, epicApi, issueTypeApi, statusApi, boardApi,
 } from '@/api';
 import LINK_URL from '@/constants/LINK_URL';
 import to from '@/utils/to';
-import queryString from 'query-string';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 
 import FilterManage from '@/components/FilterManage';
@@ -411,16 +411,18 @@ class ScrumBoardHome extends Component {
             paddingTop: 16,
           }}
         >
-          <LoadingProvider loading={ScrumBoardStore.getSpinIf} loadingStyle={{ position: 'relative' }}>
-
-            <div style={{
+          <LoadingProvider
+            loading={ScrumBoardStore.getSpinIf}
+            loadingStyle={{ position: 'relative' }}
+            style={{
               flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column',
             }}
-            >
-              <BoardSearch onRefresh={this.handleFilterChange} saveStore={this.handleSaveSearchStore} />
-              <div className="c7n-scrumboard">
-                <div style={{ display: 'table', minWidth: '100%' }}>
-                  {(!ScrumBoardStore.didCurrentSprintExist
+          >
+
+            <BoardSearch onRefresh={this.handleFilterChange} saveStore={this.handleSaveSearchStore} />
+            <div className="c7n-scrumboard">
+              <div style={{ display: 'table', minWidth: '100%' }}>
+                {(!ScrumBoardStore.didCurrentSprintExist
                   || ((!ScrumBoardStore.otherIssue || ScrumBoardStore.otherIssue.length === 0)
                     && (!ScrumBoardStore.interconnectedData
                       || ScrumBoardStore.interconnectedData.size === 0))) ? (
@@ -431,40 +433,39 @@ class ScrumBoardHome extends Component {
                             filterItems={this.issueSearchStore?.currentFlatFilter ?? {}}
                           />
                         </LoadingHiddenWrap>
-                    )
-                    : (
-                      <>
-                        <div className="c7n-scrumboard-header">
-                          <StatusColumn />
+                  )
+                  : (
+                    <>
+                      <div className="c7n-scrumboard-header">
+                        <StatusColumn />
+                      </div>
+                      <div
+                        className="c7n-scrumboard-content"
+                      >
+                        <div className="c7n-scrumboard-container">
+                          <SwimLane
+                            mode={ScrumBoardStore.getSwimLaneCode}
+                            allDataMap={this.dataConverter.getAllDataMap()}
+                            mapStructure={ScrumBoardStore.getMapStructure}
+                            onDragEnd={this.onDragEnd}
+                            onDragStart={this.onDragStart}
+                          />
                         </div>
-                        <div
-                          className="c7n-scrumboard-content"
-                        >
-                          <div className="c7n-scrumboard-container">
-                            <SwimLane
-                              mode={ScrumBoardStore.getSwimLaneCode}
-                              allDataMap={this.dataConverter.getAllDataMap()}
-                              mapStructure={ScrumBoardStore.getMapStructure}
-                              onDragEnd={this.onDragEnd}
-                              onDragStart={this.onDragStart}
-                            />
-                          </div>
-                        </div>
-                      </>
-                    )}
-                </div>
+                      </div>
+                    </>
+                  )}
               </div>
-              <IssueDetail
-                refresh={this.refresh}
-              />
-              {this.issueSearchStore ? (
-                <FilterManage
-                  visible={ScrumBoardStore.getFilterManageVisible}
-                  setVisible={() => ScrumBoardStore.setFilterManageVisible(!ScrumBoardStore.getFilterManageVisible)}
-                  issueSearchStore={this.issueSearchStore}
-                />
-              ) : null}
             </div>
+            <IssueDetail
+              refresh={this.refresh}
+            />
+            {this.issueSearchStore ? (
+              <FilterManage
+                visible={ScrumBoardStore.getFilterManageVisible}
+                setVisible={() => ScrumBoardStore.setFilterManageVisible(!ScrumBoardStore.getFilterManageVisible)}
+                issueSearchStore={this.issueSearchStore}
+              />
+            ) : null}
           </LoadingProvider>
         </Content>
         {
