@@ -226,7 +226,7 @@ public class IssueCommentServiceImpl implements IssueCommentService {
         List<Long> userIds = new ArrayList<>();
         result.forEach(issueCommentVO -> {
             userIds.add(issueCommentVO.getUserId());
-            if (CollectionUtils.isEmpty(issueCommentVO.getIssueCommentReplyList())){
+            if (!CollectionUtils.isEmpty(issueCommentVO.getIssueCommentReplyList())){
                 issueCommentVO.getIssueCommentReplyList().forEach(issueCommentReply -> {
                     userIds.add(issueCommentReply.getUserId());
                     userIds.add(issueCommentReply.getReplyToUserId());
