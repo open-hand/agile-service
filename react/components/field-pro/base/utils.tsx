@@ -11,6 +11,7 @@ function getProcessFieldConfig<T extends IComponentFCWithClassObject, C extends 
     code: fieldConfig.code,
     fieldType: fieldConfig.fieldType,
     outputs: fieldConfig.outputs,
+    display: fieldConfig.display === undefined || !!fieldConfig.display,
     props: { clearButton: true, name: fieldConfig.code, ...fieldConfig.props },
   };
   const filedTypeConfigObj = {
