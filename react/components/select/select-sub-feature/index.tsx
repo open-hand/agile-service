@@ -1,10 +1,10 @@
 import React, { useMemo, forwardRef } from 'react';
-import { Select, Tooltip } from 'choerodon-ui/pro';
+import { Select } from 'choerodon-ui/pro';
+import { FlatSelect } from '@choerodon/components';
 
-import { observer } from 'mobx-react-lite';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import {
-  featureApi, issueTypeApi, IStatusCirculation, statusTransformApi,
+  featureApi,
 } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 
@@ -13,17 +13,21 @@ interface IFeature {
   summary: string
 }
 export interface SelectSubFeatureProps extends Partial<SelectProps> {
-  featureIds?: number[],
+  featureIds?: Array<string | number>,
+  flat?: boolean
   afterLoad?: (features: any[]) => void
 }
 /**
  * 子项目查询项目群特性
  */
-const SelectSubFeature: React.FC<SelectSubFeatureProps> = forwardRef(({ featureIds, afterLoad, ...otherProps }, ref: React.Ref<Select>) => {
+const SelectSubFeature: React.FC<SelectSubFeatureProps> = forwardRef(({
+  featureIds, afterLoad, flat, ...otherProps
+}, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<IFeature> => ({
     name: 'featureId',
     textField: 'summary',
     valueField: 'issueId',
+    tooltip: true,
     request: ({ filter, page }) => featureApi.queryAllInSubProject(featureIds || [], filter!, page, 10),
     middleWare: (data) => {
       if (afterLoad) {
@@ -31,15 +35,12 @@ const SelectSubFeature: React.FC<SelectSubFeatureProps> = forwardRef(({ featureI
       }
       return data;
     },
-    optionRenderer: (feature) => (
-      <Tooltip title={feature.summary}>
-        <div className="text-overflow-hidden">{feature.summary}</div>
-      </Tooltip>
-    ),
   }), [afterLoad, featureIds]);
   const props = useSelect(config);
+  const Component = flat ? FlatSelect : Select;
+
   return (
-    <Select
+    <Component
       ref={ref}
       {...props}
       {...otherProps}

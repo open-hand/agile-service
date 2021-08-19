@@ -12,6 +12,7 @@ import SelectParentIssue from '@/components/select/select-parent-issue';
 import SelectFeatureType from '@/components/select/select-feature-type';
 import SelectTeam from '@/components/select/select-team';
 import SelectUserWithAssigneeMe from '@/components/select/pro/select-user-with-assigneeme';
+import SelectIssueType from '@/components/select/pro/select-issue-type';
 
 import getFieldsInstance, { AgileComponentMap, CustomFieldMap, IFieldBaseConfig } from '../base';
 
@@ -113,6 +114,7 @@ const fieldMap = {
 };
 const AgileComponentMapWithPro = {
   ...AgileComponentMap,
+  issueType: SelectIssueType,
   assignee: SelectUserWithAssigneeMe,
   feature: SelectFeature,
   storyPoints: SelectNumber,
