@@ -2,12 +2,12 @@ import React, {
   useMemo, forwardRef, useImperativeHandle, Ref,
 } from 'react';
 import { Select, Tooltip } from 'choerodon-ui/pro';
-import { featureApi } from '@/api';
 import { find } from 'lodash';
-import useSelect, { SelectConfig } from '@/hooks/useSelect';
-import type { Issue } from '@/common/types';
 import { FlatSelect } from '@choerodon/components';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import { featureApi } from '@/api';
+import useSelect, { SelectConfig } from '@/hooks/useSelect';
+import type { Issue } from '@/common/types';
 
 interface Props extends Partial<SelectProps> {
   featureId?: string,
@@ -28,7 +28,7 @@ const SelectFeature: React.FC<Props> = forwardRef(({
     textField: 'summary',
     valueField: 'issueId',
     tooltip: true,
-    request: request || (({ filter, page }) => featureApi.getByEpicId(undefined, filter, page, undefined, projectId)),
+    request: request || (({ filter, page }) => featureApi.getByEpicId(undefined, filter, page, 50, projectId)),
     // @ts-ignore
     middleWare: (features) => {
       if (featureId && featureName) {

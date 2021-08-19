@@ -45,7 +45,7 @@ const SelectSprint: React.FC<SelectSprintProps> = forwardRef(({
         </div>
       </FragmentForSearch>
     ),
-    request: ({ filter, page }) => (isProgram ? sprintApi.loadSubProjectSprints(filter || '', page!, selectSprints)
+    request: ({ filter, page }) => (isProgram ? sprintApi.loadSubProjectSprints(filter || '', page!, selectSprints, 50)
       : sprintApi.project(projectId).loadSprints(statusList)),
     middleWare: (sprints) => {
       let newSprint = sprints;

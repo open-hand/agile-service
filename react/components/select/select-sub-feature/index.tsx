@@ -28,7 +28,7 @@ const SelectSubFeature: React.FC<SelectSubFeatureProps> = forwardRef(({
     textField: 'summary',
     valueField: 'issueId',
     tooltip: true,
-    request: ({ filter, page }) => featureApi.queryAllInSubProject(featureIds || [], filter!, page, 10),
+    request: ({ filter, page }) => featureApi.queryAllInSubProject(featureIds || [], filter!, page, 50),
     middleWare: (data) => {
       if (afterLoad) {
         afterLoad(data);
