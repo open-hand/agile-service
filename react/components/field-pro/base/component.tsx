@@ -101,6 +101,9 @@ function getElement<T extends IComponentFCWithClassObject,
   C extends IComponentFCWithClassObject = IComponentFCWithClassObject>(filedProcessConfig: IFieldProcessConfig<T, C>,
   systemComponents: T, customComponents: C) {
   let element: IComponentFCWithClass<any, any> = getDefaultEmptyElement();
+  if (!filedProcessConfig.display) {
+    return <></>;
+  }
   if (filedProcessConfig.code && Object.keys(systemComponents).includes(filedProcessConfig.code)) {
     element = getSystemsElement(filedProcessConfig as IFieldSystemComponentConfig<T>, systemComponents);
   } else if (Object.keys(customComponents).includes(filedProcessConfig.fieldType!)) {

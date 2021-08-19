@@ -1,16 +1,9 @@
-import SelectUser from '@/components/select/pro/select-user';
-import SelectComponent from '@/components/select/select-component';
-import SelectCustomField from '@/components/select/select-custom-field';
-import SelectEnvironment from '@/components/select/select-environment';
-import SelectPriority from '@/components/select/select-priority';
-import SelectSubProject from '@/components/select/select-sub-project';
-import SelectVersion from '@/components/select/select-version';
 import {
-  Select, TimePicker, DateTimePicker, DatePicker, NumberField, TextField, TextArea,
+  Select,
 } from 'choerodon-ui/pro';
 import React from 'react';
-
-const { Option } = Select;
+import { set } from 'lodash';
+import { getAgileFields } from '@/components/field-pro';
 
 export interface IChosenField {
   name: string,
@@ -26,26 +19,29 @@ interface Props {
 }
 
 export const renderFieldRelSelect = ({ field, name = 'fieldRelOptionList' }: Props) => {
-  const { fieldCode, system, id } = field;
+  const { system, id } = field;
+  const fieldCode = field.fieldCode as 'priority' | 'component' | 'fixVersion' | 'influenceVersion' | 'subProject';
   if (system) {
+    const props = { name, multiple: true };
     switch (fieldCode) {
-      case 'priority':
-        return <SelectPriority multiple name={name} />;
-      case 'component':
-        return <SelectComponent valueField="componentId" multiple name={name} />;
-      case 'fixVersion':
-        return <SelectVersion valueField="versionId" multiple statusArr={['version_planning']} name={name} />;
-      case 'influenceVersion':
-        return <SelectVersion valueField="versionId" multiple name={name} />;
-      case 'subProject': {
-        return <SelectSubProject multiple name={name} />;
+      case 'fixVersion': {
+        set(props, 'valueField', 'versionId');
+        set(props, 'statusArr', ['version_planning']);
+        break;
+      }
+      case 'influenceVersion': {
+        set(props, 'valueField', 'versionId');
+        break;
       }
       default:
         break;
     }
+    return getAgileFields([], { code: fieldCode, outputs: ['element'], props })[0][0];
   }
   if (!system) {
-    return <SelectCustomField key={id} name={name} fieldId={id} />;
+    return getAgileFields([], [], {
+      fieldType: 'single', outputs: ['element'], props: { key: id, name, fieldId: id },
+    })[0][0];
   }
   return <Select name={name} />;
 };
@@ -53,73 +49,22 @@ export const renderFieldRelSelect = ({ field, name = 'fieldRelOptionList' }: Pro
 interface DefaultValueProps {
   field: IChosenField
   name?: string
-  fieldOptions: {meaning: string, value: string}[]
+  fieldOptions: { meaning: string, value: string }[]
 }
 export const renderDefaultValue = ({ field, name = 'defaultValue', fieldOptions = [] }: DefaultValueProps) => {
   const {
     fieldType,
   } = field;
-  switch (fieldType) {
-    case 'time': {
-      return (
-        <TimePicker name={name} />
-      );
-    }
-    case 'datetime':
-      return (
-        <DateTimePicker name={name} />
-      );
-    case 'date':
-      return (
-        <DatePicker name={name} />
-      );
-    case 'number':
-      return <NumberField name={name} />;
-    case 'input':
-      return (
-        <TextField
-          maxLength={100}
-          valueChangeAction={'input' as any}
-          name={name}
-        />
-      );
-    case 'text':
-      return (
-        <TextArea
-          rows={3}
-          maxLength={255}
-          valueChangeAction={'input' as any}
-          name={name}
-        />
-      );
-    case 'radio': case 'checkbox': case 'single': case 'multiple': {
-      return (
-        <Select name={name} multiple={fieldType === 'checkbox' || fieldType === 'multiple'}>
-          {fieldOptions.length > 0
-            && fieldOptions.map((item) => (
-              <Option
-                value={item.value}
-                key={item.value}
-              >
-                {
-                item.meaning
-                }
-              </Option>
-            ))}
-        </Select>
-      );
-    }
-    case 'multiMember':
-    case 'member':
-    {
-      return (
-        <SelectUser
-          multiple={fieldType === 'multiMember'}
-          clearButton
-          name={name}
-        />
-      );
-    }
-    default: return null;
-  }
+
+  return getAgileFields([], [], {
+    code: field.code ?? field.fieldCode as string,
+    fieldType: fieldType as any,
+    // 初次进来没有选项显示值时不显示
+    display: !!fieldOptions.filter((i) => i.meaning).length,
+    outputs: ['element'],
+    props: {
+      name,
+      fieldOptions: fieldOptions.map((i) => ({ id: i.value, value: i.meaning, enabled: true })),
+    },
+  })[0][0];
 };

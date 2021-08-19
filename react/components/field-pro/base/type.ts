@@ -14,7 +14,7 @@ type IComponentProps<C extends IComponentFCWithClass> = C extends React.FC ? IFi
 
 export type ICodeDistributeProps<T extends IComponentFCWithClassObject, K extends keyof T> = K extends string ? { code: K, fieldType?: IFieldType, props?: React.ComponentProps<T[K]>, } : never;
 
-export type IFieldTypeDistributeProps<T extends IComponentFCWithClassObject, K extends keyof T> = K extends IFieldType ? { code: string, fieldType: K, props?: React.ComponentProps<T[K]> } : never;
+export type IFieldTypeDistributeProps<T extends IComponentFCWithClassObject, K extends keyof T> = K extends IFieldType ? { code?: string, fieldType: K, props?: React.ComponentProps<T[K]> } : never;
 
 export type IFieldSystemComponentConfig<T extends IComponentFCWithClassObject> = ICodeDistributeProps<T, keyof T> // & IFieldTypeDistributeProps<T, keyof T>
 export type IFieldCustomComponentConfig<F extends IComponentFCWithClassObject> = IFieldTypeDistributeProps<F, keyof F>
@@ -26,19 +26,22 @@ export interface IFieldRequiredConfig {
     outputs: Array<IFieldConfigOutputType>
 }
 export interface IFieldPartialConfig {
+    /** 渲染函数 暂时未处理使用 */
     render?: ((
         text: any,
         props: any,
         dom: JSX.Element,
     ) => JSX.Element)
+    /** 是否展示字段  @default true */
+    display?: boolean
 }
-export type IFieldSystemConfig<T extends IComponentFCWithClassObject> = (IFieldRequiredConfig & IFieldSystemComponentConfig<T>)
-export type IFieldCustomConfig<F extends IComponentFCWithClassObject> = (IFieldRequiredConfig & IFieldCustomComponentConfig<F>)
+export type IFieldSystemConfig<T extends IComponentFCWithClassObject> = (IFieldRequiredConfig & IFieldPartialConfig & IFieldSystemComponentConfig<T>)
+export type IFieldCustomConfig<F extends IComponentFCWithClassObject> = (IFieldRequiredConfig & IFieldPartialConfig & IFieldCustomComponentConfig<F>)
 
 export type IFieldConfig<T extends IComponentFCWithClassObject,
     F extends IComponentFCWithClassObject = IComponentFCWithClassObject> = IFieldSystemConfig<T> | IFieldCustomConfig<F>
 
-type IFieldProcessConfig<T extends IComponentFCWithClassObject, C extends IComponentFCWithClassObject = IComponentFCWithClassObject> = IFieldComponentConfig<T, C> // 需要补充处理过后类型
+type IFieldProcessConfig<T extends IComponentFCWithClassObject, C extends IComponentFCWithClassObject = IComponentFCWithClassObject> = IFieldRequiredConfig & IFieldPartialConfig & Required<Pick<IFieldPartialConfig, 'display'>> & IFieldComponentConfig<T, C> // 需要补充处理过后类型
 export type IFieldOutput<T extends IComponentFCWithClassObject> = React.ReactElement | IFieldProcessConfig<T> | ((config: IFieldProcessConfig<T>) => React.ReactElement)
 
 export type ISingleOrArray<T> = T | Array<T>

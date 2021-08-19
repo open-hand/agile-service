@@ -15,6 +15,7 @@ interface IFieldsInstanceConfig {
 export interface IFieldBaseConfig {
   code: string
   fieldType: IFieldType
+  display?: boolean
   outputs?: Array<IFieldConfigOutputType>
   props?: any
 }
@@ -30,9 +31,9 @@ function getFieldsInstance<T extends IFieldBaseConfig = IFieldBaseConfig, S exte
   console.log('config....', config);
   /**
  * 获取字段配置/元素/自定义配置渲染
- * @param fields
- * @param systemFields
- * @param customFields
+ * @param fields 系统/自定义字段
+ * @param  {Array<IFieldSystemConfig>|IFieldSystemConfig} systemFields 系统字段 有TS提示
+ * @param {Array<IFieldCustomConfig>|IFieldCustomConfig} customFields  自定义字段 有TS提示
  * @returns {Array<Array<IFieldOutput<自定义|系统字段>>>}
  */
   function getFields(
@@ -42,6 +43,7 @@ function getFieldsInstance<T extends IFieldBaseConfig = IFieldBaseConfig, S exte
       props: item.props ?? {},
       code: item.code,
       fieldType: item.fieldType,
+      display: item.display,
       outputs: item.outputs ?? ['element'],
     }) as IFieldConfig<S, C>);
     const systemFieldsArray = castArray(systemFields);
