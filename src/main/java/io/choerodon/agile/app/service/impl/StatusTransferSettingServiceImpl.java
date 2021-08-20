@@ -161,7 +161,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
                 verifySubIssueCompleted = statusTransferSettingDTO.getVerifySubissueCompleted();
             }
         }
-        if (!userIds.contains(userId)) {
+        if (!CollectionUtils.isEmpty(userIds) && !userIds.contains(userId)) {
             return Boolean.TRUE;
         }
         // 校验当前问题的子级任务是否都是已解决状态
