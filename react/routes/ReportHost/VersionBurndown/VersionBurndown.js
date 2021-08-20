@@ -9,10 +9,10 @@ import {
   Tabs, Table, Icon, Tooltip, Spin,
 } from 'choerodon-ui';
 import { Select, Form, CheckBox } from 'choerodon-ui/pro';
+import { EmptyPage } from '@choerodon/components';
 import STATUS from '@/constants/STATUS';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 import to from '@/utils/to';
-import { EmptyPage } from '@choerodon/components';
 import pic from '../../../assets/image/NoData.svg';
 import SwithChart from '../Component/switchChart';
 import StatusTag from '../../../components/StatusTag';
@@ -27,6 +27,7 @@ import storyPointIcon from './storyPointIcon.svg';
 import completed from './completed.svg';
 import BackBtn from '../back-btn';
 import './VersionReport.less';
+import { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -822,7 +823,9 @@ class VersionBurndown extends Component {
         </Header>
         <Breadcrumb title="版本燃耗图" />
         <Content style={{ paddingTop: 20 }}>
-          {
+          <LoadingProvider loading={ES.chartLoading}>
+
+            {
             !(!ES.versions.length && ES.versionFinishLoading) ? (
               <div>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -883,13 +886,11 @@ class VersionBurndown extends Component {
                 <div style={{ marginTop: -10 }}>
                   {this.renderVersionInfo()}
                 </div>
-                <Spin spinning={ES.chartLoading}>
-                  <div>
-                    {
+                <div>
+                  {
                       this.renderChart()
                     }
-                  </div>
-                </Spin>
+                </div>
                 <Tabs
                   activeKey={tabActiveKey}
                   onChange={(key) => {
@@ -907,25 +908,27 @@ class VersionBurndown extends Component {
                 </Tabs>
               </div>
             ) : (
-              <EmptyPage
-                image={pic}
-                description={(
-                  <div>
-                    <span>当前项目无可用版本，请在</span>
-                    <EmptyPage.Button
-                      onClick={() => {
-                        to(LINK_URL.workListVersion);
-                      }}
-                    >
-                      【版本列表】
-                    </EmptyPage.Button>
-                    <span>中创建一个版本</span>
-                  </div>
+              <LoadingHiddenWrap>
+                <EmptyPage
+                  image={pic}
+                  description={(
+                    <div>
+                      <span>当前项目无可用版本，请在</span>
+                      <EmptyPage.Button
+                        onClick={() => {
+                          to(LINK_URL.workListVersion);
+                        }}
+                      >
+                        【版本列表】
+                      </EmptyPage.Button>
+                      <span>中创建一个版本</span>
+                    </div>
                 )}
-              />
+                />
+              </LoadingHiddenWrap>
             )
           }
-
+          </LoadingProvider>
         </Content>
       </Page>
     );

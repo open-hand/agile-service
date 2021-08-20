@@ -11,11 +11,11 @@ import {
 } from 'choerodon-ui';
 import { Form, Select, CheckBox } from 'choerodon-ui/pro';
 // import pic from './no_epic.svg';
+import { EmptyPage } from '@choerodon/components';
 import STATUS from '@/constants/STATUS';
 import to from '@/utils/to';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 
-import { EmptyPage } from '@choerodon/components';
 import pic from '../../../assets/image/NoData.svg';
 // import finish from './legend/finish.svg';
 import SwithChart from '../Component/switchChart';
@@ -31,6 +31,8 @@ import storyPointIcon from './storyPointIcon.svg';
 import completed from './completed.svg';
 import BackBtn from '../back-btn';
 import './EpicReport.less';
+import { Loading } from '@/components';
+import { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -865,7 +867,8 @@ class EpicBurndown extends Component {
         </Header>
         <Breadcrumb title="史诗燃耗图" />
         <Content style={{ paddingTop: 20 }}>
-          {
+          <LoadingProvider>
+            {
             !(!ES.epics.length && ES.epicFinishLoading) ? (
               <div>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -922,13 +925,11 @@ class EpicBurndown extends Component {
                   {this.renderEpicInfo()}
                 </div>
 
-                <Spin spinning={ES.chartLoading}>
-                  <div>
-                    {
+                <Loading loading={ES.chartLoading}>
+                  {
                       this.renderChart()
                     }
-                  </div>
-                </Spin>
+                </Loading>
                 <Tabs
                   activeKey={tabActiveKey}
                   onChange={(key) => {
@@ -946,33 +947,35 @@ class EpicBurndown extends Component {
                 </Tabs>
               </div>
             ) : (
-              <EmptyPage
-                image={pic}
-                description={(
-                  <div>
-                    <span>当前项目无可用史诗，请在</span>
-                    <EmptyPage.Button
-                      onClick={() => {
-                        to(LINK_URL.workListBacklog);
-                      }}
-                    >
-                      【待办事项】
-                    </EmptyPage.Button>
-                    <span>或</span>
-                    <EmptyPage.Button
-                      onClick={() => {
-                        to(LINK_URL.workListIssue);
-                      }}
-                    >
-                      【问题管理】
-                    </EmptyPage.Button>
-                    <span>中创建一个史诗</span>
-                  </div>
+              <LoadingHiddenWrap>
+                <EmptyPage
+                  image={pic}
+                  description={(
+                    <div>
+                      <span>当前项目无可用史诗，请在</span>
+                      <EmptyPage.Button
+                        onClick={() => {
+                          to(LINK_URL.workListBacklog);
+                        }}
+                      >
+                        【待办事项】
+                      </EmptyPage.Button>
+                      <span>或</span>
+                      <EmptyPage.Button
+                        onClick={() => {
+                          to(LINK_URL.workListIssue);
+                        }}
+                      >
+                        【问题管理】
+                      </EmptyPage.Button>
+                      <span>中创建一个史诗</span>
+                    </div>
                 )}
-              />
+                />
+              </LoadingHiddenWrap>
             )
           }
-
+          </LoadingProvider>
         </Content>
       </Page>
     );

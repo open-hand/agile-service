@@ -25,6 +25,8 @@ import SwithChart from '../../Component/switchChart';
 import BurndownTable from './components/burndown-table';
 import './BurndownChartHome.less';
 import BackBtn from '../../back-btn';
+import { Loading } from '@/components';
+import { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
 
 const { AppState } = stores;
 const moment = extendMoment(Moment);
@@ -285,7 +287,8 @@ class BurndownChartHome extends Component {
         </Header>
         <Breadcrumb title="燃尽图" />
         <Content>
-          {
+          <LoadingProvider loading={chartLoading}>
+            {
             sprints.length > 0 ? (
               <div style={{ width: '100%' }}>
                 <div style={{
@@ -352,7 +355,7 @@ class BurndownChartHome extends Component {
                 </div>
                 <BurnDownChart
                   type={select}
-                  loading={chartLoading}
+                  loading={false}
                   data={chartData}
                   endDate={endDate}
                   restDayShow={restDayShow}
@@ -360,14 +363,18 @@ class BurndownChartHome extends Component {
                 />
                 <BurndownTable
                   data={BurndownChartStore.getBurndownList}
-                  loading={tableLoading}
+                  loading={false}
                   select={select}
                 />
+                <Loading loading={tableLoading} />
               </div>
             ) : (
-              <NoDataComponent title="冲刺" links={[{ name: '待办事项', link: LINK_URL.workListBacklog }]} img={epicSvg} />
+              <LoadingHiddenWrap>
+                <NoDataComponent title="冲刺" links={[{ name: '待办事项', link: LINK_URL.workListBacklog }]} img={epicSvg} />
+              </LoadingHiddenWrap>
             )
           }
+          </LoadingProvider>
         </Content>
       </Page>
     );

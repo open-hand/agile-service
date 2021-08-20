@@ -10,11 +10,11 @@ import {
 } from 'choerodon-ui';
 import { Form, Select } from 'choerodon-ui/pro';
 // import pic from './no_epic.svg';
+import { EmptyPage } from '@choerodon/components';
 import STATUS from '@/constants/STATUS';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 import to from '@/utils/to';
 
-import { EmptyPage } from '@choerodon/components';
 import pic from '../../../../assets/image/NoData.svg';
 import finish from './legend/finish.svg';
 import SwithChart from '../../Component/switchChart';
@@ -24,6 +24,7 @@ import TypeTag from '../../../../components/TypeTag';
 import ES from '../../../../stores/project/epicReport';
 import BackBtn from '../../back-btn';
 import './EpicReport.less';
+import { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
 
 const { TabPane } = Tabs;
 const { AppState } = stores;
@@ -618,7 +619,9 @@ class EpicReport extends Component {
         </Header>
         <Breadcrumb title="史诗报告图" />
         <Content style={{ paddingTop: 20 }}>
-          {
+          <LoadingProvider loading={ES.chartLoading}>
+
+            {
             !(!ES.epics.length && ES.epicFinishLoading) ? (
               <div>
                 <div style={{ display: 'flex' }}>
@@ -649,9 +652,8 @@ class EpicReport extends Component {
                     </Select>
                   </Form>
                 </div>
-                <Spin spinning={ES.chartLoading}>
-                  <div>
-                    {
+                <div>
+                  {
                       ES.chartData.length ? (
                         <div className="c7n-report">
                           <div className="c7n-chart">
@@ -743,8 +745,7 @@ class EpicReport extends Component {
                         </div>
                       )
                     }
-                  </div>
-                </Spin>
+                </div>
                 <Tabs>
                   <TabPane tab="已完成的问题" key="done">
                     {this.renderTable('compoleted')}
@@ -762,32 +763,35 @@ class EpicReport extends Component {
                 </Tabs>
               </div>
             ) : (
-              <EmptyPage
-                image={pic}
-                description={(
-                  <div>
-                    <span>当前项目无可用史诗，请在</span>
-                    <EmptyPage.Button
-                      onClick={() => {
-                        to(LINK_URL.workListBacklog);
-                      }}
-                    >
-                      【待办事项】
-                    </EmptyPage.Button>
-                    <span>或</span>
-                    <EmptyPage.Button
-                      onClick={() => {
-                        to(LINK_URL.workListIssue);
-                      }}
-                    >
-                      【问题管理】
-                    </EmptyPage.Button>
-                    <span>中创建一个史诗</span>
-                  </div>
+              <LoadingHiddenWrap>
+                <EmptyPage
+                  image={pic}
+                  description={(
+                    <div>
+                      <span>当前项目无可用史诗，请在</span>
+                      <EmptyPage.Button
+                        onClick={() => {
+                          to(LINK_URL.workListBacklog);
+                        }}
+                      >
+                        【待办事项】
+                      </EmptyPage.Button>
+                      <span>或</span>
+                      <EmptyPage.Button
+                        onClick={() => {
+                          to(LINK_URL.workListIssue);
+                        }}
+                      >
+                        【问题管理】
+                      </EmptyPage.Button>
+                      <span>中创建一个史诗</span>
+                    </div>
               )}
-              />
+                />
+              </LoadingHiddenWrap>
             )
           }
+          </LoadingProvider>
         </Content>
       </Page>
     );

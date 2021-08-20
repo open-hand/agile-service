@@ -1,10 +1,7 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
-import {
-  Spin,
-} from 'choerodon-ui';
 import Accumulation from '@/components/charts/accumulation';
 import AccumulationSearch from '@/components/charts/accumulation/search';
 import useAccumulationReport from '@/components/charts/accumulation/useAccumulationReport';
@@ -12,18 +9,12 @@ import pic from '@/assets/image/NoData.svg';
 import BackBtn from '../back-btn';
 import NoDataComponent from '../Component/noData';
 import SwithChart from '../Component/switchChart';
+import { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
 
 const AccumulationReport: React.FC = () => {
   const [searchProps, props, refresh] = useAccumulationReport();
   const renderContent = () => {
-    const { loading, data } = props;
-    if (loading) {
-      return (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '100px' }}>
-          <Spin />
-        </div>
-      );
-    }
+    const { data } = props;
     if (!data.length) {
       return (
         <NoDataComponent title="问题" links={[{ name: '问题管理', link: '/agile/work-list/issue' }]} img={pic} />
@@ -72,10 +63,17 @@ const AccumulationReport: React.FC = () => {
           flexDirection: 'column',
         }}
       >
-        <div className="c7n-accumulation-filter">
-          <AccumulationSearch {...searchProps} />
-        </div>
-        {renderContent()}
+        <LoadingProvider
+          loading={props.loading}
+          loadId="Accumulation"
+        >
+          <div className="c7n-accumulation-filter">
+            <AccumulationSearch {...searchProps} />
+          </div>
+          <LoadingHiddenWrap>
+            {renderContent()}
+          </LoadingHiddenWrap>
+        </LoadingProvider>
       </Content>
     </Page>
   );
