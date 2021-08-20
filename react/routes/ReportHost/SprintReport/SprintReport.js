@@ -27,6 +27,7 @@ import SwithChart from '../Component/switchChart';
 import NoDataComponent from '../Component/noData';
 import BackBtn from '../back-btn';
 import './SprintReport.less';
+import { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -326,7 +327,7 @@ class SprintReport extends Component {
         </Header>
         <Breadcrumb title="冲刺报告图" />
         <Content style={{ paddingTop: 20 }}>
-          <Spin spinning={this.state.loading}>
+          <LoadingProvider loading={this.state.loading}>
             {
               BurndownChartStore.getSprintList.length > 0 ? (
                 <div>
@@ -440,10 +441,10 @@ class SprintReport extends Component {
                   </Tabs>
                 </div>
               ) : (
-                <NoDataComponent title="冲刺" links={[{ name: '待办事项', link: LINK_URL.workListBacklog }]} img={epicSvg} />
+                <LoadingHiddenWrap><NoDataComponent title="冲刺" links={[{ name: '待办事项', link: LINK_URL.workListBacklog }]} img={epicSvg} /></LoadingHiddenWrap>
               )
             }
-          </Spin>
+          </LoadingProvider>
         </Content>
       </Page>
     );

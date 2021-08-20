@@ -9,9 +9,10 @@ import {
 } from '@choerodon/boot';
 import {
   Button, DataSet, TextField, Modal, Form,
+  Spin,
 } from 'choerodon-ui/pro';
 import { EmptyPage } from '@choerodon/components';
-import { Spin } from 'choerodon-ui/pro';
+
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import {
@@ -36,6 +37,7 @@ import Chart from '../components/Chart';
 import { IChartData } from '../components/Chart/utils';
 import Table from '../components/Table';
 import ChartSearch from '../components/ChartSearch';
+import { LoadingProvider } from '@/components/Loading';
 
 interface Props {
   chartId?: string
@@ -342,7 +344,7 @@ const CustomReport: React.FC<Props> = (props) => {
       </Header>
       <Breadcrumb title={chartId ? (mode === 'read' ? chartRes?.name : '编辑自定义图表') : '创建自定义图表'} />
       <Content style={{ padding: 0 }} className={styles.content}>
-        <Spin spinning={loading} style={{ height: '100%' }}>
+        <LoadingProvider loading={loading} style={{ height: '100%' }}>
           <div
             className={styles.report}
             style={{
@@ -465,7 +467,7 @@ const CustomReport: React.FC<Props> = (props) => {
             )
           }
           </div>
-        </Spin>
+        </LoadingProvider>
       </Content>
     </Page>
   );

@@ -12,9 +12,9 @@ import {
   Page, Header, Content, axios, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import {
-  Spin, Tooltip,
-} from 'choerodon-ui';
-import { Form, Select } from 'choerodon-ui/pro';
+  Tooltip,
+  Form, Select,
+} from 'choerodon-ui/pro';
 import './pie.less';
 import { sprintApi, versionApi, statusApi } from '@/api';
 import to from '@/utils/to';
@@ -24,6 +24,7 @@ import PieChartStore from '../../../../stores/project/pieChart/PieChartStore';
 import NoDataComponent from '../../Component/noData';
 import BackBtn from '../../back-btn';
 import pic from '../../../../assets/image/NoData.svg';
+import { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
 
 const filterOption = (input, option) => option.props.children && typeof (option.props.children) === 'string' && option.props.children.toLowerCase().indexOf(
   input.toLowerCase(),
@@ -424,7 +425,7 @@ class PieChart extends Component {
         </Header>
         <Breadcrumb title="统计图" />
         <Content style={{ paddingTop: 20 }}>
-          <Spin spinning={PieChartStore.pieLoading}>
+          <LoadingProvider loading={PieChartStore.pieLoading}>
             <div className="c7n-pieChart-filter">
               <Form>
                 <Select
@@ -528,8 +529,8 @@ class PieChart extends Component {
                   </div>
                 </div>
               </>
-            ) : <NoDataComponent title="问题" links={[{ name: '【问题管理】', link: LINK_URL.workListIssue }]} img={pic} />}
-          </Spin>
+            ) : <LoadingHiddenWrap><NoDataComponent title="问题" links={[{ name: '【问题管理】', link: LINK_URL.workListIssue }]} img={pic} /></LoadingHiddenWrap> }
+          </LoadingProvider>
 
         </Content>
       </Page>

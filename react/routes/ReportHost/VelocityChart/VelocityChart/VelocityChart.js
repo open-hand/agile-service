@@ -9,14 +9,16 @@ import {
   Table, Spin,
 } from 'choerodon-ui';
 import { Form, Select } from 'choerodon-ui/pro';
+import { EmptyPage } from '@choerodon/components';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
-import { EmptyPage } from '@choerodon/components';
 import pic from '../../../../assets/image/NoData.svg';
 import SwithChart from '../../Component/switchChart';
 import VS from '../../../../stores/project/velocityChart';
 import BackBtn from '../../back-btn';
 import './VelocityChart.less';
+import { Loading } from '@/components';
+import { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
 
 const { Option } = Select;
 
@@ -366,52 +368,56 @@ class VelocityChart extends Component {
         </Header>
         <Breadcrumb title="迭代速度图" />
         <Content style={{ paddingTop: 20 }}>
-          {!(!VS.chartLoading && !VS.getChartDataX.length) ? (
-            <div>
-              <Form style={{ marginBottom: -20, width: 512 }}>
-                <Select
-                  label="单位选择"
-                  value={VS.currentUnit}
-                  onChange={(unit) => this.handleChangeCurrentUnit(unit)}
-                  clearButton={false}
-                >
-                  <Option key="story_point" value="story_point">
-                    故事点
-                  </Option>
-                  <Option key="issue_count" value="issue_count">
-                    问题计数
-                  </Option>
-                  <Option key="remain_time" value="remain_time">
-                    剩余时间
-                  </Option>
-                </Select>
-              </Form>
-              <Spin spinning={VS.chartLoading}>
-                <ReactEcharts
-                  className="c7n-chart"
-                  option={this.getOption()}
-                />
-              </Spin>
-              {this.renderTable()}
-            </div>
-          ) : (
-            <EmptyPage
-              image={pic}
-              description={(
-                <div>
-                  <span>当前项目无可用冲刺，请在</span>
-                  <EmptyPage.Button
-                    onClick={() => {
-                      to(LINK_URL.workListBacklog);
-                    }}
+          <LoadingProvider>
+            {!(!VS.chartLoading && !VS.getChartDataX.length) ? (
+              <div>
+                <Form style={{ marginBottom: -20, width: 512 }}>
+                  <Select
+                    label="单位选择"
+                    value={VS.currentUnit}
+                    onChange={(unit) => this.handleChangeCurrentUnit(unit)}
+                    clearButton={false}
                   >
-                    【待办事项】
-                  </EmptyPage.Button>
-                  <span>中创建一个冲刺</span>
-                </div>
+                    <Option key="story_point" value="story_point">
+                      故事点
+                    </Option>
+                    <Option key="issue_count" value="issue_count">
+                      问题计数
+                    </Option>
+                    <Option key="remain_time" value="remain_time">
+                      剩余时间
+                    </Option>
+                  </Select>
+                </Form>
+                <Loading loading={VS.chartLoading}>
+                  <ReactEcharts
+                    className="c7n-chart"
+                    option={this.getOption()}
+                  />
+                </Loading>
+                {this.renderTable()}
+              </div>
+            ) : (
+              <LoadingHiddenWrap>
+                <EmptyPage
+                  image={pic}
+                  description={(
+                    <div>
+                      <span>当前项目无可用冲刺，请在</span>
+                      <EmptyPage.Button
+                        onClick={() => {
+                          to(LINK_URL.workListBacklog);
+                        }}
+                      >
+                        【待办事项】
+                      </EmptyPage.Button>
+                      <span>中创建一个冲刺</span>
+                    </div>
             )}
-            />
-          )}
+                />
+              </LoadingHiddenWrap>
+            )}
+          </LoadingProvider>
         </Content>
       </Page>
     );

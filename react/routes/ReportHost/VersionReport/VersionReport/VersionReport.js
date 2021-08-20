@@ -8,10 +8,10 @@ import {
   Tabs, Table, Icon, Tooltip, Spin,
 } from 'choerodon-ui';
 import { Form, Select } from 'choerodon-ui/pro';
+import { EmptyPage } from '@choerodon/components';
 import STATUS from '@/constants/STATUS';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 import to from '@/utils/to';
-import { EmptyPage } from '@choerodon/components';
 import pic from '../../../../assets/image/NoData.svg';
 import finish from './legend/finish.svg';
 import total from './legend/total.svg';
@@ -23,6 +23,7 @@ import TypeTag from '../../../../components/TypeTag';
 import VS from '../../../../stores/project/versionReportNew';
 import BackBtn from '../../back-btn';
 import './VersionReport.less';
+import { LoadingProvider } from '@/components/Loading';
 
 const { TabPane } = Tabs;
 const { AppState } = stores;
@@ -667,7 +668,7 @@ class EpicReport extends Component {
                     <Icon style={{ fontSize: 13 }} type="open_in_new" />
                   </p>
                 </div>
-                <Spin spinning={VS.chartLoading}>
+                <LoadingProvider loading={VS.chartLoading}>
                   <div className="c7n-report">
                     {
                       VS.chartData.length ? (
@@ -688,7 +689,7 @@ class EpicReport extends Component {
                       )
                     }
                   </div>
-                </Spin>
+                </LoadingProvider>
                 <Tabs>
                   <TabPane tab="已完成的问题" key="done">
                     {this.renderTable('compoleted')}
