@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.validator.BoardValidator;
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.event.StatusPayload;
 import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.*;
@@ -567,24 +568,10 @@ public class BoardServiceImpl implements BoardService {
             stateMachineClientService.executeTransform(projectId, issueId, transformId, issueMoveVO.getObjectVersionNumber(),
                     SchemeApplyType.AGILE, new InputDTO(issueId, UPDATE_STATUS_MOVE, JSON.toJSONString(handleIssueMoveRank(projectId, issueMoveVO))));
         }
-        boolean transformFlag;
         Set<Long> influenceIssueIds = new HashSet<>();
-        /**
-         * 修改属性报错，导致数据回滚但是状态机实例已经完成状态变更，导致issue无论变更什么状态都无效
-         * 抛异常并清空当前实例的状态机的状态信息
-         */
-        try {
-            statusFieldSettingService.handlerSettingToUpdateIssue(projectId,issueId);
-            transformFlag = issueService.updateInfluenceIssueStatus(projectId, issueId, SchemeApplyType.AGILE, influenceIssueIds);
-        }
-        catch (Exception e) {
-            stateMachineClientService.cleanInstanceCache(projectId,issueId,SchemeApplyType.AGILE);
-            throw new CommonException("error.update.status.transform.setting",e);
-        }
-        if (!transformFlag) {
-            IssueMoveVO error = new IssueMoveVO();
-            error.setErrorMsg(MessageAccessor.getMessage("error.update.status.transform.parent_status_update_failed").getDesc());
-            return error;
+        IssueVO issueVO = issueService.doStateMachineCustomFlow(projectId, issueId, SchemeApplyType.AGILE, influenceIssueIds);
+        if (!ObjectUtils.isEmpty(issueVO)) {
+            return modelMapper.map(issueVO, IssueMoveVO.class);
         }
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         if (backlogExpandService != null) {

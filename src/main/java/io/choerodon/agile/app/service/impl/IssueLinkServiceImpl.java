@@ -5,8 +5,8 @@ import io.choerodon.agile.api.validator.IssueLinkValidator;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.app.assembler.IssueLinkAssembler;
 import io.choerodon.agile.app.service.IssueLinkService;
+import io.choerodon.agile.app.service.IssueOperateService;
 import io.choerodon.agile.app.service.IssueService;
-import io.choerodon.agile.app.service.LinkIssueStatusLinkageService;
 import io.choerodon.agile.infra.dto.LinkIssueStatusLinkageDTO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.IssueLinkDTO;
@@ -58,11 +58,11 @@ public class IssueLinkServiceImpl implements IssueLinkService {
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
-    private LinkIssueStatusLinkageService linkIssueStatusLinkageService;
-    @Autowired
     private LinkIssueStatusLinkageMapper linkIssueStatusLinkageMapper;
     @Autowired
     private IssueMapper issueMapper;
+    @Autowired
+    private IssueOperateService issueOperateService;
 
     @Override
     public IssueLinkResponseVO createIssueLinkList(List<IssueLinkCreateVO> issueLinkCreateVOList, Long issueId, Long projectId) {
@@ -76,11 +76,10 @@ public class IssueLinkServiceImpl implements IssueLinkService {
             }
         });
         // 创建链接时候触发关联问题联动
-        Set<Long> influenceIssueIds = new HashSet<>();
-        issueService.updateInfluenceIssueStatus(projectId, issueId, SchemeApplyType.AGILE, influenceIssueIds);
+        IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
+        issueOperateService.updateLinkIssue(projectId, issueId, issueDTO, SchemeApplyType.AGILE);
         IssueLinkResponseVO response = new IssueLinkResponseVO();
         response.setIssueLinks(listIssueLinkByIssueId(issueId, projectId, false));
-        response.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
         return response;
     }
 

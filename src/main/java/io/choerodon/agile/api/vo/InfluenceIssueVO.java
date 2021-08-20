@@ -15,6 +15,10 @@ public class InfluenceIssueVO {
 
     private Long linkSettingId;
 
+    private Integer level;
+
+    private Boolean maxDepth;
+
     private Boolean childrenTriggered;
 
     private List<InfluenceIssueVO> childrenVO;
@@ -65,5 +69,22 @@ public class InfluenceIssueVO {
 
     public void setChildrenTriggered(Boolean childrenTriggered) {
         this.childrenTriggered = childrenTriggered;
+    }
+
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
+    }
+
+    public Boolean getMaxDepth() {
+        return maxDepth;
+    }
+
+    public void setMaxDepth(Boolean maxDepth) {
+        this.maxDepth = maxDepth;
     }
 }
