@@ -2,9 +2,11 @@ package io.choerodon.agile.app.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import io.choerodon.agile.api.vo.BatchUpdateFieldStatusVO;
+import io.choerodon.agile.api.vo.LinkIssueLinkageMessageVO;
 import io.choerodon.agile.app.service.IssueOperateService;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.exception.CommonException;
@@ -14,9 +16,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author zhaotianxin
@@ -26,6 +28,7 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class IssueOperateServiceImpl implements IssueOperateService {
     private static final String WEBSOCKET_BATCH_DELETE_ISSUE = "agile-batch-delete-issue";
+    private static final String WEBSOCKET_EXECUTION_LINK_ISSUE_LINKAGE = "agile-execution-link-issue-linkage";
 
     @Autowired
     private IssueService issueService;
@@ -84,6 +87,32 @@ public class IssueOperateServiceImpl implements IssueOperateService {
             } finally {
                 messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
             }
+        }
+    }
+
+    @Async
+    @Override
+    public void updateLinkIssue(Long projectId, Long issueId, IssueDTO issueDTO, String applyType) {
+        Boolean isSub = Objects.equals("sub_task",issueDTO.getTypeCode()) || (Objects.equals("bug",issueDTO.getTypeCode()) && !ObjectUtils.isEmpty(issueDTO.getRelateIssueId()) && !Objects.equals(issueDTO.getRelateIssueId(), 0L));
+        if (Boolean.TRUE.equals(isSub)) {
+            return;
+        }
+        Set<Long> influenceIssueIds = new HashSet<>();
+        // 获取当前的issue
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        String websocketKey = WEBSOCKET_EXECUTION_LINK_ISSUE_LINKAGE + "-" + projectId;
+        LinkIssueLinkageMessageVO linkIssueLinkageMessageVO = new LinkIssueLinkageMessageVO();
+        linkIssueLinkageMessageVO.setKey(websocketKey);
+        try {
+            issueService.updateInfluenceIssueStatus(projectId, issueId, issueDTO, applyType, influenceIssueIds);
+            String statusCode = CollectionUtils.isEmpty(influenceIssueIds) ? "success" : "failed";
+            linkIssueLinkageMessageVO.setStatusCode(statusCode);
+        } catch (Exception e) {
+            linkIssueLinkageMessageVO.setStatusCode("failed");
+            linkIssueLinkageMessageVO.setMessage("error.link.issue.linkage.execution");
+            throw new CommonException("error.link.issue.linkage.execution", e);
+        } finally {
+            messageClientC7n.sendByUserId(userId, websocketKey, JSON.toJSONString(linkIssueLinkageMessageVO));
         }
     }
 }

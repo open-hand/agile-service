@@ -1,5 +1,7 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+
 import java.util.List;
 
 /**
@@ -8,4 +10,6 @@ import java.util.List;
  */
 public interface IssueOperateService {
     void batchDeleteIssue(Long projectId, List<Long> issueIds);
+
+    void updateLinkIssue(Long projectId, Long issueId, IssueDTO issueDTO, String applyType);
 }

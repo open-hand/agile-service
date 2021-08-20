@@ -3,9 +3,11 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.IssueTypeExtendDTO;
+import io.choerodon.agile.infra.dto.StatusLinkageExecutionLogDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.StatusLinkageDTO;
 import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
+import io.choerodon.agile.infra.enums.TriggerExecutionStatus;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.SpringBeanUtil;
@@ -62,6 +64,12 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
 
     @Autowired
     private LinkIssueStatusLinkageMapper linkIssueStatusLinkageMapper;
+
+    @Autowired
+    private StatusLinkageService statusLinkageService;
+
+    @Autowired
+    private StatusLinkageExecutionLogService statusLinkageExecutionLogService;
 
     @Override
     public List<StatusLinkageVO> createOrUpdate(Long projectId, Long issueTypeId, Long statusId, Long objectVersionNumber, String applyType, List<StatusLinkageVO> linkageVOS) {
@@ -221,9 +229,31 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         if (Boolean.TRUE.equals(isChange)) {
             //收集受影响的issueId
             influenceIssueIds.add(parentIssueId);
-            return changeParentStatus(projectId, applyType, parentIssue, changeStatus, issueDTO);
+            if (Objects.equals(changeStatus, parentIssue.getStatusId())) {
+                statusLinkageExecutionLog(projectId, statusLinkageDTO.getId(), parentIssue.getIssueId(), issueDTO, TriggerExecutionStatus.STOP.getValue(), "same_status");
+                return true;
+            }
+            boolean result = changeParentStatus(projectId, applyType, parentIssue, changeStatus, issueDTO);
+            statusLinkageExecutionLog(projectId, statusLinkageDTO.getId(), parentIssue.getIssueId(), issueDTO, TriggerExecutionStatus.SUCCESS.getValue(), null);
+            return result;
         }
         return true;
+    }
+
+    private void statusLinkageExecutionLog(Long projectId, Long linkSettingId, Long issueId, IssueDTO influenceIssue, String statusCode, String remark) {
+        LinkIssueStatusLinkageVO linkIssueStatusLinkageVO = statusLinkageService.queryById(projectId, linkSettingId);
+        if (ObjectUtils.isEmpty(linkIssueStatusLinkageVO)) {
+            throw new CommonException("error.link.issue.status.linkage.empty");
+        }
+        // 记录联动的执行日志
+        String content = issueService.buildStatusLinkageContent(linkIssueStatusLinkageVO);
+        StatusLinkageExecutionLogDTO statusLinkageExecutionLogDTO = new StatusLinkageExecutionLogDTO();
+        statusLinkageExecutionLogDTO.setPreIssueId(influenceIssue.getIssueId());
+        statusLinkageExecutionLogDTO.setCurIssueId(issueId);
+        statusLinkageExecutionLogDTO.setContent(content);
+        statusLinkageExecutionLogDTO.setRemark(remark);
+        statusLinkageExecutionLogDTO.setStatusCode(statusCode);
+        statusLinkageExecutionLogService.create(projectId, ConvertUtil.getOrganizationId(projectId), statusLinkageExecutionLogDTO);
     }
 
     @Override
