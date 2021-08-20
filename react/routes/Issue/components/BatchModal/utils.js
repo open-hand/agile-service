@@ -122,6 +122,7 @@ export const systemFields = new Map([
     code: 'environment',
     name: '环境',
     fieldType: 'single',
+    emptyValue: EMPTY_VALUE.value_null,
   }],
   ['tags', {
     id: 'tags',

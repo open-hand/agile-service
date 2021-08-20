@@ -20,6 +20,7 @@ import styles from './Content.less';
 import STATUS_COLOR from '../../../../constants/STATUS';
 
 const { Option } = Select;
+const DISABLE_EMPTY_DATA = ['priorityId', 'statusId', 'reporterId', 'tags'];
 
 function BatchModal({
   selected, fields: customFields, onCancel, onEdit, issueSearchStore,
@@ -149,7 +150,7 @@ function BatchModal({
     ],
     events: {
       update: ({ value, name, dataSet: formDs }) => {
-        if (value && !['priorityId', 'statusId', 'reporterId'].includes(name)) {
+        if (value && !DISABLE_EMPTY_DATA.includes(name)) {
           formDs.setState('setEmptyId', name);
         }
       },
@@ -261,7 +262,7 @@ function BatchModal({
                       }
                       Field.set(key, { ...f || {}, isSetEmpty: value });
                     }}
-                    disabled={['priorityId', 'statusId', 'reporterId'].includes(id)}
+                    disabled={DISABLE_EMPTY_DATA.includes(id)}
                   >
                     置空
                   </CheckBox>
