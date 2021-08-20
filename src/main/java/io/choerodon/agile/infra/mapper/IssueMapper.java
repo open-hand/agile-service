@@ -338,7 +338,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                             @Param("searchVO") SearchVO searchVO,
                                             @Param("filterSql") String filterSql,
                                             @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
-                                            @Param("orderStr") String orderStr,
+                                            @Param("sortMap") Map<String, Object> sortMap,
                                             @Param("isTreeView") Boolean isTreeView);
 
     List<IssueDTO> queryIssueListWithSubByIssueIds(@Param("issueIds") List<Long> issueIds,

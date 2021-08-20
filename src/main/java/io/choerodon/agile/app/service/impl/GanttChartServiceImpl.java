@@ -98,8 +98,10 @@ public class GanttChartServiceImpl implements GanttChartService {
                             Optional.ofNullable(searchVO.getSearchArgs())
                                     .map(x -> x.get("tree"))
                                     .orElse(true));
+            Map<String, Object> sortMap = new HashMap<>();
+            sortMap.put("orderStr", orderStr);
             Page<IssueDTO> page =
-                    PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), orderStr, isTreeView));
+                    PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), sortMap, isTreeView));
             List<Long> issueIds = page.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
             if (!ObjectUtils.isEmpty(issueIds)) {
                 Set<Long> childrenIds = new HashSet<>();
