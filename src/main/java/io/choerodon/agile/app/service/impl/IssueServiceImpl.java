@@ -251,6 +251,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             };
     private static final String FIX_VERSION = "fixVersion";
     private static final String INFLUENCE_VERSION = "influenceVersion";
+    private static final String ORDER_STR = "orderStr";
 
     @Value("${services.attachment.url}")
     private String attachmentUrl;
@@ -612,10 +613,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Page<Long> issueIdPage;
         Map<String, Object> sortMap = new HashMap<>();
         if (!handleSortField(pageRequest).equals("")) {
-            setSortMap(organizationId, projectId, pageRequest, sortMap);
+            setSortMap(organizationId, projectId, pageRequest, sortMap, "ai");
         } else {
             String orderStr = getOrderStrOfQueryingIssuesWithSub(pageRequest.getSort());
-            sortMap.put("orderStr", orderStr);
+            sortMap.put(ORDER_STR, orderStr);
         }
         Page<IssueDTO> issues = PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap, isTreeView));
         List<Long> issueIds = issues.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
@@ -623,21 +624,29 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         return issueIdPage;
     }
 
-    private void setSortMap(Long organizationId, Long projectId, PageRequest pageRequest, Map<String, Object> sortMap) {
+    protected void setSortMap(Long organizationId, Long projectId, PageRequest pageRequest, Map<String, Object> sortMap, String mainTableAlias) {
+        Sort.Order issueIdOrder = new Sort.Order(Sort.Direction.DESC, ISSUE_ID);
+        Sort sort = PageUtil.sortResetOrder(new Sort(issueIdOrder), mainTableAlias, new HashMap<>());
+        String orderStr = PageableHelper.getSortSql(sort);
+        sortMap.put(ORDER_STR,  orderStr);
+
         String sortCode = handleSortField(pageRequest);
         String fieldCode = sortCode.split("\\.")[1];
-
         ObjectSchemeFieldDTO objectSchemeField = objectSchemeFieldService.queryByFieldCode(organizationId, projectId, fieldCode);
+        if (Objects.isNull(objectSchemeField)) {
+            return;
+        }
         String fieldType = objectSchemeField.getFieldType();
         FieldValueUtil.handleAgileSortPageRequest(sortCode, fieldType, pageRequest);
         PageUtil.sortResetOrder(pageRequest.getSort(), "fv", new HashMap<>());
-        String orderStr = getOrderStrOfQueryingIssuesWithSub(pageRequest.getSort());
+        pageRequest.setSort(pageRequest.getSort().and(sort));
+        orderStr = PageableHelper.getSortSql(pageRequest.getSort());
 
         List<ObjectSchemeFieldExtendDTO> fieldExtendDTOList = objectSchemeFieldExtendMapper.selectExtendFields(organizationId, objectSchemeField.getId(), projectId, null);
         List<Long> fieldExtendIssueTypeIds = fieldExtendDTOList.stream().map(ObjectSchemeFieldExtendDTO::getIssueTypeId).collect(Collectors.toList());
         sortMap.put("sortFieldId", objectSchemeField.getId());
         sortMap.put("fieldExtendIssueTypeIds", fieldExtendIssueTypeIds);
-        sortMap.put("orderStr", orderStr);
+        sortMap.put(ORDER_STR, orderStr);
     }
 
     protected String getOrderStrOfQueryingIssuesWithSub(Sort sort) {

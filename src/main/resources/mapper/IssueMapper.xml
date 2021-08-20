@@ -673,10 +673,10 @@
                         string_value,
                         text_value,
                         number_value
-                    FROM fd_field_value
-                    JOIN agile_issue ai ON ai.issue_id = instance_id
-                    WHERE field_id = #{sortMap.sortFieldId}
-                    AND fd_field_value.project_id = #{projectId}
+                    FROM fd_field_value ffv
+                    JOIN agile_issue ai ON ai.issue_id = ffv.instance_id AND ai.project_id = #{projectId}
+                    WHERE ffv.field_id = #{sortMap.sortFieldId}
+                    AND ffv.project_id = #{projectId}
                     AND ai.issue_type_id IN
                     <foreach collection="sortMap.fieldExtendIssueTypeIds" item="issueTypeId" open="(" separator="," close=")">
                         #{issueTypeId}
