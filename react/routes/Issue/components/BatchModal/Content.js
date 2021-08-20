@@ -1,16 +1,17 @@
 import React, {
+  useEffect,
   useMemo, useState,
 } from 'react';
 import {
   Form, Button, Select, DataSet, Row, Col, Progress,
+  Icon, CheckBox,
 } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui/pro';
 import { WSHandler, Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import { find, pick } from 'lodash';
+import WSProvider from '@choerodon/master/lib/containers/components/c7n/tools/ws/WSProvider';
 import { getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
-import WSProvider from '@choerodon/master/lib/containers/components/c7n/tools/ws/WSProvider';
 import { fieldApi } from '@/api';
 import useFields from './useFields';
 import { systemFields, formatFields } from './utils';
@@ -146,12 +147,29 @@ function BatchModal({
       label: 'Tag',
     },
     ],
+    events: {
+      update: ({ value, name, dataSet: formDs }) => {
+        if (value && !['priorityId', 'statusId', 'reporterId'].includes(name)) {
+          formDs.setState('setEmptyId', name);
+        }
+      },
+    },
   }), []);
+
+  useEffect(() => {
+    if (dataSet.getState('setEmptyId')) {
+      const field = fields.find((item) => item.id === dataSet.getState('setEmptyId'));
+      field && Field.set(field.key, { ...field, isSetEmpty: false });
+    }
+  }, [dataSet.getState('setEmptyId')]);
+
+  const getIsDisabled = () => !fields.some((filed) => filed.code);
+
   const getData = () => {
     const temp = dataSet.current ? dataSet.current.toData() : {};
     const obj = {};
     fields.forEach((field) => {
-      if (field.code) {
+      if (field.code && (field.isSetEmpty || temp[field.code])) {
         obj[field.code] = temp[field.code];
       }
     });
@@ -205,10 +223,10 @@ function BatchModal({
         }}
       >
         {fields.map((f) => {
-          const { key, id } = f;
+          const { key, id, isSetEmpty = false } = f;
           return (
-            <Row key={key} gutter={20} type="flex" align="middle">
-              <Col span={11}>
+            <Row key={key} gutter={18} type="flex" align="middle">
+              <Col span={10}>
                 <Select
                   style={{ width: '100%' }}
                   placeholder="请选择字段"
@@ -227,17 +245,33 @@ function BatchModal({
                 </Select>
               </Col>
               {id && (
-                <Col span={11} key={id}>
+                <Col span={10} key={id}>
                   {React.cloneElement(renderField(f), {
                     label: f.name,
                   })}
                 </Col>
               )}
-              <Col span={2}>
+              {id && (
+                <Col span={3}>
+                  <CheckBox
+                    checked={isSetEmpty}
+                    onChange={(value) => {
+                      if (value) {
+                        dataSet.current?.init(f.code);
+                      }
+                      Field.set(key, { ...f || {}, isSetEmpty: value });
+                    }}
+                    disabled={['priorityId', 'statusId', 'reporterId'].includes(id)}
+                  >
+                    置空
+                  </CheckBox>
+                </Col>
+              )}
+              <Col span={1}>
                 <Icon
                   onClick={() => {
                     Field.remove(key);
-                    dataSet.current.init(f.code);
+                    dataSet.current?.init(f.code);
                   }}
                   type="delete_sweep-o"
                   style={{
@@ -270,7 +304,7 @@ function BatchModal({
           取消
         </Button>
         <Button
-          disabled={Object.keys(getData()).length === 0}
+          disabled={getIsDisabled()}
           loading={loading}
           color="primary"
           style={{
