@@ -1,4 +1,7 @@
+/* eslint-disable camelcase */
+
 import { find, pick } from 'lodash';
+import EMPTY_VALUE from '@/constants/EMPTY_VALUE';
 
 export const systemFields = new Map([
   ['statusId', {
@@ -12,6 +15,7 @@ export const systemFields = new Map([
     code: 'assigneeId',
     name: '经办人',
     fieldType: 'member',
+    emptyValue: EMPTY_VALUE.value_0_string,
   }],
   ['reporterId', {
     id: 'reporterId',
@@ -24,18 +28,21 @@ export const systemFields = new Map([
     code: 'sprintId',
     name: '冲刺',
     fieldType: 'single',
+    emptyValue: EMPTY_VALUE.value_0_string,
   }],
   ['epicId', {
     id: 'epicId',
     code: 'epicId',
     name: '所属史诗',
     fieldType: 'single',
+    emptyValue: EMPTY_VALUE.value_0_string,
   }],
   ['featureId', {
     id: 'featureId',
     code: 'featureId',
     name: '所属特性',
     fieldType: 'single',
+    emptyValue: EMPTY_VALUE.value_0_string,
   }],
   ['priorityId', {
     id: 'priorityId',
@@ -49,6 +56,7 @@ export const systemFields = new Map([
     name: '标签',
     fieldType: 'multiple',
     format: (value, labelIssueRelVOList) => labelIssueRelVOList,
+    emptyValue: EMPTY_VALUE.value_arr,
   }],
   ['componentIssueRelVOList', {
     id: 'componentIssueRelVOList',
@@ -56,6 +64,7 @@ export const systemFields = new Map([
     name: '模块',
     fieldType: 'multiple',
     format: (value, component) => component,
+    emptyValue: EMPTY_VALUE.value_arr,
   }],
   ['influenceVersion', {
     id: 'influenceVersion',
@@ -63,6 +72,7 @@ export const systemFields = new Map([
     name: '影响的版本',
     fieldType: 'multiple',
     format: (value, influenceVersion) => pick(influenceVersion, ['versionId', 'name']),
+    emptyValue: EMPTY_VALUE.value_arr,
   }],
   ['fixVersion', {
     id: 'fixVersion',
@@ -70,36 +80,42 @@ export const systemFields = new Map([
     name: '修复的版本',
     fieldType: 'multiple',
     format: (value, fixVersion) => pick(fixVersion, ['versionId', 'name']),
+    emptyValue: EMPTY_VALUE.value_arr,
   }],
   ['storyPoints', {
     id: 'storyPoints',
     code: 'storyPoints',
     name: '故事点',
     fieldType: 'number',
+    emptyValue: EMPTY_VALUE.value_null,
   }],
   ['remainingTime', {
     id: 'remainingTime',
     code: 'remainingTime',
     name: '预估时间',
     fieldType: 'number',
+    emptyValue: EMPTY_VALUE.value_null,
   }],
   ['estimatedStartTime', {
     id: 'estimatedStartTime',
     code: 'estimatedStartTime',
     name: '预计开始时间',
     fieldType: 'datetime',
+    emptyValue: EMPTY_VALUE.value_null,
   }],
   ['estimatedEndTime', {
     id: 'estimatedEndTime',
     code: 'estimatedEndTime',
     name: '预计结束时间',
     fieldType: 'datetime',
+    emptyValue: EMPTY_VALUE.value_null,
   }],
   ['mainResponsibleId', {
     id: 'mainResponsibleId',
     code: 'mainResponsibleId',
     name: '主要负责人',
     fieldType: 'member',
+    emptyValue: EMPTY_VALUE.value_0_string,
   }],
   ['environment', {
     id: 'environment',
@@ -116,6 +132,9 @@ export const systemFields = new Map([
 ]);
 
 function transformValue(dataSet, key, value, format) {
+  if (!value && ('emptyValue' in systemFields.get(key))) {
+    return systemFields.get(key)?.emptyValue;
+  }
   if (!value || !format) {
     return value;
   }
