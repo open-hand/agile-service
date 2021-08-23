@@ -462,6 +462,11 @@ const CreateIssueBase = observer(({
           hidden: !!parentIssue,
         };
       }
+      case 'status': {
+        return {
+          issueTypeId,
+        };
+      }
       case 'assignee': {
         return {
           extraOptions: defaultAssignee,
