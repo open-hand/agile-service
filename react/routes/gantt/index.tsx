@@ -531,7 +531,7 @@ const GanttPage: React.FC = () => {
       <Content
         className="c7n-gantt-content"
         style={{
-          borderTop: '1px solid rgb(216, 216, 216)',
+          borderTop: '1px solid var(--divider)',
           display: 'flex',
           paddingTop: 7,
           flexDirection: 'column',

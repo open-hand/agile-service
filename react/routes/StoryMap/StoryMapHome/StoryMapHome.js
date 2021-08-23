@@ -12,6 +12,7 @@ import {
 import { DragDropContextProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { observer } from 'mobx-react-lite';
+import { EmptyPage } from '@choerodon/components';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import FilterManage from '@/components/FilterManage';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
@@ -19,7 +20,6 @@ import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
 import { useIssueSearchStore } from '@/components/issue-search';
 import { getSystemFieldsInStoryMap } from '@/stores/project/issue/IssueStore';
 import { transformFilter } from '@/routes/Issue/stores/utils';
-import { EmptyPage } from '@choerodon/components';
 import NoData from '@/assets/image/NoData.svg';
 import Loading, { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
 import Minimap from './components/MiniMap';
@@ -150,49 +150,49 @@ const StoryMapHome = observer(() => {
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7nagile-StoryMap-fullScreen');
 
   return (
-    <Page
-      className="c7nagile-StoryMap"
-    >
-      <Header title="故事地图">
-        <HeaderButtons items={[
-          {
-            name: '创建史诗',
-            icon: 'playlist_add',
-            handler: handleCreateEpicClick,
-            display: !isInProgram && isEmpty && !loading,
-          },
-          {
-            name: '未规划列表',
-            icon: 'work_log',
-            handler: handleOpenIssueList,
-            display: !StoryMapStore.isFullScreen,
-          }, {
-            icon: isFullScreen ? 'fullscreen_exit' : 'zoom_out_map',
-            iconOnly: true,
-            handler: () => { toggleFullScreen(); },
-            display: true,
-            tooltipsConfig: {
-              title: isFullScreen ? '退出全屏' : '全屏',
-            },
-          }, {
-            display: true,
-            element: <SwitchSwimLine />,
-          }, {
-            display: isInProgram,
-            element: <CheckBox style={{ marginLeft: 16 }} name="hiddenColumn" checked={StoryMapStore.hiddenColumnNoStory} onChange={handleNoStoryCheckBoxChange}>隐藏无故事的列</CheckBox>,
-          }, {
-            display: true,
-            element: <CheckBox name="foldCompletedEpic" style={{ marginLeft: 16 }} checked={StoryMapStore.foldCompletedEpic} onChange={handleCompletedEpicCheckBoxChange}>收起已完成的史诗列</CheckBox>,
-          },
-        ]}
-        />
-      </Header>
-      <Breadcrumb />
-      <Content style={{
-        padding: 0, borderTop: '1px solid var(--divider)', overflow: 'hidden', height: '100%',
-      }}
+    <LoadingProvider loading={loading}>
+      <Page
+        className="c7nagile-StoryMap"
       >
-        <LoadingProvider loading={loading}>
+        <Header title="故事地图">
+          <HeaderButtons items={[
+            {
+              name: '创建史诗',
+              icon: 'playlist_add',
+              handler: handleCreateEpicClick,
+              display: !isInProgram && isEmpty && !loading,
+            },
+            {
+              name: '未规划列表',
+              icon: 'work_log',
+              handler: handleOpenIssueList,
+              display: !StoryMapStore.isFullScreen,
+            }, {
+              icon: isFullScreen ? 'fullscreen_exit' : 'zoom_out_map',
+              iconOnly: true,
+              handler: () => { toggleFullScreen(); },
+              display: true,
+              tooltipsConfig: {
+                title: isFullScreen ? '退出全屏' : '全屏',
+              },
+            }, {
+              display: true,
+              element: <SwitchSwimLine />,
+            }, {
+              display: isInProgram,
+              element: <CheckBox style={{ marginLeft: 16 }} name="hiddenColumn" checked={StoryMapStore.hiddenColumnNoStory} onChange={handleNoStoryCheckBoxChange}>隐藏无故事的列</CheckBox>,
+            }, {
+              display: true,
+              element: <CheckBox name="foldCompletedEpic" style={{ marginLeft: 16 }} checked={StoryMapStore.foldCompletedEpic} onChange={handleCompletedEpicCheckBoxChange}>收起已完成的史诗列</CheckBox>,
+            },
+          ]}
+          />
+        </Header>
+        <Breadcrumb />
+        <Content style={{
+          padding: 0, borderTop: '1px solid var(--divider)', overflow: 'hidden', height: '100%',
+        }}
+        >
           <StoryMapSearch issueSearchStore={issueSearchStore} />
           <LoadingHiddenWrap>
             {!isEmpty ? (
@@ -224,10 +224,10 @@ const StoryMapHome = observer(() => {
           <SideIssueList handleClickOutside={handleCloseIssueList} eventTypes={['click']} />
           <CreateEpicModal onOk={handleCreateEpic} />
           <IssueDetail refresh={handleRefresh} isFullScreen={isFullScreen} />
-        </LoadingProvider>
 
-      </Content>
-    </Page>
+        </Content>
+      </Page>
+    </LoadingProvider>
   );
 });
 

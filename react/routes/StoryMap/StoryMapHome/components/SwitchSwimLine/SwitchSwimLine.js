@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
 import { FlatSelect } from '@choerodon/components';
+import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
 
 const { Option } = FlatSelect;
 @observer
