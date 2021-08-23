@@ -1142,16 +1142,17 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             statusLinkageExecutionLogDTO.setPreIssueId(influenceIssue.getIssueId());
             statusLinkageExecutionLogDTO.setCurIssueId(issueId);
             statusLinkageExecutionLogDTO.setContent(content);
-            statusLinkageExecutionLogDTO.setRemark(remark);
             if (ObjectUtils.isEmpty(statusCode)) {
                 if (Boolean.TRUE.equals(influenceIssueVO.getLoop()) && Boolean.TRUE.equals(influenceIssueVO.getMaxDepth())) {
                     statusCode = TriggerExecutionStatus.MAX_DEPTH.getValue();
+                    remark = TriggerExecutionStatus.MAX_DEPTH.getValue();
                 } else if (Boolean.TRUE.equals(influenceIssueVO.getLoop())) {
                     statusCode = TriggerExecutionStatus.LOOP.getValue();
                 } else {
                     statusCode = TriggerExecutionStatus.SUCCESS.getValue();
                 }
             }
+            statusLinkageExecutionLogDTO.setRemark(remark);
             statusLinkageExecutionLogDTO.setStatusCode(statusCode);
             statusLinkageExecutionLogService.create(projectId, ConvertUtil.getOrganizationId(projectId), statusLinkageExecutionLogDTO);
         }

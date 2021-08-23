@@ -285,7 +285,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
             List<String> fieldList = verifyUpdateUtil.verifyUpdateData(predefinedFields, issueUpdateVO);
             fieldListRemove(v, fieldList, issueUpdateVO, programMap);
-            if (!CollectionUtils.isEmpty(fixVersion)) {
+            if (fixVersion != null) {
                 issueUpdateVO.setVersionType("fix");
                 issueUpdateVO.setVersionIssueRelVOList(fixVersion);
             }
@@ -323,7 +323,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     }
 
     private List<VersionIssueRelVO> buildVersionData(Object object) {
-       return ObjectUtils.isEmpty(object) ? null : EncryptionUtils.jsonToList(object,VersionIssueRelVO.class);
+       return object == null ? null : EncryptionUtils.jsonToList(object,VersionIssueRelVO.class);
     }
 
     private void updateIssueStatus(Long projectId, Long statusId, IssueDTO issueDTO, String appleType) {
@@ -340,15 +340,13 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     }
 
     private void handlerBugInfluenceVersion(Long projectId,IssueDTO issueDTO, List<VersionIssueRelVO> influenceVersion, IssueVO issueVO) {
-        if ("bug".equals(issueDTO.getTypeCode())) {
+        if ("bug".equals(issueDTO.getTypeCode()) && influenceVersion != null) {
             IssueUpdateVO issueUpdateVO1 = new IssueUpdateVO();
-            if (!CollectionUtils.isEmpty(influenceVersion)) {
-                issueUpdateVO1.setVersionType("influence");
-                issueUpdateVO1.setVersionIssueRelVOList(influenceVersion);
-            }
+            issueUpdateVO1.setVersionType("influence");
+            issueUpdateVO1.setVersionIssueRelVOList(influenceVersion);
             issueUpdateVO1.setIssueId(issueDTO.getIssueId());
             issueUpdateVO1.setObjectVersionNumber(issueVO.getObjectVersionNumber());
-            issueService.updateIssue(projectId, issueUpdateVO1, new ArrayList<>());
+            issueService.updateIssue(projectId, issueUpdateVO1, Collections.singletonList("objectVersionNumber"));
         }
     }
 
