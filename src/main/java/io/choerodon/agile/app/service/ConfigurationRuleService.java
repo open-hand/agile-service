@@ -74,7 +74,8 @@ public interface ConfigurationRuleService {
                    ConfigurationRuleVO rule,
                    Long projectId,
                    boolean createCustomFieldMember,
-                   List<Long> executedRuleIds);
+                   List<Long> executedRuleIds,
+                   Long noticeInstanceId);
 
     ConfigurationRuleVO filterRuleByCondition(ConfigurationRuleVO rule,
                                               Long instanceId,
