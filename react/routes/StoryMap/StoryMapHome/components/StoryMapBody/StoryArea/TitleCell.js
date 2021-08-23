@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { observer } from 'mobx-react';
-import SprintStatus from '@/components/tag/sprint-status-tag/SprintStatus';
 import { Icon, Tooltip } from 'choerodon-ui';
+import SprintStatus from '@/components/tag/sprint-status-tag/SprintStatus';
 import SprintAssigneeInfo from './SprintAssigneeInfo';
 import Cell from '../Cell';
 import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapStore';
@@ -91,7 +91,7 @@ class TitleCell extends Component {
               left: 0,
             // background: 'white',
             } : {},
-            boxShadow: 'rgb(216, 216, 216) 0px -1px 0px inset',
+            boxShadow: 'var(--divider) 0px -1px 0px inset',
           }}
         >
           <div style={{ display: 'flex' }} className="c7nagile-StoryMap-TitleCell">

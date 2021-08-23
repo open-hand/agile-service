@@ -206,7 +206,7 @@ class EpicCell extends Component {
                 ...collapse ? {
                   borderLeft: lastCollapse ? 'none' : 'solid 1px var(--divider)',
                   borderRight: 'solid 1px var(--divider)',
-                  boxShadow: 'rgb(216, 216, 216) 0px -1px 0px inset',
+                  boxShadow: 'var(--divider) 0px -1px 0px inset',
                 } : {},
               }}
             >

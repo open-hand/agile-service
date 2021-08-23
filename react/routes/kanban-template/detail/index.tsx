@@ -58,7 +58,7 @@ const KanbanTemplateDetail = () => {
       </Header>
       <Breadcrumb title="编辑看板模板" />
       <Content style={{
-        borderTop: '1px solid rgb(216, 216, 216)',
+        borderTop: '1px solid var(--divider)',
         display: 'flex',
       }}
       >
