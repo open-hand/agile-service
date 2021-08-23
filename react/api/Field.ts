@@ -1,10 +1,10 @@
 import { axios } from '@choerodon/boot';
+import { castArray } from 'lodash';
 import {
   getProjectId, getOrganizationId, getApplyType, getMenuType,
 } from '@/utils/common';
 import { sameProject } from '@/utils/detail';
 import { FieldOption, IField, IssueCreateFields } from '@/common/types';
-import { castArray } from 'lodash';
 import Api from './Api';
 
 interface IFiled {
@@ -46,6 +46,14 @@ class FieldApi extends Api<FieldApi> {
 
   get isOutside() {
     return false;
+  }
+
+  /** 自定义选项接口前缀 */
+  get prefixCustomOption() {
+    if (this.isOutside) {
+      return `${this.outPrefix}/field_value`;
+    }
+    return `/agile/v1/${getMenuType() === 'project' ? `projects/${this.projectId}/field_value` : `organizations/${this.orgId}/object_scheme_field`}`;
   }
 
   outside(outside: boolean) {
@@ -232,7 +240,7 @@ class FieldApi extends Api<FieldApi> {
   getFieldOptions(fieldId: string, searchValue: string | undefined = '', page: number | undefined, size: number, selected?: string | string[], onlyEnabled = true) {
     return axios({
       method: 'get',
-      url: this.isOutside ? `${this.outPrefix}/field_value/${fieldId}/options` : `${this.prefixOrgOrPro}/field_value/${fieldId}/options`,
+      url: `${this.prefixCustomOption}/${fieldId}/options`,
       params: {
         searchValue,
         page,
