@@ -10,10 +10,10 @@ import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 
 import { Observer, observer } from 'mobx-react-lite';
-import TableDropMenu from '@/components/table-drop-menu';
-import CheckBox from '@/components/check-box';
 import { usePersistFn } from 'ahooks';
 import { noop } from 'lodash';
+import TableDropMenu from '@/components/table-drop-menu';
+import CheckBox from '@/components/check-box';
 import { usePageIssueTypeStore } from '../../stores';
 import { useSortTableContext } from './stores';
 
@@ -47,7 +47,7 @@ const DraggableIBaseItem: React.FC<Props> = ({
   } = pageConfigFieldEdited;
   const fieldName = data.get('fieldName');
   // 是否禁止删除此字段 1.系统字段不可删除  2. 项目层下组织层字段不可删除 3.禁用问题类型字段不可操作
-  const disabledDel = !pageIssueTypeStore.currentIssueType.enabled || !!data?.get('pageConfigFieldEdited') || data.get('createdLevel') === 'system';
+  const disabledDel = !pageIssueTypeStore.currentIssueType.enabled || (isProject && data.get('createdLevel') === 'organization') || data.get('createdLevel') === 'system';
   const disabledEdit = useMemo(() => {
     if (!pageIssueTypeStore.currentIssueType.enabled || (!isProject && data.get('createdLevel') === 'system' && orgDisabledEditDefaultFields.includes(data.get('fieldCode')))) {
       return true;
