@@ -16,10 +16,39 @@ interface Props {
 
 }
 
+const StatusMap = new Map([
+  ['success', {
+    color: '#00BFA5',
+    text: '成功',
+  }],
+  [
+    'stop', {
+      color: '#F76776',
+      text: '终止',
+    },
+  ],
+  [
+    'loop', {
+      color: '#F76776',
+      text: '循环终止',
+    },
+  ],
+  [
+    'error', {
+      color: '#F76776',
+      text: '失败',
+    },
+  ],
+  ['max_depth', {
+    color: '#F76776',
+    text: '过长终止',
+  }],
+]);
 const RemarkMap = new Map([
   ['same_status', '联动的问题已处在目标状态'],
   ['sub_bug', '关联的缺陷属于子缺陷'],
   ['condition_limit', '受流转条件限制无法流转到目标状态'],
+  ['max_depth', '触发状态联动的链长度将超过最大长度 10 后，系统自动停止执行'],
 ]);
 
 const LogTable: React.FC<Props> = () => {
@@ -74,11 +103,8 @@ const LogTable: React.FC<Props> = () => {
   dataSetRef.current = logTableDs;
 
   const renderStatus = useCallback(({ value }) => (
-    <span className={styles.status} style={{ background: value === 'SUCCESS' ? '#00BFA5' : '#F76776' }}>
-      {
-      // eslint-disable-next-line no-nested-ternary
-      value === 'SUCCESS' ? '已执行' : (value === 'STOP' ? '终止' : '循环终止')
-      }
+    <span className={styles.status} style={{ background: StatusMap.get('value')?.color }}>
+      {StatusMap.get('value')?.text}
     </span>
   ), []);
 
@@ -97,29 +123,6 @@ const LogTable: React.FC<Props> = () => {
     );
   }, [handleClickIssue]);
 
-  const renderStatusHeader = useCallback(() => (
-    <div>
-      <span className={styles.header_span}>状态</span>
-      <Tooltip
-        title={(
-          <div>
-            <span>不同状态代表什么？</span>
-            <br />
-            <span>已执行：已按照状态机流动规则执行成功。</span>
-            <br />
-            <span>循环终止：检测到状态联动执行循环，这将会产生大量重复的状态变更，请检查状态机状态联动配置。</span>
-            <br />
-            <span>终止：您要联动的问题已处在目标状态，或关联的缺陷属于子缺陷。</span>
-            <br />
-          </div>
-        )}
-        placement="top"
-      >
-        <Icon type="help " className={styles.tipIcon} />
-      </Tooltip>
-    </div>
-  ), []);
-
   const renderRemark = useCallback(({ value }) => RemarkMap.get(value), []);
 
   return (
@@ -130,15 +133,18 @@ const LogTable: React.FC<Props> = () => {
           <Form dataSet={queryDataSet} columns={7}>
             <TextField name="params" prefix={<Icon type="search" />} colSpan={2} valueChangeAction={'input' as any} />
             <Select name="statusCode" colSpan={1}>
-              <Option value="SUCCESS">已执行</Option>
-              <Option value="LOOP">循环终止</Option>
+              <Option value="success">已执行</Option>
+              <Option value="error">失败</Option>
+              <Option value="stop">终止</Option>
+              <Option value="max_depth">过长终止</Option>
+              <Option value="loop">循环终止</Option>
             </Select>
           </Form>
         )}
       >
         <Column name="creationDate" lock width={150} tooltip={'overflow' as TableColumnTooltip} />
         <Column name="content" lock width={480} tooltip={'overflow' as TableColumnTooltip} />
-        <Column name="statusCode" header={renderStatusHeader} width={130} renderer={renderStatus} tooltip={'overflow' as TableColumnTooltip} />
+        <Column name="statusCode" width={130} renderer={renderStatus} tooltip={'overflow' as TableColumnTooltip} />
         <Column
           name="preIssueId"
           // @ts-ignore
