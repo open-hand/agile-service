@@ -4,7 +4,7 @@ import React, {
   useContext, useState, useEffect, useImperativeHandle, useRef, useCallback,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { stores, Choerodon } from '@choerodon/boot';
+import { stores, Choerodon, WSHandler } from '@choerodon/boot';
 import { usePersistFn } from 'ahooks';
 import { Spin } from 'choerodon-ui/pro';
 import openCreateSubTask from '@/components/create-sub-task';
@@ -18,6 +18,7 @@ import { sameProject } from '@/utils/detail';
 import IssueHeader from './IssueComponent/IssueHeader';
 import IssueBody from './IssueComponent/IssueBody/IssueBody';
 import EditIssueContext from './stores';
+import { getProjectId } from '@/utils/common';
 // 项目加入群之后，不关联自己的史诗和特性，只能关联项目群的，不能改关联的史诗
 const { AppState } = stores;
 
@@ -311,6 +312,13 @@ function EditIssue() {
       defaultTypeId: store.defaultTypeId,
     });
   });
+
+  const handleMessage = usePersistFn(() => {
+    console.log('handleMessage');
+    // TODO:
+    // store.setIssueFields(issue, fields);
+  });
+
   return (
 
     <div className={`${prefixCls}`} style={style} ref={container}>
@@ -378,6 +386,12 @@ function EditIssue() {
           onOpenCreateSubTask={handleOpenCreateSubTask}
           onOpenCreateSubBug={handleOpenCreateSubBug}
         />
+        <WSHandler
+          messageKey={`agile-batch-delete-issue-${getProjectId()}`}
+          onMessage={handleMessage}
+        >
+          <div />
+        </WSHandler>
       </div>
     </div>
   );
