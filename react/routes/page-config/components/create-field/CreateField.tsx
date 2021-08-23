@@ -370,7 +370,6 @@ function CreateField() {
             dataRef: userDataRef,
             level: type === 'project' ? 'project' : 'org',
             selectedUser: toJS(current?.get('defaultValueObj')),
-            selected: toJS(current?.get('defaultValue')),
           },
           outputs: ['element'],
         })[0][0];
