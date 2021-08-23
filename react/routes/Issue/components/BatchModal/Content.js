@@ -226,7 +226,7 @@ function BatchModal({
         {fields.map((f) => {
           const { key, id, isSetEmpty = false } = f;
           return (
-            <Row key={key} gutter={18} type="flex" align="middle">
+            <Row key={key} gutter={20} type="flex" align="middle">
               <Col span={10}>
                 <Select
                   style={{ width: '100%' }}
@@ -255,6 +255,7 @@ function BatchModal({
               {id && (
                 <Col span={3}>
                   <CheckBox
+                    style={{ marginLeft: '-6px' }}
                     checked={isSetEmpty}
                     onChange={(value) => {
                       if (value) {
@@ -278,6 +279,8 @@ function BatchModal({
                   style={{
                     cursor: 'pointer',
                     color: 'var(--primary-color)',
+                    fontSize: '0.2rem',
+                    marginLeft: id ? '-6px' : '-10px',
                   }}
                 />
               </Col>
