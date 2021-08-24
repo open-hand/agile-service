@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import {
-  Page, Header, Content, stores, Breadcrumb, Choerodon,
+  Page, Header, Content, stores, Breadcrumb, Choerodon, WSHandler,
 } from '@choerodon/boot';
 import {
   Select, Icon, Modal, Form,
@@ -36,6 +36,7 @@ import CreateBoard from '../ScrumBoardComponent/CreateBoard';
 import ExpandAllButton from '../ScrumBoardComponent/expand-all-button';
 import BoardSearch from '../ScrumBoardComponent/board-search';
 import SelectBoard from '../ScrumBoardComponent/select-board';
+import StatusLinkageWSHandle from '@/components/StatusLinkageWSHandle';
 
 const { AppState } = stores;
 
@@ -527,6 +528,7 @@ class ScrumBoardHome extends Component {
             </Modal>
           ) : null
         }
+        <StatusLinkageWSHandle />
       </Page>
     );
   }

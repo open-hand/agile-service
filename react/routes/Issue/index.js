@@ -38,6 +38,7 @@ import Store, { StoreProvider } from './stores';
 import CollapseAll from './components/CollapseAll';
 import Modal from './components/Modal';
 import './index.less';
+import StatusLinkageWSHandle from '@/components/StatusLinkageWSHandle';
 
 const defaultVisibleColumns = [
   'summary',
@@ -438,6 +439,7 @@ const Issue = observer(({ cached, updateCache }) => {
         )}
         <DetailContainer {...props} />
       </Content>
+      <StatusLinkageWSHandle />
     </Page>
   );
 });

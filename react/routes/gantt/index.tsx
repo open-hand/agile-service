@@ -22,12 +22,12 @@ import {
 } from '@choerodon/boot';
 import GanttComponent, { GanttProps, Gantt, GanttRef } from '@choerodon/gantt';
 import '@choerodon/gantt/dist/gantt.cjs.production.min.css';
+import { FlatSelect } from '@choerodon/components';
 import { ganttApi, issueApi, workCalendarApi } from '@/api';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import TypeTag from '@/components/TypeTag';
 import Loading from '@/components/Loading';
 import SelectSprint from '@/components/select/select-sprint';
-import { FlatSelect } from '@choerodon/components';
 import useFullScreen from '@/common/useFullScreen';
 import { ILocalField } from '@/components/issue-search/store';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
@@ -48,6 +48,7 @@ import GanttStore from './store';
 import GanttOperation from './components/gantt-operation';
 import GanttSortLabel, { useGanttSortLabel } from './components/gantt-sort-label';
 import './index.less';
+import StatusLinkageWSHandle from '@/components/StatusLinkageWSHandle';
 
 dayjs.extend(weekday);
 const typeOptions = [{
@@ -592,6 +593,7 @@ const GanttPage: React.FC = () => {
           />
         </Context.Provider>
       </Content>
+      <StatusLinkageWSHandle />
     </Page>
   );
 };

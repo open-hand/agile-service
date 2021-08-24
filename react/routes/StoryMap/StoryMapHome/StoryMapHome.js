@@ -32,6 +32,7 @@ import IssueDetail from './components/IssueDetail';
 import StoryMapSearch from './components/Search';
 import useFullScreen from '../../../common/useFullScreen';
 import './StoryMapHome.less';
+import StatusLinkageWSHandle from '@/components/StatusLinkageWSHandle';
 
 const HEX = {
   'c7nagile-StoryMap-EpicCard': '#D9C2FB',
@@ -226,6 +227,7 @@ const StoryMapHome = observer(() => {
           <IssueDetail refresh={handleRefresh} isFullScreen={isFullScreen} />
 
         </Content>
+        <StatusLinkageWSHandle />
       </Page>
     </LoadingProvider>
   );
