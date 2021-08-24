@@ -8,10 +8,10 @@ import {
   Button, Spin, Tooltip,
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
+import { HeaderButtons } from '@choerodon/master';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import SideNav from '@/components/side-nav';
-import { HeaderButtons } from '@choerodon/master';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import openCreateIssue from '@/components/create-issue';
 import { LoadingProvider } from '@/components/Loading';
@@ -23,6 +23,7 @@ import CreateSprint, { CreateCurrentPiSprint } from '../components/create-sprint
 import SprintList from '../components/sprint-list';
 import ShowPlanSprint from '../components/show-plan-sprint';
 import './BacklogHome.less';
+import StatusLinkageWSHandle from '@/components/StatusLinkageWSHandle';
 
 const createSprintKey = Modal.key();
 const createCurrentPiSprintKey = Modal.key();
@@ -305,6 +306,7 @@ class BacklogHome extends Component {
           refresh={() => this.refresh(false)}
           innerRef={this.IssueDetailRef}
         />
+        <StatusLinkageWSHandle />
       </>
     );
   }
