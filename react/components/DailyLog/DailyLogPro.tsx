@@ -9,14 +9,14 @@ import {
   DataSet, DateTimePicker, Form, Col, Row, Select, Modal, SelectBox,
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import { observer } from 'mobx-react-lite';
 import { workLogApi } from '@/api';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import SelectNumber from '@/components/select/select-number';
 import './DailyLog.less';
 import CKEditor from '@/components/CKEditor';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IModalProps } from '@/common/types';
-import { observer } from 'mobx-react-lite';
 import styles from './index.less';
 import { processBeforeData } from './utils';
 
@@ -97,7 +97,7 @@ const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = 
       dataSet.current?.addField(`${item}_unit`, {
         type: 'string' as FieldType,
         label: '单位',
-        defaultValue: 'H',
+        // defaultValue: 'H',
         computedProps: {
           disabled: ({ record }) => {
             if (record.get('remain') === item) {
@@ -107,6 +107,7 @@ const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = 
           },
         },
       });
+      dataSet.current?.init(`${item}_unit`, 'H');
     });
   }, [dataSet]);
 
@@ -150,7 +151,7 @@ const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = 
             <SelectTimeWithUnit timeName="direct_time" unitName="direct_unit" />
           </span>
         </Option>
-        <Option value="reduce" className={styles.remain_row}>
+        <Option value="reduce">
           <span className={styles.remain_row}>
             <span>缩减</span>
             <SelectTimeWithUnit timeName="reduce_time" unitName="reduce_unit" />
