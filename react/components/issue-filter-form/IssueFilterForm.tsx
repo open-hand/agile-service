@@ -9,6 +9,7 @@ import moment from 'moment';
 import {
   DataSet, Form, Button,
 } from 'choerodon-ui/pro';
+import { isEmpty } from 'lodash';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import renderField from './components/renderField';
 import IssueFilterFormDataSet from './IssueFilterFormDataSet';
@@ -90,7 +91,7 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
   const initField = useCallback((field: IChosenFieldField) => {
     let values = toJS(field.value);
     const dateIndex = ['time', 'datetime', 'date'].indexOf(field.fieldType ?? '');
-    if (values) {
+    if (!isEmpty(values)) {
       if (field.fieldType === 'member') {
         values = Array.isArray(values) ? values.map((item) => String(item)) : String(values);
       }
@@ -162,15 +163,15 @@ const IssueFilterForm: React.FC = () => {
   const initField = useCallback((field: IChosenFieldField) => {
     let values = toJS(field.value);
     const dateIndex = ['time', 'datetime', 'date'].indexOf(field.fieldType ?? '');
-    if (dateIndex !== -1) {
-      values = Array.isArray(values) ? values.map((item) => moment(item, dateFormatArr[dateIndex]))
-        : moment(values, dateFormatArr);
-    }
-    if (values) {
+    if (!isEmpty(values)) {
       if (field.fieldType === 'member') {
         values = Array.isArray(values) ? values.map((item) => String(item)) : String(values);
       }
-      !dataSet.current?.get(field.code) && dataSet.current?.set(field.code, values);
+      if (dateIndex !== -1) {
+        values = Array.isArray(values) ? values.map((item) => moment(item, dateFormatArr[dateIndex]))
+          : moment(values, dateFormatArr);
+      }
+      !dataSet.current?.get(field.code) && dataSet.current?.init(field.code, values);
     }
   }, [dataSet]);
   useEffect(() => {
