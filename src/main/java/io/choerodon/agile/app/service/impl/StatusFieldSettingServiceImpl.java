@@ -41,8 +41,8 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
 
     private static final String[] FILTER_FIELD_TYPE = {"checkbox", "multiple", "member", "radio", "single"};
     private static final String[] FEATURE_FIELD = {FieldCode.ACCEPTANCE_CRITERA, FieldCode.BENFIT_HYPOTHESIS, FieldCode.PROGRAM_VERSION, FieldCode.SUB_PROJECT};
-    protected static final Map<String, String> FIELD_CODE = new LinkedHashMap<>();
-    protected static final Map<String, String> PROGRAM_FIELD_CODE = new LinkedHashMap<>();
+    public static final Map<String, String> FIELD_CODE = new LinkedHashMap<>();
+    public static final Map<String, String> PROGRAM_FIELD_CODE = new LinkedHashMap<>();
     private static final String CLEAR = "clear";
     private static final String OPERATOR = "operator";
     private static final String CREATOR = "creator";

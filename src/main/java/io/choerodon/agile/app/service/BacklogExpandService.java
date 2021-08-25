@@ -178,4 +178,9 @@ public interface BacklogExpandService {
     Map<String, Long> filterRuleBySqlQuery(Long instanceId, Long projectId, List<ConfigurationRuleVO> ruleList);
 
     Map<Long, Map<String, String>> selectDataMapByIds(Set<Long> backlogIds);
+
+    void sendUpdateBacklogMsg(Long backlogId,
+                              List<String> fieldList,
+                              List<PageFieldViewUpdateVO> customFields,
+                              Long projectId);
 }
