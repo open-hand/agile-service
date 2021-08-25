@@ -69,7 +69,7 @@ function getFieldConfig({
     case 'epic':
       return { props: { unassignedEpic: true, request: () => epicApi.loadEpicsForSelect(projectId) } };
     case 'tags':
-      return { props: { projectId: undefined } };
+      return { code: 'tag', props: { projectId: undefined } };
     default:
       break;
   }
