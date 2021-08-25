@@ -156,6 +156,42 @@ public class ChartSearchVO {
     @Encrypt
     private Long serviceId;
 
+    /**
+     * 自定义报表类型
+     */
+    private String chartType;
+
+    /**
+     * 自定义报表统计数据类型
+     */
+    private String statisticsType;
+
+    /**
+     * 自定义报表统计字段
+     */
+    private String analysisField;
+
+    /**
+     * 自定义报表对比字段
+     */
+    private String comparedField;
+
+    /**
+     * 自定义报表统计字段是否系统字段
+     */
+    private Boolean analysisFieldPredefined;
+
+    /**
+     * 自定义报表对比字段是否系统字段
+     */
+    private Boolean comparedFieldPredefined;
+
+    /**
+     * 自定义报表查询参数
+     */
+    private SearchVO searchVO;
+
+
     public Long getServiceId() {
         return serviceId;
     }
@@ -354,5 +390,61 @@ public class ChartSearchVO {
 
     public void setStatusId(Long statusId) {
         this.statusId = statusId;
+    }
+
+    public String getChartType() {
+        return chartType;
+    }
+
+    public void setChartType(String chartType) {
+        this.chartType = chartType;
+    }
+
+    public String getStatisticsType() {
+        return statisticsType;
+    }
+
+    public void setStatisticsType(String statisticsType) {
+        this.statisticsType = statisticsType;
+    }
+
+    public String getAnalysisField() {
+        return analysisField;
+    }
+
+    public void setAnalysisField(String analysisField) {
+        this.analysisField = analysisField;
+    }
+
+    public String getComparedField() {
+        return comparedField;
+    }
+
+    public void setComparedField(String comparedField) {
+        this.comparedField = comparedField;
+    }
+
+    public Boolean getAnalysisFieldPredefined() {
+        return analysisFieldPredefined;
+    }
+
+    public void setAnalysisFieldPredefined(Boolean analysisFieldPredefined) {
+        this.analysisFieldPredefined = analysisFieldPredefined;
+    }
+
+    public Boolean getComparedFieldPredefined() {
+        return comparedFieldPredefined;
+    }
+
+    public void setComparedFieldPredefined(Boolean comparedFieldPredefined) {
+        this.comparedFieldPredefined = comparedFieldPredefined;
+    }
+
+    public SearchVO getSearchVO() {
+        return searchVO;
+    }
+
+    public void setSearchVO(SearchVO searchVO) {
+        this.searchVO = searchVO;
     }
 }

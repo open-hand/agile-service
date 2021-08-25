@@ -89,6 +89,11 @@ public class ChartUnitVO extends ReportUnitVO {
     public static final String SERVICE_CODE_QUALITY = "service_code_quality";
 
     /**
+     * 自定义报表图
+     */
+    public static final String CUSTOM = "custom";
+
+    /**
      * 各图表必输校验
      */
     @Override
@@ -98,6 +103,7 @@ public class ChartUnitVO extends ReportUnitVO {
         Assert.notNull(chartSearchVO, BaseConstants.ErrorCode.DATA_INVALID);
         Assert.notNull(chartSearchVO.getProjectId(), BaseConstants.ErrorCode.DATA_INVALID);
         EncryptionUtils.decryptSearchVO(chartSearchVO.getCurrentSearchVO());
+        EncryptionUtils.decryptSearchVO(chartSearchVO.getSearchVO());
 
         switch (this.chartCode){
             case BURN_DOWN_REPORT:
@@ -162,6 +168,11 @@ public class ChartUnitVO extends ReportUnitVO {
                 Assert.notNull(chartSearchVO.getServiceId(), BaseConstants.ErrorCode.DATA_INVALID);
                 break;
             default:
+                if (chartCode.startsWith(CUSTOM)){
+                    Assert.notNull(chartSearchVO.getChartType(), BaseConstants.ErrorCode.DATA_INVALID);
+                    Assert.notNull(chartSearchVO.getAnalysisField(), BaseConstants.ErrorCode.DATA_INVALID);
+                    Assert.notNull(chartSearchVO.getAnalysisFieldPredefined(), BaseConstants.ErrorCode.DATA_INVALID);
+                }
                 break;
         }
     }
