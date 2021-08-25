@@ -5,11 +5,12 @@ import {
   Form, Select, DataSet, TextField,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import SelectTeam from '@/components/select/select-team';
-import useIsProgram from '@/hooks/useIsProgram';
 import { groupBy } from 'lodash';
 import OptGroup from 'choerodon-ui/pro/lib/option/OptGroup';
+import SelectTeam from '@/components/select/select-team';
+import useIsProgram from '@/hooks/useIsProgram';
 import useHasDevops from '@/hooks/useHasDevops';
+import { customReportApi } from '@/api';
 import BurnDownComponent from './components/burndown';
 import SprintComponent from './components/sprint';
 import AccumulationComponent from './components/accumulation';
@@ -21,6 +22,7 @@ import { IReportChartBlock, ChartSearchVO } from '../../store';
 import IterationSpeedComponent from './components/iteration-speed';
 import VersionReportComponent from './components/version-report';
 import EpicReportComponent from './components/epic-report';
+import CustomRecordComponent from './components/custom-report';
 
 const { Option } = Select;
 
@@ -77,8 +79,25 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
   const chartRef = useRef<ChartRefProps>({} as ChartRefProps);
   const hasDevops = useHasDevops();
   const { isProgram } = useIsProgram();
+  const loadCustomCharts = useCallback(async () => {
+    if (!isProgram) {
+      const res = await customReportApi.getCustomReports();
+      if (res.length) {
+        const customChart = new Map<string, ChartMap>();
+        res.forEach((item: any) => {
+          customChart.set(`custom-${item.id}`, {
+            component: (customProp) => <CustomRecordComponent {...customProp || {}} customChartData={item} />,
+            name: item.name,
+            group: '自定义',
+          });
+        });
+        addChartsMap(customChart);
+      }
+    }
+  }, [isProgram]);
   useEffect(() => {
     (async () => {
+      await loadCustomCharts();
       const data = await getOptionalCharts();
       setOptionalCharts(data);
     })();

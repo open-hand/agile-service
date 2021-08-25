@@ -8,6 +8,7 @@ import {
 import { IBurndownChartType } from '@/components/charts/burn-down';
 import { IPieChartType } from '@/components/charts/pie-chart';
 import { IUnit } from '@/components/charts/version-report/search';
+import { IChartType, IChartUnit } from '@/routes/ReportHost/custom-report/components/Chart/utils';
 
 export type IChartCode = 'burn_down_report' | 'sprint_report' | 'cumulative_flow_diagram'
   | 'pie_chart' | 'version_chart' | 'epic_chart' | 'version_burn_down_report'
@@ -93,10 +94,23 @@ export type IterationSpeedSearchVO = {
   projectId: string,
 }
 
+export type CustomReportSearchVO = {
+  projectId?: undefined
+  chartType?: IChartType,
+  statisticsType?: IChartUnit,
+  analysisField?: string,
+  comparedField?: string,
+  analysisFieldPredefined?: boolean,
+  comparedFieldPredefined?: boolean,
+  searchVO?: ISearchVO,
+  currentSearchVO?: ISearchVO,
+  searchJson?: string,
+}
+
 export type ChartSearchVO = BurnDownSearchVO | SprintSearchVO
   | AccumulationSearchVO | PieSearchVO | VersionReportSearchVO
   | EpicReportSearchVO | VersionBurndownSearchVO | EpicBurndownSearchVO
-  | IterationSpeedSearchVO
+  | IterationSpeedSearchVO | CustomReportSearchVO
 
 export interface IReportChartBlock extends IBaseReportBlock {
   type: 'chart'

@@ -11,6 +11,7 @@ import EpicBlock from './components/epic-report';
 import VersionBurndownBlock from './components/version-burndown';
 import EpicBurndownBlock from './components/epic-burndown';
 import IterationSpeedBlock from './components/iteration-speed';
+import CustomReport from './components/custom-report';
 
 export const defaultChartBlockMap = new Map<IChartCode, React.FC<any>>([
   ['burn_down_report', BurnDownBlock],
@@ -32,7 +33,7 @@ interface Props {
   data: IReportChartBlock
 }
 const ChartBlock: React.FC<Props> = ({ data: { chartSearchVO, chartCode, key } }) => {
-  const ChartBlockComponent = chartBlockMap.get(chartCode);
+  const ChartBlockComponent = chartCode.includes('custom-') ? CustomReport : chartBlockMap.get(chartCode);
   const { register, finish } = useTaskContext();
   register(`${chartCode}-${key}`);
   const onFinish = useCallback(() => {
