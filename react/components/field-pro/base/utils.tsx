@@ -3,6 +3,7 @@ import {
   IComponentFCWithClassObject, IFieldConfig, IFieldProcessConfig,
 } from './type';
 import type { CustomComponentMapProps } from './component';
+import { AgileComponentMap } from './component';
 /**
  * 获取处理后的配置
  */
@@ -35,5 +36,14 @@ function getProcessFieldConfig<T extends IComponentFCWithClassObject, C extends 
   };
   return merge(config.fieldType ? filedTypeConfigObj[config.fieldType] : {}, config) as unknown as IFieldProcessConfig<T, CustomComponentMapProps>;
 }
+/**
+ * code 是否在系统组件内
+ * @param code
+ * @param components
+ * @returns
+ */
+function isCodeInSystemComponents(code: string, components: { [x: string]: any } = AgileComponentMap) {
+  return Object.keys(components).includes(code);
+}
 // export type IFieldProcessConfigFn=ReturnType<(<T extends IFiledMapProps, K extends keyof T>(fieldConfig: IFieldConfig<T, K>) =>typeof getProcessFieldConfig)>
-export { getProcessFieldConfig };
+export { getProcessFieldConfig, isCodeInSystemComponents };

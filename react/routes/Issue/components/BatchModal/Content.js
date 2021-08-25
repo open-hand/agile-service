@@ -15,9 +15,9 @@ import useIsInProgram from '@/hooks/useIsInProgram';
 import { fieldApi } from '@/api';
 import useFields from './useFields';
 import { systemFields, formatFields } from './utils';
-import renderField from './renderField';
 import styles from './Content.less';
 import STATUS_COLOR from '../../../../constants/STATUS';
+import { getBatchFelids } from '@/components/field-pro/layouts';
 
 const { Option } = Select;
 const DISABLE_EMPTY_DATA = ['priorityId', 'statusId', 'reporterId', 'tags'];
@@ -247,9 +247,7 @@ function BatchModal({
               </Col>
               {id && (
                 <Col span={10} key={id}>
-                  {React.cloneElement(renderField(f), {
-                    label: f.name,
-                  })}
+                  {getBatchFelids([f])[0]}
                 </Col>
               )}
               {id && (

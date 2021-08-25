@@ -1,23 +1,11 @@
 import React from 'react';
-import {
-  Select, TextField, TextArea, NumberField,
-} from 'choerodon-ui/pro';
 import { set } from 'lodash';
 import { toJS } from 'mobx';
-import SelectUser from '@/components/select/select-user';
 import { getMenuType } from '@/utils/common';
-import { userApi } from '@/api';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import SelectComponent from '@/components/select/select-component';
-import SelectLabel from '@/components/select/select-label';
-import SelectVersion from '@/components/select/select-version';
-import SelectSprint from '@/components/select/select-sprint';
-import SelectEpic from '@/components/select/select-epic';
-import { IField, IFieldType } from '@/common/types';
-import SelectEnvironment from '@/components/select/select-environment';
-import SelectCustomField from '@/components/select/select-custom-field';
+import { IFieldType } from '@/common/types';
 import SelectPickDate from './select-date-pick';
 import { InjectedRenderComponent } from '../page-issue-type/components/sort-table/injectComponent';
+import { getAgileFields } from '@/components/field-pro';
 
 interface IRenderFieldProps {
   data: { fieldCode: string, fieldType: IFieldType, defaultValue?: any, fieldOptions?: Array<any>, extraConfig?: boolean }
@@ -26,34 +14,80 @@ interface IRenderFieldProps {
   // otherProps?: SelectProps | any
   [propsName: string]: any
 }
+
 function renderEditor({
   data, dataRef, style, ...otherProps
-}: IRenderFieldProps) {
+}: IRenderFieldProps):React.ReactElement {
   const { fieldType, fieldCode, defaultValue: propsDefaultValue } = data;
   const defaultValue = toJS(propsDefaultValue);
   switch (fieldCode) {
     case 'component':
-      return (
-        <SelectComponent
-          // trigger={['click'] as any}
-          style={style}
-          multiple={['checkbox', 'multiple'].includes(fieldType)}
-          dataRef={dataRef}
-          {...otherProps}
-
-        />
-      );
+      return getAgileFields([], {
+        code: fieldCode,
+        outputs: ['element'],
+        props: {
+          style,
+          dataRef,
+          ...otherProps,
+        },
+      })[0][0] as React.ReactElement;
     case 'label':
-      return <SelectLabel multiple={['checkbox', 'multiple'].includes(fieldType)} dataRef={dataRef} style={style} {...otherProps} />;
+      return getAgileFields([], {
+        code: fieldCode,
+        outputs: ['element'],
+        fieldType,
+        props: {
+          style,
+          dataRef,
+          ...otherProps,
+        },
+      })[0][0] as React.ReactElement;
     case 'influenceVersion':
     case 'fixVersion':
-      return <SelectVersion valueField="versionId" multiple={['checkbox', 'multiple'].includes(fieldType)} dataRef={dataRef} style={style} {...otherProps} />;
+      return getAgileFields([], {
+        code: fieldCode,
+        outputs: ['element'],
+        fieldType,
+        props: {
+          style,
+          valueField: 'versionId',
+          dataRef,
+          ...otherProps,
+        },
+      })[0][0] as React.ReactElement;
     case 'sprint':
-      return <SelectSprint multiple={['checkbox', 'multiple'].includes(fieldType)} dataRef={dataRef} style={style} {...otherProps} />;
+      return getAgileFields([], {
+        code: fieldCode,
+        outputs: ['element'],
+        fieldType,
+        props: {
+          style,
+          dataRef,
+          ...otherProps,
+        },
+      })[0][0] as React.ReactElement;
     case 'epic':
-      return <SelectEpic multiple={['checkbox', 'multiple'].includes(fieldType)} dataRef={dataRef} style={style} {...otherProps} />;
+      return getAgileFields([], {
+        code: fieldCode,
+        outputs: ['element'],
+        fieldType,
+        props: {
+          style,
+          dataRef,
+          ...otherProps,
+        },
+      })[0][0] as React.ReactElement;
     case 'environment':
-      return <SelectEnvironment multiple={['checkbox', 'multiple'].includes(fieldType)} afterLoad={(list) => dataRef && set(dataRef, 'current', list)} style={style} {...otherProps} />;
+      return getAgileFields([], {
+        code: fieldCode,
+        outputs: ['element'],
+        fieldType,
+        props: {
+          style,
+          afterLoad: (list) => dataRef && set(dataRef, 'current', list),
+          ...otherProps,
+        },
+      })[0][0] as React.ReactElement;
     case 'backlogType':
       // @ts-ignore
       return (
@@ -75,6 +109,7 @@ function renderEditor({
       // @ts-ignore
       return <InjectedRenderComponent.progressFeedback style={style} multiple={['checkbox', 'multiple'].includes(fieldType)} afterLoad={(list) => dataRef && set(dataRef, 'current', list)} {...otherProps} />;
     default:
+
       break;
   }
 
@@ -84,45 +119,47 @@ function renderEditor({
 
   if (['checkbox', 'multiple', 'radio', 'single'].includes(fieldType)) {
     const fieldOptions = data.fieldOptions || [];
-    return (
-      <SelectCustomField
-        multiple={['checkbox', 'multiple'].includes(fieldType)}
-        style={style}
-        fieldOptions={fieldOptions.map((item: any) => ({ ...item, id: item.id ?? item.tempKey }))}
-        {...otherProps}
-      />
-    );
+    return getAgileFields([], [], {
+      fieldType: fieldType as 'checkbox' | 'multiple' | 'radio' | 'single',
+      outputs: ['element'],
+      props: { style, fieldOptions: fieldOptions.map((item: any) => ({ ...item, id: item.id ?? item.tempKey })) },
+    })[0][0] as React.ReactElement;
   }
   switch (fieldType) {
-    case 'input':
-      return <TextField maxLength={100} valueChangeAction={'input' as any} {...otherProps} />;
-    case 'text':
-      return <TextArea rows={3} maxLength={255} valueChangeAction={'input' as any} {...otherProps} />;
     case 'multiMember':
     case 'member':
     {
       const type = getMenuType();
-      return (
-        <SelectUser
-          level={type === 'project' ? 'project' : 'org'}
-          selectedUser={typeof (defaultValue) === 'object' ? defaultValue : undefined}
-          selected={typeof (defaultValue) === 'string' ? defaultValue.split(',') : undefined}
-          multiple={fieldType === 'multiMember'}
-          clearButton
-          dataRef={dataRef}
-          style={style}
-          {...otherProps}
-        />
-      );
+      return getAgileFields([], [], {
+        fieldType,
+        outputs: ['element'],
+        props: {
+          level: type === 'project' ? 'project' : 'org',
+          dataRef,
+          selectedUser: typeof (defaultValue) === 'object' ? defaultValue : undefined,
+          selected: typeof (defaultValue) === 'string' ? defaultValue.split(',') : undefined,
+          style,
+          clearButton: true,
+          ...otherProps,
+        },
+      })[0][0] as React.ReactElement;
     }
     case 'number': {
       const { extraConfig } = data;
-      return <NumberField step={extraConfig ? 0.1 : 1} {...otherProps} />;
+      return getAgileFields([], [], { fieldType, outputs: ['element'], props: { step: extraConfig ? 0.1 : 1, ...otherProps } })[0][0] as React.ReactElement;
     }
     default:
       break;
   }
-  return <TextField {...otherProps} />;
+  return getAgileFields([], [], [
+    {
+      fieldType: fieldType as any,
+      outputs: ['element'],
+      props: {
+        ...otherProps,
+      },
+    },
+  ])[0][0] as React.ReactElement;
 }
 
 export default renderEditor;

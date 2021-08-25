@@ -101,7 +101,9 @@ const systemFieldConfigMap: Record<string, ProRenderFieldPropsType> = {
 
     valueKey: 'priorityId',
   },
-
+  status: {
+    valueKey: 'statusId',
+  },
   subProject: {
 
     valueKey: 'teamProjectIds',
