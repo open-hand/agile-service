@@ -11,7 +11,6 @@ import {
 } from 'choerodon-ui/pro';
 import { isEmpty } from 'lodash';
 import { IChosenFieldField } from '@/components/chose-field/types';
-import renderField from './components/renderField';
 import IssueFilterFormDataSet from './IssueFilterFormDataSet';
 import './index.less';
 import { useIssueFilterFormStore } from './stores';

@@ -8,14 +8,14 @@ import {
 } from 'choerodon-ui/pro';
 
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
-import { getProjectId, getIsOrganization, getOrganizationId } from '@/utils/common';
 import { find, includes } from 'lodash';
+import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import moment from 'moment';
+import { getProjectId, getIsOrganization, getOrganizationId } from '@/utils/common';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
 import { pageConfigApi, statusTransformApi } from '@/api';
-import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { Priority, IField } from '@/common/types';
-import Loading from '@/components/Loading';
-import moment from 'moment';
+import { OldLoading as Loading } from '@/components/Loading';
 import useIsProgram from '@/hooks/useIsProgram';
 import renderField from './renderField';
 import styles from './index.less';

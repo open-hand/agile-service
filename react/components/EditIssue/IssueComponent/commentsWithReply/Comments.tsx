@@ -6,7 +6,7 @@ import { Button } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { useSize } from 'ahooks';
 import { issueCommentApi, IComment } from '@/api/IssueComment';
-import Loading from '@/components/Loading';
+import { OldLoading as Loading } from '@/components/Loading';
 import Comment from './components/comment';
 import AddComment from './components/addComment';
 import EditIssueContext from '../../stores';
@@ -42,10 +42,10 @@ const Comments: React.FC<Props> = ({
       } | null>(null);
 
   const replyingRef = useRef<{
-      replying: boolean,
-      setReplying:(replying: boolean) => void
-      setReplyValue: (v: string) => void
-        } | null>(null);
+    replying: boolean,
+    setReplying:(replying: boolean) => void
+    setReplyValue: (v: string) => void
+      } | null>(null);
 
   const {
     store, outside,
@@ -116,7 +116,7 @@ const Comments: React.FC<Props> = ({
           ))
         }
         {
-            comments?.totalPages > 1 && (
+          comments?.totalPages > 1 && (
             <div style={{ marginTop: 5 }}>
               {
                 comments?.totalPages === comments?.number + 1 && !folded ? (
@@ -137,7 +137,7 @@ const Comments: React.FC<Props> = ({
                 )
               }
             </div>
-            )
+          )
         }
       </div>
       {

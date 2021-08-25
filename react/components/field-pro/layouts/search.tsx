@@ -3,7 +3,6 @@ import {
   get, merge, omit,
 } from 'lodash';
 import moment from 'moment';
-import { usePersistFn } from 'ahooks';
 import { getAgileFields } from '../base';
 import {
   commonApi, epicApi, statusApi, userApi,
@@ -16,7 +15,15 @@ function getFieldConfig({
   // 系统自带字段
   switch (field.code) {
     case 'issueTypeId':
-      return { code: 'issueType', props: { config: { applyType, projectId } } };
+      return {
+        code: 'issueType',
+        props: {
+          config: {
+            applyType,
+            projectId,
+          },
+        },
+      };
     case 'statusId':
       return { // 缺少 issueTypeIds
         code: 'status',
@@ -62,7 +69,7 @@ function getFieldConfig({
     case 'epic':
       return { props: { unassignedEpic: true, request: () => epicApi.loadEpicsForSelect(projectId) } };
     case 'tags':
-      return { props: { projectId: undefined } };
+      return { code: 'tag', props: { projectId: undefined } };
     default:
       break;
   }

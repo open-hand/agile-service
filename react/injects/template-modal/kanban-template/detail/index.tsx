@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { Loading } from '@/components';
 import { useCreation } from 'ahooks';
 import { observer } from 'mobx-react-lite';
+import { Loading } from '@/components';
 import Columns from './components/columns';
 import styles from './index.less';
 import KanbanTemplateDetailStore from './store';

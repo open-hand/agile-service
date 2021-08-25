@@ -11,7 +11,7 @@ import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
 import SelectStatus from '@/components/select/select-status';
 import { issueLinkTypeApi, statusTransformApi } from '@/api';
-import Loading from '@/components/Loading';
+import { OldLoading as Loading } from '@/components/Loading';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
 import { getIsOrganization } from '@/utils/common';
 import { IIssueType } from '@/common/types';
