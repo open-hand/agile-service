@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -9,6 +10,7 @@ import javax.validation.constraints.NotNull;
  * @author shinan.chen
  * @date 2018/8/8
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class IssueTypeVO {
     @ApiModelProperty(value = "问题类型id")
     @Encrypt

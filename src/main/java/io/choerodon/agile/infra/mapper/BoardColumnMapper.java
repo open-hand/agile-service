@@ -1,14 +1,16 @@
 package io.choerodon.agile.infra.mapper;
 
-import io.choerodon.agile.api.vo.ColumnWithMaxMinNumVO;
-import io.choerodon.agile.api.vo.SearchVO;
-import io.choerodon.agile.api.vo.event.RemoveStatusWithProject;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Set;
+
+import io.choerodon.agile.api.vo.ColumnWithMaxMinNumVO;
+import io.choerodon.agile.api.vo.IssueCountStatusVO;
+import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.event.RemoveStatusWithProject;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.mybatis.common.BaseMapper;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/14.
@@ -17,12 +19,12 @@ import java.util.Set;
 public interface BoardColumnMapper extends BaseMapper<BoardColumnDTO> {
 
     List<ColumnAndIssueDTO> selectColumnsByBoardId(@Param("projectId") Long projectId,
-                                @Param("boardId") Long boardId,
-                                @Param("sprintId") Long sprintId,
-                                @Param("filterSql") String filterSql,
-                                @Param("searchVO") SearchVO searchVO,
-                                @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
-                                @Param("userId") Long userId);
+                                                   @Param("boardId") Long boardId,
+                                                   @Param("sprintId") Long sprintId,
+                                                   @Param("filterSql") String filterSql,
+                                                   @Param("searchVO") SearchVO searchVO,
+                                                   @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
+                                                   @Param("userId") Long userId);
 
     void columnSort(@Param("boardId") Long boardId,
                     @Param("sequence") Integer sequence,
@@ -97,4 +99,35 @@ public interface BoardColumnMapper extends BaseMapper<BoardColumnDTO> {
     void deleteByStatusId(@Param("projectId") Long projectId, @Param("statusId") Long statusId);
 
     Set<Long> queryStatusByBoardId(@Param("projectId") Long projectId, @Param("boardId") Long boardId);
+
+    /**
+     * 查询看板列信息
+     * @param projectId 项目id
+     * @param boardId 看板id
+     * @return 看板列信息
+     */
+    List<ColumnAndIssueDTO> selectColumnInfoByBoardId(@Param("projectId") Long projectId, @Param("boardId") Long boardId);
+
+    /**
+     * 查询看板issue
+     * @param projectId 项目id
+     * @param sprintId 冲刺id
+     * @param filterSql 筛选sql
+     * @param searchVO 查询条件
+     * @param assigneeFilterIds 经办人筛选sql
+     * @param userId 用户id
+     * @param statusIds 状态id
+     * @return 看板issue
+     */
+    List<IssueForBoardDO> selectBoardIssue(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId, @Param("filterSql") String filterSql, @Param("searchVO") SearchVO searchVO, @Param("assigneeFilterIds") List<Long> assigneeFilterIds, @Param("userId") Long userId, @Param("statusIds") Set<Long> statusIds);
+
+    /**
+     * 查询看板issue数量
+     * @param statusIds 状态id
+     * @param projectId 项目id
+     * @param sprintId 冲刺id
+     * @param columnConstraint 列约束
+     * @return 看板issue数量
+     */
+    List<IssueCountStatusVO> getColumnNumByStatus(@Param("statusIds") Set<Long> statusIds, @Param("projectId") Long projectId, @Param("sprintId") Long sprintId, @Param("columnConstraint") String columnConstraint);
 }
