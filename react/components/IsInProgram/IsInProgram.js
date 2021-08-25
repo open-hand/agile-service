@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { commonApi } from '@/api';
-import Loading from '../Loading';
+import { OldLoading as Loading } from '../Loading';
 
 class IsInProgram extends Component {
+  // eslint-disable-next-line react/state-in-constructor
   state = {
     loading: false,
     program: null,
@@ -26,9 +27,8 @@ class IsInProgram extends Component {
     const { children, project: ProjectElement } = this.props;
     if (program) {
       return children(program);
-    } else {
-      return ProjectElement || null;
     }
+    return ProjectElement || null;
   }
 
   render() {

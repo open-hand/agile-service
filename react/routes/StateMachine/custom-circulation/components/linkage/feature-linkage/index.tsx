@@ -4,13 +4,13 @@ import React, {
 import { DataSet } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import {
   statusTransformApi,
 } from '@/api';
-import Loading from '@/components/Loading';
+import { OldLoading as Loading } from '@/components/Loading';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
 import useSubProjects from '@/hooks/data/useSubProjects';
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import ProjectList from './ProjectList';
 import ProjectConfig from './ProjectConfig';
 import styles from './index.less';

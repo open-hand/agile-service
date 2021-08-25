@@ -9,11 +9,11 @@ import {
 } from 'lodash';
 import { observer } from 'mobx-react-lite';
 import { usePersistFn } from 'ahooks';
-import useIsInProgram from '@/hooks/useIsInProgram';
 import Field from 'choerodon-ui/pro/lib/data-set/Field';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import { IField, IModalProps } from '@/common/types';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
-import Loading from '@/components/Loading';
+import { OldLoading as Loading } from '@/components/Loading';
 import { issueApi } from '@/api';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import RequiredField from '@/components/required-field';
