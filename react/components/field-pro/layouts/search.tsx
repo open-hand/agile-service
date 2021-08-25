@@ -9,8 +9,8 @@ import {
   commonApi, epicApi, statusApi, userApi,
 } from '@/api';
 
-function getFieldConfigProps({
-  field, projectId, applyType, value,
+function getFieldConfig({
+  field, props: { projectId, applyType, value },
 }: any) {
   const { fieldType } = field;
   // 系统自带字段
@@ -61,7 +61,7 @@ function getFieldConfigProps({
       return { props: { disabled: field.archive, hasUnassign: true, valueField: 'versionId' } };
     case 'epic':
       return { props: { unassignedEpic: true, request: () => epicApi.loadEpicsForSelect(projectId) } };
-    case 'tag':
+    case 'tags':
       return { props: { projectId: undefined } };
     default:
       break;
@@ -155,13 +155,17 @@ function wrapDateToFlatDate(fieldConfig: any, wrapElementFn: (config: any) => JS
   }
   return React.createElement(FlatDateRangePicker, { ...fieldConfig.props });
 }
+const AgileBaseSearchInstance = {
+  fieldInstance: getAgileFields,
+  configInstance: getFieldConfig,
+};
 /**
    *  获取搜索的字段
    * @param fields
    * @param fieldCodeProps IFieldConfig<AgileComponentMapProps, CustomComponentMapProps>[]
    * @param instance 获取字段实例
    */
-function getSearchFields(fields: any[], fieldCodeProps?: Record<string, any>, instance = getAgileFields) {
+function getSearchFields(fields: any[], fieldCodeProps?: Record<string, any>, instance = AgileBaseSearchInstance) {
   const selectProps = {
     multiple: true,
     maxTagCount: 3,
@@ -170,30 +174,33 @@ function getSearchFields(fields: any[], fieldCodeProps?: Record<string, any>, in
     clearButton: true,
   };
 
+  const { fieldInstance, configInstance } = instance;
   const fieldConfigs = fields.map((field) => {
     const codeProps = get(fieldCodeProps, field.code) || {};
-    const config = getFieldConfigProps({ field, projectId: codeProps.projectId, applyType: codeProps.applyType });
+    const props = merge({
+      key: field.code,
+      label: field.name,
+      placeholder: field.name,
+      flat: true,
+      ...['single', 'multiple', 'radio', 'checkbox', 'member', 'multiMember'].includes(field.fieldType) ? selectProps : {},
+    }, codeProps);
+    const config = configInstance({ field, props });
     return {
       code: config.code ?? field.code,
       fieldType: field.fieldType,
       outputs: ['config', 'function'] as ['config', 'function'],
       props: {
-        key: field.code,
-        label: field.name,
-        placeholder: field.name,
-        flat: true,
-        ...['single', 'multiple', 'radio', 'checkbox', 'member', 'multiMember'].includes(field.fieldType) ? selectProps : {},
+        ...props,
         ...config.props,
-        ...codeProps,
       },
     };
   });
-  return instance(fieldConfigs, [], []).map((i: any[]) => {
+  return fieldInstance(fieldConfigs, [], []).map((i: any[]) => {
     if (['date', 'time', 'datetime'].includes(i[0].fieldType)) {
       return wrapDateToFlatDate(i[0], i[1]);
     }
     return i[1](i[0]);
   }) as React.ReactElement[];
 }
-
+export { AgileBaseSearchInstance };
 export default getSearchFields;
