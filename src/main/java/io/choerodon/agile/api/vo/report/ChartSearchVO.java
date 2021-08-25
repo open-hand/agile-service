@@ -186,6 +186,11 @@ public class ChartSearchVO {
      */
     private Boolean comparedFieldPredefined;
 
+    /**
+     * 自定义报表查询参数
+     */
+    private SearchVO searchVO;
+
 
     public Long getServiceId() {
         return serviceId;
@@ -433,5 +438,13 @@ public class ChartSearchVO {
 
     public void setComparedFieldPredefined(Boolean comparedFieldPredefined) {
         this.comparedFieldPredefined = comparedFieldPredefined;
+    }
+
+    public SearchVO getSearchVO() {
+        return searchVO;
+    }
+
+    public void setSearchVO(SearchVO searchVO) {
+        this.searchVO = searchVO;
     }
 }

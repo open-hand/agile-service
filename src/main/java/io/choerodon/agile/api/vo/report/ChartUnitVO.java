@@ -103,6 +103,7 @@ public class ChartUnitVO extends ReportUnitVO {
         Assert.notNull(chartSearchVO, BaseConstants.ErrorCode.DATA_INVALID);
         Assert.notNull(chartSearchVO.getProjectId(), BaseConstants.ErrorCode.DATA_INVALID);
         EncryptionUtils.decryptSearchVO(chartSearchVO.getCurrentSearchVO());
+        EncryptionUtils.decryptSearchVO(chartSearchVO.getSearchVO());
 
         switch (this.chartCode){
             case BURN_DOWN_REPORT:

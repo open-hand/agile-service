@@ -60,6 +60,9 @@ public class EncryptionUtils {
      * @param search SearchVO
      */
     public static void decryptSearchVO(SearchVO search) {
+        if (search == null){
+            return;
+        }
         if (!EncryptContext.isEncrypt()){
             filterEmptyCustomField(search);
             return;

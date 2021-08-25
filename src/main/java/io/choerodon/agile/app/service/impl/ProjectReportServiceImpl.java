@@ -125,10 +125,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
                                 objectMapper.readValue(EncryptionUtils.handlerPersonFilterJson(
                                         objectMapper.writeValueAsString(searchVO), true), SearchVO.class));
                     } else if (reportUnitVO instanceof ChartUnitVO) {
-                        SearchVO searchVO = ((ChartUnitVO) reportUnitVO).getChartSearchVO().getCurrentSearchVO();
-                        ((ChartUnitVO) reportUnitVO).getChartSearchVO().setCurrentSearchVO(
-                                objectMapper.readValue(EncryptionUtils.handlerPersonFilterJson(
-                                        objectMapper.writeValueAsString(searchVO), true), SearchVO.class));
+                        processSearch(reportUnitVO);
                     }
                 }
             } catch (IOException e) {
@@ -156,6 +153,20 @@ public class ProjectReportServiceImpl implements ProjectReportService {
             projectReportVO.setCcList(userList);
         }
         return projectReportVO;
+    }
+
+    private void processSearch(ReportUnitVO reportUnitVO) throws IOException {
+        SearchVO searchVO = ((ChartUnitVO) reportUnitVO).getChartSearchVO().getCurrentSearchVO();
+        ((ChartUnitVO) reportUnitVO).getChartSearchVO().setCurrentSearchVO(
+                objectMapper.readValue(EncryptionUtils.handlerPersonFilterJson(
+                        objectMapper.writeValueAsString(searchVO), true), SearchVO.class));
+
+        SearchVO customSearchVO = ((ChartUnitVO) reportUnitVO).getChartSearchVO().getSearchVO();
+        if (customSearchVO != null){
+            ((ChartUnitVO) reportUnitVO).getChartSearchVO().setSearchVO(
+                    objectMapper.readValue(EncryptionUtils.handlerPersonFilterJson(
+                            objectMapper.writeValueAsString(customSearchVO), true), SearchVO.class));
+        }
     }
 
     @Override
