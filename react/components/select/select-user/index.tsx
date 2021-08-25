@@ -29,11 +29,12 @@ export interface SelectUserProps extends Partial<SelectProps> {
   afterLoad?: (users: User[]) => void | User[]
   flat?: boolean
   projectId?: string
+  organizationId?: string
   optionRenderer?: (item: User, tooltip?: boolean) => React.ReactElement
 }
 
 const SelectUser: React.FC<SelectUserProps> = forwardRef(({
-  selectedUser, extraOptions, dataRef, request, level = 'project', afterLoad, selected, flat, projectId, optionRenderer, ...otherProps
+  selectedUser, extraOptions, dataRef, request, level = 'project', afterLoad, selected, flat, projectId, organizationId, optionRenderer, ...otherProps
 }, ref: React.Ref<Select>) => {
   const selectDataRef = useRef<DataSet>();
   const selectedUserLoadedIds = useCreation(() => toArray(selectedUser)?.filter((i) => i && typeof (i) === 'object' && i.id).map((i) => i.id), [selectedUser]); // 已经存在的用户查询接口会过滤，避免第二页恰好全是选中的数据，但页面无反应
@@ -63,7 +64,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     request: request || (async ({ filter, page, requestArgs }) => {
       const res = await (level === 'project'
         ? userApi.project(projectId).getProjectUsers(filter, page, requestArgs?.selectedUserIds, requestArgs?.queryFilterIds, 50, projectId)
-        : userApi.project(projectId).getOrgUsers(filter, page, requestArgs?.selectedUserIds, 50));
+        : userApi.project(projectId).org(organizationId).getOrgUsers(filter, page, requestArgs?.selectedUserIds, 50));
       res.list = res.list.filter((user: User) => user.enabled);
       return res;
     }),
