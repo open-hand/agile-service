@@ -19,7 +19,7 @@ interface Props {
 const StatusMap = new Map([
   ['success', {
     color: '#00BFA5',
-    text: '成功',
+    text: '已执行',
   }],
   [
     'stop', {
@@ -103,8 +103,8 @@ const LogTable: React.FC<Props> = () => {
   dataSetRef.current = logTableDs;
 
   const renderStatus = useCallback(({ value }) => (
-    <span className={styles.status} style={{ background: StatusMap.get('value')?.color }}>
-      {StatusMap.get('value')?.text}
+    <span className={styles.status} style={{ background: StatusMap.get(value)?.color }}>
+      {StatusMap.get(value)?.text}
     </span>
   ), []);
 
