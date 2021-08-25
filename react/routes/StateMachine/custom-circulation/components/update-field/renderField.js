@@ -8,8 +8,8 @@ import SelectUser from '@/components/select/select-user';
 import SelectEnvironment from '@/components/select/select-environment';
 import SelectProgramVersion from '@/components/select/select-program-version';
 import { userApi } from '@/api';
-import SelectCustomField from '@/components/select/select-custom-field';
 import styles from './index.less';
+import { getAgileFields } from '@/components/field-pro';
 
 const { Option } = Select;
 const singleList = ['radio', 'single'];
@@ -302,22 +302,22 @@ export default function renderField({
       const options = [...(!required ? [{ id: 'clear', value: '清空', enabled: true }] : []), ...(fieldOptions || [])];
       const isMultiple = !(singleList.indexOf(fieldType) !== -1);
       if (fieldOptions?.length && !system) {
-        return (
-          <SelectCustomField
-            searchable
-            placeholder="字段值"
-            label="字段值"
-            name={code}
-            style={{ width: '100%' }}
-            multiple={isMultiple}
-            maxTagCount={2}
-            maxTagTextLength={10}
-            onOption={({ record }) => ({
+        return getAgileFields([], [], {
+          fieldType,
+          outputs: ['element'],
+          props: {
+            searchable: true,
+            style: { width: '100%' },
+            placeholder: '字段值',
+            label: '字段值',
+            maxTagCount: 2,
+            maxTagTextLength: 10,
+            onOption: ({ record }) => ({
               disabled: isMultiple && data[code].value && ((data[code].value.indexOf('clear') > -1 && record.get(clearIdMap.get(code) || 'value') !== 'clear') || (data[code].value.indexOf('clear') === -1 && record.get(clearIdMap.get(code) || 'value') === 'clear')),
-            })}
-            fieldOptions={options.map((item) => ({ ...item, id: item.tempKey ?? item.id }))}
-          />
-        );
+            }),
+            fieldOptions: options.map((item) => ({ ...item, id: item.tempKey ?? item.id })),
+          },
+        });
       }
       return (
         <Select

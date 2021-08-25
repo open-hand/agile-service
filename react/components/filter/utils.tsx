@@ -1,12 +1,11 @@
 import React from 'react';
 import { Icon } from 'choerodon-ui/pro';
 import classNames from 'classnames';
-import { IFilter } from '@/components/filter';
 import { find, map, castArray } from 'lodash';
-import InputField from '@/components/issue-search/custom-fields/field/InputField';
-import NumberField from '@/components/issue-search/custom-fields/field/NumberField';
+import { IFilter } from '@/components/filter';
 import { IFilterField, ICustomField } from './index';
 import { IRenderFields } from './Filter';
+import { getSearchFields } from '../field-pro/layouts';
 /* eslint-disable camelcase */
 export function getFlatElement(field: IFilterField, element: React.ReactNode) {
   if (field.system) {
@@ -14,12 +13,10 @@ export function getFlatElement(field: IFilterField, element: React.ReactNode) {
   }
   switch (field.fieldType) {
     case 'number':
-      // @ts-ignore
-      return <NumberField />;
+      return getSearchFields([field])[0];
     case 'input':
     case 'text':
-      // @ts-ignore
-      return <InputField />;
+      return getSearchFields([field])[0];
     default: {
       return element;
     }

@@ -42,7 +42,8 @@ export type IFieldConfig<T extends IComponentFCWithClassObject,
     F extends IComponentFCWithClassObject = IComponentFCWithClassObject> = IFieldSystemConfig<T> | IFieldCustomConfig<F>
 
 type IFieldProcessConfig<T extends IComponentFCWithClassObject, C extends IComponentFCWithClassObject = IComponentFCWithClassObject> = IFieldRequiredConfig & IFieldPartialConfig & Required<Pick<IFieldPartialConfig, 'display'>> & IFieldComponentConfig<T, C> // 需要补充处理过后类型
-export type IFieldOutput<T extends IComponentFCWithClassObject> = React.ReactElement | IFieldProcessConfig<T> | ((config: IFieldProcessConfig<T>) => React.ReactElement)
+export type IFieldOutputFunction<T> = (config: IFieldProcessConfig<T>, element?: React.ReactElement) => React.ReactElement
+export type IFieldOutput<T extends IComponentFCWithClassObject> = React.ReactElement | IFieldProcessConfig<T> | IFieldOutputFunction<T>
 
 export type ISingleOrArray<T> = T | Array<T>
 
