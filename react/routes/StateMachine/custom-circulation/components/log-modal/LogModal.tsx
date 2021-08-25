@@ -144,21 +144,24 @@ const LogTable: React.FC<Props> = () => {
       >
         <Column name="creationDate" lock width={150} tooltip={'overflow' as TableColumnTooltip} />
         <Column name="content" lock width={480} tooltip={'overflow' as TableColumnTooltip} />
-        <Column name="statusCode" width={130} renderer={renderStatus} tooltip={'overflow' as TableColumnTooltip} />
+        <Column name="statusCode" width={100} renderer={renderStatus} tooltip={'overflow' as TableColumnTooltip} />
         <Column
           name="preIssueId"
           // @ts-ignore
           renderer={({ record }) => renderIssue({ record }, 'pre')}
+          width={200}
         />
         <Column
           name="curIssueId"
           // @ts-ignore
           renderer={({ record }) => renderIssue({ record }, 'cur')}
+          width={200}
         />
         <Column
           name="remark"
           // @ts-ignore
           renderer={renderRemark}
+          width={200}
         />
       </Table>
     </div>
