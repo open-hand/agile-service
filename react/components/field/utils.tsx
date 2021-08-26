@@ -1,17 +1,12 @@
 import React from 'react';
-import {
-  Select,
-} from 'choerodon-ui/pro';
 import moment, { Moment } from 'moment';
 import { IFilterField } from '../filter';
 import { getFilterFields } from '../field-pro/layouts';
 
-const { Option } = Select;
 export function getFieldElement(field: IFilterField, flat?: boolean): React.ReactNode {
   const {
     code, fieldType, system,
   } = field;
-  console.log('field...', field);
   return getFilterFields([{ field, otherComponentProps: { flat } }])[0];
 }
 function encodeDate(date: string, isTime: boolean): Moment

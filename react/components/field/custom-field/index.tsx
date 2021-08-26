@@ -1,8 +1,3 @@
-import { IFieldType } from '@/common/types';
-import SelectUser from '@/components/select/select-user';
-import UserTag from '@/components/tag/user-tag';
-import TextEditToggle from '@/components/TextEditTogglePro';
-import { Action } from '@/components/TextEditTogglePro/TextEditToggle';
 import {
   DatePicker, DateTimePicker, NumberField, Select, SelectBox, TextArea, TextField, TimePicker,
 } from 'choerodon-ui/pro';
@@ -10,6 +5,11 @@ import { FormFieldProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { omit } from 'lodash';
 import moment from 'moment';
 import React, { forwardRef } from 'react';
+import { IFieldType } from '@/common/types';
+import SelectUser from '@/components/select/select-user';
+import UserTag from '@/components/tag/user-tag';
+import TextEditToggle from '@/components/TextEditTogglePro';
+import { Action } from '@/components/TextEditTogglePro/TextEditToggle';
 
 export { IFieldType };
 const getEditorByFieldType = (fieldType: IFieldType, outside: boolean) => {
@@ -70,6 +70,9 @@ const transformValue = (fieldType: IFieldType, value: string | [] | undefined) =
   }
   return value;
 };
+/**
+ * @deprecated 后续将废弃，融合迁移到 `field-pro`
+ */
 const CustomField: React.FC<Props> = forwardRef(({
   field, mode = 'create', disabled, onSubmit, outside = false, ...otherProps
 }, ref) => {

@@ -3,10 +3,11 @@ import {
   get, merge, omit,
 } from 'lodash';
 import moment from 'moment';
-import { getAgileFields } from '../base';
+import getFieldsInstance, { getAgileFields } from '../base';
 import {
   commonApi, epicApi, statusApi, userApi,
 } from '@/api';
+import { IFieldProcessConfig } from '../base/type';
 
 function getFieldConfig({
   field, props: { projectId, applyType, value },
@@ -162,10 +163,15 @@ function wrapDateToFlatDate(fieldConfig: any, wrapElementFn: (config: any) => JS
   }
   return React.createElement(FlatDateRangePicker, { ...fieldConfig.props });
 }
-const AgileBaseSearchInstance = {
+const AgileBaseSearchInstance: IAgileBaseSearchFieldInstance = {
   fieldInstance: getAgileFields,
   configInstance: getFieldConfig,
 };
+const fieldInstanceHelpType = getFieldsInstance<any, any, any>();
+export interface IAgileBaseSearchFieldInstance {
+  fieldInstance: typeof fieldInstanceHelpType
+  configInstance: (field: { field: any, props: any }) => IFieldProcessConfig<any, any> | {}
+}
 /**
    *  获取搜索的字段
    * @param fields
@@ -191,7 +197,7 @@ function getSearchFields(fields: any[], fieldCodeProps?: Record<string, any>, in
       flat: true,
       ...['single', 'multiple', 'radio', 'checkbox', 'member', 'multiMember'].includes(field.fieldType) ? selectProps : {},
     }, codeProps);
-    const config = configInstance({ field, props });
+    const config = configInstance({ field, props }) as IFieldProcessConfig<any, any>;
     return {
       code: config.code ?? field.code,
       fieldType: field.fieldType,

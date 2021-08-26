@@ -19,6 +19,11 @@ interface IFieldProps extends Partial<FormFieldProps> {
   render?: (field: IFilterField, element: React.ReactNode) => React.ReactNode
   flat?: boolean
 }
+/**
+ * @deprecated 后续将废弃，融合迁移到 `field-pro`
+ * @param param0
+ * @returns
+ */
 const Field: React.FC<IFieldProps> = ({
   field, mode, value, onChange, render, flat, ...otherProps
 }) => {
