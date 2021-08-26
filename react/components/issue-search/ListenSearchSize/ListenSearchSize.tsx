@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { useSize } from 'ahooks';
+import { useDebounceEffect, useSize } from 'ahooks';
 import { BasicTarget } from 'ahooks/lib/utils/dom';
 import IssueSearchContext from '../context';
 
@@ -12,10 +12,9 @@ const ListenSize: React.FC = () => {
   }, [searchEle]);
 
   const searchSize = useSize(searchEle as BasicTarget);
-
-  useEffect(() => {
+  useDebounceEffect(() => {
     store.setOverflowLine((searchSize.height || 0) > 50);
-  }, [searchSize.height, store]);
+  }, [searchSize.height, store], { wait: 410 });
 
   return (
     <div />
