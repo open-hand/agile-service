@@ -7,6 +7,8 @@ import { observer } from 'mobx-react-lite';
 import { stores, Choerodon, WSHandler } from '@choerodon/boot';
 import { usePersistFn } from 'ahooks';
 import { Spin } from 'choerodon-ui/pro';
+import JSONbig from 'json-bigint';
+import { reverse } from 'lodash';
 import openCreateSubTask from '@/components/create-sub-task';
 import './EditIssue.less';
 import {
@@ -19,6 +21,9 @@ import IssueHeader from './IssueComponent/IssueHeader';
 import IssueBody from './IssueComponent/IssueBody/IssueBody';
 import EditIssueContext from './stores';
 import { getProjectId } from '@/utils/common';
+
+const JSONbigString = JSONbig({ storeAsString: true });
+
 // 项目加入群之后，不关联自己的史诗和特性，只能关联项目群的，不能改关联的史诗
 const { AppState } = stores;
 
@@ -238,6 +243,7 @@ function EditIssue() {
   const rightDisabled = disabled || (isInProgram && (typeCode === 'issue_epic' || typeCode === 'feature'));
   useEffect(() => {
     function updateBefore() {
+      store.setUpdateLoaded(false);
       setIssueLoading(true);
     }
     async function updateAfter(result) {
@@ -250,7 +256,8 @@ function EditIssue() {
         onUpdate(result);
       }
       if (loadIssueDetail) {
-        loadIssueDetail(issueId);
+        await loadIssueDetail(issueId);
+        store.setUpdateLoaded(true);
       }
       return result;
     }
@@ -313,10 +320,23 @@ function EditIssue() {
     });
   });
 
-  const handleMessage = usePersistFn(() => {
-    console.log('handleMessage');
-    // TODO:
-    // store.setIssueFields(issue, fields);
+  const handleMessage = usePersistFn((message) => {
+    const data = JSONbigString.parse(message);
+    store.setUpdateMessage({ ...store.updateMessage, ...(data.issue || {}) });
+    store.setUpdateFieldsAndValue([...store.updateFieldsAndValue, ...(data.customFields || [])]);
+
+    if (store.updateLoaded) {
+      const newFields = store.fields.map((item) => {
+        const newFieldAndValue = reverse(store.updateFieldsAndValue || []).find((field) => field.fieldId === item.fieldId);
+        if (newFieldAndValue) {
+          return newFieldAndValue;
+        }
+        return item;
+      });
+      store.setIssueFields({ ...issue, ...store.updateMessage }, newFields);
+      store.setUpdateMessage({});
+      store.setUpdateFieldsAndValue([]);
+    }
   });
 
   return (
@@ -387,7 +407,7 @@ function EditIssue() {
           onOpenCreateSubBug={handleOpenCreateSubBug}
         />
         <WSHandler
-          messageKey={`agile-batch-delete-issue-${getProjectId()}`}
+          messageKey={`agile-issue-update-by-trigger-${getProjectId()}`}
           onMessage={handleMessage}
         >
           <div />
