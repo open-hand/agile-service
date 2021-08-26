@@ -182,8 +182,12 @@ public class AgileEventHandler {
         LOGGER.info("分支合并变更issue状态，{}", message);
         Long projectId = devopsMergeRequestPayload.getProjectId();
         List<Long> issueIds = devopsMergeRequestPayload.getIssueIds();
-        if (!ObjectUtils.isEmpty(issueIds)) {
-            issueIds.forEach(x -> statusBranchMergeSettingService.handleBranchMergeEvent(projectId, x));
+        try {
+            if (!ObjectUtils.isEmpty(issueIds)) {
+                issueIds.forEach(x -> statusBranchMergeSettingService.handleBranchMergeEvent(projectId, x));
+            }
+        } catch (Exception e) {
+            LOGGER.error("update issue status error when branch merge, exception: {}", e);
         }
         return message;
     }
