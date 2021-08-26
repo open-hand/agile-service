@@ -3,9 +3,9 @@ import {
 } from 'choerodon-ui/pro';
 import { toJS } from 'mobx';
 import { find, groupBy } from 'lodash';
-import { useCallback } from 'react';
-import getFieldsInstance, { getAgileFields } from '../base';
+import { getAgileFields } from '../base';
 import { IChosenFieldField } from '@/components/chose-field/types';
+import { statusApi } from '@/api';
 
 function renderField(field: IChosenFieldField, dataSet?: DataSet) {
   const {
@@ -17,16 +17,16 @@ function renderField(field: IChosenFieldField, dataSet?: DataSet) {
       case 'sprint':
       case 'sprintList':
         return {
-          code: 'sprint', name: code, fieldType, statusList: [], isProgram: code === 'sprintList', multiple: true, hasUnassign: true, selectSprints: value,
+          code: 'sprint', fieldType, statusList: [], isProgram: code === 'sprintList', hasUnassign: true, selectSprints: value,
         };
       case 'statusId':
       case 'statusList':
         return {
           code: 'status',
-          name: code,
+
           fieldType,
-          isProgram: code === 'statusList',
-          multiple: true,
+          request: () => statusApi.loadByProject(code === 'statusList' ? 'program' : 'agile'),
+
           issueTypeIds: (dataSet?.current?.get('issueTypeList') ?? dataSet?.current?.get('issueTypeId')) ?? undefined,
           selectedIds: dataSet?.current?.get('statusList') ?? dataSet?.current?.get('statusId'),
         };
@@ -34,31 +34,26 @@ function renderField(field: IChosenFieldField, dataSet?: DataSet) {
       case 'issueTypeList':
         return {
           code: 'issueType',
-          name: code,
           isProgram: code === 'issueTypeList',
           filterList: code === 'issueTypeList' ? [] : undefined,
-          multiple: true,
+
         };
       case 'epic':
       case 'epicList':
         return {
           code: 'epic',
-          name: code,
           isProgram: code === 'epicList',
           unassignedEpic: true,
-          multiple: true,
         };
       case 'priorityId':
         return {
           code: 'priority',
-          name: code,
-          multiple: true,
+
         };
       case 'label':
         return {
           code: 'label',
-          name: code,
-          multiple: true,
+
           valueField: 'labelId',
         };
       case 'component':
@@ -67,15 +62,14 @@ function renderField(field: IChosenFieldField, dataSet?: DataSet) {
       case 'influenceVersion':
         return {
           code: 'version',
-          name: code,
+
           valueField: 'versionId',
           hasUnassign: true,
         };
       case 'feature': {
         return {
           code: 'feature',
-          name: code,
-          multiple: true,
+
           featureIds: defaultValue,
         };
       }
@@ -83,14 +77,13 @@ function renderField(field: IChosenFieldField, dataSet?: DataSet) {
         return {
           code: 'subProject',
           name: 'teamProjectList',
-          multiple: true,
+
         };
       }
       case 'piList': {
         return {
           code: 'pi',
-          name: code,
-          multiple: true,
+
           afterLoad: (piList: any[]) => {
             if (!dataSet?.current?.getState(`init_${code}`) && !defaultValue && Array.isArray(piList) && piList.length > 0) {
               const data = find(piList, { statusCode: 'doing' }) ?? piList[0];
@@ -105,14 +98,14 @@ function renderField(field: IChosenFieldField, dataSet?: DataSet) {
       case 'myStarBeacon': {
         return {
           code: 'quickFilter',
-          name: code,
+
           disabledRequest: code === 'myStarBeacon',
         };
       }
       case 'myAssigned': {
         return {
           code: 'quickFilter',
-          name: code,
+
           disabledRequest: code === 'myAssigned',
         };
       }
@@ -120,13 +113,13 @@ function renderField(field: IChosenFieldField, dataSet?: DataSet) {
       //   return <CheckBox label="我的关注" name={code} />;
       // }
       case 'environment': {
-        return { code: 'environment', name: code, multiple: true };
+        return { code: 'environment', multiple: true };
       }
       case 'programVersion': {
-        return { code: 'programVersion', name: code, multiple: true };
+        return { code: 'programVersion', multiple: true };
       }
       case 'tags': {
-        return { code: 'tag', name: code, multiple: true };
+        return { code: 'tag', multiple: true };
       }
       // case 'contents': {
       //   return <TextField name={code} clearButton {...otherComponentProps} />;
@@ -136,16 +129,8 @@ function renderField(field: IChosenFieldField, dataSet?: DataSet) {
     }
   }
   switch (fieldType) {
-    case 'input':
-      return { maxLength: 100, valueChangeAction: 'input' as any };
-
-    case 'text':
-      return { rows: 3, maxLength: 255, valueChangeAction: 'input' as any };
-
     case 'radio': case 'single': case 'checkbox': case 'multiple':
-      // @ts-ignore
-      return { fieldId: field.id, selected: defaultValue ?? field.valueBindValue, onlyEnabled: false }; // valueBindValue 是快速筛选处的值 TODO 后续去掉
-
+      return { fieldId: field.id, selected: defaultValue ?? (field as any).valueBindValue, onlyEnabled: false }; // valueBindValue 是快速筛选处的值 TODO 后续去掉
     case 'multiMember':
     case 'member':
     {
@@ -168,7 +153,6 @@ function getFilterFields(fields: any[], fieldCodeProps?: Record<string, any>, in
     const config = renderField(field.field, field.dataSet);
     const { code = field.field.code, name = field.field.code, ...otherProps } = config;
     return {
-      system: !field.field.id,
       code,
       fieldType: field.field.fieldType,
       props: {
@@ -183,8 +167,8 @@ function getFilterFields(fields: any[], fieldCodeProps?: Record<string, any>, in
       outputs: ['element'],
     };
   }) as any[];
-  const { system, custom } = groupBy(newFilters, (item) => (item.system ? 'system' : 'custom'));
-  return instance([], system, custom).map((i) => i[0]);
+  // const { system, custom } = groupBy(newFilters, (item) => (item.system ? 'system' : 'custom'));
+  return instance(newFilters).map((i) => i[0]);
   // return getFields(newFilters).map((i, index) => React.createElement(i[0] as any,
   //   { ...getProps(fields[index].code, fieldCodeProps) })) as JSX.Element[];
 }
