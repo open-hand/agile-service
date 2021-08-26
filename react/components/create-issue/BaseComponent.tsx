@@ -300,8 +300,8 @@ const CreateIssueBase = observer(({
   useEffect(() => {
     const oldDataSet = dataSetRef.current;
     const newDataSet = new DataSet({
-      autoCreate: false,
-      fields: fields ? insertField([...fields.map((field) => {
+      autoCreate: false, // 当显示特性的时候,并且是子项目 则过滤史诗
+      fields: fields ? insertField([...fields.filter((field) => (showFeature && isInProgram ? field.fieldCode !== 'epic' : true)).map((field) => {
         const preset = presets.get(field.fieldCode) ?? {};
         return merge(preset, {
           name: field.fieldCode,
@@ -375,7 +375,7 @@ const CreateIssueBase = observer(({
     // 创建一个新的
     newDataSet.create(newValue);
     setDataSet(newDataSet);
-  }, [defaultFeature, fields, getDefaultValue, handleUpdate, isShowFeature, isSubIssue, issueTypeCode, parentIssue, rules, showFeature, templateData]);
+  }, [defaultFeature, fields, getDefaultValue, handleUpdate, isInProgram, isShowFeature, isSubIssue, issueTypeCode, parentIssue, rules, showFeature, templateData]);
   const getIssueLinks = usePersistFn(() => {
     const links = issueLinkDataSet.toData() as {
       issueIds: string[]
