@@ -322,20 +322,22 @@ function EditIssue() {
 
   const handleMessage = usePersistFn((message) => {
     const data = JSONbigString.parse(message);
-    store.setUpdateMessage({ ...store.updateMessage, ...(data.issue || {}) });
-    store.setUpdateFieldsAndValue([...store.updateFieldsAndValue, ...(data.customFields || [])]);
+    if (data.issue?.issueId === issueId) {
+      store.setUpdateMessage({ ...store.updateMessage, ...(data.issue || {}) });
+      store.setUpdateFieldsAndValue([...store.updateFieldsAndValue, ...(data.customFields || [])]);
 
-    if (store.updateLoaded) {
-      const newFields = store.fields.map((item) => {
-        const newFieldAndValue = reverse(store.updateFieldsAndValue || []).find((field) => field.fieldId === item.fieldId);
-        if (newFieldAndValue) {
-          return newFieldAndValue;
-        }
-        return item;
-      });
-      store.setIssueFields({ ...issue, ...store.updateMessage }, newFields);
-      store.setUpdateMessage({});
-      store.setUpdateFieldsAndValue([]);
+      if (store.updateLoaded) {
+        const newFields = store.fields.map((item) => {
+          const newFieldAndValue = reverse(store.updateFieldsAndValue || []).find((field) => field.fieldId === item.fieldId);
+          if (newFieldAndValue) {
+            return newFieldAndValue;
+          }
+          return item;
+        });
+        store.setIssueFields({ ...issue, ...store.updateMessage }, newFields);
+        store.setUpdateMessage({});
+        store.setUpdateFieldsAndValue([]);
+      }
     }
   });
 
