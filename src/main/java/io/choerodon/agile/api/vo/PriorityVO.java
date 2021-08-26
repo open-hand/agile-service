@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -11,7 +12,7 @@ import java.math.BigDecimal;
  * @author cong.cheng
  * @Date 2018/8/21
  */
-
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PriorityVO implements Serializable{
     @ApiModelProperty(value = "优先级id")
     @Encrypt

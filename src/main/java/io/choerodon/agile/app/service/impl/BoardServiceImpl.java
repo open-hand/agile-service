@@ -1,30 +1,12 @@
 package io.choerodon.agile.app.service.impl;
 
-import static java.util.Comparator.*;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.choerodon.agile.api.validator.BoardValidator;
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.IssueVO;
-import io.choerodon.agile.api.vo.event.StatusPayload;
-import io.choerodon.agile.app.assembler.BoardAssembler;
-import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.enums.SchemeApplyType;
-import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.*;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.CustomUserDetails;
-import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
-import org.hzero.core.message.MessageAccessor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +17,25 @@ import org.springframework.util.ObjectUtils;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsFirst;
+
+import io.choerodon.agile.api.validator.BoardValidator;
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.api.vo.event.StatusPayload;
+import io.choerodon.agile.app.assembler.BoardAssembler;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
+import io.choerodon.agile.infra.utils.*;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.CustomUserDetails;
+import io.choerodon.core.oauth.DetailsHelper;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/14.
@@ -358,13 +359,38 @@ public class BoardServiceImpl implements BoardService {
         return parentIssueDTOList;
     }
 
-    private List<ColumnIssueNumDTO> getAllColumnNum(Long projectId, Long boardId, Long sprintId) {
+    private List<ColumnIssueNumDTO> getAllColumnNum(List<ColumnAndIssueDTO> columns, Long projectId, Long boardId, Long sprintId) {
         BoardDTO boardDTO = boardMapper.selectByPrimaryKey(boardId);
-        if (!CONTRAINT_NONE.equals(boardDTO.getColumnConstraint())) {
-            return boardColumnMapper.getAllColumnNum(projectId, boardId, sprintId, boardDTO.getColumnConstraint());
-        } else {
+        if (CONTRAINT_NONE.equals(boardDTO.getColumnConstraint())) {
             return new ArrayList<>();
         }
+        Map<Long, ColumnIssueNumDTO> statusCountMap = new HashMap<>(columns.size() * 2);
+        List<ColumnIssueNumDTO> columnIssueNumList = new ArrayList<>();
+        Set<Long> statusIds = new HashSet<>();
+        columns.forEach(column -> {
+            ColumnIssueNumDTO columnIssueNum = new ColumnIssueNumDTO();
+            columnIssueNum.setColumnId(column.getColumnId());
+            columnIssueNum.setIssueCount(0L);
+            columnIssueNumList.add(columnIssueNum);
+            if (!CollectionUtils.isEmpty(column.getSubStatusDTOS())) {
+                column.getSubStatusDTOS().forEach(status -> {
+                    if (status.getStatusId() == null) {
+                        return;
+                    }
+                    statusCountMap.put(status.getStatusId(), columnIssueNum);
+                    statusIds.add(status.getStatusId());
+                });
+            }
+        });
+        List<IssueCountStatusVO> issueCountList = boardColumnMapper.getColumnNumByStatus(statusIds, projectId, sprintId, boardDTO.getColumnConstraint());
+        issueCountList.forEach(issueCount -> {
+            ColumnIssueNumDTO columnIssueNumDTO = statusCountMap.get(issueCount.getStatusId());
+            if (columnIssueNumDTO == null) {
+                return;
+            }
+            columnIssueNumDTO.setIssueCount(columnIssueNumDTO.getIssueCount() + issueCount.getIssueCount());
+        });
+        return columnIssueNumList;
     }
 
     @Override
@@ -381,7 +407,8 @@ public class BoardServiceImpl implements BoardService {
         List<Long> parentIds = new ArrayList<>();
         List<Long> epicIds = new ArrayList<>();
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnsByBoardId(projectId, boardId, currentSprint.getSprintId(), filterSql, searchVO, searchVO.getAssigneeFilterIds(), userId);
+        List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnInfoByBoardId(projectId, boardId);
+        setColumnIssue(columns, projectId, currentSprint.getSprintId(), filterSql, searchVO, searchVO.getAssigneeFilterIds(), userId);
         Boolean condition = handlerAssigneeAndStory(searchVO);
         Map<Long, List<Long>> parentWithSubs = new HashMap<>();
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
@@ -393,7 +420,7 @@ public class BoardServiceImpl implements BoardService {
         jsonObject.put("parentWithSubs", EncryptionUtils.encryptMap(parentWithSubs));
         jsonObject.put("parentCompleted", EncryptionUtils.encryptList(sortAndJudgeCompleted(projectId, parentIds)));
         jsonObject.put("epicInfo", !epicIds.isEmpty() ? boardColumnMapper.selectEpicBatchByIds(epicIds) : null);
-        jsonObject.put("allColumnNum", getAllColumnNum(projectId, boardId, currentSprint.getSprintId()));
+        jsonObject.put("allColumnNum", getAllColumnNum(columns, projectId, boardId, currentSprint.getSprintId()));
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(assigneeIds, true);
         Comparator<IssueForBoardDO> comparator = Comparator.comparing(IssueForBoardDO::getRank, nullsFirst(naturalOrder()));
         columns.forEach(columnAndIssueDTO ->
@@ -422,6 +449,35 @@ public class BoardServiceImpl implements BoardService {
         //处理用户默认看板设置，保存最近一次的浏览
         handleUserSetting(boardId, projectId);
         return jsonObject;
+    }
+
+    private void setColumnIssue(List<ColumnAndIssueDTO> columns, Long projectId, Long sprintId, String filterSql, SearchVO searchVO, List<Long> assigneeFilterIds, Long userId) {
+        if (CollectionUtils.isEmpty(columns)){
+            return;
+        }
+        Map<Long, List<IssueForBoardDO>> issueStatusMap = new HashMap<>(columns.size() * 2);
+        Set<Long> statusIds = new HashSet<>();
+        columns.forEach(column -> {
+            if (!CollectionUtils.isEmpty(column.getSubStatusDTOS())){
+                column.getSubStatusDTOS().forEach(status -> {
+                    status.setIssues(new ArrayList<>());
+                    if (status.getStatusId() == null) {
+                        return;
+                    }
+                    statusIds.add(status.getStatusId());
+                    issueStatusMap.put(status.getStatusId(), status.getIssues());
+                });
+            }
+        });
+        List<IssueForBoardDO> issueList = boardColumnMapper.selectBoardIssue(projectId, sprintId, filterSql, searchVO, assigneeFilterIds, userId, statusIds);
+        if (CollectionUtils.isEmpty(issueList)){
+            return;
+        }
+        issueList.forEach(issue -> {
+            List<IssueForBoardDO> statusIssueList = issueStatusMap.computeIfAbsent(issue.getStatusId(), k -> new ArrayList<>());
+            issue.setStatusId(null);
+            statusIssueList.add(issue);
+        });
     }
 
     private SprintDTO handlerCurrentSprint(Long projectId, SearchVO searchVO) {

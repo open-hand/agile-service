@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
  * Created by HuangFuqiang@choerodon.io on 2018/5/14.
  * Email: fuqianghuang01@gmail.com
  */
-
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ColumnAndIssueDTO {
     @Encrypt
     private Long columnId;

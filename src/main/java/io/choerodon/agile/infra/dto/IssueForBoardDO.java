@@ -3,6 +3,7 @@ package io.choerodon.agile.infra.dto;
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.PriorityVO;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Date;
@@ -11,6 +12,7 @@ import java.util.Date;
  * Created by HuangFuqiang@choerodon.io on 2018/5/14.
  * Email: fuqianghuang01@gmail.com
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class IssueForBoardDO {
 
     @Encrypt
@@ -71,6 +73,9 @@ public class IssueForBoardDO {
     private Long relateIssueId;
 
     private Boolean starBeacon;
+
+    @Encrypt
+    private Long statusId;
 
     public Boolean getStarBeacon() {
         return starBeacon;
@@ -278,5 +283,13 @@ public class IssueForBoardDO {
 
     public void setEstimatedEndTime(Date estimatedEndTime) {
         this.estimatedEndTime = estimatedEndTime;
+    }
+
+    public Long getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(Long statusId) {
+        this.statusId = statusId;
     }
 }
