@@ -37,9 +37,9 @@ function add(num1, num2) {
         </div>
         <div className="c7n-value-wrapper" style={{ paddingLeft: '0.05rem' }}>
           <span style={{ flex: 1 }}>
-            {workloads}
+            {Number(workloads).toFixed(2)}
             {'小时/'}
-            {workloads + (remainingTime || 0)}
+            {Number(workloads + (remainingTime || 0)).toFixed(2)}
             {'小时'}
           </span>
           {
