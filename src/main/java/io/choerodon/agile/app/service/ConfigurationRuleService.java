@@ -82,5 +82,7 @@ public interface ConfigurationRuleService {
                                               NoticeEventVO noticeEvent,
                                               Set<Long> ruleIdsFindByMemberFields,
                                               boolean checkMode);
+
+    Map<Long, Map<String, String>> selectDataMapByIds(Set<Long> backlogIds);
 }
 
