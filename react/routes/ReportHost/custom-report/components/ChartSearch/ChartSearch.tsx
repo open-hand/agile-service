@@ -1,5 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
+import classNames from 'classnames';
 import IssueSearch, { useIssueSearchStore } from '@/components/issue-search';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { transformFilter } from '@/routes/Issue/stores/utils';
@@ -11,10 +12,11 @@ export interface CustomReportSearchProps {
   projectId?: string
   searchVO?: ISearchVO
   setSearchVO: (searchVO: ISearchVO) => void
+  searchCls?: string
 }
 
 const ChartSearch: React.FC<CustomReportSearchProps> = ({
-  searchVO, setSearchVO, projectId,
+  searchVO, setSearchVO, projectId, searchCls,
 }) => {
   const issueSearchStore = useIssueSearchStore({
     projectId,
@@ -24,7 +26,7 @@ const ChartSearch: React.FC<CustomReportSearchProps> = ({
     getSystemFields: () => getSystemFields().filter((f) => !['contents'].includes(f.code)),
   });
   return (
-    <div className={styles.chartSearch}>
+    <div className={classNames(styles.chartSearch, searchCls)}>
       <IssueSearch
         projectId={projectId}
         applyType="agile"

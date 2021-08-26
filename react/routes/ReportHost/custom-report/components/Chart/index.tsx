@@ -11,12 +11,14 @@ export interface ChartProps {
   chartType?: IChartType,
   type?: IChartUnit,
   option?: EChartOption
+  chartCls?: string
 }
 
 const Chart: React.FC<ChartProps> = ({
   loading,
   option,
   data,
+  chartCls,
 }) => {
   const getFontSize = useFontSize();
   const FontSize = getFontSize(12);
@@ -27,7 +29,7 @@ const Chart: React.FC<ChartProps> = ({
     ...(option || {}),
   });
   return (
-    <div style={{ padding: '10px 20px 20px 10px' }}>
+    <div style={{ padding: '10px 20px 20px 10px' }} className={chartCls}>
       <Spin spinning={loading}>
         <ReactEcharts option={getOption()} key={`${JSON.stringify(data)}-${JSON.stringify(option)}`} />
       </Spin>
