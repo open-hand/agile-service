@@ -1,14 +1,14 @@
-import { fieldApi } from '@/api';
-import SelectUser from '@/components/select/select-user';
-import UserTag from '@/components/tag/user-tag';
-import TextEditToggle from '@/components/TextEditTogglePro';
 import {
   DatePicker, DateTimePicker, NumberField, TextArea, TextField, TimePicker,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react';
 import moment from 'moment';
-import { MAX_NUMBER_VALUE, MAX_NUMBER_STEP } from '@/constants/MAX_VALUE';
 import React, { Component } from 'react';
+import { fieldApi } from '@/api';
+import SelectUser from '@/components/select/select-user';
+import UserTag from '@/components/tag/user-tag';
+import TextEditToggle from '@/components/TextEditTogglePro';
+import { MAX_NUMBER_VALUE, MAX_NUMBER_STEP } from '@/constants/MAX_VALUE';
 import SelectCustomField from '@/components/select/select-custom-field';
 import SelectCustomFieldBox from '@/components/select/select-custom-field-box';
 
@@ -46,13 +46,15 @@ const EditorMap = new Map([
       value: newValue,
     };
     setIssueLoading(true);
+    store.setUpdateLoaded(false);
     fieldApi.updateFieldValue(issueId, fieldId, fieldCode, 'agile_issue', obj)
-      .then(() => {
+      .then(async () => {
         if (onUpdate) {
           onUpdate();
         }
         if (reloadIssue) {
-          reloadIssue(issueId);
+          await reloadIssue(issueId);
+          store.setUpdateLoaded(true);
         }
       }).catch(() => {
         setIssueLoading(false);

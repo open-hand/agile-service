@@ -65,13 +65,15 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
       }
       if (transformId) {
         setIssueLoading(true);
+        store.setUpdateLoaded(false);
         issueApi.updateStatus(transformId, issueId, objectVersionNumber, applyType)
-          .then((res) => {
+          .then(async (res) => {
             if (onUpdate) {
               onUpdate(res);
             }
             if (reloadIssue) {
-              reloadIssue(issueId);
+              await reloadIssue(issueId);
+              store.setUpdateLoaded(true);
             }
           });
       }

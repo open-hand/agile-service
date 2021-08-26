@@ -3,7 +3,7 @@ import {
 } from 'mobx';
 import {
   every,
-  filter, find, includes, map, castArray,
+  filter, find, includes, map, castArray, reverse,
 } from 'lodash';
 import { Choerodon } from '@choerodon/boot';
 import { issueApi, uiApi } from '@/api';
@@ -63,9 +63,31 @@ class EditIssueStore {
   // fields
   @observable fields = [];
 
+  // 存触发器触发的其他字段改变的信息
+  @observable updateMessage = {};
+
+  @action setUpdateMessage = (updateMessage) => {
+    this.updateMessage = updateMessage;
+  }
+
+  @observable updateFieldsAndValue = [];
+
+  @action setUpdateFieldsAndValue = (data) => {
+    this.updateFieldsAndValue = data;
+  }
+
   @action setIssueFields(issue, fields) {
-    this.fields = fields;
-    this.issue = issue;
+    const newFields = fields.map((item) => {
+      const newFieldAndValue = reverse(this.updateFieldsAndValue || []).find((field) => field.fieldId === item.fieldId);
+      if (newFieldAndValue) {
+        return newFieldAndValue;
+      }
+      return item;
+    });
+    this.fields = newFields;
+    this.issue = { ...issue, ...this.updateMessage };
+    this.updateMessage = {};
+    this.updateFieldsAndValue = [];
   }
 
   getFieldByCode(code) {
@@ -305,6 +327,13 @@ class EditIssueStore {
 
   setRefreshBranch(refreshBranch) {
     this.refreshBranch = refreshBranch;
+  }
+
+  // 更新的话，重新加载数据有没有加载完
+  @observable updateLoaded = false;
+
+  @action setUpdateLoaded = (loaded) => {
+    this.updateLoaded = loaded;
   }
 
   async update(data, ignoreEvents = []) {
