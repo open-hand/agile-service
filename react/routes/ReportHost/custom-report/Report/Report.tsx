@@ -361,7 +361,7 @@ const CustomReport: React.FC<Props> = (props) => {
             )}
             {
               mode === 'read' && (
-                <ChartSearch {...searchProps} />
+                <ChartSearch {...searchProps} searchCls="searchCls" />
               )
             }
             <div className={styles.main}>
