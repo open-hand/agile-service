@@ -1137,11 +1137,20 @@
                 #{evm}
             </foreach>
         </if>
+
         <if test='searchVO.otherArgs.excludeIssueIds != null and searchVO.otherArgs.excludeIssueIds.size > 0'>
             AND ai.issue_id not in
             <foreach collection="searchVO.otherArgs.excludeIssueIds" item="issueId" open="(" separator=","
                      close=")">
                 #{issueId}
+            </foreach>
+        </if>
+
+        <if test='searchVO.otherArgs.excludeTypeCodes != null and searchVO.otherArgs.excludeTypeCodes.size > 0'>
+            AND ai.type_code not in
+            <foreach collection="searchVO.otherArgs.excludeTypeCodes" item="excludeTypeCode" open="(" separator=","
+                     close=")">
+                #{excludeTypeCode}
             </foreach>
         </if>
 
