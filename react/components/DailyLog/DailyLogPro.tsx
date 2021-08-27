@@ -66,7 +66,7 @@ const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = 
     autoCreate: true,
     fields: [
       {
-        name: 'spendTime', label: '耗费时间', required: true, type: 'number' as FieldType,
+        name: 'spendTime', label: '耗费时间', required: true, type: 'number' as FieldType, pattern: /(^\d{1,3}\.{1}\d{1}$)|(^[1-9]\d{0,2}$)/,
       },
       {
         name: 'timeUnit', label: '单位', type: 'string' as FieldType, defaultValue: 'H',
@@ -85,6 +85,7 @@ const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = 
       dataSet.current?.addField(`${item}_time`, {
         type: 'number' as FieldType,
         label: '时间',
+        pattern: /(^\d{1,3}\.{1}\d{1}$)|(^[1-9]\d{0,2}$)/,
         computedProps: {
           disabled: ({ record }) => {
             if (record.get('remain') === item) {

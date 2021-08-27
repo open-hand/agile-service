@@ -8,6 +8,7 @@ import {
   commonApi, epicApi, statusApi, userApi,
 } from '@/api';
 import { IFieldProcessConfig } from '../base/type';
+import { getFieldPropsByMode } from '../base/utils';
 
 function getFieldConfig({
   field, props: { projectId, applyType, value },
@@ -179,14 +180,6 @@ export interface IAgileBaseSearchFieldInstance {
    * @param instance 获取字段实例
    */
 function getSearchFields(fields: any[], fieldCodeProps?: Record<string, any>, instance = AgileBaseSearchInstance) {
-  const selectProps = {
-    multiple: true,
-    maxTagCount: 3,
-    maxTagTextLength: 10,
-    dropdownMatchSelectWidth: false,
-    clearButton: true,
-  };
-
   const { fieldInstance, configInstance } = instance;
   const fieldConfigs = fields.map((field) => {
     const codeProps = get(fieldCodeProps, field.code) || {};
@@ -195,7 +188,7 @@ function getSearchFields(fields: any[], fieldCodeProps?: Record<string, any>, in
       label: field.name,
       placeholder: field.name,
       flat: true,
-      ...['single', 'multiple', 'radio', 'checkbox', 'member', 'multiMember'].includes(field.fieldType) ? selectProps : {},
+      ...getFieldPropsByMode(field),
     }, codeProps);
     const config = configInstance({ field, props }) as IFieldProcessConfig<any, any>;
     return {

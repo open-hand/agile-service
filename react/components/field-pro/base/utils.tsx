@@ -4,8 +4,36 @@ import {
 } from './type';
 import type { CustomComponentMapProps } from './component';
 import { AgileComponentMap } from './component';
+
+const filterModeSelectCommonProps = {
+  multiple: true,
+  maxTagCount: 3,
+  maxTagTextLength: 10,
+  dropdownMatchSelectWidth: false,
+  clearButton: true,
+};
+const filterModeProps = {
+  input: {},
+  time: {},
+  datetime: {},
+  date: {},
+  number: {},
+  text: {
+    props: {
+      autoSize: true, rows: 3, maxLength: 255, valueChangeAction: 'input',
+    },
+  },
+  url: {},
+  radio: filterModeSelectCommonProps,
+  single: filterModeSelectCommonProps,
+  checkbox: filterModeSelectCommonProps,
+  multiple: filterModeSelectCommonProps,
+  multiMember: filterModeSelectCommonProps,
+  member: filterModeSelectCommonProps,
+};
 /**
  * 获取处理后的配置
+ * 最终确定字段配置
  */
 function getProcessFieldConfig<T extends IComponentFCWithClassObject, C extends IComponentFCWithClassObject = CustomComponentMapProps>(fieldConfig: IFieldConfig<T, C>) {
   const config = {
@@ -45,5 +73,21 @@ function getProcessFieldConfig<T extends IComponentFCWithClassObject, C extends 
 function isCodeInSystemComponents(code: string, components: { [x: string]: any } = AgileComponentMap) {
   return Object.keys(components).includes(code);
 }
+/**
+ * 通过模式获取字段的 `props` 配置
+ * @param fieldConfig
+ * @param mode `filter` 待添加`flatFilter` `create` `edit`
+ * @returns
+ */
+function getFieldPropsByMode(fieldConfig: IFieldConfig<any, any>, mode: 'filter' = 'filter') {
+  switch (mode) {
+    case 'filter':
+      if (fieldConfig.fieldType) {
+        return filterModeProps[fieldConfig.fieldType];
+      }
+  }
+
+  return {};
+}
 // export type IFieldProcessConfigFn=ReturnType<(<T extends IFiledMapProps, K extends keyof T>(fieldConfig: IFieldConfig<T, K>) =>typeof getProcessFieldConfig)>
-export { getProcessFieldConfig, isCodeInSystemComponents };
+export { getProcessFieldConfig, isCodeInSystemComponents, getFieldPropsByMode };
