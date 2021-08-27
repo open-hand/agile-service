@@ -1,14 +1,13 @@
 package io.choerodon.agile.infra.aspect;
 
-import io.choerodon.agile.api.vo.PriorityVO;
-import io.choerodon.agile.api.vo.ProjectVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.RuleLogRelVO;
-import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.annotation.DataLog;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -146,6 +145,7 @@ public class DataLogAspect {
     private static final String FIELD_STATIC_FILE = "Static File";
     private static final String FIELD_STATIC_FILE_REL = "Static File Rel";
     private static final String ISSUE_TYPE_ID = "issueTypeId";
+    private static final String FIELD_ENVIRONMENT = "environment";
 
 
     @Autowired
@@ -196,6 +196,8 @@ public class DataLogAspect {
     private StaticFileHeaderMapper staticFileHeaderMapper;
     @Autowired
     private StaticFileIssueRelMapper staticFileIssueRelMapper;
+    @Autowired
+    private LookupValueService lookupValueService;
 
     /**
      * 定义拦截规则：拦截Spring管理的后缀为ServiceImpl的bean中带有@DataLog注解的方法。
@@ -700,6 +702,7 @@ public class DataLogAspect {
         }
         if (issueComment != null) {
             IssueCommentDTO issueCommentDTO = issueCommentMapper.selectByPrimaryKey(issueComment.getCommentId());
+            dataLogRedisUtil.deleteByComponentChange(issueCommentDTO.getProjectId());
             createDataLog(issueCommentDTO.getProjectId(), issueCommentDTO.getIssueId(), FIELD_COMMENT,
                     issueCommentDTO.getCommentText(), issueComment.getCommentText(), issueComment.getCommentId().toString(),
                     issueComment.getCommentId().toString());
@@ -885,6 +888,7 @@ public class DataLogAspect {
             List<IssueLabelDTO> curLabels = issueMapper.selectLabelNameByIssueId(issueId);
             createDataLog(projectId, issueId, FIELD_LABELS, getOriginLabelNames(originLabels),
                     getOriginLabelNames(curLabels), null, null);
+            dataLogRedisUtil.deleteByLabelDataLog(projectId);
         } catch (Throwable e) {
             throw new CommonException(ERROR_METHOD_EXECUTE, e);
         }
@@ -918,6 +922,7 @@ public class DataLogAspect {
             List<IssueLabelDTO> originLabels = issueMapper.selectLabelNameByIssueId(issueId);
             createDataLog(issueDTO.getProjectId(), issueId, FIELD_LABELS, getOriginLabelNames(originLabels),
                     null, null, null);
+            dataLogRedisUtil.deleteByLabelDataLog(issueDTO.getProjectId());
         }
     }
 
@@ -1236,6 +1241,7 @@ public class DataLogAspect {
             handleRank(field, originIssueDTO, issueConvertDTO);
             handleType(field, originIssueDTO, issueConvertDTO);
             handleEstimatedTime(field, originIssueDTO, issueConvertDTO);
+            handleEnvironment(field, originIssueDTO, issueConvertDTO);
         }
     }
 
@@ -1371,6 +1377,7 @@ public class DataLogAspect {
             }
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_REPORTER, oldString, newString, oldValue, newValue);
+            dataLogRedisUtil.deleteCustomChart(originIssueDTO.getProjectId());
         }
     }
 
@@ -1391,7 +1398,7 @@ public class DataLogAspect {
             DataLogDTO dataLog = createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_ASSIGNEE, oldString, newString, oldValue, newValue);
             processRuleLogRel(issueConvertDTO, originIssueDTO, dataLog);
-            redisUtil.deleteRedisCache(new String[]{PIECHART + originIssueDTO.getProjectId() + ':' + FIELD_ASSIGNEE + "*"});
+            dataLogRedisUtil.deleteByHandleAssignee(originIssueDTO.getProjectId());
         }
     }
 
@@ -1418,7 +1425,7 @@ public class DataLogAspect {
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_PRIORITY, originPriorityVO.getName()
                     , currentPriorityVO.getName(), originIssueDTO.getPriorityId().toString(), issueConvertDTO.getPriorityId().toString());
-            redisUtil.deleteRedisCache(new String[]{PIECHART + originIssueDTO.getProjectId() + ':' + FIELD_PRIORITY + "*"});
+            dataLogRedisUtil.deleteByHandlePriority(originIssueDTO.getProjectId());
         }
     }
 
@@ -1469,6 +1476,9 @@ public class DataLogAspect {
 
     private void handleIssueSummary(List<String> field, IssueDTO originIssueDTO, IssueConvertDTO issueConvertDTO) {
         if (field.contains(SUMMARY_FIELD) && !Objects.equals(originIssueDTO.getSummary(), issueConvertDTO.getSummary())) {
+            if (IssueTypeCode.FEATURE.value().equals(originIssueDTO.getTypeCode())) {
+                dataLogRedisUtil.deleteCustomChart(originIssueDTO.getProjectId());
+            }
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     SUMMARY_FIELD, originIssueDTO.getSummary(), issueConvertDTO.getSummary(), null, null);
         }
@@ -1476,6 +1486,7 @@ public class DataLogAspect {
 
     private void handleIssueEpicName(List<String> field, IssueDTO originIssueDTO, IssueConvertDTO issueConvertDTO) {
         if (field.contains(EPIC_NAME_FIELD) && !Objects.equals(originIssueDTO.getEpicName(), issueConvertDTO.getEpicName())) {
+            dataLogRedisUtil.deleteCustomChart(originIssueDTO.getProjectId());
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_EPIC_NAME, originIssueDTO.getEpicName(), issueConvertDTO.getEpicName(), null, null);
         }
@@ -1484,6 +1495,27 @@ public class DataLogAspect {
     private void handleIssueEpic(List<String> field, IssueDTO originIssueDTO, IssueConvertDTO issueConvertDTO) {
         if (field.contains(EPIC_ID_FIELD) && !Objects.equals(originIssueDTO.getEpicId(), issueConvertDTO.getEpicId())) {
             createIssueEpicLog(issueConvertDTO.getEpicId(), originIssueDTO);
+        }
+    }
+
+    private void handleEnvironment(List<String> field, IssueDTO originIssueDTO, IssueConvertDTO issueConvertDTO) {
+        if (field.contains(FIELD_ENVIRONMENT) && !Objects.equals(originIssueDTO.getEnvironment(), issueConvertDTO.getEnvironment())) {
+            LookupTypeWithValuesVO environmentValuesVO = lookupValueService.queryLookupValueByCode(FIELD_ENVIRONMENT, originIssueDTO.getProjectId());
+
+            String oldString = null;
+            String newString = null;
+            if (!Objects.isNull(originIssueDTO.getEnvironment()) && !Objects.equals("", originIssueDTO.getEnvironment())) {
+                oldString = environmentValuesVO.getLookupValues().stream()
+                        .filter(value -> Objects.equals(value.getValueCode(), originIssueDTO.getEnvironment()))
+                        .findFirst().map(LookupValueVO::getName).orElse(null);
+            }
+            if (!Objects.isNull(issueConvertDTO.getEnvironment()) && !Objects.equals("", issueConvertDTO.getEnvironment())) {
+                newString = environmentValuesVO.getLookupValues().stream()
+                        .filter(value -> Objects.equals(value.getValueCode(), issueConvertDTO.getEnvironment()))
+                        .findFirst().map(LookupValueVO::getName).orElse(null);
+            }
+            createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
+                    FIELD_ENVIRONMENT, oldString, newString, originIssueDTO.getEnvironment(), issueConvertDTO.getEnvironment());
         }
     }
 
@@ -1502,7 +1534,7 @@ public class DataLogAspect {
     }
 
     private void dataLogResolution(Long projectId, Long issueId, StatusVO originStatusVO, StatusVO currentStatusVO, Boolean autoTranferFlag) {
-        boolean condition = (originStatusVO.getCompleted() == null || !originStatusVO.getCompleted()) || (currentStatusVO.getCompleted() == null || !currentStatusVO.getCompleted());
+        Boolean condition = (originStatusVO.getCompleted() == null || !originStatusVO.getCompleted()) || (currentStatusVO.getCompleted() == null || !currentStatusVO.getCompleted());
         if (condition) {
             String oldValue = null;
             String newValue = null;
