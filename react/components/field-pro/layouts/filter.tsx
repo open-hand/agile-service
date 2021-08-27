@@ -6,6 +6,7 @@ import { find, groupBy } from 'lodash';
 import { getAgileFields } from '../base';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import { statusApi } from '@/api';
+import { getFieldPropsByMode } from '../base/utils';
 
 function renderField(field: IChosenFieldField, dataSet?: DataSet) {
   const {
@@ -112,12 +113,12 @@ function renderField(field: IChosenFieldField, dataSet?: DataSet) {
       // case 'starBeacon': {
       //   return <CheckBox label="我的关注" name={code} />;
       // }
-      case 'environment': {
-        return { code: 'environment', multiple: true };
-      }
-      case 'programVersion': {
-        return { code: 'programVersion', multiple: true };
-      }
+      // case 'environment': {
+      //   return { code: 'environment', multiple: true };
+      // }
+      // case 'programVersion': {
+      //   return { code: 'programVersion', multiple: true };
+      // }
       case 'tags': {
         return { code: 'tag', multiple: true };
       }
@@ -158,11 +159,12 @@ function getFilterFields(fields: any[], fieldCodeProps?: Record<string, any>, in
       props: {
         name,
         label: field.field.name,
-        multiple: true,
         style: { width: '100%' },
         key: field.field.code,
+        ...getFieldPropsByMode({ code, fieldType: field.field.fieldType, outputs: ['element'] }, 'filter'),
         ...otherProps,
         ...field.otherComponentProps,
+
       },
       outputs: ['element'],
     };
