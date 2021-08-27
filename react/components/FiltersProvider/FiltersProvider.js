@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-  userApi, componentApi, epicApi, versionApi, issueTypeApi, issueLabelApi, priorityApi, statusApi, 
+  userApi, componentApi, epicApi, versionApi, issueTypeApi, issueLabelApi, priorityApi, statusApi,
+  sprintApi,
 } from '@/api';
-import { sprintApi } from '@/api';
 
 const requests = {
   issueType: {
@@ -50,7 +50,7 @@ const requests = {
   epic: {
     textField: 'epicName',
     valueField: 'issueId',
-    request: () => epicApi.loadEpicsForSelect(),
+    request: () => epicApi.loadEpicsForSelect(undefined, 1, 0),
   },
 };
 
@@ -61,15 +61,14 @@ function transform(type, data) {
   const list = isContent ? data.list : data;
   if (formatter) {
     return list.map(formatter);
-  } else {
-    return list.map(item => ({
-      text: item[textField],
-      value: item[valueField].toString(),
-    }));
   }
+  return list.map((item) => ({
+    text: item[textField],
+    value: item[valueField].toString(),
+  }));
 }
 
-const FiltersProviderHOC = (fields = []) => Component => class FiltersProvider extends React.Component {
+const FiltersProviderHOC = (fields = []) => (Component) => class FiltersProvider extends React.Component {
   constructor() {
     super();
     const filters = {};
@@ -78,17 +77,17 @@ const FiltersProviderHOC = (fields = []) => Component => class FiltersProvider e
         filters[field] = [];
       } else {
         filters[field.key] = [];
-      } 
+      }
     });
     this.state = {
       filters,
     };
-  } 
+  }
 
   componentDidMount() {
-    const keys = fields.map(field => (typeof field === 'string' ? field : field.key));
-    const args = fields.map(field => (typeof field === 'string' ? undefined : field.args));
-    
+    const keys = fields.map((field) => (typeof field === 'string' ? field : field.key));
+    const args = fields.map((field) => (typeof field === 'string' ? undefined : field.args));
+
     const requestQueue = keys.map((key, i) => requests[key].request.apply(null, args[i]));
     Promise.all(requestQueue).then((values) => {
       const filters = {};
@@ -107,6 +106,5 @@ const FiltersProviderHOC = (fields = []) => Component => class FiltersProvider e
     return <Component {...this.props} filters={filters} />;
   }
 };
-
 
 export default FiltersProviderHOC;

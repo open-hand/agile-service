@@ -33,19 +33,47 @@ class EpicApi extends Api<EpicApi> {
   }
 
   /**
-   * 查询当前项目下的史诗，供下拉列表使用
-   */
-  loadEpicsForSelect = (projectId?:string) => axios.get(
-    `/agile/v1/projects/${projectId || getProjectId()}/issues/epics/select_data`,
-  )
+  * 查询当前项目下的史诗，供下拉列表使用
+  * @param projectId
+  * @param params
+  *  @default 1 `page` 页
+  *  @default 50 `size` 页大小
+  *  @default false `onlyUnCompleted`  仅未完成的史诗
+  * @param epicIds 选中的史诗ids 以便第一页可显示
+  * @returns
+  */
+  loadEpicsForSelect = (projectId?: string, params?: { page?: number, size?: number, onlyUnCompleted?: boolean, param?: string }, epicIds?: string[]) => {
+    const defaultParams = { page: 1, size: 50, onlyUnCompleted: false };
+    return this.request({
+      url: `/agile/v1/projects/${projectId || getProjectId()}/issues/epics/select_data`,
+      method: 'get',
+      params: {
+        ...defaultParams,
+        ...params,
+      },
+    });
+  }
 
   /**
    * 在项目群中获取史诗列表 供下拉列表使用
+  * @param params
+  *  @default 1 `page` 页
+  *  @default 50 `size` 页大小
+  *  @default false `onlyUnCompleted`  仅未完成的史诗
+  * @param epicIds 选中的史诗ids 以便第一页可显示  *
+  *  @returns
    */
-  loadProgramEpics = () => this.request({
-    method: 'get',
-    url: `${this.prefix}/issues/epics/select_program_data`,
-  })
+  loadProgramEpics = (params?: { page?: number, size?: number, onlyUnCompleted?: boolean, param?: string }, epicIds?: string[]) => {
+    const defaultParams = { page: 1, size: 50, onlyUnCompleted: true };
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/issues/epics/select_program_data`,
+      params: {
+        ...defaultParams,
+        ...params,
+      },
+    });
+  }
 
   /**
    * 将批量的issue加入到史诗中
@@ -58,5 +86,5 @@ class EpicApi extends Api<EpicApi> {
 }
 
 const epicApi = new EpicApi();
-
-export { epicApi };
+const epicConfigApi = new EpicApi(true);
+export { epicApi, epicConfigApi };

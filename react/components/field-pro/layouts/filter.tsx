@@ -43,6 +43,7 @@ function renderField(field: IChosenFieldField, dataSet?: DataSet) {
       case 'epicList':
         return {
           code: 'epic',
+          onlyUnCompleted: false,
           isProgram: code === 'epicList',
           unassignedEpic: true,
         };
