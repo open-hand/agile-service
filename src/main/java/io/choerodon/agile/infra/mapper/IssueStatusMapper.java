@@ -31,4 +31,12 @@ public interface IssueStatusMapper extends BaseMapper<IssueStatusDTO> {
 
     List<StatusVO> listCompletedStatus(@Param("projectIds") Set<Long> projectIds);
 
+    /**
+     * 根据状态id查询项目下状态
+     * @param projectId 项目id
+     * @param organizationId 组织id
+     * @param statusIds 状态id
+     * @return 项目下状态
+     */
+    List<StatusVO> listStatusByIds(@Param("projectId") Long projectId, @Param("organizationId") Long organizationId, @Param("statusIds") List<Long> statusIds);
 }

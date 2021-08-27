@@ -82,4 +82,21 @@
         </foreach>
     </insert>
 
+    <select id="listStatusByIds" resultType="io.choerodon.agile.api.vo.StatusVO">
+        select
+        fs.id,
+        fs.name,
+        fs.code,
+        fs.description,
+        fs.type,
+        fs.object_version_number,
+        ais.is_completed as completed
+        from fd_status fs
+        join agile_issue_status ais on (ais.project_id = #{projectId} and fs.id = ais.status_id)
+        where fs.organization_id = #{organizationId}
+        and fs.id in
+        <foreach collection="statusIds" item="statusId" open="(" separator="," close=")">
+            #{statusId}
+        </foreach>
+    </select>
 </mapper>
