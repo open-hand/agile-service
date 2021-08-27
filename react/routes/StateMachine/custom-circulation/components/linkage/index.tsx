@@ -127,7 +127,7 @@ const Linkage = ({
       try {
         if (linkageType.includes('subIssue')) {
           const res: IParentIssueStatusSetting[] = await statusTransformApi.getLinkage(selectedType, record.get('id'));
-          const initFields = linkageType.length > 1 ? [] : Field.init(new Array(Math.max(res.length, 1)).fill({}));
+          const initFields = linkageType.length > 1 && !res.length ? [] : Field.init(new Array(Math.max(res.length, 1)).fill({}));
           initFields.forEach((item: { key: number }, i: number) => {
             addFieldRule(item.key);
             if (res.length > 0) {
@@ -139,7 +139,7 @@ const Linkage = ({
         if (linkageType.includes('linkIssue')) {
           const res: ILinkIssueStatusSetting[] = await statusTransformApi.getLinkIssueLinkage(selectedType, record.get('id'));
           setLinkIssueStatusSettings(res || []);
-          const initFields = linkageType.length > 1 ? [] : LinkField.init(new Array(Math.max(res.length, 1)).fill({}));
+          const initFields = linkageType.length > 1 && !res.length ? [] : LinkField.init(new Array(Math.max(res.length, 1)).fill({}));
           initFields.forEach((item: { key: number }, i: number) => {
             linkIssueAddFieldRule(item.key);
             if (res.length) {
