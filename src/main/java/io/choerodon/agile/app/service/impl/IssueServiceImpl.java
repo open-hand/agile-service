@@ -1663,13 +1663,19 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public Page<IssueEpicVO> listEpicSelectData(Long projectId, PageRequest pageRequest, Boolean onlyUnCompleted, String param) {
+    public Page<IssueEpicVO> listEpicSelectData(Long projectId, PageRequest pageRequest, Boolean onlyUnCompleted, String param, List<Long> epicIds) {
         Page<IssueEpicVO> page;
+        boolean append = !ObjectUtils.isEmpty(epicIds) && pageRequest.getPage() == 0;
         boolean belongToProgram = belongToProgram(ConvertUtil.getOrganizationId(projectId), projectId);
         if (belongToProgram) {
-            page = agilePluginService.selectEpicBySubProjectFeature(projectId, pageRequest, onlyUnCompleted, param);
+            page = agilePluginService.selectEpicBySubProjectFeature(projectId, pageRequest, onlyUnCompleted, param, epicIds, append);
         } else {
-            page = PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueEpicSelectList(projectId, onlyUnCompleted, param));
+            page = PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueEpicSelectList(projectId, onlyUnCompleted, param, epicIds));
+            if (append) {
+                List<IssueEpicVO> list = issueMapper.queryIssueEpicByIds(projectId, epicIds);
+                list.addAll(page.getContent());
+                page.setContent(list);
+            }
         }
         return page;
     }
