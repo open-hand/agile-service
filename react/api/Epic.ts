@@ -1,6 +1,10 @@
 import { axios } from '@choerodon/boot';
+// @ts-ignore
+import JSONbig from 'json-bigint';
 import { getProjectId } from '@/utils/common';
 import Api from './Api';
+
+const JSONbigString = JSONbig({ storeAsString: true });
 
 class EpicApi extends Api<EpicApi> {
   get prefix() {
@@ -44,6 +48,18 @@ class EpicApi extends Api<EpicApi> {
   */
   loadEpicsForSelect = (projectId?: string, params?: { page?: number, size?: number, onlyUnCompleted?: boolean, param?: string }, epicIds?: string[]) => {
     const defaultParams = { page: 1, size: 50, onlyUnCompleted: false };
+    let requestConfig: any = {};
+    if (params?.size === 0) {
+      requestConfig = {
+        transformResponse: (data: string) => {
+          try {
+            return JSONbigString.parse(data)?.content || [];
+          } catch (error) {
+            return Array.isArray(data) ? data : [];
+          }
+        },
+      };
+    }
     return this.request({
       url: `/agile/v1/projects/${projectId || getProjectId()}/issues/epics/select_data`,
       method: 'get',
@@ -51,6 +67,7 @@ class EpicApi extends Api<EpicApi> {
         ...defaultParams,
         ...params,
       },
+      ...requestConfig,
     });
   }
 
@@ -65,6 +82,18 @@ class EpicApi extends Api<EpicApi> {
    */
   loadProgramEpics = (params?: { page?: number, size?: number, onlyUnCompleted?: boolean, param?: string }, epicIds?: string[]) => {
     const defaultParams = { page: 1, size: 50, onlyUnCompleted: true };
+    let requestConfig: any = {};
+    if (params?.size === 0) {
+      requestConfig = {
+        transformResponse: (data: string) => {
+          try {
+            return JSONbigString.parse(data)?.content || [];
+          } catch (error) {
+            return Array.isArray(data) ? data : [];
+          }
+        },
+      };
+    }
     return this.request({
       method: 'get',
       url: `${this.prefix}/issues/epics/select_program_data`,
@@ -72,6 +101,7 @@ class EpicApi extends Api<EpicApi> {
         ...defaultParams,
         ...params,
       },
+      ...requestConfig,
     });
   }
 
