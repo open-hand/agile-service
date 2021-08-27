@@ -68,6 +68,7 @@ const SelectPI: React.FC<SelectPIProps> = forwardRef(({
       onOption: ({ record }) => {
         if (disabledCurrentPI && record.get('statusCode') === 'doing') {
           return {
+
             disabled: true,
           };
         }
@@ -82,6 +83,7 @@ const SelectPI: React.FC<SelectPIProps> = forwardRef(({
   return (
     <Component
       ref={ref}
+      dropdownMenuStyle={{ maxWidth: '3rem' }}
       {...props}
       {...otherProps}
     />

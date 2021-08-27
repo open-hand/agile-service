@@ -62,11 +62,12 @@ class EpicApi extends Api<EpicApi> {
     }
     return this.request({
       url: `/agile/v1/projects/${projectId || getProjectId()}/issues/epics/select_data`,
-      method: 'get',
+      method: 'post',
       params: {
         ...defaultParams,
         ...params,
       },
+      data: epicIds,
       ...requestConfig,
     });
   }
@@ -95,12 +96,13 @@ class EpicApi extends Api<EpicApi> {
       };
     }
     return this.request({
-      method: 'get',
+      method: 'post',
       url: `${this.prefix}/issues/epics/select_program_data`,
       params: {
         ...defaultParams,
         ...params,
       },
+      data: epicIds,
       ...requestConfig,
     });
   }

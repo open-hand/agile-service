@@ -69,7 +69,7 @@ function getFieldConfig({
     case 'version':
       return { props: { disabled: field.archive, hasUnassign: true, valueField: 'versionId' } };
     case 'epic':
-      return { props: { unassignedEpic: true, onlyUnCompleted: false } };
+      return { props: { unassignedEpic: true, onlyUnCompleted: false, defaultSelectedIds: value } };
     case 'tags':
       return { code: 'tag', props: { projectId: undefined } };
     default:
