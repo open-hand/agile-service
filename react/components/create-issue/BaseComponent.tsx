@@ -300,8 +300,8 @@ const CreateIssueBase = observer(({
   useEffect(() => {
     const oldDataSet = dataSetRef.current;
     const newDataSet = new DataSet({
-      autoCreate: false, // 当显示特性的时候,并且是子项目 则过滤史诗
-      fields: fields ? insertField([...fields.filter((field) => (showFeature && isInProgram ? field.fieldCode !== 'epic' : true)).map((field) => {
+      autoCreate: false, // 子项目 过滤史诗
+      fields: fields ? insertField([...fields.filter((field) => (isInProgram ? field.fieldCode !== 'epic' : true)).map((field) => {
         const preset = presets.get(field.fieldCode) ?? {};
         return merge(preset, {
           name: field.fieldCode,
