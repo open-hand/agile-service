@@ -137,7 +137,7 @@ public interface IssueService {
      * @param projectId projectId
      * @return IssueEpicVO
      */
-    Page<IssueEpicVO> listEpicSelectData(Long projectId, PageRequest pageRequest, Boolean onlyUnCompleted, String param);
+    Page<IssueEpicVO> listEpicSelectData(Long projectId, PageRequest pageRequest, Boolean onlyUnCompleted, String param, List<Long> epicIds);
 
     /**
      * 查询单个子任务信息

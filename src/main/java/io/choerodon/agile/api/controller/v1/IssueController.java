@@ -334,8 +334,8 @@ public class IssueController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("查询当前项目下的epic，提供给列表下拉")
-    @GetMapping(value = "/epics/select_data")
+    @ApiOperation("分页查询当前项目下的epic，提供给列表下拉，如果有传入的id，置前显示")
+    @PostMapping(value = "/epics/select_data")
     public ResponseEntity<Page<IssueEpicVO>> listEpicSelectData(@ApiParam(value = "项目id", required = true)
                                                                 @PathVariable(name = "project_id") Long projectId,
                                                                 @ApiParam(value = "分页信息", required = true)
@@ -344,8 +344,10 @@ public class IssueController {
                                                                 @RequestParam(required = false, defaultValue = "false")
                                                                     Boolean onlyUnCompleted,
                                                                 @ApiParam(value = "搜索内容")
-                                                                @RequestParam(required = false) String param) {
-        return Optional.ofNullable(issueService.listEpicSelectData(projectId, pageRequest, onlyUnCompleted, param))
+                                                                @RequestParam(required = false) String param,
+                                                                @ApiParam(value = "史诗ids")
+                                                                @RequestBody(required = false) @Encrypt List<Long> epicIds) {
+        return Optional.ofNullable(issueService.listEpicSelectData(projectId, pageRequest, onlyUnCompleted, param, epicIds))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.Issue.queryIssueEpicList"));
     }

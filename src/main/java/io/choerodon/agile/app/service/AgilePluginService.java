@@ -303,7 +303,7 @@ public interface AgilePluginService {
      */
     void deleteProgramVersionRel(Long projectId, Long versionId);
 
-    Page<IssueEpicVO> selectEpicBySubProjectFeature(Long subProjectId, PageRequest pageRequest, Boolean onlyUnCompleted, String param);
+    Page<IssueEpicVO> selectEpicBySubProjectFeature(Long subProjectId, PageRequest pageRequest, Boolean onlyUnCompleted, String param, List<Long> epicIds, boolean append);
 
     void listStatusLinkageByStatusIds(Long projectId, Long issueTypeId, List<Long> statusIds, String applyType, List<StatusSettingVO> list);
 

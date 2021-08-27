@@ -49,7 +49,8 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      */
     List<IssueEpicVO> queryIssueEpicSelectList(@Param("projectId") Long projectId,
                                                @Param("onlyUnCompleted") Boolean onlyUnCompleted,
-                                               @Param("param") String param);
+                                               @Param("param") String param,
+                                               @Param("epicIds") List<Long> epicIds);
 
     Integer batchRemoveFromVersion(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
 
@@ -616,4 +617,6 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     List<Long> queryUnDoneAllIssues(@Param("projectId") Long projectId, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
 
     IssueCountDTO querySubIssueCount(@Param("projectId") Long projectId, @Param("parentIssueId") Long parentIssueId);
+
+    List<IssueEpicVO> queryIssueEpicByIds(@Param("projectId")Long projectId, @Param("epicIds") List<Long> epicIds);
 }
