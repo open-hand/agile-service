@@ -1,5 +1,3 @@
-import useIsInProgram from '@/hooks/useIsInProgram';
-import { getProjectId } from '@/utils/common';
 import {
   useCallback, useMemo, useRef,
 } from 'react';
@@ -8,9 +6,12 @@ import { toJS } from 'mobx';
 import {
   assign,
 } from 'lodash';
+import { getProjectId } from '@/utils/common';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import { IField } from '@/common/types';
 import { formatFields, systemFields } from './util';
 import { IFieldsValueVo } from './RequiredField';
+import { epicConfigApi } from '@/api';
 
 interface Props {
   issueId: string
@@ -24,7 +25,7 @@ export interface RequiredFieldDs {
   getData: () => IFieldsValueVo,
 }
 
-const useRequiredFieldDataSet = (issuesFieldRequired: Props[]) : RequiredFieldDs[] => {
+const useRequiredFieldDataSet = (issuesFieldRequired: Props[]): RequiredFieldDs[] => {
   const { isInProgram } = useIsInProgram();
   const dataSetMapRef = useRef<Map<string, DataSet>>();
   const dataSetMap = useMemo(() => new Map(), []);
@@ -58,10 +59,7 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[]) : RequiredFieldDs
   }] : [{
     name: 'epicId',
     label: '所属史诗',
-    lookupAxiosConfig: () => ({
-      url: `/agile/v1/projects/${getProjectId()}/issues/epics/select_data`,
-      method: 'get',
-    }),
+    lookupAxiosConfig: () => epicConfigApi.loadEpicsForSelect(undefined, { size: 0 }),
     valueField: 'issueId',
     textField: 'epicName',
   }], {
@@ -93,7 +91,7 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[]) : RequiredFieldDs
   }, {
     name: 'componentIssueRelVOList',
     label: '模块',
-    lookupAxiosConfig: ({ params }: { params: any}) => ({
+    lookupAxiosConfig: ({ params }: { params: any }) => ({
       url: `/agile/v1/projects/${getProjectId()}/component/query_all`,
       method: 'post',
       data: {
@@ -104,7 +102,7 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[]) : RequiredFieldDs
         size: 999,
         page: 1,
       },
-      transformResponse: (response:any) => {
+      transformResponse: (response: any) => {
         try {
           const data = JSON.parse(response);
           return data.content;
@@ -213,7 +211,7 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[]) : RequiredFieldDs
       dataSet: requiredFieldDs,
       getData: () => getData({ issue: issuesFieldRequired[0], ds: requiredFieldDs }),
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getData, getRequiredFieldDataSet, JSON.stringify(issuesFieldRequired[0])]);
 
   const otherDs = useMemo(() => issuesFieldRequired.slice(1, issuesFieldRequired.length).filter((item) => item.requiredFields?.length).map((issue) => {
@@ -223,7 +221,7 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[]) : RequiredFieldDs
       dataSet: requiredFieldDs,
       getData: () => getData({ issue, ds: requiredFieldDs }),
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [getData, getRequiredFieldDataSet, JSON.stringify(issuesFieldRequired)]);
 
   const requiredFieldDsArr = useMemo(() => [...firstDs ? [firstDs] : [], ...otherDs], [firstDs, otherDs]);

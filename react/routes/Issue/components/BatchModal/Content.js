@@ -12,7 +12,7 @@ import { find, pick } from 'lodash';
 import WSProvider from '@choerodon/master/lib/containers/components/c7n/tools/ws/WSProvider';
 import { getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
-import { fieldApi } from '@/api';
+import { epicConfigApi, fieldApi } from '@/api';
 import useFields from './useFields';
 import { systemFields, formatFields } from './utils';
 import styles from './Content.less';
@@ -65,10 +65,7 @@ function BatchModal({
     }] : [{
       name: 'epicId',
       label: '所属史诗',
-      lookupAxiosConfig: () => ({
-        url: `/agile/v1/projects/${getProjectId()}/issues/epics/select_data`,
-        method: 'get',
-      }),
+      lookupAxiosConfig: () => epicConfigApi.loadEpicsForSelect(undefined, { size: 0 }),
       valueField: 'issueId',
       textField: 'epicName',
     }], {
@@ -290,10 +287,10 @@ function BatchModal({
         </div>
       </Form>
       {loading && (
-      <div style={{ textAlign: 'center' }}>
-        {loading === 'success' ? '修改成功' : ['正在修改，请稍等片刻', <span className={styles.dot}>…</span>]}
-        <Progress strokeColor={STATUS_COLOR.done} value={Math.round(progress * 100)} />
-      </div>
+        <div style={{ textAlign: 'center' }}>
+          {loading === 'success' ? '修改成功' : ['正在修改，请稍等片刻', <span className={styles.dot}>…</span>]}
+          <Progress strokeColor={STATUS_COLOR.done} value={Math.round(progress * 100)} />
+        </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <Button
@@ -326,16 +323,16 @@ function BatchModal({
     <>
       {
         issueSearchStore.batchAction === 'edit' && (
-        <div style={{ padding: 15 }}>
-          <WSProvider server={Choerodon.WEBSOCKET_SERVER}>
-            <WSHandler
-              messageKey={`agile-batch-update-field-${getProjectId()}`}
-              onMessage={handleMessage}
-            >
-              {render()}
-            </WSHandler>
-          </WSProvider>
-        </div>
+          <div style={{ padding: 15 }}>
+            <WSProvider server={Choerodon.WEBSOCKET_SERVER}>
+              <WSHandler
+                messageKey={`agile-batch-update-field-${getProjectId()}`}
+                onMessage={handleMessage}
+              >
+                {render()}
+              </WSHandler>
+            </WSProvider>
+          </div>
         )
       }
     </>
