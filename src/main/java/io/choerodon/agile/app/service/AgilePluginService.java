@@ -7,6 +7,8 @@ import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.*;
 import io.choerodon.agile.infra.enums.FieldSql;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -301,7 +303,7 @@ public interface AgilePluginService {
      */
     void deleteProgramVersionRel(Long projectId, Long versionId);
 
-    List<IssueDTO> selectEpicBySubProjectFeature(Long subProjectId);
+    Page<IssueEpicVO> selectEpicBySubProjectFeature(Long subProjectId, PageRequest pageRequest, Boolean onlyUnCompleted, String param);
 
     void listStatusLinkageByStatusIds(Long projectId, Long issueTypeId, List<Long> statusIds, String applyType, List<StatusSettingVO> list);
 

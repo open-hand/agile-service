@@ -32,7 +32,6 @@ import io.choerodon.asgard.saga.feign.SagaClient;
 import io.choerodon.core.domain.PageInfo;
 import io.choerodon.core.utils.PageUtils;
 import io.choerodon.core.utils.PageableHelper;
-import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
@@ -63,7 +62,6 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 敏捷开发Issue
@@ -845,12 +843,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                         fieldIds.add(fieldId);
                     }
                 });
-        boolean belongToProgram;
-        if (agilePluginService == null) {
-            belongToProgram = false;
-        } else {
-            belongToProgram = baseFeignClient.getGroupInfoByEnableProject(organizationId, projectId).getBody() != null;
-        }
+        boolean belongToProgram = belongToProgram(organizationId, projectId);
         List<PageFieldViewVO> requiredSystemFields = new ArrayList<>();
         List<PageFieldViewVO> requiredCustomFields = new ArrayList<>();
         createPageFields.forEach(x -> {
@@ -860,6 +853,16 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         });
         requiredSystemFields.addAll(requiredCustomFields);
         return requiredSystemFields;
+    }
+
+    private boolean belongToProgram(Long organizationId, Long projectId) {
+        boolean belongToProgram;
+        if (agilePluginService == null) {
+            belongToProgram = false;
+        } else {
+            belongToProgram = baseFeignClient.getGroupInfoByEnableProject(organizationId, projectId).getBody() != null;
+        }
+        return belongToProgram;
     }
 
     private void handlerSystemAndCustomRequiredField(Map<String, Object> customFieldMap, boolean belongToProgram, PageFieldViewVO x, List<PageFieldViewVO> requiredSystemFields, List<PageFieldViewVO> requiredCustomFields, IssueVO issue) {
@@ -1664,12 +1667,15 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public List<IssueEpicVO> listEpicSelectData(Long projectId) {
-        return issueAssembler.toTargetList(Stream.of(issueMapper.queryIssueEpicSelectList(projectId),
-                Optional.ofNullable(agilePluginService).map(service -> service
-                        .selectEpicBySubProjectFeature(projectId)).orElse(Collections.emptyList()))
-                .flatMap(Collection::stream).sorted(Comparator.comparing(AuditDomain::getCreationDate).reversed())
-                .collect(Collectors.toList()), IssueEpicVO.class);
+    public Page<IssueEpicVO> listEpicSelectData(Long projectId, PageRequest pageRequest, Boolean onlyUnCompleted, String param) {
+        Page<IssueEpicVO> page;
+        boolean belongToProgram = belongToProgram(ConvertUtil.getOrganizationId(projectId), projectId);
+        if (belongToProgram) {
+            page = agilePluginService.selectEpicBySubProjectFeature(projectId, pageRequest, onlyUnCompleted, param);
+        } else {
+            page = PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueEpicSelectList(projectId, onlyUnCompleted, param));
+        }
+        return page;
     }
 
 
