@@ -35,7 +35,7 @@ import { TabComponentProps } from '../index';
 import openLogModal from './components/log-modal';
 
 interface ISetting {
-  width: number,
+  width: number | string,
   title: string,
   children: JSX.Element,
 }
