@@ -47,7 +47,9 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      * @param projectId projectId
      * @return IssueDTO
      */
-    List<IssueDTO> queryIssueEpicSelectList(@Param("projectId") Long projectId);
+    List<IssueEpicVO> queryIssueEpicSelectList(@Param("projectId") Long projectId,
+                                               @Param("onlyUnCompleted") Boolean onlyUnCompleted,
+                                               @Param("param") String param);
 
     Integer batchRemoveFromVersion(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
 
