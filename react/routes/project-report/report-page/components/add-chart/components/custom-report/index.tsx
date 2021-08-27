@@ -18,6 +18,8 @@ import { getProjectId } from '@/utils/common';
 import useDimension
   from '@/routes/project-report/report-page/components/add-chart/components/custom-report/useDimension';
 
+import './index.less';
+
 const JSONbigString = JSONbig({ storeAsString: true });
 
 export interface CustomChartDataProps extends ICreateData{
@@ -54,6 +56,7 @@ export const transformCustomReportSearch = (searchVO: CustomReportSearchVO | und
 const CustomReportComponent: React.FC<Props> = ({
   innerRef, projectId, data, customChartData,
 }) => {
+  const prefixCls = useMemo(() => 'c7nag-project-custom-report', []);
   const dimension = useDimension();
 
   const config = useMemo(() => ({
@@ -85,8 +88,8 @@ const CustomReportComponent: React.FC<Props> = ({
   }), [handleSubmit]);
   return (
     <div>
-      <ChartSearch {...searchProps} />
-      <Chart {...props} />
+      <ChartSearch {...searchProps} searchCls={`${prefixCls}-search`} />
+      <Chart {...props} chartCls={`${prefixCls}-chart`} />
     </div>
   );
 };
