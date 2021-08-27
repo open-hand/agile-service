@@ -1088,31 +1088,14 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class, propagation = Propagation.NESTED)
     public void handlerInfluenceIssue(Long projectId, String applyType, InfluenceIssueVO influenceIssueVO, Long linkIssueId,  Map<Long, LinkIssueStatusLinkageVO> linkIssueStatusMap, Set<Long> influenceIssueIds) {
         Long issueId = influenceIssueVO.getIssueId();
         Long statusId = influenceIssueVO.getStatusId();
         IssueDTO influenceIssue = issueMapper.selectByPrimaryKey(linkIssueId);
         IssueDTO issue = issueMapper.selectByPrimaryKey(issueId);
         Boolean isSub = Objects.equals("sub_task",influenceIssue.getTypeCode()) || (Objects.equals("bug",influenceIssue.getTypeCode()) && !ObjectUtils.isEmpty(influenceIssue.getRelateIssueId()) && !Objects.equals(influenceIssue.getRelateIssueId(), 0L));
-        if (Objects.equals("bug", issue.getTypeCode()) && !ObjectUtils.isEmpty(issue.getRelateIssueId()) && !Objects.equals(issue.getRelateIssueId(), 0L)) {
-            statusLinkageExecutionLog(influenceIssueVO, issueId, influenceIssue, isSub, linkIssueStatusMap, TriggerExecutionStatus.STOP.getValue(), "sub_bug");
-            return;
-        }
-        if (Objects.equals(issue.getStatusId(), statusId)) {
-            statusLinkageExecutionLog(influenceIssueVO, issueId, influenceIssue, isSub, linkIssueStatusMap, TriggerExecutionStatus.STOP.getValue(), "same_status");
-            return;
-        }
-        Boolean verifyStatusTransferSetting = transferSettingService.verifyStatusTransferSetting(projectId, issue, statusId);
-        if (Boolean.TRUE.equals(verifyStatusTransferSetting)) {
-            statusLinkageExecutionLog(influenceIssueVO, issueId, influenceIssue, isSub, linkIssueStatusMap, TriggerExecutionStatus.STOP.getValue(), "condition_limit");
-            return;
-        }
         // 变更issue的状态和更新属性
-        executionUpdateInfluenceIssue(issue, statusId, influenceIssue, projectId, applyType, influenceIssueVO);
-        // 记录联动的执行日志
-        statusLinkageExecutionLog(influenceIssueVO, issueId, influenceIssue, isSub, linkIssueStatusMap, null, null);
-        LOGGER.info("项目{}下状态联动触发问题编号为{}的issue状态变更",issue.getProjectId(),issue.getIssueNum());
+        executionUpdateInfluenceIssue(issue, statusId, influenceIssue, projectId, applyType, influenceIssueVO, isSub, linkIssueStatusMap);
         // 处理当前issue会影响的issue
         List<InfluenceIssueVO> childrenVO = influenceIssueVO.getChildrenVO();
         if (!CollectionUtils.isEmpty(childrenVO)) {
@@ -1182,7 +1165,23 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         return stringBuilder.toString();
     }
 
-    private void executionUpdateInfluenceIssue(IssueDTO issue, Long executionStatusId, IssueDTO influenceIssue, Long projectId, String applyType, InfluenceIssueVO influenceIssueVO) {
+
+    @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+    public Boolean executionUpdateInfluenceIssue(IssueDTO issue, Long executionStatusId, IssueDTO influenceIssue, Long projectId, String applyType, InfluenceIssueVO influenceIssueVO, Boolean isSub,  Map<Long, LinkIssueStatusLinkageVO> linkIssueStatusMap) {
+        if (Objects.equals("bug", issue.getTypeCode()) && !ObjectUtils.isEmpty(issue.getRelateIssueId()) && !Objects.equals(issue.getRelateIssueId(), 0L)) {
+            statusLinkageExecutionLog(influenceIssueVO, issue.getIssueId(), influenceIssue, isSub, linkIssueStatusMap, TriggerExecutionStatus.STOP.getValue(), "sub_bug");
+            return Boolean.TRUE;
+        }
+        if (Objects.equals(issue.getStatusId(), executionStatusId)) {
+            statusLinkageExecutionLog(influenceIssueVO, issue.getIssueId(), influenceIssue, isSub, linkIssueStatusMap, TriggerExecutionStatus.STOP.getValue(), "same_status");
+            return Boolean.TRUE;
+        }
+        Boolean verifyStatusTransferSetting = transferSettingService.verifyStatusTransferSetting(projectId, issue, executionStatusId);
+        if (Boolean.TRUE.equals(verifyStatusTransferSetting)) {
+            statusLinkageExecutionLog(influenceIssueVO, issue.getIssueId(), influenceIssue, isSub, linkIssueStatusMap, TriggerExecutionStatus.STOP.getValue(), "condition_limit");
+            return Boolean.TRUE;
+        }
         Long issueId = issue.getIssueId();
         // 获取当前状态对应的transformId
         Long stateMachineId = projectConfigService.queryStateMachineId(projectId, applyType, issue.getIssueTypeId());
@@ -1209,6 +1208,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (agilePluginService != null) {
             agilePluginService.storyLinkageFeature(projectId, issue,applyType);
         }
+        // 记录联动的执行日志
+        statusLinkageExecutionLog(influenceIssueVO, issueId, influenceIssue, isSub, linkIssueStatusMap, null, null);
+        LOGGER.info("项目{}下状态联动触发问题编号为{}的issue状态变更",issue.getProjectId(),issue.getIssueNum());
+        return Boolean.FALSE;
     }
 
     @Override

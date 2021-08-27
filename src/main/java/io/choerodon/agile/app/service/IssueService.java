@@ -433,4 +433,6 @@ public interface IssueService {
     String buildStatusLinkageContent(LinkIssueStatusLinkageVO linkIssueStatusLinkageVO);
 
     void handlerInfluenceIssue(Long projectId, String applyType, InfluenceIssueVO influenceIssueVO, Long linkIssueId,  Map<Long, LinkIssueStatusLinkageVO> linkIssueStatusMap, Set<Long> influenceIssueIds);
+
+    Boolean executionUpdateInfluenceIssue(IssueDTO issue, Long executionStatusId, IssueDTO influenceIssue, Long projectId, String applyType, InfluenceIssueVO influenceIssueVO, Boolean isSub,  Map<Long, LinkIssueStatusLinkageVO> linkIssueStatusMap);
 }
