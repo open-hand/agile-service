@@ -34,4 +34,10 @@ databaseChangeLog(logicalFilePath: 'agile_rank.groovy') {
         }
     }
 
+    changeSet(id: '2021-08-25-agile-rank-add-index', author: 'ztxemail@163.com') {
+        createIndex(tableName: "agile_rank", indexName: "idx_rank") {
+            column(name: "rank")
+        }
+    }
+
 }

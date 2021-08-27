@@ -40,4 +40,5 @@ public interface StatusMapper extends BaseMapper<StatusDTO> {
 
     List<StatusDTO> queryByStateMachineIdsAndParam(@Param("organizationId") Long organizationId, @Param("stateMachineIds") List<Long> stateMachineIds, @Param("param") String param);
 
+    List<StatusVO> queryByOrgId(@Param("organizationId") Long organizationId);
 }

@@ -20,6 +20,7 @@ import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.agile.infra.mapper.RankMapper;
+import io.choerodon.agile.infra.mapper.StatusMachineSchemeConfigMapper;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EnumUtil;
@@ -103,6 +104,8 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     private StatusNoticeSettingService statusNoticeSettingService;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
+    @Autowired
+    private StatusMachineSchemeConfigMapper statusMachineSchemeConfigMapper;
 
     private void insertRank(Long projectId, Long issueId, String type, RankVO rankVO) {
         List<RankDTO> rankDTOList = new ArrayList<>();
@@ -152,7 +155,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         Long projectId = issueConvertDTO.getProjectId();
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         //获取状态机id
-        Long stateMachineId = projectConfigService.queryStateMachineId(projectId, applyType, issueConvertDTO.getIssueTypeId());
+        Long stateMachineId = statusMachineSchemeConfigMapper.selectStatusMachineIdByIssueTypeId(organizationId, projectId, applyType, issueConvertDTO.getIssueTypeId());
         if (stateMachineId == null) {
             throw new CommonException(ERROR_ISSUE_STATE_MACHINE_NOT_FOUND);
         }
@@ -167,7 +170,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         //获取项目信息
         ProjectInfoDTO projectInfoDTO = new ProjectInfoDTO();
         projectInfoDTO.setProjectId(projectId);
-        ProjectInfoDTO projectInfo = modelMapper.map(projectInfoMapper.selectOne(projectInfoDTO), ProjectInfoDTO.class);
+        ProjectInfoDTO projectInfo = projectInfoMapper.selectOne(projectInfoDTO);
         if (projectInfo == null) {
             throw new CommonException(ERROR_PROJECT_INFO_NOT_FOUND);
         }

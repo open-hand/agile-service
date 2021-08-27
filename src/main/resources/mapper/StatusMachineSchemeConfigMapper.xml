@@ -45,6 +45,22 @@
         </foreach>
     </select>
 
+    <select id="selectStatusMachineIdByIssueTypeId" resultType="java.lang.Long">
+        select
+            smsc.state_machine_id
+        from fd_status_machine_scheme_config smsc
+        where
+         smsc.organization_id = #{organizationId}
+         AND smsc.scheme_id in (
+           select scheme_id from fd_project_config
+           where project_id = #{projectId}
+           and scheme_type = 'scheme_state_machine'
+           and apply_type = #{applyType}
+         )
+         AND smsc.issue_type_id = #{issueTypeId}
+
+    </select>
+
     <insert id="migrateStatusMachineSchemeConfig">
        insert into fd_status_machine_scheme_config
        select * from fd_state_machine_scheme_config

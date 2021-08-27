@@ -29,6 +29,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -236,15 +237,12 @@ public class StatusServiceImpl implements StatusService {
 
     @Override
     public Map<Long, StatusVO> queryAllStatusMap(Long organizationId) {
-        StatusDTO status = new StatusDTO();
-        status.setOrganizationId(organizationId);
-        List<StatusDTO> statuses = statusMapper.select(status);
-        Map<Long, StatusVO> statusMap = new HashMap<>();
-        for (StatusDTO sta : statuses) {
-            StatusVO statusVO = modelMapper.map(sta, new TypeToken<StatusVO>() {
-            }.getType());
-            statusMap.put(statusVO.getId(), statusVO);
+        List<StatusVO> statusVOS = statusMapper.queryByOrgId(organizationId);
+        if (CollectionUtils.isEmpty(statusVOS)){
+            return new HashMap<>();
         }
+        Map<Long, StatusVO> statusMap = new HashMap<>();
+        statusMap.putAll(statusVOS.stream().collect(Collectors.toMap(StatusVO::getId, Function.identity())));
         return statusMap;
     }
 
