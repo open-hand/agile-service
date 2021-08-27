@@ -10,7 +10,7 @@ import styles from './index.less';
 const renderPi = (pi: any) => {
   if (pi) {
     return (
-      <div style={{ display: 'inline-block' }}>
+      <div style={{ display: 'inline' }}>
         {pi.id === '0' ? pi.name : pi.fullName || `${pi.code}-${pi.name}`}
         {
           pi.statusCode === 'doing' && (
