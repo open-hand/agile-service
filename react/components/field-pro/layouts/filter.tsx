@@ -46,6 +46,7 @@ function renderField(field: IChosenFieldField, dataSet?: DataSet) {
           onlyUnCompleted: false,
           isProgram: code === 'epicList',
           unassignedEpic: true,
+          defaultSelectedIds: value,
         };
       case 'priorityId':
         return {

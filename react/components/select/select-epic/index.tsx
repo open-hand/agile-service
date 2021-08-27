@@ -17,15 +17,18 @@ export interface SelectEpicProps extends Partial<SelectProps> {
   unassignedEpic?: boolean
   /** 仅展示已完成史诗 @default true  自定义request 本配置无效  */
   onlyUnCompleted?: boolean
+  /** 默认已选中的 */
+  defaultSelectedIds?: string | string[]
+  /** 受控值 已选中 会自动加载 */
   selectIds?: string | string[]
   flat?: boolean
   projectId?: string
 }
 
 const SelectEpic: React.FC<SelectEpicProps> = forwardRef(({
-  isProgram, afterLoad, dataRef, dontAddEpic0, unassignedEpic, request, flat, projectId, onlyUnCompleted = true, selectIds: propsSelectIds, ...otherProps
+  isProgram, afterLoad, dataRef, dontAddEpic0, unassignedEpic, request, flat, projectId, defaultSelectedIds, onlyUnCompleted = true, selectIds: propsSelectIds, ...otherProps
 }, ref: React.Ref<Select>) => {
-  const selectIds = useMemo(() => castArray(toJS(propsSelectIds)).filter(Boolean), [propsSelectIds]);
+  const selectIds = useMemo(() => [...castArray(toJS(propsSelectIds)), ...castArray(toJS(defaultSelectedIds))].filter(Boolean), [propsSelectIds]);
   const config = useMemo((): SelectConfig => ({
     name: 'epic',
     textField: 'epicName',
@@ -41,18 +44,19 @@ const SelectEpic: React.FC<SelectEpicProps> = forwardRef(({
       param: filter,
     }, requestArgs?.selectIds))),
     middleWare: (epicList: IEpic[]) => {
+      const temp = [...epicList];
       if (unassignedEpic || (isProgram && !dontAddEpic0)) {
-        epicList.unshift({ issueId: '0', epicName: '未分配史诗' });
+        temp.unshift({ issueId: '0', epicName: '未分配史诗' });
       }
       if (dataRef) {
         Object.assign(dataRef, {
-          current: (unassignedEpic || (isProgram && !dontAddEpic0)) ? epicList.unshift({ issueId: '0', epicName: '未分配史诗' }) : epicList,
+          current: (unassignedEpic || (isProgram && !dontAddEpic0)) ? temp.unshift({ issueId: '0', epicName: '未分配史诗' }) : temp,
         });
       }
       if (afterLoad) {
-        afterLoad(epicList);
+        afterLoad(temp);
       }
-      return epicList;
+      return temp;
     },
     paging: true,
   }), [afterLoad, dataRef, dontAddEpic0, isProgram, onlyUnCompleted, projectId, request, selectIds, unassignedEpic]);
