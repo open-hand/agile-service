@@ -1,5 +1,5 @@
 enum MODAL_WIDTH {
-  large = 1088,
+  large = 'calc(100vw - 3.52rem)',
   middle = 740,
   small = 380,
 }
