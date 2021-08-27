@@ -196,4 +196,16 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_issue.groovy') {
             column(name: 'environment', type: 'VARCHAR(255)', remarks: '环境')
         }
     }
+
+
+    changeSet(id: '2021-08-23-agile-issue-add-index', author: 'ztxemail@163.com') {
+        createIndex(tableName: "agile_issue", indexName: "idx_project_id_rank") {
+            column(name: "project_id")
+            column(name: "rank")
+        }
+        createIndex(tableName: "agile_issue", indexName: "idx_project_map_rank") {
+            column(name: "project_id")
+            column(name: "map_rank")
+        }
+    }
 }

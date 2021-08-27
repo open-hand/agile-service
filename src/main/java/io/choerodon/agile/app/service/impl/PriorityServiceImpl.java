@@ -15,9 +15,11 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -140,12 +142,13 @@ public class PriorityServiceImpl implements PriorityService {
         PriorityDTO priority = new PriorityDTO();
         priority.setOrganizationId(organizationId);
         List<PriorityDTO> priorities = priorityMapper.select(priority);
-        Map<Long, PriorityVO> result = new HashMap<>();
-        for (PriorityDTO pri : priorities) {
-            PriorityVO priorityVO = modelMapper.map(pri, new TypeToken<PriorityVO>() {
-            }.getType());
-            result.put(priorityVO.getId(), priorityVO);
+        if (CollectionUtils.isEmpty(priorities)) {
+           return new HashMap<>();
         }
+        Map<Long, PriorityVO> result = new HashMap<>();
+        List<PriorityVO> priorityVOS = modelMapper.map(priorities, new TypeToken<List<PriorityVO>>() {
+        }.getType());
+        result.putAll(priorityVOS.stream().collect(Collectors.toMap(PriorityVO::getId, Function.identity())));
         return result;
     }
 

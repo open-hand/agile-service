@@ -379,16 +379,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     protected void calculationRank(Long projectId, IssueConvertDTO issueConvertDTO) {
-        if (sprintValidator.hasIssue(projectId, issueConvertDTO.getSprintId())) {
-            String rank = sprintMapper.queryMaxRank(projectId, issueConvertDTO.getSprintId());
-            //处理rank为null的脏数据
-            if (StringUtils.isEmpty(rank)) {
-                issueConvertDTO.setRank(RankUtil.mid());
-            } else {
-                issueConvertDTO.setRank(RankUtil.genNext(rank));
-            }
-        } else {
+        String rank = sprintMapper.queryMaxRank(projectId, issueConvertDTO.getSprintId());
+        //处理rank为null的脏数据
+        if (StringUtils.isEmpty(rank)) {
             issueConvertDTO.setRank(RankUtil.mid());
+        } else {
+            issueConvertDTO.setRank(RankUtil.genNext(rank));
         }
     }
 

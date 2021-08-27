@@ -191,7 +191,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         if (Boolean.FALSE.equals(EnumUtil.contain(SchemeApplyType.class, applyType))) {
             throw new CommonException(ERROR_APPLYTYPE_ILLEGAL);
         }
-        Long organizationId = projectUtil.getOrganizationId(projectId);
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
         ProjectConfigDTO projectConfig = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.ISSUE_TYPE, applyType);
         //获取问题类型方案
         if (projectConfig.getSchemeId() != null) {

@@ -23,4 +23,9 @@ public interface StatusMachineSchemeConfigMapper extends BaseMapper<StatusMachin
 
     List<StatusMachineSchemeConfigDTO> selectBySchemeIds(@Param("organizationId") Long organizationId,
                                                          @Param("schemeIds") Set<Long> schemeIds);
+
+    Long selectStatusMachineIdByIssueTypeId(@Param("organizationId") Long organizationId,
+                                            @Param("projectId") Long projectId,
+                                            @Param("applyType") String applyType,
+                                            @Param("issueTypeId") Long issueTypeId);
 }

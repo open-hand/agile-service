@@ -212,4 +212,9 @@
             AND name LIKE concat('%',#{param},'%')
         </if>
     </select>
+
+    <select id="queryByOrgId" resultType="io.choerodon.agile.api.vo.StatusVO">
+        select * from fd_status
+        where organization_id = #{organizationId}
+    </select>
 </mapper>

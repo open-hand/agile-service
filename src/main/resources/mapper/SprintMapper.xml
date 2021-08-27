@@ -789,7 +789,7 @@
 
     <select id="queryMaxRank" resultType="java.lang.String">
         select MAX(ai.rank) from agile_issue ai
-        where ai.project_id = #{projectId} AND ai.type_code in ('story', 'task', 'bug') and ai.apply_type = 'agile'
+        where ai.project_id = #{projectId}
         and ai.issue_id
         <choose>
             <when test="sprintId != null and sprintId != 0">
@@ -799,7 +799,7 @@
                 agile_issue_sprint_rel aisr1,
                 agile_sprint asp
                 WHERE
-                aisr1.project_id = #{projectId}
+                asp.project_id = #{projectId}
                 AND aisr1.sprint_id = asp.sprint_id
                 AND asp.status_code != 'closed'
                 AND aisr1.sprint_id = #{sprintId})
@@ -811,7 +811,7 @@
                 agile_issue_sprint_rel aisr1,
                 agile_sprint asp
                 WHERE
-                aisr1.project_id = #{projectId}
+                asp.project_id = #{projectId}
                 AND aisr1.sprint_id = asp.sprint_id
                 AND asp.status_code != 'closed' )
             </otherwise>
