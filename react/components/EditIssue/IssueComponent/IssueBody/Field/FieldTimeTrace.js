@@ -11,6 +11,19 @@ function add(num1, num2) {
   const baseNum = Math.pow(10, Math.max(num1Digits, num2Digits));
   return (num1 * baseNum + num2 * baseNum) / baseNum;
 }
+/**
+ *  数字不保留0 的字符串
+ * @param {*} num
+ * @returns
+ */
+function numToStringWithoutZero(num, digits = 2) {
+  const strNum = String(num);
+  // 是数字并且不为0
+  if (/^(-?\d+)(\.\d+)?$/.test(strNum) && !!Number(strNum.replace(/\./g, ''))) {
+    return parseFloat(Number(num).toFixed(digits));
+  }
+  return '0';
+}
 @observer class FieldTimeTrace extends Component {
   getWorkloads = () => {
     const { store } = this.props;
@@ -37,9 +50,9 @@ function add(num1, num2) {
         </div>
         <div className="c7n-value-wrapper" style={{ paddingLeft: '0.05rem' }}>
           <span style={{ flex: 1 }}>
-            {Number(workloads).toFixed(2)}
+            {numToStringWithoutZero(workloads)}
             {'小时/'}
-            {Number(workloads + (remainingTime || 0)).toFixed(2)}
+            {numToStringWithoutZero(workloads + (remainingTime || 0))}
             {'小时'}
           </span>
           {
