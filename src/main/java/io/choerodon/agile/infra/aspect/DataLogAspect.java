@@ -33,6 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 日志切面
@@ -1269,10 +1270,15 @@ public class DataLogAspect {
 
     private void handleStatus(List<String> field, IssueDTO originIssueDTO, IssueConvertDTO issueConvertDTO) {
         if (field.contains(STATUS_ID) && !Objects.equals(originIssueDTO.getStatusId(), issueConvertDTO.getStatusId())) {
-            StatusVO originStatusVO = statusService.queryStatusById(ConvertUtil.getOrganizationId(originIssueDTO.getProjectId()), originIssueDTO.getStatusId());
-            StatusVO currentStatusVO = statusService.queryStatusById(ConvertUtil.getOrganizationId(originIssueDTO.getProjectId()), issueConvertDTO.getStatusId());
-            IssueStatusDTO originStatus = issueStatusMapper.selectByStatusId(originIssueDTO.getProjectId(), originIssueDTO.getStatusId());
-            IssueStatusDTO currentStatus = issueStatusMapper.selectByStatusId(originIssueDTO.getProjectId(), issueConvertDTO.getStatusId());
+            long organizationId = ConvertUtil.getOrganizationId(originIssueDTO.getProjectId());
+            List<StatusVO> statusList = issueStatusMapper.listStatusByIds(
+                    originIssueDTO.getProjectId(), organizationId,
+                    Stream.of(originIssueDTO.getStatusId(), issueConvertDTO.getStatusId())
+                            .collect(Collectors.toList()));
+            Map<Long, StatusVO> statusMap = statusList.stream().collect(Collectors.toMap(StatusVO::getId, Function.identity()));
+            StatusVO originStatusVO = statusMap.get(originIssueDTO.getStatusId());
+            StatusVO currentStatusVO = statusMap.get(issueConvertDTO.getStatusId());
+
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     isTrue(issueConvertDTO.getAutoTranferFlag()) ? FIELD_AUTO_STATUS : FIELD_STATUS, originStatusVO.getName(),
                     currentStatusVO.getName(), originIssueDTO.getStatusId().toString(), issueConvertDTO.getStatusId().toString());
@@ -1281,10 +1287,10 @@ public class DataLogAspect {
                 createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), FIELD_AUTO_TRIGGER, null,
                         issueConvertDTO.getAutoTriggerNum(), null, issueConvertDTO.getAutoTriggerId().toString());
             }
-            Boolean condition = (originStatus.getCompleted() != null && originStatus.getCompleted()) || (currentStatus.getCompleted() != null && currentStatus.getCompleted());
-            if (condition) {
+            Boolean condition = (originStatusVO.getCompleted() != null && originStatusVO.getCompleted()) || (currentStatusVO.getCompleted() != null && currentStatusVO.getCompleted());
+            if (Boolean.TRUE.equals(condition)) {
                 //生成解决问题日志
-                dataLogResolution(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), originStatus, currentStatus, originStatusVO, currentStatusVO, issueConvertDTO.getAutoTranferFlag());
+                dataLogResolution(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), originStatusVO, currentStatusVO, issueConvertDTO.getAutoTranferFlag());
             }
             //删除缓存
             dataLogRedisUtil.deleteByHandleStatus(issueConvertDTO, originIssueDTO, condition);
@@ -1527,18 +1533,18 @@ public class DataLogAspect {
         }
     }
 
-    private void dataLogResolution(Long projectId, Long issueId, IssueStatusDTO originStatus, IssueStatusDTO currentStatus, StatusVO originStatusVO, StatusVO currentStatusVO, Boolean autoTranferFlag) {
-        Boolean condition = (originStatus.getCompleted() == null || !originStatus.getCompleted()) || (currentStatus.getCompleted() == null || !currentStatus.getCompleted());
+    private void dataLogResolution(Long projectId, Long issueId, StatusVO originStatusVO, StatusVO currentStatusVO, Boolean autoTranferFlag) {
+        Boolean condition = (originStatusVO.getCompleted() == null || !originStatusVO.getCompleted()) || (currentStatusVO.getCompleted() == null || !currentStatusVO.getCompleted());
         if (condition) {
             String oldValue = null;
             String newValue = null;
             String oldString = null;
             String newString = null;
-            if (originStatus.getCompleted() != null && originStatus.getCompleted()) {
-                oldValue = originStatus.getStatusId().toString();
+            if (originStatusVO.getCompleted() != null && originStatusVO.getCompleted()) {
+                oldValue = originStatusVO.getId().toString();
                 oldString = originStatusVO.getName();
-            } else if (currentStatus.getCompleted()) {
-                newValue = currentStatus.getStatusId().toString();
+            } else if (Boolean.TRUE.equals(currentStatusVO.getCompleted())) {
+                newValue = currentStatusVO.getId().toString();
                 newString = currentStatusVO.getName();
             }
             createDataLog(projectId, issueId, isTrue(autoTranferFlag)? FIELD_AUTO_RESOLUTION : FIELD_RESOLUTION, oldString, newString, oldValue, newValue);
