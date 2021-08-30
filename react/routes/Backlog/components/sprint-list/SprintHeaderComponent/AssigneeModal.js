@@ -40,7 +40,7 @@ const AssigneeModal = ({ data }) => {
   };
   const columns = [{
     name: 'assigneeName',
-    width: 140,
+    // width: 130,
     tooltip: 'overflow',
     renderer: ({ text }) => (text === '合计' ? (
       <span>{text}</span>
@@ -51,7 +51,7 @@ const AssigneeModal = ({ data }) => {
     )),
   }, {
     name: 'issueCount',
-    width: 80,
+    width: 85,
     renderer: ({ text }) => (text || '无'),
   }, {
     name: 'remainingIssueCount',
@@ -59,7 +59,7 @@ const AssigneeModal = ({ data }) => {
     renderer: ({ text }) => (text || '无'),
   }, {
     name: 'totalStoryPoints',
-    width: 80,
+    width: 85,
     renderer: ({ text }) => (text || '无'),
   }, {
     width: 95,
