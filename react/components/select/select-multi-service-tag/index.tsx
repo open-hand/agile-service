@@ -24,7 +24,8 @@ export interface SelectMultiServiceTagProps extends Partial<SelectProps> {
   onPopupHidden?: (hidden: boolean) => void
   applicationId?: string | null
   flat?: boolean
-  mode?: 'program'
+  /** 模式 @default 'project' */
+  mode?: 'program' | 'project'
   projectId?: string
 }
 

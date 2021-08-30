@@ -8,8 +8,8 @@ import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import {
   observer, useComputed, useObservable,
 } from 'mobx-react-lite';
-import { devOpsApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import { devOpsApi } from '@/api';
 import { getProjectId } from '@/utils/common';
 import { randomString } from '@/utils/random';
 
@@ -172,6 +172,7 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = ({
                 name="appService"
                 record={record}
                 disabled={!currentProjectId}
+                labelLayout={'placeholder' as any}
                 label="请选择应用服务"
                 placeholder="请选择应用服务"
                 loadData={loadAppServiceData}
@@ -189,6 +190,7 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = ({
                 help={undefined}
                 projectId={currentProjectId}
                 disabled={!appServiceId}
+                labelLayout={'placeholder' as any}
                 placeholder="请选择Tag"
                 label="请选择Tag"
                 className={`${prefixCls}-content-item`}

@@ -228,7 +228,7 @@ const CreateIssueBase = observer(({
     id: issueTypeId,
   })?.typeCode;
   const enableIssueLinks = issueTypeCode && !['sub_task', 'issue_epic', 'feature'].includes(issueTypeCode);
-  const isSubIssue = issueTypeCode && ['sub_task'].includes(issueTypeCode);
+  const isSubIssue = issueTypeCode && ['sub_task', 'bug'].includes(issueTypeCode);
 
   const [{ data: fields, isFetching: isFieldsLoading }, {
     data: templateData,
@@ -318,7 +318,7 @@ const CreateIssueBase = observer(({
         field: {
           name: 'parentIssueId',
           label: '关联父级任务',
-          required: true,
+          required: issueTypeCode === 'sub_task',
         },
       }, {
         insert: showFeature,
@@ -522,6 +522,11 @@ const CreateIssueBase = observer(({
           featureId: defaultFeature.issueId,
           featureName: defaultFeature.summary,
         } : {};
+      }
+      case 'tag': {
+        return {
+          mode: isProgram ? 'program' : 'project',
+        };
       }
 
       default: break;
