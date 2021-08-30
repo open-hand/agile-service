@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useMemo } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import {
   Modal, DataSet, Form, Select, TimePicker, DateTimePicker, CheckBox,
 } from 'choerodon-ui/pro';
@@ -32,7 +32,6 @@ const getOptionsByUnit = (unit: string) => {
 };
 const AutoSendModal: React.FC<AutoSendModalProps> = (props) => {
   const { modal } = props;
-  const prefixCls = useMemo(() => 'c7nag-project-report-auto-send', []);
 
   const dataSet = useCreation(() => new DataSet({
     autoCreate: true,
@@ -65,7 +64,7 @@ const AutoSendModal: React.FC<AutoSendModalProps> = (props) => {
   const unit = dataSet.current?.get('unit');
   const dateVisible = ['week', 'month'].includes(unit);
   return (
-    <Form dataSet={dataSet} columns={2} className={prefixCls}>
+    <Form dataSet={dataSet} columns={2}>
       <Select name="unit" colSpan={1}>
         <Option value="day">天</Option>
         <Option value="week">周</Option>
