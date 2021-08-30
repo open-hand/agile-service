@@ -12,14 +12,16 @@ import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.StatusBranchMergeSettingMapper;
-import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 
@@ -42,6 +44,8 @@ public class StatusBranchMergeSettingServiceImpl implements StatusBranchMergeSet
     private ProjectConfigService projectConfigService;
     @Autowired
     private IssueService issueService;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StatusBranchMergeSettingServiceImpl.class);
 
     @Override
     public StatusBranchMergeSettingVO query(Long projectId, Long organizationId, Long issueTypeId, Long statusId) {
@@ -96,7 +100,10 @@ public class StatusBranchMergeSettingServiceImpl implements StatusBranchMergeSet
         issue.setProjectId(projectId);
         issue.setIssueId(issueId);
         IssueDTO result = issueMapper.selectOne(issue);
-        AssertUtilsForCommonException.notNull(result, "error.issue.not.existed");
+        if (ObjectUtils.isEmpty(result)) {
+            LOGGER.error("update issue status error when branch merge because of issue not existed, issueId: {}", issueId);
+            return;
+        }
         Long issueTypeId = result.getIssueTypeId();
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         StatusBranchMergeSettingDTO dto = new StatusBranchMergeSettingDTO();
