@@ -6,6 +6,7 @@ import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.springframework.web.context.request.RequestAttributes;
 
 import java.util.List;
 import java.util.Map;
@@ -75,7 +76,9 @@ public interface ConfigurationRuleService {
                    Long projectId,
                    boolean createCustomFieldMember,
                    List<Long> executedRuleIds,
-                   Long noticeInstanceId);
+                   Long noticeInstanceId,
+                   String encryptType,
+                   RequestAttributes requestAttributes);
 
     ConfigurationRuleVO filterRuleByCondition(ConfigurationRuleVO rule,
                                               Long instanceId,
