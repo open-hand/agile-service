@@ -516,6 +516,20 @@ public class DataLogAspect {
             query.setLogId(logId);
             WorkLogDTO workLogDTO = workLogMapper.selectOne(query);
             if (workLogDTO != null) {
+                DataLogDTO dataLogDTO = dataLogMapper.selectLastWorkLogById(workLogDTO.getProjectId(), workLogDTO.getIssueId(), FIELD_TIMESPENT);
+                if (!ObjectUtils.isEmpty(dataLogDTO)) {
+                    String oldString = null;
+                    String newString;
+                    String oldValue = null;
+                    String newValue;
+                    oldValue = dataLogDTO.getNewValue();
+                    oldString = dataLogDTO.getNewString();
+                    BigDecimal newTime = new BigDecimal(dataLogDTO.getNewValue());
+                    newValue = newTime.subtract(workLogDTO.getWorkTime()).toString();
+                    newString = newTime.subtract(workLogDTO.getWorkTime()).toString();
+                    createDataLog(workLogDTO.getProjectId(), workLogDTO.getIssueId(), FIELD_TIMESPENT,
+                            oldString, newString, oldValue, newValue);
+                }
                 createDataLog(workLogDTO.getProjectId(), workLogDTO.getIssueId(), FIELD_WORKLOGID,
                         workLogDTO.getLogId().toString(), null, workLogDTO.getLogId().toString(), null);
             }
