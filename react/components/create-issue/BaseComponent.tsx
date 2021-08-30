@@ -523,6 +523,11 @@ const CreateIssueBase = observer(({
           featureName: defaultFeature.summary,
         } : {};
       }
+      case 'tag': {
+        return {
+          mode: isProgram ? 'program' : 'project',
+        };
+      }
 
       default: break;
     }
