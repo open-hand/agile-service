@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.NoticeEventVO;
 import io.choerodon.agile.api.vo.business.ConfigurationRuleVO;
+import io.choerodon.agile.api.vo.business.TriggerCarrierVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -52,7 +53,10 @@ public interface ConfigurationRuleService {
      * @param checkMode 在检查模式下，仅会根据语句条件生成，不会去拼接字段类型条件，仅作检查
      * @return sql
      */
-    String generateSqlQuery(ConfigurationRuleVO configurationRuleVO, Map<String, ObjectSchemeFieldDTO> customFieldMap, boolean checkMode);
+    String generateSqlQuery(ConfigurationRuleVO configurationRuleVO,
+                            Map<String, ObjectSchemeFieldDTO> customFieldMap,
+                            boolean checkMode,
+                            boolean isBacklogTrigger);
 
     /**
      * 筛选出检测更新字段受页面规则限制的规则
@@ -62,9 +66,12 @@ public interface ConfigurationRuleService {
      * @param checkMode 在检查模式下，仅会根据语句条件生成，不会去拼接字段类型条件，仅作检查
      * @return 仅对更新字段检测的规则集合
      */
-    List<ConfigurationRuleVO> processRule(Long projectId, 
-                                          List<ConfigurationRuleVO> sourceList, Set<String> fieldList,
-                                          boolean allFieldCheck, boolean checkMode);
+    List<ConfigurationRuleVO> processRule(Long projectId,
+                                          List<ConfigurationRuleVO> sourceList,
+                                          Set<String> fieldList,
+                                          boolean allFieldCheck,
+                                          boolean checkMode,
+                                          boolean isBacklogTrigger);
 
     List<ConfigurationRuleVO> selectByProjectId(ConfigurationRuleVO configurationRuleVO);
 
@@ -87,5 +94,9 @@ public interface ConfigurationRuleService {
                                               boolean checkMode);
 
     Map<Long, Map<String, String>> selectDataMapByIds(Set<Long> backlogIds);
+
+    void batchUpdateInvokeTrigger(List<TriggerCarrierVO> triggerCarriers,
+                                  String encryptType,
+                                  RequestAttributes requestAttributes);
 }
 
