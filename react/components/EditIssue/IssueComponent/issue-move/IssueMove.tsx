@@ -9,17 +9,17 @@ import { Steps } from 'choerodon-ui';
 import {
   includes, map, compact, uniq,
 } from 'lodash';
-import {
-  IModalProps, IIssueType, Issue,
-} from '@/common/types';
-import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { Choerodon } from '@choerodon/boot';
+import Field from 'choerodon-ui/pro/lib/data-set/Field';
+import { usePersistFn } from 'ahooks';
 import {
   issueTypeApi, projectApi, moveIssueApi, commonApi,
 } from '@/api';
-import Field from 'choerodon-ui/pro/lib/data-set/Field';
-import { usePersistFn } from 'ahooks';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
+import {
+  IModalProps, IIssueType, Issue,
+} from '@/common/types';
 import SelectProject from './components/select-project';
 import Confirm from './components/confirm-data';
 import styles from './IssueMove.less';
@@ -267,11 +267,11 @@ const IssueMove: React.FC<Props> = ({
       <div className="c7n-pro-modal-footer c7n-pro-modal-footer-drawer">
         {currentStep === 1 && (
           <>
-            <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleNext}>
-              下一步
-            </Button>
             <Button onClick={handleCancel} funcType={'raised' as FuncType}>
               取消
+            </Button>
+            <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleNext}>
+              下一步
             </Button>
           </>
         )}

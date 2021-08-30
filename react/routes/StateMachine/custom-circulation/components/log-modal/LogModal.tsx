@@ -130,9 +130,9 @@ const LogTable: React.FC<Props> = () => {
       <Table
         dataSet={logTableDs}
         queryBar={() => (
-          <Form dataSet={queryDataSet} columns={7}>
-            <TextField name="params" prefix={<Icon type="search" />} colSpan={2} valueChangeAction={'input' as any} />
-            <Select name="statusCode" colSpan={1}>
+          <Form dataSet={queryDataSet} columns={14} labelLayout={'none' as any} style={{ marginLeft: -5 }}>
+            <TextField name="params" prefix={<Icon type="search" />} colSpan={3} valueChangeAction={'input' as any} placeholder="请输入搜索内容" />
+            <Select name="statusCode" colSpan={2} placeholder="状态">
               <Option value="success">已执行</Option>
               <Option value="error">失败</Option>
               <Option value="stop">终止</Option>
