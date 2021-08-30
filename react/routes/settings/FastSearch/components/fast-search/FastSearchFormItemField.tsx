@@ -1,5 +1,6 @@
 import React, {
   useCallback, useEffect, useMemo, useRef,
+  useState,
 } from 'react';
 import { Select, DataSet } from 'choerodon-ui/pro';
 import { observer, useObservable } from 'mobx-react-lite';
@@ -8,6 +9,7 @@ import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import renderField from '@/components/issue-filter-form/components/renderField';
 import './index.less';
 import { transformFieldToRenderProps } from './utils';
+import { getFilterFields } from '@/components/field-pro/layouts';
 
 const { Option } = Select;
 const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ record, ...otherProps }) => {
@@ -19,6 +21,7 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
     return { defaultValue, defaultValueArr };
   }, []);
   const componentRef = useRef<any>();
+
   /**
    * 编辑进入的数据转换为对象选项
    */
@@ -52,7 +55,7 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
     issueTypeIds: undefined,
     selectedIds: record.get('_editData') && record.get('_editDataCode') === record.get('fieldCode') ? editDefaultValue.defaultValueArr : undefined,
   }), [editDefaultValue.defaultValueArr, record]);
-  const renderComponentProps = useMemo(() => ({
+  const componentProps = useMemo(() => ({
     ref: componentRef,
     label: undefined,
     hasUnassign: undefined,
@@ -60,8 +63,6 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
     unassignedEpic: undefined,
     clearButton: true,
     primitiveValue: false,
-    // selectAllButton: false,
-    // reverse: false,
     selected: record.get('_editDataCode') === record.get('fieldCode') ? editDefaultValue.defaultValueArr : undefined,
     style: { width: '100%' },
     afterLoad: record.get('_editData') && record.get('_editDataCode') === record.get('fieldCode') ? handleBindOptions : undefined,
@@ -76,8 +77,8 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
         </Select>
       );
     }
-    return renderField(chosenField, renderComponentProps, { dataSet: record.dataSet! });
-  }, [chosenField, isRenderNullSelect, otherProps, record.dataSet, renderComponentProps]);
+    return getFilterFields([{ field: chosenField }], { [chosenField.code]: componentProps })[0] as React.ReactElement;
+  }, [chosenField, isRenderNullSelect, otherProps, componentProps]);
   return (
     <span>
       {render()}
