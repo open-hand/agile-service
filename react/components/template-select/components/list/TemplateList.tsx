@@ -3,8 +3,8 @@ import { observer } from 'mobx-react-lite';
 import {
   Icon, Tooltip, Popconfirm,
 } from 'choerodon-ui';
-import { TemplateAction, templateApi } from '@/api';
 import classnames from 'classnames';
+import { TemplateAction, templateApi } from '@/api';
 import { ITableColumnCheckBoxesDataProps } from '@/components/table-column-check-boxes';
 import styles from './TemplateList.less';
 import openEditTemplate, { IFieldOption, ITemplate } from '../edit/EditTemplate';
@@ -13,6 +13,7 @@ interface Props {
   action: TemplateAction
   checkOptions: IFieldOption[]
   templateList: ITemplate[]
+  selected: ITemplate | undefined
   setSelected: Function
   templateItemNameCls: string
   onEdit: (template: ITemplate) => void
@@ -24,7 +25,7 @@ interface Props {
 }
 
 const TemplateList: React.FC<Props> = ({
-  action, checkOptions, templateList, setSelected, templateItemNameCls, onEdit, onDelete, selectTemplateOk, transformExportFieldCodes, reverseTransformExportFieldCodes, defaultInitCodes,
+  action, checkOptions, templateList, selected, setSelected, templateItemNameCls, onEdit, onDelete, selectTemplateOk, transformExportFieldCodes, reverseTransformExportFieldCodes, defaultInitCodes,
 }) => {
   const handleSelect = useCallback((template) => {
     setSelected(template);
@@ -42,8 +43,19 @@ const TemplateList: React.FC<Props> = ({
     onDelete(template.id);
   }, [onDelete]);
 
+  const handleClearTemplate = useCallback(() => {
+    setSelected(undefined);
+  }, [setSelected]);
+
   return (
     <div className={styles.template_list}>
+      {
+        selected && (
+          <div className={classnames(styles.template_item, styles.clear_item)} role="none" onClick={handleClearTemplate}>
+            移出模板
+          </div>
+        )
+      }
       {
         templateList && templateList.length ? (
           <>
