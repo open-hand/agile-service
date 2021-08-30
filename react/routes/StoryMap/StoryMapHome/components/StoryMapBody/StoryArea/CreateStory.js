@@ -237,7 +237,7 @@ class CreateStory extends Component {
                     />
                   </div>
                 </Dropdown>
-                <Input autoFocus onPressEnter={this.handleCreateIssue} placeholder="作为什么角色，我想要什么样的结果，以便于怎样的目的" value={value} onChange={this.handleChange} maxLength={44} />
+                <Input border={false} autoFocus onPressEnter={this.handleCreateIssue} placeholder="作为什么角色，我想要什么样的结果，以便于怎样的目的" value={value} onChange={this.handleChange} maxLength={44} />
               </div>
             )
             : (
