@@ -56,6 +56,7 @@ ref: React.Ref<Select>) => {
     textField: 'value',
     valueField: 'id',
     requestArgs: args,
+    tooltip: true,
     request: ({ page, filter, requestArgs }) => {
       if (hasRule && fieldId) {
         return fieldApi.project(projectId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, SIZE);

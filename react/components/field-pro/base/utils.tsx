@@ -18,11 +18,7 @@ const filterModeProps = {
   datetime: {},
   date: {},
   number: {},
-  text: {
-    props: {
-      autoSize: true, rows: 3, maxLength: 255, valueChangeAction: 'input',
-    },
-  },
+  text: {},
   url: {},
   radio: filterModeSelectCommonProps,
   single: filterModeSelectCommonProps,

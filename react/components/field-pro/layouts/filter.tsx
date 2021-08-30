@@ -2,7 +2,7 @@ import {
   DataSet,
 } from 'choerodon-ui/pro';
 import { toJS } from 'mobx';
-import { find, groupBy } from 'lodash';
+import { find, get, groupBy } from 'lodash';
 import { getAgileFields } from '../base';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import { statusApi } from '@/api';
@@ -115,18 +115,11 @@ function renderField(field: IChosenFieldField, dataSet?: DataSet) {
       // case 'starBeacon': {
       //   return <CheckBox label="我的关注" name={code} />;
       // }
-      // case 'environment': {
-      //   return { code: 'environment', multiple: true };
-      // }
-      // case 'programVersion': {
-      //   return { code: 'programVersion', multiple: true };
-      // }
+
       case 'tags': {
         return { code: 'tag', multiple: true };
       }
-      // case 'contents': {
-      //   return <TextField name={code} clearButton {...otherComponentProps} />;
-      // }
+
       default:
         break;
     }
@@ -148,13 +141,14 @@ function renderField(field: IChosenFieldField, dataSet?: DataSet) {
 /**
  *  获取过滤的字段
  * @param fields
- * @param fieldCodeProps IFieldConfig<AgileComponentMapProps, CustomComponentMapProps>[]
+ * @param fieldCodeProps  兼容属性，key对应的是 `fields`中的code
  * @param instance 获取字段实例
  */
 function getFilterFields(fields: any[], fieldCodeProps?: Record<string, any>, instance = getAgileFields) {
   const newFilters = fields.map((field) => {
     const config = renderField(field.field, field.dataSet);
     const { code = field.field.code, name = field.field.code, ...otherProps } = config;
+
     return {
       code,
       fieldType: field.field.fieldType,
@@ -166,13 +160,12 @@ function getFilterFields(fields: any[], fieldCodeProps?: Record<string, any>, in
         ...getFieldPropsByMode({ code, fieldType: field.field.fieldType, outputs: ['element'] }, 'filter'),
         ...otherProps,
         ...field.otherComponentProps,
-
       },
-      outputs: ['element'],
+      outputs: ['config', 'function'],
     };
   }) as any[];
   // const { system, custom } = groupBy(newFilters, (item) => (item.system ? 'system' : 'custom'));
-  return instance(newFilters).map((i) => i[0]);
+  return instance(newFilters).map((i: [any, any]) => i[1]({ ...i[0], props: { ...i[0].props, ...get(fieldCodeProps, i[0].props.key) } }));
   // return getFields(newFilters).map((i, index) => React.createElement(i[0] as any,
   //   { ...getProps(fields[index].code, fieldCodeProps) })) as JSX.Element[];
 }
