@@ -3,8 +3,9 @@ import {
   Modal, DataSet, Form, Select, TimePicker, DateTimePicker, CheckBox,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import { IModalProps } from '@/common/types';
 import { useCreation } from 'ahooks';
+import { IModalProps } from '@/common/types';
+import styles from './index.less';
 
 interface AutoSendModalProps {
   modal?: IModalProps,
@@ -76,7 +77,7 @@ const AutoSendModal: React.FC<AutoSendModalProps> = (props) => {
         </Select>
       ) : null}
       {unit === 'once' ? <DateTimePicker name="time" colSpan={1} /> : <TimePicker name="time" colSpan={1} />}
-      {unit === 'month' ? <CheckBox name="includeWeek">包括周六，周日</CheckBox> : null}
+      {unit === 'month' ? <CheckBox name="includeWeek" className={styles.includeWeek}>包括周六，周日</CheckBox> : null}
     </Form>
   );
 };
