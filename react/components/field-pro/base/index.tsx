@@ -28,7 +28,6 @@ export interface IFieldBaseConfig {
 function getFieldsInstance<T extends IFieldBaseConfig = IFieldBaseConfig, S extends IComponentFCWithClassObject = AgileComponentMapProps,
   C extends IComponentFCWithClassObject = CustomComponentMapProps>(config: IFieldsInstanceConfig = {}) {
   const { SystemComponents = AgileComponentMap, CustomComponents = CustomFieldMap } = config;
-  console.log('config....', config);
   /**
  * 获取字段配置/元素/自定义配置渲染
  * @param fields 系统/自定义字段

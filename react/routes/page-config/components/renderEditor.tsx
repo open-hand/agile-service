@@ -17,7 +17,7 @@ interface IRenderFieldProps {
 
 function renderEditor({
   data, dataRef, style, ...otherProps
-}: IRenderFieldProps):React.ReactElement {
+}: IRenderFieldProps): React.ReactElement {
   const { fieldType, fieldCode, defaultValue: propsDefaultValue } = data;
   const defaultValue = toJS(propsDefaultValue);
   switch (fieldCode) {
@@ -122,7 +122,9 @@ function renderEditor({
     return getAgileFields([], [], {
       fieldType: fieldType as 'checkbox' | 'multiple' | 'radio' | 'single',
       outputs: ['element'],
-      props: { style, fieldOptions: fieldOptions.map((item: any) => ({ ...item, id: item.id ?? item.tempKey })) },
+      props: {
+        key: data.fieldCode, selected: data.defaultValue, style, fieldOptions: fieldOptions.map((item: any) => ({ ...item, id: item.id ?? item.tempKey })), ...otherProps,
+      },
     })[0][0] as React.ReactElement;
   }
   switch (fieldType) {

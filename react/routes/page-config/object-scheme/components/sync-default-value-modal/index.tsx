@@ -1,9 +1,4 @@
-import { pageConfigApi } from '@/api';
-import { IIssueType, IModalProps } from '@/common/types';
 import { toJS } from 'mobx';
-import beforeSubmitProcessData from '@/routes/page-config/components/create-field/util';
-import renderEditor from '@/routes/page-config/components/renderEditor';
-import { getMenuType } from '@/utils/common';
 import {
   Form, DataSet, Modal, Select,
 } from 'choerodon-ui/pro';
@@ -12,6 +7,12 @@ import moment from 'moment';
 import React, {
   useCallback, useEffect, useMemo,
 } from 'react';
+import { observer } from 'mobx-react-lite';
+import { getMenuType } from '@/utils/common';
+import renderEditor from '@/routes/page-config/components/renderEditor';
+import beforeSubmitProcessData from '@/routes/page-config/components/create-field/util';
+import { IIssueType, IModalProps } from '@/common/types';
+import { pageConfigApi } from '@/api';
 
 interface Props {
   prefixCls: string
@@ -20,12 +21,7 @@ interface Props {
   options: IIssueType[]
   modal?: IModalProps
 }
-const dateList = ['datetime', 'time', 'date'];
-const dateFormat = {
-  date: 'YYYY-MM-DD',
-  datetime: 'YYYY-MM-DD HH:mm:ss',
-  time: 'HH:mm:ss',
-};
+
 const SyncDefaultValueEditForm: React.FC<Props> = ({
   record, options, modal, prefixCls, defaultTypes,
 }) => {
@@ -34,24 +30,20 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
     if (defaultValue === '') {
       defaultValue = undefined;
     }
-    if (defaultValue && ['checkbox', 'multiple', 'radio', 'single'].includes(record.get('fieldType'))) {
+    if (defaultValue && ['checkbox', 'multiple', 'radio', 'single', 'multiMember', 'member'].includes(record.get('fieldType'))) {
       defaultValue = String(defaultValue).split(',');
     }
     if (['datetime', 'time', 'date'].includes(record.get('fieldType')) && record.get('extraConfig')) {
       defaultValue = 'current';
     }
-    if (['multiMember', 'member'].includes(record.get('fieldType'))) {
-      defaultValue = Array.isArray(toJS(record.get('defaultValueObj'))) ? record.get('defaultValueObj') : [record.get('defaultValueObj')].filter(Boolean);
-    }
 
     return defaultValue;
   }, [record]);
   const ds = useMemo(() => {
-    const defaultValue = initValue && ['multiMember', 'member'].includes(record.get('fieldType')) ? initValue?.map((i:any) => i.id) : initValue;
-
-    // if (dateList.includes(record.get('fieldType')) && defaultValue) {
-    //   defaultValue = defaultValue === 'current' ? '当前时间' : moment(defaultValue, dateFormat.datetime).format(dateFormat[record.get('fieldType') as 'date' | 'datetime' | 'time']);
-    // }
+    let defaultValue = initValue;
+    if (['radio', 'single', 'member'].includes(record.get('fieldType')) && initValue) {
+      defaultValue = Array.isArray(defaultValue) ? initValue[0] : initValue;
+    }
 
     return new DataSet({
       autoCreate: true,
