@@ -23,7 +23,7 @@ import {
   IIssueType, IModalProps, IssueCreateFields, Priority, User,
 } from '@/common/types';
 import useIssueCreateFields from '@/hooks/data/useIssueCreateFields';
-
+import { issueApi } from '@/api';
 import { getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { ICascadeLinkage } from '@/routes/page-config/components/setting-linkage/Linkage';
@@ -286,9 +286,18 @@ const CreateIssueBase = observer(({
     return field.defaultValue;
   });
 
-  const handleUpdate = usePersistFn(({ name, value, record }) => {
+  const handleUpdate = usePersistFn(async ({ name, value, record }) => {
     switch (name) {
-      case 'issueType': {
+      case 'parentIssueId': {
+        if (value) {
+          try {
+            const res = await issueApi.load(value);
+            const { activeSprint } = res || {};
+            record.set('sprint', activeSprint?.sprintId ?? undefined);
+          } catch (e) {
+            record.set('sprint', undefined);
+          }
+        }
         break;
       }
       default: {
@@ -330,7 +339,7 @@ const CreateIssueBase = observer(({
         },
       }]) : [],
       events: {
-        // update: handleUpdate,
+        update: handleUpdate,
       },
     });
     const newValue: { [key: string]: any } = {};
@@ -526,6 +535,11 @@ const CreateIssueBase = observer(({
       case 'tag': {
         return {
           mode: isProgram ? 'program' : 'project',
+        };
+      }
+      case 'sprint': {
+        return {
+          disabled: issueTypeCode === 'sub_task',
         };
       }
 
