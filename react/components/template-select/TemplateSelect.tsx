@@ -4,11 +4,9 @@ import React, {
   useState, useRef, useCallback, useEffect, useImperativeHandle,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Icon } from 'choerodon-ui/pro';
-import { Dropdown } from 'choerodon-ui/pro';
+import { Icon, Dropdown } from 'choerodon-ui/pro';
 
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
-import useIsProgram from '@/hooks/useIsProgram';
 import { TemplateAction, templateApi } from '@/api';
 import styles from './TemplateSelect.less';
 import TemplateList from './components/list';
@@ -131,6 +129,7 @@ const TemplateSelect: React.FC<Props> = (props) => {
             <TemplateList
               {...props}
               templateList={templateList}
+              selected={selected}
               setSelected={setSelected}
               templateItemNameCls={templateItemNameCls}
               onEdit={handleEditOk}
