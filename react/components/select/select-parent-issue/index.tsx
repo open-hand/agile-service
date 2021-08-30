@@ -1,10 +1,10 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
+import { FlatSelect } from '@choerodon/components';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { issueApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import type { Issue } from '@/common/types';
-import { FlatSelect } from '@choerodon/components';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import InlineIssueTag from '@/components/tag/inline-issue-tag';
 
 interface Props extends Partial<SelectProps> {
@@ -14,16 +14,17 @@ interface Props extends Partial<SelectProps> {
 }
 
 const SelectParentIssue: React.FC<Props> = forwardRef(({
-  flat, projectId, ...otherProps
+  flat, projectId, issueType, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<Issue> => ({
     textField: 'summary',
     valueField: 'issueId',
-    request: ({ filter, page }) => issueApi.project(projectId).loadParentIssues(page ?? 0, 20, 'sub_task', filter), // 故事、任务、缺陷（不能是子缺陷
+    requestArgs: { issueType },
+    request: ({ filter, page, requestArgs }) => issueApi.project(projectId).loadParentIssues(page ?? 0, 20, requestArgs?.issueType, filter), // 故事、任务、缺陷（不能是子缺陷
     paging: true,
     optionRenderer: InlineIssueTag.optionRenderer,
     renderer: InlineIssueTag.renderer,
-  }), [projectId]);
+  }), [issueType, projectId]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
 
