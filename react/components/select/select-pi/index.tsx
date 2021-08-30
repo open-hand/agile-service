@@ -1,5 +1,5 @@
 import React, { useMemo, forwardRef, useRef } from 'react';
-import { Select } from 'choerodon-ui/pro';
+import { Select, Tooltip } from 'choerodon-ui/pro';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
 import useSelect, { SelectConfig, FragmentForSearch, LoadConfig } from '@/hooks/useSelect';
@@ -43,12 +43,18 @@ const SelectPI: React.FC<SelectPIProps> = forwardRef(({
     name: 'all_pi',
     textField: 'piName',
     valueField: 'id',
+    tooltip: true,
     request: request || (() => piApi.project(projectId).getPiListByStatus(statusList)),
-    optionRenderer: (pi) => (
-      <FragmentForSearch name={pi.id === '0' ? pi.name : pi.piName || `${pi.code}-${pi.name}`}>
-        {renderPi(pi)}
-      </FragmentForSearch>
-    ),
+    optionRenderer: (pi) => {
+      const name = pi.id === '0' ? pi.name : pi.piName || `${pi.code}-${pi.name}`;
+      return (
+        <FragmentForSearch name={name}>
+          <Tooltip title={name} placement="bottomLeft">
+            {renderPi(pi)}
+          </Tooltip>
+        </FragmentForSearch>
+      );
+    },
     afterLoad: afterLoadRef.current,
     middleWare: (piList) => {
       let sortPiList = [...piList];
