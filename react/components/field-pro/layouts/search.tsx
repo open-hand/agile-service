@@ -33,7 +33,7 @@ function getFieldConfig({
           applyType,
           projectId,
           selectedIds: value,
-          request: () => statusApi.project(projectId).loadByProject(applyType),
+          noIssueTypeIdQuery: true,
         },
       };
     case 'assigneeId':

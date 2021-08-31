@@ -4,10 +4,12 @@ import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
 import { includes, intersection } from 'lodash';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
-import { IStatusCirculation, statusTransformApi } from '@/api';
+import { IStatusCirculation, statusApi, statusTransformApi } from '@/api';
 
 export interface SelectStatusProps extends Partial<SelectProps> {
   issueTypeId?: string
+  /** 无问题类型查询状态 用以全查状态 */
+  noIssueTypeIdQuery?: boolean
   excludeStatus?: string[]
   dataRef?: React.MutableRefObject<any>
   afterLoad?: (statuss: IStatusCirculation[]) => void
@@ -23,13 +25,16 @@ export interface SelectStatusProps extends Partial<SelectProps> {
 
 const SelectStatus: React.FC<SelectStatusProps> = forwardRef(
   ({
-    request, issueTypeId, excludeStatus = [], dataRef, afterLoad, flat, projectId, applyType, issueTypeIds, selectedIds, isOrganization = false, extraStatus = [], ...otherProps
+    request, issueTypeId, noIssueTypeIdQuery, excludeStatus = [], dataRef, afterLoad, flat, projectId, applyType, issueTypeIds, selectedIds, isOrganization = false, extraStatus = [], ...otherProps
   }, ref: React.Ref<Select>) => {
     const config = useMemo((): SelectConfig<IStatusCirculation> => ({
       name: 'status',
       textField: 'name',
       valueField: 'id',
       request: async () => {
+        if (noIssueTypeIdQuery) {
+          return statusApi.project(projectId).loadByProject(applyType);
+        }
         if (issueTypeId) {
           return isOrganization ? statusTransformApi.orgLoadList(issueTypeId) : statusTransformApi.project(projectId).loadList(issueTypeId, applyType);
         }
