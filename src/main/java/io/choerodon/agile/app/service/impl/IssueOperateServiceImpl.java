@@ -11,12 +11,15 @@ import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
+import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import java.util.*;
 
@@ -92,7 +95,9 @@ public class IssueOperateServiceImpl implements IssueOperateService {
 
     @Async
     @Override
-    public void updateLinkIssue(Long projectId, Long issueId, IssueDTO issueDTO, String applyType) {
+    public void updateLinkIssue(Long projectId, Long issueId, IssueDTO issueDTO, String applyType, String encryptType, RequestAttributes requestAttributes) {
+        EncryptContext.setEncryptType(encryptType);
+        RequestContextHolder.setRequestAttributes(requestAttributes);
         Boolean isSub = Objects.equals("sub_task",issueDTO.getTypeCode()) || (Objects.equals("bug",issueDTO.getTypeCode()) && !ObjectUtils.isEmpty(issueDTO.getRelateIssueId()) && !Objects.equals(issueDTO.getRelateIssueId(), 0L));
         if (Boolean.TRUE.equals(isSub)) {
             return;

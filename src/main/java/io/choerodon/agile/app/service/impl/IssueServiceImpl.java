@@ -41,6 +41,7 @@ import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.hzero.core.base.AopProxy;
 import org.hzero.core.message.MessageAccessor;
+import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -53,6 +54,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -759,7 +761,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             //处理issue自己字段
             handleUpdateIssueWithoutRuleNotice(issueUpdateVO, fieldList, projectId);
         }
-        Long issueId = postUpdateIssue(projectId, issueUpdateVO);
+        Long issueId = postUpdateIssueWithoutRuleNotice(projectId, issueUpdateVO);
         return queryIssueByUpdate(projectId, issueId, fieldList);
     }
 
@@ -774,6 +776,23 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         if (issueUpdateVO.getVersionIssueRelVOList() != null && issueUpdateVO.getVersionType() != null) {
             this.self().handleUpdateVersionIssueRel(issueUpdateVO.getVersionIssueRelVOList(), projectId, issueId, issueUpdateVO.getVersionType());
+        }
+        if (issueUpdateVO.getTags() != null) {
+            this.self().handleUpdateTagIssueRel(issueUpdateVO.getTags(), projectId, issueId);
+        }
+        return issueId;
+    }
+
+    private Long postUpdateIssueWithoutRuleNotice(Long projectId, IssueUpdateVO issueUpdateVO) {
+        Long issueId = issueUpdateVO.getIssueId();
+        if (issueUpdateVO.getLabelIssueRelVOList() != null) {
+            this.self().handleUpdateLabelIssueWithoutRuleNotice(issueUpdateVO.getLabelIssueRelVOList(), issueId, projectId);
+        }
+        if (issueUpdateVO.getComponentIssueRelVOList() != null) {
+            this.self().handleUpdateComponentIssueRelWithoutRuleNotice(issueUpdateVO.getComponentIssueRelVOList(), projectId, issueId);
+        }
+        if (issueUpdateVO.getVersionIssueRelVOList() != null && issueUpdateVO.getVersionType() != null) {
+            this.self().handleUpdateVersionIssueRelWithoutRuleNotice(issueUpdateVO.getVersionIssueRelVOList(), projectId, issueId, issueUpdateVO.getVersionType());
         }
         if (issueUpdateVO.getTags() != null) {
             this.self().handleUpdateTagIssueRel(issueUpdateVO.getTags(), projectId, issueId);
@@ -998,16 +1017,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public IssueVO updateIssueStatus(Long projectId, Long issueId, Long transformId, Long objectVersionNumber,
                                      String applyType, IssueDTO triggerIssue, boolean autoTranferFlag) {
-        stateMachineClientService.executeTransform(projectId, issueId, transformId, objectVersionNumber, applyType, new InputDTO(issueId, "updateStatus", updateTrigger(autoTranferFlag, triggerIssue)));
-        if (SchemeApplyType.AGILE.equals(applyType)) {
-            IssueConvertDTO issueConvertDTO = new IssueConvertDTO();
-            issueConvertDTO.setIssueId(issueId);
-            issueConvertDTO.setStayDate(new Date());
-            issueConvertDTO.setObjectVersionNumber(issueMapper.selectByPrimaryKey(issueId).getObjectVersionNumber());
-            issueAccessDataService.updateSelective(issueConvertDTO);
-        }
         Set<Long> influenceIssueIds = new HashSet<>();
-        IssueVO result = doStateMachineCustomFlow(projectId, issueId, applyType, influenceIssueIds);
+        IssueVO result = doStateMachineCustomFlowAndRuleNotice(projectId, issueId, applyType, influenceIssueIds, false, transformId, new InputDTO(issueId, "updateStatus", updateTrigger(autoTranferFlag, triggerIssue)));
         if (result != null) {
             return result;
         }
@@ -1023,16 +1034,26 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public IssueVO doStateMachineCustomFlow(Long projectId,
                                             Long issueId,
                                             String applyType,
-                                            Set<Long> influenceIssueIds) {
+                                            Set<Long> influenceIssueIds,
+                                            TriggerCarrierVO triggerCarrierVO) {
+
         /**
          * 修改属性报错，导致数据回滚但是状态机实例已经完成状态变更，导致issue无论变更什么状态都无效
          * 抛异常并清空当前实例的状态机的状态信息
          */
         try {
-            statusFieldSettingService.handlerSettingToUpdateIssue(projectId, issueId);
+            triggerCarrierVO.setInstanceId(issueId);
+            triggerCarrierVO.setFieldList(Collections.singletonList("statusId"));
+            triggerCarrierVO.setExecutedRuleIds(new ArrayList<>());
+            triggerCarrierVO.setNoticeInstanceId(issueId);
+            triggerCarrierVO.setMemberFieldIds(new HashSet<>());
+            statusFieldSettingService.handlerSettingToUpdateIssue(projectId, issueId, triggerCarrierVO);
             boolean transformFlag = statusLinkageService.updateParentStatus(projectId, issueId, applyType, influenceIssueIds);
             IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
-            issueOperateService.updateLinkIssue(projectId, issueId, issueDTO, applyType);
+            issueOperateService.updateLinkIssue(projectId, issueId, issueDTO, applyType, EncryptContext.encryptType().name(), RequestContextHolder.currentRequestAttributes());
+            triggerCarrierVO.setAuditDomain(issueDTO);
+            triggerCarrierVO.setProjectId(projectId);
+            triggerCarrierVO.setIssueTypeId(issueDTO.getIssueTypeId());
             if (transformFlag) {
                 return null;
             } else {
@@ -1053,7 +1074,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         influenceIssueVO.setIssueId(issueId);
         influenceIssueVO.setStatusId(issueDTO.getStatusId());
         influenceIssueVO.setLoop(false);
-        influenceIssueVO.setLevel(0);
+        influenceIssueVO.setLevel(1);
         List<IssueLinkChangeVO> issueLinkChangeVOS = issueLinkMapper.issueLinkChangeByProjectId(projectId);
         if (CollectionUtils.isEmpty(issueLinkChangeVOS)) {
             issueLinkChangeVOS = new ArrayList<>();
@@ -1095,7 +1116,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         IssueDTO issue = issueMapper.selectByPrimaryKey(issueId);
         Boolean isSub = Objects.equals("sub_task",influenceIssue.getTypeCode()) || (Objects.equals("bug",influenceIssue.getTypeCode()) && !ObjectUtils.isEmpty(influenceIssue.getRelateIssueId()) && !Objects.equals(influenceIssue.getRelateIssueId(), 0L));
         // 变更issue的状态和更新属性
-        executionUpdateInfluenceIssue(issue, statusId, influenceIssue, projectId, applyType, influenceIssueVO, isSub, linkIssueStatusMap);
+        TriggerCarrierVO triggerCarrierVO = new TriggerCarrierVO();
+        executionUpdateInfluenceIssue(issue, statusId, influenceIssue, projectId, applyType, influenceIssueVO, isSub, linkIssueStatusMap, triggerCarrierVO);
+        triggerCarrierVO.setAuditDomain(issueMapper.selectByPrimaryKey(linkIssueId));
+        this.self().batchUpdateInvokeTrigger(Collections.singletonList(triggerCarrierVO));
         // 处理当前issue会影响的issue
         List<InfluenceIssueVO> childrenVO = influenceIssueVO.getChildrenVO();
         if (!CollectionUtils.isEmpty(childrenVO)) {
@@ -1168,7 +1192,14 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
-    public Boolean executionUpdateInfluenceIssue(IssueDTO issue, Long executionStatusId, IssueDTO influenceIssue, Long projectId, String applyType, InfluenceIssueVO influenceIssueVO, Boolean isSub,  Map<Long, LinkIssueStatusLinkageVO> linkIssueStatusMap) {
+    public Boolean executionUpdateInfluenceIssue(IssueDTO issue, Long executionStatusId, IssueDTO influenceIssue, Long projectId, String applyType, InfluenceIssueVO influenceIssueVO, Boolean isSub,  Map<Long, LinkIssueStatusLinkageVO> linkIssueStatusMap, TriggerCarrierVO triggerCarrierVO) {
+        triggerCarrierVO.setInstanceId(issue.getIssueId());
+        triggerCarrierVO.setProjectId(projectId);
+        triggerCarrierVO.setIssueTypeId(issue.getIssueTypeId());
+        triggerCarrierVO.setExecutedRuleIds(new ArrayList<>());
+        triggerCarrierVO.setNoticeInstanceId(issue.getIssueId());
+        triggerCarrierVO.setFieldList(Collections.singletonList("statusId"));
+        triggerCarrierVO.setMemberFieldIds(new HashSet<>());
         if (Objects.equals("bug", issue.getTypeCode()) && !ObjectUtils.isEmpty(issue.getRelateIssueId()) && !Objects.equals(issue.getRelateIssueId(), 0L)) {
             statusLinkageExecutionLog(influenceIssueVO, issue.getIssueId(), influenceIssue, isSub, linkIssueStatusMap, TriggerExecutionStatus.STOP.getValue(), "sub_bug");
             return Boolean.TRUE;
@@ -1203,7 +1234,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             issueAccessDataService.updateSelective(issueConvertDTO);
         }
         // 更新属性
-        statusFieldSettingService.handlerSettingToUpdateIssue(projectId, issueId);
+        statusFieldSettingService.handlerSettingToUpdateIssue(projectId, issueId, triggerCarrierVO);
         AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
         if (agilePluginService != null) {
             agilePluginService.storyLinkageFeature(projectId, issue,applyType);
@@ -2004,6 +2035,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldList = {"labelId"}, instanceId = "issueId", idPosition = "arg")
     public void handleUpdateLabelIssue(List<LabelIssueRelVO> labelIssueRelVOList, Long issueId, Long projectId) {
+        handleUpdateLabelIssueWithoutRuleNotice(labelIssueRelVOList, issueId, projectId);
+    }
+
+    @Override
+    public void handleUpdateLabelIssueWithoutRuleNotice(List<LabelIssueRelVO> labelIssueRelVOList, Long issueId, Long projectId) {
         if (labelIssueRelVOList != null) {
             if (!labelIssueRelVOList.isEmpty()) {
                 LabelIssueRelDTO labelIssueRelDTO = new LabelIssueRelDTO();
@@ -2037,40 +2073,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             //没有issue使用且没有设为默认值的标签进行垃圾回收
             issueLabelService.labelGarbageCollection(projectId);
         }
-
     }
 
     @Override
     @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldList = {"versionId"}, instanceId = "issueId", idPosition = "arg")
     public void handleUpdateVersionIssueRel(List<VersionIssueRelVO> versionIssueRelVOList, Long projectId, Long issueId, String versionType) {
-        if (versionIssueRelVOList != null && versionType != null) {
-            if (!versionIssueRelVOList.isEmpty()) {
-                //归档状态的版本之间的关联不删除
-                List<VersionIssueRelDTO> versionIssueRelDTOS = modelMapper.map(versionIssueRelVOList, new TypeToken<List<VersionIssueRelDTO>>() {
-                }.getType());
-                List<VersionIssueRelDTO> versionIssueRelCreate = versionIssueRelDTOS.stream().filter(versionIssueRel ->
-                        versionIssueRel.getVersionId() != null).collect(Collectors.toList());
-                List<Long> curVersionIds = versionIssueRelMapper.queryByIssueIdAndProjectIdNoArchivedExceptInfluence(projectId, issueId, versionType);
-                List<Long> createVersionIds = versionIssueRelCreate.stream().map(VersionIssueRelDTO::getVersionId).collect(Collectors.toList());
-                curVersionIds.forEach(id -> {
-                    if (!createVersionIds.contains(id)) {
-                        VersionIssueRelDTO versionIssueRelDTO = new VersionIssueRelDTO();
-                        versionIssueRelDTO.setIssueId(issueId);
-                        versionIssueRelDTO.setVersionId(id);
-                        versionIssueRelDTO.setRelationType(versionType);
-                        versionIssueRelDTO.setProjectId(projectId);
-                        versionIssueRelService.delete(versionIssueRelDTO);
-                    }
-                });
-                versionIssueRelDTOS.forEach(rel -> rel.setRelationType(versionType));
-                handleVersionIssueRel(versionIssueRelDTOS, projectId, issueId);
-            } else {
-                VersionIssueRelDTO versionIssueRel = new VersionIssueRelDTO();
-                versionIssueRel.createBatchDeleteVersionIssueRel(projectId, issueId, versionType);
-                versionIssueRelService.batchDeleteByIssueIdAndTypeArchivedExceptInfluence(versionIssueRel);
-            }
-        }
-
+        handleUpdateVersionIssueRelWithoutRuleNotice(versionIssueRelVOList, projectId, issueId, versionType);
     }
 
     private List<ComponentIssueRelDTO> getComponentIssueRel(Long projectId, Long issueId) {
@@ -2080,30 +2088,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldList = {"componentId"}, instanceId = "issueId", idPosition = "arg")
     public void handleUpdateComponentIssueRel(List<ComponentIssueRelVO> componentIssueRelVOList, Long projectId, Long issueId) {
-        if (componentIssueRelVOList != null) {
-            if (!componentIssueRelVOList.isEmpty()) {
-                List<ComponentIssueRelDTO> componentIssueRelDTOList = modelMapper.map(componentIssueRelVOList, new TypeToken<List<ComponentIssueRelDTO>>() {
-                }.getType());
-                List<ComponentIssueRelDTO> componentIssueRelCreate = componentIssueRelDTOList.stream().filter(componentIssueRel ->
-                        componentIssueRel.getComponentId() != null).collect(Collectors.toList());
-                List<Long> curComponentIds = getComponentIssueRel(projectId, issueId).stream().
-                        map(ComponentIssueRelDTO::getComponentId).collect(Collectors.toList());
-                List<Long> createComponentIds = componentIssueRelCreate.stream().
-                        map(ComponentIssueRelDTO::getComponentId).collect(Collectors.toList());
-                curComponentIds.forEach(id -> {
-                    if (!createComponentIds.contains(id)) {
-                        ComponentIssueRelDTO componentIssueRelDTO = new ComponentIssueRelDTO();
-                        componentIssueRelDTO.setIssueId(issueId);
-                        componentIssueRelDTO.setComponentId(id);
-                        componentIssueRelDTO.setProjectId(projectId);
-                        componentIssueRelService.delete(componentIssueRelDTO);
-                    }
-                });
-                componentIssueRelDTOList.forEach(componentIssueRel -> handleComponentIssueRel(componentIssueRel, projectId, issueId));
-            } else {
-                componentIssueRelService.batchComponentDelete(issueId);
-            }
-        }
+        handleUpdateComponentIssueRelWithoutRuleNotice(componentIssueRelVOList, projectId, issueId);
     }
 
     private void handleLabelIssue(LabelIssueRelDTO labelIssueRelDTO) {
@@ -3166,5 +3151,114 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public Page<IssueListFieldKVVO> pagedQueryMyAssigned(Long organizationId, Long projectId, PageRequest pageRequest, WorkBenchIssueSearchVO workBenchIssueSearchVO) {
         workBenchIssueSearchVO.setType("myAssigned");
         return queryBackLogIssuesByPersonal(organizationId, projectId, pageRequest, workBenchIssueSearchVO);
+    }
+
+    @Override
+    public void handleUpdateComponentIssueRelWithoutRuleNotice(List<ComponentIssueRelVO> componentIssueRelVOList, Long projectId, Long issueId) {
+        if (componentIssueRelVOList != null) {
+            if (!componentIssueRelVOList.isEmpty()) {
+                List<ComponentIssueRelDTO> componentIssueRelDTOList = modelMapper.map(componentIssueRelVOList, new TypeToken<List<ComponentIssueRelDTO>>() {
+                }.getType());
+                List<ComponentIssueRelDTO> componentIssueRelCreate = componentIssueRelDTOList.stream().filter(componentIssueRel ->
+                        componentIssueRel.getComponentId() != null).collect(Collectors.toList());
+                List<Long> curComponentIds = getComponentIssueRel(projectId, issueId).stream().
+                        map(ComponentIssueRelDTO::getComponentId).collect(Collectors.toList());
+                List<Long> createComponentIds = componentIssueRelCreate.stream().
+                        map(ComponentIssueRelDTO::getComponentId).collect(Collectors.toList());
+                curComponentIds.forEach(id -> {
+                    if (!createComponentIds.contains(id)) {
+                        ComponentIssueRelDTO componentIssueRelDTO = new ComponentIssueRelDTO();
+                        componentIssueRelDTO.setIssueId(issueId);
+                        componentIssueRelDTO.setComponentId(id);
+                        componentIssueRelDTO.setProjectId(projectId);
+                        componentIssueRelService.delete(componentIssueRelDTO);
+                    }
+                });
+                componentIssueRelDTOList.forEach(componentIssueRel -> handleComponentIssueRel(componentIssueRel, projectId, issueId));
+            } else {
+                componentIssueRelService.batchComponentDelete(issueId);
+            }
+        }
+    }
+
+    @Override
+    public void handleUpdateVersionIssueRelWithoutRuleNotice(List<VersionIssueRelVO> versionIssueRelVOList, Long projectId, Long issueId, String versionType) {
+        if (versionIssueRelVOList != null && versionType != null) {
+            if (!versionIssueRelVOList.isEmpty()) {
+                //归档状态的版本之间的关联不删除
+                List<VersionIssueRelDTO> versionIssueRelDTOS = modelMapper.map(versionIssueRelVOList, new TypeToken<List<VersionIssueRelDTO>>() {
+                }.getType());
+                List<VersionIssueRelDTO> versionIssueRelCreate = versionIssueRelDTOS.stream().filter(versionIssueRel ->
+                        versionIssueRel.getVersionId() != null).collect(Collectors.toList());
+                List<Long> curVersionIds = versionIssueRelMapper.queryByIssueIdAndProjectIdNoArchivedExceptInfluence(projectId, issueId, versionType);
+                List<Long> createVersionIds = versionIssueRelCreate.stream().map(VersionIssueRelDTO::getVersionId).collect(Collectors.toList());
+                curVersionIds.forEach(id -> {
+                    if (!createVersionIds.contains(id)) {
+                        VersionIssueRelDTO versionIssueRelDTO = new VersionIssueRelDTO();
+                        versionIssueRelDTO.setIssueId(issueId);
+                        versionIssueRelDTO.setVersionId(id);
+                        versionIssueRelDTO.setRelationType(versionType);
+                        versionIssueRelDTO.setProjectId(projectId);
+                        versionIssueRelService.delete(versionIssueRelDTO);
+                    }
+                });
+                versionIssueRelDTOS.forEach(rel -> rel.setRelationType(versionType));
+                handleVersionIssueRel(versionIssueRelDTOS, projectId, issueId);
+            } else {
+                VersionIssueRelDTO versionIssueRel = new VersionIssueRelDTO();
+                versionIssueRel.createBatchDeleteVersionIssueRel(projectId, issueId, versionType);
+                versionIssueRelService.batchDeleteByIssueIdAndTypeArchivedExceptInfluence(versionIssueRel);
+            }
+        }
+    }
+
+    @Override
+    public IssueVO doStateMachineCustomFlowAndRuleNotice(Long projectId, Long issueId,
+                                                         String applyType, Set<Long> influenceIssueIds,
+                                                         Boolean isDemo, Long transformId, InputDTO inputDTO) {
+        TriggerCarrierVO triggerCarrierVO = new TriggerCarrierVO();
+        IssueVO issueVO = this.self().doStateMachineTransformAndCustomFlow(projectId, issueId, applyType, influenceIssueIds, triggerCarrierVO, isDemo, transformId, inputDTO);
+        this.self().batchUpdateInvokeTrigger(Collections.singletonList(triggerCarrierVO));
+        return issueVO;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public IssueVO doStateMachineTransformAndCustomFlow(Long projectId, Long issueId,
+                                                        String applyType, Set<Long> influenceIssueIds,
+                                                        TriggerCarrierVO triggerCarrierVO, Boolean isDemo,
+                                                        Long transformId, InputDTO inputDTO){
+        IssueDTO issue = issueMapper.selectByPrimaryKey(issueId);
+        if (Boolean.TRUE.equals(isDemo)) {
+            stateMachineClientService.executeTransformForDemo(projectId, issueId, transformId, issue.getObjectVersionNumber(),
+                    applyType, inputDTO);
+        } else {
+            stateMachineClientService.executeTransform(projectId, issueId, transformId, issue.getObjectVersionNumber(),
+                    applyType, inputDTO);
+        }
+        if (SchemeApplyType.AGILE.equals(applyType)) {
+            IssueConvertDTO issueConvertDTO = new IssueConvertDTO();
+            issueConvertDTO.setIssueId(issueId);
+            issueConvertDTO.setStayDate(new Date());
+            issueConvertDTO.setObjectVersionNumber(issueMapper.selectByPrimaryKey(issueId).getObjectVersionNumber());
+            issueAccessDataService.updateSelective(issueConvertDTO);
+        }
+        return doStateMachineCustomFlow(projectId, issueId, applyType, influenceIssueIds, triggerCarrierVO);
+    }
+
+    @Override
+    public IssueVO executionStateMachineCustomFlow(Long projectId, Long issueId,
+                                                        String applyType, Set<Long> influenceIssueIds) {
+        TriggerCarrierVO triggerCarrierVO = new TriggerCarrierVO();
+        IssueVO issueVO = doStateMachineCustomFlow(projectId, issueId, applyType, influenceIssueIds, triggerCarrierVO);
+        triggerCarrierVO.setAuditDomain(issueMapper.selectByPrimaryKey(issueId));
+        this.self().batchUpdateInvokeTrigger(Collections.singletonList(triggerCarrierVO));
+        return issueVO;
+    }
+
+    @Override
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, isBatch = true)
+    public void batchUpdateInvokeTrigger(List<TriggerCarrierVO> triggerCarriers) {
+
     }
 }
