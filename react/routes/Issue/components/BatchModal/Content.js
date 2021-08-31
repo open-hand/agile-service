@@ -8,7 +8,7 @@ import {
 } from 'choerodon-ui/pro';
 import { WSHandler, Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
-import { find, pick } from 'lodash';
+import { find } from 'lodash';
 import WSProvider from '@choerodon/master/lib/containers/components/c7n/tools/ws/WSProvider';
 import { getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
@@ -18,6 +18,7 @@ import { systemFields, formatFields } from './utils';
 import styles from './Content.less';
 import STATUS_COLOR from '../../../../constants/STATUS';
 import { getBatchFelids } from '@/components/field-pro/layouts';
+import useAvoidClosure from '@/hooks/useAvoidClosure';
 
 const { Option } = Select;
 const DISABLE_EMPTY_DATA = ['priorityId', 'statusId', 'reporterId', 'tags'];
@@ -36,6 +37,13 @@ function BatchModal({
     textField: 'realName',
     valueField: 'id',
   }));
+  const handleUpdate = useAvoidClosure(({ name, value }) => {
+    if (value && !DISABLE_EMPTY_DATA.includes(name)) {
+      const field = find(fields, { code: name });
+      field && Field.set(field.key, { ...field, isSetEmpty: false });
+    }
+  });
+
   const dataSet = useMemo(() => new DataSet({
     fields: [{
       name: 'statusId',
@@ -75,20 +83,9 @@ function BatchModal({
     },
     ],
     events: {
-      update: ({ value, name, dataSet: formDs }) => {
-        if (value && !DISABLE_EMPTY_DATA.includes(name)) {
-          formDs.setState('setEmptyId', name);
-        }
-      },
+      update: handleUpdate,
     },
   }), []);
-
-  useEffect(() => {
-    if (dataSet.getState('setEmptyId')) {
-      const field = fields.find((item) => item.id === dataSet.getState('setEmptyId'));
-      field && Field.set(field.key, { ...field, isSetEmpty: false });
-    }
-  }, [dataSet.getState('setEmptyId')]);
 
   const getIsDisabled = () => !fields.some((filed) => filed.code);
 
