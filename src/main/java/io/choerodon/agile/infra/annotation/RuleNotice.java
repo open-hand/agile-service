@@ -62,4 +62,6 @@ public @interface RuleNotice {
      * @return
      */
     boolean customFieldsAfterInstanceCreate() default false;
+
+    boolean isBatch() default false;
 }
