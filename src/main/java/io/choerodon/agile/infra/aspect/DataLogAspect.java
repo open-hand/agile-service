@@ -146,6 +146,8 @@ public class DataLogAspect {
     private static final String FIELD_STATIC_FILE_REL = "Static File Rel";
     private static final String ISSUE_TYPE_ID = "issueTypeId";
     private static final String FIELD_ENVIRONMENT = "environment";
+    private static final String FIELD_MAIN_RESPONSIBLE = "mainResponsible";
+    private static final String MAIN_RESPONSIBLE_ID_FIELD = "mainResponsibleId";
 
 
     @Autowired
@@ -1256,6 +1258,7 @@ public class DataLogAspect {
             handleType(field, originIssueDTO, issueConvertDTO);
             handleEstimatedTime(field, originIssueDTO, issueConvertDTO);
             handleEnvironment(field, originIssueDTO, issueConvertDTO);
+            handleMainResponsible(field, originIssueDTO, issueConvertDTO);
         }
     }
 
@@ -1416,6 +1419,26 @@ public class DataLogAspect {
         }
     }
 
+    private void handleMainResponsible(List<String> field, IssueDTO originIssueDTO, IssueConvertDTO issueConvertDTO) {
+        if (field.contains(MAIN_RESPONSIBLE_ID_FIELD) && !Objects.equals(originIssueDTO.getMainResponsibleId(), issueConvertDTO.getMainResponsibleId())) {
+            String oldValue = null;
+            String newValue = null;
+            String oldString = null;
+            String newString = null;
+            if (originIssueDTO.getMainResponsibleId() != null && originIssueDTO.getMainResponsibleId() != 0) {
+                oldValue = originIssueDTO.getMainResponsibleId().toString();
+                oldString = userService.queryUserNameByOption(originIssueDTO.getMainResponsibleId(), false).getRealName();
+            }
+            if (issueConvertDTO.getMainResponsibleId() != null && issueConvertDTO.getMainResponsibleId() != 0) {
+                newValue = issueConvertDTO.getMainResponsibleId().toString();
+                newString = userService.queryUserNameByOption(issueConvertDTO.getMainResponsibleId(), false).getRealName();
+            }
+            createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
+                    FIELD_MAIN_RESPONSIBLE, oldString, newString, oldValue, newValue);
+            dataLogRedisUtil.deleteCustomChart(originIssueDTO.getProjectId());
+        }
+    }
+
     private void processRuleLogRel(IssueConvertDTO issueConvertDTO,
                                    IssueDTO originIssueDTO,
                                    DataLogDTO dataLog) {
@@ -1530,6 +1553,7 @@ public class DataLogAspect {
             }
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_ENVIRONMENT, oldString, newString, originIssueDTO.getEnvironment(), issueConvertDTO.getEnvironment());
+            dataLogRedisUtil.deleteCustomChart(originIssueDTO.getProjectId());
         }
     }
 
