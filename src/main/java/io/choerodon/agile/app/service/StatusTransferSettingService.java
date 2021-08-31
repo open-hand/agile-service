@@ -32,4 +32,6 @@ public interface StatusTransferSettingService {
     List<StatusTransferSettingVO> listStatusTransfer(Long organizationId, Long issueTypeId, List<Long> statusIds);
 
     Boolean verifyStatusTransferSetting(Long projectId, IssueDTO issueDTO, Long endStatusId);
+
+    Boolean checkTransfer(Long projectId, Long issueId, Long targetStatusId);
 }

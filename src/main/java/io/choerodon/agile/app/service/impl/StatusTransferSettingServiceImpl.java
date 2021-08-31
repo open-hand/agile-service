@@ -258,6 +258,15 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         return statusTransferSettingAssembler.listDTOToVO(dtos,userDTOMap);
     }
 
+    @Override
+    public Boolean checkTransfer(Long projectId, Long issueId, Long targetStatusId) {
+        IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
+        if (ObjectUtils.isEmpty(issueDTO)) {
+            throw new CommonException("error.issue.not.found");
+        }
+        return !verifyStatusTransferSetting(projectId, issueDTO, targetStatusId);
+    }
+
     private void getUserIds(Long projectId, Set<Long> userIds, List<StatusTransferSettingDTO> query){
         for (StatusTransferSettingDTO statusTransferSettingDTO : query) {
             if (PROJECT_OWNER.equals(statusTransferSettingDTO.getUserType())) {

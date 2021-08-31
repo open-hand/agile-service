@@ -45,4 +45,13 @@ public class StatusTransferSettingController {
                                                                                      @RequestParam @Encrypt Long statusId) {
         return new ResponseEntity(statusTransferSettingService.query(projectId,issueTypeId,statusId),HttpStatus.OK);
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "校验能否流转到目标状态")
+    @GetMapping(value = "/check_transfer")
+    public ResponseEntity<Boolean> checkTransfer(@PathVariable("project_id") Long projectId,
+                                                        @RequestParam @Encrypt Long issueId,
+                                                        @RequestParam @Encrypt Long targetStatusId){
+        return new ResponseEntity<>(statusTransferSettingService.checkTransfer(projectId, issueId, targetStatusId),HttpStatus.OK);
+    }
 }
