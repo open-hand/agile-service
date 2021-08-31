@@ -46,7 +46,7 @@ const getColumns = ({ issueTypeId, loadData }: { issueTypeId: string, loadData: 
     key: 'fieldName',
     width: 120,
     fixed: true,
-    render: ({ rowData }: any) => rowData.get('fieldName'),
+    render: ({ rowData }: any) => <Tooltip title={rowData.get('fieldName')}>{rowData.get('fieldName')}</Tooltip>,
     // return <DraggableOrgEditItem data={new Record(rowData)} />;
 
   },

@@ -1,39 +1,34 @@
-/* eslint-disable react/jsx-indent */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   TabPage as Page, Header, Content, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
 import {
-  Button, Modal, Spin, message, Select, Tooltip,
+  Button, Modal, message, Tooltip,
 } from 'choerodon-ui/pro';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';
-import { toJS } from 'mobx';
 import { Prompt } from 'react-router-dom';
+import {
+  omit, isEmpty,
+} from 'lodash';
+import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import {
   pageConfigApi, UIssueTypeConfig,
 } from '@/api/PageConfig';
 import { validKeyReturnValue } from '@/common/commonValid';
-import {
-  omit, set, pick, isEmpty,
-} from 'lodash';
-import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import Loading from '@/components/Loading';
 import styles from './index.less';
-import IssueTypeWrap from './components/issue-type-wrap';
 import SortTable from './components/sort-table';
 import openAddField from './components/add-field';
 import { usePageIssueTypeStore } from './stores';
-import Switch from './components/switch';
 import './PageIssueType.less';
 import CreateField from '../components/create-field';
 import { PageIssueTypeStoreStatusCode } from './stores/PageIssueTypeStore';
 import { IFieldPostDataProps } from '../components/create-field/CreateField';
-import PageDescription from './components/page-description';
 import { transformDefaultValue, beforeSubmitTransform } from './utils';
-import openLinkage from '../components/setting-linkage/Linkage';
+import PageIssueTypeSwitch from '../components/issue-type-switch';
 
 const TooltipButton: React.FC<{ title?: string, buttonIcon: string, buttonDisabled: boolean, clickEvent?: () => void } & Omit<ButtonProps, 'title'>> = ({
   title, children, buttonIcon, buttonDisabled, clickEvent, ...otherProps
@@ -231,23 +226,39 @@ function PageIssueType() {
             element: <TooltipButton title="该问题类型已停用，无法创建字段" buttonDisabled={!pageIssueTypeStore.currentIssueType.enabled} buttonIcon="playlist_add" clickEvent={openCreateFieldModal}>创建字段</TooltipButton>,
           }, {
             display: true,
-            element: <TooltipButton
-              buttonIcon="add"
-              title="该问题类型已停用，无法添加已有字段"
-              buttonDisabled={!pageIssueTypeStore.currentIssueType.enabled}
-              clickEvent={() => openAddField(addUnselectedDataSet,
-                pageIssueTypeStore, onSubmitLocal, onRestoreLocal)}
-            >
-              添加已有字段
-                     </TooltipButton>,
+            element: (
+              <TooltipButton
+                buttonIcon="add"
+                title="该问题类型已停用，无法添加已有字段"
+                buttonDisabled={!pageIssueTypeStore.currentIssueType.enabled}
+                clickEvent={() => openAddField(addUnselectedDataSet,
+                  pageIssueTypeStore, onSubmitLocal, onRestoreLocal)}
+              >
+                添加已有字段
+              </TooltipButton>),
           },
         ]}
         />
       </Header>
       <Breadcrumb />
       <Content className={`${prefixCls}-content`} style={{ overflowY: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <Switch />
+        <PageIssueTypeSwitch
+          onChangeIssueType={(issueType, confirmModel, cacheChange) => {
+            const change = () => {
+              pageIssueTypeStore.setCurrentIssueType(issueType);
+              cacheChange();
+              pageIssueTypeStore.loadData();
+            };
+            if (pageIssueTypeStore.getDirty) {
+              confirmModel(change);
+              return;
+            }
+            change();
+          }}
+          value={pageIssueTypeStore.currentIssueType.id}
+        />
         <Loading loading={pageIssueTypeStore.getLoading} />
+
         <div className={styles.top}>
           <SortTable />
           {/* {
