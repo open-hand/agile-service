@@ -767,6 +767,9 @@ const fieldsMap = new Map([
   ['environment', {
     name: '环境',
   }],
+  ['mainResponsible', {
+    name: '主要负责人',
+  }],
 ]);
 
 export default fieldsMap;
