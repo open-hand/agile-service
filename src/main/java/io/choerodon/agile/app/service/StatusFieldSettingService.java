@@ -4,6 +4,7 @@ import io.choerodon.agile.api.vo.PageFieldViewUpdateVO;
 import io.choerodon.agile.api.vo.StatusFieldSettingVO;
 import io.choerodon.agile.api.vo.VersionIssueRelVO;
 import io.choerodon.agile.api.vo.business.IssueUpdateVO;
+import io.choerodon.agile.api.vo.business.TriggerCarrierVO;
 import io.choerodon.agile.infra.dto.StatusFieldSettingDTO;
 import io.choerodon.agile.infra.dto.StatusFieldValueSettingDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
@@ -24,7 +25,7 @@ public interface StatusFieldSettingService {
 
    List<StatusFieldSettingVO> listByStatusIds(Long projectId, Long issueType, List<Long> statusIds);
 
-   void handlerSettingToUpdateIssue(Long projectId,Long issueId);
+   void handlerSettingToUpdateIssue(Long projectId, Long issueId, TriggerCarrierVO triggerCarrierVO);
 
    List<StatusFieldSettingVO> saveStatusFieldSettings(Long organizationId, Long issueType, Long statusId, Long objectVersionNumber, List<StatusFieldSettingVO> list);
 
@@ -52,5 +53,6 @@ public interface StatusFieldSettingService {
                     List<PageFieldViewUpdateVO> customField,
                     Map<String, List<VersionIssueRelVO>> versionMap,
                     Map<String, Object> specifyMap,
-                    boolean doRuleNotice);
+                    boolean doRuleNotice,
+                    TriggerCarrierVO triggerCarrierVO);
 }

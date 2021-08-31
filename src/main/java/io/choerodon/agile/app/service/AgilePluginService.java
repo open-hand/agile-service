@@ -369,7 +369,7 @@ public interface AgilePluginService {
      * @param issueDTO
      * @param specifyMap
      */
-    void handlerSpecifyProgramField(IssueDTO issueDTO, Map<String, Object> specifyMap, boolean doRuleNotice);
+    void handlerSpecifyProgramField(IssueDTO issueDTO, Map<String, Object> specifyMap, boolean doRuleNotice, TriggerCarrierVO triggerCarrierVO);
 
     /**
      * 处理状态机自定义流转项目群字段属性

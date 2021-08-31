@@ -22,12 +22,14 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
+import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import java.util.*;
 import java.util.function.Function;
@@ -77,7 +79,7 @@ public class IssueLinkServiceImpl implements IssueLinkService {
         });
         // 创建链接时候触发关联问题联动
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
-        issueOperateService.updateLinkIssue(projectId, issueId, issueDTO, SchemeApplyType.AGILE);
+        issueOperateService.updateLinkIssue(projectId, issueId, issueDTO, SchemeApplyType.AGILE, EncryptContext.encryptType().name(), RequestContextHolder.currentRequestAttributes());
         IssueLinkResponseVO response = new IssueLinkResponseVO();
         response.setIssueLinks(listIssueLinkByIssueId(issueId, projectId, false));
         return response;

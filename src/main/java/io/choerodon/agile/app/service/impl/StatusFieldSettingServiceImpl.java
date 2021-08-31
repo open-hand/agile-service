@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueUpdateVO;
+import io.choerodon.agile.api.vo.business.TriggerCarrierVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
@@ -194,7 +195,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     }
 
     @Override
-    public void handlerSettingToUpdateIssue(Long projectId, Long issueId) {
+    public void handlerSettingToUpdateIssue(Long projectId, Long issueId, TriggerCarrierVO triggerCarrierVO) {
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         List<StatusFieldSettingVO> list = statusFieldSettingMapper.listByStatusIds(projectId, issueDTO.getIssueTypeId(), Arrays.asList(issueDTO.getStatusId()));
         if (CollectionUtils.isEmpty(list)) {
@@ -223,7 +224,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             }
         });
         // 执行更新
-        updateIssue(issueDTO,field,issueUpdateVO,customField,versionMap,specifyMap, true);
+        updateIssue(issueDTO,field,issueUpdateVO,customField,versionMap,specifyMap, false, triggerCarrierVO);
     }
 
     @Override
@@ -347,10 +348,17 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                             List<PageFieldViewUpdateVO> customField,
                             Map<String, List<VersionIssueRelVO>> versionMap,
                             Map<String, Object> specifyMap,
-                            boolean doRuleNotice) {
+                            boolean doRuleNotice,
+                            TriggerCarrierVO triggerCarrierVO) {
+        Set<String> fieldList = new HashSet<>();
+        if (!CollectionUtils.isEmpty(triggerCarrierVO.getFieldList())) {
+            fieldList.addAll(triggerCarrierVO.getFieldList());
+        }
+        Set<String> customFiledCodes = new HashSet<>();
         Long organizationId = ConvertUtil.getOrganizationId(issueDTO.getProjectId());
         Long objectVersionNumber = issueDTO.getObjectVersionNumber();
         if (!ObjectUtils.isEmpty(field) && field.size() > 1) {
+            handlerFiledList(issueUpdateVO, fieldList);
             issueUpdateVO.setIssueId(issueDTO.getIssueId());
             issueUpdateVO.setObjectVersionNumber(objectVersionNumber);
             if (doRuleNotice) {
@@ -362,6 +370,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         }
         // 单独更新版本
         if (!CollectionUtils.isEmpty(versionMap)) {
+            fieldList.add("versionId");
             for (Map.Entry<String, List<VersionIssueRelVO>> entry : versionMap.entrySet()) {
                 IssueUpdateVO issueUpdateVO1 = new IssueUpdateVO();
                 issueUpdateVO1.setIssueId(issueDTO.getIssueId());
@@ -378,12 +387,25 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         }
         if (!CollectionUtils.isEmpty(customField)) {
             for (PageFieldViewUpdateVO pageFieldViewUpdateVO : customField) {
+                customFiledCodes.add(pageFieldViewUpdateVO.getFieldCode());
                 fieldValueService.updateFieldValue(organizationId, issueDTO.getProjectId(), issueDTO.getIssueId(), pageFieldViewUpdateVO.getFieldId(), "agile_issue", pageFieldViewUpdateVO);
             }
         }
-
+        fieldList.addAll(field);
+        fieldList.addAll(customFiledCodes);
+        triggerCarrierVO.setMemberFieldIds(new HashSet<>());
+        triggerCarrierVO.setFieldList(new ArrayList<>(fieldList));
         if (agilePluginService != null) {
-            agilePluginService.handlerSpecifyProgramField(issueDTO, specifyMap, doRuleNotice);
+            agilePluginService.handlerSpecifyProgramField(issueDTO, specifyMap, doRuleNotice, triggerCarrierVO);
+        }
+    }
+
+    private void handlerFiledList(IssueUpdateVO issueUpdateVO, Set<String> fieldList) {
+        if (issueUpdateVO.getComponentIssueRelVOList() != null) {
+            fieldList.add("componentId");
+        }
+        if (issueUpdateVO.getLabelIssueRelVOList() != null) {
+            fieldList.add("labelId");
         }
     }
 

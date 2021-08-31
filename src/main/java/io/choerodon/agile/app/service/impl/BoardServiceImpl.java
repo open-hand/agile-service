@@ -617,15 +617,9 @@ public class BoardServiceImpl implements BoardService {
         }
         Long preStatusId = preIssueDTO.getStatusId();
         Long nowStatusId = issueMoveVO.getStatusId();
-        if (Boolean.TRUE.equals(isDemo)) {
-            stateMachineClientService.executeTransformForDemo(projectId, issueId, transformId, issueMoveVO.getObjectVersionNumber(),
-                    SchemeApplyType.AGILE, new InputDTO(issueId, UPDATE_STATUS_MOVE, JSON.toJSONString(handleIssueMoveRank(projectId, issueMoveVO))));
-        } else {
-            stateMachineClientService.executeTransform(projectId, issueId, transformId, issueMoveVO.getObjectVersionNumber(),
-                    SchemeApplyType.AGILE, new InputDTO(issueId, UPDATE_STATUS_MOVE, JSON.toJSONString(handleIssueMoveRank(projectId, issueMoveVO))));
-        }
+        InputDTO inputDTO = new InputDTO(issueId, UPDATE_STATUS_MOVE, JSON.toJSONString(handleIssueMoveRank(projectId, issueMoveVO)));
         Set<Long> influenceIssueIds = new HashSet<>();
-        IssueVO issueVO = issueService.doStateMachineCustomFlow(projectId, issueId, SchemeApplyType.AGILE, influenceIssueIds);
+        IssueVO issueVO = issueService.doStateMachineCustomFlowAndRuleNotice(projectId, issueId, SchemeApplyType.AGILE, influenceIssueIds, isDemo, transformId, inputDTO);
         if (!ObjectUtils.isEmpty(issueVO)) {
             return modelMapper.map(issueVO, IssueMoveVO.class);
         }

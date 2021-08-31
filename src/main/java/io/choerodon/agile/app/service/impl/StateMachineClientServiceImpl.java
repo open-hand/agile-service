@@ -194,7 +194,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         }
         Set<Long> influenceIssueIds = new HashSet<>();
         //创建问题执行工作流自定义流转
-        IssueVO execResult = issueService.doStateMachineCustomFlow(projectId, issueId, applyType, influenceIssueIds);
+        IssueVO execResult = issueService.executionStateMachineCustomFlow(projectId, issueId, applyType, influenceIssueIds);
         statusNoticeSettingService.noticeByChangeStatus(projectId, issueId);
         if (execResult != null) {
             return execResult;
@@ -248,7 +248,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         stateMachineClient.createInstance(initTransform, inputDTO);
         issueService.afterCreateSubIssue(issueId, subIssueConvertDTO, issueSubCreateVO, projectInfo);
         Set<Long> influenceIssueIds = new HashSet<>();
-        issueService.doStateMachineCustomFlow(projectId, issueId, SchemeApplyType.AGILE, influenceIssueIds);
+        issueService.executionStateMachineCustomFlow(projectId, issueId, SchemeApplyType.AGILE, influenceIssueIds);
         IssueSubVO issueSubVO = issueService.queryIssueSubByCreate(subIssueConvertDTO.getProjectId(), issueId);
         issueSubVO.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
         return issueSubVO;
@@ -407,7 +407,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
             issueUpdateVO.setAutoTriggerId(triggerIssueId);
             issueUpdateVO.setAutoTriggerNum(projectInfoMapper.selectProjectCodeByProjectId(issueDTO.getProjectId()) + "-" + issueDTO.getIssueNum());
         }
-        issueService.handleUpdateIssue(issueUpdateVO, Collections.singletonList(STATUS_ID), issue.getProjectId(), issueUpdateVO.getIssueId());
+        issueService.handleUpdateIssueWithoutRuleNotice(issueUpdateVO, Collections.singletonList(STATUS_ID), issue.getProjectId());
         logger.info("stateMachine updateStatus successful");
     }
 
@@ -428,10 +428,10 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         if (!issue.getStatusId().equals(targetStatusId)) {
             issueUpdateVO.setStatusId(targetStatusId);
             issueUpdateVO.setStayDate(new Date());
-            issueService.handleUpdateIssue(issueUpdateVO, Arrays.asList(STATUS_ID, RANK, STAY_DATE), issue.getProjectId(), issueUpdateVO.getIssueId());
+            issueService.handleUpdateIssueWithoutRuleNotice(issueUpdateVO, Arrays.asList(STATUS_ID, RANK, STAY_DATE), issue.getProjectId());
             logger.info("stateMachine updateStatusMove successful");
         } else {
-            issueService.handleUpdateIssue(issueUpdateVO, Collections.singletonList(RANK), issue.getProjectId(), issueUpdateVO.getIssueId());
+            issueService.handleUpdateIssueWithoutRuleNotice(issueUpdateVO, Collections.singletonList(RANK), issue.getProjectId());
         }
     }
 

@@ -12,6 +12,7 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
@@ -95,7 +96,7 @@ public interface IssueService {
      * @param influenceIssueIds
      * @return
      */
-    IssueVO doStateMachineCustomFlow(Long projectId, Long issueId, String applyType, Set<Long> influenceIssueIds);
+    IssueVO doStateMachineCustomFlow(Long projectId, Long issueId, String applyType, Set<Long> influenceIssueIds, TriggerCarrierVO triggerCarrierVO);
 
     /**
      * 更新issue自己的字段
@@ -434,5 +435,19 @@ public interface IssueService {
 
     void handlerInfluenceIssue(Long projectId, String applyType, InfluenceIssueVO influenceIssueVO, Long linkIssueId,  Map<Long, LinkIssueStatusLinkageVO> linkIssueStatusMap, Set<Long> influenceIssueIds);
 
-    Boolean executionUpdateInfluenceIssue(IssueDTO issue, Long executionStatusId, IssueDTO influenceIssue, Long projectId, String applyType, InfluenceIssueVO influenceIssueVO, Boolean isSub,  Map<Long, LinkIssueStatusLinkageVO> linkIssueStatusMap);
+    Boolean executionUpdateInfluenceIssue(IssueDTO issue, Long executionStatusId, IssueDTO influenceIssue, Long projectId, String applyType, InfluenceIssueVO influenceIssueVO, Boolean isSub, Map<Long, LinkIssueStatusLinkageVO> linkIssueStatusMap, TriggerCarrierVO triggerCarrierVO);
+
+    void handleUpdateLabelIssueWithoutRuleNotice(List<LabelIssueRelVO> labelIssueRelVOList, Long issueId, Long projectId);
+
+    void handleUpdateComponentIssueRelWithoutRuleNotice(List<ComponentIssueRelVO> componentIssueRelVOList, Long projectId, Long issueId);
+
+    void handleUpdateVersionIssueRelWithoutRuleNotice(List<VersionIssueRelVO> versionIssueRelVOList, Long projectId, Long issueId, String versionType);
+
+    IssueVO doStateMachineCustomFlowAndRuleNotice(Long projectId, Long issueId, String applyType, Set<Long> influenceIssueIds, Boolean isDemo, Long transformId, InputDTO inputDTO);
+
+    IssueVO executionStateMachineCustomFlow(Long projectId, Long issueId, String applyType, Set<Long> influenceIssueIds);
+
+    IssueVO doStateMachineTransformAndCustomFlow(Long projectId, Long issueId, String applyType, Set<Long> influenceIssueIds, TriggerCarrierVO triggerCarrierVO, Boolean isDemo, Long transformId, InputDTO inputDTO);
+
+    void batchUpdateInvokeTrigger(List<TriggerCarrierVO> triggerCarriers);
 }
