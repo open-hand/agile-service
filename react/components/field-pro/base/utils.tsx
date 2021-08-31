@@ -85,5 +85,21 @@ function getFieldPropsByMode(fieldConfig: IFieldConfig<any, any>, mode: 'filter'
 
   return {};
 }
+
+const IssueStoreSystemMapComponentCode = {
+  issueTypeId: 'issueType',
+  statusId: 'status',
+  priorityId: 'priority',
+  tags: 'tag',
+};
+/**
+ * 对于本地前端写的code转换为组件code （针对IssueStore的)
+ * @param code
+ */
+function getComponentCodeForLocalCode(code: string) {
+  return IssueStoreSystemMapComponentCode[code as keyof typeof IssueStoreSystemMapComponentCode] || code;
+}
 // export type IFieldProcessConfigFn=ReturnType<(<T extends IFiledMapProps, K extends keyof T>(fieldConfig: IFieldConfig<T, K>) =>typeof getProcessFieldConfig)>
-export { getProcessFieldConfig, isCodeInSystemComponents, getFieldPropsByMode };
+export {
+  getProcessFieldConfig, isCodeInSystemComponents, getFieldPropsByMode, getComponentCodeForLocalCode,
+};

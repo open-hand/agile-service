@@ -24,10 +24,8 @@ function renderField(field: IChosenFieldField, dataSet?: DataSet) {
       case 'statusList':
         return {
           code: 'status',
-
           fieldType,
-          request: () => statusApi.loadByProject(code === 'statusList' ? 'program' : 'agile'),
-
+          noIssueTypeIdQuery: true,
           issueTypeIds: (dataSet?.current?.get('issueTypeList') ?? dataSet?.current?.get('issueTypeId')) ?? undefined,
           selectedIds: dataSet?.current?.get('statusList') ?? dataSet?.current?.get('statusId'),
         };
