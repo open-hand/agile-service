@@ -6,8 +6,9 @@ import ObjectScheme from './object-scheme';
 import './index.less';
 import PageIssueType from './page-issue-type';
 import PageTemplate from './page-template';
+import { LoadingProvider } from '@/components/Loading';
 
-function PageConfig() {
+function PageConfig({ components }: any) {
   const tabs = [<PageTab
     title="字段"
     tabKey={`choerodon.code.${getMenuType() === 'project' ? '' : 'organization.'}setting.page.field`}
@@ -32,11 +33,11 @@ function PageConfig() {
     />);
   }
   return (
-    <div className="issue-page-config">
+    <LoadingProvider className="issue-page-config">
       <PageWrap noHeader={[]}>
         {tabs}
       </PageWrap>
-    </div>
+    </LoadingProvider>
   );
 }
 export default PageConfig;

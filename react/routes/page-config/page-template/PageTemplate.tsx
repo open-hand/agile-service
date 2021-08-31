@@ -1,13 +1,13 @@
-/* eslint-disable react/jsx-indent */
-import React, { useState, useMemo, useRef } from 'react';
+import React, {
+  useState, useMemo, useRef,
+} from 'react';
 import {
   TabPage as Page, Header, Content, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
 import {
   Button, Modal, message, Tooltip,
-
-  PerformanceTable, CheckBox,
+  PerformanceTable,
 } from 'choerodon-ui/pro';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
@@ -22,10 +22,9 @@ import {
   pageConfigApi, UIssueTypeConfig,
 } from '@/api/PageConfig';
 import { validKeyReturnValue } from '@/common/commonValid';
-import Loading from '@/components/Loading';
+import Loading, { LoadingHiddenWrap } from '@/components/Loading';
 import styles from './index.less';
 import { usePageTemplateStore } from './stores';
-import Switch from './components/switch';
 import './PageTemplate.less';
 import CreateField from '../components/create-field';
 import { PageTemplateStoreStatusCode } from './stores/PageTemplateStore';
@@ -34,7 +33,7 @@ import PageDescription from './components/page-description';
 import { transformDefaultValue, beforeSubmitTransform } from '../page-issue-type/utils';
 import PageTemplateTable from './components/template-table';
 import openPageRoleConfigModal from './components/role-config';
-import { useLayoutEffect } from 'react';
+import PageIssueTypeSwitch from '../components/issue-type-switch';
 
 const TooltipButton: React.FC<{ title?: string, buttonIcon: string, buttonDisabled: boolean, clickEvent?: () => void } & Omit<ButtonProps, 'title'>> = ({
   title, children, buttonIcon, buttonDisabled, clickEvent, ...otherProps
@@ -224,12 +223,12 @@ function PageTemplate() {
       cancelText: intl.formatMessage({ id: 'cancel' }),
     });
   }
-  useLayoutEffect(() => {
-    if (pageTemplateStore.currentIssueType && scrollRef.current) {
-      // 回到顶部
-      // scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [pageTemplateStore.currentIssueType]);
+  // useLayoutEffect(() => {
+  //   if (pageTemplateStore.currentIssueType && scrollRef.current) {
+  //     // 回到顶部
+  //     // scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+  //   }
+  // }, [pageTemplateStore.currentIssueType]);
   return (
     <Page>
       <Prompt message={`是否放弃更改 ${Choerodon.STRING_DEVIDER}页面有未保存的内容,是否放弃更改？`} when={pageTemplateStore.getDirty} />
@@ -255,7 +254,21 @@ function PageTemplate() {
       </Header>
       <Breadcrumb />
       <Content className={`${prefixCls}-content`} style={{ overflowY: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <Switch />
+        <PageIssueTypeSwitch
+          onChangeIssueType={(issueType, confirmModel, cacheChange) => {
+            const change = () => {
+              pageTemplateStore.setCurrentIssueType(issueType);
+              cacheChange();
+              pageTemplateStore.loadData();
+            };
+            if (pageTemplateStore.getDirty) {
+              confirmModel(change);
+              return;
+            }
+            change();
+          }}
+          value={pageTemplateStore.currentIssueType.id}
+        />
         <Loading loading={pageTemplateStore.getLoading} />
         <div
           role="none"

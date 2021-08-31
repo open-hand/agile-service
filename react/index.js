@@ -51,6 +51,7 @@ export function getRoutes(match) {
         type === 'project' ? [
           'choerodon.code.project.setting.page.ps.field',
           'choerodon.code.project.setting.page.ps.scheme',
+          'choerodon.code.project.setting.page.ps.template',
           'choerodon.code.program.setting.page.ps.field',
           'choerodon.code.program.setting.page.ps.scheme',
         ] : [
