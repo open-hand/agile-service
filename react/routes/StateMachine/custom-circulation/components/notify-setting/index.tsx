@@ -324,15 +324,15 @@ const NotifySetting = ({
         </Dropdown>
         {
           !isProgram && (
-            <>
+            <div>
               <div style={{ borderTop: '1px solid var(--divider)' }} />
               <CheckBox
                 name="webhook"
                 style={{
-                  marginTop: 16,
+                  marginTop: 20,
                 }}
               />
-            </>
+            </div>
           )
         }
       </Form>
