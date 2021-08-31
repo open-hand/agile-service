@@ -56,12 +56,12 @@
     //   border-radius: 0 2px 2px 0;
     // }
   }
-
-  .active {
-    font-weight: 500;
-    color: rgba(255, 255, 255, 1);
-    background: rgba(63, 81, 181, 1);
-  }
+}
+.active {
+  z-index: 2;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 1);
+  background: rgba(63, 81, 181, 1);
 }
 
 //  换行的switch样式
@@ -70,7 +70,7 @@
 
   &_wrap {
     margin-top: 0;
-    margin-bottom: 1px;
+    margin-bottom: 0;//1px;
     margin-left: 0;
     padding: 0 .15rem;
 
@@ -93,7 +93,7 @@
 
   &_inner {
     position: absolute;
-    top: 0;
+    top: -0.005rem;
     bottom: -0.005rem;
     border: 1px solid rgba(232, 232, 232, 1);
     right: -.005rem;
@@ -107,8 +107,8 @@
       // &:not(:last-child) {
       //   border-right-width: 1px;
       // }
-      z-index: 2;
-      border-color: #5365EA;
+      z-index: 3;
+      border-color: @color;
     }
   }
 
@@ -127,10 +127,29 @@
 
     &_wrap {
       border-color: #D9E6F2;
+
       &:hover {
         border-color: @color;
       }
     }
+
+    .active {
+      background: @color;
+    }
+  }
+
+  .switch_box {
+    &:hover {
+      border-color: @color;
+    }
+
+    &_inner {
+      border-color: #D9E6F2;
+      &:hover {
+        border-color: @color;
+      }
+    }
+
     .active {
       background: @color;
     }

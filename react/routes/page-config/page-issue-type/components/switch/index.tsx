@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { pageConfigApi, PageConfigIssueType } from '@/api';
 import { Modal } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
+import { pageConfigApi, PageConfigIssueType } from '@/api';
 import useQueryString from '@/hooks/useQueryString';
 import { IIssueType } from '@/common/types';
 import Switch from '@/components/switch';
@@ -70,6 +70,7 @@ function PageSwitch() {
     <Switch
       value={pageIssueTypeStore.currentIssueType.id}
       options={switchOptions || []}
+      wrap
       onChange={handleSelectBox}
     />
   );

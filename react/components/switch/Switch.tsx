@@ -1,36 +1,48 @@
 import React, {
   useState, useEffect, useCallback,
+  useMemo,
 } from 'react';
 import classnames from 'classnames';
 import { observer } from 'mobx-react-lite';
-import styles from './index.less';
+import { usePersistFn } from 'ahooks';
+import { noop } from 'lodash';
+import originStyles from './index.less';
 
-interface Props {
+interface SwitchProps {
   options: Array<{
     text: any,
     value: any,
     [propsName: string]: any,
   }>,
-  defaultValue: any,
+  defaultValue?: any,
+  className?: string
   style?: React.CSSProperties
-  onChange: (value: any, otherProps: any) => Promise<boolean> | boolean,
+  onChange?: (value: any, otherProps: any) => Promise<boolean> | boolean | void,
+  /** 是否折行平铺 @default false */
+  wrap?: boolean
   value: any,
 }
-type SwitchProps = Required<Pick<Props, 'options'>> & Partial<Pick<Props, 'defaultValue' | 'onChange' | 'value' | 'style'>>
-function Switch({
-  options: propsOption, onChange, defaultValue, value: propsValue, style,
-}: SwitchProps) {
-  const [value, setValue] = useState<Props['defaultValue']>(defaultValue || 0);
-  const [options, setOptions] = useState<Props['options']>([]);
-  const onClick = (v: any, other: any) => {
-    if (onChange && typeof onChange === 'function' && onChange(v, other)) {
+/**
+ *  有着平铺与滚动的选择框切换
+ * @param param0
+ * @returns
+ */
+const Switch:React.FC<SwitchProps> = ({
+  options: propsOption, onChange: propsOnChange, defaultValue, value: propsValue, style, wrap, className,
+}) => {
+  const [value, setValue] = useState<SwitchProps['defaultValue']>(defaultValue || 0);
+  const [options, setOptions] = useState<SwitchProps['options']>([]);
+  const onChange = usePersistFn(propsOnChange || noop);
+  const onClick = async (v: any, other: any) => {
+    const result = await onChange(v, other);
+    if (result === undefined) {
       setValue(v);
-    } else if (!onChange) {
-      setValue(v);
+      return;
     }
+    setValue(v);
   };
   const initOptions = useCallback(() => {
-    let newOptions: Props['options'] = propsOption;
+    let newOptions: SwitchProps['options'] = propsOption;
     if (!Array.isArray(newOptions)) {
       setOptions([]);
     } else if (!newOptions.some((v) => v.value)) {
@@ -51,9 +63,22 @@ function Switch({
       setValue(propsValue);
     }
   }, [propsValue]);
+  const styles = useMemo(() => {
+    let prefix = 'switch';
 
+    if (wrap) {
+      prefix = 'switch_box';
+    }
+    return {
+      switch: originStyles[prefix],
+      switch_wrap: originStyles[`${prefix}_wrap`],
+      switch_inner: originStyles[`${prefix}_inner`],
+      switch_label: originStyles[`${prefix}_label`],
+      active: originStyles.active,
+    };
+  }, []);
   return (
-    <div className={styles.switch} style={style}>
+    <div className={classnames(styles.switch, className)} style={style}>
       {options.map((option, index) => (
         <span
           role="none"
@@ -75,5 +100,6 @@ function Switch({
       ))}
     </div>
   );
-}
+};
+
 export default observer(Switch);

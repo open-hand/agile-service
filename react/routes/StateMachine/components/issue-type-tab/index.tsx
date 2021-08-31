@@ -2,11 +2,12 @@ import React, {
   useState, useEffect, useCallback, useMemo,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { IIssueType } from '@/common/types';
-import useIssueTypes from '@/hooks/data/useIssueTypes';
 import { includes } from 'lodash';
 import classNames from 'classnames';
+import { IIssueType } from '@/common/types';
+import useIssueTypes from '@/hooks/data/useIssueTypes';
 import styles from './index.less';
+import Switch from '@/components/switch';
 
 type ChangeSelected = (code: string) => void
 
@@ -50,24 +51,14 @@ const IssueTypeTab: React.FC<Props> = ({
   }, [handleSelectType, selectedType, setSelectedType, issueTypes, selected, excludeTypes, handleFilterIssueType]);
 
   return (
-    <div className={styles.issueTypeTab}>
-      {
-        (issueTypes || []).filter((item: IIssueType) => handleFilterIssueType(item)).map((item: IIssueType) => (
-          <span
-            // className={`${styles.issueTypeTabItem} ${item.id === selected ? styles.selected : ''}`}
-            className={classNames({
-              [styles.issueTypeTabItem]: true,
-              [styles.selected]: item.id === selected,
-              [styles.brighter]: item.id === selected && brighter,
-            })}
-            role="none"
-            onClick={() => handleSelectType(item.id)}
-          >
-            {item.name}
-          </span>
-        ))
-      }
-    </div>
+    <Switch
+      value={selected}
+      className={styles.issueTypeTab}
+      options={(issueTypes || []).filter((item: IIssueType) => handleFilterIssueType(item))
+        .map((item:IIssueType) => ({ text: item.name, value: item.id }))}
+      wrap
+      onChange={(v) => handleSelectType(v)}
+    />
   );
 };
 
