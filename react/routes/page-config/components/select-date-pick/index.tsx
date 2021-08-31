@@ -1,5 +1,5 @@
 import React, {
-  forwardRef, useState, useRef, useCallback,
+  forwardRef, useState, useRef, useCallback, useEffect,
 } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import classnames from 'classnames';
@@ -12,6 +12,14 @@ import moment, { Moment } from 'moment';
 import { observer } from 'mobx-react';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import styles from './index.less';
+/**
+ * 阻止冒泡以及事件执行
+ * @param e
+ */
+function stopEvent(e:React.MouseEvent) {
+  e.preventDefault();
+  e.stopPropagation();
+}
 
 interface IBaseComponentProps {
   onChange?: (value: any) => void
@@ -77,17 +85,13 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
   const [visible, setVisible] = useState<boolean>(false);
 
   function handleChange(code?: string) {
-    setOptionValue(code);
-    if (code === 'custom') {
-      setVisible(true);
-    } else {
-      // onChange && onChange(code);moment().format(dateFormat[dateType])
+    if (code === 'current') {
       innerRef.current?.choose(new Record({ meaning: '当前时间', value: 'current' }));
     }
+    setOptionValue(code);
   }
   function handleChangeDate(date: Moment) {
     setValue(date);
-    setVisible(false);
     // onChange && onChange(date.format('YYYY-MM-DD HH:mm:ss'));
     innerRef.current?.choose(new Record({ meaning: date.format(SelectDatePickDateFormat[dateType]), value: date.format(SelectDatePickDateFormat[dateType]) }));
   }
@@ -98,18 +102,20 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
       Object.assign(innerRef, { current: newRef });
     }
   }, [ref]);
+  useEffect(() => {
+    setVisible(optionValue === 'custom');
+  }, [optionValue]);
   return (
     <Select
       ref={handleBindRef}
       value={optionValue === 'custom' ? value?.format(SelectDatePickDateFormat[dateType]) : optionValue}
-      trigger={['click'] as any}
       primitiveValue={false}
       // @ts-ignore
       valueField="value"
       // @ts-ignore
       textField="meaning"
       {...otherProps}
-      dropdownMatchSelectWidth={false}
+      // dropdownMatchSelectWidth={false}
       onPopupHiddenChange={(hidden) => {
         hidden && onBlur && onBlur();
         setMode(dateType === 'datetime' ? 'dateTime' : dateType);
@@ -118,14 +124,14 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
         <div
           role="none"
           className={styles.date}
-          onClick={(e) => e.stopPropagation()}
-          onMouseDown={(e) => e.stopPropagation()}
+          onClick={stopEvent}
+          onMouseDown={stopEvent}
         >
-
           <ul className={styles.date_options}>
             {options.map((item) => (
               <li
-                role="none"
+                role="menuitem"
+                onKeyDown={() => {}}
                 className={classnames(styles.date_options_item, { [styles.date_options_item_active]: item.value === optionValue })}
                 onClick={() => handleChange(item.value)}
               >
