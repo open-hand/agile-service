@@ -2,7 +2,7 @@ import { merge } from 'lodash';
 import {
   IComponentFCWithClassObject, IFieldConfig, IFieldProcessConfig, IComponentFCWithClassObjectProps,
 } from './type';
-import type { CustomComponentMapProps } from './component';
+import type { CustomComponentMapProps, IAgileBaseComponentPartialProps } from './component';
 import { AgileComponentMap } from './component';
 
 const filterModeSelectCommonProps = {
@@ -28,7 +28,7 @@ const filterModeProps = {
   member: filterModeSelectCommonProps,
 };
 
-const filterCodeModeProps: Partial<IComponentFCWithClassObjectProps<typeof AgileComponentMap>> = {
+const filterCodeModeProps: IAgileBaseComponentPartialProps = {
   sprint: {
     statusList: [],
     hasUnassign: true,
