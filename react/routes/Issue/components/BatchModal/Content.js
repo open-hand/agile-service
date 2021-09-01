@@ -45,42 +45,27 @@ function BatchModal({
   });
 
   const dataSet = useMemo(() => new DataSet({
-    fields: [{
-      name: 'statusId',
-      label: '状态',
-
-    }, {
-      name: 'sprintId',
-      label: '冲刺',
-    },
-    ...isInProgram ? [{
-      name: 'featureId',
-      label: '所属特性',
-
-    }] : [{
-      name: 'epicId',
-      label: '所属史诗',
-    }], {
-      name: 'priorityId',
-      label: '优先级',
-    }, {
-      name: 'labelIssueRelVOList',
-      label: '标签',
-
-    }, {
-      name: 'componentIssueRelVOList',
-      label: '模块',
-    }, {
-      name: 'fixVersion',
-      label: '修复的版本',
-    }, {
-      name: 'influenceVersion',
-      label: '影响的版本',
-    },
-    {
-      name: 'tags',
-      label: 'Tag',
-    },
+    fields: [
+      ...isInProgram ? [{
+        name: 'featureId',
+        label: '所属特性',
+      }] : [{
+        name: 'labelIssueRelVOList',
+        label: '标签',
+        type: 'object',
+      }, {
+        name: 'componentIssueRelVOList',
+        label: '模块',
+        type: 'object',
+      }, {
+        name: 'influenceVersion',
+        label: '影响的版本',
+        type: 'object',
+      }, {
+        name: 'fixVersion',
+        label: '修复的版本',
+        type: 'object',
+      }],
     ],
     events: {
       update: handleUpdate,
@@ -92,6 +77,7 @@ function BatchModal({
   const getData = () => {
     const temp = dataSet.current ? dataSet.current.toData() : {};
     const obj = {};
+    console.log(temp);
     fields.forEach((field) => {
       if (field.code && (field.isSetEmpty || temp[field.code])) {
         obj[field.code] = temp[field.code];
