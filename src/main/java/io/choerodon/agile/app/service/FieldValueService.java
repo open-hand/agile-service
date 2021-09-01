@@ -2,11 +2,13 @@ package io.choerodon.agile.app.service;
 
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.TriggerCarrierVO;
 import io.choerodon.agile.infra.dto.FieldValueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author shinan.chen
@@ -99,7 +101,7 @@ public interface FieldValueService {
      * @param schemeCode
      * @param issueIds
      */
-    void handlerCustomFields(Long projectId, List<PageFieldViewUpdateVO> customFields, String schemeCode, List<Long> issueIds,BatchUpdateFieldStatusVO batchUpdateFieldStatusVO, boolean sendMsg);
+    void handlerCustomFields(Long projectId, List<PageFieldViewUpdateVO> customFields, String schemeCode, List<Long> issueIds,BatchUpdateFieldStatusVO batchUpdateFieldStatusVO, boolean sendMsg, Map<Long, TriggerCarrierVO> triggerCarrierMap);
 
     /**
      * 批量处理预定义字段值
@@ -112,7 +114,12 @@ public interface FieldValueService {
                                  JSONObject predefinedFields,
                                  BatchUpdateFieldStatusVO batchUpdateFieldStatusVO,
                                  String applyType,
-                                 boolean sendMsg);
+                                 boolean sendMsg,
+                                 Map<Long, TriggerCarrierVO> triggerCarrierMap);
 
     void copyCustomFieldValue(Long projectId, IssueDetailDTO issueDetailDTO, Long newIssueId, List<Long> customFieldIds, List<PageFieldViewCreateVO> copyRequireFields);
+
+    void checkCreateCustomFieldWithoutRuleNotice(Long projectId, Long id, String schemeCode, List<FieldValueDTO> fieldValues, List<String> fieldList);
+
+    void createFieldValuesWithoutRuleNotice(Long organizationId, Long projectId, Long instanceId, String schemeCode, List<PageFieldViewCreateVO> createDTOs);
 }

@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.choerodon.agile.api.vo.business.TagVO;
+import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.app.assembler.IssueAssembler;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -46,9 +46,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.ExportIssuesVO;
-import io.choerodon.agile.api.vo.business.IssueCreateVO;
-import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
@@ -1021,7 +1018,9 @@ public class ExcelServiceImpl implements ExcelService {
     public void batchImport(Long projectId,
                             Long organizationId,
                             Long userId,
-                            InputStream inputStream) {
+                            InputStream inputStream,
+                            ServletRequestAttributes requestAttributes) {
+        RequestContextHolder.setRequestAttributes(requestAttributes);
         Workbook workbook = ExcelUtil.getWorkbookFromInputStream(ExcelUtil.Mode.XSSF, inputStream);
         String websocketKey = WEBSOCKET_IMPORT_CODE + "-" + projectId;
         FileOperationHistoryDTO history = initFileOperationHistory(projectId, userId, DOING, UPLOAD_FILE, websocketKey);
@@ -1050,6 +1049,7 @@ public class ExcelServiceImpl implements ExcelService {
         Map<Integer, Long> rowIssueIdMap = new HashMap<>();
         List<RelatedIssueVO> relatedIssueList = new ArrayList<>();
         int lastSendCountNum = 0;
+        List<TriggerCarrierVO> triggerCarrierVOS = new ArrayList<>();
         for (int rowNum = 1; rowNum <= dataRowCount; rowNum++) {
             if (Boolean.TRUE.equals(checkCanceled(projectId, history.getId(), importedIssueIds))) {
                 return;
@@ -1104,9 +1104,14 @@ public class ExcelServiceImpl implements ExcelService {
                     Long sprintId = parent.getSprintId();
                     Long epicId = parent.getEpicId();
                     Optional.ofNullable(parent.getRelatedIssueVO()).ifPresent(relatedIssueList::add);
-                    IssueVO result = stateMachineClientService.createIssue(parent, APPLY_TYPE_AGILE);
+                    IssueVO result = stateMachineClientService.createIssueWithoutRuleNotice(parent, APPLY_TYPE_AGILE);
                     insertIds.add(result.getIssueId());
                     insertCustomFields(result.getIssueId(), parent.getCustomFields(), projectId);
+                    List<Long> customFieldIds = new ArrayList<>();
+                    if (!CollectionUtils.isEmpty(parent.getCustomFields())) {
+                        customFieldIds.addAll(parent.getCustomFields().stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList()));
+                    }
+                    issueService.buildTriggerCarrierVO(projectId, result.getIssueId(), triggerCarrierVOS, customFieldIds);
                     rowIssueIdMap.put(rowNum, result.getIssueId());
 
                     result.setComponentIssueRelVOList(components);
@@ -1140,9 +1145,14 @@ public class ExcelServiceImpl implements ExcelService {
                     }
                     sonMap.forEach((k, v) -> {
                         Optional.ofNullable(v.getRelatedIssueVO()).ifPresent(relatedIssueList::add);
-                        IssueVO returnValue = stateMachineClientService.createIssue(v, APPLY_TYPE_AGILE);
+                        IssueVO returnValue = stateMachineClientService.createIssueWithoutRuleNotice(v, APPLY_TYPE_AGILE);
                         insertIds.add(returnValue.getIssueId());
                         insertCustomFields(returnValue.getIssueId(), v.getCustomFields(), projectId);
+                        List<Long> subIssueCustomFieldIds = new ArrayList<>();
+                        if (!CollectionUtils.isEmpty(v.getCustomFields())) {
+                            subIssueCustomFieldIds.addAll(v.getCustomFields().stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList()));
+                        }
+                        issueService.buildTriggerCarrierVO(projectId, returnValue.getIssueId(), triggerCarrierVOS, subIssueCustomFieldIds);
                         rowIssueIdMap.put(k, returnValue.getIssueId());
                     });
 
@@ -1172,8 +1182,13 @@ public class ExcelServiceImpl implements ExcelService {
                     continue;
                 }
                 Optional.ofNullable(issueCreateVO.getRelatedIssueVO()).ifPresent(relatedIssueList::add);
-                IssueVO result = stateMachineClientService.createIssue(issueCreateVO, APPLY_TYPE_AGILE);
+                IssueVO result = stateMachineClientService.createIssueWithoutRuleNotice(issueCreateVO, APPLY_TYPE_AGILE);
                 insertCustomFields(result.getIssueId(), issueCreateVO.getCustomFields(), projectId);
+                List<Long> customFieldIds = new ArrayList<>();
+                if (!CollectionUtils.isEmpty(issueCreateVO.getCustomFields())) {
+                    customFieldIds.addAll(issueCreateVO.getCustomFields().stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList()));
+                }
+                issueService.buildTriggerCarrierVO(projectId, result.getIssueId(), triggerCarrierVOS, customFieldIds);
                 rowIssueIdMap.put(rowNum, result.getIssueId());
 
                 importedIssueIds.add(result.getIssueId());
@@ -1188,7 +1203,7 @@ public class ExcelServiceImpl implements ExcelService {
             }
         }
         updateRelatedIssue(relatedIssueList, rowIssueIdMap, errorRowColMap, headerMap, dataSheet, projectId, progress, parentSonMap, parentCol);
-
+        issueService.batchCreateIssueInvokeTrigger(triggerCarrierVOS);
         //错误数据生成excel
         String status;
         if (ObjectUtils.isEmpty(errorRowColMap)) {
@@ -1337,7 +1352,7 @@ public class ExcelServiceImpl implements ExcelService {
             batchUpdateFieldsValueVo.setCustomFields(customFields);
             batchUpdateFieldsValueVo.setIssueIds(Arrays.asList(issueId));
             batchUpdateFieldsValueVo.setPredefinedFields(new JSONObject());
-            fieldValueService.handlerCustomFields(projectId, customFields, "agile_issue", batchUpdateFieldsValueVo.getIssueIds(), null, false);
+            fieldValueService.handlerCustomFields(projectId, customFields, "agile_issue", batchUpdateFieldsValueVo.getIssueIds(), null, false, new HashMap<>());
             //导入创建问题通知自定义字段人员
             IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
             IssueVO result = issueAssembler.issueDetailDTOToVO(issue, new HashMap<>(), new HashMap<>(), new HashMap<>());

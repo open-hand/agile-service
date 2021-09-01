@@ -5,8 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.BatchUpdateFieldStatusVO;
 import io.choerodon.agile.api.vo.BatchUpdateFieldsValueVo;
 import io.choerodon.agile.api.vo.PageFieldViewUpdateVO;
+import io.choerodon.agile.api.vo.business.TriggerCarrierVO;
 import io.choerodon.agile.app.service.FieldValueService;
 import io.choerodon.agile.app.service.IssueFieldValueService;
+import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.mapper.ObjectSchemeFieldMapper;
 import io.choerodon.agile.infra.utils.EnumUtil;
@@ -23,7 +25,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -44,6 +48,9 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
 
     @Autowired
     private ObjectSchemeFieldMapper objectSchemeFieldMapper;
+
+    @Autowired
+    private IssueService issueService;
 
     @Async
     @Override
@@ -80,16 +87,17 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
             int allCount = (ObjectUtils.isEmpty(predefinedFields) ? 0 : issueIds.size()) + customFieldSize;
             double incrementalValue = 1.0 / (allCount == 0 ? 1 : allCount);
             batchUpdateFieldStatusVO.setIncrementalValue(incrementalValue);
+            Map<Long, TriggerCarrierVO> triggerCarrierMap = new HashMap<>();
             // 批量修改issue自定义字段值
             if (!CollectionUtils.isEmpty(customFields)) {
-                fieldValueService.handlerCustomFields(projectId, customFields, schemeCode, issueIds,batchUpdateFieldStatusVO, true);
+                fieldValueService.handlerCustomFields(projectId, customFields, schemeCode, issueIds,batchUpdateFieldStatusVO, true, triggerCarrierMap);
             }
 
             //修改issue预定义字段值
             if (!CollectionUtils.isEmpty(batchUpdateFieldsValueVo.getPredefinedFields())) {
-                fieldValueService.handlerPredefinedFields(projectId, issueIds, predefinedFields,batchUpdateFieldStatusVO,applyType, true);
+                fieldValueService.handlerPredefinedFields(projectId, issueIds, predefinedFields,batchUpdateFieldStatusVO,applyType, true, triggerCarrierMap);
             }
-
+            issueService.batchUpdateInvokeTrigger(triggerCarrierMap.values().stream().collect(Collectors.toList()));
              //发送websocket
             batchUpdateFieldStatusVO.setStatus("success");
             batchUpdateFieldStatusVO.setProcess(1.0);

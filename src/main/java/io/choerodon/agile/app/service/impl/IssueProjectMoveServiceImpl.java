@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.validator.SprintValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueUpdateVO;
+import io.choerodon.agile.api.vo.business.TriggerCarrierVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.aspect.DataLogRedisUtil;
 import io.choerodon.agile.infra.dto.FieldValueDTO;
@@ -370,21 +371,48 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
             }
             issueUpdateVO.setIssueId(issueId);
             issueUpdateVO.setObjectVersionNumber(issue1.getObjectVersionNumber());
-            issueService.updateIssue(targetProjectVO.getId(), issueUpdateVO, fieldList);
+            issueService.updateIssueWithoutRuleNotice(targetProjectVO.getId(), issueUpdateVO, fieldList);
             if (!ObjectUtils.isEmpty(influenceVersions)) {
                 List<VersionIssueRelVO> list = EncryptionUtils.jsonToList(influenceVersions, VersionIssueRelVO.class);
-                issueService.handleUpdateVersionIssueRel(list, targetProjectVO.getId(), issueDTO.getIssueId(), "influence");
+                fieldList.add("versionId");
+                issueService.handleUpdateVersionIssueRelWithoutRuleNotice(list, targetProjectVO.getId(), issueDTO.getIssueId(), "influence");
             }
         }
         // 修改自定义字段的值
+        TriggerCarrierVO triggerCarrierVO = null;
         if (!ObjectUtils.isEmpty(customFields)) {
-            addCustomFieldValues(targetProjectVO, issueDTO, customFields);
+            Map<Long, TriggerCarrierVO> triggerCarrierMap = new HashMap<>();
+            addCustomFieldValues(targetProjectVO, issueDTO, customFields, triggerCarrierMap);
+            triggerCarrierVO = triggerCarrierMap.getOrDefault(issueDTO.getIssueId(), null);
         }
         // 修改agile_feature和wsjf表中数据的projectId
         if (agilePluginService != null) {
             agilePluginService.projectMoveUpdateFeatureValue(projectVO.getId(), issueDTO, targetProjectVO.getId());
-            agilePluginService.handlerFeatureField(targetProjectVO.getId(),issueDTO,programValueMap);
+            agilePluginService.handlerFeatureField(targetProjectVO.getId(),issueDTO,programValueMap, triggerCarrierVO);
         }
+        IssueDTO currentIssue = issueMapper.selectByPrimaryKey(issueId);
+        triggerCarrierVO = buildTriggerCarrierVO(currentIssue.getProjectId(), issueId, fieldList, triggerCarrierVO, currentIssue);
+        issueService.batchUpdateInvokeTrigger(Collections.singletonList(triggerCarrierVO));
+    }
+
+    private TriggerCarrierVO buildTriggerCarrierVO(Long projectId, Long issueId, List<String> fieldList, TriggerCarrierVO triggerCarrierVO, IssueDTO issueDTO) {
+        TriggerCarrierVO triggerCarrier = triggerCarrierVO;
+        if (ObjectUtils.isEmpty(triggerCarrier)) {
+            triggerCarrier = new TriggerCarrierVO();
+            triggerCarrier.setExecutedRuleIds(new ArrayList<>());
+            triggerCarrier.setMemberFieldIds(new HashSet<>());
+            triggerCarrier.setFieldList(new ArrayList<>());
+        }
+        triggerCarrier.setInstanceId(issueId);
+        triggerCarrier.setProjectId(projectId);
+        triggerCarrier.setNoticeInstanceId(issueId);
+        triggerCarrier.setIssueTypeId(issueDTO.getIssueTypeId());
+        triggerCarrier.setAuditDomain(issueDTO);
+        Set<String> fields = new HashSet<>();
+        fields.addAll(fieldList);
+        fields.addAll(triggerCarrierVO.getFieldList());
+        triggerCarrier.setFieldList(new ArrayList<>(fields));
+        return triggerCarrier;
     }
 
     private String getApplyType(ProjectVO targetProjectVO) {
@@ -396,7 +424,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         }
     }
 
-    private void addCustomFieldValues(ProjectVO targetProjectVO, IssueDTO issueDTO, Object customFields) {
+    private void addCustomFieldValues(ProjectVO targetProjectVO, IssueDTO issueDTO, Object customFields, Map<Long, TriggerCarrierVO> triggerCarrierMap) {
         List<PageFieldViewUpdateVO> list = EncryptionUtils.jsonToList(customFields, PageFieldViewUpdateVO.class);
         List<Long> fieldIds = list.stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList());
         List<Long> existFields = objectSchemeFieldMapper.filterNotExistFields(fieldIds);
@@ -404,7 +432,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
             return;
         }
         list = list.stream().filter(v -> existFields.contains(v.getFieldId())).collect(Collectors.toList());
-        fieldValueService.handlerCustomFields(targetProjectVO.getId(), list, AGILE_SCHEME_CODE, Arrays.asList(issueDTO.getIssueId()), null, false);
+        fieldValueService.handlerCustomFields(targetProjectVO.getId(), list, AGILE_SCHEME_CODE, Arrays.asList(issueDTO.getIssueId()), null, false, triggerCarrierMap);
     }
 
     private IssueDTO buildIssue(Long projectId, IssueDTO issueDTO, Long status, Long targetProjectId) {
@@ -472,9 +500,9 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
                 issueUpdateVO.setVersionType("fix");
             }
         }
-        issueService.updateIssue(projectId, issueUpdateVO, field);
+        issueService.updateIssueWithoutRuleNotice(projectId, issueUpdateVO, field);
         if (Objects.equals(issueDTO.getTypeCode(), "bug")) {
-            issueService.handleUpdateVersionIssueRel(new ArrayList<>(), projectId, issueDTO.getIssueId(), "influence");
+            issueService.handleUpdateVersionIssueRelWithoutRuleNotice(new ArrayList<>(), projectId, issueDTO.getIssueId(), "influence");
         }
         // 清空原项目和冲刺的关系
         IssueSprintRelDTO issueSprintRelDTO = new IssueSprintRelDTO();

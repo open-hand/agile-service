@@ -168,7 +168,7 @@ public interface AgilePluginService {
      * @param issueDTO
      * @param programMap
      */
-    void handlerFeatureField(Long projectId, IssueDTO issueDTO, Map<String, Object> programMap);
+    void handlerFeatureField(Long projectId, IssueDTO issueDTO, Map<String, Object> programMap, TriggerCarrierVO triggerCarrierVO);
 
     /**
      * 过滤项目群类型
