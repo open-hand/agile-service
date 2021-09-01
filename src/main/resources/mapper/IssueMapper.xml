@@ -4167,7 +4167,7 @@
                 relation_type = 'fix')
             </if>
             <if test='advancedSearchArgs.noEpic != "" and advancedSearchArgs.noEpic == "true"'>
-                AND (ai.epic_id IS NULL OR ai.epic_id = 0)
+                AND ai.type_code NOT IN ('sub_task') AND (ai.epic_id IS NULL OR ai.epic_id = 0)
             </if>
             <if test='advancedSearchArgs.featureId != null'>
                 and ai.type_code = 'story' AND ai.feature_id = #{advancedSearchArgs.featureId}
@@ -4222,7 +4222,7 @@
                 relation_type = 'fix')
             </if>
             <if test='advancedSearchArgs.noEpic != "" and advancedSearchArgs.noEpic == "true"'>
-                AND (ai.epic_id IS NULL OR ai.epic_id = 0)
+                AND ai.type_code = 'bug'  AND (ai.epic_id IS NULL OR ai.epic_id = 0)
             </if>
             <if test='advancedSearchArgs.featureId != null'>
                 and ai.type_code = 'story' AND ai.feature_id = #{advancedSearchArgs.featureId}
