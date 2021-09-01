@@ -55,7 +55,6 @@ export const systemFields = new Map([
     code: 'labelIssueRelVOList',
     name: '标签',
     fieldType: 'multiple',
-    format: (value, labelIssueRelVOList) => labelIssueRelVOList,
     emptyValue: EMPTY_VALUE.value_arr,
   }],
   ['componentIssueRelVOList', {
@@ -63,7 +62,6 @@ export const systemFields = new Map([
     code: 'componentIssueRelVOList',
     name: '模块',
     fieldType: 'multiple',
-    format: (value, component) => component,
     emptyValue: EMPTY_VALUE.value_arr,
   }],
   ['influenceVersion', {
@@ -71,7 +69,7 @@ export const systemFields = new Map([
     code: 'influenceVersion',
     name: '影响的版本',
     fieldType: 'multiple',
-    format: (value, influenceVersion) => pick(influenceVersion, ['versionId', 'name']),
+    format: (value) => pick(value, ['versionId', 'name']),
     emptyValue: EMPTY_VALUE.value_arr,
   }],
   ['fixVersion', {
@@ -79,7 +77,7 @@ export const systemFields = new Map([
     code: 'fixVersion',
     name: '修复的版本',
     fieldType: 'multiple',
-    format: (value, fixVersion) => pick(fixVersion, ['versionId', 'name']),
+    format: (value) => pick(value, ['versionId', 'name']),
     emptyValue: EMPTY_VALUE.value_arr,
   }],
   ['storyPoints', {
@@ -140,8 +138,7 @@ function transformValue(dataSet, key, value, format) {
     return value;
   }
   function transform(v) {
-    const lookup = dataSet.getField(key).getLookupData(v);
-    return format(v, lookup);
+    return format(v);
   }
   if (Array.isArray(value)) {
     return value.map((v) => transform(v));

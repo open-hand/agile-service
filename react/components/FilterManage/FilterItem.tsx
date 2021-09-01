@@ -6,11 +6,11 @@ import {
   Modal, Icon, Tooltip, TextField,
 } from 'choerodon-ui/pro';
 import { Tag } from '@choerodon/components';
+import ObserverTextField from 'choerodon-ui/pro/lib/text-field/TextField';
+import { useLockFn } from 'ahooks';
 import { personalFilterApi } from '@/api';
 import { IPersonalFilter } from '@/components/quick-search';
-import ObserverTextField from 'choerodon-ui/pro/lib/text-field/TextField';
 import IssueStore from '@/stores/project/issue/IssueStore';
-import { useLockFn } from 'ahooks';
 
 interface Props {
   data: IPersonalFilter
@@ -29,6 +29,9 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
   }, []);
   const handleSave = useCallback(async () => {
     const newValue = valueRef.current;
+    if (await inputRef.current?.validate(newValue) !== true) {
+      return;
+    }
     IssueStore.setLoading(true);
     const updateData = {
       objectVersionNumber,
