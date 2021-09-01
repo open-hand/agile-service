@@ -98,5 +98,9 @@ public interface ConfigurationRuleService {
     void batchUpdateInvokeTrigger(List<TriggerCarrierVO> triggerCarriers,
                                   String encryptType,
                                   RequestAttributes requestAttributes);
+
+    void batchInsertInvokeTrigger(List<TriggerCarrierVO> triggerCarriers,
+                                  String encryptType,
+                                  RequestAttributes requestAttributes);
 }
 

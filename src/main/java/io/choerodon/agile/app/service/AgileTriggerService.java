@@ -11,14 +11,6 @@ import java.util.List;
 public interface AgileTriggerService {
 
     /**
-     * 插入ruleLogRel
-     *
-     * @param ruleLogRelVO
-     * @return
-     */
-    RuleLogRelVO insertRuleLogRel(RuleLogRelVO ruleLogRelVO);
-
-    /**
      * 查询ruleLogRel
      *
      * @param ruleLogRelVO
@@ -41,4 +33,9 @@ public interface AgileTriggerService {
      * 修数据，将issueTypeCode改为issueTypeId
      */
     void fixRuleIssueTypeRel();
+
+    void insertTriggerLog(Long logId,
+                          Long instanceId,
+                          Long projectId,
+                          String businessType);
 }

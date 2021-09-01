@@ -20,15 +20,27 @@ public class NoticeBatchEventVO extends ApplicationEvent {
 
     public NoticeBatchEventVO(Object source,
                               List<TriggerCarrierVO> triggerCarriers,
-                              String component) {
+                              String component,
+                              String event) {
         super(source);
         this.triggerCarriers = triggerCarriers;
         this.component = component;
+        this.event = event;
     }
 
     private List<TriggerCarrierVO> triggerCarriers;
 
     private String component;
+
+    private String event;
+
+    public String getEvent() {
+        return event;
+    }
+
+    public void setEvent(String event) {
+        this.event = event;
+    }
 
     public String getComponent() {
         return component;

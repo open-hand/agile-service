@@ -1412,9 +1412,8 @@ public class DataLogAspect {
                 newValue = issueConvertDTO.getAssigneeId().toString();
                 newString = userService.queryUserNameByOption(issueConvertDTO.getAssigneeId(), false).getRealName();
             }
-            DataLogDTO dataLog = createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
+            createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_ASSIGNEE, oldString, newString, oldValue, newValue);
-            processRuleLogRel(issueConvertDTO, originIssueDTO, dataLog);
             dataLogRedisUtil.deleteByHandleAssignee(originIssueDTO.getProjectId());
         }
     }
@@ -1436,22 +1435,6 @@ public class DataLogAspect {
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_MAIN_RESPONSIBLE, oldString, newString, oldValue, newValue);
             dataLogRedisUtil.deleteCustomChart(originIssueDTO.getProjectId());
-        }
-    }
-
-    private void processRuleLogRel(IssueConvertDTO issueConvertDTO,
-                                   IssueDTO originIssueDTO,
-                                   DataLogDTO dataLog) {
-        Long ruleId = issueConvertDTO.getRuleId();
-        if (ruleId != null
-                && agileTriggerService != null) {
-            Long logId = dataLog.getLogId();
-            Long instanceId = originIssueDTO.getIssueId();
-            Long projectId = originIssueDTO.getProjectId();
-            String businessType = ISSUE;
-            Long organizationId = ConvertUtil.getOrganizationId(projectId);
-            RuleLogRelVO ruleLogRelVO = new RuleLogRelVO(logId, ruleId, businessType, instanceId, projectId, organizationId);
-            agileTriggerService.insertRuleLogRel(ruleLogRelVO);
         }
     }
 
@@ -1662,7 +1645,11 @@ public class DataLogAspect {
         dataLogDTO.setNewString(newString);
         dataLogDTO.setOldValue(oldValue);
         dataLogDTO.setNewValue(newValue);
-        return dataLogService.create(dataLogDTO);
+        DataLogDTO result = dataLogService.create(dataLogDTO);
+        if (agileTriggerService != null) {
+            agileTriggerService.insertTriggerLog(result.getLogId(), issueId, projectId, ISSUE);
+        }
+        return result;
     }
 
 }
