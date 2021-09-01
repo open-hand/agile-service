@@ -52,13 +52,6 @@ function getFieldConfig({
           hasUnassign: true,
         },
       };
-    case 'component': {
-      return {
-        props: {
-          dropdownMenuStyle: { maxWidth: 250 },
-        },
-      };
-    }
 
     case 'reporterIds':
       return { code: 'reporter', props: { request: ({ filter, page, requestArgs }: any) => commonApi.project(projectId).getIssueReports(page, filter, requestArgs?.selectedUserIds) } };

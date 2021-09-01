@@ -12,6 +12,8 @@ type IFirstParameterFC<F extends React.FC> = Parameters<F>[0]
 
 type IComponentProps<C extends IComponentFCWithClass> = C extends React.FC ? IFirstParameterFC<C> : React.ComponentProps<C>
 
+export type IComponentFCWithClassObjectProps<T extends IComponentFCWithClassObject> = { [P in keyof T]: React.ComponentProps<T[P]> }
+
 export type ICodeDistributeProps<T extends IComponentFCWithClassObject, K extends keyof T> = K extends string ? { code: K, fieldType?: IFieldType, props?: React.ComponentProps<T[K]>, } : never;
 
 export type IFieldTypeDistributeProps<T extends IComponentFCWithClassObject, K extends keyof T> = K extends IFieldType ? { code?: string, fieldType: K, props?: React.ComponentProps<T[K]> } : never;

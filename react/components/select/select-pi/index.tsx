@@ -7,11 +7,14 @@ import { piApi } from '@/api';
 import type { PI } from '@/common/types';
 import styles from './index.less';
 
-const renderPi = (pi: any) => {
+const renderPi = (pi: any, maxLength?: number) => {
   if (pi) {
+    const name = pi.id === '0' ? pi.name : pi.fullName || `${pi.code}-${pi.name}`;
+    const suffix = name && maxLength && String(name).length > maxLength ? '...' : undefined;
     return (
       <div style={{ display: 'inline' }}>
-        {pi.id === '0' ? pi.name : pi.fullName || `${pi.code}-${pi.name}`}
+        {name?.slice(0, maxLength)}
+        {suffix}
         {
           pi.statusCode === 'doing' && (
             <div className={styles.current}>当前</div>
@@ -35,7 +38,7 @@ export interface SelectPIProps extends Partial<SelectProps> {
   projectId?: string
 }
 const SelectPI: React.FC<SelectPIProps> = forwardRef(({
-  dataRef, statusList, disabledCurrentPI = false, afterLoad, request, flat, addPi0, doingIsFirst, projectId, ...otherProps
+  dataRef, statusList, disabledCurrentPI = false, afterLoad, request, flat, addPi0, doingIsFirst, maxTagTextLength = 10, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<SelectPIProps['afterLoad']>();
   afterLoadRef.current = afterLoad;
@@ -55,6 +58,7 @@ const SelectPI: React.FC<SelectPIProps> = forwardRef(({
         </FragmentForSearch>
       );
     },
+    renderer: (item) => renderPi(item, maxTagTextLength)!,
     afterLoad: afterLoadRef.current,
     middleWare: (piList) => {
       let sortPiList = [...piList];
