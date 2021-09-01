@@ -26,7 +26,7 @@ import SelectLabel from '../../select/select-label';
 import SelectPriority from '../../select/select-priority';
 import SelectComponent from '../../select/select-component';
 import SelectVersion from '../../select/select-version';
-import QuickFilterField from './components/quick-filter-field';
+import SelectQuickFilterField from '@/components/select/select-quick-filter';
 import { IFieldType } from '@/common/types';
 import { validKeyReturnValue } from '@/common/commonValid';
 import SelectSubFeature from '@/components/select/select-sub-feature';
@@ -49,7 +49,7 @@ export const AgileComponentMap = {
   pi: SelectPI,
   programVersion: SelectProgramVersion,
   subProject: SelectSubProject,
-  quickFilter: QuickFilterField,
+  quickFilter: SelectQuickFilterField,
   description: Editor as IClassComponentType<Editor<FormFieldProps>>,
 };
 

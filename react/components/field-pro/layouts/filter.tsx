@@ -114,6 +114,7 @@ function getSystemFieldConfig({ code, value, defaultValue }: IChosenFieldField, 
         code: 'quickFilter',
         fieldType: 'multiple',
         props: {
+          commonOptions: code === 'myStarBeacon' ? (options) => options.filter((i) => i.value === 'myStarBeacon') : undefined,
           disabledRequest: code === 'myStarBeacon' || code === 'myAssigned',
 
         },
