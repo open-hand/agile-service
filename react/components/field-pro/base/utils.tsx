@@ -1,6 +1,6 @@
 import { merge } from 'lodash';
 import {
-  IComponentFCWithClassObject, IFieldConfig, IFieldProcessConfig,
+  IComponentFCWithClassObject, IFieldConfig, IFieldProcessConfig, IComponentFCWithClassObjectProps,
 } from './type';
 import type { CustomComponentMapProps } from './component';
 import { AgileComponentMap } from './component';
@@ -27,6 +27,19 @@ const filterModeProps = {
   multiMember: filterModeSelectCommonProps,
   member: filterModeSelectCommonProps,
 };
+
+const filterCodeModeProps: Partial<IComponentFCWithClassObjectProps<typeof AgileComponentMap>> = {
+  sprint: {
+    statusList: [],
+    hasUnassign: true,
+
+  },
+  status: {
+    noIssueTypeIdQuery: true,
+  },
+
+};
+
 /**
  * 获取处理后的配置
  * 最终确定字段配置
@@ -70,7 +83,7 @@ function isCodeInSystemComponents(code: string, components: { [x: string]: any }
   return Object.keys(components).includes(code);
 }
 /**
- * 通过模式获取字段的 `props` 配置
+ * 通过模式获取字段的基础 `props` 配置
  * @param fieldConfig
  * @param mode `filter` 待添加`flatFilter` `create` `edit`
  * @returns
@@ -91,6 +104,8 @@ const IssueStoreSystemMapComponentCode = {
   statusId: 'status',
   priorityId: 'priority',
   tags: 'tag',
+  assigneeId: 'assignee',
+  reporterIds: 'reporter',
 };
 /**
  * 对于本地前端写的code转换为组件code （针对IssueStore的)
