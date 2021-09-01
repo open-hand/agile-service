@@ -50,6 +50,7 @@ function getBatchFelids(fields: any[]) {
         name: field.code,
         label: field.name,
         style: { width: '100%' },
+        fieldId: field.id,
         ...config.props,
       },
     })[0][0];

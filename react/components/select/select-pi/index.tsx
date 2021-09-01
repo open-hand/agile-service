@@ -1,5 +1,6 @@
 import React, { useMemo, forwardRef, useRef } from 'react';
 import { Select, Tooltip } from 'choerodon-ui/pro';
+import classNames from 'classnames';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
 import useSelect, { SelectConfig, FragmentForSearch, LoadConfig } from '@/hooks/useSelect';
@@ -7,12 +8,12 @@ import { piApi } from '@/api';
 import type { PI } from '@/common/types';
 import styles from './index.less';
 
-const renderPi = (pi: any, maxLength?: number) => {
+const renderPi = (pi: any, maxLength?: number, tooltip?: boolean) => {
   if (pi) {
     const name = pi.id === '0' ? pi.name : pi.fullName || `${pi.code}-${pi.name}`;
     const suffix = name && maxLength && String(name).length > maxLength ? '...' : undefined;
-    return (
-      <div style={{ display: 'inline' }}>
+    const piItem = (
+      <div className={classNames({ [styles.ellipsis]: !maxLength })}>
         {name?.slice(0, maxLength)}
         {suffix}
         {
@@ -22,6 +23,12 @@ const renderPi = (pi: any, maxLength?: number) => {
         }
       </div>
     );
+    return tooltip
+      ? (
+        <Tooltip title={name} placement="topLeft" arrowPointAtCenter style={{ zIndex: 9999 }}>
+          {piItem}
+        </Tooltip>
+      ) : piItem;
   }
   return null;
 };
@@ -38,7 +45,7 @@ export interface SelectPIProps extends Partial<SelectProps> {
   projectId?: string
 }
 const SelectPI: React.FC<SelectPIProps> = forwardRef(({
-  dataRef, statusList, disabledCurrentPI = false, afterLoad, request, flat, addPi0, doingIsFirst, maxTagTextLength = 10, projectId, ...otherProps
+  dataRef, statusList, disabledCurrentPI = false, afterLoad, request, flat, addPi0, doingIsFirst, popupCls, maxTagTextLength = 10, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<SelectPIProps['afterLoad']>();
   afterLoadRef.current = afterLoad;
@@ -48,17 +55,15 @@ const SelectPI: React.FC<SelectPIProps> = forwardRef(({
     valueField: 'id',
     tooltip: true,
     request: request || (() => piApi.project(projectId).getPiListByStatus(statusList)),
-    optionRenderer: (pi) => {
-      const name = pi.id === '0' ? pi.name : pi.piName || `${pi.code}-${pi.name}`;
+    optionRenderer: (pi, tooltip) => {
+      const piName = pi.id === '0' ? pi.name : pi.piName || `${pi.code}-${pi.name}`;
       return (
-        <FragmentForSearch name={name}>
-          <Tooltip title={name} placement="bottomLeft">
-            {renderPi(pi)}
-          </Tooltip>
+        <FragmentForSearch name={piName}>
+          {renderPi(pi, undefined, tooltip)}
         </FragmentForSearch>
       );
     },
-    renderer: (item) => renderPi(item, maxTagTextLength)!,
+    renderer: (item) => renderPi(item, maxTagTextLength, false)!,
     afterLoad: afterLoadRef.current,
     middleWare: (piList) => {
       let sortPiList = [...piList];
@@ -76,13 +81,14 @@ const SelectPI: React.FC<SelectPIProps> = forwardRef(({
     props: {
       // @ts-ignore
       onOption: ({ record }) => {
+        const common = { className: styles.option };
         if (disabledCurrentPI && record.get('statusCode') === 'doing') {
           return {
-
             disabled: true,
+            ...common,
           };
         }
-        return {};
+        return common;
       },
     },
     paging: false,
@@ -93,7 +99,8 @@ const SelectPI: React.FC<SelectPIProps> = forwardRef(({
   return (
     <Component
       ref={ref}
-      dropdownMenuStyle={{ maxWidth: '3rem' }}
+      popupCls={classNames(styles.pi, popupCls)}
+      dropdownMatchSelectWidth={false}
       {...props}
       {...otherProps}
     />
