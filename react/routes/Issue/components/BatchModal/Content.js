@@ -77,7 +77,6 @@ function BatchModal({
   const getData = () => {
     const temp = dataSet.current ? dataSet.current.toData() : {};
     const obj = {};
-    console.log(temp);
     fields.forEach((field) => {
       if (field.code && (field.isSetEmpty || temp[field.code])) {
         obj[field.code] = temp[field.code];
