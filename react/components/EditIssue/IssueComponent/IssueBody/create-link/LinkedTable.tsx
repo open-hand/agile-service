@@ -135,7 +135,7 @@ const LinkedTable: React.FC<Props> = ({ issueId, linkedTableRef }) => {
       <Column name="summary" renderer={({ record }) => renderSummary({ record, clickable: false })} />
       <Column name="issueNum" sortable width={135} />
       <Column name="statusId" sortable width={135} renderer={renderStatus} />
-      <Column name="priorityId" sortable width={80} renderer={renderPriority} />
+      <Column name="priorityId" sortable width={95} renderer={renderPriority} />
       <Column name="sprintId" sortable width={135} renderer={renderSprint} />
     </Table>
   );
