@@ -160,7 +160,8 @@ const getTableColumns = ({ onSortChange }: any) => {
     ),
   },
   {
-    flex: 1,
+    // flex: 1,
+    width: 100,
     minWidth: 100,
     name: 'estimatedStartTime',
     label: (
@@ -170,7 +171,8 @@ const getTableColumns = ({ onSortChange }: any) => {
     render: (record) => record.estimatedStartTime && <Tooltip title={record.estimatedStartTime}><span>{dayjs(record.estimatedStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
   },
   {
-    flex: 1,
+    // flex: 1,
+    width: 100,
     minWidth: 100,
     name: 'estimatedEndTime',
     label: '预计结束',
