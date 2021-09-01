@@ -38,7 +38,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   const [expand, setExpand] = useState(false);
   const [id, setId] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
-  const currentTemplate = useRef<string>();
+  const currentTemplate = useRef<string>('');
   const currentType = issueTypes?.find((t) => t.id === id);
   const userDropDownRef = useRef<{ selectedUser: User | undefined }>(null);
   useEffect(() => {
@@ -113,10 +113,13 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   useEffect(() => {
     if (expand && id) {
       fieldApi.getSummaryDefaultValue(id).then((res) => {
-        summary === currentTemplate.current && setSummary(res as string);
+        if (summary === currentTemplate.current) {
+          currentTemplate.current = res as string;
+          setSummary(res as string);
+        }
       });
     }
-  }, [expand, summary, id]);
+  }, [expand, id]);
   const handleCancel = useCallback(() => {
     setExpand(false);
   }, []);
