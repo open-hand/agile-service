@@ -450,4 +450,15 @@ public interface IssueService {
     IssueVO doStateMachineTransformAndCustomFlow(Long projectId, Long issueId, String applyType, Set<Long> influenceIssueIds, TriggerCarrierVO triggerCarrierVO, Boolean isDemo, Long transformId, InputDTO inputDTO);
 
     void batchUpdateInvokeTrigger(List<TriggerCarrierVO> triggerCarriers);
+
+    IssueVO updateIssueStatusWithoutRuleNotice(Long projectId, Long issueId, Long transformId, Long objectVersionNumber,
+                                               String applyType, IssueDTO triggerIssue, boolean autoTranferFlag);
+
+    IssueVO queryIssueCreateWithoutRuleNotice(Long projectId, Long issueId);
+
+    IssueSubVO queryIssueSubByCreateWithoutRuleNotice(Long projectId, Long issueId);
+
+    void batchCreateIssueInvokeTrigger(List<TriggerCarrierVO> triggerCarriers);
+
+    void buildTriggerCarrierVO(Long projectId, Long issueId, List<TriggerCarrierVO> list, List<Long> customFieldIds);
 }

@@ -33,4 +33,8 @@ public interface StateMachineClientService {
     void cleanInstanceCache(Long projectId, Long issueId, String applyType);
 
     void initRank(IssueCreateVO issueCreateVO, Long issueId, String type);
+
+    IssueVO createIssueWithoutRuleNotice(IssueCreateVO issueCreateVO, String applyType);
+
+    IssueSubVO createSubIssueWithoutRuleNotice(IssueSubCreateVO issueSubCreateVO);
 }

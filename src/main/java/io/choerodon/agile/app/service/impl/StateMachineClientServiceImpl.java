@@ -7,6 +7,7 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.api.vo.business.IssueUpdateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.api.vo.business.TriggerCarrierVO;
 import io.choerodon.agile.api.vo.event.CreateIssuePayload;
 import io.choerodon.agile.api.vo.event.CreateSubIssuePayload;
 import io.choerodon.agile.app.assembler.IssueAssembler;
@@ -147,6 +148,37 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
      */
     @Override
     public IssueVO createIssue(IssueCreateVO issueCreateVO, String applyType) {
+        Long projectId = issueCreateVO.getProjectId();
+        Long issueId = handlerIssue(issueCreateVO, applyType);
+        //创建问题执行工作流自定义流转
+        Set<Long> influenceIssueIds = new HashSet<>();
+        IssueVO execResult = issueService.doStateMachineCustomFlow(projectId, issueId, applyType, influenceIssueIds, new TriggerCarrierVO());
+        statusNoticeSettingService.noticeByChangeStatus(projectId, issueId);
+        if (execResult != null) {
+            return execResult;
+        }
+        IssueVO result = issueService.queryIssueCreate(issueCreateVO.getProjectId(), issueId);
+        result.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
+        return result;
+    }
+
+    @Override
+    public IssueVO createIssueWithoutRuleNotice(IssueCreateVO issueCreateVO, String applyType) {
+        Long projectId = issueCreateVO.getProjectId();
+        Long issueId = handlerIssue(issueCreateVO, applyType);
+        //创建问题执行工作流自定义流转
+        Set<Long> influenceIssueIds = new HashSet<>();
+        IssueVO execResult = issueService.doStateMachineCustomFlow(projectId, issueId, applyType, influenceIssueIds, new TriggerCarrierVO());
+        statusNoticeSettingService.noticeByChangeStatus(projectId, issueId);
+        if (execResult != null) {
+            return execResult;
+        }
+        IssueVO result = issueService.queryIssueCreateWithoutRuleNotice(issueCreateVO.getProjectId(), issueId);
+        result.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
+        return result;
+    }
+
+    private Long handlerIssue(IssueCreateVO issueCreateVO, String applyType) {
         issueValidator.checkIssueCreate(issueCreateVO, applyType);
         if (agilePluginService != null) {
             agilePluginService.checkBeforeCreateIssue(issueCreateVO,applyType);
@@ -192,16 +224,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         if (agilePluginService != null) {
             agilePluginService.handlerBusinessAfterCreateIssue(issueConvertDTO,projectId,issueId,issueCreateVO);
         }
-        Set<Long> influenceIssueIds = new HashSet<>();
-        //创建问题执行工作流自定义流转
-        IssueVO execResult = issueService.executionStateMachineCustomFlow(projectId, issueId, applyType, influenceIssueIds);
-        statusNoticeSettingService.noticeByChangeStatus(projectId, issueId);
-        if (execResult != null) {
-            return execResult;
-        }
-        IssueVO result = issueService.queryIssueCreate(issueCreateVO.getProjectId(), issueId);
-        result.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
-        return result;
+        return issueId;
     }
 
     /**
@@ -214,6 +237,27 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     public IssueSubVO createSubIssue(IssueSubCreateVO issueSubCreateVO) {
         IssueConvertDTO subIssueConvertDTO = issueAssembler.toTarget(issueSubCreateVO, IssueConvertDTO.class);
         Long projectId = subIssueConvertDTO.getProjectId();
+        Long issueId = handlerSubIssue(projectId, subIssueConvertDTO, issueSubCreateVO);
+        Set<Long> influenceIssueIds = new HashSet<>();
+        issueService.doStateMachineCustomFlow(projectId, issueId, SchemeApplyType.AGILE, influenceIssueIds, new TriggerCarrierVO());
+        IssueSubVO issueSubVO = issueService.queryIssueSubByCreate(subIssueConvertDTO.getProjectId(), issueId);
+        issueSubVO.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
+        return issueSubVO;
+    }
+
+    @Override
+    public IssueSubVO createSubIssueWithoutRuleNotice(IssueSubCreateVO issueSubCreateVO) {
+        IssueConvertDTO subIssueConvertDTO = issueAssembler.toTarget(issueSubCreateVO, IssueConvertDTO.class);
+        Long projectId = subIssueConvertDTO.getProjectId();
+        Long issueId = handlerSubIssue(projectId, subIssueConvertDTO, issueSubCreateVO);
+        Set<Long> influenceIssueIds = new HashSet<>();
+        issueService.doStateMachineCustomFlow(projectId, issueId, SchemeApplyType.AGILE, influenceIssueIds, new TriggerCarrierVO());
+        IssueSubVO issueSubVO = issueService.queryIssueSubByCreateWithoutRuleNotice(subIssueConvertDTO.getProjectId(), issueId);
+        issueSubVO.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
+        return issueSubVO;
+    }
+
+    private Long handlerSubIssue(Long projectId, IssueConvertDTO subIssueConvertDTO, IssueSubCreateVO issueSubCreateVO) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         //获取状态机id
         Long stateMachineId = projectConfigService.queryStateMachineId(projectId, SchemeApplyType.AGILE, subIssueConvertDTO.getIssueTypeId());
@@ -247,11 +291,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         StateMachineTransformDTO initTransform = modelMapper.map(instanceService.queryInitTransform(organizationId, stateMachineId), StateMachineTransformDTO.class);
         stateMachineClient.createInstance(initTransform, inputDTO);
         issueService.afterCreateSubIssue(issueId, subIssueConvertDTO, issueSubCreateVO, projectInfo);
-        Set<Long> influenceIssueIds = new HashSet<>();
-        issueService.executionStateMachineCustomFlow(projectId, issueId, SchemeApplyType.AGILE, influenceIssueIds);
-        IssueSubVO issueSubVO = issueService.queryIssueSubByCreate(subIssueConvertDTO.getProjectId(), issueId);
-        issueSubVO.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
-        return issueSubVO;
+        return issueId;
     }
 
     /**

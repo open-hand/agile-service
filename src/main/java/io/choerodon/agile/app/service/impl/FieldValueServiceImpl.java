@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueUpdateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.api.vo.business.TriggerCarrierVO;
 import io.choerodon.agile.app.assembler.IssueAssembler;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.annotation.RuleNotice;
@@ -113,6 +114,12 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     }
 
     @Override
+    public void createFieldValuesWithoutRuleNotice(Long organizationId, Long projectId, Long instanceId, String schemeCode, List<PageFieldViewCreateVO> createDTOs) {
+        List<FieldValueDTO> fieldValues = this.self().validateFieldValueDTOS(organizationId, projectId, schemeCode, createDTOs);
+        this.self().checkCreateCustomFieldWithoutRuleNotice(projectId, instanceId, schemeCode, fieldValues, createDTOs.stream().map(PageFieldViewCreateVO::getFieldCode).collect(Collectors.toList()));
+    }
+
+    @Override
     public List<FieldValueDTO> validateFieldValueDTOS(Long organizationId, Long projectId, String schemeCode,
                                                        List<PageFieldViewCreateVO> createDTOs) {
         if (!EnumUtil.contain(ObjectSchemeCode.class, schemeCode)) {
@@ -141,6 +148,11 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     )
     @Override
     public void checkCreateCustomField(Long projectId, Long id, String schemeCode, List<FieldValueDTO> fieldValues, List<String> fieldList) {
+        checkCreateCustomFieldWithoutRuleNotice(projectId, id, schemeCode, fieldValues,fieldList);
+    }
+
+    @Override
+    public void checkCreateCustomFieldWithoutRuleNotice(Long projectId, Long id, String schemeCode, List<FieldValueDTO> fieldValues, List<String> fieldList) {
         if (!fieldValues.isEmpty()) {
             fieldValueMapper.batchInsert(projectId, id, schemeCode, fieldValues);
         }
@@ -268,7 +280,8 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
                                         JSONObject predefinedFields,
                                         BatchUpdateFieldStatusVO batchUpdateFieldStatusVO,
                                         String appleType,
-                                        boolean sendMsg) {
+                                        boolean sendMsg,
+                                        Map<Long, TriggerCarrierVO> triggerCarrierMap) {
         List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds, null);
         if (CollectionUtils.isEmpty(issueDTOS)) {
             throw new CommonException("error.issues.null");
@@ -282,6 +295,10 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             agilePluginService.handlerProgramPredefinedFields(projectId,predefinedFields,programMap,appleType);
         }
         issueDTOS.forEach(v -> {
+            TriggerCarrierVO triggerCarrierVO = triggerCarrierMap.getOrDefault(v.getIssueId(), null);
+            if (ObjectUtils.isEmpty(triggerCarrierVO)) {
+                triggerCarrierVO = buildTriggerCarrierVO(v, projectId);
+            }
             IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
             List<String> fieldList = verifyUpdateUtil.verifyUpdateData(predefinedFields, issueUpdateVO);
             fieldListRemove(v, fieldList, issueUpdateVO, programMap);
@@ -304,14 +321,22 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
                 issueUpdateVO.setEpicId(null);
                 addErrMessage(v, batchUpdateFieldStatusVO, EPIC_ID);
             }
-            IssueVO issueVO = issueService.updateIssue(projectId, issueUpdateVO, fieldList);
+            IssueVO issueVO = issueService.updateIssueWithoutRuleNotice(projectId, issueUpdateVO, fieldList);
             // 处理影响的版本
-            handlerBugInfluenceVersion(projectId,v, influenceVersion, issueVO);
-            // 修改issue的状态
-            updateIssueStatus(projectId, statusId, v, appleType);
-            if (agilePluginService != null) {
-                agilePluginService.handlerFeatureField(projectId,v,programMap);
+            if(influenceVersion != null){
+                fieldList.add("versionId");
+                handlerBugInfluenceVersion(projectId,v, influenceVersion, issueVO);
             }
+            // 修改issue的状态
+            if(!ObjectUtils.isEmpty(statusId)){
+                fieldList.add("statusId");
+                updateIssueStatus(projectId, statusId, v, appleType);
+            }
+            if (agilePluginService != null) {
+                agilePluginService.handlerFeatureField(projectId,v,programMap, triggerCarrierVO);
+            }
+            triggerCarrierVO.getFieldList().addAll(fieldList);
+            triggerCarrierMap.put(v.getIssueId(), triggerCarrierVO);
             if (sendMsg) {
                 batchUpdateFieldStatusVO.setProcess(batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
                 if (batchUpdateFieldStatusVO.getProcess() - batchUpdateFieldStatusVO.getLastProcess() >= 0.1) {
@@ -320,6 +345,19 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
                 }
             }
         });
+    }
+
+    private TriggerCarrierVO buildTriggerCarrierVO(IssueDTO v, Long projectId) {
+        TriggerCarrierVO triggerCarrierVO = new TriggerCarrierVO();
+        triggerCarrierVO.setProjectId(projectId);
+        triggerCarrierVO.setMemberFieldIds(new HashSet<>());
+        triggerCarrierVO.setFieldList(new ArrayList<>());
+        triggerCarrierVO.setExecutedRuleIds(new ArrayList<>());
+        triggerCarrierVO.setIssueTypeId(v.getIssueTypeId());
+        triggerCarrierVO.setNoticeInstanceId(v.getIssueId());
+        triggerCarrierVO.setInstanceId(v.getIssueId());
+        triggerCarrierVO.setAuditDomain(v);
+        return triggerCarrierVO;
     }
 
     private List<VersionIssueRelVO> buildVersionData(Object object) {
@@ -333,7 +371,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
                 Map<Long, TransformVO> map = transformVOS.stream().collect(Collectors.toMap(TransformVO::getEndStatusId, Function.identity()));
                 TransformVO transformVO = map.get(statusId);
                 if (!ObjectUtils.isEmpty(transformVO)) {
-                    issueService.updateIssueStatus(projectId, issueDTO.getIssueId(), transformVO.getId(), transformVO.getStatusVO().getObjectVersionNumber(), appleType);
+                    issueService.updateIssueStatusWithoutRuleNotice(projectId, issueDTO.getIssueId(), transformVO.getId(), transformVO.getStatusVO().getObjectVersionNumber(), appleType, null, false);
                 }
             }
         }
@@ -346,7 +384,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             issueUpdateVO1.setVersionIssueRelVOList(influenceVersion);
             issueUpdateVO1.setIssueId(issueDTO.getIssueId());
             issueUpdateVO1.setObjectVersionNumber(issueVO.getObjectVersionNumber());
-            issueService.updateIssue(projectId, issueUpdateVO1, Collections.singletonList("objectVersionNumber"));
+            issueService.updateIssueWithoutRuleNotice(projectId, issueUpdateVO1, Collections.singletonList("objectVersionNumber"));
         }
     }
 
@@ -411,11 +449,13 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
                                     String schemeCode,
                                     List<Long> issueIds,
                                     BatchUpdateFieldStatusVO batchUpdateFieldStatusVO,
-                                    boolean sendMsg) {
+                                    boolean sendMsg,
+                                    Map<Long, TriggerCarrierVO> triggerCarrierMap) {
         List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds, null);
         if (CollectionUtils.isEmpty(customFields)) {
             throw new CommonException("error.customFields.null");
         }
+        Map<Long, IssueDTO> issueMap = issueDTOS.stream().collect(Collectors.toMap(IssueDTO::getIssueId, Function.identity()));
         // 根据issueTypeId判断这个字段哪些问题类型可以添加
         customFields.forEach(v -> {
             List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtendDTOS = objectSchemeFieldExtendMapper.selectExtendFields(ConvertUtil.getOrganizationId(projectId), v.getFieldId(), projectId, null);
@@ -423,6 +463,16 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             List<Long> needAddIssueIds = issueDTOS.stream().filter(issueDTO -> issueTypeIds.contains(issueDTO.getIssueTypeId())).map(IssueDTO::getIssueId).collect(Collectors.toList());
             if (!CollectionUtils.isEmpty(needAddIssueIds)) {
                 batchHandlerCustomFields(projectId, v, schemeCode, needAddIssueIds);
+                for (Long needAddIssueId : needAddIssueIds) {
+                    IssueDTO issueDTO = issueMap.getOrDefault(needAddIssueId, null);
+                    if (!ObjectUtils.isEmpty(issueDTO)) {
+                        TriggerCarrierVO triggerCarrierVO = triggerCarrierMap.getOrDefault(needAddIssueId, null);
+                        if (ObjectUtils.isEmpty(triggerCarrierVO)) {
+                            triggerCarrierVO = buildTriggerCarrierVO(issueDTO, projectId);
+                        }
+                        triggerCarrierVO.getFieldList().add(v.getFieldCode());
+                    }
+                }
             }
             if (sendMsg) {
                 batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
@@ -456,7 +506,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             createDTOs.addAll(copyRequireFields);
         }
         if (!CollectionUtils.isEmpty(createDTOs)) {
-            createFieldValues(organizationId, projectId, newIssueId, SCHEME_CODE, createDTOs);
+            createFieldValuesWithoutRuleNotice(organizationId, projectId, newIssueId, SCHEME_CODE, createDTOs);
             List<FieldDataLogCreateVO> list = new ArrayList<>();
             for (PageFieldViewCreateVO createDTO : createDTOs) {
                 List<FieldValueDTO> addFieldValue = fieldValueMapper.listByInstanceIdsAndFieldId(projectId, Arrays.asList(newIssueId), SCHEME_CODE, createDTO.getFieldId());
