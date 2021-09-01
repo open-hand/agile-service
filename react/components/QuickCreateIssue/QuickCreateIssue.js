@@ -44,7 +44,7 @@ class QuickCreateIssue extends Component {
 
   constructor(props) {
     super(props);
-    this.currentTemplate = undefined;
+    this.currentTemplate = '';
     this.state = {
       create: false,
       loading: false,
@@ -142,7 +142,6 @@ class QuickCreateIssue extends Component {
           epicName: currentTypeId === 'issue_epic' ? summary.trim() : undefined,
           featureId: currentType.typeCode === 'story' ? chosenFeatureId : 0,
           assigneeId,
-          epicId,
           relateIssueId,
           versionIssueRelVOList: propsVersionIssueRelVOList,
           sprintId,
