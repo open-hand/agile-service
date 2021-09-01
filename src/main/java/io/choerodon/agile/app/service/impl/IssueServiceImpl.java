@@ -1138,9 +1138,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Boolean isSub = Objects.equals("sub_task",influenceIssue.getTypeCode()) || (Objects.equals("bug",influenceIssue.getTypeCode()) && !ObjectUtils.isEmpty(influenceIssue.getRelateIssueId()) && !Objects.equals(influenceIssue.getRelateIssueId(), 0L));
         // 变更issue的状态和更新属性
         TriggerCarrierVO triggerCarrierVO = new TriggerCarrierVO();
-        executionUpdateInfluenceIssue(issue, statusId, influenceIssue, projectId, applyType, influenceIssueVO, isSub, linkIssueStatusMap, triggerCarrierVO);
-        triggerCarrierVO.setAuditDomain(issueMapper.selectByPrimaryKey(linkIssueId));
-        this.self().batchUpdateInvokeTrigger(Collections.singletonList(triggerCarrierVO));
+        this.self().executionUpdateInfluenceIssue(issue, statusId, influenceIssue, projectId, applyType, influenceIssueVO, isSub, linkIssueStatusMap, triggerCarrierVO);
         // 处理当前issue会影响的issue
         List<InfluenceIssueVO> childrenVO = influenceIssueVO.getChildrenVO();
         if (!CollectionUtils.isEmpty(childrenVO)) {
@@ -1263,6 +1261,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         // 记录联动的执行日志
         statusLinkageExecutionLog(influenceIssueVO, issueId, influenceIssue, isSub, linkIssueStatusMap, null, null);
         LOGGER.info("项目{}下状态联动触发问题编号为{}的issue状态变更",issue.getProjectId(),issue.getIssueNum());
+        triggerCarrierVO.setAuditDomain(issueMapper.selectByPrimaryKey(issueId));
+        this.self().batchUpdateInvokeTrigger(Collections.singletonList(triggerCarrierVO));
         return Boolean.FALSE;
     }
 
