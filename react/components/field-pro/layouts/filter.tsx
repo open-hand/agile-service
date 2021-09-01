@@ -2,139 +2,174 @@ import {
   DataSet,
 } from 'choerodon-ui/pro';
 import { toJS } from 'mobx';
-import { find, get, groupBy } from 'lodash';
+
+import { find, get } from 'lodash';
+import type { IAgileBaseFieldTypeComponentProps, AgileComponentMapProps, CustomFCComponentMapProps } from '../base/component';
 import { getAgileFields } from '../base';
 import { IChosenFieldField } from '@/components/chose-field/types';
-import { statusApi } from '@/api';
 import { getFieldPropsByMode } from '../base/utils';
+import { IFieldSystemConfig, IFieldCustomConfig } from '../base/type';
 
-function renderField(field: IChosenFieldField, dataSet?: DataSet) {
-  const {
-    code, fieldType, name, fieldOptions, value, id,
-  } = field;
-  const defaultValue = toJS(value);
-  if (!id) {
-    switch (code) {
-      case 'sprint':
-      case 'sprintList':
-        return {
-          code: 'sprint', fieldType, statusList: [], isProgram: code === 'sprintList', hasUnassign: true, selectSprints: value,
-        };
-      case 'statusId':
-      case 'statusList':
-        return {
-          code: 'status',
-          fieldType,
+function getSystemFieldConfig({ code, value, defaultValue }: IChosenFieldField, dataSet?: DataSet): Partial<IFieldSystemConfig<AgileComponentMapProps>> {
+  switch (code) {
+    case 'sprint':
+    case 'sprintList':
+      return {
+        code: 'sprint',
+        props: {
+          statusList: [], isProgram: code === 'sprintList', hasUnassign: true, selectSprints: value,
+        },
+      };
+    case 'statusId':
+    case 'statusList':
+      return {
+        code: 'status',
+        props: {
           noIssueTypeIdQuery: true,
           issueTypeIds: (dataSet?.current?.get('issueTypeList') ?? dataSet?.current?.get('issueTypeId')) ?? undefined,
           selectedIds: dataSet?.current?.get('statusList') ?? dataSet?.current?.get('statusId'),
-        };
-      case 'issueTypeId':
-      case 'issueTypeList':
-        return {
-          code: 'issueType',
+        },
+      };
+    case 'issueTypeId':
+    case 'issueTypeList':
+      return {
+        code: 'issueType',
+        props: {
           isProgram: code === 'issueTypeList',
           filterList: code === 'issueTypeList' ? [] : undefined,
+        },
 
-        };
-      case 'epic':
-      case 'epicList':
-        return {
-          code: 'epic',
+      };
+    case 'epic':
+    case 'epicList':
+      return {
+        code: 'epic',
+        props: {
           onlyUnCompleted: false,
           isProgram: code === 'epicList',
           unassignedEpic: true,
           defaultSelectedIds: value,
-        };
-      case 'priorityId':
-        return {
-          code: 'priority',
+        },
+      };
 
-        };
-      case 'label':
-        return {
-          code: 'label',
-
+    case 'label':
+      return {
+        code: 'label',
+        props: {
           valueField: 'labelId',
-        };
-      case 'component':
-      case 'version':
-      case 'fixVersion':
-      case 'influenceVersion':
-        return {
-          code: 'version',
 
+        },
+      };
+    case 'component':
+      return {
+        props: {
+          valueField: 'componentId',
+        },
+      };
+    case 'version':
+    case 'fixVersion':
+    case 'influenceVersion':
+      return {
+        code: 'version',
+        props: {
           valueField: 'versionId',
           hasUnassign: true,
-        };
-      case 'feature': {
-        return {
-          code: 'feature',
-
+        },
+      };
+    case 'feature': {
+      return {
+        code: 'feature',
+        props: {
           featureIds: defaultValue,
-        };
-      }
-      case 'teamProjectList': {
-        return {
-          code: 'subProject',
-          name: 'teamProjectList',
+        },
+      };
+    }
+    case 'teamProjectList': {
+      return {
+        code: 'subProject',
 
-        };
-      }
-      case 'piList': {
-        return {
-          code: 'pi',
-
+      };
+    }
+    case 'piList': {
+      return {
+        code: 'pi',
+        props: {
           afterLoad: (piList: any[]) => {
             if (!dataSet?.current?.getState(`init_${code}`) && !defaultValue && Array.isArray(piList) && piList.length > 0) {
               const data = find(piList, { statusCode: 'doing' }) ?? piList[0];
-              dataSet?.current?.set(field.code, [data.id]);
+              dataSet?.current?.set(code, [data.id]);
               dataSet?.current?.setState(`init_${code}`, true);
             }
           },
 
-        };
-      }
-      case 'quickFilterIds':
-      case 'myStarBeacon': {
-        return {
-          code: 'quickFilter',
+        },
 
-          disabledRequest: code === 'myStarBeacon',
-        };
-      }
-      case 'myAssigned': {
-        return {
-          code: 'quickFilter',
-
-          disabledRequest: code === 'myAssigned',
-        };
-      }
-      // case 'starBeacon': {
-      //   return <CheckBox label="我的关注" name={code} />;
-      // }
-
-      case 'tags': {
-        return { code: 'tag', multiple: true };
-      }
-
-      default:
-        break;
+      };
     }
-  }
-  switch (fieldType) {
-    case 'radio': case 'single': case 'checkbox': case 'multiple':
-      return { fieldId: field.id, selected: defaultValue ?? (field as any).valueBindValue, onlyEnabled: false }; // valueBindValue 是快速筛选处的值 TODO 后续去掉
-    case 'multiMember':
-    case 'member':
+    case 'quickFilterIds':
+    case 'myStarBeacon':
+    case 'myAssigned':
     {
-      return { selected: defaultValue ? defaultValue.map((item: any) => String(item)) : undefined, extraOptions: code === 'assigneeId' ? [{ id: '0', realName: '未分配' }] : undefined };
+      return {
+        code: 'quickFilter',
+        fieldType: 'multiple',
+        props: {
+          disabledRequest: code === 'myStarBeacon' || code === 'myAssigned',
+
+        },
+      };
+    }
+    case 'tags': {
+      return { code: 'tag' };
     }
 
     default:
       break;
   }
   return {};
+}
+
+/**
+ * 获取自定义字段配置
+ * @param field
+ * @param dataSet
+ * @returns
+ */
+function getCustomFieldConfig(field: IChosenFieldField, dataSet?: DataSet): Partial<IFieldCustomConfig<CustomFCComponentMapProps>> {
+  const {
+    code, fieldType, name, fieldOptions, value, id,
+  } = field;
+  const defaultValue = toJS(value);
+
+  switch (fieldType) {
+    case 'radio': case 'single': case 'checkbox': case 'multiple':
+      return {
+        props: {
+          fieldId: field.id, selected: defaultValue ?? (field as any).valueBindValue, onlyEnabled: false,
+        } as IAgileBaseFieldTypeComponentProps['multiple'],
+      } as any; // valueBindValue 是快速筛选处的值 TODO 后续去掉
+    case 'member':
+    case 'multiMember':
+      return {
+        props: {
+          selected: defaultValue ? defaultValue.map((item: any) => String(item)) : undefined,
+          extraOptions: code === 'assigneeId' ? [{ id: '0', realName: '未分配' }] : undefined,
+        } as IAgileBaseFieldTypeComponentProps['multiMember'],
+      } as any;
+    default:
+      break;
+  }
+  return {};
+}
+function getFieldConfig(field: IChosenFieldField, dataSet?: DataSet) {
+  const {
+    value, id,
+  } = field;
+  const defaultValue = toJS(value);
+  if (!id) {
+    return getSystemFieldConfig({ ...field, defaultValue }, dataSet);
+  }
+  return getCustomFieldConfig({ ...field, defaultValue }, dataSet);
 }
 /**
  *  获取过滤的字段
@@ -143,21 +178,23 @@ function renderField(field: IChosenFieldField, dataSet?: DataSet) {
  * @param instance 获取字段实例
  */
 function getFilterFields(fields: any[], fieldCodeProps?: Record<string, any>, instance = getAgileFields) {
-  const newFilters = fields.map((field) => {
-    const config = renderField(field.field, field.dataSet);
-    const { code = field.field.code, name = field.field.code, ...otherProps } = config;
+  const newFilters = fields.map(({ field, dataSet, otherComponentProps }) => {
+    const config = getFieldConfig(field, dataSet);
+    const { name, code, fieldType } = field;
 
+    const { props, ...otherConfigProps } = config;
     return {
       code,
-      fieldType: field.field.fieldType,
+      fieldType,
+      ...otherConfigProps,
       props: {
-        name,
-        label: field.field.name,
+        name: code,
+        label: name,
         style: { width: '100%' },
-        key: field.field.code,
-        ...getFieldPropsByMode({ code, fieldType: field.field.fieldType, outputs: ['element'] }, 'filter'),
-        ...otherProps,
-        ...field.otherComponentProps,
+        key: code,
+        ...getFieldPropsByMode({ code, fieldType, outputs: ['config', 'function'] }, 'filter'),
+        ...props,
+        ...otherComponentProps,
       },
       outputs: ['config', 'function'],
     };

@@ -17,7 +17,9 @@ import SelectSprint from '../../select/select-sprint';
 import SelectSubProject from '../../select/select-sub-project';
 import SelectUser from '../../select/select-user';
 import type {
-  IFieldOutput, IFieldProcessConfig, IClassComponentType, ICodeDistributeProps, IFieldTypeDistributeProps, IComponentFCWithClassObject, IFieldCustomComponentConfig, IComponentFCWithClass, IComponentFCObject, IFieldSystemComponentConfig, IFieldComponentConfig, IFieldSystemConfig,
+  IFieldOutput, IFieldProcessConfig, IClassComponentType, ICodeDistributeProps, IFieldTypeDistributeProps,
+  IComponentFCWithClassObjectProps,
+  IComponentFCWithClassObject, IFieldCustomComponentConfig, IComponentFCWithClass, IComponentFCObject, IFieldSystemComponentConfig, IFieldComponentConfig, IFieldSystemConfig,
 } from './type';
 import SelectEpic from '../../select/select-epic';
 import SelectLabel from '../../select/select-label';
@@ -53,6 +55,8 @@ export const AgileComponentMap = {
 
 export type AgileComponentMapProps = typeof AgileComponentMap
 
+export type IAgileBaseComponentPartialProps = Partial<IComponentFCWithClassObjectProps<AgileComponentMapProps>>
+
 export const CustomFieldMap = {
   time: TimePicker,
   datetime: DateTimePicker,
@@ -77,6 +81,7 @@ export interface CustomComponentMapProps extends CustomFCComponentMapProps {
   input: IClassComponentType<TextField>,
   text: IClassComponentType<TextArea<any>>
 }
+export type IAgileBaseFieldTypeComponentProps = Partial<IComponentFCWithClassObjectProps<CustomComponentMapProps>>
 /**
  *  获取默认空元素
  * @param processConfig
