@@ -101,6 +101,8 @@ env:
     SERVICES_ATTACHMENT_URL: http://minio.example.choerodon.io
     # 域名地址
     SERVICES_DOMAIN_URL: http://example.com
+    # 状态机问题联动最大链深度
+    SERVICES_CHAIN_MAX_DEPTH: 10
 
 
     ## Skywalking 配置参数

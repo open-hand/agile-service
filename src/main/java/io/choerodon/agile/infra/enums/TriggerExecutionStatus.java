@@ -10,7 +10,9 @@ public enum TriggerExecutionStatus {
     STOP("stop"),
     LOOP("loop"),
     MAX_DEPTH("max_depth"),
-    ERROR("error");
+    ERROR("error"),
+    RUNNING("running"),
+    ;
 
     private String value;
 

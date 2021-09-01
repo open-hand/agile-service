@@ -117,6 +117,8 @@ services:
     url: example.com
   domain:
     url: example.com
+  chain:
+    max-depth: 10
 #logging:
 #  level:
 #    io.choerodon.agile: debug
