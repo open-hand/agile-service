@@ -15,10 +15,8 @@ import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.business.AllDataLogVO;
 import io.choerodon.agile.api.vo.business.DataLogVO;
-import io.choerodon.agile.app.service.BacklogExpandService;
-import io.choerodon.agile.app.service.DynamicService;
-import io.choerodon.agile.app.service.IssueTypeService;
-import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.api.vo.business.RuleLogRelVO;
+import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
@@ -52,6 +50,8 @@ public class DynamicServiceImpl implements DynamicService {
     private IssueTypeService issueTypeService;
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
+    @Autowired(required = false)
+    private AgileTriggerService agileTriggerService;
 
     @Override
     public Page<AllDataLogVO> listLatestOperationInfoByProjectId(Long projectId, DataLogQueryVO dataLogQueryVO, PageRequest pageRequest) {
@@ -63,6 +63,7 @@ public class DynamicServiceImpl implements DynamicService {
         boolean filterBacklog = !CollectionUtils.isEmpty(dataLogQueryVO.getOtherTypes()) && dataLogQueryVO.getOtherTypes().contains("backlog");
         boolean containIssue = !CollectionUtils.isEmpty(dataLogQueryVO.getTypeIds()) || isNotFilter;
         boolean containBacklog = ((isNotFilter || filterBacklog) && backlogExpandService != null);
+        Map<Long, RuleLogRelVO> ruleLogRelMap = new HashMap<>();
 
         if (containIssue) {
             List<AllDataLogVO> issueDataLogList = dataLogMapper.listIssueDataLogByProjectId(projectId, dataLogQueryVO);
@@ -85,12 +86,16 @@ public class DynamicServiceImpl implements DynamicService {
                                 .thenComparing(AllDataLogVO::getLogId, Comparator.reverseOrder())).collect(Collectors.toList()),
                 pageRequest
         );
-
+        List<Long> logIds = result.stream().map(AllDataLogVO::getLogId).collect(Collectors.toList());
+        if (agileTriggerService != null) {
+            List<RuleLogRelVO> ruleLogRelList = agileTriggerService.queryRuleLogRelByLogId(projectId, logIds);
+            ruleLogRelMap = ruleLogRelList.stream().collect(Collectors.toMap(RuleLogRelVO::getLogId, Function.identity()));
+        }
         setDataLogIssueInfo(result, projectId);
         if (containBacklog) {
             backlogExpandService.setDataLogBacklogInfo(result);
         }
-        setDataLogUserAndProjectInfo(result, projectId);
+        setDataLogUserAndProjectInfo(result, projectId, ruleLogRelMap);
         appendSummary(result);
         return result;
     }
@@ -143,7 +148,7 @@ public class DynamicServiceImpl implements DynamicService {
         });
     }
 
-    private void setDataLogUserAndProjectInfo(List<AllDataLogVO> dataLogList, Long projectId) {
+    private void setDataLogUserAndProjectInfo(List<AllDataLogVO> dataLogList, Long projectId, Map<Long, RuleLogRelVO> ruleLogRelMap) {
         ProjectVO project = userService.queryProject(projectId);
         List<Long> createdByIds = dataLogList.stream().map(AllDataLogVO::getCreatedBy).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(createdByIds)) {
@@ -151,6 +156,10 @@ public class DynamicServiceImpl implements DynamicService {
         }
         Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(createdByIds, true);
         dataLogList.forEach(dataLog -> {
+            RuleLogRelVO ruleLogRel = ruleLogRelMap.get(dataLog.getLogId());
+            if (ruleLogRel != null){
+                dataLog.setRuleName(ruleLogRel.getRuleName());
+            }
             dataLog.setCreatedByUser(userMap.get(dataLog.getCreatedBy()));
             dataLog.setProjectName(project.getName());
         });

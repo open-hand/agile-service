@@ -56,7 +56,24 @@ public class AllDataLogVO {
     private String projectName;
     @ApiModelProperty(value = "状态")
     private StatusVO statusVO;
+    @ApiModelProperty(value = "规则名称")
+    private String ruleName;
 
+    public Boolean getCusLog() {
+        return isCusLog;
+    }
+
+    public void setCusLog(Boolean cusLog) {
+        isCusLog = cusLog;
+    }
+
+    public String getRuleName() {
+        return ruleName;
+    }
+
+    public void setRuleName(String ruleName) {
+        this.ruleName = ruleName;
+    }
 
     public Date getCreationDate() {
         return creationDate;
