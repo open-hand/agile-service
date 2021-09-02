@@ -51,6 +51,17 @@ class SwimLane extends Component {
         onDragStart={(start) => {
           onDragStart(start);
         }}
+        onBeforeCapture={(data) => {
+          const { draggableId } = data || {};
+          if (!draggableId) {
+            return;
+          }
+          const [, issueId] = draggableId?.split(['/']);
+          const issue = ScrumBoardStore.getDragStartItem;
+          if (issue && issue.issueId === issueId && issue.typeCode !== 'sub_task') {
+            ScrumBoardStore.checkCanDragOn(issue.issueId);
+          }
+        }}
       >
         <ColumnProvider
           keyId={key}

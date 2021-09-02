@@ -213,6 +213,21 @@ class BoardApi extends Api<BoardApi> {
       },
     });
   }
+
+  /**
+   * 根据issueId获取不可拖进的看板状态
+   * 用于受子级限制的父级任务
+   * @param issueId
+   */
+  getNotAllowedTransferStatus(issueId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/status_transfer_setting/not_allowed_transfer`,
+      params: {
+        issueId,
+      },
+    });
+  }
 }
 
 const boardApi = new BoardApi();

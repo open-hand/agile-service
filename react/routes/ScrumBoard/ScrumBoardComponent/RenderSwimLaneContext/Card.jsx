@@ -56,6 +56,8 @@ class Card extends Component {
 
   myOnMouseDown = () => {
     const { issue } = this.props;
+    // 存储issue, 用于后续拖拽onBeforeCapture方法使用
+    ScrumBoardStore.setClickIssueItem(issue);
     ScrumBoardStore.setWhichCanNotDragOn(issue.statusId, issue.issueTypeVO);
   };
 
