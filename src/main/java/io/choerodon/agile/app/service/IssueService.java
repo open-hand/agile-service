@@ -54,6 +54,19 @@ public interface IssueService {
      */
     Page<IssueListFieldKVVO> listIssueWithSub(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId);
 
+    Page<Long> pagedQueryByTreeView(PageRequest pageRequest,
+                                    Long projectId,
+                                    SearchVO searchVO,
+                                    String searchSql,
+                                    Map<String, Object> sortMap,
+                                    boolean isTreeView);
+
+    List<Long> listByTreeView(Long projectId,
+                              SearchVO searchVO,
+                              String searchSql,
+                              Map<String, Object> sortMap,
+                              boolean isTreeView);
+
     List<EpicDataVO> listEpic(Long projectId);
 
     /**

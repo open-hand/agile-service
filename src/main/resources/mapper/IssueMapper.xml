@@ -689,6 +689,112 @@
         ) ai1
     </select>
 
+    <select id="queryIssueIdsList" resultType="java.lang.Long">
+        SELECT
+        ai.issue_id
+        FROM agile_issue ai
+        <if test="sortMap != null and sortMap.sortFieldId != null ">
+            LEFT JOIN
+            (
+                SELECT
+                instance_id,
+                date_value,
+                option_id,
+                string_value,
+                text_value,
+                number_value
+                FROM fd_field_value ffv
+                JOIN agile_issue ai ON ai.issue_id = ffv.instance_id AND ai.project_id = #{projectId}
+                WHERE ffv.field_id = #{sortMap.sortFieldId}
+                AND ffv.project_id = #{projectId}
+                AND ai.issue_type_id IN
+                <foreach collection="sortMap.fieldExtendIssueTypeIds" item="issueTypeId" open="(" separator="," close=")">
+                    #{issueTypeId}
+                </foreach>
+            ) fv ON ai.issue_id = fv.instance_id
+        </if>
+        WHERE ai.project_id = #{projectId}
+        AND ai.apply_type = 'agile'
+        <include refid="explainSearchVO"/>
+        <include refid="filterSqlAndAssigneeIds"/>
+        <if test='searchVO.searchArgs != null'>
+            <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
+                AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+            </if>
+        </if>
+        <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+            <foreach collection="searchVO.contents" item="content" index="index">
+                AND (
+                    ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
+                    OR ai.summary LIKE CONCAT(CONCAT('%', #{content}), '%')
+                )
+            </foreach>
+        </if>
+        <if test="sortMap != null and sortMap.orderStr != null">
+            ORDER BY ${sortMap.orderStr}
+        </if>
+    </select>
+
+
+    <select id="queryParentIssueIdsList" resultType="java.lang.Long">
+        select
+        ai.issue_id
+        from (
+            select temp.issue_id
+            from (
+                SELECT
+                case
+                when ai.type_code = 'sub_task' then ai.parent_issue_id
+                when ai.type_code = 'bug' and ai.relate_issue_id is not null and ai.relate_issue_id != 0 then ai.relate_issue_id
+                else ai.issue_id
+                end as issue_id
+                FROM agile_issue ai
+                WHERE ai.project_id = #{projectId} AND ai.apply_type = 'agile'
+                <include refid="explainSearchVO"/>
+                <include refid="filterSqlAndAssigneeIds"/>
+                <if test='searchVO.searchArgs != null'>
+                    <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
+                        AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+                    </if>
+                </if>
+                <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+                    <foreach collection="searchVO.contents" item="content" index="index">
+                        AND (
+                        ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
+                        OR ai.summary LIKE CONCAT(CONCAT('%', #{content}), '%')
+                        )
+                    </foreach>
+                </if>
+            ) temp
+            group by temp.issue_id
+        ) ai1
+        join agile_issue ai
+        on (ai.project_id = #{projectId} and ai.apply_type = 'agile' and ai1.issue_id = ai.issue_id)
+        <if test="sortMap != null and sortMap.sortFieldId != null ">
+            LEFT JOIN
+            (
+            SELECT
+            instance_id,
+            date_value,
+            option_id,
+            string_value,
+            text_value,
+            number_value
+            FROM fd_field_value ffv
+            JOIN agile_issue ai ON ai.issue_id = ffv.instance_id AND ai.project_id = #{projectId}
+            WHERE ffv.field_id = #{sortMap.sortFieldId}
+            AND ffv.project_id = #{projectId}
+            AND ai.issue_type_id IN
+            <foreach collection="sortMap.fieldExtendIssueTypeIds" item="issueTypeId" open="(" separator="," close=")">
+                #{issueTypeId}
+            </foreach>
+            ) fv ON ai.issue_id = fv.instance_id
+        </if>
+        <if test="sortMap != null and sortMap.orderStr != null">
+            ORDER BY ${sortMap.orderStr}
+        </if>
+    </select>
+
     <select id="queryChildrenIdByParentId" resultType="java.lang.Long">
         SELECT search.issue_issue_id
         from (
