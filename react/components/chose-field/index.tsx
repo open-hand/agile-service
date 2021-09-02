@@ -4,12 +4,13 @@ import React, {
 import { Button } from 'choerodon-ui/pro';
 import { Dropdown } from 'choerodon-ui';
 import {
-  find, isEmpty, isEqualWith, omit,
+  find, isEmpty, isEqual, isEqualWith, noop, omit,
 } from 'lodash';
 import { DropDownProps } from 'choerodon-ui/lib/dropdown';
 import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import { observer } from 'mobx-react-lite';
 import { toJS, runInAction, observable } from 'mobx';
+import { useCreation, usePersistFn, useWhyDidYouUpdate } from 'ahooks';
 import { IFiledListItemProps, pageConfigApi } from '@/api';
 import FieldList from './FieldList';
 import ChoseFieldStore from './store';
@@ -17,6 +18,8 @@ import { IChosenFieldField, IChosenFieldFieldEvents } from './types';
 
 interface Props {
   store: ChoseFieldStore,
+  wrapClassName?: string,
+  wrapStyle?: React.CSSProperties
   choseField?: (data: IChosenFieldField | IChosenFieldField[], status: 'add' | 'del') => void,
   dropDownProps?: Partial<DropDownProps>,
   dropDownBtnChildren?: ReactElement | ReactElement[] | string | null,
@@ -29,6 +32,8 @@ interface Props {
  */
 interface IChoseFieldConfig {
   fields?: IChosenFieldField[],
+  /** 是否启用远程加载 @default true */
+  server?: boolean
   defaultValue?: IChosenFieldField[],
   value?: Array<IChosenFieldField | string>, /** 可控value */
   events?: IChosenFieldFieldEvents,
@@ -69,6 +74,7 @@ function valueIsEqualCustomizer(aValue: any, bValue: any) {
 }
 export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps, IChoseFieldComponentProps] {
   const [fields, setFields] = useState<IChosenFieldField[]>([]);
+  const currentFields = useRef([] as any[]);
   const [value, setValue] = useState<string[] | undefined>(undefined);
 
   const loadData = async () => {
@@ -76,14 +82,15 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
     setFields(content.map((item: IFiledListItemProps) => (item.system ? omit(item, 'id') : item)));
   };
   useEffect(() => {
-    if (typeof (config?.fields) === 'undefined') {
+    if (config?.server && typeof (config?.fields) === 'undefined') {
       loadData();
-    } else {
-      setFields(config?.fields);
+    } else if (config?.fields && !isEqual(config?.fields, currentFields.current)) {
+      currentFields.current = config?.fields;
+      setFields(currentFields.current);
     }
-  }, [config?.fields]);
+  }, [config?.fields, config?.server]);
   // 操作函数只初始化一次  防止方法多次创建 多次更改
-  const events = useMemo(() => {
+  const events = useCreation(() => {
     let {
       initField, initChosenField, initFieldFinish, initFieldStart,
     }: IChosenFieldFieldEvents = defaultInitFieldAction;
@@ -100,9 +107,10 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
       initFieldFinish = config?.events?.initFieldFinish;
     }
     return {
-      initField, initChosenField, initFieldFinish, initFieldStart,
+      initField, initChosenField, initFieldFinish, initFieldStart, choseField: config?.events?.choseField || noop,
     };
   }, []);
+  const addFieldCallback = usePersistFn(config?.addFieldCallback || noop);
   // 默认值只保存第一次传入
   const defaultValue = useMemo(() => config?.defaultValue, []);
   const store = useMemo(() => {
@@ -137,9 +145,9 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
       events.initFieldFinish(customFields, systemFields, currentChosenFields);
     }
     return new ChoseFieldStore({
-      systemFields, customFields, chosenFields: [...currentChosenFields.values()], addFieldCallback: config?.addFieldCallback,
+      systemFields, customFields, chosenFields: [...currentChosenFields.values()], addFieldCallback,
     });
-  }, [config?.addFieldCallback, defaultValue, events, fields]);
+  }, [addFieldCallback, defaultValue, events, fields]);
   useEffect(() => {
     if (fields.length !== 0) {
       const nextValue = toJS(config?.value)?.map((item) => (typeof (item) === 'string' ? item : item.code)) || [];
@@ -164,11 +172,12 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
   };
   const componentProps: IChoseFieldComponentProps = {
     store,
-    choseField: config?.events?.choseField,
+    choseField: events.choseField,
     dropDownBtnChildren: config?.dropDownBtnChildren || '添加筛选',
     dropDownBtnProps: config?.dropDownBtnProps,
     dropDownProps: config?.dropDownProps,
   };
+  useWhyDidYouUpdate('componentProps', componentProps);
   return [dataProps, componentProps];
 }
 function useClickOut(onClickOut: (e?: any) => void) {
@@ -189,14 +198,16 @@ function useClickOut(onClickOut: (e?: any) => void) {
 
 const ChooseField: React.FC<Props> = (props) => {
   const [hidden, setHidden] = useState(true);
-  const { dropDownBtnChildren = '添加筛选' } = props;
+  const {
+    dropDownBtnChildren = '添加筛选', wrapClassName, wrapStyle, store, choseField,
+  } = props;
   const handleClickOut = useCallback(() => {
     setHidden(true);
   }, []);
   const ref = useClickOut(handleClickOut);
 
   return (
-    <div>
+    <div className={wrapClassName} style={wrapStyle}>
       <Dropdown
         getPopupContainer={(trigger) => document.body}
         visible={!hidden}
@@ -208,7 +219,7 @@ const ChooseField: React.FC<Props> = (props) => {
               e.stopPropagation();
             }}
           >
-            <FieldList store={props.store} closeMenu={() => setHidden(true)} onChose={props.choseField} />
+            <FieldList store={store} closeMenu={() => setHidden(true)} onChose={choseField} />
           </div>
         )}
         trigger={['click']}

@@ -4,6 +4,7 @@ import {
   CheckBox, Button, TextField, Icon, Tooltip,
 } from 'choerodon-ui/pro';
 import './FieldList.less';
+import { useDebounceFn } from 'ahooks';
 import { IChosenFieldField, IUseChoseFieldProps } from './types';
 import ChoseFieldStore from './store';
 
@@ -22,19 +23,25 @@ function FieldList({ store, closeMenu, onChose }: Props) {
   const [systemFields, customFields] = store.getFields;
   function handleChange(value: string | undefined, field: IChosenFieldField) {
     if (value) {
-      onChose && onChose(field, 'add');
       store.addChosenFields(value, field);
+      // 延迟处理
+      setTimeout(() => onChose && onChose(field, 'add'), 50);
     } else {
-      onChose && onChose(field, 'del');
       store.delChosenFields(field.code);
+      // 延迟处理 避免选择卡顿
+      setTimeout(() => onChose && onChose(field, 'del'), 60);
     }
   }
+  const { run: handleInput } = useDebounceFn((value: string) => {
+    store.setSearchVal(value);
+  }, { wait: 540 });
   return (
     <div
       className={prefix}
     >
       <div className={`${prefix}-search`}>
         <TextField
+          onInput={(e: any) => handleInput(e.target.value)}
           style={{ flex: 1 }}
           value={store.getSearchVal}
           onChange={(v) => {

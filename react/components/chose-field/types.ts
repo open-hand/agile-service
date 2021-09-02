@@ -25,11 +25,17 @@ interface IUseChoseFieldProps {
  * @param initChosenField 初始化已选字段时的操作 返回false | undefined | void 则跳过此字段
  */
 interface IChosenFieldFieldEvents {
+    /** 开始初始化字段 */
     initFieldStart?: (fields: IChosenFieldField[], currentChosenField: Map<string, IChosenFieldField>) => void,
+    /** 开始初始化单个字段 */
     initField?: (data: IChosenFieldField, currentChosenField: Map<string, IChosenFieldField>) => IChosenFieldField | false | undefined | void,
+    /** 初始化字段字段完成 */
     initFieldFinish?: (customFields: IChosenFieldField[], systemFields: IChosenFieldField[], currentChosenField: Map<string, IChosenFieldField>) => void,
+    /** 初始化传入的默认值中每个已选字段 */
     initChosenField?: (data: IChosenFieldField, currentChosenField: Map<string, IChosenFieldField>) => IChosenFieldField | false | undefined | void,
+    /** 选择字段事件 */
     choseField?: (data: IChosenFieldField | IChosenFieldField[], status: 'add' | 'del') => void,
+    /** 取消选择字段事件 */
     cancelChosenField?: (data: IChosenFieldField) => void,
 }
 export { IChosenFieldField, IUseChoseFieldProps, IChosenFieldFieldEvents };

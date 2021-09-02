@@ -10,7 +10,7 @@ import ProjectReportStore from '../report-page/store';
 const EditReport: React.FC = () => {
   const store = useMemo(() => new ProjectReportStore(), []);
   const [loading, setLoading] = useState(true);
-  const { id } = useParams();
+  const { id } = useParams<any>();
   const refresh = useCallback(async () => {
     setLoading(true);
     const res = await projectReportApi.getById(id);
