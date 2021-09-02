@@ -6,6 +6,8 @@ import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 interface DateTimePickerProps extends DatePickerProps {
   // 默认弹框中的值
   defaultPickerValue?: Moment,
+  // 用于创建冲刺中开始日期的时间默认为00:00:00
+  showStartTime?: boolean,
 }
 
 export default class DateTimePickerWithConfig extends DateTimePicker {
@@ -16,6 +18,18 @@ export default class DateTimePickerWithConfig extends DateTimePicker {
   static defaultProps = {
     ...DateTimePicker.defaultProps,
   };
+
+  getValidDate(date: Moment): Moment {
+    const { min, max } = this;
+    const { showStartTime = false } = this.props;
+    let newData = date;
+    if (min && date.isSameOrBefore(min)) {
+      newData = min;
+    } else if (max && date.isSameOrAfter(max)) {
+      newData = showStartTime ? moment(max).startOf('d') : max;
+    }
+    return newData;
+  }
 
   getSelectedDate(): Moment {
     const {

@@ -3,8 +3,8 @@ import {
   Form, TextField, DataSet, TextArea, Icon, Select,
 } from 'choerodon-ui/pro';
 import moment from 'moment';
-import { sprintApi } from '@/api';
 import { Choerodon } from '@choerodon/boot';
+import { sprintApi } from '@/api';
 import { MAX_LENGTH_SPRINT } from '@/constants/MAX_LENGTH';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import DateTimePicker from '@/components/date-time-picker';
@@ -96,7 +96,7 @@ export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
         <Option value="2">2周</Option>
         <Option value="4">4周</Option>
       </Select>
-      <DateTimePicker name="startDate" />
+      <DateTimePicker name="startDate" showStartTime />
       <DateTimePicker name="endDate" defaultPickerValue={moment().endOf('d')} />
       <TextArea
         rowSpan={2}
