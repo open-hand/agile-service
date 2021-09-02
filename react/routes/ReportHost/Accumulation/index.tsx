@@ -9,10 +9,10 @@ import pic from '@/assets/image/NoData.svg';
 import BackBtn from '../back-btn';
 import NoDataComponent from '../Component/noData';
 import SwithChart from '../Component/switchChart';
-import { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
+import Loading, { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
 
 const AccumulationReport: React.FC = () => {
-  const [searchProps, props, refresh] = useAccumulationReport();
+  const [searchProps, props, refresh] = useAccumulationReport({ defaultLoading: true });
   const renderContent = () => {
     const { data } = props;
     if (!data.length) {
@@ -36,7 +36,7 @@ const AccumulationReport: React.FC = () => {
           items={[{
             name: '切换',
             element: <SwithChart
-            // @ts-ignore
+              // @ts-ignore
               current="accumulation"
             />,
             display: true,
@@ -68,7 +68,7 @@ const AccumulationReport: React.FC = () => {
           loadId="Accumulation"
         >
           <div className="c7n-accumulation-filter">
-            <AccumulationSearch {...searchProps} />
+            <AccumulationSearch {...searchProps} float />
           </div>
           <LoadingHiddenWrap>
             {renderContent()}
