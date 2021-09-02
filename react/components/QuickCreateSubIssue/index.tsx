@@ -7,14 +7,14 @@ import {
 } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
-import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { useLockFn } from 'ahooks';
+import { find } from 'lodash';
+import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { IIssueType, Issue, User } from '@/common/types';
 import { checkCanQuickCreate, getQuickCreateDefaultObj } from '@/utils/quickCreate';
 import { fieldApi, issueApi } from '@/api';
 import { fields2Map } from '@/utils/defaultValue';
 import localCacheStore from '@/stores/common/LocalCacheStore';
-import { find } from 'lodash';
 import TypeTag from '../TypeTag';
 import UserDropdown from '../UserDropdown';
 
@@ -28,7 +28,7 @@ interface QuickCreateSubIssueProps {
   summaryChange?: (summary: string) => void,
   typeIdChange?: (typeId: string) => void,
   setDefaultSprint?: (sprintId: string | undefined) => void,
-  assigneeChange?: (assigneeId: string | undefined) => void
+  assigneeChange?: (assigneeId: string | undefined, assignee: User | undefined) => void
 }
 const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, cantCreateEvent, summaryChange, typeIdChange, setDefaultSprint, assigneeChange,
@@ -72,7 +72,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
             setDefaultSprint(sprintId);
           }
           if (assigneeChange) {
-            assigneeChange(assigneeId);
+            assigneeChange(assigneeId, userDropDownRef?.current?.selectedUser);
           }
           setLoading(false);
           handleCancel();
