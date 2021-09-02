@@ -11,7 +11,7 @@ import ProjectReportStore from '../report-page/store';
 const PreviewReport: React.FC = () => {
   const store = useMemo(() => new ProjectReportStore(), []);
   const [loading, setLoading] = useState(true);
-  const { id } = useParams();
+  const { id } = useParams<any>();
   const params = useQueryString();
   const refresh = useCallback(async () => {
     setLoading(true);

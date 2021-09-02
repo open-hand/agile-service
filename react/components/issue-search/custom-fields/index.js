@@ -1,13 +1,14 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-import React, { useContext } from 'react';
+import React, { useCallback, useContext, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import { Icon } from 'choerodon-ui/pro';
 // 自定义字段
-import ChooseField from '../choose-field';
+import { useCreation } from 'ahooks';
 import IssueSearchContext from '../context';
 import { FieldProLayout } from '@/components/field-pro';
+
+import ChooseFieldNew, { useChoseField } from '@/components/chose-field';
 
 const { getSearchFields } = FieldProLayout;
 export const getValueByFieldType = (fieldType, value) => {
@@ -82,6 +83,24 @@ function CustomFields({
   const inputTypes = [];
   const { store } = useContext(IssueSearchContext);
   const { chosenFields } = store;
+  const handleChoose = useCallback((value, status) => {
+    if (Array.isArray(value)) {
+      status === 'add' ? store.chooseAll(value) : store.unChooseAll();
+      return;
+    }
+    store.handleChosenFieldChange(status === 'add', value);
+  }, [store]);
+
+  const fields = useCreation(() => store.getAllFields.filter((field) => !field.defaultShow && !field.archive), [store, store.getAllFields.length]);
+
+  const [data, chooseFieldProps] = useChoseField({
+    value: [...chosenFields.keys()],
+    fields,
+    events: {
+      choseField: handleChoose,
+    },
+  });
+
   for (const [, field] of chosenFields) {
     if (['single', 'multiple', 'radio', 'checkbox', 'member', 'multiMember'].includes(field.fieldType)) {
       selectTypes.push(field);
@@ -104,6 +123,7 @@ function CustomFields({
       />
       {!field.defaultShow && (
         <div
+          role="none"
           style={{
             cursor: 'pointer',
             borderRadius: '50%',
@@ -131,7 +151,20 @@ function CustomFields({
   const result = types.map((type) => <div className="c7n-issue-search-left-type" style={{ display: 'flex', flexWrap: 'wrap', marginBottom: 4 }}>{render(type)}</div>);
   if (result.length > 0) {
     result[0].props.children.unshift(children);
-    result[result.length - 1].props.children.push(<ChooseField key="choose" />);
+    result[result.length - 1].props.children.push(<ChooseFieldNew
+      key="choose"
+      {...chooseFieldProps}
+      wrapStyle={{
+        marginLeft: 5, display: 'flex', alignItems: 'center',
+      }}
+      wrapClassName="c7n-agile-issue-search-choose-field"
+      dropDownBtnProps={{
+        icon: 'arrow_drop_down',
+        style: {
+          height: 32, paddingRight: 0, display: 'flex', flexFlow: 'row-reverse', alignItems: 'center',
+        },
+      }}
+    />);
   }
   return (
     <div>

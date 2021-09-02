@@ -4,9 +4,9 @@ import {
 } from '@choerodon/master';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { useParams } from 'react-router';
-import { Loading } from '@/components';
 import { useCreation } from 'ahooks';
 import { observer } from 'mobx-react-lite';
+import { Loading } from '@/components';
 import Columns from './components/columns';
 import UnsetColumn from './components/unset-column';
 import styles from './index.less';
@@ -18,7 +18,7 @@ export interface KanbanTemplateDetailContext {
 }
 export const Context = React.createContext<KanbanTemplateDetailContext>({} as KanbanTemplateDetailContext);
 const KanbanTemplateDetail = () => {
-  const { templateId } = useParams();
+  const { templateId } = useParams<any>();
   const store = useCreation(() => new KanbanTemplateDetailStore(templateId), [templateId]);
   useEffect(() => {
     store.refresh();
