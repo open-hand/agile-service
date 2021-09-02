@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.app.assembler.IssueAssembler;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -2969,12 +2970,12 @@ public class ExcelServiceImpl implements ExcelService {
                 Map<String, Object> sortMap = new HashMap<>();
                 sortMap.put("orderStr", orderStr);
                 //查询所有父节点问题
-                Page<IssueDTO> page =
-                        PageHelper.doPage(cursor.getPage(), cursor.getSize(), () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap, isTreeView));
+                PageRequest pageRequest = new PageRequest(cursor.getPage(), cursor.getSize());
+                Page<Long> page = issueService.pagedQueryByTreeView(pageRequest, projectId, searchVO, searchSql, sortMap, isTreeView);
                 if (CollectionUtils.isEmpty(page.getContent())) {
                     break;
                 }
-                List<Long> parentIds = page.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+                List<Long> parentIds = page.getContent();
                 List<Long> issueIds = new ArrayList<>();
                 Map<Long, Set<Long>> parentSonMap = new HashMap<>();
                 List<IssueDTO> issues = new ArrayList<>();

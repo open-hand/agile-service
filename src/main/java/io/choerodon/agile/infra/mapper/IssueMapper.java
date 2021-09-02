@@ -337,12 +337,38 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      */
     IssueDTO queryEpicWithStatusByIssueId(@Param("issueId") Long issueId, @Param("projectId") Long projectId);
 
+    /**
+     * 性能不好，不要用
+     *
+     * @param projectId
+     * @param searchVO
+     * @param filterSql
+     * @param assigneeFilterIds
+     * @param sortMap
+     * @param isTreeView
+     * @return
+     */
+    @Deprecated
     List<IssueDTO> queryIssueIdsListWithSub(@Param("projectId") Long projectId,
                                             @Param("searchVO") SearchVO searchVO,
                                             @Param("filterSql") String filterSql,
                                             @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
                                             @Param("sortMap") Map<String, Object> sortMap,
                                             @Param("isTreeView") Boolean isTreeView);
+
+
+    List<Long> queryIssueIdsList(@Param("projectId") Long projectId,
+                                 @Param("searchVO") SearchVO searchVO,
+                                 @Param("filterSql") String filterSql,
+                                 @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
+                                 @Param("sortMap") Map<String, Object> sortMap);
+
+    List<Long> queryParentIssueIdsList(@Param("projectId") Long projectId,
+                                       @Param("searchVO") SearchVO searchVO,
+                                       @Param("filterSql") String filterSql,
+                                       @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
+                                       @Param("sortMap") Map<String, Object> sortMap);
+
 
     List<IssueDTO> queryIssueListWithSubByIssueIds(@Param("issueIds") List<Long> issueIds,
                                                    @Param("childrenIds") Set<Long> childrenIds,

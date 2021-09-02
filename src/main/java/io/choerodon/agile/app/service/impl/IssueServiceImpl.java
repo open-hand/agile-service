@@ -192,13 +192,15 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private LinkIssueStatusLinkageService linkIssueStatusLinkageService;
     @Autowired
     private StatusLinkageExecutionLogService statusLinkageExecutionLogService;
+    @Autowired
+    private ProjectInfoMapper projectInfoMapper;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
     private static final String ISSUE_NUM = "issueNum";
     private static final String ISSUE_NUM_CONVERT = "issue_num_convert";
     private static final String ISSUE_ID = "issueId";
-    private static final String ISSUE_ISSUE_ID = "issue_issue_id";
+    private static final String TABLE_ISSUE_ID = "issue_id";
     private static final String ISSUE_MANAGER_TYPE = "模块负责人";
     private static final String TYPE_CODE_FIELD = "typeCode";
     private static final String EPIC_NAME_FIELD = "epicName";
@@ -617,7 +619,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     private Page<Long> getIssueIdPage(PageRequest pageRequest, Long projectId, SearchVO searchVO, String searchSql, Long organizationId, Boolean isTreeView) {
-        Page<Long> issueIdPage;
         Map<String, Object> sortMap = new HashMap<>();
         if (!handleSortField(pageRequest).equals("")) {
             setSortMap(organizationId, projectId, pageRequest, sortMap, "ai");
@@ -625,10 +626,66 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             String orderStr = getOrderStrOfQueryingIssuesWithSub(pageRequest.getSort());
             sortMap.put(ORDER_STR, orderStr);
         }
-        Page<IssueDTO> issues = PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap, isTreeView));
-        List<Long> issueIds = issues.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-        issueIdPage = PageUtil.buildPageInfoWithPageInfoList(issues, issueIds);
-        return issueIdPage;
+        return pagedQueryByTreeView(pageRequest, projectId, searchVO, searchSql, sortMap, isTreeView);
+    }
+
+    @Override
+    public Page<Long> pagedQueryByTreeView(PageRequest pageRequest,
+                                           Long projectId,
+                                           SearchVO searchVO,
+                                           String searchSql,
+                                           Map<String, Object> sortMap,
+                                           boolean isTreeView) {
+        splitIssueNumProjectCodePrefix(searchVO, projectId);
+        if (isTreeView) {
+            return PageHelper.doPage(pageRequest, () -> issueMapper.queryParentIssueIdsList(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap));
+        } else {
+            return PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueIdsList(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap));
+        }
+    }
+
+    @Override
+    public List<Long> listByTreeView(Long projectId,
+                                     SearchVO searchVO,
+                                     String searchSql,
+                                     Map<String, Object> sortMap,
+                                     boolean isTreeView) {
+        splitIssueNumProjectCodePrefix(searchVO, projectId);
+        if (isTreeView) {
+            return issueMapper.queryParentIssueIdsList(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap);
+        } else {
+            return issueMapper.queryIssueIdsList(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap);
+        }
+    }
+
+    private void splitIssueNumProjectCodePrefix(SearchVO searchVO, Long projectId) {
+        //去除searchVO.searchArgs.issueNum或searchVO.contents的项目code前缀
+        ProjectInfoDTO dto = new ProjectInfoDTO();
+        dto.setProjectId(projectId);
+        ProjectInfoDTO info = projectInfoMapper.selectOne(dto);
+        if (ObjectUtils.isEmpty(info)) {
+            return;
+        }
+        String prefix = info.getProjectCode() + "-";
+        List<String> contents = searchVO.getContents();
+        if (!ObjectUtils.isEmpty(contents)) {
+            List<String> replaceContents = new ArrayList<>();
+            contents.forEach(content -> {
+                if (content.startsWith(prefix)) {
+                    replaceContents.add(content.substring(prefix.length()));
+                } else {
+                    replaceContents.add(content);
+                }
+            });
+            searchVO.setContents(replaceContents);
+        }
+        Map<String, Object> searchArgs = searchVO.getSearchArgs();
+        if (!ObjectUtils.isEmpty(searchArgs)) {
+            String issueNum = (String) searchArgs.get("issueNum");
+            if (!StringUtils.isEmpty(issueNum)) {
+                searchArgs.put("issueNum", issueNum.substring(prefix.length()));
+            }
+        }
     }
 
     protected void setSortMap(Long organizationId, Long projectId, PageRequest pageRequest, Map<String, Object> sortMap, String mainTableAlias) {
@@ -657,9 +714,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     protected String getOrderStrOfQueryingIssuesWithSub(Sort sort) {
-        Map<String, String> order = new HashMap<>(1);
-        order.put(ISSUE_ID, ISSUE_ISSUE_ID);
-        order.put(ISSUE_NUM, ISSUE_NUM_CONVERT);
+        Map<String, String> order = new HashMap<>();
+        order.put(ISSUE_ID, TABLE_ISSUE_ID);
+        order.put(ISSUE_NUM, TABLE_ISSUE_ID);
         if (Objects.isNull(sort.getOrderFor(ISSUE_ID))) {
             Sort.Order issueIdOrder = new Sort.Order(Sort.Direction.DESC, ISSUE_ID);
             sort = sort.and(new Sort(issueIdOrder));
