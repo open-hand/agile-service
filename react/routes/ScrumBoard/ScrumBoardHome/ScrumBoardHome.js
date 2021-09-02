@@ -235,6 +235,12 @@ class ScrumBoardHome extends Component {
           this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
         }
       }
+    }).catch(() => {
+      ScrumBoardStore.setSwimLaneData(SwimLaneId,
+        startStatus,
+        startStatusIndex,
+        SwimLaneId, destinationStatus,
+        destinationStatusIndex, issue, true);
     });
     ScrumBoardStore.setSwimLaneData(SwimLaneId, startStatus, startStatusIndex,
       SwimLaneId, destinationStatus, destinationStatusIndex, issue, false);

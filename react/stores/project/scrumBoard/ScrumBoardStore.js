@@ -139,6 +139,8 @@ class ScrumBoardStore {
 
   @observable currentBindFunctionMaps = new Map();
 
+  @observable clickIssueItem = {};
+
   executeBindFunction(keys = [], ...args) {
     const fnResult = [];
     keys.forEach((key) => {
@@ -865,6 +867,31 @@ class ScrumBoardStore {
       }
     });
   }
+
+  @computed get getClickIssueItem() {
+    return this.clickIssueItem;
+  }
+
+  @action setClickIssueItem(data) {
+    this.clickIssueItem = data;
+  }
+
+  @action checkAndSetCanDragOn(statusId) {
+    !this.canDragOn.get(statusId) && this.canDragOn.set(statusId, true);
+  }
+
+  checkCanDragOn = async (issueId) => {
+    try {
+      const check = await boardApi.getNotAllowedTransferStatus(issueId);
+      if (!isEmpty(check)) {
+        check.forEach((status) => {
+        status?.id && this.checkAndSetCanDragOn(status.id);
+        });
+      }
+    } catch (e) {
+      // return;
+    }
+  };
 
   @computed get getCanDragOn() {
     return this.canDragOn;
