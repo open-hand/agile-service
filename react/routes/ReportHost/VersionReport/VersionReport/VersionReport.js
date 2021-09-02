@@ -611,7 +611,7 @@ class EpicReport extends Component {
             !(!VS.versions.length && VS.versionFinishLoading) ? (
               <div>
                 <div style={{ display: 'flex' }}>
-                  <Form style={{ width: 244 }}>
+                  <Form columns={2} style={{ width: 508 }}>
                     <Select
                       label="版本"
                       value={VS.currentVersionId}
@@ -619,19 +619,18 @@ class EpicReport extends Component {
                       clearButton={false}
                     >
                       {
-                      VS.versions.map((version) => (
-                        <Option
-                          key={version.versionId}
-                          value={version.versionId}
-                        >
-                          {version.name}
-                        </Option>
-                      ))
-                    }
+                        VS.versions.map((version) => (
+                          <Option
+                            key={version.versionId}
+                            value={version.versionId}
+                          >
+                            {version.name}
+                          </Option>
+                        ))
+                      }
                     </Select>
-                  </Form>
-                  <Form style={{ width: 244, marginLeft: 24 }}>
                     <Select
+                      style={{ marginLeft: 10 }}
                       label="单位"
                       value={VS.currentUnit}
                       onChange={(unit) => this.handleChangeCurrentUnit(unit)}
@@ -721,7 +720,7 @@ class EpicReport extends Component {
                     </EmptyPage.Button>
                     <span>中创建一个版本</span>
                   </div>
-          )}
+                )}
               />
             )
           }

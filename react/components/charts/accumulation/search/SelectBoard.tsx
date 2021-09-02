@@ -36,7 +36,7 @@ const SelectBoard: React.FC<Props> = ({
       label="切换看板"
       value={value}
       clearButton={false}
-      style={{ marginLeft: 15 }}
+      style={{ marginLeft: 14 }}
       onChange={(boardId) => {
         onChange(boardId);
       }}

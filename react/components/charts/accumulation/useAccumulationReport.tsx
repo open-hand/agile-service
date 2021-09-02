@@ -12,6 +12,7 @@ import { IAccumulationData } from './utils';
 
 export interface AccumulationConfig {
   boardId?: string
+  defaultLoading?: boolean
   quickFilterIds?: string[]
   range?: [Moment, Moment]
   projectId?: string
@@ -24,7 +25,7 @@ function useAccumulationReport(config?: AccumulationConfig, onFinish?: Function)
   const [data, setData] = useState<IAccumulationData[]>([]);
   const [boardId, setBoardId] = useState<string>(config?.boardId || '');
   const [columnIds, setColumnIds] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(() => !!config?.defaultLoading);
   const [range, setRange] = useControlledDefaultValue<[Moment, Moment]>(config?.range || defaultDate);
   const loadData = useCallback(async () => {
     if (boardId !== '' && columnIds.length > 0) {

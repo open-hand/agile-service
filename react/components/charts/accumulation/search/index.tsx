@@ -3,7 +3,7 @@ import { DatePicker, Form } from 'choerodon-ui/pro';
 import { Moment } from 'moment';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import SelectBoard from './SelectBoard';
-import QuickFilter from './QuickFilter';
+import SelectQuickFilterField from '@/components/select/select-quick-filter';
 
 export interface AccumulationSearchProps {
   range: [Moment, Moment]
@@ -27,7 +27,7 @@ const AccumulationSearch: React.FC<AccumulationSearchProps> = ({
 }) => (
   <Form labelLayout={float ? 'float' as any : 'none'}>
     <div style={{ display: 'flex' }}>
-      <div style={{ width: 500 }}>
+      <div style={{ width: 300 }}>
         <DatePicker
           style={{ width: '100%' }}
           range
@@ -43,9 +43,15 @@ const AccumulationSearch: React.FC<AccumulationSearchProps> = ({
         onChange={onBoardChange}
         value={boardId}
       />
-      <QuickFilter
+      <SelectQuickFilterField
         projectId={projectId}
         onChange={onQuickSearchChange}
+        commonOptions={false}
+        multiple
+        placeholder="快速筛选"
+        label="快速筛选"
+        optionFlat
+        style={{ marginLeft: 14 }}
         value={quickFilterIds}
       />
     </div>
