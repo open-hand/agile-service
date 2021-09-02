@@ -43,19 +43,9 @@ const TemplateList: React.FC<Props> = ({
     onDelete(template.id);
   }, [onDelete]);
 
-  const handleClearTemplate = useCallback(() => {
-    setSelected(undefined);
-  }, [setSelected]);
-
   return (
     <div className={styles.template_list}>
-      {
-        selected && (
-          <div className={classnames(styles.template_item, styles.clear_item)} role="none" onClick={handleClearTemplate}>
-            移出模板
-          </div>
-        )
-      }
+
       {
         templateList && templateList.length ? (
           <>

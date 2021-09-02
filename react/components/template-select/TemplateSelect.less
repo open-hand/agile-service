@@ -1,5 +1,6 @@
 .template_select {
   margin-top: 13px;
+  position: relative;
   .dropDown_trigger {
     position: relative;
     display: flex;
@@ -9,6 +10,14 @@
     height: 50px;
     border: 1px solid var(--divider);
     border-radius: 5px;
+    .clear_icon {
+      position: absolute;
+      right: 10px;
+      top: 15px;
+      color: #ABBCCF;
+      display: none;
+      cursor: pointer;
+    }
     .iconPicker {
       color: rgb(171, 188, 207);
     }
@@ -27,6 +36,20 @@
         -o-transform:rotate(180deg); 	/* Opera */
         transition:transform 0.3s, -webkit-transform 0.3s;
         top: 8px;
+      }
+      .hasSelected_iconPicker {
+        display: none;
+      }
+      .hasSelected_clearIcon {
+        display: inline-block;
+      }
+    }
+    &:hover {
+      .hasSelected_iconPicker {
+        display: none;
+      }
+      .hasSelected_clearIcon {
+        display: inline-block;
       }
     }
     .trigger_label {
