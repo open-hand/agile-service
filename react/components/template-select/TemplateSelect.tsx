@@ -7,6 +7,7 @@ import { observer } from 'mobx-react-lite';
 import { Icon, Dropdown } from 'choerodon-ui/pro';
 
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
+import classNames from 'classnames';
 import { TemplateAction, templateApi } from '@/api';
 import styles from './TemplateSelect.less';
 import TemplateList from './components/list';
@@ -111,6 +112,10 @@ const TemplateSelect: React.FC<Props> = (props) => {
     }
   }, [getTemplates, selectTemplateOk, selected?.id, selected?.templateJson]);
 
+  const handleClearTemplate = useCallback(() => {
+    setSelected(undefined);
+  }, [setSelected]);
+
   return (
     <div className={styles.template_select}>
       <Dropdown
@@ -167,7 +172,18 @@ const TemplateSelect: React.FC<Props> = (props) => {
           <span className={styles.selected}>
             {selected?.name}
           </span>
-          <Icon type="expand_more" className={styles.iconPicker} />
+          {
+            selected && (
+              <Icon
+                type="cancel"
+                className={classNames(styles.clear_icon, {
+                  [styles.hasSelected_clearIcon]: selected,
+                })}
+                onClick={handleClearTemplate}
+              />
+            )
+          }
+          <Icon type="expand_more" className={classNames(styles.iconPicker, { [styles.hasSelected_iconPicker]: selected })} />
         </div>
       </Dropdown>
     </div>
