@@ -107,8 +107,8 @@ const SubBug = observer(({
             summaryChange={(issueSummary) => {
               store.setDefaultSummary(issueSummary);
             }}
-            assigneeChange={(assigneeId) => {
-              store.setDefaultAssignee(assigneeId);
+            assigneeChange={(assigneeId, assignee) => {
+              store.setDefaultAssignee(assignee);
             }}
             setDefaultSprint={(value) => {
               store.setDefaultSprint(value);
