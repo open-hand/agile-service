@@ -526,16 +526,16 @@ const UpdateField = ({
       className={styles.form}
       disabled={Boolean(loading)}
       dataSet={dataSet}
-      columns={23}
+      columns={25}
       style={{
-        overflowY: 'auto', overflowX: 'hidden',
+        overflowY: 'auto', overflowX: 'hidden', marginLeft: '-0.05rem'
       }}
     >
       {fields.map((f: IFieldK) => {
         const { key, id, code } = f;
         return ([
           <Select
-            colSpan={11}
+            colSpan={12}
             newLine
             style={{ width: '100%' }}
             placeholder="字段"
@@ -562,7 +562,7 @@ const UpdateField = ({
           code ? (
             <div
               // @ts-ignore
-              colSpan={11}
+              colSpan={12}
             >
               {/* @ts-ignore */}
               {renderField(f, data, selectUserMap, isProgram, isOrganization)}
