@@ -79,7 +79,7 @@ export default function renderField({
         extraOptionsMap.time.unshift({ id: 'clear', label: '清空' });
       }
       return (
-        <Row gutter={20}>
+        <Row gutter={10}>
           <Col span={12}>
             <Select placeholder="字段值" label="字段值" name={`${code}-select`} className={styles.timeSelect}>
               {
@@ -113,7 +113,7 @@ export default function renderField({
         extraOptionsMap.datetime.unshift({ id: 'clear', label: '清空' });
       }
       return (
-        <Row gutter={20}>
+        <Row gutter={10}>
           <Col span={12}>
             <Select placeholder="字段值" label="字段值" name={`${code}-select`} className={styles.dateTimeSelect}>
               {
@@ -159,7 +159,7 @@ export default function renderField({
         extraOptionsMap.date.unshift({ id: 'clear', label: '清空' });
       }
       return (
-        <Row gutter={20}>
+        <Row gutter={10}>
           <Col span={12}>
             <Select placeholder="字段值" label="字段值" name={`${code}-select`} className={styles.dateSelect}>
               {
@@ -205,7 +205,7 @@ export default function renderField({
         extraOptionsMap.number.unshift({ id: 'clear', label: '清空' });
       }
       return (
-        <Row gutter={20}>
+        <Row gutter={10}>
           <Col span={16}>
             <Select placeholder="字段值" label="字段值" name={`${code}-select`} className={styles.numberSelect}>
               {
@@ -237,7 +237,7 @@ export default function renderField({
         extraOptionsMap.input.unshift({ id: 'clear', label: '清空' });
       }
       return (
-        <Row gutter={20}>
+        <Row gutter={10}>
           <Col span={12}>
             <Select placeholder="字段值" label="字段值" name={`${code}-select`} className={styles.inputSelect}>
               {
@@ -271,7 +271,7 @@ export default function renderField({
         extraOptionsMap.text.unshift({ id: 'clear', label: '清空' });
       }
       return (
-        <Row gutter={20}>
+        <Row gutter={10}>
           <Col span={12}>
             <Select placeholder="字段值" label="字段值" name={`${code}-select`} className={styles.textSelect}>
               {

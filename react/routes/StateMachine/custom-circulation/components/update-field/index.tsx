@@ -526,68 +526,68 @@ const UpdateField = ({
       className={styles.form}
       disabled={Boolean(loading)}
       dataSet={dataSet}
+      columns={23}
       style={{
         overflowY: 'auto', overflowX: 'hidden',
       }}
     >
-      {
-        fields.map((f: IFieldK) => {
-          const { key, id } = f;
-          return (
-            <Row key={key} gutter={20} type="flex" align="middle">
-              <Col span={11}>
-                <Select
-                  style={{ width: '100%' }}
-                  placeholder="字段"
-                  label="字段"
-                  value={f.id}
-                  onChange={(value) => {
-                    const field = find(fieldData, { id: value });
-                    // @ts-ignore
-                    Field.set(key, field);
-                  }}
-                >
-                  {
-                    fieldData.filter((field: IField) => (
-                      id === field.id
-                    ) || !find(fields, {
-                      id: field.id,
-                    })).map((field) => (
-                      <Option value={field.id}>
-                        {field.name}
-                      </Option>
-                    ))
-                  }
-                </Select>
-              </Col>
-              {id && (
-                <Col span={11} key={id}>
-                  {
-                    // @ts-ignore
-                    renderField(f, data, selectUserMap, isProgram, isOrganization)
-                  }
-                </Col>
-              )}
-              <Col span={2}>
-                <Icon
-                  onClick={() => {
-                    // @ts-ignore
-                    Field.remove(key);
-                    // @ts-ignore
-                    dataSet.current.init(f.code);
-                  }}
-                  type="delete_sweep-o"
-                  style={{
-                    cursor: 'pointer',
-                    color: 'var(--primary-color)',
-                  }}
-                />
-              </Col>
-            </Row>
-          );
-        })
-      }
-      <div>
+      {fields.map((f: IFieldK) => {
+        const { key, id, code } = f;
+        return ([
+          <Select
+            colSpan={11}
+            newLine
+            style={{ width: '100%' }}
+            placeholder="字段"
+            label="字段"
+            value={f.id}
+            onChange={(value) => {
+              const field = find(fieldData, { id: value });
+              // @ts-ignore
+              Field.set(key, field);
+            }}
+          >
+            {
+              fieldData.filter((field: IField) => (
+                id === field.id
+              ) || !find(fields, {
+                id: field.id,
+              })).map((field) => (
+                <Option value={field.id}>
+                  {field.name}
+                </Option>
+              ))
+            }
+          </Select>,
+          code ? (
+            <div
+              // @ts-ignore
+              colSpan={11}
+            >
+              {/* @ts-ignore */}
+              {renderField(f, data, selectUserMap, isProgram, isOrganization)}
+            </div>
+          ) : null,
+          <Icon
+            onClick={() => {
+              // @ts-ignore
+              Field.remove(key);
+              // @ts-ignore
+              dataSet.current.init(f.code);
+            }}
+            type="delete_sweep-o"
+            style={{
+              cursor: 'pointer',
+              color: 'var(--primary-color)',
+              lineHeight: '0.48rem',
+            }}
+          />,
+        ]);
+      })}
+      <div
+        // @ts-ignore
+        newLine
+      >
         <Button
           // @ts-ignore
           onClick={Field.add}
