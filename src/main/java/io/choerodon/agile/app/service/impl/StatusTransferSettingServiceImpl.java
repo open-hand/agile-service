@@ -8,17 +8,18 @@ import io.choerodon.agile.app.service.OrganizationConfigService;
 import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StatusTransferSettingService;
 import io.choerodon.agile.app.service.UserService;
-import io.choerodon.agile.infra.dto.IssueCountDTO;
-import io.choerodon.agile.infra.dto.StatusTransferSettingDTO;
-import io.choerodon.agile.infra.dto.UserDTO;
+import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.StatusMapper;
 import io.choerodon.agile.infra.mapper.StatusTransferSettingMapper;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections.CollectionUtils;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -259,12 +260,24 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
     }
 
     @Override
-    public Boolean checkTransfer(Long projectId, Long issueId, Long targetStatusId) {
+    public List<StatusDTO> queryNotAllowedTransferStatus(Long projectId, Long issueId) {
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
-        if (ObjectUtils.isEmpty(issueDTO)) {
-            throw new CommonException("error.issue.not.found");
+        Boolean subIssue = ("sub_task".equals(issueDTO.getTypeCode())) || ("bug".equals(issueDTO.getTypeCode()) && !ObjectUtils.isEmpty(issueDTO.getRelateIssueId()) && !Objects.equals(0L, issueDTO.getRelateIssueId()));
+        if (Boolean.TRUE.equals(subIssue)) {
+            return new ArrayList<>();
         }
-        return !verifyStatusTransferSetting(projectId, issueDTO, targetStatusId);
+        List<Long> statusIds = statusTransferSettingMapper.queryStatusTransferByIssueTypeAndUserType(0L, projectId, issueDTO.getIssueTypeId(), "other");
+        if (CollectionUtils.isEmpty(statusIds)) {
+            return new ArrayList<>();
+        }
+        IssueCountDTO issueCountDTO = issueMapper.querySubIssueCount(projectId, issueId);
+        if (Objects.equals(issueCountDTO.getSuccessIssueCount(), issueCountDTO.getIssueCount())) {
+            return new ArrayList<>();
+        }
+        List<StatusDTO> statusList = statusMapper.selectByCondition(Condition.builder(StatusDTO.class)
+                .andWhere(Sqls.custom().andEqualTo("organizationId", ConvertUtil.getOrganizationId(projectId))
+                        .andIn("id", statusIds)).build());
+        return statusList;
     }
 
     private void getUserIds(Long projectId, Set<Long> userIds, List<StatusTransferSettingDTO> query){

@@ -14,4 +14,6 @@ public interface StatusTransferSettingMapper extends BaseMapper<StatusTransferSe
     List<StatusTransferSettingDTO> listByStatusId(@Param("projectId") Long projectId,@Param("issueTypeId") Long issueTypeId,@Param("statusIds") List<Long> statusIds);
 
     List<StatusTransferSettingDTO> listOptions(@Param("organizationId") Long organizationId,@Param("issueTypeId") Long issueTypeId,@Param("statusIds") List<Long> statusIds);
+
+    List<Long> queryStatusTransferByIssueTypeAndUserType(@Param("organizationId") Long organizationId, @Param("projectId") Long projectId, @Param("issueTypeId") Long issueTypeId, @Param("userType") String userType);
 }

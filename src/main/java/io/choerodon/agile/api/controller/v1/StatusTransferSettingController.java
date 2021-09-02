@@ -2,6 +2,7 @@ package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.StatusTransferSettingCreateVO;
 import io.choerodon.agile.app.service.StatusTransferSettingService;
+import io.choerodon.agile.infra.dto.StatusDTO;
 import io.choerodon.agile.infra.dto.StatusTransferSettingDTO;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
@@ -47,11 +48,10 @@ public class StatusTransferSettingController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "校验能否流转到目标状态")
-    @GetMapping(value = "/check_transfer")
-    public ResponseEntity<Boolean> checkTransfer(@PathVariable("project_id") Long projectId,
-                                                        @RequestParam @Encrypt Long issueId,
-                                                        @RequestParam @Encrypt Long targetStatusId){
-        return new ResponseEntity<>(statusTransferSettingService.checkTransfer(projectId, issueId, targetStatusId),HttpStatus.OK);
+    @ApiOperation(value = "查询当前issue不能流转到的状态")
+    @GetMapping(value = "/not_allowed_transfer")
+    public ResponseEntity<List<StatusDTO>> queryNotAllowedTransferStatus(@PathVariable("project_id") Long projectId,
+                                                                         @RequestParam @Encrypt Long issueId){
+        return new ResponseEntity<>(statusTransferSettingService.queryNotAllowedTransferStatus(projectId, issueId),HttpStatus.OK);
     }
 }

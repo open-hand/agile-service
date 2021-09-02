@@ -21,4 +21,12 @@
             #{statusId}
         </foreach>
     </select>
+
+    <select id="queryStatusTransferByIssueTypeAndUserType" resultType="java.lang.Long">
+        select fsts.status_id from fd_status_transfer_setting fsts
+        where fsts.organization_id = #{organizationId}
+        AND fsts.project_id = #{projectId}
+        AND fsts.issue_type_id = #{issueTypeId}
+        AND fsts.user_type = #{userType}
+    </select>
 </mapper>
