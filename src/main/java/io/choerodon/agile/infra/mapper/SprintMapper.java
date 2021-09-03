@@ -168,4 +168,6 @@ public interface SprintMapper extends BaseMapper<SprintDTO> {
     List<IssueCountDTO> selectCountBySprintIds(@Param("projectId") Long projectId, @Param("sprintIds") List<Long> sprintIds, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
 
     SprintStartMessageVO selectSprintStartMessage(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId);
+
+    BigDecimal querySpentWorkTimeBySprintId(@Param("sprintId") Long sprint, @Param("projectId") Long projectId);
 }
