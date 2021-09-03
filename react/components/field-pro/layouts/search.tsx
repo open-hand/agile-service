@@ -5,7 +5,7 @@ import {
 import moment from 'moment';
 import getFieldsInstance, { getAgileFields } from '../base';
 import { IFieldProcessConfig } from '../base/type';
-import { getComponentCodeForLocalCode, getFieldPropsByMode } from '../base/utils';
+import { getComponentCodeForLocalCode, getFieldPropsByMode, isCodeInSystemComponents } from '../base/utils';
 
 function getFieldConfig({
   field, props,
@@ -31,7 +31,13 @@ function getFieldConfig({
       break;
     }
   }
-
+  if (isCodeInSystemComponents(code)) {
+    return {
+      props: getFieldPropsByMode({
+        code, outputs: ['config', 'function'], fieldType, props,
+      }),
+    };
+  }
   return {
     props: {
       ...getFieldPropsByMode({
