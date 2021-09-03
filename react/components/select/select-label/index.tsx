@@ -46,6 +46,7 @@ const SelectLabel: React.FC<SelectLabelProps> = forwardRef(({
     <Component
       ref={ref}
       multiple
+      placeholder="输入即可创建新标签"
       maxLength={combo ? MAX_LENGTH_LABEL : undefined}
       {...props}
       {...otherProps}
