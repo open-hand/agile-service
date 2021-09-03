@@ -46,6 +46,7 @@ class BacklogHome extends Component {
     BacklogStore.resetData();
     BacklogStore.clearMultiSelected();
     BacklogStore.resetFilter();
+    BacklogStore.setIsInProgramData({});
   }
 
   refresh = (...args) => {
