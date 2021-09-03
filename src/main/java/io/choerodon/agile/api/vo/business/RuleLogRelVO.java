@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo.business;
 
+import java.util.Set;
+
 /**
  * @author superlee
  * @since 2020-12-17
@@ -22,6 +24,8 @@ public class RuleLogRelVO {
 
     private String ruleName;
 
+    private Set<Long> searchLogIds;
+
     public RuleLogRelVO() {}
 
     public RuleLogRelVO(Long logId,
@@ -36,6 +40,14 @@ public class RuleLogRelVO {
         this.instanceId = instanceId;
         this.projectId = projectId;
         this.organizationId = organizationId;
+    }
+
+    public Set<Long> getSearchLogIds() {
+        return searchLogIds;
+    }
+
+    public void setSearchLogIds(Set<Long> searchLogIds) {
+        this.searchLogIds = searchLogIds;
     }
 
     public String getRuleName() {

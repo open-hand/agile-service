@@ -1,5 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.api.vo.business.RuleLogRelVO;
+import io.choerodon.agile.app.service.AgileTriggerService;
 import io.choerodon.agile.infra.aspect.DataLogRedisUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.api.vo.FieldDataLogCreateVO;
@@ -27,12 +29,15 @@ public class FieldDataLogServiceImpl implements FieldDataLogService {
 
     private static final String ERROR_DATALOG_CREATE = "error.dataLog.create";
     private static final String ERROR_SCHEMECODE_ILLEGAL = "error.schemeCode.illegal";
+    private static final String CUSTOM_FIELD = "custom_field";
     @Autowired
     private FieldDataLogMapper fieldDataLogMapper;
     @Autowired
     private DataLogRedisUtil dataLogRedisUtil;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired(required = false)
+    private AgileTriggerService agileTriggerService;
 
     @Override
     public FieldDataLogDTO baseCreate(FieldDataLogDTO create) {
@@ -48,7 +53,11 @@ public class FieldDataLogServiceImpl implements FieldDataLogService {
         FieldDataLogDTO dataLog = modelMapper.map(create, FieldDataLogDTO.class);
         dataLog.setProjectId(projectId);
         dataLog.setSchemeCode(schemeCode);
-        return modelMapper.map(baseCreate(dataLog), FieldDataLogVO.class);
+        FieldDataLogDTO result = baseCreate(dataLog);
+        if (agileTriggerService != null) {
+            agileTriggerService.insertTriggerLog(result.getId(), result.getFieldId(), projectId, CUSTOM_FIELD);
+        }
+        return modelMapper.map(result, FieldDataLogVO.class);
     }
 
     @Override
@@ -58,6 +67,13 @@ public class FieldDataLogServiceImpl implements FieldDataLogService {
         delete.setProjectId(projectId);
         fieldDataLogMapper.delete(delete);
         dataLogRedisUtil.deleteByCustomField(projectId);
+        if (agileTriggerService != null) {
+            RuleLogRelVO vo = new RuleLogRelVO();
+            vo.setProjectId(projectId);
+            vo.setBusinessType(CUSTOM_FIELD);
+            vo.setInstanceId(fieldId);
+            agileTriggerService.delete(vo);
+        }
     }
 
     @Override

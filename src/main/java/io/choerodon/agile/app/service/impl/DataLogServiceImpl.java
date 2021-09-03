@@ -52,6 +52,8 @@ public class DataLogServiceImpl implements DataLogService {
     private AgileTriggerService agileTriggerService;
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
+    private static final String ISSUE = "issue";
+    private static final String CUSTOM_FIELD = "custom_field";
 
     @Override
     public DataLogVO createDataLog(Long projectId, DataLogCreateVO createVO) {
@@ -72,21 +74,42 @@ public class DataLogServiceImpl implements DataLogService {
             RuleLogRelVO ruleLogRelVO = new RuleLogRelVO();
             ruleLogRelVO.setProjectId(projectId);
             ruleLogRelVO.setInstanceId(issueId);
-            ruleLogRelVO.setBusinessType("issue");
+            ruleLogRelVO.setBusinessType(ISSUE);
             List<RuleLogRelVO> ruleLogRelList = agileTriggerService.queryRuleLogRelList(ruleLogRelVO);
             ruleLogRelMap = ruleLogRelList.stream().collect(Collectors.toMap(RuleLogRelVO::getLogId, Function.identity()));
         }
         appendSummary(dataLogVOS);
         List<FieldDataLogVO> fieldDataLogVOS = fieldDataLogService.queryByInstanceId(projectId, issueId, ObjectSchemeCode.AGILE_ISSUE);
+        Map<Long, RuleLogRelVO> customFieldRuleLogMap = queryCustomFieldRuleLogMap(fieldDataLogVOS, projectId);
         for (FieldDataLogVO fieldDataLogVO : fieldDataLogVOS) {
+            Long logId = fieldDataLogVO.getId();
             DataLogVO dataLogVO = modelMapper.map(fieldDataLogVO, DataLogVO.class);
             dataLogVO.setField(fieldDataLogVO.getFieldCode());
             dataLogVO.setIssueId(fieldDataLogVO.getInstanceId());
             dataLogVO.setIsCusLog(true);
             dataLogVOS.add(dataLogVO);
+            RuleLogRelVO ruleLogRel = customFieldRuleLogMap.get(logId);
+            if (!ObjectUtils.isEmpty(ruleLogRel)) {
+                dataLogVO.setRuleName(ruleLogRel.getRuleName());
+            }
         }
         fillUserAndStatus(projectId, dataLogVOS, ruleLogRelMap);
         return dataLogVOS.stream().sorted(Comparator.comparing(DataLogVO::getCreationDate).reversed()).collect(Collectors.toList());
+    }
+
+    private Map<Long, RuleLogRelVO> queryCustomFieldRuleLogMap(List<FieldDataLogVO> fieldDataLogs,
+                                                               Long projectId) {
+        if (ObjectUtils.isEmpty(fieldDataLogs)) {
+            return new HashMap<>();
+        }
+        Set<Long> customFieldLogIds = fieldDataLogs.stream().map(FieldDataLogVO::getId).collect(Collectors.toSet());
+        RuleLogRelVO ruleLogRelVO = new RuleLogRelVO();
+        ruleLogRelVO.setProjectId(projectId);
+        ruleLogRelVO.setSearchLogIds(customFieldLogIds);
+        ruleLogRelVO.setBusinessType(CUSTOM_FIELD);
+        return agileTriggerService.queryRuleLogRelList(ruleLogRelVO)
+                .stream()
+                .collect(Collectors.toMap(RuleLogRelVO::getLogId, Function.identity()));
     }
 
     private void appendSummary(List<DataLogVO> dataLogs) {
