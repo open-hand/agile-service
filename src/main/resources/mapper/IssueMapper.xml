@@ -332,7 +332,7 @@
     </select>
 
     <resultMap id="IssueWithSub" type="io.choerodon.agile.infra.dto.business.IssueDTO">
-        <id property="issueId" column="issue_issue_id"/>
+        <id property="issueId" column="issue_id"/>
         <result property="typeCode" column="type_code"/>
         <result property="summary" column="summary"/>
         <result property="priorityId" column="priority_id"/>
@@ -411,7 +411,7 @@
 
     <select id="queryIssueListWithSubByIssueIds" resultMap="IssueWithSub">
         SELECT
-        ai.issue_id as issue_issue_id,
+        ai.issue_id,
         ai.type_code,
         ai.summary,
         ai.priority_code,
