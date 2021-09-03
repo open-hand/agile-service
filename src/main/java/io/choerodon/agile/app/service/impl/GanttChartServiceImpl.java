@@ -92,7 +92,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                 filterSql = null;
             }
             boardAssembler.handleOtherArgs(searchVO);
-            String orderStr = "issue_num_convert desc";
+            String orderStr = "issue_id desc";
             boolean isTreeView =
                     Boolean.TRUE.equals(
                             Optional.ofNullable(searchVO.getSearchArgs())
@@ -108,7 +108,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                     childrenIds.addAll(issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds()));
                 }
                 HashMap<String, String> order = new HashMap<>(1);
-                order.put("issueNum", "issue_num_convert");
+                order.put("issueNum", "issue_id");
                 Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", order);
                 List<IssueDTO> issueDTOList = PageHelper.doSort(sort, () -> issueMapper.selectWithSubByIssueIds(projectId, issueIds, childrenIds, isTreeView));
                 issueIds.addAll(childrenIds);

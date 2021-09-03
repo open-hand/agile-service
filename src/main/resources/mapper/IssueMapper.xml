@@ -533,7 +533,7 @@
 
     <select id="selectWithSubByIssueIds" resultMap="IssueWithSub">
         select
-        ai.issue_id as issue_issue_id,
+        ai.issue_id,
         ai.summary,
         ai.assignee_id,
         ai.estimated_start_time,
