@@ -40,13 +40,5 @@ public interface AgileTriggerService {
                           Long projectId,
                           String businessType);
 
-    /**
-     * 查询ruleLogRel
-     * @param projectId 项目id
-     * @param logIds 日志id
-     * @return ruleLogRel
-     */
-    List<RuleLogRelVO> queryRuleLogRelByLogId(Long projectId, List<Long> logIds);
-
     void deleteRuleLog(Long projectId, String businessType, Set<Long> instanceIds);
 }

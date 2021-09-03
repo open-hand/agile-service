@@ -14,7 +14,6 @@ import io.choerodon.agile.api.vo.DataLogQueryVO;
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.business.AllDataLogVO;
-import io.choerodon.agile.api.vo.business.DataLogVO;
 import io.choerodon.agile.api.vo.business.RuleLogRelVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
@@ -37,6 +36,10 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 public class DynamicServiceImpl implements DynamicService {
 
     private static final int MAX_SIZE = 100;
+    private static final String CUSTOM_FIELD = "custom_field";
+    private static final String BACKLOG = "backlog";
+    private static final String AGILE_ISSUE = "agile_issue";
+    private static final String ISSUE = "issue";
 
     @Autowired
     private DataLogMapper dataLogMapper;
@@ -60,10 +63,10 @@ public class DynamicServiceImpl implements DynamicService {
         }
         List<AllDataLogVO> allDataLogList = new ArrayList<>();
         boolean isNotFilter = CollectionUtils.isEmpty(dataLogQueryVO.getOtherTypes()) && CollectionUtils.isEmpty(dataLogQueryVO.getTypeIds());
-        boolean filterBacklog = !CollectionUtils.isEmpty(dataLogQueryVO.getOtherTypes()) && dataLogQueryVO.getOtherTypes().contains("backlog");
+        boolean filterBacklog = !CollectionUtils.isEmpty(dataLogQueryVO.getOtherTypes()) && dataLogQueryVO.getOtherTypes().contains(BACKLOG);
         boolean containIssue = !CollectionUtils.isEmpty(dataLogQueryVO.getTypeIds()) || isNotFilter;
         boolean containBacklog = ((isNotFilter || filterBacklog) && backlogExpandService != null);
-        Map<Long, RuleLogRelVO> ruleLogRelMap = new HashMap<>();
+        Map<String, RuleLogRelVO> ruleLogRelMap = new HashMap<>(pageRequest.getSize());
 
         if (containIssue) {
             List<AllDataLogVO> issueDataLogList = dataLogMapper.listIssueDataLogByProjectId(projectId, dataLogQueryVO);
@@ -86,11 +89,7 @@ public class DynamicServiceImpl implements DynamicService {
                                 .thenComparing(AllDataLogVO::getLogId, Comparator.reverseOrder())).collect(Collectors.toList()),
                 pageRequest
         );
-        List<Long> logIds = result.stream().map(AllDataLogVO::getLogId).collect(Collectors.toList());
-        if (agileTriggerService != null) {
-            List<RuleLogRelVO> ruleLogRelList = agileTriggerService.queryRuleLogRelByLogId(projectId, logIds);
-            ruleLogRelMap = ruleLogRelList.stream().collect(Collectors.toMap(RuleLogRelVO::getLogId, Function.identity()));
-        }
+        setLogRuleInfo(projectId, result, ruleLogRelMap);
         setDataLogIssueInfo(result, projectId);
         if (containBacklog) {
             backlogExpandService.setDataLogBacklogInfo(result);
@@ -98,6 +97,44 @@ public class DynamicServiceImpl implements DynamicService {
         setDataLogUserAndProjectInfo(result, projectId, ruleLogRelMap);
         appendSummary(result);
         return result;
+    }
+
+    private void setLogRuleInfo(Long projectId, Page<AllDataLogVO> result, Map<String, RuleLogRelVO> ruleLogRelMap) {
+        if (agileTriggerService == null){
+            return;
+        }
+        Set<Long> issueLogIds = new HashSet<>();
+        Set<Long> datalogIds = new HashSet<>();
+        Set<Long> fdDataLogIds = new HashSet<>();
+        result.forEach(datalog -> {
+            if (datalog.getLogType() == null){
+                return;
+            }
+            if (Boolean.TRUE.equals(datalog.getIsCusLog())){
+                fdDataLogIds.add(datalog.getLogId());
+            } else if (BACKLOG.equals(datalog.getLogType())){
+                datalogIds.add(datalog.getLogId());
+            } else if (AGILE_ISSUE.equals(datalog.getLogType())){
+                issueLogIds.add(datalog.getLogId());
+            }
+        });
+        putLogRuleInfoByType(ruleLogRelMap, projectId, issueLogIds, ISSUE);
+        putLogRuleInfoByType(ruleLogRelMap, projectId, datalogIds, BACKLOG);
+        putLogRuleInfoByType(ruleLogRelMap, projectId, fdDataLogIds, CUSTOM_FIELD);
+
+    }
+
+    private void putLogRuleInfoByType(Map<String, RuleLogRelVO> ruleLogRelMap, Long projectId, Set<Long> logIds, String type) {
+        if (!CollectionUtils.isEmpty(logIds)){
+            RuleLogRelVO ruleLogRelVO = new RuleLogRelVO();
+            ruleLogRelVO.setSearchLogIds(logIds);
+            ruleLogRelVO.setBusinessType(type);
+            ruleLogRelVO.setProjectId(projectId);
+            List<RuleLogRelVO> ruleLogRelList = agileTriggerService.queryRuleLogRelList(ruleLogRelVO);
+            ruleLogRelList.forEach(ruleLogRel -> {
+               ruleLogRelMap.put(type + ruleLogRel.getLogId(), ruleLogRel);
+            });
+        }
     }
 
     private void appendSummary(Page<AllDataLogVO> result) {
@@ -148,7 +185,7 @@ public class DynamicServiceImpl implements DynamicService {
         });
     }
 
-    private void setDataLogUserAndProjectInfo(List<AllDataLogVO> dataLogList, Long projectId, Map<Long, RuleLogRelVO> ruleLogRelMap) {
+    private void setDataLogUserAndProjectInfo(List<AllDataLogVO> dataLogList, Long projectId, Map<String, RuleLogRelVO> ruleLogRelMap) {
         ProjectVO project = userService.queryProject(projectId);
         List<Long> createdByIds = dataLogList.stream().map(AllDataLogVO::getCreatedBy).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(createdByIds)) {
@@ -156,7 +193,7 @@ public class DynamicServiceImpl implements DynamicService {
         }
         Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(createdByIds, true);
         dataLogList.forEach(dataLog -> {
-            RuleLogRelVO ruleLogRel = ruleLogRelMap.get(dataLog.getLogId());
+            RuleLogRelVO ruleLogRel = ruleLogRelMap.get(getLogMapKey(dataLog));
             if (ruleLogRel != null){
                 dataLog.setRuleName(ruleLogRel.getRuleName());
             }
@@ -165,11 +202,23 @@ public class DynamicServiceImpl implements DynamicService {
         });
     }
 
+    private String getLogMapKey(AllDataLogVO dataLog) {
+        String type = "";
+        if (Boolean.TRUE.equals(dataLog.getIsCusLog())){
+            type = CUSTOM_FIELD;
+        } else if (BACKLOG.equals(dataLog.getLogType())){
+            type = BACKLOG;
+        } else if (AGILE_ISSUE.equals(dataLog.getLogType())){
+            type = ISSUE;
+        }
+        return type + dataLog.getLogId();
+    }
+
     private void setDataLogIssueInfo(List<AllDataLogVO> issueDataLogList, Long projectId) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         List<Long> issueIds = issueDataLogList
                 .stream()
-                .filter(dataLog -> "agile_issue".equals(dataLog.getLogType()))
+                .filter(dataLog -> AGILE_ISSUE.equals(dataLog.getLogType()))
                 .map(AllDataLogVO::getInstanceId)
                 .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(issueIds)) {
