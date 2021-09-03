@@ -7,6 +7,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author peng.jiang, dinghuang123@gmail.com
@@ -59,6 +60,8 @@ public interface StatusService {
     List<StatusVO> queryAllStatus(Long organizationId);
 
     Map<Long, StatusVO> queryAllStatusMap(Long organizationId);
+
+    Map<Long, StatusVO> queryStatusMapByIds(Long organizationId, Set<Long> statusIds);
 
     /**
      * 校验状态名字是否未被使用

@@ -576,4 +576,28 @@
             </if>
         ORDER BY osf.id DESC
     </select>
+
+    <select id="listFieldWithExtendList" resultMap="objectSchemeFieldWithExtends">
+        SELECT
+            osf.id,
+            osf.code,
+            osf.field_type,
+            osf.extra_config,
+            osfe.id as extend_id,
+            osfe.issue_type_id as extend_issue_type_id
+        FROM fd_object_scheme_field osf
+        LEFT JOIN fd_object_scheme_field_extend osfe ON osf.id = osfe.field_id AND osfe.organization_id = #{organizationId}
+        WHERE
+        osf.organization_id = #{organizationId}
+        AND ( osfe.project_id IS NULL OR osfe.project_id = #{projectId} )
+        AND osf.id IN
+        <foreach collection="fieldIds" item="fieldId" open="(" separator="," close=")">
+            #{fieldId}
+        </foreach>
+        AND osfe.issue_type_id IN
+        <foreach collection="issueTypeIds" item="issueTypeId" open="(" separator="," close=")">
+            #{issueTypeId}
+        </foreach>
+    </select>
+
 </mapper>

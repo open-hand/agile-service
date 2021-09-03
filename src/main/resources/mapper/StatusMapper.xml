@@ -217,4 +217,21 @@
         select * from fd_status
         where organization_id = #{organizationId}
     </select>
+
+    <select id="queryStatusByIds" resultType="io.choerodon.agile.api.vo.StatusVO">
+        SELECT
+            id,
+            name,
+            code,
+            description,
+            type,
+            organization_id,
+            object_version_number
+        FROM fd_status
+        WHERE organization_id = #{organizationId}
+        AND id IN
+        <foreach collection="statusIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
 </mapper>

@@ -247,6 +247,20 @@ public class StatusServiceImpl implements StatusService {
     }
 
     @Override
+    public Map<Long, StatusVO> queryStatusMapByIds(Long organizationId, Set<Long> statusIds) {
+        if (CollectionUtils.isEmpty(statusIds)) {
+            return new HashMap<>();
+        }
+        List<StatusVO> statusVOS = statusMapper.queryStatusByIds(organizationId, statusIds);
+        if (CollectionUtils.isEmpty(statusVOS)){
+            return new HashMap<>();
+        }
+        Map<Long, StatusVO> statusMap = new HashMap<>();
+        statusMap.putAll(statusVOS.stream().collect(Collectors.toMap(StatusVO::getId, Function.identity())));
+        return statusMap;
+    }
+
+    @Override
     public StatusCheckVO checkName(Long organizationId, String name) {
         StatusDTO status = new StatusDTO();
         status.setOrganizationId(organizationId);

@@ -123,11 +123,11 @@ public interface PageFieldService {
      * 根据实例ids获取全部自定义字段的CodeValue键值对
      *
      * @param organizationId
-     * @param projectId
+     * @param projectIds
      * @param instanceIds
      * @return
      */
-    Map<Long, Map<String, Object>> queryFieldValueWithIssueIdsForAgileExport(Long organizationId, Long projectId, List<Long> instanceIds, Boolean isJustStr, String schemeCode);
+    Map<Long, Map<String, Object>> queryFieldValueWithIssueIdsForAgileExport(Long organizationId, List<Long> projectIds, List<Long> instanceIds, Boolean isJustStr);
 
     /**
      * 根据传入的fieldIds,过滤出必填的字段

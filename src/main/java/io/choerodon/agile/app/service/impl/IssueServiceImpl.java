@@ -605,7 +605,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
                 Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
                 List<Long> allIssueIds = issueDTOList.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-                Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, allIssueIds, false, AGILE_SCHEME_CODE);
+                Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, Arrays.asList(projectId), allIssueIds, false);
                 Map<Long, List<WorkLogVO>> workLogVOMap = workLogMapper.queryByIssueIds(Collections.singletonList(projectId), allIssueIds).stream().collect(Collectors.groupingBy(WorkLogVO::getIssueId));
                 List<IssueListFieldKVVO> issueListFieldKVVOS = issueAssembler.issueDoToIssueListFieldKVDTO(issueDTOList, priorityMap, statusMapDTOMap, issueTypeDTOMap, foundationCodeValue, workLogVOMap);
                 if (!ObjectUtils.isEmpty(agilePluginService) && !CollectionUtils.isEmpty(issueListFieldKVVOS)) {
@@ -900,7 +900,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         String schemeCode = AGILE_SCHEME_CODE;
         IssueVO issue = queryIssue(projectId, issueId, organizationId);
         Map<String, Object> customFieldMap =
-                pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, Arrays.asList(issueId), false, AGILE_SCHEME_CODE)
+                pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, Arrays.asList(projectId), Arrays.asList(issueId), false)
                         .get(issueId);
         AssertUtilsForCommonException.notNull(issue, "error.issue.null");
         PageFieldViewParamVO param = new PageFieldViewParamVO();
