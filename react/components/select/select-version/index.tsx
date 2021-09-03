@@ -39,7 +39,7 @@ const SelectVersion: React.FC<SelectVersionProps> = forwardRef(({
       }
       return versionApi.project(projectId || getProjectId()).loadNamesByStatus(statusArr);
     },
-    middleWare: (versions: IVersion[]) => {
+    middleWare: (versions: IVersion[] = []) => {
       if (dataRef) {
         Object.assign(dataRef, {
           current: versions,
