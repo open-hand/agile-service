@@ -7,6 +7,7 @@ import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author peng.jiang, dinghuang123@gmail.com
@@ -41,4 +42,6 @@ public interface StatusMapper extends BaseMapper<StatusDTO> {
     List<StatusDTO> queryByStateMachineIdsAndParam(@Param("organizationId") Long organizationId, @Param("stateMachineIds") List<Long> stateMachineIds, @Param("param") String param);
 
     List<StatusVO> queryByOrgId(@Param("organizationId") Long organizationId);
+
+    List<StatusVO> queryStatusByIds(@Param("organizationId") Long organizationId, @Param("statusIds") Set<Long> statusIds);
 }

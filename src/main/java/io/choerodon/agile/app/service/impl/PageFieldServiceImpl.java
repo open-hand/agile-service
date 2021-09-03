@@ -443,14 +443,8 @@ public class PageFieldServiceImpl implements PageFieldService {
     }
 
     @Override
-    public Map<Long, Map<String, Object>> queryFieldValueWithIssueIdsForAgileExport(Long organizationId, Long projectId, List<Long> instanceIds, Boolean isJustStr, String schemeCode) {
-        List<FieldValueDTO> values = fieldValueMapper.queryListByInstanceIds(Arrays.asList(projectId), instanceIds, schemeCode, null);
-        ObjectSchemeFieldSearchVO searchDTO = new ObjectSchemeFieldSearchVO();
-        searchDTO.setSchemeCode(ObjectSchemeCode.AGILE_ISSUE);
-        List<ObjectSchemeFieldDTO> fieldDTOS = objectSchemeFieldService.listQuery(organizationId, projectId, searchDTO);
-        Map<Long, Map<String, Object>> fieldValueMap = getFieldValueMap(fieldDTOS, values, instanceIds, isJustStr);
-        handlerFieldValueMap(organizationId, projectId, instanceIds, schemeCode, fieldValueMap);
-        return fieldValueMap;
+    public Map<Long, Map<String, Object>> queryFieldValueWithIssueIdsForAgileExport(Long organizationId, List<Long> projectIds, List<Long> instanceIds, Boolean isJustStr) {
+        return getFieldValueMap(organizationId, projectIds, instanceIds, isJustStr);
     }
 
     @Override
@@ -468,86 +462,19 @@ public class PageFieldServiceImpl implements PageFieldService {
         return pageFieldViewVOS.stream().filter(v -> fieldCodes.contains(v.getFieldCode()) && Objects.equals( Boolean.TRUE, v.getRequired())).collect(Collectors.toList());
     }
 
-    private void handlerFieldValueMap(Long organizationId, Long projectId, List<Long> instanceIds, String schemeCode, Map<Long, Map<String, Object>> fieldValueMap) {
-        if (CollectionUtils.isEmpty(instanceIds)) {
-            return;
-        }
-        Map<String, Object> fieldMap = objectSchemeFieldService.listQuery(organizationId, projectId, "agile_issue");
-        Object content = fieldMap.get("content");
-        if (ObjectUtils.isEmpty(content)) {
-            return;
-        }
-        List<ObjectSchemeFieldVO> fieldViews = (List<ObjectSchemeFieldVO>) content;
-        Map<Long, List<String>> instanceFieldMap = new HashMap<>();
-        if (Objects.equals("agile_issue", schemeCode)) {
-            handlerIssue(instanceFieldMap, fieldViews, instanceIds);
-        } else {
-            // 查询需求问题类型类型
-            if (backlogExpandService != null) {
-                handlerBacklog(instanceFieldMap, organizationId, fieldViews, instanceIds);
-            }
-        }
-        for (Map.Entry<Long, Map<String, Object>> entry : fieldValueMap.entrySet()) {
-            Map<String, Object> value = entry.getValue();
-            if (value != null && !value.isEmpty()) {
-                Set<String> fieldCodes = value.keySet();
-                List<String> instanceFieldCodes = instanceFieldMap.get(entry.getKey());
-                fieldCodes.removeIf(fieldCode -> !instanceFieldCodes.contains(fieldCode));
-            }
-        }
-    }
-
-    private void handlerBacklog(Map<Long, List<String>> instanceFieldMap, Long organizationId, List<ObjectSchemeFieldVO> fieldViews, List<Long> instanceIds) {
-        List<IssueTypeVO> issueTypeVOS = issueTypeService.queryByOrgId(organizationId, null);
-        IssueTypeVO typeVO = issueTypeVOS.stream().filter(issueTypeVO -> "backlog".equals(issueTypeVO.getTypeCode())).findAny().orElse(null);
-        if (!ObjectUtils.isEmpty(typeVO)) {
-            instanceIds.forEach(v -> {
-                String issueTypeId = typeVO.getId().toString();
-                List<String> fieldIds = new ArrayList<>();
-                for (ObjectSchemeFieldVO fieldView : fieldViews) {
-                    if (ObjectUtils.isEmpty(fieldView.getContext())) {
-                        continue;
-                    }
-                    String[] split = fieldView.getContext().split(",");
-                    List<String> list = Arrays.asList(split);
-                    if (list.contains(issueTypeId)) {
-                        fieldIds.add(fieldView.getCode());
-                    }
-                }
-                instanceFieldMap.put(v, fieldIds);
-            });
-        }
-    }
-
-    private void handlerIssue(Map<Long, List<String>> instanceFieldMap, List<ObjectSchemeFieldVO> fieldViews, List<Long> instanceIds) {
-        List<IssueDTO> issueDTOS = issueMapper.queryIssueListWithSubByIssueIds(instanceIds, null, false, false);
-        if (CollectionUtils.isEmpty(issueDTOS)) {
-            return;
-        }
-        issueDTOS.forEach(v -> {
-            String issueTypeId = v.getIssueTypeId().toString();
-            List<String> fieldIds = new ArrayList<>();
-            for (ObjectSchemeFieldVO fieldView : fieldViews) {
-                if (ObjectUtils.isEmpty(fieldView.getContext())) {
-                    continue;
-                }
-                String[] split = fieldView.getContext().split(",");
-                List<String> list = Arrays.asList(split);
-                if (list.contains(issueTypeId)) {
-                    fieldIds.add(fieldView.getCode());
-                }
-            }
-            instanceFieldMap.put(v.getIssueId(), fieldIds);
-        });
-    }
-
-    protected Map<Long, Map<String, Object>> getFieldValueMap(List<ObjectSchemeFieldDTO> fieldDTOS,
-                                                              List<FieldValueDTO> values,
-                                                              List<Long> instanceIds,
-                                                              Boolean isJustStr) {
+    private Map<Long, Map<String, Object>> getFieldValueMap(Long organizationId,
+                                                            List<Long> projectIds,
+                                                            List<Long> instanceIds,
+                                                            Boolean isJustStr) {
         Map<Long, Map<String, Object>> result = new HashMap<>();
-        Map<Long, ObjectSchemeFieldDTO> fieldMap = fieldDTOS.stream().collect(Collectors.toMap(ObjectSchemeFieldDTO::getId, Function.identity()));
-        Map<Long, List<FieldValueDTO>> valuesMap = values.stream().collect(Collectors.groupingBy(FieldValueDTO::getInstanceId));
+        List<FieldValueDTO> values = fieldValueMapper.queryListByInstanceIds(projectIds, instanceIds, "agile_issue", null);
+        if (CollectionUtils.isEmpty(values)) {
+            return result;
+        }
+        List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(instanceIds, null, false, false);
+
+        Set<Long> fieldIds = values.stream().map(FieldValueDTO::getFieldId).collect(Collectors.toSet());
+        Map<Long, List<IssueDTO>> issueProjectMap = issueDTOList.stream().collect(Collectors.groupingBy(IssueDTO::getProjectId));
         Map<Long, UserDTO> userMap =
                 FieldValueUtil.handleUserMap(
                         values
@@ -555,23 +482,41 @@ public class PageFieldServiceImpl implements PageFieldService {
                                 .filter(x -> (FieldType.MEMBER.equals(x.getFieldType()) || FieldType.MULTI_MEMBER.equals(x.getFieldType())))
                                 .map(FieldValueDTO::getOptionId)
                                 .collect(Collectors.toList()));
-        for (Long instanceId : instanceIds) {
+
+        issueProjectMap.keySet().forEach(projectId -> {
+            List<IssueDTO> issues = issueProjectMap.get(projectId);
+            Set<Long> issueTypeIds = issues.stream().map(IssueDTO::getIssueTypeId).collect(Collectors.toSet());
+            List<ObjectSchemeFieldDTO> fieldDTOS = objectSchemeFieldMapper.listFieldWithExtendList(organizationId, projectId, fieldIds, issueTypeIds);
+            Map<Long, ObjectSchemeFieldDTO> fieldMap = fieldDTOS.stream().collect(Collectors.toMap(ObjectSchemeFieldDTO::getId, Function.identity()));
+            Map<Long, List<FieldValueDTO>> valuesMap = values.stream().collect(Collectors.groupingBy(FieldValueDTO::getInstanceId));
+            for (IssueDTO issue : issues) {
+                List<FieldValueDTO> issueValues = valuesMap.get(issue.getIssueId());
+                Map<String, Object> codeValueMap = getCodeValueMap(fieldMap, userMap, isJustStr,  issue, issueValues);
+                result.put(issue.getIssueId(), codeValueMap);
+            }
+        });
+        return result;
+    }
+
+    private Map<String, Object> getCodeValueMap(Map<Long, ObjectSchemeFieldDTO> fieldMap, Map<Long, UserDTO> userMap, Boolean isJustStr, IssueDTO issue, List<FieldValueDTO> issueValues) {
+        if (issueValues != null) {
             Map<String, Object> codeValueMap = new HashMap<>();
-            List<FieldValueDTO> instanceValues = valuesMap.get(instanceId);
-            if (instanceValues != null) {
-                Map<Long, List<FieldValueDTO>> valueGroup = instanceValues.stream().collect(Collectors.groupingBy(FieldValueDTO::getFieldId));
-                valueGroup.forEach((fieldId, fieldValueDTOList) -> {
-                    ObjectSchemeFieldDTO objectSchemeField = fieldMap.get(fieldId);
-                    if (objectSchemeField != null) {
+            Map<Long, List<FieldValueDTO>> valueGroup = issueValues.stream().collect(Collectors.groupingBy(FieldValueDTO::getFieldId));
+            valueGroup.forEach((fieldId, fieldValueDTOList) -> {
+                ObjectSchemeFieldDTO objectSchemeField = fieldMap.get(fieldId);
+                if (objectSchemeField != null) {
+                    List<Long> extendIssueTypeIds = objectSchemeField.getExtendFields().stream().map(ObjectSchemeFieldExtendDTO::getIssueTypeId).collect(Collectors.toList());
+                    if (!CollectionUtils.isEmpty(extendIssueTypeIds) && extendIssueTypeIds.contains(issue.getIssueTypeId())) {
                         PageFieldViewVO view = new PageFieldViewVO();
                         view.setExtraConfig(objectSchemeField.getExtraConfig());
                         FieldValueUtil.handleDTO2Value(view, objectSchemeField.getFieldType(), fieldValueDTOList, userMap, isJustStr);
                         codeValueMap.put(objectSchemeField.getCode(), view.getValueStr());
                     }
-                });
-            }
-            result.put(instanceId, codeValueMap);
+                }
+            });
+            return codeValueMap;
+        } else {
+            return null;
         }
-        return result;
     }
 }

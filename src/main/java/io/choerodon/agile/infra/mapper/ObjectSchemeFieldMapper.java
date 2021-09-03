@@ -123,4 +123,10 @@ public interface ObjectSchemeFieldMapper extends BaseMapper<ObjectSchemeFieldDTO
             @Param("organizationId") Long organizationId,
             @Param("projectId") Long projectId,
             @Param("issueTypeList") String issueTypeList);
+
+
+    List<ObjectSchemeFieldDTO> listFieldWithExtendList(@Param("organizationId") Long organizationId,
+                                                       @Param("projectId") Long projectId,
+                                                       @Param("fieldIds") Set<Long> fieldIds,
+                                                       @Param("issueTypeIds") Set<Long> issueTypeIds);
 }
