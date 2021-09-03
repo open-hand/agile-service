@@ -297,7 +297,8 @@ export default function renderField({
           outputs: ['element'],
           props: {
             searchable: true,
-            style: { width: '100%' },
+            // style: { width: '100%' },
+            colSpan,
             placeholder: '字段值',
             label: '字段值',
             maxTagCount: 2,
