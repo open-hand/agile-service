@@ -1,3 +1,5 @@
+/* eslint-disable no-nested-ternary */
+
 import React from 'react';
 
 import {
@@ -24,18 +26,18 @@ const clearIdMap = new Map([
 const extraOptionsMap = new Map();
 export default function renderField({
   code, fieldType, fieldOptions, required, system,
-}, data, selectUserMap, isProgram, isOrganization) {
+}, data, selectUserMap, isProgram, isOrganization, colSpan = 12) {
   switch (code) {
     case 'component': {
       return (
         <Select
-          style={{ width: '100%' }}
           multiple
           name={code}
           searchable
           searchMatcher="name"
           maxTagCount={2}
           maxTagTextLength={10}
+          colSpan={colSpan}
           onOption={({ record }) => ({
             disabled: data[code].value && ((data[code].value.indexOf('clear') > -1 && record.get(clearIdMap.get(code) || 'value') !== 'clear') || (data[code].value.indexOf('clear') === -1 && record.get(clearIdMap.get(code) || 'value') === 'clear')),
           })}
@@ -46,7 +48,7 @@ export default function renderField({
       return (
         <SelectEnvironment
           label="环境"
-          style={{ width: '100%' }}
+          colSpan={colSpan}
           name={code}
           onOption={({ record }) => ({
             disabled: data[code].value && ((data[code].value.indexOf('clear') > -1 && record.get(clearIdMap.get(code) || 'value') !== 'clear') || (data[code].value.indexOf('clear') === -1 && record.get(clearIdMap.get(code) || 'value') === 'clear')),
@@ -58,7 +60,7 @@ export default function renderField({
       return (
         <SelectProgramVersion
           label="版本"
-          style={{ width: '100%' }}
+          colSpan={colSpan}
           name={code}
           multiple
           onOption={({ record }) => ({
@@ -78,30 +80,29 @@ export default function renderField({
       if (!required) {
         extraOptionsMap.time.unshift({ id: 'clear', label: '清空' });
       }
-      return (
-        <Row gutter={10}>
-          <Col span={12}>
-            <Select placeholder="字段值" label="字段值" name={`${code}-select`} className={styles.timeSelect}>
-              {
-                  extraOptionsMap.time.map((item) => (
-                    <Option value={item.id} key={item.id}>{item.label}</Option>
-                  ))
-                }
-            </Select>
-          </Col>
+      return ([
+        <Select
+          placeholder="字段值"
+          label="字段值"
+          name={`${code}-select`}
+          className={styles.timeSelect}
+          colSpan={colSpan / 2}
+        >
           {
-            data[code].selected && data[code].selected === 'specifier' && (
-              <Col span={12}>
-                <TimePicker
-                  label="字段值"
-                  name={code}
-                  style={{ width: '100%' }}
-                />
-              </Col>
-            )
-          }
-        </Row>
-      );
+              extraOptionsMap.time.map((item) => (
+                <Option value={item.id} key={item.id}>{item.label}</Option>
+              ))
+            }
+        </Select>,
+        data[code].selected && data[code].selected === 'specifier' ? (
+          <TimePicker
+            label="字段值"
+            name={code}
+            style={{ width: '100%' }}
+            colSpan={colSpan / 2}
+          />
+        ) : null,
+      ]);
     }
     case 'datetime': {
       extraOptionsMap.datetime = [
@@ -112,42 +113,38 @@ export default function renderField({
       if (!required) {
         extraOptionsMap.datetime.unshift({ id: 'clear', label: '清空' });
       }
-      return (
-        <Row gutter={10}>
-          <Col span={12}>
-            <Select placeholder="字段值" label="字段值" name={`${code}-select`} className={styles.dateTimeSelect}>
-              {
-                extraOptionsMap.datetime.map((item) => (
-                  <Option value={item.id} key={item.id}>{item.label}</Option>
-                ))
-              }
-            </Select>
-          </Col>
+      return ([
+        <Select
+          placeholder="字段值"
+          label="字段值"
+          name={`${code}-select`}
+          className={styles.dateTimeSelect}
+          colSpan={colSpan / 2}
+        >
           {
-            data[code].selected && (data[code].selected === 'specifier' || data[code].selected === 'add') && (
-            <Col span={12}>
-              {
-                data[code].selected === 'specifier' ? (
-                  <DateTimePicker
-                    name={code}
-                    label="字段值"
-                    style={{ width: '100%' }}
-                  />
-                ) : (
-                  <NumberField
-                    name={code}
-                    label="字段值"
-                    style={{ width: '100%' }}
-                    step={1}
-                    min={1}
-                  />
-                )
-              }
-            </Col>
-            )
-          }
-        </Row>
-      );
+              extraOptionsMap.datetime.map((item) => (
+                <Option value={item.id} key={item.id}>{item.label}</Option>
+              ))
+            }
+        </Select>,
+        data[code].selected && (data[code].selected === 'specifier' || data[code].selected === 'add') ? (
+          data[code].selected === 'specifier' ? (
+            <DateTimePicker
+              name={code}
+              label="字段值"
+              colSpan={colSpan / 2}
+            />
+          ) : (
+            <NumberField
+              name={code}
+              label="字段值"
+              colSpan={colSpan / 2}
+              step={1}
+              min={1}
+            />
+          )
+        ) : null,
+      ]);
     }
     case 'date': {
       extraOptionsMap.date = [
@@ -158,42 +155,38 @@ export default function renderField({
       if (!required) {
         extraOptionsMap.date.unshift({ id: 'clear', label: '清空' });
       }
-      return (
-        <Row gutter={10}>
-          <Col span={12}>
-            <Select placeholder="字段值" label="字段值" name={`${code}-select`} className={styles.dateSelect}>
-              {
-                extraOptionsMap.date.map((item) => (
-                  <Option value={item.id} key={item.id}>{item.label}</Option>
-                ))
-              }
-            </Select>
-          </Col>
+      return ([
+        <Select
+          placeholder="字段值"
+          label="字段值"
+          name={`${code}-select`}
+          className={styles.dateSelect}
+          colSpan={colSpan / 2}
+        >
           {
-            data[code].selected && (data[code].selected === 'specifier' || data[code].selected === 'add') && (
-            <Col span={12}>
-              {
-                data[code].selected === 'specifier' ? (
-                  <DatePicker
-                    name={code}
-                    label="字段值"
-                    style={{ width: '100%' }}
-                  />
-                ) : (
-                  <NumberField
-                    name={code}
-                    label="字段值"
-                    style={{ width: '100%' }}
-                    step={1}
-                    min={1}
-                  />
-                )
-              }
-            </Col>
-            )
-          }
-        </Row>
-      );
+              extraOptionsMap.date.map((item) => (
+                <Option value={item.id} key={item.id}>{item.label}</Option>
+              ))
+            }
+        </Select>,
+        data[code].selected && (data[code].selected === 'specifier' || data[code].selected === 'add') ? (
+          data[code].selected === 'specifier' ? (
+            <DatePicker
+              name={code}
+              label="字段值"
+              colSpan={colSpan / 2}
+            />
+          ) : (
+            <NumberField
+              name={code}
+              label="字段值"
+              colSpan={colSpan / 2}
+              step={1}
+              min={1}
+            />
+          )
+        ) : null,
+      ]);
     }
 
     case 'number': {
@@ -204,29 +197,28 @@ export default function renderField({
       if (!required) {
         extraOptionsMap.number.unshift({ id: 'clear', label: '清空' });
       }
-      return (
-        <Row gutter={10}>
-          <Col span={16}>
-            <Select placeholder="字段值" label="字段值" name={`${code}-select`} className={styles.numberSelect}>
-              {
-                extraOptionsMap.number.map((item) => (
-                  <Option value={item.id} key={item.id}>{item.label}</Option>
-                ))
-              }
-            </Select>
-          </Col>
+      return ([
+        <Select
+          placeholder="字段值"
+          label="字段值"
+          name={`${code}-select`}
+          className={styles.numberSelect}
+          colSpan={colSpan / 3 * 2}
+        >
           {
-            data[code].selected && (data[code].selected === 'specifier' || data[code].selected === 'add') && (
-            <Col span={8}>
-              <NumberField
-                label="字段值"
-                name={code}
-                style={{ width: '100%' }}
-              />
-            </Col>
-            )
-          }
-        </Row>
+              extraOptionsMap.number.map((item) => (
+                <Option value={item.id} key={item.id}>{item.label}</Option>
+              ))
+            }
+        </Select>,
+        data[code].selected && (data[code].selected === 'specifier' || data[code].selected === 'add') ? (
+          <NumberField
+            label="字段值"
+            name={code}
+            colSpan={colSpan / 3}
+          />
+        ) : null,
+      ]
       );
     }
     case 'input': {
@@ -236,31 +228,30 @@ export default function renderField({
       if (!required) {
         extraOptionsMap.input.unshift({ id: 'clear', label: '清空' });
       }
-      return (
-        <Row gutter={10}>
-          <Col span={12}>
-            <Select placeholder="字段值" label="字段值" name={`${code}-select`} className={styles.inputSelect}>
-              {
-                extraOptionsMap.input.map((item) => (
-                  <Option value={item.id} key={item.id}>{item.label}</Option>
-                ))
-              }
-            </Select>
-          </Col>
+      return ([
+        <Select
+          placeholder="字段值"
+          label="字段值"
+          name={`${code}-select`}
+          className={styles.inputSelect}
+          colSpan={colSpan / 2}
+        >
           {
-            data[code].selected && data[code].selected === 'specifier' && (
-              <Col span={12}>
-                <TextField
-                  label="字段值"
-                  name={code}
-                  maxLength={100}
-                  valueChangeAction="input"
-                  style={{ width: '100%' }}
-                />
-              </Col>
-            )
-          }
-        </Row>
+              extraOptionsMap.input.map((item) => (
+                <Option value={item.id} key={item.id}>{item.label}</Option>
+              ))
+            }
+        </Select>,
+        data[code].selected && data[code].selected === 'specifier' ? (
+          <TextField
+            label="字段值"
+            name={code}
+            maxLength={100}
+            valueChangeAction="input"
+            colSpan={colSpan / 2}
+          />
+        ) : null,
+      ]
       );
     }
     case 'text': {
@@ -270,32 +261,31 @@ export default function renderField({
       if (!required) {
         extraOptionsMap.text.unshift({ id: 'clear', label: '清空' });
       }
-      return (
-        <Row gutter={10}>
-          <Col span={12}>
-            <Select placeholder="字段值" label="字段值" name={`${code}-select`} className={styles.textSelect}>
-              {
-                extraOptionsMap.text.map((item) => (
-                  <Option value={item.id} key={item.id}>{item.label}</Option>
-                ))
-              }
-            </Select>
-          </Col>
-          <Col span={12}>
-            {
-              data[code].selected && data[code].selected === 'specifier' && (
-              <TextArea
-                label="字段值"
-                name={code}
-                rows={3}
-                maxLength={255}
-                valueChangeAction="input"
-                style={{ width: '100%' }}
-              />
-              )
+      return ([
+        <Select
+          placeholder="字段值"
+          label="字段值"
+          name={`${code}-select`}
+          className={styles.textSelect}
+          colSpan={colSpan / 2}
+        >
+          {
+              extraOptionsMap.text.map((item) => (
+                <Option value={item.id} key={item.id}>{item.label}</Option>
+              ))
             }
-          </Col>
-        </Row>
+        </Select>,
+        data[code].selected && data[code].selected === 'specifier' ? (
+          <TextArea
+            label="字段值"
+            name={code}
+            rows={3}
+            maxLength={255}
+            valueChangeAction="input"
+            colSpan={colSpan / 2}
+          />
+        ) : null,
+      ]
       );
     }
     case 'radio': case 'single': case 'checkbox': case 'multiple': {
@@ -325,7 +315,7 @@ export default function renderField({
           placeholder="字段值"
           label="字段值"
           name={code}
-          style={{ width: '100%' }}
+          colSpan={colSpan}
           multiple={isMultiple}
           maxTagCount={2}
           maxTagTextLength={10}
@@ -397,7 +387,7 @@ export default function renderField({
 
       return (
         <SelectUser
-          style={{ width: '100%' }}
+          colSpan={colSpan}
           name={code}
           extraOptions={extraOptionsMap.member}
           selectedUser={selectUserMap.get(code)}

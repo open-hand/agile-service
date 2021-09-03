@@ -559,15 +559,8 @@ const UpdateField = ({
               ))
             }
           </Select>,
-          code ? (
-            <div
-              // @ts-ignore
-              colSpan={12}
-            >
-              {/* @ts-ignore */}
-              {renderField(f, data, selectUserMap, isProgram, isOrganization)}
-            </div>
-          ) : null,
+          // @ts-ignore
+          renderField(f, data, selectUserMap, isProgram, isOrganization),
           <Icon
             onClick={() => {
               // @ts-ignore
