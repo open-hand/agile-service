@@ -43,7 +43,7 @@ function SprintHeader({ data }) {
     type, expand, sprintId, piId, sprintType,
   } = data;
   const isSprint = type === 'sprint';
-  const { isInProgram } = useIsInProgram();
+  const { isInProgram } = BacklogStore.getIsInProgramData || {}
   return (
     isSprint ? (
       <div className={prefix}>

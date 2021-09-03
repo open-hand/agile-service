@@ -491,7 +491,7 @@ class StartSprint extends Component {
 const FormStartSprint = Form.create()(StartSprint);
 
 const FormStartSprintHoc = (props) => {
-  const { isShowFeature } = useIsInProgram();
+  const { isShowFeature } = BacklogStore.getIsInProgramData || {};
   return <FormStartSprint {...props} isShowFeature={isShowFeature} />;
 };
 

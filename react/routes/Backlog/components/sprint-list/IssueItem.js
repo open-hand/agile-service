@@ -53,7 +53,7 @@ const Item = observer(({
   level = 0,
   ...otherProps
 }) => {
-  const { isShowFeature } = useIsInProgram(); // 由后端判断是否显示特性
+  const { isShowFeature } = BacklogStore.getIsInProgramData || {}; // 由后端判断是否显示特性
   const {
     estimatedEndTime, statusVO, children, issueId,
   } = issue;

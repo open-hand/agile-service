@@ -108,6 +108,16 @@ class BacklogStore {
 
   @observable newIssueVisible = false;
 
+  @observable isInProgramData = {};
+
+  @computed get getIsInProgramData() {
+    return this.isInProgramData;
+  }
+
+  @action setIsInProgramData(data) {
+    this.isInProgramData = data;
+  }
+
   @computed get getNewIssueVisible() {
     return this.newIssueVisible;
   }
