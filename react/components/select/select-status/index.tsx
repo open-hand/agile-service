@@ -16,27 +16,36 @@ export interface SelectStatusProps extends Partial<SelectProps> {
   request?: Function
   flat?: boolean
   projectId?: string
-  applyType?: 'program' | 'agile'
+  applyType?: 'program' | 'agile' | 'backlog'
   issueTypeIds?: string[]
   selectedIds?: string[]
   isOrganization?: boolean
+  isProgram?: boolean
+  isBacklog?: boolean
   extraStatus?: IStatusCirculation[]
 }
 
 const SelectStatus: React.FC<SelectStatusProps> = forwardRef(
   ({
-    request, issueTypeId, noIssueTypeIdQuery, excludeStatus = [], dataRef, afterLoad, flat, projectId, applyType, issueTypeIds, selectedIds, isOrganization = false, extraStatus = [], ...otherProps
+    request, issueTypeId, noIssueTypeIdQuery, excludeStatus = [], isProgram, isBacklog, dataRef, afterLoad, flat, projectId, applyType: propsApplyType, issueTypeIds, selectedIds, isOrganization = false, extraStatus = [], ...otherProps
   }, ref: React.Ref<Select>) => {
+    let applyType = propsApplyType;
+    if (isProgram) {
+      applyType = 'program';
+    }
+    if (isBacklog) {
+      applyType = 'backlog';
+    }
     const config = useMemo((): SelectConfig<IStatusCirculation> => ({
       name: 'status',
       textField: 'name',
       valueField: 'id',
       request: async () => {
         if (noIssueTypeIdQuery) {
-          return statusApi.project(projectId).loadByProject(applyType);
+          return statusApi.project(projectId).loadByProject(applyType as any);
         }
-        if (issueTypeId) {
-          return isOrganization ? statusTransformApi.orgLoadList(issueTypeId) : statusTransformApi.project(projectId).loadList(issueTypeId, applyType);
+        if (issueTypeId && (!applyType || ['program', 'backlog'].includes(applyType))) {
+          return isOrganization ? statusTransformApi.orgLoadList(issueTypeId) : statusTransformApi.project(projectId).loadList(issueTypeId, applyType as any);
         }
         if (request) {
           return request();
