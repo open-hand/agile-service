@@ -630,7 +630,7 @@ class EpicReport extends Component {
                       }
                     </Select>
                     <Select
-                      style={{ marginLeft: 10 }}
+                      style={{ marginLeft: 4 }}
                       label="单位"
                       value={VS.currentUnit}
                       onChange={(unit) => this.handleChangeCurrentUnit(unit)}
