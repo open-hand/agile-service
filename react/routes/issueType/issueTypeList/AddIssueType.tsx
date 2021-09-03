@@ -4,16 +4,16 @@ import React, {
 import { observer } from 'mobx-react-lite';
 import {
   Form, Select, DataSet, TextField, TextArea, IconPicker, Modal, Button, CheckBox,
+  Icon,
 } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui/pro';
 import { debounce } from 'lodash';
-import { IModalProps } from '@/common/types';
 import { CompactPicker } from 'react-color';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { Choerodon } from '@choerodon/boot';
+import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { issueTypeApi, IUpdate, ICreate } from '@/api';
 import { TypeTag } from '@/components';
-import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
+import { IModalProps } from '@/common/types';
 import LINK_URL from '@/constants/LINK_URL';
 import to from '@/utils/to';
 import styles from './AddIssueType.less';
@@ -375,7 +375,7 @@ const AddIssueType: React.FC<Props> = ({
                   <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} loading={editLoading} onClick={handleSave} style={{ marginLeft: 10 }}>保存</Button>
                 )
               }
-              <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToPage} disabled={editLoading}>跳转配置页面</Button>
+              <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToPage} disabled={editLoading} style={{ marginLeft: 10 }}>跳转配置页面</Button>
               {
                 !isOrganization && (
                 <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToStatus} disabled={editLoading}>跳转状态机</Button>
