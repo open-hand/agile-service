@@ -474,4 +474,6 @@ public interface IssueService {
     void batchCreateIssueInvokeTrigger(List<TriggerCarrierVO> triggerCarriers);
 
     void buildTriggerCarrierVO(Long projectId, Long issueId, List<TriggerCarrierVO> list, List<Long> customFieldIds);
+
+    void addCollectionFieldIfNotNull(IssueUpdateVO issueUpdateVO, List<String> fieldList);
 }

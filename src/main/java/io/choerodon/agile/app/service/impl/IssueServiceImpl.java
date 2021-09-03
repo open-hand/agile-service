@@ -2136,7 +2136,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldList = {"labelId"}, instanceId = "issueId", idPosition = "arg")
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldList = {RuleNotice.LABEL_ID}, instanceId = "issueId", idPosition = "arg")
     public void handleUpdateLabelIssue(List<LabelIssueRelVO> labelIssueRelVOList, Long issueId, Long projectId) {
         handleUpdateLabelIssueWithoutRuleNotice(labelIssueRelVOList, issueId, projectId);
     }
@@ -2179,7 +2179,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldList = {"versionId"}, instanceId = "issueId", idPosition = "arg")
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldList = {RuleNotice.VERSION_ID}, instanceId = "issueId", idPosition = "arg")
     public void handleUpdateVersionIssueRel(List<VersionIssueRelVO> versionIssueRelVOList, Long projectId, Long issueId, String versionType) {
         handleUpdateVersionIssueRelWithoutRuleNotice(versionIssueRelVOList, projectId, issueId, versionType);
     }
@@ -2189,7 +2189,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldList = {"componentId"}, instanceId = "issueId", idPosition = "arg")
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldList = {RuleNotice.COMPONENT_ID}, instanceId = "issueId", idPosition = "arg")
     public void handleUpdateComponentIssueRel(List<ComponentIssueRelVO> componentIssueRelVOList, Long projectId, Long issueId) {
         handleUpdateComponentIssueRelWithoutRuleNotice(componentIssueRelVOList, projectId, issueId);
     }
@@ -2334,6 +2334,23 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         triggerCarrierVO.setMemberFieldIds(new HashSet<>(customFieldIds));
         triggerCarrierVO.setAuditDomain(issueDTO);
         list.add(triggerCarrierVO);
+    }
+
+    @Override
+    public void addCollectionFieldIfNotNull(IssueUpdateVO issueUpdateVO,
+                                            List<String> fieldList) {
+        if (issueUpdateVO.getComponentIssueRelVOList() != null
+                && !fieldList.contains(RuleNotice.COMPONENT_ID)) {
+            fieldList.add(RuleNotice.COMPONENT_ID);
+        }
+        if (issueUpdateVO.getLabelIssueRelVOList() != null
+                && !fieldList.contains(RuleNotice.LABEL_ID)) {
+            fieldList.add(RuleNotice.LABEL_ID);
+        }
+        if (issueUpdateVO.getVersionIssueRelVOList() != null
+                && !fieldList.contains(RuleNotice.VERSION_ID)) {
+            fieldList.add(RuleNotice.VERSION_ID);
+        }
     }
 
     private void setCopyRequireField(IssueDetailDTO issueDetailDTO, List<String> handlerRequireFiled) {

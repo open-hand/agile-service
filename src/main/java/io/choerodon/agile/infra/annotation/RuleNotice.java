@@ -14,6 +14,10 @@ import io.choerodon.agile.api.vo.NoticeEventVO;
 @Target({ElementType.METHOD})
 public @interface RuleNotice {
 
+    String LABEL_ID = "labelId";
+    String VERSION_ID = "versionId";
+    String COMPONENT_ID = "componentId";
+
     /**
      * 通知检测所使用的模块
      */
