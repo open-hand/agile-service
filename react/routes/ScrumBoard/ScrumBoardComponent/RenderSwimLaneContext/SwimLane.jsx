@@ -57,7 +57,7 @@ class SwimLane extends Component {
             return;
           }
           const [, issueId] = draggableId?.split(['/']);
-          const issue = ScrumBoardStore.getDragStartItem;
+          const issue = ScrumBoardStore.getClickIssueItem;
           if (issue && issue.issueId === issueId && issue.typeCode !== 'sub_task') {
             ScrumBoardStore.checkCanDragOn(issue.issueId);
           }

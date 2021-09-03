@@ -946,8 +946,8 @@ class ScrumBoardStore {
         statusId: destinationStatus,
       });
     } else {
-      this.swimLaneData[startSwimLane][destinationStatus].splice(startStatusIndex, 1);
-      this.swimLaneData[startSwimLane][startStatus].splice(destinationStatusIndex, 0, {
+      this.swimLaneData[startSwimLane][destinationStatus].splice(destinationStatusIndex, 1);
+      this.swimLaneData[startSwimLane][startStatus].splice(startStatusIndex, 0, {
         ...issue,
         statusId: startStatus,
       });
