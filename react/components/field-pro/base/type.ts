@@ -36,6 +36,12 @@ export interface IFieldPartialConfig {
     ) => JSX.Element)
     /** 是否展示字段  @default true */
     display?: boolean
+    /**  归档后的字段，不可进行操作 用以展示
+     * 因此在 最终确定配置 `getProcessFieldConfig` 处 会进行处理
+     *   为兼容过往已保存筛选
+     *
+     *  @default false */
+    archive?: boolean
 }
 export type IFieldSystemConfig<T extends IComponentFCWithClassObject> = (IFieldRequiredConfig & IFieldPartialConfig & IFieldSystemComponentConfig<T>)
 export type IFieldCustomConfig<F extends IComponentFCWithClassObject> = (IFieldRequiredConfig & IFieldPartialConfig & IFieldCustomComponentConfig<F>)

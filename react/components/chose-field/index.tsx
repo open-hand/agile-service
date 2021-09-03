@@ -177,7 +177,6 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
     dropDownBtnProps: config?.dropDownBtnProps,
     dropDownProps: config?.dropDownProps,
   };
-  useWhyDidYouUpdate('componentProps', componentProps);
   return [dataProps, componentProps];
 }
 function useClickOut(onClickOut: (e?: any) => void) {

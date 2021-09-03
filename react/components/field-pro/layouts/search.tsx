@@ -8,65 +8,19 @@ import {
   commonApi, epicApi, statusApi, userApi,
 } from '@/api';
 import { IFieldProcessConfig } from '../base/type';
-import { getFieldPropsByMode } from '../base/utils';
+import { getComponentCodeForLocalCode, getFieldPropsByMode, isCodeInSystemComponents } from '../base/utils';
 
 function getFieldConfig({
-  field, props: { projectId, applyType, value },
+  field, props,
 }: any) {
   const { fieldType } = field;
+  const { projectId, applyType, value } = props;
+  const code = getComponentCodeForLocalCode(field.code);
   // 系统自带字段
-  switch (field.code) {
-    case 'issueTypeId':
-      return {
-        code: 'issueType',
-        props: {
-          config: {
-            applyType,
-            projectId,
-          },
-        },
-      };
-    case 'statusId':
-      return { // 缺少 issueTypeIds
-        code: 'status',
-        props: {
-          applyType,
-          projectId,
-          selectedIds: value,
-          noIssueTypeIdQuery: true,
-        },
-      };
-    case 'assigneeId':
-      return {
-        code: 'assignee',
-        props: {
-          extraOptions: [{ id: '0', realName: '未分配' }],
-          selected: value,
-          request: ({ filter, page, requestArgs }: any) => userApi.project(projectId).getAllInProjectIncludesLeaveUsers(filter, page, requestArgs?.selectedUserIds),
-        },
-      };
-    case 'sprint':
-      return {
-        props: {
-          statusList: [],
-          hasUnassign: true,
-        },
-      };
-
-    case 'reporterIds':
-      return { code: 'reporter', props: { request: ({ filter, page, requestArgs }: any) => commonApi.project(projectId).getIssueReports(page, filter, requestArgs?.selectedUserIds) } };
-    case 'priorityId':
-      return { code: 'priority' };
-    case 'influenceVersion':
-    case 'fixVersion':
-    case 'version':
-      return { props: { disabled: field.archive, hasUnassign: true, valueField: 'versionId' } };
-    case 'epic':
-      return { props: { unassignedEpic: true, onlyUnCompleted: false, defaultSelectedIds: value } };
-    case 'tags':
-      return { code: 'tag', props: { projectId: undefined } };
-    default:
-      break;
+  if (isCodeInSystemComponents(code)) {
+    return getFieldPropsByMode({
+      code, outputs: ['config', 'function'], fieldType: field.fieldType, props,
+    });
   }
   switch (fieldType) {
     case 'input':
@@ -181,11 +135,10 @@ function getSearchFields(fields: any[], fieldCodeProps?: Record<string, any>, in
       label: field.name,
       placeholder: field.name,
       flat: true,
-      ...getFieldPropsByMode(field),
     }, codeProps);
     const config = configInstance({ field, props }) as IFieldProcessConfig<any, any>;
     return {
-      code: config.code ?? field.code,
+      code: getComponentCodeForLocalCode(config.code ?? field.code),
       fieldType: field.fieldType,
       outputs: ['config', 'function'] as ['config', 'function'],
       props: {
