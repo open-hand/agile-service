@@ -326,6 +326,7 @@ const CreateIssueBase = observer(({
         after: 'issueType',
         field: {
           name: 'parentIssueId',
+          type: 'object'as any,
           label: '关联父级任务',
           required: issueTypeCode === 'sub_task',
         },
@@ -376,7 +377,7 @@ const CreateIssueBase = observer(({
       setValue('description', templateData.template);
     }
     if (parentIssue) {
-      setValue('parentIssueId', parentIssue.issueId);
+      setValue('parentIssueId', parentIssue);
     }
     if (showFeature && defaultFeature) {
       setValue('feature', defaultFeature.issueId);
@@ -439,7 +440,7 @@ const CreateIssueBase = observer(({
       Object.assign(values, {
         typeCode: (issueType as IIssueType)?.typeCode,
         priorityCode: `priority-${data.priority || 0}`,
-        parentIssueId: data.parentIssueId,
+        parentIssueId: data.parentIssueId?.issueId,
         programId: projectId ?? getProjectId(),
         projectId: projectId ?? getProjectId(),
         featureId: data.feature,

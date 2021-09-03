@@ -13,19 +13,18 @@ import SelectFeatureType from '@/components/select/select-feature-type';
 import SelectTeam from '@/components/select/select-team';
 import SelectUserWithAssigneeMe from '@/components/select/pro/select-user-with-assigneeme';
 import SelectIssueType from '@/components/select/pro/select-issue-type';
-
 import getFieldsInstance, { AgileComponentMap, CustomFieldMap, IFieldBaseConfig } from '../base';
 
 type ProRenderFieldPropsType = {
-    render?: ((
-        text: any,
-        props: any,
-        dom: JSX.Element,
-    ) => JSX.Element)
-    renderFormItem?: ((props: any) => JSX.Element)
-    props?: any
-    /** 创建时提交至服务端的值和field的code的对应 */
-    valueKey?: string
+  render?: ((
+    text: any,
+    props: any,
+    dom: JSX.Element,
+  ) => JSX.Element)
+  renderFormItem?: ((props: any) => JSX.Element)
+  props?: any
+  /** 创建时提交至服务端的值和field的code的对应 */
+  valueKey?: string
 };
 const valueTypeConfigMap: Record<string, ProRenderFieldPropsType> = {
   default: {
@@ -63,7 +62,10 @@ const systemFieldConfigMap: Record<string, ProRenderFieldPropsType> = {
   },
   label: {
     render: (text) => text,
-    props: { combo: true },
+    props: {
+      combo: true,
+      placeholder: undefined,
+    },
     valueKey: 'labelIssueRelVOList',
   },
   epic: {
@@ -108,6 +110,7 @@ const systemFieldConfigMap: Record<string, ProRenderFieldPropsType> = {
 
     valueKey: 'teamProjectIds',
   },
+
 };
 
 const fieldMap = {
