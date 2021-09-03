@@ -212,14 +212,14 @@
               WHEN ai.assignee_id IS NULL THEN 0 ELSE ai.assignee_id
             END AS assignee_id,
             ai.story_points,
-            (ai.remaining_time + IFNULL(wl.work_time,0)) as remaining_time
+            (IFNULL(ai.remaining_time, 0)+IFNULL(wl.work_time, 0)) as remaining_time
             FROM
             agile_issue ai
             JOIN (<include refid="selectSprintIssue"/>) aii on ai.issue_id = aii.issue_id
             LEFT JOIN (
                 select
                     wl1.issue_id,
-                    SUM(wl1.work_time) as work_time
+                    SUM(IFNULL(wl1.work_time, 0)) as work_time
                 from agile_work_log wl1,
                 (
                     <include refid="selectSprintIssue"/>
@@ -1248,4 +1248,21 @@
             and aisr.issue_id = ai.issue_id
     </select>
 
+    <select id="querySpentWorkTimeBySprintId" resultType="java.math.BigDecimal">
+        SELECT
+            SUM(IFNULL(wl.work_time, 0)) AS work_time
+        FROM
+            agile_work_log wl
+        WHERE
+        wl.project_id = #{projectId}
+        and wl.issue_id IN (
+            SELECT
+                aisr.issue_id
+            FROM
+                agile_issue_sprint_rel aisr
+            WHERE
+                aisr.project_id = #{projectId}
+              AND aisr.sprint_id = #{sprintId}
+        )
+    </select>
 </mapper>

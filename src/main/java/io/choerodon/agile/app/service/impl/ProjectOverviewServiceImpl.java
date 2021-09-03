@@ -81,8 +81,10 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
         uncompletedCount.setTotalStoryPoints(totalIssueList.stream()
                 .filter(issue -> Objects.equals(issue.getTypeCode(), InitIssueType.STORY.getTypeCode()))
                 .map(IssueOverviewVO::getStoryPoints).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add));
-        uncompletedCount.setTotalEstimatedTime(totalIssueList.stream()
-                .map(IssueOverviewVO::getRemainingTime).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add));
+        BigDecimal totalSpentWorkTime = sprintMapper.querySpentWorkTimeBySprintId(sprintId, projectId);
+        BigDecimal totalRemainingEstimatedTime = totalIssueList.stream()
+                .map(IssueOverviewVO::getRemainingTime).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add);
+        uncompletedCount.setTotalEstimatedTime(totalSpentWorkTime.add(totalRemainingEstimatedTime));
         uncompletedCount.setTotalIssueCount(totalIssueList.size());
         return uncompletedCount;
     }
