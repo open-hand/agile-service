@@ -1,23 +1,22 @@
-import {
+import type {
   DataSet,
 } from 'choerodon-ui/pro';
 import { toJS } from 'mobx';
 
-import { find, get } from 'lodash';
+import { find, get, merge } from 'lodash';
 import type { IAgileBaseFieldTypeComponentProps, AgileComponentMapProps, CustomFCComponentMapProps } from '../base/component';
 import { getAgileFields } from '../base';
-import { IChosenFieldField } from '@/components/chose-field/types';
-import { getFieldPropsByMode } from '../base/utils';
+import type { IChosenFieldField } from '@/components/chose-field/types';
+import { getComponentCodeForLocalCode, getFieldPropsByMode } from '../base/utils';
 import { IFieldSystemConfig, IFieldCustomConfig } from '../base/type';
 
 function getSystemFieldConfig({ code, value, defaultValue }: IChosenFieldField, dataSet?: DataSet): Partial<IFieldSystemConfig<AgileComponentMapProps>> {
   switch (code) {
-    case 'sprint':
     case 'sprintList':
       return {
         code: 'sprint',
         props: {
-          statusList: [], isProgram: code === 'sprintList', hasUnassign: true, selectSprints: value,
+          isProgram: true,
         },
       };
     case 'statusId':
@@ -25,55 +24,23 @@ function getSystemFieldConfig({ code, value, defaultValue }: IChosenFieldField, 
       return {
         code: 'status',
         props: {
-          noIssueTypeIdQuery: true,
+          isProgram: code === 'statusList',
           issueTypeIds: (dataSet?.current?.get('issueTypeList') ?? dataSet?.current?.get('issueTypeId')) ?? undefined,
-          selectedIds: dataSet?.current?.get('statusList') ?? dataSet?.current?.get('statusId'),
         },
       };
-    case 'issueTypeId':
     case 'issueTypeList':
       return {
         code: 'issueType',
         props: {
-          isProgram: code === 'issueTypeList',
-          filterList: code === 'issueTypeList' ? [] : undefined,
+          isProgram: true,
+          filterList: [],
         },
-
       };
-    case 'epic':
     case 'epicList':
       return {
         code: 'epic',
         props: {
-          onlyUnCompleted: false,
-          isProgram: code === 'epicList',
-          unassignedEpic: true,
-          defaultSelectedIds: value,
-        },
-      };
-
-    case 'label':
-      return {
-        code: 'label',
-        props: {
-          valueField: 'labelId',
-
-        },
-      };
-    case 'component':
-      return {
-        props: {
-          valueField: 'componentId',
-        },
-      };
-    case 'version':
-    case 'fixVersion':
-    case 'influenceVersion':
-      return {
-        code: 'version',
-        props: {
-          valueField: 'versionId',
-          hasUnassign: true,
+          isProgram: true,
         },
       };
     case 'feature': {
@@ -87,7 +54,6 @@ function getSystemFieldConfig({ code, value, defaultValue }: IChosenFieldField, 
     case 'teamProjectList': {
       return {
         code: 'subProject',
-
       };
     }
     case 'piList': {
@@ -119,9 +85,6 @@ function getSystemFieldConfig({ code, value, defaultValue }: IChosenFieldField, 
 
         },
       };
-    }
-    case 'tags': {
-      return { code: 'tag' };
     }
 
     default:
@@ -175,30 +138,25 @@ function getFieldConfig(field: IChosenFieldField, dataSet?: DataSet) {
 /**
  *  获取过滤的字段
  * @param fields
- * @param fieldCodeProps  兼容属性，key对应的是 `fields`中的code
+ * @param fieldCodeProps  组件的props， key对应的是 `fields`中的code
  * @param instance 获取字段实例
  */
 function getFilterFields(fields: any[], fieldCodeProps?: Record<string, any>, instance = getAgileFields) {
   const newFilters = fields.map(({ field, dataSet, otherComponentProps }) => {
-    const config = getFieldConfig(field, dataSet);
     const { name, code, fieldType } = field;
-
-    const { props, ...otherConfigProps } = config;
-    return {
-      code,
+    const config = merge({
+      code: getComponentCodeForLocalCode(field.code),
       fieldType,
-      ...otherConfigProps,
       props: {
         name: code,
         label: name,
         style: { width: '100%' },
         key: code,
-        ...getFieldPropsByMode({ code, fieldType, outputs: ['config', 'function'] }, 'filter'),
-        ...props,
         ...otherComponentProps,
       },
       outputs: ['config', 'function'],
-    };
+    }, getFieldConfig(field, dataSet));
+    return merge(config, { props: getFieldPropsByMode(config, 'filter') });
   }) as any[];
   // const { system, custom } = groupBy(newFilters, (item) => (item.system ? 'system' : 'custom'));
   return instance(newFilters).map((i: [any, any]) => i[1]({ ...i[0], props: { ...i[0].props, ...get(fieldCodeProps, i[0].props.key) } }));

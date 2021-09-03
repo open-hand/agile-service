@@ -2,8 +2,9 @@ import { merge } from 'lodash';
 import {
   IComponentFCWithClassObject, IFieldConfig, IFieldProcessConfig, IComponentFCWithClassObjectProps,
 } from './type';
-import type { CustomComponentMapProps, IAgileBaseComponentPartialProps } from './component';
+import type { CustomComponentMapProps, IAgileBaseComponentPartialProps, IAgileBaseFieldTypeComponentProps } from './component';
 import { AgileComponentMap } from './component';
+import { userApi } from '@/api';
 
 const filterModeSelectCommonProps = {
   multiple: true,
@@ -27,17 +28,51 @@ const filterModeProps = {
   multiMember: filterModeSelectCommonProps,
   member: filterModeSelectCommonProps,
 };
-
-const filterCodeModeProps: IAgileBaseComponentPartialProps = {
-  sprint: {
+type IAgileSystemFieldProps = IAgileBaseComponentPartialProps & {
+  assignee?: IAgileBaseFieldTypeComponentProps['member'],
+  reporter?: IAgileBaseFieldTypeComponentProps['member'],
+}
+type IComponentPropsToFn<T> = { [P in keyof T]: (fieldConfig: IFieldConfig<any, any>) => T[P] }
+/**
+ * 筛选模式通用的props （根据code匹配)
+ */
+const filterCodeModeProps: IComponentPropsToFn<IAgileSystemFieldProps> = {
+  assignee: ({ props }) => ({
+    extraOptions: [{ id: '0', realName: '未分配' }],
+    selected: props?.value,
+    request: ({ filter, page, requestArgs }: any) => userApi.project(props?.projectId).getAllInProjectIncludesLeaveUsers(filter, page, requestArgs?.selectedUserIds),
+  }),
+  sprint: ({ props }) => ({
     statusList: [],
     hasUnassign: true,
-
-  },
-  status: {
+  }),
+  issueType: ({ props }) => ({
+    applyType: props?.applyType,
+    projectId: props?.projectId,
+  }),
+  status: ({ props }) => ({
+    applyType: props?.applyType,
+    projectId: props?.projectId,
+    selectedIds: props?.value,
     noIssueTypeIdQuery: true,
-  },
-
+  }),
+  influenceVersion: () => ({
+    hasUnassign: true,
+    valueField: 'versionId',
+  }),
+  fixVersion: () => ({
+    hasUnassign: true,
+    valueField: 'versionId',
+  }),
+  version: () => ({
+    hasUnassign: true,
+    valueField: 'versionId',
+  }),
+  epic: ({ props }) => ({
+    unassignedEpic: true,
+    onlyUnCompleted: false,
+    defaultSelectedIds: props?.value,
+  }),
 };
 
 /**
@@ -50,7 +85,9 @@ function getProcessFieldConfig<T extends IComponentFCWithClassObject, C extends 
     fieldType: fieldConfig.fieldType,
     outputs: fieldConfig.outputs,
     display: fieldConfig.display === undefined || !!fieldConfig.display,
-    props: { clearButton: true, name: fieldConfig.code, ...fieldConfig.props },
+    props: {
+      clearButton: true, name: fieldConfig.code, disabled: fieldConfig.archive, ...fieldConfig.props,
+    },
   };
   const filedTypeConfigObj = {
     time: {},
@@ -80,22 +117,25 @@ function getProcessFieldConfig<T extends IComponentFCWithClassObject, C extends 
  * @returns
  */
 function isCodeInSystemComponents(code: string, components: { [x: string]: any } = AgileComponentMap) {
-  return Object.keys(components).includes(code);
+  return Object.keys(filterCodeModeProps).includes(code);
 }
 /**
- * 通过模式获取字段的基础 `props` 配置
+ * 通过模式获取字段 `props` 配置
  * @param fieldConfig
+ * @param props 外部传入的props
  * @param mode `filter` 待添加`flatFilter` `create` `edit`
  * @returns
  */
-function getFieldPropsByMode(fieldConfig: IFieldConfig<any, any>, mode: 'filter' = 'filter') {
+function getFieldPropsByMode(fieldConfig: IFieldConfig<any, any>, mode: 'filter' | string = 'filter') {
   switch (mode) {
-    case 'filter':
+    case 'filter': {
+      const codeConfigFn = filterCodeModeProps[fieldConfig.code as keyof typeof filterCodeModeProps] || ((...args: any) => ({}));
       if (fieldConfig.fieldType) {
-        return filterModeProps[fieldConfig.fieldType];
+        return { ...filterModeProps[fieldConfig.fieldType], ...codeConfigFn(fieldConfig) };
       }
+      return codeConfigFn(fieldConfig) as any;
+    }
   }
-
   return {};
 }
 
