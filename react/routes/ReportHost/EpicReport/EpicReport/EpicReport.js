@@ -625,7 +625,7 @@ class EpicReport extends Component {
             !(!ES.epics.length && ES.epicFinishLoading) ? (
               <div>
                 <div style={{ display: 'flex' }}>
-                  <Form style={{ width: 244 }}>
+                  <Form columns={2} style={{ width: 508 }}>
                     <Select
                       label="史诗选择"
                       value={ES.currentEpicId}
@@ -638,10 +638,9 @@ class EpicReport extends Component {
                       ))
                     }
                     </Select>
-                  </Form>
-                  <Form style={{ width: 244, marginLeft: 24 }}>
                     <Select
                       label="单位选择"
+                      style={{ marginLeft: 6 }}
                       value={ES.currentUnit}
                       onChange={(unit) => this.handleChangeCurrentUnit(unit)}
                       clearButton={false}

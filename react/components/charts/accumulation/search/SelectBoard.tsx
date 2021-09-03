@@ -10,6 +10,7 @@ const { Option } = Select;
 interface Props {
   onChange: (boardId: string) => void
   value: string
+  // eslint-disable-next-line react/require-default-props
   projectId?: string
 }
 const SelectBoard: React.FC<Props> = ({
@@ -36,7 +37,7 @@ const SelectBoard: React.FC<Props> = ({
       label="切换看板"
       value={value}
       clearButton={false}
-      style={{ marginLeft: 14 }}
+      style={{ marginLeft: 16 }}
       onChange={(boardId) => {
         onChange(boardId);
       }}

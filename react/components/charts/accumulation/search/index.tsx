@@ -51,7 +51,7 @@ const AccumulationSearch: React.FC<AccumulationSearchProps> = ({
         placeholder="快速筛选"
         label="快速筛选"
         optionFlat
-        style={{ marginLeft: 14 }}
+        style={{ marginLeft: 16 }}
         value={quickFilterIds}
       />
     </div>
