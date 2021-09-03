@@ -335,6 +335,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             if (agilePluginService != null) {
                 agilePluginService.handlerFeatureField(projectId,v,programMap, triggerCarrierVO);
             }
+            issueService.addCollectionFieldIfNotNull(issueUpdateVO, fieldList);
             triggerCarrierVO.getFieldList().addAll(fieldList);
             triggerCarrierMap.put(v.getIssueId(), triggerCarrierVO);
             if (sendMsg) {

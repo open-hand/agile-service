@@ -3669,7 +3669,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected String getOrderStrOfQueryingIssuesWithSub(Sort sort) {
         Map<String, String> order = new HashMap<>(1);
-        order.put("issueId", "issue_issue_id");
+        order.put("issueId", "issue_id");
         return PageableHelper.getSortSql(PageUtil.sortResetOrder(sort, null, order));
     }
 }
