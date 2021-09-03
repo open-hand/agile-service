@@ -11,4 +11,24 @@
         and asp.status_code != 'closed'
     </select>
 
+    <select id="selectAllIssueSprintRelIds" resultType="java.lang.Long">
+        SELECT
+            aisr.id
+        FROM agile_issue_sprint_rel aisr WHERE EXISTS (SELECT 0 FROM agile_sprint asp WHERE asp.sprint_id =
+        aisr.sprint_id AND asp.status_code != 'closed' ) and aisr.project_id =
+        #{projectId}
+        AND aisr.issue_id IN
+        <foreach collection="issueIds" item="issueId"
+                 open="(" separator="," close=")">
+            #{issueId}
+        </foreach>
+    </select>
+
+    <delete id="deleteByIds">
+        DELETE FROM agile_pi_feature
+        WHERE id IN
+        <foreach collection="issueSprintRelIds" item="issueSprintRelId" open="(" separator="," close=")">
+            #{issueSprintRelId}
+        </foreach>
+    </delete>
 </mapper>

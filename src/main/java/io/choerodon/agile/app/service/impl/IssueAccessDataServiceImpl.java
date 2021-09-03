@@ -5,6 +5,7 @@ import io.choerodon.agile.infra.dto.BatchRemoveSprintDTO;
 import io.choerodon.agile.infra.annotation.DataLog;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.mapper.IssueSprintRelMapper;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.agile.infra.dto.*;
@@ -14,6 +15,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -28,6 +30,8 @@ public class IssueAccessDataServiceImpl implements IssueAccessDataService {
 
     @Autowired
     private IssueMapper issueMapper;
+    @Autowired
+    private IssueSprintRelMapper issueSprintRelMapper;
 
     @Autowired
     private RedisUtil redisUtil;
@@ -125,7 +129,11 @@ public class IssueAccessDataServiceImpl implements IssueAccessDataService {
     @Override
     @DataLog(type = "batchRemoveSprint", single = false)
     public int removeIssueFromSprintByIssueIds(BatchRemoveSprintDTO batchRemoveSprintDTO) {
-        return issueMapper.removeIssueFromSprintByIssueIds(batchRemoveSprintDTO.getProjectId(), batchRemoveSprintDTO.getIssueIds());
+        List<Long> issueSprintRelIds = issueSprintRelMapper.selectAllIssueSprintRelIds(batchRemoveSprintDTO.getProjectId(), batchRemoveSprintDTO.getIssueIds());
+        if (!CollectionUtils.isEmpty(issueSprintRelIds)) {
+            return issueSprintRelMapper.deleteByIds(issueSprintRelIds);
+        }
+        return 0;
     }
 
     @Override
