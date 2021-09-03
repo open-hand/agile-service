@@ -872,7 +872,7 @@ class EpicBurndown extends Component {
             !(!ES.epics.length && ES.epicFinishLoading) ? (
               <div>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <Form style={{ width: 512, marginRight: 33 }}>
+                  <Form style={{ width: 512, marginRight: 19 }}>
                     <Select
                       label="史诗"
                       value={ES.currentEpicId}

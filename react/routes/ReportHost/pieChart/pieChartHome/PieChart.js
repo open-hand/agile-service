@@ -427,7 +427,7 @@ class PieChart extends Component {
         <Content style={{ paddingTop: 20 }}>
           <LoadingProvider loading={PieChartStore.pieLoading}>
             <div className="c7n-pieChart-filter">
-              <Form>
+              <Form columns={2} style={{ width: 508 }}>
                 <Select
                   className="c7n-pieChart-filter-item"
                   getPopupContainer={(triggerNode) => triggerNode.parentNode}
@@ -443,11 +443,9 @@ class PieChart extends Component {
                   ))
                 }
                 </Select>
-              </Form>
-              <Form style={{ marginLeft: 10 }}>
                 <Select
                   className="c7n-pieChart-filter-item"
-                  style={{ minWidth: 70 }}
+                  style={{ minWidth: 70, marginLeft: 6 }}
                   label="选择维度"
                   defaultValue={chooseDimensionType[0].name}
                   value={chooseDimensionType

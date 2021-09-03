@@ -783,7 +783,7 @@ class VersionBurndown extends Component {
         .filter((item) => item.versionId === ES.currentVersionId)[0];
       return (
         <p className="c7n-versionInfo">
-          {`${currentVersion && currentVersion.releaseDate === null ? '未发布' : (`发布于 ${currentVersion && currentVersion.releaseDate.split(' ')[0]}`)}`}
+          {`${currentVersion && (currentVersion.releaseDate === null || !currentVersion.releaseDate) ? '未发布' : (`发布于 ${currentVersion && currentVersion.releaseDate.split(' ')[0]}`)}`}
         </p>
       );
     }
@@ -826,108 +826,108 @@ class VersionBurndown extends Component {
           <LoadingProvider loading={ES.chartLoading}>
 
             {
-            !(!ES.versions.length && ES.versionFinishLoading) ? (
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <Form style={{ width: 512, marginRight: 33 }}>
-                    <Select
-                      label="版本"
-                      value={ES.currentVersionId}
-                      onChange={(versionId) => this.handleChangeCurrentVersion(versionId)}
-                      getPopupContainer={((triggerNode) => triggerNode.parentNode)}
-                      clearButton={false}
-                    >
-                      {
-                      ES.versions.map((version) => (
-                        <Option
-                          key={version.versionId}
-                          value={version.versionId}
-                        >
-                          {version.name}
-                        </Option>
-                      ))
-                    }
-                    </Select>
-                  </Form>
-                  <div className="c7n-versionSelectHeader" style={{ marginTop: 5 }}>
-                    <CheckBox
-                      value="checked"
-                      onChange={this.handleChangeCheckbox}
-                      checked={checkbox === 'checked'}
-                    >
-                      根据图表校准冲刺
-                    </CheckBox>
-                    <span className="icon-show" role="none" onMouseEnter={this.handleIconMouseEnter} onMouseLeave={this.handleIconMouseLeave}>
-                      <Icon type="help icon" />
-                    </span>
+              !(!ES.versions.length && ES.versionFinishLoading) ? (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <Form style={{ width: 512, marginRight: 19 }}>
+                      <Select
+                        label="版本"
+                        value={ES.currentVersionId}
+                        onChange={(versionId) => this.handleChangeCurrentVersion(versionId)}
+                        getPopupContainer={((triggerNode) => triggerNode.parentNode)}
+                        clearButton={false}
+                      >
+                        {
+                          ES.versions.map((version) => (
+                            <Option
+                              key={version.versionId}
+                              value={version.versionId}
+                            >
+                              {version.name}
+                            </Option>
+                          ))
+                        }
+                      </Select>
+                    </Form>
+                    <div className="c7n-versionSelectHeader" style={{ marginTop: 5 }}>
+                      <CheckBox
+                        value="checked"
+                        onChange={this.handleChangeCheckbox}
+                        checked={checkbox === 'checked'}
+                      >
+                        根据图表校准冲刺
+                      </CheckBox>
+                      <span className="icon-show" role="none" onMouseEnter={this.handleIconMouseEnter} onMouseLeave={this.handleIconMouseLeave}>
+                        <Icon type="help icon" />
+                      </span>
 
-                    <div className="icon-show-info" onMouseEnter={this.handleIconMouseEnter} onMouseLeave={this.handleIconMouseLeave}>
-                      <figure className="icon-show-progress">
-                        <div className="icon-show-info-svg">
-                          <img src={seeProgress} alt="查看进度" />
-                        </div>
-                        <figcaption className="icon-show-info-detail">
-                          <p className="icon-show-info-detail-header">查看进度</p>
-                          <p className="icon-show-info-detail-content">按照版本查看冲刺进度</p>
-                        </figcaption>
-                      </figure>
-                      <figure>
-                        <div className="icon-show-info-svg">
-                          <img src={seeChangeRange} alt="查看变更范围" />
-                        </div>
-                        <figcaption className="icon-show-info-detail">
-                          <p className="icon-show-info-detail-header">查看变更范围</p>
-                          <p className="icon-show-info-detail-content">跟踪范围的扩大和缩小，由底部条状信息显示。</p>
-                        </figcaption>
-                      </figure>
+                      <div className="icon-show-info" onMouseEnter={this.handleIconMouseEnter} onMouseLeave={this.handleIconMouseLeave}>
+                        <figure className="icon-show-progress">
+                          <div className="icon-show-info-svg">
+                            <img src={seeProgress} alt="查看进度" />
+                          </div>
+                          <figcaption className="icon-show-info-detail">
+                            <p className="icon-show-info-detail-header">查看进度</p>
+                            <p className="icon-show-info-detail-content">按照版本查看冲刺进度</p>
+                          </figcaption>
+                        </figure>
+                        <figure>
+                          <div className="icon-show-info-svg">
+                            <img src={seeChangeRange} alt="查看变更范围" />
+                          </div>
+                          <figcaption className="icon-show-info-detail">
+                            <p className="icon-show-info-detail-header">查看变更范围</p>
+                            <p className="icon-show-info-detail-content">跟踪范围的扩大和缩小，由底部条状信息显示。</p>
+                          </figcaption>
+                        </figure>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div style={{ marginTop: -10 }}>
-                  {this.renderVersionInfo()}
-                </div>
-                <div>
-                  {
+                  <div style={{ marginTop: -10 }}>
+                    {this.renderVersionInfo()}
+                  </div>
+                  <div>
+                    {
                       this.renderChart()
                     }
+                  </div>
+                  <Tabs
+                    activeKey={tabActiveKey}
+                    onChange={(key) => {
+                      this.setState({
+                        tabActiveKey: key,
+                      });
+                    }}
+                  >
+                    <TabPane tab="已完成的问题" key="done">
+                      {this.renderTable('compoleted')}
+                    </TabPane>
+                    <TabPane tab="未完成的问题" key="todo">
+                      {this.renderTable('unFinish')}
+                    </TabPane>
+                  </Tabs>
                 </div>
-                <Tabs
-                  activeKey={tabActiveKey}
-                  onChange={(key) => {
-                    this.setState({
-                      tabActiveKey: key,
-                    });
-                  }}
-                >
-                  <TabPane tab="已完成的问题" key="done">
-                    {this.renderTable('compoleted')}
-                  </TabPane>
-                  <TabPane tab="未完成的问题" key="todo">
-                    {this.renderTable('unFinish')}
-                  </TabPane>
-                </Tabs>
-              </div>
-            ) : (
-              <LoadingHiddenWrap>
-                <EmptyPage
-                  image={pic}
-                  description={(
-                    <div>
-                      <span>当前项目无可用版本，请在</span>
-                      <EmptyPage.Button
-                        onClick={() => {
-                          to(LINK_URL.workListVersion);
-                        }}
-                      >
-                        【版本列表】
-                      </EmptyPage.Button>
-                      <span>中创建一个版本</span>
-                    </div>
-                )}
-                />
-              </LoadingHiddenWrap>
-            )
-          }
+              ) : (
+                <LoadingHiddenWrap>
+                  <EmptyPage
+                    image={pic}
+                    description={(
+                      <div>
+                        <span>当前项目无可用版本，请在</span>
+                        <EmptyPage.Button
+                          onClick={() => {
+                            to(LINK_URL.workListVersion);
+                          }}
+                        >
+                          【版本列表】
+                        </EmptyPage.Button>
+                        <span>中创建一个版本</span>
+                      </div>
+                    )}
+                  />
+                </LoadingHiddenWrap>
+              )
+            }
           </LoadingProvider>
         </Content>
       </Page>
