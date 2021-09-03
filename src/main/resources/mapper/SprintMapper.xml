@@ -1250,7 +1250,7 @@
 
     <select id="querySpentWorkTimeBySprintId" resultType="java.math.BigDecimal">
         SELECT
-            SUM(IFNULL(wl.work_time, 0)) AS work_time
+            IFNULL(SUM(wl.work_time), 0) AS work_time
         FROM
             agile_work_log wl
         WHERE
