@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service;
 import io.choerodon.agile.api.vo.business.RuleLogRelVO;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author superlee
@@ -46,4 +47,6 @@ public interface AgileTriggerService {
      * @return ruleLogRel
      */
     List<RuleLogRelVO> queryRuleLogRelByLogId(Long projectId, List<Long> logIds);
+
+    void deleteRuleLog(Long projectId, String businessType, Set<Long> instanceIds);
 }

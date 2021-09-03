@@ -240,6 +240,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String TRIGGER_ISSUE_ID = "triggerIssueId";
     private static final String AUTO_TRANFER_FLAG = "autoTranferFlag";
     private static final String STAR_BEACON_TYPE_ISSUE = "issue";
+    private static final String CUSTOM_FIELD = "custom_field";
     private static final String BUG_TYPE = "bug";
     private static final String TASK_TYPE = "task";
     private static final String MY_START_BEACON = "myStarBeacon";
@@ -1491,6 +1492,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             wikiRelationMapper.deleteByIssueId(projectId, issueId);
         }
         // 删除自定义字段的值
+        FieldValueDTO fieldValueDTO = new FieldValueDTO();
+        fieldValueDTO.setProjectId(projectId);
+        fieldValueDTO.setSchemeCode(AGILE_SCHEME_CODE);
+        fieldValueDTO.setInstanceId(issueId);
+        Set<Long> fieldIds = fieldValueMapper.select(fieldValueDTO).stream().map(FieldValueDTO::getFieldId).collect(Collectors.toSet());
         fieldValueMapper.deleteList(projectId, issueId, AGILE_SCHEME_CODE, null);
         //不是子任务的issue删除子任务
         if (!(SUB_TASK).equals(issueConvertDTO.getTypeCode())) {
@@ -1517,7 +1523,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         //删除日志信息
         dataLogDeleteByIssueId(projectId, issueId);
-        deleteRuleLogRel(projectId, issueId);
+        deleteRuleLogRel(projectId, issueId, fieldIds);
         issueAccessDataService.delete(projectId, issueConvertDTO.getIssueId());
         //删除rank数据
         rankMapper.deleteRankByIssueId(issueId);
@@ -1531,13 +1537,16 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         statusLinkageExecutionLogService.deleteByIssueId(projectId, ConvertUtil.getOrganizationId(projectId), issueId);
     }
 
-    private void deleteRuleLogRel(Long projectId, Long issueId) {
+    private void deleteRuleLogRel(Long projectId, Long issueId, Set<Long> fieldIds) {
         if (agileTriggerService != null) {
             RuleLogRelVO ruleLogRel = new RuleLogRelVO();
             ruleLogRel.setBusinessType(STAR_BEACON_TYPE_ISSUE);
             ruleLogRel.setInstanceId(issueId);
             ruleLogRel.setProjectId(projectId);
             agileTriggerService.delete(ruleLogRel);
+            if (!ObjectUtils.isEmpty(fieldIds)) {
+                agileTriggerService.deleteRuleLog(projectId, CUSTOM_FIELD, fieldIds);
+            }
         }
     }
 
