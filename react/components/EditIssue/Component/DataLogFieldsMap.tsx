@@ -189,18 +189,9 @@ const fieldsMap = new Map([
     name: '经办人',
     create: {
       render: (log: ILog) => {
-        const { newString, ruleName } = log;
+        const { newString } = log;
         return (
           <>
-            {
-              ruleName && (
-                <span>
-                  <span className="c7n-Log-operation">触发</span>
-                  <span className="c7n-Log-field">{`【${ruleName}】`}</span>
-                  <span className="c7n-Log-operation">触发器，</span>
-                </span>
-              )
-            }
             <span>
               <span className="c7n-Log-operation">更新</span>
               <span className="c7n-Log-field">【经办人】</span>
@@ -213,18 +204,9 @@ const fieldsMap = new Map([
     },
     update: {
       render: (log: ILog) => {
-        const { newString, oldString, ruleName } = log;
+        const { newString, oldString } = log;
         return (
           <>
-            {
-              ruleName && (
-                <span>
-                  <span className="c7n-Log-operation">触发</span>
-                  <span className="c7n-Log-field">{`【${ruleName}】`}</span>
-                  <span className="c7n-Log-operation">触发器，</span>
-                </span>
-              )
-            }
             <span className="c7n-Log-operation">将</span>
             <span className="c7n-Log-field">【经办人】</span>
             <span className="c7n-Log-operation">由</span>
