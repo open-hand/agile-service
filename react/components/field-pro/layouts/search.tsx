@@ -4,11 +4,8 @@ import {
 } from 'lodash';
 import moment from 'moment';
 import getFieldsInstance, { getAgileFields } from '../base';
-import {
-  commonApi, epicApi, statusApi, userApi,
-} from '@/api';
 import { IFieldProcessConfig } from '../base/type';
-import { getComponentCodeForLocalCode, getFieldPropsByMode, isCodeInSystemComponents } from '../base/utils';
+import { getComponentCodeForLocalCode, getFieldPropsByMode } from '../base/utils';
 
 function getFieldConfig({
   field, props,
@@ -16,28 +13,34 @@ function getFieldConfig({
   const { fieldType } = field;
   const { projectId, applyType, value } = props;
   const code = getComponentCodeForLocalCode(field.code);
-  // 系统自带字段
-  if (isCodeInSystemComponents(code)) {
-    return getFieldPropsByMode({
-      code, outputs: ['config', 'function'], fieldType: field.fieldType, props,
-    });
-  }
+  let newProps: any = {};
   switch (fieldType) {
-    case 'input':
-      return { props: { style: { width: 100 } } };
-    case 'number':
-      return { props: { style: { width: 100 } } };
+    case 'input': {
+      newProps = { style: { width: 100 } };
+      break;
+    }
+    case 'number': {
+      newProps = { style: { width: 100 } };
+      break;
+    }
     case 'single':
     case 'multiple':
     case 'radio':
-    case 'checkbox':
-      return { props: { onlyEnabled: false, fieldId: field.id, selected: value } };
-    default:
+    case 'checkbox': {
+      newProps = { onlyEnabled: false, fieldId: field.id, selected: value };
       break;
+    }
   }
-  return {};
-}
 
+  return {
+    props: {
+      ...getFieldPropsByMode({
+        code, outputs: ['config', 'function'], fieldType, props,
+      }),
+      ...newProps,
+    },
+  };
+}
 function wrapDateToFlatDate(fieldConfig: any, wrapElementFn: (config: any) => JSX.Element): JSX.Element {
   const { fieldType } = fieldConfig;
   class FlatDateRangePicker extends React.PureComponent<any, any> {
