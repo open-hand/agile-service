@@ -208,7 +208,6 @@ const ChooseField: React.FC<Props> = (props) => {
   return (
     <div className={wrapClassName} style={wrapStyle}>
       <Dropdown
-        getPopupContainer={(trigger) => document.body}
         visible={!hidden}
         overlay={(
           <div

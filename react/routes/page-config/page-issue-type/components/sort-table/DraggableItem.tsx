@@ -42,7 +42,6 @@ const DraggableItem: React.FC<Props> = ({
       <div
         role="none"
         className={`${prefixCls}-item ${prefixCls}-item-text`}
-        {...provided.dragHandleProps}
       >
         <ToggleFieldValue data={data} />
       </div>
