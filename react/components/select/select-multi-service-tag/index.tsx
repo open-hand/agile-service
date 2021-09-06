@@ -41,7 +41,7 @@ const SelectMultiServiceTag: React.FC<SelectMultiServiceTagProps> = forwardRef((
             // 重新实现focus，将time置为非空  避免click事件随后触发
             set((innerRef.current?.trigger || {}), 'focusTime', 1);
             set((innerRef.current?.trigger || {}), 'preClickTime', 1);
-            innerRef.current?.trigger?.popupTask.cancel();
+            innerRef.current?.trigger?.popupTask?.cancel();
             innerRef.current?.trigger?.delaySetPopupHidden(false, 150);
           },
         }),
@@ -65,22 +65,22 @@ const SelectMultiServiceTag: React.FC<SelectMultiServiceTagProps> = forwardRef((
     hidden && onBlur && onBlur();
     onPopupHidden && onPopupHidden(hidden);
   }, 230);
-  function handleCancel() {
+  const handleCancel = useCallback(() => {
     setEditValue(undefined);
     innerRef.current?.trigger?.delaySetPopupHidden(true, 0); // 关闭下拉框
     // handlePopupHidden(true);
-  }
+  }, []);
   useEffect(() => () => {
     onPopupHidden && onPopupHidden(true);
   }, []);
   const [value, setValue] = useState(() => handleProcessPropsValue(propsValue) || handleProcessPropsValue(defaultValue));
-  function handleSave(data: IMultiServiceTagItemProps[]) {
+  const handleSave = useCallback((data: IMultiServiceTagItemProps[]) => {
     onChange && onChange(data);
     setValue(handleProcessPropsValue(data));
     otherProps.name && innerRef.current?.record?.set(otherProps.name, data);
     setEditValue(undefined); // 置空编辑值 隐藏下拉框
     innerRef.current?.trigger?.delaySetPopupHidden(true, 0); // 关闭下拉框
-  }
+  }, []);
   const optionsDataSet = useMemo(() => new DataSet({ autoCreate: false, autoQuery: false, paging: false }), []);
   useEffect(() => {
     // 重新加载optionsDataSet数据  以显示值
