@@ -6,18 +6,18 @@ import {
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { Choerodon } from '@choerodon/boot';
+import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
+import { set, isEmpty } from 'lodash';
 import IssueTable from '@/components/issue-table';
 import IssueSearch, { useIssueSearchStore } from '@/components/issue-search';
 import {
   transformFilter,
 } from '@/routes/Issue/stores/utils';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
-import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
 import { IIssueColumnName } from '@/common/types';
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { issueApi } from '@/api';
-import { set } from 'lodash';
 import useTable from '@/hooks/useTable';
 import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 import { IReportListBlock } from '../../store';
@@ -192,18 +192,20 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
         onClear={refresh}
         onChange={refresh}
       />
-      {/* @ts-ignore */}
-      <IssueTable
-        tableProps={tableProps}
-        style={{ marginTop: 10 }}
-        queryBar={'none' as TableQueryBarType}
-        fields={data}
-        createIssue={false}
-        listLayoutColumns={formDataSet.current?.get('visibleColumns').map((code: string) => ({
-          columnCode: code,
-          display: true,
-        })) || []}
-      />
+      {!isEmpty(formDataSet.current?.get('visibleColumns')) && (
+        // @ts-ignore
+        <IssueTable
+          tableProps={tableProps}
+          style={{ marginTop: 10 }}
+          queryBar={'none' as TableQueryBarType}
+          fields={data}
+          createIssue={false}
+          listLayoutColumns={formDataSet.current?.get('visibleColumns')?.map((code: string) => ({
+            columnCode: code,
+            display: true,
+          })) || []}
+        />
+      )}
     </div>
   );
 };
