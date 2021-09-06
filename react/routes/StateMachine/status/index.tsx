@@ -48,7 +48,12 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
         label: '使用情况',
       },
     ],
-    queryFields: [],
+    queryFields: [
+      {
+        name: 'name',
+        label: '名称',
+      },
+    ],
 
   }), []);
   const handleCreateStatusClick = () => {
