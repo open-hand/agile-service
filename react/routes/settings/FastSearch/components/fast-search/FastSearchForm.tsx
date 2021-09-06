@@ -37,7 +37,7 @@ function FastSearchFormItemOrigin({ record, onDelete }: FastSearchFormItemProps)
             </Col>
           )}
           <Col span={colSpanList[1]} style={{ paddingRight: '.1rem' }}>
-            <Select name="attribute" optionRenderer={renderOption} style={{ width: '100%' }} clearButton={false} searchable searchMatcher={({ record: attributeRecord, text }) => String(attributeRecord.get('name')).toLocaleLowerCase().indexOf(text.toLocaleLowerCase()) !== -1} />
+            <Select name="attribute" optionRenderer={renderOption} style={{ width: '100%' }} clearButton={false} searchable searchMatcher={({ record: attributeRecord, text }) => String(attributeRecord.get('name')).toLocaleLowerCase().indexOf((text as string).toLocaleLowerCase()) !== -1} />
           </Col>
           <Col span={colSpanList[2]} style={{ paddingRight: '.05rem' }}>
             <Select name="relation" clearButton={false} dropdownMatchSelectWidth={false} dropdownMenuStyle={{ minWidth: '1rem' }} />
