@@ -1,5 +1,5 @@
 import React, {
-  useEffect, useMemo, useRef, useState,
+  useCallback, useEffect, useMemo, useRef, useState,
 } from 'react';
 import {
   DataSet, Row, Col, Spin, Form, TextField,
@@ -23,7 +23,7 @@ import {
   IIssueType, IModalProps, IssueCreateFields, Priority, User,
 } from '@/common/types';
 import useIssueCreateFields from '@/hooks/data/useIssueCreateFields';
-import { issueApi } from '@/api';
+import { fieldApi, issueApi } from '@/api';
 import { getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { ICascadeLinkage } from '@/routes/page-config/components/setting-linkage/Linkage';
@@ -194,6 +194,8 @@ const CreateIssueBase = observer(({
 }: CreateIssueBaseProps) => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
+  const currentTemplateSummary = useRef(defaultValues?.summary || '');
+  const [templateSummary] = useState(new Map());
   const [dataSet, setDataSet] = useState(defaultDataSet);
   dataSetRef.current = dataSet;
   const issueTypeId = dataSet.current && dataSet.current.get('issueType');
@@ -306,6 +308,26 @@ const CreateIssueBase = observer(({
     }
   });
 
+  // 设置概要默认前缀
+  const setSummaryValue = useCallback(async (newDataSet) => {
+    const newIssueTypeId = newDataSet.current?.get('issueType');
+    const oldSummary = newDataSet.current?.get('summary');
+    if (!newIssueTypeId) {
+      return;
+    }
+    if (!oldSummary || currentTemplateSummary.current === oldSummary) {
+      let prefix: string | undefined = '';
+      if (templateSummary.has(newIssueTypeId)) {
+        prefix = templateSummary.get(newIssueTypeId);
+      } else {
+        prefix = await fieldApi.getSummaryDefaultValue(newIssueTypeId);
+        templateSummary.set(newIssueTypeId, prefix);
+      }
+      currentTemplateSummary.current = prefix as string;
+      newDataSet.current?.set('summary', prefix);
+    }
+  }, [templateSummary, currentTemplateSummary.current]);
+
   useEffect(() => {
     const oldDataSet = dataSetRef.current;
     const newDataSet = new DataSet({
@@ -369,6 +391,10 @@ const CreateIssueBase = observer(({
       if (defaultValue !== null && defaultValue !== undefined) {
         // 没有值的时候再设置
         setValue(field.fieldCode, defaultValue);
+        if (field.fieldCode === 'summary' && !currentTemplateSummary.current) {
+          currentTemplateSummary.current = defaultValue;
+          templateSummary.set(issueTypeId, defaultValue);
+        }
       }
     });
     // TODO: 将各种默认值的获取和设置逻辑合并
@@ -385,6 +411,7 @@ const CreateIssueBase = observer(({
     // 创建一个新的
     newDataSet.create(newValue);
     setDataSet(newDataSet);
+    setSummaryValue(newDataSet);
   }, [defaultFeature, fields, getDefaultValue, handleUpdate, isInProgram, isShowFeature, isSubIssue, issueTypeCode, parentIssue, rules, showFeature, templateData]);
   const getIssueLinks = usePersistFn(() => {
     const links = issueLinkDataSet.toData() as {
