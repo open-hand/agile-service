@@ -104,14 +104,18 @@ public class NoticeEventVO extends ApplicationEvent {
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
         sb.append("\"event\":\"")
-                .append(event).append('\"');
-        sb.append(",\"instanceId\":")
-                .append(instanceId);
-        sb.append(",\"projectId\":")
-                .append(projectId);
-        sb.append(",\"fieldList\":")
-                .append(fieldList);
-        sb.append('}');
+                .append(event).append('\"')
+                .append(",\"instanceId\":")
+                .append(instanceId)
+                .append(",\"projectId\":")
+                .append(projectId)
+                .append(",\"fieldList\":")
+                .append(fieldList)
+                .append(",\"allFieldCheck\":")
+                .append(allFieldCheck)
+                .append(",\"memberFieldIds\":")
+                .append(memberFieldIds)
+                .append('}');
         return sb.toString();
     }
 }
