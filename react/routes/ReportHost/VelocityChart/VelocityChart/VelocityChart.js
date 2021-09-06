@@ -368,7 +368,7 @@ class VelocityChart extends Component {
         </Header>
         <Breadcrumb title="迭代速度图" />
         <Content style={{ paddingTop: 20 }}>
-          <LoadingProvider>
+          <LoadingProvider loading={VS.chartLoading}>
             {!(!VS.chartLoading && !VS.getChartDataX.length) ? (
               <div>
                 <Form style={{ marginBottom: -20, width: 512 }}>

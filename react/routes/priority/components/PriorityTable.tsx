@@ -35,7 +35,7 @@ const Priority: React.FC<{
     autoQuery: true,
     paging: false,
     transport: {
-      read: () => priorityApiConfig.load(),
+      read: ({ data }) => priorityApiConfig.load(data),
     },
     fields: [{
       name: 'name',

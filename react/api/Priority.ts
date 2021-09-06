@@ -27,10 +27,15 @@ class PriorityApi extends Api<PriorityApi> {
   /**
    * 加载优先级列表
    */
-  load() {
+  load(data: { name?: string, description?: string, params?: string }) {
     return this.request({
       method: 'get',
       url: `${this.orgPrefix}/priority`,
+      params: {
+        param: data?.params,
+        name: data?.name,
+        description: data?.description,
+      },
     });
   }
 

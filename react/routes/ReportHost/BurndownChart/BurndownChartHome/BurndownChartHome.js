@@ -39,8 +39,8 @@ class BurndownChartHome extends Component {
     this.state = {
       select: 'remainingEstimatedTime',
       defaultSprintId: '',
-      chartLoading: true,
-      tableLoading: true,
+      chartLoading: false,
+      tableLoading: false,
       endDate: '',
       restDayShow: true,
       restDays: [],
