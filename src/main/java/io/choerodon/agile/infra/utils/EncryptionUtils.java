@@ -12,10 +12,12 @@ import java.util.stream.Collectors;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.choerodon.agile.api.vo.SearchSourceVO;
 import io.choerodon.agile.api.vo.SearchVO;
@@ -25,10 +27,8 @@ import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-import org.hzero.starter.keyencrypt.core.EncryptContext;
-import org.hzero.starter.keyencrypt.core.EncryptProperties;
-import org.hzero.starter.keyencrypt.core.EncryptionService;
+import org.hzero.starter.keyencrypt.core.*;
+import org.hzero.starter.keyencrypt.json.EncryptedSerializerModifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ObjectUtils;
@@ -852,5 +852,18 @@ public class EncryptionUtils {
         } catch (IOException e) {
             throw new CommonException(e);
         }
+    }
+
+    public static ObjectMapper buildEncryptedSerializerObjectMapper(IEncryptionService encryptionService) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objectMapper.registerModule(new SimpleModule() {
+            @Override
+            public void setupModule(SetupContext context) {
+                super.setupModule(context);
+                context.addBeanSerializerModifier(new EncryptedSerializerModifier(encryptionService));
+            }
+        });
+        return objectMapper;
     }
 }
