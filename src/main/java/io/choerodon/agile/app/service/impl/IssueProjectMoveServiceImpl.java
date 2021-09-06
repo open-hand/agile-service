@@ -378,6 +378,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
                 issueService.handleUpdateVersionIssueRelWithoutRuleNotice(list, targetProjectVO.getId(), issueDTO.getIssueId(), "influence");
             }
         }
+        issueService.addCollectionFieldIfNotNull(issueUpdateVO, fieldList);
         // 修改自定义字段的值
         TriggerCarrierVO triggerCarrierVO = null;
         if (!ObjectUtils.isEmpty(customFields)) {
