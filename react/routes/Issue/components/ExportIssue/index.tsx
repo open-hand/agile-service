@@ -1,10 +1,11 @@
 import React from 'react';
-import { DataSet, Table, Modal } from 'choerodon-ui/pro';
+import { Modal } from 'choerodon-ui/pro';
+import { Choerodon } from '@choerodon/boot';
+import { set } from 'lodash';
 import ExportIssue, { openExportIssueModal as originOpenExportIssueModal } from '@/components/issue-export';
 import IssueExportStore from '@/components/issue-export/stores/store';
 import { issueApi, TemplateAction } from '@/api';
 import { IChosenFieldField } from '@/components/chose-field/types';
-import { set } from 'lodash';
 import { IFoundationHeader } from '@/common/types';
 import { isInProgram } from '@/utils/program';
 import {
@@ -68,7 +69,11 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     events: {
       exportAxios: (searchData, sort) => {
         set(searchData, 'searchArgs.tree', !tableListMode);
-        return issueApi.export(searchData, sort);
+        return issueApi.export(searchData, sort).then(() => {
+          Choerodon.prompt('导出成功');
+        }).catch(() => {
+          Choerodon.prompt('导出失败');
+        });
       },
       loadRecordAxios: () => issueApi.loadLastImportOrExport('download_file'),
     },
