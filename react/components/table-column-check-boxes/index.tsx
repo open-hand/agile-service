@@ -10,8 +10,8 @@ import { CheckBoxProps } from 'choerodon-ui/pro/lib/check-box/CheckBox';
 import { FormProps } from 'choerodon-ui/pro/lib/form/Form';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/interface';
 
-import { pageConfigApi } from '@/api';
 import { OptionProps } from 'choerodon-ui/lib/select';
+import { pageConfigApi } from '@/api';
 
 export interface ITableColumnCheckBoxesOptionData {
   label: string, value: string, checkBoxProps?: CheckBoxProps, defaultChecked?: boolean, optionConfig?: OptionProps
@@ -180,7 +180,7 @@ const TableColumnCheckBoxes: React.FC<Props> = ({
     setFilter(value);
   }, []);
 
-  const filteredOptions = options.filter((option) => option.label.indexOf(filter || '') > -1);
+  const filteredOptions = options.filter((option) => option.label?.indexOf(filter || '') > -1);
   return (
     <Form dataSet={dataSet} {...formProps} labelLayout={'none' as LabelLayout} style={{ marginLeft: -5 }}>
       <TextField prefix={<Icon type="search" />} placeholder="请输入搜索内容" style={{ height: 34 }} onChange={handleSearch} clearButton />
