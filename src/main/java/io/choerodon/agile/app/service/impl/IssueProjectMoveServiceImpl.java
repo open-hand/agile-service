@@ -400,7 +400,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         TriggerCarrierVO triggerCarrier = triggerCarrierVO;
         if (ObjectUtils.isEmpty(triggerCarrier)) {
             triggerCarrier = new TriggerCarrierVO();
-            triggerCarrier.setExecutedRuleIds(new ArrayList<>());
+            triggerCarrier.setExecutedRules(new ArrayList<>());
             triggerCarrier.setMemberFieldIds(new HashSet<>());
             triggerCarrier.setFieldList(new ArrayList<>());
         }

@@ -82,7 +82,6 @@ public interface ConfigurationRuleService {
                    ConfigurationRuleVO rule,
                    Long projectId,
                    boolean createCustomFieldMember,
-                   List<Long> executedRuleIds,
                    Long noticeInstanceId,
                    String encryptType,
                    RequestAttributes requestAttributes);

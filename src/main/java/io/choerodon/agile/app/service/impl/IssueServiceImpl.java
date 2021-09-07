@@ -1125,7 +1125,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         try {
             triggerCarrierVO.setInstanceId(issueId);
             triggerCarrierVO.setFieldList(Collections.singletonList("statusId"));
-            triggerCarrierVO.setExecutedRuleIds(new ArrayList<>());
+            triggerCarrierVO.setExecutedRules(new ArrayList<>());
             triggerCarrierVO.setNoticeInstanceId(issueId);
             triggerCarrierVO.setMemberFieldIds(new HashSet<>());
             statusFieldSettingService.handlerSettingToUpdateIssue(projectId, issueId, triggerCarrierVO);
@@ -1277,7 +1277,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         triggerCarrierVO.setInstanceId(issue.getIssueId());
         triggerCarrierVO.setProjectId(projectId);
         triggerCarrierVO.setIssueTypeId(issue.getIssueTypeId());
-        triggerCarrierVO.setExecutedRuleIds(new ArrayList<>());
+        triggerCarrierVO.setExecutedRules(new ArrayList<>());
         triggerCarrierVO.setNoticeInstanceId(issue.getIssueId());
         triggerCarrierVO.setFieldList(Collections.singletonList("statusId"));
         triggerCarrierVO.setMemberFieldIds(new HashSet<>());
@@ -1682,6 +1682,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             issueAccessDataService.removeIssueFromSprintByIssueIds(batchRemoveSprintDTO);
             if (sprintId != null && !Objects.equals(sprintId, 0L)) {
                 issueAccessDataService.issueToDestinationByIds(projectId, sprintId, moveIssueIdsFilter, new Date(), customUserDetails.getUserId());
+                invokeUpdateSprintAspect(projectId, moveIssueIdsFilter);
                 if (agilePluginService != null) {
                     agilePluginService.handlerAssociateSprintsWithFeature(projectId, sprintId, frontIncomingIssues, issueSearchDTOList);
                 }
@@ -1693,6 +1694,36 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             return new ArrayList<>();
         }
 
+    }
+
+    private void invokeUpdateSprintAspect(Long projectId, List<Long> issueIds) {
+        if (ObjectUtils.isEmpty(issueIds)) {
+            return;
+        }
+        Map<Long, IssueDTO> issueMap =
+                issueMapper.selectByIds(org.apache.commons.lang3.StringUtils.join(issueIds, ","))
+                        .stream()
+                        .collect(Collectors.toMap(IssueDTO::getIssueId, Function.identity()));
+        List<String> fieldList = Arrays.asList("rank", "sprintId");
+        List<TriggerCarrierVO> triggerCarriers = new ArrayList<>();
+        issueIds.forEach(issueId -> {
+            IssueDTO dto = issueMap.get(issueId);
+            if (ObjectUtils.isEmpty(dto)) {
+                return;
+            }
+            TriggerCarrierVO triggerCarrier = new TriggerCarrierVO();
+            triggerCarrier.setProjectId(projectId);
+            triggerCarrier.setInstanceId(issueId);
+            triggerCarrier.setMemberFieldIds(new HashSet<>());
+            triggerCarrier.setFieldList(fieldList);
+            triggerCarrier.setExecutedRules(new ArrayList<>());
+            triggerCarrier.setIssueTypeId(dto.getIssueTypeId());
+            triggerCarrier.setCheckMode(false);
+            triggerCarrier.setAuditDomain(dto);
+            triggerCarrier.setNoticeInstanceId(issueId);
+            triggerCarriers.add(triggerCarrier);
+        });
+        this.self().batchUpdateInvokeTrigger(triggerCarriers);
     }
 
     private void handlerDataLogRank(MoveIssueVO moveIssueVO, Long projectId, Long sprintId) {
@@ -2330,7 +2361,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         triggerCarrierVO.setIssueTypeId(issueDTO.getIssueTypeId());
         triggerCarrierVO.setNoticeInstanceId(issueId);
         triggerCarrierVO.setFieldList(new ArrayList<>());
-        triggerCarrierVO.setExecutedRuleIds(new ArrayList<>());
+        triggerCarrierVO.setExecutedRules(new ArrayList<>());
         triggerCarrierVO.setMemberFieldIds(new HashSet<>(customFieldIds));
         triggerCarrierVO.setAuditDomain(issueDTO);
         list.add(triggerCarrierVO);

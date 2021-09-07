@@ -19,7 +19,7 @@ public class TriggerCarrierVO {
 
     private List<String> fieldList;
 
-    private List<Long> executedRuleIds;
+    private List<String> executedRules;
 
     private Long issueTypeId;
 
@@ -61,12 +61,12 @@ public class TriggerCarrierVO {
         this.fieldList = fieldList;
     }
 
-    public List<Long> getExecutedRuleIds() {
-        return executedRuleIds;
+    public List<String> getExecutedRules() {
+        return executedRules;
     }
 
-    public void setExecutedRuleIds(List<Long> executedRuleIds) {
-        this.executedRuleIds = executedRuleIds;
+    public void setExecutedRules(List<String> executedRules) {
+        this.executedRules = executedRules;
     }
 
     public Long getIssueTypeId() {
