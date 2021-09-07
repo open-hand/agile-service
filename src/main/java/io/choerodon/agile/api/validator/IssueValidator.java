@@ -198,7 +198,9 @@ public class IssueValidator {
             if (ObjectUtils.isEmpty(issueUpdate.get(EPIC_ID))) {
                 throw new CommonException("error.issue.epic.null");
             }
-            this.judgeEpicExist(projectId, EncryptionUtils.decrypt(issueUpdate.get(EPIC_ID).toString(), EncryptionUtils.BLANK_KEY));
+            if (!judgeEpicExist(projectId, EncryptionUtils.decrypt(issueUpdate.get(EPIC_ID).toString(), EncryptionUtils.BLANK_KEY))) {
+                throw new CommonException("error.epic.notFound");
+            }
         }
     }
 
@@ -232,16 +234,17 @@ public class IssueValidator {
         }
     }
 
-    public void judgeEpicExist(Long projectId, Long epicId) {
+    public boolean judgeEpicExist(Long projectId, Long epicId) {
         if (epicId != null && !Objects.equals(epicId, 0L)) {
             IssueDTO issueDTO = new IssueDTO();
             issueDTO.setProjectId(projectId);
             issueDTO.setTypeCode(ISSUE_EPIC);
             issueDTO.setIssueId(epicId);
             if (issueMapper.selectOne(issueDTO) == null) {
-                throw new CommonException("error.epic.notFound");
+                return false;
             }
         }
+        return true;
     }
 
 

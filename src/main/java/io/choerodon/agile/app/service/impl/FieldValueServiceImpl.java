@@ -356,9 +356,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     private void checkEpic(Long projectId, JSONObject predefinedFields) {
         if (predefinedFields.containsKey(EPIC_ID) && !ObjectUtils.isEmpty(predefinedFields.get(EPIC_ID))) {
             Long epicId = EncryptionUtils.decrypt(predefinedFields.get(EPIC_ID).toString(), EncryptionUtils.BLANK_KEY);
-            try {
-                issueValidator.judgeEpicExist(projectId, epicId);
-            } catch (CommonException e) {
+            if (!issueValidator.judgeEpicExist(projectId, epicId)) {
                 predefinedFields.remove(EPIC_ID);
             }
         }
