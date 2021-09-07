@@ -45,7 +45,8 @@ public interface StatusFieldSettingService {
    void processCustomFieldValues(IssueDTO issueDTO,
                                  List<PageFieldViewUpdateVO> customField,
                                  Long fieldId, String fieldType,
-                                 List<StatusFieldValueSettingDTO> statusFieldValueSettings);
+                                 List<StatusFieldValueSettingDTO> statusFieldValueSettings,
+                                 String fieldCode);
 
    void updateIssue(IssueDTO issueDTO,
                     List<String> field,
