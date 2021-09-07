@@ -35,7 +35,7 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     ? tableRef.current.tableStore.columns.filter((column) => column.name && !column.hidden)
     : [];
 
-  const checkOptions = [...tableDataSet.fields.values()].map((option) => ({ value: option.props.name!, label: (option.props as any).label as string, order: option.order }));
+  const checkOptions = [...tableDataSet.fields.values()].map((option) => ({ value: option.pristineProps.name!, label: (option.pristineProps as any).label as string, order: option.order }));
   const { className, ...otherProps } = otherModalProps || {};
   const key = Modal.key();
   Modal.open({
