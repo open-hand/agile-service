@@ -220,7 +220,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             if (isSystemField) {
                 processSystemFieldValues(issueDTO, issueUpdateVO, field, versionMap, specifyMap, fieldCode, statusFieldValueSettings);
             } else {
-                processCustomFieldValues(issueDTO, customField, fieldId, fieldType, statusFieldValueSettings);
+                processCustomFieldValues(issueDTO, customField, fieldId, fieldType, statusFieldValueSettings, fieldCode);
             }
         });
         // 执行更新
@@ -231,13 +231,15 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     public void processCustomFieldValues(IssueDTO issueDTO,
                                          List<PageFieldViewUpdateVO> customField,
                                          Long fieldId, String fieldType,
-                                         List<StatusFieldValueSettingDTO> statusFieldValueSettings) {
+                                         List<StatusFieldValueSettingDTO> statusFieldValueSettings,
+                                         String fieldCode) {
         if (ObjectUtils.isEmpty(statusFieldValueSettings)) {
             return;
         }
         PageFieldViewUpdateVO pageFieldViewUpdateVO = new PageFieldViewUpdateVO();
         pageFieldViewUpdateVO.setFieldType(fieldType);
         pageFieldViewUpdateVO.setFieldId(fieldId);
+        pageFieldViewUpdateVO.setFieldCode(fieldCode);
         setCustomFieldValue(issueDTO, fieldType, pageFieldViewUpdateVO, statusFieldValueSettings, fieldId);
         customField.add(pageFieldViewUpdateVO);
     }
