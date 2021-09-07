@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueUpdateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
@@ -89,6 +90,8 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     private SendMsgUtil sendMsgUtil;
     @Autowired
     private IssueAssembler issueAssembler;
+    @Autowired
+    private IssueValidator issueValidator;
 
     @Override
     public void fillValues(Long organizationId, Long projectId, Long instanceId, String schemeCode, List<PageFieldViewVO> pageFieldViews) {
@@ -286,6 +289,8 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         if (CollectionUtils.isEmpty(issueDTOS)) {
             throw new CommonException("error.issues.null");
         }
+        //史诗校验
+        checkEpic(projectId, predefinedFields);
         List<VersionIssueRelVO> fixVersion = buildVersionData(predefinedFields.get(FIX_VERSION));
         List<VersionIssueRelVO> influenceVersion = buildVersionData(predefinedFields.get(INFLUENCE_VERSION));
         predefinedFields.remove(FIX_VERSION);
@@ -346,6 +351,17 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
                 }
             }
         });
+    }
+
+    private void checkEpic(Long projectId, JSONObject predefinedFields) {
+        if (predefinedFields.containsKey(EPIC_ID) && !ObjectUtils.isEmpty(predefinedFields.get(EPIC_ID))) {
+            Long epicId = EncryptionUtils.decrypt(predefinedFields.get(EPIC_ID).toString(), EncryptionUtils.BLANK_KEY);
+            try {
+                issueValidator.judgeEpicExist(projectId, epicId);
+            } catch (CommonException e) {
+                predefinedFields.remove(EPIC_ID);
+            }
+        }
     }
 
     private TriggerCarrierVO buildTriggerCarrierVO(IssueDTO v, Long projectId) {
