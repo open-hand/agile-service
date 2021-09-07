@@ -60,6 +60,7 @@ function getSystemFieldConfig({ code, value, defaultValue }: IChosenFieldField, 
       return {
         code: 'pi',
         props: {
+          addPi0: true,
           afterLoad: (piList: any[]) => {
             if (!dataSet?.current?.getState(`init_${code}`) && !defaultValue && Array.isArray(piList) && piList.length > 0) {
               const data = find(piList, { statusCode: 'doing' }) ?? piList[0];

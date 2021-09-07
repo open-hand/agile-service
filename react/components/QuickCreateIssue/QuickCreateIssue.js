@@ -123,6 +123,7 @@ class QuickCreateIssue extends Component {
             create: false,
           });
           cantCreateEvent();
+          this.setState({ summary: this.currentTemplate || '' });
         }
         return;
       }
@@ -167,6 +168,7 @@ class QuickCreateIssue extends Component {
           if (onCreate) {
             onCreate(res);
           }
+          this.setState({ summary: this.currentTemplate || '' });
           localCacheStore.setItem('agile.issue.type.common.selected', currentType.id);
         }).catch(() => {
           this.setState({
