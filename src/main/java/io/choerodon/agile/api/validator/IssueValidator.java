@@ -192,6 +192,15 @@ public class IssueValidator {
         if (issueUpdate.containsKey(STATUS_ID_FIELD) && ObjectUtils.isEmpty(issueUpdate.get(PRIORITY_ID))) {
             throw new CommonException("error.issue.statusId.null");
         }
+
+        //判断要关联的史诗是否存在
+        if (issueUpdate.containsKey(EPIC_ID) ) {
+            if (ObjectUtils.isEmpty(issueUpdate.get(EPIC_ID))) {
+                throw new CommonException("error.issue.epic.null");
+            }
+            //可能为项目群史诗，故不传projectId
+            this.judgeExist(null, EncryptionUtils.decrypt(issueUpdate.get(EPIC_ID).toString(), EncryptionUtils.BLANK_KEY));
+        }
     }
 
     public void verifySubCreateData(IssueSubCreateVO issueSubCreateVO, Long projectId) {
@@ -228,8 +237,9 @@ public class IssueValidator {
         if (epicId != null && !Objects.equals(epicId, 0L)) {
             IssueDTO issueDTO = new IssueDTO();
             issueDTO.setProjectId(projectId);
+            issueDTO.setTypeCode(ISSUE_EPIC);
             issueDTO.setIssueId(epicId);
-            if (issueMapper.selectByPrimaryKey(issueDTO) == null) {
+            if (issueMapper.selectOne(issueDTO) == null) {
                 throw new CommonException("error.epic.notFound");
             }
         }
