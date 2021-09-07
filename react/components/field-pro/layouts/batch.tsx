@@ -4,10 +4,12 @@ import moment from 'moment';
 // eslint-disable-next-line import/no-cycle
 import { getAgileFields } from '../base';
 import { getComponentCodeForLocalCode } from '../base/utils';
+import { IFieldSystemConfig } from '../base/type';
+import { AgileComponentMapProps } from '../base/component';
 
 function getFieldConfig({
   code, fieldType, fieldOptions, id, name,
-}: any) {
+}: any): Partial<IFieldSystemConfig<AgileComponentMapProps>> {
   switch (code) {
     case 'componentIssueRelVOList':
       return { code: 'component', props: { searchable: true } };
@@ -20,9 +22,9 @@ function getFieldConfig({
       return { props: { statusArr: ['version_planning'] } };
     }
     case 'estimatedEndTime':
-      return { props: { defaultPickerValue: moment().endOf('d') } };
-    case 'tags': {
-      return { code: 'tag' };
+      return { props: { defaultPickerValue: moment().endOf('d') } } as any;
+    case 'epicId': {
+      return { code: 'epic' };
     }
     case 'sprintId':
       return { code: 'sprint', props: { statusList: ['started', 'sprint_planning'] } };

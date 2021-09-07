@@ -254,7 +254,6 @@ const IssueDropDown = ({
     <Dropdown
       overlay={getMenu()}
       trigger={['click']}
-      getPopupContainer={(trigger) => trigger.parentNode}
       placement="bottomRight"
     >
       <Button icon="more_vert" style={{ background: 'var(--primary-color)', color: 'white' }} />

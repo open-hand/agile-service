@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Dropdown, Menu, Icon } from 'choerodon-ui';
+import { Dropdown, Menu, Icon } from 'choerodon-ui/pro';
 import { find } from 'lodash';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { issueApi } from '@/api';
@@ -169,7 +169,6 @@ const IssueType = observer(({
           overlay={typeList}
           trigger={['click']}
           disabled={disabled}
-          getPopupContainer={((triggerNode) => triggerNode.parentNode)}
         >
           <div
             className="issue-nav-narrow"
