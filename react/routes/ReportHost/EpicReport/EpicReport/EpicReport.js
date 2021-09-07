@@ -24,7 +24,7 @@ import TypeTag from '../../../../components/TypeTag';
 import ES from '../../../../stores/project/epicReport';
 import BackBtn from '../../back-btn';
 import './EpicReport.less';
-import { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
+import Loading, { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
 
 const { TabPane } = Tabs;
 const { AppState } = stores;
@@ -580,7 +580,7 @@ class EpicReport extends Component {
         filterBar={false}
         columns={column}
         scroll={{ x: true }}
-        loading={ES.tableLoading}
+        loading={false}
       />
     );
   }
@@ -619,8 +619,10 @@ class EpicReport extends Component {
         </Header>
         <Breadcrumb title="史诗报告图" />
         <Content style={{ paddingTop: 20 }}>
-          <LoadingProvider loading={ES.chartLoading}>
-
+          <LoadingProvider>
+            <Loading loading={ES.chartLoading} />
+            <Loading loading={!ES.epicFinishLoading} />
+            <Loading loading={ES.tableLoading} />
             {
             !(!ES.epics.length && ES.epicFinishLoading) ? (
               <div>
@@ -656,15 +658,14 @@ class EpicReport extends Component {
                       ES.chartData.length ? (
                         <div className="c7n-report">
                           <div className="c7n-chart">
-                            {
-                              ES.reload ? null : (
-                                <ReactEcharts
-                                  ref={(e) => { this.echarts_react = e; }}
-                                  option={this.getOption()}
-                                  style={{ height: 400 }}
-                                />
-                              )
-                            }
+                            <LoadingHiddenWrap>
+                              <ReactEcharts
+                                ref={(e) => { this.echarts_react = e; }}
+                                option={this.getOption()}
+                                style={{ height: 400 }}
+                              />
+                            </LoadingHiddenWrap>
+
                           </div>
                           <div className="c7n-toolbar">
                             <h2>汇总</h2>
@@ -739,9 +740,11 @@ class EpicReport extends Component {
                           </div>
                         </div>
                       ) : (
-                        <div style={{ padding: '30px 0 20px', textAlign: 'center' }}>
-                          {ES.tableData.length ? '当前单位下问题均未预估，切换单位或从下方问题列表进行预估。' : '当前史诗下没有问题。'}
-                        </div>
+                        <LoadingHiddenWrap>
+                          <div style={{ padding: '30px 0 20px', textAlign: 'center' }}>
+                            {ES.tableData.length ? '当前单位下问题均未预估，切换单位或从下方问题列表进行预估。' : '当前史诗下没有问题。'}
+                          </div>
+                        </LoadingHiddenWrap>
                       )
                     }
                 </div>

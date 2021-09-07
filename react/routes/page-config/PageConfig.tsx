@@ -1,12 +1,12 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 import { PageWrap, PageTab } from '@choerodon/boot';
+import { LoadingProvider } from '@choerodon/components';
 import { getMenuType } from '@/utils/common';
 import ObjectScheme from './object-scheme';
 import './index.less';
 import PageIssueType from './page-issue-type';
 import PageTemplate from './page-template';
-import { LoadingProvider } from '@/components/Loading';
 
 function PageConfig({ components }: any) {
   const tabs = [<PageTab

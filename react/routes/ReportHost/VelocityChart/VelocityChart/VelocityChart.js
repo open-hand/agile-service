@@ -333,7 +333,7 @@ class VelocityChart extends Component {
         filterBar={false}
         pagination={false}
         scroll={{ x: true }}
-        loading={VS.tableLoading}
+        loading={false}
       />
     );
   }
@@ -368,7 +368,9 @@ class VelocityChart extends Component {
         </Header>
         <Breadcrumb title="迭代速度图" />
         <Content style={{ paddingTop: 20 }}>
-          <LoadingProvider loading={VS.chartLoading}>
+          <LoadingProvider>
+            <Loading loading={VS.chartLoading} />
+            <Loading loading={VS.tableLoading} />
             {!(!VS.chartLoading && !VS.getChartDataX.length) ? (
               <div>
                 <Form style={{ marginBottom: -20, width: 512 }}>
@@ -389,12 +391,10 @@ class VelocityChart extends Component {
                     </Option>
                   </Select>
                 </Form>
-                <Loading loading={VS.chartLoading}>
-                  <ReactEcharts
-                    className="c7n-chart"
-                    option={this.getOption()}
-                  />
-                </Loading>
+                <ReactEcharts
+                  className="c7n-chart"
+                  option={this.getOption()}
+                />
                 {this.renderTable()}
               </div>
             ) : (

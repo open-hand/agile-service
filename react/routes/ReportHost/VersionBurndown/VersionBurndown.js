@@ -27,7 +27,7 @@ import storyPointIcon from './storyPointIcon.svg';
 import completed from './completed.svg';
 import BackBtn from '../back-btn';
 import './VersionReport.less';
-import { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
+import Loading, { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -581,23 +581,25 @@ class VersionBurndown extends Component {
   renderChart = () => {
     if (!ES.chartDataOrigin.length) {
       return (
-        <EmptyPage
-          style={{ paddingTop: 20 }}
-          image={pic}
-          description={(
-            <div>
-              在此版本中没有预估的故事，请在
-              <EmptyPage.Button
-                onClick={() => {
-                  to(LINK_URL.workListBacklog);
-                }}
-              >
-                【待办事项】
-              </EmptyPage.Button>
-              <span>中创建故事并预估故事点。</span>
-            </div>
+        <LoadingHiddenWrap>
+          <EmptyPage
+            style={{ paddingTop: 20 }}
+            image={pic}
+            description={(
+              <div>
+                在此版本中没有预估的故事，请在
+                <EmptyPage.Button
+                  onClick={() => {
+                    to(LINK_URL.workListBacklog);
+                  }}
+                >
+                  【待办事项】
+                </EmptyPage.Button>
+                <span>中创建故事并预估故事点。</span>
+              </div>
           )}
-        />
+          />
+        </LoadingHiddenWrap>
       );
     }
     return (
@@ -637,7 +639,7 @@ class VersionBurndown extends Component {
           // columns={column}
           columns={this.getColumn(this.getTableDta('unFinish'))}
           scroll={{ x: true }}
-          loading={ES.tableLoading}
+          loading={false}
           pagination={!!(this.getTableDta('unFinish') && this.getTableDta('unFinish').length > 10)}
         />
       );
@@ -823,8 +825,10 @@ class VersionBurndown extends Component {
         </Header>
         <Breadcrumb title="版本燃耗图" />
         <Content style={{ paddingTop: 20 }}>
-          <LoadingProvider loading={ES.chartLoading}>
-
+          <LoadingProvider>
+            <Loading loading={!ES.versionFinishLoading} />
+            <Loading loading={ES.chartLoading} />
+            <Loading loading={ES.tableLoading} />
             {
               !(!ES.versions.length && ES.versionFinishLoading) ? (
                 <div>
@@ -900,10 +904,14 @@ class VersionBurndown extends Component {
                     }}
                   >
                     <TabPane tab="已完成的问题" key="done">
-                      {this.renderTable('compoleted')}
+                      <LoadingHiddenWrap>
+                        {this.renderTable('compoleted')}
+                      </LoadingHiddenWrap>
                     </TabPane>
                     <TabPane tab="未完成的问题" key="todo">
-                      {this.renderTable('unFinish')}
+                      <LoadingHiddenWrap>
+                        {this.renderTable('unFinish')}
+                      </LoadingHiddenWrap>
                     </TabPane>
                   </Tabs>
                 </div>

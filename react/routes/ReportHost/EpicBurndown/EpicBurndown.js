@@ -617,24 +617,26 @@ class EpicBurndown extends Component {
   renderChart = () => {
     if (!ES.chartDataOrigin.length) {
       return (
-        <EmptyPage
-          image={pic}
-          style={{ paddingTop: '.2rem' }}
-          description={(
-            <div style={{ textAlign: 'left' }}>
-              在此史诗中没有预估的故事，请在
-              <a
-                role="none"
-                onClick={() => {
-                  to(LINK_URL.workListBacklog);
-                }}
-              >
-                待办事项
-              </a>
-              中创建故事并预估故事点。
-            </div>
+        <LoadingHiddenWrap>
+          <EmptyPage
+            image={pic}
+            style={{ paddingTop: '.2rem' }}
+            description={(
+              <div style={{ textAlign: 'left' }}>
+                在此史诗中没有预估的故事，请在
+                <a
+                  role="none"
+                  onClick={() => {
+                    to(LINK_URL.workListBacklog);
+                  }}
+                >
+                  待办事项
+                </a>
+                中创建故事并预估故事点。
+              </div>
           )}
-        />
+          />
+        </LoadingHiddenWrap>
       );
     }
     return (
@@ -674,7 +676,7 @@ class EpicBurndown extends Component {
           filterBar={false}
           columns={this.getColumn(this.getTableDta('unFinish'))}
           scroll={{ x: true }}
-          loading={ES.tableLoading}
+          loading={false}
           pagination={!!(this.getTableDta(type) && this.getTableDta(type).length > 10)}
         />
       );
@@ -868,6 +870,9 @@ class EpicBurndown extends Component {
         <Breadcrumb title="史诗燃耗图" />
         <Content style={{ paddingTop: 20 }}>
           <LoadingProvider>
+            <Loading loading={!ES.epicFinishLoading} />
+            <Loading loading={ES.chartLoading} />
+            <Loading loading={ES.tableLoading} />
             {
             !(!ES.epics.length && ES.epicFinishLoading) ? (
               <div>
@@ -925,11 +930,9 @@ class EpicBurndown extends Component {
                   {this.renderEpicInfo()}
                 </div>
 
-                <Loading loading={ES.chartLoading}>
-                  {
+                {
                       this.renderChart()
                     }
-                </Loading>
                 <Tabs
                   activeKey={tabActiveKey}
                   onChange={(key) => {
@@ -939,10 +942,14 @@ class EpicBurndown extends Component {
                   }}
                 >
                   <TabPane tab="已完成的问题" key="done">
-                    {this.renderTable('compoleted')}
+                    <LoadingHiddenWrap>
+                      {this.renderTable('compoleted')}
+                    </LoadingHiddenWrap>
                   </TabPane>
                   <TabPane tab="未完成的问题" key="todo">
-                    {this.renderTable('unFinish')}
+                    <LoadingHiddenWrap>
+                      {this.renderTable('unFinish')}
+                    </LoadingHiddenWrap>
                   </TabPane>
                 </Tabs>
               </div>

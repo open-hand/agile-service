@@ -10,9 +10,9 @@ import { DragDropContextProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
 
+import Table, { ColumnsType } from 'antd/lib/table';
 import STATUS from '@/constants/STATUS';
 import { IStatusCirculation, statusTransformApi } from '@/api';
-import Table, { ColumnsType } from 'antd/lib/table';
 import 'antd/lib/table/style';
 import { useStateMachineContext } from '@/routes/StateMachine/context';
 import CheckboxAll from '@/components/check-box';
@@ -22,6 +22,7 @@ import Checkbox from './Checkbox';
 import DeleteStatus from './DeleteStatus';
 import DragableBodyRow from './DragableBodyRow';
 import styles from './index.less';
+import { Loading } from '@/components';
 
 const StatusCirculationTable: React.FC = () => {
   const [height, setHeight] = useState<number>(0);
@@ -197,7 +198,7 @@ const StatusCirculationTable: React.FC = () => {
     >
       {({ measureRef }) => (
         <div ref={measureRef} className={styles.table}>
-          <Spin spinning={loading}>
+          <Loading loading={loading}>
             <Table
               key={selectedType}
               size="small"
@@ -215,7 +216,7 @@ const StatusCirculationTable: React.FC = () => {
                 moveRow,
               })}
             />
-          </Spin>
+          </Loading>
         </div>
       )}
     </Measure>

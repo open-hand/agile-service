@@ -5,11 +5,11 @@ import { Tabs } from 'choerodon-ui';
 import { find, includes } from 'lodash';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react-lite';
+import classNames from 'classnames';
 import useQueryString from '@/hooks/useQueryString';
 import { getIsOrganization } from '@/utils/common';
 import { statusTransformApi } from '@/api';
-import Loading from '@/components/Loading';
-import classNames from 'classnames';
+import Loading, { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
 import Status from './status';
 import StatusCirculation from './status-circulation';
 import CustomCirculation from './custom-circulation';
@@ -110,28 +110,27 @@ const StateMachine: React.FC = ({
       visibleIssueTypeCategory,
     }}
     >
-      {
-        loading ? <Loading loading={loading} /> : (
-          <div
-            style={{
-              marginLeft: readOnly ? -24 : 0,
-              marginTop: readOnly ? -10 : 0,
-              flex: readOnly ? 1 : 0,
-            }}
-          >
-            {
-              isOrganization && !issueTypeInitedMap.get(selectedType) ? (
-                <NoTemplate activeKey={activeKey} />
-              ) : (
-                <>
-                  {Component && <Component {...otherProps} tab={tabComponent} />}
-                </>
-              )
+      <Loading loading={loading} />
+      <div
+        style={{
+          marginLeft: readOnly ? -24 : 0,
+          marginTop: readOnly ? -10 : 0,
+          flex: readOnly ? 1 : 0,
+        }}
+      >
+        {
+         isOrganization && !issueTypeInitedMap.get(selectedType) ? (
+           <LoadingHiddenWrap>
+             <NoTemplate activeKey={activeKey} />
+           </LoadingHiddenWrap>
+         ) : (
+           <>
+             {Component && <Component {...otherProps} tab={tabComponent} />}
+           </>
+         )
             }
-          </div>
-        )
+      </div>
 
-      }
     </StateMachineContext.Provider>
   );
 };
