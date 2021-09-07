@@ -747,9 +747,9 @@ public class ExcelServiceImpl implements ExcelService {
         Map<String, Long> epicMap = new HashMap<>();
         List<EpicDataVO> epics = issueService.listEpic(projectId);
         epics.forEach(e -> {
-            String summary = e.getSummary();
-            if (ObjectUtils.isEmpty(epicMap.get(summary))) {
-                epicMap.put(summary, e.getIssueId());
+            String epicName = e.getEpicName();
+            if (ObjectUtils.isEmpty(epicMap.get(epicName))) {
+                epicMap.put(epicName, e.getIssueId());
             }
         });
         return epicMap;
