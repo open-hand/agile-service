@@ -1,5 +1,5 @@
 import {
-  observable, action, computed,  
+  observable, action, computed,
 } from 'mobx';
 import { store } from '@choerodon/boot';
 import _ from 'lodash';
@@ -68,10 +68,9 @@ class EpicReportStore {
 
   loadChartData(epicId = this.currentEpicId, unit = this.currentUnit) {
     this.setChartLoading(true);
-    this.setReload(true);
     reportApi.loadEpicChart(epicId, unit).then((res) => {
       this.setBeforeCurrentUnit(unit);
-      const data = res.map(item => ({
+      const data = res.map((item) => ({
         ...item,
         allRemainTimes: item.allRemainTimes || 0,
         allStoryPoints: item.allStoryPoints || 0,
@@ -83,7 +82,6 @@ class EpicReportStore {
       }));
       this.setChartData(data);
       this.setChartLoading(false);
-      this.setReload(false);
     });
   }
 
@@ -156,9 +154,8 @@ class EpicReportStore {
         return item.toFixed(1);
       }
       return item || 0;
-    } else {
-      return 0;
     }
+    return 0;
   });
 
   @computed get getChartDataYCompleted() {

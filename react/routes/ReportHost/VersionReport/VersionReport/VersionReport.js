@@ -23,7 +23,7 @@ import TypeTag from '../../../../components/TypeTag';
 import VS from '../../../../stores/project/versionReportNew';
 import BackBtn from '../../back-btn';
 import './VersionReport.less';
-import { LoadingProvider } from '@/components/Loading';
+import Loading, { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
 
 const { TabPane } = Tabs;
 const { AppState } = stores;
@@ -570,7 +570,7 @@ class EpicReport extends Component {
         filterBar={false}
         columns={column}
         scroll={{ x: true }}
-        loading={VS.tableLoading}
+        loading={false}
       />
     );
   }
@@ -607,7 +607,9 @@ class EpicReport extends Component {
         </Header>
         <Breadcrumb title="版本报告图" />
         <Content style={{ paddingTop: 20 }}>
-          {
+          <LoadingProvider>
+            <Loading loading={!VS.versionFinishLoading} />
+            {
             !(!VS.versions.length && VS.versionFinishLoading) ? (
               <div>
                 <div style={{ display: 'flex' }}>
@@ -667,9 +669,8 @@ class EpicReport extends Component {
                     <Icon style={{ fontSize: 13 }} type="open_in_new" />
                   </p>
                 </div>
-                <LoadingProvider loading={VS.chartLoading}>
-                  <div className="c7n-report">
-                    {
+                <div className="c7n-report">
+                  {
                       VS.chartData.length ? (
                         <div className="c7n-chart">
                           {
@@ -679,16 +680,19 @@ class EpicReport extends Component {
                           }
                         </div>
                       ) : (
-                        <div style={{
-                          padding: '20px 0', textAlign: 'center', width: '100%', color: 'var(--text-color)',
-                        }}
-                        >
-                          {VS.tableData.length ? '当前单位下问题均未预估，切换单位或从下方问题列表进行预估。' : '当前版本下没有问题。'}
-                        </div>
+                        <LoadingHiddenWrap>
+                          <div style={{
+                            padding: '20px 0', textAlign: 'center', width: '100%', color: 'var(--text-color)',
+                          }}
+                          >
+                            {VS.tableData.length ? '当前单位下问题均未预估，切换单位或从下方问题列表进行预估。' : '当前版本下没有问题。'}
+                          </div>
+                        </LoadingHiddenWrap>
                       )
                     }
-                  </div>
-                </LoadingProvider>
+                </div>
+                <Loading loading={VS.chartLoading} />
+                <Loading loading={VS.tableLoading} />
                 <Tabs>
                   <TabPane tab="已完成的问题" key="done">
                     {this.renderTable('compoleted')}
@@ -706,24 +710,28 @@ class EpicReport extends Component {
                 </Tabs>
               </div>
             ) : (
-              <EmptyPage
-                image={pic}
-                description={(
-                  <div>
-                    <span>当前项目无可用版本，请在</span>
-                    <EmptyPage.Button
-                      onClick={() => {
-                        to(LINK_URL.workListVersion);
-                      }}
-                    >
-                      【版本列表】
-                    </EmptyPage.Button>
-                    <span>中创建一个版本</span>
-                  </div>
+              <LoadingHiddenWrap>
+                <EmptyPage
+                  image={pic}
+                  description={(
+                    <div>
+                      <span>当前项目无可用版本，请在</span>
+                      <EmptyPage.Button
+                        onClick={() => {
+                          to(LINK_URL.workListVersion);
+                        }}
+                      >
+                        【版本列表】
+                      </EmptyPage.Button>
+                      <span>中创建一个版本</span>
+                    </div>
                 )}
-              />
+                />
+              </LoadingHiddenWrap>
             )
           }
+          </LoadingProvider>
+
         </Content>
       </Page>
     );

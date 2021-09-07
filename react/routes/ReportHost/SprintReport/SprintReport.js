@@ -27,7 +27,7 @@ import SwithChart from '../Component/switchChart';
 import NoDataComponent from '../Component/noData';
 import BackBtn from '../back-btn';
 import './SprintReport.less';
-import { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
+import Loading, { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -138,7 +138,7 @@ class SprintReport extends Component {
           columns={column}
           filterBar={false}
           scroll={{ x: true }}
-          loading={ReportStore.loading}
+          loading={false}
           onChange={(pagination, filters, sorter) => {
             ReportStore.setTodoPagination(Pagination);
             ReportStore.loadTodoIssues(pagination.current, pagination.pageSize);
@@ -158,7 +158,7 @@ class SprintReport extends Component {
           columns={column}
           filterBar={false}
           scroll={{ x: true }}
-          loading={ReportStore.loading}
+          loading={false}
           onChange={(pagination, filters, sorter) => {
             ReportStore.setDonePagination(pagination);
             ReportStore.loadDoneIssues(pagination.current, pagination.pageSize);
@@ -178,7 +178,7 @@ class SprintReport extends Component {
           columns={column}
           filterBar={false}
           scroll={{ x: true }}
-          loading={ReportStore.loading}
+          loading={false}
           onChange={(pagination, filters, sorter) => {
             ReportStore.setRemovePagination(Pagination);
             ReportStore.loadRemoveIssues(pagination.current, pagination.pageSize);
@@ -428,6 +428,7 @@ class SprintReport extends Component {
                     restDayShow={restDayShow}
                     restDays={restDays}
                   />
+                  <Loading loading={ReportStore.loading} />
                   <Tabs activeKey={ReportStore.activeKey} onChange={this.callback}>
                     <TabPane tab="已完成的问题" key="done">
                       {this.renderDoneIssue(column)}

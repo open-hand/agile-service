@@ -16,6 +16,7 @@ import { getStageMap, getStageList } from '@/utils/stateMachine';
 import Store from './stores';
 import openStateModal from './StateModal';
 import openDeleteModal from './components/DeleteModal';
+import { Loading } from '@/components';
 
 const backlogStates = ['backlog_pending_approval', 'backlog_rejected', 'backlog_create', 'backlog_planning', 'backlog_processing', 'backlog_developed', 'backlog_publish'];
 
@@ -235,16 +236,17 @@ function StateList(props) {
         </Header>
         <Breadcrumb />
         <Content className="issue-state-content" style={theme === 'theme4' ? undefined : { paddingTop: 0 }}>
-          <Table
-            dataSource={statesList.list}
-            columns={getColumn()}
-            filterBarPlaceholder="过滤表"
-            rowKey={(record) => record.id}
-            loading={stateStore.getIsLoading}
-            pagination={pageInfo}
-            onChange={tableChange}
-            className="issue-table"
-          />
+          <Loading loading={stateStore.getIsLoading}>
+            <Table
+              dataSource={statesList.list}
+              columns={getColumn()}
+              filterBarPlaceholder="过滤表"
+              rowKey={(record) => record.id}
+              pagination={pageInfo}
+              onChange={tableChange}
+              className="issue-table"
+            />
+          </Loading>
         </Content>
       </Page>
     );
