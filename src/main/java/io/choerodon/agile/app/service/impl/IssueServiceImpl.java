@@ -1125,7 +1125,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         try {
             triggerCarrierVO.setInstanceId(issueId);
             triggerCarrierVO.setFieldList(Collections.singletonList("statusId"));
-            triggerCarrierVO.setExecutedRuleIds(new ArrayList<>());
+            triggerCarrierVO.setExecutedRules(new ArrayList<>());
             triggerCarrierVO.setNoticeInstanceId(issueId);
             triggerCarrierVO.setMemberFieldIds(new HashSet<>());
             statusFieldSettingService.handlerSettingToUpdateIssue(projectId, issueId, triggerCarrierVO);
@@ -1277,7 +1277,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         triggerCarrierVO.setInstanceId(issue.getIssueId());
         triggerCarrierVO.setProjectId(projectId);
         triggerCarrierVO.setIssueTypeId(issue.getIssueTypeId());
-        triggerCarrierVO.setExecutedRuleIds(new ArrayList<>());
+        triggerCarrierVO.setExecutedRules(new ArrayList<>());
         triggerCarrierVO.setNoticeInstanceId(issue.getIssueId());
         triggerCarrierVO.setFieldList(Collections.singletonList("statusId"));
         triggerCarrierVO.setMemberFieldIds(new HashSet<>());
@@ -1716,7 +1716,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             triggerCarrier.setInstanceId(issueId);
             triggerCarrier.setMemberFieldIds(new HashSet<>());
             triggerCarrier.setFieldList(fieldList);
-            triggerCarrier.setExecutedRuleIds(new ArrayList<>());
+            triggerCarrier.setExecutedRules(new ArrayList<>());
             triggerCarrier.setIssueTypeId(dto.getIssueTypeId());
             triggerCarrier.setCheckMode(false);
             triggerCarrier.setAuditDomain(dto);
@@ -2361,7 +2361,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         triggerCarrierVO.setIssueTypeId(issueDTO.getIssueTypeId());
         triggerCarrierVO.setNoticeInstanceId(issueId);
         triggerCarrierVO.setFieldList(new ArrayList<>());
-        triggerCarrierVO.setExecutedRuleIds(new ArrayList<>());
+        triggerCarrierVO.setExecutedRules(new ArrayList<>());
         triggerCarrierVO.setMemberFieldIds(new HashSet<>(customFieldIds));
         triggerCarrierVO.setAuditDomain(issueDTO);
         list.add(triggerCarrierVO);

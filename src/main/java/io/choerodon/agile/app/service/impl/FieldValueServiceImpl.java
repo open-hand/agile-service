@@ -353,7 +353,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         triggerCarrierVO.setProjectId(projectId);
         triggerCarrierVO.setMemberFieldIds(new HashSet<>());
         triggerCarrierVO.setFieldList(new ArrayList<>());
-        triggerCarrierVO.setExecutedRuleIds(new ArrayList<>());
+        triggerCarrierVO.setExecutedRules(new ArrayList<>());
         triggerCarrierVO.setIssueTypeId(v.getIssueTypeId());
         triggerCarrierVO.setNoticeInstanceId(v.getIssueId());
         triggerCarrierVO.setInstanceId(v.getIssueId());
