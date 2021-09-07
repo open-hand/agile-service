@@ -1627,7 +1627,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public List<IssueSearchVO> batchIssueToEpic(Long projectId, Long epicId, List<Long> issueIds) {
-        issueValidator.judgeExist(projectId, epicId);
+        issueValidator.judgeEpicExist(projectId, epicId);
         issueAccessDataService.batchIssueToEpic(projectId, epicId, issueIds);
         return issueSearchAssembler.dtoListToVO(issueMapper.queryIssueByIssueIds(projectId, issueIds), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
     }
@@ -1790,8 +1790,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public Page<IssueEpicVO> listEpicSelectData(Long projectId, PageRequest pageRequest, Boolean onlyUnCompleted, String param, List<Long> epicIds) {
         Page<IssueEpicVO> page;
         boolean append = !ObjectUtils.isEmpty(epicIds) && pageRequest.getPage() == 0;
-        boolean belongToProgram = belongToProgram(ConvertUtil.getOrganizationId(projectId), projectId);
-        if (belongToProgram) {
+        if (agilePluginService != null && agilePluginService.isSubProjectAndArtDoing(projectId)) {
             page = agilePluginService.selectEpicBySubProjectFeature(projectId, pageRequest, onlyUnCompleted, param, epicIds, append);
         } else {
             page = PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueEpicSelectList(projectId, onlyUnCompleted, param, epicIds));

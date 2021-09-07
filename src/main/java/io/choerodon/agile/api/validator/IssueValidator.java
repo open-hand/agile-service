@@ -198,8 +198,7 @@ public class IssueValidator {
             if (ObjectUtils.isEmpty(issueUpdate.get(EPIC_ID))) {
                 throw new CommonException("error.issue.epic.null");
             }
-            //可能为项目群史诗，故不传projectId
-            this.judgeExist(null, EncryptionUtils.decrypt(issueUpdate.get(EPIC_ID).toString(), EncryptionUtils.BLANK_KEY));
+            this.judgeEpicExist(projectId, EncryptionUtils.decrypt(issueUpdate.get(EPIC_ID).toString(), EncryptionUtils.BLANK_KEY));
         }
     }
 
@@ -233,7 +232,7 @@ public class IssueValidator {
         }
     }
 
-    public void judgeExist(Long projectId, Long epicId) {
+    public void judgeEpicExist(Long projectId, Long epicId) {
         if (epicId != null && !Objects.equals(epicId, 0L)) {
             IssueDTO issueDTO = new IssueDTO();
             issueDTO.setProjectId(projectId);
