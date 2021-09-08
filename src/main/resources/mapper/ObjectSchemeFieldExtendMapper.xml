@@ -453,4 +453,18 @@
         order by t4.rank desc, t4.id asc
     </select>
 
+    <select id="selectIssueTypeMinRank" resultType="io.choerodon.agile.infra.dto.ObjectSchemeFieldExtendDTO">
+        SELECT
+            MIN(`rank`) AS `rank`,
+            issue_type_id,
+            project_id
+        FROM fd_object_scheme_field_extend
+        WHERE organization_id = #{organizationId}
+        AND (project_id IS NULL
+        <if test="projectId != null">
+            OR project_id = #{projectId}
+        </if>
+        )
+        GROUP BY issue_type_id, project_id
+    </select>
 </mapper>

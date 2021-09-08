@@ -124,6 +124,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                   Boolean extraConfig) {
         Long fieldId = field.getId();
         String rank = field.getRank();
+        Map<Long, String> minRankMap = getMinRankMap(organizationId, projectId);
+        List<ObjectSchemeFieldExtendDTO> insertList = new ArrayList<>();
         for (IssueTypeVO issueType : issueTypes) {
             String type = issueType.getTypeCode();
             Long typeId = issueType.getId();
@@ -133,23 +135,37 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             dto.setProjectId(projectId);
             dto.setOrganizationId(organizationId);
             dto.setFieldId(fieldId);
-            if (objectSchemeFieldExtendMapper.select(dto).isEmpty()) {
-                dto.setRequired(false);
-                dto.setCreated(true);
-                dto.setEdited(true);
-                dto.setIssueTypeId(typeId);
-                dto.setDefaultValue(defaultValue);
-                dto.setExtraConfig(extraConfig);
-                if (Objects.equals(typeId, issueTypeIdForRank)
-                        && !StringUtils.isEmpty(rank)) {
-                    dto.setRank(rank);
-                } else {
-                    String minRank = getMinRank(organizationId, projectId, typeId, null);
-                    dto.setRank(minRank);
-                }
-                objectSchemeFieldExtendMapper.insert(dto);
+            dto.setRequired(false);
+            dto.setCreated(true);
+            dto.setEdited(true);
+            dto.setIssueTypeId(typeId);
+            dto.setDefaultValue(defaultValue);
+            dto.setExtraConfig(extraConfig);
+            if (Objects.equals(typeId, issueTypeIdForRank)
+                    && !StringUtils.isEmpty(rank)) {
+                dto.setRank(rank);
+            } else {
+                String minRank = RankUtil.genPre(minRankMap.getOrDefault(typeId, RankUtil.mid()));
+                dto.setRank(minRank);
             }
+            insertList.add(dto);
         }
+        objectSchemeFieldExtendMapper.batchInsert(insertList);
+    }
+
+    private Map<Long, String> getMinRankMap(Long organizationId, Long projectId) {
+        List<ObjectSchemeFieldExtendDTO> minRankInfoList = objectSchemeFieldExtendMapper.selectIssueTypeMinRank(organizationId, projectId);
+        if (CollectionUtils.isEmpty(minRankInfoList)){
+            return new HashMap<>(0);
+        }
+        Map<Long, String> minRankMap = new HashMap<>(minRankInfoList.size());
+        minRankInfoList.forEach(proMinRankInfo -> {
+            if (minRankMap.get(proMinRankInfo.getId()) != null && proMinRankInfo.getProjectId() == null){
+                return;
+            }
+            minRankMap.put(proMinRankInfo.getIssueTypeId(), proMinRankInfo.getRank());
+        });
+        return minRankMap;
     }
 
     private String getMinRank(Long organizationId, Long projectId, Long issueTypeId, String minRank) {
@@ -678,16 +694,17 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                                 Long projectId,
                                                 List<Long> issueTypeIds,
                                                 Boolean enabled) {
-        Set<String> typeCodes =
-                issueTypeMapper.selectByIds(StringUtils.join(issueTypeIds, ","))
-                        .stream().map(IssueTypeDTO::getTypeCode).collect(Collectors.toSet());
-        String[] contexts = new String[typeCodes.size()];
-        new ArrayList(typeCodes).toArray(contexts);
-        ObjectSchemeFieldContext.isIllegalContexts(contexts);
-
         IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
         issueTypeSearchVO.setEnabled(enabled);
         List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO);
+        Map<Long, IssueTypeVO> typeMap = issueTypes.stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity()));
+        Set<String> contextList = issueTypeIds
+                .stream()
+                .map(typeId -> typeMap.getOrDefault(typeId, new IssueTypeVO()).getTypeCode())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        String[] contexts =  contextList.toArray(new String[0]);
+        ObjectSchemeFieldContext.isIllegalContexts(contexts);
         return filterIssueType(projectId, issueTypes, issueTypeIds);
     }
 
