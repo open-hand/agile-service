@@ -26,8 +26,8 @@ const DISABLE_EMPTY_DATA = ['priorityId', 'statusId', 'reporterId', 'tags'];
 function BatchModal({
   selected, fields: customFields, onCancel, onEdit, issueSearchStore,
 }) {
-  const { isInProgram } = useIsInProgram();
-  const fieldData = [...systemFields.values(), ...customFields].filter(((f) => (isInProgram ? f.code !== 'epicId' : f.code !== 'featureId')));
+  const { isShowFeature } = useIsInProgram();
+  const fieldData = [...systemFields.values(), ...customFields].filter(((f) => (isShowFeature ? f.code !== 'epicId' : f.code !== 'featureId')));
   const [fields, Field] = useFields();
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -46,7 +46,7 @@ function BatchModal({
 
   const dataSet = useMemo(() => new DataSet({
     fields: [
-      ...isInProgram ? [{
+      ...isShowFeature ? [{
         name: 'featureId',
         label: '所属特性',
       }] : [{
