@@ -157,7 +157,8 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         if (execResult != null) {
             return execResult;
         }
-        IssueVO result = issueService.queryIssueCreate(issueCreateVO.getProjectId(), issueId);
+        //前端请求创建issue和创建自定义字段是两个接口，issue创建不走切面，解决issue创建和自定义字段创建都走切面导致某个触发器失败的问题
+        IssueVO result = issueService.queryIssueCreateWithoutRuleNotice(issueCreateVO.getProjectId(), issueId);
         result.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
         return result;
     }
@@ -240,7 +241,8 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         Long issueId = handlerSubIssue(projectId, subIssueConvertDTO, issueSubCreateVO);
         Set<Long> influenceIssueIds = new HashSet<>();
         issueService.doStateMachineCustomFlow(projectId, issueId, SchemeApplyType.AGILE, influenceIssueIds, new TriggerCarrierVO());
-        IssueSubVO issueSubVO = issueService.queryIssueSubByCreate(subIssueConvertDTO.getProjectId(), issueId);
+        //前端请求创建issue和创建自定义字段是两个接口，issue创建不走切面，解决issue创建和自定义字段创建都走切面导致某个触发器失败的问题
+        IssueSubVO issueSubVO = issueService.queryIssueSubByCreateWithoutRuleNotice(subIssueConvertDTO.getProjectId(), issueId);
         issueSubVO.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
         return issueSubVO;
     }

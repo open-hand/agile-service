@@ -33,6 +33,7 @@
         WHERE fdl.project_id = #{projectId}
         AND fdl.scheme_code = #{schemeCode}
         AND fdl.instance_id = #{instanceId}
+        order by fdl.id desc
     </select>
 
     <insert id="batchInsert">

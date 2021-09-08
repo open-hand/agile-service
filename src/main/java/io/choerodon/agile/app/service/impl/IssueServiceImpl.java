@@ -2940,7 +2940,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         // update sprint
         updateSubTaskSprint(projectId, issueUpdateParentIdVO);
         issueAccessDataService.updateSelective(updateIssue);
-        return queryIssueCreate(projectId, issueId);
+        return queryIssueCreateWithoutRuleNotice(projectId, issueId);
     }
 
     private void updateSubTaskSprint(Long projectId, IssueUpdateParentIdVO issueUpdateParentIdVO) {
