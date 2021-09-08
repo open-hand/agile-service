@@ -40,7 +40,7 @@ public interface FieldValueService {
     List<FieldValueDTO> validateFieldValueDTOS(Long organizationId, Long projectId, String schemeCode,
                                                List<PageFieldViewCreateVO> createDTOs);
 
-    void checkCreateCustomField(Long projectId, Long id, String schemeCode, List<FieldValueDTO> fieldValues, List<String> fieldList);
+    void checkCreateCustomField(Long projectId, Long issueId, String schemeCode, List<FieldValueDTO> fieldValues, List<String> fieldList);
 
     /**
      * 保存值/修改值
