@@ -103,7 +103,7 @@ public class IssueValidator {
     @Autowired
     private StatusTransferSettingService statusTransferSettingService;
 
-    @Autowired
+    @Autowired(required = false)
     private AgilePluginService agilePluginService;
 
 
