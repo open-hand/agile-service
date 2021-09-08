@@ -408,11 +408,14 @@ const CreateIssueBase = observer(({
     if (showFeature && defaultFeature) {
       setValue('feature', defaultFeature.issueId);
     }
+    if (issueTypeCode === 'feature') {
+      setValue('jobSize', '1');
+    }
     // 创建一个新的
     newDataSet.create(newValue);
     setDataSet(newDataSet);
     setSummaryValue(newDataSet);
-  }, [defaultFeature, fields, getDefaultValue, handleUpdate, isInProgram, isShowFeature, isSubIssue, issueTypeCode, parentIssue, rules, showFeature, templateData]);
+  }, [defaultFeature, fields, getDefaultValue, handleUpdate, isInProgram, isShowFeature, isSubIssue, issueTypeCode, issueTypeId, parentIssue, rules, setSummaryValue, showFeature, templateData, templateSummary]);
   const getIssueLinks = usePersistFn(() => {
     const links = issueLinkDataSet.toData() as {
       issueIds: string[]

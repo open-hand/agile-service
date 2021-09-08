@@ -96,7 +96,7 @@ function IssueLinkHome() {
       },
     ];
 
-    return <Action data={actionData} />;
+    return <Action data={actionData} className="c7n-issue-link-action" />;
   }
 
   return (
