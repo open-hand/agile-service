@@ -7,10 +7,7 @@ import java.util.Objects;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueCreateVO;
-import io.choerodon.agile.app.service.IssueService;
-import io.choerodon.agile.app.service.ProjectConfigService;
-import io.choerodon.agile.app.service.StateMachineTransformService;
-import io.choerodon.agile.app.service.StatusTransferSettingService;
+import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
@@ -106,6 +103,9 @@ public class IssueValidator {
     @Autowired
     private StatusTransferSettingService statusTransferSettingService;
 
+    @Autowired
+    private AgilePluginService agilePluginService;
+
 
     public void verifyCreateData(IssueCreateVO issueCreateVO, Long projectId, String applyType) {
         issueCreateVO.setProjectId(projectId);
@@ -193,14 +193,12 @@ public class IssueValidator {
             throw new CommonException("error.issue.statusId.null");
         }
 
-        //判断要关联的史诗是否存在
+        //史诗校验
         if (issueUpdate.containsKey(EPIC_ID) ) {
             if (ObjectUtils.isEmpty(issueUpdate.get(EPIC_ID))) {
                 throw new CommonException("error.issue.epic.null");
             }
-            if (!judgeEpicExist(projectId, EncryptionUtils.decrypt(issueUpdate.get(EPIC_ID).toString(), EncryptionUtils.BLANK_KEY))) {
-                throw new CommonException("error.epic.notFound");
-            }
+            judgeEpicCanUpdateAndExist(projectId, EncryptionUtils.decrypt(issueUpdate.get(EPIC_ID).toString(), EncryptionUtils.BLANK_KEY));
         }
     }
 
@@ -234,17 +232,19 @@ public class IssueValidator {
         }
     }
 
-    public boolean judgeEpicExist(Long projectId, Long epicId) {
+    public void judgeEpicCanUpdateAndExist(Long projectId, Long epicId) {
+        if (agilePluginService != null && agilePluginService.isSubProjectAndArtDoing(projectId)) {
+            throw new CommonException("error.issue.can.not.update.epic");
+        }
         if (epicId != null && !Objects.equals(epicId, 0L)) {
             IssueDTO issueDTO = new IssueDTO();
             issueDTO.setProjectId(projectId);
             issueDTO.setTypeCode(ISSUE_EPIC);
             issueDTO.setIssueId(epicId);
             if (issueMapper.selectOne(issueDTO) == null) {
-                return false;
+                throw new CommonException("error.epic.notFound");
             }
         }
-        return true;
     }
 
 

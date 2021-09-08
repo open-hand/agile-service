@@ -1627,9 +1627,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public List<IssueSearchVO> batchIssueToEpic(Long projectId, Long epicId, List<Long> issueIds) {
-        if (!issueValidator.judgeEpicExist(projectId, epicId)) {
-            throw new CommonException("error.epic.notFound");
-        }
+        issueValidator.judgeEpicCanUpdateAndExist(projectId, epicId);
         issueAccessDataService.batchIssueToEpic(projectId, epicId, issueIds);
         return issueSearchAssembler.dtoListToVO(issueMapper.queryIssueByIssueIds(projectId, issueIds), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
     }
