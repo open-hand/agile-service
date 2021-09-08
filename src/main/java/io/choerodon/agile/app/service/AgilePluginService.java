@@ -492,4 +492,6 @@ public interface AgilePluginService {
      * @return 项目关联信息
      */
     List<ProjectRelationshipInfoVO> getProjUnderGroup(Long organizationId, Long projectId, Long parentId, boolean onlySelectEnable);
+
+    boolean isSubProjectAndArtDoing(Long projectId);
 }
