@@ -401,7 +401,7 @@ class SprintReport extends Component {
                           }, { blank: true });
                         }}
                       >
-                        在“问题管理中”查看
+                        在“所有问题中”查看
                         <Icon style={{ fontSize: 13, verticalAlign: -2 }} type="open_in_new" />
                       </p>
                     </div>

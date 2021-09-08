@@ -1,9 +1,9 @@
 import React, { useMemo, useCallback, useImperativeHandle } from 'react';
+import { EmptyPage } from '@choerodon/components';
 import EpicBurnDown from '@/components/charts/epic-burnDown';
 import EpicBurnDownSearch from '@/components/charts/epic-burnDown/search';
 import useEpicBurnDownReport, { EpicBurnConfig } from '@/components/charts/epic-burnDown/useEpicBurnDownReport';
 import pic from '@/assets/image/NoData.svg';
-import { EmptyPage } from '@choerodon/components';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
 import { IReportChartBlock, EpicBurndownSearchVO } from '@/routes/project-report/report-page/store';
@@ -72,7 +72,7 @@ const EpicBurnDownComponent:React.FC<Props> = ({ innerRef, projectId, data }) =>
                     to(LINK_URL.workListIssue);
                   }}
                 >
-                  【问题管理】
+                  【所有问题】
                 </EmptyPage.Button>
                 <span>中创建一个史诗</span>
               </div>
