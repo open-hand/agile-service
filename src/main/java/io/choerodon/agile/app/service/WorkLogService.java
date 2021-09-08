@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.WorkLogVO;
 import io.choerodon.agile.infra.dto.WorkLogDTO;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 
 import java.util.List;
 
@@ -22,5 +23,10 @@ public interface WorkLogService {
     List<WorkLogVO> queryWorkLogListByIssueId(Long projectId, Long issueId);
 
     WorkLogDTO updateBase(WorkLogDTO workLogDTO);
+
+    void updateRemainingTime(IssueConvertDTO issueConvertDTO,
+                             Long projectId,
+                             Long issueId,
+                             List<String> fieldList);
 
 }

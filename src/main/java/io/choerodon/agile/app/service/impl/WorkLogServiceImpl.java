@@ -2,18 +2,18 @@ package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.WorkLogVO;
 import io.choerodon.agile.api.validator.WorkLogValidator;
-import io.choerodon.agile.app.service.IWorkLogService;
-import io.choerodon.agile.app.service.IssueAccessDataService;
-import io.choerodon.agile.app.service.WorkLogService;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.annotation.RuleNotice;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.WorkLogDTO;
-import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.agile.infra.enums.RuleNoticeEvent;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.WorkLogMapper;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import io.choerodon.core.exception.CommonException;
+import org.hzero.core.base.AopProxy;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class WorkLogServiceImpl implements WorkLogService {
+public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogService> {
 
     private static final String SELF_ADJUSTMENT = "self_adjustment";
     private static final String NO_SET_PREDICTION_TIME = "no_set_prediction_time";
@@ -60,7 +61,9 @@ public class WorkLogServiceImpl implements WorkLogService {
     private void setTo(Long issueId, BigDecimal predictionTime) {
         IssueConvertDTO issueConvertDTO = modelMapper.map(issueMapper.selectByPrimaryKey(issueId), IssueConvertDTO.class);
         issueConvertDTO.setRemainingTime(predictionTime);
-        issueAccessDataService.update(issueConvertDTO, new String[]{REMAINING_TIME_FIELD});
+        Long projectId = issueConvertDTO.getProjectId();
+        List<String> fieldList = Arrays.asList(REMAINING_TIME_FIELD);
+        this.self().updateRemainingTime(issueConvertDTO, projectId, issueId, fieldList);
     }
 
     private BigDecimal getRemainTime(IssueConvertDTO issueConvertDTO, BigDecimal theTime) {
@@ -68,20 +71,23 @@ public class WorkLogServiceImpl implements WorkLogService {
         return issueConvertDTO.getRemainingTime().subtract(theTime).compareTo(zero) < 0 ? zero : issueConvertDTO.getRemainingTime().subtract(theTime);
     }
 
-    private void reducePrediction(Long issueId, BigDecimal predictionTime) {
-        IssueConvertDTO issueConvertDTO = modelMapper.map(issueMapper.selectByPrimaryKey(issueId), IssueConvertDTO.class);
-        if (issueConvertDTO.getRemainingTime() != null) {
-            issueConvertDTO.setRemainingTime(getRemainTime(issueConvertDTO, predictionTime));
-            issueAccessDataService.update(issueConvertDTO, new String[]{REMAINING_TIME_FIELD});
-        }
-    }
-
     private void selfAdjustment(Long issueId, BigDecimal workTime) {
         IssueConvertDTO issueConvertDTO = modelMapper.map(issueMapper.selectByPrimaryKey(issueId), IssueConvertDTO.class);
         if (issueConvertDTO.getRemainingTime() != null) {
             issueConvertDTO.setRemainingTime(getRemainTime(issueConvertDTO, workTime));
-            issueAccessDataService.update(issueConvertDTO, new String[]{REMAINING_TIME_FIELD});
+            Long projectId = issueConvertDTO.getProjectId();
+            List<String> fieldList = Arrays.asList(REMAINING_TIME_FIELD);
+            this.self().updateRemainingTime(issueConvertDTO, projectId, issueId, fieldList);
         }
+    }
+
+    @Override
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldListName = "fieldList", instanceId = "issueId", idPosition = "arg")
+    public void updateRemainingTime(IssueConvertDTO issueConvertDTO,
+                                    Long projectId,
+                                    Long issueId,
+                                    List<String> fieldList) {
+        issueAccessDataService.update(issueConvertDTO, new String[]{REMAINING_TIME_FIELD});
     }
 
     @Override
@@ -99,7 +105,7 @@ public class WorkLogServiceImpl implements WorkLogService {
                     setTo(workLogVO.getIssueId(), workLogVO.getPredictionTime());
                     break;
                 case REDUCE:
-                    reducePrediction(workLogVO.getIssueId(), workLogVO.getPredictionTime());
+                    selfAdjustment(workLogVO.getIssueId(), workLogVO.getPredictionTime());
                     break;
                 default:
                     break;
