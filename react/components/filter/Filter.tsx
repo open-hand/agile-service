@@ -4,12 +4,12 @@ import React, {
 import { find, uniq, pull } from 'lodash';
 import { Button, Icon } from 'choerodon-ui/pro';
 import classNames from 'classnames';
-import SelectField, { SelectFieldProps } from '@/components/field/select-field';
-import Field from '@/components/field';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import { FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { BasicTarget } from 'ahooks/lib/utils/dom';
 import { usePersistFn, useSize } from 'ahooks';
+import Field from '@/components/field';
+import SelectField, { SelectFieldProps } from '@/components/field/select-field';
 import { ISystemField, ICustomField, IFilterField } from '.';
 import { getFlatElement, renderGroupedFields, renderFields } from './utils';
 import styles from './Filter.less';
@@ -230,7 +230,7 @@ const Filter: React.FC<FilterProps> = ({
           maxTagCount: 3,
           maxTagTextLength: 5,
         } : {}}
-        labelLayout={!flat || isText || isTime ? 'float' as LabelLayout : 'none' as LabelLayout}
+        labelLayout={!flat || isTime ? 'float' as LabelLayout : 'none' as LabelLayout}
         {...isUser ? {
           selected: filter[field.code],
         } : {}}
