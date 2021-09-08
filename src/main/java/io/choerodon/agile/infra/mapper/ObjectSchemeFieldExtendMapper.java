@@ -180,4 +180,12 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
      * @return
      */
     List<PageConfigFieldVO> listConfigsByFieldCodes(@Param("fieldCodes") List<String> fieldCodes);
+
+    /**
+     * 查询各个问题类型的最小rank
+     * @param organizationId 组织id
+     * @param projectId 项目id
+     * @return 各个问题类型的最小rank
+     */
+    List<ObjectSchemeFieldExtendDTO> selectIssueTypeMinRank(@Param("organizationId") Long organizationId, @Param("projectId") Long projectId);
 }
