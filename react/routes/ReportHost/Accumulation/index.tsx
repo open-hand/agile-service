@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
@@ -9,7 +9,7 @@ import pic from '@/assets/image/NoData.svg';
 import BackBtn from '../back-btn';
 import NoDataComponent from '../Component/noData';
 import SwithChart from '../Component/switchChart';
-import Loading, { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
+import { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
 
 const AccumulationReport: React.FC = () => {
   const [searchProps, props, refresh] = useAccumulationReport({ defaultLoading: true });
@@ -17,7 +17,7 @@ const AccumulationReport: React.FC = () => {
     const { data } = props;
     if (!data.length) {
       return (
-        <NoDataComponent title="问题" links={[{ name: '问题管理', link: '/agile/work-list/issue' }]} img={pic} />
+        <NoDataComponent title="问题" links={[{ name: '所有问题', link: '/agile/work-list/issue' }]} img={pic} />
       );
     }
     return (

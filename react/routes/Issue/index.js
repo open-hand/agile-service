@@ -298,7 +298,7 @@ const Issue = observer(({ cached, updateCache }) => {
       className="c7nagile-issue"
     >
       <Header
-        title="问题管理"
+        title="所有问题"
       >
         <HeaderButtons items={[
           {

@@ -569,7 +569,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
                       }, { blank: true });
                     }}
                   >
-                    在“问题管理”中查看
+                    在“所有问题”中查看
                     <Icon style={{ fontSize: getFontSize(13) }} type="open_in_new" />
                   </p>
                 </div>

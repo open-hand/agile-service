@@ -527,7 +527,7 @@ class PieChart extends Component {
                   </div>
                 </div>
               </>
-            ) : <LoadingHiddenWrap><NoDataComponent title="问题" links={[{ name: '【问题管理】', link: LINK_URL.workListIssue }]} img={pic} /></LoadingHiddenWrap> }
+            ) : <LoadingHiddenWrap><NoDataComponent title="问题" links={[{ name: '【所有问题】', link: LINK_URL.workListIssue }]} img={pic} /></LoadingHiddenWrap> }
           </LoadingProvider>
 
         </Content>

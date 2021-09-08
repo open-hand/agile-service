@@ -6,6 +6,7 @@ import {
 } from 'choerodon-ui/pro';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { observer } from 'mobx-react-lite';
 import { MAX_LENGTH_STATUS } from '@/constants/MAX_LENGTH';
 import { getProjectId, getIsOrganization } from '@/utils/common';
 import { IStatus, IIssueType } from '@/common/types';
@@ -15,9 +16,9 @@ import useIssueTypes from '@/hooks/data/useIssueTypes';
 import {
   boardApiConfig, statusTransformApi, statusTransformApiConfig,
 } from '@/api';
-import { observer } from 'mobx-react-lite';
 import useDeepCompareEffect from '@/hooks/useDeepCompareEffect';
 import useIsProgram from '@/hooks/useIsProgram';
+import { OldLoading as Loading } from '@/components/Loading';
 
 const { Option } = SelectBox;
 const key = Modal.key();
@@ -30,6 +31,7 @@ interface Props {
 const CreateStatus: React.FC<Props> = ({
   modal, onSubmit, selectedIssueType = [], record: statusRecord,
 }) => {
+  const [loading, setLoading] = useState<boolean>(false);
   const modalRef = useRef(modal);
   modalRef.current = modal;
   const isOrganization = getIsOrganization();
@@ -155,8 +157,10 @@ const CreateStatus: React.FC<Props> = ({
 
   useEffect(() => {
     if (statusRecord) {
+      setLoading(true);
       statusTransformApi.getStatus(statusRecord.get('id')).then((res: any) => {
         setEditStatus(res);
+        setLoading(false);
         dataSet.current?.set('name', res.name);
         dataSet.current?.set('valueCode', res.type);
         dataSet.current?.set('issueTypeIds', res.issueTypeIds);
@@ -167,6 +171,7 @@ const CreateStatus: React.FC<Props> = ({
 
   return (
     <>
+      <Loading loading={loading} />
       <Form dataSet={dataSet}>
         <TextField
           disabled={!!statusRecord}

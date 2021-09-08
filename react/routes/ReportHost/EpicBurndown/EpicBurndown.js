@@ -973,7 +973,7 @@ class EpicBurndown extends Component {
                           to(LINK_URL.workListIssue);
                         }}
                       >
-                        【问题管理】
+                        【所有问题】
                       </EmptyPage.Button>
                       <span>中创建一个史诗</span>
                     </div>
