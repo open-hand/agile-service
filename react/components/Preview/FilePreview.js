@@ -3,7 +3,7 @@ import { getFileSuffix } from '@/utils/common';
 import './index.less';
 import PdfViewer from './PdfViewer';
 
-const officeSuffix = ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'];
+const officeSuffix = ['doc', 'docx', 'docm', 'dotm', 'dotx', 'ppt', 'pptx', 'ppsx', 'ppt', 'pps', 'pptm', 'potm', 'ppam', 'potx', 'ppsm', 'xls', 'xlsx', 'xlsb', 'xlsm'];
 const prefixCls = 'c7n-agile-preview';
 const FilePreview = ({
   url,
