@@ -6,6 +6,7 @@ import TriggerField from 'choerodon-ui/pro/lib/trigger-field';
 import { toJS } from 'mobx';
 import { isEqual } from 'lodash';
 import classNames from 'classnames';
+import { useCreation } from 'ahooks';
 import useClickOut from '@/hooks/useClickOut';
 import styles from './TextEditToggle.less';
 
@@ -47,6 +48,10 @@ const TextEditToggle: React.FC<Props> = ({
     }
   };
   const containerRef = useClickOut<HTMLDivElement>(handleClickOut);
+  const containerSize = useCreation(() => ({
+    width: containerRef.current?.getBoundingClientRect().width,
+    height: containerRef.current?.getBoundingClientRect().height,
+  }), [editing]);
   editingRef.current = editing;
   useEffect(() => {
     dataRef.current = initValue;
@@ -136,8 +141,7 @@ const TextEditToggle: React.FC<Props> = ({
     };
     if (containerRef.current) {
       editorProps.style = {
-        width: containerRef.current.getBoundingClientRect().width,
-        height: containerRef.current.getBoundingClientRect().height,
+        ...containerSize,
         ...originProps.style,
       };
     }
