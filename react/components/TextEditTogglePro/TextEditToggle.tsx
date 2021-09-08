@@ -2,6 +2,7 @@ import React, {
   useState, useRef, cloneElement, useEffect, Fragment,
 } from 'react';
 import FormField from 'choerodon-ui/pro/lib/field';
+import TriggerField from 'choerodon-ui/pro/lib/trigger-field';
 import { toJS } from 'mobx';
 import { isEqual } from 'lodash';
 import classNames from 'classnames';
@@ -60,16 +61,23 @@ const TextEditToggle: React.FC<Props> = ({
   });
   const hideEditor = () => {
     if (editing) {
-      setEditing(false);
       if (containerRef.current) {
         containerRef.current.blur();
       }
+      const { popupTask, trigger } = editorRef.current as unknown as TriggerField<any>;
+      // 如果属于下拉框类型组件 则立刻关闭下拉框 避免飘逸现象
+      if (popupTask && trigger) {
+        popupTask.cancel();
+        trigger.setPopupHidden(true);
+      }
+      // 延迟一会隐藏
+      setTimeout(() => setEditing(false), 10);
     }
   };
   const showEditor = () => {
     firstRenderEditorRef.current = false;
     if (!editing) {
-      setEditing(true);
+      setEditing(() => true);
     }
   };
   const handleChange = (originOnChange: Function | undefined) => (newValue: any) => {
