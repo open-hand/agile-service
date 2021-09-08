@@ -324,7 +324,7 @@ const CreateIssueBase = observer(({
         templateSummary.set(newIssueTypeId, prefix);
       }
       currentTemplateSummary.current = prefix as string;
-      newDataSet.current?.set('summary', prefix);
+      newDataSet.current?.init('summary', prefix);
     }
   }, [templateSummary, currentTemplateSummary.current]);
 
