@@ -58,7 +58,7 @@ const systemColumns = [
   { label: '史诗', code: 'epic' },
   { label: '主要负责人', code: 'mainResponsibleUser' },
   { label: '环境', code: 'environmentName' },
-  { label: 'Tags', code: 'tags' },
+  { label: 'Tag', code: 'tags' },
 ];
 
 const featureColumn = { label: '特性', code: 'feature' };
