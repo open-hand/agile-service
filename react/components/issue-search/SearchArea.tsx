@@ -71,6 +71,7 @@ const SearchArea: React.FC = () => {
       }
     }
   };
+  const isCancelUserId = (code: string) => !store.getFilterValueByCode(code === 'starBeacon' ? 'myAssigned' : 'starBeacon');
   const handleDeselect = (key: string) => {
     const [type, id] = key.split('|');
     if (type === 'quick') {
@@ -83,10 +84,10 @@ const SearchArea: React.FC = () => {
         store.handleFilterChange('assigneeId', []);
       } else if (id === 'starBeacon') {
         store.handleFilterChange('starBeacon', undefined);
-        store.handleFilterChange('userId', undefined);
+        isCancelUserId(id) && store.handleFilterChange('userId', undefined);
       } else if (id === 'myAssigned') {
         store.handleFilterChange('myAssigned', undefined);
-        store.handleFilterChange('userId', undefined);
+        isCancelUserId(id) && store.handleFilterChange('userId', undefined);
       }
     }
   };
