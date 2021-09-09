@@ -790,70 +790,134 @@
             </foreach>
             ) fv ON ai.issue_id = fv.instance_id
         </if>
+        where ai.project_id = #{projectId} and ai.apply_type = 'agile'
+        and (
+            ai.type_code in ('issue_epic', 'story', 'task')
+            or (ai.type_code = 'bug' and (ai.relate_issue_id is null or ai.relate_issue_id = 0))
+        )
         <if test="sortMap != null and sortMap.orderStr != null">
             ORDER BY ${sortMap.orderStr}
         </if>
     </select>
 
-    <select id="queryChildrenIdByParentId" resultType="java.lang.Long">
-        SELECT search.issue_issue_id
-        from (
-        <include refid="queryIssueIdsListWithSubSql"/>
-        ) search
-        where 1=1
+    <select id="queryParentIssueIdsList_COUNT" resultType="java.lang.Long">
+        select count(ai.issue_id)
+        from agile_issue ai
+        where ai.project_id = #{projectId}
+        and ai.apply_type = 'agile'
         and (
-        search.type_code != 'sub_task'
-        or search.parent_type_code != 'bug'
-        or search.parent_relate_issue_id is null
-        or search.parent_relate_issue_id = 0
-        )
-        <if test="issueIds != null and issueIds.size > 0">
-            and (
-                (
-                    search.project_id = #{projectId}
-                    and search.type_code = 'sub_task' and search.parent_type_code != 'bug'
-                    and search.parent_issue_id is not null
-                    and search.parent_issue_id != 0
-                    and search.parent_issue_id in
-                    <foreach collection="issueIds" item="id" open="(" separator="," close=")">
-                        #{id}
-                    </foreach>
-                )
-                or (
-                    search.project_id = #{projectId}
-                    and search.type_code = 'sub_task'
-                    and search.parent_issue_id is not null
-                    and search.parent_issue_id != 0
-                    and search.parent_issue_id in
-                    <foreach collection="issueIds" item="id" open="(" separator="," close=")">
-                        #{id}
-                    </foreach>
-                )
-                or
-                (
-                    search.project_id = #{projectId}
-                    and search.type_code = 'bug'
-                    and search.relate_issue_id is not null
-                    and search.relate_issue_id != 0
-                    and search.relate_issue_id in
-                    <foreach collection="issueIds" item="id" open="(" separator="," close=")">
-                        #{id}
-                    </foreach>
-                )
-            )
-        </if>
+        ai.type_code in ('issue_epic', 'story', 'task')
+        or (ai.type_code = 'bug' and (ai.relate_issue_id is null or ai.relate_issue_id = 0)))
+        <include refid="explainSearchVO"/>
+        <include refid="filterSqlAndAssigneeIds"/>
         <if test='searchVO.searchArgs != null'>
             <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
-                AND search.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+                AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
             </if>
         </if>
         <if test='searchVO.contents != null and searchVO.contents.size != 0'>
             <foreach collection="searchVO.contents" item="content" index="index">
-                AND (search.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR search.summary LIKE
-                CONCAT(CONCAT('%',
-                #{content}), '%'))
+                AND (
+                ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
+                OR ai.summary LIKE CONCAT(CONCAT('%', #{content}), '%')
+                )
             </foreach>
         </if>
+    </select>
+
+    <select id="queryChildrenIdByParentId" resultType="java.lang.Long">
+        select
+        ai.issue_id
+        from agile_issue ai
+        where ai.project_id = #{projectId}
+        and ai.apply_type = 'agile'
+        and (
+            (
+            ai.type_code = 'sub_task'
+            and ai.parent_issue_id in
+            <foreach collection="issueIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+            )
+            or (
+            ai.type_code = 'bug'
+            and ai.relate_issue_id in
+            <foreach collection="issueIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+            )
+        )
+        <include refid="explainSearchVO"/>
+        <include refid="filterSqlAndAssigneeIds"/>
+        <if test='searchVO.searchArgs != null'>
+            <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
+                AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+            </if>
+        </if>
+        <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+            <foreach collection="searchVO.contents" item="content" index="index">
+                AND (ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
+                OR ai.summary LIKE CONCAT(CONCAT('%', #{content}), '%'))
+            </foreach>
+        </if>
+        <!--SELECT search.issue_issue_id-->
+        <!--from (-->
+        <!--<include refid="queryIssueIdsListWithSubSql"/>-->
+        <!--) search-->
+        <!--where 1=1-->
+        <!--and (-->
+        <!--search.type_code != 'sub_task'-->
+        <!--or search.parent_type_code != 'bug'-->
+        <!--or search.parent_relate_issue_id is null-->
+        <!--or search.parent_relate_issue_id = 0-->
+        <!--)-->
+        <!--<if test="issueIds != null and issueIds.size > 0">-->
+            <!--and (-->
+                <!--(-->
+                    <!--search.project_id = #{projectId}-->
+                    <!--and search.type_code = 'sub_task' and search.parent_type_code != 'bug'-->
+                    <!--and search.parent_issue_id is not null-->
+                    <!--and search.parent_issue_id != 0-->
+                    <!--and search.parent_issue_id in-->
+                    <!--<foreach collection="issueIds" item="id" open="(" separator="," close=")">-->
+                        <!--#{id}-->
+                    <!--</foreach>-->
+                <!--)-->
+                <!--or (-->
+                    <!--search.project_id = #{projectId}-->
+                    <!--and search.type_code = 'sub_task'-->
+                    <!--and search.parent_issue_id is not null-->
+                    <!--and search.parent_issue_id != 0-->
+                    <!--and search.parent_issue_id in-->
+                    <!--<foreach collection="issueIds" item="id" open="(" separator="," close=")">-->
+                        <!--#{id}-->
+                    <!--</foreach>-->
+                <!--)-->
+                <!--or-->
+                <!--(-->
+                    <!--search.project_id = #{projectId}-->
+                    <!--and search.type_code = 'bug'-->
+                    <!--and search.relate_issue_id is not null-->
+                    <!--and search.relate_issue_id != 0-->
+                    <!--and search.relate_issue_id in-->
+                    <!--<foreach collection="issueIds" item="id" open="(" separator="," close=")">-->
+                        <!--#{id}-->
+                    <!--</foreach>-->
+                <!--)-->
+            <!--)-->
+        <!--</if>-->
+        <!--<if test='searchVO.searchArgs != null'>-->
+            <!--<if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>-->
+                <!--AND search.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')-->
+            <!--</if>-->
+        <!--</if>-->
+        <!--<if test='searchVO.contents != null and searchVO.contents.size != 0'>-->
+            <!--<foreach collection="searchVO.contents" item="content" index="index">-->
+                <!--AND (search.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR search.summary LIKE-->
+                <!--CONCAT(CONCAT('%',-->
+                <!--#{content}), '%'))-->
+            <!--</foreach>-->
+        <!--</if>-->
     </select>
 
     <select id="queryStoryAndTaskByProjectId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
