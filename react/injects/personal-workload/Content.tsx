@@ -43,6 +43,7 @@ const PersonalWorkload = () => {
       xAxisData.push(item.assigneeRealName);
       data.push(personalNum);
     });
+    console.log(data, xAxisData);
     return { data, xAxisData };
   }, [chartOption, workloadChartDs]);
 
@@ -229,6 +230,11 @@ const PersonalWorkload = () => {
     }
     if (!startedRecord) {
       return <SprintEmptyPage />;
+    }
+    const { xAxisData, data } = getCategoryAndCategoryCount();
+
+    if (!xAxisData.length || !data.length) {
+      return <SprintEmptyPage content="当前暂无数据" />;
     }
     return <Echart option={getOption()} style={{ height: '100%' }} />;
   }
