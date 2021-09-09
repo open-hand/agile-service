@@ -4299,27 +4299,11 @@
     </select>
 
     <select id="queryUnDoneAllIssues" resultType="java.lang.Long">
-        SELECT
-            ai.issue_id
-        FROM agile_issue ai
-        LEFT JOIN (SELECT aisr.issue_id, asp.sprint_id
-            FROM agile_issue_sprint_rel aisr, agile_sprint asp
-            WHERE asp.project_id = #{projectId}
-            AND aisr.project_id = #{projectId}
-            AND aisr.sprint_id = asp.sprint_id
-            AND asp.status_code != 'closed'
-        ) asp1 ON asp1.issue_id = ai.issue_id
-        WHERE
-        ai.project_id = #{projectId}
-        and ai.type_code in ('story', 'task', 'bug', 'sub_task')
-        and (ai.relate_issue_id IS NULL OR ai.relate_issue_id = 0)
-        AND ai.status_id in
-        <foreach collection="statusIds" item="statusId" open="(" separator="," close=")">
-            #{statusId}
-        </foreach>
-        and asp1.sprint_id IS NULL
-        <include refid="filterSql"/>
-        ORDER BY ai.rank asc
+        (<include refid="selectParentIssue"/>)
+        UNION ALL
+        (
+            <include refid="selectChildren"/>
+        )
     </select>
 
     <select id="querySubIssueCount" resultType="io.choerodon.agile.infra.dto.IssueCountDTO">
@@ -4358,17 +4342,21 @@
     </sql>
 
     <sql id="selectChildren">
-        select
-            ai.issue_id
-        from agile_issue ai
-        where
-         ai.project_id = #{projectId}
-         AND ai.type_code in ('sub_task','bug')
-         AND (
-            ai.parent_issue_id in (<include refid="selectParentIssue"/>)
-            OR ai.relate_issue_id in (<include refid="selectParentIssue"/>)
-         )
-         <include refid="filterSql"/>
+            select
+                ai.issue_id
+            from agile_issue ai
+            where
+            ai.project_id = #{projectId}
+            AND ai.type_code in ('sub_task', 'bug')
+            AND (
+                ai.parent_issue_id in (<include refid="selectParentIssue"/>)
+                OR ai.relate_issue_id in (<include refid="selectParentIssue"/>)
+              )
+            AND ai.status_id in
+            <foreach collection="statusIds" item="statusId" open="(" separator="," close=")">
+                #{statusId}
+            </foreach>
+            <include refid="filterSql"/>
     </sql>
 
     <sql id="filterSql">

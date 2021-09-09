@@ -728,12 +728,8 @@ public class SprintServiceImpl implements SprintService {
         SprintSearchVO sprintSearchVO = new SprintSearchVO();
         List<Long> statusIds = issueStatusMapper.queryUnCompletedStatus(projectId);
         if (!CollectionUtils.isEmpty(statusIds)) {
-            List<Long> todoIssues = issueMapper.queryUnDoneIssues(projectId, statusIds, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
-            if (!CollectionUtils.isEmpty(todoIssues)) {
-                Set<Long> childrenIds = issueMapper.queryChildrenIds(projectId, statusIds, todoIssues, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
-                todoIssues.addAll(childrenIds);
-            }
-            sprintSearchVO.setIssueCount(todoIssues != null ? todoIssues.size() : 0);
+            List<Long> list = issueMapper.queryUnDoneAllIssues(projectId, statusIds, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
+            sprintSearchVO.setIssueCount(CollectionUtils.isEmpty(list) ? 0 : list.size());
         } else {
             sprintSearchVO.setIssueCount(0);
         }
