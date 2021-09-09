@@ -1,7 +1,7 @@
 import React from 'react';
 import { usePersistFn, useUnmount } from 'ahooks';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
-import { OldLoading as Loading } from '@/components/Loading';
+import Loading from '@/components/Loading';
 import useTableColumns from '@/hooks/data/useTableColumns';
 import { ListLayoutColumnVO } from '@/api';
 
@@ -13,6 +13,7 @@ interface Cache {
   visibleColumns: string[]
   listLayoutColumns?: ListLayoutColumnVO[]
 }
+
 export interface TableCacheRenderProps {
   cached: Cache
   updateCache: (cache: Cache) => void

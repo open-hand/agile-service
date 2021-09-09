@@ -12,7 +12,7 @@ import {
 } from 'lodash';
 import { useUnmount, usePersistFn } from 'ahooks';
 import openCreateIssue from '@/components/create-issue';
-import { OldLoading as Loading } from '@/components/Loading';
+import Loading, { LoadingProvider } from '@/components/Loading';
 import { projectApi } from '@/api/Project';
 import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 import { issueApi } from '@/api';
@@ -446,14 +446,21 @@ const Issue = observer(({ cached, updateCache }) => {
 
 export default (props) => {
   const { data, isLoading } = useDefaultMyFilter();
-  if (isLoading) {
-    return <Loading loading />;
+  function render() {
+    if (isLoading) {
+      return <Loading loading />;
+    }
+    return (
+      <StoreProvider {...props} defaultMyFilter={data}>
+        <TableCache>
+          {(cacheProps) => <Issue {...cacheProps} />}
+        </TableCache>
+      </StoreProvider>
+    );
   }
   return (
-    <StoreProvider {...props} defaultMyFilter={data}>
-      <TableCache>
-        {(cacheProps) => <Issue {...cacheProps} />}
-      </TableCache>
-    </StoreProvider>
+    <LoadingProvider style={{ height: '100%', zIndex: 0 }}>
+      {render()}
+    </LoadingProvider>
   );
 };
