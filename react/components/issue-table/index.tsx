@@ -5,14 +5,14 @@ import { observer } from 'mobx-react-lite';
 import {
   PerformanceTable, Pagination,
 } from 'choerodon-ui/pro';
+import { TableProps } from 'choerodon-ui/pro/lib/table/Table';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
 import { IFoundationHeader, IIssueColumnName } from '@/common/types';
-import { TableProps } from 'choerodon-ui/pro/lib/table/Table';
 import './index.less';
 import { ListLayoutColumnVO } from '@/api';
 import useTable from '@/hooks/useTable';
-import { useCreation } from 'ahooks';
 import { checkBoxColumn, expandColumn, getTableColumns } from './columns';
+import { Loading } from '@/components';
 
 export interface IssueTableProps extends Partial<TableProps> {
   tableRef?: React.RefObject<any>
@@ -99,11 +99,11 @@ const IssueTable: React.FC<IssueTableProps> = ({
     handleCheckChange: props.handleCheckChange,
     handleCheckAllChange: props.handleCheckAllChange,
   }), [props.checkValues, props.flattenData, props.handleCheckAllChange, props.handleCheckChange]);
-
   return (
     <div className="c7nagile-issue-table">
       <PerformanceTable
         {...restProps}
+        renderLoading={(spinElement: JSX.Element) => <Loading loadId="issue-table" loading={restProps.loading} />}
         virtualized
         bordered={false}
         columns={[checkboxColumn, ...isTree ? [expandColumn] : [], ...visibleColumns]}
