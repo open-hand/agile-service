@@ -23,13 +23,14 @@ const SelectPriority: React.FC<SelectPriorityProps> = forwardRef(({
 ref: React.Ref<Select>) => {
   const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
   const hasRule = Object.keys(args).filter((key: keyof typeof args) => Boolean(args[key])).length > 0;
+  const isRequestCascadeOptions = !!(hasRule && fieldId);
   const config = useMemo((): SelectConfig => ({
     name: 'priority',
     textField: 'name',
     valueField: 'id',
     requestArgs: args,
-    request: hasRule && fieldId
-      ? ({ requestArgs, filter, page }) => fieldApi.project(projectId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, 0)
+    request: isRequestCascadeOptions
+      ? ({ requestArgs, filter, page }) => fieldApi.project(projectId).getCascadeOptions(fieldId!, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, 0)
       : () => priorityApi.loadByProject(projectId, [String(priorityId)]),
     middleWare: (data: Priority[]) => {
       if (dataRef) {
@@ -42,8 +43,8 @@ ref: React.Ref<Select>) => {
       }
       return data;
     },
-    paging: hasRule,
-  }), [afterLoad, args, dataRef, fieldId, hasRule, priorityId, projectId]);
+    paging: isRequestCascadeOptions,
+  }), [afterLoad, args, dataRef, fieldId, isRequestCascadeOptions, priorityId, projectId]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
   return (
