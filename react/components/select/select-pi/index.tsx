@@ -13,8 +13,8 @@ const renderPi = (pi: any, maxLength?: number, tooltip?: boolean) => {
     const name = pi.id === '0' ? pi.name : pi.fullName || `${pi.code}-${pi.name}`;
     const suffix = name && maxLength && String(name).length > maxLength ? '...' : undefined;
     const piItem = (
-      <div className={classNames({ [styles.ellipsis]: !maxLength })}>
-        {name?.slice(0, maxLength)}
+      <div className={styles.option_wrap}>
+        <span className={classNames({ [styles.ellipsis]: !maxLength })}>{name?.slice(0, maxLength)}</span>
         {suffix}
         {
           pi.statusCode === 'doing' && (

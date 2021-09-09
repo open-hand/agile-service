@@ -21,6 +21,16 @@
   display: inline-flex;
   align-items: center;
   width: 100%;
+
+  &_wrap {
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  label +.option_wrap {
+    max-width: calc(100% - 28px);
+  }
 }
 
 .pi {
