@@ -459,7 +459,7 @@ export default (props) => {
     );
   }
   return (
-    <LoadingProvider style={{ height: '100%', zIndex: 0 }}>
+    <LoadingProvider style={{ height: '100%', zIndex: 'auto' }}>
       {render()}
     </LoadingProvider>
   );

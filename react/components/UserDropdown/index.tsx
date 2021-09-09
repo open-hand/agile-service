@@ -143,8 +143,6 @@ const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee }) => 
       trigger={['click']}
       visible={visible}
       onVisibleChange={handleVisibleChange}
-      // @ts-ignore
-      getPopupContainer={((triggerNode) => triggerNode.parentNode)}
     >
       <div style={{ display: 'flex', alignItems: 'center' }}>
         {
