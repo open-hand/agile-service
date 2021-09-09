@@ -4294,27 +4294,32 @@
     </select>
 
     <select id="queryUnDoneIssues" resultType="java.lang.Long">
-        select ai1.issue_id from (
-           (<include refid="selectParentIssue"/>)
-        ) as aii
-        JOIN agile_issue ai1 ON ai1.issue_id = aii.issue_id
-        left join agile_issue_status ais on ais.status_id = ai1.status_id and ais.project_id = ai1.project_id
-        where (ais.is_completed != 1 or ais.is_completed is null)
-        AND ai1.project_id = #{projectId}
-        ORDER BY ai1.rank asc
+        <include refid="selectParentIssue"/>
+        ORDER BY ai.rank
     </select>
 
     <select id="queryUnDoneAllIssues" resultType="java.lang.Long">
-        select ai1.issue_id from (
-        (<include refid="selectParentIssue"/>)
-        UNION
-        (<include refid="selectChildren"/>)
-        ) as aii
-        JOIN agile_issue ai1 ON ai1.issue_id = aii.issue_id
-        left join agile_issue_status ais on ais.status_id = ai1.status_id and ais.project_id = ai1.project_id
-        where (ais.is_completed != 1 or ais.is_completed is null)
-        AND ai1.project_id = #{projectId}
-        ORDER BY ai1.rank asc
+        SELECT
+            ai.issue_id
+        FROM agile_issue ai
+        LEFT JOIN (SELECT aisr.issue_id, asp.sprint_id
+            FROM agile_issue_sprint_rel aisr, agile_sprint asp
+            WHERE asp.project_id = #{projectId}
+            AND aisr.project_id = #{projectId}
+            AND aisr.sprint_id = asp.sprint_id
+            AND asp.status_code != 'closed'
+        ) asp1 ON asp1.issue_id = ai.issue_id
+        WHERE
+        ai.project_id = #{projectId}
+        and ai.type_code in ('story', 'task', 'bug', 'sub_task')
+        and (ai.relate_issue_id IS NULL OR ai.relate_issue_id = 0)
+        AND ai.status_id in
+        <foreach collection="statusIds" item="statusId" open="(" separator="," close=")">
+            #{statusId}
+        </foreach>
+        and asp1.sprint_id IS NULL
+        <include refid="filterSql"/>
+        ORDER BY ai.rank asc
     </select>
 
     <select id="querySubIssueCount" resultType="io.choerodon.agile.infra.dto.IssueCountDTO">
@@ -4328,31 +4333,28 @@
     </select>
 
     <sql id = "selectParentIssue">
-        select aii.issue_id from (
+        SELECT
+            ai.issue_id
+        FROM agile_issue ai
+        LEFT JOIN (
             SELECT
-            distinct case
-            when ai.type_code = 'sub_task' then ai.parent_issue_id
-            when ai.type_code = 'bug' and ai.relate_issue_id is not null and ai.relate_issue_id != 0 then ai.relate_issue_id
-            else ai.issue_id
-            end as issue_id
-            FROM agile_issue ai
-            left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
-            LEFT JOIN (SELECT aisr.issue_id, asp.sprint_id
+                aisr.issue_id, asp.sprint_id
             FROM agile_issue_sprint_rel aisr, agile_sprint asp
-            WHERE aisr.sprint_id = asp.sprint_id AND asp.status_code != 'closed'
-            ) asp1 ON asp1.issue_id = ai.issue_id
-            WHERE
-            (ais.is_completed != 1 or ais.is_completed is null)
-            and ai.project_id = #{projectId}
-            and ai.type_code in ('story', 'task', 'bug','sub_task')
-            AND asp1.sprint_id IS NULL
-            <include refid="filterSql"/>
-        ) as aii
-        JOIN agile_issue ai1 ON ai1.issue_id = aii.issue_id
-        left join agile_issue_status ais on ais.status_id = ai1.status_id and ais.project_id = ai1.project_id
-        where (ais.is_completed != 1 or ais.is_completed is null)
-        AND ai1.type_code in ('story', 'task', 'bug')
-        AND ai1.project_id = #{projectId}
+            WHERE asp.project_id = #{projectId}
+            AND aisr.project_id = #{projectId}
+            AND aisr.sprint_id = asp.sprint_id
+            AND asp.status_code != 'closed'
+        ) asp1 ON asp1.issue_id = ai.issue_id
+        WHERE
+        ai.project_id = #{projectId}
+        and ai.type_code in ('story', 'task', 'bug')
+        and (ai.relate_issue_id IS NULL OR ai.relate_issue_id = 0)
+        and asp1.sprint_id IS NULL
+        AND ai.status_id in
+        <foreach collection="statusIds" item="statusId" open="(" separator="," close=")">
+            #{statusId}
+        </foreach>
+        <include refid="filterSql"/>
     </sql>
 
     <sql id="selectChildren">
@@ -4408,58 +4410,31 @@
     </sql>
 
     <select id="queryChildrenIds" resultType="java.lang.Long">
-          SELECT
-            ai.issue_id
-           FROM agile_issue ai
-        WHERE
-         ai.project_id = #{projectId}
-        AND ai.type_code in ('sub_task', 'bug')
-        AND (
-            ai.parent_issue_id in
+          (
+            SELECT
+                ai.issue_id
+            FROM agile_issue ai
+            WHERE
+             ai.relate_issue_id in
             <foreach collection="parentIssueIds" item="parentIssueId" open="(" separator="," close=")">
                 #{parentIssueId}
             </foreach>
-            or
-            ai.relate_issue_id in
+            and ai.type_code = 'bug'
+            <include refid="filterSql"/>
+           )
+            UNION ALL
+            (
+            SELECT
+                ai.issue_id
+            FROM agile_issue ai
+            WHERE
+             ai.parent_issue_id in
             <foreach collection="parentIssueIds" item="parentIssueId" open="(" separator="," close=")">
                 #{parentIssueId}
             </foreach>
-        )
-        <if test='advancedSearchArgs != null'>
-            <if test='advancedSearchArgs.versionId != null'>
-                AND ai.issue_id IN (SELECT issue_id FROM agile_version_issue_rel WHERE version_id =
-                #{advancedSearchArgs.versionId} AND relation_type = 'fix')
-            </if>
-            <if test='advancedSearchArgs.epicId != null'>
-                AND ai.epic_id = #{advancedSearchArgs.epicId}
-            </if>
-            <if test='advancedSearchArgs.noVersion != "" and advancedSearchArgs.noVersion == "true"'>
-                AND ai.issue_id NOT IN (SELECT issue_id FROM agile_version_issue_rel WHERE version_id != 0 AND
-                relation_type = 'fix')
-            </if>
-            <if test='advancedSearchArgs.noEpic != "" and advancedSearchArgs.noEpic == "true"'>
-                AND ai.type_code = 'bug'  AND (ai.epic_id IS NULL OR ai.epic_id = 0)
-            </if>
-            <if test='advancedSearchArgs.featureId != null'>
-                and ai.type_code = 'story' AND ai.feature_id = #{advancedSearchArgs.featureId}
-            </if>
-            <if test='advancedSearchArgs.noFeature != "" and advancedSearchArgs.noFeature == "true"'>
-                and ai.type_code = 'story' AND (ai.feature_id IS NULL OR ai.feature_id = 0)
-            </if>
-            <if test='advancedSearchArgs.ownIssue != "" and advancedSearchArgs.ownIssue == "true"'>
-                AND ai.assignee_id = #{userId}
-            </if>
-            <if test='advancedSearchArgs.onlyStory != "" and advancedSearchArgs.onlyStory == "true"'>
-                AND ai.type_code = 'story'
-            </if>
-            <if test='advancedSearchArgs.assigneeFilterIds != null and advancedSearchArgs.assigneeFilterIds.size > 0'>
-                AND ai.assignee_id IN
-                <foreach collection="advancedSearchArgs.assigneeFilterIds" item="assigneeFilterId"
-                         open="(" close=")" separator=",">
-                    #{assigneeFilterId}
-                </foreach>
-            </if>
-        </if>
+            and ai.type_code = 'sub_task'
+            <include refid="filterSql"/>
+           )
     </select>
 
     <sql id="extendExplainSearchVO">

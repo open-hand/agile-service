@@ -95,7 +95,7 @@
         ai.type_code, ai.summary,
         ai.reporter_id, ai.description,
         ai.assignee_id, ai.project_id,
-        ai.epic_id, asp1.sprint_id as is_sprint_id,
+        ai.epic_id,
         ai.story_points, ai.status_id,
         ai.priority_id,
         ai.issue_type_id,
@@ -107,7 +107,6 @@
         IF(ai.parent_issue_id IS NULL OR ai.parent_issue_id = 0,
         (IF(ai.relate_issue_id IS NULL OR ai.relate_issue_id = 0, null, ai.relate_issue_id)),
         ai.parent_issue_id) as parent_id,
---         feature_info.feature_name AS feature_name,
         apv1.version_id AS version_id,
         apv1.name AS version_name
         FROM (select ai3.* from agile_issue ai3
@@ -118,28 +117,16 @@
             #{issueId}
         </foreach>
         )ai
-        LEFT JOIN agile_issue_status ais ON ai.status_id = ais.status_id and ai.project_id = ais.project_id
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
         LEFT JOIN agile_issue ai1 ON ai.epic_id = ai1.issue_id
---         LEFT JOIN (
---             select
---             aio.issue_id as issue_id,
---             aio.summary as feature_name
---             from agile_issue aio, agile_feature af
---             where aio.type_code = 'feature'
---             and aio.issue_id = af.issue_id
---         ) feature_info ON ai.feature_id = feature_info.issue_id
         LEFT JOIN lookup_value alv2 ON ai1.color_code = alv2.value_code
-        LEFT JOIN (SELECT aisr.issue_id, asp.sprint_id
-        FROM agile_issue_sprint_rel aisr, agile_sprint asp
-        WHERE aisr.sprint_id = asp.sprint_id AND asp.status_code != 'closed'
-        ) asp1 ON asp1.issue_id = ai.issue_id
         LEFT JOIN (SELECT avir.issue_id, avir.version_id, apv.name
         FROM agile_version_issue_rel avir, agile_product_version apv
-        WHERE avir.version_id = apv.version_id AND avir.relation_type = 'fix'
+        WHERE avir.project_id = #{projectId}
+        AND avir.version_id = apv.version_id
+        AND avir.relation_type = 'fix'
         ) apv1 ON apv1.issue_id = ai.issue_id
-        WHERE asp1.sprint_id is null and ais.is_completed != 1
-            and ai.type_code in ('story', 'task', 'bug','sub_task')
+        WHERE ai.type_code in ('story', 'task', 'bug','sub_task')
             and ai.apply_type = 'agile'
             and ai.project_id = #{projectId}
         ORDER BY ai.rank asc
@@ -583,10 +570,8 @@
         IF(ai2.parent_issue_id IS NULL OR ai2.parent_issue_id = 0,
             (IF(ai2.relate_issue_id IS NULL OR ai2.relate_issue_id = 0, null, ai2.relate_issue_id)),
              ai2.parent_issue_id) as parent_id,
---         ai2.feature_id,
         ai1.epic_name AS issue_epic_name,
         alv2.name AS color,
---         feature_info.feature_name AS feature_name,
         apv1.version_id AS version_id,
         apv1.name AS version_name
         FROM
@@ -599,24 +584,13 @@
         </foreach>)ai2
         LEFT JOIN agile_project_info api ON ai2.project_id = api.project_id
         LEFT JOIN agile_issue ai1 ON ai2.epic_id = ai1.issue_id
---         LEFT JOIN (
---           select
---             ai3.issue_id as issue_id,
---             ai3.summary as feature_name
---           from agile_issue ai3, agile_feature af
---           where ai3.type_code = 'feature'
---           and ai3.issue_id = af.issue_id
---         ) feature_info ON ai2.feature_id = feature_info.issue_id
         LEFT JOIN lookup_value alv2 ON ai1.color_code = alv2.value_code
         LEFT JOIN (
-            SELECT
-            avir.version_id,
-            avir.issue_id,
-            apv.NAME
-            FROM
-            agile_version_issue_rel avir
-            LEFT JOIN agile_product_version apv ON avir.version_id = apv.version_id
-            where avir.relation_type = 'fix') apv1
+            SELECT avir.issue_id, avir.version_id, apv.name
+            FROM agile_version_issue_rel avir, agile_product_version apv
+            WHERE avir.project_id = #{projectId}
+            AND avir.version_id = apv.version_id
+            AND avir.relation_type = 'fix') apv1
         ON apv1.issue_id = ai2.issue_id
         order by ai2.rank asc
     </select>
@@ -1147,9 +1121,8 @@
             end as issue_id
             FROM agile_issue ai
             LEFT JOIN agile_issue_sprint_rel aisr ON aisr.issue_id = ai.issue_id
-            LEFT JOIN agile_sprint asp on asp.sprint_id = aisr.sprint_id
-            WHERE ai.project_id = #{projectId}
-            AND asp.sprint_id = #{sprintId}
+            WHERE aisr.project_id = #{projectId}
+            AND aisr.sprint_id = #{sprintId}
             <if test='advancedSearchArgs != null'>
                 <if test='advancedSearchArgs.versionId != null'>
                     AND ai.issue_id IN (SELECT issue_id FROM agile_version_issue_rel WHERE version_id =
