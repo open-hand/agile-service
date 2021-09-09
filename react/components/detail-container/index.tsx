@@ -155,7 +155,7 @@ const DetailContainer: React.FC<DetailContainerProps> = ({ children, visible, ..
   ) : null;
   return (
     <DetailContainerContext.Provider value={{
-      topAnnouncementHeight: HeaderStore.announcementClosed ? 0 : 50,
+      topAnnouncementHeight: HeaderStore.announcementClosed ? 0 : 40,
       outside: false,
       resizeRef,
       ...props,
