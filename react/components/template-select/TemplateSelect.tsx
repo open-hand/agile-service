@@ -119,8 +119,6 @@ const TemplateSelect: React.FC<Props> = (props) => {
   return (
     <div className={styles.template_select}>
       <Dropdown
-          // @ts-ignore
-        getPopupContainer={(trigger) => trigger.parentNode}
         visible={!hidden}
         overlay={(
           <div
