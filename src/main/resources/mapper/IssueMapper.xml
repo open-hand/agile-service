@@ -801,28 +801,32 @@
     </select>
 
     <select id="queryParentIssueIdsList_COUNT" resultType="java.lang.Long">
-        select count(ai.issue_id)
-        from agile_issue ai
-        where ai.project_id = #{projectId}
-        and ai.apply_type = 'agile'
-        and (
-        ai.type_code in ('issue_epic', 'story', 'task')
-        or (ai.type_code = 'bug' and (ai.relate_issue_id is null or ai.relate_issue_id = 0)))
-        <include refid="explainSearchVO"/>
-        <include refid="filterSqlAndAssigneeIds"/>
-        <if test='searchVO.searchArgs != null'>
-            <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
-                AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+        select count(distinct temp.issue_id)
+        from (
+            select
+            case
+            when ai.type_code = 'sub_task' then ai.parent_issue_id
+            when ai.type_code = 'bug' and ai.relate_issue_id is not null and ai.relate_issue_id != 0 then ai.relate_issue_id
+            else ai.issue_id
+            end as issue_id
+            from agile_issue ai
+            where ai.project_id = #{projectId} and ai.apply_type = 'agile'
+            <include refid="explainSearchVO"/>
+            <include refid="filterSqlAndAssigneeIds"/>
+            <if test='searchVO.searchArgs != null'>
+                <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
+                    and ai.issue_num like CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+                </if>
             </if>
-        </if>
-        <if test='searchVO.contents != null and searchVO.contents.size != 0'>
-            <foreach collection="searchVO.contents" item="content" index="index">
-                AND (
-                ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
-                OR ai.summary LIKE CONCAT(CONCAT('%', #{content}), '%')
-                )
-            </foreach>
-        </if>
+            <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+                <foreach collection="searchVO.contents" item="content" index="index">
+                    and (
+                    ai.issue_num like CONCAT(CONCAT('%', #{content}), '%')
+                    or ai.summary like CONCAT(CONCAT('%', #{content}), '%')
+                    )
+                </foreach>
+            </if>
+        ) temp
     </select>
 
     <select id="queryChildrenIdByParentId" resultType="java.lang.Long">
