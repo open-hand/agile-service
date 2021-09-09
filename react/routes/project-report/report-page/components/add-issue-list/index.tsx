@@ -8,7 +8,9 @@ import { observer } from 'mobx-react-lite';
 import { Choerodon } from '@choerodon/boot';
 import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { set, isEmpty } from 'lodash';
+import {
+  set, isEmpty, map, some,
+} from 'lodash';
 import IssueTable from '@/components/issue-table';
 import IssueSearch, { useIssueSearchStore } from '@/components/issue-search';
 import {
@@ -28,10 +30,39 @@ const defaultVisibleColumns: IIssueColumnName[] = [
   'summary',
   'issueNum',
   'priority',
-  'assign',
+  'assignee',
   'status',
   'reporter',
 ];
+
+const systemColumns = [
+  { label: '概要', code: 'summary' },
+  { label: '编号', code: 'issueNum' },
+  { label: '优先级', code: 'priority' },
+  { label: '经办人', code: 'assignee' },
+  { label: '状态', code: 'status' },
+  { label: '报告人', code: 'reporter' },
+  { label: '冲刺', code: 'sprint' },
+  { label: '创建人', code: 'createUser' },
+  { label: '更新人', code: 'updateUser' },
+  { label: '创建时间', code: 'creationDate' },
+  { label: '剩余预估时间', code: 'remainingTime' },
+  { label: '最后更新时间', code: 'lastUpdateDate' },
+  { label: '预计开始时间', code: 'estimatedStartTime' },
+  { label: '预计结束时间', code: 'estimatedEndTime' },
+  { label: '标签', code: 'label' },
+  { label: '模块', code: 'component' },
+  { label: '故事点', code: 'storyPoints' },
+  { label: '修复的版本', code: 'fixVersion' },
+  { label: '影响的版本', code: 'influenceVersion' },
+  { label: '史诗', code: 'epic' },
+  { label: '主要负责人', code: 'mainResponsibleUser' },
+  { label: '环境', code: 'environmentName' },
+  { label: 'Tag', code: 'tags' },
+];
+
+const featureColumn = { label: '特性', code: 'feature' };
+
 interface Props {
   innerRef: React.MutableRefObject<RefProps>
   data?: IReportListBlock
@@ -142,6 +173,12 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
   }), [handleSubmit]);
   const { isInProgram } = useIsInProgram();
 
+  useEffect(() => {
+    if (isInProgram && !some(systemColumns, { code: 'feature' })) {
+      systemColumns.splice(-3, 0, featureColumn);
+    }
+  }, [isInProgram]);
+
   const { data } = useIssueTableFields();
   if (!data) {
     return null;
@@ -159,27 +196,9 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
             </div>
           )}
         >
-          <Option value="summary">概要</Option>
-          <Option value="issueNum">编号</Option>
-          <Option value="priority">优先级</Option>
-          <Option value="assign">经办人</Option>
-          <Option value="status">状态</Option>
-          <Option value="sprint">冲刺</Option>
-          <Option value="reporter">报告人</Option>
-          <Option value="createUser">创建人</Option>
-          <Option value="updateUser">更新人</Option>
-          <Option value="creationDate">创建时间</Option>
-          <Option value="lastUpdateDate">最后更新时间</Option>
-          <Option value="estimatedStartTime">预计开始时间</Option>
-          <Option value="estimatedEndTime">预计结束时间</Option>
-          <Option value="label">标签</Option>
-          <Option value="component">模块</Option>
-          <Option value="storyPoints">故事点</Option>
-          <Option value="version">版本</Option>
-          <Option value="epic">史诗</Option>
-          {isInProgram && <Option value="feature">特性</Option>}
-          <Option value="mainResponsibleUser">主要负责人</Option>
-          <Option value="environmentName">环境</Option>
+          {map(systemColumns, ({ label, code }) => (
+            <Option value={code}>{label}</Option>
+          ))}
           {issueSearchStore.fields.map((field) => (
             <Option value={field.code}>
               {field.name}

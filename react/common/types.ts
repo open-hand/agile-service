@@ -369,6 +369,7 @@ export type IIssueColumnName =
   'reporter' |
   'creationDate' |
   'assign' |
+  'assignee' |
   'status' |
   'lastUpdateDate' |
   'estimatedStartTime' |
