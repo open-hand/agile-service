@@ -348,7 +348,7 @@ class ScrumBoardHome extends Component {
       >
         <Header title="活跃冲刺">
           <SelectBoard
-            style={{ marginRight: 24 }}
+            style={{ marginRight: 8 }}
             onFooterClick={this.handleCreateBoardClick}
             onChange={(value) => {
               const selectedBoard = ScrumBoardStore.getBoardList.get(value);

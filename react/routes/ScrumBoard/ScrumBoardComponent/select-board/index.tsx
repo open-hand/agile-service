@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import { Permission } from '@choerodon/boot';
-import { Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { FlatSelect } from '@choerodon/components';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
@@ -36,6 +35,7 @@ const SelectBoard: React.FC<SelectBoardProps> = ({
       }}
       onChange={onChange}
       clearButton={false}
+      className={styles.boardSelect}
       {...props}
       {...otherProps}
     >
