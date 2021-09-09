@@ -4419,6 +4419,12 @@
             <foreach collection="parentIssueIds" item="parentIssueId" open="(" separator="," close=")">
                 #{parentIssueId}
             </foreach>
+            <if test="statusIds != null and statusIds.size > 0">
+                AND ai.status_id in
+                <foreach collection="statusIds" item="statusId" open="(" close=")" separator=",">
+                        #{statusId}
+                </foreach>
+            </if>
             and ai.type_code = 'bug'
             <include refid="filterSql"/>
            )
@@ -4432,6 +4438,12 @@
             <foreach collection="parentIssueIds" item="parentIssueId" open="(" separator="," close=")">
                 #{parentIssueId}
             </foreach>
+            <if test="statusIds != null and statusIds.size > 0">
+                AND ai.status_id in
+                <foreach collection="statusIds" item="statusId" open="(" close=")" separator=",">
+                    #{statusId}
+                </foreach>
+            </if>
             and ai.type_code = 'sub_task'
             <include refid="filterSql"/>
            )

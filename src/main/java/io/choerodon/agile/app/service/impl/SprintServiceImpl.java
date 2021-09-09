@@ -728,8 +728,12 @@ public class SprintServiceImpl implements SprintService {
         SprintSearchVO sprintSearchVO = new SprintSearchVO();
         List<Long> statusIds = issueStatusMapper.queryUnCompletedStatus(projectId);
         if (!CollectionUtils.isEmpty(statusIds)) {
-            List<Long> todoIssues = issueMapper.queryUnDoneAllIssues(projectId, statusIds, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
-            sprintSearchVO.setIssueCount(CollectionUtils.isEmpty(todoIssues) ? 0 : todoIssues.size());
+            List<Long> todoIssues = issueMapper.queryUnDoneIssues(projectId, statusIds, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
+            if (!CollectionUtils.isEmpty(todoIssues)) {
+                Set<Long> childrenIds = issueMapper.queryChildrenIds(projectId, statusIds, todoIssues, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
+                todoIssues.addAll(childrenIds);
+            }
+            sprintSearchVO.setIssueCount(todoIssues != null ? todoIssues.size() : 0);
         } else {
             sprintSearchVO.setIssueCount(0);
         }
@@ -784,7 +788,7 @@ public class SprintServiceImpl implements SprintService {
         List<Long> allIssueIds = new ArrayList<>();
         allIssueIds.addAll(parentIssueIds);
         // 查询子任务issueId
-        Set<Long> childrenIds = issueMapper.queryChildrenIds(projectId,parentIssueIds, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
+        Set<Long> childrenIds = issueMapper.queryChildrenIds(projectId, null, parentIssueIds, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
         if(!CollectionUtils.isEmpty(childrenIds)){
             allIssueIds.addAll(childrenIds);
         }
@@ -808,7 +812,7 @@ public class SprintServiceImpl implements SprintService {
         List<Long> allIssueIds = new ArrayList<>();
         allIssueIds.addAll(parentIssueIds);
         // 查询子任务issueId
-        Set<Long> childrenIds = issueMapper.queryChildrenIds(projectId,parentIssueIds, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
+        Set<Long> childrenIds = issueMapper.queryChildrenIds(projectId, statusIds, parentIssueIds, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
         if(!CollectionUtils.isEmpty(childrenIds)){
             allIssueIds.addAll(childrenIds);
         }
