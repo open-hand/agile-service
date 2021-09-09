@@ -37,6 +37,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -724,9 +725,14 @@ public class SprintServiceImpl implements SprintService {
             agilePluginService.handlerSprintProgramAttr(sprintIds, projectId, sprintSearches);
         }
         // 添加代办问题的统计数
-        List<Long> todoIssues = issueMapper.queryUnDoneAllIssues(projectId, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
         SprintSearchVO sprintSearchVO = new SprintSearchVO();
-        sprintSearchVO.setIssueCount(CollectionUtils.isEmpty(todoIssues) ? 0 : todoIssues.size());
+        List<Long> statusIds = issueStatusMapper.queryUnCompletedStatus(projectId);
+        if (!CollectionUtils.isEmpty(statusIds)) {
+            List<Long> todoIssues = issueMapper.queryUnDoneAllIssues(projectId, statusIds, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
+            sprintSearchVO.setIssueCount(CollectionUtils.isEmpty(todoIssues) ? 0 : todoIssues.size());
+        } else {
+            sprintSearchVO.setIssueCount(0);
+        }
         sprintSearchVO.setSprintId(0L);
         sprintSearches.add(sprintSearchVO);
         return sprintSearches;
@@ -789,7 +795,12 @@ public class SprintServiceImpl implements SprintService {
     @Override
     public Page<IssueSearchVO> todoIssuePage(Long projectId, PageRequest pageRequest, Map<String, Object> searchParamMap) {
         // 分页查询id父任务
-        Page<Long> page = PageHelper.doPage(pageRequest.getPage(), pageRequest.getSize(), () -> issueMapper.queryUnDoneIssues(projectId, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS))));
+        // 查询出设置已解决的状态
+        List<Long> statusIds = issueStatusMapper.queryUnCompletedStatus(projectId);
+        if (CollectionUtils.isEmpty(statusIds)) {
+            return new Page<>();
+        }
+        Page<Long> page = PageHelper.doPage(pageRequest.getPage(), pageRequest.getSize(), () -> issueMapper.queryUnDoneIssues(projectId, statusIds, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS))));
         List<Long> parentIssueIds = page.getContent();
         if(CollectionUtils.isEmpty(parentIssueIds)){
             return new Page<>();

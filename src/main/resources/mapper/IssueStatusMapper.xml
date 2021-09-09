@@ -99,4 +99,10 @@
             #{statusId}
         </foreach>
     </select>
+
+    <select id="queryUnCompletedStatus" resultType="java.lang.Long">
+        select ais.status_id from agile_issue_status ais
+        where ais.project_id = #{projectId}
+        and ais.is_completed != 1
+    </select>
 </mapper>

@@ -39,4 +39,6 @@ public interface IssueStatusMapper extends BaseMapper<IssueStatusDTO> {
      * @return 项目下状态
      */
     List<StatusVO> listStatusByIds(@Param("projectId") Long projectId, @Param("organizationId") Long organizationId, @Param("statusIds") List<Long> statusIds);
+
+    List<Long> queryUnCompletedStatus(@Param("projectId") Long projectId);
 }
