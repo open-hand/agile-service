@@ -43,7 +43,6 @@ const PersonalWorkload = () => {
       xAxisData.push(item.assigneeRealName);
       data.push(personalNum);
     });
-    console.log(data, xAxisData);
     return { data, xAxisData };
   }, [chartOption, workloadChartDs]);
 
