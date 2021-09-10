@@ -69,11 +69,7 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     events: {
       exportAxios: (searchData, sort) => {
         set(searchData, 'searchArgs.tree', !tableListMode);
-        return issueApi.export(searchData, sort).then(() => {
-          Choerodon.prompt('导出成功');
-        }).catch(() => {
-          Choerodon.prompt('导出失败');
-        });
+        return issueApi.export(searchData, sort);
       },
       loadRecordAxios: () => issueApi.loadLastImportOrExport('download_file'),
     },
