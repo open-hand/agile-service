@@ -8,12 +8,12 @@ import {
 } from 'lodash';
 import classnames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
+import { FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import IssueFilterForm, { useIssueFilterForm } from '@/components/issue-filter-form';
 import ChooseField, { useChoseField } from '@/components/chose-field';
 import TableColumnCheckBoxes, { ITableColumnCheckBoxesDataProps, useTableColumnCheckBoxes } from '@/components/table-column-check-boxes';
 import WsProgress from '@/components/ws-progress';
 import { getProjectName, getProjectId } from '@/utils/common';
-import { FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { useExportIssueStore } from './stores';
 import { getCustomFieldFilters } from './utils';
 import { IChosenFieldField } from '../chose-field/types';
@@ -199,6 +199,7 @@ const ExportIssue: React.FC = () => {
     // @ts-ignore
     store.exportButtonConfig.buttonProps.loading = false;
     modal?.update({ okProps: { loading: false } });
+    Choerodon.prompt('导出成功');
     store.setDownloadInfo(messageData);
   };
   const renderExport = () => {
