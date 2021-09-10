@@ -1,11 +1,13 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.infra.dto.IssueSprintDTO;
 import io.choerodon.agile.infra.dto.IssueSprintRelDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author dinghuang123@gmail.com
@@ -29,4 +31,8 @@ public interface IssueSprintRelMapper extends BaseMapper<IssueSprintRelDTO> {
      * @return 影响数量
      */
     int deleteByIds(@Param("issueSprintRelIds") List<Long> issueSprintRelIds);
+
+    List<IssueSprintDTO> selectIssueSprintByIds(@Param("projectId") Long projectId,
+                                                @Param("issueIds") Set<Long> issueIds,
+                                                @Param("statusCodes") List<String> statusCodes);
 }

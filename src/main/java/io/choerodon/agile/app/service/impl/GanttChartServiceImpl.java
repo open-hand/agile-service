@@ -9,11 +9,14 @@ import io.choerodon.agile.infra.dto.IssueSprintDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.agile.infra.mapper.IssueSprintRelMapper;
+import io.choerodon.agile.infra.mapper.IssueStatusMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.utils.PageUtils;
+import io.choerodon.core.utils.PageableHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
@@ -32,6 +35,10 @@ import java.util.stream.Collectors;
 @Service
 public class GanttChartServiceImpl implements GanttChartService {
 
+    private static final String ISSUE_ID = "issueId";
+
+    private static final String ORDER_STR = "orderStr";
+
     @Autowired
     private IssueService issueService;
     @Autowired
@@ -48,6 +55,10 @@ public class GanttChartServiceImpl implements GanttChartService {
     private ProjectConfigService projectConfigService;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private IssueStatusMapper issueStatusMapper;
+    @Autowired
+    private IssueSprintRelMapper issueSprintRelMapper;
 
     @Override
     public Page<GanttChartVO> pagedQuery(Long projectId,
@@ -64,7 +75,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         if (ObjectUtils.isEmpty(issueIds)) {
             return new ArrayList<>();
         }
-        List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(projectId, new ArrayList<>(issueIds), null, false);
+        List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(projectId, new ArrayList<>(issueIds));
         Map<Long, Date> completedDateMap =
                 issueMapper.selectActuatorCompletedDateByIssueIds(new ArrayList<>(issueIds), projectId)
                         .stream()
@@ -92,14 +103,13 @@ public class GanttChartServiceImpl implements GanttChartService {
                 filterSql = null;
             }
             boardAssembler.handleOtherArgs(searchVO);
-            String orderStr = "issue_id desc";
             boolean isTreeView =
                     Boolean.TRUE.equals(
                             Optional.ofNullable(searchVO.getSearchArgs())
                                     .map(x -> x.get("tree"))
                                     .orElse(true));
             Map<String, Object> sortMap = new HashMap<>();
-            sortMap.put("orderStr", orderStr);
+            Sort sort = processSort(pageRequest, sortMap);
             Page<Long> page = issueService.pagedQueryByTreeView(pageRequest, projectId, searchVO, filterSql, sortMap, isTreeView);
             List<Long> issueIds = page.getContent();
             if (!ObjectUtils.isEmpty(issueIds)) {
@@ -107,11 +117,8 @@ public class GanttChartServiceImpl implements GanttChartService {
                 if (isTreeView) {
                     childrenIds.addAll(issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds()));
                 }
-                HashMap<String, String> order = new HashMap<>(1);
-                order.put("issueNum", "issue_id");
-                Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", order);
-                List<IssueDTO> issueDTOList = PageHelper.doSort(sort, () -> issueMapper.selectWithSubByIssueIds(projectId, issueIds, childrenIds, isTreeView));
                 issueIds.addAll(childrenIds);
+                List<IssueDTO> issueDTOList = queryIssueDetailsByIds(sort, projectId, issueIds);
                 Map<Long, Date> completedDateMap =
                         issueMapper.selectActuatorCompletedDateByIssueIds(issueIds, projectId)
                                 .stream()
@@ -124,6 +131,40 @@ public class GanttChartServiceImpl implements GanttChartService {
         } else {
             return emptyPage;
         }
+    }
+
+    private List<IssueDTO> queryIssueDetailsByIds(Sort sort, Long projectId, List<Long> issueIds) {
+        List<IssueDTO> issueDTOList = PageHelper.doSort(sort, () -> issueMapper.selectWithSubByIssueIds(projectId, issueIds));
+        Set<Long> completedStatusIds =
+                issueStatusMapper.listCompletedStatus(new HashSet<>(Arrays.asList(projectId)))
+                        .stream().map(StatusVO::getId).collect(Collectors.toSet());
+        List<String> statusCodes = Arrays.asList("started", "sprint_planning");
+        Map<Long, List<IssueSprintDTO>> issueSprintMap =
+                issueSprintRelMapper.selectIssueSprintByIds(projectId, new HashSet<>(issueIds), statusCodes)
+                        .stream()
+                        .collect(Collectors.groupingBy(IssueSprintDTO::getIssueId));
+        issueDTOList.forEach(issue -> {
+            Long statusId = issue.getStatusId();
+            boolean completed = completedStatusIds.contains(statusId);
+            issue.setCompleted(completed);
+            List<IssueSprintDTO> issueSprints = issueSprintMap.get(issue.getIssueId());
+            if (ObjectUtils.isEmpty(issueSprints)) {
+                return;
+            }
+            issue.setIssueSprintDTOS(Arrays.asList(issueSprints.get(0)));
+        });
+        return issueDTOList;
+    }
+
+    private Sort processSort(PageRequest pageRequest, Map<String, Object> sortMap) {
+        Sort sort = pageRequest.getSort();
+        if (ObjectUtils.isEmpty(sort.getOrderFor(ISSUE_ID))) {
+            Sort.Order issueIdOrder = new Sort.Order(Sort.Direction.DESC, ISSUE_ID);
+            sort = sort.and(new Sort(issueIdOrder));
+        }
+        String sortSql = PageableHelper.getSortSql(PageUtil.sortResetOrder(sort, null, new HashMap<>()));
+        sortMap.put(ORDER_STR, sortSql);
+        return sort;
     }
 
     private boolean buildIssueType(SearchVO searchVO, Long projectId) {

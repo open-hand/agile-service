@@ -24,6 +24,29 @@
         </foreach>
     </select>
 
+    <select id="selectIssueSprintByIds" resultType="io.choerodon.agile.infra.dto.IssueSprintDTO">
+        select
+        aisr.issue_id,
+        asp.sprint_id,
+        asp.sprint_name,
+        asp.start_date,
+        asp.end_date,
+        asp.actual_end_date,
+        asp.status_code
+        from agile_issue_sprint_rel aisr
+        join agile_sprint asp on aisr.sprint_id = asp.sprint_id
+        where aisr.issue_id in
+        <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
+            #{issueId}
+        </foreach>
+        <if test="statusCodes != null and statusCodes.size() > 0">
+            and asp.status_code in
+            <foreach collection="statusCodes" item="statusCode" open="(" separator="," close=")">
+                #{statusCode}
+            </foreach>
+        </if>
+    </select>
+
     <delete id="deleteByIds">
         DELETE FROM agile_issue_sprint_rel
         WHERE id IN

@@ -23,6 +23,16 @@ public class IssueSprintDTO {
     private Date endDate;
 
     private Date actualEndDate;
+    @Encrypt
+    private Long issueId;
+
+    public Long getIssueId() {
+        return issueId;
+    }
+
+    public void setIssueId(Long issueId) {
+        this.issueId = issueId;
+    }
 
     public Date getStartDate() {
         return startDate;

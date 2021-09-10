@@ -542,54 +542,13 @@
         ai.issue_type_id,
         ai.parent_issue_id,
         ai.relate_issue_id,
-        ai.status_id,
-        CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert,
-        ais.is_completed as completed,
-        asp.sprint_id,
-        asp.sprint_name,
-        asp.start_date as sprint_start_date,
-        asp.end_date as sprint_end_date,
-        asp.actual_end_date as sprint_actual_end_date,
-        asp.status_code as sp_status_code
+        ai.status_id
         from agile_issue ai
-        left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
-        left join agile_issue_sprint_rel aisr on aisr.issue_id = ai.issue_id
-        left join agile_sprint asp on (aisr.sprint_id = asp.sprint_id and asp.status_code in ('started','sprint_planning'))
         where ai.project_id = #{projectId}
         and ai.issue_id in
         <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
             #{issueId}
         </foreach>
-        <if test="withSubIssues">
-            <choose>
-                <when test="childrenIds != null and childrenIds.size() > 0">
-                    or ai.issue_id in
-                    <foreach collection="childrenIds" item="child" open="(" separator="," close=")">
-                        #{child}
-                    </foreach>
-                </when>
-                <otherwise>
-                    or (
-                    ai.parent_issue_id is not null
-                    and ai.parent_issue_id != 0
-                    and ai.parent_issue_id in
-                    <foreach collection="issueIds" item="issueId" open="(" separator=","
-                             close=")">
-                        #{issueId}
-                    </foreach>
-                    )
-                    or (
-                    ai.relate_issue_id is not null
-                    and ai.relate_issue_id != 0
-                    and ai.relate_issue_id in
-                    <foreach collection="issueIds" item="issueId" open="(" separator=","
-                             close=")">
-                        #{issueId}
-                    </foreach>
-                    )
-                </otherwise>
-            </choose>
-        </if>
     </select>
 
     <select id="queryIssueIdsListWithSub" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
@@ -827,6 +786,12 @@
                 </foreach>
             </if>
         ) temp
+        join agile_issue ai on ai.issue_id = temp.issue_id
+        where ai.project_id = #{projectId} and ai.apply_type = 'agile'
+        and (
+        ai.type_code in ('issue_epic', 'story', 'task')
+        or (ai.type_code = 'bug' and (ai.relate_issue_id is null or ai.relate_issue_id = 0))
+        )
     </select>
 
     <select id="queryChildrenIdByParentId" resultType="java.lang.Long">
