@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import React, {
-  useState, useEffect, useCallback, useMemo,
+  useState, useEffect, useCallback, useMemo, useRef,
 } from 'react';
 // eslint-disable-next-line camelcase
 import { unstable_batchedUpdates } from 'react-dom';
@@ -63,6 +63,7 @@ const typeOptions = [{
 }] as const;
 const typeValues = typeOptions.map((t) => t.value);
 type TypeValue = (typeof typeValues)[number];
+
 const ganttList2Tree = (data: any[]) => list2tree(data, { valueField: 'issueId', parentField: 'parentId' });
 const groupByTask = (data: any[]) => ganttList2Tree(data);
 const groupByUser = (data: any[]) => {
@@ -182,6 +183,7 @@ const getTableColumns = ({ onSortChange }: any) => {
 };
 const GanttPage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
+  const typeChangeRefreshFlag = useRef<boolean>(false);
   const [type, setType] = useState<TypeValue>(localPageCacheStore.getItem('gantt.search.type') ?? typeValues[0]);
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
   const [{ data: sortedList }, sortLabelProps] = useGanttSortLabel();
@@ -211,7 +213,7 @@ const GanttPage: React.FC = () => {
         workCalendarApi.getYearCalendar(year),
         ganttApi.loadByTask({
           ...filter,
-          searchArgs: { tree: false },
+          searchArgs: { tree: type !== 'assignee' },
         }, sortedList),
       ]);
       // setColumns(headers.map((h: any) => ({
@@ -219,6 +221,7 @@ const GanttPage: React.FC = () => {
       //   name: h.fieldCode,
       //   label: h.name,
       // })));
+      typeChangeRefreshFlag.current = false;
       unstable_batchedUpdates(() => {
         setWorkCalendar(workCalendarRes);
         setProjectWorkCalendar(projectWorkCalendarRes);
@@ -235,6 +238,12 @@ const GanttPage: React.FC = () => {
     run();
     flush();
   }, [sortedList]);
+  useUpdateEffect(() => {
+    if (typeChangeRefreshFlag.current) {
+      run();
+      flush();
+    }
+  }, [type]);
   const handleUpdate = useCallback<GanttProps<Issue>['onUpdate']>(async (issue, startDate, endDate) => {
     try {
       await issueApi.update({
@@ -270,7 +279,10 @@ const GanttPage: React.FC = () => {
     }
   }, [sprintIds, store]);
   const handleTypeChange = useCallback((newType) => {
-    setType(newType);
+    setType((oldType) => {
+      typeChangeRefreshFlag.current = [newType, oldType].includes('assignee');
+      return newType;
+    });
     localPageCacheStore.setItem('gantt.search.type', newType);
   }, []);
 
@@ -451,6 +463,10 @@ const GanttPage: React.FC = () => {
     handleIssueDelete(issue);
   });
   const ganttData = useMemo(() => {
+    // 需要刷新时先不进行排序，等待数据请求完再进行
+    if (typeChangeRefreshFlag.current) {
+      return data;
+    }
     if (type === 'assignee') {
       return groupByUser(data);
     } if (type === 'sprint') {
