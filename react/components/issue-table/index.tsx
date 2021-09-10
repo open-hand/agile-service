@@ -14,6 +14,7 @@ import useTable from '@/hooks/useTable';
 import { checkBoxColumn, expandColumn, getTableColumns } from './columns';
 import { Loading } from '@/components';
 
+// @ts-ignore
 export interface IssueTableProps extends Partial<TableProps> {
   tableRef?: React.RefObject<any>
   onCreateIssue?: () => void
