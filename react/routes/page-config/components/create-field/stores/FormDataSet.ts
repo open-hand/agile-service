@@ -1,5 +1,7 @@
 import moment from 'moment';
-import { remove } from 'lodash';
+import {
+  orderBy, remove, set,
+} from 'lodash';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { DataSet } from 'choerodon-ui/pro';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
@@ -8,6 +10,7 @@ import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { MAX_LENGTH_FIELD_CODE, MAX_LENGTH_FIELD_NAME } from '@/constants/MAX_LENGTH';
 import { MAX_NUMBER_VALUE, MAX_NUMBER_STEP } from '@/constants/MAX_VALUE';
 import { Store } from './useStore';
+import { IFieldType } from '@/common/types';
 
 interface Props {
   formatMessage: any,
@@ -22,6 +25,25 @@ interface Props {
   localCheckCode?: (code: string) => Promise<boolean> | boolean,
   localCheckName?: (name: string) => Promise<boolean> | boolean,
 }
+interface IFieldTypeLookupDataItem {
+  description: string
+  name: string
+  objectVersionNumber: 1
+  typeCode: 'field_type'
+  valueCode: IFieldType
+}
+function attachRankForFieldType(data: Array<IFieldTypeLookupDataItem>): Array<IFieldTypeLookupDataItem & { rank: number }> {
+  const rankMap: { [P in IFieldType]?: number } = {
+    multiple: 12,
+    single: 12,
+    radio: 9,
+    checkbox: 9,
+    member: 8,
+    date: 7,
+    multiMember: 6,
+  };
+  return data.map((item) => ({ ...item, rank: rankMap[item.valueCode] || 10 }));
+}
 function getLookupConfig(code: string, filterArr?: string[], type?: string, id?: string) {
   return {
     url: `/agile/v1/lookup_values/${code}`,
@@ -34,6 +56,9 @@ function getLookupConfig(code: string, filterArr?: string[], type?: string, id?:
           if (code === 'object_scheme_field_context') {
             const waitRemove = filterArr ? [...filterArr, 'global'] : ['global'];
             remove(data.lookupValues, (item: any) => waitRemove.some((w) => w === item.valueCode));
+          }
+          if (code === 'field_type') {
+            set(data, 'lookupValues', orderBy(attachRankForFieldType(data.lookupValues), (a) => a.rank, 'desc'));
           }
           return data.lookupValues;
         }
