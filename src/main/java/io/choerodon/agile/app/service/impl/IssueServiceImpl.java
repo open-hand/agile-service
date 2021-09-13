@@ -54,6 +54,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
 import java.beans.IntrospectionException;
@@ -1139,7 +1140,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             statusFieldSettingService.handlerSettingToUpdateIssue(projectId, issueId, triggerCarrierVO);
             boolean transformFlag = statusLinkageService.updateParentStatus(projectId, issueId, applyType, influenceIssueIds);
             IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
-            issueOperateService.updateLinkIssue(projectId, issueId, issueDTO, applyType, EncryptContext.encryptType().name(), RequestContextHolder.currentRequestAttributes());
+            String encryptType = EncryptContext.encryptType().name();
+            RequestAttributes requestAttributes = null;
+            if (EncryptContext.isEncrypt()) {
+                requestAttributes = RequestContextHolder.currentRequestAttributes();
+            }
+            issueOperateService.updateLinkIssue(projectId, issueId, issueDTO, applyType, encryptType, requestAttributes);
             triggerCarrierVO.setAuditDomain(issueDTO);
             triggerCarrierVO.setProjectId(projectId);
             triggerCarrierVO.setIssueTypeId(issueDTO.getIssueTypeId());

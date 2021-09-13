@@ -12,6 +12,8 @@ import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.asgard.saga.annotation.SagaTask;
+import org.hzero.starter.keyencrypt.core.EncryptContext;
+import org.hzero.starter.keyencrypt.core.EncryptType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -182,6 +184,7 @@ public class AgileEventHandler {
         LOGGER.info("分支合并变更issue状态，{}", message);
         Long projectId = devopsMergeRequestPayload.getProjectId();
         List<Long> issueIds = devopsMergeRequestPayload.getIssueIds();
+        EncryptContext.setEncryptType(EncryptType.TO_STRING.name());
         if (!ObjectUtils.isEmpty(issueIds)) {
             issueIds.forEach(x -> statusBranchMergeSettingService.handleBranchMergeEvent(projectId, x));
         }
