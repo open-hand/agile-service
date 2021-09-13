@@ -63,7 +63,7 @@ public class FieldPermissionController {
     @GetMapping("/filed_id/{filed_id}")
     public ResponseEntity<List<PermissionVO>> queryByFieldId(@ApiParam(value = "项目id", required = true)
                                                              @PathVariable("project_id") Long projectId,
-                                                             @PathVariable("filed_id") Long fieldId,
+                                                             @PathVariable("filed_id") @Encrypt Long fieldId,
                                                              @ApiParam(value = "组织id", required = true)
                                                              @RequestParam Long organizationId,
                                                              @RequestParam @Encrypt Long issueTypeId) {
