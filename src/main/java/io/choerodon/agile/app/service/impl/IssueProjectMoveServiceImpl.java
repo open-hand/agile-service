@@ -411,7 +411,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         triggerCarrier.setAuditDomain(issueDTO);
         Set<String> fields = new HashSet<>();
         fields.addAll(fieldList);
-        fields.addAll(triggerCarrierVO.getFieldList());
+        fields.addAll(triggerCarrier.getFieldList());
         triggerCarrier.setFieldList(new ArrayList<>(fields));
         return triggerCarrier;
     }

@@ -909,7 +909,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         IssueVO issue = queryIssue(projectId, issueId, organizationId);
         Map<String, Object> customFieldMap =
                 pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, Arrays.asList(projectId), Arrays.asList(issueId), false)
-                        .get(issueId);
+                        .getOrDefault(issueId, new HashMap<>());
         AssertUtilsForCommonException.notNull(issue, "error.issue.null");
         PageFieldViewParamVO param = new PageFieldViewParamVO();
         param.setIssueTypeId(issueTypeId);
