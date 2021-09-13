@@ -620,6 +620,14 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     private Page<Long> getIssueIdPage(PageRequest pageRequest, Long projectId, SearchVO searchVO, String searchSql, Long organizationId, Boolean isTreeView) {
+        Map<String, Object> sortMap = processSortMap(pageRequest, projectId, organizationId);
+        return pagedQueryByTreeView(pageRequest, projectId, searchVO, searchSql, sortMap, isTreeView);
+    }
+
+    @Override
+    public Map<String, Object> processSortMap(PageRequest pageRequest,
+                                              Long projectId,
+                                              Long organizationId) {
         Map<String, Object> sortMap = new HashMap<>();
         if (!handleSortField(pageRequest).equals("")) {
             setSortMap(organizationId, projectId, pageRequest, sortMap, "ai");
@@ -627,7 +635,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             String orderStr = getOrderStrOfQueryingIssuesWithSub(pageRequest.getSort());
             sortMap.put(ORDER_STR, orderStr);
         }
-        return pagedQueryByTreeView(pageRequest, projectId, searchVO, searchSql, sortMap, isTreeView);
+        return sortMap;
     }
 
     @Override

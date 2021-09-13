@@ -2929,8 +2929,13 @@ public class ExcelServiceImpl implements ExcelService {
 
     @Override
     @Async
-    public void asyncExportIssues(Long projectId, SearchVO searchVO, HttpServletRequest request,
-                                  HttpServletResponse response, Long organizationId, Sort sort, ServletRequestAttributes requestAttributes) {
+    public void asyncExportIssues(Long projectId,
+                                  SearchVO searchVO,
+                                  HttpServletRequest request,
+                                  HttpServletResponse response,
+                                  Long organizationId,
+                                  Sort sort,
+                                  ServletRequestAttributes requestAttributes) {
         RequestContextHolder.setRequestAttributes(requestAttributes);
         Long userId = DetailsHelper.getUserDetails().getUserId();
         String websocketKey = WEBSOCKET_EXPORT_CODE + "-" + projectId;
@@ -2964,11 +2969,10 @@ public class ExcelServiceImpl implements ExcelService {
                 filterSql = getQuickFilter(searchVO.getQuickFilterIds());
             }
             final String searchSql = filterSql;
-            String orderStr = getOrderStrOfQueryingIssuesWithSub(sort);
             double lastProcess = 0D;
+            PageRequest sourcePage = new PageRequest(0, 1, sort);
+            Map<String, Object> sortMap = issueService.processSortMap(sourcePage, projectId, organizationId);
             while (true) {
-                Map<String, Object> sortMap = new HashMap<>();
-                sortMap.put("orderStr", orderStr);
                 //查询所有父节点问题
                 PageRequest pageRequest = new PageRequest(cursor.getPage(), cursor.getSize());
                 Page<Long> page = issueService.pagedQueryByTreeView(pageRequest, projectId, searchVO, searchSql, sortMap, isTreeView);
