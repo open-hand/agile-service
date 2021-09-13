@@ -1,10 +1,9 @@
 import React from 'react';
-import { Select, CheckBox } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui/pro';
+import { Select, CheckBox, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
+import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import to, { linkUrl } from '@/utils/to';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
-import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import seeChangeRange from './image/seeChangeRange.svg';
 import seeProgress from './image/seeProgress.svg';
 import styles from './index.less';
@@ -96,8 +95,6 @@ const EpicBurnDownSearch:React.FC<EpicBurnDownSearchProps> = ({
               label="史诗"
               value={currentEpicId}
               onChange={handleChangeCurrentEpic}
-              // @ts-ignore
-              getPopupContainer={((triggerNode) => triggerNode.parentNode)}
             >
               {
                 epics.map((epic) => (

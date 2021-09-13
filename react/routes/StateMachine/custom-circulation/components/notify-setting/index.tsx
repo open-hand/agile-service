@@ -48,7 +48,7 @@ const NotifySelect: React.FC<NotifySelectProps> = (
             selectedUser={notifySettingDataSet.current?.getState('defaultSelectUsers')}
             className={styles.notify_assigners}
             // @ts-ignore
-            getPopupContainer={(trigger) => trigger.parentNode}
+            
           />
         )
       }
@@ -275,7 +275,7 @@ const NotifySetting = ({
         <Select name="noticeTypeList" />
         <Dropdown
           // @ts-ignore
-          getPopupContainer={(trigger) => trigger.parentNode}
+          
           visible={!hidden}
           overlay={(
             <div

@@ -1,20 +1,20 @@
-import { IModalProps, IRole, User } from '@/common/types';
 import React, {
   useMemo, useCallback, useEffect, useState,
 } from 'react';
 import {
   DataSet, Form, Select, Modal, SelectBox,
 } from 'choerodon-ui/pro';
+import {
+  isEmpty, noop,
+} from 'lodash';
+import { observer, useComputed } from 'mobx-react-lite';
+import { usePersistFn } from 'ahooks';
 import SelectUser, { SelectUserProps } from '@/components/select/select-user';
 import {
   commonApi, getProjectUsersByIds, IPageFieldCreatePermissionItem, IPageFieldPermissionItem, pageConfigApi,
 } from '@/api';
-import {
-  isEmpty, noop,
-} from 'lodash';
 import UserTag from '@/components/tag/user-tag';
-import { observer, useComputed } from 'mobx-react-lite';
-import { usePersistFn } from 'ahooks';
+import { IModalProps, IRole, User } from '@/common/types';
 import styles from './index.less';
 import { mainValueTransformUserAndRole } from './utils';
 
@@ -46,14 +46,13 @@ const SelectUserWithRole: React.FC<SelectUserProps & { roles: IRoleWithSelectOpt
       renderer={({ record: r, value: item }) => (typeof (item) === 'string' ? rolesMap.get(item)?.meaning : <UserTag data={item} size={14} />)}
       popupContent={(
         <div role="none" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} className={styles.select_content}>
-          <SelectBox name={`${name}_Roles`} vertical getPopupContainer={(node) => node.parentNode as any} multiple />
+          <SelectBox name={`${name}_Roles`} vertical multiple />
           {true && (
             <SelectUser
               name={`${name}_Users`}
               hidden={!showSelectUser}
               selectedUser={record?.getState(`${name}_defaultSelectUsers`)}
               style={{ marginTop: '.2rem', width: '100%' }}
-              getPopupContainer={(node) => node.parentNode as any}
             />
           )}
         </div>

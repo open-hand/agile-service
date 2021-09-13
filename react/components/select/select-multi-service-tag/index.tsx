@@ -121,8 +121,6 @@ const SelectMultiServiceTag: React.FC<SelectMultiServiceTagProps> = forwardRef((
       onPopupHiddenChange={(hidden) => {
         handlePopupHidden(hidden);
       }}
-      // getPopupContainer={(node) => document.getElementById(componentId) as HTMLElement}
-      // getPopupContainer={() => document.body}
       trigger={['click'] as any}
       onChange={(v) => {
         let newValue = v;

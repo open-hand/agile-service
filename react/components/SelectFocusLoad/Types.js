@@ -3,13 +3,13 @@
 import React from 'react';
 import { Select } from 'choerodon-ui';
 import { find, castArray } from 'lodash';
+import { Tooltip } from 'choerodon-ui/pro';
 import {
   userApi, componentApi, issueApi, epicApi, versionApi,
   issueTypeApi, commonApi, issueLabelApi, priorityApi, statusApi,
   featureApi, piApi, sprintApi, fieldApi,
 } from '@/api';
 import { issueLinkTypeApi } from '@/api/IssueLinkType';
-import { Tooltip } from 'choerodon-ui/pro';
 import TypeTag from '../TypeTag';
 import StatusTag from '../StatusTag';
 import UserTag from '../tag/user-tag';
@@ -150,7 +150,7 @@ export default {
   },
   epic_program: {
     props: {
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+
       filterOption:
         (input, option) => option.props.children
           && option.props.children.toLowerCase().indexOf(
@@ -220,7 +220,7 @@ export default {
   },
   custom_field: {
     props: {
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+
       loadWhenMount: true,
     },
     request: ({ filter, page }, { fieldId, selected, projectId } = {}) => fieldApi.project(projectId).getFieldOptions(fieldId, filter, page, 10, castArray(selected).filter(Boolean)),
@@ -237,7 +237,7 @@ export default {
   },
   issue_link: {
     props: {
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+
       filter: false,
       filterOption: false,
       loadWhenMount: true,
@@ -253,7 +253,7 @@ export default {
     props: {
       mode: 'multiple',
       optionLabelProp: 'showName',
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+
     },
     request: ({ filter, page }, { issueId, excludeIssueIds, projectId } = {}) => issueApi.project(projectId).loadIssuesInLink(page, 20, issueId, filter, excludeIssueIds),
     render: (issue) => (
@@ -298,7 +298,7 @@ export default {
     props: {
       optionLabelProp: 'showName',
       loadWhenMount: true,
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+
     },
     request: ({ filter, page }, requestArgs) => issueApi.project(requestArgs?.projectId).loadParentIssues(page, 20, 'sub_task', filter), // 故事、任务、缺陷（不能是子缺陷）
     render: (issue) => (
@@ -342,7 +342,7 @@ export default {
     props: {
       optionLabelProp: 'showName',
       loadWhenMount: true,
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+
     },
     request: ({ filter, page }, requestArgs) => issueApi.project(requestArgs?.projectId).loadParentIssues(page, 20, 'bug', filter), // 故事、任务
     render: (issue) => (
@@ -386,7 +386,7 @@ export default {
     props: {
       mode: 'multiple',
       optionLabelProp: 'showName',
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+
     },
     request: ({ filter, page }, issueId) => featureApi.loadFeaturesInLink(page, 20, issueId, filter),
     render: (issue) => (
@@ -428,7 +428,7 @@ export default {
   },
   priority: {
     props: {
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+
       filter: false,
       filterOption: false,
       loadWhenMount: true,
@@ -445,7 +445,7 @@ export default {
   },
   component: {
     props: {
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+
       // filterOption: filterOptionByName,
       // onFilterChange: false,
       loadWhenMount: true,
@@ -465,7 +465,7 @@ export default {
   },
   label: {
     props: {
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+
       filter: false,
       filterOption: false,
       loadWhenMount: true,
@@ -479,7 +479,7 @@ export default {
   },
   label_id: {
     props: {
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+
       filter: true,
       filterOption,
       loadWhenMount: true,
@@ -493,7 +493,7 @@ export default {
   },
   version: {
     props: {
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+
       filterOption,
       onFilterChange: false,
       loadWhenMount: true,
@@ -510,7 +510,7 @@ export default {
   },
   sprint: {
     props: {
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+
       filterOption,
       loadWhenMount: true,
     },
@@ -523,7 +523,7 @@ export default {
   },
   sprint_in_project: {
     props: {
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+
       filterOption,
       loadWhenMount: true,
     },
@@ -536,7 +536,7 @@ export default {
   },
   pi: {
     props: {
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+
       filterOption,
       loadWhenMount: true,
     },
@@ -553,7 +553,7 @@ export default {
       <Option key={`${item.issueId}`} value={item.issueId}>{item.summary}</Option>
     ),
     props: {
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+
       loadWhenMount: true,
     },
     avoidShowError: (props, List) => new Promise((resolve) => {
@@ -578,14 +578,14 @@ export default {
       </Option>
     ),
     props: {
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+
       // filterOption,
       loadWhenMount: true,
     },
   }, // 特性列表
   sub_project: {
     props: {
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+
       filterOption: filterOptionByName,
       onFilterChange: false,
       loadWhenMount: true,
@@ -599,7 +599,7 @@ export default {
   },
   sub_sprint: {
     props: {
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+
       filterOption,
       onFilterChange: false,
       loadWhenMount: true,

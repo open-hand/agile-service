@@ -882,7 +882,6 @@ class EpicBurndown extends Component {
                       label="史诗"
                       value={ES.currentEpicId}
                       onChange={(epic) => this.handleChangeCurrentEpic(epic)}
-                      getPopupContainer={((triggerNode) => triggerNode.parentNode)}
                       clearButton={false}
                     >
                       {

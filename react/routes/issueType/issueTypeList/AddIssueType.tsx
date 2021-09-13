@@ -231,6 +231,7 @@ const AddIssueType: React.FC<Props> = ({
             debounceSaveEdit(data as IUpdate);
           }
         } else if (callback) {
+          modal?.close();
           callback(data.id);
         }
       }

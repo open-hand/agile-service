@@ -1,17 +1,17 @@
-import { useIssueSearchStore } from '@/components/issue-search';
 import {
   Button, Dropdown,
 } from 'choerodon-ui/pro';
 import classNames from 'classnames';
 import { flatten } from 'lodash';
 import { runInAction } from 'mobx';
+import React, {
+  useState, useCallback, useEffect, useMemo,
+} from 'react';
+import { useIssueSearchStore } from '@/components/issue-search';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 import { CustomReportSearchProps } from '@/routes/ReportHost/custom-report/components/ChartSearch/ChartSearch';
 import ChoseField, { useChoseField } from '@/components/chose-field';
 import { IChosenFieldField } from '@/components/chose-field/types';
-import React, {
-  useState, useCallback, useEffect, useMemo,
-} from 'react';
 import useClickOut from '@/hooks/useClickOut';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import useGetIssueSearchData from './useGetIssueSearchData';
@@ -43,7 +43,7 @@ const InjectCustomSearch: React.FC<CustomReportSearchProps> = ({ searchVO, setSe
     events: {
       choseField: handleChoseField,
     },
-    dropDownProps: { getPopupContainer: (node) => node.parentNode as any },
+    dropDownProps: { },
   });
 
   useEffect(() => {

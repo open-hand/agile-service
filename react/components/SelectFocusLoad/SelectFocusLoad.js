@@ -119,7 +119,7 @@ const SelectFocusLoad = (props) => {
       loading={loading}
       ref={SelectRef}
       // style={{ width: 200 }}
-      getPopupContainer={(triggerNode) => triggerNode.parentNode}
+
       onFilterChange={handleFilterChange}
       {...TypeProps}
       {...props}

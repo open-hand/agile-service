@@ -89,7 +89,7 @@ class SideIssueList extends Component {
             onChange={(value) => {
               this.setFilter('statusList', value);
             }}
-            getPopupContainer={(trigger) => trigger.parentNode}
+            
             placeholder="状态"
             dropdownStyle={{
               width: 180,
@@ -106,7 +106,7 @@ class SideIssueList extends Component {
             onChange={(value) => {
               this.setFilter('versionList', value);
             }}
-            getPopupContainer={(trigger) => trigger.parentNode}
+            
             placeholder="版本"
             dropdownStyle={{
               width: 180,

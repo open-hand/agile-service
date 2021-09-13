@@ -336,7 +336,7 @@ class SprintReport extends Component {
                       <Form style={{ width: 244, marginBottom: -20 }}>
                         <Select
                           clearButton={false}
-                          getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                          
                           label="迭代冲刺"
                           value={this.state.defaultSprint}
                           onChange={(value) => {

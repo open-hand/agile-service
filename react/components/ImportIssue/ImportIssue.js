@@ -9,11 +9,11 @@ import { Modal, Button } from 'choerodon-ui/pro';
 import FileSaver from 'file-saver';
 import classnames from 'classnames';
 import './ImportIssue.less';
-import { issueApi } from '@/api';
-import { getApplyType, getProjectId } from '@/utils/common';
 import {
   includes, isEqual, uniq, map,
 } from 'lodash';
+import { issueApi } from '@/api';
+import { getApplyType, getProjectId } from '@/utils/common';
 import ImportFields from './ImportFields';
 import TemplateSelect from '../template-select';
 import openSaveTemplate from '../template-select/components/save/SaveTemplate';
@@ -218,7 +218,7 @@ class ImportIssue extends Component {
           <span className="c7n-importIssue-text">
             导入失败
             <span style={{ color: '#FF0000' }}>{failCount}</span>
-            {`${this.props.name || '问题'}`}
+            {`${this.props.name || '问题'} `}
             <a href={fileUrl}>
               点击下载失败详情
             </a>

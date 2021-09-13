@@ -96,7 +96,7 @@ const SubTask = observer(({
           </div>
           {!disableCreate && (
             <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
-              <Tooltip placement="topRight" title="创建子任务" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
+              <Tooltip placement="topRight" title="创建子任务" >
                 <Button onClick={onOpenCreateSubTask}>
                   <Icon type="playlist_add icon" />
                 </Button>

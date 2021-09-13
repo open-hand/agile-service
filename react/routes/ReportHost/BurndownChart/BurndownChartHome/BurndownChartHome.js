@@ -296,7 +296,7 @@ class BurndownChartHome extends Component {
                 }}
                 >
                   <Select
-                    getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                    
                     style={{
                       width: 150,
                       flexShrink: 0,
@@ -331,7 +331,7 @@ class BurndownChartHome extends Component {
                       : ''}
                   </Select>
                   <Select
-                    getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                    
                     style={{ marginLeft: 10, marginTop: 10, marginRight: 15 }}
                     label="单位"
                     value={this.state.select}
