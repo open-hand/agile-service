@@ -476,4 +476,8 @@ public interface IssueService {
     void buildTriggerCarrierVO(Long projectId, Long issueId, List<TriggerCarrierVO> list, List<Long> customFieldIds);
 
     void addCollectionFieldIfNotNull(IssueUpdateVO issueUpdateVO, List<String> fieldList);
+
+    Map<String, Object> processSortMap(PageRequest pageRequest,
+                                       Long projectId,
+                                       Long organizationId);
 }
