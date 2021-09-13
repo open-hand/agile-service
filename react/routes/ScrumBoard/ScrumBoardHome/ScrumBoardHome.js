@@ -8,7 +8,7 @@ import {
 } from 'choerodon-ui';
 import screenfull from 'screenfull';
 import { HeaderButtons } from '@choerodon/master';
-import { set } from 'lodash';
+import { cloneDeep, set } from 'lodash';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import queryString from 'query-string';
 import { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
@@ -71,7 +71,7 @@ class ScrumBoardHome extends Component {
 
   componentDidMount() {
     ScrumBoardStore.setSelectedBoardId('');
-    const defaultSearchVO = localPageCacheStore.getItem('scrumBoard.searchVO') || {};
+    const defaultSearchVO = cloneDeep(localPageCacheStore.getItem('scrumBoard.searchVO') || {});
     ScrumBoardStore.bindFunction('refresh', (sprintId) => {
       if (!defaultSearchVO.otherArgs || !defaultSearchVO.otherArgs.sprint || defaultSearchVO.otherArgs.sprint.length === 0) {
         // defaultSearchVO.otherArgs.sprint = [sprintId];
