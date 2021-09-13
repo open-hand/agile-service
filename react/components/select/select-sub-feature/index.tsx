@@ -42,7 +42,7 @@ const SelectSubFeature: React.FC<SelectSubFeatureProps> = forwardRef(({
   return (
     <Component
       ref={ref}
-      dropdownMenuStyle={{ maxWidth: '3rem' }}
+      popupStyle={{ maxWidth: '3rem !important' }}
       {...props}
       {...otherProps}
     />
