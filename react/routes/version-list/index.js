@@ -5,8 +5,8 @@ import {
 import {
   PageWrap, PageTab, Permission,
 } from '@choerodon/boot';
-import LINK_URL from '@/constants/LINK_URL';
 import { mount, has, get } from '@choerodon/inject';
+import LINK_URL from '@/constants/LINK_URL';
 import useHasDevops from '@/hooks/useHasDevops';
 import useCheckCurrentService from './useCheckServerVerison';
 
@@ -37,7 +37,7 @@ const VersionList = ({ match }) => {
 
 const Index = ({ match }) => {
   const { loading, version } = useCheckCurrentService();
-  const isShowPublish = has('agile:PublishVersion') && !loading && version !== 'sass-normal';
+  const isShowPublish = has('agile:PublishVersion') && !loading && version !== 'saas-normal';
   return isShowPublish ? <VersionList /> : <Release />;
 };
 export default Index;
