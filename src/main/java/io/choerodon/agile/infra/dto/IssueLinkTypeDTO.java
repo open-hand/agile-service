@@ -88,7 +88,7 @@ public class IssueLinkTypeDTO extends AuditDomain {
 
     public void initRelates(Long projectId) {
         this.projectId = projectId;
-        this.inWard = "关联";
+        this.inWard = "被关联";
         this.outWard = "关联";
         this.linkName = "关联";
     }
