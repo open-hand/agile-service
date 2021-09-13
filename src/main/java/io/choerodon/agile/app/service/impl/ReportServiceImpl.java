@@ -1534,7 +1534,7 @@ public class ReportServiceImpl implements ReportService {
                 .sorted(Comparator.comparing(CustomChartPointVO::getAnalysisId, Comparator.nullsFirst(Comparator.naturalOrder()))
                         .thenComparing(CustomChartPointVO::getAnalysisValue, Comparator.nullsFirst(Comparator.naturalOrder())))
                 .forEach(point -> {
-                    String key = point.getComparedId() + point.getComparedValue();
+                    String key = EncryptionUtils.encrypt(point.getComparedId()) + point.getComparedValue();
                     CustomChartDimensionVO dimension = comparedDimensionMap.get(key);
                     dimension.getPointList().add(point);
                 });
