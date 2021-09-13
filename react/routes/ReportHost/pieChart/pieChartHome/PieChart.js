@@ -427,10 +427,9 @@ class PieChart extends Component {
         <Content style={{ paddingTop: 20 }}>
           <LoadingProvider loading={PieChartStore.pieLoading}>
             <div className="c7n-pieChart-filter">
-              <Form columns={2} style={{ width: 508 }}>
+              <Form columns={2}>
                 <Select
                   className="c7n-pieChart-filter-item"
-                  getPopupContainer={(triggerNode) => triggerNode.parentNode}
                   defaultValue={type}
                   value={type}
                   label="统计类型"

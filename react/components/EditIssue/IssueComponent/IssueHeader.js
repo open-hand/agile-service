@@ -39,7 +39,6 @@ const IssueHeader = (props) => {
                   />
                 )}
                 trigger="hover"
-                getPopupContainer={((triggerNode) => triggerNode.parentNode)}
               >
                 <div style={{
                   display: 'flex',

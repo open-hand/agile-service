@@ -1,5 +1,5 @@
-import { getProjectId } from '@/utils/common';
 import { QueryKey } from 'react-query';
+import { getProjectId } from '@/utils/common';
 
 export interface ProjectKeyConfig {
   key: QueryKey

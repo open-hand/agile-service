@@ -56,7 +56,7 @@ const ConditionSelect: React.FC<ConditionSelectProps> = ({ conditionDataSet }) =
               maxTagCount={2}
               className={styles.condition_assigners}
               // @ts-ignore
-              getPopupContainer={(trigger) => trigger.parentNode}
+
             />
           )
         }
@@ -225,7 +225,7 @@ const Condition:React.FC<Props> = ({
         <p className={styles.memberSelectTip}>仅以下成员可移动工作项到此状态</p>
         <Dropdown
           // @ts-ignore
-          getPopupContainer={(trigger) => trigger.parentNode}
+
           visible={!hidden}
           overlay={(
             <div

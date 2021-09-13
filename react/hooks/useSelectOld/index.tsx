@@ -50,7 +50,6 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
     children: Options.concat(loadMoreButton),
     filter: true,
     filterOption: false,
-    getPopupContainer: (triggerNode) => triggerNode.parentElement as HTMLElement,
     onFilterChange: searchData,
     dropdownClassName: 'hidden-text hidden-label minSelectFocusLoadDropDownWidth',
   };

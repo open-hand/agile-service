@@ -1,9 +1,9 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { Select } from 'choerodon-ui/pro';
-import { IVersion, ISprint, IStatus } from '@/common/types';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import { find } from 'lodash';
+import { IVersion, ISprint, IStatus } from '@/common/types';
 import styles from './index.less';
 import { IPieChartType } from './index';
 
@@ -102,8 +102,6 @@ const PieSearch: React.FC<PieSearchProps> = ({
       <Select
         className={styles.c7n_pieChart_filter_item}
         labelLayout={'float' as LabelLayout}
-        // @ts-ignore
-        getPopupContainer={(triggerNode) => triggerNode.parentNode}
         defaultValue={type}
         value={type}
         label="统计类型"

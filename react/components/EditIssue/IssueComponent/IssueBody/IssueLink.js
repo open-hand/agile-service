@@ -89,7 +89,7 @@ import openCreateLink from './create-link/CreateLink';
           </div>
           {!disabled && (
             <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
-              <Tooltip placement="topRight" title={typeCode === 'feature' ? '创建关联Feature' : '创建关联问题'} getPopupContainer={(triggerNode) => triggerNode.parentNode}>
+              <Tooltip placement="topRight" title={typeCode === 'feature' ? '创建关联Feature' : '创建关联问题'}>
                 <Button onClick={() => { openCreateLink({ issueId, onOk: this.onCreateLinkIssue }); }}>
                   <Icon type="playlist_add icon" />
                 </Button>

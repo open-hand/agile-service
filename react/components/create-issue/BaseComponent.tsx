@@ -293,7 +293,7 @@ const CreateIssueBase = observer(({
       case 'parentIssueId': {
         if (value) {
           try {
-            const res = await issueApi.load(value);
+            const res = await issueApi.load(value?.issueId);
             const { activeSprint } = res || {};
             record.set('sprint', activeSprint?.sprintId ?? undefined);
           } catch (e) {

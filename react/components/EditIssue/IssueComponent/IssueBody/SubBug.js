@@ -81,7 +81,7 @@ const SubBug = observer(({
         </div>
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
-            <Tooltip placement="topRight" title="新创建缺陷" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
+            <Tooltip placement="topRight" title="新创建缺陷">
               <Button onClick={onOpenCreateSubBug} disabled={(issueTypeData || []).length === 0}>
                 <Icon type="playlist_add icon" />
               </Button>

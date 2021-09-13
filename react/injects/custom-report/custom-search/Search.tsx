@@ -5,10 +5,10 @@ import renderField from '@/components/issue-filter-form/components/renderField';
 import { Tooltip, Icon } from 'choerodon-ui/pro/lib';
 import { observer } from 'mobx-react-lite';
 import './Search.less';
-import { IChosenFieldField } from '@/components/chose-field/types';
-import { IChosenFields } from '@/components/issue-search/store';
 import { usePersistFn } from 'ahooks';
 import { noop } from 'lodash';
+import { IChosenFields } from '@/components/issue-search/store';
+import { IChosenFieldField } from '@/components/chose-field/types';
 
 interface CustomSearchItemProps {
   fields: IChosenFields// IChosenFields
@@ -36,7 +36,6 @@ const Field = memo(({ field, onChange }: { field: IChosenFieldField } & Pick<Cus
         style: { width: 'calc(100% - .9rem)' },
         onChange: (val: any) => onChange && onChange(field, val),
         className: `${prefixCls}-item-field`,
-        getPopupContainer: (node: any) => node.parentNode,
       }, {})}
       {!defaultShow && <Icon type="delete_sweep-o" className={`${prefixCls}-item-del-btn`} />}
     </div>

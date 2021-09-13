@@ -131,7 +131,7 @@ class CreateFeatureModal extends Component {
               })(
                 <Select
                   label="特性类型"
-                  getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                  
                 >
                   <Option key="business" value="business">
                     特性

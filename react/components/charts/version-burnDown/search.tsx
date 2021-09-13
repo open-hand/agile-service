@@ -1,6 +1,5 @@
 import React from 'react';
-import { Select, CheckBox } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui/pro';
+import { Select, CheckBox, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import seeChangeRange from './image/seeChangeRange.svg';
@@ -73,8 +72,6 @@ const VersionBurnDownSearch:React.FC<VersionBurnDownSearchProps> = ({
               label="版本"
               value={currentVersionId}
               onChange={handleChangeCurrentVersion}
-              // @ts-ignore
-              getPopupContainer={((triggerNode) => triggerNode.parentNode)}
             >
               {
                 versions.map((version) => (

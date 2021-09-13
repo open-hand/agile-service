@@ -63,7 +63,7 @@ class SelectNumber extends Component {
     const options = selectNumbers || selectValues;
     return (
       <Select
-        getPopupContainer={(triggerNode) => triggerNode.parentNode}
+        
         // autoFocus
         {...this.props}
         value={value}

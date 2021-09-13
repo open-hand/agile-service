@@ -127,7 +127,7 @@ class CreateFeature extends Component {
       }}
       >
         <Input autoFocus value={value} placeholder="在此创建新内容" onChange={this.handleChange} onPressEnter={this.handleCreateIssue} maxLength={44} />
-        <Dropdown overlay={typeList} trigger={['click']} getPopupContainer={(triggerNode) => triggerNode.parentNode}>
+        <Dropdown overlay={typeList} trigger={['click']} >
           <div style={{ display: 'flex', marginTop: 5 }}>
             <TypeTag
               data={find(types, { featureType: currentType })}

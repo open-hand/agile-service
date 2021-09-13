@@ -838,7 +838,6 @@ class VersionBurndown extends Component {
                         label="版本"
                         value={ES.currentVersionId}
                         onChange={(versionId) => this.handleChangeCurrentVersion(versionId)}
-                        getPopupContainer={((triggerNode) => triggerNode.parentNode)}
                         clearButton={false}
                       >
                         {
