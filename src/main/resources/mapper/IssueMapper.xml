@@ -999,10 +999,10 @@
         </if>
         <if test='searchVO.advancedSearchArgs != null'>
             <if test='searchVO.advancedSearchArgs.storyPoints != null and searchVO.advancedSearchArgs.storyPoints != "" '>
-                AND ai.story_points = #{searchVO.searchArgs.storyPoints}
+                AND ai.story_points = #{searchVO.advancedSearchArgs.storyPoints}
             </if>
             <if test='searchVO.advancedSearchArgs.remainingTime != null and searchVO.advancedSearchArgs.remainingTime != "" '>
-                AND ai.remaining_time = #{searchVO.searchArgs.remainingTime}
+                AND ai.remaining_time = #{searchVO.advancedSearchArgs.remainingTime}
             </if>
             <if test="searchVO.advancedSearchArgs.storyPointsNull != null and searchVO.advancedSearchArgs.storyPointsNull == true">
                 AND ai.type_code = 'story' AND ai.story_points IS NULL
