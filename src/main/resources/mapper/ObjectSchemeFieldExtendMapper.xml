@@ -4,7 +4,7 @@
     <insert id="batchInsert">
         <bind name="audit" value="@io.choerodon.mybatis.helper.AuditHelper@audit()"/>
         insert into fd_object_scheme_field_extend
-        (issue_type_id, issue_type, organization_id, project_id, field_id, is_required, is_created, is_edited, rank, created_by, last_updated_by)
+        (issue_type_id, issue_type, organization_id, project_id, field_id, is_required, is_created, is_edited, rank, created_by, last_updated_by, default_value, extra_config)
         values
         <foreach collection="insertList" item="extend" index="index" separator=",">
             (
@@ -18,7 +18,9 @@
                 #{extend.edited},
                 #{extend.rank},
                 #{audit.user},
-                #{audit.user}
+                #{audit.user},
+                #{extend.defaultValue},
+                #{extend.extraConfig}
             )
         </foreach>
     </insert>
