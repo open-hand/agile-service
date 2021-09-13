@@ -62,7 +62,7 @@ const SelectComponent: React.FC<SelectComponentProps> = forwardRef(({
       ref={ref}
       clearButton
       multiple
-      dropdownMenuStyle={{ maxWidth: '3rem' }}
+      popupStyle={{ maxWidth: '3rem !important' }}
       maxTagTextLength={10}
       {...props}
       {...otherProps}

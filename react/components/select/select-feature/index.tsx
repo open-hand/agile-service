@@ -71,7 +71,7 @@ const SelectFeature: React.FC<Props> = forwardRef(({
     <Component
       ref={ref}
       clearButton
-      dropdownMenuStyle={{ maxWidth: '3rem' }}
+      popupStyle={{ maxWidth: '3rem !important' }}
       {...props}
       {...otherProps}
     />

@@ -195,28 +195,33 @@ const StoryMapHome = observer(() => {
         }}
         >
           <StoryMapSearch issueSearchStore={issueSearchStore} />
-          <LoadingHiddenWrap>
-            {!isEmpty ? (
-              hiddenColumnNoStory && Object.values(storyData).every((item) => !item.storys.length) ? (
+
+          {!isEmpty ? (
+            hiddenColumnNoStory && Object.values(storyData).every((item) => !item.storys.length) ? (
+              <LoadingHiddenWrap>
                 <EmptyPage
                   image={NoData}
                   description="隐藏无故事的列后无史诗数据"
                 />
-              ) : (
-                <Minimap ref={ref} disabledVertical width={300} height={40} showHeight={300} className="c7nagile-StoryMap-minimap" selector=".minimapCard" childComponent={renderChild}>
-                  <StoryMapBody />
-                </Minimap>
-              )
+              </LoadingHiddenWrap>
+
             ) : (
-              loading ? null : (
+              <Minimap ref={ref} disabledVertical width={300} height={40} showHeight={300} className="c7nagile-StoryMap-minimap" selector=".minimapCard" childComponent={renderChild}>
+                <StoryMapBody />
+              </Minimap>
+            )
+          ) : (
+            loading ? null : (
+
               // eslint-disable-next-line react/jsx-indent
-              <EmptyPage
-                image={epicPic}
-                description="用户故事地图是以史诗为基础，根据版本控制进行管理规划"
-              />
-              )
-            )}
-          </LoadingHiddenWrap>
+              <LoadingHiddenWrap>
+                <EmptyPage
+                  image={epicPic}
+                  description="用户故事地图是以史诗为基础，根据版本控制进行管理规划"
+                />
+              </LoadingHiddenWrap>
+            )
+          )}
           <FilterManage
             visible={StoryMapStore.filterListVisible}
             setVisible={StoryMapStore.setFilterListVisible}
