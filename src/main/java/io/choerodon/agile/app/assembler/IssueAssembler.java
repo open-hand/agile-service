@@ -516,6 +516,7 @@ public class IssueAssembler extends AbstractAssembler {
         if (predefinedFieldNames.contains("tag")) {
             issueCreateVO.setTags(issueDetailDTO.getTags());
         }
+        issueCreateVO.setProgramId(issueDetailDTO.getProjectId());
         return issueCreateVO;
     }
 
