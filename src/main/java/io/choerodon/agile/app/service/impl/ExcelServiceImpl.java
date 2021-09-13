@@ -3124,7 +3124,9 @@ public class ExcelServiceImpl implements ExcelService {
         setEnvironmentName(envMap, issue, exportIssuesVO);
         setPriorityName(priorityDTOMap, issue, exportIssuesVO);
         setStatusName(statusMapDTOMap, issue, exportIssuesVO);
-        setTypeName(issueTypeDTOMap, issue, exportIssuesVO);
+        if (!ObjectUtils.isEmpty(issueTypeDTOMap)) {
+            setTypeName(issueTypeDTOMap, issue, exportIssuesVO);
+        }
         setCloseSprintName(closeSprintNames, issueId, exportIssuesVO);
         setFixVersionName(fixVersionNames, issueId, exportIssuesVO);
         setCreationUserName(usersMap, issue, exportIssuesVO);
