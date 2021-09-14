@@ -64,7 +64,7 @@ class CloseSprint extends Component {
           个问题 未完成
         </p>
         {completeMessage?.parentsDoneUnfinishedSubtasks?.length ? (
-          <p style={{ marginTop: 14, color: 'var(--text-color3)' }}>{`其中有${completeMessage ? completeMessage.parentsDoneUnfinishedSubtasks.length : 0}个问题下有未完成的子任务，父级任务移动后与之相关的子任务也会被移动`}</p>
+          <p style={{ marginTop: 14, color: 'var(--text-color3)' }}>{`其中有${completeMessage ? completeMessage.parentsDoneUnfinishedSubtasks.length : 0}个已完成的问题下有未完成的子任务，父级任务移动后与之相关的子任务也会被移动`}</p>
         ) : null}
         <div style={{ fontSize: 14, marginTop: 30 }}>选择该冲刺未完成的问题移动到：</div>
         <Select
