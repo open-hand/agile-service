@@ -8,6 +8,7 @@ import ExportIssueContextProvider from './stores';
 import './ExportIssue.less';
 import IssueExportStore from './stores/store';
 import { IChosenFieldField } from '../chose-field/types';
+import { removeCodeExtraPrefix } from './utils';
 
 interface IExportIssueProps {
   fields: IChosenFieldField[],
@@ -35,7 +36,7 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     ? tableRef.current.tableStore.columns.filter((column) => column.name && !column.hidden)
     : [];
 
-  const checkOptions = [...tableDataSet.fields.values()].map((option) => ({ value: option.pristineProps.name!, label: (option.pristineProps as any).label as string, order: option.order }));
+  const checkOptions = [...tableDataSet.fields.values()].map((option) => ({ value: removeCodeExtraPrefix(option.pristineProps.name!), label: (option.pristineProps as any).label as string, order: option.order }));
   const { className, ...otherProps } = otherModalProps || {};
   const key = Modal.key();
   Modal.open({

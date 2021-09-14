@@ -1,8 +1,8 @@
 import { toJS } from 'mobx';
 import moment from 'moment';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { ICustomFieldData } from '@/api';
 import { IChosenFieldField } from '@/components/chose-field/types';
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
 
 const getCustomFieldFilters = (chosenFields: Array<IChosenFieldField>, record: Record, transformSystemFilter: Function) => {
   const customField: ICustomFieldData = {
@@ -110,5 +110,16 @@ const getCustomFieldFilters = (chosenFields: Array<IChosenFieldField>, record: R
   filter.otherArgs.customField = customField;
   return filter;
 };
+/**
+ * 移除code 的额外前缀
+ *（用于导出对dataset的name中的code获取）
+ * @param code
+ * @param prefix 前缀
+ * @param startPos 前缀开始的位置
+ */
+function removeCodeExtraPrefix(code: string, prefix: string = 'foundation.', startPos: number = 0) {
+  const isFoundPrefix = typeof code === 'string' ? code.indexOf(prefix) === startPos : false;
+  return isFoundPrefix ? code.slice(startPos, prefix.length) : code;
+}
 
-export { getCustomFieldFilters };
+export { getCustomFieldFilters, removeCodeExtraPrefix };
