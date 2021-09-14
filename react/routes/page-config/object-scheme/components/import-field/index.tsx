@@ -65,8 +65,10 @@ const ImportField: React.FC<{ modal?: IModalProps, onOk: Function }> = ({ modal,
     loadRecord();
     setWsData(() => {
       modal?.update({ okText: '导入' });
-      onOk();
-      modal?.close();
+      if (newWsData.status !== 'failed') {
+        onOk();
+        modal?.close();
+      }
       return newWsData;
     });
   }, [modal]);
@@ -133,6 +135,7 @@ const ImportField: React.FC<{ modal?: IModalProps, onOk: Function }> = ({ modal,
           }
           return false;
         }}
+        autoDownload
         onFinish={handleFinish}
         predefineProgressTextConfig="import"
       />
