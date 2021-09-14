@@ -9,10 +9,13 @@ import { commonApi } from '@/api';
 
 export interface SelectEnvironmentProps extends Partial<SelectProps> {
   flat?: boolean
+  dataRef?: React.MutableRefObject<any>
   afterLoad?: (data: any[]) => void
 }
 interface UseEnvironmentDataProps {
   afterLoad?: SelectEnvironmentProps['afterLoad']
+  dataRef?: React.MutableRefObject<any>
+
 }
 function useEnvironmentData(props?: UseEnvironmentDataProps) {
   const [options, setOptions] = useState<{ valueCode: string, name: string }[]>([]);
@@ -22,15 +25,20 @@ function useEnvironmentData(props?: UseEnvironmentDataProps) {
       const { lookupValues = [] } = res || {};
       setOptions(lookupValues);
       callback(lookupValues);
+      if (props?.dataRef) {
+        Object.assign(props?.dataRef, {
+          current: lookupValues,
+        });
+      }
     });
-  }, [callback]);
+  }, [callback, props?.dataRef]);
   return options;
 }
 const SelectEnvironment: React.FC<SelectEnvironmentProps> = forwardRef(({
-  flat, afterLoad, ...otherProps
+  flat, afterLoad, dataRef, ...otherProps
 }, ref: React.Ref<Select>) => {
   const Component = flat ? FlatSelect : Select;
-  const options = useEnvironmentData({ afterLoad });
+  const options = useEnvironmentData({ afterLoad, dataRef });
   return (
     <Component
       ref={ref}

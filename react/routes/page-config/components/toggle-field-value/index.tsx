@@ -35,7 +35,6 @@ const ToggleFieldValue: React.FC<Pick<Props, 'data'>> = ({
   data,
 }) => {
   const textEditToggleProps = useTextEditTogglePropsWithPage(data);
-
   return (
 
     <TextEditToggle
