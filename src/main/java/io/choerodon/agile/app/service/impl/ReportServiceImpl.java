@@ -281,13 +281,13 @@ public class ReportServiceImpl implements ReportService {
         List<Long> personalFilterIds = burnDownSearchVO.getPersonalFilterIds();
         SearchVO currentSearchVO = burnDownSearchVO.getCurrentSearchVO();
 
-        //处理未匹配的筛选
-        boardAssembler.handleOtherArgs(currentSearchVO);
         List<SearchVO> list = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(personalFilterIds)) {
             list.addAll(boardService.getSearchVO(personalFilterIds));
         }
         if (Objects.nonNull(currentSearchVO)){
+            //处理未匹配的筛选
+            boardAssembler.handleOtherArgs(currentSearchVO);
             list.add(currentSearchVO);
         }
         if (CollectionUtils.isNotEmpty(list)){
