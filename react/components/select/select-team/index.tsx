@@ -1,9 +1,9 @@
 import React, { useMemo, forwardRef, useRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
-import useSelect, { SelectConfig } from '@/hooks/useSelect';
-import { commonApi, fieldApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
+import useSelect, { SelectConfig } from '@/hooks/useSelect';
+import { commonApi, fieldApi } from '@/api';
 
 interface Props extends Partial<SelectProps> {
   projectDataRef?: React.RefObject<Array<any>>,
@@ -41,6 +41,7 @@ const SelectTeam: React.FC<Props> = forwardRef(({
       return request();
     },
     paging: false,
+    afterLoad: afterLoadRef.current as any,
     middleWare: (projects) => {
       if (Array.isArray(projects)) {
         // @ts-ignore
@@ -55,9 +56,7 @@ const SelectTeam: React.FC<Props> = forwardRef(({
       // @ts-ignore
       // eslint-disable-next-line no-param-reassign
       projectDataRef.current = newProjects;
-      if (afterLoadRef.current) {
-        afterLoadRef.current(newProjects);
-      }
+
       return newProjects;
     },
   }), [args, fieldId, hasRule, noAssign, projectDataRef, projectId, request, textField, valueField]);

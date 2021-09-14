@@ -117,7 +117,7 @@ function getProcessFieldConfig<T extends IComponentFCWithClassObject, C extends 
  * @returns
  */
 function isCodeInSystemComponents(code: string, components: { [x: string]: any } = AgileComponentMap) {
-  return Object.keys(filterCodeModeProps).includes(code);
+  return Object.keys(filterCodeModeProps).includes(code) || Object.keys(components).includes(code);
 }
 /**
  * 通过模式获取字段 `props` 配置

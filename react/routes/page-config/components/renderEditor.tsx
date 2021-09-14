@@ -1,11 +1,12 @@
 import React from 'react';
-import { set } from 'lodash';
+import { merge, set } from 'lodash';
 import { toJS } from 'mobx';
 import { getMenuType } from '@/utils/common';
 import { IFieldType } from '@/common/types';
 import SelectPickDate from './select-date-pick';
 import { InjectedRenderComponent } from '../page-issue-type/components/sort-table/injectComponent';
 import { getAgileFields } from '@/components/field-pro';
+import { isCodeInSystemComponents } from '@/components/field-pro/base/utils';
 
 interface IRenderFieldProps {
   data: { fieldCode: string, fieldType: IFieldType, defaultValue?: any, fieldOptions?: Array<any>, extraConfig?: boolean }
@@ -20,74 +21,21 @@ function renderEditor({
 }: IRenderFieldProps): React.ReactElement {
   const { fieldType, fieldCode, defaultValue: propsDefaultValue } = data;
   const defaultValue = toJS(propsDefaultValue);
+  if (isCodeInSystemComponents(fieldCode)) {
+    const el = getAgileFields([], {
+      code: fieldCode as any,
+      fieldType: fieldType as any,
+      outputs: ['element'],
+      props: {
+        style,
+        dataRef,
+        valueField: fieldCode.toLowerCase().includes('version') ? 'versionId' : undefined,
+        ...otherProps,
+      },
+    })[0][0] as React.ReactElement;
+    return React.cloneElement(el, { ...el.props, dataRef });
+  }
   switch (fieldCode) {
-    case 'component':
-      return getAgileFields([], {
-        code: fieldCode,
-        outputs: ['element'],
-        props: {
-          style,
-          dataRef,
-          ...otherProps,
-        },
-      })[0][0] as React.ReactElement;
-    case 'label':
-      return getAgileFields([], {
-        code: fieldCode,
-        outputs: ['element'],
-        fieldType,
-        props: {
-          style,
-          dataRef,
-          ...otherProps,
-        },
-      })[0][0] as React.ReactElement;
-    case 'influenceVersion':
-    case 'fixVersion':
-      return getAgileFields([], {
-        code: fieldCode,
-        outputs: ['element'],
-        fieldType,
-        props: {
-          style,
-          valueField: 'versionId',
-          dataRef,
-          ...otherProps,
-        },
-      })[0][0] as React.ReactElement;
-    case 'sprint':
-      return getAgileFields([], {
-        code: fieldCode,
-        outputs: ['element'],
-        fieldType,
-        props: {
-          style,
-          dataRef,
-          ...otherProps,
-        },
-      })[0][0] as React.ReactElement;
-    case 'epic':
-      return getAgileFields([], {
-        code: fieldCode,
-        outputs: ['element'],
-        fieldType,
-        props: {
-          style,
-          dataRef,
-          ...otherProps,
-        },
-      })[0][0] as React.ReactElement;
-    case 'environment':
-      return getAgileFields([], {
-        code: fieldCode,
-        outputs: ['element'],
-        fieldType,
-        props: {
-          style,
-          afterLoad: (list) => dataRef && set(dataRef, 'current', list),
-          ...otherProps,
-        },
-      })[0][0] as React.ReactElement;
     case 'backlogType':
       // @ts-ignore
       return (
@@ -119,20 +67,26 @@ function renderEditor({
 
   if (['checkbox', 'multiple', 'radio', 'single'].includes(fieldType)) {
     const fieldOptions = data.fieldOptions || [];
-    return getAgileFields([], [], {
+    const el = getAgileFields([], [], {
       fieldType: fieldType as 'checkbox' | 'multiple' | 'radio' | 'single',
       outputs: ['element'],
       props: {
-        key: data.fieldCode, selected: data.defaultValue, style, fieldOptions: fieldOptions.map((item: any) => ({ ...item, id: item.id ?? item.tempKey })), ...otherProps,
-      },
+        key: data.fieldCode,
+        dataRef,
+        selected: data.defaultValue,
+        style,
+        fieldOptions: fieldOptions.map((item: any) => ({ ...item, id: item.id ?? item.tempKey })),
+        ...otherProps,
+      } as any,
     })[0][0] as React.ReactElement;
+    return React.cloneElement(el, { ...el.props, dataRef });
   }
   switch (fieldType) {
     case 'multiMember':
     case 'member':
     {
       const type = getMenuType();
-      return getAgileFields([], [], {
+      const el = getAgileFields([], [], {
         fieldType,
         outputs: ['element'],
         props: {
@@ -145,7 +99,9 @@ function renderEditor({
           ...otherProps,
         },
       })[0][0] as React.ReactElement;
+      return React.cloneElement(el, { ...el.props, dataRef });
     }
+
     case 'number': {
       const { extraConfig } = data;
       return getAgileFields([], [], { fieldType, outputs: ['element'], props: { step: extraConfig ? 0.1 : 1, ...otherProps } })[0][0] as React.ReactElement;

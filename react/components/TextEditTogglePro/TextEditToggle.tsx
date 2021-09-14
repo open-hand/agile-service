@@ -76,7 +76,7 @@ const TextEditToggle: React.FC<Props> = ({
         trigger.setPopupHidden(true);
       }
       // 延迟一会隐藏
-      setTimeout(() => setEditing(false), 10);
+      setEditing(false);
     }
   };
   const showEditor = () => {
