@@ -72,7 +72,7 @@ export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
         onCreate(sprint);
         close();
       } else {
-        Choerodon.prompt(sprint.message);
+        // Choerodon.prompt(sprint.message);
       }
     }
     return false;
@@ -180,7 +180,7 @@ export function CreateCurrentPiSprint({
         onCreate(sprint);
         close();
       } else {
-        Choerodon.prompt(sprint.message);
+        // Choerodon.prompt(sprint.message);
       }
     }
     return false;
