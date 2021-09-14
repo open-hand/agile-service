@@ -1,7 +1,7 @@
+import { useQueries, UseQueryResult } from 'react-query';
 import { fieldApi, pageConfigApi } from '@/api';
 import { IssueCreateFields } from '@/common/types';
 import { ICascadeLinkage } from '@/routes/page-config/components/setting-linkage/Linkage';
-import { useQueries, UseQueryResult } from 'react-query';
 import useProjectKey from './useProjectKey';
 
 export interface IssueCreateFieldsConfig {
@@ -32,7 +32,7 @@ export default function useIssueCreateFields(config: IssueCreateFieldsConfig): [
     enabled: !!issueTypeId,
   }, {
     queryKey: pageCascadeRuleList,
-    queryFn: () => pageConfigApi.getCascadeRuleList(issueTypeId, projectId),
+    queryFn: () => pageConfigApi.getCascadeRuleList(issueTypeId),
     keepPreviousData: true, // ?
     enabled: !!issueTypeId,
   },
