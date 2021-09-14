@@ -144,12 +144,12 @@ function IssueBody(props) {
         {
           issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
             ? (
-              <TabPane tab={`拆分的Story${splitStoryData?.storyList ? `(${splitStoryData?.storyList?.length || 0})` : ''}`} key="split_story">
+              <TabPane tab={`拆分的Story${splitStoryData?.storyList ? `(${(splitStoryData?.storyList?.length || 0) > 99 ? '99+' : (splitStoryData?.storyList?.length || 0)})` : ''}`} key="split_story">
                 <SplitStory {...props} splitStoryData={splitStoryData} />
               </TabPane>
             ) : ''
         }
-        <TabPane tab={`评论${comments ? `(${comments?.totalElements || 0})` : ''}`} key="comment">
+        <TabPane tab={`评论${comments ? `(${(comments?.totalElements || 0) > 99 ? '99+' : (comments?.totalElements || 0)})` : ''}`} key="comment">
           <Comments {...props} />
         </TabPane>
         <TabPane tab="记录" key="record">
