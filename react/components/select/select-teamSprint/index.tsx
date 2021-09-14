@@ -45,7 +45,7 @@ const SelectSprint: React.FC<Props> = forwardRef(({
       const res = await sprintApi.getTeamSprints(piId, teamIds);
       const newRes = res.map((item: Team) => (hasUnassign ? {
         ...item,
-        sprints: [{ sprintId: `${item.projectVO.id}-0`, sprintName: '未分配冲刺', projectId: item.projectVO.id }, ...item.sprints],
+        sprints: [{ sprintId: `${item.projectVO.id}**0`, sprintName: '未分配冲刺', projectId: item.projectVO.id }, ...item.sprints],
       } : item));
       setTeams(newRes);
       if (afterLoad) {

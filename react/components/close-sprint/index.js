@@ -51,6 +51,7 @@ class CloseSprint extends Component {
   render() {
     const { completeMessage, defaultValuePrompt } = this.props;
     const { selectChose } = this.state;
+    console.log(completeMessage);
     return (
       <div className="c7n-pro-form-float">
         <p className="c7n-closeSprint-message">
@@ -63,7 +64,9 @@ class CloseSprint extends Component {
           {' '}
           个问题 未完成
         </p>
-        <p style={{ marginTop: 14, color: 'var(--text-color3)' }}>{`其中有${completeMessage ? completeMessage.parentsDoneUnfinishedSubtasks.length : 0}个问题包含子任务，父级任务移动后与之相关的子任务也会被移动`}</p>
+        {completeMessage?.parentsDoneUnfinishedSubtasks?.length ? (
+          <p style={{ marginTop: 14, color: 'var(--text-color3)' }}>{`其中有${completeMessage ? completeMessage.parentsDoneUnfinishedSubtasks.length : 0}个问题下有未完成的子任务，父级任务移动后与之相关的子任务也会被移动`}</p>
+        ) : null}
         <div style={{ fontSize: 14, marginTop: 30 }}>选择该冲刺未完成的问题移动到：</div>
         <Select
           label="移动至"
