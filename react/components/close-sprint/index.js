@@ -51,7 +51,6 @@ class CloseSprint extends Component {
   render() {
     const { completeMessage, defaultValuePrompt } = this.props;
     const { selectChose } = this.state;
-    console.log(completeMessage);
     return (
       <div className="c7n-pro-form-float">
         <p className="c7n-closeSprint-message">
