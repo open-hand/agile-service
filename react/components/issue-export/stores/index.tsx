@@ -4,6 +4,7 @@ import React, {
 import { injectIntl, InjectedIntl } from 'react-intl';
 import { uniq } from 'lodash';
 import { observer } from 'mobx-react-lite';
+import { useCreation } from 'ahooks';
 import { IModalProps } from '@/common/types';
 import { ITableColumnCheckBoxesOptionData } from '@/components/table-column-check-boxes';
 import IssueExportStore from './store';
@@ -46,7 +47,7 @@ const ExportIssueContextProvider = injectIntl(observer(
     const value = {
       ...props,
       // 有概要 则置为显示
-      fields: fields.map((item) => (item.code === 'contents' ? { ...item, noDisplay: false } : item)),
+      fields: useCreation(() => fields.map((item) => (item.code === 'contents' ? { ...item, noDisplay: false } : item)), [fields]),
       store,
       prefixCls: 'c7n-agile-export-issue-modal',
     };
