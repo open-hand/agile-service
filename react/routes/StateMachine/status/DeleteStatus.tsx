@@ -70,7 +70,7 @@ const DeleteStatus: React.FC<Props> = ({
   return (
     <Spin spinning={loading}>
       <div>
-        {reason || `确认删除状态“${data.name}”`}
+        {reason || `确认要删除“${data.name}”状态吗？`}
       </div>
     </Spin>
   );
@@ -78,7 +78,7 @@ const DeleteStatus: React.FC<Props> = ({
 const openDeleteStatus = (props: Omit<Props, 'modal'>) => {
   Modal.open({
     key: 'delete',
-    title: `确认删除状态“${props.data.name}”`,
+    title: '删除状态',
     okProps: {
       disabled: true,
     },

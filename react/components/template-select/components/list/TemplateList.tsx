@@ -73,6 +73,9 @@ const TemplateList: React.FC<Props> = ({
                       okText="删除"
                       cancelText="取消"
                       okType="danger"
+                      overlayStyle={{
+                        zIndex: 1051,
+                      }}
                     >
                       <Icon type="delete_sweep-o" />
                     </Popconfirm>
