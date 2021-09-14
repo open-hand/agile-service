@@ -1,10 +1,10 @@
 import React from 'react';
 import { Modal } from 'choerodon-ui/pro';
+import { omit } from 'lodash';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { IModalProps, Issue } from '@/common/types';
 import { fieldApi, issueApi } from '@/api';
 import { uploadAttachment } from '@/utils/richText';
-import { omit } from 'lodash';
 import localCacheStore from '@/stores/common/LocalCacheStore';
 import BaseComponent, { CreateIssueBaseProps } from './BaseComponent';
 
@@ -20,10 +20,10 @@ const openModal = (props: CreateIssueProps) => {
   } = props;
   const handleSubmit: CreateIssueBaseProps['onSubmit'] = async ({ data, fieldList, fileList }) => {
     const res = await (request ?? issueApi.create)(data as any, applyType);
-    await fieldApi.createFieldValue(res.issueId, 'agile_issue', fieldList);
+    await fieldApi.createFieldValue(res.issueId, 'agile_issue', fieldList, data.projectId);
     if (fileList && fileList.length > 0) {
       if (fileList.some((one) => !one.url)) {
-        await uploadAttachment(fileList, res.issueId, projectId);
+        await uploadAttachment(fileList, res.issueId, data.projectId);
       }
     }
     onCreate(res);
