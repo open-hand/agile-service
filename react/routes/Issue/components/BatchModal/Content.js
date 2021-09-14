@@ -50,6 +50,9 @@ function BatchModal({
         name: 'featureId',
         label: '所属特性',
       }] : [{
+        name: 'epicId',
+        label: '所属史诗',
+      }], {
         name: 'labelIssueRelVOList',
         label: '标签',
         type: 'object',
@@ -65,7 +68,7 @@ function BatchModal({
         name: 'fixVersion',
         label: '修复的版本',
         type: 'object',
-      }],
+      },
     ],
     events: {
       update: handleUpdate,
