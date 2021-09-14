@@ -110,6 +110,9 @@ const systemFieldConfigMap: Record<string, ProRenderFieldPropsType> = {
 
     valueKey: 'teamProjectIds',
   },
+  pi: {
+    valueKey: 'piId',
+  },
 
 };
 
