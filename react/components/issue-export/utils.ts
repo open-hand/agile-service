@@ -118,8 +118,8 @@ const getCustomFieldFilters = (chosenFields: Array<IChosenFieldField>, record: R
  * @param startPos 前缀开始的位置
  */
 function removeCodeExtraPrefix(code: string, prefix: string = 'foundation.', startPos: number = 0) {
-  const isFoundPrefix = typeof code === 'string' ? code.indexOf(prefix) === startPos : false;
-  return isFoundPrefix ? code.slice(startPos, prefix.length) : code;
+  const isFoundPrefix = typeof code === 'string' && typeof prefix === 'string' ? code.indexOf(prefix) === startPos : false;
+  return isFoundPrefix ? code.slice(startPos + prefix.length) : code;
 }
 
 export { getCustomFieldFilters, removeCodeExtraPrefix };
