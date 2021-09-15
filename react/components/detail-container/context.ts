@@ -17,7 +17,8 @@ interface DetailContainerContext {
   descriptionChanged: boolean
   setDescriptionChanged: (changed: boolean) => void
   outside: boolean
-  topAnnouncementHeight: number
+  /** css 变量的高度  */
+  topAnnouncementHeight: string
   routes: IRouteWithKey[]
   match: IRouteWithKey
   open: (route: IRoute) => void

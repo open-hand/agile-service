@@ -46,6 +46,7 @@ const SelectSubFeature: React.FC<SelectSubFeatureProps> = forwardRef(({
       if (afterLoad) {
         afterLoad(data);
       }
+      optionsRef.current = data;
       return data;
     },
   }), [afterLoad, args]);

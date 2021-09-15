@@ -20,7 +20,7 @@ const FilterManage: React.FC<Props> = ({ visible, setVisible, issueSearchStore }
   return (
     <div
       className="c7n-filterList"
-      style={{ width: 350, top: HeaderStore.announcementClosed ? 50 : 100 }}
+      style={{ width: 350, top: `calc(50px + ${HeaderStore.announcementClosed ? '0px' : 'var(--banner-height)'}` }}
     >
       <div className="c7n-filterList-header">
         <span>个人筛选</span>
