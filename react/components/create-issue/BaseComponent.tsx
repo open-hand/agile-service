@@ -1,6 +1,7 @@
 import React, {
   useCallback, useEffect, useMemo, useRef, useState,
 } from 'react';
+import { stores } from '@choerodon/boot';
 import {
   DataSet, Row, Col, Spin, Form, TextField,
 } from 'choerodon-ui/pro';
@@ -34,6 +35,8 @@ import hooks from './hooks';
 // import getFieldConfig from './fields';
 import getFieldConfig from '@/components/field-pro/layouts/create';
 import { insertField } from './utils';
+
+const { AppState } = stores;
 
 export interface CreateIssueBaseProps {
   onSubmit: ({ data, fieldList }: {
@@ -267,6 +270,9 @@ const CreateIssueBase = observer(({
     // defaultAssignee优先级更高
     if (field.fieldCode === 'assignee' && defaultAssignee) {
       return defaultAssignee.id;
+    }
+    if (field.fieldCode === 'reporter') {
+      return AppState.userInfo.id;
     }
     // 通过外部设置的默认值优先
     if (defaultValues && defaultValues[field.fieldCode]) {
@@ -516,7 +522,6 @@ const CreateIssueBase = observer(({
           hidden: getRuleHidden(field, rules),
         };
       }
-      case 'reporter':
       case 'mainResponsible':
       case 'estimatedStartTime':
       case 'estimatedEndTime':
@@ -524,6 +529,12 @@ const CreateIssueBase = observer(({
       case 'acceptanceCritera': {
         return {
           hidden: getRuleHidden(field, rules),
+        };
+      }
+      case 'reporter': {
+        return {
+          hidden: getRuleHidden(field, rules),
+          selected: dataSet.current?.get('reporter'),
         };
       }
       case 'component':
