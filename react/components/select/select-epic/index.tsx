@@ -1,4 +1,4 @@
-import React, { useMemo, forwardRef } from 'react';
+import React, { useMemo, forwardRef, useRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { toJS } from 'mobx';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
@@ -29,11 +29,23 @@ const SelectEpic: React.FC<SelectEpicProps> = forwardRef(({
   isProgram, afterLoad, dataRef, dontAddEpic0, unassignedEpic, request, flat, projectId, defaultSelectedIds, onlyUnCompleted = true, selectIds: propsSelectIds, ...otherProps
 }, ref: React.Ref<Select>) => {
   const selectIds = useMemo(() => [...castArray(toJS(propsSelectIds)), ...castArray(toJS(defaultSelectedIds))].filter(Boolean), [propsSelectIds]);
+  const selectIdsRef = useRef<string[]>(selectIds);
+  const optionsRef = useRef<any[]>();
+  const args = useMemo(() => {
+    if (optionsRef.current && selectIds) {
+      // 有新的未加载的值，就重新加载
+      const hasNewUnExistValue = selectIds.some((v) => !optionsRef.current?.find((item) => item.issueId === v));
+      if (hasNewUnExistValue) {
+        selectIdsRef.current = selectIds;
+      }
+    }
+    return { selectIds: selectIdsRef.current };
+  }, [selectIds]);
   const config = useMemo((): SelectConfig => ({
     name: 'epic',
     textField: 'epicName',
     valueField: 'issueId',
-    requestArgs: { selectIds },
+    requestArgs: args,
     request: request || (({ page, filter, requestArgs }) => (isProgram ? epicApi.project(projectId).loadProgramEpics({
       page,
       onlyUnCompleted,
@@ -56,10 +68,11 @@ const SelectEpic: React.FC<SelectEpicProps> = forwardRef(({
       if (afterLoad) {
         afterLoad(temp);
       }
+      optionsRef.current = temp;
       return temp;
     },
     paging: true,
-  }), [afterLoad, dataRef, dontAddEpic0, isProgram, onlyUnCompleted, projectId, request, selectIds, unassignedEpic]);
+  }), [afterLoad, args, dataRef, dontAddEpic0, isProgram, onlyUnCompleted, projectId, request, unassignedEpic]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
 

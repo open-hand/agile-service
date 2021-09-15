@@ -10,7 +10,8 @@ import type { IChosenFieldField } from '@/components/chose-field/types';
 import { getComponentCodeForLocalCode, getFieldPropsByMode } from '../base/utils';
 import { IFieldSystemConfig, IFieldCustomConfig } from '../base/type';
 
-function getSystemFieldConfig({ code, value, defaultValue }: IChosenFieldField, dataSet?: DataSet): Partial<IFieldSystemConfig<AgileComponentMapProps>> {
+function getSystemFieldConfig(field: IChosenFieldField, dataSet?: DataSet): Partial<IFieldSystemConfig<AgileComponentMapProps>> {
+  const { code, value, defaultValue } = field;
   switch (code) {
     case 'sprintList':
       return {
@@ -36,13 +37,16 @@ function getSystemFieldConfig({ code, value, defaultValue }: IChosenFieldField, 
           filterList: [],
         },
       };
-    case 'epicList':
+    case 'epic':
+    case 'epicList': {
       return {
         code: 'epic',
         props: {
-          isProgram: true,
+          defaultSelectedIds: defaultValue,
+          isProgram: code === 'epicList',
         },
       };
+    }
     case 'feature': {
       return {
         code: 'feature',
@@ -91,7 +95,7 @@ function getSystemFieldConfig({ code, value, defaultValue }: IChosenFieldField, 
     default:
       break;
   }
-  return {};
+  return getCustomFieldConfig(field, dataSet) as any;
 }
 
 /**
@@ -102,9 +106,8 @@ function getSystemFieldConfig({ code, value, defaultValue }: IChosenFieldField, 
  */
 function getCustomFieldConfig(field: IChosenFieldField, dataSet?: DataSet): Partial<IFieldCustomConfig<CustomFCComponentMapProps>> {
   const {
-    code, fieldType, name, fieldOptions, value, id,
+    code, fieldType, name, fieldOptions, value, id, defaultValue,
   } = field;
-  const defaultValue = toJS(value);
 
   switch (fieldType) {
     case 'radio': case 'single': case 'checkbox': case 'multiple':

@@ -71,7 +71,7 @@ const filterCodeModeProps: IComponentPropsToFn<IAgileSystemFieldProps> = {
   epic: ({ props }) => ({
     unassignedEpic: true,
     onlyUnCompleted: false,
-    defaultSelectedIds: props?.value,
+    selectIds: props?.value,
   }),
 };
 
