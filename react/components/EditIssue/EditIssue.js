@@ -374,7 +374,7 @@ function EditIssue() {
           loginUserId={AppState.userInfo.id}
           onDeleteIssue={onDeleteIssue}
           onUpdate={onUpdate}
-          otherProject={otherProject}
+          otherProject={otherProject || String(issue?.projectId) !== String(getProjectId())}
           outside={outside}
           onTransformType={onTransformType}
           onOpenCreateSubTask={handleOpenCreateSubTask}
@@ -401,7 +401,7 @@ function EditIssue() {
           onDeleteIssue={onDeleteIssue}
           parentSummary={summary}
           push={push}
-          otherProject={otherProject}
+          otherProject={otherProject || String(issue?.projectId) !== String(getProjectId())}
           onChangeParent={onChangeParent}
           onRelateIssue={onRelateIssue}
           onTransformSubIssue={handleTransformSubIssue}
