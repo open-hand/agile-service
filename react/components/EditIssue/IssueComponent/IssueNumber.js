@@ -35,7 +35,6 @@ const IssueNumber = ({
         paramIssueId: decryptIssueId, paramName: issueNum,
       },
     };
-
     if (!isProgram) {
       copy(`${window.location.host}/#/${linkUrl('agile/work-list/issue', queryData)}`);
     } else {
