@@ -9,7 +9,7 @@ import { HeaderButtons } from '@choerodon/master';
 import {
   CheckBox,
 } from 'choerodon-ui/pro';
-import { DragDropContextProvider } from 'react-dnd';
+import { DragDropContextProvider, DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { observer } from 'mobx-react-lite';
 import { EmptyPage } from '@choerodon/components';
@@ -241,8 +241,6 @@ const StoryMapHome = observer(() => {
 StoryMapHome.propTypes = {
 
 };
-export default ({ ...props }) => (
-  <DragDropContextProvider backend={HTML5Backend}>
-    <StoryMapHome {...props} />
-  </DragDropContextProvider>
-);
+
+const DragDropContextInstance = DragDropContext(HTML5Backend);
+export default DragDropContextInstance(StoryMapHome);
