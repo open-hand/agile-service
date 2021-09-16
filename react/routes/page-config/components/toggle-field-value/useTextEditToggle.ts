@@ -131,7 +131,7 @@ function useTextEditTogglePropsWithPage(record: Record): ITextEditToggleConfigPr
       return isProject ? disabledEditDefaultFields.includes(record.get('fieldCode')) : orgDisabledEditDefaultFields.includes(record.get('fieldCode'));
     }
 
-    return true;
+    return false;
   }, [isProject, record]);
   return {
     ...variableProps,

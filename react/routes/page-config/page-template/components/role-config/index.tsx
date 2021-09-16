@@ -53,6 +53,7 @@ const SelectUserWithRole: React.FC<SelectUserProps & { roles: IRoleWithSelectOpt
               hidden={!showSelectUser}
               selectedUser={record?.getState(`${name}_defaultSelectUsers`)}
               style={{ marginTop: '.2rem', width: '100%' }}
+              getPopupContainer={(node) => node.parentNode as any}
             />
           )}
         </div>
