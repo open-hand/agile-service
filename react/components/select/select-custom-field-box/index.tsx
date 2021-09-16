@@ -1,12 +1,12 @@
 import React, { useMemo, forwardRef } from 'react';
 import { SelectBox } from 'choerodon-ui/pro';
-import useSelect, { SelectConfig } from '@/hooks/useSelect';
-import { fieldApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { unionBy, castArray, partition } from 'lodash';
 import { usePersistFn } from 'ahooks';
+import { fieldApi } from '@/api';
+import useSelect, { SelectConfig } from '@/hooks/useSelect';
 
-interface BasicProps extends Partial<SelectProps> {
+export interface SelectCustomFieldBasicProps extends Partial<SelectProps> {
 
   selected?: string[] | string
   extraOptions?: any[]
@@ -18,7 +18,7 @@ interface BasicProps extends Partial<SelectProps> {
   afterLoad?: (data: any) => void
 }
 // 参数互斥，要么传fieldId，要么传fieldOptions
-type SelectCustomFieldProps = BasicProps & ({
+export type SelectCustomFieldProps = SelectCustomFieldBasicProps & ({
   fieldId: string
   fieldOptions?: never
   onlyEnabled?: boolean

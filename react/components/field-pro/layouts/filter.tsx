@@ -4,7 +4,7 @@ import type {
 import { toJS } from 'mobx';
 
 import { find, get, merge } from 'lodash';
-import type { IAgileBaseFieldTypeComponentProps, AgileComponentMapProps, CustomFCComponentMapProps } from '../base/component';
+import type { IAgileBaseFieldTypeComponentProps, AgileComponentMapProps } from '../base/component';
 import { getAgileFields } from '../base';
 import type { IChosenFieldField } from '@/components/chose-field/types';
 import { getComponentCodeForLocalCode, getFieldPropsByMode } from '../base/utils';
@@ -104,7 +104,7 @@ function getSystemFieldConfig(field: IChosenFieldField, dataSet?: DataSet): Part
  * @param dataSet
  * @returns
  */
-function getCustomFieldConfig(field: IChosenFieldField, dataSet?: DataSet): Partial<IFieldCustomConfig<CustomFCComponentMapProps>> {
+function getCustomFieldConfig(field: IChosenFieldField, dataSet?: DataSet): Partial<IFieldCustomConfig<IAgileBaseFieldTypeComponentProps>> {
   const {
     code, fieldType, name, fieldOptions, value, id, defaultValue,
   } = field;
@@ -114,16 +114,16 @@ function getCustomFieldConfig(field: IChosenFieldField, dataSet?: DataSet): Part
       return {
         props: {
           fieldId: field.id, selected: defaultValue ?? (field as any).valueBindValue, onlyEnabled: false,
-        } as IAgileBaseFieldTypeComponentProps['multiple'],
-      } as any; // valueBindValue 是快速筛选处的值 TODO 后续去掉
+        },
+      }; // valueBindValue 是快速筛选处的值 TODO 后续去掉
     case 'member':
     case 'multiMember':
       return {
         props: {
           selected: defaultValue ? defaultValue.map((item: any) => String(item)) : undefined,
           extraOptions: code === 'assigneeId' ? [{ id: '0', realName: '未分配' }] : undefined,
-        } as IAgileBaseFieldTypeComponentProps['multiMember'],
-      } as any;
+        },
+      };
     default:
       break;
   }

@@ -13,20 +13,51 @@ import SelectFeatureType from '@/components/select/select-feature-type';
 import SelectTeam from '@/components/select/select-team';
 import SelectUserWithAssigneeMe from '@/components/select/pro/select-user-with-assigneeme';
 import SelectIssueType from '@/components/select/pro/select-issue-type';
+import DateTimePickerWithDefault from '@/components/date-time-picker';
+import type { DateTimePickerProps } from '@/components/date-time-picker/DateTimePicker';
 import getFieldsInstance, { AgileComponentMap, CustomFieldMap, IFieldBaseConfig } from '../base';
+import type { IAgileBaseFieldTypeComponentProps } from '../base/component';
+import type {
+  IComponentFCWithClassObject, IClassComponentType, IComponentFCWithClassObjectProps, IComponentFCWithClass,
+} from '../base/type';
 
-type ProRenderFieldPropsType = {
+type ProRenderFieldPropsType<P = any> = {
   render?: ((
     text: any,
     props: any,
     dom: JSX.Element,
   ) => JSX.Element)
   renderFormItem?: ((props: any) => JSX.Element)
-  props?: any
+  props?: P
   /** 创建时提交至服务端的值和field的code的对应 */
   valueKey?: string
 };
-const valueTypeConfigMap: Record<string, ProRenderFieldPropsType> = {
+const AgileComponentMapWithPro = {
+  ...AgileComponentMap,
+  issueType: SelectIssueType,
+  assignee: SelectUserWithAssigneeMe,
+  feature: SelectFeature,
+  storyPoints: SelectNumber,
+  remainingTime: SelectNumber,
+  parentIssueId: SelectParentIssue,
+  featureType: SelectFeatureType,
+  subProject: SelectTeam,
+  estimatedStartTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
+  estimatedEndTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
+};
+const CreateCustomFieldMap = {
+  ...CustomFieldMap,
+  radio: SelectCustomFieldBox,
+  checkbox: SelectCustomFieldBox,
+
+};
+export type ICreateComponentPropsDistributeProRender<T extends IComponentFCWithClassObject> = {
+  [P in keyof T]?: ProRenderFieldPropsType<T[P] extends IComponentFCWithClass ? React.ComponentProps<T[P]> : T[P]> }
+export type ICreateCustomFieldMapProps = IAgileBaseFieldTypeComponentProps & Pick<IComponentFCWithClassObjectProps<typeof CreateCustomFieldMap>, 'radio' | 'checkbox'>
+
+const valueTypeConfigMap: ICreateComponentPropsDistributeProRender<ICreateCustomFieldMapProps & {
+  default: ProRenderFieldPropsType
+}> = {
   default: {
     render: (text: any,
       props: any,
@@ -42,7 +73,12 @@ const valueTypeConfigMap: Record<string, ProRenderFieldPropsType> = {
     render: (text) => (Array.isArray(text) ? text.join('、') : text),
   },
 };
-const systemFieldConfigMap: Record<string, ProRenderFieldPropsType> = {
+
+const systemFieldConfigMap: ICreateComponentPropsDistributeProRender<typeof AgileComponentMapWithPro& {
+  // estimatedEndTime: ICreateCustomFieldMapProps['datetime']
+  reporter: ICreateCustomFieldMapProps['member']
+  mainResponsible: ICreateCustomFieldMapProps['member']
+}> = {
   issueType: {
     props: { showIcon: true },
     valueKey: 'issueTypeId',
@@ -107,7 +143,6 @@ const systemFieldConfigMap: Record<string, ProRenderFieldPropsType> = {
     valueKey: 'statusId',
   },
   subProject: {
-
     valueKey: 'teamProjectIds',
   },
   pi: {
@@ -124,23 +159,7 @@ const fieldMap = {
   ...valueTypeConfigMap,
   ...systemFieldConfigMap,
 };
-const AgileComponentMapWithPro = {
-  ...AgileComponentMap,
-  issueType: SelectIssueType,
-  assignee: SelectUserWithAssigneeMe,
-  feature: SelectFeature,
-  storyPoints: SelectNumber,
-  remainingTime: SelectNumber,
-  parentIssueId: SelectParentIssue,
-  featureType: SelectFeatureType,
-  subProject: SelectTeam,
-};
-const CreateCustomFieldMap = {
-  ...CustomFieldMap,
-  radio: SelectCustomFieldBox,
-  checkbox: SelectCustomFieldBox,
 
-};
 /** 创建问题字段实例 */
 const getCreateFields = getFieldsInstance<IFieldBaseConfig, typeof AgileComponentMapWithPro>({ SystemComponents: AgileComponentMapWithPro, CustomComponents: CreateCustomFieldMap });
 

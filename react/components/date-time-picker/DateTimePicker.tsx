@@ -3,7 +3,7 @@ import moment, { Moment, isMoment } from 'moment';
 import DateTimePicker from 'choerodon-ui/pro/lib/date-time-picker/DateTimePicker';
 import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 
-interface DateTimePickerProps extends DatePickerProps {
+export interface DateTimePickerProps extends DatePickerProps {
   // 默认弹框中的值
   defaultPickerValue?: Moment,
   // 用于创建冲刺中开始日期的时间默认为00:00:00
