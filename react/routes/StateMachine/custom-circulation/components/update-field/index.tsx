@@ -123,7 +123,7 @@ const transformUpdateData = (data) => {
         if (key === 'environment') {
           break;
         }
-        if (value || value.length > 0) {
+        if (value || value?.length > 0) {
           updateData.push({
             fieldId,
             fieldValueList: (fieldType === 'radio' || fieldType === 'single') ? [{
@@ -483,11 +483,12 @@ const UpdateField = ({
         setLoading(false);
       });
     }
-  }, [fieldData, record, selectedType]);
+  }, [Field, dataSet, fieldData, record, selectUserMap, selectedType]);
 
   const getData = useCallback(() => {
     const temp = dataSet.current ? dataSet.current.toData() : {} as any;
     const obj: any = {};
+    console.log(temp);
     fields.forEach((field: IFieldK) => {
       if (field.code) {
         const fieldObj = {
@@ -517,7 +518,7 @@ const UpdateField = ({
       return false;
     };
     modal.handleOk(submit);
-  }, [customCirculationDataSet, getData, modal, record, selectedType, isOrganization]);
+  }, [customCirculationDataSet, getData, modal, record, selectedType, isOrganization, dataSet]);
 
   const data = getData();
 
@@ -528,7 +529,7 @@ const UpdateField = ({
       dataSet={dataSet}
       columns={25}
       style={{
-        overflowY: 'auto', overflowX: 'hidden', marginLeft: '-0.05rem'
+        overflowY: 'auto', overflowX: 'hidden', marginLeft: '-0.05rem',
       }}
     >
       {fields.map((f: IFieldK) => {

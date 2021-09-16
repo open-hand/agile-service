@@ -296,6 +296,7 @@ export default function renderField({
           fieldType,
           outputs: ['element'],
           props: {
+            name: code,
             searchable: true,
             // style: { width: '100%' },
             colSpan,
