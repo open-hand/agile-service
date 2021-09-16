@@ -131,37 +131,42 @@ const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee }) => 
   }, []);
 
   return (
-    <Dropdown
-      overlay={(
-        <ObserverOverlay
-          setVisible={setVisible}
-          defaultAssignee={defaultAssignee}
-          setSelectedUser={setSelectedUser}
-          selectedUser={selectedUser}
-        />
-)}
-      trigger={['click']}
-      visible={visible}
-      onVisibleChange={handleVisibleChange}
-    >
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        {
+    <div id="userDropdown-container">
+      <Dropdown
+        overlay={(
+          <ObserverOverlay
+            setVisible={setVisible}
+            defaultAssignee={defaultAssignee}
+            setSelectedUser={setSelectedUser}
+            selectedUser={selectedUser}
+          />
+      )}
+        trigger={['click']}
+        visible={visible}
+        onVisibleChange={handleVisibleChange}
+      >
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {
           selectedUser ? (
             <>
               <UserTag
                 data={selectedUser}
                 showText={false}
+                tooltip={false}
               />
               <Icon type="close" style={{ fontSize: 14, cursor: 'pointer' }} onClick={handleClear} />
             </>
           ) : <div className={styles.tip}>经办人</div>
         }
-        <Icon
-          type="arrow_drop_down"
-          style={{ fontSize: 16, cursor: 'pointer' }}
-        />
-      </div>
-    </Dropdown>
+          <Icon
+            type="arrow_drop_down"
+            style={{ fontSize: 16, cursor: 'pointer' }}
+          />
+        </div>
+      </Dropdown>
+
+    </div>
+
   );
 };
 

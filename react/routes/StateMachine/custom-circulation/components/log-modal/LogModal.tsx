@@ -41,7 +41,7 @@ const StatusMap = new Map([
   ],
   ['max_depth', {
     color: '#F76776',
-    text: '过长终止',
+    text: '链路超长',
   }],
 ]);
 const RemarkMap = new Map([

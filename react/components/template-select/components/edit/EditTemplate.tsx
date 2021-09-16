@@ -7,12 +7,12 @@ import {
 import { FuncType } from 'choerodon-ui/pro/lib/button/interface';
 import { Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
-import TableColumnCheckBoxes, { ITableColumnCheckBoxesDataProps, useTableColumnCheckBoxes } from '@/components/table-column-check-boxes';
-import { IModalProps } from '@/common/types';
-import { TemplateAction, templateApi } from '@/api';
 import classnames from 'classnames';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { map, uniq } from 'lodash';
+import TableColumnCheckBoxes, { ITableColumnCheckBoxesDataProps, useTableColumnCheckBoxes } from '@/components/table-column-check-boxes';
+import { IModalProps } from '@/common/types';
+import { TemplateAction, templateApi } from '@/api';
 import styles from './EditTemplate.less';
 
 interface FormPartProps {

@@ -120,6 +120,8 @@ const TemplateSelect: React.FC<Props> = (props) => {
     <div className={styles.template_select}>
       <Dropdown
         visible={!hidden}
+        // @ts-ignore
+        // getPopupContainer={(triggerNode) => document.querySelector('#template_select')}
         overlay={(
           <div
             // @ts-ignore
@@ -141,6 +143,7 @@ const TemplateSelect: React.FC<Props> = (props) => {
               transformExportFieldCodes={transformExportFieldCodes}
               reverseTransformExportFieldCodes={reverseTransformExportFieldCodes}
               defaultInitCodes={defaultInitCodes}
+              setHidden={setHidden}
             />
           </div>
           )}
