@@ -52,6 +52,7 @@ export const AgileComponentMap = {
   quickFilter: SelectQuickFilterField,
   description: Editor as IClassComponentType<Editor<FormFieldProps>>,
 };
+const A = { pi: SelectPI };
 
 export type AgileComponentMapProps = typeof AgileComponentMap
 
@@ -71,9 +72,7 @@ export const CustomFieldMap = {
   multiMember: SelectUser,
   member: SelectUser,
 };
-export type CustomFCComponentMapProps = Pick<typeof CustomFieldMap, 'radio' | 'checkbox' | 'single' | 'multiMember' | 'multiple' | 'member'>
-
-export interface CustomComponentMapProps extends CustomFCComponentMapProps {
+export interface CustomClassComponentMapProps {
   time: IClassComponentType<TimePicker>
   datetime: IClassComponentType<DateTimePicker>
   date: IClassComponentType<DatePicker>
@@ -81,7 +80,10 @@ export interface CustomComponentMapProps extends CustomFCComponentMapProps {
   input: IClassComponentType<TextField>,
   text: IClassComponentType<TextArea<any>>
 }
+export type CustomComponentMapProps = typeof CustomFieldMap & CustomClassComponentMapProps
+
 export type IAgileBaseFieldTypeComponentProps = Partial<IComponentFCWithClassObjectProps<CustomComponentMapProps>>
+
 /**
  *  获取默认空元素
  * @param processConfig

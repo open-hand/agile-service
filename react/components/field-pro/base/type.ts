@@ -1,21 +1,21 @@
 import React from 'react';
 import { IFieldType } from '@/common/types';
-
+/** key- 函数组件 */
 export type IComponentFCObject = { [propsName: string]: React.FC }
-
+/** key-类组件 */
 export type IComponentClassObject = { [propsName: string]: React.ComponentClass }
-
-export type IComponentFCWithClass<P = {}, S = any> = React.FC<P> | React.ComponentClass<P, S>
-
+/** 组件类型 */
+export type IComponentFCWithClass<P = {}, S = any> = React.FC<P> | React.ComponentClass<P, S> | React.ForwardRefExoticComponent<P>
+/** key--组件 */
 export type IComponentFCWithClassObject = { [propsName: string]: IComponentFCWithClass<any, any> | any }
 type IFirstParameterFC<F extends React.FC> = Parameters<F>[0]
 
 type IComponentProps<C extends IComponentFCWithClass> = C extends React.FC ? IFirstParameterFC<C> : React.ComponentProps<C>
-
+/** 获取组件props 并分配到组件对应key  */
 export type IComponentFCWithClassObjectProps<T extends IComponentFCWithClassObject> = { [P in keyof T]: React.ComponentProps<T[P]> }
-
+/** 获取组件props 并分配到对应code */
 export type ICodeDistributeProps<T extends IComponentFCWithClassObject, K extends keyof T> = K extends string ? { code: K, fieldType?: IFieldType, props?: React.ComponentProps<T[K]>, } : never;
-
+/** 获取组件props 分配到对应fieldType */
 export type IFieldTypeDistributeProps<T extends IComponentFCWithClassObject, K extends keyof T> = K extends IFieldType ? { code?: string, fieldType: K, props?: React.ComponentProps<T[K]> } : never;
 
 export type IFieldSystemComponentConfig<T extends IComponentFCWithClassObject> = ICodeDistributeProps<T, keyof T> // & IFieldTypeDistributeProps<T, keyof T>

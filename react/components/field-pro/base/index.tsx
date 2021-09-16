@@ -4,8 +4,9 @@ import type {
 } from './type';
 import { getProcessFieldConfig } from './utils';
 import getElement, {
-  AgileComponentMapProps, CustomComponentMapProps, AgileComponentMap, CustomFieldMap,
+  AgileComponentMap, CustomFieldMap,
 } from './component';
+import type { AgileComponentMapProps, CustomComponentMapProps } from './component';
 import { IFieldType } from '@/common/types';
 
 interface IFieldsInstanceConfig {
