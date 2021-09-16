@@ -488,7 +488,6 @@ const UpdateField = ({
   const getData = useCallback(() => {
     const temp = dataSet.current ? dataSet.current.toData() : {} as any;
     const obj: any = {};
-    console.log(temp);
     fields.forEach((field: IFieldK) => {
       if (field.code) {
         const fieldObj = {

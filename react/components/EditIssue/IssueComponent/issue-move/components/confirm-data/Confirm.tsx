@@ -53,7 +53,6 @@ const Confirm: React.FC<Props> = ({
     return <Loading loading />;
   }
 
-  console.log(issueMapValues, loseItems);
   return (
     <div className={styles.confirm}>
       {

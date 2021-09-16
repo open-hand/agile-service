@@ -22,10 +22,11 @@ interface Props {
   transformExportFieldCodes: (data: Array<string>, otherData: ITableColumnCheckBoxesDataProps) => Array<string>
   reverseTransformExportFieldCodes: (data: string[]) => string[]
   defaultInitCodes: string[]
+  setHidden: (hidden: boolean) => void
 }
 
 const TemplateList: React.FC<Props> = ({
-  action, checkOptions, templateList, selected, setSelected, templateItemNameCls, onEdit, onDelete, selectTemplateOk, transformExportFieldCodes, reverseTransformExportFieldCodes, defaultInitCodes,
+  action, checkOptions, templateList, selected, setSelected, templateItemNameCls, onEdit, onDelete, selectTemplateOk, transformExportFieldCodes, reverseTransformExportFieldCodes, defaultInitCodes, setHidden,
 }) => {
   const handleSelect = useCallback((template) => {
     setSelected(template);
@@ -33,10 +34,13 @@ const TemplateList: React.FC<Props> = ({
   }, [selectTemplateOk, setSelected]);
 
   const handleClickEdit = useCallback(({ template }) => {
-    openEditTemplate({
-      template, checkOptions, action, onEdit, transformExportFieldCodes, reverseTransformExportFieldCodes, defaultInitCodes,
-    });
-  }, [action, checkOptions, defaultInitCodes, onEdit, reverseTransformExportFieldCodes, transformExportFieldCodes]);
+    setHidden(true);
+    setTimeout(() => {
+      openEditTemplate({
+        template, checkOptions, action, onEdit, transformExportFieldCodes, reverseTransformExportFieldCodes, defaultInitCodes,
+      });
+    }, 200);
+  }, [action, checkOptions, defaultInitCodes, onEdit, reverseTransformExportFieldCodes, setHidden, transformExportFieldCodes]);
 
   const handleClickDelete = useCallback(async (template) => {
     await templateApi.delete(template.id);
