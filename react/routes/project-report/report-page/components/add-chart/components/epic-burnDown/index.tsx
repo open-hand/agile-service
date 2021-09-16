@@ -14,6 +14,8 @@ interface Props {
   innerRef: React.MutableRefObject<ChartRefProps>
   data?: IReportChartBlock
   projectId?: string
+  isProgram?: boolean,
+  linkTo: (url: string) => void,
 }
 export const transformEpicBurndownSearch = (searchVO: EpicBurndownSearchVO | undefined): EpicBurnConfig | undefined => {
   if (!searchVO) {
@@ -26,7 +28,9 @@ export const transformEpicBurndownSearch = (searchVO: EpicBurndownSearchVO | und
   });
 };
 
-const EpicBurnDownComponent:React.FC<Props> = ({ innerRef, projectId, data }) => {
+const EpicBurnDownComponent:React.FC<Props> = ({
+  innerRef, projectId, data, isProgram, linkTo,
+}) => {
   const config = useMemo(() => ({
     ...transformEpicBurndownSearch(data?.chartSearchVO as EpicBurndownSearchVO),
     projectId,
@@ -58,23 +62,29 @@ const EpicBurnDownComponent:React.FC<Props> = ({ innerRef, projectId, data }) =>
             image={pic}
             description={(
               <div>
-                <span>当前项目无可用史诗，请在</span>
-                <EmptyPage.Button
-                  onClick={() => {
-                    to(LINK_URL.workListBacklog);
-                  }}
-                >
-                  【待办事项】
-                </EmptyPage.Button>
-                <span>或</span>
-                <EmptyPage.Button
-                  onClick={() => {
-                    to(LINK_URL.workListIssue);
-                  }}
-                >
-                  【所有问题】
-                </EmptyPage.Button>
-                <span>中创建一个史诗</span>
+                {isProgram ? (
+                  <span>当前项目无可用史诗，请在【待办事项】或【所有问题】中创建一个史诗</span>
+                ) : (
+                  <>
+                    <span>当前项目无可用史诗，请在</span>
+                    <EmptyPage.Button
+                      onClick={() => {
+                        linkTo(LINK_URL.workListBacklog);
+                      }}
+                    >
+                      【待办事项】
+                    </EmptyPage.Button>
+                    <span>或</span>
+                    <EmptyPage.Button
+                      onClick={() => {
+                        linkTo(LINK_URL.workListIssue);
+                      }}
+                    >
+                      【所有问题】
+                    </EmptyPage.Button>
+                    <span>中创建一个史诗</span>
+                  </>
+                )}
               </div>
             )}
           />

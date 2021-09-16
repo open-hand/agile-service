@@ -68,11 +68,12 @@ export function addChartsMap(extraCharts: Map<string, ChartMap>) {
 interface Props {
   innerRef: React.MutableRefObject<RefProps>
   data?: IReportChartBlock
+  linkTo: (url: string) => void
 }
 export interface ChartRefProps {
   submit: () => Promise<ChartSearchVO>
 }
-const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
+const AddChart: React.FC<Props> = ({ innerRef, data: editData, linkTo }) => {
   const initProject = useMemo(() => editData?.chartSearchVO.projectId, [editData?.chartSearchVO.projectId]);
   const initChartCode = useMemo(() => editData?.chartCode, [editData?.chartCode]);
   const [optionalCharts, setOptionalCharts] = useState(new Map());
@@ -181,6 +182,8 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
             innerRef={chartRef}
             data={data}
             projectId={isProgram ? subProjectId : undefined}
+            isProgram={isProgram}
+            linkTo={linkTo}
           />
         ) : null}
       </div>
