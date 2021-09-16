@@ -1,8 +1,8 @@
-import { IFieldOptionProps } from '@/api';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import moment from 'moment';
 import { isEmpty } from 'lodash';
 import { toJS } from 'mobx';
+import { IFieldOptionProps } from '@/api';
 import { User } from '@/common/types';
 
 const disabledEditDefaultFields = ['featureType', 'issueType', 'status', 'priority', 'creationDate', 'lastUpdateDate', 'timeTrace', 'belongToBacklog', 'urgent', 'progressFeedback', 'description', 'environment', 'created_user', 'last_updated_user', 'email', 'tag'];
@@ -16,6 +16,8 @@ const fieldTextValueConfig = {
   sprint: { optionKey: 'sprintId', textKey: 'sprintName' },
   backlogType: { optionKey: 'id', textKey: 'name' },
   backlogClassification: { optionKey: 'id', textKey: 'name' },
+  pi: { optionKey: 'id', textKey: 'piName' },
+  programVersion: { optionKey: 'id', textKey: 'name' },
 };
 function transformDefaultValue({
   fieldType, defaultValue, defaultValueObj, fieldOptions, optionKey: propsOptionKey = 'id', textKey: propsTextKey = 'value', fieldCode, extraConfig,

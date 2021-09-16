@@ -111,6 +111,10 @@ const systemFieldConfigMap: Record<string, ProRenderFieldPropsType> = {
     valueKey: 'teamProjectIds',
   },
   pi: {
+    props: {
+      openPermission: true,
+      statusList: ['todo', 'doing'],
+    },
     valueKey: 'piId',
   },
 

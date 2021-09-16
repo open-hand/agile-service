@@ -51,7 +51,6 @@ function PageIssueTypeSwitch({ value, onInit = noop, onChangeIssueType }: PageSw
 
   // 加载全部字段 用于增添已有字段
   useMount(() => {
-    console.log('init', switchOptions);
     pageConfigApi.loadAvailableIssueType().then((res) => {
       const { issueTypeId } = params;
       let currentType;
