@@ -8,7 +8,7 @@ import { stores, Choerodon, WSHandler } from '@choerodon/boot';
 import { usePersistFn } from 'ahooks';
 import { Spin } from 'choerodon-ui/pro';
 import JSONbig from 'json-bigint';
-import { reverse, isEmpty } from 'lodash';
+import { reverse } from 'lodash';
 import openCreateSubTask from '@/components/create-sub-task';
 import './EditIssue.less';
 import {
