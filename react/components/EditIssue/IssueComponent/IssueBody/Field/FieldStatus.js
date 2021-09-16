@@ -1,6 +1,7 @@
 import React, { Component, useMemo, forwardRef } from 'react';
 import { observer } from 'mobx-react';
-import { Select } from 'choerodon-ui/pro';
+import { Select, Tooltip } from 'choerodon-ui/pro';
+import { some } from 'lodash';
 import STATUS from '@/constants/STATUS';
 import { issueApi, statusApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
@@ -80,6 +81,24 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
     }
   };
 
+  isNotAllowedStatus = (id) => {
+    const { store } = this.props;
+    return id && some(store.getNotAllowedTransferStatus || [], { id });
+  };
+
+  onOption = ({ record }) => ({
+    disabled: this.isNotAllowedStatus(record.get('value')),
+  });
+
+  optionRenderer = ({ text, value }) => {
+    const title = this.isNotAllowedStatus(value) ? '子级任务未完成，不可移动到此状态' : '';
+    return (
+      <Tooltip title={title}>
+        {text}
+      </Tooltip>
+    );
+  };
+
   render() {
     const {
       store, disabled, projectId, applyType, issueId: currentIssueId,
@@ -110,6 +129,8 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
                 statusArgs={{
                   statusId, issueId, typeId, projectId, applyType, name,
                 }}
+                onOption={this.onOption}
+                optionRenderer={this.optionRenderer}
               />
             )}
           >
