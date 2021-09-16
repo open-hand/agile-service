@@ -428,5 +428,15 @@ class EditIssueStore {
       }
     });
   }
+
+  @observable notAllowedTransferStatus = [];
+
+  @computed get getNotAllowedTransferStatus() {
+    return this.notAllowedTransferStatus;
+  }
+
+  @action setNotAllowedTransferStatus(data) {
+    this.notAllowedTransferStatus = data || [];
+  }
 }
 export default EditIssueStore;
