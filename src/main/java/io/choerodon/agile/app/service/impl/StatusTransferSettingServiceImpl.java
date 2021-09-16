@@ -136,7 +136,8 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
     public void checkStatusTransferSetting(Long projectId, IssueDTO issueDTO, Long endStatusId) {
         Boolean verifyStatusTransferSetting = verifyStatusTransferSetting(projectId, issueDTO, endStatusId);
         if (Boolean.TRUE.equals(verifyStatusTransferSetting)) {
-            throw new CommonException("error.no.permission.to.switch");
+            StatusDTO statusDTO = statusMapper.selectByPrimaryKey(endStatusId);
+            throw new CommonException("error.no.permission.to.switch", statusDTO.getName());
         }
     }
 
