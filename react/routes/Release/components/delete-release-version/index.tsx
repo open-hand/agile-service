@@ -5,10 +5,10 @@ import {
   DataSet, DatePicker, Form, Modal, TextField, Select, Icon,
 } from 'choerodon-ui/pro';
 import { FieldTrim } from 'choerodon-ui/pro/lib/data-set/enum';
+import moment from 'moment';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { IModalProps } from '@/common/types';
 import { versionApi } from '@/api';
-import moment from 'moment';
 import { getProjectId } from '@/utils/common';
 
 interface PublishVersionModalProps {
@@ -21,7 +21,7 @@ const { Option } = Select;
 const DeletePublishVersion: React.FC<{ modal?: IModalProps } & PublishVersionModalWithEditProps> = ({
   modal, handleOk, versionDelInfo,
 }) => {
-  const [distributed, setDistributed] = useState<boolean>();
+  const [distributed, setDistributed] = useState<boolean>(!!versionDelInfo.versionNames[0]?.versionId);
   const [targetVersionId, setTargetVersionId] = useState<string | null | undefined>(versionDelInfo.versionNames[0]?.versionId);
   const handleSubmit = useCallback(async () => {
     const result = await versionApi.delete(versionDelInfo.versionId,
