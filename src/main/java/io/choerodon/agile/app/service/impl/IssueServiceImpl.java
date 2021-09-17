@@ -818,9 +818,19 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public IssueVO updateIssue(Long projectId, IssueUpdateVO issueUpdateVO, List<String> fieldList) {
         validateBeforeUpdate(projectId, issueUpdateVO, fieldList);
+        String issueIdStr = "issueId";
+        String objectVersionNumberStr = "objectVersionNumber";
+        //更新issue表字段，fieldList包含issueId，objectVersionNumber和一个field
+        boolean updateRelationField =
+                fieldList.size() == 2
+                        && fieldList.contains(issueIdStr)
+                        && fieldList.contains(objectVersionNumberStr);
         if (!fieldList.isEmpty()) {
-            //处理issue自己字段
-            this.self().handleUpdateIssue(issueUpdateVO, fieldList, projectId, issueUpdateVO.getIssueId());
+            if (updateRelationField) {
+                handleUpdateIssue(issueUpdateVO, fieldList, projectId, issueUpdateVO.getIssueId());
+            } else {
+                this.self().handleUpdateIssue(issueUpdateVO, fieldList, projectId, issueUpdateVO.getIssueId());
+            }
         }
         Long issueId = postUpdateIssue(projectId, issueUpdateVO);
         return queryIssueByUpdate(projectId, issueId, fieldList);
