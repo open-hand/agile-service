@@ -29,10 +29,10 @@ const FastSearchTable: React.ForwardRefRenderFunction<any, FastSearchTableProps>
       name: 'name',
       label: '名称',
     }, {
-      name: 'expressQuery',
+      name: 'expressQueryText',
       label: '筛选器',
     }, {
-      name: 'description',
+      name: 'descriptionText',
       label: '描述',
     }],
     queryFields: [{
@@ -93,10 +93,18 @@ const FastSearchTable: React.ForwardRefRenderFunction<any, FastSearchTableProps>
           />
         )}
       />
-      {/* @ts-ignore */}
-      <Column tooltip={'overflow' as TableColumnTooltip} className="c7n-agile-table-cell" name="expressQuery" renderer={({ text }) => text && transformOperation(text)} />
-      {/* @ts-ignore */}
-      <Column tooltip={'overflow' as TableColumnTooltip} className="c7n-agile-table-cell" name="description" renderer={({ text }) => text && text.split('+++')[0]} />
+      <Column
+        tooltip={'overflow' as TableColumnTooltip}
+        className="c7n-agile-table-cell"
+        name="expressQueryText"
+        renderer={({ record }) => record?.get('expressQuery') && transformOperation(record?.get('expressQuery'))}
+      />
+      <Column
+        tooltip={'overflow' as TableColumnTooltip}
+        className="c7n-agile-table-cell"
+        name="descriptionText"
+        renderer={({ record }) => record?.get('description') && record?.get('description').split('+++')[0]}
+      />
     </Table>
   );
 };
