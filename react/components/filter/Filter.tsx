@@ -43,6 +43,7 @@ export interface FilterProps {
   grouped?: boolean
   flat?: boolean
   selectFieldGroups?: SelectFieldProps['groups']
+  resetAll?: boolean
 }
 const Filter: React.FC<FilterProps> = ({
   systemFields,
@@ -58,6 +59,7 @@ const Filter: React.FC<FilterProps> = ({
   flat,
   filter,
   selectFieldGroups,
+  resetAll,
 }) => {
   const [folded, setFolded] = useState<boolean | undefined>();
   const [overflowLine, setOverflowLine] = useState<boolean>(false);
@@ -263,8 +265,12 @@ const Filter: React.FC<FilterProps> = ({
   }, [flat, groups, handleSelectChange, selected]);
   const resetFilter = useCallback(() => {
     onFilterChange({});
-    clearAllSelected();
-  }, [clearAllSelected, onFilterChange]);
+    if (resetAll) {
+      onSelectChange([]);
+    } else {
+      clearAllSelected();
+    }
+  }, [clearAllSelected, onFilterChange, onSelectChange, resetAll]);
 
   const expandFilter = useCallback(() => {
     setFolded(!folded);
