@@ -7,7 +7,7 @@ import { unstable_batchedUpdates } from 'react-dom';
 import { Tooltip, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import {
-  find, omit, remove,
+  find, omit, remove, some,
 } from 'lodash';
 import produce from 'immer';
 import dayjs from 'dayjs';
@@ -454,7 +454,7 @@ const GanttPage: React.FC = () => {
   const handleIssueDelete = usePersistFn((issue: Issue | null) => {
     if (issue) {
       setData(produce(data, (draft) => {
-        remove(draft, { issueId: issue.issueId });
+        remove(draft, (item) => item.issueId === issue.issueId || some(issue.subIssueVOList || [], { issueId: item.issueId }));
       }));
     }
   });
