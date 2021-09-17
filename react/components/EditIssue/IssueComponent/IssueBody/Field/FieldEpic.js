@@ -154,7 +154,7 @@ import styles from './FieldEpic.less';
                     disabled={isShowFeature || disabled}
                     onSubmit={this.updateIssueEpic}
                     initValue={issueEpicName ? epicId || null : null}
-                    editor={({ submit }) => <SelectEpic required={required} onChange={submit} />}
+                    editor={({ submit }) => <SelectEpic required={required} onChange={submit} selectIds={epicId} />}
                   >
                     {
                       issueEpicName ? (
