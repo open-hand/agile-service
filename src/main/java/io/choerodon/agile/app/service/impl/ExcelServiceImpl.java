@@ -1050,6 +1050,7 @@ public class ExcelServiceImpl implements ExcelService {
         Map<Integer, Long> rowIssueIdMap = new HashMap<>();
         List<RelatedIssueVO> relatedIssueList = new ArrayList<>();
         int lastSendCountNum = 0;
+        Map<Long,List<String>> requireFieldMap = new HashMap<>();
         List<TriggerCarrierVO> triggerCarrierVOS = new ArrayList<>();
         for (int rowNum = 1; rowNum <= dataRowCount; rowNum++) {
             if (Boolean.TRUE.equals(checkCanceled(projectId, history.getId(), importedIssueIds))) {
@@ -1095,7 +1096,7 @@ public class ExcelServiceImpl implements ExcelService {
                 List<Long> insertIds = new ArrayList<>();
                 try {
                     IssueCreateVO parent = new IssueCreateVO();
-                    validateData(projectId, row, headerMap, withoutParentRows, errorRowColMap, parent, null, issueTypeCol, parentCol);
+                    validateData(projectId, row, headerMap, withoutParentRows, errorRowColMap, parent, null, issueTypeCol, parentCol, requireFieldMap);
                     if (!ObjectUtils.isEmpty(errorRowColMap.get(rowNum))) {
                         lastSendCountNum = processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet, parentCol, lastSendCountNum);
                         rowNum = Collections.max(sonSet);
@@ -1130,7 +1131,7 @@ public class ExcelServiceImpl implements ExcelService {
                                 sonRow.getCell(col).setCellType(CellType.STRING);
                             }
                         }
-                        validateData(projectId, sonRow, headerMap, withoutParentRows, errorRowColMap, son, result, issueTypeCol, parentCol);
+                        validateData(projectId, sonRow, headerMap, withoutParentRows, errorRowColMap, son, result, issueTypeCol, parentCol, requireFieldMap);
                         if (!ObjectUtils.isEmpty(errorRowColMap.get(sonRowNum))) {
                             sonsOk = false;
                             break;
@@ -1171,7 +1172,7 @@ public class ExcelServiceImpl implements ExcelService {
                 }
             } else {
                 IssueCreateVO issueCreateVO = new IssueCreateVO();
-                validateData(projectId, row, headerMap, withoutParentRows, errorRowColMap, issueCreateVO, null, issueTypeCol, parentCol);
+                validateData(projectId, row, headerMap, withoutParentRows, errorRowColMap, issueCreateVO, null, issueTypeCol, parentCol, requireFieldMap);
                 if (!ObjectUtils.isEmpty(errorRowColMap.get(rowNum))) {
                     progress.failCountIncrease();
                     progress.processNumIncrease();
@@ -1488,7 +1489,8 @@ public class ExcelServiceImpl implements ExcelService {
                               IssueCreateVO issueCreateVO,
                               IssueVO parentIssue,
                               int issueTypeCol,
-                              int parentCol) {
+                              int parentCol,
+                              Map<Long, List<String>> requireFieldMap) {
         issueCreateVO.setProjectId(projectId);
         int rowNum = row.getRowNum();
         Cell issueTypeCell = row.getCell(issueTypeCol);
@@ -1540,10 +1542,45 @@ public class ExcelServiceImpl implements ExcelService {
             Integer col = entry.getKey();
             ExcelColumnVO excelColumn = entry.getValue();
             boolean isCustomField = excelColumn.isCustomField();
+            Boolean checkRequireField = checkRequireField(requireFieldMap, excelColumn, issueCreateVO, row, col, errorRowColMap);
+            if (!checkRequireField) {
+                break;
+            }
             if (isCustomField) {
                 validateCustomFieldData(row, col, excelColumn, errorRowColMap, issueCreateVO);
             } else {
                 validateSystemFieldData(row, col, excelColumn, errorRowColMap, issueCreateVO, parentIssue, projectId, headerMap);
+            }
+            handlerRequireFiled(excelColumn, requireFieldMap, issueCreateVO, projectId);
+        }
+    }
+
+    protected Boolean checkRequireField(Map<Long, List<String>> requireFieldMap, ExcelColumnVO excelColum, IssueCreateVO issueCreateVO, Row row, Integer col, Map<Integer, List<Integer>> errorRowColMap) {
+        Boolean checkRequireField = true;
+        Cell cell = row.getCell(col);
+        if (isCellEmpty(cell)) {
+            List<String> list = requireFieldMap.get(issueCreateVO.getIssueTypeId());
+            if (!CollectionUtils.isEmpty(list) && list.contains(excelColum.getFieldCode())) {
+                cell = row.createCell(col);
+                cell.setCellValue("必填字段不能为空");
+                addErrorColumn(row.getRowNum(), col, errorRowColMap);
+                checkRequireField = false;
+            }
+        }
+        return checkRequireField;
+    }
+
+    protected void handlerRequireFiled(ExcelColumnVO excelColumn, Map<Long, List<String>> requireFieldMap, IssueCreateVO issueCreateVO, Long projectId){
+        if ("issueType".equals(excelColumn.getFieldCode()) && !ObjectUtils.isEmpty(issueCreateVO.getIssueTypeId())) {
+            List<String> list = requireFieldMap.get(issueCreateVO.getIssueTypeId());
+            if (CollectionUtils.isEmpty(list)) {
+                PageFieldViewParamVO pageFieldViewParamVO = new PageFieldViewParamVO();
+                pageFieldViewParamVO.setPageCode("agile_issue_create");
+                pageFieldViewParamVO.setSchemeCode("agile_issue");
+                pageFieldViewParamVO.setIssueTypeId(issueCreateVO.getIssueTypeId());
+                List<PageFieldViewVO> pageFieldViewVOS = pageFieldService.queryPageFieldViewList(ConvertUtil.getOrganizationId(projectId), projectId, pageFieldViewParamVO);
+                List<String> fieldCodes = pageFieldViewVOS.stream().filter(v -> Boolean.TRUE.equals(v.getRequired())).map(PageFieldViewVO::getFieldCode).collect(Collectors.toList());
+                requireFieldMap.put(issueCreateVO.getIssueTypeId(), fieldCodes);
             }
         }
     }
@@ -1921,19 +1958,12 @@ public class ExcelServiceImpl implements ExcelService {
                                      Map<Integer, List<Integer>> errorRowColMap,
                                      Long projectId) {
         Cell cell = row.getCell(col);
-        int rowNum = row.getRowNum();
         if (!isCellEmpty(cell)) {
             String value = cell.toString();
-            List<String> values = excelColumn.getPredefinedValues();
-            if (!values.contains(value)) {
-                cell.setCellValue(buildWithErrorMsg(value, "请输入正确的标签"));
-                addErrorColumn(rowNum, col, errorRowColMap);
-            } else {
-                LabelIssueRelVO label = new LabelIssueRelVO();
-                label.setProjectId(projectId);
-                label.setLabelName(value);
-                issueCreateVO.setLabelIssueRelVOList(Arrays.asList(label));
-            }
+            LabelIssueRelVO label = new LabelIssueRelVO();
+            label.setProjectId(projectId);
+            label.setLabelName(value);
+            issueCreateVO.setLabelIssueRelVOList(Arrays.asList(label));
         }
     }
 
