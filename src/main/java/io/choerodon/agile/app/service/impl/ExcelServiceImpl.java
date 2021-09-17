@@ -1391,9 +1391,10 @@ public class ExcelServiceImpl implements ExcelService {
         ztFont.setColor(Font.COLOR_RED);
         ztStyle.setFont(ztFont);
         int startRow = 1;
-        for (Map.Entry<Integer, List<Integer>> entry: errorRowColMap.entrySet()) {
-            int rowNum = entry.getKey();
-            List<Integer> errorCol = entry.getValue();
+        List<Integer> errorRows = new ArrayList<>(errorRowColMap.keySet());
+        Collections.sort(errorRows);
+        for (Integer rowNum : errorRows) {
+            List<Integer> errorCol = errorRowColMap.get(rowNum);
             Row originRow = dataSheet.getRow(rowNum);
             Row row = sheet.createRow(startRow);
             for (int i = 0; i < colNum; i++) {
@@ -2830,32 +2831,14 @@ public class ExcelServiceImpl implements ExcelService {
             String type = issueTypeLink.getType();
             String issueTypeCode = getIssueTypeCode(headerMap, type);
             //故事和任务下有子任务子缺陷
+            //缺陷下只有子任务，但保留子缺陷父子结构，后续有父子关系校验
             if (IssueTypeCode.isStory(issueTypeCode)
-                    || IssueTypeCode.isTask(issueTypeCode)) {
-                storyRecursive(map, issueTypeLink, rowNum, headerMap);
-            }
-            //缺陷下只有子任务
-            if (IssueTypeCode.isBug(issueTypeCode)) {
-                bugRecursive(map, issueTypeLink, rowNum, headerMap);
+                    || IssueTypeCode.isTask(issueTypeCode)
+                    || (IssueTypeCode.isBug(issueTypeCode) && !SUB_BUG_CN.equals(type))) {
+                parentRecursive(map, issueTypeLink, rowNum, headerMap);
             }
         }
         return map;
-    }
-
-    private void bugRecursive(Map<Integer, Set<Integer>> map,
-                              IssueTypeLinkDTO issueTypeLink,
-                              Integer rowNum,
-                              Map<Integer, ExcelColumnVO> headerMap) {
-        if (Boolean.TRUE.equals(issueTypeLink.hasNext())) {
-            IssueTypeLinkDTO next = issueTypeLink.getNext();
-            String nextType = next.getType();
-            String nextIssueTypeCode = getIssueTypeCode(headerMap, nextType);
-            Integer nextRowNum = next.getRow();
-            if (IssueTypeCode.isSubTask(nextIssueTypeCode)) {
-                processSonRow(map, rowNum, nextRowNum);
-                bugRecursive(map, next, rowNum, headerMap);
-            }
-        }
     }
 
     private void processSonRow(Map<Integer, Set<Integer>> map, Integer rowNum, Integer nextRowNum) {
@@ -2869,7 +2852,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private void storyRecursive(Map<Integer, Set<Integer>> map,
+    private void parentRecursive(Map<Integer, Set<Integer>> map,
                                 IssueTypeLinkDTO issueTypeLink,
                                 Integer rowNum,
                                 Map<Integer, ExcelColumnVO> headerMap) {
@@ -2881,7 +2864,7 @@ public class ExcelServiceImpl implements ExcelService {
             if (IssueTypeCode.isSubTask(nextIssueTypeCode)
                     || SUB_BUG_CN.equals(nextType)) {
                 processSonRow(map, rowNum, nextRowNum);
-                storyRecursive(map, next, rowNum, headerMap);
+                parentRecursive(map, next, rowNum, headerMap);
             }
         }
     }
