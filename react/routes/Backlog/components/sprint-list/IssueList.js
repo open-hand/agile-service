@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-globals */
 import React, { useCallback, useRef } from 'react';
-import { observer } from 'mobx-react-lite';
+import { observer, Observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import { Pagination } from 'choerodon-ui/pro';
 import { Draggable } from 'react-beautiful-dnd';
@@ -13,6 +13,7 @@ import useDeepCompareEffect from '@/hooks/useDeepCompareEffect';
 import { ISSUE_HEIGHT } from './constant';
 import IssueItem from './IssueItem';
 import NoneIssue from './NoneIssue';
+import './IssueList.less';
 
 function IssueList({
   data, sprintId, sprintData, openCreateIssueModal, snapshot: dropSnapshot, provided: dropProvided,
@@ -74,7 +75,10 @@ function IssueList({
     : data.length;
   const { total, page, size } = pagination;
   return (
-    <div>
+    <div className="c7n-backlog-issue-list">
+      <Observer>
+        {() => <Loading loading={loading} allowSelfLoading className="c7n-backlog-issue-list-loading" />}
+      </Observer>
       {data.length === 0
         ? <LoadingHiddenWrap><NoneIssue type={sprintId === 0 ? 'backlog' : 'sprint'} /></LoadingHiddenWrap>
         : (
@@ -103,7 +107,6 @@ function IssueList({
             )}
           </WindowScroller>
         )}
-      <Loading loading={loading} allowSelfLoading />
       <div style={{ padding: '10px 0px 10px 20px', borderBottom: '0.01rem solid var(--divider)' }}>
         <QuickCreateIssue
           epicId={BacklogStore.getChosenEpic !== 'all' && BacklogStore.getChosenEpic !== 'unset' ? BacklogStore.getChosenEpic : undefined}
