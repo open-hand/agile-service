@@ -118,6 +118,9 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
         Assert.notNull(sprint.getStartDate(), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.notNull(sprint.getEndDate(), BaseConstants.ErrorCode.DATA_INVALID);
         if(!Objects.equals("closed", sprint.getStatusCode())){
+            if (sprint.getStartDate().after(new Date())){
+                return Collections.emptyList();
+            }
             sprint.setActualEndDate(new Date());
         } else {
             Assert.notNull(sprint.getActualEndDate(), BaseConstants.ErrorCode.DATA_INVALID);
