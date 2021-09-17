@@ -3,6 +3,7 @@ import { Choerodon } from '@choerodon/boot';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
+import { some } from 'lodash';
 import { featureApi, issueApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectEpic from '@/components/select/select-epic';
@@ -13,6 +14,8 @@ import styles from './FieldEpic.less';
 @inject('AppState')
 @observer class FieldEpic extends Component {
   ref = React.createRef();
+
+  dataRef = React.createRef();
 
   updateIssueEpic = async (newEpicId, done) => {
     const { store } = this.props;
@@ -54,7 +57,7 @@ import styles from './FieldEpic.less';
 
   render() {
     const {
-      store, disabled, push, outside, projectId, organizationId,
+      store, disabled, push, outside, projectId, organizationId, applyType,
     } = this.props;
     const issue = store.getIssue;
     const {
@@ -153,8 +156,8 @@ import styles from './FieldEpic.less';
                   <TextEditToggle
                     disabled={isShowFeature || disabled}
                     onSubmit={this.updateIssueEpic}
-                    initValue={issueEpicName ? epicId || null : null}
-                    editor={({ submit }) => <SelectEpic required={required} onChange={submit} selectIds={epicId} />}
+                    initValue={issueEpicName && (applyType === 'program' || some(this.dataRef.current || [], { issueId: epicId })) ? epicId || null : null}
+                    editor={({ submit }) => <SelectEpic required={required} onChange={submit} selectIds={epicId} dataRef={this.dataRef} />}
                   >
                     {
                       issueEpicName ? (
