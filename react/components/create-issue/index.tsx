@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal } from 'choerodon-ui/pro';
-import { omit } from 'lodash';
+import { isEmpty, omit } from 'lodash';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { IModalProps, Issue } from '@/common/types';
 import { fieldApi, issueApi } from '@/api';
@@ -28,7 +28,8 @@ const openModal = (props: CreateIssueProps) => {
     }
     onCreate(res);
   };
-  const defaultIssueTypeId = localCacheStore.getItem('agile.issue.type.common.selected');
+  const defaultIssueTypeId = isEmpty(props.defaultTypeId) ? localCacheStore.getItem('agile.issue.type.common.selected') : props.defaultTypeId;
+
   Modal.open({
     drawer: true,
     style: {
@@ -37,7 +38,7 @@ const openModal = (props: CreateIssueProps) => {
     key: 'create-issue',
     title: '创建问题',
     okText: '创建',
-    children: <BaseComponent onSubmit={handleSubmit} defaultTypeId={defaultIssueTypeId} {...omit(props, 'onSubmit')} />,
+    children: <BaseComponent onSubmit={handleSubmit} {...omit(props, 'onSubmit')} defaultTypeId={defaultIssueTypeId} />,
   });
 };
 export default openModal;
