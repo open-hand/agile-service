@@ -606,7 +606,7 @@ class IssueApi extends Api<IssueApi> {
       method: 'get',
       url: `${this.outPrefix}/issue_comment/issue/${issueId}/page`,
       params: {
-        project_id: this.projectId,
+        projectId: this.projectId,
         organizationId: this.orgId,
         page,
         size,
