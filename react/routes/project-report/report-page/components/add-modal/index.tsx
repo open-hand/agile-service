@@ -85,7 +85,6 @@ const openAddModal = (props: Props) => {
     },
     drawer: true,
     children: <AddModal {...props} />,
-    closeOnLocationChange: true,
   });
 };
 export default openAddModal;
