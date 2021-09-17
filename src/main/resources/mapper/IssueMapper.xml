@@ -4089,6 +4089,7 @@
             or t1.type_code = 'task'
             or (t1.type_code = 'bug' and (t1.relate_issue_id is null or t1.relate_issue_id = 0))
         )
+        order by t1.issue_id desc
     </select>
 
 
