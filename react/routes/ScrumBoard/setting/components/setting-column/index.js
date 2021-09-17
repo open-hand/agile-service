@@ -38,6 +38,7 @@ class SettingColumn extends Component {
     const { refresh } = this.props;
     const originBoardData = cloneDeep(ScrumBoardStore.getBoardData);
     const BoardData = ScrumBoardStore.getBoardData;
+    const { sequence } = BoardData[destinationIndex] || { sequence: destinationIndex };
     const [movedColumn] = BoardData.splice(sourceIndex, 1);
     BoardData.splice(destinationIndex, 0, movedColumn);
     ScrumBoardStore.setBoardData(BoardData);
@@ -45,7 +46,7 @@ class SettingColumn extends Component {
       boardId: ScrumBoardStore.getSelectedBoard,
       columnId: JSON.parse(draggableId).columnId,
       projectId: AppState.currentMenuType.id,
-      sequence: destinationIndex,
+      sequence,
       objectVersionNumber: JSON.parse(draggableId).objectVersionNumber,
     };
     boardColumnApi.updateSequence(data).then((res) => {
