@@ -1,6 +1,56 @@
 # Changelog
 All notable changes about agile-service will be documented in this file.
 
+## [1.1.0-alpha] - 2021-09-18
+
+### Added
+
+- Support custom collaboration charts.
+- Project reports support inserting custom charts.
+- Project overview supports adding custom charts.
+- Gantt chart supports viewing tasks with multiple iterations.
+- Gantt chart supports viewing by sprint view.
+- Gantt chart supports sorting by handler and estimated start time.
+- Notification configuration supports custom personnel fields.
+- Notify the configuration support to select the main person in charge.
+- Issue notice to increase followers.
+- Support sending daily work reminders.
+- The page supports displaying by role configuration field.
+- The page supports field cascade settings.
+- The copy issue supports mandatory field verification.
+- Turn on iteration support to check whether story points and work hours are estimated.
+- All issue lists support field ascending and descending sorting.
+- All issue lists support setting the problem field value blank.
+- The state machine supports conditional verification of dragging parent tasks when child tasks have been completed.
+
+
+### Changed
+
+- Issue log details support the display of epic summary.
+- Issue details support displaying the number of comments.
+- Time spent optimizing the recording of issue log details.
+- Issue Log add environment and main person in charge.
+- Optimize the content display of issue comments and replies.
+- Optimize the to-do list. By default, only the current sprint will be expanded.
+- Export issue filter add filter by summary.
+- Export issue style optimization.
+- Workbench style optimization
+- Optimize the workbench and click issue details to open a new tab.
+- Add common filter "I handle" to all issues.
+- The optimization to-do issue can be dragged into the unexpanded iteration.
+- Optimize agile message notification content.
+- Optimize interface loading dynamics.
+
+### Fixed
+
+- Fixed a problem where the profile default value was not displayed when creating an issue quickly.
+- Fix some editing defects in rich text editor.
+- Fixed the problem of scrolling white pages left and right on the Gantt chart.
+- Fix the problem that the input and output directions of the issue chain are wrong when creating the issue.
+- Fixed the problem of adding static list table field to project report.
+- Fix the problem of duplicate name verification of personal filter.
+
+
 ## [1.0.0] - 2021-06-18
 
 ### Added
