@@ -113,7 +113,7 @@ function getCustomFieldConfig(field: IChosenFieldField, dataSet?: DataSet): Part
     case 'radio': case 'single': case 'checkbox': case 'multiple':
       return {
         props: {
-          fieldId: field.id, selected: defaultValue ?? (field as any).valueBindValue, onlyEnabled: false,
+          fieldId: field.id, selected: defaultValue ?? (field as any).valueBindValue, onlyEnabled: false, disabledRuleConfig: true,
         },
       }; // valueBindValue 是快速筛选处的值 TODO 后续去掉
     case 'member':
