@@ -1,10 +1,11 @@
 import React from 'react';
 import { stores } from '@choerodon/boot';
-import { AppStateProps } from '@/common/types';
 import { usePersistFn } from 'ahooks';
+import { AppStateProps } from '@/common/types';
 import useIsProgram from './useIsProgram';
 import useParentProgram from './data/useParentProgram';
 import useParentArtDoing from './data/useParentArtDoing';
+import useIsProgramProject from '@/hooks/useIsProgramProject';
 
 const { AppState }: { AppState: AppStateProps } = stores;
 // @ts-ignore
@@ -27,9 +28,11 @@ interface useIsInProgramConfig {
 const useIsInProgram = (config?: useIsInProgramConfig): ChildrenProps => {
   const { projectId } = config ?? {};
   const { isProgram } = useIsProgram();
+  // 判断是否是项目群子项目
+  const { isProgramProject } = useIsProgramProject();
   const isProject = AppState.currentMenuType.type === 'project';
   const { data: program, isLoading: loading1, refetch: refresh1 } = useParentProgram({ projectId }, {
-    enabled: shouldRequest && isProject && !isProgram,
+    enabled: shouldRequest && isProject && !isProgram && !isProgramProject,
   });
   const isInProgram = Boolean(program);
   const { data: parentArtDoing, isLoading: loading2, refetch: refresh2 } = useParentArtDoing({ projectId }, {
