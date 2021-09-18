@@ -17,6 +17,7 @@ function getSystemFieldConfig(field: IChosenFieldField, dataSet?: DataSet): Part
       return {
         code: 'sprint',
         props: {
+          selectSprints: defaultValue,
           isProgram: true,
         },
       };
