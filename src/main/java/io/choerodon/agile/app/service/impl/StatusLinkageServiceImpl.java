@@ -71,6 +71,9 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
     @Autowired
     private StatusLinkageExecutionLogService statusLinkageExecutionLogService;
 
+    @Autowired
+    private StatusTransferSettingService statusTransferSettingService;
+
     @Override
     public List<StatusLinkageVO> createOrUpdate(Long projectId, Long issueTypeId, Long statusId, Long objectVersionNumber, String applyType, List<StatusLinkageVO> linkageVOS) {
         List<StatusLinkageDTO> statusLinkageDTOS = queryByStatusIdAndIssueTypeId(projectId, issueTypeId, statusId);
@@ -231,6 +234,10 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
             influenceIssueIds.add(parentIssueId);
             if (Objects.equals(changeStatus, parentIssue.getStatusId())) {
                 statusLinkageExecutionLog(projectId, statusLinkageDTO.getId(), parentIssue.getIssueId(), issueDTO, TriggerExecutionStatus.STOP.getValue(), "same_status");
+                return true;
+            }
+            if (statusTransferSettingService.verifyStatusTransferSetting(projectId, issueDTO, changeStatus)) {
+                statusLinkageExecutionLog(projectId, statusLinkageDTO.getId(), parentIssue.getIssueId(), issueDTO, TriggerExecutionStatus.STOP.getValue(), "condition_limit");
                 return true;
             }
             boolean result = changeParentStatus(projectId, applyType, parentIssue, changeStatus, issueDTO);
