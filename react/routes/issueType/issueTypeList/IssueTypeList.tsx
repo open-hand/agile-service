@@ -1,18 +1,18 @@
 import React, {
-  useContext, useCallback, useRef, useState,
+  useContext, useCallback,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { withRouter } from 'react-router-dom';
 import {
-  Table, Dropdown, Icon, Menu, Modal, Button, DataSet,
+  Table, Dropdown, Icon, Menu, Modal,
 } from 'choerodon-ui/pro';
 import {
   Content, Page, Breadcrumb, Choerodon, Header,
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
-import { IIssueType } from '@/common/types';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
+import { IIssueType } from '@/common/types';
 import { issueTypeApi } from '@/api';
 import TypeTag from '../../../components/TypeTag/TypeTag';
 import AddIssueType from './AddIssueType';
@@ -294,7 +294,7 @@ function IssueTypeList() {
         <Table
           dataSet={issueTypeDataSet}
           className={styles.issueTypeTable}
-          rowDraggable
+          rowDraggable={!isOrganization}
           onDragEnd={async (ds, columns, resultDrag) => {
             const { draggableId, destination, source: { index: sourceIndex } } = resultDrag;
             if (!destination) {
