@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { filter, find } from 'lodash';
 import { DataSet, TextField } from 'choerodon-ui/pro';
 import {
-  Dropdown, Icon, Menu,
+  Dropdown, Icon, Menu, Tooltip,
 } from 'choerodon-ui';
 import UserTag from '@/components/tag/user-tag';
 
@@ -88,11 +88,14 @@ const Overlay: React.FC<OverlayProps> = ({
         {
           filter(userListDs.toData(), (user: User) => user.id !== selectedUser?.id).map((user: User) => (
             <Menu.Item key={user.id}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <UserTag
-                  data={user}
-                />
-              </div>
+              <Tooltip title={`${user.ldap ? `${user.realName}(${user.loginName})` : `${user.realName}(${user.email})`}`}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <UserTag
+                    data={user}
+                    tooltip={false}
+                  />
+                </div>
+              </Tooltip>
             </Menu.Item>
           ))
         }
@@ -152,7 +155,6 @@ const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee }) => 
               <UserTag
                 data={selectedUser}
                 showText={false}
-                tooltip={false}
               />
               <Icon type="close" style={{ fontSize: 14, cursor: 'pointer' }} onClick={handleClear} />
             </>
