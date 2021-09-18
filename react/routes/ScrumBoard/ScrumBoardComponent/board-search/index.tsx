@@ -120,7 +120,7 @@ const BoardSearch: React.FC<Props> = ({ onRefresh, saveStore }) => {
         onClickSaveFilter={handleClickSaveFilter}
         onChange={() => {
           const newSearch = issueSearchStore.getCustomFieldFilters();
-          localPageCacheStore.setItem('scrumBoard.searchVO', newSearch);
+          localPageCacheStore.setItem('scrumBoard.searchVO', issueSearchStore.getCustomFieldFilters(true));
           scrumBoardStore.setSearchVO(newSearch);
           onRefresh();
         }}
