@@ -362,6 +362,7 @@
         <result property="completed" column="completed"/>
         <result property="mainResponsibleId" column="main_responsible_id"/>
         <result property="environment" column="environment"/>
+        <result property="epicSelfName" column="epic_self_name"/>
         <collection property="versionIssueRelDTOS"
                     ofType="io.choerodon.agile.infra.dto.VersionIssueRelDTO">
             <id property="versionId" column="version_id"/>
@@ -426,6 +427,7 @@
         ai3.epic_name,
         alv2.name as epic_color,
         ai.epic_id,
+        ai.epic_name as epic_self_name,
         ai.creation_date,
         ai.last_update_date as issue_last_update_date,
         apv.version_id,

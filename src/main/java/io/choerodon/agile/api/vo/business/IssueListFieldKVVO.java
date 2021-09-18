@@ -180,6 +180,16 @@ public class IssueListFieldKVVO {
 
     private List<ProjectVO> projectVOList;
 
+    private String epicSelfName;
+
+    public String getEpicSelfName() {
+        return epicSelfName;
+    }
+
+    public void setEpicSelfName(String epicSelfName) {
+        this.epicSelfName = epicSelfName;
+    }
+
     public List<ProjectVO> getProjectVOList() {
         return projectVOList;
     }
