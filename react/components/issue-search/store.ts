@@ -2,7 +2,8 @@ import {
   observable, action, computed, toJS,
 } from 'mobx';
 import {
-  debounce, find, isEmpty, isObject,
+  cloneDeep,
+  debounce, find, isEmpty, isObject, omit, set, unset,
 } from 'lodash';
 import { fieldApi, personalFilterApi } from '@/api';
 import { IField, ISearchVO } from '@/common/types';
@@ -36,6 +37,35 @@ export interface IssueSearchStoreProps {
   defaultChosenFields?: IChosenFields,
   defaultSearchVO?: ISearchVO
   projectId?: string
+}
+/**
+ * 过滤字段中空选项
+ *
+ */
+
+function filterFieldWithoutNull<T extends { [x: string]: any } = any, K extends string = string>(data: T, maxDepth = 3) {
+  if (!maxDepth) {
+    return;
+  }
+  const keepKeys = ['advancedSearchArgs', 'otherArgs', 'searchArgs', 'customField'];
+  (Object.keys(data) as Array<K>).forEach((key) => {
+    if (isEmpty(data[key]) && !keepKeys.includes(key)) {
+      unset(data, key);
+    } else if (key === 'customField') {
+      // 自定义字段单独处理
+      const customField = data[key];
+      Object.keys(customField).forEach((fieldTypeKey) => {
+        const fieldTypeArr = customField[fieldTypeKey].filter((item: any) => {
+          const itemWithoutFiledId = omit(item, ['fieldId']);
+          return Object.values(itemWithoutFiledId).some((i) => !isEmpty(i));
+        });
+        set(data, `${key}.${fieldTypeKey}`, fieldTypeArr);
+      });
+      // 不处理系统字段中的数组
+    } else if (isObject(data[key]) && !Array.isArray(data[key])) {
+      filterFieldWithoutNull(data[key], maxDepth - 1);
+    }
+  });
 }
 class IssueSearchStore {
   query: () => void = () => { }
@@ -114,7 +144,7 @@ class IssueSearchStore {
         if (value && isObject(value) && value.isCustom) {
           const code = this.getFieldCodeById(key);
           if (code) {
-          // @ts-ignore
+            // @ts-ignore
             this.handleFilterChange(code, value.value);
           }
         } else if (key === 'createEndDate' || key === 'createStartDate') {
@@ -256,7 +286,14 @@ class IssueSearchStore {
     return filter;
   }
 
-  getCustomFieldFilters = () => this.transformFilter(this.chosenFields)
+  getCustomFieldFilters = (filterNull = false) => {
+    if (!filterNull) {
+      return this.transformFilter(this.chosenFields);
+    }
+    const filter = cloneDeep(toJS(this.transformFilter(this.chosenFields)));
+    filterFieldWithoutNull(filter);
+    return filter;
+  }
 
   @computed
   get isHasFilter() {

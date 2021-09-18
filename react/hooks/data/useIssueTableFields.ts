@@ -22,7 +22,7 @@ const systemFields = [
   { code: 'fixVersion', title: '修复的版本' },
   { code: 'influenceVersion', title: '影响的版本' },
   { code: 'epic', title: '史诗' },
-  { code: 'epicName', title: '史诗名称' },
+  { code: 'epicSelfName', title: '史诗名称' },
   { code: 'feature', title: '特性' },
   { code: 'lastUpdateDate', title: '最后更新时间' },
   { code: 'creationDate', title: '创建时间' },
