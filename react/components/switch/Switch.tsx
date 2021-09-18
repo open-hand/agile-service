@@ -27,7 +27,7 @@ interface SwitchProps {
  * @param param0
  * @returns
  */
-const Switch:React.FC<SwitchProps> = ({
+const Switch: React.FC<SwitchProps> = ({
   options: propsOption, onChange: propsOnChange, defaultValue, value: propsValue, style, wrap, className,
 }) => {
   const [value, setValue] = useState<SwitchProps['defaultValue']>(defaultValue || 0);
@@ -39,7 +39,7 @@ const Switch:React.FC<SwitchProps> = ({
       setValue(v);
       return;
     }
-    setValue(v);
+    result && setValue(v);
   };
   const initOptions = useCallback(() => {
     let newOptions: SwitchProps['options'] = propsOption;
