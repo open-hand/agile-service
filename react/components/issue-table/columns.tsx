@@ -365,7 +365,9 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
   }],
   ['epicSelfName', {
     title: <Tooltip title="史诗名称">史诗名称</Tooltip>,
+    width: 150,
     dataIndex: 'epicSelfName',
+    render: ({ rowData, dataIndex }) => (rowData[dataIndex] ? <Tooltip title={rowData[dataIndex]}>{rowData[dataIndex]}</Tooltip> : ''),
   }],
 ]);
 
