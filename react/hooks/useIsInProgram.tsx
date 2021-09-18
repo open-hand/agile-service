@@ -28,8 +28,8 @@ interface useIsInProgramConfig {
 const useIsInProgram = (config?: useIsInProgramConfig): ChildrenProps => {
   const { projectId } = config ?? {};
   const { isProgram } = useIsProgram();
-  const isFirstMount = useRef<boolean>(shouldRequest);
   const isProject = AppState.currentMenuType.type === 'project';
+  const isFirstMount = useRef<boolean>(shouldRequest && isProject && !isProgram);
   const { data: program, isLoading: loading1, refetch: refresh1 } = useParentProgram({ projectId }, {
     enabled: shouldRequest && isProject && !isProgram,
     onSuccess: () => {
