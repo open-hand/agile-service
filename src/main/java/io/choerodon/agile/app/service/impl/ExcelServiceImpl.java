@@ -139,6 +139,7 @@ public class ExcelServiceImpl implements ExcelService {
     protected static final String ALL_ESTIMATE_TIME = "allEstimateTime";
     protected static final String TAGS = "tags";
     protected static final String RELATED_ISSUE = "relatedIssue";
+    protected static final String EPIC_SELF_NAME = "epicSelfName";
 
     protected static final String USER_MAP = "userMap";
     protected static final String ISSUE_TYPE_MAP = "issueTypeMap";
@@ -278,6 +279,7 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put(ALL_ESTIMATE_TIME, "总预估时间");
         FIELD_MAP.put(TAGS, "Tag");
         FIELD_MAP.put(RELATED_ISSUE, "关联问题");
+        FIELD_MAP.put(EPIC_SELF_NAME, "史诗名称");
         FIELDS = new ArrayList<>(FIELD_MAP.keySet()).toArray(new String[FIELD_MAP.keySet().size()]);
         FIELDS_NAMES = new ArrayList<>(FIELD_MAP.values()).toArray(new String[FIELD_MAP.values().size()]);
     }

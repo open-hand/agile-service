@@ -113,7 +113,17 @@ public class ExportIssuesVO {
 
     private Integer relatedIssueCount = 1;
 
+    private String epicSelfName;
+
     public ExportIssuesVO() {
+    }
+
+    public String getEpicSelfName() {
+        return epicSelfName;
+    }
+
+    public void setEpicSelfName(String epicSelfName) {
+        this.epicSelfName = epicSelfName;
     }
 
     public Integer getRelatedIssueCount() {
