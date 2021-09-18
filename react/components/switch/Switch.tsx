@@ -34,12 +34,12 @@ const Switch: React.FC<SwitchProps> = ({
   const [options, setOptions] = useState<SwitchProps['options']>([]);
   const onChange = usePersistFn(propsOnChange || noop);
   const onClick = async (v: any, other: any) => {
-    const result = await onChange(v, other);
+    const result: boolean | void = await onChange(v, other);
     if (result === undefined) {
       setValue(v);
       return;
     }
-    result && setValue(v);
+    (result as boolean) && setValue(v);
   };
   const initOptions = useCallback(() => {
     let newOptions: SwitchProps['options'] = propsOption;
