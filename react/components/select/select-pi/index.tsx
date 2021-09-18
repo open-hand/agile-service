@@ -5,8 +5,14 @@ import { Permission } from '@choerodon/boot';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
 import { omit } from 'lodash';
+// @ts-ignore
+import AppState from '@choerodon/master/lib/containers/stores/c7n/AppState';
+// @ts-ignore
+import PermissionProvider from '@choerodon/master/lib/containers/components/c7n/tools/permission/PermissionProvider';
+import { Provider } from 'mobx-react';
 import useSelect, { SelectConfig, FragmentForSearch, LoadConfig } from '@/hooks/useSelect';
 import { piApi } from '@/api';
+
 import type { PI } from '@/common/types';
 import styles from './index.less';
 
@@ -94,7 +100,7 @@ const SelectPI: React.FC<SelectPIProps> = forwardRef(({
       },
     },
     paging: false,
-  }), [JSON.stringify(statusList)]);
+  }), [JSON.stringify(statusList), disabledCurrentPI]);
   const props = useSelect(config);
 
   const Component = flat ? FlatSelect : Select;
@@ -131,16 +137,21 @@ function wrapSelectPIPermissionHOC(Element: React.FC<SelectPIProps>) {
         return <Element {...this.getProps()} />;
       }
       return (
-        <Permission service={[
-          'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.completepi',
-          'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.startpi',
-          'choerodon.code.project.plan.feature.ps.pi.plan',
-        ]}
-        >
-          {(hasPermission: boolean) => (
-            <Element {...this.getProps()} disabledCurrentPI={!hasPermission} />
-          )}
-        </Permission>
+        <PermissionProvider>
+
+          <Provider AppState={AppState}>
+            <Permission service={[
+              'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.completepi',
+              'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.startpi',
+              'choerodon.code.project.plan.feature.ps.pi.plan',
+            ]}
+            >
+              {(hasPermission: boolean) => (
+                <Element {...this.getProps()} disabledCurrentPI={!hasPermission} />
+              )}
+            </Permission>
+          </Provider>
+        </PermissionProvider>
       );
     }
   }

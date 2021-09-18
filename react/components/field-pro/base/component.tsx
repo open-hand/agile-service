@@ -52,7 +52,6 @@ export const AgileComponentMap = {
   quickFilter: SelectQuickFilterField,
   description: Editor as IClassComponentType<Editor<FormFieldProps>>,
 };
-const A = { pi: SelectPI };
 
 export type AgileComponentMapProps = typeof AgileComponentMap
 
