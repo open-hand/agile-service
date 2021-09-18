@@ -363,6 +363,10 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
       return tagShowText ? <Tooltip title={tagShowText}>{tagShowText}</Tooltip> : '';
     },
   }],
+  ['epicSelfName', {
+    title: <Tooltip title="史诗名称">史诗名称</Tooltip>,
+    dataIndex: 'epicSelfName',
+  }],
 ]);
 
 export function getTableColumns({
