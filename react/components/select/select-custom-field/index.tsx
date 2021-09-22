@@ -8,7 +8,7 @@ import { fieldApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 
 export interface SelectCustomFieldBasicProps extends Partial<SelectProps> {
-  selected?: string[]
+  selected?: string[] | string
   extraOptions?: any[]
   flat?: boolean
   projectId?: string
@@ -39,9 +39,9 @@ const SelectCustomField: React.FC<SelectCustomFieldProps> = forwardRef(({
   fieldId, fieldOptions, flat, afterLoad, projectId, organizationId, disabledRuleConfig, selected, extraOptions, ruleIds, outside = false, onlyEnabled = true, ...otherProps
 },
 ref: React.Ref<Select>) => {
-  const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
+  const args = useMemo(() => ({ ruleIds, selected: selected ? castArray(selected).filter(Boolean) : undefined }), [ruleIds, selected]);
   const hasRule = !disabledRuleConfig && Object.keys(args).filter((key: keyof typeof args) => Boolean(args[key])).length > 0;
-  const needOptions = useMemo(() => [...castArray(otherProps.value), ...castArray(selected)].filter(Boolean), [selected, otherProps.value]);
+  const needOptions = useMemo(() => [...castArray(otherProps.value), ...(args.selected || [])].filter(Boolean), [otherProps.value, args.selected]);
   const fakePageRequest = usePersistFn((filter: string = '', page: number = 1, size: number, ensureOptions: string[], enabled: boolean = true) => {
     if (!fieldOptions) {
       return [];
