@@ -1347,6 +1347,9 @@ public class ReportServiceImpl implements ReportService {
                 break;
             }
         }
+        if (Objects.isNull(g1.getCompletedRemainTimes())) {
+            g1.setCompletedRemainTimes(new BigDecimal(0));
+        }
         for (GroupDataChartDTO g3 : remainTimeWorkLogCompleted) {
             if (g1.getGroupDay().equals(g3.getGroupDay())) {
                 g1.setCompletedRemainTimes(g1.getCompletedRemainTimes().add(g3.getCompletedRemainTimes()));
@@ -1361,6 +1364,9 @@ public class ReportServiceImpl implements ReportService {
                 g1.setAllRemainTimes(g4.getAllRemainTimes());
                 break;
             }
+        }
+        if (Objects.isNull(g1.getAllRemainTimes())) {
+            g1.setAllRemainTimes(new BigDecimal(0));
         }
         for (GroupDataChartDTO g5 : remainTimeWorkLogAll) {
             if (g1.getGroupDay().equals(g5.getGroupDay())) {
