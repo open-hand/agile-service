@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { stores } from '@choerodon/boot';
 import { usePersistFn } from 'ahooks';
 import { AppStateProps } from '@/common/types';
@@ -47,9 +47,7 @@ const useIsInProgram = (config?: useIsInProgramConfig): ChildrenProps => {
   const { data: parentArtDoing, isLoading: loading2, refetch: refresh2 } = useParentArtDoing({ projectId }, {
     enabled: shouldRequest && isInProgram,
   });
-  useMount(() => {
-    refresh1({ cancelRefetch: true });
-  });
+
   const refresh = usePersistFn(async () => {
     await refresh1();
     await refresh2();
