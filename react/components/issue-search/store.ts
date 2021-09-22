@@ -3,7 +3,7 @@ import {
 } from 'mobx';
 import {
   cloneDeep,
-  debounce, find, isEmpty, isObject, omit, set, unset,
+  debounce, find, isEmpty, isNull, isObject, omit, set, unset,
 } from 'lodash';
 import { fieldApi, personalFilterApi } from '@/api';
 import { IField, ISearchVO } from '@/common/types';
@@ -38,6 +38,12 @@ export interface IssueSearchStoreProps {
   defaultSearchVO?: ISearchVO
   projectId?: string
 }
+function isInvalidValue(value:any) {
+  if (value === undefined || isNull(value) || (isObject(value) && isEmpty(value))) {
+    return true;
+  }
+  return false;
+}
 /**
  * 过滤字段中空选项
  *
@@ -49,7 +55,7 @@ function filterFieldWithoutNull<T extends { [x: string]: any } = any, K extends 
   }
   const keepKeys = ['advancedSearchArgs', 'otherArgs', 'searchArgs', 'customField'];
   (Object.keys(data) as Array<K>).forEach((key) => {
-    if (isEmpty(data[key]) && !keepKeys.includes(key)) {
+    if (isInvalidValue(data[key]) && !keepKeys.includes(key)) {
       unset(data, key);
     } else if (key === 'customField') {
       // 自定义字段单独处理
