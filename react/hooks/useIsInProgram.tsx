@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { stores } from '@choerodon/boot';
 import { usePersistFn } from 'ahooks';
 import { AppStateProps } from '@/common/types';
@@ -32,7 +32,9 @@ const useIsInProgram = (config?: useIsInProgramConfig): ChildrenProps => {
   const { isProgram } = useIsProgram();
   const isProject = AppState.currentMenuType.type === 'project';
   const isFirstMount = useRef<boolean>(shouldRequest && isProject && !isProgram);
-  const { data: program, isLoading: loading1, refetch: refresh1 } = useParentProgram({ projectId }, {
+  const {
+    data: program, isLoading: loading1, refetch: refresh1,
+  } = useParentProgram({ projectId }, {
     enabled: shouldRequest && isProject && !isProgram,
     onSuccess: () => {
       isFirstMount.current = false;
@@ -45,7 +47,9 @@ const useIsInProgram = (config?: useIsInProgramConfig): ChildrenProps => {
   const { data: parentArtDoing, isLoading: loading2, refetch: refresh2 } = useParentArtDoing({ projectId }, {
     enabled: shouldRequest && isInProgram,
   });
-
+  useMount(() => {
+    refresh1({ cancelRefetch: true });
+  });
   const refresh = usePersistFn(async () => {
     await refresh1();
     await refresh2();
