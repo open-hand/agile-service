@@ -4340,7 +4340,33 @@
             <foreach collection="statusIds" item="statusId" open="(" separator="," close=")">
                 #{statusId}
             </foreach>
-            <include refid="filterSql"/>
+            <include refid="filterChildrenSql"/>
+    </sql>
+
+    <sql id="filterChildrenSql">
+        <if test='advancedSearchArgs != null'>
+            <if test='advancedSearchArgs.versionId != null'>
+                AND ai.issue_id IN (SELECT issue_id FROM agile_version_issue_rel WHERE version_id =
+                #{advancedSearchArgs.versionId} AND relation_type = 'fix')
+            </if>
+            <if test='advancedSearchArgs.noVersion != "" and advancedSearchArgs.noVersion == "true"'>
+                AND ai.issue_id NOT IN (SELECT issue_id FROM agile_version_issue_rel WHERE version_id != 0 AND
+                relation_type = 'fix')
+            </if>
+            <if test='advancedSearchArgs.ownIssue != "" and advancedSearchArgs.ownIssue == "true"'>
+                AND ai.assignee_id = #{userId}
+            </if>
+            <if test='advancedSearchArgs.onlyStory != "" and advancedSearchArgs.onlyStory == "true"'>
+                AND ai.type_code = 'story'
+            </if>
+            <if test='advancedSearchArgs.assigneeFilterIds != null and advancedSearchArgs.assigneeFilterIds.size > 0'>
+                AND ai.assignee_id IN
+                <foreach collection="advancedSearchArgs.assigneeFilterIds" item="assigneeFilterId"
+                         open="(" close=")" separator=",">
+                    #{assigneeFilterId}
+                </foreach>
+            </if>
+        </if>
     </sql>
 
     <sql id="filterSql">
@@ -4398,7 +4424,7 @@
                 </foreach>
             </if>
             and ai.type_code = 'bug'
-            <include refid="filterSql"/>
+            <include refid="filterChildrenSql"/>
            )
             UNION ALL
             (
@@ -4417,7 +4443,7 @@
                 </foreach>
             </if>
             and ai.type_code = 'sub_task'
-            <include refid="filterSql"/>
+            <include refid="filterChildrenSql"/>
            )
     </select>
 
