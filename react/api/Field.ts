@@ -135,7 +135,7 @@ class FieldApi extends Api<FieldApi> {
    * @param dto 自定义字段列表
    * @returns {V|*}
    */
-  createFieldValue(issueId: number, schemeCode: string, dto?: Array<any>, projectId?: number) {
+  createFieldValue(issueId: number, schemeCode: string, dto?: Array<any>, projectId?: string) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'post',

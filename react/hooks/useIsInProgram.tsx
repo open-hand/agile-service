@@ -1,16 +1,16 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { stores } from '@choerodon/boot';
+import { useMount, usePersistFn } from 'ahooks';
 import { AppStateProps } from '@/common/types';
-import { usePersistFn } from 'ahooks';
 import useIsProgram from './useIsProgram';
 import useParentProgram from './data/useParentProgram';
 import useParentArtDoing from './data/useParentArtDoing';
+import useIsProgramProject from '@/hooks/useIsProgramProject';
 
 const { AppState }: { AppState: AppStateProps } = stores;
-const isDEV = process.env.NODE_ENV === 'development';
 // @ts-ignore
 const HAS_AGILE_PRO = C7NHasModule('@choerodon/agile-pro');
-const shouldRequest = isDEV || HAS_AGILE_PRO;
+const shouldRequest = HAS_AGILE_PRO;
 interface ChildrenProps {
   isInProgram: boolean,
   program: object | boolean,
@@ -28,9 +28,16 @@ interface useIsInProgramConfig {
 const useIsInProgram = (config?: useIsInProgramConfig): ChildrenProps => {
   const { projectId } = config ?? {};
   const { isProgram } = useIsProgram();
+  const isFirstMount = useRef<boolean>(shouldRequest);
   const isProject = AppState.currentMenuType.type === 'project';
   const { data: program, isLoading: loading1, refetch: refresh1 } = useParentProgram({ projectId }, {
     enabled: shouldRequest && isProject && !isProgram,
+    onSuccess: () => {
+      isFirstMount.current = false;
+    },
+    onError: () => {
+      isFirstMount.current = false;
+    },
   });
   const isInProgram = Boolean(program);
   const { data: parentArtDoing, isLoading: loading2, refetch: refresh2 } = useParentArtDoing({ projectId }, {
@@ -44,9 +51,9 @@ const useIsInProgram = (config?: useIsInProgramConfig): ChildrenProps => {
   return {
     isInProgram,
     program,
-    isShowFeature: Boolean(parentArtDoing),
+    isShowFeature: isInProgram && Boolean(parentArtDoing),
     artInfo: parentArtDoing,
-    loading: loading1 || loading2,
+    loading: isFirstMount.current || loading1 || loading2,
     refresh,
   };
 };

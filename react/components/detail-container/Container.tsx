@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useCallback } from 'react';
-import ResizeAble from '@/components/ResizeAble';
 import { find } from 'lodash';
 import { Icon } from 'choerodon-ui/pro';
+import ResizeAble from '@/components/ResizeAble';
 import EditIssue from '@/components/EditIssue';
 import './Container.less';
 import { useDetailContainerContext } from './context';
@@ -90,11 +90,12 @@ const Container: React.FC = () => {
       {match ? render() : null}
     </div>
   );
+
   return fullPage ? element : (
     <div
       className={prefixCls}
       style={{
-        top: outside ? 75 : 50 + topAnnouncementHeight,
+        top: outside ? 75 : `calc(50px + ${topAnnouncementHeight})`,
       }}
     >
       <ResizeAble

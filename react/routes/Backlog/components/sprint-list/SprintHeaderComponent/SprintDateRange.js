@@ -115,6 +115,7 @@ const FormItem = Form.Item;
                                 autoFocus
                                 style={{ width: 170 }}
                                 allowClear
+                                disabled={isShowFeature && statusCode === 'started'}
                                 disabledDate={(date) => {
                                   if (!date) {
                                     return false;

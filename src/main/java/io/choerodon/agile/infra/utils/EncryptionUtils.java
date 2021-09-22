@@ -27,6 +27,7 @@ import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hzero.core.jackson.config.ObjectMapperPostProcess;
 import org.hzero.starter.keyencrypt.core.*;
 import org.hzero.starter.keyencrypt.json.EncryptedSerializerModifier;
 import org.slf4j.Logger;
@@ -855,7 +856,9 @@ public class EncryptionUtils {
     }
 
     public static ObjectMapper buildEncryptedSerializerObjectMapper(IEncryptionService encryptionService) {
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapperPostProcess objectMapperPostProcess = new ObjectMapperPostProcess();
+        ObjectMapper objectMapper =
+                (ObjectMapper) objectMapperPostProcess.postProcessAfterInitialization(new ObjectMapper(), "");
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         objectMapper.registerModule(new SimpleModule() {
             @Override

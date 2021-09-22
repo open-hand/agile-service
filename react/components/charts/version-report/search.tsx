@@ -77,31 +77,33 @@ const VersionReportSearch:React.FC<VersionReportSearchProps> = ({
       </div>
       <div style={{ marginTop: 10, display: 'flex', justifyContent: 'space-between' }}>
         <p style={{ marginBottom: 0 }}>{versionId && currentVersion && currentVersion.statusCode === 'released' ? `发布于 ${currentVersion.releaseDate ? currentVersion.releaseDate.split(' ')[0] : '未指定发布日期'}` : '未发布'}</p>
-        <p
-          className="primary"
-          style={{
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            marginBottom: 0,
-            color: '#5365EA',
-            whiteSpace: 'nowrap',
-          }}
-          role="none"
-          onClick={() => {
-            to(LINK_URL.workListIssue, {
-              type: 'project',
-              params: {
-                paramType: 'version',
-                paramId: versionId,
-                paramName: `${currentVersion && currentVersion.name}下的问题`,
-              },
-            }, { blank: true });
-          }}
-        >
-          在“所有问题中”查看
-          <Icon style={{ fontSize: 13 }} type="open_in_new" />
-        </p>
+        {versions?.length ? (
+          <p
+            className="primary"
+            style={{
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              marginBottom: 0,
+              color: '#5365EA',
+              whiteSpace: 'nowrap',
+            }}
+            role="none"
+            onClick={() => {
+              to(LINK_URL.workListIssue, {
+                type: 'project',
+                params: {
+                  paramType: 'version',
+                  paramId: versionId,
+                  paramName: `${currentVersion && currentVersion.name}下的问题`,
+                },
+              }, { blank: true });
+            }}
+          >
+            在“所有问题中”查看
+            <Icon style={{ fontSize: 13 }} type="open_in_new" />
+          </p>
+        ) : null}
       </div>
     </div>
   );

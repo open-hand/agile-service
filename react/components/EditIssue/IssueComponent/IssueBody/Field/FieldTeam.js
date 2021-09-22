@@ -36,7 +36,7 @@ class FieldTeam extends Component {
     const { store, disabled } = this.props;
     const issue = store.getIssue;
     const activePiTeams = issue.activePiTeams || [];
-    const teamIds = activePiTeams.map((team) => team.id);
+    const teamIds = activePiTeams.map((team) => String(team.id));
     const field = store.getFieldByCode('sprint');
     const required = field?.required || store.getRuleRequired(field);
 

@@ -1,19 +1,19 @@
 import React, {
   useMemo, forwardRef, useEffect, useRef, useCallback,
 } from 'react';
-import { Select, Icon, DataSet } from 'choerodon-ui/pro';
+import {
+  Select, Icon, DataSet, Tooltip,
+} from 'choerodon-ui/pro';
 import {
   useForceUpdate,
 } from 'mobx-react-lite';
-import useSelect from '@/hooks/useSelect';
-import { devOpsApi } from '@/api';
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
-import { ILabel } from '@/common/types';
 import { FlatSelect } from '@choerodon/components';
 import { useDebounceFn, usePersistFn } from 'ahooks';
-import Tooltip from 'antd/lib/tooltip';
+import { ILabel } from '@/common/types';
+import { devOpsApi } from '@/api';
+import useSelect from '@/hooks/useSelect';
 
 interface Props extends Partial<SelectProps> {
   dataRef?: React.RefObject<Array<any>>
@@ -91,7 +91,6 @@ function useGetBranchTagData({
   const { run: debounceLoadData } = useDebounceFn(loadData, { wait: 350 });
   useEffect(() => {
     branchProps.options.addEventListener('load', () => {
-      // console.log('branchProps..data finish');
       debounceLoadData();
     });
     tagProps.options.addEventListener('load', () => {

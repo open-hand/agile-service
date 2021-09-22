@@ -1,10 +1,18 @@
 import React, { useMemo, forwardRef, useRef } from 'react';
 import { Select, Tooltip } from 'choerodon-ui/pro';
 import classNames from 'classnames';
+import { Permission } from '@choerodon/boot';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
+import { omit } from 'lodash';
+// @ts-ignore
+import AppState from '@choerodon/master/lib/containers/stores/c7n/AppState';
+// @ts-ignore
+import PermissionProvider from '@choerodon/master/lib/containers/components/c7n/tools/permission/PermissionProvider';
+import { Provider } from 'mobx-react';
 import useSelect, { SelectConfig, FragmentForSearch, LoadConfig } from '@/hooks/useSelect';
 import { piApi } from '@/api';
+
 import type { PI } from '@/common/types';
 import styles from './index.less';
 
@@ -92,7 +100,7 @@ const SelectPI: React.FC<SelectPIProps> = forwardRef(({
       },
     },
     paging: false,
-  }), [JSON.stringify(statusList)]);
+  }), [JSON.stringify(statusList), disabledCurrentPI]);
   const props = useSelect(config);
 
   const Component = flat ? FlatSelect : Select;
@@ -108,4 +116,51 @@ const SelectPI: React.FC<SelectPIProps> = forwardRef(({
     />
   );
 });
-export default SelectPI;
+
+export interface SelectPIPermissionHOCProps extends SelectPIProps {
+  /** 开启权限校验，会自动对涉及权限的选项进行相关操作  @default false */
+  openPermission?: boolean
+
+}
+function wrapSelectPIPermissionHOC(Element: React.FC<SelectPIProps>) {
+  class SelectPIPermission extends React.PureComponent<SelectPIPermissionHOCProps & { selectPIRef?: React.Ref<Select> }> {
+    getProps() {
+      return { ...omit(this.props, ['openPermission', 'selectPIRef']), ref: this.props.selectPIRef };
+    }
+
+    getRef() {
+      return this.props.selectPIRef;
+    }
+
+    render() {
+      if (!this.props.openPermission) {
+        return <Element {...this.getProps()} />;
+      }
+      return (
+        <PermissionProvider>
+
+          <Provider AppState={AppState}>
+            <Permission service={[
+              'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.completepi',
+              'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.startpi',
+              'choerodon.code.project.plan.feature.ps.pi.plan',
+            ]}
+            >
+              {(hasPermission: boolean) => (
+                <Element {...this.getProps()} disabledCurrentPI={!hasPermission} />
+              )}
+            </Permission>
+          </Provider>
+        </PermissionProvider>
+      );
+    }
+  }
+
+  function forwardPIRef(props: SelectPIPermissionHOCProps, ref: React.Ref<Select>) {
+    return <SelectPIPermission {...props} selectPIRef={ref} />;
+  }
+  const name = Element.displayName || Element.name;
+  forwardPIRef.displayName = `SelectPIPermissionHOC(${name})`;
+  return React.forwardRef(forwardPIRef);
+}
+export default wrapSelectPIPermissionHOC(SelectPI);

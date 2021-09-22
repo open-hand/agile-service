@@ -4,18 +4,20 @@ import type {
 import { toJS } from 'mobx';
 
 import { find, get, merge } from 'lodash';
-import type { IAgileBaseFieldTypeComponentProps, AgileComponentMapProps, CustomFCComponentMapProps } from '../base/component';
+import type { IAgileBaseFieldTypeComponentProps, AgileComponentMapProps } from '../base/component';
 import { getAgileFields } from '../base';
 import type { IChosenFieldField } from '@/components/chose-field/types';
 import { getComponentCodeForLocalCode, getFieldPropsByMode } from '../base/utils';
 import { IFieldSystemConfig, IFieldCustomConfig } from '../base/type';
 
-function getSystemFieldConfig({ code, value, defaultValue }: IChosenFieldField, dataSet?: DataSet): Partial<IFieldSystemConfig<AgileComponentMapProps>> {
+function getSystemFieldConfig(field: IChosenFieldField, dataSet?: DataSet): Partial<IFieldSystemConfig<AgileComponentMapProps>> {
+  const { code, value, defaultValue } = field;
   switch (code) {
     case 'sprintList':
       return {
         code: 'sprint',
         props: {
+          selectSprints: defaultValue,
           isProgram: true,
         },
       };
@@ -36,13 +38,16 @@ function getSystemFieldConfig({ code, value, defaultValue }: IChosenFieldField, 
           filterList: [],
         },
       };
-    case 'epicList':
+    case 'epic':
+    case 'epicList': {
       return {
         code: 'epic',
         props: {
-          isProgram: true,
+          defaultSelectedIds: defaultValue,
+          isProgram: code === 'epicList',
         },
       };
+    }
     case 'feature': {
       return {
         code: 'feature',
@@ -91,7 +96,7 @@ function getSystemFieldConfig({ code, value, defaultValue }: IChosenFieldField, 
     default:
       break;
   }
-  return {};
+  return getCustomFieldConfig(field, dataSet) as any;
 }
 
 /**
@@ -100,27 +105,26 @@ function getSystemFieldConfig({ code, value, defaultValue }: IChosenFieldField, 
  * @param dataSet
  * @returns
  */
-function getCustomFieldConfig(field: IChosenFieldField, dataSet?: DataSet): Partial<IFieldCustomConfig<CustomFCComponentMapProps>> {
+function getCustomFieldConfig(field: IChosenFieldField, dataSet?: DataSet): Partial<IFieldCustomConfig<IAgileBaseFieldTypeComponentProps>> {
   const {
-    code, fieldType, name, fieldOptions, value, id,
+    code, fieldType, name, fieldOptions, value, id, defaultValue,
   } = field;
-  const defaultValue = toJS(value);
 
   switch (fieldType) {
     case 'radio': case 'single': case 'checkbox': case 'multiple':
       return {
         props: {
-          fieldId: field.id, selected: defaultValue ?? (field as any).valueBindValue, onlyEnabled: false,
-        } as IAgileBaseFieldTypeComponentProps['multiple'],
-      } as any; // valueBindValue 是快速筛选处的值 TODO 后续去掉
+          fieldId: field.id, selected: defaultValue ?? (field as any).valueBindValue, onlyEnabled: false, disabledRuleConfig: true,
+        },
+      }; // valueBindValue 是快速筛选处的值 TODO 后续去掉
     case 'member':
     case 'multiMember':
       return {
         props: {
           selected: defaultValue ? defaultValue.map((item: any) => String(item)) : undefined,
           extraOptions: code === 'assigneeId' ? [{ id: '0', realName: '未分配' }] : undefined,
-        } as IAgileBaseFieldTypeComponentProps['multiMember'],
-      } as any;
+        },
+      };
     default:
       break;
   }

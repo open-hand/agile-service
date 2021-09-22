@@ -15,6 +15,8 @@ export interface SelectCustomFieldBasicProps extends Partial<SelectProps> {
   organizationId?: string
   outside?: boolean
   ruleIds?: string[]
+  /** 是否禁用级联规则相关配置 @default false */
+  disabledRuleConfig?: boolean
   afterLoad?: (data: any) => void
 }
 // 参数互斥，要么传fieldId，要么传fieldOptions
@@ -34,11 +36,11 @@ export type SelectCustomFieldProps = SelectCustomFieldBasicProps & ({
 })
 const SIZE = 50;
 const SelectCustomField: React.FC<SelectCustomFieldProps> = forwardRef(({
-  fieldId, fieldOptions, flat, afterLoad, projectId, organizationId, selected, extraOptions, ruleIds, outside = false, onlyEnabled = true, ...otherProps
+  fieldId, fieldOptions, flat, afterLoad, projectId, organizationId, disabledRuleConfig, selected, extraOptions, ruleIds, outside = false, onlyEnabled = true, ...otherProps
 },
 ref: React.Ref<Select>) => {
   const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
-  const hasRule = Object.keys(args).filter((key: keyof typeof args) => Boolean(args[key])).length > 0;
+  const hasRule = !disabledRuleConfig && Object.keys(args).filter((key: keyof typeof args) => Boolean(args[key])).length > 0;
   const needOptions = useMemo(() => [...castArray(otherProps.value), ...castArray(selected)].filter(Boolean), [selected, otherProps.value]);
   const fakePageRequest = usePersistFn((filter: string = '', page: number = 1, size: number, ensureOptions: string[], enabled: boolean = true) => {
     if (!fieldOptions) {

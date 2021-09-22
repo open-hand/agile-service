@@ -2,8 +2,8 @@ import {
   useCallback, useMemo, useRef,
 } from 'react';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { Action } from '@/components/TextEditTogglePro/TextEditToggle';
 import moment from 'moment';
+import { Action } from '@/components/TextEditTogglePro/TextEditToggle';
 import { getMenuType } from '@/utils/common';
 import renderEditor from '../renderEditor';
 import {
@@ -60,7 +60,6 @@ function useTextEditTogglePropsWithPage(record: Record): ITextEditToggleConfigPr
       extraConfig && record.init('defaultValue', newValue);
       record.set('extraConfig', extraConfig);
     }
-
     record.set('defaultValue', newValue);
     record.set('showDefaultValueText', transformDefaultValue({
       ...currentData,
@@ -132,7 +131,7 @@ function useTextEditTogglePropsWithPage(record: Record): ITextEditToggleConfigPr
       return isProject ? disabledEditDefaultFields.includes(record.get('fieldCode')) : orgDisabledEditDefaultFields.includes(record.get('fieldCode'));
     }
 
-    return !!(record.get('createdLevel') === 'organization' && isProject);
+    return false;
   }, [isProject, record]);
   return {
     ...variableProps,

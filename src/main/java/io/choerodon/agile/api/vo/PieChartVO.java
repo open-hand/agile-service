@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo;
 
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.infra.utils.StringUtil;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.io.Serializable;
 
@@ -17,6 +18,7 @@ public class PieChartVO implements Serializable {
 
     private String realName;
 
+    @Encrypt(ignoreValue = {"0"})
     private String typeName;
 
     private Integer value;

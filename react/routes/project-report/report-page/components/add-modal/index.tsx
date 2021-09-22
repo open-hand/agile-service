@@ -1,6 +1,7 @@
 /* eslint-disable no-nested-ternary */
 import React, { useEffect, useRef } from 'react';
 import { Modal } from 'choerodon-ui/pro';
+import { usePersistFn } from 'ahooks';
 import { IModalProps, IReportContentType } from '@/common/types';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import AddChart from '../add-chart';
@@ -8,6 +9,7 @@ import AddText from '../add-text';
 import AddIssueList from '../add-issue-list';
 import AddDynamicIssueList from '../add-dynamic-list';
 import ProjectReportStore, { IReportBlock } from '../../store';
+import to from '@/utils/to';
 
 interface Props {
   modal?: IModalProps,
@@ -22,12 +24,13 @@ export interface RefProps {
 const Components = new Map<IReportContentType, React.FC<{
   innerRef: React.MutableRefObject<RefProps>
   data?: IReportBlock
-}>>([
-  ['chart', AddChart],
-  ['text', AddText],
-  ['static_list', AddIssueList],
-  ['dynamic_list', AddDynamicIssueList],
-]);
+  linkTo?:(url: string) => void,
+    }>>([
+      ['chart', AddChart],
+      ['text', AddText],
+      ['static_list', AddIssueList],
+      ['dynamic_list', AddDynamicIssueList],
+    ]);
 const AddModal: React.FC<Props> = (props) => {
   const {
     modal, type, store, data: editData, index,
@@ -50,10 +53,14 @@ const AddModal: React.FC<Props> = (props) => {
     modal?.handleOk(handleSubmit);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const linkTo = usePersistFn((linkUrl: string) => {
+    modal?.close();
+    to(linkUrl);
+  });
   const Component = Components.get((editData?.type || type) as IReportContentType);
   if (Component) {
     return (
-      <div><Component innerRef={ref} data={editData} /></div>
+      <div><Component innerRef={ref} data={editData} linkTo={linkTo} /></div>
     );
   }
   return null;

@@ -2,13 +2,13 @@ import React, {
   forwardRef, useCallback, useMemo,
 } from 'react';
 import { Select } from 'choerodon-ui/pro';
+import { castArray, omit, uniqBy } from 'lodash';
 import useIsProjectMember from '@/hooks/useIsProjectMember';
 import { User } from '@/common/types';
-import { castArray, omit, uniqBy } from 'lodash';
 import SelectUser, { SelectUserProps } from '../select-user';
 
 export interface SelectUserWithAssigneeMeProps extends SelectUserProps {
-  onAssigneeMe: (userInfo: User) => void
+  onAssigneeMe?: (userInfo: User) => void
 }
 
 const SelectUserWithAssigneeMe: React.FC<SelectUserWithAssigneeMeProps> = forwardRef((props, ref: React.Ref<Select>) => {

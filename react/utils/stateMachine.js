@@ -19,7 +19,7 @@ export function getStageList() {
     {
       id: 'doing',
       code: 'doing',
-      name: '处理中',
+      name: '进行中',
       colour: '#4d90fe',
     },
     {
@@ -52,7 +52,7 @@ export function getStageMap() {
     doing: {
       id: 'doing',
       code: 'doing',
-      name: '处理中',
+      name: '进行中',
       colour: '#4d90fe',
     },
     done: {

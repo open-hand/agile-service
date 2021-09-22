@@ -5,6 +5,7 @@ import React, {
 import { Animate } from 'choerodon-ui/pro';
 import { stores } from '@choerodon/boot';
 import { usePersistFn } from 'ahooks';
+import { observer, useComputed } from 'mobx-react-lite';
 import Container, { registerPath } from './Container';
 import PreviewIssueFile from './PreviewIssueFile';
 import DetailContainerContext, { IPreview, IRoute, IRouteWithKey } from './context';
@@ -153,9 +154,10 @@ const DetailContainer: React.FC<DetailContainerProps> = ({ children, visible, ..
   const element = visible ? (
     <Container>{children}</Container>
   ) : null;
+  const topAnnouncementHeight = useComputed(() => HeaderStore.announcementClosed);
   return (
     <DetailContainerContext.Provider value={{
-      topAnnouncementHeight: HeaderStore.announcementClosed ? 0 : 40,
+      topAnnouncementHeight: topAnnouncementHeight ? '0px' : 'var(--banner-height)',
       outside: false,
       resizeRef,
       ...props,
@@ -178,4 +180,4 @@ const DetailContainer: React.FC<DetailContainerProps> = ({ children, visible, ..
   );
 };
 
-export default DetailContainer;
+export default observer(DetailContainer);

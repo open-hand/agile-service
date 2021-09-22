@@ -211,6 +211,16 @@ public class IssueDTO extends AuditDomain {
 
     @Transient
     private List<TagVO> tags;
+    @Transient
+    private String epicSelfName;
+
+    public String getEpicSelfName() {
+        return epicSelfName;
+    }
+
+    public void setEpicSelfName(String epicSelfName) {
+        this.epicSelfName = epicSelfName;
+    }
 
     public List<TagVO> getTags() {
         return tags;

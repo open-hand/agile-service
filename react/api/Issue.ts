@@ -266,7 +266,7 @@ class IssueApi extends Api<IssueApi> {
     * 根据问题id加载问题
     * @param issueId
     */
-  load(issueId: string) {
+  load(issueId: string, projectId?: string) {
     return this.isOutside ? this.request({
       method: 'get',
       url: `${this.outPrefix}/issues/${issueId}`,
@@ -276,7 +276,7 @@ class IssueApi extends Api<IssueApi> {
       },
     }) : this.request({
       method: 'get',
-      url: `${`/agile/v1/projects/${getProjectId()}`}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issues/${issueId}`,
+      url: `${`/agile/v1/projects/${projectId || getProjectId()}`}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issues/${issueId}`,
       params: {
         organizationId: this.orgId,
         instanceProjectId: this.projectId,
@@ -606,7 +606,7 @@ class IssueApi extends Api<IssueApi> {
       method: 'get',
       url: `${this.outPrefix}/issue_comment/issue/${issueId}/page`,
       params: {
-        project_id: this.projectId,
+        projectId: this.projectId,
         organizationId: this.orgId,
         page,
         size,

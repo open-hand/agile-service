@@ -12,7 +12,7 @@ import { reverse } from 'lodash';
 import openCreateSubTask from '@/components/create-sub-task';
 import './EditIssue.less';
 import {
-  issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, pageConfigApi,
+  issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, pageConfigApi, boardApi,
 } from '@/api';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { useDetailContainerContext } from '@/components/detail-container/context';
@@ -189,17 +189,21 @@ function EditIssue() {
         dataLogs,
         linkIssues,
         comments,
+        notAllowedTransferStatus,
       ] = await Promise.all([
         otherProject || outside ? null : knowledgeApi.project(projectId).loadByIssue(id),
         otherProject || outside || programId || applyType === 'program' ? null : workLogApi.project(projectId).loadByIssue(id),
         programId ? dataLogApi.loadUnderProgram(id, programId) : dataLogApi.org(organizationId).outside(outside).project(projectId).loadByIssue(id),
         programId || applyType === 'program' ? null : issueLinkApi.org(organizationId).outside(outside).project(projectId).loadByIssueAndApplyType(id),
         programId ? issueApi.project(projectId).getCommentsUnderProgram(id, programId) : issueApi.org(organizationId).outside(outside).project(projectId).getComments(id),
+        // issue中非子任务的问题需要请求不能流转到的状态数据
+        applyType !== 'program' && issue.typeCode !== 'sub_task' ? boardApi.getNotAllowedTransferStatus(id) : null,
       ]);
       if (idRef.current !== id) {
         return;
       }
       store.initIssueAttribute(doc, workLogs, dataLogs, linkIssues, comments);
+      store.setNotAllowedTransferStatus(notAllowedTransferStatus);
     } catch (error) {
       Choerodon.prompt(error.message, 'error');
     }
@@ -374,7 +378,7 @@ function EditIssue() {
           loginUserId={AppState.userInfo.id}
           onDeleteIssue={onDeleteIssue}
           onUpdate={onUpdate}
-          otherProject={otherProject}
+          otherProject={otherProject || String(issue?.projectId) !== String(getProjectId())}
           outside={outside}
           onTransformType={onTransformType}
           onOpenCreateSubTask={handleOpenCreateSubTask}
@@ -401,7 +405,7 @@ function EditIssue() {
           onDeleteIssue={onDeleteIssue}
           parentSummary={summary}
           push={push}
-          otherProject={otherProject}
+          otherProject={otherProject || String(issue?.projectId) !== String(getProjectId())}
           onChangeParent={onChangeParent}
           onRelateIssue={onRelateIssue}
           onTransformSubIssue={handleTransformSubIssue}

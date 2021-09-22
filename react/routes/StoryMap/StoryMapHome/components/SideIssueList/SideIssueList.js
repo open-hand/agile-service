@@ -61,9 +61,8 @@ class SideIssueList extends Component {
     const { filter } = this.state;
     const issues = issueList.filter(this.handleFilter);
     const { filters: { issueStatus, version: versionList }, HeaderStore } = this.props;
-
     return (
-      <div className="c7nagile-SideIssueList" style={{ top: 104 }}>
+      <div className="c7nagile-SideIssueList" style={{ top: HeaderStore.announcementClosed ? 104 : 'calc(104px + var(--banner-height))' }}>
         <div className="c7nagile-SideIssueList-header">
           <div className="c7nagile-SideIssueList-input">
             <TextField
@@ -89,7 +88,7 @@ class SideIssueList extends Component {
             onChange={(value) => {
               this.setFilter('statusList', value);
             }}
-            
+            getPopupContainer={(trigger) => trigger.parentNode}
             placeholder="状态"
             dropdownStyle={{
               width: 180,
@@ -106,7 +105,7 @@ class SideIssueList extends Component {
             onChange={(value) => {
               this.setFilter('versionList', value);
             }}
-            
+            getPopupContainer={(trigger) => trigger.parentNode}
             placeholder="版本"
             dropdownStyle={{
               width: 180,

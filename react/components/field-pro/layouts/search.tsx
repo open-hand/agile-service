@@ -27,7 +27,11 @@ function getFieldConfig({
     case 'multiple':
     case 'radio':
     case 'checkbox': {
-      newProps = { onlyEnabled: false, fieldId: field.id, selected: value };
+      newProps = {
+        onlyEnabled: false,
+        fieldId: field.id,
+        // 这里不使用selected 字段内部会处理 value 第二页情况
+      };
       break;
     }
   }

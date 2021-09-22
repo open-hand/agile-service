@@ -77,13 +77,13 @@ const ReportPage: React.FC<Props> = ({
             <HeaderButtons items={[{
               display: true,
               element: renderAddButton({ color: 'primary' as ButtonColor }),
-            }, {
-              display: true,
-              name: '设置定时发报',
-              icon: 'settings',
-              handler: () => {
-                openAutoSendModal({});
-              },
+            // }, {
+            //   display: true,
+            //   name: '设置定时发报',
+            //   icon: 'settings',
+            //   handler: () => {
+            //     openAutoSendModal({});
+            //   },
             }, {
               display: true,
               element: <CollapseAll />,

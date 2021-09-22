@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { filter, find } from 'lodash';
 import { DataSet, TextField } from 'choerodon-ui/pro';
 import {
-  Dropdown, Icon, Menu,
+  Dropdown, Icon, Menu, Tooltip,
 } from 'choerodon-ui';
 import UserTag from '@/components/tag/user-tag';
 
@@ -88,11 +88,14 @@ const Overlay: React.FC<OverlayProps> = ({
         {
           filter(userListDs.toData(), (user: User) => user.id !== selectedUser?.id).map((user: User) => (
             <Menu.Item key={user.id}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <UserTag
-                  data={user}
-                />
-              </div>
+              <Tooltip title={`${user.ldap ? `${user.realName}(${user.loginName})` : `${user.realName}(${user.email})`}`}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <UserTag
+                    data={user}
+                    tooltip={false}
+                  />
+                </div>
+              </Tooltip>
             </Menu.Item>
           ))
         }
@@ -131,21 +134,22 @@ const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee }) => 
   }, []);
 
   return (
-    <Dropdown
-      overlay={(
-        <ObserverOverlay
-          setVisible={setVisible}
-          defaultAssignee={defaultAssignee}
-          setSelectedUser={setSelectedUser}
-          selectedUser={selectedUser}
-        />
-)}
-      trigger={['click']}
-      visible={visible}
-      onVisibleChange={handleVisibleChange}
-    >
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        {
+    <div id="userDropdown-container">
+      <Dropdown
+        overlay={(
+          <ObserverOverlay
+            setVisible={setVisible}
+            defaultAssignee={defaultAssignee}
+            setSelectedUser={setSelectedUser}
+            selectedUser={selectedUser}
+          />
+      )}
+        trigger={['click']}
+        visible={visible}
+        onVisibleChange={handleVisibleChange}
+      >
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {
           selectedUser ? (
             <>
               <UserTag
@@ -156,12 +160,15 @@ const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee }) => 
             </>
           ) : <div className={styles.tip}>经办人</div>
         }
-        <Icon
-          type="arrow_drop_down"
-          style={{ fontSize: 16, cursor: 'pointer' }}
-        />
-      </div>
-    </Dropdown>
+          <Icon
+            type="arrow_drop_down"
+            style={{ fontSize: 16, cursor: 'pointer' }}
+          />
+        </div>
+      </Dropdown>
+
+    </div>
+
   );
 };
 

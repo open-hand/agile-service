@@ -33,6 +33,8 @@ function getFieldConfig({
     }
     case 'priorityId':
       return { code: 'priority', props: {} };
+    case 'pi':
+      return { code: 'pi', props: { openPermission: true } };
   }
   return {};
 }

@@ -22,7 +22,6 @@ import SelectMultiServiceTag from '@/components/select/select-multi-service-tag'
       return;
     }
     // if(tags.map((i) => `${i.appServiceCode}:${i.tagName}`).join('，')===)
-    console.log('newTags', newTags);
     store.update(obj);
   };
 

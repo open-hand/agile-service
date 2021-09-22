@@ -1948,6 +1948,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
         List<ObjectSchemeFieldExtendDTO> extendDTO =
                 objectSchemeFieldExtendMapper.selectExtendFieldByOptions(Collections.singletonList(issueTypeId), organizationId, summaryFieldDTO.getId(), projectId);
+        if (CollectionUtils.isEmpty(extendDTO)) {
+            extendDTO = objectSchemeFieldExtendMapper.selectExtendFieldByOptions(Collections.singletonList(issueTypeId), organizationId, summaryFieldDTO.getId(), null);
+        }
         if (!CollectionUtils.isEmpty(extendDTO)) {
             return extendDTO.get(0).getDefaultValue();
         }

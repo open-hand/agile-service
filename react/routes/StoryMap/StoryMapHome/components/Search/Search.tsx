@@ -28,7 +28,7 @@ const StoryMapSearch: React.FC<Props> = ({ issueSearchStore }) => {
         store={issueSearchStore}
         onClear={handleClear}
         onChange={() => {
-          localPageCacheStore.setItem('storyMapSearchVO', issueSearchStore.getCustomFieldFilters());
+          localPageCacheStore.setItem('storyMapSearchVO', issueSearchStore.getCustomFieldFilters(true));
           StoryMapStore.setSearchVO(issueSearchStore.getCustomFieldFilters());
           StoryMapStore.clearData();
           StoryMapStore.getStoryMap();

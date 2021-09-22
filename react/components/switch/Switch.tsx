@@ -27,19 +27,19 @@ interface SwitchProps {
  * @param param0
  * @returns
  */
-const Switch:React.FC<SwitchProps> = ({
+const Switch: React.FC<SwitchProps> = ({
   options: propsOption, onChange: propsOnChange, defaultValue, value: propsValue, style, wrap, className,
 }) => {
   const [value, setValue] = useState<SwitchProps['defaultValue']>(defaultValue || 0);
   const [options, setOptions] = useState<SwitchProps['options']>([]);
   const onChange = usePersistFn(propsOnChange || noop);
   const onClick = async (v: any, other: any) => {
-    const result = await onChange(v, other);
+    const result: boolean | void = await onChange(v, other);
     if (result === undefined) {
       setValue(v);
       return;
     }
-    setValue(v);
+    (result as boolean) && setValue(v);
   };
   const initOptions = useCallback(() => {
     let newOptions: SwitchProps['options'] = propsOption;
