@@ -1559,20 +1559,6 @@ public class ExcelServiceImpl implements ExcelService {
             }
             handlerRequireFiled(excelColumn, requireFieldMap, issueCreateVO, projectId);
         }
-        // 校验excel中字段是否包含当前问题类型的所有必填字段
-        includeAllRequiredField(errorRowColMap, headerMap, requireFieldMap.get(issueCreateVO.getIssueTypeId()), row);
-    }
-
-    protected void includeAllRequiredField(Map<Integer, List<Integer>> errorRowColMap, Map<Integer, ExcelColumnVO> headerMap, List<String> requireFieldList, Row row) {
-        if (!CollectionUtils.isEmpty(requireFieldList)) {
-            List<String> excelColumn = headerMap.values().stream().map(ExcelColumnVO::getFieldCode).collect(Collectors.toList());
-            if (!excelColumn.containsAll(requireFieldList)) {
-                Integer col = headerMap.size();
-                Cell cell = row.createCell(col);
-                cell.setCellValue("缺少必填字段");
-                addErrorColumn(row.getRowNum(), col, errorRowColMap);
-            }
-        }
     }
 
     protected Boolean checkRequireField(Map<Long, List<String>> requireFieldMap, ExcelColumnVO excelColum, IssueCreateVO issueCreateVO, Row row, Integer col, Map<Integer, List<Integer>> errorRowColMap) {
