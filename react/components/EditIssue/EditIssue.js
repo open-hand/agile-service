@@ -156,7 +156,7 @@ function EditIssue() {
       const fields = await fieldApi.project(programId ?? projectId).org(organizationId).outside(outside).getFieldAndValue(id, param);
 
       // 根据问题类型查询rules
-      if (!outside && !otherProject) {
+      if (!outside && !otherProject && String(issue?.projectId) === String(getProjectId())) {
         const rules = await pageConfigApi.project(programId ?? projectId).org(organizationId).getCascadeRuleList(issue.issueTypeId);
         store.setIssueTypeRules(rules);
       }

@@ -1,16 +1,18 @@
 import React, { useRef } from 'react';
 import { stores } from '@choerodon/boot';
-import { useMount, usePersistFn } from 'ahooks';
+import { usePersistFn } from 'ahooks';
 import { AppStateProps } from '@/common/types';
 import useIsProgram from './useIsProgram';
 import useParentProgram from './data/useParentProgram';
 import useParentArtDoing from './data/useParentArtDoing';
-import useIsProgramProject from '@/hooks/useIsProgramProject';
 
 const { AppState }: { AppState: AppStateProps } = stores;
 // @ts-ignore
 const HAS_AGILE_PRO = C7NHasModule('@choerodon/agile-pro');
-const shouldRequest = HAS_AGILE_PRO;
+// const shouldRequest = HAS_AGILE_PRO;
+const isDEV = process.env.NODE_ENV === 'development';
+const shouldRequest = isDEV || HAS_AGILE_PRO;
+
 interface ChildrenProps {
   isInProgram: boolean,
   program: object | boolean,
