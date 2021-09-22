@@ -127,6 +127,12 @@ const systemFieldConfigMap: ICreateComponentPropsDistributeProRender<typeof Agil
       statusArr: ['version_planning'],
     },
   },
+  influenceVersion: {
+    render: (text) => text,
+    props: {
+      valueField: 'versionId',
+    },
+  },
   mainResponsible: {
     ...valueTypeConfigMap.member,
     valueKey: 'mainResponsibleId',
