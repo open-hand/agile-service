@@ -2,7 +2,7 @@ import React, { forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
-import useSelectPro from '@/hooks/useSelectPro';
+import useSelectPro, { FragmentForSearch } from '@/hooks/useSelectPro';
 import { IIssueType } from '@/common/types';
 import useProjectIssueTypes, { ProjectIssueTypesConfig } from '@/hooks/data/useProjectIssueTypes';
 import TypeTag from '@/components/TypeTag';
@@ -26,7 +26,11 @@ const SelectIssueType: React.FC<Props> = forwardRef(({
     valueField: valueField || 'id',
     data: issueTypes || [],
     paging: false,
-    optionRenderer: showIcon ? (issueType) => <TypeTag data={issueType} showName /> : undefined,
+    optionRenderer: showIcon ? (issueType) => (
+      <FragmentForSearch name={issueType.name}>
+        <TypeTag data={issueType} showName />
+      </FragmentForSearch>
+    ) : undefined,
   });
   const Component = flat ? FlatSelect : Select;
 
