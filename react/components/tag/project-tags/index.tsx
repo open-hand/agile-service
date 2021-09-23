@@ -15,9 +15,9 @@ const ProjectTags: React.FC<ProjectTagsProps> = ({
   if (!data || !data.length) {
     return null;
   }
-  const visibleData = data.slice(0, maxTagCount);
-  const hiddenData = data.slice(maxTagCount);
-  const compact = data.length > maxTagCount;
+  const visibleData = data.filter((item) => item?.id).slice(0, maxTagCount);
+  const hiddenData = data.filter((item) => item?.id).slice(maxTagCount);
+  const compact = data.filter((item) => item?.id).length > maxTagCount;
   return (
     <div style={{ display: 'inline-flex', ...style }}>
       {visibleData.map((item) => (
