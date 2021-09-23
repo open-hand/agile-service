@@ -198,6 +198,7 @@ const CreateIssueBase = observer(({
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
   const currentTemplateSummary = useRef(defaultValues?.summary || '');
+  const currentTemplateDescription = useRef(defaultValues?.description || '');
   const [templateSummary] = useState(new Map());
   const [dataSet, setDataSet] = useState(defaultDataSet);
   dataSetRef.current = dataSet;
@@ -412,10 +413,11 @@ const CreateIssueBase = observer(({
       }
     });
     // TODO: 将各种默认值的获取和设置逻辑合并
-    // 设置描述默认值
-    if (templateData && templateData.template) {
-      setValue('description', templateData.template);
+    // 设置描述默认值  和上一个模板相同 或默认值
+    if (currentTemplateDescription.current === newValue.description) {
+      newValue.description = templateData?.template;
     }
+    currentTemplateDescription.current = templateData?.template;
     if (parentIssue) {
       setValue('parentIssueId', parentIssue);
     }
