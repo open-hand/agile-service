@@ -294,7 +294,9 @@ const CreateIssueBase = observer(({
     return field.defaultValue;
   });
 
-  const handleUpdate = usePersistFn(async ({ name, value, record }) => {
+  const handleUpdate = usePersistFn(async ({
+    name, value, oldValue, record,
+  }) => {
     switch (name) {
       case 'parentIssueId': {
         if (value) {
@@ -307,6 +309,12 @@ const CreateIssueBase = observer(({
           }
         }
         break;
+      }
+      case 'issueType': {
+        if (!value) {
+          // 问题类型不能置空
+          record.set('issueType', oldValue);
+        }
       }
       default: {
         break;
@@ -354,7 +362,7 @@ const CreateIssueBase = observer(({
         after: 'issueType',
         field: {
           name: 'parentIssueId',
-          type: 'object'as any,
+          type: 'object' as any,
           label: '关联父级任务',
           required: issueTypeCode === 'sub_task',
         },

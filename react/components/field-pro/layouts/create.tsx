@@ -74,13 +74,13 @@ const valueTypeConfigMap: ICreateComponentPropsDistributeProRender<ICreateCustom
   },
 };
 
-const systemFieldConfigMap: ICreateComponentPropsDistributeProRender<typeof AgileComponentMapWithPro& {
+const systemFieldConfigMap: ICreateComponentPropsDistributeProRender<typeof AgileComponentMapWithPro & {
   // estimatedEndTime: ICreateCustomFieldMapProps['datetime']
   reporter: ICreateCustomFieldMapProps['member']
   mainResponsible: ICreateCustomFieldMapProps['member']
 }> = {
   issueType: {
-    props: { showIcon: true },
+    props: { showIcon: true, clearButton: false },
     valueKey: 'issueTypeId',
   },
   sprint: {
