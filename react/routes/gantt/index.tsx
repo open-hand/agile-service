@@ -4,7 +4,7 @@ import React, {
 } from 'react';
 // eslint-disable-next-line camelcase
 import { unstable_batchedUpdates } from 'react-dom';
-import { Tooltip, Icon } from 'choerodon-ui/pro';
+import { Tooltip, Icon, Button } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import {
   find, merge, omit, remove, some,
@@ -49,6 +49,7 @@ import GanttOperation from './components/gantt-operation';
 import GanttSortLabel, { useGanttSortLabel } from './components/gantt-sort-label';
 import './index.less';
 import StatusLinkageWSHandle from '@/components/StatusLinkageWSHandle';
+import { openCustomColumnManageModal } from '@/components/table-cache/column-manage/Modal';
 
 dayjs.extend(weekday);
 const typeOptions = [{
@@ -522,7 +523,38 @@ const GanttPage: React.FC = () => {
               name: '个人筛选',
               icon: 'settings-o',
               display: true,
+
               handler: handleClickFilterManage,
+            },
+            {
+              display: true,
+              name: '列配置',
+              // icon: 'view_column-o',
+              handler: () => {
+                // openColumnManageModal
+                openCustomColumnManageModal({
+                  modelProps: {
+                    title: '设置列显示字段',
+                  },
+                  options: [
+                    { code: 'assignee', title: '经办人' },
+                    { code: 'startDate', title: '预计开始时间' },
+                    ...new Array(30).fill({ code: 'startDate', title: '预计开始时间' }).map((i, index) => ({
+                      code: `${i.code}-${index}`, title: `${i.title}-${index}`,
+                    })),
+
+                  ],
+                  type: 'gannt',
+                });
+              },
+              element: (
+                <Button>
+                  <Icon
+                    type="view_column-o"
+                    style={{ fontSize: 20, marginBottom: -1 }}
+                  />
+                  <span>列配置</span>
+                </Button>),
             },
             {
               icon: isFullScreen ? 'fullscreen_exit' : 'zoom_out_map',
@@ -536,6 +568,7 @@ const GanttPage: React.FC = () => {
                 title: isFullScreen ? '退出全屏' : '全屏',
               },
             },
+
             {
               display: true,
               icon: 'refresh',
