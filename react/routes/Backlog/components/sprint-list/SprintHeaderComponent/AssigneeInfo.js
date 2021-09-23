@@ -21,6 +21,7 @@ import { UserUniqueTag } from '@/components/tag/user-tag';
         imageUrl: sprintDefaultAssignee.imageUrl,
         loginName: sprintDefaultAssignee.assigneeLoginName,
         realName: sprintDefaultAssignee.assigneeRealName,
+        tooltip: sprintDefaultAssignee.assigneeName,
       });
     } else {
       localPageCacheStore.remove(`backlog.sprint-${sprintId}`);
@@ -42,6 +43,7 @@ import { UserUniqueTag } from '@/components/tag/user-tag';
         imageUrl: sprintDefaultAssignee.imageUrl,
         loginName: sprintDefaultAssignee.assigneeLoginName,
         realName: sprintDefaultAssignee.assigneeRealName,
+        tooltip: sprintDefaultAssignee.assigneeName,
       });
     }
   };
