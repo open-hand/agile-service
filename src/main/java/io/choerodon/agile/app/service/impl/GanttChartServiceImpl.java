@@ -162,7 +162,9 @@ public class GanttChartServiceImpl implements GanttChartService {
             Sort.Order issueIdOrder = new Sort.Order(Sort.Direction.DESC, ISSUE_ID);
             sort = sort.and(new Sort(issueIdOrder));
         }
-        String sortSql = PageableHelper.getSortSql(PageUtil.sortResetOrder(sort, null, new HashMap<>()));
+        Map<String, String> convertMapping = new HashMap<>();
+        convertMapping.put("issueNum", "issue_num_convert");
+        String sortSql = PageableHelper.getSortSql(PageUtil.sortResetOrder(sort, null, convertMapping));
         sortMap.put(ORDER_STR, sortSql);
         return sort;
     }
