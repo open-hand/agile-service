@@ -3,11 +3,12 @@ import { Icon } from 'choerodon-ui/pro';
 import classNames from 'classnames';
 import './index.less';
 
-interface IWarnInfoBlockProps {
+export interface IWarnInfoBlockProps {
   className?: string
   style?: React.CSSProperties
   defaultVisible?: boolean
   mode?: 'simple' | 'default'
+  iconHidden?: boolean
   visible?: boolean
   content?: React.ReactNode
   predefineContent?: { type: 'requiredNoPermission', props?: { fieldNames: string[] } }
@@ -25,7 +26,7 @@ const getPredefineContent = (key: string, extraProps: any) => {
   return undefined;
 };
 const WarnInfoBlock: React.FC<IWarnInfoBlockProps> = ({
-  defaultVisible = true, content, visible: propsVisible, className, style, mode = 'default', predefineContent,
+  defaultVisible = true, content, visible: propsVisible, className, style, mode = 'default', predefineContent, iconHidden,
 }) => {
   const prefixCls = 'c7n-agile-warn-info-block';
   const [visible, setVisible] = useState(defaultVisible);
@@ -43,13 +44,13 @@ const WarnInfoBlock: React.FC<IWarnInfoBlockProps> = ({
   }, [content, predefineContent]);
   return visible ? (
     <div
-      className={classNames(prefixCls, className, {
+      className={classNames(prefixCls, {
         [`${prefixCls}-default`]: mode === 'default',
         [`${prefixCls}-simple`]: mode === 'simple',
-      })}
+      }, className)}
       style={style}
     >
-      <Icon type="error" className={`${prefixCls}-icon`} />
+      {!iconHidden && <Icon type="error" className={`${prefixCls}-icon`} />}
       <p className={`${prefixCls}-content`}>
         {renderContent()}
       </p>
