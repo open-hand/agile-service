@@ -544,7 +544,8 @@
         ai.issue_type_id,
         ai.parent_issue_id,
         ai.relate_issue_id,
-        ai.status_id
+        ai.status_id,
+        CONVERT(ai.issue_num,SIGNED) as issue_num_convert
         from agile_issue ai
         where ai.project_id = #{projectId}
         and ai.issue_id in
@@ -650,9 +651,10 @@
         ) ai1
     </select>
 
-    <select id="queryIssueIdsList" resultType="java.lang.Long">
+    <select id="queryIssueIdsList" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
-        ai.issue_id
+        ai.issue_id,
+        CONVERT(ai.issue_num,SIGNED) as issue_num_convert
         FROM agile_issue ai
         <if test="sortMap != null and sortMap.sortFieldId != null ">
             LEFT JOIN
@@ -697,9 +699,10 @@
     </select>
 
 
-    <select id="queryParentIssueIdsList" resultType="java.lang.Long">
+    <select id="queryParentIssueIdsList" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         select
-        ai.issue_id
+        ai.issue_id,
+        CONVERT(ai.issue_num,SIGNED) as issue_num_convert
         from (
             select temp.issue_id
             from (

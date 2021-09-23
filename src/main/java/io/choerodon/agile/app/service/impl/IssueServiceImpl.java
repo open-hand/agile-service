@@ -647,11 +647,16 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                                            Map<String, Object> sortMap,
                                            boolean isTreeView) {
         splitIssueNumProjectCodePrefix(searchVO, projectId);
+        Page<IssueDTO> issuePage;
         if (isTreeView) {
-            return PageHelper.doPage(pageRequest, () -> issueMapper.queryParentIssueIdsList(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap));
+            issuePage =
+                    PageHelper.doPage(pageRequest, () -> issueMapper.queryParentIssueIdsList(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap));
         } else {
-            return PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueIdsList(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap));
+            issuePage =
+                    PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueIdsList(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap));
         }
+        List<Long> issueIds = issuePage.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+        return PageUtil.buildPageInfoWithPageInfoList(issuePage, issueIds);
     }
 
     @Override
@@ -662,9 +667,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                                      boolean isTreeView) {
         splitIssueNumProjectCodePrefix(searchVO, projectId);
         if (isTreeView) {
-            return issueMapper.queryParentIssueIdsList(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap);
+            return issueMapper.queryParentIssueIdsList(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap)
+                    .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
         } else {
-            return issueMapper.queryIssueIdsList(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap);
+            return issueMapper.queryIssueIdsList(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap)
+                    .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
         }
     }
 
@@ -726,7 +733,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     protected String getOrderStrOfQueryingIssuesWithSub(Sort sort) {
         Map<String, String> order = new HashMap<>();
         order.put(ISSUE_ID, TABLE_ISSUE_ID);
-        order.put(ISSUE_NUM, TABLE_ISSUE_ID);
+        order.put(ISSUE_NUM, ISSUE_NUM_CONVERT);
         if (Objects.isNull(sort.getOrderFor(ISSUE_ID))) {
             Sort.Order issueIdOrder = new Sort.Order(Sort.Direction.DESC, ISSUE_ID);
             sort = sort.and(new Sort(issueIdOrder));
