@@ -459,14 +459,14 @@ class EpicReport extends Component {
     const d = Math.floor(time / 8);
     time -= 8 * d;
     if (time % 1 > 0) {
-      time = time.toFixed(1);
+      time = time?.toFixed(1) ?? time;
     }
     return `${w ? `${w} 周 ` : ''}${d ? `${d} 天 ` : ''}${time ? `${time} 小时 ` : ''}`;
   }
 
   transformStoryPoints(storyPoints) {
     return storyPoints && storyPoints > 0
-      ? `${storyPoints % 1 > 0 ? storyPoints.toFixed(1) : storyPoints} 点` : storyPoints;
+      ? `${storyPoints % 1 > 0 ? storyPoints?.toFixed(1) ?? storyPoints : storyPoints} 点` : storyPoints;
   }
 
   renderTable(type) {

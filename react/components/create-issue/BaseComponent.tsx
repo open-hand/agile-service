@@ -198,6 +198,7 @@ const CreateIssueBase = observer(({
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
   const currentTemplateSummary = useRef(defaultValues?.summary || '');
+  const currentTemplateDescription = useRef(defaultValues?.description || '');
   const [templateSummary] = useState(new Map());
   const [dataSet, setDataSet] = useState(defaultDataSet);
   dataSetRef.current = dataSet;
@@ -294,7 +295,9 @@ const CreateIssueBase = observer(({
     return field.defaultValue;
   });
 
-  const handleUpdate = usePersistFn(async ({ name, value, record }) => {
+  const handleUpdate = usePersistFn(async ({
+    name, value, oldValue, record,
+  }) => {
     switch (name) {
       case 'parentIssueId': {
         if (value) {
@@ -307,6 +310,12 @@ const CreateIssueBase = observer(({
           }
         }
         break;
+      }
+      case 'issueType': {
+        if (!value) {
+          // 问题类型不能置空
+          record.set('issueType', oldValue);
+        }
       }
       default: {
         break;
@@ -354,7 +363,7 @@ const CreateIssueBase = observer(({
         after: 'issueType',
         field: {
           name: 'parentIssueId',
-          type: 'object'as any,
+          type: 'object' as any,
           label: '关联父级任务',
           required: issueTypeCode === 'sub_task',
         },
@@ -404,10 +413,11 @@ const CreateIssueBase = observer(({
       }
     });
     // TODO: 将各种默认值的获取和设置逻辑合并
-    // 设置描述默认值
-    if (templateData && templateData.template) {
-      setValue('description', templateData.template);
+    // 设置描述默认值  和上一个模板相同 或默认值
+    if (currentTemplateDescription.current === newValue.description) {
+      newValue.description = templateData?.template;
     }
+    currentTemplateDescription.current = templateData?.template;
     if (parentIssue) {
       setValue('parentIssueId', parentIssue);
     }

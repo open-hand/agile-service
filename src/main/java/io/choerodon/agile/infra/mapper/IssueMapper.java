@@ -357,17 +357,17 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                             @Param("isTreeView") Boolean isTreeView);
 
 
-    List<Long> queryIssueIdsList(@Param("projectId") Long projectId,
-                                 @Param("searchVO") SearchVO searchVO,
-                                 @Param("filterSql") String filterSql,
-                                 @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
-                                 @Param("sortMap") Map<String, Object> sortMap);
+    List<IssueDTO> queryIssueIdsList(@Param("projectId") Long projectId,
+                                     @Param("searchVO") SearchVO searchVO,
+                                     @Param("filterSql") String filterSql,
+                                     @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
+                                     @Param("sortMap") Map<String, Object> sortMap);
 
-    List<Long> queryParentIssueIdsList(@Param("projectId") Long projectId,
-                                       @Param("searchVO") SearchVO searchVO,
-                                       @Param("filterSql") String filterSql,
-                                       @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
-                                       @Param("sortMap") Map<String, Object> sortMap);
+    List<IssueDTO> queryParentIssueIdsList(@Param("projectId") Long projectId,
+                                           @Param("searchVO") SearchVO searchVO,
+                                           @Param("filterSql") String filterSql,
+                                           @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
+                                           @Param("sortMap") Map<String, Object> sortMap);
 
 
     List<IssueDTO> queryIssueListWithSubByIssueIds(@Param("issueIds") List<Long> issueIds,
