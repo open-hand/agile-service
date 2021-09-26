@@ -368,7 +368,7 @@ public class SiteMsgUtil {
             MessageSender messageSender = new MessageSender();
             messageSender.setTenantId(ConvertUtil.getOrganizationId(projectVO.getId()));
             messageSender.setMessageCode("ISSUE_COMMENT");
-            messageSender.setReceiverAddressList(Collections.singletonList(usersMap.get(userId)));
+            messageSender.setReceiverAddressList(Objects.isNull(userId) ? null : Collections.singletonList(usersMap.get(userId)));
             messageSender.setArgs(argsMap);
             // 设置额外参数
             Map<String, Object> objectMap = new HashMap<>(1);
@@ -376,6 +376,15 @@ public class SiteMsgUtil {
             messageSender.setAdditionalInformation(objectMap);
             senderList.add(messageSender);
         });
-        senderList.forEach(sender -> messageClient.async().sendMessage(sender));
+        senderList.forEach(sender -> {
+            if (!Objects.isNull(sender.getReceiverAddressList())) {
+                //向接收人发送邮件和站内信消息
+                messageClient.async().sendWebMessage("ISSUE_COMMENT_NOTICE.WEB", sender.getReceiverAddressList(), sender.getArgs());
+                messageClient.async().sendEmail("CHOERODON-EMAIL", "ISSUE_COMMENT_NOTICE.EMAIL", sender.getReceiverAddressList(), sender.getArgs());
+            } else {
+                //发送无接收人的消息(webhook等)
+                messageClient.async().sendMessage(sender);
+            }
+        });
     }
 }
