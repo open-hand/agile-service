@@ -15,7 +15,7 @@ class FieldTeam extends Component {
     const issue = store.getIssue;
     const { issueId } = issue;
     const activePiTeams = issue.activePiTeams || [];
-    const originTeamIds = activePiTeams.map((team) => team.id);
+    const originTeamIds = activePiTeams.map((team) => String(team.id));
     const addTeams = teamIds ? teamIds.filter((teamId) => !originTeamIds.includes(teamId)) : [];
     const removeTeams = teamIds ? originTeamIds.filter((teamId) => !teamIds.includes(teamId)) : originTeamIds;
     await featureApi.updateTeamAndSprint({
