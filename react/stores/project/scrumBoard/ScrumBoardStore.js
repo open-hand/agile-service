@@ -1,4 +1,5 @@
 /* eslint-disable max-len */
+import { createRef } from 'react';
 import {
   observable, action, computed, toJS,
 } from 'mobx';
@@ -11,6 +12,8 @@ const { AppState } = stores;
 
 @store('ScrumBoardStore')
 class ScrumBoardStore {
+  editRef = createRef();
+
   @observable searchVO = {};
 
   @observable filterManageVisible = false;
@@ -885,7 +888,7 @@ class ScrumBoardStore {
       const check = await boardApi.getNotAllowedTransferStatus(issueId);
       if (!isEmpty(check)) {
         check.forEach((status) => {
-        status?.id && this.checkAndSetCanDragOn(status.id);
+          status?.id && this.checkAndSetCanDragOn(status.id);
         });
       }
     } catch (e) {
