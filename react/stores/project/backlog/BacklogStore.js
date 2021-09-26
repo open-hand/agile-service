@@ -417,6 +417,28 @@ class BacklogStore {
   // 过滤选中冲刺中的经办人
   @observable filterSprintAssign = observable.map();
 
+  @action('初始化各冲刺下经办人筛选')
+  initFilterAssign(sprintData = []) {
+    sprintData.forEach((sprint) => {
+      const { sprintId, assigneeIssues } = sprint;
+      const assigneeId = localPageCacheStore.getItem(`backlog.sprint-${sprintId}`);
+      const sprintDefaultAssignee = assigneeId ? find(assigneeIssues, (item) => String(item.assigneeId) === String(assigneeId)) : undefined;
+      if (sprintDefaultAssignee) {
+        this.filterSprintAssign.set(sprintId, assigneeId);
+        this.setFilterSprintAssignUser(sprintId, {
+          id: assigneeId,
+          imageUrl: sprintDefaultAssignee.imageUrl,
+          loginName: sprintDefaultAssignee.assigneeLoginName,
+          realName: sprintDefaultAssignee.assigneeRealName,
+          tooltip: sprintDefaultAssignee.assigneeName,
+        });
+      } else {
+        localPageCacheStore.remove(`backlog.sprint-${sprintId}`);
+      }
+      this.filterSprintAssign.set(sprintId, assigneeId);
+    });
+  }
+
   @action setFilterSprintAssign(sprintId, assigneeId) {
     this.filterSprintAssign.set(sprintId, assigneeId);
     this.refreshSprint(sprintId);
@@ -1026,12 +1048,13 @@ class BacklogStore {
   /**
    * 加载选择快速搜索的冲刺数据
    */
-  getSprint = async (setPiIdIf) => {
+  getSprint = async (setPiIdIf, setAssigner = false) => {
     const [issueTypes, priorityArr, sprintData] = await Promise.all([
       issueTypeApi.loadAllWithStateMachineId(),
       priorityApi.getDefaultByProject(),
       this.axiosGetSprint(),
     ]);
+    setAssigner && this.initFilterAssign(sprintData);
     await this.getPlanPi(sprintData, setPiIdIf);
     this.initBacklogData(issueTypes, priorityArr, sprintData);
   };
@@ -1095,14 +1118,17 @@ class BacklogStore {
     });
   };
 
-  refresh = (spinIf = true, setPiIdIf = true) => {
+  /**
+   * @param setAssigner 设置经办人
+   */
+  refresh = (spinIf = true, setPiIdIf = true, setAssigner = true) => {
     // if (this.IssueDetail) {
     //   this.IssueDetail.refreshIssueDetail();
     // }
     if (spinIf) {
       this.setSpinIf(true);
     }
-    this.getSprint(setPiIdIf);
+    this.getSprint(setPiIdIf, setAssigner);
     if (this.getCurrentVisible === 'version') {
       this.loadVersion();
     } else if (this.getCurrentVisible === 'epic') {
