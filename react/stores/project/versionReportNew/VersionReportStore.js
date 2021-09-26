@@ -1,7 +1,7 @@
 import {
   observable, action, computed,
 } from 'mobx';
-import _ from 'lodash';
+import _, { isNumber } from 'lodash';
 import { versionApi, reportApi } from '@/api';
 
 const UNIT_STATUS = {
@@ -132,7 +132,7 @@ class VersionReportStore {
   // 处理后端返回值为null或小数精度问题
   dealNullValue = (list = []) => _.map(list, (item) => {
     if (item) {
-      if (item % 1 > 0) {
+      if (isNumber(item) && item % 1 > 0) {
         return item.toFixed(1);
       }
       return item || 0;
