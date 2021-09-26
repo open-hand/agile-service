@@ -235,7 +235,8 @@ class ScrumBoardHome extends Component {
           this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
         }
       }
-    }).catch(() => {
+    }).catch((error) => {
+      console.error(error);
       ScrumBoardStore.setSwimLaneData(SwimLaneId,
         startStatus,
         startStatusIndex,

@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
-import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import { observer } from 'mobx-react-lite';
+import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import DetailContainer, { useDetail } from '@/components/detail-container';
 
 const IssueDetail = ({ refresh }) => {
@@ -28,6 +28,7 @@ const IssueDetail = ({ refresh }) => {
         path: 'issue',
         props: {
           issueId,
+          forwardedRef: ScrumBoardStore.editRef,
         },
         events: {
           update: () => {
