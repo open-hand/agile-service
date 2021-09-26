@@ -413,6 +413,7 @@ public class SendMsgUtil {
     private void setIssueCommentMessageActionAndUser(Map<Long, String> actionMap, Long userId, IssueVO issueVO, ProjectVO projectVO, List<Long> userIds) {
         Map<Long, String> map = new HashMap<>();
         List<Long> starUsers = starBeaconMapper.selectUsersByInstanceId(projectVO.getId(), issueVO.getIssueId());
+        //邮件和站内信有接收人的消息中的action
         if (!CollectionUtils.isEmpty(starUsers)) {
             starUsers.forEach(starUserId -> {
                 if (userIds.contains(starUserId)) {
@@ -429,6 +430,10 @@ public class SendMsgUtil {
             }
             actionMap.put(sendUserId, map.getOrDefault(sendUserId, "管理的"));
         });
+        //webhook等无接收人的消息中的默认action
+        if (CollectionUtils.isNotEmpty(actionMap.keySet())) {
+            actionMap.put(null, "管理的");
+        }
     }
 
     @Async
