@@ -50,6 +50,26 @@ public class GanttChartVO {
 
     private IssueSprintDTO sprint;
 
+    private IssueEpicVO epic;
+
+    private IssueFeatureVO feature;
+
+    public IssueEpicVO getEpic() {
+        return epic;
+    }
+
+    public void setEpic(IssueEpicVO epic) {
+        this.epic = epic;
+    }
+
+    public IssueFeatureVO getFeature() {
+        return feature;
+    }
+
+    public void setFeature(IssueFeatureVO feature) {
+        this.feature = feature;
+    }
+
     public IssueSprintDTO getSprint() {
         return sprint;
     }
