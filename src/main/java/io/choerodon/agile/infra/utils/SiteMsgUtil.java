@@ -59,7 +59,8 @@ public class SiteMsgUtil {
                             String summary,
                             String url,
                             Long operatorId,
-                            Long projectId) {
+                            Long projectId,
+                            boolean customFieldUsers) {
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
         Map<String,String> map = new HashMap<>();
         map.put(ASSIGNEENAME, userName);
@@ -73,7 +74,13 @@ public class SiteMsgUtil {
         //发送站内信
         MessageSender messageSender = handlerMessageSender(0L,"ISSUECREATE",userIds,map);
         messageSender.setAdditionalInformation(objectMap);
-        messageClient.async().sendMessage(messageSender);
+        //问题创建通知自定义字段人员时仅发送邮件和站内信，避免重复发送webhook
+        if (customFieldUsers) {
+            messageClient.async().sendWebMessage("ISSUE_CREATE.WEB", messageSender.getReceiverAddressList(), messageSender.getArgs());
+            messageClient.async().sendEmail("CHOERODON-EMAIL", "ISSUE_CREATE.EMAIL", messageSender.getReceiverAddressList(), messageSender.getArgs());
+        } else {
+            messageClient.async().sendMessage(messageSender);
+        }
     }
 
     private void setLoginNameAndRealName(Long operatorId, Map<String, String> map) {
