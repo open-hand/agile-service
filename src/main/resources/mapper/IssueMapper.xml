@@ -545,7 +545,8 @@
         ai.parent_issue_id,
         ai.relate_issue_id,
         ai.status_id,
-        CONVERT(ai.issue_num,SIGNED) as issue_num_convert
+        CONVERT(ai.issue_num,SIGNED) as issue_num_convert,
+        ai.epic_id
         from agile_issue ai
         where ai.project_id = #{projectId}
         and ai.issue_id in
@@ -4978,7 +4979,10 @@
         FROM
             agile_issue ai
         LEFT JOIN lookup_value alv ON ai.color_code = alv.value_code
-        WHERE ai.project_id = #{projectId}
+        WHERE 1=1
+        <if test="projectId != null">
+            AND ai.project_id = #{projectId}
+        </if>
         AND ai.type_code = 'issue_epic'
         AND ai.issue_id IN
         <foreach collection="epicIds" item="epicId" open="(" separator="," close=")">
