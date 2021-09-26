@@ -82,17 +82,15 @@ public class GanttChartServiceImpl implements GanttChartService {
         if (isSprintEmpty(searchVO)) {
             throw new CommonException("error.otherArgs.sprint.empty");
         }
-        validateDimension(projectId, dimension);
+        validateDimension(dimension);
         return listByProjectIdAndSearch(projectId, searchVO, pageRequest, dimension);
     }
 
-    private void validateDimension(Long projectId, String dimension) {
+    private void validateDimension(String dimension) {
         if (!GanttDimension.contains(dimension)) {
             throw new CommonException("error.illegal.gantt.dimension");
         }
-        boolean belongToProgram = (agilePluginService != null && belongToProgram(projectId));
-        if ((!belongToProgram && GanttDimension.isFeature(dimension))
-                || (belongToProgram && GanttDimension.isEpic(dimension))) {
+        if (GanttDimension.isFeature(dimension)) {
             throw new CommonException("error.gantt.dimension.not.support");
         }
     }
@@ -102,7 +100,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         if (ObjectUtils.isEmpty(issueIds)) {
             return new ArrayList<>();
         }
-        validateDimension(projectId, dimension);
+        validateDimension(dimension);
         List<IssueDTO> issueList = issueMapper.selectWithSubByIssueIds(projectId, new ArrayList<>(issueIds));
         return buildGanttList(projectId, dimension, new ArrayList<>(issueIds), issueList);
     }
@@ -166,7 +164,9 @@ public class GanttChartServiceImpl implements GanttChartService {
         Map<Long, IssueSprintDTO> issueSprintMap = queryIssueSprint(projectId, issueIds);
         Map<Long, IssueEpicVO> epicMap = new HashMap<>();
         Map<Long, IssueFeatureVO> featureMap = new HashMap<>();
-        queryAdditionalInfo(issueList, epicMap, featureMap, dimension, projectId);
+        if (GanttDimension.isEpic(dimension)) {
+            queryAdditionalInfo(issueList, epicMap, featureMap, projectId);
+        }
         Map<Long, Date> completedDateMap =
                 issueMapper.selectActuatorCompletedDateByIssueIds(issueIds, projectId)
                         .stream()
@@ -177,11 +177,9 @@ public class GanttChartServiceImpl implements GanttChartService {
     private void queryAdditionalInfo(List<IssueDTO> issueList,
                                      Map<Long, IssueEpicVO> epicMap,
                                      Map<Long, IssueFeatureVO> featureMap,
-                                     String dimension,
                                      Long projectId) {
-        if (GanttDimension.isEpic(dimension)) {
-            epicMap.putAll(queryIssueEpic(issueList, projectId));
-        } else if (GanttDimension.isFeature(dimension) && agilePluginService != null) {
+        boolean belongProgram = (agilePluginService != null && belongToProgram(projectId));
+        if (belongProgram) {
             epicMap.putAll(queryIssueEpic(issueList, null));
             List<IssueListFieldKVVO> inputList =
                     modelMapper.map(issueList, new TypeToken<List<IssueListFieldKVVO>>() {
@@ -199,6 +197,8 @@ public class GanttChartServiceImpl implements GanttChartService {
                 feature.setFeatureColor(issue.getFeatureColor());
                 featureMap.put(issueId, feature);
             });
+        } else {
+            epicMap.putAll(queryIssueEpic(issueList, projectId));
         }
     }
 
