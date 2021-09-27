@@ -52,7 +52,7 @@ public class GanttChartVO {
 
     private IssueEpicVO epic;
 
-    private IssueFeatureVO feature;
+    private FeatureForIssueVO feature;
 
     public IssueEpicVO getEpic() {
         return epic;
@@ -62,11 +62,11 @@ public class GanttChartVO {
         this.epic = epic;
     }
 
-    public IssueFeatureVO getFeature() {
+    public FeatureForIssueVO getFeature() {
         return feature;
     }
 
-    public void setFeature(IssueFeatureVO feature) {
+    public void setFeature(FeatureForIssueVO feature) {
         this.feature = feature;
     }
 

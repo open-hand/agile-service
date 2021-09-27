@@ -4975,7 +4975,9 @@
         SELECT
             ai.issue_id,
             ai.epic_name,
-            alv.name AS epicColor
+            alv.name AS epicColor,
+            ai.issue_type_id,
+            ai.project_id
         FROM
             agile_issue ai
         LEFT JOIN lookup_value alv ON ai.color_code = alv.value_code

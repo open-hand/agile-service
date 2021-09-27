@@ -3,8 +3,7 @@ package io.choerodon.agile.app.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.IssueFeatureVO;
-import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
+import io.choerodon.agile.api.vo.FeatureForIssueVO;
 import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.IssueSprintDTO;
@@ -25,7 +24,6 @@ import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -163,7 +161,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                         .stream().map(StatusVO::getId).collect(Collectors.toSet());
         Map<Long, IssueSprintDTO> issueSprintMap = queryIssueSprint(projectId, issueIds);
         Map<Long, IssueEpicVO> epicMap = new HashMap<>();
-        Map<Long, IssueFeatureVO> featureMap = new HashMap<>();
+        Map<Long, FeatureForIssueVO> featureMap = new HashMap<>();
         if (GanttDimension.isEpic(dimension)) {
             queryAdditionalInfo(issueList, epicMap, featureMap, projectId);
         }
@@ -176,27 +174,12 @@ public class GanttChartServiceImpl implements GanttChartService {
 
     private void queryAdditionalInfo(List<IssueDTO> issueList,
                                      Map<Long, IssueEpicVO> epicMap,
-                                     Map<Long, IssueFeatureVO> featureMap,
+                                     Map<Long, FeatureForIssueVO> featureMap,
                                      Long projectId) {
         boolean belongProgram = (agilePluginService != null && belongToProgram(projectId));
         if (belongProgram) {
             epicMap.putAll(queryIssueEpic(issueList, null));
-            List<IssueListFieldKVVO> inputList =
-                    modelMapper.map(issueList, new TypeToken<List<IssueListFieldKVVO>>() {
-                    }.getType());
-            agilePluginService.doToIssueListFieldKVDTO(projectId, inputList);
-            inputList.forEach(issue -> {
-                Long issueId = issue.getIssueId();
-                Long featureId = issue.getFeatureId();
-                if (ObjectUtils.isEmpty(featureId)) {
-                    return;
-                }
-                IssueFeatureVO feature = new IssueFeatureVO();
-                feature.setIssueId(featureId);
-                feature.setFeatureName(issue.getFeatureName());
-                feature.setFeatureColor(issue.getFeatureColor());
-                featureMap.put(issueId, feature);
-            });
+            featureMap.putAll(agilePluginService.queryIssueFeature(projectId, issueList));
         } else {
             epicMap.putAll(queryIssueEpic(issueList, projectId));
         }
@@ -240,6 +223,14 @@ public class GanttChartServiceImpl implements GanttChartService {
                         .map(IssueDTO::getEpicId)
                         .collect(Collectors.toSet());
         if (!epicIds.isEmpty()) {
+            List<IssueEpicVO> epics = issueMapper.queryIssueEpicByIds(projectId, new ArrayList<>(epicIds));
+            Set<Long> projectIds = epics.stream().map(IssueEpicVO::getProjectId).collect(Collectors.toSet());
+            Map<Long, Map<Long, IssueTypeVO>> projectIssueTypeMap = new HashMap<>();
+            projectIds.forEach(pId -> {
+                Long organizationId = ConvertUtil.getOrganizationId(pId);
+                Map<Long, IssueTypeVO> issueTypeMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
+                projectIssueTypeMap.put(pId, issueTypeMap);
+            });
             Map<Long, IssueEpicVO> epicMap =
                     issueMapper.queryIssueEpicByIds(projectId, new ArrayList<>(epicIds))
                             .stream()
@@ -251,6 +242,12 @@ public class GanttChartServiceImpl implements GanttChartService {
                     return;
                 }
                 IssueEpicVO epic = epicMap.get(epicId);
+                Long thisProjectId = epic.getProjectId();
+                Map<Long, IssueTypeVO> issueTypeMap = projectIssueTypeMap.get(thisProjectId);
+                if (!ObjectUtils.isEmpty(issueTypeMap)) {
+                    IssueTypeVO issueType = issueTypeMap.get(epic.getIssueTypeId());
+                    epic.setIssueTypeVO(issueType);
+                }
                 if (!ObjectUtils.isEmpty(epic)) {
                     map.put(issueId, epic);
                 }
@@ -320,7 +317,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                                                  Set<Long> completedStatusIds,
                                                  Map<Long, IssueSprintDTO> issueSprintMap,
                                                  Map<Long, IssueEpicVO> epicMap,
-                                                 Map<Long, IssueFeatureVO> featureMap) {
+                                                 Map<Long, FeatureForIssueVO> featureMap) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
@@ -353,7 +350,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             if (!ObjectUtils.isEmpty(epic)) {
                 ganttChart.setEpic(epic);
             }
-            IssueFeatureVO feature = featureMap.get(issueId);
+            FeatureForIssueVO feature = featureMap.get(issueId);
             if (!ObjectUtils.isEmpty(feature)) {
                 ganttChart.setFeature(feature);
             }
