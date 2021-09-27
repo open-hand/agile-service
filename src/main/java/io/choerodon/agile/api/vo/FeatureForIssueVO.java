@@ -6,7 +6,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  * @author superlee
  * @since 2021-09-26
  */
-public class IssueFeatureVO {
+public class FeatureForIssueVO {
 
     @Encrypt
     private Long issueId;
@@ -14,6 +14,36 @@ public class IssueFeatureVO {
     private String featureName;
 
     private String featureColor;
+    @Encrypt
+    private Long issueTypeId;
+
+    private IssueTypeVO issueTypeVO;
+
+    private Long projectId;
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
+
+    public Long getIssueTypeId() {
+        return issueTypeId;
+    }
+
+    public void setIssueTypeId(Long issueTypeId) {
+        this.issueTypeId = issueTypeId;
+    }
+
+    public IssueTypeVO getIssueTypeVO() {
+        return issueTypeVO;
+    }
+
+    public void setIssueTypeVO(IssueTypeVO issueTypeVO) {
+        this.issueTypeVO = issueTypeVO;
+    }
 
     public Long getIssueId() {
         return issueId;
