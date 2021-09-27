@@ -35,7 +35,7 @@ const IssueDropDown = ({
     store.setCopyIssueShow(false);
     reloadIssue(issue.issueId);
     if (onIssueCopy) {
-      onIssueCopy(issue);
+      onIssueCopy(issue, store.getIssue?.issueId);
     }
   };
   const issue = store.getIssue;

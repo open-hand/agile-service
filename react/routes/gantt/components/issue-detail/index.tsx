@@ -10,7 +10,7 @@ interface Props {
   onDelete: (issue: Issue) => void
   onDeleteSubIssue: (issue: Issue, subIssueId: string) => void
   onCreateSubIssue: (subIssue: Issue, parentIssueId: string) => void
-  onCopyIssue: (issue: Issue) => void
+  onCopyIssue: (issue: Issue, issueId: string) => void
   onTransformType: (newIssue: Issue, oldIssue: Issue) => void
   onChangeParent: (newIssue: Issue, oldIssue: Issue) => void
   onLinkIssue: ({ influenceIssueIds }:{ influenceIssueIds?: string[] }) => void
