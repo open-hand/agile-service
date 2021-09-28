@@ -206,7 +206,6 @@ const CustomReport: React.FC<Props> = (props) => {
   const analysisField = reportDs.current?.get('row');
   const comparedField = reportDs.current?.get('column');
   const statisticsType = reportDs.current?.get('unit');
-  const maxShow = expand ? 18 : 12;
   const configMemo = useMemo(() => ({
     chartType,
     statisticsType,
@@ -216,7 +215,7 @@ const CustomReport: React.FC<Props> = (props) => {
     comparedFieldPredefined: comparedField && dimension.find((item) => item.code === comparedField)?.system,
     searchVO,
   }), [analysisField, chartType, comparedField, dimension, searchVO, statisticsType]);
-  const [searchProps, chartProps] = useReport(configMemo, maxShow);
+  const [searchProps, chartProps] = useReport(configMemo);
   const {
     data,
   } = chartProps;
