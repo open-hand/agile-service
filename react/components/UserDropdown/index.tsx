@@ -162,6 +162,7 @@ const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee }) => 
         )}
         trigger={['click'] as any}
         visible={visible}
+        // @ts-ignore
         onHiddenBeforeChange={(hidden) => {
           if (!hidden && dataLoading) {
             return false;
