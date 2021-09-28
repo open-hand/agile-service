@@ -205,12 +205,7 @@ class IssueApi extends Api<IssueApi> {
         transformId,
         objectVersionNumber,
       },
-    }).then((res: any) => {
-      if (typeof (res) === 'object') {
-        const { errorMsg } = res;
-        errorMsg && Choerodon.prompt(errorMsg, 'error');
-      }
-      return res;
+      noPrompt: true,
     });
   }
 

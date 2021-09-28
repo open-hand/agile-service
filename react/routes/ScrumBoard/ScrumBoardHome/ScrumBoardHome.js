@@ -211,7 +211,6 @@ class ScrumBoardHome extends Component {
       destinationStatusIndex,
       SwimLaneId).then((data) => {
       if (data.failed) {
-        Choerodon.prompt(data.message);
         ScrumBoardStore.setSwimLaneData(SwimLaneId,
           startStatus,
           startStatusIndex,
@@ -497,7 +496,10 @@ class ScrumBoardHome extends Component {
                   data.objectVersionNumber).then((res) => {
                   ScrumBoardStore.setUpdateParent(false);
                   this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
-                }).catch(() => {
+                }).catch((err) => {
+                  if (err.code === 'error.stateMachine.executeTransform') {
+                    Choerodon.prompt('该问题项状态已被修改，请打开父问题进行状态修改', 'error');
+                  }
                 });
               }}
               disableOk={!ScrumBoardStore.getTransformToCompleted.length}
