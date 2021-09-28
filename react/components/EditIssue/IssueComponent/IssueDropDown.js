@@ -1,4 +1,4 @@
-import React, { useCallback, useContext } from 'react';
+import React, { useContext, useState, useRef } from 'react';
 import {
   Button,
   Modal as ModalPro, Dropdown, Menu,
@@ -31,18 +31,18 @@ const IssueDropDown = ({
   const docs = store.getDoc;
   const hasDevops = useHasDevops();
   const hasTest = useHasTest();
-
-  const handleCopyIssue = (issue) => {
+  const [copyHasEpic, setCopyHasEpic] = useState(store.copyFields.find((item) => item.fieldCode === 'epic'));
+  const dontCopyEpicRef = useRef();
+  const handleCopyIssue = (issueId, isSubTask, dontCopyEpic, issue) => {
     store.setCopyIssueShow(false);
     reloadIssue(issue.issueId);
-    console.log(toJS(store.getIssue?.issueId));
     if (onIssueCopy) {
-      onIssueCopy(issue, store.getIssue?.issueId);
+      onIssueCopy(issue, issueId, isSubTask, dontCopyEpicRef.current);
     }
   };
   const issue = store.getIssue;
   const {
-    issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, activePi, issueTypeVO, parentRelateSummary,
+    issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, activePi, issueTypeVO, parentRelateSummary, parentIssueId, relateIssueId,
   } = issue;
   const disableFeatureDeleteWhilePiDoing = typeCode === 'feature' && activePi && activePi.statusCode === 'doing';
   const handleDeleteIssue = () => {
@@ -72,6 +72,8 @@ const IssueDropDown = ({
       okText: '删除',
     });
   };
+  const dontCopyEpic = !!store.copyFields.find((item) => item.fieldCode === 'epic') && !copyHasEpic;
+  dontCopyEpicRef.current = dontCopyEpic;
 
   const handleClickMenu = async (e) => {
     if (e.key === '0') {
@@ -87,9 +89,10 @@ const IssueDropDown = ({
         issueLink: store.getLinkIssues,
         issueSummary: issue.summary,
         // onCancel: () => store.setCopyIssueShow(false),
-        onOk: handleCopyIssue.bind(this),
+        onOk: handleCopyIssue.bind(this, parentIssueId || relateIssueId || issueId, typeCode === 'sub_task' || (typeCode === 'bug' && parentRelateSummary), dontCopyEpic),
         applyType,
         copyFields: store.copyFields,
+        setCopyHasEpic,
       });
       store.setCopyIssueShow(true);
     } else if (e.key === '4') {
