@@ -375,7 +375,7 @@ const GanttPage: React.FC = () => {
     sprint: issue.activeSprint,
   });
 
-  const handleCreateIssue = usePersistFn((issue: Issue, parentId?: string) => {
+  const handleCreateIssue = usePersistFn((issue: Issue, issueId?: string, parentId?: string) => {
     setData(produce(data, (draft) => {
       const normalizeIssueWidthParentId = Object.assign(normalizeIssue(issue), { parentId });
       draft.unshift(normalizeIssueWidthParentId);
@@ -384,14 +384,14 @@ const GanttPage: React.FC = () => {
     updateInfluenceIssues(issue);
   });
   const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId) => {
-    handleCreateIssue(subIssue, parentIssueId);
+    handleCreateIssue(subIssue, parentIssueId, parentIssueId);
   });
-  const handleCopyIssue = usePersistFn((issue: Issue) => {
-    handleCreateIssue(issue);
+  const handleCopyIssue = usePersistFn((issue: Issue, issueId: string, isSubTask?: boolean) => {
+    handleCreateIssue(issue, issueId, isSubTask ? issueId : undefined);
     const subIssues = [...(issue.subIssueVOList ?? []), ...(issue.subBugVOList ?? [])];
     if (subIssues.length > 0) {
       subIssues.forEach((child) => {
-        handleCreateIssue(child, issue.issueId);
+        handleCreateIssue(child, issue.issueId, issue.issueId);
       });
     }
   });

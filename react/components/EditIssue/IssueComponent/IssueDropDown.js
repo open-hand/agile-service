@@ -31,16 +31,16 @@ const IssueDropDown = ({
   const hasDevops = useHasDevops();
   const hasTest = useHasTest();
 
-  const handleCopyIssue = (issue) => {
+  const handleCopyIssue = (issueId, isSubTask, issue) => {
     store.setCopyIssueShow(false);
     reloadIssue(issue.issueId);
     if (onIssueCopy) {
-      onIssueCopy(issue);
+      onIssueCopy(issue, issueId, isSubTask);
     }
   };
   const issue = store.getIssue;
   const {
-    issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, activePi, issueTypeVO, parentRelateSummary,
+    issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, activePi, issueTypeVO, parentRelateSummary, parentIssueId, relateIssueId,
   } = issue;
   const disableFeatureDeleteWhilePiDoing = typeCode === 'feature' && activePi && activePi.statusCode === 'doing';
   const handleDeleteIssue = () => {
@@ -85,7 +85,7 @@ const IssueDropDown = ({
         issueLink: store.getLinkIssues,
         issueSummary: issue.summary,
         // onCancel: () => store.setCopyIssueShow(false),
-        onOk: handleCopyIssue.bind(this),
+        onOk: handleCopyIssue.bind(this, parentIssueId || relateIssueId || issueId, typeCode === 'sub_task' || (typeCode === 'bug' && parentRelateSummary)),
         applyType,
         copyFields: store.copyFields,
       });
