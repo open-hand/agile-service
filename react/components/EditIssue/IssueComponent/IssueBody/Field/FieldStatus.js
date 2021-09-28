@@ -1,4 +1,5 @@
 import React, { Component, useMemo, forwardRef } from 'react';
+import { Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react';
 import { Select, Tooltip } from 'choerodon-ui/pro';
 import { some } from 'lodash';
@@ -75,6 +76,11 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
             if (reloadIssue) {
               await reloadIssue(issueId);
               store.setUpdateLoaded(true);
+            }
+          }).catch((err = {}) => {
+            setIssueLoading(false);
+            if (err.code === 'error.stateMachine.executeTransform') {
+              Choerodon.prompt('该问题项状态已被修改，请重新打开问题详情进行状态更改。', 'error');
             }
           });
       }
