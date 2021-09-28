@@ -6,6 +6,7 @@ import {
 import { Permission } from '@choerodon/boot';
 
 import { includes } from 'lodash';
+import { toJS } from 'mobx';
 import { issueApi } from '@/api';
 import useHasDevops from '@/hooks/useHasDevops';
 import useHasTest from '@/hooks/useHasTest';
@@ -34,6 +35,7 @@ const IssueDropDown = ({
   const handleCopyIssue = (issue) => {
     store.setCopyIssueShow(false);
     reloadIssue(issue.issueId);
+    console.log(toJS(store.getIssue?.issueId));
     if (onIssueCopy) {
       onIssueCopy(issue, store.getIssue?.issueId);
     }
