@@ -449,7 +449,7 @@ const GanttPage: React.FC = () => {
       } else {
         const target = find(draft, { issueId });
         if (target) {
-          draft.unshift(Object.assign(normalizeIssueWidthParentId, pick(issue, ['epic', 'feature'])));
+          draft.unshift(Object.assign(normalizeIssueWidthParentId, pick(target, ['epic', 'feature'])));
         }
       }
     }));
