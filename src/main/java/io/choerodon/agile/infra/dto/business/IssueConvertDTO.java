@@ -116,6 +116,10 @@ public class IssueConvertDTO {
 
     private Long ruleId;
 
+    private Date actualStartTime;
+
+    private Date actualEndTime;
+
     public Long getRuleId() {
         return ruleId;
     }
@@ -555,5 +559,21 @@ public class IssueConvertDTO {
 
     public void setPiId(Long piId) {
         this.piId = piId;
+    }
+
+    public Date getActualStartTime() {
+        return actualStartTime;
+    }
+
+    public void setActualStartTime(Date actualStartTime) {
+        this.actualStartTime = actualStartTime;
+    }
+
+    public Date getActualEndTime() {
+        return actualEndTime;
+    }
+
+    public void setActualEndTime(Date actualEndTime) {
+        this.actualEndTime = actualEndTime;
     }
 }

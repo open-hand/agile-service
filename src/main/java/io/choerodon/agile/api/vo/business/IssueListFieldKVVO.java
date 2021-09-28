@@ -139,6 +139,10 @@ public class IssueListFieldKVVO {
 
     private Date estimatedEndTime;
 
+    private Date actualStartTime;
+
+    private Date actualEndTime;
+
     @ApiModelProperty("项目名")
     private String projectName;
 
@@ -634,5 +638,21 @@ public class IssueListFieldKVVO {
 
     public void setAllEstimateTime(BigDecimal allEstimateTime) {
         this.allEstimateTime = allEstimateTime;
+    }
+
+    public Date getActualStartTime() {
+        return actualStartTime;
+    }
+
+    public void setActualStartTime(Date actualStartTime) {
+        this.actualStartTime = actualStartTime;
+    }
+
+    public Date getActualEndTime() {
+        return actualEndTime;
+    }
+
+    public void setActualEndTime(Date actualEndTime) {
+        this.actualEndTime = actualEndTime;
     }
 }

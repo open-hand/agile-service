@@ -84,6 +84,12 @@ public class IssueSubCreateVO {
     @Encrypt
     private Long statusId;
 
+    @ApiModelProperty(value = "实际开始时间")
+    private Date actualStartTime;
+
+    @ApiModelProperty(value = "实际结束时间")
+    private Date actualEndTime;
+
     public List<TagVO> getTags() {
         return tags;
     }
@@ -264,5 +270,21 @@ public class IssueSubCreateVO {
 
     public void setStatusId(Long statusId) {
         this.statusId = statusId;
+    }
+
+    public Date getActualStartTime() {
+        return actualStartTime;
+    }
+
+    public void setActualStartTime(Date actualStartTime) {
+        this.actualStartTime = actualStartTime;
+    }
+
+    public Date getActualEndTime() {
+        return actualEndTime;
+    }
+
+    public void setActualEndTime(Date actualEndTime) {
+        this.actualEndTime = actualEndTime;
     }
 }
