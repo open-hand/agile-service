@@ -4,7 +4,7 @@ import React, {
 import { observer } from 'mobx-react-lite';
 import { filter, find } from 'lodash';
 import {
-  DataSet, TextField, Icon, Dropdown, Menu, Tooltip, Spin,
+  DataSet, TextField, Icon, Dropdown, Menu, Tooltip, Spin, Button,
 } from 'choerodon-ui/pro';
 import UserTag from '@/components/tag/user-tag';
 
@@ -48,8 +48,6 @@ const Overlay: React.FC<OverlayProps> = ({
   }, []);
   const handleUserChange = useCallback(({ key, domEvent }) => {
     if (key === 'loadMore') {
-      setVisible(true);
-      userListDs.queryMore(userListDs.currentPage + 1);
       return;
     }
     if (key === 'noContentTip') {
@@ -104,7 +102,17 @@ const Overlay: React.FC<OverlayProps> = ({
               key="loadMore"
               className={styles.dropdown_loadMoreMenuItem}
             >
-              <div style={{ textAlign: 'center' }}>查看更多</div>
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setVisible(true);
+                  userListDs.queryMore(userListDs.currentPage + 1);
+                }}
+                style={{ margin: '-4px -12px', width: 'calc(100% + 24px)' }}
+              >
+                加载更多
+              </Button>
+              {/* <div style={{ textAlign: 'center' }}>查看更多</div> */}
             </Menu.Item>
           )
         }
