@@ -362,6 +362,7 @@ const GanttPage: React.FC = () => {
   const onRow: GanttProps<Issue>['onRow'] = useMemo(() => ({
     onClick: (issue) => {
       store.setIssueId(issue.issueId);
+      store.setProgramId(issue.programId);
     },
   }), [store]);
   const getExpandIcon = useCallback(({ level, collapsed, onClick }) => (
