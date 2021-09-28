@@ -9,13 +9,12 @@ import {
 } from 'choerodon-ui/pro';
 
 import { difference, find, map } from 'lodash';
-import { epicApi, issueApi } from '@/api';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { epicApi, issueApi } from '@/api';
 import {
   IFieldWidthValue, IModalProps, Issue,
 } from '@/common/types';
 import useIsInProgram from '@/hooks/useIsInProgram';
-import useFieldRequiredNoPermission from '@/hooks/data/useFieldRequiredNoPermission';
 import CopyRequired from './copy-required';
 import styles from './CopyIssue.less';
 import { RequiredFieldDs } from '../required-field/useRequiredFieldDataSet';
@@ -53,9 +52,10 @@ interface Props {
   onOk: (issue: Issue) => void,
   closeSprint: any[]
   copyFields: IFieldWidthValue[]
+  setCopyHasEpic: (hasEpic: boolean) => void
 }
 const CopyIssue: React.FC<Props> = ({
-  issue, issueLink, applyType, modal, onOk, closeSprint, copyFields,
+  issue, issueLink, applyType, modal, onOk, closeSprint, copyFields, setCopyHasEpic,
 }) => {
   const [finalFields, setFinalFields] = useState<IFieldWidthValue[]>([]);
   const { isInProgram } = useIsInProgram();
@@ -77,7 +77,9 @@ const CopyIssue: React.FC<Props> = ({
     return true;
   }, [issue.typeCode]);
 
-  const handleUpdate = useCallback(async ({ name, oldValue, value }) => {
+  const handleUpdate = useCallback(async ({
+    name, oldValue, value,
+  }) => {
     if (name === 'fields') {
       const unCopyFieldCodes = difference(finalFields.map((item) => item.fieldCode), value) || [];
       if (unCopyFieldCodes?.length) {
@@ -86,8 +88,9 @@ const CopyIssue: React.FC<Props> = ({
       } else {
         setSelfExtraRequiredFields([]);
       }
+      setCopyHasEpic(value.find((code: string) => code === 'epic'));
     }
-  }, [finalFields, issue.issueTypeId]);
+  }, [finalFields, issue.issueTypeId, setCopyHasEpic]);
   const copyIssueDataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [{

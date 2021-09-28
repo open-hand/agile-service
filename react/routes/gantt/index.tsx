@@ -128,10 +128,10 @@ const groupByFeature = (epicChildrenData: any) => {
   const noFeatureData: any[] = [];
   epicChildrenData.forEach((issue: any) => {
     if (issue.feature) {
-      if (map.has(issue.feature.summary)) {
-        map.get(issue.feature.summary)?.children.push(issue);
+      if (map.has(issue.feature.featureName)) {
+        map.get(issue.feature.featureName)?.children.push(issue);
       } else {
-        map.set(issue.feature.summary, {
+        map.set(issue.feature.featureName, {
           feature: issue.feature,
           children: [issue],
         });
@@ -441,15 +441,17 @@ const GanttPage: React.FC = () => {
     sprint: issue.activeSprint,
   });
 
-  const handleCreateIssue = usePersistFn((issue: Issue, issueId?: string, parentId?: string) => {
+  const handleCreateIssue = usePersistFn((issue: Issue, issueId?: string, parentId?: string, dontCopyEpic = false) => {
     setData(produce(data, (draft) => {
       const normalizeIssueWidthParentId = Object.assign(normalizeIssue(issue), { parentId });
       if (!issueId) {
         draft.unshift(normalizeIssueWidthParentId);
       } else {
         const target = find(draft, { issueId });
-        if (target) {
+        if (target && !dontCopyEpic) {
           draft.unshift(Object.assign(normalizeIssueWidthParentId, pick(target, ['epic', 'feature'])));
+        } else {
+          draft.unshift(normalizeIssueWidthParentId);
         }
       }
     }));
@@ -458,12 +460,12 @@ const GanttPage: React.FC = () => {
   const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {
     handleCreateIssue(subIssue, parentIssueId, parentIssueId);
   });
-  const handleCopyIssue = usePersistFn((issue: Issue, issueId: string) => {
-    handleCreateIssue(issue, issueId);
+  const handleCopyIssue = usePersistFn((issue: Issue, issueId: string, isSubTask?: boolean, dontCopyEpic?: boolean) => {
+    handleCreateIssue(issue, issueId, isSubTask ? issueId : undefined, dontCopyEpic);
     const subIssues = [...(issue.subIssueVOList ?? []), ...(issue.subBugVOList ?? [])];
     if (subIssues.length > 0) {
       subIssues.forEach((child) => {
-        handleCreateIssue(child, issueId, issue.issueId);
+        handleCreateIssue(child, issueId, issue.issueId, dontCopyEpic);
       });
     }
   });
