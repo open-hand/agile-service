@@ -7,7 +7,7 @@ import { unstable_batchedUpdates } from 'react-dom';
 import { Tooltip, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import {
-  find, merge, omit, remove, some,
+  find, merge, omit, pick, remove, some,
 } from 'lodash';
 import produce from 'immer';
 import dayjs from 'dayjs';
@@ -375,21 +375,23 @@ const GanttPage: React.FC = () => {
     sprint: issue.activeSprint,
   });
 
-  const handleCreateIssue = usePersistFn((issue: Issue) => {
+  const handleCreateIssue = usePersistFn((issue: Issue, parentId?: string) => {
     setData(produce(data, (draft) => {
-      draft.unshift(normalizeIssue(issue));
+      const normalizeIssueWidthParentId = Object.assign(normalizeIssue(issue), { parentId });
+      draft.unshift(normalizeIssueWidthParentId);
     }));
+
     updateInfluenceIssues(issue);
   });
   const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId) => {
-    handleCreateIssue(subIssue);
+    handleCreateIssue(subIssue, parentIssueId);
   });
   const handleCopyIssue = usePersistFn((issue: Issue) => {
     handleCreateIssue(issue);
     const subIssues = [...(issue.subIssueVOList ?? []), ...(issue.subBugVOList ?? [])];
     if (subIssues.length > 0) {
       subIssues.forEach((child) => {
-        handleCreateIssue(child);
+        handleCreateIssue(child, issue.issueId);
       });
     }
   });
