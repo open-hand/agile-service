@@ -209,7 +209,7 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_issue.groovy') {
         }
     }
 
-    changeSet(id: '2020-09-22-agile-issue-add-column', author: 'ztxemail@163.com') {
+    changeSet(id: '2020-09-28-agile-issue-add-column', author: 'ztxemail@163.com') {
         addColumn(tableName: 'agile_issue') {
             column(name: 'actual_start_time', type: 'DATETIME', remarks: '实际开始时间')
             column(name: 'actual_end_time', type: 'DATETIME', remarks: '实际结束时间')
