@@ -63,10 +63,10 @@ function EditIssue() {
   const onCancel = useCallback(() => {
     close();
   }, [close]);
-  const onIssueCopy = useCallback((issue) => {
+  const onIssueCopy = useCallback((issue, issueId, isSubTask) => {
     const callback = issueEvents?.copy || issueEvents?.update;
     if (callback) {
-      callback(issue);
+      callback(issue, issueId, isSubTask);
     }
   }, [issueEvents]);
   const onCreateSubIssue = useCallback((subIssue, parentIssueId) => {
