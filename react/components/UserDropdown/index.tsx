@@ -133,7 +133,7 @@ const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee }) => 
   useEffect(() => {
     if (dataLoading && isFirstLoad) {
       userListDs.query().then(() => {
-        setDataMount((oldValue) => ({ ...oldValue, dataLoading: false }));
+        setDataMount((oldValue) => ({ ...oldValue, isFirstLoad: false, dataLoading: false }));
         setVisible(true);
       });
     }
@@ -163,9 +163,12 @@ const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee }) => 
         trigger={['click'] as any}
         visible={visible}
         onHiddenBeforeChange={(hidden) => {
+          if (!hidden && dataLoading) {
+            return false;
+          }
           // 初次打开，等待数据加载完成后再打开下拉框
           if (!hidden && isFirstLoad) {
-            setDataMount((oldValue) => ({ ...oldValue, isFirstLoad: false, dataLoading: true }));
+            setDataMount((oldValue) => ({ ...oldValue, dataLoading: true }));
             return false;
           }
           return true;
