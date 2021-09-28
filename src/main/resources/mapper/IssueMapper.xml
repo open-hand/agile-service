@@ -554,7 +554,9 @@
         ai.relate_issue_id,
         ai.status_id,
         CONVERT(ai.issue_num,SIGNED) as issue_num_convert,
-        ai.epic_id
+        ai.epic_id,
+        ai.actual_start_time,
+        ai.actual_end_time
         from agile_issue ai
         where ai.project_id = #{projectId}
         and ai.issue_id in
