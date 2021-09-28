@@ -65,6 +65,13 @@ class GanttStore {
     }
   }
 
+  @observable programId: string | null = null
+
+  @action
+  setProgramId(programId: string | null) {
+    this.programId = programId;
+  }
+
   @action
   setSprintIds(sprintIds: string[] | null) {
     this.sprintIds = sprintIds;

@@ -19,9 +19,10 @@ const IssueDetail: React.FC<Props> = ({
   refresh, onUpdate, onDelete, onDeleteSubIssue, onCreateSubIssue, onCopyIssue, onTransformType, onChangeParent, onLinkIssue,
 }) => {
   const { store } = useContext(Context);
-  const { issueId } = store;
+  const { issueId, programId } = store;
   const handleResetIssue = useCallback((newIssueId) => {
     store.setIssueId(newIssueId);
+    store.setProgramId(null);
   }, [store]);
   const [detailProps] = useDetail();
 
@@ -37,6 +38,9 @@ const IssueDetail: React.FC<Props> = ({
         path: 'issue',
         props: {
           issueId,
+          programId,
+          disabled: programId,
+          applyType: programId ? 'program' : 'agile',
         },
         events: {
           update: onUpdate,
@@ -58,10 +62,7 @@ const IssueDetail: React.FC<Props> = ({
     } else {
       close();
     }
-  }, [visible, issueId, open, refresh,
-    handleResetIssue, close, onUpdate, onDelete,
-    onDeleteSubIssue, onCreateSubIssue, onCopyIssue,
-    onTransformType, onChangeParent, onLinkIssue]);
+  }, [visible, issueId, open, refresh, handleResetIssue, close, onUpdate, onDelete, onDeleteSubIssue, onCreateSubIssue, onCopyIssue, onTransformType, onChangeParent, onLinkIssue, programId]);
   return (
     <DetailContainer {...detailProps} />
   );
