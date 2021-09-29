@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
 import { useTheme } from '@choerodon/master';
 import { observer } from 'mobx-react-lite';
+import { usePersistFn } from 'ahooks';
 import IssueTable, { IssueTableProps } from '@/components/issue-table';
 import { useUpdateColumnMutation } from '@/hooks/data/useTableColumns';
-import { usePersistFn } from 'ahooks';
 import { ColumnManage } from '@/components/issue-table/Component';
 import { getTableColumns } from '@/components/issue-table/columns';
 import AutoSize from '@/components/auto-size';

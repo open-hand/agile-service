@@ -284,6 +284,18 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     dataIndex: 'estimatedEndTime',
     sortable: true,
   }],
+  ['actualStartTime', {
+    title: <Tooltip title="实际开始时间">实际开始时间</Tooltip>,
+    width: 170,
+    dataIndex: 'actualStartTime',
+    sortable: true,
+  }],
+  ['actualEndTime', {
+    title: <Tooltip title="实际结束时间">实际结束时间</Tooltip>,
+    width: 170,
+    dataIndex: 'actualEndTime',
+    sortable: true,
+  }],
   ['remainingTime', {
     title: <Tooltip title="剩余预估时间">剩余预估时间</Tooltip>,
     width: 170,

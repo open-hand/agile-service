@@ -161,6 +161,10 @@ class IssueSearchStore {
           this.handleFilterChange('estimatedStartTime', [filter.estimatedStartTimeScopeStart, filter.estimatedStartTimeScopeEnd]);
         } else if (key === 'estimatedEndTimeScopeStart' || key === 'estimatedEndTimeScopeEnd') {
           this.handleFilterChange('estimatedEndTime', [filter.estimatedEndTimeScopeStart, filter.estimatedEndTimeScopeEnd]);
+        } else if (key === 'actualStartTimeScopeStart' || key === 'actualStartTimeScopeEnd') {
+          this.handleFilterChange('actualStartTime', [filter.actualStartTimeScopeStart, filter.actualStartTimeScopeEnd]);
+        } else if (key === 'actualEndTimeScopeStart' || key === 'actualEndTimeScopeEnd') {
+          this.handleFilterChange('actualEndTime', [filter.actualEndTimeScopeStart, filter.actualEndTimeScopeEnd]);
         } else {
           this.handleFilterChange(key, value);
         }
