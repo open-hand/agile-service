@@ -456,6 +456,7 @@ const GanttPage: React.FC = () => {
         }
       }
     }));
+
     updateInfluenceIssues(issue);
   });
   const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {

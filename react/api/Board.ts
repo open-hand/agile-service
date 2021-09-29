@@ -173,12 +173,15 @@ class BoardApi extends Api<BoardApi> {
         transformId,
       },
       data,
-    }).then((res: any) => {
-      if (typeof (res) === 'object') {
-        const { errorMsg } = res;
-        errorMsg && Choerodon.prompt(errorMsg, 'error');
+      noPrompt: true,
+    }).catch((err:any) => {
+      const { code } = err || {};
+      if (code === 'error.stateMachine.executeTransform') {
+        Choerodon.prompt('该问题项状态已被修改，请刷新看板', 'error');
+      } else {
+        Choerodon.prompt(err.message, 'error');
       }
-      return res;
+      return err;
     });
   }
 

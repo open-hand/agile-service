@@ -5,7 +5,7 @@
     display: flex;
     align-items: center;
 
-    & >span:first-child {
+    &>span:first-child {
       display: inline-block;
       width: .52rem;
     }
@@ -27,4 +27,10 @@
 
 .form {
   overflow: hidden;
+
+  :global {
+    .ck-editor__editable {
+      overflow: visible;
+    }
+  }
 }

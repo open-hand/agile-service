@@ -1,12 +1,11 @@
 import React, {
-  useMemo, useCallback, useState, useImperativeHandle,
+  useMemo, useCallback, useState, useImperativeHandle, useRef, useEffect,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { filter, find } from 'lodash';
-import { DataSet, TextField } from 'choerodon-ui/pro';
 import {
-  Dropdown, Icon, Menu, Tooltip,
-} from 'choerodon-ui';
+  DataSet, TextField, Icon, Dropdown, Menu, Tooltip, Spin, Button,
+} from 'choerodon-ui/pro';
 import UserTag from '@/components/tag/user-tag';
 
 import { User } from '@/common/types';
@@ -14,7 +13,9 @@ import { userApiConfig } from '@/api';
 import styles from './index.less';
 
 interface OverlayProps {
+  userListDs: DataSet
   defaultAssignee: User | undefined,
+  setDataMount: (newValue: any) => any
   setVisible: (visible: boolean) => void
   setSelectedUser: (user: User | undefined) => void
   selectedUser: User | undefined
@@ -25,32 +26,28 @@ interface Props {
 }
 
 const Overlay: React.FC<OverlayProps> = ({
-  setVisible, defaultAssignee, setSelectedUser, selectedUser,
+  setVisible, defaultAssignee, setSelectedUser, selectedUser, userListDs, setDataMount,
 }) => {
   const [filterStr, setFilterStr] = useState<string | null | undefined>();
-
-  const userListDs = useMemo(() => new DataSet({
-    autoQuery: true,
-    pageSize: 10,
-    transport: {
-      // @ts-ignore
-      read: ({ params }) => userApiConfig.getAllInProject(params?.param, params.page),
-    },
-  }), []);
 
   const handleSearchUser = useCallback((value) => {
     setFilterStr(value);
     userListDs.setQueryParameter('param', value);
-    userListDs.query();
-  }, [userListDs]);
+    setDataMount((oldValue: any) => ({ ...oldValue, dataLoading: true }));
+    setVisible(false);
+    const startTime = new Date().getTime();
+    userListDs.query().then((res) => {
+      setDataMount((oldValue: any) => ({ ...oldValue, dataLoading: false }));
+      const diff = new Date().getTime() - startTime;
+      setTimeout(() => setVisible(true), Math.max(0, diff - 250));
+    });
+  }, [setDataMount, setVisible, userListDs]);
 
   const handleClick = useCallback((e) => {
     e.stopPropagation();
   }, []);
   const handleUserChange = useCallback(({ key, domEvent }) => {
     if (key === 'loadMore') {
-      setVisible(true);
-      userListDs.queryMore(userListDs.currentPage + 1);
       return;
     }
     if (key === 'noContentTip') {
@@ -101,12 +98,22 @@ const Overlay: React.FC<OverlayProps> = ({
         }
         {
           userListDs.totalPage > userListDs.currentPage && (
-          <Menu.Item
-            key="loadMore"
-            className={styles.dropdown_loadMoreMenuItem}
-          >
-            <div style={{ textAlign: 'center' }}>查看更多</div>
-          </Menu.Item>
+            <Menu.Item
+              key="loadMore"
+              className={styles.dropdown_loadMoreMenuItem}
+            >
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setVisible(true);
+                  userListDs.queryMore(userListDs.currentPage + 1);
+                }}
+                style={{ margin: '-4px -12px', width: 'calc(100% + 24px)' }}
+              >
+                加载更多
+              </Button>
+              {/* <div style={{ textAlign: 'center' }}>查看更多</div> */}
+            </Menu.Item>
           )
         }
       </Menu>
@@ -118,12 +125,27 @@ const ObserverOverlay = observer(Overlay);
 
 const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee }) => {
   const [visible, setVisible] = useState<boolean>(false);
+  const [{ dataLoading, isFirstLoad }, setDataMount] = useState({ dataLoading: false, isFirstLoad: true });
   const [selectedUser, setSelectedUser] = useState<User | undefined>(defaultAssignee);
-
+  const userListDs = useMemo(() => new DataSet({
+    autoQuery: false,
+    pageSize: 20,
+    transport: {
+      // @ts-ignore
+      read: ({ params }) => userApiConfig.getAllInProject(params?.param, params.page, undefined, params.size),
+    },
+  }), []);
   useImperativeHandle(userDropDownRef, () => ({
     selectedUser,
   }));
-
+  useEffect(() => {
+    if (dataLoading && isFirstLoad) {
+      userListDs.query().then(() => {
+        setDataMount((oldValue) => ({ ...oldValue, isFirstLoad: false, dataLoading: false }));
+        setVisible(true);
+      });
+    }
+  }, [dataLoading, isFirstLoad, userListDs]);
   const handleClear = useCallback((e) => {
     e.stopPropagation();
     setSelectedUser(undefined);
@@ -138,33 +160,50 @@ const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee }) => 
       <Dropdown
         overlay={(
           <ObserverOverlay
+            userListDs={userListDs}
+            setDataMount={setDataMount}
             setVisible={setVisible}
             defaultAssignee={defaultAssignee}
             setSelectedUser={setSelectedUser}
             selectedUser={selectedUser}
           />
-      )}
-        trigger={['click']}
+        )}
+        trigger={['click'] as any}
         visible={visible}
+        // @ts-ignore
+        onHiddenBeforeChange={(hidden) => {
+          if (!hidden && dataLoading) {
+            return false;
+          }
+          // 初次打开，等待数据加载完成后再打开下拉框
+          if (!hidden && isFirstLoad) {
+            setDataMount((oldValue) => ({ ...oldValue, dataLoading: true }));
+            return false;
+          }
+          return true;
+        }}
+        placement={'topCenter' as any}
         onVisibleChange={handleVisibleChange}
       >
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          {
-          selectedUser ? (
-            <>
-              <UserTag
-                data={selectedUser}
-                showText={false}
-              />
-              <Icon type="close" style={{ fontSize: 14, cursor: 'pointer' }} onClick={handleClear} />
-            </>
-          ) : <div className={styles.tip}>经办人</div>
-        }
-          <Icon
-            type="arrow_drop_down"
-            style={{ fontSize: 16, cursor: 'pointer' }}
-          />
-        </div>
+        <Spin spinning={dataLoading} size={'small' as any} style={{ width: '50%' }} wrapperClassName={styles.loading}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {
+              selectedUser ? (
+                <>
+                  <UserTag
+                    data={selectedUser}
+                    showText={false}
+                  />
+                  <Icon type="close" style={{ fontSize: 14, cursor: 'pointer' }} onClick={handleClear} />
+                </>
+              ) : <div className={styles.tip}>经办人</div>
+            }
+            <Icon
+              type="arrow_drop_down"
+              style={{ fontSize: 16, cursor: 'pointer' }}
+            />
+          </div>
+        </Spin>
       </Dropdown>
 
     </div>

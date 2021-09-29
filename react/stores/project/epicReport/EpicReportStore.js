@@ -2,7 +2,7 @@ import {
   observable, action, computed,
 } from 'mobx';
 import { store } from '@choerodon/boot';
-import _ from 'lodash';
+import _, { isNumber } from 'lodash';
 import { epicApi, reportApi } from '@/api';
 
 const UNIT_STATUS = {
@@ -149,11 +149,15 @@ class EpicReportStore {
 
   // 处理后端返回值为null或小数精度问题
   dealNullValue = (list = []) => _.map(list, (item) => {
-    if (item) {
-      if (item % 1 > 0) {
-        return item.toFixed(1);
+    try {
+      if (item) {
+        if (isNumber(item) && item % 1 > 0) {
+          return item.toFixed(1);
+        }
+        return item || 0;
       }
-      return item || 0;
+    } catch (error) {
+      return 0;
     }
     return 0;
   });

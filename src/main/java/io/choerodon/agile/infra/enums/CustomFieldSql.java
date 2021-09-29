@@ -60,11 +60,15 @@ public enum CustomFieldSql implements FieldSql {
 
     public static String getDefaultSql(String fieldCode, String type) {
         if (ANALYSIS.equals(type)){
-            return CUSTOM_DEFAULT_ANALYSIS_JOIN;
+            return convertSql(CUSTOM_DEFAULT_ANALYSIS_JOIN, fieldCode);
         } else if (COMPARED.equals(type)){
-            return CUSTOM_DEFAULT_COMPARED_JOIN;
+            return convertSql(CUSTOM_DEFAULT_COMPARED_JOIN, fieldCode);
         }
         return "";
+    }
+
+    public static String convertSql(String sql, String fieldCode){
+        return sql.replaceAll("%s", fieldCode);
     }
 
     @Override
