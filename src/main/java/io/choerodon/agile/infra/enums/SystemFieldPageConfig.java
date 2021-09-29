@@ -41,8 +41,8 @@ public class SystemFieldPageConfig {
         TAG(FieldCode.TAG, true, true),
         FEATURE_TYPE(FieldCode.FEATURE_TYPE, true, false),
         PROCESSOR(FieldCode.PROCESSOR, false, true),
-        ACTUAL_START_TIME(FieldCode.ACTUAL_START_TIME, true, true),
-        ACTUAL_END_TIME(FieldCode.ACTUAL_END_TIME, true, true),
+        ACTUAL_START_TIME(FieldCode.ACTUAL_START_TIME, false, true),
+        ACTUAL_END_TIME(FieldCode.ACTUAL_END_TIME, false, true),
         ;
 
 
