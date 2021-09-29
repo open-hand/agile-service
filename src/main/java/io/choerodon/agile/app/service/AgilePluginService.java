@@ -494,4 +494,6 @@ public interface AgilePluginService {
     List<ProjectRelationshipInfoVO> getProjUnderGroup(Long organizationId, Long projectId, Long parentId, boolean onlySelectEnable);
 
     boolean isSubProjectAndArtDoing(Long projectId);
+
+    Map<Long, FeatureForIssueVO> queryIssueFeature(Long projectId, List<IssueDTO> issueList);
 }

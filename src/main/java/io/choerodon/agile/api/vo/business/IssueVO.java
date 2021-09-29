@@ -244,6 +244,12 @@ public class IssueVO {
 
     private UserMessageDTO updater;
 
+    @ApiModelProperty(value = "实际开始时间")
+    private Date actualStartTime;
+
+    @ApiModelProperty(value = "实际结束时间")
+    private Date actualEndTime;
+
     public Long getSprintId() {
         return sprintId;
     }
@@ -970,5 +976,21 @@ public class IssueVO {
 
     public void setMainResponsibleId(Long mainResponsibleId) {
         this.mainResponsibleId = mainResponsibleId;
+    }
+
+    public Date getActualStartTime() {
+        return actualStartTime;
+    }
+
+    public void setActualStartTime(Date actualStartTime) {
+        this.actualStartTime = actualStartTime;
+    }
+
+    public Date getActualEndTime() {
+        return actualEndTime;
+    }
+
+    public void setActualEndTime(Date actualEndTime) {
+        this.actualEndTime = actualEndTime;
     }
 }

@@ -214,6 +214,10 @@ public class IssueDTO extends AuditDomain {
     @Transient
     private String epicSelfName;
 
+    private Date actualStartTime;
+
+    private Date actualEndTime;
+
     public String getEpicSelfName() {
         return epicSelfName;
     }
@@ -692,6 +696,22 @@ public class IssueDTO extends AuditDomain {
 
     public void setFeatureColor(String featureColor) {
         this.featureColor = featureColor;
+    }
+
+    public Date getActualStartTime() {
+        return actualStartTime;
+    }
+
+    public void setActualStartTime(Date actualStartTime) {
+        this.actualStartTime = actualStartTime;
+    }
+
+    public Date getActualEndTime() {
+        return actualEndTime;
+    }
+
+    public void setActualEndTime(Date actualEndTime) {
+        this.actualEndTime = actualEndTime;
     }
 
     @Override

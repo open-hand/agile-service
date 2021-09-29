@@ -42,18 +42,20 @@ public class GanttChartController {
                                                                  PageRequest pageRequest,
                                                          @ApiParam(value = "项目id", required = true)
                                                          @PathVariable(name = "project_id") Long projectId,
+                                                         @RequestParam String dimension,
                                                          @ApiParam(value = "查询参数", required = true)
                                                          @RequestBody(required = false) SearchVO searchVO) {
         EncryptionUtils.decryptSearchVO(searchVO);
-        return ResponseEntity.ok(ganttChartService.pagedQuery(projectId, searchVO, pageRequest));
+        return ResponseEntity.ok(ganttChartService.pagedQuery(projectId, searchVO, pageRequest, dimension));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据issueId查询甘特图列表数据")
     @PostMapping(value = "/list_by_ids")
     public ResponseEntity<List<GanttChartVO>> listByIds(@ApiParam(value = "项目id", required = true)
-                                                         @PathVariable(name = "project_id") Long projectId,
-                                                        @RequestBody @Encrypt Set<Long> issueIds) {
-        return ResponseEntity.ok(ganttChartService.listByIds(projectId, issueIds));
+                                                        @PathVariable(name = "project_id") Long projectId,
+                                                        @RequestBody @Encrypt Set<Long> issueIds,
+                                                        @RequestParam String dimension) {
+        return ResponseEntity.ok(ganttChartService.listByIds(projectId, issueIds, dimension));
     }
 }

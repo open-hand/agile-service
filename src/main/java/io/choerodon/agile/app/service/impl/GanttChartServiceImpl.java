@@ -3,11 +3,14 @@ package io.choerodon.agile.app.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.FeatureForIssueVO;
 import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.IssueSprintDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.GanttDimension;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.IssueSprintRelMapper;
 import io.choerodon.agile.infra.mapper.IssueStatusMapper;
@@ -20,12 +23,15 @@ import io.choerodon.core.utils.PageableHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -59,34 +65,48 @@ public class GanttChartServiceImpl implements GanttChartService {
     private IssueStatusMapper issueStatusMapper;
     @Autowired
     private IssueSprintRelMapper issueSprintRelMapper;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
+    @Autowired
+    private BaseFeignClient baseFeignClient;
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public Page<GanttChartVO> pagedQuery(Long projectId,
                                          SearchVO searchVO,
-                                         PageRequest pageRequest) {
+                                         PageRequest pageRequest,
+                                         String dimension) {
         if (isSprintEmpty(searchVO)) {
             throw new CommonException("error.otherArgs.sprint.empty");
         }
-        return listByProjectIdAndSearch(projectId, searchVO, pageRequest);
+        validateDimension(dimension);
+        return listByProjectIdAndSearch(projectId, searchVO, pageRequest, dimension);
+    }
+
+    private void validateDimension(String dimension) {
+        if (!GanttDimension.contains(dimension)) {
+            throw new CommonException("error.illegal.gantt.dimension");
+        }
+        if (GanttDimension.isFeature(dimension)) {
+            throw new CommonException("error.gantt.dimension.not.support");
+        }
     }
 
     @Override
-    public List<GanttChartVO> listByIds(Long projectId, Set<Long> issueIds) {
+    public List<GanttChartVO> listByIds(Long projectId, Set<Long> issueIds, String dimension) {
         if (ObjectUtils.isEmpty(issueIds)) {
             return new ArrayList<>();
         }
-        List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(projectId, new ArrayList<>(issueIds));
-        Map<Long, Date> completedDateMap =
-                issueMapper.selectActuatorCompletedDateByIssueIds(new ArrayList<>(issueIds), projectId)
-                        .stream()
-                        .collect(Collectors.toMap(GanttChartVO::getIssueId, GanttChartVO::getActualCompletedDate));
-        List<GanttChartVO> result = buildFromIssueDto(issueDTOList, projectId, completedDateMap);
-        return result;
+        validateDimension(dimension);
+        List<IssueDTO> issueList = issueMapper.selectWithSubByIssueIds(projectId, new ArrayList<>(issueIds));
+        return buildGanttList(projectId, dimension, new ArrayList<>(issueIds), issueList);
     }
 
     private Page<GanttChartVO> listByProjectIdAndSearch(Long projectId,
                                                         SearchVO searchVO,
-                                                        PageRequest pageRequest) {
+                                                        PageRequest pageRequest,
+                                                        String dimension) {
         Page<GanttChartVO> emptyPage = PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
         //设置不查询史诗
         boolean illegalIssueTypeId = buildIssueType(searchVO, projectId);
@@ -118,12 +138,8 @@ public class GanttChartServiceImpl implements GanttChartService {
                     childrenIds.addAll(issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds()));
                 }
                 issueIds.addAll(childrenIds);
-                List<IssueDTO> issueDTOList = queryIssueDetailsByIds(sort, projectId, issueIds);
-                Map<Long, Date> completedDateMap =
-                        issueMapper.selectActuatorCompletedDateByIssueIds(issueIds, projectId)
-                                .stream()
-                                .collect(Collectors.toMap(GanttChartVO::getIssueId, GanttChartVO::getActualCompletedDate));
-                List<GanttChartVO> result = buildFromIssueDto(issueDTOList, projectId, completedDateMap);
+                List<IssueDTO> issueList = PageHelper.doSort(sort, () -> issueMapper.selectWithSubByIssueIds(projectId, issueIds));
+                List<GanttChartVO> result = buildGanttList(projectId, dimension, issueIds, issueList);
                 return PageUtils.copyPropertiesAndResetContent(page, result);
             } else {
                 return emptyPage;
@@ -133,27 +149,111 @@ public class GanttChartServiceImpl implements GanttChartService {
         }
     }
 
-    private List<IssueDTO> queryIssueDetailsByIds(Sort sort, Long projectId, List<Long> issueIds) {
-        List<IssueDTO> issueDTOList = PageHelper.doSort(sort, () -> issueMapper.selectWithSubByIssueIds(projectId, issueIds));
+    private List<GanttChartVO> buildGanttList(Long projectId,
+                                              String dimension,
+                                              List<Long> issueIds,
+                                              List<IssueDTO> issueList) {
+        if (ObjectUtils.isEmpty(issueList)) {
+            return Collections.emptyList();
+        }
         Set<Long> completedStatusIds =
                 issueStatusMapper.listCompletedStatus(new HashSet<>(Arrays.asList(projectId)))
                         .stream().map(StatusVO::getId).collect(Collectors.toSet());
+        Map<Long, IssueSprintDTO> issueSprintMap = queryIssueSprint(projectId, issueIds);
+        Map<Long, IssueEpicVO> epicMap = new HashMap<>();
+        Map<Long, FeatureForIssueVO> featureMap = new HashMap<>();
+        if (GanttDimension.isEpic(dimension)) {
+            queryAdditionalInfo(issueList, epicMap, featureMap, projectId);
+        }
+        Map<Long, Date> completedDateMap =
+                issueMapper.selectActuatorCompletedDateByIssueIds(issueIds, projectId)
+                        .stream()
+                        .collect(Collectors.toMap(GanttChartVO::getIssueId, GanttChartVO::getActualCompletedDate));
+        return buildFromIssueDto(issueList, projectId, completedDateMap, completedStatusIds, issueSprintMap, epicMap, featureMap);
+    }
+
+    private void queryAdditionalInfo(List<IssueDTO> issueList,
+                                     Map<Long, IssueEpicVO> epicMap,
+                                     Map<Long, FeatureForIssueVO> featureMap,
+                                     Long projectId) {
+        boolean belongProgram = (agilePluginService != null && belongToProgram(projectId));
+        if (belongProgram) {
+            epicMap.putAll(queryIssueEpic(issueList, null));
+            featureMap.putAll(agilePluginService.queryIssueFeature(projectId, issueList));
+        } else {
+            epicMap.putAll(queryIssueEpic(issueList, projectId));
+        }
+    }
+
+    private Map<Long, IssueSprintDTO> queryIssueSprint(Long projectId,
+                                                       List<Long> issueIds) {
+        if (ObjectUtils.isEmpty(issueIds)) {
+            return Collections.emptyMap();
+        }
+        Map<Long, IssueSprintDTO> map = new HashMap<>();
         List<String> statusCodes = Arrays.asList("started", "sprint_planning");
         Map<Long, List<IssueSprintDTO>> issueSprintMap =
                 issueSprintRelMapper.selectIssueSprintByIds(projectId, new HashSet<>(issueIds), statusCodes)
                         .stream()
                         .collect(Collectors.groupingBy(IssueSprintDTO::getIssueId));
-        issueDTOList.forEach(issue -> {
-            Long statusId = issue.getStatusId();
-            boolean completed = completedStatusIds.contains(statusId);
-            issue.setCompleted(completed);
-            List<IssueSprintDTO> issueSprints = issueSprintMap.get(issue.getIssueId());
-            if (ObjectUtils.isEmpty(issueSprints)) {
+        issueIds.forEach(issueId -> {
+            List<IssueSprintDTO> sprints = issueSprintMap.get(issueId);
+            if (ObjectUtils.isEmpty(sprints)) {
                 return;
             }
-            issue.setIssueSprintDTOS(Arrays.asList(issueSprints.get(0)));
+            map.put(issueId, sprints.get(0));
         });
-        return issueDTOList;
+        return map;
+    }
+
+    private boolean belongToProgram(Long projectId) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        ResponseEntity<ProjectVO> response =
+                baseFeignClient.getGroupInfoByEnableProject(organizationId, projectId);
+        return response.getBody() != null;
+    }
+
+    private Map<Long, IssueEpicVO> queryIssueEpic(List<IssueDTO> issueList,
+                                                  Long projectId) {
+        Map<Long, IssueEpicVO> map = new HashMap<>();
+        Set<Long> epicIds =
+                issueList
+                        .stream()
+                        .filter(x -> x.getEpicId() != null && !Objects.equals(0L, x.getEpicId()))
+                        .map(IssueDTO::getEpicId)
+                        .collect(Collectors.toSet());
+        if (!epicIds.isEmpty()) {
+            List<IssueEpicVO> epics = issueMapper.queryIssueEpicByIds(projectId, new ArrayList<>(epicIds));
+            Set<Long> projectIds = epics.stream().map(IssueEpicVO::getProjectId).collect(Collectors.toSet());
+            Map<Long, Map<Long, IssueTypeVO>> projectIssueTypeMap = new HashMap<>();
+            projectIds.forEach(pId -> {
+                Long organizationId = ConvertUtil.getOrganizationId(pId);
+                Map<Long, IssueTypeVO> issueTypeMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
+                projectIssueTypeMap.put(pId, issueTypeMap);
+            });
+            Map<Long, IssueEpicVO> epicMap =
+                    issueMapper.queryIssueEpicByIds(projectId, new ArrayList<>(epicIds))
+                            .stream()
+                            .collect(Collectors.toMap(IssueEpicVO::getIssueId, Function.identity()));
+            issueList.forEach(issue -> {
+                Long issueId = issue.getIssueId();
+                Long epicId = issue.getEpicId();
+                if (ObjectUtils.isEmpty(epicId) || Objects.equals(0L, epicId)) {
+                    return;
+                }
+                IssueEpicVO epic = epicMap.get(epicId);
+                Long thisProjectId = epic.getProjectId();
+                Map<Long, IssueTypeVO> issueTypeMap = projectIssueTypeMap.get(thisProjectId);
+                if (!ObjectUtils.isEmpty(issueTypeMap)) {
+                    IssueTypeVO issueType = issueTypeMap.get(epic.getIssueTypeId());
+                    epic.setIssueTypeVO(issueType);
+                }
+                if (!ObjectUtils.isEmpty(epic)) {
+                    map.put(issueId, epic);
+                }
+            });
+        }
+        return map;
     }
 
     private Sort processSort(PageRequest pageRequest, Map<String, Object> sortMap) {
@@ -213,7 +313,11 @@ public class GanttChartServiceImpl implements GanttChartService {
 
     private List<GanttChartVO> buildFromIssueDto(List<IssueDTO> issueList,
                                                  Long projectId,
-                                                 Map<Long, Date> completedDateMap) {
+                                                 Map<Long, Date> completedDateMap,
+                                                 Set<Long> completedStatusIds,
+                                                 Map<Long, IssueSprintDTO> issueSprintMap,
+                                                 Map<Long, IssueEpicVO> epicMap,
+                                                 Map<Long, FeatureForIssueVO> featureMap) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
@@ -229,14 +333,26 @@ public class GanttChartServiceImpl implements GanttChartService {
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(new ArrayList<>(userIds), true);
         List<GanttChartVO> result = new ArrayList<>(issueList.size());
         issueList.forEach(i -> {
+            Long statusId = i.getStatusId();
+            Long issueId = i.getIssueId();
             GanttChartVO ganttChart = new GanttChartVO();
             result.add(ganttChart);
             BeanUtils.copyProperties(i, ganttChart);
+            boolean completed = completedStatusIds.contains(statusId);
+            ganttChart.setCompleted(completed);
             ganttChart.setIssueTypeVO(issueTypeDTOMap.get(i.getIssueTypeId()));
-            ganttChart.setStatusVO(statusMap.get(i.getStatusId()));
-            List<IssueSprintDTO> sprints = i.getIssueSprintDTOS();
-            if (!ObjectUtils.isEmpty(sprints)) {
-                ganttChart.setSprint(sprints.get(0));
+            ganttChart.setStatusVO(statusMap.get(statusId));
+            IssueSprintDTO sprint = issueSprintMap.get(issueId);
+            if (!ObjectUtils.isEmpty(sprint)) {
+                ganttChart.setSprint(sprint);
+            }
+            IssueEpicVO epic = epicMap.get(issueId);
+            if (!ObjectUtils.isEmpty(epic)) {
+                ganttChart.setEpic(epic);
+            }
+            FeatureForIssueVO feature = featureMap.get(issueId);
+            if (!ObjectUtils.isEmpty(feature)) {
+                ganttChart.setFeature(feature);
             }
             Long assigneeId = i.getAssigneeId();
             if (!ObjectUtils.isEmpty(assigneeId)) {
@@ -251,7 +367,25 @@ public class GanttChartServiceImpl implements GanttChartService {
             }
             setParentId(ganttChart, i);
         });
+        setSubIssueEpicAndFeature(result);
         return result;
+    }
+
+    private void setSubIssueEpicAndFeature(List<GanttChartVO> result) {
+        Map<Long, GanttChartVO> ganttMap =
+                result.stream().collect(Collectors.toMap(GanttChartVO::getIssueId, Function.identity()));
+        result.forEach(gantt -> {
+            Long parentId = gantt.getParentId();
+            if (ObjectUtils.isEmpty(parentId)) {
+                return;
+            }
+            GanttChartVO parent = ganttMap.get(parentId);
+            if (ObjectUtils.isEmpty(parent)) {
+                return;
+            }
+            gantt.setEpic(parent.getEpic());
+            gantt.setFeature(parent.getFeature());
+        });
     }
 
     private void setParentId(GanttChartVO ganttChartVO, IssueDTO dto) {

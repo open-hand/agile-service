@@ -21,8 +21,8 @@ public interface GanttChartService {
      * @param searchVO
      * @return
      */
-    Page<GanttChartVO> pagedQuery(Long projectId, SearchVO searchVO, PageRequest pageRequest);
+    Page<GanttChartVO> pagedQuery(Long projectId, SearchVO searchVO, PageRequest pageRequest, String dimension);
 
-    List<GanttChartVO> listByIds(Long projectId, Set<Long> issueIds);
+    List<GanttChartVO> listByIds(Long projectId, Set<Long> issueIds, String dimension);
 
 }

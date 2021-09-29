@@ -31,6 +31,8 @@ public enum AgileSystemFieldContext {
     CREATOR(FieldCode.CREATOR,"story,issue_epic,bug,task,sub_task"),
     UPDATER(FieldCode.UPDATOR,"story,issue_epic,bug,task,sub_task"),
     TAG(FieldCode.TAG,"story,bug,task,sub_task"),
+    ACTUAL_START_TIME(FieldCode.ACTUAL_START_TIME,"story,issue_epic,bug,task,sub_task"),
+    ACTUAL_END_TIME(FieldCode.ACTUAL_END_TIME,"story,issue_epic,bug,task,sub_task"),
     ;
     private String fieldCode;
     private String context;

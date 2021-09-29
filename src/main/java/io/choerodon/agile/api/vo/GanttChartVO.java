@@ -50,6 +50,30 @@ public class GanttChartVO {
 
     private IssueSprintDTO sprint;
 
+    private IssueEpicVO epic;
+
+    private FeatureForIssueVO feature;
+
+    private Date actualStartTime;
+
+    private Date actualEndTime;
+
+    public IssueEpicVO getEpic() {
+        return epic;
+    }
+
+    public void setEpic(IssueEpicVO epic) {
+        this.epic = epic;
+    }
+
+    public FeatureForIssueVO getFeature() {
+        return feature;
+    }
+
+    public void setFeature(FeatureForIssueVO feature) {
+        this.feature = feature;
+    }
+
     public IssueSprintDTO getSprint() {
         return sprint;
     }
@@ -152,5 +176,21 @@ public class GanttChartVO {
 
     public void setObjectVersionNumber(Long objectVersionNumber) {
         this.objectVersionNumber = objectVersionNumber;
+    }
+
+    public Date getActualStartTime() {
+        return actualStartTime;
+    }
+
+    public void setActualStartTime(Date actualStartTime) {
+        this.actualStartTime = actualStartTime;
+    }
+
+    public Date getActualEndTime() {
+        return actualEndTime;
+    }
+
+    public void setActualEndTime(Date actualEndTime) {
+        this.actualEndTime = actualEndTime;
     }
 }

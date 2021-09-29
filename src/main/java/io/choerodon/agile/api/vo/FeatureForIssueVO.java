@@ -1,32 +1,25 @@
 package io.choerodon.agile.api.vo;
 
-
-import io.choerodon.agile.infra.utils.StringUtil;
-import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
- * @author dinghuang123@gmail.com
- * @since 2018/5/25
+ * @author superlee
+ * @since 2021-09-26
  */
-public class IssueEpicVO {
+public class FeatureForIssueVO {
 
-    @ApiModelProperty(value = "史诗id")
     @Encrypt
     private Long issueId;
 
-    @ApiModelProperty(value = "史诗名称")
-    private String epicName;
+    private String featureName;
 
-    @ApiModelProperty(value = "史诗颜色")
-    private String epicColor;
-
+    private String featureColor;
     @Encrypt
     private Long issueTypeId;
 
-    private Long projectId;
-
     private IssueTypeVO issueTypeVO;
+
+    private Long projectId;
 
     public Long getProjectId() {
         return projectId;
@@ -60,25 +53,19 @@ public class IssueEpicVO {
         this.issueId = issueId;
     }
 
-    public String getEpicName() {
-        return epicName;
+    public String getFeatureName() {
+        return featureName;
     }
 
-    public void setEpicName(String epicName) {
-        this.epicName = epicName;
+    public void setFeatureName(String featureName) {
+        this.featureName = featureName;
     }
 
-    public String getEpicColor() {
-        return epicColor;
+    public String getFeatureColor() {
+        return featureColor;
     }
 
-    public void setEpicColor(String epicColor) {
-        this.epicColor = epicColor;
+    public void setFeatureColor(String featureColor) {
+        this.featureColor = featureColor;
     }
-
-    @Override
-    public String toString() {
-        return StringUtil.getToString(this);
-    }
-
 }

@@ -141,6 +141,10 @@ public class IssueDetailDTO {
 
     private String priorityCode;
 
+    private Date actualStartTime;
+
+    private Date actualEndTime;
+
     public String getPriorityCode() {
         return priorityCode;
     }
@@ -648,5 +652,21 @@ public class IssueDetailDTO {
 
     public void setLastUpdatedBy(Long lastUpdatedBy) {
         this.lastUpdatedBy = lastUpdatedBy;
+    }
+
+    public Date getActualStartTime() {
+        return actualStartTime;
+    }
+
+    public void setActualStartTime(Date actualStartTime) {
+        this.actualStartTime = actualStartTime;
+    }
+
+    public Date getActualEndTime() {
+        return actualEndTime;
+    }
+
+    public void setActualEndTime(Date actualEndTime) {
+        this.actualEndTime = actualEndTime;
     }
 }

@@ -1,4 +1,4 @@
-import React, { useCallback, useContext } from 'react';
+import React, { useContext, useState, useRef } from 'react';
 import {
   Button,
   Modal as ModalPro, Dropdown, Menu,
@@ -6,6 +6,7 @@ import {
 import { Permission } from '@choerodon/boot';
 
 import { includes } from 'lodash';
+import { toJS } from 'mobx';
 import { issueApi } from '@/api';
 import useHasDevops from '@/hooks/useHasDevops';
 import useHasTest from '@/hooks/useHasTest';
@@ -30,12 +31,13 @@ const IssueDropDown = ({
   const docs = store.getDoc;
   const hasDevops = useHasDevops();
   const hasTest = useHasTest();
-
-  const handleCopyIssue = (issueId, isSubTask, issue) => {
+  const [copyHasEpic, setCopyHasEpic] = useState(store.copyFields.find((item) => item.fieldCode === 'epic'));
+  const dontCopyEpicRef = useRef();
+  const handleCopyIssue = (issueId, isSubTask, dontCopyEpic, issue) => {
     store.setCopyIssueShow(false);
     reloadIssue(issue.issueId);
     if (onIssueCopy) {
-      onIssueCopy(issue, issueId, isSubTask);
+      onIssueCopy(issue, issueId, isSubTask, dontCopyEpicRef.current);
     }
   };
   const issue = store.getIssue;
@@ -70,6 +72,8 @@ const IssueDropDown = ({
       okText: '删除',
     });
   };
+  const dontCopyEpic = !!store.copyFields.find((item) => item.fieldCode === 'epic') && !copyHasEpic;
+  dontCopyEpicRef.current = dontCopyEpic;
 
   const handleClickMenu = async (e) => {
     if (e.key === '0') {
@@ -85,9 +89,10 @@ const IssueDropDown = ({
         issueLink: store.getLinkIssues,
         issueSummary: issue.summary,
         // onCancel: () => store.setCopyIssueShow(false),
-        onOk: handleCopyIssue.bind(this, parentIssueId || relateIssueId || issueId, typeCode === 'sub_task' || (typeCode === 'bug' && parentRelateSummary)),
+        onOk: handleCopyIssue.bind(this, parentIssueId || relateIssueId || issueId, typeCode === 'sub_task' || (typeCode === 'bug' && parentRelateSummary), dontCopyEpic),
         applyType,
         copyFields: store.copyFields,
+        setCopyHasEpic,
       });
       store.setCopyIssueShow(true);
     } else if (e.key === '4') {

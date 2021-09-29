@@ -4,7 +4,7 @@ import React, {
 } from 'react';
 // eslint-disable-next-line camelcase
 import { unstable_batchedUpdates } from 'react-dom';
-import { Tooltip, Icon } from 'choerodon-ui/pro';
+import { Tooltip, Icon, Button } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import {
   find, merge, omit, pick, remove, some,
@@ -49,6 +49,8 @@ import GanttOperation from './components/gantt-operation';
 import GanttSortLabel, { useGanttSortLabel } from './components/gantt-sort-label';
 import './index.less';
 import StatusLinkageWSHandle from '@/components/StatusLinkageWSHandle';
+import { openCustomColumnManageModal } from '@/components/table-cache/column-manage/Modal';
+import useIsInProgram from '@/hooks/useIsInProgram';
 
 dayjs.extend(weekday);
 const typeOptions = [{
@@ -60,6 +62,9 @@ const typeOptions = [{
 }, {
   value: 'sprint',
   label: '按冲刺查看',
+}, {
+  value: 'epic',
+  label: '按史诗查看',
 }] as const;
 const typeValues = typeOptions.map((t) => t.value);
 type TypeValue = (typeof typeValues)[number];
@@ -115,6 +120,66 @@ const groupBySprint = (data: any[]) => {
     estimatedStartTime: sprint.startDate,
     estimatedEndTime: sprint.endDate,
     children: ganttList2Tree(children),
+  }));
+};
+
+const groupByFeature = (epicChildrenData: any) => {
+  const map = new Map<string, { feature: any, children: any[] }>();
+  const noFeatureData: any[] = [];
+  epicChildrenData.forEach((issue: any) => {
+    if (issue.feature) {
+      if (map.has(issue.feature.featureName)) {
+        map.get(issue.feature.featureName)?.children.push(issue);
+      } else {
+        map.set(issue.feature.featureName, {
+          feature: issue.feature,
+          children: [issue],
+        });
+      }
+    } else {
+      noFeatureData.push(issue);
+    }
+  });
+  if (noFeatureData.length > 0) {
+    map.set('未分配', { feature: {}, children: noFeatureData });
+  }
+
+  return [...map.entries()].map(([name, { feature, children }]) => ({
+    group: name === '未分配',
+    groupType: 'feature',
+    summary: name,
+    ...feature,
+    children: ganttList2Tree(children),
+  }));
+};
+
+const groupByEpic = (data: any, isInProgram: boolean) => {
+  const map = new Map<string, { epic: any, children: any[] }>();
+  const noEpicData: any[] = [];
+  data.forEach((issue: any) => {
+    if (issue.epic) {
+      if (map.has(issue.epic.epicName)) {
+        map.get(issue.epic.epicName)?.children.push(issue);
+      } else {
+        map.set(issue.epic.epicName, {
+          epic: issue.epic,
+          children: [issue],
+        });
+      }
+    } else {
+      noEpicData.push(issue);
+    }
+  });
+  if (noEpicData.length > 0) {
+    map.set('未分配', { epic: {}, children: noEpicData });
+  }
+
+  return [...map.entries()].map(([name, { epic, children }]) => ({
+    group: name === '未分配',
+    groupType: 'epic',
+    summary: name,
+    ...epic,
+    children: isInProgram ? groupByFeature(children) : ganttList2Tree(children),
   }));
 };
 const renderTooltip = (user: User) => {
@@ -182,6 +247,7 @@ const getTableColumns = ({ onSortChange }: any) => {
   return tableColumns;
 };
 const GanttPage: React.FC = () => {
+  const { isInProgram } = useIsInProgram();
   const [data, setData] = useState<any[]>([]);
   const typeChangeRefreshFlag = useRef<boolean>(false);
   const [type, setType] = useState<TypeValue>(localPageCacheStore.getItem('gantt.search.type') ?? typeValues[0]);
@@ -213,7 +279,7 @@ const GanttPage: React.FC = () => {
         workCalendarApi.getYearCalendar(year),
         ganttApi.loadByTask(merge(filter, {
           searchArgs: { tree: type !== 'assignee' },
-        }), sortedList),
+        }), type, sortedList),
       ]);
       // setColumns(headers.map((h: any) => ({
       //   width: 100,
@@ -279,7 +345,7 @@ const GanttPage: React.FC = () => {
   }, [sprintIds, store]);
   const handleTypeChange = useCallback((newType) => {
     setType((oldType) => {
-      typeChangeRefreshFlag.current = [newType, oldType].includes('assignee');
+      typeChangeRefreshFlag.current = [newType, oldType].includes('assignee') || [newType, oldType].includes('epic');
       return newType;
     });
     localPageCacheStore.setItem('gantt.search.type', newType);
@@ -296,6 +362,7 @@ const GanttPage: React.FC = () => {
   const onRow: GanttProps<Issue>['onRow'] = useMemo(() => ({
     onClick: (issue) => {
       store.setIssueId(issue.issueId);
+      store.setProgramId(issue.programId);
     },
   }), [store]);
   const getExpandIcon = useCallback(({ level, collapsed, onClick }) => (
@@ -375,23 +442,32 @@ const GanttPage: React.FC = () => {
     sprint: issue.activeSprint,
   });
 
-  const handleCreateIssue = usePersistFn((issue: Issue, issueId?: string, parentId?: string) => {
+  const handleCreateIssue = usePersistFn((issue: Issue, issueId?: string, parentId?: string, dontCopyEpic = false) => {
     setData(produce(data, (draft) => {
       const normalizeIssueWidthParentId = Object.assign(normalizeIssue(issue), { parentId });
-      draft.unshift(normalizeIssueWidthParentId);
+      if (!issueId) {
+        draft.unshift(normalizeIssueWidthParentId);
+      } else {
+        const target = find(draft, { issueId });
+        if (target && !dontCopyEpic) {
+          draft.unshift(Object.assign(normalizeIssueWidthParentId, pick(target, ['epic', 'feature'])));
+        } else {
+          draft.unshift(normalizeIssueWidthParentId);
+        }
+      }
     }));
 
     updateInfluenceIssues(issue);
   });
-  const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId) => {
+  const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {
     handleCreateIssue(subIssue, parentIssueId, parentIssueId);
   });
-  const handleCopyIssue = usePersistFn((issue: Issue, issueId: string, isSubTask?: boolean) => {
-    handleCreateIssue(issue, issueId, isSubTask ? issueId : undefined);
+  const handleCopyIssue = usePersistFn((issue: Issue, issueId: string, isSubTask?: boolean, dontCopyEpic?: boolean) => {
+    handleCreateIssue(issue, issueId, isSubTask ? issueId : undefined, dontCopyEpic);
     const subIssues = [...(issue.subIssueVOList ?? []), ...(issue.subBugVOList ?? [])];
     if (subIssues.length > 0) {
       subIssues.forEach((child) => {
-        handleCreateIssue(child, issue.issueId, issue.issueId);
+        handleCreateIssue(child, issueId, issue.issueId, dontCopyEpic);
       });
     }
   });
@@ -474,15 +550,18 @@ const GanttPage: React.FC = () => {
       return groupBySprint(data);
     } if (type === 'task') {
       return groupByTask(data);
+    } if (type === 'epic') {
+      return groupByEpic(data, isInProgram);
     }
     return data;
-  }, [data, type]);
+  }, [data, isInProgram, type]);
   const renderEmpty = usePersistFn(() => {
     if (!sprintIds || sprintIds?.length === 0) {
       return <span>暂无数据，请选择冲刺</span>;
     }
     return <span>暂无数据</span>;
   });
+
   return (
     <Page>
       <Header>
@@ -524,7 +603,38 @@ const GanttPage: React.FC = () => {
               name: '个人筛选',
               icon: 'settings-o',
               display: true,
+
               handler: handleClickFilterManage,
+            },
+            {
+              display: true,
+              name: '列配置',
+              // icon: 'view_column-o',
+              handler: () => {
+                // openColumnManageModal
+                openCustomColumnManageModal({
+                  modelProps: {
+                    title: '设置列显示字段',
+                  },
+                  options: [
+                    { code: 'assignee', title: '经办人' },
+                    { code: 'startDate', title: '预计开始时间' },
+                    ...new Array(30).fill({ code: 'startDate', title: '预计开始时间' }).map((i, index) => ({
+                      code: `${i.code}-${index}`, title: `${i.title}-${index}`,
+                    })),
+
+                  ],
+                  type: 'gannt',
+                });
+              },
+              element: (
+                <Button>
+                  <Icon
+                    type="view_column-o"
+                    style={{ fontSize: 20, marginBottom: -1 }}
+                  />
+                  <span>列配置</span>
+                </Button>),
             },
             {
               icon: isFullScreen ? 'fullscreen_exit' : 'zoom_out_map',
@@ -538,6 +648,7 @@ const GanttPage: React.FC = () => {
                 title: isFullScreen ? '退出全屏' : '全屏',
               },
             },
+
             {
               display: true,
               icon: 'refresh',

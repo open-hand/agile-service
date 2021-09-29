@@ -14,3 +14,4 @@ declare module '@choerodon/ckeditor';
 declare module 'react-image-lightbox';
 declare module 'react-html-email';
 declare module 'uuid/v4';
+declare module 'query-string';
