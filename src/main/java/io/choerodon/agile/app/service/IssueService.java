@@ -480,4 +480,6 @@ public interface IssueService {
     Map<String, Object> processSortMap(PageRequest pageRequest,
                                        Long projectId,
                                        Long organizationId);
+
+    void splitIssueNumProjectCodePrefix(SearchVO searchVO, Long projectId);
 }

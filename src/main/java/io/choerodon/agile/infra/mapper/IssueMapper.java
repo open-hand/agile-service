@@ -376,7 +376,10 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                                    @Param("withSubIssues") boolean withSubIssues);
 
     List<IssueDTO> selectWithSubByIssueIds(@Param("projectId") Long projectId,
-                                           @Param("issueIds") List<Long> issueIds);
+                                           @Param("issueIds") List<Long> issueIds,
+                                           @Param("sortMap") Map<String, Object> sortMap,
+                                           @Param("ganttDefaultOrder") boolean ganttDefaultOrder,
+                                           @Param("dimension") String dimension);
 
 
     /**
@@ -464,11 +467,12 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                            @Param("issueIds") List<Long> issueIds,
                                            @Param("issueQueryVO") IssueQueryVO issueQueryVO);
 
-    Set<Long> queryChildrenIdByParentId(@Param("issueIds") List<Long> issueIds,
-                                        @Param("projectId") Long projectId,
-                                        @Param("searchVO") SearchVO searchVO,
-                                        @Param("filterSql") String filterSql,
-                                        @Param("assigneeFilterIds") List<Long> assigneeFilterIds);
+    List<IssueDTO> queryChildrenIdByParentId(@Param("issueIds") List<Long> issueIds,
+                                             @Param("projectId") Long projectId,
+                                             @Param("searchVO") SearchVO searchVO,
+                                             @Param("filterSql") String filterSql,
+                                             @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
+                                             @Param("sortMap") Map<String, Object> sortMap);
 
     List<IssueDTO> queryStoryAndTaskByProjectId(@Param("projectId") Long projectId, @Param("searchVO") SearchVO searchVO);
 

@@ -33,4 +33,8 @@ public enum GanttDimension {
     public static boolean isEpic(String dimension) {
         return EPIC.name().equalsIgnoreCase(dimension);
     }
+
+    public static boolean isTask(String dimension) {
+        return TASK.name().equalsIgnoreCase(dimension);
+    }
 }

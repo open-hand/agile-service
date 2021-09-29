@@ -21,6 +21,16 @@ public class FeatureForIssueVO {
 
     private Long projectId;
 
+    private Long programId;
+
+    public Long getProgramId() {
+        return programId;
+    }
+
+    public void setProgramId(Long programId) {
+        this.programId = programId;
+    }
+
     public Long getProjectId() {
         return projectId;
     }
