@@ -134,7 +134,11 @@ public class DataLogAspect {
     private static final String KNOWLEDGE_RELATION_DELETE = "knowledgeRelationDelete";
     private static final String ESTIMATED_START_TIME = "estimatedStartTime";
     private static final String FIELD_ESTIMATED_START_TIME = "Estimated Start Time";
+    private static final String FIELD_ACTUAL_START_TIME = "Actual Start Time";
+    private static final String FIELD_ACTUAL_END_TIME = "Actual End Time";
     private static final String ESTIMATED_END_TIME = "estimatedEndTime";
+    private static final String ACTUAL_START_TIME = "actualStartTime";
+    private static final String ACTUAL_END_TIME = "actualEndTime";
     private static final String FIELD_ESTIMATED_END_TIME = "Estimated End Time";
     private static final String PROJECT_MOVE = "projectMove";
     private static final String FIELD_PROJECT_MOVE = "Project Move";
@@ -1259,6 +1263,38 @@ public class DataLogAspect {
             handleEstimatedTime(field, originIssueDTO, issueConvertDTO);
             handleEnvironment(field, originIssueDTO, issueConvertDTO);
             handleMainResponsible(field, originIssueDTO, issueConvertDTO);
+            handleActualTime(field, originIssueDTO, issueConvertDTO);
+        }
+    }
+
+    private void handleActualTime(List<String> field, IssueDTO originIssueDTO, IssueConvertDTO issueConvertDTO) {
+        Long projectId = originIssueDTO.getProjectId();
+        Long issueId = originIssueDTO.getIssueId();
+        SimpleDateFormat smf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        if (field.contains(ACTUAL_START_TIME)
+                && !Objects.equals(originIssueDTO.getActualStartTime(), issueConvertDTO.getActualStartTime())) {
+            String originActualStartTime = null;
+            String convertActualStartTime = null;
+            if (!ObjectUtils.isEmpty(originIssueDTO.getActualStartTime())) {
+                originActualStartTime = smf.format(originIssueDTO.getActualStartTime());
+            }
+            if (!ObjectUtils.isEmpty(issueConvertDTO.getActualStartTime())) {
+                convertActualStartTime = smf.format(issueConvertDTO.getActualStartTime());
+            }
+            createDataLog(projectId, issueId, FIELD_ACTUAL_START_TIME, originActualStartTime, convertActualStartTime, originActualStartTime, convertActualStartTime);
+        }
+
+        if (field.contains(ACTUAL_END_TIME)
+                && !Objects.equals(originIssueDTO.getActualEndTime(), issueConvertDTO.getActualEndTime())) {
+            String originActualEndTime = null;
+            String convertActualEndTime = null;
+            if (!ObjectUtils.isEmpty(originIssueDTO.getActualEndTime())) {
+                originActualEndTime = smf.format(originIssueDTO.getActualEndTime());
+            }
+            if (!ObjectUtils.isEmpty(issueConvertDTO.getActualEndTime())) {
+                convertActualEndTime = smf.format(issueConvertDTO.getActualEndTime());
+            }
+            createDataLog(projectId, issueId, FIELD_ACTUAL_END_TIME, originActualEndTime, convertActualEndTime, originActualEndTime, convertActualEndTime);
         }
     }
 

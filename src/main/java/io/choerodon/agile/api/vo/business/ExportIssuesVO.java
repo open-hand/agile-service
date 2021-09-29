@@ -81,6 +81,10 @@ public class ExportIssuesVO {
     private Date estimatedStartTime;
     @ApiModelProperty("预计结束时间")
     private Date estimatedEndTime;
+    @ApiModelProperty("预计开始时间")
+    private Date actualStartTime;
+    @ApiModelProperty("预计开始时间")
+    private Date actualEndTime;
     private String teamProjects;
 
     @ApiModelProperty("创建人名称")
@@ -516,5 +520,21 @@ public class ExportIssuesVO {
 
     public void setAllEstimateTime(BigDecimal allEstimateTime) {
         this.allEstimateTime = allEstimateTime;
+    }
+
+    public Date getActualStartTime() {
+        return actualStartTime;
+    }
+
+    public void setActualStartTime(Date actualStartTime) {
+        this.actualStartTime = actualStartTime;
+    }
+
+    public Date getActualEndTime() {
+        return actualEndTime;
+    }
+
+    public void setActualEndTime(Date actualEndTime) {
+        this.actualEndTime = actualEndTime;
     }
 }
