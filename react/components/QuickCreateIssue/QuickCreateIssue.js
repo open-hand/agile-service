@@ -20,6 +20,7 @@ const propTypes = {
   defaultPriority: PropTypes.number,
   issueTypes: PropTypes.shape([]),
   onCreate: PropTypes.func,
+  mountCreate: PropTypes.bool,
 };
 
 class QuickCreateIssue extends Component {
@@ -46,7 +47,7 @@ class QuickCreateIssue extends Component {
     super(props);
     this.currentTemplate = '';
     this.state = {
-      create: false,
+      create: props.mountCreate,
       loading: false,
       currentTypeId: QuickCreateIssue.getCacheAvailableIssueType(props.issueTypes)?.id,
       summary: '',
@@ -61,6 +62,12 @@ class QuickCreateIssue extends Component {
       };
     }
     return null;
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (typeof prevProps.onCreateChange === 'function' && this.state.create !== prevState.create) {
+      prevProps.onCreateChange(this.state.create);
+    }
   }
 
   loadInitValue = async (currentIssueTypeId) => {
@@ -283,6 +290,7 @@ class QuickCreateIssue extends Component {
                 <Button
                   color="primary"
                   funcType="raised"
+                  className="c7nagile-QuickCreateIssue-creating-btn"
                   disabled={this.props.issueTypes.length === 0 || !summary}
                   onClick={this.handleCreate}
                   style={{ marginLeft: 10 }}
@@ -291,6 +299,7 @@ class QuickCreateIssue extends Component {
                   确定
                 </Button>
                 <Button
+                  className="c7nagile-QuickCreateIssue-creating-btn"
                   funcType="raised"
                   onClick={this.handleCancel}
                 >

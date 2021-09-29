@@ -7,7 +7,7 @@ import {
 } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
-import { useLockFn } from 'ahooks';
+import { useClickAway, useLockFn } from 'ahooks';
 import { find } from 'lodash';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { IIssueType, Issue, User } from '@/common/types';
@@ -22,8 +22,11 @@ interface QuickCreateSubIssueProps {
   priorityId: string
   parentIssueId: string
   sprintId: string
+  typeCode?: string | string[]
+  mountCreate?: boolean
   onCreate?: (issue: Issue) => void
-  defaultAssignee: User | undefined
+  onAwayClick?: (createFn: any) => void
+  defaultAssignee?: User | undefined
   cantCreateEvent?: () => void
   summaryChange?: (summary: string) => void,
   typeIdChange?: (typeId: string) => void,
@@ -31,16 +34,18 @@ interface QuickCreateSubIssueProps {
   assigneeChange?: (assigneeId: string | undefined, assignee: User | undefined) => void
 }
 const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
-  priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, cantCreateEvent, summaryChange, typeIdChange, setDefaultSprint, assigneeChange,
+  priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, cantCreateEvent, typeCode, summaryChange, typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick,
 }) => {
-  const { data: issueTypes, isLoading } = useProjectIssueTypes({ typeCode: 'sub_task', onlyEnabled: true });
+  const { data: issueTypes, isLoading } = useProjectIssueTypes({ typeCode: typeCode || 'sub_task', onlyEnabled: true });
   const [summary, setSummary] = useState('');
-  const [expand, setExpand] = useState(false);
+  const [expand, setExpand] = useState(!!mountCreate);
   const [id, setId] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
   const currentTemplate = useRef<string>('');
   const currentType = issueTypes?.find((t) => t.id === id);
   const userDropDownRef = useRef<{ selectedUser: User | undefined }>(null);
+  const ref = useRef<any>();
+
   useEffect(() => {
     if (issueTypes && issueTypes.length > 0) {
       const localIssueTypeId = localCacheStore.getItem('agile.issue.type.sub.selected');
@@ -91,8 +96,9 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
         summary,
         priorityId,
         parentIssueId,
+        relateIssueId: currentType.typeCode === 'bug' ? parentIssueId : undefined,
         issueTypeId: currentType.id,
-        typeCode: 'sub_task',
+        typeCode: currentType.typeCode,
         sprintId,
         assigneeId,
       }, fieldsMap);
@@ -123,11 +129,18 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   const handleCancel = useCallback(() => {
     setExpand(false);
   }, []);
+  useClickAway((e) => {
+    if (e && (e as MouseEvent).composedPath().some((dom) => (dom as HTMLElement)?.className === 'c7n-pro-popup-container')) {
+      return;
+    }
+    !isLoading && onAwayClick && onAwayClick(handleCreate);
+  }, ref);
   if (isLoading) {
     return null;
   }
+
   return issueTypes ? (
-    <div className="c7n-subTask-quickCreate">
+    <div className="c7n-subTask-quickCreate" ref={ref}>
       {expand
         ? (
           <div style={{ display: 'block', width: '100%' }}>
