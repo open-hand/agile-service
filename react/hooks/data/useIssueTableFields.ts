@@ -28,6 +28,8 @@ const systemFields = [
   { code: 'creationDate', title: '创建时间' },
   { code: 'estimatedStartTime', title: '预计开始时间' },
   { code: 'estimatedEndTime', title: '预计结束时间' },
+  { code: 'actualStartTime', title: '实际开始时间' },
+  { code: 'actualEndTime', title: '实际结束时间' },
   { code: 'remainingTime', title: '剩余预估时间' },
   { code: 'spentWorkTime', title: '已耗费时间' },
   { code: 'allEstimateTime', title: '总预估时间' },

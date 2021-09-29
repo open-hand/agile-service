@@ -5,10 +5,10 @@ import { observer } from 'mobx-react-lite';
 import {
   SelectBox, DataSet, Button, TextField, Icon,
 } from 'choerodon-ui/pro';
-import { fieldApi } from '@/api';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { FuncType } from 'choerodon-ui/pro/lib/button/interface';
 import { includes } from 'lodash';
+import { fieldApi } from '@/api';
 import { getApplyType } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import styles from './ImportFields.less';
@@ -29,6 +29,8 @@ const programSystemFields = [
   { code: 'subProject', title: '负责的子项目' },
   { code: 'estimatedStartTime', title: '预计开始时间' },
   { code: 'estimatedEndTime', title: '预计结束时间' },
+  { code: 'actualStartTime', title: '实际开始时间' },
+  { code: 'actualEndTime', title: '实际结束时间' },
   { code: 'benfitHypothesis', title: '特性价值' },
   { code: 'acceptanceCritera', title: '验收标准' },
   { code: 'programVersion', title: '版本' },
@@ -55,6 +57,8 @@ const projectSystemFields = [
   { code: 'label', title: '标签' },
   { code: 'estimatedStartTime', title: '预计开始时间' },
   { code: 'estimatedEndTime', title: '预计结束时间' },
+  { code: 'actualStartTime', title: '实际开始时间' },
+  { code: 'actualEndTime', title: '实际结束时间' },
   { code: 'mainResponsible', title: '主要负责人' },
   { code: 'environment', title: '环境' },
 ];
@@ -79,6 +83,8 @@ const subProjectSystemFields = [
   { code: 'label', title: '标签' },
   { code: 'estimatedStartTime', title: '预计开始时间' },
   { code: 'estimatedEndTime', title: '预计结束时间' },
+  { code: 'actualStartTime', title: '实际开始时间' },
+  { code: 'actualEndTime', title: '实际结束时间' },
   { code: 'mainResponsible', title: '主要负责人' },
   { code: 'environment', title: '环境' },
 ];

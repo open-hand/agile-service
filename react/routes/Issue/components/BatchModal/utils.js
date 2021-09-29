@@ -108,6 +108,20 @@ export const systemFields = new Map([
     fieldType: 'datetime',
     emptyValue: EMPTY_VALUE.value_null,
   }],
+  ['actualStartTime', {
+    id: 'actualStartTime',
+    code: 'actualStartTime',
+    name: '实际开始时间',
+    fieldType: 'datetime',
+    emptyValue: EMPTY_VALUE.value_null,
+  }],
+  ['actualEndTime', {
+    id: 'actualEndTime',
+    code: 'actualEndTime',
+    name: '实际结束时间',
+    fieldType: 'datetime',
+    emptyValue: EMPTY_VALUE.value_null,
+  }],
   ['mainResponsibleId', {
     id: 'mainResponsibleId',
     code: 'mainResponsibleId',

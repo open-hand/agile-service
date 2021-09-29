@@ -1,6 +1,6 @@
+import { find } from 'lodash';
 import { ListLayoutColumnVO } from '@/api';
 import { IFoundationHeader } from '@/common/types';
-import { find } from 'lodash';
 
 export default function getListLayoutColumns(listLayoutColumns: ListLayoutColumnVO[] | null, fields: IFoundationHeader[]): ListLayoutColumnVO[] {
   let res:ListLayoutColumnVO[] = [];
