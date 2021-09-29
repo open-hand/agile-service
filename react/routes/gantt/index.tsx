@@ -53,6 +53,11 @@ import { openCustomColumnManageModal } from '@/components/table-cache/column-man
 import QuickCreateIssue from '@/components/QuickCreateIssue';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import QuickCreateSubIssue from '@/components/QuickCreateSubIssue';
+import { useUpdateColumnMutation } from '@/hooks/data/useTableColumns';
+import TableCache, { TableCacheRenderProps } from '@/components/table-cache';
+import { getTableColumns as getIssueTableColumns } from '@/components/issue-table/columns';
+import getListLayoutColumns from '../Issue/components/issue-table/utils/getListLayoutColumns';
+import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 
 dayjs.extend(weekday);
 const typeOptions = [{
@@ -305,15 +310,21 @@ const getTableColumns = ({ onSortChange }: any, openCreateSubIssue: (parentIssue
     //   label: '预计结束',
     // },
   ];
+
   return tableColumns;
 };
-const GanttPage: React.FC = () => {
+const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
   const { isInProgram } = useIsInProgram();
   const [data, setData] = useState<any[]>([]);
   const [isCreate, setIsCreate] = useState(false);
   const typeChangeRefreshFlag = useRef<boolean>(false);
   const [type, setType] = useState<TypeValue>(localPageCacheStore.getItem('gantt.search.type') ?? typeValues[0]);
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
+  const mutation = useUpdateColumnMutation('gantt');
+  const { data: tableFields } = useIssueTableFields();
+  // console.log('tableFields', tableFields);
+  const listLayoutColumns = useMemo(() => getListLayoutColumns(cached?.listLayoutColumns || [], tableFields || []), [cached?.listLayoutColumns, tableFields]);
+
   const [{ data: sortedList }, sortLabelProps] = useGanttSortLabel();
 
   const [workCalendar, setWorkCalendar] = useState<any>();
@@ -653,6 +664,12 @@ const GanttPage: React.FC = () => {
     }
     set(quickCreateDataRef.current, defaultKey, value);
   });
+  const visibleColumnCodes = useMemo(() => (listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode)), [listLayoutColumns]);
+
+  // const showColumns = useMemo(() => getTableColumns({
+  //   cached?.listLayoutColumns, tableFields, onSummaryClick: () => { }, handleColumnResize: () => { },
+  // }), [listLayoutColumns]);
+
   return (
     <Page>
       <Header>
@@ -707,14 +724,8 @@ const GanttPage: React.FC = () => {
                   modelProps: {
                     title: '设置列显示字段',
                   },
-                  options: [
-                    { code: 'assignee', title: '经办人' },
-                    { code: 'startDate', title: '预计开始时间' },
-                    ...new Array(30).fill({ code: 'startDate', title: '预计开始时间' }).map((i, index) => ({
-                      code: `${i.code}-${index}`, title: `${i.title}-${index}`,
-                    })),
 
-                  ],
+                  options: tableFields || [],
                   type: 'gannt',
                 });
               },
@@ -847,4 +858,10 @@ const GanttPage: React.FC = () => {
     </Page>
   );
 };
-export default observer(GanttPage);
+const ObserverGanttPage = observer(GanttPage) as React.FC<TableCacheRenderProps>;
+const GanntPageHOC = () => (
+  <TableCache type="gantt">
+    {(cacheProps) => <ObserverGanttPage {...cacheProps} />}
+  </TableCache>
+);
+export default GanntPageHOC;
