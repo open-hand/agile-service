@@ -7,6 +7,47 @@ body.c7n-gantt-fullScreen {
 }
 
 .c7n-gantt-content {
+  &-body {
+    display: flex;
+    flex-flow: column;
+    flex: 1;
+    margin-bottom: .2rem;
+
+    &-create {
+      .c7n-subTask-quickCreate {
+        padding: 0;
+      }
+
+      .c7n-pro-btn-wrapper {
+        display: none !important;
+      }
+    }
+
+    &-parent_create {
+      padding-left: .05rem;
+      opacity: 0;
+      transition: all ease-in 0.3s;
+      color: var(--primary-color);
+    }
+
+    &-quick-create {
+      margin-top: -.01rem;
+      border: 1px solid var(--divider);
+      // border-top: none;
+      &-open {
+        margin-top: .05rem;
+        border: none;
+      }
+    }
+    .gantt-table-body-cell:hover,
+    .gantt-table-body-cell:focus,
+    .gantt-table-body-cell:active {
+      .c7n-gantt-content-body-parent_create {
+        opacity: 1;
+      }
+    }
+  }
+
   .c7n-issue-search {
     max-width: 100%;
     margin-right: 0;
@@ -16,6 +57,8 @@ body.c7n-gantt-fullScreen {
 .gantt-body {
   flex: 1;
   border: 1px solid var(--divider);
+  border-bottom-left-radius: unset;
+  border-bottom-right-radius: unset;
 
   * {
     border-color: var(--divider) !important;
@@ -34,7 +77,7 @@ body.c7n-gantt-fullScreen {
 }
 
 .gantt-table-body {
-  & > div {
+  &>div {
     color: var(--text-color3) !important;
   }
 }

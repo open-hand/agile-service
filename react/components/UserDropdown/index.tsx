@@ -59,7 +59,14 @@ const Overlay: React.FC<OverlayProps> = ({
   }, [defaultAssignee, setSelectedUser, setVisible, userListDs]);
 
   return (
-    <div className={styles.overlay}>
+    <div
+      role="none"
+      className={styles.overlay}
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      }}
+    >
       <div style={{ background: '#FFF' }}>
         <div role="none" onClick={handleClick} className={styles.searchDiv}>
           <TextField clearButton placeholder="输入文字以进行过滤" value={filterStr} onChange={handleSearchUser} />
