@@ -197,7 +197,7 @@ const renderTooltip = (user: User) => {
 };
 const { Option } = FlatSelect;
 
-const getTableColumns = ({ onSortChange }: any, openCreateSubIssue: (parentIssue: Issue) => void, onCreateAfter: (createId: number, subIssue: Issue, parentIssueId: string) => void) => {
+const getTableColumns = ({ onSortChange }: any, openCreateSubIssue: (parentIssue: Issue) => void, onCreateAfter: (createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed?: boolean) => void) => {
   const tableColumns: GanttProps<Issue>['columns'] = [{
     flex: 2,
     minWidth: 200,
@@ -208,7 +208,7 @@ const getTableColumns = ({ onSortChange }: any, openCreateSubIssue: (parentIssue
     render: (record) => {
       if (record.create) {
         const parentIssue: Issue = record.parent;
-        const onCreate = (issue: Issue) => onCreateAfter(record.createId, issue, parentIssue.issueId);
+        const onCreate = (issue: Issue) => onCreateAfter(record.createId, { subIssue: issue, parentIssueId: parentIssue.issueId });
         return (
           <span role="none" onClick={(e) => e.stopPropagation()} className="c7n-gantt-content-body-create">
             <QuickCreateSubIssue
@@ -217,13 +217,21 @@ const getTableColumns = ({ onSortChange }: any, openCreateSubIssue: (parentIssue
               priorityId={parentIssue.priorityVO?.id}
               parentIssueId={parentIssue.issueId}
               sprintId={(parentIssue as any).sprint?.sprintId!}
-              cantCreateEvent={() => openCreateIssue({
-                onCreate,
-              })}
+              cantCreateEvent={() => {
+                onCreateAfter(record.createId, undefined, true);
+                // 这里延迟打开
+                setTimeout(() => {
+                  openCreateIssue({
+                    onCreate,
+                  });
+                }, 110);
+              }}
               onCreate={onCreate}
               defaultAssignee={undefined}
               onAwayClick={(createFn) => {
-                createFn();
+                createFn().then((res: boolean) => {
+                  !res && onCreateAfter(record.createId, undefined, true);
+                });
               }}
             />
           </span>
@@ -288,13 +296,13 @@ const getTableColumns = ({ onSortChange }: any, openCreateSubIssue: (parentIssue
     label: '预计结束',
     render: (record) => record.estimatedEndTime && <Tooltip title={record.estimatedEndTime}><span>{dayjs(record.estimatedEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
   },
-  {
-    // flex: 1,
-    width: 100,
-    minWidth: 100,
-    name: 'estimatedEndTime1',
-    label: '预计结束',
-  },
+    // {
+    //   // flex: 1,
+    //   width: 100,
+    //   minWidth: 100,
+    //   name: 'estimatedEndTime1',
+    //   label: '预计结束',
+    // },
     // {
     //   // flex: 1,
     //   width: 100,
@@ -321,8 +329,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
   const [type, setType] = useState<TypeValue>(localPageCacheStore.getItem('gantt.search.type') ?? typeValues[0]);
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
   const mutation = useUpdateColumnMutation('gantt');
-  const { data: tableFields } = useIssueTableFields();
-  // console.log('tableFields', tableFields);
+  const { data: tableFields } = useIssueTableFields({ hiddenFieldCodes: ['epicSelfName'] });
   const listLayoutColumns = useMemo(() => getListLayoutColumns(cached?.listLayoutColumns || [], tableFields || []), [cached?.listLayoutColumns, tableFields]);
 
   const [{ data: sortedList }, sortLabelProps] = useGanttSortLabel();
@@ -548,12 +555,15 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
     handleCreateIssue(subIssue, parentIssueId, parentIssueId);
   });
 
-  const handleQuickCreateSubIssueAfter = usePersistFn((createId: number, subIssue: Issue, parentIssueId: string) => {
+  const handleQuickCreateSubIssueAfter = usePersistFn((createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed = false) => {
     setData(produce(data, (draft) => {
       const delCreateIndex = findIndex(draft, { createId });
       draft.splice(delCreateIndex, 1);
     }));
-    handleCreateSubIssue(subIssue, parentIssueId);
+    if (!flagFailed && createSuccessData) {
+      const { subIssue, parentIssueId } = createSuccessData;
+      handleCreateSubIssue(subIssue, parentIssueId);
+    }
   });
   const tableWithSortedColumns = useMemo(() => getTableColumns(sortLabelProps, handleQuickCreateSubIssue, handleQuickCreateSubIssueAfter), [handleQuickCreateSubIssue, handleQuickCreateSubIssueAfter, sortLabelProps]);
 

@@ -5,7 +5,7 @@ import useIsInProgram from '../useIsInProgram';
 import useProjectKey from './useProjectKey';
 
 export interface IssueTableFieldsConfig {
-
+  hiddenFieldCodes?: string[]
 }
 const systemFields = [
   { code: 'summary', title: '概要' },
@@ -43,7 +43,7 @@ export default function useIssueTableFields(config?: IssueTableFieldsConfig, opt
   const { isInProgram } = useIsInProgram();
   const { data, ...others } = useQuery(key, () => fieldApi.getFoundationHeader(), {
     initialData: systemFields,
-    select: (res) => systemFields.concat(res),
+    select: (res) => (config?.hiddenFieldCodes ? systemFields.concat(res).filter((field) => !config.hiddenFieldCodes?.includes(field.code)) : systemFields.concat(res)),
     ...options,
   });
 
