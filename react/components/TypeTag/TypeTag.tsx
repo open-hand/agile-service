@@ -1,17 +1,19 @@
 import React, { memo } from 'react';
 import { Icon, Tooltip } from 'choerodon-ui';
 import './TypeTag.less';
+import classNames from 'classnames';
 import { IIssueType, IFeatureType } from '@/common/types';
 
 interface Props {
   data: IIssueType
   showName?: boolean
+  className?: string
   style?: React.CSSProperties
   featureType?: IFeatureType
   iconSize?: number
 }
 const TypeTag: React.FC<Props> = ({
-  data, showName, style, featureType, iconSize = 24,
+  data, showName, style, featureType, iconSize = 24, className,
 }) => {
   let {
     colour, name = '', icon,
@@ -33,7 +35,7 @@ const TypeTag: React.FC<Props> = ({
     <Tooltip
       title={name}
     >
-      <div className="c7n-typeTag" style={style}>
+      <div className={classNames('c7n-typeTag', className)} style={style}>
         {!reverse ? (
           <Icon
             className="c7n-typeTag-icon-normal"

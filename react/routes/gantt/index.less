@@ -33,12 +33,34 @@ body.c7n-gantt-fullScreen {
     &-quick-create {
       margin-top: -.01rem;
       border: 1px solid var(--divider);
+
       // border-top: none;
       &-open {
         margin-top: .05rem;
         border: none;
       }
     }
+
+    &-summary {
+      flex: 1;
+      display: flex;
+      align-items: center;
+
+      &-text {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .c7n-typeTag {
+        flex-shrink: 0;
+      }
+
+      .c7n-gantt-content-body-parent_create {
+        flex-shrink: 0;
+      }
+    }
+
     .gantt-table-body-cell:hover,
     .gantt-table-body-cell:focus,
     .gantt-table-body-cell:active {
