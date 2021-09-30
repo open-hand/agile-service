@@ -200,8 +200,8 @@ const { Option } = FlatSelect;
 const getTableColumns = ({ onSortChange }: any, openCreateSubIssue: (parentIssue: Issue) => void, onCreateAfter: (createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed?: boolean) => void) => {
   const tableColumns: GanttProps<Issue>['columns'] = [{
     flex: 2,
-    minWidth: 200,
-    width: 300,
+    minWidth: 300,
+    // width: 300,
     lock: 'left',
     name: 'summary',
     label: '名称',
@@ -240,10 +240,10 @@ const getTableColumns = ({ onSortChange }: any, openCreateSubIssue: (parentIssue
       const isCanCreateIssue = isCanQuickCreateIssue(record);
       return !record.group ? (
         // eslint-disable-next-line no-underscore-dangle
-        <span style={{ cursor: 'pointer', color: 'var(--table-click-color)' }} className={classNames({ 'c7n-gantt-content-body-summary': isCanCreateIssue })}>
+        <span style={{ cursor: 'pointer', color: 'var(--table-click-color)' }} className={classNames('c7n-gantt-content-body-summary')}>
           <TypeTag iconSize={22} data={record.issueTypeVO} style={{ marginRight: 5 }} />
           <Tooltip title={record.summary}>
-            <span style={{ verticalAlign: 'middle' }}>{record.summary}</span>
+            <span style={{ verticalAlign: 'middle', flex: 1 }} className="c7n-gantt-content-body-summary-text">{record.summary}</span>
           </Tooltip>
           {isCanCreateIssue && (
             <Icon
@@ -278,7 +278,6 @@ const getTableColumns = ({ onSortChange }: any, openCreateSubIssue: (parentIssue
     ),
   },
   {
-    // flex: 1,
     width: 100,
     minWidth: 100,
     name: 'estimatedStartTime',
@@ -289,7 +288,6 @@ const getTableColumns = ({ onSortChange }: any, openCreateSubIssue: (parentIssue
     render: (record) => record.estimatedStartTime && <Tooltip title={record.estimatedStartTime}><span>{dayjs(record.estimatedStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
   },
   {
-    // flex: 1,
     width: 100,
     minWidth: 100,
     name: 'estimatedEndTime',
