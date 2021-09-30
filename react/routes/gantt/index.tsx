@@ -348,7 +348,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
   const handleQuickCreateSubIssue = usePersistFn((parentIssue: Issue) => {
     setData(produce(data, (draft) => {
       const targetIndex = findIndex(draft, (issue) => issue.parentId === parentIssue.issueId || issue.issueId === parentIssue.issueId);
-      targetIndex && draft.splice(targetIndex, 0, {
+      targetIndex !== -1 && draft.splice(targetIndex, 0, {
         parentId: parentIssue.issueId, parent: parentIssue, create: true, createId: targetIndex,
       });
     }));
