@@ -61,6 +61,7 @@ const Overlay: React.FC<OverlayProps> = ({
   return (
     <div
       role="none"
+      id="agile-userDropdown-overlay"
       className={styles.overlay}
       onClick={(e) => {
         e.stopPropagation();

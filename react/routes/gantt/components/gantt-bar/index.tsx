@@ -31,7 +31,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
   const { ganttRef } = store;
   const { record: issue, loading, stepGesture } = bar;
   const statusType = issue.statusVO.type;
-  const subTasks = issue.children ? issue.children.filter((i) => i.issueTypeVO.typeCode === 'sub_task') : [];
+  const subTasks = issue.children ? issue.children.filter((i) => i.issueTypeVO?.typeCode === 'sub_task') : [];
   const hasChildren = subTasks && subTasks.length > 0;
   const totalCount = subTasks?.length || 0;
   const completeCount = subTasks?.filter((item) => item.completed).length || 0;

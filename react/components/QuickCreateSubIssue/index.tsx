@@ -5,9 +5,9 @@ import { Choerodon } from '@choerodon/boot';
 import {
   Input, Icon, Dropdown, Menu,
 } from 'choerodon-ui';
-import { Button } from 'choerodon-ui/pro';
+import { Button, Spin } from 'choerodon-ui/pro';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
-import { useClickAway, useLockFn } from 'ahooks';
+import { useClickAway, useLockFn, useUpdateEffect } from 'ahooks';
 import { find } from 'lodash';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { IIssueType, Issue, User } from '@/common/types';
@@ -40,6 +40,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   const [summary, setSummary] = useState('');
   const [expand, setExpand] = useState(!!mountCreate);
   const [id, setId] = useState<string | undefined>();
+  const [createStatus, setCreateStatus] = useState<'init' | 'success' | 'failed'>('init');
   const [loading, setLoading] = useState(false);
   const currentTemplate = useRef<string>('');
   const currentType = issueTypes?.find((t) => t.id === id);
@@ -80,10 +81,11 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
             assigneeChange(assigneeId, userDropDownRef?.current?.selectedUser);
           }
           setLoading(false);
+          setCreateStatus('failed');
           handleCancel();
           cantCreateEvent();
         }
-        return;
+        return false;
       }
       const param = {
         schemeCode: 'agile_issue',
@@ -114,7 +116,11 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
       handleCancel();
       onCreate && onCreate(res);
       localCacheStore.setItem('agile.issue.type.sub.selected', currentType.id);
+      setCreateStatus('success');
+      return true;
     }
+    setCreateStatus('failed');
+    return false;
   });
   useEffect(() => {
     if (expand && id) {
@@ -130,11 +136,14 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
     setExpand(false);
   }, []);
   useClickAway((e) => {
-    if (e && (e as MouseEvent).composedPath().some((dom) => (dom as HTMLElement)?.className === 'c7n-pro-popup-container')) {
+    if (e && (e as MouseEvent).composedPath().some((dom) => (dom as HTMLElement)?.id === 'quickCreateSubIssue-issueType-overlay' || (dom as HTMLElement)?.id === 'agile-userDropdown-overlay')) {
       return;
     }
-    !isLoading && onAwayClick && onAwayClick(handleCreate);
+    !isLoading && createStatus !== 'failed' && onAwayClick && onAwayClick(handleCreate);
   }, ref);
+  useUpdateEffect(() => {
+    expand && setCreateStatus('init');
+  }, [expand]);
   if (isLoading) {
     return null;
   }
@@ -144,75 +153,79 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
       {expand
         ? (
           <div style={{ display: 'block', width: '100%' }}>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              {issueTypes.length > 1 && (
-                <Dropdown
-                  overlay={(
-                    <Menu
-                      style={{
-                        background: '#fff',
-                        boxShadow: '0 5px 5px -3px rgba(0, 0, 0, 0.20), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px var(--divider)',
-                        borderRadius: '2px',
-                      }}
-                      onClick={handleMenuClick}
-                    >
-                      {
-                        issueTypes.map((type) => (
-                          <Menu.Item key={type.id}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <TypeTag
-                                data={type}
-                                showName
-                              />
-                            </div>
-                          </Menu.Item>
-                        ))
-                      }
-                    </Menu>
-                  )}
-                  trigger={['click']}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <TypeTag
-                      data={currentType as IIssueType}
-                    />
-                    <Icon
-                      type="arrow_drop_down"
-                      style={{ fontSize: 16 }}
-                    />
-                  </div>
-                </Dropdown>
-              )}
-              <UserDropdown userDropDownRef={userDropDownRef} defaultAssignee={defaultAssignee} key={defaultAssignee?.id} />
+            <Spin spinning={loading} size={'small' as any}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                {issueTypes.length > 1 && (
+                  <Dropdown
+                    overlay={(
+                      <Menu
+                        style={{
+                          background: '#fff',
+                          boxShadow: '0 5px 5px -3px rgba(0, 0, 0, 0.20), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px var(--divider)',
+                          borderRadius: '2px',
+                        }}
+                        id="quickCreateSubIssue-issueType-overlay"
+                        onClick={handleMenuClick}
+                      >
+                        {
+                          issueTypes.map((type) => (
+                            <Menu.Item key={type.id}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <TypeTag
+                                  data={type}
+                                  showName
+                                />
+                              </div>
+                            </Menu.Item>
+                          ))
+                        }
+                      </Menu>
+                    )}
+                    trigger={['click']}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <TypeTag
+                        data={currentType as IIssueType}
+                      />
+                      <Icon
+                        type="arrow_drop_down"
+                        style={{ fontSize: 16 }}
+                      />
+                    </div>
+                  </Dropdown>
+                )}
+                <UserDropdown userDropDownRef={userDropDownRef} defaultAssignee={defaultAssignee} key={defaultAssignee?.id} />
 
-              <Input
-                className="hidden-label"
-                autoFocus
-                autoComplete="on"
-                onPressEnter={handleCreate}
-                onChange={(e) => {
-                  setSummary(e.target.value);
-                }}
-                value={summary}
-                maxLength={44}
-                placeholder="请输入问题概要"
-              />
-              <Button
-                color={'primary' as ButtonColor}
-                onClick={handleCreate}
-                style={{ marginLeft: 10 }}
-                loading={loading}
-                disabled={!summary}
-              >
-                确定
-              </Button>
-              <Button
-                onClick={handleCancel}
-                disabled={loading}
-              >
-                取消
-              </Button>
-            </div>
+                <Input
+                  className="hidden-label"
+                  autoFocus
+                  autoComplete="on"
+                  onPressEnter={handleCreate}
+                  onChange={(e) => {
+                    setSummary(e.target.value);
+                  }}
+                  disabled={loading}
+                  value={summary}
+                  maxLength={44}
+                  placeholder="请输入问题概要"
+                />
+                <Button
+                  color={'primary' as ButtonColor}
+                  onClick={handleCreate}
+                  style={{ marginLeft: 10 }}
+                  loading={loading}
+                  disabled={!summary}
+                >
+                  确定
+                </Button>
+                <Button
+                  onClick={handleCancel}
+                  disabled={loading}
+                >
+                  取消
+                </Button>
+              </div>
+            </Spin>
           </div>
         ) : (
           <Button
