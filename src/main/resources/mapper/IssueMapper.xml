@@ -553,6 +553,7 @@
         ai.parent_issue_id,
         ai.relate_issue_id,
         ai.status_id,
+        ai.priority_id,
         CONVERT(ai.issue_num,SIGNED) as issue_num_convert,
         ai.actual_start_time,
         ai.actual_end_time,

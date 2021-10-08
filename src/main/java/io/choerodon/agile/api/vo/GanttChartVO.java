@@ -43,6 +43,8 @@ public class GanttChartVO {
 
     private IssueTypeVO issueTypeVO;
 
+    private PriorityVO priorityVO;
+
     @Encrypt
     private Long parentId;
 
@@ -421,5 +423,13 @@ public class GanttChartVO {
 
     public void setEnvironment(String environment) {
         this.environment = environment;
+    }
+
+    public PriorityVO getPriorityVO() {
+        return priorityVO;
+    }
+
+    public void setPriorityVO(PriorityVO priorityVO) {
+        this.priorityVO = priorityVO;
     }
 }
