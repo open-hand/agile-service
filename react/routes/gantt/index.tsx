@@ -44,7 +44,7 @@ import {
   IFoundationHeader, IIssueType, Issue, User,
 } from '@/common/types';
 import isHoliday from '@/utils/holiday';
-import { list2PartTree, list2tree } from '@/utils/tree';
+import { list2tree } from '@/utils/tree';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 import openCreateIssue from '@/components/create-issue';
 import Search from './components/search';
