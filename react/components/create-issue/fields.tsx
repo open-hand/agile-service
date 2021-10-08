@@ -163,6 +163,18 @@ const systemFieldMap: Record<ISystemFieldCodeMap, ProRenderFieldPropsType> = {
       <DateTimePickerWithDefault defaultPickerValue={moment().endOf('d')} {...props} />
     ),
   },
+  actualStartTime: {
+    render: (text) => text,
+    renderFormItem: (props) => (
+      <DateTimePickerWithDefault {...props} />
+    ),
+  },
+  actualEndTime: {
+    render: (text) => text,
+    renderFormItem: (props) => (
+      <DateTimePickerWithDefault defaultPickerValue={moment().endOf('d')} {...props} />
+    ),
+  },
   component: {
     render: (text) => text,
     renderFormItem: (props) => (
