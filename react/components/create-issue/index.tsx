@@ -35,6 +35,9 @@ const openModal = (props: CreateIssueProps) => {
     style: {
       width: MODAL_WIDTH.middle,
     },
+    bodyStyle: {
+      overflowX: 'hidden',
+    },
     key: 'create-issue',
     title: '创建问题',
     okText: '创建',

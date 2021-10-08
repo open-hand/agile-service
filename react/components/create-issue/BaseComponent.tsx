@@ -623,62 +623,60 @@ const CreateIssueBase = observer(({
     }
   });
   const renderFields = usePersistFn(() => (
-    <Row gutter={24}>
-      {[...dataSet.fields.values()].filter((f) => f.get('display') !== false).map((dataSetField) => {
-        const { name, required } = dataSetField;
-        const fieldType = dataSetField.get('fieldType');
-        const fieldId = dataSetField.get('fieldId');
-        const config = getFieldConfig({
-          fieldCode: name,
-          fieldType,
-        });
-        const field = find(fields, { fieldCode: name });
+    [...dataSet.fields.values()].filter((f) => f.get('display') !== false).map((dataSetField) => {
+      const { name, required } = dataSetField;
+      const fieldType = dataSetField.get('fieldType');
+      const fieldId = dataSetField.get('fieldId');
+      const config = getFieldConfig({
+        fieldCode: name,
+        fieldType,
+      });
+      const field = find(fields, { fieldCode: name });
 
-        const extraProps = getFieldProps({
-          required: required || false,
-          fieldCode: name,
-          fieldType,
-          defaultValueObj: field?.defaultValueObj,
-          defaultValueObjs: field?.defaultValueObjs,
-        });
-        if (extraProps.hidden) {
-          return null;
-        }
-        return config
-          ? (
-            <Col
-              key={name}
-              style={{ marginBottom: 24 }}
-              span={lineField.includes(dataSetField.name) ? 24 : 12}
+      const extraProps = getFieldProps({
+        required: required || false,
+        fieldCode: name,
+        fieldType,
+        defaultValueObj: field?.defaultValueObj,
+        defaultValueObjs: field?.defaultValueObjs,
+      });
+      if (extraProps.hidden) {
+        return null;
+      }
+      return config
+        ? ([
+          config.renderFormItem({
+            name,
+            fieldId,
+            projectId,
+            clearButton: !required,
+            multiple: dataSetField.get('multiple'),
+            style: {
+              width: '100%',
+            },
+            colSpan: lineField.includes(dataSetField.name) ? 2 : 1,
+            newLine: lineField.includes(dataSetField.name),
+            ...extraProps,
+          }),
+          name === 'description' ? (
+            <div
+              // @ts-ignore
+              newLine
+              colSpan={2}
             >
-              {config.renderFormItem({
-                name,
-                fieldId,
-                projectId,
-                clearButton: !required,
-                multiple: dataSetField.get('multiple'),
-                style: {
-                  width: '100%',
-                },
-                ...extraProps,
-              })}
-              {name === 'description' ? (
-                <div style={{ marginTop: 14 }}>
-                  <UploadButton
-                    fileList={fileList}
-                    onChange={({ fileList: files }) => {
-                      if (validateFile(files)) {
-                        setFileList(files);
-                      }
-                    }}
-                  />
-                </div>
-              ) : null}
-            </Col>
-          )
-          : null;
-      })}
-    </Row>
+              <UploadButton
+                fileList={fileList}
+                onChange={({ fileList: files }) => {
+                  if (validateFile(files)) {
+                    setFileList(files);
+                  }
+                }}
+              />
+            </div>
+          ) : null,
+        ])
+        : null;
+    })
   ));
   const issueLinkDataSet = useMemo(() => new DataSet({
     // autoCreate: true,
@@ -705,10 +703,11 @@ const CreateIssueBase = observer(({
     <Spin spinning={isLoading || isFieldsLoading}>
       <Form
         dataSet={dataSet}
+        columns={2}
       >
-        {parentIssue ? <TextField label="父任务概要" value={parentIssue.summary} disabled /> : null}
+        {parentIssue ? <TextField label="父任务概要" value={parentIssue.summary} disabled colSpan={2} /> : null}
         {renderFields()}
-        {issueTypeCode === 'feature' ? <WSJF /> : null}
+        {issueTypeCode === 'feature' ? <WSJF dataSet={dataSet} /> : null}
       </Form>
       {enableIssueLinks ? <IssueLink projectId={projectId} dataSet={issueLinkDataSet} /> : null}
     </Spin>
