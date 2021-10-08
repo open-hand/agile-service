@@ -405,6 +405,8 @@ export type ISystemFieldCodeMap =
   'storyPoints' |
   'estimatedStartTime' |
   'estimatedEndTime' |
+  'actualStartTime' |
+  'actualEndTime' |
   'label' |
   'component' |
   'storyPoints' |

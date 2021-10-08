@@ -44,6 +44,8 @@ const AgileComponentMapWithPro = {
   subProject: SelectTeam,
   estimatedStartTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
   estimatedEndTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
+  actualStartTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
+  actualEndTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
 };
 const CreateCustomFieldMap = {
   ...CustomFieldMap,
@@ -87,6 +89,12 @@ const systemFieldConfigMap: ICreateComponentPropsDistributeProRender<typeof Agil
     valueKey: 'sprintId',
   },
   estimatedEndTime: {
+    render: (text) => text,
+    props: {
+      defaultPickerValue: moment().endOf('d'),
+    },
+  },
+  actualEndTime: {
     render: (text) => text,
     props: {
       defaultPickerValue: moment().endOf('d'),

@@ -94,6 +94,12 @@ const presets = new Map([
   ['estimatedEndTime', {
     min: 'estimatedStartTime',
   }],
+  ['actualStartTime', {
+    max: 'actualEndTime',
+  }],
+  ['actualEndTime', {
+    min: 'actualStartTime',
+  }],
 ]);
 const afterLoadKeyMap = new Map([
   ['component', 'componentId'],
@@ -535,6 +541,8 @@ const CreateIssueBase = observer(({
       case 'mainResponsible':
       case 'estimatedStartTime':
       case 'estimatedEndTime':
+      case 'actualStartTime':
+      case 'actualEndTime':
       case 'benfitHypothesis':
       case 'acceptanceCritera': {
         return {

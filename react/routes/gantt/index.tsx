@@ -202,6 +202,7 @@ const getTableColumns = ({ onSortChange }: any, openCreateSubIssue: (parentIssue
     flex: 2,
     minWidth: 300,
     // width: 300,
+    // @ts-ignore
     lock: 'left',
     name: 'summary',
     label: '名称',
