@@ -1,9 +1,12 @@
 import React from 'react';
 
 import moment from 'moment';
+import 'moment/locale/zh-cn';
+import 'moment/locale/en-nz';
 import {
   merge, omit,
 } from 'lodash';
+import { stores } from '@choerodon/boot';
 import UserTag from '@/components/tag/user-tag';
 import SelectCustomFieldBox from '@/components/select/select-custom-field-box';
 import SelectFeature from '@/components/select/select-feature';
@@ -20,6 +23,12 @@ import type { IAgileBaseFieldTypeComponentProps } from '../base/component';
 import type {
   IComponentFCWithClassObject, IClassComponentType, IComponentFCWithClassObjectProps, IComponentFCWithClass,
 } from '../base/type';
+
+const { AppState } = stores;
+
+if (AppState.currentLanguage === 'zh_CN') {
+  moment.locale('zh-cn');
+}
 
 type ProRenderFieldPropsType<P = any> = {
   render?: ((
