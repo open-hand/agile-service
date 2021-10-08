@@ -581,8 +581,8 @@
         </if>
         left join lookup_value alv on ai.color_code = alv.value_code
         where ai.project_id in
-        <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
-            #{issueId}
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
         </foreach>
         and ai.issue_id in
         <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
