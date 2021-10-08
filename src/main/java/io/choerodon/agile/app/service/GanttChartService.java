@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.GanttChartVO;
+import io.choerodon.agile.api.vo.GanttMoveVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -21,8 +22,9 @@ public interface GanttChartService {
      * @param searchVO
      * @return
      */
-    Page<GanttChartVO> pagedQuery(Long projectId, SearchVO searchVO, PageRequest pageRequest, String dimension);
+    Page<GanttChartVO> pagedQuery(Long projectId, SearchVO searchVO, PageRequest pageRequest);
 
     List<GanttChartVO> listByIds(Long projectId, Set<Long> issueIds, String dimension);
 
+    void move(Long projectId, GanttMoveVO ganttMoveVO);
 }

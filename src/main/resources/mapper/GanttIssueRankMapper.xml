@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.GanttIssueRankMapper">
+    <insert id="batchInsert">
+        <bind name="audit" value="@io.choerodon.mybatis.helper.AuditHelper@audit()"/>
+        insert into agile_gantt_issue_rank (issue_id, dimension, instance_id, instance_type, rank, project_id, organization_id, created_by, last_updated_by)
+        values
+        <foreach collection="ganttIssueRanks" item="ganttIssueRank" separator=",">
+            (
+            #{ganttIssueRank.issueId},
+            #{ganttIssueRank.dimension},
+            #{ganttIssueRank.instanceId},
+            #{ganttIssueRank.instanceType},
+            #{ganttIssueRank.rank},
+            #{ganttIssueRank.projectId},
+            #{ganttIssueRank.organizationId},
+            #{audit.user},
+            #{audit.user}
+            )
+        </foreach>
+    </insert>
+
+
+    <select id="selectByOptions" resultType="io.choerodon.agile.infra.dto.GanttIssueRankDTO">
+        select agir.*
+        from agile_gantt_issue_rank agir
+        where agir.organization_id = #{organizationId}
+        and agir.project_id = #{projectId}
+        and agir.dimension = #{dimension}
+        and agir.instance_type = #{instanceType}
+        and agir.instance_id = #{instanceId}
+        <if test="issueIds != null and issueIds.size() > 0">
+            and agir.issue_id in
+            <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+                #{issueId}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="selectMinRank" resultType="io.choerodon.agile.infra.dto.GanttIssueRankDTO">
+        select rank
+        from agile_gantt_issue_rank
+        where organization_id = #{organizationId}
+        and project_id = #{projectId}
+        and dimension = #{dimension}
+        and instance_type = #{instanceType}
+        and instance_id = #{instanceId}
+        order by rank asc
+        limit 1
+    </select>
+
+    <select id="selectByIssueIdWithRank" resultType="io.choerodon.agile.infra.dto.GanttIssueRankDTO">
+        select
+        ai.issue_id,
+        agir.rank,
+        agir.id
+        from agile_issue ai
+        left join agile_gantt_issue_rank agir
+        on (
+        agir.organization_id = #{organizationId}
+        and agir.project_id = #{projectId}
+        and agir.dimension = #{dimension}
+        and agir.instance_type = #{instanceType}
+        and agir.instance_id = #{instanceId}
+        and ai.issue_id = agir.issue_id
+        )
+        where ai.project_id = #{projectId}
+        and ai.issue_id in
+        <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+            #{issueId}
+        </foreach>
+    </select>
+
+    <select id="selectMaxPreviousRankOrderByRankAsc" resultType="java.lang.String">
+        select rank
+        from agile_gantt_issue_rank
+        where organization_id = #{organizationId}
+        and project_id = #{projectId}
+        and dimension = #{dimension}
+        and instance_type = #{instanceType}
+        and instance_id = #{instanceId}
+        and rank &lt; #{rank}
+        order by rank desc
+        limit 1
+    </select>
+</mapper>

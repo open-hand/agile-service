@@ -599,7 +599,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 List<Long> issueIds = issueIdPage.getContent();
                 Set<Long> childrenIds = new HashSet<>();
                 if (isTreeView) {
-                    childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
+                    List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null);
+                    childrenIds.addAll(childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet()));
                 }
                 List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds, false, isTreeView);
                 Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
@@ -675,7 +676,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
     }
 
-    private void splitIssueNumProjectCodePrefix(SearchVO searchVO, Long projectId) {
+    @Override
+    public void splitIssueNumProjectCodePrefix(SearchVO searchVO, Long projectId) {
         //去除searchVO.searchArgs.issueNum或searchVO.contents的项目code前缀
         ProjectInfoDTO dto = new ProjectInfoDTO();
         dto.setProjectId(projectId);

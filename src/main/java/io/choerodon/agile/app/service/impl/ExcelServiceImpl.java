@@ -3043,7 +3043,8 @@ public class ExcelServiceImpl implements ExcelService {
                 if (!parentIds.isEmpty()) {
                     Set<Long> childrenIds = new HashSet<>();
                     if (isTreeView) {
-                        childrenIds = issueMapper.queryChildrenIdByParentId(parentIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
+                        List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(parentIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null);
+                        childrenIds.addAll(childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet()));
                     }
                     cursor.addCollections(childrenIds);
                     issues = issueMapper.queryIssueListWithSubByIssueIds(parentIds, childrenIds, true, isTreeView);

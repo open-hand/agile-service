@@ -375,8 +375,11 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                                    @Param("isExcelExported") boolean isExcelExported,
                                                    @Param("withSubIssues") boolean withSubIssues);
 
-    List<IssueDTO> selectWithSubByIssueIds(@Param("projectId") Long projectId,
-                                           @Param("issueIds") List<Long> issueIds);
+    List<IssueDTO> selectWithSubByIssueIds(@Param("projectIds") Set<Long> projectIds,
+                                           @Param("issueIds") List<Long> issueIds,
+                                           @Param("sortMap") Map<String, Object> sortMap,
+                                           @Param("ganttDefaultOrder") boolean ganttDefaultOrder,
+                                           @Param("dimension") String dimension);
 
 
     /**
@@ -464,11 +467,12 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                            @Param("issueIds") List<Long> issueIds,
                                            @Param("issueQueryVO") IssueQueryVO issueQueryVO);
 
-    Set<Long> queryChildrenIdByParentId(@Param("issueIds") List<Long> issueIds,
-                                        @Param("projectId") Long projectId,
-                                        @Param("searchVO") SearchVO searchVO,
-                                        @Param("filterSql") String filterSql,
-                                        @Param("assigneeFilterIds") List<Long> assigneeFilterIds);
+    List<IssueDTO> queryChildrenIdByParentId(@Param("issueIds") List<Long> issueIds,
+                                             @Param("projectId") Long projectId,
+                                             @Param("searchVO") SearchVO searchVO,
+                                             @Param("filterSql") String filterSql,
+                                             @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
+                                             @Param("sortMap") Map<String, Object> sortMap);
 
     List<IssueDTO> queryStoryAndTaskByProjectId(@Param("projectId") Long projectId, @Param("searchVO") SearchVO searchVO);
 
@@ -644,4 +648,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     IssueCountDTO querySubIssueCount(@Param("projectId") Long projectId, @Param("parentIssueId") Long parentIssueId);
 
     List<IssueEpicVO> queryIssueEpicByIds(@Param("projectId")Long projectId, @Param("epicIds") List<Long> epicIds);
+
+    List<IssueDTO> listIssueWithEpicId(@Param("projectId") Long projectId,
+                                       @Param("issueIds") List<Long> issueIds);
 }

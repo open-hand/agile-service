@@ -28,6 +28,16 @@ public class IssueEpicVO {
 
     private IssueTypeVO issueTypeVO;
 
+    private Long programId;
+
+    public Long getProgramId() {
+        return programId;
+    }
+
+    public void setProgramId(Long programId) {
+        this.programId = programId;
+    }
+
     public Long getProjectId() {
         return projectId;
     }

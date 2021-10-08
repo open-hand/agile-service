@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.choerodon.agile.infra.utils.StringUtil;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -38,7 +39,17 @@ public class SearchVO {
 
     private List<String> contents;
 
+    private Boolean ganttDefaultOrder = false;
+
     private List<String> displayFieldCodes;
+
+    public Boolean getGanttDefaultOrder() {
+        return ganttDefaultOrder;
+    }
+    @JsonIgnore
+    public void setGanttDefaultOrder(Boolean ganttDefaultOrder) {
+        this.ganttDefaultOrder = ganttDefaultOrder;
+    }
 
     public List<String> getExportFieldCodes() {
         return exportFieldCodes;
