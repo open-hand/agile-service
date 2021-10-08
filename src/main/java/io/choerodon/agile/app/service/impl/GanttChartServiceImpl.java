@@ -554,6 +554,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         Set<Long> epicIds = new HashSet<>(issueEpicMap.values());
         Set<Long> featureIds = issueFeatureMap.values().stream().map(IssueDTO::getIssueId).collect(Collectors.toSet());
         Map<String, String> envMap = lookupValueService.queryMapByTypeCode(FieldCode.ENVIRONMENT);
+        Map<Long, PriorityVO> priorityMap = ConvertUtil.getIssuePriorityMap(projectId);
         issueList.forEach(i -> {
             Long statusId = i.getStatusId();
             Long issueId = i.getIssueId();
@@ -575,6 +576,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             ganttChart.setFeatureId(Optional.ofNullable(issueFeatureMap.get(issueId)).map(IssueDTO::getIssueId).orElse(null));
             ganttChart.setEpicName(i.getEpicName());
             ganttChart.setColor(i.getEpicColor());
+            ganttChart.setPriorityVO(priorityMap.get(i.getPriorityId()));
             Long assigneeId = i.getAssigneeId();
             if (!ObjectUtils.isEmpty(assigneeId)) {
                 UserMessageDTO assignee = usersMap.get(assigneeId);
