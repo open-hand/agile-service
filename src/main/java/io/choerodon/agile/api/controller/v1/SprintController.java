@@ -123,7 +123,7 @@ public class SprintController {
                                                       @PathVariable(name = "project_id") Long projectId,
                                                       @ApiParam(value = "冲刺DTO对象", required = true)
                                                       @RequestBody @Valid  SprintUpdateVO sprintUpdateVO) {
-        return Optional.ofNullable(sprintService.startSprint(projectId, sprintUpdateVO))
+        return Optional.ofNullable(sprintService.startSprint(projectId, sprintUpdateVO, true))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(OPEN_ERROR));
     }

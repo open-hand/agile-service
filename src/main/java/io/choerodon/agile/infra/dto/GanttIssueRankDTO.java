@@ -12,10 +12,10 @@ import javax.persistence.Table;
  * @author superlee
  * @since 2021-09-28
  */
-@Table(name = "agile_gantt_order")
+@Table(name = "agile_gantt_issue_rank")
 @ModifyAudit
 @VersionAudit
-public class GanttOrderDTO extends AuditDomain {
+public class GanttIssueRankDTO extends AuditDomain {
 
     @Id
     @GeneratedValue

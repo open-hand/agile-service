@@ -29,7 +29,7 @@ public interface SprintService {
 
     List<SprintNameVO> queryNameByOptions(Long projectId, List<String> sprintStatusCodes);
 
-    SprintDetailVO startSprint(Long projectId, SprintUpdateVO sprintUpdateVO);
+    SprintDetailVO startSprint(Long projectId, SprintUpdateVO sprintUpdateVO, boolean noticeIam);
 
     Boolean completeSprint(Long projectId, SprintCompleteVO sprintCompleteVO);
 

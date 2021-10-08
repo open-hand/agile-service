@@ -5,7 +5,6 @@ import io.choerodon.agile.infra.dto.UserMessageDTO;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author superlee
@@ -42,36 +41,84 @@ public class GanttChartVO {
 
     private StatusVO statusVO;
 
-    private List<GanttChartVO> children;
-
     private Boolean completed;
 
     private Date actualCompletedDate;
 
     private IssueSprintDTO sprint;
 
-    private IssueEpicVO epic;
-
-    private FeatureForIssueVO feature;
-
     private Date actualStartTime;
 
     private Date actualEndTime;
 
-    public IssueEpicVO getEpic() {
-        return epic;
+    private String epicName;
+
+    private String color;
+
+    private Long programId;
+
+    private Long projectId;
+    @Encrypt
+    private Long featureId;
+    @Encrypt
+    private Long epicId;
+
+    private String featureName;
+
+    public String getFeatureName() {
+        return featureName;
     }
 
-    public void setEpic(IssueEpicVO epic) {
-        this.epic = epic;
+    public void setFeatureName(String featureName) {
+        this.featureName = featureName;
     }
 
-    public FeatureForIssueVO getFeature() {
-        return feature;
+    public Long getFeatureId() {
+        return featureId;
     }
 
-    public void setFeature(FeatureForIssueVO feature) {
-        this.feature = feature;
+    public void setFeatureId(Long featureId) {
+        this.featureId = featureId;
+    }
+
+    public Long getEpicId() {
+        return epicId;
+    }
+
+    public void setEpicId(Long epicId) {
+        this.epicId = epicId;
+    }
+
+    public String getEpicName() {
+        return epicName;
+    }
+
+    public void setEpicName(String epicName) {
+        this.epicName = epicName;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public Long getProgramId() {
+        return programId;
+    }
+
+    public void setProgramId(Long programId) {
+        this.programId = programId;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
     }
 
     public IssueSprintDTO getSprint() {
@@ -96,14 +143,6 @@ public class GanttChartVO {
 
     public void setCompleted(Boolean completed) {
         this.completed = completed;
-    }
-
-    public List<GanttChartVO> getChildren() {
-        return children;
-    }
-
-    public void setChildren(List<GanttChartVO> children) {
-        this.children = children;
     }
 
     public StatusVO getStatusVO() {

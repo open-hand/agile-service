@@ -371,7 +371,7 @@ public class SprintServiceImpl implements SprintService {
     }
 
     @Override
-    public SprintDetailVO startSprint(Long projectId, SprintUpdateVO sprintUpdateVO) {
+    public SprintDetailVO startSprint(Long projectId, SprintUpdateVO sprintUpdateVO, boolean noticeIam) {
         if (!Objects.equals(projectId, sprintUpdateVO.getProjectId())) {
             throw new CommonException(NOT_EQUAL_ERROR);
         }
@@ -403,6 +403,9 @@ public class SprintServiceImpl implements SprintService {
             });
         }
         issueAccessDataService.updateStayDate(projectId, sprintConvertDTO.getSprintId(), new Date());
+        if (agilePluginService != null && noticeIam) {
+            agilePluginService.sprintStarted(projectId);
+        }
         return sprintUpdateAssembler.toTarget(update(sprintConvertDTO), SprintDetailVO.class);
     }
 

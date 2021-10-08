@@ -1,7 +1,7 @@
 package script.db.groovy.agile_service
-databaseChangeLog(logicalFilePath:'agile_gantt_order.groovy') {
-    changeSet(id: '2021-09-26-agile-gantt-order', author: 'kaiwen.li@hand-china.com') {
-        createTable(tableName: "agile_gantt_order") {
+databaseChangeLog(logicalFilePath:'agile_gantt_issue_rank.groovy') {
+    changeSet(id: '2021-09-26-agile-gantt-issue-rank', author: 'kaiwen.li@hand-china.com') {
+        createTable(tableName: "agile_gantt_issue_rank") {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }

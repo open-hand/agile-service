@@ -557,16 +557,24 @@
         ai.actual_start_time,
         ai.actual_end_time,
         <if test="ganttDefaultOrder">
-            ago.rank,
-            ago.instance_id,
-            ago.instance_type,
+            agir.rank,
+            agir.instance_id,
+            agir.instance_type,
         </if>
-        ai.epic_id
+        ai.epic_id,
+        ai.epic_name,
+        ai.project_id as issue_project_id,
+        alv.name AS epic_color,
+        ai.type_code
         from agile_issue ai
         <if test="ganttDefaultOrder">
-            left join agile_gantt_order ago on ai.issue_id = ago.issue_id and ago.dimension = #{dimension}
+            left join agile_gantt_issue_rank agir on ai.issue_id = agir.issue_id and agir.dimension = #{dimension}
         </if>
-        where ai.project_id = #{projectId}
+        left join lookup_value alv on ai.color_code = alv.value_code
+        where ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
         and ai.issue_id in
         <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
             #{issueId}
@@ -677,14 +685,14 @@
         SELECT
         ai.issue_id,
         <if test="searchVO.ganttDefaultOrder">
-            ago.rank,
-            ago.instance_id,
-            ago.instance_type,
+            agir.rank,
+            agir.instance_id,
+            agir.instance_type,
         </if>
         CONVERT(ai.issue_num,SIGNED) as issue_num_convert
         FROM agile_issue ai
         <if test="searchVO.ganttDefaultOrder">
-            left join agile_gantt_order ago on ai.issue_id = ago.issue_id and ago.dimension = #{searchVO.searchArgs.dimension}
+            left join agile_gantt_issue_rank agir on ai.issue_id = agir.issue_id and agir.dimension = #{searchVO.searchArgs.dimension}
         </if>
         <if test="sortMap != null and sortMap.sortFieldId != null ">
             LEFT JOIN
@@ -733,9 +741,9 @@
         select
         ai.issue_id,
         <if test="searchVO.ganttDefaultOrder">
-            ago.rank,
-            ago.instance_id,
-            ago.instance_type,
+            agir.rank,
+            agir.instance_id,
+            agir.instance_type,
         </if>
         CONVERT(ai.issue_num,SIGNED) as issue_num_convert
         from (
@@ -770,7 +778,7 @@
         join agile_issue ai
         on (ai.project_id = #{projectId} and ai.apply_type = 'agile' and ai1.issue_id = ai.issue_id)
         <if test="searchVO.ganttDefaultOrder">
-            left join agile_gantt_order ago on ai.issue_id = ago.issue_id and ago.dimension = #{searchVO.searchArgs.dimension}
+            left join agile_gantt_issue_rank agir on ai.issue_id = agir.issue_id and agir.dimension = #{searchVO.searchArgs.dimension}
         </if>
         <if test="sortMap != null and sortMap.sortFieldId != null ">
             LEFT JOIN
@@ -841,14 +849,14 @@
         select
         ai.issue_id,
         <if test="searchVO.ganttDefaultOrder">
-            ago.rank,
-            ago.instance_id,
-            ago.instance_type,
+            agir.rank,
+            agir.instance_id,
+            agir.instance_type,
         </if>
         CONVERT(ai.issue_num,SIGNED) as issue_num_convert
         from agile_issue ai
         <if test="searchVO.ganttDefaultOrder">
-            left join agile_gantt_order ago on ai.issue_id = ago.issue_id and ago.dimension = #{searchVO.searchArgs.dimension}
+            left join agile_gantt_issue_rank agir on ai.issue_id = agir.issue_id and agir.dimension = #{searchVO.searchArgs.dimension}
         </if>
         <if test="sortMap != null and sortMap.sortFieldId != null ">
             LEFT JOIN
@@ -5012,4 +5020,19 @@
             #{epicId}
         </foreach>
     </select>
+
+    <select id="listIssueWithEpicId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        select
+            issue_id,
+            epic_id
+        from agile_issue
+        where project_id = #{projectId}
+        and issue_id in
+        <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
+            #{issueId}
+        </foreach>
+        and epic_id is not null
+        and epic_id != 0
+    </select>
+
 </mapper>
