@@ -9,7 +9,7 @@ import { Tooltip, Icon, Button } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import {
-  find, findIndex, isNumber, merge, omit, pick, remove, set, some, get,
+  find, findIndex, isNumber, merge, omit, pick, remove, set, some, get, includes,
 } from 'lodash';
 import produce from 'immer';
 import dayjs from 'dayjs';
@@ -44,7 +44,7 @@ import {
   IFoundationHeader, IIssueType, Issue, User,
 } from '@/common/types';
 import isHoliday from '@/utils/holiday';
-import { list2tree } from '@/utils/tree';
+import { list2PartTree, list2tree } from '@/utils/tree';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 import openCreateIssue from '@/components/create-issue';
 import Search from './components/search';
@@ -96,6 +96,8 @@ const isDisableDrag = (bar: Gantt.Bar, draggingBar?: Gantt.Bar) => {
 };
 const isCanQuickCreateIssue = (record: Gantt.Record<any>) => (!record.group && !record.parentId) && ['story', 'bug', 'task'].includes(record.issueTypeVO?.typeCode);
 const ganttList2Tree = (data: any[]) => list2tree(data, { valueField: 'issueId', parentField: 'parentId' });
+const ganttList2PartTree = (parents: any[], children: any[], placeItem?: any) => list2PartTree(parents, children, { valueField: 'issueId', parentField: 'parentId' }, placeItem);
+
 const groupByTask = (data: any[]) => ganttList2Tree(data);
 const groupByUser = (data: any[]) => {
   const map = new Map<string, any[]>();
@@ -179,7 +181,7 @@ const groupByFeature = (epicChildrenData: any) => {
   }));
 };
 
-const groupByEpic = (data: any, isInProgram: boolean) => {
+const groupByEpic1 = (data: any, isInProgram: boolean) => {
   const map = new Map<string, { epic: any, children: any[] }>();
   const noEpicData: any[] = [];
   data.forEach((issue: any) => {
@@ -208,6 +210,56 @@ const groupByEpic = (data: any, isInProgram: boolean) => {
     children: isInProgram ? groupByFeature(children) : ganttList2Tree(children),
   }));
 };
+
+const groupByEpic = (data: any[], isInProgram: boolean) => {
+  if (isInProgram) {
+    const topTree = ganttList2PartTree(
+      data.filter((item) => item.issueTypeVO.typeCode === 'epic'),
+      data.filter((item) => item.issueTypeVO.typeCode === 'feature'),
+      {
+        group: true,
+        groupType: 'epic',
+        summary: '未分配史诗',
+      },
+    );
+    const otherTree = ganttList2PartTree(
+      data.filter((item) => item.issueTypeVO.typeCode === 'feature'),
+      data.filter((item) => includes(['story', 'task', 'bug'], item.issueTypeVO.typeCode)),
+      {
+        group: true,
+        groupType: 'feature',
+        summary: '未分配特性',
+      },
+    );
+    return topTree.map((item) => ({
+      ...item,
+      children: item.children.map((feature: any) => ({
+        ...feature,
+        children: ganttList2PartTree(
+          (otherTree.find((feature1) => feature1.issueId === feature.issueId)?.children || []).filter((issue: any) => issue.issueTypeVO.typeCode !== 'bug' || (item.issueTypeVO.typeCode === 'bug' && !item.parentId)),
+          data.filter((subIssue) => includes(['sub_task', 'bug'], subIssue.issueTypeVO.typeCode)),
+        ),
+      })),
+    }));
+  }
+  const topTree = ganttList2PartTree(
+    data.filter((item) => item.issueTypeVO.typeCode === 'epic'),
+    data.filter((item) => includes(['story', 'task', 'bug'], item.issueTypeVO.typeCode)),
+    {
+      group: true,
+      groupType: 'epic',
+      summary: '未分配史诗',
+    },
+  );
+  return topTree.map((item) => ({
+    ...item,
+    children: ganttList2PartTree(
+      (item.children || []).filter((issue: any) => issue.issueTypeVO.typeCode !== 'bug' || (item.issueTypeVO.typeCode === 'bug' && !item.parentId)),
+      data.filter((subIssue) => includes(['sub_task', 'bug'], subIssue.issueTypeVO.typeCode)),
+    ),
+  }));
+};
+
 const renderTooltip = (user: User) => {
   const {
     loginName, realName, email, ldap,
