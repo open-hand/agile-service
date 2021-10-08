@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable no-param-reassign */
 import React, {
   useState, useEffect, useCallback, useMemo, useRef,
@@ -6,8 +7,9 @@ import React, {
 import { unstable_batchedUpdates } from 'react-dom';
 import { Tooltip, Icon, Button } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
+import { runInAction } from 'mobx';
 import {
-  find, findIndex, get, merge, omit, pick, remove, set, some,
+  find, findIndex, isNumber, merge, omit, pick, remove, set, some, get,
 } from 'lodash';
 import produce from 'immer';
 import dayjs from 'dayjs';
@@ -23,6 +25,9 @@ import {
 import GanttComponent, { GanttProps, Gantt, GanttRef } from '@choerodon/gantt';
 import '@choerodon/gantt/dist/gantt.cjs.production.min.css';
 import { FlatSelect } from '@choerodon/components';
+import {
+  DragDropContext, Draggable, DragStart, Droppable, DropResult, ResponderProvided,
+} from 'react-beautiful-dnd';
 import {
   ganttApi, issueApi, ListLayoutColumnVO, workCalendarApi,
 } from '@/api';
@@ -60,7 +65,6 @@ import QuickCreateSubIssue from '@/components/QuickCreateSubIssue';
 import { useUpdateColumnMutation } from '@/hooks/data/useTableColumns';
 import TableCache, { TableCacheRenderProps } from '@/components/table-cache';
 import { getTableColumns as getIssueTableColumns } from '@/components/issue-table/columns';
-import getListLayoutColumns from '../Issue/components/issue-table/utils/getListLayoutColumns';
 import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 import { PriorityTag, StatusTag } from '@/components';
 import UserTag from '@/components/tag/user-tag';
@@ -81,6 +85,15 @@ const typeOptions = [{
 }] as const;
 const typeValues = typeOptions.map((t) => t.value);
 type TypeValue = (typeof typeValues)[number];
+const isDisableDrag = (bar: Gantt.Bar, draggingBar?: Gantt.Bar) => {
+  if (bar._group || !bar.record.parentId) {
+    return true;
+  }
+  if (draggingBar && bar.record.parentId !== draggingBar.record.parentId) {
+    return true;
+  }
+  return false;
+};
 const isCanQuickCreateIssue = (record: Gantt.Record<any>) => (!record.group && !record.parentId) && ['story', 'bug', 'task'].includes(record.issueTypeVO?.typeCode);
 const ganttList2Tree = (data: any[]) => list2tree(data, { valueField: 'issueId', parentField: 'parentId' });
 const groupByTask = (data: any[]) => ganttList2Tree(data);
@@ -516,6 +529,35 @@ const getCustomColumn = (field?: IFoundationHeader) => (field && {
     );
   },
 });
+function getListLayoutColumns(listLayoutColumns: ListLayoutColumnVO[] | null, fields: IFoundationHeader[]): Array<ListLayoutColumnVO & IFoundationHeader & { label: string }> {
+  let res: any[] = [];
+
+  if (listLayoutColumns) {
+    // TODO 过滤已被删除的字段
+    res = [...listLayoutColumns];
+  }
+  fields.forEach(((field) => {
+    const resIndex = findIndex(res, { columnCode: field.code });
+    if (resIndex === -1) {
+      res.push({
+        width: 0,
+        sort: 0,
+        label: field.title,
+        columnCode: field.code,
+        display: false,
+        ...field,
+        // fieldId: field.id,
+      });
+    } else {
+      res[resIndex] = {
+        ...res[resIndex],
+        label: field.title,
+        ...field,
+      };
+    }
+  }));
+  return res;
+}
 const getTableColumns = (visibleColumns: ListLayoutColumnVO[], tableFields: IFoundationHeader[], { onSortChange }: any, openCreateSubIssue: (parentIssue: Issue) => void, onCreateAfter: (createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed?: boolean) => void) => {
   const tableColumns: GanttProps<Issue>['columns'] = [{
     flex: 2,
@@ -591,7 +633,6 @@ const getTableColumns = (visibleColumns: ListLayoutColumnVO[], tableFields: IFou
 
       return merge(baseColumn, typeof field === 'function' ? field(onSortChange) as Gantt.Column : field);
     }
-    // console.log('columnCode..', columnCode, find(tableFields, { code: columnCode }));
     return merge(baseColumn, getCustomColumn(find(tableFields, { code: columnCode })));
   }));
   return tableColumns;
@@ -608,14 +649,14 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
   const typeChangeRefreshFlag = useRef<boolean>(false);
   const [type, setType] = useState<TypeValue>(localPageCacheStore.getItem('gantt.search.type') ?? typeValues[0]);
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
-  const mutation = useUpdateColumnMutation('gantt');
+  // const mutation = useUpdateColumnMutation('gantt');
   const { data: tableFields } = useIssueTableFields({ hiddenFieldCodes: ['epicSelfName', 'summary'] });
   const listLayoutColumns = useMemo(() => getListLayoutColumns(cached?.listLayoutColumns || defaultListLayoutColumns as any, tableFields || []), [cached?.listLayoutColumns, tableFields]);
   const visibleColumnCodes = useMemo(() => (listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode)), [listLayoutColumns]);
-
   const [{ data: sortedList }, sortLabelProps] = useGanttSortLabel();
 
   const [workCalendar, setWorkCalendar] = useState<any>();
+  const [draggingBar, setDraggingBar] = useState<Gantt.Bar>();
   const [projectWorkCalendar, setProjectWorkCalendar] = useState<any>();
   const [filterManageVisible, setFilterManageVisible] = useState<boolean>();
   const [loading, setLoading] = useState(false);
@@ -675,13 +716,14 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
   useUpdateEffect(() => {
     run();
     flush();
-  }, [sortedList]);
+  }, [sortedList, visibleColumnCodes]);
   useUpdateEffect(() => {
     if (typeChangeRefreshFlag.current) {
       run();
       flush();
     }
-  }, [type, visibleColumnCodes]);
+  }, [type]);
+
   const handleUpdate = useCallback<GanttProps<Issue>['onUpdate']>(async (issue, startDate, endDate) => {
     try {
       await issueApi.update({
@@ -957,10 +999,74 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
     set(quickCreateDataRef.current, defaultKey, value);
   });
 
-  // const showColumns = useMemo(() => getTableColumns({
-  //   cached?.listLayoutColumns, tableFields, onSummaryClick: () => { }, handleColumnResize: () => { },
-  // }), [listLayoutColumns]);
+  const renderTableBody = useCallback((Component: React.ReactElement) => (
+    <Droppable
+      droppableId="table"
+      direction="vertical"
+      mode="virtual"
+      renderClone={(provider, snapshot, rubric) => {
+        const record = store.ganttRef.current?.flattenData[rubric.source.index].record;
+        return (
+          <div ref={provider.innerRef} {...provider.draggableProps} {...provider.draggableProps}>
+            {record && tableWithSortedColumns[0]?.render!(record)}
 
+          </div>
+        );
+      }}
+    >
+      {(provided) => {
+        const { children } = Component.props;
+        provided.innerRef((Component as any).ref?.current);
+        return React.cloneElement(Component, {
+          ...Component.props,
+          // ref: provided.innerRef,
+          ...provided.droppableProps,
+        });
+      }}
+    </Droppable>
+  ), [store.ganttRef, tableWithSortedColumns]);
+  // eslint-disable-next-line no-multi-spaces
+  const renderTableRow = useCallback((row: React.ReactElement, bar: Gantt.Bar) => (
+    <Draggable
+      key={`drag-${bar.absoluteIndex}`}
+      draggableId={String(bar.absoluteIndex)}
+      isDragDisabled={isDisableDrag(bar, draggingBar)}
+      index={bar.absoluteIndex}
+    >
+      {(provided, snapshot) => React.cloneElement(row, {
+        key: row.key,
+        type: row.type,
+        ...row.props,
+        ...provided.dragHandleProps,
+        ...provided.draggableProps,
+        ref: provided.innerRef,
+        style: { ...row.props?.style, ...provided.draggableProps.style },
+      })}
+    </Draggable>
+  ), [draggingBar]);
+  const handleDragStart = useCallback((initial: DragStart, provided: ResponderProvided) => {
+    const dragBar = store.ganttRef.current?.flattenData[initial.source.index];
+    dragBar && setDraggingBar(dragBar);
+  }, [store.ganttRef]);
+  const handleDragEnd = useCallback((result: DropResult, provider: ResponderProvided) => {
+    setDraggingBar(undefined);
+    if (!result.destination || result.destination.index === result.source.index) {
+      return;
+    }
+    const destinationRecord = store.ganttRef.current?.flattenData[result.destination.index];
+    if (!destinationRecord || !store.ganttRef.current?.flattenData) {
+      return;
+    }
+    const flattenData = store.ganttRef.current?.flattenData;
+    runInAction(() => {
+      const startIndex = destinationRecord.absoluteIndex < 0 ? flattenData.length + destinationRecord.absoluteIndex : destinationRecord.absoluteIndex;
+      const item = flattenData.splice(result.source.index, 1)[0];
+      console.log('startIndex', startIndex, result.source.index, item);
+      flattenData.splice(startIndex, 0, item);
+      flattenData.forEach((value, index) => { value.absoluteIndex = index; });
+    });
+    console.log('store.ganttRef.current?.flattenData', flattenData);
+  }, [store.ganttRef]);
   return (
     <Page>
       <Header>
@@ -1010,13 +1116,12 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
               name: '列配置',
               // icon: 'view_column-o',
               handler: () => {
-                // openColumnManageModal
                 openCustomColumnManageModal({
                   modelProps: {
                     title: '设置列显示字段',
                   },
                   value: visibleColumnCodes,
-                  options: tableFields || [],
+                  options: listLayoutColumns.map((item) => ({ code: item.columnCode, title: item.label })),
                   type: 'gantt',
                 });
               },
@@ -1070,34 +1175,40 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
           <Loading loading={loading} />
           {columns.length > 0 && workCalendar && (
             <div className="c7n-gantt-content-body">
-              <GanttComponent
-                innerRef={store.ganttRef as React.MutableRefObject<GanttRef>}
-                data={ganttData}
-                columns={columns}
-                onUpdate={handleUpdate}
-                startDateKey="estimatedStartTime"
-                endDateKey="estimatedEndTime"
-                isRestDay={isRestDay}
-                showBackToday={false}
-                showUnitSwitch={false}
-                unit={unit}
-                onRow={onRow}
-                onBarClick={onRow.onClick}
-                tableIndent={20}
-                expandIcon={getExpandIcon}
-                renderBar={renderBar}
-                renderInvalidBar={renderInvalidBar}
-                renderGroupBar={renderGroupBar}
-                renderBarThumb={renderBarThumb}
-                tableCollapseAble={false}
-                scrollTop={{
-                  right: -4,
-                  bottom: 8,
-                }}
-                rowHeight={34}
-                // @ts-ignore
-                renderEmpty={renderEmpty}
-              />
+              <DragDropContext
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+              >
+                <GanttComponent
+                  innerRef={store.ganttRef as React.MutableRefObject<GanttRef>}
+                  data={ganttData}
+                  columns={columns}
+                  onUpdate={handleUpdate}
+                  startDateKey="estimatedStartTime"
+                  endDateKey="estimatedEndTime"
+                  isRestDay={isRestDay}
+                  showBackToday={false}
+                  showUnitSwitch={false}
+                  unit={unit}
+                  onRow={onRow}
+                  onBarClick={onRow.onClick}
+                  tableIndent={20}
+                  components={{ mainBody: renderTableBody, tableRow: renderTableRow }}
+                  expandIcon={getExpandIcon}
+                  renderBar={renderBar}
+                  renderInvalidBar={renderInvalidBar}
+                  renderGroupBar={renderGroupBar}
+                  renderBarThumb={renderBarThumb}
+                  tableCollapseAble={false}
+                  scrollTop={{
+                    right: -4,
+                    bottom: 8,
+                  }}
+                  rowHeight={34}
+                  // @ts-ignore
+                  renderEmpty={renderEmpty}
+                />
+              </DragDropContext>
               <div className={classNames('c7n-gantt-content-body-quick-create', { 'c7n-gantt-content-body-quick-create-open': isCreate })}>
                 <QuickCreateIssue
                   onCreateChange={setIsCreate}
