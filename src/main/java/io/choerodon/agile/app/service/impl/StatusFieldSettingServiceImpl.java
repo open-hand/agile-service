@@ -102,6 +102,8 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         FIELD_CODE.put(FieldCode.CREATION_DATE, "creationDate");
         FIELD_CODE.put(FieldCode.LAST_UPDATE_DATE, "lastUpdateDate");
         FIELD_CODE.put(FieldCode.ESTIMATED_END_TIME, "estimatedEndTime");
+        FIELD_CODE.put(FieldCode.ACTUAL_END_TIME, "actualEndTime");
+        FIELD_CODE.put(FieldCode.ACTUAL_START_TIME, "actualStartTime");
         FIELD_CODE.put(FieldCode.ESTIMATED_START_TIME, "estimatedStartTime");
         FIELD_CODE.put(FieldCode.MAIN_RESPONSIBLE, "mainResponsibleId");
         FIELD_CODE.put(FieldCode.ENVIRONMENT, "environment");
@@ -480,6 +482,8 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             case FieldCode.LAST_UPDATE_DATE:
             case FieldCode.ESTIMATED_START_TIME:
             case FieldCode.ESTIMATED_END_TIME:
+            case FieldCode.ACTUAL_START_TIME:
+            case FieldCode.ACTUAL_END_TIME:
                 field.set(issueUpdateVO, handlerPredefinedTimeField(fieldValueSettingDTO));
                 break;
             case FieldCode.EPIC:

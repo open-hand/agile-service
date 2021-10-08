@@ -294,6 +294,9 @@ public class GanttChartServiceImpl implements GanttChartService {
     }
 
     private void handlerCustomFiledValue(Map<String, Object> fieldCodeValues, List<String> fieldCodes, Long projectId, List<Long> issueIds) {
+        if (CollectionUtils.isEmpty(fieldCodes)) {
+            return;
+        }
         List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS = objectSchemeFieldMapper.queryByFieldCodeList(ConvertUtil.getOrganizationId(projectId), projectId, fieldCodes);
         if (!CollectionUtils.isEmpty(objectSchemeFieldDTOS)) {
             List<ObjectSchemeFieldDTO> customFields = objectSchemeFieldDTOS.stream().filter(v -> Boolean.FALSE.equals(v.getSystem())).collect(Collectors.toList());
