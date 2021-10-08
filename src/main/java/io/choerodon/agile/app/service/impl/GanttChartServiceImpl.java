@@ -572,7 +572,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                 ganttChart.setSprint(sprint);
             }
             ganttChart.setProjectId(thisProjectId);
-            ganttChart.setEpicId(issueEpicMap.get(issueId));
+            ganttChart.setEpicId(Optional.ofNullable(issueEpicMap.get(issueId)).orElse(i.getEpicId()));
             ganttChart.setFeatureId(Optional.ofNullable(issueFeatureMap.get(issueId)).map(IssueDTO::getIssueId).orElse(null));
             ganttChart.setEpicName(i.getEpicName());
             ganttChart.setColor(i.getEpicColor());
