@@ -555,6 +555,7 @@
         ai.status_id,
         ai.priority_id,
         CONVERT(ai.issue_num,SIGNED) as issue_num_convert,
+        CONCAT(api.project_code,'-', ai.issue_num) as issue_num,
         ai.actual_start_time,
         ai.actual_end_time,
         <if test="ganttDefaultOrder">
@@ -581,6 +582,7 @@
             left join agile_gantt_issue_rank agir on ai.issue_id = agir.issue_id and agir.dimension = #{dimension}
         </if>
         left join lookup_value alv on ai.color_code = alv.value_code
+        left join agile_project_info api on api.project_id = ai.project_id
         where ai.project_id in
         <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
             #{projectId}
