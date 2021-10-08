@@ -9,7 +9,7 @@ import { Tooltip, Icon, Button } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import {
-  find, findIndex, isNumber, merge, omit, pick, remove, set, some, get,
+  find, findIndex, isNumber, merge, omit, pick, remove, set, some, get, includes,
 } from 'lodash';
 import produce from 'immer';
 import dayjs from 'dayjs';
@@ -96,6 +96,19 @@ const isDisableDrag = (bar: Gantt.Bar, draggingBar?: Gantt.Bar) => {
 };
 const isCanQuickCreateIssue = (record: Gantt.Record<any>) => (!record.group && !record.parentId) && ['story', 'bug', 'task'].includes(record.issueTypeVO?.typeCode);
 const ganttList2Tree = (data: any[]) => list2tree(data, { valueField: 'issueId', parentField: 'parentId' });
+
+const formatData = (data: any[]) => data.map((item, i, arr) => {
+  if ((item.issueTypeVO.typeCode === 'sub_task' || item.issueTypeVO.typeCode === 'bug') && item.parentId) {
+    const parent = arr.find((issue) => issue.issueId === item.parentId);
+    return ({
+      ...item,
+      epicId: parent?.epicId,
+      featureId: parent?.featureId,
+    });
+  }
+  return item;
+});
+
 const groupByTask = (data: any[]) => ganttList2Tree(data);
 const groupByUser = (data: any[]) => {
   const map = new Map<string, any[]>();
@@ -149,16 +162,17 @@ const groupBySprint = (data: any[]) => {
   }));
 };
 
-const groupByFeature = (epicChildrenData: any) => {
+const groupByFeature = (epicChildrenData: any, data: any) => {
   const map = new Map<string, { feature: any, children: any[] }>();
   const noFeatureData: any[] = [];
   epicChildrenData.forEach((issue: any) => {
-    if (issue.feature) {
-      if (map.has(issue.feature.featureName)) {
-        map.get(issue.feature.featureName)?.children.push(issue);
+    if (issue.featureId) {
+      const feature = data.find((item: any) => item.issueId.toString() === issue.featureId.toString());
+      if (map.has(feature?.featureName)) {
+        map.get(feature?.featureName)?.children.push(issue);
       } else {
-        map.set(issue.feature.featureName, {
-          feature: issue.feature,
+        map.set(feature?.featureName, {
+          feature,
           children: [issue],
         });
       }
@@ -167,11 +181,11 @@ const groupByFeature = (epicChildrenData: any) => {
     }
   });
   if (noFeatureData.length > 0) {
-    map.set('未分配', { feature: {}, children: noFeatureData });
+    map.set('未分配特性', { feature: {}, children: noFeatureData });
   }
 
   return [...map.entries()].map(([name, { feature, children }]) => ({
-    group: name === '未分配',
+    group: name === '未分配特性',
     groupType: 'feature',
     summary: name,
     ...feature,
@@ -182,13 +196,14 @@ const groupByFeature = (epicChildrenData: any) => {
 const groupByEpic = (data: any, isInProgram: boolean) => {
   const map = new Map<string, { epic: any, children: any[] }>();
   const noEpicData: any[] = [];
-  data.forEach((issue: any) => {
-    if (issue.epic) {
-      if (map.has(issue.epic.epicName)) {
-        map.get(issue.epic.epicName)?.children.push(issue);
+  data.filter((item: any) => item.issueTypeVO.typeCode !== 'issue_epic' && item.issueTypeVO.typeCode !== 'feature').forEach((issue: any) => {
+    if (issue.epicId && issue.epicId !== '0') {
+      const epic = data.find((item: any) => item.issueId === issue.epicId);
+      if (map.has(epic?.epicName)) {
+        map.get(epic?.epicName)?.children.push(issue);
       } else {
-        map.set(issue.epic.epicName, {
-          epic: issue.epic,
+        map.set(epic?.epicName, {
+          epic,
           children: [issue],
         });
       }
@@ -197,17 +212,18 @@ const groupByEpic = (data: any, isInProgram: boolean) => {
     }
   });
   if (noEpicData.length > 0) {
-    map.set('未分配', { epic: {}, children: noEpicData });
+    map.set('未分配史诗', { epic: {}, children: noEpicData });
   }
 
   return [...map.entries()].map(([name, { epic, children }]) => ({
-    group: name === '未分配',
+    group: name === '未分配史诗',
     groupType: 'epic',
     summary: name,
     ...epic,
-    children: isInProgram ? groupByFeature(children) : ganttList2Tree(children),
+    children: isInProgram ? groupByFeature(children, data) : ganttList2Tree(children),
   }));
 };
+
 const renderTooltip = (user: User) => {
   const {
     loginName, realName, email, ldap,
@@ -686,6 +702,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
         return;
       }
       filter.otherArgs.sprint = sprintIds;
+      filter.searchArgs.dimension = type;
       setLoading(true);
       const [workCalendarRes, projectWorkCalendarRes, res] = await Promise.all([
         workCalendarApi.getWorkSetting(year),
@@ -693,7 +710,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
         ganttApi.loadByTask(merge(filter, {
           displayFieldCodes: visibleColumnCodes,
           searchArgs: { tree: type !== 'assignee', dimension: type },
-        }), type, sortedList),
+        }), sortedList),
       ]);
       // setColumns(headers.map((h: any) => ({
       //   width: 100,
@@ -865,7 +882,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
       } else {
         const target = find(draft, { issueId });
         if (target && !dontCopyEpic) {
-          draft.unshift(Object.assign(normalizeIssueWidthParentId, pick(target, ['epic', 'feature'])));
+          draft.unshift(Object.assign(normalizeIssueWidthParentId, pick(target, ['epicId', 'featureId'])));
         } else {
           draft.unshift(normalizeIssueWidthParentId);
         }
@@ -981,7 +998,8 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
     } if (type === 'task') {
       return groupByTask(data);
     } if (type === 'epic') {
-      return groupByEpic(data, isInProgram);
+      const formattedData = formatData(data);
+      return groupByEpic(formattedData, isInProgram);
     }
     return data;
   }, [data, isInProgram, type]);

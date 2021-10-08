@@ -97,7 +97,7 @@ class IssueList extends Component {
         {
           showPriority && (
           <div style={{ marginRight: '8px', overflow: 'hidden' }}>
-            <Tooltip mouseEnterDelay={0.5} title={`优先级： ${issue.priorityVO.name}`}>
+            <Tooltip mouseEnterDelay={0.5} title={`优先级： ${issue.priorityVO?.name}`}>
               <div>
                 <PriorityTag
                   priority={issue.priorityVO}
