@@ -20,6 +20,9 @@ public class IssueComponentBriefVO implements Serializable {
     @ApiModelProperty(value = "模块名称")
     private String name;
 
+    @Encrypt
+    private Long issueId;
+
 
     public Long getComponentId() {
         return componentId;
@@ -40,5 +43,13 @@ public class IssueComponentBriefVO implements Serializable {
     @Override
     public String toString() {
         return StringUtil.getToString(this);
+    }
+
+    public Long getIssueId() {
+        return issueId;
+    }
+
+    public void setIssueId(Long issueId) {
+        this.issueId = issueId;
     }
 }

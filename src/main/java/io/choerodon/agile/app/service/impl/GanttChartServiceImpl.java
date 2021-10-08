@@ -4,16 +4,17 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.FeatureForIssueVO;
+import io.choerodon.agile.api.vo.business.TagVO;
 import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.IssueSprintDTO;
+import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.GanttDimension;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.mapper.IssueMapper;
-import io.choerodon.agile.infra.mapper.IssueSprintRelMapper;
-import io.choerodon.agile.infra.mapper.IssueStatusMapper;
+import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.core.domain.Page;
@@ -28,6 +29,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
@@ -44,6 +46,18 @@ public class GanttChartServiceImpl implements GanttChartService {
     private static final String ISSUE_ID = "issueId";
 
     private static final String ORDER_STR = "orderStr";
+
+    private static final String CREATE_USER = "createUser";
+
+    private static final String UPDATE_USER = "updateUser";
+
+    private static final String MAIN_RESPONSIBLE_USER = "mainResponsibleUser";
+
+    private static final String TAGS = "tags";
+
+    private static final String[] SPECIAL_HANDLER_SYSTEM_FIELD = {FieldCode.LABEL, FieldCode.COMPONENT, FieldCode.FIX_VERSION,
+            FieldCode.INFLUENCE_VERSION, FieldCode.ASSIGNEE, FieldCode.REPORTER, CREATE_USER, UPDATE_USER, MAIN_RESPONSIBLE_USER
+            , FieldCode.SPRINT, TAGS};
 
     @Autowired
     private IssueService issueService;
@@ -71,6 +85,19 @@ public class GanttChartServiceImpl implements GanttChartService {
     private BaseFeignClient baseFeignClient;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private ObjectSchemeFieldMapper objectSchemeFieldMapper;
+    @Autowired
+    private PageFieldService pageFieldService;
+    @Autowired
+    private IssueLabelMapper issueLabelMapper;
+    @Autowired
+    private IssueComponentMapper issueComponentMapper;
+    @Autowired
+    private VersionIssueRelMapper versionIssueRelMapper;
+    @Autowired
+    private LookupValueService lookupValueService;
+
 
     @Override
     public Page<GanttChartVO> pagedQuery(Long projectId,
@@ -80,8 +107,12 @@ public class GanttChartServiceImpl implements GanttChartService {
         if (isSprintEmpty(searchVO)) {
             throw new CommonException("error.otherArgs.sprint.empty");
         }
+        List<String> displayFieldCodes = searchVO.getDisplayFieldCodes();
+        if (CollectionUtils.isEmpty(displayFieldCodes)) {
+            displayFieldCodes = new ArrayList<>();
+        }
         validateDimension(dimension);
-        return listByProjectIdAndSearch(projectId, searchVO, pageRequest, dimension);
+        return listByProjectIdAndSearch(projectId, searchVO, pageRequest, dimension, displayFieldCodes);
     }
 
     private void validateDimension(String dimension) {
@@ -100,13 +131,14 @@ public class GanttChartServiceImpl implements GanttChartService {
         }
         validateDimension(dimension);
         List<IssueDTO> issueList = issueMapper.selectWithSubByIssueIds(projectId, new ArrayList<>(issueIds));
-        return buildGanttList(projectId, dimension, new ArrayList<>(issueIds), issueList);
+        return buildGanttList(projectId, dimension, new ArrayList<>(issueIds), issueList, new ArrayList<>());
     }
 
     private Page<GanttChartVO> listByProjectIdAndSearch(Long projectId,
                                                         SearchVO searchVO,
                                                         PageRequest pageRequest,
-                                                        String dimension) {
+                                                        String dimension,
+                                                        List<String> fieldCodes) {
         Page<GanttChartVO> emptyPage = PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
         //设置不查询史诗
         boolean illegalIssueTypeId = buildIssueType(searchVO, projectId);
@@ -139,7 +171,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                 }
                 issueIds.addAll(childrenIds);
                 List<IssueDTO> issueList = PageHelper.doSort(sort, () -> issueMapper.selectWithSubByIssueIds(projectId, issueIds));
-                List<GanttChartVO> result = buildGanttList(projectId, dimension, issueIds, issueList);
+                List<GanttChartVO> result = buildGanttList(projectId, dimension, issueIds, issueList, fieldCodes);
                 return PageUtils.copyPropertiesAndResetContent(page, result);
             } else {
                 return emptyPage;
@@ -152,7 +184,8 @@ public class GanttChartServiceImpl implements GanttChartService {
     private List<GanttChartVO> buildGanttList(Long projectId,
                                               String dimension,
                                               List<Long> issueIds,
-                                              List<IssueDTO> issueList) {
+                                              List<IssueDTO> issueList,
+                                              List<String> fieldCodes) {
         if (ObjectUtils.isEmpty(issueList)) {
             return Collections.emptyList();
         }
@@ -169,7 +202,122 @@ public class GanttChartServiceImpl implements GanttChartService {
                 issueMapper.selectActuatorCompletedDateByIssueIds(issueIds, projectId)
                         .stream()
                         .collect(Collectors.toMap(GanttChartVO::getIssueId, GanttChartVO::getActualCompletedDate));
-        return buildFromIssueDto(issueList, projectId, completedDateMap, completedStatusIds, issueSprintMap, epicMap, featureMap);
+        Map<String, Object> fieldCodeValues = new HashMap<>();
+        buildFieldCodeValues(projectId, issueIds, fieldCodes, fieldCodeValues, issueList);
+        return buildFromIssueDto(issueList, projectId, completedDateMap, completedStatusIds, issueSprintMap, epicMap, featureMap, fieldCodes, fieldCodeValues);
+    }
+
+    private void buildFieldCodeValues(Long projectId, List<Long> issueIds, List<String> fieldCodes, Map<String, Object> fieldCodeValues, List<IssueDTO> issueList) {
+         // 过滤出自定义字段
+         handlerCustomFiledValue(fieldCodeValues, fieldCodes, projectId, issueIds);
+         // 处理预定义字段的值
+         handlerSystemFieldValue(fieldCodeValues, fieldCodes, projectId, issueIds, issueList);
+    }
+
+    private void handlerSystemFieldValue(Map<String, Object> fieldCodeValues, List<String> fieldCodes, Long projectId, List<Long> issueIds, List<IssueDTO> issueList) {
+        for (String fieldCode : fieldCodes) {
+            if (Arrays.asList(SPECIAL_HANDLER_SYSTEM_FIELD).contains(fieldCode)) {
+                Set<Long> userIds = new HashSet<>();
+                handlerSystemField(fieldCode, issueIds, projectId, fieldCodeValues, userIds, issueList);
+                fieldCodeValues.put("userIds", userIds);
+            }
+        }
+    }
+
+    private void handlerSystemField(String fieldCode, List<Long> issueIds, Long projectId, Map<String, Object> fieldCodeValues,Set<Long> userIds, List<IssueDTO> issueList) {
+      switch (fieldCode){
+          case FieldCode.LABEL:
+              List<LabelIssueRelVO> labelIssueRelVOS = issueLabelMapper.listByIssueIds(projectId, issueIds);
+              if (!CollectionUtils.isEmpty(labelIssueRelVOS)) {
+                  Map<Long, List<LabelIssueRelVO>> labelIssueRelGroup = labelIssueRelVOS.stream().collect(Collectors.groupingBy(LabelIssueRelVO::getIssueId));
+                  fieldCodeValues.put(fieldCode, labelIssueRelGroup);
+              }
+              break;
+          case FieldCode.COMPONENT:
+              List<IssueComponentBriefVO> issueComponentBriefVOS = issueComponentMapper.listByIssueIds(projectId, issueIds);
+              if (!CollectionUtils.isEmpty(issueComponentBriefVOS)) {
+                  Map<Long, List<IssueComponentBriefVO>> issueComponentBriefGroup = issueComponentBriefVOS.stream().collect(Collectors.groupingBy(IssueComponentBriefVO::getIssueId));
+                  fieldCodeValues.put(fieldCode, issueComponentBriefGroup);
+              }
+              break;
+          case FieldCode.INFLUENCE_VERSION:
+               handlerVersionList(fieldCode, projectId, issueIds, fieldCodeValues);
+              break;
+          case FieldCode.SPRINT:
+              List<IssueSprintVO> issueSprintVOS = issueSprintRelMapper.listByIssueIds(projectId, issueIds);
+              if (!CollectionUtils.isEmpty(issueSprintVOS)) {
+                  Map<Long, List<IssueSprintVO>> issueSprintGroup = issueSprintVOS.stream().collect(Collectors.groupingBy(IssueSprintVO::getIssueId));
+                  fieldCodeValues.put(fieldCode, issueSprintGroup);
+              }
+              break;
+          case FieldCode.FIX_VERSION:
+              handlerVersionList(fieldCode, projectId, issueIds, fieldCodeValues);
+              break;
+          case FieldCode.ASSIGNEE:
+              handlerUser(userIds,issueList , IssueDTO::getAssigneeId);
+              break;
+          case FieldCode.REPORTER:
+              handlerUser(userIds,issueList , IssueDTO::getReporterId);
+              break;
+          case CREATE_USER:
+              handlerUser(userIds,issueList , IssueDTO::getCreatedBy);
+              break;
+          case UPDATE_USER:
+              handlerUser(userIds,issueList , IssueDTO::getLastUpdatedBy);
+              break;
+          case MAIN_RESPONSIBLE_USER:
+              handlerUser(userIds,issueList , IssueDTO::getMainResponsibleId);
+              break;
+          case TAGS:
+               if(agilePluginService != null){
+                   agilePluginService.handlerTags(projectId, issueIds, fieldCodeValues);
+               }
+              break;
+          default:
+              break;
+      }
+    }
+
+    private void handlerVersionList(String fieldCode, Long projectId, List<Long> issueIds, Map<String, Object> fieldCodeValues) {
+        List<VersionIssueRelVO> versionIssueRelVOS = versionIssueRelMapper.listByIssueIds(projectId, issueIds, FieldCode.FIX_VERSION.equals(fieldCode) ? "fix" : "influence");
+        if (!CollectionUtils.isEmpty(versionIssueRelVOS)) {
+            Map<Long, List<VersionIssueRelVO>> issueComponentBriefGroup = versionIssueRelVOS.stream().collect(Collectors.groupingBy(VersionIssueRelVO::getIssueId));
+            fieldCodeValues.put(fieldCode, issueComponentBriefGroup);
+        }
+    }
+
+    private void handlerUser(Set<Long> userIds, List<IssueDTO> issueList, Function<IssueDTO, Long> function) {
+        Set<Long> assigneeIds = issueList.stream().map(function).filter(v -> !ObjectUtils.isEmpty(v)).collect(Collectors.toSet());
+        if (!CollectionUtils.isEmpty(assigneeIds)) {
+            userIds.addAll(assigneeIds);
+        }
+    }
+
+    private void handlerCustomFiledValue(Map<String, Object> fieldCodeValues, List<String> fieldCodes, Long projectId, List<Long> issueIds) {
+        List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS = objectSchemeFieldMapper.queryByFieldCodeList(ConvertUtil.getOrganizationId(projectId), projectId, fieldCodes);
+        if (!CollectionUtils.isEmpty(objectSchemeFieldDTOS)) {
+            List<ObjectSchemeFieldDTO> customFields = objectSchemeFieldDTOS.stream().filter(v -> Boolean.FALSE.equals(v.getSystem())).collect(Collectors.toList());
+            if (!CollectionUtils.isEmpty(customFields)) {
+                Map<Long, Map<String, Object>> allIssueFieldMap = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(ConvertUtil.getOrganizationId(projectId), Arrays.asList(projectId), issueIds, false);
+                List<String> customFieldCodes = customFields.stream().map(ObjectSchemeFieldDTO::getCode).collect(Collectors.toList());
+                Map<Long, Map<String, Object>> newAllIssueFieldMap = new HashMap<>();
+                for (Map.Entry<Long, Map<String, Object>> entry : allIssueFieldMap.entrySet()) {
+                    Long key = entry.getKey();
+                    Map<String, Object> value = entry.getValue();
+                    if (CollectionUtils.isEmpty(value)) {
+                        continue;
+                    }
+                    Map<String, Object> filterValue = value.entrySet().stream()
+                            .filter(e -> customFieldCodes.contains(e.getKey()))
+                            .collect(Collectors.toMap(
+                                    e -> e.getKey(),
+                                    e -> e.getValue()
+                            ));
+                    newAllIssueFieldMap.put(key, filterValue);
+                }
+                fieldCodeValues.put("foundationCodeValue", newAllIssueFieldMap);
+            }
+        }
     }
 
     private void queryAdditionalInfo(List<IssueDTO> issueList,
@@ -317,7 +465,9 @@ public class GanttChartServiceImpl implements GanttChartService {
                                                  Set<Long> completedStatusIds,
                                                  Map<Long, IssueSprintDTO> issueSprintMap,
                                                  Map<Long, IssueEpicVO> epicMap,
-                                                 Map<Long, FeatureForIssueVO> featureMap) {
+                                                 Map<Long, FeatureForIssueVO> featureMap,
+                                                 List<String> fieldCodes,
+                                                 Map<String, Object> fieldCodeValues) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
@@ -330,8 +480,11 @@ public class GanttChartServiceImpl implements GanttChartService {
                 userIds.add(dto.getAssigneeId());
             }
         }
+        Set<Long> otherUserIds = (Set<Long>) fieldCodeValues.getOrDefault("userIds", new HashSet<>());
+        userIds.addAll(otherUserIds);
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(new ArrayList<>(userIds), true);
         List<GanttChartVO> result = new ArrayList<>(issueList.size());
+        Map<String, String> envMap = lookupValueService.queryMapByTypeCode(FieldCode.ENVIRONMENT);
         issueList.forEach(i -> {
             Long statusId = i.getStatusId();
             Long issueId = i.getIssueId();
@@ -366,9 +519,73 @@ public class GanttChartServiceImpl implements GanttChartService {
                 ganttChart.setActualCompletedDate(completedDate);
             }
             setParentId(ganttChart, i);
+            handlerFieldValue(fieldCodes, fieldCodeValues, ganttChart, i, usersMap, envMap);
         });
         setSubIssueEpicAndFeature(result);
         return result;
+    }
+
+    private void handlerFieldValue(List<String> fieldCodes,
+                                   Map<String, Object> fieldCodeValues,
+                                   GanttChartVO ganttChartVO,
+                                   IssueDTO issueDTO,
+                                   Map<Long, UserMessageDTO> usersMap,
+                                   Map<String, String> envMap) {
+        if (!fieldCodes.contains(FieldCode.STORY_POINTS)) {
+            ganttChartVO.setStoryPoints(null);
+        }
+        if (!fieldCodes.contains(FieldCode.REMAINING_TIME)) {
+            ganttChartVO.setRemainingTime(null);
+        }
+        if (!fieldCodes.contains(FieldCode.CREATION_DATE)) {
+            ganttChartVO.setCreationDate(null);
+        }
+        if (!fieldCodes.contains(FieldCode.LAST_UPDATE_DATE)) {
+            ganttChartVO.setLastUpdateDate(null);
+        }
+        if (fieldCodes.contains(FieldCode.COMPONENT)) {
+            Map<Long, List<IssueComponentBriefVO>> componentMap = (Map<Long, List<IssueComponentBriefVO>>) fieldCodeValues.getOrDefault(FieldCode.COMPONENT, new HashMap<>());
+            ganttChartVO.setComponents(componentMap.get(issueDTO.getIssueId()));
+        }
+        if (fieldCodes.contains(FieldCode.FIX_VERSION)) {
+            Map<Long, List<VersionIssueRelVO>> fixVersionMap = (Map<Long, List<VersionIssueRelVO>>) fieldCodeValues.getOrDefault(FieldCode.FIX_VERSION, new HashMap<>());
+            ganttChartVO.setFixVersion(fixVersionMap.get(issueDTO.getIssueId()));
+        }
+        if (fieldCodes.contains(FieldCode.INFLUENCE_VERSION)) {
+            Map<Long, List<VersionIssueRelVO>> influenceVersionMap = (Map<Long, List<VersionIssueRelVO>>) fieldCodeValues.getOrDefault(FieldCode.INFLUENCE_VERSION, new HashMap<>());
+            ganttChartVO.setInfluenceVersion(influenceVersionMap.get(issueDTO.getIssueId()));
+        }
+        if (fieldCodes.contains(FieldCode.LABEL)) {
+            Map<Long, List<LabelIssueRelVO>> labelMap = (Map<Long, List<LabelIssueRelVO>>) fieldCodeValues.getOrDefault(FieldCode.LABEL, new HashMap<>());
+            ganttChartVO.setLabels(labelMap.get(issueDTO.getIssueId()));
+        }
+        if (fieldCodes.contains(FieldCode.SPRINT)) {
+            Map<Long, List<IssueSprintVO>> map = (Map<Long, List<IssueSprintVO>>) fieldCodeValues.getOrDefault(FieldCode.SPRINT, new HashMap<>());
+            ganttChartVO.setSprints(map.get(issueDTO.getIssueId()));
+        }
+        if (fieldCodes.contains(CREATE_USER) && !ObjectUtils.isEmpty(issueDTO.getCreatedBy())) {
+            ganttChartVO.setCreateUser(usersMap.get(issueDTO.getCreatedBy()));
+        }
+        if (fieldCodes.contains(UPDATE_USER) && !ObjectUtils.isEmpty(issueDTO.getLastUpdatedBy())) {
+            ganttChartVO.setCreateUser(usersMap.get(issueDTO.getLastUpdatedBy()));
+        }
+        if (fieldCodes.contains(MAIN_RESPONSIBLE_USER) && !ObjectUtils.isEmpty(issueDTO.getMainResponsibleId())) {
+            ganttChartVO.setCreateUser(usersMap.get(issueDTO.getMainResponsibleId()));
+        }
+        // 处理环境字段
+        if (fieldCodes.contains(FieldCode.ENVIRONMENT) && !ObjectUtils.isEmpty(issueDTO.getEnvironment())) {
+            ganttChartVO.setEnvironment(envMap.get(issueDTO.getEnvironment()));
+        }
+
+        if (fieldCodes.contains("tags")) {
+            Map<Long, List<TagVO>> tagMap = (Map<Long, List<TagVO>>) fieldCodeValues.getOrDefault("tags", new HashMap<>());
+            ganttChartVO.setTags(tagMap.get(issueDTO.getIssueId()));
+        }
+        Map<Long, Object> customFieldMap = (Map<Long, Object>) fieldCodeValues.getOrDefault("foundationCodeValue", new HashMap<>());
+        Map<String, Object> fieldCodeValue = (Map<String, Object>) customFieldMap.getOrDefault(issueDTO.getIssueId(), new HashMap<>());
+        if (!CollectionUtils.isEmpty(fieldCodeValue)) {
+            ganttChartVO.setFoundationFieldValue(fieldCodeValue);
+        }
     }
 
     private void setSubIssueEpicAndFeature(List<GanttChartVO> result) {

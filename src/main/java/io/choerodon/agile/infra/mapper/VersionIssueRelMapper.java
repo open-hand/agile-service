@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.VersionIssueRelVO;
 import io.choerodon.mybatis.common.BaseMapper;
 import io.choerodon.agile.infra.dto.*;
 import org.apache.ibatis.annotations.Param;
@@ -45,4 +46,6 @@ public interface VersionIssueRelMapper extends BaseMapper<VersionIssueRelDTO> {
      * @return Long
      */
     List<Long> queryVersionIdsByIssueId(@Param("issueId") Long issueId, @Param("projectId") Long projectId);
+
+    List<VersionIssueRelVO> listByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds, @Param("type") String type);
 }

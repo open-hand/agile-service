@@ -23,6 +23,9 @@ public class IssueSprintVO implements Serializable {
     @Encrypt
     private Long sprintId;
 
+    @Encrypt
+    private Long issueId;
+
     public String getSprintName() {
         return sprintName;
     }
@@ -50,5 +53,13 @@ public class IssueSprintVO implements Serializable {
     @Override
     public String toString() {
         return StringUtil.getToString(this);
+    }
+
+    public Long getIssueId() {
+        return issueId;
+    }
+
+    public void setIssueId(Long issueId) {
+        this.issueId = issueId;
     }
 }

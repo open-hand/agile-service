@@ -38,6 +38,8 @@ public class SearchVO {
 
     private List<String> contents;
 
+    private List<String> displayFieldCodes;
+
     public List<String> getExportFieldCodes() {
         return exportFieldCodes;
     }
@@ -113,5 +115,13 @@ public class SearchVO {
     @Override
     public String toString() {
         return StringUtil.getToString(this);
+    }
+
+    public List<String> getDisplayFieldCodes() {
+        return displayFieldCodes;
+    }
+
+    public void setDisplayFieldCodes(List<String> displayFieldCodes) {
+        this.displayFieldCodes = displayFieldCodes;
     }
 }
