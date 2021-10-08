@@ -8,20 +8,20 @@ class GanttApi {
     return `/agile/v1/projects/${getProjectId()}`;
   }
 
-  async loadByTask(data: any, dimension: IGanttDimension, sort?: any) {
+  async loadByTask(data: any, sort?: any) {
     let result: any = [];
     let hasNextPage = true;
     let page = 0;
     while (hasNextPage) {
       // eslint-disable-next-line no-await-in-loop
-      const res = await this.loadByTaskPage(data, dimension, page += 1, sort);
+      const res = await this.loadByTaskPage(data, page += 1, sort);
       hasNextPage = res.hasNextPage;
       result = [...result, ...res.list];
     }
     return result;
   }
 
-  loadByTaskPage(data: any, dimension: IGanttDimension, page: number, sort?: any) {
+  loadByTaskPage(data: any, page: number, sort?: any) {
     return axios({
       method: 'post',
       url: `${this.prefix}/gantt/list`,
@@ -33,7 +33,6 @@ class GanttApi {
         size: 1000,
         page,
         sort,
-        dimension,
       },
     });
   }
