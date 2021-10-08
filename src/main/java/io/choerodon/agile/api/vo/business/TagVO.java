@@ -28,6 +28,9 @@ public class TagVO {
 
     private String alias;
 
+    @Encrypt
+    private Long issueId;
+
     public String getAlias() {
         return alias;
     }
@@ -82,6 +85,14 @@ public class TagVO {
 
     public void setAppServiceName(String appServiceName) {
         this.appServiceName = appServiceName;
+    }
+
+    public Long getIssueId() {
+        return issueId;
+    }
+
+    public void setIssueId(Long issueId) {
+        this.issueId = issueId;
     }
 
     @Override

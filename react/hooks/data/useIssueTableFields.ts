@@ -5,7 +5,7 @@ import useIsInProgram from '../useIsInProgram';
 import useProjectKey from './useProjectKey';
 
 export interface IssueTableFieldsConfig {
-
+  hiddenFieldCodes?: string[]
 }
 const systemFields = [
   { code: 'summary', title: '概要' },
@@ -28,6 +28,8 @@ const systemFields = [
   { code: 'creationDate', title: '创建时间' },
   { code: 'estimatedStartTime', title: '预计开始时间' },
   { code: 'estimatedEndTime', title: '预计结束时间' },
+  { code: 'actualStartTime', title: '实际开始时间' },
+  { code: 'actualEndTime', title: '实际结束时间' },
   { code: 'remainingTime', title: '剩余预估时间' },
   { code: 'spentWorkTime', title: '已耗费时间' },
   { code: 'allEstimateTime', title: '总预估时间' },
@@ -41,7 +43,7 @@ export default function useIssueTableFields(config?: IssueTableFieldsConfig, opt
   const { isInProgram } = useIsInProgram();
   const { data, ...others } = useQuery(key, () => fieldApi.getFoundationHeader(), {
     initialData: systemFields,
-    select: (res) => systemFields.concat(res),
+    select: (res) => (config?.hiddenFieldCodes ? systemFields.concat(res).filter((field) => !config.hiddenFieldCodes?.includes(field.code)) : systemFields.concat(res)),
     ...options,
   });
 

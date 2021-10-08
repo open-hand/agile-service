@@ -38,7 +38,7 @@
         <result property="estimatedStartTime" column="estimated_start_time"/>
         <result property="estimatedEndTime" column="estimated_end_time"/>
         <result property="actualStartTime" column="actual_start_time"/>
-        <result property="actualEndTime" column="acutal_end_time"/>
+        <result property="actualEndTime" column="actual_end_time"/>
         <association property="activeSprint" column="issue_id" select="queryActiveSprintNameByIssueId"/>
         <collection property="versionIssueRelDTOList" column="issue_id"
                     ofType="io.choerodon.agile.infra.dto.business.IssueDetailDTO"
@@ -565,15 +565,24 @@
         ai.epic_name,
         ai.project_id as issue_project_id,
         alv.name AS epic_color,
-        ai.type_code
+        ai.type_code,
+        ai.story_points,
+        ai.main_responsible_id,
+        ai.remaining_time,
+        ai.environment,
+        ai.created_by,
+        ai.last_updated_by,
+        ai.reporter_id,
+        ai.creation_date,
+        ai.last_update_date
         from agile_issue ai
         <if test="ganttDefaultOrder">
             left join agile_gantt_issue_rank agir on ai.issue_id = agir.issue_id and agir.dimension = #{dimension}
         </if>
         left join lookup_value alv on ai.color_code = alv.value_code
         where ai.project_id in
-        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
-            #{projectId}
+        <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
+            #{issueId}
         </foreach>
         and ai.issue_id in
         <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">

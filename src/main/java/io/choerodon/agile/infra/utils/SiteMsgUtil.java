@@ -59,7 +59,8 @@ public class SiteMsgUtil {
                             String summary,
                             String url,
                             Long operatorId,
-                            Long projectId) {
+                            Long projectId,
+                            boolean customFieldUsers) {
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
         Map<String,String> map = new HashMap<>();
         map.put(ASSIGNEENAME, userName);
@@ -73,7 +74,13 @@ public class SiteMsgUtil {
         //发送站内信
         MessageSender messageSender = handlerMessageSender(0L,"ISSUECREATE",userIds,map);
         messageSender.setAdditionalInformation(objectMap);
-        messageClient.async().sendMessage(messageSender);
+        //问题创建通知自定义字段人员时仅发送邮件和站内信，避免重复发送webhook
+        if (customFieldUsers) {
+            messageClient.async().sendWebMessage("ISSUE_CREATE.WEB", messageSender.getReceiverAddressList(), messageSender.getArgs());
+            messageClient.async().sendEmail("CHOERODON-EMAIL", "ISSUE_CREATE.EMAIL", messageSender.getReceiverAddressList(), messageSender.getArgs());
+        } else {
+            messageClient.async().sendMessage(messageSender);
+        }
     }
 
     private void setLoginNameAndRealName(Long operatorId, Map<String, String> map) {
@@ -361,7 +368,7 @@ public class SiteMsgUtil {
             MessageSender messageSender = new MessageSender();
             messageSender.setTenantId(ConvertUtil.getOrganizationId(projectVO.getId()));
             messageSender.setMessageCode("ISSUE_COMMENT");
-            messageSender.setReceiverAddressList(Collections.singletonList(usersMap.get(userId)));
+            messageSender.setReceiverAddressList(Objects.isNull(userId) ? null : Collections.singletonList(usersMap.get(userId)));
             messageSender.setArgs(argsMap);
             // 设置额外参数
             Map<String, Object> objectMap = new HashMap<>(1);
@@ -369,6 +376,15 @@ public class SiteMsgUtil {
             messageSender.setAdditionalInformation(objectMap);
             senderList.add(messageSender);
         });
-        senderList.forEach(sender -> messageClient.async().sendMessage(sender));
+        senderList.forEach(sender -> {
+            if (!Objects.isNull(sender.getReceiverAddressList())) {
+                //向接收人发送邮件和站内信消息
+                messageClient.async().sendWebMessage("ISSUE_COMMENT_NOTICE.WEB", sender.getReceiverAddressList(), sender.getArgs());
+                messageClient.async().sendEmail("CHOERODON-EMAIL", "ISSUE_COMMENT_NOTICE.EMAIL", sender.getReceiverAddressList(), sender.getArgs());
+            } else {
+                //发送无接收人的消息(webhook等)
+                messageClient.async().sendMessage(sender);
+            }
+        });
     }
 }

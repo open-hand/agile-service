@@ -1,8 +1,8 @@
 import React, { useContext, Fragment } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import useIsInProgram from '@/hooks/useIsInProgram';
 import { includes } from 'lodash';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import {
   FieldAssignee, FieldVersion, FieldStatus, FieldSprint, FieldText,
   FieldReporter, FieldPriority, FieldLabel, FieldFixVersion, FieldPI,
@@ -19,6 +19,8 @@ import FieldCreator from './Field/FieldCreator';
 import FieldUpdater from './Field/FieldUpdater';
 import FieldEnvironment from './Field/FieldEnvironment';
 import FieldTag from './Field/FieldTag';
+import FieldActualStartTime from './Field/FieldActualStartTime';
+import FieldActualEndTime from './Field/FieldActualEndTime';
 
 const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 'timeTrace', 'assignee'];
 
@@ -89,6 +91,10 @@ const IssueField = observer((props) => {
         return <FieldStartTime {...props} field={field} />;
       case 'estimatedEndTime':
         return <FieldEndTime {...props} field={field} />;
+      case 'actualStartTime':
+        return <FieldActualStartTime {...props} field={field} />;
+      case 'actualEndTime':
+        return <FieldActualEndTime {...props} field={field} />;
       case 'programVersion':
         return <FieldProgramVersion {...props} field={field} />;
       case 'mainResponsible':

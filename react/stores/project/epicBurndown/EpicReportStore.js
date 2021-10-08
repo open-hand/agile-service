@@ -2,7 +2,7 @@ import {
   observable, action, computed,
 } from 'mobx';
 import { store } from '@choerodon/boot';
-import _ from 'lodash';
+import _, { isNumber } from 'lodash';
 import { epicApi, reportApi } from '@/api';
 
 const UNIT_STATUS = {
@@ -29,7 +29,7 @@ function transformZero2Placeholder(arr) {
   // 处理小数精度和null
   return arr.map((item) => {
     if (item) {
-      if (item % 1 > 0) {
+      if (isNumber(item) && item % 1 > 0) {
         return item.toFixed(1);
       }
       return item;
@@ -69,9 +69,9 @@ function getChartDataFromServerData(data) {
   assistant.forEach((v, i) => {
     showZero.push(
       !completed[i]
-  && !remaining[i]
-  && !added[i]
-  && !completedAgain[i] ? 0 : '-',
+        && !remaining[i]
+        && !added[i]
+        && !completedAgain[i] ? 0 : '-',
     );
   });
 

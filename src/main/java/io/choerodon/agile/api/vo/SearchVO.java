@@ -41,6 +41,8 @@ public class SearchVO {
 
     private Boolean ganttDefaultOrder = false;
 
+    private List<String> displayFieldCodes;
+
     public Boolean getGanttDefaultOrder() {
         return ganttDefaultOrder;
     }
@@ -124,5 +126,13 @@ public class SearchVO {
     @Override
     public String toString() {
         return StringUtil.getToString(this);
+    }
+
+    public List<String> getDisplayFieldCodes() {
+        return displayFieldCodes;
+    }
+
+    public void setDisplayFieldCodes(List<String> displayFieldCodes) {
+        this.displayFieldCodes = displayFieldCodes;
     }
 }

@@ -498,4 +498,6 @@ public interface AgilePluginService {
     Map<Long, IssueDTO> queryIssueFeature(Long projectId, List<Long> issueIds);
 
     void sprintStarted(Long projectId);
+
+    void handlerTags(Long projectId, List<Long> issueIds, Map<String, Object> fieldCodeValues);
 }

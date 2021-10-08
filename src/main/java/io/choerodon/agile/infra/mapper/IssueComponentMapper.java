@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.IssueComponentBriefVO;
 import io.choerodon.agile.infra.dto.ComponentForListDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import io.choerodon.agile.infra.dto.IssueComponentDTO;
@@ -65,4 +66,6 @@ public interface IssueComponentMapper extends BaseMapper<IssueComponentDTO> {
     String queryRightRank(@Param("projectId") Long projectId, @Param("leftRank") String leftRank);
 
     void updateRank(@Param("projectId") Long projectId, @Param("issueComponentDTO") IssueComponentDTO issueComponentDTO);
+
+    List<IssueComponentBriefVO> listByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
 }

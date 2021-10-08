@@ -1,7 +1,7 @@
-import { IExportSearch } from '@/api';
 import { findIndex, flatMap, isEmpty } from 'lodash';
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
 import { stores } from '@choerodon/boot';
+import { IExportSearch } from '@/api';
 
 const { AppState } = stores;
 function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes'> {
@@ -17,6 +17,8 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
     updateDate = [],
     estimatedStartTime = [],
     estimatedEndTime = [],
+    actualStartTime = [],
+    actualEndTime = [],
     contents,
     component,
     epic,
@@ -77,6 +79,10 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
       estimatedStartTimeScopeEnd: estimatedStartTime[1],
       estimatedEndTimeScopeStart: estimatedEndTime[0],
       estimatedEndTimeScopeEnd: estimatedEndTime[1],
+      actualStartTimeScopeStart: actualStartTime[0],
+      actualStartTimeScopeEnd: actualStartTime[1],
+      actualEndTimeScopeStart: actualEndTime[0],
+      actualEndTimeScopeEnd: actualEndTime[1],
       createStartDate: createDate[0],
       createEndDate: createDate[1],
       updateStartDate: updateDate[0],

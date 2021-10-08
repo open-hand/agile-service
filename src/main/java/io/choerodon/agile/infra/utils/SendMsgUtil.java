@@ -100,7 +100,7 @@ public class SendMsgUtil {
             String reporterName = result.getReporterName();
             ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
             String url = getIssueCreateUrl(result, projectVO, result.getIssueId());
-            siteMsgUtil.issueCreate(userIds, reporterName, summary, url, operatorId, projectId);
+            siteMsgUtil.issueCreate(userIds, reporterName, summary, url, operatorId, projectId, false);
             if (result.getAssigneeId() != null) {
                 List<Long> assigneeIds = new ArrayList<>();
                 assigneeIds.add(result.getAssigneeId());
@@ -141,7 +141,7 @@ public class SendMsgUtil {
             ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
             String projectName = convertProjectName(projectVO);
             String url = URL_TEMPLATE1 + projectId + URL_TEMPLATE2 + projectName + URL_TEMPLATE6 + projectVO.getOrganizationId() + URL_TEMPLATE7 + projectVO.getOrganizationId() + URL_TEMPLATE3 + result.getIssueNum() + URL_TEMPLATE4 + result.getParentIssueId() + URL_TEMPLATE5 + result.getIssueId();
-            siteMsgUtil.issueCreate(userIds, reporterName, summary, url, operatorId, projectId);
+            siteMsgUtil.issueCreate(userIds, reporterName, summary, url, operatorId, projectId, false);
             Long getAssigneeId = result.getAssigneeId();
             if (!ObjectUtils.isEmpty(getAssigneeId)) {
                 siteMsgUtil.issueAssignee(Arrays.asList(getAssigneeId), result.getAssigneeName(), summary, url, projectId, reporterName, operatorId);
@@ -413,6 +413,7 @@ public class SendMsgUtil {
     private void setIssueCommentMessageActionAndUser(Map<Long, String> actionMap, Long userId, IssueVO issueVO, ProjectVO projectVO, List<Long> userIds) {
         Map<Long, String> map = new HashMap<>();
         List<Long> starUsers = starBeaconMapper.selectUsersByInstanceId(projectVO.getId(), issueVO.getIssueId());
+        //邮件和站内信有接收人的消息中的action
         if (!CollectionUtils.isEmpty(starUsers)) {
             starUsers.forEach(starUserId -> {
                 if (userIds.contains(starUserId)) {
@@ -429,6 +430,10 @@ public class SendMsgUtil {
             }
             actionMap.put(sendUserId, map.getOrDefault(sendUserId, "管理的"));
         });
+        //webhook等无接收人的消息中的默认action
+        if (CollectionUtils.isNotEmpty(actionMap.keySet())) {
+            actionMap.put(null, "管理的");
+        }
     }
 
     @Async
@@ -499,11 +504,14 @@ public class SendMsgUtil {
         //问题创建通知自定义字段人员（普通创建、快速创建、问题导入）
         if (SchemeApplyType.AGILE.equals(result.getApplyType())) {
             List<Long> userIds = noticeService.queryCustomFieldUserIdsByProjectId(projectId, ISSUE_CREATE, result);
+            if (CollectionUtils.isEmpty(userIds)) {
+                return;
+            }
             String summary = result.getIssueNum() + "-" + result.getSummary();
             String reporterName = result.getReporterName();
             ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
             String url = getIssueCreateUrl(result, projectVO, result.getIssueId());
-            siteMsgUtil.issueCreate(userIds, reporterName, summary, url, operatorId, projectId);
+            siteMsgUtil.issueCreate(userIds, reporterName, summary, url, operatorId, projectId, true);
         }
     }
 }

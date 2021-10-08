@@ -7,7 +7,7 @@ import { unstable_batchedUpdates } from 'react-dom';
 import { Tooltip, Icon, Button } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import {
-  find, merge, omit, pick, remove, some,
+  find, findIndex, merge, omit, pick, remove, set, some,
 } from 'lodash';
 import produce from 'immer';
 import dayjs from 'dayjs';
@@ -33,7 +33,7 @@ import { ILocalField } from '@/components/issue-search/store';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { useIssueSearchStore } from '@/components/issue-search';
 import FilterManage from '@/components/FilterManage';
-import { Issue, User } from '@/common/types';
+import { IIssueType, Issue, User } from '@/common/types';
 import isHoliday from '@/utils/holiday';
 import { list2tree } from '@/utils/tree';
 import { transformFilter } from '@/routes/Issue/stores/utils';
@@ -50,7 +50,14 @@ import GanttSortLabel, { useGanttSortLabel } from './components/gantt-sort-label
 import './index.less';
 import StatusLinkageWSHandle from '@/components/StatusLinkageWSHandle';
 import { openCustomColumnManageModal } from '@/components/table-cache/column-manage/Modal';
+import QuickCreateIssue from '@/components/QuickCreateIssue';
 import useIsInProgram from '@/hooks/useIsInProgram';
+import QuickCreateSubIssue from '@/components/QuickCreateSubIssue';
+import { useUpdateColumnMutation } from '@/hooks/data/useTableColumns';
+import TableCache, { TableCacheRenderProps } from '@/components/table-cache';
+import { getTableColumns as getIssueTableColumns } from '@/components/issue-table/columns';
+import getListLayoutColumns from '../Issue/components/issue-table/utils/getListLayoutColumns';
+import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 
 dayjs.extend(weekday);
 const typeOptions = [{
@@ -68,7 +75,7 @@ const typeOptions = [{
 }] as const;
 const typeValues = typeOptions.map((t) => t.value);
 type TypeValue = (typeof typeValues)[number];
-
+const isCanQuickCreateIssue = (record: Gantt.Record<any>) => (!record.group && !record.parentId) && ['story', 'bug', 'task'].includes(record.issueTypeVO?.typeCode);
 const ganttList2Tree = (data: any[]) => list2tree(data, { valueField: 'issueId', parentField: 'parentId' });
 const groupByTask = (data: any[]) => ganttList2Tree(data);
 const groupByUser = (data: any[]) => {
@@ -190,26 +197,71 @@ const renderTooltip = (user: User) => {
 };
 const { Option } = FlatSelect;
 
-const getTableColumns = ({ onSortChange }: any) => {
+const getTableColumns = ({ onSortChange }: any, openCreateSubIssue: (parentIssue: Issue) => void, onCreateAfter: (createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed?: boolean) => void) => {
   const tableColumns: GanttProps<Issue>['columns'] = [{
     flex: 2,
-    minWidth: 200,
+    minWidth: 300,
+    // width: 300,
+    lock: 'left',
     name: 'summary',
     label: '名称',
-    render: (record) => (
-      !record.group ? (
-        <span style={{ cursor: 'pointer', color: 'var(--table-click-color)' }}>
+    render: (record) => {
+      if (record.create) {
+        const parentIssue: Issue = record.parent;
+        const onCreate = (issue: Issue) => onCreateAfter(record.createId, { subIssue: issue, parentIssueId: parentIssue.issueId });
+        return (
+          <span role="none" onClick={(e) => e.stopPropagation()} className="c7n-gantt-content-body-create">
+            <QuickCreateSubIssue
+              mountCreate
+              typeCode={['sub_task', 'bug']}
+              priorityId={parentIssue.priorityVO?.id}
+              parentIssueId={parentIssue.issueId}
+              sprintId={(parentIssue as any).sprint?.sprintId!}
+              cantCreateEvent={() => {
+                onCreateAfter(record.createId, undefined, true);
+                // 这里延迟打开
+                setTimeout(() => {
+                  openCreateIssue({
+                    onCreate,
+                  });
+                }, 110);
+              }}
+              onCreate={onCreate}
+              defaultAssignee={undefined}
+              onAwayClick={(createFn) => {
+                createFn().then((res: boolean) => {
+                  !res && onCreateAfter(record.createId, undefined, true);
+                });
+              }}
+            />
+          </span>
+        );
+      }
+      const isCanCreateIssue = isCanQuickCreateIssue(record);
+      return !record.group ? (
+        // eslint-disable-next-line no-underscore-dangle
+        <span style={{ cursor: 'pointer', color: 'var(--table-click-color)' }} className={classNames('c7n-gantt-content-body-summary')}>
           <TypeTag iconSize={22} data={record.issueTypeVO} style={{ marginRight: 5 }} />
           <Tooltip title={record.summary}>
-            <span style={{ verticalAlign: 'middle' }}>{record.summary}</span>
+            <span style={{ verticalAlign: 'middle', flex: 1 }} className="c7n-gantt-content-body-summary-text">{record.summary}</span>
           </Tooltip>
+          {isCanCreateIssue && (
+            <Icon
+              type="add"
+              className="c7n-gantt-content-body-parent_create"
+              onClick={(e) => {
+                e.stopPropagation();
+                openCreateSubIssue(record as any);
+              }}
+            />
+          )}
         </span>
       ) : (
         <Tooltip title={record.summary}>
           <span style={{ color: 'var(--table-click-color)' }}>{record.summary}</span>
         </Tooltip>
-      )
-    ),
+      );
+    },
   },
   {
     width: 85,
@@ -226,7 +278,6 @@ const getTableColumns = ({ onSortChange }: any) => {
     ),
   },
   {
-    // flex: 1,
     width: 100,
     minWidth: 100,
     name: 'estimatedStartTime',
@@ -237,27 +288,55 @@ const getTableColumns = ({ onSortChange }: any) => {
     render: (record) => record.estimatedStartTime && <Tooltip title={record.estimatedStartTime}><span>{dayjs(record.estimatedStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
   },
   {
-    // flex: 1,
     width: 100,
     minWidth: 100,
     name: 'estimatedEndTime',
     label: '预计结束',
     render: (record) => record.estimatedEndTime && <Tooltip title={record.estimatedEndTime}><span>{dayjs(record.estimatedEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
-  }];
+  },
+    // {
+    //   // flex: 1,
+    //   width: 100,
+    //   minWidth: 100,
+    //   name: 'estimatedEndTime1',
+    //   label: '预计结束',
+    // },
+    // {
+    //   // flex: 1,
+    //   width: 100,
+    //   minWidth: 100,
+    //   name: 'estimatedEndTime2',
+    //   label: '预计结束',
+    // },
+    // {
+    //   // flex: 1,
+    //   width: 100,
+    //   minWidth: 100,
+    //   name: 'estimatedEndTime3',
+    //   label: '预计结束',
+    // },
+  ];
+
   return tableColumns;
 };
-const GanttPage: React.FC = () => {
+const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
   const { isInProgram } = useIsInProgram();
   const [data, setData] = useState<any[]>([]);
+  const [isCreate, setIsCreate] = useState(false);
   const typeChangeRefreshFlag = useRef<boolean>(false);
   const [type, setType] = useState<TypeValue>(localPageCacheStore.getItem('gantt.search.type') ?? typeValues[0]);
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
+  const mutation = useUpdateColumnMutation('gantt');
+  const { data: tableFields } = useIssueTableFields({ hiddenFieldCodes: ['epicSelfName'] });
+  const listLayoutColumns = useMemo(() => getListLayoutColumns(cached?.listLayoutColumns || [], tableFields || []), [cached?.listLayoutColumns, tableFields]);
+
   const [{ data: sortedList }, sortLabelProps] = useGanttSortLabel();
-  const tableWithSortedColumns = useMemo(() => getTableColumns(sortLabelProps), [sortLabelProps]);
+
   const [workCalendar, setWorkCalendar] = useState<any>();
   const [projectWorkCalendar, setProjectWorkCalendar] = useState<any>();
   const [filterManageVisible, setFilterManageVisible] = useState<boolean>();
   const [loading, setLoading] = useState(false);
+  const quickCreateDataRef = useRef<any>({});
   const issueSearchStore = useIssueSearchStore({
     getSystemFields: () => getSystemFields().map((item) => (item.code === 'feature' || item.code === 'epic' ? { ...item, defaultShow: false } : item)).filter((item) => item.code !== 'sprint') as ILocalField[],
     transformFilter,
@@ -265,6 +344,16 @@ const GanttPage: React.FC = () => {
   const store = useMemo(() => new GanttStore(), []);
   const { sprintIds } = store;
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
+
+  const handleQuickCreateSubIssue = usePersistFn((parentIssue: Issue) => {
+    setData(produce(data, (draft) => {
+      const targetIndex = findIndex(draft, (issue) => issue.parentId === parentIssue.issueId || issue.issueId === parentIssue.issueId);
+      targetIndex !== -1 && draft.splice(targetIndex, 0, {
+        parentId: parentIssue.issueId, parent: parentIssue, create: true, createId: targetIndex,
+      });
+    }));
+  });
+
   const { run, flush } = useDebounceFn(() => {
     (async () => {
       const year = dayjs().year();
@@ -456,11 +545,26 @@ const GanttPage: React.FC = () => {
         }
       }
     }));
+
     updateInfluenceIssues(issue);
   });
+
   const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {
     handleCreateIssue(subIssue, parentIssueId, parentIssueId);
   });
+
+  const handleQuickCreateSubIssueAfter = usePersistFn((createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed = false) => {
+    setData(produce(data, (draft) => {
+      const delCreateIndex = findIndex(draft, { createId });
+      draft.splice(delCreateIndex, 1);
+    }));
+    if (!flagFailed && createSuccessData) {
+      const { subIssue, parentIssueId } = createSuccessData;
+      handleCreateSubIssue(subIssue, parentIssueId);
+    }
+  });
+  const tableWithSortedColumns = useMemo(() => getTableColumns(sortLabelProps, handleQuickCreateSubIssue, handleQuickCreateSubIssueAfter), [handleQuickCreateSubIssue, handleQuickCreateSubIssueAfter, sortLabelProps]);
+
   const handleCopyIssue = usePersistFn((issue: Issue, issueId: string, isSubTask?: boolean, dontCopyEpic?: boolean) => {
     handleCreateIssue(issue, issueId, isSubTask ? issueId : undefined, dontCopyEpic);
     const subIssues = [...(issue.subIssueVOList ?? []), ...(issue.subBugVOList ?? [])];
@@ -538,6 +642,7 @@ const GanttPage: React.FC = () => {
   const handleDeleteSubIssue = usePersistFn((issue: Issue, subIssueId: string) => {
     handleIssueDelete(issue);
   });
+
   const ganttData = useMemo(() => {
     // 需要刷新时先不进行排序，等待数据请求完再进行
     if (typeChangeRefreshFlag.current) {
@@ -560,6 +665,18 @@ const GanttPage: React.FC = () => {
     }
     return <span>暂无数据</span>;
   });
+  const handleChangeQuickCreateData = usePersistFn((key: string, value: any) => {
+    let defaultKey = key;
+    if (['summary', 'sprint'].includes(key)) {
+      defaultKey = `defaultValues.${key}`;
+    }
+    set(quickCreateDataRef.current, defaultKey, value);
+  });
+  const visibleColumnCodes = useMemo(() => (listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode)), [listLayoutColumns]);
+
+  // const showColumns = useMemo(() => getTableColumns({
+  //   cached?.listLayoutColumns, tableFields, onSummaryClick: () => { }, handleColumnResize: () => { },
+  // }), [listLayoutColumns]);
 
   return (
     <Page>
@@ -615,14 +732,8 @@ const GanttPage: React.FC = () => {
                   modelProps: {
                     title: '设置列显示字段',
                   },
-                  options: [
-                    { code: 'assignee', title: '经办人' },
-                    { code: 'startDate', title: '预计开始时间' },
-                    ...new Array(30).fill({ code: 'startDate', title: '预计开始时间' }).map((i, index) => ({
-                      code: `${i.code}-${index}`, title: `${i.title}-${index}`,
-                    })),
 
-                  ],
+                  options: tableFields || [],
                   type: 'gannt',
                 });
               },
@@ -675,34 +786,63 @@ const GanttPage: React.FC = () => {
           </div>
           <Loading loading={loading} />
           {columns.length > 0 && workCalendar && (
-            <GanttComponent
-              innerRef={store.ganttRef as React.MutableRefObject<GanttRef>}
-              data={ganttData}
-              columns={columns}
-              onUpdate={handleUpdate}
-              startDateKey="estimatedStartTime"
-              endDateKey="estimatedEndTime"
-              isRestDay={isRestDay}
-              showBackToday={false}
-              showUnitSwitch={false}
-              unit={unit}
-              onRow={onRow}
-              onBarClick={onRow.onClick}
-              tableIndent={20}
-              expandIcon={getExpandIcon}
-              renderBar={renderBar}
-              renderInvalidBar={renderInvalidBar}
-              renderGroupBar={renderGroupBar}
-              renderBarThumb={renderBarThumb}
-              tableCollapseAble={false}
-              scrollTop={{
-                right: -4,
-                bottom: 8,
-              }}
-              rowHeight={34}
-              // @ts-ignore
-              renderEmpty={renderEmpty}
-            />
+            <div className="c7n-gantt-content-body">
+              <GanttComponent
+                innerRef={store.ganttRef as React.MutableRefObject<GanttRef>}
+                data={ganttData}
+                columns={columns}
+                onUpdate={handleUpdate}
+                startDateKey="estimatedStartTime"
+                endDateKey="estimatedEndTime"
+                isRestDay={isRestDay}
+                showBackToday={false}
+                showUnitSwitch={false}
+                unit={unit}
+                onRow={onRow}
+                onBarClick={onRow.onClick}
+                tableIndent={20}
+                expandIcon={getExpandIcon}
+                renderBar={renderBar}
+                renderInvalidBar={renderInvalidBar}
+                renderGroupBar={renderGroupBar}
+                renderBarThumb={renderBarThumb}
+                tableCollapseAble={false}
+                scrollTop={{
+                  right: -4,
+                  bottom: 8,
+                }}
+                rowHeight={34}
+                // @ts-ignore
+                renderEmpty={renderEmpty}
+              />
+              <div className={classNames('c7n-gantt-content-body-quick-create', { 'c7n-gantt-content-body-quick-create-open': isCreate })}>
+                <QuickCreateIssue
+                  onCreateChange={setIsCreate}
+                  cantCreateEvent={() => {
+                    openCreateIssue({
+                      ...quickCreateDataRef.current,
+                      onCreate: handleCreateIssue,
+                    });
+                  }}
+                  onCreate={(res: any) => {
+                    handleCreateIssue(res);
+                  }}
+                  typeIdChange={(id: any) => {
+                    handleChangeQuickCreateData('defaultTypeId', id);
+                  }}
+                  summaryChange={(issueSummary: any) => {
+                    handleChangeQuickCreateData('summary', issueSummary);
+                  }}
+                  assigneeChange={(assigneeId: string, assignee: any) => {
+                    handleChangeQuickCreateData('defaultAssignee', assignee);
+                  }}
+                  setDefaultSprint={(value: any) => {
+                    handleChangeQuickCreateData('sprint', value);
+                  }}
+
+                />
+              </div>
+            </div>
           )}
           <IssueDetail
             refresh={run}
@@ -726,4 +866,10 @@ const GanttPage: React.FC = () => {
     </Page>
   );
 };
-export default observer(GanttPage);
+const ObserverGanttPage = observer(GanttPage) as React.FC<TableCacheRenderProps>;
+const GanntPageHOC = () => (
+  <TableCache type="gantt">
+    {(cacheProps) => <ObserverGanttPage {...cacheProps} />}
+  </TableCache>
+);
+export default GanntPageHOC;

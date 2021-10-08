@@ -13,44 +13,41 @@ interface IssueLinkProps {
 const IssueLink: React.FC<IssueLinkProps> = ({
   projectId, dataSet,
 }) => (
-  <Form dataSet={dataSet} style={{ marginTop: -20 }}>
-    {dataSet.map((record) => (
-      <Row gutter={20} type="flex" align="middle">
-        <Col span={11}>
-          <SelectLinkType
-            style={{ width: '100%' }}
-            record={record}
-            projectId={projectId}
-            name="linkType"
-            clearButton={false}
-          />
-        </Col>
-        <Col span={11}>
-          <SelectIssuesInLink
-            style={{ width: '100%' }}
-            record={record}
-            projectId={projectId}
-            name="issueIds"
-            clearButton={false}
-            disabled={!record.get('linkType')}
-            key={record.get('linkType')}
-            multiple
-          />
-        </Col>
-        <Col span={2}>
-          <Icon
-            onClick={() => {
-              dataSet.remove(record);
-            }}
-            type="delete_sweep-o"
-            style={{
-              color: 'var(--primary-color)',
-              cursor: 'pointer',
-            }}
-          />
-        </Col>
-      </Row>
-    ))}
+  <Form dataSet={dataSet} columns={23}>
+    {dataSet.map((record) => ([
+      <SelectLinkType
+        style={{ width: '100%' }}
+        record={record}
+        projectId={projectId}
+        name="linkType"
+        clearButton={false}
+        // @ts-ignore
+        colSpan={11}
+      />,
+      <SelectIssuesInLink
+        style={{ width: '100%' }}
+        record={record}
+        projectId={projectId}
+        name="issueIds"
+        clearButton={false}
+        disabled={!record.get('linkType')}
+        key={record.get('linkType')}
+        multiple
+        // @ts-ignore
+        colSpan={11}
+      />,
+      <Icon
+        onClick={() => {
+          dataSet.remove(record);
+        }}
+        type="delete_sweep-o"
+        style={{
+          color: 'var(--primary-color)',
+          cursor: 'pointer',
+          lineHeight: '0.48rem',
+        }}
+      />,
+    ]))}
     <div>
       <Button
         style={{ marginTop: -4 }}

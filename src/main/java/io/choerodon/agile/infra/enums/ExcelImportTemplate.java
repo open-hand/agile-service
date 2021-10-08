@@ -186,6 +186,8 @@ public class ExcelImportTemplate {
             HEADERS.add(new Header(FieldCode.ENVIRONMENT, "环境", false, null));
             HEADERS.add(new Header(RELATE_ISSUE, "关联问题", false, null));
             HEADERS.add(new Header(FieldCode.ISSUE_STATUS, "状态", false, null));
+            HEADERS.add(new Header(FieldCode.ACTUAL_START_TIME, "实际开始时间", false, null));
+            HEADERS.add(new Header(FieldCode.ACTUAL_END_TIME, "实际结束时间", false, null));
 
             HEADERS.forEach(h -> {
                 String code = h.getCode();

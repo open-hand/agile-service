@@ -125,6 +125,18 @@ export function getSystemFields(excludeCodes = []) {
     fieldType: 'datetime',
   },
   {
+    code: 'actualStartTime',
+    name: '实际开始时间',
+    defaultShow: false,
+    fieldType: 'datetime',
+  },
+  {
+    code: 'actualEndTime',
+    name: '实际结束时间',
+    defaultShow: false,
+    fieldType: 'datetime',
+  },
+  {
     code: 'mainResponsibleIds',
     name: '主要负责人',
     defaultShow: false,

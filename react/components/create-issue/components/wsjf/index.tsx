@@ -1,9 +1,14 @@
 import React from 'react';
-import { Tooltip, Icon } from 'choerodon-ui/pro';
-import { Row, Col } from 'choerodon-ui';
+import {
+  Tooltip, Icon, Form, DataSet,
+} from 'choerodon-ui/pro';
 import SelectNumber from '@/components/select/select-number';
 
-function WSJF() {
+interface Props {
+  dataSet: DataSet,
+}
+
+function WSJF({ dataSet }: Props) {
   return (
     <div>
       <h3 style={{ marginLeft: 10 }}>
@@ -12,32 +17,12 @@ function WSJF() {
           <Icon type="help" style={{ color: 'var(--text-color3)', marginLeft: 2, marginTop: -5 }} />
         </Tooltip>
       </h3>
-      <Row gutter={24}>
-        <Col
-          style={{ marginBottom: 24 }}
-          span={12}
-        >
-          <SelectNumber style={{ width: '100%' }} name="userBusinessValue" label="用户/业务价值" />
-        </Col>
-        <Col
-          style={{ marginBottom: 24 }}
-          span={12}
-        >
-          <SelectNumber style={{ width: '100%' }} name="timeCriticality" label="时间紧迫性" />
-        </Col>
-        <Col
-          style={{ marginBottom: 24 }}
-          span={12}
-        >
-          <SelectNumber style={{ width: '100%' }} name="rrOeValue" label="降低风险|促成机会" />
-        </Col>
-        <Col
-          style={{ marginBottom: 24 }}
-          span={12}
-        >
-          <SelectNumber style={{ width: '100%' }} name="jobSize" label="用户/工作规模" />
-        </Col>
-      </Row>
+      <Form dataSet={dataSet} columns={2}>
+        <SelectNumber name="userBusinessValue" label="用户/业务价值" />
+        <SelectNumber name="timeCriticality" label="时间紧迫性" />
+        <SelectNumber name="rrOeValue" label="降低风险|促成机会" />
+        <SelectNumber name="jobSize" label="用户/工作规模" />
+      </Form>
     </div>
   );
 }

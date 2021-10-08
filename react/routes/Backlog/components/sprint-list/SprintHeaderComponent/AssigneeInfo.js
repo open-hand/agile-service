@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { observer } from 'mobx-react';
-import { findIndex, find } from 'lodash';
+import { find } from 'lodash';
 import classnames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
@@ -9,25 +9,6 @@ import './AssigneeInfo.less';
 import { UserUniqueTag } from '@/components/tag/user-tag';
 
 @observer class AssigneeInfo extends Component {
-  constructor(props) {
-    super(props);
-    const { data: { sprintId, assigneeIssues } } = this.props;
-    const assigneeId = localPageCacheStore.getItem(`backlog.sprint-${sprintId}`);
-    if (assigneeId && findIndex(assigneeIssues, (item) => String(item.assigneeId) === String(assigneeId)) !== -1) {
-      BacklogStore.setFilterSprintAssign(sprintId, assigneeId);
-      const sprintDefaultAssignee = find(assigneeIssues, (item) => String(item.assigneeId) === String(assigneeId));
-      BacklogStore.setFilterSprintAssignUser(sprintId, {
-        id: assigneeId,
-        imageUrl: sprintDefaultAssignee.imageUrl,
-        loginName: sprintDefaultAssignee.assigneeLoginName,
-        realName: sprintDefaultAssignee.assigneeRealName,
-        tooltip: sprintDefaultAssignee.assigneeName,
-      });
-    } else {
-      localPageCacheStore.remove(`backlog.sprint-${sprintId}`);
-    }
-  }
-
   handleSearchAssignee = (assigneeId) => {
     const { data: { sprintId, assigneeIssues } } = this.props;
     const filterSprintAssignId = BacklogStore.filterSprintAssign.get(sprintId);

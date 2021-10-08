@@ -130,7 +130,9 @@ public class ExcelServiceImpl implements ExcelService {
     protected static final String CREATION_DATE = "creationDate";
     protected static final String LAST_UPDATE_DATE = "lastUpdateDate";
     protected static final String ESTIMATED_START_TIME = "estimatedStartTime";
+    protected static final String ACTUAL_START_TIME = "actualStartTime";
     protected static final String ESTIMATED_END_TIME = "estimatedEndTime";
+    protected static final String ACTUAL_END_TIME = "actualEndTime";
     protected static final String CREATED_USER_NAME = "createdUserName";
     protected static final String LAST_UPDATE_USER_NAME = "lastUpdatedUserName";
     protected static final String MAIN_RESPONSIBLE_NAME = "mainResponsibleName";
@@ -163,6 +165,8 @@ public class ExcelServiceImpl implements ExcelService {
     private static final int PREDEFINED_VALUE_START_ROW = 1;
     private static final int PREDEFINED_VALUE_END_ROW = 500;
     private static final String INSERT = "insert";
+
+    protected static final String[] SYSTEM_DATE_FIELD_LIST = {FieldCode.ACTUAL_START_TIME, FieldCode.ACTUAL_END_TIME, FieldCode.ESTIMATED_START_TIME, FieldCode.ESTIMATED_END_TIME};
 
     @Autowired
     protected StateMachineClientService stateMachineClientService;
@@ -271,6 +275,8 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put(LAST_UPDATE_DATE, "最后更新时间");
         FIELD_MAP.put(ESTIMATED_START_TIME, "预计开始时间");
         FIELD_MAP.put(ESTIMATED_END_TIME, "预计结束时间");
+        FIELD_MAP.put(ACTUAL_START_TIME, "实际开始时间");
+        FIELD_MAP.put(ACTUAL_END_TIME, "实际结束时间");
         FIELD_MAP.put(CREATED_USER_NAME, "创建人");
         FIELD_MAP.put(LAST_UPDATE_USER_NAME, "更新人");
         FIELD_MAP.put(MAIN_RESPONSIBLE_NAME, "主要负责人");
@@ -1800,6 +1806,12 @@ public class ExcelServiceImpl implements ExcelService {
             case FieldCode.ISSUE_STATUS:
                 validateAndSetIssueStatus(row, col, excelColumn, errorRowColMap, issueCreateVO, issueType);
                 break;
+            case FieldCode.ACTUAL_START_TIME:
+                validateAndSetActualTime(row, col, issueCreateVO, errorRowColMap, FieldCode.ACTUAL_START_TIME);
+                break;
+            case FieldCode.ACTUAL_END_TIME:
+                validateAndSetActualTime(row, col, issueCreateVO, errorRowColMap, FieldCode.ACTUAL_END_TIME);
+                break;
             default:
                 break;
         }
@@ -1951,6 +1963,34 @@ public class ExcelServiceImpl implements ExcelService {
                     }
                     if (FieldCode.ESTIMATED_END_TIME.equals(fieldCode)) {
                         issueCreateVO.setEstimatedEndTime(date);
+                    }
+                }
+            }
+        }
+    }
+
+    protected void validateAndSetActualTime(Row row,
+                                            Integer col,
+                                            IssueCreateVO issueCreateVO,
+                                            Map<Integer, List<Integer>> errorRowColMap,
+                                            String fieldCode) {
+        Cell cell = row.getCell(col);
+        int rowNum = row.getRowNum();
+        if (!isCellEmpty(cell)) {
+            if (!cell.getCellTypeEnum().equals(CellType.NUMERIC)) {
+                cell.setCellValue(buildWithErrorMsg("", DATE_CHECK_MSG));
+                addErrorColumn(rowNum, col, errorRowColMap);
+            } else {
+                if (!DateUtil.isCellDateFormatted(cell)) {
+                    cell.setCellValue(buildWithErrorMsg("", DATE_CHECK_MSG));
+                    addErrorColumn(rowNum, col, errorRowColMap);
+                } else {
+                    Date date = cell.getDateCellValue();
+                    if (FieldCode.ACTUAL_START_TIME.equals(fieldCode)) {
+                        issueCreateVO.setActualStartTime(date);
+                    }
+                    if (FieldCode.ACTUAL_END_TIME.equals(fieldCode)) {
+                        issueCreateVO.setActualEndTime(date);
                     }
                 }
             }
@@ -2515,8 +2555,7 @@ public class ExcelServiceImpl implements ExcelService {
                                           String code,
                                           int col,
                                           ExcelColumnVO excelColumnVO) {
-        if (FieldCode.ESTIMATED_START_TIME.equals(code)
-                || FieldCode.ESTIMATED_END_TIME.equals(code)) {
+        if (Arrays.asList(SYSTEM_DATE_FIELD_LIST).contains(code)) {
             dateTypeColumns.add(col);
             excelColumnVO.setDateType(true);
         }
