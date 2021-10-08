@@ -554,10 +554,21 @@
         ai.relate_issue_id,
         ai.status_id,
         CONVERT(ai.issue_num,SIGNED) as issue_num_convert,
+        CONCAT(api.project_code,'-', ai.issue_num) as issue_num,
         ai.epic_id,
         ai.actual_start_time,
-        ai.actual_end_time
+        ai.actual_end_time,
+        ai.story_points,
+        ai.main_responsible_id,
+        ai.remaining_time,
+        ai.environment,
+        ai.created_by,
+        ai.last_updated_by,
+        ai.reporter_id,
+        ai.creation_date,
+        ai.last_update_date
         from agile_issue ai
+        LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
         where ai.project_id = #{projectId}
         and ai.issue_id in
         <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">

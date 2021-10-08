@@ -47,4 +47,18 @@
         </foreach>
     </select>
 
+    <select id="listByIssueIds" resultType="io.choerodon.agile.api.vo.LabelIssueRelVO">
+        select
+            alir.issue_id,
+            alir.label_id,
+            ail.label_name
+        from agile_label_issue_rel alir
+        left join agile_issue_label ail on ail.label_id = alir.label_id
+        where alir.project_id = #{projectId}
+        and alir.issue_id in
+        <foreach collection="issueIds" item="issueId" separator="," open="(" close=")">
+            #{issueId}
+        </foreach>
+    </select>
+
 </mapper>

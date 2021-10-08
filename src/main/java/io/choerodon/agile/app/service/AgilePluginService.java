@@ -496,4 +496,6 @@ public interface AgilePluginService {
     boolean isSubProjectAndArtDoing(Long projectId);
 
     Map<Long, FeatureForIssueVO> queryIssueFeature(Long projectId, List<IssueDTO> issueList);
+
+    void handlerTags(Long projectId, List<Long> issueIds, Map<String, Object> fieldCodeValues);
 }

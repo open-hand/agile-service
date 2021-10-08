@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.IssueSprintVO;
 import io.choerodon.agile.infra.dto.IssueSprintDTO;
 import io.choerodon.agile.infra.dto.IssueSprintRelDTO;
 import io.choerodon.mybatis.common.BaseMapper;
@@ -35,4 +36,6 @@ public interface IssueSprintRelMapper extends BaseMapper<IssueSprintRelDTO> {
     List<IssueSprintDTO> selectIssueSprintByIds(@Param("projectId") Long projectId,
                                                 @Param("issueIds") Set<Long> issueIds,
                                                 @Param("statusCodes") List<String> statusCodes);
+
+    List<IssueSprintVO> listByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
 }

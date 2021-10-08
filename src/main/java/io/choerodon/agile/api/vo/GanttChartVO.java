@@ -1,11 +1,15 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.api.vo.business.TagVO;
 import io.choerodon.agile.infra.dto.IssueSprintDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author superlee
@@ -24,6 +28,8 @@ public class GanttChartVO {
 
     @Encrypt
     private Long issueId;
+
+    private String issueNum;
 
     private String summary;
 
@@ -57,6 +63,53 @@ public class GanttChartVO {
     private Date actualStartTime;
 
     private Date actualEndTime;
+
+    @ApiModelProperty(value = "创建时间")
+    private Date creationDate;
+
+    private BigDecimal storyPoints;
+
+    @ApiModelProperty(value = "最后更新时间")
+    private Date lastUpdateDate;
+
+    @ApiModelProperty(value = "预估时间")
+    private BigDecimal estimateTime;
+
+    @ApiModelProperty(value = "剩余时间")
+    private BigDecimal remainingTime;
+
+    @ApiModelProperty(value = "修复的版本")
+    private List<VersionIssueRelVO> fixVersion;
+
+    @ApiModelProperty(value = "影响的版本")
+    private List<VersionIssueRelVO> influenceVersion;
+
+    @ApiModelProperty(value = "标签")
+    private List<LabelIssueRelVO> labels;
+
+    @ApiModelProperty(value = "模块")
+    private List<IssueComponentBriefVO> components;
+
+    @ApiModelProperty(value = "tag")
+    private List<TagVO> tags;
+
+    @ApiModelProperty(value = "创建人")
+    private UserMessageDTO createUser;
+
+    @ApiModelProperty(value = "更新人")
+    private UserMessageDTO updateUser;
+
+    @ApiModelProperty(value = "主要负责人")
+    private UserMessageDTO mainResponsibleUser;
+
+    @ApiModelProperty(value = "自定义字段的kv")
+    private Map<String,Object> foundationFieldValue;
+
+    @ApiModelProperty(value = "冲刺")
+    private List<IssueSprintVO> sprints;
+
+    @ApiModelProperty(value = "环境")
+    private String environment;
 
     public IssueEpicVO getEpic() {
         return epic;
@@ -192,5 +245,141 @@ public class GanttChartVO {
 
     public void setActualEndTime(Date actualEndTime) {
         this.actualEndTime = actualEndTime;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public BigDecimal getStoryPoints() {
+        return storyPoints;
+    }
+
+    public void setStoryPoints(BigDecimal storyPoints) {
+        this.storyPoints = storyPoints;
+    }
+
+    public Date getLastUpdateDate() {
+        return lastUpdateDate;
+    }
+
+    public void setLastUpdateDate(Date lastUpdateDate) {
+        this.lastUpdateDate = lastUpdateDate;
+    }
+
+    public BigDecimal getEstimateTime() {
+        return estimateTime;
+    }
+
+    public void setEstimateTime(BigDecimal estimateTime) {
+        this.estimateTime = estimateTime;
+    }
+
+    public BigDecimal getRemainingTime() {
+        return remainingTime;
+    }
+
+    public void setRemainingTime(BigDecimal remainingTime) {
+        this.remainingTime = remainingTime;
+    }
+
+    public List<VersionIssueRelVO> getFixVersion() {
+        return fixVersion;
+    }
+
+    public void setFixVersion(List<VersionIssueRelVO> fixVersion) {
+        this.fixVersion = fixVersion;
+    }
+
+    public List<VersionIssueRelVO> getInfluenceVersion() {
+        return influenceVersion;
+    }
+
+    public void setInfluenceVersion(List<VersionIssueRelVO> influenceVersion) {
+        this.influenceVersion = influenceVersion;
+    }
+
+    public List<LabelIssueRelVO> getLabels() {
+        return labels;
+    }
+
+    public void setLabels(List<LabelIssueRelVO> labels) {
+        this.labels = labels;
+    }
+
+    public List<IssueComponentBriefVO> getComponents() {
+        return components;
+    }
+
+    public void setComponents(List<IssueComponentBriefVO> components) {
+        this.components = components;
+    }
+
+    public List<TagVO> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<TagVO> tags) {
+        this.tags = tags;
+    }
+
+    public UserMessageDTO getCreateUser() {
+        return createUser;
+    }
+
+    public void setCreateUser(UserMessageDTO createUser) {
+        this.createUser = createUser;
+    }
+
+    public UserMessageDTO getUpdateUser() {
+        return updateUser;
+    }
+
+    public void setUpdateUser(UserMessageDTO updateUser) {
+        this.updateUser = updateUser;
+    }
+
+    public UserMessageDTO getMainResponsibleUser() {
+        return mainResponsibleUser;
+    }
+
+    public void setMainResponsibleUser(UserMessageDTO mainResponsibleUser) {
+        this.mainResponsibleUser = mainResponsibleUser;
+    }
+
+    public Map<String, Object> getFoundationFieldValue() {
+        return foundationFieldValue;
+    }
+
+    public void setFoundationFieldValue(Map<String, Object> foundationFieldValue) {
+        this.foundationFieldValue = foundationFieldValue;
+    }
+
+    public List<IssueSprintVO> getSprints() {
+        return sprints;
+    }
+
+    public void setSprints(List<IssueSprintVO> sprints) {
+        this.sprints = sprints;
+    }
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
+    }
+
+    public String getIssueNum() {
+        return issueNum;
+    }
+
+    public void setIssueNum(String issueNum) {
+        this.issueNum = issueNum;
     }
 }
