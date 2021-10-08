@@ -7,7 +7,7 @@ import { unstable_batchedUpdates } from 'react-dom';
 import { Tooltip, Icon, Button } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import {
-  find, findIndex, merge, omit, pick, remove, set, some,
+  find, findIndex, get, merge, omit, pick, remove, set, some,
 } from 'lodash';
 import produce from 'immer';
 import dayjs from 'dayjs';
@@ -23,7 +23,9 @@ import {
 import GanttComponent, { GanttProps, Gantt, GanttRef } from '@choerodon/gantt';
 import '@choerodon/gantt/dist/gantt.cjs.production.min.css';
 import { FlatSelect } from '@choerodon/components';
-import { ganttApi, issueApi, workCalendarApi } from '@/api';
+import {
+  ganttApi, issueApi, ListLayoutColumnVO, workCalendarApi,
+} from '@/api';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import TypeTag from '@/components/TypeTag';
 import Loading from '@/components/Loading';
@@ -33,7 +35,9 @@ import { ILocalField } from '@/components/issue-search/store';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { useIssueSearchStore } from '@/components/issue-search';
 import FilterManage from '@/components/FilterManage';
-import { IIssueType, Issue, User } from '@/common/types';
+import {
+  IFoundationHeader, IIssueType, Issue, User,
+} from '@/common/types';
 import isHoliday from '@/utils/holiday';
 import { list2tree } from '@/utils/tree';
 import { transformFilter } from '@/routes/Issue/stores/utils';
@@ -58,6 +62,8 @@ import TableCache, { TableCacheRenderProps } from '@/components/table-cache';
 import { getTableColumns as getIssueTableColumns } from '@/components/issue-table/columns';
 import getListLayoutColumns from '../Issue/components/issue-table/utils/getListLayoutColumns';
 import useIssueTableFields from '@/hooks/data/useIssueTableFields';
+import { PriorityTag, StatusTag } from '@/components';
+import UserTag from '@/components/tag/user-tag';
 
 dayjs.extend(weekday);
 const typeOptions = [{
@@ -196,8 +202,321 @@ const renderTooltip = (user: User) => {
   return ldap ? `${realName}(${loginName})` : `${realName}(${email})`;
 };
 const { Option } = FlatSelect;
-
-const getTableColumns = ({ onSortChange }: any, openCreateSubIssue: (parentIssue: Issue) => void, onCreateAfter: (createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed?: boolean) => void) => {
+function renderEpicOrFeature(rowData: any, fieldName: any) {
+  const color = fieldName === 'epicId' ? get(rowData, 'epicColor') : get(rowData, 'featureColor');
+  const name = fieldName === 'epicId' ? get(rowData, 'epicName') : get(rowData, 'featureName');
+  return name ? (
+    <Tooltip title={name}>
+      <span style={{
+        width: '100%',
+        color,
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        borderColor: color,
+        borderRadius: '2px',
+        fontSize: '13px',
+        lineHeight: '20px',
+        verticalAlign: 'middle',
+        padding: '0 4px',
+        display: 'inline-block',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+      }}
+      >
+        {name}
+      </span>
+    </Tooltip>
+  ) : null;
+}
+const renderTag = (listField: any, nameField: any) => (rowData: any) => {
+  const list = get(rowData, listField);
+  if (list) {
+    if (list.length > 0) {
+      return list;
+      // return (
+      //   <Tooltip title={<div>{map(list, (item) => item[nameField]).map((name) => <div>{name}</div>)}</div>}>
+      //     <div style={{ display: 'inline-flex', maxWidth: '100%' }}>
+      //       <Tag
+      //         color="blue"
+      //         style={{
+      //           maxWidth: 160,
+      //           overflow: 'hidden',
+      //           textOverflow: 'ellipsis',
+      //           whiteSpace: 'nowrap',
+      //           cursor: 'auto',
+      //         }}
+      //       >
+      //         {list[0][nameField]}
+      //       </Tag>
+      //       {list.length > 1 ? <Tag color="blue">...</Tag> : null}
+      //     </div>
+      //   </Tooltip>
+      // );
+    }
+  }
+  return null;
+};
+const ganttColumnMap = new Map<string, any>([['assignee', (onSortChange: any) => ({
+  width: 85,
+  minWidth: 85,
+  name: 'assignee',
+  label: (
+    <GanttSortLabel dataKey="assigneeId" onChange={onSortChange}>
+      经办人
+    </GanttSortLabel>) as any,
+  render: (record: any) => (
+    <Tooltip title={renderTooltip(record.assignee)}>
+      <span>{record.assignee?.realName}</span>
+    </Tooltip>
+  ),
+}),
+], ['estimatedStartTime', (onSortChange: any) => ({
+  width: 100,
+  minWidth: 100,
+  name: 'estimatedStartTime',
+  label: (
+    <GanttSortLabel dataKey="estimatedStartTime" onChange={onSortChange}>
+      预计开始
+    </GanttSortLabel>) as any,
+  render: (record: any) => record.estimatedStartTime && <Tooltip title={record.estimatedStartTime}><span>{dayjs(record.estimatedStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
+})], ['estimatedEndTime', (onSortChange: any) => ({
+  width: 100,
+  minWidth: 100,
+  name: 'estimatedEndTime',
+  label: '预计结束',
+  render: (record: any) => record.estimatedEndTime && <Tooltip title={record.estimatedEndTime}><span>{dayjs(record.estimatedEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
+}),
+], ['issueNum', {
+  label: <Tooltip title="编号">编号</Tooltip>,
+  name: 'issueNum',
+  width: 120,
+  className: 'c7n-agile-table-cell',
+  sortable: true,
+}],
+['priority', {
+  label: <Tooltip title="优先级">优先级</Tooltip>,
+  name: 'priorityId',
+  className: 'c7n-agile-table-cell',
+  sortable: true,
+  render: (rowData: any) => (
+    <Tooltip mouseEnterDelay={0.5} title={`优先级： ${get(rowData, 'priorityDTO') ? get(rowData, 'priorityDTO').name : ''}`}>
+      <PriorityTag
+        priority={get(rowData, 'priorityVO')}
+        style={{ display: 'inline-flex' }}
+      />
+    </Tooltip>
+  ),
+}], ['createUser', {
+  label: <Tooltip title="创建人">创建人</Tooltip>,
+  name: 'createdBy',
+  render: (rowData: any) => (
+    <div style={{ display: 'inline-flex', height: 40 }}>
+      {
+        get(rowData, 'createUser') && (
+          <UserTag
+            data={get(rowData, 'createUser')}
+          />
+        )
+      }
+    </div>
+  ),
+  sortable: true,
+}],
+['updateUser', {
+  label: <Tooltip title="更新人">更新人</Tooltip>,
+  name: 'lastUpdatedBy',
+  render: (rowData: any) => (
+    <div style={{ display: 'inline-flex', height: 40 }}>
+      {
+        get(rowData, 'updateUser') && (
+          <UserTag
+            data={get(rowData, 'updateUser')}
+          />
+        )
+      }
+    </div>
+  ),
+  sortable: true,
+}],
+['status', {
+  label: <Tooltip title="状态">状态</Tooltip>,
+  name: 'statusId',
+  sortable: true,
+  render: (rowData: any) => (
+    <Tooltip title={get(rowData, 'statusVO')?.name}>
+      <div style={{
+        display: 'inline-flex',
+        overflow: 'hidden',
+      }}
+      >
+        <StatusTag
+          data={get(rowData, 'statusVO')}
+          style={{ display: 'inline-flex' }}
+        />
+      </div>
+    </Tooltip>
+  ),
+}],
+['reporter', {
+  label: <Tooltip title="报告人">报告人</Tooltip>,
+  name: 'reporterId',
+  sortable: true,
+  render: (rowData: any) => (
+    <div style={{ display: 'inline-flex', height: 40 }}>
+      {get(rowData, 'reporterId') && get(rowData, 'reporterId') !== '0' && (
+        <UserTag
+          data={{
+            id: get(rowData, 'reporterId'),
+            tooltip: get(rowData, 'reporterName'),
+            loginName: get(rowData, 'reporterLoginName'),
+            realName: get(rowData, 'reporterRealName'),
+            imageUrl: get(rowData, 'reporterImageUrl'),
+          }}
+        />
+      )}
+    </div>
+  ),
+}],
+['lastUpdateDate', {
+  label: <Tooltip title="最近更新时间">最近更新时间</Tooltip>,
+  width: 170,
+  name: 'lastUpdateDate',
+  sortable: true,
+}],
+['creationDate', {
+  label: <Tooltip title="创建时间">创建时间</Tooltip>,
+  width: 170,
+  name: 'creationDate',
+  sortable: true,
+}],
+['estimatedStartTime', {
+  label: <Tooltip title="预计开始时间">预计开始时间</Tooltip>,
+  width: 170,
+  name: 'estimatedStartTime',
+  sortable: true,
+}],
+['estimatedEndTime', {
+  label: <Tooltip title="预计结束时间">预计结束时间</Tooltip>,
+  width: 170,
+  name: 'estimatedEndTime',
+  sortable: true,
+}],
+['actualStartTime', {
+  label: <Tooltip title="实际开始时间">实际开始时间</Tooltip>,
+  width: 170,
+  name: 'actualStartTime',
+  sortable: true,
+}],
+['actualEndTime', {
+  label: <Tooltip title="实际结束时间">实际结束时间</Tooltip>,
+  width: 170,
+  name: 'actualEndTime',
+  sortable: true,
+}],
+['remainingTime', {
+  label: <Tooltip title="剩余预估时间">剩余预估时间</Tooltip>,
+  width: 170,
+  name: 'remainingTime',
+  sortable: true,
+}],
+['spentWorkTime', {
+  label: <Tooltip title="已耗费时间">已耗费时间</Tooltip>,
+  width: 170,
+  name: 'spentWorkTime',
+}],
+['allEstimateTime', {
+  label: <Tooltip title="总预估时间">总预估时间</Tooltip>,
+  width: 170,
+  name: 'allEstimateTime',
+}],
+['label', {
+  label: <Tooltip title="标签">标签</Tooltip>,
+  name: 'label',
+  render: renderTag('labelIssueRelVOS', 'labelName'),
+}],
+['component', {
+  label: <Tooltip title="模块">模块</Tooltip>,
+  name: 'component',
+  render: renderTag('issueComponentBriefVOS', 'name'),
+}],
+['fixVersion', {
+  label: <Tooltip title="修复的版本">修复的版本</Tooltip>,
+  name: 'fixVersion',
+  render: renderTag('fixVersionIssueRelVOS', 'name'),
+}],
+['influenceVersion', {
+  label: <Tooltip title="影响的版本">影响的版本</Tooltip>,
+  name: 'influenceVersion',
+  render: renderTag('influenceVersionIssueRelVOS', 'name'),
+}],
+['sprint', {
+  label: <Tooltip title="冲刺">冲刺</Tooltip>,
+  name: 'sprint',
+  render: renderTag('issueSprintVOS', 'sprintName'),
+}],
+['storyPoints', {
+  label: <Tooltip title="故事点">故事点</Tooltip>,
+  name: 'storyPoints',
+  render: (rowData: any) => rowData.storyPoints ?? '-',
+  sortable: true,
+}],
+['feature', {
+  label: <Tooltip title="特性">特性</Tooltip>,
+  name: 'featureId',
+  render: (row: any) => renderEpicOrFeature(row, 'featureId'),
+  sortable: true,
+}],
+['epic', {
+  label: <Tooltip title="史诗">史诗</Tooltip>,
+  name: 'epicId',
+  render: (row: any) => renderEpicOrFeature(row, 'epicId'),
+  sortable: true,
+}],
+['mainResponsibleUser', {
+  label: <Tooltip title="主要负责人">主要负责人</Tooltip>,
+  name: 'mainResponsibleId',
+  render: (rowData: any) => rowData.mainResponsibleUser && <UserTag data={rowData.mainResponsibleUser} />,
+  sortable: true,
+}],
+['environmentName', {
+  label: <Tooltip title="环境">环境</Tooltip>,
+  name: 'environment',
+  render: (rowData: any) => rowData.environmentName,
+  sortable: true,
+}],
+['tags', {
+  label: <Tooltip title="Tag">Tag</Tooltip>,
+  name: 'tags',
+  render: (rowData: any) => {
+    const tagShowText = rowData.tags && rowData.tags.map((tag: any) => `${tag.appServiceCode}:${tag.tagName}`).join('、');
+    return tagShowText ? <Tooltip title={tagShowText}>{tagShowText}</Tooltip> : '';
+  },
+}]]);
+const getCustomColumn = (field?: IFoundationHeader) => (field && {
+  label: <Tooltip title={field.title}>{field.title}</Tooltip>,
+  name: `foundation.${field.code}`,
+  sortable: !(field.fieldType === 'multiple' || field.fieldType === 'checkbox' || field.fieldType === 'multiMember'),
+  render: (rowData: any) => {
+    const { fieldType, code } = field;
+    const value = get(rowData, 'foundationFieldValue')[code];
+    if (['member', 'multiMember'].includes(fieldType)) {
+      return value && (
+        <div style={{ display: 'inline-flex', verticalAlign: 'middle', height: 40 }}>
+          <UserTag
+            data={value}
+          />
+        </div>
+      );
+    }
+    return (
+      <Tooltip title={value || ''}>
+        <span>{value || ''}</span>
+      </Tooltip>
+    );
+  },
+});
+const getTableColumns = (visibleColumns: ListLayoutColumnVO[], tableFields: IFoundationHeader[], { onSortChange }: any, openCreateSubIssue: (parentIssue: Issue) => void, onCreateAfter: (createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed?: boolean) => void) => {
   const tableColumns: GanttProps<Issue>['columns'] = [{
     flex: 2,
     minWidth: 300,
@@ -264,62 +583,24 @@ const getTableColumns = ({ onSortChange }: any, openCreateSubIssue: (parentIssue
       );
     },
   },
-  {
-    width: 85,
-    minWidth: 85,
-    name: 'assignee',
-    label: (
-      <GanttSortLabel dataKey="assigneeId" onChange={onSortChange}>
-        经办人
-      </GanttSortLabel>) as any,
-    render: (record) => (
-      <Tooltip title={renderTooltip(record.assignee)}>
-        <span>{record.assignee?.realName}</span>
-      </Tooltip>
-    ),
-  },
-  {
-    width: 100,
-    minWidth: 100,
-    name: 'estimatedStartTime',
-    label: (
-      <GanttSortLabel dataKey="estimatedStartTime" onChange={onSortChange}>
-        预计开始
-      </GanttSortLabel>) as any,
-    render: (record) => record.estimatedStartTime && <Tooltip title={record.estimatedStartTime}><span>{dayjs(record.estimatedStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
-  },
-  {
-    width: 100,
-    minWidth: 100,
-    name: 'estimatedEndTime',
-    label: '预计结束',
-    render: (record) => record.estimatedEndTime && <Tooltip title={record.estimatedEndTime}><span>{dayjs(record.estimatedEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
-  },
-    // {
-    //   // flex: 1,
-    //   width: 100,
-    //   minWidth: 100,
-    //   name: 'estimatedEndTime1',
-    //   label: '预计结束',
-    // },
-    // {
-    //   // flex: 1,
-    //   width: 100,
-    //   minWidth: 100,
-    //   name: 'estimatedEndTime2',
-    //   label: '预计结束',
-    // },
-    // {
-    //   // flex: 1,
-    //   width: 100,
-    //   minWidth: 100,
-    //   name: 'estimatedEndTime3',
-    //   label: '预计结束',
-    // },
   ];
+  tableColumns.push(...visibleColumns.map(({ columnCode }) => {
+    const baseColumn = { width: 100 };
+    if (ganttColumnMap.has(columnCode)) {
+      const field = ganttColumnMap.get(columnCode);
 
+      return merge(baseColumn, typeof field === 'function' ? field(onSortChange) as Gantt.Column : field);
+    }
+    // console.log('columnCode..', columnCode, find(tableFields, { code: columnCode }));
+    return merge(baseColumn, getCustomColumn(find(tableFields, { code: columnCode })));
+  }));
   return tableColumns;
 };
+const defaultVisibleColumns = ['assignee', 'estimatedStartTime', 'estimatedEndTime'];
+const defaultListLayoutColumns = defaultVisibleColumns.map((code) => ({
+  columnCode: code,
+  display: true,
+}));
 const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
   const { isInProgram } = useIsInProgram();
   const [data, setData] = useState<any[]>([]);
@@ -328,8 +609,9 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
   const [type, setType] = useState<TypeValue>(localPageCacheStore.getItem('gantt.search.type') ?? typeValues[0]);
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
   const mutation = useUpdateColumnMutation('gantt');
-  const { data: tableFields } = useIssueTableFields({ hiddenFieldCodes: ['epicSelfName'] });
-  const listLayoutColumns = useMemo(() => getListLayoutColumns(cached?.listLayoutColumns || [], tableFields || []), [cached?.listLayoutColumns, tableFields]);
+  const { data: tableFields } = useIssueTableFields({ hiddenFieldCodes: ['epicSelfName', 'summary'] });
+  const listLayoutColumns = useMemo(() => getListLayoutColumns(cached?.listLayoutColumns || defaultListLayoutColumns as any, tableFields || []), [cached?.listLayoutColumns, tableFields]);
+  const visibleColumnCodes = useMemo(() => (listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode)), [listLayoutColumns]);
 
   const [{ data: sortedList }, sortLabelProps] = useGanttSortLabel();
 
@@ -368,7 +650,8 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
         workCalendarApi.getWorkSetting(year),
         workCalendarApi.getYearCalendar(year),
         ganttApi.loadByTask(merge(filter, {
-          searchArgs: { tree: type !== 'assignee' },
+          displayFieldCodes: visibleColumnCodes,
+          searchArgs: { tree: type !== 'assignee', dimension: type },
         }), type, sortedList),
       ]);
       // setColumns(headers.map((h: any) => ({
@@ -398,7 +681,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
       run();
       flush();
     }
-  }, [type]);
+  }, [type, visibleColumnCodes]);
   const handleUpdate = useCallback<GanttProps<Issue>['onUpdate']>(async (issue, startDate, endDate) => {
     try {
       await issueApi.update({
@@ -564,7 +847,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
       handleCreateSubIssue(subIssue, parentIssueId);
     }
   });
-  const tableWithSortedColumns = useMemo(() => getTableColumns(sortLabelProps, handleQuickCreateSubIssue, handleQuickCreateSubIssueAfter), [handleQuickCreateSubIssue, handleQuickCreateSubIssueAfter, sortLabelProps]);
+  const tableWithSortedColumns = useMemo(() => getTableColumns(listLayoutColumns.filter((item) => item.display), tableFields || [], sortLabelProps, handleQuickCreateSubIssue, handleQuickCreateSubIssueAfter), [handleQuickCreateSubIssue, handleQuickCreateSubIssueAfter, listLayoutColumns, sortLabelProps, tableFields]);
 
   const handleCopyIssue = usePersistFn((issue: Issue, issueId: string, isSubTask?: boolean, dontCopyEpic?: boolean) => {
     handleCreateIssue(issue, issueId, isSubTask ? issueId : undefined, dontCopyEpic);
@@ -673,7 +956,6 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
     }
     set(quickCreateDataRef.current, defaultKey, value);
   });
-  const visibleColumnCodes = useMemo(() => (listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode)), [listLayoutColumns]);
 
   // const showColumns = useMemo(() => getTableColumns({
   //   cached?.listLayoutColumns, tableFields, onSummaryClick: () => { }, handleColumnResize: () => { },
@@ -733,9 +1015,9 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
                   modelProps: {
                     title: '设置列显示字段',
                   },
-
+                  value: visibleColumnCodes,
                   options: tableFields || [],
-                  type: 'gannt',
+                  type: 'gantt',
                 });
               },
               element: (
