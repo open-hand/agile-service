@@ -65,7 +65,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     requestArgs: args,
     request: request || (async ({ filter, page, requestArgs }) => {
       const res = await (level === 'project'
-        ? userApi.project(projectId).getProjectUsers(filter, page, requestArgs?.selectedUserIds, requestArgs?.queryFilterIds, 10, projectId)
+        ? userApi.project(projectId).getProjectUsers(filter, page, requestArgs?.selectedUserIds, requestArgs?.queryFilterIds, 50, projectId)
         : userApi.project(projectId).org(organizationId).getOrgUsers(filter, page, requestArgs?.selectedUserIds, 50));
       res.list = res.list.filter((user: User) => user.enabled);
       return res;
