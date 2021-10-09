@@ -715,8 +715,8 @@ const CreateIssueBase = observer(({
       >
         {parentIssue ? <TextField label="父任务概要" value={parentIssue.summary} disabled colSpan={2} /> : null}
         {renderFields()}
-        {issueTypeCode === 'feature' ? <WSJF dataSet={dataSet} /> : null}
       </Form>
+      {issueTypeCode === 'feature' ? <WSJF dataSet={dataSet} /> : null}
       {enableIssueLinks ? <IssueLink projectId={projectId} dataSet={issueLinkDataSet} /> : null}
     </Spin>
   );
