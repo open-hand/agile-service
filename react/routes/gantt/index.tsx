@@ -113,7 +113,7 @@ const formatData = (data: any[]) => data.map((item, i, arr) => {
   if (item.featureId && item.featureId !== '0' && !arr.find((issue) => issue.issueId === item.featureId)) {
     Object.assign(newItem, { featureId: null });
   }
-  if ((item.issueTypeVO.typeCode === 'sub_task' || item.issueTypeVO.typeCode === 'bug') && item.parentId) {
+  if ((item.create || item.issueTypeVO.typeCode === 'sub_task' || item.issueTypeVO.typeCode === 'bug') && item.parentId) {
     const parent = arr.find((issue) => issue.issueId === item.parentId);
     const newParent = Object.assign(parent, {});
     if (parent.epicId && parent.epicId !== '0' && !arr.find((issue) => issue.issueId === parent.epicId)) {
@@ -220,7 +220,7 @@ const groupByFeature = (epicChildrenData: any, data: any) => {
 const groupByEpic = (data: any, isInProgram: boolean) => {
   const map = new Map<string, { epic: any, children: any[] }>();
   const noEpicData: any[] = [];
-  data.filter((item: any) => item.issueTypeVO.typeCode !== 'issue_epic' && item.issueTypeVO.typeCode !== 'feature').forEach((issue: any) => {
+  data.filter((item: any) => item.issueTypeVO?.typeCode !== 'issue_epic' && item.issueTypeVO?.typeCode !== 'feature').forEach((issue: any) => {
     if (issue.epicId && issue.epicId !== '0') {
       const epic = data.find((item: any) => item.issueId === issue.epicId);
       if (map.has(epic?.epicName)) {
