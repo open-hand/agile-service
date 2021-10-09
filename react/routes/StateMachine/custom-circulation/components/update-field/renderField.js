@@ -6,6 +6,7 @@ import {
   TextField, Select, DatePicker, TimePicker, DateTimePicker,
   NumberField, TextArea, Col, Row,
 } from 'choerodon-ui/pro';
+import moment from 'moment';
 import SelectUser from '@/components/select/select-user';
 import SelectEnvironment from '@/components/select/select-environment';
 import SelectProgramVersion from '@/components/select/select-program-version';
@@ -133,6 +134,7 @@ export default function renderField({
               name={code}
               label="字段值"
               colSpan={colSpan / 2}
+              defaultTime={code === 'actualEndTime' || code === 'estimatedEndTime' ? moment().endOf('d') : undefined}
             />
           ) : (
             <NumberField
