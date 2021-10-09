@@ -155,16 +155,14 @@ public class GanttChartServiceImpl implements GanttChartService {
         Long instanceId = ganttMoveVO.getInstanceId();
         moveValidator(ganttMoveVO, dimension, instanceType);
         SearchVO searchVO = validateAndProcessSearchVO(projectId, ganttMoveVO);
-
         SearchVO searchWithRequiredFilter = copyRequiredFilter(searchVO);
-
         Long previousId = ganttMoveVO.getPreviousId();
         Long nextId = ganttMoveVO.getNextId();
         Long currentId = ganttMoveVO.getCurrentId();
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        //查询没有额外筛选条件的当前维度的排序
+        //查询没有额外筛选条件的当前维度当前基准的排序
         LinkedHashMap<Long, String> issueWithRankMap =
-                queryIssueListByInstanceType(projectId, searchWithRequiredFilter, instanceId, instanceType, dimension);
+                queryIssueListByInstanceType(projectId, searchWithRequiredFilter, instanceId, instanceType, dimension, currentId);
         if (nextId == null) {
             nextId = queryNextIdByPreviousId(previousId, issueWithRankMap);
         }
@@ -290,11 +288,11 @@ public class GanttChartServiceImpl implements GanttChartService {
                                                                      SearchVO searchVO,
                                                                      Long instanceId,
                                                                      String instanceType,
-                                                                     String dimension) {
+                                                                     String dimension,
+                                                                     Long currentId) {
         PageRequest pageRequest = new PageRequest(1, 0);
         boolean isTreeView = (boolean) searchVO.getSearchArgs().get("tree");
         addDimensionIfNotExisted(searchVO, dimension);
-        addFilterConditionByInstanceType(searchVO, instanceType, instanceId);
         Map<String, Object> sortMap = new HashMap<>();
         addGanttDefaultOrder(searchVO, pageRequest);
         boardAssembler.handleOtherArgs(searchVO);
@@ -304,12 +302,44 @@ public class GanttChartServiceImpl implements GanttChartService {
             //子任务拖动，查出子任务
             List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(Arrays.asList(instanceId), projectId, searchVO, null, searchVO.getAssigneeFilterIds(), sortMap);
             issueIds = childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+        } else if (GanttDimension.isEpic(instanceType) && !Objects.equals(0L, instanceId)) {
+            //在史诗下的拖动
+            addFilterConditionByInstanceType(searchVO, instanceType, instanceId);
+            issueIds = issueService.listByTreeView(projectId, searchVO, null, sortMap, isTreeView);
+            IssueDTO issue = issueMapper.selectByPrimaryKey(currentId);
+            AssertUtilsForCommonException.notNull(issue, "error.gantt.move.currentId.not.existed");
+            String typeCode = issue.getTypeCode();
+            if (IssueTypeCode.isFeature(typeCode) && agilePluginService != null) {
+                AssertUtilsForCommonException.notNull(issueIds, "error.gantt.move.null.data");
+                issueIds = agilePluginService.queryFeatureIdByIssueIdAndEpicId(issueIds, instanceId);
+            }
+        } else if (GanttDimension.isEpic(instanceType) && Objects.equals(0L, instanceId)) {
+            //在未分配史诗下的拖动或根目录拖动
+            issueIds = issueService.listByTreeView(projectId, searchVO, null, sortMap, isTreeView);
+            AssertUtilsForCommonException.notEmpty(issueIds, "error.gantt.move.null.data");
+            List<IssueDTO> issues = issueMapper.selectByIds(StringUtils.join(issueIds, ","));
+            Set<Long> epicIds =
+                    issues.stream()
+                            .filter(x -> !ObjectUtils.isEmpty(x.getEpicId()) && !Objects.equals(0L, x.getEpicId()))
+                            .map(IssueDTO::getEpicId)
+                            .collect(Collectors.toSet());
+            if (agilePluginService != null) {
+                epicIds.addAll(agilePluginService.queryNoEpicFeatureIds(issues));
+            }
+            issueIds = new ArrayList<>(epicIds);
+        } else if (GanttDimension.isFeature(instanceType) && Objects.equals(0L, instanceId)) {
+            setOtherArgsValueByKey(searchVO, "featureNull", "true");
+            List<String> list = new ArrayList<>();
+            list.add("0");
+            setOtherArgsValueByKey(searchVO, "feature", list);
+            setOtherArgsValueByKey(searchVO, "epic", list);
+            boardAssembler.handleOtherArgs(searchVO);
+            issueIds = issueService.listByTreeView(projectId, searchVO, null, sortMap, isTreeView);
         } else {
+            addFilterConditionByInstanceType(searchVO, instanceType, instanceId);
             issueIds = issueService.listByTreeView(projectId, searchVO, null, sortMap, isTreeView);
         }
-        if (issueIds.isEmpty()) {
-            throw new CommonException("error.gantt.move.null.data");
-        }
+        AssertUtilsForCommonException.notNull(issueIds, "error.gantt.move.null.data");
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Map<Long, String> rankMap = new HashMap<>();
         ganttIssueRankMapper.selectByIssueIdWithRank(organizationId, projectId, instanceId, instanceType, dimension, issueIds)
@@ -330,35 +360,36 @@ public class GanttChartServiceImpl implements GanttChartService {
                                                   String instanceType,
                                                   Long instanceId) {
         GanttDimension ganttDimension = GanttDimension.valueOf(instanceType.toUpperCase());
+        List<String> instanceIdStrList = new ArrayList<>();
+        instanceIdStrList.add(instanceId.toString());
         switch (ganttDimension) {
             case EPIC:
-                setValueByKey(searchVO, "epic", instanceId);
+                setOtherArgsValueByKey(searchVO, "epic", instanceIdStrList);
                 break;
             case FEATURE:
-                setValueByKey(searchVO, "feature", instanceId);
+                setOtherArgsValueByKey(searchVO, "feature", instanceIdStrList);
                 break;
             case SPRINT:
-                setValueByKey(searchVO, SPRINT, instanceId);
+                setOtherArgsValueByKey(searchVO, SPRINT, instanceIdStrList);
                 break;
             case ASSIGNEE:
-                setValueByKey(searchVO, "assigneeId", instanceId);
+                setOtherArgsValueByKey(searchVO, "assigneeId", instanceIdStrList);
                 break;
             case TASK:
                 break;
             default:
                 break;
         }
+        boardAssembler.handleOtherArgs(searchVO);
     }
 
-    private void setValueByKey(SearchVO searchVO, String key, Long value) {
+    private void setOtherArgsValueByKey(SearchVO searchVO, String key, Object value) {
         Map<String, Object> otherArgs = searchVO.getOtherArgs();
         if (otherArgs == null) {
             otherArgs = new HashMap<>();
             searchVO.setOtherArgs(otherArgs);
         }
-        List<String> values = new ArrayList<>();
-        values.add(value.toString());
-        otherArgs.put(key, values);
+        otherArgs.put(key, value);
     }
 
     private void addDimensionIfNotExisted(SearchVO searchVO, String dimension) {
@@ -572,7 +603,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                 ganttChart.setSprint(sprint);
             }
             ganttChart.setProjectId(thisProjectId);
-            ganttChart.setEpicId(Optional.ofNullable(issueEpicMap.get(issueId)).orElse(i.getEpicId()));
+            ganttChart.setEpicId(issueEpicMap.get(issueId));
             ganttChart.setFeatureId(Optional.ofNullable(issueFeatureMap.get(issueId)).map(IssueDTO::getIssueId).orElse(null));
             ganttChart.setEpicName(i.getEpicName());
             ganttChart.setColor(i.getEpicColor());
@@ -617,8 +648,8 @@ public class GanttChartServiceImpl implements GanttChartService {
         }
     }
 
-    private void handlerSystemField(String fieldCode, List<Long> issueIds, Long projectId, Map<String, Object> fieldCodeValues,Set<Long> userIds, List<IssueDTO> issueList) {
-        switch (fieldCode){
+    private void handlerSystemField(String fieldCode, List<Long> issueIds, Long projectId, Map<String, Object> fieldCodeValues, Set<Long> userIds, List<IssueDTO> issueList) {
+        switch (fieldCode) {
             case FieldCode.LABEL:
                 List<LabelIssueRelVO> labelIssueRelVOS = issueLabelMapper.listByIssueIds(projectId, issueIds);
                 if (!CollectionUtils.isEmpty(labelIssueRelVOS)) {
@@ -647,22 +678,22 @@ public class GanttChartServiceImpl implements GanttChartService {
                 handlerVersionList(fieldCode, projectId, issueIds, fieldCodeValues);
                 break;
             case FieldCode.ASSIGNEE:
-                handlerUser(userIds,issueList , IssueDTO::getAssigneeId);
+                handlerUser(userIds, issueList, IssueDTO::getAssigneeId);
                 break;
             case FieldCode.REPORTER:
-                handlerUser(userIds,issueList , IssueDTO::getReporterId);
+                handlerUser(userIds, issueList, IssueDTO::getReporterId);
                 break;
             case CREATE_USER:
-                handlerUser(userIds,issueList , IssueDTO::getCreatedBy);
+                handlerUser(userIds, issueList, IssueDTO::getCreatedBy);
                 break;
             case UPDATE_USER:
-                handlerUser(userIds,issueList , IssueDTO::getLastUpdatedBy);
+                handlerUser(userIds, issueList, IssueDTO::getLastUpdatedBy);
                 break;
             case MAIN_RESPONSIBLE_USER:
-                handlerUser(userIds,issueList , IssueDTO::getMainResponsibleId);
+                handlerUser(userIds, issueList, IssueDTO::getMainResponsibleId);
                 break;
             case TAGS:
-                if(agilePluginService != null){
+                if (agilePluginService != null) {
                     agilePluginService.handlerTags(projectId, issueIds, fieldCodeValues);
                 }
                 break;
@@ -828,6 +859,9 @@ public class GanttChartServiceImpl implements GanttChartService {
         }
         Long epicId = ganttChartVO.getEpicId();
         Long featureId = ganttChartVO.getFeatureId();
+        if (ObjectUtils.isEmpty(epicId) && IssueTypeCode.isFeature(dto.getTypeCode())) {
+            epicId = dto.getEpicId();
+        }
         if (!ObjectUtils.isEmpty(featureId)
                 && IssueTypeCode.isStory(dto.getTypeCode())) {
             ganttChartVO.setParentId(featureId);
@@ -836,7 +870,6 @@ public class GanttChartServiceImpl implements GanttChartService {
         if (!ObjectUtils.isEmpty(epicId)
                 && (IssueTypeCode.isStory(dto.getTypeCode()) || IssueTypeCode.isFeature(dto.getTypeCode()))) {
             ganttChartVO.setParentId(epicId);
-            return;
         }
     }
 
