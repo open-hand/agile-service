@@ -5,6 +5,7 @@ import { stores } from '@choerodon/boot';
 import IssueSearchStore from '@/components/issue-search/store';
 import FilterItem from './FilterItem';
 import './FilterManage.less';
+import useGetAnnouncementHeight from '@/hooks/useGetAnnouncementHeight';
 
 const { HeaderStore } = stores;
 interface Props {
@@ -14,13 +15,14 @@ interface Props {
 }
 const FilterManage: React.FC<Props> = ({ visible, setVisible, issueSearchStore }) => {
   const { myFilters } = issueSearchStore;
+  const announcementHeight = useGetAnnouncementHeight();
   if (!visible) {
     return null;
   }
   return (
     <div
       className="c7n-filterList"
-      style={{ width: 350, top: `calc(50px + ${HeaderStore.announcementClosed ? '0px' : 'var(--banner-height)'}` }}
+      style={{ width: 350, top: `calc(50px + ${announcementHeight}` }}
     >
       <div className="c7n-filterList-header">
         <span>个人筛选</span>

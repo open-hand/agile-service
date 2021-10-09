@@ -61,8 +61,9 @@ class SideIssueList extends Component {
     const { filter } = this.state;
     const issues = issueList.filter(this.handleFilter);
     const { filters: { issueStatus, version: versionList }, HeaderStore } = this.props;
+    const topAnnouncement = HeaderStore.existAnnouncement();
     return (
-      <div className="c7nagile-SideIssueList" style={{ top: HeaderStore.announcementClosed ? 104 : 'calc(104px + var(--banner-height))' }}>
+      <div className="c7nagile-SideIssueList" style={{ top: topAnnouncement ? 'calc(104px + var(--banner-height))' : 104 }}>
         <div className="c7nagile-SideIssueList-header">
           <div className="c7nagile-SideIssueList-input">
             <TextField
