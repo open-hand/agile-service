@@ -57,6 +57,8 @@ public class IssueValidator {
     private static final String ENVIRONMENT = "environment";
     private static final String MAIN_RESPONSIBLE_ID = "mainResponsibleId";
     private static final String ESTIMATED_START_TIME = "estimatedStartTime";
+    private static final String ACTUAL_START_TIME = "actualStartTime";
+    private static final String ACTUAL_END_TIME = "actualEndTime";
     private static final String ESTIMATED_END_TIME = "estimatedEndTime";
     private static final String COMPONENT = "component";
     private static final String FIX_VERSION = "fixVersion";
@@ -73,7 +75,8 @@ public class IssueValidator {
                     ENVIRONMENT, MAIN_RESPONSIBLE_ID, REMAIN_TIME_FIELD,
                     ESTIMATED_START_TIME, ESTIMATED_END_TIME, SPRINT_ID_FIELD,
                     COMPONENT, LABEL, FIX_VERSION, INFLUENCE_VERSION, TAG,
-                    REPORTER_ID, PRIORITY_ID, STATUS_ID_FIELD
+                    REPORTER_ID, PRIORITY_ID, STATUS_ID_FIELD,ACTUAL_START_TIME,
+                    ACTUAL_END_TIME
             };
 
     @Autowired
