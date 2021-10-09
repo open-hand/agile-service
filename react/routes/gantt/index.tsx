@@ -63,9 +63,7 @@ import { openCustomColumnManageModal } from '@/components/table-cache/column-man
 import QuickCreateIssue from '@/components/QuickCreateIssue';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import QuickCreateSubIssue from '@/components/QuickCreateSubIssue';
-import { useUpdateColumnMutation } from '@/hooks/data/useTableColumns';
 import TableCache, { TableCacheRenderProps } from '@/components/table-cache';
-import { getTableColumns as getIssueTableColumns } from '@/components/issue-table/columns';
 import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 import { PriorityTag, StatusTag } from '@/components';
 import UserTag from '@/components/tag/user-tag';
@@ -95,7 +93,13 @@ const isDisableDrag = (bar: Gantt.Bar, draggingBar?: Gantt.Bar) => {
   }
   return false;
 };
-const isCanQuickCreateIssue = (record: Gantt.Record<any>) => (!record.group && !record.parentId) && ['story', 'bug', 'task'].includes(record.issueTypeVO?.typeCode);
+const isCanQuickCreateIssue = (record: Gantt.Record<any>) => {
+  const { typeCode } = record.issueTypeVO || {};
+  if (record.group || !typeCode) {
+    return false;
+  }
+  return typeCode === 'story' || (!record.parentId && ['bug', 'task'].includes(typeCode));
+};
 const ganttList2Tree = (data: any[]) => list2tree(data, { valueField: 'issueId', parentField: 'parentId' });
 
 const formatData = (data: any[]) => data.map((item, i, arr) => {
@@ -663,7 +667,6 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
   const { isInProgram } = useIsInProgram();
   const [data, setData] = useState<any[]>([]);
   const [isCreate, setIsCreate] = useState(false);
-  const typeChangeRefreshFlag = useRef<boolean>(false);
   const [type, setType] = useState<TypeValue>(localPageCacheStore.getItem('gantt.search.type') ?? typeValues[0]);
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
   // const mutation = useUpdateColumnMutation('gantt');
@@ -718,7 +721,6 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
       //   name: h.fieldCode,
       //   label: h.name,
       // })));
-      typeChangeRefreshFlag.current = false;
       unstable_batchedUpdates(() => {
         setWorkCalendar(workCalendarRes);
         setProjectWorkCalendar(projectWorkCalendarRes);
@@ -734,13 +736,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
   useUpdateEffect(() => {
     run();
     flush();
-  }, [sortedList, visibleColumnCodes]);
-  useUpdateEffect(() => {
-    if (typeChangeRefreshFlag.current) {
-      run();
-      flush();
-    }
-  }, [type]);
+  }, [sortedList, type]);
 
   const handleUpdate = useCallback<GanttProps<Issue>['onUpdate']>(async (issue, startDate, endDate) => {
     try {
@@ -777,10 +773,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
     }
   }, [sprintIds, store]);
   const handleTypeChange = useCallback((newType) => {
-    setType((oldType) => {
-      typeChangeRefreshFlag.current = [newType, oldType].includes('assignee') || [newType, oldType].includes('epic');
-      return newType;
-    });
+    setType(newType);
     localPageCacheStore.setItem('gantt.search.type', newType);
   }, []);
 
@@ -988,10 +981,6 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
   });
 
   const ganttData = useMemo(() => {
-    // 需要刷新时先不进行排序，等待数据请求完再进行
-    if (typeChangeRefreshFlag.current) {
-      return data;
-    }
     if (type === 'assignee') {
       return groupByUser(data);
     } if (type === 'sprint') {
