@@ -651,4 +651,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     List<IssueDTO> listIssueWithEpicId(@Param("projectId") Long projectId,
                                        @Param("issueIds") List<Long> issueIds);
+
+    Set<Long> selectAssigneeIdByIssueIds(@Param("projectId") Long projectId,
+                                         @Param("issueIds") List<Long> issueIds);
 }
