@@ -1,4 +1,5 @@
 import { useQuery, UseQueryOptions } from 'react-query';
+import { useCreation, useWhyDidYouUpdate } from 'ahooks';
 import { fieldApi } from '@/api';
 import { IFoundationHeader } from '@/common/types';
 import useIsInProgram from '../useIsInProgram';
@@ -40,15 +41,16 @@ const systemFields = [
 ] as IFoundationHeader[];
 export default function useIssueTableFields(config?: IssueTableFieldsConfig, options?: UseQueryOptions<IFoundationHeader[]>) {
   const key = useProjectKey({ key: ['IssueTableFields'] });
-  const { isInProgram } = useIsInProgram();
+  const { isInProgram, loading } = useIsInProgram();
   const { data, ...others } = useQuery(key, () => fieldApi.getFoundationHeader(), {
+    enabled: !loading,
     initialData: systemFields,
     select: (res) => (config?.hiddenFieldCodes ? systemFields.concat(res).filter((field) => !config.hiddenFieldCodes?.includes(field.code)) : systemFields.concat(res)),
     ...options,
   });
-
+  const fieldData = useCreation(() => (!isInProgram ? data?.filter((f) => f.code !== 'feature') : data), [isInProgram, data]);
   return {
     ...others,
-    data: !isInProgram ? data?.filter((f) => f.code !== 'feature') : data,
+    data: fieldData,
   };
 }

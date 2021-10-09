@@ -729,7 +729,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
   });
   useEffect(() => {
     run();
-  }, [issueSearchStore, sprintIds, run]);
+  }, [issueSearchStore, sprintIds, run, visibleColumnCodes]);
   useUpdateEffect(() => {
     run();
     flush();
