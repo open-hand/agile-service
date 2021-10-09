@@ -17,7 +17,7 @@ import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 import classNames from 'classnames';
 import {
-  usePersistFn, useDebounceFn, useUpdateEffect,
+  usePersistFn, useDebounceFn, useUpdateEffect, useCreation,
 } from 'ahooks';
 import moment from 'moment';
 import {
@@ -27,7 +27,7 @@ import GanttComponent, { GanttProps, Gantt, GanttRef } from '@choerodon/gantt';
 import '@choerodon/gantt/dist/gantt.cjs.production.min.css';
 import { FlatSelect } from '@choerodon/components';
 import {
-  DragDropContext, Draggable, DragStart, Droppable, DropResult, ResponderProvided,
+  DragDropContext, Draggable, DraggableStateSnapshot, DragStart, DragUpdate, Droppable, DropResult, ResponderProvided,
 } from 'react-beautiful-dnd';
 import {
   ganttApi, issueApi, ListLayoutColumnVO, workCalendarApi,
@@ -84,15 +84,56 @@ const typeOptions = [{
 }] as const;
 const typeValues = typeOptions.map((t) => t.value);
 type TypeValue = (typeof typeValues)[number];
-const isDisableDrag = (bar: Gantt.Bar, draggingBar?: Gantt.Bar) => {
-  if (bar._group || !bar.record.parentId) {
-    return true;
-  }
-  if (draggingBar && bar.record.parentId !== draggingBar.record.parentId) {
+const isDisableDrag = (bar: Gantt.Bar) => {
+  const { record } = bar;
+  if (record.disabledDrag) {
     return true;
   }
   return false;
 };
+/**
+ * 拖拽的元素是否能放置到目标位置
+ */
+function isDragRowDrop(bar: Gantt.Bar, destinationBar?: Gantt.Bar) {
+  if (bar._depth === destinationBar?._depth && bar._parent?.key === destinationBar?._parent?.key) {
+    return true;
+  }
+  return false;
+}
+/**
+ * barA的父级是否为BarB
+ */
+function isBarParentBar(barA: Gantt.Bar, barB: Gantt.Bar, depth = 3): boolean {
+  if (depth === 0 || !barA._parent?._bar) {
+    return false;
+  }
+  if (barA._parent?.key === barB.key) {
+    return true;
+  }
+  return isBarParentBar(barA._parent?._bar!, barB, depth - 1);
+}
+/**
+ * 判断 BarA 是否为BarB的后代或父级
+ */
+function isBarParentOrChildren(barA: Gantt.Bar, barB: Gantt.Bar) {
+  if (barA._depth > barB._depth) {
+    return isBarParentBar(barA, barB);
+  }
+  if (barA._depth < barB._depth) {
+    return isBarParentBar(barB, barA);
+  }
+  return false;
+}
+function getDestinationBar(depth: number, bar?: Gantt.Bar): Gantt.Bar | undefined {
+  if (!bar || bar._depth < depth) {
+    return undefined;
+  }
+  if (bar._depth > depth && bar._parent?._bar) {
+    return getDestinationBar(depth, bar._parent?._bar!);
+  }
+
+  return bar;
+}
 const isCanQuickCreateIssue = (record: Gantt.Record<any>) => {
   const { typeCode } = record.issueTypeVO || {};
   if (record.group || !typeCode) {
@@ -154,12 +195,13 @@ const groupByUser = (data: any[]) => {
   return [...map.entries()].map(([name, children]) => ({
     summary: name,
     group: true,
+    disabledDrag: name === '未分配',
     groupType: 'assignee',
     children: ganttList2Tree(children),
   }));
 };
 const groupBySprint = (data: any[]) => {
-  const map = new Map<string, { sprint: any, children: any[] }>();
+  const map = new Map<string, { sprint: any, children: any[], disabledDrag?: boolean }>();
   const noSprintData: any[] = [];
   data.forEach((issue) => {
     if (issue.sprint) {
@@ -173,11 +215,12 @@ const groupBySprint = (data: any[]) => {
     }
   });
   if (noSprintData.length > 0) {
-    map.set('无冲刺', { sprint: {}, children: noSprintData });
+    map.set('无冲刺', { sprint: {}, disabledDrag: true, children: noSprintData });
   }
-  return [...map.entries()].map(([name, { sprint, children }]) => ({
+  return [...map.entries()].map(([name, { sprint, disabledDrag, children }]) => ({
     summary: name,
     group: true,
+    disabledDrag: !!disabledDrag,
     groupType: 'sprint',
     groupWidthSelf: true,
     estimatedStartTime: sprint.startDate,
@@ -187,11 +230,11 @@ const groupBySprint = (data: any[]) => {
 };
 
 const groupByFeature = (epicChildrenData: any, data: any) => {
-  const map = new Map<string, { feature: any, children: any[] }>();
+  const map = new Map<string, { feature: any, disabledDrag?: boolean, children: any[] }>();
   const noFeatureData: any[] = [];
   epicChildrenData.forEach((issue: any) => {
     if (issue.featureId && issue.featureId !== '0') {
-      const feature = data.find((item: any) => item.issueId.toString() === issue.featureId.toString());
+      const feature = data.find((item: any) => !item.create && item.issueId.toString() === issue.featureId.toString());
       if (map.has(feature?.featureName)) {
         map.get(feature?.featureName)?.children.push(issue);
       } else {
@@ -205,11 +248,12 @@ const groupByFeature = (epicChildrenData: any, data: any) => {
     }
   });
   if (noFeatureData.length > 0) {
-    map.set('未分配特性', { feature: {}, children: noFeatureData });
+    map.set('未分配特性', { feature: {}, disabledDrag: true, children: noFeatureData });
   }
 
-  return [...map.entries()].map(([name, { feature, children }]) => ({
+  return [...map.entries()].map(([name, { feature, disabledDrag, children }]) => ({
     group: name === '未分配特性',
+    disabledDrag: !!disabledDrag,
     groupType: 'feature',
     summary: name,
     ...feature,
@@ -218,7 +262,7 @@ const groupByFeature = (epicChildrenData: any, data: any) => {
 };
 
 const groupByEpic = (data: any, isInProgram: boolean) => {
-  const map = new Map<string, { epic: any, children: any[] }>();
+  const map = new Map<string, { epic: any, disabledDrag?: boolean, children: any[] }>();
   const noEpicData: any[] = [];
   data.filter((item: any) => item.issueTypeVO?.typeCode !== 'issue_epic' && item.issueTypeVO?.typeCode !== 'feature').forEach((issue: any) => {
     if (issue.epicId && issue.epicId !== '0') {
@@ -236,11 +280,12 @@ const groupByEpic = (data: any, isInProgram: boolean) => {
     }
   });
   if (noEpicData.length > 0) {
-    map.set('未分配史诗', { epic: {}, children: noEpicData });
+    map.set('未分配史诗', { epic: {}, disabledDrag: true, children: noEpicData });
   }
 
   return [...map.entries()].map(([name, { epic, children }]) => ({
     group: name === '未分配史诗',
+    disabledDrag: true,
     groupType: 'epic',
     summary: name,
     ...epic,
@@ -695,7 +740,8 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
   const [{ data: sortedList }, sortLabelProps] = useGanttSortLabel();
 
   const [workCalendar, setWorkCalendar] = useState<any>();
-  const [draggingBar, setDraggingBar] = useState<Gantt.Bar>();
+  const [{ source: draggingBar, destination: draggingBarDestinationBar }, setDraggingBar] = useState<{ source?: Gantt.Bar, destination?: Gantt.Bar }>({} as any);
+  const draggingStyle = useRef<React.CSSProperties>();
   const [projectWorkCalendar, setProjectWorkCalendar] = useState<any>();
   const [filterManageVisible, setFilterManageVisible] = useState<boolean>();
   const [loading, setLoading] = useState(false);
@@ -1043,12 +1089,11 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
         return (
           <div ref={provider.innerRef} {...provider.draggableProps} {...provider.draggableProps}>
             {record && tableWithSortedColumns[0]?.render!(record)}
-
           </div>
         );
       }}
     >
-      {(provided) => {
+      {(provided, dropSnapshot) => {
         const { children } = Component.props;
         provided.innerRef((Component as any).ref?.current);
         return React.cloneElement(Component, {
@@ -1059,12 +1104,28 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
       }}
     </Droppable>
   ), [store.ganttRef, tableWithSortedColumns]);
-  // eslint-disable-next-line no-multi-spaces
+
+  /**
+   * 获取拖拽行样式
+   */
+  const getDragRowStyle = useCallback((style: React.CSSProperties, bar: Gantt.Bar, snapshot: DraggableStateSnapshot, dragStyle?: React.CSSProperties): React.CSSProperties => {
+    const baseStyle: React.CSSProperties = { ...style };
+    if (draggingBar && draggingBarDestinationBar) {
+      if (isDragRowDrop(draggingBar, bar)) {
+        merge(baseStyle, dragStyle);
+      }
+      if (bar.key === draggingBarDestinationBar.key || bar._parent?.key === draggingBarDestinationBar?.key) {
+        console.log('row bar', bar.record.summary, draggingStyle.current);
+        merge(baseStyle, draggingStyle.current);
+      }
+    }
+    return baseStyle;
+  }, [draggingBar, draggingBarDestinationBar]);
   const renderTableRow = useCallback((row: React.ReactElement, bar: Gantt.Bar) => (
     <Draggable
       key={`drag-${bar.absoluteIndex}`}
       draggableId={String(bar.absoluteIndex)}
-      isDragDisabled={isDisableDrag(bar, draggingBar)}
+      isDragDisabled={isDisableDrag(bar)}
       index={bar.absoluteIndex}
     >
       {(provided, snapshot) => React.cloneElement(row, {
@@ -1074,29 +1135,54 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
         ...provided.dragHandleProps,
         ...provided.draggableProps,
         ref: provided.innerRef,
-        style: { ...row.props?.style, ...provided.draggableProps.style },
+        style: getDragRowStyle(row.props?.style, bar, snapshot, provided.draggableProps?.style),
       })}
     </Draggable>
-  ), [draggingBar]);
+  ), [getDragRowStyle]);
   const handleDragStart = useCallback((initial: DragStart, provided: ResponderProvided) => {
     const dragBar = store.ganttRef.current?.flattenData[initial.source.index];
-    dragBar && setDraggingBar(dragBar);
+    runInAction(() => {
+      if (dragBar) {
+        dragBar.task.collapsed = true;
+        setDraggingBar({ source: dragBar });
+      }
+    });
   }, [store.ganttRef]);
   const handleDragEnd = useCallback((result: DropResult, provider: ResponderProvided) => {
-    setDraggingBar(undefined);
+    setDraggingBar({} as any);
     if (!result.destination || result.destination.index === result.source.index) {
       return;
     }
-    const destinationRecord = store.ganttRef.current?.flattenData[result.destination.index];
-    if (!destinationRecord || !store.ganttRef.current?.flattenData) {
+    const flattenData = store.ganttRef.current?.flattenData || [];
+    const destinationData = flattenData[result.destination.index];
+    const sourceData = flattenData[result.source.index];
+    if (!destinationData || !sourceData || !isDragRowDrop(sourceData, destinationData)) {
       return;
     }
-    const flattenData = store.ganttRef.current?.flattenData;
-    runInAction(() => {
-      const startIndex = destinationRecord.absoluteIndex < 0 ? flattenData.length + destinationRecord.absoluteIndex : destinationRecord.absoluteIndex;
-      const item = flattenData.splice(result.source.index, 1)[0];
-      flattenData.splice(startIndex, 0, item);
-      flattenData.forEach((value, index) => { value.absoluteIndex = index; });
+    // eslint-disable-next-line consistent-return
+    return false;
+    // runInAction(() => {
+    //   const startIndex = destinationData.absoluteIndex < 0 ? flattenData.length + destinationData.absoluteIndex : destinationData.absoluteIndex;
+    //   const item = flattenData.splice(result.source.index, 1)[0];
+    //   console.log('startIndex', startIndex, result.source.index, item);
+    //   flattenData.splice(startIndex, 0, item);
+    //   flattenData.forEach((value, index) => { value.absoluteIndex = index; });
+    // });
+    // console.log('store.ganttRef.current?.flattenData', flattenData);
+  }, [store.ganttRef]);
+  const handleDragUpdate = useCallback((initial: DragUpdate, provided: ResponderProvided) => {
+    setDraggingBar((oldValue) => {
+      if (!oldValue.source || oldValue.destination?.absoluteIndex === initial.destination?.index) {
+        return oldValue;
+      }
+      if (!initial.destination) {
+        return { source: oldValue.source, destination: undefined };
+      }
+      // 移动是同层级进行移动，因此这里获取的目标节点应该是同层级的,当目标节点为高层级别的，则无效
+      const newDestination = getDestinationBar(oldValue.source._depth, store.ganttRef.current?.flattenData[initial.destination.index]);
+      console.log('handleDragUpdate', newDestination?.record.summary);
+      draggingStyle.current = newDestination && { transform: `translate(0px, ${oldValue.source.absoluteIndex > newDestination.absoluteIndex ? 34 : -34}px)` };
+      return { source: oldValue.source, destination: newDestination };
     });
   }, [store.ganttRef]);
 
@@ -1211,6 +1297,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
               <DragDropContext
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
+                onDragUpdate={handleDragUpdate}
               >
                 <GanttComponent
                   innerRef={store.ganttRef as React.MutableRefObject<GanttRef>}
@@ -1294,9 +1381,9 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
   );
 };
 const ObserverGanttPage = observer(GanttPage) as React.FC<TableCacheRenderProps>;
-const GanntPageHOC = () => (
+const GanttPageHOC = () => (
   <TableCache type="gantt">
     {(cacheProps) => <ObserverGanttPage {...cacheProps} />}
   </TableCache>
 );
-export default GanntPageHOC;
+export default GanttPageHOC;
