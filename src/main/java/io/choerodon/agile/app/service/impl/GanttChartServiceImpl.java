@@ -6,10 +6,7 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.TagVO;
 import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.dto.GanttIssueRankDTO;
-import io.choerodon.agile.infra.dto.IssueSprintDTO;
-import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
-import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.GanttDimension;
@@ -101,6 +98,8 @@ public class GanttChartServiceImpl implements GanttChartService {
     private LookupValueService lookupValueService;
     @Autowired
     private GanttIssueRankMapper ganttIssueRankMapper;
+    @Autowired
+    private GanttDimensionRankMapper ganttDimensionRankMapper;
 
     @Override
     public Page<GanttChartVO> pagedQuery(Long projectId,
@@ -154,7 +153,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         String instanceType = ganttMoveVO.getInstanceType();
         Long instanceId = ganttMoveVO.getInstanceId();
         moveValidator(ganttMoveVO, dimension, instanceType);
-        SearchVO searchVO = validateAndProcessSearchVO(projectId, ganttMoveVO);
+        SearchVO searchVO = validateAndProcessSearchVO(projectId, ganttMoveVO.getSearchVO());
         SearchVO searchWithRequiredFilter = copyRequiredFilter(searchVO);
         Long previousId = ganttMoveVO.getPreviousId();
         Long nextId = ganttMoveVO.getNextId();
@@ -174,7 +173,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             String nextRank = issueWithRankMap.get(nextId);
             if (StringUtils.isEmpty(nextRank)) {
                 nextRank =
-                        initRankIfNull(projectId, dimension, instanceType, instanceId, nextId, organizationId, issueWithRankMap);
+                        initIssueRankIfNull(projectId, dimension, instanceType, instanceId, nextId, organizationId, issueWithRankMap);
             }
             String previousRank =
                     ganttIssueRankMapper.selectMaxPreviousRankOrderByRankAsc(organizationId, projectId, instanceId, instanceType, dimension, nextRank);
@@ -184,35 +183,241 @@ public class GanttChartServiceImpl implements GanttChartService {
                 currentRank = RankUtil.between(previousRank, nextRank);
             }
         }
-        updateGanttRank(currentId, organizationId, projectId, instanceId, instanceType, dimension, currentRank);
+        updateGanttIssueRank(currentId, organizationId, projectId, instanceId, instanceType, dimension, currentRank);
     }
 
-    private String initRankIfNull(Long projectId,
-                                  String dimension,
-                                  String instanceType,
-                                  Long instanceId,
-                                  Long nextId,
-                                  Long organizationId,
-                                  LinkedHashMap<Long, String> issueWithRankMap) {
-        String minRank = null;
+    @Override
+    public void moveDimension(Long projectId,
+                              GanttDimensionMoveVO ganttDimensionMoveVO) {
+        String dimension = ganttDimensionMoveVO.getDimension();
+        moveDimensionValidator(ganttDimensionMoveVO, dimension);
+        SearchVO searchVO = validateAndProcessSearchVO(projectId, ganttDimensionMoveVO.getSearchVO());
+        SearchVO searchWithRequiredFilter = copyRequiredFilter(searchVO);
+        Long previousId = ganttDimensionMoveVO.getPreviousId();
+        Long nextId = ganttDimensionMoveVO.getNextId();
+        Long currentId = ganttDimensionMoveVO.getCurrentId();
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        LinkedHashMap<Long, String> instanceRankMap = queryInstanceRankMap(projectId, searchWithRequiredFilter, dimension);
+        if (nextId == null) {
+            nextId = queryNextIdByPreviousId(previousId, instanceRankMap);
+        }
+        String currentRank;
+        if (nextId == null) {
+            //该维度没有设置排序，currentId设置为RankUtil.mid()
+            currentRank = RankUtil.mid();
+        } else {
+            String nextRank = instanceRankMap.get(nextId);
+            if (StringUtils.isEmpty(nextRank)) {
+                nextRank =
+                        initDimensionRankIfNull(projectId, dimension, nextId, organizationId, instanceRankMap);
+            }
+            String previousRank =
+                    ganttDimensionRankMapper.selectMaxPreviousRankOrderByRankAsc(organizationId, projectId, dimension, nextRank);
+            if (StringUtils.isEmpty(previousRank)) {
+                currentRank = RankUtil.genPre(nextRank);
+            } else {
+                currentRank = RankUtil.between(previousRank, nextRank);
+            }
+        }
+        updateGanttDimensionRank(currentId, organizationId, projectId, dimension, currentRank);
+    }
+
+    private void updateGanttDimensionRank(Long instanceId,
+                                          Long organizationId,
+                                          Long projectId,
+                                          String dimension,
+                                          String rank) {
+        GanttDimensionRankDTO example = new GanttDimensionRankDTO();
+        example.setInstanceId(instanceId);
+        example.setInstanceType(dimension);
+        example.setDimension(dimension);
+        example.setProjectId(projectId);
+        example.setOrganizationId(organizationId);
+        List<GanttDimensionRankDTO> ganttDimensionRankList = ganttDimensionRankMapper.select(example);
+        if (ganttDimensionRankList.isEmpty()) {
+            example.setRank(rank);
+            if (ganttDimensionRankMapper.insert(example) != 1) {
+                throw new CommonException("error.gantt.dimension.update.rank");
+            }
+        } else {
+            GanttDimensionRankDTO dto = ganttDimensionRankList.get(0);
+            dto.setRank(rank);
+            if (ganttDimensionRankMapper.updateByPrimaryKey(dto) != 1) {
+                throw new CommonException("error.gantt.dimension.update.rank");
+            }
+        }
+
+    }
+
+    private void moveDimensionValidator(GanttDimensionMoveVO ganttDimensionMoveVO, String dimension) {
+        if (!GanttDimension.isSprint(dimension)
+                && !GanttDimension.isAssignee(dimension)) {
+            throw new CommonException("error.gantt.dimension.not.support");
+        }
+        Long previewId = ganttDimensionMoveVO.getPreviousId();
+        Long nextId = ganttDimensionMoveVO.getNextId();
+        if (ObjectUtils.isEmpty(previewId) && ObjectUtils.isEmpty(nextId)) {
+            throw new CommonException("error.gantt.move.target.id.null");
+        }
+    }
+
+    @Override
+    public GanttDimensionListVO ganttDimensionList(Long projectId, SearchVO searchVO) {
+        if (isSprintEmpty(searchVO)) {
+            throw new CommonException("error.otherArgs.sprint.empty");
+        }
+        String dimension = getDimensionFromSearchVO(searchVO);
+        if (!GanttDimension.isSprint(dimension)
+                && !GanttDimension.isAssignee(dimension)) {
+            throw new CommonException("error.gantt.dimension.not.support");
+        }
+        GanttDimensionListVO result = new GanttDimensionListVO();
+        result.setIds(new ArrayList<>());
+        LinkedHashMap<Long, String> instanceRankMap = queryInstanceRankMap(projectId, searchVO, dimension);
+        List<Long> ids = new ArrayList<>();
+        instanceRankMap.forEach((k, v) -> ids.add(k));
+        result.setIds(ids);
+        return result;
+    }
+
+    private LinkedHashMap<Long, String> queryInstanceRankMap(Long projectId,
+                                                             SearchVO searchVO,
+                                                             String dimension) {
+        PageRequest pageRequest = new PageRequest(1, 0);
+        boolean illegalIssueTypeId = buildIssueType(searchVO, projectId);
+        if (illegalIssueTypeId) {
+            return new LinkedHashMap<>();
+        }
+        Boolean condition = issueService.handleSearchUser(searchVO, projectId);
+        if (!Boolean.TRUE.equals(condition)) {
+            return new LinkedHashMap<>();
+        }
+        String filterSql = getFilterSql(searchVO);
+        boardAssembler.handleOtherArgs(searchVO);
+        boolean isTreeView =
+                Boolean.TRUE.equals(
+                        Optional.ofNullable(searchVO.getSearchArgs())
+                                .map(x -> x.get("tree"))
+                                .orElse(true));
+        Page<Long> page = issueService.pagedQueryByTreeView(pageRequest, projectId, searchVO, filterSql, null, isTreeView);
+        List<Long> issueIds = page.getContent();
+        if (issueIds.isEmpty()) {
+            return new LinkedHashMap<>();
+        }
+        return queryOrderedInstanceIdsWithRank(projectId, dimension, issueIds);
+    }
+
+    private LinkedHashMap<Long, String> queryOrderedInstanceIdsWithRank(Long projectId,
+                                                                        String dimension,
+                                                                        List<Long> issueIds) {
+        Set<Long> instanceIds = new HashSet<>();
+        GanttDimension ganttDimension = GanttDimension.valueOf(dimension);
+        switch (ganttDimension) {
+            case ASSIGNEE:
+                instanceIds.addAll(issueMapper.selectAssigneeIdByIssueIds(projectId, issueIds));
+                break;
+            case SPRINT:
+                Map<Long, IssueSprintDTO> issueSprintMap = queryIssueSprint(projectId, issueIds);
+                issueSprintMap.forEach((issueId, sprint) -> instanceIds.add(sprint.getSprintId()));
+                break;
+        }
+        List<GanttDimensionRankDTO> ganttDimensionRankList =
+                ganttDimensionRankMapper.orderByInstanceId(instanceIds, projectId, dimension);
+        LinkedHashMap<Long, String> rankMap = new LinkedHashMap<>();
+        ganttDimensionRankList.forEach(x -> rankMap.put(x.getInstanceId(), x.getRank()));
+        List<Long> noRankList = new ArrayList<>();
+        instanceIds.forEach(id -> {
+            if (!rankMap.containsKey(id)) {
+                noRankList.add(id);
+            }
+        });
+        noRankList.sort(Long::compareTo);
+        LinkedHashMap<Long, String> resultMap = new LinkedHashMap<>();
+        noRankList.forEach(id -> resultMap.put(id, null));
+        rankMap.forEach((k, v) -> resultMap.put(k, v));
+        return resultMap;
+    }
+
+
+    private String initIssueRankIfNull(Long projectId,
+                                       String dimension,
+                                       String instanceType,
+                                       Long instanceId,
+                                       Long nextId,
+                                       Long organizationId,
+                                       LinkedHashMap<Long, String> issueWithRankMap) {
         List<Long> nullRankIssueIds = new ArrayList<>();
+        //rank 升序
+        List<String> rankList = new ArrayList<>();
+        processNullRankList(nullRankIssueIds, rankList, issueWithRankMap, nextId);
+        List<GanttIssueRankDTO> insertList = new ArrayList<>();
+        int nullRankSize = nullRankIssueIds.size();
+        for (int i = 0; i < nullRankSize; i++) {
+            Long issueId = nullRankIssueIds.get(i);
+            String thisRank = rankList.get(i);
+            insertList.add(buildGanttIssueRank(organizationId, projectId, instanceId, instanceType, dimension, issueId, thisRank));
+        }
+        ganttIssueRankMapper.batchInsert(insertList);
+        return rankList.get(0);
+    }
+
+    private String initDimensionRankIfNull(Long projectId,
+                                           String dimension,
+                                           Long nextId,
+                                           Long organizationId,
+                                           LinkedHashMap<Long, String> instanceRankMap) {
+        List<Long> nullRankIssueIds = new ArrayList<>();
+        //rank 升序
+        List<String> rankList = new ArrayList<>();
+        processNullRankList(nullRankIssueIds, rankList, instanceRankMap, nextId);
+        List<GanttDimensionRankDTO> insertList = new ArrayList<>();
+        int nullRankSize = nullRankIssueIds.size();
+        for (int i = 0; i < nullRankSize; i++) {
+            Long instanceId = nullRankIssueIds.get(i);
+            String thisRank = rankList.get(i);
+            insertList.add(buildGanttDimensionRank(organizationId, projectId, instanceId, dimension, thisRank));
+        }
+        ganttDimensionRankMapper.batchInsert(insertList);
+        return rankList.get(0);
+    }
+
+    private GanttDimensionRankDTO buildGanttDimensionRank(Long organizationId,
+                                                          Long projectId,
+                                                          Long instanceId,
+                                                          String dimension,
+                                                          String rank) {
+        GanttDimensionRankDTO dto = new GanttDimensionRankDTO();
+        dto.setOrganizationId(organizationId);
+        dto.setProjectId(projectId);
+        dto.setInstanceId(instanceId);
+        dto.setInstanceType(dimension);
+        dto.setDimension(dimension);
+        dto.setRank(rank);
+        return dto;
+    }
+
+    private void processNullRankList(List<Long> nullRankIds,
+                                     List<String> rankList,
+                                     LinkedHashMap<Long, String> idWithRankMap,
+                                     Long nextId) {
+        String minRank = null;
         boolean afterNextId = false;
-        for (Map.Entry<Long, String> entry : issueWithRankMap.entrySet()) {
-            Long issueId = entry.getKey();
+        for (Map.Entry<Long, String> entry : idWithRankMap.entrySet()) {
+            Long id = entry.getKey();
             String thisRank = entry.getValue();
-            if (issueId.equals(nextId)) {
+            if (id.equals(nextId)) {
                 afterNextId = true;
             }
             if (afterNextId) {
                 if (StringUtils.isEmpty(thisRank)) {
-                    nullRankIssueIds.add(issueId);
+                    nullRankIds.add(id);
                 } else {
                     minRank = thisRank;
                     break;
                 }
             }
         }
-        int nullRankSize = nullRankIssueIds.size();
+        int nullRankSize = nullRankIds.size();
         String[] rankArrays = new String[nullRankSize];
         if (minRank == null) {
             minRank = RankUtil.mid();
@@ -222,16 +427,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             minRank = thisRank;
             rankArrays[nullRankSize - i - 1] = thisRank;
         }
-        //rank 升序
-        List<String> rankList = Arrays.asList(rankArrays);
-        List<GanttIssueRankDTO> insertList = new ArrayList<>();
-        for (int i = 0; i < nullRankSize; i++) {
-            Long issueId = nullRankIssueIds.get(i);
-            String thisRank = rankList.get(i);
-            insertList.add(buildGanttIssueRank(organizationId, projectId, instanceId, instanceType, dimension, issueId, thisRank));
-        }
-        ganttIssueRankMapper.batchInsert(insertList);
-        return rankList.get(0);
+        rankList.addAll(Arrays.asList(rankArrays));
     }
 
     private Long queryNextIdByPreviousId(Long previousId, LinkedHashMap<Long, String> issueWithRankMap) {
@@ -270,8 +466,8 @@ public class GanttChartServiceImpl implements GanttChartService {
         return searchWithRequiredFilter;
     }
 
-    private SearchVO validateAndProcessSearchVO(Long projectId, GanttMoveVO ganttMoveVO) {
-        SearchVO searchVO = ganttMoveVO.getSearchVO();
+    private SearchVO validateAndProcessSearchVO(Long projectId,
+                                                SearchVO searchVO) {
         boolean illegalIssueTypeId = buildIssueType(searchVO, projectId);
         boolean condition = issueService.handleSearchUser(searchVO, projectId);
         if (illegalIssueTypeId || !condition) {
@@ -328,6 +524,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             }
             issueIds = new ArrayList<>(epicIds);
         } else if (GanttDimension.isFeature(instanceType) && Objects.equals(0L, instanceId)) {
+            //未分配特性下拖动
             setOtherArgsValueByKey(searchVO, "featureNull", "true");
             List<String> list = new ArrayList<>();
             list.add("0");
@@ -401,13 +598,13 @@ public class GanttChartServiceImpl implements GanttChartService {
         searchArgs.put("dimension", dimension);
     }
 
-    private void updateGanttRank(Long issueId,
-                                 Long organizationId,
-                                 Long projectId,
-                                 Long instanceId,
-                                 String instanceType,
-                                 String dimension,
-                                 String rank) {
+    private void updateGanttIssueRank(Long issueId,
+                                      Long organizationId,
+                                      Long projectId,
+                                      Long instanceId,
+                                      String instanceType,
+                                      String dimension,
+                                      String rank) {
         List<GanttIssueRankDTO> ganttIssueRankList =
                 ganttIssueRankMapper.selectByOptions(organizationId, projectId, instanceId, instanceType, dimension, new HashSet<>(Arrays.asList(issueId)));
         if (ganttIssueRankList.isEmpty()) {

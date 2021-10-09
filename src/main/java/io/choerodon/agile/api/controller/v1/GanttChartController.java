@@ -1,8 +1,6 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.agile.api.vo.GanttChartVO;
-import io.choerodon.agile.api.vo.GanttMoveVO;
-import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.GanttChartService;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.domain.Page;
@@ -70,4 +68,25 @@ public class GanttChartController {
     }
 
 
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询甘特图列表数据")
+    @PostMapping(value = "/list")
+    public ResponseEntity<GanttDimensionListVO> ganttDimensionList(@ApiParam(value = "项目id", required = true)
+                                                                   @PathVariable(name = "project_id") Long projectId,
+                                                                   @ApiParam(value = "查询参数", required = true)
+                                                                   @RequestBody(required = false) SearchVO searchVO) {
+        EncryptionUtils.decryptSearchVO(searchVO);
+        return ResponseEntity.ok(ganttChartService.ganttDimensionList(projectId, searchVO));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("移动甘特图冲刺/经办人")
+    @PostMapping(value = "/move_dimension")
+    public ResponseEntity moveDimension(@ApiParam(value = "项目id", required = true)
+                               @PathVariable(name = "project_id") Long projectId,
+                               @RequestBody @Validated GanttDimensionMoveVO ganttDimensionMoveVO) {
+        EncryptionUtils.decryptSearchVO(ganttDimensionMoveVO.getSearchVO());
+        ganttChartService.moveDimension(projectId, ganttDimensionMoveVO);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }

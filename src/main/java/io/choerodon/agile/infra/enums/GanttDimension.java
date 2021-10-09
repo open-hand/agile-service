@@ -37,4 +37,8 @@ public enum GanttDimension {
     public static boolean isTask(String dimension) {
         return TASK.name().equalsIgnoreCase(dimension);
     }
+
+    public static boolean isAssignee(String dimension) {
+        return ASSIGNEE.name().equalsIgnoreCase(dimension);
+    }
 }

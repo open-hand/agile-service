@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.GanttDimensionRankMapper">
+    <insert id="batchInsert">
+        <bind name="audit" value="@io.choerodon.mybatis.helper.AuditHelper@audit()"/>
+        insert into agile_gantt_dimension_rank (dimension, instance_id, instance_type, rank, project_id, organization_id, created_by, last_updated_by)
+        values
+        <foreach collection="ganttDimensionRanks" item="ganttDimensionRank" separator=",">
+            (
+            #{ganttDimensionRank.dimension},
+            #{ganttDimensionRank.instanceId},
+            #{ganttDimensionRank.instanceType},
+            #{ganttDimensionRank.rank},
+            #{ganttDimensionRank.projectId},
+            #{ganttDimensionRank.organizationId},
+            #{audit.user},
+            #{audit.user}
+            )
+        </foreach>
+    </insert>
+
+    <select id="orderByInstanceId" resultType="io.choerodon.agile.infra.dto.GanttDimensionRankDTO">
+        select instance_id, rank, id
+        from agile_gantt_dimension_rank
+        where project_id = #{projectId}
+        and instance_type = #{dimension}
+        and dimension = #{dimension}
+        and instance_id in
+        <foreach collection="instanceIds" item="instanceId" open="(" close=")" separator=",">
+            #{instanceId}
+        </foreach>
+        order by rank asc
+    </select>
+
+    <select id="selectMaxPreviousRankOrderByRankAsc" resultType="java.lang.String">
+        select rank
+        from agile_gantt_dimension_rank
+        where organization_id = #{organizationId}
+        and project_id = #{projectId}
+        and dimension = #{dimension}
+        and instance_type = #{dimension}
+        and rank &lt; #{rank}
+        order by rank desc
+        limit 1
+    </select>
+</mapper>

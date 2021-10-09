@@ -5047,4 +5047,16 @@
         and epic_id != 0
     </select>
 
+    <select id="selectAssigneeIdByIssueIds" resultType="java.lang.Long">
+        select assignee_id
+        from agile_issue
+        where project_id = #{projectId}
+        and issue_id in
+        <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
+            #{issueId}
+        </foreach>
+        and assignee_id is not null
+        and assignee_id != 0
+    </select>
+
 </mapper>
