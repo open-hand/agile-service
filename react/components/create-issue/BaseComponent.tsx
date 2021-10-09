@@ -81,7 +81,7 @@ const defaultDataSet = new DataSet({
 });
 const presets = new Map([
   ['component', {
-    // type: 'object',
+    type: 'object',
     valueField: 'componentId',
   }],
   ['label', {
@@ -317,6 +317,29 @@ const CreateIssueBase = observer(({
         }
         break;
       }
+      case 'assignee': {
+        record.setState('changeAssignee', !!value);
+        break;
+      }
+      case 'component': {
+        if (!record.getState('changeAssignee')) {
+          if (value && value.length) {
+            const hasManagerId = value.some((component: any) => {
+              if (component.managerId) {
+                record.init('assignee', component.managerId);
+                return true;
+              }
+              return false;
+            });
+            if (!hasManagerId && record.get('assignee')) {
+              record.init('assignee', null);
+            }
+          } else if (record.get('assignee')) {
+            record.init('assignee', null);
+          }
+        }
+        break;
+      }
       case 'issueType': {
         if (!value) {
           // 问题类型不能置空
@@ -536,6 +559,7 @@ const CreateIssueBase = observer(({
             setFieldValue('assignee', userInfo.id);
           },
           hidden: getRuleHidden(field, rules),
+          selected: dataSet.current?.get('assignee'),
         };
       }
       case 'mainResponsible':

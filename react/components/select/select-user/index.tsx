@@ -12,6 +12,7 @@ import { FlatSelect } from '@choerodon/components';
 import { userApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import type { User } from '@/common/types';
+import UserTag from "@/components/tag/user-tag";
 
 const toArray = (something: any) => (Array.isArray(something) ? something : [something]);
 export interface SelectUserProps extends Partial<SelectProps> {
@@ -64,12 +65,12 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     requestArgs: args,
     request: request || (async ({ filter, page, requestArgs }) => {
       const res = await (level === 'project'
-        ? userApi.project(projectId).getProjectUsers(filter, page, requestArgs?.selectedUserIds, requestArgs?.queryFilterIds, 50, projectId)
+        ? userApi.project(projectId).getProjectUsers(filter, page, requestArgs?.selectedUserIds, requestArgs?.queryFilterIds, 10, projectId)
         : userApi.project(projectId).org(organizationId).getOrgUsers(filter, page, requestArgs?.selectedUserIds, 50));
       res.list = res.list.filter((user: User) => user.enabled);
       return res;
     }),
-    optionRenderer,
+    optionRenderer: optionRenderer || ((user: User) => <UserTag data={user as User} />),
     middleWare: (data) => {
       let newData = [];
       const temp: User[] = [];

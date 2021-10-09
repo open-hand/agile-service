@@ -5,7 +5,7 @@ import { Select } from 'choerodon-ui/pro';
 import { castArray, omit, uniqBy } from 'lodash';
 import useIsProjectMember from '@/hooks/useIsProjectMember';
 import { User } from '@/common/types';
-import SelectUser, { SelectUserProps } from '../select-user';
+import SelectUser, { SelectUserProps } from '@/components/select/select-user';
 
 export interface SelectUserWithAssigneeMeProps extends SelectUserProps {
   onAssigneeMe?: (userInfo: User) => void
