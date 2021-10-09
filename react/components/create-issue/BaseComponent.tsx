@@ -520,7 +520,7 @@ const CreateIssueBase = observer(({
         projectId: projectId ?? getProjectId(),
         featureId: data.feature,
         issueLinkCreateVOList: enableIssueLinks ? getIssueLinks() : undefined,
-        componentIssueRelVOList: data.component ? data.component.map((id: string) => ({ componentId: id })) : [],
+        componentIssueRelVOList: data.component ? data.component.map((item: { componentId: string }) => ({ componentId: item.componentId })) : [],
       });
 
       values = hooks.reduce((result, hook) => hook(result, data), values);
