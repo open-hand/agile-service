@@ -103,15 +103,34 @@ const isCanQuickCreateIssue = (record: Gantt.Record<any>) => {
 const ganttList2Tree = (data: any[]) => list2tree(data, { valueField: 'issueId', parentField: 'parentId' });
 
 const formatData = (data: any[]) => data.map((item, i, arr) => {
+  let newItem = Object.assign(item, {});
+  if (item.parentId && item.parentId !== '0' && !arr.find((issue) => issue.issueId === item.parentId)) {
+    Object.assign(newItem, { parentId: '0' });
+  }
+  if (item.epicId && item.epicId !== '0' && !arr.find((issue) => issue.issueId === item.epicId)) {
+    Object.assign(newItem, { epicId: '0' });
+  }
+  if (item.featureId && item.featureId !== '0' && !arr.find((issue) => issue.issueId === item.featureId)) {
+    Object.assign(newItem, { featureId: null });
+  }
   if ((item.issueTypeVO.typeCode === 'sub_task' || item.issueTypeVO.typeCode === 'bug') && item.parentId) {
     const parent = arr.find((issue) => issue.issueId === item.parentId);
-    return ({
-      ...item,
-      epicId: parent?.epicId,
-      featureId: parent?.featureId,
-    });
+    const newParent = Object.assign(newItem, {});
+    if (parent.epicId && parent.epicId !== '0' && !arr.find((issue) => issue.issueId === parent.epicId)) {
+      Object.assign(newParent, { epicId: '0' });
+    }
+    if (parent.featureId && parent.featureId !== '0' && !arr.find((issue) => issue.issueId === parent.featureId)) {
+      Object.assign(newParent, { featureId: null });
+    }
+    newItem = {
+      ...newItem,
+      ...{
+        epicId: newParent?.epicId,
+        featureId: newParent?.featureId,
+      },
+    };
   }
-  return item;
+  return newItem;
 });
 
 const groupByTask = (data: any[]) => ganttList2Tree(data);
@@ -171,7 +190,7 @@ const groupByFeature = (epicChildrenData: any, data: any) => {
   const map = new Map<string, { feature: any, children: any[] }>();
   const noFeatureData: any[] = [];
   epicChildrenData.forEach((issue: any) => {
-    if (issue.featureId) {
+    if (issue.featureId && issue.featureId !== '0') {
       const feature = data.find((item: any) => item.issueId.toString() === issue.featureId.toString());
       if (map.has(feature?.featureName)) {
         map.get(feature?.featureName)?.children.push(issue);
@@ -866,23 +885,27 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
       realName: issue.assigneeRealName,
     } : null,
     sprint: issue.activeSprint,
+    featureId: issue.featureId,
+    epicId: issue.epicId,
   });
 
   const handleCreateIssue = usePersistFn((issue: Issue, issueId?: string, parentId?: string, dontCopyEpic = false) => {
-    setData(produce(data, (draft) => {
-      const normalizeIssueWidthParentId = Object.assign(normalizeIssue(issue), { parentId });
-      if (!issueId) {
-        draft.unshift(normalizeIssueWidthParentId);
-      } else {
-        const target = find(draft, { issueId });
-        if (target && !dontCopyEpic) {
-          draft.unshift(Object.assign(normalizeIssueWidthParentId, pick(target, ['epicId', 'featureId'])));
-        } else {
+    // @ts-ignore
+    if ((sprintIds || []).includes(issue.activeSprint?.sprintId || '0')) {
+      setData(produce(data, (draft) => {
+        const normalizeIssueWidthParentId = Object.assign(normalizeIssue(issue), { parentId });
+        if (!issueId) {
           draft.unshift(normalizeIssueWidthParentId);
+        } else {
+          const target = find(draft, { issueId });
+          if (target && !dontCopyEpic) {
+            draft.unshift(Object.assign(normalizeIssueWidthParentId, pick(target, ['epicId', 'featureId'])));
+          } else {
+            draft.unshift(normalizeIssueWidthParentId);
+          }
         }
-      }
-    }));
-
+      }));
+    }
     updateInfluenceIssues(issue);
   });
 
@@ -900,6 +923,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
       handleCreateSubIssue(subIssue, parentIssueId);
     }
   });
+
   const tableWithSortedColumns = useMemo(() => getTableColumns(listLayoutColumns.filter((item) => item.display), tableFields || [], sortLabelProps, handleQuickCreateSubIssue, handleQuickCreateSubIssueAfter), [handleQuickCreateSubIssue, handleQuickCreateSubIssueAfter, listLayoutColumns, sortLabelProps, tableFields]);
 
   const handleCopyIssue = usePersistFn((issue: Issue, issueId: string, isSubTask?: boolean, dontCopyEpic?: boolean) => {
@@ -913,7 +937,9 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
   });
 
   const handleIssueUpdate = usePersistFn((issue: Issue | null) => {
-    if (issue) {
+    if (type === 'epic') {
+      run();
+    } else if (issue) {
       setData(produce(data, (draft) => {
         const target = find(draft, { issueId: issue.issueId });
         if (target) {
@@ -1075,6 +1101,9 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
     });
     console.log('store.ganttRef.current?.flattenData', flattenData);
   }, [store.ganttRef]);
+
+  console.log('ganttData：');
+  console.log(ganttData);
   return (
     <Page>
       <Header>
@@ -1108,7 +1137,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
               display: true,
               handler: () => {
                 openCreateIssue({
-                  onCreate: handleCreateIssue,
+                  onCreate: run,
                 });
               },
             },
