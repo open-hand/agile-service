@@ -10,6 +10,7 @@ import Container, { registerPath } from './Container';
 import PreviewIssueFile from './PreviewIssueFile';
 import DetailContainerContext, { IPreview, IRoute, IRouteWithKey } from './context';
 import openDescriptionConfirm from './openDescriptionConfirm';
+import useGetAnnouncementHeight from '@/hooks/useGetAnnouncementHeight';
 // 默认展示children，push之后再匹配
 const { HeaderStore } = stores;
 export { registerPath };
@@ -150,14 +151,13 @@ export interface DetailContainerProps {
 }
 const DetailContainer: React.FC<DetailContainerProps> = ({ children, visible, ...props }) => {
   const resizeRef = useRef();
-
   const element = visible ? (
     <Container>{children}</Container>
   ) : null;
-  const topAnnouncementHeight = useComputed(() => HeaderStore.announcementClosed);
+  const topAnnouncementHeight = useGetAnnouncementHeight();
   return (
     <DetailContainerContext.Provider value={{
-      topAnnouncementHeight: topAnnouncementHeight ? '0px' : 'var(--banner-height)',
+      topAnnouncementHeight,
       outside: false,
       resizeRef,
       ...props,
