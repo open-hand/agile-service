@@ -752,7 +752,7 @@ const fieldsMap = new Map([
   ['mainResponsible', {
     name: '主要负责人',
   }],
-  ['actualStartTime', {
+  ['Actual Start Time', {
     name: '实际开始时间',
     create: {
       render: (log: ILog) => {
@@ -785,7 +785,7 @@ const fieldsMap = new Map([
       },
     },
   }],
-  ['actualEndTime', {
+  ['Actual End Time', {
     name: '实际结束时间',
     create: {
       render: (log: ILog) => {
