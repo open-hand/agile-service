@@ -81,7 +81,7 @@ const defaultDataSet = new DataSet({
 });
 const presets = new Map([
   ['component', {
-    // type: 'object',
+    type: 'object',
     valueField: 'componentId',
   }],
   ['label', {
@@ -317,6 +317,31 @@ const CreateIssueBase = observer(({
         }
         break;
       }
+      case 'assignee': {
+        // 标识经办人是否手动选择过，以便判断是否赋值为模块负责人
+        record.setState('changeAssignee', !!value);
+        break;
+      }
+      case 'component': {
+        // 若经办人未手动选择，按照选中的模块顺序，经办人默认赋值为第一个模块负责人
+        if (!record.getState('changeAssignee')) {
+          if (value && value.length) {
+            const hasManagerId = value.some((component: any) => {
+              if (component.managerId) {
+                record.init('assignee', component.managerId);
+                return true;
+              }
+              return false;
+            });
+            if (!hasManagerId && record.get('assignee')) {
+              record.init('assignee', null);
+            }
+          } else if (record.get('assignee')) {
+            record.init('assignee', null);
+          }
+        }
+        break;
+      }
       case 'issueType': {
         if (!value) {
           // 问题类型不能置空
@@ -497,7 +522,7 @@ const CreateIssueBase = observer(({
         projectId: projectId ?? getProjectId(),
         featureId: data.feature,
         issueLinkCreateVOList: enableIssueLinks ? getIssueLinks() : undefined,
-        componentIssueRelVOList: data.component ? data.component.map((id: string) => ({ componentId: id })) : [],
+        componentIssueRelVOList: data.component ? data.component.map((item: { componentId: string }) => ({ componentId: item.componentId })) : [],
       });
 
       values = hooks.reduce((result, hook) => hook(result, data), values);
@@ -536,6 +561,7 @@ const CreateIssueBase = observer(({
             setFieldValue('assignee', userInfo.id);
           },
           hidden: getRuleHidden(field, rules),
+          selected: dataSet.current?.get('assignee'),
         };
       }
       case 'mainResponsible':
