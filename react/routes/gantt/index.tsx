@@ -936,22 +936,19 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
   });
 
   const handleCreateIssue = usePersistFn((issue: Issue, issueId?: string, parentId?: string, dontCopyEpic = false) => {
-    // @ts-ignore
-    if ((sprintIds || []).includes(issue.activeSprint?.sprintId || '0')) {
-      setData(produce(data, (draft) => {
-        const normalizeIssueWidthParentId = Object.assign(normalizeIssue(issue), { parentId });
-        if (!issueId) {
-          draft.unshift(normalizeIssueWidthParentId);
+    setData(produce(data, (draft) => {
+      const normalizeIssueWidthParentId = Object.assign(normalizeIssue(issue), { parentId });
+      if (!issueId) {
+        draft.unshift(normalizeIssueWidthParentId);
+      } else {
+        const target = find(draft, { issueId });
+        if (target && !dontCopyEpic) {
+          draft.unshift(Object.assign(normalizeIssueWidthParentId, pick(target, ['epicId', 'featureId'])));
         } else {
-          const target = find(draft, { issueId });
-          if (target && !dontCopyEpic) {
-            draft.unshift(Object.assign(normalizeIssueWidthParentId, pick(target, ['epicId', 'featureId'])));
-          } else {
-            draft.unshift(normalizeIssueWidthParentId);
-          }
+          draft.unshift(normalizeIssueWidthParentId);
         }
-      }));
-    }
+      }
+    }));
     updateInfluenceIssues(issue);
   });
 
