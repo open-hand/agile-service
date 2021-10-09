@@ -500,4 +500,8 @@ public interface AgilePluginService {
     void sprintStarted(Long projectId);
 
     void handlerTags(Long projectId, List<Long> issueIds, Map<String, Object> fieldCodeValues);
+
+    List<Long> queryFeatureIdByIssueIdAndEpicId(List<Long> issueIds, Long epicId);
+
+    List<Long> queryNoEpicFeatureIds(List<IssueDTO> issues);
 }
