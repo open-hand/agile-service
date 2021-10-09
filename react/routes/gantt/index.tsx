@@ -115,7 +115,7 @@ const formatData = (data: any[]) => data.map((item, i, arr) => {
   }
   if ((item.issueTypeVO.typeCode === 'sub_task' || item.issueTypeVO.typeCode === 'bug') && item.parentId) {
     const parent = arr.find((issue) => issue.issueId === item.parentId);
-    const newParent = Object.assign(newItem, {});
+    const newParent = Object.assign(parent, {});
     if (parent.epicId && parent.epicId !== '0' && !arr.find((issue) => issue.issueId === parent.epicId)) {
       Object.assign(newParent, { epicId: '0' });
     }
@@ -1095,15 +1095,11 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
     runInAction(() => {
       const startIndex = destinationRecord.absoluteIndex < 0 ? flattenData.length + destinationRecord.absoluteIndex : destinationRecord.absoluteIndex;
       const item = flattenData.splice(result.source.index, 1)[0];
-      console.log('startIndex', startIndex, result.source.index, item);
       flattenData.splice(startIndex, 0, item);
       flattenData.forEach((value, index) => { value.absoluteIndex = index; });
     });
-    console.log('store.ganttRef.current?.flattenData', flattenData);
   }, [store.ganttRef]);
 
-  console.log('ganttData：');
-  console.log(ganttData);
   return (
     <Page>
       <Header>
