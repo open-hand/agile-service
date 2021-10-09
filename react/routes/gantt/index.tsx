@@ -5,11 +5,12 @@ import React, {
 } from 'react';
 // eslint-disable-next-line camelcase
 import { unstable_batchedUpdates } from 'react-dom';
+import { Tag } from 'choerodon-ui';
 import { Tooltip, Icon, Button } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import {
-  find, findIndex, isNumber, merge, omit, pick, remove, set, some, get, includes,
+  find, findIndex, isNumber, merge, omit, pick, remove, set, some, get, includes, map as lodashMap,
 } from 'lodash';
 import produce from 'immer';
 import dayjs from 'dayjs';
@@ -262,26 +263,26 @@ const renderTag = (listField: any, nameField: any) => (rowData: any) => {
   const list = get(rowData, listField);
   if (list) {
     if (list.length > 0) {
-      return list;
-      // return (
-      //   <Tooltip title={<div>{map(list, (item) => item[nameField]).map((name) => <div>{name}</div>)}</div>}>
-      //     <div style={{ display: 'inline-flex', maxWidth: '100%' }}>
-      //       <Tag
-      //         color="blue"
-      //         style={{
-      //           maxWidth: 160,
-      //           overflow: 'hidden',
-      //           textOverflow: 'ellipsis',
-      //           whiteSpace: 'nowrap',
-      //           cursor: 'auto',
-      //         }}
-      //       >
-      //         {list[0][nameField]}
-      //       </Tag>
-      //       {list.length > 1 ? <Tag color="blue">...</Tag> : null}
-      //     </div>
-      //   </Tooltip>
-      // );
+      // return list;
+      return (
+        <Tooltip title={<div>{lodashMap(list, (item) => item[nameField]).map((name) => <div>{name}</div>)}</div>}>
+          <div style={{ display: 'inline-flex', maxWidth: '100%' }}>
+            <Tag
+              color="blue"
+              style={{
+                maxWidth: 160,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                cursor: 'auto',
+              }}
+            >
+              {list[0][nameField]}
+            </Tag>
+            {list.length > 1 ? <Tag color="blue">...</Tag> : null}
+          </div>
+        </Tooltip>
+      );
     }
   }
   return null;
@@ -462,27 +463,27 @@ const ganttColumnMap = new Map<string, any>([['assignee', (onSortChange: any) =>
 ['label', {
   label: <Tooltip title="标签">标签</Tooltip>,
   name: 'label',
-  render: renderTag('labelIssueRelVOS', 'labelName'),
+  render: renderTag('labels', 'labelName'),
 }],
 ['component', {
   label: <Tooltip title="模块">模块</Tooltip>,
   name: 'component',
-  render: renderTag('issueComponentBriefVOS', 'name'),
+  render: renderTag('components', 'name'),
 }],
 ['fixVersion', {
   label: <Tooltip title="修复的版本">修复的版本</Tooltip>,
   name: 'fixVersion',
-  render: renderTag('fixVersionIssueRelVOS', 'name'),
+  render: renderTag('fixVersion', 'name'),
 }],
 ['influenceVersion', {
   label: <Tooltip title="影响的版本">影响的版本</Tooltip>,
   name: 'influenceVersion',
-  render: renderTag('influenceVersionIssueRelVOS', 'name'),
+  render: renderTag('influenceVersion', 'name'),
 }],
 ['sprint', {
   label: <Tooltip title="冲刺">冲刺</Tooltip>,
   name: 'sprint',
-  render: renderTag('issueSprintVOS', 'sprintName'),
+  render: renderTag('sprints', 'sprintName'),
 }],
 ['storyPoints', {
   label: <Tooltip title="故事点">故事点</Tooltip>,
@@ -528,7 +529,7 @@ const getCustomColumn = (field?: IFoundationHeader) => (field && {
   sortable: !(field.fieldType === 'multiple' || field.fieldType === 'checkbox' || field.fieldType === 'multiMember'),
   render: (rowData: any) => {
     const { fieldType, code } = field;
-    const value = get(rowData, 'foundationFieldValue')[code];
+    const value = get(get(rowData, 'foundationFieldValue') || {}, code);
     if (['member', 'multiMember'].includes(fieldType)) {
       return value && (
         <div style={{ display: 'inline-flex', verticalAlign: 'middle', height: 40 }}>
