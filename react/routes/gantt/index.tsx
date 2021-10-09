@@ -643,7 +643,7 @@ const getTableColumns = (visibleColumns: ListLayoutColumnVO[], tableFields: IFou
       return !record.group ? (
         // eslint-disable-next-line no-underscore-dangle
         <span style={{ cursor: 'pointer', color: 'var(--table-click-color)' }} className={classNames('c7n-gantt-content-body-summary')}>
-          <TypeTag iconSize={22} data={record.issueTypeVO} style={{ marginRight: 5 }} />
+          <TypeTag iconSize={22} data={record.issueTypeVO} featureType={record.featureType} style={{ marginRight: 5 }} />
           <Tooltip title={record.summary}>
             <span style={{ verticalAlign: 'middle', flex: 1 }} className="c7n-gantt-content-body-summary-text">{record.summary}</span>
           </Tooltip>
