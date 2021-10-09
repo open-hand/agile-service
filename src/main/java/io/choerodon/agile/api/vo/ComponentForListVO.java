@@ -27,6 +27,7 @@ public class ComponentForListVO {
     private String description;
 
     @ApiModelProperty(value = "负责人id")
+    @Encrypt(ignoreValue = "0")
     private Long managerId;
 
     @ApiModelProperty(value = "默认经办人")
