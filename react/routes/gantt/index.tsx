@@ -30,7 +30,7 @@ import {
   DragDropContext, Draggable, DraggableStateSnapshot, DragStart, DragUpdate, Droppable, DropResult, ResponderProvided,
 } from 'react-beautiful-dnd';
 import {
-  ganttApi, issueApi, ListLayoutColumnVO, workCalendarApi,
+  ganttApi, IGanttMoveRequestData, IGanttMoveRequestDataPreviousWithNext, issueApi, ListLayoutColumnVO, workCalendarApi,
 } from '@/api';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import TypeTag from '@/components/TypeTag';
@@ -86,7 +86,7 @@ const typeValues = typeOptions.map((t) => t.value);
 type TypeValue = (typeof typeValues)[number];
 const isDisableDrag = (bar: Gantt.Bar) => {
   const { record } = bar;
-  if (record.disabledDrag) {
+  if (record.disabledDrag || record.create) {
     return true;
   }
   return false;
@@ -100,39 +100,16 @@ function isDragRowDrop(bar: Gantt.Bar, destinationBar?: Gantt.Bar) {
   }
   return false;
 }
-/**
- * barA的父级是否为BarB
- */
-function isBarParentBar(barA: Gantt.Bar, barB: Gantt.Bar, depth = 3): boolean {
-  if (depth === 0 || !barA._parent?._bar) {
-    return false;
-  }
-  if (barA._parent?.key === barB.key) {
-    return true;
-  }
-  return isBarParentBar(barA._parent?._bar!, barB, depth - 1);
-}
-/**
- * 判断 BarA 是否为BarB的后代或父级
- */
-function isBarParentOrChildren(barA: Gantt.Bar, barB: Gantt.Bar) {
-  if (barA._depth > barB._depth) {
-    return isBarParentBar(barA, barB);
-  }
-  if (barA._depth < barB._depth) {
-    return isBarParentBar(barB, barA);
-  }
-  return false;
-}
-function getDestinationBar(depth: number, bar?: Gantt.Bar): Gantt.Bar | undefined {
-  if (!bar || bar._depth < depth) {
+
+function getDestinationBar(sourceDepth: number, bar?: Gantt.Bar): Gantt.Bar | undefined {
+  //
+  if (!bar || bar._depth < sourceDepth) {
     return undefined;
   }
-  if (bar._depth > depth && bar._parent?._bar) {
-    return getDestinationBar(depth, bar._parent?._bar!);
+  if (bar._depth > sourceDepth && bar._parent?._bar) {
+    return getDestinationBar(sourceDepth, bar._parent?._bar!);
   }
-
-  return bar;
+  return bar._depth === sourceDepth ? bar : undefined;
 }
 const isCanQuickCreateIssue = (record: Gantt.Record<any>) => {
   const { typeCode } = record.issueTypeVO || {};
@@ -176,26 +153,27 @@ const formatData = (data: any[]) => data.map((item, i, arr) => {
 
 const groupByTask = (data: any[]) => ganttList2Tree(data);
 const groupByUser = (data: any[]) => {
-  const map = new Map<string, any[]>();
+  const map = new Map<string, { user: User, children: any[] }>();
   const noAssigneeData: any[] = [];
   data.forEach((issue) => {
-    if (issue.assignee) {
-      if (map.has(issue.assignee.name)) {
-        map.get(issue.assignee.name)?.push(issue);
+    if (issue.assignee?.id) {
+      if (map.has(issue.assignee.id)) {
+        map.get(issue.assignee.id)?.children.push(issue);
       } else {
-        map.set(issue.assignee.name, [issue]);
+        map.set(issue.assignee.id, { user: issue.assignee, children: [issue] });
       }
     } else {
       noAssigneeData.push(issue);
     }
   });
   if (noAssigneeData.length > 0) {
-    map.set('未分配', noAssigneeData);
+    map.set('0', { user: { id: '0', name: '未分配' } as User, children: noAssigneeData });
   }
-  return [...map.entries()].map(([name, children]) => ({
-    summary: name,
+  return [...map.entries()].map(([assigneeId, { user, children }]) => ({
+    summary: user.name,
     group: true,
-    disabledDrag: name === '未分配',
+    assigneeId,
+    disabledDrag: assigneeId === '0',
     groupType: 'assignee',
     children: ganttList2Tree(children),
   }));
@@ -215,12 +193,13 @@ const groupBySprint = (data: any[]) => {
     }
   });
   if (noSprintData.length > 0) {
-    map.set('无冲刺', { sprint: {}, disabledDrag: true, children: noSprintData });
+    map.set('无冲刺', { sprint: { sprintId: 0 }, disabledDrag: true, children: noSprintData });
   }
   return [...map.entries()].map(([name, { sprint, disabledDrag, children }]) => ({
     summary: name,
     group: true,
     disabledDrag: !!disabledDrag,
+    sprintId: sprint.sprintId,
     groupType: 'sprint',
     groupWidthSelf: true,
     estimatedStartTime: sprint.startDate,
@@ -248,7 +227,7 @@ const groupByFeature = (epicChildrenData: any, data: any) => {
     }
   });
   if (noFeatureData.length > 0) {
-    map.set('未分配特性', { feature: {}, disabledDrag: true, children: noFeatureData });
+    map.set('未分配特性', { feature: { issueId: 0 }, disabledDrag: true, children: noFeatureData });
   }
 
   return [...map.entries()].map(([name, { feature, disabledDrag, children }]) => ({
@@ -280,7 +259,7 @@ const groupByEpic = (data: any, isInProgram: boolean) => {
     }
   });
   if (noEpicData.length > 0) {
-    map.set('未分配史诗', { epic: {}, disabledDrag: true, children: noEpicData });
+    map.set('未分配史诗', { epic: { issueId: '0' }, disabledDrag: true, children: noEpicData });
   }
 
   return [...map.entries()].map(([name, { epic, children }]) => ({
@@ -762,24 +741,26 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
       });
     }));
   });
-
+  const getFilter = useCallback(() => {
+    const filter = issueSearchStore.getCustomFieldFilters();
+    filter.otherArgs.sprint = sprintIds;
+    filter.searchArgs.dimension = type;
+    return merge(filter, {
+      displayFieldCodes: visibleColumnCodes,
+      searchArgs: { tree: type !== 'assignee', dimension: type },
+    });
+  }, [issueSearchStore, sprintIds, type, visibleColumnCodes]);
   const { run, flush } = useDebounceFn(() => {
     (async () => {
       const year = dayjs().year();
-      const filter = issueSearchStore.getCustomFieldFilters();
       if (sprintIds === null) {
         return;
       }
-      filter.otherArgs.sprint = sprintIds;
-      filter.searchArgs.dimension = type;
       setLoading(true);
       const [workCalendarRes, projectWorkCalendarRes, res] = await Promise.all([
         workCalendarApi.getWorkSetting(year),
         workCalendarApi.getYearCalendar(year),
-        ganttApi.loadByTask(merge(filter, {
-          displayFieldCodes: visibleColumnCodes,
-          searchArgs: { tree: type !== 'assignee', dimension: type },
-        }), sortedList),
+        ganttApi.loadByTask(getFilter(), sortedList),
       ]);
       // setColumns(headers.map((h: any) => ({
       //   width: 100,
@@ -1082,9 +1063,13 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
       direction="vertical"
       mode="virtual"
       renderClone={(provider, snapshot, rubric) => {
-        const record = store.ganttRef.current?.flattenData[rubric.source.index].record;
+        const record = draggingBar?.record;
         return (
-          <div ref={provider.innerRef} {...provider.draggableProps} {...provider.draggableProps}>
+          <div
+            ref={provider.innerRef}
+            {...provider.draggableProps}
+            {...provider.draggableProps}
+          >
             {record && tableWithSortedColumns[0]?.render!(record)}
           </div>
         );
@@ -1097,24 +1082,40 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
           ...Component.props,
           // ref: provided.innerRef,
           ...provided.droppableProps,
+          style: { ...Component.props.style, background: dropSnapshot.isDraggingOver ? '#F1F3F6' : undefined } as React.CSSProperties,
         });
       }}
     </Droppable>
-  ), [store.ganttRef, tableWithSortedColumns]);
+  ), [draggingBar?.record, tableWithSortedColumns]);
 
   /**
    * 获取拖拽行样式
    */
   const getDragRowStyle = useCallback((style: React.CSSProperties, bar: Gantt.Bar, snapshot: DraggableStateSnapshot, dragStyle?: React.CSSProperties): React.CSSProperties => {
     const baseStyle: React.CSSProperties = { ...style };
+    function isNeedDraggingStyle(nextBar?: Gantt.Bar): boolean {
+      if (nextBar?._parent?.key === draggingBarDestinationBar?.key) {
+        return true;
+      }
+      if (nextBar && nextBar._depth > draggingBarDestinationBar!._depth && nextBar?._parent) {
+        return isNeedDraggingStyle(nextBar?._parent._bar!);
+      }
+      return false;
+    }
     if (draggingBar && draggingBarDestinationBar) {
+      baseStyle.cursor = 'not-allowed';
+      if (bar.key === draggingBarDestinationBar.key) {
+        merge(baseStyle, draggingStyle.current);
+        return baseStyle;
+      }
       if (isDragRowDrop(draggingBar, bar)) {
         merge(baseStyle, dragStyle);
-      }
-      if (bar.key === draggingBarDestinationBar.key || bar._parent?.key === draggingBarDestinationBar?.key) {
-        console.log('row bar', bar.record.summary, draggingStyle.current);
+        baseStyle.cursor = undefined;
+      } else if (isNeedDraggingStyle(bar)) {
+        console.log('need DraggingStyle', bar.record.summary);
         merge(baseStyle, draggingStyle.current);
       }
+      // 如果
     }
     return baseStyle;
   }, [draggingBar, draggingBarDestinationBar]);
@@ -1126,9 +1127,6 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
       index={bar.absoluteIndex}
     >
       {(provided, snapshot) => React.cloneElement(row, {
-        key: row.key,
-        type: row.type,
-        ...row.props,
         ...provided.dragHandleProps,
         ...provided.draggableProps,
         ref: provided.innerRef,
@@ -1145,6 +1143,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
       }
     });
   }, [store.ganttRef]);
+
   const handleDragEnd = useCallback((result: DropResult, provider: ResponderProvided) => {
     setDraggingBar({} as any);
     if (!result.destination || result.destination.index === result.source.index) {
@@ -1156,17 +1155,98 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
     if (!destinationData || !sourceData || !isDragRowDrop(sourceData, destinationData)) {
       return;
     }
-    // eslint-disable-next-line consistent-return
-    return false;
-    // runInAction(() => {
-    //   const startIndex = destinationData.absoluteIndex < 0 ? flattenData.length + destinationData.absoluteIndex : destinationData.absoluteIndex;
-    //   const item = flattenData.splice(result.source.index, 1)[0];
-    //   console.log('startIndex', startIndex, result.source.index, item);
-    //   flattenData.splice(startIndex, 0, item);
-    //   flattenData.forEach((value, index) => { value.absoluteIndex = index; });
-    // });
-    // console.log('store.ganttRef.current?.flattenData', flattenData);
-  }, [store.ganttRef]);
+    console.log(sourceData.record.summary, 'move--->', destinationData.record.summary);
+    function getInstanceObject() {
+      const instanceId = sourceData._depth > 0 ? sourceData._parent?.record.issueId : 0;
+      switch (type) {
+        case 'task':
+          return {
+            instanceType: 'task',
+            instanceId,
+          };
+        case 'assignee': {
+          return sourceData._depth === 1 ? {
+            instanceType: 'assignee',
+            instanceId: sourceData._parent?.record.assigneeId,
+          } : {
+            instanceType: 'task',
+            instanceId,
+          };
+        }
+        case 'sprint': {
+          return sourceData._depth === 1 ? {
+            instanceType: 'sprint',
+            instanceId: sourceData._parent?.record.sprintId,
+          } : {
+            instanceType: 'task',
+            instanceId,
+          };
+        }
+        case 'epic': {
+          if (sourceData._depth === 1) {
+            return {
+              instanceType: 'epic',
+              instanceId: sourceData._parent?.record.issueId,
+            };
+          }
+          return sourceData._parent?._depth === 1 && sourceData._parent?.record.groupType === 'feature' ? {
+            instanceType: 'feature',
+            instanceId: sourceData._parent?.record.issueId,
+          } : {
+            instanceType: 'task',
+            instanceId,
+          };
+        }
+        default:
+          break;
+      }
+      return {
+        instanceType: 'task',
+        instanceId: '0',
+      };
+    }
+    //  是否有上层级
+    const instanceObject = getInstanceObject();
+    function getSameDepthBar(depth: number, bar?: Gantt.Bar): Gantt.Bar | undefined {
+      console.log('getSameDepthBar', bar?._depth, bar?._depth === depth);
+      return bar?._depth === depth ? bar : undefined;
+    }
+    // 上一个 下一个
+    const previousAndNextIdObject = {} as IGanttMoveRequestDataPreviousWithNext;
+    if (sourceData.absoluteIndex > destinationData.absoluteIndex) {
+      const previousRecord = getSameDepthBar(sourceData._depth, flattenData[result.destination.index - 1])?.record;
+      previousAndNextIdObject.previousId = previousRecord?.issueId;
+      previousAndNextIdObject.nextId = destinationData.record.issueId;
+    } else {
+      previousAndNextIdObject.previousId = destinationData.record.issueId;
+      previousAndNextIdObject.nextId = getSameDepthBar(sourceData._depth, flattenData[result.destination.index + 1])?.record.issueId;
+    }
+
+    const requestData: IGanttMoveRequestData = {
+      dimension: type,
+      currentId: sourceData.record.issueId,
+      ...instanceObject,
+      ...previousAndNextIdObject,
+    };
+    setLoading(true);
+    // 这里对 data 原数据进行移动，避免创建删除等操作导致排序混乱
+    setData(produce(data, (draft) => {
+      // 问题移动
+      const sourceDataIndex = findIndex(draft, { issueId: sourceData.record.issueId });
+      const destinationDataIndx = findIndex(draft, { issueId: destinationData.record.issueId });
+      if ((sourceDataIndex + destinationDataIndx) >= 0) {
+        const startIndex = destinationDataIndx < 0 ? draft.length + destinationDataIndx : destinationDataIndx;
+        const delItem = draft.splice(sourceDataIndex, 1)[0];
+        draft.splice(startIndex, 0, delItem);
+      }
+      // 冲刺移动
+
+      // 经办人移动
+    }));
+    ganttApi.move(requestData, getFilter()).then(() => {
+      setLoading(false);
+    });
+  }, [data, getFilter, store.ganttRef, type]);
   const handleDragUpdate = useCallback((initial: DragUpdate, provided: ResponderProvided) => {
     setDraggingBar((oldValue) => {
       if (!oldValue.source || oldValue.destination?.absoluteIndex === initial.destination?.index) {
@@ -1175,10 +1255,17 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
       if (!initial.destination) {
         return { source: oldValue.source, destination: undefined };
       }
+      const destinationBar = store.ganttRef.current?.flattenData[initial.destination.index];
       // 移动是同层级进行移动，因此这里获取的目标节点应该是同层级的,当目标节点为高层级别的，则无效
-      const newDestination = getDestinationBar(oldValue.source._depth, store.ganttRef.current?.flattenData[initial.destination.index]);
-      console.log('handleDragUpdate', newDestination?.record.summary);
+      const newDestination = getDestinationBar(oldValue.source._depth, destinationBar);
+      console.log(oldValue.source.record.summary, oldValue.source._depth, 'drag===>', newDestination, newDestination?.record.summary);
+      // runInAction(() => {
+      //   if (newDestination?.task) {
+      //     newDestination.task.collapsed = true;
+      //   }
+      // });
       draggingStyle.current = newDestination && { transform: `translate(0px, ${oldValue.source.absoluteIndex > newDestination.absoluteIndex ? 34 : -34}px)` };
+
       return { source: oldValue.source, destination: newDestination };
     });
   }, [store.ganttRef]);
@@ -1292,7 +1379,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
           {columns.length > 0 && workCalendar && (
             <div className="c7n-gantt-content-body">
               <DragDropContext
-                onDragStart={handleDragStart}
+                onBeforeDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
                 onDragUpdate={handleDragUpdate}
               >
@@ -1310,7 +1397,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
                   onRow={onRow}
                   onBarClick={onRow.onClick}
                   tableIndent={20}
-                  components={{ mainBody: renderTableBody, tableRow: renderTableRow }}
+                  components={{ tableBody: renderTableBody, tableRow: renderTableRow }}
                   expandIcon={getExpandIcon}
                   renderBar={renderBar}
                   renderInvalidBar={renderInvalidBar}
