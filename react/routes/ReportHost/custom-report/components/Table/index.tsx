@@ -101,7 +101,7 @@ const CustomReportTable: React.FC<CustomReportTableProps> = ({
   }, [dataSet, queryDataSet, tableData]);
 
   const renderColumns = useCallback(() => {
-    const columns = [<Column name="value" header={type === 'storyPoints' ? '故事点' : '问题个数'} />];
+    const columns = [<Column name="value" header={type === 'storyPoints' ? '故事点' : '工作项个数'} />];
     if (chartType === 'stackedBar') {
       columns.length = 0;
       columns.splice(0, 0, ...(data || []).map((i, index) => (

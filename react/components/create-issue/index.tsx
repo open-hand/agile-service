@@ -39,7 +39,7 @@ const openModal = (props: CreateIssueProps) => {
       overflowX: 'hidden',
     },
     key: 'create-issue',
-    title: '创建问题',
+    title: '创建工作项',
     okText: '创建',
     children: <BaseComponent onSubmit={handleSubmit} {...omit(props, 'onSubmit')} defaultTypeId={defaultIssueTypeId} />,
   });

@@ -35,7 +35,7 @@ function SprintButton({
     statusCode, sprintId, planning, issueCount,
   } = data;
   const hasActiveSprint = BacklogStore.getHasActiveSprint;
-  const [disableStart, reason] = judgeDisabled([[hasActiveSprint, '已有活跃冲刺'], [issueCount <= 0, '冲刺下没有问题'], [planning === true, '非当前PI下冲刺不可开启']]);
+  const [disableStart, reason] = judgeDisabled([[hasActiveSprint, '已有活跃冲刺'], [issueCount <= 0, '冲刺下没有工作项'], [planning === true, '非当前PI下冲刺不可开启']]);
   const { isShowFeature, isInProgram } = BacklogStore.getIsInProgramData || {};
   const openStartSprint = async () => {
     if (!disableStart) {

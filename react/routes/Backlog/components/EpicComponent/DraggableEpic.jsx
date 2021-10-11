@@ -216,7 +216,7 @@ class DraggableEpic extends Component {
             <p className="c7n-backlog-epicItemDetail">计数详情</p>
             <div className="c7n-backlog-epicItemParams">
               <div className="c7n-backlog-epicItemParam">
-                <p className="c7n-backlog-epicItemParamKey">问题数</p>
+                <p className="c7n-backlog-epicItemParamKey">工作项数</p>
                 <p className="c7n-backlog-epicItemNotStoryPoint">{item.issueCount}</p>
               </div>
               <div className="c7n-backlog-epicItemParam">

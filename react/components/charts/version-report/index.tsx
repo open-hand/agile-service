@@ -26,7 +26,7 @@ const UNIT_STATUS = {
 };
 const UNIT2NAME = {
   story_point: '故事点',
-  issue_count: '问题计数',
+  issue_count: '工作项计数',
   remain_time: '剩余时间',
 };
 
@@ -53,7 +53,7 @@ export interface VersionReportProps {
   animation?: boolean
 }
 
-// 处理后端返回值为null或小数精度问题
+// 处理后端返回值为null或小数精度工作项
 const dealNullValue = (list: number[] = []) => map(list, (item: number) => {
   if (item) {
     if (item % 1 > 0) {
@@ -114,9 +114,9 @@ const VersionReport: React.FC<VersionReportProps> = ({
 
   const getOption = (): EChartOption => {
     const UNIT = {
-      总问题数: '个',
-      已完成问题数: '个',
-      未预估问题百分比: '%',
+      总工作项数: '个',
+      已完成工作项数: '个',
+      未预估工作项百分比: '%',
       已完成故事点: '点',
       总计故事点: '点',
       已完成剩余时间: '小时',
@@ -157,19 +157,19 @@ const VersionReport: React.FC<VersionReportProps> = ({
           ],
           ...[
             unit === 'issue_count' ? {
-              name: '总问题数',
+              name: '总工作项数',
               icon: `image://${total}`,
             } : {},
           ],
           ...[
             unit === 'issue_count' ? {} : {
-              name: '未预估问题百分比',
+              name: '未预估工作项百分比',
               icon: `image://${noEstimated}`,
             },
           ],
           ...[
             unit === 'issue_count' ? {
-              name: '已完成问题数',
+              name: '已完成工作项数',
               icon: `image://${finish}`,
             } : {},
           ],
@@ -248,7 +248,7 @@ const VersionReport: React.FC<VersionReportProps> = ({
       option = {
         yAxis: [
           {
-            name: '问题数',
+            name: '工作项数',
             nameTextStyle: {
               color: 'var(--text-color)',
             },
@@ -282,7 +282,7 @@ const VersionReport: React.FC<VersionReportProps> = ({
         ],
         series: [
           {
-            name: '总问题数',
+            name: '总工作项数',
             type: 'line',
             step: true,
             itemStyle: {
@@ -294,7 +294,7 @@ const VersionReport: React.FC<VersionReportProps> = ({
             data: getChartDataYIssueCountAll(),
           },
           {
-            name: '已完成问题数',
+            name: '已完成工作项数',
             type: 'line',
             step: true,
             itemStyle: {
@@ -306,7 +306,7 @@ const VersionReport: React.FC<VersionReportProps> = ({
             data: getChartDataYIssueCountCompleted(),
           },
           {
-            name: '未预估问题百分比',
+            name: '未预估工作项百分比',
             type: 'line',
             step: true,
             itemStyle: {
@@ -390,7 +390,7 @@ const VersionReport: React.FC<VersionReportProps> = ({
         ],
         series: [
           {
-            name: '总问题数',
+            name: '总工作项数',
             type: 'line',
             step: true,
             itemStyle: {
@@ -403,7 +403,7 @@ const VersionReport: React.FC<VersionReportProps> = ({
             data: getChartDataYIssueCountAll(),
           },
           {
-            name: '已完成问题数',
+            name: '已完成工作项数',
             type: 'line',
             step: true,
             itemStyle: {
@@ -416,7 +416,7 @@ const VersionReport: React.FC<VersionReportProps> = ({
             data: getChartDataYIssueCountCompleted(),
           },
           {
-            name: '未预估问题百分比',
+            name: '未预估工作项百分比',
             type: 'line',
             step: true,
             itemStyle: {
@@ -477,7 +477,7 @@ const VersionReport: React.FC<VersionReportProps> = ({
               </div>
             ) : (
               <div style={{ padding: '20px 0', textAlign: 'center', width: '100%' }}>
-                {tableData.length ? '当前单位下问题均未预估，切换单位或从下方问题列表进行预估。' : '当前版本下没有问题。'}
+                {tableData.length ? '当前单位下工作项均未预估，切换单位或从下方工作项列表进行预估。' : '当前版本下没有工作项。'}
               </div>
             )
           }

@@ -64,7 +64,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
       setLoading(true);
       if (!await checkCanQuickCreate(currentType.id, assigneeId)) {
         if (!cantCreateEvent) {
-          Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
+          Choerodon.prompt('该工作项类型含有必填选项，请使用弹框创建');
           setLoading(false);
         } else {
           Choerodon.prompt('请填写标注的必填字段');
@@ -207,7 +207,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
                   disabled={loading}
                   value={summary}
                   maxLength={44}
-                  placeholder="请输入问题概要"
+                  placeholder="请输入工作项概要"
                 />
                 <Button
                   color={'primary' as ButtonColor}

@@ -98,7 +98,7 @@ function ObjectScheme() {
     const isOpen: boolean = !(localStorage.getItem('agile.page.field.setting.required.prompt') === 'false');
     if (isOpen) {
       const promptText = `确定要将【${fieldName}】设置为${!required ? '不' : ''}必填项吗？
-      设置后${getMenuType() !== 'project' ? '组织下所有' : ''}项目中该字段都将为${!required ? '不' : ''}必填，这将会影响【快速创建】问题的使用。`;
+      设置后${getMenuType() !== 'project' ? '组织下所有' : ''}项目中该字段都将为${!required ? '不' : ''}必填，这将会影响【快速创建】工作项的使用。`;
       Modal.open({
         key: Modal.key(),
         className: `${prefixCls}-detail-prompt`,

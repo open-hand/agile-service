@@ -95,7 +95,7 @@ const BugBarChart = observer(() => {
       },
     },
     yAxis: {
-      name: '问题计数',
+      name: '工作项计数',
       minInterval: 1,
       nameGap: 23,
       axisTick: { show: false },

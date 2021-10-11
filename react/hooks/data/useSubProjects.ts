@@ -11,7 +11,7 @@ export interface ISubProject {
 
 export interface SubProjectsConfig {
   projectId?: string
-  /** 只返回某一类的问题类型 */
+  /** 只返回某一类的工作项类型 */
   typeCode?: string | string[]
   /** 只查询启用的 */
   onlySelectEnable?: boolean

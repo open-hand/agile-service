@@ -28,7 +28,7 @@ export default ({
   },
   fields: [
     { name: 'issueId', type: 'string', label: '概要' },
-    { name: 'issueTypeId', type: 'object', label: '问题类型' },
+    { name: 'issueTypeId', type: 'object', label: '工作项类型' },
     { name: 'issueNum', type: 'string', label: '任务编号' },
     { name: 'priorityId', type: 'string', label: '优先级' },
     { name: 'statusId', type: 'object', label: '状态' },
@@ -57,7 +57,7 @@ export default ({
 
   ],
   queryFields: [
-    { name: 'issueTypeId', type: 'array', label: '问题类型' },
+    { name: 'issueTypeId', type: 'array', label: '工作项类型' },
     // { name: 'service', type: 'string', label: service },
     // { name: 'description', type: 'string', label: description },
   ],

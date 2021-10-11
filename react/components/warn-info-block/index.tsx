@@ -17,7 +17,7 @@ const getPredefineContent = (key: string, extraProps: any) => {
   switch (key) {
     case 'requiredNoPermission': {
       const { fieldNames = [] } = extraProps || {};
-      return `当前问题类型下存在字段【${fieldNames?.join('、')}】设置为必填并且您无权限查看，请联系项目管理员`;
+      return `当前工作项类型下存在字段【${fieldNames?.join('、')}】设置为必填并且您无权限查看，请联系项目管理员`;
     }
 
     default:

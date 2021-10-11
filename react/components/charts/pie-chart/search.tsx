@@ -12,7 +12,7 @@ const { Option } = Select;
 export const types = [
   { title: '经办人', value: 'assignee' },
   { title: '模块', value: 'component' },
-  { title: '问题类型', value: 'typeCode' },
+  { title: '工作项类型', value: 'typeCode' },
   { title: '版本', value: 'version' },
   { title: '优先级', value: 'priority' },
   { title: '状态', value: 'status' },

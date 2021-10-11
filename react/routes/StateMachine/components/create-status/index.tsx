@@ -85,7 +85,7 @@ const CreateStatus: React.FC<Props> = ({
       {
         name: 'issueTypeIds',
         type: 'string' as FieldType,
-        label: '问题类型',
+        label: '工作项类型',
         required: true,
         textField: 'name',
         valueField: 'id',

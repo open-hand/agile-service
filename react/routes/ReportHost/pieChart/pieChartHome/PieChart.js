@@ -66,7 +66,7 @@ class PieChart extends Component {
     const { location: { pathname } } = this.props;
     const quaryLinks = [
       { title: '经办人', value: 'assignee' },
-      { title: '问题类型', value: 'typeCode' },
+      { title: '工作项类型', value: 'typeCode' },
       { title: '优先级', value: 'priority' },
       { title: '状态', value: 'status' },
       { title: '史诗', value: 'epic' },
@@ -96,7 +96,7 @@ class PieChart extends Component {
             if (this.otherTooltipRef && this.otherTooltipRef.current) {
               this.otherTooltipRef.current.style.display = 'none';
             }
-            return `<div><span>问题：${value.data.value} 个</span><br/><span>百分比：${(value.data.percent.toFixed(2))}%</span></div>`;
+            return `<div><span>工作项：${value.data.value} 个</span><br/><span>百分比：${(value.data.percent.toFixed(2))}%</span></div>`;
           }
           if (this.otherTooltipRef && this.otherTooltipRef.current) {
             this.otherTooltipRef.current.style.display = 'block';
@@ -207,7 +207,7 @@ class PieChart extends Component {
       paramName += `、版本为${versions.find((versionItem) => versionItem.versionId === chooseId).name}`;
     }
 
-    paramName += '下的问题';
+    paramName += '下的工作项';
     let paramType = type;
     if (type === 'typeCode') {
       paramType = 'issueTypeId';
@@ -356,7 +356,7 @@ class PieChart extends Component {
     const types = [
       { title: '经办人', value: 'assignee' },
       { title: '模块', value: 'component' },
-      { title: '问题类型', value: 'typeCode' },
+      { title: '工作项类型', value: 'typeCode' },
       { title: '版本', value: 'version' },
       { title: '优先级', value: 'priority' },
       { title: '状态', value: 'status' },
@@ -495,7 +495,7 @@ class PieChart extends Component {
                       <thead>
                         <tr>
                           <td style={{ width: '158px' }}>{(types.find((item) => item.value === type) || {}).title}</td>
-                          <td style={{ width: '62px' }}>问题</td>
+                          <td style={{ width: '62px' }}>工作项</td>
                           <td style={{ paddingRight: 35 }}>百分比</td>
                         </tr>
                       </thead>
@@ -526,7 +526,7 @@ class PieChart extends Component {
                   </div>
                 </div>
               </>
-            ) : <LoadingHiddenWrap><NoDataComponent title="问题" links={[{ name: '【所有问题】', link: LINK_URL.workListIssue }]} img={pic} /></LoadingHiddenWrap> }
+            ) : <LoadingHiddenWrap><NoDataComponent title="工作项" links={[{ name: '【所有工作项】', link: LINK_URL.workListIssue }]} img={pic} /></LoadingHiddenWrap> }
           </LoadingProvider>
 
         </Content>

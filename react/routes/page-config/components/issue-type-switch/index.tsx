@@ -16,7 +16,7 @@ interface IssueOption {
   type: 'organization' | 'common',
 }
 interface PageSwitchProps {
-  /** 更改问题类型时 */
+  /** 更改工作项类型时 */
   onChangeIssueType: (issueType: IIssueType, confirmModal: (onOk: () => void) => void, cacheChange: (issueType?: IIssueType) => void) => void
   /** 初始化 */
   onInit?: (currentType: IIssueType) => void

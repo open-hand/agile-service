@@ -63,7 +63,7 @@ const EpicBurnDownComponent:React.FC<Props> = ({
             description={(
               <div>
                 {isProgram ? (
-                  <span>当前项目无可用史诗，请在【待办事项】或【所有问题】中创建一个史诗</span>
+                  <span>当前项目无可用史诗，请在【待办事项】或【所有工作项】中创建一个史诗</span>
                 ) : (
                   <>
                     <span>当前项目无可用史诗，请在</span>
@@ -80,7 +80,7 @@ const EpicBurnDownComponent:React.FC<Props> = ({
                         linkTo(LINK_URL.workListIssue);
                       }}
                     >
-                      【所有问题】
+                      【所有工作项】
                     </EmptyPage.Button>
                     <span>中创建一个史诗</span>
                   </>

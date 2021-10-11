@@ -17,7 +17,7 @@ const AccumulationReport: React.FC = () => {
     const { data } = props;
     if (!data.length) {
       return (
-        <NoDataComponent title="问题" links={[{ name: '所有问题', link: '/agile/work-list/issue' }]} img={pic} />
+        <NoDataComponent title="工作项" links={[{ name: '所有工作项', link: '/agile/work-list/issue' }]} img={pic} />
       );
     }
     return (

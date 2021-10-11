@@ -84,7 +84,7 @@ import { UserUniqueTag } from '@/components/tag/user-tag';
                           {totalRemainingTime || '无'}
                         </p>
                         <p>
-                          {'问题: '}
+                          {'工作项: '}
                           {issueCount}
                         </p>
                       </div>),

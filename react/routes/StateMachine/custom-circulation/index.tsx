@@ -515,7 +515,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     return '';
   };
 
-  const renderLinkIssueLinkageSetting = (linkIssueStatusLinkageVOS: ILinkIssueLinkageVOS[]) => linkIssueStatusLinkageVOS.map((item) => `关联关系为【${item.linkTypeVO.linkName}】，且问题类型为【${item.linkIssueType.name}】的关联问题将自动流转到【${item.linkIssueStatus.name}】状态`).join('；');
+  const renderLinkIssueLinkageSetting = (linkIssueStatusLinkageVOS: ILinkIssueLinkageVOS[]) => linkIssueStatusLinkageVOS.map((item) => `关联关系为【${item.linkTypeVO.linkName}】，且工作项类型为【${item.linkIssueType.name}】的关联工作项将自动流转到【${item.linkIssueStatus.name}】状态`).join('；');
 
   const renderConditionSetting = (statusTransferSettingVOS: IStatusTransferSettingVOS[], record: Record) => {
     const verifySubissueCompleted = statusTransferSettingVOS && find(statusTransferSettingVOS, (item) => item.userType === 'other' && item.verifySubissueCompleted);
@@ -552,7 +552,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         {
           selectedTypeCode !== 'feature' && selectedTypeCode !== 'epic' && record.get('executionCaseStatusChangeSettingVO')?.testStatusVO && (
             <div className={styles.settingItem}>
-              {`问题关联的测试用例的执行到${record.get('executionCaseStatusChangeSettingVO')?.testStatusVO.statusName}状态，将自动流转到${record.get('name')}状态`}
+              {`工作项关联的测试用例的执行到${record.get('executionCaseStatusChangeSettingVO')?.testStatusVO.statusName}状态，将自动流转到${record.get('name')}状态`}
             </div>
           )
         }

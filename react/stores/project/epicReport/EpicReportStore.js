@@ -21,7 +21,7 @@ const UNIT_STATUS = {
 };
 const UNIT2NAME = {
   story_point: '故事点',
-  issue_count: '问题计数',
+  issue_count: '工作项计数',
   remain_time: '剩余时间',
 };
 
@@ -147,7 +147,7 @@ class EpicReportStore {
     return this.dealNullValue(all);
   }
 
-  // 处理后端返回值为null或小数精度问题
+  // 处理后端返回值为null或小数精度工作项
   dealNullValue = (list = []) => _.map(list, (item) => {
     try {
       if (item) {

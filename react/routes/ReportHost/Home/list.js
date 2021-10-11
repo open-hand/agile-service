@@ -16,7 +16,7 @@ export default [
   {
     key: 'accumulation',
     title: '累积流量图',
-    des: '显示状态的问题，这有助于您识别潜在的瓶颈， 需要对此进行调查。',
+    des: '显示状态的工作项，这有助于您识别潜在的瓶颈， 需要对此进行调查。',
     link: '/agile/charts/accumulation',
     pic: 'accumulation',
   },
@@ -37,14 +37,14 @@ export default [
   {
     key: 'epicReport',
     title: '史诗报告图',
-    des: '随时了解一个史诗的完成进度。这有助于您跟踪未完成或未分配问题来管理团队的开发进度。',
+    des: '随时了解一个史诗的完成进度。这有助于您跟踪未完成或未分配工作项来管理团队的开发进度。',
     link: '/agile/charts/EpicReport',
     pic: 'epicReport',
   },
   {
     key: 'pieReport',
     title: '统计图',
-    des: '根据指定字段以统计图呈现项目或筛选器下的问题。这可以使您一目了然地了解问题详情。',
+    des: '根据指定字段以统计图呈现项目或筛选器下的工作项。这可以使您一目了然地了解工作项详情。',
     link: '/agile/charts/pieReport',
     pic: 'pieReport',
   },

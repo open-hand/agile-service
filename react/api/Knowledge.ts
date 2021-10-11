@@ -15,7 +15,7 @@ class KnowledgeApi extends Api<KnowledgeApi> {
   }
 
   /**
-   * 创建问题关联的知识关系
+   * 创建工作项关联的知识关系
    * @param data
    */
   createRelationForIssue(data:Array<IIssueRelation>) {
@@ -23,7 +23,7 @@ class KnowledgeApi extends Api<KnowledgeApi> {
   }
 
   /**
-   * 根据问题id加载知识
+   * 根据工作项id加载知识
    * @param issueId
    */
   loadByIssue(issueId: number) {
@@ -48,7 +48,7 @@ class KnowledgeApi extends Api<KnowledgeApi> {
   }
 
   /**
-   * 删除问题中的知识关联
+   * 删除工作项中的知识关联
    * @param relationId
    */
   deleteRelationForIssue(relationId:number) {

@@ -34,7 +34,7 @@ const TransformFromSubIssue: React.FC<Props> = ({
     autoCreate: true,
     fields: [{
       name: 'typeId',
-      label: '问题类型',
+      label: '工作项类型',
       required: true,
     }, {
       name: 'epicName',
@@ -144,7 +144,7 @@ const ObserverTransformFromSubIssue = observer(TransformFromSubIssue);
 const openTransformFromSubIssue = (props: Props) => {
   Modal.open({
     key: Modal.key(),
-    title: '转化为问题',
+    title: '转化为工作项',
     children: <ObserverTransformFromSubIssue {...props} />,
     drawer: true,
     okText: '转化',

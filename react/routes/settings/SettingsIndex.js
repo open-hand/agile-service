@@ -25,7 +25,7 @@ class SettingsIndex extends React.Component {
         <PageWrap noHeader={['choerodon.code.setting.issue.notification']} cache>
           <PageTab title="模块管理" tabKey="choerodon.code.project.setting.issue.ps.component" component={withRouter(ComponentIndex)} alwaysShow />
           <PageTab title="快速筛选" tabKey="choerodon.code.project.setting.issue.ps.fastsearch" component={withRouter(FastSearchIndex)} alwaysShow />
-          <PageTab title="问题链接" tabKey="choerodon.code.project.setting.issue.ps.issuelink" component={withRouter(IssueLinkIndex)} alwaysShow />
+          <PageTab title="工作项链接" tabKey="choerodon.code.project.setting.issue.ps.issuelink" component={withRouter(IssueLinkIndex)} alwaysShow />
         </PageWrap>
       </div>
     );

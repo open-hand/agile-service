@@ -710,7 +710,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
   }
 
   /**
-   * 获取关联问题状态联动设置
+   * 获取关联工作项状态联动设置
    * @param issueTypeId
    * @param statusId
    */

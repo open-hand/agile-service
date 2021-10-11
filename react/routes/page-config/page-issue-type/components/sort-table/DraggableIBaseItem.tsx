@@ -46,7 +46,7 @@ const DraggableIBaseItem: React.FC<Props> = ({
     editedFieldCanNotEdit = false,
   } = pageConfigFieldEdited;
   const fieldName = data.get('fieldName');
-  // 是否禁止删除此字段 1.系统字段不可删除  2. 项目层下组织层字段不可删除 3.禁用问题类型字段不可操作
+  // 是否禁止删除此字段 1.系统字段不可删除  2. 项目层下组织层字段不可删除 3.禁用工作项类型字段不可操作
   const disabledDel = !pageIssueTypeStore.currentIssueType.enabled || (isProject && data.get('createdLevel') === 'organization') || data.get('createdLevel') === 'system';
   const disabledEdit = useMemo(() => {
     if (!pageIssueTypeStore.currentIssueType.enabled || (!isProject && data.get('createdLevel') === 'system' && orgDisabledEditDefaultFields.includes(data.get('fieldCode')))) {
@@ -58,7 +58,7 @@ const DraggableIBaseItem: React.FC<Props> = ({
   const handleDelete = useCallback(() => {
     Modal.open({
       title: '确认删除？',
-      children: `确认删除【${fieldName}】字段吗？这里仅删除字段和当前问题类型的关联关系，不会删除这个字段的数据或值。`,
+      children: `确认删除【${fieldName}】字段吗？这里仅删除字段和当前工作项类型的关联关系，不会删除这个字段的数据或值。`,
       onOk: () => {
         const recordData = data.toData();
         onDelete(data.toData());

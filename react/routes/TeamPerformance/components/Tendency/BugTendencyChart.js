@@ -143,7 +143,7 @@ const BugTendencyChart = observer(() => {
         data: xData,
       },
       yAxis: {
-        name: '问题计数',
+        name: '工作项计数',
         nameTextStyle: {
           color: 'var(--text-color)',
           padding: [0, 10, 0, 0],

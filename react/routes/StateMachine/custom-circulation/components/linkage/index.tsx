@@ -41,7 +41,7 @@ interface ILinkType {
 }
 
 const { Option } = Select;
-const linkTypeHasIssueTypeMap = new Map([]); // 存储关联类型都选择了哪些问题类型，避免重复选择
+const linkTypeHasIssueTypeMap = new Map([]); // 存储关联类型都选择了哪些工作项类型，避免重复选择
 const Linkage = ({
   // @ts-ignore
   modal, record, selectedType, customCirculationDataSet, linkageType, selectedTypeName, selectedTypeCode,
@@ -235,7 +235,7 @@ const Linkage = ({
       <Loading loading={loading} />
       {
         linkageType.length === 1 && (
-          <div className={styles.tip}>{linkageType[0] === 'subIssue' ? '当工作项流转到此状态后，关联的父任务状态设置。' : `当问题流转到${record.get('name')}后，关联的问题满足下列设置，将自动流转到指定状态。`}</div>
+          <div className={styles.tip}>{linkageType[0] === 'subIssue' ? '当工作项流转到此状态后，关联的父任务状态设置。' : `当工作项流转到${record.get('name')}后，关联的工作项满足下列设置，将自动流转到指定状态。`}</div>
         )
       }
       {
@@ -249,10 +249,10 @@ const Linkage = ({
                 text: '父子级联动',
               }, {
                 key: 'linkIssue',
-                text: '关联问题联动',
+                text: '关联工作项联动',
               }]}
             />
-            <div className={styles.linkageTip}>{activeKey === 'subIssue' ? '当工作项流转到此状态后，关联的父任务状态设置。' : `当问题流转到${record.get('name')}后，关联的问题满足下列设置，将自动流转到指定状态。`}</div>
+            <div className={styles.linkageTip}>{activeKey === 'subIssue' ? '当工作项流转到此状态后，关联的父任务状态设置。' : `当工作项流转到${record.get('name')}后，关联的工作项满足下列设置，将自动流转到指定状态。`}</div>
           </div>
         )
       }
@@ -366,7 +366,7 @@ const Linkage = ({
                       </Col>
                       <Col span={7}>
                         <Select
-                          label="问题类型"
+                          label="工作项类型"
                           name={typeName}
                           disabled={!linkTypeId}
                           onChange={(value, oldValue) => {

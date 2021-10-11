@@ -451,7 +451,7 @@ class EpicBurndown extends Component {
       ...[
         {
           // width: '15%',
-          title: '问题编号',
+          title: '工作项编号',
           dataIndex: 'issueNum',
           render: (issueNum, record) => (
             <span
@@ -479,7 +479,7 @@ class EpicBurndown extends Component {
           dataIndex: 'summary',
           render: (summary) => (
             <div style={{ width: '100%', overflow: 'hidden' }}>
-              <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={`问题概要：${summary}`}>
+              <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={`工作项概要：${summary}`}>
                 <p style={{
                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
                 }}
@@ -492,7 +492,7 @@ class EpicBurndown extends Component {
         },
         {
           // width: '15%',
-          title: '问题类型',
+          title: '工作项类型',
           dataIndex: 'typeCode',
           render: (typeCode, record) => (
             <div>
@@ -746,15 +746,15 @@ class EpicBurndown extends Component {
                 }
                 return '';
               })
-              //  : <p>当前史诗下的冲刺没有已完成的问题</p>
+              //  : <p>当前史诗下的冲刺没有已完成的工作项</p>
             }
           </div>
         );
       }
-      return <p style={{ color: 'var(--text-color)' }}>当前史诗下的冲刺没有已完成的问题</p>;
+      return <p style={{ color: 'var(--text-color)' }}>当前史诗下的冲刺没有已完成的工作项</p>;
     }
 
-    return <p style={{ color: 'var(--text-color)' }}>当前史诗下的冲刺没有已完成的问题</p>;
+    return <p style={{ color: 'var(--text-color)' }}>当前史诗下的冲刺没有已完成的工作项</p>;
   }
 
   renderToolbarTitle = () => {
@@ -779,9 +779,9 @@ class EpicBurndown extends Component {
       return (
         <div className="toolbar-complete">
           <div className="pic">
-            <img src={completed} alt="所有预估的问题都已完成!" />
+            <img src={completed} alt="所有预估的工作项都已完成!" />
           </div>
-          <div className="word">所有预估的问题都已完成！</div>
+          <div className="word">所有预估的工作项都已完成！</div>
         </div>
       );
     }
@@ -940,12 +940,12 @@ class EpicBurndown extends Component {
                     });
                   }}
                 >
-                  <TabPane tab="已完成的问题" key="done">
+                  <TabPane tab="已完成的工作项" key="done">
                     <LoadingHiddenWrap>
                       {this.renderTable('compoleted')}
                     </LoadingHiddenWrap>
                   </TabPane>
-                  <TabPane tab="未完成的问题" key="todo">
+                  <TabPane tab="未完成的工作项" key="todo">
                     <LoadingHiddenWrap>
                       {this.renderTable('unFinish')}
                     </LoadingHiddenWrap>
@@ -972,7 +972,7 @@ class EpicBurndown extends Component {
                           to(LINK_URL.workListIssue);
                         }}
                       >
-                        【所有问题】
+                        【所有工作项】
                       </EmptyPage.Button>
                       <span>中创建一个史诗</span>
                     </div>

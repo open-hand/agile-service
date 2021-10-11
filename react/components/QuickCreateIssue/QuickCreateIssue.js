@@ -107,7 +107,7 @@ class QuickCreateIssue extends Component {
       const currentType = issueTypes.find((t) => t.id === currentTypeId);
       if (!await checkCanQuickCreate(currentType.id, assigneeId)) { //
         if (!cantCreateEvent) {
-          Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
+          Choerodon.prompt('该工作项类型含有必填选项，请使用弹框创建');
           this.setState({
             loading: false,
           });
@@ -285,7 +285,7 @@ class QuickCreateIssue extends Component {
                   }}
                   value={summary}
                   maxLength={44}
-                  placeholder="请输入问题概要"
+                  placeholder="请输入工作项概要"
                 />
                 <Button
                   color="primary"
@@ -321,7 +321,7 @@ class QuickCreateIssue extends Component {
               }}
               style={this.props.btnStyle || {}}
             >
-              {buttonShowText || '创建问题'}
+              {buttonShowText || '创建工作项'}
             </Button>
           )
         }

@@ -44,7 +44,7 @@ class DataLogApi extends Api<DataLogApi> {
   }
 
   /**
-   * 项目层下查询问题记录 (项目群)
+   * 项目层下查询工作项记录 (项目群)
    * @param issueId
    * @param programId 项目群id
    */

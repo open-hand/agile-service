@@ -41,7 +41,7 @@ const PreviewIssueFile = () => {
             setHidden(!hidden);
           }}
         >
-          查看问题详情
+          查看工作项详情
         </Button>
         <Button
           style={{

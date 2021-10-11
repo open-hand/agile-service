@@ -100,7 +100,7 @@ const AccumulationChart: React.FC<AccumulationChartProps> = ({
             // type: 'dashed',
           },
         },
-        name: '问题数',
+        name: '工作项数',
         type: 'value',
         minInterval: 1,
         axisLabel: {

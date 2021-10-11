@@ -63,7 +63,7 @@ const EpicReportSearch:React.FC<EpicReportSearchProps> = ({
           onChange={handleChangeUnit}
         >
           <Option key="story_point" value="story_point">故事点</Option>
-          <Option key="issue_count" value="issue_count">问题计数</Option>
+          <Option key="issue_count" value="issue_count">工作项计数</Option>
           <Option key="remain_time" value="remain_time">剩余时间</Option>
         </Select>
       </div>

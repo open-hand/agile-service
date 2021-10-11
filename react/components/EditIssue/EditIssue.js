@@ -155,7 +155,7 @@ function EditIssue() {
       };
       const fields = await fieldApi.project(programId ?? projectId).org(organizationId).outside(outside).getFieldAndValue(id, param);
 
-      // 根据问题类型查询rules
+      // 根据工作项类型查询rules
       if (!outside && !otherProject && String(issue?.projectId) === String(getProjectId())) {
         const rules = await pageConfigApi.project(programId ?? projectId).org(organizationId).getCascadeRuleList(issue.issueTypeId);
         store.setIssueTypeRules(rules);
@@ -196,7 +196,7 @@ function EditIssue() {
         programId ? dataLogApi.loadUnderProgram(id, programId) : dataLogApi.org(organizationId).outside(outside).project(projectId).loadByIssue(id),
         programId || applyType === 'program' ? null : issueLinkApi.org(organizationId).outside(outside).project(projectId).loadByIssueAndApplyType(id),
         programId ? issueApi.project(projectId).getCommentsUnderProgram(id, programId) : issueApi.org(organizationId).outside(outside).project(projectId).getComments(id),
-        // issue中非子任务的问题需要请求不能流转到的状态数据
+        // issue中非子任务的工作项需要请求不能流转到的状态数据
         applyType !== 'program' && issue.typeCode !== 'sub_task' ? boardApi.getNotAllowedTransferStatus(id) : null,
       ]);
       if (idRef.current !== id) {

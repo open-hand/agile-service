@@ -48,7 +48,7 @@ const NotifySelect: React.FC<NotifySelectProps> = (
             selectedUser={notifySettingDataSet.current?.getState('defaultSelectUsers')}
             className={styles.notify_assigners}
             // @ts-ignore
-            
+
           />
         )
       }
@@ -270,12 +270,12 @@ const NotifySetting = ({
   return (
     <div className={styles.notify_setting}>
       <OldLoading loading={loading} />
-      <div className={styles.tip}>问题流转到当前状态后，将按照下方设置通知相关方。</div>
+      <div className={styles.tip}>工作项流转到当前状态后，将按照下方设置通知相关方。</div>
       <Form dataSet={notifySettingDataSet} className={styles.form}>
         <Select name="noticeTypeList" />
         <Dropdown
           // @ts-ignore
-          
+
           visible={!hidden}
           overlay={(
             <div

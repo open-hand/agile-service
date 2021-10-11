@@ -41,7 +41,7 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
   const key = Modal.key();
   Modal.open({
     key,
-    title: '导出问题',
+    title: '导出工作项',
     style: {
       width: 740,
     },

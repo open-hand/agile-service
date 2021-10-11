@@ -314,7 +314,7 @@ class VersionItem extends Component {
                 </Permission>
               </div>
               <div className="c7n-backlog-versionItemParam">
-                <p className="c7n-backlog-versionItemParamKey">问题数</p>
+                <p className="c7n-backlog-versionItemParamKey">工作项数</p>
                 <p className="c7n-backlog-versionItemNotStoryPoint">{item.issueCount}</p>
               </div>
               <div className="c7n-backlog-versionItemParam">

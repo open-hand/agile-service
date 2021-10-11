@@ -31,7 +31,7 @@ const IterationSpeedSearch: React.FC<IterationSpeedSearchProps> = ({ unit, setUn
           故事点
         </Option>
         <Option key="issue_count" value="issue_count">
-          问题计数
+          工作项计数
         </Option>
         <Option key="remain_time" value="remain_time">
           剩余时间

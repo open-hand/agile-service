@@ -44,7 +44,7 @@ const en_US = {
 
   'issueType.title': 'Issue Type',
   'issueType.create': 'Create Type',
-  'issueType.tip': '问题类型是将敏捷服务和测试服务中的问题类型进行统一管理。',
+  'issueType.tip': '工作项类型是将敏捷服务和测试服务中的工作项类型进行统一管理。',
   'issueType.name': 'Name',
   'issueType.res': 'Description',
   'issueType.scheme': 'Related Schemes',
@@ -203,7 +203,7 @@ const en_US = {
   'stateMachine.publish.success': 'Publish Success!',
   'stateMachine.publish.info': 'Publish draft stateMachine fail',
   'stateMachineScheme.publish.warn': 'The current scheme has been modified, please refresh and try again.',
-  'stateMachineScheme.tip': '状态机方案指的是，将状态机和问题类型组合形成的方案，并关联项目。',
+  'stateMachineScheme.tip': '状态机方案指的是，将状态机和工作项类型组合形成的方案，并关联项目。',
   'stateMachine.publish.des': 'The current state machine draft cannot be deleted because the state of the associated issue has been removed from your edits and the issue needs to be transitioned to another state in order to continue publishing.',
 
   'field.create': 'add field',

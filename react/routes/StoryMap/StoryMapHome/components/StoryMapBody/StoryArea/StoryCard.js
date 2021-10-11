@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Icon, Tooltip, Modal } from 'choerodon-ui/pro';
 
-import StatusTag from '@/components/StatusTag';
 import { DragSource } from 'react-dnd';
 import { find } from 'lodash';
 import { observer } from 'mobx-react';
+import StatusTag from '@/components/StatusTag';
 import { storyMapApi } from '@/api';
 
 import { TypeTag } from '@/components';
@@ -63,12 +63,12 @@ class StoryCard extends Component {
         // 未规划或无泳道
         if (swimLine === 'none' || (storyMapVersionDTOList.length === 0 && storyMapSprintList.length === 0)) {
           const storyMapDragVO = {
-            // 问题id列表，移动到版本，配合versionId使用
+            // 工作项id列表，移动到版本，配合versionId使用
             // versionIssueIds: [],
             epicId: 0, // 要关联的史诗id
             epicIssueIds: [issueId],
             featureId: 0, // 要关联的特性id
-            // 问题id列表，移动到特性，配合featureId使用
+            // 工作项id列表，移动到特性，配合featureId使用
             featureIssueIds: [issueId],
           };
           await storyMapApi.move(storyMapDragVO);
@@ -182,10 +182,10 @@ export default DragSource(
       //   versionId: 0, // 要关联的版本id
       //   epicId: 0, // 要关联的史诗id
       //   versionIssueRelVOList: [],
-      //   // 问题id列表，移动到史诗，配合epicId使用
+      //   // 工作项id列表，移动到史诗，配合epicId使用
       //   epicIssueIds: [],
       //   featureId: 0, // 要关联的特性id
-      //   // 问题id列表，移动到特性，配合featureId使用
+      //   // 工作项id列表，移动到特性，配合featureId使用
       //   featureIssueIds: [],
       //   sprintIssueIds: [],
       //   sprintId: 0, // 要关联的版本id

@@ -51,7 +51,7 @@ class CreateEpic extends Component {
         },
       };
       if (!await checkCanQuickCreate(epicType.id)) {
-        Choerodon.prompt('该问题类型含有必填选项，请使用创建问题弹框创建');
+        Choerodon.prompt('该工作项类型含有必填选项，请使用创建工作项弹框创建');
         this.canAdd = true;
         StoryMapStore.removeAddingEpic();
         return;

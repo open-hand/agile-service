@@ -48,15 +48,15 @@ const IssueDropDown = ({
   const handleDeleteIssue = () => {
     const deleteModal = ModalPro.open({
       width: 560,
-      title: `删除问题${issueNum}`,
+      title: `删除工作项${issueNum}`,
       children:
         (
           <div>
-            <p style={{ marginBottom: 10 }}>请确认您要删除这个问题。</p>
-            <p style={{ marginBottom: 10 }}>该问题将会被彻底删除，包括所有附件、关联关系、评论。</p>
-            <p style={{ marginBottom: 10 }}>如果您完成了这个问题，通常是已解决或者已关闭，而不是删除。</p>
+            <p style={{ marginBottom: 10 }}>请确认您要删除这个工作项。</p>
+            <p style={{ marginBottom: 10 }}>该工作项将会被彻底删除，包括所有附件、关联关系、评论。</p>
+            <p style={{ marginBottom: 10 }}>如果您完成了这个工作项，通常是已解决或者已关闭，而不是删除。</p>
             {
-              subIssueVOList.length ? <p style={{ color: '#d50000' }}>{`注意：问题的${subIssueVOList.length}个子任务将被删除。`}</p> : null
+              subIssueVOList.length ? <p style={{ color: '#d50000' }}>{`注意：工作项的${subIssueVOList.length}个子任务将被删除。`}</p> : null
             }
             {store.promptExtraNodeMap.has('delete.issue') ? store.promptExtraNodeMap.get('delete.issue')({ deleteModal: { destroy: () => deleteModal.close() } }) : null}
           </div>
@@ -108,7 +108,7 @@ const IssueDropDown = ({
       store.setCreateBranchShow(true);
     } else if (e.key === '7') {
       ModalPro.open({
-        title: '分配问题',
+        title: '分配工作项',
         children: <Assignee
           issueId={issueId}
           assigneeId={assigneeId}
@@ -167,14 +167,14 @@ const IssueDropDown = ({
       {
         (typeCode !== 'feature' && typeCode !== 'issue_epic') && (
           <Menu.Item key="7">
-            分配问题
+            分配工作项
           </Menu.Item>
         )
       }
       {
         typeCode === 'bug' && !subIssueVOList.length > 0 && (
           <Menu.Item key="10">
-            关联问题
+            关联工作项
           </Menu.Item>
         )
       }
@@ -209,7 +209,7 @@ const IssueDropDown = ({
       }
       {['feature', ...(isInProgram() ? ['issue_epic'] : [])].indexOf(typeCode) === -1 && (
         <Menu.Item key="3">
-          复制问题
+          复制工作项
         </Menu.Item>
       )}
       {

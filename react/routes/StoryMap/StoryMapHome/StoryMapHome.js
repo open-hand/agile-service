@@ -137,7 +137,7 @@ const StoryMapHome = observer(() => {
   } = StoryMapStore;
   const isEmpty = StoryMapStore.getIsEmpty;
   // /**
-  //  * 打开问题详情时设置样式 用以显示全部地图
+  //  * 打开工作项详情时设置样式 用以显示全部地图
   //  */
   // useEffect(() => {
   //   if (ref.current && selectedIssueMap.size) {

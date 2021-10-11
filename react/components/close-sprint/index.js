@@ -56,17 +56,17 @@ class CloseSprint extends Component {
         <p className="c7n-closeSprint-message">
           <span>{!_.isNull(completeMessage) ? completeMessage.partiallyCompleteIssues : ''}</span>
           {' '}
-          个问题 已经完成
+          个工作项 已经完成
         </p>
         <p style={{ marginTop: 14 }} className="c7n-closeSprint-message">
           <span>{!_.isNull(completeMessage) ? completeMessage.incompleteIssues : ''}</span>
           {' '}
-          个问题 未完成
+          个工作项 未完成
         </p>
         {completeMessage?.parentsDoneUnfinishedSubtasks?.length ? (
-          <p style={{ marginTop: 14, color: 'var(--text-color3)' }}>{`其中有${completeMessage ? completeMessage.parentsDoneUnfinishedSubtasks.length : 0}个已完成的问题下有未完成的子任务，父级任务移动后与之相关的子任务也会被移动`}</p>
+          <p style={{ marginTop: 14, color: 'var(--text-color3)' }}>{`其中有${completeMessage ? completeMessage.parentsDoneUnfinishedSubtasks.length : 0}个已完成的工作项下有未完成的子任务，父级任务移动后与之相关的子任务也会被移动`}</p>
         ) : null}
-        <div style={{ fontSize: 14, marginTop: 30 }}>选择该冲刺未完成的问题移动到：</div>
+        <div style={{ fontSize: 14, marginTop: 30 }}>选择该冲刺未完成的工作项移动到：</div>
         <Select
           label="移动至"
           labelLayout="float"

@@ -83,7 +83,7 @@ class BurndownTable extends Component {
       } else if (this.props.select === 'storyPoints') {
         result = '用户修改故事点';
       } else {
-        result = '用户修改问题计数';
+        result = '用户修改工作项计数';
       }
     }
     return result;
@@ -144,7 +144,7 @@ class BurndownTable extends Component {
         </Tooltip>
       ),
     }, {
-      title: '问题',
+      title: '工作项',
       dataIndex: 'issues',
       key: 'issues',
       width: '22%',
@@ -170,7 +170,7 @@ class BurndownTable extends Component {
                   }
                 }}
               >
-                <Tooltip mouseEnterDelay={0.5} title={`问题：${item.parentIssueId ? `${item.parentIssueNum}/${item.issueNum}` : item.issueNum}`}>
+                <Tooltip mouseEnterDelay={0.5} title={`工作项：${item.parentIssueId ? `${item.parentIssueNum}/${item.issueNum}` : item.issueNum}`}>
                   {item.parentIssueId ? `${item.parentIssueNum}/${item.issueNum}` : item.issueNum}
                 </Tooltip>
               </p>

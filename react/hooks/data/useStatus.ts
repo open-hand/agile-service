@@ -15,7 +15,7 @@ function useProjectStatusKey(config: ProjecStatustKeyConfig): QueryKey {
 
 export interface StatusConfig {
   applyType?: 'agile' | 'program'
-  /** 只返回某一问题类型的状态 */
+  /** 只返回某一工作项类型的状态 */
   issueTypeId?: string
 }
 export default function useProjectStatus(config?: StatusConfig, options?: UseQueryOptions<IStatus[]>) {

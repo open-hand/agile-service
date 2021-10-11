@@ -149,7 +149,7 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
       const data = formDataSet.current?.toData();
       const issueIds = tableProps.checkValues;
       if (issueIds.length === 0) {
-        Choerodon.prompt('请至少勾选一个问题');
+        Choerodon.prompt('请至少勾选一个工作项');
         return false;
       }
       const block: IReportListBlock = {

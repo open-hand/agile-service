@@ -238,7 +238,7 @@ class ScrumBoardStore {
     return toJS(this.parentIssueIdData);
   }
 
-  // 其他问题计数 -- 临时逻辑
+  // 其他工作项计数 -- 临时逻辑
   @action addOtherQuestionCount() {
     this.otherQuestionCount += 1;
   }
@@ -247,7 +247,7 @@ class ScrumBoardStore {
     this.otherQuestionCount = 0;
   }
 
-  // 其他问题计数 -- 临时逻辑
+  // 其他工作项计数 -- 临时逻辑
   @computed get getOtherQuestionCount() {
     return this.otherQuestionCount;
   }
@@ -446,7 +446,7 @@ class ScrumBoardStore {
   /**
    *
    * @param {*} parentIssueId
-   * @param {*} isSkipIssue  是否为跳转问题
+   * @param {*} isSkipIssue  是否为跳转工作项
    */
   @action resetCurrentClick(parentIssueId, isSkipIssue = false) {
     if (this.currentClickTarget && !isSkipIssue) {
@@ -666,7 +666,7 @@ class ScrumBoardStore {
       sprintId: this.sprintId,
       rankFlag: true,
     };
-    // Object.keys(this.stateMachineMap)[0] 若无问题类型状态机方案，则选用默认的
+    // Object.keys(this.stateMachineMap)[0] 若无工作项类型状态机方案，则选用默认的
     const { id: transformId } = this.stateMachineMap[issueTypeId] ? this.stateMachineMap[issueTypeId][startStatus].find((issue) => issue.endStatusId === destinationStatus) : this.stateMachineMap[Object.keys(this.stateMachineMap)[0]][startStatus].find((issue) => issue.endStatusId === destinationStatus);
     return boardApi.moveIssue(issueId, transformId, data);
   };
@@ -786,7 +786,7 @@ class ScrumBoardStore {
     this.stateMachineMap = stateMachineMap;
     const oldData = toJS(this.canDragOn) ?? {};
     this.canDragOn = observable.map(canDragOn);
-    // 处理子任务设置了状态联动并在拖动后，立马拖动父级的问题
+    // 处理子任务设置了状态联动并在拖动后，立马拖动父级的工作项
     Object.keys(oldData).forEach((status) => {
       if (this.canDragOn.has(status)) {
         this.canDragOn.set(status, oldData[status]);
@@ -862,7 +862,7 @@ class ScrumBoardStore {
         } else {
           this.canDragOn.set(status, true);
         }
-        // Object.keys(this.stateMachineMap)[0] 若无问题类型状态机方案，则选用默认的
+        // Object.keys(this.stateMachineMap)[0] 若无工作项类型状态机方案，则选用默认的
       } else if (this.stateMachineMap[Object.keys(this.stateMachineMap)[0]][statusId].find((issue) => issue.endStatusId === status)) {
         this.canDragOn.set(status, false);
       } else {

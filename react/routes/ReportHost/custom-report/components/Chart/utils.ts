@@ -140,7 +140,7 @@ const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[],
       },
       yAxis: {
         ...yAxis,
-        name: `单位：${unit === 'storyPoints' ? '故事点' : '问题计数'}`,
+        name: `单位：${unit === 'storyPoints' ? '故事点' : '工作项计数'}`,
       },
       series: {
         type: chartType,
@@ -224,7 +224,7 @@ const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[],
       },
       yAxis: {
         ...yAxis,
-        name: unit === 'storyPoints' ? '故事点' : '问题计数',
+        name: unit === 'storyPoints' ? '故事点' : '工作项计数',
       },
       series: (data || []).map((item) => ({
         name: item.comparedValue,

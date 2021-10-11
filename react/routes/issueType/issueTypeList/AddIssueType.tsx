@@ -99,7 +99,7 @@ const AddIssueType: React.FC<Props> = ({
       {
         name: 'description',
         type: 'string' as FieldType,
-        label: '问题类型描述',
+        label: '工作项类型描述',
         maxLength: 255,
       },
       {
@@ -288,7 +288,7 @@ const AddIssueType: React.FC<Props> = ({
     <div className={styles.addIssueType}>
       <div className={styles.addIssueType_content}>
         <Form dataSet={addDataSet} disabled={isOrganization && isSystemType} className={styles.addIssueType_form}>
-          <TextField name="name" placeholder="请输入问题类型名称，例如：故事、工单" />
+          <TextField name="name" placeholder="请输入工作项类型名称，例如：故事、工单" />
           <TextArea name="description" placeholder="请输入描述，例如：故事是用户的需求，是从用户的角度来描述用户渴望得到的功能。" />
           {
             !isSystemType && (

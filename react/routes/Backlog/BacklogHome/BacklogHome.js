@@ -163,7 +163,7 @@ class BacklogHome extends Component {
             ? <ShowPlanSprint /> : null}
           <HeaderButtons
             items={[{
-              name: '创建问题',
+              name: '创建工作项',
               icon: 'playlist_add',
               handler: this.openCreateIssueModal,
               display: true,

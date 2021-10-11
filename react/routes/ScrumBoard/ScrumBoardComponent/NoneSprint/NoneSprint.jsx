@@ -10,9 +10,9 @@ const NoneSprint = ({ doingSprintExist, filterItems, hasSetFilter }) => {
   let tipTitle = '没有活跃的Sprint';
   const { sprint } = filterItems;
   if ((doingSprintExist || sprint) && Object.keys(filterItems).length === 1) {
-    tipTitle = '当前冲刺下未规划问题';
+    tipTitle = '当前冲刺下未规划工作项';
   } else if (hasSetFilter) {
-    tipTitle = '当前筛选条件下无问题';
+    tipTitle = '当前筛选条件下无工作项';
   }
 
   const handleLinkToBacklog = useCallback(() => {
@@ -29,7 +29,7 @@ const NoneSprint = ({ doingSprintExist, filterItems, hasSetFilter }) => {
             ，
             在工作列表的
             <EmptyPage.Button style={{ color: '#5365EA' }} onClick={handleLinkToBacklog}>待办事项</EmptyPage.Button>
-            {!doingSprintExist ? '中开启冲刺' : '规划问题到当前冲刺'}
+            {!doingSprintExist ? '中开启冲刺' : '规划工作项到当前冲刺'}
           </>
         )}
       >

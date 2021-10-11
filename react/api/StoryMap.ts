@@ -4,7 +4,7 @@ import Api from './Api';
 
 interface versionIssueRelVO {
     relationType: string // 版本关系：fix、influence
-    issueId: number, // 问题id
+    issueId: number, // 工作项id
     versionId: number, // 版本id
     name: string, // 版本名称
     projectId: number, // 项目id
@@ -13,11 +13,11 @@ interface versionIssueRelVO {
 
 interface DragStoryMap {
     epicId: number, // 要关联的史诗id
-    epicIssueIds: Array<number>, // 问题id列表，移动到版本，配合versionId使用
+    epicIssueIds: Array<number>, // 工作项id列表，移动到版本，配合versionId使用
     featureId: number, // 要关联的特性id
-    featureIssueIds: Array<number>, // 问题id列表，移动到特性，配合featureId使用
+    featureIssueIds: Array<number>, // 工作项id列表，移动到特性，配合featureId使用
     versionId: number, // 要关联的版本id
-    versionIssueIds: Array<number>, // 问题id列表，移动到版本，配合versionId使用
+    versionIssueIds: Array<number>, // 工作项id列表，移动到版本，配合versionId使用
     versionIssueRelVOList: Array<versionIssueRelVO>
 }
 
@@ -53,8 +53,8 @@ interface SortVO {
     type: string,
     before: boolean,
     after: boolean,
-    referenceIssueId: number, // 移动到的位置所在问题id
-    issueId: number, // 拖拽的问题id
+    referenceIssueId: number, // 移动到的位置所在工作项id
+    issueId: number, // 拖拽的工作项id
     objectVersionNumber: number
 }
 
@@ -100,7 +100,7 @@ class StoryMapApi extends Api<StoryMapApi> {
   }
 
   /**
-     * 获取故事地图的需求池中问题列表
+     * 获取故事地图的需求池中工作项列表
      * @param searchVO
      */
   getDemands(searchVO: demandAdvancedSearch) {

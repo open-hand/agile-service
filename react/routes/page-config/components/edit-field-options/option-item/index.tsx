@@ -158,7 +158,7 @@ const OptionItem: React.FC<OptionItemProps> = ({
             </Tooltip>
             <Popconfirm
               placement="top"
-              title={`确认要删除 ${data.value} 吗？问题上该字段值也会被清空。`}
+              title={`确认要删除 ${data.value} 吗？工作项上该字段值也会被清空。`}
               onConfirm={handleDeleteClick}
               okText="删除"
               cancelText="取消"

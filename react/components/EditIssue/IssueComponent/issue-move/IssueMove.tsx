@@ -155,7 +155,7 @@ const IssueMove: React.FC<Props> = ({
           }
         }
         if (name === 'targetProjectId' || name === 'issueType' || name === 'subTaskIssueTypeId' || name === 'subBugIssueTypeId') {
-          resetData(moveDataSet, ['targetProjectId', 'issueType', 'subTaskIssueTypeId', 'subBugIssueTypeId']); // 改变项目或者问题类型应该重置
+          resetData(moveDataSet, ['targetProjectId', 'issueType', 'subTaskIssueTypeId', 'subBugIssueTypeId']); // 改变项目或者工作项类型应该重置
         }
         if (name === 'subTaskIssueTypeId') {
           store.setSubTaskTypeId(value);
@@ -242,7 +242,7 @@ const IssueMove: React.FC<Props> = ({
       <div style={{ padding: '20px 20px 0' }}>
         <Steps current={currentStep - 1}>
           <Step
-            title={<span style={{ color: currentStep === 1 ? '#5365EA' : '', fontSize: 14 }}>选择项目和问题类型</span>}
+            title={<span style={{ color: currentStep === 1 ? '#5365EA' : '', fontSize: 14 }}>选择项目和工作项类型</span>}
           />
           <Step
             title={<span style={{ color: currentStep === 2 ? '#5365EA' : '', fontSize: 14 }}>确认数据信息</span>}
@@ -301,7 +301,7 @@ const openIssueMove = ({
   Modal.open({
     key: 'issueMoveModal',
     drawer: true,
-    title: '移动问题',
+    title: '移动工作项',
     className: styles.issueMoveModal,
     style: {
       width: MODAL_WIDTH.middle,

@@ -78,7 +78,7 @@ const IssueHeader = (props) => {
               </div>
             )
           }
-          {/* 问题编号 */}
+          {/* 工作项编号 */}
           <span className={`${prefixCls}-IssueHeader-top-number`}>
             <IssueNumber
               reloadIssue={reloadIssue}

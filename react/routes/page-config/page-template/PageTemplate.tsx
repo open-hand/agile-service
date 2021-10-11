@@ -238,7 +238,7 @@ function PageTemplate() {
             display: true,
             element: (
               <TooltipButton
-                title={selectedAllowedEditPermissionFields.length === 0 ? '请选择批量权限配置的字段' : '该问题类型已停用，无法批量权限配置'}
+                title={selectedAllowedEditPermissionFields.length === 0 ? '请选择批量权限配置的字段' : '该工作项类型已停用，无法批量权限配置'}
                 buttonDisabled={selectedAllowedEditPermissionFields.length === 0 || !pageTemplateStore.currentIssueType.enabled}
                 buttonIcon="playlist_add"
                 clickEvent={() => {

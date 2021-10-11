@@ -27,7 +27,7 @@ const UNIT_STATUS = {
 };
 const UNIT2NAME = {
   story_point: '故事点',
-  issue_count: '问题计数',
+  issue_count: '工作项计数',
   remain_time: '剩余时间',
 };
 
@@ -56,7 +56,7 @@ export interface EpicReportProps {
   animation?: boolean
 }
 
-// 处理后端返回值为null或小数精度问题
+// 处理后端返回值为null或小数精度工作项
 const dealNullValue = (list: number[] = []) => map(list, (item: number) => {
   if (item) {
     if (item % 1 > 0) {
@@ -154,9 +154,9 @@ const EpicReport: React.FC<EpicReportProps> = ({
 
   const getOption = (): EChartOption => {
     const UNIT = {
-      总问题数: '个',
-      已完成问题数: '个',
-      未预估问题数: '个',
+      总工作项数: '个',
+      已完成工作项数: '个',
+      未预估工作项数: '个',
       已完成故事点: '点',
       总计故事点: '点',
       已完成剩余时间: '小时',
@@ -203,19 +203,19 @@ const EpicReport: React.FC<EpicReportProps> = ({
           ],
           ...[
             {
-              name: '总问题数',
+              name: '总工作项数',
               icon: 'line',
             },
           ],
           ...[
             unit === 'issue_count' ? {} : {
-              name: '未预估问题数',
+              name: '未预估工作项数',
               icon: 'line',
             },
           ],
           ...[
             unit === 'issue_count' ? {
-              name: '已完成问题数',
+              name: '已完成工作项数',
               icon: 'line',
             } : {},
           ],
@@ -294,7 +294,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
       option = {
         yAxis: [
           {
-            name: '问题计数',
+            name: '工作项计数',
             nameTextStyle: {
               color: 'var(--text-color)',
             },
@@ -328,7 +328,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
         ],
         series: [
           {
-            name: '总问题数',
+            name: '总工作项数',
             type: 'line',
             step: true,
             itemStyle: {
@@ -337,7 +337,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
             data: getChartDataYIssueCountAll(),
           },
           {
-            name: '已完成问题数',
+            name: '已完成工作项数',
             type: 'line',
             step: true,
             itemStyle: {
@@ -346,7 +346,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
             data: getChartDataYIssueCountCompleted(),
           },
           {
-            name: '未预估问题数',
+            name: '未预估工作项数',
             type: 'line',
             step: true,
             itemStyle: {
@@ -398,7 +398,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
             },
           },
           {
-            name: '问题计数',
+            name: '工作项计数',
             nameTextStyle: {
               color: 'var(--text-color)',
             },
@@ -427,7 +427,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
         ],
         series: [
           {
-            name: '总问题数',
+            name: '总工作项数',
             type: 'line',
             step: true,
             itemStyle: {
@@ -437,7 +437,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
             data: getChartDataYIssueCountAll(),
           },
           {
-            name: '已完成问题数',
+            name: '已完成工作项数',
             type: 'line',
             step: true,
             itemStyle: {
@@ -447,7 +447,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
             data: getChartDataYIssueCountCompleted(),
           },
           {
-            name: '未预估问题数',
+            name: '未预估工作项数',
             type: 'line',
             step: true,
             itemStyle: {
@@ -503,7 +503,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
                 <ReactEcharts key={unit} option={getOption()} style={{ width: '80%', height: 400 }} />
                 <div className={styles.epicReport_toolbar}>
                   <h2>汇总</h2>
-                  <h4>问题汇总</h4>
+                  <h4>工作项汇总</h4>
                   <ul>
                     <li>
                       <span className={styles.epicReport_toolbar_tip}>合计：</span>
@@ -564,19 +564,19 @@ const EpicReport: React.FC<EpicReportProps> = ({
                         params: {
                           paramType: 'epic',
                           paramId: epicId,
-                          paramName: `${epics.find((x: IEpic) => x.issueId === epicId)?.epicName}下的问题`,
+                          paramName: `${epics.find((x: IEpic) => x.issueId === epicId)?.epicName}下的工作项`,
                         },
                       }, { blank: true });
                     }}
                   >
-                    在“所有问题”中查看
+                    在“所有工作项”中查看
                     <Icon style={{ fontSize: getFontSize(13) }} type="open_in_new" />
                   </p>
                 </div>
               </div>
             ) : (
               <div style={{ padding: '20px 0', textAlign: 'center', width: '100%' }}>
-                {tableData.length ? '当前单位下问题均未预估，切换单位或从下方问题列表进行预估。' : '当前史诗下没有问题。'}
+                {tableData.length ? '当前单位下工作项均未预估，切换单位或从下方工作项列表进行预估。' : '当前史诗下没有工作项。'}
               </div>
             )
           }

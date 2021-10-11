@@ -1,6 +1,6 @@
 import { isNull } from 'lodash';
 
-// 问题完成趋势-故事
+// 工作项完成趋势-故事
 const CompleteStoryDataSet = ({ projectId }) => ({
   paging: false,
   autoQuery: false,
@@ -13,7 +13,7 @@ const CompleteStoryDataSet = ({ projectId }) => ({
   },
 });
 
-// 问题完成趋势-任务工时
+// 工作项完成趋势-任务工时
 const CompleteTaskDataSet = ({ projectId }) => ({
   paging: false,
   autoQuery: false,

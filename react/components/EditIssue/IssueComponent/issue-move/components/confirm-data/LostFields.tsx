@@ -14,14 +14,14 @@ const loseItemMap = new Map([
   ['test', '测试用例'],
   ['doc', '文档'],
   ['backlog', '需求'],
-  ['linkIssue', '问题项'],
+  ['linkIssue', '工作项项'],
 ]);
 const LostFields: React.FC<LostFieldsProps> = ({
   loseItems, lostFields, targetProject, issue,
 }) => {
   const loseItemNames = [...Object.entries(loseItems)].filter(([k, v]) => v).map(([k, v]) => loseItemMap.get(k));
   const lostFieldsText = lostFields.length > 0 ? `，${lostFields.map((item) => `【${item.name}】`).join('、')}的字段值将永久丢失。` : '';
-  const lostLinksText = loseItemNames.length > 0 ? `${lostFields.length > 0 ? '且' : '，'}该问题与其他${loseItemNames.join('、')}的关联关系，将永久丢失。` : '';
+  const lostLinksText = loseItemNames.length > 0 ? `${lostFields.length > 0 ? '且' : '，'}该工作项与其他${loseItemNames.join('、')}的关联关系，将永久丢失。` : '';
   if (loseItemNames.length === 0 && lostFields.length === 0) {
     return null;
   }

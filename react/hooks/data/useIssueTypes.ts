@@ -8,7 +8,7 @@ import useKey from './useKey';
 
 export interface IssueTypeConfig {
   id?: string
-  /** 只返回某一类的问题类型 */
+  /** 只返回某一类的工作项类型 */
   typeCode?: string | string[]
   applyType?: 'agile' | 'program'
   onlyEnabled?: boolean

@@ -168,7 +168,7 @@ class DevOpsApi extends Api<DevOpsApi> {
   }
 
   /**
-   * 根据issueId获取问题关联的请求合并列表
+   * 根据issueId获取工作项关联的请求合并列表
    * @param issueId
    */
   loadMergeRequest(issueId: number) {

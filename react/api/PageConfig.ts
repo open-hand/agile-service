@@ -173,7 +173,7 @@ class PageConfigApi extends Api<PageConfigApi> {
   }
 
   /**
-   * 根据问题类型id查询字段
+   * 根据工作项类型id查询字段
    * @param issueTypeId
    */
   loadFieldsByType(issueTypeId: string) {
@@ -188,7 +188,7 @@ class PageConfigApi extends Api<PageConfigApi> {
   }
 
   /**
-   * 根据问题类型code查询默认模板
+   * 根据工作项类型code查询默认模板
    * @param issueType
    */
   loadTemplateByType(issueType: string, projectId?: string) {
@@ -203,7 +203,7 @@ class PageConfigApi extends Api<PageConfigApi> {
   }
 
   /**
-   * 查询当前项目或组织下可配置的问题类型
+   * 查询当前项目或组织下可配置的工作项类型
    *
    */
   loadAvailableIssueType(): Promise<{ id: string, name: string, typeCode: string }[]> {
@@ -217,7 +217,7 @@ class PageConfigApi extends Api<PageConfigApi> {
   }
 
   /**
-   * 根据问题类型加载页面配置
+   * 根据工作项类型加载页面配置
    * @param issueTypeId
    */
   loadByIssueType(issueTypeId: string): Promise<PageIssueType> {
@@ -232,7 +232,7 @@ class PageConfigApi extends Api<PageConfigApi> {
   }
 
   /**
-   * 根据问题类型加载页面模板
+   * 根据工作项类型加载页面模板
    * @param issueTypeId
    */
   loadTemplateByIssueType(issueTypeId: string): Promise<PageIssueType> {

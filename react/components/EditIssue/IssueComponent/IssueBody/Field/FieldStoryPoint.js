@@ -65,7 +65,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
                   </>
                 )
               }
-              {completed && fieldCode === 'remainingTime' ? <Tooltip title="问题已到已解决状态,无剩余预估时间">0</Tooltip> : ''}
+              {completed && fieldCode === 'remainingTime' ? <Tooltip title="工作项已到已解决状态,无剩余预估时间">0</Tooltip> : ''}
             </div>
           </TextEditToggle>
         </div>

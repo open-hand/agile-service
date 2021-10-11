@@ -193,7 +193,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   }
 
   /**
-   * 加载全部问题类型（带关联的状态机id)
+   * 加载全部工作项类型（带关联的状态机id)
    * @param applyType
    */
   loadAllWithStateMachineId(applyType: string = 'agile', projectId?: string, onlyEnabled?: boolean, programId?: string | number): Promise<IIssueType[]> {
@@ -210,7 +210,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   }
 
   /**
-   * 加载全部问题类型
+   * 加载全部工作项类型
    * @param applyType
    */
   loadAll(applyType: string = 'agile') {
@@ -224,7 +224,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   }
 
   /**
-   * 根据方案id查询所有问题类型及关联的方案
+   * 根据方案id查询所有工作项类型及关联的方案
    * @param schemeId
    */
   loadAllByScheme(schemeId: number) {
@@ -296,7 +296,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   }
 
   /**
-   * 问题类型排序更新
+   * 工作项类型排序更新
    * @param typeId
    * @param data
    * @returns

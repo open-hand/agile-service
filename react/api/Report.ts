@@ -95,7 +95,7 @@ class ReportApi extends Api<ReportApi> {
   }
 
   /**
-   * 加载版本报告问题列表
+   * 加载版本报告工作项列表
    * @param versionId
    */
   loadVersionTable(versionId: string) {
@@ -159,7 +159,7 @@ class ReportApi extends Api<ReportApi> {
   }
 
   /**
-   * 加载史诗图问题列表
+   * 加载史诗图工作项列表
    * @param epicId
    */
   loadIssuesForEpic(epicId: string) {
