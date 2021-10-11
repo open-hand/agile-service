@@ -179,6 +179,9 @@ public class GanttChartServiceImpl implements GanttChartService {
             //该维度没有设置排序，currentId设置为RankUtil.mid()
             currentRank = RankUtil.mid();
         } else {
+            if(!issueWithRankMap.containsKey(nextId)) {
+                throw new CommonException("error.gantt.move.illegal.nextId");
+            }
             String nextRank = issueWithRankMap.get(nextId);
             if (StringUtils.isEmpty(nextRank)) {
                 nextRank =
@@ -215,6 +218,9 @@ public class GanttChartServiceImpl implements GanttChartService {
             //该维度没有设置排序，currentId设置为RankUtil.mid()
             currentRank = RankUtil.mid();
         } else {
+            if(!instanceRankMap.containsKey(nextId)) {
+                throw new CommonException("error.gantt.move.illegal.nextId");
+            }
             String nextRank = instanceRankMap.get(nextId);
             if (StringUtils.isEmpty(nextRank)) {
                 nextRank =
@@ -522,7 +528,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             addFilterConditionByInstanceType(searchVO, instanceType, instanceId);
             issueIds = issueService.listByTreeView(projectId, searchVO, null, sortMap, isTreeView);
         }
-        AssertUtilsForCommonException.notNull(issueIds, ERROR_GANTT_MOVE_NULL_DATA);
+        AssertUtilsForCommonException.notEmpty(issueIds, ERROR_GANTT_MOVE_NULL_DATA);
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Map<Long, String> rankMap = new HashMap<>();
         ganttIssueRankMapper.selectByIssueIdWithRank(organizationId, projectId, instanceId, instanceType, dimension, issueIds)
@@ -575,7 +581,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         AssertUtilsForCommonException.notNull(issue, "error.gantt.move.currentId.not.existed");
         String typeCode = issue.getTypeCode();
         if (IssueTypeCode.isFeature(typeCode) && agilePluginService != null) {
-            AssertUtilsForCommonException.notNull(issueIds, ERROR_GANTT_MOVE_NULL_DATA);
+            AssertUtilsForCommonException.notEmpty(issueIds, ERROR_GANTT_MOVE_NULL_DATA);
             issueIds = agilePluginService.queryFeatureIdByIssueIdAndEpicId(issueIds, instanceId);
         }
         return issueIds;
