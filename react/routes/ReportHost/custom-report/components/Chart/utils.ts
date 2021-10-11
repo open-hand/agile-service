@@ -201,6 +201,8 @@ const getOptions = (chartType: IChartType, unit: IChartUnit, data: IChartData[],
         },
         formatter(params: any[]) {
           let content = '';
+          // eslint-disable-next-line no-param-reassign
+          params = params.filter((item) => item.value);
           content += `${params[0].axisValue}<br/>`;
           for (let i = 0; i < params.length; i += 1) {
             content += `${params[i].marker}${params[i].seriesName}: ${(params[i].value || params[i].value === 0) ? params[i].value : '-'}${unitZ}`;
