@@ -121,6 +121,16 @@ public class GanttChartVO {
     @ApiModelProperty(value = "环境")
     private String environment;
 
+    private String featureType;
+
+    public String getFeatureType() {
+        return featureType;
+    }
+
+    public void setFeatureType(String featureType) {
+        this.featureType = featureType;
+    }
+
     public Long getIssueId() {
         return issueId;
     }

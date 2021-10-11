@@ -70,7 +70,7 @@ public class GanttChartController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询甘特图列表数据")
-    @PostMapping(value = "/list")
+    @PostMapping(value = "/list_dimension")
     public ResponseEntity<GanttDimensionListVO> ganttDimensionList(@ApiParam(value = "项目id", required = true)
                                                                    @PathVariable(name = "project_id") Long projectId,
                                                                    @ApiParam(value = "查询参数", required = true)
@@ -83,8 +83,8 @@ public class GanttChartController {
     @ApiOperation("移动甘特图冲刺/经办人")
     @PostMapping(value = "/move_dimension")
     public ResponseEntity moveDimension(@ApiParam(value = "项目id", required = true)
-                               @PathVariable(name = "project_id") Long projectId,
-                               @RequestBody @Validated GanttDimensionMoveVO ganttDimensionMoveVO) {
+                                        @PathVariable(name = "project_id") Long projectId,
+                                        @RequestBody @Validated GanttDimensionMoveVO ganttDimensionMoveVO) {
         EncryptionUtils.decryptSearchVO(ganttDimensionMoveVO.getSearchVO());
         ganttChartService.moveDimension(projectId, ganttDimensionMoveVO);
         return new ResponseEntity(HttpStatus.OK);
