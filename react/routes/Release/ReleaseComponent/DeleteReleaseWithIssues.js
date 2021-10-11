@@ -82,7 +82,7 @@ class DeleteReleaseWithIssue extends Component {
                     versionDelInfo.agileIssueCount ? (
                       <span>
                         <span style={{ color: 'red' }}>{` ${versionDelInfo.agileIssueCount} `}</span>
-                        个问题
+                        个工作项
                       </span>
                     ) : ''
                   }
@@ -95,7 +95,7 @@ class DeleteReleaseWithIssue extends Component {
                       </span>
                     ) : ''
                   }
-                  {'。相关的问题将移动到下面选择的版本中。'}
+                  {'。相关的工作项将移动到下面选择的版本中。'}
                 </p>
               </div>
             ) : ''

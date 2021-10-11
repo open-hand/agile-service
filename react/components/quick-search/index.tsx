@@ -161,7 +161,7 @@ class QuickSearch extends Component<Props, State> {
 
   renderCommonlyUsedOptions = () => (
     <OptGroup key="commonly" label="常用选项">
-      <Option value={`commonly${SEPARATE}${'onlyMe'}`}>仅我的问题</Option>
+      <Option value={`commonly${SEPARATE}${'onlyMe'}`}>仅我的工作项</Option>
       <Option value={`commonly${SEPARATE}${'onlyStory'}`}>仅故事</Option>
     </OptGroup>
   )

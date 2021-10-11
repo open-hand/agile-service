@@ -55,7 +55,7 @@ const DeleteComponent = (props) => {
           删除模块
         </Radio>
         <Radio style={{ display: 'block', marginTop: 5 }} value={2}>
-          删除模块，相关的问题关联到其他模块
+          删除模块，相关的工作项关联到其他模块
         </Radio>
       </RadioGroup>
       {radio === 2 && (
@@ -99,10 +99,10 @@ const DeleteComponent = (props) => {
                 />
                 当前有
                 <span style={{ margin: '0 5px', color: 'red' }}>{issueCount}</span>
-                个问题使用此模块
+                个工作项使用此模块
               </div>
               <div style={{ margin: '10px 0' }}>
-                注意：将会从所有使用的问题中删除此模块，相关的问题可以选择关联到其他模块，或不关联模块。
+                注意：将会从所有使用的工作项中删除此模块，相关的工作项可以选择关联到其他模块，或不关联模块。
               </div>
             </div>
             <div>{renderDelete()}</div>

@@ -6,12 +6,12 @@ import {
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { Choerodon, WSHandler } from '@choerodon/boot';
+import { ProgressStatus } from 'choerodon-ui/lib/progress/enum';
+import { ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
 import { IModalProps } from '@/common/types';
 import { issueApi } from '@/api';
 import { getProjectId, getApplyType } from '@/utils/common';
 
-import { ProgressStatus } from 'choerodon-ui/lib/progress/enum';
-import { ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
 import styles from './index.less';
 
 interface Props {
@@ -71,7 +71,7 @@ const BatchDeleteModal: React.FC<Props> = (props) => {
   return (
     <div>
       <div style={{ padding: '0.2rem' }}>
-        {`确定要删除选中的${selected.length}个问题项吗？删除后，问题下的关联项将一并删除${getApplyType() === 'program' ? '' : '，包括子任务'}。`}
+        {`确定要删除选中的${selected.length}个工作项吗？删除后，工作项下的关联项将一并删除${getApplyType() === 'program' ? '' : '，包括子任务'}。`}
         <span style={{ color: '#F44336' }}>
           请谨慎操作！
         </span>
@@ -114,7 +114,7 @@ const ObserverBatchDeleteModal = observer(BatchDeleteModal);
 const openBatchDeleteModal = (props: Props) => {
   Modal.open({
     key: 'BatchDeleteModal',
-    title: '删除问题',
+    title: '删除工作项',
     style: {
       width: 520,
     },

@@ -7,7 +7,7 @@ const { AppState } = stores;
 interface IIssue {
   summary: string, // 概要
   epicName?: string, // 史诗名称
-  typeCode: string, // 问题类型
+  typeCode: string, // 工作项类型
   priorityId: number, // 优先级id
   priorityCode: string, // 优先级code "priority-17"
   projectId: number, // 项目id
@@ -17,12 +17,12 @@ interface IIssue {
   description?: string, // 描述
   epicId?: number, // 史诗id
   featureVO?: object, // 特性 {}
-  issueLinkCreateVOList?: Array<object>, // 关联的问题列表 [{linkTypeId: "4833", linkedIssueId: 275652, in: false}]//问题链接
-  issueTypeId?: number, // 问题类型id
+  issueLinkCreateVOList?: Array<object>, // 关联的工作项列表 [{linkTypeId: "4833", linkedIssueId: 275652, in: false}]//工作项链接
+  issueTypeId?: number, // 工作项类型id
   labelIssueRelVOList?: Array<any>, // 标签列表 []
-  parentIssueId?: number, // 父id 为0代表自己是父问题
+  parentIssueId?: number, // 父id 为0代表自己是父工作项
   piId?: number, // pi Id
-  relateIssueId?: number, // 关联的问题id
+  relateIssueId?: number, // 关联的工作项id
   sprintId?: number, // 冲刺id
   storyPoints?: number | string, // 故事点
   versionIssueRelVOList?: Array<object>, // 关联的版本信息 [{versionId: 1814, relationType: "fix"}]
@@ -36,7 +36,7 @@ interface UIssue {
 }
 interface UTypeAndStatus {
   issueId: string,
-  issueTypeId: string, // 问题类型id
+  issueTypeId: string, // 工作项类型id
   objectVersionNumber: number,
   projectId?: string,
   typeCode: string,
@@ -81,7 +81,7 @@ interface ICustomFieldData {
 }
 interface IExportSearch {
   advancedSearchArgs?: {
-    issueTypeId?: number, // 问题类型id
+    issueTypeId?: number, // 工作项类型id
     reporterIds?: Array<number>, // 报告人id列表
     statusId?: number, // 状态id
     priorityId?: number, // 优先级id
@@ -159,7 +159,7 @@ class IssueApi extends Api<IssueApi> {
   }
 
   /**
-    * 创建问题 敏捷/测试
+    * 创建工作项 敏捷/测试
     * @param issueObj
     * @param applyType
     */
@@ -173,7 +173,7 @@ class IssueApi extends Api<IssueApi> {
   });
 
   /**
-    * 更新问题
+    * 更新工作项
     * @param issueObj
     * @param projectId
     */
@@ -184,7 +184,7 @@ class IssueApi extends Api<IssueApi> {
       });
     } catch (error) {
       if (error.code === 'error.dataLogEpic.methodExecute') {
-        Choerodon.prompt('该问题项详情信息已被锁定，请重新打开问题详情进行编辑。', 'error');
+        Choerodon.prompt('该工作项详情信息已被锁定，请重新打开工作项详情进行编辑。', 'error');
       } else {
         Choerodon.prompt(error.message);
       }
@@ -193,9 +193,9 @@ class IssueApi extends Api<IssueApi> {
   }
 
   /**
-    * 更新问题状态
+    * 更新工作项状态
     * @param transformId 转换的状态id
-    * @param issueId  问题id
+    * @param issueId  工作项id
     * @param objectVersionNumber 版本号
     * @param applyType 应用类型
     */
@@ -226,7 +226,7 @@ class IssueApi extends Api<IssueApi> {
   }
 
   /**
-    * 更新问题类型
+    * 更新工作项类型
     * @param data
     */
   updateType(data: UTypeAndStatus) {
@@ -243,7 +243,7 @@ class IssueApi extends Api<IssueApi> {
   }
 
   /**
-    * 克隆问题
+    * 克隆工作项
     * @param issueId
     * @param applyType
     * @param copyCondition
@@ -262,7 +262,7 @@ class IssueApi extends Api<IssueApi> {
   }
 
   /**
-    * 根据问题id加载问题
+    * 根据工作项id加载工作项
     * @param issueId
     */
   load(issueId: string, projectId?: string) {
@@ -284,8 +284,8 @@ class IssueApi extends Api<IssueApi> {
   }
 
   /**
-   * 项目层中加载问题（项目群）
-   * @param issueId 问题id
+   * 项目层中加载工作项（项目群）
+   * @param issueId 工作项id
    * @param programId 项目群id
    */
   loadUnderProgram(issueId: number, programId: number) {
@@ -301,9 +301,9 @@ class IssueApi extends Api<IssueApi> {
   }
 
   /**
-    * 删除问题
-    * @param issueId//问题id
-    * @param creatorId//问题创建者id
+    * 删除工作项
+    * @param issueId//工作项id
+    * @param creatorId//工作项创建者id
     */
   delete(issueId: number, creatorId: string) {
     if (creatorId.toString() === AppState.userInfo.id.toString()) {
@@ -313,7 +313,7 @@ class IssueApi extends Api<IssueApi> {
   }
 
   /**
-    * 导出问题列表
+    * 导出工作项列表
     * @param searchVO
     * @param sort
     */
@@ -418,7 +418,7 @@ class IssueApi extends Api<IssueApi> {
   createSubtask = (issueObj: object) => axios.post(`${this.prefix}/issues/sub_issue`, issueObj)
 
   /**
-    * 根据子任务问题id 进行加载这个子任务（废弃，不再使用）
+    * 根据子任务工作项id 进行加载这个子任务（废弃，不再使用）
     * @param issueId
     */
   loadSubtask(issueId: number) {
@@ -466,7 +466,7 @@ class IssueApi extends Api<IssueApi> {
   }
 
   /**
-  * 查询故事和任务   关联问题时 (对于BUG管理问题)
+  * 查询故事和任务   关联工作项时 (对于BUG管理工作项)
   * @param {*} page
   * @param {*} size
   * @param {*} searchVO

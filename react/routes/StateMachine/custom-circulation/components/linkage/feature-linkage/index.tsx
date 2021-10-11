@@ -41,7 +41,7 @@ const FeatureLinkage = ({
       autoCreate: true,
       fields: [{
         name: 'issueTypeId',
-        label: '选择问题类型',
+        label: '选择工作项类型',
         required: true,
       }, {
         name: 'statusId',

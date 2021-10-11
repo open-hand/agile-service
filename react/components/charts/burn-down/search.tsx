@@ -132,7 +132,7 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
       >
         <Option value="remainingEstimatedTime">剩余时间</Option>
         <Option value="storyPoints">故事点</Option>
-        <Option value="issueCount">问题计数</Option>
+        <Option value="issueCount">工作项计数</Option>
       </Select>
       <CheckBox
         style={{ marginLeft: 24 }}

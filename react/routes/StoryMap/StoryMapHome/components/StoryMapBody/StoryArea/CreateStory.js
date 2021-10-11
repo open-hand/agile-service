@@ -119,7 +119,7 @@ class CreateStory extends Component {
       };
 
       if (!await checkCanQuickCreate(storyType.id)) {
-        Choerodon.prompt('该问题类型含有必填选项，请使用创建问题弹框创建');
+        Choerodon.prompt('该工作项类型含有必填选项，请使用创建工作项弹框创建');
         this.canAdd = true;
         this.setState({
           adding: false,
@@ -242,8 +242,8 @@ class CreateStory extends Component {
             )
             : (
               <div className="c7nagile-StoryMap-CreateStory-btn">
-                {issueTypes.length > 0 ? <span role="none" className="primary" style={{ cursor: 'pointer' }} onClick={this.handleAddStoryClick}>新建问题</span>
-                  : <Tooltip title="问题类型中所有故事类型被禁用，无法新建问题"><span role="none" style={{ color: 'rgba(0, 0, 0, 0.26)' }}>新建问题</span></Tooltip>}
+                {issueTypes.length > 0 ? <span role="none" className="primary" style={{ cursor: 'pointer' }} onClick={this.handleAddStoryClick}>新建工作项</span>
+                  : <Tooltip title="工作项类型中所有故事类型被禁用，无法新建工作项"><span role="none" style={{ color: 'rgba(0, 0, 0, 0.26)' }}>新建工作项</span></Tooltip>}
 
                 {' '}
                 或

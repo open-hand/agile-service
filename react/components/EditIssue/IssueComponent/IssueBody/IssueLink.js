@@ -85,11 +85,11 @@ import openCreateLink from './create-link/CreateLink';
         <Divider />
         <div className="c7n-title-wrapper">
           <div className="c7n-title-left">
-            <span>{typeCode === 'feature' ? '关联Feature' : '关联问题'}</span>
+            <span>{typeCode === 'feature' ? '关联Feature' : '关联工作项'}</span>
           </div>
           {!disabled && (
             <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
-              <Tooltip placement="topRight" title={typeCode === 'feature' ? '创建关联Feature' : '创建关联问题'}>
+              <Tooltip placement="topRight" title={typeCode === 'feature' ? '创建关联Feature' : '创建关联工作项'}>
                 <Button onClick={() => { openCreateLink({ issueId, onOk: this.onCreateLinkIssue }); }}>
                   <Icon type="playlist_add icon" />
                 </Button>

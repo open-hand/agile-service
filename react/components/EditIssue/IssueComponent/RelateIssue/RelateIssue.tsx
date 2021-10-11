@@ -29,7 +29,7 @@ const RelateIssue: React.FC<Props> = ({
     fields: [{
       name: 'relateIssueId',
       type: 'string' as FieldType,
-      label: '问题',
+      label: '工作项',
       textField: 'summary',
       valueField: 'issueId',
     }],
@@ -101,7 +101,7 @@ const ObserverRelateIssue = observer(RelateIssue);
 const openRelateIssueModal = (props: Props) => {
   Modal.open({
     key: Modal.key(),
-    title: '关联问题',
+    title: '关联工作项',
     children: <ObserverRelateIssue {...props} />,
     drawer: true,
   });

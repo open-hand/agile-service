@@ -38,8 +38,8 @@ interface advancedSearch {
 }
 interface MoveIssueCardsInfo {
   before: boolean, // 是否移动到前面
-  issueIds: Array<number>, // 待移动的问题ids
-  outsetIssueId: number, // 移动参照问题id 0代表无问题
+  issueIds: Array<number>, // 待移动的工作项ids
+  outsetIssueId: number, // 移动参照工作项id 0代表无工作项
   rankIndex: number, // 是否生成移动日志
 }
 export interface SprintStartCheckInfo {
@@ -140,7 +140,7 @@ class SprintApi extends Api<SprintApi> {
   }
 
   /**
-   * 根据冲刺id及状态加载问题
+   * 根据冲刺id及状态加载工作项
    * @param sprintId
    * @param status
    * @param page
@@ -290,7 +290,7 @@ class SprintApi extends Api<SprintApi> {
   }
 
   /**
-   * 根据冲刺id查询问题类型分布状况
+   * 根据冲刺id查询工作项类型分布状况
    * @param sprintId
    */
   getIssueTypeDistribute(sprintId: number) {

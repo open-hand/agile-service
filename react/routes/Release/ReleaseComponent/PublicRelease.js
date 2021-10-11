@@ -54,7 +54,7 @@ class PublicRelease extends Component {
       params: {
         paramType: 'version',
         paramId: ReleaseStore.getVersionDetail.versionId,
-        paramName: `版本${ReleaseStore.getVersionDetail.name}中的问题`,
+        paramName: `版本${ReleaseStore.getVersionDetail.name}中的工作项`,
       },
     }, { blank: true });
   }
@@ -101,7 +101,7 @@ class PublicRelease extends Component {
                       {'这个版本还有 '}
                       {ReleaseStore.getPublicVersionDetail.fixIssueCount}
                       {' '}
-                      {'个没有解决的问题。'}
+                      {'个没有解决的工作项。'}
                     </span>
                   </div>
                 ) : ''
@@ -118,7 +118,7 @@ class PublicRelease extends Component {
                           }],
                         })(
                           <RadioGroup
-                            label="未解决的问题"
+                            label="未解决的工作项"
                           >
                             <Radio style={{ marginRight: '.12rem' }} value={1}>
                               忽略并继续发布
@@ -127,7 +127,7 @@ class PublicRelease extends Component {
                               value={2}
                               disabled={this.renderRadioDisabled()}
                             >
-                              移动问题到版本
+                              移动工作项到版本
                             </Radio>
                           </RadioGroup>,
                         )}

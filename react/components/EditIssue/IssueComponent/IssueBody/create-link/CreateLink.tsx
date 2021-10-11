@@ -84,7 +84,7 @@ const CreateLink: React.FC<Props> = ({ modal, issueId, onOk }) => {
       const linkTypeId: string = linkedDataSet?.current?.get('linkType');
       const selected = linkedTableRef.current?.linkedIssues || [];
       if (!selected.length) {
-        Choerodon.prompt('请选择要关联的问题');
+        Choerodon.prompt('请选择要关联的工作项');
         return false;
       }
       const labelIssueRelVOList: IIssueLink[] = map(selected, (issue) => {
@@ -140,7 +140,7 @@ const ObserverCreateLink = observer(CreateLink);
 const openCreateLink = (props: Props) => {
   Modal.open({
     key: Modal.key(),
-    title: '创建问题链接',
+    title: '创建工作项链接',
     drawer: true,
     style: {
       width: MODAL_WIDTH.middle + 100,

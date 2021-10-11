@@ -38,10 +38,10 @@ interface IFieldPostData extends FiledOptions {
   schemeCode: string,
   check?: boolean,
   objectVersionNumber?: number,
-  issueTypeIds: string[] // 问题类型id
+  issueTypeIds: string[] // 工作项类型id
   extraConfig: any,
   createdLevel: string // 创建层级
-  syncIssueType?: string[] // 同步主默认值的问题类型
+  syncIssueType?: string[] // 同步主默认值的工作项类型
 }
 export type IFieldPostDataProps = IFieldPostData;
 function CreateField() {

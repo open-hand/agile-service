@@ -44,7 +44,7 @@ const Condition: React.FC<{
         />
       </Form>
     </Part>
-    <Part title="数据设置" tip="您可以在此设置图表的分析维度、对比维度，以及统计单位。例如：分析维度为优先级，对比维度为迭代，统计单位为问题计数。那么图表展示的就是各个优先级在各个迭代的问题数量。">
+    <Part title="数据设置" tip="您可以在此设置图表的分析维度、对比维度，以及统计单位。例如：分析维度为优先级，对比维度为迭代，统计单位为工作项计数。那么图表展示的就是各个优先级在各个迭代的工作项数量。">
       <Form dataSet={reportDs} className={styles.form}>
         <Select name="type" clearButton={false}>
           <Option value="line">基础折线图</Option>
@@ -72,11 +72,11 @@ const Condition: React.FC<{
         }
         <Select name="unit" clearButton={false}>
           <Option value="storyPoints">故事点</Option>
-          <Option value="quantity">问题计数</Option>
+          <Option value="quantity">工作项计数</Option>
         </Select>
       </Form>
     </Part>
-    <Part title="数据过滤" tip="设置图表的数据范围。例如：您可以选择一部分迭代的问题进行分析">
+    <Part title="数据过滤" tip="设置图表的数据范围。例如：您可以选择一部分迭代的工作项进行分析">
       <div className={styles.search}>
         <Search filterComponentProps={filterComponentProps} choseComponentProps={choseComponentProps} />
       </div>

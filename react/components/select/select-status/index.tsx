@@ -8,7 +8,7 @@ import { IStatusCirculation, statusApi, statusTransformApi } from '@/api';
 
 export interface SelectStatusProps extends Partial<SelectProps> {
   issueTypeId?: string
-  /** 无问题类型查询状态 用以全查状态 */
+  /** 无工作项类型查询状态 用以全查状态 */
   noIssueTypeIdQuery?: boolean
   excludeStatus?: string[]
   dataRef?: React.MutableRefObject<any>

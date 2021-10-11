@@ -13,7 +13,7 @@ type ChangeSelected = (code: string) => void
 
 interface Props {
   selectedType?: string,
-  visibleIssueTypeCategory?: 'all' | 'custom' | 'initial' /** @default 'all'  'custom' 自定义问题类型  'initial' 初始问题类型 */
+  visibleIssueTypeCategory?: 'all' | 'custom' | 'initial' /** @default 'all'  'custom' 自定义工作项类型  'initial' 初始工作项类型 */
   setSelectedType?: ChangeSelected,
   excludeTypes?: string[]
   brighter?: boolean

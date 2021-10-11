@@ -18,7 +18,7 @@ const WorkList = ({ match }) => {
       onChange={setActiveKey}
     >
       <PageTab title="待办事项" route={LINK_URL.workListBacklog} tabKey="backlog" component={Backlog} />
-      <PageTab title="所有问题" route={LINK_URL.workListIssue} tabKey="issue" component={Issue} />
+      <PageTab title="所有工作项" route={LINK_URL.workListIssue} tabKey="issue" component={Issue} />
 
     </PageWrap>
   );

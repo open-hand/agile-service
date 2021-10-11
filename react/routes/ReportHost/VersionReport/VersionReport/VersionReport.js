@@ -47,9 +47,9 @@ class EpicReport extends Component {
 
   getOption() {
     const UNIT = {
-      总问题数: '个',
-      已完成问题数: '个',
-      未预估问题百分比: '%',
+      总工作项数: '个',
+      已完成工作项数: '个',
+      未预估工作项百分比: '%',
       已完成故事点: '点',
       总计故事点: '点',
       已完成剩余时间: '小时',
@@ -90,19 +90,19 @@ class EpicReport extends Component {
           ],
           ...[
             VS.beforeCurrentUnit === 'issue_count' ? {
-              name: '总问题数',
+              name: '总工作项数',
               icon: `image://${total}`,
             } : {},
           ],
           ...[
             VS.beforeCurrentUnit === 'issue_count' ? {} : {
-              name: '未预估问题百分比',
+              name: '未预估工作项百分比',
               icon: `image://${noEstimated}`,
             },
           ],
           ...[
             VS.beforeCurrentUnit === 'issue_count' ? {
-              name: '已完成问题数',
+              name: '已完成工作项数',
               icon: `image://${finish}`,
             } : {},
           ],
@@ -186,7 +186,7 @@ class EpicReport extends Component {
       option = {
         yAxis: [
           {
-            name: '问题数',
+            name: '工作项数',
             nameTextStyle: {
               color: 'var(--text-color)',
             },
@@ -223,7 +223,7 @@ class EpicReport extends Component {
         ],
         series: [
           {
-            name: '总问题数',
+            name: '总工作项数',
             type: 'line',
             step: true,
             itemStyle: {
@@ -235,7 +235,7 @@ class EpicReport extends Component {
             data: VS.getChartDataYIssueCountAll,
           },
           {
-            name: '已完成问题数',
+            name: '已完成工作项数',
             type: 'line',
             step: true,
             itemStyle: {
@@ -247,7 +247,7 @@ class EpicReport extends Component {
             data: VS.getChartDataYIssueCountCompleted,
           },
           {
-            name: '未预估问题百分比',
+            name: '未预估工作项百分比',
             type: 'line',
             step: true,
             itemStyle: {
@@ -343,7 +343,7 @@ class EpicReport extends Component {
         ],
         series: [
           {
-            name: '总问题数',
+            name: '总工作项数',
             type: 'line',
             step: true,
             itemStyle: {
@@ -356,7 +356,7 @@ class EpicReport extends Component {
             data: VS.getChartDataYIssueCountAll,
           },
           {
-            name: '已完成问题数',
+            name: '已完成工作项数',
             type: 'line',
             step: true,
             itemStyle: {
@@ -369,7 +369,7 @@ class EpicReport extends Component {
             data: VS.getChartDataYIssueCountCompleted,
           },
           {
-            name: '未预估问题百分比',
+            name: '未预估工作项百分比',
             type: 'line',
             step: true,
             itemStyle: {
@@ -465,7 +465,7 @@ class EpicReport extends Component {
       ...[
         {
           width: '15%',
-          title: '问题编号',
+          title: '工作项编号',
           dataIndex: 'issueNum',
           render: (issueNum, record) => (
             <span
@@ -492,7 +492,7 @@ class EpicReport extends Component {
           dataIndex: 'summary',
           render: (summary) => (
             <div style={{ width: '100%', overflow: 'hidden' }}>
-              <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={`问题概要：${summary}`}>
+              <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={`工作项概要：${summary}`}>
                 <p style={{
                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
                 }}
@@ -505,7 +505,7 @@ class EpicReport extends Component {
         },
         {
           width: '15%',
-          title: '问题类型',
+          title: '工作项类型',
           dataIndex: 'typeCode',
           render: (typeCode, record) => (
             <div>
@@ -639,7 +639,7 @@ class EpicReport extends Component {
                       clearButton={false}
                     >
                       <Option key="story_point" value="story_point">故事点</Option>
-                      <Option key="issue_count" value="issue_count">问题计数</Option>
+                      <Option key="issue_count" value="issue_count">工作项计数</Option>
                       <Option key="remain_time" value="remain_time">剩余时间</Option>
                     </Select>
                   </Form>
@@ -660,12 +660,12 @@ class EpicReport extends Component {
                         params: {
                           paramType: 'version',
                           paramId: VS.currentVersionId,
-                          paramName: `${VS.getCurrentVersion.name}下的问题`,
+                          paramName: `${VS.getCurrentVersion.name}下的工作项`,
                         },
                       }, { blank: true });
                     }}
                   >
-                    在“所有问题中”查看
+                    在“所有工作项中”查看
                     <Icon style={{ fontSize: 13 }} type="open_in_new" />
                   </p>
                 </div>
@@ -685,7 +685,7 @@ class EpicReport extends Component {
                             padding: '20px 0', textAlign: 'center', width: '100%', color: 'var(--text-color)',
                           }}
                           >
-                            {VS.tableData.length ? '当前单位下问题均未预估，切换单位或从下方问题列表进行预估。' : '当前版本下没有问题。'}
+                            {VS.tableData.length ? '当前单位下工作项均未预估，切换单位或从下方工作项列表进行预估。' : '当前版本下没有工作项。'}
                           </div>
                         </LoadingHiddenWrap>
                       )
@@ -694,15 +694,15 @@ class EpicReport extends Component {
                 <Loading loading={VS.chartLoading} />
                 <Loading loading={VS.tableLoading} />
                 <Tabs>
-                  <TabPane tab="已完成的问题" key="done">
+                  <TabPane tab="已完成的工作项" key="done">
                     {this.renderTable('compoleted')}
                   </TabPane>
-                  <TabPane tab="未完成的问题" key="todo">
+                  <TabPane tab="未完成的工作项" key="todo">
                     {this.renderTable('unFinish')}
                   </TabPane>
                   {
                     VS.beforeCurrentUnit === 'issue_count' ? null : (
-                      <TabPane tab="未完成的未预估问题" key="undo">
+                      <TabPane tab="未完成的未预估工作项" key="undo">
                         {this.renderTable('unFinishAndunEstimate')}
                       </TabPane>
                     )

@@ -63,7 +63,7 @@ const { Option } = Select;
           >
             <Tooltip
               placement="top"
-              title={`该问题经历迭代数${closeSprint.length + (sprintId ? 1 : 0)}`}
+              title={`该工作项经历迭代数${closeSprint.length + (sprintId ? 1 : 0)}`}
             >
               <div style={{
                 width: '100%',

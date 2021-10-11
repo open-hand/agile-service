@@ -71,7 +71,7 @@ const VersionReportSearch:React.FC<VersionReportSearchProps> = ({
           onChange={handleChangeUnit}
         >
           <Option key="story_point" value="story_point">故事点</Option>
-          <Option key="issue_count" value="issue_count">问题计数</Option>
+          <Option key="issue_count" value="issue_count">工作项计数</Option>
           <Option key="remain_time" value="remain_time">剩余时间</Option>
         </Select>
       </div>
@@ -95,12 +95,12 @@ const VersionReportSearch:React.FC<VersionReportSearchProps> = ({
                 params: {
                   paramType: 'version',
                   paramId: versionId,
-                  paramName: `${currentVersion && currentVersion.name}下的问题`,
+                  paramName: `${currentVersion && currentVersion.name}下的工作项`,
                 },
               }, { blank: true });
             }}
           >
-            在“所有问题中”查看
+            在“所有工作项中”查看
             <Icon style={{ fontSize: 13 }} type="open_in_new" />
           </p>
         ) : null}

@@ -391,7 +391,7 @@ class DragList extends Component<Props, StateProps> {
                   >
                     <Popconfirm
                       placement="top"
-                      title={`确认要删除 ${item.value} 吗？问题上该字段值也会被清空。`}
+                      title={`确认要删除 ${item.value} 吗？工作项上该字段值也会被清空。`}
                       onConfirm={() => this.remove(item.tempKey || item.id)}
                       okText="删除"
                       cancelText="取消"

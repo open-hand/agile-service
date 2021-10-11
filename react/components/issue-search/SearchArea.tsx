@@ -194,7 +194,7 @@ const SearchArea: React.FC = () => {
                 multiple
               >
                 <OptGroup key="commonly" label="常用选项">
-                  <Option value="commonly|onlyMe">仅我的问题</Option>
+                  <Option value="commonly|onlyMe">仅我的工作项</Option>
                   <Option value="commonly|starBeacon">我的关注</Option>
                   {
                     hasMyAssigned && (

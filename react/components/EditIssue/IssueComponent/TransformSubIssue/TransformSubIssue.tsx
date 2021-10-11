@@ -87,7 +87,7 @@ const ObserverTransformSubIssue = observer(TransformSubIssue);
 const openTransformSubIssue = (props: Props) => {
   Modal.open({
     key: Modal.key(),
-    title: '转化为子问题',
+    title: '转化为子工作项',
     children: <ObserverTransformSubIssue {...props} />,
     drawer: true,
     okText: '转化',

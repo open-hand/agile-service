@@ -178,7 +178,7 @@ function getFilterFormSystemFields(): FieldProps[] {
     textField: 'sprintName',
   }, {
     name: 'issueTypeId',
-    label: '问题类型',
+    label: '工作项类型',
     valueField: 'id',
     textField: 'name',
   },

@@ -111,7 +111,7 @@ const fieldsMap = new Map([
     },
   }],
   ['summary', {
-    name: '问题概要',
+    name: '工作项概要',
   }],
   ['Attachment', {
     name: '附件',
@@ -429,7 +429,7 @@ const fieldsMap = new Map([
     },
   ],
   ['createInitType', {
-    name: '创建问题',
+    name: '创建工作项',
     create: {
       render: (log: ILog) => (
         <span>
@@ -595,7 +595,7 @@ const fieldsMap = new Map([
             <span>
               <span className="c7n-Log-operation">变更了</span>
               <span className="c7n-Log-value">{`【${trigger}】`}</span>
-              <span className="c7n-Log-operation">，使得当前问题自动流转到</span>
+              <span className="c7n-Log-operation">，使得当前工作项自动流转到</span>
               <span className="c7n-Log-value">{`【${newStatus}】`}</span>
               {
                 resolutionChanged && !removeResolution && (

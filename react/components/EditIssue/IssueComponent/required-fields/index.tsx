@@ -55,7 +55,7 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
     autoCreate: true,
     fields: [{
       name: 'issueTypeId',
-      label: '问题类型',
+      label: '工作项类型',
       required: true,
       defaultValue: issueVO.issueTypeId,
     }],
@@ -192,7 +192,7 @@ const openRequiredFieldsModal = (props: ChangeTypeModalProps) => {
   Modal.open({
     key: 'changeTypeModal',
     className: styles.changeTypeModal,
-    title: '修改问题类型',
+    title: '修改工作项类型',
     drawer: true,
     style: {
       width: MODAL_WIDTH.middle,

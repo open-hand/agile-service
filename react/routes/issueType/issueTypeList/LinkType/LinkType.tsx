@@ -81,7 +81,7 @@ const LinkType: React.FC<Props> = ({ modal, issueTypeDataSet }) => {
     if (value) {
       const res = await issueTypeApi.checkName(value);
       if (res) {
-        return '问题类型名称重复';
+        return '工作项类型名称重复';
       }
       return true;
     }
@@ -92,7 +92,7 @@ const LinkType: React.FC<Props> = ({ modal, issueTypeDataSet }) => {
     if (value) {
       const res = await issueTypeApi.checkIcon(value);
       if (res) {
-        return '问题类型图标重复';
+        return '工作项类型图标重复';
       }
       return true;
     }
@@ -106,7 +106,7 @@ const LinkType: React.FC<Props> = ({ modal, issueTypeDataSet }) => {
       textField: 'name',
       valueField: 'id',
       required: true,
-      label: '请选择引用的问题类型',
+      label: '请选择引用的工作项类型',
       validator: checkRefrencedType,
     }, {
       name: 'copyStatusMachine',
@@ -227,7 +227,7 @@ const LinkType: React.FC<Props> = ({ modal, issueTypeDataSet }) => {
                   marginBottom: 8,
                 }}
                 >
-                  该问题类型名称和当前项目已有的问题类型名称重复
+                  该工作项类型名称和当前项目已有的工作项类型名称重复
                 </div>
                 <TextField
                   name="newName"
@@ -250,7 +250,7 @@ const LinkType: React.FC<Props> = ({ modal, issueTypeDataSet }) => {
                   marginBottom: 8,
                 }}
                 >
-                  该问题类型名称和当前项目已有的问题类型图标重复
+                  该工作项类型名称和当前项目已有的工作项类型图标重复
                 </div>
                 <div className={styles.icon}>
                   <IconPicker
@@ -300,7 +300,7 @@ const openLink = (props: Props) => {
       width: 480,
     },
     key: 'link',
-    title: '引用问题类型',
+    title: '引用工作项类型',
     children: <ObserverLinkType {...props} />,
     footer: null,
   });

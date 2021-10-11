@@ -1211,7 +1211,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
           showClassName={false}
           items={[
             {
-              name: '创建问题',
+              name: '创建工作项',
               icon: 'playlist_add',
               display: true,
               handler: () => {

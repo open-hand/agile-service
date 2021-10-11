@@ -124,7 +124,7 @@ const LinkedTable: React.FC<Props> = ({ issueId, linkedTableRef }) => {
               prefix={<Icon type="search" />}
               valueChangeAction={'input' as any}
             />
-            <SelectIssueType placeholder="问题类型" flat name="issueType" style={{ marginRight: 10, marginBottom: 10 }} filterList={['issue_epic', 'sub_task', 'feature']} dropdownMatchSelectWidth={false} />
+            <SelectIssueType placeholder="工作项类型" flat name="issueType" style={{ marginRight: 10, marginBottom: 10 }} filterList={['issue_epic', 'sub_task', 'feature']} dropdownMatchSelectWidth={false} />
             <SelectStatus placeholder="状态" flat name="status" style={{ marginRight: 10, marginBottom: 10 }} request={() => statusApi.loadByProject('agile')} dropdownMatchSelectWidth={false} />
             <SelectPriority placeholder="优先级" flat name="priority" style={{ marginRight: 10, marginBottom: 10 }} clearButton dropdownMatchSelectWidth={false} />
             <SelectUser placeholder="经办人" flat name="assignee" style={{ marginRight: 10, marginBottom: 10 }} clearButton dropdownMatchSelectWidth={false} />

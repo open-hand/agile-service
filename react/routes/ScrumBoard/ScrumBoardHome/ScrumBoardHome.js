@@ -360,7 +360,7 @@ class ScrumBoardHome extends Component {
           <HeaderButtons
             items={[
               {
-                name: '创建问题',
+                name: '创建工作项',
                 icon: 'playlist_add',
                 handler: this.handleCreateIssue,
                 display: true,
@@ -480,7 +480,7 @@ class ScrumBoardHome extends Component {
             <Modal
               closable={false}
               maskClosable={false}
-              title="更新父问题"
+              title="更新父工作项"
               visible={ScrumBoardStore.getUpdateParent}
               onCancel={() => {
                 ScrumBoardStore.setUpdateParent(false);
@@ -498,7 +498,7 @@ class ScrumBoardHome extends Component {
                   this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
                 }).catch((err) => {
                   if (err.code === 'error.stateMachine.executeTransform') {
-                    Choerodon.prompt('该问题项状态已被修改，请打开父问题进行状态修改', 'error');
+                    Choerodon.prompt('该工作项项状态已被修改，请打开父工作项进行状态修改', 'error');
                   }
                 });
               }}
@@ -510,7 +510,7 @@ class ScrumBoardHome extends Component {
                 {'全部子任务均为已解决状态'}
               </p>
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <p style={{ marginRight: 20, marginBottom: 0 }}>是否更新父级问题状态</p>
+                <p style={{ marginRight: 20, marginBottom: 0 }}>是否更新父级工作项状态</p>
                 <Select
                   style={{
                     width: 250,

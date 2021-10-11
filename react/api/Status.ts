@@ -73,10 +73,10 @@ class StatusApi extends Api<StatusApi> {
   }
 
   /**
-   * 根据issueId查询问题可以转换的全部的状态
-   * @param currentStatusId 当前问题状态id
-   * @param issueId 问题id
-   * @param issueTypeId 问题类型id
+   * 根据issueId查询工作项可以转换的全部的状态
+   * @param currentStatusId 当前工作项状态id
+   * @param issueId 工作项id
+   * @param issueTypeId 工作项类型id
    * @param applyType
    */
   loadTransformStatusByIssue(currentStatusId: number, issueId: number, issueTypeId: string, applyType: string = 'agile') {
@@ -100,7 +100,7 @@ class StatusApi extends Api<StatusApi> {
   }
 
   /**
-   * 根据问题类型id查询改问题类型下所有状态
+   * 根据工作项类型id查询改工作项类型下所有状态
    * @param issueTypeId
    * @param applyType
    */
@@ -134,7 +134,7 @@ class StatusApi extends Api<StatusApi> {
   }
 
   /**
-   * 查询所有问题类型的全部状态的对应的转换
+   * 查询所有工作项类型的全部状态的对应的转换
    */
   loadAllTransformForAllIssueType = (boardId: string) => axios({
     method: 'get',

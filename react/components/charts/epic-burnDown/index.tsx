@@ -80,9 +80,9 @@ const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
       return (
         <div className={styles.toolbar_complete}>
           <div className={styles.pic}>
-            <img src={completed} alt="所有预估的问题都已完成!" />
+            <img src={completed} alt="所有预估的工作项都已完成!" />
           </div>
-          <div className={styles.word}>所有预估的问题都已完成！</div>
+          <div className={styles.word}>所有预估的工作项都已完成！</div>
         </div>
       );
     }

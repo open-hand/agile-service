@@ -81,7 +81,7 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
         value: 'description',
       });
       options.splice(12, 0, {
-        label: '关联问题',
+        label: '关联工作项',
         value: 'relatedIssue',
       });
       return !isInProgram() ? options.filter((item) => item.value !== 'feature') : options;
@@ -92,7 +92,7 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
   const key = Modal.key();
   Modal.open({
     key,
-    title: '导出问题',
+    title: '导出工作项',
     style: {
       width: 740,
     },

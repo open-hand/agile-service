@@ -1,4 +1,4 @@
-// 趋势分析-问题完成趋势
+// 趋势分析-工作项完成趋势
 import React, { useContext, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Spin } from 'choerodon-ui/pro';
@@ -245,7 +245,7 @@ const CompeleteTendencyChart = observer(() => {
       <div className="chart-container chart-container-complete">
         <div className="line-chart-container">
           <div className="chart-handle line-chart-handle">
-            <span className="chart-title">问题完成趋势</span>
+            <span className="chart-title">工作项完成趋势</span>
             {
               (chartData && chartData.length > 0) && (
                 <SwitchTabs

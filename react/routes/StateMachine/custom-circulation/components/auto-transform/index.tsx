@@ -8,8 +8,8 @@ import {
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { Divider } from 'choerodon-ui';
 import { mount } from '@choerodon/inject';
-import { IModalProps } from '@/common/types';
 import { Choerodon } from '@choerodon/boot';
+import { IModalProps } from '@/common/types';
 import { statusTransformApi } from '@/api';
 import useHasTest from '@/hooks/useHasTest';
 import styles from './index.less';
@@ -69,7 +69,7 @@ const AutoTransform: React.FC<Props> = ({
 
   return (
     <div className={styles.autoTransform}>
-      <div className={styles.tip}>满足以下条件后问题将自动流转到当前状态。</div>
+      <div className={styles.tip}>满足以下条件后工作项将自动流转到当前状态。</div>
       <div className={styles.setting}>
         {
           hasTest && (
@@ -81,7 +81,7 @@ const AutoTransform: React.FC<Props> = ({
                 marginBottom: 10,
               }}
               >
-                {`问题关联的用例的测试执行处于下方状态，问题将自动流转到${record.get('name')}。`}
+                {`工作项关联的用例的测试执行处于下方状态，工作项将自动流转到${record.get('name')}。`}
               </div>
             </>
           )

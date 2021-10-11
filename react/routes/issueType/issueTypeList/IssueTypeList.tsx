@@ -35,7 +35,7 @@ function IssueTypeList() {
         width: 480,
       },
       key: Modal.key(),
-      title: '编辑问题类型',
+      title: '编辑工作项类型',
       children: <AddIssueType typeId={record?.get('id')} typeTableDataSet={dataSet} isOrganization={isOrganization} />,
       okText: '保存',
       footer: null,
@@ -105,7 +105,7 @@ function IssueTypeList() {
     const handleStop = () => {
       issueTypeApi.getStopDisable(record?.get('id')).then((disable: boolean) => {
         if (!disable) {
-          Choerodon.prompt(`至少启用一个${record?.get('typeCode') === 'sub_task' ? '子级' : '父级'}问题类型`);
+          Choerodon.prompt(`至少启用一个${record?.get('typeCode') === 'sub_task' ? '子级' : '父级'}工作项类型`);
         } else {
           issueTypeApi.enabled(record?.get('id'), false).then(() => {
             Choerodon.prompt('停用成功');
@@ -130,8 +130,8 @@ function IssueTypeList() {
               width: 416,
             },
             key: 'delete',
-            title: '删除问题类型',
-            children: <span>{`确定要删除“${record?.get('name')}”问题类型？删除后，该问题类型的页面字段方案和状态机方案将一并删除。`}</span>,
+            title: '删除工作项类型',
+            children: <span>{`确定要删除“${record?.get('name')}”工作项类型？删除后，该工作项类型的页面字段方案和状态机方案将一并删除。`}</span>,
             onOk: handleDelete,
             border: false,
           });
@@ -259,7 +259,7 @@ function IssueTypeList() {
         width: 480,
       },
       key: Modal.key(),
-      title: '添加问题类型',
+      title: '添加工作项类型',
       children: <AddIssueType typeTableDataSet={issueTypeDataSet} isOrganization={isOrganization} />,
       okText: '保存',
       footer: null,
@@ -276,12 +276,12 @@ function IssueTypeList() {
       <Header>
         <HeaderButtons items={[
           {
-            name: '添加问题类型',
+            name: '添加工作项类型',
             icon: 'playlist_add',
             handler: handleAdd,
             display: true,
           }, {
-            name: '引用问题类型',
+            name: '引用工作项类型',
             icon: 'relate',
             handler: handleOpenRefrenced,
             display: !isOrganization,

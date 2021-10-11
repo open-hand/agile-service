@@ -83,10 +83,10 @@ export default DragSource(
         //   versionId: 0, // 要关联的版本id
         //   epicId: targetEpicId, // 要关联的史诗id
         //   versionIssueRelVOList: [],
-        //   // 问题id列表，移动到史诗，配合epicId使用
+        //   // 工作项id列表，移动到史诗，配合epicId使用
         //   epicIssueIds: [issueId],
         //   featureId: 0, // 要关联的特性id
-        //   // 问题id列表，移动到特性，配合featureId使用
+        //   // 工作项id列表，移动到特性，配合featureId使用
         //   featureIssueIds: [],
         if (epicId !== targetEpicId) {
           storyMapDragVO.epicId = targetEpicId;

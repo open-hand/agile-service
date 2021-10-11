@@ -6,7 +6,7 @@ function SprintVisibleIssue({
 }) {
   return (
     <div style={{ color: 'var(--text-color3)', marginLeft: '0.26rem' }}>
-      {`${issueCount}个问题可见`}
+      {`${issueCount}个工作项可见`}
     </div>
   );
 }

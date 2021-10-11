@@ -90,7 +90,7 @@ const IssueTypeDataSet = ({ isOrganization }: { isOrganization: boolean}): DataS
       {
         name: 'typeCode',
         type: 'string' as FieldType,
-        label: '标准问题类型',
+        label: '标准工作项类型',
       },
       {
         name: 'usage',

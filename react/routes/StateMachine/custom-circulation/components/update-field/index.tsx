@@ -595,7 +595,7 @@ const UpdateField = ({
     <div className={styles.updateField}>
       <Loading loading={loading} />
       <div className={styles.content}>
-        <div className={styles.tip}>问题流转到当前状态后，将自动执行下面设置的字段值变更。</div>
+        <div className={styles.tip}>工作项流转到当前状态后，将自动执行下面设置的字段值变更。</div>
         {render()}
       </div>
 

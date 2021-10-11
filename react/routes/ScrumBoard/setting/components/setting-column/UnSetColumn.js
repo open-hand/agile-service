@@ -29,7 +29,7 @@ class Column extends Component {
             </div>
             <div style={{ borderBottom: '3px solid rgba(0,0,0,0.26)' }} className="c7n-scrumsetting-columnBottom">
               <div>
-                <span>无该问题的状态</span>
+                <span>无该工作项的状态</span>
               </div>
             </div>
           </div>

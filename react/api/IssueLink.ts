@@ -5,8 +5,8 @@ import Api from './Api';
 
 export interface IIssueLink {
     linkTypeId: string, // 链接类型id
-    linkedIssueId: string, // 被链接问题id
-    issueId: string;// 链接问题id
+    linkedIssueId: string, // 被链接工作项id
+    issueId: string;// 链接工作项id
 }
 
 class IssueLinkApi extends Api<IssueLinkApi> {
@@ -27,7 +27,7 @@ class IssueLinkApi extends Api<IssueLinkApi> {
   }
 
   /**
-   * 根据issueId及applyType加载问题链接
+   * 根据issueId及applyType加载工作项链接
    * @param issueId
    * @param applyType project
    */
@@ -56,16 +56,16 @@ class IssueLinkApi extends Api<IssueLinkApi> {
   }
 
   /**
-   * 创建问题链接
+   * 创建工作项链接
    * @param issueId
-   * @param issueLinkCreateVOList 关联的问题
+   * @param issueLinkCreateVOList 关联的工作项
    */
   create(issueId:string, issueLinkCreateVOList:Array<IIssueLink>) {
     return axios.post(`${this.prefix}/issue_links/${issueId}`, issueLinkCreateVOList);
   }
 
   /**
-   * 删除问题链接
+   * 删除工作项链接
    * @param issueLinkId
    */
   delete(issueLinkId:number) {

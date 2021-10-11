@@ -15,7 +15,7 @@ const PersonalWorkload = () => {
     startSprintDs,
     startedRecord,
   } = useProjectOverviewStore();
-  const options = useMemo(() => [{ value: 'issueCount', text: '问题计数' }, { value: 'workTime', text: '工时' }], []);
+  const options = useMemo(() => [{ value: 'issueCount', text: '工作项计数' }, { value: 'workTime', text: '工时' }], []);
   const [chartOption, setChartOption] = useState('issueCount');
   const {
     workloadChartDs,
@@ -112,7 +112,7 @@ const PersonalWorkload = () => {
         },
       },
       yAxis: {
-        name: chartOption === 'issueCount' ? '问题计数' : '工时',
+        name: chartOption === 'issueCount' ? '工作项计数' : '工时',
         minInterval: 1,
         nameTextStyle: {
           color: 'var(--text-color3)',

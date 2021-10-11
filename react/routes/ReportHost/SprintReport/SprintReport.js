@@ -195,10 +195,10 @@ class SprintReport extends Component {
     const column = [
       {
         width: '15%',
-        title: '问题编号',
+        title: '工作项编号',
         dataIndex: 'issueNum',
         render: (issueNum, record) => (
-          <Tooltip mouseEnterDelay={0.5} title={`问题编号：${issueNum}`}>
+          <Tooltip mouseEnterDelay={0.5} title={`工作项编号：${issueNum}`}>
             <span
               className="primary"
               style={{
@@ -222,7 +222,7 @@ class SprintReport extends Component {
         title: '概要',
         dataIndex: 'summary',
         render: (summary, record) => (
-          <Tooltip MouseEnterDelay={0.5} title={`问题概要：${record.summary}`}>
+          <Tooltip MouseEnterDelay={0.5} title={`工作项概要：${record.summary}`}>
             <div
               style={{
                 overflow: 'hidden',
@@ -237,7 +237,7 @@ class SprintReport extends Component {
         ),
       }, {
         width: '15%',
-        title: '问题类型',
+        title: '工作项类型',
         dataIndex: 'typeCode',
         render: (typeCode, record) => (
           <div>
@@ -396,12 +396,12 @@ class SprintReport extends Component {
                             params: {
                               paramType: 'sprint',
                               paramId: ReportStore.currentSprint.sprintId,
-                              paramName: `${ReportStore.currentSprint.sprintName}下的问题`,
+                              paramName: `${ReportStore.currentSprint.sprintName}下的工作项`,
                             },
                           }, { blank: true });
                         }}
                       >
-                        在“所有问题中”查看
+                        在“所有工作项中”查看
                         <Icon style={{ fontSize: 13, verticalAlign: -2 }} type="open_in_new" />
                       </p>
                     </div>
@@ -412,7 +412,7 @@ class SprintReport extends Component {
                           {'冲刺,'}
                           {'共'}
                           {ReportStore.currentSprint.issueCount || 0}
-                          {'个问题'}
+                          {'个工作项'}
                         </span>
                         <span>
                           {`${commonformatDate(ReportStore.currentSprint.startDate)} - ${commonformatDate(ReportStore.currentSprint.actualEndDate) || '至今'}`}
@@ -430,13 +430,13 @@ class SprintReport extends Component {
                   />
                   <Loading loading={ReportStore.loading} />
                   <Tabs activeKey={ReportStore.activeKey} onChange={this.callback}>
-                    <TabPane tab="已完成的问题" key="done">
+                    <TabPane tab="已完成的工作项" key="done">
                       {this.renderDoneIssue(column)}
                     </TabPane>
-                    <TabPane tab="未完成的问题" key="todo">
+                    <TabPane tab="未完成的工作项" key="todo">
                       {this.renderTodoIssue(column)}
                     </TabPane>
-                    <TabPane tab="从Sprint中移除的问题" key="remove">
+                    <TabPane tab="从Sprint中移除的工作项" key="remove">
                       {this.renderRemoveIssue(column)}
                     </TabPane>
                   </Tabs>

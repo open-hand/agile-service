@@ -298,17 +298,17 @@ const Issue = observer(({ cached, updateCache }) => {
       className="c7nagile-issue"
     >
       <Header
-        title="所有问题"
+        title="所有工作项"
       >
         <HeaderButtons items={[
           {
-            name: '创建问题',
+            name: '创建工作项',
             icon: 'playlist_add',
             handler: handleOpenCreateIssue,
             display: true,
           },
           {
-            name: '导入问题',
+            name: '导入工作项',
             icon: 'archive-o',
             handler: () => handleOpenImport({
               onFinish: refresh, action: 'agile_import_issue',
@@ -316,7 +316,7 @@ const Issue = observer(({ cached, updateCache }) => {
             display: true,
           },
           {
-            name: '导出问题',
+            name: '导出工作项',
             icon: 'unarchive-o',
             handler: () => {
               const visibleColumns = (cached?.listLayoutColumns || defaultListLayoutColumns).filter((item) => item.display).map((item) => item.columnCode);

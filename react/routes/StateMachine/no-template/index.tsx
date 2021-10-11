@@ -3,8 +3,7 @@ import { observer } from 'mobx-react-lite';
 import {
   Header, Page, Content, Breadcrumb,
 } from '@choerodon/boot';
-import { Button } from 'choerodon-ui/pro';
-import { Tooltip } from 'choerodon-ui/pro';
+import { Button, Tooltip } from 'choerodon-ui/pro';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
 import { EmptyPage } from '@choerodon/components';
 import { getIsOrganization } from '@/utils/common';
@@ -81,7 +80,7 @@ const NoTemplate: React.FC<{ activeKey: string }> = ({ activeKey }) => {
           image={NoData}
           description={(
             <>
-              {`当前问题类型暂未配置状态机模板${readOnly ? '请到组织层状态机页面配置模板' : '点击按钮配置模板'}。`}
+              {`当前工作项类型暂未配置状态机模板${readOnly ? '请到组织层状态机页面配置模板' : '点击按钮配置模板'}。`}
               {
                 !readOnly && (
                   <>

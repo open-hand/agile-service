@@ -70,7 +70,7 @@ export interface CreateIssueBaseProps {
   defaultValues?: {
     [key: string]: any
   }
-  /** 限定可选问题类型 */
+  /** 限定可选工作项类型 */
   typeCode?: string | string[]
   /** 是否在项目群创建 */
   isProgram?: boolean
@@ -344,7 +344,7 @@ const CreateIssueBase = observer(({
       }
       case 'issueType': {
         if (!value) {
-          // 问题类型不能置空
+          // 工作项类型不能置空
           record.set('issueType', oldValue);
         }
       }
@@ -720,7 +720,7 @@ const CreateIssueBase = observer(({
       required: true,
     }, {
       name: 'issueIds',
-      label: '问题',
+      label: '工作项',
       required: true,
       multiLine: true,
     }],

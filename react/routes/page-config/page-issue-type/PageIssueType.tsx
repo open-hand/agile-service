@@ -223,13 +223,13 @@ function PageIssueType() {
         <HeaderButtons items={[
           {
             display: true,
-            element: <TooltipButton title="该问题类型已停用，无法创建字段" buttonDisabled={!pageIssueTypeStore.currentIssueType.enabled} buttonIcon="playlist_add" clickEvent={openCreateFieldModal}>创建字段</TooltipButton>,
+            element: <TooltipButton title="该工作项类型已停用，无法创建字段" buttonDisabled={!pageIssueTypeStore.currentIssueType.enabled} buttonIcon="playlist_add" clickEvent={openCreateFieldModal}>创建字段</TooltipButton>,
           }, {
             display: true,
             element: (
               <TooltipButton
                 buttonIcon="add"
-                title="该问题类型已停用，无法添加已有字段"
+                title="该工作项类型已停用，无法添加已有字段"
                 buttonDisabled={!pageIssueTypeStore.currentIssueType.enabled}
                 clickEvent={() => openAddField(addUnselectedDataSet,
                   pageIssueTypeStore, onSubmitLocal, onRestoreLocal)}

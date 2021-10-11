@@ -11,10 +11,10 @@ const AssigneeModal = ({ data }) => {
       label: '经办人',
     }, {
       name: 'issueCount',
-      label: '总问题数',
+      label: '总工作项数',
     }, {
       name: 'remainingIssueCount',
-      label: '剩余问题数',
+      label: '剩余工作项数',
     }, {
       name: 'totalStoryPoints',
       label: '总故事点',

@@ -12,7 +12,7 @@ function SprintNoIssue() {
         <img style={{ width: 80, height: 70 }} alt="空sprint" src={emptySprint} />
         <div style={{ marginLeft: 20 }}>
           <p>计划您的SPRINT</p>
-          <p>这是一个Sprint。将问题拖拽至此来计划一个Sprint。</p>
+          <p>这是一个Sprint。将工作项拖拽至此来计划一个Sprint。</p>
         </div>
       </div>
     </div>
@@ -32,7 +32,7 @@ function BacklogNoIssue() {
       <div style={{ marginLeft: 40 }}>
         <p style={{ color: 'var(--text-color3)', fontSize: '13px' }}>当前项目暂无待办事项</p>
         <p style={{ fontSize: 16, lineHeight: '28px', marginTop: 8 }}>
-          您可以在此创建并评估问题，可通过上下拖动来规划问题的排列顺序
+          您可以在此创建并评估工作项，可通过上下拖动来规划工作项的排列顺序
         </p>
       </div>
     </div>
@@ -44,7 +44,7 @@ function BacklogNoIssue() {
     // eslint-disable-next-line no-nested-ternary
     return BacklogStore.hasFilter ? (
       <div className="c7n-noissue-wapper">
-        <div className="c7n-noissue-notzero">{`在${type === 'backlog' ? 'backlog' : 'sprint'}中所有问题已筛选`}</div>
+        <div className="c7n-noissue-notzero">{`在${type === 'backlog' ? 'backlog' : 'sprint'}中所有工作项已筛选`}</div>
       </div>
     ) : (
       type === 'backlog' ? <BacklogNoIssue /> : <SprintNoIssue />

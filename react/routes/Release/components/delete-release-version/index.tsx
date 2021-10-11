@@ -55,7 +55,7 @@ const DeletePublishVersion: React.FC<{ modal?: IModalProps } & PublishVersionMod
                                     versionDelInfo.agileIssueCount ? (
                                       <span>
                                         <span style={{ color: 'red' }}>{` ${versionDelInfo.agileIssueCount} `}</span>
-                                        个问题
+                                        个工作项
                                       </span>
                                     ) : ''
                                 }
@@ -69,7 +69,7 @@ const DeletePublishVersion: React.FC<{ modal?: IModalProps } & PublishVersionMod
                                     ) : ''
                                 }
                           。
-                          {Object.keys(versionDelInfo).length && versionDelInfo.versionNames.length && versionDelInfo.agileIssueCount ? '相关的问题将移动到下面选择的版本中。' : ''}
+                          {Object.keys(versionDelInfo).length && versionDelInfo.versionNames.length && versionDelInfo.agileIssueCount ? '相关的工作项将移动到下面选择的版本中。' : ''}
                         </p>
                       </div>
                     ) : ''

@@ -143,7 +143,7 @@ export default class SwimLaneHeader extends Component {
     } = this.props;
     if (keyId === 'other') {
       if (mode === 'swimlane_epic') {
-        return `无史诗问题（${subIssueDataLength}）`;
+        return `无史诗工作项（${subIssueDataLength}）`;
       } if (mode === 'swimlane_none') {
         return (
           <div
@@ -153,11 +153,11 @@ export default class SwimLaneHeader extends Component {
               e.stopPropagation();
             }}
           >
-            {`所有问题（${subIssueDataLength}）`}
+            {`所有工作项（${subIssueDataLength}）`}
           </div>
         );
       }
-      return `其他问题(${subIssueDataLength} 任务)`;
+      return `其他工作项(${subIssueDataLength} 任务)`;
     }
     return (
       <div

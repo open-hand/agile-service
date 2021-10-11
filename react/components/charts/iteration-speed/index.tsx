@@ -27,7 +27,7 @@ export interface IterationSpeedProps {
 
 const UnitNameMap = new Map([
   ['story_point', '故事点'],
-  ['issue_count', '问题计数'],
+  ['issue_count', '工作项计数'],
   ['remain_time', '剩余时间'],
 ]);
 

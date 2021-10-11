@@ -42,7 +42,7 @@ export default ({ id, intl }) => {
       {
         name: 'issueCount',
         type: 'string',
-        label: '问题',
+        label: '工作项',
       },
       {
         name: 'manager',

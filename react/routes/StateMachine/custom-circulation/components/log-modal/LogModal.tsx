@@ -45,7 +45,7 @@ const StatusMap = new Map([
   }],
 ]);
 const RemarkMap = new Map([
-  ['same_status', '联动的问题已处在目标状态'],
+  ['same_status', '联动的工作项已处在目标状态'],
   ['sub_bug', '关联的缺陷属于子缺陷'],
   ['condition_limit', '受流转条件限制无法流转到目标状态'],
   ['max_depth', '触发状态联动的链长度将超过最大长度 10 后，系统自动停止执行'],
@@ -89,10 +89,10 @@ const LogTable: React.FC<Props> = () => {
       label: '状态',
     }, {
       name: 'preIssueId',
-      label: '源问题',
+      label: '源工作项',
     }, {
       name: 'curIssueId',
-      label: '联动的问题',
+      label: '联动的工作项',
     }, {
       name: 'remark',
       label: '备注',

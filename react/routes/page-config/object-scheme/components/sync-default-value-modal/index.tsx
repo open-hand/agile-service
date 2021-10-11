@@ -60,7 +60,7 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
           multiple: true,
           required: true,
           defaultValue: defaultTypes,
-          // defaultValidationMessages: '请选择同步的问题类型',
+          // defaultValidationMessages: '请选择同步的工作项类型',
         },
       ],
     });

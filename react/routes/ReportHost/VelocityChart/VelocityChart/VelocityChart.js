@@ -285,7 +285,7 @@ class VelocityChart extends Component {
                 params: {
                   paramType: 'sprint',
                   paramId: record.sprintId,
-                  paramName: `${sprintName}下的问题`,
+                  paramName: `${sprintName}下的工作项`,
                 },
               }, { blank: true });
             }}
@@ -384,7 +384,7 @@ class VelocityChart extends Component {
                       故事点
                     </Option>
                     <Option key="issue_count" value="issue_count">
-                      问题计数
+                      工作项计数
                     </Option>
                     <Option key="remain_time" value="remain_time">
                       剩余时间

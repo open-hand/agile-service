@@ -171,7 +171,7 @@ class FieldApi extends Api<FieldApi> {
   }
 
   /**
-   * 批量更新问题字段
+   * 批量更新工作项字段
    * @param data
    * @param schemeCode
    * @param applyType

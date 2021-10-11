@@ -522,7 +522,7 @@ class BacklogStore {
     const currentIndex = data.findIndex((issue) => currentClick.issueId === issue.issueId);
     if (this.prevClickedIssue && this.prevClickedIssue.sprintId === currentClick.sprintId) {
       // 如果以后想利用 ctrl 从多个冲刺中选取 issue，可以把判断条件2直接挪到 shift 上
-      // 但是请考虑清楚操作多个数组可能带来的性能开销问题
+      // 但是请考虑清楚操作多个数组可能带来的性能开销工作项
       if (type === 'shift') {
         this.dealWithShift(data, currentIndex, sprintId);
       } else if (type === 'ctrl') {
@@ -541,7 +541,7 @@ class BacklogStore {
       // this.multiSelected.set(data[i].issueId, data[i]);
       // } else {
       // (issue) => String(issue.assigneeId) === String(filterAssignId)
-      // 有过滤，则只选过滤后的问题
+      // 有过滤，则只选过滤后的工作项
       this.multiSelected.set(data[i].issueId, data[i]);
       // }
     }
@@ -1146,7 +1146,7 @@ class BacklogStore {
       title: '删除冲刺',
       children: hasIssue ? (
         <div>
-          <p style={{ marginBottom: 10 }}>{`确认要删除冲刺“${data.sprintName}”吗？删除冲刺后当前规划的问题将移动到待办事项。`}</p>
+          <p style={{ marginBottom: 10 }}>{`确认要删除冲刺“${data.sprintName}”吗？删除冲刺后当前规划的工作项将移动到待办事项。`}</p>
           {defaultValuePrompt && <p style={{ marginBottom: 10 }}>{defaultValuePrompt}</p>}
         </div>
       ) : (

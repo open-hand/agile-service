@@ -87,14 +87,14 @@ class ImportIssue extends Component {
     if (this.props.downloadTemplateRequest) {
       this.props.downloadTemplateRequest(importFieldsData).then((excel) => {
         const blob = new Blob([excel], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const fileName = `${this.props.name || '问题'}导入模板.xlsx`;
+        const fileName = `${this.props.name || '工作项'}导入模板.xlsx`;
         FileSaver.saveAs(blob, fileName);
       });
       return;
     }
     issueApi.downloadTemplateForImport(importFieldsData).then((excel) => {
       const blob = new Blob([excel], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      const fileName = `${this.props.name || '问题'}导入模板.xlsx`;
+      const fileName = `${this.props.name || '工作项'}导入模板.xlsx`;
       FileSaver.saveAs(blob, fileName);
     });
   };
@@ -218,7 +218,7 @@ class ImportIssue extends Component {
           <span className="c7n-importIssue-text">
             导入失败
             <span style={{ color: '#FF0000' }}>{failCount}</span>
-            {`${this.props.name || '问题'} `}
+            {`${this.props.name || '工作项'} `}
             <a href={fileUrl}>
               点击下载失败详情
             </a>
@@ -231,7 +231,7 @@ class ImportIssue extends Component {
           <span className="c7n-importIssue-text">
             导入成功
             <span style={{ color: '#0000FF' }}>{successCount}</span>
-            {`${this.props.name || '问题'}`}
+            {`${this.props.name || '工作项'}`}
           </span>
         </div>
       );
@@ -423,7 +423,7 @@ class ImportIssue extends Component {
             </>
           )}
         >
-          {`您必须使用模板文件，录入${this.props.name || '问题'}信息。`}
+          {`您必须使用模板文件，录入${this.props.name || '工作项'}信息。`}
           <ImportFields
             importFieldsRef={this.importFieldsRef}
             setReRender={this.handleSetReRender}
@@ -436,7 +436,7 @@ class ImportIssue extends Component {
         {id && <Divider />}
         {id && (
           <ImportIssueForm
-            title={`导入${this.props.name || '问题'}`}
+            title={`导入${this.props.name || '工作项'}`}
           >
             <div style={{ marginTop: 10 }}>
               上次导入共导入
@@ -482,7 +482,7 @@ const handleOpenImport = (props) => {
     className: 'c7n-importIssue',
     maskClosable: false,
     key: Modal.key(),
-    title: `导入${props.name || '问题'}`,
+    title: `导入${props.name || '工作项'}`,
     style: {
       width: 740,
     },

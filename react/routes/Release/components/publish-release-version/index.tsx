@@ -36,7 +36,7 @@ const PublishVersion: React.FC<{ modal?: IModalProps } & PublishVersionModalWith
     fields: [
       {
         name: 'unsolvedIssue',
-        label: '未解决的问题',
+        label: '未解决的工作项',
         type: 'string' as any,
         required: publishDetailData.fixIssueCount,
       },
@@ -77,7 +77,7 @@ const PublishVersion: React.FC<{ modal?: IModalProps } & PublishVersionModalWith
       params: {
         paramType: 'version',
         paramId: data.versionId,
-        paramName: `版本${data.name}中的问题`,
+        paramName: `版本${data.name}中的工作项`,
       },
     }, { blank: true });
   };
@@ -91,7 +91,7 @@ const PublishVersion: React.FC<{ modal?: IModalProps } & PublishVersionModalWith
             role="none"
             onClick={handleGoIssue}
           >
-            {`这个版本还有 ${publishDetailData.fixIssueCount} 个没有解决的问题。`}
+            {`这个版本还有 ${publishDetailData.fixIssueCount} 个没有解决的工作项。`}
           </span>
         </div>
       ) : ''}
@@ -101,7 +101,7 @@ const PublishVersion: React.FC<{ modal?: IModalProps } & PublishVersionModalWith
             {hasUnSolvedIssue ? (
               <SelectBox name="unsolvedIssue" className={styles.selectBox}>
                 <SelectBox.Option value="ignore">忽略并继续发布</SelectBox.Option>
-                <SelectBox.Option value="newVersion" disabled={disabledMoveNewVersion}>移动问题到版本</SelectBox.Option>
+                <SelectBox.Option value="newVersion" disabled={disabledMoveNewVersion}>移动工作项到版本</SelectBox.Option>
               </SelectBox>
             ) : null}
             {hasUnSolvedIssue && !disabledMoveNewVersion && ds.current?.get('unsolvedIssue') === 'newVersion' ? (

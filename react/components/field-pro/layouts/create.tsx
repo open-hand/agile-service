@@ -183,7 +183,7 @@ const fieldMap = {
   ...systemFieldConfigMap,
 };
 
-/** 创建问题字段实例 */
+/** 创建工作项字段实例 */
 const getCreateFields = getFieldsInstance<IFieldBaseConfig, typeof AgileComponentMapWithPro>({ SystemComponents: AgileComponentMapWithPro, CustomComponents: CreateCustomFieldMap });
 
 // export { fieldMap };

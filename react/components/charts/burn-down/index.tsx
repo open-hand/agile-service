@@ -43,7 +43,7 @@ const BurndownChart: React.FC<BurnDownProps> = ({
       result = '故事点';
     }
     if (type === 'issueCount') {
-      result = '问题计数';
+      result = '工作项计数';
     }
     return result;
   };

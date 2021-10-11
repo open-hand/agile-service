@@ -139,7 +139,7 @@ class StartSprint extends Component {
   handleLinkToIssue(paramType) {
     to(LINK_URL.workListIssue, {
       params: {
-        paramName: `${this.props.data.sprintName}冲刺下未预估${paramType === 'storyPoints' ? '故事点的故事' : '工时的问题'}`,
+        paramName: `${this.props.data.sprintName}冲刺下未预估${paramType === 'storyPoints' ? '故事点的故事' : '工时的工作项'}`,
         storyPointsNull: paramType === 'storyPoints',
         remainingTimeNull: paramType === 'remainingTime',
         paramType: 'sprint',
@@ -194,7 +194,7 @@ class StartSprint extends Component {
           {
             isNull(sprintDetail) ? '0' : ''
           }
-          <span>个问题。</span>
+          <span>个工作项。</span>
           {checkInfo.noRemainingTimeIssue > 0 || checkInfo.noStoryPointIssue > 0
             ? (
               <>
@@ -224,7 +224,7 @@ class StartSprint extends Component {
                         style={{ cursor: 'pointer', color: 'var(--primary-color)' }}
                         onClick={() => { this.handleLinkToIssue('remainingTime'); }}
                       >
-                        {`${checkInfo.noRemainingTimeIssue}个问题`}
+                        {`${checkInfo.noRemainingTimeIssue}个工作项`}
                       </span>
                       <span>未预估工时</span>
                     </>

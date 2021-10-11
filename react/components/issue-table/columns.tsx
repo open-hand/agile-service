@@ -138,7 +138,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     render: ({ rowData }) => (
       <>
         <TypeTag data={get(rowData, 'issueTypeVO')} style={{ marginRight: 5, marginTop: -2 }} />
-        <Tooltip mouseEnterDelay={0.5} placement="topLeft" title={`问题概要： ${get(rowData, 'summary')}`}>
+        <Tooltip mouseEnterDelay={0.5} placement="topLeft" title={`工作项概要： ${get(rowData, 'summary')}`}>
           <span role="none" className="c7n-agile-table-cell-click" onClick={() => onSummaryClick(rowData)}>
             {get(rowData, 'summary')}
           </span>

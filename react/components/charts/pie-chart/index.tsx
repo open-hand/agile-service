@@ -131,7 +131,7 @@ const PieChart: React.FC<PieChartProps> = ({
       paramName += `、版本为${versions.find((version: IVersion) => version.versionId === chooseId)?.name}`;
     }
 
-    paramName += '下的问题';
+    paramName += '下的工作项';
 
     let paramType: string = type;
     if (type === 'typeCode') {
@@ -181,7 +181,7 @@ const PieChart: React.FC<PieChartProps> = ({
               // @ts-ignore
               otherTooltipRef.current.style.display = 'none';
             }
-            return `<div><span>问题：${value.data.value} 个</span><br/><span>百分比：${(value.data.percent.toFixed(2))}%</span></div>`;
+            return `<div><span>工作项：${value.data.value} 个</span><br/><span>百分比：${(value.data.percent.toFixed(2))}%</span></div>`;
           }
           // @ts-ignore
           if (otherTooltipRef && otherTooltipRef.current) {
@@ -265,7 +265,7 @@ const PieChart: React.FC<PieChartProps> = ({
             <thead>
               <tr>
                 <td>{currentType.title}</td>
-                <td>问题</td>
+                <td>工作项</td>
                 <td style={{ paddingRight: 35 }}>百分比</td>
               </tr>
             </thead>

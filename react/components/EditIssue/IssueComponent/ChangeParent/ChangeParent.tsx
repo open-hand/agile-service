@@ -61,7 +61,7 @@ const ObserverChangeParent = observer(ChangeParent);
 const openChangeParentModal = (props: Props) => {
   Modal.open({
     key: Modal.key(),
-    title: `修改${props.issueNum}的父级问题`,
+    title: `修改${props.issueNum}的父级工作项`,
     children: <ObserverChangeParent {...props} />,
   });
 };

@@ -83,7 +83,7 @@ function DeleteModal(props) {
           <>
             <div>
               <div>
-                删除问题链接:
+                删除工作项链接:
                 <span style={{ margin: '0 10px', fontWeight: 500 }}>{name}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', marginTop: 10 }}>
@@ -95,10 +95,10 @@ function DeleteModal(props) {
                 />
                 当前有
                 <span style={{ margin: '0 5px', color: 'red' }}>{issueCount}</span>
-                个问题使用此问题链接
+                个工作项使用此工作项链接
               </div>
               <div style={{ margin: '10px 0' }}>
-                注意：将会从所有相关的问题中删除此链接，相关的问题可以选择关联到其他链接，或者不关联。
+                注意：将会从所有相关的工作项中删除此链接，相关的工作项可以选择关联到其他链接，或者不关联。
               </div>
             </div>
             <div>
@@ -109,7 +109,7 @@ function DeleteModal(props) {
                   dataSet={deleteModalDs}
                   name="linkId"
                   className="c7n-delete-issueLinkModal-select"
-                  placeholder="请选择一个新的问题链接"
+                  placeholder="请选择一个新的工作项链接"
                 />
               ) : null}
             </div>
@@ -119,7 +119,7 @@ function DeleteModal(props) {
             <>
               确定要删除
               <span style={{ margin: '0 5px', fontWeight: 500 }}>{name}</span>
-              问题链接吗？
+              工作项链接吗？
             </>
           )
       }

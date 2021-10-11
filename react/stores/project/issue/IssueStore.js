@@ -39,7 +39,7 @@ export function getSystemFields(excludeCodes = []) {
     noDisplay: true,
   }, {
     code: 'issueTypeId',
-    name: '问题类型',
+    name: '工作项类型',
     defaultShow: true,
     fieldType: 'multiple',
   }, {
@@ -236,7 +236,7 @@ export function getSystemFieldsInStoryMap(excludeCodes = []) {
     fieldType: 'multiple',
   }, {
     code: 'issueTypeId',
-    name: '问题类型',
+    name: '工作项类型',
     defaultShow: true,
     fieldType: 'multiple',
   }, {
@@ -310,10 +310,10 @@ class IssueStore {
   // 当前加载状态
   @observable loading = false;
 
-  // 创建问题窗口是否展开
+  // 创建工作项窗口是否展开
   @observable createFlag = false;
 
-  // 问题详情是否展开
+  // 工作项详情是否展开
   @observable expand = false;
 
   // 当前选中 Issue 详细信息
