@@ -177,7 +177,7 @@ class BoardApi extends Api<BoardApi> {
     }).catch((err:any) => {
       const { code } = err || {};
       if (code === 'error.stateMachine.executeTransform') {
-        Choerodon.prompt('该工作项项状态已被修改，请刷新看板', 'error');
+        Choerodon.prompt('该工作项状态已被修改，请刷新看板', 'error');
       } else {
         Choerodon.prompt(err.message, 'error');
       }

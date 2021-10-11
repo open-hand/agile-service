@@ -80,7 +80,7 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
           }).catch((err = {}) => {
             setIssueLoading(false);
             if (err.code === 'error.stateMachine.executeTransform') {
-              Choerodon.prompt('该工作项项状态已被修改，请重新打开工作项详情进行状态更改。', 'error');
+              Choerodon.prompt('该工作项状态已被修改，请重新打开工作项详情进行状态更改。', 'error');
             }
           });
       }
