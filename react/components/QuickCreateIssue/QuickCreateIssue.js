@@ -260,7 +260,7 @@ class QuickCreateIssue extends Component {
                 {
                   buttonShow && (
                     <Dropdown overlay={typeList} trigger={['click']}>
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
                         <TypeTag
                           data={this.getCurrentType()}
                         />

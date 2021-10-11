@@ -556,7 +556,7 @@ const CreateIssueBase = observer(({
       }
       case 'assignee': {
         return {
-          extraOptions: defaultAssignee,
+          extraOptions: [defaultAssignee].filter(Boolean),
           onAssigneeMe: (userInfo: User) => {
             setFieldValue('assignee', userInfo.id);
           },

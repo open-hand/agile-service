@@ -183,7 +183,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
                     )}
                     trigger={['click']}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
                       <TypeTag
                         data={currentType as IIssueType}
                       />
