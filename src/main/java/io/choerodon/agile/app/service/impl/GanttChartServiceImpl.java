@@ -741,7 +741,8 @@ public class GanttChartServiceImpl implements GanttChartService {
                                        Map<Long, Long> issueEpicMap,
                                        Map<Long, IssueDTO> issueFeatureMap,
                                        Set<Long> projectIds) {
-        if (GanttDimension.isEpic(dimension)) {
+        if (GanttDimension.isEpic(dimension)
+                && !ObjectUtils.isEmpty(issueIds)) {
             Long programId = queryProgramId(projectId);
             boolean belongProgram = (agilePluginService != null && !ObjectUtils.isEmpty(programId));
             issueEpicMap.putAll(issueMapper.listIssueWithEpicId(projectId, issueIds)
