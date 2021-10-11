@@ -25,7 +25,7 @@ const SelectProject: React.FC<Props> = ({ issue, dataSet, issueTypeDataSet }) =>
       <div className={styles.tip}>
         <Icon type="info-o" />
         <p className={styles.tipText}>
-          由于目标项目与源项目的字段设置不同，在不同项目之间移动工作项项，您可能会丢失部分数据信息。即使您移回源项目，也无法恢复这些数据。
+          由于目标项目与源项目的字段设置不同，在不同项目之间移动工作项，您可能会丢失部分数据信息。即使您移回源项目，也无法恢复这些数据。
         </p>
       </div>
       <div className={styles.form}>

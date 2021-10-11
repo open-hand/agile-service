@@ -498,7 +498,7 @@ class ScrumBoardHome extends Component {
                   this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
                 }).catch((err) => {
                   if (err.code === 'error.stateMachine.executeTransform') {
-                    Choerodon.prompt('该工作项项状态已被修改，请打开父工作项进行状态修改', 'error');
+                    Choerodon.prompt('该工作项状态已被修改，请打开父工作项进行状态修改', 'error');
                   }
                 });
               }}

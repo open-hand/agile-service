@@ -14,7 +14,7 @@ const loseItemMap = new Map([
   ['test', '测试用例'],
   ['doc', '文档'],
   ['backlog', '需求'],
-  ['linkIssue', '工作项项'],
+  ['linkIssue', '工作项'],
 ]);
 const LostFields: React.FC<LostFieldsProps> = ({
   loseItems, lostFields, targetProject, issue,
