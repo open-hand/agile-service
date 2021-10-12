@@ -3,9 +3,9 @@ import { Button } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import { stores } from '@choerodon/boot';
 import IssueSearchStore from '@/components/issue-search/store';
+import useGetAnnouncementHeight from '@/hooks/useGetAnnouncementHeight';
 import FilterItem from './FilterItem';
 import './FilterManage.less';
-import useGetAnnouncementHeight from '@/hooks/useGetAnnouncementHeight';
 
 const { HeaderStore } = stores;
 interface Props {

@@ -258,7 +258,7 @@ class SprintReport extends Component {
         dataIndex: 'priorityId',
         render: (priorityId, record) => (
           <div>
-            <Tooltip mouseEnterDelay={0.5} placement="topLeft" title={`优先级： ${record.priorityVO.name}`}>
+            <Tooltip mouseEnterDelay={0.5} placement="topLeft" title={`优先级： ${record.priorityVO?.name}`}>
               <div style={{ marginRight: 12 }}>
                 <PriorityTag
                   style={{ minWidth: 55 }}

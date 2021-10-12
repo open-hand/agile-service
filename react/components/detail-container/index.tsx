@@ -3,16 +3,14 @@ import React, {
 } from 'react';
 
 import { Animate } from 'choerodon-ui/pro';
-import { stores } from '@choerodon/boot';
 import { usePersistFn } from 'ahooks';
-import { observer, useComputed } from 'mobx-react-lite';
+import { observer } from 'mobx-react-lite';
+import useGetAnnouncementHeight from '@/hooks/useGetAnnouncementHeight';
 import Container, { registerPath } from './Container';
 import PreviewIssueFile from './PreviewIssueFile';
 import DetailContainerContext, { IPreview, IRoute, IRouteWithKey } from './context';
 import openDescriptionConfirm from './openDescriptionConfirm';
-import useGetAnnouncementHeight from '@/hooks/useGetAnnouncementHeight';
 // 默认展示children，push之后再匹配
-const { HeaderStore } = stores;
 export { registerPath };
 export interface DetailEvents {
   [type: string]: (...args: any[]) => void
