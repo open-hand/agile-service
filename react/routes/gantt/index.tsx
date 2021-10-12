@@ -1276,9 +1276,13 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
     // 这里对 data 原数据进行移动，避免创建删除等操作导致排序混乱
 
     if (type === 'sprint' && sourceData._depth === 0) {
+      // 冲刺移动
       rankList && setRankList(produce(rankList, (draft) => {
-        sourceDataIndex = findIndex(draft, (a) => sourceData.record.sprintId);
-        destinationDataIndx = findIndex(draft, (a) => destinationData.record.sprintId);
+        sourceDataIndex = findIndex(draft, (a) => a === sourceData.record.sprintId);
+        destinationDataIndx = findIndex(draft, (a) => a === destinationData.record.sprintId);
+        if ((sourceDataIndex + destinationDataIndx) >= 0) {
+          moveData(draft, sourceDataIndex, destinationDataIndx);
+        }
         console.log('type...', type, draft.length, sourceDataIndex, destinationDataIndx, sourceData.record);
       }));
     } else if (type === 'assignee' && sourceData._depth === 0) {
@@ -1294,7 +1298,6 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
     } else {
       // 问题移动
       setData(produce(data, (draft) => {
-        // 冲刺移动
         sourceDataIndex = findIndex(draft, { issueId: sourceData.record.issueId });
         destinationDataIndx = findIndex(draft, { issueId: destinationData.record.issueId });
         if ((sourceDataIndex + destinationDataIndx) >= 0) {
