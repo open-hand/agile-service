@@ -37,6 +37,7 @@ public class FieldCode {
     public static final String TAG = "tag";
     public static final String ACTUAL_START_TIME = "actualStartTime";
     public static final String ACTUAL_END_TIME = "actualEndTime";
+    public static final String PARTICIPANT = "participant";
 
     public static final String SUB_PROJECT = "subProject";
     public static final String ESTIMATED_START_TIME = "estimatedStartTime";

@@ -43,6 +43,7 @@ public class SystemFieldPageConfig {
         PROCESSOR(FieldCode.PROCESSOR, false, true),
         ACTUAL_START_TIME(FieldCode.ACTUAL_START_TIME, false, true),
         ACTUAL_END_TIME(FieldCode.ACTUAL_END_TIME, false, true),
+        PARTICIPANT(FieldCode.PARTICIPANT, true, true),
         ;
 
 
