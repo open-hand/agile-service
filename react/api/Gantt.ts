@@ -3,7 +3,7 @@ import queryString from 'query-string';
 import { getProjectId } from '@/utils/common';
 
 type IGanttDimension = 'task' | 'assignee' | 'sprint' | 'epic';
-export type IGanttMoveRequestDataPreviousWithNext={
+export type IGanttMoveRequestDataPreviousWithNext = {
   previousId?: string
   nextId: string
 } | {
@@ -66,10 +66,26 @@ class GanttApi {
     });
   }
 
+  loadDimensionRank(searchVO:any) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/gantt/list_dimension`,
+      data: searchVO,
+    });
+  }
+
   move(dragData: IGanttMoveRequestData, searchVO: any) {
     return axios({
       method: 'post',
       url: `${this.prefix}/gantt/move`,
+      data: { ...dragData, searchVO },
+    });
+  }
+
+  moveTopDimension(dragData: Omit<IGanttMoveRequestData, 'instanceId' | 'instanceType'>, searchVO: any) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/gantt/move_dimension`,
       data: { ...dragData, searchVO },
     });
   }
