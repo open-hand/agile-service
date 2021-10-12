@@ -1071,7 +1071,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
     set(quickCreateDataRef.current, defaultKey, value);
   });
 
-  const renderTableBody = useCallback((Component: React.ReactElement) => (
+  const renderTableBody = useCallback((Component: React.ReactElement, ganttStore: any) => (
     <Droppable
       droppableId="table"
       direction="vertical"
@@ -1091,6 +1091,9 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
     >
       {(provided, dropSnapshot) => {
         const { children } = Component.props;
+        if (dropSnapshot.isDraggingOver) {
+          ganttStore.setTableTranslateX(0);
+        }
         return React.cloneElement(Component, {
           ref: (r: any) => {
             (Component as any).ref.current = r;
@@ -1450,7 +1453,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
                   onRow={onRow}
                   onBarClick={onRow.onClick}
                   tableIndent={20}
-                  components={{ mainBody: renderTableBody, tableRow: renderTableRow }}
+                  components={{ tableBody: renderTableBody, tableRow: renderTableRow }}
                   expandIcon={getExpandIcon}
                   renderBar={renderBar}
                   renderInvalidBar={renderInvalidBar}
