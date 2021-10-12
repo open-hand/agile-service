@@ -37,20 +37,22 @@ import getFieldConfig from '@/components/field-pro/layouts/create';
 import { insertField } from './utils';
 
 const { AppState } = stores;
-
+interface CreateIssueBaseCallbackData {
+  data: {
+    [key: string]: any
+  }
+  fieldList: {
+    fieldType: string,
+    value: any,
+    fieldId: string,
+    fieldCode: string,
+  }[]
+  fileList: UploadFile[]
+}
 export interface CreateIssueBaseProps {
-  onSubmit: ({ data, fieldList }: {
-    data: {
-      [key: string]: any
-    }
-    fieldList: {
-      fieldType: string,
-      value: any,
-      fieldId: string,
-      fieldCode: string,
-    }[]
-    fileList: UploadFile[]
-  }) => void,
+  onSubmit: ({ data, fieldList }: CreateIssueBaseCallbackData) => void,
+  /** 返回 boolean 类型则会阻止关闭或 关闭 弹窗 */
+  onAfterSubmitError?: ({ data, fieldList }: CreateIssueBaseCallbackData, errorData: any) => void | Promise<boolean> | boolean,
   modal?: IModalProps,
   projectId?: string,
   defaultTypeCode?: string
@@ -192,6 +194,7 @@ const CreateIssueBase = observer(({
   modal,
   projectId,
   onSubmit,
+  onAfterSubmitError,
   defaultTypeCode = 'story',
   defaultTypeId,
   defaultAssignee,
@@ -526,9 +529,17 @@ const CreateIssueBase = observer(({
       });
 
       values = hooks.reduce((result, hook) => hook(result, data), values);
-      await onSubmit({
-        data: values, fieldList, fileList,
-      });
+      try {
+        await onSubmit({
+          data: values, fieldList, fileList,
+        });
+      } catch (error) {
+        const res = onAfterSubmitError && await onAfterSubmitError({
+          data: values, fieldList, fileList,
+        }, error);
+        return typeof res === 'boolean' ? res : false;
+      }
+
       return true;
     }
     return false;
