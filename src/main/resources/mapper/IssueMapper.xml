@@ -67,6 +67,9 @@
         <collection property="tags" column="issue_id"
                     ofType="io.choerodon.agile.api.vo.business.TagVO"
                     select="queryTagsByIssueId"/>
+        <collection property="participantIds" column="issue_id"
+                    ofType="java.lang.Long"
+                    select="queryParticipantByIssueId"/>
     </resultMap>
 
     <resultMap id="issueSearch" type="io.choerodon.agile.infra.dto.business.IssueSearchDTO">
@@ -290,6 +293,11 @@
         atir.tag_name
         from agile_tag_issue_rel atir
         where atir.issue_id = #{issueId}
+    </select>
+
+    <select id="queryParticipantByIssueId" resultType="java.lang.Long">
+        select participant_id from agile_issue_participant_rel
+        where issue_id = #{issueId}
     </select>
 
     <select id="queryIssueAttachmentByIssueId" resultType="io.choerodon.agile.infra.dto.IssueAttachmentDTO">

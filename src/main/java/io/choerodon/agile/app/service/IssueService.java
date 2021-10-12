@@ -482,4 +482,6 @@ public interface IssueService {
                                        Long organizationId);
 
     void splitIssueNumProjectCodePrefix(SearchVO searchVO, Long projectId);
+
+    void handleUpdateParticipant(List<Long> participantIds, Long projectId, Long issueId);
 }

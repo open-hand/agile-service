@@ -90,6 +90,10 @@ public class IssueSubCreateVO {
     @ApiModelProperty(value = "实际结束时间")
     private Date actualEndTime;
 
+    @ApiModelProperty(value = "参与人")
+    @Encrypt
+    private List<Long> participantIds;
+
     public List<TagVO> getTags() {
         return tags;
     }
@@ -286,5 +290,13 @@ public class IssueSubCreateVO {
 
     public void setActualEndTime(Date actualEndTime) {
         this.actualEndTime = actualEndTime;
+    }
+
+    public List<Long> getParticipantIds() {
+        return participantIds;
+    }
+
+    public void setParticipantIds(List<Long> participantIds) {
+        this.participantIds = participantIds;
     }
 }

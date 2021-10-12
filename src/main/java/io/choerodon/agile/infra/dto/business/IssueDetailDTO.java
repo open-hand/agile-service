@@ -145,6 +145,8 @@ public class IssueDetailDTO {
 
     private Date actualEndTime;
 
+    private List<Long> participantIds;
+
     public String getPriorityCode() {
         return priorityCode;
     }
@@ -668,5 +670,13 @@ public class IssueDetailDTO {
 
     public void setActualEndTime(Date actualEndTime) {
         this.actualEndTime = actualEndTime;
+    }
+
+    public List<Long> getParticipantIds() {
+        return participantIds;
+    }
+
+    public void setParticipantIds(List<Long> participantIds) {
+        this.participantIds = participantIds;
     }
 }

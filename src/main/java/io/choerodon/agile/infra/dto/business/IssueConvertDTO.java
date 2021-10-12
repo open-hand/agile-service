@@ -120,6 +120,8 @@ public class IssueConvertDTO {
 
     private Date actualEndTime;
 
+    private List<Long> participantIds;
+
     public Long getRuleId() {
         return ruleId;
     }
@@ -575,5 +577,13 @@ public class IssueConvertDTO {
 
     public void setActualEndTime(Date actualEndTime) {
         this.actualEndTime = actualEndTime;
+    }
+
+    public List<Long> getParticipantIds() {
+        return participantIds;
+    }
+
+    public void setParticipantIds(List<Long> participantIds) {
+        this.participantIds = participantIds;
     }
 }
