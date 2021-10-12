@@ -13,10 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -117,6 +114,15 @@ public class WorkCalenderServiceImpl implements WorkCalenderService {
         if (workItemSearchVO.getStartTime().after(workItemSearchVO.getEndTime())) {
             throw new CommonException("error.search.time.illegal");
         }
+        if (diffTime(workItemSearchVO.getStartTime(), workItemSearchVO.getEndTime()) > 31) {
+            throw new CommonException("error.search.time.illegal");
+        }
+    }
+
+    private long diffTime(Date startTime, Date endTime) {
+        long diff = endTime.getTime() - startTime.getTime();//这样得到的差值是毫秒级别
+        long days = diff / (1000 * 60 * 60 * 24);
+        return days;
     }
 
     private void handlerProject(Long organizationId, List<Long> projectIds, Long userId, WorkItemSearchVO workItemSearchVO){

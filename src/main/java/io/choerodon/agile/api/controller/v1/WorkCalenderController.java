@@ -28,7 +28,7 @@ public class WorkCalenderController {
     private WorkCalenderService workCalenderService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("查询项目下活跃冲刺中我经办的issue")
+    @ApiOperation("查询组织下活跃冲刺中我经办的issue")
     @PostMapping(value = "/query_parent_issue")
     public ResponseEntity<List<WorkItemVO>> queryAssigneeParentIssueList(@ApiParam(value = "项目id", required = true)
                                                                          @PathVariable(name = "organization_id") Long organizationId,
@@ -39,7 +39,7 @@ public class WorkCalenderController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("查询项目下我经办的issue")
+    @ApiOperation("查询组织下我经办的issue")
     @PostMapping(value = "/query_assignee_issue")
     public ResponseEntity<List<WorkItemVO>> queryAssigneeIssueList(@ApiParam(value = "项目id", required = true)
                                                                          @PathVariable(name = "organization_id") Long organizationId,
