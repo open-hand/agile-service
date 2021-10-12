@@ -98,6 +98,9 @@ public class IssueAssembler extends AbstractAssembler {
         assigneeIdList.add(issueDetailDTO.getCreatedBy());
         assigneeIdList.add(issueDetailDTO.getMainResponsibleId());
         assigneeIdList.add(issueDetailDTO.getLastUpdatedBy());
+        if (!CollectionUtils.isEmpty(issueDetailDTO.getParticipantIds())) {
+            assigneeIdList.addAll(issueDetailDTO.getParticipantIds());
+        }
         Boolean issueCommentCondition = CollectionUtils.isNotEmpty(issueVO.getIssueCommentVOList());
         if (Boolean.TRUE.equals(issueCommentCondition)) {
             assigneeIdList.addAll(issueVO.getIssueCommentVOList().stream().map(IssueCommentVO::getUserId).collect(Collectors.toList()));
@@ -159,6 +162,17 @@ public class IssueAssembler extends AbstractAssembler {
         issueVO.setUpdater(updaterUserDO);
         // 添加主要负责人、测试负责人信息
         issueVO.setMainResponsible(userMessageDOMap.get(issueDetailDTO.getMainResponsibleId()));
+        // 添加参与人信息
+        if (!CollectionUtils.isEmpty(issueDetailDTO.getParticipantIds())) {
+            List<UserMessageDTO> participants = new ArrayList<>();
+            for (Long participantId : issueDetailDTO.getParticipantIds()) {
+                UserMessageDTO userMessageDTO = userMessageDOMap.get(participantId);
+                if (!ObjectUtils.isEmpty(userMessageDTO)) {
+                    participants.add(userMessageDTO);
+                }
+            }
+            issueVO.setParticipants(participants);
+        }
     }
 
     /**

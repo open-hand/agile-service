@@ -312,6 +312,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
     @Value("${services.chain.max-depth:20}")
     private int triggerMaxDepth;
+    @Autowired
+    private IssueParticipantRelService issueParticipantRelService;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -329,6 +331,15 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         handleCreateVersionIssueRel(issueCreateVO.getVersionIssueRelVOList(), projectInfoDTO.getProjectId(), issueId);
         handleCreateIssueLink(issueCreateVO.getIssueLinkCreateVOList(), projectInfoDTO.getProjectId(), issueId);
         handleCreateTagIssueRel(issueCreateVO.getTags(), projectInfoDTO.getProjectId(), issueId);
+        // 处理参与人
+        handlerParticipantRel(issueConvertDTO, projectInfoDTO.getProjectId());
+    }
+
+    private void handlerParticipantRel(IssueConvertDTO issueConvertDTO, Long projectId) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        if (!CollectionUtils.isEmpty(issueConvertDTO.getParticipantIds())) {
+            issueParticipantRelService.createParticipantRel(issueConvertDTO.getIssueId(), projectId, issueConvertDTO.getParticipantIds());
+        }
     }
 
     private void handleCreateTagIssueRel(List<TagVO> tags, Long projectId, Long issueId) {
@@ -873,6 +884,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (issueUpdateVO.getTags() != null) {
             this.self().handleUpdateTagIssueRel(issueUpdateVO.getTags(), projectId, issueId);
         }
+        if(issueUpdateVO.getParticipantIds() != null){
+            this.self().handleUpdateParticipant(issueUpdateVO.getParticipantIds(), projectId, issueId);
+        }
         return issueId;
     }
 
@@ -889,6 +903,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         if (issueUpdateVO.getTags() != null) {
             this.self().handleUpdateTagIssueRel(issueUpdateVO.getTags(), projectId, issueId);
+        }
+        if(issueUpdateVO.getParticipantIds() != null){
+            this.self().handleUpdateParticipant(issueUpdateVO.getParticipantIds(), projectId, issueId);
         }
         return issueId;
     }
@@ -908,6 +925,15 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public void handleUpdateTagIssueRel(List<TagVO> tags, Long projectId, Long issueId) {
         if (agilePluginService != null) {
             agilePluginService.updateTagIssueRel(tags, projectId, issueId);
+        }
+    }
+
+    @Override
+    public void handleUpdateParticipant(List<Long> participantIds, Long projectId, Long issueId) {
+        if(!participantIds.isEmpty()){
+            issueParticipantRelService.updateParticipantRel(issueId, projectId, participantIds);
+        } else {
+            issueParticipantRelService.deleteParticipantRel(issueId, projectId);
         }
     }
 

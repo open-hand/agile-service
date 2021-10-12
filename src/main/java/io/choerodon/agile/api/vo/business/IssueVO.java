@@ -270,6 +270,9 @@ public class IssueVO {
 
     private UserMessageDTO mainResponsible;
 
+    @ApiModelProperty(value = "参与人")
+    private List<UserMessageDTO> participants;
+
     private String environment;
 
     private List<TagVO> tags;
@@ -992,5 +995,13 @@ public class IssueVO {
 
     public void setActualEndTime(Date actualEndTime) {
         this.actualEndTime = actualEndTime;
+    }
+
+    public List<UserMessageDTO> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(List<UserMessageDTO> participants) {
+        this.participants = participants;
     }
 }

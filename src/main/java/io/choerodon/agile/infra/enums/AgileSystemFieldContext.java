@@ -33,6 +33,7 @@ public enum AgileSystemFieldContext {
     TAG(FieldCode.TAG,"story,bug,task,sub_task"),
     ACTUAL_START_TIME(FieldCode.ACTUAL_START_TIME,"story,issue_epic,bug,task,sub_task"),
     ACTUAL_END_TIME(FieldCode.ACTUAL_END_TIME,"story,issue_epic,bug,task,sub_task"),
+    PARTICIPANT(FieldCode.PARTICIPANT,"story,issue_epic,bug,task,sub_task"),
     ;
     private String fieldCode;
     private String context;

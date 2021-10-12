@@ -152,6 +152,10 @@ public class DataLogAspect {
     private static final String FIELD_ENVIRONMENT = "environment";
     private static final String FIELD_MAIN_RESPONSIBLE = "mainResponsible";
     private static final String MAIN_RESPONSIBLE_ID_FIELD = "mainResponsibleId";
+    private static final String PARTICIPANT_DELETE = "deleteParticipant";
+    private static final String PARTICIPANT_CREATE = "createParticipant";
+    private static final String PARTICIPANT_UPDATE = "updateParticipant";
+    private static final String FIELD_PARTICIPANT = "participant";
 
 
     @Autowired
@@ -204,6 +208,8 @@ public class DataLogAspect {
     private StaticFileIssueRelMapper staticFileIssueRelMapper;
     @Autowired
     private LookupValueService lookupValueService;
+    @Autowired
+    private IssueParticipantRelMapper issueParticipantRelMapper;
 
     /**
      * 定义拦截规则：拦截Spring管理的后缀为ServiceImpl的bean中带有@DataLog注解的方法。
@@ -297,6 +303,15 @@ public class DataLogAspect {
                     case STATIC_FILE_REL_DELETE:
                         handleStaticFileRelDelete(args);
                         break;
+                    case PARTICIPANT_CREATE:
+                        handlerParticipantCreate(args);
+                        break;
+                    case PARTICIPANT_UPDATE:
+                        handlerParticipantUpdate(args);
+                        break;
+                    case PARTICIPANT_DELETE:
+                        handlerParticipantDelete(args);
+                        break;
                     default:
                         break;
                 }
@@ -369,6 +384,78 @@ public class DataLogAspect {
             throw new CommonException(ERROR_METHOD_EXECUTE, e);
         }
         return result;
+    }
+
+    private void handlerParticipantCreate(Object[] args) {
+        Long projectId = (Long) args[1];
+        Long issueId = (Long) args[0];
+        List<Long> participantIds = (List<Long>) args[2];
+        if (!CollectionUtils.isEmpty(participantIds) && issueId != null && projectId != null) {
+            List<UserDTO> userDTOS = userService.listUsersByIds(participantIds.toArray(new Long[participantIds.size()]));
+            String newString = userDTOS.stream().map(UserDTO::getRealName).collect(Collectors.joining(","));
+            String newValue = participantIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+            createDataLog(projectId, issueId,
+                    FIELD_PARTICIPANT,
+                    null,
+                    newString,
+                    null,
+                    newValue);
+        }
+    }
+
+    private void handlerParticipantUpdate(Object[] args) {
+        Long projectId = (Long) args[1];
+        Long issueId = (Long) args[0];
+        List<Long> participantIds = (List<Long>) args[2];
+        if (!CollectionUtils.isEmpty(participantIds) && issueId != null && projectId != null) {
+            String oldString = null;
+            String oldValue = null;
+            List<Long> allUserIds = new ArrayList<>();
+            allUserIds.addAll(participantIds);
+            //查询原来的参与人
+            List<Long> oldParticipants = issueParticipantRelMapper.listByIssueId(projectId, issueId);
+            if (!CollectionUtils.isEmpty(oldParticipants)) {
+                allUserIds.addAll(oldParticipants);
+                oldValue = oldParticipants.stream().map(String::valueOf).collect(Collectors.joining(","));
+            }
+            List<UserDTO> userDTOS = userService.listUsersByIds(allUserIds.toArray(new Long[allUserIds.size()]));
+            String newString = userDTOS.stream()
+                    .filter(v -> participantIds.contains(v.getId()))
+                    .map(UserDTO::getRealName).collect(Collectors.joining(","));
+            String newValue = participantIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+            if (!CollectionUtils.isEmpty(oldParticipants)) {
+                oldString = userDTOS.stream()
+                        .filter(v -> oldParticipants.contains(v.getId()))
+                        .map(UserDTO::getRealName).collect(Collectors.joining(","));
+            }
+            createDataLog(projectId, issueId,
+                    FIELD_PARTICIPANT,
+                    oldString,
+                    newString,
+                    oldValue,
+                    newValue);
+        }
+    }
+
+    private void handlerParticipantDelete(Object[] args) {
+        Long projectId = (Long) args[1];
+        Long issueId = (Long) args[0];
+        List<Long> oldParticipants = issueParticipantRelMapper.listByIssueId(projectId, issueId);
+        String oldString = null;
+        String oldValue = null;
+        if (!CollectionUtils.isEmpty(oldParticipants)) {
+            List<UserDTO> userDTOS = userService.listUsersByIds(oldParticipants.toArray(new Long[oldParticipants.size()]));
+            oldString = userDTOS.stream()
+                    .filter(v -> oldParticipants.contains(v.getId()))
+                    .map(UserDTO::getRealName).collect(Collectors.joining(","));
+            oldValue = oldParticipants.stream().map(String::valueOf).collect(Collectors.joining(","));
+        }
+        createDataLog(projectId, issueId,
+                FIELD_PARTICIPANT,
+                oldString,
+                null,
+                oldValue,
+                null);
     }
 
     private void handleStaticFileRelDelete(Object[] args) {
