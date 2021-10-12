@@ -393,6 +393,9 @@ public class QuickFilterServiceImpl implements QuickFilterService {
             case "last_update_date":
                 sqlQuery.append(" unix_timestamp(" + field + ")" + " " + quickFilterValueVO.getOperation() + " " + "unix_timestamp('" + value + "') ");
                 break;
+            case "participant_id":
+                dealParticipant(field, value, operation, sqlQuery);
+                break;
             default:
                 if(Arrays.asList(EncryptionUtils.FIELD_VALUE).contains(field)){
                     sqlQuery.append(" " + field + " " + quickFilterValueVO.getOperation() + " " + value + " ");
@@ -401,6 +404,22 @@ public class QuickFilterServiceImpl implements QuickFilterService {
                     sqlQuery.append(" " + field + " " + quickFilterValueVO.getOperation() + " " + inSql(operation,value) + " ");
                 }
                 break;
+        }
+    }
+
+    private void dealParticipant(String field, String value, String operation, StringBuilder sqlQuery) {
+        if (NULL_STR.equals(value)) {
+            if (IS.equals(operation)) {
+                sqlQuery.append(" issue_id not in ( select issue_id from agile_issue_participant_rel ) ");
+            } else if (IS_NOT.equals(operation)) {
+                sqlQuery.append(" issue_id in ( select issue_id from agile_issue_participant_rel ) ");
+            }
+        } else {
+            if (NOT_IN.equals(operation)) {
+                sqlQuery.append(" issue_id not in ( select issue_id from agile_issue_participant_rel where participant_id in " + inSql(operation,value) + " ) ");
+            } else {
+                sqlQuery.append(" issue_id in ( select issue_id from agile_issue_participant_rel where " + field + " " + operation + " " + inSql(operation,value) + " ) ");
+            }
         }
     }
 
