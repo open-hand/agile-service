@@ -959,6 +959,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
     if (!flagFailed && createSuccessData) {
       const { subIssue, parentIssueId } = createSuccessData;
       handleCreateSubIssue(subIssue, parentIssueId);
+      run();
     }
   });
 
@@ -1319,11 +1320,6 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
       // 移动是同层级进行移动，因此这里获取的目标节点应该是同层级的,当目标节点为高层级别的，则无效
       const newDestination = getDestinationBar(oldValue.source._depth, destinationBar);
       console.log(oldValue.source.record.summary, oldValue.source._depth, 'drag===>', newDestination, newDestination?.record.summary);
-      // runInAction(() => {
-      //   if (newDestination?.task) {
-      //     newDestination.task.collapsed = true;
-      //   }
-      // });
       draggingStyle.current = newDestination && { transform: `translate(0px, ${oldValue.source.absoluteIndex > newDestination.absoluteIndex ? 34 : -34}px)` };
       draggingBarDestinationBarRef.current = newDestination;
 
@@ -1477,14 +1473,16 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
               <div className={classNames('c7n-gantt-content-body-quick-create', { 'c7n-gantt-content-body-quick-create-open': isCreate })}>
                 <QuickCreateIssue
                   onCreateChange={setIsCreate}
+                  sprintId={sprintIds?.length === 1 ? sprintIds.filter((i) => i !== '0')[0] : undefined}
                   cantCreateEvent={() => {
                     openCreateIssue({
                       ...quickCreateDataRef.current,
-                      onCreate: handleCreateIssue,
+                      onCreate: run,
                     });
                   }}
                   onCreate={(res: any) => {
-                    handleCreateIssue(res);
+                    // handleCreateIssue(res);
+                    run();
                   }}
                   typeIdChange={(id: any) => {
                     handleChangeQuickCreateData('defaultTypeId', id);
