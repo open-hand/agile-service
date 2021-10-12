@@ -654,4 +654,10 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     Set<Long> selectAssigneeIdByIssueIds(@Param("projectId") Long projectId,
                                          @Param("issueIds") List<Long> issueIds);
+
+    List<WorkItemVO> listWorkCalenderParentIssue(@Param("projectIds") List<Long> projectIds, @Param("userId") Long userId, @Param("workItemSearchVO") WorkItemSearchVO workItemSearchVO);
+
+    List<CountVO> countWorkCalenderSubIssueProgress(@Param("projectIds") List<Long> projectIds, @Param("userId") Long userId, @Param("issueIds") List<Long> issueIds);
+
+    List<WorkItemVO> queryAssigneeIssueList(@Param("projectIds") List<Long> projectIds, @Param("userId") Long userId, @Param("workItemSearchVO") WorkItemSearchVO workItemSearchVO);
 }
