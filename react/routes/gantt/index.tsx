@@ -1363,6 +1363,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
               display: true,
               handler: () => {
                 openCreateIssue({
+                  defaultValues: { sprint: sprintIds?.length === 1 ? sprintIds.filter((item) => item !== '0')[0] : undefined },
                   onCreate: run,
                 });
               },
