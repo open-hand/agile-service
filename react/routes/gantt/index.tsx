@@ -203,7 +203,7 @@ const groupBySprint = (data: any[], rankList: string[]) => {
     }
   });
   if (noSprintData.length > 0) {
-    map.set('0', { sprint: { sprintId: 0, sprintName: '未分配' }, disabledDrag: true, children: noSprintData });
+    map.set('0', { sprint: { sprintId: '0', sprintName: '未分配' }, disabledDrag: true, children: noSprintData });
   }
   return [...map.entries()].map(([sprintId, { sprint, disabledDrag, children }]) => ({
     summary: sprint?.sprintName,
@@ -237,7 +237,7 @@ const groupByFeature = (epicChildrenData: any, data: any) => {
     }
   });
   if (noFeatureData.length > 0) {
-    map.set('未分配特性', { feature: { issueId: 0 }, disabledDrag: true, children: noFeatureData });
+    map.set('未分配特性', { feature: { issueId: '0' }, disabledDrag: true, children: noFeatureData });
   }
 
   return [...map.entries()].map(([name, { feature, disabledDrag, children }]) => ({
@@ -1260,6 +1260,11 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
       ...instanceObject,
       ...previousAndNextIdObject,
     };
+    //  未分配永远是最后一个
+    requestData.nextId = Number(requestData.nextId) === 0 ? undefined : requestData.nextId;
+    if (Number(requestData.previousId) === 0) {
+      return;
+    }
     if (['sprint', 'assignee'].includes(type) && sourceData._depth === 0) {
       requestData.currentId = sourceData.record.sprintId || sourceData.record.assigneeId;
     }
