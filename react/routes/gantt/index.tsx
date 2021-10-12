@@ -1151,17 +1151,14 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
       })}
     </Draggable>
   ), [getDragRowStyle]);
-  const handleDragStart = useCallback((initial: any) => {
+  const handleDragStart = usePersistFn((initial: any) => {
     draggingBarDestinationBarRef.current = undefined;
     const dragBar = store.ganttRef.current?.flattenData[Number(initial.draggableId)];
     if (dragBar && dragBar._childrenCount > 0) {
-      runInAction(() => {
-        console.log('runInAction dragBar', dragBar, dragBar.task);
-        dragBar.task.collapsed = true;
-        setDraggingBar({ source: dragBar });
-      });
+      store.ganttRef.current?.setRowCollapse(Number(initial.draggableId), true);
     }
-  }, [store.ganttRef]);
+    setDraggingBar({ source: dragBar });
+  });
 
   const handleDragEnd = useCallback((result: DropResult, provider: ResponderProvided) => {
     setDraggingBar({} as any);
@@ -1174,7 +1171,6 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
     if (!destinationData || !sourceData || !isDragRowDrop(sourceData, destinationData)) {
       return;
     }
-    console.log('destinationData', sourceData.record.summary, destinationData.record.summary);
     console.log(sourceData.record.summary, 'move--->', destinationData.record.summary);
     function getInstanceObject() {
       const instanceId = sourceData._depth > 0 ? sourceData._parent?.record.issueId : 0;
