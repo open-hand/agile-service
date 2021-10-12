@@ -171,6 +171,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         //查询没有额外筛选条件的当前维度当前基准的排序
         LinkedHashMap<Long, String> issueWithRankMap =
                 queryIssueListByInstanceType(projectId, searchWithRequiredFilter, instanceId, instanceType, dimension, currentId);
+        validateMoveId(issueWithRankMap, previousId, nextId, currentId);
         if (nextId == null) {
             nextId = queryNextIdByPreviousId(previousId, issueWithRankMap);
         }
@@ -179,9 +180,6 @@ public class GanttChartServiceImpl implements GanttChartService {
             //该维度没有设置排序，currentId设置为RankUtil.mid()
             currentRank = RankUtil.mid();
         } else {
-            if(!issueWithRankMap.containsKey(nextId)) {
-                throw new CommonException("error.gantt.move.illegal.nextId");
-            }
             String nextRank = issueWithRankMap.get(nextId);
             if (StringUtils.isEmpty(nextRank)) {
                 nextRank =
@@ -198,6 +196,21 @@ public class GanttChartServiceImpl implements GanttChartService {
         updateGanttIssueRank(currentId, organizationId, projectId, instanceId, instanceType, dimension, currentRank);
     }
 
+    private void validateMoveId(LinkedHashMap<Long, String> rankMap,
+                                Long previousId,
+                                Long nextId,
+                                Long currentId) {
+        if(!ObjectUtils.isEmpty(previousId) && !rankMap.containsKey(previousId)) {
+            throw new CommonException("error.gantt.move.illegal.previousId");
+        }
+        if (!ObjectUtils.isEmpty(nextId) && !rankMap.containsKey(nextId)) {
+            throw new CommonException("error.gantt.move.illegal.nextId");
+        }
+        if (!rankMap.containsKey(currentId)) {
+            throw new CommonException("error.gantt.move.illegal.currentId");
+        }
+    }
+
     @Override
     public void moveDimension(Long projectId,
                               GanttDimensionMoveVO ganttDimensionMoveVO) {
@@ -210,6 +223,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         Long currentId = ganttDimensionMoveVO.getCurrentId();
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         LinkedHashMap<Long, String> instanceRankMap = queryInstanceRankMap(projectId, searchWithRequiredFilter, dimension);
+        validateMoveId(instanceRankMap, previousId, nextId, currentId);
         if (nextId == null) {
             nextId = queryNextIdByPreviousId(previousId, instanceRankMap);
         }
@@ -218,9 +232,6 @@ public class GanttChartServiceImpl implements GanttChartService {
             //该维度没有设置排序，currentId设置为RankUtil.mid()
             currentRank = RankUtil.mid();
         } else {
-            if(!instanceRankMap.containsKey(nextId)) {
-                throw new CommonException("error.gantt.move.illegal.nextId");
-            }
             String nextRank = instanceRankMap.get(nextId);
             if (StringUtils.isEmpty(nextRank)) {
                 nextRank =
