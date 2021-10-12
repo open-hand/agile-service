@@ -5059,4 +5059,127 @@
         and assignee_id != 0
     </select>
 
+    <select id="listWorkCalenderParentIssue" resultType="io.choerodon.agile.api.vo.WorkItemVO">
+        select
+          ai.issue_id,
+          ai.summary,
+          ai.estimated_start_time,
+          ai.estimated_end_time,
+          ai.project_id
+        from (
+          select
+           aisr.issue_id
+          from agile_issue_sprint_rel aisr,agile_sprint asp
+          where
+           aisr.sprint_id = asp.sprint_id
+           and asp.project_id in
+           <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+               #{projectId}
+           </foreach>
+           and asp.status_code = 'started'
+        ) aisp
+        join agile_issue ai on ai.issue_id = aisp.issue_id
+        where
+        ai.type_code in ('story', 'bug', 'task')
+        and ai.estimated_start_time is not null
+        and ai.estimated_end_time is not null
+        and (ai.relate_issue_id is null or ai.relate_issue_id = 0)
+        <if test="workItemSearchVO.params != null">
+          and ai.summary LIKE CONCAT(CONCAT('%' ,#{workItemSearchVO.params}) ,'%') )
+        </if>
+        <if test="workItemSearchVO.assigneeFilter != null and workItemSearchVO.assigneeFilter.size > 0">
+            and (
+            <if test="workItemSearchVO.assigneeFilter.contains('assignee')">
+               ai.assignee_id = #{userId}
+            </if>
+            )
+        </if>
+    </select>
+
+    <select id="countWorkCalenderSubIssueProgress" resultType="io.choerodon.agile.api.vo.CountVO">
+        select
+            aii.parent_issue_id as id,
+            COUNT( CASE WHEN aii.is_completed = 1 THEN aii.issue_id END) as completedCount,
+            COUNT(aii.issue_id) as totalCount
+        from (
+          <include refid="selectSubIssue"/>
+         ) aii
+        group by aii.parent_issue_id
+   </select>
+
+    <select id="queryAssigneeIssueList" resultType="io.choerodon.agile.api.vo.WorkItemVO">
+        select
+            ai.issue_id,
+            ai.summary,
+            ai.estimated_start_time,
+            ai.estimated_end_time,
+            ai.project_id,
+            ai.priority_id,
+            ai.assignee_id,
+            ai.status_id
+        from agile_issue ai
+        where
+        ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+            #{projectId}
+        </foreach>
+        and ai.type_code in ('story', 'bug', 'task', 'sub_task')
+        and ai.estimated_start_time is not null
+        and ai.estimated_end_time is not null
+        <if test="workItemSearchVO.startTime != null and workItemSearchVO.endTime != null">
+            and ai.estimated_start_time between #{workItemSearchVO.startTime} and  #{workItemSearchVO.endTime}
+        </if>
+
+        <if test="workItemSearchVO.filterIssueId != null">
+            and (
+                ai.issue_id = #{workItemSearchVO.filterIssueId}
+                or ai.parent_issue_id = #{workItemSearchVO.filterIssueId}
+                or ai.relate_issue_id = #{workItemSearchVO.filterIssueId}
+            )
+        </if>
+
+        <if test="workItemSearchVO.assigneeFilter != null and workItemSearchVO.assigneeFilter.size > 0">
+            and (
+            <if test="workItemSearchVO.assigneeFilter.contains('assignee')">
+                ai.assignee_id = #{userId}
+            </if>
+            )
+        </if>
+    </select>
+
+   <sql id="selectSubIssue">
+       (
+           select
+               ai.parent_issue_id,
+               ais.is_completed,
+               ai.issue_id
+           FROM agile_issue ai
+           LEFT JOIN agile_issue_status ais ON ais.status_id = ai.status_id AND ais.project_id = ai.project_id
+           where ai.project_id in
+           <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+               #{projectId}
+           </foreach>
+           and ai.type_code = 'sub_task'
+           and ai.parent_issue_id in
+           <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+               #{issueId}
+           </foreach>
+       ) union all (
+           select
+               ai.relate_issue_id as parent_issue_id,
+               ais.is_completed,
+               ai.issue_id
+           FROM agile_issue ai
+           LEFT JOIN agile_issue_status ais ON ais.status_id = ai.status_id AND ais.project_id = ai.project_id
+           where ai.project_id in
+           <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+               #{projectId}
+           </foreach>
+           and ai.type_code = 'bug'
+           and ai.relate_issue_id in
+           <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+               #{issueId}
+           </foreach>
+       )
+   </sql>
 </mapper>
