@@ -7,7 +7,7 @@ import { User } from '@/common/types';
  */
 export function mainValueTransformUserAndRole(value: any, submitProcess: boolean = false) {
   const { newUsers = [], newRoles = [] } = groupBy(value || [], (item) => (String(item).indexOf('role-') === 0 ? 'newRoles' : 'newUsers'));
-  const processNewRoles = newRoles.map((item:any) => String(item).split('role-')[1]);
+  const processNewRoles = (newRoles as any[]).map((item: string) => String(item).split('role-')[1]);
   if (newUsers.length > 0 && !submitProcess) {
     processNewRoles.push('specificUser');
   }
