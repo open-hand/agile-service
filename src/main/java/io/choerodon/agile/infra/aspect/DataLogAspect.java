@@ -390,7 +390,7 @@ public class DataLogAspect {
         Long projectId = (Long) args[1];
         Long issueId = (Long) args[0];
         List<Long> participantIds = (List<Long>) args[2];
-        if(!CollectionUtils.isEmpty(participantIds) && issueId != null && projectId != null){
+        if (!CollectionUtils.isEmpty(participantIds) && issueId != null && projectId != null) {
             List<UserDTO> userDTOS = userService.listUsersByIds(participantIds.toArray(new Long[participantIds.size()]));
             String newString = userDTOS.stream().map(UserDTO::getRealName).collect(Collectors.joining(","));
             String newValue = participantIds.stream().map(String::valueOf).collect(Collectors.joining(","));
@@ -407,14 +407,14 @@ public class DataLogAspect {
         Long projectId = (Long) args[1];
         Long issueId = (Long) args[0];
         List<Long> participantIds = (List<Long>) args[2];
-        if(!CollectionUtils.isEmpty(participantIds) && issueId != null && projectId != null){
+        if (!CollectionUtils.isEmpty(participantIds) && issueId != null && projectId != null) {
             String oldString = null;
             String oldValue = null;
             List<Long> allUserIds = new ArrayList<>();
             allUserIds.addAll(participantIds);
             //查询原来的参与人
             List<Long> oldParticipants = issueParticipantRelMapper.listByIssueId(projectId, issueId);
-            if(!CollectionUtils.isEmpty(oldParticipants)){
+            if (!CollectionUtils.isEmpty(oldParticipants)) {
                 allUserIds.addAll(oldParticipants);
                 oldValue = oldParticipants.stream().map(String::valueOf).collect(Collectors.joining(","));
             }
@@ -423,10 +423,10 @@ public class DataLogAspect {
                     .filter(v -> participantIds.contains(v.getId()))
                     .map(UserDTO::getRealName).collect(Collectors.joining(","));
             String newValue = participantIds.stream().map(String::valueOf).collect(Collectors.joining(","));
-            if(!CollectionUtils.isEmpty(oldParticipants)){
-               oldString = userDTOS.stream()
-                       .filter(v -> oldParticipants.contains(v.getId()))
-                       .map(UserDTO::getRealName).collect(Collectors.joining(","));
+            if (!CollectionUtils.isEmpty(oldParticipants)) {
+                oldString = userDTOS.stream()
+                        .filter(v -> oldParticipants.contains(v.getId()))
+                        .map(UserDTO::getRealName).collect(Collectors.joining(","));
             }
             createDataLog(projectId, issueId,
                     FIELD_PARTICIPANT,
@@ -443,7 +443,7 @@ public class DataLogAspect {
         List<Long> oldParticipants = issueParticipantRelMapper.listByIssueId(projectId, issueId);
         String oldString = null;
         String oldValue = null;
-        if(!CollectionUtils.isEmpty(oldParticipants)){
+        if (!CollectionUtils.isEmpty(oldParticipants)) {
             List<UserDTO> userDTOS = userService.listUsersByIds(oldParticipants.toArray(new Long[oldParticipants.size()]));
             oldString = userDTOS.stream()
                     .filter(v -> oldParticipants.contains(v.getId()))
