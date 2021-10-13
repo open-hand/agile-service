@@ -2300,12 +2300,12 @@ public class ExcelServiceImpl implements ExcelService {
             for (String participant : participants) {
                 List<String> values = excelColumn.getPredefinedValues();
                 Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
-                if (!values.contains(value)) {
-                    cell.setCellValue(buildWithErrorMsg(value, "请输入正确的版本"));
+                if (!values.contains(participant)) {
+                    cell.setCellValue(buildWithErrorMsg(participant, "请输入正确的用户"));
                     addErrorColumn(row.getRowNum(), col, errorRowColMap);
                     break;
                 } else {
-                    participantIds.add(valueIdMap.get(value));
+                    participantIds.add(valueIdMap.get(participant));
                 }
             }
             issueCreateVO.setParticipantIds(participantIds);
