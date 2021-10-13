@@ -10,10 +10,7 @@ import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.MessageDTO;
 import io.choerodon.agile.infra.dto.MessageDetailDTO;
 import io.choerodon.agile.infra.feign.vo.MessageSettingVO;
-import io.choerodon.agile.infra.mapper.FieldValueMapper;
-import io.choerodon.agile.infra.mapper.NoticeDetailMapper;
-import io.choerodon.agile.infra.mapper.NoticeMapper;
-import io.choerodon.agile.infra.mapper.StarBeaconMapper;
+import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +52,9 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Autowired
     private FieldValueMapper fieldValueMapper;
+
+    @Autowired
+    private IssueParticipantRelMapper issueParticipantRelMapper;
 
     private void getIds(List<MessageDTO> result, List<Long> ids) {
         for (MessageDTO messageDTO : result) {
@@ -214,9 +214,20 @@ public class NoticeServiceImpl implements NoticeService {
         addUsersByUsers(res, result, users);
         //通知增加关注人
         addUsersByStarUsers(projectId, res, code, result, issueVO);
+        // 通知增加参与人
+        addUsersByParticipants(projectId, res, code, result, issueVO);
         //通知增加自定义人员字段选项
         addUsersByCustomUserTypes(projectId, res, result, issueVO);
         return result;
+    }
+
+    private void addUsersByParticipants(Long projectId, List<String> res, String code, List<Long> result, IssueVO issueVO) {
+        if (res.contains("participant")) {
+            List<Long> participantIds = issueParticipantRelMapper.listByIssueId(projectId, issueVO.getIssueId());
+            if (!CollectionUtils.isEmpty(participantIds)) {
+                result.addAll(participantIds);
+            }
+        }
     }
 
     @Override
