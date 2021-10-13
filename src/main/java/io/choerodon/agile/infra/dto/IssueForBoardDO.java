@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/14.
@@ -76,6 +77,11 @@ public class IssueForBoardDO {
 
     @Encrypt
     private Long statusId;
+
+    @Encrypt
+    private List<Long> participantIds;
+
+    private List<UserMessageDTO> participants;
 
     public Boolean getStarBeacon() {
         return starBeacon;
@@ -291,5 +297,21 @@ public class IssueForBoardDO {
 
     public void setStatusId(Long statusId) {
         this.statusId = statusId;
+    }
+
+    public List<Long> getParticipantIds() {
+        return participantIds;
+    }
+
+    public void setParticipantIds(List<Long> participantIds) {
+        this.participantIds = participantIds;
+    }
+
+    public List<UserMessageDTO> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(List<UserMessageDTO> participants) {
+        this.participants = participants;
     }
 }

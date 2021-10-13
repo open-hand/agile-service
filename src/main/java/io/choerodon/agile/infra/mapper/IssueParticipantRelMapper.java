@@ -16,4 +16,6 @@ public interface IssueParticipantRelMapper extends BaseMapper<IssueParticipantRe
     void deleteByIssueIdAndParticipantIds(@Param("projectId") Long projectId, @Param("issueId") Long issueId, @Param("participantIds")  List<Long> participantIds);
 
     List<Long> listByIssueId(@Param("projectId") Long projectId, @Param("issueId") Long issueId);
+
+    List<IssueParticipantRelDTO> listParticipantByIssueIds(Long projectId, List<Long> issueIds);
 }
