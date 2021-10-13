@@ -589,13 +589,15 @@
         ai.last_updated_by,
         ai.reporter_id,
         ai.creation_date,
-        ai.last_update_date
+        ai.last_update_date,
+        aipr.participant_id
         from agile_issue ai
         <if test="ganttDefaultOrder">
             left join agile_gantt_issue_rank agir on ai.issue_id = agir.issue_id and agir.dimension = #{dimension}
         </if>
         left join lookup_value alv on ai.color_code = alv.value_code
         left join agile_project_info api on api.project_id = ai.project_id
+        left join agile_issue_participant_rel aipr on ai.issue_id = aipr.issue_id
         where ai.project_id in
         <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
             #{projectId}

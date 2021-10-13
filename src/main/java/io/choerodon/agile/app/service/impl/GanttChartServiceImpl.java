@@ -827,7 +827,9 @@ public class GanttChartServiceImpl implements GanttChartService {
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(new ArrayList<>(userIds), true);
         List<GanttChartVO> result = new ArrayList<>(issueList.size());
         Set<Long> epicIds = new HashSet<>(issueEpicMap.values());
-        Set<Long> featureIds = issueFeatureMap.values().stream().map(IssueDTO::getIssueId).collect(Collectors.toSet());
+        Map<Long, IssueDTO> featureMap = new HashMap<>();
+        issueFeatureMap.values().forEach(x -> featureMap.put(x.getIssueId(), x));
+        Set<Long> featureIds = featureMap.keySet();
         Map<String, String> envMap = lookupValueService.queryMapByTypeCode(FieldCode.ENVIRONMENT);
         Map<Long, PriorityVO> priorityMap = ConvertUtil.getIssuePriorityMap(projectId);
         issueList.forEach(i -> {
@@ -855,7 +857,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             Long assigneeId = i.getAssigneeId();
             setGanttChartAssignee(usersMap, ganttChart, assigneeId);
             setGanttChartCompletedDate(completedDateMap, i, ganttChart);
-            setGanttChartEpicOrFeatureInfo(epicIds, featureIds, i, issueId, ganttChart, thisProjectId, issueFeatureMap);
+            setGanttChartEpicOrFeatureInfo(epicIds, featureIds, i, issueId, ganttChart, thisProjectId, featureMap);
             handlerFieldValue(fieldCodes, fieldCodeValues, ganttChart, i, usersMap, envMap);
             setParentId(ganttChart, i);
         });
@@ -868,12 +870,12 @@ public class GanttChartServiceImpl implements GanttChartService {
                                                 Long issueId,
                                                 GanttChartVO ganttChart,
                                                 Long thisProjectId,
-                                                Map<Long, IssueDTO> issueFeatureMap) {
+                                                Map<Long, IssueDTO> featureMap) {
         if (epicIds.contains(issueId) || featureIds.contains(issueId)) {
             ganttChart.setProgramId(thisProjectId);
             if (featureIds.contains(issueId)) {
                 ganttChart.setFeatureName(issue.getSummary());
-                IssueDTO feature = issueFeatureMap.get(issueId);
+                IssueDTO feature = featureMap.get(issueId);
                 if (!ObjectUtils.isEmpty(feature)) {
                     ganttChart.setFeatureType(feature.getFeatureType());
                 }
