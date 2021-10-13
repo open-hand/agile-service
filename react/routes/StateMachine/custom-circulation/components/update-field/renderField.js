@@ -347,61 +347,65 @@ export default function renderField({
     }
     case 'multiMember':
     case 'member': {
-      if (code === 'assignee') {
-        extraOptionsMap.member = [
-          { id: 'reportor', realName: '报告人' },
-          { id: 'creator', realName: '创建人' },
-          { id: 'operator', realName: '当前操作人' },
-        ];
-      } else if (code === 'reporter') {
-        extraOptionsMap.member = [
-          { id: 'creator', realName: '创建人' },
-          { id: 'operator', realName: '当前操作人' },
+      extraOptionsMap.member = [];
+      if (fieldType === 'member') {
+        if (code === 'assignee') {
+          extraOptionsMap.member = [
+            { id: 'reportor', realName: '报告人', tooltip: false },
+            { id: 'creator', realName: '创建人', tooltip: false },
+            { id: 'operator', realName: '当前操作人', tooltip: false },
+          ];
+        } else if (code === 'reporter') {
+          extraOptionsMap.member = [
+            { id: 'creator', realName: '创建人', tooltip: false },
+            { id: 'operator', realName: '当前操作人', tooltip: false },
 
-        ];
-      } else if (code === 'mainResponsible') {
-        extraOptionsMap.member = [
-          { id: 'reportor', realName: '报告人' },
-          { id: 'creator', realName: '创建人' },
-          { id: 'operator', realName: '当前操作人' },
+          ];
+        } else if (code === 'mainResponsible') {
+          extraOptionsMap.member = [
+            { id: 'reportor', realName: '报告人', tooltip: false },
+            { id: 'creator', realName: '创建人', tooltip: false },
+            { id: 'operator', realName: '当前操作人', tooltip: false },
 
-        ];
-      } else {
-        extraOptionsMap.member = [
-          { id: 'reportor', realName: '报告人' },
-          { id: 'creator', realName: '创建人' },
-          { id: 'operator', realName: '当前操作人' },
-        ];
+          ];
+        } else {
+          extraOptionsMap.member = [
+            { id: 'reportor', realName: '报告人', tooltip: false },
+            { id: 'creator', realName: '创建人', tooltip: false },
+            { id: 'operator', realName: '当前操作人', tooltip: false },
+          ];
+        }
+
+        if (!isProgram && code !== 'mainResponsible') {
+          extraOptionsMap.member.push({
+            id: 'mainResponsible', realName: '主要负责人', tooltip: false,
+          });
+        }
+
+        if (!isProgram && code !== 'assignee') {
+          extraOptionsMap.member.unshift({
+            id: 'assignee', realName: '经办人', tooltip: false,
+          });
+        }
       }
-
-      if (!isProgram && code !== 'mainResponsible') {
-        extraOptionsMap.member.push({
-          id: 'mainResponsible', realName: '主要负责人',
-        });
-      }
-
-      if (!isProgram && code !== 'assignee') {
-        extraOptionsMap.member.unshift({
-          id: 'assignee', realName: '经办人',
-        });
-      }
-
       if (!required || code !== 'reporter') {
-        extraOptionsMap.member.unshift({ id: 'clear', realName: '清空' });
+        extraOptionsMap.member.unshift({ id: 'clear', realName: '清空', tooltip: false });
       }
-
+      const selected = Array.isArray(selectUserMap?.get(code)) ? selectUserMap?.get(code)?.map((item) => item.id) : selectUserMap?.get(code)?.id;
+      console.log('seletced：');
+      console.log(selected, typeof selected);
       return (
         <SelectUser
+          multiple={fieldType === 'multiMember'}
           colSpan={colSpan}
           name={code}
           extraOptions={extraOptionsMap.member}
-          selectedUser={selectUserMap.get(code)}
+          selected={Array.isArray(selectUserMap?.get(code)) ? selectUserMap?.get(code)?.map((item) => item.id?.toString()) : selectUserMap?.get(code)?.id}
           maxTagCount={2}
           maxTagTextLength={10}
           onOption={({ record }) => ({
             disabled: fieldType === 'multiMember' && data[code].value.length && ((data[code].value.indexOf('clear') > -1 && record.get(clearIdMap.get(code) || 'value') !== 'clear') || (data[code].value.indexOf('clear') === -1 && record.get(clearIdMap.get(code) || 'value') === 'clear')),
           })}
-          request={({ filter, page }) => (!isOrganization ? userApi.getAllInProject(filter, page) : userApi.getAllInOrg(filter, page))}
         />
       );
     }

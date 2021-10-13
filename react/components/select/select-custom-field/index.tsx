@@ -1,4 +1,4 @@
-import React, { useMemo, forwardRef } from 'react';
+import React, { useMemo, forwardRef, useCallback } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
@@ -39,14 +39,14 @@ const SelectCustomField: React.FC<SelectCustomFieldProps> = forwardRef(({
   fieldId, fieldOptions, flat, afterLoad, projectId, organizationId, disabledRuleConfig, selected, extraOptions, ruleIds, outside = false, onlyEnabled = true, ...otherProps
 },
 ref: React.Ref<Select>) => {
-  const args = useMemo(() => ({ ruleIds, selected: selected ? castArray(selected).filter(Boolean) : undefined }), [ruleIds, selected]);
-  const hasRule = !disabledRuleConfig && Object.keys(args).filter((key: keyof typeof args) => Boolean(args[key])).length > 0;
+  const args = useMemo(() => ({ ruleIds, fieldOptions, selected: selected ? castArray(selected).filter(Boolean) : undefined }), [fieldOptions, ruleIds, selected]);
+  const hasRule = !disabledRuleConfig && Object.keys(args).filter((key: keyof typeof args) => key !== 'fieldOptions' && Boolean(args[key])).length > 0;
   const needOptions = useMemo(() => [...castArray(otherProps.value), ...(args.selected || [])].filter(Boolean), [otherProps.value, args.selected]);
-  const fakePageRequest = usePersistFn((filter: string = '', page: number = 1, size: number, ensureOptions: string[], enabled: boolean = true) => {
-    if (!fieldOptions) {
+  const fakePageRequest = usePersistFn((filter: string = '', page: number = 1, size: number, ensureOptions: string[], enabled: boolean = true, optionData:any = undefined) => {
+    if (!optionData) {
       return [];
     }
-    const [ensuredOptions, restOptions] = partition(fieldOptions, (item) => ensureOptions.includes(item.id));
+    const [ensuredOptions, restOptions] = partition(optionData, (item) => ensureOptions.includes(item.id));
     const list = restOptions.filter((item) => (enabled ? item.enabled : true)).filter((item) => item.value && item.value?.indexOf(filter) > -1).slice(Math.max((page - 1) * size, 0), (page) * size);
     return {
       // 第一页包含已选的选项
@@ -63,7 +63,7 @@ ref: React.Ref<Select>) => {
       if (hasRule && fieldId) {
         return fieldApi.project(projectId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, SIZE);
       }
-      return fieldOptions ? fakePageRequest(filter, page, SIZE, needOptions, onlyEnabled) : fieldApi.outside(outside).org(organizationId).project(projectId).getFieldOptions(fieldId!, filter, page, SIZE, needOptions, onlyEnabled);
+      return requestArgs?.fieldOptions ? fakePageRequest(filter, page, SIZE, needOptions, onlyEnabled, requestArgs?.fieldOptions) : fieldApi.outside(outside).org(organizationId).project(projectId).getFieldOptions(fieldId!, filter, page, SIZE, needOptions, onlyEnabled);
     },
     middleWare: (data) => {
       if (!extraOptions) {

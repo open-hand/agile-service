@@ -54,7 +54,7 @@ interface IStatusTransferSettingVOS {
   statusId: string
   user: null | User
   userId: null | string
-  userType: 'projectOwner' | 'specifier' | 'other'
+  userType: 'projectOwner' | 'specifier' | 'other' | 'participant'
   verifySubissueCompleted: boolean
 }
 
@@ -62,7 +62,7 @@ interface IStatusNoticeSettingVOS {
   issueTypeId: string,
   projectId: number,
   statusId: string,
-  userTypeList: ['projectOwner', 'assignee', 'reporter', 'specifier'],
+  userTypeList: ['projectOwner', 'assignee', 'reporter', 'specifier', 'participant'],
   userList: { id: string, realName: string }[],
   noticeTypeList: ['WEB_HOOK' | 'EMAIL' | 'WEB'];
   memberList: { id: string, name: string }[]
@@ -144,6 +144,7 @@ const transformedMember = {
   projectOwner: '项目所有者',
   clear: '清空',
   mainResponsible: '主要负责人',
+  participant: '参与人',
 };
 
 const transformedNoticeType = {
@@ -306,7 +307,17 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     ) => item.id === selectedType);
     const selectedTypeCode = selectedTypeItem?.typeCode;
     const selectedTypeName = selectedTypeItem?.name;
-
+    const memberOptions = [];
+    if (selectedTypeCode && !['issue_epic', 'feature'].includes(selectedTypeCode)) {
+      memberOptions.push({
+        code: 'mainResponsible', name: '主要负责人',
+      });
+    }
+    if (selectedTypeCode && selectedTypeCode !== 'feature') {
+      memberOptions.push({
+        code: 'participant', name: '参与人',
+      });
+    }
     const settings: ModalSettings = {
       autoTransform: {
         width: 380,
@@ -370,7 +381,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         // @ts-ignore
         children: <NotifySetting
           record={record}
-          memberOptions={selectedTypeCode && ['issue_epic', 'feature'].includes(selectedTypeCode) ? [] : [{ code: 'mainResponsible', name: '主要负责人' }]}
+          memberOptions={memberOptions}
           selectedType={selectedType}
           customCirculationDataSet={customCirculationDataSet}
         />,
@@ -520,16 +531,26 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const renderConditionSetting = (statusTransferSettingVOS: IStatusTransferSettingVOS[], record: Record) => {
     const verifySubissueCompleted = statusTransferSettingVOS && find(statusTransferSettingVOS, (item) => item.userType === 'other' && item.verifySubissueCompleted);
     const isProjectOwnerExist = statusTransferSettingVOS && find(statusTransferSettingVOS, (item: IStatusTransferSettingVOS) => item.userType === 'projectOwner');
+    const isParticipantExist = statusTransferSettingVOS && find(statusTransferSettingVOS, (item: IStatusTransferSettingVOS) => item.userType === 'participant');
     const assigners = filter((statusTransferSettingVOS || []), (item: IStatusTransferSettingVOS) => item.userType === 'specifier')?.map((item: IStatusTransferSettingVOS) => item.user?.realName) || [];
     let conditionStr = '';
     if (verifySubissueCompleted) {
       conditionStr += `子级任务需全部到已解决状态才能流转到${record.get('name')}`;
     }
-    if (verifySubissueCompleted && (isProjectOwnerExist || (assigners && assigners.length > 0))) {
+    if (verifySubissueCompleted && (isProjectOwnerExist || isParticipantExist || (assigners && assigners.length > 0))) {
       conditionStr += '，';
     }
-    if (isProjectOwnerExist || (assigners && assigners.length > 0)) {
-      conditionStr += `移到工作项到此状态需为：${isProjectOwnerExist ? '项目所有者' : ''}${isProjectOwnerExist && assigners.length > 0 ? '、' : ''}${assigners.join('、')}`;
+    if (isProjectOwnerExist || isParticipantExist || (assigners && assigners.length > 0)) {
+      conditionStr += '移到工作项到此状态需为：';
+      if (isProjectOwnerExist) {
+        conditionStr += '项目所有者';
+      }
+      if (isParticipantExist) {
+        conditionStr += `${isProjectOwnerExist ? '、' : ''}参与人`;
+      }
+      if (assigners && assigners.length > 0) {
+        conditionStr += `${isProjectOwnerExist || isParticipantExist ? '、' : ''}${assigners.join('、')}`;
+      }
     }
     return conditionStr;
   };

@@ -142,6 +142,13 @@ export const systemFields = new Map([
     name: 'Tag',
     fieldType: 'multiple',
   }],
+  ['participantIds', {
+    id: 'participantIds',
+    code: 'participantIds',
+    name: '参与人',
+    fieldType: 'multiMember',
+    emptyValue: EMPTY_VALUE.value_arr,
+  }],
 ]);
 
 function transformValue(dataSet, key, value, format) {

@@ -12,7 +12,7 @@ import { FlatSelect } from '@choerodon/components';
 import { userApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import type { User } from '@/common/types';
-import UserTag from "@/components/tag/user-tag";
+import UserTag from '@/components/tag/user-tag';
 
 const toArray = (something: any) => (Array.isArray(something) ? something : [something]);
 export interface SelectUserProps extends Partial<SelectProps> {
@@ -36,7 +36,7 @@ export interface SelectUserProps extends Partial<SelectProps> {
 }
 
 const SelectUser: React.FC<SelectUserProps> = forwardRef(({
-  selectedUser, extraOptions, dataRef, request, level = 'project', afterLoad, selected, flat, projectId, organizationId, optionRenderer, excludeIds, ...otherProps
+  selectedUser, extraOptions, dataRef, request, level = 'project', afterLoad, selected, onOption, flat, projectId, organizationId, optionRenderer, excludeIds, ...otherProps
 }, ref: React.Ref<Select>) => {
   const selectDataRef = useRef<DataSet>();
   const selectedUserLoadedIds = useCreation(() => toArray(selectedUser)?.filter((i) => i && typeof (i) === 'object' && i.id).map((i) => i.id), [selectedUser]); // 已经存在的用户查询接口会过滤，避免第二页恰好全是选中的数据，但页面无反应
@@ -63,6 +63,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     textField: 'realName',
     valueField: 'id',
     requestArgs: args,
+    onOption,
     request: request || (async ({ filter, page, requestArgs }) => {
       const res = await (level === 'project'
         ? userApi.project(projectId).getProjectUsers(filter, page, requestArgs?.selectedUserIds, requestArgs?.queryFilterIds, 50, projectId)

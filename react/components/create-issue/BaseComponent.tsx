@@ -592,6 +592,12 @@ const CreateIssueBase = observer(({
           selected: dataSet.current?.get('reporter'),
         };
       }
+      case 'participant': {
+        return {
+          hidden: getRuleHidden(field, rules),
+          selected: dataSet.current?.get('participant'),
+        };
+      }
       case 'component':
       case 'fixVersion':
       case 'influenceVersion':

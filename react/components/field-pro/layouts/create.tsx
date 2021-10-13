@@ -23,6 +23,7 @@ import type { IAgileBaseFieldTypeComponentProps } from '../base/component';
 import type {
   IComponentFCWithClassObject, IClassComponentType, IComponentFCWithClassObjectProps, IComponentFCWithClass,
 } from '../base/type';
+import SelectUser from '@/components/select/select-user';
 
 const { AppState } = stores;
 
@@ -51,6 +52,7 @@ const AgileComponentMapWithPro = {
   parentIssueId: SelectParentIssue,
   featureType: SelectFeatureType,
   subProject: SelectTeam,
+  participant: SelectUser,
   estimatedStartTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
   estimatedEndTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
   actualStartTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
@@ -175,7 +177,9 @@ const systemFieldConfigMap: ICreateComponentPropsDistributeProRender<typeof Agil
     },
     valueKey: 'piId',
   },
-
+  participant: {
+    valueKey: 'participantIds',
+  },
 };
 
 const fieldMap = {

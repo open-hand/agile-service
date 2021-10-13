@@ -159,6 +159,12 @@ export function getSystemFields(excludeCodes = []) {
     fieldType: 'member',
   },
   {
+    code: 'participantIds',
+    name: '参与人',
+    defaultShow: false,
+    fieldType: 'multiMember',
+  },
+  {
     code: 'storyPointsNull',
     name: '故事点为空',
     archive: true,

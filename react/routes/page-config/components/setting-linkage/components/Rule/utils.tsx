@@ -60,7 +60,7 @@ export const renderDefaultValue = ({ field, name = 'defaultValue', fieldOptions 
     code: field.code ?? field.fieldCode as string,
     fieldType: fieldType as any,
     // 初次进来没有选项显示值时不显示
-    display: !!fieldOptions.filter((i) => i.meaning).length,
+    // display: !!fieldOptions.filter((i) => i.meaning).length,
     outputs: ['element'],
     props: {
       name,

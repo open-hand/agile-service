@@ -275,7 +275,6 @@ const NotifySetting = ({
         <Select name="noticeTypeList" />
         <Dropdown
           // @ts-ignore
-
           visible={!hidden}
           overlay={(
             <div
