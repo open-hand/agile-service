@@ -2,9 +2,9 @@ import { omit, pick, merge } from 'lodash';
 // @ts-ignore
 import JSONbig from 'json-bigint';
 import { DataSet } from 'choerodon-ui/pro';
+import moment from 'moment';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import { getProjectId } from '@/utils/common';
-import moment from 'moment';
 import {
   IFastSearchCondition, IFastSearchEditData, IFastSearchEditConditionWithEditStatus, IFieldTypeWithSystemType,
 } from './types';
@@ -112,6 +112,9 @@ export function getFastSearchAttribute({
   }
   if (['last_updated_user', 'assignee', 'created_user', 'reporter'].includes(fieldCode)) {
     return { fieldCode, fieldType: 'member', ...otherData };
+  }
+  if (['participant_id'].includes(fieldCode)) {
+    return { fieldCode, fieldType: 'multiMember', ...otherData };
   }
   return { fieldCode, fieldType: (fieldType || type) as IFieldTypeWithSystemType, ...otherData };
 }

@@ -35,6 +35,7 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
     creatorIds,
     updatorIds,
     tags,
+    participantIds,
   } = data;
   const starBeaconIndex = findIndex(quickFilterIds, (item) => item === 'myStarBeacon');
   let starBeacon;
@@ -73,6 +74,7 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
       creatorIds,
       updatorIds,
       tags,
+      participantIds,
     },
     searchArgs: {
       estimatedStartTimeScopeStart: estimatedStartTime[0],
@@ -124,6 +126,7 @@ const getExportFieldCodes = (data: Array<any>): string[] => {
     mainResponsibleUser: 'mainResponsibleName',
     environmentName: 'environmentName',
     tags: 'tags',
+    participants: 'participant',
   };
   // @ts-ignore
   return data.map((code: string) => fieldTransform[code] || code);

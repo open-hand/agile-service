@@ -31,7 +31,7 @@ interface IConditionInfo {
   objectVersionNumber: number
   statusId: string
   userId?: null | number[]
-  userType: 'projectOwner' | 'specifier' | 'other',
+  userType: 'projectOwner' | 'participant' | 'specifier' | 'other',
   verifySubissueCompleted?: boolean
 }
 
@@ -47,6 +47,7 @@ const ConditionSelect: React.FC<ConditionSelectProps> = ({ conditionDataSet }) =
     >
       <Form dataSet={conditionDataSet}>
         <CheckBox name="projectOwner" />
+        <CheckBox name="participant" />
         <CheckBox name="specifier" />
         {
           // @ts-ignore
@@ -118,6 +119,7 @@ const Condition:React.FC<Props> = ({
     autoCreate: true,
     fields: [
       { name: 'projectOwner', label: '项目所有者', type: 'boolean' as FieldType },
+      { name: 'participant', label: '参与人', type: 'boolean' as FieldType },
       { name: 'specifier', label: '被指定人', type: 'boolean' as FieldType },
       {
         name: 'assigners',
@@ -145,6 +147,7 @@ const Condition:React.FC<Props> = ({
       if (res) {
         const assigners = filter(res, (item: IConditionInfo) => item.userType === 'specifier');
         const projectOwnerItem = find(res, (item: IConditionInfo) => item.userType === 'projectOwner');
+        const participantItem = find(res, (item: IConditionInfo) => item.userType === 'participant');
         const subIssueCompletedItem = find(res, (item: IConditionInfo) => item.userType === 'other' && !!item.verifySubissueCompleted);
         if (assigners && assigners.length) {
           current?.set('specifier', true);
@@ -152,6 +155,9 @@ const Condition:React.FC<Props> = ({
         }
         if (projectOwnerItem) {
           current?.set('projectOwner', true);
+        }
+        if (participantItem) {
+          current?.set('participant', true);
         }
         if (subIssueCompletedItem) {
           current?.set('verifySubissueCompleted', true);
@@ -166,13 +172,18 @@ const Condition:React.FC<Props> = ({
       const validate = await conditionDataSet.validate();
       const {
       // @ts-ignore
-        projectOwner, specifier, assigners, verifySubissueCompleted,
+        projectOwner, specifier, assigners, participant, verifySubissueCompleted,
       } = (data && data[0]) || {};
       if (validate) {
         const updateData: ICondition[] = [];
         if (projectOwner) {
           updateData.push({
             type: 'projectOwner',
+          });
+        }
+        if (participant) {
+          updateData.push({
+            type: 'participant',
           });
         }
         if (specifier) {
@@ -202,7 +213,10 @@ const Condition:React.FC<Props> = ({
   // @ts-ignore
   if (data && data.projectOwner) {
     selected.push('项目所有者');
-    // @ts-ignore
+  }
+  // @ts-ignore
+  if (data && data.participant) {
+    selected.push('参与人');
   }
   // @ts-ignore
   if (data && data.specifier) {
@@ -225,7 +239,6 @@ const Condition:React.FC<Props> = ({
         <p className={styles.memberSelectTip}>仅以下成员可移动工作项到此状态</p>
         <Dropdown
           // @ts-ignore
-
           visible={!hidden}
           overlay={(
             <div

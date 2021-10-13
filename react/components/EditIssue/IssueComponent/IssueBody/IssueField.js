@@ -21,6 +21,7 @@ import FieldEnvironment from './Field/FieldEnvironment';
 import FieldTag from './Field/FieldTag';
 import FieldActualStartTime from './Field/FieldActualStartTime';
 import FieldActualEndTime from './Field/FieldActualEndTime';
+import FieldParticipant from './Field/FieldParticipant';
 
 const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 'timeTrace', 'assignee'];
 
@@ -107,6 +108,8 @@ const IssueField = observer((props) => {
         return <FieldUpdater {...props} field={field} />;
       case 'tag':
         return <FieldTag {...props} field={field} />;
+      case 'participant':
+        return <FieldParticipant {...props} field={field} />;
       default:
         return renderNormalField(field);
     }

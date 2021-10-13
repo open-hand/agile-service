@@ -818,6 +818,9 @@ const fieldsMap = new Map([
       },
     },
   }],
+  ['participant', {
+    name: '参与人',
+  }],
 ]);
 
 export default fieldsMap;

@@ -165,6 +165,8 @@ class IssueSearchStore {
           this.handleFilterChange('actualStartTime', [filter.actualStartTimeScopeStart, filter.actualStartTimeScopeEnd]);
         } else if (key === 'actualEndTimeScopeStart' || key === 'actualEndTimeScopeEnd') {
           this.handleFilterChange('actualEndTime', [filter.actualEndTimeScopeStart, filter.actualEndTimeScopeEnd]);
+        } else if (key === 'participantIds') {
+          this.handleFilterChange('participant', filter.participantIds);
         } else {
           this.handleFilterChange(key, value);
         }

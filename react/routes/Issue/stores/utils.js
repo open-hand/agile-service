@@ -41,6 +41,7 @@ function transformSystemFilter(data) {
     remainingTimeNull,
     storyPoints,
     remainingTime,
+    participantIds,
   } = data;
   return {
     advancedSearchArgs: {
@@ -75,6 +76,7 @@ function transformSystemFilter(data) {
       updatorIds,
       appVersion,
       tags,
+      participantIds,
     },
     searchArgs: {
       estimatedStartTimeScopeStart: getDateValue(estimatedStartTime, 0),

@@ -107,6 +107,7 @@ interface IExportSearch {
     creatorIds?: string
     updatorIds?: string[]
     tags?: any[]
+    participantIds?: []
   },
   searchArgs?: {
     estimatedStartTimeScopeStart?: string,

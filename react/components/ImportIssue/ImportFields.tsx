@@ -61,6 +61,7 @@ const projectSystemFields = [
   { code: 'actualEndTime', title: '实际结束时间' },
   { code: 'mainResponsible', title: '主要负责人' },
   { code: 'environment', title: '环境' },
+  { code: 'participant', title: '参与人' },
 ];
 
 const subProjectSystemFields = [
@@ -87,6 +88,7 @@ const subProjectSystemFields = [
   { code: 'actualEndTime', title: '实际结束时间' },
   { code: 'mainResponsible', title: '主要负责人' },
   { code: 'environment', title: '环境' },
+  { code: 'participant', title: '参与人' },
 ];
 
 interface Props {

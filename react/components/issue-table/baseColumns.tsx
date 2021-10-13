@@ -356,6 +356,11 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     dataIndex: 'epicSelfName',
     render: (rowData, getDataMethod = get) => (getDataMethod(rowData, 'epicSelfName') ? <Tooltip title={getDataMethod(rowData, 'epicSelfName')}>{getDataMethod(rowData, 'epicSelfName')}</Tooltip> : <></>),
   }],
+  ['participants', {
+    title: <Tooltip title="参与人">参与人</Tooltip>,
+    dataIndex: 'participants',
+    render: (rowData, getDataMethod = get) => getDataMethod(rowData, 'participants') && <UserTag data={getDataMethod(rowData, 'participants')} />,
+  }],
 ]);
 
 export { systemColumnsMap, getCustomColumn };
