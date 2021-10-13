@@ -1,39 +1,32 @@
-/* eslint-disable no-underscore-dangle */
 /* eslint-disable no-param-reassign */
 import React, {
   useState, useEffect, useCallback, useMemo, useRef,
 } from 'react';
 // eslint-disable-next-line camelcase
 import { unstable_batchedUpdates } from 'react-dom';
-import { Tag } from 'choerodon-ui';
 import { Tooltip, Icon, Button } from 'choerodon-ui/pro';
-import { observer } from 'mobx-react-lite';
-import { runInAction } from 'mobx';
+import { observer, useComputed } from 'mobx-react-lite';
 import {
-  find, findIndex, isNumber, merge, omit, pick, remove, set, some, get, includes, map as lodashMap,
+  find, findIndex, flow, merge, omit, pick, remove, set, some,
 } from 'lodash';
 import produce from 'immer';
 import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 import classNames from 'classnames';
 import {
-  usePersistFn, useDebounceFn, useUpdateEffect, useCreation,
+  usePersistFn, useDebounceFn, useUpdateEffect,
 } from 'ahooks';
 import moment from 'moment';
 import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
-import GanttComponent, { GanttProps, Gantt, GanttRef } from '@choerodon/gantt';
+import GanttComponent, { Gantt, GanttProps, GanttRef } from '@choerodon/gantt';
 import '@choerodon/gantt/dist/gantt.cjs.production.min.css';
 import { FlatSelect } from '@choerodon/components';
 import {
-  DragDropContext, Draggable, DraggableStateSnapshot, DragStart, DragUpdate, Droppable, DropResult, ResponderProvided,
-} from 'react-beautiful-dnd';
-import {
-  ganttApi, IGanttMoveRequestData, IGanttMoveRequestDataPreviousWithNext, issueApi, ListLayoutColumnVO, workCalendarApi,
+  ganttApi, issueApi, workCalendarApi,
 } from '@/api';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
-import TypeTag from '@/components/TypeTag';
 import Loading from '@/components/Loading';
 import SelectSprint from '@/components/select/select-sprint';
 import useFullScreen from '@/common/useFullScreen';
@@ -42,7 +35,7 @@ import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { useIssueSearchStore } from '@/components/issue-search';
 import FilterManage from '@/components/FilterManage';
 import {
-  IFoundationHeader, IIssueType, Issue, User,
+  Issue, User,
 } from '@/common/types';
 import isHoliday from '@/utils/holiday';
 import { list2tree } from '@/utils/tree';
@@ -56,17 +49,18 @@ import IssueDetail from './components/issue-detail';
 import Context from './context';
 import GanttStore from './store';
 import GanttOperation from './components/gantt-operation';
-import GanttSortLabel, { useGanttSortLabel } from './components/gantt-sort-label';
+import { useGanttSortLabel } from './components/gantt-sort-label';
 import './index.less';
 import StatusLinkageWSHandle from '@/components/StatusLinkageWSHandle';
 import { openCustomColumnManageModal } from '@/components/table-cache/column-manage/Modal';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
 import useIsInProgram from '@/hooks/useIsInProgram';
-import QuickCreateSubIssue from '@/components/QuickCreateSubIssue';
 import TableCache, { TableCacheRenderProps } from '@/components/table-cache';
-import useIssueTableFields from '@/hooks/data/useIssueTableFields';
-import { PriorityTag, StatusTag } from '@/components';
-import UserTag from '@/components/tag/user-tag';
+import useGanttColumns from './hooks/useGanttColumns';
+import { ganttLocalMove, getGanttMoveDataOrigin, getGanttMoveSubmitData } from './utils';
+import GanttDragWrapper from './components/gantt-drag-wrapper';
+
+const { Option } = FlatSelect;
 
 dayjs.extend(weekday);
 const typeOptions = [{
@@ -83,46 +77,7 @@ const typeOptions = [{
   label: '按史诗查看',
 }] as const;
 const typeValues = typeOptions.map((t) => t.value);
-type TypeValue = (typeof typeValues)[number];
-const isDisableDrag = (bar: Gantt.Bar) => {
-  const { record } = bar;
-  if (record.disabledDrag || record.create) {
-    return true;
-  }
-  return false;
-};
-/**
- * 拖拽的元素是否能放置到目标位置
- */
-function isDragRowDrop(bar: Gantt.Bar, destinationBar?: Gantt.Bar) {
-  if (bar._depth === destinationBar?._depth && bar._parent?.key === destinationBar?._parent?.key) {
-    return true;
-  }
-  return false;
-}
-
-function getDestinationBar(sourceDepth: number, bar?: Gantt.Bar): Gantt.Bar | undefined {
-  //
-  if (!bar || bar._depth < sourceDepth) {
-    return undefined;
-  }
-  if (bar._depth > sourceDepth && bar._parent?._bar) {
-    return getDestinationBar(sourceDepth, bar._parent?._bar!);
-  }
-  return bar._depth === sourceDepth ? bar : undefined;
-}
-function moveData(data: any[], sourceIndex: number, destinationIndex: number) {
-  const startIndex = destinationIndex < 0 ? data.length + destinationIndex : destinationIndex;
-  const delItem = data.splice(sourceIndex, 1)[0];
-  data.splice(startIndex, 0, delItem);
-}
-const isCanQuickCreateIssue = (record: Gantt.Record<any>) => {
-  const { typeCode } = record.issueTypeVO || {};
-  if (record.group || !typeCode) {
-    return false;
-  }
-  return typeCode === 'story' || (!record.parentId && ['bug', 'task'].includes(typeCode));
-};
+export type IGanttDimensionTypeValue = (typeof typeValues)[number];
 
 const ganttList2Tree = (data: any[]) => list2tree(data, { valueField: 'issueId', parentField: 'parentId' });
 
@@ -282,456 +237,15 @@ const groupByEpic = (data: any, isInProgram: boolean) => {
   }));
 };
 
-const renderTooltip = (user: User) => {
-  const {
-    loginName, realName, email, ldap,
-  } = user || {};
-  return ldap ? `${realName}(${loginName})` : `${realName}(${email})`;
-};
-const { Option } = FlatSelect;
-function renderEpicOrFeature(rowData: any, fieldName: any) {
-  const color = fieldName === 'epicId' ? get(rowData, 'epicColor') : get(rowData, 'featureColor');
-  const name = fieldName === 'epicId' ? get(rowData, 'epicName') : get(rowData, 'featureName');
-  return name ? (
-    <Tooltip title={name}>
-      <span style={{
-        width: '100%',
-        color,
-        borderWidth: '1px',
-        borderStyle: 'solid',
-        borderColor: color,
-        borderRadius: '2px',
-        fontSize: '13px',
-        lineHeight: '20px',
-        verticalAlign: 'middle',
-        padding: '0 4px',
-        display: 'inline-block',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-      }}
-      >
-        {name}
-      </span>
-    </Tooltip>
-  ) : null;
-}
-const renderTag = (listField: any, nameField: any) => (rowData: any) => {
-  const list = get(rowData, listField);
-  if (list) {
-    if (list.length > 0) {
-      // return list;
-      return (
-        <Tooltip title={<div>{lodashMap(list, (item) => item[nameField]).map((name) => <div>{name}</div>)}</div>}>
-          <div style={{ display: 'inline-flex', maxWidth: '100%' }}>
-            <Tag
-              color="blue"
-              style={{
-                maxWidth: 160,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                cursor: 'auto',
-              }}
-            >
-              {list[0][nameField]}
-            </Tag>
-            {list.length > 1 ? <Tag color="blue">...</Tag> : null}
-          </div>
-        </Tooltip>
-      );
-    }
-  }
-  return null;
-};
-const ganttColumnMap = new Map<string, any>([['assignee', (onSortChange: any) => ({
-  width: 85,
-  minWidth: 85,
-  name: 'assignee',
-  label: (
-    <GanttSortLabel dataKey="assigneeId" onChange={onSortChange}>
-      经办人
-    </GanttSortLabel>) as any,
-  render: (record: any) => (
-    <Tooltip title={renderTooltip(record.assignee)}>
-      <span>{record.assignee?.realName}</span>
-    </Tooltip>
-  ),
-}),
-], ['estimatedStartTime', (onSortChange: any) => ({
-  width: 100,
-  minWidth: 100,
-  name: 'estimatedStartTime',
-  label: (
-    <GanttSortLabel dataKey="estimatedStartTime" onChange={onSortChange}>
-      预计开始
-    </GanttSortLabel>) as any,
-  render: (record: any) => record.estimatedStartTime && <Tooltip title={record.estimatedStartTime}><span>{dayjs(record.estimatedStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
-})], ['estimatedEndTime', (onSortChange: any) => ({
-  width: 100,
-  minWidth: 100,
-  name: 'estimatedEndTime',
-  label: '预计结束',
-  render: (record: any) => record.estimatedEndTime && <Tooltip title={record.estimatedEndTime}><span>{dayjs(record.estimatedEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
-}),
-], ['issueNum', {
-  label: <Tooltip title="编号">编号</Tooltip>,
-  name: 'issueNum',
-  width: 120,
-  className: 'c7n-agile-table-cell',
-  sortable: true,
-}],
-['priority', {
-  label: <Tooltip title="优先级">优先级</Tooltip>,
-  name: 'priorityId',
-  className: 'c7n-agile-table-cell',
-  sortable: true,
-  render: (rowData: any) => (
-    <Tooltip mouseEnterDelay={0.5} title={`优先级： ${get(rowData, 'priorityDTO') ? get(rowData, 'priorityDTO').name : ''}`}>
-      <PriorityTag
-        priority={get(rowData, 'priorityVO')}
-        style={{ display: 'inline-flex' }}
-      />
-    </Tooltip>
-  ),
-}], ['createUser', {
-  label: <Tooltip title="创建人">创建人</Tooltip>,
-  name: 'createdBy',
-  render: (rowData: any) => (
-    <div style={{ display: 'inline-flex', height: 40 }}>
-      {
-        get(rowData, 'createUser') && (
-          <UserTag
-            data={get(rowData, 'createUser')}
-          />
-        )
-      }
-    </div>
-  ),
-  sortable: true,
-}],
-['updateUser', {
-  label: <Tooltip title="更新人">更新人</Tooltip>,
-  name: 'lastUpdatedBy',
-  render: (rowData: any) => (
-    <div style={{ display: 'inline-flex', height: 40 }}>
-      {
-        get(rowData, 'updateUser') && (
-          <UserTag
-            data={get(rowData, 'updateUser')}
-          />
-        )
-      }
-    </div>
-  ),
-  sortable: true,
-}],
-['status', {
-  label: <Tooltip title="状态">状态</Tooltip>,
-  name: 'statusId',
-  sortable: true,
-  render: (rowData: any) => (
-    <Tooltip title={get(rowData, 'statusVO')?.name}>
-      <div style={{
-        display: 'inline-flex',
-        overflow: 'hidden',
-      }}
-      >
-        <StatusTag
-          data={get(rowData, 'statusVO')}
-          style={{ display: 'inline-flex' }}
-        />
-      </div>
-    </Tooltip>
-  ),
-}],
-['reporter', {
-  label: <Tooltip title="报告人">报告人</Tooltip>,
-  name: 'reporterId',
-  sortable: true,
-  render: (rowData: any) => (
-    <div style={{ display: 'inline-flex', height: 40 }}>
-      {get(rowData, 'reporterId') && get(rowData, 'reporterId') !== '0' && (
-        <UserTag
-          data={{
-            id: get(rowData, 'reporterId'),
-            tooltip: get(rowData, 'reporterName'),
-            loginName: get(rowData, 'reporterLoginName'),
-            realName: get(rowData, 'reporterRealName'),
-            imageUrl: get(rowData, 'reporterImageUrl'),
-          }}
-        />
-      )}
-    </div>
-  ),
-}],
-['lastUpdateDate', {
-  label: <Tooltip title="最近更新时间">最近更新时间</Tooltip>,
-  width: 170,
-  name: 'lastUpdateDate',
-  sortable: true,
-}],
-['creationDate', {
-  label: <Tooltip title="创建时间">创建时间</Tooltip>,
-  width: 170,
-  name: 'creationDate',
-  sortable: true,
-}],
-['estimatedStartTime', {
-  label: <Tooltip title="预计开始时间">预计开始时间</Tooltip>,
-  width: 170,
-  name: 'estimatedStartTime',
-  sortable: true,
-}],
-['estimatedEndTime', {
-  label: <Tooltip title="预计结束时间">预计结束时间</Tooltip>,
-  width: 170,
-  name: 'estimatedEndTime',
-  sortable: true,
-}],
-['actualStartTime', {
-  label: <Tooltip title="实际开始时间">实际开始时间</Tooltip>,
-  width: 170,
-  name: 'actualStartTime',
-  sortable: true,
-}],
-['actualEndTime', {
-  label: <Tooltip title="实际结束时间">实际结束时间</Tooltip>,
-  width: 170,
-  name: 'actualEndTime',
-  sortable: true,
-}],
-['remainingTime', {
-  label: <Tooltip title="剩余预估时间">剩余预估时间</Tooltip>,
-  width: 170,
-  name: 'remainingTime',
-  sortable: true,
-}],
-['spentWorkTime', {
-  label: <Tooltip title="已耗费时间">已耗费时间</Tooltip>,
-  width: 170,
-  name: 'spentWorkTime',
-}],
-['allEstimateTime', {
-  label: <Tooltip title="总预估时间">总预估时间</Tooltip>,
-  width: 170,
-  name: 'allEstimateTime',
-}],
-['label', {
-  label: <Tooltip title="标签">标签</Tooltip>,
-  name: 'label',
-  render: renderTag('labels', 'labelName'),
-}],
-['component', {
-  label: <Tooltip title="模块">模块</Tooltip>,
-  name: 'component',
-  render: renderTag('components', 'name'),
-}],
-['fixVersion', {
-  label: <Tooltip title="修复的版本">修复的版本</Tooltip>,
-  name: 'fixVersion',
-  render: renderTag('fixVersion', 'name'),
-}],
-['influenceVersion', {
-  label: <Tooltip title="影响的版本">影响的版本</Tooltip>,
-  name: 'influenceVersion',
-  render: renderTag('influenceVersion', 'name'),
-}],
-['sprint', {
-  label: <Tooltip title="冲刺">冲刺</Tooltip>,
-  name: 'sprint',
-  render: renderTag('sprints', 'sprintName'),
-}],
-['storyPoints', {
-  label: <Tooltip title="故事点">故事点</Tooltip>,
-  name: 'storyPoints',
-  render: (rowData: any) => rowData.storyPoints ?? '-',
-  sortable: true,
-}],
-['feature', {
-  label: <Tooltip title="特性">特性</Tooltip>,
-  name: 'featureId',
-  render: (row: any) => renderEpicOrFeature(row, 'featureId'),
-  sortable: true,
-}],
-['epic', {
-  label: <Tooltip title="史诗">史诗</Tooltip>,
-  name: 'epicId',
-  render: (row: any) => renderEpicOrFeature(row, 'epicId'),
-  sortable: true,
-}],
-['mainResponsibleUser', {
-  label: <Tooltip title="主要负责人">主要负责人</Tooltip>,
-  name: 'mainResponsibleId',
-  render: (rowData: any) => rowData.mainResponsibleUser && <UserTag data={rowData.mainResponsibleUser} />,
-  sortable: true,
-}],
-['environmentName', {
-  label: <Tooltip title="环境">环境</Tooltip>,
-  name: 'environment',
-  render: (rowData: any) => rowData.environmentName,
-  sortable: true,
-}],
-['tags', {
-  label: <Tooltip title="Tag">Tag</Tooltip>,
-  name: 'tags',
-  render: (rowData: any) => {
-    const tagShowText = rowData.tags && rowData.tags.map((tag: any) => `${tag.appServiceCode}:${tag.tagName}`).join('、');
-    return tagShowText ? <Tooltip title={tagShowText}>{tagShowText}</Tooltip> : '';
-  },
-}]]);
-const getCustomColumn = (field?: IFoundationHeader) => (field && {
-  label: <Tooltip title={field.title}>{field.title}</Tooltip>,
-  name: `foundation.${field.code}`,
-  sortable: !(field.fieldType === 'multiple' || field.fieldType === 'checkbox' || field.fieldType === 'multiMember'),
-  render: (rowData: any) => {
-    const { fieldType, code } = field;
-    const value = get(get(rowData, 'foundationFieldValue') || {}, code);
-    if (['member', 'multiMember'].includes(fieldType)) {
-      return value && (
-        <div style={{ display: 'inline-flex', verticalAlign: 'middle', height: 40 }}>
-          <UserTag
-            data={value}
-          />
-        </div>
-      );
-    }
-    return (
-      <Tooltip title={value || ''}>
-        <span>{value || ''}</span>
-      </Tooltip>
-    );
-  },
-});
-function getListLayoutColumns(listLayoutColumns: ListLayoutColumnVO[] | null, fields: IFoundationHeader[]): Array<ListLayoutColumnVO & IFoundationHeader & { label: string }> {
-  let res: any[] = [];
-
-  if (listLayoutColumns) {
-    // TODO 过滤已被删除的字段
-    res = [...listLayoutColumns];
-  }
-  fields.forEach(((field) => {
-    const resIndex = findIndex(res, { columnCode: field.code });
-    if (resIndex === -1) {
-      res.push({
-        width: 0,
-        sort: 0,
-        label: field.title,
-        columnCode: field.code,
-        display: false,
-        ...field,
-        // fieldId: field.id,
-      });
-    } else {
-      res[resIndex] = {
-        ...res[resIndex],
-        label: field.title,
-        ...field,
-      };
-    }
-  }));
-  return res;
-}
-const getTableColumns = (visibleColumns: ListLayoutColumnVO[], tableFields: IFoundationHeader[], { onSortChange }: any, openCreateSubIssue: (parentIssue: Issue) => void, onCreateAfter: (createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed?: boolean) => void) => {
-  const tableColumns: GanttProps<Issue>['columns'] = [{
-    flex: 2,
-    minWidth: 300,
-    // width: 300,
-    // @ts-ignore
-    lock: 'left',
-    name: 'summary',
-    label: '名称',
-    render: (record) => {
-      if (record.create) {
-        const parentIssue: Issue = record.parent;
-        const onCreate = (issue: Issue) => onCreateAfter(record.createId, { subIssue: issue, parentIssueId: parentIssue.issueId });
-        return (
-          <span role="none" onClick={(e) => e.stopPropagation()} className="c7n-gantt-content-body-create">
-            <QuickCreateSubIssue
-              mountCreate
-              typeCode={['sub_task', 'bug']}
-              priorityId={parentIssue.priorityVO?.id}
-              parentIssueId={parentIssue.issueId}
-              sprintId={(parentIssue as any).sprint?.sprintId!}
-              cantCreateEvent={() => {
-                onCreateAfter(record.createId, undefined, true);
-                // 这里延迟打开
-                setTimeout(() => {
-                  openCreateIssue({
-                    onCreate,
-                  });
-                }, 110);
-              }}
-              onCreate={onCreate}
-              defaultAssignee={undefined}
-              onAwayClick={(createFn) => {
-                createFn().then((res: boolean) => {
-                  !res && onCreateAfter(record.createId, undefined, true);
-                });
-              }}
-            />
-          </span>
-        );
-      }
-      const isCanCreateIssue = isCanQuickCreateIssue(record);
-      return !record.group ? (
-        // eslint-disable-next-line no-underscore-dangle
-        <span style={{ cursor: 'pointer', color: 'var(--table-click-color)' }} className={classNames('c7n-gantt-content-body-summary')}>
-          <TypeTag iconSize={22} data={record.issueTypeVO} featureType={record.featureType} style={{ marginRight: 5 }} />
-          <Tooltip title={record.summary}>
-            <span style={{ verticalAlign: 'middle', flex: 1 }} className="c7n-gantt-content-body-summary-text">{record.summary}</span>
-          </Tooltip>
-          {isCanCreateIssue && (
-            <Icon
-              type="add"
-              className="c7n-gantt-content-body-parent_create"
-              onClick={(e) => {
-                e.stopPropagation();
-                openCreateSubIssue(record as any);
-              }}
-            />
-          )}
-        </span>
-      ) : (
-        <Tooltip title={record.summary}>
-          <span style={{ color: 'var(--table-click-color)' }}>{record.summary}</span>
-        </Tooltip>
-      );
-    },
-  },
-  ];
-  tableColumns.push(...visibleColumns.map(({ columnCode }) => {
-    const baseColumn = { width: 100 };
-    if (ganttColumnMap.has(columnCode)) {
-      const field = ganttColumnMap.get(columnCode);
-
-      return merge(baseColumn, typeof field === 'function' ? field(onSortChange) as Gantt.Column : field);
-    }
-    return merge(baseColumn, getCustomColumn(find(tableFields, { code: columnCode })));
-  }));
-  return tableColumns;
-};
-const defaultVisibleColumns = ['assignee', 'estimatedStartTime', 'estimatedEndTime'];
-const defaultListLayoutColumns = defaultVisibleColumns.map((code) => ({
-  columnCode: code,
-  display: true,
-}));
-const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
+const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
   const { isInProgram } = useIsInProgram();
   const [data, setData] = useState<any[]>([]);
   const [isCreate, setIsCreate] = useState(false);
-  const [type, setType] = useState<TypeValue>(localPageCacheStore.getItem('gantt.search.type') ?? typeValues[0]);
+  const [type, setType] = useState<IGanttDimensionTypeValue>(localPageCacheStore.getItem('gantt.search.type') ?? typeValues[0]);
   const [rankList, setRankList] = useState<string[] | undefined>(undefined);
-  const [columns, setColumns] = useState<Gantt.Column[]>([]);
-  const { data: tableFields } = useIssueTableFields({ hiddenFieldCodes: ['epicSelfName', 'summary'] });
-  const listLayoutColumns = useMemo(() => getListLayoutColumns(cached?.listLayoutColumns || defaultListLayoutColumns as any, tableFields || []), [cached?.listLayoutColumns, tableFields]);
-  const visibleColumnCodes = useMemo(() => (listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode)), [listLayoutColumns]);
-  const [{ data: sortedList }, sortLabelProps] = useGanttSortLabel();
-
   const [workCalendar, setWorkCalendar] = useState<any>();
-  const [{ source: draggingBar, destination: draggingBarDestinationBar }, setDraggingBar] = useState<{ source?: Gantt.Bar, destination?: Gantt.Bar }>({} as any);
-  const draggingBarDestinationBarRef = useRef<Gantt.Bar>();
-  const draggingStyle = useRef<React.CSSProperties>();
+  const [{ data: sortedList }, onSortChange] = useGanttSortLabel();
+
   const [projectWorkCalendar, setProjectWorkCalendar] = useState<any>();
   const [filterManageVisible, setFilterManageVisible] = useState<boolean>();
   const [loading, setLoading] = useState(false);
@@ -743,7 +257,6 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
   const store = useMemo(() => new GanttStore(), []);
   const { sprintIds } = store;
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
-
   const handleQuickCreateSubIssue = usePersistFn((parentIssue: Issue) => {
     setData(produce(data, (draft) => {
       const targetIndex = findIndex(draft, (issue) => issue.parentId === parentIssue.issueId || issue.issueId === parentIssue.issueId);
@@ -752,7 +265,27 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
       });
     }));
   });
-  const getFilter = usePersistFn(() => {
+  const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {
+    handleCreateIssue(subIssue, parentIssueId, parentIssueId);
+  });
+
+  const handleQuickCreateSubIssueAfter = usePersistFn((createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed = false) => {
+    setData(produce(data, (draft) => {
+      const delCreateIndex = findIndex(draft, { createId });
+      draft.splice(delCreateIndex, 1);
+    }));
+    if (!flagFailed && createSuccessData) {
+      const { subIssue, parentIssueId } = createSuccessData;
+      handleCreateSubIssue(subIssue, parentIssueId);
+      run();
+    }
+  });
+  const {
+    columns, setColumns, visibleColumnCodes, tableWithSortedColumns, listLayoutColumns,
+  } = useGanttColumns({
+    ...props, onSortChange, onCreateSubIssue: handleQuickCreateSubIssue, onAfterCreateSubIssue: handleQuickCreateSubIssueAfter,
+  });
+  const searchFilter = useComputed(() => {
     const filter = issueSearchStore.getCustomFieldFilters();
     filter.otherArgs.sprint = sprintIds;
     filter.searchArgs.dimension = type;
@@ -760,7 +293,8 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
       displayFieldCodes: visibleColumnCodes,
       searchArgs: { tree: type !== 'assignee', dimension: type },
     });
-  });
+  }, [sprintIds]);
+
   const { run, flush } = useDebounceFn(() => {
     (async () => {
       const year = dayjs().year();
@@ -771,8 +305,8 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
       const [workCalendarRes, projectWorkCalendarRes, rankListRes, res] = await Promise.all([
         workCalendarApi.getWorkSetting(year),
         workCalendarApi.getYearCalendar(year),
-        ['sprint', 'assignee'].includes(type) ? ganttApi.loadDimensionRank(getFilter()) : { ids: [] },
-        ganttApi.loadByTask(getFilter(), sortedList),
+        ['sprint', 'assignee'].includes(type) ? ganttApi.loadDimensionRank(searchFilter) : { ids: [] },
+        ganttApi.loadByTask(searchFilter, sortedList),
       ]);
       // setColumns(headers.map((h: any) => ({
       //   width: 100,
@@ -947,24 +481,6 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
     updateInfluenceIssues(issue);
   });
 
-  const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {
-    handleCreateIssue(subIssue, parentIssueId, parentIssueId);
-  });
-
-  const handleQuickCreateSubIssueAfter = usePersistFn((createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed = false) => {
-    setData(produce(data, (draft) => {
-      const delCreateIndex = findIndex(draft, { createId });
-      draft.splice(delCreateIndex, 1);
-    }));
-    if (!flagFailed && createSuccessData) {
-      const { subIssue, parentIssueId } = createSuccessData;
-      handleCreateSubIssue(subIssue, parentIssueId);
-      run();
-    }
-  });
-
-  const tableWithSortedColumns = useMemo(() => getTableColumns(listLayoutColumns.filter((item) => item.display), tableFields || [], sortLabelProps, handleQuickCreateSubIssue, handleQuickCreateSubIssueAfter), [handleQuickCreateSubIssue, handleQuickCreateSubIssueAfter, listLayoutColumns, sortLabelProps, tableFields]);
-
   const handleCopyIssue = usePersistFn((issue: Issue, issueId: string, isSubTask?: boolean, dontCopyEpic?: boolean) => {
     handleCreateIssue(issue, issueId, isSubTask ? issueId : undefined, dontCopyEpic);
     const subIssues = [...(issue.subIssueVOList ?? []), ...(issue.subBugVOList ?? [])];
@@ -1071,265 +587,36 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
     }
     set(quickCreateDataRef.current, defaultKey, value);
   });
-
-  const renderTableBody = useCallback((Component: React.ReactElement, ganttStore: any) => (
-    <Droppable
-      droppableId="table"
-      direction="vertical"
-      mode="virtual"
-      renderClone={(provider, snapshot, rubric) => {
-        const record = store.ganttRef.current?.flattenData[rubric.source.index]?.record;
-        return (
-          <div
-            ref={provider.innerRef}
-            {...provider.draggableProps}
-            {...provider.draggableProps}
-          >
-            {record && tableWithSortedColumns[0]?.render!(record)}
-          </div>
-        );
-      }}
-    >
-      {(provided, dropSnapshot) => {
-        const { children } = Component.props;
-        if (dropSnapshot.isDraggingOver) {
-          ganttStore.setTableTranslateX(0);
-        }
-        return React.cloneElement(Component, {
-          ref: (r: any) => {
-            (Component as any).ref.current = r;
-            provided.innerRef(r);
-          },
-          ...provided.droppableProps,
-          style: { ...Component.props.style, background: dropSnapshot.isDraggingOver ? '#F1F3F6' : undefined } as React.CSSProperties,
-        });
-      }}
-    </Droppable>
-  ), [store.ganttRef, tableWithSortedColumns]);
-
-  /**
-   * 获取拖拽行样式
-   */
-  const getDragRowStyle = useCallback((style: React.CSSProperties, bar: Gantt.Bar, snapshot: DraggableStateSnapshot, dragStyle?: React.CSSProperties): React.CSSProperties => {
-    const baseStyle: React.CSSProperties = { ...style, ...dragStyle };
-    function isNeedDraggingStyle(nextBar?: Gantt.Bar): boolean {
-      if (nextBar?._parent?.key === draggingBarDestinationBar?.key) {
-        return true;
-      }
-      if (nextBar && nextBar._depth > draggingBarDestinationBar!._depth && nextBar?._parent) {
-        return isNeedDraggingStyle(nextBar?._parent._bar!);
-      }
-      return false;
-    }
-    if (draggingBar && draggingBarDestinationBar) {
-      // baseStyle.cursor = 'not-allowed';
-      if (bar.key === draggingBarDestinationBar.key) {
-        merge(baseStyle, draggingStyle.current);
-        return baseStyle;
-      }
-      // if (isDragRowDrop(draggingBar, bar)) {
-      //   merge(baseStyle, dragStyle);
-      //   baseStyle.cursor = undefined;
-      // } else
-      if (isNeedDraggingStyle(bar)) {
-        // console.log('need DraggingStyle', bar.record.summary);
-        merge(baseStyle, draggingStyle.current);
-      }
-      // 如果
-      return baseStyle;
-    }
-    return style;
-  }, [draggingBar, draggingBarDestinationBar]);
-  const renderTableRow = useCallback((row: React.ReactElement, bar: Gantt.Bar) => (
-    <Draggable
-      key={`drag-${bar.absoluteIndex}`}
-      draggableId={String(bar.absoluteIndex)}
-      isDragDisabled={isDisableDrag(bar)}
-      index={bar.absoluteIndex}
-    >
-      {(provided, snapshot) => React.cloneElement(row, {
-        ...provided.dragHandleProps,
-        ...provided.draggableProps,
-        ref: provided.innerRef,
-        style: getDragRowStyle(row.props?.style, bar, snapshot, provided.draggableProps?.style),
-      })}
-    </Draggable>
-  ), [getDragRowStyle]);
-  const handleDragStart = usePersistFn((initial: any) => {
-    draggingBarDestinationBarRef.current = undefined;
-    const dragBar = store.ganttRef.current?.flattenData[Number(initial.draggableId)];
-    if (dragBar && dragBar._childrenCount > 0) {
-      store.ganttRef.current?.setRowCollapse(Number(initial.draggableId), true);
-    }
-    setDraggingBar({ source: dragBar });
-  });
-
-  const handleDragEnd = useCallback((result: DropResult, provider: ResponderProvided) => {
-    setDraggingBar({} as any);
-    if (!result.destination || result.destination.index === result.source.index) {
-      return;
-    }
-    const flattenData = store.ganttRef.current?.flattenData || [];
-    const destinationData = draggingBarDestinationBarRef.current!;
-    const sourceData = flattenData[result.source.index];
-    if (!destinationData || !sourceData || !isDragRowDrop(sourceData, destinationData)) {
-      return;
-    }
-    console.log(sourceData.record.summary, 'move--->', destinationData.record.summary);
-    function getInstanceObject() {
-      const instanceId = sourceData._depth > 0 ? sourceData._parent?.record.issueId : 0;
-      switch (type) {
-        case 'task':
-          return {
-            instanceType: 'task',
-            instanceId,
-          };
-        case 'assignee': {
-          if (sourceData._depth === 0) {
-            return {};
-          }
-          return sourceData._depth === 1 ? {
-            instanceType: 'assignee',
-            instanceId: sourceData._parent?.record.assigneeId,
-          } : {
-            instanceType: 'task',
-            instanceId,
-          };
-        }
-        case 'sprint': {
-          if (sourceData._depth === 0) {
-            return {};
-          }
-          return sourceData._depth === 1 ? {
-            instanceType: 'sprint',
-            instanceId: sourceData._parent?.record.sprintId,
-          } : {
-            instanceType: 'task',
-            instanceId,
-          };
-        }
-        case 'epic': {
-          if (sourceData._depth === 1) {
-            return {
-              instanceType: 'epic',
-              instanceId: sourceData._parent?.record.issueId,
-            };
-          }
-          return sourceData._parent?._depth === 1 && sourceData._parent?.record.groupType === 'feature' ? {
-            instanceType: 'feature',
-            instanceId: sourceData._parent?.record.issueId,
-          } : {
-            instanceType: 'task',
-            instanceId,
-          };
-        }
-        default:
-          break;
-      }
-      return {
-        instanceType: 'task',
-        instanceId: '0',
-      };
-    }
-
-    //  是否有上层级
-    const instanceObject = getInstanceObject();
-    function getSameDepthBar(depth: number, bar?: Gantt.Bar): Gantt.Bar | undefined {
-      console.log('getSameDepthBar', bar?._depth, bar?._depth === depth);
-      return bar?._depth === depth ? bar : undefined;
-    }
-    function getRecordId(r?: Gantt.Record) {
-      if (['sprint', 'assignee'].includes(type) && sourceData._depth === 0) {
-        return r?.sprintId || r?.assigneeId;
-      }
-      return r?.issueId;
-    }
-    // 上一个 下一个
-    const previousAndNextIdObject = {} as IGanttMoveRequestDataPreviousWithNext;
-    if (sourceData.absoluteIndex > destinationData.absoluteIndex) {
-      const previousRecord = getSameDepthBar(sourceData._depth, flattenData[result.destination.index - 1])?.record;
-      previousAndNextIdObject.previousId = getRecordId(previousRecord);
-      previousAndNextIdObject.nextId = getRecordId(destinationData.record);
-    } else {
-      previousAndNextIdObject.previousId = getRecordId(destinationData.record);
-      previousAndNextIdObject.nextId = getRecordId(getSameDepthBar(sourceData._depth, flattenData[result.destination.index + 1])?.record);
-    }
-
-    const requestData: IGanttMoveRequestData = {
-      dimension: type,
-      currentId: sourceData.record.issueId,
-      ...instanceObject,
-      ...previousAndNextIdObject,
-    };
-    //  未分配永远是最后一个
-    requestData.nextId = Number(requestData.nextId) === 0 ? undefined : requestData.nextId;
-    if (Number(requestData.previousId) === 0) {
-      return;
-    }
-    if (['sprint', 'assignee'].includes(type) && sourceData._depth === 0) {
-      requestData.currentId = sourceData.record.sprintId || sourceData.record.assigneeId;
-    }
-    const moveRequest = ['sprint', 'assignee'].includes(type) && sourceData._depth === 0 ? 'moveTopDimension' : 'move';
+  const renderClone = usePersistFn((record: Gantt.Record) => tableWithSortedColumns[0].render!(record) as React.ReactElement);
+  const handleDragEnd = useCallback((sourceBar: Gantt.Bar, destinationBar: Gantt.Bar) => {
     setLoading(true);
-    let sourceDataIndex = -1;
-    let destinationDataIndx = -1;
-    // 这里对 data 原数据进行移动，避免创建删除等操作导致排序混乱
-
-    if (type === 'sprint' && sourceData._depth === 0) {
-      // 冲刺移动
-      rankList && setRankList(produce(rankList, (draft) => {
-        sourceDataIndex = findIndex(draft, (a) => a === sourceData.record.sprintId);
-        destinationDataIndx = findIndex(draft, (a) => a === destinationData.record.sprintId);
-        if ((sourceDataIndex + destinationDataIndx) >= 0) {
-          moveData(draft, sourceDataIndex, destinationDataIndx);
-        }
-        console.log('type...', type, draft.length, sourceDataIndex, destinationDataIndx, sourceData.record);
-      }));
-    } else if (type === 'assignee' && sourceData._depth === 0) {
-      // 经办人移动
-      rankList && setRankList(produce(rankList, (draft) => {
-        sourceDataIndex = findIndex(draft, (a) => a === sourceData.record.assigneeId);
-        destinationDataIndx = findIndex(draft, (a) => a === destinationData.record.assigneeId);
-        if ((sourceDataIndex + destinationDataIndx) >= 0) {
-          moveData(draft, sourceDataIndex, destinationDataIndx);
-        }
-        console.log('type...', type, [...draft], draft.length, sourceData.record.assigneeId, sourceDataIndex, destinationDataIndx, sourceData.record);
-      }));
-    } else {
-      // 问题移动
-      setData(produce(data, (draft) => {
-        sourceDataIndex = findIndex(draft, { issueId: sourceData.record.issueId });
-        destinationDataIndx = findIndex(draft, { issueId: destinationData.record.issueId });
-        if ((sourceDataIndex + destinationDataIndx) >= 0) {
-          moveData(draft, sourceDataIndex, destinationDataIndx);
-        }
-      }));
-    }
-
-    (sourceDataIndex + destinationDataIndx) >= 0 ? ganttApi[moveRequest](requestData, getFilter()).then(() => {
-      setLoading(false);
-    }) : setLoading(false);
-  }, [data, getFilter, rankList, store.ganttRef, type]);
-  const handleDragUpdate = useCallback((initial: DragUpdate, provided: ResponderProvided) => {
-    setDraggingBar((oldValue) => {
-      if (!oldValue.source || oldValue.destination?.absoluteIndex === initial.destination?.index) {
-        return oldValue;
-      }
-      if (!initial.destination) {
-        draggingBarDestinationBarRef.current = undefined;
-        return { source: oldValue.source, destination: undefined };
-      }
-      const destinationBar = store.ganttRef.current?.flattenData[initial.destination.index];
-      // 移动是同层级进行移动，因此这里获取的目标节点应该是同层级的,当目标节点为高层级别的，则无效
-      const newDestination = getDestinationBar(oldValue.source._depth, destinationBar);
-      console.log(oldValue.source.record.summary, oldValue.source._depth, 'drag===>', newDestination, newDestination?.record.summary);
-      draggingStyle.current = newDestination && { transform: `translate(0px, ${oldValue.source.absoluteIndex > newDestination.absoluteIndex ? 34 : -34}px)` };
-      draggingBarDestinationBarRef.current = newDestination;
-
-      return { source: oldValue.source, destination: newDestination };
+    const requestData = getGanttMoveSubmitData({
+      sourceBar, destinationBar, flattenData: store.ganttRef.current?.flattenData || [], type,
     });
-  }, [store.ganttRef]);
 
+    // 先本地移动 再请求
+    const dataOrigin = getGanttMoveDataOrigin({ type, sourceBar });
+    const moveConfig = dataOrigin === 'rankList' ? {
+      data: rankList || [],
+      setData: setRankList,
+      request: () => requestData && ganttApi.moveTopDimension(requestData, searchFilter),
+    } : {
+      data,
+      setData,
+      request: () => requestData && ganttApi.move(requestData, searchFilter),
+    };
+    async function request(success: boolean) {
+      success && await moveConfig.request();
+      setLoading(false);
+    }
+    const moveFn = flow(ganttLocalMove, ({ newData, success }) => {
+      success && moveConfig.setData(newData);
+      return success;
+    }, request);
+    moveFn({
+      sourceBar, destinationBar, type, data: moveConfig.data,
+    });
+  }, [data, rankList, searchFilter, store.ganttRef, type]);
   return (
     <Page>
       <Header>
@@ -1431,7 +718,10 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
           paddingBottom: 0,
         }}
       >
-        <Context.Provider value={{ store }}>
+        <Context.Provider value={{
+          store, searchFilter, dimensionType: type,
+        }}
+        >
           <div style={{ display: 'flex', flexWrap: 'wrap' }}>
             <Search issueSearchStore={issueSearchStore} loadData={run} />
             <GanttOperation />
@@ -1439,11 +729,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
           <Loading loading={loading} />
           {columns.length > 0 && workCalendar && (
             <div className="c7n-gantt-content-body">
-              <DragDropContext
-                onBeforeCapture={handleDragStart}
-                onDragEnd={handleDragEnd}
-                onDragUpdate={handleDragUpdate}
-              >
+              <GanttDragWrapper renderClone={renderClone} onDragEnd={handleDragEnd}>
                 <GanttComponent
                   innerRef={store.ganttRef as React.MutableRefObject<GanttRef>}
                   data={ganttData}
@@ -1458,7 +744,6 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
                   onRow={onRow}
                   onBarClick={onRow.onClick}
                   tableIndent={20}
-                  components={{ tableBody: renderTableBody, tableRow: renderTableRow }}
                   expandIcon={getExpandIcon}
                   renderBar={renderBar}
                   renderInvalidBar={renderInvalidBar}
@@ -1473,7 +758,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = ({ cached }) => {
                   // @ts-ignore
                   renderEmpty={renderEmpty}
                 />
-              </DragDropContext>
+              </GanttDragWrapper>
               <div className={classNames('c7n-gantt-content-body-quick-create', { 'c7n-gantt-content-body-quick-create-open': isCreate })}>
                 <QuickCreateIssue
                   onCreateChange={setIsCreate}
