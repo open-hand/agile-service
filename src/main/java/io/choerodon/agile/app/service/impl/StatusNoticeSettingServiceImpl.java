@@ -58,6 +58,8 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
     private OrganizationConfigService organizationConfigService;
     @Autowired
     private StarBeaconMapper starBeaconMapper;
+    @Autowired
+    private IssueParticipantRelMapper issueParticipantRelMapper;
 
     @Override
     public StatusNoticeSettingVO detail(Long projectId, Long issueTypeId, Long statusId, String schemeCode) {
@@ -255,6 +257,10 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
                 userSet.addAll(starBeaconMapper.selectUsersByInstanceId(projectId, issue.getIssueId()));
                 break;
             case StatusNoticeUserType.ONLY_WEB_HOOK:
+                break;
+            case StatusNoticeUserType.PARTICIPANT:
+                List<Long> participantIds = issueParticipantRelMapper.listByIssueId(projectId, issue.getIssueId());
+                userSet.addAll(participantIds);
                 break;
             default:
                 // 不在默认配置里，则检索自定义字段，有则加入，没有则忽略

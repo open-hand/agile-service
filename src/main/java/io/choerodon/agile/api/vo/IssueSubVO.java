@@ -146,6 +146,9 @@ public class IssueSubVO {
 
     private Date estimatedEndTime;
 
+    @Encrypt
+    private List<Long> participantIds;
+
     public Date getEstimatedStartTime() {
         return estimatedStartTime;
     }
@@ -488,6 +491,14 @@ public class IssueSubVO {
 
     public void setReporterImageUrl(String reporterImageUrl) {
         this.reporterImageUrl = reporterImageUrl;
+    }
+
+    public List<Long> getParticipantIds() {
+        return participantIds;
+    }
+
+    public void setParticipantIds(List<Long> participantIds) {
+        this.participantIds = participantIds;
     }
 
     @Override

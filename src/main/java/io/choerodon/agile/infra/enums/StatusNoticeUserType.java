@@ -14,6 +14,7 @@ public class StatusNoticeUserType {
     public static final String SPECIFIER = "specifier";
     public static final String ONLY_WEB_HOOK = "";
     public static final String STAR_USER = "starUser";
+    public static final String PARTICIPANT = "participant";
 
-    public static final String[] BASE_USER_TYPE_LIST = new String[]{PROJECT_OWNER, ASSIGNEE, REPORTER, MAIN_RESPONSIBLE, STAR_USER, SPECIFIER};
+    public static final String[] BASE_USER_TYPE_LIST = new String[]{PROJECT_OWNER, ASSIGNEE, REPORTER, MAIN_RESPONSIBLE, STAR_USER, SPECIFIER, PARTICIPANT};
 }

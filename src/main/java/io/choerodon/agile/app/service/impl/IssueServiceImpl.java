@@ -578,6 +578,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Long operatorId = DetailsHelper.getUserDetails().getUserId();
         sendMsgUtil.sendMsgByIssueAssignee(projectId, fieldList, result, operatorId);
         sendMsgUtil.sendMsgByIssueComplete(projectId, fieldList, result, operatorId);
+        sendMsgUtil.sendMsgByIssueParticipant(projectId, fieldList, result, operatorId);
         setCompletedAndActualCompletedDate(result);
         return result;
     }
@@ -853,6 +854,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             }
         }
         Long issueId = postUpdateIssue(projectId, issueUpdateVO);
+        if (issueUpdateVO.getParticipantIds() != null) {
+           fieldList.add("participantIds");
+        }
         return queryIssueByUpdate(projectId, issueId, fieldList);
     }
 
@@ -866,6 +870,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             handleUpdateIssueWithoutRuleNotice(issueUpdateVO, fieldList, projectId);
         }
         Long issueId = postUpdateIssueWithoutRuleNotice(projectId, issueUpdateVO);
+        if (issueUpdateVO.getParticipantIds() != null) {
+            fieldList.add("participantIds");
+        }
         return queryIssueByUpdate(projectId, issueId, fieldList);
     }
 

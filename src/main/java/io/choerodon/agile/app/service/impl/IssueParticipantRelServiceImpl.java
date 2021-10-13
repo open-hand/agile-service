@@ -67,7 +67,7 @@ public class IssueParticipantRelServiceImpl implements IssueParticipantRelServic
         // 删除无用的参与人
         List<Long> needDelete = currentUser.stream().filter(v -> !participantIds.contains(v)).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(needDelete)) {
-            issueParticipantRelMapper.deleteByIssueIdAndParticipantIds(projectId, issueId, participantIds);
+            issueParticipantRelMapper.deleteByIssueIdAndParticipantIds(projectId, issueId, needDelete);
         }
         // 新增参与人
         List<Long> needAdd = participantIds.stream().filter(v -> !currentUser.contains(v)).collect(Collectors.toList());

@@ -64,6 +64,7 @@ public class SendMsgUtil {
     private static final String FEATURE_URL_TEMPLATE4 = "&organizationId=";
     private static final String ISSUE_SOLVE = "ISSUESOLVE";
     private static final String ISSUE_CREATE = "ISSUECREATE";
+    private static final String ISSUE_SET_PARTICIPANT = "ISSUE_SET_PARTICIPANT";
     @Autowired
     private SiteMsgUtil siteMsgUtil;
 
@@ -106,6 +107,10 @@ public class SendMsgUtil {
                 assigneeIds.add(result.getAssigneeId());
                 siteMsgUtil.issueAssignee(assigneeIds, result.getAssigneeName(), summary, url, projectId, reporterName, operatorId);
             }
+            if (CollectionUtils.isNotEmpty(result.getParticipants())) {
+                List<Long> sendUserIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_SET_PARTICIPANT, result);
+                siteMsgUtil.issueParticipant(summary, url, projectId, operatorId, sendUserIds, reporterName);
+            }
         }
     }
 
@@ -135,6 +140,7 @@ public class SendMsgUtil {
         if (SchemeApplyType.AGILE.equals(result.getApplyType())) {
             IssueVO issueVO = new IssueVO();
             issueVO.setReporterId(result.getReporterId());
+            issueVO.setIssueId(result.getIssueId());
             List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_CREATE, issueVO);
             String summary = result.getIssueNum() + "-" + result.getSummary();
             String reporterName = result.getReporterName();
@@ -145,6 +151,10 @@ public class SendMsgUtil {
             Long getAssigneeId = result.getAssigneeId();
             if (!ObjectUtils.isEmpty(getAssigneeId)) {
                 siteMsgUtil.issueAssignee(Arrays.asList(getAssigneeId), result.getAssigneeName(), summary, url, projectId, reporterName, operatorId);
+            }
+            if (CollectionUtils.isNotEmpty(result.getParticipantIds())) {
+                List<Long> sendUserIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_SET_PARTICIPANT, issueVO);
+                siteMsgUtil.issueParticipant(summary, url, projectId, operatorId, sendUserIds, reporterName);
             }
         }
     }
@@ -512,6 +522,23 @@ public class SendMsgUtil {
             ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
             String url = getIssueCreateUrl(result, projectVO, result.getIssueId());
             siteMsgUtil.issueCreate(userIds, reporterName, summary, url, operatorId, projectId, true);
+        }
+    }
+
+    public void sendMsgByIssueParticipant(Long projectId, List<String> fieldList, IssueVO result, Long operatorId) {
+        if (fieldList.contains("participantIds") && SchemeApplyType.AGILE.equals(result.getApplyType())) {
+            List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_SET_PARTICIPANT, result);
+            String summary = result.getIssueNum() + "-" + result.getSummary();
+            String reporterName = result.getReporterName();
+            ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
+            String projectName = convertProjectName(projectVO);
+            StringBuilder url = new StringBuilder();
+            if (SUB_TASK.equals(result.getTypeCode())) {
+                url.append(URL_TEMPLATE1 + projectId + URL_TEMPLATE2 + projectName + URL_TEMPLATE6 + projectVO.getOrganizationId() + URL_TEMPLATE7 + projectVO.getOrganizationId() + URL_TEMPLATE3 + result.getIssueNum() + URL_TEMPLATE4 + result.getParentIssueId() + URL_TEMPLATE5 + result.getIssueId());
+            } else {
+                url.append(URL_TEMPLATE1 + projectId + URL_TEMPLATE2 + projectName + URL_TEMPLATE6 + projectVO.getOrganizationId() + URL_TEMPLATE7 + projectVO.getOrganizationId() + URL_TEMPLATE3 + result.getIssueNum() + URL_TEMPLATE4 + result.getIssueId() + URL_TEMPLATE5 + result.getIssueId());
+            }
+            siteMsgUtil.issueParticipant(summary, url.toString(), projectId, operatorId, userIds, reporterName);
         }
     }
 }

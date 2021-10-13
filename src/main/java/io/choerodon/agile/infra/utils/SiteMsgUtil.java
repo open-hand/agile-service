@@ -387,4 +387,19 @@ public class SiteMsgUtil {
             }
         });
     }
+
+    public void issueParticipant(String summary, String url, Long projectId, Long operatorId, List<Long> sendUserIds, String operatorName) {
+        Map<String,String> map = new HashMap<>();
+        map.put(SUMMARY, summary);
+        map.put(OPERATOR_NAME, operatorName);
+        map.put(URL, url);
+        setLoginNameAndRealName(operatorId, map);
+        // 额外参数
+        Map<String,Object> objectMap=new HashMap<>();
+        objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
+        //发送站内信
+        MessageSender messageSender = handlerMessageSender(0L,"ISSUE_SET_PARTICIPANT",sendUserIds, map);
+        messageSender.setAdditionalInformation(objectMap);
+        messageClient.async().sendMessage(messageSender);
+    }
 }
