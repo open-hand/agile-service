@@ -7,7 +7,7 @@ import { findIndex, noop } from 'lodash';
 import { usePersistFn } from 'ahooks';
 import styles from './index.less';
 
-interface IGanttSortLabelProps {
+export interface IGanttSortLabelProps {
   dataKey: string
   onChange?: (dataKey: string, sorted: 'asc' | 'desc' | undefined) => void
 }
@@ -18,7 +18,7 @@ interface IGanttSortLabelHookData {
   origin: Array<IGanttSortLabelSortItem>
   data: string[]
 }
-export function useGanttSortLabel(): [IGanttSortLabelHookData, { onSortChange: IGanttSortLabelProps['onChange'] }] {
+export function useGanttSortLabel(): [IGanttSortLabelHookData, IGanttSortLabelProps['onChange']] {
   const [sortedList, setSortedList] = useState<Array<IGanttSortLabelSortItem>>([]);
   const handleChange = useCallback((dataKey: string, sorted: 'asc' | 'desc' | undefined) => {
     setSortedList((oldList) => {
@@ -36,7 +36,7 @@ export function useGanttSortLabel(): [IGanttSortLabelHookData, { onSortChange: I
   }, []);
 
   const data = useMemo(() => sortedList.map((item) => `${item.dataKey},${item.sorted}`), [sortedList]);
-  return [{ origin: sortedList, data }, { onSortChange: handleChange }];
+  return [{ origin: sortedList, data }, handleChange];
 }
 const GanttSortLabel: React.FC<IGanttSortLabelProps> = ({ children, dataKey, onChange: propsOnChange }) => {
   const [sorted, setSorted] = useState<'desc' | 'asc' | undefined>();
