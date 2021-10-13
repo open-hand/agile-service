@@ -142,6 +142,7 @@ public class ExcelServiceImpl implements ExcelService {
     protected static final String TAGS = "tags";
     protected static final String RELATED_ISSUE = "relatedIssue";
     protected static final String EPIC_SELF_NAME = "epicSelfName";
+    protected static final String PARTICIPANT = "participant";
 
     protected static final String USER_MAP = "userMap";
     protected static final String ISSUE_TYPE_MAP = "issueTypeMap";
@@ -286,6 +287,7 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put(TAGS, "Tag");
         FIELD_MAP.put(RELATED_ISSUE, "关联问题");
         FIELD_MAP.put(EPIC_SELF_NAME, "史诗名称");
+        FIELD_MAP.put(PARTICIPANT, "参与人");
         FIELDS = new ArrayList<>(FIELD_MAP.keySet()).toArray(new String[FIELD_MAP.keySet().size()]);
         FIELDS_NAMES = new ArrayList<>(FIELD_MAP.values()).toArray(new String[FIELD_MAP.values().size()]);
     }
@@ -483,6 +485,9 @@ public class ExcelServiceImpl implements ExcelService {
         Optional.ofNullable(buildPredefinedByFieldCodeAndValues(cursor, systemFields, Arrays.asList("非生产环境", "生产环境"), FieldCode.ENVIRONMENT))
                 .ifPresent(result::add);
         Optional.ofNullable(processIssueStatusPredefined(organizationId, projectId, cursor, systemFields))
+                .ifPresent(result::add);
+        Optional
+                .ofNullable(buildPredefinedByFieldCodeAndValues(cursor, systemFields, userNameList, FieldCode.PARTICIPANT))
                 .ifPresent(result::add);
         return result;
     }
@@ -1812,6 +1817,9 @@ public class ExcelServiceImpl implements ExcelService {
             case FieldCode.ACTUAL_END_TIME:
                 validateAndSetActualTime(row, col, issueCreateVO, errorRowColMap, FieldCode.ACTUAL_END_TIME);
                 break;
+            case FieldCode.PARTICIPANT:
+                validateAndSetParticipant(row, col, excelColumn, errorRowColMap, issueCreateVO);
+                break;
             default:
                 break;
         }
@@ -2278,6 +2286,32 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
+
+    private void validateAndSetParticipant(Row row,
+                                          Integer col,
+                                          ExcelColumnVO excelColumn,
+                                          Map<Integer, List<Integer>> errorRowColMap,
+                                          IssueCreateVO issueCreateVO) {
+        Cell cell = row.getCell(col);
+        if (!isCellEmpty(cell)) {
+            String value = cell.toString();
+            String[] participants = value.split(",");
+            List<Long> participantIds = new ArrayList<>();
+            for (String participant : participants) {
+                List<String> values = excelColumn.getPredefinedValues();
+                Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
+                if (!values.contains(value)) {
+                    cell.setCellValue(buildWithErrorMsg(value, "请输入正确的版本"));
+                    addErrorColumn(row.getRowNum(), col, errorRowColMap);
+                    break;
+                } else {
+                    participantIds.add(valueIdMap.get(value));
+                }
+            }
+            issueCreateVO.setParticipantIds(participantIds);
+        }
+    }
+
     private void validateAndSetFixVersion(Row row,
                                           Integer col,
                                           ExcelColumnVO excelColumn,
@@ -2665,6 +2699,7 @@ public class ExcelServiceImpl implements ExcelService {
             case FieldCode.ASSIGNEE:
             case FieldCode.REPORTER:
             case FieldCode.MAIN_RESPONSIBLE:
+            case FieldCode.PARTICIPANT:
                 processUser(projectId, excelColumnVO);
                 break;
             case FieldCode.EPIC:
@@ -3081,6 +3116,9 @@ public class ExcelServiceImpl implements ExcelService {
                         if (!ObjectUtils.isEmpty(mainResponsibleId) && !Objects.equals(mainResponsibleId, 0L)) {
                             userIds.add(mainResponsibleId);
                         }
+                        if (!CollectionUtils.isEmpty(i.getParticipantIds())) {
+                            userIds.addAll(i.getParticipantIds());
+                        }
                     });
                     Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(ListUtil.filterByKey(new ArrayList<>(userIds), 0L), true);
                     Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.AGILE);
@@ -3202,7 +3240,22 @@ public class ExcelServiceImpl implements ExcelService {
         setSpentWorkTimeAndAllEstimateTime(workLogVOMap, exportIssuesVO);
         setTag(tagMap, exportIssuesVO);
         setRelatedIssue(exportIssuesVO, relatedIssueMap);
+        setParticipant(exportIssuesVO, issue, usersMap);
         return exportIssuesVO;
+    }
+
+    private void setParticipant(ExportIssuesVO exportIssuesVO, IssueDTO issue, Map<Long, UserMessageDTO> usersMap) {
+        List<Long> participantIds = issue.getParticipantIds();
+        if (!CollectionUtils.isEmpty(participantIds)) {
+            List<String> participants = new ArrayList<>();
+            for (Long participantId : participantIds) {
+                UserMessageDTO userMessageDTO = usersMap.get(participantId);
+                if (!ObjectUtils.isEmpty(userMessageDTO)) {
+                    participants.add(userMessageDTO.getName());
+                }
+            }
+            exportIssuesVO.setParticipant(participants.stream().collect(Collectors.joining(",")));
+        }
     }
 
     private void setRelatedIssue(ExportIssuesVO exportIssuesVO, Map<Long, List<IssueLinkDTO>> relatedIssueMap) {

@@ -411,6 +411,9 @@
             <id property="projectId" column="tag_project_id"/>
             <id property="appServiceCode" column="app_service_code"/>
         </collection>
+        <collection property="participantIds" column="participant_id" ofType="java.lang.Long">
+            <result column="participant_id" />
+        </collection>
     </resultMap>
 
     <select id="queryIssueByIssueIdsAndSubIssueIds" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
@@ -477,7 +480,8 @@
         ai.environment,
         atir.tag_project_id,
         atir.app_service_code as app_service_code,
-        atir.tag_name as tag_name
+        atir.tag_name as tag_name,
+        aipr.participant_id
         FROM agile_issue ai
         left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
         left join agile_issue ai3 on ai.epic_id = ai3.issue_id
@@ -492,6 +496,7 @@
         left join agile_label_issue_rel alir on alir.issue_id = ai.issue_id
         left join agile_issue_label ail on ail.label_id = alir.label_id
         left join agile_tag_issue_rel atir on ai.issue_id = atir.issue_id
+        left join agile_issue_participant_rel aipr on ai.issue_id = aipr.issue_id
         WHERE
         ai.issue_id IN
         (
@@ -1200,6 +1205,27 @@
             <foreach collection="searchVO.otherArgs.component" item="id" open="(" separator=","
                      close=")">
                 #{id}
+            </foreach>
+            ))
+        </if>
+
+        <if test='searchVO.otherArgs.participantIds != null and searchVO.otherArgs.participantIds.size > 0'>
+            AND (
+            <if test='searchVO.otherArgs.participantNull != null and searchVO.otherArgs.participantNull == true'>
+                ai.issue_id in (
+                SELECT ai12.issue_id from agile_issue ai12
+                left join agile_issue_participant_rel aipr
+                on ai12.issue_id = aipr.issue_id WHERE
+                ai.project_id = #{projectId}
+                AND aipr.participant_id is null ) OR
+            </if>
+            ai.issue_id in
+            (SELECT aipr.issue_id FROM agile_issue_participant_rel aipr WHERE
+            aipr.project_id = #{projectId}
+            AND aipr.participant_id in
+            <foreach collection="searchVO.otherArgs.participantIds" item="participantId" open="(" separator=","
+                     close=")">
+                #{participantId}
             </foreach>
             ))
         </if>

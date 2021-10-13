@@ -119,6 +119,8 @@ public class ExportIssuesVO {
 
     private String epicSelfName;
 
+    private String participant;
+
     public ExportIssuesVO() {
     }
 
@@ -536,5 +538,13 @@ public class ExportIssuesVO {
 
     public void setActualEndTime(Date actualEndTime) {
         this.actualEndTime = actualEndTime;
+    }
+
+    public String getParticipant() {
+        return participant;
+    }
+
+    public void setParticipant(String participant) {
+        this.participant = participant;
     }
 }

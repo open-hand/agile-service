@@ -50,6 +50,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     private static final String REPORTOR = "reportor";
     private static final String ASSIGNEE = "assignee";
     private static final String MAIN_RESPONSIBLE = "mainResponsible";
+    private static final String[] CLEAR_FIELD = {FieldCode.LABEL, FieldCode.COMPONENT, FieldCode.TAG, FieldCode.PARTICIPANT};
 
     @Autowired
     private StatusFieldSettingMapper statusFieldSettingMapper;
@@ -108,6 +109,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         FIELD_CODE.put(FieldCode.MAIN_RESPONSIBLE, "mainResponsibleId");
         FIELD_CODE.put(FieldCode.ENVIRONMENT, "environment");
         FIELD_CODE.put(FieldCode.TAG, "tags");
+        FIELD_CODE.put(FieldCode.PARTICIPANT, "participantIds");
         PROGRAM_FIELD_CODE.put(FieldCode.PROGRAM_VERSION, "programVersion");
     }
     @Override
@@ -444,7 +446,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             StatusFieldValueSettingDTO statusFieldValueSettingDTO = statusFieldValueSettingDTOS.get(0);
             fieldList.add(fieldName);
             if (CLEAR.equals(statusFieldValueSettingDTO.getOperateType())) {
-                if (FieldCode.COMPONENT.equals(fieldCode) || FieldCode.LABEL.equals(fieldCode) || FieldCode.TAG.equals(fieldCode)) {
+                if (Arrays.asList(CLEAR_FIELD).contains(fieldCode)) {
                     field.set(issueUpdateVO, new ArrayList<>());
                 } else {
                     field.set(issueUpdateVO, null);
@@ -509,6 +511,9 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                 }).collect(Collectors.toList());
                 field.set(issueUpdateVO, componentIssueRelVOS);
                 break;
+            case FieldCode.PARTICIPANT:
+                List<Long> participantIds = statusFieldValueSettingDTOS.stream().map(StatusFieldValueSettingDTO::getUserId).collect(Collectors.toList());
+                field.set(issueUpdateVO, participantIds);
             case FieldCode.LABEL:
                 List<LabelIssueRelVO> labelIssueRelVOS = statusFieldValueSettingDTOS.stream().map(settingDTO -> {
                     LabelIssueRelVO labelIssueRelVO = new LabelIssueRelVO();

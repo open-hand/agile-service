@@ -332,13 +332,13 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         handleCreateIssueLink(issueCreateVO.getIssueLinkCreateVOList(), projectInfoDTO.getProjectId(), issueId);
         handleCreateTagIssueRel(issueCreateVO.getTags(), projectInfoDTO.getProjectId(), issueId);
         // 处理参与人
-        handlerParticipantRel(issueConvertDTO, projectInfoDTO.getProjectId());
+        handlerParticipantRel(issueConvertDTO, projectInfoDTO.getProjectId(), issueId);
     }
 
-    private void handlerParticipantRel(IssueConvertDTO issueConvertDTO, Long projectId) {
+    private void handlerParticipantRel(IssueConvertDTO issueConvertDTO, Long projectId, Long issueId) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         if (!CollectionUtils.isEmpty(issueConvertDTO.getParticipantIds())) {
-            issueParticipantRelService.createParticipantRel(issueConvertDTO.getIssueId(), projectId, issueConvertDTO.getParticipantIds());
+            issueParticipantRelService.createParticipantRel(issueId, projectId, issueConvertDTO.getParticipantIds());
         }
     }
 

@@ -218,6 +218,9 @@ public class IssueDTO extends AuditDomain {
 
     private Date actualEndTime;
 
+    @Transient
+    private List<Long> participantIds;
+
     public String getEpicSelfName() {
         return epicSelfName;
     }
@@ -712,6 +715,14 @@ public class IssueDTO extends AuditDomain {
 
     public void setActualEndTime(Date actualEndTime) {
         this.actualEndTime = actualEndTime;
+    }
+
+    public List<Long> getParticipantIds() {
+        return participantIds;
+    }
+
+    public void setParticipantIds(List<Long> participantIds) {
+        this.participantIds = participantIds;
     }
 
     @Override

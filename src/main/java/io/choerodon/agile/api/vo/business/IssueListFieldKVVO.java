@@ -186,6 +186,9 @@ public class IssueListFieldKVVO {
 
     private String epicSelfName;
 
+    @ApiModelProperty("参与人")
+    private List<UserMessageDTO> participants;
+
     public String getEpicSelfName() {
         return epicSelfName;
     }
@@ -654,5 +657,13 @@ public class IssueListFieldKVVO {
 
     public void setActualEndTime(Date actualEndTime) {
         this.actualEndTime = actualEndTime;
+    }
+
+    public List<UserMessageDTO> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(List<UserMessageDTO> participants) {
+        this.participants = participants;
     }
 }

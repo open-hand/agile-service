@@ -189,6 +189,11 @@ public class IssueAssembler extends AbstractAssembler {
         userIds.addAll(issueDTOList.stream().filter(issue -> issue.getCreatedBy() != null && !Objects.equals(issue.getCreatedBy(), 0L)).map(IssueDTO::getCreatedBy).collect(Collectors.toSet()));
         userIds.addAll(issueDTOList.stream().filter(issue -> issue.getLastUpdatedBy() != null && !Objects.equals(issue.getLastUpdatedBy(), 0L)).map(IssueDTO::getLastUpdatedBy).collect(Collectors.toSet()));
         userIds.addAll(issueDTOList.stream().filter(issue -> issue.getMainResponsibleId() != null && !Objects.equals(issue.getMainResponsibleId(), 0L)).map(IssueDTO::getMainResponsibleId).collect(Collectors.toSet()));
+        issueDTOList.forEach(v -> {
+            if (CollectionUtils.isNotEmpty(v.getParticipantIds())) {
+                userIds.addAll(v.getParticipantIds());
+            }
+        });
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(Lists.newArrayList(userIds), true);
         Map<String, String> envMap = lookupValueService.queryMapByTypeCode(FieldCode.ENVIRONMENT);
         issueDTOList.forEach(issueDO -> {
@@ -230,6 +235,16 @@ public class IssueAssembler extends AbstractAssembler {
             issueListFieldKVVO.setEnvironmentName(envMap.get(issueDO.getEnvironment()));
             issueListFieldKVVO.setTags(issueDO.getTags());
             setSpentWorkTimeAndAllEstimateTime(workLogVOMap, issueListFieldKVVO);
+            if (CollectionUtils.isNotEmpty(issueDO.getParticipantIds())) {
+               List<UserMessageDTO> participants = new ArrayList<>();
+                for (Long participantId : issueDO.getParticipantIds()) {
+                    UserMessageDTO userMessageDTO = usersMap.get(participantId);
+                    if (!ObjectUtils.isEmpty(userMessageDTO)) {
+                        participants.add(userMessageDTO);
+                    }
+                }
+                issueListFieldKVVO.setParticipants(participants);
+            }
             issueListFieldKVDTOList.add(issueListFieldKVVO);
         });
         return issueListFieldKVDTOList;
