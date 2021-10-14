@@ -38,6 +38,8 @@ public class WorkItemVO {
 
     private UserMessageDTO assignee;
 
+    private Long objectVersionNumber;
+
     public Long getIssueId() {
         return issueId;
     }
@@ -132,5 +134,13 @@ public class WorkItemVO {
 
     public void setStatusVO(StatusVO statusVO) {
         this.statusVO = statusVO;
+    }
+
+    public Long getObjectVersionNumber() {
+        return objectVersionNumber;
+    }
+
+    public void setObjectVersionNumber(Long objectVersionNumber) {
+        this.objectVersionNumber = objectVersionNumber;
     }
 }

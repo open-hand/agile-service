@@ -5167,7 +5167,8 @@
             ai.project_id,
             ai.priority_id,
             ai.assignee_id,
-            ai.status_id
+            ai.status_id,
+            ai.object_version_number
         from agile_issue ai
         where
         ai.project_id in
