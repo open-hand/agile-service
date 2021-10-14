@@ -55,6 +55,12 @@ export function getGanttMoveSubmitData({
             instanceId: sourceBar._parent?.record.issueId,
           };
         }
+        if (sourceBar._depth === 0) {
+          return {
+            instanceType: 'epic',
+            instanceId: '0',
+          };
+        }
         return sourceBar._parent?._depth === 1 && sourceBar._parent?.record.groupType === 'feature' ? {
           instanceType: 'feature',
           instanceId: sourceBar._parent?.record.issueId,

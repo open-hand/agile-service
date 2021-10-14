@@ -399,21 +399,24 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
 
   const renderClone = usePersistFn((record: Gantt.Record) => tableWithSortedColumns[0].render!(record) as React.ReactElement);
   const handleDragEnd = useCallback((sourceBar: Gantt.Bar, destinationBar: Gantt.Bar) => {
-    setLoading(true);
     const requestData = getGanttMoveSubmitData({
       sourceBar, destinationBar, flattenData: store.ganttRef.current?.flattenData || [], type,
     });
+    if (!requestData) {
+      return;
+    }
+    setLoading(true);
 
     // 先本地移动 再请求
     const dataOrigin = getGanttMoveDataOrigin({ type, sourceBar });
     const moveConfig = dataOrigin === 'rankList' ? {
       data: rankList || [],
       setData: setRankList,
-      request: () => requestData && ganttApi.moveTopDimension(requestData, searchFilter),
+      request: () => ganttApi.moveTopDimension(requestData, searchFilter),
     } : {
       data,
       setData,
-      request: () => requestData && ganttApi.move(requestData, searchFilter),
+      request: () => ganttApi.move(requestData, searchFilter),
     };
     async function request(success: boolean) {
       success && await moveConfig.request();
