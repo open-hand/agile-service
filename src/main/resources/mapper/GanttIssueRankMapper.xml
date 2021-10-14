@@ -83,4 +83,25 @@
         order by rank desc
         limit 1
     </select>
+
+    <select id="orderByDefaultRank" resultType="java.lang.Long">
+        select distinct temp.issue_id
+        from (
+        select
+        ai.issue_id,
+        agir.rank,
+        agir.instance_id,
+        agir.instance_type,
+        CONVERT(ai.issue_num,SIGNED) as issue_num_convert
+        from agile_issue ai
+        left join agile_gantt_issue_rank agir on ai.issue_id = agir.issue_id and agir.dimension = #{dimension}
+        where ai.issue_id in
+        <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+            #{issueId}
+        </foreach>
+        <if test="sortMap != null and sortMap.orderStr != null">
+            ORDER BY ${sortMap.orderStr}
+        </if>
+        ) temp
+    </select>
 </mapper>
