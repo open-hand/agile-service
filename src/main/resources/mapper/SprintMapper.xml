@@ -809,7 +809,7 @@
         FROM agile_issue_sprint_rel aisr1, agile_sprint asp
         WHERE aisr1.project_id = #{projectId} AND aisr1.sprint_id = asp.sprint_id
         AND asp.status_code != 'closed') aisr ON aisr.issue_id = ai.issue_id
-        WHERE ai.project_id = #{projectId} AND ai.type_code in ('story', 'task', 'bug')
+        WHERE ai.project_id = #{projectId} AND ai.type_code in ('story', 'task', 'bug', 'sub_task')
         <choose>
             <when test="sprintId != null and sprintId != 0">
                 AND aisr.sprint_id = #{sprintId}
