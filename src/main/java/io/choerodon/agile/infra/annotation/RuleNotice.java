@@ -17,6 +17,7 @@ public @interface RuleNotice {
     String LABEL_ID = "labelId";
     String VERSION_ID = "versionId";
     String COMPONENT_ID = "componentId";
+    String PARTICIPANT_ID = "participantId";
 
     /**
      * 通知检测所使用的模块
