@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import { Gantt } from '@choerodon/gantt';
 import { produce } from 'immer';
-import { findIndex, noop } from 'lodash';
+import { findIndex, noop, sortBy } from 'lodash';
 import { IGanttMoveRequestData, IGanttMoveRequestDataPreviousWithNext } from '@/api';
 import type { IGanttDimensionTypeValue } from '.';
 import { Issue, User } from '@/common/types';
@@ -271,16 +271,18 @@ const groupBySprint = (data: any[], rankList: string[]) => {
 };
 
 const groupByFeature = (epicChildrenData: any, data: any) => {
-  const map = new Map<string, { feature: any, disabledDrag?: boolean, children: any[] }>();
+  const map = new Map<string, { feature: any, rankIndex: number, disabledDrag?: boolean, children: any[] }>();
   const noFeatureData: any[] = [];
   epicChildrenData.forEach((issue: any) => {
     if (issue.featureId && issue.featureId !== '0') {
-      const feature = data.find((item: any) => !item.create && item.issueId.toString() === issue.featureId.toString());
-      if (map.has(feature?.featureName)) {
-        map.get(feature?.featureName)?.children.push(issue);
+      const featureIssueIndex = map.get(issue.epicId)?.rankIndex ?? findIndex(data, (item: any) => !item.create && item.issueId.toString() === issue.featureId.toString());
+      const feature = data[featureIssueIndex];
+      if (map.has(feature?.featureId)) {
+        map.get(feature?.featureId)?.children.push(issue);
       } else {
-        map.set(feature?.featureName, {
+        map.set(feature?.featureId, {
           feature,
+          rankIndex: featureIssueIndex,
           children: [issue],
         });
       }
@@ -289,30 +291,34 @@ const groupByFeature = (epicChildrenData: any, data: any) => {
     }
   });
   if (noFeatureData.length > 0) {
-    map.set('未分配特性', { feature: { issueId: '0' }, disabledDrag: true, children: noFeatureData });
+    map.set('0', {
+      feature: { issueId: '0', summary: '未分配特性' }, rankIndex: Infinity, disabledDrag: true, children: noFeatureData,
+    });
   }
 
-  return [...map.entries()].map(([name, { feature, disabledDrag, children }]) => ({
-    group: name === '未分配特性',
+  return sortBy([...map.entries()], ([_, { rankIndex }]) => rankIndex).map(([featureId, { feature, disabledDrag, children }]) => ({
+    group: featureId === '0',
     disabledDrag: !!disabledDrag,
     groupType: 'feature',
-    summary: name,
+    summary: feature.summary,
     ...feature,
     children: ganttList2Tree(children),
   }));
 };
 
 const groupByEpic = (data: any, isInProgram: boolean) => {
-  const map = new Map<string, { epic: any, disabledDrag?: boolean, children: any[] }>();
+  const map = new Map<string, { epic: any, rankIndex: number, disabledDrag?: boolean, children: any[] }>();
   const noEpicData: any[] = [];
   data.filter((item: any) => item.issueTypeVO?.typeCode !== 'issue_epic' && item.issueTypeVO?.typeCode !== 'feature').forEach((issue: any) => {
     if (issue.epicId && issue.epicId !== '0') {
-      const epic = data.find((item: any) => item.issueId === issue.epicId);
-      if (map.has(epic?.epicName)) {
-        map.get(epic?.epicName)?.children.push(issue);
+      const epicIssueIndex = map.get(issue.epicId)?.rankIndex ?? findIndex(data, (item: any) => item.issueId === issue.epicId);
+      const epic = data[epicIssueIndex];
+      if (map.has(epic?.issueId)) {
+        map.get(epic?.issueId)?.children.push(issue);
       } else {
-        map.set(epic?.epicName, {
+        map.set(epic?.issueId, {
           epic,
+          rankIndex: epicIssueIndex,
           children: [issue],
         });
       }
@@ -321,14 +327,15 @@ const groupByEpic = (data: any, isInProgram: boolean) => {
     }
   });
   if (noEpicData.length > 0) {
-    map.set('未分配史诗', { epic: { issueId: '0' }, disabledDrag: true, children: noEpicData });
+    map.set('0', {
+      epic: { issueId: '0', epicName: '未分配史诗' }, rankIndex: Infinity, disabledDrag: true, children: noEpicData,
+    });
   }
-
-  return [...map.entries()].map(([name, { epic, children, disabledDrag }]) => ({
-    group: name === '未分配史诗',
+  return sortBy([...map.entries()], ([_, { rankIndex }]) => rankIndex).map(([epicIssueId, { epic, children, disabledDrag }]) => ({
+    group: epicIssueId === '0',
     disabledDrag: !!disabledDrag,
     groupType: 'epic',
-    summary: name,
+    summary: epic.epicName,
     ...epic,
     children: isInProgram ? groupByFeature(children, data) : ganttList2Tree(children),
   }));
