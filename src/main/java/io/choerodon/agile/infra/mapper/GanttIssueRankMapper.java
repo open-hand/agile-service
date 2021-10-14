@@ -5,6 +5,7 @@ import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -42,4 +43,8 @@ public interface GanttIssueRankMapper extends BaseMapper<GanttIssueRankDTO> {
                                                @Param("instanceType") String instanceType,
                                                @Param("dimension") String dimension,
                                                @Param("rank") String rank);
+
+    List<Long> orderByDefaultRank(@Param("issueIds") Set<Long> issueIds,
+                                  @Param("dimension") String dimension,
+                                  @Param("sortMap") Map<String, Object> sortMap);
 }

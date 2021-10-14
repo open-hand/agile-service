@@ -534,7 +534,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             issueIds = queryUnderEpicIssueIds(projectId, searchVO, instanceId, instanceType, currentId, isTreeView, sortMap);
         } else if (GanttDimension.isEpic(instanceType) && Objects.equals(0L, instanceId)) {
             //在未分配史诗下的拖动或根目录拖动
-            issueIds = queryRootOrNoEpicIssueIds(projectId, searchVO, isTreeView, sortMap);
+            issueIds = queryRootOrNoEpicIssueIds(projectId, searchVO, isTreeView, sortMap, currentId);
         } else if (GanttDimension.isFeature(instanceType) && Objects.equals(0L, instanceId)) {
             //未分配特性下拖动
             issueIds = queryNoFeatureIssueIds(projectId, searchVO, isTreeView, sortMap);
@@ -559,38 +559,55 @@ public class GanttChartServiceImpl implements GanttChartService {
     }
 
     private List<Long> queryNoFeatureIssueIds(Long projectId, SearchVO searchVO, boolean isTreeView, Map<String, Object> sortMap) {
-        List<Long> issueIds;
         setOtherArgsValueByKey(searchVO, "featureNull", "true");
         List<String> list = new ArrayList<>();
         list.add("0");
         setOtherArgsValueByKey(searchVO, "feature", list);
         setOtherArgsValueByKey(searchVO, "epic", list);
         boardAssembler.handleOtherArgs(searchVO);
-        issueIds = issueService.listByTreeView(projectId, searchVO, null, sortMap, isTreeView);
+        List<Long> issueIds = issueService.listByTreeView(projectId, searchVO, null, sortMap, isTreeView);
         return issueIds;
     }
 
-    private List<Long> queryRootOrNoEpicIssueIds(Long projectId, SearchVO searchVO, boolean isTreeView, Map<String, Object> sortMap) {
-        List<Long> issueIds;
-        issueIds = issueService.listByTreeView(projectId, searchVO, null, sortMap, isTreeView);
+    private List<Long> queryRootOrNoEpicIssueIds(Long projectId,
+                                                 SearchVO searchVO,
+                                                 boolean isTreeView,
+                                                 Map<String, Object> sortMap,
+                                                 Long currentId) {
+        IssueDTO currentIssue = issueMapper.selectByPrimaryKey(currentId);
+        AssertUtilsForCommonException.notNull(currentIssue, "error.gantt.current.issue.not.existed");
+        String typeCode = currentIssue.getTypeCode();
+        List<Long> issueIds = issueService.listByTreeView(projectId, searchVO, null, sortMap, isTreeView);
         AssertUtilsForCommonException.notEmpty(issueIds, ERROR_GANTT_MOVE_NULL_DATA);
         List<IssueDTO> issues = issueMapper.selectByIds(StringUtils.join(issueIds, ","));
-        Set<Long> epicIds =
-                issues.stream()
-                        .filter(x -> !ObjectUtils.isEmpty(x.getEpicId()) && !Objects.equals(0L, x.getEpicId()))
-                        .map(IssueDTO::getEpicId)
-                        .collect(Collectors.toSet());
+        Set<Long> epicIds = new HashSet<>();
+        List<Long> noEpicIssueIds = new ArrayList<>();
+        issues.forEach(issue -> {
+            Long epicId = issue.getEpicId();
+            if (!ObjectUtils.isEmpty(epicId) && !Objects.equals(0L, epicId)) {
+                epicIds.add(epicId);
+            } else {
+                noEpicIssueIds.add(issue.getIssueId());
+            }
+        });
         if (agilePluginService != null) {
             epicIds.addAll(agilePluginService.queryNoEpicFeatureIds(issues));
         }
-        issueIds = new ArrayList<>(epicIds);
-        return issueIds;
+        List<Long> orderedList = new ArrayList<>();
+        if (!epicIds.isEmpty() && Boolean.TRUE.equals(searchVO.getGanttDefaultOrder())) {
+            String dimension = getDimensionFromSearchVO(searchVO);
+            orderedList.addAll(ganttIssueRankMapper.orderByDefaultRank(epicIds, dimension, sortMap));
+        }
+        List<Long> result = new ArrayList<>(orderedList);
+        if (!IssueTypeCode.isFeature(typeCode)) {
+            result.addAll(noEpicIssueIds);
+        }
+        return result;
     }
 
     private List<Long> queryUnderEpicIssueIds(Long projectId, SearchVO searchVO, Long instanceId, String instanceType, Long currentId, boolean isTreeView, Map<String, Object> sortMap) {
-        List<Long> issueIds;
         addFilterConditionByInstanceType(searchVO, instanceType, instanceId);
-        issueIds = issueService.listByTreeView(projectId, searchVO, null, sortMap, isTreeView);
+        List<Long> issueIds = issueService.listByTreeView(projectId, searchVO, null, sortMap, isTreeView);
         IssueDTO issue = issueMapper.selectByPrimaryKey(currentId);
         AssertUtilsForCommonException.notNull(issue, "error.gantt.move.currentId.not.existed");
         String typeCode = issue.getTypeCode();
