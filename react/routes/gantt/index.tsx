@@ -38,7 +38,6 @@ import {
   Issue, User,
 } from '@/common/types';
 import isHoliday from '@/utils/holiday';
-import { list2tree } from '@/utils/tree';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 import openCreateIssue from '@/components/create-issue';
 import Search from './components/search';
@@ -57,7 +56,9 @@ import QuickCreateIssue from '@/components/QuickCreateIssue';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import TableCache, { TableCacheRenderProps } from '@/components/table-cache';
 import useGanttColumns from './hooks/useGanttColumns';
-import { ganttLocalMove, getGanttMoveDataOrigin, getGanttMoveSubmitData } from './utils';
+import {
+  ganttLocalMove, getGanttMoveDataOrigin, getGanttMoveSubmitData, ganttDataGroupByType, ganttNormalizeIssue,
+} from './utils';
 import GanttDragWrapper from './components/gantt-drag-wrapper';
 
 const { Option } = FlatSelect;
@@ -79,164 +80,6 @@ const typeOptions = [{
 const typeValues = typeOptions.map((t) => t.value);
 export type IGanttDimensionTypeValue = (typeof typeValues)[number];
 
-const ganttList2Tree = (data: any[]) => list2tree(data, { valueField: 'issueId', parentField: 'parentId' });
-
-const formatData = (data: any[]) => data.map((item, i, arr) => {
-  let newItem = Object.assign(item, {});
-  if (item.parentId && item.parentId !== '0' && !arr.find((issue) => issue.issueId === item.parentId)) {
-    Object.assign(newItem, { parentId: '0' });
-  }
-  if (item.epicId && item.epicId !== '0' && !arr.find((issue) => issue.issueId === item.epicId)) {
-    Object.assign(newItem, { epicId: '0' });
-  }
-  if (item.featureId && item.featureId !== '0' && !arr.find((issue) => issue.issueId === item.featureId)) {
-    Object.assign(newItem, { featureId: null });
-  }
-  if ((item.create || item.issueTypeVO.typeCode === 'sub_task' || item.issueTypeVO.typeCode === 'bug') && item.parentId) {
-    const parent = arr.find((issue) => issue.issueId === item.parentId);
-    const newParent = Object.assign(parent, {});
-    if (parent.epicId && parent.epicId !== '0' && !arr.find((issue) => issue.issueId === parent.epicId)) {
-      Object.assign(newParent, { epicId: '0' });
-    }
-    if (parent.featureId && parent.featureId !== '0' && !arr.find((issue) => issue.issueId === parent.featureId)) {
-      Object.assign(newParent, { featureId: null });
-    }
-    newItem = {
-      ...newItem,
-      ...{
-        epicId: newParent?.epicId,
-        featureId: newParent?.featureId,
-      },
-    };
-  }
-  return newItem;
-});
-
-const groupByTask = (data: any[]) => ganttList2Tree(data);
-const groupByUser = (data: any[], rankList: string[]) => {
-  const collectIdSet = new Set<string>();
-  const map = new Map<string, { user?: User, rank: number, children: any[] }>(rankList.map((item, index) => [item, { rank: index, children: [] }]));
-  const noAssigneeData: any[] = [];
-  data.forEach((issue) => {
-    if (issue.assignee?.id) {
-      if (collectIdSet.has(issue.assignee.id)) {
-        map.get(issue.assignee.id)?.children.push(issue);
-      } else {
-        collectIdSet.add(issue.assignee.id);
-        map.set(issue.assignee.id, { ...map.get(issue.assignee.id)!, user: issue.assignee, children: [issue] });
-      }
-    } else {
-      noAssigneeData.push(issue);
-    }
-  });
-  if (noAssigneeData.length > 0) {
-    map.set('0', { user: { id: '0', name: '未分配' } as User, rank: rankList.length, children: noAssigneeData });
-  }
-  return [...map.entries()].map(([assigneeId, { user, children }]) => ({
-    summary: user?.name,
-    group: true,
-    assigneeId: String(assigneeId),
-    disabledDrag: assigneeId === '0',
-    groupType: 'assignee',
-    children: ganttList2Tree(children),
-  }));
-};
-const groupBySprint = (data: any[], rankList: string[]) => {
-  const collectIdSet = new Set<string>();
-  const map = new Map<string, { sprint?: any, rank?: number, children: any[], disabledDrag?: boolean }>(rankList.map((item, index) => [item, { rank: index, children: [] }]));
-  const noSprintData: any[] = [];
-  data.forEach((issue) => {
-    if (issue.sprint) {
-      if (collectIdSet.has(issue.sprint.sprintId)) {
-        map.get(issue.sprint.sprintId)?.children.push(issue);
-      } else {
-        collectIdSet.add(issue.sprint.sprintId);
-        map.set(issue.sprint.sprintId, { ...map.get(issue.sprint.sprintId), sprint: issue.sprint, children: [issue] });
-      }
-    } else {
-      noSprintData.push(issue);
-    }
-  });
-  if (noSprintData.length > 0) {
-    map.set('0', { sprint: { sprintId: '0', sprintName: '未分配' }, disabledDrag: true, children: noSprintData });
-  }
-  return [...map.entries()].map(([sprintId, { sprint, disabledDrag, children }]) => ({
-    summary: sprint?.sprintName,
-    group: true,
-    disabledDrag: !!disabledDrag,
-    sprintId,
-    groupType: 'sprint',
-    groupWidthSelf: true,
-    estimatedStartTime: sprint.startDate,
-    estimatedEndTime: sprint.endDate,
-    children: ganttList2Tree(children),
-  }));
-};
-
-const groupByFeature = (epicChildrenData: any, data: any) => {
-  const map = new Map<string, { feature: any, disabledDrag?: boolean, children: any[] }>();
-  const noFeatureData: any[] = [];
-  epicChildrenData.forEach((issue: any) => {
-    if (issue.featureId && issue.featureId !== '0') {
-      const feature = data.find((item: any) => !item.create && item.issueId.toString() === issue.featureId.toString());
-      if (map.has(feature?.featureName)) {
-        map.get(feature?.featureName)?.children.push(issue);
-      } else {
-        map.set(feature?.featureName, {
-          feature,
-          children: [issue],
-        });
-      }
-    } else {
-      noFeatureData.push(issue);
-    }
-  });
-  if (noFeatureData.length > 0) {
-    map.set('未分配特性', { feature: { issueId: '0' }, disabledDrag: true, children: noFeatureData });
-  }
-
-  return [...map.entries()].map(([name, { feature, disabledDrag, children }]) => ({
-    group: name === '未分配特性',
-    disabledDrag: !!disabledDrag,
-    groupType: 'feature',
-    summary: name,
-    ...feature,
-    children: ganttList2Tree(children),
-  }));
-};
-
-const groupByEpic = (data: any, isInProgram: boolean) => {
-  const map = new Map<string, { epic: any, disabledDrag?: boolean, children: any[] }>();
-  const noEpicData: any[] = [];
-  data.filter((item: any) => item.issueTypeVO?.typeCode !== 'issue_epic' && item.issueTypeVO?.typeCode !== 'feature').forEach((issue: any) => {
-    if (issue.epicId && issue.epicId !== '0') {
-      const epic = data.find((item: any) => item.issueId === issue.epicId);
-      if (map.has(epic?.epicName)) {
-        map.get(epic?.epicName)?.children.push(issue);
-      } else {
-        map.set(epic?.epicName, {
-          epic,
-          children: [issue],
-        });
-      }
-    } else {
-      noEpicData.push(issue);
-    }
-  });
-  if (noEpicData.length > 0) {
-    map.set('未分配史诗', { epic: { issueId: '0' }, disabledDrag: true, children: noEpicData });
-  }
-
-  return [...map.entries()].map(([name, { epic, children }]) => ({
-    group: name === '未分配史诗',
-    disabledDrag: true,
-    groupType: 'epic',
-    summary: name,
-    ...epic,
-    children: isInProgram ? groupByFeature(children, data) : ganttList2Tree(children),
-  }));
-};
-
 const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
   const { isInProgram } = useIsInProgram();
   const [data, setData] = useState<any[]>([]);
@@ -255,7 +98,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
     transformFilter,
   });
   const store = useMemo(() => new GanttStore(), []);
-  const { sprintIds } = store;
+  const { sprintIds, unit } = store;
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
   const handleQuickCreateSubIssue = usePersistFn((parentIssue: Issue) => {
     setData(produce(data, (draft) => {
@@ -378,7 +221,6 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
   const handleClickFilterManage = () => {
     setFilterManageVisible(true);
   };
-  const { unit } = store;
   const onRow: GanttProps<Issue>['onRow'] = useMemo(() => ({
     onClick: (issue) => {
       store.setIssueId(issue.issueId);
@@ -444,29 +286,10 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
       {t === 'left' ? <Icon type="navigate_before" /> : <Icon type="navigate_next" />}
     </div>
   ), []);
-  const normalizeIssue = (issue: Issue, source: any = {}) => Object.assign(source, {
-    parentId: issue.relateIssueId || issue.parentIssueId,
-    estimatedEndTime: issue.estimatedEndTime,
-    estimatedStartTime: issue.estimatedStartTime,
-    issueTypeVO: issue.issueTypeVO,
-    objectVersionNumber: issue.objectVersionNumber,
-    statusVO: issue.statusVO,
-    summary: issue.summary,
-    actualCompletedDate: issue.actualCompletedDate,
-    completed: issue.completed,
-    issueId: issue.issueId,
-    assignee: issue.assigneeId ? {
-      name: issue.assigneeName,
-      realName: issue.assigneeRealName,
-    } : null,
-    sprint: issue.activeSprint,
-    featureId: issue.featureId,
-    epicId: issue.epicId,
-  });
 
   const handleCreateIssue = usePersistFn((issue: Issue, issueId?: string, parentId?: string, dontCopyEpic = false) => {
     setData(produce(data, (draft) => {
-      const normalizeIssueWidthParentId = Object.assign(normalizeIssue(issue), { parentId });
+      const normalizeIssueWidthParentId = Object.assign(ganttNormalizeIssue(issue), { parentId });
       if (!issueId) {
         draft.unshift(normalizeIssueWidthParentId);
       } else {
@@ -499,7 +322,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
         const target = find(draft, { issueId: issue.issueId });
         if (target) {
           // 更新属性
-          normalizeIssue(issue, target);
+          ganttNormalizeIssue(issue, target);
         }
       }));
       updateInfluenceIssues(issue);
@@ -561,19 +384,9 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
     handleIssueDelete(issue);
   });
 
-  const ganttData = useMemo(() => {
-    if (type === 'assignee') {
-      return rankList ? groupByUser(data, rankList) : [];
-    } if (type === 'sprint') {
-      return rankList ? groupBySprint(data, rankList) : [];
-    } if (type === 'task') {
-      return groupByTask(data);
-    } if (type === 'epic') {
-      const formattedData = formatData(data);
-      return groupByEpic(formattedData, isInProgram);
-    }
-    return data;
-  }, [data, isInProgram, rankList, type]);
+  const ganttData = useMemo(() => ganttDataGroupByType({
+    data, type, isInProgram, rankList,
+  }), [data, isInProgram, rankList, type]);
   const renderEmpty = usePersistFn(() => {
     if (!sprintIds || sprintIds?.length === 0) {
       return <span>暂无数据，请选择冲刺</span>;
