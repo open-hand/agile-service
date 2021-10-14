@@ -5127,6 +5127,19 @@
             and (
             <if test="workItemSearchVO.assigneeFilter.contains('assignee')">
                ai.assignee_id = #{userId}
+               <if test="workItemSearchVO.assigneeFilter.contains('participant')">
+                   or
+               </if>
+            </if>
+            <if test="workItemSearchVO.assigneeFilter.contains('participant')">
+                ai.issue_id in (
+                  select issue_id from agile_issue_participant_rel
+                  where project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+                    #{projectId}
+                    </foreach>
+                     and participant_id = #{userId}
+                )
             </if>
             )
         </if>
@@ -5163,7 +5176,8 @@
         and ai.estimated_start_time is not null
         and ai.estimated_end_time is not null
         <if test="workItemSearchVO.startTime != null and workItemSearchVO.endTime != null">
-            and ai.estimated_start_time between #{workItemSearchVO.startTime} and  #{workItemSearchVO.endTime}
+            and (ai.estimated_start_time between #{workItemSearchVO.startTime} and  #{workItemSearchVO.endTime}
+            or ai.estimated_end_time between #{workItemSearchVO.startTime} and  #{workItemSearchVO.endTime})
         </if>
 
         <if test="workItemSearchVO.filterIssueId != null">
@@ -5176,9 +5190,22 @@
 
         <if test="workItemSearchVO.assigneeFilter != null and workItemSearchVO.assigneeFilter.size > 0">
             and (
-            <if test="workItemSearchVO.assigneeFilter.contains('assignee')">
-                ai.assignee_id = #{userId}
-            </if>
+                <if test="workItemSearchVO.assigneeFilter.contains('assignee')">
+                    ai.assignee_id = #{userId}
+                    <if test="workItemSearchVO.assigneeFilter.contains('participant')">
+                        or
+                    </if>
+                </if>
+                <if test="workItemSearchVO.assigneeFilter.contains('participant')">
+                    ai.issue_id in (
+                    select issue_id from agile_issue_participant_rel
+                    where project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+                        #{projectId}
+                    </foreach>
+                    and participant_id = #{userId}
+                    )
+                </if>
             )
         </if>
     </select>

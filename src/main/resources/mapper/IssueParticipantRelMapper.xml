@@ -22,4 +22,16 @@
         where project_id = #{projectId}
         and issue_id = #{issueId}
     </select>
+
+    <select id="listParticipantByIssueIds" resultType="io.choerodon.agile.infra.dto.IssueParticipantRelDTO">
+         select
+            issue_id,
+            participant_id
+         from agile_issue_participant_rel
+        where project_id = #{projectId}
+        and issue_id in
+        <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+            #{issueId}
+        </foreach>
+    </select>
 </mapper>

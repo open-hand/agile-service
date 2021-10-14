@@ -89,6 +89,11 @@ public enum SystemBaseFieldSql implements FieldSql {
                     "WHEN 'pro' THEN '生产环境'\n" +
                     "WHEN 'other' THEN '非生产环境'\n" +
                     "ELSE '无' END)", "null", DEFAULT),
+    //参与人
+    PARTICIPANT("participant",
+            "LEFT JOIN agile_issue_participant_rel aipr ON aipr.issue_id = ai.issue_id",
+            "aipr.participant_id",
+            "null", "IFNULL(aipr.participant_id, 0)", USER),
     ;
 
     String fieldCode;

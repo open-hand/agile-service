@@ -109,6 +109,8 @@ public class BoardServiceImpl implements BoardService {
     private LinkIssueStatusLinkageService linkIssueStatusLinkageService;
     @Autowired
     private IssueService issueService;
+    @Autowired
+    private IssueParticipantRelMapper issueParticipantRelMapper;
 
     @Override
     public void create(Long projectId, String boardName) {
@@ -406,9 +408,10 @@ public class BoardServiceImpl implements BoardService {
         List<Long> assigneeIds = new ArrayList<>();
         List<Long> parentIds = new ArrayList<>();
         List<Long> epicIds = new ArrayList<>();
+        List<Long> participantIds = new ArrayList<>();
         Long userId = DetailsHelper.getUserDetails().getUserId();
         List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnInfoByBoardId(projectId, boardId);
-        setColumnIssue(columns, projectId, currentSprint.getSprintId(), filterSql, searchVO, searchVO.getAssigneeFilterIds(), userId);
+        setColumnIssue(columns, projectId, currentSprint.getSprintId(), filterSql, searchVO, searchVO.getAssigneeFilterIds(), userId, participantIds);
         Boolean condition = handlerAssigneeAndStory(searchVO);
         Map<Long, List<Long>> parentWithSubs = new HashMap<>();
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
@@ -417,6 +420,7 @@ public class BoardServiceImpl implements BoardService {
         jsonObject.put("parentIds", EncryptionUtils.encryptList(parentIds));
         jsonObject.put("parentIssues", getParentIssues(projectId, parentIds, statusMap, issueTypeDTOMap));
         jsonObject.put("assigneeIds", EncryptionUtils.encryptList(assigneeIds));
+        jsonObject.put("participantIds", EncryptionUtils.encryptList(participantIds));
         jsonObject.put("parentWithSubs", EncryptionUtils.encryptMap(parentWithSubs));
         jsonObject.put("parentCompleted", EncryptionUtils.encryptList(sortAndJudgeCompleted(projectId, parentIds)));
         jsonObject.put("epicInfo", !epicIds.isEmpty() ? boardColumnMapper.selectEpicBatchByIds(epicIds) : null);
@@ -451,7 +455,7 @@ public class BoardServiceImpl implements BoardService {
         return jsonObject;
     }
 
-    private void setColumnIssue(List<ColumnAndIssueDTO> columns, Long projectId, Long sprintId, String filterSql, SearchVO searchVO, List<Long> assigneeFilterIds, Long userId) {
+    private void setColumnIssue(List<ColumnAndIssueDTO> columns, Long projectId, Long sprintId, String filterSql, SearchVO searchVO, List<Long> assigneeFilterIds, Long userId, List<Long> participantIds) {
         if (CollectionUtils.isEmpty(columns)){
             return;
         }
@@ -473,11 +477,27 @@ public class BoardServiceImpl implements BoardService {
         if (CollectionUtils.isEmpty(issueList)){
             return;
         }
+        List<Long> issueIds = issueList.stream().map(IssueForBoardDO::getIssueId).collect(Collectors.toList());
+        List<IssueParticipantRelDTO> issueParticipantRelDTOS = issueParticipantRelMapper.listParticipantByIssueIds(projectId, issueIds);
+        Map<Long, List<Long>> participantGroupMap = new HashMap<>();
+        Map<Long, UserMessageDTO> userMessageDTOMap = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(issueParticipantRelDTOS)) {
+            participantGroupMap.putAll(issueParticipantRelDTOS.stream().collect(Collectors.groupingBy(IssueParticipantRelDTO::getIssueId, Collectors.mapping(IssueParticipantRelDTO::getParticipantId, Collectors.toList()))));
+            Set<Long> participants = issueParticipantRelDTOS.stream().map(IssueParticipantRelDTO::getParticipantId).collect(Collectors.toSet());
+            participantIds.addAll(participants);
+            userMessageDTOMap.putAll(userService.queryUsersMap(participantIds, true));
+        }
         issueList.forEach(issue -> {
             List<IssueForBoardDO> statusIssueList = issueStatusMap.computeIfAbsent(issue.getStatusId(), k -> new ArrayList<>());
             issue.setStatusId(null);
             statusIssueList.add(issue);
+            List<Long> participants = participantGroupMap.get(issue.getIssueId());
+            if (CollectionUtils.isNotEmpty(participants)) {
+                issue.setParticipantIds(participants);
+                issue.setParticipants(participants.stream().map(v -> userMessageDTOMap.get(v)).filter(Objects::nonNull).collect(Collectors.toList()));
+            }
         });
+        Collections.sort(participantIds);
     }
 
     private SprintDTO handlerCurrentSprint(Long projectId, SearchVO searchVO) {
