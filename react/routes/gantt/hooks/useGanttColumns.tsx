@@ -179,7 +179,9 @@ const getTableColumns = (visibleColumns: ListLayoutColumnVO[], tableFields: IFou
     }
     if (systemColumnsMap.has(columnCode)) {
       const column = systemColumnsMap.get(columnCode);
-      return merge(baseColumn, { ...column, label: column?.title, name: column?.dataIndex });
+      return merge(baseColumn, {
+        ...column, label: column?.title, name: column?.dataIndex,
+      });
     }
     const field = find(tableFields, { code: columnCode });
     return merge(baseColumn, field ? { ...getCustomColumn(field), label: field.title } : {});
