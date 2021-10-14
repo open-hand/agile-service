@@ -590,7 +590,9 @@
         ai.reporter_id,
         ai.creation_date,
         ai.last_update_date,
-        aipr.participant_id
+        aipr.participant_id,
+        ai.actual_start_time,
+        ai.actual_end_time
         from agile_issue ai
         <if test="ganttDefaultOrder">
             left join agile_gantt_issue_rank agir on ai.issue_id = agir.issue_id and agir.dimension = #{dimension}
