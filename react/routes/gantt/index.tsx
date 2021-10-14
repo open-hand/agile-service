@@ -331,15 +331,6 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
       updateInfluenceIssues(issue);
     }
   });
-  const updateInfluenceIssues = usePersistFn((res: { influenceIssueIds?: string[], [key: string]: any }) => {
-    // @ts-ignore
-    const { influenceIssueIds } = res;
-    if (influenceIssueIds && influenceIssueIds.length > 0) {
-      ganttApi.loadInfluenceIssues(influenceIssueIds).then((issues: any[]) => {
-        updateIssues(issues);
-      });
-    }
-  });
   const updateIssues = usePersistFn((issues: Issue[]) => {
     issues.forEach((issue) => {
       setData(produce(data, (draft) => {
@@ -351,6 +342,16 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
       }));
     });
   });
+  const updateInfluenceIssues = useCallback((res: { influenceIssueIds?: string[], [key: string]: any }) => {
+    // @ts-ignore
+    const { influenceIssueIds } = res;
+    // 更新自身 及影响的issue
+    const updateIssueIds = [res.issueId, ...(influenceIssueIds || [])];
+    ganttApi.loadInfluenceIssues(type, updateIssueIds).then((issues: any[]) => {
+      updateIssues(issues);
+    });
+  }, [type, updateIssues]);
+
   const handleTransformType = usePersistFn((newIssue: Issue, oldIssue: Issue) => {
     const parentTypes = ['story', 'task'];
     const oldType = oldIssue.issueTypeVO.typeCode;
