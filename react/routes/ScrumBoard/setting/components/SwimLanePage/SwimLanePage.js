@@ -47,6 +47,7 @@ class SwimLanePage extends Component {
         >
           <Option value="parent_child">故事</Option>
           <Option value="assignee">经办人</Option>
+          <Option value="participant">参与人</Option>
           <Option value="swimlane_epic">史诗</Option>
           <Option value="swimlane_none">无</Option>
         </Select>

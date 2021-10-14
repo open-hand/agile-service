@@ -14,7 +14,7 @@ import EpicRenderHeader from './EpicRenderHeader';
 
 @observer
 class SwimLane extends Component {
-  renderEpicLane = mode => (
+  renderEpicLane = (mode) => (
     <EpicRenderHeader
       parentIssueArr={ScrumBoardStore.getInterconnectedData}
       otherIssueWithoutParent={ScrumBoardStore.getOtherQuestion}
@@ -37,7 +37,7 @@ class SwimLane extends Component {
       epicPrefix={epicPrefix}
       mode={mode}
     >
-      {key => this.renderSwimLane(key)}
+      {(key) => this.renderSwimLane(key)}
     </RenderSwimLaneContext>
   );
 
@@ -85,6 +85,7 @@ class SwimLane extends Component {
     switch (mode) {
       case 'assignee':
       case 'parent_child':
+      case 'participant':
         return this.renderParentWithSub(mode);
       case 'swimlane_epic':
         return this.renderEpicLane(mode);

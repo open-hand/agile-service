@@ -14,6 +14,7 @@ const getPanelKey = (mode, issue) => {
   const modeMap = new Map([
     ['swimlane_none', 'swimlaneContext%all'],
     ['assignee', `swimlaneContext%${issue.assigneeId || issue.type}`],
+    ['participant', `swimlaneContext%${issue.participantId || issue.type}`],
     ['swimlane_epic', `swimlaneContext%${issue.epicId || issue.type}`],
     ['parent_child', `swimlaneContext%${issue.issueId || issue.type || 'other'}`],
   ]);
@@ -132,6 +133,7 @@ class SwimLaneContext extends React.Component {
     const retMap = new Map([
       ['parent_child', `parent_child%${key}`],
       ['assignee', `assignee%${key}`],
+      ['participant', `participant%${key}`],
       ['swimlane_none', 'swimlane_none%other'],
     ]);
     if (epicPrefix) {
