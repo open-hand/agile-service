@@ -112,6 +112,9 @@ public class VerifyUpdateUtil {
 
     private void  handlerListObject(Field field, Object objectUpdate, Object v) throws
             IllegalAccessException, ClassNotFoundException, InstantiationException {
+        if (v == null) {
+            return;
+        }
         String className = field.getGenericType().getTypeName().substring(15, field.getGenericType().getTypeName().length() - 1);
         Class<?> forName = Class.forName(className);
         if (forName.isPrimitive() || EncryptionUtils.isWrapClass(forName) || forName.newInstance() instanceof String) {
