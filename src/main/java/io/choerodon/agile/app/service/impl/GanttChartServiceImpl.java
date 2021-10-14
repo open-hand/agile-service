@@ -145,15 +145,20 @@ public class GanttChartServiceImpl implements GanttChartService {
     }
 
     @Override
-    public List<GanttChartVO> listByIds(Long projectId, Set<Long> issueIds, String dimension) {
+    public List<GanttChartVO> listByIds(Long projectId, GanttChartSearchVO ganttChartSearchVO, String dimension) {
+        Set<Long> issueIds = ganttChartSearchVO.getIssueIds();
         if (ObjectUtils.isEmpty(issueIds)) {
             return new ArrayList<>();
+        }
+        List<String> displayFieldCodes = ganttChartSearchVO.getDisplayFieldCodes();
+        if (CollectionUtils.isEmpty(displayFieldCodes)) {
+            displayFieldCodes = new ArrayList<>();
         }
         validateDimension(dimension);
         Set<Long> projectIds = new HashSet<>();
         projectIds.add(projectId);
         List<IssueDTO> issueList = issueMapper.selectWithSubByIssueIds(projectIds, new ArrayList<>(issueIds), null, false, null);
-        return buildGanttList(projectId, projectIds, new ArrayList<>(issueIds), issueList, new HashMap<>(), new HashMap<>(), new ArrayList<>());
+        return buildGanttList(projectId, projectIds, new ArrayList<>(issueIds), issueList, new HashMap<>(), new HashMap<>(), displayFieldCodes);
     }
 
     @Override

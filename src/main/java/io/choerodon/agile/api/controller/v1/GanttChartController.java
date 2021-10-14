@@ -51,9 +51,9 @@ public class GanttChartController {
     @PostMapping(value = "/list_by_ids")
     public ResponseEntity<List<GanttChartVO>> listByIds(@ApiParam(value = "项目id", required = true)
                                                         @PathVariable(name = "project_id") Long projectId,
-                                                        @RequestBody @Encrypt Set<Long> issueIds,
+                                                        @RequestBody GanttChartSearchVO ganttChartSearchVO,
                                                         @RequestParam String dimension) {
-        return ResponseEntity.ok(ganttChartService.listByIds(projectId, issueIds, dimension));
+        return ResponseEntity.ok(ganttChartService.listByIds(projectId, ganttChartSearchVO, dimension));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
