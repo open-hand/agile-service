@@ -22,7 +22,7 @@ public interface GanttChartService {
      */
     Page<GanttChartVO> pagedQuery(Long projectId, SearchVO searchVO, PageRequest pageRequest);
 
-    List<GanttChartVO> listByIds(Long projectId, Set<Long> issueIds, String dimension);
+    List<GanttChartVO> listByIds(Long projectId, GanttChartSearchVO ganttChartSearchVO, String dimension);
 
     void move(Long projectId, GanttMoveVO ganttMoveVO);
 
