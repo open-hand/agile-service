@@ -58,15 +58,16 @@ class GanttApi {
     });
   }
 
-  loadInfluenceIssues(issueIds: string[]) {
+  loadInfluenceIssues(dimension: string, issueIds: string[]) {
     return axios({
       method: 'post',
       url: `${this.prefix}/gantt/list_by_ids`,
+      params: { dimension },
       data: issueIds,
     });
   }
 
-  loadDimensionRank(searchVO:any) {
+  loadDimensionRank(searchVO: any) {
     return axios({
       method: 'post',
       url: `${this.prefix}/gantt/list_dimension`,
