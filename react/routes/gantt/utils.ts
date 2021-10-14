@@ -318,9 +318,9 @@ const groupByEpic = (data: any, isInProgram: boolean) => {
     map.set('未分配史诗', { epic: { issueId: '0' }, disabledDrag: true, children: noEpicData });
   }
 
-  return [...map.entries()].map(([name, { epic, children }]) => ({
+  return [...map.entries()].map(([name, { epic, children, disabledDrag }]) => ({
     group: name === '未分配史诗',
-    disabledDrag: true,
+    disabledDrag: !!disabledDrag,
     groupType: 'epic',
     summary: name,
     ...epic,
