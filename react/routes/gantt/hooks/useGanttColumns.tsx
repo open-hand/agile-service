@@ -24,9 +24,9 @@ import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 import { getCustomColumn, systemColumnsMap } from '@/components/issue-table/baseColumns';
 
 interface IGanttColumnsHookProps extends TableCacheRenderProps {
-    onSortChange: IGanttSortLabelProps['onChange']
-    onCreateSubIssue?: (parentIssue: Issue) => void
-    onAfterCreateSubIssue?: (createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed?: boolean) => void
+  onSortChange: IGanttSortLabelProps['onChange']
+  onCreateSubIssue?: (parentIssue: Issue) => void
+  onAfterCreateSubIssue?: (createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed?: boolean) => void
 }
 const renderTooltip = (user: User) => {
   const {
@@ -146,21 +146,21 @@ const getTableColumns = (visibleColumns: ListLayoutColumnVO[], tableFields: IFou
       }
       const isCanCreateIssue = isCanQuickCreateIssue(record);
       return !record.group ? (
-      // eslint-disable-next-line no-underscore-dangle
+        // eslint-disable-next-line no-underscore-dangle
         <span style={{ cursor: 'pointer', color: 'var(--table-click-color)' }} className={classNames('c7n-gantt-content-body-summary')}>
           <TypeTag iconSize={22} data={record.issueTypeVO} featureType={record.featureType} style={{ marginRight: 5 }} />
           <Tooltip title={record.summary}>
             <span style={{ verticalAlign: 'middle', flex: 1 }} className="c7n-gantt-content-body-summary-text">{record.summary}</span>
           </Tooltip>
           {isCanCreateIssue && (
-          <Icon
-            type="add"
-            className="c7n-gantt-content-body-parent_create"
-            onClick={(e) => {
-              e.stopPropagation();
-              openCreateSubIssue(record as any);
-            }}
-          />
+            <Icon
+              type="add"
+              className="c7n-gantt-content-body-parent_create"
+              onClick={(e) => {
+                e.stopPropagation();
+                openCreateSubIssue(record as any);
+              }}
+            />
           )}
         </span>
       ) : (
@@ -178,10 +178,11 @@ const getTableColumns = (visibleColumns: ListLayoutColumnVO[], tableFields: IFou
       return merge(baseColumn, typeof field === 'function' ? field(onSortChange) as Gantt.Column : field);
     }
     if (systemColumnsMap.has(columnCode)) {
-      return merge(baseColumn, systemColumnsMap.get(columnCode)!);
+      const column = systemColumnsMap.get(columnCode);
+      return merge(baseColumn, { ...column, label: column?.title, name: column?.dataIndex });
     }
     const field = find(tableFields, { code: columnCode });
-    return merge(baseColumn, field ? getCustomColumn(field) : {});
+    return merge(baseColumn, field ? { ...getCustomColumn(field), label: field.title } : {});
   }));
   return tableColumns;
 };
