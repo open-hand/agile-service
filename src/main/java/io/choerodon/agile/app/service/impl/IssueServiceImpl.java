@@ -891,7 +891,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (issueUpdateVO.getTags() != null) {
             this.self().handleUpdateTagIssueRel(issueUpdateVO.getTags(), projectId, issueId);
         }
-        if(issueUpdateVO.getParticipantIds() != null){
+        if (issueUpdateVO.getParticipantIds() != null) {
             this.self().handleUpdateParticipant(issueUpdateVO.getParticipantIds(), projectId, issueId);
         }
         return issueId;
@@ -912,7 +912,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             this.self().handleUpdateTagIssueRel(issueUpdateVO.getTags(), projectId, issueId);
         }
         if(issueUpdateVO.getParticipantIds() != null){
-            this.self().handleUpdateParticipant(issueUpdateVO.getParticipantIds(), projectId, issueId);
+            this.self().handleUpdateParticipantWithoutRuleNotice(issueUpdateVO.getParticipantIds(), projectId, issueId);
         }
         return issueId;
     }
@@ -936,8 +936,14 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldList = {RuleNotice.PARTICIPANT_ID}, instanceId = "issueId", idPosition = "arg")
     public void handleUpdateParticipant(List<Long> participantIds, Long projectId, Long issueId) {
-        if(!participantIds.isEmpty()){
+        handleUpdateParticipantWithoutRuleNotice(participantIds, projectId, issueId);
+    }
+
+    @Override
+    public void handleUpdateParticipantWithoutRuleNotice(List<Long> participantIds, Long projectId, Long issueId) {
+        if (!participantIds.isEmpty()) {
             issueParticipantRelService.updateParticipantRel(issueId, projectId, participantIds);
         } else {
             issueParticipantRelService.deleteParticipantRel(issueId, projectId);
