@@ -60,6 +60,7 @@ import {
   ganttLocalMove, getGanttMoveDataOrigin, getGanttMoveSubmitData, ganttDataGroupByType, ganttNormalizeIssue,
 } from './utils';
 import GanttDragWrapper from './components/gantt-drag-wrapper';
+import useQuickCreateIssue from './hooks/useQuickCreateIssue';
 
 const { Option } = FlatSelect;
 
@@ -83,7 +84,6 @@ export type IGanttDimensionTypeValue = (typeof typeValues)[number];
 const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
   const { isInProgram } = useIsInProgram();
   const [data, setData] = useState<any[]>([]);
-  const [isCreate, setIsCreate] = useState(false);
   const [type, setType] = useState<IGanttDimensionTypeValue>(localPageCacheStore.getItem('gantt.search.type') ?? typeValues[0]);
   const [rankList, setRankList] = useState<string[] | undefined>(undefined);
   const [workCalendar, setWorkCalendar] = useState<any>();
@@ -92,11 +92,11 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
   const [projectWorkCalendar, setProjectWorkCalendar] = useState<any>();
   const [filterManageVisible, setFilterManageVisible] = useState<boolean>();
   const [loading, setLoading] = useState(false);
-  const quickCreateDataRef = useRef<any>({});
   const issueSearchStore = useIssueSearchStore({
     getSystemFields: () => getSystemFields().map((item) => (item.code === 'feature' || item.code === 'epic' ? { ...item, defaultShow: false } : item)).filter((item) => item.code !== 'sprint') as ILocalField[],
     transformFilter,
   });
+
   const store = useMemo(() => new GanttStore(), []);
   const { sprintIds, unit } = store;
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
@@ -136,7 +136,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
       displayFieldCodes: visibleColumnCodes,
       searchArgs: { tree: type !== 'assignee', dimension: type },
     });
-  }, [sprintIds]);
+  }, [sprintIds, type]);
 
   const { run, flush } = useDebounceFn(() => {
     (async () => {
@@ -166,6 +166,9 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
       });
     })();
   });
+
+  const [{ isCreate }, quickCreateProps] = useQuickCreateIssue({ onCreate: run });
+
   useEffect(() => {
     run();
   }, [issueSearchStore, sprintIds, run, visibleColumnCodes]);
@@ -393,13 +396,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
     }
     return <span>暂无数据</span>;
   });
-  const handleChangeQuickCreateData = usePersistFn((key: string, value: any) => {
-    let defaultKey = key;
-    if (['summary', 'sprint'].includes(key)) {
-      defaultKey = `defaultValues.${key}`;
-    }
-    set(quickCreateDataRef.current, defaultKey, value);
-  });
+
   const renderClone = usePersistFn((record: Gantt.Record) => tableWithSortedColumns[0].render!(record) as React.ReactElement);
   const handleDragEnd = useCallback((sourceBar: Gantt.Bar, destinationBar: Gantt.Bar) => {
     setLoading(true);
@@ -574,31 +571,8 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
               </GanttDragWrapper>
               <div className={classNames('c7n-gantt-content-body-quick-create', { 'c7n-gantt-content-body-quick-create-open': isCreate })}>
                 <QuickCreateIssue
-                  onCreateChange={setIsCreate}
+                  {...quickCreateProps}
                   sprintId={sprintIds?.length === 1 ? sprintIds.filter((i) => i !== '0')[0] : undefined}
-                  cantCreateEvent={() => {
-                    openCreateIssue({
-                      ...quickCreateDataRef.current,
-                      onCreate: run,
-                    });
-                  }}
-                  onCreate={(res: any) => {
-                    // handleCreateIssue(res);
-                    run();
-                  }}
-                  typeIdChange={(id: any) => {
-                    handleChangeQuickCreateData('defaultTypeId', id);
-                  }}
-                  summaryChange={(issueSummary: any) => {
-                    handleChangeQuickCreateData('summary', issueSummary);
-                  }}
-                  assigneeChange={(assigneeId: string, assignee: any) => {
-                    handleChangeQuickCreateData('defaultAssignee', assignee);
-                  }}
-                  setDefaultSprint={(value: any) => {
-                    handleChangeQuickCreateData('sprint', value);
-                  }}
-
                 />
               </div>
             </div>
