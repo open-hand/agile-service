@@ -14,11 +14,13 @@ export default class SwimLaneHeader extends Component {
     const switchMap = new Map([
       ['parent_child', this.renderStoryComponent],
       ['assignee', this.renderAssigneeComponent],
+      ['participant', this.renderParticipantComponent],
       ['swimlane_epic', this.renderEpicComponent],
     ]);
     const strMap = new Map([
       ['parent_child', '子任务'],
       ['assignee', '任务'],
+      ['participant', '任务'],
       ['swimlane_epic', '子任务'],
       ['swimlane_none', '子任务'],
     ]);
@@ -130,6 +132,31 @@ export default class SwimLaneHeader extends Component {
         }}
       />
       <span>{assigneeName}</span>
+    </>
+  );
+
+  renderParticipantComponent = ({
+    participantId,
+    participantAvatarUrl,
+    participantName,
+    participantRealName,
+    participantLoginName, ldap, email,
+  }) => (
+    <>
+      <UserTag
+        showText={false}
+        size={24}
+        data={{
+          id: participantId,
+          loginName: participantLoginName,
+          tooltip: participantName,
+          realName: participantRealName,
+          imageUrl: participantAvatarUrl,
+          ldap,
+          email,
+        }}
+      />
+      <span>{participantName}</span>
     </>
   );
 

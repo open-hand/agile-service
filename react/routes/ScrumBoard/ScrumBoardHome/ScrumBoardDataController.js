@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import _ from 'lodash';
+import _, { includes } from 'lodash';
 /**
  * IssueFilterControler
  * 用于拼接 Issue 整体页面的请求，根据页面函数需求返回相应的请求结果
@@ -13,6 +13,7 @@ export default class ScrumBoardDataController {
     this.flattenedArr = [];
     this.epicDataMap = [];
     this.assigneeDataMap = [];
+    this.participantDataMap = [];
     this.parentWithSubsDataMapCollection = {};
     this.columnStructureMap = new Map();
     this.statusStructureMap = new Map();
@@ -62,11 +63,12 @@ export default class ScrumBoardDataController {
 
   setSourceData(epicData, boardData) {
     const {
-      assigneeIds, epicInfo, parentWithSubs, parentCompleted, parentIssues,
+      assigneeIds, participantIds, epicInfo, parentWithSubs, parentCompleted, parentIssues,
     } = boardData;
     this.dataConvertToFlatten(boardData);
     this.epicDataMap = this.addEpicLabelToFlattenData(this.flattenedArr, epicInfo, parentWithSubs, parentIssues, parentCompleted);
     this.assigneeDataMap = this.addAssigneeLabelToFlattenData(this.flattenedArr, assigneeIds);
+    this.participantDataMap = this.addParticipantLabelToFlattenData(this.flattenedArr, participantIds);
     this.parentWithSubsDataMapCollection = this.addParentIdsLabelToFlattenData(this.flattenedArr, parentWithSubs, parentIssues, parentCompleted);
     this.dataReady = true;
   }
@@ -149,9 +151,35 @@ export default class ScrumBoardDataController {
     };
   }
 
+  addParticipantLabelToFlattenData(flattenedArr, participantIds) {
+    const issueWithParticipantArr = participantIds.map((participantId) => {
+      const hasParticipantIdIssue = flattenedArr.filter((issue) => !!(issue.participants || []).filter((item) => item.id === participantId).length)[0];
+      const participant = hasParticipantIdIssue.participants?.find((item) => item.id === participantId);
+      return ({
+        participantId,
+        participantAvatarUrl: participant.imageUrl,
+        participantName: participant.name,
+        participantRealName: participant.realName,
+        participantLoginName: participant.loginName,
+        subIssueData: flattenedArr.filter((issue) => includes(issue.participantIds || [], participantId)),
+      });
+    });
+    const issueWithParticipantMap = issueWithParticipantArr.map((participantObj) => [participantObj.participantId, participantObj]);
+    const issueWithoutParticipant = flattenedArr.filter((issue) => !issue.participantIds || !issue.participantIds?.length);
+    return {
+      swimLaneData: this.swimLaneDataConstructor(issueWithParticipantArr, issueWithoutParticipant, 'participant', 'participantId'),
+      interConnectedDataMap: issueWithParticipantMap,
+      unInterConnectedDataMap: issueWithoutParticipant,
+    };
+  }
+
   getAssigneeData = () => ({
     ...this.assigneeDataMap,
   });
+
+  getParticipantData = () => ({
+    ...this.participantDataMap,
+  })
 
   addParentIdsLabelToFlattenData(flattenedArr, parentWithSubs, parentIssues, parentCompleted, mode = 'parent_child') {
     const isEpic = mode.includes('swimlane_epic');
