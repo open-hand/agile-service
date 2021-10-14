@@ -349,6 +349,9 @@ public class GanttChartServiceImpl implements GanttChartService {
             default:
                 break;
         }
+        if (instanceIds.isEmpty()) {
+            return new LinkedHashMap<>();
+        }
         List<GanttDimensionRankDTO> ganttDimensionRankList =
                 ganttDimensionRankMapper.orderByInstanceId(instanceIds, projectId, dimension);
         LinkedHashMap<Long, String> rankMap = new LinkedHashMap<>();
@@ -809,10 +812,6 @@ public class GanttChartServiceImpl implements GanttChartService {
                 issueStatusMapper.listCompletedStatus(new HashSet<>(Arrays.asList(projectId)))
                         .stream().map(StatusVO::getId).collect(Collectors.toSet());
         Map<Long, IssueSprintDTO> issueSprintMap = queryIssueSprint(projectId, issueIds);
-        Map<Long, Date> completedDateMap =
-                issueMapper.selectActuatorCompletedDateByIssueIds(issueIds, projectId)
-                        .stream()
-                        .collect(Collectors.toMap(GanttChartVO::getIssueId, GanttChartVO::getActualCompletedDate));
         Map<String, Object> fieldCodeValues = new HashMap<>();
         buildFieldCodeValues(projectId, issueIds, fieldCodes, fieldCodeValues, issueList);
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
@@ -856,7 +855,6 @@ public class GanttChartServiceImpl implements GanttChartService {
             ganttChart.setPriorityVO(priorityMap.get(i.getPriorityId()));
             Long assigneeId = i.getAssigneeId();
             setGanttChartAssignee(usersMap, ganttChart, assigneeId);
-            setGanttChartCompletedDate(completedDateMap, i, ganttChart);
             setGanttChartEpicOrFeatureInfo(epicIds, featureIds, i, issueId, ganttChart, thisProjectId, featureMap);
             handlerFieldValue(fieldCodes, fieldCodeValues, ganttChart, i, usersMap, envMap);
             setParentId(ganttChart, i);
@@ -883,14 +881,6 @@ public class GanttChartServiceImpl implements GanttChartService {
         }
     }
 
-    private void setGanttChartCompletedDate(Map<Long, Date> completedDateMap,
-                                            IssueDTO issue,
-                                            GanttChartVO ganttChart) {
-        Date completedDate = completedDateMap.get(issue.getIssueId());
-        if (completedDate != null) {
-            ganttChart.setActualCompletedDate(completedDate);
-        }
-    }
 
     private void setGanttChartAssignee(Map<Long, UserMessageDTO> usersMap,
                                        GanttChartVO ganttChart,
