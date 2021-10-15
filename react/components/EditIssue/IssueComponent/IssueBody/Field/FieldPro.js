@@ -50,7 +50,7 @@ const EditorMap = new Map([
     fieldApi.updateFieldValue(issueId, fieldId, fieldCode, 'agile_issue', obj)
       .then(async () => {
         if (onUpdate) {
-          onUpdate();
+          onUpdate(issue);
         }
         if (reloadIssue) {
           await reloadIssue(issueId);
