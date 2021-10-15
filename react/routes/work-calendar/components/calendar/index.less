@@ -1,0 +1,170 @@
+.wrap {
+  height: 100%;
+
+  //用于覆盖fullCalendar部分css变量
+  --fc-border-color: var(--divider);
+  --fc-today-bg-color: transparent;
+  --fc-neutral-bg-color: transparent;
+  --fc-event-border-color: transparent;
+
+  //用于覆盖fullCalendar样式
+  :global {
+    .fc-scrollgrid {
+      border: none;
+    }
+    tr td.fc-timegrid-slot:first-child {
+      border: none;
+    }
+    .fc td.fc-day-sat:not(.fc-day-today), .fc td.fc-day-sun:not(.fc-day-today) {
+      background: #F7F8FA;
+    }
+    .fc th.fc-day-today {
+      background: #F76776;
+
+      .fc-col-header-cell-cushion {
+        color: #fff;
+      }
+    }
+    .fc .fc-timegrid-divider {
+      background: none;
+      padding: 0 !important;
+      border-bottom: none;
+    }
+    .fc .fc-col-header .fc-timegrid-axis {
+      border: none;
+      background: #F5F6FB;
+    }
+    .fc-daygrid-dot-event {
+      overflow: hidden;
+      padding: 0;
+      margin-top: 2px;
+      border-radius: 0;
+    }
+
+    .fc-h-event {
+      border: none;
+      border-radius: 0;
+    }
+
+    .fc td.fc-day-today .fc-daygrid-day-top .fc-daygrid-day-number {
+      background: #F76776;
+      color: #fff;
+      border-radius: 50%;
+    }
+
+    .fc .fc-daygrid-day-top {
+      flex-direction: row;
+      width: .3rem;
+      height: .3rem;
+      flex-shrink: 0;
+      text-align: center;
+      line-height: .3rem;
+
+      .fc-daygrid-day-number {
+        padding: 0;
+        color: var(--text-color);
+        font-size: .12rem;
+        width: 100%;
+      }
+    }
+    .fc .fc-v-event {
+      border: 3px solid var(--fc-event-border-color, #3788d8);
+      border-top: none;
+      border-right: none;
+      border-bottom: none;
+      padding: .04rem;
+      border-radius: 0;
+    }
+  }
+
+  .slotLabel {
+    font-size: .12rem;
+    color: var(--text-color3);
+
+    :global {
+      .fc-timegrid-slot-label-frame {
+        text-align: center;
+      }
+    }
+  }
+  .slotLane {
+    height: 30px !important;
+  }
+
+  .dayHeader {
+    background: #F5F6FB;
+    font-weight: 500;
+    border: none !important;
+    text-align: left !important;
+    padding-left: .1rem !important;
+
+    :global{
+      .fc-col-header-cell-cushion {
+        color: var(--text-color);
+        line-height: .18rem;
+        padding: .07rem 0;
+      }
+    }
+  }
+
+  .allDayLabel {
+    font-size: .12rem;
+    color: var(--text-color3);
+
+    :global {
+      .fc-timegrid-axis-frame {
+        justify-content: center;
+      }
+    }
+  }
+
+  .issueStartTime {
+    font-size: .12rem;
+    color: var(--text-color3);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .monthIssueStartTime {
+    font-size: .12rem;
+    color: var(--text-color3);
+    margin-left: auto;
+  }
+
+  .issueSummary {
+    font-size: .13rem;
+    margin-top: .07rem;
+  }
+
+  .monthIssue {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    padding: 0 2px;
+    width: 100%;
+  }
+
+  .timeIssueTimeWrap {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    justify-content: space-between;
+  }
+
+  .monthIssueSummary {
+    color: var(--text-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .allDayIssue {
+    padding: .04rem;
+    border-radius: 0;
+
+    .issueSummary {
+      margin-top: 0;
+    }
+  }
+}
