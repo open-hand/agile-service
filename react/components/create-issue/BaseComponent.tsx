@@ -76,6 +76,7 @@ export interface CreateIssueBaseProps {
   typeCode?: string | string[]
   /** 是否在项目群创建 */
   isProgram?: boolean
+  showSelectProject?: boolean,
 }
 const defaultDataSet = new DataSet({
   autoCreate: true,
@@ -203,6 +204,7 @@ const CreateIssueBase = observer(({
   defaultValues,
   typeCode,
   isProgram,
+  showSelectProject = false,
 }: CreateIssueBaseProps) => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
@@ -492,6 +494,9 @@ const CreateIssueBase = observer(({
     return issueLinkCreateVOList;
   });
   const handleSubmit = usePersistFn(async () => {
+    if (showSelectProject && !projectId) {
+      return false;
+    }
     if (await dataSet.validate()) {
       if (enableIssueLinks && !await issueLinkDataSet.validate()) {
         return false;

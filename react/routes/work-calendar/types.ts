@@ -1,8 +1,13 @@
 import { CalendarApi } from '@fullcalendar/common';
-import { IStatus } from '@/common/types';
+import { Issue, IStatus } from '@/common/types';
 
 interface CalendarRefPros {
   getApi(): CalendarApi,
+}
+
+interface IssueItem extends Issue{
+  completedCount: number,
+  totalCount: number
 }
 
 type StatusProps = {
@@ -15,4 +20,5 @@ export {
   CalendarRefPros,
   StatusProps,
   UserValueCode,
+  IssueItem,
 };

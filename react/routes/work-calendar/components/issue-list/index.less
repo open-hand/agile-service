@@ -1,0 +1,79 @@
+@hoverOrSelectColor: #F1F3FF;
+
+.wrap {
+  padding: .08rem .08rem .1rem .1rem;
+  cursor: pointer;
+
+  &:hover {
+    background: @hoverOrSelectColor;
+  }
+
+  .header {
+    font-weight: 500;
+    display: flex;
+  }
+
+  .progressWrap {
+    width: 100%;
+    height: .04rem;
+    display: flex;
+    margin-top: .05rem;
+    padding-left: .09rem;
+
+    .progressDone {
+      height: 100%;
+      background: #00BFA5;
+    }
+    .progressTodo {
+      height: 100%;
+      background: #E9EBEB;
+    }
+  }
+
+  .issueDetail {
+    padding: .09rem 0 0 .09rem;
+    font-size: .12rem;
+
+    .issueDetailLink {
+      padding-bottom: .05rem;
+      margin-bottom: .05rem;
+      border-bottom: 1px solid var(--divider);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .label {
+        color: var(--text-color2);
+      }
+
+      .link {
+        font-size: .13rem;
+        color: var(--primary-color);
+      }
+    }
+
+    .detailOption {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: .07rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .label {
+        color: var(--text-color3);
+      }
+    }
+  }
+}
+
+.wrapSelected {
+  background: @hoverOrSelectColor;
+}
+
+.search {
+  text-align: center;
+  margin: .12rem .2rem .08rem;
+}

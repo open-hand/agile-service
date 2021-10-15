@@ -1,5 +1,5 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId } from '@/utils/common';
+import {getOrganizationId, getProjectId} from '@/utils/common';
 
 class ProjectApi {
   get prefix() {
@@ -19,6 +19,14 @@ class ProjectApi {
  */
   loadBasicInfo(projectId?: string) {
     return axios.get(`/iam/choerodon/v1/projects/${projectId}/basic_info`);
+  }
+
+  /**
+   * 查询组织下用户有权限的项目
+   * @param userId
+   */
+  loadProjectByUser({ userId, filter, page, size }) {
+    return axios.get(`iam/choerodon/v1/organizations/${getOrganizationId()}/users/${userId}/projects/paging?page=${page}&size=${size}`);
   }
 }
 
