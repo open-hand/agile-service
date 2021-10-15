@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { map } from 'lodash';
 import {
@@ -11,6 +11,7 @@ import { Issue } from '@/common/types';
 import { formatIssueTime } from '@/routes/work-calendar/utils';
 import { useWorkCalendarStore } from '@/routes/work-calendar/stores';
 import CalendarContent from '@/routes/work-calendar/components/calendar';
+import IssueList from '@/routes/work-calendar/components/issue-list';
 import SelectProject from '@/components/select/select-project';
 
 const { Option } = Select;
@@ -127,7 +128,7 @@ const WorkCalendar = observer(() => {
       <Breadcrumb title="工作日历" />
       <Content className={`${prefixCls}-content`}>
         <div className={`${prefixCls}-content-task`}>
-          左侧任务内容
+          <IssueList refresh={refresh} />
         </div>
         <div className={`${prefixCls}-content-main`}>
           <CalendarContent />
