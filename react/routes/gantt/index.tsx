@@ -101,10 +101,22 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
   const store = useMemo(() => new GanttStore(), []);
   const { sprintIds, unit } = store;
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
-  const handleQuickCreateSubIssue = usePersistFn((parentIssue: GanttIssue) => {
+  const handleQuickCreateSubIssue = usePersistFn((parentIssue: GanttIssue & { groupType?: string, firstIssue?: GanttIssue }) => {
     setData(produce(data, (draft) => {
-      const targetIndex = findIndex(draft, (issue) => issue.parentId === parentIssue.issueId || issue.issueId === parentIssue.issueId);
-      targetIndex !== -1 && draft.splice(targetIndex, 0, getGanttCreatingSubIssue(parentIssue, targetIndex));
+      let targetIndex = -1;
+      if (parentIssue.groupType === 'assignee') {
+        targetIndex = parentIssue.firstIssue ? findIndex(draft, (issue) => issue.issueId === parentIssue.firstIssue?.issueId) : -1;
+      } else if (parentIssue.groupType === 'sprint') {
+        targetIndex = parentIssue.firstIssue ? findIndex(draft, (issue) => issue.issueId === parentIssue.firstIssue?.issueId) : -1;
+      } else if (parentIssue.groupType === 'epic') {
+        targetIndex = findIndex(draft, (issue) => issue.issueId === parentIssue.issueId);
+        // targetIndex = targetIndex !== -1 && draft.length !== (targetIndex + 1) ? targetIndex + 1 : targetIndex;
+      } else {
+        targetIndex = findIndex(draft, (issue) => issue.parentId === parentIssue.issueId || issue.issueId === parentIssue.issueId);
+      }
+      const newIssue = getGanttCreatingSubIssue(parentIssue, targetIndex);
+      console.log('ta', targetIndex, newIssue);
+      targetIndex !== -1 && draft.splice(targetIndex, 0, newIssue);
     }));
   });
   const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {

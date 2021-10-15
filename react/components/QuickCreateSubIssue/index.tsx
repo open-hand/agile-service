@@ -8,21 +8,23 @@ import {
 import { Button, Spin } from 'choerodon-ui/pro';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
 import { useClickAway, useLockFn, useUpdateEffect } from 'ahooks';
-import { find } from 'lodash';
+import { castArray, find } from 'lodash';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { IIssueType, Issue, User } from '@/common/types';
-import { checkCanQuickCreate, getQuickCreateDefaultObj } from '@/utils/quickCreate';
+import { checkCanQuickCreate, getQuickCreateDefaultObj, IQuickCreateDefaultValueParams } from '@/utils/quickCreate';
 import { fieldApi, issueApi } from '@/api';
 import { fields2Map } from '@/utils/defaultValue';
 import localCacheStore from '@/stores/common/LocalCacheStore';
 import TypeTag from '../TypeTag';
 import UserDropdown from '../UserDropdown';
+import useDefaultPriority from '@/hooks/data/useDefaultPriority';
 
 interface QuickCreateSubIssueProps {
-  priorityId: string
-  parentIssueId: string
+  priorityId?: string
+  parentIssueId?: string
   sprintId: string
   typeCode?: string | string[]
+  defaultValues?: Partial<IQuickCreateDefaultValueParams>
   mountCreate?: boolean
   onCreate?: (issue: Issue) => void
   onAwayClick?: (createFn: any) => void
@@ -34,9 +36,11 @@ interface QuickCreateSubIssueProps {
   assigneeChange?: (assigneeId: string | undefined, assignee: User | undefined) => void
 }
 const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
-  priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, cantCreateEvent, typeCode, summaryChange, typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick,
+  priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, defaultValues, cantCreateEvent, typeCode, summaryChange, typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick,
 }) => {
   const { data: issueTypes, isLoading } = useProjectIssueTypes({ typeCode: typeCode || 'sub_task', onlyEnabled: true });
+  const { data: defaultPriority } = useDefaultPriority(undefined, { enabled: !priorityId });
+
   const [summary, setSummary] = useState('');
   const [expand, setExpand] = useState(!!mountCreate);
   const [id, setId] = useState<string | undefined>();
@@ -49,11 +53,16 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
 
   useEffect(() => {
     if (issueTypes && issueTypes.length > 0) {
-      const localIssueTypeId = localCacheStore.getItem('agile.issue.type.sub.selected');
+      const typeCodes = castArray(typeCode || 'sub_task');
+      let localIssueTypeId = localCacheStore.getItem('agile.issue.type.sub.selected');
+
+      if (!typeCodes.includes('sub_task')) {
+        localIssueTypeId = localCacheStore.getItem('agile.issue.type.common.selected');
+      }
       const newIssueType = find(issueTypes, { id: localIssueTypeId }) || issueTypes[0];
       setId(newIssueType.id);
     }
-  }, [issueTypes]);
+  }, [issueTypes, typeCode]);
   const handleMenuClick = useCallback(({ key }) => {
     setId(key);
   }, []);
@@ -95,8 +104,9 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
       const fields = await fieldApi.getFields(param);
       const fieldsMap = fields2Map(fields);
       const issue = getQuickCreateDefaultObj({
+        ...defaultValues,
         summary,
-        priorityId,
+        priorityId: priorityId || defaultPriority?.id,
         parentIssueId,
         relateIssueId: currentType.typeCode === 'bug' ? parentIssueId : undefined,
         issueTypeId: currentType.id,
@@ -105,7 +115,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
         assigneeId,
       }, fieldsMap);
 
-      const res = await issueApi.createSubtask(issue);
+      const res = issue.relateIssueId || issue.relateIssueId ? await issueApi.createSubtask(issue) : await issueApi.create(issue);
       await fieldApi.quickCreateDefault(res.issueId, {
         schemeCode: 'agile_issue',
         issueTypeId: currentType.id,
@@ -115,7 +125,11 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
       setSummary('');
       handleCancel();
       onCreate && onCreate(res);
-      localCacheStore.setItem('agile.issue.type.sub.selected', currentType.id);
+      if (castArray(typeCode || 'sub_task').includes(currentType.typeCode)) {
+        localCacheStore.setItem('agile.issue.type.sub.selected', currentType.id);
+      } else {
+        localCacheStore.setItem('agile.issue.type.common.selected', currentType.id);
+      }
       setCreateStatus('success');
       return true;
     }
@@ -131,7 +145,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
         }
       });
     }
-  }, [expand, id]);
+  }, [expand, id, summary]);
   const handleCancel = useCallback(() => {
     setExpand(false);
   }, []);
@@ -148,7 +162,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
     return null;
   }
 
-  return issueTypes ? (
+  return issueTypes && (priorityId || defaultPriority) ? (
     <div className="c7n-subTask-quickCreate" ref={ref}>
       {expand
         ? (
@@ -241,4 +255,5 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
     </div>
   ) : null;
 };
+
 export default QuickCreateSubIssue;

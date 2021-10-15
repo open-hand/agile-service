@@ -1,5 +1,5 @@
-import { fieldApi } from '@/api';
 import { isEmpty } from 'lodash';
+import { fieldApi } from '@/api';
 import { getProjectId } from './common';
 
 export async function checkCanQuickCreate(typeId: string, assigneeId?: string) {
@@ -16,7 +16,7 @@ export async function checkCanQuickCreate(typeId: string, assigneeId?: string) {
   }
   return false;
 }
-interface IQuickCreateDefaultValueParams {
+export interface IQuickCreateDefaultValueParams {
   issueTypeId: string
   typeCode: string
   priorityId?: string
