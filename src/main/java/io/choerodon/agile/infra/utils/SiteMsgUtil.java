@@ -5,6 +5,7 @@ import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.ProjectReportReceiverDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
+import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.core.enums.MessageAdditionalType;
 import org.apache.commons.collections4.CollectionUtils;
@@ -388,12 +389,13 @@ public class SiteMsgUtil {
         });
     }
 
-    public void issueParticipant(String summary, String url, Long projectId, Long operatorId, List<Long> sendUserIds, String operatorName) {
+    public void issueParticipant(String summary, String url, Long projectId, Long operatorId, List<Long> sendUserIds, String operatorName, List<Long> participantIds) {
         Map<String,String> map = new HashMap<>();
         map.put(SUMMARY, summary);
         map.put(OPERATOR_NAME, operatorName);
         map.put(URL, url);
         setLoginNameAndRealName(operatorId, map);
+        setParticipantName(map, participantIds);
         // 额外参数
         Map<String,Object> objectMap=new HashMap<>();
         objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
@@ -401,5 +403,16 @@ public class SiteMsgUtil {
         MessageSender messageSender = handlerMessageSender(0L,"ISSUE_SET_PARTICIPANT",sendUserIds, map);
         messageSender.setAdditionalInformation(objectMap);
         messageClient.async().sendMessage(messageSender);
+    }
+
+    private void setParticipantName(Map<String,String> map, List<Long> participantIds) {
+        Map<Long, UserMessageDTO> userMessageDTOMap = userService.queryUsersMap(participantIds, true);
+        if (CollectionUtils.isNotEmpty(participantIds)) {
+            String participantName = participantIds.stream().map(v -> userMessageDTOMap.get(v))
+                                        .filter(Objects::nonNull)
+                                        .map(UserMessageDTO::getName)
+                                        .collect(Collectors.joining(","));
+            map.put("participantName", participantName);
+        }
     }
 }
