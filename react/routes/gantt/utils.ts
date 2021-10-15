@@ -6,6 +6,7 @@ import { IGanttMoveRequestData, IGanttMoveRequestDataPreviousWithNext } from '@/
 import type { IGanttDimensionTypeValue } from '.';
 import { Issue, User } from '@/common/types';
 import { list2tree } from '@/utils/tree';
+import { GanttIssue } from './types';
 
 /**
  * 获取甘特图移动后待提交到后端数据
@@ -188,7 +189,7 @@ const formatData = (data: any[]) => data.map((item, i, arr) => {
   }
   return newItem;
 });
-export function getGanttCreatingSubIssue(parentIssue: Issue, dataIndex: number) {
+export function getGanttCreatingSubIssue(parentIssue: GanttIssue, dataIndex: number) {
   return {
     ...parentIssue,
     parentId: parentIssue.issueId,

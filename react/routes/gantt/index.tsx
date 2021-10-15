@@ -61,6 +61,7 @@ import {
 } from './utils';
 import GanttDragWrapper from './components/gantt-drag-wrapper';
 import useQuickCreateIssue from './hooks/useQuickCreateIssue';
+import { GanttIssue } from './types';
 
 const { Option } = FlatSelect;
 
@@ -100,7 +101,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
   const store = useMemo(() => new GanttStore(), []);
   const { sprintIds, unit } = store;
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
-  const handleQuickCreateSubIssue = usePersistFn((parentIssue: Issue) => {
+  const handleQuickCreateSubIssue = usePersistFn((parentIssue: GanttIssue) => {
     setData(produce(data, (draft) => {
       const targetIndex = findIndex(draft, (issue) => issue.parentId === parentIssue.issueId || issue.issueId === parentIssue.issueId);
       targetIndex !== -1 && draft.splice(targetIndex, 0, getGanttCreatingSubIssue(parentIssue, targetIndex));
@@ -222,10 +223,10 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
   const handleClickFilterManage = () => {
     setFilterManageVisible(true);
   };
-  const onRow: GanttProps<Issue>['onRow'] = useMemo(() => ({
+  const onRow: GanttProps<GanttIssue>['onRow'] = useMemo(() => ({
     onClick: (issue) => {
       store.setIssueId(issue.issueId);
-      store.setProgramId(issue.programId);
+      store.setProgramId(issue.programId && (String(issue.programId) !== String(issue.projectId)) ? String(issue.programId) : null);
     },
   }), [store]);
   const getExpandIcon = useCallback(({ level, collapsed, onClick }) => (
@@ -315,7 +316,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
     }
   });
 
-  const handleIssueUpdate = usePersistFn((issue: Issue | null) => {
+  const handleIssueUpdate = usePersistFn((issue: GanttIssue | Issue | null) => {
     if (type === 'epic') {
       run();
     } else if (issue) {
@@ -323,13 +324,13 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
         const target = find(draft, { issueId: issue.issueId });
         if (target) {
           // 更新属性
-          ganttNormalizeIssue(issue, target);
+          ganttNormalizeIssue(issue as Issue, target);
         }
       }));
       updateInfluenceIssues(issue);
     }
   });
-  const updateIssues = usePersistFn((issues: Issue[]) => {
+  const updateIssues = usePersistFn((issues: GanttIssue[]) => {
     issues.forEach((issue) => {
       setData(produce(data, (draft) => {
         const target = find(draft, { issueId: issue.issueId });

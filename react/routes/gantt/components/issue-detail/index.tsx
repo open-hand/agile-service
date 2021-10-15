@@ -13,7 +13,7 @@ interface Props {
   onCopyIssue: (issue: Issue, issueId?: string, isSubTask?: boolean) => void
   onTransformType: (newIssue: Issue, oldIssue: Issue) => void
   onChangeParent: (newIssue: Issue, oldIssue: Issue) => void
-  onLinkIssue: ({ influenceIssueIds }:{ influenceIssueIds?: string[] }) => void
+  onLinkIssue: ({ influenceIssueIds }: { influenceIssueIds?: string[] }) => void
 }
 const IssueDetail: React.FC<Props> = ({
   refresh, onUpdate, onDelete, onDeleteSubIssue, onCreateSubIssue, onCopyIssue, onTransformType, onChangeParent, onLinkIssue,
@@ -34,6 +34,7 @@ const IssueDetail: React.FC<Props> = ({
   const visible = issueId;
   useEffect(() => {
     if (visible) {
+      console.log('disabled', programId, !!programId);
       open({
         path: 'issue',
         props: {
