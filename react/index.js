@@ -25,6 +25,7 @@ const PageConfig = React.lazy(() => import('./routes/page-config'));
 const StateMachine = React.lazy(() => import('./routes/StateMachine'));
 const TeamPerformance = React.lazy(() => import('./routes/TeamPerformance'));
 const VersionList = React.lazy(() => (import('./routes/version-list')));
+const WorkCalendar = React.lazy(() => (import('./routes/work-calendar')));
 // 敏捷设置
 const Component = React.lazy(() => import('./routes/settings/Component'));
 const IssueLink = React.lazy(() => import('./routes/settings/IssueLinkHome'));
@@ -94,6 +95,7 @@ export function getRoutes(match) {
     />,
     <Route path={`${match.url}/ui-preview/:uuid`} component={UiPreview} />,
     <Route path={`${match.url}/outside/ui-preview/:uuid`} component={UiPreview} />,
+    <Route path={`${match.url}/work-calendar`} component={WorkCalendar} />,
   ];
 }
 class Agile extends React.Component {

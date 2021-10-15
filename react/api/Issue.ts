@@ -166,7 +166,7 @@ class IssueApi extends Api<IssueApi> {
     */
   create = (issueObj: IIssue, applyType: string = 'agile') => axios({
     method: 'post',
-    url: `${this.prefix}/issues`,
+    url: `/agile/v1/projects/${issueObj?.projectId || this.projectId}/issues`,
     data: issueObj,
     params: {
       applyType,
@@ -178,9 +178,12 @@ class IssueApi extends Api<IssueApi> {
     * @param issueObj
     * @param projectId
     */
-  update = async (issueObj: UIssue) => {
+  async update(issueObj: UIssue) {
     try {
-      return await axios.put(`${this.prefix}/issues`, issueObj, {
+      return await this.request({
+        method: 'put',
+        url: `${this.prefix}/issues`,
+        data: issueObj,
         noPrompt: true,
       });
     } catch (error) {
