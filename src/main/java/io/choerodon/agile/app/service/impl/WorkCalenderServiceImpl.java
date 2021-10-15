@@ -71,6 +71,14 @@ public class WorkCalenderServiceImpl implements WorkCalenderService {
     public List<WorkItemVO> queryAssigneeIssueList(Long organizationId, WorkItemSearchVO workItemSearchVO) {
         // 校验查询的时间范围
         checkTimeRange(workItemSearchVO);
+        // 默认按经办人和参与人筛选
+        List<String> assigneeFilter = workItemSearchVO.getAssigneeFilter();
+        if (CollectionUtils.isEmpty(assigneeFilter)) {
+            assigneeFilter = new ArrayList<>();
+            assigneeFilter.add("assignee");
+            assigneeFilter.add("participant");
+            workItemSearchVO.setAssigneeFilter(assigneeFilter);
+        }
         // 如果有做项目筛选,就直接使用。没有的话，查询组织下有权限的项目
         List<Long> projectIds = new ArrayList<>();
         Long userId = DetailsHelper.getUserDetails().getUserId();

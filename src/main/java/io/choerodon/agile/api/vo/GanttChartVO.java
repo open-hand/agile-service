@@ -123,6 +123,9 @@ public class GanttChartVO {
 
     private String featureType;
 
+    @ApiModelProperty(value = "参与人")
+    private List<UserMessageDTO> participants;
+
     public String getFeatureType() {
         return featureType;
     }
@@ -441,5 +444,13 @@ public class GanttChartVO {
 
     public void setPriorityVO(PriorityVO priorityVO) {
         this.priorityVO = priorityVO;
+    }
+
+    public List<UserMessageDTO> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(List<UserMessageDTO> participants) {
+        this.participants = participants;
     }
 }
