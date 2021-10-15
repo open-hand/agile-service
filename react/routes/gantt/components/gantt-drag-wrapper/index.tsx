@@ -165,6 +165,10 @@ const GanttGroupDragWrapper: React.FC<IGanttGroupDragWrapperProps> = ({
       const destinationBar = store.ganttRef.current?.flattenData[initial.destination.index];
       // 移动是同层级进行移动，因此这里获取的目标节点应该是同层级的,当目标节点为高层级别的，则无效
       const newDestination = getDestinationBar(oldValue.source._depth, destinationBar);
+      if (newDestination?._parent?.key !== oldValue.source._parent?.key) {
+        draggingBarDestinationBarRef.current = undefined;
+        return { source: oldValue.source, destination: undefined };
+      }
       console.log(oldValue.source.record.summary, oldValue.source._depth, 'drag===>', newDestination, newDestination?.record.summary);
       draggingStyle.current = newDestination && { transform: `translate(0px, ${oldValue.source.absoluteIndex > newDestination.absoluteIndex ? 34 : -34}px)` };
       draggingBarDestinationBarRef.current = newDestination;

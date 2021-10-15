@@ -188,7 +188,16 @@ const formatData = (data: any[]) => data.map((item, i, arr) => {
   }
   return newItem;
 });
-
+export function getGanttCreatingSubIssue(parentIssue: Issue, dataIndex: number) {
+  return {
+    ...parentIssue,
+    parentId: parentIssue.issueId,
+    issueId: `create**${parentIssue.issueId}`,
+    parent: parentIssue,
+    create: true,
+    createId: dataIndex,
+  };
+}
 export const ganttNormalizeIssue = (issue: Issue, source: any = {}) => Object.assign(source, {
   parentId: issue.relateIssueId || issue.parentIssueId,
   estimatedEndTime: issue.estimatedEndTime,
