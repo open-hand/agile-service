@@ -22,10 +22,11 @@ import QuickCreateSubIssue from '@/components/QuickCreateSubIssue';
 import { TableCacheRenderProps } from '@/components/table-cache';
 import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 import { getCustomColumn, systemColumnsMap } from '@/components/issue-table/baseColumns';
+import type { GanttIssue } from '../types';
 
 interface IGanttColumnsHookProps extends TableCacheRenderProps {
   onSortChange: IGanttSortLabelProps['onChange']
-  onCreateSubIssue?: (parentIssue: Issue) => void
+  onCreateSubIssue?: (parentIssue: GanttIssue) => void
   onAfterCreateSubIssue?: (createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed?: boolean) => void
 }
 const renderTooltip = (user: User) => {

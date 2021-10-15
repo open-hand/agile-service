@@ -4,16 +4,16 @@ import dayjs, { Dayjs } from 'dayjs';
 import { Tooltip } from 'choerodon-ui/pro';
 import { GanttProps, Gantt } from '@choerodon/gantt';
 import STATUS_COLOR from '@/constants/STATUS_COLOR';
-import { Issue } from '@/common/types';
 import Context from '../../context';
 import styles from './index.less';
+import type { GanttIssue } from '../../types';
 
 interface GanttBarProps {
   type: string
-  bar: Gantt.Bar<Issue>
+  bar: Gantt.Bar<GanttIssue>
   width: number
   height: number
-  onClick: GanttProps<Issue>['onBarClick']
+  onClick: GanttProps<GanttIssue>['onBarClick']
 }
 function format(h: number) {
   if (h >= 24) {
