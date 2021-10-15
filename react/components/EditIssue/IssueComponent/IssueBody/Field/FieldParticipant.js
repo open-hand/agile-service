@@ -16,7 +16,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
     const obj = {
       issueId,
       objectVersionNumber,
-      participantIds: value || null,
+      participantIds: value?.length ? value : [],
     };
     store.update(obj);
   };

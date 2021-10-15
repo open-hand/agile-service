@@ -165,6 +165,9 @@ class ScrumBoardStore {
   }
 
   needRefresh(issue, destinationStatus) {
+    if (this.getSwimLaneCode === 'participant' && toJS(issue.participantIds)?.length > 1) {
+      return true;
+    }
     if ((issue.issueTypeVO.typeCode === 'bug' && issue.relateIssueId) || issue.issueTypeVO.typeCode === 'sub_task' || ['story', 'bug', 'task'].includes(issue.issueTypeVO.typeCode)) {
       const hasLinkage = this.statusLinkages.find((link) => link.issueTypeId === issue.issueTypeVO.id && link.statusId === destinationStatus);
       return hasLinkage;
