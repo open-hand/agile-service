@@ -58,12 +58,12 @@ class GanttApi {
     });
   }
 
-  loadInfluenceIssues(dimension: string, issueIds: string[]) {
+  loadInfluenceIssues(dimension: string, issueIds: string[], displayFieldCodes: string[]) {
     return axios({
       method: 'post',
       url: `${this.prefix}/gantt/list_by_ids`,
       params: { dimension },
-      data: issueIds,
+      data: { issueIds, displayFieldCodes },
     });
   }
 

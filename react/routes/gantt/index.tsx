@@ -347,10 +347,10 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
     const { influenceIssueIds } = res;
     // 更新自身 及影响的issue
     const updateIssueIds = [res.issueId, ...(influenceIssueIds || [])];
-    ganttApi.loadInfluenceIssues(type, updateIssueIds).then((issues: any[]) => {
+    ganttApi.loadInfluenceIssues(type, updateIssueIds, visibleColumnCodes).then((issues: any[]) => {
       updateIssues(issues);
     });
-  }, [type, updateIssues]);
+  }, [type, updateIssues, visibleColumnCodes]);
 
   const handleTransformType = usePersistFn((newIssue: Issue, oldIssue: Issue) => {
     const parentTypes = ['story', 'task'];
