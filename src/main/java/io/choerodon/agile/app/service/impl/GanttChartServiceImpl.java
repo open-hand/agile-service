@@ -51,6 +51,7 @@ public class GanttChartServiceImpl implements GanttChartService {
     private static final String UPDATE_USER = "updateUser";
     private static final String MAIN_RESPONSIBLE_USER = "mainResponsibleUser";
     private static final String TAGS = "tags";
+    private static final String PARTICIPANTS = "participants";
     private static final String ERROR_SPRINT_EMPTY = "error.otherArgs.sprint.empty";
     private static final String ERROR_GANTT_DIMENSION_NOT_SUPPORT = "error.gantt.dimension.not.support";
     private static final String ERROR_GANTT_MOVE_NULL_DATA = "error.gantt.move.null.data";
@@ -66,7 +67,8 @@ public class GanttChartServiceImpl implements GanttChartService {
                     UPDATE_USER,
                     MAIN_RESPONSIBLE_USER,
                     FieldCode.SPRINT,
-                    TAGS
+                    TAGS,
+                    PARTICIPANTS
             };
 
     @Autowired
@@ -973,6 +975,9 @@ public class GanttChartServiceImpl implements GanttChartService {
             case UPDATE_USER:
                 handlerUser(userIds, issueList, IssueDTO::getLastUpdatedBy);
                 break;
+            case FieldCode.PARTICIPANT:
+                handlerParticipant(userIds, issueList);
+                break;
             case MAIN_RESPONSIBLE_USER:
                 handlerUser(userIds, issueList, IssueDTO::getMainResponsibleId);
                 break;
@@ -983,6 +988,19 @@ public class GanttChartServiceImpl implements GanttChartService {
                 break;
             default:
                 break;
+        }
+    }
+
+    private void handlerParticipant(Set<Long> userIds, List<IssueDTO> issueList) {
+        Set<Long> assigneeIds = new HashSet<>();
+        for (IssueDTO issueDTO : issueList) {
+            List<Long> participantIds = issueDTO.getParticipantIds();
+            if (!CollectionUtils.isEmpty(participantIds)) {
+                assigneeIds.addAll(participantIds);
+            }
+        }
+        if (!CollectionUtils.isEmpty(assigneeIds)) {
+            userIds.addAll(assigneeIds);
         }
     }
 
@@ -1207,6 +1225,18 @@ public class GanttChartServiceImpl implements GanttChartService {
         // 处理环境字段
         if (fieldCodes.contains(FieldCode.ENVIRONMENT) && !ObjectUtils.isEmpty(issueDTO.getEnvironment())) {
             ganttChartVO.setEnvironment(envMap.get(issueDTO.getEnvironment()));
+        }
+        // 处理参与人
+        if (fieldCodes.contains(PARTICIPANTS) && !CollectionUtils.isEmpty(issueDTO.getParticipantIds())) {
+            List<Long> participantIds = issueDTO.getParticipantIds();
+            List<UserMessageDTO> participants = new ArrayList<>();
+            for (Long participantId : participantIds) {
+                UserMessageDTO userMessageDTO = usersMap.get(participantId);
+                if (!ObjectUtils.isEmpty(userMessageDTO)) {
+                    participants.add(userMessageDTO);
+                }
+            }
+            ganttChartVO.setParticipants(participants);
         }
 
         if (fieldCodes.contains("tags")) {
