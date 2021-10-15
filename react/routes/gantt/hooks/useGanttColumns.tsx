@@ -38,6 +38,9 @@ const renderTooltip = (user: User) => {
 
 const isCanQuickCreateIssue = (record: Gantt.Record<any>) => {
   const { typeCode } = record.issueTypeVO || {};
+  if (['assignee', 'sprint', 'epic'].includes(record.groupType) && !record.isInProgram) {
+    return true;
+  }
   if (record.group || !typeCode) {
     return false;
   }
@@ -115,15 +118,20 @@ const getTableColumns = (visibleColumns: ListLayoutColumnVO[], tableFields: IFou
     label: '名称',
     render: (record) => {
       if (record.create) {
-        const parentIssue: Issue = record.parent;
+        const parentIssue: GanttIssue = record.parent;
         const onCreate = (issue: Issue) => onAfterCreateSubIssue(record.createId, { subIssue: issue, parentIssueId: parentIssue.issueId });
+        let typeCodes = ['sub_task', 'bug'];
+        if (record.groupType) {
+          typeCodes = ['story', 'bug', 'task'];
+        }
         return (
           <span role="none" onClick={(e) => e.stopPropagation()} className="c7n-gantt-content-body-create">
             <QuickCreateSubIssue
               mountCreate
-              typeCode={['sub_task', 'bug']}
+              typeCode={typeCodes}
               priorityId={parentIssue.priorityVO?.id}
               parentIssueId={parentIssue.issueId}
+              defaultValues={{ epicId: parentIssue.epicId }}
               sprintId={(parentIssue as any).sprint?.sprintId!}
               cantCreateEvent={() => {
                 onAfterCreateSubIssue(record.createId, undefined, true);
@@ -135,7 +143,7 @@ const getTableColumns = (visibleColumns: ListLayoutColumnVO[], tableFields: IFou
                 }, 110);
               }}
               onCreate={onCreate}
-              defaultAssignee={undefined}
+              defaultAssignee={parentIssue.assignee ?? undefined}
               onAwayClick={(createFn) => {
                 createFn().then((res: boolean) => {
                   !res && onAfterCreateSubIssue(record.createId, undefined, true);
@@ -159,6 +167,7 @@ const getTableColumns = (visibleColumns: ListLayoutColumnVO[], tableFields: IFou
               className="c7n-gantt-content-body-parent_create"
               onClick={(e) => {
                 e.stopPropagation();
+
                 openCreateSubIssue(record as any);
               }}
             />
@@ -166,26 +175,53 @@ const getTableColumns = (visibleColumns: ListLayoutColumnVO[], tableFields: IFou
         </span>
       ) : (
         <Tooltip title={record.summary}>
-          <span style={{ color: 'var(--table-click-color)' }}>{record.summary}</span>
+          <span style={{ color: 'var(--table-click-color)' }} className="c7n-gantt-content-body-summary">
+            <span style={{ verticalAlign: 'middle', flex: 1 }} className="c7n-gantt-content-body-summary-text">{record.summary}</span>
+            {isCanCreateIssue && (
+              <Icon
+                type="add"
+                className="c7n-gantt-content-body-parent_create"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openCreateSubIssue(record as any);
+                }}
+              />
+            )}
+          </span>
+
         </Tooltip>
       );
     },
   },
   ];
   tableColumns.push(...visibleColumns.map(({ columnCode }) => {
-    const baseColumn = { width: 100 };
+    const baseColumn = { width: 100 } as any;
     if (ganttColumnMap.has(columnCode)) {
       const field = ganttColumnMap.get(columnCode);
-      return merge(baseColumn, typeof field === 'function' ? field(onSortChange) as Gantt.Column : field);
-    }
-    if (systemColumnsMap.has(columnCode)) {
+      merge(baseColumn, typeof field === 'function' ? field(onSortChange) as Gantt.Column : field);
+    } else if (systemColumnsMap.has(columnCode)) {
       const column = systemColumnsMap.get(columnCode);
-      return merge(baseColumn, {
-        ...column, label: column?.title, name: column?.dataIndex,
+      merge(baseColumn, {
+        ...column,
+        label: column?.title,
+        name: column?.dataIndex,
       });
+    } else {
+      const field = find(tableFields, { code: columnCode });
+      merge(baseColumn, field ? {
+        ...getCustomColumn(field),
+        label: field.title,
+      } : {});
     }
-    const field = find(tableFields, { code: columnCode });
-    return merge(baseColumn, field ? { ...getCustomColumn(field), label: field.title } : {});
+    const { render, name } = baseColumn;
+    return merge(baseColumn, {
+      render: (record: any) => {
+        if (record?.create) {
+          return undefined;
+        }
+        return render ? render(record) : record[name];
+      },
+    });
   }));
   return tableColumns;
 };

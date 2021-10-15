@@ -1,7 +1,9 @@
 /* eslint-disable no-underscore-dangle */
 import { Gantt } from '@choerodon/gantt';
 import { produce } from 'immer';
-import { findIndex, noop, sortBy } from 'lodash';
+import {
+  findIndex, noop, omit, pick, sortBy,
+} from 'lodash';
 import { IGanttMoveRequestData, IGanttMoveRequestDataPreviousWithNext } from '@/api';
 import type { IGanttDimensionTypeValue } from '.';
 import { Issue, User } from '@/common/types';
@@ -82,7 +84,6 @@ export function getGanttMoveSubmitData({
   //  是否有上层级
   const instanceObject = getInstanceObject();
   function getSameDepthBar(depth: number, bar?: Gantt.Bar): Gantt.Bar | undefined {
-    console.log('getSameDepthBar', bar?._depth, bar?._depth === depth);
     return bar?._depth === depth ? bar : undefined;
   }
   function getRecordId(r?: Gantt.Record) {
@@ -170,7 +171,7 @@ const formatData = (data: any[]) => data.map((item, i, arr) => {
   if (item.featureId && item.featureId !== '0' && !arr.find((issue) => issue.issueId === item.featureId)) {
     Object.assign(newItem, { featureId: null });
   }
-  if ((item.create || item.issueTypeVO.typeCode === 'sub_task' || item.issueTypeVO.typeCode === 'bug') && item.parentId) {
+  if (!item.create && (item.issueTypeVO.typeCode === 'sub_task' || item.issueTypeVO.typeCode === 'bug') && item.parentId) {
     const parent = arr.find((issue) => issue.issueId === item.parentId);
     const newParent = Object.assign(parent, {});
     if (parent.epicId && parent.epicId !== '0' && !arr.find((issue) => issue.issueId === parent.epicId)) {
@@ -191,7 +192,8 @@ const formatData = (data: any[]) => data.map((item, i, arr) => {
 });
 export function getGanttCreatingSubIssue(parentIssue: GanttIssue, dataIndex: number) {
   return {
-    ...parentIssue,
+    ...pick(parentIssue, ['sprint', 'assignee', 'epicId', 'groupType']),
+    group: true,
     parentId: parentIssue.issueId,
     issueId: `create**${parentIssue.issueId}`,
     parent: parentIssue,
@@ -239,14 +241,19 @@ const groupByUser = (data: any[], rankList: string[]) => {
   if (noAssigneeData.length > 0) {
     map.set('0', { user: { id: '0', name: '未分配' } as User, rank: rankList.length, children: noAssigneeData });
   }
-  return [...map.entries()].map(([assigneeId, { user, children }]) => ({
-    summary: user?.name,
-    group: true,
-    assigneeId: String(assigneeId),
-    disabledDrag: assigneeId === '0',
-    groupType: 'assignee',
-    children: ganttList2Tree(children),
-  }));
+  return [...map.entries()].map(([assigneeId, { user, children }]) => {
+    const groupIssues = ganttList2Tree(children);
+    return ({
+      summary: user?.name,
+      group: true,
+      assigneeId: String(assigneeId),
+      assignee: user,
+      disabledDrag: assigneeId === '0',
+      groupType: 'assignee',
+      firstIssue: groupIssues[0],
+      children: groupIssues,
+    });
+  });
 };
 const groupBySprint = (data: any[], rankList: string[]) => {
   const collectIdSet = new Set<string>();
@@ -267,17 +274,23 @@ const groupBySprint = (data: any[], rankList: string[]) => {
   if (noSprintData.length > 0) {
     map.set('0', { sprint: { sprintId: '0', sprintName: '未分配' }, disabledDrag: true, children: noSprintData });
   }
-  return [...map.entries()].map(([sprintId, { sprint, disabledDrag, children }]) => ({
-    summary: sprint?.sprintName,
-    group: true,
-    disabledDrag: !!disabledDrag,
-    sprintId,
-    groupType: 'sprint',
-    groupWidthSelf: true,
-    estimatedStartTime: sprint.startDate,
-    estimatedEndTime: sprint.endDate,
-    children: ganttList2Tree(children),
-  }));
+  return [...map.entries()].map(([sprintId, { sprint, disabledDrag, children }]) => {
+    const groupIssues = ganttList2Tree(children);
+
+    return ({
+      summary: sprint?.sprintName,
+      group: true,
+      disabledDrag: !!disabledDrag,
+      sprint,
+      sprintId,
+      groupType: 'sprint',
+      groupWidthSelf: true,
+      estimatedStartTime: sprint.startDate,
+      estimatedEndTime: sprint.endDate,
+      firstIssue: groupIssues[0],
+      children: groupIssues,
+    });
+  });
 };
 
 const groupByFeature = (epicChildrenData: any, data: any) => {
@@ -341,14 +354,19 @@ const groupByEpic = (data: any, isInProgram: boolean) => {
       epic: { issueId: '0', epicName: '未分配史诗' }, rankIndex: Infinity, disabledDrag: true, children: noEpicData,
     });
   }
-  return sortBy([...map.entries()], ([_, { rankIndex }]) => rankIndex).map(([epicIssueId, { epic, children, disabledDrag }]) => ({
-    group: epicIssueId === '0',
-    disabledDrag: !!disabledDrag,
-    groupType: 'epic',
-    summary: epic.epicName,
-    ...epic,
-    children: isInProgram ? groupByFeature(children, data) : ganttList2Tree(children),
-  }));
+  return sortBy([...map.entries()], ([_, { rankIndex }]) => rankIndex).map(([epicIssueId, { epic, children, disabledDrag }]) => {
+    const groupIssues = isInProgram ? groupByFeature(children, data) : ganttList2Tree(children);
+    return ({
+      ...epic,
+      group: epicIssueId === '0',
+      disabledDrag: !!disabledDrag,
+      groupType: 'epic',
+      isInProgram,
+      summary: epic.epicName,
+      epicId: epicIssueId,
+      children: groupIssues,
+    });
+  });
 };
 
 export const ganttDataGroupByType = ({
