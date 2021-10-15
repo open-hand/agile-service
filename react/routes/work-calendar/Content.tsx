@@ -11,6 +11,7 @@ import { Issue } from '@/common/types';
 import { formatIssueTime } from '@/routes/work-calendar/utils';
 import { useWorkCalendarStore } from '@/routes/work-calendar/stores';
 import CalendarContent from '@/routes/work-calendar/components/calendar';
+import SelectProject from '@/components/select/select-project';
 
 const { Option } = Select;
 
@@ -36,6 +37,11 @@ const WorkCalendar = observer(() => {
     refresh();
   }, [mainStore, refresh]);
 
+  const handleProjectChange = useCallback((value) => {
+    mainStore.setCurrentProjectIds(value);
+    refresh();
+  }, [mainStore, refresh]);
+
   const handleChangeTab = useCallback((e, tabName, tabKey: string) => {
     const calendarRef = mainStore.getCalendarRef;
     if (calendarRef.current) {
@@ -47,7 +53,8 @@ const WorkCalendar = observer(() => {
   const openCreate = useCallback(() => {
     const calendarRef = mainStore.getCalendarRef;
     openCreateIssue({
-      projectId: '223894445333270528',
+      // projectId: '223894445333270528',
+      showSelectProject: true,
       defaultAssignee: AppState.userInfo,
       onCreate: (issue: Issue) => {
         const calenderApi = calendarRef.current?.getApi();
@@ -89,6 +96,15 @@ const WorkCalendar = observer(() => {
                   <Option value={value} key={value}>{name}</Option>
                 ))}
               </Select>
+            ),
+          }, {
+            display: true,
+            element: (
+              <SelectProject
+                placeholder="所属项目"
+                onChange={handleProjectChange}
+                multiple
+              />
             ),
           }, {
             display: true,

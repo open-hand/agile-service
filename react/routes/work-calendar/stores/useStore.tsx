@@ -1,11 +1,11 @@
 import { useLocalStore } from 'mobx-react-lite';
 import { axios } from '@choerodon/boot';
 import { map, assign } from 'lodash';
+import moment from 'moment';
 import { getOrganizationId } from '@/utils/common';
 import { Issue as OldIssue } from '@/common/types';
 import { formatIssueTime, formatDate } from '@/routes/work-calendar/utils';
 import { CalendarRefPros, StatusProps, UserValueCode } from '@/routes/work-calendar/types';
-import moment from 'moment';
 
 interface Issue extends OldIssue{
   id: string,
@@ -37,6 +37,14 @@ export default function useStore({ STATUS, DEFAULT_USER }: Props) {
       this.users = data;
     },
 
+    currentProjectIds: null,
+    get getCurrentProjectIds() {
+      return this.currentProjectIds;
+    },
+    setCurrentProjectIds(data: string[]) {
+      this.currentProjectIds = data;
+    },
+
     issues: [],
     get getIssues() {
       return this.issues.slice();
@@ -48,6 +56,7 @@ export default function useStore({ STATUS, DEFAULT_USER }: Props) {
       try {
         const postData = {
           assigneeFilter: this.users,
+          projectIds: this.currentProjectIds,
           startTime: formatDate(start),
           endTime: formatDate(end),
         };

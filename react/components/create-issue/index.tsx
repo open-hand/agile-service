@@ -1,5 +1,5 @@
-import React from 'react';
-import { Modal } from 'choerodon-ui/pro';
+import React, { useState } from 'react';
+import { Modal, Form } from 'choerodon-ui/pro';
 import { isEmpty, omit } from 'lodash';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { IModalProps, Issue } from '@/common/types';
@@ -7,12 +7,42 @@ import { fieldApi, issueApi } from '@/api';
 import { uploadAttachment } from '@/utils/richText';
 import localCacheStore from '@/stores/common/LocalCacheStore';
 import BaseComponent, { CreateIssueBaseProps } from './BaseComponent';
+import SelectProject from '@/components/select/select-project';
 
 export interface CreateIssueProps extends Omit<CreateIssueBaseProps, 'onSubmit'> {
   onCreate: (issue: Issue) => void,
   applyType?: 'agile' | 'program'
   request?: (data: any) => Promise<any>
+  showSelectProject?: boolean,
 }
+
+const CreateContent = (props: CreateIssueBaseProps) => {
+  const {
+    showSelectProject = false, projectId,
+  } = props;
+  const [currentProjectId, setCurrentProjectId] = useState<string | never>();
+  const handleProjectChange = (value: string) => {
+    setCurrentProjectId(value);
+  };
+
+  return (
+    <>
+      {showSelectProject && (
+        <Form>
+          <SelectProject
+            onChange={handleProjectChange}
+            label="所属项目"
+            required
+            clearButton={false}
+          />
+        </Form>
+      )}
+      {(!showSelectProject || currentProjectId) && (
+        <BaseComponent {...props} projectId={showSelectProject ? currentProjectId : projectId} />
+      )}
+    </>
+  );
+};
 
 const openModal = (props: CreateIssueProps) => {
   const {
@@ -41,7 +71,7 @@ const openModal = (props: CreateIssueProps) => {
     key: 'create-issue',
     title: '创建工作项',
     okText: '创建',
-    children: <BaseComponent onSubmit={handleSubmit} {...omit(props, 'onSubmit')} defaultTypeId={defaultIssueTypeId} />,
+    children: <CreateContent onSubmit={handleSubmit} {...omit(props, 'onSubmit')} defaultTypeId={defaultIssueTypeId} />,
   });
 };
 export default openModal;
