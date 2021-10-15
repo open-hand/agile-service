@@ -57,7 +57,7 @@ import useIsInProgram from '@/hooks/useIsInProgram';
 import TableCache, { TableCacheRenderProps } from '@/components/table-cache';
 import useGanttColumns from './hooks/useGanttColumns';
 import {
-  ganttLocalMove, getGanttMoveDataOrigin, getGanttMoveSubmitData, ganttDataGroupByType, ganttNormalizeIssue,
+  ganttLocalMove, getGanttMoveDataOrigin, getGanttMoveSubmitData, ganttDataGroupByType, getGanttCreatingSubIssue, ganttNormalizeIssue,
 } from './utils';
 import GanttDragWrapper from './components/gantt-drag-wrapper';
 import useQuickCreateIssue from './hooks/useQuickCreateIssue';
@@ -103,9 +103,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
   const handleQuickCreateSubIssue = usePersistFn((parentIssue: Issue) => {
     setData(produce(data, (draft) => {
       const targetIndex = findIndex(draft, (issue) => issue.parentId === parentIssue.issueId || issue.issueId === parentIssue.issueId);
-      targetIndex !== -1 && draft.splice(targetIndex, 0, {
-        parentId: parentIssue.issueId, parent: parentIssue, create: true, createId: targetIndex,
-      });
+      targetIndex !== -1 && draft.splice(targetIndex, 0, getGanttCreatingSubIssue(parentIssue, targetIndex));
     }));
   });
   const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {
