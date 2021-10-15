@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import io.choerodon.agile.api.vo.IssueCommentVO;
 import io.choerodon.agile.api.vo.IssueMoveVO;
@@ -109,7 +110,8 @@ public class SendMsgUtil {
             }
             if (CollectionUtils.isNotEmpty(result.getParticipants())) {
                 List<Long> sendUserIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_SET_PARTICIPANT, result);
-                siteMsgUtil.issueParticipant(summary, url, projectId, operatorId, sendUserIds, reporterName);
+                List<Long> participantIds = result.getParticipants().stream().map(UserMessageDTO::getId).collect(Collectors.toList());
+                siteMsgUtil.issueParticipant(summary, url, projectId, operatorId, sendUserIds, reporterName, participantIds);
             }
         }
     }
@@ -154,7 +156,7 @@ public class SendMsgUtil {
             }
             if (CollectionUtils.isNotEmpty(result.getParticipantIds())) {
                 List<Long> sendUserIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_SET_PARTICIPANT, issueVO);
-                siteMsgUtil.issueParticipant(summary, url, projectId, operatorId, sendUserIds, reporterName);
+                siteMsgUtil.issueParticipant(summary, url, projectId, operatorId, sendUserIds, reporterName, result.getParticipantIds());
             }
         }
     }
@@ -539,7 +541,8 @@ public class SendMsgUtil {
             } else {
                 url.append(URL_TEMPLATE1 + projectId + URL_TEMPLATE2 + projectName + URL_TEMPLATE6 + projectVO.getOrganizationId() + URL_TEMPLATE7 + projectVO.getOrganizationId() + URL_TEMPLATE3 + result.getIssueNum() + URL_TEMPLATE4 + result.getIssueId() + URL_TEMPLATE5 + result.getIssueId());
             }
-            siteMsgUtil.issueParticipant(summary, url.toString(), projectId, operatorId, userIds, reporterName);
+            List<Long> participantIds = result.getParticipants().stream().map(UserMessageDTO::getId).collect(Collectors.toList());
+            siteMsgUtil.issueParticipant(summary, url.toString(), projectId, operatorId, userIds, reporterName, participantIds);
         }
     }
 }
