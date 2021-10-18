@@ -10,6 +10,16 @@ interface IssueItem extends Issue{
   totalCount: number
 }
 
+interface DefaultValuesProps {
+  estimatedStartTime: string,
+  estimatedEndTime: string
+}
+
+interface CreateProps {
+  defaultValues: DefaultValuesProps,
+  clearSelect?: boolean,
+}
+
 type StatusProps = {
   [key in IStatus['valueCode']]: string
 }
@@ -21,4 +31,5 @@ export {
   StatusProps,
   UserValueCode,
   IssueItem,
+  CreateProps,
 };

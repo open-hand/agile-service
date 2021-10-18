@@ -1,12 +1,11 @@
 import { useLocalStore } from 'mobx-react-lite';
-import { axios } from '@choerodon/boot';
-import { map, assign } from 'lodash';
-import moment from 'moment';
-import { getOrganizationId } from '@/utils/common';
+import { map } from 'lodash';
 import { Issue as OldIssue } from '@/common/types';
-import { formatIssueTime, formatDate } from '@/routes/work-calendar/utils';
 import {
-  CalendarRefPros, StatusProps, UserValueCode, IssueItem,
+  formatDate, formatIssueData,
+} from '@/routes/work-calendar/utils';
+import {
+  CalendarRefPros, UserValueCode, IssueItem,
 } from '@/routes/work-calendar/types';
 import { orgWorkCalendarApi } from '@/api/OrgWorkCalendar';
 
@@ -18,11 +17,10 @@ interface Issue extends OldIssue{
 }
 
 interface Props {
-  STATUS: StatusProps,
   DEFAULT_USER: UserValueCode[],
 }
 
-export default function useStore({ STATUS, DEFAULT_USER }: Props) {
+export default function useStore({ DEFAULT_USER }: Props) {
   return useLocalStore(() => ({
     calendarRef: null,
     get getCalendarRef() {
@@ -83,20 +81,7 @@ export default function useStore({ STATUS, DEFAULT_USER }: Props) {
           endTime: formatDate(end),
         };
         const issues = await orgWorkCalendarApi.loadIssueByDate(postData);
-        const newIssues = map(issues || [], (item) => {
-          const startTime = moment(item.estimatedEndTime);
-          const allDay = startTime.diff(moment(item.estimatedStartTime), 'hours') % 24 === 0 && startTime.hours() === 0 && startTime.minutes() === 0;
-          return assign(item, {
-            id: item.issueId,
-            start: formatIssueTime(item.estimatedStartTime),
-            end: formatIssueTime(item.estimatedEndTime),
-            title: item.summary,
-            // @ts-ignore
-            backgroundColor: STATUS[item.statusVO?.type || 'todo'],
-            borderColor: item.priorityVO?.colour || 'transparent',
-            allDay,
-          });
-        });
+        const newIssues = map(issues || [], (item) => formatIssueData(item));
         this.setIssues(newIssues);
         return newIssues;
       } catch (e) {

@@ -4,7 +4,7 @@ import React, {
 } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import { Tooltip } from 'choerodon-ui/pro';
-import { CalendarApi } from '@fullcalendar/common';
+import { CalendarApi, EventApi } from '@fullcalendar/common';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -13,14 +13,12 @@ import { usePersistFn } from 'ahooks';
 import { xorBy } from 'lodash';
 import moment from 'moment';
 import { useWorkCalendarStore } from '@/routes/work-calendar/stores';
-import openCreateIssue from '@/components/create-issue';
-import { Issue } from '@/common/types';
-import { formatIssueTime, formatDate } from '@/routes/work-calendar/utils';
+import { formatDate } from '@/routes/work-calendar/utils';
 import { issueApi } from '@/api';
-import DetailContainer, { useDetail } from '@/components/detail-container';
 import CalendarToolbar from '@/routes/work-calendar/components/calendar-toolbar';
 import Style from './index.less';
 import UserTag from '@/components/tag/user-tag';
+import { CreateProps } from '@/routes/work-calendar/types';
 
 const TIME_LABEL = ['凌晨0点', '凌晨1点', '凌晨2点', '凌晨3点', '凌晨4点', '早上5点', '早上6点', '早上7点', '早上8点', '上午9点', '上午10点', '上午11点', '中午12点', '下午1点', '下午2点', '下午3点', '下午4点', '下午5点', '晚上6点', '晚上7点', '晚上8点', '晚上9点', '晚上10点', '晚上11点', '晚上12点'];
 
@@ -29,12 +27,14 @@ interface CalendarRefPros {
 }
 
 interface Props {
-  calendarRef: React.MutableRefObject<CalendarRefPros>
+  openEditIssue({ event }: { event: EventApi }): void,
+  handleCreateIssue(data?: CreateProps): void,
 }
 
-const CalendarContent = observer(() => {
+const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) => {
   const {
-    mainStore, AppState,
+    mainStore,
+    prefixCls,
   } = useWorkCalendarStore();
 
   const calendarRef = useRef<CalendarRefPros>();
@@ -47,8 +47,6 @@ const CalendarContent = observer(() => {
   }, [calendarRef.current]);
 
   const getCalendarApi = useCallback(() => calendarRef.current?.getApi(), [calendarRef.current]);
-
-  const [issueDetailProps] = useDetail();
 
   const loadIssuesData = useCallback((info, successCallback) => {
     mainStore.loadIssues(info).then((res) => {
@@ -77,7 +75,9 @@ const CalendarContent = observer(() => {
           <Tooltip title={event.title}>
             <span className={Style.monthIssueSummary}>{event.title}</span>
           </Tooltip>
-          <span className={Style.monthIssueStartTime}>{timeSpan}</span>
+          <span className={Style.monthIssueStartTime}>
+            {event.allDay ? '全天' : timeSpan}
+          </span>
         </div>
       );
     }
@@ -107,11 +107,13 @@ const CalendarContent = observer(() => {
     );
   });
 
-  const renderDayHeaderContent = usePersistFn(({ date, text }) => {
-    if (date?.getDay() === 1) {
+  const renderDayHeaderContent = usePersistFn((data) => {
+    const { date, text, view } = data;
+    const viewType = view?.type;
+    if (viewType === 'dayGridMonth') {
       return text;
     }
-    return text.slice(-2);
+    return `${date.getDate()} ${text.slice(-2)}`;
   });
 
   const renderSlotLabelContent = usePersistFn(({ date }) => {
@@ -135,39 +137,14 @@ const CalendarContent = observer(() => {
   });
 
   const handleDateSelect = useCallback((selectInfo) => {
-    openCreateIssue({
+    handleCreateIssue({
       defaultValues: {
         estimatedStartTime: formatDate(selectInfo?.startStr),
         estimatedEndTime: formatDate(selectInfo?.endStr),
       },
-      defaultAssignee: AppState.userInfo,
-      projectId: '223894445333270528',
-      onCreate: (issue: Issue) => {
-        const calendarApi = getCalendarApi();
-        if (calendarApi && issue.estimatedStartTime && issue.estimatedEndTime) {
-          calendarApi.addEvent({
-            ...issue,
-            id: issue.issueId,
-            title: issue.summary,
-            start: formatIssueTime(issue.estimatedStartTime),
-            end: formatIssueTime(issue.estimatedEndTime),
-            allDay: selectInfo.allDay,
-          });
-        }
-        calendarApi?.unselect(); // clear date selection
-      },
+      clearSelect: true,
     });
-  }, [getCalendarApi]);
-
-  const handleEventClick = usePersistFn(({ event }) => {
-    issueDetailProps?.open({
-      path: 'issue',
-      props: {
-        issueId: event?.id,
-        projectId: event?.extendedProps?.projectId,
-      },
-    });
-  });
+  }, [handleCreateIssue]);
 
   return (
     <>
@@ -195,20 +172,19 @@ const CalendarContent = observer(() => {
           events={loadIssuesData} // use the `events` setting to fetch from a feed
           select={handleDateSelect}
           eventContent={renderEventContent} // custom render function
-          eventClick={handleEventClick}
+          eventClick={openEditIssue}
           eventChange={handleEventChange}
           eventTextColor="var(--text-color)"
           eventBackgroundColor="#FFE9B6"
           viewClassNames={Style.viewClass}
           slotLabelClassNames={Style.slotLabel}
           slotLaneClassNames={Style.slotLane}
-          dayHeaderClassNames={Style.dayHeader}
+          dayHeaderClassNames={`${prefixCls}-dayHeader`}
           allDayClassNames={Style.allDayLabel}
           allDayContent="全天"
           height="100%"
         />
       </div>
-      <DetailContainer {...issueDetailProps} />
     </>
   );
 });

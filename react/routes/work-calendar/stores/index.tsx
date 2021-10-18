@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { injectIntl } from 'react-intl';
 import { inject } from 'mobx-react';
-import { IStatus, User } from '@/common/types';
+import { User } from '@/common/types';
 import { StatusProps, UserValueCode } from '@/routes/work-calendar/types';
 import useStore, { StoreProps } from './useStore';
 
@@ -35,12 +35,6 @@ export const StoreProvider = injectIntl(inject('AppState')((props: any) => {
   } = props;
   const intlPrefix = 'c7nag.work.calendar';
 
-  const STATUS: StatusProps = useMemo(() => ({
-    todo: '#FFE9B6',
-    prepare: '#FFE9B6',
-    doing: '#CFE1FF',
-    done: '#d8f0ec',
-  }), []);
   const USER_OPTION = useMemo(() => ([{
     name: '我经办的',
     value: 'assignee',
@@ -49,7 +43,7 @@ export const StoreProvider = injectIntl(inject('AppState')((props: any) => {
     value: 'participant',
   }]), []);
   const DEFAULT_USER: UserValueCode[] = useMemo(() => ['assignee', 'participant'], []);
-  const mainStore = useStore({ STATUS, DEFAULT_USER });
+  const mainStore = useStore({ DEFAULT_USER });
 
   const value = {
     ...props,
@@ -57,7 +51,6 @@ export const StoreProvider = injectIntl(inject('AppState')((props: any) => {
     prefixCls: 'c7nag-work-calendar',
     formatMessage,
     mainStore,
-    STATUS,
     USER_OPTION,
     DEFAULT_USER,
   };
