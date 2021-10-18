@@ -25,9 +25,9 @@
             <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
                 #{projectId}
             </foreach>
-            <if test="workHoursSearchVO.userIds != null">
+            <if test="workHoursSearchVO.userIds != null and workHoursSearchVO.userIds.size > 0">
                 and awl.created_by in
-                <foreach collection="userIds" item="userId" open="(" close=")" separator=",">
+                <foreach collection="workHoursSearchVO.userIds" item="userId" open="(" close=")" separator=",">
                     #{userId}
                 </foreach>
             </if>
