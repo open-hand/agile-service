@@ -66,14 +66,6 @@ const WorkCalendar = observer(() => {
         const calenderApi = calendarRef.current?.getApi();
         if (calenderApi && issue.estimatedStartTime && issue.estimatedEndTime) {
           calenderApi.addEvent(formatIssueData(issue));
-          // calenderApi?.addEvent({
-          //   ...issue,
-          //   id: issue.issueId,
-          //   title: issue.summary,
-          //   start: formatIssueTime(issue.estimatedStartTime),
-          //   end: formatIssueTime(issue.estimatedEndTime),
-          //   allDay: isAllDay(issue.estimatedStartTime, issue.estimatedEndTime),
-          // });
           clearSelect && calenderApi.unselect();
         }
       },
