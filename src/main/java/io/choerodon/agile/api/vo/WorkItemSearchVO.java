@@ -30,6 +30,9 @@ public class WorkItemSearchVO {
     @ApiModelProperty(value = "按父任务id查询")
     private Long filterIssueId;
 
+    @ApiModelProperty("生成日历文件时只有开始时间")
+    private Boolean onlyStartTime;
+
     public List<Long> getProjectIds() {
         return projectIds;
     }
@@ -76,5 +79,13 @@ public class WorkItemSearchVO {
 
     public void setFilterIssueId(Long filterIssueId) {
         this.filterIssueId = filterIssueId;
+    }
+
+    public Boolean getOnlyStartTime() {
+        return onlyStartTime;
+    }
+
+    public void setOnlyStartTime(Boolean onlyStartTime) {
+        this.onlyStartTime = onlyStartTime;
     }
 }

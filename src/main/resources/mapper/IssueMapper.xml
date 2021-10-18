@@ -5144,6 +5144,7 @@
         select
             ai.issue_id,
             ai.summary,
+            CONCAT_WS('-', api.project_code, ai.issue_num) AS issue_num,
             ai.estimated_start_time,
             ai.estimated_end_time,
             ai.project_id,
@@ -5155,6 +5156,7 @@
           <include refid="queryAssigneeIssue"/>
         ) aii
         join agile_issue ai on ai.issue_id = aii.issue_id
+        left join agile_project_info api on ai.project_id = api.project_id
         where
         ai.type_code in ('story', 'bug', 'task', 'sub_task')
         and ai.estimated_start_time is not null
@@ -5163,7 +5165,9 @@
             and (ai.estimated_start_time between #{workItemSearchVO.startTime} and  #{workItemSearchVO.endTime}
             or ai.estimated_end_time between #{workItemSearchVO.startTime} and  #{workItemSearchVO.endTime})
         </if>
-
+        <if test="workItemSearchVO.onlyStartTime != null and workItemSearchVO.onlyStartTime">
+            and TO_DAYS(ai.estimated_start_time) >= TO_DAYS(#{workItemSearchVO.startTime})
+        </if>
         <if test="workItemSearchVO.filterIssueId != null">
             and (
                 ai.issue_id = #{workItemSearchVO.filterIssueId}

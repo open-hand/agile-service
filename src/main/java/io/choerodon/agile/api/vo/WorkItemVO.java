@@ -40,6 +40,8 @@ public class WorkItemVO {
 
     private Long objectVersionNumber;
 
+    private String issueNum;
+
     public Long getIssueId() {
         return issueId;
     }
@@ -142,5 +144,13 @@ public class WorkItemVO {
 
     public void setObjectVersionNumber(Long objectVersionNumber) {
         this.objectVersionNumber = objectVersionNumber;
+    }
+
+    public String getIssueNum() {
+        return issueNum;
+    }
+
+    public void setIssueNum(String issueNum) {
+        this.issueNum = issueNum;
     }
 }
