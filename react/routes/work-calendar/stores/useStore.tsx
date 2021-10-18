@@ -5,7 +5,7 @@ import {
   formatDate, formatIssueData,
 } from '@/routes/work-calendar/utils';
 import {
-  CalendarRefPros, UserValueCode, IssueItem,
+  CalendarRefPros, UserValueCode, IssueItem, ViewTypeCode,
 } from '@/routes/work-calendar/types';
 import { orgWorkCalendarApi } from '@/api/OrgWorkCalendar';
 
@@ -70,6 +70,14 @@ export default function useStore({ DEFAULT_USER }: Props) {
     },
     setSearchParams(data: string) {
       this.searchParams = data;
+    },
+
+    currentViewType: 'timeGridWeek',
+    get getCurrentViewType() {
+      return this.currentViewType;
+    },
+    setCurrentViewType(data: ViewTypeCode) {
+      this.currentViewType = data;
     },
 
     async loadIssues({ start, end }: { start: Date, end: Date }) {

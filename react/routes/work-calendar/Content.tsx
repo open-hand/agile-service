@@ -14,7 +14,7 @@ import CalendarContent from '@/routes/work-calendar/components/calendar';
 import IssueList from '@/routes/work-calendar/components/issue-list';
 import SelectProject from '@/components/select/select-project';
 import DetailContainer, { useDetail } from '@/components/detail-container';
-import { CreateProps } from '@/routes/work-calendar/types';
+import { CreateProps, ViewTypeCode } from '@/routes/work-calendar/types';
 
 const { Option } = Select;
 
@@ -47,9 +47,10 @@ const WorkCalendar = observer(() => {
     refresh();
   }, [mainStore, refresh]);
 
-  const handleChangeTab = useCallback((e, tabName, tabKey: string) => {
+  const handleChangeTab = useCallback((e, tabName, tabKey: ViewTypeCode) => {
     const calendarRef = mainStore.getCalendarRef;
     if (calendarRef.current) {
+      mainStore.setCurrentViewType(tabKey);
       const calendarApi = calendarRef.current.getApi();
       calendarApi?.changeView(tabKey);
     }
