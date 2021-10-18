@@ -394,6 +394,7 @@ public class SiteMsgUtil {
         map.put(SUMMARY, summary);
         map.put(OPERATOR_NAME, operatorName);
         map.put(URL, url);
+        map.put(LINK, domainUrl + "/" + url);
         setLoginNameAndRealName(operatorId, map);
         setParticipantName(map, participantIds);
         // 额外参数
