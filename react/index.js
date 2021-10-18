@@ -34,6 +34,7 @@ const ProjectReport = React.lazy(() => import('./routes/project-report'));
 const GanttPage = React.lazy(() => import('./routes/gantt'));
 const UiPreview = React.lazy(() => import('./routes/ui-preview'));
 const KanbanTemplateDetail = React.lazy(() => import('./routes/kanban-template/detail'));
+const WorkingHours = React.lazy(() => import('./routes/working-hours'));
 
 const { AppState } = stores;
 export function getRoutes(match) {
@@ -92,6 +93,18 @@ export function getRoutes(match) {
       ]}
       path={`${match.url}/project-report`}
       component={ProjectReport}
+    />,
+    <PermissionRoute
+      // service={(type) => (
+      //   type === 'project' ? [
+      //     'choerodon.code.project.working-hours.log.ps.default',
+      //   ] : [
+      //     'choerodon.code.organization.working-hours.log.ps.default',
+      //   ]
+      // )}
+      service={[]}
+      path={`${match.url}/working-hours`}
+      component={WorkingHours}
     />,
     <Route path={`${match.url}/ui-preview/:uuid`} component={UiPreview} />,
     <Route path={`${match.url}/outside/ui-preview/:uuid`} component={UiPreview} />,

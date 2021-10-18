@@ -1,14 +1,14 @@
 import React, { useMemo } from 'react';
 import { toJS } from 'mobx';
-import { User } from '@/common/types';
 import { Tooltip, Icon } from 'choerodon-ui/pro';
+import { User } from '@/common/types';
 import HeadTag, { HeadTagProps } from '../head-tag';
 import { getFistStr } from './util';
 import './index.less';
 /**
  * 数组内只有一个User 或者User是对象时,显示名字
  */
-type UserTagData = Pick<User, 'loginName' | 'realName' | 'imageUrl'> & Partial<Pick<User, 'ldap' | 'email' | 'id'>> & Pick<HeadTagProps, 'tooltip'>
+type UserTagData = Pick<User, 'loginName' | 'realName' | 'imageUrl' | 'textShow'> & Partial<Pick<User, 'ldap' | 'email' | 'id' | 'textShow'>> & Pick<HeadTagProps, 'tooltip'>
 interface Props extends HeadTagProps {
   data: UserTagData[] | UserTagData /**   */
   maxTagCount?: number /** @default 3 */
@@ -17,8 +17,10 @@ interface Props extends HeadTagProps {
 export const UserUniqueTag: React.FC<{ data: UserTagData, prefixCls?: string } & HeadTagProps> = ({
   data, size = 18, showText = true, prefixCls = 'c7n-agile-user-tag', style, avatarStyle, ...otherProps
 }) => {
-  const { realName, email, loginName } = data;
-  const text = useMemo(() => realName || loginName, [loginName, realName]);
+  const {
+    realName, email, loginName, textShow,
+  } = data;
+  const text = useMemo(() => textShow || realName || loginName, [loginName, realName, textShow]);
   return text ? (
     <HeadTag
       size={size}
