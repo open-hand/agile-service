@@ -27,10 +27,13 @@ type StatusProps = {
 
 type UserValueCode = 'assignee' | 'participant';
 
+type ViewTypeCode = 'timeGridWeek' | 'dayGridMonth';
+
 export {
   CalendarRefPros,
   StatusProps,
   UserValueCode,
   IssueItem,
   CreateProps,
+  ViewTypeCode,
 };
