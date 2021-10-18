@@ -35,7 +35,11 @@
         asp.status_code
         from agile_issue_sprint_rel aisr
         join agile_sprint asp on aisr.sprint_id = asp.sprint_id
-        where aisr.issue_id in
+        where aisr.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and aisr.issue_id in
         <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
             #{issueId}
         </foreach>
@@ -54,8 +58,10 @@
             asp.sprint_name
         from agile_issue_sprint_rel aisr
         join agile_sprint asp on aisr.sprint_id = asp.sprint_id
-        where
-        aisr.project_id = #{projectId}
+        where aisr.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
         and aisr.issue_id in
         <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
             #{issueId}

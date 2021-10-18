@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author dinghuang123@gmail.com
@@ -47,5 +48,5 @@ public interface VersionIssueRelMapper extends BaseMapper<VersionIssueRelDTO> {
      */
     List<Long> queryVersionIdsByIssueId(@Param("issueId") Long issueId, @Param("projectId") Long projectId);
 
-    List<VersionIssueRelVO> listByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds, @Param("type") String type);
+    List<VersionIssueRelVO> listByIssueIds(@Param("projectIds") Set<Long> projectIds, @Param("issueIds") List<Long> issueIds, @Param("type") String type);
 }

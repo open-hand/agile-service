@@ -55,18 +55,21 @@
 
     <select id="listByIssueIds" resultType="io.choerodon.agile.api.vo.VersionIssueRelVO">
         select
-         avir.issue_id,
-         avir.version_id,
-         apv.name
-         from agile_version_issue_rel avir,agile_product_version apv
-         where
-         apv.version_id = avir.version_id
-         and avir.project_id = #{projectId}
-         and avir.issue_id in
-         <foreach collection="issueIds" item="issueId" separator="," open="(" close=")">
-             #{issueId}
-         </foreach>
-         and avir.relation_type = #{type}
+        avir.issue_id,
+        avir.version_id,
+        apv.name
+        from agile_version_issue_rel avir,agile_product_version apv
+        where
+        apv.version_id = avir.version_id
+        and avir.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and avir.issue_id in
+        <foreach collection="issueIds" item="issueId" separator="," open="(" close=")">
+            #{issueId}
+        </foreach>
+        and avir.relation_type = #{type}
     </select>
 
 </mapper>

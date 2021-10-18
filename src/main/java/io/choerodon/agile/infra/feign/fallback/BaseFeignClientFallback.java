@@ -80,6 +80,11 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     }
 
     @Override
+    public ResponseEntity<List<ProjectVO>> getGroupInfoByEnableProjects(Long organizationId, Set<Long> projectIds) {
+        throw new CommonException("error.groupInfo.get");
+    }
+
+    @Override
     public ResponseEntity<Page<UserWithRoleVO>> pagingQueryUsersWithProjectLevelRoles(int page, int size, Long sourceId, @Valid RoleAssignmentSearchVO roleAssignmentSearchVO, boolean doPage) {
         throw new CommonException("error.usersWithRoles.get");
     }
@@ -183,5 +188,16 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     @Override
     public ResponseEntity<List<RoleVO>> listRolesByIds(Long tenantId, List<Long> roleIds) {
         throw new CommonException("error.listRolesByIds");
+    }
+
+    @Override
+    public ResponseEntity<Page<ProjectVO>> pagedQueryProjects(Long organizationId,
+                                                              int page,
+                                                              int size,
+                                                              String name,
+                                                              String code,
+                                                              Boolean enabled,
+                                                              String params) {
+        throw new CommonException("error.query.projects.under.organization");
     }
 }

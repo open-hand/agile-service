@@ -100,6 +100,10 @@ public interface BaseFeignClient {
     ResponseEntity<ProjectVO> getGroupInfoByEnableProject(@PathVariable(name = "organization_id") Long organizationId,
                                                           @PathVariable(name = "project_id") Long projectId);
 
+    @PostMapping(value = "/choerodon/v1/organizations/{organization_id}/projects/programs")
+    ResponseEntity<List<ProjectVO>> getGroupInfoByEnableProjects(@PathVariable(name = "organization_id") Long organizationId,
+                                                                 @RequestBody Set<Long> projectIds);
+
     @PostMapping(value = "/choerodon/v1/projects/{project_id}/role_members/users/roles")
     ResponseEntity<Page<UserWithRoleVO>> pagingQueryUsersWithProjectLevelRoles(
             @RequestParam(name = "page") int page,
@@ -224,5 +228,25 @@ public interface BaseFeignClient {
     @PostMapping(value = "/choerodon/v1/list_roles")
     ResponseEntity<List<RoleVO>> listRolesByIds(@RequestParam("tenantId") Long  tenantId,
                                                 @RequestBody List<Long> roleIds);
+
+    /*
+     * 分页查询组织下的项目
+     * @param organizationId
+     * @param size
+     * @param code
+     * @param name
+     * @param page
+     * @param enabled
+     * @param params
+     * @return
+     */
+    @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/projects")
+    ResponseEntity<Page<ProjectVO>> pagedQueryProjects(@PathVariable(name = "organization_id") Long organizationId,
+                                                       @RequestParam(name = "page") int page,
+                                                       @RequestParam(name = "size") int size,
+                                                       @RequestParam String name,
+                                                       @RequestParam String code,
+                                                       @RequestParam Boolean enabled,
+                                                       @RequestParam String params);
 }
 

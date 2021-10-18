@@ -309,7 +309,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         }
 
         if (result == null) {
-            return PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
+            return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }
         return result;
     }

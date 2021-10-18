@@ -3067,7 +3067,7 @@ public class ExcelServiceImpl implements ExcelService {
             while (true) {
                 //查询所有父节点问题
                 PageRequest pageRequest = new PageRequest(cursor.getPage(), cursor.getSize());
-                Page<Long> page = issueService.pagedQueryByTreeView(pageRequest, projectId, searchVO, searchSql, sortMap, isTreeView);
+                Page<Long> page = issueService.pagedQueryByTreeView(pageRequest, new HashSet<>(Arrays.asList(projectId)), searchVO, searchSql, sortMap, isTreeView);
                 if (CollectionUtils.isEmpty(page.getContent())) {
                     break;
                 }
@@ -3078,7 +3078,7 @@ public class ExcelServiceImpl implements ExcelService {
                 if (!parentIds.isEmpty()) {
                     Set<Long> childrenIds = new HashSet<>();
                     if (isTreeView) {
-                        List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(parentIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null);
+                        List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(parentIds, new HashSet<>(Arrays.asList(projectId)), searchVO, searchSql, searchVO.getAssigneeFilterIds(), null);
                         childrenIds.addAll(childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet()));
                     }
                     cursor.addCollections(childrenIds);

@@ -374,7 +374,7 @@ public class StatusServiceImpl implements StatusService {
                                                       List<Long> stateMachineIds,
                                                       String param) {
         if (ObjectUtils.isEmpty(stateMachineIds)) {
-            return PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
+            return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }
         Page<StatusDTO> status =
                 PageHelper.doPageAndSort(pageRequest, () -> statusMapper.queryByStateMachineIdsAndParam(organizationId, stateMachineIds, param));

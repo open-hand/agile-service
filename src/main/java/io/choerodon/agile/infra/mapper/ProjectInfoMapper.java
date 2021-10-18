@@ -6,6 +6,8 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author dinghuang123@gmail.com
@@ -30,4 +32,6 @@ public interface ProjectInfoMapper extends BaseMapper<ProjectInfoDTO> {
     String selectProjectCodeByProjectId(@Param("projectId") Long projectId);
 
     void updateFeedbackMaxNum(@Param("projectId") Long projectId, @Param("feedbackMaxNum") Long feedbackMaxNum);
+
+    List<ProjectInfoDTO> selectByProjectIds(@Param("projectIds") Set<Long> projectIds);
 }

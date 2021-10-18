@@ -1,7 +1,5 @@
 package io.choerodon.agile.app.service.impl;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.TagVO;
 import io.choerodon.agile.app.assembler.BoardAssembler;
@@ -46,6 +44,7 @@ public class GanttChartServiceImpl implements GanttChartService {
     private static final String ISSUE_ID = "issueId";
     private static final String ORDER_STR = "orderStr";
     private static final String ISSUE_TYPE_ID = "issueTypeId";
+    private static final String TYPE_CODES = "typeCodes";
     private static final String SPRINT = "sprint";
     private static final String CREATE_USER = "createUser";
     private static final String UPDATE_USER = "updateUser";
@@ -55,8 +54,8 @@ public class GanttChartServiceImpl implements GanttChartService {
     private static final String ERROR_SPRINT_EMPTY = "error.otherArgs.sprint.empty";
     private static final String ERROR_GANTT_DIMENSION_NOT_SUPPORT = "error.gantt.dimension.not.support";
     private static final String ERROR_GANTT_MOVE_NULL_DATA = "error.gantt.move.null.data";
-    private static final String[] SPECIAL_HANDLER_SYSTEM_FIELD =
-            {
+    private static final List<String> SPECIAL_HANDLER_SYSTEM_FIELD =
+            Arrays.asList(
                     FieldCode.LABEL,
                     FieldCode.COMPONENT,
                     FieldCode.FIX_VERSION,
@@ -68,8 +67,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                     MAIN_RESPONSIBLE_USER,
                     FieldCode.SPRINT,
                     TAGS,
-                    PARTICIPANTS
-            };
+                    PARTICIPANTS);
 
     @Autowired
     private IssueService issueService;
@@ -78,15 +76,11 @@ public class GanttChartServiceImpl implements GanttChartService {
     @Autowired
     private IssueMapper issueMapper;
     @Autowired
-    private IssueTypeService issueTypeService;
+    private IssueTypeMapper issueTypeMapper;
     @Autowired
     private UserService userService;
     @Autowired
     private StatusService statusService;
-    @Autowired
-    private ProjectConfigService projectConfigService;
-    @Autowired
-    private ObjectMapper objectMapper;
     @Autowired
     private IssueStatusMapper issueStatusMapper;
     @Autowired
@@ -111,6 +105,8 @@ public class GanttChartServiceImpl implements GanttChartService {
     private GanttIssueRankMapper ganttIssueRankMapper;
     @Autowired
     private GanttDimensionRankMapper ganttDimensionRankMapper;
+    @Autowired
+    private PriorityService priorityService;
 
     @Override
     public Page<GanttChartVO> pagedQuery(Long projectId,
@@ -119,13 +115,28 @@ public class GanttChartServiceImpl implements GanttChartService {
         if (isSprintEmpty(searchVO)) {
             throw new CommonException(ERROR_SPRINT_EMPTY);
         }
-        List<String> displayFieldCodes = searchVO.getDisplayFieldCodes();
-        if (CollectionUtils.isEmpty(displayFieldCodes)) {
-            displayFieldCodes = new ArrayList<>();
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        Map<Long, ProjectVO> projectMap = queryProjectMap(projectId);
+        return listByProjectIdAndSearch(projectMap, searchVO, pageRequest, organizationId);
+    }
+
+    private Map<Long, ProjectVO> queryProjectMap(Long projectId) {
+        Map<Long, ProjectVO> projectMap = new HashMap<>();
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
+        AssertUtilsForCommonException.notNull(projectVO, "error.gantt.project.null");
+        projectMap.put(projectVO.getId(), projectVO);
+        return projectMap;
+    }
+
+    private void validateDisplayFields(SearchVO searchVO) {
+        List<ObjectSchemeFieldVO> displayFields = searchVO.getDisplayFields();
+        if (CollectionUtils.isEmpty(displayFields)) {
+            displayFields = new ArrayList<>();
+            searchVO.setDisplayFields(displayFields);
+        } else {
+            displayFields.forEach(field ->
+                    AssertUtilsForCommonException.notNull(field.getCode(), "error.gantt.display.field.code.null"));
         }
-        String dimension = getDimensionFromSearchVO(searchVO);
-        validateDimension(dimension);
-        return listByProjectIdAndSearch(projectId, searchVO, pageRequest, dimension, displayFieldCodes);
     }
 
     private void validateDimension(String dimension) {
@@ -147,20 +158,24 @@ public class GanttChartServiceImpl implements GanttChartService {
     }
 
     @Override
-    public List<GanttChartVO> listByIds(Long projectId, GanttChartSearchVO ganttChartSearchVO, String dimension) {
+    public List<GanttChartVO> listByIds(Long projectId,
+                                        GanttChartSearchVO ganttChartSearchVO,
+                                        String dimension) {
         Set<Long> issueIds = ganttChartSearchVO.getIssueIds();
         if (ObjectUtils.isEmpty(issueIds)) {
             return new ArrayList<>();
         }
-        List<String> displayFieldCodes = ganttChartSearchVO.getDisplayFieldCodes();
-        if (CollectionUtils.isEmpty(displayFieldCodes)) {
-            displayFieldCodes = new ArrayList<>();
+        List<ObjectSchemeFieldVO> displayFields = ganttChartSearchVO.getDisplayFields();
+        if (CollectionUtils.isEmpty(displayFields)) {
+            displayFields = new ArrayList<>();
         }
         validateDimension(dimension);
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Set<Long> projectIds = new HashSet<>();
         projectIds.add(projectId);
         List<IssueDTO> issueList = issueMapper.selectWithSubByIssueIds(projectIds, new ArrayList<>(issueIds), null, false, null);
-        return buildGanttList(projectId, projectIds, new ArrayList<>(issueIds), issueList, new HashMap<>(), new HashMap<>(), displayFieldCodes);
+        Map<Long, ProjectVO> projectMap = queryProjectMap(projectId);
+        return buildGanttList(projectMap, new ArrayList<>(issueIds), issueList, new HashMap<>(), new HashMap<>(), displayFields, organizationId);
     }
 
     @Override
@@ -207,7 +222,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                                 Long previousId,
                                 Long nextId,
                                 Long currentId) {
-        if(!ObjectUtils.isEmpty(previousId) && !rankMap.containsKey(previousId)) {
+        if (!ObjectUtils.isEmpty(previousId) && !rankMap.containsKey(previousId)) {
             throw new CommonException("error.gantt.move.illegal.previousId");
         }
         if (!ObjectUtils.isEmpty(nextId) && !rankMap.containsKey(nextId)) {
@@ -317,10 +332,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                                                              SearchVO searchVO,
                                                              String dimension) {
         PageRequest pageRequest = new PageRequest(1, 0);
-        boolean illegalIssueTypeId = buildIssueType(searchVO, projectId);
-        if (illegalIssueTypeId) {
-            return new LinkedHashMap<>();
-        }
+        buildIssueType(searchVO);
         Boolean condition = issueService.handleSearchUser(searchVO, projectId);
         if (!Boolean.TRUE.equals(condition)) {
             return new LinkedHashMap<>();
@@ -332,7 +344,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                         Optional.ofNullable(searchVO.getSearchArgs())
                                 .map(x -> x.get("tree"))
                                 .orElse(true));
-        Page<Long> page = issueService.pagedQueryByTreeView(pageRequest, projectId, searchVO, filterSql, null, isTreeView);
+        Page<Long> page = issueService.pagedQueryByTreeView(pageRequest, new HashSet<>(Arrays.asList(projectId)), searchVO, filterSql, null, isTreeView);
         List<Long> issueIds = page.getContent();
         if (issueIds.isEmpty()) {
             return new LinkedHashMap<>();
@@ -350,7 +362,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                 instanceIds.addAll(issueMapper.selectAssigneeIdByIssueIds(projectId, issueIds));
                 break;
             case SPRINT:
-                Map<Long, IssueSprintDTO> issueSprintMap = queryIssueSprint(projectId, issueIds);
+                Map<Long, IssueSprintDTO> issueSprintMap = queryIssueSprint(new HashSet<>(Arrays.asList(projectId)), issueIds);
                 issueSprintMap.forEach((issueId, sprint) -> instanceIds.add(sprint.getSprintId()));
                 break;
             default:
@@ -506,9 +518,9 @@ public class GanttChartServiceImpl implements GanttChartService {
 
     private SearchVO validateAndProcessSearchVO(Long projectId,
                                                 SearchVO searchVO) {
-        boolean illegalIssueTypeId = buildIssueType(searchVO, projectId);
+        buildIssueType(searchVO);
         boolean condition = issueService.handleSearchUser(searchVO, projectId);
-        if (illegalIssueTypeId || !condition) {
+        if (!condition) {
             throw new CommonException("error.illegal.gantt.searchVO");
         }
         if (isSprintEmpty(searchVO)) {
@@ -532,22 +544,23 @@ public class GanttChartServiceImpl implements GanttChartService {
         boardAssembler.handleOtherArgs(searchVO);
         processSort(pageRequest, sortMap);
         List<Long> issueIds;
+        Set<Long> projectIds = new HashSet<>(Arrays.asList(projectId));
         if (GanttDimension.isTask(instanceType) && !Objects.equals(0L, instanceId)) {
             //子任务拖动，查出子任务
-            List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(Arrays.asList(instanceId), projectId, searchVO, null, searchVO.getAssigneeFilterIds(), sortMap);
+            List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(Arrays.asList(instanceId), projectIds, searchVO, null, searchVO.getAssigneeFilterIds(), sortMap);
             issueIds = childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
         } else if (GanttDimension.isEpic(instanceType) && !Objects.equals(0L, instanceId)) {
             //在史诗下的拖动
-            issueIds = queryUnderEpicIssueIds(projectId, searchVO, instanceId, instanceType, currentId, isTreeView, sortMap);
+            issueIds = queryUnderEpicIssueIds(projectIds, searchVO, instanceId, instanceType, currentId, isTreeView, sortMap);
         } else if (GanttDimension.isEpic(instanceType) && Objects.equals(0L, instanceId)) {
             //在未分配史诗下的拖动或根目录拖动
-            issueIds = queryRootOrNoEpicIssueIds(projectId, searchVO, isTreeView, sortMap, currentId);
+            issueIds = queryRootOrNoEpicIssueIds(projectIds, searchVO, isTreeView, sortMap, currentId);
         } else if (GanttDimension.isFeature(instanceType) && Objects.equals(0L, instanceId)) {
             //未分配特性下拖动
-            issueIds = queryNoFeatureIssueIds(projectId, searchVO, isTreeView, sortMap);
+            issueIds = queryNoFeatureIssueIds(projectIds, searchVO, isTreeView, sortMap);
         } else {
             addFilterConditionByInstanceType(searchVO, instanceType, instanceId);
-            issueIds = issueService.listByTreeView(projectId, searchVO, null, sortMap, isTreeView);
+            issueIds = issueService.listByTreeView(projectIds, searchVO, null, sortMap, isTreeView);
         }
         AssertUtilsForCommonException.notEmpty(issueIds, ERROR_GANTT_MOVE_NULL_DATA);
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
@@ -565,18 +578,21 @@ public class GanttChartServiceImpl implements GanttChartService {
         return linkedHashMap;
     }
 
-    private List<Long> queryNoFeatureIssueIds(Long projectId, SearchVO searchVO, boolean isTreeView, Map<String, Object> sortMap) {
+    private List<Long> queryNoFeatureIssueIds(Set<Long> projectIds,
+                                              SearchVO searchVO,
+                                              boolean isTreeView,
+                                              Map<String, Object> sortMap) {
         setOtherArgsValueByKey(searchVO, "featureNull", "true");
         List<String> list = new ArrayList<>();
         list.add("0");
         setOtherArgsValueByKey(searchVO, "feature", list);
         setOtherArgsValueByKey(searchVO, "epic", list);
         boardAssembler.handleOtherArgs(searchVO);
-        List<Long> issueIds = issueService.listByTreeView(projectId, searchVO, null, sortMap, isTreeView);
+        List<Long> issueIds = issueService.listByTreeView(projectIds, searchVO, null, sortMap, isTreeView);
         return issueIds;
     }
 
-    private List<Long> queryRootOrNoEpicIssueIds(Long projectId,
+    private List<Long> queryRootOrNoEpicIssueIds(Set<Long> projectIds,
                                                  SearchVO searchVO,
                                                  boolean isTreeView,
                                                  Map<String, Object> sortMap,
@@ -584,7 +600,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         IssueDTO currentIssue = issueMapper.selectByPrimaryKey(currentId);
         AssertUtilsForCommonException.notNull(currentIssue, "error.gantt.current.issue.not.existed");
         String typeCode = currentIssue.getTypeCode();
-        List<Long> issueIds = issueService.listByTreeView(projectId, searchVO, null, sortMap, isTreeView);
+        List<Long> issueIds = issueService.listByTreeView(projectIds, searchVO, null, sortMap, isTreeView);
         AssertUtilsForCommonException.notEmpty(issueIds, ERROR_GANTT_MOVE_NULL_DATA);
         List<IssueDTO> issues = issueMapper.selectByIds(StringUtils.join(issueIds, ","));
         Set<Long> epicIds = new HashSet<>();
@@ -612,9 +628,15 @@ public class GanttChartServiceImpl implements GanttChartService {
         return result;
     }
 
-    private List<Long> queryUnderEpicIssueIds(Long projectId, SearchVO searchVO, Long instanceId, String instanceType, Long currentId, boolean isTreeView, Map<String, Object> sortMap) {
+    private List<Long> queryUnderEpicIssueIds(Set<Long> projectIds,
+                                              SearchVO searchVO,
+                                              Long instanceId,
+                                              String instanceType,
+                                              Long currentId,
+                                              boolean isTreeView,
+                                              Map<String, Object> sortMap) {
         addFilterConditionByInstanceType(searchVO, instanceType, instanceId);
-        List<Long> issueIds = issueService.listByTreeView(projectId, searchVO, null, sortMap, isTreeView);
+        List<Long> issueIds = issueService.listByTreeView(projectIds, searchVO, null, sortMap, isTreeView);
         IssueDTO issue = issueMapper.selectByPrimaryKey(currentId);
         AssertUtilsForCommonException.notNull(issue, "error.gantt.move.currentId.not.existed");
         String typeCode = issue.getTypeCode();
@@ -725,88 +747,88 @@ public class GanttChartServiceImpl implements GanttChartService {
         }
     }
 
-    private Page<GanttChartVO> listByProjectIdAndSearch(Long projectId,
-                                                        SearchVO searchVO,
-                                                        PageRequest pageRequest,
-                                                        String dimension,
-                                                        List<String> fieldCodes) {
-        Page<GanttChartVO> emptyPage = PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
-        //设置不查询史诗
-        boolean illegalIssueTypeId = buildIssueType(searchVO, projectId);
-        if (illegalIssueTypeId) {
-            return emptyPage;
+    @Override
+    public Page<GanttChartVO> listByProjectIdAndSearch(Map<Long, ProjectVO> projectMap,
+                                                       SearchVO searchVO,
+                                                       PageRequest pageRequest,
+                                                       Long organizationId) {
+        if (ObjectUtils.isEmpty(projectMap)) {
+            return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }
-        Boolean condition = issueService.handleSearchUser(searchVO, projectId);
-        if (Boolean.TRUE.equals(condition)) {
-            String filterSql = getFilterSql(searchVO);
-            boardAssembler.handleOtherArgs(searchVO);
-            boolean isTreeView =
-                    Boolean.TRUE.equals(
-                            Optional.ofNullable(searchVO.getSearchArgs())
-                                    .map(x -> x.get("tree"))
-                                    .orElse(true));
-            Map<String, Object> sortMap = new HashMap<>();
-            boolean isDefaultOrder = ObjectUtils.isEmpty(pageRequest.getSort());
-            boolean ganttDefaultOrder = false;
-            if (isDefaultOrder) {
-                //无排序时根据rank,issueNum排序
-                addGanttDefaultOrder(searchVO, pageRequest);
-                ganttDefaultOrder = true;
+        Set<Long> projectIds = projectMap.keySet();
+        String dimension = getDimensionFromSearchVO(searchVO);
+        validateDimension(dimension);
+        validateDisplayFields(searchVO);
+        Page<GanttChartVO> emptyPage = PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
+        //设置不查询史诗
+        buildIssueType(searchVO);
+        String filterSql = getFilterSql(searchVO);
+        boardAssembler.handleOtherArgs(searchVO);
+        boolean isTreeView =
+                Boolean.TRUE.equals(
+                        Optional.ofNullable(searchVO.getSearchArgs())
+                                .map(x -> x.get("tree"))
+                                .orElse(true));
+        Map<String, Object> sortMap = new HashMap<>();
+        boolean isDefaultOrder = ObjectUtils.isEmpty(pageRequest.getSort());
+        boolean ganttDefaultOrder = false;
+        if (isDefaultOrder) {
+            //无排序时根据rank,issueNum排序
+            addGanttDefaultOrder(searchVO, pageRequest);
+            ganttDefaultOrder = true;
+        }
+        processSort(pageRequest, sortMap);
+        Page<Long> page = issueService.pagedQueryByTreeView(pageRequest, projectIds, searchVO, filterSql, sortMap, isTreeView);
+        List<Long> issueIds = page.getContent();
+        Map<Long, Long> issueEpicMap = new HashMap<>();
+        Map<Long, IssueDTO> issueFeatureMap = new HashMap<>();
+        addEpicIdOrFeatureIds(dimension, issueIds, issueEpicMap, issueFeatureMap, projectIds, projectMap);
+        if (!ObjectUtils.isEmpty(issueIds)) {
+            Set<Long> childrenIds = new HashSet<>();
+            if (isTreeView) {
+                List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(issueIds, projectIds, searchVO, filterSql, searchVO.getAssigneeFilterIds(), null);
+                childrenIds.addAll(childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet()));
             }
-            processSort(pageRequest, sortMap);
-            Page<Long> page = issueService.pagedQueryByTreeView(pageRequest, projectId, searchVO, filterSql, sortMap, isTreeView);
-            List<Long> issueIds = page.getContent();
-            Map<Long, Long> issueEpicMap = new HashMap<>();
-            Map<Long, IssueDTO> issueFeatureMap = new HashMap<>();
-            Set<Long> projectIds = new HashSet<>();
-            projectIds.add(projectId);
-            addEpicIdOrFeatureIds(projectId, dimension, issueIds, issueEpicMap, issueFeatureMap, projectIds);
-            if (!ObjectUtils.isEmpty(issueIds)) {
-                Set<Long> childrenIds = new HashSet<>();
-                if (isTreeView) {
-                    List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), null);
-                    childrenIds.addAll(childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet()));
-                }
-                issueIds.addAll(childrenIds);
-                List<IssueDTO> issueList = issueMapper.selectWithSubByIssueIds(projectIds, issueIds, sortMap, ganttDefaultOrder, dimension);
-                List<GanttChartVO> result = buildGanttList(projectId, projectIds, issueIds, issueList, issueEpicMap, issueFeatureMap, fieldCodes);
-                return PageUtils.copyPropertiesAndResetContent(page, result);
-            } else {
-                return emptyPage;
-            }
+            issueIds.addAll(childrenIds);
+            List<IssueDTO> issueList = issueMapper.selectWithSubByIssueIds(projectIds, issueIds, sortMap, ganttDefaultOrder, dimension);
+            List<ObjectSchemeFieldVO> displayFieldCodes = searchVO.getDisplayFields();
+            List<GanttChartVO> result = buildGanttList(projectMap, issueIds, issueList, issueEpicMap, issueFeatureMap, displayFieldCodes, organizationId);
+            return PageUtils.copyPropertiesAndResetContent(page, result);
         } else {
             return emptyPage;
         }
+
     }
 
-    private void addEpicIdOrFeatureIds(Long projectId,
-                                       String dimension,
+    private void addEpicIdOrFeatureIds(String dimension,
                                        List<Long> issueIds,
                                        Map<Long, Long> issueEpicMap,
                                        Map<Long, IssueDTO> issueFeatureMap,
-                                       Set<Long> projectIds) {
+                                       Set<Long> projectIds,
+                                       Map<Long, ProjectVO> projectMap) {
         if (GanttDimension.isEpic(dimension)
                 && !ObjectUtils.isEmpty(issueIds)) {
-            Long programId = queryProgramId(projectId);
-            boolean belongProgram = (agilePluginService != null && !ObjectUtils.isEmpty(programId));
-            issueEpicMap.putAll(issueMapper.listIssueWithEpicId(projectId, issueIds)
+            List<ProjectVO> programs = queryProgramIds(projectIds);
+            boolean belongProgram = (agilePluginService != null && !ObjectUtils.isEmpty(programs));
+            issueEpicMap.putAll(issueMapper.listIssueWithEpicId(projectIds, issueIds)
                     .stream()
                     .collect(Collectors.toMap(IssueDTO::getIssueId, IssueDTO::getEpicId)));
             issueIds.addAll(issueEpicMap.values());
             if (belongProgram) {
-                projectIds.add(programId);
-                issueFeatureMap.putAll(agilePluginService.queryIssueFeature(projectId, issueIds));
+                programs.forEach(p -> projectMap.put(p.getId(), p));
+                issueFeatureMap.putAll(agilePluginService.queryIssueFeature(projectIds, issueIds));
                 issueFeatureMap.forEach((issueId, feature) -> issueIds.add(feature.getIssueId()));
             }
         }
     }
 
     private void addGanttDefaultOrder(SearchVO searchVO, PageRequest pageRequest) {
+        Sort.Order projectIdOrder = new Sort.Order(Sort.Direction.DESC, "project_id");
         Sort.Order instanceTypeOrder = new Sort.Order(Sort.Direction.ASC, "instance_type");
         Sort.Order instanceIdOrder = new Sort.Order(Sort.Direction.ASC, "instance_id");
         Sort.Order rankOrder = new Sort.Order(Sort.Direction.ASC, "rank");
         Sort.Order issueNumOrder = new Sort.Order(Sort.Direction.DESC, "issue_num_convert");
-        Sort sort = new Sort(instanceTypeOrder, instanceIdOrder, rankOrder, issueNumOrder);
+        Sort sort = new Sort(projectIdOrder, instanceTypeOrder, instanceIdOrder, rankOrder, issueNumOrder);
         pageRequest.setSort(sort);
         searchVO.setGanttDefaultOrder(true);
     }
@@ -822,30 +844,42 @@ public class GanttChartServiceImpl implements GanttChartService {
         return filterSql;
     }
 
-    private List<GanttChartVO> buildGanttList(Long projectId,
-                                              Set<Long> projectIds,
+    private List<GanttChartVO> buildGanttList(Map<Long, ProjectVO> projectMap,
                                               List<Long> issueIds,
                                               List<IssueDTO> issueList,
                                               Map<Long, Long> issueEpicMap,
                                               Map<Long, IssueDTO> issueFeatureMap,
-                                              List<String> fieldCodes) {
-        if (ObjectUtils.isEmpty(issueList)) {
+                                              List<ObjectSchemeFieldVO> displayFields,
+                                              Long organizationId) {
+        if (ObjectUtils.isEmpty(projectMap) || ObjectUtils.isEmpty(issueList)) {
             return Collections.emptyList();
         }
+        Set<Long> projectIds = projectMap.keySet();
         Set<Long> completedStatusIds =
-                issueStatusMapper.listCompletedStatus(new HashSet<>(Arrays.asList(projectId)))
+                issueStatusMapper.listCompletedStatus(projectIds)
                         .stream().map(StatusVO::getId).collect(Collectors.toSet());
-        Map<Long, IssueSprintDTO> issueSprintMap = queryIssueSprint(projectId, issueIds);
+        Map<Long, IssueSprintDTO> issueSprintMap = queryIssueSprint(projectIds, issueIds);
         Map<String, Object> fieldCodeValues = new HashMap<>();
-        buildFieldCodeValues(projectId, issueIds, fieldCodes, fieldCodeValues, issueList);
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        Set<Long> systemMemberFieldUserIds = new HashSet<>();
+        buildFieldCodeValues(projectIds, issueIds, displayFields, fieldCodeValues, issueList, organizationId, systemMemberFieldUserIds);
+        List<IssueTypeVO> issueTypes = issueTypeMapper.selectByProjectIds(organizationId, new ArrayList<>(projectIds));
         Map<Long, Map<Long, IssueTypeVO>> projectIssueTypeMap = new HashMap<>();
-        projectIds.forEach(pId -> {
-            Map<Long, IssueTypeVO> issueTypeMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
-            projectIssueTypeMap.put(pId, issueTypeMap);
+        issueTypes.forEach(issueType -> {
+            Long projectId = issueType.getProjectId();
+            Long issueTypeId = issueType.getId();
+            Set<Long> projectIdSet = new HashSet<>();
+            if (Objects.equals(0L, projectId)) {
+                projectIdSet.addAll(projectIds);
+            } else {
+                projectIdSet.add(projectId);
+            }
+            projectIdSet.forEach(id -> {
+                Map<Long, IssueTypeVO> issueTypeMap = projectIssueTypeMap.computeIfAbsent(id, x -> new HashMap<>());
+                issueTypeMap.put(issueTypeId, issueType);
+            });
         });
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
-        Set<Long> userIds = new HashSet<>();
+        Set<Long> userIds = new HashSet<>(systemMemberFieldUserIds);
         getUserIdFromIssueList(issueList, userIds);
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(new ArrayList<>(userIds), true);
         List<GanttChartVO> result = new ArrayList<>(issueList.size());
@@ -854,7 +888,8 @@ public class GanttChartServiceImpl implements GanttChartService {
         issueFeatureMap.values().forEach(x -> featureMap.put(x.getIssueId(), x));
         Set<Long> featureIds = featureMap.keySet();
         Map<String, String> envMap = lookupValueService.queryMapByTypeCode(FieldCode.ENVIRONMENT);
-        Map<Long, PriorityVO> priorityMap = ConvertUtil.getIssuePriorityMap(projectId);
+        Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
+        List<String> fieldCodes = displayFields.stream().map(ObjectSchemeFieldVO::getCode).collect(Collectors.toList());
         issueList.forEach(i -> {
             Long statusId = i.getStatusId();
             Long issueId = i.getIssueId();
@@ -872,6 +907,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                 ganttChart.setSprint(sprint);
             }
             ganttChart.setProjectId(thisProjectId);
+            ganttChart.setProject(projectMap.get(thisProjectId));
             ganttChart.setEpicId(issueEpicMap.get(issueId));
             ganttChart.setFeatureId(Optional.ofNullable(issueFeatureMap.get(issueId)).map(IssueDTO::getIssueId).orElse(null));
             ganttChart.setEpicName(i.getEpicName());
@@ -917,51 +953,67 @@ public class GanttChartServiceImpl implements GanttChartService {
         }
     }
 
-    private void buildFieldCodeValues(Long projectId, List<Long> issueIds, List<String> fieldCodes, Map<String, Object> fieldCodeValues, List<IssueDTO> issueList) {
+    private void buildFieldCodeValues(Set<Long> projectIds,
+                                      List<Long> issueIds,
+                                      List<ObjectSchemeFieldVO> displayFields,
+                                      Map<String, Object> fieldCodeValues,
+                                      List<IssueDTO> issueList,
+                                      Long organizationId,
+                                      Set<Long> systemMemberFieldUserIds) {
         // 过滤出自定义字段
-        handlerCustomFiledValue(fieldCodeValues, fieldCodes, projectId, issueIds);
+        handlerCustomFiledValue(fieldCodeValues, displayFields, projectIds, issueIds, organizationId);
         // 处理预定义字段的值
-        handlerSystemFieldValue(fieldCodeValues, fieldCodes, projectId, issueIds, issueList);
+        systemMemberFieldUserIds.addAll(handlerSystemFieldValue(fieldCodeValues, displayFields, projectIds, issueIds, issueList));
     }
 
-    private void handlerSystemFieldValue(Map<String, Object> fieldCodeValues, List<String> fieldCodes, Long projectId, List<Long> issueIds, List<IssueDTO> issueList) {
-        for (String fieldCode : fieldCodes) {
-            if (Arrays.asList(SPECIAL_HANDLER_SYSTEM_FIELD).contains(fieldCode)) {
-                Set<Long> userIds = new HashSet<>();
-                handlerSystemField(fieldCode, issueIds, projectId, fieldCodeValues, userIds, issueList);
-                fieldCodeValues.put("userIds", userIds);
+    private Set<Long> handlerSystemFieldValue(Map<String, Object> fieldCodeValues,
+                                              List<ObjectSchemeFieldVO> displayFields,
+                                              Set<Long> projectIds,
+                                              List<Long> issueIds,
+                                              List<IssueDTO> issueList) {
+        Set<Long> userIds = new HashSet<>();
+        displayFields.forEach(field -> {
+            String code = field.getCode();
+            if (SPECIAL_HANDLER_SYSTEM_FIELD.contains(code)) {
+                handlerSystemField(code, issueIds, projectIds, fieldCodeValues, userIds, issueList);
             }
-        }
+        });
+        return userIds;
     }
 
-    private void handlerSystemField(String fieldCode, List<Long> issueIds, Long projectId, Map<String, Object> fieldCodeValues, Set<Long> userIds, List<IssueDTO> issueList) {
+    private void handlerSystemField(String fieldCode,
+                                    List<Long> issueIds,
+                                    Set<Long> projectIds,
+                                    Map<String, Object> fieldCodeValues,
+                                    Set<Long> userIds,
+                                    List<IssueDTO> issueList) {
         switch (fieldCode) {
             case FieldCode.LABEL:
-                List<LabelIssueRelVO> labelIssueRelVOS = issueLabelMapper.listByIssueIds(projectId, issueIds);
+                List<LabelIssueRelVO> labelIssueRelVOS = issueLabelMapper.listByIssueIds(projectIds, issueIds);
                 if (!CollectionUtils.isEmpty(labelIssueRelVOS)) {
                     Map<Long, List<LabelIssueRelVO>> labelIssueRelGroup = labelIssueRelVOS.stream().collect(Collectors.groupingBy(LabelIssueRelVO::getIssueId));
                     fieldCodeValues.put(fieldCode, labelIssueRelGroup);
                 }
                 break;
             case FieldCode.COMPONENT:
-                List<IssueComponentBriefVO> issueComponentBriefVOS = issueComponentMapper.listByIssueIds(projectId, issueIds);
+                List<IssueComponentBriefVO> issueComponentBriefVOS = issueComponentMapper.listByIssueIds(projectIds, issueIds);
                 if (!CollectionUtils.isEmpty(issueComponentBriefVOS)) {
                     Map<Long, List<IssueComponentBriefVO>> issueComponentBriefGroup = issueComponentBriefVOS.stream().collect(Collectors.groupingBy(IssueComponentBriefVO::getIssueId));
                     fieldCodeValues.put(fieldCode, issueComponentBriefGroup);
                 }
                 break;
             case FieldCode.INFLUENCE_VERSION:
-                handlerVersionList(fieldCode, projectId, issueIds, fieldCodeValues);
+                handlerVersionList(fieldCode, projectIds, issueIds, fieldCodeValues);
                 break;
             case FieldCode.SPRINT:
-                List<IssueSprintVO> issueSprintVOS = issueSprintRelMapper.listByIssueIds(projectId, issueIds);
+                List<IssueSprintVO> issueSprintVOS = issueSprintRelMapper.listByIssueIds(projectIds, issueIds);
                 if (!CollectionUtils.isEmpty(issueSprintVOS)) {
                     Map<Long, List<IssueSprintVO>> issueSprintGroup = issueSprintVOS.stream().collect(Collectors.groupingBy(IssueSprintVO::getIssueId));
                     fieldCodeValues.put(fieldCode, issueSprintGroup);
                 }
                 break;
             case FieldCode.FIX_VERSION:
-                handlerVersionList(fieldCode, projectId, issueIds, fieldCodeValues);
+                handlerVersionList(fieldCode, projectIds, issueIds, fieldCodeValues);
                 break;
             case FieldCode.ASSIGNEE:
                 handlerUser(userIds, issueList, IssueDTO::getAssigneeId);
@@ -983,7 +1035,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                 break;
             case TAGS:
                 if (agilePluginService != null) {
-                    agilePluginService.handlerTags(projectId, issueIds, fieldCodeValues);
+                    agilePluginService.handlerTags(projectIds, issueIds, fieldCodeValues);
                 }
                 break;
             default:
@@ -1004,8 +1056,11 @@ public class GanttChartServiceImpl implements GanttChartService {
         }
     }
 
-    private void handlerVersionList(String fieldCode, Long projectId, List<Long> issueIds, Map<String, Object> fieldCodeValues) {
-        List<VersionIssueRelVO> versionIssueRelVOS = versionIssueRelMapper.listByIssueIds(projectId, issueIds, FieldCode.FIX_VERSION.equals(fieldCode) ? "fix" : "influence");
+    private void handlerVersionList(String fieldCode,
+                                    Set<Long> projectIds,
+                                    List<Long> issueIds,
+                                    Map<String, Object> fieldCodeValues) {
+        List<VersionIssueRelVO> versionIssueRelVOS = versionIssueRelMapper.listByIssueIds(projectIds, issueIds, FieldCode.FIX_VERSION.equals(fieldCode) ? "fix" : "influence");
         if (!CollectionUtils.isEmpty(versionIssueRelVOS)) {
             Map<Long, List<VersionIssueRelVO>> issueComponentBriefGroup = versionIssueRelVOS.stream().collect(Collectors.groupingBy(VersionIssueRelVO::getIssueId));
             fieldCodeValues.put(fieldCode, issueComponentBriefGroup);
@@ -1019,37 +1074,57 @@ public class GanttChartServiceImpl implements GanttChartService {
         }
     }
 
-    private void handlerCustomFiledValue(Map<String, Object> fieldCodeValues, List<String> fieldCodes, Long projectId, List<Long> issueIds) {
-        if (CollectionUtils.isEmpty(fieldCodes)) {
+    private void handlerCustomFiledValue(Map<String, Object> fieldCodeValues,
+                                         List<ObjectSchemeFieldVO> displayFields,
+                                         Set<Long> projectIds,
+                                         List<Long> issueIds,
+                                         Long organizationId) {
+        if (CollectionUtils.isEmpty(displayFields)) {
             return;
         }
-        List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS = objectSchemeFieldMapper.queryByFieldCodeList(ConvertUtil.getOrganizationId(projectId), projectId, fieldCodes);
-        if (!CollectionUtils.isEmpty(objectSchemeFieldDTOS)) {
-            List<ObjectSchemeFieldDTO> customFields = objectSchemeFieldDTOS.stream().filter(v -> Boolean.FALSE.equals(v.getSystem())).collect(Collectors.toList());
-            if (!CollectionUtils.isEmpty(customFields)) {
-                Map<Long, Map<String, Object>> allIssueFieldMap = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(ConvertUtil.getOrganizationId(projectId), Arrays.asList(projectId), issueIds, false);
-                List<String> customFieldCodes = customFields.stream().map(ObjectSchemeFieldDTO::getCode).collect(Collectors.toList());
-                Map<Long, Map<String, Object>> newAllIssueFieldMap = new HashMap<>();
-                for (Map.Entry<Long, Map<String, Object>> entry : allIssueFieldMap.entrySet()) {
-                    Long key = entry.getKey();
-                    Map<String, Object> value = entry.getValue();
-                    if (CollectionUtils.isEmpty(value)) {
-                        continue;
-                    }
-                    Map<String, Object> filterValue = value.entrySet().stream()
+        Map<String, Set<Long>> codeProjectMap = new HashMap<>();
+        displayFields.forEach(field -> {
+            String fieldCode = field.getCode();
+            Set<Long> projectIdSet = codeProjectMap.computeIfAbsent(fieldCode, x -> new HashSet<>());
+            Long projectId = field.getProjectId();
+            if (!ObjectUtils.isEmpty(projectId)) {
+                projectIdSet.add(projectId);
+            }
+        });
+        List<String> fieldCodes = new ArrayList<>(codeProjectMap.keySet());
+        List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS = objectSchemeFieldMapper.queryByFieldCodeList(organizationId, projectIds, fieldCodes);
+        if (ObjectUtils.isEmpty(objectSchemeFieldDTOS)) {
+            return;
+        }
+        List<ObjectSchemeFieldDTO> customFields = objectSchemeFieldDTOS.stream().filter(v -> Boolean.FALSE.equals(v.getSystem())).collect(Collectors.toList());
+        if (ObjectUtils.isEmpty(customFields)) {
+            return;
+        }
+        Map<Long, Map<String, Object>> allIssueFieldMap =
+                pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, new ArrayList<>(projectIds), issueIds, false);
+        List<String> customFieldCodes = customFields.stream().map(ObjectSchemeFieldDTO::getCode).collect(Collectors.toList());
+        Map<Long, Map<String, Object>> newAllIssueFieldMap = new HashMap<>();
+        for (Map.Entry<Long, Map<String, Object>> entry : allIssueFieldMap.entrySet()) {
+            Long issueId = entry.getKey();
+            Map<String, Object> value = entry.getValue();
+            if (CollectionUtils.isEmpty(value)) {
+                continue;
+            }
+            Map<String, Object> filterValue =
+                    value
+                            .entrySet()
+                            .stream()
                             .filter(e -> customFieldCodes.contains(e.getKey()))
                             .collect(Collectors.toMap(
                                     e -> e.getKey(),
                                     e -> e.getValue()
                             ));
-                    newAllIssueFieldMap.put(key, filterValue);
-                }
-                fieldCodeValues.put("foundationCodeValue", newAllIssueFieldMap);
-            }
+            newAllIssueFieldMap.put(issueId, filterValue);
         }
+        fieldCodeValues.put("foundationCodeValue", newAllIssueFieldMap);
     }
 
-    private Map<Long, IssueSprintDTO> queryIssueSprint(Long projectId,
+    private Map<Long, IssueSprintDTO> queryIssueSprint(Set<Long> projectIds,
                                                        List<Long> issueIds) {
         if (ObjectUtils.isEmpty(issueIds)) {
             return Collections.emptyMap();
@@ -1057,7 +1132,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         Map<Long, IssueSprintDTO> map = new HashMap<>();
         List<String> statusCodes = Arrays.asList("started", "sprint_planning");
         Map<Long, List<IssueSprintDTO>> issueSprintMap =
-                issueSprintRelMapper.selectIssueSprintByIds(projectId, new HashSet<>(issueIds), statusCodes)
+                issueSprintRelMapper.selectIssueSprintByIds(projectIds, new HashSet<>(issueIds), statusCodes)
                         .stream()
                         .collect(Collectors.groupingBy(IssueSprintDTO::getIssueId));
         issueIds.forEach(issueId -> {
@@ -1070,15 +1145,16 @@ public class GanttChartServiceImpl implements GanttChartService {
         return map;
     }
 
-    private Long queryProgramId(Long projectId) {
+    private List<ProjectVO> queryProgramIds(Set<Long> projectIds) {
+        Long projectId = new ArrayList<>(projectIds).get(0);
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        ResponseEntity<ProjectVO> response =
-                baseFeignClient.getGroupInfoByEnableProject(organizationId, projectId);
-        ProjectVO project = response.getBody();
-        if (ObjectUtils.isEmpty(project)) {
-            return null;
+        ResponseEntity<List<ProjectVO>> response =
+                baseFeignClient.getGroupInfoByEnableProjects(organizationId, projectIds);
+        List<ProjectVO> projects = response.getBody();
+        if (ObjectUtils.isEmpty(projects)) {
+            return Collections.emptyList();
         }
-        return project.getId();
+        return projects;
     }
 
     private Sort processSort(PageRequest pageRequest, Map<String, Object> sortMap) {
@@ -1094,38 +1170,15 @@ public class GanttChartServiceImpl implements GanttChartService {
         return sort;
     }
 
-    private boolean buildIssueType(SearchVO searchVO, Long projectId) {
+    private void buildIssueType(SearchVO searchVO) {
         List<String> issueTypes = Arrays.asList("story", "bug", "task", "sub_task");
-        String key = ISSUE_TYPE_ID;
-        List<Long> allowedIssueTypeIds =
-                projectConfigService
-                        .queryIssueTypesWithStateMachineIdByProjectId(projectId, "agile", false)
-                        .stream()
-                        .filter(x -> issueTypes.contains(x.getTypeCode()))
-                        .map(IssueTypeWithStateMachineIdVO::getId)
-                        .collect(Collectors.toList());
-
         Map<String, Object> advancedSearchArgs = searchVO.getAdvancedSearchArgs();
         if (advancedSearchArgs == null) {
             advancedSearchArgs = new HashMap<>();
             searchVO.setAdvancedSearchArgs(advancedSearchArgs);
         }
-        Object issueTypeId = advancedSearchArgs.get(key);
-        List<String> list = new ArrayList<>();
-        if (ObjectUtils.isEmpty(issueTypeId)) {
-            allowedIssueTypeIds.forEach(a -> list.add(a + ""));
-        } else {
-            List<String> array = objectMapper.convertValue(issueTypeId, new TypeReference<List<String>>() {
-            });
-            allowedIssueTypeIds.forEach(a -> {
-                String idStr = a + "";
-                if (array.contains(idStr)) {
-                    list.add(idStr);
-                }
-            });
-        }
-        advancedSearchArgs.put(key, list);
-        return list.isEmpty();
+        List<String> typeCodes = new ArrayList<>(issueTypes);
+        advancedSearchArgs.put(TYPE_CODES, typeCodes);
     }
 
     private boolean isSprintEmpty(SearchVO searchVO) {

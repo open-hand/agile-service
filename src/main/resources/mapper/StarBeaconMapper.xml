@@ -23,7 +23,10 @@
             SELECT fsb.instance_id
             FROM fd_star_beacon fsb
             WHERE fsb.type = 'issue'
-            AND fsb.project_id = #{projectId}
+            AND fsb.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
             AND fsb.user_id = #{extendSearchVO.otherArgs.userId}
             )
         </if>

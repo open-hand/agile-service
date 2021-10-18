@@ -27,6 +27,14 @@
         where project_id = #{projectId}
     </select>
 
+    <select id="selectByProjectIds" resultType="io.choerodon.agile.infra.dto.ProjectInfoDTO">
+        select * from agile_project_info
+        where project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+    </select>
+
     <update id="updateFeedbackMaxNum">
         update agile_project_info
         set feedback_max_num = #{feedbackMaxNum}

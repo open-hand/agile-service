@@ -14,7 +14,7 @@ public class GanttChartSearchVO {
     @Encrypt
     private Set<Long> issueIds;
 
-    private List<String> displayFieldCodes;
+    private List<ObjectSchemeFieldVO> displayFields;
 
     public Set<Long> getIssueIds() {
         return issueIds;
@@ -24,11 +24,11 @@ public class GanttChartSearchVO {
         this.issueIds = issueIds;
     }
 
-    public List<String> getDisplayFieldCodes() {
-        return displayFieldCodes;
+    public List<ObjectSchemeFieldVO> getDisplayFields() {
+        return displayFields;
     }
 
-    public void setDisplayFieldCodes(List<String> displayFieldCodes) {
-        this.displayFieldCodes = displayFieldCodes;
+    public void setDisplayFields(List<ObjectSchemeFieldVO> displayFields) {
+        this.displayFields = displayFields;
     }
 }

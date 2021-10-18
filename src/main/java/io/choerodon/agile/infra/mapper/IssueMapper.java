@@ -357,13 +357,13 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                             @Param("isTreeView") Boolean isTreeView);
 
 
-    List<IssueDTO> queryIssueIdsList(@Param("projectId") Long projectId,
+    List<IssueDTO> queryIssueIdsList(@Param("projectIds") Set<Long> projectIds,
                                      @Param("searchVO") SearchVO searchVO,
                                      @Param("filterSql") String filterSql,
                                      @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
                                      @Param("sortMap") Map<String, Object> sortMap);
 
-    List<IssueDTO> queryParentIssueIdsList(@Param("projectId") Long projectId,
+    List<IssueDTO> queryParentIssueIdsList(@Param("projectIds") Set<Long> projectIds,
                                            @Param("searchVO") SearchVO searchVO,
                                            @Param("filterSql") String filterSql,
                                            @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
@@ -468,7 +468,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                            @Param("issueQueryVO") IssueQueryVO issueQueryVO);
 
     List<IssueDTO> queryChildrenIdByParentId(@Param("issueIds") List<Long> issueIds,
-                                             @Param("projectId") Long projectId,
+                                             @Param("projectIds") Set<Long> projectIds,
                                              @Param("searchVO") SearchVO searchVO,
                                              @Param("filterSql") String filterSql,
                                              @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
@@ -649,7 +649,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     List<IssueEpicVO> queryIssueEpicByIds(@Param("projectId")Long projectId, @Param("epicIds") List<Long> epicIds);
 
-    List<IssueDTO> listIssueWithEpicId(@Param("projectId") Long projectId,
+    List<IssueDTO> listIssueWithEpicId(@Param("projectIds") Set<Long> projectIds,
                                        @Param("issueIds") List<Long> issueIds);
 
     Set<Long> selectAssigneeIdByIssueIds(@Param("projectId") Long projectId,
