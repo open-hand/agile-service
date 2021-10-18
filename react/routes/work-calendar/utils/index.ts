@@ -1,14 +1,7 @@
 import moment from 'moment';
 import { assign } from 'lodash';
 import { Issue } from '@/common/types';
-import { StatusProps } from '@/routes/work-calendar/types';
-
-const STATUS: StatusProps = {
-  todo: '#FFE9B6',
-  prepare: '#FFE9B6',
-  doing: '#CFE1FF',
-  done: '#d8f0ec',
-};
+import { STATUS_COLOR } from '@/routes/work-calendar/stores/index';
 
 function formatDate(date: Date) {
   return date ? moment(date).format('YYYY-MM-DD HH:mm:ss') : date;
@@ -47,7 +40,7 @@ function formatIssueData(item: Issue) {
     end: formatIssueTime(item.estimatedEndTime),
     title: item.summary,
     // @ts-ignore
-    backgroundColor: STATUS[item.statusVO?.type || 'todo'],
+    backgroundColor: STATUS_COLOR[item.statusVO?.type || 'todo'],
     borderColor: item.priorityVO?.colour || 'transparent',
     allDay: isAllDay(item.estimatedStartTime, item.estimatedEndTime),
   });
