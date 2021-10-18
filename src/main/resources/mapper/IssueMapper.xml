@@ -5125,7 +5125,7 @@
         and ai.estimated_end_time is not null
         and (ai.relate_issue_id is null or ai.relate_issue_id = 0)
         <if test="workItemSearchVO.params != null">
-          and ai.summary LIKE CONCAT(CONCAT('%' ,#{workItemSearchVO.params}) ,'%') )
+          and ai.summary LIKE CONCAT(CONCAT('%' ,#{workItemSearchVO.params}) ,'%')
         </if>
     </select>
 

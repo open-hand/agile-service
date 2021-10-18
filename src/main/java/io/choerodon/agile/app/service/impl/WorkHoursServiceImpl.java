@@ -49,7 +49,7 @@ public class WorkHoursServiceImpl implements WorkHoursService {
                                                              WorkHoursSearchVO workHoursSearchVO) {
         // 校验时间范围
         checkTimeRange(workHoursSearchVO);
-        Page<WorkHoursLogVO> page = PageHelper.doPage(pageRequest,
+        Page<WorkHoursLogVO> page = PageHelper.doPageAndSort(pageRequest,
                 () -> workHoursMapper.listByProjectIds(projectIds, workHoursSearchVO));
         List<WorkHoursLogVO> workHoursLogVOS = page.getContent();
         if (CollectionUtils.isEmpty(workHoursLogVOS)) {
@@ -68,10 +68,14 @@ public class WorkHoursServiceImpl implements WorkHoursService {
             workHoursLogVO.setUser(usersMap.get(workHoursLogVO.getUserId()));
             workHoursLogVO.setStatusVO(statusVOMap.get(workHoursLogVO.getStatusId()));
             workHoursLogVO.setProjectVO(projectMap.get(workHoursLogVO.getProjectId()));
-            List<IssueTypeVO> issueTypeVOS = issueTypeMap.get(workHoursLogVO.getProjectId());
+            List<IssueTypeVO> issueTypeVOS = issueTypeMap.get(workHoursLogVO.getIssueTypeId());
             if (!CollectionUtils.isEmpty(issueTypeVOS)) {
-                Map<Long, IssueTypeVO> typeVOMap = issueTypeVOS.stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity()));
-                workHoursLogVO.setIssueTypeVO(typeVOMap.get(workHoursLogVO.getIssueTypeId()));
+                Map<Long, IssueTypeVO> typeVOMap = issueTypeVOS.stream().collect(Collectors.toMap(IssueTypeVO::getProjectId, Function.identity()));
+                IssueTypeVO issueTypeVO = typeVOMap.get(workHoursLogVO.getProjectId());
+                if (ObjectUtils.isEmpty(issueTypeVO)) {
+                    issueTypeVO = typeVOMap.get(0L);
+                }
+                workHoursLogVO.setIssueTypeVO(issueTypeVO);
             }
         }
         return PageUtil.buildPageInfoWithPageInfoList(page, workHoursLogVOS);
