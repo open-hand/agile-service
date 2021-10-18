@@ -530,7 +530,7 @@ public class SendMsgUtil {
     @Async
     public void sendMsgByIssueParticipant(Long projectId, List<String> fieldList, IssueVO result, Long operatorId) {
         if (fieldList.contains("participantIds") && SchemeApplyType.AGILE.equals(result.getApplyType())) {
-            if (CollectionUtils.isNotEmpty(result.getParticipants())){
+            if (CollectionUtils.isEmpty(result.getParticipants())){
               return;
             }
             List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_SET_PARTICIPANT, result);
