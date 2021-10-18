@@ -1,7 +1,6 @@
 package io.choerodon.agile.infra.aspect;
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.RuleLogRelVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.annotation.DataLog;
 import io.choerodon.agile.infra.dto.*;
@@ -210,6 +209,8 @@ public class DataLogAspect {
     private LookupValueService lookupValueService;
     @Autowired
     private IssueParticipantRelMapper issueParticipantRelMapper;
+    @Autowired
+    private WorkCalendarSubscribeService workCalendarSubscribeService;
 
     /**
      * 定义拦截规则：拦截Spring管理的后缀为ServiceImpl的bean中带有@DataLog注解的方法。
@@ -400,6 +401,7 @@ public class DataLogAspect {
                     newString,
                     null,
                     newValue);
+            workCalendarSubscribeService.handleWorkCalendarSubscribeChanged(projectId, issueId, false, new ArrayList<>());
         }
     }
 
@@ -434,6 +436,7 @@ public class DataLogAspect {
                     newString,
                     oldValue,
                     newValue);
+            workCalendarSubscribeService.handleWorkCalendarSubscribeChanged(projectId, issueId, false, oldParticipants);
         }
     }
 
@@ -449,13 +452,14 @@ public class DataLogAspect {
                     .filter(v -> oldParticipants.contains(v.getId()))
                     .map(UserDTO::getRealName).collect(Collectors.joining(","));
             oldValue = oldParticipants.stream().map(String::valueOf).collect(Collectors.joining(","));
+            createDataLog(projectId, issueId,
+                    FIELD_PARTICIPANT,
+                    oldString,
+                    null,
+                    oldValue,
+                    null);
+            workCalendarSubscribeService.handleWorkCalendarSubscribeChanged(projectId, issueId, false, oldParticipants);
         }
-        createDataLog(projectId, issueId,
-                FIELD_PARTICIPANT,
-                oldString,
-                null,
-                oldValue,
-                null);
     }
 
     private void handleStaticFileRelDelete(Object[] args) {
@@ -1300,6 +1304,7 @@ public class DataLogAspect {
                         handleCalculateRemainData(issueConvertDTO, originIssueDTO);
                     }
                 }
+                workCalendarSubscribeService.handleWorkCalendarSubscribeChanged(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId(), false, new ArrayList<>());
                 dataLogRedisUtil.deleteByHandleIssueCreateDataLog(issueConvertDTO, condition);
             }
         } catch (Throwable e) {
@@ -1537,6 +1542,7 @@ public class DataLogAspect {
             }
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_ASSIGNEE, oldString, newString, oldValue, newValue);
+            workCalendarSubscribeService.handleWorkCalendarSubscribeChanged(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), false, Collections.singletonList(originIssueDTO.getAssigneeId()));
             dataLogRedisUtil.deleteByHandleAssignee(originIssueDTO.getProjectId());
         }
     }
@@ -1590,6 +1596,7 @@ public class DataLogAspect {
         Long projectId = originIssueDTO.getProjectId();
         Long issueId = originIssueDTO.getIssueId();
         SimpleDateFormat smf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        boolean estimatedTimeChanged = false;
         if (field.contains(ESTIMATED_START_TIME)
                 && !Objects.equals(originIssueDTO.getEstimatedStartTime(), issueConvertDTO.getEstimatedStartTime())) {
             String originEstimatedStartTime = null;
@@ -1601,6 +1608,7 @@ public class DataLogAspect {
                 convertEstimatedStartTime = smf.format(issueConvertDTO.getEstimatedStartTime());
             }
             createDataLog(projectId, issueId, FIELD_ESTIMATED_START_TIME, originEstimatedStartTime, convertEstimatedStartTime, originEstimatedStartTime, convertEstimatedStartTime);
+            estimatedTimeChanged = true;
         }
 
         if (field.contains(ESTIMATED_END_TIME)
@@ -1614,6 +1622,10 @@ public class DataLogAspect {
                 convertEstimatedEndTime = smf.format(issueConvertDTO.getEstimatedEndTime());
             }
             createDataLog(projectId, issueId, FIELD_ESTIMATED_END_TIME, originEstimatedEndTime, convertEstimatedEndTime, originEstimatedEndTime, convertEstimatedEndTime);
+            estimatedTimeChanged = true;
+        }
+        if (estimatedTimeChanged) {
+            workCalendarSubscribeService.handleWorkCalendarSubscribeChanged(projectId, issueId, estimatedTimeChanged, new ArrayList<>());
         }
     }
 
@@ -1624,6 +1636,7 @@ public class DataLogAspect {
             }
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     SUMMARY_FIELD, originIssueDTO.getSummary(), issueConvertDTO.getSummary(), null, null);
+            workCalendarSubscribeService.handleWorkCalendarSubscribeChanged(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), false, new ArrayList<>());
         }
     }
 
