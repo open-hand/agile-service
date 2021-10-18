@@ -10,7 +10,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { observer } from 'mobx-react-lite';
 import { usePersistFn } from 'ahooks';
-import { xorBy } from 'lodash';
+import { xorBy, concat } from 'lodash';
 import moment from 'moment';
 import { useWorkCalendarStore } from '@/routes/work-calendar/stores';
 import { formatDate } from '@/routes/work-calendar/utils';
@@ -52,7 +52,8 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
     mainStore.loadIssues(info).then((res) => {
       const calendarApi = getCalendarApi();
       const oldResources = calendarApi?.getEventSources() || [];
-      const newResources = xorBy(oldResources.concat(res), 'id');
+      // @ts-ignore
+      const newResources = xorBy(concat(oldResources, res), 'id');
       successCallback(newResources);
     });
   }, [mainStore, getCalendarApi]);
@@ -124,16 +125,24 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
     return TIME_LABEL[hours] || '';
   });
 
-  const handleEventChange = usePersistFn(({ event, revert }) => {
+  const handleEventChange = usePersistFn((data) => {
+    const { event, revert, oldEvent } = data;
+    if (moment(event.start).isSame(oldEvent.start) && moment(event.end).isSame(oldEvent.end)) {
+      return;
+    }
     const postData = {
       issueId: event.id,
       objectVersionNumber: event.extendedProps?.objectVersionNumber,
       estimatedStartTime: formatDate(event.start),
       estimatedEndTime: formatDate(event.end),
     };
-    issueApi.project(event.extendedProps?.projectId).update(postData).catch(() => {
-      revert();
-    });
+    issueApi.project(event.extendedProps?.projectId).update(postData)
+      .then((res) => {
+        event.setExtendedProp('objectVersionNumber', res.objectVersionNumber);
+      })
+      .catch(() => {
+        revert();
+      });
   });
 
   const handleDateSelect = useCallback((selectInfo) => {

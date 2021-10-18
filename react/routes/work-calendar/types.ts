@@ -8,6 +8,7 @@ interface CalendarRefPros {
 interface IssueItem extends Issue{
   completedCount: number,
   totalCount: number
+  projectId: string,
 }
 
 interface DefaultValuesProps {
