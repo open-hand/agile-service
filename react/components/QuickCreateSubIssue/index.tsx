@@ -29,7 +29,7 @@ interface QuickCreateSubIssueProps {
   onCreate?: (issue: Issue) => void
   onAwayClick?: (createFn: any) => void
   defaultAssignee?: User | undefined
-  cantCreateEvent?: () => void
+  cantCreateEvent?: (data: { defaultValues?: { summary?: string, sprint?: string, [propsName: string]: any }, defaultTypeId?: string, defaultAssignee?: User }) => void
   summaryChange?: (summary: string) => void,
   typeIdChange?: (typeId: string) => void,
   setDefaultSprint?: (sprintId: string | undefined) => void,
@@ -76,6 +76,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
           Choerodon.prompt('该工作项类型含有必填选项，请使用弹框创建');
           setLoading(false);
         } else {
+          const currentAssignee = userDropDownRef?.current?.selectedUser;
           Choerodon.prompt('请填写标注的必填字段');
           if (summaryChange) {
             summaryChange(summary);
@@ -87,12 +88,20 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
             setDefaultSprint(sprintId);
           }
           if (assigneeChange) {
-            assigneeChange(assigneeId, userDropDownRef?.current?.selectedUser);
+            assigneeChange(assigneeId, currentAssignee);
           }
           setLoading(false);
           setCreateStatus('failed');
           handleCancel();
-          cantCreateEvent();
+          cantCreateEvent({
+            defaultValues: {
+              summary,
+              sprint: sprintId,
+              priority: priorityId,
+            },
+            defaultTypeId: currentType.id,
+            defaultAssignee: currentAssignee,
+          });
         }
         return false;
       }

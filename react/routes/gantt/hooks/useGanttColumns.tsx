@@ -40,13 +40,16 @@ const renderTooltip = (user: User) => {
 
 const isCanQuickCreateIssue = (record: Gantt.Record<any>) => {
   const { typeCode } = record.issueTypeVO || {};
-  if (['assignee', 'sprint', 'epic'].includes(record.groupType) && !record.isInProgram) {
-    return true;
-  }
-  if (record.group || !typeCode) {
+  if (record.disabledCreate) {
     return false;
   }
-  return typeCode === 'story' || (!record.parentId && ['bug', 'task'].includes(typeCode));
+  if (['sprint', 'assignee', 'feature'].includes(record.groupType)) {
+    return true;
+  }
+  if (record.groupType === 'epic' && !record.isInProgram) {
+    return true;
+  }
+  return typeCode && (typeCode === 'story' || (!record.parentId && ['bug', 'task'].includes(typeCode)));
 };
 
 const ganttColumnMap = new Map<string, any>([['assignee', (onSortChange: any) => ({
@@ -120,26 +123,46 @@ const getTableColumns = (visibleColumns: ListLayoutColumnVO[], tableFields: IFou
     label: '名称',
     render: (record) => {
       if (record.create) {
-        const parentIssue: GanttIssue = record.parent;
+        const parentIssue: Gantt.Record<GanttIssue> & { groupType?: string, isInProgram?: boolean } = record.parent;
+
         const onCreate = (issue: Issue) => onAfterCreateSubIssue(record.createId, { subIssue: issue, parentIssueId: parentIssue.issueId });
         let typeCodes = ['sub_task', 'bug'];
-        if (record.groupType) {
+        const defaultValues = {} as any;
+        let priorityId: string | undefined = parentIssue.priorityVO?.id;
+        let parentIssueId: string | undefined = parentIssue.issueId;
+        if (parentIssue.groupType) {
+          parentIssueId = undefined;
+          priorityId = record.groupType === 'epic' ? priorityId : undefined;
           typeCodes = ['story', 'bug', 'task'];
+        }
+        if (parentIssue.groupType && ['feature', 'epic'].includes(parentIssue.groupType)) {
+          defaultValues.featureId = parentIssue.isInProgram ? parentIssue.issueId : undefined;
+          defaultValues.epicId = !parentIssue.isInProgram ? parentIssue.issueId : undefined;
+          typeCodes = ['story'];
         }
         return (
           <span role="none" onClick={(e) => e.stopPropagation()} className="c7n-gantt-content-body-create">
             <QuickCreateSubIssue
               mountCreate
               typeCode={typeCodes}
-              priorityId={parentIssue.priorityVO?.id}
-              parentIssueId={parentIssue.issueId}
-              defaultValues={{ epicId: parentIssue.epicId }}
+              priorityId={priorityId}
+              parentIssueId={parentIssueId}
+              defaultValues={defaultValues}
               sprintId={(parentIssue as any).sprint?.sprintId!}
-              cantCreateEvent={() => {
+              cantCreateEvent={(res) => {
                 onAfterCreateSubIssue(record.createId, undefined, true);
                 // 这里延迟打开
+                console.log('res', parentIssue, res);
                 setTimeout(() => {
                   openCreateIssue({
+                    ...merge(res, {
+                      parentIssue: !parentIssue.groupType ? parentIssue : undefined,
+                      defaultFeature: parentIssue.groupType === 'feature' ? parentIssue : undefined,
+                      defaultValues: {
+                        epicId: parentIssue.epicId,
+                      },
+                    }),
+
                     onCreate,
                   });
                 }, 110);
