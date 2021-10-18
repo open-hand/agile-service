@@ -5116,6 +5116,7 @@
                #{projectId}
            </foreach>
            and asp.status_code = 'started'
+           and aisr.issue_id in (<include refid="queryAssigneeIssue"/>)
         ) aisp
         join agile_issue ai on ai.issue_id = aisp.issue_id
         where
@@ -5125,26 +5126,6 @@
         and (ai.relate_issue_id is null or ai.relate_issue_id = 0)
         <if test="workItemSearchVO.params != null">
           and ai.summary LIKE CONCAT(CONCAT('%' ,#{workItemSearchVO.params}) ,'%') )
-        </if>
-        <if test="workItemSearchVO.assigneeFilter != null and workItemSearchVO.assigneeFilter.size > 0">
-            and (
-            <if test="workItemSearchVO.assigneeFilter.contains('assignee')">
-               ai.assignee_id = #{userId}
-               <if test="workItemSearchVO.assigneeFilter.contains('participant')">
-                   or
-               </if>
-            </if>
-            <if test="workItemSearchVO.assigneeFilter.contains('participant')">
-                ai.issue_id in (
-                  select issue_id from agile_issue_participant_rel
-                  where project_id in
-                    <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
-                    #{projectId}
-                    </foreach>
-                     and participant_id = #{userId}
-                )
-            </if>
-            )
         </if>
     </select>
 
@@ -5170,13 +5151,12 @@
             ai.assignee_id,
             ai.status_id,
             ai.object_version_number
-        from agile_issue ai
+        from (
+          <include refid="queryAssigneeIssue"/>
+        ) aii
+        join agile_issue ai on ai.issue_id = aii.issue_id
         where
-        ai.project_id in
-        <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
-            #{projectId}
-        </foreach>
-        and ai.type_code in ('story', 'bug', 'task', 'sub_task')
+        ai.type_code in ('story', 'bug', 'task', 'sub_task')
         and ai.estimated_start_time is not null
         and ai.estimated_end_time is not null
         <if test="workItemSearchVO.startTime != null and workItemSearchVO.endTime != null">
@@ -5191,28 +5171,32 @@
                 or ai.relate_issue_id = #{workItemSearchVO.filterIssueId}
             )
         </if>
-
-        <if test="workItemSearchVO.assigneeFilter != null and workItemSearchVO.assigneeFilter.size > 0">
-            and (
-                <if test="workItemSearchVO.assigneeFilter.contains('assignee')">
-                    ai.assignee_id = #{userId}
-                    <if test="workItemSearchVO.assigneeFilter.contains('participant')">
-                        or
-                    </if>
-                </if>
-                <if test="workItemSearchVO.assigneeFilter.contains('participant')">
-                    ai.issue_id in (
-                    select issue_id from agile_issue_participant_rel
-                    where project_id in
-                    <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
-                        #{projectId}
-                    </foreach>
-                    and participant_id = #{userId}
-                    )
-                </if>
-            )
-        </if>
     </select>
+
+    <sql id="queryAssigneeIssue">
+        <if test="workItemSearchVO.assigneeFilter.contains('assignee')">
+            select
+              ai.issue_id
+            from agile_issue ai
+            where
+            ai.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+             and ai.assignee_id = #{userId}
+            <if test="workItemSearchVO.assigneeFilter.contains('participant')">
+                UNION
+            </if>
+        </if>
+        <if test="workItemSearchVO.assigneeFilter.contains('participant')">
+            select issue_id from agile_issue_participant_rel
+            where project_id in
+            <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+                #{projectId}
+            </foreach>
+            and participant_id = #{userId}
+        </if>
+    </sql>
 
    <sql id="selectSubIssue">
        (
