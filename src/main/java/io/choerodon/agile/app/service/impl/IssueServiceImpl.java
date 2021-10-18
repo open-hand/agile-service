@@ -267,6 +267,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private IssueOperateService issueOperateService;
 
     @Autowired
+    private IssueParticipantRelMapper issueParticipantRelMapper;
+
+    @Autowired
     public IssueServiceImpl(SagaClient sagaClient) {
         this.sagaClient = sagaClient;
     }
@@ -1605,6 +1608,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (backlogExpandService != null) {
             backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
         }
+        // 删除issue的参与人数据
+        issueParticipantRelMapper.deleteByIssueIdAndParticipantIds(projectId, issueId, null);
         // 删除当前issue相关的状态联动执行记录
         statusLinkageExecutionLogService.deleteByIssueId(projectId, ConvertUtil.getOrganizationId(projectId), issueId);
     }

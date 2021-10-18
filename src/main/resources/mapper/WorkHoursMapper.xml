@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.WorkHoursMapper">
+    <select id="listByProjectIds" resultType="io.choerodon.agile.api.vo.WorkHoursLogVO">
+        select
+        ai.summary,
+        CONCAT(api.project_code,'-', ai.issue_num) as issue_num,
+        ai.status_id,
+        ai.issue_type_id,
+        awl.work_time,
+        awl.project_id,
+        awl.created_by as user_id,
+        awl.start_date,
+        ai.issue_id,
+        ai.object_version_number
+        from agile_work_log awl
+        LEFT JOIN agile_issue ai on ai.issue_id = awl.issue_id
+        LEFT JOIN agile_project_info api on api.project_id = ai.project_id
+        where awl.project_id in
+        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+            #{projectId}
+        </foreach>
+        <if test="workHoursSearchVO.userId != null">
+            and awl.created_by = #{workHoursSearchVO.userId}
+        </if>
+        <if test="workHoursSearchVO.startTime != null and workHoursSearchVO.endTime != null">
+            and awl.creation_date between #{workHoursSearchVO.startTime} and #{workHoursSearchVO.endTime}
+        </if>
+        order by awl.creation_date desc
+    </select>
+</mapper>
