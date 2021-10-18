@@ -5,7 +5,7 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * @author superlee
@@ -29,4 +29,9 @@ public interface GanttChartService {
     GanttDimensionListVO ganttDimensionList(Long projectId, SearchVO searchVO);
 
     void moveDimension(Long projectId, GanttDimensionMoveVO ganttDimensionMoveVO);
+
+    Page<GanttChartVO> listByProjectIdAndSearch(Map<Long, ProjectVO> projectMap,
+                                                SearchVO searchVO,
+                                                PageRequest pageRequest,
+                                                Long organizationId);
 }

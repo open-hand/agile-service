@@ -126,8 +126,11 @@
         osf.is_system = 0
         AND ( osf.organization_id = #{organizationId}
         AND osf.project_id IS NULL
-        <if test="projectId != null">
-            OR osf.project_id = #{projectId}
+        <if test="projectIds != null and projectIds.size() > 0">
+            or osf.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
         </if>))
         AND osf.code IN
         <foreach collection="fieldCodeList" item="fieldCode" separator="," open="(" close=")">

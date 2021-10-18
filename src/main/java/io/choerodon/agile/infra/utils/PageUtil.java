@@ -57,7 +57,7 @@ public class PageUtil {
         return (page - 1) * size;
     }
 
-    public static Page emptyPageInfo(int page, int size) {
+    public static Page emptyPage(int page, int size) {
         PageInfo pageInfo = new PageInfo(page, size);
         return new Page(new ArrayList(), pageInfo, 0);
     }

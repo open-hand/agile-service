@@ -126,6 +126,16 @@ public class GanttChartVO {
     @ApiModelProperty(value = "参与人")
     private List<UserMessageDTO> participants;
 
+    private ProjectVO project;
+
+    public ProjectVO getProject() {
+        return project;
+    }
+
+    public void setProject(ProjectVO project) {
+        this.project = project;
+    }
+
     public String getFeatureType() {
         return featureType;
     }

@@ -579,6 +579,7 @@
         ai.epic_id,
         ai.epic_name,
         ai.project_id as issue_project_id,
+        ai.project_id as project_id,
         alv.name AS epic_color,
         ai.type_code,
         ai.story_points,
@@ -714,6 +715,7 @@
     <select id="queryIssueIdsList" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
         ai.issue_id,
+        ai.project_id,
         <if test="searchVO.ganttDefaultOrder">
             agir.rank,
             agir.instance_id,
@@ -737,14 +739,20 @@
                 FROM fd_field_value ffv
                 JOIN agile_issue ai ON ai.issue_id = ffv.instance_id AND ai.project_id = #{projectId}
                 WHERE ffv.field_id = #{sortMap.sortFieldId}
-                AND ffv.project_id = #{projectId}
+                AND ffv.project_id in
+                <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                    #{projectId}
+                </foreach>
                 AND ai.issue_type_id IN
                 <foreach collection="sortMap.fieldExtendIssueTypeIds" item="issueTypeId" open="(" separator="," close=")">
                     #{issueTypeId}
                 </foreach>
             ) fv ON ai.issue_id = fv.instance_id
         </if>
-        WHERE ai.project_id = #{projectId}
+        WHERE ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
         AND ai.apply_type = 'agile'
         <include refid="explainSearchVO"/>
         <include refid="filterSqlAndAssigneeIds"/>
@@ -770,6 +778,7 @@
     <select id="queryParentIssueIdsList" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         select
         ai.issue_id,
+        ai.project_id,
         <if test="searchVO.ganttDefaultOrder">
             agir.rank,
             agir.instance_id,
@@ -786,7 +795,11 @@
                 else ai.issue_id
                 end as issue_id
                 FROM agile_issue ai
-                WHERE ai.project_id = #{projectId} AND ai.apply_type = 'agile'
+                WHERE ai.project_id in
+                <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                    #{projectId}
+                </foreach>
+                AND ai.apply_type = 'agile'
                 <include refid="explainSearchVO"/>
                 <include refid="filterSqlAndAssigneeIds"/>
                 <if test='searchVO.searchArgs != null'>
@@ -806,7 +819,14 @@
             group by temp.issue_id
         ) ai1
         join agile_issue ai
-        on (ai.project_id = #{projectId} and ai.apply_type = 'agile' and ai1.issue_id = ai.issue_id)
+        on (
+            ai.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            and ai.apply_type = 'agile'
+            and ai1.issue_id = ai.issue_id
+        )
         <if test="searchVO.ganttDefaultOrder">
             left join agile_gantt_issue_rank agir on ai.issue_id = agir.issue_id and agir.dimension = #{searchVO.searchArgs.dimension}
         </if>
@@ -823,14 +843,21 @@
             FROM fd_field_value ffv
             JOIN agile_issue ai ON ai.issue_id = ffv.instance_id AND ai.project_id = #{projectId}
             WHERE ffv.field_id = #{sortMap.sortFieldId}
-            AND ffv.project_id = #{projectId}
+            AND ffv.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
             AND ai.issue_type_id IN
             <foreach collection="sortMap.fieldExtendIssueTypeIds" item="issueTypeId" open="(" separator="," close=")">
                 #{issueTypeId}
             </foreach>
             ) fv ON ai.issue_id = fv.instance_id
         </if>
-        where ai.project_id = #{projectId} and ai.apply_type = 'agile'
+        where ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and ai.apply_type = 'agile'
         and (
             ai.type_code in ('issue_epic', 'story', 'task')
             or (ai.type_code = 'bug' and (ai.relate_issue_id is null or ai.relate_issue_id = 0))
@@ -850,7 +877,11 @@
             else ai.issue_id
             end as issue_id
             from agile_issue ai
-            where ai.project_id = #{projectId} and ai.apply_type = 'agile'
+            where ai.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            and ai.apply_type = 'agile'
             <include refid="explainSearchVO"/>
             <include refid="filterSqlAndAssigneeIds"/>
             <if test='searchVO.searchArgs != null'>
@@ -868,7 +899,11 @@
             </if>
         ) temp
         join agile_issue ai on ai.issue_id = temp.issue_id
-        where ai.project_id = #{projectId} and ai.apply_type = 'agile'
+        where ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and ai.apply_type = 'agile'
         and (
         ai.type_code in ('issue_epic', 'story', 'task')
         or (ai.type_code = 'bug' and (ai.relate_issue_id is null or ai.relate_issue_id = 0))
@@ -899,16 +934,26 @@
             text_value,
             number_value
             FROM fd_field_value ffv
-            JOIN agile_issue ai ON ai.issue_id = ffv.instance_id AND ai.project_id = #{projectId}
+            JOIN agile_issue ai ON ai.issue_id = ffv.instance_id
+            AND ai.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
             WHERE ffv.field_id = #{sortMap.sortFieldId}
-            AND ffv.project_id = #{projectId}
+            AND ffv.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
             AND ai.issue_type_id IN
             <foreach collection="sortMap.fieldExtendIssueTypeIds" item="issueTypeId" open="(" separator="," close=")">
                 #{issueTypeId}
             </foreach>
             ) fv ON ai.issue_id = fv.instance_id
         </if>
-        where ai.project_id = #{projectId}
+        where ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
         and ai.apply_type = 'agile'
         and (
             (
@@ -1221,12 +1266,18 @@
                 SELECT ai12.issue_id from agile_issue ai12
                 left join agile_issue_participant_rel aipr
                 on ai12.issue_id = aipr.issue_id WHERE
-                ai.project_id = #{projectId}
+                ai.project_id in
+                <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                    #{projectId}
+                </foreach>
                 AND aipr.participant_id is null ) OR
             </if>
             ai.issue_id in
             (SELECT aipr.issue_id FROM agile_issue_participant_rel aipr WHERE
-            aipr.project_id = #{projectId}
+            aipr.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
             AND aipr.participant_id in
             <foreach collection="searchVO.otherArgs.participantIds" item="participantId" open="(" separator=","
                      close=")">
@@ -1399,7 +1450,10 @@
             ai.issue_id in (
             SELECT atir.issue_id
             FROM agile_tag_issue_rel atir
-            WHERE atir.project_id = #{projectId}
+            WHERE atir.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
             AND
             <foreach collection="searchVO.otherArgs.tags" item="tag" open="(" separator="OR" close=")">
                 (
@@ -1414,7 +1468,14 @@
         <if test="searchVO.otherArgs.myAssigned != null and searchVO.otherArgs.myAssigned == true">
             <bind name="audit" value="@io.choerodon.mybatis.helper.AuditHelper@audit()"/>
             AND (ai.assignee_id = #{audit.user} OR ai.issue_id in (
-            SELECT issue_id FROM agile_data_log adl WHERE adl.field = 'assignee' AND adl.project_id = #{projectId} AND (adl.new_value = #{audit.user} OR adl.old_value = #{audit.user})
+            SELECT issue_id
+            FROM agile_data_log adl
+            WHERE adl.field = 'assignee'
+            AND adl.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            AND (adl.new_value = #{audit.user} OR adl.old_value = #{audit.user})
             ))
         </if>
     </sql>
@@ -1434,7 +1495,10 @@
                     (
                     SELECT issue_id
                     FROM agile_issue_sprint_rel aisr
-                    WHERE project_id = #{projectId}
+                    WHERE project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                        #{projectId}
+                    </foreach>
                     )
                 </if>
                 <if test="id != 0 ">
@@ -1460,7 +1524,10 @@
                     FROM
                     fd_field_value ffv
                     WHERE
-                    ffv.project_id = #{projectId}
+                    ffv.project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                        #{projectId}
+                    </foreach>
                     AND ffv.field_id = #{item.fieldId}
                     AND ffv.option_id IN
                     <foreach collection="item.value" item="value" open="(" separator=","
@@ -1481,7 +1548,10 @@
                     FROM
                     fd_field_value ffv
                     WHERE
-                    ffv.project_id = #{projectId}
+                    ffv.project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                        #{projectId}
+                    </foreach>
                     AND ffv.field_id = #{item.fieldId}
                     AND ffv.date_value &gt;= #{item.startDate} AND ffv.date_value &lt;= #{item.endDate}
                     )
@@ -1498,7 +1568,10 @@
                     FROM
                     fd_field_value ffv
                     WHERE
-                    ffv.project_id = #{projectId}
+                    ffv.project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                        #{projectId}
+                    </foreach>
                     AND ffv.field_id = #{item.fieldId}
                     AND DATE_FORMAT(ffv.date_value, '%H:%i:%s') &gt;= #{item.startDate} AND DATE_FORMAT(ffv.date_value, '%H:%i:%s') &lt;= #{item.endDate}
                     )
@@ -1515,7 +1588,10 @@
                     FROM
                     fd_field_value ffv
                     WHERE
-                    ffv.project_id = #{projectId}
+                    ffv.project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                        #{projectId}
+                    </foreach>
                     AND ffv.field_id = #{item.fieldId}
                     AND ffv.number_value = #{item.value}
                     )
@@ -1532,7 +1608,10 @@
                     FROM
                     fd_field_value ffv
                     WHERE
-                    ffv.project_id = #{projectId}
+                    ffv.project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                        #{projectId}
+                    </foreach>
                     AND ffv.field_id = #{item.fieldId}
                     AND ffv.string_value LIKE CONCAT(CONCAT('%' ,#{item.value}) ,'%')
                     )
@@ -1549,7 +1628,10 @@
                     FROM
                     fd_field_value ffv
                     WHERE
-                    ffv.project_id = #{projectId}
+                    ffv.project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                        #{projectId}
+                    </foreach>
                     AND ffv.field_id = #{item.fieldId}
                     AND ffv.text_value LIKE CONCAT(CONCAT('%' ,#{item.value}) ,'%')
                     )
@@ -5077,7 +5159,10 @@
             issue_id,
             epic_id
         from agile_issue
-        where project_id = #{projectId}
+        where project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
         and issue_id in
         <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
             #{issueId}

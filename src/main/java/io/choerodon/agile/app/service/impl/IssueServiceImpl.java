@@ -611,7 +611,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 List<Long> issueIds = issueIdPage.getContent();
                 Set<Long> childrenIds = new HashSet<>();
                 if (isTreeView) {
-                    List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null);
+                    List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(issueIds, new HashSet<>(Arrays.asList(projectId)), searchVO, searchSql, searchVO.getAssigneeFilterIds(), null);
                     childrenIds.addAll(childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet()));
                 }
                 List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds, false, isTreeView);
@@ -635,7 +635,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     private Page<Long> getIssueIdPage(PageRequest pageRequest, Long projectId, SearchVO searchVO, String searchSql, Long organizationId, Boolean isTreeView) {
         Map<String, Object> sortMap = processSortMap(pageRequest, projectId, organizationId);
-        return pagedQueryByTreeView(pageRequest, projectId, searchVO, searchSql, sortMap, isTreeView);
+        return pagedQueryByTreeView(pageRequest, new HashSet<>(Arrays.asList(projectId)), searchVO, searchSql, sortMap, isTreeView);
     }
 
     @Override
@@ -654,59 +654,60 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public Page<Long> pagedQueryByTreeView(PageRequest pageRequest,
-                                           Long projectId,
+                                           Set<Long> projectIds,
                                            SearchVO searchVO,
                                            String searchSql,
                                            Map<String, Object> sortMap,
                                            boolean isTreeView) {
-        splitIssueNumProjectCodePrefix(searchVO, projectId);
+        splitIssueNumProjectCodePrefix(searchVO, projectIds);
         Page<IssueDTO> issuePage;
         if (isTreeView) {
             issuePage =
-                    PageHelper.doPage(pageRequest, () -> issueMapper.queryParentIssueIdsList(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap));
+                    PageHelper.doPage(pageRequest, () -> issueMapper.queryParentIssueIdsList(projectIds, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap));
         } else {
             issuePage =
-                    PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueIdsList(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap));
+                    PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueIdsList(projectIds, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap));
         }
         List<Long> issueIds = issuePage.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
         return PageUtil.buildPageInfoWithPageInfoList(issuePage, issueIds);
     }
 
     @Override
-    public List<Long> listByTreeView(Long projectId,
+    public List<Long> listByTreeView(Set<Long> projectIds,
                                      SearchVO searchVO,
                                      String searchSql,
                                      Map<String, Object> sortMap,
                                      boolean isTreeView) {
-        splitIssueNumProjectCodePrefix(searchVO, projectId);
+        splitIssueNumProjectCodePrefix(searchVO, projectIds);
         if (isTreeView) {
-            return issueMapper.queryParentIssueIdsList(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap)
+            return issueMapper.queryParentIssueIdsList(projectIds, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap)
                     .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
         } else {
-            return issueMapper.queryIssueIdsList(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap)
+            return issueMapper.queryIssueIdsList(projectIds, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap)
                     .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
         }
     }
 
     @Override
-    public void splitIssueNumProjectCodePrefix(SearchVO searchVO, Long projectId) {
+    public void splitIssueNumProjectCodePrefix(SearchVO searchVO, Set<Long> projectIds) {
         //去除searchVO.searchArgs.issueNum或searchVO.contents的项目code前缀
-        ProjectInfoDTO dto = new ProjectInfoDTO();
-        dto.setProjectId(projectId);
-        ProjectInfoDTO info = projectInfoMapper.selectOne(dto);
-        if (ObjectUtils.isEmpty(info)) {
+        List<ProjectInfoDTO> projectInfos = projectInfoMapper.selectByProjectIds(projectIds);
+        if (projectInfos.isEmpty()) {
             return;
         }
-        String prefix = info.getProjectCode() + "-";
+        List<String> projectCodes = projectInfos.stream().map(ProjectInfoDTO::getProjectCode).collect(Collectors.toList());
         List<String> contents = searchVO.getContents();
         if (!ObjectUtils.isEmpty(contents)) {
             List<String> replaceContents = new ArrayList<>();
             contents.forEach(content -> {
-                if (content.startsWith(prefix)) {
-                    replaceContents.add(content.substring(prefix.length()));
-                } else {
-                    replaceContents.add(content);
-                }
+                projectCodes.forEach(projectCode -> {
+                    String prefix = projectCode + "-";
+                    if (content.startsWith(prefix)) {
+                        replaceContents.add(content.substring(prefix.length()));
+                    } else {
+                        replaceContents.add(content);
+                    }
+                });
             });
             searchVO.setContents(replaceContents);
         }
@@ -714,7 +715,13 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (!ObjectUtils.isEmpty(searchArgs)) {
             String issueNum = (String) searchArgs.get("issueNum");
             if (!StringUtils.isEmpty(issueNum)) {
-                searchArgs.put("issueNum", issueNum.substring(prefix.length()));
+                projectCodes.forEach(projectCode -> {
+                    String prefix = projectCode + "-";
+                    if (issueNum.startsWith(prefix)) {
+                        searchArgs.put("issueNum", issueNum.substring(prefix.length()));
+                        return;
+                    }
+                });
             }
         }
     }
@@ -3143,7 +3150,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public Page<IssueLinkVO> pagedQueryByOptions(Long projectId, PageRequest pageRequest, IssueQueryVO issueQueryVO) {
         List<Long> issueIds = issueQueryVO.getIssueIds();
-        Page emptyPage = PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
+        Page emptyPage = PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         if (ObjectUtils.isEmpty(issueIds)) {
             return emptyPage;
         }
@@ -3181,7 +3188,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             });
             return PageUtil.buildPageInfoWithPageInfoList(pageInfo, listFieldKVVOS);
         } else {
-            return PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
+            return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }
     }
 
@@ -3402,7 +3409,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             result.getContent().forEach(r -> r.setIssueTypeVO(issueTypeDTOMap.get(r.getIssueTypeId())));
             return result;
         } else {
-            return PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
+            return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }
     }
 

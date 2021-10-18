@@ -720,7 +720,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (dto == null) {
             throw new CommonException(ERROR_ISSUE_TYPE_NOT_EXISTED);
         }
-        Page<ProjectIssueTypeVO> emptyPage = PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
+        Page<ProjectIssueTypeVO> emptyPage = PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         if (Boolean.TRUE.equals(dto.getInitialize())) {
             List<String> categories = TYPE_CODE_CATEGORY_MAP.get(dto.getTypeCode());
             if (ObjectUtils.isEmpty(categories)) {
@@ -773,7 +773,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (codes.contains(ProjectCategory.MODULE_AGILE)) {
             return PageHelper.doPage(pageRequest, () -> issueTypeMapper.selectEnableReference(organizationId, projectId));
         } else {
-            return PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
+            return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }
     }
 

@@ -495,11 +495,11 @@ public interface AgilePluginService {
 
     boolean isSubProjectAndArtDoing(Long projectId);
 
-    Map<Long, IssueDTO> queryIssueFeature(Long projectId, List<Long> issueIds);
+    Map<Long, IssueDTO> queryIssueFeature(Set<Long> projectIds, List<Long> issueIds);
 
     void sprintStarted(Long projectId);
 
-    void handlerTags(Long projectId, List<Long> issueIds, Map<String, Object> fieldCodeValues);
+    void handlerTags(Set<Long> projectIds, List<Long> issueIds, Map<String, Object> fieldCodeValues);
 
     List<Long> queryFeatureIdByIssueIdAndEpicId(List<Long> issueIds, Long epicId);
 

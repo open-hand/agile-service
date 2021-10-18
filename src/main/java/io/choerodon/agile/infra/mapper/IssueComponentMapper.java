@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/14.
@@ -67,5 +68,5 @@ public interface IssueComponentMapper extends BaseMapper<IssueComponentDTO> {
 
     void updateRank(@Param("projectId") Long projectId, @Param("issueComponentDTO") IssueComponentDTO issueComponentDTO);
 
-    List<IssueComponentBriefVO> listByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
+    List<IssueComponentBriefVO> listByIssueIds(@Param("projectIds") Set<Long> projectIds, @Param("issueIds") List<Long> issueIds);
 }

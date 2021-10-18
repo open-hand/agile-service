@@ -54,7 +54,10 @@
             ail.label_name
         from agile_label_issue_rel alir
         left join agile_issue_label ail on ail.label_id = alir.label_id
-        where alir.project_id = #{projectId}
+        where alir.project_id in
+        <foreach collection="projectIds" item="projectId"  separator=",">
+            #{projectId}
+        </foreach>
         and alir.issue_id in
         <foreach collection="issueIds" item="issueId" separator="," open="(" close=")">
             #{issueId}

@@ -218,7 +218,7 @@ public class IssueCommentServiceImpl implements IssueCommentService {
     public Page<IssueCommentVO> queryIssueCommentPage(PageRequest pageRequest, Long issueId, Long projectId) {
         Page<IssueCommentDTO> issueCommentList = PageHelper.doPage(pageRequest, () -> issueCommentMapper.queryIssueCommentList(projectId, issueId));
         if (CollectionUtils.isEmpty(issueCommentList)){
-            return PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
+            return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }
         Page<IssueCommentVO> result = PageUtils.copyPropertiesAndResetContent(issueCommentList, modelMapper.map(issueCommentList.getContent(), new TypeToken<List<IssueCommentVO>>(){}.getType()));
         setDefaultDisplayReply(result, issueId, projectId);

@@ -164,17 +164,20 @@
     </update>
 
     <select id="listByIssueIds" resultType="io.choerodon.agile.api.vo.IssueComponentBriefVO">
-         select
+        select
             acir.issue_id,
             acir.component_id,
             aic.name
-         from agile_component_issue_rel acir
-         LEFT JOIN agile_issue_component aic ON aic.component_id = acir.component_id
-         where acir.project_id = #{projectId}
-         and acir.issue_id in
-         <foreach collection="issueIds" item="issueId" separator="," open="(" close=")">
-             #{issueId}
-         </foreach>
+        from agile_component_issue_rel acir
+        LEFT JOIN agile_issue_component aic ON aic.component_id = acir.component_id
+        where acir.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and acir.issue_id in
+        <foreach collection="issueIds" item="issueId" separator="," open="(" close=")">
+            #{issueId}
+        </foreach>
     </select>
 
 </mapper>

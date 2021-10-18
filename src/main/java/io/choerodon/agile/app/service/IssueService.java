@@ -55,13 +55,13 @@ public interface IssueService {
     Page<IssueListFieldKVVO> listIssueWithSub(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId);
 
     Page<Long> pagedQueryByTreeView(PageRequest pageRequest,
-                                    Long projectId,
+                                    Set<Long> projectIds,
                                     SearchVO searchVO,
                                     String searchSql,
                                     Map<String, Object> sortMap,
                                     boolean isTreeView);
 
-    List<Long> listByTreeView(Long projectId,
+    List<Long> listByTreeView(Set<Long> projectIds,
                               SearchVO searchVO,
                               String searchSql,
                               Map<String, Object> sortMap,
@@ -481,7 +481,7 @@ public interface IssueService {
                                        Long projectId,
                                        Long organizationId);
 
-    void splitIssueNumProjectCodePrefix(SearchVO searchVO, Long projectId);
+    void splitIssueNumProjectCodePrefix(SearchVO searchVO, Set<Long> projectIds);
 
     void handleUpdateParticipant(List<Long> participantIds, Long projectId, Long issueId);
 

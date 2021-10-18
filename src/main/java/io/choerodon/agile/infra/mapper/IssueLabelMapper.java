@@ -53,9 +53,9 @@ public interface IssueLabelMapper extends BaseMapper<IssueLabelDTO> {
 
     /**
      * 根据issueIds 查询标签
-     * @param projectId
+     * @param projectIds
      * @param issueIds
      * @return
      */
-    List<LabelIssueRelVO> listByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
+    List<LabelIssueRelVO> listByIssueIds(@Param("projectIds") Set<Long> projectIds, @Param("issueIds") List<Long> issueIds);
 }
