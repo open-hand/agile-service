@@ -11,10 +11,12 @@
         where
         project_id = #{projectId}
         and issue_id = #{issueId}
-        and participant_id in
-        <foreach collection="participantIds" item="participantId" open="(" close=")" separator=",">
-            #{participantId}
-        </foreach>
+        <if test="participantIds != null and participantIds.size > 0">
+            and participant_id in
+            <foreach collection="participantIds" item="participantId" open="(" close=")" separator=",">
+                #{participantId}
+            </foreach>
+        </if>
     </delete>
 
     <select id="listByIssueId" resultType="java.lang.Long">
