@@ -64,13 +64,14 @@ export default function useStore({ DEFAULT_USER }: Props) {
 
     expandMap: new Map(),
 
-    issues: [],
-    get getIssues() {
-      return this.issues.slice();
+    searchParams: null,
+    getSearchParams() {
+      return this.searchParams;
     },
-    setIssues(data: Issue[]) {
-      this.issues = data;
+    setSearchParams(data: string) {
+      this.searchParams = data;
     },
+
     async loadIssues({ start, end }: { start: Date, end: Date }) {
       try {
         const postData = {
@@ -82,7 +83,6 @@ export default function useStore({ DEFAULT_USER }: Props) {
         };
         const issues = await orgWorkCalendarApi.loadIssueByDate(postData);
         const newIssues = map(issues || [], (item) => formatIssueData(item));
-        this.setIssues(newIssues);
         return newIssues;
       } catch (e) {
         return [];
@@ -94,6 +94,7 @@ export default function useStore({ DEFAULT_USER }: Props) {
         const postData = {
           assigneeFilter: this.users,
           projectIds: this.currentProjectIds,
+          params: this.searchParams,
         };
         const res = await orgWorkCalendarApi.loadIssueList(postData);
         const newData = map(res, (item) => ({
