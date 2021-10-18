@@ -512,7 +512,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                 field.set(issueUpdateVO, componentIssueRelVOS);
                 break;
             case FieldCode.PARTICIPANT:
-                List<Long> participantIds = statusFieldValueSettingDTOS.stream().map(StatusFieldValueSettingDTO::getUserId).collect(Collectors.toList());
+                List<Long> participantIds = statusFieldValueSettingDTOS.stream().map(settingDTO -> handlerMember(settingDTO, issueDTO)).collect(Collectors.toList());
                 field.set(issueUpdateVO, participantIds);
                 break;
             case FieldCode.LABEL:
