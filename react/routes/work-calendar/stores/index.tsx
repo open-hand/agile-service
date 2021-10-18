@@ -7,6 +7,13 @@ import { User } from '@/common/types';
 import { StatusProps, UserValueCode } from '@/routes/work-calendar/types';
 import useStore, { StoreProps } from './useStore';
 
+export const STATUS_COLOR: StatusProps = {
+  todo: '#FFE9B6',
+  prepare: '#FFE9B6',
+  doing: '#CFE1FF',
+  done: '#d8f0ec',
+};
+
 interface UserItemProps {
   name: string,
   value: UserValueCode,

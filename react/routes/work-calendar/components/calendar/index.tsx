@@ -12,13 +12,15 @@ import { observer } from 'mobx-react-lite';
 import { usePersistFn } from 'ahooks';
 import { xorBy, concat } from 'lodash';
 import moment from 'moment';
-import { useWorkCalendarStore } from '@/routes/work-calendar/stores';
+import { useWorkCalendarStore, STATUS_COLOR } from '@/routes/work-calendar/stores';
 import { formatDate } from '@/routes/work-calendar/utils';
 import { issueApi } from '@/api';
 import CalendarToolbar from '@/routes/work-calendar/components/calendar-toolbar';
 import Style from './index.less';
 import UserTag from '@/components/tag/user-tag';
 import { CreateProps } from '@/routes/work-calendar/types';
+import STATUS from '@/constants/STATUS';
+import { IStatus } from '@/common/types';
 
 const TIME_LABEL = ['凌晨0点', '凌晨1点', '凌晨2点', '凌晨3点', '凌晨4点', '早上5点', '早上6点', '早上7点', '早上8点', '上午9点', '上午10点', '上午11点', '中午12点', '下午1点', '下午2点', '下午3点', '下午4点', '下午5点', '晚上6点', '晚上7点', '晚上8点', '晚上9点', '晚上10点', '晚上11点', '晚上12点'];
 
@@ -64,13 +66,18 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
     const timeLabel = timeText?.slice(0, 2) || '';
     const viewType = view?.type;
     const timeSpan = `${timeLabel}${moment(event?.start).format('HH:mm')}`;
+    const statusCode: IStatus['valueCode'] = event?.extendedProps?.statusVO?.type || 'todo';
+    const issueHoverClass = Style[`issueHover-${statusCode}`];
+    const issueBorderClass = {
+      borderLeft: `3px solid ${event?.extendedProps?.priorityVO?.colour || 'transparent'}`,
+    };
     if (viewType === 'dayGridMonth') {
       return (
         <div
-          className={Style.monthIssue}
+          className={`${Style.monthIssue} ${issueHoverClass}`}
           style={{
             background: event?.backgroundColor,
-            borderLeft: `3px solid ${event?.extendedProps?.priorityVO?.colour || 'transparent'}`,
+            ...issueBorderClass,
           }}
         >
           <Tooltip title={event.title}>
@@ -85,9 +92,9 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
     if (event.allDay) {
       return (
         <div
-          className={Style.allDayIssue}
+          className={`${Style.allDayIssue} ${issueHoverClass}`}
           style={{
-            borderLeft: `3px solid ${event?.extendedProps?.priorityVO?.colour || 'transparent'}`,
+            ...issueBorderClass,
           }}
         >
           <div className={Style.issueSummary}>{event.title}</div>
@@ -95,7 +102,12 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
       );
     }
     return (
-      <>
+      <div
+        className={`${Style.weekIssue}`}
+        // 由于跨天的issue是分成两个div,因此没法使用css的hover来设置颜色
+        onMouseEnter={() => event.setProp('backgroundColor', STATUS[statusCode])}
+        onMouseLeave={() => event.setProp('backgroundColor', STATUS_COLOR[statusCode])}
+      >
         <div className={Style.timeIssueTimeWrap}>
           <div className={Style.issueStartTime}>{timeSpan}</div>
           <UserTag
@@ -104,7 +116,7 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
           />
         </div>
         <div className={Style.issueSummary}>{event.title}</div>
-      </>
+      </div>
     );
   });
 
