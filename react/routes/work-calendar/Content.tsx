@@ -8,11 +8,13 @@ import { Select } from 'choerodon-ui/pro';
 import { CustomTabs } from '@choerodon/components';
 import openCreateIssue from '@/components/create-issue';
 import { Issue } from '@/common/types';
-import { formatIssueTime } from '@/routes/work-calendar/utils';
+import { formatIssueData } from '@/routes/work-calendar/utils';
 import { useWorkCalendarStore } from '@/routes/work-calendar/stores';
 import CalendarContent from '@/routes/work-calendar/components/calendar';
 import IssueList from '@/routes/work-calendar/components/issue-list';
 import SelectProject from '@/components/select/select-project';
+import DetailContainer, { useDetail } from '@/components/detail-container';
+import { CreateProps } from '@/routes/work-calendar/types';
 
 const { Option } = Select;
 
@@ -24,6 +26,8 @@ const WorkCalendar = observer(() => {
     USER_OPTION,
     DEFAULT_USER,
   } = useWorkCalendarStore();
+
+  const [issueDetailProps] = useDetail();
 
   const refresh = useCallback(() => {
     const calendarRef = mainStore.getCalendarRef;
@@ -51,26 +55,40 @@ const WorkCalendar = observer(() => {
     }
   }, [mainStore]);
 
-  const openCreate = useCallback(() => {
+  const handleCreateIssue = useCallback((data?: CreateProps) => {
     const calendarRef = mainStore.getCalendarRef;
+    const { defaultValues, clearSelect = false } = data || {};
     openCreateIssue({
-      // projectId: '223894445333270528',
       showSelectProject: true,
       defaultAssignee: AppState.userInfo,
+      defaultValues,
       onCreate: (issue: Issue) => {
         const calenderApi = calendarRef.current?.getApi();
         if (calenderApi && issue.estimatedStartTime && issue.estimatedEndTime) {
-          calenderApi?.addEvent({
-            ...issue,
-            id: issue.issueId,
-            title: issue.summary,
-            start: formatIssueTime(issue.estimatedStartTime),
-            end: formatIssueTime(issue.estimatedEndTime),
-          });
+          calenderApi.addEvent(formatIssueData(issue));
+          // calenderApi?.addEvent({
+          //   ...issue,
+          //   id: issue.issueId,
+          //   title: issue.summary,
+          //   start: formatIssueTime(issue.estimatedStartTime),
+          //   end: formatIssueTime(issue.estimatedEndTime),
+          //   allDay: isAllDay(issue.estimatedStartTime, issue.estimatedEndTime),
+          // });
+          clearSelect && calenderApi.unselect();
         }
       },
     });
   }, [mainStore]);
+
+  const openEditIssue = useCallback(({ event }) => {
+    issueDetailProps?.open({
+      path: 'issue',
+      props: {
+        issueId: event?.id,
+        projectId: event?.extendedProps?.projectId,
+      },
+    });
+  }, [issueDetailProps]);
 
   return (
     <Page className={prefixCls}>
@@ -80,7 +98,7 @@ const WorkCalendar = observer(() => {
             display: true,
             name: '创建工作项',
             icon: 'playlist_add',
-            handler: openCreate,
+            handler: () => handleCreateIssue(),
           }, {
             display: true,
             name: '订阅到本地',
@@ -128,11 +146,12 @@ const WorkCalendar = observer(() => {
       <Breadcrumb title="工作日历" />
       <Content className={`${prefixCls}-content`}>
         <div className={`${prefixCls}-content-task`}>
-          <IssueList refresh={refresh} />
+          <IssueList refresh={refresh} openEditIssue={openEditIssue} />
         </div>
         <div className={`${prefixCls}-content-main`}>
-          <CalendarContent />
+          <CalendarContent openEditIssue={openEditIssue} handleCreateIssue={handleCreateIssue} />
         </div>
+        <DetailContainer {...issueDetailProps} />
       </Content>
     </Page>
   );

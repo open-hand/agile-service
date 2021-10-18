@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo} from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { map } from 'lodash';
 import { Icon, TextField } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
@@ -8,9 +8,10 @@ import Style from './index.less';
 
 interface Props {
   refresh(): void,
+  openEditIssue(data: { event: { id: string, extendedProps: { projectId: string } } }): void,
 }
 
-const IssueList = ({ refresh }: Props) => {
+const IssueList = ({ refresh, openEditIssue }: Props) => {
   const {
     mainStore,
   } = useWorkCalendarStore();
@@ -49,9 +50,15 @@ const IssueList = ({ refresh }: Props) => {
     expandMap.set(issueId, !expandMap.get(issueId) || false);
   }, [mainStore]);
 
-  const openIssueDetail = useCallback((item: IssueItem) => {
+  const openIssueDetail = useCallback((e, item: IssueItem) => {
     e.stopPropagation();
-  }, []);
+    openEditIssue({
+      event: {
+        id: item.issueId,
+        extendedProps: { projectId: item?.projectId },
+      },
+    });
+  }, [openEditIssue]);
 
   const isExpand = useCallback((issueId: string) => {
     const { expandMap } = mainStore;
@@ -96,7 +103,7 @@ const IssueList = ({ refresh }: Props) => {
                 <span
                   role="none"
                   className={Style.link}
-                  onClick={() => openIssueDetail(item)}
+                  onClick={(e) => openIssueDetail(e, item)}
                 >
                   查看详情
                 </span>
