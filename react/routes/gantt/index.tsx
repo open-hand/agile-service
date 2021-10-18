@@ -144,8 +144,9 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
     const filter = issueSearchStore.getCustomFieldFilters();
     filter.otherArgs.sprint = sprintIds;
     filter.searchArgs.dimension = type;
+    const projectId = getProjectId();
     return merge(filter, {
-      displayFieldCodes: visibleColumnCodes,
+      displayFields: visibleColumnCodes.map((code) => ({ code, projectId })),
       searchArgs: { tree: type !== 'assignee', dimension: type },
     });
   }, [sprintIds, type]);
@@ -262,7 +263,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
       onClick={onRow.onClick}
     />
   ), [onRow.onClick, type]);
-  const renderGroupBar: GanttProps['renderBar'] = useCallback((bar, { width, height }) => {
+  const renderGroupBar: GanttProps['renderGroupBar'] = useCallback((bar, { width, height }) => {
     const { record } = bar;
     if (record.groupType === 'sprint') {
       return (
@@ -359,10 +360,10 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
     const { influenceIssueIds } = res;
     // 更新自身 及影响的issue
     const updateIssueIds = [res.issueId, ...(influenceIssueIds || [])];
-    ganttApi.loadInfluenceIssues(type, updateIssueIds, visibleColumnCodes).then((issues: any[]) => {
+    ganttApi.loadInfluenceIssues(type, updateIssueIds, searchFilter.displayFields).then((issues: any[]) => {
       updateIssues(issues);
     });
-  }, [type, updateIssues, visibleColumnCodes]);
+  }, [searchFilter.displayFields, type, updateIssues]);
 
   const handleTransformType = usePersistFn((newIssue: Issue, oldIssue: Issue) => {
     const parentTypes = ['story', 'task'];
