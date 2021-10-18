@@ -25,9 +25,11 @@ const IssueList = ({ refresh, openEditIssue }: Props) => {
   }, {
     name: '已完成工作项数',
     value: 'completedCount',
+    hasBackground: true,
   }, {
     name: '总工作项数',
     value: 'totalCount',
+    hasBackground: true,
   }], []);
 
   useEffect(() => {
@@ -120,11 +122,11 @@ const IssueList = ({ refresh, openEditIssue }: Props) => {
                 </span>
               </div>
               <div>
-                {map(detailOption, ({ name, value }) => (
+                {map(detailOption, ({ name, value, hasBackground = false }) => (
                   <div className={Style.detailOption}>
                     <span className={Style.label}>{name}</span>
                     {/* @ts-ignore */}
-                    <span>{item[value]}</span>
+                    <span className={hasBackground ? Style.value : ''}>{item[value]}</span>
                   </div>
                 ))}
               </div>
