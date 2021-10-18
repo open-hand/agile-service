@@ -6,7 +6,9 @@ import io.choerodon.agile.app.service.WorkHoursService;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -34,6 +36,7 @@ public class WorkHoursOrgController {
     @PostMapping(value = "/work_hours_log")
     public ResponseEntity<Page<WorkHoursLogVO>> pageWorkHoursLogByOrgId(@ApiParam(value = "组织id", required = true)
                                                                              @PathVariable(name = "organization_id") Long organizationId,
+                                                                             @SortDefault(value = "creationDate", direction = Sort.Direction.DESC)
                                                                              PageRequest pageRequest,
                                                                              @RequestBody WorkHoursSearchVO workHoursSearchVO) {
         return Optional.ofNullable(workHoursService.pageWorkHoursLogByOrgId(organizationId, pageRequest, workHoursSearchVO))

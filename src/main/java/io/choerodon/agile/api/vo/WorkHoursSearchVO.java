@@ -16,7 +16,7 @@ public class WorkHoursSearchVO {
     private Date endTime;
 
     @Encrypt
-    private Long userId;
+    private List<Long> userIds;
 
     private List<Long> projectIds;
 
@@ -36,12 +36,12 @@ public class WorkHoursSearchVO {
         this.endTime = endTime;
     }
 
-    public Long getUserId() {
-        return userId;
+    public List<Long> getUserIds() {
+        return userIds;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUserIds(List<Long> userIds) {
+        this.userIds = userIds;
     }
 
     public List<Long> getProjectIds() {
