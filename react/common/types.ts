@@ -14,6 +14,7 @@ export interface User {
   loginName: string
   realName: string
   name?: string
+  textShow?: string
 }
 
 export interface ISprint {

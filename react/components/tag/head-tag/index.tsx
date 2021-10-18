@@ -16,6 +16,7 @@ export interface HeadTagProps extends React.HTMLAttributes<HTMLDivElement>{
   size?: number
   className?: string
   style?: React.CSSProperties
+  textShow?: string
 }
 const HeadTag: React.FC<HeadTagProps> = ({
   size,
