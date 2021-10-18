@@ -38,8 +38,8 @@ const LogSearchDataSet = ({ logDs, currentProject }: { logDs: DataSet, currentPr
   autoQuery: false,
   fields: [{
     name: 'projectIds',
-    textField: 'projName',
-    valueField: 'projectId',
+    textField: 'name',
+    valueField: 'id',
   }, {
     name: 'dateRange',
     range: true,

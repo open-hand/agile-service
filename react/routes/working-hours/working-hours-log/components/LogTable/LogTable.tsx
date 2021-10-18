@@ -33,20 +33,28 @@ const LogTable = () => {
 
   const renderIssue = useCallback(({ record }) => (
     <Tooltip title={`${record.get('issueNum')} ${record?.get('summary')}`}>
-      <div>
+      <div className={styles.issue}>
         <TypeTag data={record?.get('issueTypeVO')} />
-        <span className={styles.issue} role="none" onClick={() => {}}>
-          {`${record.get('issueNum')} ${record?.get('summary')}`}
+        <span
+          role="none"
+          onClick={() => {}}
+          style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+        >
+          {`${record.get('issueNum')}`}
+          <span className={styles.summary}>{record?.get('summary')}</span>
         </span>
       </div>
     </Tooltip>
   ), []);
+
+  const renderProject = useCallback(({ record }) => record.get('projectVO')?.name, []);
 
   const renderStatus = useCallback(({ record }) => (
     <Tooltip title={record.get('statusVO').name}>
       <div style={{
         display: 'inline-flex',
         overflow: 'hidden',
+        maxWidth: 100,
       }}
       >
         <StatusTag
@@ -59,16 +67,16 @@ const LogTable = () => {
 
   return (
     <Table dataSet={logDs} queryBar={'none' as TableQueryBarType}>
-      <Column name="user" sortable renderer={renderMember} width={140} />
-      <Column name="workTime" sortable renderer={renderWorkTime} align={'left' as ColumnAlign} width={110} />
+      <Column name="userId" sortable renderer={renderMember} width={150} />
+      <Column name="workTime" sortable renderer={renderWorkTime} align={'left' as ColumnAlign} width={120} />
       <Column name="startDate" sortable tooltip={'overflow' as TableColumnTooltip} width={150} />
-      <Column name="issue" sortable renderer={renderIssue} />
+      <Column name="issueId" sortable renderer={renderIssue} />
       {
       getIsOrganization() && (
-        <Column name="projectVO.name" sortable tooltip={'overflow' as TableColumnTooltip} />
+        <Column name="projectId" sortable tooltip={'overflow' as TableColumnTooltip} renderer={renderProject} />
       )
     }
-      <Column name="statusVO" sortable renderer={renderStatus} width={100} />
+      <Column name="statusId" sortable renderer={renderStatus} width={120} />
     </Table>
   );
 };

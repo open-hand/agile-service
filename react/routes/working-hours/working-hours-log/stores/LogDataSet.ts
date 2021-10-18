@@ -14,12 +14,12 @@ const LogDataSet = (): DataSetProps => ({
     },
   },
   fields: [
-    { name: 'user', type: 'string' as FieldType, label: '成员' },
+    { name: 'userId', type: 'string' as FieldType, label: '成员' },
     { name: 'workTime', type: 'number' as FieldType, label: '耗费时间' },
     { name: 'startDate', type: 'string' as FieldType, label: '工作日期' },
-    { name: 'issue', type: 'string' as FieldType, label: '工作项' },
-    { name: 'projectVO.name', type: 'string' as FieldType, label: '所属项目' },
-    { name: 'statusVO', type: 'object' as FieldType, label: '状态' },
+    { name: 'issueId', type: 'string' as FieldType, label: '工作项' },
+    { name: 'projectId', type: 'string' as FieldType, label: '所属项目' },
+    { name: 'statusId', type: 'object' as FieldType, label: '状态' },
   ],
 });
 

@@ -5,7 +5,7 @@ import styles from './LogSearch.less';
 import { useLogStore } from '../../stores';
 import SelectUser from '@/components/select/select-user';
 import { getIsOrganization } from '@/utils/common';
-import SelectTeam from '@/components/select/select-team';
+import SelectProject from '@/components/select/select-project';
 
 const LogSearch = () => {
   const {
@@ -16,7 +16,14 @@ const LogSearch = () => {
     <div className={styles.logSearch}>
       {
         getIsOrganization() && (
-          <SelectTeam placeholder="所属项目" name="projectIds" dataSet={logSearchDs} />
+          <SelectProject
+            placeholder="所属项目"
+            name="projectIds"
+            dataSet={logSearchDs}
+            multiple
+            maxTagCount={2}
+            maxTagTextLength={5}
+          />
         )
       }
       <DatePicker
@@ -27,6 +34,7 @@ const LogSearch = () => {
           width: 260,
           marginLeft: 10,
         }}
+        clearButton={false}
       />
       <SelectUser
         dataSet={logSearchDs}
@@ -37,6 +45,7 @@ const LogSearch = () => {
         style={{
           marginLeft: 10,
         }}
+        clearButton
       />
     </div>
   );
