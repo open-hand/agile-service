@@ -3,12 +3,13 @@ import React, {
 } from 'react';
 import { Tooltip, Icon } from 'choerodon-ui/pro';
 import {
-  find, findIndex, merge, noop,
+  find, findIndex, get, merge, noop,
 } from 'lodash';
 import dayjs from 'dayjs';
 import classNames from 'classnames';
 import { GanttProps, Gantt } from '@choerodon/gantt';
 import '@choerodon/gantt/dist/gantt.cjs.production.min.css';
+import { AnyMap } from 'immer/dist/internal';
 import {
   ListLayoutColumnVO,
 } from '@/api';
@@ -21,8 +22,9 @@ import GanttSortLabel, { IGanttSortLabelProps } from '../components/gantt-sort-l
 import QuickCreateSubIssue from '@/components/QuickCreateSubIssue';
 import { TableCacheRenderProps } from '@/components/table-cache';
 import useIssueTableFields from '@/hooks/data/useIssueTableFields';
-import { getCustomColumn, systemColumnsMap } from '@/components/issue-table/baseColumns';
+import { getCustomColumn, systemColumnsMap, BaseSystemColumnRender } from '@/components/issue-table/baseColumns';
 import type { GanttIssue } from '../types';
+import UserTag from '@/components/tag/user-tag';
 
 interface IGanttColumnsHookProps extends TableCacheRenderProps {
   onSortChange: IGanttSortLabelProps['onChange']
@@ -194,6 +196,13 @@ const getTableColumns = (visibleColumns: ListLayoutColumnVO[], tableFields: IFou
     },
   },
   ];
+  const fieldMapRender = {
+    label: BaseSystemColumnRender.renderTag('labels', 'labelName'),
+    component: BaseSystemColumnRender.renderTag('components', 'name'),
+    fixVersion: BaseSystemColumnRender.renderTag('fixVersion', 'name'),
+    influenceVersion: BaseSystemColumnRender.renderTag('influenceVersion', 'name'),
+    // assignee: (rowData: AnyMap) => <UserTag data={get(rowData, 'assignee')} />,
+  };
   tableColumns.push(...visibleColumns.map(({ columnCode }) => {
     const baseColumn = { width: 100 } as any;
     if (ganttColumnMap.has(columnCode)) {
@@ -205,6 +214,7 @@ const getTableColumns = (visibleColumns: ListLayoutColumnVO[], tableFields: IFou
         ...column,
         label: column?.title,
         name: column?.dataIndex,
+        render: fieldMapRender[columnCode as keyof typeof fieldMapRender] ?? column?.render,
       });
     } else {
       const field = find(tableFields, { code: columnCode });

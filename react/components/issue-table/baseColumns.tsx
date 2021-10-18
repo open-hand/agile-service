@@ -12,24 +12,24 @@ import { IFoundationHeader } from '@/common/types';
 
 type IIssueTableBaseColumnRenderGetData<T> = (data: T, nameKey: string) => any
 interface IIssueTableBaseColumn<D extends object = any> {
-    /** 标题 */
-    title: React.ReactElement
-    // originTitle: string
-    dataIndex: string
-    // name: string
-    width?: number
-    className?: string
-    fixed?: boolean
-    /** 能否排序 */
-    sortable?: boolean
-    render?: (data: D, getDataMethod?: IIssueTableBaseColumnRenderGetData<D>) => React.ReactElement
+  /** 标题 */
+  title: React.ReactElement
+  // originTitle: string
+  dataIndex: string
+  // name: string
+  width?: number
+  className?: string
+  fixed?: boolean
+  /** 能否排序 */
+  sortable?: boolean
+  render?: (data: D, getDataMethod?: IIssueTableBaseColumnRenderGetData<D>) => React.ReactElement
 }
 /**
  * 获取自定义列配置
  * @param field
  * @returns
  */
-function getCustomColumn(field:IFoundationHeader):IIssueTableBaseColumn {
+function getCustomColumn(field: IFoundationHeader): IIssueTableBaseColumn {
   return {
     title: <Tooltip title={field.title}>{field.title}</Tooltip>,
     dataIndex: `foundation.${field.code}`,
@@ -39,11 +39,11 @@ function getCustomColumn(field:IFoundationHeader):IIssueTableBaseColumn {
       const value = get(getDataMethod(rowData, 'foundationFieldValue') || {}, code);
       if (['member', 'multiMember'].includes(fieldType)) {
         return value && (
-        <div style={{ display: 'inline-flex', verticalAlign: 'middle', height: 40 }}>
-          <UserTag
-            data={value}
-          />
-        </div>
+          <div style={{ display: 'inline-flex', verticalAlign: 'middle', height: 40 }}>
+            <UserTag
+              data={value}
+            />
+          </div>
         );
       }
       return (
@@ -155,15 +155,15 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     render: (rowData, getDataMethod = get) => (
       <div style={{ display: 'inline-flex', height: 40 }}>
         {getDataMethod(rowData, 'assigneeId') && getDataMethod(rowData, 'assigneeId') !== '0' && (
-        <UserTag
-          data={{
-            id: getDataMethod(rowData, 'assigneeId'),
-            tooltip: getDataMethod(rowData, 'assigneeName'),
-            loginName: getDataMethod(rowData, 'assigneeLoginName'),
-            realName: getDataMethod(rowData, 'assigneeRealName'),
-            imageUrl: getDataMethod(rowData, 'assigneeImageUrl'),
-          }}
-        />
+          <UserTag
+            data={{
+              id: getDataMethod(rowData, 'assigneeId'),
+              tooltip: getDataMethod(rowData, 'assigneeName'),
+              loginName: getDataMethod(rowData, 'assigneeLoginName'),
+              realName: getDataMethod(rowData, 'assigneeRealName'),
+              imageUrl: getDataMethod(rowData, 'assigneeImageUrl'),
+            }}
+          />
         )}
       </div>
     ),
@@ -174,9 +174,9 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     render: (rowData, getDataMethod = get) => (
       <div style={{ display: 'inline-flex', height: 40 }}>
         {getDataMethod(rowData, 'createUser') && (
-        <UserTag
-          data={getDataMethod(rowData, 'createUser')}
-        />
+          <UserTag
+            data={getDataMethod(rowData, 'createUser')}
+          />
         )}
       </div>
     ),
@@ -188,9 +188,9 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     render: (rowData, getDataMethod = get) => (
       <div style={{ display: 'inline-flex', height: 40 }}>
         {getDataMethod(rowData, 'updateUser') && (
-        <UserTag
-          data={getDataMethod(rowData, 'updateUser')}
-        />
+          <UserTag
+            data={getDataMethod(rowData, 'updateUser')}
+          />
         )}
       </div>
     ),
@@ -222,15 +222,15 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     render: (rowData, getDataMethod = get) => (
       <div style={{ display: 'inline-flex', height: 40 }}>
         {getDataMethod(rowData, 'reporterId') && getDataMethod(rowData, 'reporterId') !== '0' && (
-        <UserTag
-          data={{
-            id: getDataMethod(rowData, 'reporterId'),
-            tooltip: getDataMethod(rowData, 'reporterName'),
-            loginName: getDataMethod(rowData, 'reporterLoginName'),
-            realName: getDataMethod(rowData, 'reporterRealName'),
-            imageUrl: getDataMethod(rowData, 'reporterImageUrl'),
-          }}
-        />
+          <UserTag
+            data={{
+              id: getDataMethod(rowData, 'reporterId'),
+              tooltip: getDataMethod(rowData, 'reporterName'),
+              loginName: getDataMethod(rowData, 'reporterLoginName'),
+              realName: getDataMethod(rowData, 'reporterRealName'),
+              imageUrl: getDataMethod(rowData, 'reporterImageUrl'),
+            }}
+          />
         )}
       </div>
     ),
@@ -315,7 +315,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   ['storyPoints', {
     title: <Tooltip title="故事点">故事点</Tooltip>,
     dataIndex: 'storyPoints',
-    render: ({ rowData, dataIndex }) => rowData[dataIndex] ?? '-',
+    render: (rowData, getDataMethod = get) => getDataMethod(rowData, 'storyPoints') ?? '-',
     sortable: true,
   }],
   ['feature', {
@@ -362,5 +362,8 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     render: (rowData, getDataMethod = get) => getDataMethod(rowData, 'participants') && <UserTag data={getDataMethod(rowData, 'participants')} />,
   }],
 ]);
-
-export { systemColumnsMap, getCustomColumn };
+const BaseSystemColumnRender = {
+  renderTag,
+  renderEpicOrFeature,
+};
+export { systemColumnsMap, getCustomColumn, BaseSystemColumnRender };
