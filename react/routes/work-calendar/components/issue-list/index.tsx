@@ -31,6 +31,10 @@ const IssueList = ({ refresh, openEditIssue }: Props) => {
   }], []);
 
   useEffect(() => {
+    loadList();
+  }, []);
+
+  const loadList = useCallback(() => {
     mainStore.loadIssueList();
   }, [mainStore]);
 
@@ -65,12 +69,19 @@ const IssueList = ({ refresh, openEditIssue }: Props) => {
     return expandMap.get(issueId);
   }, [mainStore]);
 
+  const handleSearch = useCallback((value) => {
+    mainStore.setSearchParams(value);
+    loadList();
+  }, [mainStore, loadList]);
+
   return (
     <>
       <TextField
         placeholder="请输入搜索内容"
         prefix={<Icon type="search" />}
         className={Style.search}
+        clearButton
+        onChange={handleSearch}
       />
       {map(mainStore.getIssueList, (item: IssueItem) => (
         <div
