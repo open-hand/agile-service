@@ -38,8 +38,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -64,7 +62,6 @@ public class WorkCalendarSubscribeServiceImpl implements WorkCalendarSubscribeSe
     private static final String CALENDAR_CONTENT_TYPE = "text/calendar";
     private static final String ASSIGNEE = "assignee";
     private static final String PARTICIPANT = "participant";
-    private static final String MALFORMED_EXCEPTION_CODE = "error.malformed.url";
 
     @Autowired
     private WorkCalendarSubscribeMapper workCalendarSubscribeMapper;
@@ -125,23 +122,20 @@ public class WorkCalendarSubscribeServiceImpl implements WorkCalendarSubscribeSe
     }
 
     private String create(Long organizationId, Long userId, String url) {
-        WorkCalendarSubscribeDTO dto = new WorkCalendarSubscribeDTO(organizationId, userId, dealUrl(url), getUuid());
+        WorkCalendarSubscribeDTO dto = new WorkCalendarSubscribeDTO(organizationId, userId, getRelativeUrl(url), getUuid());
         if (workCalendarSubscribeMapper.insertSelective(dto) != 1) {
             throw new CommonException("error.workCalendarSubscribe.insert");
         }
         return dto.getUuid();
     }
 
-    private String dealUrl(String url) {
+    private String getRelativeUrl(String url) {
         // 获取相对路径
-        String dealUrl;
-        try {
-            URL netUrl = new URL(url);
-            dealUrl = netUrl.getFile().substring(BUCKET_NAME.length() + 2);
-        } catch (MalformedURLException e) {
-            throw new CommonException(MALFORMED_EXCEPTION_CODE, e);
+        String relativeUrl = url.substring(url.indexOf(BUCKET_NAME) + BUCKET_NAME.length() + 1);
+        if (relativeUrl.length() < 1) {
+            throw new CommonException("error.illegal.url");
         }
-        return dealUrl;
+        return relativeUrl;
     }
 
     private String getUuid() {

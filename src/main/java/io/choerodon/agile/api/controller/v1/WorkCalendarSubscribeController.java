@@ -32,7 +32,7 @@ public class WorkCalendarSubscribeController {
 
     @Permission(permissionPublic = true)
     @ApiOperation(value = "获取文件")
-    @GetMapping("/uuid/{uuid}")
+    @GetMapping("/{uuid}")
     public ResponseEntity<byte[]> downloadFile(@ApiParam(value = "组织ID", required = true)
                                                @PathVariable("organization_id") Long organizationId,
                                                @ApiParam(value = "uuid", required = true)
