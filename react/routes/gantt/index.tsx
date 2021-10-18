@@ -62,6 +62,7 @@ import {
 import GanttDragWrapper from './components/gantt-drag-wrapper';
 import useQuickCreateIssue from './hooks/useQuickCreateIssue';
 import { GanttIssue } from './types';
+import { getProjectId } from '@/utils/common';
 
 const { Option } = FlatSelect;
 
@@ -238,7 +239,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
   const onRow: GanttProps<GanttIssue>['onRow'] = useMemo(() => ({
     onClick: (issue) => {
       store.setIssueId(issue.issueId);
-      store.setProgramId(issue.programId && (String(issue.programId) !== String(issue.projectId)) ? String(issue.programId) : null);
+      store.setProgramId(issue.programId && (String(issue.programId) !== String(getProjectId())) ? String(issue.programId) : null);
     },
   }), [store]);
   const getExpandIcon = useCallback(({ level, collapsed, onClick }) => (
