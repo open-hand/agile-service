@@ -39,6 +39,7 @@ public class IssueValidator {
     private static final String ERROR_PARENT_ISSUE_ISTEST = "error.parentIssue.isTest";
     private static final String ERROR_PARENT_ISSUE_NOT_EXIST = "error.parentIssue.get";
     private static final String ERROR_ISSUE_RULE_TYPE_CODE= "error.IssueRule.typeCode";
+    private static final String ERROR_ISSUE_TYPE_ID_IS_NULL= "error.issueTypeId.isNull";
     private static final String ISSUE_ID = "issueId";
     private static final String COLOR = "color";
     private static final String EPIC_NAME = "epicName";
@@ -127,11 +128,11 @@ public class IssueValidator {
         if (issueCreateVO.getEpicName() != null && !ISSUE_EPIC.equals(issueCreateVO.getTypeCode())) {
             throw new CommonException("error.IssueRule.EpicName");
         }
-        if (issueCreateVO.getPriorityId() == null) {
+        if (issueCreateVO.getPriorityId() == null || Objects.equals(0L, issueCreateVO.getPriorityId())) {
             throw new CommonException("error.priorityId.isNull");
         }
-        if (issueCreateVO.getIssueTypeId() == null) {
-            throw new CommonException("error.issueTypeId.isNull");
+        if (issueCreateVO.getIssueTypeId() == null || Objects.equals(0L, issueCreateVO.getIssueTypeId())) {
+            throw new CommonException(ERROR_ISSUE_TYPE_ID_IS_NULL);
         }
         if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
             throw new CommonException("error.applyType.illegal");
@@ -188,11 +189,11 @@ public class IssueValidator {
             throw new CommonException("error.issue.rank.null");
         }
 
-        if (issueUpdate.containsKey(PRIORITY_ID) && ObjectUtils.isEmpty(issueUpdate.get(PRIORITY_ID))) {
+        if (issueUpdate.containsKey(PRIORITY_ID) && (ObjectUtils.isEmpty(issueUpdate.get(PRIORITY_ID)) || Objects.equals(0L, issueUpdate.get(PRIORITY_ID)))) {
             throw new CommonException("error.issue.priorityId.null");
         }
 
-        if (issueUpdate.containsKey(STATUS_ID_FIELD) && ObjectUtils.isEmpty(issueUpdate.get(PRIORITY_ID))) {
+        if (issueUpdate.containsKey(STATUS_ID_FIELD) && (ObjectUtils.isEmpty(issueUpdate.get(STATUS_ID_FIELD)) || Objects.equals(0L, issueUpdate.get(STATUS_ID_FIELD)))) {
             throw new CommonException("error.issue.statusId.null");
         }
 
@@ -215,11 +216,11 @@ public class IssueValidator {
         if (issueSubCreateVO.getProjectId() == null) {
             throw new CommonException("error.IssueRule.ProjectId");
         }
-        if (issueSubCreateVO.getPriorityId() == null) {
+        if (issueSubCreateVO.getPriorityId() == null || Objects.equals(0L, issueSubCreateVO.getPriorityId())) {
             throw new CommonException("error.priorityId.isNull");
         }
-        if (issueSubCreateVO.getIssueTypeId() == null) {
-            throw new CommonException("error.issueTypeId.isNull");
+        if (issueSubCreateVO.getIssueTypeId() == null || Objects.equals(0L, issueSubCreateVO.getIssueTypeId())) {
+            throw new CommonException(ERROR_ISSUE_TYPE_ID_IS_NULL);
         }
         if (issueSubCreateVO.getParentIssueId() == null) {
             throw new CommonException("error.IssueRule.ParentIssueId");
@@ -275,8 +276,8 @@ public class IssueValidator {
         if (issueUpdateTypeVO.getIssueId() == null) {
             throw new CommonException(ERROR_ISSUE_ID_NOT_FOUND);
         }
-        if (issueUpdateTypeVO.getIssueTypeId() == null) {
-            throw new CommonException("error.issuetypeId.isNull");
+        if (issueUpdateTypeVO.getIssueTypeId() == null || Objects.equals(0L, issueUpdateTypeVO.getIssueTypeId())) {
+            throw new CommonException(ERROR_ISSUE_TYPE_ID_IS_NULL);
         }
         if (issueUpdateTypeVO.getTypeCode() == null) {
             throw new CommonException(ERROR_ISSUE_RULE_TYPE_CODE);
@@ -331,8 +332,8 @@ public class IssueValidator {
         if (issueTransformTask.getIssueId() == null) {
             throw new CommonException(ERROR_ISSUE_ID_NOT_FOUND);
         }
-        if (issueTransformTask.getIssueTypeId() == null) {
-            throw new CommonException("error.issuetypeId.isNull");
+        if (issueTransformTask.getIssueTypeId() == null || Objects.equals(0L, issueTransformTask.getIssueTypeId())) {
+            throw new CommonException(ERROR_ISSUE_TYPE_ID_IS_NULL);
         }
         if (issueTransformTask.getTypeCode() == null) {
             throw new CommonException(ERROR_ISSUE_RULE_TYPE_CODE);
