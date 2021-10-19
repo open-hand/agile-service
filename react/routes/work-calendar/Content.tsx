@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { map } from 'lodash';
 import {
@@ -12,6 +12,7 @@ import { formatIssueData } from '@/routes/work-calendar/utils';
 import { useWorkCalendarStore } from '@/routes/work-calendar/stores';
 import CalendarContent from '@/routes/work-calendar/components/calendar';
 import IssueList from '@/routes/work-calendar/components/issue-list';
+import openSubscribeModal from '@/routes/work-calendar/components/subscribe';
 import SelectProject from '@/components/select/select-project';
 import DetailContainer, { useDetail } from '@/components/detail-container';
 import { CreateProps, ViewTypeCode } from '@/routes/work-calendar/types';
@@ -96,6 +97,7 @@ const WorkCalendar = observer(() => {
             display: true,
             name: '订阅到本地',
             icon: 'API_subscription',
+            handler: openSubscribeModal,
           }, {
             display: true,
             element: (

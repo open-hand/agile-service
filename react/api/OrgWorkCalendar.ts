@@ -3,7 +3,7 @@ import Api from './Api';
 
 class OrgWorkCalendarApi extends Api<OrgWorkCalendarApi> {
   get prefix() {
-    return `/agile/v1/organizations/${getOrganizationId()}/work_calender`;
+    return `/agile/v1/organizations/${getOrganizationId()}/work_calendar`;
   }
 
   /**
@@ -27,6 +27,17 @@ class OrgWorkCalendarApi extends Api<OrgWorkCalendarApi> {
       method: 'post',
       url: `${this.prefix}/query_parent_issue`,
       data,
+    });
+  }
+
+  /**
+   * 工作日历中获取订阅文件的uuid
+   * @return uuid
+   */
+  loadSubscribeUuid() {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}_subscribe`,
     });
   }
 }
