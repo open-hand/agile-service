@@ -27,7 +27,7 @@ public class WorkCalenderController {
     @Autowired
     private WorkCalenderService workCalenderService;
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("查询组织下活跃冲刺中我经办的issue")
     @PostMapping(value = "/query_parent_issue")
     public ResponseEntity<List<WorkItemVO>> queryAssigneeParentIssueList(@ApiParam(value = "项目id", required = true)
@@ -38,7 +38,7 @@ public class WorkCalenderController {
                 .orElseThrow(() -> new CommonException("error.workCalendar.get"));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("查询组织下我经办的issue")
     @PostMapping(value = "/query_assignee_issue")
     public ResponseEntity<List<WorkItemVO>> queryAssigneeIssueList(@ApiParam(value = "项目id", required = true)
