@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author superlee
@@ -127,6 +128,16 @@ public class GanttChartVO {
     private List<UserMessageDTO> participants;
 
     private ProjectVO project;
+
+    private Set<Long> subProjectIds;
+
+    public Set<Long> getSubProjectIds() {
+        return subProjectIds;
+    }
+
+    public void setSubProjectIds(Set<Long> subProjectIds) {
+        this.subProjectIds = subProjectIds;
+    }
 
     public ProjectVO getProject() {
         return project;

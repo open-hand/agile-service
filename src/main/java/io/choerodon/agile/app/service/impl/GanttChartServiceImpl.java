@@ -919,7 +919,39 @@ public class GanttChartServiceImpl implements GanttChartService {
             handlerFieldValue(fieldCodes, fieldCodeValues, ganttChart, i, usersMap, envMap);
             setParentId(ganttChart, i);
         });
+        setSubProjectIds(result, issueEpicMap, issueFeatureMap);
         return result;
+    }
+
+    private void setSubProjectIds(List<GanttChartVO> result,
+                                  Map<Long, Long> issueEpicMap,
+                                  Map<Long, IssueDTO> issueFeatureMap) {
+        if (ObjectUtils.isEmpty(issueEpicMap)
+                && ObjectUtils.isEmpty(issueFeatureMap)) {
+            return;
+        }
+        Map<Long, GanttChartVO> ganttMap = result.stream().collect(Collectors.toMap(GanttChartVO::getIssueId, Function.identity()));
+        issueEpicMap.forEach((issueId, epicId) -> addParentSubProjectIds(ganttMap, issueId, epicId));
+        issueFeatureMap.forEach((issueId, feature) -> {
+            Long featureId = feature.getIssueId();
+            addParentSubProjectIds(ganttMap, issueId, featureId);
+        });
+
+    }
+
+    private void addParentSubProjectIds(Map<Long, GanttChartVO> ganttMap, Long issueId, Long parentId) {
+        GanttChartVO issue = ganttMap.get(issueId);
+        GanttChartVO parentIssue = ganttMap.get(parentId);
+        if (ObjectUtils.isEmpty(issue) || ObjectUtils.isEmpty(parentIssue)) {
+            return;
+        }
+        Long subProjectId = issue.getProjectId();
+        Set<Long> subProjectIds = parentIssue.getSubProjectIds();
+        if (subProjectIds == null) {
+            subProjectIds = new HashSet<>();
+            parentIssue.setSubProjectIds(subProjectIds);
+        }
+        subProjectIds.add(subProjectId);
     }
 
     private void setGanttChartEpicOrFeatureInfo(Set<Long> epicIds,

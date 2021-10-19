@@ -1117,6 +1117,13 @@
                     #{issueTypeId}
                 </foreach>
             </if>
+            <if test='searchVO.advancedSearchArgs.typeCodes != null and searchVO.advancedSearchArgs.typeCodes.size > 0'>
+                AND ai.type_code IN
+                <foreach collection="searchVO.advancedSearchArgs.typeCodes" item="typeCode" open="(" separator=","
+                         close=")">
+                    #{typeCode}
+                </foreach>
+            </if>
             <if test='searchVO.advancedSearchArgs.assigneeIds != null and searchVO.advancedSearchArgs.assigneeIds.size > 0'>
                 AND ai.assignee_id IN
                 <foreach collection="searchVO.advancedSearchArgs.assigneeIds" item="assigneeId" open="(" separator=","
