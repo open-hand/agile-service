@@ -8,10 +8,7 @@ const LogDataSet = (): DataSetProps => ({
   paging: true,
   selection: false,
   transport: {
-    read: ({ params, data }) => {
-      console.log(params, data);
-      return getIsOrganization() ? workingHoursApiConfig.orgGetLogs(params, data) : workingHoursApiConfig.getLogs(params, data);
-    },
+    read: ({ params, data }) => (getIsOrganization() ? workingHoursApiConfig.orgGetLogs(params, data) : workingHoursApiConfig.getLogs(params, data)),
   },
   fields: [
     { name: 'userId', type: 'string' as FieldType, label: '成员' },

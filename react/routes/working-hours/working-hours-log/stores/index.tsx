@@ -7,8 +7,9 @@ import { observer } from 'mobx-react-lite';
 import moment from 'moment';
 import LogDataSet from './LogDataSet';
 import { AppStateProps } from '@/common/types';
-import LogSearchDataSet from './LogSearchDataSet';
+import LogSearchDataSet, { formatEndDate, formatStartDate } from './LogSearchDataSet';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
+import { getIsOrganization } from '@/utils/common';
 
 const Store = createContext({} as Context);
 
@@ -29,12 +30,15 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
   const logSearchDs = useMemo(() => new DataSet(LogSearchDataSet({ logDs, currentProject: AppState.getCurrentProject })), [AppState.getCurrentProject, logDs]);
 
   const loadData = useCallback(() => {
-    logDs.setQueryParameter('startTime', localPageCacheStore.getItem('workingHours-log-startTime') || `${moment().subtract(31, 'days').format('YYYY-MM-DD HH:mm:ss')}`);
-    logDs.setQueryParameter('endTime', localPageCacheStore.getItem('workingHours-log-endTime') || `${moment().format('YYYY-MM-DD HH:mm:ss')}`);
+    // eslint-disable-next-line no-nested-ternary
+    logDs.setQueryParameter('startTime', localPageCacheStore.getItem('workingHours-log-startTime') || `${formatStartDate(getIsOrganization() ? moment().subtract(7, 'days') : (
+      moment().subtract(7, 'days').isBefore(moment(AppState.getCurrentProject?.creationDate)) ? moment(AppState.getCurrentProject?.creationDate) : moment().subtract(7, 'days')
+    ), true)}`);
+    logDs.setQueryParameter('endTime', localPageCacheStore.getItem('workingHours-log-endTime') || `${formatEndDate(moment(), true)}`);
     logDs.setQueryParameter('userIds', localPageCacheStore.getItem('workingHours-log-userIds'));
     logDs.setQueryParameter('projectIds', localPageCacheStore.getItem('workingHours-log-projectIds'));
     logDs.query();
-  }, [logDs]);
+  }, [AppState.getCurrentProject?.creationDate, logDs]);
 
   useEffect(() => {
     loadData();
