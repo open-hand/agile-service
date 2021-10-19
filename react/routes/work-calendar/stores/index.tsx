@@ -14,6 +14,13 @@ export const STATUS_COLOR: StatusProps = {
   done: '#d8f0ec',
 };
 
+export const STATUS: StatusProps = {
+  todo: '#F7C552',
+  prepare: '#F7C552',
+  doing: '#74A9FF',
+  done: '#2FD2BC',
+};
+
 interface UserItemProps {
   name: string,
   value: UserValueCode,

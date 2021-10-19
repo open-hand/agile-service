@@ -12,14 +12,13 @@ import { observer } from 'mobx-react-lite';
 import { usePersistFn } from 'ahooks';
 import { xorBy, concat } from 'lodash';
 import moment from 'moment';
-import { useWorkCalendarStore, STATUS_COLOR } from '@/routes/work-calendar/stores';
+import { useWorkCalendarStore, STATUS_COLOR, STATUS } from '@/routes/work-calendar/stores';
 import { formatDate } from '@/routes/work-calendar/utils';
 import { issueApi } from '@/api';
 import CalendarToolbar from '@/routes/work-calendar/components/calendar-toolbar';
 import Style from './index.less';
 import UserTag from '@/components/tag/user-tag';
 import { CreateProps } from '@/routes/work-calendar/types';
-import STATUS from '@/constants/STATUS';
 import { IStatus } from '@/common/types';
 
 const TIME_LABEL = ['凌晨0点', '凌晨1点', '凌晨2点', '凌晨3点', '凌晨4点', '早上5点', '早上6点', '早上7点', '早上8点', '上午9点', '上午10点', '上午11点', '中午12点', '下午1点', '下午2点', '下午3点', '下午4点', '下午5点', '晚上6点', '晚上7点', '晚上8点', '晚上9点', '晚上10点', '晚上11点', '晚上12点'];
@@ -105,8 +104,14 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
       <div
         className={`${Style.weekIssue}`}
         // 由于跨天的issue是分成两个div,因此没法使用css的hover来设置颜色
-        onMouseEnter={() => event.setProp('backgroundColor', STATUS[statusCode])}
-        onMouseLeave={() => event.setProp('backgroundColor', STATUS_COLOR[statusCode])}
+        onMouseEnter={() => {
+          event.setProp('backgroundColor', STATUS[statusCode]);
+          event.setProp('textColor', '#fff');
+        }}
+        onMouseLeave={() => {
+          event.setProp('backgroundColor', STATUS_COLOR[statusCode]);
+          event.setProp('textColor', 'var(--text-color)');
+        }}
       >
         <div className={Style.timeIssueTimeWrap}>
           <div className={Style.issueStartTime}>{timeSpan}</div>
@@ -181,8 +186,7 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
           eventMinHeight={30}
           slotLabelContent={renderSlotLabelContent}
           dayHeaderContent={renderDayHeaderContent}
-          // 每周第一天：Sunday=0, Monday=1, Tuesday=2, etc.
-          firstDay={1}
+          firstDay={1} // 每周第一天：Sunday=0, Monday=1, Tuesday=2, etc.
           locale="zh-cn"
           initialView="timeGridWeek"
           editable
@@ -191,10 +195,11 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
           dayMaxEvents
           showNonCurrentDates={false}
           events={loadIssuesData} // use the `events` setting to fetch from a feed
-          select={handleDateSelect}
-          eventContent={renderEventContent} // custom render function
+          select={handleDateSelect} // 日历上时间选择后事件
+          eventContent={renderEventContent} // 自定义日程渲染
           eventClick={openEditIssue}
-          eventChange={handleEventChange}
+          eventDrop={handleEventChange} // issue拖拽后回调事件
+          eventResize={handleEventChange}
           eventTextColor="var(--text-color)"
           eventBackgroundColor="#FFE9B6"
           viewClassNames={Style.viewClass}
