@@ -3,8 +3,8 @@ import * as React from 'react';
 function SprintIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
-      width={27}
-      height={13}
+      width={34}
+      height={14}
       viewBox="0 0 27 13"
       xmlns="http://www.w3.org/2000/svg"
       {...props}

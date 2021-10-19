@@ -11,9 +11,13 @@ const { HeaderStore } = stores;
 interface Props {
   visible: boolean,
   setVisible: Function,
+  /** @default project */
+  menuType?: 'project' | 'org',
   issueSearchStore: IssueSearchStore,
 }
-const FilterManage: React.FC<Props> = ({ visible, setVisible, issueSearchStore }) => {
+const FilterManage: React.FC<Props> = ({
+  visible, menuType = 'project', setVisible, issueSearchStore,
+}) => {
   const { myFilters } = issueSearchStore;
   const announcementHeight = useGetAnnouncementHeight();
   if (!visible) {
@@ -41,6 +45,7 @@ const FilterManage: React.FC<Props> = ({ visible, setVisible, issueSearchStore }
               myFilters.map((filter) => (
                 <FilterItem
                   key={filter.filterId}
+                  menuType={menuType}
                   data={filter}
                   onSubmit={async () => {
                     await issueSearchStore.loadMyFilterList();

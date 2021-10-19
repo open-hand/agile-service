@@ -1,0 +1,29 @@
+.legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  width: min-content;
+  padding: .16rem .08rem .19rem .14rem;
+
+  .item {
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  .item +.item {
+    margin-top: .12rem;
+  }
+
+  .label {
+    color: var(--text-color);
+    font-size: 12px;
+    margin-left: .06rem;
+  }
+
+  .block {
+    width: .34rem;
+    height: .14rem;
+    border-radius: 2px;
+  }
+}
