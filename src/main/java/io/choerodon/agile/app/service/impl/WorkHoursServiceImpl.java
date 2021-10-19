@@ -49,6 +49,10 @@ public class WorkHoursServiceImpl implements WorkHoursService {
                                                              WorkHoursSearchVO workHoursSearchVO) {
         // 校验时间范围
         checkTimeRange(workHoursSearchVO);
+        //
+        Map<String, String> order = new HashMap<>();
+        order.put("issueNum", "issue_num_convert");
+        pageRequest.setSort(PageUtil.sortResetOrder(pageRequest.getSort(), null, order));
         Page<WorkHoursLogVO> page = PageHelper.doPageAndSort(pageRequest,
                 () -> workHoursMapper.listByProjectIds(projectIds, workHoursSearchVO));
         List<WorkHoursLogVO> workHoursLogVOS = page.getContent();

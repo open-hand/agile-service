@@ -8,6 +8,7 @@
         (
             select
                 ai.summary,
+                CONVERT(ai.issue_num,SIGNED) as issue_num_convert,
                 CONCAT(api.project_code,'-', ai.issue_num) as issue_num,
                 ai.status_id,
                 ai.issue_type_id,
