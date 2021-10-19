@@ -1,11 +1,17 @@
-import React, { createContext } from 'react';
-import type { IGanttDimensionTypeValue } from '.';
+import React, { createContext, useContext } from 'react';
+import type { IGanttDimensionTypeValue, IGanttPageProps } from './Gantt';
 import type GanttStore from './store';
 
 interface GanttContext {
   store: GanttStore
   searchFilter: any
-  dimensionType:IGanttDimensionTypeValue
+  menuType: IGanttPageProps['menuType']
+  disable: boolean
+  dimensionType: IGanttDimensionTypeValue
 }
 const context = createContext({} as GanttContext);
+function useGanttContext() {
+  return useContext(context);
+}
+export { useGanttContext };
 export default context;

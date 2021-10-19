@@ -61,7 +61,7 @@ const GanttGroupDragWrapper: React.FC<IGanttGroupDragWrapperProps> = ({
   children, renderClone, onDragEnd,
 }) => {
   const {
-    store,
+    store, menuType,
   } = useContext(Context);
   const [{ source: draggingBar, destination: draggingBarDestinationBar }, setDraggingBar] = useState<{ source?: Gantt.Bar, destination?: Gantt.Bar }>({} as any);
   const draggingBarDestinationBarRef = useRef<Gantt.Bar>();
@@ -176,7 +176,9 @@ const GanttGroupDragWrapper: React.FC<IGanttGroupDragWrapperProps> = ({
       return { source: oldValue.source, destination: newDestination };
     });
   }, [store.ganttRef]);
-
+  if (menuType === 'org') {
+    return children as React.ReactElement;
+  }
   return (
     <DragDropContext
       onBeforeCapture={handleDragStart}

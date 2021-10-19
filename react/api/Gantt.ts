@@ -1,6 +1,6 @@
 import { axios } from '@choerodon/boot';
 import queryString from 'query-string';
-import { getProjectId } from '@/utils/common';
+import { getProjectId, getOrganizationId } from '@/utils/common';
 
 type IGanttDimension = 'task' | 'assignee' | 'sprint' | 'epic';
 export type IGanttMoveRequestDataPreviousWithNext = {
@@ -20,6 +20,27 @@ export type IGanttMoveRequestData = {
 class GanttApi {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
+  }
+
+  get orgPrefix() {
+    return `/agile/v1/organizations/${getOrganizationId()}`;
+  }
+
+  async loadOrgByTask(data:any, page:number, sort?:any) {
+    const res = await axios({
+      method: 'post',
+      url: `${this.orgPrefix}/gantt/list`,
+      data,
+      paramsSerializer(params: any) {
+        return queryString.stringify(params);
+      },
+      params: {
+        size: 10,
+        page,
+        sort,
+      },
+    });
+    return res.list;
   }
 
   async loadByTask(data: any, sort?: any) {

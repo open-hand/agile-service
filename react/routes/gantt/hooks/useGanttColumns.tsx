@@ -25,11 +25,16 @@ import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 import { getCustomColumn, systemColumnsMap, BaseSystemColumnRender } from '@/components/issue-table/baseColumns';
 import type { GanttIssue } from '../types';
 import UserTag from '@/components/tag/user-tag';
+import { IGanttPageProps } from '../Gantt';
 
 interface IGanttColumnsHookProps extends TableCacheRenderProps {
+  menuType: IGanttPageProps['menuType']
   onSortChange: IGanttSortLabelProps['onChange']
   onCreateSubIssue?: (parentIssue: GanttIssue) => void
   onAfterCreateSubIssue?: (createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed?: boolean) => void
+}
+interface IGanttOrgColumnsHookProps extends TableCacheRenderProps {
+
 }
 const renderTooltip = (user: User) => {
   const {
@@ -112,7 +117,112 @@ function getListLayoutColumns(listLayoutColumns: ListLayoutColumnVO[] | null, fi
   }));
   return res;
 }
-const getTableColumns = (visibleColumns: ListLayoutColumnVO[], tableFields: IFoundationHeader[], onSortChange: IGanttColumnsHookProps['onSortChange'], openCreateSubIssue: IGanttColumnsHookProps['onCreateSubIssue'] = noop, onAfterCreateSubIssue: IGanttColumnsHookProps['onAfterCreateSubIssue'] = noop) => {
+interface TableColumnEvent {
+  onSortChange?: IGanttColumnsHookProps['onSortChange']
+  openCreateSubIssue?: IGanttColumnsHookProps['onCreateSubIssue']
+  onAfterCreateSubIssue?: IGanttColumnsHookProps['onAfterCreateSubIssue']
+}
+const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: boolean }>,
+  tableFields: IFoundationHeader[], events: TableColumnEvent = {}, disableOperate: boolean = false) => {
+  const {
+    onSortChange = noop,
+    openCreateSubIssue = noop, onAfterCreateSubIssue = noop,
+  } = events;
+  function renderSummary(record: Gantt.Record) {
+    if (record.create) {
+      const parentIssue: Gantt.Record<GanttIssue> & { groupType?: string, isInProgram?: boolean } = record.parent;
+
+      const onCreate = (issue: Issue) => onAfterCreateSubIssue(record.createId, { subIssue: issue, parentIssueId: parentIssue.issueId });
+      let typeCodes = ['sub_task', 'bug'];
+      const defaultValues = {} as any;
+      let priorityId: string | undefined = parentIssue.priorityVO?.id;
+      let parentIssueId: string | undefined = parentIssue.issueId;
+      if (parentIssue.groupType) {
+        parentIssueId = undefined;
+        priorityId = record.groupType === 'epic' ? priorityId : undefined;
+        typeCodes = ['story', 'bug', 'task'];
+      }
+      if (parentIssue.groupType && ['feature', 'epic'].includes(parentIssue.groupType)) {
+        defaultValues.featureId = parentIssue.isInProgram ? parentIssue.issueId : undefined;
+        defaultValues.epicId = !parentIssue.isInProgram ? parentIssue.issueId : undefined;
+        typeCodes = ['story'];
+      }
+      return (
+        <span role="none" onClick={(e) => e.stopPropagation()} className="c7n-gantt-content-body-create">
+          <QuickCreateSubIssue
+            mountCreate
+            typeCode={typeCodes}
+            priorityId={priorityId}
+            parentIssueId={parentIssueId}
+            defaultValues={defaultValues}
+            sprintId={(parentIssue as any).sprint?.sprintId!}
+            cantCreateEvent={(res) => {
+              onAfterCreateSubIssue(record.createId, undefined, true);
+              // 这里延迟打开
+              setTimeout(() => {
+                openCreateIssue({
+                  ...merge(res, {
+                    parentIssue: !parentIssue.groupType ? parentIssue : undefined,
+                    defaultFeature: parentIssue.groupType === 'feature' ? parentIssue : undefined,
+                    defaultValues: {
+                      epicId: parentIssue.epicId,
+                    },
+                  }),
+
+                  onCreate,
+                });
+              }, 110);
+            }}
+            onCreate={onCreate}
+            defaultAssignee={parentIssue.assignee ?? undefined}
+            onAwayClick={(createFn) => {
+              createFn().then((res: boolean) => {
+                !res && onAfterCreateSubIssue(record.createId, undefined, true);
+              });
+            }}
+          />
+        </span>
+      );
+    }
+    const isCanCreateIssue = !disableOperate && isCanQuickCreateIssue(record);
+    return !record.group ? (
+      // eslint-disable-next-line no-underscore-dangle
+      <span style={{ cursor: 'pointer', color: 'var(--table-click-color)' }} className={classNames('c7n-gantt-content-body-summary')}>
+        <TypeTag iconSize={22} data={record.issueTypeVO} featureType={record.featureType} style={{ marginRight: 5 }} />
+        <Tooltip title={record.summary}>
+          <span style={{ verticalAlign: 'middle', flex: 1 }} className="c7n-gantt-content-body-summary-text">{record.summary}</span>
+        </Tooltip>
+        {isCanCreateIssue && (
+          <Icon
+            type="add"
+            className="c7n-gantt-content-body-parent_create"
+            onClick={(e) => {
+              e.stopPropagation();
+
+              openCreateSubIssue(record as any);
+            }}
+          />
+        )}
+      </span>
+    ) : (
+      <Tooltip title={record.summary}>
+        <span style={{ color: 'var(--table-click-color)' }} className="c7n-gantt-content-body-summary">
+          <span style={{ verticalAlign: 'middle', flex: 1 }} className="c7n-gantt-content-body-summary-text">{record.summary}</span>
+          {isCanCreateIssue && (
+            <Icon
+              type="add"
+              className="c7n-gantt-content-body-parent_create"
+              onClick={(e) => {
+                e.stopPropagation();
+                openCreateSubIssue(record as any);
+              }}
+            />
+          )}
+        </span>
+
+      </Tooltip>
+    );
+  }
   const tableColumns: GanttProps<Issue>['columns'] = [{
     flex: 2,
     minWidth: 300,
@@ -121,101 +231,7 @@ const getTableColumns = (visibleColumns: ListLayoutColumnVO[], tableFields: IFou
     lock: 'left',
     name: 'summary',
     label: '名称',
-    render: (record) => {
-      if (record.create) {
-        const parentIssue: Gantt.Record<GanttIssue> & { groupType?: string, isInProgram?: boolean } = record.parent;
-
-        const onCreate = (issue: Issue) => onAfterCreateSubIssue(record.createId, { subIssue: issue, parentIssueId: parentIssue.issueId });
-        let typeCodes = ['sub_task', 'bug'];
-        const defaultValues = {} as any;
-        let priorityId: string | undefined = parentIssue.priorityVO?.id;
-        let parentIssueId: string | undefined = parentIssue.issueId;
-        if (parentIssue.groupType) {
-          parentIssueId = undefined;
-          priorityId = record.groupType === 'epic' ? priorityId : undefined;
-          typeCodes = ['story', 'bug', 'task'];
-        }
-        if (parentIssue.groupType && ['feature', 'epic'].includes(parentIssue.groupType)) {
-          defaultValues.featureId = parentIssue.isInProgram ? parentIssue.issueId : undefined;
-          defaultValues.epicId = !parentIssue.isInProgram ? parentIssue.issueId : undefined;
-          typeCodes = ['story'];
-        }
-        return (
-          <span role="none" onClick={(e) => e.stopPropagation()} className="c7n-gantt-content-body-create">
-            <QuickCreateSubIssue
-              mountCreate
-              typeCode={typeCodes}
-              priorityId={priorityId}
-              parentIssueId={parentIssueId}
-              defaultValues={defaultValues}
-              sprintId={(parentIssue as any).sprint?.sprintId!}
-              cantCreateEvent={(res) => {
-                onAfterCreateSubIssue(record.createId, undefined, true);
-                // 这里延迟打开
-                setTimeout(() => {
-                  openCreateIssue({
-                    ...merge(res, {
-                      parentIssue: !parentIssue.groupType ? parentIssue : undefined,
-                      defaultFeature: parentIssue.groupType === 'feature' ? parentIssue : undefined,
-                      defaultValues: {
-                        epicId: parentIssue.epicId,
-                      },
-                    }),
-
-                    onCreate,
-                  });
-                }, 110);
-              }}
-              onCreate={onCreate}
-              defaultAssignee={parentIssue.assignee ?? undefined}
-              onAwayClick={(createFn) => {
-                createFn().then((res: boolean) => {
-                  !res && onAfterCreateSubIssue(record.createId, undefined, true);
-                });
-              }}
-            />
-          </span>
-        );
-      }
-      const isCanCreateIssue = isCanQuickCreateIssue(record);
-      return !record.group ? (
-        // eslint-disable-next-line no-underscore-dangle
-        <span style={{ cursor: 'pointer', color: 'var(--table-click-color)' }} className={classNames('c7n-gantt-content-body-summary')}>
-          <TypeTag iconSize={22} data={record.issueTypeVO} featureType={record.featureType} style={{ marginRight: 5 }} />
-          <Tooltip title={record.summary}>
-            <span style={{ verticalAlign: 'middle', flex: 1 }} className="c7n-gantt-content-body-summary-text">{record.summary}</span>
-          </Tooltip>
-          {isCanCreateIssue && (
-            <Icon
-              type="add"
-              className="c7n-gantt-content-body-parent_create"
-              onClick={(e) => {
-                e.stopPropagation();
-
-                openCreateSubIssue(record as any);
-              }}
-            />
-          )}
-        </span>
-      ) : (
-        <Tooltip title={record.summary}>
-          <span style={{ color: 'var(--table-click-color)' }} className="c7n-gantt-content-body-summary">
-            <span style={{ verticalAlign: 'middle', flex: 1 }} className="c7n-gantt-content-body-summary-text">{record.summary}</span>
-            {isCanCreateIssue && (
-              <Icon
-                type="add"
-                className="c7n-gantt-content-body-parent_create"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openCreateSubIssue(record as any);
-                }}
-              />
-            )}
-          </span>
-
-        </Tooltip>
-      );
-    },
+    render: renderSummary,
   },
   ];
   const fieldMapRender = {
@@ -262,19 +278,15 @@ const defaultListLayoutColumns = defaultVisibleColumns.map((code) => ({
   columnCode: code,
   display: true,
 }));
-/**
- * 甘特图列配置获取hook
- * @param param0
- * @returns
- */
-function useGanttColumns({
+function useGanttProjectColumns({
   cached, onAfterCreateSubIssue, onCreateSubIssue, onSortChange,
 }: IGanttColumnsHookProps) {
   const { data: tableFields } = useIssueTableFields({ hiddenFieldCodes: ['epicSelfName', 'summary'] });
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
   const listLayoutColumns = useMemo(() => getListLayoutColumns(cached?.listLayoutColumns || defaultListLayoutColumns as any, tableFields || []), [cached?.listLayoutColumns, tableFields]);
   const visibleColumnCodes = useMemo(() => (listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode)), [listLayoutColumns]);
-  const tableWithSortedColumns = useMemo(() => getTableColumns(listLayoutColumns.filter((item) => item.display), tableFields || [], onSortChange, onCreateSubIssue, onAfterCreateSubIssue), [listLayoutColumns, onAfterCreateSubIssue, onCreateSubIssue, onSortChange, tableFields]);
+  const tableWithSortedColumns = useMemo(() => getTableColumns(listLayoutColumns.filter((item) => item.display)
+    .map((item) => ({ ...item, disable: true })), tableFields || [], { onSortChange, openCreateSubIssue: onCreateSubIssue, onAfterCreateSubIssue }), [listLayoutColumns, onAfterCreateSubIssue, onCreateSubIssue, onSortChange, tableFields]);
   return {
     columns,
     setColumns,
@@ -283,4 +295,35 @@ function useGanttColumns({
     listLayoutColumns,
   };
 }
+function useGanttOrgColumns({
+  cached,
+}: IGanttOrgColumnsHookProps) {
+  const tableFields: any[] = useMemo(() => [], []);
+  const [columns, setColumns] = useState<Gantt.Column[]>([]);
+  const listLayoutColumns = useMemo(() => getListLayoutColumns(cached?.listLayoutColumns || defaultListLayoutColumns as any, tableFields || []), [cached?.listLayoutColumns, tableFields]);
+  const visibleColumnCodes = useMemo(() => (listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode)), [listLayoutColumns]);
+  const tableWithSortedColumns = useMemo(() => getTableColumns(listLayoutColumns.filter((item) => item.display), tableFields || [], {}, true), [listLayoutColumns, tableFields]);
+  return {
+    columns,
+    setColumns,
+    visibleColumnCodes,
+    tableWithSortedColumns,
+    listLayoutColumns,
+  };
+}
+/**
+ * 甘特图列配置获取hook
+ * @param param0
+ * @returns
+ */
+function useGanttColumns(props: IGanttColumnsHookProps) {
+  if (props.menuType === 'project') {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useGanttProjectColumns(props);
+  }
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  return useGanttOrgColumns({ cached: props.cached, updateCache: props.updateCache });
+}
+
+export { useGanttOrgColumns };
 export default useGanttColumns;
