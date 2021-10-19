@@ -371,7 +371,7 @@ const CreateIssueBase = observer(({
       if (templateSummary.has(newIssueTypeId)) {
         prefix = templateSummary.get(newIssueTypeId);
       } else {
-        prefix = await fieldApi.getSummaryDefaultValue(newIssueTypeId);
+        prefix = await fieldApi.project(projectId).getSummaryDefaultValue(newIssueTypeId);
         templateSummary.set(newIssueTypeId, prefix);
       }
       currentTemplateSummary.current = prefix as string;

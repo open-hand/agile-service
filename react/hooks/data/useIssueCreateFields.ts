@@ -32,7 +32,7 @@ export default function useIssueCreateFields(config: IssueCreateFieldsConfig): [
     enabled: !!issueTypeId,
   }, {
     queryKey: pageCascadeRuleList,
-    queryFn: () => pageConfigApi.getCascadeRuleList(issueTypeId),
+    queryFn: () => pageConfigApi.project(projectId).getCascadeRuleList(issueTypeId),
     keepPreviousData: true, // ?
     enabled: !!issueTypeId,
   },
