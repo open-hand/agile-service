@@ -68,9 +68,9 @@ import { getProjectId } from '@/utils/common';
 
 const { Option } = FlatSelect;
 export interface IGanttPageProps extends TableCacheRenderProps {
-    isInProgram: boolean
-    /** 组织层禁止编辑 */
-    menuType: 'project' | 'org'
+  isInProgram: boolean
+  /** 组织层禁止编辑 */
+  menuType: 'project' | 'org'
 }
 dayjs.extend(weekday);
 const typeOptions = [{
@@ -96,7 +96,6 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const [rankList, setRankList] = useState<string[] | undefined>(undefined);
   const [workCalendar, setWorkCalendar] = useState<any>();
   const [{ data: sortedList }, onSortChange] = useGanttSortLabel();
-
   const [projectWorkCalendar, setProjectWorkCalendar] = useState<any>();
   const [filterManageVisible, setFilterManageVisible] = useState<boolean>();
   const [loading, setLoading] = useState(false);
@@ -156,7 +155,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
       displayFields: visibleColumnCodes.map((code) => ({ code, projectId })),
       searchArgs: { tree: type !== 'assignee', dimension: type },
     });
-  }, [sprintIds, type]);
+  }, [sprintIds, visibleColumnCodes, type]);
 
   const { run, flush } = useDebounceFn(() => {
     (async () => {
@@ -177,7 +176,6 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
       //   name: h.fieldCode,
       //   label: h.name,
       // })));
-      console.log('workCalendarRes', workCalendarRes);
       unstable_batchedUpdates(() => {
         if (menuType === 'project') {
           setProjectWorkCalendar(projectWorkCalendarRes);
@@ -295,7 +293,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   }, []);
   const renderInvalidBar: GanttProps['renderInvalidBar'] = useCallback((element, barInfo) => (
     <Tooltip
-            // @ts-ignore
+      // @ts-ignore
       getPopupContainer={(t) => document.getElementsByClassName('gantt-chart')[0] as HTMLElement}
       hidden={barInfo.stepGesture === 'moving'}
       placement="top"
@@ -455,6 +453,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
       sourceBar, destinationBar, type, data: moveConfig.data,
     });
   }, [data, rankList, searchFilter, store.ganttRef, type]);
+
   return (
     <Page>
       <Header>
@@ -626,7 +625,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
                   }}
                   rowHeight={34}
                   barHeight={13}
-                                    // @ts-ignore
+                  // @ts-ignore
                   renderEmpty={renderEmpty}
                 />
               </GanttDragWrapper>
