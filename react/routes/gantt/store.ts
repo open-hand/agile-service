@@ -9,6 +9,7 @@ import { GanttRef, Gantt } from '@choerodon/gantt';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { DetailContainerProps } from '@/components/detail-container';
 import openDescriptionConfirm from '@/components/detail-container/openDescriptionConfirm';
+import { GanttIssue } from './types';
 // 视图日视图、周视图、月视图、季视图、年视图
 export const units = [
   {
@@ -39,6 +40,8 @@ class GanttStore {
 
   @observable issueId: string | null = null
 
+  @observable issue: Pick<GanttIssue, 'issueId'|'projectId'> | null = null
+
   @observable sprintIds: string[] | null = null
 
   @action
@@ -47,9 +50,10 @@ class GanttStore {
   }
 
   @action
-  setIssueId(issueId: string | null) {
+  setIssue(issue: Pick<GanttIssue, 'issueId'|'projectId'> | null) {
     const setData = () => {
-      this.issueId = issueId;
+      this.issueId = issue?.issueId || null;
+      this.issue = issue;
     };
     if (!this.detailProps.descriptionChanged) {
       setData();

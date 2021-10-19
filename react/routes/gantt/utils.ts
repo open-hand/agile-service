@@ -5,7 +5,7 @@ import {
   findIndex, noop, omit, pick, sortBy,
 } from 'lodash';
 import { IGanttMoveRequestData, IGanttMoveRequestDataPreviousWithNext } from '@/api';
-import type { IGanttDimensionTypeValue } from '.';
+import type { IGanttDimensionTypeValue } from './Gantt';
 import { Issue, User } from '@/common/types';
 import { list2tree } from '@/utils/tree';
 import { GanttIssue } from './types';

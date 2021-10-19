@@ -37,8 +37,10 @@ export interface IssueSearchStoreProps {
   defaultChosenFields?: IChosenFields,
   defaultSearchVO?: ISearchVO
   projectId?: string
+  /** @default project */
+  menuType?:'project'|'org'
 }
-function isInvalidValue(value:any) {
+function isInvalidValue(value: any) {
   if (value === undefined || isNull(value) || (isObject(value) && isEmpty(value))) {
     return true;
   }
@@ -88,6 +90,8 @@ class IssueSearchStore {
 
   projectId?: string
 
+  menuType: 'project'|'org'='project';
+
   constructor({
     getSystemFields,
     transformFilter,
@@ -95,6 +99,7 @@ class IssueSearchStore {
     defaultChosenFields,
     defaultSearchVO,
     projectId,
+    menuType,
   }: IssueSearchStoreProps) {
     this.getSystemFields = getSystemFields;
     this.transformFilter = transformFilter;
@@ -102,6 +107,7 @@ class IssueSearchStore {
     this.defaultChosenFields = defaultChosenFields;
     this.defaultSearchVO = defaultSearchVO;
     this.projectId = projectId;
+    this.menuType = menuType || 'project';
   }
 
   setQuery(query: () => void) {
@@ -120,7 +126,7 @@ class IssueSearchStore {
   }
 
   loadMyFilterList = async () => {
-    const data = await personalFilterApi.project(this.projectId || getProjectId()).loadAll();
+    const data = this.menuType === 'project' ? await personalFilterApi.project(this.projectId || getProjectId()).loadAll() : [];
     this.setMyFilters(data);
   };
 
@@ -128,7 +134,7 @@ class IssueSearchStore {
   @observable fields: IField[] = []
 
   async loadCustomFields() {
-    const fields = await fieldApi.project(this.projectId || getProjectId()).getCustomFields();
+    const fields = this.menuType === 'project' ? await fieldApi.project(this.projectId || getProjectId()).getCustomFields() : [];
     this.setFields(fields);
     // 自定义字段加载完，设置默认searchVO的内容
     if (this.defaultSearchVO) {

@@ -12,7 +12,6 @@ const GanttIssueSearch: React.FC<Props> = ({ issueSearchStore, loadData }) => {
   //   getSystemFields: () => getSystemFields().filter((item) => item.code !== 'sprint') as ILocalField[],
   //   transformFilter,
   // });
-
   const handleSaveFilter = () => {
     openSaveFilterModal({ searchVO: issueSearchStore.getCustomFieldFilters(), onOk: issueSearchStore.loadMyFilterList });
   };

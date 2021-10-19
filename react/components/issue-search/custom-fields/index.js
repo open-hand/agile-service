@@ -9,6 +9,7 @@ import IssueSearchContext from '../context';
 import { FieldProLayout } from '@/components/field-pro';
 
 import ChooseFieldNew, { useChoseField } from '@/components/chose-field';
+import getSearchOrgFields from '@/components/field-pro/layouts/searchOrg';
 
 const { getSearchFields } = FieldProLayout;
 export const getValueByFieldType = (fieldType, value) => {
@@ -60,7 +61,7 @@ function CustomField({ field }) {
     onChange: handleChange,
   };
 
-  const element = getSearchFields([field], {
+  const element = store.menuType === 'project' ? getSearchFields([field], {
     [field.code]: props,
     statusId: {
       ...props,
@@ -70,7 +71,7 @@ function CustomField({ field }) {
       ...props,
       featureIds: value,
     },
-  })[0];
+  })[0] : getSearchOrgFields([field])[0];
   return element;
 }
 
