@@ -229,7 +229,9 @@ class FieldApi extends Api<FieldApi> {
    * @param issueTypeId
    */
   getSummaryDefaultValue(issueTypeId: string): Promise<string | undefined> {
-    return axios.get(`${this.prefix}/field_value/summary_default_value`, {
+    return this.request({
+      url: `${this.prefix}/field_value/summary_default_value`,
+      method: 'get',
       params: {
         issueTypeId,
         organizationId: getOrganizationId(),

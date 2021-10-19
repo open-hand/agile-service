@@ -28,7 +28,7 @@ class ProjectApi {
   loadProjectByUser({
     userId, filter, page, size,
   }:any) {
-    return axios.get(`iam/choerodon/v1/organizations/${getOrganizationId()}/users/${userId}/projects/paging?page=${page}&size=${size}`);
+    return axios.get(`iam/choerodon/v1/organizations/${getOrganizationId()}/users/${userId}/projects/paging?page=${page}&size=${size}${filter ? `&name=${filter}` : ''}`);
   }
 }
 
