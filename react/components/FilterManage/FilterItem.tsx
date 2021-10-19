@@ -1,5 +1,5 @@
 import React, {
-  useState, useCallback, useRef, MutableRefObject,
+  useState, useCallback, useRef, MutableRefObject, useMemo,
 } from 'react';
 import { Choerodon, Action } from '@choerodon/boot';
 import {
@@ -8,20 +8,32 @@ import {
 import { Tag } from '@choerodon/components';
 import ObserverTextField from 'choerodon-ui/pro/lib/text-field/TextField';
 import { useLockFn } from 'ahooks';
-import { personalFilterApi } from '@/api';
+import { personalFilterApi, UPersonalFilter } from '@/api';
 import { IPersonalFilter } from '@/components/quick-search';
 import IssueStore from '@/stores/project/issue/IssueStore';
 
 interface Props {
   data: IPersonalFilter
+  menuType: 'project' | 'org'
   onSubmit: () => void
   onDelete: () => void
 }
-const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
+const FilterItem: React.FC<Props> = ({
+  data, menuType, onSubmit, onDelete,
+}) => {
   const {
     filterId, name, objectVersionNumber, default: isDefault,
   } = data;
   const [isEditing, setIsEditing] = useState(false);
+  const menuConfig = useMemo(() => (menuType === 'project' ? ({
+    update: (updateData: UPersonalFilter) => personalFilterApi.update(filterId, updateData),
+    checkName: (newName: string) => personalFilterApi.checkName(newName),
+    delete: () => personalFilterApi.checkName(filterId),
+  }) : ({
+    update: (updateData: UPersonalFilter) => personalFilterApi.update(filterId, updateData),
+    checkName: (newName: string) => personalFilterApi.checkName(newName),
+    delete: () => personalFilterApi.checkName(filterId),
+  })), [filterId, menuType]);
   const valueRef = useRef<string>(name);
   const inputRef = useRef() as MutableRefObject<ObserverTextField>;
   const handleCancel = useCallback(() => {
@@ -37,14 +49,14 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
       objectVersionNumber,
       name: newValue,
     };
-    personalFilterApi.update(filterId, updateData).then(() => {
+    menuConfig.update(updateData).then(() => {
       onSubmit();
       Choerodon.prompt('修改成功');
     }).catch(() => {
       IssueStore.setLoading(false);
       Choerodon.prompt('修改失败');
     });
-  }, [filterId, objectVersionNumber, onSubmit]);
+  }, [menuConfig, objectVersionNumber, onSubmit]);
   const handleDelete = useCallback(() => {
     Modal.open({
       title: '删除筛选',
@@ -57,7 +69,7 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
       ),
       onOk() {
         IssueStore.setLoading(true);
-        personalFilterApi.delete(filterId)
+        menuConfig.delete()
           .then(() => {
             onDelete();
             Choerodon.prompt('删除成功');
@@ -70,7 +82,7 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
       okText: '删除',
       okType: 'danger',
     });
-  }, [filterId, name, onDelete]);
+  }, [menuConfig, name, onDelete]);
 
   const handleSetDefault = useLockFn(async () => {
     const updateData = {
@@ -79,7 +91,7 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
       default: !isDefault,
     };
     try {
-      await personalFilterApi.update(filterId, updateData);
+      await menuConfig.update(updateData);
       await onSubmit();
       Choerodon.prompt('修改成功');
     } catch (error) {
@@ -91,12 +103,12 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
     if (name === value) {
       return true;
     }
-    const res = await personalFilterApi.checkName(value);
+    const res = await menuConfig.checkName(value);
     if (res) {
       return '名称重复';
     }
     return true;
-  }, [name]);
+  }, [menuConfig, name]);
   return (
     <li className="c7n-filterList-item">
       {

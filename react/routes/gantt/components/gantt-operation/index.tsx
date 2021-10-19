@@ -6,9 +6,9 @@ import { observer } from 'mobx-react-lite';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
 import { find } from 'lodash';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
-import SprintIcon from './SprintIcon';
 import Context from '../../context';
 import { units } from '../../store';
+import GanttLegend from '../gantt-legend';
 
 const GanttOperation: React.FC = () => {
   const { store } = useContext(Context);
@@ -22,6 +22,15 @@ const GanttOperation: React.FC = () => {
       display: 'flex', flexShrink: 0, alignItems: 'flex-end', paddingBottom: 19, marginLeft: 'auto',
     }}
     >
+      <Dropdown overlay={() => <GanttLegend />}>
+        <span style={{
+          display: 'inline-block', marginBottom: 5, marginRight: 16, marginLeft: 3, lineHeight: '18px',
+        }}
+        >
+          图例说明
+          <Icon type="help_outline" style={{ color: 'var(--primary-color)', marginBottom: 1, fontSize: 14 }} />
+        </span>
+      </Dropdown>
       <Button
         onClick={() => {
           ganttRef.current && ganttRef.current.backToday();
@@ -62,55 +71,7 @@ const GanttOperation: React.FC = () => {
           <Icon type="arrow_drop_down" style={{ marginTop: -4 }} />
         </Button>
       </Dropdown>
-      <div style={{
-        marginLeft: 18, display: 'flex', alignItems: 'center', marginBottom: 2,
-      }}
-      >
-        <SprintIcon />
-        <span style={{
-          color: 'var(--text-color3)', fontSize: '12px', marginLeft: 4,
-        }}
-        >
-          冲刺时间范围
-        </span>
-        <svg
-          style={{ marginLeft: 10 }}
-          xmlns="http://www.w3.org/2000/svg"
-          version="1.1"
-          width={38}
-          height={18}
-        >
-          <defs>
-            <pattern
-              id="repeat"
-              width="2.5"
-              height="10"
-              patternUnits="userSpaceOnUse"
-              patternTransform="rotate(70 50 50)"
-            >
-              <line stroke="#D9E6F2" strokeWidth="1px" y2="10" />
-            </pattern>
-          </defs>
-          <g stroke="#D9E6F2">
-            <rect
-              fill="url(#repeat)"
-              strokeWidth="1"
-              x={1}
-              y={1}
-              rx={2}
-              ry={2}
-              width={36}
-              height={16}
-            />
-          </g>
-        </svg>
-        <span style={{
-          color: 'var(--text-color3)', fontSize: '12px', marginLeft: 4,
-        }}
-        >
-          节假日
-        </span>
-      </div>
+
     </div>
   );
 };
