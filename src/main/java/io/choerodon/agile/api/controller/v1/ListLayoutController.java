@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -32,7 +33,7 @@ public class ListLayoutController {
                                              @PathVariable(name = "project_id") Long projectId,
                                              @ApiParam(value = "组织id", required = true)
                                              @RequestParam Long organizationId,
-                                             @RequestBody ListLayoutVO listLayoutVO) {
+                                             @RequestBody @Validated ListLayoutVO listLayoutVO) {
         return Optional.ofNullable(listLayoutService.save(organizationId, projectId, listLayoutVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.list.layout.save"));

@@ -248,5 +248,8 @@ public interface BaseFeignClient {
                                                        @RequestParam String code,
                                                        @RequestParam Boolean enabled,
                                                        @RequestParam String params);
+
+    @PostMapping(value = "/choerodon/v1/projects/ids")
+    ResponseEntity<List<ProjectVO>> queryProjectByIds(@RequestBody Set<Long> projectIds);
 }
 

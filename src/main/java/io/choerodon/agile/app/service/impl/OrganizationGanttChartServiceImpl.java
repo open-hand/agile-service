@@ -39,7 +39,6 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
     public Page<GanttChartVO> pagedQuery(Long organizationId,
                                          SearchVO searchVO,
                                          PageRequest pageRequest) {
-
         Page<ProjectVO> projectPage =
                 baseFeignClient
                         .pagedQueryProjects(organizationId, 1, 0, null, null, true, null)
@@ -58,6 +57,6 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         }
         Map<Long, ProjectVO> projectMap =
                 projects.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
-        return ganttChartService.listByProjectIdAndSearch(projectMap, searchVO, pageRequest, organizationId);
+        return ganttChartService.listByProjectIdAndSearch(projectMap, searchVO, pageRequest, organizationId, false);
     }
 }

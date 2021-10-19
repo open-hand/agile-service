@@ -6,7 +6,9 @@ import io.choerodon.agile.app.service.OrganizationGanttChartService;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -31,6 +33,7 @@ public class OrganizationGanttChartController {
     @PostMapping(value = "/list")
     public ResponseEntity<Page<GanttChartVO>> pagedQuery(@ApiIgnore
                                                          @ApiParam(value = "分页信息", required = true)
+                                                         @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
                                                                  PageRequest pageRequest,
                                                          @ApiParam(value = "组织id", required = true)
                                                          @PathVariable(name = "organization_id") Long organizationId,
