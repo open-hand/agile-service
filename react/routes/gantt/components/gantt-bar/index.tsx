@@ -49,7 +49,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
   const [color1, color2] = STATUS_COLOR[statusType];
   const percent = totalCount ? completeCount / totalCount : 0;
   let diff = 0;
-  let delayDiff = 0;
+  const delayDiff = 0;
   if (issue.estimatedStartTime && issue.estimatedEndTime) {
     // 延期
     // if (dayjs(issue.estimatedEndTime).isBefore(dayjs()) && !issue.completed) {
@@ -83,16 +83,11 @@ const GanttBar: React.FC<GanttBarProps> = ({
     return { width: fragmentWidth, left };
   }, [estimatedStartTime, estimatedStartTime.width, estimatedEndTime, estimatedEndTime.width]);
   const delayWidth = (() => {
-    if (!issue.estimatedEndTime || loading) {
+    if (!estimatedEndTime.value || !actualEndTime.value || actualEndTime.value === '' || loading) {
       return 0;
     }
-    const actualCompletedDate: Dayjs = issue.completed && issue.actualCompletedDate ? dayjs(issue.actualCompletedDate).startOf('day') : dayjs().hour(0).minute(0).second(0);
-    const endDate: Dayjs = dayjs(issue.estimatedEndTime).endOf('day');
-    if (actualCompletedDate.isBefore(endDate) || actualCompletedDate.isSame(endDate)) {
-      return 0;
-    }
-    delayDiff = (issue.actualCompletedDate ? dayjs(issue.actualCompletedDate) : dayjs()).diff(dayjs(issue.estimatedEndTime), 'hour');
-    return (ganttRef.current?.getWidthByDate(endDate, actualCompletedDate) || 0) + (issue.completed && issue.actualCompletedDate ? 0 : 15);
+    const dWidth = ganttRef.current?.getWidthByDate(dayjs(estimatedEndTime.value), dayjs(actualEndTime.value));
+    return dWidth && dWidth > 0 ? dWidth : 0;
   })();
   const delayVisible = stepGesture !== 'moving' && !loading;
   return (
@@ -135,7 +130,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
         )}
       >
         <div style={{
-          width,
+          width: width - delayWidth + 1,
           height,
           padding: '.02rem',
           // backgroundColor: color2,
@@ -151,13 +146,13 @@ const GanttBar: React.FC<GanttBarProps> = ({
             id="ganttBar"
             style={{
               marginLeft: estimateTime.left,
-              width: estimateTime.width - 3,
+              width: estimateTime.width - 1,
               height,
               borderColor: color1,
             }}
             className={styles.estimate}
           />
-          <div className={styles.actual} style={{ width: actualTime.width, marginLeft: actualTime.left, backgroundColor: color2 }}>
+          <div className={styles.actual} style={{ width: actualTime.width - delayWidth + 1, marginLeft: actualTime.left, backgroundColor: color2 }}>
             <div style={{ flex: totalCount > 0 ? completeCount : 1, backgroundColor: color1 }} />
             <div style={{ flex: totalCount > 0 ? totalCount - completeCount : 0 }} />
           </div>
@@ -173,7 +168,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
               onClick && onClick(bar.record);
             }}
             className={styles.delay}
-            style={{ width: delayWidth, marginLeft: width }}
+            style={{ width: delayWidth, marginLeft: width - delayWidth }}
           />
         )}
       </Tooltip>
