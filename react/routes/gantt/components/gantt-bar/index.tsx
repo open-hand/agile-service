@@ -1,8 +1,13 @@
-import React, { useContext } from 'react';
-import { observer } from 'mobx-react-lite';
+import React, {
+  useContext, useMemo, useRef, useEffect,
+} from 'react';
+import {
+  observer, useComputed, useObservable, Observer, useObserver,
+} from 'mobx-react-lite';
 import dayjs, { Dayjs } from 'dayjs';
 import { Tooltip } from 'choerodon-ui/pro';
 import { GanttProps, Gantt } from '@choerodon/gantt';
+import { find } from 'lodash';
 import STATUS_COLOR from '@/constants/STATUS_COLOR';
 import Context from '../../context';
 import styles from './index.less';
@@ -13,6 +18,7 @@ interface GanttBarProps {
   bar: Gantt.Bar<GanttIssue>
   width: number
   height: number
+  dateKeyRange: [string, string]
   onClick: GanttProps<GanttIssue>['onBarClick']
 }
 function format(h: number) {
@@ -25,11 +31,15 @@ function format(h: number) {
   return `${h}小时`;
 }
 const GanttBar: React.FC<GanttBarProps> = ({
-  type, bar, width, height, onClick,
+  type, bar, width, height, onClick, dateKeyRange,
 }) => {
   const { store } = useContext(Context);
   const { ganttRef } = store;
-  const { record: issue, loading, stepGesture } = bar;
+  const estimateRef = useRef<HTMLDivElement>(null);
+  const {
+    record: issue, loading, stepGesture, task, middleWidthList, dateMaps,
+  } = bar;
+
   const statusType = issue.statusVO.type;
   const subTasks = issue.children ? issue.children.filter((i) => i.issueTypeVO?.typeCode === 'sub_task') : [];
   const hasChildren = subTasks && subTasks.length > 0;
@@ -48,6 +58,30 @@ const GanttBar: React.FC<GanttBarProps> = ({
     // }
     diff = dayjs(issue.estimatedEndTime).diff(issue.estimatedStartTime, 'hour');
   }
+  const actualStartTime = useComputed(() => dateMaps.get('actualStartTime') || { width: 0 } as Gantt.MiddleDateWithWidth, [dateMaps]);
+  const actualEndTime = useComputed(() => dateMaps.get('actualEndTime') || { width: 0 } as Gantt.MiddleDateWithWidth, [dateMaps]);
+  const estimatedStartTime = useComputed(() => dateMaps.get('estimatedStartTime') || { width: 0 } as Gantt.MiddleDateWithWidth, [dateMaps]);
+  const estimatedEndTime = useComputed(() => dateMaps.get('estimatedEndTime') || { width: 0 } as Gantt.MiddleDateWithWidth, [dateMaps]);
+
+  const actualTime = useComputed(() => {
+    let fragmentWidth = actualEndTime.width - actualStartTime.width;
+    let left = actualStartTime.width;
+    if (actualStartTime.width > 0) {
+      fragmentWidth += (actualEndTime as Gantt.MiddleDateWithWidth).unitWidth;
+      left -= (actualEndTime as Gantt.MiddleDateWithWidth).unitWidth;
+    }
+    return { width: fragmentWidth, left };
+  }, [actualStartTime, actualEndTime, actualStartTime.width]);
+  const estimateTime = useComputed(() => {
+    let fragmentWidth = estimatedEndTime.width - estimatedStartTime.width;
+    let left = estimatedStartTime.width;
+
+    if (estimatedStartTime.width > 0) {
+      fragmentWidth += (estimatedEndTime as Gantt.MiddleDateWithWidth).unitWidth;
+      left -= (estimatedEndTime as Gantt.MiddleDateWithWidth).unitWidth;
+    }
+    return { width: fragmentWidth, left };
+  }, [estimatedStartTime, estimatedStartTime.width, estimatedEndTime, estimatedEndTime.width]);
   const delayWidth = (() => {
     if (!issue.estimatedEndTime || loading) {
       return 0;
@@ -103,15 +137,30 @@ const GanttBar: React.FC<GanttBarProps> = ({
         <div style={{
           width,
           height,
-          backgroundColor: color2,
-          borderColor: color1,
+          padding: '.02rem',
+          // backgroundColor: color2,
+          // borderColor: color1,
           display: 'flex',
+          position: 'relative',
           borderRadius: delayVisible && delayWidth > 0 ? '2px 0 0 2px' : '2px',
           overflow: 'hidden',
         }}
         >
-          <div style={{ flex: totalCount > 0 ? completeCount : 1, backgroundColor: color1 }} />
-          <div style={{ flex: totalCount > 0 ? totalCount - completeCount : 0 }} />
+          <div
+            ref={estimateRef}
+            id="ganttBar"
+            style={{
+              marginLeft: estimateTime.left,
+              width: estimateTime.width - 3,
+              height,
+              borderColor: color1,
+            }}
+            className={styles.estimate}
+          />
+          <div className={styles.actual} style={{ width: actualTime.width, marginLeft: actualTime.left, backgroundColor: color2 }}>
+            <div style={{ flex: totalCount > 0 ? completeCount : 1, backgroundColor: color1 }} />
+            <div style={{ flex: totalCount > 0 ? totalCount - completeCount : 0 }} />
+          </div>
         </div>
         {delayVisible && (
           <div

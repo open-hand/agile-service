@@ -23,6 +23,7 @@ import {
 import GanttComponent, { Gantt, GanttProps, GanttRef } from '@choerodon/gantt';
 import '@choerodon/gantt/dist/gantt.cjs.production.min.css';
 import { FlatSelect } from '@choerodon/components';
+import { set as mobxSet } from 'mobx';
 import {
   ganttApi, issueApi, workCalendarApi,
 } from '@/api';
@@ -116,7 +117,6 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
         targetIndex = findIndex(draft, (issue) => issue.parentId === parentIssue.issueId || issue.issueId === parentIssue.issueId);
       }
       const newIssue = getGanttCreatingSubIssue(parentIssue, targetIndex);
-      console.log('ta', targetIndex, newIssue);
       targetIndex !== -1 && draft.splice(targetIndex, 0, newIssue);
     }));
   });
@@ -190,17 +190,16 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
     flush();
   }, [sortedList, type]);
 
-  const handleUpdate = useCallback<GanttProps<Issue>['onUpdate']>(async (issue, startDate, endDate) => {
+  const handleUpdate = useCallback<GanttProps<Issue>['onUpdate']>(async (issue, startDate, endDate, middleDates) => {
     try {
-      await issueApi.update({
+      const changeDateObj = middleDates.filter((item) => item.value && item.value !== '').reduce((pre, current) => ({ ...pre, [current.key]: current.value }), {});
+      const res = await issueApi.update({
+        ...changeDateObj,
         issueId: issue.issueId,
         objectVersionNumber: issue.objectVersionNumber,
-        estimatedStartTime: startDate,
-        estimatedEndTime: endDate,
       });
-      issue.objectVersionNumber += 1;
-      issue.estimatedStartTime = startDate;
-      issue.estimatedEndTime = endDate;
+      issue.objectVersionNumber = res.objectVersionNumber;
+      mobxSet(issue, changeDateObj);
       return true;
     } catch (error) {
       return false;
@@ -254,12 +253,13 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
       <Icon type="navigate_next" />
     </div>
   ), []);
-  const renderBar: GanttProps['renderBar'] = useCallback((bar, { width, height }) => (
+  const renderBar: GanttProps['renderBar'] = useCallback((bar, { width, height }, dateKeyRange) => (
     <GanttBar
       type={type}
       bar={bar}
       width={width}
       height={height}
+      dateKeyRange={dateKeyRange}
       onClick={onRow.onClick}
     />
   ), [onRow.onClick, type]);
@@ -569,6 +569,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
                   showUnitSwitch={false}
                   unit={unit}
                   onRow={onRow}
+                  middleDateKeys={[{ key: 'actualStartTime', maxDateKey: 'actualEndTime' }, { key: 'actualEndTime', minDateKey: 'actualStartTime' }]}
                   onBarClick={onRow.onClick}
                   tableIndent={20}
                   expandIcon={getExpandIcon}
@@ -582,6 +583,7 @@ const GanttPage: React.FC<TableCacheRenderProps> = (props) => {
                     bottom: 8,
                   }}
                   rowHeight={34}
+                  barHeight={13}
                   // @ts-ignore
                   renderEmpty={renderEmpty}
                 />

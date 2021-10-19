@@ -152,7 +152,6 @@ const getTableColumns = (visibleColumns: ListLayoutColumnVO[], tableFields: IFou
               cantCreateEvent={(res) => {
                 onAfterCreateSubIssue(record.createId, undefined, true);
                 // 这里延迟打开
-                console.log('res', parentIssue, res);
                 setTimeout(() => {
                   openCreateIssue({
                     ...merge(res, {
