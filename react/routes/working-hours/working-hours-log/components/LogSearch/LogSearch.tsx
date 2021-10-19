@@ -14,6 +14,29 @@ const LogSearch = () => {
 
   return (
     <div className={styles.logSearch}>
+      <div className={styles.dateRange}>
+        <DatePicker
+          dataSet={logSearchDs}
+          name="startTime"
+          placeholder="开始时间"
+          style={{
+            width: 120,
+            marginRight: 5,
+          }}
+          clearButton={false}
+        />
+        <span>-</span>
+        <DatePicker
+          dataSet={logSearchDs}
+          name="endTime"
+          placeholder="结束时间"
+          style={{
+            width: 120,
+            marginLeft: 5,
+          }}
+          clearButton={false}
+        />
+      </div>
       {
         getIsOrganization() && (
           <SelectProject
@@ -26,16 +49,6 @@ const LogSearch = () => {
           />
         )
       }
-      <DatePicker
-        dataSet={logSearchDs}
-        name="dateRange"
-        placeholder={['开始时间', '结束时间']}
-        style={{
-          width: 260,
-          marginLeft: 10,
-        }}
-        clearButton={false}
-      />
       <SelectUser
         dataSet={logSearchDs}
         name="userIds"
