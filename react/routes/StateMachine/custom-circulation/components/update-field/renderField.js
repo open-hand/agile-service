@@ -348,52 +348,47 @@ export default function renderField({
     case 'multiMember':
     case 'member': {
       extraOptionsMap.member = [];
-      if (fieldType === 'member') {
-        if (code === 'assignee') {
-          extraOptionsMap.member = [
-            { id: 'reportor', realName: '报告人', tooltip: false },
-            { id: 'creator', realName: '创建人', tooltip: false },
-            { id: 'operator', realName: '当前操作人', tooltip: false },
-          ];
-        } else if (code === 'reporter') {
-          extraOptionsMap.member = [
-            { id: 'creator', realName: '创建人', tooltip: false },
-            { id: 'operator', realName: '当前操作人', tooltip: false },
+      if (code === 'assignee') {
+        extraOptionsMap.member = [
+          { id: 'reportor', realName: '报告人', tooltip: false },
+          { id: 'creator', realName: '创建人', tooltip: false },
+          { id: 'operator', realName: '当前操作人', tooltip: false },
+        ];
+      } else if (code === 'reporter') {
+        extraOptionsMap.member = [
+          { id: 'creator', realName: '创建人', tooltip: false },
+          { id: 'operator', realName: '当前操作人', tooltip: false },
 
-          ];
-        } else if (code === 'mainResponsible') {
-          extraOptionsMap.member = [
-            { id: 'reportor', realName: '报告人', tooltip: false },
-            { id: 'creator', realName: '创建人', tooltip: false },
-            { id: 'operator', realName: '当前操作人', tooltip: false },
+        ];
+      } else if (code === 'mainResponsible') {
+        extraOptionsMap.member = [
+          { id: 'reportor', realName: '报告人', tooltip: false },
+          { id: 'creator', realName: '创建人', tooltip: false },
+          { id: 'operator', realName: '当前操作人', tooltip: false },
 
-          ];
-        } else {
-          extraOptionsMap.member = [
-            { id: 'reportor', realName: '报告人', tooltip: false },
-            { id: 'creator', realName: '创建人', tooltip: false },
-            { id: 'operator', realName: '当前操作人', tooltip: false },
-          ];
-        }
+        ];
+      } else {
+        extraOptionsMap.member = [
+          { id: 'reportor', realName: '报告人', tooltip: false },
+          { id: 'creator', realName: '创建人', tooltip: false },
+          { id: 'operator', realName: '当前操作人', tooltip: false },
+        ];
+      }
 
-        if (!isProgram && code !== 'mainResponsible') {
-          extraOptionsMap.member.push({
-            id: 'mainResponsible', realName: '主要负责人', tooltip: false,
-          });
-        }
+      if (!isProgram && code !== 'mainResponsible') {
+        extraOptionsMap.member.push({
+          id: 'mainResponsible', realName: '主要负责人', tooltip: false,
+        });
+      }
 
-        if (!isProgram && code !== 'assignee') {
-          extraOptionsMap.member.unshift({
-            id: 'assignee', realName: '经办人', tooltip: false,
-          });
-        }
+      if (!isProgram && code !== 'assignee') {
+        extraOptionsMap.member.unshift({
+          id: 'assignee', realName: '经办人', tooltip: false,
+        });
       }
       if (!required || code !== 'reporter') {
         extraOptionsMap.member.unshift({ id: 'clear', realName: '清空', tooltip: false });
       }
-      const selected = Array.isArray(selectUserMap?.get(code)) ? selectUserMap?.get(code)?.map((item) => item.id) : selectUserMap?.get(code)?.id;
-      console.log('seletced：');
-      console.log(selected, typeof selected);
       return (
         <SelectUser
           multiple={fieldType === 'multiMember'}
