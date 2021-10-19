@@ -1,9 +1,8 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.agile.api.vo.WorkCalendarRefVO;
 import io.choerodon.agile.api.vo.WorkItemSearchVO;
 import io.choerodon.agile.api.vo.WorkItemVO;
-import io.choerodon.agile.app.service.WorkCalenderService;
+import io.choerodon.agile.app.service.WorkCalendarService;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
@@ -22,10 +21,10 @@ import java.util.Optional;
  * @date 2021-10-11 15:47
  */
 @RestController
-@RequestMapping(value = "/v1/organizations/{organization_id}/work_calender")
-public class WorkCalenderController {
+@RequestMapping(value = "/v1/organizations/{organization_id}/work_calendar")
+public class WorkCalendarController {
     @Autowired
-    private WorkCalenderService workCalenderService;
+    private WorkCalendarService workCalendarService;
 
     @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("查询组织下活跃冲刺中我经办的issue")
@@ -33,7 +32,7 @@ public class WorkCalenderController {
     public ResponseEntity<List<WorkItemVO>> queryAssigneeParentIssueList(@ApiParam(value = "项目id", required = true)
                                                                          @PathVariable(name = "organization_id") Long organizationId,
                                                                          @RequestBody WorkItemSearchVO workItemSearchVO) {
-        return Optional.ofNullable(workCalenderService.queryAssigneeParentIssueList(organizationId, workItemSearchVO))
+        return Optional.ofNullable(workCalendarService.queryAssigneeParentIssueList(organizationId, workItemSearchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.workCalendar.get"));
     }
@@ -44,7 +43,7 @@ public class WorkCalenderController {
     public ResponseEntity<List<WorkItemVO>> queryAssigneeIssueList(@ApiParam(value = "项目id", required = true)
                                                                          @PathVariable(name = "organization_id") Long organizationId,
                                                                          @RequestBody WorkItemSearchVO workItemSearchVO) {
-        return Optional.ofNullable(workCalenderService.queryAssigneeIssueList(organizationId, workItemSearchVO))
+        return Optional.ofNullable(workCalendarService.queryAssigneeIssueList(organizationId, workItemSearchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.workCalendar.get"));
     }
