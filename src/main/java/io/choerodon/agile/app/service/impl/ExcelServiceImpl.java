@@ -2295,9 +2295,9 @@ public class ExcelServiceImpl implements ExcelService {
         Cell cell = row.getCell(col);
         if (!isCellEmpty(cell)) {
             String value = cell.toString();
-            String[] participants = value.split(",");
             List<Long> participantIds = new ArrayList<>();
-            for (String participant : participants) {
+            List<String> list = splitByRegex(value);
+            for (String participant : list) {
                 List<String> values = excelColumn.getPredefinedValues();
                 Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
                 if (!values.contains(participant)) {
