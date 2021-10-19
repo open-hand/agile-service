@@ -118,6 +118,7 @@ const WorkCalendar = observer(() => {
                 placeholder="所属项目"
                 onChange={handleProjectChange}
                 multiple
+                style={{ maxWidth: 600 }}
               />
             ),
           }, {

@@ -1,6 +1,6 @@
 import { useLocalStore } from 'mobx-react-lite';
 import { map } from 'lodash';
-import { Issue as OldIssue } from '@/common/types';
+import moment from 'moment';
 import {
   formatDate, formatIssueData,
 } from '@/routes/work-calendar/utils';
@@ -8,13 +8,6 @@ import {
   CalendarRefPros, UserValueCode, IssueItem, ViewTypeCode,
 } from '@/routes/work-calendar/types';
 import { orgWorkCalendarApi } from '@/api/OrgWorkCalendar';
-
-interface Issue extends OldIssue{
-  id: string,
-  title: string,
-  start: Date,
-  end: Date,
-}
 
 interface Props {
   DEFAULT_USER: UserValueCode[],
@@ -107,6 +100,8 @@ export default function useStore({ DEFAULT_USER }: Props) {
         const res = await orgWorkCalendarApi.loadIssueList(postData);
         const newData = map(res, (item) => ({
           ...item,
+          estimatedStartTime: moment(item.estimatedStartTime).format('YYYY-MM-DD HH:mm'),
+          estimatedEndTime: moment(item.estimatedEndTime).format('YYYY-MM-DD HH:mm'),
           completedCount: item.countVO?.completedCount ?? 0,
           totalCount: item.countVO?.totalCount ?? 0,
         }));

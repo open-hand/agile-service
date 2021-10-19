@@ -1,3 +1,7 @@
+@todo: #F7C552;
+@doing: #74A9FF;
+@done: #2FD2BC;
+
 .wrap {
   height: 100%;
 
@@ -141,7 +145,7 @@
 
   .issueStartTime {
     font-size: .12rem;
-    color: var(--text-color3);
+    opacity: 0.65;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
@@ -149,8 +153,9 @@
 
   .monthIssueStartTime {
     font-size: .12rem;
-    color: var(--text-color3);
+    color: var(--text-color);
     margin-left: auto;
+    opacity: 0.65;
   }
 
   .issueSummary {
@@ -171,13 +176,28 @@
   }
 
   .issueHover-todo:hover {
-    background: #ffb100 !important;
+    background: @todo !important;
+    .monthIssueSummary,
+    .issueSummary,
+    .monthIssueStartTime{
+      color: #fff;
+    }
   }
   .issueHover-doing:hover {
-    background: #4d90fe !important;
+    background: @doing !important;
+    .monthIssueSummary,
+    .issueSummary,
+    .monthIssueStartTime{
+      color: #fff;
+    }
   }
   .issueHover-done:hover {
-    background: #00bfa5 !important;
+    background: @done !important;
+    .monthIssueSummary,
+    .issueSummary,
+    .monthIssueStartTime{
+      color: #fff;
+    }
   }
 
   .timeIssueTimeWrap {
