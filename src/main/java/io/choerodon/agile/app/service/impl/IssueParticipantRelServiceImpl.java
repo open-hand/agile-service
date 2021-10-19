@@ -56,6 +56,8 @@ public class IssueParticipantRelServiceImpl implements IssueParticipantRelServic
     @Override
     @DataLog(type = "updateParticipant")
     public void updateParticipantRel(Long issueId, Long projectId, List<Long> participantIds) {
+        List<Long> participants = new ArrayList<>();
+        participants.addAll(participantIds.stream().distinct().collect(Collectors.toList()));
         // 获取当前的参与人
         IssueParticipantRelDTO issueParticipantRelDTO = new IssueParticipantRelDTO();
         issueParticipantRelDTO.setIssueId(issueId);
@@ -65,12 +67,12 @@ public class IssueParticipantRelServiceImpl implements IssueParticipantRelServic
             currentUser.addAll(issueParticipantRelDTOS.stream().map(IssueParticipantRelDTO::getParticipantId).collect(Collectors.toList()));
         }
         // 删除无用的参与人
-        List<Long> needDelete = currentUser.stream().filter(v -> !participantIds.contains(v)).collect(Collectors.toList());
+        List<Long> needDelete = currentUser.stream().filter(v -> !participants.contains(v)).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(needDelete)) {
             issueParticipantRelMapper.deleteByIssueIdAndParticipantIds(projectId, issueId, needDelete);
         }
         // 新增参与人
-        List<Long> needAdd = participantIds.stream().filter(v -> !currentUser.contains(v)).collect(Collectors.toList());
+        List<Long> needAdd = participants.stream().filter(v -> !currentUser.contains(v)).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(needAdd)) {
             Long organizationId = ConvertUtil.getOrganizationId(projectId);
             IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
