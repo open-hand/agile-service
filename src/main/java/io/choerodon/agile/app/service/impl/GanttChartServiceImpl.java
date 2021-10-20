@@ -112,12 +112,9 @@ public class GanttChartServiceImpl implements GanttChartService {
     public Page<GanttChartVO> pagedQuery(Long projectId,
                                          SearchVO searchVO,
                                          PageRequest pageRequest) {
-        if (isSprintEmpty(searchVO)) {
-            throw new CommonException(ERROR_SPRINT_EMPTY);
-        }
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Map<Long, ProjectVO> projectMap = queryProjectMap(projectId);
-        return listByProjectIdAndSearch(projectMap, searchVO, pageRequest, organizationId);
+        return listByProjectIdAndSearch(projectMap, searchVO, pageRequest, organizationId, true);
     }
 
     private Map<Long, ProjectVO> queryProjectMap(Long projectId) {
@@ -751,7 +748,11 @@ public class GanttChartServiceImpl implements GanttChartService {
     public Page<GanttChartVO> listByProjectIdAndSearch(Map<Long, ProjectVO> projectMap,
                                                        SearchVO searchVO,
                                                        PageRequest pageRequest,
-                                                       Long organizationId) {
+                                                       Long organizationId,
+                                                       boolean orderByRank) {
+        if (isSprintEmpty(searchVO)) {
+            throw new CommonException(ERROR_SPRINT_EMPTY);
+        }
         if (ObjectUtils.isEmpty(projectMap)) {
             return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }
@@ -772,7 +773,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         Map<String, Object> sortMap = new HashMap<>();
         boolean isDefaultOrder = ObjectUtils.isEmpty(pageRequest.getSort());
         boolean ganttDefaultOrder = false;
-        if (isDefaultOrder) {
+        if (isDefaultOrder && orderByRank) {
             //无排序时根据rank,issueNum排序
             addGanttDefaultOrder(searchVO, pageRequest);
             ganttDefaultOrder = true;
@@ -1189,8 +1190,11 @@ public class GanttChartServiceImpl implements GanttChartService {
         return projects;
     }
 
-    private Sort processSort(PageRequest pageRequest, Map<String, Object> sortMap) {
+    private void processSort(PageRequest pageRequest, Map<String, Object> sortMap) {
         Sort sort = pageRequest.getSort();
+        if (ObjectUtils.isEmpty(sort)) {
+            return;
+        }
         if (ObjectUtils.isEmpty(sort.getOrderFor(ISSUE_ID))) {
             Sort.Order issueIdOrder = new Sort.Order(Sort.Direction.DESC, ISSUE_ID);
             sort = sort.and(new Sort(issueIdOrder));
@@ -1199,7 +1203,6 @@ public class GanttChartServiceImpl implements GanttChartService {
         convertMapping.put("issueNum", "issue_num_convert");
         String sortSql = PageableHelper.getSortSql(PageUtil.sortResetOrder(sort, null, convertMapping));
         sortMap.put(ORDER_STR, sortSql);
-        return sort;
     }
 
     private void buildIssueType(SearchVO searchVO) {

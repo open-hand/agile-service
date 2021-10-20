@@ -200,4 +200,9 @@ public class BaseFeignClientFallback implements BaseFeignClient {
                                                               String params) {
         throw new CommonException("error.query.projects.under.organization");
     }
+
+    @Override
+    public ResponseEntity<List<ProjectVO>> queryProjectByIds(Set<Long> projectIds) {
+        throw new CommonException("error.query.project.by.ids");
+    }
 }

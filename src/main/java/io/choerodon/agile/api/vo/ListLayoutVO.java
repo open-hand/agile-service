@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo;
 
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -12,6 +13,7 @@ public class ListLayoutVO {
     @Encrypt
     private Long id;
 
+    @NotNull(message = "error.layout.applyType.null")
     private String applyType;
 
     @Encrypt

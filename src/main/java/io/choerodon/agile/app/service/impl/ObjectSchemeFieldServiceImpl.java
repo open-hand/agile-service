@@ -234,7 +234,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     @Override
     public List<ObjectSchemeFieldDTO> listQuery(Long organizationId, Long projectId, ObjectSchemeFieldSearchVO searchDTO) {
-        return objectSchemeFieldMapper.listQuery(organizationId, projectId, searchDTO);
+        return objectSchemeFieldMapper.listQuery(organizationId, new HashSet<>(Arrays.asList(projectId)), searchDTO, null);
     }
 
     @Override

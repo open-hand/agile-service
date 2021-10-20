@@ -53,6 +53,16 @@ public class ObjectSchemeFieldDetailVO {
     @Encrypt
     private List<Long> issueTypeIds;
 
+    private String projectName;
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
     public String getRequiredScope() {
         return requiredScope;
     }

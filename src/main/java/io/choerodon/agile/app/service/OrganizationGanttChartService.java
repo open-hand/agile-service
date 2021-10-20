@@ -1,9 +1,10 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.api.vo.GanttChartVO;
-import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import java.util.List;
 
 /**
  * @author superlee
@@ -12,4 +13,10 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 public interface OrganizationGanttChartService {
 
     Page<GanttChartVO> pagedQuery(Long organizationId, SearchVO searchVO, PageRequest pageRequest);
+
+    List<ProjectVO> listAgileProjects(Long organizationId, String name, String code, String param);
+
+    List<AgileIssueHeadVO> getIssueHeaderFields(Long organizationId, String schemeCode);
+
+    List<ObjectSchemeFieldDetailVO> listCustomFields(Long organizationId);
 }

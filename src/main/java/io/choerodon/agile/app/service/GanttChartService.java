@@ -33,5 +33,6 @@ public interface GanttChartService {
     Page<GanttChartVO> listByProjectIdAndSearch(Map<Long, ProjectVO> projectMap,
                                                 SearchVO searchVO,
                                                 PageRequest pageRequest,
-                                                Long organizationId);
+                                                Long organizationId,
+                                                boolean orderByRank);
 }

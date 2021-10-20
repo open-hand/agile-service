@@ -2,6 +2,8 @@ package io.choerodon.agile.api.vo;
 
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * @author zhaotianxin
  * @date 2021-05-07 14:13
@@ -12,23 +14,32 @@ public class ListLayoutColumnRelVO {
 
     @Encrypt
     private Long layoutId;
-
     @Encrypt
     private Long fieldId;
-
+    @NotNull(message = "error.layout.column.code.null")
     private String columnCode;
-
+    @NotNull(message = "error.layout.column.width.null")
     private Integer width;
-
+    @NotNull(message = "error.layout.column.sort.null")
     private Integer sort;
-
+    @NotNull(message = "error.layout.column.display.null")
     private Boolean display;
+
+    private String fieldProjectName;
 
     private Long projectId;
 
     private Long organizationId;
 
     private Long objectVersionNumber;
+
+    public String getFieldProjectName() {
+        return fieldProjectName;
+    }
+
+    public void setFieldProjectName(String fieldProjectName) {
+        this.fieldProjectName = fieldProjectName;
+    }
 
     public Long getId() {
         return id;
