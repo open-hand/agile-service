@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import classNames from 'classnames';
+import moment from 'moment';
 import TypeTag from '@/components/TypeTag';
 import Star from '@/components/tag/star';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
-import moment from 'moment';
 import { calcDays } from '@/utils/Date';
 import {
   IssueNum, StayDay, StatusName, Priority, Assignee, Summary, Delay,
@@ -63,14 +63,14 @@ class Card extends Component {
 
   scrollIntoView() {
     const { selected } = this.props;
-    if (selected && this.ref && this.ref.current.scrollIntoViewIfNeeded) {
+    if (selected && this.ref && this.ref.current.scrollIntoViewIfNeeded && ScrumBoardStore.getSwimLaneCode !== 'participant') {
       this.ref.current.scrollIntoViewIfNeeded();
     }
   }
 
   render() {
     const {
-      completed, issue, statusName, categoryCode, selected, ...otherProps
+      completed, issue, statusName, categoryCode, selected, keyId, ...otherProps
     } = this.props;
     let delayDays = 0;
     const { estimatedEndTime } = issue;
@@ -88,7 +88,7 @@ class Card extends Component {
         onClick={(e) => this.handleClick(e)}
         ref={this.ref}
         {...otherProps}
-        key={issue.issueNum}
+        key={`${issue.issueNum}-${keyId}`}
         style={{
           background: selected ? '#edeff6' : 'white',
         }}
@@ -154,12 +154,13 @@ function IssueItem({
   clicked,
   style,
   provided,
+  keyId,
   ...otherProps
 }) {
   const selected = ScrumBoardStore.clickIssueMap.get(issue.issueId);
   return (
     <div
-      key={issue.issueId}
+      key={`${issue.issueId}-${keyId}`}
       role="none"
       ref={provided.innerRef}
       {...provided.draggableProps}
@@ -179,6 +180,8 @@ function IssueItem({
         statusName={statusName}
         categoryCode={categoryCode}
         selected={selected}
+        keyId={keyId}
+        key={`${issue.issueId}-${keyId}`}
       />
     </div>
   );
