@@ -94,6 +94,9 @@ public class IssueSubCreateVO {
     @Encrypt
     private List<Long> participantIds;
 
+    @ApiModelProperty(value = "预估时间")
+    private BigDecimal estimateTime;
+
     public List<TagVO> getTags() {
         return tags;
     }
@@ -298,5 +301,13 @@ public class IssueSubCreateVO {
 
     public void setParticipantIds(List<Long> participantIds) {
         this.participantIds = participantIds;
+    }
+
+    public BigDecimal getEstimateTime() {
+        return estimateTime;
+    }
+
+    public void setEstimateTime(BigDecimal estimateTime) {
+        this.estimateTime = estimateTime;
     }
 }

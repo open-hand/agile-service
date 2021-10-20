@@ -463,9 +463,9 @@
         ail.label_id,
         ai.story_points,
         ai.remaining_time,
+        ai.estimate_time,
         <if test="isExcelExported">
             ai.description,
-            ai.estimate_time,
             IF((ais.is_completed = 1), '是', '否') AS resolution,
         </if>
         ai.parent_issue_id,
@@ -1094,6 +1094,9 @@
             <if test='searchVO.searchArgs.remainingTime != null and searchVO.searchArgs.remainingTime != "" '>
                 AND ai.remaining_time LIKE concat(concat('%',#{searchVO.searchArgs.remainingTime}),'%')
             </if>
+            <if test='searchVO.searchArgs.estimateTime != null and searchVO.searchArgs.estimateTime != "" '>
+                AND ai.estimate_time LIKE concat(concat('%',#{searchVO.searchArgs.estimateTime}),'%')
+            </if>
         </if>
         <if test='searchVO.onlyStory != null and searchVO.onlyStory'>
             and ai.type_code = 'story'
@@ -1105,11 +1108,17 @@
             <if test='searchVO.advancedSearchArgs.remainingTime != null and searchVO.advancedSearchArgs.remainingTime != "" '>
                 AND ai.remaining_time = #{searchVO.advancedSearchArgs.remainingTime}
             </if>
+            <if test='searchVO.advancedSearchArgs.estimateTime != null and searchVO.advancedSearchArgs.estimateTime != "" '>
+                AND ai.estimate_time = #{searchVO.advancedSearchArgs.estimateTime}
+            </if>
             <if test="searchVO.advancedSearchArgs.storyPointsNull != null and searchVO.advancedSearchArgs.storyPointsNull == true">
                 AND ai.type_code = 'story' AND ai.story_points IS NULL
             </if>
             <if test="searchVO.advancedSearchArgs.remainingTimeNull != null and searchVO.advancedSearchArgs.remainingTimeNull == true">
                 AND ai.remaining_time IS NULL
+            </if>
+            <if test="searchVO.advancedSearchArgs.estimateTimeNull != null and searchVO.advancedSearchArgs.estimateTimeNull == true">
+                AND ai.estimate_time IS NULL
             </if>
             <if test='searchVO.advancedSearchArgs.issueTypeId != null and searchVO.advancedSearchArgs.issueTypeId.size > 0'>
                 AND ai.issue_type_id IN
@@ -1274,19 +1283,11 @@
                 SELECT ai12.issue_id from agile_issue ai12
                 left join agile_issue_participant_rel aipr
                 on ai12.issue_id = aipr.issue_id WHERE
-                ai.project_id in
-                <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
-                    #{projectId}
-                </foreach>
-                AND aipr.participant_id is null ) OR
+                aipr.participant_id is null ) OR
             </if>
             ai.issue_id in
             (SELECT aipr.issue_id FROM agile_issue_participant_rel aipr WHERE
-            aipr.project_id in
-            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
-                #{projectId}
-            </foreach>
-            AND aipr.participant_id in
+            aipr.participant_id in
             <foreach collection="searchVO.otherArgs.participantIds" item="participantId" open="(" separator=","
                      close=")">
                 #{participantId}
@@ -3261,7 +3262,8 @@
             ai.status_id,
             ai.apply_type,
             ai.epic_id,
-            sprint.sprint_id
+            sprint.sprint_id,
+            ai.estimate_time
         FROM
             agile_issue ai
             LEFT JOIN (

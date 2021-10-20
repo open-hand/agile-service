@@ -389,6 +389,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             calculationMapRank(issueConvertDTO);
         }
         issueValidator.verifyStoryPoints(issueConvertDTO);
+        setRemainingTime(issueConvertDTO);
     }
 
     protected void calculationMapRank(IssueConvertDTO issueConvertDTO) {
@@ -1512,6 +1513,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 issueConvertDTO.setOriginSprintId(originIssue.getSprintId());
             }
         }
+        if (fieldList.contains("estimateTime")
+                && !ObjectUtils.isEmpty(issueConvertDTO.getEstimateTime())
+                && ObjectUtils.isEmpty(originIssue.getRemainingTime())) {
+            fieldList.add("remainingTime");
+            issueConvertDTO.setRemainingTime(issueConvertDTO.getEstimateTime());
+        }
         if (agilePluginService != null) {
             agilePluginService.handlerProgramUpdateIssue(issueType, fieldList, projectId, issueUpdateVO, originIssue);
         }
@@ -1678,6 +1685,15 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         //初始化排序
         if (subIssueConvertDTO.isIssueRank()) {
             calculationRank(subIssueConvertDTO.getProjectId(), subIssueConvertDTO);
+        }
+        setRemainingTime(subIssueConvertDTO);
+    }
+
+    private void setRemainingTime(IssueConvertDTO issueConvertDTO) {
+        if (!ISSUE_EPIC.equals(issueConvertDTO.getTypeCode())) {
+            if (!ObjectUtils.isEmpty(issueConvertDTO.getEstimateTime()) && ObjectUtils.isEmpty(issueConvertDTO.getRemainingTime())) {
+                issueConvertDTO.setRemainingTime(issueConvertDTO.getEstimateTime());
+            }
         }
     }
 

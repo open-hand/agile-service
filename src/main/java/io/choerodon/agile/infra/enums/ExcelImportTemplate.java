@@ -174,7 +174,7 @@ public class ExcelImportTemplate {
             HEADERS.add(new Header(FieldCode.ASSIGNEE, "经办人", true, null));
             HEADERS.add(new Header(FieldCode.REPORTER, "报告人", true, null));
             HEADERS.add(new Header(FieldCode.PRIORITY, "优先级*", true, null));
-            HEADERS.add(new Header(FieldCode.REMAINING_TIME, "预估时间(小时)", true, null));
+            HEADERS.add(new Header(FieldCode.REMAINING_TIME, "剩余预估时间(小时)", true, null));
             HEADERS.add(new Header(FieldCode.FIX_VERSION, "修复的版本", false, null));
             HEADERS.add(new Header(FieldCode.INFLUENCE_VERSION, "影响的版本", false, null));
             HEADERS.add(new Header(FieldCode.STORY_POINTS, "故事点", true, null));
@@ -189,6 +189,7 @@ public class ExcelImportTemplate {
             HEADERS.add(new Header(FieldCode.ACTUAL_START_TIME, "实际开始时间", false, null));
             HEADERS.add(new Header(FieldCode.ACTUAL_END_TIME, "实际结束时间", false, null));
             HEADERS.add(new Header(FieldCode.PARTICIPANT, "参与人", false, null));
+            HEADERS.add(new Header(FieldCode.ESTIMATE_TIME, "预估时间(小时)", false, null));
 
             HEADERS.forEach(h -> {
                 String code = h.getCode();

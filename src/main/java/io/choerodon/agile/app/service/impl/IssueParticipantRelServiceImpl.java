@@ -15,6 +15,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -57,7 +58,7 @@ public class IssueParticipantRelServiceImpl implements IssueParticipantRelServic
     @DataLog(type = "updateParticipant")
     public void updateParticipantRel(Long issueId, Long projectId, List<Long> participantIds) {
         List<Long> participants = new ArrayList<>();
-        participants.addAll(participantIds.stream().distinct().collect(Collectors.toList()));
+        participants.addAll(participantIds.stream().filter(Objects::nonNull).distinct().collect(Collectors.toList()));
         // 获取当前的参与人
         IssueParticipantRelDTO issueParticipantRelDTO = new IssueParticipantRelDTO();
         issueParticipantRelDTO.setIssueId(issueId);

@@ -13,7 +13,7 @@ public class SystemFieldPageConfig {
         EPIC_NAME(FieldCode.EPIC_NAME, true, true),
         SUMMARY(FieldCode.SUMMARY, true, true),
         DESCRIPTION(FieldCode.DESCRIPTION, true, true),
-        REMAINING_TIME(FieldCode.REMAINING_TIME, true, true),
+        REMAINING_TIME(FieldCode.REMAINING_TIME, false, true),
         STORY_POINTS(FieldCode.STORY_POINTS, true, true),
         ASSIGNEE(FieldCode.ASSIGNEE, true, true),
         EPIC(FieldCode.EPIC, true, true),
@@ -44,6 +44,7 @@ public class SystemFieldPageConfig {
         ACTUAL_START_TIME(FieldCode.ACTUAL_START_TIME, false, true),
         ACTUAL_END_TIME(FieldCode.ACTUAL_END_TIME, false, true),
         PARTICIPANT(FieldCode.PARTICIPANT, true, true),
+        ESTIMATE_TIME(FieldCode.ESTIMATE_TIME, true, true),
         ;
 
 
