@@ -59,7 +59,7 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
     });
   }, [mainStore, getCalendarApi]);
 
-  const renderEventContent = usePersistFn(({ event, view }) => {
+  const renderEventContent = usePersistFn(({ event, view, isStart }) => {
     const hours = event?.start?.getHours();
     const timeText = TIME_LABEL[hours] ?? '';
     const timeLabel = timeText?.slice(0, 2) || '';
@@ -105,19 +105,28 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
         onMouseEnter={() => {
           event.setProp('backgroundColor', STATUS[statusCode]);
           event.setProp('textColor', '#fff');
+          event.setExtendedProp('timeColor', '#fff');
         }}
         onMouseLeave={() => {
           event.setProp('backgroundColor', STATUS_COLOR[statusCode]);
           event.setProp('textColor', 'var(--text-color)');
+          event.setExtendedProp('timeColor', 'var(--text-color3)');
         }}
       >
-        <div className={Style.timeIssueTimeWrap}>
-          <div className={Style.issueStartTime}>{timeSpan}</div>
-          <UserTag
-            data={event?.extendedProps?.assignee}
-            showText={false}
-          />
-        </div>
+        {isStart ? (
+          <div className={Style.timeIssueTimeWrap}>
+            <div
+              className={Style.issueStartTime}
+              style={{ color: event?.extendedProps?.timeColor }}
+            >
+              {timeSpan}
+            </div>
+            <UserTag
+              data={event?.extendedProps?.assignee}
+              showText={false}
+            />
+          </div>
+        ) : null}
         <div className={Style.issueSummary}>{event.title}</div>
       </div>
     );

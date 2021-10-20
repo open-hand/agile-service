@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Modal, Form } from 'choerodon-ui/pro';
 import { isEmpty, omit } from 'lodash';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
@@ -18,18 +18,32 @@ export interface CreateIssueProps extends Omit<CreateIssueBaseProps, 'onSubmit'>
 
 const CreateContent = (props: CreateIssueBaseProps) => {
   const {
-    showSelectProject = false, projectId,
+    showSelectProject = false, projectId, modal,
   } = props;
+  const selectProjectRef = useRef();
   const [currentProjectId, setCurrentProjectId] = useState<string | never>();
   const handleProjectChange = (value: string) => {
     setCurrentProjectId(value);
   };
+
+  useEffect(() => {
+    // @ts-ignore
+    modal?.handleOk(() => {
+      if (showSelectProject && !projectId) {
+        // @ts-ignore
+        selectProjectRef?.current?.validate();
+      }
+      return false;
+    });
+  }, []);
 
   return (
     <>
       {showSelectProject && (
         <Form>
           <SelectProject
+            // @ts-ignore
+            ref={selectProjectRef}
             onChange={handleProjectChange}
             label="所属项目"
             required

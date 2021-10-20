@@ -74,7 +74,7 @@ const WorkCalendar = observer(() => {
           calenderApi.unselect();
         }
         if (issue.estimatedStartTime && issue.estimatedEndTime) {
-          refreshCalendar();
+          refresh();
         }
       },
     });
