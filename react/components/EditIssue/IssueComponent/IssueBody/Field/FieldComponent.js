@@ -3,10 +3,10 @@ import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
 import { map, find } from 'lodash';
+import { Tooltip } from 'choerodon-ui/pro';
 import { issueApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectComponent from '@/components/select/select-component';
-import { Tooltip } from 'choerodon-ui/pro';
 
 @inject('AppState')
 @observer class FieldComponent extends Component {
@@ -93,6 +93,7 @@ import { Tooltip } from 'choerodon-ui/pro';
             editor={(
               <SelectComponent
                 valueField="name"
+                projectId={store.projectId}
                 required={required}
                 dataRef={this.dataRef}
                 getPopupContainer={() => document.getElementById('detail')}

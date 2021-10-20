@@ -27,7 +27,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
       value, fieldType, valueStr,
     } = field;
     const required = field?.required || store.getRuleRequired(field);
-    return <SelectUser required={required} multiple clearButton selectedUser={valueStr} />;
+    return <SelectUser projectId={store.projectId} required={required} multiple clearButton selectedUser={valueStr} />;
   }
 
   render() {

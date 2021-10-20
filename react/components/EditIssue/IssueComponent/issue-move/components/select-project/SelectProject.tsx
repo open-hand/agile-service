@@ -14,9 +14,12 @@ interface Props {
   dataSet: DataSet,
   issueTypeDataSet: DataSet,
   issue: IssueWithSubIssueVOList
+  projectId?:string
 }
 
-const SelectProject: React.FC<Props> = ({ issue, dataSet, issueTypeDataSet }) => {
+const SelectProject: React.FC<Props> = ({
+  issue, dataSet, issueTypeDataSet, projectId,
+}) => {
   const hasSubIssue = issue.subIssueVOList?.length > 0;
   const hasSubBug = issue.subBugVOList?.length > 0;
 
@@ -35,7 +38,8 @@ const SelectProject: React.FC<Props> = ({ issue, dataSet, issueTypeDataSet }) =>
             name="targetProjectId"
             textField="name"
             valueField="id"
-            request={() => moveIssueApi.getProjectListMoveTo(issue.typeCode as string)}
+            projectId={projectId}
+            request={() => moveIssueApi.project(projectId).getProjectListMoveTo(issue.typeCode as string)}
             afterLoad={(data) => {
               store.setMoveToProjectList(data);
             }}

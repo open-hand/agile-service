@@ -43,7 +43,11 @@ class PriorityApi extends Api<PriorityApi> {
      * 根据项目id查询组织默认优先级
      */
   getDefaultByProject() {
-    return axios.get(`${this.prefix}/priority/default`);
+    return this.request({
+      url: `${this.prefix}/priority/default`,
+      method: 'get',
+
+    });
   }
 
   /**

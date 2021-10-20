@@ -14,7 +14,8 @@ const IssueType = observer(({
   reloadIssue, applyType, onTransformType,
 }) => {
   const { store, disabled } = useContext(EditIssueContext);
-  let { data: issueTypeData } = useProjectIssueTypes({ onlyEnabled: true, applyType }, { enabled: !disabled });
+  console.log('store.projectId', store.projectId);
+  let { data: issueTypeData } = useProjectIssueTypes({ onlyEnabled: true, applyType, projectId: store.projectId }, { enabled: !disabled });
   const handleChangeType = async (type) => {
     const issue = store.getIssue;
     const {
@@ -34,7 +35,7 @@ const IssueType = observer(({
           featureType: type.item.props.value,
         },
       };
-      issueApi.update(issueUpdateVO)
+      issueApi.project(store.projectId).update(issueUpdateVO)
         .then((newIssue) => {
           if (reloadIssue) {
             reloadIssue(issueId);
@@ -44,7 +45,7 @@ const IssueType = observer(({
           }
         });
     } else {
-      const res = await issueApi.getRequiredField(issueId, value);
+      const res = await issueApi.project(store.projectId).getRequiredField(issueId, value);
       if (res && res.length) {
         openRequiredFieldsModal({
           requiredFields: res,
@@ -75,7 +76,7 @@ const IssueType = observer(({
           issueTypeId: value,
           featureType,
         };
-        issueApi.updateType(issueUpdateTypeVO)
+        issueApi.project(store.projectId).updateType(issueUpdateTypeVO)
           .then((newIssue) => {
             if (reloadIssue) {
               reloadIssue(issueId);

@@ -38,33 +38,34 @@ const IssueAttachment = observer((props) => {
           <span>附件</span>
         </div>
         {
-        (hasPermission && !disabled) ? (
-          <div className="c7n-title-right">
-            <Tooltip title="上传附件">
-              <div>
-                <ChunkUploader
-                  prefixPatch="/hfle"
-                  showUploadList={false}
-                  fileList={fileList}
-                  setFileList={setFileList}
-                  combine={{
-                    url: `${API_HOST}/agile/v1/projects/${getProjectId()}/issue_attachment/combine`,
-                    requestData: {
-                      issueId,
-                    },
-                  }}
-                />
-              </div>
-            </Tooltip>
-          </div>
-        ) : (
-          <div style={{ height: 32 }} />
-        )
-      }
+          (hasPermission && !disabled) ? (
+            <div className="c7n-title-right">
+              <Tooltip title="上传附件">
+                <div>
+                  <ChunkUploader
+                    prefixPatch="/hfle"
+                    showUploadList={false}
+                    fileList={fileList}
+                    setFileList={setFileList}
+                    combine={{
+                      url: `${API_HOST}/agile/v1/projects/${store.projectId || getProjectId()}/issue_attachment/combine`,
+                      requestData: {
+                        issueId,
+                      },
+                    }}
+                  />
+                </div>
+              </Tooltip>
+            </div>
+          ) : (
+            <div style={{ height: 32 }} />
+          )
+        }
       </div>
       <div className="c7n-content-container">
         <UploadButtonNow
           fileList={fileList}
+          projectId={store.projectId}
           setFileList={setFileList}
           hasPermission={hasPermission}
           disabled={disabled}

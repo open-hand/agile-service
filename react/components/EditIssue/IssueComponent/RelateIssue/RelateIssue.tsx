@@ -7,19 +7,20 @@ import {
 } from 'choerodon-ui/pro';
 
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { map } from 'lodash';
 import { IModalProps, Issue } from '@/common/types';
 import { issueApi, issueTypeApi } from '@/api';
-import { map } from 'lodash';
 import SelectRelateIssue from './SelectRelateIssue';
 
 interface Props {
   issue: Issue
   modal?: IModalProps
+  projectId?:string
   onOk: (issue: Issue) => void
 }
 
 const RelateIssue: React.FC<Props> = ({
-  issue, modal, onOk,
+  issue, modal, onOk, projectId,
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [issueTypeId, setIssueTypeId] = useState<string[]>([]);
@@ -58,7 +59,7 @@ const RelateIssue: React.FC<Props> = ({
 
   useEffect(() => {
     setLoading(true);
-    issueTypeApi.loadAllWithStateMachineId().then((issueTypes) => {
+    issueTypeApi.project(projectId).loadAllWithStateMachineId('agile', projectId).then((issueTypes) => {
       setLoading(false);
       const types = issueTypes.filter((type) => type.typeCode === 'story' || type.typeCode === 'task');
       if (types.length) {
@@ -75,20 +76,20 @@ const RelateIssue: React.FC<Props> = ({
 
   useEffect(() => {
     if (issue.relateIssueId) {
-      issueApi.load(issue.relateIssueId).then((task: undefined | Issue) => {
+      issueApi.load(issue.relateIssueId, projectId).then((task: undefined | Issue) => {
         if (task) {
           setRelateIssue(task);
         }
       });
     }
-  }, [issue.relateIssueId]);
+  }, [issue.relateIssueId, projectId]);
 
   return (
     <Spin spinning={loading}>
       <Form dataSet={relateIssueDs}>
         {
           issueTypeId?.length && (
-            <SelectRelateIssue name="relateIssueId" issueTypeId={issueTypeId} relateIssue={relateIssue} />
+            <SelectRelateIssue name="relateIssueId" issueTypeId={issueTypeId} relateIssue={relateIssue} projectId={projectId} />
           )
         }
       </Form>

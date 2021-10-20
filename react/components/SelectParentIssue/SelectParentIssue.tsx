@@ -1,9 +1,9 @@
 import React, { useMemo, forwardRef, useRef } from 'react';
-import { Tooltip } from 'choerodon-ui/pro';
-import { Select } from 'choerodon-ui/pro';
+import { Tooltip, Select } from 'choerodon-ui/pro';
+
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import useSelect, { SelectConfig, FragmentForSearch, LoadConfig } from '@/hooks/useSelect';
 import { FlatSelect } from '@choerodon/components';
+import useSelect, { SelectConfig, FragmentForSearch, LoadConfig } from '@/hooks/useSelect';
 import { issueApi } from '@/api';
 import type { Issue, PI } from '@/common/types';
 import { TypeTag } from '@/components';
@@ -39,11 +39,12 @@ interface Props extends Partial<SelectProps> {
   issueId?: string
   afterLoad?: (issueList: Issue[]) => void
   multiple?: boolean
+  projectId?:string
   dataRef?: React.MutableRefObject<any>
   flat?: boolean
 }
 const SelectParentIssue: React.FC<Props> = forwardRef(({
-  issueId, dataRef, afterLoad, flat, ...otherProps
+  issueId, dataRef, afterLoad, flat, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Props['afterLoad']>();
   afterLoadRef.current = afterLoad;
@@ -51,7 +52,7 @@ const SelectParentIssue: React.FC<Props> = forwardRef(({
     name: 'parentIssue',
     textField: 'summary',
     valueField: 'issueId',
-    request: ({ page, filter }) => issueApi.loadIssuesInLink(page, 20, issueId, filter),
+    request: ({ page, filter }) => issueApi.project(projectId).loadIssuesInLink(page, 20, issueId, filter),
     // @ts-ignore
     optionRenderer: (issue: Issue) => (
       <FragmentForSearch name={issue.issueId}>

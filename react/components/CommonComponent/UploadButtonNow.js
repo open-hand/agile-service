@@ -24,13 +24,14 @@ const propTypes = {
  */
 function UploadButtonNow(props) {
   const {
-    issueId, fileList, setFileList, hasPermission = true, disabled = false, refresh,
+    issueId, fileList, setFileList, hasPermission = true, disabled = false, refresh, projectId,
   } = props;
+
   const handleRemove = (file) => {
     const index = fileList.indexOf(file);
     const newFileList = fileList.slice();
     if (file.url) {
-      fileApi.deleteFile(file.uid)
+      fileApi.project(projectId).deleteFile(file.uid)
         .then((response) => {
           if (response) {
             newFileList.splice(index, 1);

@@ -29,9 +29,9 @@ class MergeRequest extends Component {
   }
 
   loadMergeRequest() {
-    const { issueId } = this.props;
+    const { issueId, projectId } = this.props;
     this.setState({ loading: true });
-    devOpsApi.loadMergeRequest(issueId).then((res) => {
+    devOpsApi.project(projectId).loadMergeRequest(issueId).then((res) => {
       this.setState({
         mergeRequests: res,
         loading: false,

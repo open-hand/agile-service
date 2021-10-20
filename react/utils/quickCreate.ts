@@ -2,14 +2,14 @@ import { isEmpty } from 'lodash';
 import { fieldApi } from '@/api';
 import { getProjectId } from './common';
 
-export async function checkCanQuickCreate(typeId: string, assigneeId?: string) {
+export async function checkCanQuickCreate(typeId: string, assigneeId?: string, projectId?: string) {
   const param = {
     schemeCode: 'agile_issue',
     issueTypeId: typeId,
     pageCode: 'agile_issue_create',
   };
   const whiteList = ['summary', 'status', 'reporter', 'issueType', 'priority', 'epicName'];
-  const fields = await fieldApi.getFields(param);
+  const fields = await fieldApi.getFields(param, projectId);
   const requiredButNullFields = fields.filter((field: any) => !whiteList.includes(field.fieldCode) && field.required && !field.defaultValue);
   if (!requiredButNullFields.length || (requiredButNullFields.length === 1 && requiredButNullFields[0].fieldCode === 'assignee' && assigneeId)) {
     return true;

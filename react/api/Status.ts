@@ -122,7 +122,7 @@ class StatusApi extends Api<StatusApi> {
    */
   loadFirstInWorkFlow(issueTypeId: number, applyType: string = 'agile') {
     const organizationId = getOrganizationId();
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/status/query_first_status`,
       params: {

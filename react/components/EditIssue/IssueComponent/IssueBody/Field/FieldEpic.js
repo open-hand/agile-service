@@ -88,6 +88,7 @@ import styles from './FieldEpic.less';
                         editor={(
                           <SelectFeature
                             featureId={featureId}
+                            projectId={store.projectId}
                             featureName={featureName}
                             style={{
                               width: 200,
@@ -157,7 +158,7 @@ import styles from './FieldEpic.less';
                     disabled={isShowFeature || disabled}
                     onSubmit={this.updateIssueEpic}
                     initValue={issueEpicName && (applyType === 'program' || some(this.dataRef.current || [], { issueId: epicId })) ? epicId || null : null}
-                    editor={({ submit }) => <SelectEpic required={required} onChange={submit} selectIds={epicId} dataRef={this.dataRef} />}
+                    editor={({ submit }) => <SelectEpic projectId={store.projectId} required={required} onChange={submit} selectIds={epicId} dataRef={this.dataRef} />}
                   >
                     {
                       issueEpicName ? (

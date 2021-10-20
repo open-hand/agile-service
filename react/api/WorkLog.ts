@@ -32,7 +32,11 @@ class WorkLogApi extends Api<WorkLogApi> {
      * @param data
      */
   create(data: IWorkLog) {
-    return axios.post(`${this.prefix}/work_log`, data);
+    return this.request({
+      url: `${this.prefix}/work_log`,
+      method: 'post',
+      data,
+    });
   }
 
   /**

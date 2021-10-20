@@ -12,15 +12,15 @@ class LinkList extends Component {
   }
 
   handleDeleteIssue(linkId) {
-    const { onRefresh, issue } = this.props;
+    const { onRefresh, issue, projectId } = this.props;
     const { typeCode } = issue;
     if (typeCode !== 'feature') {
-      issueLinkApi.delete(linkId)
+      issueLinkApi.project(projectId).delete(linkId)
         .then(() => {
           onRefresh();
         });
     } else {
-      featureApi.deleteLink(linkId)
+      featureApi.project(projectId).deleteLink(linkId)
         .then(() => {
           onRefresh();
         });

@@ -11,11 +11,12 @@ interface Props {
   objectVersionNumber: number
   issueNum: string
   modal?: IModalProps
+  projectId?:string
   onOk: (issue: Issue) => void
 }
 
 const ChangeParent: React.FC<Props> = ({
-  issueId, objectVersionNumber, modal, onOk,
+  issueId, objectVersionNumber, modal, onOk, projectId,
 }) => {
   const changeParentDs = useMemo(() => new DataSet({
     autoCreate: true,
@@ -51,7 +52,7 @@ const ChangeParent: React.FC<Props> = ({
 
   return (
     <Form dataSet={changeParentDs}>
-      <SelectParentIssue name="parentIssueId" issueId={issueId} />
+      <SelectParentIssue name="parentIssueId" issueId={issueId} projectId={projectId} />
     </Form>
   );
 };

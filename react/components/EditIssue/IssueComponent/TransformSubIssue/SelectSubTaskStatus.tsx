@@ -12,12 +12,14 @@ const STATUS_COLOR = {
 
 interface Props {
   issueTypeId?: string
+  projectId?:string
   name: string
 }
 
-const SelectSubTaskStatus: React.FC<Props> = ({ issueTypeId, name }) => {
-  const { data: statusList = [] } = useStatus({ issueTypeId }, {
+const SelectSubTaskStatus: React.FC<Props> = ({ issueTypeId, projectId, name }) => {
+  const { data: statusList = [] } = useStatus({ issueTypeId, projectId }, {
     enabled: !!issueTypeId,
+
   });
   return (
     <Select name={name} clearButton={false} style={{ width: '100%' }}>

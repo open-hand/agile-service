@@ -19,13 +19,14 @@ import styles from './TransformFromSubIssue.less';
 interface Props {
   modal?: IModalProps
   issueId: string
+  projectId?:string
   issueTypeId: string
   objectVersionNumber: number
   onOk: (issue: Issue) => void
   store: EditIssueStore
 }
 const TransformFromSubIssue: React.FC<Props> = ({
-  modal, issueId, issueTypeId, objectVersionNumber, store, onOk,
+  modal, issueId, issueTypeId, objectVersionNumber, store, onOk, projectId,
 }) => {
   const [isEpicType, setIsEpicType] = useState<boolean>(false);
   const issueTypesRef = useRef<IIssueType[]>([]);
@@ -82,7 +83,7 @@ const TransformFromSubIssue: React.FC<Props> = ({
         // @ts-ignore
         summary, issueTypeVO = {},
       } = issue;
-      const res = await issueApi.getRequiredField(issueId, typeId);
+      const res = await issueApi.project(projectId).getRequiredField(issueId, typeId);
       if (res && res.length) {
         modal?.close();
         openRequiredFieldsModal({
@@ -99,7 +100,7 @@ const TransformFromSubIssue: React.FC<Props> = ({
           epicName: isEpicType ? transformFromSubIssueDs.current?.get('epicName') : undefined,
         });
       } else {
-        return issueApi.updateType(issueUpdateTypeVO)
+        return issueApi.project(projectId).updateType(issueUpdateTypeVO)
           .then((newIssue: Issue) => {
             onOk(newIssue);
             return true;
@@ -110,7 +111,7 @@ const TransformFromSubIssue: React.FC<Props> = ({
       }
     }
     return false;
-  }, [isEpicType, issueId, modal, objectVersionNumber, onOk, store.getIssue, transformFromSubIssueDs]);
+  }, [isEpicType, issueId, modal, objectVersionNumber, onOk, projectId, store.getIssue, transformFromSubIssueDs]);
 
   useEffect(() => {
     modal?.handleOk(handleSubmit);
@@ -122,6 +123,7 @@ const TransformFromSubIssue: React.FC<Props> = ({
           <Form dataSet={transformFromSubIssueDs}>
             <SelectIssueType
               name="typeId"
+              projectId={projectId}
               filterList={isInProgram ? ['issue_epic', 'feature'] : ['feature']}
               dataRef={issueTypesRef}
               clearButton={false}

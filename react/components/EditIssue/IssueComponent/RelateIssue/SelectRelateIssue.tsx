@@ -1,9 +1,9 @@
 import React, { useMemo, forwardRef, useRef } from 'react';
-import { Tooltip } from 'choerodon-ui/pro';
-import { Select } from 'choerodon-ui/pro';
+import { Tooltip, Select } from 'choerodon-ui/pro';
+
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import useSelect, { SelectConfig, FragmentForSearch } from '@/hooks/useSelect';
 import { FlatSelect } from '@choerodon/components';
+import useSelect, { SelectConfig, FragmentForSearch } from '@/hooks/useSelect';
 import { issueApi } from '@/api';
 import type { Issue } from '@/common/types';
 import { TypeTag } from '@/components';
@@ -39,10 +39,11 @@ interface Props extends Partial<SelectProps> {
   afterLoad?: (issueList: Issue[]) => void
   multiple?: boolean
   dataRef?: React.MutableRefObject<any>
+  projectId?:string
   flat?: boolean
 }
 const SelectRelateIssue: React.FC<Props> = forwardRef(({
-  relateIssue, issueTypeId, dataRef, afterLoad, flat, ...otherProps
+  relateIssue, issueTypeId, dataRef, afterLoad, flat, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Props['afterLoad']>();
   afterLoadRef.current = afterLoad;
@@ -50,7 +51,7 @@ const SelectRelateIssue: React.FC<Props> = forwardRef(({
     name: 'parentIssue',
     textField: 'summary',
     valueField: 'issueId',
-    request: ({ page, filter }) => issueApi.loadStroyAndTask(page, 20, {
+    request: ({ page, filter }) => issueApi.project(projectId).loadStroyAndTask(page, 20, {
       advancedSearchArgs: {
         summary: filter,
         issueTypeId,

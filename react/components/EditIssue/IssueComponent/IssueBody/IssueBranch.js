@@ -56,6 +56,7 @@ const IssueBranch = observer(({
         </div>
       </div>
       <MergeRequest
+        projectId={projectId}
         ref={mergeRequestRef}
         issueId={issueId}
       />

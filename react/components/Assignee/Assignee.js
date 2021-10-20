@@ -8,7 +8,7 @@ import SelectUser from '@/components/select/select-user';
 import './Assignee.less';
 
 const Assignee = (props) => {
-  const { modal } = props;
+  const { modal, projectId } = props;
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [{
@@ -35,7 +35,7 @@ const Assignee = (props) => {
         objectVersionNumber,
         assigneeId: assigneeId || null,
       };
-      const res = await issueApi.update(obj);
+      const res = await issueApi.project(projectId).update(obj);
       onOk && onOk(res);
       return true;
     }
@@ -47,9 +47,9 @@ const Assignee = (props) => {
   return (
     <div className="c7n-agile-assignee">
       <Form style={{ width: 400 }} dataSet={dataSet}>
-        <SelectUser name="assignee" />
+        <SelectUser name="assignee" projectId={projectId} />
       </Form>
-      <IsProjectMember>
+      <IsProjectMember projectId={projectId}>
         {(isProjectMember) => isProjectMember && (
         <Button
           className="btn"

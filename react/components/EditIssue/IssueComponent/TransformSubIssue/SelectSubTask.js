@@ -1,11 +1,11 @@
 import React from 'react';
-import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { Select } from 'choerodon-ui/pro';
+import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import TypeTag from '@/components/TypeTag';
 
 const { Option } = Select;
 const SelectSubTask = (props) => {
-  const { data: issueTypes } = useProjectIssueTypes({ typeCode: 'sub_task', onlyEnabled: true });
+  const { data: issueTypes } = useProjectIssueTypes({ typeCode: 'sub_task', onlyEnabled: true, projectId: props.projectId });
   return (
     <Select {...props} clearButton={false}>
       {issueTypes.map((type) => (

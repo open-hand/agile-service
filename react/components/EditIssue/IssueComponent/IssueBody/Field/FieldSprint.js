@@ -59,7 +59,7 @@ const { Option } = Select;
                 </div>
               ) : null
             }
-            editor={({ submit }) => <SelectSprint required={required} onChange={submit} />}
+            editor={({ submit }) => <SelectSprint projectId={store.projectId} required={required} onChange={submit} />}
           >
             <Tooltip
               placement="top"

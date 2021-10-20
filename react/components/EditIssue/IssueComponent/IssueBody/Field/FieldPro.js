@@ -90,6 +90,7 @@ const EditorMap = new Map([
               selected={value}
               required={required}
               fieldId={fieldId}
+              projectId={store.projectId}
               multiple={fieldType === 'multiple' || fieldType === 'checkbox'}
               {
                 ...store.getOptionsData(field, value)
@@ -101,10 +102,10 @@ const EditorMap = new Map([
           return <Editor required={required} autoSize />;
         }
         case 'multiMember': {
-          return <Editor required={required} multiple selectedUser={valueStr} />;
+          return <Editor required={required} projectId={store.projectId} multiple selectedUser={valueStr} />;
         }
         case 'member': {
-          return <Editor required={required} selectedUser={valueStr} />;
+          return <Editor required={required} projectId={store.projectId} selectedUser={valueStr} />;
         }
         case 'number': {
           return <Editor required={required} max={MAX_NUMBER_VALUE} step={extraConfig ? MAX_NUMBER_STEP : 1} />;

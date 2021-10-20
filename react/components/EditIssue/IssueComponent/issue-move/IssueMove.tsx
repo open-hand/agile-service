@@ -37,13 +37,14 @@ const { Step } = Steps;
 interface Props {
   issue: IssueWithSubIssueVOList,
   modal?: IModalProps
+  projectId?:string
   fieldsWithValue: FieldWithValue[]
   onMoveIssue: (issue: Issue) => void,
   loseItems: ILoseItems,
 }
 
 const IssueMove: React.FC<Props> = ({
-  modal, issue, fieldsWithValue, onMoveIssue, loseItems,
+  modal, issue, fieldsWithValue, onMoveIssue, loseItems, projectId,
 }) => {
   const [, setUpdateCount] = useState<number>(0);
   const [currentStep, setCurrentStep] = useState<number>(1);
@@ -221,7 +222,7 @@ const IssueMove: React.FC<Props> = ({
       ...mainIssue,
       subIssues: [...issue.subIssueVOList, ...issue.subBugVOList].map((i) => result.get(i.issueId)),
     };
-    moveIssueApi.moveIssueToProject(issue.issueId, targetProjectId, submitData).then(() => {
+    moveIssueApi.project(projectId).moveIssueToProject(issue.issueId, targetProjectId, submitData).then(() => {
       onMoveIssue(issue as any);
       Choerodon.prompt('移动成功');
       setBtnLoading(false);
@@ -250,7 +251,7 @@ const IssueMove: React.FC<Props> = ({
         </Steps>
       </div>
       <div className={styles.step_content}>
-        {currentStep === 1 && <SelectProject issue={issue} dataSet={dataSet} issueTypeDataSet={issueTypeDataSet} />}
+        {currentStep === 1 && <SelectProject issue={issue} dataSet={dataSet} issueTypeDataSet={issueTypeDataSet} projectId={projectId} />}
         {currentStep === 2 && (
           <Confirm
             issue={issue}

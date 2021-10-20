@@ -1,4 +1,4 @@
-import { getProjectId } from './common';
+import { getMenuType, getProjectId } from './common';
 
 export function sameProject(projectId: string): boolean {
   if (!projectId) {
@@ -6,6 +6,10 @@ export function sameProject(projectId: string): boolean {
   }
   const same = String(projectId) === String(getProjectId());
   return same;
+}
+export function getRequestProjectId(projectId?: string) {
+  const same = String(projectId) === String(getProjectId());
+  return same && getMenuType() === 'project' ? getProjectId() : projectId;
 }
 export function disableIssueEdit(projectId: string): boolean {
   const same = String(projectId) === String(getProjectId());

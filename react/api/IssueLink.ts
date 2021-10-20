@@ -1,12 +1,12 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId } from '@/utils/common';
+import { getProjectId, getMenuType } from '@/utils/common';
 import { sameProject } from '@/utils/detail';
 import Api from './Api';
 
 export interface IIssueLink {
-    linkTypeId: string, // 链接类型id
-    linkedIssueId: string, // 被链接工作项id
-    issueId: string;// 链接工作项id
+  linkTypeId: string, // 链接类型id
+  linkedIssueId: string, // 被链接工作项id
+  issueId: string;// 链接工作项id
 }
 
 class IssueLinkApi extends Api<IssueLinkApi> {
@@ -31,7 +31,7 @@ class IssueLinkApi extends Api<IssueLinkApi> {
    * @param issueId
    * @param applyType project
    */
-  loadByIssueAndApplyType(issueId:number, applyType = 'project') {
+  loadByIssueAndApplyType(issueId: number, applyType = 'project', projectId?: string) {
     if (applyType === 'project') {
       return this.isOutside ? this.request({
         method: 'get',
@@ -42,7 +42,7 @@ class IssueLinkApi extends Api<IssueLinkApi> {
         },
       }) : this.request({
         method: 'get',
-        url: `/agile/v1/projects/${getProjectId()}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issue_links/${issueId}`,
+        url: `/agile/v1/projects/${projectId || getProjectId()}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issue_links/${issueId}`,
         params: {
           organizationId: this.orgId,
           instanceProjectId: this.projectId,
@@ -60,15 +60,19 @@ class IssueLinkApi extends Api<IssueLinkApi> {
    * @param issueId
    * @param issueLinkCreateVOList 关联的工作项
    */
-  create(issueId:string, issueLinkCreateVOList:Array<IIssueLink>) {
-    return axios.post(`${this.prefix}/issue_links/${issueId}`, issueLinkCreateVOList);
+  create(issueId: string, issueLinkCreateVOList: Array<IIssueLink>) {
+    return this.request({
+      url: `${this.prefix}/issue_links/${issueId}`,
+      method: 'post',
+      data: issueLinkCreateVOList,
+    });
   }
 
   /**
    * 删除工作项链接
    * @param issueLinkId
    */
-  delete(issueLinkId:number) {
+  delete(issueLinkId: number) {
     return axios.delete(`${this.prefix}/issue_links/${issueLinkId}`);
   }
 }

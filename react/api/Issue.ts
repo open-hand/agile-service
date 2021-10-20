@@ -1,5 +1,7 @@
 import { axios, stores, Choerodon } from '@choerodon/boot';
-import { getProjectId, getOrganizationId, getApplyType } from '@/utils/common';
+import {
+  getProjectId, getOrganizationId, getApplyType, getMenuType,
+} from '@/utils/common';
 import { sameProject } from '@/utils/detail';
 import Api from './Api';
 
@@ -164,14 +166,16 @@ class IssueApi extends Api<IssueApi> {
     * @param issueObj
     * @param applyType
     */
-  create = (issueObj: IIssue, applyType: string = 'agile') => axios({
-    method: 'post',
-    url: `/agile/v1/projects/${issueObj?.projectId || this.projectId}/issues`,
-    data: issueObj,
-    params: {
-      applyType,
-    },
-  });
+  create(issueObj: IIssue, applyType: string = 'agile') {
+    return this.request({
+      method: 'post',
+      url: `/agile/v1/projects/${issueObj?.projectId || this.projectId}/issues`,
+      data: issueObj,
+      params: {
+        applyType,
+      },
+    });
+  }
 
   /**
     * 更新工作项
@@ -219,7 +223,7 @@ class IssueApi extends Api<IssueApi> {
 
   getRequiredField(issueId: string, issueTypeId: string) {
     const organizationId = getOrganizationId();
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/issues/${issueId}/list_required_field`,
       params: {
@@ -235,7 +239,7 @@ class IssueApi extends Api<IssueApi> {
     */
   updateType(data: UTypeAndStatus) {
     const organizationId = getOrganizationId();
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/issues/update_type`,
       params: {
@@ -311,9 +315,15 @@ class IssueApi extends Api<IssueApi> {
     */
   delete(issueId: number, creatorId: string) {
     if (creatorId.toString() === AppState.userInfo.id.toString()) {
-      return axios.delete(`/agile/v1/projects/${getProjectId()}/issues/delete_self_issue/${issueId}`);
+      return this.request({
+        method: 'delete',
+        url: `${this.prefix}/issues/delete_self_issue/${issueId}`,
+      });
     }
-    return axios.delete(`/agile/v1/projects/${getProjectId()}/issues/${issueId}`);
+    return this.request({
+      method: 'delete',
+      url: `${this.prefix}/issues/${issueId}`,
+    });
   }
 
   /**
@@ -419,7 +429,13 @@ class IssueApi extends Api<IssueApi> {
     * @param obj
     * @param applyType
     */
-  createSubtask = (issueObj: object) => axios.post(`${this.prefix}/issues/sub_issue`, issueObj)
+  createSubtask(issueObj: object) {
+    return this.request({
+      url: `${this.prefix}/issues/sub_issue`,
+      method: 'post',
+      data: issueObj,
+    });
+  }
 
   /**
     * 根据子任务工作项id 进行加载这个子任务（废弃，不再使用）
@@ -451,7 +467,7 @@ class IssueApi extends Api<IssueApi> {
     */
   taskTransformSubTask(data: UTypeAndStatus) {
     const organizationId = getOrganizationId();
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/issues/transformed_sub_task`,
       data,
@@ -476,7 +492,7 @@ class IssueApi extends Api<IssueApi> {
   * @param {*} searchVO
   */
   loadStroyAndTask(page: number = 1, size: number = 10, searchVO?: SearchVO) {
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/issues/query_story_task`,
       params: {
@@ -495,7 +511,7 @@ class IssueApi extends Api<IssueApi> {
     * @param content
     */
   loadIssuesInLink(page: number = 1, size: number = 10, issueId?: string, content?: string, excludeIssueIds?: string[]) {
-    return axios({
+    return this.request({
       method: 'post',
       url: `/agile/v1/projects/${this.projectId}/issues/agile/summary`,
       params: {
@@ -605,18 +621,23 @@ class IssueApi extends Api<IssueApi> {
   }
 
   getComments(issueId: string, page = 1, size = 10) {
-    return this.isOutside ? this.request({
+    if (this.isOutside) {
+      return this.request({
+        method: 'get',
+        url: `${this.outPrefix}/issue_comment/issue/${issueId}/page`,
+        params: {
+          projectId: this.projectId,
+          organizationId: this.orgId,
+          page,
+          size,
+        },
+      });
+    }
+    // 是组织层访问有权限的项目时 进行的判断所需
+    const isOrg = !(getMenuType() === 'project');
+    return this.request({
       method: 'get',
-      url: `${this.outPrefix}/issue_comment/issue/${issueId}/page`,
-      params: {
-        projectId: this.projectId,
-        organizationId: this.orgId,
-        page,
-        size,
-      },
-    }) : this.request({
-      method: 'get',
-      url: `${`/agile/v1/projects/${getProjectId()}`}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issue_comment/issue/${issueId}/page`,
+      url: `${`/agile/v1/projects/${!sameProject(this.projectId) && isOrg ? this.projectId : getProjectId()}`}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issue_comment/issue/${issueId}/page`,
       params: {
         organizationId: this.orgId,
         instanceProjectId: this.projectId,

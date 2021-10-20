@@ -17,8 +17,8 @@ export interface ProjectIssueTypesConfig {
   isInProgram?: boolean
 }
 export default function useProjectIssueTypes(config?: ProjectIssueTypesConfig, options?: UseQueryOptions<IIssueType[]>) {
-  const { isProgram } = useIsProgram();
-  const { isInProgram } = useIsInProgram();
+  const { isProgram } = useIsProgram(); // 这里对项目群判断 对 config?.projectId 传入项目未做判断
+  const { isInProgram } = useIsInProgram({ projectId: config?.projectId });
   const key = useProjectKey({ key: ['issueTypes', { onlyEnabled: config?.onlyEnabled ?? true, isProgram: config?.isProgram ?? isProgram }], projectId: config?.projectId });
   return useQuery(key, () => issueTypeApi.loadAllWithStateMachineId('agile', config?.projectId, config?.onlyEnabled ?? true, config?.programId), {
     select: (data) => {

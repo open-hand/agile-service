@@ -13,11 +13,12 @@ import SelectSubTaskStatus from './SelectSubTaskStatus';
 interface Props {
   modal?: IModalProps
   issueId: string
+  projectId?:string
   objectVersionNumber: number
   onOk: (issue: Issue) => void
 }
 const TransformSubIssue: React.FC<Props> = ({
-  modal, issueId, objectVersionNumber, onOk,
+  modal, issueId, projectId, objectVersionNumber, onOk,
 }) => {
   const transformSubIssueDs = useMemo(() => new DataSet({
     autoCreate: true,
@@ -37,7 +38,7 @@ const TransformSubIssue: React.FC<Props> = ({
     events: {
       update: async ({ record, value, name }: any) => {
         if (name === 'issueTypeId' && value) {
-          const firstInWorkflowStatus = await statusApi.loadFirstInWorkFlow(value);
+          const firstInWorkflowStatus = await statusApi.project(projectId).loadFirstInWorkFlow(value);
           record.set('statusId', firstInWorkflowStatus);
         }
       },
@@ -55,7 +56,7 @@ const TransformSubIssue: React.FC<Props> = ({
         issueTypeId: transformSubIssueDs.current?.get('issueTypeId'),
         typeCode: 'sub_task',
       };
-      return issueApi.taskTransformSubTask(issueTransformSubTask)
+      return issueApi.project(projectId).taskTransformSubTask(issueTransformSubTask)
         .then((res: Issue) => {
           onOk(res);
           return true;
@@ -65,7 +66,7 @@ const TransformSubIssue: React.FC<Props> = ({
         });
     }
     return false;
-  }, [issueId, objectVersionNumber, onOk, transformSubIssueDs]);
+  }, [issueId, objectVersionNumber, onOk, projectId, transformSubIssueDs]);
 
   useEffect(() => {
     modal?.handleOk(handleSubmit);
@@ -74,9 +75,9 @@ const TransformSubIssue: React.FC<Props> = ({
   return (
     <div className={styles.transformSubIssue}>
       <Form dataSet={transformSubIssueDs}>
-        <SelectSubTask name="issueTypeId" />
-        <SelectParentIssue name="issueId" issueId={issueId} clearButton={false} />
-        <SelectSubTaskStatus name="statusId" issueTypeId={transformSubIssueDs.current?.get('issueTypeId')} />
+        <SelectSubTask name="issueTypeId" projectId={projectId} />
+        <SelectParentIssue name="issueId" issueId={issueId} clearButton={false} projectId={projectId} />
+        <SelectSubTaskStatus name="statusId" issueTypeId={transformSubIssueDs.current?.get('issueTypeId')} projectId={projectId} />
       </Form>
     </div>
   );

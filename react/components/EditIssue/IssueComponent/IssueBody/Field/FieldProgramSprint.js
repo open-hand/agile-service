@@ -61,6 +61,7 @@ import SelectTeamSprints from '@/components/select/select-teamSprint';
               <SelectTeamSprints
                 label="活跃冲刺"
                 mode="multiple"
+                projectId={store.projectId}
                 getPopupContainer={() => document.getElementById('detail')}
                 allowClear
                 showCheckAll={false}

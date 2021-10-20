@@ -28,10 +28,13 @@ interface ILink {
 }
 interface Props {
   modal?: IModalProps,
+  projectId?:string
   issueId: string,
   onOk: (res: any) => void,
 }
-const CreateLink: React.FC<Props> = ({ modal, issueId, onOk }) => {
+const CreateLink: React.FC<Props> = ({
+  modal, projectId, issueId, onOk,
+}) => {
   const [originLinks, setOriginLinks] = useState<IOriginLink[]>([]);
   const [showLinks, setShowLinks] = useState<ILink[]>([]);
   const linkedTableRef = useRef<{
@@ -102,14 +105,14 @@ const CreateLink: React.FC<Props> = ({ modal, issueId, onOk }) => {
           linkedIssueId: issueId,
         });
       });
-      return issueLinkApi.create(issueId, labelIssueRelVOList)
+      return issueLinkApi.project(projectId).create(issueId, labelIssueRelVOList)
         .then((r: any) => {
           onOk(r);
           return true;
         });
     }
     return false;
-  }, [issueId, linkedDataSet, onOk, originLinks]);
+  }, [issueId, linkedDataSet, onOk, originLinks, projectId]);
 
   useEffect(() => {
     modal?.handleOk(handleOk);
