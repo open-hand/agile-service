@@ -824,12 +824,11 @@ public class GanttChartServiceImpl implements GanttChartService {
     }
 
     private void addGanttDefaultOrder(SearchVO searchVO, PageRequest pageRequest) {
-        Sort.Order projectIdOrder = new Sort.Order(Sort.Direction.DESC, "project_id");
         Sort.Order instanceTypeOrder = new Sort.Order(Sort.Direction.ASC, "instance_type");
         Sort.Order instanceIdOrder = new Sort.Order(Sort.Direction.ASC, "instance_id");
         Sort.Order rankOrder = new Sort.Order(Sort.Direction.ASC, "rank");
         Sort.Order issueNumOrder = new Sort.Order(Sort.Direction.DESC, "issue_num_convert");
-        Sort sort = new Sort(projectIdOrder, instanceTypeOrder, instanceIdOrder, rankOrder, issueNumOrder);
+        Sort sort = new Sort(instanceTypeOrder, instanceIdOrder, rankOrder, issueNumOrder);
         pageRequest.setSort(sort);
         searchVO.setGanttDefaultOrder(true);
     }

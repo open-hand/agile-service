@@ -913,6 +913,7 @@
     <select id="queryChildrenIdByParentId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         select
         ai.issue_id,
+        ai.project_id,
         <if test="searchVO.ganttDefaultOrder">
             agir.rank,
             agir.instance_id,
