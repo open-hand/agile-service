@@ -8,7 +8,7 @@ import { IGanttMoveRequestData, IGanttMoveRequestDataPreviousWithNext } from '@/
 import type { IGanttDimensionTypeValue } from './Gantt';
 import { Issue, User } from '@/common/types';
 import { list2tree } from '@/utils/tree';
-import { GanttIssue } from './types';
+import { GanttIssue, IGanttCollapsedHistory } from './types';
 
 /**
  * 获取甘特图移动后待提交到后端数据
@@ -156,6 +156,14 @@ export function ganttLocalMove({
     success = moveData(draft, sourceDataIndex, destinationDataIndx);
   });
   return { success, newData };
+}
+
+/**  甘特图保存收起与否状态 */
+export function ganttSaveCollapsedStatus({ flattenData }: { flattenData: Gantt.Bar[] }): IGanttCollapsedHistory[] {
+  return flattenData.map((item) => ({ path: item.flatPath, collapsed: item._collapsed }));
+}
+export function ganttRestoreCollapsedStatus(ganttData: any, collapseHistory: IGanttCollapsedHistory[]) {
+  return ganttData;
 }
 
 const ganttList2Tree = (data: any[]) => list2tree(data, { valueField: 'issueId', parentField: 'parentId' });
@@ -323,6 +331,7 @@ const groupByFeature = (epicChildrenData: any, data: any) => {
   return sortBy([...map.entries()], ([_, { rankIndex }]) => rankIndex).map(([featureId, { feature, disabledDrag, children }]) => ({
     ...feature,
     group: featureId === '0',
+    onlyShow: true,
     disabledCreate: !!disabledDrag,
     disabledDrag: !!disabledDrag,
     groupType: 'feature',
@@ -365,6 +374,7 @@ const groupByEpic = (data: any, isInProgram: boolean) => {
       group: epicIssueId === '0',
       disabledCreate: !!disabledDrag,
       disabledDrag: !!disabledDrag,
+      onlyShow: isInProgram,
       groupType: 'epic',
       isInProgram,
       summary: epic.epicName,
