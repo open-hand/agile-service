@@ -8,7 +8,13 @@ const LogDataSet = (): DataSetProps => ({
   paging: true,
   selection: false,
   transport: {
-    read: ({ params, data }) => (getIsOrganization() ? workingHoursApiConfig.orgGetLogs(params, data) : workingHoursApiConfig.getLogs(params, data)),
+    read: ({ params, data }) => {
+      const { sort } = params;
+      if (!getIsOrganization() && sort?.includes('issueId')) {
+        Object.assign(params, { sort: `issueNum,${sort.split(',')[1]}` });
+      }
+      return (getIsOrganization() ? workingHoursApiConfig.orgGetLogs(params, data) : workingHoursApiConfig.getLogs(params, data));
+    },
   },
   fields: [
     { name: 'userId', type: 'string' as FieldType, label: '成员' },
