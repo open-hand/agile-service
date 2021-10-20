@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.controller.v1;
 
+import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 
@@ -41,6 +42,8 @@ public class FieldValueController {
     private IssueFieldValueService issueFieldValueService;
     @Autowired
     private FieldOptionService fieldOptionService;
+    @Autowired
+    private IssueValidator issueValidator;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "界面上获取字段列表，带有字段选项")
@@ -162,6 +165,7 @@ public class FieldValueController {
                                                    @RequestParam String schemeCode,
                                                    @RequestParam String applyType,
                                                    @RequestBody @Encrypt BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
+        issueValidator.verifybatchUpdateFieldsValue(projectId, batchUpdateFieldsValueVo, applyType);
         issueFieldValueService.asyncUpdateFields(projectId,schemeCode,batchUpdateFieldsValueVo,applyType, (ServletRequestAttributes)RequestContextHolder.currentRequestAttributes(), EncryptContext.encryptType().name());
         return new ResponseEntity<>(HttpStatus.OK);
     }
