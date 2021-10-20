@@ -163,6 +163,7 @@ const getReverseExportFieldCodes = (data: Array<any>) => {
     createdUserName: 'createUser',
     lastUpdatedUserName: 'updateUser',
     tags: 'tags',
+    participant: 'participants',
   };
   // @ts-ignore
   return data.map((code: string) => fieldTransform[code] || code);
