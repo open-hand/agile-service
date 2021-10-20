@@ -43,7 +43,7 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
                                          SearchVO searchVO,
                                          PageRequest pageRequest) {
         Long projectId = getTeamProjectId(searchVO);
-        AssertUtilsForCommonException.notNull(projectId, "error.gantt.teamProjectId.null");
+        AssertUtilsForCommonException.notNull(projectId, "error.gantt.teamProjectIds.null");
         List<ProjectVO> projects = listAgileProjects(organizationId, null, null, null);
         if (ObjectUtils.isEmpty(projects)) {
             return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
