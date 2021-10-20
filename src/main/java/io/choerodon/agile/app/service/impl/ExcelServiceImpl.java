@@ -122,6 +122,7 @@ public class ExcelServiceImpl implements ExcelService {
     protected static final String REPORTER_NAME = "reporterName";
     protected static final String STORY_POINTS = "storyPoints";
     protected static final String REMAINING_TIME = "remainingTime";
+    protected static final String ESTIMATE_TIME = "estimateTime";
     protected static final String VERSION_NAME = "versionName";
     protected static final String FIX_VERSION_NAME = "fixVersionName";
     protected static final String INFLUENCE_VERSION_NAME = "influenceVersionName";
@@ -266,6 +267,7 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put(REPORTER_NAME, "报告人");
         FIELD_MAP.put(STORY_POINTS, "故事点");
         FIELD_MAP.put(REMAINING_TIME, "剩余预估时间");
+        FIELD_MAP.put(ESTIMATE_TIME, "预估时间");
         FIELD_MAP.put(VERSION_NAME, "版本");
         FIELD_MAP.put(FIX_VERSION_NAME, "修复的版本");
         FIELD_MAP.put(INFLUENCE_VERSION_NAME, "影响的版本");
@@ -1820,6 +1822,9 @@ public class ExcelServiceImpl implements ExcelService {
             case FieldCode.PARTICIPANT:
                 validateAndSetParticipant(row, col, excelColumn, errorRowColMap, issueCreateVO);
                 break;
+            case FieldCode.ESTIMATE_TIME:
+                validateAndSetEstimateTime(row, col, errorRowColMap, issueCreateVO);
+                break;
             default:
                 break;
         }
@@ -2362,6 +2367,23 @@ public class ExcelServiceImpl implements ExcelService {
                 versionIssueRelVO.setRelationType(INFLUENCE_RELATION_TYPE);
                 versionIssueRelList.add(versionIssueRelVO);
                 issueCreateVO.setVersionIssueRelVOList(versionIssueRelList);
+            }
+        }
+    }
+
+
+    private void validateAndSetEstimateTime(Row row,
+                                            Integer col,
+                                            Map<Integer, List<Integer>> errorRowColMap,
+                                            IssueCreateVO issueCreateVO) {
+        Cell cell = row.getCell(col);
+        Integer rowNum = row.getRowNum();
+        if (!isCellEmpty(cell)) {
+            String value = cell.toString().trim();
+            validateBigDecimal(col, errorRowColMap, cell, rowNum, value);
+            List<Integer> errorCol = errorRowColMap.get(rowNum);
+            if (ObjectUtils.isEmpty(errorCol)) {
+                issueCreateVO.setEstimateTime(new BigDecimal(value));
             }
         }
     }

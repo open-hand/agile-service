@@ -100,6 +100,7 @@ public class DataLogAspect {
     private static final String FIELD_EPIC_CHILD = "Epic Child";
     private static final String REMAIN_TIME_FIELD = "remainingTime";
     private static final String FIELD_TIMEESTIMATE = "timeestimate";
+    private static final String FIELD_ESTIMATE_TIME = "Estimate Time";
     private static final String STATUS_ID = "statusId";
     private static final String FIELD_STATUS = "status";
     private static final String FIELD_AUTO_STATUS = "Auto Status";
@@ -1291,7 +1292,8 @@ public class DataLogAspect {
                 }
                 Boolean storyCondition = issueConvertDTO.getStoryPoints() != null && issueConvertDTO.getStoryPoints().compareTo(BigDecimal.ZERO) != 0;
                 Boolean remainingTimeCondition = issueConvertDTO.getRemainingTime() != null && issueConvertDTO.getRemainingTime().compareTo(new BigDecimal(0)) > 0;
-                if (storyCondition || remainingTimeCondition) {
+                Boolean estimateTimeCondition = issueConvertDTO.getEstimateTime() != null && issueConvertDTO.getEstimateTime().compareTo(new BigDecimal(0)) > 0;
+                if (storyCondition || remainingTimeCondition || estimateTimeCondition) {
                     IssueDTO originIssueDTO = new IssueDTO();
                     BeanUtils.copyProperties(issueConvertDTO, originIssueDTO);
                     if (Boolean.TRUE.equals(storyCondition)) {
@@ -1302,6 +1304,10 @@ public class DataLogAspect {
                     if (Boolean.TRUE.equals(remainingTimeCondition)) {
                         originIssueDTO.setRemainingTime(null);
                         handleCalculateRemainData(issueConvertDTO, originIssueDTO);
+                    }
+                    if (Boolean.TRUE.equals(estimateTimeCondition)) {
+                        originIssueDTO.setEstimateTime(null);
+                        handleCalculateEstimateData(issueConvertDTO, originIssueDTO);
                     }
                 }
                 workCalendarSubscribeService.handleWorkCalendarSubscribeChanged(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId(), false, new ArrayList<>());
@@ -1356,6 +1362,13 @@ public class DataLogAspect {
             handleEnvironment(field, originIssueDTO, issueConvertDTO);
             handleMainResponsible(field, originIssueDTO, issueConvertDTO);
             handleActualTime(field, originIssueDTO, issueConvertDTO);
+            handlerEstimateTime(field, originIssueDTO, issueConvertDTO);
+        }
+    }
+
+    private void handlerEstimateTime(List<String> field, IssueDTO originIssueDTO, IssueConvertDTO issueConvertDTO) {
+        if (field.contains("estimateTime") && (!Objects.equals(originIssueDTO.getEstimateTime(), issueConvertDTO.getEstimateTime()))) {
+            handleCalculateEstimateData(issueConvertDTO, originIssueDTO);
         }
     }
 
@@ -1453,6 +1466,23 @@ public class DataLogAspect {
         if (field.contains(REMAIN_TIME_FIELD) && (!Objects.equals(originIssueDTO.getRemainingTime(), issueConvertDTO.getRemainingTime()))) {
             handleCalculateRemainData(issueConvertDTO, originIssueDTO);
         }
+    }
+
+    private void handleCalculateEstimateData(IssueConvertDTO issueConvertDTO, IssueDTO originIssueDTO) {
+        String oldData;
+        String newData;
+        BigDecimal zero = new BigDecimal(0);
+        if (issueConvertDTO.getEstimateTime() != null && issueConvertDTO.getEstimateTime().compareTo(zero) > 0) {
+            oldData = originIssueDTO.getEstimateTime() == null ? null : originIssueDTO.getEstimateTime().toString();
+            newData = issueConvertDTO.getEstimateTime().toString();
+        } else if (issueConvertDTO.getEstimateTime() == null) {
+            oldData = originIssueDTO.getEstimateTime() == null ? null : originIssueDTO.getEstimateTime().toString();
+            newData = null;
+        } else {
+            oldData = originIssueDTO.getEstimateTime() == null ? null : originIssueDTO.getEstimateTime().toString();
+            newData = zero.toString();
+        }
+        createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), FIELD_ESTIMATE_TIME, oldData, newData, oldData, newData);
     }
 
     private void handleCalculateRemainData(IssueConvertDTO issueConvertDTO, IssueDTO originIssueDTO) {

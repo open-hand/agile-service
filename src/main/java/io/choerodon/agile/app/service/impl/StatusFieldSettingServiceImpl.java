@@ -499,6 +499,9 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                 BigDecimal bigDecimal = issueDTO.getRemainingTime();
                 field.set(issueUpdateVO, handlerPredefinedNumber(fieldValueSettingDTO, bigDecimal));
                 break;
+            case FieldCode.ESTIMATE_TIME:
+                field.set(issueUpdateVO, handlerPredefinedNumber(fieldValueSettingDTO, issueDTO.getEstimateTime()));
+                break;
             case FieldCode.STORY_POINTS:
                 BigDecimal storyPoints = issueDTO.getStoryPoints();
                 field.set(issueUpdateVO, handlerPredefinedNumber(fieldValueSettingDTO, storyPoints));

@@ -189,6 +189,9 @@ public class IssueListFieldKVVO {
     @ApiModelProperty("参与人")
     private List<UserMessageDTO> participants;
 
+    @ApiModelProperty("预估时间")
+    private Date estimateTime;
+
     public String getEpicSelfName() {
         return epicSelfName;
     }
@@ -665,5 +668,13 @@ public class IssueListFieldKVVO {
 
     public void setParticipants(List<UserMessageDTO> participants) {
         this.participants = participants;
+    }
+
+    public Date getEstimateTime() {
+        return estimateTime;
+    }
+
+    public void setEstimateTime(Date estimateTime) {
+        this.estimateTime = estimateTime;
     }
 }

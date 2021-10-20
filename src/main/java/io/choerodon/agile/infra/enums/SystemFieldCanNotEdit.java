@@ -84,6 +84,8 @@ public class SystemFieldCanNotEdit {
         storyMap.put(FieldCode.STORY_POINTS, new PageConfigFieldEditedVO(false, false, true));
         storyMap.put(FieldCode.REMAINING_TIME, new PageConfigFieldEditedVO(false, false, true));
         storyMap.put(FieldCode.TIME_TRACE, new PageConfigFieldEditedVO(true, true, false));
+        storyMap.put(FieldCode.ESTIMATE_TIME, new PageConfigFieldEditedVO(false, false, true));
+
 
         taskMap = new HashMap<>();
         taskMap.put(FieldCode.ISSUE_TYPE, new PageConfigFieldEditedVO(true, true, true));
@@ -99,6 +101,7 @@ public class SystemFieldCanNotEdit {
         taskMap.put(FieldCode.TAG, new PageConfigFieldEditedVO(false, false, false));
         taskMap.put(FieldCode.REMAINING_TIME, new PageConfigFieldEditedVO(false, false, true));
         taskMap.put(FieldCode.TIME_TRACE, new PageConfigFieldEditedVO(true, true, false));
+        taskMap.put(FieldCode.ESTIMATE_TIME, new PageConfigFieldEditedVO(false, false, true));
 
         bugMap = new HashMap<>();
         bugMap.put(FieldCode.ISSUE_TYPE, new PageConfigFieldEditedVO(true, true, true));
@@ -114,6 +117,7 @@ public class SystemFieldCanNotEdit {
         bugMap.put(FieldCode.TAG, new PageConfigFieldEditedVO(false, false, false));
         bugMap.put(FieldCode.REMAINING_TIME, new PageConfigFieldEditedVO(false, false, true));
         bugMap.put(FieldCode.TIME_TRACE, new PageConfigFieldEditedVO(true, true, false));
+        bugMap.put(FieldCode.ESTIMATE_TIME, new PageConfigFieldEditedVO(false, false, true));
     }
 
 }
