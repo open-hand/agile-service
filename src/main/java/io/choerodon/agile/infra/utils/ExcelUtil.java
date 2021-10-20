@@ -1,5 +1,7 @@
 package io.choerodon.agile.infra.utils;
 
+import io.choerodon.agile.api.vo.ExcelTitleVO;
+import io.choerodon.agile.api.vo.WorkHoursExportVO;
 import io.choerodon.agile.api.vo.business.ExportIssuesVO;
 import io.choerodon.agile.infra.dto.ExcelCursorDTO;
 import io.choerodon.agile.infra.enums.ExcelImportTemplate;
@@ -237,6 +239,65 @@ public class ExcelUtil {
         }
     }
 
+    public static <T> void  writeWorkHoursLog(Workbook workbook,
+                                             String sheetName,
+                                             Class<T> clazz,
+                                             List<WorkHoursExportVO> workHoursExportVOS,
+                                             List<ExcelTitleVO> workHoursLogList,
+                                              ExcelCursorDTO cursorDTO) {
+        //样式
+        CellStyle cellStyle = workbook.createCellStyle();
+        SXSSFSheet sheet = (SXSSFSheet) workbook.getSheet(sheetName);
+        cellStyle.setAlignment(HorizontalAlignment.LEFT);
+        CellStyle dateCellStyle =workbook.createCellStyle(); //单元格样式类
+        dateCellStyle.setAlignment(HorizontalAlignment.LEFT);
+        dateCellStyle.setDataFormat(workbook.getCreationHelper().createDataFormat().getFormat("yyyy/mm/dd"));
+        for (WorkHoursExportVO workHoursExportVO : workHoursExportVOS) {
+            Integer rowNum = cursorDTO.getRow();
+            SXSSFRow row = sheet.createRow(rowNum);
+            for (int i = 0; i < workHoursLogList.size(); i++) {
+                ExcelTitleVO excelTitleVO = workHoursLogList.get(i);
+                sheet.setColumnWidth(i, excelTitleVO.getWidth());
+                Boolean isDate = "workDate".equals(excelTitleVO.getCode());
+                handleWriteCell(row, i, workHoursExportVO, (isDate ? dateCellStyle : cellStyle), excelTitleVO.getCode(), clazz);
+            }
+            cursorDTO.increaseRow();
+        }
+        sheet.trackAllColumnsForAutoSizing();
+    }
+
+    public static Workbook initWorkHoursExportWorkbook(String sheetName, List<ExcelTitleVO> list) {
+        //1、创建工作簿
+        SXSSFWorkbook workbook = new SXSSFWorkbook();
+        //1.3、列标题样式
+        CellStyle style2 = createCellStyle(workbook, (short) 13, HorizontalAlignment.LEFT.getCode(), true);
+        //1.4、强制换行
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setWrapText(true);
+        //2、创建工作表
+        SXSSFSheet sheet = workbook.createSheet(sheetName);
+        //设置默认列宽
+        sheet.setDefaultColumnWidth(13);
+        //创建标题列
+        SXSSFRow row2 = sheet.createRow(0);
+        row2.setHeight((short) 260);
+        for (int i = 0; i < list.size(); i++) {
+            //3.3设置列标题
+            SXSSFCell cell2 = row2.createCell(i);
+            ExcelTitleVO excelTitleVO = list.get(i);
+            //加载单元格样式
+            style2.setFillForegroundColor(HSSFColor.HSSFColorPredefined.PALE_BLUE.getIndex());
+            style2.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            cell2.setCellStyle(style2);
+            cell2.setCellValue(excelTitleVO.getTitle());
+            Integer width = excelTitleVO.getWidth();
+            if (width != null) {
+                sheet.setColumnWidth(i, width);
+            }
+        }
+        return workbook;
+    }
+
     public static void writeToResponse(HttpServletResponse response, Workbook workbook) {
         try {
             String disposition = String.format("attachment;filename=\"%s-%s.xlsx\"", "Choerodon", System.currentTimeMillis());
@@ -370,6 +431,52 @@ public class ExcelUtil {
         font.setFontHeightInPoints(fontSize);
         cellStyle.setFont(font);
         return cellStyle;
+    }
+
+    protected static <T> void handleWriteCell(SXSSFRow row,
+                                              int i,
+                                              Object data,
+                                              CellStyle cellStyle,
+                                              String field,
+                                              Class<T> clazz) {
+        SXSSFCell cell = row.createCell(i);
+        if (data != null) {
+            Method method = null;
+            try {
+                method = clazz.getMethod(createGetter(field));
+            } catch (NoSuchMethodException e) {
+                LOGGER.debug("no such method exception: {}", e.getMessage());
+                try {
+                    method = clazz.getMethod("getFoundationFieldValue");
+                } catch (NoSuchMethodException e1) {
+                    LOGGER.error(EXCEPTION, e1);
+                }
+            }
+            Object invoke = new Object();
+            if (!ObjectUtils.isEmpty(method)) {
+                try {
+                    invoke = method.invoke(data);
+                } catch (InvocationTargetException | IllegalAccessException e) {
+                    LOGGER.error(EXCEPTION, e);
+                }
+            }
+            if (invoke instanceof Date) {
+                cell.setCellValue((Date) invoke);
+            } else if (invoke instanceof Map) {
+                ObjectMapper m = new ObjectMapper();
+                Map<String, String> foundationFieldValue = m.convertValue(invoke, Map.class);
+
+                String str = foundationFieldValue.get(field) != null ? foundationFieldValue.get(field) : "";
+                cell.setCellValue(substring(str));
+            } else {
+                String str = invoke == null ? null : invoke.toString();
+                cell.setCellValue(substring(str));
+            }
+        } else {
+            cell.setCellValue("");
+        }
+        cell.setCellStyle(cellStyle);
+
     }
 
     /**
