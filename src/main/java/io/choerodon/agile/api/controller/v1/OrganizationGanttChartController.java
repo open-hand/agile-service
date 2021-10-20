@@ -1,7 +1,6 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.agile.api.vo.GanttChartVO;
-import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.OrganizationGanttChartService;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.domain.Page;
@@ -13,9 +12,12 @@ import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+
+import java.util.List;
 
 /**
  * @author superlee
@@ -41,6 +43,34 @@ public class OrganizationGanttChartController {
                                                          @RequestBody(required = false) SearchVO searchVO) {
         EncryptionUtils.decryptSearchVO(searchVO);
         return ResponseEntity.ok(organizationGanttChartService.pagedQuery(organizationId, searchVO, pageRequest));
+    }
+
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询组织层项目列表数据")
+    @GetMapping(value = "/agile_projects")
+    public ResponseEntity<List<ProjectVO>> listAgileProjects(@ApiParam(value = "组织id", required = true)
+                                                             @PathVariable(name = "organization_id") Long organizationId,
+                                                             @RequestParam String name,
+                                                             @RequestParam String code,
+                                                             @RequestParam String param) {
+        return ResponseEntity.ok(organizationGanttChartService.listAgileProjects(organizationId, name, code, param));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "组织甘特图获取自定义字段表头")
+    @GetMapping("/header_field")
+    public ResponseEntity<List<AgileIssueHeadVO>> getIssueHeaderFields(@PathVariable(name = "organization_id") Long organizationId,
+                                                                       @ApiParam(value = "方案编码", required = true)
+                                                                       @RequestParam String schemeCode) {
+        return new ResponseEntity<>(organizationGanttChartService.getIssueHeaderFields(organizationId, schemeCode), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "组织需求统计界面获取自定义字段表头")
+    @GetMapping("/custom_field")
+    public ResponseEntity<List<ObjectSchemeFieldDetailVO>> listCustomFields(@PathVariable(name = "organization_id") Long organizationId) {
+        return new ResponseEntity<>(organizationGanttChartService.listCustomFields(organizationId), HttpStatus.OK);
     }
 
 }

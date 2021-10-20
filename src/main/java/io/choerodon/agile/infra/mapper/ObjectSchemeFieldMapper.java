@@ -20,7 +20,10 @@ public interface ObjectSchemeFieldMapper extends BaseMapper<ObjectSchemeFieldDTO
      * @param organizationId
      * @return
      */
-    List<ObjectSchemeFieldDTO> listQuery(@Param("organizationId") Long organizationId, @Param("projectId") Long projectId, @Param("searchVO") ObjectSchemeFieldSearchVO searchVO);
+    List<ObjectSchemeFieldDTO> listQuery(@Param("organizationId") Long organizationId,
+                                         @Param("projectIds") Set<Long> projectIds,
+                                         @Param("searchVO") ObjectSchemeFieldSearchVO searchVO,
+                                         @Param("issueTypes") List<String> issueTypes);
 
     ObjectSchemeFieldDTO queryById(@Param("fieldId") Long fieldId);
 
@@ -31,6 +34,11 @@ public interface ObjectSchemeFieldMapper extends BaseMapper<ObjectSchemeFieldDTO
                                                     @Param("fieldCodeList") List<String> fieldCodeList);
 
     List<ObjectSchemeFieldDetailVO> selectCustomFieldList(@Param("organizationId") Long organizationId, @Param("projectId") Long projectId, @Param("issueTypeList") String issueTypeList);
+
+    List<ObjectSchemeFieldDetailVO> selectFieldByProjectIdsWithoutOptions(@Param("organizationId") Long organizationId,
+                                                                          @Param("projectIds") List<Long> projectIds,
+                                                                          @Param("issueTypeList") String issueTypeList,
+                                                                          @Param("issueTypes") List<String> issueTypes);
 
     /**
      * 根据fd_object_scheme_field_extend id查询字段

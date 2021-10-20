@@ -50,8 +50,11 @@
             AND
             (
                 osf.project_id is null
-                <if test="projectId != null">
-                    OR osf.project_id = #{projectId}
+                <if test="projectIds != null and projectIds.size > 0">
+                    or osf.project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                        #{projectId}
+                    </foreach>
                 </if>
             )
             <if test='searchVO.issueTypeList != null and searchVO.issueTypeList != ""'>
@@ -62,12 +65,22 @@
                 fd_object_scheme_field_extend osfe
                 WHERE
                 osfe.field_id = osf.id
-                <if test='searchVO.issueTypeList == "agileIssueType"'>
-                    AND osfe.issue_type IN ('issue_epic', 'story', 'bug', 'task', 'sub_task')
-                </if>
-                <if test='searchVO.issueTypeList == "programIssueType"'>
-                    AND osfe.issue_type IN ('issue_epic', 'feature')
-                </if>
+                <choose>
+                    <when test="issueTypes != null and issueTypes.size > 0">
+                        and osfe.issue_type in
+                        <foreach item="item" index="index" collection="issueTypes" open="(" separator="," close=")">
+                            #{item}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        <if test='searchVO.issueTypeList == "agileIssueType"'>
+                            AND osfe.issue_type IN ('issue_epic', 'story', 'bug', 'task', 'sub_task')
+                        </if>
+                        <if test='searchVO.issueTypeList == "programIssueType"'>
+                            AND osfe.issue_type IN ('issue_epic', 'feature')
+                        </if>
+                    </otherwise>
+                </choose>
             )
             </if>
         ))
@@ -156,6 +169,18 @@
         </collection>
     </resultMap>
 
+    <resultMap id="objectSchemeField" type="io.choerodon.agile.api.vo.ObjectSchemeFieldDetailVO">
+        <id property="id" column="id"/>
+        <id property="code" column="code"/>
+        <id property="name" column="name"/>
+        <id property="fieldType" column="field_type"/>
+        <id property="projectId" column="project_id"/>
+        <id property="fieldTypeName" column="field_type_name"/>
+        <id property="required" column="required"/>
+        <id property="system" column="is_system"/>
+        <id property="extraConfig" column="extra_config"/>
+    </resultMap>
+
     <select id="selectFieldsWithOptionals" resultMap="objectSchemeFieldDetailMap">
         select
             t1.id,
@@ -217,6 +242,56 @@
             )
         </if>
         order by osf.id DESC, ffo.sequence ASC
+    </select>
+
+    <select id="selectFieldByProjectIdsWithoutOptions" resultMap="objectSchemeField">
+        SELECT
+        osf.id,
+        osf.code,
+        osf.name,
+        osf.field_type,
+        osf.extra_config,
+        osf.project_id,
+        flv.name as field_type_name
+        FROM fd_object_scheme_field osf
+        LEFT JOIN lookup_value flv ON flv.value_code = osf.field_type and flv.type_code = 'field_type'
+        WHERE
+        osf.organization_id = #{organizationId}
+        AND
+        (
+        osf.project_id in
+        <foreach item="item" index="index" collection="projectIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        OR osf.project_id IS NULL
+        )
+        <if test='(issueTypeList != null and issueTypeList != "") or (issueTypes != null and issueTypes.size > 0)'>
+            AND osf.id in (
+            SELECT osfe.field_id
+            FROM fd_object_scheme_field_extend osfe
+            WHERE osfe.field_id = osf.id
+            <choose>
+                <when test="issueTypes != null and issueTypes.size > 0">
+                    and osfe.issue_type in
+                    <foreach item="item" index="index" collection="issueTypes" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </when>
+                <otherwise>
+                    <if test='issueTypeList == "agileIssueType"'>
+                        AND osfe.issue_type IN ('issue_epic', 'story', 'bug', 'task', 'sub_task')
+                    </if>
+                    <if test='issueTypeList == "programIssueType"'>
+                        AND osfe.issue_type IN ('issue_epic', 'feature')
+                    </if>
+                    <if test='issueTypeList == "backlogIssueType" '>
+                        AND osfe.issue_type IN ('backlog')
+                    </if>
+                </otherwise>
+            </choose>
+            )
+        </if>
+        order by osf.id DESC
     </select>
 
     <select id="selectByExtendIds" resultType="io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO">

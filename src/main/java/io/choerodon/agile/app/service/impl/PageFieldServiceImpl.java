@@ -305,7 +305,7 @@ public class PageFieldServiceImpl implements PageFieldService {
             List<PageDTO> pages = pageMapper.fulltextSearch(organizationId, new PageSearchVO());
             Map<String, Long> pageMap = pages.stream().collect(Collectors.toMap(PageDTO::getPageCode, PageDTO::getId));
             //查询field
-            List<ObjectSchemeFieldDTO> fields = objectSchemeFieldMapper.listQuery(organizationId, null, new ObjectSchemeFieldSearchVO());
+            List<ObjectSchemeFieldDTO> fields = objectSchemeFieldMapper.listQuery(organizationId, null, new ObjectSchemeFieldSearchVO(), null);
             Map<String, Map<String, Long>> schemeCodeFieldMap = fields.stream().collect(Collectors.groupingBy(ObjectSchemeFieldDTO::getSchemeCode, Collectors.toMap(ObjectSchemeFieldDTO::getCode, ObjectSchemeFieldDTO::getId)));
             handleInitPageFieldE(organizationId, schemeCodeFieldMap, pageMap);
         }

@@ -16,6 +16,36 @@ public class AgileIssueHeadVO {
     @ApiModelProperty(value = "字段类型")
     private String fieldType;
 
+    private String projectName;
+
+    private Long projectId;
+
+    private Long id;
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getTitle() {
         return title;
     }

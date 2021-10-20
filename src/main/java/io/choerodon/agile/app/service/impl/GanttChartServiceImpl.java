@@ -112,9 +112,6 @@ public class GanttChartServiceImpl implements GanttChartService {
     public Page<GanttChartVO> pagedQuery(Long projectId,
                                          SearchVO searchVO,
                                          PageRequest pageRequest) {
-        if (isSprintEmpty(searchVO)) {
-            throw new CommonException(ERROR_SPRINT_EMPTY);
-        }
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Map<Long, ProjectVO> projectMap = queryProjectMap(projectId);
         return listByProjectIdAndSearch(projectMap, searchVO, pageRequest, organizationId, true);
@@ -753,6 +750,9 @@ public class GanttChartServiceImpl implements GanttChartService {
                                                        PageRequest pageRequest,
                                                        Long organizationId,
                                                        boolean orderByRank) {
+        if (isSprintEmpty(searchVO)) {
+            throw new CommonException(ERROR_SPRINT_EMPTY);
+        }
         if (ObjectUtils.isEmpty(projectMap)) {
             return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }
