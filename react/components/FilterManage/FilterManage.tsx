@@ -13,10 +13,11 @@ interface Props {
   setVisible: Function,
   /** @default project */
   menuType?: 'project' | 'org',
+  projectId?: string
   issueSearchStore: IssueSearchStore,
 }
 const FilterManage: React.FC<Props> = ({
-  visible, menuType = 'project', setVisible, issueSearchStore,
+  visible, menuType = 'project', setVisible, projectId, issueSearchStore,
 }) => {
   const { myFilters } = issueSearchStore;
   const announcementHeight = useGetAnnouncementHeight();
@@ -46,6 +47,7 @@ const FilterManage: React.FC<Props> = ({
                 <FilterItem
                   key={filter.filterId}
                   menuType={menuType}
+                  projectId={projectId}
                   data={filter}
                   onSubmit={async () => {
                     await issueSearchStore.loadMyFilterList();

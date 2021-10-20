@@ -29,12 +29,13 @@ import { IGanttPageProps } from '../Gantt';
 
 interface IGanttColumnsHookProps extends TableCacheRenderProps {
   menuType: IGanttPageProps['menuType']
+  projectId?: string
   onSortChange: IGanttSortLabelProps['onChange']
   onCreateSubIssue?: (parentIssue: GanttIssue) => void
   onAfterCreateSubIssue?: (createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed?: boolean) => void
 }
 interface IGanttOrgColumnsHookProps extends TableCacheRenderProps {
-
+  projectId?: string
 }
 const renderTooltip = (user: User) => {
   const {
@@ -279,9 +280,10 @@ const defaultListLayoutColumns = defaultVisibleColumns.map((code) => ({
   display: true,
 }));
 function useGanttProjectColumns({
-  cached, onAfterCreateSubIssue, onCreateSubIssue, onSortChange,
+  cached, onAfterCreateSubIssue, onCreateSubIssue, onSortChange, projectId, menuType,
 }: IGanttColumnsHookProps) {
-  const { data: tableFields } = useIssueTableFields({ hiddenFieldCodes: ['epicSelfName', 'summary'] });
+  // 恒为 项目层级
+  const { data: tableFields } = useIssueTableFields({ hiddenFieldCodes: ['epicSelfName', 'summary'], projectId, menuType: 'project' });
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
   const listLayoutColumns = useMemo(() => getListLayoutColumns(cached?.listLayoutColumns || defaultListLayoutColumns as any, tableFields || []), [cached?.listLayoutColumns, tableFields]);
   const visibleColumnCodes = useMemo(() => (listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode)), [listLayoutColumns]);
@@ -326,4 +328,4 @@ function useGanttColumns(props: IGanttColumnsHookProps) {
 }
 
 export { useGanttOrgColumns };
-export default useGanttColumns;
+export default useGanttProjectColumns;

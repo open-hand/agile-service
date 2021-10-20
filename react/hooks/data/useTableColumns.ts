@@ -6,21 +6,22 @@ import useProjectKey from './useProjectKey';
 
 export interface TableColumnConfig {
   type: string
+  projectId?: string
 }
-export function useTableColumnsKey(type: string) {
-  return useProjectKey({ key: ['TableColumns', type] });
+export function useTableColumnsKey(type: string, projectId?: string) {
+  return useProjectKey({ key: ['TableColumns', type], projectId });
 }
 export default function useTableColumns(config: TableColumnConfig, options?: UseQueryOptions<IListLayout>) {
-  const key = useTableColumnsKey(config.type);
-  return useQuery(key, () => cacheColumnApi.getDefault(config.type), {
+  const key = useTableColumnsKey(config.type, config.projectId);
+  return useQuery(key, () => cacheColumnApi.project(config.projectId).getDefault(config.type), {
     ...options,
   });
 }
-export const useUpdateColumnMutation = (type: string) => {
+export const useUpdateColumnMutation = (type: string, projectId?: string) => {
   const queryClient = useQueryClient();
-  const key = useTableColumnsKey(type);
+  const key = useTableColumnsKey(type, projectId);
   return useMutation(
-    (listLayout: IListLayout) => cacheColumnApi.update(listLayout),
+    (listLayout: IListLayout) => cacheColumnApi.project(projectId).update(listLayout),
     {
       onSuccess: (data) => {
         // 用返回数据更新

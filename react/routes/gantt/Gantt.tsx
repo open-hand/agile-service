@@ -65,6 +65,7 @@ import GanttDragWrapper from './components/gantt-drag-wrapper';
 import useQuickCreateIssue from './hooks/useQuickCreateIssue';
 import { GanttIssue } from './types';
 import { getProjectId } from '@/utils/common';
+import SelectProject from '@/components/select/select-project';
 
 const middleDateKeys = [{ key: 'actualStartTime', maxDateKey: 'actualEndTime' }, { key: 'actualEndTime', minDateKey: 'actualStartTime' }];
 const { Option } = FlatSelect;
@@ -72,6 +73,9 @@ export interface IGanttPageProps extends TableCacheRenderProps {
   isInProgram: boolean
   /** 组织层禁止编辑 */
   menuType: 'project' | 'org'
+  projectId?: string
+  projects?: any[]
+  setCurrentProject?: any
 }
 dayjs.extend(weekday);
 const typeOptions = [{
@@ -91,7 +95,9 @@ const typeValues = typeOptions.map((t) => t.value);
 export type IGanttDimensionTypeValue = (typeof typeValues)[number];
 
 const GanttPage: React.FC<IGanttPageProps> = (props) => {
-  const { isInProgram, menuType } = props;
+  const {
+    isInProgram, menuType, projectId, setCurrentProject, projects,
+  } = props;
   const [data, setData] = useState<any[]>([]);
   const [type, setType] = useState<IGanttDimensionTypeValue>(localPageCacheStore.getItem('gantt.search.type') ?? typeValues[0]);
   const [rankList, setRankList] = useState<string[] | undefined>(undefined);
@@ -101,7 +107,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const [filterManageVisible, setFilterManageVisible] = useState<boolean>();
   const [loading, setLoading] = useState(false);
   const issueSearchStore = useIssueSearchStore({
-    menuType,
+    projectId,
     getSystemFields: () => getSystemFields().map((item) => (item.code === 'feature' || item.code === 'epic' ? { ...item, defaultShow: false } : item)).filter((item) => item.code !== 'sprint') as ILocalField[],
     transformFilter,
   });
@@ -144,19 +150,18 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const {
     columns, setColumns, visibleColumnCodes, tableWithSortedColumns, listLayoutColumns,
   } = useGanttColumns({
-    ...props, onSortChange, onCreateSubIssue: handleQuickCreateSubIssue, onAfterCreateSubIssue: handleQuickCreateSubIssueAfter,
+    ...props, onSortChange, projectId, onCreateSubIssue: handleQuickCreateSubIssue, onAfterCreateSubIssue: handleQuickCreateSubIssueAfter,
   });
 
   const searchFilter = useComputed(() => {
     const filter = issueSearchStore.getCustomFieldFilters();
     filter.otherArgs.sprint = sprintIds;
     filter.searchArgs.dimension = type;
-    const projectId = getProjectId();
     return merge(filter, {
       displayFields: visibleColumnCodes.map((code) => ({ code, projectId })),
       searchArgs: { tree: type !== 'assignee', dimension: type },
     });
-  }, [sprintIds, visibleColumnCodes, type]);
+  }, [sprintIds, visibleColumnCodes, type, projectId]);
 
   const { run, flush } = useDebounceFn(() => {
     (async () => {
@@ -165,11 +170,11 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
         return;
       }
       setLoading(true);
-      const requestArr = menuType === 'project' ? [
+      const requestArr = menuType === 'project' || true ? [
         workCalendarApi.getWorkSetting(year),
-        workCalendarApi.getYearCalendar(year),
-        ['sprint', 'assignee'].includes(type) ? ganttApi.loadDimensionRank(searchFilter) : { ids: [] },
-        ganttApi.loadByTask(searchFilter, sortedList),
+        workCalendarApi.project(projectId).getYearCalendar(year),
+        ['sprint', 'assignee'].includes(type) ? ganttApi.project(projectId).loadDimensionRank(searchFilter) : { ids: [] },
+        ganttApi.project(projectId).loadByTask(searchFilter, sortedList),
       ] : [workCalendarApi.getWorkSetting(year), null, { ids: [] }, ganttApi.loadOrgByTask(searchFilter, 1)];
       const [workCalendarRes, projectWorkCalendarRes, rankListRes, res] = await Promise.all(requestArr);
       // setColumns(headers.map((h: any) => ({
@@ -178,13 +183,11 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
       //   label: h.name,
       // })));
       unstable_batchedUpdates(() => {
-        if (menuType === 'project') {
-          setProjectWorkCalendar(projectWorkCalendarRes);
-        }
+        setProjectWorkCalendar(projectWorkCalendarRes);
         setWorkCalendar(workCalendarRes);
         setColumns(tableWithSortedColumns);
         setRankList(rankListRes?.ids);
-        setData(res);
+        setData(res.map((item: any) => ({ ...item, onlyShow: menuType === 'org' })));
         setLoading(false);
       });
     })();
@@ -454,26 +457,31 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
       sourceBar, destinationBar, type, data: moveConfig.data,
     });
   }, [data, rankList, searchFilter, store.ganttRef, type]);
-
   return (
     <Page>
       <Header>
-        {menuType === 'project' ? (
-          <SelectSprint
-            flat
-            placeholder="冲刺"
-            value={sprintIds}
-            multiple
-            onChange={handleSprintChange}
-            clearButton={false}
-            afterLoad={afterSprintLoad}
-            hasUnassign
-            style={{ marginRight: 16 }}
-            maxTagCount={3}
-            searchable={false}
-            selectAllButton={false}
-          />
-        ) : <CheckBox>是否按项目划分</CheckBox>}
+        <SelectProject
+          value={projectId}
+          optionData={projects}
+          onChange={(val) => setCurrentProject && setCurrentProject(val ? String(val) : val)}
+        />
+        <SelectSprint
+          key={`SelectSprint-${projectId}`}
+          flat
+          projectId={projectId}
+          placeholder="冲刺"
+          value={sprintIds}
+          multiple
+          onChange={handleSprintChange}
+          clearButton={false}
+          afterLoad={afterSprintLoad}
+          hasUnassign
+          style={{ marginRight: 16 }}
+          maxTagCount={3}
+          searchable={false}
+          selectAllButton={false}
+        />
+
         <FlatSelect value={type} onChange={handleTypeChange} clearButton={false} style={{ marginRight: 8 }}>
           {typeOptions.map((o) => (
             <Option value={o.value}>
@@ -588,7 +596,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
         }}
       >
         <Context.Provider value={{
-          store, searchFilter, dimensionType: type, menuType, disable: menuType === 'org',
+          store, searchFilter, dimensionType: type, menuType, disable: menuType === 'org', projectId,
         }}
         >
           <div style={{ display: 'flex', flexWrap: 'wrap' }}>
@@ -630,12 +638,15 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
                   renderEmpty={renderEmpty}
                 />
               </GanttDragWrapper>
-              <div className={classNames('c7n-gantt-content-body-quick-create', { 'c7n-gantt-content-body-quick-create-open': isCreate })}>
-                <QuickCreateIssue
-                  {...quickCreateProps}
-                  sprintId={sprintIds?.length === 1 ? sprintIds.filter((i) => i !== '0')[0] : undefined}
-                />
-              </div>
+              {menuType === 'project' && (
+                <div className={classNames('c7n-gantt-content-body-quick-create', { 'c7n-gantt-content-body-quick-create-open': isCreate })}>
+                  <QuickCreateIssue
+                    {...quickCreateProps}
+                    sprintId={sprintIds?.length === 1 ? sprintIds.filter((i) => i !== '0')[0] : undefined}
+                  />
+                </div>
+
+              )}
             </div>
           )}
           <IssueDetail
@@ -650,6 +661,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
             onLinkIssue={handleLinkIssue}
           />
           <FilterManage
+            projectId={projectId}
             visible={filterManageVisible!}
             setVisible={setFilterManageVisible}
             issueSearchStore={issueSearchStore}

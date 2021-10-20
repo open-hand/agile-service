@@ -20,13 +20,14 @@ export interface TableCacheRenderProps {
 }
 export interface TableCacheProps {
   type: string
+  projectId?: string
   children: (props: TableCacheRenderProps) => React.ReactElement<any, any> | null
 }
 const TableCache: React.FC<TableCacheProps> = ({
-  type, children,
+  type, children, projectId,
 }) => {
   const cached = localPageCacheStore.getItem(type);
-  const { isLoading, data } = useTableColumns({ type });
+  const { isLoading, data } = useTableColumns({ type, projectId });
   const updateCache = usePersistFn(({ pagination, visibleColumns }) => {
     localPageCacheStore.setItem(type, {
       pagination,

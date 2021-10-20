@@ -18,7 +18,7 @@ class CacheColumnApi extends Api<CacheColumnApi> {
   }
 
   getDefault(code: string): Promise<IListLayout> {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/list_layout/${code}`,
       params: {
@@ -28,7 +28,7 @@ class CacheColumnApi extends Api<CacheColumnApi> {
   }
 
   update(data: IListLayout) {
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/list_layout`,
       params: {

@@ -7,6 +7,7 @@ interface GanttContext {
   searchFilter: any
   menuType: IGanttPageProps['menuType']
   disable: boolean
+  projectId?: string
   dimensionType: IGanttDimensionTypeValue
 }
 const context = createContext({} as GanttContext);

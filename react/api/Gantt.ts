@@ -1,6 +1,7 @@
 import { axios } from '@choerodon/boot';
 import queryString from 'query-string';
 import { getProjectId, getOrganizationId } from '@/utils/common';
+import Api from './Api';
 
 type IGanttDimension = 'task' | 'assignee' | 'sprint' | 'epic';
 export type IGanttMoveRequestDataPreviousWithNext = {
@@ -17,16 +18,16 @@ export type IGanttMoveRequestData = {
   instanceType?: string
   // searchVO:any
 } & IGanttMoveRequestDataPreviousWithNext
-class GanttApi {
+class GanttApi extends Api<GanttApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   get orgPrefix() {
-    return `/agile/v1/organizations/${getOrganizationId()}`;
+    return `/agile/v1/organizations/${this.orgId}`;
   }
 
-  async loadOrgByTask(data:any, page:number, sort?:any) {
+  async loadOrgByTask(data: any, page: number, sort?: any) {
     const res = await axios({
       method: 'post',
       url: `${this.orgPrefix}/gantt/list`,
@@ -56,8 +57,25 @@ class GanttApi {
     return result;
   }
 
+  /**
+   * 查询组织下所有敏捷项目
+   * @param filter
+   * @returns
+   */
+  loadProjects(filter?: any) {
+    return this.request({
+      method: 'get',
+      url: `${this.orgPrefix}/gantt/agile_projects`,
+      params: {
+        name: '',
+        code: '',
+        param: filter || '',
+      },
+    });
+  }
+
   loadByTaskPage(data: any, page: number, sort?: any) {
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/gantt/list`,
       data,
@@ -73,7 +91,7 @@ class GanttApi {
   }
 
   loadHeaders() {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/headers/gantt_chart`,
     });
@@ -89,7 +107,7 @@ class GanttApi {
   }
 
   loadDimensionRank(searchVO: any) {
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/gantt/list_dimension`,
       data: searchVO,

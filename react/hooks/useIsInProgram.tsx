@@ -26,11 +26,12 @@ interface Props {
 }
 interface useIsInProgramConfig {
   projectId?: string
+  menuType?: 'project' | 'org'
 }
 const useIsInProgram = (config?: useIsInProgramConfig): ChildrenProps => {
-  const { projectId } = config ?? {};
+  const { projectId, menuType } = config ?? {};
   const { isProgram } = useIsProgram();
-  const isProject = AppState.currentMenuType.type === 'project';
+  const isProject = menuType ? menuType === 'project' : AppState.currentMenuType.type === 'project';
   const isFirstMount = useRef<boolean>(shouldRequest && isProject && !isProgram);
   const {
     data: program, isLoading: loading1, refetch: refresh1,

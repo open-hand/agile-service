@@ -1,5 +1,5 @@
-import { commonApi } from '@/api';
 import { useQuery, UseQueryOptions } from 'react-query';
+import { commonApi } from '@/api';
 import useProjectKey from './useProjectKey';
 
 export interface ParentArtDoingConfig {
@@ -9,7 +9,7 @@ export default function useParentArtDoing(config?: ParentArtDoingConfig, options
   const { projectId } = config || {};
 
   const key = useProjectKey({ key: ['parent-art-doing'], projectId });
-  return useQuery(key, () => commonApi.getIsShowFeature(), {
+  return useQuery(key, () => commonApi.project(projectId).getIsShowFeature(), {
     ...options,
   });
 }
