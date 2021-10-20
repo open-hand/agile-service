@@ -135,6 +135,7 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
                 statusArgs={{
                   statusId, issueId, typeId, projectId, applyType, name,
                 }}
+                projectId={store.projectId}
                 onOption={this.onOption}
                 optionRenderer={this.optionRenderer}
               />

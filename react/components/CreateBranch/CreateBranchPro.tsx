@@ -3,11 +3,11 @@ import {
   Modal, Form, Select, DataSet, Row, Col, TextField,
 } from 'choerodon-ui/pro';
 import { FieldType, FieldIgnore } from 'choerodon-ui/pro/lib/data-set/enum';
+import { observer } from 'mobx-react-lite';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { devOpsApi } from '@/api';
 import { IModalProps } from '@/common/types';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
-import { observer } from 'mobx-react-lite';
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { getProjectId } from '@/utils/common';
 import SelectAppService from '../select/select-app-service';
 import SelectBranch from '../select/select-branch-with-tag';
@@ -18,6 +18,7 @@ const { Option } = Select;
 interface ILinkBranchModalProps {
   issueId: string
   typeCode?: string
+  projectId?: string
   defaultBranchSuffixName?: string
   onOk?: Function
 }
@@ -45,7 +46,7 @@ const SelectBranchType: React.FC<{ name: string }> = ({ name }) => {
 };
 
 const CreateBranch: React.FC<{ modal?: IModalProps } & ILinkBranchModalProps> = observer(({
-  modal, issueId, typeCode, onOk, defaultBranchSuffixName,
+  modal, issueId, typeCode, onOk, defaultBranchSuffixName, projectId: propsProjectId,
 }) => {
   const handleCheckName = useCallback(async (value?: string, name?: string, record?: Record) => {
     const endWith = /(\/|\.|\.lock)$/;
@@ -138,7 +139,7 @@ const CreateBranch: React.FC<{ modal?: IModalProps } & ILinkBranchModalProps> = 
         <Option value="self">本项目</Option>
         <Option value="other">其他项目</Option>
       </Select>
-      <SelectAppService name="app" mode={formDs.current?.get('source')} autoFocus />
+      <SelectAppService name="app" mode={formDs.current?.get('source')} autoFocus projectId={propsProjectId} />
       <SelectBranch name="originBranch" issueId={issueId} projectId={formDs.current?.get('projectId')} applicationId={formDs.current?.get('appServiceId')} enabledTag />
       <Row>
         <Col span={9} style={{ paddingRight: '.2rem' }}>

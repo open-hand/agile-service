@@ -16,7 +16,7 @@ import Divider from './Divider';
 const SubTask = observer(({
   onDeleteSubIssue, reloadIssue, onUpdate, parentSummary, onCreateSubIssue, onOpenCreateSubTask,
 }) => {
-  const { store, disabled } = useContext(EditIssueContext);
+  const { store, disabled, projectId } = useContext(EditIssueContext);
   const {
     issueId: parentIssueId, subIssueVOList = [], priorityId, sprintId, typeCode, relateIssueId, activeSprint,
   } = store.getIssue;
@@ -96,7 +96,7 @@ const SubTask = observer(({
           </div>
           {!disableCreate && (
             <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
-              <Tooltip placement="topRight" title="创建子任务" >
+              <Tooltip placement="topRight" title="创建子任务">
                 <Button onClick={onOpenCreateSubTask}>
                   <Icon type="playlist_add icon" />
                 </Button>
@@ -116,6 +116,7 @@ const SubTask = observer(({
           <QuickCreateSubIssue
             priorityId={priorityId}
             sprintId={sprintId}
+            projectId={projectId}
             parentIssueId={parentIssueId}
             onCreate={handleCreateSubIssue}
             cantCreateEvent={() => { onOpenCreateSubTask(); }}

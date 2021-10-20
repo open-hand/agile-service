@@ -47,6 +47,7 @@ import UserTag from '@/components/tag/user-tag';
               <SelectUser
                 clearButton={!required}
                 required={required}
+                projectId={store.projectId}
                 onChange={submit}
                 selectedUser={assigneeId ? {
                   id: assigneeId,
@@ -77,7 +78,7 @@ import UserTag from '@/components/tag/user-tag';
             }
           </TextEditToggle>
           {!disabled && (
-            <IsProjectMember>
+            <IsProjectMember projectId={store.projectId}>
               {(isProjectMember) => isProjectMember && (
                 (!assigneeId || (
                   assigneeId && assigneeId.toString() !== loginUserId.toString()

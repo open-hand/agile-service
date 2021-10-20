@@ -62,7 +62,7 @@ const IssueDropDown = ({
           </div>
         ),
       onOk() {
-        return issueApi.delete(issueId, createdBy)
+        return issueApi.project(store.projectId).delete(issueId, createdBy)
           .then((res) => {
             if (onDeleteIssue) {
               onDeleteIssue(issue);
@@ -78,7 +78,7 @@ const IssueDropDown = ({
   const handleClickMenu = async (e) => {
     if (e.key === '0') {
       // store.setWorkLogShow(true);
-      openRecordWorkLogModal({ issueId, onOk: () => reloadIssue(issueId) });
+      openRecordWorkLogModal({ issueId, projectId: store.projectId, onOk: () => reloadIssue(issueId) });
     } else if (e.key === 'item_11') {
       handleDeleteIssue();
     } else if (e.key === '2') {
@@ -96,10 +96,12 @@ const IssueDropDown = ({
       });
       store.setCopyIssueShow(true);
     } else if (e.key === '4') {
-      openTransformSubIssue({ issueId, objectVersionNumber, onOk: onTransformSubIssue });
+      openTransformSubIssue({
+        issueId, objectVersionNumber, projectId: store.projectId, onOk: onTransformSubIssue,
+      });
     } else if (e.key === '5') {
       openTransformFromSubIssue({
-        issueId, objectVersionNumber, issueTypeId: issueTypeVO.id, onOk: onTransformSubIssue, store,
+        issueId, objectVersionNumber, issueTypeId: issueTypeVO.id, projectId: store.projectId, onOk: onTransformSubIssue, store,
       });
     } else if (e.key === '6') {
       openCreateBranchModal({
@@ -111,6 +113,7 @@ const IssueDropDown = ({
         title: '分配工作项',
         children: <Assignee
           issueId={issueId}
+          projectId={store.projectId}
           assigneeId={assigneeId}
           objectVersionNumber={objectVersionNumber}
           onOk={(res) => {
@@ -123,12 +126,12 @@ const IssueDropDown = ({
       });
     } else if (e.key === '8') {
       openChangeParentModal({
-        issueId, issueNum, objectVersionNumber, onOk: onChangeParent,
+        issueId, issueNum, objectVersionNumber, onOk: onChangeParent, projectId: store.projectId,
       });
     } else if (e.key === '9') {
       onOpenCreateSubBug();
     } else if (e.key === '10') {
-      openRelateIssueModal({ issue, onOk: onRelateIssue });
+      openRelateIssueModal({ issue, onOk: onRelateIssue, projectId: store.projectId });
     } else if (e.key === 'item_10') {
       openIssueMove({
         issue,

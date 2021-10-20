@@ -40,7 +40,7 @@ const IssueWorkLog = observer(({
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
             <Tooltip placement="topRight" title="登记工作">
-              <Button onClick={() => openRecordWorkLogModal({ issueId, onOk: () => reloadIssue(issueId) })}>
+              <Button onClick={() => openRecordWorkLogModal({ issueId, projectId: store.projectId, onOk: () => reloadIssue(issueId) })}>
                 <Icon type="playlist_add icon" />
               </Button>
             </Tooltip>

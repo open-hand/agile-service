@@ -40,6 +40,7 @@ import { issueApi } from '@/api';
             editor={({ submit }) => (
               <SelectPriority
                 required={required}
+                projectId={store.projectId}
                 priorityId={priorityId}
                 onChange={submit}
                 {

@@ -55,6 +55,7 @@ class FieldTeam extends Component {
             editor={(
               <SelectTeam
                 multiple
+                projectId={store.projectId}
                 required={required}
                 label="团队"
                 style={{

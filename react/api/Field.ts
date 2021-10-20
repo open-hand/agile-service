@@ -68,7 +68,7 @@ class FieldApi extends Api<FieldApi> {
   quickCreateDefault(issueId: number, dto: IFiled) {
     const organizationId = getOrganizationId();
 
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/field_value/quick_create/${issueId}`,
       data: { ...dto },
@@ -83,7 +83,7 @@ class FieldApi extends Api<FieldApi> {
  * @returns {V|*}
  */
   getFields(dto: IFiled, projectId?: string) {
-    return axios({
+    return this.request({
       method: 'post',
       url: `/agile/v1/projects/${projectId || getProjectId()}/field_value/list`,
       params: {
@@ -97,7 +97,7 @@ class FieldApi extends Api<FieldApi> {
  * 加载字段配置（包含值）
  * @returns {V|*}
  */
-  getFieldAndValue(issueId: string, dto: IFiled) {
+  getFieldAndValue(issueId: string, dto: IFiled, projectId?: string) {
     return this.isOutside ? this.request({
       method: 'post',
       url: `${this.outPrefix}/field_value/list/${issueId}`,
@@ -108,7 +108,7 @@ class FieldApi extends Api<FieldApi> {
       data: { ...dto },
     }) : this.request({
       method: 'post',
-      url: `/agile/v1/projects/${getProjectId()}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}field_value/list/${issueId}`,
+      url: `/agile/v1/projects/${projectId || getProjectId()}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}field_value/list/${issueId}`,
       params: {
         organizationId: this.orgId,
         instanceProjectId: this.projectId,

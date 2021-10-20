@@ -23,6 +23,7 @@ import useDefaultPriority from '@/hooks/data/useDefaultPriority';
 
 interface QuickCreateSubIssueProps {
   priorityId?: string
+  projectId?: string
   parentIssueId?: string
   sprintId: string
   typeCode?: string | string[]
@@ -38,10 +39,10 @@ interface QuickCreateSubIssueProps {
   assigneeChange?: (assigneeId: string | undefined, assignee: User | undefined) => void
 }
 const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
-  priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, defaultValues, cantCreateEvent, typeCode, summaryChange, typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick,
+  priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, defaultValues, projectId, cantCreateEvent, typeCode, summaryChange, typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick,
 }) => {
-  const { data: issueTypes, isLoading } = useProjectIssueTypes({ typeCode: typeCode || 'sub_task', onlyEnabled: true });
-  const { data: defaultPriority } = useDefaultPriority(undefined, { enabled: !priorityId });
+  const { data: issueTypes, isLoading } = useProjectIssueTypes({ typeCode: typeCode || 'sub_task', projectId, onlyEnabled: true });
+  const { data: defaultPriority } = useDefaultPriority({ projectId }, { enabled: !priorityId });
 
   const [summary, setSummary] = useState('');
   const [expand, setExpand] = useState(!!mountCreate);
@@ -73,7 +74,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
 
     if (currentType && summary && summary.trim()) {
       setLoading(true);
-      if (!await checkCanQuickCreate(currentType.id, assigneeId)) {
+      if (!await checkCanQuickCreate(currentType.id, assigneeId, projectId)) {
         if (!cantCreateEvent) {
           Choerodon.prompt('该工作项类型含有必填选项，请使用弹框创建');
           setLoading(false);
@@ -112,7 +113,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
         issueTypeId: currentType.id,
         pageCode: 'agile_issue_create',
       };
-      const fields = await fieldApi.getFields(param);
+      const fields = await fieldApi.getFields(param, projectId);
       const fieldsMap = fields2Map(fields);
       const issue = getQuickCreateDefaultObj({
         ...defaultValues,
@@ -126,8 +127,8 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
         assigneeId,
       }, fieldsMap);
 
-      const res = issue.relateIssueId || issue.relateIssueId ? await issueApi.createSubtask(issue) : await issueApi.create(issue);
-      await fieldApi.quickCreateDefault(res.issueId, {
+      const res = issue.relateIssueId || issue.relateIssueId ? await issueApi.project(projectId).createSubtask(issue) : await issueApi.project(projectId).create(issue);
+      await fieldApi.project(projectId).quickCreateDefault(res.issueId, {
         schemeCode: 'agile_issue',
         issueTypeId: currentType.id,
         pageCode: 'agile_issue_create',
@@ -149,7 +150,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   });
   useEffect(() => {
     if (expand && id) {
-      fieldApi.getSummaryDefaultValue(id).then((res) => {
+      fieldApi.project(projectId).getSummaryDefaultValue(id).then((res) => {
         if (summary === currentTemplate.current) {
           currentTemplate.current = res as string;
           setSummary(res as string);

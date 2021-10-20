@@ -1,9 +1,9 @@
+import { observer } from 'mobx-react';
+import React, { Component } from 'react';
 import { issueApi } from '@/api';
 import SelectUser from '@/components/select/select-user';
 import UserTag from '@/components/tag/user-tag';
 import TextEditToggle from '@/components/TextEditTogglePro';
-import { observer } from 'mobx-react';
-import React, { Component } from 'react';
 
 @observer class FieldMember extends Component {
   updateIssueField = (value) => {
@@ -27,7 +27,7 @@ import React, { Component } from 'react';
       value, fieldType, valueStr,
     } = field;
     const required = field?.required || store.getRuleRequired(field);
-    return <SelectUser required={required} clearButton selectedUser={valueStr} />;
+    return <SelectUser required={required} projectId={store.projectId} clearButton selectedUser={valueStr} />;
   }
 
   render() {

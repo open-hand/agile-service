@@ -61,6 +61,7 @@ class FieldProgramVersion extends Component {
             editor={() => (
               <SelectProgramVersion
                 multiple
+                projectId={store.projectId}
                 required={required}
               />
             )}

@@ -1,4 +1,4 @@
-import { sameProject } from '@/utils/detail';
+import { getRequestProjectId, sameProject } from '@/utils/detail';
 import { getProjectId } from '@/utils/common';
 import Api from './Api';
 
@@ -36,7 +36,7 @@ class UiApi extends Api<UiApi> {
       },
     }) : this.request({
       method: 'get',
-      url: `/agile/v1/projects/${getProjectId()}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/related_'}static_file/${sameProject(this.projectId) ? 'related/' : ''}${issueId}`,
+      url: `/agile/v1/projects/${getRequestProjectId(this.projectId)}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/related_'}static_file/${sameProject(this.projectId) ? 'related/' : ''}${issueId}`,
       params: {
         organizationId: this.orgId,
         instanceProjectId: this.projectId,

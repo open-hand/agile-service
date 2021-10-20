@@ -172,7 +172,10 @@ class DevOpsApi extends Api<DevOpsApi> {
    * @param issueId
    */
   loadMergeRequest(issueId: number) {
-    return axios.get(`${this.issuePrefix}/issue/${issueId}/merge_request/list`);
+    return this.request({
+      url: `${this.issuePrefix}/issue/${issueId}/merge_request/list`,
+      method: 'get',
+    });
   }
 
   /**

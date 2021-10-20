@@ -4,11 +4,11 @@ import React, {
 import { observer } from 'mobx-react-lite';
 import classnames from 'classnames';
 import { DataSet } from 'choerodon-ui/pro';
+import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import { IField, IFieldWidthValue, Issue } from '@/common/types';
 import { issueApi } from '@/api';
 import RequiredField from '@/components/required-field';
 import useRequiredFieldDataSet, { RequiredFieldDs } from '@/components/required-field/useRequiredFieldDataSet';
-import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import styles from './CopyRequired.less';
 import SubTaskRequired, { ISubTaskRequiredItem } from './SubTaskRequired';
 
@@ -55,10 +55,11 @@ interface Props {
   requiredFieldsVOArrRef: React.MutableRefObject<RequiredFieldDs[] | null>
   setLoading: (loading: boolean) => void
   selfExtraRequiredFields: IFieldWidthValue[]
+  projectId?:string
 }
 
 const CopyRequired: React.FC<Props> = ({
-  issue, copySubIssueChecked, requiredFieldsVOArrRef, setLoading, selfExtraRequiredFields,
+  issue, copySubIssueChecked, requiredFieldsVOArrRef, setLoading, selfExtraRequiredFields, projectId,
 }) => {
   const [selfRequiredFields, setSelfRequiredFields] = useState<IField[]>([]);
   const [subTaskRequiredFieldsArr, setSubTaskRequiredFieldsArr] = useState<(IField[])[]>([]);
@@ -67,19 +68,19 @@ const CopyRequired: React.FC<Props> = ({
   useEffect(() => {
     setLoading(true);
     const getSelfRequiredField = async () => {
-      const res = await issueApi.getRequiredField(issue.issueId, issue.issueTypeId);
+      const res = await issueApi.project(projectId).getRequiredField(issue.issueId, issue.issueTypeId);
       batchedUpdates(() => {
         setSelfRequiredFields(res);
         setLoading(false);
       });
     };
     getSelfRequiredField();
-  }, [issue.issueId, issue.issueTypeId, setLoading]);
+  }, [issue.issueId, issue.issueTypeId, projectId, setLoading]);
 
   useEffect(() => {
     if (copySubIssueChecked && !hasGot) {
       setLoading(true);
-      const getSubTaskRequiredFieldsArr = issue.subIssueVOList.map((subTask) => (() => issueApi.getRequiredField(subTask.issueId, subTask.issueTypeId)));
+      const getSubTaskRequiredFieldsArr = issue.subIssueVOList.map((subTask) => (() => issueApi.project(projectId).getRequiredField(subTask.issueId, subTask.issueTypeId)));
       Promise.all(getSubTaskRequiredFieldsArr.map((fn) => fn())).then((res) => {
         batchedUpdates(() => {
           setHasGot(true);
@@ -88,7 +89,7 @@ const CopyRequired: React.FC<Props> = ({
         });
       });
     }
-  }, [copySubIssueChecked, hasGot, issue.subIssueVOList, setLoading]);
+  }, [copySubIssueChecked, hasGot, issue.subIssueVOList, projectId, setLoading]);
 
   const subTaskRequiredFieldsMap = useMemo(() => {
     const map = new Map();

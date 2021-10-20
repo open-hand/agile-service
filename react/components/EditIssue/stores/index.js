@@ -4,10 +4,10 @@ import React, {
 import { inject } from 'mobx-react';
 import { injectIntl } from 'react-intl';
 import EditIssueStore from './EditIssueStore';
+import { getMenuType } from '@/utils/common';
 
 const EditIssueContext = createContext();
 export default EditIssueContext;
-
 export const EditIssueContextProvider = injectIntl(inject('AppState', 'HeaderStore')((props) => {
   const FieldVersionRef = {
     current: null,
@@ -15,12 +15,15 @@ export const EditIssueContextProvider = injectIntl(inject('AppState', 'HeaderSto
   const FieldFixVersionRef = {
     current: null,
   };
+  const isProjectLevel = useMemo(() => (props.menuType || getMenuType()) === 'project', [props.menuType, getMenuType]);
   const descriptionEditRef = useRef(false);
   const value = {
     ...props,
+    isProjectLevel,
+    menuType: props.menuType || getMenuType(), /** project organization */
     prefixCls: 'c7n-agile-EditIssue',
     intlPrefix: 'agile.EditIssue',
-    store: useMemo(() => new EditIssueStore(), []), // 防止update时创建多次store
+    store: useMemo(() => new EditIssueStore({ projectId: props.projectId }), [props.projectId]), // 防止update时创建多次store
     FieldVersionRef,
     FieldFixVersionRef,
     descriptionEditRef,

@@ -34,6 +34,7 @@ import openCreateLink from './create-link/CreateLink';
           typeCode: link.typeCode,
         }}
         i={i}
+        projectId={projectId}
         onOpen={(issueId, linkedIssueId) => {
           const rightId = issueId === id ? linkedIssueId : issueId;
           push({
@@ -90,7 +91,7 @@ import openCreateLink from './create-link/CreateLink';
           {!disabled && (
             <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
               <Tooltip placement="topRight" title={typeCode === 'feature' ? '创建关联Feature' : '创建关联工作项'}>
-                <Button onClick={() => { openCreateLink({ issueId, onOk: this.onCreateLinkIssue }); }}>
+                <Button onClick={() => { openCreateLink({ issueId, projectId: store.projectId, onOk: this.onCreateLinkIssue }); }}>
                   <Icon type="playlist_add icon" />
                 </Button>
               </Tooltip>

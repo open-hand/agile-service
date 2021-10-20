@@ -223,7 +223,7 @@ class BoardApi extends Api<BoardApi> {
    * @param issueId
    */
   getNotAllowedTransferStatus(issueId: string) {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/status_transfer_setting/not_allowed_transfer`,
       params: {

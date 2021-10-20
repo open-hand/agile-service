@@ -38,13 +38,13 @@ const DeleteUI: React.FC<Props> = ({
 
   const handleDelete = useCallback(() => {
     if (deleteType === 'deleteWithLink') {
-      return uiApi.deleteUI(ui.id).then(() => {
+      return uiApi.project(store.projectId).deleteUI(ui.id).then(() => {
         store.getLinkedUI();
         reloadIssue();
       });
     }
     // @ts-ignore
-    return uiApi.deleteLink(issue.issueId, ui.id).then(() => {
+    return uiApi.project(store.projectId).deleteLink(issue.issueId, ui.id).then(() => {
       store.getLinkedUI();
       reloadIssue();
     });

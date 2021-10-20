@@ -19,7 +19,11 @@ class KnowledgeApi extends Api<KnowledgeApi> {
    * @param data
    */
   createRelationForIssue(data:Array<IIssueRelation>) {
-    return axios.post(`${this.prefix}/knowledge_relation`, data);
+    return this.request({
+      url: `${this.prefix}/knowledge_relation`,
+      method: 'post',
+      data,
+    });
   }
 
   /**
@@ -37,12 +41,11 @@ class KnowledgeApi extends Api<KnowledgeApi> {
    * 查询当前项目下可用的知识库中的全部文档
    */
   loadAllCurrentProject() {
-    const organizationId = getOrganizationId();
-    return axios({
+    return this.request({
       method: 'get',
-      url: `/knowledge/v1/projects/${getProjectId()}/work_space/all_space`,
+      url: `/knowledge/v1/projects/${this.projectId}/work_space/all_space`,
       params: {
-        organizationId,
+        organizationId: this.orgId,
       },
     });
   }
@@ -52,7 +55,10 @@ class KnowledgeApi extends Api<KnowledgeApi> {
    * @param relationId
    */
   deleteRelationForIssue(relationId:number) {
-    return axios.delete(`${this.prefix}/knowledge_relation/${relationId}`);
+    return this.request({
+      url: `${this.prefix}/knowledge_relation/${relationId}`,
+      method: 'delete',
+    });
   }
 }
 

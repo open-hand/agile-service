@@ -1,9 +1,10 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
+import Api from './Api';
 
-class FileApi {
+class FileApi extends Api<FileApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   /**
@@ -50,7 +51,11 @@ class FileApi {
     * @param {number} resourceId 文件资源id
     */
   deleteFile(fileId: number) {
-    return axios.delete(`${this.prefix}/issue_attachment/${fileId}`);
+    return this.request({
+      url: `${this.prefix}/issue_attachment/${fileId}`,
+      method: 'delete',
+
+    });
   }
 }
 

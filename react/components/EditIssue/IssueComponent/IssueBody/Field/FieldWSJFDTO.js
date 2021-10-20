@@ -22,7 +22,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
       ...wsjf,
       [fieldCode]: value === '' ? null : value,
     };
-    wsjfApi.update(obj)
+    wsjfApi.project(store.projectId).update(obj)
       .then(() => {
         if (onUpdate) {
           onUpdate();

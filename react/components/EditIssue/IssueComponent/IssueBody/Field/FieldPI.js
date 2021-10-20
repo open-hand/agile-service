@@ -56,6 +56,7 @@ class FieldPI extends Component {
                     required={required}
                     statusList={['todo', 'doing']}
                     multiple={false}
+                    projectId={store.projectId}
                     allowClear
                     onChange={submit}
                     disabledCurrentPI={!hasPermission}

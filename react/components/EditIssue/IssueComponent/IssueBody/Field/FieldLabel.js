@@ -68,7 +68,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
             disabled={disabled}
             onSubmit={this.updateIssueLabel}
             initValue={this.transToArr(labelIssueRelVOList, 'labelName', 'array')}
-            editor={() => <SelectLabel combo valueField="labelName" required={required} dataRef={this.dataRef} />}
+            editor={() => <SelectLabel combo projectId={store.projectId} valueField="labelName" required={required} dataRef={this.dataRef} />}
           >
             {
               labelIssueRelVOList.length > 0 ? (

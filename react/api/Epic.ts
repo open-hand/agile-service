@@ -26,7 +26,7 @@ class EpicApi extends Api<EpicApi> {
    * @param epicName
    */
   checkName(epicName: string, epicId?: string) {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/issues/check_epic_name`,
       params: {

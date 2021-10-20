@@ -50,6 +50,7 @@ function EditIssue() {
     issueStore,
     transformIssue,
     setSelect,
+    isProjectLevel,
     descriptionEditRef,
   } = useContext(EditIssueContext);
   const otherProject = !sameProject(projectId);
@@ -129,7 +130,7 @@ function EditIssue() {
       let issue;
       try {
         issue = await (programId
-          ? issueApi.project(projectId).loadUnderProgram(id, programId) : issueApi.org(organizationId).outside(outside).project(projectId).load(id));
+          ? issueApi.project(projectId).loadUnderProgram(id, programId) : issueApi.org(organizationId).outside(outside).project(projectId).load(id, isProjectLevel ? undefined : projectId));
       } catch (error) {
         if (error.code === 'error.issue.null') {
           close();
@@ -153,7 +154,7 @@ function EditIssue() {
         // context: issue.typeCode,
         pageCode: 'agile_issue_edit',
       };
-      const fields = await fieldApi.project(programId ?? projectId).org(organizationId).outside(outside).getFieldAndValue(id, param);
+      const fields = await fieldApi.project(programId ?? projectId).org(organizationId).outside(outside).getFieldAndValue(id, param, isProjectLevel ? undefined : projectId);
 
       // 根据工作项类型查询rules
       if (!outside && !otherProject && String(issue?.projectId) === String(getProjectId())) {
@@ -191,13 +192,13 @@ function EditIssue() {
         comments,
         notAllowedTransferStatus,
       ] = await Promise.all([
-        otherProject || outside ? null : knowledgeApi.project(projectId).loadByIssue(id),
-        otherProject || outside || programId || applyType === 'program' ? null : workLogApi.project(projectId).loadByIssue(id),
+        isProjectLevel && (otherProject || outside) ? null : knowledgeApi.project(projectId).loadByIssue(id),
+        isProjectLevel && (otherProject || outside || programId || applyType === 'program') ? null : workLogApi.project(projectId).loadByIssue(id),
         programId ? dataLogApi.loadUnderProgram(id, programId) : dataLogApi.org(organizationId).outside(outside).project(projectId).loadByIssue(id),
-        programId || applyType === 'program' ? null : issueLinkApi.org(organizationId).outside(outside).project(projectId).loadByIssueAndApplyType(id),
-        programId ? issueApi.project(projectId).getCommentsUnderProgram(id, programId) : issueApi.org(organizationId).outside(outside).project(projectId).getComments(id),
+        programId || applyType === 'program' ? null : issueLinkApi.org(organizationId).outside(outside).project(projectId).loadByIssueAndApplyType(id, projectId),
+        programId ? issueApi.getCommentsUnderProgram(id, programId) : issueApi.org(organizationId).outside(outside).project(projectId).getComments(id),
         // issue中非子任务的工作项需要请求不能流转到的状态数据
-        applyType !== 'program' && issue.typeCode !== 'sub_task' ? boardApi.getNotAllowedTransferStatus(id) : null,
+        applyType !== 'program' && issue.typeCode !== 'sub_task' ? boardApi.project(projectId).getNotAllowedTransferStatus(id) : null,
       ]);
       if (idRef.current !== id) {
         return;
@@ -294,6 +295,7 @@ function EditIssue() {
         summary: store.defaultSummary,
         sprint: activeSprint ? activeSprint.sprintId : undefined,
       },
+      projectId: store.projectId,
       defaultAssignee: store.defaultAssignee,
       defaultTypeId: store.defaultTypeId,
     });
@@ -319,6 +321,7 @@ function EditIssue() {
         summary: store.defaultSummary,
         sprint: activeSprint ? activeSprint.sprintId : undefined,
       },
+      projectId: store.projectId,
       defaultAssignee: store.defaultAssignee,
       defaultTypeId: store.defaultTypeId,
     });

@@ -91,6 +91,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
             editor={(
               <SelectVersion
                 required={required}
+                projectId={store.projectId}
                 dataRef={this.dataRef}
                 statusArr={[]}
                 {

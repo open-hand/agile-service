@@ -99,6 +99,7 @@ import SelectVersion from '@/components/select/select-version';
             editor={(
               <SelectVersion
                 required={required}
+                projectId={store.projectId}
                 dataRef={this.dataRef}
                 statusArr={['version_planning']}
                 {

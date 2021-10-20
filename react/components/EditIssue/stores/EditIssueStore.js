@@ -49,6 +49,10 @@ const hasValue = (issue, field) => (isMultiple(field) ? getValue(issue, field)?.
 class EditIssueStore {
   events = { updateAfter: () => { }, updateBefore: () => { } };
 
+  constructor({ projectId }) {
+    this.projectId = projectId;
+  }
+
   // issue
   @observable issue = {};
 
@@ -340,7 +344,7 @@ class EditIssueStore {
     ignoreEvents.includes('updateBefore') || await this.events.updateBefore();
     let res;
     try {
-      res = await issueApi.update(data);
+      res = await issueApi.project(this.projectId).update(data);
     } catch (error) {
       res = { failed: true, ...error };
       if (res.failed && res.code === 'error.epic.duplicate.feature.summary') {

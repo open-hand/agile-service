@@ -46,6 +46,7 @@ const predefinedFieldsMap = new Map([
 
 interface Props {
   issue: Issue
+  projectId?:string
   issueLink: any[]
   modal: IModalProps
   applyType: 'agile' | 'program'
@@ -55,7 +56,7 @@ interface Props {
   setCopyHasEpic: (hasEpic: boolean) => void
 }
 const CopyIssue: React.FC<Props> = ({
-  issue, issueLink, applyType, modal, onOk, closeSprint, copyFields, setCopyHasEpic,
+  issue, issueLink, applyType, projectId, modal, onOk, closeSprint, copyFields, setCopyHasEpic,
 }) => {
   const [finalFields, setFinalFields] = useState<IFieldWidthValue[]>([]);
   const { isInProgram } = useIsInProgram();
@@ -65,7 +66,7 @@ const CopyIssue: React.FC<Props> = ({
   const checkEpicName = useCallback(async (value: string) => {
     if (issue.typeCode === 'issue_epic') {
       if (value && value.trim()) {
-        return epicApi.checkName(value)
+        return epicApi.project(projectId).checkName(value)
           .then((res: boolean) => {
             if (res) {
               return '史诗名称重复';
@@ -83,14 +84,14 @@ const CopyIssue: React.FC<Props> = ({
     if (name === 'fields') {
       const unCopyFieldCodes = difference(finalFields.map((item) => item.fieldCode), value) || [];
       if (unCopyFieldCodes?.length) {
-        const res = await issueApi.checkRequiredFields(issue.issueTypeId, unCopyFieldCodes as string[]);
+        const res = await issueApi.project(projectId).checkRequiredFields(issue.issueTypeId, unCopyFieldCodes as string[]);
         setSelfExtraRequiredFields(res);
       } else {
         setSelfExtraRequiredFields([]);
       }
       setCopyHasEpic(value.find((code: string) => code === 'epic'));
     }
-  }, [finalFields, issue.issueTypeId, setCopyHasEpic]);
+  }, [finalFields, issue.issueTypeId, projectId, setCopyHasEpic]);
   const copyIssueDataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [{
@@ -174,7 +175,7 @@ const CopyIssue: React.FC<Props> = ({
             ...copyfs,
           };
 
-          const res = await issueApi.clone(issue.issueId, applyType, copyConditionVO);
+          const res = await issueApi.project(projectId).clone(issue.issueId, applyType, copyConditionVO);
           onOk(res);
           return true;
         }
@@ -182,7 +183,7 @@ const CopyIssue: React.FC<Props> = ({
       });
     }
     return false;
-  }, [applyType, copyIssueDataSet, finalFields, isInProgram, issue.issueId, issue.typeCode, onOk]);
+  }, [applyType, copyIssueDataSet, finalFields, isInProgram, issue.issueId, issue.typeCode, onOk, projectId]);
   useEffect(() => {
     modal.handleOk(handleSubmit);
   }, [handleSubmit, modal]);
@@ -272,6 +273,7 @@ const CopyIssue: React.FC<Props> = ({
       </Form>
       <CopyRequired
         issue={issue}
+        projectId={projectId}
         copySubIssueChecked={copyIssueDataSet.current?.get('copySubIssue') || false}
         selfExtraRequiredFields={selfExtraRequiredFields}
         requiredFieldsVOArrRef={requiredFieldsVOArrRef}

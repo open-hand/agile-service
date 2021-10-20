@@ -22,6 +22,7 @@ import { processBeforeData } from './utils';
 
 interface RecordWorkModalProps {
   issueId: string
+  projectId?:string
   onOk?: () => void
 
 }
@@ -59,7 +60,9 @@ const SelectTimeWithUnit: React.FC<SelectTimeWithUnitProps> = observer(({ timeNa
     </Row>
   );
 });
-const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = ({ modal, issueId, onOk }) => {
+const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = ({
+  modal, projectId, issueId, onOk,
+}) => {
   const [uploading, setUploading] = useState(false);
 
   const dataSet = useMemo(() => new DataSet({
@@ -121,11 +124,11 @@ const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = 
       return false;
     }
     const data = { issueId, ...processBeforeData(dataSet.toJSONData()[0]) };
-    await workLogApi.create(data);
+    await workLogApi.project(projectId).create(data);
     onOk && onOk();
 
     return true;
-  }, [dataSet, issueId, uploading]);
+  }, [dataSet, issueId, onOk, projectId, uploading]);
   useEffect(() => { modal?.handleOk(handleSubmit); }, [handleSubmit, modal]);
   return (
     <Form dataSet={dataSet} className={styles.form}>

@@ -13,14 +13,14 @@ const IssueDoc = observer(({ reloadIssue }) => {
   const { issueId } = store.getIssue;
   const docs = store.getDoc;
   const onDeleteDoc = async (id) => {
-    await knowledgeApi.deleteRelationForIssue(id);
-    const res = await knowledgeApi.loadByIssue(issueId);
+    await knowledgeApi.project(store.projectId).deleteRelationForIssue(id);
+    const res = await knowledgeApi.project(store.projectId).loadByIssue(issueId);
     store.setDoc(res || []);
   };
 
   const onDocCreate = async () => {
     setAddDocShow(false);
-    const res = await knowledgeApi.loadByIssue(issueId);
+    const res = await knowledgeApi.project(store.projectId).loadByIssue(issueId);
     store.setDoc(res || []);
     if (reloadIssue) {
       reloadIssue();
@@ -68,6 +68,7 @@ const IssueDoc = observer(({ reloadIssue }) => {
           <Doc
             issueId={issueId}
             visible={addDocShow}
+            projectId={store.projectId}
             onCancel={() => setAddDocShow(false)}
             onOk={onDocCreate}
             checkIds={docs && docs.knowledgeRelationList ? docs.knowledgeRelationList.map((doc) => doc.spaceId) : []}

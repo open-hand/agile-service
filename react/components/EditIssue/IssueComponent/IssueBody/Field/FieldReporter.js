@@ -1,12 +1,12 @@
-import { issueApi } from '@/api';
-import SelectUser from '@/components/select/select-user';
-import UserTag from '@/components/tag/user-tag';
-import TextEditToggle from '@/components/TextEditTogglePro';
 import { Permission } from '@choerodon/boot';
 import { inject, observer } from 'mobx-react';
 import React, { Component } from 'react';
 import { injectIntl } from 'react-intl';
 import { withRouter } from 'react-router-dom';
+import TextEditToggle from '@/components/TextEditTogglePro';
+import UserTag from '@/components/tag/user-tag';
+import SelectUser from '@/components/select/select-user';
+import { issueApi } from '@/api';
 
 @inject('AppState')
 @observer class FieldStatus extends Component {
@@ -56,6 +56,7 @@ import { withRouter } from 'react-router-dom';
                   editor={({ submit }) => (
                     <SelectUser
                       clearButton={!required}
+                      projectId={store.projectId}
                       required={required}
                       onChange={submit}
                       selectedUser={reporterId ? {

@@ -33,7 +33,7 @@ class Doc extends Component {
     this.setState({
       loading: true,
     });
-    const newData = await knowledgeApi.loadAllCurrentProject();
+    const newData = await knowledgeApi.project(this.props.projectId).loadAllCurrentProject();
     if (newData && !newData.failed) {
       this.setState({
         data: newData,
@@ -91,7 +91,7 @@ class Doc extends Component {
           });
         }
       });
-      knowledgeApi.createRelationForIssue(postData).then(() => {
+      knowledgeApi.project(this.props.projectId).createRelationForIssue(postData).then(() => {
         this.setState({
           createLoading: false,
         });

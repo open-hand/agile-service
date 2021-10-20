@@ -1,6 +1,6 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
-import { sameProject } from '@/utils/detail';
+import { getRequestProjectId, sameProject } from '@/utils/detail';
 import Api from './Api';
 
 class DataLogApi extends Api<DataLogApi> {
@@ -24,7 +24,7 @@ class DataLogApi extends Api<DataLogApi> {
    *根据issueId查询操作记录
    * @param issueId
    */
-  loadByIssue(issueId:number) {
+  loadByIssue(issueId: number) {
     return this.isOutside ? this.request({
       method: 'get',
       url: `${this.outPrefix}/data_log`,
@@ -35,7 +35,7 @@ class DataLogApi extends Api<DataLogApi> {
       },
     }) : this.request({
       method: 'get',
-      url: `/agile/v1/projects/${getProjectId()}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}data_log`,
+      url: `/agile/v1/projects/${getRequestProjectId(this.projectId)}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}data_log`,
       params: {
         issueId,
         instanceProjectId: this.projectId,
@@ -48,8 +48,8 @@ class DataLogApi extends Api<DataLogApi> {
    * @param issueId
    * @param programId 项目群id
    */
-  loadUnderProgram(issueId:number, programId:number) {
-    return axios({
+  loadUnderProgram(issueId: number, programId: number) {
+    return this.request({
       method: 'get',
       url: `${this.prefix}/project_invoke_program/datalog`,
       params: {
