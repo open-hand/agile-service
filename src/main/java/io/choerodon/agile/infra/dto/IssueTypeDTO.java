@@ -48,6 +48,11 @@ public class IssueTypeDTO extends AuditDomain {
     public IssueTypeDTO() {
     }
 
+    public IssueTypeDTO(Long organizationId, Long id) {
+        this.organizationId = organizationId;
+        this.id = id;
+    }
+
     @Transient
     private BigDecimal sequence;
 

@@ -28,6 +28,13 @@ public class PriorityDTO extends AuditDomain {
     @Column(name = "is_enable")
     private Boolean enable;
 
+    public PriorityDTO() {}
+
+    public PriorityDTO(Long organizationId, Long id) {
+        this.organizationId = organizationId;
+        this.id = id;
+    }
+
     public Boolean getEnable() {
         return enable;
     }

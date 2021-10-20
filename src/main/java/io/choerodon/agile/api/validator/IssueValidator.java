@@ -111,13 +111,10 @@ public class IssueValidator {
     private AgilePluginService agilePluginService;
 
     @Autowired
-    private PriorityService priorityService;
+    private PriorityMapper priorityMapper;
 
     @Autowired
-    private StatusService statusService;
-
-    @Autowired
-    private IssueTypeService issueTypeService;
+    private IssueTypeMapper issueTypeMapper;
 
 
     public void verifyCreateData(IssueCreateVO issueCreateVO, Long projectId, String applyType) {
@@ -139,13 +136,13 @@ public class IssueValidator {
             throw new CommonException("error.IssueRule.EpicName");
         }
         if (issueCreateVO.getPriorityId() == null ||
-                (Objects.equals(AGILE, applyType) && Objects.isNull(priorityService.queryById(organizationId, issueCreateVO.getPriorityId())))) {
+                (Objects.equals(AGILE, applyType) && Objects.isNull(priorityMapper.selectOne(new PriorityDTO(organizationId, issueCreateVO.getPriorityId()))))) {
             throw new CommonException("error.priorityId.isNull.or.illegal");
         }
-        if (issueCreateVO.getIssueTypeId() == null || !issueTypeService.listIssueTypeMap(organizationId, projectId).containsKey(issueCreateVO.getIssueTypeId())) {
+        if (issueCreateVO.getIssueTypeId() == null || Objects.isNull(issueTypeMapper.selectOne(new IssueTypeDTO(organizationId, issueCreateVO.getIssueTypeId())))) {
             throw new CommonException(ERROR_ISSUE_TYPE_ID_IS_NULL_OR_ILLEGAL);
         }
-        if (issueCreateVO.getStatusId() != null && Objects.isNull(statusService.queryProjectStatusById(projectId, issueCreateVO.getStatusId()))) {
+        if (issueCreateVO.getStatusId() != null && Objects.isNull(issueStatusMapper.selectByStatusId(projectId, issueCreateVO.getStatusId()))) {
             throw new CommonException("error.statusId.illegal");
         }
         if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
@@ -175,6 +172,7 @@ public class IssueValidator {
     }
 
     public void verifyUpdateData(JSONObject issueUpdate, Long projectId) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
         if (issueUpdate.get(ISSUE_ID) == null) {
             throw new CommonException(ERROR_ISSUE_ID_NOT_FOUND);
         }
@@ -204,12 +202,12 @@ public class IssueValidator {
         }
 
         if (issueUpdate.containsKey(PRIORITY_ID) && (ObjectUtils.isEmpty(issueUpdate.get(PRIORITY_ID))
-                || Objects.isNull(priorityService.queryById(ConvertUtil.getOrganizationId(projectId), decrypt(issueUpdate.get(PRIORITY_ID).toString()))))) {
+                || Objects.isNull(priorityMapper.selectOne(new PriorityDTO(organizationId, decrypt(issueUpdate.get(PRIORITY_ID).toString())))))) {
             throw new CommonException("error.issue.priorityId.illegal");
         }
 
         if (issueUpdate.containsKey(STATUS_ID_FIELD) && (ObjectUtils.isEmpty(issueUpdate.get(STATUS_ID_FIELD))
-                || Objects.isNull(statusService.queryProjectStatusById(projectId, decrypt(issueUpdate.get(STATUS_ID_FIELD).toString()))))) {
+                || Objects.isNull(issueStatusMapper.selectByStatusId(projectId, decrypt(issueUpdate.get(STATUS_ID_FIELD).toString()))))) {
             throw new CommonException("error.issue.statusId.illegal");
         }
 
@@ -233,13 +231,13 @@ public class IssueValidator {
         if (issueSubCreateVO.getProjectId() == null) {
             throw new CommonException("error.IssueRule.ProjectId");
         }
-        if (issueSubCreateVO.getPriorityId() == null || Objects.isNull(priorityService.queryById(organizationId, issueSubCreateVO.getPriorityId()))) {
+        if (issueSubCreateVO.getPriorityId() == null || Objects.isNull(priorityMapper.selectOne(new PriorityDTO(organizationId, issueSubCreateVO.getPriorityId())))) {
             throw new CommonException("error.priorityId.isNull.or.illegal");
         }
-        if (issueSubCreateVO.getIssueTypeId() == null || !issueTypeService.listIssueTypeMap(organizationId, projectId).containsKey(issueSubCreateVO.getIssueTypeId())) {
+        if (issueSubCreateVO.getIssueTypeId() == null || Objects.isNull(issueTypeMapper.selectOne(new IssueTypeDTO(organizationId, issueSubCreateVO.getIssueTypeId())))) {
             throw new CommonException(ERROR_ISSUE_TYPE_ID_IS_NULL_OR_ILLEGAL);
         }
-        if (issueSubCreateVO.getStatusId() != null && Objects.isNull(statusService.queryProjectStatusById(projectId, issueSubCreateVO.getStatusId()))) {
+        if (issueSubCreateVO.getStatusId() != null && Objects.isNull(issueStatusMapper.selectByStatusId(projectId, issueSubCreateVO.getStatusId()))) {
             throw new CommonException("error.statusId.is.illegal");
         }
         if (issueSubCreateVO.getParentIssueId() == null) {
@@ -297,7 +295,7 @@ public class IssueValidator {
             throw new CommonException(ERROR_ISSUE_ID_NOT_FOUND);
         }
         if (issueUpdateTypeVO.getIssueTypeId() == null ||
-                !issueTypeService.listIssueTypeMap(ConvertUtil.getOrganizationId(projectId), projectId).containsKey(issueUpdateTypeVO.getIssueTypeId())) {
+                Objects.isNull(issueTypeMapper.selectOne(new IssueTypeDTO(ConvertUtil.getOrganizationId(projectId), issueUpdateTypeVO.getIssueTypeId())))) {
             throw new CommonException(ERROR_ISSUE_TYPE_ID_IS_NULL_OR_ILLEGAL);
         }
         if (issueUpdateTypeVO.getTypeCode() == null) {
@@ -342,11 +340,11 @@ public class IssueValidator {
             throw new CommonException(ERROR_ISSUE_ID_NOT_FOUND);
         }
         if (issueTransformSubTask.getIssueTypeId() == null ||
-                !issueTypeService.listIssueTypeMap(ConvertUtil.getOrganizationId(projectId), projectId).containsKey(issueTransformSubTask.getIssueTypeId())) {
+                Objects.isNull(issueTypeMapper.selectOne( new IssueTypeDTO(ConvertUtil.getOrganizationId(projectId), issueTransformSubTask.getIssueTypeId())))) {
             throw new CommonException(ERROR_ISSUE_TYPE_ID_IS_NULL_OR_ILLEGAL);
         }
         if (issueTransformSubTask.getStatusId() == null ||
-                Objects.isNull(statusService.queryProjectStatusById(projectId, issueTransformSubTask.getStatusId()))) {
+                Objects.isNull(issueStatusMapper.selectByStatusId(projectId, issueTransformSubTask.getStatusId()))) {
             throw new CommonException("error.statusId.is.null.or.illegal");
         }
         if (issueTransformSubTask.getParentIssueId() == null) {
@@ -362,7 +360,7 @@ public class IssueValidator {
             throw new CommonException(ERROR_ISSUE_ID_NOT_FOUND);
         }
         if (issueTransformTask.getIssueTypeId() == null ||
-                !issueTypeService.listIssueTypeMap(ConvertUtil.getOrganizationId(projectId), projectId).containsKey(issueTransformTask.getIssueTypeId())) {
+                Objects.isNull(issueTypeMapper.selectOne(new IssueTypeDTO(ConvertUtil.getOrganizationId(projectId), issueTransformTask.getIssueTypeId())))) {
             throw new CommonException(ERROR_ISSUE_TYPE_ID_IS_NULL_OR_ILLEGAL);
         }
         if (issueTransformTask.getTypeCode() == null) {
@@ -454,12 +452,13 @@ public class IssueValidator {
     public void verifybatchUpdateFieldsValue(Long projectId, BatchUpdateFieldsValueVo batchUpdateFieldsValueVo, String applyType) {
         JSONObject predefinedFields = batchUpdateFieldsValueVo.getPredefinedFields();
         if (!CollectionUtils.isEmpty(predefinedFields)) {
+            Long organizationId = ConvertUtil.getOrganizationId(projectId);
             if (predefinedFields.containsKey(STATUS_ID_FIELD) && (ObjectUtils.isEmpty(predefinedFields.get(STATUS_ID_FIELD))
-                    || Objects.isNull(statusService.queryProjectStatusById(projectId, decrypt(predefinedFields.get(STATUS_ID_FIELD).toString()))))) {
+                    || Objects.isNull(issueStatusMapper.selectByStatusId(projectId, decrypt(predefinedFields.get(STATUS_ID_FIELD).toString()))))) {
                 throw new CommonException("error.statusId.illegal");
             }
             if (Objects.equals(AGILE, applyType) && predefinedFields.containsKey(PRIORITY_ID) && (ObjectUtils.isEmpty(predefinedFields.get(PRIORITY_ID))
-                    || Objects.isNull(priorityService.queryById(ConvertUtil.getOrganizationId(projectId), decrypt(predefinedFields.get(PRIORITY_ID).toString()))))) {
+                    || Objects.isNull(priorityMapper.selectOne(new PriorityDTO(organizationId, decrypt(predefinedFields.get(PRIORITY_ID).toString())))))) {
                     throw new CommonException("error.priorityId.illegal");
             }
          }
