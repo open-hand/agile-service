@@ -35,8 +35,9 @@ class DraggableFeature extends Component {
     }
   }
 
-  handleClickDetail=() => {
+  handleClickDetail=(e) => {
     const { item } = this.props;
+    e.stopPropagation();
     BacklogStore.setClickIssueDetail(item);
   }
 
@@ -156,8 +157,16 @@ class DraggableFeature extends Component {
             {/* <p className="c7n-backlog-epicItemDes">
               {_.isNull(item.summary) ? '没有描述' : item.summary}
             </p> */}
-            <p className="c7n-backlog-epicItemDetail">计数详情</p>
-            <div role="none" onClick={this.handleClickDetail}>查看详情</div>
+            <div className="c7n-backlog-epicItemDetail">
+              <span>计数详情</span>
+              <div
+                role="none"
+                onClick={this.handleClickDetail}
+                className="c7n-backlog-epicItemDetail-more"
+              >
+                查看详情
+              </div>
+            </div>
             <div className="c7n-backlog-epicItemParams">
               <div className="c7n-backlog-epicItemParam">
                 <p className="c7n-backlog-epicItemParamKey">总故事数量</p>
