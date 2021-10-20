@@ -43,6 +43,14 @@ public class WorkCalendarServiceImpl implements WorkCalendarService {
         List<Long> projectIds = new ArrayList<>();
         Long userId = DetailsHelper.getUserDetails().getUserId();
         handlerProject(organizationId, projectIds, userId, workItemSearchVO);
+        // 默认按经办人和参与人筛选
+        List<String> assigneeFilter = workItemSearchVO.getAssigneeFilter();
+        if (CollectionUtils.isEmpty(assigneeFilter)) {
+            assigneeFilter = new ArrayList<>();
+            assigneeFilter.add("assignee");
+            assigneeFilter.add("participant");
+            workItemSearchVO.setAssigneeFilter(assigneeFilter);
+        }
         if (CollectionUtils.isEmpty(projectIds)) {
             return new ArrayList<>();
         }
