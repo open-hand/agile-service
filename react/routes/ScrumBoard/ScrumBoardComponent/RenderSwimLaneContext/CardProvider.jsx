@@ -35,7 +35,8 @@ class CardProvider extends React.Component {
         {(provided) => (
           <Card
             provided={provided}
-            key={issueObj.issueId}
+            key={`${issueObj.issueId}-${keyId}`}
+            keyId={keyId}
             index={index}
             issue={issueObj}
             completed={completed}

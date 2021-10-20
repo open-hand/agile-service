@@ -17,7 +17,7 @@ export default class StatusProvider extends Component {
     const mode = data.length > VIRTUAL_LIMIT ? 'virtual' : 'standard';
     return (
       <div
-        key={statusId}
+        key={`${statusId}-${keyId}`}
         className="c7n-swimlaneContext-itemBodyStatus"
         onClick={this.handleColumnClick}
         role="none"
@@ -42,7 +42,8 @@ export default class StatusProvider extends Component {
               <Card
                 isDragging={snapshot.isDragging}
                 provided={provided}
-                key={issueObj.issueId}
+                key={`${issueObj.issueId}-${keyId}`}
+                keyId={keyId}
                 index={index}
                 issue={issueObj}
                 completed={completed}
