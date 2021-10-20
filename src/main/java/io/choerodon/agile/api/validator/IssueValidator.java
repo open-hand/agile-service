@@ -39,7 +39,7 @@ public class IssueValidator {
     private static final String ERROR_PARENT_ISSUE_ISTEST = "error.parentIssue.isTest";
     private static final String ERROR_PARENT_ISSUE_NOT_EXIST = "error.parentIssue.get";
     private static final String ERROR_ISSUE_RULE_TYPE_CODE= "error.IssueRule.typeCode";
-    private static final String ERROR_ISSUE_TYPE_ID_IS_NULL= "error.issueTypeId.isNull";
+    private static final String ERROR_ISSUE_TYPE_ID_IS_NULL_OR_ILLEGAL = "error.issueTypeId.isNull.or.illegal";
     private static final String ISSUE_ID = "issueId";
     private static final String COLOR = "color";
     private static final String EPIC_NAME = "epicName";
@@ -143,7 +143,7 @@ public class IssueValidator {
             throw new CommonException("error.priorityId.isNull.or.illegal");
         }
         if (issueCreateVO.getIssueTypeId() == null || !issueTypeService.listIssueTypeMap(organizationId, projectId).containsKey(issueCreateVO.getIssueTypeId())) {
-            throw new CommonException("error.issueTypeId.isNull.or.illegal");
+            throw new CommonException(ERROR_ISSUE_TYPE_ID_IS_NULL_OR_ILLEGAL);
         }
         if (issueCreateVO.getStatusId() != null && Objects.isNull(statusService.queryProjectStatusById(projectId, issueCreateVO.getStatusId()))) {
             throw new CommonException("error.statusId.illegal");
@@ -208,8 +208,9 @@ public class IssueValidator {
             throw new CommonException("error.issue.priorityId.illegal");
         }
 
-        if (issueUpdate.containsKey(STATUS_ID_FIELD) && (ObjectUtils.isEmpty(issueUpdate.get(STATUS_ID_FIELD)) || Objects.equals(0L, issueUpdate.get(STATUS_ID_FIELD)))) {
-            throw new CommonException("error.issue.statusId.null");
+        if (issueUpdate.containsKey(STATUS_ID_FIELD) && (ObjectUtils.isEmpty(issueUpdate.get(STATUS_ID_FIELD))
+                || Objects.isNull(statusService.queryProjectStatusById(projectId, decrypt(issueUpdate.get(STATUS_ID_FIELD).toString()))))) {
+            throw new CommonException("error.issue.statusId.illegal");
         }
 
         //史诗校验
@@ -236,7 +237,7 @@ public class IssueValidator {
             throw new CommonException("error.priorityId.isNull.or.illegal");
         }
         if (issueSubCreateVO.getIssueTypeId() == null || !issueTypeService.listIssueTypeMap(organizationId, projectId).containsKey(issueSubCreateVO.getIssueTypeId())) {
-            throw new CommonException("error.issueTypeId.isNull.or.illegal");
+            throw new CommonException(ERROR_ISSUE_TYPE_ID_IS_NULL_OR_ILLEGAL);
         }
         if (issueSubCreateVO.getStatusId() != null && Objects.isNull(statusService.queryProjectStatusById(projectId, issueSubCreateVO.getStatusId()))) {
             throw new CommonException("error.statusId.is.illegal");
@@ -295,8 +296,9 @@ public class IssueValidator {
         if (issueUpdateTypeVO.getIssueId() == null) {
             throw new CommonException(ERROR_ISSUE_ID_NOT_FOUND);
         }
-        if (issueUpdateTypeVO.getIssueTypeId() == null || Objects.equals(0L, issueUpdateTypeVO.getIssueTypeId())) {
-            throw new CommonException(ERROR_ISSUE_TYPE_ID_IS_NULL);
+        if (issueUpdateTypeVO.getIssueTypeId() == null ||
+                !issueTypeService.listIssueTypeMap(ConvertUtil.getOrganizationId(projectId), projectId).containsKey(issueUpdateTypeVO.getIssueTypeId())) {
+            throw new CommonException(ERROR_ISSUE_TYPE_ID_IS_NULL_OR_ILLEGAL);
         }
         if (issueUpdateTypeVO.getTypeCode() == null) {
             throw new CommonException(ERROR_ISSUE_RULE_TYPE_CODE);
@@ -335,9 +337,17 @@ public class IssueValidator {
         return labelIssueRelMapper.selectOne(labelIssueRel) == null;
     }
 
-    public void verifyTransformedSubTask(IssueTransformSubTask issueTransformSubTask) {
+    public void verifyTransformedSubTask(Long projectId, IssueTransformSubTask issueTransformSubTask) {
         if (issueTransformSubTask.getIssueId() == null) {
             throw new CommonException(ERROR_ISSUE_ID_NOT_FOUND);
+        }
+        if (issueTransformSubTask.getIssueTypeId() == null ||
+                !issueTypeService.listIssueTypeMap(ConvertUtil.getOrganizationId(projectId), projectId).containsKey(issueTransformSubTask.getIssueTypeId())) {
+            throw new CommonException(ERROR_ISSUE_TYPE_ID_IS_NULL_OR_ILLEGAL);
+        }
+        if (issueTransformSubTask.getStatusId() == null ||
+                Objects.isNull(statusService.queryProjectStatusById(projectId, issueTransformSubTask.getStatusId()))) {
+            throw new CommonException("error.statusId.is.null.or.illegal");
         }
         if (issueTransformSubTask.getParentIssueId() == null) {
             throw new CommonException("error.IssueRule.parentIssueId");
@@ -351,8 +361,9 @@ public class IssueValidator {
         if (issueTransformTask.getIssueId() == null) {
             throw new CommonException(ERROR_ISSUE_ID_NOT_FOUND);
         }
-        if (issueTransformTask.getIssueTypeId() == null || Objects.equals(0L, issueTransformTask.getIssueTypeId())) {
-            throw new CommonException(ERROR_ISSUE_TYPE_ID_IS_NULL);
+        if (issueTransformTask.getIssueTypeId() == null ||
+                !issueTypeService.listIssueTypeMap(ConvertUtil.getOrganizationId(projectId), projectId).containsKey(issueTransformTask.getIssueTypeId())) {
+            throw new CommonException(ERROR_ISSUE_TYPE_ID_IS_NULL_OR_ILLEGAL);
         }
         if (issueTransformTask.getTypeCode() == null) {
             throw new CommonException(ERROR_ISSUE_RULE_TYPE_CODE);
