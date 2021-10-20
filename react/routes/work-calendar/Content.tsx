@@ -8,7 +8,6 @@ import { Select } from 'choerodon-ui/pro';
 import { CustomTabs } from '@choerodon/components';
 import openCreateIssue from '@/components/create-issue';
 import { Issue } from '@/common/types';
-import { formatIssueData } from '@/routes/work-calendar/utils';
 import { useWorkCalendarStore } from '@/routes/work-calendar/stores';
 import CalendarContent from '@/routes/work-calendar/components/calendar';
 import IssueList from '@/routes/work-calendar/components/issue-list';
@@ -30,13 +29,18 @@ const WorkCalendar = observer(() => {
 
   const [issueDetailProps] = useDetail();
 
-  const refresh = useCallback(() => {
+  const refreshCalendar = useCallback(() => {
     const calendarRef = mainStore.getCalendarRef;
     if (calendarRef.current) {
       const calendarApi = calendarRef.current.getApi();
       calendarApi?.refetchEvents();
     }
   }, [mainStore]);
+
+  const refresh = useCallback(() => {
+    refreshCalendar();
+    mainStore.loadIssueList();
+  }, [mainStore, refreshCalendar]);
 
   const handleUsersChange = useCallback((value) => {
     mainStore.setUsers(value);
@@ -66,9 +70,11 @@ const WorkCalendar = observer(() => {
       defaultValues,
       onCreate: (issue: Issue) => {
         const calenderApi = calendarRef.current?.getApi();
-        if (calenderApi && issue.estimatedStartTime && issue.estimatedEndTime) {
-          calenderApi.addEvent(formatIssueData(issue));
-          clearSelect && calenderApi.unselect();
+        if (calenderApi && clearSelect) {
+          calenderApi.unselect();
+        }
+        if (issue.estimatedStartTime && issue.estimatedEndTime) {
+          refreshCalendar();
         }
       },
     });
@@ -119,6 +125,7 @@ const WorkCalendar = observer(() => {
                 onChange={handleProjectChange}
                 multiple
                 style={{ maxWidth: 600 }}
+                category="N_AGILE"
               />
             ),
           }, {
@@ -142,7 +149,7 @@ const WorkCalendar = observer(() => {
       <Breadcrumb title="工作日历" />
       <Content className={`${prefixCls}-content`}>
         <div className={`${prefixCls}-content-task`}>
-          <IssueList refresh={refresh} openEditIssue={openEditIssue} />
+          <IssueList refresh={refreshCalendar} openEditIssue={openEditIssue} />
         </div>
         <div className={`${prefixCls}-content-main`}>
           <CalendarContent openEditIssue={openEditIssue} handleCreateIssue={handleCreateIssue} />

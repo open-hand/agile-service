@@ -22,13 +22,13 @@ class ProjectApi {
   }
 
   /**
-   * 查询组织下用户有权限的项目
-   * @param userId
+   * 查询组织下用户有权限的启用的项目
+   * @param { userId, filter, page, size, category } category表示筛选的项目类型
    */
   loadProjectByUser({
-    userId, filter, page, size,
+    userId, filter, page, size, category,
   }:any) {
-    return axios.get(`iam/choerodon/v1/organizations/${getOrganizationId()}/users/${userId}/projects/paging?page=${page}&size=${size}${filter ? `&name=${filter}` : ''}`);
+    return axios.get(`iam/choerodon/v1/organizations/${getOrganizationId()}/users/${userId}/projects/paging?enabled=true&page=${page}&size=${size}${filter ? `&name=${filter}` : ''}${category ? `&category=${category}` : ''}`);
   }
 }
 

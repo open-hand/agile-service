@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { map } from 'lodash';
-import { Icon, TextField } from 'choerodon-ui/pro';
+import { map, isEmpty } from 'lodash';
+import { Icon, TextField, Spin } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
+import { EmptyPage } from '@choerodon/components';
 import { useWorkCalendarStore } from '@/routes/work-calendar/stores';
 import { IssueItem } from '@/routes/work-calendar/types';
+import NoData from '@/assets/image/NoData.svg';
 import Style from './index.less';
 
 interface Props {
@@ -72,12 +74,16 @@ const IssueList = ({ refresh, openEditIssue }: Props) => {
   }, [mainStore]);
 
   const handleSearch = useCallback((value) => {
-    mainStore.setSearchParams(value);
+    mainStore.setIssueSearchParams(value);
     loadList();
   }, [mainStore, loadList]);
 
+  if (!mainStore.getIssueListLoading && !mainStore.getIssueSearchParams && isEmpty(mainStore.getIssueList)) {
+    return <EmptyPage className={Style.emptyPage} image={NoData} title="暂无数据" />;
+  }
+
   return (
-    <>
+    <Spin spinning={mainStore.getIssueListLoading}>
       <TextField
         placeholder="请输入搜索内容"
         prefix={<Icon type="search" />}
@@ -85,56 +91,58 @@ const IssueList = ({ refresh, openEditIssue }: Props) => {
         clearButton
         onChange={handleSearch}
       />
-      {map(mainStore.getIssueList, (item: IssueItem) => (
-        <div
-          key={item.issueId}
-          role="none"
-          onClick={() => handleClick(item.issueId)}
-          className={`${Style.wrap} ${mainStore.getFilterIssueId === item.issueId ? Style.wrapSelected : ''}`}
-        >
-          <div className={Style.header}>
-            <Icon
-              type={isExpand(item.issueId) ? 'baseline-arrow_drop_down' : 'baseline-arrow_right'}
-              onClick={(e) => handleExpand(e, item.issueId)}
-            />
-            <span className={Style.summary}>{item.summary}</span>
-          </div>
-          <div className={Style.progressWrap}>
-            <div
-              className={Style.progressDone}
-              style={{ flex: item.completedCount }}
-            />
-            <div
-              className={Style.progressTodo}
-              style={{ flex: item.totalCount ? item.totalCount - item.completedCount : 1 }}
-            />
-          </div>
-          {isExpand(item.issueId) && (
-            <div className={Style.issueDetail}>
-              <div className={Style.issueDetailLink}>
-                <span className={Style.label}>任务详情</span>
-                <span
-                  role="none"
-                  className={Style.link}
-                  onClick={(e) => openIssueDetail(e, item)}
-                >
-                  查看详情
-                </span>
-              </div>
-              <div>
-                {map(detailOption, ({ name, value, hasBackground = false }) => (
-                  <div className={Style.detailOption}>
-                    <span className={Style.label}>{name}</span>
-                    {/* @ts-ignore */}
-                    <span className={hasBackground ? Style.value : ''}>{item[value]}</span>
-                  </div>
-                ))}
-              </div>
+      <div className={Style.listWrap}>
+        {map(mainStore.getIssueList, (item: IssueItem) => (
+          <div
+            key={item.issueId}
+            role="none"
+            onClick={() => handleClick(item.issueId)}
+            className={`${Style.wrap} ${mainStore.getFilterIssueId === item.issueId ? Style.wrapSelected : ''}`}
+          >
+            <div className={Style.header}>
+              <Icon
+                type={isExpand(item.issueId) ? 'baseline-arrow_drop_down' : 'baseline-arrow_right'}
+                onClick={(e) => handleExpand(e, item.issueId)}
+              />
+              <span className={Style.summary}>{item.summary}</span>
             </div>
-          )}
-        </div>
-      ))}
-    </>
+            <div className={Style.progressWrap}>
+              <div
+                className={Style.progressDone}
+                style={{ flex: item.completedCount }}
+              />
+              <div
+                className={Style.progressTodo}
+                style={{ flex: item.totalCount ? item.totalCount - item.completedCount : 1 }}
+              />
+            </div>
+            {isExpand(item.issueId) && (
+              <div className={Style.issueDetail}>
+                <div className={Style.issueDetailLink}>
+                  <span className={Style.label}>任务详情</span>
+                  <span
+                    role="none"
+                    className={Style.link}
+                    onClick={(e) => openIssueDetail(e, item)}
+                  >
+                    查看详情
+                  </span>
+                </div>
+                <div>
+                  {map(detailOption, ({ name, value, hasBackground = false }) => (
+                    <div className={Style.detailOption}>
+                      <span className={Style.label}>{name}</span>
+                      {/* @ts-ignore */}
+                      <span className={hasBackground ? Style.value : ''}>{item[value]}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </Spin>
   );
 };
 

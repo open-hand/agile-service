@@ -5,6 +5,7 @@ import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { projectApi } from '@/api';
+import { ICategoryCode } from '@/hooks/useCategoryCodes';
 
 // 用于查询组织下的项目
 
@@ -15,10 +16,11 @@ export interface SelectTeamProps extends Partial<SelectProps> {
   afterLoad?: (projects: any[]) => void
   flat?: boolean
   userId?: string,
+  category?: ICategoryCode,
 }
 
 const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
-  userId, projectDataRef = { current: null }, afterLoad, flat, ...otherProps
+  userId, projectDataRef = { current: null }, afterLoad, flat, category, ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Function>();
   afterLoadRef.current = afterLoad;
@@ -31,6 +33,7 @@ const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
       filter,
       page,
       size: 50,
+      category,
     }),
     // @ts-ignore
     afterLoad: afterLoadRef.current,
