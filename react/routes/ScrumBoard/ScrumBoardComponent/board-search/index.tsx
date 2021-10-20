@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
+import { useUnmount } from 'ahooks';
 import IssueSearch, { IssueSearchStore, useIssueSearchStore } from '@/components/issue-search';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { getSystemFields as originGetSystemFields } from '@/stores/project/issue/IssueStore';
@@ -111,7 +112,7 @@ const BoardSearch: React.FC<Props> = ({ onRefresh, saveStore }) => {
   const handleClickSaveFilter = () => {
     openSaveFilterModal({ searchVO: issueSearchStore.getCustomFieldFilters(), onOk: issueSearchStore.loadMyFilterList });
   };
-
+  useUnmount(() => { localPageCacheStore.setItem('scrumBoard.searchVO', issueSearchStore.getCustomFieldFilters(true)); });
   return (
     <div className="c7n-agile-scrum-board-search" style={{ display: 'flex' }}>
       <IssueSearch
@@ -120,7 +121,6 @@ const BoardSearch: React.FC<Props> = ({ onRefresh, saveStore }) => {
         onClickSaveFilter={handleClickSaveFilter}
         onChange={() => {
           const newSearch = issueSearchStore.getCustomFieldFilters();
-          localPageCacheStore.setItem('scrumBoard.searchVO', issueSearchStore.getCustomFieldFilters(true));
           scrumBoardStore.setSearchVO(newSearch);
           onRefresh();
         }}

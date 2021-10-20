@@ -309,7 +309,7 @@ class IssueSearchStore {
       return this.transformFilter(this.chosenFields);
     }
     const filter = cloneDeep(toJS(this.transformFilter(this.chosenFields)));
-    filterFieldWithoutNull(filter);
+    // filterFieldWithoutNull(filter);
     return filter;
   }
 
