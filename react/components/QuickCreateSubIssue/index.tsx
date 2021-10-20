@@ -7,7 +7,9 @@ import {
 } from 'choerodon-ui';
 import { Button, Spin } from 'choerodon-ui/pro';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
-import { useClickAway, useLockFn, useUpdateEffect } from 'ahooks';
+import {
+  useClickAway, useLockFn, useUpdateEffect, useWhyDidYouUpdate,
+} from 'ahooks';
 import { castArray, find } from 'lodash';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { IIssueType, Issue, User } from '@/common/types';
@@ -154,7 +156,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
         }
       });
     }
-  }, [expand, id, summary]);
+  }, [expand, id]);
   const handleCancel = useCallback(() => {
     setExpand(false);
   }, []);
