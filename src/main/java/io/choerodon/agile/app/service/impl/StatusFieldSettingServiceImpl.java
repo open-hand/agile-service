@@ -50,6 +50,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     private static final String REPORTOR = "reportor";
     private static final String ASSIGNEE = "assignee";
     private static final String MAIN_RESPONSIBLE = "mainResponsible";
+    private static final String PARTICIPANT = "participant";
     private static final String[] CLEAR_FIELD = {FieldCode.LABEL, FieldCode.COMPONENT, FieldCode.TAG, FieldCode.PARTICIPANT};
 
     @Autowired
@@ -88,6 +89,8 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     private OrganizationConfigService organizationConfigService;
     @Autowired
     private ObjectSchemeFieldMapper objectSchemeFieldMapper;
+    @Autowired
+    private IssueParticipantRelMapper issueParticipantRelMapper;
     static {
         FIELD_CODE.put(FieldCode.ASSIGNEE, "assigneeId");
         FIELD_CODE.put(FieldCode.REPORTER, "reporterId");
@@ -620,12 +623,20 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         }
         List<String> userIds = new ArrayList<>();
         for (StatusFieldValueSettingDTO statusFieldValueSettingDTO : statusFieldValueSettingDTOS) {
+            List<Long> list = new ArrayList<>();
             Long userId = handlerMember(statusFieldValueSettingDTO, issueDTO);
-            if (ObjectUtils.isEmpty(userId)) {
-                continue;
+            if (!ObjectUtils.isEmpty(userId)) {
+                list.add(userId);
             }
-            if (!userIds.contains(userId.toString())) {
-                userIds.add(userId.toString());
+            if (PARTICIPANT.equals(statusFieldValueSettingDTO.getOperateType())) {
+                List<Long> participants = issueParticipantRelMapper.listByIssueId(issueDTO.getProjectId(), issueDTO.getIssueId());
+                if (!CollectionUtils.isEmpty(participants)) {
+                    list.addAll(participants);
+                }
+            }
+            List<String> needAdd = list.stream().filter(v -> !userIds.contains(v)).map(String::valueOf).collect(Collectors.toList());
+            if (!CollectionUtils.isEmpty(needAdd)) {
+                userIds.addAll(needAdd);
             }
         }
         return userIds;
