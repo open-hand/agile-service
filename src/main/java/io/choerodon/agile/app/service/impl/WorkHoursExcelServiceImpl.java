@@ -56,7 +56,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
     private static final String SUCCESS = "success";
     private static final String FAILED = "failed";
     private static final String DOING = "doing";
-    private static final String DOWNLOAD_FILE = "download_file";
+    private static final String DOWNLOAD_FILE = "download_file_work_hours_log";
     private static final List<ExcelTitleVO> WORK_HOURS_LOG_LIST = new ArrayList<>();
     private static final String EXPORT_ERROR_WORKBOOK_CLOSE = "error.close.workbook";
 
