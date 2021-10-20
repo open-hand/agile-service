@@ -66,6 +66,7 @@ import useQuickCreateIssue from './hooks/useQuickCreateIssue';
 import { GanttIssue } from './types';
 import { getProjectId } from '@/utils/common';
 
+const middleDateKeys = [{ key: 'actualStartTime', maxDateKey: 'actualEndTime' }, { key: 'actualEndTime', minDateKey: 'actualStartTime' }];
 const { Option } = FlatSelect;
 export interface IGanttPageProps extends TableCacheRenderProps {
   isInProgram: boolean
@@ -610,7 +611,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
                   showUnitSwitch={false}
                   unit={unit}
                   onRow={onRow}
-                  middleDateKeys={[{ key: 'actualStartTime', maxDateKey: 'actualEndTime' }, { key: 'actualEndTime', minDateKey: 'actualStartTime' }]}
+                  middleDateKeys={middleDateKeys}
                   onBarClick={onRow.onClick}
                   tableIndent={20}
                   expandIcon={getExpandIcon}
