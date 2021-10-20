@@ -372,6 +372,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         children: <UpdateField
           record={record}
           selectedType={selectedType}
+          selectedTypeCode={selectedTypeCode}
           customCirculationDataSet={customCirculationDataSet}
         />,
       },

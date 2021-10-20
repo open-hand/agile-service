@@ -27,7 +27,7 @@ const clearIdMap = new Map([
 const extraOptionsMap = new Map();
 export default function renderField({
   code, fieldType, fieldOptions, required, system,
-}, data, selectUserMap, isProgram, isOrganization, colSpan = 12) {
+}, data, selectedTypeCode, selectUserMap, isProgram, isOrganization, colSpan = 12) {
   switch (code) {
     case 'component': {
       return (
@@ -384,6 +384,11 @@ export default function renderField({
       if (!isProgram && code !== 'assignee') {
         extraOptionsMap.member.unshift({
           id: 'assignee', realName: '经办人', tooltip: false,
+        });
+      }
+      if (selectedTypeCode !== 'feature' && !system && fieldType === 'multiMember') {
+        extraOptionsMap.member.push({
+          id: 'participant', realName: '参与人', tooltip: false,
         });
       }
       if (!required || code !== 'reporter') {

@@ -37,7 +37,7 @@ interface IFieldValue {
   projectId: number,
   optionId: null | string | string[],
   fieldType: 'member' | 'radio' | 'single' | 'checkbox' | 'multiple' | 'text' | 'input' | 'number' | 'date' | 'time' | 'datetime',
-  operateType: 'clear' | 'specifier' | 'current_time' | 'add' | 'reportor' | 'creator' | 'operator',
+  operateType: 'clear' | 'specifier' | 'current_time' | 'add' | 'reportor' | 'creator' | 'operator' | 'participant',
   numberValue: null | number,
   numberAddValue: null | number,
   textValue: null | string,
@@ -59,7 +59,7 @@ type ISelectUserMap = Map<string, { id: null | string, realName: null | string }
 
 const excludeCode = ['summary', 'status', 'issueNum', 'issueType', 'sprint', 'feature', 'epicName', 'epic', 'pi', 'timeTrace', 'lastUpdateDate', 'creationDate', 'created_user', 'last_updated_user', 'tag'];
 const orgExcludeCode: string[] = ['component', 'label', 'fixVersion', 'featureType', 'subProject', 'programVersion', 'tag'];
-const memberIsNotSpecifier = ['reportor', 'clear', 'operator', 'creator', 'assignee', 'mainResponsible'];
+const memberIsNotSpecifier = ['reportor', 'clear', 'operator', 'creator', 'assignee', 'mainResponsible', 'participant'];
 // @ts-ignore
 const transformUpdateData = (data) => {
   const updateData = [];
@@ -270,7 +270,7 @@ const setCurrentByFieldType = (current, fieldValue, fieldCode) => {
 const memberTypeList = ['member', 'multiMember'];
 const UpdateField = ({
   // @ts-ignore
-  modal, selectedType, record, customCirculationDataSet,
+  modal, selectedType, selectedTypeCode, record, customCirculationDataSet,
 }) => {
   const { isProgram } = useIsProgram();
   const [fieldData, setFieldData] = useState<IField[]>([]);
@@ -560,7 +560,7 @@ const UpdateField = ({
             }
           </Select>,
           // @ts-ignore
-          renderField(f, data, selectUserMap, isProgram, isOrganization),
+          renderField(f, data, selectedTypeCode, selectUserMap, isProgram, isOrganization),
           <Icon
             onClick={() => {
               // @ts-ignore
