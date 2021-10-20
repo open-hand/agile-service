@@ -77,6 +77,8 @@ export interface CreateIssueBaseProps {
   /** 是否在项目群创建 */
   isProgram?: boolean
   showSelectProject?: boolean,
+  /** 额外的需要必填的字段建 */
+  extendRequiredCodes?: string[]
 }
 const defaultDataSet = new DataSet({
   autoCreate: true,
@@ -205,6 +207,7 @@ const CreateIssueBase = observer(({
   typeCode,
   isProgram,
   showSelectProject = false,
+  extendRequiredCodes = [],
 }: CreateIssueBaseProps) => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
@@ -391,7 +394,7 @@ const CreateIssueBase = observer(({
           fieldType: field.fieldType,
           fieldCode: field.fieldCode,
           label: field.fieldName,
-          required: field.required || getRuleRequired(field, rules),
+          required: field.required || getRuleRequired(field, rules) || extendRequiredCodes.includes(field.fieldCode),
           multiple: isMultiple(field),
         });
       })], [{
