@@ -59,6 +59,21 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
     });
   }, [mainStore, getCalendarApi]);
 
+  const handleSetProps = useCallback(({ event, isHover = false, statusCode }) => {
+    let statusMap = STATUS_COLOR;
+    let textColor = 'var(--text-color)';
+    let timeColor = 'var(--text-color3)';
+    if (isHover) {
+      statusMap = STATUS;
+      textColor = '#fff';
+      timeColor = '#fff';
+    }
+    // @ts-ignore
+    event.setProp('backgroundColor', statusMap[statusCode]);
+    event.setProp('textColor', textColor);
+    event.setExtendedProp('timeColor', timeColor);
+  }, []);
+
   const renderEventContent = usePersistFn(({ event, view, isStart }) => {
     const hours = event?.start?.getHours();
     const timeText = TIME_LABEL[hours] ?? '';
@@ -103,14 +118,10 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
         className={`${Style.weekIssue}`}
         // 由于跨天的issue是分成两个div,因此没法使用css的hover来设置颜色
         onMouseEnter={() => {
-          event.setProp('backgroundColor', STATUS[statusCode]);
-          event.setProp('textColor', '#fff');
-          event.setExtendedProp('timeColor', '#fff');
+          handleSetProps({ event, isHover: true, statusCode });
         }}
         onMouseLeave={() => {
-          event.setProp('backgroundColor', STATUS_COLOR[statusCode]);
-          event.setProp('textColor', 'var(--text-color)');
-          event.setExtendedProp('timeColor', 'var(--text-color3)');
+          handleSetProps({ event, isHover: false, statusCode });
         }}
       >
         {isStart ? (

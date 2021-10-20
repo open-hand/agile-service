@@ -67,6 +67,7 @@ const WorkCalendar = observer(() => {
     openCreateIssue({
       showSelectProject: true,
       defaultAssignee: AppState.userInfo,
+      extendRequiredCodes: ['estimatedStartTime', 'estimatedEndTime', 'assignee'],
       defaultValues,
       onCreate: (issue: Issue) => {
         const calenderApi = calendarRef.current?.getApi();
