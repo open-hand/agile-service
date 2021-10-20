@@ -326,6 +326,7 @@ export interface Issue {
     relationType: 'influence' | 'fix',
   }[]
   programId: string
+  projectId: string
 }
 
 export interface ILog {

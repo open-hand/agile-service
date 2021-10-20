@@ -49,7 +49,7 @@ export default function useStore({ DEFAULT_USER }: Props) {
 
     issueList: [],
     get getIssueList() {
-      return this.issueList;
+      return this.issueList?.slice();
     },
     setIssueList(data: IssueItem[]) {
       this.issueList = data;
@@ -57,12 +57,20 @@ export default function useStore({ DEFAULT_USER }: Props) {
 
     expandMap: new Map(),
 
-    searchParams: null,
-    getSearchParams() {
-      return this.searchParams;
+    issueSearchParams: '',
+    get getIssueSearchParams() {
+      return this.issueSearchParams;
     },
-    setSearchParams(data: string) {
-      this.searchParams = data;
+    setIssueSearchParams(data: string) {
+      this.issueSearchParams = data;
+    },
+
+    issueListLoading: true,
+    get getIssueListLoading() {
+      return this.issueListLoading;
+    },
+    setIssueListLoading(flag: boolean) {
+      this.issueListLoading = flag;
     },
 
     currentViewType: 'timeGridWeek',
@@ -92,6 +100,7 @@ export default function useStore({ DEFAULT_USER }: Props) {
 
     async loadIssueList() {
       try {
+        this.setIssueListLoading(true);
         const postData = {
           assigneeFilter: this.users,
           projectIds: this.currentProjectIds,
@@ -105,9 +114,11 @@ export default function useStore({ DEFAULT_USER }: Props) {
           completedCount: item.countVO?.completedCount ?? 0,
           totalCount: item.countVO?.totalCount ?? 0,
         }));
+        this.setIssueListLoading(false);
         this.setIssueList(newData);
         return newData;
       } catch (e) {
+        this.setIssueListLoading(false);
         return [];
       }
     },

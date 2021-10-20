@@ -79,9 +79,7 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
             ...issueBorderClass,
           }}
         >
-          <Tooltip title={event.title}>
-            <span className={Style.monthIssueSummary}>{event.title}</span>
-          </Tooltip>
+          <span className={Style.monthIssueSummary}>{event.title}</span>
           <span className={Style.monthIssueStartTime}>
             {event.allDay ? '全天' : timeSpan}
           </span>

@@ -34,6 +34,7 @@ const CreateContent = (props: CreateIssueBaseProps) => {
             label="所属项目"
             required
             clearButton={false}
+            category="N_AGILE"
           />
         </Form>
       )}
