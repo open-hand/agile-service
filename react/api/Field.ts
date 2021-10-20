@@ -192,7 +192,9 @@ class FieldApi extends Api<FieldApi> {
    * 项目层，获取自定义字段表头
    */
   getFoundationHeader(issueTypeList?: 'agileIssueType' | 'programIssueType') {
-    return axios.get(`${this.prefix}/field_value/list/getFields`, {
+    return this.request({
+      url: `${this.prefix}/field_value/list/getFields`,
+      method: 'get',
       params: {
         project_id: getProjectId(),
         organizationId: getOrganizationId(),

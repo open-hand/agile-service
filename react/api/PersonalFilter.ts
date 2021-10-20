@@ -34,7 +34,11 @@ class PersonalFilterApi extends Api<PersonalFilterApi> {
             * @param data
             */
   create(data: IPersonalFilter) {
-    return axios.post(`${this.prefix}/personal_filter`, data);
+    return this.request({
+      url: `${this.prefix}/personal_filter`,
+      method: 'post',
+      data,
+    });
   }
 
   /**
@@ -43,7 +47,11 @@ class PersonalFilterApi extends Api<PersonalFilterApi> {
            * @param updateData
            */
   update(filterId: string, updateData: UPersonalFilter):Promise<any> {
-    return axios.put(`${this.prefix}/personal_filter/${filterId}`, updateData);
+    return this.request({
+      url: `${this.prefix}/personal_filter/${filterId}`,
+      method: 'put',
+      data: updateData,
+    });
   }
 
   /**
@@ -51,7 +59,11 @@ class PersonalFilterApi extends Api<PersonalFilterApi> {
     * @param filterId
     */
   delete(filterId: string) {
-    return axios.delete(`${this.prefix}/personal_filter/${filterId}`);
+    return this.request({
+      url: `${this.prefix}/personal_filter/${filterId}`,
+      method: 'delete',
+
+    });
   }
 
   /**
@@ -60,7 +72,7 @@ class PersonalFilterApi extends Api<PersonalFilterApi> {
     */
   checkName(name: string) {
     const userId = AppState.userInfo.id;
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/personal_filter/check_name`,
       params: {

@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId, getMenuType } from '@/utils/common';
+import Api from './Api';
 
 interface IWorkCalendar {
   status: number,
@@ -9,9 +10,9 @@ interface IWorkCalendar {
  * 冲刺的工作日历 api
  * @author ding
  */
-class WorkCalendarApi {
+class WorkCalendarApi extends Api<WorkCalendarApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   /**
@@ -33,7 +34,7 @@ class WorkCalendarApi {
    * @param year //1999
    */
   getYearCalendar(year: number) {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/work_calendar_ref`,
       params: {

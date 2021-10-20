@@ -17,23 +17,24 @@ interface Props {
   menuType: 'project' | 'org'
   onSubmit: () => void
   onDelete: () => void
+  projectId?: string
 }
 const FilterItem: React.FC<Props> = ({
-  data, menuType, onSubmit, onDelete,
+  data, menuType, onSubmit, onDelete, projectId,
 }) => {
   const {
     filterId, name, objectVersionNumber, default: isDefault,
   } = data;
   const [isEditing, setIsEditing] = useState(false);
   const menuConfig = useMemo(() => (menuType === 'project' ? ({
-    update: (updateData: UPersonalFilter) => personalFilterApi.update(filterId, updateData),
-    checkName: (newName: string) => personalFilterApi.checkName(newName),
-    delete: () => personalFilterApi.checkName(filterId),
+    update: (updateData: UPersonalFilter) => personalFilterApi.project(projectId).update(filterId, updateData),
+    checkName: (newName: string) => personalFilterApi.project(projectId).checkName(newName),
+    delete: () => personalFilterApi.project(projectId).checkName(filterId),
   }) : ({
     update: (updateData: UPersonalFilter) => personalFilterApi.update(filterId, updateData),
     checkName: (newName: string) => personalFilterApi.checkName(newName),
     delete: () => personalFilterApi.checkName(filterId),
-  })), [filterId, menuType]);
+  })), [filterId, menuType, projectId]);
   const valueRef = useRef<string>(name);
   const inputRef = useRef() as MutableRefObject<ObserverTextField>;
   const handleCancel = useCallback(() => {
