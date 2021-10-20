@@ -250,6 +250,9 @@ public class IssueVO {
     @ApiModelProperty(value = "实际结束时间")
     private Date actualEndTime;
 
+    @ApiModelProperty(value = "所属项目")
+    private ProjectVO projectVO;
+
     public Long getSprintId() {
         return sprintId;
     }
@@ -1003,5 +1006,13 @@ public class IssueVO {
 
     public void setParticipants(List<UserMessageDTO> participants) {
         this.participants = participants;
+    }
+
+    public ProjectVO getProjectVO() {
+        return projectVO;
+    }
+
+    public void setProjectVO(ProjectVO projectVO) {
+        this.projectVO = projectVO;
     }
 }

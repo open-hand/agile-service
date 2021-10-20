@@ -92,6 +92,7 @@ public class IssueAssembler extends AbstractAssembler {
         issueVO.setPriorityVO(priorityDTOMap.get(issueVO.getPriorityId()));
         issueVO.setIssueTypeVO(issueTypeDTOMap.get(issueVO.getIssueTypeId()));
         issueVO.setStatusVO(statusMapDTOMap.get(issueVO.getStatusId()));
+        issueVO.setProjectVO(ConvertUtil.queryProject(issueVO.getProjectId()));
         List<Long> assigneeIdList = new ArrayList<>();
         assigneeIdList.add(issueDetailDTO.getAssigneeId());
         assigneeIdList.add(issueDetailDTO.getReporterId());
