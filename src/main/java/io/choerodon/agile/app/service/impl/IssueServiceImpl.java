@@ -1513,6 +1513,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 issueConvertDTO.setOriginSprintId(originIssue.getSprintId());
             }
         }
+        if (fieldList.contains("estimateTime")
+                && !ObjectUtils.isEmpty(issueConvertDTO.getEstimateTime())
+                && ObjectUtils.isEmpty(originIssue.getRemainingTime())) {
+            fieldList.add("remainingTime");
+            issueConvertDTO.setRemainingTime(issueConvertDTO.getEstimateTime());
+        }
         if (agilePluginService != null) {
             agilePluginService.handlerProgramUpdateIssue(issueType, fieldList, projectId, issueUpdateVO, originIssue);
         }

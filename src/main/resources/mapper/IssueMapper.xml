@@ -1283,19 +1283,11 @@
                 SELECT ai12.issue_id from agile_issue ai12
                 left join agile_issue_participant_rel aipr
                 on ai12.issue_id = aipr.issue_id WHERE
-                ai.project_id in
-                <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
-                    #{projectId}
-                </foreach>
-                AND aipr.participant_id is null ) OR
+                aipr.participant_id is null ) OR
             </if>
             ai.issue_id in
             (SELECT aipr.issue_id FROM agile_issue_participant_rel aipr WHERE
-            aipr.project_id in
-            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
-                #{projectId}
-            </foreach>
-            AND aipr.participant_id in
+            aipr.participant_id in
             <foreach collection="searchVO.otherArgs.participantIds" item="participantId" open="(" separator=","
                      close=")">
                 #{participantId}
@@ -3270,7 +3262,8 @@
             ai.status_id,
             ai.apply_type,
             ai.epic_id,
-            sprint.sprint_id
+            sprint.sprint_id,
+            ai.estimate_time
         FROM
             agile_issue ai
             LEFT JOIN (
