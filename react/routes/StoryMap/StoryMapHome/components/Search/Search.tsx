@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, Tooltip } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
+import { useUnmount } from 'ahooks';
 import IssueSearch, { IssueSearchStore } from '@/components/issue-search';
 import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
@@ -21,20 +22,19 @@ const StoryMapSearch: React.FC<Props> = ({ issueSearchStore }) => {
   const handleClickSaveFilter = () => {
     openSaveFilterModal({ searchVO: issueSearchStore.getCustomFieldFilters(), onOk: issueSearchStore.loadMyFilterList });
   };
-
+  useUnmount(() => { localPageCacheStore.setItem('storyMapSearchVO', issueSearchStore.getCustomFieldFilters(true)); });
   return (
     <div className={styles.storyMapSearch}>
       <IssueSearch
         store={issueSearchStore}
         onClear={handleClear}
         onChange={() => {
-          localPageCacheStore.setItem('storyMapSearchVO', issueSearchStore.getCustomFieldFilters(true));
           StoryMapStore.setSearchVO(issueSearchStore.getCustomFieldFilters());
           StoryMapStore.clearData();
           StoryMapStore.getStoryMap();
         }}
         foldedHeight={42}
-        // onClickSaveFilter={handleClickSaveFilter}
+      // onClickSaveFilter={handleClickSaveFilter}
       />
       <div style={{
         marginLeft: 'auto',

@@ -3,6 +3,7 @@ import React, {
 } from 'react';
 import { inject } from 'mobx-react';
 import { injectIntl } from 'react-intl';
+import { useUnmount } from 'ahooks';
 import { fieldApi, permissionApi } from '@/api';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { useIssueSearchStore } from '@/components/issue-search';
@@ -45,7 +46,9 @@ export const StoreProvider = inject('AppState')(injectIntl(
       transformFilter,
       defaultSearchVO: (cachedFilter) ?? (defaultMyFilter && defaultMyFilter.filterJson ? JSON.parse(defaultMyFilter.filterJson) : undefined) ?? undefined,
     });
-
+    useUnmount(() => {
+      localPageCacheStore.setItem('issues', issueSearchStore.getCustomFieldFilters(true));
+    });
     /**
     * detail data
     * 详情页数据
