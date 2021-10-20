@@ -30,6 +30,7 @@ import { IGanttPageProps } from '../Gantt';
 interface IGanttColumnsHookProps extends TableCacheRenderProps {
   menuType: IGanttPageProps['menuType']
   projectId?: string
+  onClickSummary?: (issue: GanttIssue) => void
   onSortChange: IGanttSortLabelProps['onChange']
   onCreateSubIssue?: (parentIssue: GanttIssue) => void
   onAfterCreateSubIssue?: (createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed?: boolean) => void
@@ -119,6 +120,7 @@ function getListLayoutColumns(listLayoutColumns: ListLayoutColumnVO[] | null, fi
   return res;
 }
 interface TableColumnEvent {
+  onClickSummary?:IGanttColumnsHookProps['onClickSummary']
   onSortChange?: IGanttColumnsHookProps['onSortChange']
   openCreateSubIssue?: IGanttColumnsHookProps['onCreateSubIssue']
   onAfterCreateSubIssue?: IGanttColumnsHookProps['onAfterCreateSubIssue']
@@ -126,7 +128,7 @@ interface TableColumnEvent {
 const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: boolean }>,
   tableFields: IFoundationHeader[], events: TableColumnEvent = {}, disableOperate: boolean = false) => {
   const {
-    onSortChange = noop,
+    onSortChange = noop, onClickSummary = noop,
     openCreateSubIssue = noop, onAfterCreateSubIssue = noop,
   } = events;
   function renderSummary(record: Gantt.Record) {
@@ -188,10 +190,20 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
     const isCanCreateIssue = !disableOperate && isCanQuickCreateIssue(record);
     return !record.group ? (
       // eslint-disable-next-line no-underscore-dangle
-      <span style={{ cursor: 'pointer', color: 'var(--table-click-color)' }} className={classNames('c7n-gantt-content-body-summary')}>
+      <span className={classNames('c7n-gantt-content-body-summary')}>
         <TypeTag iconSize={22} data={record.issueTypeVO} featureType={record.featureType} style={{ marginRight: 5 }} />
-        <Tooltip title={record.summary}>
-          <span style={{ verticalAlign: 'middle', flex: 1 }} className="c7n-gantt-content-body-summary-text">{record.summary}</span>
+        <Tooltip placement="topLeft" title={record.summary}>
+          <span
+            role="none"
+            style={{ verticalAlign: 'middle', flex: 1 }}
+            className="c7n-gantt-content-body-summary-text c7n-agile-table-cell-click"
+            onClick={() => {
+              onClickSummary(record);
+            }}
+          >
+            {record.summary}
+
+          </span>
         </Tooltip>
         {isCanCreateIssue && (
           <Icon
@@ -199,7 +211,6 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
             className="c7n-gantt-content-body-parent_create"
             onClick={(e) => {
               e.stopPropagation();
-
               openCreateSubIssue(record as any);
             }}
           />
@@ -280,7 +291,7 @@ const defaultListLayoutColumns = defaultVisibleColumns.map((code) => ({
   display: true,
 }));
 function useGanttProjectColumns({
-  cached, onAfterCreateSubIssue, onCreateSubIssue, onSortChange, projectId, menuType,
+  cached, onAfterCreateSubIssue, onCreateSubIssue, onClickSummary, onSortChange, projectId, menuType,
 }: IGanttColumnsHookProps) {
   // 恒为 项目层级
   const { data: tableFields } = useIssueTableFields({ hiddenFieldCodes: ['epicSelfName', 'summary'], projectId, menuType: 'project' });
@@ -288,7 +299,9 @@ function useGanttProjectColumns({
   const listLayoutColumns = useMemo(() => getListLayoutColumns(cached?.listLayoutColumns || defaultListLayoutColumns as any, tableFields || []), [cached?.listLayoutColumns, tableFields]);
   const visibleColumnCodes = useMemo(() => (listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode)), [listLayoutColumns]);
   const tableWithSortedColumns = useMemo(() => getTableColumns(listLayoutColumns.filter((item) => item.display)
-    .map((item) => ({ ...item, disable: true })), tableFields || [], { onSortChange, openCreateSubIssue: onCreateSubIssue, onAfterCreateSubIssue }), [listLayoutColumns, onAfterCreateSubIssue, onCreateSubIssue, onSortChange, tableFields]);
+    .map((item) => ({ ...item, disable: true })), tableFields || [], {
+    onClickSummary, onSortChange, openCreateSubIssue: onCreateSubIssue, onAfterCreateSubIssue,
+  }), [listLayoutColumns, onAfterCreateSubIssue, onClickSummary, onCreateSubIssue, onSortChange, tableFields]);
   return {
     columns,
     setColumns,
@@ -328,4 +341,4 @@ function useGanttColumns(props: IGanttColumnsHookProps) {
 }
 
 export { useGanttOrgColumns };
-export default useGanttProjectColumns;
+export default useGanttColumns;

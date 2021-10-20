@@ -9,7 +9,7 @@ import {
 } from 'choerodon-ui/pro';
 import { observer, useComputed } from 'mobx-react-lite';
 import {
-  find, findIndex, flow, merge, omit, pick, remove, set, some,
+  find, findIndex, flow, merge, noop, omit, pick, remove, set, some,
 } from 'lodash';
 import produce from 'immer';
 import dayjs from 'dayjs';
@@ -59,11 +59,11 @@ import QuickCreateIssue from '@/components/QuickCreateIssue';
 import TableCache, { TableCacheRenderProps } from '@/components/table-cache';
 import useGanttColumns, { useGanttOrgColumns } from './hooks/useGanttColumns';
 import {
-  ganttLocalMove, getGanttMoveDataOrigin, getGanttMoveSubmitData, ganttDataGroupByType, getGanttCreatingSubIssue, ganttNormalizeIssue,
+  ganttLocalMove, getGanttMoveDataOrigin, getGanttMoveSubmitData, ganttDataGroupByType, getGanttCreatingSubIssue, ganttNormalizeIssue, ganttSaveCollapsedStatus, ganttRestoreCollapsedStatus,
 } from './utils';
 import GanttDragWrapper from './components/gantt-drag-wrapper';
 import useQuickCreateIssue from './hooks/useQuickCreateIssue';
-import { GanttIssue } from './types';
+import { GanttIssue, IGanttCollapsedHistory } from './types';
 import { getProjectId } from '@/utils/common';
 import SelectProject from '@/components/select/select-project';
 
@@ -102,6 +102,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const [type, setType] = useState<IGanttDimensionTypeValue>(localPageCacheStore.getItem('gantt.search.type') ?? typeValues[0]);
   const [rankList, setRankList] = useState<string[] | undefined>(undefined);
   const [workCalendar, setWorkCalendar] = useState<any>();
+  const collapsedHistoryRef = useRef<{ [key: string]: IGanttCollapsedHistory }>({});
   const [{ data: sortedList }, onSortChange] = useGanttSortLabel();
   const [projectWorkCalendar, setProjectWorkCalendar] = useState<any>();
   const [filterManageVisible, setFilterManageVisible] = useState<boolean>();
@@ -147,10 +148,15 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
       run();
     }
   });
+  const handleClickSummary = useCallback((issue: any) => {
+    console.log('handleClickSummary');
+    store.setIssue(issue);
+    store.setProgramId(issue.programId && (String(issue.programId) !== String(getProjectId())) ? String(issue.programId) : null);
+  }, [store]);
   const {
     columns, setColumns, visibleColumnCodes, tableWithSortedColumns, listLayoutColumns,
   } = useGanttColumns({
-    ...props, onSortChange, projectId, onCreateSubIssue: handleQuickCreateSubIssue, onAfterCreateSubIssue: handleQuickCreateSubIssueAfter,
+    ...props, onSortChange, projectId, onClickSummary: handleClickSummary, onCreateSubIssue: handleQuickCreateSubIssue, onAfterCreateSubIssue: handleQuickCreateSubIssueAfter,
   });
 
   const searchFilter = useComputed(() => {
@@ -197,7 +203,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
 
   useEffect(() => {
     run();
-  }, [issueSearchStore, sprintIds, run, visibleColumnCodes]);
+  }, [issueSearchStore, sprintIds, run, visibleColumnCodes, searchFilter]);
   useUpdateEffect(() => {
     run();
     flush();
@@ -249,23 +255,23 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const handleClickFilterManage = () => {
     setFilterManageVisible(true);
   };
-  const onRow: GanttProps<GanttIssue>['onRow'] = useMemo(() => ({
-    onClick: (issue) => {
-      store.setIssue(issue);
-      store.setProgramId(issue.programId && (String(issue.programId) !== String(getProjectId())) ? String(issue.programId) : null);
-    },
-  }), [store]);
-  const getExpandIcon = useCallback(({ level, collapsed, onClick }) => (
+
+  const getExpandIcon = useCallback(({
+    level, index, collapsed, onClick,
+  }) => (
     <div
       role="none"
-      onClick={onClick}
+      onClick={(event) => {
+        onClick(event);
+        collapsedHistoryRef.current[index] = { path: store.ganttRef.current?.flattenData[index].flatPath!, collapsed: !collapsed };
+      }}
       className={classNames('c7n-gantt-expand-icon', {
         'c7n-gantt-expand-icon-expanded': !collapsed,
       })}
     >
       <Icon type="navigate_next" />
     </div>
-  ), []);
+  ), [store.ganttRef]);
   const renderBar: GanttProps['renderBar'] = useCallback((bar, { width, height }, dateKeyRange) => (
     <GanttBar
       type={type}
@@ -273,9 +279,10 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
       width={width}
       height={height}
       dateKeyRange={dateKeyRange}
-      onClick={onRow.onClick}
+      onClick={noop}
+    // onClick={onRow.onClick}
     />
-  ), [onRow.onClick, type]);
+  ), [type]);
   const renderGroupBar: GanttProps['renderGroupBar'] = useCallback((bar, { width, height }) => {
     const { record } = bar;
     if (record.groupType === 'sprint') {
@@ -414,9 +421,9 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
     handleIssueDelete(issue);
   });
 
-  const ganttData = useMemo(() => ganttDataGroupByType({
+  const ganttData = useMemo(() => ganttRestoreCollapsedStatus(ganttDataGroupByType({
     data, type, isInProgram, rankList,
-  }), [data, isInProgram, rankList, type]);
+  }), Object.values(collapsedHistoryRef.current).filter((i) => i.collapsed)), [data, isInProgram, rankList, type]);
   const renderEmpty = usePersistFn(() => {
     if (!sprintIds || sprintIds?.length === 0) {
       return <span>暂无数据，请选择冲刺</span>;
@@ -450,7 +457,10 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
       setLoading(false);
     }
     const moveFn = flow(ganttLocalMove, ({ newData, success }) => {
-      success && moveConfig.setData(newData);
+      if (success) {
+        // collapsedHistoryRef.current = ganttSaveCollapsedStatus({ flattenData: store.ganttRef.current?.flattenData || [] });
+        moveConfig.setData(newData);
+      }
       return success;
     }, request);
     moveFn({
@@ -460,11 +470,13 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   return (
     <Page>
       <Header>
-        <SelectProject
-          value={projectId}
-          optionData={projects}
-          onChange={(val) => setCurrentProject && setCurrentProject(val ? String(val) : val)}
-        />
+        {menuType === 'org' && (
+          <SelectProject
+            value={projectId}
+            optionData={projects}
+            onChange={(val) => setCurrentProject && setCurrentProject(val ? String(val) : val)}
+          />
+        )}
         <SelectSprint
           key={`SelectSprint-${projectId}`}
           flat
@@ -618,9 +630,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
                   showBackToday={false}
                   showUnitSwitch={false}
                   unit={unit}
-                  onRow={onRow}
                   middleDateKeys={middleDateKeys}
-                  onBarClick={onRow.onClick}
                   tableIndent={20}
                   expandIcon={getExpandIcon}
                   renderBar={renderBar}

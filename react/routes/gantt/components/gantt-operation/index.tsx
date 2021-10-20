@@ -28,7 +28,12 @@ const GanttOperation: React.FC = () => {
         }}
         >
           图例说明
-          <Icon type="help_outline" style={{ color: 'var(--primary-color)', marginBottom: 1, fontSize: 14 }} />
+          <Icon
+            type="help_outline"
+            style={{
+              color: 'var(--primary-color)', marginBottom: 2, marginLeft: 4, fontSize: 16,
+            }}
+          />
         </span>
       </Dropdown>
       <Button

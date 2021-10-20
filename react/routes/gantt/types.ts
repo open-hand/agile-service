@@ -35,3 +35,8 @@ export interface GanttIssue extends Pick<Issue, 'issueId' | 'issueNum' | 'summar
     tags?: any[]
     updateUser?: User
 }
+
+export interface IGanttCollapsedHistory {
+    path: string
+    collapsed: boolean
+}
