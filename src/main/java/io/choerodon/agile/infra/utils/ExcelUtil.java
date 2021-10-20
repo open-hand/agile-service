@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.utils;
 
 import io.choerodon.agile.api.vo.ExcelTitleVO;
+import io.choerodon.agile.api.vo.WorkHoursExportVO;
 import io.choerodon.agile.api.vo.business.ExportIssuesVO;
 import io.choerodon.agile.infra.dto.ExcelCursorDTO;
 import io.choerodon.agile.infra.enums.ExcelImportTemplate;
@@ -238,6 +239,33 @@ public class ExcelUtil {
         }
     }
 
+    public static <T> void  writeWorkHoursLog(Workbook workbook,
+                                             String sheetName,
+                                             Class<T> clazz,
+                                             List<WorkHoursExportVO> workHoursExportVOS,
+                                             List<ExcelTitleVO> workHoursLogList,
+                                              ExcelCursorDTO cursorDTO) {
+        //样式
+        CellStyle cellStyle = workbook.createCellStyle();
+        SXSSFSheet sheet = (SXSSFSheet) workbook.getSheet(sheetName);
+        cellStyle.setAlignment(HorizontalAlignment.LEFT);
+        CellStyle dateCellStyle =workbook.createCellStyle(); //单元格样式类
+        dateCellStyle.setAlignment(HorizontalAlignment.LEFT);
+        dateCellStyle.setDataFormat(workbook.getCreationHelper().createDataFormat().getFormat("yyyy/mm/dd"));
+        for (WorkHoursExportVO workHoursExportVO : workHoursExportVOS) {
+            Integer rowNum = cursorDTO.getRow();
+            SXSSFRow row = sheet.createRow(rowNum);
+            for (int i = 0; i < workHoursLogList.size(); i++) {
+                ExcelTitleVO excelTitleVO = workHoursLogList.get(i);
+                sheet.setColumnWidth(i, excelTitleVO.getWidth());
+                Boolean isDate = "workDate".equals(excelTitleVO.getCode());
+                handleWriteCell(row, i, workHoursExportVO, (isDate ? dateCellStyle : cellStyle), excelTitleVO.getCode(), clazz);
+            }
+            cursorDTO.increaseRow();
+        }
+        sheet.trackAllColumnsForAutoSizing();
+    }
+
     public static Workbook initWorkHoursExportWorkbook(String sheetName, List<ExcelTitleVO> list) {
         //1、创建工作簿
         SXSSFWorkbook workbook = new SXSSFWorkbook();
@@ -403,6 +431,52 @@ public class ExcelUtil {
         font.setFontHeightInPoints(fontSize);
         cellStyle.setFont(font);
         return cellStyle;
+    }
+
+    protected static <T> void handleWriteCell(SXSSFRow row,
+                                              int i,
+                                              Object data,
+                                              CellStyle cellStyle,
+                                              String field,
+                                              Class<T> clazz) {
+        SXSSFCell cell = row.createCell(i);
+        if (data != null) {
+            Method method = null;
+            try {
+                method = clazz.getMethod(createGetter(field));
+            } catch (NoSuchMethodException e) {
+                LOGGER.debug("no such method exception: {}", e.getMessage());
+                try {
+                    method = clazz.getMethod("getFoundationFieldValue");
+                } catch (NoSuchMethodException e1) {
+                    LOGGER.error(EXCEPTION, e1);
+                }
+            }
+            Object invoke = new Object();
+            if (!ObjectUtils.isEmpty(method)) {
+                try {
+                    invoke = method.invoke(data);
+                } catch (InvocationTargetException | IllegalAccessException e) {
+                    LOGGER.error(EXCEPTION, e);
+                }
+            }
+            if (invoke instanceof Date) {
+                cell.setCellValue((Date) invoke);
+            } else if (invoke instanceof Map) {
+                ObjectMapper m = new ObjectMapper();
+                Map<String, String> foundationFieldValue = m.convertValue(invoke, Map.class);
+
+                String str = foundationFieldValue.get(field) != null ? foundationFieldValue.get(field) : "";
+                cell.setCellValue(substring(str));
+            } else {
+                String str = invoke == null ? null : invoke.toString();
+                cell.setCellValue(substring(str));
+            }
+        } else {
+            cell.setCellValue("");
+        }
+        cell.setCellStyle(cellStyle);
+
     }
 
     /**

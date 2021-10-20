@@ -11,15 +11,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.Arrays;
 
 /**
  * @author zhaotianxin
  * @date 2021-10-19 14:09
  */
 @RestController
-@RequestMapping(value = "/v1/projects/{project_id}/work_hours")
-public class WorkHoursExcelController {
+@RequestMapping(value = "/v1/organizations/{organization_id}/work_hours")
+public class WorkHoursExcelOrgController {
     @Autowired
     private WorkHoursExcelService workHoursExcelService;
 
@@ -27,10 +26,8 @@ public class WorkHoursExcelController {
     @ApiOperation("导出工时日历")
     @PostMapping(value = "/export_work_hours_log")
     public void download(@ApiParam(value = "项目id", required = true)
-                         @PathVariable(name = "project_id") Long projectId,
-                         @ApiParam(value = "组织id", required = true)
-                         @RequestParam Long organizationId,
+                         @PathVariable(name = "organization_id") Long organizationId,
                          @RequestBody WorkHoursSearchVO workHoursSearchVO) {
-        workHoursExcelService.exportWorkHoursLogOnProjectLevel(organizationId, Arrays.asList(projectId), workHoursSearchVO, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes());
+        workHoursExcelService.exportWorkHoursLogOnOrganizationLevel(organizationId, workHoursSearchVO, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes());
     }
 }
