@@ -5257,8 +5257,13 @@
         and ai.estimated_start_time is not null
         and ai.estimated_end_time is not null
         <if test="workItemSearchVO.startTime != null and workItemSearchVO.endTime != null">
-            and (ai.estimated_start_time between #{workItemSearchVO.startTime} and  #{workItemSearchVO.endTime}
-            or ai.estimated_end_time between #{workItemSearchVO.startTime} and  #{workItemSearchVO.endTime})
+            and (
+            ai.estimated_start_time between #{workItemSearchVO.startTime} and  #{workItemSearchVO.endTime}
+            or ai.estimated_end_time between #{workItemSearchVO.startTime} and  #{workItemSearchVO.endTime}
+            or (
+                ai.estimated_start_time &lt; #{workItemSearchVO.startTime}
+                and ai.estimated_end_time > #{workItemSearchVO.endTime}
+            )
         </if>
         <if test="workItemSearchVO.onlyStartTime != null and workItemSearchVO.onlyStartTime">
             and TO_DAYS(ai.estimated_start_time) >= TO_DAYS(#{workItemSearchVO.startTime})
