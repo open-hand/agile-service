@@ -14,17 +14,22 @@ const IssueHeader = (props) => {
   const { AppState, store, prefixCls } = useContext(EditIssueContext);
   const { fullPage } = useDetailContainerContext();
   const {
-    resetIssue, onCancel, reloadIssue, disabled, otherProject, outside,
+    resetIssue, onCancel, reloadIssue, disabled, otherProject, outside, showProjectInfo = false,
   } = props;
   const issue = store.getIssue;
   const {
     parentIssueId, relateIssueId, typeCode, parentIssueSummary, parentRelateSummary, parentIssueDescription, parentRelateDescription,
-    parentStarBeacon, relateStarBeacon,
+    parentStarBeacon, relateStarBeacon, projectVO,
   } = issue;
   return (
     <div className={`${prefixCls}-IssueHeader`}>
       <div className={`${prefixCls}-IssueHeader-top`}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
+          {showProjectInfo && projectVO && (
+            <div className={`${prefixCls}-IssueHeader-top-project`}>
+              <span>{projectVO.name}</span>
+            </div>
+          )}
           {
             parentIssueSummary || parentRelateSummary ? (
               <Popover

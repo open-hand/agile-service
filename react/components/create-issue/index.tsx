@@ -12,7 +12,7 @@ import SelectProject from '@/components/select/select-project';
 export interface CreateIssueProps extends Omit<CreateIssueBaseProps, 'onSubmit'> {
   onCreate: (issue: Issue) => void,
   applyType?: 'agile' | 'program'
-  request?: (data: any) => Promise<any>
+  request?: (data: any, applyType?: 'agile' | 'program') => Promise<any>
   showSelectProject?: boolean,
 }
 
@@ -64,7 +64,7 @@ const openModal = (props: CreateIssueProps) => {
     projectId, applyType = 'agile', onCreate, request,
   } = props;
   const handleSubmit: CreateIssueBaseProps['onSubmit'] = async ({ data, fieldList, fileList }) => {
-    const res = await (request ?? issueApi.create)(data as any, applyType);
+    const res = request ? await request(data as any, applyType) : await issueApi.create(data as any, applyType);
     await fieldApi.createFieldValue(res.issueId, 'agile_issue', fieldList, data.projectId);
     if (fileList && fileList.length > 0) {
       if (fileList.some((one) => !one.url)) {
