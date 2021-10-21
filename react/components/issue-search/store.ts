@@ -38,7 +38,8 @@ export interface IssueSearchStoreProps {
   defaultSearchVO?: ISearchVO
   projectId?: string
   /** @default project */
-  menuType?:'project'|'org'
+  menuType?: 'project' | 'org'
+  fieldConfigs?: { [key: string]: any }
 }
 function isInvalidValue(value: any) {
   if (value === undefined || isNull(value) || (isObject(value) && isEmpty(value))) {
@@ -90,7 +91,9 @@ class IssueSearchStore {
 
   projectId?: string
 
-  menuType: 'project'|'org'='project';
+  fieldConfigs: { [key: string]: any } = {}
+
+  menuType: 'project' | 'org' = 'project';
 
   constructor({
     getSystemFields,
@@ -100,6 +103,7 @@ class IssueSearchStore {
     defaultSearchVO,
     projectId,
     menuType,
+    fieldConfigs,
   }: IssueSearchStoreProps) {
     this.getSystemFields = getSystemFields;
     this.transformFilter = transformFilter;
@@ -108,6 +112,7 @@ class IssueSearchStore {
     this.defaultSearchVO = defaultSearchVO;
     this.projectId = projectId;
     this.menuType = menuType || 'project';
+    this.fieldConfigs = fieldConfigs || {};
   }
 
   setQuery(query: () => void) {

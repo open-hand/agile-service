@@ -58,9 +58,9 @@ function CustomField({ field }) {
     projectId,
     applyType,
     value,
+    ...store.fieldConfigs[field.code],
     onChange: handleChange,
   };
-
   const element = store.menuType === 'project' ? getSearchFields([field], {
     [field.code]: props,
     statusId: {

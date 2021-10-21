@@ -36,6 +36,7 @@ interface IGanttColumnsHookProps extends TableCacheRenderProps {
   onAfterCreateSubIssue?: (createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed?: boolean) => void
 }
 interface IGanttOrgColumnsHookProps extends TableCacheRenderProps {
+  onClickSummary?: (issue: GanttIssue) => void
   projectId?: string
 }
 const renderTooltip = (user: User) => {
@@ -120,7 +121,7 @@ function getListLayoutColumns(listLayoutColumns: ListLayoutColumnVO[] | null, fi
   return res;
 }
 interface TableColumnEvent {
-  onClickSummary?:IGanttColumnsHookProps['onClickSummary']
+  onClickSummary?: IGanttColumnsHookProps['onClickSummary']
   onSortChange?: IGanttColumnsHookProps['onSortChange']
   openCreateSubIssue?: IGanttColumnsHookProps['onCreateSubIssue']
   onAfterCreateSubIssue?: IGanttColumnsHookProps['onAfterCreateSubIssue']
@@ -337,8 +338,8 @@ function useGanttColumns(props: IGanttColumnsHookProps) {
     return useGanttProjectColumns(props);
   }
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  return useGanttOrgColumns({ cached: props.cached, updateCache: props.updateCache });
+  return useGanttOrgColumns({ cached: props.cached, updateCache: props.updateCache, onClickSummary: props.onClickSummary });
 }
 
 export { useGanttOrgColumns };
-export default useGanttColumns;
+export default useGanttProjectColumns;

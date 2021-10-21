@@ -40,7 +40,7 @@ const IssueDetail: React.FC<Props> = ({
           issueId,
           programId,
           projectId: store.issue?.projectId,
-          disabled: menuType === 'org' || programId,
+          disabled: programId,
           applyType: programId ? 'program' : 'agile',
         },
         events: {
