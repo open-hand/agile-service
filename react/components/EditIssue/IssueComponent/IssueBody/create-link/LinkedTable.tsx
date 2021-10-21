@@ -24,9 +24,10 @@ interface Props {
   linkedTableRef: React.MutableRefObject<{
     linkedIssues: string[] | undefined,
   } | undefined>
+  projectId: string
 }
 
-const LinkedTable: React.FC<Props> = ({ issueId, linkedTableRef }) => {
+const LinkedTable: React.FC<Props> = ({ issueId, linkedTableRef, projectId }) => {
   const [, setUpdateCount] = useState<number>(0);
   const dataSetRef = useRef<DataSet>();
   const queryDataSet = useMemo(() => new DataSet({
@@ -72,7 +73,7 @@ const LinkedTable: React.FC<Props> = ({ issueId, linkedTableRef }) => {
       label: '冲刺',
     }],
     transport: {
-      read: ({ params, data }) => issueApiConfig.getUnLinkedIssues(issueId, {
+      read: ({ params, data }) => issueApiConfig.project(projectId).getUnLinkedIssues(issueId, {
         contents: data.content ? [data.content] : undefined,
         advancedSearchArgs: {
           statusId: data.status,
@@ -124,10 +125,10 @@ const LinkedTable: React.FC<Props> = ({ issueId, linkedTableRef }) => {
               prefix={<Icon type="search" />}
               valueChangeAction={'input' as any}
             />
-            <SelectIssueType placeholder="工作项类型" flat name="issueType" style={{ marginRight: 10, marginBottom: 10 }} filterList={['issue_epic', 'sub_task', 'feature']} dropdownMatchSelectWidth={false} />
-            <SelectStatus placeholder="状态" flat name="status" style={{ marginRight: 10, marginBottom: 10 }} request={() => statusApi.loadByProject('agile')} dropdownMatchSelectWidth={false} />
-            <SelectPriority placeholder="优先级" flat name="priority" style={{ marginRight: 10, marginBottom: 10 }} clearButton dropdownMatchSelectWidth={false} />
-            <SelectUser placeholder="经办人" flat name="assignee" style={{ marginRight: 10, marginBottom: 10 }} clearButton dropdownMatchSelectWidth={false} />
+            <SelectIssueType placeholder="工作项类型" flat name="issueType" style={{ marginRight: 10, marginBottom: 10 }} filterList={['issue_epic', 'sub_task', 'feature']} dropdownMatchSelectWidth={false} projectId={projectId} />
+            <SelectStatus placeholder="状态" flat name="status" style={{ marginRight: 10, marginBottom: 10 }} request={() => statusApi.project(projectId).loadByProject('agile')} dropdownMatchSelectWidth={false} />
+            <SelectPriority placeholder="优先级" flat name="priority" style={{ marginRight: 10, marginBottom: 10 }} clearButton dropdownMatchSelectWidth={false} projectId={projectId} />
+            <SelectUser placeholder="经办人" flat name="assignee" style={{ marginRight: 10, marginBottom: 10 }} clearButton dropdownMatchSelectWidth={false} projectId={projectId} />
           </div>
         </Form>
       )}

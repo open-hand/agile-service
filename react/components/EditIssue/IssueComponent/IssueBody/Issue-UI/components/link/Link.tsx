@@ -36,7 +36,7 @@ const Link: React.FC<Props> = ({ modal, store, reloadIssue }) => {
     // @ts-ignore
     if (issue.issueId) {
       // @ts-ignore
-      uiApi.getUIUnLinked(issue.issueId).then((res: IUi[]) => {
+      uiApi.project(issue?.projectId).getUIUnLinked(issue.issueId).then((res: IUi[]) => {
         optionDataSet.loadData(res);
       });
     }
@@ -62,7 +62,7 @@ const Link: React.FC<Props> = ({ modal, store, reloadIssue }) => {
       const linkedUI = linkedDataSet.current?.get('ui');
       // @ts-ignore
       if (linkedUI && linkedUI.length && issue?.issueId) {
-        uiApi.linkUI({
+        uiApi.project(issue?.projectId).linkUI({
           // @ts-ignore
           issueId: issue.issueId,
           fileHeaderIds: linkedUI,

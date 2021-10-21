@@ -15,7 +15,7 @@ export function timeTransformWorkHour(time: number, unit: 'H' | 'D' | 'W') {
 }
 export function processBeforeData(data: any) {
   const {
-    startDate, spendTime, timeUnit, remain, description,
+    startDate, spendTime, timeUnit, remain, description, projectId,
   } = data;
   const TYPE = {
     auto: 'self_adjustment',
@@ -24,7 +24,7 @@ export function processBeforeData(data: any) {
     reduce: 'reduce',
   };
   return {
-    projectId: getProjectId(),
+    projectId: projectId ?? getProjectId(),
     startDate,
     workTime: timeTransformWorkHour(spendTime, timeUnit),
     residualPrediction: TYPE[remain as keyof typeof TYPE],

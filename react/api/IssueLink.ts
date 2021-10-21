@@ -38,11 +38,11 @@ class IssueLinkApi extends Api<IssueLinkApi> {
         url: `${this.outPrefix}/issue_links/${issueId}`,
         params: {
           project_id: this.projectId,
-          organizationId: this.orgId,
+          organizationId: this.orgId,work
         },
       }) : this.request({
         method: 'get',
-        url: `/agile/v1/projects/${projectId || getProjectId()}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issue_links/${issueId}`,
+        url: `/agile/v1/projects/${projectId || this.projectId}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issue_links/${issueId}`,
         params: {
           organizationId: this.orgId,
           instanceProjectId: this.projectId,

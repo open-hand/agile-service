@@ -19,6 +19,7 @@ import CKEditor from '@/components/CKEditor';
 import { IModalProps } from '@/common/types';
 import styles from './index.less';
 import { processBeforeData } from './utils';
+import {getProjectId} from "@/utils/common";
 
 interface RecordWorkModalProps {
   issueId: string
@@ -123,7 +124,7 @@ const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = 
       Choerodon.prompt('请等待图片上传完成');
       return false;
     }
-    const data = { issueId, ...processBeforeData(dataSet.toJSONData()[0]) };
+    const data = { issueId, ...processBeforeData(dataSet.toJSONData()[0]), projectId: projectId ?? getProjectId() };
     await workLogApi.project(projectId).create(data);
     onOk && onOk();
 

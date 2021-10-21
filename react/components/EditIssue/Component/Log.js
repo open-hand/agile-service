@@ -19,8 +19,8 @@ class Log extends Component {
   }
 
   updateLog = (log) => {
-    const { onUpdateLog } = this.props;
-    workLogApi.update(log.logId, log).then((res) => {
+    const { onUpdateLog, projectId } = this.props;
+    workLogApi.project(projectId).update(log.logId, log).then((res) => {
       this.setState({
         editLogId: undefined,
         editLog: undefined,
@@ -30,8 +30,8 @@ class Log extends Component {
   };
 
   handleDeleteLog(logId) {
-    const { onDeleteLog } = this.props;
-    workLogApi.delete(logId)
+    const { onDeleteLog, projectId } = this.props;
+    workLogApi.project(projectId).delete(logId)
       .then((res) => {
         onDeleteLog();
       });
