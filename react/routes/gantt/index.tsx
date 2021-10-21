@@ -19,7 +19,7 @@ const GanttProject: React.FC<{ projectId: string, menuType?: 'project' | 'org', 
   if (menuType === 'project') {
     return !loading ? (
       <TableCache type="gantt" projectId={projectId}>
-        {(cacheProps) => <Gantt {...cacheProps} isInProgram={isInProgram} menuType="project" />}
+        {(cacheProps) => <Gantt {...cacheProps} isInProgram={isInProgram} menuType="project" projectId={projectId} />}
       </TableCache>
     ) : <span />;
   }
