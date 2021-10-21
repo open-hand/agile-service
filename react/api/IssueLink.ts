@@ -38,7 +38,7 @@ class IssueLinkApi extends Api<IssueLinkApi> {
         url: `${this.outPrefix}/issue_links/${issueId}`,
         params: {
           project_id: this.projectId,
-          organizationId: this.orgId,work
+          organizationId: this.orgId,
         },
       }) : this.request({
         method: 'get',
