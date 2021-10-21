@@ -147,8 +147,8 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
         typeCodes = ['story', 'bug', 'task'];
       }
       if (parentIssue.groupType && ['feature', 'epic'].includes(parentIssue.groupType)) {
-        defaultValues.featureId = parentIssue.isInProgram ? parentIssue.issueId : undefined;
-        defaultValues.epicId = !parentIssue.isInProgram ? parentIssue.issueId : undefined;
+        defaultValues.featureId = parentIssue.groupType === 'feature' ? parentIssue.issueId : undefined;
+        defaultValues.epicId = parentIssue.groupType === 'epic' ? parentIssue.issueId : undefined;
         typeCodes = ['story'];
       }
       return (
@@ -159,7 +159,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
             priorityId={priorityId}
             parentIssueId={parentIssueId}
             defaultValues={defaultValues}
-            sprintId={(parentIssue as any).sprint?.sprintId!}
+            sprintId={(parentIssue as any).sprint?.sprintId! || record.sprint?.sprintId}
             cantCreateEvent={(res) => {
               onAfterCreateSubIssue(record.createId, undefined, true);
               // 这里延迟打开
