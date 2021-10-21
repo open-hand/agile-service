@@ -1213,6 +1213,10 @@ public class ReportServiceImpl implements ReportService {
                 return handlePieChartByUser(projectId, startDate, endDate, sprintId, versionId, statusId, "participant_id", false);
             case FieldCode.MAIN_RESPONSIBLE:
                 return handlePieChartByUser(projectId, startDate, endDate, sprintId, versionId, statusId, "main_responsible_id", true);
+            case FieldCode.REPORTER:
+                return handlePieChartByUser(projectId, startDate, endDate, sprintId, versionId, statusId, "reporter_id", true);
+            case FieldCode.ENVIRONMENT:
+                return handlePieChartByType(projectId, fieldName, false, startDate, endDate, sprintId, versionId);
             case "customField":
                 return handlePieChartByCustomField(projectId, startDate, endDate, sprintId, versionId, statusId, customFieldId);
             default:
