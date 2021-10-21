@@ -57,9 +57,10 @@ public interface ReportService {
      * @param sprintId       sprintId
      * @param versionId      versionId
      * @param statusId       statusId
+     * @param customFieldId  customFieldId
      * @return PieChartVO
      */
-    List<PieChartVO> queryPieChart(Long projectId, String fieldName, Long organizationId, Date startDate, Date endDate, Long sprintId, Long versionId, Long statusId);
+    List<PieChartVO> queryPieChart(Long projectId, String fieldName, Long organizationId, Date startDate, Date endDate, Long sprintId, Long versionId, Long statusId, Long customFieldId);
 
     List<GroupDataChartDTO> queryEpicChart(Long projectId, Long epicId, String type);
 
