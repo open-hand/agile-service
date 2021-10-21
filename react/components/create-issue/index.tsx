@@ -27,14 +27,16 @@ const CreateContent = (props: CreateIssueBaseProps) => {
   };
 
   useEffect(() => {
-    // @ts-ignore
-    modal?.handleOk(() => {
-      if (showSelectProject && !projectId) {
-        // @ts-ignore
-        selectProjectRef?.current?.validate();
-      }
-      return false;
-    });
+    if (showSelectProject) {
+      // @ts-ignore
+      modal?.handleOk(() => {
+        if (!projectId) {
+          // @ts-ignore
+          selectProjectRef?.current?.validate();
+        }
+        return false;
+      });
+    }
   }, []);
 
   return (
