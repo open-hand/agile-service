@@ -14,7 +14,7 @@ interface Props {
 
 const UploadUI: React.FC<Props> = (props) => {
   const { hasPermission = true, uploading } = props;
-  const { store, disabled } = useContext(EditIssueContext);
+  const { store, disabled, projectId } = useContext(EditIssueContext);
   const { issueId } = store.getIssue;
   const { linkedUI } = store;
 
@@ -49,7 +49,7 @@ const UploadUI: React.FC<Props> = (props) => {
     fileList.forEach((file: any) => {
       formData.append('file', file);
     });
-    uiApi.uploadUI(issueId, formData);
+    uiApi.project(projectId).uploadUI(issueId, formData);
   }, [issueId]);
 
   const handleUpdate = useCallback((arr) => {

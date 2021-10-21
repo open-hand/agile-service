@@ -34,7 +34,7 @@ interface Props {
 const { AppState } = stores;
 
 const Comment: React.FC<Props> = (props) => {
-  const { store } = useContext(EditIssueContext);
+  const { store, projectId } = useContext(EditIssueContext);
   const { commentExpandMap, commentReplysMap } = store;
   const { comment, reload, readonly } = props;
   const loginUserId = AppState.userInfo.id;
@@ -44,7 +44,7 @@ const Comment: React.FC<Props> = (props) => {
   }, [comment.commentId, commentExpandMap]);
 
   const getReplys = useCallback((id?: string) => {
-    issueCommentApi.getReplys(id || comment.commentId).then((res: ReplyComment[]) => {
+    issueCommentApi.project(projectId).getReplys(id || comment.commentId).then((res: ReplyComment[]) => {
       commentReplysMap.set(id || comment.commentId, res || []);
       commentExpandMap.set(id || comment.commentId, true);
     });

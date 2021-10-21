@@ -42,7 +42,7 @@ class IssueLinkApi extends Api<IssueLinkApi> {
         },
       }) : this.request({
         method: 'get',
-        url: `/agile/v1/projects/${projectId || getProjectId()}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issue_links/${issueId}`,
+        url: `/agile/v1/projects/${projectId || this.projectId}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issue_links/${issueId}`,
         params: {
           organizationId: this.orgId,
           instanceProjectId: this.projectId,

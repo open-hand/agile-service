@@ -59,7 +59,8 @@ const CreateLink: React.FC<Props> = ({
   }, []);
 
   const getLinks = useCallback(() => {
-    issueLinkTypeApi.getAll().then((res: { list: IOriginLink[] }) => {
+    // @ts-ignore
+    issueLinkTypeApi.getAll({}, projectId).then((res: { list: IOriginLink[] }) => {
       setOriginLinks(res.list);
       transform(res.list);
     });
@@ -133,7 +134,7 @@ const CreateLink: React.FC<Props> = ({
           ))}
         </Select>
       </Form>
-      <LinkedTable issueId={issueId} linkedTableRef={linkedTableRef} />
+      <LinkedTable issueId={issueId} linkedTableRef={linkedTableRef} projectId={projectId} />
     </>
   );
 };

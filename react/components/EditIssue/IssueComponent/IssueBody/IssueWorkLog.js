@@ -10,7 +10,7 @@ import Divider from './Divider';
 const IssueWorkLog = observer(({
   reloadIssue, issueId,
 }) => {
-  const { store, disabled } = useContext(EditIssueContext);
+  const { store, disabled, projectId } = useContext(EditIssueContext);
 
   const renderLogs = () => {
     const worklogs = store.getWorkLogs || [];
@@ -24,6 +24,7 @@ const IssueWorkLog = observer(({
               onDeleteLog={reloadIssue}
               onUpdateLog={reloadIssue}
               disabled={disabled}
+              projectId={projectId}
             />
           ))
         }
