@@ -17,8 +17,9 @@ export interface SelectIssueTypeProps extends Partial<SelectProps> {
   dataRef?: React.MutableRefObject<any>
   valueField?: string
   flat?: boolean
-  projectId?:string
-  applyType?:string
+  projectId?: string
+  applyType?: string
+  excludeTypeCodes?: string[]
   excludeTypeIds?: string[]
   showIcon?: boolean
 
@@ -26,7 +27,7 @@ export interface SelectIssueTypeProps extends Partial<SelectProps> {
 
 const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
   filterList = ['feature'], isProgram, request, valueField, dataRef, flat, excludeTypeIds = [], showIcon,
-  afterLoad, projectId, applyType, ...otherProps
+  afterLoad, projectId, applyType, excludeTypeCodes, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<IIssueType> => ({
     name: 'issueType',
@@ -61,7 +62,7 @@ const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
     })),
     optionRenderer: showIcon ? (issueType) => <TypeTag data={issueType} showName /> : undefined,
     middleWare: (issueTypes) => {
-      const newData = issueTypes.filter((item) => !includes(excludeTypeIds, item.id));
+      const newData = issueTypes.filter((item) => !(includes(excludeTypeCodes, item.typeCode) || includes(excludeTypeIds, item.id)));
       if (afterLoad) {
         afterLoad(newData);
       }
@@ -73,7 +74,7 @@ const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
       return newData;
     },
     paging: false,
-  }), [afterLoad, applyType, dataRef, excludeTypeIds, filterList, isProgram, projectId, request, valueField]);
+  }), [afterLoad, applyType, dataRef, excludeTypeCodes, excludeTypeIds, filterList, isProgram, projectId, request, showIcon, valueField]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
 

@@ -109,6 +109,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const [loading, setLoading] = useState(false);
   const issueSearchStore = useIssueSearchStore({
     projectId,
+    fieldConfigs: { issueTypeId: { excludeTypeCodes: ['issue_epic'] } },
     getSystemFields: () => getSystemFields().map((item) => (item.code === 'feature' || item.code === 'epic' ? { ...item, defaultShow: false } : item)).filter((item) => item.code !== 'sprint') as ILocalField[],
     transformFilter,
   });
@@ -149,7 +150,6 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
     }
   });
   const handleClickSummary = useCallback((issue: any) => {
-    console.log('handleClickSummary');
     store.setIssue(issue);
     store.setProgramId(issue.programId && (String(issue.programId) !== String(getProjectId())) ? String(issue.programId) : null);
   }, [store]);
@@ -172,7 +172,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const { run, flush } = useDebounceFn(() => {
     (async () => {
       const year = dayjs().year();
-      if (sprintIds === null && menuType === 'project') {
+      if (sprintIds === null || !projectId) {
         return;
       }
       setLoading(true);
@@ -473,8 +473,18 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
         {menuType === 'org' && (
           <SelectProject
             value={projectId}
+            clearButton={false}
             optionData={projects}
-            onChange={(val) => setCurrentProject && setCurrentProject(val ? String(val) : val)}
+            onChange={(val) => {
+              setCurrentProject && setCurrentProject((oldValue: string) => {
+                if (oldValue === val || !val) {
+                  return String(oldValue);
+                }
+                setLoading(true);
+                store.setSprintIds(null);
+                return val;
+              });
+            }}
           />
         )}
         <SelectSprint
