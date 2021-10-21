@@ -1807,6 +1807,10 @@
                 <if test="fieldName == 'participant_id'">
                     other.${fieldName} AS type_name,
                 </if>
+                <if test="fieldName == 'environment'">
+                    ai.${fieldName} AS type_name,
+                    otherName.name as name,
+                </if>
             </otherwise>
         </choose>
         count( * ) AS value
@@ -1836,6 +1840,9 @@
             <if test="fieldName == 'participant_id'">
                 LEFT JOIN agile_issue_participant_rel other on ai.issue_id = other.issue_id
             </if>
+            <if test="fieldName == 'environment'">
+                LEFT JOIN lookup_value otherName on ai.${fieldName} = otherName.value_code
+            </if>
         </if>
         WHERE
         ai.project_id = #{projectId}
@@ -1863,6 +1870,9 @@
                 <choose>
                     <when test="fieldName == 'resolution'">
                         other.is_completed
+                    </when>
+                    <when test="fieldName == 'environment'">
+                        ai.${fieldName},otherName.name
                     </when>
                     <otherwise>
                         other.${fieldName}
