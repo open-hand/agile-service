@@ -87,6 +87,7 @@ const WorkCalendar = observer(() => {
       props: {
         issueId: event?.id,
         projectId: event?.extendedProps?.projectId,
+        showProjectInfo: true,
       },
     });
   }, [issueDetailProps]);

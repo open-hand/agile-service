@@ -52,6 +52,7 @@ function EditIssue() {
     setSelect,
     isProjectLevel,
     descriptionEditRef,
+    showProjectInfo, // 顶部是否显示所属项目信息
   } = useContext(EditIssueContext);
   const otherProject = !sameProject(projectId);
   const container = useRef();
@@ -386,6 +387,7 @@ function EditIssue() {
           onTransformType={onTransformType}
           onOpenCreateSubTask={handleOpenCreateSubTask}
           onOpenCreateSubBug={handleOpenCreateSubBug}
+          showProjectInfo={showProjectInfo}
         />
         <IssueBody
           setIssueLoading={setIssueLoading}
