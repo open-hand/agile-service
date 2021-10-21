@@ -308,8 +308,66 @@ export function getSystemFieldsInStoryMap(excludeCodes = []) {
     defaultShow: false,
     fieldType: 'datetime',
   },
-
-  ];
+  {
+    code: 'actualStartTime',
+    name: '实际开始时间',
+    defaultShow: false,
+    fieldType: 'datetime',
+  },
+  {
+    code: 'actualEndTime',
+    name: '实际结束时间',
+    defaultShow: false,
+    fieldType: 'datetime',
+  },
+  {
+    code: 'mainResponsibleIds',
+    name: '主要负责人',
+    defaultShow: false,
+    fieldType: 'member',
+  }, {
+    code: 'environment',
+    name: '环境',
+    defaultShow: false,
+    fieldType: 'multiple',
+  },
+  {
+    code: 'creatorIds',
+    name: '创建人',
+    defaultShow: false,
+    fieldType: 'member',
+  }, {
+    code: 'updatorIds',
+    name: '更新人',
+    defaultShow: false,
+    fieldType: 'member',
+  },
+  {
+    code: 'participantIds',
+    name: '参与人',
+    defaultShow: false,
+    fieldType: 'multiMember',
+  }];
+  if (has('agile:PublishVersion')) {
+    systemFields.push({
+      code: 'tags',
+      name: 'Tag',
+      defaultShow: false,
+      fieldType: 'multiple',
+    });
+  }
+  systemFields.push({
+    code: 'storyPoints',
+    name: '故事点',
+    defaultShow: false,
+    fieldType: 'number',
+  });
+  systemFields.push({
+    code: 'remainingTime',
+    name: '预估时间',
+    defaultShow: false,
+    fieldType: 'number',
+  });
   return isInProgram() ? systemFields.filter((f) => !includes(excludeCodes, f.code)) : systemFields.filter((f) => f.code !== 'feature' && !includes(excludeCodes, f.code));
 }
 class IssueStore {
