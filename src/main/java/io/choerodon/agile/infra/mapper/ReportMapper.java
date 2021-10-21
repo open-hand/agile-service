@@ -326,6 +326,10 @@ public interface ReportMapper {
                                            @Param("total") Integer total, @Param("startDate") Date startDate, @Param("endDate") Date endDate,
                                            @Param("sprintId") Long sprintId, @Param("versionId") Long versionId, @Param("statusId") Long statusId);
 
+    List<PieChartDTO> queryPieChartByCustomField(@Param("projectId") Long projectId, @Param("typeCode") Boolean typeCode, @Param("total") Integer total,
+                                                 @Param("startDate") Date startDate, @Param("endDate") Date endDate,
+                                                 @Param("sprintId") Long sprintId, @Param("versionId") Long versionId,
+                                                 @Param("statusId") Long statusId, @Param("fieldId") Long fieldId, @Param("user") Boolean user);
     /**
      * 根据Epic查询统计信息
      *

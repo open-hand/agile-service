@@ -129,6 +129,7 @@ public class ReportServiceImpl implements ReportService {
     private static final String EPIC = "epic";
     private static final String RESOLUTION = "resolution";
     private static final String LABEL = "label";
+    private static final String PARTICIPANT = "participant";
     private static final String TYPE_ISSUE_COUNT = "issue_count";
     private static final String TYPE_STORY_POINT = "story_point";
     private static final String TYPE_REMAIN_TIME = "remain_time";
@@ -1185,8 +1186,8 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    @Cacheable(cacheNames = AGILE, key = "'PieChart' + #projectId + ':' + #fieldName + ':' + #startDate+ ':' + #endDate+ ':' + #sprintId+':' + #versionId + ':' + #statusId")
-    public List<PieChartVO> queryPieChart(Long projectId, String fieldName, Long organizationId, Date startDate, Date endDate, Long sprintId, Long versionId, Long statusId) {
+    @Cacheable(cacheNames = AGILE, key = "'PieChart' + #projectId + ':' + #fieldName + ':' + #startDate+ ':' + #endDate+ ':' + #sprintId+':' + #versionId + ':' + #statusId + ':' + #customFieldId")
+    public List<PieChartVO> queryPieChart(Long projectId, String fieldName, Long organizationId, Date startDate, Date endDate, Long sprintId, Long versionId, Long statusId, Long customFieldId) {
         switch (fieldName) {
             case ASSIGNEE:
                 return handlePieChartByAssignee(projectId, startDate, endDate, sprintId, versionId, statusId);
@@ -1208,10 +1209,99 @@ public class ReportServiceImpl implements ReportService {
                 return handlePieChartByType(projectId, RESOLUTION, false, startDate, endDate, sprintId, versionId);
             case LABEL:
                 return handlePieChartByType(projectId, "label_id", false, startDate, endDate, sprintId, versionId);
+            case PARTICIPANT:
+                return handlePieChartByUser(projectId, startDate, endDate, sprintId, versionId, statusId, "participant_id", false);
+            case FieldCode.MAIN_RESPONSIBLE:
+                return handlePieChartByUser(projectId, startDate, endDate, sprintId, versionId, statusId, "main_responsible_id", true);
+            case "customField":
+                return handlePieChartByCustomField(projectId, startDate, endDate, sprintId, versionId, statusId, customFieldId);
             default:
                 break;
         }
         return new ArrayList<>();
+    }
+
+    private List<PieChartVO> handlePieChartByCustomField(Long projectId,
+                                                         Date startDate,
+                                                         Date endDate,
+                                                         Long sprintId,
+                                                         Long versionId,
+                                                         Long statusId,
+                                                         Long fieldId) {
+        Integer total = reportMapper.queryIssueCountByFieldName(projectId, "customField", startDate, endDate, sprintId, versionId);
+        ObjectSchemeFieldDTO objectSchemeFieldDTO = objectSchemeFieldMapper.queryById(fieldId);
+        boolean user = FieldType.MEMBER.equals(objectSchemeFieldDTO.getFieldType()) || FieldType.MULTI_MEMBER.equals(objectSchemeFieldDTO.getFieldType());
+        List<PieChartDTO> pieChartDTOS = reportMapper.queryPieChartByCustomField(projectId, false, total,
+                startDate, endDate, sprintId, versionId, statusId, fieldId, user);
+        List<PieChartVO> pieChartVOList = reportAssembler.toTargetList(pieChartDTOS, PieChartVO.class);
+        if (user) {
+            List<Long> userIds = pieChartVOList.stream().filter(pieChartDTO ->
+                    pieChartDTO.getTypeName() != null && !"0".equals(pieChartDTO.getTypeName())).map(pieChartDTO ->
+                    Long.parseLong(pieChartDTO.getTypeName())).collect(Collectors.toList());
+            Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(userIds, true);
+            pieChartVOList.parallelStream().forEach(pieChartDTO -> {
+                JSONObject jsonObject = new JSONObject();
+                if (pieChartDTO.getTypeName() != null && usersMap.get(Long.parseLong(pieChartDTO.getTypeName())) != null) {
+                    UserMessageDTO userMessageDTO = usersMap.get(Long.parseLong(pieChartDTO.getTypeName()));
+                    String assigneeName = userMessageDTO.getName();
+                    String assigneeLoginName = userMessageDTO.getLoginName();
+                    String assigneeRealName = userMessageDTO.getRealName();
+                    String assigneeImageUrl = userMessageDTO.getImageUrl();
+                    String email = userMessageDTO.getEmail();
+                    pieChartDTO.setName(assigneeName);
+                    pieChartDTO.setLoginName(assigneeLoginName);
+                    pieChartDTO.setRealName(assigneeRealName);
+                    jsonObject.put("assigneeImageUrl", assigneeImageUrl);
+                    jsonObject.put("email", email);
+                } else {
+                    jsonObject.put("assigneeImageUrl", null);
+                    jsonObject.put("email", null);
+                }
+                pieChartDTO.setJsonObject(jsonObject);
+            });
+        }
+        return pieChartVOList;
+    }
+
+    private List<PieChartVO> handlePieChartByUser(Long projectId,
+                                                  Date startDate,
+                                                  Date endDate,
+                                                  Long sprintId,
+                                                  Long versionId,
+                                                  Long statusId,
+                                                  String fieldName,
+                                                  Boolean own) {
+        Integer total = reportMapper.queryIssueCountByFieldName(projectId, fieldName, startDate, endDate, sprintId, versionId);
+        List<PieChartDTO> pieChartDTOS = reportMapper.queryPieChartByParam(projectId, own, fieldName, false, total,
+                startDate, endDate, sprintId, versionId, null);
+        List<PieChartVO> pieChartVOList = reportAssembler.toTargetList(pieChartDTOS, PieChartVO.class);
+        if (pieChartVOList != null && !pieChartVOList.isEmpty()) {
+            List<Long> userIds = pieChartVOList.stream().filter(pieChartDTO ->
+                    pieChartDTO.getTypeName() != null && !"0".equals(pieChartDTO.getTypeName())).map(pieChartDTO ->
+                    Long.parseLong(pieChartDTO.getTypeName())).collect(Collectors.toList());
+            Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(userIds, true);
+            pieChartVOList.parallelStream().forEach(pieChartDTO -> {
+                JSONObject jsonObject = new JSONObject();
+                if (pieChartDTO.getTypeName() != null && usersMap.get(Long.parseLong(pieChartDTO.getTypeName())) != null) {
+                    UserMessageDTO userMessageDTO = usersMap.get(Long.parseLong(pieChartDTO.getTypeName()));
+                    String assigneeName = userMessageDTO.getName();
+                    String assigneeLoginName = userMessageDTO.getLoginName();
+                    String assigneeRealName = userMessageDTO.getRealName();
+                    String assigneeImageUrl = userMessageDTO.getImageUrl();
+                    String email = userMessageDTO.getEmail();
+                    pieChartDTO.setName(assigneeName);
+                    pieChartDTO.setLoginName(assigneeLoginName);
+                    pieChartDTO.setRealName(assigneeRealName);
+                    jsonObject.put("assigneeImageUrl", assigneeImageUrl);
+                    jsonObject.put("email", email);
+                } else {
+                    jsonObject.put("assigneeImageUrl", null);
+                    jsonObject.put("email", null);
+                }
+                pieChartDTO.setJsonObject(jsonObject);
+            });
+        }
+        return pieChartVOList;
     }
 
     private List<PieChartVO> handlePieChartByPriorityType(Long projectId, Long organizationId, Date startDate, Date endDate, Long sprintId, Long versionId) {

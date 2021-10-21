@@ -1737,7 +1737,45 @@
         ORDER BY sprint_id DESC
     </select>
 
-
+    <select id="queryPieChartByCustomField" resultType="io.choerodon.agile.infra.dto.PieChartDTO">
+        select *,(pieData.value/#{total})*100 as percent from (
+        SELECT
+        <choose>
+            <when test="user">
+                other.option_id AS type_name,
+            </when>
+            <otherwise>
+                other.option_id AS type_name,
+                otherName.value as name,
+            </otherwise>
+        </choose>
+        count( * ) AS value
+        FROM
+        agile_issue ai
+        LEFT JOIN fd_field_value other on other.instance_id = ai.issue_id and other.field_id = #{fieldId}
+        <if test="!user">
+            LEFT JOIN fd_field_option otherName on other.option_id = otherName.id
+        </if>
+        where
+        ai.project_id = #{projectId}
+        AND ai.apply_type = 'agile'
+        <if test="startDate != null and endDate!= null">
+            and ai.creation_date &gt;= #{startDate} and ai.creation_date &lt;= #{endDate}
+        </if>
+        <if test="sprintId != null">
+            and ai.issue_id in (select aisr.issue_id from agile_issue_sprint_rel aisr where aisr.sprint_id =
+            #{sprintId})
+        </if>
+        <if test="versionId != null">
+            and ai.issue_id in (select avir.issue_id from agile_version_issue_rel avir where avir.version_id =
+            #{versionId} and avir.relation_type = 'fix')
+        </if>
+        <if test="statusId != null">
+            and ai.status_id = #{statusId}
+        </if>
+        GROUP BY other.option_id
+        )pieData ORDER BY pieData.value DESC
+    </select>
     <select id="queryPieChartByParam" resultType="io.choerodon.agile.infra.dto.PieChartDTO">
         select *,(pieData.value/#{total})*100 as percent from (
         SELECT
@@ -1766,6 +1804,9 @@
                     other.${fieldName} AS type_name,
                     otherName.label_name as name,
                 </if>
+                <if test="fieldName == 'participant_id'">
+                    other.${fieldName} AS type_name,
+                </if>
             </otherwise>
         </choose>
         count( * ) AS value
@@ -1791,6 +1832,9 @@
             <if test="fieldName == 'label_id'">
                 LEFT JOIN agile_label_issue_rel other on ai.issue_id = other.issue_id
                 LEFT JOIN agile_issue_label otherName on other.${fieldName} = otherName.${fieldName}
+            </if>
+            <if test="fieldName == 'participant_id'">
+                LEFT JOIN agile_issue_participant_rel other on ai.issue_id = other.issue_id
             </if>
         </if>
         WHERE
@@ -1894,6 +1938,9 @@
         </if>
         <if test="fieldName == 'label_id'">
             LEFT JOIN agile_label_issue_rel other on ai.issue_id = other.issue_id
+        </if>
+        <if test="fieldName == 'participant_id'">
+            LEFT JOIN agile_issue_participant_rel other on ai.issue_id = other.issue_id
         </if>
         WHERE
         ai.project_id = #{projectId}

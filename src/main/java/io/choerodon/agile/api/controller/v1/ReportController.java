@@ -158,11 +158,11 @@ public class ReportController {
                                                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date endDate,
                                                           @ApiParam(value = "冲刺id")
                                                            @RequestParam(required = false) @Encrypt Long sprintId,
-                                                          @ApiParam(value = "版本id")
+                                                           @ApiParam(value = "版本id")
                                                            @RequestParam(required = false) @Encrypt Long versionId,
-                                                          @ApiParam(value = "状态id")
-                                                              @RequestParam(required = false) @Encrypt Long statusId) {
-        return Optional.ofNullable(reportService.queryPieChart(projectId, fieldName, organizationId, startDate, endDate, sprintId, versionId, statusId))
+                                                           @RequestParam(required = false) @Encrypt Long customFieldId,
+                                                           @ApiParam(value = "状态id") @RequestParam(required = false) @Encrypt Long statusId) {
+        return Optional.ofNullable(reportService.queryPieChart(projectId, fieldName, organizationId, startDate, endDate, sprintId, versionId, statusId, customFieldId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.report.queryPieChart"));
     }
