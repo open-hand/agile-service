@@ -6,6 +6,7 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.fallback.BaseFeignClientFallback;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.swagger.annotations.ApiParam;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -192,6 +193,14 @@ public interface BaseFeignClient {
     @GetMapping("/choerodon/v1/organizations/{organization_id}/users/{user_id}/projects")
     ResponseEntity<List<ProjectVO>> queryOrgProjects(@PathVariable("organization_id") Long organizationId,
                                                       @PathVariable("user_id") Long userId);
+
+    @GetMapping("/choerodon/v1/organizations/{organization_id}/users/{user_id}/projects/paging")
+    ResponseEntity<Page<ProjectVO>> pagingProjectsByUserId(@PathVariable("organization_id") Long organizationId,
+                                                           @PathVariable("user_id") Long userId,
+                                                           @RequestParam int page,
+                                                           @RequestParam int size,
+                                                           @RequestParam(required = false) Boolean enabled,
+                                                           @RequestParam(required = false) String category);
 
     @PostMapping(value = "/choerodon/v1/projects/ids")
     ResponseEntity<List<ProjectVO>> queryByIds(@RequestBody Set<Long> ids);

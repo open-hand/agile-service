@@ -3,7 +3,9 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,9 @@ public class WorkCalendarServiceImpl implements WorkCalendarService {
 
     @Autowired
     private StatusService statusService;
+
+    @Autowired
+    private BaseFeignClient baseFeignClient;
 
     @Override
     public List<WorkItemVO> queryAssigneeParentIssueList(Long organizationId, WorkItemSearchVO workItemSearchVO) {
@@ -143,8 +148,10 @@ public class WorkCalendarServiceImpl implements WorkCalendarService {
     private void handlerProject(Long organizationId, List<Long> projectIds, Long userId, WorkItemSearchVO workItemSearchVO){
         if (CollectionUtils.isEmpty(workItemSearchVO.getProjectIds())) {
             // 查询有权限的项目
-            List<ProjectVO> projects = new ArrayList<>();
-            issueService.queryUserProjects(organizationId, null, projectIds, projects, userId, null);
+            Page<ProjectVO> page = baseFeignClient.pagingProjectsByUserId(organizationId, userId, 0, 0, true, "N_AGILE").getBody();
+            if (!CollectionUtils.isEmpty(page.getContent())) {
+                projectIds.addAll(page.getContent().stream().map(ProjectVO::getId).collect(Collectors.toList()));
+            }
         } else {
             projectIds.addAll(workItemSearchVO.getProjectIds());
         }
