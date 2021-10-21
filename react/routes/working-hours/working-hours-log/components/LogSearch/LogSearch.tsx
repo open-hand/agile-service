@@ -11,7 +11,6 @@ const LogSearch = () => {
   const {
     logSearchDs,
   } = useLogStore();
-
   return (
     <div className={styles.logSearch}>
       <div className={styles.dateRange}>

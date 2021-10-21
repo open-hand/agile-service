@@ -1,10 +1,10 @@
 import React from 'react';
-import { Modal } from 'choerodon-ui/pro';
+import { Modal, DataSet } from 'choerodon-ui/pro';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import ExportLog from './ExportLog';
 import styles from './ExportLog.less';
 
-function openExportLogModal(props: any) {
+function openExportLogModal(props: { exportDs: DataSet}) {
   Modal.open({
     maskClosable: false,
     key: Modal.key(),

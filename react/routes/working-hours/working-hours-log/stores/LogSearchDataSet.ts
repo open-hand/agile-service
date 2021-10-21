@@ -79,7 +79,7 @@ const LogSearchDataSet = ({ logDs, currentProject }: { logDs: DataSet, currentPr
     required: true,
     dynamicProps: {
       max: ({ record }: { record: Record}) => (moment(record?.get('startTime')).add(31, 'days').isBefore(moment()) ? (formatStartDate(moment(record?.get('startTime'))) as Moment).add(31, 'days') : moment().endOf('day')),
-      min: ({ record }: { record: Record }) => moment(record.get('startTime')).endOf('day'),
+      min: ({ record }: { record: Record }) => moment(record.get('startTime')).startOf('day'),
     },
   }, {
     name: 'userIds',
