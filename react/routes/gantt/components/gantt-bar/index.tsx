@@ -93,7 +93,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
     const dWidth = ganttRef.current?.getWidthByDate(dayjs(estimatedEndTime.value), endDate);
     return dWidth && dWidth > 0 ? dWidth : 0;
   })();
-  const delayVisible = (actualEndTime.value || stepGesture !== 'moving') && !loading;
+  const delayVisible = !(issue.statusVO.type === 'done') && (actualEndTime.value || stepGesture !== 'moving') && !loading;
   const operateWidth = actualEndTime.value ? width - delayWidth : width;
   const actualTimeWidth = actualEndTime.value ? actualTime.width : actualTime.width; // actualTime.width - delayWidth + 1;
   return (

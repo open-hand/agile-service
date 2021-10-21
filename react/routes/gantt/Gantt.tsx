@@ -133,6 +133,10 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
         targetIndex = findIndex(draft, (issue) => issue.parentId === parentIssue.issueId || issue.issueId === parentIssue.issueId);
       }
       const newIssue = getGanttCreatingSubIssue(parentIssue, targetIndex);
+      if (!parentIssue.sprint) {
+        const sprintId = store.sprintIds?.length === 1 ? store.sprintIds[0] : undefined;
+        sprintId && sprintId !== '0' && set(newIssue, 'sprint', { sprintId });
+      }
       targetIndex !== -1 && draft.splice(targetIndex, 0, newIssue);
     }));
   });
@@ -304,17 +308,19 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
       />
     );
   }, []);
+  const handleTooltipMouseEnter = useCallback(
+    (e) => Tooltip.show(e.target, {
+      title: '点击并拖动以设置预计开始、结束时间。',
+      placement: 'topLeft',
+    }),
+    [],
+  );
+  const handleTooltipMouseLeave = useCallback(() => Tooltip.hide(), []);
   const renderInvalidBar: GanttProps['renderInvalidBar'] = useCallback((element, barInfo) => (
-    <Tooltip
-      // @ts-ignore
-      getPopupContainer={(t) => document.getElementsByClassName('gantt-chart')[0] as HTMLElement}
-      hidden={barInfo.stepGesture === 'moving'}
-      placement="top"
-      title="点击并拖动以设置预计开始、结束时间。"
-    >
+    <span onMouseEnter={handleTooltipMouseEnter} onMouseLeave={handleTooltipMouseLeave}>
       {element}
-    </Tooltip>
-  ), []);
+    </span>
+  ), [handleTooltipMouseEnter, handleTooltipMouseLeave]);
 
   const renderBarThumb: GanttProps['renderBarThumb'] = useCallback((record, t) => (
     <div
