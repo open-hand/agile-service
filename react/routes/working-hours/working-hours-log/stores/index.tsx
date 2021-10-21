@@ -10,6 +10,7 @@ import { AppStateProps } from '@/common/types';
 import LogSearchDataSet, { formatEndDate, formatStartDate } from './LogSearchDataSet';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { getIsOrganization } from '@/utils/common';
+import LogExportDataSet from './LogExportDataSet';
 
 const Store = createContext({} as Context);
 
@@ -20,6 +21,7 @@ export function useLogStore() {
 interface Context {
   logDs: DataSet,
   logSearchDs: DataSet,
+  exportDs: DataSet,
   loadData: () => void
   AppState: AppStateProps,
 }
@@ -28,7 +30,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
   const { children, AppState } = props;
   const logDs = useMemo(() => new DataSet(LogDataSet()), []);
   const logSearchDs = useMemo(() => new DataSet(LogSearchDataSet({ logDs, currentProject: AppState.getCurrentProject })), [AppState.getCurrentProject, logDs]);
-
+  const exportDs = useMemo(() => new DataSet(LogExportDataSet({ currentProject: AppState.getCurrentProject })), [AppState.getCurrentProject]);
   const loadData = useCallback(() => {
     // eslint-disable-next-line no-nested-ternary
     logDs.setQueryParameter('startTime', localPageCacheStore.getItem('workingHours-log-startTime') || `${formatStartDate(getIsOrganization() ? moment().subtract(7, 'days') : (
@@ -48,6 +50,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     ...props,
     logDs,
     logSearchDs,
+    exportDs,
     loadData,
   };
   return (
