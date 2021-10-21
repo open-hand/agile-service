@@ -193,7 +193,7 @@ public class IssueValidator {
             throw new CommonException("error.IssueRule.EpicName");
         }
         //修改状态要有当前状态
-        if (issueUpdate.get(STATUS_ID) != null && issueStatusMapper.selectByPrimaryKey(decrypt(issueUpdate.get(STATUS_ID).toString())) == null) {
+        if (issueUpdate.get(STATUS_ID) != null && issueStatusMapper.selectByStatusId(projectId, decrypt(issueUpdate.get(STATUS_ID).toString())) == null) {
             throw new CommonException("error.IssueRule.statusId");
         }
 
