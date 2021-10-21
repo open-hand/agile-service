@@ -125,8 +125,10 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
       } else if (parentIssue.groupType === 'sprint') {
         targetIndex = parentIssue.firstIssue ? findIndex(draft, (issue) => issue.issueId === parentIssue.firstIssue?.issueId) : -1;
       } else if (parentIssue.groupType === 'epic') {
-        targetIndex = findIndex(draft, (issue) => issue.issueId === parentIssue.issueId);
+        targetIndex = findIndex(draft, (issue) => issue.epicId === parentIssue.issueId || issue.issueId === parentIssue.issueId);
         // targetIndex = targetIndex !== -1 && draft.length !== (targetIndex + 1) ? targetIndex + 1 : targetIndex;
+      } else if (parentIssue.groupType === 'feature') {
+        targetIndex = findIndex(draft, (issue) => issue.featureId === parentIssue.issueId || issue.issueId === parentIssue.issueId);
       } else {
         targetIndex = findIndex(draft, (issue) => issue.parentId === parentIssue.issueId || issue.issueId === parentIssue.issueId);
       }
