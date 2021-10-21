@@ -305,14 +305,12 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const renderInvalidBar: GanttProps['renderInvalidBar'] = useCallback((element, barInfo) => (
     <Tooltip
       // @ts-ignore
-      // getPopupContainer={(t) => document.getElementsByClassName('gantt-chart')[0] as HTMLElement}
+      getPopupContainer={(t) => document.getElementsByClassName('gantt-chart')[0] as HTMLElement}
       hidden={barInfo.stepGesture === 'moving'}
       placement="top"
       title="点击并拖动以设置预计开始、结束时间。"
     >
-      <span>
-        {element}
-      </span>
+      {element}
     </Tooltip>
   ), []);
 
