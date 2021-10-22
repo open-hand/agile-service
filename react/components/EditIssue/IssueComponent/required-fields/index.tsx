@@ -23,6 +23,7 @@ import styles from './index.less';
 const { Option } = Select;
 export interface ChangeTypeModalProps {
   modal?: IModalProps,
+  projectId?:string
   requiredFields: IField[]
   issueVO: {
     issueTypeVO: {
@@ -46,7 +47,7 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
   let { data: issueTypeData = [] } = useProjectIssueTypes({ onlyEnabled: true });
 
   const {
-    modal, requiredFields: fields, issueVO, reloadIssue, onUpdate,
+    modal, requiredFields: fields, issueVO, reloadIssue, onUpdate, projectId,
   } = props;
   const [requiredFields, setRequiredFields] = useState(fields.filter((item) => !includes(extraFields, item.fieldCode)) || []);
   const [loading, setLoading] = useState<boolean>(false);
@@ -70,7 +71,7 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
           }
           if (value) {
             setLoading(true);
-            const res = await issueApi.getRequiredField(issueVO.issueId, value);
+            const res = await issueApi.project(projectId).getRequiredField(issueVO.issueId, value);
             setRequiredFields(res.filter((item: IField) => !includes(extraFields, item.fieldCode)));
             setLoading(false);
           } else {
@@ -79,13 +80,13 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
         }
       },
     },
-  }), [issueVO.issueId, issueVO.issueTypeId]);
+  }), [issueVO.issueId, issueVO.issueTypeId, projectId]);
 
   const requiredFieldDsArr = useRequiredFieldDataSet([{
     issueId: issueVO.issueId,
     issueTypeId: issueTypeIdDataSet.current?.get('issueTypeId'),
     requiredFields: requiredFields || [],
-  }]);
+  }], projectId);
 
   const removeField = useCallback((name: string) => {
     requiredFieldDsArr[0]?.dataSet?.fields?.delete(name);
@@ -126,7 +127,7 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
         typeCode: find(issueTypeData, { id: issueTypeIdDataSet.current?.get('issueTypeId') })?.typeCode as string,
         issueTypeId: issueTypeIdDataSet.current?.get('issueTypeId') as string,
       };
-      const res = await issueApi.updateType(submitData);
+      const res = await issueApi.project(projectId).updateType(submitData);
       if (reloadIssue) {
         reloadIssue(res);
       }
@@ -177,6 +178,7 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
       {
         !!requiredFieldDsArr.length && (
           <RequiredField
+            projectId={projectId}
             requiredFields={requiredFields}
             requiredFieldDataSet={requiredFieldDsArr[0]?.dataSet}
           />

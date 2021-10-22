@@ -2,14 +2,14 @@
 import { observable, action, computed } from 'mobx';
 import { stores } from '@choerodon/master';
 import {
+  find, findIndex, uniq, flatten,
+} from 'lodash';
+import {
   IField, IIssueType, Issue, User,
 } from '@/common/types';
 import {
   fieldApi, moveIssueApi, issueApi, userApi, statusTransformApi, IStatusCirculation,
 } from '@/api';
-import {
-  find, findIndex, uniq, flatten,
-} from 'lodash';
 import { initTargetIssue, getFinalFields } from './utils';
 
 const { AppState } = stores;
@@ -161,27 +161,27 @@ class Store {
 
   @observable statusList = []
 
-  @action async loadData(targetIssueTypes: IIssueType[], targetProjectId: string, targetProjectType: string) {
+  @action async loadData(targetIssueTypes: IIssueType[], targetProjectId: string, targetProjectType: string, sourceProjectId: string) {
     const needLoadUserIds = uniq(flatten(this.issues.map((issue) => ([issue.assigneeId, issue.reporterId, issue.mainResponsible?.id])))).filter(Boolean);
     const [users, lostFields, issueDetails, issueFields, targetIssueFields, issueStatus] = await Promise.all([
       Promise.all(
         needLoadUserIds.map((userId) => userApi.project(targetProjectId).getById(userId as string).then((res: any) => res.list[0])),
       ),
       Promise.all(
-        this.issueMapValues.map(({ issue, target }) => moveIssueApi.getFieldsLosed(targetProjectId, issue.issueId, target.issueTypeId)),
+        this.issueMapValues.map(({ issue, target }) => moveIssueApi.project(sourceProjectId).getFieldsLosed(targetProjectId, issue.issueId, target.issueTypeId)),
       ),
       Promise.all(
-        this.issues.map((issue) => issueApi.load(issue.issueId)),
+        this.issues.map((issue) => issueApi.project(sourceProjectId).load(issue.issueId)),
       ),
       Promise.all(
-        this.issues.map((issue) => fieldApi.getFieldAndValue(issue.issueId, {
+        this.issues.map((issue) => fieldApi.project(sourceProjectId).getFieldAndValue(issue.issueId, {
           schemeCode: 'agile_issue',
           issueTypeId: issue.issueTypeId,
           pageCode: 'agile_issue_edit',
         })),
       ),
       Promise.all(
-        targetIssueTypes.map((issueType) => fieldApi.getFields({
+        targetIssueTypes.map((issueType) => fieldApi.project(sourceProjectId).getFields({
           issueTypeId: issueType.id,
           pageCode: 'agile_issue_create',
           schemeCode: 'agile_issue',

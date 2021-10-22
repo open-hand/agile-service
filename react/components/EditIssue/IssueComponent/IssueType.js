@@ -14,7 +14,6 @@ const IssueType = observer(({
   reloadIssue, applyType, onTransformType,
 }) => {
   const { store, disabled } = useContext(EditIssueContext);
-  console.log('store.projectId', store.projectId);
   let { data: issueTypeData } = useProjectIssueTypes({ onlyEnabled: true, applyType, projectId: store.projectId }, { enabled: !disabled });
   const handleChangeType = async (type) => {
     const issue = store.getIssue;
@@ -48,6 +47,7 @@ const IssueType = observer(({
       const res = await issueApi.project(store.projectId).getRequiredField(issueId, value);
       if (res && res.length) {
         openRequiredFieldsModal({
+          projectId: store.projectId,
           requiredFields: res,
           issueVO: {
             summary,

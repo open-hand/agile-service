@@ -25,8 +25,8 @@ export interface RequiredFieldDs {
   getData: () => IFieldsValueVo,
 }
 
-const useRequiredFieldDataSet = (issuesFieldRequired: Props[]): RequiredFieldDs[] => {
-  const { isInProgram } = useIsInProgram();
+const useRequiredFieldDataSet = (issuesFieldRequired: Props[], projectId?: string): RequiredFieldDs[] => {
+  const { isInProgram } = useIsInProgram({ projectId });
   const dataSetMapRef = useRef<Map<string, DataSet>>();
   const dataSetMap = useMemo(() => new Map(), []);
   // @ts-ignore
@@ -35,7 +35,7 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[]): RequiredFieldDs[
     name: 'statusId',
     label: '状态',
     lookupAxiosConfig: () => ({
-      url: `/agile/v1/projects/${getProjectId()}/schemes/query_status_by_issue_type_id?apply_type=agile&issue_type_id=${issueTypeId}`,
+      url: `/agile/v1/projects/${projectId || getProjectId()}/schemes/query_status_by_issue_type_id?apply_type=agile&issue_type_id=${issueTypeId}`,
       method: 'get',
     }),
     valueField: 'id',
@@ -44,7 +44,7 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[]): RequiredFieldDs[
     name: 'sprintId',
     label: '冲刺',
     lookupAxiosConfig: () => ({
-      url: `/agile/v1/projects/${getProjectId()}/sprint/names`,
+      url: `/agile/v1/projects/${projectId || getProjectId()}/sprint/names`,
       method: 'post',
       data: ['started', 'sprint_planning'],
     }),
@@ -59,14 +59,14 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[]): RequiredFieldDs[
   }] : [{
     name: 'epicId',
     label: '所属史诗',
-    lookupAxiosConfig: () => epicConfigApi.loadEpicsForSelect(undefined, { size: 0 }),
+    lookupAxiosConfig: () => epicConfigApi.loadEpicsForSelect(projectId, { size: 0 }),
     valueField: 'issueId',
     textField: 'epicName',
   }], {
     name: 'priorityId',
     label: '优先级',
     lookupAxiosConfig: () => ({
-      url: `/agile/v1/projects/${getProjectId()}/priority/list_by_org`,
+      url: `/agile/v1/projects/${projectId || getProjectId()}/priority/list_by_org`,
       method: 'get',
       transformResponse: (response: any) => {
         try {
@@ -83,7 +83,7 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[]): RequiredFieldDs[
     name: 'labelIssueRelVOList',
     label: '标签',
     lookupAxiosConfig: () => ({
-      url: `/agile/v1/projects/${getProjectId()}/issue_labels`,
+      url: `/agile/v1/projects/${projectId || getProjectId()}/issue_labels`,
       method: 'get',
     }),
     valueField: 'labelId',
@@ -92,7 +92,7 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[]): RequiredFieldDs[
     name: 'componentIssueRelVOList',
     label: '模块',
     lookupAxiosConfig: ({ params }: { params: any }) => ({
-      url: `/agile/v1/projects/${getProjectId()}/component/query_all`,
+      url: `/agile/v1/projects/${projectId || getProjectId()}/component/query_all`,
       method: 'post',
       data: {
         advancedSearchArgs: {},
@@ -117,7 +117,7 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[]): RequiredFieldDs[
     name: 'fixVersion',
     label: '修复的版本',
     lookupAxiosConfig: () => ({
-      url: `/agile/v1/projects/${getProjectId()}/product_version/names`,
+      url: `/agile/v1/projects/${projectId || getProjectId()}/product_version/names`,
       method: 'post',
       data: ['version_planning'],
     }),
@@ -127,13 +127,13 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[]): RequiredFieldDs[
     name: 'influenceVersion',
     label: '影响的版本',
     lookupAxiosConfig: () => ({
-      url: `/agile/v1/projects/${getProjectId()}/product_version/names`,
+      url: `/agile/v1/projects/${projectId || getProjectId()}/product_version/names`,
       method: 'post',
       data: [],
     }),
     valueField: 'versionId',
     textField: 'name',
-  }]), [isInProgram]);
+  }]), [isInProgram, projectId]);
 
   const getRequiredFieldDataSet = useCallback((issue: Props) => {
     const newDataSet = new DataSet({

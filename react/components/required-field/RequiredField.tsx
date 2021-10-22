@@ -26,12 +26,13 @@ export type IRequiredFieldRef = React.MutableRefObject<IRequiredField | null>
 interface Props {
   requiredFields: IField[]
   requiredFieldDataSet: DataSet
+  projectId?:string
 }
 
 const RequiredField: React.FC<Props> = ({
-  requiredFields, requiredFieldDataSet,
+  requiredFields, requiredFieldDataSet, projectId,
 }) => {
-  const { isInProgram } = useIsInProgram();
+  const { isInProgram } = useIsInProgram({ projectId });
   useEffect(() => {
     requiredFields.filter((item) => item.defaultValue).forEach(({ fieldCode, defaultValue }) => {
       requiredFieldDataSet.current?.set(fieldCode as string, defaultValue);
@@ -42,7 +43,7 @@ const RequiredField: React.FC<Props> = ({
     <Form dataSet={requiredFieldDataSet} columns={2} style={{ marginLeft: -5 }}>
       {
         requiredFields.map((item) => (renderField({
-          field: item, otherComponentProps: {}, dataSet: requiredFieldDataSet, isInProgram,
+          field: item, otherComponentProps: { projectId }, dataSet: requiredFieldDataSet, isInProgram,
         })))
       }
     </Form>

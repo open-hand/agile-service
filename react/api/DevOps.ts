@@ -29,7 +29,7 @@ class DevOpsApi extends Api<DevOpsApi> {
    * @param devopsBranchVO
    */
   createBranch(applicationId: number, devopsBranchVO: ICreateBranch) {
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/app_service/${applicationId}/git/branch`,
       data: devopsBranchVO,
@@ -37,7 +37,7 @@ class DevOpsApi extends Api<DevOpsApi> {
   }
 
   linkBranch(applicationId: number, devopsBranchVO: ILinkBrach) {
-    return axios({
+    return this.request({
       method: 'put',
       url: `${this.prefix}/app_service/${applicationId}/git/update_branch_issue`,
       data: devopsBranchVO,
@@ -48,7 +48,7 @@ class DevOpsApi extends Api<DevOpsApi> {
   }
 
   checkBranchName(applicationId: number, branchName: string) {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/app_service/${applicationId}/git/check_branch_name`,
       params: {
@@ -83,14 +83,22 @@ class DevOpsApi extends Api<DevOpsApi> {
    * 加载已经启用的服务列表
    */
   loadActiveService(checkMember?:boolean) {
-    return axios.get(`${this.prefix}/app_service/list_by_active`, { params: { checkMember } });
+    return this.request({
+      url: `${this.prefix}/app_service/list_by_active`,
+      method: 'get',
+      params: {
+        checkMember,
+      },
+    });
   }
 
   /**
    * 加载已经启用的服务列表
    */
   loadProjectActiveService(page: number, size: number, param?: string) {
-    return axios.get(`${this.prefix}/app_service/list_service_under_org`, {
+    return this.request({
+      url: `${this.prefix}/app_service/list_service_under_org`,
+      method: 'get',
       params: {
         page,
         size,
@@ -107,7 +115,7 @@ class DevOpsApi extends Api<DevOpsApi> {
    * @param searchVO
    */
   loadBranchesByService(applicationId: number, page: number = 1, size: number = 5, searchVO: any) {
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/app_service/${applicationId}/git/page_branch_by_options`,
       params: {
@@ -120,7 +128,7 @@ class DevOpsApi extends Api<DevOpsApi> {
   }
 
   loadBranchesByServiceFilterIssue(applicationId: number | string, page: number = 1, size: number = 5, searchVO: any, issue_id: string) {
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/app_service/${applicationId}/git/page_branch_by_options_filtered_by_issue_id`,
       params: {
@@ -144,7 +152,7 @@ class DevOpsApi extends Api<DevOpsApi> {
     param?: string
     searchParam?: { tagName?: string }
   }, checkMember?: boolean) {
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/app_service/${applicationId}/git/page_tags_by_options`,
       params: {
@@ -157,7 +165,7 @@ class DevOpsApi extends Api<DevOpsApi> {
   }
 
   removeLinkBranch(applicationId: number, branchId: string, issueId: string) {
-    return axios({
+    return this.request({
       method: 'delete',
       url: `${this.prefix}/app_service/${applicationId}/git/branch/issue/remove_association`,
       params: {
@@ -184,7 +192,11 @@ class DevOpsApi extends Api<DevOpsApi> {
    */
   loadGitUrl(appServiceId: number) {
     // return axios.get(`${this.prefix}/app_service/${appServiceId}/git/url`);
-    return axios.get(`${this.prefix}/app_service/${appServiceId}/git/url`);
+    return this.request({
+      url: `${this.prefix}/app_service/${appServiceId}/git/url`,
+      method: 'get',
+
+    });
   }
 }
 
