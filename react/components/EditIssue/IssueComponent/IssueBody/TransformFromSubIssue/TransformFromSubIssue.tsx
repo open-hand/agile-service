@@ -87,6 +87,7 @@ const TransformFromSubIssue: React.FC<Props> = ({
       if (res && res.length) {
         modal?.close();
         openRequiredFieldsModal({
+          projectId,
           requiredFields: res,
           issueVO: {
             summary,

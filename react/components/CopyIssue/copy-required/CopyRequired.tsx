@@ -120,7 +120,7 @@ const CopyRequired: React.FC<Props> = ({
     requiredFields,
   }, ...subTaskRequiredFieldsMap.values()]), [issue.issueId, issue.issueTypeId, requiredFields, subTaskRequiredFieldsMap]);
 
-  const requiredFieldDsArr = useRequiredFieldDataSet(issuesFieldRequired);
+  const requiredFieldDsArr = useRequiredFieldDataSet(issuesFieldRequired, projectId);
 
   useImperativeHandle(requiredFieldsVOArrRef, () => requiredFieldDsArr);
 
@@ -130,6 +130,7 @@ const CopyRequired: React.FC<Props> = ({
         !!requiredFields.length && (
           <FormPart title="补全必填字段" partStyle={{ marginBottom: 10 }}>
             <RequiredField
+              projectId={projectId}
               requiredFields={requiredFields}
               requiredFieldDataSet={requiredFieldDsArr.find((item) => item.issueId === issue.issueId)?.dataSet as DataSet}
             />

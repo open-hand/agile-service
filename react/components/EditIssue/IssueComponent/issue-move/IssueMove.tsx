@@ -37,7 +37,7 @@ const { Step } = Steps;
 interface Props {
   issue: IssueWithSubIssueVOList,
   modal?: IModalProps
-  projectId?:string
+  projectId?: string
   fieldsWithValue: FieldWithValue[]
   onMoveIssue: (issue: Issue) => void,
   loseItems: ILoseItems,
@@ -297,8 +297,8 @@ const IssueMove: React.FC<Props> = ({
 const ObserverIssueMove = observer(IssueMove);
 
 const openIssueMove = ({
-  issue, customFields, onMoveIssue, loseItems,
-}: { issue: IssueWithSubIssueVOList, customFields: FieldWithValue[], onMoveIssue: (issue: Issue) => void, loseItems: ILoseItems }) => {
+  issue, customFields, onMoveIssue, loseItems, projectId,
+}: { issue: IssueWithSubIssueVOList, customFields: FieldWithValue[], onMoveIssue: (issue: Issue) => void, loseItems: ILoseItems, projectId?: string }) => {
   Modal.open({
     key: 'issueMoveModal',
     drawer: true,
@@ -307,7 +307,7 @@ const openIssueMove = ({
     style: {
       width: MODAL_WIDTH.middle,
     },
-    children: <ObserverIssueMove issue={issue} fieldsWithValue={customFields} onMoveIssue={onMoveIssue} loseItems={loseItems} />,
+    children: <ObserverIssueMove issue={issue} fieldsWithValue={customFields} onMoveIssue={onMoveIssue} loseItems={loseItems} projectId={projectId} />,
     footer: null,
   });
 };

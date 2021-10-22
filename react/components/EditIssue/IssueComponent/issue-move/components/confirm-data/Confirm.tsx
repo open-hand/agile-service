@@ -8,6 +8,7 @@ import styles from './Confirm.less';
 import store, { FieldWithValue } from '../../store';
 import IssueCard from '../issue-card';
 import LostFields from './LostFields';
+import { getProjectId } from '@/utils/common';
 
 export interface IssueWithSubIssueVOList extends Omit<Issue, 'subIssueVOList'> {
   subIssueVOList: Issue[]
@@ -27,11 +28,12 @@ interface Props {
   targetIssueType?: IIssueType
   targetSubTaskType?: IIssueType
   targetSubBugType?: IIssueType
+  projectId?: string
   loseItems: ILoseItems,
 }
 
 const Confirm: React.FC<Props> = ({
-  issue: mainIssue, dataSet, targetProjectType, targetIssueType, targetSubTaskType, targetSubBugType, loseItems,
+  issue: mainIssue, dataSet, targetProjectType, targetIssueType, targetSubTaskType, targetSubBugType, loseItems, projectId,
 }) => {
   const { moveToProjectList } = store;
   const targetProjectId = dataSet?.current?.get('targetProjectId');
@@ -44,10 +46,10 @@ const Confirm: React.FC<Props> = ({
     (async () => {
       store.setLoading(true);
       await store.initIssueMap(issueType, mainIssue);
-      await store.loadData(targetIssueTypes as IIssueType[], targetProjectId, targetProjectType);
+      await store.loadData(targetIssueTypes as IIssueType[], targetProjectId, targetProjectType, projectId || getProjectId());
       store.setLoading(false);
     })();
-  }, [issueType, mainIssue, targetIssueTypes, targetProjectId, targetProjectType]);
+  }, [issueType, mainIssue, projectId, targetIssueTypes, targetProjectId, targetProjectType]);
   const targetProject = useMemo(() => moveToProjectList.find((item: any) => item.id === targetProjectId) || { name: '' }, [moveToProjectList, targetProjectId]);
   if (store.loading) {
     return <Loading loading />;

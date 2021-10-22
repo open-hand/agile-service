@@ -90,7 +90,7 @@ const CreateBranch: React.FC<{ modal?: IModalProps } & ILinkBranchModalProps> = 
         {
           name: 'app', label: '应用服务', type: 'object' as FieldType, ignore: 'always' as FieldIgnore, required: true,
         },
-        { name: 'projectId', type: 'string' as FieldType, bind: 'app.value.projectId' },
+        { name: 'projectId', type: 'string' as FieldType, bind: 'app.projectId' },
         {
           name: 'appServiceId', type: 'string' as FieldType, required: true, dynamicProps: { bind: ({ record }: any) => (record.get('source') === 'self' ? 'app.id' : 'app.value.id') },
         },

@@ -85,6 +85,7 @@ const IssueDropDown = ({
       onOpenCreateSubTask();
     } else if (e.key === '3') {
       openEditIssueCopyIssue({
+        projectId: store.projectId,
         issue,
         issueLink: store.getLinkIssues,
         issueSummary: issue.summary,
@@ -105,7 +106,7 @@ const IssueDropDown = ({
       });
     } else if (e.key === '6') {
       openCreateBranchModal({
-        issueId, onOk: () => store.refreshBranch(), typeCode, defaultBranchSuffixName: issueNum,
+        issueId, onOk: () => store.refreshBranch(), typeCode, defaultBranchSuffixName: issueNum, projectId: store.projectId,
       });
       store.setCreateBranchShow(true);
     } else if (e.key === '7') {
@@ -135,6 +136,7 @@ const IssueDropDown = ({
     } else if (e.key === 'item_10') {
       openIssueMove({
         issue,
+        projectId: store.projectId,
         customFields: store.customFields,
         onMoveIssue: onDeleteIssue,
         loseItems: {
