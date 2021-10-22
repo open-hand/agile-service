@@ -8,9 +8,9 @@ import Loading from '@/components/Loading';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
 import { Priority, ISprint, IVersion } from '@/common/types';
-import { types } from './search';
 import styles from './index.less';
 import { useFontSize } from '../context';
+import { IType } from './usePieChartReport';
 
 export type IPieChartType = 'assignee' | 'component' | 'typeCode' | 'version' | 'priority' | 'status' | 'sprint' | 'epic' | 'label'
 
@@ -37,6 +37,7 @@ export interface PieChartProps {
   versions: IVersion[],
   option?: EChartOption
   link?: boolean
+  allTypes: IType[]
 }
 
 function compare(pro: string) {
@@ -52,8 +53,18 @@ function compare(pro: string) {
   };
 }
 
+const paramTypeMap = new Map([
+  ['typeCode', 'issueTypeId'],
+  ['priority', 'priorityId'],
+  ['status', 'statusId'],
+  ['assignee', 'assigneeId'],
+  ['reporter', 'reporterIds'],
+  ['mainResponsible', 'mainResponsibleIds'],
+  ['participant', 'participantIds'],
+]);
+
 const PieChart: React.FC<PieChartProps> = ({
-  loading, data, colors, chooseDimension, chooseId, type, sprints, versions, link = true, option,
+  loading, data, colors, chooseDimension, chooseId, type, sprints, versions, link = true, option, allTypes,
 }) => {
   const otherTooltipRef = useRef();
   const getFontSize = useFontSize();
@@ -120,35 +131,28 @@ const PieChart: React.FC<PieChartProps> = ({
   };
 
   const handleLinkToIssue = (item: any) => {
+    const currentType = allTypes.find((typeItem) => typeItem.value === type);
     const { typeName, name } = item;
     const queryObj = getCurrentChoose();
     let paramName = name || '未分配';
     if (chooseDimension === 'sprint') {
-      paramName += `、冲刺为${sprints.find((sprint: ISprint) => sprint.sprintId === chooseId)?.sprintName}`;
+      paramName += `、冲刺为${sprints.find((sprintItem) => sprintItem.sprintId === chooseId)?.sprintName}`;
     }
-
     if (chooseDimension === 'version') {
-      paramName += `、版本为${versions.find((version: IVersion) => version.versionId === chooseId)?.name}`;
+      paramName += `、版本为${versions.find((versionItem) => versionItem.versionId === chooseId)?.name}`;
     }
 
     paramName += '下的工作项';
-
-    let paramType: string = type;
-    if (type === 'typeCode') {
-      paramType = 'issueTypeId';
-    } else if (type === 'priority') {
-      paramType = 'priorityId';
-    } else if (type === 'status') {
-      paramType = 'statusId';
-    } else if (type === 'assignee') {
-      paramType = 'assigneeId';
-    }
+    const paramType = paramTypeMap.get(type) || (currentType?.isCustom ? 'customField' : type);
     to(LINK_URL.workListIssue, {
-      type: 'project',
       params: {
         paramName,
         paramType,
         paramId: typeName === null ? '0' : typeName,
+        // @ts-ignore
+        paramCustomFieldId: currentType?.isCustom && type,
+        // @ts-ignore
+        paramCustomFieldName: currentType?.isCustom && currentType.title,
         ...queryObj,
       },
     }, { blank: true });
@@ -209,8 +213,8 @@ const PieChart: React.FC<PieChartProps> = ({
           // @ts-ignore
           data: pieData,
           label: {
-            color: 'var(--text-color3)',
             position: 'outside',
+            color: '#0f1358',
             formatter: (value: any) => {
               if (value.data.name === null) {
                 return '未分配';
@@ -230,7 +234,7 @@ const PieChart: React.FC<PieChartProps> = ({
     };
   };
 
-  const currentType = types.find((item) => item.value === type) || { title: '' };
+  const currentType = allTypes.find((item) => item.value === type) || { title: '' };
 
   return (
     <>
