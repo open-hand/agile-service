@@ -171,14 +171,14 @@ class Store {
         this.issueMapValues.map(({ issue, target }) => moveIssueApi.project(sourceProjectId).getFieldsLosed(targetProjectId, issue.issueId, target.issueTypeId)),
       ),
       Promise.all(
-        this.issues.map((issue) => issueApi.project(sourceProjectId).load(issue.issueId)),
+        this.issues.map((issue) => issueApi.project(sourceProjectId).load(issue.issueId, sourceProjectId)),
       ),
       Promise.all(
         this.issues.map((issue) => fieldApi.project(sourceProjectId).getFieldAndValue(issue.issueId, {
           schemeCode: 'agile_issue',
           issueTypeId: issue.issueTypeId,
           pageCode: 'agile_issue_edit',
-        })),
+        }, sourceProjectId)),
       ),
       Promise.all(
         targetIssueTypes.map((issueType) => fieldApi.project(sourceProjectId).getFields({

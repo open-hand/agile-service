@@ -39,12 +39,12 @@ const ChangeParent: React.FC<Props> = ({
         parentIssueId: changeParentDs.current?.get('parentIssueId'),
       };
 
-      const res = await issueApi.subTaskChangeParent(data);
+      const res = await issueApi.project(projectId).subTaskChangeParent(data);
       onOk(res);
       return true;
     }
     return false;
-  }, [changeParentDs, issueId, objectVersionNumber, onOk]);
+  }, [changeParentDs, issueId, objectVersionNumber, onOk, projectId]);
 
   useEffect(() => {
     modal?.handleOk(handleSubmit);
