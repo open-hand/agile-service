@@ -25,6 +25,8 @@ public class BoardAssembler extends AbstractAssembler {
             assertNull(args, "label");
             assertNull(args, "assigneeId");
             assertNull(args, "feature");
+            assertNull(args, "participantIds");
+            assertNull(args, "mainResponsibleIds");
         }
     }
 
@@ -32,6 +34,7 @@ public class BoardAssembler extends AbstractAssembler {
         Map<String, Object> args = searchVO.getAdvancedSearchArgs();
         if (args != null) {
             assertNull(args, "versionList");
+            assertNull(args, "reporterIds");
         }
     }
 
