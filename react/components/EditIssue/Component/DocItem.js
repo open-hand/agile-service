@@ -22,6 +22,8 @@ class DocItem extends Component {
 
   handleDocClick = ({ id, baseId }) => {
     to(LINK_URL.knowledgeDoc(baseId), {
+      type: 'project',
+      id: this.props.projectId,
       params: {
         spaceId: id,
       },

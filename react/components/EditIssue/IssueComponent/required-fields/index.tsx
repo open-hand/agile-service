@@ -23,7 +23,7 @@ import styles from './index.less';
 const { Option } = Select;
 export interface ChangeTypeModalProps {
   modal?: IModalProps,
-  projectId?:string
+  projectId?: string
   requiredFields: IField[]
   issueVO: {
     issueTypeVO: {
@@ -43,8 +43,8 @@ export interface ChangeTypeModalProps {
 const extraFields = ['timeTrace'];
 
 const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
-  const { isInProgram } = useIsInProgram();
-  let { data: issueTypeData = [] } = useProjectIssueTypes({ onlyEnabled: true });
+  const { isInProgram } = useIsInProgram({ projectId: props.projectId });
+  let { data: issueTypeData = [] } = useProjectIssueTypes({ onlyEnabled: true, projectId: props.projectId });
 
   const {
     modal, requiredFields: fields, issueVO, reloadIssue, onUpdate, projectId,

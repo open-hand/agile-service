@@ -47,7 +47,7 @@ const EditorMap = new Map([
     };
     setIssueLoading(true);
     store.setUpdateLoaded(false);
-    fieldApi.updateFieldValue(issueId, fieldId, fieldCode, 'agile_issue', obj)
+    fieldApi.project(store.projectId).updateFieldValue(issueId, fieldId, fieldCode, 'agile_issue', obj)
       .then(async () => {
         if (onUpdate) {
           onUpdate(issue);

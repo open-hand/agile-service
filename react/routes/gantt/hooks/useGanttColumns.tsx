@@ -141,16 +141,16 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
       const defaultValues = {} as any;
       let priorityId: string | undefined = parentIssue.priorityVO?.id;
       let parentIssueId: string | undefined = parentIssue.issueId;
-
+      if (record.groupType) {
+        parentIssueId = undefined;
+        priorityId = undefined;
+        typeCodes = ['story', 'bug', 'task'];
+      }
       if (record.groupType === 'epic') {
         defaultValues.epicId = parentIssue.issueId;
       } else if (record.groupType === 'feature') {
         defaultValues.featureId = parentIssue.issueId;
         typeCodes = ['story'];
-      } else if (record.groupType) {
-        parentIssueId = undefined;
-        priorityId = undefined;
-        typeCodes = ['story', 'bug', 'task'];
       }
       return (
         <span role="none" onClick={(e) => e.stopPropagation()} className="c7n-gantt-content-body-create">

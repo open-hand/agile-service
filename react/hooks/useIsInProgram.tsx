@@ -22,6 +22,7 @@ interface ChildrenProps {
   refresh: () => Promise<void>,
 }
 interface Props {
+  projectId?: string
   children: (data: ChildrenProps) => React.ReactElement,
 }
 interface useIsInProgramConfig {
@@ -63,8 +64,8 @@ const useIsInProgram = (config?: useIsInProgramConfig): ChildrenProps => {
   };
 };
 
-const IsInProgram: React.FC<Props> = ({ children }) => {
-  const data = useIsInProgram();
+const IsInProgram: React.FC<Props> = ({ children, projectId }) => {
+  const data = useIsInProgram({ projectId });
   return children(data);
 };
 

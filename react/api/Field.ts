@@ -157,7 +157,7 @@ class FieldApi extends Api<FieldApi> {
    */
   updateFieldValue(issueId: number, fieldId: number, fieldCode: string, schemeCode: string, dto: UIssueFiled) {
     const organizationId = getOrganizationId();
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/field_value/update/${issueId}`,
       params: {

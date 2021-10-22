@@ -29,7 +29,7 @@ const IssueField = observer((props) => {
   const {
     store, applyType, saveFieldVersionRef, saveFieldFixVersionRef, disabled,
   } = useContext(EditIssueContext);
-  const { isShowFeature } = useIsInProgram();
+  const { isShowFeature } = useIsInProgram({ projectId: store.projectId });
   const renderNormalField = (field) => (<FieldPro {...props} field={field} />);
   const getFieldComponent = (field) => {
     const issue = store.getIssue;

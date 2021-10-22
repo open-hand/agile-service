@@ -67,7 +67,7 @@ import styles from './FieldEpic.less';
     const field = store.getFieldByCode('epic');
     const required = field?.required;
     return (
-      <IsInProgram>
+      <IsInProgram projectId={store.projectId}>
         {
           ({ isShowFeature, program }) => (
             <>

@@ -35,6 +35,7 @@ const IssueDoc = observer(({ reloadIssue }) => {
           <DocItem
             key={doc.id}
             doc={doc}
+            projectId={store.projectId}
             onDeleteDoc={onDeleteDoc}
             type="narrow"
             disabled={disabled}
