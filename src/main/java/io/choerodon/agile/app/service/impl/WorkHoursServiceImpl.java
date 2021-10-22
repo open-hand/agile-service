@@ -96,8 +96,10 @@ public class WorkHoursServiceImpl implements WorkHoursService {
     private void handlerProject(Long organizationId, List<Long> projectIds, Long userId, WorkHoursSearchVO workHoursSearchVO){
         if (CollectionUtils.isEmpty(workHoursSearchVO.getProjectIds())) {
             // 查询有权限的项目
-            List<ProjectVO> projects = new ArrayList<>();
-            issueService.queryUserProjects(organizationId, null, projectIds, projects, userId, null);
+            Page<ProjectVO> page = baseFeignClient.pagingProjectsByUserId(organizationId, userId, 0, 0, true, "N_AGILE").getBody();
+            if (!CollectionUtils.isEmpty(page.getContent())) {
+                projectIds.addAll(page.getContent().stream().map(ProjectVO::getId).collect(Collectors.toList()));
+            }
         } else {
             projectIds.addAll(workHoursSearchVO.getProjectIds());
         }
