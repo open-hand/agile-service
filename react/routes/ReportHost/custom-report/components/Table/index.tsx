@@ -36,7 +36,7 @@ const CustomReportTable: React.FC<CustomReportTableProps> = ({
 
         return mergeWith(preValue, newValue, (aValue: any, bValue: any, key) => {
           if (key === 'total') {
-            return aValue || 0 + bValue || 0;
+            return (aValue || 0) + (bValue || 0);
           }
           return undefined;
         });
