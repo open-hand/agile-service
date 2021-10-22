@@ -255,6 +255,7 @@ const IssueMove: React.FC<Props> = ({
         {currentStep === 2 && (
           <Confirm
             issue={issue}
+            projectId={projectId}
             dataSet={dataSet}
             fieldsWithValue={fieldsWithValue}
             targetProjectType={targetProjectType}
