@@ -1537,23 +1537,41 @@
                 and
                 <foreach collection="searchVO.otherArgs.customField.option" item="item" open="(" separator="and"
                          close=")">
+                (
+                    <if test='item.value.contains("0")'>
+                        ai.issue_id not in (
+                            SELECT
+                            ffv.instance_id
+                            FROM
+                            fd_field_value ffv
+                            WHERE
+                            ffv.project_id in
+                            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                                #{projectId}
+                            </foreach>
+                            AND ffv.field_id = #{item.fieldId}
+                        )
+                        OR
+                    </if>
                     ai.issue_id in
-                    (
-                    SELECT
-                    ffv.instance_id
-                    FROM
-                    fd_field_value ffv
-                    WHERE
-                    ffv.project_id in
-                    <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
-                        #{projectId}
-                    </foreach>
-                    AND ffv.field_id = #{item.fieldId}
-                    AND ffv.option_id IN
-                    <foreach collection="item.value" item="value" open="(" separator=","
-                             close=")">
-                        #{value}
-                    </foreach>
+                        (
+                        SELECT
+                        ffv.instance_id
+                        FROM
+                        fd_field_value
+                        ffv
+                        WHERE
+                        ffv.project_id in
+                        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                                #{projectId}
+                            </foreach>
+                            AND ffv.field_id = #{item.fieldId}
+                            AND ffv.option_id IN
+                            <foreach collection="item.value" item="valueTemp" open="(" separator=","
+                                     close=")">
+                                #{valueTemp}
+                            </foreach>
+                        )
                     )
                 </foreach>
             </if>
