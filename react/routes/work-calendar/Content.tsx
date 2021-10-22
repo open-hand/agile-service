@@ -89,6 +89,14 @@ const WorkCalendar = observer(() => {
         projectId: event?.extendedProps?.projectId,
         showProjectInfo: true,
       },
+      events: {
+        update: () => {
+          refresh();
+        },
+        delete: () => {
+          refresh();
+        },
+      },
     });
   }, [issueDetailProps]);
 

@@ -3,7 +3,7 @@ import React, {
   useEffect, useMemo, useRef, useState,
 } from 'react';
 import FullCalendar from '@fullcalendar/react';
-import { Tooltip } from 'choerodon-ui/pro';
+import { Spin } from 'choerodon-ui/pro';
 import { CalendarApi, EventApi } from '@fullcalendar/common';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -12,6 +12,7 @@ import { observer } from 'mobx-react-lite';
 import { usePersistFn } from 'ahooks';
 import { xorBy, concat } from 'lodash';
 import moment from 'moment';
+import { Loading } from '@choerodon/components';
 import { useWorkCalendarStore, STATUS_COLOR, STATUS } from '@/routes/work-calendar/stores';
 import { formatDate } from '@/routes/work-calendar/utils';
 import { issueApi } from '@/api';
@@ -38,6 +39,7 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
     prefixCls,
   } = useWorkCalendarStore();
 
+  const [loading, setLoading] = useState<boolean>(false);
   const calendarRef = useRef<CalendarRefPros>();
 
   useEffect(() => {
@@ -162,9 +164,10 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
 
   const handleEventChange = usePersistFn((data) => {
     const { event, revert, oldEvent } = data;
-    if (moment(event.start).isSame(oldEvent.start) && moment(event.end).isSame(oldEvent.end)) {
+    if (loading && moment(event.start).isSame(oldEvent.start) && moment(event.end).isSame(oldEvent.end)) {
       return;
     }
+    setLoading(true);
     const postData = {
       issueId: event.id,
       objectVersionNumber: event.extendedProps?.objectVersionNumber,
@@ -174,9 +177,11 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
     issueApi.project(event.extendedProps?.projectId).update(postData)
       .then((res) => {
         event.setExtendedProp('objectVersionNumber', res.objectVersionNumber);
+        setLoading(false);
       })
       .catch(() => {
         revert();
+        setLoading(false);
       });
   });
 
@@ -191,7 +196,7 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
   }, [handleCreateIssue]);
 
   return (
-    <>
+    <Loading type="c7n" display={loading} className={Style.loading}>
       <div className={Style.wrap}>
         <CalendarToolbar />
         <FullCalendar
@@ -227,9 +232,10 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
           allDayClassNames={Style.allDayLabel}
           allDayContent="全天"
           height="100%"
+          loading={setLoading}
         />
       </div>
-    </>
+    </Loading>
   );
 });
 
