@@ -120,7 +120,8 @@ const Issue = observer(({ cached, updateCache }) => {
   const initFilter = usePersistFn(async () => {
     const {
       paramChoose, paramCurrentVersion, paramCurrentSprint, paramId,
-      paramType, paramIssueId, paramName, paramOpenIssueId, detailTab, storyPointsNull, remainingTimeNull, ...searchArgs
+      paramType, paramIssueId, paramName, paramOpenIssueId, detailTab, storyPointsNull, remainingTimeNull,
+      paramCustomFieldId, paramCustomFieldName, ...searchArgs
     } = params;
     if (hasUrlFilter(filterParams)) {
       issueSearchStore.clearAllFilter();
@@ -160,10 +161,23 @@ const Issue = observer(({ cached, updateCache }) => {
       sprint: '冲刺',
       epic: '史诗',
       label: '标签',
+      reporterIds: '报告人',
+      mainResponsibleIds: '主要负责人',
+      participantIds: '主要参与人',
+      environment: '环境',
     };
     if (paramType) {
-      prefix = prefixs[paramType];
-      issueSearchStore.handleFilterChange(paramType, [paramId]);
+      prefix = prefixs[paramType] || paramCustomFieldName;
+      if (paramType !== 'customField') {
+        issueSearchStore.handleFilterChange(paramType, [paramId]);
+      } else {
+        issueSearchStore.updateFilter({
+          [paramCustomFieldId]: {
+            isCustom: true,
+            value: [paramId],
+          },
+        });
+      }
     }
     if (storyPointsNull === 'true') {
       issueSearchStore.handleFilterChange('storyPointsNull', true);

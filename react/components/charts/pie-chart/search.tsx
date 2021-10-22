@@ -6,21 +6,9 @@ import { find } from 'lodash';
 import { IVersion, ISprint, IStatus } from '@/common/types';
 import styles from './index.less';
 import { IPieChartType } from './index';
+import { IType } from './usePieChartReport';
 
 const { Option } = Select;
-
-export const types = [
-  { title: '经办人', value: 'assignee' },
-  { title: '模块', value: 'component' },
-  { title: '工作项类型', value: 'typeCode' },
-  { title: '版本', value: 'version' },
-  { title: '优先级', value: 'priority' },
-  { title: '状态', value: 'status' },
-  { title: '冲刺', value: 'sprint' },
-  { title: '史诗', value: 'epic' },
-  { title: '标签', value: 'label' },
-];
-
 export interface PieSearchProps {
   chooseId: string | '',
   versions: IVersion[],
@@ -32,9 +20,10 @@ export interface PieSearchProps {
   setChooseDimension: Function,
   setChooseId: Function,
   projectId?: string
+  allTypes: IType[]
 }
 const PieSearch: React.FC<PieSearchProps> = ({
-  chooseId, versions, sprints, status, type, chooseDimension, setType, setChooseDimension, setChooseId,
+  chooseId, versions, sprints, status, type, chooseDimension, setType, setChooseDimension, setChooseId, allTypes,
 }) => {
   let chooseDimensionType = [
     {
@@ -110,8 +99,8 @@ const PieSearch: React.FC<PieSearchProps> = ({
         style={{ width: 240 }}
       >
         {
-          types.map((item) => (
-            <Option value={item.value} key={item.title}>{item.title}</Option>
+          allTypes.map((item) => (
+            <Option value={item.value} key={item.value}>{item.title}</Option>
           ))
         }
       </Select>

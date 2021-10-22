@@ -16,7 +16,10 @@ import {
   Form, Select,
 } from 'choerodon-ui/pro';
 import './pie.less';
-import { sprintApi, versionApi, statusApi } from '@/api';
+import { uniq } from 'lodash';
+import {
+  sprintApi, versionApi, statusApi, pageConfigApi,
+} from '@/api';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
 import SwitchChart from '../../Component/switchChart';
@@ -30,12 +33,22 @@ const filterOption = (input, option) => option.props.children && typeof (option.
   input.toLowerCase(),
 ) >= 0;
 const { Option } = Select;
+
+const paramTypeMap = new Map([
+  ['typeCode', 'issueTypeId'],
+  ['priority', 'priorityId'],
+  ['status', 'statusId'],
+  ['assignee', 'assigneeId'],
+  ['reporter', 'reporterIds'],
+  ['mainResponsible', 'mainResponsibleIds'],
+  ['participant', 'participantIds'],
+]);
 @observer
 class PieChart extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      type: '',
+      type: 'assignee',
       sprints: [],
       versions: [],
       status: [],
@@ -46,42 +59,26 @@ class PieChart extends Component {
   }
 
   componentDidMount = async () => {
-    const type = this.getSelectDefaultValue();
-    await PieChartStore.getPieDatas(type);
+    await PieChartStore.getPieDatas('assignee');
     await axios.all([
       sprintApi.loadSprints(['started', 'closed']),
       versionApi.loadNamesByStatus(),
       statusApi.loadByProject('agile'),
+      pageConfigApi.load(),
     ])
-      .then(axios.spread((sprints, versions, status) => {
+      .then(axios.spread((sprints, versions, status, fields) => {
         this.setState({
           sprints,
           versions,
           status,
         });
+        PieChartStore.setAllTypes(uniq([...PieChartStore.allTypes, ...(fields.content || []).filter((item) => !item.system
+        && ['single', 'multiple', 'checkbox', 'radio', 'member', 'multiMember'].includes(item.fieldType)).map((item) => ({
+          title: item.name,
+          value: item.id,
+          isCustom: true,
+        }))], 'value'));
       }));
-  }
-
-  getSelectDefaultValue = () => {
-    const { location: { pathname } } = this.props;
-    const quaryLinks = [
-      { title: '经办人', value: 'assignee' },
-      { title: '工作项类型', value: 'typeCode' },
-      { title: '优先级', value: 'priority' },
-      { title: '状态', value: 'status' },
-      { title: '史诗', value: 'epic' },
-    ];
-    const quaryLink = pathname.slice(pathname.lastIndexOf('/') + 1, pathname.length);
-    if (quaryLinks.filter((item) => item.value === quaryLink).length === 0) {
-      this.setState({
-        type: 'assignee',
-      });
-      return 'assignee';
-    }
-    this.setState({
-      type: quaryLink,
-    });
-    return quaryLink;
   }
 
   getOption() {
@@ -128,9 +125,8 @@ class PieChart extends Component {
           center: ['50%', '47%'],
           data: datas,
           label: {
-            color: 'var(--text-color3)',
             position: 'outside',
-
+            color: '#0f1358',
             formatter: (value) => {
               if (value.data.name === null) {
                 return '未分配';
@@ -163,7 +159,6 @@ class PieChart extends Component {
     this.setState({
       type: value,
       chooseDimension: '',
-
     });
     PieChartStore.getPieDatas(value);
   };
@@ -196,33 +191,26 @@ class PieChart extends Component {
     const {
       type, chooseDimension, sprints, versions, chooseId,
     } = this.state;
+    const currentType = PieChartStore.allTypes.find((typeItem) => typeItem.value === type);
     const { typeName, name } = item;
     const queryObj = this.getCurrentChoose();
     let paramName = name || '未分配';
     if (chooseDimension === 'sprint') {
       paramName += `、冲刺为${sprints.find((sprintItem) => sprintItem.sprintId === chooseId).sprintName}`;
     }
-
     if (chooseDimension === 'version') {
       paramName += `、版本为${versions.find((versionItem) => versionItem.versionId === chooseId).name}`;
     }
 
     paramName += '下的工作项';
-    let paramType = type;
-    if (type === 'typeCode') {
-      paramType = 'issueTypeId';
-    } else if (type === 'priority') {
-      paramType = 'priorityId';
-    } else if (type === 'status') {
-      paramType = 'statusId';
-    } else if (type === 'assignee') {
-      paramType = 'assigneeId';
-    }
+    const paramType = paramTypeMap.get(type) || (currentType?.isCustom ? 'customField' : type);
     to(LINK_URL.workListIssue, {
       params: {
         paramName,
         paramType,
         paramId: typeName === null ? '0' : typeName,
+        paramCustomFieldId: currentType?.isCustom && type,
+        paramCustomFieldName: currentType?.isCustom && currentType.title,
         ...queryObj,
       },
     }, { blank: true });
@@ -353,17 +341,7 @@ class PieChart extends Component {
     const data = PieChartStore.getPieData;
     const sourceData = PieChartStore.getSourceData;
     const colors = PieChartStore.getColors;
-    const types = [
-      { title: '经办人', value: 'assignee' },
-      { title: '模块', value: 'component' },
-      { title: '工作项类型', value: 'typeCode' },
-      { title: '版本', value: 'version' },
-      { title: '优先级', value: 'priority' },
-      { title: '状态', value: 'status' },
-      { title: '冲刺', value: 'sprint' },
-      { title: '史诗', value: 'epic' },
-      { title: '标签', value: 'label' },
-    ];
+    const { allTypes } = PieChartStore;
 
     let chooseDimensionType = [
       {
@@ -437,8 +415,8 @@ class PieChart extends Component {
                   clearButton={false}
                 >
                   {
-                  types.map((item) => (
-                    <Option value={item.value} key={item.title}>{item.title}</Option>
+                  allTypes.map((item) => (
+                    <Option value={item.value} key={item.value}>{item.title}</Option>
                   ))
                 }
                 </Select>
@@ -494,7 +472,7 @@ class PieChart extends Component {
                     <table>
                       <thead>
                         <tr>
-                          <td style={{ width: '158px' }}>{(types.find((item) => item.value === type) || {}).title}</td>
+                          <td style={{ width: '158px' }}>{(allTypes.find((item) => item.value === type) || {}).title}</td>
                           <td style={{ width: '62px' }}>工作项</td>
                           <td style={{ paddingRight: 35 }}>百分比</td>
                         </tr>
@@ -511,12 +489,19 @@ class PieChart extends Component {
                             </Tooltip>
                           </td>
                           <td style={{ width: '62px' }}>
-                            <a
-                              role="none"
-                              onClick={this.handleLinkToIssue.bind(this, item)}
-                            >
-                              {item.value}
-                            </a>
+                            {
+                              type === 'environment' && !item.name ? (
+                                <span>{item.value}</span>
+                              ) : (
+                                // eslint-disable-next-line jsx-a11y/anchor-is-valid
+                                <a
+                                  role="none"
+                                  onClick={this.handleLinkToIssue.bind(this, item)}
+                                >
+                                  {item.value}
+                                </a>
+                              )
+                            }
                           </td>
                           <td style={{ width: '62px', paddingRight: 15 }}>{`${(item.percent).toFixed(2)}%`}</td>
                         </tr>

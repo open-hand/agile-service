@@ -193,14 +193,15 @@ class ReportApi extends Api<ReportApi> {
    * @param versionId
    * @param type
    */
-  loadPie(fieldName: string, sprintId?: string, versionId?: string, statusId?: string, startDate?: string, endDate?: string) {
+  loadPie(currentType: { value: string, isCustom?: boolean}, sprintId?: string, versionId?: string, statusId?: string, startDate?: string, endDate?: string) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'get',
       url: `${this.prefix}/reports/pie_chart`,
       params: {
         organizationId,
-        fieldName,
+        fieldName: currentType?.isCustom ? 'customField' : currentType?.value,
+        customFieldId: currentType?.isCustom ? currentType?.value : undefined,
         sprintId,
         versionId,
         statusId,
