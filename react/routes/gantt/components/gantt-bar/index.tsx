@@ -1,5 +1,5 @@
 import React, {
-  useContext, useMemo, useRef, useEffect,
+  useContext, useMemo, useRef, useEffect, useCallback,
 } from 'react';
 import {
   observer, useComputed, useObservable, Observer, useObserver,
@@ -7,7 +7,9 @@ import {
 import dayjs, { Dayjs } from 'dayjs';
 import { Tooltip } from 'choerodon-ui/pro';
 import { GanttProps, Gantt } from '@choerodon/gantt';
-import { find } from 'lodash';
+import { find, set } from 'lodash';
+import { TooltipProps } from 'choerodon-ui/pro/lib/tooltip/Tooltip';
+import { useThrottleFn } from 'ahooks';
 import STATUS_COLOR from '@/constants/STATUS_COLOR';
 import Context from '../../context';
 import styles from './index.less';
@@ -95,56 +97,69 @@ const GanttBar: React.FC<GanttBarProps> = ({
   })();
   const delayVisible = !(issue.statusVO.type === 'done') && (actualEndTime.value || stepGesture !== 'moving') && !loading;
   const operateWidth = actualEndTime.value ? width - delayWidth : width;
+
   const actualTimeWidth = actualEndTime.value ? actualTime.width : actualTime.width; // actualTime.width - delayWidth + 1;
-  return (
-    <>
-      <Tooltip
-        // @ts-ignore
-        // getPopupContainer={(t) => document.getElementsByClassName('gantt-chart')[0] as HTMLElement}
-        title={(
+
+  const handleTooltipMouseEnter: React.MouseEventHandler<HTMLDivElement> = useCallback(
+    (e) => Tooltip.show(e.target, {
+      onPopupAlign: (source: HTMLDivElement, align, target, translate) => {
+        // eslint-disable-next-line no-param-reassign
+        source.style.left = `${e.clientX}px`;
+      },
+      title: (
+        <div>
+          {issue.summary}
           <div>
-            {issue.summary}
-            <div>
-              状态：
-              {issue.statusVO.name}
-            </div>
-            <div>
-              持续时间：
-              {format(diff)}
-            </div>
-            {delayDiff > 0 && (
-              <div>
-                逾期：
-                {format(delayDiff)}
-              </div>
-            )}
-            {type !== 'assignee' && hasChildren && (
-              <div>
-                当前进度：
-                {`${Math.round(percent * 100 * 100) / 100}%`}
-              </div>
-            )}
-            <div>
-              预计开始：
-              {issue.estimatedStartTime}
-            </div>
-            <div>
-              预计结束：
-              {issue.estimatedEndTime}
-            </div>
-            <div>
-              实际开始：
-              {issue.actualStartTime}
-            </div>
-            <div>
-              实际结束：
-              {issue.actualEndTime}
-            </div>
+            状态：
+            {issue.statusVO.name}
           </div>
-        )}
-      >
-        <div style={{
+          <div>
+            持续时间：
+            {format(diff)}
+          </div>
+          {delayDiff > 0 && (
+            <div>
+              逾期：
+              {format(delayDiff)}
+            </div>
+          )}
+          {type !== 'assignee' && hasChildren && (
+            <div>
+              当前进度：
+              {`${Math.round(percent * 100 * 100) / 100}%`}
+            </div>
+          )}
+          <div>
+            预计开始：
+            {issue.estimatedStartTime}
+          </div>
+          <div>
+            预计结束：
+            {issue.estimatedEndTime}
+          </div>
+          <div>
+            实际开始：
+            {issue.actualStartTime}
+          </div>
+          <div>
+            实际结束：
+            {issue.actualEndTime}
+          </div>
+        </div>
+      ),
+      placement: 'topLeft',
+    } as TooltipProps),
+    [diff, hasChildren, issue.actualEndTime, issue.actualStartTime, issue.estimatedEndTime, issue.estimatedStartTime, issue.statusVO.name, issue.summary, percent, type],
+  );
+  const handleTooltipMouseLeave = useCallback(() => Tooltip.hide(), []); return (
+    <>
+      <div
+        onMouseMove={handleTooltipMouseEnter}
+        onMouseEnter={handleTooltipMouseEnter}
+        onMouseLeave={handleTooltipMouseLeave}
+        style={{
           width: operateWidth,
+
           height,
           padding: '.02rem',
           // backgroundColor: color2,
@@ -154,37 +169,44 @@ const GanttBar: React.FC<GanttBarProps> = ({
           borderRadius: delayVisible && delayWidth > 0 ? '2px 0 0 2px' : '2px',
           overflow: 'hidden',
         }}
+      >
+        <div
+          ref={estimateRef}
+          id="ganttBar"
+          style={{
+            marginLeft: estimateTime.left,
+            width: estimateTime.width - 1,
+            display: estimateTime.width - 1 <= 0 ? 'none' : undefined,
+            height,
+            borderColor: color1,
+          }}
+          className={styles.estimate}
+        />
+        <div
+          className={styles.actual}
+          // onMouseEnter={handleTooltipMouseEnter}
+          // onMouseLeave={handleTooltipMouseLeave}
+          style={{ width: actualTimeWidth, marginLeft: actualTime.left, backgroundColor: color2 }}
         >
-          <div
-            ref={estimateRef}
-            id="ganttBar"
-            style={{
-              marginLeft: estimateTime.left,
-              width: estimateTime.width - 1,
-              height,
-              borderColor: color1,
-            }}
-            className={styles.estimate}
-          />
-          <div className={styles.actual} style={{ width: actualTimeWidth, marginLeft: actualTime.left, backgroundColor: color2 }}>
-            <div style={{ flex: totalCount > 0 ? completeCount : 1, backgroundColor: color1 }} />
-            <div style={{ flex: totalCount > 0 ? totalCount - completeCount : 0 }} />
-          </div>
+          <div style={{ flex: totalCount > 0 ? completeCount : 1, backgroundColor: color1 }} />
+          <div style={{ flex: totalCount > 0 ? totalCount - completeCount : 0 }} />
         </div>
-        {delayVisible && (
-          <div
-            role="none"
-            onMouseDown={(e) => {
-              e.stopPropagation();
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            className={styles.delay}
-            style={{ width: delayWidth, marginLeft: operateWidth }}
-          />
-        )}
-      </Tooltip>
+      </div>
+      {delayVisible && (
+        <div
+          role="none"
+          onMouseDown={(e) => {
+            e.stopPropagation();
+          }}
+          onMouseEnter={handleTooltipMouseEnter}
+          onMouseLeave={handleTooltipMouseLeave}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+          className={styles.delay}
+          style={{ width: delayWidth, marginLeft: operateWidth }}
+        />
+      )}
     </>
   );
 };
