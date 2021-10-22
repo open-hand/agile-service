@@ -24,7 +24,7 @@ interface Props {
   linkedTableRef: React.MutableRefObject<{
     linkedIssues: string[] | undefined,
   } | undefined>
-  projectId: string
+  projectId?: string
 }
 
 const LinkedTable: React.FC<Props> = ({ issueId, linkedTableRef, projectId }) => {
