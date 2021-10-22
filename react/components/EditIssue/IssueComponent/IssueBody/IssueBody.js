@@ -5,6 +5,7 @@ import React, {
 import { Tabs } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import { mount } from '@choerodon/inject';
+import map from 'lodash/map';
 import { useDetailContainerContext } from '@/components/detail-container/context';
 import useHasDevops from '@/hooks/useHasDevops';
 import useHasTest from '@/hooks/useHasTest';
@@ -43,10 +44,10 @@ function IssueBody(props) {
   const { comments } = store;
   const issue = store.getIssue;
   const {
-    issueId, issueNum, typeCode, issueTypeVO = {}, projectId,
+    issueId, issueNum, typeCode, issueTypeVO = {}, projectId, projectVO,
   } = issue;
   const { otherProject, outside } = props;
-  const hasDevops = useHasDevops();
+  const hasDevops = useHasDevops(projectVO?.categories ? map(projectVO.categories, 'code') : null);
   const hasTest = useHasTest();
   const testLinkStoreRef = useRef();
 

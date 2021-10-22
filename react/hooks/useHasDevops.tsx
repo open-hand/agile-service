@@ -1,8 +1,8 @@
-import useCategoryCodes from './useCategoryCodes';
+import useCategoryCodes, { ICategoryCode } from './useCategoryCodes';
 
-const useHasDevops = () => {
+const useHasDevops = (propCodes?: ICategoryCode[]) => {
   const codes = useCategoryCodes();
-  return codes.includes('N_DEVOPS');
+  return (propCodes || codes).includes('N_DEVOPS');
 };
 
 export default useHasDevops;
