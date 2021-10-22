@@ -141,15 +141,16 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
       const defaultValues = {} as any;
       let priorityId: string | undefined = parentIssue.priorityVO?.id;
       let parentIssueId: string | undefined = parentIssue.issueId;
-      if (parentIssue.groupType) {
-        parentIssueId = undefined;
-        priorityId = record.groupType === 'epic' ? priorityId : undefined;
-        typeCodes = ['story', 'bug', 'task'];
-      }
-      if (parentIssue.groupType && ['feature', 'epic'].includes(parentIssue.groupType)) {
-        defaultValues.featureId = parentIssue.groupType === 'feature' ? parentIssue.issueId : undefined;
-        defaultValues.epicId = parentIssue.groupType === 'epic' ? parentIssue.issueId : undefined;
+
+      if (record.groupType === 'epic') {
+        defaultValues.epicId = parentIssue.issueId;
+      } else if (record.groupType === 'feature') {
+        defaultValues.featureId = parentIssue.issueId;
         typeCodes = ['story'];
+      } else if (record.groupType) {
+        parentIssueId = undefined;
+        priorityId = undefined;
+        typeCodes = ['story', 'bug', 'task'];
       }
       return (
         <span role="none" onClick={(e) => e.stopPropagation()} className="c7n-gantt-content-body-create">
@@ -169,7 +170,8 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
                     parentIssue: !parentIssue.groupType ? parentIssue : undefined,
                     defaultFeature: parentIssue.groupType === 'feature' ? parentIssue : undefined,
                     defaultValues: {
-                      epicId: parentIssue.epicId,
+                      feature: defaultValues.featureId,
+                      epic: defaultValues.epicId,
                     },
                   }),
 
@@ -302,7 +304,7 @@ function useGanttProjectColumns({
   const tableWithSortedColumns = useMemo(() => getTableColumns(listLayoutColumns.filter((item) => item.display)
     .map((item) => ({ ...item, disable: true })), tableFields || [], {
     onClickSummary, onSortChange, openCreateSubIssue: onCreateSubIssue, onAfterCreateSubIssue,
-  }), [listLayoutColumns, onAfterCreateSubIssue, onClickSummary, onCreateSubIssue, onSortChange, tableFields]);
+  }, menuType !== 'project'), [listLayoutColumns, menuType, onAfterCreateSubIssue, onClickSummary, onCreateSubIssue, onSortChange, tableFields]);
   return {
     columns,
     setColumns,

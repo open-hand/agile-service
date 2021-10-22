@@ -475,6 +475,9 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
       sourceBar, destinationBar, type, data: moveConfig.data,
     });
   }, [data, rankList, searchFilter, store.ganttRef, type]);
+  useEffect(() => () => {
+    store.setSprintIds(null);
+  }, [projectId, store]);
   return (
     <Page>
       <Header>
@@ -482,6 +485,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
           <SelectProject
             value={projectId}
             clearButton={false}
+            style={{ marginRight: 16 }}
             optionData={projects}
             onChange={(val) => {
               setCurrentProject && setCurrentProject((oldValue: string) => {
