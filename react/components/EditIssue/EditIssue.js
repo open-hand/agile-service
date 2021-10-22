@@ -245,7 +245,7 @@ function EditIssue() {
     assigneeId, objectVersionNumber, createdBy, typeCode, issueTypeId,
   } = issue;
 
-  const { isInProgram } = useIsInProgram();
+  const { isInProgram } = useIsInProgram({ projectId });
   const rightDisabled = disabled || (isInProgram && (typeCode === 'issue_epic' || typeCode === 'feature'));
   useEffect(() => {
     function updateBefore() {

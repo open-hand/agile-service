@@ -8,7 +8,7 @@ import './index.less';
 /**
  * 数组内只有一个User 或者User是对象时,显示名字
  */
-export type UserTagData = Pick<User, 'loginName' | 'realName' | 'imageUrl' | 'textShow'> & Partial<Pick<User, 'ldap' | 'email' | 'id' | 'textShow'>> & Pick<HeadTagProps, 'tooltip'>
+export type UserTagData = Pick<User, 'loginName' | 'realName' | 'imageUrl' > & Partial<Pick<User, 'ldap' | 'email' | 'id' | 'textShow'>> & Pick<HeadTagProps, 'tooltip'>
 interface Props extends HeadTagProps {
   data: UserTagData[] | UserTagData /**   */
   maxTagCount?: number /** @default 3 */

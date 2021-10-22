@@ -44,6 +44,7 @@ const IssueAttachment = observer((props) => {
                 <div>
                   <ChunkUploader
                     prefixPatch="/hfle"
+                    projectId={store.projectId}
                     showUploadList={false}
                     fileList={fileList}
                     setFileList={setFileList}
