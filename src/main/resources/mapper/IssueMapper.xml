@@ -1142,11 +1142,17 @@
                 </foreach>
             </if>
             <if test='searchVO.advancedSearchArgs.reporterIds != null and searchVO.advancedSearchArgs.reporterIds.size > 0'>
-                AND ai.reporter_id IN
+                AND
+                (
+                <if test='searchVO.advancedSearchArgs.reporterIdsNull != null and searchVO.advancedSearchArgs.reporterIdsNull == true'>
+                    (ai.reporter_id = 0 or ai.reporter_id is null) OR
+                </if>
+                ai.reporter_id IN
                 <foreach collection="searchVO.advancedSearchArgs.reporterIds" item="reporterId" open="(" separator=","
                          close=")">
                     #{reporterId}
                 </foreach>
+                )
             </if>
             <if test='searchVO.advancedSearchArgs.priorityId != null and searchVO.advancedSearchArgs.priorityId.size > 0'>
                 AND ai.priority_id IN
@@ -1278,7 +1284,7 @@
 
         <if test='searchVO.otherArgs.participantIds != null and searchVO.otherArgs.participantIds.size > 0'>
             AND (
-            <if test='searchVO.otherArgs.participantNull != null and searchVO.otherArgs.participantNull == true'>
+            <if test='searchVO.otherArgs.participantIdsNull != null and searchVO.otherArgs.participantIdsNull == true'>
                 ai.issue_id in (
                 SELECT ai12.issue_id from agile_issue ai12
                 left join agile_issue_participant_rel aipr
@@ -1410,10 +1416,15 @@
         </if>
 
         <if test="searchVO.otherArgs.mainResponsibleIds != null and searchVO.otherArgs.mainResponsibleIds.size > 0">
-            and ai.main_responsible_id in
-            <foreach collection="searchVO.otherArgs.mainResponsibleIds" item="mainResponsibleId" open="(" close=")" separator=",">
-                  #{mainResponsibleId}
-            </foreach>
+            and (
+                <if test='searchVO.otherArgs.mainResponsibleIdsNull != null and searchVO.otherArgs.mainResponsibleIdsNull == true'>
+                    (ai.main_responsible_id = 0 or ai.main_responsible_id is null) OR
+                </if>
+                ai.main_responsible_id in
+                <foreach collection="searchVO.otherArgs.mainResponsibleIds" item="mainResponsibleId" open="(" close=")" separator=",">
+                    #{mainResponsibleId}
+                </foreach>
+            )
         </if>
 
         <if test="searchVO.otherArgs.environment != null and searchVO.otherArgs.environment.size > 0 ">
@@ -1526,23 +1537,41 @@
                 and
                 <foreach collection="searchVO.otherArgs.customField.option" item="item" open="(" separator="and"
                          close=")">
+                (
+                    <if test='item.value.contains("0")'>
+                        ai.issue_id not in (
+                            SELECT
+                            ffv.instance_id
+                            FROM
+                            fd_field_value ffv
+                            WHERE
+                            ffv.project_id in
+                            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                                #{projectId}
+                            </foreach>
+                            AND ffv.field_id = #{item.fieldId}
+                        )
+                        OR
+                    </if>
                     ai.issue_id in
-                    (
-                    SELECT
-                    ffv.instance_id
-                    FROM
-                    fd_field_value ffv
-                    WHERE
-                    ffv.project_id in
-                    <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
-                        #{projectId}
-                    </foreach>
-                    AND ffv.field_id = #{item.fieldId}
-                    AND ffv.option_id IN
-                    <foreach collection="item.value" item="value" open="(" separator=","
-                             close=")">
-                        #{value}
-                    </foreach>
+                        (
+                        SELECT
+                        ffv.instance_id
+                        FROM
+                        fd_field_value
+                        ffv
+                        WHERE
+                        ffv.project_id in
+                        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                                #{projectId}
+                            </foreach>
+                            AND ffv.field_id = #{item.fieldId}
+                            AND ffv.option_id IN
+                            <foreach collection="item.value" item="valueTemp" open="(" separator=","
+                                     close=")">
+                                #{valueTemp}
+                            </foreach>
+                        )
                     )
                 </foreach>
             </if>

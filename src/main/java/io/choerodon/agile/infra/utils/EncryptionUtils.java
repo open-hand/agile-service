@@ -681,7 +681,9 @@ public class EncryptionUtils {
                     if ("option".equals(next.getKey())) {
                         List<String> list = new ArrayList<>();
                         if (value1.isArray()) {
-                            value1.forEach(v -> list.add(v.isNumber() ? v.textValue() : (encrypt ? encryptionService.encrypt(v.textValue(), BLANK_KEY) : encryptionService.decrypt(v.textValue(), BLANK_KEY))));
+                            value1.forEach(v -> {
+                                list.add(v.isNumber() || Arrays.asList(IGNORE_VALUES).contains(v.textValue())  ? v.textValue() : (encrypt ? encryptionService.encrypt(v.textValue(), BLANK_KEY) : encryptionService.decrypt(v.textValue(), BLANK_KEY)));
+                            });
                         }
                         if (CollectionUtils.isEmpty(list)) {
                             continue;
