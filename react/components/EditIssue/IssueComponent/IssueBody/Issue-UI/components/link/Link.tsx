@@ -62,6 +62,7 @@ const Link: React.FC<Props> = ({ modal, store, reloadIssue }) => {
       const linkedUI = linkedDataSet.current?.get('ui');
       // @ts-ignore
       if (linkedUI && linkedUI.length && issue?.issueId) {
+        // @ts-ignore
         uiApi.project(issue?.projectId).linkUI({
           // @ts-ignore
           issueId: issue.issueId,
