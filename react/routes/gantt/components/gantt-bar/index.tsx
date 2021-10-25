@@ -60,20 +60,20 @@ const GanttBar: React.FC<GanttBarProps> = ({
     // }
     diff = dayjs(issue.estimatedEndTime).diff(issue.estimatedStartTime, 'hour');
   }
-  const actualStartTime = useComputed(() => dateMaps.get('actualStartTime') || { width: 0 } as Gantt.MiddleDateWithWidth, [dateMaps]);
-  const actualEndTime = useComputed(() => dateMaps.get('actualEndTime') || { width: 0 } as Gantt.MiddleDateWithWidth, [dateMaps]);
-  const estimatedStartTime = useComputed(() => dateMaps.get('estimatedStartTime') || { width: 0 } as Gantt.MiddleDateWithWidth, [dateMaps]);
-  const estimatedEndTime = useComputed(() => dateMaps.get('estimatedEndTime') || { width: 0 } as Gantt.MiddleDateWithWidth, [dateMaps]);
+  const actualStartTime = useComputed(() => dateMaps.get('actualStartTime') || { width: 0 } as Gantt.DateWithWidth, [dateMaps]);
+  const actualEndTime = useComputed(() => dateMaps.get('actualEndTime') || { width: 0 } as Gantt.DateWithWidth, [dateMaps]);
+  const estimatedStartTime = useComputed(() => dateMaps.get('estimatedStartTime') || { width: 0 } as Gantt.DateWithWidth, [dateMaps]);
+  const estimatedEndTime = useComputed(() => dateMaps.get('estimatedEndTime') || { width: 0 } as Gantt.DateWithWidth, [dateMaps]);
 
   const actualTime = useComputed(() => {
     let fragmentWidth = actualEndTime.width - actualStartTime.width;
     let left = actualStartTime.width;
     if (actualEndTime.width === 0 && actualStartTime.value) {
-      fragmentWidth = estimatedEndTime.value ? estimatedEndTime.width - actualStartTime.width + (estimatedEndTime as Gantt.MiddleDateWithWidth).unitWidth : 0;
-      left = fragmentWidth ? (actualStartTime as Gantt.MiddleDateWithWidth).dragLeft : 0;
+      fragmentWidth = estimatedEndTime.value ? estimatedEndTime.width - actualStartTime.width + (estimatedEndTime as Gantt.DateWithWidth).unitWidth : 0;
+      left = fragmentWidth ? (actualStartTime as Gantt.DateWithWidth).dragLeft : 0;
     } else if (actualStartTime.width > 0) {
-      fragmentWidth += (actualEndTime as Gantt.MiddleDateWithWidth).unitWidth;
-      left -= (actualEndTime as Gantt.MiddleDateWithWidth).unitWidth;
+      fragmentWidth += (actualEndTime as Gantt.DateWithWidth).unitWidth;
+      left -= (actualEndTime as Gantt.DateWithWidth).unitWidth;
     }
     return { width: fragmentWidth, left };
   }, [actualStartTime, actualEndTime.width, estimatedEndTime.width, actualStartTime.width]);
@@ -82,8 +82,8 @@ const GanttBar: React.FC<GanttBarProps> = ({
     let left = estimatedStartTime.width;
 
     if (estimatedStartTime.width > 0) {
-      fragmentWidth += (estimatedEndTime as Gantt.MiddleDateWithWidth).unitWidth;
-      left -= (estimatedEndTime as Gantt.MiddleDateWithWidth).unitWidth;
+      fragmentWidth += (estimatedEndTime as Gantt.DateWithWidth).unitWidth;
+      left -= (estimatedEndTime as Gantt.DateWithWidth).unitWidth;
     }
     return { width: fragmentWidth, left };
   }, [estimatedStartTime, estimatedStartTime.width, estimatedEndTime, estimatedEndTime.width]);
