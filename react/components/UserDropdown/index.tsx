@@ -23,6 +23,7 @@ interface OverlayProps {
 interface Props {
   userDropDownRef: React.MutableRefObject<{ selectedUser: User | undefined } | null>
   defaultAssignee: User | undefined,
+  projectId?: string
 }
 
 const Overlay: React.FC<OverlayProps> = ({
@@ -131,7 +132,7 @@ const Overlay: React.FC<OverlayProps> = ({
 
 const ObserverOverlay = observer(Overlay);
 
-const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee }) => {
+const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee, projectId }) => {
   const [visible, setVisible] = useState<boolean>(false);
   const [{ dataLoading, isFirstLoad }, setDataMount] = useState({ dataLoading: false, isFirstLoad: true });
   const [selectedUser, setSelectedUser] = useState<User | undefined>(defaultAssignee);
@@ -140,9 +141,9 @@ const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee }) => 
     pageSize: 20,
     transport: {
       // @ts-ignore
-      read: ({ params }) => userApiConfig.getAllInProject(params?.param, params.page, undefined, params.size),
+      read: ({ params }) => userApiConfig.getAllInProject(params?.param, params.page, undefined, params.size, projectId),
     },
-  }), []);
+  }), [projectId]);
   useImperativeHandle(userDropDownRef, () => ({
     selectedUser,
   }));

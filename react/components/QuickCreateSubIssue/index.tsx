@@ -150,6 +150,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   });
   useEffect(() => {
     if (expand && id) {
+      console.log('projectId', projectId);
       fieldApi.project(projectId).getSummaryDefaultValue(id).then((res) => {
         if (summary === currentTemplate.current) {
           currentTemplate.current = res as string;
@@ -157,7 +158,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
         }
       });
     }
-  }, [expand, id]);
+  }, [expand, id, projectId]);
   const handleCancel = useCallback(() => {
     setExpand(false);
   }, []);
@@ -220,7 +221,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
                     </div>
                   </Dropdown>
                 )}
-                <UserDropdown userDropDownRef={userDropDownRef} defaultAssignee={defaultAssignee} key={defaultAssignee?.id} />
+                <UserDropdown userDropDownRef={userDropDownRef} defaultAssignee={defaultAssignee} key={defaultAssignee?.id} projectId={projectId} />
 
                 <Input
                   className="hidden-label"
