@@ -152,7 +152,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
     [diff, hasChildren, issue.actualEndTime, issue.actualStartTime, issue.estimatedEndTime, issue.estimatedStartTime, issue.statusVO.name, issue.summary, percent, type],
   );
   const handleTooltipMouseLeave = useCallback(() => Tooltip.hide(), []); return (
-    <>
+    <div style={{ width }}>
       <div
         onMouseMove={handleTooltipMouseEnter}
         onMouseEnter={handleTooltipMouseEnter}
@@ -207,7 +207,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
           style={{ width: delayWidth, marginLeft: operateWidth }}
         />
       )}
-    </>
+    </div>
   );
 };
 export default observer(GanttBar);
