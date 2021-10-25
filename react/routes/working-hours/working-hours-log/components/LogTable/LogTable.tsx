@@ -103,12 +103,12 @@ const LogTable = () => {
     <div>
       <Table dataSet={logDs} queryBar={'none' as TableQueryBarType}>
         <Column name="userId" sortable renderer={renderMember} width={150} />
-        <Column name="workTime" sortable renderer={renderWorkTime} align={'left' as ColumnAlign} width={120} />
-        <Column name="startDate" sortable tooltip={'overflow' as TableColumnTooltip} width={150} />
+        <Column name="workTime" sortable renderer={renderWorkTime} align={'left' as ColumnAlign} width={110} />
+        <Column name="startDate" sortable tooltip={'overflow' as TableColumnTooltip} width={170} />
         <Column name="issueId" sortable renderer={renderIssue} />
         {
           getIsOrganization() && (
-            <Column name="projectId" sortable tooltip={'overflow' as TableColumnTooltip} renderer={renderProject} />
+            <Column name="projectId" sortable tooltip={'overflow' as TableColumnTooltip} renderer={renderProject} width={170} />
           )
         }
         <Column name="statusId" sortable renderer={renderStatus} width={120} />
