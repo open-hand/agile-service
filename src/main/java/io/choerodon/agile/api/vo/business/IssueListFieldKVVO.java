@@ -190,7 +190,7 @@ public class IssueListFieldKVVO {
     private List<UserMessageDTO> participants;
 
     @ApiModelProperty("预估时间")
-    private Date estimateTime;
+    private BigDecimal estimateTime;
 
     public String getEpicSelfName() {
         return epicSelfName;
@@ -670,11 +670,11 @@ public class IssueListFieldKVVO {
         this.participants = participants;
     }
 
-    public Date getEstimateTime() {
+    public BigDecimal getEstimateTime() {
         return estimateTime;
     }
 
-    public void setEstimateTime(Date estimateTime) {
+    public void setEstimateTime(BigDecimal estimateTime) {
         this.estimateTime = estimateTime;
     }
 }
