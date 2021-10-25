@@ -1,11 +1,14 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.WorkHoursCalendarVO;
 import io.choerodon.agile.api.vo.WorkHoursLogVO;
 import io.choerodon.agile.api.vo.WorkHoursSearchVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author zhaotianxin
@@ -31,4 +34,47 @@ public interface WorkHoursService {
      */
     Page<WorkHoursLogVO> pageWorkHoursLogByOrgId(Long organizationId, PageRequest pageRequest, WorkHoursSearchVO workHoursSearchVO);
 
+    /**
+     * 工时日历
+     * @param organizationId
+     * @param projectIds
+     * @param workHoursSearchVO
+     * @return
+     */
+    List<WorkHoursCalendarVO> workHoursCalendar(Long organizationId, List<Long> projectIds, WorkHoursSearchVO workHoursSearchVO);
+
+    /**
+     * 组织层：工时日历
+     * @param organizationId
+     * @param workHoursSearchVO
+     * @return
+     */
+    List<WorkHoursCalendarVO> workHoursCalendarByOrg(Long organizationId, WorkHoursSearchVO workHoursSearchVO);
+
+    /**
+     * 工时日历查用户的登记详情
+     * @param organizationId
+     * @param projectIds
+     * @param workHoursSearchVO
+     * @return
+     */
+    Map<String, List<WorkHoursLogVO>> workHoursCalendarInfoByUserId(Long organizationId, List<Long> projectIds, Long userId, WorkHoursSearchVO workHoursSearchVO);
+
+    /**
+     * 工时日历查用户的登记详情
+     * @param organizationId
+     * @param userId
+     * @param workHoursSearchVO
+     * @return
+      */
+    Map<String, List<WorkHoursLogVO>> workHoursCalendarOrgInfoByUserId(Long organizationId, Long userId, WorkHoursSearchVO workHoursSearchVO);
+
+    /**
+     * 查询项目下的问题
+     * @param projectId
+     * @param pageRequest
+     * @param params
+     * @return
+     */
+    Page<IssueVO> queryIssue(Long projectId, PageRequest pageRequest, String params);
 }

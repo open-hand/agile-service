@@ -18,7 +18,8 @@
                 awl.start_date,
                 ai.issue_id,
                 ai.object_version_number,
-                awl.creation_date
+                awl.creation_date,
+                ai.estimate_time
             from agile_work_log awl
             LEFT JOIN agile_issue ai on ai.issue_id = awl.issue_id
             LEFT JOIN agile_project_info api on api.project_id = ai.project_id
@@ -33,8 +34,27 @@
                 </foreach>
             </if>
             <if test="workHoursSearchVO.startTime != null and workHoursSearchVO.endTime != null">
-                and awl.creation_date between #{workHoursSearchVO.startTime} and #{workHoursSearchVO.endTime}
+                and awl.start_date between #{workHoursSearchVO.startTime} and #{workHoursSearchVO.endTime}
             </if>
         ) wl
+    </select>
+
+    <select id="queryIssue" resultType="io.choerodon.agile.api.vo.business.IssueVO">
+        select * from (
+            select
+              ai.issue_id,
+              CONVERT(ai.issue_num,SIGNED) as issue_num_convert,
+              CONCAT(api.project_code,'-', ai.issue_num) as issue_num,
+              ai.issue_type_id,
+              ai.summary
+            from agile_issue ai
+            LEFT JOIN agile_project_info api on api.project_id = ai.project_id
+            where ai.project_id = #{projectId}
+            AND ai.type_code in ('story', 'task', 'sub_task', 'bug')
+            <if test="params != null">
+                and ai.summary like concat(concat('%', #{params}),'%')
+            </if>
+        ) aii
+        order by aii.issue_num_convert desc
     </select>
 </mapper>

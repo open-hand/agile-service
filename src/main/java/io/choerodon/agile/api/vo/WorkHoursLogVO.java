@@ -44,6 +44,8 @@ public class WorkHoursLogVO {
 
     private ProjectVO projectVO;
 
+    private BigDecimal estimateTime;
+
     public Long getUserId() {
         return userId;
     }
@@ -154,5 +156,13 @@ public class WorkHoursLogVO {
 
     public void setStartDate(Date startDate) {
         this.startDate = startDate;
+    }
+
+    public BigDecimal getEstimateTime() {
+        return estimateTime;
+    }
+
+    public void setEstimateTime(BigDecimal estimateTime) {
+        this.estimateTime = estimateTime;
     }
 }
