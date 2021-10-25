@@ -231,6 +231,7 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
           dayHeaderClassNames={`${prefixCls}-dayHeader`}
           allDayClassNames={Style.allDayLabel}
           allDayContent="全天"
+          moreLinkContent={({ num }) => `+${num}`}
           height="100%"
           loading={setLoading}
         />

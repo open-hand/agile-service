@@ -19,6 +19,9 @@
     tr td.fc-timegrid-slot:first-child {
       border: none;
     }
+    .fc .fc-timegrid-slot-minor {
+      border-top: none;
+    }
     .fc td.fc-day-sat:not(.fc-day-today), .fc td.fc-day-sun:not(.fc-day-today) {
       background: #F7F8FA;
     }
@@ -106,6 +109,10 @@
     .fc-more-popover {
       z-index: 99;
     }
+
+    .fc .fc-dayGridMonth-view .fc-scrollgrid-section-liquid > td {
+      border-bottom: none;
+    }
   }
 
   .slotLabel {
@@ -159,6 +166,7 @@
     font-size: .12rem;
     color: var(--text-color3);
     margin-left: auto;
+    margin-right: .06rem;
   }
 
   .issueSummary {
