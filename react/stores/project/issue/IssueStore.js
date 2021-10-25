@@ -172,7 +172,7 @@ export function getSystemFields(excludeCodes = []) {
   },
   {
     code: 'remainingTimeNull',
-    name: '预估时间为空',
+    name: '剩余预估时间为空',
     archive: true,
     defaultShow: false,
   },
@@ -193,6 +193,12 @@ export function getSystemFields(excludeCodes = []) {
   });
   systemFields.push({
     code: 'remainingTime',
+    name: '剩余预估时间',
+    defaultShow: false,
+    fieldType: 'number',
+  });
+  systemFields.push({
+    code: 'estimateTime',
     name: '预估时间',
     defaultShow: false,
     fieldType: 'number',
@@ -364,6 +370,12 @@ export function getSystemFieldsInStoryMap(excludeCodes = []) {
   });
   systemFields.push({
     code: 'remainingTime',
+    name: '剩余预估时间',
+    defaultShow: false,
+    fieldType: 'number',
+  });
+  systemFields.push({
+    code: 'estimateTime',
     name: '预估时间',
     defaultShow: false,
     fieldType: 'number',

@@ -90,6 +90,13 @@ export const systemFields = new Map([
   ['remainingTime', {
     id: 'remainingTime',
     code: 'remainingTime',
+    name: '剩余预估时间',
+    fieldType: 'number',
+    emptyValue: EMPTY_VALUE.value_null,
+  }],
+  ['estimateTime', {
+    id: 'estimateTime',
+    code: 'estimateTime',
     name: '预估时间',
     fieldType: 'number',
     emptyValue: EMPTY_VALUE.value_null,

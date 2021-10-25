@@ -31,6 +31,8 @@ const mapper = {
   influenceVersion: 'influenceVersion',
   epic: 'epic',
   feature: 'feature',
+  estimateTime: 'estimateTime',
+  remainingTime: 'remainingTime',
 };
 function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Array<any>,
   tableFields: IFoundationHeader[], visibleColumns: string[], tableListMode: boolean, action?: TemplateAction) {

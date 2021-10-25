@@ -36,6 +36,9 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
     updatorIds,
     tags,
     participantIds,
+    estimateTime,
+    remainingTime,
+    storyPoints,
   } = data;
   const starBeaconIndex = findIndex(quickFilterIds, (item) => item === 'myStarBeacon');
   let starBeacon;
@@ -53,6 +56,9 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
       reporterIds,
       statusId,
       priorityId,
+      estimateTime,
+      remainingTime,
+      storyPoints,
     },
     otherArgs: {
       assigneeId,
@@ -127,6 +133,7 @@ const getExportFieldCodes = (data: Array<any>): string[] => {
     environmentName: 'environmentName',
     tags: 'tags',
     participants: 'participant',
+    estimateTime: 'estimateTime',
   };
   // @ts-ignore
   return data.map((code: string) => fieldTransform[code] || code);
@@ -164,6 +171,7 @@ const getReverseExportFieldCodes = (data: Array<any>) => {
     lastUpdatedUserName: 'updateUser',
     tags: 'tags',
     participant: 'participants',
+    estimateTime: 'estimateTime',
   };
   // @ts-ignore
   return data.map((code: string) => fieldTransform[code] || code);

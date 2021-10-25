@@ -87,6 +87,9 @@ interface IExportSearch {
     reporterIds?: Array<number>, // 报告人id列表
     statusId?: number, // 状态id
     priorityId?: number, // 优先级id
+    estimateTime?: number,
+    remainingTime?: number,
+    storyPoints?: number,
   },
   otherArgs: {
     customField?: ICustomFieldData, // 通用组件 （自定义）

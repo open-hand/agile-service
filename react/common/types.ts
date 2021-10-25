@@ -418,9 +418,10 @@ export type ISystemFieldCodeMap =
   'environment' |
   'tag' |
   'parentIssueId' |
+  'estimateTime' |
   // 项目群字段
-  'featureType' |
-  'subProject';
+  'featureType'
+  | 'subProject';
 export type ISystemFieldCode =
   'summary' |
   'issueTypeId' |

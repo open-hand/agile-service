@@ -65,7 +65,6 @@ const Issue = observer(({ cached, updateCache }) => {
   const [props] = useDetail();
   const { open } = props;
   const { data: tableFields } = useIssueTableFields();
-
   const handleCheckBefore = useCallback(() => {
     if (!issueSearchStore.batchAction && !hasBatchDeletePermission) {
       issueSearchStore.setBatchAction('edit');
