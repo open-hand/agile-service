@@ -162,7 +162,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const {
     columns, setColumns, visibleColumnCodes, tableWithSortedColumns, listLayoutColumns,
   } = useGanttColumns({
-    ...props, onSortChange, projectId, onClickSummary: handleClickSummary, onCreateSubIssue: handleQuickCreateSubIssue, onAfterCreateSubIssue: handleQuickCreateSubIssueAfter,
+    ...props, onSortChange, projectId, isInProgram, onClickSummary: handleClickSummary, onCreateSubIssue: handleQuickCreateSubIssue, onAfterCreateSubIssue: handleQuickCreateSubIssueAfter,
   });
 
   const searchFilter = useComputed(() => {
@@ -178,7 +178,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const { run, flush } = useDebounceFn(() => {
     (async () => {
       const year = dayjs().year();
-      if (sprintIds === null || !projectId) {
+      if (sprintIds === null || !projectId || !tableWithSortedColumns.length) {
         return;
       }
       setLoading(true);
