@@ -284,7 +284,7 @@ const groupBySprint = (data: any[], rankList: string[]) => {
     map.set('0', { sprint: { sprintId: '0', sprintName: '未分配' }, disabledDrag: true, children: noSprintData });
   }
   return [...map.entries()].map(([sprintId, { sprint, disabledDrag, children }]) => {
-    const groupIssues = ganttList2Tree(children);
+    const groupIssues = ganttList2Tree(sprint.statusCode === 'closed' ? children.map((ch) => ({ ...ch, disabledCreate: true })) : children);
 
     return ({
       summary: sprint?.sprintName,
