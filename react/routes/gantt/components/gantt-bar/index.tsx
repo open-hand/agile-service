@@ -131,19 +131,19 @@ const GanttBar: React.FC<GanttBarProps> = ({
           )}
           <div>
             预计开始：
-            {issue.estimatedStartTime}
+            {issue.estimatedStartTime?.split(' ')[0] || '-'}
           </div>
           <div>
             预计结束：
-            {issue.estimatedEndTime}
+            {issue.estimatedEndTime?.split(' ')[0] || '-'}
           </div>
           <div>
             实际开始：
-            {issue.actualStartTime}
+            {issue.actualStartTime?.split(' ')[0] || '-'}
           </div>
           <div>
             实际结束：
-            {issue.actualEndTime}
+            {issue.actualEndTime?.split(' ')[0] || '-'}
           </div>
         </div>
       ),

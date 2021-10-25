@@ -90,7 +90,24 @@ const ganttColumnMap = new Map<string, any>([['assignee', (onSortChange: any) =>
   label: '预计结束',
   render: (record: any) => record.estimatedEndTime && <Tooltip title={record.estimatedEndTime}><span>{dayjs(record.estimatedEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
 }),
-]]);
+],
+['actualStartTime', (onSortChange: any) => ({
+  width: 100,
+  minWidth: 100,
+  name: 'actualStartTime',
+  label: '实际开始',
+  render: (record: any) => record.actualStartTime && <Tooltip title={record.actualStartTime}><span>{dayjs(record.actualStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
+}),
+],
+['actualEndTime', (onSortChange: any) => ({
+  width: 100,
+  minWidth: 100,
+  name: 'actualEndTime',
+  label: '实际结束',
+  render: (record: any) => record.actualEndTime && <Tooltip title={record.actualEndTime}><span>{dayjs(record.actualEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
+}),
+],
+]);
 
 function getListLayoutColumns(listLayoutColumns: ListLayoutColumnVO[] | null, fields: IFoundationHeader[]): Array<ListLayoutColumnVO & IFoundationHeader & { label: string }> {
   let res: any[] = [];
@@ -288,7 +305,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
   }));
   return tableColumns;
 };
-const defaultVisibleColumns = ['assignee', 'estimatedStartTime', 'estimatedEndTime'];
+const defaultVisibleColumns = ['assignee', 'estimatedStartTime', 'estimatedEndTime', 'actualStartTime', 'actualEndTime'];
 const defaultListLayoutColumns = defaultVisibleColumns.map((code) => ({
   columnCode: code,
   display: true,
