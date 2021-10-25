@@ -30,4 +30,13 @@ public class WorkHoursExcelOrgController {
                          @RequestBody WorkHoursSearchVO workHoursSearchVO) {
         workHoursExcelService.exportWorkHoursLogOnOrganizationLevel(organizationId, workHoursSearchVO, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes());
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("导出工时日历")
+    @PostMapping(value = "/export_work_hours_calendar")
+    public void exportWorkHoursCalendar(@ApiParam(value = "组织id", required = true)
+                                        @PathVariable(name = "organization_id") Long organizationId,
+                                        @RequestBody WorkHoursSearchVO workHoursSearchVO) {
+        workHoursExcelService.exportWorkHoursCalendarOnOrganizationLevel(organizationId, workHoursSearchVO, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes(), true);
+    }
 }

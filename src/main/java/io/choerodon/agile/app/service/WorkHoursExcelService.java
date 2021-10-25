@@ -37,4 +37,33 @@ public interface WorkHoursExcelService {
      * @param requestAttributes
      */
     void exportWorkHoursLogOnOrganizationLevel(Long organizationId, WorkHoursSearchVO workHoursSearchVO, ServletRequestAttributes requestAttributes);
+
+    /**
+     * 导出工时日历
+     * @param organizationId
+     * @param projectIds
+     * @param workHoursSearchVO
+     * @param requestAttributes
+     * @param isOrg
+     */
+    void exportWorkHoursCalendar(Long organizationId, List<Long> projectIds, WorkHoursSearchVO workHoursSearchVO, ServletRequestAttributes requestAttributes, Boolean isOrg);
+
+    /**
+     * 组织层导出工时日历
+     * @param organizationId
+     * @param workHoursSearchVO
+     * @param requestAttributes
+     * @param isOrg
+     */
+    void exportWorkHoursCalendarOnOrganizationLevel(Long organizationId, WorkHoursSearchVO workHoursSearchVO, ServletRequestAttributes requestAttributes, Boolean isOrg);
+
+    /**
+     * 项目层导出工时日历
+     * @param organizationId
+     * @param projectId
+     * @param workHoursSearchVO
+     * @param requestAttributes
+     * @param isOrg
+     */
+    void exportWorkHoursCalendarOnProjectLevel(Long organizationId, Long projectId, WorkHoursSearchVO workHoursSearchVO, ServletRequestAttributes requestAttributes, Boolean isOrg);
 }
