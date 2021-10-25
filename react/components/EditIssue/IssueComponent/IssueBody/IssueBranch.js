@@ -49,7 +49,7 @@ const IssueBranch = observer(({
           </div>
         )}
       </div>
-      <LinkedBranch ref={commitsRef} issueId={issueId} />
+      <LinkedBranch ref={commitsRef} issueId={issueId} projectId={projectId} />
       <div className="c7n-title-wrapper">
         <div className="c7n-title-left">
           合并请求

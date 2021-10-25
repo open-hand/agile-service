@@ -9,9 +9,9 @@ import {
   Popover,
 } from 'choerodon-ui';
 import { TableColumnTooltip, TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
+import { map } from 'lodash';
 import { devOpsApi, devOpsApiConfig } from '@/api';
 import TableDropMenu from '@/components/table-drop-menu';
-import { map } from 'lodash';
 
 const { Column } = Table;
 
@@ -34,14 +34,14 @@ function getStatus(mergeRequests: any[]) {
   return '关闭';
 }
 const LinkedBranch: React.ForwardRefRenderFunction<{
-  issueId: string
-}> = ({ issueId }, ref) => {
+  issueId: string, projectId?: string
+}> = ({ issueId, projectId: propsProjectId }, ref) => {
   const dataSet = useMemo(() => new DataSet({
     autoQuery: true,
     selection: false,
     paging: false,
     transport: {
-      read: ({ params }) => devOpsApiConfig.loadCommit(issueId),
+      read: ({ params }) => devOpsApiConfig.project(propsProjectId).loadCommit(issueId),
     },
     fields: [{
       name: 'branchName',
@@ -62,7 +62,7 @@ const LinkedBranch: React.ForwardRefRenderFunction<{
       name: 'status',
       label: '状态',
     }],
-  }), [issueId]);
+  }), [issueId, propsProjectId]);
   const handleCreateMergeRequest = (record) => {
     const win = window.open('');
     const { appServiceId, projectId } = record;

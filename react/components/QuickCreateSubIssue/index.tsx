@@ -118,6 +118,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
       const issue = getQuickCreateDefaultObj({
         ...defaultValues,
         summary,
+        projectId,
         priorityId: priorityId || defaultPriority?.id,
         parentIssueId,
         relateIssueId: currentType.typeCode === 'bug' ? parentIssueId : undefined,
