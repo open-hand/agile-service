@@ -72,7 +72,7 @@ class QuickCreateIssue extends Component {
 
   loadInitValue = async (currentIssueTypeId) => {
     const { summary } = this.state;
-    const defaultSummary = await fieldApi.getSummaryDefaultValue(currentIssueTypeId);
+    const defaultSummary = await fieldApi.project(this.props.projectId).getSummaryDefaultValue(currentIssueTypeId);
     if (summary === this.currentTemplate) {
       this.currentTemplate = defaultSummary;
       this.setState({
@@ -94,7 +94,7 @@ class QuickCreateIssue extends Component {
       return;
     }
     const {
-      issueTypes, relateIssueId, sprintId, epicId, versionIssueRelVOList: propsVersionIssueRelVOList, chosenFeatureId, isInProgram, cantCreateEvent,
+      issueTypes, relateIssueId, sprintId, epicId, versionIssueRelVOList: propsVersionIssueRelVOList, chosenFeatureId, projectId, isInProgram, cantCreateEvent,
     } = this.props;
 
     const assigneeId = this.userDropDownRef?.current?.selectedUser?.id;
@@ -105,7 +105,7 @@ class QuickCreateIssue extends Component {
         loading: true,
       });
       const currentType = issueTypes.find((t) => t.id === currentTypeId);
-      if (!await checkCanQuickCreate(currentType.id, assigneeId)) { //
+      if (!await checkCanQuickCreate(currentType.id, assigneeId, projectId)) { //
         if (!cantCreateEvent) {
           Choerodon.prompt('该工作项类型含有必填选项，请使用弹框创建');
           this.setState({
@@ -143,7 +143,7 @@ class QuickCreateIssue extends Component {
           issueTypeId: currentType.id,
           pageCode: 'agile_issue_create',
         };
-        const fields = await fieldApi.getFields(param);
+        const fields = await fieldApi.project(projectId).getFields(param, projectId);
         const fieldsMap = fields2Map(fields);
 
         const issue = getQuickCreateDefaultObj({
@@ -160,7 +160,7 @@ class QuickCreateIssue extends Component {
           epicId,
         }, fieldsMap);
 
-        await issueApi.create(issue).then((res) => {
+        await issueApi.project(projectId).create(issue).then((res) => {
           this.setState({
             loading: false,
             create: false,
@@ -171,7 +171,7 @@ class QuickCreateIssue extends Component {
             issueTypeId: currentType.id, // res.issueTypeId,
             pageCode: 'agile_issue_create',
           };
-          fieldApi.quickCreateDefault(res.issueId, dto);
+          fieldApi.project(projectId).quickCreateDefault(res.issueId, dto);
           if (onCreate) {
             onCreate(res);
           }
@@ -272,7 +272,7 @@ class QuickCreateIssue extends Component {
                     </Dropdown>
                   )
                 }
-                <UserDropdown userDropDownRef={this.userDropDownRef} defaultAssignee={this.props.defaultAssignee} key={this.props.defaultAssignee?.id || 'null'} />
+                <UserDropdown projectId={this.props.projectId} userDropDownRef={this.userDropDownRef} defaultAssignee={this.props.defaultAssignee} key={this.props.defaultAssignee?.id || 'null'} />
                 <Input
                   className="hidden-label"
                   autoFocus
