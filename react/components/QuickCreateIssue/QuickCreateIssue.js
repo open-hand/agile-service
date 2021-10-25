@@ -154,6 +154,7 @@ class QuickCreateIssue extends Component {
           versionIssueRelVOList: propsVersionIssueRelVOList,
           sprintId,
           summary,
+          projectId,
           issueTypeId: currentType.id,
           typeCode: currentType.typeCode,
           priorityId: defaultPriority.id,
