@@ -67,7 +67,7 @@ import { GanttIssue, IGanttCollapsedHistory } from './types';
 import { getProjectId } from '@/utils/common';
 import SelectProject from '@/components/select/select-project';
 
-const middleDateKeys = [{ key: 'actualStartTime', maxDateKey: 'actualEndTime' }, { key: 'actualEndTime', minDateKey: 'actualStartTime' }];
+const middleDateKeys = [{ key: 'actualStartTime', maxDateKey: 'actualEndTime', ignoreCheckDateKeys: ['actualEndTime'] }, { key: 'actualEndTime', minDateKey: 'actualStartTime' }];
 const { Option } = FlatSelect;
 export interface IGanttPageProps extends TableCacheRenderProps {
   isInProgram: boolean
