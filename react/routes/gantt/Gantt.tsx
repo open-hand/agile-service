@@ -502,6 +502,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
         <SelectSprint
           key={`SelectSprint-${projectId}`}
           flat
+          statusList={[]}
           projectId={projectId}
           placeholder="冲刺"
           value={sprintIds}
