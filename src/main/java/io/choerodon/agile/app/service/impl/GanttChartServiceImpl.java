@@ -300,10 +300,10 @@ public class GanttChartServiceImpl implements GanttChartService {
 
     @Override
     public GanttDimensionListVO ganttDimensionList(Long projectId, SearchVO searchVO) {
-        if (SearchVoUtil.isSprintEmpty(searchVO)) {
+        if (SearchVOUtil.isSprintEmpty(searchVO)) {
             throw new CommonException(ERROR_SPRINT_EMPTY);
         }
-        String dimension = SearchVoUtil.getDimensionFromSearchVO(searchVO);
+        String dimension = SearchVOUtil.getDimensionFromSearchVO(searchVO);
         if (!GanttDimension.isSprint(dimension)
                 && !GanttDimension.isAssignee(dimension)) {
             throw new CommonException(ERROR_GANTT_DIMENSION_NOT_SUPPORT);
@@ -321,7 +321,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                                                              SearchVO searchVO,
                                                              String dimension) {
         PageRequest pageRequest = new PageRequest(1, 0);
-        SearchVoUtil.setTypeCodes(searchVO, Arrays.asList("story", "bug", "task", "sub_task"));
+        SearchVOUtil.setTypeCodes(searchVO, Arrays.asList("story", "bug", "task", "sub_task"));
         Boolean condition = issueService.handleSearchUser(searchVO, projectId);
         if (!Boolean.TRUE.equals(condition)) {
             return new LinkedHashMap<>();
@@ -507,12 +507,12 @@ public class GanttChartServiceImpl implements GanttChartService {
 
     private SearchVO validateAndProcessSearchVO(Long projectId,
                                                 SearchVO searchVO) {
-        SearchVoUtil.setTypeCodes(searchVO, Arrays.asList("story", "bug", "task", "sub_task"));
+        SearchVOUtil.setTypeCodes(searchVO, Arrays.asList("story", "bug", "task", "sub_task"));
         boolean condition = issueService.handleSearchUser(searchVO, projectId);
         if (!condition) {
             throw new CommonException("error.illegal.gantt.searchVO");
         }
-        if (SearchVoUtil.isSprintEmpty(searchVO)) {
+        if (SearchVOUtil.isSprintEmpty(searchVO)) {
             throw new CommonException(ERROR_SPRINT_EMPTY);
         }
         boardAssembler.handleOtherArgs(searchVO);
@@ -607,7 +607,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         }
         List<Long> orderedList = new ArrayList<>();
         if (!epicIds.isEmpty() && Boolean.TRUE.equals(searchVO.getGanttDefaultOrder())) {
-            String dimension = SearchVoUtil.getDimensionFromSearchVO(searchVO);
+            String dimension = SearchVOUtil.getDimensionFromSearchVO(searchVO);
             orderedList.addAll(ganttIssueRankMapper.orderByDefaultRank(epicIds, dimension, sortMap));
         }
         List<Long> result = new ArrayList<>(orderedList);
@@ -742,19 +742,19 @@ public class GanttChartServiceImpl implements GanttChartService {
                                                        PageRequest pageRequest,
                                                        Long organizationId,
                                                        boolean orderByRank) {
-        if (SearchVoUtil.isSprintEmpty(searchVO)) {
+        if (SearchVOUtil.isSprintEmpty(searchVO)) {
             throw new CommonException(ERROR_SPRINT_EMPTY);
         }
         if (ObjectUtils.isEmpty(projectMap)) {
             return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }
         Set<Long> projectIds = projectMap.keySet();
-        String dimension = SearchVoUtil.getDimensionFromSearchVO(searchVO);
+        String dimension = SearchVOUtil.getDimensionFromSearchVO(searchVO);
         validateDimension(dimension);
         validateDisplayFields(searchVO);
         Page<GanttChartVO> emptyPage = PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         //设置不查询史诗
-        SearchVoUtil.setTypeCodes(searchVO, Arrays.asList("story", "bug", "task", "sub_task"));
+        SearchVOUtil.setTypeCodes(searchVO, Arrays.asList("story", "bug", "task", "sub_task"));
         String filterSql = getFilterSql(searchVO);
         boardAssembler.handleOtherArgs(searchVO);
         boolean isTreeView =

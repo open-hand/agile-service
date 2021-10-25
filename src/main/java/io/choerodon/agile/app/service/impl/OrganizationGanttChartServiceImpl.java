@@ -15,7 +15,7 @@ import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.ObjectSchemeFieldMapper;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.agile.infra.utils.PageUtil;
-import io.choerodon.agile.infra.utils.SearchVoUtil;
+import io.choerodon.agile.infra.utils.SearchVOUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.utils.PageUtils;
@@ -157,11 +157,11 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
                                                                     SearchVO searchVO) {
         Long projectId = getTeamProjectId(searchVO);
         AssertUtilsForCommonException.notNull(projectId, "error.gantt.teamProjectIds.null");
-        String dimension = SearchVoUtil.getDimensionFromSearchVO(searchVO);
+        String dimension = SearchVOUtil.getDimensionFromSearchVO(searchVO);
         if (!GanttDimension.isAssignee(dimension)) {
             throw new CommonException(ERROR_GANTT_DIMENSION_NOT_SUPPORT);
         }
-        SearchVoUtil.setTypeCodes(searchVO, Arrays.asList("story", "bug", "task", "sub_task"));
+        SearchVOUtil.setTypeCodes(searchVO, Arrays.asList("story", "bug", "task", "sub_task"));
         String filterSql = ganttChartService.getFilterSql(searchVO);
         boardAssembler.handleOtherArgs(searchVO);
         Set<Long> userIds =
@@ -198,7 +198,7 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         if (ObjectUtils.isEmpty(projectIds)) {
             return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }
-        SearchVoUtil.setTypeCodes(searchVO, Arrays.asList("story", "bug", "task", "sub_task"));
+        SearchVOUtil.setTypeCodes(searchVO, Arrays.asList("story", "bug", "task", "sub_task"));
         String filterSql = ganttChartService.getFilterSql(searchVO);
         boardAssembler.handleOtherArgs(searchVO);
         Map<String, Object> sortMap = new HashMap<>();

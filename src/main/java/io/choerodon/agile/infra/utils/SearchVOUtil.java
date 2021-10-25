@@ -10,7 +10,7 @@ import java.util.*;
  * @author superlee
  * @since 2021-10-21
  */
-public class SearchVoUtil {
+public class SearchVOUtil {
 
     private static final String SPRINT = "sprint";
     private static final String TYPE_CODES = "typeCodes";
