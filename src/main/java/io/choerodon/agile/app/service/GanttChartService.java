@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
@@ -35,4 +36,16 @@ public interface GanttChartService {
                                                 PageRequest pageRequest,
                                                 Long organizationId,
                                                 boolean orderByRank);
+
+    String getFilterSql(SearchVO searchVO);
+
+    void processSort(PageRequest pageRequest, Map<String, Object> sortMap);
+
+    List<GanttChartVO> buildGanttList(Map<Long, ProjectVO> projectMap,
+                                      List<Long> issueIds,
+                                      List<IssueDTO> issueList,
+                                      Map<Long, Long> issueEpicMap,
+                                      Map<Long, IssueDTO> issueFeatureMap,
+                                      List<ObjectSchemeFieldVO> displayFields,
+                                      Long organizationId);
 }

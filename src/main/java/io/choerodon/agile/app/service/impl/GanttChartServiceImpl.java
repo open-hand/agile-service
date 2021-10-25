@@ -44,7 +44,7 @@ public class GanttChartServiceImpl implements GanttChartService {
     private static final String ISSUE_ID = "issueId";
     private static final String ORDER_STR = "orderStr";
     private static final String ISSUE_TYPE_ID = "issueTypeId";
-    private static final String TYPE_CODES = "typeCodes";
+
     private static final String SPRINT = "sprint";
     private static final String CREATE_USER = "createUser";
     private static final String UPDATE_USER = "updateUser";
@@ -144,14 +144,6 @@ public class GanttChartServiceImpl implements GanttChartService {
         if (GanttDimension.isFeature(dimension)) {
             throw new CommonException(ERROR_GANTT_DIMENSION_NOT_SUPPORT);
         }
-    }
-
-    private String getDimensionFromSearchVO(SearchVO searchVO) {
-        Map<String, Object> searchArgs = searchVO.getSearchArgs();
-        if (ObjectUtils.isEmpty(searchArgs)) {
-            throw new CommonException("error.gantt.dimension.null");
-        }
-        return (String) searchArgs.get("dimension");
     }
 
     @Override
@@ -308,10 +300,10 @@ public class GanttChartServiceImpl implements GanttChartService {
 
     @Override
     public GanttDimensionListVO ganttDimensionList(Long projectId, SearchVO searchVO) {
-        if (isSprintEmpty(searchVO)) {
+        if (SearchVoUtil.isSprintEmpty(searchVO)) {
             throw new CommonException(ERROR_SPRINT_EMPTY);
         }
-        String dimension = getDimensionFromSearchVO(searchVO);
+        String dimension = SearchVoUtil.getDimensionFromSearchVO(searchVO);
         if (!GanttDimension.isSprint(dimension)
                 && !GanttDimension.isAssignee(dimension)) {
             throw new CommonException(ERROR_GANTT_DIMENSION_NOT_SUPPORT);
@@ -329,7 +321,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                                                              SearchVO searchVO,
                                                              String dimension) {
         PageRequest pageRequest = new PageRequest(1, 0);
-        buildIssueType(searchVO);
+        SearchVoUtil.setTypeCodes(searchVO, Arrays.asList("story", "bug", "task", "sub_task"));
         Boolean condition = issueService.handleSearchUser(searchVO, projectId);
         if (!Boolean.TRUE.equals(condition)) {
             return new LinkedHashMap<>();
@@ -515,12 +507,12 @@ public class GanttChartServiceImpl implements GanttChartService {
 
     private SearchVO validateAndProcessSearchVO(Long projectId,
                                                 SearchVO searchVO) {
-        buildIssueType(searchVO);
+        SearchVoUtil.setTypeCodes(searchVO, Arrays.asList("story", "bug", "task", "sub_task"));
         boolean condition = issueService.handleSearchUser(searchVO, projectId);
         if (!condition) {
             throw new CommonException("error.illegal.gantt.searchVO");
         }
-        if (isSprintEmpty(searchVO)) {
+        if (SearchVoUtil.isSprintEmpty(searchVO)) {
             throw new CommonException(ERROR_SPRINT_EMPTY);
         }
         boardAssembler.handleOtherArgs(searchVO);
@@ -615,7 +607,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         }
         List<Long> orderedList = new ArrayList<>();
         if (!epicIds.isEmpty() && Boolean.TRUE.equals(searchVO.getGanttDefaultOrder())) {
-            String dimension = getDimensionFromSearchVO(searchVO);
+            String dimension = SearchVoUtil.getDimensionFromSearchVO(searchVO);
             orderedList.addAll(ganttIssueRankMapper.orderByDefaultRank(epicIds, dimension, sortMap));
         }
         List<Long> result = new ArrayList<>(orderedList);
@@ -750,19 +742,19 @@ public class GanttChartServiceImpl implements GanttChartService {
                                                        PageRequest pageRequest,
                                                        Long organizationId,
                                                        boolean orderByRank) {
-        if (isSprintEmpty(searchVO)) {
+        if (SearchVoUtil.isSprintEmpty(searchVO)) {
             throw new CommonException(ERROR_SPRINT_EMPTY);
         }
         if (ObjectUtils.isEmpty(projectMap)) {
             return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }
         Set<Long> projectIds = projectMap.keySet();
-        String dimension = getDimensionFromSearchVO(searchVO);
+        String dimension = SearchVoUtil.getDimensionFromSearchVO(searchVO);
         validateDimension(dimension);
         validateDisplayFields(searchVO);
         Page<GanttChartVO> emptyPage = PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         //设置不查询史诗
-        buildIssueType(searchVO);
+        SearchVoUtil.setTypeCodes(searchVO, Arrays.asList("story", "bug", "task", "sub_task"));
         String filterSql = getFilterSql(searchVO);
         boardAssembler.handleOtherArgs(searchVO);
         boolean isTreeView =
@@ -833,7 +825,8 @@ public class GanttChartServiceImpl implements GanttChartService {
         searchVO.setGanttDefaultOrder(true);
     }
 
-    private String getFilterSql(SearchVO searchVO) {
+    @Override
+    public String getFilterSql(SearchVO searchVO) {
         String filterSql;
         List<Long> quickFilterIds = searchVO.getQuickFilterIds();
         if (!ObjectUtils.isEmpty(quickFilterIds)) {
@@ -844,13 +837,14 @@ public class GanttChartServiceImpl implements GanttChartService {
         return filterSql;
     }
 
-    private List<GanttChartVO> buildGanttList(Map<Long, ProjectVO> projectMap,
-                                              List<Long> issueIds,
-                                              List<IssueDTO> issueList,
-                                              Map<Long, Long> issueEpicMap,
-                                              Map<Long, IssueDTO> issueFeatureMap,
-                                              List<ObjectSchemeFieldVO> displayFields,
-                                              Long organizationId) {
+    @Override
+    public List<GanttChartVO> buildGanttList(Map<Long, ProjectVO> projectMap,
+                                             List<Long> issueIds,
+                                             List<IssueDTO> issueList,
+                                             Map<Long, Long> issueEpicMap,
+                                             Map<Long, IssueDTO> issueFeatureMap,
+                                             List<ObjectSchemeFieldVO> displayFields,
+                                             Long organizationId) {
         if (ObjectUtils.isEmpty(projectMap) || ObjectUtils.isEmpty(issueList)) {
             return Collections.emptyList();
         }
@@ -1189,7 +1183,8 @@ public class GanttChartServiceImpl implements GanttChartService {
         return projects;
     }
 
-    private void processSort(PageRequest pageRequest, Map<String, Object> sortMap) {
+    @Override
+    public void processSort(PageRequest pageRequest, Map<String, Object> sortMap) {
         Sort sort = pageRequest.getSort();
         if (ObjectUtils.isEmpty(sort)) {
             return;
@@ -1202,25 +1197,6 @@ public class GanttChartServiceImpl implements GanttChartService {
         convertMapping.put("issueNum", "issue_num_convert");
         String sortSql = PageableHelper.getSortSql(PageUtil.sortResetOrder(sort, null, convertMapping));
         sortMap.put(ORDER_STR, sortSql);
-    }
-
-    private void buildIssueType(SearchVO searchVO) {
-        List<String> issueTypes = Arrays.asList("story", "bug", "task", "sub_task");
-        Map<String, Object> advancedSearchArgs = searchVO.getAdvancedSearchArgs();
-        if (advancedSearchArgs == null) {
-            advancedSearchArgs = new HashMap<>();
-            searchVO.setAdvancedSearchArgs(advancedSearchArgs);
-        }
-        List<String> typeCodes = new ArrayList<>(issueTypes);
-        advancedSearchArgs.put(TYPE_CODES, typeCodes);
-    }
-
-    private boolean isSprintEmpty(SearchVO searchVO) {
-        Map<String, Object> otherArgs = searchVO.getOtherArgs();
-        if (!ObjectUtils.isEmpty(otherArgs)) {
-            return ObjectUtils.isEmpty(otherArgs.get(SPRINT));
-        }
-        return true;
     }
 
     private void getUserIdFromIssueList(List<IssueDTO> issueList, Set<Long> userIds) {

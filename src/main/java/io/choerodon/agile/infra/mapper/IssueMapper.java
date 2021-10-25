@@ -660,4 +660,16 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     List<CountVO> countWorkCalenderSubIssueProgress(@Param("projectIds") List<Long> projectIds, @Param("userId") Long userId, @Param("issueIds") List<Long> issueIds);
 
     List<WorkItemVO> queryAssigneeIssueList(@Param("projectIds") List<Long> projectIds, @Param("userId") Long userId, @Param("workItemSearchVO") WorkItemSearchVO workItemSearchVO);
+
+    Set<Long> queryAssigneeIdsBySearchVO(@Param("projectIds") Set<Long> projectIds,
+                                         @Param("searchVO") SearchVO searchVO,
+                                         @Param("filterSql") String filterSql,
+                                         @Param("assigneeFilterIds") List<Long> assigneeFilterIds);
+
+    List<IssueDTO> selectConflictEstimatedTime(@Param("projectIds") Set<Long> projectIds,
+                                               @Param("assigneeIds") Set<Long> assigneeIds,
+                                               @Param("searchVO") SearchVO searchVO,
+                                               @Param("filterSql") String filterSql,
+                                               @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
+                                               @Param("sortMap") Map<String, Object> sortMap);
 }

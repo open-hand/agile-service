@@ -11,6 +11,7 @@ import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,10 +68,31 @@ public class OrganizationGanttChartController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "组织需求统计界面获取自定义字段表头")
+    @ApiOperation(value = "组织甘特图界面获取自定义字段")
     @GetMapping("/custom_field")
     public ResponseEntity<List<ObjectSchemeFieldDetailVO>> listCustomFields(@PathVariable(name = "organization_id") Long organizationId) {
         return new ResponseEntity<>(organizationGanttChartService.listCustomFields(organizationId), HttpStatus.OK);
     }
 
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "组织甘特图预计时间冲突统计")
+    @PostMapping("/estimated_time/conflict")
+    public ResponseEntity<List<EstimatedTimeConflictVO>> queryEstimatedTimeConflict(@PathVariable(name = "organization_id") Long organizationId,
+                                                                                    @RequestBody SearchVO searchVO) {
+        return new ResponseEntity<>(organizationGanttChartService.queryEstimatedTimeConflict(organizationId, searchVO), HttpStatus.OK);
+    }
+
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "组织甘特图预计时间冲突统计用户的详情")
+    @PostMapping("/estimated_time/conflict/details")
+    public ResponseEntity<Page<GanttChartVO>> queryEstimatedTimeConflictDetails(@ApiIgnore
+                                                                                @ApiParam(value = "分页信息", required = true)
+                                                                                @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
+                                                                                        PageRequest pageRequest,
+                                                                                @PathVariable(name = "organization_id") Long organizationId,
+                                                                                @RequestBody SearchVO searchVO,
+                                                                                @RequestParam @Encrypt Long assigneeId) {
+        return new ResponseEntity<>(organizationGanttChartService.queryEstimatedTimeConflictDetails(organizationId, searchVO, assigneeId, pageRequest), HttpStatus.OK);
+    }
 }

@@ -19,4 +19,11 @@ public interface OrganizationGanttChartService {
     List<AgileIssueHeadVO> getIssueHeaderFields(Long organizationId, String schemeCode);
 
     List<ObjectSchemeFieldDetailVO> listCustomFields(Long organizationId);
+
+    List<EstimatedTimeConflictVO> queryEstimatedTimeConflict(Long organizationId, SearchVO searchVO);
+
+    Page<GanttChartVO> queryEstimatedTimeConflictDetails(Long organizationId,
+                                                         SearchVO searchVO,
+                                                         Long assigneeId,
+                                                         PageRequest pageRequest);
 }
