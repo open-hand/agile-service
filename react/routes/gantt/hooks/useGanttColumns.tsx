@@ -26,10 +26,12 @@ import { getCustomColumn, systemColumnsMap, BaseSystemColumnRender } from '@/com
 import type { GanttIssue } from '../types';
 import UserTag from '@/components/tag/user-tag';
 import { IGanttPageProps } from '../Gantt';
+import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 
 interface IGanttColumnsHookProps extends TableCacheRenderProps {
   menuType: IGanttPageProps['menuType']
   projectId?: string
+  isInProgram: boolean
   onClickSummary?: (issue: GanttIssue) => void
   onSortChange: IGanttSortLabelProps['onChange']
   onCreateSubIssue?: (parentIssue: GanttIssue) => void
@@ -46,12 +48,15 @@ const renderTooltip = (user: User) => {
   return ldap ? `${realName}(${loginName})` : `${realName}(${email})`;
 };
 
-const isCanQuickCreateIssue = (record: Gantt.Record<any>) => {
+const isCanQuickCreateIssue = (record: Gantt.Record<any>, { disableFeature }: { disableFeature: boolean }) => {
   const { typeCode } = record.issueTypeVO || {};
   if (record.disabledCreate) {
     return false;
   }
-  if (['sprint', 'assignee', 'feature'].includes(record.groupType)) {
+  if (record.groupType === 'feature') {
+    return !!disableFeature;
+  }
+  if (['sprint', 'assignee'].includes(record.groupType)) {
     return true;
   }
   if (record.groupType === 'epic' && !record.isInProgram) {
@@ -144,7 +149,7 @@ interface TableColumnEvent {
   onAfterCreateSubIssue?: IGanttColumnsHookProps['onAfterCreateSubIssue']
 }
 const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: boolean }>,
-  tableFields: IFoundationHeader[], events: TableColumnEvent = {}, disableOperate: boolean = false) => {
+  tableFields: IFoundationHeader[], events: TableColumnEvent = {}, disable: { disableOperate: boolean, disableFeatureCreateIssue: boolean } = { disableFeatureCreateIssue: false, disableOperate: false }) => {
   const {
     onSortChange = noop, onClickSummary = noop,
     openCreateSubIssue = noop, onAfterCreateSubIssue = noop,
@@ -207,7 +212,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
         </span>
       );
     }
-    const isCanCreateIssue = !disableOperate && isCanQuickCreateIssue(record);
+    const isCanCreateIssue = !disable.disableOperate && isCanQuickCreateIssue(record, { disableFeature: disable.disableFeatureCreateIssue });
     return !record.group ? (
       // eslint-disable-next-line no-underscore-dangle
       <span className={classNames('c7n-gantt-content-body-summary')}>
@@ -311,22 +316,24 @@ const defaultListLayoutColumns = defaultVisibleColumns.map((code) => ({
   display: true,
 }));
 function useGanttProjectColumns({
-  cached, onAfterCreateSubIssue, onCreateSubIssue, onClickSummary, onSortChange, projectId, menuType,
+  cached, onAfterCreateSubIssue, onCreateSubIssue, onClickSummary, onSortChange, projectId, menuType, isInProgram,
 }: IGanttColumnsHookProps) {
   // 恒为 项目层级
   const { data: tableFields } = useIssueTableFields({ hiddenFieldCodes: ['epicSelfName', 'summary'], projectId, menuType: 'project' });
+  const { data: issueTypes, isLoading } = useProjectIssueTypes({ projectId, isInProgram });
+  const disableFeatureCreateIssue = !!issueTypes?.some((issueType) => issueType.typeCode === 'story');
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
   const listLayoutColumns = useMemo(() => getListLayoutColumns(cached?.listLayoutColumns || defaultListLayoutColumns as any, tableFields || []), [cached?.listLayoutColumns, tableFields]);
   const visibleColumnCodes = useMemo(() => (listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode)), [listLayoutColumns]);
   const tableWithSortedColumns = useMemo(() => getTableColumns(listLayoutColumns.filter((item) => item.display)
     .map((item) => ({ ...item, disable: true })), tableFields || [], {
     onClickSummary, onSortChange, openCreateSubIssue: onCreateSubIssue, onAfterCreateSubIssue,
-  }, menuType !== 'project'), [listLayoutColumns, menuType, onAfterCreateSubIssue, onClickSummary, onCreateSubIssue, onSortChange, tableFields]);
+  }, { disableOperate: menuType !== 'project', disableFeatureCreateIssue }), [disableFeatureCreateIssue, listLayoutColumns, menuType, onAfterCreateSubIssue, onClickSummary, onCreateSubIssue, onSortChange, tableFields]);
   return {
     columns,
     setColumns,
     visibleColumnCodes,
-    tableWithSortedColumns,
+    tableWithSortedColumns: isLoading ? [] : tableWithSortedColumns,
     listLayoutColumns,
   };
 }
@@ -337,7 +344,7 @@ function useGanttOrgColumns({
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
   const listLayoutColumns = useMemo(() => getListLayoutColumns(cached?.listLayoutColumns || defaultListLayoutColumns as any, tableFields || []), [cached?.listLayoutColumns, tableFields]);
   const visibleColumnCodes = useMemo(() => (listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode)), [listLayoutColumns]);
-  const tableWithSortedColumns = useMemo(() => getTableColumns(listLayoutColumns.filter((item) => item.display), tableFields || [], {}, true), [listLayoutColumns, tableFields]);
+  const tableWithSortedColumns = useMemo(() => getTableColumns(listLayoutColumns.filter((item) => item.display), tableFields || [], {}, { disableFeatureCreateIssue: true, disableOperate: true }), [listLayoutColumns, tableFields]);
   return {
     columns,
     setColumns,
