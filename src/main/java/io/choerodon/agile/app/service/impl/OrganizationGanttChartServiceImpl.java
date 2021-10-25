@@ -1,18 +1,25 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.GanttChartService;
 import io.choerodon.agile.app.service.OrganizationGanttChartService;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.GanttDimension;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
+import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.ObjectSchemeFieldMapper;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.agile.infra.utils.PageUtil;
+import io.choerodon.agile.infra.utils.SearchVOUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.utils.PageUtils;
+import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +44,13 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
     private BaseFeignClient baseFeignClient;
     @Autowired
     private ObjectSchemeFieldMapper objectSchemeFieldMapper;
+    @Autowired
+    private IssueMapper issueMapper;
+    @Autowired
+    private BoardAssembler boardAssembler;
+
+    private static final String ERROR_GANTT_DIMENSION_NOT_SUPPORT = "error.gantt.dimension.not.support";
+
 
     @Override
     public Page<GanttChartVO> pagedQuery(Long organizationId,
@@ -136,6 +150,72 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
                 objectSchemeFieldMapper.selectFieldByProjectIdsWithoutOptions(organizationId, new ArrayList<>(projectIds), null, issueTypes);
         result.forEach(r -> r.setProjectName(projectNameMap.get(r.getProjectId())));
         return result;
+    }
+
+    @Override
+    public List<EstimatedTimeConflictVO> queryEstimatedTimeConflict(Long organizationId,
+                                                                    SearchVO searchVO) {
+        Long projectId = getTeamProjectId(searchVO);
+        AssertUtilsForCommonException.notNull(projectId, "error.gantt.teamProjectIds.null");
+        String dimension = SearchVOUtil.getDimensionFromSearchVO(searchVO);
+        if (!GanttDimension.isAssignee(dimension)) {
+            throw new CommonException(ERROR_GANTT_DIMENSION_NOT_SUPPORT);
+        }
+        SearchVOUtil.setTypeCodes(searchVO, Arrays.asList("story", "bug", "task", "sub_task"));
+        String filterSql = ganttChartService.getFilterSql(searchVO);
+        boardAssembler.handleOtherArgs(searchVO);
+        Set<Long> userIds =
+                issueMapper.queryAssigneeIdsBySearchVO(new HashSet<>(Arrays.asList(projectId)), searchVO, filterSql, searchVO.getAssigneeFilterIds());
+        if (ObjectUtils.isEmpty(userIds)) {
+            return Collections.emptyList();
+        }
+        List<ProjectVO> projects = listAgileProjects(organizationId, null, null, null);
+        List<Long> projectIds = projects.stream().map(ProjectVO::getId).collect(Collectors.toList());
+        if (projectIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<IssueDTO> issues = issueMapper.selectConflictEstimatedTime(new HashSet<>(projectIds), userIds, null, null, null, null);
+        Map<Long, List<IssueDTO>> assigneeMap = issues.stream().collect(Collectors.groupingBy(IssueDTO::getAssigneeId));
+        List<EstimatedTimeConflictVO> result = new ArrayList<>();
+        userIds.forEach(userId -> {
+            EstimatedTimeConflictVO vo = new EstimatedTimeConflictVO();
+            result.add(vo);
+            vo.setUserId(userId);
+            boolean isConflicted = !ObjectUtils.isEmpty(assigneeMap.get(userId));
+            vo.setConflicted(isConflicted);
+        });
+        return result;
+    }
+
+    @Override
+    public Page<GanttChartVO> queryEstimatedTimeConflictDetails(Long organizationId,
+                                                                SearchVO searchVO,
+                                                                Long assigneeId,
+                                                                PageRequest pageRequest) {
+        List<ProjectVO> projects = listAgileProjects(organizationId, null, null, null);
+        Map<Long, ProjectVO> projectMap = projects.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
+        List<Long> projectIds = new ArrayList<>(projectMap.keySet());
+        if (ObjectUtils.isEmpty(projectIds)) {
+            return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
+        }
+        SearchVOUtil.setTypeCodes(searchVO, Arrays.asList("story", "bug", "task", "sub_task"));
+        String filterSql = ganttChartService.getFilterSql(searchVO);
+        boardAssembler.handleOtherArgs(searchVO);
+        Map<String, Object> sortMap = new HashMap<>();
+        ganttChartService.processSort(pageRequest, sortMap);
+        Page<IssueDTO> issuePage =
+                PageHelper.doPage(pageRequest, () -> issueMapper.selectConflictEstimatedTime(
+                        new HashSet<>(projectIds),
+                        new HashSet<>(Arrays.asList(assigneeId)),
+                        searchVO,
+                        filterSql,
+                        searchVO.getAssigneeFilterIds(),
+                        sortMap));
+        List<IssueDTO> issues = issuePage.getContent();
+        List<Long> issueIds = issues.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+        List<IssueDTO> issueList = issueMapper.selectWithSubByIssueIds(new HashSet<>(projectIds), issueIds, sortMap, false, null);
+        List<GanttChartVO> result = ganttChartService.buildGanttList(projectMap, issueIds, issueList, Collections.emptyMap(), Collections.emptyMap(), Collections.emptyList(), organizationId);
+        return PageUtils.copyPropertiesAndResetContent(issuePage, result);
     }
 
     private Long getTeamProjectId(SearchVO searchVO) {

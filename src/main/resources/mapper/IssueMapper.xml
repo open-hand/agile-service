@@ -5306,6 +5306,154 @@
         </if>
     </select>
 
+    <select id="queryAssigneeIdsBySearchVO" resultType="java.lang.Long">
+        SELECT
+        ai.assignee_id
+        FROM agile_issue ai
+        WHERE ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        AND ai.apply_type = 'agile'
+        and ai.assignee_id is not null
+        and ai.assignee_id != 0
+        <include refid="explainSearchVO"/>
+        <include refid="filterSqlAndAssigneeIds"/>
+        <if test='searchVO.searchArgs != null'>
+            <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
+                AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+            </if>
+        </if>
+        <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+            <foreach collection="searchVO.contents" item="content" index="index">
+                AND (
+                ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
+                OR ai.summary LIKE CONCAT(CONCAT('%', #{content}), '%')
+                )
+            </foreach>
+        </if>
+    </select>
+
+
+    <select id="selectConflictEstimatedTime" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        select
+        temp.issue_id,
+        temp.assignee_id
+        from
+        (
+            (
+                select
+                ai.issue_id,
+                ai.assignee_id,
+                CONVERT(ai.issue_num,SIGNED) as issue_num_convert,
+                if(
+                    @lastAssigneeId = ai.assignee_id,
+                    ai.estimated_start_time &gt;= @lastStartDate and ai.estimated_start_time &lt; @lastEndDate,
+                    0
+                ) as overlap,
+                @lastAssigneeId := ai.assignee_id as last_assignee,
+                case
+                    when ai.estimated_end_time &lt; @lastEndDate
+                    then @lastStartDate := @lastStartDate
+                    else @lastStartDate := ai.estimated_start_time
+                end as last_start,
+                case
+                    when ai.estimated_end_time &lt; @lastEndDate
+                    then @lastEndDate := @lastEndDate
+                    else @lastEndDate := ai.estimated_end_time
+                end as last_end
+                from agile_issue ai,
+                (
+                    select
+                    @lastAssigneeId := 0,
+                    @lastStartDate := '1000-01-01 00:00:00',
+                    @lastEndDate := '1000-01-01 00:00:00'
+                ) sqlVars
+                where ai.project_id in
+                <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                    #{projectId}
+                </foreach>
+                and ai.assignee_id in
+                <foreach collection="assigneeIds" item="assigneeId" open="(" separator="," close=")">
+                    #{assigneeId}
+                </foreach>
+                and ai.type_code in ('story', 'bug', 'task', 'sub_task')
+                and ai.estimated_start_time is not null
+                and ai.estimated_end_time is not null
+                <if test="searchVO != null">
+                    <include refid="explainSearchVO"/>
+                    <include refid="filterSqlAndAssigneeIds"/>
+                    <if test='searchVO.searchArgs != null'>
+                        <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
+                            and ai.issue_num like CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+                        </if>
+                    </if>
+                    <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+                        <foreach collection="searchVO.contents" item="content" index="index">
+                            and (
+                            ai.issue_num like CONCAT(CONCAT('%', #{content}), '%')
+                            or ai.summary like CONCAT(CONCAT('%', #{content}), '%')
+                            )
+                        </foreach>
+                    </if>
+                </if>
+                order by ai.assignee_id asc, ai.estimated_start_time asc, ai.issue_id asc
+            )
+            union
+            (
+                select
+                ai.issue_id,
+                ai.assignee_id,
+                CONVERT(ai.issue_num,SIGNED) as issue_num_convert,
+                if(
+                    @lastAssigneeId = ai.assignee_id,
+                    @lastStartDate &gt;= ai.estimated_start_time and @lastStartDate &lt; ai.estimated_start_time,
+                    0
+                ) as overlap,
+                @lastAssigneeId := ai.assignee_id as last_assignee,
+                @lastStartDate := ai.estimated_start_time as last_start,
+                @lastEndDate := ai.estimated_end_time as last_end
+                from agile_issue ai,
+                (
+                select
+                    @lastAssigneeId := 0,
+                    @lastStartDate := '1000-01-01 00:00:00',
+                    @lastEndDate := '1000-01-01 00:00:00'
+                ) sqlVars
+                where ai.project_id in
+                <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                    #{projectId}
+                </foreach>
+                and ai.assignee_id in
+                <foreach collection="assigneeIds" item="assigneeId" open="(" separator="," close=")">
+                    #{assigneeId}
+                </foreach>
+                and ai.type_code in ('story', 'bug', 'task', 'sub_task')
+                and ai.estimated_start_time is not null
+                and ai.estimated_end_time is not null
+                <if test="searchVO != null">
+                    <include refid="explainSearchVO"/>
+                    <include refid="filterSqlAndAssigneeIds"/>
+                    <if test='searchVO.searchArgs != null'>
+                        <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
+                            and ai.issue_num like CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+                        </if>
+                    </if>
+                    <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+                        <foreach collection="searchVO.contents" item="content" index="index">
+                            and (
+                            ai.issue_num like CONCAT(CONCAT('%', #{content}), '%')
+                            or ai.summary like CONCAT(CONCAT('%', #{content}), '%')
+                            )
+                        </foreach>
+                    </if>
+                </if>
+                order by ai.assignee_id asc, ai.estimated_start_time desc, ai.issue_id desc
+            )
+        ) temp
+        where temp.overlap = 1
+    </select>
+
     <sql id="queryAssigneeIssue">
         <if test="workItemSearchVO.assigneeFilter.contains('assignee')">
             select
