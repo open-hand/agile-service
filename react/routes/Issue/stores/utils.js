@@ -42,6 +42,7 @@ function transformSystemFilter(data) {
     storyPoints,
     remainingTime,
     participantIds,
+    estimateTime,
   } = data;
   return {
     advancedSearchArgs: {
@@ -53,6 +54,7 @@ function transformSystemFilter(data) {
       remainingTimeNull,
       storyPoints,
       remainingTime,
+      estimateTime,
     },
     otherArgs: {
       userId,

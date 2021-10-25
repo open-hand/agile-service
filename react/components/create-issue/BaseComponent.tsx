@@ -653,7 +653,6 @@ const CreateIssueBase = observer(({
           disabled: issueTypeCode === 'sub_task',
         };
       }
-
       default: break;
     }
     switch (field.fieldType) {

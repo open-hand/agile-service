@@ -48,7 +48,7 @@ const projectSystemFields = [
   { code: 'component', title: '模块' },
   { code: 'sprint', title: '冲刺' },
   { code: 'epicName', title: '史诗名称' },
-  { code: 'remainingTime', title: '预估时间' },
+  { code: 'remainingTime', title: '剩余预估时间' },
   { code: 'storyPoints', title: '故事点' },
   { code: 'linkIssue', title: '关联工作项' },
   { code: 'issueStatus', title: '状态' },
@@ -62,6 +62,7 @@ const projectSystemFields = [
   { code: 'mainResponsible', title: '主要负责人' },
   { code: 'environment', title: '环境' },
   { code: 'participant', title: '参与人' },
+  { code: 'estimateTime', title: '预估时间' },
 ];
 
 const subProjectSystemFields = [
@@ -75,7 +76,7 @@ const subProjectSystemFields = [
   { code: 'assignee', title: '经办人' },
   { code: 'reporter', title: '报告人' },
   { code: 'priority', title: '优先级' },
-  { code: 'remainingTime', title: '预估时间' },
+  { code: 'remainingTime', title: '剩余预估时间' },
   { code: 'storyPoints', title: '故事点' },
   { code: 'linkIssue', title: '关联工作项' },
   { code: 'issueStatus', title: '状态' },
@@ -89,6 +90,7 @@ const subProjectSystemFields = [
   { code: 'mainResponsible', title: '主要负责人' },
   { code: 'environment', title: '环境' },
   { code: 'participant', title: '参与人' },
+  { code: 'estimateTime', title: '预估时间' },
 ];
 
 interface Props {

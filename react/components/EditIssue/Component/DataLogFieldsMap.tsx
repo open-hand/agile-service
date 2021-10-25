@@ -821,6 +821,49 @@ const fieldsMap = new Map([
   ['participant', {
     name: '参与人',
   }],
+  ['Estimate Time', {
+    name: '预估时间',
+    create: {
+      render: (log: ILog) => {
+        const { newString } = log;
+        return (
+          <span>
+            <span className="c7n-Log-operation">将</span>
+            <span className="c7n-Log-field">【预估时间】</span>
+            <span className="c7n-Log-operation">由</span>
+            <span className="c7n-Log-value">【未预估】</span>
+            <span className="c7n-Log-operation">改变为</span>
+            <span className="c7n-Log-value">{`【${Number(newString)}】`}</span>
+          </span>
+        );
+      },
+    },
+    update: {
+      transform: ({ oldString, newString }: { oldString?: string, newString?: string }) => {
+        if (oldString) {
+          return Number(oldString);
+        } if (newString) {
+          return Number(newString);
+        }
+        return '';
+      },
+    },
+    delete: {
+      render: (log: ILog) => {
+        const { oldString } = log;
+        return (
+          <span>
+            <span className="c7n-Log-operation">将</span>
+            <span className="c7n-Log-field">【预估时间】</span>
+            <span className="c7n-Log-operation">由</span>
+            <span className="c7n-Log-value">{`【${Number(oldString)}】`}</span>
+            <span className="c7n-Log-operation">改变为</span>
+            <span className="c7n-Log-value">【未预估】</span>
+          </span>
+        );
+      },
+    },
+  }],
 ]);
 
 export default fieldsMap;

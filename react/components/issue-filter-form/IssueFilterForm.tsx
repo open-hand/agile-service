@@ -9,7 +9,7 @@ import moment from 'moment';
 import {
   DataSet, Form, Button,
 } from 'choerodon-ui/pro';
-import { isEmpty } from 'lodash';
+import { isEmpty, isNumber } from 'lodash';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import IssueFilterFormDataSet from './IssueFilterFormDataSet';
 import './index.less';
@@ -90,7 +90,7 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
   const initField = useCallback((field: IChosenFieldField) => {
     let values = toJS(field.value);
     const dateIndex = ['time', 'datetime', 'date'].indexOf(field.fieldType ?? '');
-    if (!isEmpty(values)) {
+    if (!isEmpty(values) || isNumber(values)) {
       if (field.fieldType === 'member') {
         values = Array.isArray(values) ? values.map((item) => String(item)) : String(values);
       }

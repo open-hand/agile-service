@@ -49,6 +49,7 @@ const AgileComponentMapWithPro = {
   feature: SelectFeature,
   storyPoints: SelectNumber,
   remainingTime: SelectNumber,
+  estimateTime: SelectNumber,
   parentIssueId: SelectParentIssue,
   featureType: SelectFeatureType,
   subProject: SelectTeam,

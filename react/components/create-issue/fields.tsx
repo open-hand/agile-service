@@ -255,6 +255,12 @@ const systemFieldMap: Record<ISystemFieldCodeMap, ProRenderFieldPropsType> = {
       <SelectNumber {...props} />
     ),
   },
+  estimateTime: {
+    render: (text) => text,
+    renderFormItem: (props) => (
+      <SelectNumber {...props} />
+    ),
+  },
   environment: {
     render: (text) => text,
     renderFormItem: (props) => (
