@@ -235,7 +235,6 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
           moreLinkContent={({ shortText }) => shortText}
           height="100%"
           loading={setLoading}
-          moreLinkDidMount={(data) => console.log(data)}
         />
       </div>
     </Loading>
