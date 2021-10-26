@@ -1156,17 +1156,36 @@ public class GanttChartServiceImpl implements GanttChartService {
             return Collections.emptyMap();
         }
         Map<Long, IssueSprintDTO> map = new HashMap<>();
-        List<String> statusCodes = Arrays.asList("started", "sprint_planning");
         Map<Long, List<IssueSprintDTO>> issueSprintMap =
-                issueSprintRelMapper.selectIssueSprintByIds(projectIds, new HashSet<>(issueIds), statusCodes)
+                issueSprintRelMapper.selectIssueSprintByIds(projectIds, new HashSet<>(issueIds), null)
                         .stream()
                         .collect(Collectors.groupingBy(IssueSprintDTO::getIssueId));
+        String planning = "sprint_planning";
+        String closed = "closed";
+        String started = "started";
         issueIds.forEach(issueId -> {
             List<IssueSprintDTO> sprints = issueSprintMap.get(issueId);
             if (ObjectUtils.isEmpty(sprints)) {
                 return;
             }
-            map.put(issueId, sprints.get(0));
+            Map<String, List<IssueSprintDTO>> statusCodeSprintMap =
+                    sprints.stream().collect(Collectors.groupingBy(IssueSprintDTO::getStatusCode));
+            List<IssueSprintDTO> startedSprints = statusCodeSprintMap.get(started);
+            if (!ObjectUtils.isEmpty(startedSprints)) {
+                map.put(issueId, startedSprints.get(0));
+                return;
+            }
+            List<IssueSprintDTO> planningSprints = statusCodeSprintMap.get(planning);
+            if (!ObjectUtils.isEmpty(planningSprints)) {
+                planningSprints.sort(Comparator.comparing(IssueSprintDTO::getSprintId));
+                map.put(issueId, planningSprints.get(0));
+                return;
+            }
+            List<IssueSprintDTO> closedSprints = statusCodeSprintMap.get(closed);
+            if (!ObjectUtils.isEmpty(closedSprints)) {
+                closedSprints.sort(Comparator.comparing(IssueSprintDTO::getSprintId).reversed());
+                map.put(issueId, closedSprints.get(0));
+            }
         });
         return map;
     }
