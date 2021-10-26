@@ -388,10 +388,10 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
     const { influenceIssueIds } = res;
     // 更新自身 及影响的issue
     const updateIssueIds = [res.issueId, ...(influenceIssueIds || [])];
-    ganttApi.loadInfluenceIssues(type, updateIssueIds, searchFilter.displayFields).then((issues: any[]) => {
+    ganttApi.project(projectId).loadInfluenceIssues(type, updateIssueIds, searchFilter.displayFields).then((issues: any[]) => {
       updateIssues(issues);
     });
-  }, [searchFilter.displayFields, type, updateIssues]);
+  }, [projectId, searchFilter.displayFields, type, updateIssues]);
 
   const handleTransformType = usePersistFn((newIssue: Issue, oldIssue: Issue) => {
     const parentTypes = ['story', 'task'];
@@ -454,11 +454,11 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
     const moveConfig = dataOrigin === 'rankList' ? {
       data: rankList || [],
       setData: setRankList,
-      request: () => ganttApi.moveTopDimension(requestData, searchFilter),
+      request: () => ganttApi.project(projectId).moveTopDimension(requestData, searchFilter),
     } : {
       data,
       setData,
-      request: () => ganttApi.move(requestData, searchFilter),
+      request: () => ganttApi.project(projectId).move(requestData, searchFilter),
     };
     async function request(success: boolean) {
       success && await moveConfig.request();
@@ -474,7 +474,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
     moveFn({
       sourceBar, destinationBar, type, data: moveConfig.data,
     });
-  }, [data, rankList, searchFilter, store.ganttRef, type]);
+  }, [data, projectId, rankList, searchFilter, store.ganttRef, type]);
   useEffect(() => () => {
     store.setSprintIds(null);
   }, [projectId, store]);

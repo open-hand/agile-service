@@ -98,7 +98,7 @@ class GanttApi extends Api<GanttApi> {
   }
 
   loadInfluenceIssues(dimension: string, issueIds: string[], displayFields: { code: string, projectId?: string }[]) {
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/gantt/list_by_ids`,
       params: { dimension },
@@ -115,7 +115,7 @@ class GanttApi extends Api<GanttApi> {
   }
 
   move(dragData: IGanttMoveRequestData, searchVO: any) {
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/gantt/move`,
       data: { ...dragData, searchVO },
@@ -123,7 +123,7 @@ class GanttApi extends Api<GanttApi> {
   }
 
   moveTopDimension(dragData: Omit<IGanttMoveRequestData, 'instanceId' | 'instanceType'>, searchVO: any) {
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/gantt/move_dimension`,
       data: { ...dragData, searchVO },
