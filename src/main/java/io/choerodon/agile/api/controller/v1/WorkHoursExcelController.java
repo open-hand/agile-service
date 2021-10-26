@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 
 /**
@@ -24,7 +25,7 @@ public class WorkHoursExcelController {
     private WorkHoursExcelService workHoursExcelService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("导出工时日历")
+    @ApiOperation("导出工时日志")
     @PostMapping(value = "/export_work_hours_log")
     public void download(@ApiParam(value = "项目id", required = true)
                          @PathVariable(name = "project_id") Long projectId,
@@ -33,4 +34,17 @@ public class WorkHoursExcelController {
                          @RequestBody WorkHoursSearchVO workHoursSearchVO) {
         workHoursExcelService.exportWorkHoursLogOnProjectLevel(organizationId, Arrays.asList(projectId), workHoursSearchVO, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes());
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("导出工时日历")
+    @PostMapping(value = "/export_work_hours_calendar")
+    public void exportWorkHoursCalendar(@ApiParam(value = "项目id", required = true)
+                         @PathVariable(name = "project_id") Long projectId,
+                         @ApiParam(value = "组织id", required = true)
+                         @RequestParam Long organizationId,
+                         @RequestBody WorkHoursSearchVO workHoursSearchVO) {
+        workHoursExcelService.exportWorkHoursCalendarOnProjectLevel(organizationId, projectId, workHoursSearchVO, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes(), false);
+    }
+
+
 }

@@ -2,6 +2,7 @@ package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.api.vo.WorkHoursLogVO;
 import io.choerodon.agile.api.vo.WorkHoursSearchVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -14,4 +15,5 @@ public interface WorkHoursMapper {
 
     List<WorkHoursLogVO> listByProjectIds(@Param("projectIds") List<Long> projectIds, @Param("workHoursSearchVO") WorkHoursSearchVO workHoursSearchVO);
 
+    List<IssueVO> queryIssue(@Param("projectId") Long projectId, @Param("params") String params);
 }
