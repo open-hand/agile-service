@@ -131,6 +131,16 @@ public class GanttChartVO {
 
     private Set<Long> subProjectIds;
 
+    private BigDecimal workTimePercentage;
+
+    public BigDecimal getWorkTimePercentage() {
+        return workTimePercentage;
+    }
+
+    public void setWorkTimePercentage(BigDecimal workTimePercentage) {
+        this.workTimePercentage = workTimePercentage;
+    }
+
     public Set<Long> getSubProjectIds() {
         return subProjectIds;
     }

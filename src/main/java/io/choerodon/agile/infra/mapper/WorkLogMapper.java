@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/18.
@@ -31,4 +32,7 @@ public interface WorkLogMapper extends BaseMapper<WorkLogDTO> {
     void updateProject(@Param("projectId") Long projectId, @Param("issueId") Long issueId, @Param("targetProjectId") Long targetProjectId);
 
     List<WorkLogVO> queryByIssueIds(@Param("projectIds") List<Long> projectIds, @Param("issueIds") List<Long> issueIds);
+
+    List<WorkLogVO> selectTotalWorkTimeByIssueId(@Param("projectIds") Set<Long> projectIds,
+                                                 @Param("issueIds") List<Long> issueIds);
 }
