@@ -193,4 +193,12 @@
             AND t1.project_id = #{projectId}
         </if>
     </delete>
+
+    <delete id="deleteByCascadeRuleIds">
+        delete from fd_field_cascade_rule
+        where id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
 </mapper>

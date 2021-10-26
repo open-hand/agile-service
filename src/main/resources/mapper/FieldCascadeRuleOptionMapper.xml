@@ -149,4 +149,24 @@
         </if>
         ORDER BY version_id DESC
     </select>
+
+    <select id="selectFieldCascadeRuleByFieldIdAndOptionId" resultType="java.lang.Long">
+        select ffcr.id from fd_field_cascade_rule ffcr
+        left join fd_field_cascade_rule_option ffcro on ffcr.id = ffcro.field_cascade_rule_id
+        where
+           ffcr.organization_id = #{organizationId}
+           and (
+              (ffcr.field_id = #{fieldId} and ffcr.field_option_id = #{optionId})
+              or
+              (ffcr.cascade_field_id = #{fieldId} and ffcro.cascade_option_id = #{optionId})
+           )
+    </select>
+
+    <delete id="deleteByCascadeRuleIds">
+        delete from fd_field_cascade_rule_option
+        where field_cascade_rule_id in
+        <foreach collection="cascadeRuleIds" item="cascadeRuleId" separator="," open="(" close=")">
+            #{cascadeRuleId}
+        </foreach>
+    </delete>
 </mapper>

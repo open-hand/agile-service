@@ -1,5 +1,8 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.infra.mapper.FieldCascadeRuleMapper;
+import io.choerodon.agile.infra.mapper.FieldCascadeRuleOptionMapper;
+import io.choerodon.agile.infra.mapper.ObjectSchemeFieldExtendMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.api.vo.FieldOptionUpdateVO;
@@ -46,6 +49,12 @@ public class FieldOptionServiceImpl implements FieldOptionService {
     private FieldValueService fieldValueService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
+    @Autowired
+    private FieldCascadeRuleOptionMapper fieldCascadeRuleOptionMapper;
+    @Autowired
+    private FieldCascadeRuleMapper fieldCascadeRuleMapper;
 
     @Override
     public FieldOptionDTO baseCreate(FieldOptionDTO option) {
@@ -231,7 +240,19 @@ public class FieldOptionServiceImpl implements FieldOptionService {
             throw new CommonException(ERROR_OPTION_NOTFOUND);
         }
         updateSequence(null, fieldOption, fieldId, organizationId);
+        // 删除选项是不是默认值，以及清除级联规则
+        handleDefaultValueAndCascadeRule(fieldId, optionId, organizationId);
         baseDelete(optionId);
+    }
+
+    private void handleDefaultValueAndCascadeRule(Long fieldId, Long optionId, Long organizationId) {
+        objectSchemeFieldExtendMapper.updateDefaultValueDeleteOption(fieldId, optionId, organizationId);
+        // 删除级联配置
+        List<Long> cascadeRuleIds = fieldCascadeRuleOptionMapper.selectFieldCascadeRuleByFieldIdAndOptionId(organizationId, fieldId, optionId);
+        if (CollectionUtils.isNotEmpty(cascadeRuleIds)) {
+            fieldCascadeRuleMapper.deleteByCascadeRuleIds(cascadeRuleIds);
+            fieldCascadeRuleOptionMapper.deleteByCascadeRuleIds(cascadeRuleIds);
+        }
     }
 
     private void updateSequence(FieldOptionUpdateVO fieldOption, FieldOptionDTO oldFieldOption, Long fieldId, Long organizationId) {

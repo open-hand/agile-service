@@ -469,4 +469,12 @@
         )
         GROUP BY issue_type_id, project_id
     </select>
+
+    <update id="updateDefaultValueDeleteOption">
+        update fd_object_scheme_field_extend
+        set default_value = null
+        where field_id = #{fieldId}
+        and default_value = #{optionId}
+        and organization_id = #{organizationId}
+    </update>
 </mapper>

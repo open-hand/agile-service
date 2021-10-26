@@ -77,4 +77,6 @@ public interface FieldCascadeRuleMapper extends BaseMapper<FieldCascadeRuleDTO> 
      * @param fieldId        字段id
      */
     void deleteByFieldId(@Param("organizationId") Long organizationId, @Param("projectId") Long projectId, @Param("fieldId") Long fieldId);
+
+    void deleteByCascadeRuleIds(@Param("ids") List<Long> ids);
 }

@@ -188,4 +188,6 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
      * @return 各个问题类型的最小rank
      */
     List<ObjectSchemeFieldExtendDTO> selectIssueTypeMinRank(@Param("organizationId") Long organizationId, @Param("projectId") Long projectId);
+
+    void updateDefaultValueDeleteOption(@Param("fieldId") Long fieldId, @Param("optionId") Long optionId, @Param("organizationId") Long organizationId);
 }
