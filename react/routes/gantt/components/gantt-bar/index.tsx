@@ -6,7 +6,9 @@ import {
 } from 'mobx-react-lite';
 import dayjs, { Dayjs } from 'dayjs';
 import { Tooltip } from 'choerodon-ui/pro';
-import { GanttProps, Gantt } from '@choerodon/gantt';
+import type { GanttProps, Gantt } from '@choerodon/gantt';
+import { GanntMoveWrap } from '@choerodon/gantt';
+
 import { find, set } from 'lodash';
 import { TooltipProps } from 'choerodon-ui/pro/lib/tooltip/Tooltip';
 import { useThrottleFn } from 'ahooks';
@@ -68,7 +70,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
   const actualTime = useComputed(() => {
     let fragmentWidth = actualEndTime.width - actualStartTime.width;
     let left = actualStartTime.width;
-    if (actualEndTime.width === 0 && actualStartTime.value) {
+    if ((!actualEndTime || actualEndTime.width === 0) && actualStartTime.value) {
       fragmentWidth = estimatedEndTime.value ? estimatedEndTime.width - actualStartTime.width + (estimatedEndTime as Gantt.DateWithWidth).unitWidth : 0;
       left = fragmentWidth ? (actualStartTime as Gantt.DateWithWidth).dragLeft : 0;
     } else if (actualStartTime.width > 0) {
@@ -170,27 +172,31 @@ const GanttBar: React.FC<GanttBarProps> = ({
           overflow: 'hidden',
         }}
       >
-        <div
-          ref={estimateRef}
-          id="ganttBar"
-          style={{
-            marginLeft: estimateTime.left,
-            width: estimateTime.width - 1,
-            display: estimateTime.width - 1 <= 0 ? 'none' : undefined,
-            height,
-            borderColor: color1,
-          }}
-          className={styles.estimate}
-        />
-        <div
-          className={styles.actual}
-          // onMouseEnter={handleTooltipMouseEnter}
-          // onMouseLeave={handleTooltipMouseLeave}
-          style={{ width: actualTimeWidth, marginLeft: actualTime.left, backgroundColor: color2 }}
-        >
-          <div style={{ flex: totalCount > 0 ? completeCount : 1, backgroundColor: color1 }} />
-          <div style={{ flex: totalCount > 0 ? totalCount - completeCount : 0 }} />
-        </div>
+        <GanntMoveWrap data={bar} startDate={estimatedStartTime} endDate={estimatedEndTime}>
+          <div
+            ref={estimateRef}
+            id="ganttBar"
+            style={{
+              marginLeft: estimateTime.left,
+              width: estimateTime.width - 1,
+              display: estimateTime.width - 1 <= 0 ? 'none' : undefined,
+              height,
+              borderColor: color1,
+            }}
+            className={styles.estimate}
+          />
+        </GanntMoveWrap>
+        <GanntMoveWrap data={bar} startDate={actualStartTime} endDate={actualEndTime}>
+          <div
+            className={styles.actual}
+            // onMouseEnter={handleTooltipMouseEnter}
+            // onMouseLeave={handleTooltipMouseLeave}
+            style={{ width: actualTimeWidth, marginLeft: actualTime.left, backgroundColor: color2 }}
+          >
+            <div style={{ flex: totalCount > 0 ? completeCount : 1, backgroundColor: color1 }} />
+            <div style={{ flex: totalCount > 0 ? totalCount - completeCount : 0 }} />
+          </div>
+        </GanntMoveWrap>
       </div>
       {delayVisible && (
         <div
