@@ -101,6 +101,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         FIELD_CODE.put(FieldCode.DESCRIPTION, "description");
         FIELD_CODE.put(FieldCode.STORY_POINTS, "storyPoints");
         FIELD_CODE.put(FieldCode.REMAINING_TIME, "remainingTime");
+        FIELD_CODE.put(FieldCode.ESTIMATE_TIME, "estimateTime");
         FIELD_CODE.put(FieldCode.PRIORITY, "priorityId");
         FIELD_CODE.put(FieldCode.EPIC, "epicId");
         FIELD_CODE.put(FieldCode.CREATION_DATE, "creationDate");
