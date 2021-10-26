@@ -36,6 +36,22 @@
         </foreach>
     </select>
 
+    <select id="selectTotalWorkTimeByIssueId" resultType="io.choerodon.agile.api.vo.WorkLogVO">
+        SELECT
+        issue_id,
+        sum(ifnull(work_time, 0)) as work_time
+        FROM agile_work_log
+        WHERE project_id IN
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        AND issue_id IN
+        <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
+            #{issueId}
+        </foreach>
+        group by issue_id
+    </select>
+
     <update id="updateProject">
         update agile_work_log set project_id = #{targetProjectId}
         where project_id = #{projectId}
