@@ -128,7 +128,8 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
         assigneeId,
       }, fieldsMap);
 
-      const res = issue.relateIssueId || issue.relateIssueId ? await issueApi.project(projectId).createSubtask(issue) : await issueApi.project(projectId).create(issue);
+      const res = currentType.typeCode === 'sub_task'
+        || issue.parentIssueId || issue.relateIssueId || issue.relateIssueId ? await issueApi.project(projectId).createSubtask(issue) : await issueApi.project(projectId).create(issue);
       await fieldApi.project(projectId).quickCreateDefault(res.issueId, {
         schemeCode: 'agile_issue',
         issueTypeId: currentType.id,
@@ -151,7 +152,6 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   });
   useEffect(() => {
     if (expand && id) {
-      console.log('projectId', projectId);
       fieldApi.project(projectId).getSummaryDefaultValue(id).then((res) => {
         if (summary === currentTemplate.current) {
           currentTemplate.current = res as string;

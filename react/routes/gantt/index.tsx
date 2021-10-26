@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
-import { Select } from 'choerodon-ui/pro/lib';
 import { EmptyPage, FlatSelect } from '@choerodon/components';
 import TableCache from '@/components/table-cache';
 import useIsInProgram from '@/hooks/useIsInProgram';
