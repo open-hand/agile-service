@@ -255,6 +255,7 @@ const groupByUser = (data: any[], rankList: string[]) => {
       summary: user?.name,
       group: true,
       assigneeId: String(assigneeId),
+      uniqueKey: `assignee**${assigneeId}`,
       assignee: user,
       disabledCreate: assigneeId === '0',
       disabledDrag: assigneeId === '0',
@@ -289,6 +290,7 @@ const groupBySprint = (data: any[], rankList: string[]) => {
     return ({
       summary: sprint?.sprintName,
       group: true,
+      uniqueKey: `sprint**${sprintId}`,
       disabledCreate: !!disabledDrag,
       disabledDrag: !!disabledDrag,
       sprint,
@@ -331,6 +333,7 @@ const groupByFeature = (epicChildrenData: any, data: any) => {
   return sortBy([...map.entries()], ([_, { rankIndex }]) => rankIndex).map(([featureId, { feature, disabledDrag, children }]) => ({
     ...feature,
     group: featureId === '0',
+    uniqueKey: `feature**${featureId}`,
     onlyShow: true,
     disabledCreate: !!disabledDrag,
     disabledDrag: !!disabledDrag,
@@ -372,6 +375,7 @@ const groupByEpic = (data: any, isInProgram: boolean) => {
     return ({
       ...epic,
       group: epicIssueId === '0',
+      uniqueKey: `epic**${epicIssueId}`,
       disabledCreate: !!disabledDrag,
       disabledDrag: !!disabledDrag,
       onlyShow: isInProgram,

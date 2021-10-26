@@ -27,6 +27,7 @@ export function list2tree<T extends { [key: string]: any }>(list: T[],
   });
   return [...map.values()].map((item) => ({
     ...item,
+    uniqueKey: item[valueField],
     children: childrenMap.get(item[valueField]),
   }));
 }
