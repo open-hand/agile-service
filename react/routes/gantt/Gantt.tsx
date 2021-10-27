@@ -91,6 +91,7 @@ const typeOptions = [{
   value: 'epic',
   label: '按史诗查看',
 }] as const;
+const progressOptions = [{ value: 'task', label: '工作项个数' }, { value: 'workTime', label: '工时计数' }];
 const typeValues = typeOptions.map((t) => t.value);
 export type IGanttDimensionTypeValue = (typeof typeValues)[number];
 
@@ -100,6 +101,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   } = props;
   const [conflictAssignees, setConflictAssignees] = useState<Array<IGanttConflictAssignee>>([]);
   const [data, setData] = useState<any[]>([]);
+  const [processType, setProcessType] = useState<'task' | 'workTime'>('task');
   const [type, setType] = useState<IGanttDimensionTypeValue>(localPageCacheStore.getItem('gantt.search.type') ?? typeValues[0]);
   const [rankList, setRankList] = useState<string[] | undefined>(undefined);
   const [workCalendar, setWorkCalendar] = useState<any>();
@@ -264,6 +266,16 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
     sprintSetting: projectWorkCalendar,
     orgWorkCalendar: workCalendar,
   }, moment(date)), [projectWorkCalendar, workCalendar]);
+  const isShowBar: GanttProps['isShowBar'] = useCallback((({ record }, barType): boolean => {
+    if (barType === 'task') {
+      //  无的成对的时间区间则不展示bar
+      return (record.actualStartTime && record.actualEndTime) || (record.estimatedStartTime && record.estimatedEndTime);
+    }
+    if (barType === 'create') {
+      return !(record.actualStartTime || record.actualEndTime || record.estimatedStartTime || record.estimatedEndTime);
+    }
+    return true;
+  }), []);
   const handleClickFilterManage = () => {
     setFilterManageVisible(true);
   };
@@ -529,6 +541,13 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
             </Option>
           ))}
         </FlatSelect>
+        <FlatSelect value={processType} onChange={setProcessType} clearButton={false} style={{ marginRight: 8 }}>
+          {progressOptions.map((o) => (
+            <Option value={o.value}>
+              {o.label}
+            </Option>
+          ))}
+        </FlatSelect>
         <HeaderButtons
           showClassName={false}
           items={menuType === 'project' ? [
@@ -657,6 +676,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
                   startDateKey="estimatedStartTime"
                   endDateKey="estimatedEndTime"
                   isRestDay={isRestDay}
+                  isShowBar={isShowBar}
                   showBackToday={false}
                   showUnitSwitch={false}
                   unit={unit}
