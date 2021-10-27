@@ -7,6 +7,7 @@ import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -79,4 +80,22 @@ public interface WorkHoursService {
      * @return
      */
     Page<IssueVO> queryIssue(Long projectId, PageRequest pageRequest, String params);
+
+    /**
+     * 项目层查询工时统计
+     * @param organizationId
+     * @param projectIds
+     * @param workHoursSearchVO
+     * @return
+     */
+    Map<String, BigDecimal> countWorkHours(Long organizationId, List<Long> projectIds, WorkHoursSearchVO workHoursSearchVO);
+
+
+    /**
+     * 项目层查询工时统计
+     * @param organizationId
+     * @param workHoursSearchVO
+     * @return
+     */
+    Map<String, BigDecimal> countWorkHoursOnOrganizationLevel(Long organizationId, WorkHoursSearchVO workHoursSearchVO);
 }

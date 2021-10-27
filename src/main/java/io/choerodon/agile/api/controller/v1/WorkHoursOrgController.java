@@ -19,6 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -69,5 +71,16 @@ public class WorkHoursOrgController {
         return Optional.ofNullable(workHoursService.workHoursCalendarOrgInfoByUserId(organizationId, userId, workHoursSearchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.work.hours.calendar.info.get"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("统计每天的工时总数")
+    @PostMapping(value = "/count_work_hours")
+    public ResponseEntity<Map<String, BigDecimal>> countWorkHours(@ApiParam(value = "组织id", required = true)
+                                                                  @PathVariable(name = "organization_id") Long organizationId,
+                                                                  @RequestBody WorkHoursSearchVO workHoursSearchVO) {
+        return Optional.ofNullable(workHoursService.countWorkHoursOnOrganizationLevel(organizationId,  workHoursSearchVO))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.count.work.hours"));
     }
 }

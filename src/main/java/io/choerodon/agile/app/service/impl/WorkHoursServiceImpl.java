@@ -241,6 +241,32 @@ public class WorkHoursServiceImpl implements WorkHoursService {
         return PageUtil.buildPageInfoWithPageInfoList(page, content);
     }
 
+    @Override
+    public Map<String, BigDecimal> countWorkHours(Long organizationId, List<Long> projectIds, WorkHoursSearchVO workHoursSearchVO) {
+        checkTimeRange(workHoursSearchVO);
+        List<WorkHoursLogVO> workHoursLogVOS = workHoursMapper.listByProjectIds(projectIds, workHoursSearchVO);
+        if (CollectionUtils.isEmpty(workHoursLogVOS)) {
+            return new HashMap<>();
+        }
+        DateFormat df = new SimpleDateFormat(BaseConstants.Pattern.DATE);
+        Map<String, List<WorkHoursLogVO>> map = workHoursLogVOS.stream().collect(Collectors.groupingBy(v -> df.format(v.getStartDate())));
+        Map<String, BigDecimal> countMap = new HashMap<>();
+        for (Map.Entry<String, List<WorkHoursLogVO>> entry : map.entrySet()) {
+            String key = entry.getKey();
+            List<WorkHoursLogVO> value = entry.getValue();
+            countMap.put(key, value.stream().map(WorkHoursLogVO::getWorkTime).reduce(BigDecimal.ZERO, BigDecimal::add));
+        }
+        return countMap;
+    }
+
+    @Override
+    public Map<String, BigDecimal> countWorkHoursOnOrganizationLevel(Long organizationId, WorkHoursSearchVO workHoursSearchVO) {
+        List<Long> projectIds = new ArrayList<>();
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        handlerProject(organizationId, projectIds, userId, workHoursSearchVO);
+        return countWorkHours(organizationId, projectIds, workHoursSearchVO);
+    }
+
     private void handlerProject(Long organizationId, List<Long> projectIds, Long userId, WorkHoursSearchVO workHoursSearchVO){
         if (CollectionUtils.isEmpty(workHoursSearchVO.getProjectIds())) {
             // 查询有权限的项目
