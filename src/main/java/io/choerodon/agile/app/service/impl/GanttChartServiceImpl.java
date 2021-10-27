@@ -1,5 +1,8 @@
 package io.choerodon.agile.app.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.TagVO;
 import io.choerodon.agile.app.assembler.BoardAssembler;
@@ -16,6 +19,7 @@ import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.core.utils.PageUtils;
 import io.choerodon.core.utils.PageableHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -29,6 +33,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
@@ -110,6 +115,8 @@ public class GanttChartServiceImpl implements GanttChartService {
     private PriorityService priorityService;
     @Autowired
     private WorkLogMapper workLogMapper;
+    @Autowired
+    private IssuePersonalSortMapper issuePersonalSortMapper;
 
     @Override
     public Page<GanttChartVO> pagedQuery(Long projectId,
@@ -927,6 +934,79 @@ public class GanttChartServiceImpl implements GanttChartService {
         return result;
     }
 
+    @Override
+    public void saveSort(Long projectId, List<IssuePersonalSortVO> issuePersonalSorts) {
+        if (issuePersonalSorts == null) {
+            issuePersonalSorts = new ArrayList<>();
+        }
+        validateIssuePersonalSorts(issuePersonalSorts);
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        IssuePersonalSortDTO personalSort = new IssuePersonalSortDTO();
+        personalSort.setProjectId(projectId);
+        personalSort.setOrganizationId(organizationId);
+        personalSort.setUserId(userId);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String sortJson;
+        try {
+            sortJson = objectMapper.writeValueAsString(issuePersonalSorts);
+        } catch (JsonProcessingException e) {
+            throw new CommonException("error.gantt.sortJson.serialization", e);
+        }
+        List<IssuePersonalSortDTO> personalSortList = issuePersonalSortMapper.select(personalSort);
+        if (personalSortList.isEmpty()) {
+            personalSort.setSortJson(sortJson);
+            if (issuePersonalSortMapper.insert(personalSort) != 1) {
+                throw new CommonException("error.gantt.sort.save");
+            }
+        } else {
+            IssuePersonalSortDTO existedOne = personalSortList.get(0);
+            existedOne.setSortJson(sortJson);
+            if (issuePersonalSortMapper.updateByPrimaryKey(existedOne) != 1) {
+                throw new CommonException("error.gantt.sort.save");
+            }
+        }
+    }
+
+    private void validateIssuePersonalSorts(List<IssuePersonalSortVO> issuePersonalSorts) {
+        if (!ObjectUtils.isEmpty(issuePersonalSorts)) {
+            issuePersonalSorts.forEach(sort -> {
+                String property = sort.getProperty();
+                String direction = sort.getDirection();
+                AssertUtilsForCommonException.notEmpty(property, "error.gantt.sort.property.empty");
+                AssertUtilsForCommonException.notEmpty(direction, "error.gantt.sort.direction.empty");
+                List<String> directions = Arrays.asList("asc", "desc");
+                if (!directions.contains(direction.toLowerCase())) {
+                    throw new CommonException("error.illegal.gantt.sort.direction");
+                }
+            });
+        }
+    }
+
+    @Override
+    public List<IssuePersonalSortVO> listLatestSort(Long projectId) {
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        IssuePersonalSortDTO personalSort = new IssuePersonalSortDTO();
+        personalSort.setProjectId(projectId);
+        personalSort.setOrganizationId(organizationId);
+        personalSort.setUserId(userId);
+        List<IssuePersonalSortDTO> personalSortList = issuePersonalSortMapper.select(personalSort);
+        if (personalSortList.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            IssuePersonalSortDTO sort = personalSortList.get(0);
+            String json = sort.getSortJson();
+            ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                return objectMapper.readValue(json, new TypeReference<List<IssuePersonalSortVO>>() {
+                });
+            } catch (IOException e) {
+                throw new CommonException("error.gantt.sortJson.deserialization", e);
+            }
+        }
+    }
+
     private Map<Long, BigDecimal> queryWorkTimeByIssueIds(Set<Long> projectIds,
                                                           List<Long> issueIds) {
         if (ObjectUtils.isEmpty(projectIds) || ObjectUtils.isEmpty(issueIds)) {
@@ -942,7 +1022,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                                   Map<Long, Set<Long>> parentSonMap,
                                   Map<Long, BigDecimal> workTimeMap,
                                   Map<Long, BigDecimal> remainingTimeMap) {
-        BigDecimal zero = new BigDecimal(0);
+        BigDecimal zero = BigDecimal.valueOf(0L, 4);
         Map<Long, GanttChartVO> ganttMap = new HashMap<>();
         result.forEach(gantt -> {
             Long issueId = gantt.getIssueId();
@@ -964,8 +1044,8 @@ public class GanttChartServiceImpl implements GanttChartService {
             }
             BigDecimal total = remainingTime.add(workTime);
             BigDecimal percentage = zero;
-            if (!zero.equals(total)) {
-                percentage = workTime.divide(total).setScale(4, BigDecimal.ROUND_HALF_UP);
+            if (zero.compareTo(total) != 0) {
+                percentage = workTime.divide(total, 4, BigDecimal.ROUND_HALF_UP);
             }
             gantt.setWorkTimePercentage(percentage);
         });

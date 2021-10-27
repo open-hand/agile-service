@@ -737,7 +737,10 @@
                 text_value,
                 number_value
                 FROM fd_field_value ffv
-                JOIN agile_issue ai ON ai.issue_id = ffv.instance_id AND ai.project_id = #{projectId}
+                JOIN agile_issue ai ON ai.issue_id = ffv.instance_id AND ai.project_id in
+                <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                    #{projectId}
+                </foreach>
                 WHERE ffv.field_id = #{sortMap.sortFieldId}
                 AND ffv.project_id in
                 <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
@@ -841,7 +844,10 @@
             text_value,
             number_value
             FROM fd_field_value ffv
-            JOIN agile_issue ai ON ai.issue_id = ffv.instance_id AND ai.project_id = #{projectId}
+            JOIN agile_issue ai ON ai.issue_id = ffv.instance_id AND ai.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
             WHERE ffv.field_id = #{sortMap.sortFieldId}
             AND ffv.project_id in
             <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
