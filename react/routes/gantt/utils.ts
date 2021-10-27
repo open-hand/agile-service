@@ -4,7 +4,7 @@ import { produce } from 'immer';
 import {
   findIndex, noop, omit, pick, sortBy,
 } from 'lodash';
-import { IGanttMoveRequestData, IGanttMoveRequestDataPreviousWithNext } from '@/api';
+import { IGanttConflictAssignee, IGanttMoveRequestData, IGanttMoveRequestDataPreviousWithNext } from '@/api';
 import type { IGanttDimensionTypeValue } from './Gantt';
 import { Issue, User } from '@/common/types';
 import { list2tree } from '@/utils/tree';
@@ -230,8 +230,9 @@ export const ganttNormalizeIssue = (issue: Issue, source: any = {}) => Object.as
 });
 
 const groupByTask = (data: any[]) => ganttList2Tree(data);
-const groupByUser = (data: any[], rankList: string[]) => {
+const groupByUser = (data: any[], rankList: string[], conflictAssignees: IGanttConflictAssignee[]) => {
   const collectIdSet = new Set<string>();
+  const conflictMap = new Map<string, boolean>(conflictAssignees.map((item) => [item.userId, item.conflicted]));
   const map = new Map<string, { user?: User, rank: number, children: any[] }>(rankList.map((item, index) => [item, { rank: index, children: [] }]));
   const noAssigneeData: any[] = [];
   data.forEach((issue) => {
@@ -257,6 +258,7 @@ const groupByUser = (data: any[], rankList: string[]) => {
       assigneeId: String(assigneeId),
       uniqueKey: `assignee**${assigneeId}`,
       assignee: user,
+      timeConflict: conflictMap.get(assigneeId),
       disabledCreate: assigneeId === '0',
       disabledDrag: assigneeId === '0',
       groupType: 'assignee',
@@ -389,14 +391,17 @@ const groupByEpic = (data: any, isInProgram: boolean) => {
 };
 
 export const ganttDataGroupByType = ({
-  data, type, rankList, isInProgram,
-}: { data: any[], rankList?: string[], type: IGanttDimensionTypeValue, isInProgram: boolean }) => {
+  data, type, rankList, isInProgram, conflictAssignees,
+}: {
+  data: any[], rankList?: string[], type: IGanttDimensionTypeValue, isInProgram: boolean,
+  conflictAssignees: IGanttConflictAssignee[]
+}) => {
   switch (type) {
     case 'assignee': {
       if (!rankList) {
         return [];
       }
-      return groupByUser(data, rankList);
+      return groupByUser(data, rankList, conflictAssignees);
     }
     case 'epic': {
       const formattedData = formatData(data);

@@ -22,7 +22,7 @@ interface IIssueTableBaseColumn<D extends object = any> {
   fixed?: boolean
   /** 能否排序 */
   sortable?: boolean
-  render?: (data: D, getDataMethod?: IIssueTableBaseColumnRenderGetData<D>) => React.ReactElement
+  render?: (data: D, getDataMethod?: IIssueTableBaseColumnRenderGetData<D>, ...args: any) => React.ReactElement
 }
 /**
  * 获取自定义列配置
@@ -116,11 +116,11 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     width: 400,
     fixed: true,
     sortable: true,
-    render: (rowData, getDataMethod = get) => (
+    render: (rowData, getDataMethod = get, summaryProps?: any) => (
       <>
         <TypeTag data={getDataMethod(rowData, 'issueTypeVO')} style={{ marginRight: 5, marginTop: -2 }} />
         <Tooltip mouseEnterDelay={0.5} placement="topLeft" title={`工作项概要： ${getDataMethod(rowData, 'summary')}`}>
-          <span role="none" className="c7n-agile-table-cell-click">
+          <span role="none" className="c7n-agile-table-cell-click" {...summaryProps}>
             {getDataMethod(rowData, 'summary')}
           </span>
         </Tooltip>
@@ -368,6 +368,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     render: (rowData, getDataMethod = get) => getDataMethod(rowData, 'participants') && <UserTag data={getDataMethod(rowData, 'participants')} />,
   }],
 ]);
+
 const BaseSystemColumnRender = {
   renderTag,
   renderEpicOrFeature,

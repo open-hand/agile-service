@@ -1,12 +1,13 @@
 import to from '@/utils/to';
 
 interface IRouterToList {
-  issueLinkTo: (issueId: string, issueName: string | null, otherParams?: any) => void,
+  issueLinkTo:(issueId: string, issueName: string | null, otherParams?: any, projectId?: string) => void,
 }
 
-function issueLinkTo(issueId: string, issueName: string | null = null, otherParams: any = {}) {
+function issueLinkTo(issueId: string, issueName: string | null = null, otherParams: any = {}, projectId?: string) {
   to(LINK_URL.workListIssue, {
     type: 'project',
+    id: projectId as any,
     params: {
       paramIssueId: issueId,
       paramName: issueName,

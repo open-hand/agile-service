@@ -27,6 +27,7 @@ import type { GanttIssue } from '../types';
 import UserTag from '@/components/tag/user-tag';
 import { IGanttPageProps } from '../Gantt';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
+import openGanttConflictModal from '../components/gannt-conflict-modal';
 
 interface IGanttColumnsHookProps extends TableCacheRenderProps {
   menuType: IGanttPageProps['menuType']
@@ -244,7 +245,18 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
     ) : (
       <Tooltip title={record.summary}>
         <span style={{ color: 'var(--table-click-color)' }} className="c7n-gantt-content-body-summary">
-          <span style={{ verticalAlign: 'middle', flex: 1 }} className="c7n-gantt-content-body-summary-text">{record.summary}</span>
+          <span style={{ verticalAlign: 'middle', flex: 1 }} className="c7n-gantt-content-body-summary-text">
+            {record.timeConflict && (
+              <Icon
+                type="info"
+                className="c7n-gantt-content-body-summary-conflict"
+                onClick={() => {
+                  openGanttConflictModal({ assigneeId: record.assigneeId, assigneeName: record.assignee?.realName });
+                }}
+              />
+            )}
+            {record.summary}
+          </span>
           {isCanCreateIssue && (
             <Icon
               type="add"

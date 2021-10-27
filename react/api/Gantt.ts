@@ -11,6 +11,10 @@ export type IGanttMoveRequestDataPreviousWithNext = {
   previousId: string
   nextId?: string
 }
+export interface IGanttConflictAssignee {
+  userId: string
+  conflicted: boolean
+}
 export type IGanttMoveRequestData = {
   dimension: IGanttDimension
   currentId: string
@@ -129,8 +133,43 @@ class GanttApi extends Api<GanttApi> {
       data: { ...dragData, searchVO },
     });
   }
+
+  /**
+   *  组织层甘特图 经办人视图查询时间冲突的经办人
+   * @param searchVO
+   * @returns
+   */
+  loadTimeConflict(searchVO: any): Promise<IGanttConflictAssignee[]> {
+    return this.request({
+      method: 'post',
+      url: `${this.orgPrefix}/gantt/estimated_time/conflict`,
+      data: searchVO,
+    });
+  }
+
+  /**
+   * 组织层甘特图查询冲突详情
+   * @param assigneeId
+   * @param data
+   * @param page
+   * @param size
+   * @returns
+   */
+  loadTimeConflictDetail(assigneeId: string, data: any = {}, page: number = 1, size: number = 10) {
+    return this.request({
+      method: 'post',
+      url: `${this.orgPrefix}/gantt/estimated_time/conflict/details`,
+      params: { assigneeId, page, size },
+      data: {
+        contents: [data.contents].filter(Boolean),
+        searchArgs: {
+          teamProjectIds: data.teamProjectIds,
+        },
+      },
+    });
+  }
 }
 
 const ganttApi = new GanttApi();
-
-export { ganttApi };
+const ganttApiConfig = new GanttApi(true);
+export { ganttApi, ganttApiConfig };
