@@ -3,12 +3,14 @@ import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import { EmptyPage, FlatSelect } from '@choerodon/components';
+import { find } from 'lodash';
 import TableCache from '@/components/table-cache';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { getMenuType, getProjectId } from '@/utils/common';
 import { ganttApi } from '@/api';
 import noDataPic from '@/assets/image/NoData.svg';
 import Gantt from './Gantt';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 // eslint-disable-next-line react/require-default-props
 const GanttProject: React.FC<{ projectId: string, menuType?: 'project' | 'org', HeadSelect?: JSX.Element, [key: string]: any }> = ({
   projectId, projects, setCurrentProject, menuType = 'project',
@@ -36,8 +38,12 @@ const GanttOrg = () => {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     ganttApi.loadProjects().then((res: any) => {
-      setProjectIds(res);
-      setCurrentProject(res[0]?.id?.toString());
+      const cacheProjectId = localPageCacheStore.getItem('org.gantt.projectId');
+      const newProjects = res.map((i: any) => ({ ...i, id: String(i.id) }));
+      const newProjectId = (find(newProjects, { id: cacheProjectId }) || newProjects[0])?.id;
+      localPageCacheStore.setItem('org.gantt.projectId', newProjectId);
+      setProjectIds(newProjects);
+      setCurrentProject(newProjectId);
       setLoading(false);
     });
   }, []);

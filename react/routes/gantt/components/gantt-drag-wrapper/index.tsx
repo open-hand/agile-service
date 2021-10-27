@@ -150,7 +150,6 @@ const GanttGroupDragWrapper: React.FC<IGanttGroupDragWrapperProps> = ({
     if (!destinationData || !sourceData || !isDragRowDrop(sourceData, destinationData)) {
       return;
     }
-    console.log(sourceData.record.summary, 'move--->', destinationData.record.summary);
     onDragEnd(sourceData, destinationData);
   }, [onDragEnd, store.ganttRef]);
   const handleDragUpdate = useCallback((initial: DragUpdate, provided: ResponderProvided) => {
@@ -169,7 +168,6 @@ const GanttGroupDragWrapper: React.FC<IGanttGroupDragWrapperProps> = ({
         draggingBarDestinationBarRef.current = undefined;
         return { source: oldValue.source, destination: undefined };
       }
-      console.log(oldValue.source.record.summary, oldValue.source._depth, 'drag===>', newDestination, newDestination?.record.summary);
       draggingStyle.current = newDestination && { transform: `translate(0px, ${oldValue.source.absoluteIndex > newDestination.absoluteIndex ? 34 : -34}px)` };
       draggingBarDestinationBarRef.current = newDestination;
 

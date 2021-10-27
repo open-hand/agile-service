@@ -475,9 +475,9 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
       sourceBar, destinationBar, type, data: moveConfig.data,
     });
   }, [data, projectId, rankList, searchFilter, store.ganttRef, type]);
-  useEffect(() => () => {
-    store.setSprintIds(null);
-  }, [projectId, store]);
+  // useEffect(() => () => {
+  //   store.setSprintIds(null);
+  // }, [projectId, store]);
   return (
     <Page>
       <Header>
@@ -494,6 +494,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
                 }
                 setLoading(true);
                 store.setSprintIds(null);
+                localPageCacheStore.setItem('org.gantt.projectId', val);
                 return val;
               });
             }}
@@ -554,6 +555,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
                   modelProps: {
                     title: '设置列显示字段',
                   },
+                  projectId,
                   value: visibleColumnCodes,
                   options: listLayoutColumns.map((item) => ({ code: item.columnCode, title: item.label })),
                   type: 'gantt',
@@ -596,6 +598,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
                 modelProps: {
                   title: '设置列显示字段',
                 },
+                projectId,
                 value: visibleColumnCodes,
                 options: listLayoutColumns.map((item) => ({ code: item.columnCode, title: item.label })),
                 type: 'gantt',

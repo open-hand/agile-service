@@ -24,6 +24,7 @@ export interface ColumnManageProps {
   modal?: IModalProps,
   options: Option[]
   value?: string[]
+  projectId?: string
   onChange?: (value: string[]) => void
   tooltip?: boolean
 }
@@ -34,7 +35,7 @@ function useColumnManageModal(props: ColumnManageProps) {
   const [columns, setColumns] = useState([...options]);
   const allKeys = useMemo(() => columns.map((c) => c.code), [columns]);
   const [selectedKeys, setSelectedKeys] = useState<string[]>(props.value ?? []);
-  const mutation = useUpdateColumnMutation(type);
+  const mutation = useUpdateColumnMutation(type, props.projectId);
   const updateSelectKeys = usePersistFn((keys: string[]) => {
     setSelectedKeys(keys);
   });
