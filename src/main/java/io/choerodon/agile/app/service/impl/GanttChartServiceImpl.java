@@ -946,6 +946,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         personalSort.setProjectId(projectId);
         personalSort.setOrganizationId(organizationId);
         personalSort.setUserId(userId);
+        personalSort.setBusinessType("gantt");
         ObjectMapper objectMapper = new ObjectMapper();
         String sortJson;
         try {
@@ -991,6 +992,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         personalSort.setProjectId(projectId);
         personalSort.setOrganizationId(organizationId);
         personalSort.setUserId(userId);
+        personalSort.setBusinessType("gantt");
         List<IssuePersonalSortDTO> personalSortList = issuePersonalSortMapper.select(personalSort);
         if (personalSortList.isEmpty()) {
             return Collections.emptyList();

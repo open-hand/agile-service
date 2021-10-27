@@ -29,6 +29,16 @@ public class IssuePersonalSortDTO extends AuditDomain {
 
     private Long organizationId;
 
+    private String businessType;
+
+    public String getBusinessType() {
+        return businessType;
+    }
+
+    public void setBusinessType(String businessType) {
+        this.businessType = businessType;
+    }
+
     public Long getId() {
         return id;
     }

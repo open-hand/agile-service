@@ -111,6 +111,7 @@ public class ListLayoutServiceImpl implements ListLayoutService {
             dto.setOrganizationId(organizationId);
             dto.setProjectId(projectId);
             dto.setUserId(DetailsHelper.getUserDetails().getUserId());
+            dto.setBusinessType("gantt");
             List<IssuePersonalSortDTO> sorts = issuePersonalSortMapper.select(dto);
             if (sorts.isEmpty()) {
                 return;
