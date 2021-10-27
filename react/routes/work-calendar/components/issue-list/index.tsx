@@ -79,7 +79,7 @@ const IssueList = ({ refresh, openEditIssue }: Props) => {
   }, [mainStore, loadList]);
 
   if (!mainStore.getIssueListLoading && !mainStore.getIssueSearchParams && isEmpty(mainStore.getIssueList)) {
-    return <EmptyPage className={Style.emptyPage} image={NoData} title="暂无数据" />;
+    return <div className={Style.emptyText}>当前活跃冲刺暂无父级任务</div>;
   }
 
   return (
