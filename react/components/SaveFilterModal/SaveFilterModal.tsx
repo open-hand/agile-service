@@ -2,18 +2,19 @@ import React, { useEffect, useCallback, useMemo } from 'react';
 import {
   Modal, Form, TextField, DataSet, CheckBox,
 } from 'choerodon-ui/pro';
-import { IModalProps } from '@/common/types';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { personalFilterApi } from '@/api';
 import { Choerodon } from '@choerodon/boot';
+import { IModalProps } from '@/common/types';
+import { personalFilterApi } from '@/api';
 
 interface Props {
   modal?: IModalProps,
+  projectId?: string
   searchVO: any,
   onOk: () => void
 }
-async function checkName(value: string) {
-  const data: boolean = await personalFilterApi.checkName(value);
+async function checkName(value: string, projectId?: string) {
+  const data: boolean = await personalFilterApi.project(projectId).checkName(value);
   if (data) {
     return '筛选名称重复';
   }
@@ -21,7 +22,9 @@ async function checkName(value: string) {
   return true;
 }
 const SaveFilterModal: React.FC<Props> = (props) => {
-  const { modal, searchVO, onOk } = props;
+  const {
+    modal, searchVO, onOk, projectId,
+  } = props;
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [{
@@ -30,7 +33,7 @@ const SaveFilterModal: React.FC<Props> = (props) => {
       type: 'string' as FieldType,
       maxLength: 10,
       required: true,
-      validator: checkName,
+      validator: (v) => checkName(v, projectId),
     }, {
       name: 'default',
       label: '设为默认',
@@ -48,7 +51,7 @@ const SaveFilterModal: React.FC<Props> = (props) => {
       personalFilterSearchVO: searchVO,
     };
     try {
-      await personalFilterApi.create(data);
+      await personalFilterApi.project(projectId).create(data);
       Choerodon.prompt('保存成功');
       onOk();
       return true;
@@ -57,7 +60,7 @@ const SaveFilterModal: React.FC<Props> = (props) => {
       Choerodon.prompt('保存失败');
       return false;
     }
-  }, [dataSet, onOk, searchVO]);
+  }, [dataSet, onOk, projectId, searchVO]);
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [handleSubmit, modal]);
