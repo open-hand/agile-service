@@ -67,17 +67,35 @@ const GanttBar: React.FC<GanttBarProps> = ({
   const estimatedStartTime = useComputed(() => dateMaps.get('estimatedStartTime') || { width: 0 } as Gantt.DateWithWidth, [dateMaps]);
   const estimatedEndTime = useComputed(() => dateMaps.get('estimatedEndTime') || { width: 0 } as Gantt.DateWithWidth, [dateMaps]);
 
+  // 这里的返回的宽度都在可拖拽区域
   const actualTime = useComputed(() => {
+    if (estimatedEndTime.width === 0 || (actualEndTime.width === 0 && !actualStartTime.value)) {
+      return { width: 0, left: 0 };
+    }
     let fragmentWidth = actualEndTime.width - actualStartTime.width;
     let left = actualStartTime.width;
-    if ((!actualEndTime || actualEndTime.width === 0) && actualStartTime.value) {
-      fragmentWidth = estimatedEndTime.value ? estimatedEndTime.width - actualStartTime.width + (estimatedEndTime as Gantt.DateWithWidth).unitWidth : 0;
-      left = fragmentWidth ? (actualStartTime as Gantt.DateWithWidth).dragLeft : 0;
-    } else if (actualStartTime.width > 0) {
-      fragmentWidth += (actualEndTime as Gantt.DateWithWidth).unitWidth;
-      left -= (actualEndTime as Gantt.DateWithWidth).unitWidth;
+    if (actualEndTime.width === 0) {
+      fragmentWidth = estimatedEndTime.width - actualStartTime.width;
+      left = fragmentWidth > 0 ? (actualStartTime as Gantt.DateWithWidth).width : estimatedEndTime.width;
     }
-    return { width: fragmentWidth, left };
+    let delay = Math.max(0, Math.abs(actualEndTime.width - estimatedEndTime.width));
+    console.log('fragmentWidth', fragmentWidth);
+    if (fragmentWidth > 0) {
+      delay = 0;
+    }
+    if (fragmentWidth > 0 && actualStartTime.width > estimatedEndTime.width) {
+      fragmentWidth += actualStartTime.unitWidth;
+      left -= actualStartTime.unitWidth;
+      delay = fragmentWidth;
+    }
+
+    fragmentWidth = Math.abs(fragmentWidth);
+    delay = Math.min(fragmentWidth, delay);
+
+    // left = Math.max(0, left);
+    return {
+      width: fragmentWidth, left, delayWidth: delay, processWidth: fragmentWidth - delay,
+    };
   }, [actualStartTime, actualEndTime.width, estimatedEndTime.width, actualStartTime.width]);
   const estimateTime = useComputed(() => {
     let fragmentWidth = estimatedEndTime.width - estimatedStartTime.width;
@@ -89,18 +107,17 @@ const GanttBar: React.FC<GanttBarProps> = ({
     }
     return { width: fragmentWidth, left };
   }, [estimatedStartTime, estimatedStartTime.width, estimatedEndTime, estimatedEndTime.width]);
+  // 此宽度不可操作
   const delayWidth = (() => {
-    if (!estimatedEndTime.value || loading) {
+    if (!estimatedEndTime.value || actualEndTime.value || loading) {
       return 0;
     }
-    const endDate = actualEndTime.value ? dayjs(actualEndTime.value) : dayjs();
-    const dWidth = ganttRef.current?.getWidthByDate(dayjs(estimatedEndTime.value), endDate);
+    const dWidth = ganttRef.current?.getWidthByDate(dayjs(estimatedEndTime.value), dayjs());
     return dWidth && dWidth > 0 ? dWidth : 0;
   })();
-  const delayVisible = !(issue.statusVO.type === 'done') && (actualEndTime.value || stepGesture !== 'moving') && !loading;
+  const delayVisible = !(issue.statusVO.type === 'done') && !actualEndTime.width && (stepGesture !== 'moving') && !loading;
   const operateWidth = actualEndTime.value ? width - delayWidth : width;
-
-  const actualTimeWidth = actualEndTime.value ? actualTime.width : actualTime.width; // actualTime.width - delayWidth + 1;
+  const actualTimeWidth = actualTime.width; // actualTime.width - delayWidth + 1;
 
   const handleTooltipMouseEnter: React.MouseEventHandler<HTMLDivElement> = useCallback(
     (e) => Tooltip.show(e.target, {
@@ -153,7 +170,8 @@ const GanttBar: React.FC<GanttBarProps> = ({
     } as TooltipProps),
     [diff, hasChildren, issue.actualEndTime, issue.actualStartTime, issue.estimatedEndTime, issue.estimatedStartTime, issue.statusVO.name, issue.summary, percent, type],
   );
-  const handleTooltipMouseLeave = useCallback(() => Tooltip.hide(), []); return (
+  const handleTooltipMouseLeave = useCallback(() => Tooltip.hide(), []);
+  return (
     <div style={{ width }}>
       <div
         onMouseMove={handleTooltipMouseEnter}
@@ -161,7 +179,6 @@ const GanttBar: React.FC<GanttBarProps> = ({
         onMouseLeave={handleTooltipMouseLeave}
         style={{
           width: operateWidth,
-
           height,
           padding: '.02rem',
           // backgroundColor: color2,
@@ -169,7 +186,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
           display: 'flex',
           position: 'relative',
           borderRadius: delayVisible && delayWidth > 0 ? '2px 0 0 2px' : '2px',
-          overflow: 'hidden',
+          // overflow: 'hidden',
         }}
       >
         <GanntMoveWrap data={bar} startDate={estimatedStartTime} endDate={estimatedEndTime}>
@@ -178,8 +195,8 @@ const GanttBar: React.FC<GanttBarProps> = ({
             id="ganttBar"
             style={{
               marginLeft: estimateTime.left,
-              width: estimateTime.width - 1,
-              display: estimateTime.width - 1 <= 0 ? 'none' : undefined,
+              width: estimateTime.width,
+              display: estimateTime.width <= 0 ? 'none' : undefined,
               height,
               borderColor: color1,
             }}
@@ -189,12 +206,13 @@ const GanttBar: React.FC<GanttBarProps> = ({
         <GanntMoveWrap data={bar} startDate={actualStartTime} endDate={actualEndTime}>
           <div
             className={styles.actual}
-            // onMouseEnter={handleTooltipMouseEnter}
-            // onMouseLeave={handleTooltipMouseLeave}
-            style={{ width: actualTimeWidth, marginLeft: actualTime.left, backgroundColor: color2 }}
+            style={{ width: actualTimeWidth, marginLeft: actualTime.left }}
           >
-            <div style={{ flex: totalCount > 0 ? completeCount : 1, backgroundColor: color1 }} />
-            <div style={{ flex: totalCount > 0 ? totalCount - completeCount : 0 }} />
+            <div className={styles.actual_process} style={{ width: actualTime.processWidth, display: actualTime.processWidth ? 'flex' : 'none', background: color2 }}>
+              <div style={{ flex: totalCount > 0 ? completeCount : 1, backgroundColor: color1 }} />
+              <div style={{ flex: totalCount > 0 ? totalCount - completeCount : 0 }} />
+            </div>
+            <div className={styles.delay} style={{ width: actualTime.delayWidth }} />
           </div>
         </GanntMoveWrap>
       </div>

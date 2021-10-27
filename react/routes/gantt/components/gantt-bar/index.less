@@ -15,7 +15,21 @@
 }
 
 .actual {
-  display: flex;
+  // display: flex;
+  flex: 0;
   width: 100%;
-  overflow: hidden;
+  // overflow: hidden;
+
+  &_process {
+    display: flex;
+    overflow: hidden;
+    height: 100%;
+  }
+
+  .delay {
+    margin: 0;
+    position: relative;
+    bottom: 2px;
+    // height: unset;
+  }
 }
