@@ -27,7 +27,7 @@ import '@choerodon/gantt/dist/gantt.cjs.production.min.css';
 import { FlatSelect } from '@choerodon/components';
 import { set as mobxSet } from 'mobx';
 import {
-  ganttApi, issueApi, workCalendarApi,
+  ganttApi, IGanttConflictAssignee, issueApi, workCalendarApi,
 } from '@/api';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import Loading from '@/components/Loading';
@@ -98,6 +98,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const {
     isInProgram, menuType, projectId, setCurrentProject, projects,
   } = props;
+  const [conflictAssignees, setConflictAssignees] = useState<Array<IGanttConflictAssignee>>([]);
   const [data, setData] = useState<any[]>([]);
   const [type, setType] = useState<IGanttDimensionTypeValue>(localPageCacheStore.getItem('gantt.search.type') ?? typeValues[0]);
   const [rankList, setRankList] = useState<string[] | undefined>(undefined);
@@ -169,11 +170,14 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
     const filter = issueSearchStore.getCustomFieldFilters();
     filter.otherArgs.sprint = sprintIds;
     filter.searchArgs.dimension = type;
+    if (menuType === 'org') {
+      filter.searchArgs.teamProjectIds = [projectId];
+    }
     return merge(filter, {
       displayFields: visibleColumnCodes.map((code) => ({ code, projectId })),
       searchArgs: { tree: type !== 'assignee', dimension: type },
     });
-  }, [sprintIds, visibleColumnCodes, type, projectId]);
+  }, [sprintIds, visibleColumnCodes, menuType, type, projectId]);
 
   const { run, flush } = useDebounceFn(() => {
     (async () => {
@@ -189,6 +193,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
         ganttApi.project(projectId).loadByTask(searchFilter, sortedList),
       ] : [workCalendarApi.getWorkSetting(year), null, { ids: [] }, ganttApi.loadOrgByTask(searchFilter, 1)];
       const [workCalendarRes, projectWorkCalendarRes, rankListRes, res] = await Promise.all(requestArr);
+      const conflictUsers = menuType === 'org' && type === 'assignee' ? await ganttApi.loadTimeConflict(searchFilter) : [];
       // setColumns(headers.map((h: any) => ({
       //   width: 100,
       //   name: h.fieldCode,
@@ -199,6 +204,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
         setWorkCalendar(workCalendarRes);
         setColumns(tableWithSortedColumns);
         setRankList(rankListRes?.ids);
+        setConflictAssignees(conflictUsers);
         setData(res.map((item: any) => ({ ...item, onlyShow: menuType === 'org' })));
         setLoading(false);
       });
@@ -430,8 +436,8 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   });
 
   const ganttData = useMemo(() => ganttRestoreCollapsedStatus(ganttDataGroupByType({
-    data, type, isInProgram, rankList,
-  }), Object.values(collapsedHistoryRef.current).filter((i) => i.collapsed)), [data, isInProgram, rankList, type]);
+    data, type, isInProgram, rankList, conflictAssignees,
+  }), Object.values(collapsedHistoryRef.current).filter((i) => i.collapsed)), [data, conflictAssignees, isInProgram, rankList, type]);
   const renderEmpty = usePersistFn(() => {
     if (!sprintIds || sprintIds?.length === 0) {
       return <span>暂无数据，请选择冲刺</span>;
@@ -475,9 +481,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
       sourceBar, destinationBar, type, data: moveConfig.data,
     });
   }, [data, projectId, rankList, searchFilter, store.ganttRef, type]);
-  // useEffect(() => () => {
-  //   store.setSprintIds(null);
-  // }, [projectId, store]);
+
   return (
     <Page>
       <Header>
