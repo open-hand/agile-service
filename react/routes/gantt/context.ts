@@ -7,6 +7,7 @@ interface GanttContext {
   searchFilter: any
   menuType: IGanttPageProps['menuType']
   disable: boolean
+  processType: 'task' | 'workTime'
   projectId?: string
   dimensionType: IGanttDimensionTypeValue
 }

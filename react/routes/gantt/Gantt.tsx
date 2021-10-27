@@ -657,7 +657,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
         }}
       >
         <Context.Provider value={{
-          store, searchFilter, dimensionType: type, menuType, disable: menuType === 'org', projectId,
+          store, searchFilter, dimensionType: type, menuType, disable: menuType === 'org', projectId, processType,
         }}
         >
           <div style={{ display: 'flex', flexWrap: 'wrap' }}>
