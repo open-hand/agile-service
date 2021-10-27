@@ -177,11 +177,27 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
         SXSSFWorkbook workbook = new SXSSFWorkbook();
          buildExcelTitle(workbook,"工时日历", WORK_HOURS_CALENDAR_LIST, workHoursSearchVO, dateColMap);
          buildExcelTitle(workbook,"未饱和", WORK_HOURS_CALENDAR_LIST, workHoursSearchVO, dateColMap);
-        // 写入数据
-        List<WorkHoursCalendarVO> list = workHoursService.workHoursCalendar(organizationId, projectIds, workHoursSearchVO, isOrg);
-        if (!CollectionUtils.isEmpty(list)) {
-            setData(workbook, list, 0, dateColMap, fileOperationHistoryDTO, userId, websocketKey, false);
-            setData(workbook, list, 1, dateColMap, fileOperationHistoryDTO, userId, websocketKey, true);
+        ExcelCursorDTO cursor = new ExcelCursorDTO(2, 0, 100);
+        double lastProcess = 0D;
+        while (true) {
+            // 写入数据
+            PageRequest pageRequest = new PageRequest(cursor.getPage(), cursor.getSize());
+            Page<WorkHoursCalendarVO> page = workHoursService.workHoursCalendar(organizationId, projectIds, pageRequest, workHoursSearchVO, isOrg);
+            if (!CollectionUtils.isEmpty(page.getContent())) {
+                List<WorkHoursCalendarVO> list = page.getContent();
+                setData(workbook, list, 0, dateColMap, false, cursor.getRow());
+                setData(workbook, list, 1, dateColMap, true, cursor.getRow());
+                cursor.setRow(cursor.getRow() + page.getContent().size());
+                double process = getProcess(cursor.getPage(), page.getTotalPages());
+                if (process - lastProcess >= 0.1) {
+                    sendProcess(fileOperationHistoryDTO, userId, process, websocketKey);
+                    lastProcess = process;
+                }
+                boolean hasNextPage = (cursor.getPage() + 1) < page.getTotalPages();
+                if (!hasNextPage) {
+                    break;
+                }
+            }
         }
         // 上传至minio
         downloadExcel(workbook, excelName, organizationId, websocketKey, userId, fileOperationHistoryDTO);
@@ -210,6 +226,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
     }
 
     @Override
+    @Async
     public void exportWorkHoursCalendarOnProjectLevel(Long organizationId, Long projectId, WorkHoursSearchVO workHoursSearchVO, ServletRequestAttributes requestAttributes, Boolean isOrg) {
         exportWorkHoursCalendar(organizationId, Arrays.asList(projectId), workHoursSearchVO, requestAttributes, isOrg);
     }
@@ -218,13 +235,9 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
                          List<WorkHoursCalendarVO> list,
                          Integer sheetNum,
                          Map<String, Integer> dateColMap,
-                         FileOperationHistoryDTO fileOperationHistoryDTO,
-                         Long userId,
-                         String webSocketKey,
-                         Boolean notSaturated) {
+                         Boolean notSaturated,
+                         int startRow) {
         Sheet sheetAt = workbook.getSheetAt(sheetNum);
-        int startRow = 2;
-        double lastSendProcess = ObjectUtils.isArray(fileOperationHistoryDTO.getProcess()) ? 0D : fileOperationHistoryDTO.getProcess();
         for (int i = 0; i < list.size(); i++) {
             WorkHoursCalendarVO workHoursCalendarVO = list.get(i);
             Row row = sheetAt.createRow(startRow);
@@ -234,7 +247,8 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
                 cell.setCellValue(userMessageDTO.getName());
             }
             Cell cell1 = row.createCell(1);
-            cell1.setCellValue(workHoursCalendarVO.getAllEstimateTime().toString());
+            BigDecimal allEstimateTime = workHoursCalendarVO.getAllEstimateTime();
+            cell1.setCellValue(ObjectUtils.isEmpty(allEstimateTime) ? null : allEstimateTime.toString());
             Map<String, BigDecimal> countMap = workHoursCalendarVO.getCountMap();
             if (!CollectionUtils.isEmpty(countMap)) {
                 for (Map.Entry<String, BigDecimal> entry : countMap.entrySet()) {
@@ -250,11 +264,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
                     }
                 }
             }
-            double process = (i * 1.0) / (list.size() * 2);
-            if (process - lastSendProcess >= 0.1) {
-                sendProcess(fileOperationHistoryDTO, userId, process, webSocketKey);
-                lastSendProcess = process;
-            }
+            startRow++;
         }
     }
 

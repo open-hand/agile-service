@@ -28,7 +28,11 @@ public interface UserService {
 
     Map<Long, UserMessageDTO> queryUsersMap(List<Long> assigneeIds, Boolean withLoginName);
 
-    Map<Long, UserMessageDTO> queryUserByProjectId(Long projectId, Boolean withLoginName);
+    List<UserMessageDTO> queryUsers(List<Long> assigneeIds, Boolean withLoginName);
+
+    Page<UserMessageDTO> queryUserByProjectId(Long projectId, int page, int size, Boolean withLoginName);
+
+    Page<UserMessageDTO> queryUserByOrganizationId(Long organizationId, int page, int size, Boolean withLoginName);
 
     /**
      * 根据项目id和名称查询用户信息

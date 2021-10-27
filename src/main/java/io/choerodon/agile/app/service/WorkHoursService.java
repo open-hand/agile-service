@@ -38,18 +38,20 @@ public interface WorkHoursService {
      * 工时日历
      * @param organizationId
      * @param projectIds
+     * @param pageRequest
      * @param workHoursSearchVO
      * @return
      */
-    List<WorkHoursCalendarVO> workHoursCalendar(Long organizationId, List<Long> projectIds, WorkHoursSearchVO workHoursSearchVO, Boolean isOrg);
+    Page<WorkHoursCalendarVO> workHoursCalendar(Long organizationId, List<Long> projectIds, PageRequest pageRequest, WorkHoursSearchVO workHoursSearchVO, Boolean isOrg);
 
     /**
      * 组织层：工时日历
      * @param organizationId
+     * @param pageRequest
      * @param workHoursSearchVO
      * @return
      */
-    List<WorkHoursCalendarVO> workHoursCalendarByOrg(Long organizationId, WorkHoursSearchVO workHoursSearchVO);
+    Page<WorkHoursCalendarVO> workHoursCalendarByOrg(Long organizationId, PageRequest pageRequest, WorkHoursSearchVO workHoursSearchVO);
 
     /**
      * 工时日历查用户的登记详情

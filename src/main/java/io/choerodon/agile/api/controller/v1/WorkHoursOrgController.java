@@ -50,10 +50,11 @@ public class WorkHoursOrgController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询工时日历")
     @PostMapping(value = "/work_hours_calendar")
-    public ResponseEntity<List<WorkHoursCalendarVO>> workHoursCalendarByProjectIds(@ApiParam(value = "组织Id", required = true)
+    public ResponseEntity<Page<WorkHoursCalendarVO>> workHoursCalendarByProjectIds(@ApiParam(value = "组织Id", required = true)
                                                                                    @PathVariable(name = "organization_id") Long organizationId,
+                                                                                   PageRequest pageRequest,
                                                                                    @RequestBody WorkHoursSearchVO workHoursSearchVO) {
-        return Optional.ofNullable(workHoursService.workHoursCalendarByOrg(organizationId, workHoursSearchVO))
+        return Optional.ofNullable(workHoursService.workHoursCalendarByOrg(organizationId, pageRequest, workHoursSearchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.work.hours.calendar.get"));
     }

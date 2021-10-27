@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.app.service.AgilePluginService;
+import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.UserService;
@@ -17,6 +18,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -80,33 +82,92 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Map<Long, UserMessageDTO> queryUserByProjectId(Long projectId, Boolean withLoginName) {
-        Page<UserVO> page = baseFeignClient.queryUsersByProject(projectId, null, 0, 0).getBody();
-        if (CollectionUtils.isEmpty(page.getContent())) {
-            return new HashMap<>();
+    public List<UserMessageDTO> queryUsers(List<Long> assigneeIdList, Boolean withLoginName) {
+        if (assigneeIdList == null) {
+            return new ArrayList<>();
         }
-        Map<Long, UserMessageDTO> userMessageMap = new HashMap<>();
+        List<UserMessageDTO> userMessage = new ArrayList<>(assigneeIdList.size());
+        if (!assigneeIdList.isEmpty()) {
+            Long[] assigneeIds = new Long[assigneeIdList.size()];
+            assigneeIdList.toArray(assigneeIds);
+            List<UserDTO> userDTOS = baseFeignClient.listUsersByIds(assigneeIds, false).getBody();
+            if (withLoginName) {
+                userDTOS.forEach(userDO -> {
+                    String ldapName = userDO.getRealName() + "（" + userDO.getLoginName() + "）";
+                    String noLdapName = userDO.getRealName() + "（" + userDO.getEmail() + "）";
+                    userMessage.add(
+                            new UserMessageDTO(userDO.getLdap() ? ldapName : noLdapName,
+                                    userDO.getLoginName(),
+                                    userDO.getRealName(),
+                                    userDO.getImageUrl(),
+                                    userDO.getEmail(),
+                                    userDO.getLdap(),
+                                    userDO.getId()));
+                });
+            } else {
+                userDTOS.forEach(userDO -> userMessage.add( new UserMessageDTO(userDO.getRealName(), userDO.getLoginName(), userDO.getRealName(), userDO.getImageUrl(), userDO.getEmail(), userDO.getLdap())));
+            }
+        }
+        return userMessage;
+    }
+
+    @Override
+    public Page<UserMessageDTO> queryUserByProjectId(Long projectId, int page, int size, Boolean withLoginName) {
+        Page<UserVO> pages = baseFeignClient.queryUsersByProject(projectId, null, page, size).getBody();
+        if (CollectionUtils.isEmpty(pages.getContent())) {
+            return new Page<>();
+        }
+        List<UserMessageDTO> content = new ArrayList<>();
         if (withLoginName) {
-            page.getContent().stream()
+            content = pages.getContent().stream()
                     .filter(v -> Boolean.TRUE.equals(v.getEnabled()))
-                    .forEach(userDO -> {
+                    .map(userDO -> {
                         String ldapName = userDO.getRealName() + "（" + userDO.getLoginName() + "）";
                         String noLdapName = userDO.getRealName() + "（" + userDO.getEmail() + "）";
-                        userMessageMap.put(userDO.getId(),
-                                new UserMessageDTO(userDO.getLdap() ? ldapName : noLdapName,
+
+                              return   new UserMessageDTO(userDO.getLdap() ? ldapName : noLdapName,
                                         userDO.getLoginName(),
                                         userDO.getRealName(),
                                         userDO.getImageUrl(),
                                         userDO.getEmail(),
                                         userDO.getLdap(),
-                                        userDO.getId()));
-                    });
+                                        userDO.getId());
+                    }).collect(Collectors.toList());
         } else {
-            page.getContent().stream()
+            content = pages.getContent().stream()
                     .filter(v -> Boolean.TRUE.equals(v.getEnabled()))
-                    .forEach(userDO -> userMessageMap.put(userDO.getId(), new UserMessageDTO(userDO.getRealName(), userDO.getLoginName(), userDO.getRealName(), userDO.getImageUrl(), userDO.getEmail(), userDO.getLdap())));
+                    .map(userDO -> new UserMessageDTO(userDO.getRealName(), userDO.getLoginName(), userDO.getRealName(), userDO.getImageUrl(), userDO.getEmail(), userDO.getLdap())).collect(Collectors.toList());
         }
-        return userMessageMap;
+        return PageUtil.buildPageInfoWithPageInfoList(pages, content);
+    }
+
+    @Override
+    public Page<UserMessageDTO> queryUserByOrganizationId(Long organizationId, int page, int size, Boolean withLoginName) {
+        Page<UserVO> pages = baseFeignClient.queryUsersByOrganization(organizationId, null, page, size).getBody();
+        if (CollectionUtils.isEmpty(pages.getContent())) {
+            return new Page<>();
+        }
+        List<UserMessageDTO> content = new ArrayList<>();
+        if (withLoginName) {
+            content = pages.getContent().stream()
+                    .filter(v -> Boolean.TRUE.equals(v.getEnabled()))
+                    .map(userDO -> {
+                        String ldapName = userDO.getRealName() + "（" + userDO.getLoginName() + "）";
+                        String noLdapName = userDO.getRealName() + "（" + userDO.getEmail() + "）";
+                        return   new UserMessageDTO(userDO.getLdap() ? ldapName : noLdapName,
+                                userDO.getLoginName(),
+                                userDO.getRealName(),
+                                userDO.getImageUrl(),
+                                userDO.getEmail(),
+                                userDO.getLdap(),
+                                userDO.getId());
+                    }).collect(Collectors.toList());
+        } else {
+            content = pages.getContent().stream()
+                    .filter(v -> Boolean.TRUE.equals(v.getEnabled()))
+                    .map(userDO -> new UserMessageDTO(userDO.getRealName(), userDO.getLoginName(), userDO.getRealName(), userDO.getImageUrl(), userDO.getEmail(), userDO.getLdap())).collect(Collectors.toList());
+        }
+        return PageUtil.buildPageInfoWithPageInfoList(pages, content);
     }
 
     @Override
