@@ -41,7 +41,7 @@ public interface WorkHoursService {
      * @param workHoursSearchVO
      * @return
      */
-    List<WorkHoursCalendarVO> workHoursCalendar(Long organizationId, List<Long> projectIds, WorkHoursSearchVO workHoursSearchVO);
+    List<WorkHoursCalendarVO> workHoursCalendar(Long organizationId, List<Long> projectIds, WorkHoursSearchVO workHoursSearchVO, Boolean isOrg);
 
     /**
      * 组织层：工时日历

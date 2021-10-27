@@ -174,11 +174,14 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
         sendProcess(fileOperationHistoryDTO, userId, 0.0, websocketKey);
         // 构建标题栏
         Map<String, Integer> dateColMap = new HashMap<>();
-         Workbook workbook = buildExcelTitle("工时日历", WORK_HOURS_CALENDAR_LIST, workHoursSearchVO, dateColMap);
+        SXSSFWorkbook workbook = new SXSSFWorkbook();
+         buildExcelTitle(workbook,"工时日历", WORK_HOURS_CALENDAR_LIST, workHoursSearchVO, dateColMap);
+         buildExcelTitle(workbook,"未饱和", WORK_HOURS_CALENDAR_LIST, workHoursSearchVO, dateColMap);
         // 写入数据
-        List<WorkHoursCalendarVO> list = workHoursService.workHoursCalendar(organizationId, projectIds, workHoursSearchVO);
-        if(!CollectionUtils.isEmpty(list)){
-            setData(workbook, list, dateColMap, fileOperationHistoryDTO, userId, websocketKey);
+        List<WorkHoursCalendarVO> list = workHoursService.workHoursCalendar(organizationId, projectIds, workHoursSearchVO, isOrg);
+        if (!CollectionUtils.isEmpty(list)) {
+            setData(workbook, list, 0, dateColMap, fileOperationHistoryDTO, userId, websocketKey, false);
+            setData(workbook, list, 1, dateColMap, fileOperationHistoryDTO, userId, websocketKey, true);
         }
         // 上传至minio
         downloadExcel(workbook, excelName, organizationId, websocketKey, userId, fileOperationHistoryDTO);
@@ -207,20 +210,21 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
     }
 
     @Override
-    @Async
     public void exportWorkHoursCalendarOnProjectLevel(Long organizationId, Long projectId, WorkHoursSearchVO workHoursSearchVO, ServletRequestAttributes requestAttributes, Boolean isOrg) {
         exportWorkHoursCalendar(organizationId, Arrays.asList(projectId), workHoursSearchVO, requestAttributes, isOrg);
     }
 
     private void setData(Workbook workbook,
                          List<WorkHoursCalendarVO> list,
+                         Integer sheetNum,
                          Map<String, Integer> dateColMap,
                          FileOperationHistoryDTO fileOperationHistoryDTO,
                          Long userId,
-                         String webSocketKey) {
-        Sheet sheetAt = workbook.getSheetAt(0);
+                         String webSocketKey,
+                         Boolean notSaturated) {
+        Sheet sheetAt = workbook.getSheetAt(sheetNum);
         int startRow = 2;
-        double lastSendProcess = 0D;
+        double lastSendProcess = ObjectUtils.isArray(fileOperationHistoryDTO.getProcess()) ? 0D : fileOperationHistoryDTO.getProcess();
         for (int i = 0; i < list.size(); i++) {
             WorkHoursCalendarVO workHoursCalendarVO = list.get(i);
             Row row = sheetAt.createRow(startRow);
@@ -236,6 +240,9 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
                 for (Map.Entry<String, BigDecimal> entry : countMap.entrySet()) {
                     String key = entry.getKey();
                     BigDecimal value = entry.getValue();
+                    if (notSaturated && value.intValue() >= 8) {
+                        continue;
+                    }
                     Integer col = dateColMap.getOrDefault(key, null);
                     if (!ObjectUtils.isEmpty(col)) {
                         Cell rowCell = row.createCell(col);
@@ -243,7 +250,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
                     }
                 }
             }
-            double process = (i * 1.0) / list.size();
+            double process = (i * 1.0) / (list.size() * 2);
             if (process - lastSendProcess >= 0.1) {
                 sendProcess(fileOperationHistoryDTO, userId, process, webSocketKey);
                 lastSendProcess = process;
@@ -251,10 +258,11 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
         }
     }
 
-    private Workbook buildExcelTitle(String sheetName, List<ExcelTitleVO> list,
-                                     WorkHoursSearchVO workHoursSearchVO,
-                                     Map<String, Integer> dateColMap) {
-        SXSSFWorkbook workbook = new SXSSFWorkbook();
+    private void buildExcelTitle(SXSSFWorkbook workbook ,
+                                 String sheetName,
+                                 List<ExcelTitleVO> list,
+                                 WorkHoursSearchVO workHoursSearchVO,
+                                 Map<String, Integer> dateColMap) {
         CellStyle cellStyle = workbook.createCellStyle();
         cellStyle.setAlignment(HorizontalAlignment.CENTER.getCode());
         cellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
@@ -310,7 +318,6 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
                 calendar.add(Calendar.DATE, 1);
             }
         }
-        return workbook;
     }
 
     private String buildDate(Calendar calendar) {

@@ -57,7 +57,7 @@ public class WorkHoursController {
                                                                                    @PathVariable(name = "project_id") Long projectId,
                                                                                    @RequestParam Long organizationId,
                                                                                    @RequestBody WorkHoursSearchVO workHoursSearchVO) {
-        return Optional.ofNullable(workHoursService.workHoursCalendar(organizationId, Arrays.asList(projectId), workHoursSearchVO))
+        return Optional.ofNullable(workHoursService.workHoursCalendar(organizationId, Arrays.asList(projectId), workHoursSearchVO, false))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.work.hours.calendar.get"));
     }

@@ -104,16 +104,23 @@ public class WorkHoursServiceImpl implements WorkHoursService {
     }
 
     @Override
-    public List<WorkHoursCalendarVO> workHoursCalendar(Long organizationId, List<Long> projectIds, WorkHoursSearchVO workHoursSearchVO) {
+    public List<WorkHoursCalendarVO> workHoursCalendar(Long organizationId, List<Long> projectIds, WorkHoursSearchVO workHoursSearchVO, Boolean isOrg) {
         checkTimeRange(workHoursSearchVO);
         List<WorkHoursLogVO> workHoursLogVOS = workHoursMapper.listByProjectIds(projectIds, workHoursSearchVO);
         if (CollectionUtils.isEmpty(workHoursLogVOS)) {
             return new ArrayList<>();
         }
-        List<Long> userIds = workHoursLogVOS.stream().map(WorkHoursLogVO::getUserId).distinct().collect(Collectors.toList());
         Map<Long, List<WorkHoursLogVO>> workHoursGroup = workHoursLogVOS.stream().collect(Collectors.groupingBy(WorkHoursLogVO::getUserId));
         List<WorkHoursCalendarVO> list = new ArrayList<>();
-        Map<Long, UserMessageDTO> userMessageDTOMap = userService.queryUsersMap(userIds, true);
+        Map<Long, UserMessageDTO> userMessageDTOMap = new HashMap<>();
+        List<Long> userIds = new ArrayList<>();
+        if (Boolean.TRUE.equals(isOrg)) {
+            userIds = workHoursLogVOS.stream().map(WorkHoursLogVO::getUserId).distinct().collect(Collectors.toList());
+            userMessageDTOMap.putAll(userService.queryUsersMap(userIds, true));
+        } else {
+            userMessageDTOMap.putAll(userService.queryUserByProjectId(projectIds.get(0), true));
+            userIds.addAll(userMessageDTOMap.keySet());
+        }
         Collections.sort(userIds);
         DateFormat df = new SimpleDateFormat(BaseConstants.Pattern.DATE);
         for (Long userId : userIds) {
@@ -149,7 +156,7 @@ public class WorkHoursServiceImpl implements WorkHoursService {
         if (CollectionUtils.isEmpty(projectIds)) {
             return new ArrayList<>();
         }
-        return workHoursCalendar(organizationId, projectIds, workHoursSearchVO);
+        return workHoursCalendar(organizationId, projectIds, workHoursSearchVO, true);
     }
 
     @Override

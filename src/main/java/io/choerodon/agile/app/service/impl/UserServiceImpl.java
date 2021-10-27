@@ -80,6 +80,36 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Map<Long, UserMessageDTO> queryUserByProjectId(Long projectId, Boolean withLoginName) {
+        Page<UserVO> page = baseFeignClient.queryUsersByProject(projectId, null, 0, 0).getBody();
+        if (CollectionUtils.isEmpty(page.getContent())) {
+            return new HashMap<>();
+        }
+        Map<Long, UserMessageDTO> userMessageMap = new HashMap<>();
+        if (withLoginName) {
+            page.getContent().stream()
+                    .filter(v -> Boolean.TRUE.equals(v.getEnabled()))
+                    .forEach(userDO -> {
+                        String ldapName = userDO.getRealName() + "（" + userDO.getLoginName() + "）";
+                        String noLdapName = userDO.getRealName() + "（" + userDO.getEmail() + "）";
+                        userMessageMap.put(userDO.getId(),
+                                new UserMessageDTO(userDO.getLdap() ? ldapName : noLdapName,
+                                        userDO.getLoginName(),
+                                        userDO.getRealName(),
+                                        userDO.getImageUrl(),
+                                        userDO.getEmail(),
+                                        userDO.getLdap(),
+                                        userDO.getId()));
+                    });
+        } else {
+            page.getContent().stream()
+                    .filter(v -> Boolean.TRUE.equals(v.getEnabled()))
+                    .forEach(userDO -> userMessageMap.put(userDO.getId(), new UserMessageDTO(userDO.getRealName(), userDO.getLoginName(), userDO.getRealName(), userDO.getImageUrl(), userDO.getEmail(), userDO.getLdap())));
+        }
+        return userMessageMap;
+    }
+
+    @Override
     public List<UserVO> queryUsersByNameAndProjectId(Long projectId, String name) {
         ResponseEntity<Page<UserVO>> userList = baseFeignClient.list(projectId, name);
         if (userList != null) {
