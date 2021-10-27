@@ -48,4 +48,8 @@ public interface GanttChartService {
                                       Map<Long, IssueDTO> issueFeatureMap,
                                       List<ObjectSchemeFieldVO> displayFields,
                                       Long organizationId);
+
+    void saveSort(Long projectId, List<IssuePersonalSortVO> issuePersonalSorts);
+
+    List<IssuePersonalSortVO> listLatestSort(Long projectId);
 }

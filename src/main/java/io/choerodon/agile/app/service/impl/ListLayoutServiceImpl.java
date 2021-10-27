@@ -1,14 +1,22 @@
 package io.choerodon.agile.app.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.choerodon.agile.api.vo.IssuePersonalSortVO;
 import io.choerodon.agile.api.vo.ListLayoutColumnRelVO;
 import io.choerodon.agile.api.vo.ListLayoutVO;
 import io.choerodon.agile.app.service.ListLayoutService;
+import io.choerodon.agile.infra.dto.IssuePersonalSortDTO;
 import io.choerodon.agile.infra.dto.ListLayoutColumnRelDTO;
 import io.choerodon.agile.infra.dto.ListLayoutDTO;
+import io.choerodon.agile.infra.enums.IssueSortFieldMapping;
+import io.choerodon.agile.infra.mapper.IssuePersonalSortMapper;
 import io.choerodon.agile.infra.mapper.ListLayoutColumnRelMapper;
 import io.choerodon.agile.infra.mapper.ListLayoutMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author zhaotianxin
@@ -32,6 +42,8 @@ public class ListLayoutServiceImpl implements ListLayoutService {
     private ListLayoutColumnRelMapper listLayoutColumnRelMapper;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private IssuePersonalSortMapper issuePersonalSortMapper;
 
     @Override
     public ListLayoutVO save(Long organizationId, Long projectId, ListLayoutVO listLayoutVO) {
@@ -56,6 +68,10 @@ public class ListLayoutServiceImpl implements ListLayoutService {
         listLayoutColumnRelDTO.setOrganizationId(organizationId);
         listLayoutColumnRelDTO.setLayoutId(layoutId);
         List<ListLayoutColumnRelDTO> layoutColumnRelDTOS = listLayoutColumnRelMapper.select(listLayoutColumnRelDTO);
+        if (!Objects.equals(projectId, 0L)) {
+            //项目层
+            deleteIssuePersonalSortIfExisted(layoutColumnRelDTOS, listLayoutColumnRelVOS, projectId, organizationId);
+        }
         if (!CollectionUtils.isEmpty(layoutColumnRelDTOS)) {
             listLayoutColumnRelMapper.delete(listLayoutColumnRelDTO);
         }
@@ -68,6 +84,77 @@ public class ListLayoutServiceImpl implements ListLayoutService {
                 throw new CommonException("error.list.layout.column.rel.insert");
             }
         });
+    }
+
+    private void deleteIssuePersonalSortIfExisted(List<ListLayoutColumnRelDTO> existedLayoutColumnRelList,
+                                                  List<ListLayoutColumnRelVO> inputLayoutColumnRelList,
+                                                  Long projectId,
+                                                  Long organizationId) {
+        Set<String> inputDisplayCodes =
+                inputLayoutColumnRelList.stream()
+                        .filter(x -> Boolean.TRUE.equals(x.getDisplay()))
+                        .map(ListLayoutColumnRelVO::getColumnCode)
+                        .collect(Collectors.toSet());
+        Set<String> deleteCodes = new HashSet<>();
+        existedLayoutColumnRelList.forEach(rel -> {
+            String columnCode = rel.getColumnCode();
+            boolean display = rel.getDisplay();
+            if (!inputDisplayCodes.contains(columnCode) && display) {
+                deleteCodes.add(columnCode);
+            }
+        });
+        String projectCodePrefix = "pro_";
+        String organizationCodePrefix = "org_";
+        String customFieldSortPrefix = "foundation.";
+        if (!deleteCodes.isEmpty()) {
+            IssuePersonalSortDTO dto = new IssuePersonalSortDTO();
+            dto.setOrganizationId(organizationId);
+            dto.setProjectId(projectId);
+            dto.setUserId(DetailsHelper.getUserDetails().getUserId());
+            dto.setBusinessType("gantt");
+            List<IssuePersonalSortDTO> sorts = issuePersonalSortMapper.select(dto);
+            if (sorts.isEmpty()) {
+                return;
+            }
+            IssuePersonalSortDTO sort = sorts.get(0);
+            String sortJson = sort.getSortJson();
+            if (StringUtils.isEmpty(sortJson)) {
+                return;
+            }
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, IssuePersonalSortVO> sortMap = new LinkedHashMap<>();
+            try {
+                List<IssuePersonalSortVO> issuePersonalSorts =
+                        objectMapper.readValue(sortJson, new TypeReference<List<IssuePersonalSortVO>>() {});
+                issuePersonalSorts.forEach(s -> sortMap.put(s.getProperty(), s));
+            } catch (IOException e) {
+                throw new CommonException("error.gantt.sortJson.deserialization", e);
+            }
+            deleteCodes.forEach(code -> {
+                String property;
+                if (code.startsWith(projectCodePrefix) || code.startsWith(organizationCodePrefix)) {
+                    property = customFieldSortPrefix + code;
+                } else {
+                    property = IssueSortFieldMapping.getSortByField(code);
+                    if (property == null) {
+                        property = code;
+                    }
+                }
+                if (sortMap.containsKey(property)) {
+                    sortMap.remove(property);
+                }
+            });
+            List<IssuePersonalSortVO> sortList = new ArrayList<>(sortMap.values());
+            try {
+                sortJson = objectMapper.writeValueAsString(sortList);
+                sort.setSortJson(sortJson);
+                if (issuePersonalSortMapper.updateByPrimaryKey(sort) != 1) {
+                    throw new CommonException("error.gantt.sort.save");
+                }
+            } catch (JsonProcessingException e) {
+                throw new CommonException("error.gantt.sortJson.serialization", e);
+            }
+        }
     }
 
     private ListLayoutDTO baseInsert(ListLayoutDTO layoutDTO) {

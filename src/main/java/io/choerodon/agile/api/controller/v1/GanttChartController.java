@@ -87,4 +87,23 @@ public class GanttChartController {
         ganttChartService.moveDimension(projectId, ganttDimensionMoveVO);
         return new ResponseEntity(HttpStatus.OK);
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("保存上次查询甘特图的排序规则")
+    @PostMapping(value = "/save/sort")
+    public ResponseEntity saveSort(@ApiParam(value = "项目id", required = true)
+                                   @PathVariable(name = "project_id") Long projectId,
+                                   @RequestBody @Validated List<IssuePersonalSortVO> issuePersonalSorts) {
+        ganttChartService.saveSort(projectId, issuePersonalSorts);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询上次查询甘特图的排序规则")
+    @GetMapping(value = "/latest_sort")
+    public ResponseEntity<List<IssuePersonalSortVO>> listLatestSort(@ApiParam(value = "项目id", required = true)
+                                                                    @PathVariable(name = "project_id") Long projectId) {
+        return ResponseEntity.ok(ganttChartService.listLatestSort(projectId));
+    }
+
 }
