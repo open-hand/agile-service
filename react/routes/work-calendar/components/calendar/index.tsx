@@ -195,6 +195,34 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
     });
   }, [handleCreateIssue]);
 
+  const moreLinkDidMount = useCallback(({ el }) => {
+    const parentHeight = el?.parentNode?.parentNode?.parentNode?.clientHeight - 30;
+    const childNodes = el?.parentNode?.parentNode?.childNodes;
+    let hiddenCount = 0;
+    if (childNodes && childNodes.length) {
+      const firstChild = el?.parentNode?.parentNode?.firstElementChild;
+      const childHeight = firstChild?.clientHeight ?? 0;
+      const margin = firstChild?.style.marginTop ? firstChild?.style.marginTop?.slice(0, -2) ?? 0 : 0;
+      const count = Math.floor(childHeight ? (parentHeight - margin) / childHeight : 0);
+      childNodes.forEach((child: Element, index: number) => {
+        if (index === childNodes.length - 1) {
+          return;
+        }
+        if (count >= index + 1) {
+          child?.classList?.remove('fc-daygrid-event-harness-abs');
+          child?.classList?.remove(Style.hidden);
+          child?.classList?.add(Style.visible);
+        } else {
+          child?.classList?.add('fc-daygrid-event-harness-abs');
+          child?.classList?.remove(Style.visible);
+          child?.classList?.add(Style.hidden);
+          hiddenCount += 1;
+        }
+      });
+    }
+    el.innerHTML = `+${hiddenCount}`;
+  }, []);
+
   return (
     <Loading type="c7n" display={loading} className={Style.loading}>
       <div className={Style.wrap}>
@@ -233,6 +261,8 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
           allDayContent="全天"
           eventDisplay="block"
           moreLinkContent={({ shortText }) => shortText}
+          // moreLinkDidMount={moreLinkDidMount}
+          moreLinkHint="查看更多工作项"
           height="100%"
           loading={setLoading}
         />
