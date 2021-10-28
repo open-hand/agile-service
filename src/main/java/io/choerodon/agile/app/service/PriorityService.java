@@ -62,7 +62,7 @@ public interface PriorityService {
      * @param organizationId 组织
      * @return 更新是否成功
      */
-    List<PriorityVO> updateByList(List<PriorityVO> list, Long organizationId);
+    void updateByList(List<PriorityVO> list, Long organizationId);
 
     Map<Long, PriorityVO> queryByOrganizationId(Long organizationId);
 

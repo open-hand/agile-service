@@ -2,11 +2,14 @@ package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.SprintSearchVO;
+import io.choerodon.agile.api.vo.StoryMapStoryVO;
 import io.choerodon.agile.api.vo.business.StoryMapDragVO;
 import io.choerodon.agile.api.vo.StoryMapVO;
 import io.choerodon.agile.app.service.StoryMapService;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
 import io.swagger.annotations.ApiOperation;
@@ -50,12 +53,14 @@ public class StoryMapController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询故事地图需求池")
     @PostMapping("/demand")
-    public ResponseEntity<StoryMapVO> queryStoryMapDemand(@ApiParam(value = "项目id", required = true)
-                                                          @PathVariable(name = "project_id") Long projectId,
-                                                          @ApiParam(value = "search DTO", required = true)
-                                                          @RequestBody SearchVO searchVO) {
+    public ResponseEntity<Page<StoryMapStoryVO>> queryStoryMapDemand(@ApiParam(value = "项目id", required = true)
+                                                                     @PathVariable(name = "project_id") Long projectId,
+                                                                     @ApiParam(value = "search DTO", required = true)
+                                                                     @RequestBody SearchVO searchVO,
+                                                                     @ApiParam(value = "分页信息", required = true)
+                                                                     PageRequest pageRequest) {
         EncryptionUtils.decryptSearchVO(searchVO);
-        return Optional.ofNullable(storyMapService.queryStoryMapDemand(projectId, searchVO))
+        return Optional.ofNullable(storyMapService.queryStoryMapDemand(projectId, searchVO, pageRequest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.storyMapDemand.get"));
     }

@@ -87,10 +87,10 @@ public class PriorityController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "更新展示顺序")
     @PutMapping(value = "/sequence")
-    public ResponseEntity<List<PriorityVO>> updateByList(@PathVariable("organization_id") Long organizationId,
-                                                         @RequestBody List<PriorityVO> list) {
-
-        return new ResponseEntity<>(priorityService.updateByList(list, organizationId), HttpStatus.OK);
+    public ResponseEntity<Void> updateByList(@PathVariable("organization_id") Long organizationId,
+                                             @RequestBody List<PriorityVO> list) {
+        priorityService.updateByList(list, organizationId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
