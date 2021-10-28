@@ -66,6 +66,7 @@ function numToStringWithoutZero(num, digits = 2) {
                 }}
                 onClick={() => {
                   openRecordWorkLogModal({
+                    projectId: store.projectId,
                     issueId,
                     onOk: () => {
                       reloadIssue(issueId);
