@@ -51,11 +51,11 @@ const AssigneeModal = ({ data }) => {
     )),
   }, {
     name: 'issueCount',
-    width: 85,
+    width: 95,
     renderer: ({ text }) => (text || '无'),
   }, {
     name: 'remainingIssueCount',
-    width: 95,
+    width: 110,
     renderer: ({ text }) => (text || '无'),
   }, {
     name: 'totalStoryPoints',
