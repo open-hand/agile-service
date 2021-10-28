@@ -1,14 +1,14 @@
 import React from 'react';
 import { Modal, DataSet } from 'choerodon-ui/pro';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
-import ExportLog from './ExportLog';
+import ExportLog, { IExportProps } from './ExportLog';
 import styles from './ExportLog.less';
 
-function openExportLogModal(props: { exportDs: DataSet}) {
+function openExportLogModal(props: IExportProps) {
   Modal.open({
     maskClosable: false,
     key: Modal.key(),
-    title: '导出工时日志',
+    title: props.title || '导出',
     style: {
       width: MODAL_WIDTH.small,
     },

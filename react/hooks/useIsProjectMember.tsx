@@ -12,7 +12,7 @@ const useIsProjectMember = (projectId?: string) => {
     if (res.list && res.list.length > 0) {
       setUserInfo(res.list[0]);
     }
-  }, []);
+  }, [projectId]);
 
   useEffect(() => {
     refresh();

@@ -1,13 +1,14 @@
 import { getIsOrganization, getOrganizationId, getProjectId } from '@/utils/common';
 import Api from './Api';
 
-export interface ILogData {
+export interface IWorkingHoursData {
   userIds: string[],
   projectIds?: string[],
   startTime: string,
   endTime: string,
 }
 
+export type WorkingHoursExportAction = 'download_file_work_hours_log' | 'download_file_work_hours_calendar'
 class WorkingHoursApi extends Api<WorkingHoursApi> {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
@@ -17,7 +18,7 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
     return `/agile/v1/organizations/${getOrganizationId()}`;
   }
 
-  getLogs(params: any, data: ILogData) {
+  getLogs(params: any, data: IWorkingHoursData) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/work_hours/work_hours_log`,
@@ -29,7 +30,7 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
     });
   }
 
-  orgGetLogs(params: any, data: ILogData) {
+  orgGetLogs(params: any, data: IWorkingHoursData) {
     return this.request({
       method: 'post',
       url: `${this.orgPrefix}/work_hours/work_hours_log`,
@@ -40,7 +41,7 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
     });
   }
 
-  exportLog(data: ILogData) {
+  exportLog(data: IWorkingHoursData) {
     return this.request({
       method: 'post',
       url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/work_hours/export_work_hours_log`,
@@ -51,14 +52,63 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
     });
   }
 
-  getLatest() {
+  getLatest(action: WorkingHoursExportAction) {
     return this.request({
       method: 'get',
       url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/excel/latest`,
       params: {
         organizationId: getOrganizationId(),
-        action: 'download_file_work_hours_log',
+        action,
       },
+    });
+  }
+
+  getCalendar({ params, data }:{params?: { page: number, size: number }, data: IWorkingHoursData}) {
+    return this.request({
+      method: 'post',
+      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/work_hours/work_hours_calendar`,
+      params: {
+        organizationId: getOrganizationId(),
+        ...params,
+      },
+      data,
+    });
+  }
+
+  getCount(data: IWorkingHoursData) {
+    return this.request({
+      method: 'post',
+      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/work_hours/count_work_hours`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+      data,
+    });
+  }
+
+  getUserCalendar(userId: string, startTime: string, endTime: string) {
+    return this.request({
+      method: 'post',
+      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/work_hours/work_hours_calendar_info`,
+      params: {
+        organizationId: getOrganizationId(),
+        userId,
+      },
+      data: {
+        startTime,
+        endTime,
+      },
+    });
+  }
+
+  exportCalendar(data: IWorkingHoursData) {
+    return this.request({
+      method: 'post',
+      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/work_hours/export_work_hours_calendar`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+      data,
     });
   }
 }
