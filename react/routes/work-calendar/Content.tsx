@@ -69,6 +69,7 @@ const WorkCalendar = observer(() => {
       defaultAssignee: AppState.userInfo,
       extendRequiredCodes: ['estimatedStartTime', 'estimatedEndTime', 'assignee'],
       defaultValues,
+      menuType: 'org',
       onCreate: (issue: Issue) => {
         const calenderApi = calendarRef.current?.getApi();
         if (calenderApi && clearSelect) {
