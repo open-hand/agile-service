@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Page, Header, Content, Breadcrumb, HeaderButtons,
+  Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
 import { EmptyPage, FlatSelect } from '@choerodon/components';
 import { find } from 'lodash';
+
 import TableCache from '@/components/table-cache';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { getMenuType, getProjectId } from '@/utils/common';
@@ -11,6 +12,7 @@ import { ganttApi } from '@/api';
 import noDataPic from '@/assets/image/NoData.svg';
 import Gantt from './Gantt';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
+
 // eslint-disable-next-line react/require-default-props
 const GanttProject: React.FC<{ projectId: string, menuType?: 'project' | 'org', HeadSelect?: JSX.Element, [key: string]: any }> = ({
   projectId, projects, setCurrentProject, menuType = 'project',
@@ -62,6 +64,7 @@ const GanttOrg = () => {
   }
   return <GanttProject projectId={currentProject} setCurrentProject={setCurrentProject} projects={projectIds} menuType="org" projectIds={projectIds} />;
 };
+
 const GanttProjectOrg = () => {
   if (getMenuType() === 'project') {
     return (

@@ -23,7 +23,7 @@ import openTransformSubIssue from './TransformSubIssue/TransformSubIssue';
 import openTransformFromSubIssue from './IssueBody/TransformFromSubIssue';
 
 const IssueDropDown = ({
-  onDeleteIssue, loginUserId, reloadIssue, testLinkStoreRef, onIssueCopy, onUpdate, onChangeParent, onRelateIssue, onTransformSubIssue, onOpenCreateSubTask, onOpenCreateSubBug,
+  onDeleteIssue, loginUserId, reloadIssue, onIssueRecordTime, testLinkStoreRef, onIssueCopy, onUpdate, onChangeParent, onRelateIssue, onTransformSubIssue, onOpenCreateSubTask, onOpenCreateSubBug,
 }) => {
   const {
     store, applyType,
@@ -78,7 +78,14 @@ const IssueDropDown = ({
   const handleClickMenu = async (e) => {
     if (e.key === '0') {
       // store.setWorkLogShow(true);
-      openRecordWorkLogModal({ issueId, projectId: store.projectId, onOk: () => reloadIssue(issueId) });
+      openRecordWorkLogModal({
+        issueId,
+        projectId: store.projectId,
+        onOk: async () => {
+          reloadIssue(issueId);
+          onIssueRecordTime();
+        },
+      });
     } else if (e.key === 'item_11') {
       handleDeleteIssue();
     } else if (e.key === '2') {

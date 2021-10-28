@@ -211,7 +211,7 @@ class IssueApi extends Api<IssueApi> {
     * @param applyType 应用类型
     */
   updateStatus(transformId: number, issueId: number, objectVersionNumber: number, applyType = 'agile') {
-    return axios({
+    return this.request({
       method: 'put',
       url: `${this.prefix}/issues/update_status`,
       params: {

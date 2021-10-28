@@ -37,21 +37,39 @@ function format(h: number) {
 const GanttBar: React.FC<GanttBarProps> = ({
   type, bar, width, height, onClick, dateKeyRange,
 }) => {
-  const { store } = useContext(Context);
+  const { store, processType } = useContext(Context);
   const { ganttRef } = store;
   const estimateRef = useRef<HTMLDivElement>(null);
   const {
-    record: issue, loading, stepGesture, task, middleWidthList, dateMaps,
+    record: issue, loading, stepGesture, task, dateMaps,
   } = bar;
 
   const statusType = issue.statusVO.type;
   const subTasks = issue.children ? issue.children.filter((i) => i.issueTypeVO?.typeCode === 'sub_task') : [];
-  const hasChildren = subTasks && subTasks.length > 0;
-  const totalCount = subTasks?.length || 0;
-  const completeCount = subTasks?.filter((item) => item.completed).length || 0;
+  const {
+    showPercent, totalCount, completeCount, percent,
+  }: any = useComputed(() => {
+    const process = {
+      showPercent: type !== 'assignee' && subTasks && subTasks.length > 0,
+      totalCount: subTasks?.length || 0,
+      completeCount: subTasks?.filter((item) => item.completed).length || 0,
+      percent: 0,
+    } as any;
+    if (processType === 'task') {
+      process.percent = process.totalCount ? process.completeCount / process.totalCount : 0;
+      return process;
+    }
+    process.showPercent = true;
+    process.percent = issue.workTimePercentage;
+    const fakeCompleteCount = Math.ceil(process.percent * 100);
+    process.completeCount = fakeCompleteCount;
+    process.totalCount = 100;
+    return process as any;
+  }, [type, processType, issue.workTimePercentage, subTasks]);
+
   // @ts-ignore
   const [color1, color2] = STATUS_COLOR[statusType];
-  const percent = totalCount ? completeCount / totalCount : 0;
+  // const percent = totalCount ? completeCount / totalCount : 0;
   let diff = 0;
   const delayDiff = 0;
   if (issue.estimatedStartTime && issue.estimatedEndTime) {
@@ -78,21 +96,22 @@ const GanttBar: React.FC<GanttBarProps> = ({
       fragmentWidth = estimatedEndTime.width - actualStartTime.width;
       left = fragmentWidth > 0 ? (actualStartTime as Gantt.DateWithWidth).width : estimatedEndTime.width;
     }
-    let delay = Math.max(0, Math.abs(actualEndTime.width - estimatedEndTime.width));
-    console.log('fragmentWidth', fragmentWidth);
+    let delay = 0;
     if (fragmentWidth > 0) {
-      delay = 0;
+      delay = actualEndTime.width - estimatedEndTime.width;
     }
     if (fragmentWidth > 0 && actualStartTime.width > estimatedEndTime.width) {
       fragmentWidth += actualStartTime.unitWidth;
       left -= actualStartTime.unitWidth;
       delay = fragmentWidth;
     }
+    // if (issue.statusVO.type === 'done') {
+    //   delay = 0;
+    // }
 
     fragmentWidth = Math.abs(fragmentWidth);
     delay = Math.min(fragmentWidth, delay);
-
-    // left = Math.max(0, left);
+    delay = Math.max(0, delay);
     return {
       width: fragmentWidth, left, delayWidth: delay, processWidth: fragmentWidth - delay,
     };
@@ -113,7 +132,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
       return 0;
     }
     const dWidth = ganttRef.current?.getWidthByDate(dayjs(estimatedEndTime.value), dayjs());
-    return dWidth && dWidth > 0 ? dWidth : 0;
+    return dWidth && dWidth > 0 ? dWidth - estimatedEndTime.unitWidth / 2 + 5 : 0;
   })();
   const delayVisible = !(issue.statusVO.type === 'done') && !actualEndTime.width && (stepGesture !== 'moving') && !loading;
   const operateWidth = actualEndTime.value ? width - delayWidth : width;
@@ -142,7 +161,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
               {format(delayDiff)}
             </div>
           )}
-          {type !== 'assignee' && hasChildren && (
+          {showPercent && (
             <div>
               当前进度：
               {`${Math.round(percent * 100 * 100) / 100}%`}
@@ -168,7 +187,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
       ),
       placement: 'topLeft',
     } as TooltipProps),
-    [diff, hasChildren, issue.actualEndTime, issue.actualStartTime, issue.estimatedEndTime, issue.estimatedStartTime, issue.statusVO.name, issue.summary, percent, type],
+    [diff, showPercent, issue.actualEndTime, issue.actualStartTime, issue.estimatedEndTime, issue.estimatedStartTime, issue.statusVO.name, issue.summary, percent],
   );
   const handleTooltipMouseLeave = useCallback(() => Tooltip.hide(), []);
   return (

@@ -36,7 +36,7 @@ function numToStringWithoutZero(num, digits = 2) {
 
   render() {
     const {
-      store, disabled, issueId, reloadIssue,
+      store, disabled, issueId, reloadIssue, onIssueRecordTime,
     } = this.props;
     const issue = store.getIssue;
     const { remainingTime } = issue;
@@ -65,7 +65,13 @@ function numToStringWithoutZero(num, digits = 2) {
                   cursor: 'pointer',
                 }}
                 onClick={() => {
-                  openRecordWorkLogModal({ issueId, onOk: () => reloadIssue(issueId) });
+                  openRecordWorkLogModal({
+                    issueId,
+                    onOk: () => {
+                      reloadIssue(issueId);
+                      onIssueRecordTime();
+                    },
+                  });
                   // store.setWorkLogShow(true);
                 }}
               >

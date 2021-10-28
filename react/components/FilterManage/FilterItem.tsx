@@ -29,11 +29,11 @@ const FilterItem: React.FC<Props> = ({
   const menuConfig = useMemo(() => (menuType === 'project' ? ({
     update: (updateData: UPersonalFilter) => personalFilterApi.project(projectId).update(filterId, updateData),
     checkName: (newName: string) => personalFilterApi.project(projectId).checkName(newName),
-    delete: () => personalFilterApi.project(projectId).checkName(filterId),
+    delete: () => personalFilterApi.project(projectId).delete(filterId),
   }) : ({
     update: (updateData: UPersonalFilter) => personalFilterApi.update(filterId, updateData),
     checkName: (newName: string) => personalFilterApi.checkName(newName),
-    delete: () => personalFilterApi.checkName(filterId),
+    delete: () => personalFilterApi.delete(filterId),
   })), [filterId, menuType, projectId]);
   const valueRef = useRef<string>(name);
   const inputRef = useRef() as MutableRefObject<ObserverTextField>;

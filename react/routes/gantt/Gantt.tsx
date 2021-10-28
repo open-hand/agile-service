@@ -428,6 +428,10 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
       handleCreateIssue(newIssue);
     }
   });
+  const handleRecordTime = usePersistFn((oldIssue: Issue) => {
+    const influenceIssueIds = [...((oldIssue as any).influenceIssueIds || []), oldIssue.parentIssueId].filter(Boolean);
+    updateInfluenceIssues({ ...oldIssue, influenceIssueIds });
+  });
   const handleChangeParent = usePersistFn((newIssue: Issue, oldIssue: Issue) => {
     handleIssueDelete(oldIssue);
     handleCreateIssue(newIssue);
@@ -657,7 +661,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
         }}
       >
         <Context.Provider value={{
-          store, searchFilter, dimensionType: type, menuType, disable: menuType === 'org', projectId,
+          store, searchFilter, dimensionType: type, menuType, disable: menuType === 'org', projectId, processType,
         }}
         >
           <div style={{ display: 'flex', flexWrap: 'wrap' }}>
@@ -711,6 +715,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
           )}
           <IssueDetail
             refresh={run}
+            onRecordTime={handleRecordTime}
             onUpdate={handleIssueUpdate}
             onDelete={handleIssueDelete}
             onDeleteSubIssue={handleDeleteSubIssue}

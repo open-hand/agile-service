@@ -65,6 +65,11 @@ function EditIssue() {
   const onCancel = useCallback(() => {
     close();
   }, [close]);
+  const onIssueRecordTime = useCallback(() => {
+    if (issueEvents?.recordTime) {
+      issueEvents?.recordTime(store.issue);
+    }
+  }, [issueEvents, store.issue]);
   const onIssueCopy = useCallback((issue, issueId, isSubTask, dontCopyEpic) => {
     const callback = issueEvents?.copy || issueEvents?.update;
     if (callback) {
@@ -385,6 +390,7 @@ function EditIssue() {
           otherProject={otherProject || String(issue?.projectId) !== String(getProjectId())}
           outside={outside}
           onTransformType={onTransformType}
+          onIssueRecordTime={onIssueRecordTime}
           onOpenCreateSubTask={handleOpenCreateSubTask}
           onOpenCreateSubBug={handleOpenCreateSubBug}
           showProjectInfo={showProjectInfo}
@@ -402,6 +408,7 @@ function EditIssue() {
           reloadIssue={loadIssueDetail}
           onUpdate={onUpdate}
           onIssueCopy={onIssueCopy}
+          onIssueRecordTime={onIssueRecordTime}
           onCreateSubIssue={onCreateSubIssue}
           onDeleteSubIssue={onDeleteSubIssue}
           onLinkIssue={onLinkIssue}
