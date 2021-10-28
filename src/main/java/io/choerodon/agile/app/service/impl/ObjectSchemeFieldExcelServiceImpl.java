@@ -386,7 +386,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         int jumpRow = isKeyValue(sheet.getRow(r)) ? 0 : 1;
         if (CollectionUtils.isEmpty(objectSchemeFieldCreate.getFieldOptions())) {
             Row row = sheet.getRow(r);
-            row.createCell(5).setCellValue(buildWithErrorMsg("", "字段列表不能为空"));
+            row.createCell(5).setCellValue(buildWithErrorMsg("", "字段选项不能为空"));
             addErrorColumn(row.getRowNum(), 5, errorRowColMap);
             addErrorColumn(r, 10, errorRowColMap);
             return;
