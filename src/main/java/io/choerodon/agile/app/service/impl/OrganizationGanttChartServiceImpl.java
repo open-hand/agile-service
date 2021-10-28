@@ -194,7 +194,7 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
                                                                 PageRequest pageRequest) {
         List<ProjectVO> projects = listAgileProjects(organizationId, null, null, null);
         Map<Long, ProjectVO> projectMap = projects.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
-        List<Long> projectIds = new ArrayList<>(projectMap.keySet());
+        Set<Long> projectIds = projectMap.keySet();
         if (ObjectUtils.isEmpty(projectIds)) {
             return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }
@@ -203,19 +203,51 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         boardAssembler.handleOtherArgs(searchVO);
         Map<String, Object> sortMap = new HashMap<>();
         ganttChartService.processSort(pageRequest, sortMap);
+        Set<Long> filterProjectIds = filterByTeamProjectIds(projectIds, searchVO);
+        if (ObjectUtils.isEmpty(filterProjectIds)) {
+            return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
+        }
         Page<IssueDTO> issuePage =
                 PageHelper.doPage(pageRequest, () -> issueMapper.selectConflictEstimatedTime(
-                        new HashSet<>(projectIds),
+                        filterProjectIds,
                         new HashSet<>(Arrays.asList(assigneeId)),
                         searchVO,
                         filterSql,
                         searchVO.getAssigneeFilterIds(),
                         sortMap));
         List<IssueDTO> issues = issuePage.getContent();
+        if (issues.isEmpty()) {
+            return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
+        }
+        Map<Long, ProjectVO> filterProjectMap = new HashMap<>();
+        projectMap.forEach((k, v) -> {
+            if (filterProjectIds.contains(k)) {
+                filterProjectMap.put(k, v);
+            }
+        });
         List<Long> issueIds = issues.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-        List<IssueDTO> issueList = issueMapper.selectWithSubByIssueIds(new HashSet<>(projectIds), issueIds, sortMap, false, null);
-        List<GanttChartVO> result = ganttChartService.buildGanttList(projectMap, issueIds, issueList, Collections.emptyMap(), Collections.emptyMap(), Collections.emptyList(), organizationId);
+        List<IssueDTO> issueList = issueMapper.selectWithSubByIssueIds(filterProjectIds, issueIds, sortMap, false, null);
+        List<GanttChartVO> result = ganttChartService.buildGanttList(filterProjectMap, issueIds, issueList, Collections.emptyMap(), Collections.emptyMap(), Collections.emptyList(), organizationId);
         return PageUtils.copyPropertiesAndResetContent(issuePage, result);
+    }
+
+    private Set<Long> filterByTeamProjectIds(Set<Long> projectIds, SearchVO searchVO) {
+        Map<String, Object> searchArgs = searchVO.getSearchArgs();
+        if (ObjectUtils.isEmpty(searchArgs)) {
+            return projectIds;
+        }
+        List<String> teamProjectIds = (List<String>) searchArgs.get("teamProjectIds");
+        if (ObjectUtils.isEmpty(teamProjectIds)) {
+            return projectIds;
+        }
+        Set<Long> result = new HashSet<>();
+        teamProjectIds.forEach(idStr -> {
+            Long id = Long.valueOf(idStr);
+            if (projectIds.contains(id)) {
+                result.add(id);
+            }
+        });
+        return result;
     }
 
     private Long getTeamProjectId(SearchVO searchVO) {

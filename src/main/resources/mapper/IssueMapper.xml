@@ -5383,7 +5383,6 @@
                 <foreach collection="assigneeIds" item="assigneeId" open="(" separator="," close=")">
                     #{assigneeId}
                 </foreach>
-                and ai.type_code in ('story', 'bug', 'task', 'sub_task')
                 and ai.estimated_start_time is not null
                 and ai.estimated_end_time is not null
                 <if test="searchVO != null">
@@ -5434,7 +5433,6 @@
                 <foreach collection="assigneeIds" item="assigneeId" open="(" separator="," close=")">
                     #{assigneeId}
                 </foreach>
-                and ai.type_code in ('story', 'bug', 'task', 'sub_task')
                 and ai.estimated_start_time is not null
                 and ai.estimated_end_time is not null
                 <if test="searchVO != null">
