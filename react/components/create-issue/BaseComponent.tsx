@@ -55,6 +55,7 @@ export interface CreateIssueBaseProps {
   onAfterSubmitError?: ({ data, fieldList }: CreateIssueBaseCallbackData, errorData: any) => void | Promise<boolean> | boolean,
   modal?: IModalProps,
   projectId?: string,
+  menuType?: 'project' | 'org',
   defaultTypeCode?: string
   defaultTypeId?: string
   defaultAssignee?: {
@@ -208,6 +209,7 @@ const CreateIssueBase = observer(({
   isProgram,
   showSelectProject = false,
   extendRequiredCodes = [],
+  menuType = 'project',
 }: CreateIssueBaseProps) => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
@@ -634,6 +636,8 @@ const CreateIssueBase = observer(({
           isProgram,
           config: {
             typeCode,
+            projectId,
+            menuType: menuType ?? 'project',
           },
         };
       }
