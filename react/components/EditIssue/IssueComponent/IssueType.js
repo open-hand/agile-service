@@ -13,7 +13,7 @@ import openRequiredFieldsModal from './required-fields';
 const IssueType = observer(({
   reloadIssue, applyType, onTransformType,
 }) => {
-  const { store, disabled } = useContext(EditIssueContext);
+  const { store, disabled, menuType } = useContext(EditIssueContext);
   let { data: issueTypeData } = useProjectIssueTypes({ onlyEnabled: true, applyType, projectId: store.projectId }, { enabled: !disabled });
   const handleChangeType = async (type) => {
     const issue = store.getIssue;
@@ -116,7 +116,7 @@ const IssueType = observer(({
     issueTypeData = issueTypeData.filter((item, i) => item.stateMachineId !== stateMachineId && item.typeCode === 'sub_task');
   } else {
     issueTypeData = issueTypeData.filter((item) => item.stateMachineId !== stateMachineId).filter((item) => !['feature', 'sub_task'].includes(item.typeCode));
-    if (isInProgram) {
+    if (isInProgram || menuType === 'org') {
       issueTypeData = issueTypeData.filter((item) => item.typeCode !== 'issue_epic');
     }
   }
