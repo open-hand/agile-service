@@ -15,6 +15,8 @@ export interface SelectCustomFieldBasicProps extends Partial<SelectProps> {
   organizationId?: string
   outside?: boolean
   ruleIds?: string[]
+  menuType?:'project'|'organization'
+
   afterLoad?: (data: any) => void
 }
 // 参数互斥，要么传fieldId，要么传fieldOptions
@@ -34,7 +36,7 @@ export type SelectCustomFieldProps = SelectCustomFieldBasicProps & ({
 })
 const SIZE = 0;
 const SelectCustomField: React.FC<SelectCustomFieldProps> = forwardRef(({
-  fieldId, fieldOptions, flat, projectId, afterLoad, organizationId, selected, extraOptions, ruleIds, outside = false, onlyEnabled = true, ...otherProps
+  fieldId, fieldOptions, flat, projectId, afterLoad, organizationId, selected, extraOptions, ruleIds, outside = false, onlyEnabled = true, menuType, ...otherProps
 },
 ref: React.Ref<SelectBox>) => {
   const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
@@ -60,7 +62,8 @@ ref: React.Ref<SelectBox>) => {
       if (hasRule && fieldId) {
         return fieldApi.project(projectId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, SIZE);
       }
-      return fieldOptions ? fakePageRequest(filter, page, SIZE, needOptions, onlyEnabled) : fieldApi.outside(outside).org(organizationId).project(projectId).getFieldOptions(fieldId!, filter, page, SIZE, needOptions, onlyEnabled);
+      return fieldOptions ? fakePageRequest(filter, page, SIZE, needOptions, onlyEnabled) : fieldApi.outside(outside).org(organizationId).project(projectId).menu(menuType)
+        .getFieldOptions(fieldId!, filter, page, SIZE, needOptions, onlyEnabled);
     },
     middleWare: (data) => {
       if (!extraOptions) {

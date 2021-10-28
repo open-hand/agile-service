@@ -85,7 +85,30 @@ const valueTypeConfigMap: ICreateComponentPropsDistributeProRender<ICreateCustom
   },
   multiple: {
     render: (text) => (Array.isArray(text) ? text.join('、') : text),
+    // @ts-ignore
+    props: {
+      menuType: 'project',
+    },
   },
+  single: {
+    // @ts-ignore
+    props: {
+      menuType: 'project',
+    },
+  },
+  checkbox: {
+    // @ts-ignore
+    props: {
+      menuType: 'project',
+    },
+  },
+  radio: {
+    // @ts-ignore
+    props: {
+      menuType: 'project',
+    },
+  },
+
 };
 
 const systemFieldConfigMap: ICreateComponentPropsDistributeProRender<typeof AgileComponentMapWithPro & {
@@ -184,7 +207,6 @@ const systemFieldConfigMap: ICreateComponentPropsDistributeProRender<typeof Agil
 };
 
 const fieldMap = {
-  ...valueTypeConfigMap,
   ...systemFieldConfigMap,
 };
 
@@ -197,7 +219,7 @@ const getCreateFields = getFieldsInstance<IFieldBaseConfig, typeof AgileComponen
  * @param field
  */
 const getCreateFieldConfig = (field: { fieldCode: string, fieldType: string }): Required<Pick<ProRenderFieldPropsType, 'render' | 'renderFormItem'>> & Pick<ProRenderFieldPropsType, 'valueKey'> => {
-  const config = fieldMap[field.fieldCode as keyof typeof fieldMap] ?? fieldMap[field.fieldType as keyof typeof fieldMap];
+  const config = fieldMap[field.fieldCode as keyof typeof fieldMap] ?? valueTypeConfigMap[field.fieldType as keyof typeof valueTypeConfigMap];
 
   const createConfig = getCreateFields([{
     code: field.fieldCode,

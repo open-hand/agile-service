@@ -53,7 +53,7 @@ class FieldApi extends Api<FieldApi> {
     if (this.isOutside) {
       return `${this.outPrefix}/field_value`;
     }
-    return `/agile/v1/${getMenuType() === 'project' ? `projects/${this.projectId}/field_value` : `organizations/${this.orgId}/object_scheme_field`}`;
+    return `/agile/v1/${this.menuType === 'project' ? `projects/${this.projectId}/field_value` : `organizations/${this.orgId}/object_scheme_field`}`;
   }
 
   outside(outside: boolean) {
