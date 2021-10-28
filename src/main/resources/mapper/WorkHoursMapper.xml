@@ -39,6 +39,65 @@
         ) wl
     </select>
 
+    <select id="listGroupDataByProjectIds" resultType="io.choerodon.agile.api.vo.WorkHoursLogVO">
+        select
+            wl.summary,
+            wl.issue_num_convert,
+            SUM(wl.work_time) as work_time,
+            wl.project_id,
+            wl.user_id,
+            wl.start_date,
+            wl.issue_id,
+            wl.estimate_time
+        from
+        (
+            select
+            ai.summary,
+            CONVERT(ai.issue_num,SIGNED) as issue_num_convert,
+            awl.work_time,
+            awl.project_id,
+            awl.created_by as user_id,
+            DATE_FORMAT(awl.start_date,'%Y-%m-%d') as start_date,
+            ai.issue_id,
+            ai.estimate_time
+            from agile_work_log awl
+            JOIN agile_issue ai on ai.issue_id = awl.issue_id
+            LEFT JOIN agile_project_info api on api.project_id = ai.project_id
+            where awl.project_id in
+            <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                #{projectId}
+            </foreach>
+            <if test="workHoursSearchVO.userIds != null and workHoursSearchVO.userIds.size > 0">
+                and awl.created_by in
+                <foreach collection="workHoursSearchVO.userIds" item="userId" open="(" close=")" separator=",">
+                    #{userId}
+                </foreach>
+            </if>
+            <if test="workHoursSearchVO.startTime != null and workHoursSearchVO.endTime != null">
+                and awl.start_date between #{workHoursSearchVO.startTime} and #{workHoursSearchVO.endTime}
+            </if>
+        ) wl
+        group by
+            wl.issue_id,
+            wl.user_id,
+            wl.start_date,
+            wl.project_id
+        order by wl.start_date
+    </select>
+    
+    <select id="selectUserIds" resultType="java.lang.Long">
+        select
+         awl.created_by
+        from agile_work_log awl
+        where awl.project_id in
+        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+            #{projectId}
+        </foreach>
+        <if test="workHoursSearchVO.startTime != null and workHoursSearchVO.endTime != null">
+            and awl.start_date between #{workHoursSearchVO.startTime} and #{workHoursSearchVO.endTime}
+        </if>
+    </select>
+
     <select id="queryIssue" resultType="io.choerodon.agile.api.vo.business.IssueVO">
         select * from (
             select

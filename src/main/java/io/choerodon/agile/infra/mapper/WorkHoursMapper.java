@@ -6,6 +6,7 @@ import io.choerodon.agile.api.vo.business.IssueVO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author zhaotianxin
@@ -14,6 +15,10 @@ import java.util.List;
 public interface WorkHoursMapper {
 
     List<WorkHoursLogVO> listByProjectIds(@Param("projectIds") List<Long> projectIds, @Param("workHoursSearchVO") WorkHoursSearchVO workHoursSearchVO);
+
+    List<WorkHoursLogVO> listGroupDataByProjectIds(@Param("projectIds") List<Long> projectIds, @Param("workHoursSearchVO") WorkHoursSearchVO workHoursSearchVO);
+
+    Set<Long> selectUserIds(@Param("projectIds") List<Long> projectIds, @Param("workHoursSearchVO") WorkHoursSearchVO workHoursSearchVO);
 
     List<IssueVO> queryIssue(@Param("projectId") Long projectId, @Param("params") String params);
 }

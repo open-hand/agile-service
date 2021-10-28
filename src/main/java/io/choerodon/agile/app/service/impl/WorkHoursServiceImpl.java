@@ -112,7 +112,7 @@ public class WorkHoursServiceImpl implements WorkHoursService {
         }
         List<Long> userIds = page.getContent().stream().map(UserMessageDTO::getId).collect(Collectors.toList());
         workHoursSearchVO.setUserIds(userIds);
-        List<WorkHoursLogVO> workHoursLogVOS = workHoursMapper.listByProjectIds(projectIds, workHoursSearchVO);
+        List<WorkHoursLogVO> workHoursLogVOS = workHoursMapper.listGroupDataByProjectIds(projectIds, workHoursSearchVO);
         Map<Long, List<WorkHoursLogVO>> workHoursGroup = new HashMap<>();
         if (!CollectionUtils.isEmpty(workHoursLogVOS)) {
             workHoursGroup = workHoursLogVOS.stream().collect(Collectors.groupingBy(WorkHoursLogVO::getUserId));
@@ -152,16 +152,12 @@ public class WorkHoursServiceImpl implements WorkHoursService {
                                              WorkHoursSearchVO workHoursSearchVO,
                                              Boolean isOrg) {
         Page<UserMessageDTO> page = new Page<>();
-        if(!CollectionUtils.isEmpty(workHoursSearchVO.getUserIds())){
-            List<UserMessageDTO> userMessageDTOMap = userService.queryUsers(workHoursSearchVO.getUserIds(), true);
-            if(CollectionUtils.isEmpty(userMessageDTOMap)){
-                userMessageDTOMap = new ArrayList<>();
-            }
-            // 手动分页
-            page = buildPage(pageRequest, userMessageDTOMap);
+        if (!CollectionUtils.isEmpty(workHoursSearchVO.getUserIds())){
+            page = queryUserAndBuildPage(workHoursSearchVO.getUserIds(), pageRequest);
         } else {
             if (Boolean.TRUE.equals(isOrg)) {
-                page = userService.queryUserByOrganizationId(organizationId, pageRequest.getPage(), pageRequest.getSize(), true);
+                Set<Long> userIds = workHoursMapper.selectUserIds(projectIds, workHoursSearchVO);
+                page = queryUserAndBuildPage(new ArrayList<>(userIds), pageRequest);
             } else {
                 page = userService.queryUserByProjectId(projectIds.get(0), pageRequest.getPage(), pageRequest.getSize(), true);
             }
@@ -169,11 +165,20 @@ public class WorkHoursServiceImpl implements WorkHoursService {
         return page;
     }
 
+    private Page<UserMessageDTO> queryUserAndBuildPage(List<Long> userIds, PageRequest pageRequest){
+        if (CollectionUtils.isEmpty(userIds)) {
+            return new Page<>();
+        }
+        List<UserMessageDTO> userMessageDTOS = userService.queryUsers(userIds, true);
+        return buildPage(pageRequest, userMessageDTOS);
+    }
+
     private Page<UserMessageDTO> buildPage(PageRequest pageRequest, List<UserMessageDTO> userMessageDTOS) {
         Page<UserMessageDTO> page = new Page<>();
-        page.setTotalPages(userMessageDTOS.size());
         page.setSize(pageRequest.getSize());
         page.setNumber(pageRequest.getPage());
+        page.setNumberOfElements(userMessageDTOS.size());
+        page.setTotalElements(userMessageDTOS.size());
         List<UserMessageDTO> list = new ArrayList<>();
         if (!CollectionUtils.isEmpty(userMessageDTOS)) {
             int total = userMessageDTOS.size();
@@ -181,7 +186,6 @@ public class WorkHoursServiceImpl implements WorkHoursService {
             int fromIndex = pageRequest.getPage() * size;
             int totalPage = (int) Math.ceil(total / (size * 1.0));
             page.setTotalPages(totalPage);
-            page.setNumberOfElements(total);
             if (fromIndex < total) {
                 int toIndex = (pageRequest.getPage() + 1) * size;
                 list = userMessageDTOS.subList(fromIndex, (toIndex > total) ? total : toIndex);
@@ -208,7 +212,7 @@ public class WorkHoursServiceImpl implements WorkHoursService {
         List<Long> userIds = new ArrayList<>();
         userIds.add(userId);
         workHoursSearchVO.setUserIds(userIds);
-        List<WorkHoursLogVO> workHoursLogVOS = workHoursMapper.listByProjectIds(projectIds, workHoursSearchVO);
+        List<WorkHoursLogVO> workHoursLogVOS = workHoursMapper.listGroupDataByProjectIds(projectIds, workHoursSearchVO);
         if (CollectionUtils.isEmpty(workHoursLogVOS)) {
             return new HashMap<>();
         }
@@ -244,7 +248,7 @@ public class WorkHoursServiceImpl implements WorkHoursService {
     @Override
     public Map<String, BigDecimal> countWorkHours(Long organizationId, List<Long> projectIds, WorkHoursSearchVO workHoursSearchVO) {
         checkTimeRange(workHoursSearchVO);
-        List<WorkHoursLogVO> workHoursLogVOS = workHoursMapper.listByProjectIds(projectIds, workHoursSearchVO);
+        List<WorkHoursLogVO> workHoursLogVOS = workHoursMapper.listGroupDataByProjectIds(projectIds, workHoursSearchVO);
         if (CollectionUtils.isEmpty(workHoursLogVOS)) {
             return new HashMap<>();
         }
@@ -270,7 +274,10 @@ public class WorkHoursServiceImpl implements WorkHoursService {
     private void handlerProject(Long organizationId, List<Long> projectIds, Long userId, WorkHoursSearchVO workHoursSearchVO){
         if (CollectionUtils.isEmpty(workHoursSearchVO.getProjectIds())) {
             // 查询有权限的项目
-            Page<ProjectVO> page = baseFeignClient.pagingProjectsByUserId(organizationId, userId, 0, 0, true, "N_AGILE").getBody();
+            ProjectSearchVO projectSearchVO = new ProjectSearchVO();
+            projectSearchVO.setEnable(true);
+            projectSearchVO.setCategoryCodes(Arrays.asList("N_AGILE"));
+            Page<ProjectVO> page = baseFeignClient.listWithCategoryByOrganizationIds(organizationId, projectSearchVO, 0, 0).getBody();
             if (!CollectionUtils.isEmpty(page.getContent())) {
                 projectIds.addAll(page.getContent().stream().map(ProjectVO::getId).collect(Collectors.toList()));
             }
