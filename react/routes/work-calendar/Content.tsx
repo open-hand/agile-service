@@ -89,6 +89,7 @@ const WorkCalendar = observer(() => {
         issueId: event?.id,
         projectId: event?.extendedProps?.projectId,
         showProjectInfo: true,
+        menuType: 'org',
       },
       events: {
         update: () => {
