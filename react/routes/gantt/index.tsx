@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Page, Header, Content, Breadcrumb, HeaderButtons,
+  Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
 import { EmptyPage, FlatSelect } from '@choerodon/components';
 import { find } from 'lodash';
-import {
-  Tooltip, Icon, Button, CheckBox, Select,
-} from 'choerodon-ui/pro';
+
 import TableCache from '@/components/table-cache';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { getMenuType, getProjectId } from '@/utils/common';
@@ -15,7 +13,6 @@ import noDataPic from '@/assets/image/NoData.svg';
 import Gantt from './Gantt';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 
-const { Option } = Select;
 // eslint-disable-next-line react/require-default-props
 const GanttProject: React.FC<{ projectId: string, menuType?: 'project' | 'org', HeadSelect?: JSX.Element, [key: string]: any }> = ({
   projectId, projects, setCurrentProject, menuType = 'project',
@@ -67,39 +64,8 @@ const GanttOrg = () => {
   }
   return <GanttProject projectId={currentProject} setCurrentProject={setCurrentProject} projects={projectIds} menuType="org" projectIds={projectIds} />;
 };
+
 const GanttProjectOrg = () => {
-  console.log('......');
-  const [value, setValue] = useState('4');
-  const [option, setOption] = useState<any[]>([]);
-  const ref = useRef<any>();
-  useEffect(() => {
-    setTimeout(() => {
-      console.log('ref', ref);
-      // ref.current?.checkValue();
-    }, 1000);
-  }, []);
-  return (
-    <div style={{ margin: 40 }}>
-      22
-      <Button onClick={() => setOption((old) => [...old, old.length])}>ADD</Button>
-      <FlatSelect
-        // value={value}
-        valueChangeCheckValue
-        defaultValue={['4']}
-        multiple
-        checkValueOnOptionsChange
-        onChange={(v) => { console.log('onChange', v); }}
-        ref={ref}
-      >
-        <Option value="1">选项</Option>
-        <Option value="2">2选项</Option>
-        <Option value="3">3选项</Option>
-        {option.map((i) => <Option value={i}>{`${i}选项`}</Option>)}
-      </FlatSelect>
-    </div>
-  );
-};
-const GanttProjectOrg0 = () => {
   if (getMenuType() === 'project') {
     return (
       <GanttProject projectId={getProjectId()} />
@@ -107,4 +73,4 @@ const GanttProjectOrg0 = () => {
   }
   return <GanttOrg />;
 };
-export default GanttProjectOrg0;
+export default GanttProjectOrg;

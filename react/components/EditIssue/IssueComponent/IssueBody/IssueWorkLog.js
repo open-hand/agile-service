@@ -8,7 +8,7 @@ import EditIssueContext from '../../stores';
 import Divider from './Divider';
 
 const IssueWorkLog = observer(({
-  reloadIssue, issueId,
+  reloadIssue, issueId, onIssueRecordTime,
 }) => {
   const { store, disabled, projectId } = useContext(EditIssueContext);
 
@@ -41,7 +41,15 @@ const IssueWorkLog = observer(({
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
             <Tooltip placement="topRight" title="登记工作">
-              <Button onClick={() => openRecordWorkLogModal({ issueId, projectId: store.projectId, onOk: () => reloadIssue(issueId) })}>
+              <Button onClick={() => openRecordWorkLogModal({
+                issueId,
+                projectId: store.projectId,
+                onOk: () => {
+                  reloadIssue(issueId);
+                  onIssueRecordTime();
+                },
+              })}
+              >
                 <Icon type="playlist_add icon" />
               </Button>
             </Tooltip>

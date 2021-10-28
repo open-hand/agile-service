@@ -14,9 +14,10 @@ interface Props {
   onTransformType: (newIssue: Issue, oldIssue: Issue) => void
   onChangeParent: (newIssue: Issue, oldIssue: Issue) => void
   onLinkIssue: ({ influenceIssueIds }: { influenceIssueIds?: string[] }) => void
+  onRecordTime: (oldIssue: Issue) => void
 }
 const IssueDetail: React.FC<Props> = ({
-  refresh, onUpdate, onDelete, onDeleteSubIssue, onCreateSubIssue, onCopyIssue, onTransformType, onChangeParent, onLinkIssue,
+  refresh, onUpdate, onDelete, onDeleteSubIssue, onCreateSubIssue, onRecordTime, onCopyIssue, onTransformType, onChangeParent, onLinkIssue,
 }) => {
   const { store, menuType } = useContext(Context);
   const { issueId, programId } = store;
@@ -54,6 +55,7 @@ const IssueDetail: React.FC<Props> = ({
           close: () => {
             handleResetIssue(null);
           },
+          recordTime: onRecordTime,
           copy: onCopyIssue,
           transformType: onTransformType,
           changeParent: onChangeParent,

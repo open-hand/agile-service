@@ -53,17 +53,19 @@ const GanttBar: React.FC<GanttBarProps> = ({
       showPercent: type !== 'assignee' && subTasks && subTasks.length > 0,
       totalCount: subTasks?.length || 0,
       completeCount: subTasks?.filter((item) => item.completed).length || 0,
-      percent: totalCount ? completeCount / totalCount : 0,
+      percent: 0,
     } as any;
     if (processType === 'task') {
+      process.percent = process.totalCount ? process.completeCount / process.totalCount : 0;
       return process;
     }
+    process.showPercent = true;
     process.percent = issue.workTimePercentage;
     const fakeCompleteCount = Math.ceil(process.percent * 100);
     process.completeCount = fakeCompleteCount;
     process.totalCount = 100;
     return process as any;
-  }, [type, processType, subTasks]);
+  }, [type, processType, issue.workTimePercentage, subTasks]);
 
   // @ts-ignore
   const [color1, color2] = STATUS_COLOR[statusType];
