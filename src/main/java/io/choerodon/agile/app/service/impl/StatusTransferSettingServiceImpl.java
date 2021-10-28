@@ -171,7 +171,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
             Boolean subIssue = ("sub_task".equals(issueDTO.getTypeCode())) || ("bug".equals(issueDTO.getTypeCode()) && !ObjectUtils.isEmpty(issueDTO.getRelateIssueId()) && !Objects.equals(0L, issueDTO.getRelateIssueId()));
             if (Boolean.FALSE.equals(subIssue)) {
                 IssueCountDTO issueCountDTO = issueMapper.querySubIssueCount(projectId, issueDTO.getIssueId());
-                if (!Objects.equals(issueCountDTO.getSuccessIssueCount(), issueCountDTO.getIssueCount())) {
+                if (!Objects.equals(0, issueCountDTO.getIssueCount()) && !Objects.equals(issueCountDTO.getSuccessIssueCount(), issueCountDTO.getIssueCount())) {
                     return Boolean.TRUE;
                 }
             }

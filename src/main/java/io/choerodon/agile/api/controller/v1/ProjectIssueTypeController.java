@@ -1,9 +1,11 @@
 package io.choerodon.agile.api.controller.v1;
 
+import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.IssueTypeRankVO;
 import io.choerodon.agile.api.vo.IssueTypeSearchVO;
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.app.service.IssueTypeService;
+import io.choerodon.agile.infra.utils.VerifyUpdateUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * @author superlee
@@ -32,6 +35,8 @@ public class ProjectIssueTypeController {
 
     @Autowired
     private IssueTypeService issueTypeService;
+    @Autowired
+    private VerifyUpdateUtil verifyUpdateUtil;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "项目层分页查询问题类型列表")
@@ -73,11 +78,13 @@ public class ProjectIssueTypeController {
     public ResponseEntity<IssueTypeVO> update(@PathVariable("project_id") Long projectId,
                                               @PathVariable("id") @Encrypt Long issueTypeId,
                                               @RequestParam Long organizationId,
-                                              @RequestBody @Valid IssueTypeVO issueTypeVO) {
+                                              @RequestBody JSONObject jsonObject) {
+        IssueTypeVO issueTypeVO = new IssueTypeVO();
+        List<String> fieldList = verifyUpdateUtil.verifyUpdateData(jsonObject, issueTypeVO);
         issueTypeVO.setId(issueTypeId);
         issueTypeVO.setOrganizationId(organizationId);
         issueTypeVO.setProjectId(projectId);
-        return new ResponseEntity<>(issueTypeService.update(issueTypeVO), HttpStatus.OK);
+        return new ResponseEntity<>(issueTypeService.update(issueTypeVO, fieldList), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

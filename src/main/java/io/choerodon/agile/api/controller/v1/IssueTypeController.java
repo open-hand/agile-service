@@ -1,7 +1,9 @@
 package io.choerodon.agile.api.controller.v1;
 
 
+import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.ProjectIssueTypeVO;
+import io.choerodon.agile.infra.utils.VerifyUpdateUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
@@ -36,6 +38,8 @@ public class IssueTypeController extends BaseController {
 
     @Autowired
     private IssueTypeService issueTypeService;
+    @Autowired
+    private VerifyUpdateUtil verifyUpdateUtil;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "组织层分页查询问题类型列表")
@@ -73,11 +77,13 @@ public class IssueTypeController extends BaseController {
     @PutMapping(value = "/{id}")
     public ResponseEntity<IssueTypeVO> update(@PathVariable("organization_id") Long organizationId,
                                               @PathVariable("id") @Encrypt Long issueTypeId,
-                                              @RequestBody @Valid IssueTypeVO issueTypeVO) {
+                                              @RequestBody JSONObject jsonObject) {
+        IssueTypeVO issueTypeVO = new IssueTypeVO();
+        List<String> fieldList = verifyUpdateUtil.verifyUpdateData(jsonObject, issueTypeVO);
         issueTypeVO.setId(issueTypeId);
         issueTypeVO.setOrganizationId(organizationId);
         issueTypeVO.setProjectId(0L);
-        return new ResponseEntity<>(issueTypeService.update(issueTypeVO), HttpStatus.OK);
+        return new ResponseEntity<>(issueTypeService.update(issueTypeVO, fieldList), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
