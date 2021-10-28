@@ -46,7 +46,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   }
 
   getType(typeId: string) {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/issue_type/${typeId}`,
       params: {
@@ -56,7 +56,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   }
 
   update(typeId: string, data: IUpdate) {
-    return axios({
+    return this.request({
       method: 'put',
       url: `${this.prefix}/issue_type/${typeId}`,
       params: {
@@ -67,7 +67,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   }
 
   systemUpdate(typeId: string, data: IUpdate) {
-    return axios({
+    return this.request({
       method: 'put',
       url: `${this.prefix}/issue_type/${typeId}/update_system_issue_type`,
       params: {
@@ -78,7 +78,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   }
 
   checkName(name: string, typeId?: string) {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/issue_type/check_name`,
       params: {
@@ -90,7 +90,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   }
 
   checkIcon(icon: string, typeId?: string) {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/issue_type/check_icon`,
       params: {
@@ -102,7 +102,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   }
 
   getStopDisable(typeId: string) {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/issue_type/${typeId}/can_disable`,
       params: {
@@ -112,7 +112,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   }
 
   delete(typeId: string) {
-    return axios({
+    return this.request({
       method: 'delete',
       url: `${this.prefix}/issue_type/${typeId}`,
       params: {
@@ -146,14 +146,14 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   }
 
   orgGetType(typeId: string) {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.OrgPrefix}/issue_type/${typeId}`,
     });
   }
 
   orgUpdate(typeId: string, data: IUpdate) {
-    return axios({
+    return this.request({
       method: 'put',
       url: `${this.OrgPrefix}/issue_type/${typeId}`,
       data,
@@ -161,7 +161,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   }
 
   orgCheckName(name: string, typeId?: string) {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.OrgPrefix}/issue_type/check_name`,
       params: {
@@ -172,7 +172,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   }
 
   orgCheckIcon(icon: string, typeId?: string) {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.OrgPrefix}/issue_type/check_icon`,
       params: {
@@ -183,7 +183,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   }
 
   orgDelete(typeId: string) {
-    return axios({
+    return this.request({
       method: 'delete',
       url: `${this.OrgPrefix}/issue_type/${typeId}`,
       params: {
@@ -214,7 +214,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
    * @param applyType
    */
   loadAll(applyType: string = 'agile') {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/schemes/query_issue_types`,
       params: {
@@ -228,7 +228,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
    * @param schemeId
    */
   loadAllByScheme(schemeId: number) {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
       params: {
@@ -239,7 +239,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   }
 
   orgReferenced(typeId: string, referenced: boolean) {
-    return axios({
+    return this.request({
       method: 'put',
       url: `${this.OrgPrefix}/issue_type/${typeId}/update_referenced`,
       params: {
@@ -250,7 +250,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   }
 
   enabled(typeId: string, enabled: boolean) {
-    return axios({
+    return this.request({
       method: 'put',
       url: `${this.prefix}/issue_type/${typeId}/update_enabled`,
       params: {
@@ -262,7 +262,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   }
 
   orgGetUsage(typeId: string, page = 0, size = 15) {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.OrgPrefix}/issue_type/${typeId}/usage_detail`,
       params: {

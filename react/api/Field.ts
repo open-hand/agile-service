@@ -242,7 +242,7 @@ class FieldApi extends Api<FieldApi> {
   }
 
   getFieldOptions(fieldId: string, searchValue: string | undefined = '', page: number | undefined, size: number, selected?: string | string[], onlyEnabled = true) {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefixCustomOption}/${fieldId}/options`,
       params: {

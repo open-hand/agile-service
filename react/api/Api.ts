@@ -1,6 +1,7 @@
 import { axios } from '@choerodon/boot';
 import { AxiosRequestConfig } from 'axios';
-import { getProjectId, getOrganizationId } from '@/utils/common';
+import { set } from 'lodash';
+import { getProjectId, getOrganizationId, getMenuType } from '@/utils/common';
 import globalCache from './Cache';
 
 interface RequestConfig extends AxiosRequestConfig {
@@ -28,15 +29,20 @@ class Api<T> {
     }
     const { cache } = AxiosConfig;
     if (cache) {
-      return new Promise((resolve) => {
+      const promise = new Promise((resolve) => {
         globalCache.apply({
           request: axios.bind(null, AxiosConfig),
           cacheKey: getCacheKey(AxiosConfig),
           callback: resolve,
         });
       });
+      set(promise, 'cancel', () => { });
+      return promise;
     }
-    return axios(AxiosConfig);
+    const req = axios(AxiosConfig);
+    // 避免 useQuery cancel调用异常
+    req.cancel = () => { };
+    return req;
   }
 
   get projectId() {
@@ -45,6 +51,10 @@ class Api<T> {
 
   get orgId() {
     return getOrganizationId();
+  }
+
+  get menuType() {
+    return getMenuType();
   }
 
   /**
