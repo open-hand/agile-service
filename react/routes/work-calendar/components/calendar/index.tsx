@@ -263,7 +263,7 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
           moreLinkContent={({ shortText }) => shortText}
           // moreLinkDidMount={moreLinkDidMount}
           moreLinkHint="查看更多工作项"
-          height="100%"
+          height="calc(100% - 38px)"
           loading={setLoading}
         />
       </div>
