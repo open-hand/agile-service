@@ -17,6 +17,7 @@ import Store from './stores';
 import openStateModal from './StateModal';
 import openDeleteModal from './components/DeleteModal';
 import { Loading } from '@/components';
+import Style from './index.less';
 
 const backlogStates = ['backlog_pending_approval', 'backlog_rejected', 'backlog_create', 'backlog_planning', 'backlog_processing', 'backlog_developed', 'backlog_publish'];
 
@@ -236,7 +237,7 @@ function StateList(props) {
         </Header>
         <Breadcrumb />
         <Content className="issue-state-content" style={theme === 'theme4' ? undefined : { paddingTop: 0 }}>
-          <Loading loading={stateStore.getIsLoading}>
+          <Loading loading={stateStore.getIsLoading} className={Style.tableWrap}>
             <Table
               dataSource={statesList.list}
               columns={getColumn()}

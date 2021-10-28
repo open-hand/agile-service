@@ -1,7 +1,10 @@
 import React, { Fragment, useState } from 'react';
 import {
-  Radio, Select, message, Icon,
+  Radio, message,
 } from 'choerodon-ui';
+import {
+  Select, Icon,
+} from 'choerodon-ui/pro';
 import { componentApi } from '@/api';
 
 const RadioGroup = Radio.Group;
