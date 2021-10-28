@@ -9,11 +9,7 @@ export default function useParentProgram(config?: ParentProgramConfig, options?:
   const { projectId } = config || {};
 
   const key = useProjectKey({ key: ['parent-program'], projectId });
-  return useQuery(key, () => {
-    const promise = commonApi.getProjectsInProgram(projectId);
-    promise.cancel = () => { };
-    return promise;
-  }, {
+  return useQuery(key, () => commonApi.getProjectsInProgram(projectId), {
     ...options,
   });
 }
