@@ -106,7 +106,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const [rankList, setRankList] = useState<string[] | undefined>(undefined);
   const [workCalendar, setWorkCalendar] = useState<any>();
   const collapsedHistoryRef = useRef<{ [key: string]: IGanttCollapsedHistory }>({});
-  const [{ data: sortedList }, onSortChange] = useGanttSortLabel();
+  const [{ origin: sortedList, data: sorted, loading: sortLoading }, onSortChange] = useGanttSortLabel({ projectId });
   const [projectWorkCalendar, setProjectWorkCalendar] = useState<any>();
   const [filterManageVisible, setFilterManageVisible] = useState<boolean>();
   const [loading, setLoading] = useState(false);
@@ -165,7 +165,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const {
     columns, setColumns, visibleColumnCodes, tableWithSortedColumns, listLayoutColumns,
   } = useGanttColumns({
-    ...props, onSortChange, projectId, isInProgram, onClickSummary: handleClickSummary, onCreateSubIssue: handleQuickCreateSubIssue, onAfterCreateSubIssue: handleQuickCreateSubIssueAfter,
+    ...props, onSortChange, sortedList, projectId, isInProgram, onClickSummary: handleClickSummary, onCreateSubIssue: handleQuickCreateSubIssue, onAfterCreateSubIssue: handleQuickCreateSubIssueAfter,
   });
 
   const searchFilter = useComputed(() => {
@@ -184,7 +184,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const { run, flush } = useDebounceFn(() => {
     (async () => {
       const year = dayjs().year();
-      if (sprintIds === null || !projectId || !tableWithSortedColumns.length) {
+      if (sprintIds === null || !projectId || !tableWithSortedColumns.length || sortLoading) {
         return;
       }
       setLoading(true);
@@ -192,7 +192,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
         workCalendarApi.getWorkSetting(year),
         workCalendarApi.project(projectId).getYearCalendar(year),
         ['sprint', 'assignee'].includes(type) ? ganttApi.project(projectId).loadDimensionRank(searchFilter) : { ids: [] },
-        ganttApi.project(projectId).loadByTask(searchFilter, sortedList),
+        ganttApi.project(projectId).loadByTask(searchFilter, sorted),
       ] : [workCalendarApi.getWorkSetting(year), null, { ids: [] }, ganttApi.loadOrgByTask(searchFilter, 1)];
       const [workCalendarRes, projectWorkCalendarRes, rankListRes, res] = await Promise.all(requestArr);
       const conflictUsers = menuType === 'org' && type === 'assignee' ? await ganttApi.loadTimeConflict(searchFilter) : [];
@@ -217,11 +217,11 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
 
   useEffect(() => {
     run();
-  }, [issueSearchStore, sprintIds, run, visibleColumnCodes, searchFilter]);
+  }, [issueSearchStore, sprintIds, run, visibleColumnCodes, searchFilter, sortLoading]);
   useUpdateEffect(() => {
     run();
     flush();
-  }, [sortedList, type]);
+  }, [sorted, type]);
 
   const handleUpdate = useCallback<GanttProps<Issue>['onUpdate']>(async (issue, startDate, endDate, middleDates) => {
     try {
@@ -661,14 +661,14 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
         }}
       >
         <Context.Provider value={{
-          store, searchFilter, dimensionType: type, menuType, disable: menuType === 'org', projectId, processType,
+          store, searchFilter, dimensionType: type, menuType, disable: menuType === 'org', projectId, processType, sortedList,
         }}
         >
           <div style={{ display: 'flex', flexWrap: 'wrap' }}>
             <Search issueSearchStore={issueSearchStore} loadData={run} />
             <GanttOperation />
           </div>
-          <Loading loading={loading} />
+          <Loading loading={sortLoading || loading} />
           {columns.length > 0 && workCalendar && (
             <div className="c7n-gantt-content-body">
               <GanttDragWrapper renderClone={renderClone} onDragEnd={handleDragEnd}>
