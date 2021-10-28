@@ -91,6 +91,8 @@ const EditorMap = new Map([
               required={required}
               fieldId={fieldId}
               projectId={store.projectId}
+              // 始终为项目层查询接口
+              menuType="project"
               multiple={fieldType === 'multiple' || fieldType === 'checkbox'}
               {
                 ...store.getOptionsData(field, value)

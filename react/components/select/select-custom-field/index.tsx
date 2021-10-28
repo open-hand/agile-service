@@ -15,6 +15,7 @@ export interface SelectCustomFieldBasicProps extends Partial<SelectProps> {
   organizationId?: string
   outside?: boolean
   ruleIds?: string[]
+  menuType?:'project'|'organization'
   /** 是否禁用级联规则相关配置 @default false */
   disabledRuleConfig?: boolean
   afterLoad?: (data: any) => void
@@ -36,7 +37,7 @@ export type SelectCustomFieldProps = SelectCustomFieldBasicProps & ({
 })
 const SIZE = 50;
 const SelectCustomField: React.FC<SelectCustomFieldProps> = forwardRef(({
-  fieldId, fieldOptions, flat, afterLoad, projectId, organizationId, disabledRuleConfig, selected, extraOptions, ruleIds, outside = false, onlyEnabled = true, ...otherProps
+  fieldId, fieldOptions, flat, afterLoad, projectId, organizationId, disabledRuleConfig, selected, extraOptions, ruleIds, outside = false, onlyEnabled = true, menuType, ...otherProps
 },
 ref: React.Ref<Select>) => {
   const args = useMemo(() => ({ ruleIds, fieldOptions, selected: selected ? castArray(selected).filter(Boolean) : undefined }), [fieldOptions, ruleIds, selected]);
@@ -63,7 +64,8 @@ ref: React.Ref<Select>) => {
       if (hasRule && fieldId) {
         return fieldApi.project(projectId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, SIZE);
       }
-      return requestArgs?.fieldOptions ? fakePageRequest(filter, page, SIZE, needOptions, onlyEnabled, requestArgs?.fieldOptions) : fieldApi.outside(outside).org(organizationId).project(projectId).getFieldOptions(fieldId!, filter, page, SIZE, needOptions, onlyEnabled);
+      return requestArgs?.fieldOptions ? fakePageRequest(filter, page, SIZE, needOptions, onlyEnabled, requestArgs?.fieldOptions) : fieldApi.outside(outside).org(organizationId).project(projectId).menu(menuType)
+        .getFieldOptions(fieldId!, filter, page, SIZE, needOptions, onlyEnabled);
     },
     middleWare: (data) => {
       if (!extraOptions) {

@@ -53,7 +53,7 @@ class Api<T> {
     return getOrganizationId();
   }
 
-  get menuType() {
+  get menuType(): 'organization' | 'project' {
     return getMenuType();
   }
 
@@ -85,6 +85,13 @@ class Api<T> {
   org(orgId: string | number | undefined) {
     if (orgId) {
       return this.overwrite('orgId', orgId);
+    }
+    return this;
+  }
+
+  menu(menuType?:'project'|'organization') {
+    if (menuType) {
+      return this.overwrite('menuType', menuType);
     }
     return this;
   }
