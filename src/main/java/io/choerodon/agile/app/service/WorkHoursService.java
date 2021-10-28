@@ -7,6 +7,7 @@ import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -38,18 +39,20 @@ public interface WorkHoursService {
      * 工时日历
      * @param organizationId
      * @param projectIds
+     * @param pageRequest
      * @param workHoursSearchVO
      * @return
      */
-    List<WorkHoursCalendarVO> workHoursCalendar(Long organizationId, List<Long> projectIds, WorkHoursSearchVO workHoursSearchVO);
+    Page<WorkHoursCalendarVO> workHoursCalendar(Long organizationId, List<Long> projectIds, PageRequest pageRequest, WorkHoursSearchVO workHoursSearchVO, Boolean isOrg);
 
     /**
      * 组织层：工时日历
      * @param organizationId
+     * @param pageRequest
      * @param workHoursSearchVO
      * @return
      */
-    List<WorkHoursCalendarVO> workHoursCalendarByOrg(Long organizationId, WorkHoursSearchVO workHoursSearchVO);
+    Page<WorkHoursCalendarVO> workHoursCalendarByOrg(Long organizationId, PageRequest pageRequest, WorkHoursSearchVO workHoursSearchVO);
 
     /**
      * 工时日历查用户的登记详情
@@ -77,4 +80,22 @@ public interface WorkHoursService {
      * @return
      */
     Page<IssueVO> queryIssue(Long projectId, PageRequest pageRequest, String params);
+
+    /**
+     * 项目层查询工时统计
+     * @param organizationId
+     * @param projectIds
+     * @param workHoursSearchVO
+     * @return
+     */
+    Map<String, BigDecimal> countWorkHours(Long organizationId, List<Long> projectIds, WorkHoursSearchVO workHoursSearchVO);
+
+
+    /**
+     * 项目层查询工时统计
+     * @param organizationId
+     * @param workHoursSearchVO
+     * @return
+     */
+    Map<String, BigDecimal> countWorkHoursOnOrganizationLevel(Long organizationId, WorkHoursSearchVO workHoursSearchVO);
 }

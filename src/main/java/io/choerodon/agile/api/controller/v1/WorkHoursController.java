@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -53,11 +54,12 @@ public class WorkHoursController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询工时日历")
     @PostMapping(value = "/work_hours_calendar")
-    public ResponseEntity<List<WorkHoursCalendarVO>> workHoursCalendarByProjectIds(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Page<WorkHoursCalendarVO>> workHoursCalendarByProjectIds(@ApiParam(value = "项目id", required = true)
                                                                                    @PathVariable(name = "project_id") Long projectId,
                                                                                    @RequestParam Long organizationId,
+                                                                                   PageRequest pageRequest,
                                                                                    @RequestBody WorkHoursSearchVO workHoursSearchVO) {
-        return Optional.ofNullable(workHoursService.workHoursCalendar(organizationId, Arrays.asList(projectId), workHoursSearchVO))
+        return Optional.ofNullable(workHoursService.workHoursCalendar(organizationId, Arrays.asList(projectId),pageRequest, workHoursSearchVO, false))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.work.hours.calendar.get"));
     }
@@ -85,5 +87,17 @@ public class WorkHoursController {
         return Optional.ofNullable(workHoursService.queryIssue(projectId, pageRequest, params))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.work.hours.calendar.issue.query"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("统计每天的工时总数")
+    @PostMapping(value = "/count_work_hours")
+    public ResponseEntity<Map<String, BigDecimal>> countWorkHours(@ApiParam(value = "项目id", required = true)
+                                                    @PathVariable(name = "project_id") Long projectId,
+                                                    @RequestParam(name = "organizationId") Long organizationId,
+                                                    @RequestBody WorkHoursSearchVO workHoursSearchVO) {
+        return Optional.ofNullable(workHoursService.countWorkHours(organizationId, Arrays.asList(projectId), workHoursSearchVO))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.count.work.hours"));
     }
 }
