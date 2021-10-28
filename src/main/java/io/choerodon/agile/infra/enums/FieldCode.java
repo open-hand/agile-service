@@ -1,5 +1,12 @@
 package io.choerodon.agile.infra.enums;
 
+import io.choerodon.core.exception.CommonException;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * @author shinan.chen
  * @since 2019/4/2
@@ -51,5 +58,31 @@ public class FieldCode {
     public static final String PROCESSOR = "processor";
 
     public static final String ISSUE_STATUS = "issueStatus";
+
+    private static final List<String> FIELD_CODE_LIST = new ArrayList<>();
+
+    public static List<String> values() {
+        List<String> result = new ArrayList<>();
+        if (!FIELD_CODE_LIST.isEmpty()) {
+            result.addAll(FIELD_CODE_LIST);
+            return result;
+        }
+        List<String> ignoreFields = Arrays.asList("FIELD_CODE_LIST");
+        Field[] fields = FieldCode.class.getDeclaredFields();
+        for (Field field : fields) {
+            String fieldName = field.getName();
+            if (ignoreFields.contains(fieldName)) {
+                continue;
+            }
+            field.setAccessible(true);
+            try {
+                String value = (String) field.get(null);
+                result.add(value);
+            } catch (IllegalAccessException e) {
+                throw new CommonException("error.reflection.FieldCode.get.value");
+            }
+        }
+        return result;
+    }
 
 }
