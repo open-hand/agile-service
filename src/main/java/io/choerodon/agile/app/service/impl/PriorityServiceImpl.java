@@ -121,7 +121,7 @@ public class PriorityServiceImpl implements PriorityService {
     }
 
     @Override
-    public List<PriorityVO> updateByList(List<PriorityVO> list, Long organizationId) {
+    public void updateByList(List<PriorityVO> list, Long organizationId) {
         int seq = 1;
         for (PriorityVO priorityVO : list) {
             PriorityDTO p = modelMapper.map(priorityVO, PriorityDTO.class);
@@ -132,9 +132,6 @@ public class PriorityServiceImpl implements PriorityService {
                 throw new CommonException("error.priority.update");
             }
         }
-        List<PriorityDTO> priorities = priorityMapper.fulltextSearch(new PriorityDTO(organizationId, null), null);
-        return modelMapper.map(priorities, new TypeToken<List<PriorityVO>>() {
-        }.getType());
     }
 
     @Override
