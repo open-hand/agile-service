@@ -22,42 +22,42 @@ export const formatEndDate = (date: string | Moment, format = false) => {
 const searchDsUpdate = ({
   // @ts-ignore
   name, value,
-}, logDs: DataSet, currentProject: any) => {
+}, calendarDs: DataSet, currentProject: any) => {
   if (name === 'startTime') {
     const adjustedStartDate = getIsOrganization() ? formatStartDate(moment().subtract(6, 'days'), true) : formatStartDate(moment().subtract(6, 'days').isBefore(moment(currentProject?.creationDate)) ? moment(currentProject?.creationDate) : moment().subtract(6, 'days'), true);
     if (value) {
       const formateStartDate = formatStartDate(value, true) || adjustedStartDate;
-      localPageCacheStore.setItem('workingHours-log-startTime', formateStartDate);
-      logDs.setQueryParameter('startTime', formateStartDate);
+      localPageCacheStore.setItem('workingHours-calendar-startTime', formateStartDate);
+      calendarDs.setQueryParameter('startTime', formateStartDate);
     } else {
-      localPageCacheStore.setItem('workingHours-log-startTime', adjustedStartDate);
-      logDs.setQueryParameter('startTime', adjustedStartDate);
+      localPageCacheStore.setItem('workingHours-calendar-startTime', adjustedStartDate);
+      calendarDs.setQueryParameter('startTime', adjustedStartDate);
     }
   }
 
   if (name === 'endTime') {
     if (value) {
       const formateEndDate = formatEndDate(value, true) || formatEndDate(moment(), true);
-      localPageCacheStore.setItem('workingHours-log-endTime', formateEndDate);
-      logDs.setQueryParameter('endTime', formateEndDate);
+      localPageCacheStore.setItem('workingHours-calendar-endTime', formateEndDate);
+      calendarDs.setQueryParameter('endTime', formateEndDate);
     } else {
-      localPageCacheStore.setItem('workingHours-log-endTime', formatEndDate(moment(), true));
-      logDs.setQueryParameter('endTime', formatEndDate(moment()));
+      localPageCacheStore.setItem('workingHours-calendar-endTime', formatEndDate(moment(), true));
+      calendarDs.setQueryParameter('endTime', formatEndDate(moment()));
     }
   }
 
   if (name === 'userIds') {
-    localPageCacheStore.setItem('workingHours-log-userIds', value);
-    logDs.setQueryParameter('userIds', value);
+    localPageCacheStore.setItem('workingHours-calendar-userIds', value);
+    calendarDs.setQueryParameter('userIds', value);
   }
   if (name === 'projectIds') {
-    localPageCacheStore.setItem('workingHours-log-projectIds', value);
-    logDs.setQueryParameter('projectIds', value);
+    localPageCacheStore.setItem('workingHours-calendar-projectIds', value);
+    calendarDs.setQueryParameter('projectIds', value);
   }
-  logDs.query();
+  calendarDs.query();
 };
 
-const LogSearchDataSet = ({ logDs, currentProject }: { logDs: DataSet, currentProject: any}) => ({
+const LogSearchDataSet = ({ calendarDs, currentProject }: { calendarDs: DataSet, currentProject: any}) => ({
   autoCreate: true,
   autoQuery: false,
   fields: [{
@@ -88,16 +88,16 @@ const LogSearchDataSet = ({ logDs, currentProject }: { logDs: DataSet, currentPr
     valueField: 'id',
   }],
   data: [{
-    endTime: localPageCacheStore.getItem('workingHours-log-endTime') ? moment(localPageCacheStore.getItem('workingHours-log-endTime')) : formatEndDate(moment()),
+    endTime: localPageCacheStore.getItem('workingHours-calendar-endTime') ? moment(localPageCacheStore.getItem('workingHours-calendar-endTime')) : formatEndDate(moment()),
     // eslint-disable-next-line no-nested-ternary
-    startTime: localPageCacheStore.getItem('workingHours-log-startTime') ? moment(localPageCacheStore.getItem('workingHours-log-startTime')) : formatStartDate(getIsOrganization() ? moment().subtract(6, 'days') : (
+    startTime: localPageCacheStore.getItem('workingHours-calendar-startTime') ? moment(localPageCacheStore.getItem('workingHours-calendar-startTime')) : formatStartDate(getIsOrganization() ? moment().subtract(6, 'days') : (
       moment().subtract(6, 'days').isBefore(moment(currentProject?.creationDate)) ? moment(currentProject?.creationDate) : moment().subtract(6, 'days')
     )),
-    userIds: localPageCacheStore.getItem('workingHours-log-userIds'),
+    userIds: localPageCacheStore.getItem('workingHours-calendar-userIds'),
   }],
   events: {
     update: debounce((updateData: any) => {
-      searchDsUpdate(updateData, logDs, currentProject);
+      searchDsUpdate(updateData, calendarDs, currentProject);
     }, 500),
   },
 });

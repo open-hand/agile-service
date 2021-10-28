@@ -33,8 +33,8 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
   const exportDs = useMemo(() => new DataSet(LogExportDataSet({ currentProject: AppState.getCurrentProject })), [AppState.getCurrentProject]);
   const loadData = useCallback(() => {
     // eslint-disable-next-line no-nested-ternary
-    logDs.setQueryParameter('startTime', localPageCacheStore.getItem('workingHours-log-startTime') || `${formatStartDate(getIsOrganization() ? moment().subtract(7, 'days') : (
-      moment().subtract(7, 'days').isBefore(moment(AppState.getCurrentProject?.creationDate)) ? moment(AppState.getCurrentProject?.creationDate) : moment().subtract(7, 'days')
+    logDs.setQueryParameter('startTime', localPageCacheStore.getItem('workingHours-log-startTime') || `${formatStartDate(getIsOrganization() ? moment().subtract(6, 'days') : (
+      moment().subtract(6, 'days').isBefore(moment(AppState.getCurrentProject?.creationDate)) ? moment(AppState.getCurrentProject?.creationDate) : moment().subtract(6, 'days')
     ), true)}`);
     logDs.setQueryParameter('endTime', localPageCacheStore.getItem('workingHours-log-endTime') || `${formatEndDate(moment(), true)}`);
     logDs.setQueryParameter('userIds', localPageCacheStore.getItem('workingHours-log-userIds'));

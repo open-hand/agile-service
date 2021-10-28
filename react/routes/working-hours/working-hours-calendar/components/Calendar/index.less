@@ -1,0 +1,39 @@
+.calendar {
+  height: 100%;
+  width: 100%;
+  padding-top: 44px;
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    padding: 0 20px;
+    .legend {
+      display: flex;
+      align-items: center;
+      .legendItem {
+        display: flex;
+       align-items: center;
+        margin-right: 26px;
+        .icon {
+          color: rgba(15,19,88,0.45);
+        }
+        .label {
+          margin-left: 4px;
+          margin-right: 6px;
+        }
+        .block {
+          display: inline-block;
+          width: 10px;
+          height: 10px;
+          border-radius: 1px;
+        }
+      }
+    }
+  }
+  .body {
+    height: calc(100% - 64px);
+    width: 100%;
+    overflow-x: auto;
+  }
+}

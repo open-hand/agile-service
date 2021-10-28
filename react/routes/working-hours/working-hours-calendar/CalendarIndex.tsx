@@ -6,33 +6,33 @@ import {
 import moment from 'moment';
 import { toJS } from 'mobx';
 import { LoadingProvider } from '@/components/Loading';
-import LogTable from './components/LogTable';
-import { openExportLogModal } from './components/export-modal';
-import LogSearch from './components/LogSearch';
-import { useLogStore } from './stores';
+import Calendar from './components/Calendar';
+import { openExportLogModal } from '../working-hours-log/components/export-modal';
+import Search from '../working-hours-log/components/LogSearch';
+import { useCalendarStore } from './stores';
 import { IWorkingHoursData, workingHoursApi } from '@/api';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 
-const WorkingHoursLog = () => {
+const WorkingHoursCalendar = () => {
   const {
-    logDs, loadData, exportDs, logSearchDs,
-  } = useLogStore();
+    loadData, exportDs, searchDs, calendarDs, loading,
+  } = useCalendarStore();
   const handleOpenExport = useCallback(() => {
-    const search: IWorkingHoursData = logSearchDs.current?.data as IWorkingHoursData;
+    const search: IWorkingHoursData = searchDs.current?.data as IWorkingHoursData;
     exportDs.current?.set('userIds', search.userIds?.length ? toJS(search.userIds) : undefined);
     exportDs.current?.set('projectIds', search.projectIds?.length ? toJS(search.projectIds) : undefined);
     exportDs.current?.set('startTime', moment(search.startTime).startOf('day'));
     exportDs.current?.set('endTime', moment(search.endTime).endOf('day'));
     openExportLogModal({
       exportDs,
-      title: '导出工时日志',
-      action: 'download_file_work_hours_log',
-      proMessageKey: `agile-export-work-hours-log-${getProjectId()}`,
-      orgMessageKey: `agile-export-work-hours-log-org-${getOrganizationId()}`,
-      exportFn: (data) => workingHoursApi.exportLog(data),
-      fileName: '工时日志',
+      title: '导出工时日历',
+      action: 'download_file_work_hours_calendar',
+      proMessageKey: `agile-export-work-hours-calendar-${getProjectId()}`,
+      orgMessageKey: `agile-export-work-hours-calendar-org-${getOrganizationId()}`,
+      exportFn: (data) => workingHoursApi.exportCalendar(data),
+      fileName: '工时日历',
     });
-  }, [exportDs, logSearchDs]);
+  }, [exportDs, searchDs]);
   const refresh = useCallback(() => {
     loadData();
   }, [loadData]);
@@ -40,7 +40,7 @@ const WorkingHoursLog = () => {
   return (
     <Page>
       <Header>
-        <LogSearch searchDs={logSearchDs} />
+        <Search searchDs={searchDs} />
         <HeaderButtons items={[{
           name: '导出',
           icon: 'unarchive-o',
@@ -54,22 +54,21 @@ const WorkingHoursLog = () => {
         />
       </Header>
       <Breadcrumb />
-      <Content style={{ borderTop: '1px solid var(--divider)' }}>
+      <Content style={{ padding: 0, overflowX: 'hidden' }}>
         <LoadingProvider
-          loading={logDs.status === 'loading'}
+          loading={calendarDs.status === 'loading' || loading}
           globalSingle
           style={{
             height: '100%',
             width: '100%',
             zIndex: 'auto',
-            marginTop: -16,
           }}
         >
-          <LogTable />
+          <Calendar />
         </LoadingProvider>
       </Content>
     </Page>
   );
 };
 
-export default observer(WorkingHoursLog);
+export default observer(WorkingHoursCalendar);

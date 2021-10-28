@@ -15,7 +15,7 @@ import {
 } from '@/utils/common';
 import SelectProject from '@/components/select/select-project';
 import { IModalProps } from '@/common/types';
-import { ILogData, workingHoursApi } from '@/api';
+import { IWorkingHoursData, workingHoursApi, WorkingHoursExportAction } from '@/api';
 
 interface IDownLoadInfo {
   id: string | null,
@@ -24,35 +24,45 @@ interface IDownLoadInfo {
   lastUpdateDate: string | null,
 }
 
-const ExportLog: React.FC<{
+export interface IExportProps {
   exportDs: DataSet,
   // eslint-disable-next-line react/require-default-props
-  modal?: IModalProps
-}> = ({ exportDs, modal }) => {
+  modal?: IModalProps,
+  action: WorkingHoursExportAction,
+  title?: string
+  orgMessageKey: string,
+  proMessageKey: string,
+  fileName: string
+  exportFn: (data: IWorkingHoursData) => void,
+}
+
+const ExportLog: React.FC<IExportProps> = ({
+  exportDs, action, orgMessageKey, proMessageKey, fileName, exportFn, modal,
+}) => {
   const [loading, setLoading] = useState(false);
   const [downloadInfo, setDownloadInfo] = useState({} as IDownLoadInfo);
   useEffect(() => {
-    workingHoursApi.getLatest().then((res: IDownLoadInfo) => {
+    workingHoursApi.getLatest(action).then((res: IDownLoadInfo) => {
       if (res.id) {
         setDownloadInfo(res);
       }
     });
-  }, []);
+  }, [action]);
   const handleExportExcel = useCallback(async () => {
-    let search: ILogData = {} as ILogData;
+    let search: IWorkingHoursData = {} as IWorkingHoursData;
     if (await exportDs.current?.validate()) {
       search = exportDs.current?.toData();
     } else {
       return false;
     }
     setLoading(true);
-    await workingHoursApi.exportLog({
+    await exportFn({
       ...search,
       startTime: moment(search.startTime).startOf('day').format('YYYY-MM-DD HH:mm:ss'),
       endTime: moment(search.endTime).endOf('day').format('YYYY-MM-DD HH:mm:ss'),
     });
     return false;
-  }, [exportDs]);
+  }, [exportDs, exportFn]);
 
   const handleFinish = (messageData: any) => {
     Choerodon.prompt('导出成功');
@@ -110,11 +120,11 @@ const ExportLog: React.FC<{
       </Button>
       <WsProgress
         key={getProjectId() || getOrganizationId()}
-        messageKey={getIsOrganization() ? `agile-export-work-hours-log-org-${getOrganizationId()}` : `agile-export-work-hours-log-${getProjectId()}`}
+        messageKey={getIsOrganization() ? orgMessageKey : proMessageKey}
         onFinish={handleFinish}
         onStart={() => setLoading(true)}
         autoDownload={{
-          fileName: `${getProjectName()}工时日志.xlsx`,
+          fileName: `${getProjectName()}${fileName}.xlsx`,
         }}
         downloadInfo={downloadInfo.id ? {
           url: downloadInfo.fileUrl!,
