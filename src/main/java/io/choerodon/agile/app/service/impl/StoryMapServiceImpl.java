@@ -14,8 +14,10 @@ import io.choerodon.agile.infra.mapper.IssueStatusMapper;
 import io.choerodon.agile.infra.mapper.SprintMapper;
 import io.choerodon.agile.infra.mapper.StoryMapMapper;
 import io.choerodon.agile.infra.mapper.StoryMapWidthMapper;
+import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.modelmapper.ModelMapper;
@@ -130,12 +132,11 @@ public class StoryMapServiceImpl implements StoryMapService {
     }
 
     @Override
-    public StoryMapVO queryStoryMapDemand(Long projectId, SearchVO searchVO) {
-        StoryMapVO storyMap = new StoryMapVO();
+    public Page<StoryMapStoryVO> queryStoryMapDemand(Long projectId, SearchVO searchVO, PageRequest pageRequest) {
         boardAssembler.handleAdvanceSearch(searchVO);
-        List<StoryMapStoryDTO> storyMapStoryDTOList = storyMapMapper.selectDemandStoryList(projectId, searchVO);
-        storyMap.setDemandStoryList(storyMapAssembler.storyMapStoryDTOToVO(projectId, storyMapStoryDTOList));
-        return storyMap;
+        Page<StoryMapStoryDTO> page = PageHelper.doPage(pageRequest, () -> storyMapMapper.selectDemandStoryList(projectId, searchVO));
+        List<StoryMapStoryVO> storyMapStoryVOList = storyMapAssembler.storyMapStoryDTOToVO(projectId, page.getContent());
+        return PageUtil.buildPageInfoWithPageInfoList(page, storyMapStoryVOList);
     }
 
     protected void dragToEpic(Long projectId, Long epicId, StoryMapDragVO storyMapDragVO) {

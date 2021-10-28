@@ -132,7 +132,7 @@ public class PriorityServiceImpl implements PriorityService {
                 throw new CommonException("error.priority.update");
             }
         }
-        List<PriorityDTO> priorities = priorityMapper.fulltextSearch(new PriorityDTO(), null);
+        List<PriorityDTO> priorities = priorityMapper.fulltextSearch(new PriorityDTO(organizationId, null), null);
         return modelMapper.map(priorities, new TypeToken<List<PriorityVO>>() {
         }.getType());
     }
