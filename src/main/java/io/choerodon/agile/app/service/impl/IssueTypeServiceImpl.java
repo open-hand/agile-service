@@ -477,7 +477,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     @Override
-    public IssueTypeVO update(IssueTypeVO issueTypeVO) {
+    public IssueTypeVO update(IssueTypeVO issueTypeVO, List<String> fieldList) {
         Long projectId = issueTypeVO.getProjectId();
         Long organizationId = issueTypeVO.getOrganizationId();
         Long issueTypeId = issueTypeVO.getId();
@@ -502,7 +502,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         issueTypeDTO.setName(name);
         issueTypeDTO.setIcon(issueTypeVO.getIcon());
         issueTypeDTO.setReferenced(issueTypeVO.getReferenced());
-        if (issueTypeMapper.updateByPrimaryKeySelective(issueTypeDTO) != 1) {
+        if (issueTypeMapper.updateOptional(issueTypeDTO, fieldList.toArray(new String[fieldList.size()])) != 1) {
             throw new CommonException("error.issue.type.update");
         }
         return modelMapper.map(issueTypeMapper.selectWithAlias(issueTypeId, projectId), IssueTypeVO.class);

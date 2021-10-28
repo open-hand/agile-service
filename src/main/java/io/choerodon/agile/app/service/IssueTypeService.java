@@ -23,7 +23,7 @@ public interface IssueTypeService {
                        Long projectId,
                        IssueTypeVO issueTypeVO);
 
-    IssueTypeVO update(IssueTypeVO issueTypeVO);
+    IssueTypeVO update(IssueTypeVO issueTypeVO, List<String> fieldList);
 
     void delete(Long organizationId, Long projectId, Long issueTypeId);
 
