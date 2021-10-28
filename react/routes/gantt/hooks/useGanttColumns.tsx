@@ -1,16 +1,18 @@
 import React, {
-  useState, useMemo,
+  useState, useMemo, useEffect, useRef,
 } from 'react';
 import { Tooltip, Icon } from 'choerodon-ui/pro';
 import {
-  find, findIndex, get, merge, noop,
+  find, findIndex, get, intersection, merge, noop,
 } from 'lodash';
 import dayjs from 'dayjs';
 import classNames from 'classnames';
 import { GanttProps, Gantt } from '@choerodon/gantt';
 import '@choerodon/gantt/dist/gantt.cjs.production.min.css';
 import { AnyMap } from 'immer/dist/internal';
+import { useUpdateEffect } from 'ahooks';
 import {
+  ganttApi,
   ListLayoutColumnVO,
 } from '@/api';
 import TypeTag from '@/components/TypeTag';
@@ -18,7 +20,7 @@ import {
   IFoundationHeader, Issue, User,
 } from '@/common/types';
 import openCreateIssue from '@/components/create-issue';
-import GanttSortLabel, { IGanttSortLabelProps } from '../components/gantt-sort-label';
+import GanttSortLabel, { IGanttSortLabelProps, IGanttSortLabelSortItem } from '../components/gantt-sort-label';
 import QuickCreateSubIssue from '@/components/QuickCreateSubIssue';
 import { TableCacheRenderProps } from '@/components/table-cache';
 import useIssueTableFields from '@/hooks/data/useIssueTableFields';
@@ -33,6 +35,7 @@ interface IGanttColumnsHookProps extends TableCacheRenderProps {
   menuType: IGanttPageProps['menuType']
   projectId?: string
   isInProgram: boolean
+  sortedList: IGanttSortLabelSortItem[]
   onClickSummary?: (issue: GanttIssue) => void
   onSortChange: IGanttSortLabelProps['onChange']
   onCreateSubIssue?: (parentIssue: GanttIssue) => void
@@ -93,7 +96,11 @@ const ganttColumnMap = new Map<string, any>([['assignee', (onSortChange: any) =>
   width: 100,
   minWidth: 100,
   name: 'estimatedEndTime',
-  label: '预计结束',
+  label: (
+    <GanttSortLabel dataKey="estimatedEndTime" onChange={onSortChange}>
+      预计结束
+    </GanttSortLabel>
+  ),
   render: (record: any) => record.estimatedEndTime && <Tooltip title={record.estimatedEndTime}><span>{dayjs(record.estimatedEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
 }),
 ],
@@ -101,7 +108,11 @@ const ganttColumnMap = new Map<string, any>([['assignee', (onSortChange: any) =>
   width: 100,
   minWidth: 100,
   name: 'actualStartTime',
-  label: '实际开始',
+  label: (
+    <GanttSortLabel dataKey="actualStartTime" onChange={onSortChange}>
+      实际开始
+    </GanttSortLabel>
+  ),
   render: (record: any) => record.actualStartTime && <Tooltip title={record.actualStartTime}><span>{dayjs(record.actualStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
 }),
 ],
@@ -109,7 +120,11 @@ const ganttColumnMap = new Map<string, any>([['assignee', (onSortChange: any) =>
   width: 100,
   minWidth: 100,
   name: 'actualEndTime',
-  label: '实际结束',
+  label: (
+    <GanttSortLabel dataKey="actualEndTime" onChange={onSortChange}>
+      实际结束
+    </GanttSortLabel>
+  ),
   render: (record: any) => record.actualEndTime && <Tooltip title={record.actualEndTime}><span>{dayjs(record.actualEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
 }),
 ],
@@ -279,7 +294,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
     // @ts-ignore
     lock: 'left',
     name: 'summary',
-    label: '名称',
+    label: (<GanttSortLabel dataKey="summary" onChange={onSortChange}>名称</GanttSortLabel>) as any,
     render: renderSummary,
   },
   ];
@@ -296,10 +311,10 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
       const field = ganttColumnMap.get(columnCode);
       merge(baseColumn, typeof field === 'function' ? field(onSortChange) as Gantt.Column : field);
     } else if (systemColumnsMap.has(columnCode)) {
-      const column = systemColumnsMap.get(columnCode);
+      const column = systemColumnsMap.get(columnCode)!;
       merge(baseColumn, {
         ...column,
-        label: column?.title,
+        label: (<GanttSortLabel dataKey={column.dataIndex} onChange={onSortChange}>{column?.title}</GanttSortLabel>),
         name: column?.dataIndex,
         render: fieldMapRender[columnCode as keyof typeof fieldMapRender] ?? column?.render,
       });
@@ -328,7 +343,7 @@ const defaultListLayoutColumns = defaultVisibleColumns.map((code) => ({
   display: true,
 }));
 function useGanttProjectColumns({
-  cached, onAfterCreateSubIssue, onCreateSubIssue, onClickSummary, onSortChange, projectId, menuType, isInProgram,
+  cached, onAfterCreateSubIssue, onCreateSubIssue, onClickSummary, onSortChange, projectId, menuType, isInProgram, sortedList,
 }: IGanttColumnsHookProps) {
   // 恒为 项目层级
   const { data: tableFields } = useIssueTableFields({ hiddenFieldCodes: ['epicSelfName', 'summary'], projectId, menuType: 'project' });
@@ -341,6 +356,19 @@ function useGanttProjectColumns({
     .map((item) => ({ ...item, disable: true })), tableFields || [], {
     onClickSummary, onSortChange, openCreateSubIssue: onCreateSubIssue, onAfterCreateSubIssue,
   }, { disableOperate: menuType !== 'project', disableFeatureCreateIssue }), [disableFeatureCreateIssue, listLayoutColumns, menuType, onAfterCreateSubIssue, onClickSummary, onCreateSubIssue, onSortChange, tableFields]);
+  const sortedListRef = useRef<IGanttSortLabelSortItem[]>(sortedList);
+  sortedListRef.current = sortedList;
+
+  useUpdateEffect(() => {
+    // 检查排序是否有效
+    if (sortedListRef.current.length > 0) {
+      const sortKeyMapSystemKey = [...systemColumnsMap.entries()].filter(([_, value]) => sortedListRef.current.some((sorted) => sorted.dataKey === value.dataIndex)).map(([key]) => key);
+      const sortedCodes = intersection(sortKeyMapSystemKey, visibleColumnCodes).map((key) => systemColumnsMap.get(key)?.dataIndex!);
+      const newSortedList = sortedListRef.current
+        .map((item) => (sortedCodes.includes(item.dataKey) ? item : { ...item, sorted: undefined }));
+      sortedCodes.length !== sortedListRef.current.length && onSortChange && onSortChange(newSortedList);
+    }
+  }, [onSortChange, visibleColumnCodes]);
   return {
     columns,
     setColumns,

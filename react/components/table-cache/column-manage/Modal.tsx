@@ -25,6 +25,7 @@ export interface ColumnManageProps {
   options: Option[]
   value?: string[]
   projectId?: string
+  onSaveBefore?: (willSaveData: Option[]) => boolean | Promise<boolean>
   onChange?: (value: string[]) => void
   tooltip?: boolean
 }

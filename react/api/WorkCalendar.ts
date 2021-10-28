@@ -51,7 +51,7 @@ class WorkCalendarApi extends Api<WorkCalendarApi> {
     const orgId = getOrganizationId();
     return axios({
       method: 'get',
-      url: getMenuType() === 'proejct' ? `/iam/choerodon/v1/projects/${getProjectId()}/time_zone_work_calendars/time_zone_detail/${orgId}`
+      url: getMenuType() === 'project' ? `/iam/choerodon/v1/projects/${getProjectId()}/time_zone_work_calendars/time_zone_detail/${orgId}`
         : `/iam/choerodon/v1/organizations/${orgId}/time_zone_work_calendars/detail`,
       params: {
         year,

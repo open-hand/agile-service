@@ -15,6 +15,10 @@ export interface IGanttConflictAssignee {
   userId: string
   conflicted: boolean
 }
+export interface IGanttSortDataItem {
+  property: string,
+  direction: 'desc' | 'asc'
+}
 export type IGanttMoveRequestData = {
   dimension: IGanttDimension
   currentId: string
@@ -166,6 +170,21 @@ class GanttApi extends Api<GanttApi> {
           teamProjectIds: data.teamProjectIds,
         },
       },
+    });
+  }
+
+  saveSort(sortData: IGanttSortDataItem[]) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/gantt/save/sort`,
+      data: sortData,
+    });
+  }
+
+  loadSort() {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/gantt/latest_sort`,
     });
   }
 }
