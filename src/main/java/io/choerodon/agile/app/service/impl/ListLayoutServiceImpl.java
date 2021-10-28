@@ -10,7 +10,7 @@ import io.choerodon.agile.app.service.ListLayoutService;
 import io.choerodon.agile.infra.dto.IssuePersonalSortDTO;
 import io.choerodon.agile.infra.dto.ListLayoutColumnRelDTO;
 import io.choerodon.agile.infra.dto.ListLayoutDTO;
-import io.choerodon.agile.infra.enums.IssueSortFieldMapping;
+import io.choerodon.agile.infra.enums.IssueFieldMapping;
 import io.choerodon.agile.infra.mapper.IssuePersonalSortMapper;
 import io.choerodon.agile.infra.mapper.ListLayoutColumnRelMapper;
 import io.choerodon.agile.infra.mapper.ListLayoutMapper;
@@ -135,7 +135,7 @@ public class ListLayoutServiceImpl implements ListLayoutService {
                 if (code.startsWith(projectCodePrefix) || code.startsWith(organizationCodePrefix)) {
                     property = customFieldSortPrefix + code;
                 } else {
-                    property = IssueSortFieldMapping.getSortByField(code);
+                    property = IssueFieldMapping.getSortFieldByCode(code);
                     if (property == null) {
                         property = code;
                     }

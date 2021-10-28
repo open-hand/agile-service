@@ -1,6 +1,5 @@
 package io.choerodon.agile.api.validator;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -9,6 +8,7 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.enums.IssueFieldMapping;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
@@ -69,16 +69,6 @@ public class IssueValidator {
     private static final String REPORTER_ID = "reporterId";
     private static final String PRIORITY_ID = "priorityId";
     private static final String STATUS_ID_FIELD = "statusId";
-
-    private static final String[] LEGAL_COPY_PREDEFINED_FIELDS_NAME = new String[]
-            {
-                    ASSIGNEE_ID, EPIC_ID, STORY_POINTS_FIELD, FEATURE_ID,
-                    ENVIRONMENT, MAIN_RESPONSIBLE_ID, REMAIN_TIME_FIELD,
-                    ESTIMATED_START_TIME, ESTIMATED_END_TIME, SPRINT_ID_FIELD,
-                    COMPONENT, LABEL, FIX_VERSION, INFLUENCE_VERSION, TAG,
-                    REPORTER_ID, PRIORITY_ID, STATUS_ID_FIELD,ACTUAL_START_TIME,
-                    ACTUAL_END_TIME
-            };
 
     @Autowired
     private IssueService issueService;
@@ -440,9 +430,9 @@ public class IssueValidator {
 
     public void checkPredefinedFields(List<String> predefinedFieldNames) {
         if (!CollectionUtils.isEmpty(predefinedFieldNames)) {
-            List<String> legalCopyPredefinedFields = Arrays.asList(LEGAL_COPY_PREDEFINED_FIELDS_NAME);
             for (String fieldName: predefinedFieldNames) {
-                if (!legalCopyPredefinedFields.contains(fieldName)) {
+                String field = IssueFieldMapping.getCloneFieldCodeByInputField(fieldName);
+                if (field == null) {
                     throw new CommonException("error.copy.issue.illegal.field");
                 }
             }
