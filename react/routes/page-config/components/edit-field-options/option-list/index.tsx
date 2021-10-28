@@ -1,3 +1,4 @@
+import ReactDOM from 'react-dom';
 import { fieldApi } from '@/api';
 import { FieldOption } from '@/common/types';
 import { usePersistFn } from 'ahooks';
@@ -142,6 +143,18 @@ const OptionList: React.ForwardRefRenderFunction<OptionListRef, OptionListProps>
               <AutoSizer>
                 {({ width, height }) => (
                   <List
+                    ref={(listRef) => {
+                      // 如果不设置ref，拖拽时滚动条会失效
+                      // react-virtualized has no way to get the list's ref that I can so
+                      // So we use the `ReactDOM.findDOMNode(ref)` escape hatch to get the ref
+                      if (listRef) {
+                        // eslint-disable-next-line react/no-find-dom-node
+                        const whatHasMyLifeComeTo = ReactDOM.findDOMNode(listRef);
+                        if (whatHasMyLifeComeTo instanceof HTMLElement) {
+                          p.innerRef(whatHasMyLifeComeTo);
+                        }
+                      }
+                    }}
                     height={height ?? 200}
                     overscanRowCount={5}
                     rowCount={fieldOptions.length}
@@ -174,7 +187,6 @@ const OptionList: React.ForwardRefRenderFunction<OptionListRef, OptionListProps>
                   />
                 )}
               </AutoSizer>
-              {p.placeholder}
             </div>
           )}
         </Droppable>
