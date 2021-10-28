@@ -4,6 +4,7 @@ import React, {
 import type { ChangeEvent } from 'react';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { Select } from 'choerodon-ui/pro';
+import { useCreation, usePersistFn } from 'ahooks';
 
 const { Option } = Select;
 
@@ -15,7 +16,7 @@ const SelectNumber: React.FC<Props> = forwardRef(({
   selectNumbers = ['0.5', '1', '2', '3', '4', '5', '8', '13'],
   onChange,
   onBlur,
-  pattern = /(^\d{1,3}\.{1}\d{1}$)|(^[1-9]\d{0,2}$)/,
+  pattern: propsPattern = /(^\d{1,3}\.{1}\d{1}$)|(^[1-9]\d{0,2}$)/,
   validationRenderer = () => (
     <span>请输入小于3位的整数或者整数位小于3位小数点后一位的小数</span>
   ),
@@ -23,8 +24,16 @@ const SelectNumber: React.FC<Props> = forwardRef(({
   name,
   ...otherProps
 }, ref: React.Ref<Select>) => {
-  const [value, setValue] = useState<string>('');
-
+  // 减少重复创建
+  const pattern = useCreation(() => propsPattern, []);
+  const [value, setOriginValue] = useState<string>('');
+  const setValue: React.Dispatch<React.SetStateAction<string>> = usePersistFn((v) => {
+    // 避免1.5.0-alpha.5 组件设置value  造成combo 模式下键入的数字丢失
+    if (name) {
+      return;
+    }
+    setOriginValue(v);
+  });
   const handleChange = (newValue: string, oldValue: string) => {
     setValue(newValue);
     if (onChange) {
