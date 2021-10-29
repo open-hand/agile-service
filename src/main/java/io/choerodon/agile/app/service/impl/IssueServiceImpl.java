@@ -226,7 +226,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String ENVIRONMENT = "environment";
     private static final String MAIN_RESPONSIBLE_ID = "mainResponsibleId";
     private static final String ESTIMATED_START_TIME = "estimatedStartTime";
+    private static final String ACTUAL_START_TIME = "actualStartTime";
     private static final String ESTIMATED_END_TIME = "estimatedEndTime";
+    private static final String ACTUAL_END_TIME = "actualEndTime";
     private static final String FIELD_RANK = "Rank";
     protected static final String RANK_HIGHER = "评级更高";
     protected static final String RANK_LOWER = "评级更低";
@@ -245,6 +247,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String BUG_TYPE = "bug";
     private static final String TASK_TYPE = "task";
     private static final String MY_START_BEACON = "myStarBeacon";
+    private static final String PARTICIPANT_IDS = "participantIds";
     private static final List<String> WORK_BENCH_SEARCH_TYPE = Arrays.asList("myBug", "reportedBug", MY_START_BEACON, "myReported", "myAssigned");
     private static final String[] UPDATE_TYPE_CODE_FIELD_LIST_NO_RANK = new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, RELATE_ISSUE_ID};
     private static final String[] TRANSFORMED_TASK_FIELD_LIST_NO_RANK = new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, STATUS_ID};
@@ -252,7 +255,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             {
                     ASSIGNEE_ID, EPIC_ID_FIELD, STORY_POINTS_FIELD, STATUS_ID,
                     FEATURE_ID, ENVIRONMENT, MAIN_RESPONSIBLE_ID, REMAIN_TIME_FIELD,
-                    ESTIMATED_START_TIME, ESTIMATED_END_TIME, REPORTER_ID, PRIORITY_ID
+                    ESTIMATED_START_TIME, ESTIMATED_END_TIME, REPORTER_ID, PRIORITY_ID,
+                    ACTUAL_START_TIME, ACTUAL_END_TIME, PARTICIPANT_IDS
             };
     private static final String FIX_VERSION = "fixVersion";
     private static final String INFLUENCE_VERSION = "influenceVersion";
