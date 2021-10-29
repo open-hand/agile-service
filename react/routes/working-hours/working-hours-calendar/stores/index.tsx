@@ -30,7 +30,7 @@ export interface ICalendarData {
   }
 }
 
-export type ICountData = {[date: string]: [count: number] };
+export type ICountData = {[date: string]: number };
 
 interface Context {
   searchDs: DataSet,

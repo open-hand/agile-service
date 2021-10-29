@@ -9,7 +9,7 @@ import { LoadingProvider } from '@/components/Loading';
 import LogTable from './components/LogTable';
 import { openExportLogModal } from './components/export-modal';
 import LogSearch from './components/LogSearch';
-import { useLogStore } from './stores';
+import { StoreProvider, useLogStore } from './stores';
 import { IWorkingHoursData, workingHoursApi } from '@/api';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 
@@ -72,4 +72,12 @@ const WorkingHoursLog = () => {
   );
 };
 
-export default observer(WorkingHoursLog);
+const ObserverWorkingHoursLog = observer(WorkingHoursLog);
+
+const Index = (props: any) => (
+  <StoreProvider {...props}>
+    <ObserverWorkingHoursLog />
+  </StoreProvider>
+);
+
+export default Index;

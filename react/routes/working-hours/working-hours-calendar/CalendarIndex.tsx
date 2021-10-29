@@ -9,7 +9,7 @@ import { LoadingProvider } from '@/components/Loading';
 import Calendar from './components/Calendar';
 import { openExportLogModal } from '../working-hours-log/components/export-modal';
 import Search from '../working-hours-log/components/LogSearch';
-import { useCalendarStore } from './stores';
+import { StoreProvider, useCalendarStore } from './stores';
 import { IWorkingHoursData, workingHoursApi } from '@/api';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 
@@ -71,4 +71,12 @@ const WorkingHoursCalendar = () => {
   );
 };
 
-export default observer(WorkingHoursCalendar);
+const ObserverWorkingHoursCalendar = observer(WorkingHoursCalendar);
+
+const Index = (props: any) => (
+  <StoreProvider {...props}>
+    <ObserverWorkingHoursCalendar />
+  </StoreProvider>
+);
+
+export default Index;

@@ -94,14 +94,7 @@ export function getRoutes(match) {
       path={`${match.url}/project-report`}
       component={ProjectReport}
     />,
-    <PermissionRoute
-      service={(type) => (
-        type === 'project' ? [
-          'choerodon.code.project.cooperation.working-hours.log.ps.default',
-        ] : [
-          'choerodon.code.organization.cooperation.working-hours.log.ps.default',
-        ]
-      )}
+    <Route
       path={`${match.url}/working-hours`}
       component={WorkingHours}
     />,
