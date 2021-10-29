@@ -5485,6 +5485,9 @@
                 </foreach>
             </if>
         </if>
+        <if test="sortMap != null and sortMap.orderStr != null">
+            ORDER BY ${sortMap.orderStr}
+        </if>
     </select>
 
     <sql id="queryAssigneeIssue">
