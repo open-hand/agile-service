@@ -7,8 +7,10 @@ import originMoment, { Moment } from 'moment';
 import { Icon, Tooltip } from 'choerodon-ui';
 import { extendMoment } from 'moment-range';
 import classNames from 'classnames';
-import { useSize, useWhyDidYouUpdate } from 'ahooks';
-import { cloneDeep, max, sum } from 'lodash';
+import { useSize } from 'ahooks';
+import {
+  cloneDeep, debounce, max, sum,
+} from 'lodash';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import { ICalendarData, useCalendarStore } from '../../../stores';
 import styles from './index.less';
@@ -63,24 +65,20 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
   const [userIssuesHeightMap, setUserIssuesHeightMap] = useState<Map<string, number>>(new Map());
   const [defaultScrolled, setDefaultScrolled] = useState<boolean>(false);
   const [firstSetDefaultScrolled, setFirstSetDefaultScrolled] = useState<boolean>(false);
-  // useWhyDidYouUpdate('DateTable', {
-  //   dateTableWrapperSize,
-  //   dateTableSize,
-  //   dateBodySize,
-  //   widthPerDay,
-  //   expandMap,
-  //   userIssuesHeightMap,
-  //   userIssuesMap,
-  //   countData,
-  // });
-  useEffect(() => {
-    setWidthPerDay((width) => {
-      if (!width) {
-        return dateTableSize.width ? ((dateTableSize.width - 250)) / 7 : 0;
+  const appEle = document.querySelector('#app');
+  const menuEle = document.querySelector('#menu');
+  // @ts-ignore
+  const appEleSize = useSize(appEle);
+  // @ts-ignore
+  const menuEleSize = useSize(menuEle);
+
+  useEffect(debounce(() => {
+    if (appEleSize.width && menuEleSize.width) {
+      if ((appEleSize.width - menuEleSize.width - 24 - 250) / 7 !== widthPerDay) {
+        setWidthPerDay((appEleSize.width - menuEleSize.width - 24 - 250) / 7);
       }
-      return width;
-    });
-  }, [dateTableSize.width]);
+    }
+  }, 300), [appEleSize.width, menuEleSize.width]);
 
   useEffect(() => {
     if (!firstSetDefaultScrolled && dateTableSize.height && dateTableWrapperSize.height) {
@@ -134,6 +132,18 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
     </div>
   )), [betweenDate]);
 
+  useEffect(() => { // 更改筛选条件时，全部折叠，避免没有请求展开的user的登记出现问题
+    batchedUpdates(() => {
+      setUserIssuesHeightMap(new Map());
+      setUserIssuesMap(new Map());
+      setExpandMap(new Map());
+    });
+  }, [
+    searchDs.current?.get('startTime'),
+    searchDs.current?.get('endTime'),
+    searchDs.current?.get('userIds'),
+    searchDs.current?.get('projectIds'),
+  ]);
   const handleExpand = useCallback((item: ICalendarData) => {
     const newMap = cloneDeep(expandMap);
     const newUserIssuesMap = cloneDeep(userIssuesMap);
@@ -212,7 +222,7 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
                 {
               betweenDate.map((date) => {
                 const dateCount = item.countMap?.[date.format] || 0;
-                let cellColor = '#D9E6F2';
+                let cellColor = '#edfffd';
                 if (dateCount > 8) {
                   cellColor = '#FFD9CD';
                 }
@@ -294,7 +304,7 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
   ), [betweenDate, calendarDs, expandMap, handleExpand, userIssuesMap, userIssuesHeightMap]);
 
   const renderEmptyBlock = useCallback(() => {
-    const blockHeight = (dateTableWrapperSize.height || 0) - (dateBodySize.height || 0) - 100; // 96
+    const blockHeight = (dateTableWrapperSize.height || 0) - ((calendarDs.toData().length) * countHeight + sum([...userIssuesHeightMap.values()]) + (calendarDs.totalPage > calendarDs.currentPage ? 40 : 0)) - 100; // 96
     return blockHeight > 0 && (
     <div
       className={classNames(styles.row, styles.blockRow, {
@@ -334,7 +344,7 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
     </div>
     );
   },
-  [betweenDate, dateTableWrapperSize.height, dateBodySize.height]);
+  [betweenDate, dateTableWrapperSize.height, userIssuesHeightMap, calendarDs]);
 
   const renderFooter = useCallback(() => (
     <div
@@ -366,26 +376,21 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
 
   const handleLoadMore = useCallback(() => {
     calendarDs.queryMore(calendarDs.currentPage + 1);
-    getCountData({
-      startTime,
-      endTime,
-      userIds: searchDs.current?.get('userIds'),
-      projectIds: searchDs.current?.get('projectIds'),
-    });
   }, []);
 
   return (
     <div
       className={styles.dateTable}
       style={{
-        width: '100%',
+        // width: '100%',
+        width: 250 + 7 * widthPerDay,
         maxWidth: widthPerDay ? 250 + 7 * widthPerDay - (((dateTableWrapperSize.height || 0) < (dateTableSize.height || 0) && !defaultScrolled) ? 4 : 0) : '100%', // -2,滚动条
       }}
     // @ts-ignore
       ref={dateTableRef}
     >
       {
-        startDate && endDate && (
+        startDate && endDate && calendarDs.toData().length > 0 && (
           <>
             <div
               className={classNames(styles.header, { [styles.lastCellHasBorderRow]: betweenDate.length < 7 })}
@@ -406,6 +411,7 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
               className={styles.body}
               style={{
                 width: 250 + betweenDate.length * widthPerDay,
+                height: (calendarDs.toData().length) * countHeight + sum([...userIssuesHeightMap.values()]) + (calendarDs.totalPage > calendarDs.currentPage ? 40 : 0),
               }}
               // @ts-ignore
               ref={dateBodyRef}
