@@ -21,6 +21,7 @@ const propTypes = {
   issueTypes: PropTypes.shape([]),
   onCreate: PropTypes.func,
   mountCreate: PropTypes.bool,
+  isCanQuickCreate: PropTypes.func,
 };
 
 class QuickCreateIssue extends Component {
@@ -94,7 +95,7 @@ class QuickCreateIssue extends Component {
       return;
     }
     const {
-      issueTypes, relateIssueId, sprintId, epicId, versionIssueRelVOList: propsVersionIssueRelVOList, chosenFeatureId, projectId, isInProgram, cantCreateEvent,
+      issueTypes, relateIssueId, sprintId, epicId, versionIssueRelVOList: propsVersionIssueRelVOList, chosenFeatureId, projectId, isInProgram, cantCreateEvent, isCanQuickCreate,
     } = this.props;
 
     const assigneeId = this.userDropDownRef?.current?.selectedUser?.id;
@@ -104,7 +105,24 @@ class QuickCreateIssue extends Component {
       this.setState({
         loading: true,
       });
+
       const currentType = issueTypes.find((t) => t.id === currentTypeId);
+
+      const setDefaultValues = () => {
+        if (this.props.summaryChange) {
+          this.props.summaryChange(summary);
+        }
+        if (this.props.typeIdChange) {
+          this.props.typeIdChange(currentType.id);
+        }
+        if (this.props.setDefaultSprint) {
+          this.props.setDefaultSprint(sprintId);
+        }
+        if (this.props.assigneeChange) {
+          this.props.assigneeChange(assigneeId, this.userDropDownRef?.current?.selectedUser);
+        }
+      };
+
       if (!await checkCanQuickCreate(currentType.id, assigneeId, projectId)) { //
         if (!cantCreateEvent) {
           Choerodon.prompt('该工作项类型含有必填选项，请使用弹框创建');
@@ -113,18 +131,7 @@ class QuickCreateIssue extends Component {
           });
         } else {
           Choerodon.prompt('请填写标注的必填字段');
-          if (this.props.summaryChange) {
-            this.props.summaryChange(summary);
-          }
-          if (this.props.typeIdChange) {
-            this.props.typeIdChange(currentType.id);
-          }
-          if (this.props.setDefaultSprint) {
-            this.props.setDefaultSprint(sprintId);
-          }
-          if (this.props.assigneeChange) {
-            this.props.assigneeChange(assigneeId, this.userDropDownRef?.current?.selectedUser);
-          }
+          setDefaultValues();
           this.setState({
             loading: false,
             create: false,
@@ -160,7 +167,16 @@ class QuickCreateIssue extends Component {
           priorityId: defaultPriority.id,
           epicId,
         }, fieldsMap);
-
+        if (isCanQuickCreate && !await isCanQuickCreate(issue)) {
+          setDefaultValues();
+          this.setState({
+            loading: false,
+            create: false,
+          });
+          cantCreateEvent();
+          this.setState({ summary: this.currentTemplate || '' });
+          return;
+        }
         await issueApi.project(projectId).create(issue).then((res) => {
           this.setState({
             loading: false,

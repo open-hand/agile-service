@@ -37,9 +37,11 @@ interface QuickCreateSubIssueProps {
   typeIdChange?: (typeId: string) => void,
   setDefaultSprint?: (sprintId: string | undefined) => void,
   assigneeChange?: (assigneeId: string | undefined, assignee: User | undefined) => void
+  isCanQuickCreate?: (createData: any) => boolean
+
 }
 const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
-  priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, defaultValues, projectId, cantCreateEvent, typeCode, summaryChange, typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick,
+  priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, defaultValues, projectId, cantCreateEvent, isCanQuickCreate, typeCode, summaryChange, typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick,
 }) => {
   const { data: issueTypes, isLoading } = useProjectIssueTypes({ typeCode: typeCode || 'sub_task', projectId, onlyEnabled: true });
   const { data: defaultPriority } = useDefaultPriority({ projectId }, { enabled: !priorityId });
@@ -74,25 +76,29 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
 
     if (currentType && summary && summary.trim()) {
       setLoading(true);
+      const currentAssignee = userDropDownRef?.current?.selectedUser;
+
+      const setDefaultValues = () => {
+        if (summaryChange) {
+          summaryChange(summary);
+        }
+        if (typeIdChange) {
+          typeIdChange(currentType.id);
+        }
+        if (setDefaultSprint) {
+          setDefaultSprint(sprintId);
+        }
+        if (assigneeChange) {
+          assigneeChange(assigneeId, currentAssignee);
+        }
+      };
       if (!await checkCanQuickCreate(currentType.id, assigneeId, projectId)) {
         if (!cantCreateEvent) {
           Choerodon.prompt('该工作项类型含有必填选项，请使用弹框创建');
           setLoading(false);
         } else {
-          const currentAssignee = userDropDownRef?.current?.selectedUser;
           Choerodon.prompt('请填写标注的必填字段');
-          if (summaryChange) {
-            summaryChange(summary);
-          }
-          if (typeIdChange) {
-            typeIdChange(currentType.id);
-          }
-          if (setDefaultSprint) {
-            setDefaultSprint(sprintId);
-          }
-          if (assigneeChange) {
-            assigneeChange(assigneeId, currentAssignee);
-          }
+          setDefaultValues();
           setLoading(false);
           setCreateStatus('failed');
           handleCancel();
@@ -127,6 +133,22 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
         sprintId,
         assigneeId,
       }, fieldsMap);
+      if (isCanQuickCreate && !await isCanQuickCreate(issue)) {
+        setDefaultValues();
+        setLoading(false);
+        setCreateStatus('failed');
+        handleCancel();
+        cantCreateEvent && cantCreateEvent({
+          defaultValues: {
+            summary,
+            sprint: sprintId,
+            priority: priorityId,
+          },
+          defaultTypeId: currentType.id,
+          defaultAssignee: currentAssignee,
+        });
+        return false;
+      }
 
       const res = currentType.typeCode === 'sub_task'
         || issue.parentIssueId || issue.relateIssueId || issue.relateIssueId ? await issueApi.project(projectId).createSubtask(issue) : await issueApi.project(projectId).create(issue);
