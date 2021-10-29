@@ -688,7 +688,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
                   columns={columns}
                   onUpdate={handleUpdate}
                   onResizeWidth={handleResizeWidth}
-                  defaultTableWidth={localCacheStore.unPrefix().getItem('agile.gantt.table.width')}
+                  defaultTableWidth={Number(localCacheStore.unPrefix().getItem('agile.gantt.table.width')) || undefined}
                   startDateKey="estimatedStartTime"
                   endDateKey="estimatedEndTime"
                   isRestDay={isRestDay}
