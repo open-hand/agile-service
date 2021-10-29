@@ -30,6 +30,7 @@ import UserTag from '@/components/tag/user-tag';
 import { IGanttPageProps } from '../Gantt';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import openGanttConflictModal from '../components/gannt-conflict-modal';
+import { ganttIsCanQuickCreateIssue } from '../utils';
 
 interface IGanttColumnsHookProps extends TableCacheRenderProps {
   menuType: IGanttPageProps['menuType']
@@ -170,7 +171,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
     onSortChange = noop, onClickSummary = noop,
     openCreateSubIssue = noop, onAfterCreateSubIssue = noop,
   } = events;
-  function renderSummary(record: Gantt.Record) {
+  function renderSummary(record: Gantt.Record<{ createSprintIds?: string[] } & any>) {
     if (record.create) {
       const parentIssue: Gantt.Record<GanttIssue> & { groupType?: string, isInProgram?: boolean } = record.parent;
 
@@ -179,6 +180,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
       const defaultValues = {} as any;
       let priorityId: string | undefined = parentIssue.priorityVO?.id;
       let parentIssueId: string | undefined = parentIssue.issueId;
+      const sprintId = (parentIssue as any).sprint?.sprintId! || record.sprint?.sprintId || (record.createSprintIds || [])[0];
       if (record.groupType) {
         parentIssueId = undefined;
         priorityId = undefined;
@@ -198,7 +200,8 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
             priorityId={priorityId}
             parentIssueId={parentIssueId}
             defaultValues={defaultValues}
-            sprintId={(parentIssue as any).sprint?.sprintId! || record.sprint?.sprintId}
+            isCanQuickCreate={() => ganttIsCanQuickCreateIssue(record.createSprintIds)}
+            sprintId={sprintId}
             cantCreateEvent={(res) => {
               onAfterCreateSubIssue(record.createId, undefined, true);
               // 这里延迟打开

@@ -19,12 +19,12 @@ const GanttOperation: React.FC = () => {
   }, [store]);
   return (
     <div style={{
-      display: 'flex', flexShrink: 0, alignItems: 'flex-end', paddingBottom: 19, marginLeft: 'auto',
+      display: 'flex', flexShrink: 0, alignItems: 'center', paddingBottom: 19, marginLeft: 'auto',
     }}
     >
       <Dropdown overlay={() => <GanttLegend />}>
         <span style={{
-          display: 'inline-block', marginBottom: 5, marginRight: 16, marginLeft: 3, lineHeight: '18px',
+          display: 'inline-block', marginRight: 16, marginLeft: 3, lineHeight: '18px',
         }}
         >
           图例说明

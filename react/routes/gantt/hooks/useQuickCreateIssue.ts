@@ -18,13 +18,18 @@ interface IQuickCreateIssueHookComponentProps {
 }
 interface IQuickCreateIssueHookConfig {
   onCreate?: (res: any, isQuickCreate: boolean) => void
+  isCanQuickCreate?: (createData: any) => boolean
 }
-function useQuickCreateIssue({ onCreate = noop }: IQuickCreateIssueHookConfig): [IQuickCreateIssueHookData, IQuickCreateIssueHookComponentProps] {
+function defaultIsCanQuickCreate() {
+  return true;
+}
+function useQuickCreateIssue({ onCreate = noop, isCanQuickCreate: propsIsCanQuickCreate = defaultIsCanQuickCreate }: IQuickCreateIssueHookConfig): [IQuickCreateIssueHookData, IQuickCreateIssueHookComponentProps] {
   const [isCreate, setIsCreate] = useState(false);
   const quickCreateDataRef = useRef<any>({});
   const handleFinishCreate = usePersistFn((res: any, isQuickCreate: boolean) => {
     onCreate(res, isQuickCreate);
   });
+  const isCanQuickCreate = usePersistFn((createData: any) => propsIsCanQuickCreate(createData));
   const handleCantCreateEvent = usePersistFn(() => {
     openCreateIssue({
       ...quickCreateDataRef.current,
@@ -42,6 +47,7 @@ function useQuickCreateIssue({ onCreate = noop }: IQuickCreateIssueHookConfig): 
   const props = useMemo(() => ({
     onCreateChange: setIsCreate,
     cantCreateEvent: handleCantCreateEvent,
+    isCanQuickCreate,
     onCreate: (res: any) => handleFinishCreate(res, true),
     typeIdChange: (id: any) => {
       handleChangeQuickCreateData('defaultTypeId', id);
@@ -56,7 +62,7 @@ function useQuickCreateIssue({ onCreate = noop }: IQuickCreateIssueHookConfig): 
       handleChangeQuickCreateData('sprint', value);
     },
 
-  }), [handleCantCreateEvent, handleChangeQuickCreateData, handleFinishCreate]);
+  }), [handleCantCreateEvent, handleChangeQuickCreateData, handleFinishCreate, isCanQuickCreate]);
   return [{ isCreate }, props];
 }
 

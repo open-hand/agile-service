@@ -5,6 +5,10 @@ import React, {
 // eslint-disable-next-line camelcase
 import { unstable_batchedUpdates } from 'react-dom';
 import {
+  Choerodon,
+  Page, Header, Content, Breadcrumb, HeaderButtons,
+} from '@choerodon/boot';
+import {
   Tooltip, Icon, Button, CheckBox,
 } from 'choerodon-ui/pro';
 import { observer, useComputed } from 'mobx-react-lite';
@@ -19,9 +23,7 @@ import {
   usePersistFn, useDebounceFn, useUpdateEffect,
 } from 'ahooks';
 import moment from 'moment';
-import {
-  Page, Header, Content, Breadcrumb, HeaderButtons,
-} from '@choerodon/boot';
+
 import GanttComponent, { Gantt, GanttProps, GanttRef } from '@choerodon/gantt';
 import '@choerodon/gantt/dist/gantt.cjs.production.min.css';
 import { FlatSelect } from '@choerodon/components';
@@ -59,7 +61,7 @@ import QuickCreateIssue from '@/components/QuickCreateIssue';
 import TableCache, { TableCacheRenderProps } from '@/components/table-cache';
 import useGanttColumns, { useGanttOrgColumns } from './hooks/useGanttColumns';
 import {
-  ganttLocalMove, getGanttMoveDataOrigin, getGanttMoveSubmitData, ganttDataGroupByType, getGanttCreatingSubIssue, ganttNormalizeIssue, ganttSaveCollapsedStatus, ganttRestoreCollapsedStatus,
+  ganttLocalMove, getGanttMoveDataOrigin, getGanttMoveSubmitData, ganttDataGroupByType, getGanttCreatingSubIssue, ganttNormalizeIssue, ganttSaveCollapsedStatus, ganttRestoreCollapsedStatus, ganttIsCanQuickCreateIssue,
 } from './utils';
 import GanttDragWrapper from './components/gantt-drag-wrapper';
 import useQuickCreateIssue from './hooks/useQuickCreateIssue';
@@ -137,14 +139,14 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
       }
       const newIssue = getGanttCreatingSubIssue(parentIssue, targetIndex);
       if (!parentIssue.sprint) {
-        const sprintId = store.sprintIds?.length === 1 ? store.sprintIds[0] : undefined;
-        sprintId && sprintId !== '0' && set(newIssue, 'sprint', { sprintId });
+        set(newIssue, 'createSprintIds', store.sprintIds || []);
       }
+
       targetIndex !== -1 && draft.splice(targetIndex, 0, newIssue);
     }));
   });
   const handleCreateSubIssue = usePersistFn((subIssue: Issue, parentIssueId: string) => {
-    handleCreateIssue(subIssue, parentIssueId, parentIssueId);
+    handleCreateIssue(subIssue, undefined, parentIssueId);
   });
 
   const handleQuickCreateSubIssueAfter = usePersistFn((createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed = false) => {
@@ -213,7 +215,10 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
     })();
   });
 
-  const [{ isCreate }, quickCreateProps] = useQuickCreateIssue({ onCreate: run });
+  const [{ isCreate }, quickCreateProps] = useQuickCreateIssue({
+    onCreate: run,
+    isCanQuickCreate: () => ganttIsCanQuickCreateIssue(store.sprintIds),
+  });
 
   useEffect(() => {
     run();
@@ -352,6 +357,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const handleCreateIssue = usePersistFn((issue: Issue, issueId?: string, parentId?: string, dontCopyEpic = false) => {
     setData(produce(data, (draft) => {
       const normalizeIssueWidthParentId = Object.assign(ganttNormalizeIssue(issue), { parentId });
+      console.log('normalizeIssueWidthParentId', normalizeIssueWidthParentId, issueId);
       if (!issueId) {
         draft.unshift(normalizeIssueWidthParentId);
       } else {
@@ -367,6 +373,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   });
 
   const handleCopyIssue = usePersistFn((issue: Issue, issueId: string, isSubTask?: boolean, dontCopyEpic?: boolean) => {
+    console.log('copy', issue, issueId, isSubTask, dontCopyEpic);
     handleCreateIssue(issue, issueId, isSubTask ? issueId : undefined, dontCopyEpic);
     const subIssues = [...(issue.subIssueVOList ?? []), ...(issue.subBugVOList ?? [])];
     if (subIssues.length > 0) {
@@ -706,6 +713,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
                 <div className={classNames('c7n-gantt-content-body-quick-create', { 'c7n-gantt-content-body-quick-create-open': isCreate })}>
                   <QuickCreateIssue
                     {...quickCreateProps}
+                    projectId={projectId}
                     sprintId={sprintIds?.length === 1 ? sprintIds.filter((i) => i !== '0')[0] : undefined}
                   />
                 </div>

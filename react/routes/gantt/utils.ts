@@ -2,6 +2,9 @@
 import { Gantt } from '@choerodon/gantt';
 import { produce } from 'immer';
 import {
+  Choerodon,
+} from '@choerodon/boot';
+import {
   findIndex, noop, omit, pick, sortBy,
 } from 'lodash';
 import { IGanttConflictAssignee, IGanttMoveRequestData, IGanttMoveRequestDataPreviousWithNext } from '@/api';
@@ -198,19 +201,22 @@ const formatData = (data: any[]) => data.map((item, i, arr) => {
   }
   return newItem;
 });
-export function getGanttCreatingSubIssue(parentIssue: GanttIssue, dataIndex: number) {
+export function getGanttCreatingSubIssue(parentIssue: GanttIssue & { groupType?: string }, dataIndex: number) {
   return {
     ...pick(parentIssue, ['sprint', 'assignee', 'epicId', 'groupType', 'featureId']),
     group: true,
+    epicId: parentIssue.groupType === 'epic' ? parentIssue.issueId : parentIssue.epicId,
+    featureId: parentIssue.groupType === 'feature' ? parentIssue.issueId : parentIssue.featureId,
     parentId: parentIssue.issueId,
     issueId: `create**${parentIssue.issueId}`,
     parent: parentIssue,
     create: true,
+    createSprintIds: [],
     createId: dataIndex,
   };
 }
 export const ganttNormalizeIssue = (issue: Issue, source: any = {}) => Object.assign(source, {
-  parentId: issue.relateIssueId || issue.parentIssueId,
+  parentId: issue.relateIssueId || issue.parentIssueId || issue.featureId || issue.epicId,
   estimatedEndTime: issue.estimatedEndTime,
   estimatedStartTime: issue.estimatedStartTime,
   issueTypeVO: issue.issueTypeVO,
@@ -221,13 +227,14 @@ export const ganttNormalizeIssue = (issue: Issue, source: any = {}) => Object.as
   completed: issue.completed,
   issueId: issue.issueId,
   assignee: issue.assigneeId ? {
+    id: issue.assigneeId,
     name: issue.assigneeName,
     realName: issue.assigneeRealName,
   } : null,
   sprint: issue.activeSprint,
   featureId: issue.featureId,
   epicId: issue.epicId,
-});
+} as GanttIssue);
 
 const groupByTask = (data: any[]) => ganttList2Tree(data);
 const groupByUser = (data: any[], rankList: string[], conflictAssignees: IGanttConflictAssignee[]) => {
@@ -420,3 +427,10 @@ export const ganttDataGroupByType = ({
   }
   return data;
 };
+export function ganttIsCanQuickCreateIssue(sprintIds?: string[] | null) {
+  if (!sprintIds || sprintIds?.length === 1) {
+    return true;
+  }
+  Choerodon.prompt('有多个冲刺，请您使用弹框创建');
+  return false;
+}
