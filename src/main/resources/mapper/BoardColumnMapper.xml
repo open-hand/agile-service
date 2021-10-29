@@ -89,7 +89,7 @@
             #{projectId}
         </foreach>
         and ai.parent_issue_id = aii2.issue_id
-        WHERE ai.project_id = in
+        WHERE ai.project_id in
         <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
             #{projectId}
         </foreach>
