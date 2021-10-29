@@ -73,12 +73,14 @@ public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogServi
 
     private void selfAdjustment(Long issueId, BigDecimal workTime) {
         IssueConvertDTO issueConvertDTO = modelMapper.map(issueMapper.selectByPrimaryKey(issueId), IssueConvertDTO.class);
+        Long projectId = issueConvertDTO.getProjectId();
+        List<String> fieldList = Arrays.asList(REMAINING_TIME_FIELD);
         if (issueConvertDTO.getRemainingTime() != null) {
             issueConvertDTO.setRemainingTime(getRemainTime(issueConvertDTO, workTime));
-            Long projectId = issueConvertDTO.getProjectId();
-            List<String> fieldList = Arrays.asList(REMAINING_TIME_FIELD);
-            this.self().updateRemainingTime(issueConvertDTO, projectId, issueId, fieldList);
+        } else {
+            issueConvertDTO.setRemainingTime(BigDecimal.ZERO);
         }
+        this.self().updateRemainingTime(issueConvertDTO, projectId, issueId, fieldList);
     }
 
     @Override
