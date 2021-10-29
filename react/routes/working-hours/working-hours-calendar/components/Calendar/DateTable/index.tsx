@@ -61,7 +61,8 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
   const [expandMap, setExpandMap] = useState<Map<string, boolean>>(new Map([]));
   const [userIssuesMap, setUserIssuesMap] = useState<Map<string, {[date: string]: ICalendarIssue[]}>>(new Map());
   const [userIssuesHeightMap, setUserIssuesHeightMap] = useState<Map<string, number>>(new Map());
-
+  const [defaultScrolled, setDefaultScrolled] = useState<boolean>(false);
+  const [firstSetDefaultScrolled, setFirstSetDefaultScrolled] = useState<boolean>(false);
   // useWhyDidYouUpdate('DateTable', {
   //   dateTableWrapperSize,
   //   dateTableSize,
@@ -80,6 +81,16 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
       return width;
     });
   }, [dateTableSize.width]);
+
+  useEffect(() => {
+    if (!firstSetDefaultScrolled && dateTableSize.height && dateTableWrapperSize.height) {
+      batchedUpdates(() => {
+        // @ts-ignore
+        setDefaultScrolled(dateTableSize.height > dateTableWrapperSize.height);
+        setFirstSetDefaultScrolled(true);
+      });
+    }
+  }, [firstSetDefaultScrolled, dateTableSize.height, dateTableWrapperSize.height]);
 
   const getBetweenDate = useCallback((start: Moment, end: Moment): {
     date: string,
@@ -125,34 +136,42 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
 
   const handleExpand = useCallback((item: ICalendarData) => {
     const newMap = cloneDeep(expandMap);
+    const newUserIssuesMap = cloneDeep(userIssuesMap);
+    const newUserIssuesHeightMap = cloneDeep(userIssuesHeightMap);
     if (!newMap.get(item.userId)) {
       newMap.set(item.userId, true);
-      if (!userIssuesMap.get(item.userId)) {
-        const newUserIssuesMap = cloneDeep(userIssuesMap);
-        const newUserIssuesHeightMap = cloneDeep(userIssuesHeightMap);
-        setLoading(true);
-        workingHoursApi.getUserCalendar(item.userId, startTime, endTime).then((data: {[date: string]: ICalendarIssue[]}) => {
-          newUserIssuesMap.set(item.userId, data);
-          let maxCellIssuesHeight = 0;
-          if (data) {
-            const mostCount = max(Object.values(data).map((issues) => issues.length)) || 0;
-            if (mostCount > 0) {
-              maxCellIssuesHeight = mostCount * (cardMargin + cardHeight) - cardMargin + issuePadding1 + issuePadding2;
-            }
+      setLoading(true);
+      workingHoursApi.getUserCalendar(item.userId, {
+        startTime,
+        endTime,
+        projectIds: searchDs.current?.get('projectIds'),
+      }).then((data: {[date: string]: ICalendarIssue[]}) => {
+        newUserIssuesMap.set(item.userId, data);
+        let maxCellIssuesHeight = 0;
+        if (data) {
+          const mostCount = max(Object.values(data).map((issues) => issues.length)) || 0;
+          if (mostCount > 0) {
+            maxCellIssuesHeight = mostCount * (cardMargin + cardHeight) - cardMargin + issuePadding1 + issuePadding2;
           }
-          newUserIssuesHeightMap.set(item.userId, maxCellIssuesHeight);
-          batchedUpdates(() => {
-            setLoading(false);
-            setUserIssuesMap(newUserIssuesMap);
-            setUserIssuesHeightMap(newUserIssuesHeightMap);
-          });
+        }
+        newUserIssuesHeightMap.set(item.userId, maxCellIssuesHeight);
+        batchedUpdates(() => {
+          setLoading(false);
+          setUserIssuesMap(newUserIssuesMap);
+          setUserIssuesHeightMap(newUserIssuesHeightMap);
         });
-      }
+      });
     } else {
       newMap.delete(item.userId);
+      newUserIssuesHeightMap.delete(item.userId);
+      newUserIssuesHeightMap.delete(item.userId);
     }
-    setExpandMap(newMap);
-  }, [expandMap, userIssuesMap, userIssuesHeightMap]);
+    batchedUpdates(() => {
+      setExpandMap(newMap);
+      setUserIssuesHeightMap(newUserIssuesHeightMap);
+      setUserIssuesMap(newUserIssuesMap);
+    });
+  }, [expandMap, userIssuesMap, userIssuesHeightMap, startTime, endTime, searchDs.current?.get('projectIds')]);
 
   const renderRows = useCallback(() => (
     <>
@@ -172,15 +191,15 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
               }}
             >
               <div className={classNames(styles.firstCell, styles.row_firstCell, styles.row_cell, styles.body_cell)}>
-                <div>
+                <div style={{ marginLeft: (item.allEstimateTime || 0) > 0 ? 0 : 20 }}>
                   {
-                  (item.allEstimateTime || 0) > 0 ? (
+                  (item.allEstimateTime || 0) > 0 && (
                     <Icon
                       className={styles.row_firstCell_icon}
                       type={expandMap.get(item.userId) ? 'expand_more' : 'navigate_next'}
                       onClick={() => handleExpand(item)}
                     />
-                  ) : <div style={{ width: 20, height: 20, display: 'inline-block' }} />
+                  )
                 }
                   <UserTag data={item.userMessageDTO} />
                 </div>
@@ -358,7 +377,10 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
   return (
     <div
       className={styles.dateTable}
-      style={{ width: widthPerDay ? 250 + 7 * widthPerDay : '100%' }}
+      style={{
+        width: '100%',
+        maxWidth: widthPerDay ? 250 + 7 * widthPerDay - (((dateTableWrapperSize.height || 0) < (dateTableSize.height || 0) && !defaultScrolled) ? 4 : 0) : '100%', // -2,滚动条
+      }}
     // @ts-ignore
       ref={dateTableRef}
     >
@@ -410,7 +432,6 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
                       type="expand_more"
                     />
                   </span>
-
                 </div>
                 )
               }

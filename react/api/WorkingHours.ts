@@ -2,7 +2,7 @@ import { getIsOrganization, getOrganizationId, getProjectId } from '@/utils/comm
 import Api from './Api';
 
 export interface IWorkingHoursData {
-  userIds: string[],
+  userIds?: string[],
   projectIds?: string[],
   startTime: string,
   endTime: string,
@@ -86,7 +86,7 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
     });
   }
 
-  getUserCalendar(userId: string, startTime: string, endTime: string) {
+  getUserCalendar(userId: string, data: IWorkingHoursData) {
     return this.request({
       method: 'post',
       url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/work_hours/work_hours_calendar_info`,
@@ -94,10 +94,7 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
         organizationId: getOrganizationId(),
         userId,
       },
-      data: {
-        startTime,
-        endTime,
-      },
+      data,
     });
   }
 
