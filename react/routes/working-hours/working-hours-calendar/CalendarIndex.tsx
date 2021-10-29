@@ -67,7 +67,7 @@ const WorkingHoursCalendar = () => {
           }}
         >
           {
-            calendarDs.totalPage === 0 && !(calendarDs.status === 'loading' || loading) ? (
+            calendarDs.totalPage === 0 && !(calendarDs.status === 'loading' || loading) && (
               <EmptyPage
                 image={NoData}
                 description="暂无数据"
@@ -79,10 +79,9 @@ const WorkingHoursCalendar = () => {
                   paddingTop: 0,
                 }}
               />
-            ) : (
-              <Calendar />
             )
           }
+          <Calendar />
         </LoadingProvider>
       </Content>
     </Page>
