@@ -29,7 +29,7 @@ export const UserUniqueTag: React.FC<{ data: UserTagData, prefixCls?: string } &
       text={text}
       showText={showText}
       textClassName={`${prefixCls}-text`}
-      tooltip={data.tooltip ?? (data.ldap ? `${realName}(${loginName})` : `${realName}(${email})`)}
+      tooltip={data.tooltip ?? (data.ldap ? `${realName}${loginName ? `(${loginName})` : ''}` : `${realName}${email ? `(${email})` : ''}`)}
       style={{ maxWidth: 108, ...style }}
       avatarStyle={{
         color: '#6473c3',
