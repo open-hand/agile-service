@@ -1081,10 +1081,14 @@
     </sql>
 
     <sql id="explainSearchVO">
+        <!--不包含projectIds-->
         <include refid="io.choerodon.agile.infra.mapper.IssueMapper.explainSearchVOSql"/>
         <if test='searchVO.otherArgs != null'>
+            <!--包含projectIds-->
             <include refid="io.choerodon.agile.infra.mapper.IssueMapper.otherArgsSql1"/>
+            <!--包含projectIds-->
             <include refid="io.choerodon.agile.infra.mapper.IssueMapper.otherArgsSql2"/>
+            <!--不包含projectIds-->
             <include refid="io.choerodon.agile.infra.mapper.StarBeaconMapper.filterStarBeaconSql"/>
         </if>
     </sql>
@@ -4477,7 +4481,10 @@
         <if test="linkSql != null and linkSql != ''">
             ${linkSql}
         </if>
-        WHERE ai.project_id = #{projectId}
+        WHERE ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+            #{projectId}
+        </foreach>
         <if test="searchVO != null">
             <include refid="io.choerodon.agile.infra.mapper.IssueMapper.explainSearchVO"/>
         </if>
@@ -4977,7 +4984,10 @@
             ai.issue_id in (
             SELECT atir.issue_id
             FROM agile_tag_issue_rel atir
-            WHERE atir.project_id = #{projectId}
+            WHERE atir.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+                #{projectId}
+            </foreach>
             and atir.tag_project_id in
             <foreach collection="extendSearchVO.otherArgs.tags" item="tag" open="(" separator="," close=")">
                 #{tag.projectId}
@@ -5010,7 +5020,10 @@
                     (
                     SELECT issue_id
                     FROM agile_issue_sprint_rel aisr
-                    WHERE project_id = #{projectId}
+                    WHERE project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+                        #{projectId}
+                    </foreach>
                     )
                 </if>
                 <if test="id != 0 ">
@@ -5036,7 +5049,10 @@
                     FROM
                     fd_field_value ffv
                     WHERE
-                    ffv.project_id = #{projectId}
+                    ffv.project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+                        #{projectId}
+                    </foreach>
                     AND ffv.field_id = #{item.fieldId}
                     AND ffv.option_id IN
                     <foreach collection="item.value" item="value" open="(" separator=","
@@ -5057,7 +5073,10 @@
                     FROM
                     fd_field_value ffv
                     WHERE
-                    ffv.project_id = #{projectId}
+                    ffv.project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+                        #{projectId}
+                    </foreach>
                     AND ffv.field_id = #{item.fieldId}
                     AND ffv.date_value &gt;= #{item.startDate} AND ffv.date_value &lt;= #{item.endDate}
                     )
@@ -5074,7 +5093,10 @@
                     FROM
                     fd_field_value ffv
                     WHERE
-                    ffv.project_id = #{projectId}
+                    ffv.project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+                        #{projectId}
+                    </foreach>
                     AND ffv.field_id = #{item.fieldId}
                     AND DATE_FORMAT(ffv.date_value, '%H:%i:%s') &gt;= #{item.startDate} AND DATE_FORMAT(ffv.date_value, '%H:%i:%s') &lt;= #{item.endDate}
                     )
@@ -5091,7 +5113,10 @@
                     FROM
                     fd_field_value ffv
                     WHERE
-                    ffv.project_id = #{projectId}
+                    ffv.project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+                        #{projectId}
+                    </foreach>
                     AND ffv.field_id = #{item.fieldId}
                     AND ffv.number_value = #{item.value}
                     )
@@ -5108,7 +5133,10 @@
                     FROM
                     fd_field_value ffv
                     WHERE
-                    ffv.project_id = #{projectId}
+                    ffv.project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+                        #{projectId}
+                    </foreach>
                     AND ffv.field_id = #{item.fieldId}
                     AND ffv.string_value LIKE CONCAT(CONCAT('%' ,#{item.value}) ,'%')
                     )
@@ -5125,7 +5153,10 @@
                     FROM
                     fd_field_value ffv
                     WHERE
-                    ffv.project_id = #{projectId}
+                    ffv.project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+                        #{projectId}
+                    </foreach>
                     AND ffv.field_id = #{item.fieldId}
                     AND ffv.text_value LIKE CONCAT(CONCAT('%' ,#{item.value}) ,'%')
                     )

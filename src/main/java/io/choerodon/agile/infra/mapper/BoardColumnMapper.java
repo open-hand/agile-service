@@ -18,7 +18,7 @@ import io.choerodon.mybatis.common.BaseMapper;
  */
 public interface BoardColumnMapper extends BaseMapper<BoardColumnDTO> {
 
-    List<ColumnAndIssueDTO> selectColumnsByBoardId(@Param("projectId") Long projectId,
+    List<ColumnAndIssueDTO> selectColumnsByBoardId(@Param("projectIds") Set<Long> projectIds,
                                                    @Param("boardId") Long boardId,
                                                    @Param("sprintId") Long sprintId,
                                                    @Param("filterSql") String filterSql,
@@ -110,7 +110,7 @@ public interface BoardColumnMapper extends BaseMapper<BoardColumnDTO> {
 
     /**
      * 查询看板issue
-     * @param projectId 项目id
+     * @param projectIds 项目id
      * @param sprintId 冲刺id
      * @param filterSql 筛选sql
      * @param searchVO 查询条件
@@ -119,7 +119,7 @@ public interface BoardColumnMapper extends BaseMapper<BoardColumnDTO> {
      * @param statusIds 状态id
      * @return 看板issue
      */
-    List<IssueForBoardDO> selectBoardIssue(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId, @Param("filterSql") String filterSql, @Param("searchVO") SearchVO searchVO, @Param("assigneeFilterIds") List<Long> assigneeFilterIds, @Param("userId") Long userId, @Param("statusIds") Set<Long> statusIds);
+    List<IssueForBoardDO> selectBoardIssue(@Param("projectIds") Set<Long> projectIds, @Param("sprintId") Long sprintId, @Param("filterSql") String filterSql, @Param("searchVO") SearchVO searchVO, @Param("assigneeFilterIds") List<Long> assigneeFilterIds, @Param("userId") Long userId, @Param("statusIds") Set<Long> statusIds);
 
     /**
      * 查询看板issue数量

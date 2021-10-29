@@ -122,13 +122,20 @@
         left join (
         select avir.issue_id, apv.version_id, apv.name
         from agile_version_issue_rel avir, agile_product_version apv
-        where avir.version_id = apv.version_id and avir.project_id = #{projectId}
+        where avir.version_id = apv.version_id and avir.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+            #{projectId}
+        </foreach>
         ) version_info on ai.issue_id = version_info.issue_id
         LEFT JOIN agile_issue_sprint_rel aisl on aisl.project_id = ai.project_id and aisl.issue_id = ai.issue_id
         LEFT JOIN agile_sprint asp on asp.project_id = aisl.project_id and asp.sprint_id = aisl.sprint_id
         LEFT JOIN agile_issue_status ais on ais.project_id = ai.project_id and ais.status_id = ai.status_id
         LEFT JOIN fd_status fs on fs.id = ais.status_id
-        where ai.project_id = #{projectId} and ai.type_code = 'story'
+        where ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+            #{projectId}
+        </foreach>
+        and ai.type_code = 'story'
         and (
         <if test="epicIds != null and epicIds.size > 0">
             ai.epic_id in

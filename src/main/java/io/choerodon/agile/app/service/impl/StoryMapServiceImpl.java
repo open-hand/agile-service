@@ -111,7 +111,7 @@ public class StoryMapServiceImpl implements StoryMapService {
             } else {
                 List<EpicWithInfoDTO> epicWithInfoDTOList = storyMapMapper.selectEpicList(projectId, epicIds, searchVO.getAdvancedSearchArgs());
                 storyMap.setEpics(epicWithInfoDTOList);
-                storyMapStoryDTOS.addAll(storyMapMapper.selectStoryList(projectId, epicIds, searchVO,filterSql,searchVO.getAssigneeFilterIds()));
+                storyMapStoryDTOS.addAll(storyMapMapper.selectStoryList(new HashSet<>(Arrays.asList(projectId)), epicIds, searchVO,filterSql,searchVO.getAssigneeFilterIds()));
             }
             storyMap.setStoryList(!epicIds.isEmpty() ? storyMapStoryDTOS : new ArrayList<>());
         }
@@ -283,7 +283,7 @@ public class StoryMapServiceImpl implements StoryMapService {
                 List<EpicWithInfoDTO> epicWithInfoDTOList = storyMapMapper.selectEpicList(projectId, content, searchVO.getAdvancedSearchArgs());
                 storyMap.setEpics(epicWithInfoDTOList);
             }
-            List<StoryMapStoryDTO> storyMapStoryDTOS = storyMapMapper.selectStoryList(projectId, content, searchVO,filterSql,searchVO.getAssigneeFilterIds());
+            List<StoryMapStoryDTO> storyMapStoryDTOS = storyMapMapper.selectStoryList(new HashSet<>(Arrays.asList(projectId)), content, searchVO,filterSql,searchVO.getAssigneeFilterIds());
             storyMap.setStoryList(!content.isEmpty() ? storyMapStoryDTOS : new ArrayList<>());
             storyMap.setTotalPage(pageEpicIds.getTotalPages());
         }
