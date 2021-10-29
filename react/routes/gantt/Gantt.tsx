@@ -69,6 +69,7 @@ import { GanttIssue, IGanttCollapsedHistory } from './types';
 import { getProjectId } from '@/utils/common';
 import SelectProject from '@/components/select/select-project';
 import localCacheStore from '@/stores/common/LocalCacheStore';
+import { IPersonalFilter } from '@/components/quick-search';
 
 const middleDateKeys = [{ key: 'actualStartTime', maxDateKey: 'actualEndTime', ignoreCheckDateKeys: ['actualEndTime'] }, { key: 'actualEndTime', minDateKey: 'actualStartTime' }];
 const { Option } = FlatSelect;
@@ -76,6 +77,7 @@ export interface IGanttPageProps extends TableCacheRenderProps {
   isInProgram: boolean
   /** 组织层禁止编辑 */
   menuType: 'project' | 'org'
+  myDefaultFilter: IPersonalFilter | undefined
   projectId?: string
   projects?: any[]
   setCurrentProject?: any
@@ -100,12 +102,12 @@ export type IGanttDimensionTypeValue = (typeof typeValues)[number];
 
 const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const {
-    isInProgram, menuType, projectId, setCurrentProject, projects,
+    isInProgram, menuType, projectId, setCurrentProject, projects, myDefaultFilter,
   } = props;
   const [conflictAssignees, setConflictAssignees] = useState<Array<IGanttConflictAssignee>>([]);
   const [data, setData] = useState<any[]>([]);
   const [processType, setProcessType] = useState<'task' | 'workTime'>('task');
-  const [type, setType] = useState<IGanttDimensionTypeValue>(localPageCacheStore.getItem('gantt.search.type') ?? typeValues[0]);
+  const [type, setType] = useState<IGanttDimensionTypeValue>(localPageCacheStore.project(projectId).getItem('gantt.search.type') ?? typeValues[0]);
   const [rankList, setRankList] = useState<string[] | undefined>(undefined);
   const [workCalendar, setWorkCalendar] = useState<any>();
   const collapsedHistoryRef = useRef<{ [key: string]: IGanttCollapsedHistory }>({});
@@ -118,9 +120,10 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
     fieldConfigs: { issueTypeId: { excludeTypeCodes: ['issue_epic'] } },
     getSystemFields: () => getSystemFields().map((item) => (item.code === 'feature' || item.code === 'epic' ? { ...item, defaultShow: false } : item)).filter((item) => item.code !== 'sprint') as ILocalField[],
     transformFilter,
+    defaultSearchVO: localPageCacheStore.project(projectId).getItem('agile.gantt.search') ?? (myDefaultFilter && myDefaultFilter.filterJson ? JSON.parse(myDefaultFilter.filterJson) : undefined) ?? undefined,
   });
 
-  const store = useMemo(() => new GanttStore(), []);
+  const store = useMemo(() => new GanttStore({ projectId }), [projectId]);
   const { sprintIds, unit } = store;
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
   const handleQuickCreateSubIssue = usePersistFn((parentIssue: GanttIssue & { groupType?: string, firstIssue?: GanttIssue }) => {
@@ -249,7 +252,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   }, [store]);
   const afterSprintLoad = useCallback((sprints) => {
     if (!sprintIds) {
-      const cachedSprintId = localPageCacheStore.getItem('gantt.search.sprints');
+      const cachedSprintId = localPageCacheStore.project(projectId).getItem('gantt.search.sprints');
       if (cachedSprintId) {
         store.setSprintIds(cachedSprintId);
       } else {
@@ -265,7 +268,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const handleTypeChange = useCallback((newType) => {
     setRankList(undefined);
     setType(newType);
-    localPageCacheStore.setItem('gantt.search.type', newType);
+    localPageCacheStore.project(projectId).setItem('gantt.search.type', newType);
   }, []);
 
   const isRestDay = useCallback((date: string) => isHoliday({
@@ -508,6 +511,8 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const handleResizeWidth: GanttProps['onResizeWidth'] = usePersistFn((tableWidth) => {
     localCacheStore.unPrefix().setItem('agile.gantt.table.width', tableWidth);
   });
+
+  useEffect(() => () => { localPageCacheStore.project(projectId).setItem('agile.gantt.search', issueSearchStore.getCustomFieldFilters()); }, []);
   return (
     <Page>
       <Header>

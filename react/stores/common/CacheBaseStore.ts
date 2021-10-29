@@ -2,11 +2,11 @@ import { omit, set } from 'lodash';
 import { getProjectId } from '@/utils/common';
 
 export interface CacheStoreInterface {
-  getItem: (code: string) => any
+  getItem: (code: string, that: CacheBaseStore<any>) => any
 
-  setItem: (code: string, data: any) => void
+  setItem: (code: string, data: any, that: CacheBaseStore<any>) => void
 
-  removeItem: (code: string) => void
+  removeItem: (code: string, that: CacheBaseStore<any>) => void
 
   clear: () => void
 
@@ -26,8 +26,12 @@ class CacheBaseStore<T extends string> implements CacheStoreInterface {
 
   [propsName: string]: any;
 
-  get project() {
-    return this.openProjectPrefix ? `${getProjectId()} ` : '';
+  get prefix() {
+    return this.openProjectPrefix ? `${this.projectId} ` : '';
+  }
+
+  get projectId() {
+    return getProjectId();
   }
 
   overwrite(Property: string, value: any): CacheBaseStore<T> {
@@ -41,6 +45,13 @@ class CacheBaseStore<T extends string> implements CacheStoreInterface {
     });
     // 返回新对象
     return temp;
+  }
+
+  project(projectId?: string) {
+    if (projectId) {
+      return this.overwrite('projectId', projectId);
+    }
+    return this;
   }
 
   unPrefix() {
@@ -59,15 +70,15 @@ class CacheBaseStore<T extends string> implements CacheStoreInterface {
     });
   }
 
-  getItem(code: T) { return this.cacheStore.getItem(`${this.project}${code}`); }
+  getItem(code: T): any { return this.cacheStore.getItem(`${this.prefix}${code}`, this); }
 
-  setItem(code: T, data: any) { this.cacheStore.setItem(`${this.project}${code}`, data); }
+  setItem(code: T, data: any) { this.cacheStore.setItem(`${this.prefix}${code}`, data, this); }
 
-  removeItem(code: T) { this.cacheStore.removeItem(`${this.project}${code}`); }
+  removeItem(code: T) { this.cacheStore.removeItem(`${this.prefix}${code}`, this); }
 
-  remove(code: T) { this.removeItem(`${this.project}${code}` as T); }
+  remove(code: T) { this.removeItem(`${this.prefix}${code}` as T); }
 
-  has(code: any) { return (typeof (this.cacheStore.has) === 'function' ? this.cacheStore.has(`${this.project}${code}`) : this.getItem(`${this.project}${code}` as T)); }
+  has(code: any) { return (typeof (this.cacheStore.has) === 'function' ? this.cacheStore.has(`${this.prefix}${code}`, this) : this.getItem(`${this.prefix}${code}` as T)); }
 
   clear() { this.cacheStore.clear(); }
 }

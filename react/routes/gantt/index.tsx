@@ -12,24 +12,26 @@ import { ganttApi } from '@/api';
 import noDataPic from '@/assets/image/NoData.svg';
 import Gantt from './Gantt';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
+import useDefaultMyFilter from '@/hooks/useDefaultMyFilter';
 
 // eslint-disable-next-line react/require-default-props
 const GanttProject: React.FC<{ projectId: string, menuType?: 'project' | 'org', HeadSelect?: JSX.Element, [key: string]: any }> = ({
   projectId, projects, setCurrentProject, menuType = 'project',
 }) => {
-  const { isInProgram, loading } = useIsInProgram();
-
+  const { isInProgram, loading: programLoading } = useIsInProgram();
+  const { data: myFilter, isLoading } = useDefaultMyFilter(projectId);
+  const loading = programLoading || isLoading;
   if (menuType === 'project') {
     return !loading ? (
       <TableCache type="gantt" projectId={projectId}>
-        {(cacheProps) => <Gantt {...cacheProps} isInProgram={isInProgram} menuType="project" projectId={projectId} />}
+        {(cacheProps) => <Gantt myDefaultFilter={myFilter} {...cacheProps} isInProgram={isInProgram} menuType="project" projectId={projectId} />}
       </TableCache>
     ) : <span />;
   }
   return projects.length && projectId && !loading ? (
     <TableCache type="gantt" projectId={projectId}>
       {(cacheProps) => (
-        <Gantt {...cacheProps} isInProgram={isInProgram} menuType="org" projectId={projectId} projects={projects} setCurrentProject={setCurrentProject} />
+        <Gantt myDefaultFilter={myFilter} {...cacheProps} isInProgram={isInProgram} menuType="org" projectId={projectId} projects={projects} setCurrentProject={setCurrentProject} />
       )}
     </TableCache>
   ) : null;
