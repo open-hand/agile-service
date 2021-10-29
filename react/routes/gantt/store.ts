@@ -34,7 +34,13 @@ export const units = [
   },
 ];
 class GanttStore {
-  ganttRef = createRef<GanttRef>()
+  ganttRef = createRef<GanttRef>();
+
+  projectId:string|undefined;
+
+  constructor({ projectId }:{projectId?:string}) {
+    this.projectId = projectId;
+  }
 
   @observable unit: Gantt.Sight = 'day'
 
@@ -79,7 +85,7 @@ class GanttStore {
   @action
   setSprintIds(sprintIds: string[] | null) {
     this.sprintIds = sprintIds;
-    localPageCacheStore.setItem('gantt.search.sprints', sprintIds);
+    localPageCacheStore.project(this.projectId).setItem('gantt.search.sprints', sprintIds);
   }
 
   @observable detailProps = {} as DetailContainerProps;
