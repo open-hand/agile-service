@@ -103,13 +103,15 @@ class StoryMapApi extends Api<StoryMapApi> {
      * 获取故事地图的需求池中工作项列表
      * @param searchVO
      */
-  getDemands(searchVO: demandAdvancedSearch) {
+  getDemands(searchVO: demandAdvancedSearch, page = 1, size = 100) {
     return axios({
       method: 'post',
       url: `${this.prefix}/story_map/demand`,
       data: searchVO,
       params: {
         organizationId: this.orgId,
+        page,
+        size,
       },
     });
   }
