@@ -96,6 +96,12 @@
         <if test="workHoursSearchVO.startTime != null and workHoursSearchVO.endTime != null">
             and awl.start_date between #{workHoursSearchVO.startTime} and #{workHoursSearchVO.endTime}
         </if>
+        <if test="workHoursSearchVO.userIds != null and workHoursSearchVO.userIds.size > 0">
+            and awl.created_by in
+            <foreach collection="workHoursSearchVO.userIds" item="userId" open="(" close=")" separator=",">
+                #{userId}
+            </foreach>
+        </if>
     </select>
 
     <select id="queryIssue" resultType="io.choerodon.agile.api.vo.business.IssueVO">

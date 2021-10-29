@@ -41,7 +41,7 @@ public class WorkHoursOrgController {
     @PostMapping(value = "/work_hours_log")
     public ResponseEntity<Page<WorkHoursLogVO>> pageWorkHoursLogByOrgId(@ApiParam(value = "组织id", required = true)
                                                                         @PathVariable(name = "organization_id") Long organizationId,
-                                                                        @SortDefault(value = "creationDate", direction = Sort.Direction.DESC)
+                                                                        @SortDefault(value = "startDate", direction = Sort.Direction.DESC)
                                                                                 PageRequest pageRequest,
                                                                         @RequestBody WorkHoursSearchVO workHoursSearchVO) {
         return Optional.ofNullable(workHoursService.pageWorkHoursLogByOrgId(organizationId, pageRequest, workHoursSearchVO))
