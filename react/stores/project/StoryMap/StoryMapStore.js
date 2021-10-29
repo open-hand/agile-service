@@ -3,7 +3,7 @@ import {
 } from 'mobx';
 import {
   cloneDeep,
-  find, findIndex, remove, sortBy,
+  find, findIndex, remove, sortBy, pick,
 } from 'lodash';
 import { getProjectId } from '@/utils/common';
 import {
@@ -93,6 +93,20 @@ class StoryMapStore {
 
   @action setFoldCompletedEpic = (data) => {
     this.foldCompletedEpic = data;
+  }
+
+  @observable sideIssueListPageInfo = {
+    page: 1,
+    size: 100,
+    hasNextPage: false,
+  };
+
+  @computed get getSideIssueListPageInfo() {
+    return this.sideIssueListPageInfo;
+  }
+
+  @action setSideIssueListPageInfo(pageInfo) {
+    this.sideIssueListPageInfo = pageInfo;
   }
 
   miniMap = {};
@@ -198,14 +212,17 @@ class StoryMapStore {
       this.initStoryMapData(storyMapData, firstLoad);
       this.setLoading(false);
     }).catch((error) => {
-      console.log(error);
       this.setLoading(false);
     });
   }
 
-  loadIssueList = () => {
-    storyMapApi.getDemands(this.sideSearchVO).then((res) => {
-      this.setIssueList(res.demandStoryList);
+  loadIssueList = (propsPage = 1) => {
+    const { page = 1, size = 100 } = this.sideIssueListPageInfo || {};
+    const newPage = propsPage ?? page;
+    storyMapApi.getDemands(this.sideSearchVO, newPage, size).then((res) => {
+      const list = res.isFirstPage ? res.content : this.issueList.concat(res.content);
+      this.setIssueList(list);
+      this.setSideIssueListPageInfo({ page: res.pageNum, size: res.pageSize, hasNextPage: res.hasNextPage });
     });
   }
 

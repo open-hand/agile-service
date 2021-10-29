@@ -80,9 +80,9 @@
   }
 
   &-content {
-    overflow-y: auto;
-    overflow-x: hidden;
-    height: calc(~'100% - 1.08rem');
+    //overflow-y: auto;
+    //overflow-x: hidden;
+    height: 100%;
     padding: 0.16rem;
     padding-top: 0.1rem;
     position: relative;
@@ -97,6 +97,10 @@
         font-size: 0.14rem;
         font-weight: 500;
       }
+    }
+
+    .infinite-scroll-component__outerdiv {
+      height: calc(100% - 1rem);
     }
 
     &-list {

@@ -5,6 +5,7 @@ import {
 import { TextField } from 'choerodon-ui/pro';
 import { observer, inject } from 'mobx-react';
 import { FlatSelect } from '@choerodon/components';
+import ScrollContext from 'react-infinite-scroll-component';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 import FiltersProvider from '../../../../../components/FiltersProvider';
 import ClickOutSide from '../../../../../components/CommonComponent/ClickOutSide';
@@ -54,9 +55,14 @@ class SideIssueList extends Component {
     StoryMapStore.handleSideFilterChange(field, values);
   }
 
+  loadMoreIssues = () => {
+    const { page } = StoryMapStore.getSideIssueListPageInfo || {};
+    StoryMapStore.loadIssueList(page + 1);
+  };
+
   render() {
     const {
-      issueList,
+      issueList, getSideIssueListPageInfo,
     } = StoryMapStore;
     const { filter } = this.state;
     const issues = issueList.filter(this.handleFilter);
@@ -124,11 +130,17 @@ class SideIssueList extends Component {
           </FlatSelect>
         </div>
         <div className="c7nagile-SideIssueList-content">
-          {/* <Loading loading={issueListLoading} /> */}
           {issues.length > 0 ? (
-            <div className="c7nagile-SideIssueList-content-list">
+            <ScrollContext
+              className="c7nagile-SideIssueList-content-list"
+              dataLength={issues.length}
+              next={this.loadMoreIssues}
+              hasMore={getSideIssueListPageInfo?.hasNextPage}
+              loader={null}
+              height="100%"
+            >
               {issues.map((issue) => <IssueItem issue={issue} />)}
-            </div>
+            </ScrollContext>
           ) : <div style={{ textAlign: 'center', color: 'rgba(0, 0, 0, 0.54)' }}>暂无数据</div>}
         </div>
       </div>
