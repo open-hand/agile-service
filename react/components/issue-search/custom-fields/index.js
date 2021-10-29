@@ -83,7 +83,7 @@ function CustomFields({
   const dateTypes = [];
   const inputTypes = [];
   const { store } = useContext(IssueSearchContext);
-  const { chosenFields } = store;
+  const { chosenFields, chosenNotDisplayField } = store;
   const handleChoose = useCallback((value, status) => {
     if (Array.isArray(value)) {
       status === 'add' ? store.chooseAll(value) : store.unChooseAll();
@@ -95,7 +95,7 @@ function CustomFields({
   const fields = useCreation(() => store.getAllFields.filter((field) => !field.defaultShow && !field.archive), [store, store.getAllFields.length]);
 
   const [data, chooseFieldProps] = useChoseField({
-    value: [...chosenFields.keys()],
+    value: chosenNotDisplayField,
     fields,
     events: {
       choseField: handleChoose,

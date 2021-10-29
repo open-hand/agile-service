@@ -68,6 +68,7 @@ import useQuickCreateIssue from './hooks/useQuickCreateIssue';
 import { GanttIssue, IGanttCollapsedHistory } from './types';
 import { getProjectId } from '@/utils/common';
 import SelectProject from '@/components/select/select-project';
+import localCacheStore from '@/stores/common/LocalCacheStore';
 
 const middleDateKeys = [{ key: 'actualStartTime', maxDateKey: 'actualEndTime', ignoreCheckDateKeys: ['actualEndTime'] }, { key: 'actualEndTime', minDateKey: 'actualStartTime' }];
 const { Option } = FlatSelect;
@@ -504,7 +505,9 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
       sourceBar, destinationBar, type, data: moveConfig.data,
     });
   }, [data, projectId, rankList, searchFilter, store.ganttRef, type]);
-
+  const handleResizeWidth: GanttProps['onResizeWidth'] = usePersistFn((tableWidth) => {
+    localCacheStore.unPrefix().setItem('agile.gantt.table.width', tableWidth);
+  });
   return (
     <Page>
       <Header>
@@ -684,6 +687,8 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
                   data={ganttData}
                   columns={columns}
                   onUpdate={handleUpdate}
+                  onResizeWidth={handleResizeWidth}
+                  defaultTableWidth={localCacheStore.unPrefix().getItem('agile.gantt.table.width')}
                   startDateKey="estimatedStartTime"
                   endDateKey="estimatedEndTime"
                   isRestDay={isRestDay}
