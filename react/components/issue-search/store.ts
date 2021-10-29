@@ -189,6 +189,16 @@ class IssueSearchStore {
 
   @observable chosenFields: IChosenFields = new Map();
 
+  @computed get chosenNotDisplayField() {
+    const noDisplayChosenFields: IChosenField[] = [];
+    this.chosenFields.forEach((value, key) => {
+      if (!((value as ILocalField).noDisplay || (value as ILocalField).defaultShow)) {
+        noDisplayChosenFields.push(value);
+      }
+    });
+    return noDisplayChosenFields;
+  }
+
   @action initChosenFields() {
     const chosenFields = new Map(this.chosenFields);
 

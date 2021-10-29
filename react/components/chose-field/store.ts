@@ -79,7 +79,7 @@ class ChoseFieldStore {
 
   @action('状态值自更新')
   selfUpdateCurrentOptionStatus() {
-    let nextOptionStatus:any = this.chosenFields.size ? 'PART' : 'NONE';
+    let nextOptionStatus: any = this.chosenFields.size ? 'PART' : 'NONE';
     if (this.chosenFields.size === (this.fields.get('system')!.length + this.fields.get('custom')!.length)) {
       nextOptionStatus = 'ALL';
     }
@@ -100,6 +100,7 @@ class ChoseFieldStore {
 
   @action('删除选择字段') delChosenFields(key: string) {
     this.chosenFields.delete(key);
+    this.selfUpdateCurrentOptionStatus();
   }
 
   @action('增添全部字段') addAllChosenFields() {

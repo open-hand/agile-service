@@ -80,12 +80,16 @@ export function getTableColumns({
 }) {
   const res = [];
   const columnsMap = getColumnsMap({ onSummaryClick });
+  const getCustom = (field) => {
+    const column = getCustomColumn(field);
+    return { ...column, render: ({ rowData }) => column.render(rowData) };
+  };
   listLayoutColumns.forEach((layoutColumn) => {
     const { columnCode: code, width } = layoutColumn;
     const field = find(fields, { code });
     if (field) {
       // 系统字段和自定义字段处理
-      const column = columnsMap.has(code) ? columnsMap.get(code) : getCustomColumn(field);
+      const column = columnsMap.has(code) ? columnsMap.get(code) : getCustom(field);
       res.push({
         ...column,
         code,
