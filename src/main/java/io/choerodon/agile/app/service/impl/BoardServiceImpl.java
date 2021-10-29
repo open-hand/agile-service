@@ -473,7 +473,7 @@ public class BoardServiceImpl implements BoardService {
                 });
             }
         });
-        List<IssueForBoardDO> issueList = boardColumnMapper.selectBoardIssue(projectId, sprintId, filterSql, searchVO, assigneeFilterIds, userId, statusIds);
+        List<IssueForBoardDO> issueList = boardColumnMapper.selectBoardIssue(new HashSet<>(Arrays.asList(projectId)), sprintId, filterSql, searchVO, assigneeFilterIds, userId, statusIds);
         if (CollectionUtils.isEmpty(issueList)){
             return;
         }

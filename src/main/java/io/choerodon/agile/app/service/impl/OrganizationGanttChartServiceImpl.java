@@ -21,6 +21,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.utils.PageUtils;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -202,6 +203,7 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         String filterSql = ganttChartService.getFilterSql(searchVO);
         boardAssembler.handleOtherArgs(searchVO);
         Map<String, Object> sortMap = new HashMap<>();
+        addProjectSortIfNotExisted(pageRequest);
         ganttChartService.processSort(pageRequest, sortMap);
         Set<Long> filterProjectIds = filterByTeamProjectIds(projectIds, searchVO);
         if (ObjectUtils.isEmpty(filterProjectIds)) {
@@ -229,6 +231,18 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         List<IssueDTO> issueList = issueMapper.selectWithSubByIssueIds(filterProjectIds, issueIds, sortMap, false, null);
         List<GanttChartVO> result = ganttChartService.buildGanttList(filterProjectMap, issueIds, issueList, Collections.emptyMap(), Collections.emptyMap(), Collections.emptyList(), organizationId);
         return PageUtils.copyPropertiesAndResetContent(issuePage, result);
+    }
+
+    private void addProjectSortIfNotExisted(PageRequest pageRequest) {
+        Sort sort = pageRequest.getSort();
+        if (ObjectUtils.isEmpty(sort)) {
+            return;
+        }
+        if (ObjectUtils.isEmpty(sort.getOrderFor("projectId"))) {
+            Sort.Order projectIdOrder = new Sort.Order(Sort.Direction.DESC, "projectId");
+            sort = sort.and(new Sort(projectIdOrder));
+            pageRequest.setSort(sort);
+        }
     }
 
     private Set<Long> filterByTeamProjectIds(Set<Long> projectIds, SearchVO searchVO) {

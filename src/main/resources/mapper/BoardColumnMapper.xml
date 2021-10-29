@@ -50,8 +50,16 @@
             IF(ai.issue_num IS NULL, NULL, CONCAT_WS('-', api.project_code, ai.issue_num)) AS issue_num
             FROM agile_issue ai
             LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
-            left join agile_issue aii2 on aii2.project_id = #{projectId} and ai.parent_issue_id = aii2.issue_id
-            WHERE ai.project_id = #{projectId} AND ai.apply_type = 'agile'
+            left join agile_issue aii2 on aii2.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+                #{projectId}
+            </foreach>
+            and ai.parent_issue_id = aii2.issue_id
+            WHERE ai.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+                #{projectId}
+            </foreach>
+            AND ai.apply_type = 'agile'
             <include refid="io.choerodon.agile.infra.mapper.IssueMapper.explainSearchVO"/>
             <include refid="io.choerodon.agile.infra.mapper.IssueMapper.filterSqlAndAssigneeIds"/>
         ) aii
@@ -76,8 +84,16 @@
         ai.issue_id
         FROM agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
-        left join agile_issue aii2 on aii2.project_id = #{projectId} and ai.parent_issue_id = aii2.issue_id
-        WHERE ai.project_id = #{projectId} AND ai.apply_type = 'agile'
+        left join agile_issue aii2 on aii2.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+            #{projectId}
+        </foreach>
+        and ai.parent_issue_id = aii2.issue_id
+        WHERE ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+            #{projectId}
+        </foreach>
+        AND ai.apply_type = 'agile'
         <include refid="io.choerodon.agile.infra.mapper.IssueMapper.explainSearchVO"/>
     </sql>
 
@@ -130,9 +146,17 @@
         ) ai ON ai.status_id = ais.status_id
         LEFT JOIN agile_project_info api ON api.project_id = ai.project_id
         LEFT JOIN lookup_value alv1 ON abc.color_code = alv1.value_code
-        LEFT JOIN fd_star_beacon fsb ON fsb.project_id = #{projectId} AND fsb.type = 'issue' AND fsb.user_id = #{userId} AND ai.issue_id = fsb.instance_id
+        LEFT JOIN fd_star_beacon fsb ON fsb.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+            #{projectId}
+        </foreach>
+        AND fsb.type = 'issue' AND fsb.user_id = #{userId} AND ai.issue_id = fsb.instance_id
         WHERE
-        abc.project_id = #{projectId} AND abc.board_id = #{boardId}
+        abc.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+            #{projectId}
+        </foreach>
+        AND abc.board_id = #{boardId}
         ORDER BY abc.sequence
     </select>
 
@@ -455,10 +479,20 @@
         FROM
         agile_issue ai
         LEFT JOIN agile_project_info api ON api.project_id = ai.project_id
-        LEFT JOIN agile_issue_sprint_rel aisr ON ai.issue_id = aisr.issue_id AND aisr.project_id = #{projectId}
-        LEFT JOIN fd_star_beacon fsb ON fsb.project_id = #{projectId} AND fsb.type = 'issue' AND fsb.user_id = #{userId} AND ai.issue_id = fsb.instance_id
+        LEFT JOIN agile_issue_sprint_rel aisr ON ai.issue_id = aisr.issue_id AND aisr.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+            #{projectId}
+        </foreach>
+        LEFT JOIN fd_star_beacon fsb ON fsb.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+            #{projectId}
+        </foreach>
+        AND fsb.type = 'issue' AND fsb.user_id = #{userId} AND ai.issue_id = fsb.instance_id
         WHERE
-        ai.project_id = #{projectId}
+        ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+            #{projectId}
+        </foreach>
         AND aisr.sprint_id = #{sprintId}
         AND ai.type_code in ('story', 'task', 'bug', 'sub_task')
         <if test="statusIds != null and statusIds.size() != 0">

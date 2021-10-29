@@ -611,7 +611,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     /**
      * 查询自定义报表数据点
      *
-     * @param projectId            项目id
+     * @param projectIds            项目id
      * @param searchVO             问题id
      * @param extendSearchVO
      * @param filterSql            filterSql
@@ -622,7 +622,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      * @return 自定义报表数据点
      */
     List<CustomChartPointVO> selectCustomChartPointVO(
-            @Param("projectId") Long projectId,
+            @Param("projectIds") Set<Long> projectIds,
             @Param("searchVO") SearchVO searchVO,
             @Param("extendSearchVO") SearchVO extendSearchVO,
             @Param("filterSql") String filterSql,

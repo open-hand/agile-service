@@ -766,13 +766,14 @@ public class ReportServiceImpl implements ReportService {
         List<Long> issueIdAddList;
         //获取当前冲刺期间移除的issue
         List<Long> issueIdRemoveList;
+        Set<Long> projectIds = new HashSet<>(Arrays.asList(sprintDTO.getProjectId()));
         //异步任务
         CompletableFuture<List<Long>> task1 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryIssueIdsBeforeSprintStart(sprintDTO, burnDownSearchVO, sprintDTO.getProjectId()), pool);
+                .supplyAsync(() -> reportMapper.queryIssueIdsBeforeSprintStart(sprintDTO, burnDownSearchVO, projectIds), pool);
         CompletableFuture<List<Long>> task2 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryAddIssueIdsDuringSprint(sprintDTO, burnDownSearchVO, sprintDTO.getProjectId()), pool);
+                .supplyAsync(() -> reportMapper.queryAddIssueIdsDuringSprint(sprintDTO, burnDownSearchVO, projectIds), pool);
         CompletableFuture<List<Long>> task3 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryRemoveIssueIdsDuringSprint(sprintDTO, burnDownSearchVO, sprintDTO.getProjectId()), pool);
+                .supplyAsync(() -> reportMapper.queryRemoveIssueIdsDuringSprint(sprintDTO, burnDownSearchVO, projectIds), pool);
         issueIdBeforeSprintList = task1.join();
         issueIdAddList = task2.join();
         issueIdRemoveList = task3.join();
@@ -803,13 +804,14 @@ public class ReportServiceImpl implements ReportService {
         List<Long> issueIdAddList;
         //获取当前冲刺期间移除的issue
         List<Long> issueIdRemoveList;
+        Set<Long> projectIds = new HashSet<>(Arrays.asList(sprintDTO.getProjectId()));
         //异步任务
         CompletableFuture<List<Long>> task1 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryIssueIdsBeforeSprintStart(sprintDTO, burnDownSearchVO, sprintDTO.getProjectId()), pool);
+                .supplyAsync(() -> reportMapper.queryIssueIdsBeforeSprintStart(sprintDTO, burnDownSearchVO, projectIds), pool);
         CompletableFuture<List<Long>> task2 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryAddIssueIdsDuringSprint(sprintDTO, burnDownSearchVO, sprintDTO.getProjectId()), pool);
+                .supplyAsync(() -> reportMapper.queryAddIssueIdsDuringSprint(sprintDTO, burnDownSearchVO, projectIds), pool);
         CompletableFuture<List<Long>> task3 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryRemoveIssueIdsDuringSprint(sprintDTO, burnDownSearchVO, sprintDTO.getProjectId()), pool);
+                .supplyAsync(() -> reportMapper.queryRemoveIssueIdsDuringSprint(sprintDTO, burnDownSearchVO, projectIds), pool);
         issueIdBeforeSprintList = task1.join();
         issueIdAddList = task2.join();
         issueIdRemoveList = task3.join();
@@ -1680,7 +1682,7 @@ public class ReportServiceImpl implements ReportService {
         }
         filterSql = dealSearchVO(customChartSearchVO);
         List<CustomChartPointVO> result = issueMapper.selectCustomChartPointVO(
-                projectId,
+                new HashSet<>(Arrays.asList(projectId)),
                 customChartSearchVO.getSearchVO(),
                 customChartSearchVO.getExtendSearchVO(),
                 filterSql,
