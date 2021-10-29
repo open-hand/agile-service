@@ -59,7 +59,7 @@ class CacheBaseStore<T extends string> implements CacheStoreInterface {
     });
   }
 
-  getItem(code: T) { this.cacheStore.getItem(`${this.project}${code}`); }
+  getItem(code: T) { return this.cacheStore.getItem(`${this.project}${code}`); }
 
   setItem(code: T, data: any) { this.cacheStore.setItem(`${this.project}${code}`, data); }
 
@@ -67,7 +67,7 @@ class CacheBaseStore<T extends string> implements CacheStoreInterface {
 
   remove(code: T) { this.removeItem(`${this.project}${code}` as T); }
 
-  has(code: any) { (typeof (this.cacheStore.has) === 'function' ? this.cacheStore.has(`${this.project}${code}`) : this.getItem(`${this.project}${code}` as T)); }
+  has(code: any) { return (typeof (this.cacheStore.has) === 'function' ? this.cacheStore.has(`${this.project}${code}`) : this.getItem(`${this.project}${code}` as T)); }
 
   clear() { this.cacheStore.clear(); }
 }
