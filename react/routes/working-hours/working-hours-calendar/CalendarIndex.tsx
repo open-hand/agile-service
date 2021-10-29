@@ -5,6 +5,7 @@ import {
 } from '@choerodon/boot';
 import moment from 'moment';
 import { toJS } from 'mobx';
+import { EmptyPage } from '@choerodon/components';
 import { LoadingProvider } from '@/components/Loading';
 import Calendar from './components/Calendar';
 import { openExportLogModal } from '../working-hours-log/components/export-modal';
@@ -12,6 +13,7 @@ import Search from '../working-hours-log/components/LogSearch';
 import { StoreProvider, useCalendarStore } from './stores';
 import { IWorkingHoursData, workingHoursApi } from '@/api';
 import { getProjectId, getOrganizationId } from '@/utils/common';
+import NoData from './NoData.svg';
 
 const WorkingHoursCalendar = () => {
   const {
@@ -64,7 +66,23 @@ const WorkingHoursCalendar = () => {
             zIndex: 'auto',
           }}
         >
-          <Calendar />
+          {
+            calendarDs.totalPage === 0 && !(calendarDs.status === 'loading' || loading) ? (
+              <EmptyPage
+                image={NoData}
+                description="暂无数据"
+                style={{
+                  height: '100%',
+                  width: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  paddingTop: 0,
+                }}
+              />
+            ) : (
+              <Calendar />
+            )
+          }
         </LoadingProvider>
       </Content>
     </Page>
