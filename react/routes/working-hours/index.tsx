@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation, withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import {
   PageWrap, PageTab,
 } from '@choerodon/boot';
@@ -7,8 +7,7 @@ import { useTabActiveKey } from '@choerodon/components';
 
 const WorkingHoursLog = withRouter(React.lazy(() => (import('./working-hours-log'))));
 const WorkingHoursCalendar = withRouter(React.lazy(() => (import('./working-hours-calendar'))));
-const WorkList = () => {
-  const location = useLocation();
+const WorkingHours = () => {
   const [, setActiveKey] = useTabActiveKey('calendar');
   return (
     <PageWrap
@@ -20,4 +19,4 @@ const WorkList = () => {
     </PageWrap>
   );
 };
-export default WorkList;
+export default WorkingHours;
