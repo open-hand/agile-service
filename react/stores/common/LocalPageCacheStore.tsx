@@ -7,12 +7,12 @@ class LocalPageCacheStore {
 
   pageKeys = new Map<string, Set<string>>();
 
-  setItem = (pageKey: string, data: any, that: CacheBaseStore<any>) => {
+  setItem(pageKey: string, data: any, that: CacheBaseStore<any>) {
     this.pageKeys.get(that.projectId)?.add(pageKey) || this.pageKeys.set(that.projectId, new Set([pageKey]));
     this.pages.set(`${that.projectId}-${pageKey}`, data);
   }
 
-  mergeSetItem = (pageKey: string, data: any, that: CacheBaseStore<any>) => {
+  mergeSetItem(pageKey: string, data: any, that: CacheBaseStore<any>) {
     this.pageKeys.get(that.projectId)?.add(pageKey) || this.pageKeys.set(that.projectId, new Set([pageKey]));
     const oldData = this.pages.get(`${that.projectId}-${pageKey}`);
     const omitKeys = [];
@@ -27,14 +27,16 @@ class LocalPageCacheStore {
     this.pages.set(`${that.projectId}-${pageKey}`, newData);
   }
 
-  getItem = (pageKey: string, that: CacheBaseStore<any>) => this.pages.get(`${that.projectId}-${pageKey}`)
+  getItem(pageKey: string, that: CacheBaseStore<any>) {
+    return this.pages.get(`${that.projectId}-${pageKey}`);
+  }
 
-  removeItem = (pageKey: string, that: CacheBaseStore<any>) => {
+  removeItem(pageKey: string, that: CacheBaseStore<any>) {
     this.pageKeys.get(that.projectId)?.delete(pageKey);
     this.pages.delete(`${that.projectId}-${pageKey}`);
   }
 
-  has = (pageKey: string | RegExp, that: CacheBaseStore<any>) => {
+  has(pageKey: string | RegExp, that: CacheBaseStore<any>) {
     const { projectId } = that;
     if (typeof (pageKey) === 'string' && this.pages.has(`${projectId}-${pageKey}`)) {
       return true;
@@ -57,4 +59,5 @@ interface CacheBaseStoreExtension extends CacheBaseStore<string> {
   cacheStore: LocalPageCacheStore
 }
 const testLocalPageCacheStore = new CacheBaseStore<string>(new LocalPageCacheStore(), { openProjectPrefix: false }) as CacheBaseStoreExtension;
+
 export { testLocalPageCacheStore as localPageCacheStore };

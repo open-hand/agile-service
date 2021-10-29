@@ -8,6 +8,8 @@ export interface CacheStoreInterface {
 
   removeItem: (code: string, that: CacheBaseStore<any>) => void
 
+  mergeSetItem?: (pageKey: string, data: any, that: CacheBaseStore<any>) => void
+
   clear: () => void
 
   [propsName: string]: any
@@ -77,6 +79,10 @@ class CacheBaseStore<T extends string> implements CacheStoreInterface {
   removeItem(code: T) { this.cacheStore.removeItem(`${this.prefix}${code}`, this); }
 
   remove(code: T) { this.removeItem(`${this.prefix}${code}` as T); }
+
+  mergeSetItem(pageKey: string, data: any) {
+    this.cacheStore.mergeSetItem && this.cacheStore.mergeSetItem(pageKey, data, this);
+  }
 
   has(code: any) { return (typeof (this.cacheStore.has) === 'function' ? this.cacheStore.has(`${this.prefix}${code}`, this) : this.getItem(`${this.prefix}${code}` as T)); }
 
