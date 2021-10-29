@@ -43,7 +43,7 @@ public class WorkHoursController {
     public ResponseEntity<Page<WorkHoursLogVO>> pageWorkHoursLogByProjectIds(@ApiParam(value = "项目id", required = true)
                                                                              @PathVariable(name = "project_id") Long projectId,
                                                                              @RequestParam Long organizationId,
-                                                                             @SortDefault(value = "creationDate", direction = Sort.Direction.DESC)
+                                                                             @SortDefault(value = "startDate", direction = Sort.Direction.DESC)
                                                                              PageRequest pageRequest,
                                                                              @RequestBody WorkHoursSearchVO workHoursSearchVO) {
         return Optional.ofNullable(workHoursService.pageWorkHoursLogByProjectIds(organizationId, Arrays.asList(projectId), pageRequest, workHoursSearchVO))

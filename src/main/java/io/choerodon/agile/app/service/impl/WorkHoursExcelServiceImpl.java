@@ -13,6 +13,7 @@ import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
 import io.choerodon.agile.infra.mapper.FileOperationHistoryMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.DateUtil;
 import io.choerodon.agile.infra.utils.ExcelUtil;
 import io.choerodon.agile.infra.utils.MultipartExcel;
 import io.choerodon.core.client.MessageClientC7n;
@@ -21,6 +22,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFCell;
@@ -297,7 +299,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
             CellRangeAddress cellRangeAddress = new CellRangeAddress(0, 1, i, i);
             sheet.addMergedRegion(cellRangeAddress);
         }
-        Long days = diffTime(workHoursSearchVO.getStartTime(), workHoursSearchVO.getEndTime());
+        Long days = diffTime(workHoursSearchVO.getStartTime(), DateUtils.addDays(workHoursSearchVO.getEndTime(), 1));
         DateFormat df = new SimpleDateFormat(BaseConstants.Pattern.DATE);
         if (days > 0) {
             int startCol = list.size();

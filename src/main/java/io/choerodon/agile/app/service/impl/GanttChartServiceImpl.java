@@ -174,7 +174,10 @@ public class GanttChartServiceImpl implements GanttChartService {
         projectIds.add(projectId);
         List<IssueDTO> issueList = issueMapper.selectWithSubByIssueIds(projectIds, new ArrayList<>(issueIds), null, false, null);
         Map<Long, ProjectVO> projectMap = queryProjectMap(projectId);
-        return buildGanttList(projectMap, new ArrayList<>(issueIds), issueList, new HashMap<>(), new HashMap<>(), displayFields, organizationId);
+        Map<Long, Long> issueEpicMap = new HashMap<>();
+        Map<Long, IssueDTO> issueFeatureMap = new HashMap<>();
+        addEpicIdOrFeatureIds(dimension, new ArrayList<>(issueIds), issueEpicMap, issueFeatureMap, projectIds, projectMap);
+        return buildGanttList(projectMap, new ArrayList<>(issueIds), issueList, issueEpicMap, issueFeatureMap, displayFields, organizationId);
     }
 
     @Override
