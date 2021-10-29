@@ -128,9 +128,9 @@ public class WorkHoursServiceImpl implements WorkHoursService {
             List<WorkHoursLogVO> workHoursLogS = workHoursGroup.get(userId);
             Map<String, BigDecimal> countMap = new HashMap<>();
             // 按时间分组
+            BigDecimal allEstimateTime = BigDecimal.ZERO;
             if(!CollectionUtils.isEmpty(workHoursLogS)){
                 Map<String, List<WorkHoursLogVO>> dateMap = workHoursLogS.stream().collect(Collectors.groupingBy(v -> df.format(v.getStartDate())));
-                BigDecimal allEstimateTime = BigDecimal.ZERO;
                 for (Map.Entry<String, List<WorkHoursLogVO>> entry : dateMap.entrySet()) {
                     String key = entry.getKey();
                     List<WorkHoursLogVO> value = entry.getValue();
@@ -138,8 +138,8 @@ public class WorkHoursServiceImpl implements WorkHoursService {
                     allEstimateTime = allEstimateTime.add(count);
                     countMap.put(key, count);
                 }
-                workHoursCalendarVO.setAllEstimateTime(allEstimateTime);
             }
+            workHoursCalendarVO.setAllEstimateTime(allEstimateTime);
             workHoursCalendarVO.setCountMap(countMap);
             list.add(workHoursCalendarVO);
         }

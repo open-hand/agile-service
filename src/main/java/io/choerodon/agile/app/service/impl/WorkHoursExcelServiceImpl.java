@@ -252,19 +252,15 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
             BigDecimal allEstimateTime = workHoursCalendarVO.getAllEstimateTime();
             cell1.setCellValue(ObjectUtils.isEmpty(allEstimateTime) ? null : allEstimateTime.toString());
             Map<String, BigDecimal> countMap = workHoursCalendarVO.getCountMap();
-            if (!CollectionUtils.isEmpty(countMap)) {
-                for (Map.Entry<String, BigDecimal> entry : countMap.entrySet()) {
-                    String key = entry.getKey();
-                    BigDecimal value = entry.getValue();
-                    if (notSaturated && value.intValue() >= 8) {
-                        continue;
-                    }
-                    Integer col = dateColMap.getOrDefault(key, null);
-                    if (!ObjectUtils.isEmpty(col)) {
-                        Cell rowCell = row.createCell(col);
-                        rowCell.setCellValue(value.toString());
-                    }
+            for (Map.Entry<String, Integer> entry : dateColMap.entrySet()) {
+                String key = entry.getKey();
+                Integer value = entry.getValue();
+                Cell rowCell = row.createCell(value);
+                BigDecimal workTime = countMap.getOrDefault(key, BigDecimal.ZERO);
+                if (notSaturated && workTime.intValue() >= 8) {
+                    continue;
                 }
+                rowCell.setCellValue(workTime.toString());
             }
             startRow++;
         }
