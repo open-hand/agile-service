@@ -2,7 +2,7 @@ import React, { ComponentType } from 'react';
 import { Spin } from 'choerodon-ui/pro';
 import { Permission } from '@choerodon/boot';
 // @ts-ignore
-import NoAccess from '@choerodon/master/lib/containers/components/c7n/tools/error-pages/403';
+import NoAccess from '@choerodon/master/lib/components/c7n-error-pages/403';
 import { Size } from 'choerodon-ui/pro/lib/core/enum';
 
 const defaultChildren = (

@@ -9,7 +9,7 @@ import {
 import { WSHandler, Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import { find } from 'lodash';
-import WSProvider from '@choerodon/master/lib/containers/components/c7n/tools/ws/WSProvider';
+import WSProvider from '@choerodon/master/lib/components/ws/WSProvider';
 import { getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { epicConfigApi, fieldApi } from '@/api';
