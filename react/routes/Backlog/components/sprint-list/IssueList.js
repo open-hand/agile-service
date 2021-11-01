@@ -145,7 +145,7 @@ function IssueList({
             pageSize={size}
             onChange={handlePaginationChange}
             showSizeChangerLabel={false}
-            // pageSizeOptions={[10, 50, 100, 200, 300]}
+            pageSizeOptions={['10', '50', '100', '200', '300']}
             showTotal={(t, range) => `显示${range[0]}-${range[1]} 共 ${t}条`}
             showPager
             showQuickJumper
