@@ -436,7 +436,7 @@ const CreateIssueBase = observer(({
       }
     });
     const setValue = (name: string, value: any) => {
-      if (newValue[name] === null || newValue[name] === undefined) {
+      if (newValue[name] === null || newValue[name] === undefined || (Array.isArray(newValue[name]) && !newValue[name].length)) {
         newValue[name] = value;
       }
     };

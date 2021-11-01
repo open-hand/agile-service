@@ -232,7 +232,7 @@ const getCreateFieldConfig = (field: { fieldCode: string, fieldType: string }): 
   return {
     ...valueTypeConfigMap.default as any,
     ...omit(config || {}, 'props'),
-    renderFormItem: (props: any) => fn(merge(elementConfig, { props })),
+    renderFormItem: (props: any) => fn(merge(elementConfig, { props: { ...props, key: field.fieldCode } })),
   };
 };
 export default getCreateFieldConfig;
