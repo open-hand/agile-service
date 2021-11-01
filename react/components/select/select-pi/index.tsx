@@ -1,20 +1,20 @@
 import React, { useMemo, forwardRef, useRef } from 'react';
 import { Select, Tooltip } from 'choerodon-ui/pro';
 import classNames from 'classnames';
-import { Permission } from '@choerodon/boot';
+import { Permission, stores } from '@choerodon/boot';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
 import { omit } from 'lodash';
 // @ts-ignore
-import AppState from '@choerodon/master/lib/containers/stores/c7n/AppState';
-// @ts-ignore
-import PermissionProvider from '@choerodon/master/lib/containers/components/c7n/tools/permission/PermissionProvider';
+import { PermissionProvider } from '@choerodon/master';
 import { Provider } from 'mobx-react';
 import useSelect, { SelectConfig, FragmentForSearch, LoadConfig } from '@/hooks/useSelect';
 import { piApi } from '@/api';
 
 import type { PI } from '@/common/types';
 import styles from './index.less';
+
+const { AppState } = stores;
 
 const renderPi = (pi: any, maxLength?: number, tooltip?: boolean) => {
   if (pi) {
