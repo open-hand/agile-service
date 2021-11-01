@@ -12,10 +12,13 @@ import {
 import { Divider, Icon } from 'choerodon-ui';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
-import { ICondition, statusTransformApi } from '@/api';
-import { getProjectId, getIsOrganization } from '@/utils/common';
+import {
+  getOrgUsersByIds, getProjectUsersByIds, ICondition, statusTransformApi, userApi,
+} from '@/api';
+import { getProjectId, getIsOrganization, getMenuType } from '@/utils/common';
 import { User } from '@/common/types';
 import styles from './index.less';
+import SelectUser from '@/components/select/select-user';
 
 interface Props {
   modal: any,
@@ -52,11 +55,12 @@ const ConditionSelect: React.FC<ConditionSelectProps> = ({ conditionDataSet }) =
         {
           // @ts-ignore
           data.specifier && (
-            <Select
+            <SelectUser
+              level={getMenuType() === 'project' ? 'project' : 'org'}
               name="assigners"
               maxTagCount={2}
               className={styles.condition_assigners}
-              // @ts-ignore
+            // @ts-ignore
 
             />
           )
@@ -93,7 +97,7 @@ function useClickOut(onClickOut) {
   return ref;
 }
 
-const Condition:React.FC<Props> = ({
+const Condition: React.FC<Props> = ({
   modal, record, selectedType, customCirculationDataSet, selectedTypeCode,
 }) => {
   const [hidden, setHidden] = useState(true);
@@ -102,18 +106,6 @@ const Condition:React.FC<Props> = ({
     setHidden(true);
   }, []);
   const ref = useClickOut(handleClickOut);
-
-  const userDs = useMemo(() => new DataSet({
-    autoQuery: true,
-    selection: false,
-    paging: false,
-    transport: {
-      read: {
-        url: `/iam/choerodon/v1/projects/${getProjectId()}/users/search_by_name`,
-        method: 'get',
-      },
-    },
-  }), []);
 
   const conditionDataSet = useMemo(() => new DataSet({
     autoCreate: true,
@@ -124,10 +116,10 @@ const Condition:React.FC<Props> = ({
       {
         name: 'assigners',
         label: '指定人',
-        multiple: true,
+        type: 'object' as FieldType,
         textField: 'realName',
         valueField: 'id',
-        options: userDs,
+        multiple: true,
         dynamicProps: {
           // eslint-disable-next-line no-shadow
           required: ({ record }) => record.get('specifier'),
@@ -139,19 +131,23 @@ const Condition:React.FC<Props> = ({
         type: 'boolean' as FieldType,
       },
     ],
-  }), [userDs]);
+  }), []);
 
   useEffect(() => {
     const { current } = conditionDataSet;
-    statusTransformApi.getCondition(selectedType, record.get('id')).then((res: IConditionInfo[]) => {
+    async function loadData() {
+      const res: IConditionInfo[] = await statusTransformApi.getCondition(selectedType, record.get('id'));
       if (res) {
         const assigners = filter(res, (item: IConditionInfo) => item.userType === 'specifier');
         const projectOwnerItem = find(res, (item: IConditionInfo) => item.userType === 'projectOwner');
         const participantItem = find(res, (item: IConditionInfo) => item.userType === 'participant');
         const subIssueCompletedItem = find(res, (item: IConditionInfo) => item.userType === 'other' && !!item.verifySubissueCompleted);
+
         if (assigners && assigners.length) {
           current?.set('specifier', true);
-          current?.set('assigners', assigners.map((item: IConditionInfo) => item.userId));
+          const userIds = assigners.filter((item) => item.userId).map((item: IConditionInfo) => String(item.userId));
+          const users = await (getMenuType() === 'project' ? getProjectUsersByIds(userIds) : getOrgUsersByIds(userIds));
+          current?.set('assigners', users);
         }
         if (projectOwnerItem) {
           current?.set('projectOwner', true);
@@ -163,7 +159,8 @@ const Condition:React.FC<Props> = ({
           current?.set('verifySubissueCompleted', true);
         }
       }
-    });
+    }
+    loadData();
   }, [conditionDataSet, record, selectedType]);
 
   useEffect(() => {
@@ -189,7 +186,7 @@ const Condition:React.FC<Props> = ({
         if (specifier) {
           updateData.push({
             type: 'specifier',
-            userIds: assigners,
+            userIds: assigners?.map((user: User) => user.id),
           });
         }
         if (verifySubissueCompleted) {
@@ -208,26 +205,18 @@ const Condition:React.FC<Props> = ({
     modal.handleOk(handleOk);
   }, [conditionDataSet, customCirculationDataSet, isOrganization, modal, record, selectedType]);
 
-  const data = conditionDataSet.toData()[0];
+  const data = conditionDataSet.toData()[0] as any;
   const selected = [];
-  // @ts-ignore
   if (data && data.projectOwner) {
     selected.push('项目所有者');
   }
-  // @ts-ignore
   if (data && data.participant) {
     selected.push('参与人');
   }
-  // @ts-ignore
   if (data && data.specifier) {
-    // @ts-ignore
     const assigners = data.assigners || [];
-    // @ts-ignore
-    assigners.forEach((id) => {
-      // @ts-ignore
-      const user = find(userDs.toData(), (item: User) => item.id.toString() === id.toString());
+    assigners.forEach((user: any) => {
       if (user) {
-        // @ts-ignore
         selected.push(user.realName);
       }
     });
@@ -238,24 +227,26 @@ const Condition:React.FC<Props> = ({
       <div className={styles.setting}>
         <p className={styles.memberSelectTip}>仅以下成员可移动工作项到此状态</p>
         <Dropdown
-          // @ts-ignore
+        // @ts-ignore
           visible={!hidden}
+          getPopupContainer={() => document.getElementsByClassName(styles.form)[0] as any}
           overlay={(
             <div
             // @ts-ignore
               ref={ref}
               role="none"
+              onMouseDown={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.stopPropagation();
               }}
             >
               <ConditionSelect conditionDataSet={conditionDataSet} />
             </div>
-          )}
+        )}
           trigger={['click'] as Action[]}
         >
           <div
-            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
             tabIndex={1}
             className={`${styles.dropDown_trigger} ${selected && selected.length ? styles.dropDown_trigger_hasSelected : styles.dropDown_trigger_hasNoSelected}`}
             role="none"
@@ -281,17 +272,17 @@ const Condition:React.FC<Props> = ({
           </div>
         </Dropdown>
         {
-          includes(['story', 'task', 'bug'], selectedTypeCode) && (
-            <>
-              <Divider className={styles.divider} />
-              <Form dataSet={conditionDataSet}>
-                <div className={styles.completeSetting}>
-                  <CheckBox name="verifySubissueCompleted" />
-                </div>
-              </Form>
-            </>
-          )
-        }
+        includes(['story', 'task', 'bug'], selectedTypeCode) && (
+          <>
+            <Divider className={styles.divider} />
+            <Form dataSet={conditionDataSet}>
+              <div className={styles.completeSetting}>
+                <CheckBox name="verifySubissueCompleted" />
+              </div>
+            </Form>
+          </>
+        )
+      }
       </div>
     </div>
   );
