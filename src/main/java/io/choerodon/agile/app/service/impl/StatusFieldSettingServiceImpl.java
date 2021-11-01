@@ -417,6 +417,9 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         if (issueUpdateVO.getLabelIssueRelVOList() != null) {
             fieldList.add("labelId");
         }
+        if (issueUpdateVO.getParticipantIds() != null) {
+            fieldList.add("participantId");
+        }
     }
 
     private void handlerVersion(Map<String, List<VersionIssueRelVO>> versionMap,
