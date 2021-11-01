@@ -1,8 +1,8 @@
+import { includes } from 'lodash';
+import { useQuery, UseQueryOptions } from 'react-query';
 import { issueTypeApi } from '@/api';
 import { IIssueType } from '@/common/types';
 import { getIsOrganization } from '@/utils/common';
-import { includes } from 'lodash';
-import { useQuery, UseQueryOptions } from 'react-query';
 import useIsProgram from '../useIsProgram';
 import useKey from './useKey';
 

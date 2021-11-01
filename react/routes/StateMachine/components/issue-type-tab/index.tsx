@@ -31,7 +31,9 @@ const IssueTypeTab: React.FC<Props> = ({
     }
     return visibleIssueTypeCategory === 'custom' ? !item.initialize : (!hiddenCustomType || item.initialize);
   }, [excludeTypes, hiddenCustomType, visibleIssueTypeCategory]);
-  const { data: issueTypes } = useIssueTypes();
+  const {
+    data: issueTypes, isFetchedAfterMount,
+  } = useIssueTypes(undefined);
   const handleSelectType = useCallback((id: string) => {
     if (setSelectedType) {
       setSelectedType(id);
@@ -41,14 +43,16 @@ const IssueTypeTab: React.FC<Props> = ({
   }, [setSelectedType]);
 
   useEffect(() => {
-    const newIssueTypes = (issueTypes || []).filter((item: IIssueType) => handleFilterIssueType(item));
-    if (!selectedType || (selectedType && !newIssueTypes.find((item: IIssueType) => item.id === selectedType))) {
-      handleSelectType((newIssueTypes && newIssueTypes[0] && newIssueTypes[0].id) as string);
+    if (isFetchedAfterMount) {
+      const newIssueTypes = (issueTypes || []).filter((item: IIssueType) => handleFilterIssueType(item));
+      if (!selectedType || (selectedType && !newIssueTypes.find((item: IIssueType) => item.id === selectedType))) {
+        handleSelectType((newIssueTypes && newIssueTypes[0] && newIssueTypes[0].id) as string);
+      }
+      if (selectedType && selected !== selectedType && newIssueTypes.find((item: IIssueType) => item.id === selectedType)) {
+        setSelected(selectedType);
+      }
     }
-    if (selectedType && selected !== selectedType && newIssueTypes.find((item: IIssueType) => item.id === selectedType)) {
-      setSelected(selectedType);
-    }
-  }, [handleSelectType, selectedType, setSelectedType, issueTypes, selected, excludeTypes, handleFilterIssueType]);
+  }, [handleFilterIssueType, handleSelectType, isFetchedAfterMount, issueTypes, selected, selectedType]);
 
   return (
     <Switch
