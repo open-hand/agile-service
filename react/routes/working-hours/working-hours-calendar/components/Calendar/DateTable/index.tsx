@@ -9,14 +9,16 @@ import { extendMoment } from 'moment-range';
 import classNames from 'classnames';
 import { useSize } from 'ahooks';
 import {
-  cloneDeep, debounce, max, sum,
+  cloneDeep, debounce, max, pick, sum,
 } from 'lodash';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import { ICalendarData, useCalendarStore } from '../../../stores';
 import styles from './index.less';
 import UserTag from '@/components/tag/user-tag';
+import DetailContainer, { useDetail } from '@/components/detail-container';
 import { workingHoursApi } from '@/api';
 import { ConstantNum } from './utils';
+import { getIsOrganization } from '@/utils/common';
 
 const {
   cardHeight, cardMargin, cardPadding1, cardPadding2, issuePadding1, issuePadding2, countHeight,
@@ -38,6 +40,8 @@ interface ICalendarIssue {
   summary: string
   workTime: number
   estimateTime: number
+  issueId: string
+  projectId: string
 }
 
 interface Props {
@@ -49,16 +53,14 @@ interface Props {
 
 const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
   const {
-    searchDs, isRestDay, calendarDs, countData, setLoading, getCountData,
+    searchDs, isRestDay, calendarDs, countData, setLoading, getCountData, AppState,
   } = useCalendarStore();
   const startDate = useMemo(() => searchDs.current?.get('startTime')?.toString(), [searchDs.current?.get('startTime')]);
   const endDate = useMemo(() => searchDs.current?.get('endTime')?.toString(), [searchDs.current?.get('endTime')]);
   const startTime = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
   const endTime = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
   const dateTableRef = useRef();
-  const dateBodyRef = useRef();
   const dateTableSize = useSize(dateTableRef);
-  const dateBodySize = useSize(dateBodyRef);
   const [widthPerDay, setWidthPerDay] = useState(0);
   const [expandMap, setExpandMap] = useState<Map<string, boolean>>(new Map([]));
   const [userIssuesMap, setUserIssuesMap] = useState<Map<string, {[date: string]: ICalendarIssue[]}>>(new Map());
@@ -71,6 +73,7 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
   const appEleSize = useSize(appEle);
   // @ts-ignore
   const menuEleSize = useSize(menuEle);
+  const [issueDetailProps] = useDetail();
 
   useEffect(debounce(() => {
     if (appEleSize.width && menuEleSize.width) {
@@ -183,6 +186,80 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
     });
   }, [expandMap, userIssuesMap, userIssuesHeightMap, startTime, endTime, searchDs.current?.get('projectIds')]);
 
+  const detailCallback = useCallback(() => {
+    setLoading(true);
+    const userId = AppState.userInfo.id;
+    const newUserIssuesMap = cloneDeep(userIssuesMap);
+    const newUserIssuesHeightMap = cloneDeep(userIssuesHeightMap);
+    workingHoursApi.getUserCalendar(userId, {
+      startTime,
+      endTime,
+      projectIds: searchDs.current?.get('projectIds'),
+    }).then((data: {[date: string]: ICalendarIssue[]}) => {
+      if (expandMap.get(userId)) {
+        newUserIssuesMap.set(userId, data);
+        let maxCellIssuesHeight = 0;
+        if (data) {
+          const mostCount = max(Object.values(data).map((issues) => issues.length)) || 0;
+          if (mostCount > 0) {
+            maxCellIssuesHeight = mostCount * (cardMargin + cardHeight) - cardMargin + issuePadding1 + issuePadding2;
+          }
+        }
+        newUserIssuesHeightMap.set(userId, maxCellIssuesHeight);
+      }
+
+      const userRecord = calendarDs.find((record) => record.get('userId') === userId);
+      if (userRecord && data) {
+        const newCountMap = {};
+        Object.entries(data).forEach(([date, values]) => {
+          // @ts-ignore
+          newCountMap[date] = sum((values || []).map((value) => value.workTime || 0));
+        });
+        userRecord.set('countMap', newCountMap);
+        userRecord.set('allEstimateTime', sum(Object.values(newCountMap)));
+      }
+
+      batchedUpdates(() => {
+        setLoading(false);
+        if (expandMap.get(userId)) {
+          setUserIssuesMap(newUserIssuesMap);
+          setUserIssuesHeightMap(newUserIssuesHeightMap);
+        }
+      });
+    });
+    getCountData({
+      startTime,
+      endTime,
+      userIds: searchDs.current?.get('userIds'),
+      projectIds: searchDs.current?.get('projectIds'),
+    });
+  }, [
+    searchDs.current?.get('userIds'),
+    searchDs.current?.get('projectIds'),
+    startTime,
+    endTime,
+    expandMap,
+    userIssuesMap,
+    userIssuesHeightMap,
+  ]);
+
+  const openIssueDetail = useCallback((e, issue) => {
+    e.stopPropagation();
+    issueDetailProps?.open({
+      path: 'issue',
+      props: {
+        issueId: issue.issueId,
+        projectId: issue.projectId,
+        applyType: 'agile',
+        disabled: getIsOrganization(),
+      },
+      events: {
+        delete: detailCallback,
+        close: detailCallback,
+      },
+    });
+  }, [issueDetailProps, detailCallback]);
+
   const renderRows = useCallback(() => (
     <>
       {
@@ -265,12 +342,14 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
                             // @ts-ignore
                             userIssuesMap.get(item.userId)?.[date.format]?.map((issue: ICalendarIssue, i, arr) => (
                               <div
+                                role="none"
                                 className={styles.issueCard}
                                 style={{
                                   height: cardHeight,
                                   padding: `${cardPadding1}px ${cardPadding2}px`,
                                   marginBottom: i + 1 === arr.length ? 0 : cardMargin,
                                 }}
+                                onClick={(e) => openIssueDetail(e, issue)}
                               >
                                 <Tooltip title={issue.summary}>
                                   <div className={styles.issueCard_summary}>{issue.summary}</div>
@@ -413,8 +492,6 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
                 width: 250 + betweenDate.length * widthPerDay,
                 height: (calendarDs.toData().length) * countHeight + sum([...userIssuesHeightMap.values()]) + (calendarDs.totalPage > calendarDs.currentPage ? 40 : 0),
               }}
-              // @ts-ignore
-              ref={dateBodyRef}
             >
               {renderRows()}
               {
@@ -449,6 +526,7 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
           </>
         )
       }
+      <DetailContainer {...issueDetailProps} />
     </div>
   );
 };
