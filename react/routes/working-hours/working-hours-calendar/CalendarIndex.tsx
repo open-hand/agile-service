@@ -14,6 +14,7 @@ import { StoreProvider, useCalendarStore } from './stores';
 import { IWorkingHoursData, workingHoursApi } from '@/api';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import NoData from './NoData.svg';
+import styles from './CalendarIndex.less';
 
 const WorkingHoursCalendar = () => {
   const {
@@ -40,7 +41,7 @@ const WorkingHoursCalendar = () => {
   }, [loadData]);
 
   return (
-    <Page>
+    <Page className={styles.calendarIndex}>
       <Header>
         <Search searchDs={searchDs} />
         <HeaderButtons items={[{
@@ -56,7 +57,7 @@ const WorkingHoursCalendar = () => {
         />
       </Header>
       <Breadcrumb />
-      <Content style={{ padding: 0, overflowX: 'hidden' }}>
+      <Content style={{ overflowX: 'hidden' }}>
         <LoadingProvider
           loading={calendarDs.status === 'loading' || loading}
           globalSingle

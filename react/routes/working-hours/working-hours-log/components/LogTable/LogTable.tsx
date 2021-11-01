@@ -84,7 +84,7 @@ const LogTable = () => {
   const renderProject = useCallback(({ record }) => record.get('projectVO')?.name, []);
 
   const renderStatus = useCallback(({ record }) => (
-    <Tooltip title={record.get('statusVO').name}>
+    <Tooltip title={record.get('statusVO')?.name}>
       <div style={{
         display: 'inline-flex',
         overflow: 'hidden',
@@ -100,7 +100,7 @@ const LogTable = () => {
   ), []);
 
   return (
-    <div>
+    <div style={{ paddingTop: 12 }}>
       <Table dataSet={logDs} queryBar={'none' as TableQueryBarType}>
         <Column name="userId" sortable renderer={renderMember} width={150} />
         <Column name="workTime" sortable renderer={renderWorkTime} align={'left' as ColumnAlign} width={110} />

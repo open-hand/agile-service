@@ -9,7 +9,7 @@ import { extendMoment } from 'moment-range';
 import classNames from 'classnames';
 import { useSize } from 'ahooks';
 import {
-  cloneDeep, debounce, max, pick, sum,
+  cloneDeep, debounce, max, sum,
 } from 'lodash';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import { ICalendarData, useCalendarStore } from '../../../stores';
