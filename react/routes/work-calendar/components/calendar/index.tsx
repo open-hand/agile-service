@@ -14,7 +14,7 @@ import { xorBy, concat } from 'lodash';
 import moment from 'moment';
 import { Loading } from '@choerodon/components';
 import { useWorkCalendarStore, STATUS_COLOR, STATUS } from '@/routes/work-calendar/stores';
-import { formatDate } from '@/routes/work-calendar/utils';
+import { formatDate, getInterval } from '@/routes/work-calendar/utils';
 import { issueApi } from '@/api';
 import CalendarToolbar from '@/routes/work-calendar/components/calendar-toolbar';
 import Style from './index.less';
@@ -76,13 +76,17 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
     event.setExtendedProp('timeColor', timeColor);
   }, []);
 
+  const getStatusCode = useCallback((event) => (
+  event?.extendedProps?.statusVO?.type || 'todo'
+  ), []);
+
   const renderEventContent = usePersistFn(({ event, view, isStart }) => {
     const hours = event?.start?.getHours();
     const timeText = TIME_LABEL[hours] ?? '';
     const timeLabel = timeText?.slice(0, 2) || '';
     const viewType = view?.type;
     const timeSpan = `${timeLabel}${moment(event?.start).format('HH:mm')}`;
-    const statusCode: IStatus['valueCode'] = event?.extendedProps?.statusVO?.type || 'todo';
+    const statusCode: IStatus['valueCode'] = getStatusCode(event);
     const issueHoverClass = Style[`issueHover-${statusCode}`];
     const issueBorderClass = {
       borderLeft: `3px solid ${event?.extendedProps?.priorityVO?.colour || 'transparent'}`,
@@ -126,7 +130,7 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
           handleSetProps({ event, isHover: false, statusCode });
         }}
       >
-        {isStart ? (
+        {isStart && getInterval(event?.startStr, event?.endStr) ? (
           <div className={Style.timeIssueTimeWrap}>
             <div
               className={Style.issueStartTime}
@@ -174,14 +178,17 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
       estimatedStartTime: formatDate(event.start),
       estimatedEndTime: formatDate(event.end),
     };
+    const statusCode: IStatus['valueCode'] = getStatusCode(event);
     issueApi.project(event.extendedProps?.projectId).update(postData)
       .then((res) => {
         event.setExtendedProp('objectVersionNumber', res.objectVersionNumber);
         setLoading(false);
+        handleSetProps({ event, isHover: false, statusCode });
       })
       .catch(() => {
         revert();
         setLoading(false);
+        handleSetProps({ event, isHover: false, statusCode });
       });
   });
 
@@ -194,34 +201,6 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
       clearSelect: true,
     });
   }, [handleCreateIssue]);
-
-  const moreLinkDidMount = useCallback(({ el }) => {
-    const parentHeight = el?.parentNode?.parentNode?.parentNode?.clientHeight - 30;
-    const childNodes = el?.parentNode?.parentNode?.childNodes;
-    let hiddenCount = 0;
-    if (childNodes && childNodes.length) {
-      const firstChild = el?.parentNode?.parentNode?.firstElementChild;
-      const childHeight = firstChild?.clientHeight ?? 0;
-      const margin = firstChild?.style.marginTop ? firstChild?.style.marginTop?.slice(0, -2) ?? 0 : 0;
-      const count = Math.floor(childHeight ? (parentHeight - margin) / childHeight : 0);
-      childNodes.forEach((child: Element, index: number) => {
-        if (index === childNodes.length - 1) {
-          return;
-        }
-        if (count >= index + 1) {
-          child?.classList?.remove('fc-daygrid-event-harness-abs');
-          child?.classList?.remove(Style.hidden);
-          child?.classList?.add(Style.visible);
-        } else {
-          child?.classList?.add('fc-daygrid-event-harness-abs');
-          child?.classList?.remove(Style.visible);
-          child?.classList?.add(Style.hidden);
-          hiddenCount += 1;
-        }
-      });
-    }
-    el.innerHTML = `+${hiddenCount}`;
-  }, []);
 
   return (
     <Loading type="c7n" display={loading} className={Style.loading}>
@@ -261,7 +240,6 @@ const CalendarContent = observer(({ openEditIssue, handleCreateIssue }: Props) =
           allDayContent="全天"
           eventDisplay="block"
           moreLinkContent={({ shortText }) => shortText}
-          // moreLinkDidMount={moreLinkDidMount}
           moreLinkHint="查看更多工作项"
           height="calc(100% - 38px)"
           loading={setLoading}

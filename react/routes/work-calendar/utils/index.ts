@@ -12,6 +12,21 @@ function formatIssueTime(dateString: string | undefined) {
 }
 
 /**
+ * 计算开始与结束时间间隔（单位为小时）
+ * @param estimatedStartTime 预计开始时间
+ * @param estimatedEndTime 预计结束时间
+ * @return number
+ */
+function getInterval(estimatedStartTime: string | undefined, estimatedEndTime: string | undefined) {
+  if (estimatedStartTime && estimatedEndTime) {
+    const endTime = moment(estimatedEndTime);
+    const startTime = moment(estimatedStartTime);
+    return endTime.diff(startTime, 'hours');
+  }
+  return 0;
+}
+
+/**
  * 判断是否是全天的issue
  * @param estimatedStartTime 预计开始时间
  * @param estimatedEndTime 预计结束时间
@@ -19,9 +34,12 @@ function formatIssueTime(dateString: string | undefined) {
  */
 function isAllDay(estimatedStartTime: string | undefined, estimatedEndTime: string | undefined) {
   if (estimatedStartTime && estimatedEndTime) {
-    const endTime = moment(estimatedEndTime);
     const startTime = moment(estimatedStartTime);
-    return endTime.diff(startTime, 'hours') % 24 === 0 && startTime.hours() === 0 && startTime.minutes() === 0;
+    const interval = getInterval(estimatedStartTime, estimatedEndTime);
+    if (!interval) {
+      return false;
+    }
+    return interval % 24 === 0 && startTime.hours() === 0 && startTime.minutes() === 0;
   }
   return false;
 }
@@ -47,5 +65,5 @@ function formatIssueData(item: Issue) {
 }
 
 export {
-  formatDate, formatIssueTime, isAllDay, formatIssueData,
+  formatDate, formatIssueTime, isAllDay, formatIssueData, getInterval,
 };
