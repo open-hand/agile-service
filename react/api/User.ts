@@ -13,7 +13,7 @@ export async function getProjectUsersByIds(userIds?: string[], projectId?: strin
   });
 }
 
-async function getOrgUsersByIds(userIds?: string[], orgId?: string): Promise<User[]> {
+export async function getOrgUsersByIds(userIds?: string[], orgId?: string): Promise<User[]> {
   return axios({
     method: 'post',
     url: `/agile/v1/users/organizations/${orgId ?? getOrganizationId()}/list_by_ids`,

@@ -11,7 +11,7 @@ import { observer } from 'mobx-react-lite';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
 import { statusTransformApi, IUpdateNotifySetting, statusTransformApiConfig } from '@/api';
-import { getProjectId, getIsOrganization } from '@/utils/common';
+import { getProjectId, getIsOrganization, getMenuType } from '@/utils/common';
 import { User } from '@/common/types';
 import { OldLoading } from '@/components/Loading';
 import useIsProgram from '@/hooks/useIsProgram';
@@ -45,9 +45,10 @@ const NotifySelect: React.FC<NotifySelectProps> = (
           <SelectUser
             name="userList"
             maxTagCount={2}
+            level={getMenuType() === 'project' ? 'project' : 'org'}
             selectedUser={notifySettingDataSet.current?.getState('defaultSelectUsers')}
             className={styles.notify_assigners}
-            // @ts-ignore
+          // @ts-ignore
 
           />
         )
@@ -276,11 +277,14 @@ const NotifySetting = ({
         <Dropdown
           // @ts-ignore
           visible={!hidden}
+          // 避免内部select滚动无效
+          getPopupContainer={() => document.getElementsByClassName(styles.form)[0] as any}
           overlay={(
             <div
               // @ts-ignore
               ref={ref}
               role="none"
+              onMouseDown={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.stopPropagation();
               }}
