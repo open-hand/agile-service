@@ -804,7 +804,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                             .map(ProjectVO::getId)
                             .collect(Collectors.toList());
             if (!projectIds.isEmpty()) {
-                isFieldDeleted(projectIds, fieldId, null);
+                isFieldDeleted(projectIds, fieldId, null, null);
             }
         }
         fieldCascadeRuleMapper.deleteByFieldId(organizationId, projectId, fieldId);
@@ -902,7 +902,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             deleteList.forEach(d -> {
                 Long issueTypeId = d.getIssueTypeId();
                 String schemeCode = getSchemeCodeByIssueTypeId(issueTypeId);
-                isFieldDeleted(projectIdList, fieldId, schemeCode);
+                isFieldDeleted(projectIdList, fieldId, schemeCode, issueTypeId);
                 String issueType = d.getIssueType();
                 ObjectSchemeFieldExtendDTO target = new ObjectSchemeFieldExtendDTO();
                 target.setIssueType(issueType);
@@ -1504,7 +1504,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 fieldDataLogDTO.setFieldId(fieldId);
                 fieldDataLogMapper.delete(fieldDataLogDTO);
             } else {
-                isFieldDeleted(projectIds, fieldId, schemeCode);
+                isFieldDeleted(projectIds, fieldId, schemeCode, issueTypeId);
             }
         } else if (ObjectSchemeCode.AGILE_ISSUE.equals(schemeCode)) {
             List<Long> issueIds = issueMapper.selectIdsByIssueTypeIdsAndProjectIds(projectIds, issueTypeId);
@@ -1515,7 +1515,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                     fieldDataLogMapper.deleteByInstanceIdsAndFieldIds(projectId, issueIds, schemeCode, Arrays.asList(fieldId));
                 } else {
                     //组织下的项目如果有相关的field_value值，如果有不允许删除
-                    isFieldDeleted(projectIds, fieldId, schemeCode);
+                    isFieldDeleted(projectIds, fieldId, schemeCode, issueTypeId);
                 }
             }
         } else {
@@ -1525,13 +1525,13 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     private void isFieldDeleted(List<Long> projectIds,
                                 Long fieldId,
-                                String schemeCode) {
+                                String schemeCode,
+                                Long issueTypeId) {
         if (ObjectUtils.isEmpty(projectIds)) {
             return;
         }
-        List<FieldValueDTO> fieldValues =
-                fieldValueMapper.queryListByInstanceIds(projectIds, null, schemeCode, fieldId);
-        if (!fieldValues.isEmpty()) {
+        List<Long> instanceIds = fieldValueMapper.queryInstanceByFieldIdAndIssueTypeId(projectIds, schemeCode, fieldId, issueTypeId);
+        if (!instanceIds.isEmpty()) {
             throw new CommonException("error.organization.field.can.not.delete");
         }
     }
