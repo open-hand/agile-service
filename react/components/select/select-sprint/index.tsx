@@ -40,7 +40,9 @@ const SelectSprint: React.FC<SelectSprintProps> = forwardRef(({
     optionRenderer: (sprint) => (
       <FragmentForSearch name={sprint.sprintName}>
         <div style={{ display: 'inline-block' }}>
-          {sprint.sprintName}
+          <span>
+            {sprint.sprintName}
+          </span>
           {sprint.statusCode === 'started' && <div className="c7n-agile-sprintSearchSelect-option-active">活跃</div>}
         </div>
       </FragmentForSearch>
@@ -70,6 +72,7 @@ const SelectSprint: React.FC<SelectSprintProps> = forwardRef(({
     <Component
       ref={ref}
       {...props}
+      popupStyle={{ minWidth: '2rem' }}
       {...otherProps}
       // @ts-ignore
       // optionRenderer={({ record, text, value }) => (
