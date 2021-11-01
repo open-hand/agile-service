@@ -27,6 +27,7 @@ public class IssueFieldMapping {
     private static final String MAIN_RESPONSIBLE_ID = "mainResponsibleId";
     private static final String ENVIRONMENT_NAME = "environmentName";
     private static final String SPRINT_ID = "sprintId";
+    private static final String PARTICIPANT_IDS = "participantIds";
 
     static {
         SORT_FIELD_MAP.put(FieldCode.PRIORITY, PRIORITY_ID);
@@ -48,6 +49,7 @@ public class IssueFieldMapping {
         CLONE_ISSUE_FIELD_MAP.put(FieldCode.SPRINT, SPRINT_ID);
         CLONE_ISSUE_FIELD_MAP.put(FieldCode.PRIORITY, PRIORITY_ID);
         CLONE_ISSUE_FIELD_MAP.put(FieldCode.FEATURE, FEATURE_ID);
+        CLONE_ISSUE_FIELD_MAP.put(FieldCode.PARTICIPANT, PARTICIPANT_IDS);
     }
 
     public static String getSortFieldByCode(String code) {
