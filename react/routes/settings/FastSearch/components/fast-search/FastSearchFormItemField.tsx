@@ -1,13 +1,12 @@
 import React, {
   useCallback, useEffect, useMemo, useRef,
-  useState,
 } from 'react';
 import { Select, DataSet } from 'choerodon-ui/pro';
 import { observer, useObservable } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import renderField from '@/components/issue-filter-form/components/renderField';
 import './index.less';
+import { useCreation } from 'ahooks';
 import { transformFieldToRenderProps } from './utils';
 import { getFilterFields } from '@/components/field-pro/layouts';
 
@@ -15,11 +14,12 @@ const { Option } = Select;
 const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ record, ...otherProps }) => {
   const isRenderNullSelect = useMemo(() => !!['is', 'notIs'].includes(record.get('relation')), [record, record.get('relation')]);
   const optionDataSet = useObservable<{ dataSet: null, options?: DataSet }>({ dataSet: null, options: undefined });
-  const editDefaultValue = useMemo(() => {
+  const editDefaultValue = useCreation(() => {
     const defaultValue: string[] | string = toJS(record.get('value'));
     const defaultValueArr: string[] = Array.isArray(defaultValue) ? defaultValue : [defaultValue].filter(Boolean);
-    return { defaultValue, defaultValueArr };
+    return { defaultValue, defaultValueArr, misMatchDefaultValueSets: new Set(defaultValueArr) };
   }, []);
+
   const componentRef = useRef<any>();
 
   /**
@@ -33,8 +33,7 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
   // 保证再次提交时 能够获取到value显示值
   useEffect(() => {
     if (optionDataSet.options && optionDataSet.options.length > 0 && record.get('_editData') && !record.getState('init_edit_data')) {
-      const { defaultValue, defaultValueArr } = editDefaultValue;
-      const misMatchDefaultValueSets = new Set<string>(defaultValueArr);
+      const { defaultValue, defaultValueArr, misMatchDefaultValueSets } = editDefaultValue;
       const defaultValueRecordArr: Record[] = optionDataSet.options.filter((optionRecord: any) => {
         if (defaultValueArr.includes(optionRecord.get('value'))) {
           misMatchDefaultValueSets.delete(optionRecord.get('value'));
@@ -60,6 +59,7 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
     label: undefined,
     hasUnassign: undefined,
     ...selectStatusConfig,
+    multiple: undefined, // 交由dataset设置
     unassignedEpic: undefined,
     clearButton: true,
     primitiveValue: false,
