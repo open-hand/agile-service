@@ -32,6 +32,7 @@ const systemFieldsMap = new Map([
   ['label', 'labelIssueRelVOList'],
   ['component', 'componentIssueRelVOList'],
   ['tag', 'tags'],
+  ['participant', 'participants'],
 ]);
 
 const predefinedFieldsMap = new Map([
@@ -42,6 +43,7 @@ const predefinedFieldsMap = new Map([
   ['mainResponsible', 'mainResponsibleId'],
   ['sprint', 'sprintId'],
   ['priority', 'priorityId'],
+  ['participant', 'participantIds'],
 ]);
 
 interface Props {
