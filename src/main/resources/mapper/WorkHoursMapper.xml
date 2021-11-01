@@ -21,7 +21,7 @@
                 awl.creation_date,
                 ai.estimate_time
             from agile_work_log awl
-            LEFT JOIN agile_issue ai on ai.issue_id = awl.issue_id
+            JOIN agile_issue ai on ai.issue_id = awl.issue_id
             LEFT JOIN agile_project_info api on api.project_id = ai.project_id
             where awl.project_id in
             <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
