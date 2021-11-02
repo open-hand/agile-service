@@ -73,12 +73,13 @@ class ScrumBoardHome extends Component {
     ScrumBoardStore.setSelectedBoardId('');
     const defaultSearchVO = cloneDeep(localPageCacheStore.getItem('scrumBoard.searchVO') || {});
     ScrumBoardStore.bindFunction('refresh', (sprintId) => {
+      const currentSprint = sprintId ?? defaultSearchVO?.otherArgs?.sprint;
       if (!defaultSearchVO.otherArgs || !defaultSearchVO.otherArgs.sprint || defaultSearchVO.otherArgs.sprint.length === 0) {
         // defaultSearchVO.otherArgs.sprint = [sprintId];
         sprintId && set(defaultSearchVO, 'otherArgs.sprint', [sprintId]);
       }
       ScrumBoardStore.setSearchVO(defaultSearchVO);
-      this.getBoard(!sprintId);
+      this.getBoard(!currentSprint);
     });
     // eslint-disable-next-line react/destructuring-assignment
     const { state } = this.props.location;
