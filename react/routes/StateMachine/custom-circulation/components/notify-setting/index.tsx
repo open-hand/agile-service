@@ -27,7 +27,7 @@ interface NotifySelectProps {
 const NotifySelect: React.FC<NotifySelectProps> = (
   { memberOptionsDataSet, notifySettingDataSet },
 ) => {
-  const data = notifySettingDataSet.toData()[0];
+  const data = notifySettingDataSet.toData()[0] as any;
   return (
     <div
       className={styles.notifyMember_select}
@@ -46,7 +46,7 @@ const NotifySelect: React.FC<NotifySelectProps> = (
             name="userList"
             maxTagCount={2}
             level={getMenuType() === 'project' ? 'project' : 'org'}
-            selectedUser={notifySettingDataSet.current?.getState('defaultSelectUsers')}
+            selectedUser={[...notifySettingDataSet.current?.getState('defaultSelectUsers')]}
             className={styles.notify_assigners}
           // @ts-ignore
 

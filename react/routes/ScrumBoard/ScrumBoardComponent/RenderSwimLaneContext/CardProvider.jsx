@@ -1,5 +1,6 @@
-import React from 'react';
-import { observer } from 'mobx-react';
+import React, { useMemo } from 'react';
+import { observer as ClassObserver } from 'mobx-react';
+import { observer } from 'mobx-react-lite';
 import { find } from 'lodash';
 import { Draggable } from 'react-beautiful-dnd';
 import { WindowScroller, List, AutoSizer } from 'react-virtualized';
@@ -7,7 +8,36 @@ import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import Card from './Card';
 import { VIRTUAL_LIMIT } from './constant';
 
-@observer
+const IssueItem = observer((props) => {
+  const {
+    keyId, id, completed, statusName, categoryCode, index, style,
+  } = props;
+  const data = ScrumBoardStore.getSwimLaneData[keyId][id];
+  const issueObj = data[index];
+  const draggableId = useMemo(() => `${keyId}/${issueObj?.issueId}`, [issueObj?.issueId, keyId]);
+  if (!issueObj) {
+    return null;
+  }
+  return (
+    <Draggable draggableId={draggableId} index={index} key={draggableId}>
+      {(provided) => (
+        <Card
+          provided={provided}
+          key={`${issueObj.issueId}-${keyId}`}
+          keyId={keyId}
+          index={index}
+          issue={issueObj}
+          completed={completed}
+          statusName={statusName}
+          categoryCode={categoryCode}
+          style={style}
+        />
+      )}
+    </Draggable>
+
+  );
+});
+@ClassObserver
 class CardProvider extends React.Component {
   shouldIncreaseHeight = () => {
     const {
@@ -20,35 +50,7 @@ class CardProvider extends React.Component {
     return isUsingPlaceholder && !find(data, { issueId });
   };
 
-  renderIssueItem = ({ index, style }) => {
-    const {
-      keyId, id, completed, statusName, categoryCode,
-    } = this.props;
-    const data = ScrumBoardStore.getSwimLaneData[keyId][id];
-    const issueObj = data[index];
-    if (!issueObj) {
-      return null;
-    }
-    const draggableId = `${keyId}/${issueObj.issueId}`;
-    return (
-      <Draggable draggableId={draggableId} index={index} key={draggableId}>
-        {(provided) => (
-          <Card
-            provided={provided}
-            key={`${issueObj.issueId}-${keyId}`}
-            keyId={keyId}
-            index={index}
-            issue={issueObj}
-            completed={completed}
-            statusName={statusName}
-            categoryCode={categoryCode}
-            style={style}
-          />
-        )}
-      </Draggable>
-
-    );
-  };
+  renderIssueItem = ({ index, style }) => <IssueItem {...this.props} index={index} style={style} />;
 
   render() {
     const {

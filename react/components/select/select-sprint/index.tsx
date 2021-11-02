@@ -1,12 +1,13 @@
 import React, { useMemo, forwardRef } from 'react';
-import { Select, Tooltip } from 'choerodon-ui/pro';
+import { Select } from 'choerodon-ui/pro';
 
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import type { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
+import classNames from 'classnames';
 import { sprintApi } from '@/api';
 import useSelect, { SelectConfig, FragmentForSearch } from '@/hooks/useSelect';
 import { ISprint } from '@/common/types';
-import './index.less';
+import renderEllipsisBlockOption, { styles } from '../select-pi/utils';
 
 export interface SelectSprintProps extends Partial<SelectProps> {
   hasUnassign?: boolean,
@@ -36,17 +37,14 @@ const SelectSprint: React.FC<SelectSprintProps> = forwardRef(({
     name: 'sprint',
     textField: 'sprintName',
     valueField: 'sprintId',
+    tooltip: false,
     afterLoad,
     optionRenderer: (sprint) => (
       <FragmentForSearch name={sprint.sprintName}>
-        <div style={{ display: 'inline-block' }}>
-          <span>
-            {sprint.sprintName}
-          </span>
-          {sprint.statusCode === 'started' && <div className="c7n-agile-sprintSearchSelect-option-active">活跃</div>}
-        </div>
+        {renderEllipsisBlockOption(sprint.sprintName, <>活跃</>, { showBlock: sprint.statusCode === 'started', tooltip: true })}
       </FragmentForSearch>
     ),
+    renderer: (sprint) => renderEllipsisBlockOption(sprint.sprintName, <>活跃</>, { showBlock: sprint.statusCode === 'started', tooltip: false }) as JSX.Element,
     request: ({ filter, page }) => (isProgram ? sprintApi.loadSubProjectSprints(filter || '', page!, selectSprints, 50)
       : sprintApi.project(projectId).loadSprints(statusList)),
     middleWare: (sprints) => {
@@ -64,6 +62,9 @@ const SelectSprint: React.FC<SelectSprintProps> = forwardRef(({
       }
       return newSprint;
     },
+    props: {
+      onOption: () => ({ className: styles.option }),
+    },
     paging: !!isProgram,
   }), [isProgram, projectId, selectSprints, JSON.stringify(statusList), currentSprintOption, afterLoad]);
   const props = useSelect(config);
@@ -71,15 +72,17 @@ const SelectSprint: React.FC<SelectSprintProps> = forwardRef(({
   return (
     <Component
       ref={ref}
-      {...props}
+      dropdownMatchSelectWidth={false}
       popupStyle={{ minWidth: '2rem' }}
+      {...props}
       {...otherProps}
-      // @ts-ignore
-      // optionRenderer={({ record, text, value }) => (
-      //   <Tooltip title={text}>
-      //     <span>{text}</span>
-      //   </Tooltip>
-      // )}
+      popupCls={classNames(styles.popup, otherProps.popupCls)}
+    // @ts-ignore
+    // optionRenderer={({ record, text, value }) => (
+    //   <Tooltip title={text}>
+    //     <span>{text}</span>
+    //   </Tooltip>
+    // )}
     />
   );
 });

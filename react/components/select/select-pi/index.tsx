@@ -107,7 +107,7 @@ const SelectPI: React.FC<SelectPIProps> = forwardRef(({
   return (
     <Component
       ref={ref}
-      popupCls={classNames(styles.pi, popupCls)}
+      popupCls={classNames(styles.popup, popupCls)}
       dropdownMatchSelectWidth={false}
       maxTagTextLength={maxTagTextLength}
       maxTagCount={3}
