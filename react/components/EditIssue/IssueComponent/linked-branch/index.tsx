@@ -96,9 +96,15 @@ const LinkedBranch: React.ForwardRefRenderFunction<{
       default: break;
     }
   }, [dataSet, issueId]);
+
+  const renderAppServiceName = useCallback(({ value, record }) => (
+    `${value}${record.get('appServiceCode') ? `(${record.get('appServiceCode')})` : ''}`
+  ), []);
+
   useImperativeHandle(ref, () => ({
     query: () => dataSet.query(),
   }));
+
   return (
 
     <Table dataSet={dataSet} queryBar={'none' as TableQueryBarType}>
@@ -120,7 +126,7 @@ const LinkedBranch: React.ForwardRefRenderFunction<{
           />
         )}
       />
-      <Column tooltip={'overflow' as TableColumnTooltip} className="c7n-agile-table-cell" name="appServiceName" />
+      <Column tooltip={'overflow' as TableColumnTooltip} className="c7n-agile-table-cell" name="appServiceName" renderer={renderAppServiceName} />
       <Column tooltip={'overflow' as TableColumnTooltip} className="c7n-agile-table-cell" name="projectName" />
       <Column tooltip={'overflow' as TableColumnTooltip} className="c7n-agile-table-cell" name="originBranch" />
       <Column width={70} className="c7n-agile-table-cell" name="commits" renderer={({ record }) => record?.get('commits')?.length} />

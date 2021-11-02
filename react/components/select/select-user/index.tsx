@@ -13,6 +13,7 @@ import { userApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import type { User } from '@/common/types';
 import UserTag from '@/components/tag/user-tag';
+import Styles from './index.less';
 
 const toArray = (something: any) => (Array.isArray(something) ? something : [something]);
 export interface SelectUserProps extends Partial<SelectProps> {
@@ -86,7 +87,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     onOption,
     request: userRequest,
     optionRenderer: optionRenderer || ((user: User) => <UserTag data={user as User} />),
-    renderer: optionRenderer || ((user: User) => <UserTag data={user as User} tooltip={!flat} />),
+    renderer: optionRenderer || ((user: User) => <UserTag data={user as User} tooltip={!flat} className={Styles.userWrap} textClassName={Styles.userText} />),
     middleWare: (data) => {
       let newData = [];
       const temp: User[] = [];
