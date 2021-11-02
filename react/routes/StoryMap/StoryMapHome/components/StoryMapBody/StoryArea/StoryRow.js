@@ -53,8 +53,8 @@ class StoryRow extends Component {
           {epicList.map((epic, index) => {
             const otherData = storyData[epic.issueId];
             // 无特性的故事不会显示在板子上,当隐藏无故事的列时，隐藏特性列
-            const storysWithFeature = ((otherData && otherData.storys) || []).filter((item) => item.featureId && item.featureId !== '0');
-            return (!StoryMapStore.hiddenColumnNoStory || storysWithFeature.length > 0) ? (
+            // const storysWithFeature = ((otherData && otherData.storys) || []).filter((item) => item.featureId && item.featureId !== '0');
+            return (!StoryMapStore.hiddenColumnNoStory || otherData.storys?.length > 0) ? (
               <StoryCell
                 rowIndex={rowIndex}
                 epicIndex={index}
