@@ -12,6 +12,7 @@ import {
 import { Divider, Icon } from 'choerodon-ui';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
+import { useCreation } from 'ahooks';
 import {
   getOrgUsersByIds, getProjectUsersByIds, ICondition, statusTransformApi, userApi,
 } from '@/api';
@@ -43,7 +44,8 @@ interface ConditionSelectProps {
 }
 
 const ConditionSelect: React.FC<ConditionSelectProps> = ({ conditionDataSet }) => {
-  const data = conditionDataSet.toData()[0];
+  const data = conditionDataSet.toData()[0] as any;
+  const defaultAssigners = useCreation(() => data?.assigners || [], []);
   return (
     <div
       className={styles.condition_select}
@@ -58,6 +60,7 @@ const ConditionSelect: React.FC<ConditionSelectProps> = ({ conditionDataSet }) =
             <SelectUser
               level={getMenuType() === 'project' ? 'project' : 'org'}
               name="assigners"
+              selectedUser={defaultAssigners}
               maxTagCount={2}
               className={styles.condition_assigners}
             // @ts-ignore
@@ -108,7 +111,8 @@ const Condition: React.FC<Props> = ({
   const ref = useClickOut(handleClickOut);
 
   const conditionDataSet = useMemo(() => new DataSet({
-    autoCreate: true,
+    autoQuery: false,
+    autoCreate: false,
     fields: [
       { name: 'projectOwner', label: '项目所有者', type: 'boolean' as FieldType },
       { name: 'participant', label: '参与人', type: 'boolean' as FieldType },
@@ -134,9 +138,10 @@ const Condition: React.FC<Props> = ({
   }), []);
 
   useEffect(() => {
-    const { current } = conditionDataSet;
+    // const { current } = conditionDataSet;
     async function loadData() {
       const res: IConditionInfo[] = await statusTransformApi.getCondition(selectedType, record.get('id'));
+      const current = new Map<string, any>();
       if (res) {
         const assigners = filter(res, (item: IConditionInfo) => item.userType === 'specifier');
         const projectOwnerItem = find(res, (item: IConditionInfo) => item.userType === 'projectOwner');
@@ -159,6 +164,7 @@ const Condition: React.FC<Props> = ({
           current?.set('verifySubissueCompleted', true);
         }
       }
+      conditionDataSet.create([...current.keys()].reduce((obj, key) => ({ ...obj, [key]: current.get(key) }), {}));
     }
     loadData();
   }, [conditionDataSet, record, selectedType]);
@@ -168,7 +174,7 @@ const Condition: React.FC<Props> = ({
       const data = conditionDataSet.toData();
       const validate = await conditionDataSet.validate();
       const {
-      // @ts-ignore
+        // @ts-ignore
         projectOwner, specifier, assigners, participant, verifySubissueCompleted,
       } = (data && data[0]) || {};
       if (validate) {
@@ -227,12 +233,11 @@ const Condition: React.FC<Props> = ({
       <div className={styles.setting}>
         <p className={styles.memberSelectTip}>仅以下成员可移动工作项到此状态</p>
         <Dropdown
-        // @ts-ignore
-          visible={!hidden}
+          visible={!!conditionDataSet.current && !hidden}
           getPopupContainer={() => document.getElementsByClassName(styles.form)[0] as any}
           overlay={(
             <div
-            // @ts-ignore
+              // @ts-ignore
               ref={ref}
               role="none"
               onMouseDown={(e) => e.stopPropagation()}
@@ -242,11 +247,11 @@ const Condition: React.FC<Props> = ({
             >
               <ConditionSelect conditionDataSet={conditionDataSet} />
             </div>
-        )}
+          )}
           trigger={['click'] as Action[]}
         >
           <div
-          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
             tabIndex={1}
             className={`${styles.dropDown_trigger} ${selected && selected.length ? styles.dropDown_trigger_hasSelected : styles.dropDown_trigger_hasNoSelected}`}
             role="none"
@@ -272,17 +277,17 @@ const Condition: React.FC<Props> = ({
           </div>
         </Dropdown>
         {
-        includes(['story', 'task', 'bug'], selectedTypeCode) && (
-          <>
-            <Divider className={styles.divider} />
-            <Form dataSet={conditionDataSet}>
-              <div className={styles.completeSetting}>
-                <CheckBox name="verifySubissueCompleted" />
-              </div>
-            </Form>
-          </>
-        )
-      }
+          includes(['story', 'task', 'bug'], selectedTypeCode) && (
+            <>
+              <Divider className={styles.divider} />
+              <Form dataSet={conditionDataSet}>
+                <div className={styles.completeSetting}>
+                  <CheckBox name="verifySubissueCompleted" />
+                </div>
+              </Form>
+            </>
+          )
+        }
       </div>
     </div>
   );
