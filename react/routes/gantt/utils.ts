@@ -354,7 +354,7 @@ const groupByFeature = (epicChildrenData: any, data: any) => {
   }));
 };
 
-const groupByEpic = (data: any, isInProgram: boolean) => {
+const groupByEpic = (data: any, isInProgram: boolean, onlyShow?: boolean) => {
   const map = new Map<string, { epic: any, rankIndex: number, disabledDrag?: boolean, children: any[] }>();
   const noEpicData: any[] = [];
   data.filter((item: any) => item.issueTypeVO?.typeCode !== 'issue_epic' && item.issueTypeVO?.typeCode !== 'feature').forEach((issue: any) => {
@@ -387,7 +387,7 @@ const groupByEpic = (data: any, isInProgram: boolean) => {
       uniqueKey: `epic**${epicIssueId}`,
       disabledCreate: !!disabledDrag,
       disabledDrag: !!disabledDrag,
-      onlyShow: isInProgram,
+      onlyShow: onlyShow || isInProgram,
       groupType: 'epic',
       isInProgram,
       summary: epic.epicName,
@@ -396,13 +396,17 @@ const groupByEpic = (data: any, isInProgram: boolean) => {
     });
   });
 };
-
-export const ganttDataGroupByType = ({
-  data, type, rankList, isInProgram, conflictAssignees,
-}: {
-  data: any[], rankList?: string[], type: IGanttDimensionTypeValue, isInProgram: boolean,
+interface IGanttDataGroupProps {
+  data: any[]
+  rankList?: string[]
+  type: IGanttDimensionTypeValue,
+  isInProgram: boolean
+  menuType: 'project' | 'org'
   conflictAssignees: IGanttConflictAssignee[]
-}) => {
+}
+export const ganttDataGroupByType = ({
+  data, type, rankList, isInProgram, conflictAssignees, menuType,
+}: IGanttDataGroupProps) => {
   switch (type) {
     case 'assignee': {
       if (!rankList) {
@@ -412,7 +416,7 @@ export const ganttDataGroupByType = ({
     }
     case 'epic': {
       const formattedData = formatData(data);
-      return groupByEpic(formattedData, isInProgram);
+      return groupByEpic(formattedData, isInProgram, menuType !== 'project');
     }
     case 'task':
       return groupByTask(data);

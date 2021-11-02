@@ -463,8 +463,8 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   });
 
   const ganttData = useMemo(() => ganttRestoreCollapsedStatus(ganttDataGroupByType({
-    data, type, isInProgram, rankList, conflictAssignees,
-  }), Object.values(collapsedHistoryRef.current).filter((i) => i.collapsed)), [data, conflictAssignees, isInProgram, rankList, type]);
+    data, type, isInProgram, rankList, conflictAssignees, menuType,
+  }), Object.values(collapsedHistoryRef.current).filter((i) => i.collapsed)), [data, type, isInProgram, rankList, conflictAssignees, menuType]);
   const renderEmpty = usePersistFn(() => {
     if (!sprintIds || sprintIds?.length === 0) {
       return <span>暂无数据，请选择冲刺</span>;
