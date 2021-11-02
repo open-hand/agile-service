@@ -88,12 +88,16 @@ function transformFilter(chosenFields: IChosenFields) {
   }
   return filter;
 }
+const fieldConfigs = {
+  issueTypeId: { excludeTypeCodes: ['issue_epic'] },
+};
 const BoardSearch: React.FC<Props> = ({ onRefresh, saveStore }) => {
   const issueSearchStore = useIssueSearchStore({
     // @ts-ignore
     getSystemFields,
     transformFilter,
     renderField,
+    fieldConfigs,
     defaultSearchVO: localPageCacheStore.getItem('scrumBoard.searchVO'),
   });
   const handleClear = () => {

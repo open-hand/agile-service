@@ -11,6 +11,9 @@ import SelectProject from '@/components/select/select-project';
 
 export interface CreateIssueProps extends Omit<CreateIssueBaseProps, 'onSubmit'> {
   onCreate: (issue: Issue) => void,
+  /** 创建来源 */
+  originFrom?: 'scrumBoard' | 'Backlog'
+  hiddenTypeCodes?: string[],
   applyType?: 'agile' | 'program'
   request?: (data: any, applyType?: 'agile' | 'program') => Promise<any>
   showSelectProject?: boolean,
@@ -25,7 +28,6 @@ const CreateContent = (props: CreateIssueBaseProps) => {
   const handleProjectChange = (value: string) => {
     setCurrentProjectId(value);
   };
-
   useEffect(() => {
     if (showSelectProject) {
       // @ts-ignore
@@ -63,7 +65,7 @@ const CreateContent = (props: CreateIssueBaseProps) => {
 
 const openModal = (props: CreateIssueProps) => {
   const {
-    projectId, applyType = 'agile', onCreate, request,
+    projectId, applyType = 'agile', onCreate, request, originFrom,
   } = props;
   const handleSubmit: CreateIssueBaseProps['onSubmit'] = async ({ data, fieldList, fileList }) => {
     const res = request ? await request(data as any, applyType) : await issueApi.create(data as any, applyType);
@@ -76,7 +78,10 @@ const openModal = (props: CreateIssueProps) => {
     onCreate(res);
   };
   const defaultIssueTypeId = isEmpty(props.defaultTypeId) ? localCacheStore.getItem('agile.issue.type.common.selected') : props.defaultTypeId;
-
+  let issueTypeCode: string | string[] | undefined;
+  if (originFrom && ['scrumBoard', 'Backlog'].includes(originFrom)) {
+    issueTypeCode = ['bug', 'task', 'story', 'sub_task'];
+  }
   Modal.open({
     drawer: true,
     style: {
@@ -88,7 +93,7 @@ const openModal = (props: CreateIssueProps) => {
     key: 'create-issue',
     title: '创建工作项',
     okText: '创建',
-    children: <CreateContent onSubmit={handleSubmit} {...omit(props, 'onSubmit')} defaultTypeId={defaultIssueTypeId} />,
+    children: <CreateContent typeCode={issueTypeCode} onSubmit={handleSubmit} {...omit(props, 'onSubmit')} defaultTypeId={defaultIssueTypeId} />,
   });
 };
 export default openModal;

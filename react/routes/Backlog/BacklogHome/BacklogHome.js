@@ -135,6 +135,7 @@ class BacklogHome extends Component {
         fixVersion: chosenVersion !== 'all' && chosenVersion !== 'unset' ? chosenVersion : undefined,
         sprint: defaultSprint,
       },
+      originFrom: 'Backlog',
       defaultTypeId,
       defaultAssignee,
       defaultFeature: chosenFeature !== 'all' && chosenFeature !== 'unset' ? chosenFeatureItem : undefined,

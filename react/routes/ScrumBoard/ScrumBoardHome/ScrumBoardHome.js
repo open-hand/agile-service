@@ -321,6 +321,7 @@ class ScrumBoardHome extends Component {
       defaultValues: {
         sprint: ScrumBoardStore.quickSearchObj?.sprintId || doingSprint?.sprintId,
       },
+      originFrom: 'scrumBoard',
       onCreate: (res) => {
         const { sprintId } = res.activeSprint || {};
         if (ScrumBoardStore.getSprintId && String(sprintId) === String(ScrumBoardStore.getSprintId)) {
