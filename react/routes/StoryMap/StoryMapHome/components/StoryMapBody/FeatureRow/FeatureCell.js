@@ -28,9 +28,9 @@ class FeatureCell extends Component {
     const targetEpic = storyData[epicId] || {};
     const { collapse } = otherData || {};
     // 无特性的故事不会显示在板子上,当隐藏无故事的列时，隐藏特性列
-    const storysWithFeature = (otherData.storys || []).filter((item) => item.featureId && item.featureId !== '0');
+    // const storysWithFeature = (otherData.storys || []).filter((item) => item.featureId && item.featureId !== '0');
     return (
-      (collapse || (StoryMapStore.hiddenColumnNoStory && storysWithFeature.length === 0)) ? null : (
+      (collapse || (StoryMapStore.hiddenColumnNoStory && otherData.storys?.length === 0)) ? null : (
         <Cell
           epicIndex={epicIndex}
           lastCollapse={lastCollapse}
