@@ -255,8 +255,8 @@ public class ExcelServiceImpl implements ExcelService {
             CREATION_DATE, LAST_UPDATE_DATE, SPRINT_NAME};
 
     static {
-        FIELD_MAP.put(TYPE_NAME, "问题类型");
-        FIELD_MAP.put(ISSUE_NUM, "问题编号");
+        FIELD_MAP.put(TYPE_NAME, IssueConstant.ISSUE_TYPE_CN);
+        FIELD_MAP.put(ISSUE_NUM, IssueConstant.ISSUE_CN + "编号");
         FIELD_MAP.put(SUMMARY, "概要");
         FIELD_MAP.put(DESCRIPTION, "描述");
         FIELD_MAP.put(PRIORITY_NAME, "优先级");
@@ -287,7 +287,7 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put(SPENT_WORK_TIME, "已耗费时间");
         FIELD_MAP.put(ALL_ESTIMATE_TIME, "总预估时间");
         FIELD_MAP.put(TAGS, "Tag");
-        FIELD_MAP.put(RELATED_ISSUE, "关联问题");
+        FIELD_MAP.put(RELATED_ISSUE, "关联" + IssueConstant.ISSUE_CN);
         FIELD_MAP.put(EPIC_SELF_NAME, "史诗名称");
         FIELD_MAP.put(PARTICIPANT, "参与人");
         FIELDS = new ArrayList<>(FIELD_MAP.keySet()).toArray(new String[FIELD_MAP.keySet().size()]);
@@ -1091,7 +1091,7 @@ public class ExcelServiceImpl implements ExcelService {
             String issueType;
             if (isCellEmpty(issueTypeCell)) {
                 errorRowColMap.put(rowNum, Arrays.asList(issueTypeCol));
-                issueTypeCell.setCellValue(buildWithErrorMsg("", "问题类型为空"));
+                issueTypeCell.setCellValue(buildWithErrorMsg("", IssueConstant.ISSUE_TYPE_CN + "为空"));
                 progress.failCountIncrease();
                 progress.processNumIncrease();
                 history.setFailCount(progress.getFailCount());
@@ -1311,7 +1311,7 @@ public class ExcelServiceImpl implements ExcelService {
                     Long relatedIssueId = rowIssueIdMap.get(relatedRow);
                     if (relatedIssueId == null) {
                         deleteIssueIds.add(issueId);
-                        cell.setCellValue(buildWithErrorMsg(value, "第" + (relatedRow + 1) + "行问题项不存在"));
+                        cell.setCellValue(buildWithErrorMsg(value, "第" + (relatedRow + 1) + "行" + IssueConstant.ISSUE_CN + "不存在"));
                         addErrorColumn(rowNum, relateIssueIndex, errorRowColMap);
                         ok = false;
                         progress.failCountIncrease();
@@ -1518,7 +1518,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
         String value = "";
         if (isCellEmpty(issueTypeCell)) {
-            issueTypeCell.setCellValue(buildWithErrorMsg(value, "问题类型为空"));
+            issueTypeCell.setCellValue(buildWithErrorMsg(value, IssueConstant.ISSUE_TYPE_CN + "为空"));
             addErrorColumn(rowNum, issueTypeCol, errorRowColMap);
             return;
         }
@@ -1948,7 +1948,7 @@ public class ExcelServiceImpl implements ExcelService {
                     relatedIssueVO.setRelatedRows(relatedRows);
                 }
             } else {
-                cell.setCellValue(buildWithErrorMsg(value, "关联问题格式不正确"));
+                cell.setCellValue(buildWithErrorMsg(value, "关联" + IssueConstant.ISSUE_CN + "格式不正确"));
                 addErrorColumn(rowNum, col, errorRowColMap);
             }
         }
@@ -2263,7 +2263,7 @@ public class ExcelServiceImpl implements ExcelService {
         Map<String, IssueTypeVO> issueTypeMap = excelColumn.getIssueTypeMap();
         List<String> values = excelColumn.getPredefinedValues();
         if (!values.contains(value)){
-            cell.setCellValue(buildWithErrorMsg(value, "问题类型错误"));
+            cell.setCellValue(buildWithErrorMsg(value, IssueConstant.ISSUE_TYPE_CN + "错误"));
             addErrorColumn(rowNum, col, errorRowColMap);
         } else {
             IssueTypeVO issueTypeVO = issueTypeMap.get(value);
@@ -3572,9 +3572,9 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected String[] sortFieldNames(String[] fieldNames) {
         List<String> result = new ArrayList<>();
-        result.add("问题类型");
+        result.add(IssueConstant.ISSUE_TYPE_CN);
         result.add("概要");
-        result.add("问题编号");
+        result.add(IssueConstant.ISSUE_CN + "编号");
         for (String str : fieldNames) {
             if (result.get(0).equals(str)
                     || result.get(1).equals(str)

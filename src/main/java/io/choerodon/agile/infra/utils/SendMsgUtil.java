@@ -3,6 +3,7 @@ package io.choerodon.agile.infra.utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import io.choerodon.agile.infra.enums.IssueConstant;
 import io.choerodon.agile.infra.mapper.StarBeaconMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -408,7 +409,7 @@ public class SendMsgUtil {
             issueType = "特性";
             url = getFeatureUrl(issueVO, projectVO, issueVO.getIssueId()) + URL_TEMPLATE8;
         } else {
-            issueType = "问题";
+            issueType = IssueConstant.ISSUE_CN;
             url = getIssueCreateUrl(issueVO, projectVO, issueVO.getIssueId()) + URL_TEMPLATE8;
         }
         //设置动作与发送人
@@ -464,7 +465,7 @@ public class SendMsgUtil {
             issueType = "特性";
             url = getFeatureUrl(issueVO, projectVO, issueVO.getIssueId()) + URL_TEMPLATE8;
         } else {
-            issueType = "问题";
+            issueType = IssueConstant.ISSUE_CN;
             url = getIssueCreateUrl(issueVO, projectVO, issueVO.getIssueId()) + URL_TEMPLATE8;
         }
 

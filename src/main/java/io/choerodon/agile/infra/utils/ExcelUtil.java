@@ -5,6 +5,7 @@ import io.choerodon.agile.api.vo.WorkHoursExportVO;
 import io.choerodon.agile.api.vo.business.ExportIssuesVO;
 import io.choerodon.agile.infra.dto.ExcelCursorDTO;
 import io.choerodon.agile.infra.enums.ExcelImportTemplate;
+import io.choerodon.agile.infra.enums.IssueConstant;
 import io.choerodon.core.exception.CommonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -97,7 +98,7 @@ public class ExcelUtil {
 
     private static final Map<String, Integer> WIDTH_MAP = new HashMap<>();
     static {
-        Arrays.asList("概要", "Tag", "关联问题").forEach(x -> WIDTH_MAP.put(x, 8000));
+        Arrays.asList("概要", "Tag", "关联" + IssueConstant.ISSUE_CN).forEach(x -> WIDTH_MAP.put(x, 8000));
         Arrays.asList("描述").forEach(x -> WIDTH_MAP.put(x, 12000));
         Arrays.asList("冲刺").forEach(x -> WIDTH_MAP.put(x, 6000));
         Arrays.asList("版本", "修复的版本", "冲刺", "影响的版本", "所属史诗", "创建时间", "最后更新时间", "预计开始时间", "预计结束时间", "已耗费时间", "总预估时间")
