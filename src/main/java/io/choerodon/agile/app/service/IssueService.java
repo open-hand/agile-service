@@ -182,7 +182,7 @@ public interface IssueService {
      */
     IssueConvertDTO queryIssueByProjectIdAndIssueId(Long projectId, Long issueId);
 
-    Page<IssueNumVO> queryIssueByOption(Long projectId, Long issueId, String issueNum, Boolean onlyActiveSprint, Boolean self, String content, PageRequest pageRequest);
+    Page<IssueNumVO> queryIssueByOption(Long projectId, IssueFilterParamVO issueFilterParamVO , PageRequest pageRequest);
 
     /**
      * 根据issueId复制一个issue

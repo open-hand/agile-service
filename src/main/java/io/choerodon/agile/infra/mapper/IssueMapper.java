@@ -119,11 +119,8 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     IssueDTO queryIssueSprintNotClosed(@Param("projectId") Long projectId, @Param("issueId") Long issueId);
 
     List queryIssueByOption(@Param("projectId") Long projectId,
-                            @Param("issueId") Long issueId,
-                            @Param("issueNum") String issueNum,
                             @Param("activeSprintId") Long activeSprintId,
-                            @Param("self") Boolean self,
-                            @Param("content") String content);
+                            @Param("issueFilterParamVO") IssueFilterParamVO issueFilterParamVO);
 
     /**
      * 根据参数查询issue列表，不对外开放

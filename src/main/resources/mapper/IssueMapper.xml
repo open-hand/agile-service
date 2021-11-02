@@ -2211,15 +2211,23 @@
             project_id = #{projectId}
             AND sprint_id = #{activeSprintId})
         </if>
-        <if test="issueId != null">
-            AND ai.issue_id != #{issueId}
-        </if>
-        <if test="issueNum != null">
-            AND ai.issue_num != #{issueNum}
-        </if>
-        <if test='content != null'>
-            AND (ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR ai.summary LIKE CONCAT(CONCAT('%',
-            #{content}), '%'))
+        <if test="issueFilterParamVO != null">
+            <if test="issueFilterParamVO.issueId != null">
+                AND ai.issue_id != #{issueFilterParamVO.issueId}
+            </if>
+            <if test="issueFilterParamVO.issueNum != null">
+                AND ai.issue_num != #{issueFilterParamVO.issueNum}
+            </if>
+            <if test='issueFilterParamVO.content != null'>
+                AND (ai.issue_num LIKE CONCAT(CONCAT('%', #{issueFilterParamVO.content}), '%') OR ai.summary LIKE CONCAT(CONCAT('%',
+                #{issueFilterParamVO.content}), '%'))
+            </if>
+            <if test="issueFilterParamVO.userIds != null and issueFilterParamVO.userIds.size > 0">
+                AND ai.assignee_id in
+                <foreach collection="issueFilterParamVO.userIds" item="userId" open="(" close=")" separator=",">
+                     #{userId}
+                </foreach>
+            </if>
         </if>
     </select>
 
