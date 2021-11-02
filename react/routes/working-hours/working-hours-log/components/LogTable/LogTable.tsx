@@ -100,7 +100,7 @@ const LogTable = () => {
   ), []);
 
   return (
-    <div style={{ paddingTop: 12 }}>
+    <div>
       <Table dataSet={logDs} queryBar={'none' as TableQueryBarType}>
         <Column name="userId" sortable renderer={renderMember} width={150} />
         <Column name="workTime" sortable renderer={renderWorkTime} align={'left' as ColumnAlign} width={110} />

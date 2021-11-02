@@ -506,7 +506,6 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
                     className={styles.more_span}
                     style={{
                       left: ((250 + 7 * widthPerDay) - 75) / 2,
-                      right: ((250 + 7 * widthPerDay) - 75) / 2,
                     }}
                   >
                     <span>查看更多</span>
