@@ -121,7 +121,7 @@ class UserApi extends Api<UserApi> {
     });
   }
 
-  async getOrgUsers(param?: string, page?: number, userIds?: string[], size?: number): Promise<{
+  async getOrgUsers(param?: string, page?: number, userIds?: string[], queryFilterIds?: string[], size?: number): Promise<{
     list: User[]
     hasNextPage: boolean
   }> {
@@ -133,7 +133,7 @@ class UserApi extends Api<UserApi> {
         page: page || 1,
         size: size || 20,
       },
-      data: userIds ?? [],
+      data: queryFilterIds ?? [],
     }), {
       isOrg: true,
       page: page || 1,
