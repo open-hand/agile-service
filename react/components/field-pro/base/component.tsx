@@ -28,6 +28,7 @@ import SelectComponent from '../../select/select-component';
 import SelectVersion from '../../select/select-version';
 import SelectQuickFilterField from '@/components/select/select-quick-filter';
 import { IFieldType } from '@/common/types';
+import type { DateTimePickerProps } from '@/components/date-time-picker/DateTimePicker';
 import { validKeyReturnValue } from '@/common/commonValid';
 import SelectSubFeature from '@/components/select/select-sub-feature';
 import Editor from '@/components/Editor';
@@ -51,6 +52,10 @@ export const AgileComponentMap = {
   subProject: SelectSubProject,
   quickFilter: SelectQuickFilterField,
   description: Editor as IClassComponentType<Editor<FormFieldProps>>,
+  estimatedStartTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
+  estimatedEndTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
+  actualStartTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
+  actualEndTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
 };
 
 export type AgileComponentMapProps = typeof AgileComponentMap

@@ -86,6 +86,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     onOption,
     request: userRequest,
     optionRenderer: optionRenderer || ((user: User) => <UserTag data={user as User} />),
+    renderer: optionRenderer || ((user: User) => <UserTag data={user as User} tooltip={!flat} />),
     middleWare: (data) => {
       let newData = [];
       const temp: User[] = [];
@@ -108,7 +109,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
       }
       return newData;
     },
-  }), [afterLoad, args, dataRef, excludeIds, extraOptions, onOption, optionRenderer, selectedUser, userRequest]);
+  }), [afterLoad, args, dataRef, excludeIds, extraOptions, onOption, optionRenderer, selectedUser, userRequest, flat]);
   const props = useSelect(config);
   selectDataRef.current = props.options;
 

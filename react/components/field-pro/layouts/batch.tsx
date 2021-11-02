@@ -23,6 +23,9 @@ function getFieldConfig({
     }
     case 'estimatedEndTime':
       return { props: { defaultPickerValue: moment().endOf('d') } } as any;
+    case 'actualEndTime': {
+      return { props: { defaultPickerValue: moment().endOf('d') } };
+    }
     case 'epicId': {
       return { code: 'epic' };
     }
