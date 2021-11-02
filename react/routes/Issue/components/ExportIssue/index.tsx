@@ -90,7 +90,8 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     },
   });
 
-  const checkOptions = tableFields.map((option) => ({ value: mapper[option.code as keyof typeof mapper] || option.code, label: option.title as string, order: false }));
+  const checkOptions = [...tableFields.map((option) => ({ value: mapper[option.code as keyof typeof mapper] || option.code, label: option.title as string, order: false })),
+    { value: 'issueTypeId', name: '问题类型', order: false }]; // 加上问题类型，避免首次判断是否有默认模板时，没有issueTypeId导致的无法选中默认模板的问题
   const key = Modal.key();
   Modal.open({
     key,
@@ -103,6 +104,7 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     children: <ExportIssue
       fields={fields}
       chosenFields={chosenFields}
+      // @ts-ignore
       checkOptions={checkOptions}
       visibleColumns={visibleColumns.map((i) => mapper[i as keyof typeof mapper] || i)}
       store={store}

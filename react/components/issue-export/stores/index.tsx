@@ -9,6 +9,7 @@ import { IModalProps } from '@/common/types';
 import { ITableColumnCheckBoxesOptionData } from '@/components/table-column-check-boxes';
 import IssueExportStore from './store';
 import { IExportIssueProps } from '..';
+import { removeCodeExtraPrefix } from '../utils';
 
 interface Context extends IExportIssueProps {
   intl: InjectedIntl,
@@ -32,7 +33,7 @@ const ExportIssueContextProvider = injectIntl(observer(
     const store = useMemo(() => {
       if (props.store) {
         // 设置默认选项
-        props.store.setDefaultCheckedExportFields(uniq(visibleColumns.concat(props.store.defaultCheckedExportFields)));
+        props.store.setDefaultCheckedExportFields(uniq(visibleColumns.concat(props.store.defaultCheckedExportFields)).map((code) => removeCodeExtraPrefix(code)));
         // 设置默认选择
         props.store.setDefaultCurrentChosenFields(chosenFields);
         return props.store;
