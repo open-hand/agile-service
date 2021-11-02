@@ -2354,22 +2354,22 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public Page<IssueNumVO> queryIssueByOption(Long projectId, Long issueId, String issueNum, Boolean onlyActiveSprint, Boolean self, String content, PageRequest pageRequest) {
+    public Page<IssueNumVO> queryIssueByOption(Long projectId, IssueFilterParamVO issueFilterParamVO, PageRequest pageRequest) {
         //连表查询需要设置主表别名
         Map<String,String> orders = new HashMap<>();
         orders.put(ISSUE_NUM,ISSUE_NUM_CONVERT);
         Sort sort = PageUtil.sortResetOrder( pageRequest.getSort(), "ai", orders);
         pageRequest.setSort(sort);
         IssueNumDTO issueNumDTO = null;
-        if (self) {
-            issueNumDTO = issueMapper.queryIssueByIssueNumOrIssueId(projectId, issueId, issueNum);
+        if (Boolean.TRUE.equals(issueFilterParamVO.getSelf())) {
+            issueNumDTO = issueMapper.queryIssueByIssueNumOrIssueId(projectId, issueFilterParamVO.getIssueId(), issueFilterParamVO.getIssueNum());
             if (issueNumDTO != null) {
                 pageRequest = new PageRequest(pageRequest.getPage(), pageRequest.getSize() - 1);
             }
         }
-        Long activeSprintId = onlyActiveSprint ? getActiveSprintId(projectId) : null;
-        Page<IssueNumDTO> issueDOPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryIssueByOption(projectId, issueId, issueNum, activeSprintId, self, content));
-        if (self && issueNumDTO != null) {
+        Long activeSprintId = issueFilterParamVO.getOnlyActiveSprint() ? getActiveSprintId(projectId) : null;
+        Page<IssueNumDTO> issueDOPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryIssueByOption(projectId, activeSprintId, issueFilterParamVO));
+        if (issueFilterParamVO.getSelf() && issueNumDTO != null) {
             issueDOPage.getContent().add(0, issueNumDTO);
             issueDOPage.setSize(issueDOPage.getSize() + 1);
         }

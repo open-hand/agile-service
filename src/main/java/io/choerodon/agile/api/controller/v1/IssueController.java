@@ -187,24 +187,15 @@ public class IssueController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("分页搜索查询issue列表(包含子任务)")
     @CustomPageRequest
-    @GetMapping(value = "/summary")
+    @PostMapping(value = "/summary")
     public ResponseEntity<Page<IssueNumVO>> queryIssueByOption(@ApiIgnore
                                                                 @ApiParam(value = "分页信息", required = true)
                                                                 @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
                                                                         PageRequest pageRequest,
                                                                @ApiParam(value = "项目id", required = true)
                                                                 @PathVariable(name = "project_id") Long projectId,
-                                                               @ApiParam(value = "issueId")
-                                                                @RequestParam(required = false) @Encrypt Long issueId,
-                                                               @ApiParam(value = "issueNum")
-                                                                @RequestParam(required = false) String issueNum,
-                                                               @ApiParam(value = "only active sprint", required = true)
-                                                                @RequestParam Boolean onlyActiveSprint,
-                                                               @ApiParam(value = "是否包含自身", required = true)
-                                                                @RequestParam() Boolean self,
-                                                               @ApiParam(value = "搜索内容", required = false)
-                                                                @RequestParam(required = false) String content) {
-        return Optional.ofNullable(issueService.queryIssueByOption(projectId, issueId, issueNum, onlyActiveSprint, self, content, pageRequest))
+                                                                @RequestBody IssueFilterParamVO issueFilterParamVO) {
+        return Optional.ofNullable(issueService.queryIssueByOption(projectId, issueFilterParamVO, pageRequest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.Issue.queryIssueByOption"));
     }
