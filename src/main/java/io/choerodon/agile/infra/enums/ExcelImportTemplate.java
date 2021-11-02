@@ -163,7 +163,7 @@ public class ExcelImportTemplate {
 
         static {
             HEADERS = new ArrayList<>(INIT_CAPACITY);
-            HEADERS.add(new Header(FieldCode.ISSUE_TYPE, "问题类型*", true, null));
+            HEADERS.add(new Header(FieldCode.ISSUE_TYPE, IssueConstant.ISSUE_TYPE_CN + "*", true, null));
             HEADERS.add(new Header(PARENT, "父级故事/任务/缺陷", false, 12000));
             HEADERS.add(new Header(FieldCode.EPIC, "所属史诗", false, 8000));
             HEADERS.add(new Header(FieldCode.FEATURE, "所属特性", false, 8000));
@@ -178,13 +178,13 @@ public class ExcelImportTemplate {
             HEADERS.add(new Header(FieldCode.FIX_VERSION, "修复的版本", false, null));
             HEADERS.add(new Header(FieldCode.INFLUENCE_VERSION, "影响的版本", false, null));
             HEADERS.add(new Header(FieldCode.STORY_POINTS, "故事点", true, null));
-            HEADERS.add(new Header(FieldCode.EPIC_NAME, "史诗名称(仅问题类型为史诗时生效)", false, 8000));
+            HEADERS.add(new Header(FieldCode.EPIC_NAME, "史诗名称(仅" + IssueConstant.ISSUE_TYPE_CN + "为史诗时生效)", false, 8000));
             HEADERS.add(new Header(FieldCode.LABEL, "标签", false, null));
             HEADERS.add(new Header(FieldCode.ESTIMATED_START_TIME, "预估开始时间", false, null));
             HEADERS.add(new Header(FieldCode.ESTIMATED_END_TIME, "预估结束时间", false, null));
             HEADERS.add(new Header(FieldCode.MAIN_RESPONSIBLE, "主要负责人", false, null));
             HEADERS.add(new Header(FieldCode.ENVIRONMENT, "环境", false, null));
-            HEADERS.add(new Header(RELATE_ISSUE, "关联问题", false, null));
+            HEADERS.add(new Header(RELATE_ISSUE, "关联" + IssueConstant.ISSUE_CN, false, null));
             HEADERS.add(new Header(FieldCode.ISSUE_STATUS, "状态", false, null));
             HEADERS.add(new Header(FieldCode.ACTUAL_START_TIME, "实际开始时间", false, null));
             HEADERS.add(new Header(FieldCode.ACTUAL_END_TIME, "实际结束时间", false, null));

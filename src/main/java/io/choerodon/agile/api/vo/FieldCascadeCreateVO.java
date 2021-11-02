@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.infra.enums.IssueConstant;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import javax.validation.constraints.NotNull;
  */
 public class FieldCascadeCreateVO {
     @Encrypt
-    @NotNull(message = "问题类型不能为空")
+    @NotNull(message = IssueConstant.ISSUE_CN + "类型不能为空")
     private Long issueTypeId;
     @Encrypt
     @NotNull(message = "字段不能为空")
