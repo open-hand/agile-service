@@ -2019,10 +2019,15 @@ public class ExcelServiceImpl implements ExcelService {
         Cell cell = row.getCell(col);
         if (!isCellEmpty(cell)) {
             String value = cell.toString();
-            LabelIssueRelVO label = new LabelIssueRelVO();
-            label.setProjectId(projectId);
-            label.setLabelName(value);
-            issueCreateVO.setLabelIssueRelVOList(Arrays.asList(label));
+            if (value.length() > 10) {
+                cell.setCellValue(buildWithErrorMsg(value, "标签名称过长"));
+                addErrorColumn(row.getRowNum(), col, errorRowColMap);
+            } else {
+                LabelIssueRelVO label = new LabelIssueRelVO();
+                label.setProjectId(projectId);
+                label.setLabelName(value);
+                issueCreateVO.setLabelIssueRelVOList(Arrays.asList(label));
+            }
         }
     }
 
