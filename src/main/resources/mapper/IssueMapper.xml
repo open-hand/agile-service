@@ -1237,6 +1237,12 @@
                 and ai.actual_end_time &gt;= #{searchVO.searchArgs.actualEndTimeScopeStart} and ai.actual_end_time &lt;=
                 #{searchVO.searchArgs.actualEndTimeScopeEnd}
             </if>
+            <if test='searchVO.searchArgs.teamProjectIds != null and searchVO.searchArgs.teamProjectIds.size() > 0'>
+                and ai.project_id in
+                <foreach collection="searchVO.searchArgs.teamProjectIds" item="teamProjectId" open="(" separator="," close=")">
+                    #{teamProjectId}
+                </foreach>
+            </if>
         </if>
     </sql>
 
@@ -5391,7 +5397,7 @@
             temp.assignee_id
             from
             (
-                (
+                select t1.* from (
                     select
                     ai.issue_id,
                     ai.assignee_id,
@@ -5430,16 +5436,16 @@
                     and ai.estimated_start_time is not null
                     and ai.estimated_end_time is not null
                     order by ai.assignee_id asc, ai.estimated_start_time asc, ai.issue_id asc
-                )
+                ) t1
                 union
-                (
+                select t2.* from (
                     select
                     ai.issue_id,
                     ai.assignee_id,
                     CONVERT(ai.issue_num,SIGNED) as issue_num_convert,
                     if(
                         @lastAssigneeId = ai.assignee_id,
-                        @lastStartDate &gt;= ai.estimated_start_time and @lastStartDate &lt; ai.estimated_start_time,
+                        @lastStartDate &gt;= ai.estimated_start_time and @lastStartDate &lt; ai.estimated_end_time,
                         0
                     ) as overlap,
                     @lastAssigneeId := ai.assignee_id as last_assignee,
@@ -5463,7 +5469,7 @@
                     and ai.estimated_start_time is not null
                     and ai.estimated_end_time is not null
                     order by ai.assignee_id asc, ai.estimated_start_time desc, ai.issue_id desc
-                )
+                ) t2
             ) temp
             where temp.overlap = 1
         ) conflict_table on conflict_table.issue_id = ai.issue_id
