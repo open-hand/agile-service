@@ -4,8 +4,9 @@ import Echart from 'echarts-for-react';
 import { EChartOption } from 'echarts';
 import { map } from 'lodash';
 import {
-  OverviewWrap, SprintEmptyPage, LoadingBar, useProjectOverviewStore,
+  OverviewWrap, SprintEmptyPage, useProjectOverviewStore,
 } from '@choerodon/master';
+import { Loading } from '@choerodon/components';
 import { usePersonalWorkloadStore } from './stores';
 import './index.less';
 
@@ -28,7 +29,7 @@ const PersonalWorkload = () => {
   );
   const getCategoryAndCategoryCount = useCallback(() => {
     const personalWorkloadData = workloadChartDs.toData();
-    const data: {undone: number, done: number, total: number}[] = [];
+    const data: { undone: number, done: number, total: number }[] = [];
     const xAxisData: string[] = [];
     personalWorkloadData?.forEach((item: {
       remainingIssueCount: number | null,
@@ -225,7 +226,7 @@ const PersonalWorkload = () => {
 
   function getContent() {
     if (startSprintDs.status === 'loading') {
-      return <LoadingBar display />;
+      return <Loading display type="c7n" />;
     }
     if (!startedRecord) {
       return <SprintEmptyPage />;
