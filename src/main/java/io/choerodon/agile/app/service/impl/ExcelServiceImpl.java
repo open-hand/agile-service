@@ -1882,7 +1882,8 @@ public class ExcelServiceImpl implements ExcelService {
                 cell.setCellValue(buildWithErrorMsg(value, "请输入正确的环境"));
                 addErrorColumn(rowNum, col, errorRowColMap);
             } else {
-                issueCreateVO.setEnvironment(value);
+                Map<String, String> envNameCodeMap = excelColumnVO.getEnvNameCodeMap();
+                issueCreateVO.setEnvironment(envNameCodeMap.getOrDefault(value, null));
             }
         }
     }
@@ -2737,7 +2738,7 @@ public class ExcelServiceImpl implements ExcelService {
                 processLabel(projectId, excelColumnVO);
                 break;
             case FieldCode.ENVIRONMENT:
-                processEnvironment(excelColumnVO);
+                processEnvironment(excelColumnVO, projectId);
                 break;
             case FieldCode.ISSUE_STATUS:
                 processIssueStatus(projectId, excelColumnVO);
@@ -2771,9 +2772,11 @@ public class ExcelServiceImpl implements ExcelService {
         excelColumnVO.setIssueStatusMap(issueStatusMap);
     }
 
-    private void processEnvironment(ExcelColumnVO excelColumnVO) {
+    private void processEnvironment(ExcelColumnVO excelColumnVO, Long projectId) {
         List<String> values = Arrays.asList("非生产环境", "生产环境");
         excelColumnVO.setPredefinedValues(values);
+        LookupTypeWithValuesVO environment = lookupValueService.queryLookupValueByCode("environment", projectId);
+        excelColumnVO.setEnvNameCodeMap(environment.getLookupValues().stream().collect(Collectors.toMap(LookupValueVO::getName, LookupValueVO::getValueCode)));
     }
 
     private void processLabel(Long projectId, ExcelColumnVO excelColumnVO) {

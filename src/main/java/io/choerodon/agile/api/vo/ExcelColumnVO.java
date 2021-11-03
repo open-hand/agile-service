@@ -45,6 +45,11 @@ public class ExcelColumnVO {
 
     private Map<String, StatusVO> issueStatusMap;
 
+    /**
+     * 环境名称和code的映射
+     */
+    private Map<String, String> envNameCodeMap;
+
     private PageFieldViewUpdateVO customFieldDetail;
 
     public boolean isDateType() {
@@ -117,5 +122,13 @@ public class ExcelColumnVO {
 
     public void setIssueStatusMap(Map<String, StatusVO> issueStatusMap) {
         this.issueStatusMap = issueStatusMap;
+    }
+
+    public Map<String, String> getEnvNameCodeMap() {
+        return envNameCodeMap;
+    }
+
+    public void setEnvNameCodeMap(Map<String, String> envNameCodeMap) {
+        this.envNameCodeMap = envNameCodeMap;
     }
 }
