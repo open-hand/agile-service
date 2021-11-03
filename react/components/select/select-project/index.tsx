@@ -34,7 +34,7 @@ const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
     }
     return optionData;
   });
-  const config = useMemo((): SelectConfig => ({
+  const config = useMemo((): SelectConfig<any> => ({
     name: 'team',
     textField: 'name',
     valueField: 'id',
@@ -53,10 +53,11 @@ const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
     // @ts-ignore
     afterLoad: afterLoadRef.current,
     middleWare: (projects) => {
+      const newProjects = projects.map((item) => ({ ...item, id: String(item.id) }));
       // @ts-ignore
       // eslint-disable-next-line
-      projectDataRef.current = projects;
-      return projects || [];
+      projectDataRef.current = newProjects;
+      return newProjects || [];
     },
     paging: !queryAgile && !optionData,
   }), [optionData, projectDataRef, queryAgile, userId]);
