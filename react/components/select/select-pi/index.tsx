@@ -44,11 +44,11 @@ const SelectPI: React.FC<SelectPIProps> = forwardRef(({
       const piName = pi.id === '0' ? pi.name : pi.piName || `${pi.code}-${pi.name}`;
       return (
         <FragmentForSearch name={piName}>
-          {renderEllipsisBlockOption(piName, <>当前</>, { tooltip: true })}
+          {renderEllipsisBlockOption(piName, <>当前</>, { tooltip: true, showBlock: pi.statusCode === 'doing' })}
         </FragmentForSearch>
       );
     },
-    renderer: (pi) => renderEllipsisBlockOption(pi.id === '0' ? pi.name : pi.piName || `${pi.code}-${pi.name}`, <>当前</>, { tooltip: false, maxLength: maxTagTextLength }),
+    renderer: (pi) => renderEllipsisBlockOption(pi.id === '0' ? pi.name : pi.piName || `${pi.code}-${pi.name}`, <>当前</>, { tooltip: false, maxLength: maxTagTextLength, showBlock: pi.statusCode === 'doing' }),
     afterLoad: afterLoadRef.current,
     middleWare: (piList) => {
       let sortPiList = [...piList];
