@@ -211,7 +211,6 @@ export function getGanttCreatingSubIssue(parentIssue: GanttIssue & { groupType?:
     issueId: `create**${parentIssue.issueId}`,
     parent: parentIssue,
     create: true,
-    createSprintIds: [],
     createId: dataIndex,
   };
 }

@@ -153,8 +153,8 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
     handleCreateIssue(subIssue, undefined, parentIssueId);
   });
 
-  const handleQuickCreateSubIssueAfter = usePersistFn((createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed = false) => {
-    setData(produce(data, (draft) => {
+  const handleQuickCreateSubIssueAfter = usePersistFn((createId?: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed = false) => {
+    Number.isSafeInteger(createId) && setData(produce(data, (draft) => {
       const delCreateIndex = findIndex(draft, { createId });
       draft.splice(delCreateIndex, 1);
     }));
