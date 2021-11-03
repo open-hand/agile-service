@@ -657,7 +657,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         }
         if (!ObjectUtils.isEmpty(issueTypeIdForRank)
                 && issueTypeIds.contains(issueTypeIdForRank)) {
-            Map<Long, String> issueTypeMap = getIssueTypeMap(organizationId, projectId);
+            Map<Long, String> issueTypeMap = getIssueTypeList(organizationId, projectId).stream().collect(Collectors.toMap(IssueTypeVO::getId, IssueTypeVO::getTypeCode));
             insertObjectSchemeFieldExtend(organizationId, projectId, field.getId(), fieldCreateDTO.getRequired(), issueTypeMap, issueTypeIdForRank, fieldCreateDTO.getCreated(), fieldCreateDTO.getEdited(), field.getDefaultValue(), field.getExtraConfig());
         }
         return queryById(organizationId, projectId, field.getId());
@@ -1271,7 +1271,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 //项目层暂未配置，查组织层并新建
                 extendList = objectSchemeFieldExtendMapper.selectExtendFieldByOptions(null, organizationId, fieldId, null);
             }
-            Map<Long, String> issueTypeMap = getIssueTypeMap(organizationId, projectId);
+            Map<Long, String> issueTypeMap = getIssueTypeList(organizationId, projectId).stream().collect(Collectors.toMap(IssueTypeVO::getId, IssueTypeVO::getTypeCode));
             ObjectSchemeFieldDTO objectSchemeFieldDTO = getObjectSchemeFieldByFieldId(organizationId, projectId, fieldId);
             extendList.forEach(e ->
                     insertObjectSchemeFieldExtend(organizationId, projectId, fieldId, required, issueTypeMap, e.getIssueTypeId(), e.getCreated(), e.getEdited(), objectSchemeFieldDTO.getDefaultValue(), objectSchemeFieldDTO.getExtraConfig()));
@@ -1363,7 +1363,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
         String issueType = issueTypeService.getIssueTypeById(issueTypeId);
         ObjectSchemeFieldContext.isIllegalIssueType(issueType);
-        Map<Long, String> issueTypeMap = getIssueTypeMap(organizationId, projectId);
+        Map<Long, String> issueTypeMap = getIssueTypeList(organizationId, projectId).stream().collect(Collectors.toMap(IssueTypeVO::getId, IssueTypeVO::getTypeCode));
         if (!ObjectUtils.isEmpty(fields)) {
             updateFieldConfig(organizationId, projectId, issueTypeId, fields, issueTypeMap);
         }
@@ -1639,37 +1639,42 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             if (CollectionUtils.isEmpty(fieldCodeS)) {
                 return;
             }
-            Map<Long, String> issueTypeMap = getIssueTypeMap(organizationId, 0L);
+            List<IssueTypeVO> issueTypeList = getIssueTypeList(organizationId, projectId);
+            Map<Long, String> issueTypeCodeMap = issueTypeList.stream().collect(Collectors.toMap(IssueTypeVO::getId, IssueTypeVO::getTypeCode));
+            Map<Long, IssueTypeVO> issueTypeMap = issueTypeList.stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity()));
             List<PageConfigFieldVO> configFieldVOS = objectSchemeFieldExtendMapper.listConfigsByFieldCodes(fieldCodeS);
             for (PageConfigFieldVO configFieldVO : configFieldVOS) {
-                SystemFieldPageConfig.CommonField commonField = SystemFieldPageConfig.CommonField.queryByField(configFieldVO.getFieldCode());
-                if (!ObjectUtils.isEmpty(commonField)) {
-                    configFieldVO.setCreated(commonField.created());
-                    configFieldVO.setEdited(commonField.edited());
+                if (!Objects.isNull(issueTypeMap.get(issueTypeId))) {
+                    SystemFieldPageConfig.CommonField commonField = SystemFieldPageConfig.CommonField.queryByField(configFieldVO.getFieldCode());
+                    if (!ObjectUtils.isEmpty(commonField)) {
+                        configFieldVO.setCreated(commonField.created());
+                        configFieldVO.setEdited(commonField.edited());
+                    }
+                    configFieldVO.setIssueTypeId(issueTypeId);
+                    ObjectSchemeFieldExtendDTO extendDTO = insertExtendFieldByConfig(organizationId, issueTypeMap.get(issueTypeId).getProjectId(), configFieldVO, issueTypeCodeMap);
+                    configFieldVO.setRank(extendDTO.getRank());
+                    pageConfigFieldVOS.add(configFieldVO);
                 }
-                configFieldVO.setIssueTypeId(issueTypeId);
-                ObjectSchemeFieldExtendDTO extendDTO = insertExtendFieldByConfig(organizationId, null, configFieldVO, issueTypeMap);
-                configFieldVO.setRank(extendDTO.getRank());
             }
-            pageConfigFieldVOS.addAll(configFieldVOS);
         }
     }
 
     private ObjectSchemeFieldExtendDTO insertExtendFieldByConfig(Long organizationId, Long projectId, PageConfigFieldVO vo, Map<Long, String> issueTypeMap) {
+        Long newProjectId = Objects.equals(0L, projectId) ? null : projectId;
         String defaultValue = Objects.isNull(vo.getDefaultValue()) ? null : vo.getDefaultValue().toString();
-        return insertObjectSchemeFieldExtend(organizationId, projectId,
+        return insertObjectSchemeFieldExtend(organizationId, newProjectId,
                 vo.getFieldId(), vo.getRequired(), issueTypeMap,
                 vo.getIssueTypeId(), vo.getCreated(), vo.getEdited(),
                 defaultValue, vo.getExtraConfig());
     }
 
-    private Map<Long, String> getIssueTypeMap(Long organizationId, Long projectId) {
+    private List<IssueTypeVO> getIssueTypeList(Long organizationId, Long projectId) {
         Long newProjectId = projectId == null ? 0L : projectId;
         IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
         issueTypeSearchVO.setEnabled(true);
-        Map<Long, String> issueTypeMap =
-                issueTypeMapper.selectByOptions(organizationId, newProjectId, issueTypeSearchVO).stream().collect(Collectors.toMap(IssueTypeVO::getId, IssueTypeVO::getTypeCode));
-        return issueTypeMap;
+        List<IssueTypeVO> issueTypeList =
+                issueTypeMapper.selectByOptions(organizationId, newProjectId, issueTypeSearchVO);
+        return issueTypeList;
     }
 
     private void processFieldEdited(String issueType, List<PageConfigFieldVO> pageConfigFields) {
