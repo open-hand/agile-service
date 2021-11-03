@@ -40,7 +40,7 @@ interface IGanttColumnsHookProps extends TableCacheRenderProps {
   onClickSummary?: (issue: GanttIssue) => void
   onSortChange: IGanttSortLabelProps['onChange']
   onCreateSubIssue?: (parentIssue: GanttIssue) => void
-  onAfterCreateSubIssue?: (createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed?: boolean) => void
+  onAfterCreateSubIssue?: (createId?: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed?: boolean) => void
 }
 interface IGanttOrgColumnsHookProps extends TableCacheRenderProps {
   onClickSummary?: (issue: GanttIssue) => void
@@ -215,8 +215,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
                       epic: defaultValues.epicId,
                     },
                   }),
-
-                  onCreate,
+                  onCreate: (issue) => onAfterCreateSubIssue(undefined, { subIssue: issue, parentIssueId: parentIssue.issueId }),
                 });
               }, 110);
             }}
