@@ -15,13 +15,18 @@ interface IRenderFieldProps {
   // otherProps?: SelectProps | any
   [propsName: string]: any
 }
-
+/**
+ * @deprecated 后续将迁移到 field-pro
+ * @param param0
+ * @returns
+ */
 function renderEditor({
   data, dataRef, style, ...otherProps
 }: IRenderFieldProps): React.ReactElement {
   const { fieldType, fieldCode, defaultValue: propsDefaultValue } = data;
   const defaultValue = toJS(propsDefaultValue);
-  if (isCodeInSystemComponents(fieldCode)) {
+  // 系统字段的时间类字段这里不取用
+  if (!['date', 'time', 'datetime'].includes(fieldType) && isCodeInSystemComponents(fieldCode)) {
     const el = getAgileFields([], {
       code: fieldCode as any,
       fieldType: fieldType as any,
