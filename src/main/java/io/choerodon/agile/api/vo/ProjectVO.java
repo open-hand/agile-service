@@ -39,6 +39,16 @@ public class ProjectVO {
     @ApiModelProperty("创建时间")
     private Date creationDate;
 
+    private String projectStatus;
+
+    public String getProjectStatus() {
+        return projectStatus;
+    }
+
+    public void setProjectStatus(String projectStatus) {
+        this.projectStatus = projectStatus;
+    }
+
     public Long getId() {
         return id;
     }

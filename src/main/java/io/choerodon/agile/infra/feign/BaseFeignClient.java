@@ -256,6 +256,7 @@ public interface BaseFeignClient {
                                                        @RequestParam String name,
                                                        @RequestParam String code,
                                                        @RequestParam Boolean enabled,
+                                                       @RequestParam Boolean withAdditionInfo,
                                                        @RequestParam String params);
 
     @PostMapping(value = "/choerodon/v1/projects/ids")
