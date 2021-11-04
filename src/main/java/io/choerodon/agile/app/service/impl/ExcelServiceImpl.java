@@ -906,7 +906,7 @@ public class ExcelServiceImpl implements ExcelService {
         List<Long> importedFieldIds = new ArrayList<>();
         Map<Integer, List<Integer>> errorRowColMap = new HashMap<>(sheet.getPhysicalNumberOfRows());
         List<IssueTypeVO> issueTypes = objectSchemeFieldService.issueTypes(organizationId, projectId);
-        Map<String, IssueTypeVO> issueTypeNameMap = issueTypes.stream().collect(Collectors.toMap(IssueTypeVO::getName, a -> a, (k1, k2) -> k1));
+        Map<String, IssueTypeVO> issueTypeNameMap = issueTypes.stream().filter(IssueTypeVO::getEnabled).collect(Collectors.toMap(IssueTypeVO::getName, a -> a, (k1, k2) -> k1));
         Map<String, UserVO> userNameMap = objectSchemeFieldExcelService.getUserNameMap(organizationId, projectId);
         for (int r = 1; r < sheet.getPhysicalNumberOfRows(); r++) {
             Row row = sheet.getRow(r);

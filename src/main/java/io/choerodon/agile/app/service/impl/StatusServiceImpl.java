@@ -400,8 +400,10 @@ public class StatusServiceImpl implements StatusService {
         StateMachineSchemeVO stateMachineSchemeVO = projectConfigDetailVO.getStateMachineSchemeMap().get(applyType);
         List<IssueCountDTO> countDTOS = nodeDeployMapper.countIssueTypeByStatusIds(projectVO.getOrganizationId(),stateMachineSchemeVO.getId(),statusIds,applyType);
         Map<Long, List<String>> map = new HashMap<>();
+        Map<Long, String> issueTypeMap = issueTypeMapper.selectByOptions(projectVO.getOrganizationId(), projectId, null)
+                .stream().collect(Collectors.toMap(IssueTypeVO::getId, IssueTypeVO::getName));
         if (!CollectionUtils.isEmpty(countDTOS)) {
-            map.putAll(countDTOS.stream().collect(Collectors.groupingBy(IssueCountDTO::getId, Collectors.mapping(IssueCountDTO::getName, Collectors.toList()))));
+            map.putAll(countDTOS.stream().collect(Collectors.groupingBy(IssueCountDTO::getId, Collectors.mapping(v -> issueTypeMap.get(v.getIssueTypeId()), Collectors.toList()))));
         }
         content.forEach(v -> v.setUsage(CollectionUtils.isEmpty(map.get(v.getId())) ? null : StringUtils.collectionToDelimitedString(map.get(v.getId()), ",")));
         page.setContent(content);

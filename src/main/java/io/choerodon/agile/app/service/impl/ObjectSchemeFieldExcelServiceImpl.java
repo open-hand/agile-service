@@ -704,7 +704,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
 
     private List<String> getIssueTypePredefined(Long projectId, Long organizationId) {
         List<IssueTypeVO> issueTypeList = objectSchemeFieldService.issueTypes(organizationId, projectId);
-        return issueTypeList.stream().map(IssueTypeVO::getName).collect(Collectors.toList());
+        return issueTypeList.stream().filter(IssueTypeVO::getEnabled).map(IssueTypeVO::getName).collect(Collectors.toList());
     }
 
     private List<String> getFieldTypePredefined() {
