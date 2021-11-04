@@ -32,7 +32,7 @@ const SelectEpic: React.FC<SelectEpicProps> = forwardRef(({
   isProgram, afterLoad, dataRef, dontAddEpic0, unassignedEpic, request, flat, projectId, defaultSelectedIds, onlyUnCompleted = true, selectIds: propsSelectIds, ...otherProps
 }, ref: React.Ref<Select>) => {
   const selectRef = useRef<Select>();
-  const values = useComputed(() => selectRef.current?.getValues() || [], [selectRef.current?.getValues()]);
+  const values = useComputed(() => (selectRef.current?.getValues() || []).map((item) => (typeof item === 'object' ? item.issueId : item)), [selectRef.current?.getValues()]);
 
   const selectIds = useMemo(() => [...castArray(toJS(propsSelectIds)), ...castArray(toJS(defaultSelectedIds)), ...values].filter(Boolean), [propsSelectIds, values]);
   const selectIdsRef = useRef<string[]>(selectIds);
