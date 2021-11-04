@@ -39,7 +39,6 @@ const AddModal: React.FC<Props> = (props) => {
   const ref = useRef<RefProps>({} as RefProps);
   async function handleSubmit() {
     const data = await ref.current.submit();
-    console.log(data);
     if (data) {
       if (isEdit) {
         store.updateBlock(index as number, data as IReportBlock);

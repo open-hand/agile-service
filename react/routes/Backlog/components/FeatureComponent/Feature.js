@@ -163,7 +163,7 @@ class Feature extends Component {
             </Droppable>
           </DragDropContext>
           <div
-            className="c7n-backlog-epicItems-last"
+            className="c7n-backlog-epicItems-last c7n-backlog-epicItems-last-assgin"
             style={{
               background: BacklogStore.getChosenFeature === 'unset' ? 'rgba(140, 158, 254, 0.16)' : '',
             }}

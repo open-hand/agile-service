@@ -275,7 +275,7 @@ class VersionItem extends Component {
                 </EasyEdit>
               </Permission>
             </div>
-            <p className="c7n-backlog-versionItemDetail">详情</p>
+            <p className="c7n-backlog-versionItemDetail">计数详情</p>
             <div className="c7n-backlog-versionItemParams">
               <div className="c7n-backlog-versionItemParam">
                 <p style={{ color: 'var(--text-color3)' }}>开始日期</p>
