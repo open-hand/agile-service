@@ -18,6 +18,8 @@ const fieldTextValueConfig = {
   backlogClassification: { optionKey: 'id', textKey: 'name' },
   pi: { optionKey: 'id', textKey: 'piName' },
   programVersion: { optionKey: 'id', textKey: 'name' },
+  subProject: { optionKey: 'projectId', textKey: 'projName' },
+
 };
 function transformDefaultValue({
   fieldType, defaultValue, defaultValueObj, fieldOptions, optionKey: propsOptionKey = 'id', textKey: propsTextKey = 'value', fieldCode, extraConfig,
