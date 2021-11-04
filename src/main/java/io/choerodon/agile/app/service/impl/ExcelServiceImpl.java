@@ -285,7 +285,7 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put(MAIN_RESPONSIBLE_NAME, "主要负责人");
         FIELD_MAP.put(ENVIRONMENT_NAME, "环境");
         FIELD_MAP.put(SPENT_WORK_TIME, "已耗费时间");
-        FIELD_MAP.put(ALL_ESTIMATE_TIME, "总预估时间");
+        FIELD_MAP.put(ALL_ESTIMATE_TIME, "当前预估时间");
         FIELD_MAP.put(TAGS, "Tag");
         FIELD_MAP.put(RELATED_ISSUE, "关联" + IssueConstant.ISSUE_CN);
         FIELD_MAP.put(EPIC_SELF_NAME, "史诗名称");
@@ -3264,10 +3264,10 @@ public class ExcelServiceImpl implements ExcelService {
         exportIssuesVO.setVersionName(exportIssuesVersionName(exportIssuesVO));
         exportIssuesVO.setDescription(getDes(exportIssuesVO.getDescription()));
         setFoundationFieldValue(foundationCodeValue, issueId, exportIssuesVO);
-        resetRemainingTimeIfCompleted(issue, exportIssuesVO);
         issueMap.put(issueId, exportIssuesVO);
         processParentSonRelation(parentSonMap, issue);
         setSpentWorkTimeAndAllEstimateTime(workLogVOMap, exportIssuesVO);
+        resetRemainingTimeIfCompleted(issue, exportIssuesVO);
         setTag(tagMap, exportIssuesVO);
         setRelatedIssue(exportIssuesVO, relatedIssueMap);
         setParticipant(exportIssuesVO, issue, usersMap);
@@ -3363,7 +3363,7 @@ public class ExcelServiceImpl implements ExcelService {
             }
             allEstimateTime = exportIssuesVO.getRemainingTime() == null ? spentWorkTime : spentWorkTime.add(exportIssuesVO.getRemainingTime());
         } else {
-            allEstimateTime = exportIssuesVO.getRemainingTime();
+            allEstimateTime = exportIssuesVO.getRemainingTime() == null ? new BigDecimal(0) : exportIssuesVO.getRemainingTime();
         }
         exportIssuesVO.setSpentWorkTime(spentWorkTime);
         exportIssuesVO.setAllEstimateTime(allEstimateTime);
