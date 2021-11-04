@@ -101,7 +101,7 @@ public class ExcelUtil {
         Arrays.asList("概要", "Tag", "关联" + IssueConstant.ISSUE_CN).forEach(x -> WIDTH_MAP.put(x, 8000));
         Arrays.asList("描述").forEach(x -> WIDTH_MAP.put(x, 12000));
         Arrays.asList("冲刺").forEach(x -> WIDTH_MAP.put(x, 6000));
-        Arrays.asList("版本", "修复的版本", "冲刺", "影响的版本", "所属史诗", "创建时间", "最后更新时间", "预计开始时间", "预计结束时间", "已耗费时间", "总预估时间")
+        Arrays.asList("版本", "修复的版本", "冲刺", "影响的版本", "所属史诗", "创建时间", "最后更新时间", "预计开始时间", "预计结束时间", "已耗费时间", "当前预估时间")
                 .forEach(x -> WIDTH_MAP.put(x, 5000));
     }
 
