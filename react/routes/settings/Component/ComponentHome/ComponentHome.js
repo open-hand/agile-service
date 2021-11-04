@@ -122,7 +122,11 @@ function ComponentHome() {
           ) : null
         )}
       />
-      <Column name="description" className="c7n-agile-table-cell" />
+      <Column
+        name="description"
+        className="c7n-agile-table-cell"
+        tooltip="overflow"
+      />
       <Column name="defaultAssigneeRole" className="c7n-agile-table-cell" />
       <Column name="sequence" className="c7n-agile-table-cell" />
     </Table>

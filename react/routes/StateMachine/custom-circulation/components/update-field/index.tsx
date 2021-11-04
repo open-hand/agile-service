@@ -82,6 +82,19 @@ const transformUpdateData = (data) => {
         }
         break;
       }
+      case 'featureType': {
+        if (value) {
+          updateData.push({
+            fieldId,
+            fieldValueList: [{
+              operateType: value ? 'specifier' : selected,
+              stringValue: value,
+              fieldType: 'single',
+            }],
+          });
+        }
+        break;
+      }
       default: {
         break;
       }
@@ -120,7 +133,7 @@ const transformUpdateData = (data) => {
         break;
       }
       case 'radio': case 'single': case 'checkbox': case 'multiple': {
-        if (key === 'environment') {
+        if (key === 'environment' || key === 'featureType') {
           break;
         }
         if (value || value?.length > 0) {
@@ -226,10 +239,13 @@ const setCurrentByFieldType = (current, fieldValue, fieldCode) => {
       break;
     }
     case 'radio': case 'single': case 'checkbox': case 'multiple': {
-      const { operateType } = firstField;
+      const { operateType, stringValue } = firstField;
       const isClear = operateType === 'clear';
       if (fieldType === 'radio' || fieldType === 'single') {
         current.set(fieldCode, isClear ? 'clear' : firstField.optionId);
+        if (fieldCode === 'featureType') {
+          current.set(fieldCode, stringValue);
+        }
       } else {
         // @ts-ignore
         current.set(fieldCode, isClear ? ['clear'] : fieldValueList.map((item) => item.optionId));

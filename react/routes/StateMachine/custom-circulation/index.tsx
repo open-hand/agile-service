@@ -175,7 +175,7 @@ const dateTransform = (fieldType: string, d: Date) => {
 };
 // @ts-ignore
 const transformFieldValue = (fieldSetting) => {
-  const { fieldType, fieldValueList: values } = fieldSetting;
+  const { fieldType, fieldValueList: values, fieldCode } = fieldSetting;
   const fieldValueList = values ?? [];
   const firstField = (fieldValueList && fieldValueList[0]) || {};
   let transformedValue = '';
@@ -198,10 +198,13 @@ const transformFieldValue = (fieldSetting) => {
       break;
     }
     case 'radio': case 'single': case 'checkbox': case 'multiple': {
-      const { operateType, name } = firstField;
+      const { operateType, name, stringValue } = firstField;
       const isClear = operateType === 'clear';
       if (fieldType === 'radio' || fieldType === 'single') {
         transformedValue = isClear ? '清空' : name;
+        if (fieldCode === 'featureType') {
+          transformedValue = stringValue === 'business' ? '特性' : '使能';
+        }
       } else {
         // @ts-ignore
         transformedValue = isClear ? '清空' : fieldValueList.map((item) => item.name).join('、');

@@ -70,6 +70,18 @@ export default function renderField({
         />
       );
     }
+    case 'featureType': {
+      return (
+        <Select
+          label="特性类型"
+          colSpan={colSpan}
+          name={code}
+        >
+          <Option value="business">特性</Option>
+          <Option value="enabler">使能</Option>
+        </Select>
+      );
+    }
     default: break;
   }
   switch (fieldType) {

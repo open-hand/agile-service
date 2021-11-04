@@ -129,6 +129,7 @@ const TransformFromSubIssue: React.FC<Props> = ({
               dataRef={issueTypesRef}
               clearButton={false}
               excludeTypeIds={[issueTypeId]}
+              onlyEnabled
             />
             {
               isEpicType && (

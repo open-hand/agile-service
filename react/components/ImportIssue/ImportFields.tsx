@@ -18,7 +18,7 @@ const projectImportRequiresFields = ['issueType', 'parentIssue', 'epic', 'compon
 const subProjectImportRequiredFields = ['issueType', 'parentIssue', 'feature', 'component', 'sprint', 'summary', 'description', 'assignee', 'reporter', 'priority', 'remainingTime', 'storyPoints', 'linkIssue'];
 
 const programSystemFields = [
-  { code: 'issueType', title: '类型' },
+  { code: 'issueType', title: '工作项类型' },
   { code: 'summary', title: '概要' },
   { code: 'description', title: '描述' },
   { code: 'reporter', title: '报告人' },
@@ -37,7 +37,7 @@ const programSystemFields = [
 ];
 
 const projectSystemFields = [
-  { code: 'issueType', title: '类型' },
+  { code: 'issueType', title: '工作项类型' },
   { code: 'summary', title: '概要' },
   { code: 'description', title: '描述' },
   { code: 'parentIssue', title: '父级故事/任务/缺陷' },
@@ -66,7 +66,7 @@ const projectSystemFields = [
 ];
 
 const subProjectSystemFields = [
-  { code: 'issueType', title: '类型' },
+  { code: 'issueType', title: '工作项类型' },
   { code: 'summary', title: '概要' },
   { code: 'description', title: '描述' },
   { code: 'parentIssue', title: '父级故事/任务/缺陷' },
