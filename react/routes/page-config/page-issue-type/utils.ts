@@ -5,7 +5,7 @@ import { toJS } from 'mobx';
 import { IFieldOptionProps } from '@/api';
 import { User } from '@/common/types';
 
-const disabledEditDefaultFields = ['featureType', 'issueType', 'status', 'priority', 'creationDate', 'lastUpdateDate', 'timeTrace', 'belongToBacklog', 'urgent', 'progressFeedback', 'description', 'environment', 'created_user', 'last_updated_user', 'email', 'tag'];
+const disabledEditDefaultFields = ['featureType', 'issueType', 'status', 'priority', 'creationDate', 'lastUpdateDate', 'timeTrace', 'belongToBacklog', 'urgent', 'progressFeedback', 'description', 'environment', 'subProject', 'created_user', 'last_updated_user', 'email', 'tag'];
 const orgDisabledEditDefaultFields = [...disabledEditDefaultFields, 'component', 'label', 'influenceVersion', 'fixVersion', 'epic', 'sprint', 'pi', 'subProject', 'backlogClassification', 'backlogType', 'programVersion'];
 const fieldTextValueConfig = {
   epic: { optionKey: 'issueId', textKey: 'epicName' },
