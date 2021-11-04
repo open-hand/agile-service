@@ -44,7 +44,7 @@ class Epic extends Component {
 
   handleOpenCreateIssue = () => {
     const { openCreateIssueModal } = this.props;
-    openCreateIssueModal();
+    openCreateIssueModal('BacklogEpic');
   };
 
   render() {

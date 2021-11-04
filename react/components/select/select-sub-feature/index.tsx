@@ -3,10 +3,14 @@ import { Select } from 'choerodon-ui/pro';
 import { FlatSelect } from '@choerodon/components';
 
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import { useComputed } from 'mobx-react-lite';
+import { uniq } from 'lodash';
 import {
   featureApi,
 } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
+import { useNoticeSelectUpdateSelected } from '../useNoticeSelectUpdateSelected';
+import { refsBindRef, wrapRequestCallback } from '../utils';
 
 interface IFeature {
   issueId: string
@@ -21,27 +25,34 @@ export interface SelectSubFeatureProps extends Partial<SelectProps> {
  * 子项目查询项目群特性
  */
 const SelectSubFeature: React.FC<SelectSubFeatureProps> = forwardRef(({
-  featureIds, afterLoad, flat, ...otherProps
+  featureIds: propsFeatureIds, afterLoad, flat, ...otherProps
 }, ref: React.Ref<Select>) => {
-  const selectIdsRef = useRef<Array<string | number>>(featureIds || []);
+  const selectRef = useRef<Select>();
+  const selectIdsRef = useRef<Array<string | number>>(propsFeatureIds || []);
+  const values = useComputed(() => selectRef.current?.getValues() || [], [selectRef.current?.getValues()]);
   const optionsRef = useRef<any[]>();
+  const featureIds = useMemo(() => uniq([...values, propsFeatureIds]).filter(Boolean), [values, propsFeatureIds]);
+  const [forceValue, setFilterWord] = useNoticeSelectUpdateSelected();
   const args = useMemo(() => {
     if (optionsRef.current && featureIds) {
       // 有新的未加载的值，就重新加载
       const hasNewUnExistValue = featureIds.some((v) => !optionsRef.current?.find((item) => item.issueId === v));
-      if (hasNewUnExistValue) {
+      if (hasNewUnExistValue || forceValue) {
         selectIdsRef.current = featureIds;
       }
     }
     return { featureIds: selectIdsRef.current };
-  }, [featureIds]);
+  }, [featureIds, forceValue]);
   const config = useMemo((): SelectConfig<IFeature> => ({
     name: 'featureId',
     textField: 'summary',
     valueField: 'issueId',
     tooltip: true,
     requestArgs: args,
-    request: ({ filter, page, requestArgs }) => featureApi.queryAllInSubProject(requestArgs?.featureIds || [], filter!, page, 50),
+    request: wrapRequestCallback(
+      ({ filter, page, requestArgs }) => featureApi.queryAllInSubProject(requestArgs?.featureIds || [], filter!, page, 50),
+      ({ filter }) => setFilterWord('filter', filter),
+    ),
     middleWare: (data) => {
       if (afterLoad) {
         afterLoad(data);
@@ -55,7 +66,7 @@ const SelectSubFeature: React.FC<SelectSubFeatureProps> = forwardRef(({
 
   return (
     <Component
-      ref={ref}
+      ref={refsBindRef(ref, selectRef)}
       popupStyle={{ maxWidth: '3rem !important' }}
       {...props}
       {...otherProps}

@@ -22,14 +22,21 @@ function getSystemFieldConfig(field: IChosenFieldField, dataSet?: DataSet): Part
         },
       };
     case 'statusId':
-    case 'statusList':
+    case 'statusList': {
+      let issueTypeIds = (dataSet?.current?.get('issueTypeList') ?? dataSet?.current?.get('issueTypeId')) ?? undefined;
+      if (issueTypeIds && code === 'statusList' && (issueTypeIds.includes('business') || issueTypeIds.includes('enabler'))) {
+        //  解决状态联动  此处的featureId需从
+        issueTypeIds = [...issueTypeIds, get(field, 'otherComponentProps.featureTypeId')];
+      }
       return {
         code: 'status',
         props: {
           isProgram: code === 'statusList',
-          issueTypeIds: (dataSet?.current?.get('issueTypeList') ?? dataSet?.current?.get('issueTypeId')) ?? undefined,
+          selectedIds: defaultValue,
+          issueTypeIds,
         },
       };
+    }
     case 'issueTypeList':
       return {
         code: 'issueType',
@@ -59,6 +66,9 @@ function getSystemFieldConfig(field: IChosenFieldField, dataSet?: DataSet): Part
     case 'teamProjectList': {
       return {
         code: 'subProject',
+        props: {
+          hasUnassign: true,
+        },
       };
     }
     case 'piList': {
