@@ -1,13 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import WYSIWYGEditor from '@/components/CKEditor';
 import { Icon } from 'choerodon-ui/pro';
 import classNames from 'classnames';
+import WYSIWYGEditor from '@/components/CKEditor';
 import { usePageTemplateStore } from '../../stores';
 import styles from './index.less';
 
 function PageDescription() {
-  const { pageTemplateStore } = usePageTemplateStore();
+  const { pageTemplateStore, disabled } = usePageTemplateStore();
   const [hidden, setHidden] = useState(false);
   const handleChangeDes = (val: string) => {
     pageTemplateStore.changeTemplate(val);
@@ -22,6 +22,7 @@ function PageDescription() {
       <div className={classNames(styles.edit)}>
         <WYSIWYGEditor
           style={{ height: '150px', width: '100%' }}
+          disabled={disabled}
           onChange={handleChangeDes}
           value={pageTemplateStore.descriptionObj.template}
           defaultValue={defaultValue}

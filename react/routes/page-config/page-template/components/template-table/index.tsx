@@ -15,7 +15,7 @@ interface IPageTemplateTableProps {
   tableRef: React.RefObject<PerformanceTable>
 }
 const PageTemplateTable: React.FC<IPageTemplateTableProps> = ({ tableRef: propsTableRef }) => {
-  const { sortTableDataSet, pageTemplateStore } = usePageTemplateStore();
+  const { sortTableDataSet, pageTemplateStore, disabled } = usePageTemplateStore();
   const currentIssueTypeId = pageTemplateStore.currentIssueType.id;
   const handleCheckChange = useCallback((val: any, index: number) => {
     typeof (val) === 'number' ? sortTableDataSet.select(index) : sortTableDataSet.unSelect(index);
@@ -32,6 +32,7 @@ const PageTemplateTable: React.FC<IPageTemplateTableProps> = ({ tableRef: propsT
       <Observer>
         {() => (
           <CheckBox
+            disabled={disabled}
             indeterminate={sortTableDataSet.selected.length > 0 && (sortTableDataSet.filter((record) => record.selectable).length !== sortTableDataSet.selected.length)}
             checked={sortTableDataSet.selected.length > 0}
             onChange={handleCheckAllChange}
@@ -49,7 +50,7 @@ const PageTemplateTable: React.FC<IPageTemplateTableProps> = ({ tableRef: propsT
           <CheckBox
             key={rowIndex}
             value={rowData.index}
-            disabled={!rowData.selectable}
+            disabled={disabled || !rowData.selectable}
             checked={rowData.isSelected}
             //   checked={checkValues.includes(rowData.issueId)}
             onChange={(value) => handleCheckChange(value, rowData.index)}
@@ -58,8 +59,8 @@ const PageTemplateTable: React.FC<IPageTemplateTableProps> = ({ tableRef: propsT
       </Observer>
     )
     ,
-  }), [handleCheckAllChange, handleCheckChange, sortTableDataSet]);
-  const visibleColumns = useMemo(() => [checkBoxColumn, ...getColumns({ issueTypeId: currentIssueTypeId, loadData: handleRefresh })], [checkBoxColumn, currentIssueTypeId, handleRefresh]);
+  }), [disabled, handleCheckAllChange, handleCheckChange, sortTableDataSet]);
+  const visibleColumns = useMemo(() => [checkBoxColumn, ...getColumns({ issueTypeId: currentIssueTypeId, loadData: handleRefresh, disabled })], [checkBoxColumn, currentIssueTypeId, disabled, handleRefresh]);
   return (
     <PerformanceTable
       ref={(r) => {

@@ -22,6 +22,7 @@ export interface IToggleFieldDefaultValueData {
 }
 interface Props {
   data: Record,
+  disabled?: boolean
 
 }
 function SpanPlaceholder({ fieldType }: { fieldType: string }) {
@@ -31,14 +32,16 @@ function SpanPlaceholder({ fieldType }: { fieldType: string }) {
   }
   return <span style={{ color: 'rgba(0,0,0,0.6)', fontStyle: 'italic' }}>{placeholder}</span>;
 }
-const ToggleFieldValue: React.FC<Pick<Props, 'data'>> = ({
-  data,
+const ToggleFieldValue: React.FC<Pick<Props, 'data' | 'disabled'>> = ({
+  data, disabled: propsDisabled,
 }) => {
   const textEditToggleProps = useTextEditTogglePropsWithPage(data);
+  const disabled = propsDisabled || textEditToggleProps?.disabled;
   return (
 
     <TextEditToggle
       {...textEditToggleProps}
+      disabled={disabled}
       className={styles.toggle}
     >
 
@@ -46,7 +49,7 @@ const ToggleFieldValue: React.FC<Pick<Props, 'data'>> = ({
         {() => (
           <Tooltip title={data.get('showDefaultValueText') !== '' ? data.get('showDefaultValueText') : undefined}>
             <span className={styles.text}>
-              {(!textEditToggleProps?.disabled && (!data.get('showDefaultValueText') || data.get('showDefaultValueText') === '') ? <SpanPlaceholder fieldType={data.get('fieldType')} /> : data.get('showDefaultValueText') || '')}
+              {(!disabled && (!data.get('showDefaultValueText') || data.get('showDefaultValueText') === '') ? <SpanPlaceholder fieldType={data.get('fieldType')} /> : data.get('showDefaultValueText') || '')}
             </span>
           </Tooltip>
         )}
