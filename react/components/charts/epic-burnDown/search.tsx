@@ -7,6 +7,7 @@ import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 import seeChangeRange from './image/seeChangeRange.svg';
 import seeProgress from './image/seeProgress.svg';
 import styles from './index.less';
+import useIsProgram from '@/hooks/useIsProgram';
 
 export interface IEpic {
   issueId: string,
@@ -29,6 +30,8 @@ const { Option } = Select;
 const EpicBurnDownSearch:React.FC<EpicBurnDownSearchProps> = ({
   epics, epicIsLoading, checked, currentEpicId, setCurrentEpicId, setChecked,
 }) => {
+  const { isProgram } = useIsProgram();
+
   const handleChangeCurrentEpic = (epicId: string) => {
     setCurrentEpicId(epicId);
   };
@@ -64,16 +67,22 @@ const EpicBurnDownSearch:React.FC<EpicBurnDownSearchProps> = ({
       const currentEpic = epics.find((item) => item.issueId === currentEpicId);
       return (
         <p className={styles.epicInfo}>
-          <span
-            className={styles.primary}
-            style={{
-              cursor: 'pointer',
-            }}
-            role="none"
-            onClick={handleLinkToIssue.bind(this, 'epic', currentEpicId !== undefined ? epics.filter((item) => item.issueId === currentEpicId)[0] : {})}
-          >
-            {`${currentEpic ? currentEpic.issueNum : ''}`}
-          </span>
+          {isProgram ? (
+            <span>
+              {currentEpic ? currentEpic.issueNum : ''}
+            </span>
+          ) : (
+            <span
+              className={styles.primary}
+              style={{
+                cursor: 'pointer',
+              }}
+              role="none"
+              onClick={handleLinkToIssue.bind(this, 'epic', currentEpicId !== undefined ? epics.filter((item) => item.issueId === currentEpicId)[0] : {})}
+            >
+              {`${currentEpic ? currentEpic.issueNum : ''}`}
+            </span>
+          )}
           <span>{` ${currentEpic ? currentEpic.summary : ''}`}</span>
         </p>
       );
