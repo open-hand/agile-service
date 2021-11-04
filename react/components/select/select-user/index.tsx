@@ -49,7 +49,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
   const { selectedUser, extraOptions } = useCreation(() => ({ selectedUser: propsSelectedUser, extraOptions: propExtraOptions }), [propsSelectedUser]);
   const selectDataRef = useRef<DataSet>();
   const requestLoading = useRef<boolean>(true);
-  const values = useComputed(() => (selectRef.current?.getValues() || []).map((item) => (typeof item === 'object' ? item.id : item)), [selectRef.current?.getValues()]);
+  const values = useComputed(() => (selectRef.current?.getValues() || []).flat(Infinity).map((item) => (typeof item === 'object' ? item.id : item)), [selectRef.current?.getValues()]);
   const [forceUpdateValue, setFilterWord] = useNoticeSelectUpdateSelected();
   const selectedUserLoadedIds = useCreation(() => toArray(selectedUser)?.filter((i) => i && typeof (i) === 'object' && i.id).map((i) => i.id), [selectedUser]); // 已经存在的用户查询接口会过滤，避免第二页恰好全是选中的数据，但页面无反应
   const selectedUserIds = useMemo(() => {
