@@ -856,6 +856,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         validateBeforeUpdate(projectId, issueUpdateVO, fieldList);
         String issueIdStr = "issueId";
         String objectVersionNumberStr = "objectVersionNumber";
+        if (agilePluginService != null) {
+            agilePluginService.buildFieldList(fieldList, issueUpdateVO);
+        }
         //更新issue表字段，fieldList包含issueId，objectVersionNumber和一个field
         boolean updateRelationField =
                 fieldList.size() == 2
@@ -880,6 +883,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                                                 IssueUpdateVO issueUpdateVO,
                                                 List<String> fieldList) {
         validateBeforeUpdate(projectId, issueUpdateVO, fieldList);
+        if (agilePluginService != null) {
+            agilePluginService.buildFieldList(fieldList, issueUpdateVO);
+        }
         if (!fieldList.isEmpty()) {
             //处理issue自己字段
             handleUpdateIssueWithoutRuleNotice(issueUpdateVO, fieldList, projectId);

@@ -417,7 +417,7 @@ public interface AgilePluginService {
      * @param specifyMap
      * @param statusFieldValueSettingDTOS
      */
-    void handlerFeatureFieldValue(String fieldCode, IssueUpdateVO issueUpdateVO, Map<String, Object> specifyMap, List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS, IssueDTO issueDTO);
+    void handlerFeatureFieldValue(String fieldCode, IssueUpdateVO issueUpdateVO, Map<String, Object> specifyMap, List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS, IssueDTO issueDTO, List<String> fieldList);
 
     /**
      * 如果是开源版升级到商业版，需要补充feature问题类型
@@ -504,4 +504,6 @@ public interface AgilePluginService {
     List<Long> queryFeatureIdByIssueIdAndEpicId(List<Long> issueIds, Long epicId);
 
     List<Long> queryNoEpicFeatureIds(List<IssueDTO> issues);
+
+    void buildFieldList(List<String> fieldList, IssueUpdateVO issueUpdateVO);
 }
