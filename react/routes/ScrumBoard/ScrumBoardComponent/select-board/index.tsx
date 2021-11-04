@@ -1,4 +1,4 @@
-import React, {useMemo, useRef} from 'react';
+import React, { useRef } from 'react';
 import { Permission } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import { FlatSelect } from '@choerodon/components';

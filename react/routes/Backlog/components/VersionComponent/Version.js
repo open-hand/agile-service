@@ -81,7 +81,7 @@ class Version extends Component {
             </Droppable>
           </DragDropContext>
           <div
-            className="c7n-backlog-versionItems"
+            className="c7n-backlog-versionItems c7n-backlog-versionItems-assign"
             style={{
               background: BacklogStore.getChosenVersion === 'unset' ? 'rgba(140, 158, 254, 0.16)' : '',
             }}
