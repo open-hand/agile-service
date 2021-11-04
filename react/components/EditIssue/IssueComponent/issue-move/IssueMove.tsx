@@ -145,7 +145,7 @@ const IssueMove: React.FC<Props> = ({
             } else {
               setTargetProjectType('program');
             }
-            await issueTypeDataSet.loadData(issueTypes.filter((item) => !includes(excludeTypeCode, item.typeCode)));
+            await issueTypeDataSet.loadData(issueTypes.filter((item) => item.enabled && !includes(excludeTypeCode, item.typeCode)));
           } else {
             issueTypeDataSet.loadData([]);
           }
