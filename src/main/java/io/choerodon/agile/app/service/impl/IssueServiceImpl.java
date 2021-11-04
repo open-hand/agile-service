@@ -1142,6 +1142,18 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             case FieldCode.ENVIRONMENT:
                 value = issue.getEnvironment();
                 break;
+            case FieldCode.ACTUAL_START_TIME:
+                value = issue.getActualStartTime();
+                break;
+            case FieldCode.ACTUAL_END_TIME:
+                value = issue.getActualEndTime();
+                break;
+            case FieldCode.PARTICIPANT:
+                value = issue.getParticipants();
+                break;
+            case FieldCode.ESTIMATE_TIME:
+                value = issue.getEstimateTime();
+                break;
             case FieldCode.EPIC:
                 Long epicId = issue.getEpicId();
                 if (Objects.equals(0L, epicId)) {
