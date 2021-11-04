@@ -322,6 +322,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             String rank = issueTypeExtendMapper.selectMaxRank(organizationId, projectId, null);
             if (!StringUtils.hasText(rank)) {
                 rank = RankUtil.mid();
+            }else {
+                rank = RankUtil.genNext(rank);
             }
             dto.setRank(rank);
             issueTypeExtendMapper.insert(dto);
