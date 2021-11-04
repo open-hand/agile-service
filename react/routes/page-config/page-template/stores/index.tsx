@@ -2,9 +2,9 @@ import React, {
   createContext, useContext, useMemo,
 } from 'react';
 import { injectIntl, InjectedIntl } from 'react-intl';
-import { getMenuType } from '@/utils/common';
 import { DataSet } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
+import { getMenuType } from '@/utils/common';
 import SortTableDataSet from './SortTableDataSet';
 import AddUnselectedDataSet from './AddUnselectedDataSet';
 import PageTemplateStore from './PageTemplateStore';
@@ -15,6 +15,7 @@ interface Context {
   addUnselectedDataSet: DataSet,
   pageTemplateStore: PageTemplateStore,
   isInProgram: boolean,
+  disabled: boolean,
   isProject: boolean,
   intl: InjectedIntl,
   prefixCls: 'c7n-agile-page-config-page-template',
@@ -34,8 +35,10 @@ const PageTemplateProvider = injectIntl(observer(
     const pageTemplateStore = useMemo(() => new PageTemplateStore(
       { sortTableDataSet, addUnselectedDataSet, isInProgram },
     ), [sortTableDataSet, addUnselectedDataSet, isInProgram]);
+    const disabled = !pageTemplateStore.currentIssueType.enabled;
     const value = {
       ...props,
+      disabled,
       sortTableDataSet,
       addUnselectedDataSet,
       pageTemplateStore,

@@ -38,7 +38,7 @@ function checkPermissionLinkage(data: any) {
   return res || keyFilters.filter((filter) => filter?.ignoreOtherInclude).some((filter) => filter?.include?.includes(data[filter.key]));
 }
 
-const getColumns = ({ issueTypeId, loadData }: { issueTypeId: string, loadData: () => void }) => ([
+const getColumns = ({ issueTypeId, loadData, disabled }: { issueTypeId: string, loadData: () => void, disabled:boolean }) => ([
 
   {
     title: '字段名称',
@@ -55,7 +55,7 @@ const getColumns = ({ issueTypeId, loadData }: { issueTypeId: string, loadData: 
     dataIndex: 'defaultValue',
     key: 'defaultValue',
     width: 200,
-    render: ({ rowData }: any) => <div style={{ display: 'inline-flex', alignItems: 'center', width: '99%' }}><ToggleFieldValue data={rowData} /></div>,
+    render: ({ rowData }: any) => <div style={{ display: 'inline-flex', alignItems: 'center', width: '99%' }}><ToggleFieldValue data={rowData} disabled={disabled} /></div>,
   },
   {
     title: '角色权限说明',
@@ -90,7 +90,7 @@ const getColumns = ({ issueTypeId, loadData }: { issueTypeId: string, loadData: 
     dataIndex: 'action',
     key: 'action',
     width: 80,
-    render: ({ rowData }: any) => (
+    render: ({ rowData }: any) => (disabled ? null : (
       <TableDropMenu
         menuData={[{
           text: '权限配置',
@@ -121,7 +121,7 @@ const getColumns = ({ issueTypeId, loadData }: { issueTypeId: string, loadData: 
         defaultButtonProps={{ size: 'default' as any }}
         showText={false}
       />
-    ),
+    )),
   },
 ]);
 
