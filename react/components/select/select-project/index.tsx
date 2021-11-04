@@ -28,12 +28,7 @@ const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Function>();
   afterLoadRef.current = afterLoad;
-  const fakePageRequest = usePersistFn((filter: string = '') => {
-    if (!optionData) {
-      return [];
-    }
-    return optionData;
-  });
+
   const config = useMemo((): SelectConfig<any> => ({
     name: 'team',
     textField: 'name',

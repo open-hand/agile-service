@@ -2,18 +2,23 @@ import React, {
   useMemo, forwardRef, useRef, useCallback,
 } from 'react';
 import { toJS } from 'mobx';
-import { useCreation } from 'ahooks';
+import {
+  useCreation, useSafeState,
+} from 'ahooks';
 import { Select, DataSet } from 'choerodon-ui/pro';
 import {
   unionBy, castArray, uniq, includes,
 } from 'lodash';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
+import { useComputed } from 'mobx-react-lite';
 import { userApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import type { User } from '@/common/types';
 import UserTag from '@/components/tag/user-tag';
 import Styles from './index.less';
+import { refsBindRef, wrapRequestCallback } from '../utils';
+import { useNoticeSelectUpdateSelected } from '../useNoticeSelectUpdateSelected';
 
 const toArray = (something: any) => (Array.isArray(something) ? something : [something]);
 export interface SelectUserProps extends Partial<SelectProps> {
@@ -36,32 +41,34 @@ export interface SelectUserProps extends Partial<SelectProps> {
   optionRenderer?: (item: User, tooltip?: boolean) => React.ReactElement
   excludeIds?: string[]
 }
-
 const SelectUser: React.FC<SelectUserProps> = forwardRef(({
   selectedUser: propsSelectedUser, extraOptions: propExtraOptions, dataRef, request, level = 'project', afterLoad,
   selected, onOption, flat, projectId, organizationId, optionRenderer, excludeIds, ...otherProps
 }, ref: React.Ref<Select>) => {
+  const selectRef = useRef<Select>();
   const { selectedUser, extraOptions } = useCreation(() => ({ selectedUser: propsSelectedUser, extraOptions: propExtraOptions }), [propsSelectedUser]);
   const selectDataRef = useRef<DataSet>();
   const requestLoading = useRef<boolean>(true);
+  const values = useComputed(() => selectRef.current?.getValues() || [], [selectRef.current?.getValues()]);
+  const [forceUpdateValue, setFilterWord] = useNoticeSelectUpdateSelected();
   const selectedUserLoadedIds = useCreation(() => toArray(selectedUser)?.filter((i) => i && typeof (i) === 'object' && i.id).map((i) => i.id), [selectedUser]); // 已经存在的用户查询接口会过滤，避免第二页恰好全是选中的数据，但页面无反应
   const selectedUserIds = useMemo(() => {
     const ids: string[] | string | undefined = toJS(selected);
     // 避免value是对象的情况
     const valueArray: string[] = castArray(otherProps.value).map((i) => (typeof (i) === 'object' ? i?.id : i)).filter(Boolean);
-    return uniq(castArray(ids).concat(valueArray).filter((i) => i && i !== '0'));
-  }, [JSON.stringify(selected), JSON.stringify(otherProps.value)]);
+    return uniq(castArray(ids).concat(valueArray).concat(values).filter((i) => i && i !== '0'));
+  }, [JSON.stringify(selected), JSON.stringify(otherProps.value), values]);
   const idsRef = useRef(selectedUserIds);
   const args = useMemo(() => {
     if (selectDataRef.current && selectedUserIds) {
       // 有新的未加载的值，就重新加载，以区分用户选择和自动选择（比如选中了个人筛选）
       const hasNewUnExistValue = selectedUserIds.some((v) => !selectDataRef.current?.find((record) => record.get('id') === v));
-      if (hasNewUnExistValue) {
+      if (hasNewUnExistValue || forceUpdateValue) {
         idsRef.current = selectedUserIds;
       }
     }
     return { selectedUserIds: idsRef.current, queryFilterIds: uniq([...idsRef.current, ...selectedUserLoadedIds]) };
-  }, [selectedUserLoadedIds, selectedUserIds]);
+  }, [selectedUserLoadedIds, selectedUserIds, forceUpdateValue]);
   const userRequest: SelectConfig<User>['request'] = useCallback(
     async (requestData) => {
       let res: any;
@@ -75,9 +82,11 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
         res.list = res.list.filter((user: User) => user.enabled);
       }
       requestLoading.current = false;
+      // 临时解决组件筛选时
+      setFilterWord('filter', requestData.filter);
       return res;
     },
-    [level, organizationId, projectId, request],
+    [level, organizationId, projectId, request, setFilterWord],
   );
   const config = useMemo((): SelectConfig<User> => ({
     name: 'user',
@@ -117,7 +126,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
   const Component = flat ? FlatSelect : Select;
   return (
     <Component
-      ref={ref}
+      ref={refsBindRef(ref, selectRef)}
       clearButton={false}
       {...props}
       {...otherProps}
