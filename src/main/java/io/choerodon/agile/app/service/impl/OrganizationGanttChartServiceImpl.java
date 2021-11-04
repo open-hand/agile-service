@@ -207,13 +207,12 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         Map<String, Object> sortMap = new HashMap<>();
         addProjectSortIfNotExisted(pageRequest);
         ganttChartService.processSort(pageRequest, sortMap);
-        Set<Long> filterProjectIds = filterByTeamProjectIds(projectIds, searchVO);
-        if (ObjectUtils.isEmpty(filterProjectIds)) {
+        if (ObjectUtils.isEmpty(projectIds)) {
             return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }
         Page<IssueDTO> issuePage =
                 PageHelper.doPage(pageRequest, () -> issueMapper.selectConflictEstimatedTime(
-                        filterProjectIds,
+                        projectIds,
                         new HashSet<>(Arrays.asList(assigneeId)),
                         searchVO,
                         filterSql,
@@ -223,6 +222,7 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         if (issues.isEmpty()) {
             return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }
+        Set<Long> filterProjectIds = filterByTeamProjectIds(projectIds, searchVO);
         Map<Long, ProjectVO> filterProjectMap = new HashMap<>();
         projectMap.forEach((k, v) -> {
             if (filterProjectIds.contains(k)) {
