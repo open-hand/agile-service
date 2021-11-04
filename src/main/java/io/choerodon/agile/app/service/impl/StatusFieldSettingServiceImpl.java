@@ -268,7 +268,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             handlerVersion(versionMap, fieldCode, statusFieldValueSettings);
         } else if (Arrays.asList(FEATURE_FIELD).contains(fieldCode)) {
             if (agilePluginService != null) {
-                agilePluginService.handlerFeatureFieldValue(fieldCode, issueUpdateVO, specifyMap, statusFieldValueSettings, issueDTO);
+                agilePluginService.handlerFeatureFieldValue(fieldCode, issueUpdateVO, specifyMap, statusFieldValueSettings, issueDTO, field);
             }
         } else {
             handlerPredefinedValue(issueUpdateVO, field, issueDTO, fieldCode, statusFieldValueSettings);
