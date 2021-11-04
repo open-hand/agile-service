@@ -267,7 +267,7 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put(REPORTER_NAME, "报告人");
         FIELD_MAP.put(STORY_POINTS, "故事点");
         FIELD_MAP.put(REMAINING_TIME, "剩余预估时间");
-        FIELD_MAP.put(ESTIMATE_TIME, "预估时间");
+        FIELD_MAP.put(ESTIMATE_TIME, "原始预估时间");
         FIELD_MAP.put(VERSION_NAME, "版本");
         FIELD_MAP.put(FIX_VERSION_NAME, "修复的版本");
         FIELD_MAP.put(INFLUENCE_VERSION_NAME, "影响的版本");
