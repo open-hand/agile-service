@@ -23,7 +23,7 @@ export default function useProjectIssueTypes(config?: ProjectIssueTypesConfig, o
   return useQuery(key, () => issueTypeApi.loadAllWithStateMachineId('agile', config?.projectId, config?.onlyEnabled ?? true, config?.programId), {
     select: (data) => {
       const issueTypes = (!(config?.isProgram ?? isProgram) ? data.filter((item: IIssueType) => item.typeCode !== 'feature') : data);
-      const finalIssueTypes = (config?.isInProgram ?? isInProgram) ? issueTypes.filter((item) => item.typeCode !== 'issue_epic') : data;
+      const finalIssueTypes = (config?.isInProgram ?? isInProgram) ? issueTypes.filter((item) => item.typeCode !== 'issue_epic') : issueTypes;
       // eslint-disable-next-line no-nested-ternary
       const typeCodes = Array.isArray(config?.typeCode) ? config?.typeCode : (config?.typeCode ? [config?.typeCode] : null);
       return typeCodes ? finalIssueTypes.filter((type) => typeCodes.includes(type.typeCode)) : finalIssueTypes;
