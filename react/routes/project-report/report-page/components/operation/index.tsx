@@ -28,7 +28,8 @@ const htmlTemplate = (images: { url: String, height: number, width: number }[]) 
         <Image
           src={image.url}
           style={{
-            maxWidth: 780,
+            maxWidth: 'calc(100% - 310px)',
+            margin: '0 auto',
           }}
         />
       </Item>

@@ -4,17 +4,18 @@ import ReactEcharts from 'echarts-for-react';
 import {
   map, trim, fill, sum, floor, last,
 } from 'lodash';
+import { Spin } from 'choerodon-ui/pro';
+import { EChartOption } from 'echarts';
 import LINK_URL from '@/constants/LINK_URL';
 import pic from '@/assets/image/NoData.svg';
 import to from '@/utils/to';
-import { Spin } from 'choerodon-ui/pro';
-import { EChartOption } from 'echarts';
 import completed from './image/completed.svg';
 import sprintIcon from './image/sprintIcon.svg';
 import storyPointIcon from './image/storyPointIcon.svg';
 import speedIcon from './image/speedIcon.svg';
 import styles from './index.less';
 import { useFontSize } from '../context';
+import useIsProgram from '@/hooks/useIsProgram';
 
 export type ChartData = [number[], (string | number)[], (string | number)[], (string | number)[], (string | number)[], (0 | '0.00001' | '-')[], ('-' | '0.00001')[], (0 | '-')[]];
 export interface OriginData {
@@ -38,6 +39,7 @@ const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
   checked, chartData, data, loading, option: propsOption,
 }) => {
   const getFontSize = useFontSize();
+  const { isProgram } = useIsProgram();
   const transformPlaceholder2Zero = (arr: any[]) => arr.map((v) => (v === '-' ? 0 : v));
 
   const getStoryPoints = () => {
@@ -423,18 +425,20 @@ const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
             <span style={{ fontSize: getFontSize(12), color: 'var(--text-color3)' }}>报表不能显示</span>
             <p style={{ marginTop: 10, fontSize: getFontSize(20) }}>
               在此史诗中没有预估的故事，请在
-              <span
-                style={{
-                  color: '#5365EA',
-                  cursor: 'pointer',
-                }}
-                role="none"
-                onClick={() => {
-                  to(LINK_URL.workListBacklog);
-                }}
-              >
-                待办事项
-              </span>
+              {isProgram ? '待办事项' : (
+                <span
+                  style={{
+                    color: '#5365EA',
+                    cursor: 'pointer',
+                  }}
+                  role="none"
+                  onClick={() => {
+                    to(LINK_URL.workListBacklog);
+                  }}
+                >
+                  待办事项
+                </span>
+              )}
               中创建故事并预估故事点。
             </p>
           </div>
