@@ -35,7 +35,7 @@ const systemFields = [
   { code: 'actualEndTime', title: '实际结束时间' },
   { code: 'remainingTime', title: '剩余预估时间' },
   { code: 'spentWorkTime', title: '已耗费时间' },
-  { code: 'allEstimateTime', title: '当前预估量' },
+  { code: 'allEstimateTime', title: '当前预估时间' },
   { code: 'sprint', title: '冲刺' },
   { code: 'mainResponsibleUser', title: '主要负责人' },
   { code: 'environmentName', title: '环境' },
