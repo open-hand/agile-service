@@ -4,9 +4,11 @@ import { stores } from '@choerodon/boot';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
 import { usePersistFn } from 'ahooks';
+import classNames from 'classnames';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { projectApi, ganttApi } from '@/api';
 import { ICategoryCode } from '@/hooks/useCategoryCodes';
+import { styles } from '../select-pi/utils';
 
 // 用于查询组织下的项目
 
@@ -24,7 +26,7 @@ export interface SelectTeamProps extends Partial<SelectProps> {
 }
 
 const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
-  userId, projectDataRef = { current: null }, afterLoad, flat, category, optionData, queryAgile, ...otherProps
+  userId, projectDataRef = { current: null }, afterLoad, flat, category, optionData, queryAgile, popupCls, ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Function>();
   afterLoadRef.current = afterLoad;
@@ -33,6 +35,7 @@ const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
     name: 'team',
     textField: 'name',
     valueField: 'id',
+    tooltip: true,
     request: ({ filter, page }) => {
       if (optionData) {
         return optionData;
@@ -61,8 +64,10 @@ const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
   return (
     <Component
       ref={ref}
+      popupCls={classNames(styles.popup, popupCls)}
       {...props}
       {...otherProps}
+
     />
   );
 });
