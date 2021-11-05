@@ -5,6 +5,7 @@ import io.choerodon.agile.api.vo.ComponentForListVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.SearchVO;
 
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.VerifyUpdateUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
@@ -113,6 +114,7 @@ public class IssueComponentController {
                                                                     @ApiParam(value = "分页信息", required = true)
                                                                      @SortDefault(sort = {"sequence","component_id"}, direction = Sort.Direction.DESC)
                                                                      @ApiIgnore PageRequest pageRequest) {
+        EncryptionUtils.decryptSearchVO(searchVO);
         return Optional.ofNullable(issueComponentService.queryComponentByProjectId(projectId, componentId, noIssueTest, searchVO, pageRequest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.componentList.get"));
