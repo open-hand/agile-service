@@ -46,7 +46,7 @@ const SubscribeContent = () => {
     <div className={Style.wrap}>
       <div>
         <span>将订阅链接添加到您的Outlook等日历应用中，直接点击复制以下链接即可。</span>
-        <span className={Style.more}>了解如何使用？</span>
+        {/* <span className={Style.more}>了解如何使用？</span> */}
       </div>
       <div role="none" className={Style.urlWrap} onClick={handleCopyUrl}>
         {url ? <span>{url}</span> : <Spin />}
