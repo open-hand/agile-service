@@ -1,11 +1,19 @@
-import React, { useMemo, forwardRef } from 'react';
+import React, {
+  useMemo, forwardRef, useRef, useEffect,
+} from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
-import { uniqBy } from 'lodash';
+import {
+  castArray, get, set, uniqBy,
+} from 'lodash';
+import { useComputed } from 'mobx-react-lite';
+import { useCreation } from 'ahooks';
 import { componentApi, fieldApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { IComponent } from '@/common/types';
+import { useNoticeSelectUpdateSelected } from '../useNoticeSelectUpdateSelected';
+import { refsBindRef, wrapRequestCallback } from '../utils';
 
 export interface SelectComponentProps extends Partial<SelectProps> {
   dataRef?: React.MutableRefObject<any>
@@ -18,20 +26,43 @@ export interface SelectComponentProps extends Partial<SelectProps> {
   selected?: string[]
   fieldId?: string
 }
-
+function getSelectIds(options: any[], values: any, valueField?: string) {
+  if (valueField === 'name') {
+    return castArray(values || []).map((v) => options.find((option) => option.name === v)?.componentId);
+  }
+  return values || [];
+}
 const SelectComponent: React.FC<SelectComponentProps> = forwardRef(({
-  dataRef, afterLoad, valueField, flat, projectId, extraOptions, ruleIds, selected, fieldId, ...otherProps
+  dataRef, afterLoad, valueField, flat, projectId, extraOptions, ruleIds, selected, fieldId, name, ...otherProps
 }, ref: React.Ref<Select>) => {
-  const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
-  const hasRule = Object.keys(args).filter((key: keyof typeof args) => Boolean(args[key])).length > 0;
+  const selectRef = useRef<Select>();
+  const optionsRef = useRef<any[]>(extraOptions || []);
+  const values = useComputed(() => ((castArray(otherProps.value ?? (selectRef.current?.getValues() || []))).flat(Infinity).map((item: any) => (typeof item === 'object' ? get(item, 'componentId') : item))), [otherProps.value, selectRef.current?.getValues()]);
+  const selectIdsRef = useRef<string[] | undefined>();
+  const [forceValue, setFilterWord] = useNoticeSelectUpdateSelected();
+  const selectIds = useCreation(() => {
+    if (optionsRef.current) {
+      const idValues = getSelectIds(optionsRef.current || [], values, valueField);
+      const hasNewUnExistValue = idValues.some((v: string) => !optionsRef.current?.find((item) => item.componentId === v));
+      if (hasNewUnExistValue || forceValue || !selectIdsRef.current) {
+        selectIdsRef.current = idValues;
+      }
+    }
+    return [...castArray(selectIdsRef.current || [])].filter(Boolean);
+  }, [forceValue, values, valueField]);
+  const ruleArgs = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
+
+  const hasRule = Object.keys(ruleArgs).filter((key: keyof typeof ruleArgs) => Boolean(ruleArgs[key])).length > 0;
+  const args = useMemo(() => ({ ...ruleArgs, selectIds }), [ruleArgs, selectIds]);
   const config = useMemo((): SelectConfig<IComponent> => ({
     name: 'component',
     textField: 'name',
     valueField: valueField || 'componentId',
     requestArgs: args,
-    request: hasRule && fieldId
+    request: wrapRequestCallback(hasRule && fieldId
       ? ({ requestArgs, filter, page }) => fieldApi.project(projectId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, 50)
-      : ({ page, filter }) => componentApi.loadAllComponents(filter, projectId, page, 50),
+      : ({ page, filter, requestArgs }) => componentApi.loadAllComponents(filter, projectId, page, 50, requestArgs?.selectIds),
+    ({ filter }) => setFilterWord('filter', filter)),
     middleWare: (components) => {
       // @ts-ignore
       let data = components || [];
@@ -49,17 +80,22 @@ const SelectComponent: React.FC<SelectComponentProps> = forwardRef(({
       if (afterLoad) {
         afterLoad(data);
       }
+      optionsRef.current = data;
       return data;
     },
     paging: true,
     tooltip: true,
-  }), [valueField, args, hasRule, fieldId, projectId, dataRef, extraOptions, afterLoad]);
+  }), [valueField, args, hasRule, fieldId, projectId, setFilterWord, dataRef, extraOptions, afterLoad]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
 
+  if (selectRef.current && name) {
+    selectRef.current?.dataSet?.getField(name)?.setOptions(props.options);
+  }
   return (
     <Component
-      ref={ref}
+      ref={refsBindRef(ref, selectRef)}
+      name={name}
       clearButton
       multiple
       popupStyle={{ maxWidth: '3rem !important' }}

@@ -16,6 +16,7 @@ import SelectEnvironment from '@/components/select/select-environment';
 import SelectFeature from '@/components/select/select-feature';
 import SelectCustomField from '@/components/select/select-custom-field';
 import SelectMultiServiceTag from '@/components/select/select-multi-service-tag';
+import SelectComponent from '../select/select-component';
 
 const multipleCodes = ['label', 'component', 'fixVersion', 'influenceVersion'];
 export default function renderField<T extends Partial<SelectProps>>({
@@ -28,9 +29,8 @@ export default function renderField<T extends Partial<SelectProps>>({
     switch (fieldCode) {
       case 'sprint':
       case 'status':
-      case 'priority':
       case 'label':
-      case 'component':
+      case 'priority':
       case 'fixVersion':
       case 'influenceVersion':
         return (
@@ -50,6 +50,16 @@ export default function renderField<T extends Partial<SelectProps>>({
         ) : (
           <SelectFeature name="featureId" {...otherComponentProps} />
         );
+      case 'component': {
+        return (
+          <SelectComponent
+            name={fieldCode}
+            clearButton
+            multiple={includes(multipleCodes, fieldCode)}
+            {...otherComponentProps}
+          />
+        );
+      }
       case 'environment': {
         return <SelectEnvironment name={fieldCode} clearButton placeholder={fieldName} {...otherComponentProps} />;
       }

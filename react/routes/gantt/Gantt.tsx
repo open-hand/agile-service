@@ -553,7 +553,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
           selectAllButton={false}
         />
 
-        <FlatSelect value={type} onChange={handleTypeChange} clearButton={false} style={{ marginRight: 8 }}>
+        <FlatSelect value={type} onChange={handleTypeChange} clearButton={false} style={{ marginRight: 16 }}>
           {typeOptions.map((o) => (
             <Option value={o.value}>
               {o.label}
