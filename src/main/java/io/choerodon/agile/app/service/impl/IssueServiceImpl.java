@@ -2132,6 +2132,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         map.put(ENVIRONMENT, FieldCode.ENVIRONMENT);
         map.put(ESTIMATED_END_TIME, FieldCode.ESTIMATED_END_TIME);
         map.put(ESTIMATED_START_TIME, FieldCode.ESTIMATED_START_TIME);
+        map.put("actualStartTime", FieldCode.ACTUAL_START_TIME);
+        map.put("actualEndTime", FieldCode.ACTUAL_END_TIME);
         map.put("fixVersion", FieldCode.FIX_VERSION);
         map.put("influenceVersion", FieldCode.INFLUENCE_VERSION);
         map.put("labelIssueRelVOList", FieldCode.LABEL);
@@ -2147,6 +2149,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         map.put(EPIC_ID_FIELD, FieldCode.EPIC);
         map.put("tags", FieldCode.TAG);
         map.put("participantIds", FieldCode.PARTICIPANT);
+        map.put("estimateTime", FieldCode.ESTIMATE_TIME);
         Set<String> result = new HashSet<>();
         systemFields.forEach(x -> {
             if (map.get(x) != null) {
