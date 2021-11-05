@@ -120,7 +120,7 @@ const Issue = observer(({ cached, updateCache }) => {
     const {
       paramChoose, paramCurrentVersion, paramCurrentSprint, paramId,
       paramType, paramIssueId, paramName, paramOpenIssueId, detailTab, storyPointsNull, remainingTimeNull,
-      paramCustomFieldId, paramCustomFieldName, ...searchArgs
+      paramCustomFieldId, paramCustomFieldName, filterTypeCode, ...searchArgs
     } = params;
     if (hasUrlFilter(filterParams)) {
       issueSearchStore.clearAllFilter();
@@ -183,6 +183,10 @@ const Issue = observer(({ cached, updateCache }) => {
       prefix = '';
     }
     if (remainingTimeNull === 'true') {
+      // 开启冲刺中查看未预估工时的工作项，仅查看故事、任务、子任务、缺陷
+      if (filterTypeCode) {
+        issueSearchStore.handleFilterChange('typeCodes', ['story', 'task', 'sub_task', 'bug']);
+      }
       issueSearchStore.handleFilterChange('remainingTimeNull', true);
       prefix = '';
     }

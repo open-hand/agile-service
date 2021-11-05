@@ -176,6 +176,12 @@ export function getSystemFields(excludeCodes = []) {
     archive: true,
     defaultShow: false,
   },
+  {
+    code: 'typeCodes',
+    name: '工作项类型code',
+    archive: true,
+    defaultShow: false,
+  },
   ];
   if (has('agile:PublishVersion')) {
     systemFields.push({
