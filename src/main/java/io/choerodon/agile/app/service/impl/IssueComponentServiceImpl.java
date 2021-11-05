@@ -204,7 +204,7 @@ public class IssueComponentServiceImpl implements IssueComponentService {
                                 projectIds,
                                 noIssueTest,
                                 null,
-                                toppedComponentIds,
+                                ignoredComponentIds,
                                 searchVO.getSearchArgs(),
                                 searchVO.getAdvancedSearchArgs(),
                                 searchVO.getContents()));
