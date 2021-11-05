@@ -19,7 +19,7 @@ const GanttOperation: React.FC = () => {
   }, [store]);
   return (
     <div style={{
-      display: 'flex', flexShrink: 0, alignItems: 'center', paddingBottom: 19, marginLeft: 'auto',
+      display: 'flex', flexShrink: 0, alignItems: 'center', paddingBottom: 8, marginLeft: 'auto',
     }}
     >
       <Dropdown overlay={() => <GanttLegend />}>
