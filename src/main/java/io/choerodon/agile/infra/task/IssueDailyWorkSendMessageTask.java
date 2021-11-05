@@ -365,12 +365,11 @@ public class IssueDailyWorkSendMessageTask {
         StringBuilder emailHtmlTable = new StringBuilder();
 
         userOrgProjectIds.forEach(projectId -> {
-            boolean pmEnable = projectMap.get(projectId).getPmEnable();
-            boolean emailEnable = projectMap.get(projectId).getEmailEnable();
-            if (pmEnable) {
+            ProjectMessageVO projectMessageVO = projectMap.get(projectId);
+            if (!Objects.isNull(projectMessageVO.getPmEnable()) && Boolean.TRUE.equals(projectMessageVO.getPmEnable())) {
                 pmHtmlTable.append(projectTableMap.get(projectId));
             }
-            if (emailEnable) {
+            if (!Objects.isNull(projectMessageVO.getEmailEnable()) && Boolean.TRUE.equals(projectMessageVO.getEmailEnable())) {
                 emailHtmlTable.append(projectTableMap.get(projectId));
             }
             htmlTable.append(projectTableMap.get(projectId));
