@@ -128,8 +128,8 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
         issueTypeId: issueTypeIdDataSet.current?.get('issueTypeId') as string,
       };
       const res = await issueApi.project(projectId).updateType(submitData);
-      if (reloadIssue) {
-        reloadIssue(res);
+      if (reloadIssue && res.issueId) {
+        reloadIssue(res?.issueId);
       }
       if (onUpdate) {
         onUpdate(res);
