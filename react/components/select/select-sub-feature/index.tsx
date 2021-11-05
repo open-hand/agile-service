@@ -31,7 +31,7 @@ const SelectSubFeature: React.FC<SelectSubFeatureProps> = forwardRef(({
   const selectIdsRef = useRef<Array<string | number>>(propsFeatureIds || []);
   const values = useComputed(() => (selectRef.current?.getValues() || []).flat(Infinity).map((item) => (typeof item === 'object' ? item.issueId : item)), [selectRef.current?.getValues()]);
   const optionsRef = useRef<any[]>();
-  const featureIds = useMemo(() => uniq([...values, propsFeatureIds]).filter(Boolean), [values, propsFeatureIds]);
+  const featureIds = useMemo(() => uniq([...values, ...(propsFeatureIds || [])]).filter(Boolean), [values, propsFeatureIds]);
   const [forceValue, setFilterWord] = useNoticeSelectUpdateSelected();
   const args = useMemo(() => {
     if (optionsRef.current && featureIds) {
