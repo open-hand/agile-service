@@ -33,11 +33,12 @@ class ComponentApi {
     return axios.post(`${this.prefix}/component/query_all?no_issue_test=true&page=${page}&size=${size}`, filters);
   }
 
-  loadAllComponents(filter?: string, projectId?: string, page: number = 1, size: number = 999) {
+  loadAllComponents(filter?: string, projectId?: string, page: number = 1, size: number = 999, selectIds?: string[]) {
     return axios.post(
       `/agile/v1/projects/${projectId || getProjectId()}/component/query_all?size=${size}&page=${page}`, {
         advancedSearchArgs: {},
         searchArgs: {},
+        otherArgs: { component: selectIds },
         contents: filter && filter !== '' ? [filter] : undefined,
       },
     );

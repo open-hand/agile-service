@@ -1,5 +1,5 @@
 import { DataSet } from 'choerodon-ui/pro';
-import { find, pick } from 'lodash';
+import { castArray, find, pick } from 'lodash';
 import { IField } from '@/common/types';
 
 export const systemFields = new Map([
@@ -78,7 +78,13 @@ export function transformValue(dataSet: DataSet, key: string, value: any, format
     return value;
   }
   function transform(v: any) {
-    const lookup = dataSet.getField(key)?.getLookupData(v);
+    let lookup = dataSet.getField(key)?.getLookupData(v);
+
+    if (key === 'component') {
+      const options = dataSet.getField(key)?.getOptions()?.toData() as any[];
+      lookup = typeof v === 'object' ? v : options?.find((r) => r.componentId === v) || v;
+    }
+
     return format(v, lookup);
   }
   if (Array.isArray(value)) {
