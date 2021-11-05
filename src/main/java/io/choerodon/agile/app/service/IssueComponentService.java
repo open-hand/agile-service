@@ -4,6 +4,7 @@ import io.choerodon.agile.api.vo.ComponentForListVO;
 import io.choerodon.agile.api.vo.IssueComponentVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.infra.dto.ComponentForListDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.infra.dto.IssueComponentDTO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -38,4 +39,10 @@ public interface IssueComponentService {
     IssueComponentDTO updateBase(IssueComponentDTO issueComponentDTO);
 
     void deleteBase(Long id);
+
+    Page<ComponentForListDTO> pagedQueryComponentsByOptions(List<Long> projectIds,
+                                                            Long ignoredComponentId,
+                                                            Boolean noIssueTest,
+                                                            SearchVO searchVO,
+                                                            PageRequest pageRequest);
 }

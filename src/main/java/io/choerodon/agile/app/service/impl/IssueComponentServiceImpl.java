@@ -152,9 +152,8 @@ public class IssueComponentServiceImpl implements IssueComponentService {
         //处理用户搜索
         Boolean condition = handleSearchUser(searchVO);
         if (Boolean.TRUE.equals(condition)) {
-            Page<ComponentForListDTO> componentForListDTOPage = PageHelper.doPageAndSort(pageRequest, () ->
-                    issueComponentMapper.queryComponentByOption(Arrays.asList(projectId), noIssueTest, componentId, searchVO.getSearchArgs(),
-                            searchVO.getAdvancedSearchArgs(), searchVO.getContents()));
+            Page<ComponentForListDTO> componentForListDTOPage =
+                    pagedQueryComponentsByOptions(Arrays.asList(projectId), componentId, noIssueTest, searchVO, pageRequest);
             Page<ComponentForListVO> componentForListVOPageInfo = new Page<>();
             componentForListVOPageInfo.setSize(componentForListDTOPage.getSize());
             componentForListVOPageInfo.setTotalElements(componentForListDTOPage.getTotalElements());
@@ -180,7 +179,49 @@ public class IssueComponentServiceImpl implements IssueComponentService {
         } else {
             return new Page<>();
         }
+    }
 
+    @Override
+    public Page<ComponentForListDTO> pagedQueryComponentsByOptions(List<Long> projectIds,
+                                                                   Long ignoredComponentId,
+                                                                   Boolean noIssueTest,
+                                                                   SearchVO searchVO,
+                                                                   PageRequest pageRequest) {
+        Set<Long> toppedComponentIds = getComponentIdsFromSearchVO(searchVO);
+        Set<Long> ignoredComponentIds = new HashSet<>();
+        if (!ObjectUtils.isEmpty(ignoredComponentId)) {
+            ignoredComponentIds.add(ignoredComponentId);
+        }
+        List<ComponentForListDTO> components = new ArrayList<>();
+        if (!toppedComponentIds.isEmpty()) {
+            components.addAll(issueComponentMapper.queryComponentByOption(projectIds, noIssueTest, toppedComponentIds, null, null, null, null));
+        }
+        ignoredComponentIds.addAll(toppedComponentIds);
+        Page<ComponentForListDTO> componentForListDTOPage =
+                PageHelper.doPageAndSort(pageRequest,
+                        () -> issueComponentMapper.queryComponentByOption(
+                                projectIds,
+                                noIssueTest,
+                                null,
+                                toppedComponentIds,
+                                searchVO.getSearchArgs(),
+                                searchVO.getAdvancedSearchArgs(),
+                                searchVO.getContents()));
+        components.addAll(componentForListDTOPage.getContent());
+        componentForListDTOPage.setContent(components);
+        return componentForListDTOPage;
+    }
+
+    private Set<Long> getComponentIdsFromSearchVO(SearchVO searchVO) {
+        Set<Long> componentIds = new HashSet<>();
+        Map<String, Object> otherArgs = searchVO.getOtherArgs();
+        if (!ObjectUtils.isEmpty(otherArgs)) {
+            List<String> componentIdStr = (List<String>) otherArgs.get("component");
+            if (!ObjectUtils.isEmpty(componentIdStr)) {
+                componentIdStr.forEach(str -> componentIds.add(Long.valueOf(str)));
+            }
+        }
+        return componentIds;
     }
 
     private Boolean handleSearchUser(SearchVO searchVO) {
