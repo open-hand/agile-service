@@ -9,7 +9,7 @@ interface IWorkLog {
     startDate: string,
     residualPrediction: string, // 剩余估计类型 'self_adjustment' 'no_set_prediction_time'  'set_to' 'reduce'
     description?: string,
-    predictionTime?:number, // 预估时间
+    predictionTime?:number,
 }
 class WorkLogApi extends Api<WorkLogApi> {
   get prefix() {

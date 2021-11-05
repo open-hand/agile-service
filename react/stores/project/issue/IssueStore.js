@@ -199,7 +199,7 @@ export function getSystemFields(excludeCodes = []) {
   });
   systemFields.push({
     code: 'estimateTime',
-    name: '预估时间',
+    name: '原始预估时间',
     defaultShow: false,
     fieldType: 'number',
   });
@@ -376,7 +376,7 @@ export function getSystemFieldsInStoryMap(excludeCodes = []) {
   });
   systemFields.push({
     code: 'estimateTime',
-    name: '预估时间',
+    name: '原始预估时间',
     defaultShow: false,
     fieldType: 'number',
   });

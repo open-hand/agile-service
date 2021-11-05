@@ -62,7 +62,7 @@ const projectSystemFields = [
   { code: 'mainResponsible', title: '主要负责人' },
   { code: 'environment', title: '环境' },
   { code: 'participant', title: '参与人' },
-  { code: 'estimateTime', title: '预估时间' },
+  { code: 'estimateTime', title: '原始预估时间' },
 ];
 
 const subProjectSystemFields = [
@@ -90,7 +90,7 @@ const subProjectSystemFields = [
   { code: 'mainResponsible', title: '主要负责人' },
   { code: 'environment', title: '环境' },
   { code: 'participant', title: '参与人' },
-  { code: 'estimateTime', title: '预估时间' },
+  { code: 'estimateTime', title: '原始预估时间' },
 ];
 
 interface Props {

@@ -29,7 +29,7 @@ class FieldEstimateTime extends Component {
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
           <span className="c7n-property">
-            预估时间
+            原始预估时间
           </span>
         </div>
         <div className="c7n-value-wrapper" style={{ width: 'auto' }}>
