@@ -283,12 +283,12 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     dataIndex: 'spentWorkTime',
   }],
   ['allEstimateTime', {
-    title: <Tooltip title="总预估时间">总预估时间</Tooltip>,
+    title: <Tooltip title="当前预估时间">当前预估时间</Tooltip>,
     width: 170,
     dataIndex: 'allEstimateTime',
   }],
   ['estimateTime', {
-    title: <Tooltip title="预估时间">预估时间</Tooltip>,
+    title: <Tooltip title="原始预估时间">原始预估时间</Tooltip>,
     width: 170,
     dataIndex: 'estimateTime',
     sortable: true,

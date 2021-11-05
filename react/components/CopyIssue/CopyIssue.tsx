@@ -78,7 +78,7 @@ const CopyIssue: React.FC<Props> = ({
       }
     }
     return true;
-  }, [issue.typeCode]);
+  }, [issue.typeCode, projectId]);
 
   const handleUpdate = useCallback(async ({
     name, oldValue, value,

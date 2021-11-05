@@ -322,7 +322,7 @@ class DailyLog extends Component {
             <div className="line-info">
               <RadioGroup label="剩余的估计" onChange={this.onRadioChange} value={radio}>
                 <Radio style={radioStyle} value={1}>自动调整</Radio>
-                <Radio style={radioStyle} value={2}>不设置预估时间</Radio>
+                <Radio style={radioStyle} value={2}>不自动调整剩余预估时间</Radio>
                 <Radio
                   style={{
                     ...radioStyle,

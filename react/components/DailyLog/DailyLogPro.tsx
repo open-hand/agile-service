@@ -19,7 +19,7 @@ import CKEditor from '@/components/CKEditor';
 import { IModalProps } from '@/common/types';
 import styles from './index.less';
 import { processBeforeData } from './utils';
-import {getProjectId} from "@/utils/common";
+import { getProjectId } from '@/utils/common';
 
 interface RecordWorkModalProps {
   issueId: string
@@ -149,7 +149,7 @@ const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = 
         })}
       >
         <Option value="auto">自动调整</Option>
-        <Option value="none">不设置预估时间</Option>
+        <Option value="none">不自动调整剩余预估时间</Option>
         <Option value="direct">
           <span className={styles.remain_row}>
             <span>设置为</span>

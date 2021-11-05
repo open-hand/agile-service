@@ -822,14 +822,14 @@ const fieldsMap = new Map([
     name: '参与人',
   }],
   ['Estimate Time', {
-    name: '预估时间',
+    name: '原始预估时间',
     create: {
       render: (log: ILog) => {
         const { newString } = log;
         return (
           <span>
             <span className="c7n-Log-operation">将</span>
-            <span className="c7n-Log-field">【预估时间】</span>
+            <span className="c7n-Log-field">【原始预估时间】</span>
             <span className="c7n-Log-operation">由</span>
             <span className="c7n-Log-value">【未预估】</span>
             <span className="c7n-Log-operation">改变为</span>
@@ -854,7 +854,7 @@ const fieldsMap = new Map([
         return (
           <span>
             <span className="c7n-Log-operation">将</span>
-            <span className="c7n-Log-field">【预估时间】</span>
+            <span className="c7n-Log-field">【原始预估时间】</span>
             <span className="c7n-Log-operation">由</span>
             <span className="c7n-Log-value">{`【${Number(oldString)}】`}</span>
             <span className="c7n-Log-operation">改变为</span>

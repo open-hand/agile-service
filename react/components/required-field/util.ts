@@ -1,6 +1,6 @@
 import { DataSet } from 'choerodon-ui/pro';
-import { IField } from '@/common/types';
 import { find, pick } from 'lodash';
+import { IField } from '@/common/types';
 
 export const systemFields = new Map([
   ['description', {
@@ -67,6 +67,9 @@ export const systemFields = new Map([
   }],
   ['tag', {
     id: 'tags',
+  }],
+  ['participant', {
+    id: 'participantIds',
   }],
 ]);
 
