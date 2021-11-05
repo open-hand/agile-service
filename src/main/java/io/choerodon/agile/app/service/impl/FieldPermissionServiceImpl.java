@@ -190,21 +190,19 @@ public class FieldPermissionServiceImpl implements FieldPermissionService {
             return pageFieldViews;
         }
         List<PageFieldViewVO> result = new ArrayList<>();
-        List<PageFieldViewVO> allowedEditPermissionList = new ArrayList<>();
+        Set<Long> hasPermissionFieldIds = new HashSet<>();
         Set<Long> fieldIds = new HashSet<>();
         pageFieldViews.forEach(x -> {
             if (IGNORED_FIELDS.contains(x.getFieldCode())) {
-                result.add(x);
+                hasPermissionFieldIds.add(x.getFieldId());
             } else {
                 fieldIds.add(x.getFieldId());
-                allowedEditPermissionList.add(x);
             }
         });
-        Set<Long> hasPermissionFieldIds =
-                filterHavingPermissionFieldIds(projectId, organizationId, issueTypeIds, fieldIds);
-        allowedEditPermissionList.forEach(x -> {
-            if (hasPermissionFieldIds.contains(x.getFieldId())) {
-                result.add(x);
+        hasPermissionFieldIds.addAll(filterHavingPermissionFieldIds(projectId, organizationId, issueTypeIds, fieldIds));
+        pageFieldViews.forEach(field -> {
+            if (hasPermissionFieldIds.contains(field.getFieldId())) {
+                result.add(field);
             }
         });
         return result;
