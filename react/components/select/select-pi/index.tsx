@@ -41,14 +41,14 @@ const SelectPI: React.FC<SelectPIProps> = forwardRef(({
     tooltip: true,
     request: request || (() => piApi.project(projectId).getPiListByStatus(statusList)),
     optionRenderer: (pi, tooltip) => {
-      const piName = pi.id === '0' ? pi.name : pi.piName || `${pi.code}-${pi.name}`;
+      const piName = pi.piName || `${pi.code}-${pi.name}`;
       return (
         <FragmentForSearch name={piName}>
           {renderEllipsisBlockOption(piName, <>当前</>, { tooltip: true, showBlock: pi.statusCode === 'doing' })}
         </FragmentForSearch>
       );
     },
-    renderer: (pi) => renderEllipsisBlockOption(pi.id === '0' ? pi.name : pi.piName || `${pi.code}-${pi.name}`, <>当前</>, { tooltip: false, maxLength: maxTagTextLength, showBlock: pi.statusCode === 'doing' }),
+    renderer: (pi) => renderEllipsisBlockOption(pi.piName || `${pi.code}-${pi.name}`, <>当前</>, { tooltip: false, maxLength: maxTagTextLength, showBlock: pi.statusCode === 'doing' }),
     afterLoad: afterLoadRef.current,
     middleWare: (piList) => {
       let sortPiList = [...piList];
@@ -61,7 +61,7 @@ const SelectPI: React.FC<SelectPIProps> = forwardRef(({
           current: sortPiList,
         });
       }
-      return addPi0 ? [{ id: '0', name: '未分配PI' } as unknown as PI, ...sortPiList] : sortPiList;
+      return addPi0 ? [{ id: '0', name: '未分配PI', piName: '未分配PI' } as unknown as PI, ...sortPiList] : sortPiList;
     },
     props: {
       // @ts-ignore
