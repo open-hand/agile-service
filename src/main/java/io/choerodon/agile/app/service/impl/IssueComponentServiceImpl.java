@@ -188,12 +188,13 @@ public class IssueComponentServiceImpl implements IssueComponentService {
                                                                    SearchVO searchVO,
                                                                    PageRequest pageRequest) {
         Set<Long> toppedComponentIds = getComponentIdsFromSearchVO(searchVO);
+        boolean append = !ObjectUtils.isEmpty(toppedComponentIds) && pageRequest.getPage() == 0;
         Set<Long> ignoredComponentIds = new HashSet<>();
         if (!ObjectUtils.isEmpty(ignoredComponentId)) {
             ignoredComponentIds.add(ignoredComponentId);
         }
         List<ComponentForListDTO> components = new ArrayList<>();
-        if (!toppedComponentIds.isEmpty()) {
+        if (append) {
             components.addAll(issueComponentMapper.queryComponentByOption(projectIds, noIssueTest, toppedComponentIds, null, null, null, null));
         }
         ignoredComponentIds.addAll(toppedComponentIds);
