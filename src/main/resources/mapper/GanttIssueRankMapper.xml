@@ -58,13 +58,16 @@
         left join agile_gantt_issue_rank agir
         on (
         agir.organization_id = #{organizationId}
-        and agir.project_id = #{projectId}
+        and agir.project_id = #{currentProjectId}
         and agir.dimension = #{dimension}
         and agir.instance_type = #{instanceType}
         and agir.instance_id = #{instanceId}
         and ai.issue_id = agir.issue_id
         )
-        where ai.project_id = #{projectId}
+        where ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+            #{projectId}
+        </foreach>
         and ai.issue_id in
         <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
             #{issueId}
