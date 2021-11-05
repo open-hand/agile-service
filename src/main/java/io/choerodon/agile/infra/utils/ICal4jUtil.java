@@ -24,7 +24,9 @@ public class ICal4jUtil {
         // 添加事件
         addEvents(cld, events);
         // 文件验证
-        validate(cld);
+        if (!CollectionUtils.isEmpty(events)) {
+            validate(cld);
+        }
         // 生成二进制流
         return getByteArray(cld);
     }
