@@ -2146,6 +2146,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         map.put(EPIC_NAME_FIELD, FieldCode.EPIC_NAME);
         map.put(EPIC_ID_FIELD, FieldCode.EPIC);
         map.put("tags", FieldCode.TAG);
+        map.put("participantIds", FieldCode.PARTICIPANT);
         Set<String> result = new HashSet<>();
         systemFields.forEach(x -> {
             if (map.get(x) != null) {
