@@ -71,7 +71,7 @@ function IssueBody(props) {
 
   return (
     <section className={`${prefixCls}-body`} id="scroll-area" style={{ position: 'relative' }}>
-      <div style={{ paddingRight: 20 }}>
+      <div style={{ paddingRight: 20, marginBottom: 10 }}>
         <div style={{ display: 'flex', marginBottom: 10, alignItems: 'flex-start' }}>
           <FieldSummary
             {...props}
@@ -86,13 +86,20 @@ function IssueBody(props) {
           </div>
         </div>
         {/* 故事点 */}
-        <div className="line-start">
+        <div className="line-start" style={{ flexWrap: 'wrap' }}>
           {
             issueId && ['story', 'feature'].indexOf(typeCode) !== -1 ? (
-              <div style={{ display: 'flex', marginRight: 25 }}>
+              <div style={{ display: 'flex', marginRight: 15 }}>
                 <FieldStoryPoint {...props} field={{ fieldCode: 'storyPoints', fieldName: '故事点' }} />
               </div>
             ) : null
+          }
+          {
+            issueId && ['issue_epic', 'feature'].indexOf(typeCode) === -1 && (
+              <div style={{ display: 'flex', marginRight: 15 }}>
+                <FieldStoryPoint {...props} field={{ fieldCode: 'estimateTime', fieldName: '原始预估时间' }} />
+              </div>
+            )
           }
           {
             issueId && ['issue_epic', 'feature'].indexOf(typeCode) === -1 ? (
