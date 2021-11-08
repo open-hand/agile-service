@@ -48,8 +48,17 @@
         <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
             #{projectId}
         </foreach>
-        <if test="componentId != null">
-            AND aic.component_id != #{componentId}
+        <if test="componentIds != null and componentIds.size() > 0">
+            AND aic.component_id in
+            <foreach collection="componentIds" item="componentId" open="(" separator="," close=")">
+                #{componentId}
+            </foreach>
+        </if>
+        <if test="ignoredComponentIds != null and ignoredComponentIds.size() > 0">
+            AND aic.component_id not in
+            <foreach collection="ignoredComponentIds" item="ignoredComponentId" open="(" separator="," close=")">
+                #{ignoredComponentId}
+            </foreach>
         </if>
         <if test='searchArgs != null'>
             <if test='searchArgs.name != null and searchArgs.name != "" '>

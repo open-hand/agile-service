@@ -35,13 +35,13 @@ const systemFields = [
   { code: 'actualEndTime', title: '实际结束时间' },
   { code: 'remainingTime', title: '剩余预估时间' },
   { code: 'spentWorkTime', title: '已耗费时间' },
-  { code: 'allEstimateTime', title: '总预估时间' },
+  { code: 'allEstimateTime', title: '当前预估时间' },
   { code: 'sprint', title: '冲刺' },
   { code: 'mainResponsibleUser', title: '主要负责人' },
   { code: 'environmentName', title: '环境' },
   { code: 'tags', title: 'Tag' },
   { code: 'participants', title: '参与人' },
-  { code: 'estimateTime', title: '预估时间' },
+  { code: 'estimateTime', title: '原始预估时间' },
 ] as IFoundationHeader[];
 export default function useIssueTableFields(config?: IssueTableFieldsConfig, options?: UseQueryOptions<IFoundationHeader[]>) {
   const key = useProjectKey({ key: ['IssueTableFields'], projectId: config?.projectId });

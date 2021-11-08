@@ -49,13 +49,15 @@
                     #{userId}
                 </foreach>
             )
-            or (
-                ffp.type = 'role'
-                and ffp.role_member_id in
-                <foreach collection="permissionVO.roleIds" item="roleId" index="index" open="(" close=")" separator=",">
-                    #{roleId}
-                </foreach>
-            )
+            <if test="permissionVO.roleIds != null and permissionVO.roleIds.size() > 0">
+                or (
+                    ffp.type = 'role'
+                    and ffp.role_member_id in
+                    <foreach collection="permissionVO.roleIds" item="roleId" index="index" open="(" close=")" separator=",">
+                        #{roleId}
+                    </foreach>
+                )
+            </if>
         )
         union
         select fosf.id

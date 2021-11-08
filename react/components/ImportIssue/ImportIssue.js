@@ -52,6 +52,7 @@ class ImportIssue extends Component {
     // eslint-disable-next-line react/no-unused-state
     reRender: false,
     templateIsExist: false,
+    templateFirstLoaded: false,
   };
 
   loadLatestImport = () => {
@@ -330,7 +331,6 @@ class ImportIssue extends Component {
 
     importFieldsData.systemFields = fields.filter((code) => allFields.find((item) => item.code === code && item.system)).sort();
     importFieldsData.customFields = fields.filter((code) => allFields.find((item) => item.code === code && !item.system)).sort();
-
     if (!fields.length) {
       this.setState({
         templateIsExist: true,
@@ -352,9 +352,15 @@ class ImportIssue extends Component {
     this.templateSelectRef?.current?.setTemplate(undefined);
   };
 
+  handleSetTemplateFirstLoaded = (loaded) => {
+    this.setState({
+      templateFirstLoaded: loaded,
+    });
+  }
+
   render() {
     const {
-      uploading, latestInfo, wsData, templateIsExist,
+      uploading, latestInfo, wsData, templateIsExist, templateFirstLoaded,
     } = this.state;
     const {
       action, requires, systems, fields, messageKey,
@@ -393,6 +399,7 @@ class ImportIssue extends Component {
               transformExportFieldCodes={(data) => data}
               reverseTransformExportFieldCodes={(data) => data}
               defaultInitCodes={requiredFields}
+              setTemplateFirstLoaded={this.handleSetTemplateFirstLoaded}
             />
           </ImportIssueForm>
           )
@@ -417,6 +424,7 @@ class ImportIssue extends Component {
                     templateSelectRef={this.templateSelectRef}
                     checkBoxChangeOk={this.handleCheckBoxChangeOk}
                     templateIsExist={templateIsExist}
+                    templateFirstLoaded={templateFirstLoaded}
                   />
                 )
               }

@@ -59,13 +59,17 @@
         smddn.name as smddn_name,
         smddn.status as smddn_status
         from fd_status st
-        left join (select smn.status_id, smn.state_machine_id, sm.name, sm.status
-        from fd_status_machine_node smn, fd_status_machine sm
-        where smn.state_machine_id = sm.id
-        union all
-        select smnd.status_id, smnd.state_machine_id, sm.name, sm.status
-        from fd_state_machine_node_draft smnd, fd_status_machine sm
-        where smnd.state_machine_id = sm.id) smddn on st.id = smddn.status_id
+        left join (
+            select smn.status_id, smn.state_machine_id, sm.name, sm.status
+            from fd_status_machine_node smn, fd_status_machine sm
+            where smn.state_machine_id = sm.id
+            and smn.organization_id = #{organizationId}
+            union all
+            select smnd.status_id, smnd.state_machine_id, sm.name, sm.status
+            from fd_state_machine_node_draft smnd, fd_status_machine sm
+            where smnd.state_machine_id = sm.id
+            and sm.organization_id = #{organizationId}
+        ) smddn on st.id = smddn.status_id
         where st.organization_id = #{organizationId}
         and st.id in
         <foreach collection="statusIds" item="statusId"

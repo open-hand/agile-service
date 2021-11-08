@@ -31,7 +31,8 @@ public interface GanttIssueRankMapper extends BaseMapper<GanttIssueRankDTO> {
                                     @Param("dimension") String dimension);
 
     List<GanttIssueRankDTO> selectByIssueIdWithRank(@Param("organizationId") Long organizationId,
-                                                    @Param("projectId") Long projectId,
+                                                    @Param("projectIds") Set<Long> projectIds,
+                                                    @Param("currentProjectId") Long currentProjectId,
                                                     @Param("instanceId") Long instanceId,
                                                     @Param("instanceType") String instanceType,
                                                     @Param("dimension") String dimension,

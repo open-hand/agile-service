@@ -5,8 +5,8 @@ import { observer } from 'mobx-react-lite';
 import {
   Form, TextField, DataSet, Select,
 } from 'choerodon-ui/pro';
-import { IField } from '@/common/types';
 import { find } from 'lodash';
+import { IField } from '@/common/types';
 import { fieldApi } from '@/api';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { flattenObject } from '@/components/issue-search/utils';
@@ -28,11 +28,15 @@ const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
   const listRef = useRef<ListRefProps>({} as ListRefProps);
   const [loading, setLoading] = useState(true);
   const [fields, setFields] = useState<IField[]>([]);
-  const getFieldCodeById = useCallback((id: string) => {
+  const allFields = useMemo(() => [...getSystemFields(), ...fields].map((item) => ({ ...item, immutableCheck: item.code === 'sprint' ? true : undefined, otherComponentProps: { range: item.fieldType && ['time', 'datetime', 'date'].includes(item.fieldType) ? true : undefined } })), [fields]);
+  const getCustomFieldById = useCallback((id: string) => {
     const field = find(fields, { id });
-    return field ? field.code : undefined;
+    return field || undefined;
   }, [fields]);
-
+  const getSystemFieldByCode = useCallback((code: string) => {
+    const field = find(allFields, { code });
+    return field;
+  }, [allFields]);
   const chosenFields = useMemo(() => {
     if (!editData) {
       return [];
@@ -43,21 +47,23 @@ const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
       if (value) {
         // 自定义字段保存的时候只保存了id，这里要找到code
         if (value.isCustom) {
-          const code = getFieldCodeById(key);
-          if (code) {
-            result.push([{ code, value: value.value }]);
+          const field = getCustomFieldById(key);
+          if (field) {
+            result.push({ ...field, code: field.code, value: value.value });
           }
         } else if (key === 'createEndDate' || key === 'createStartDate') {
-          result.push({ code: 'createDate', value: [filterObject.createStartDate, filterObject.createEndDate] });
+          result.push({ ...getSystemFieldByCode('createDate'), code: 'createDate', value: [filterObject.createStartDate, filterObject.createEndDate] });
         } else if (key === 'updateEndDate' || key === 'updateStartDate') {
-          result.push({ code: 'updateDate', value: [filterObject.updateStartDate, filterObject.updateEndDate] });
+          result.push({ ...getSystemFieldByCode('updateDate'), code: 'updateDate', value: [filterObject.updateStartDate, filterObject.updateEndDate] });
         } else {
-          result.push({ code: key, value });
+          result.push({
+            ...getSystemFieldByCode(key), code: key, value,
+          });
         }
       }
     }
     return result;
-  }, [editData, getFieldCodeById]);
+  }, [editData, getCustomFieldById, getSystemFieldByCode]);
   const formDataSet = useMemo(() => new DataSet({
     autoCreate: true,
     data: editData ? [{ title: editData.title, visibleColumns: editData.colList }] : undefined,
@@ -101,6 +107,7 @@ const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
           colList: data.visibleColumns,
           searchVO,
         };
+        console.log('search', block, search);
         return block;
       }
     }
@@ -156,7 +163,7 @@ const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
       {!loading ? (
         <ExportIssueContextProvider
           colList={editData?.colList || []}
-          fields={[...getSystemFields(), ...fields]}
+          fields={allFields}
           // @ts-ignore
           chosenFields={chosenFields}
         >

@@ -1,17 +1,15 @@
 import React, {
-  useContext, useMemo, useRef, useEffect, useCallback,
+  useContext, useRef, useCallback,
 } from 'react';
 import {
-  observer, useComputed, useObservable, Observer, useObserver,
+  observer, useComputed,
 } from 'mobx-react-lite';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { Tooltip } from 'choerodon-ui/pro';
 import type { GanttProps, Gantt } from '@choerodon/gantt';
 import { GanntMoveWrap } from '@choerodon/gantt';
 
-import { find, set } from 'lodash';
 import { TooltipProps } from 'choerodon-ui/pro/lib/tooltip/Tooltip';
-import { useThrottleFn } from 'ahooks';
 import STATUS_COLOR from '@/constants/STATUS_COLOR';
 import Context from '../../context';
 import styles from './index.less';
@@ -84,19 +82,23 @@ const GanttBar: React.FC<GanttBarProps> = ({
   const actualEndTime = useComputed(() => dateMaps.get('actualEndTime') || { width: 0 } as Gantt.DateWithWidth, [dateMaps]);
   const estimatedStartTime = useComputed(() => dateMaps.get('estimatedStartTime') || { width: 0 } as Gantt.DateWithWidth, [dateMaps]);
   const estimatedEndTime = useComputed(() => dateMaps.get('estimatedEndTime') || { width: 0 } as Gantt.DateWithWidth, [dateMaps]);
-
   // 这里的返回的宽度都在可拖拽区域
   const actualTime = useComputed(() => {
-    if (estimatedEndTime.width === 0 || (actualEndTime.width === 0 && !actualStartTime.value)) {
+    if (actualEndTime.width === 0 && !actualStartTime.value) {
       return { width: 0, left: 0 };
     }
     let fragmentWidth = actualEndTime.width - actualStartTime.width;
     let left = actualStartTime.width;
+    let delay = 0;
+    if (estimatedEndTime.width === 0) {
+      return {
+        width: fragmentWidth, left, delayWidth: 0, processWidth: fragmentWidth,
+      };
+    }
     if (actualEndTime.width === 0) {
       fragmentWidth = estimatedEndTime.width - actualStartTime.width;
       left = fragmentWidth > 0 ? (actualStartTime as Gantt.DateWithWidth).width : estimatedEndTime.width;
     }
-    let delay = 0;
     if (fragmentWidth > 0) {
       delay = actualEndTime.width - estimatedEndTime.width;
     }

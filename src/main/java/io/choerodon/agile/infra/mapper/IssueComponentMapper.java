@@ -42,14 +42,18 @@ public interface IssueComponentMapper extends BaseMapper<IssueComponentDTO> {
      *
      * @param projectIds          projectIds
      * @param noIssueTest        noIssueTest
-     * @param componentId        componentId
+     * @param componentIds        componentIds
      * @param searchArgs         searchArgs
      * @param advancedSearchArgs advancedSearchArgs
      * @return Long
      */
-    List<ComponentForListDTO> queryComponentByOption(@Param("projectIds") List<Long> projectIds, @Param("noIssueTest") Boolean noIssueTest,
-                                                     @Param("componentId") Long componentId, @Param("searchArgs") Map<String, Object> searchArgs,
-                                                     @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs, @Param("contents") List<String> contents);
+    List<ComponentForListDTO> queryComponentByOption(@Param("projectIds") List<Long> projectIds,
+                                                     @Param("noIssueTest") Boolean noIssueTest,
+                                                     @Param("componentIds") Set<Long> componentIds,
+                                                     @Param("ignoredComponentIds") Set<Long> ignoredComponentIds,
+                                                     @Param("searchArgs") Map<String, Object> searchArgs,
+                                                     @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs,
+                                                     @Param("contents") List<String> contents);
 
     List<ComponentForListDTO> queryComponentWithIssueNum(@Param("projectId") Long projectId, @Param("componentId") Long componentId,
                                                          @Param("noIssueTest") Boolean noIssueTest);

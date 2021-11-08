@@ -91,26 +91,7 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[], projectId?: strin
   }, {
     name: 'componentIssueRelVOList',
     label: '模块',
-    lookupAxiosConfig: ({ params }: { params: any }) => ({
-      url: `/agile/v1/projects/${projectId || getProjectId()}/component/query_all`,
-      method: 'post',
-      data: {
-        advancedSearchArgs: {},
-        searchArgs: { name: params.name },
-      },
-      params: {
-        size: 999,
-        page: 1,
-      },
-      transformResponse: (response: any) => {
-        try {
-          const data = JSON.parse(response);
-          return data.content;
-        } catch (error) {
-          return response;
-        }
-      },
-    }),
+    type: 'object',
     valueField: 'componentId',
     textField: 'name',
   }, {
@@ -141,13 +122,40 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[], projectId?: strin
       fields: [
         ...(issue.requiredFields.map((item) => {
           const key = item.fieldCode === 'epic' && isInProgram ? 'featureId' : (systemFields.get(item.fieldCode as string)?.id || item?.fieldCode);
-          const lookupField = {};
+          const dsField = {};
           const lookupFields = getLookupFields(issue.issueTypeId);
           if (item.system && lookupFields.find((field) => field.name === key)) {
-            assign(lookupField, lookupFields.find((field) => field.name === key));
+            assign(dsField, lookupFields.find((field) => field.name === key));
+          }
+          if (item.system && item.fieldCode === 'estimatedStartTime') {
+            assign(dsField, {
+              max: 'estimatedEndTime',
+            });
+          }
+          if (item.system && item.fieldCode === 'estimatedEndTime') {
+            assign(dsField, {
+              min: 'estimatedStartTime',
+            });
+          }
+          if (item.system && item.fieldCode === 'actualStartTime') {
+            assign(dsField, {
+              max: 'actualEndTime',
+            });
+          }
+          if (item.system && item.fieldCode === 'actualEndTime') {
+            assign(dsField, {
+              min: 'actualStartTime',
+            });
+          }
+          if (item.system && item.fieldCode === 'component') {
+            assign(dsField, {
+              type: 'object',
+              valueField: 'componentId',
+              textField: 'name',
+            });
           }
           return ({
-            ...lookupField,
+            ...dsField,
             name: item.fieldCode === 'epic' && isInProgram ? 'featureId' : item.fieldCode,
             label: item.fieldCode === 'epic' && isInProgram ? '特性' : item.fieldName,
             required: true,

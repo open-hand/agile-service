@@ -856,6 +856,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         validateBeforeUpdate(projectId, issueUpdateVO, fieldList);
         String issueIdStr = "issueId";
         String objectVersionNumberStr = "objectVersionNumber";
+        if (agilePluginService != null) {
+            agilePluginService.buildFieldList(fieldList, issueUpdateVO);
+        }
         //更新issue表字段，fieldList包含issueId，objectVersionNumber和一个field
         boolean updateRelationField =
                 fieldList.size() == 2
@@ -880,6 +883,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                                                 IssueUpdateVO issueUpdateVO,
                                                 List<String> fieldList) {
         validateBeforeUpdate(projectId, issueUpdateVO, fieldList);
+        if (agilePluginService != null) {
+            agilePluginService.buildFieldList(fieldList, issueUpdateVO);
+        }
         if (!fieldList.isEmpty()) {
             //处理issue自己字段
             handleUpdateIssueWithoutRuleNotice(issueUpdateVO, fieldList, projectId);
@@ -1141,6 +1147,18 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 break;
             case FieldCode.ENVIRONMENT:
                 value = issue.getEnvironment();
+                break;
+            case FieldCode.ACTUAL_START_TIME:
+                value = issue.getActualStartTime();
+                break;
+            case FieldCode.ACTUAL_END_TIME:
+                value = issue.getActualEndTime();
+                break;
+            case FieldCode.PARTICIPANT:
+                value = issue.getParticipants();
+                break;
+            case FieldCode.ESTIMATE_TIME:
+                value = issue.getEstimateTime();
                 break;
             case FieldCode.EPIC:
                 Long epicId = issue.getEpicId();
@@ -2114,6 +2132,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         map.put(ENVIRONMENT, FieldCode.ENVIRONMENT);
         map.put(ESTIMATED_END_TIME, FieldCode.ESTIMATED_END_TIME);
         map.put(ESTIMATED_START_TIME, FieldCode.ESTIMATED_START_TIME);
+        map.put("actualStartTime", FieldCode.ACTUAL_START_TIME);
+        map.put("actualEndTime", FieldCode.ACTUAL_END_TIME);
         map.put("fixVersion", FieldCode.FIX_VERSION);
         map.put("influenceVersion", FieldCode.INFLUENCE_VERSION);
         map.put("labelIssueRelVOList", FieldCode.LABEL);
@@ -2128,6 +2148,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         map.put(EPIC_NAME_FIELD, FieldCode.EPIC_NAME);
         map.put(EPIC_ID_FIELD, FieldCode.EPIC);
         map.put("tags", FieldCode.TAG);
+        map.put("participantIds", FieldCode.PARTICIPANT);
+        map.put("estimateTime", FieldCode.ESTIMATE_TIME);
         Set<String> result = new HashSet<>();
         systemFields.forEach(x -> {
             if (map.get(x) != null) {

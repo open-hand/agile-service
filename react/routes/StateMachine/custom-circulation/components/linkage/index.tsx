@@ -7,7 +7,6 @@ import {
 } from 'choerodon-ui/pro';
 
 import { observer } from 'mobx-react-lite';
-import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
 import SelectStatus from '@/components/select/select-status';
 import { issueLinkTypeApi, statusTransformApi } from '@/api';
@@ -81,8 +80,7 @@ const Linkage = ({
   const getField = useCallback((ds, name) => ds.current?.getField(name), []);
 
   const addField = useCallback((ds, name, props, defaultValue?: any) => {
-    const field = new DataSetField({ ...props, name }, ds, ds.current);
-    ds?.current?.fields.set(name, field);
+    ds?.current?.addField(name, { ...props, name });
     if (defaultValue) {
       ds?.current?.set(name, defaultValue);
     }

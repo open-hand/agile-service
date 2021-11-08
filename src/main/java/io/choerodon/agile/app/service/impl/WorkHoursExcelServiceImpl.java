@@ -317,8 +317,10 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
                     }
                     SXSSFCell cell2 = row.getCell(startCol);
                     cell2.setCellValue(year + "年");
-                    CellRangeAddress cellRangeAddress = new CellRangeAddress(0, 0, startCol, endCol);
-                    sheet.addMergedRegion(cellRangeAddress);
+                    if (!Objects.equals(startCol, endCol)) {
+                        CellRangeAddress cellRangeAddress = new CellRangeAddress(0, 0, startCol, endCol);
+                        sheet.addMergedRegion(cellRangeAddress);
+                    }
                     year = currentYear;
                     startCol = col;
                 }

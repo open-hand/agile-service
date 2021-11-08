@@ -46,7 +46,6 @@ const AgileComponentMapWithPro = {
   ...AgileComponentMap,
   issueType: SelectIssueType,
   assignee: SelectUserWithAssigneeMe,
-  feature: SelectFeature,
   storyPoints: SelectNumber,
   remainingTime: SelectNumber,
   estimateTime: SelectNumber,

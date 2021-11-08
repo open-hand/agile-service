@@ -80,8 +80,7 @@
   },
   "resolutions": {
     "react": "16.14.0",
-    "react-dom": "16.14.0",
-    "ua-parser-js": "0.7.28"
+    "react-dom": "16.14.0"
   },
   "scripts": {
     "start": "node --max_old_space_size=4096 node_modules/@choerodon/boot/bin/choerodon-front-boot-start --config ./react/config.js",

@@ -567,7 +567,15 @@ public class GanttChartServiceImpl implements GanttChartService {
         AssertUtilsForCommonException.notEmpty(issueIds, ERROR_GANTT_MOVE_NULL_DATA);
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Map<Long, String> rankMap = new HashMap<>();
-        ganttIssueRankMapper.selectByIssueIdWithRank(organizationId, projectId, instanceId, instanceType, dimension, issueIds)
+        if (agilePluginService != null) {
+            ResponseEntity<ProjectVO> response =
+                    baseFeignClient.getGroupInfoByEnableProject(organizationId, projectId);
+            ProjectVO program = response.getBody();
+            if (program != null) {
+                projectIds.add(program.getId());
+            }
+        }
+        ganttIssueRankMapper.selectByIssueIdWithRank(organizationId, projectIds, projectId, instanceId, instanceType, dimension, issueIds)
                 .forEach(dto -> {
                     Long issueId = dto.getIssueId();
                     if (issueId == null) {

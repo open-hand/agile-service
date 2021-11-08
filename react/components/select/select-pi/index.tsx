@@ -13,33 +13,10 @@ import { piApi } from '@/api';
 
 import type { PI } from '@/common/types';
 import styles from './index.less';
+import renderEllipsisBlockOption from './utils';
 
 const { AppState } = stores;
 
-const renderPi = (pi: any, maxLength?: number, tooltip?: boolean) => {
-  if (pi) {
-    const name = pi.id === '0' ? pi.name : pi.fullName || `${pi.code}-${pi.name}`;
-    const suffix = name && maxLength && String(name).length > maxLength ? '...' : undefined;
-    const piItem = (
-      <div className={classNames(styles.option_wrap, { [styles.option_wrap_suffix]: !!maxLength })}>
-        <span className={classNames({ [styles.ellipsis]: !maxLength })}>{name?.slice(0, maxLength)}</span>
-        {suffix}
-        {
-          pi.statusCode === 'doing' && (
-            <div className={styles.current}>当前</div>
-          )
-        }
-      </div>
-    );
-    return tooltip
-      ? (
-        <Tooltip title={name} placement="topLeft" arrowPointAtCenter style={{ zIndex: 9999 }}>
-          {piItem}
-        </Tooltip>
-      ) : piItem;
-  }
-  return null;
-};
 export interface SelectPIProps extends Partial<SelectProps> {
   statusList?: string[]
   afterLoad?: (piList: PI[]) => void
@@ -64,14 +41,14 @@ const SelectPI: React.FC<SelectPIProps> = forwardRef(({
     tooltip: true,
     request: request || (() => piApi.project(projectId).getPiListByStatus(statusList)),
     optionRenderer: (pi, tooltip) => {
-      const piName = pi.id === '0' ? pi.name : pi.piName || `${pi.code}-${pi.name}`;
+      const piName = pi.piName || `${pi.code}-${pi.name}`;
       return (
         <FragmentForSearch name={piName}>
-          {renderPi(pi, undefined, tooltip)}
+          {renderEllipsisBlockOption(piName, <>当前</>, { tooltip: true, showBlock: pi.statusCode === 'doing' })}
         </FragmentForSearch>
       );
     },
-    renderer: (item) => renderPi(item, maxTagTextLength, false)!,
+    renderer: (pi) => renderEllipsisBlockOption(pi.piName || `${pi.code}-${pi.name}`, <>当前</>, { tooltip: false, maxLength: maxTagTextLength, showBlock: pi.statusCode === 'doing' }),
     afterLoad: afterLoadRef.current,
     middleWare: (piList) => {
       let sortPiList = [...piList];
@@ -84,7 +61,7 @@ const SelectPI: React.FC<SelectPIProps> = forwardRef(({
           current: sortPiList,
         });
       }
-      return addPi0 ? [{ id: '0', name: '未分配PI' } as unknown as PI, ...sortPiList] : sortPiList;
+      return addPi0 ? [{ id: '0', name: '未分配PI', piName: '未分配PI' } as unknown as PI, ...sortPiList] : sortPiList;
     },
     props: {
       // @ts-ignore

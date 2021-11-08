@@ -20,6 +20,7 @@ public class PageUtil {
         result.setNumber(page.getNumber());
         result.setSize(page.getSize());
         result.setTotalElements(page.getTotalElements());
+        result.setTotalPages(page.getTotalPages());
         result.setContent(list);
         return result;
     }

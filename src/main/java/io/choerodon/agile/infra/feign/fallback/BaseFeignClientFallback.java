@@ -202,6 +202,7 @@ public class BaseFeignClientFallback implements BaseFeignClient {
                                                               String name,
                                                               String code,
                                                               Boolean enabled,
+                                                              Boolean withAdditionInfo,
                                                               String params) {
         throw new CommonException("error.query.projects.under.organization");
     }

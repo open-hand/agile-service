@@ -75,7 +75,6 @@ const ExportIssue: React.FC = () => {
     onOk:(template: ITemplate) => Promise<void>,
     templateList: ITemplate[]
     setTemplate: (template: ITemplate | undefined) => void
-    templateFirstLoaded: boolean
   }>();
 
   const checkBoxDataPropsRef = useRef<ITableColumnCheckBoxesDataProps>();
@@ -84,6 +83,8 @@ const ExportIssue: React.FC = () => {
   const {
     prefixCls, checkOptions: propsCheckOptions, store, fields, modal, action, exportBtnText,
   } = useExportIssueStore();
+
+  const [templateFirstLoaded, setTemplateFirstLoaded] = useState(false);
 
   // 添加筛选配置 数据
   const [choseDataProps, choseComponentProps] = useChoseField({
@@ -107,7 +108,6 @@ const ExportIssue: React.FC = () => {
   const handleCheckBoxChangeOk = useCallback((value) => {
     const currentFieldCodes = store.transformExportFieldCodes(value, checkBoxDataPropsRef?.current);
     const reverseFieldCodes = store.reverseTransformExportFieldCodes(uniq(currentFieldCodes)).filter((code) => map(checkOptions, 'value').includes(code));
-
     const templateList = templateSelectRef?.current?.templateList || [];
     for (let i = 0; i < templateList.length; i += 1) {
       if (isEqual(JSON.parse(templateList[i].templateJson).sort(), store.transformExportFieldCodes(reverseFieldCodes, checkBoxDataPropsRef?.current).sort())) {
@@ -119,10 +119,10 @@ const ExportIssue: React.FC = () => {
   }, [checkOptions, store]);
 
   useEffect(() => {
-    if (templateSelectRef?.current?.templateFirstLoaded) {
+    if (templateFirstLoaded) {
       handleCheckBoxChangeOk(store.defaultCheckedExportFields);
     }
-  }, [handleCheckBoxChangeOk, store.defaultCheckedExportFields, templateSelectRef?.current?.templateFirstLoaded]);
+  }, [handleCheckBoxChangeOk, store.defaultCheckedExportFields, templateFirstLoaded]);
 
   // 选择字段框配置 数据
   const [checkBoxDataProps, checkBoxComponentProps] = useTableColumnCheckBoxes({
@@ -265,6 +265,7 @@ const ExportIssue: React.FC = () => {
                 selectTemplateOk={selectTemplateOk}
                 transformExportFieldCodes={store.transformExportFieldCodes}
                 reverseTransformExportFieldCodes={store.reverseTransformExportFieldCodes}
+                setTemplateFirstLoaded={setTemplateFirstLoaded}
               />
             </FormPart>
           </>

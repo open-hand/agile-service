@@ -5,14 +5,14 @@ import styles from './index.less';
 
 function renderEllipsisBlockOption(text?: string, block?: React.ReactElement, config?: { maxLength?: number, showBlock?: boolean, tooltip?: boolean }) {
   if (!text) {
-    return null;
+    return <></>;
   }
   const { maxLength, tooltip, showBlock } = config || {};
   const suffix = text && maxLength && String(text).length > maxLength ? '...' : undefined;
 
   const textBlock = (
     <div className={classNames(styles.option_wrap, { [styles.option_wrap_suffix]: !!maxLength })}>
-      <span className={classNames({ [styles.ellipsis]: !maxLength })}>{text?.slice(0, maxLength)}</span>
+      <span className={classNames({ [styles.ellipsis]: !maxLength })} style={{ height: '100%', margin: 0 }}>{text?.slice(0, maxLength)}</span>
       {suffix}
       {
         showBlock && (

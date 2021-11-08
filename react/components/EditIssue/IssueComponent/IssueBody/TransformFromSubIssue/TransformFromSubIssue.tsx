@@ -19,7 +19,7 @@ import styles from './TransformFromSubIssue.less';
 interface Props {
   modal?: IModalProps
   issueId: string
-  projectId?:string
+  projectId?: string
   issueTypeId: string
   objectVersionNumber: number
   onOk: (issue: Issue) => void
@@ -84,7 +84,8 @@ const TransformFromSubIssue: React.FC<Props> = ({
         summary, issueTypeVO = {},
       } = issue;
       const res = await issueApi.project(projectId).getRequiredField(issueId, typeId);
-      if (res && res.length) {
+      const isNeedModal = res && res.filter((field: any) => field.fieldCode !== 'epicName').length > 0;
+      if (isNeedModal) {
         modal?.close();
         openRequiredFieldsModal({
           projectId,
@@ -129,6 +130,7 @@ const TransformFromSubIssue: React.FC<Props> = ({
               dataRef={issueTypesRef}
               clearButton={false}
               excludeTypeIds={[issueTypeId]}
+              onlyEnabled
             />
             {
               isEpicType && (

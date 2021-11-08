@@ -46,7 +46,7 @@ const NotifySelect: React.FC<NotifySelectProps> = (
             name="userList"
             maxTagCount={2}
             level={getMenuType() === 'project' ? 'project' : 'org'}
-            selectedUser={[...notifySettingDataSet.current?.getState('defaultSelectUsers')]}
+            selectedUser={[...(notifySettingDataSet.current?.getState('defaultSelectUsers') || [])]}
             className={styles.notify_assigners}
           // @ts-ignore
 

@@ -4,9 +4,11 @@ import { stores } from '@choerodon/boot';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
 import { usePersistFn } from 'ahooks';
+import classNames from 'classnames';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { projectApi, ganttApi } from '@/api';
 import { ICategoryCode } from '@/hooks/useCategoryCodes';
+import { styles } from '../select-pi/utils';
 
 // 用于查询组织下的项目
 
@@ -24,20 +26,16 @@ export interface SelectTeamProps extends Partial<SelectProps> {
 }
 
 const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
-  userId, projectDataRef = { current: null }, afterLoad, flat, category, optionData, queryAgile, ...otherProps
+  userId, projectDataRef = { current: null }, afterLoad, flat, category, optionData, queryAgile, popupCls, ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Function>();
   afterLoadRef.current = afterLoad;
-  const fakePageRequest = usePersistFn((filter: string = '') => {
-    if (!optionData) {
-      return [];
-    }
-    return optionData;
-  });
-  const config = useMemo((): SelectConfig => ({
+
+  const config = useMemo((): SelectConfig<any> => ({
     name: 'team',
     textField: 'name',
     valueField: 'id',
+    tooltip: true,
     request: ({ filter, page }) => {
       if (optionData) {
         return optionData;
@@ -53,10 +51,11 @@ const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
     // @ts-ignore
     afterLoad: afterLoadRef.current,
     middleWare: (projects) => {
+      const newProjects = projects.map((item) => ({ ...item, id: String(item.id) }));
       // @ts-ignore
       // eslint-disable-next-line
-      projectDataRef.current = projects;
-      return projects || [];
+      projectDataRef.current = newProjects;
+      return newProjects || [];
     },
     paging: !queryAgile && !optionData,
   }), [optionData, projectDataRef, queryAgile, userId]);
@@ -65,8 +64,10 @@ const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
   return (
     <Component
       ref={ref}
+      popupCls={classNames(styles.popup, popupCls)}
       {...props}
       {...otherProps}
+
     />
   );
 });

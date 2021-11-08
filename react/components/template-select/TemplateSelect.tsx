@@ -49,20 +49,19 @@ interface Props {
     onOk: (template: ITemplate) => Promise<void>,
     templateList: ITemplate[],
     setTemplate: (template: ITemplate | undefined) => void
-    templateFirstLoaded: boolean,
   } | undefined>
   selectTemplateOk: (codes: string[]) => void
   transformExportFieldCodes: (data: Array<string>, otherData: ITableColumnCheckBoxesDataProps) => Array<string>
   reverseTransformExportFieldCodes: (data: string[]) => string[]
   defaultInitCodes: string[]
+  setTemplateFirstLoaded: (loaded: boolean) => void
 }
 const TemplateSelect: React.FC<Props> = (props) => {
   const {
-    action, templateSelectRef, selectTemplateOk, transformExportFieldCodes, reverseTransformExportFieldCodes, defaultInitCodes,
+    action, templateSelectRef, selectTemplateOk, transformExportFieldCodes, reverseTransformExportFieldCodes, defaultInitCodes, setTemplateFirstLoaded,
   } = props;
   const [templateList, setTemplateList] = useState<ITemplate[]>([]);
   const [selected, setSelected] = useState<ITemplate | undefined>();
-  const [firstLoaded, setFirstLoaded] = useState<boolean>(false);
 
   const [hidden, setHidden] = useState(true);
 
@@ -78,10 +77,12 @@ const TemplateSelect: React.FC<Props> = (props) => {
   useEffect(() => {
     const loadTemplates = async () => {
       await getTemplates();
-      setFirstLoaded(true);
+      if (setTemplateFirstLoaded) {
+        setTemplateFirstLoaded(true);
+      }
     };
     loadTemplates();
-  }, [getTemplates]);
+  }, [getTemplates, setTemplateFirstLoaded]);
 
   const handleCreateOk = useCallback(async (template) => {
     await getTemplates();
@@ -93,7 +94,6 @@ const TemplateSelect: React.FC<Props> = (props) => {
     onOk: handleCreateOk,
     templateList,
     setTemplate: setSelected,
-    templateFirstLoaded: firstLoaded,
   }));
 
   const handleEditOk = useCallback(async (template) => {

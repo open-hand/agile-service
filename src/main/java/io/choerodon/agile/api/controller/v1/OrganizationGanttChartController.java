@@ -79,6 +79,7 @@ public class OrganizationGanttChartController {
     @PostMapping("/estimated_time/conflict")
     public ResponseEntity<List<EstimatedTimeConflictVO>> queryEstimatedTimeConflict(@PathVariable(name = "organization_id") Long organizationId,
                                                                                     @RequestBody SearchVO searchVO) {
+        EncryptionUtils.decryptSearchVO(searchVO);
         return new ResponseEntity<>(organizationGanttChartService.queryEstimatedTimeConflict(organizationId, searchVO), HttpStatus.OK);
     }
 
@@ -93,6 +94,7 @@ public class OrganizationGanttChartController {
                                                                                 @PathVariable(name = "organization_id") Long organizationId,
                                                                                 @RequestBody SearchVO searchVO,
                                                                                 @RequestParam @Encrypt Long assigneeId) {
+        EncryptionUtils.decryptSearchVO(searchVO);
         return new ResponseEntity<>(organizationGanttChartService.queryEstimatedTimeConflictDetails(organizationId, searchVO, assigneeId, pageRequest), HttpStatus.OK);
     }
 }

@@ -16,31 +16,31 @@ const TemplateManage = () => {
     />
   ));
   return (
-    <LoadingProvider>
-      <PageWrap
-        noHeader={activeKey === 'custom' ? ['choerodon.code.organization.setting.issue.states.ps.stateMachine'] : []}
-        className="c7n-status-pageWrap"
-      >
-        <PageTab
-          title="状态"
-          route="/agile/states/state"
-          tabKey="choerodon.code.organization.setting.issue.states.ps.state"
-          component={StateList}
-        />
-        <PageTab
-          title="状态机模板"
-          route="/agile/states/stateMachine"
-          tabKey="choerodon.code.organization.setting.issue.states.ps.stateMachine"
-          component={component}
-        />
-        <PageTab
-          title="看板模板"
-          route="/agile/states/kanban"
-          tabKey="choerodon.code.organization.setting.issue.states.ps.kanban"
-          component={KanbanTemplate}
-        />
-      </PageWrap>
-    </LoadingProvider>
+  // <LoadingProvider>
+    <PageWrap
+      noHeader={activeKey === 'custom' ? ['choerodon.code.organization.setting.issue.states.ps.stateMachine'] : []}
+      className="c7n-status-pageWrap"
+    >
+      <PageTab
+        title="状态"
+        route="/agile/states/state"
+        tabKey="choerodon.code.organization.setting.issue.states.ps.state"
+        component={StateList}
+      />
+      <PageTab
+        title="状态机模板"
+        route="/agile/states/stateMachine"
+        tabKey="choerodon.code.organization.setting.issue.states.ps.stateMachine"
+        component={component}
+      />
+      <PageTab
+        title="看板模板"
+        route="/agile/states/kanban"
+        tabKey="choerodon.code.organization.setting.issue.states.ps.kanban"
+        component={KanbanTemplate}
+      />
+    </PageWrap>
+  // </LoadingProvider>
   );
 };
 export default TemplateManage;

@@ -6,6 +6,7 @@ import { find } from 'lodash';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
+import useIsProgram from "@/hooks/useIsProgram";
 
 const { Option } = Select;
 
@@ -31,6 +32,7 @@ const VersionReportSearch:React.FC<VersionReportSearchProps> = ({
   unit, setUnit, versions, versionId, setVersionId,
 }) => {
   const currentVersion = find(versions, { versionId });
+  const { isProgram } = useIsProgram();
 
   const handleChangeVersion = (value: string) => {
     setVersionId(value);
@@ -77,7 +79,7 @@ const VersionReportSearch:React.FC<VersionReportSearchProps> = ({
       </div>
       <div style={{ marginTop: 10, display: 'flex', justifyContent: 'space-between' }}>
         <p style={{ marginBottom: 0 }}>{versionId && currentVersion && currentVersion.statusCode === 'released' ? `发布于 ${currentVersion.releaseDate ? currentVersion.releaseDate.split(' ')[0] : '未指定发布日期'}` : '未发布'}</p>
-        {versions?.length ? (
+        {versions?.length && !isProgram ? (
           <p
             className="primary"
             style={{

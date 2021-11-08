@@ -153,8 +153,8 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
     handleCreateIssue(subIssue, undefined, parentIssueId);
   });
 
-  const handleQuickCreateSubIssueAfter = usePersistFn((createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed = false) => {
-    setData(produce(data, (draft) => {
+  const handleQuickCreateSubIssueAfter = usePersistFn((createId?: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed = false) => {
+    Number.isSafeInteger(createId) && setData(produce(data, (draft) => {
       const delCreateIndex = findIndex(draft, { createId });
       draft.splice(delCreateIndex, 1);
     }));
@@ -463,8 +463,8 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   });
 
   const ganttData = useMemo(() => ganttRestoreCollapsedStatus(ganttDataGroupByType({
-    data, type, isInProgram, rankList, conflictAssignees,
-  }), Object.values(collapsedHistoryRef.current).filter((i) => i.collapsed)), [data, conflictAssignees, isInProgram, rankList, type]);
+    data, type, isInProgram, rankList, conflictAssignees, menuType,
+  }), Object.values(collapsedHistoryRef.current).filter((i) => i.collapsed)), [data, type, isInProgram, rankList, conflictAssignees, menuType]);
   const renderEmpty = usePersistFn(() => {
     if (!sprintIds || sprintIds?.length === 0) {
       return <span>暂无数据，请选择冲刺</span>;
@@ -519,8 +519,10 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
         {menuType === 'org' && (
           <SelectProject
             value={projectId}
+            flat
             clearButton={false}
             style={{ marginRight: 16 }}
+            maxTagTextLength={12}
             optionData={projects}
             onChange={(val) => {
               setCurrentProject && setCurrentProject((oldValue: string) => {
@@ -553,7 +555,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
           selectAllButton={false}
         />
 
-        <FlatSelect value={type} onChange={handleTypeChange} clearButton={false} style={{ marginRight: 8 }}>
+        <FlatSelect value={type} onChange={handleTypeChange} clearButton={false} style={{ marginRight: 16 }}>
           {typeOptions.map((o) => (
             <Option value={o.value}>
               {o.label}

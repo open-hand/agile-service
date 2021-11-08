@@ -25,15 +25,15 @@ interface Props {
     onOk: (template: ITemplate) => Promise<void>,
     templateList: ITemplate[],
     setTemplate: (template: ITemplate | undefined) => void
-    templateFirstLoaded: boolean,
   } | undefined>
   checkBoxChangeOk: (data: string[]) => void
   templateIsExist: boolean
   action: TemplateAction
+  templateFirstLoaded: boolean
 }
 
 const SaveTemplateBtn: React.FC<Props> = ({
-  importFieldsRef, templateSelectRef, checkBoxChangeOk, templateIsExist, action,
+  importFieldsRef, templateSelectRef, checkBoxChangeOk, templateIsExist, action, templateFirstLoaded,
 }) => {
   const handleSaveTemplate = useCallback(() => {
     const importFieldsData: {
@@ -54,10 +54,10 @@ const SaveTemplateBtn: React.FC<Props> = ({
   }, [action, importFieldsRef, templateSelectRef]);
 
   useEffect(() => {
-    if (templateSelectRef?.current?.templateFirstLoaded) {
-      checkBoxChangeOk(importFieldsRef?.current?.requiredFields || []);
+    if (templateFirstLoaded && importFieldsRef.current?.requiredFields?.length && importFieldsRef.current?.allFields?.length) {
+      checkBoxChangeOk(importFieldsRef?.current?.requiredFields);
     }
-  }, [checkBoxChangeOk, importFieldsRef, importFieldsRef?.current?.requiredFields, templateSelectRef, templateSelectRef?.current?.templateFirstLoaded]);
+  }, [checkBoxChangeOk, importFieldsRef, importFieldsRef.current?.requiredFields, importFieldsRef.current?.allFields, templateFirstLoaded, templateSelectRef]);
 
   return (
     <>

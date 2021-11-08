@@ -122,7 +122,7 @@ class BacklogHome extends Component {
     );
   }
 
-  openCreateIssueModal = () => {
+  openCreateIssueModal = (originFrom) => {
     const {
       chosenEpic, chosenFeature, chosenVersion, featureList, defaultTypeId, defaultSummary, defaultSprint, defaultAssignee, defaultEpicName,
     } = BacklogStore;
@@ -135,7 +135,7 @@ class BacklogHome extends Component {
         fixVersion: chosenVersion !== 'all' && chosenVersion !== 'unset' ? chosenVersion : undefined,
         sprint: defaultSprint,
       },
-      originFrom: 'Backlog',
+      originFrom: originFrom || 'Backlog',
       defaultTypeId,
       defaultAssignee,
       defaultFeature: chosenFeature !== 'all' && chosenFeature !== 'unset' ? chosenFeatureItem : undefined,

@@ -267,7 +267,7 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put(REPORTER_NAME, "报告人");
         FIELD_MAP.put(STORY_POINTS, "故事点");
         FIELD_MAP.put(REMAINING_TIME, "剩余预估时间");
-        FIELD_MAP.put(ESTIMATE_TIME, "预估时间");
+        FIELD_MAP.put(ESTIMATE_TIME, "原始预估时间");
         FIELD_MAP.put(VERSION_NAME, "版本");
         FIELD_MAP.put(FIX_VERSION_NAME, "修复的版本");
         FIELD_MAP.put(INFLUENCE_VERSION_NAME, "影响的版本");
@@ -285,7 +285,7 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put(MAIN_RESPONSIBLE_NAME, "主要负责人");
         FIELD_MAP.put(ENVIRONMENT_NAME, "环境");
         FIELD_MAP.put(SPENT_WORK_TIME, "已耗费时间");
-        FIELD_MAP.put(ALL_ESTIMATE_TIME, "总预估时间");
+        FIELD_MAP.put(ALL_ESTIMATE_TIME, "当前预估时间");
         FIELD_MAP.put(TAGS, "Tag");
         FIELD_MAP.put(RELATED_ISSUE, "关联" + IssueConstant.ISSUE_CN);
         FIELD_MAP.put(EPIC_SELF_NAME, "史诗名称");
@@ -906,7 +906,7 @@ public class ExcelServiceImpl implements ExcelService {
         List<Long> importedFieldIds = new ArrayList<>();
         Map<Integer, List<Integer>> errorRowColMap = new HashMap<>(sheet.getPhysicalNumberOfRows());
         List<IssueTypeVO> issueTypes = objectSchemeFieldService.issueTypes(organizationId, projectId);
-        Map<String, IssueTypeVO> issueTypeNameMap = issueTypes.stream().collect(Collectors.toMap(IssueTypeVO::getName, a -> a, (k1, k2) -> k1));
+        Map<String, IssueTypeVO> issueTypeNameMap = issueTypes.stream().filter(IssueTypeVO::getEnabled).collect(Collectors.toMap(IssueTypeVO::getName, a -> a, (k1, k2) -> k1));
         Map<String, UserVO> userNameMap = objectSchemeFieldExcelService.getUserNameMap(organizationId, projectId);
         for (int r = 1; r < sheet.getPhysicalNumberOfRows(); r++) {
             Row row = sheet.getRow(r);
@@ -1882,7 +1882,8 @@ public class ExcelServiceImpl implements ExcelService {
                 cell.setCellValue(buildWithErrorMsg(value, "请输入正确的环境"));
                 addErrorColumn(rowNum, col, errorRowColMap);
             } else {
-                issueCreateVO.setEnvironment(value);
+                Map<String, String> envNameCodeMap = excelColumnVO.getEnvNameCodeMap();
+                issueCreateVO.setEnvironment(envNameCodeMap.getOrDefault(value, null));
             }
         }
     }
@@ -2019,10 +2020,15 @@ public class ExcelServiceImpl implements ExcelService {
         Cell cell = row.getCell(col);
         if (!isCellEmpty(cell)) {
             String value = cell.toString();
-            LabelIssueRelVO label = new LabelIssueRelVO();
-            label.setProjectId(projectId);
-            label.setLabelName(value);
-            issueCreateVO.setLabelIssueRelVOList(Arrays.asList(label));
+            if (value.length() > 10) {
+                cell.setCellValue(buildWithErrorMsg(value, "标签名称过长"));
+                addErrorColumn(row.getRowNum(), col, errorRowColMap);
+            } else {
+                LabelIssueRelVO label = new LabelIssueRelVO();
+                label.setProjectId(projectId);
+                label.setLabelName(value);
+                issueCreateVO.setLabelIssueRelVOList(Arrays.asList(label));
+            }
         }
     }
 
@@ -2732,7 +2738,7 @@ public class ExcelServiceImpl implements ExcelService {
                 processLabel(projectId, excelColumnVO);
                 break;
             case FieldCode.ENVIRONMENT:
-                processEnvironment(excelColumnVO);
+                processEnvironment(excelColumnVO, projectId);
                 break;
             case FieldCode.ISSUE_STATUS:
                 processIssueStatus(projectId, excelColumnVO);
@@ -2766,9 +2772,11 @@ public class ExcelServiceImpl implements ExcelService {
         excelColumnVO.setIssueStatusMap(issueStatusMap);
     }
 
-    private void processEnvironment(ExcelColumnVO excelColumnVO) {
+    private void processEnvironment(ExcelColumnVO excelColumnVO, Long projectId) {
         List<String> values = Arrays.asList("非生产环境", "生产环境");
         excelColumnVO.setPredefinedValues(values);
+        LookupTypeWithValuesVO environment = lookupValueService.queryLookupValueByCode("environment", projectId);
+        excelColumnVO.setEnvNameCodeMap(environment.getLookupValues().stream().collect(Collectors.toMap(LookupValueVO::getName, LookupValueVO::getValueCode)));
     }
 
     private void processLabel(Long projectId, ExcelColumnVO excelColumnVO) {
@@ -3256,10 +3264,10 @@ public class ExcelServiceImpl implements ExcelService {
         exportIssuesVO.setVersionName(exportIssuesVersionName(exportIssuesVO));
         exportIssuesVO.setDescription(getDes(exportIssuesVO.getDescription()));
         setFoundationFieldValue(foundationCodeValue, issueId, exportIssuesVO);
-        resetRemainingTimeIfCompleted(issue, exportIssuesVO);
         issueMap.put(issueId, exportIssuesVO);
         processParentSonRelation(parentSonMap, issue);
         setSpentWorkTimeAndAllEstimateTime(workLogVOMap, exportIssuesVO);
+        resetRemainingTimeIfCompleted(issue, exportIssuesVO);
         setTag(tagMap, exportIssuesVO);
         setRelatedIssue(exportIssuesVO, relatedIssueMap);
         setParticipant(exportIssuesVO, issue, usersMap);
@@ -3355,7 +3363,7 @@ public class ExcelServiceImpl implements ExcelService {
             }
             allEstimateTime = exportIssuesVO.getRemainingTime() == null ? spentWorkTime : spentWorkTime.add(exportIssuesVO.getRemainingTime());
         } else {
-            allEstimateTime = exportIssuesVO.getRemainingTime();
+            allEstimateTime = exportIssuesVO.getRemainingTime() == null ? new BigDecimal(0) : exportIssuesVO.getRemainingTime();
         }
         exportIssuesVO.setSpentWorkTime(spentWorkTime);
         exportIssuesVO.setAllEstimateTime(allEstimateTime);

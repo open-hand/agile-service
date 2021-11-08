@@ -189,7 +189,7 @@ function transformSubmitFieldValue(field: IssueCreateFields, value: any) {
     case 'time':
     case 'date':
     case 'datetime': {
-      return value && moment.isMoment(value) ? value.format('YYYY-MM-DD HH:mm:ss') : value;
+      return value && moment.isMoment(value) ? value.format('YYYY-MM-DD HH:mm:ss') : value && moment(value, ['YYYY-MM-DD HH:mm:ss', 'HH:mm:ss']).format('YYYY-MM-DD HH:mm:ss');
     }
     default: return value;
   }
@@ -307,6 +307,12 @@ const CreateIssueBase = observer(({
     }
     if (field.defaultValue === '') {
       return undefined;
+    }
+    if (field.fieldType === 'time') {
+      return field.defaultValue?.split(' ')[1];
+    }
+    if (field.fieldType === 'date') {
+      return field.defaultValue?.split(' ')[0];
     }
     return field.defaultValue;
   });

@@ -78,7 +78,7 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
     public List<ProjectVO> listAgileProjects(Long organizationId, String name, String code, String param) {
         Page<ProjectVO> projectPage =
                 baseFeignClient
-                        .pagedQueryProjects(organizationId, 1, 0, name, code, true, param)
+                        .pagedQueryProjects(organizationId, 1, 0, name, code, true, true, param)
                         .getBody();
         List<ProjectVO> projects = projectPage.getContent();
         projects =
@@ -88,7 +88,9 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
                             Set<String> categories =
                                     x.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toSet());
                             return categories.contains(ProjectCategory.MODULE_AGILE);
-                        }).collect(Collectors.toList());
+                        })
+                        .filter(x -> "success".equalsIgnoreCase(x.getProjectStatus()))
+                        .collect(Collectors.toList());
         return projects;
     }
 
@@ -205,13 +207,12 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         Map<String, Object> sortMap = new HashMap<>();
         addProjectSortIfNotExisted(pageRequest);
         ganttChartService.processSort(pageRequest, sortMap);
-        Set<Long> filterProjectIds = filterByTeamProjectIds(projectIds, searchVO);
-        if (ObjectUtils.isEmpty(filterProjectIds)) {
+        if (ObjectUtils.isEmpty(projectIds)) {
             return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }
         Page<IssueDTO> issuePage =
                 PageHelper.doPage(pageRequest, () -> issueMapper.selectConflictEstimatedTime(
-                        filterProjectIds,
+                        projectIds,
                         new HashSet<>(Arrays.asList(assigneeId)),
                         searchVO,
                         filterSql,
@@ -221,6 +222,7 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         if (issues.isEmpty()) {
             return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }
+        Set<Long> filterProjectIds = filterByTeamProjectIds(projectIds, searchVO);
         Map<Long, ProjectVO> filterProjectMap = new HashMap<>();
         projectMap.forEach((k, v) -> {
             if (filterProjectIds.contains(k)) {

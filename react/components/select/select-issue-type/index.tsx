@@ -22,12 +22,12 @@ export interface SelectIssueTypeProps extends Partial<SelectProps> {
   excludeTypeCodes?: string[]
   excludeTypeIds?: string[]
   showIcon?: boolean
-
+  onlyEnabled?: boolean
 }
 
 const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
   filterList = ['feature'], isProgram, request, valueField, dataRef, flat, excludeTypeIds = [], showIcon,
-  afterLoad, projectId, applyType, excludeTypeCodes, ...otherProps
+  afterLoad, projectId, applyType, excludeTypeCodes, onlyEnabled = false, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<IIssueType> => ({
     name: 'issueType',
@@ -56,7 +56,7 @@ const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
         return [...featureTypes, epicType];
       }
       if (Array.isArray(filterList) && filterList.length > 0) {
-        return issueTypes.filter((issueType) => !filterList.some((filter) => filter === issueType.typeCode));
+        return issueTypes.filter((issueType) => (onlyEnabled ? issueType.enabled : true && !filterList.some((filter) => filter === issueType.typeCode)));
       }
       return issueTypes;
     })),
@@ -74,7 +74,7 @@ const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
       return newData;
     },
     paging: false,
-  }), [afterLoad, applyType, dataRef, excludeTypeCodes, excludeTypeIds, filterList, isProgram, projectId, request, showIcon, valueField]);
+  }), [afterLoad, applyType, dataRef, excludeTypeCodes, excludeTypeIds, filterList, isProgram, onlyEnabled, projectId, request, showIcon, valueField]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
 

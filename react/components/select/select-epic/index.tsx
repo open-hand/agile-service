@@ -4,9 +4,12 @@ import { toJS } from 'mobx';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
 import { castArray } from 'lodash';
+import { useComputed } from 'mobx-react-lite';
 import { epicApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { IEpic } from '@/components/charts/epic-report/search';
+import { useNoticeSelectUpdateSelected } from '../useNoticeSelectUpdateSelected';
+import { refsBindRef, wrapRequestCallback } from '../utils';
 
 export interface SelectEpicProps extends Partial<SelectProps> {
   isProgram?: boolean
@@ -28,25 +31,31 @@ export interface SelectEpicProps extends Partial<SelectProps> {
 const SelectEpic: React.FC<SelectEpicProps> = forwardRef(({
   isProgram, afterLoad, dataRef, dontAddEpic0, unassignedEpic, request, flat, projectId, defaultSelectedIds, onlyUnCompleted = true, selectIds: propsSelectIds, ...otherProps
 }, ref: React.Ref<Select>) => {
-  const selectIds = useMemo(() => [...castArray(toJS(propsSelectIds)), ...castArray(toJS(defaultSelectedIds))].filter(Boolean), [propsSelectIds]);
+  const selectRef = useRef<Select>();
+  const values = useComputed(() => (selectRef.current?.getValues() || []).flat(Infinity).map((item) => (typeof item === 'object' ? item.issueId : item)), [selectRef.current?.getValues()]);
+
+  const selectIds = useMemo(() => [...castArray(toJS(propsSelectIds)), ...castArray(toJS(defaultSelectedIds)), ...values].filter(Boolean), [propsSelectIds, values]);
   const selectIdsRef = useRef<string[]>(selectIds);
+
+  const [forceValue, setFilterWord] = useNoticeSelectUpdateSelected();
   const optionsRef = useRef<any[]>();
   const args = useMemo(() => {
     if (optionsRef.current && selectIds) {
       // 有新的未加载的值，就重新加载
       const hasNewUnExistValue = selectIds.some((v) => !optionsRef.current?.find((item) => item.issueId === v));
-      if (hasNewUnExistValue) {
+      if (hasNewUnExistValue || forceValue) {
         selectIdsRef.current = selectIds;
       }
+      selectIdsRef.current = selectIds;
     }
     return { selectIds: selectIdsRef.current };
-  }, [selectIds]);
+  }, [forceValue, selectIds]);
   const config = useMemo((): SelectConfig => ({
     name: 'epic',
     textField: 'epicName',
     valueField: 'issueId',
     requestArgs: args,
-    request: request || (({ page, filter, requestArgs }) => (isProgram ? epicApi.project(projectId).loadProgramEpics({
+    request: wrapRequestCallback(request || (({ page, filter, requestArgs }) => (isProgram ? epicApi.project(projectId).loadProgramEpics({
       page,
       onlyUnCompleted,
       param: filter,
@@ -54,7 +63,7 @@ const SelectEpic: React.FC<SelectEpicProps> = forwardRef(({
       page,
       onlyUnCompleted,
       param: filter,
-    }, requestArgs?.selectIds))),
+    }, requestArgs?.selectIds))), ({ filter }) => setFilterWord('filter', filter)),
     middleWare: (epicList: IEpic[]) => {
       const temp = [...epicList];
       if (unassignedEpic || (isProgram && !dontAddEpic0)) {
@@ -78,7 +87,7 @@ const SelectEpic: React.FC<SelectEpicProps> = forwardRef(({
 
   return (
     <Component
-      ref={ref}
+      ref={refsBindRef(ref, selectRef)}
       clearButton
       {...props}
       {...otherProps}

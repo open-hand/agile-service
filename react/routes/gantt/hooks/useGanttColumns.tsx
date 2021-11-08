@@ -40,7 +40,7 @@ interface IGanttColumnsHookProps extends TableCacheRenderProps {
   onClickSummary?: (issue: GanttIssue) => void
   onSortChange: IGanttSortLabelProps['onChange']
   onCreateSubIssue?: (parentIssue: GanttIssue) => void
-  onAfterCreateSubIssue?: (createId: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed?: boolean) => void
+  onAfterCreateSubIssue?: (createId?: number, createSuccessData?: { subIssue: Issue, parentIssueId: string }, flagFailed?: boolean) => void
 }
 interface IGanttOrgColumnsHookProps extends TableCacheRenderProps {
   onClickSummary?: (issue: GanttIssue) => void
@@ -69,7 +69,23 @@ const isCanQuickCreateIssue = (record: Gantt.Record<any>, { disableFeature }: { 
   }
   return typeCode && (typeCode === 'story' || (!record.parentId && ['bug', 'task'].includes(typeCode)));
 };
-
+const ganttColumnCodeMapProps: Record<string, { title?: string, width?: number }> = {
+  issueNum: {
+    title: '编号',
+  },
+  estimatedStartTime: {
+    title: '预计开始',
+  },
+  estimatedEndTime: {
+    title: '预计结束',
+  },
+  actualStartTime: {
+    title: '实际开始',
+  },
+  actualEndTime: {
+    title: '实际结束',
+  },
+};
 const ganttColumnMap = new Map<string, any>([['assignee', (onSortChange: any) => ({
   width: 85,
   minWidth: 85,
@@ -137,7 +153,8 @@ function getListLayoutColumns(listLayoutColumns: ListLayoutColumnVO[] | null, fi
     // TODO 过滤已被删除的字段
     res = [...listLayoutColumns];
   }
-  fields.forEach(((field) => {
+  fields.forEach(((f) => {
+    const field = { ...f, ...ganttColumnCodeMapProps[f.code] };
     const resIndex = findIndex(res, { columnCode: field.code });
     if (resIndex === -1) {
       res.push({
@@ -215,8 +232,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
                       epic: defaultValues.epicId,
                     },
                   }),
-
-                  onCreate,
+                  onCreate: (issue) => onAfterCreateSubIssue(undefined, { subIssue: issue, parentIssueId: parentIssue.issueId }),
                 });
               }, 110);
             }}

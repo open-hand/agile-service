@@ -337,7 +337,7 @@ public class IssueController {
                                                                 @ApiParam(value = "搜索内容")
                                                                 @RequestParam(required = false) String param,
                                                                 @ApiParam(value = "史诗ids")
-                                                                @RequestBody(required = false) @Encrypt List<Long> epicIds) {
+                                                                @RequestBody(required = false) @Encrypt(ignoreValue = {"0"}) List<Long> epicIds) {
         return Optional.ofNullable(issueService.listEpicSelectData(projectId, pageRequest, onlyUnCompleted, param, epicIds))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.Issue.queryIssueEpicList"));

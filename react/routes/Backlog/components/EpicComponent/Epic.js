@@ -44,7 +44,7 @@ class Epic extends Component {
 
   handleOpenCreateIssue = () => {
     const { openCreateIssueModal } = this.props;
-    openCreateIssueModal();
+    openCreateIssueModal('BacklogEpic');
   };
 
   render() {
@@ -123,7 +123,7 @@ class Epic extends Component {
               </Droppable>
             </DragDropContext>
             <div
-              className="c7n-backlog-epicItems-last"
+              className="c7n-backlog-epicItems-last c7n-backlog-epicItems-last-assgin"
               style={{
                 background: BacklogStore.getChosenEpic === 'unset' ? 'rgba(140, 158, 254, 0.16)' : '',
               }}

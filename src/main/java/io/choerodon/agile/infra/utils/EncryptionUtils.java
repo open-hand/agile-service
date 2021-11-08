@@ -51,7 +51,7 @@ public class EncryptionUtils {
     public static final String[] FIELD_VALUE = {"remaining_time","story_points","creation_date","last_update_date","estimated_start_time", "estimated_end_time", "actual_start_time", "actual_end_time"};
 
     public static final String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","issueTypeList","epicList","piList","issueIds", "statusList","assigneeId","reporterIds","programVersion","mainResponsibleIds","fixVersion","influenceVersion", "creatorIds", "updatorIds", "statusIds","participantIds"};
-
+    public static final String[] FILTER_SINGLE_FIELD = {"userId"};
     public static final String[] IGNORE_VALUES = {"0","none"};
     public static final String BLANK_KEY = "";
 
@@ -633,6 +633,7 @@ public class EncryptionUtils {
 
     private static Map<String, Object> handlerOtherArgs(Map<String, Object> map, boolean encrypt) {
         List<String> list = Arrays.asList(FILTER_FIELD);
+        List<String> singleList = Arrays.asList(FILTER_SINGLE_FIELD);
         Map<String, Object> map1 = new HashMap<>();
         Iterator<Map.Entry<String, Object>> iterator = map.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -646,12 +647,14 @@ public class EncryptionUtils {
                     LOGGER.error("string to object error: {}", e);
                 }
                 if (!ObjectUtils.isEmpty(next.getValue()) && !CollectionUtils.isEmpty(value)) {
-                    object = value.stream().map(v -> encrypt ? encrypt(v, IGNORE_VALUES) : decrypt(v, IGNORE_VALUES)).collect(Collectors.toList());
+                    object = value.stream().map(v -> encryptOrDecrypt(v, encrypt)).collect(Collectors.toList());
 
                 }
                 else {
-                    object = next.getValue();
+                  object = next.getValue();
                 }
+            } else if (singleList.contains(next.getKey()) && next.getValue() != null) {
+                object = encryptOrDecrypt(next.getValue().toString(), encrypt);
             } else if ("customField".equals(next.getKey())) {
                 object = personalFilterHandlerCustomField(next.getValue(), encrypt);
             } else {
@@ -660,6 +663,10 @@ public class EncryptionUtils {
             map1.put(next.getKey(), object);
         }
         return map1;
+    }
+
+    private static String encryptOrDecrypt(String value, Boolean encrypt){
+        return encrypt ? encrypt(value, IGNORE_VALUES) : decrypt(value, IGNORE_VALUES);
     }
 
     protected static Object handlerCustomField(Object value, Boolean encrypt) {

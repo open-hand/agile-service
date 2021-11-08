@@ -18,7 +18,7 @@ const projectImportRequiresFields = ['issueType', 'parentIssue', 'epic', 'compon
 const subProjectImportRequiredFields = ['issueType', 'parentIssue', 'feature', 'component', 'sprint', 'summary', 'description', 'assignee', 'reporter', 'priority', 'remainingTime', 'storyPoints', 'linkIssue'];
 
 const programSystemFields = [
-  { code: 'issueType', title: '类型' },
+  { code: 'issueType', title: '工作项类型' },
   { code: 'summary', title: '概要' },
   { code: 'description', title: '描述' },
   { code: 'reporter', title: '报告人' },
@@ -37,7 +37,7 @@ const programSystemFields = [
 ];
 
 const projectSystemFields = [
-  { code: 'issueType', title: '类型' },
+  { code: 'issueType', title: '工作项类型' },
   { code: 'summary', title: '概要' },
   { code: 'description', title: '描述' },
   { code: 'parentIssue', title: '父级故事/任务/缺陷' },
@@ -62,11 +62,11 @@ const projectSystemFields = [
   { code: 'mainResponsible', title: '主要负责人' },
   { code: 'environment', title: '环境' },
   { code: 'participant', title: '参与人' },
-  { code: 'estimateTime', title: '预估时间' },
+  { code: 'estimateTime', title: '原始预估时间' },
 ];
 
 const subProjectSystemFields = [
-  { code: 'issueType', title: '类型' },
+  { code: 'issueType', title: '工作项类型' },
   { code: 'summary', title: '概要' },
   { code: 'description', title: '描述' },
   { code: 'parentIssue', title: '父级故事/任务/缺陷' },
@@ -90,7 +90,7 @@ const subProjectSystemFields = [
   { code: 'mainResponsible', title: '主要负责人' },
   { code: 'environment', title: '环境' },
   { code: 'participant', title: '参与人' },
-  { code: 'estimateTime', title: '预估时间' },
+  { code: 'estimateTime', title: '原始预估时间' },
 ];
 
 interface Props {
