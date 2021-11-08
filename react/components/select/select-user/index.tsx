@@ -54,10 +54,12 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
   const selectedUserLoadedIds = useCreation(() => toArray(selectedUser)?.filter((i) => i && typeof (i) === 'object' && i.id).map((i) => i.id), [selectedUser]); // 已经存在的用户查询接口会过滤，避免第二页恰好全是选中的数据，但页面无反应
   const selectedUserIds = useMemo(() => {
     const ids: string[] | string | undefined = toJS(selected);
+    const extraOptionIds = extraOptions?.map((i) => i.id) || [];
+
     // 避免value是对象的情况
     const valueArray: string[] = castArray(otherProps.value).map((i) => (typeof (i) === 'object' ? i?.id : i)).filter(Boolean);
-    return uniq(castArray(ids).concat(valueArray).concat(values).filter((i) => i && i !== '0'));
-  }, [JSON.stringify(selected), JSON.stringify(otherProps.value), values]);
+    return uniq(castArray(ids).concat(valueArray).concat(values).filter((i) => i && !(i === '0' || extraOptionIds.includes(i))));
+  }, [JSON.stringify(selected), JSON.stringify(otherProps.value), values, extraOptions]);
   const idsRef = useRef(selectedUserIds);
   const args = useMemo(() => {
     if (selectDataRef.current && selectedUserIds) {
