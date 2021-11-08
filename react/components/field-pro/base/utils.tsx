@@ -74,7 +74,7 @@ const filterCodeModeProps: IComponentPropsToFn<IAgileSystemFieldProps> = {
     selectIds: props?.value,
   }),
   label: () => ({
-    placeholder: undefined,
+    placeholder: '标签',
   }),
 };
 
