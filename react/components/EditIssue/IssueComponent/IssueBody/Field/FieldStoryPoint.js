@@ -19,6 +19,9 @@ import TextEditToggle from '@/components/TextEditTogglePro';
     const {
       issueId, objectVersionNumber,
     } = issue;
+    if (!issue[fieldCode] && !value) {
+      return;
+    }
     const obj = {
       issueId,
       objectVersionNumber,
@@ -34,7 +37,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
     const { [fieldCode]: value, typeCode, statusVO } = issue;
     const { completed } = statusVO;
     return (
-      <div className="line-start mt-10" style={{ width: '100%' }}>
+      <div className="line-start mt-10" style={{ width: '100%', marginBottom: 0 }}>
         <div>
           <span className="c7n-property">
             {`${fieldName}：`}
@@ -47,7 +50,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
             onSubmit={this.updateIssueField}
             initValue={value ? String(value) : undefined}
             editor={({ submit }) => (
-              <SelectNumber required={required} onChange={submit} />
+              <SelectNumber required={required} onChange={submit} style={{ height: 30 }} />
             )}
           >
             <div style={{ whiteSpace: 'nowrap' }}>
@@ -59,7 +62,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
                 )
               }
               {
-                !completed && fieldCode === 'remainingTime' && (
+                !completed && (fieldCode === 'remainingTime' || fieldCode === 'estimateTime') && (
                   <>
                     {value !== null && value !== undefined ? `${value} 小时` : '无'}
                   </>

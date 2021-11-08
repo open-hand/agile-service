@@ -112,7 +112,7 @@ const IssueField = observer((props) => {
       case 'participant':
         return <FieldParticipant {...props} field={field} />;
       case 'estimateTime':
-        return <FieldEstimateTime {...props} field={field} />;
+        return null;
       default:
         return renderNormalField(field);
     }
