@@ -29,10 +29,10 @@ public class StarBeaconController extends BaseController {
     @ApiOperation("关注Instance")
     @PostMapping("/instance/{instance_id}/star")
     public ResponseEntity<Void> starInstance(@ApiParam(value = "项目id", required = true)
-                                          @PathVariable(name = "project_id") Long projectId,
-                                          @PathVariable("instance_id") @Encrypt Long instanceId,
-                                          @ApiParam(value = "instance信息", required = true)
-                                          @RequestBody StarBeaconVO starBeaconVO) {
+                                             @PathVariable(name = "project_id") Long projectId,
+                                             @PathVariable("instance_id") @Encrypt Long instanceId,
+                                             @ApiParam(value = "instance信息", required = true)
+                                             @RequestBody StarBeaconVO starBeaconVO) {
         starBeaconVO.setInstanceId(instanceId);
         starBeaconVO.setProjectId(projectId);
         starBeaconService.starInstance(starBeaconVO);
@@ -42,10 +42,10 @@ public class StarBeaconController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("取关Instance")
     @PostMapping("/instance/{instance_id}/unstar")
-    public ResponseEntity<Void> unstarIssue(@ApiParam(value = "项目id", required = true)
-                                            @PathVariable(name = "project_id") Long projectId,
-                                            @PathVariable("instance_id") @Encrypt Long instanceId,
-                                            @RequestBody StarBeaconVO starBeaconVO) {
+    public ResponseEntity<Void> unStarInstance(@ApiParam(value = "项目id", required = true)
+                                               @PathVariable(name = "project_id") Long projectId,
+                                               @PathVariable("instance_id") @Encrypt Long instanceId,
+                                               @RequestBody StarBeaconVO starBeaconVO) {
         starBeaconVO.setInstanceId(instanceId);
         starBeaconVO.setProjectId(projectId);
         starBeaconService.unStarInstance(starBeaconVO);
