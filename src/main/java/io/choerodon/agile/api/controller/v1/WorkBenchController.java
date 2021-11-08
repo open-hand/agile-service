@@ -3,6 +3,7 @@ package io.choerodon.agile.api.controller.v1;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.app.service.IssueService;
+import io.choerodon.agile.app.service.StarBeaconService;
 import io.choerodon.agile.app.service.StatusService;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.core.domain.Page;
@@ -14,6 +15,7 @@ import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.core.util.Results;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +36,9 @@ public class WorkBenchController {
 
     @Autowired
     private StatusService statusService;
+
+    @Autowired
+    private StarBeaconService starBeaconService;
 
     @Permission(level = ResourceLevel.ORGANIZATION,permissionLogin = true)
     @ApiOperation("查询工作台个人代办事项")
@@ -95,5 +100,17 @@ public class WorkBenchController {
                                                                 @PathVariable(name = "organization_id") Long organizationId,
                                                                 @RequestParam(value = "param", required = false) String param) {
         return ResponseEntity.ok(issueService.pagingUserProjectUsers(pageRequest, organizationId, param));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
+    @ApiOperation("工作台取关Instance")
+    @PostMapping("/star_beacon/unstar")
+    public ResponseEntity<Void> unStarInstance(@ApiParam(value = "组织id", required = true)
+                                               @PathVariable(name = "organization_id") Long organizationId,
+                                               @ApiParam(value = "取关VO", required = true)
+                                               @RequestBody StarBeaconVO starBeaconVO) {
+        starBeaconVO.setOrganizationId(organizationId);
+        starBeaconService.unStarInstance(starBeaconVO);
+        return Results.success();
     }
 }
