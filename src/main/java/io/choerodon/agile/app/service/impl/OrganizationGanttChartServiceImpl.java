@@ -158,26 +158,15 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
     @Override
     public List<EstimatedTimeConflictVO> queryEstimatedTimeConflict(Long organizationId,
                                                                     SearchVO searchVO) {
-        Long projectId = getTeamProjectId(searchVO);
-        AssertUtilsForCommonException.notNull(projectId, "error.gantt.teamProjectIds.null");
         String dimension = SearchVOUtil.getDimensionFromSearchVO(searchVO);
         if (!GanttDimension.isAssignee(dimension)) {
             throw new CommonException(ERROR_GANTT_DIMENSION_NOT_SUPPORT);
         }
-        SearchVOUtil.setTypeCodes(searchVO, Arrays.asList("story", "bug", "task", "sub_task"));
-        String filterSql = ganttChartService.getFilterSql(searchVO);
-        boardAssembler.handleOtherArgs(searchVO);
-        Set<Long> userIds =
-                issueMapper.queryAssigneeIdsBySearchVO(new HashSet<>(Arrays.asList(projectId)), searchVO, filterSql, searchVO.getAssigneeFilterIds());
-        if (ObjectUtils.isEmpty(userIds)) {
+        Set<Long> userIds = new HashSet<>();
+        List<IssueDTO> issues = queryConflictIssues(organizationId, searchVO, userIds);
+        if (ObjectUtils.isEmpty(userIds) || ObjectUtils.isEmpty(issues)) {
             return Collections.emptyList();
         }
-        List<ProjectVO> projects = listAgileProjects(organizationId, null, null, null);
-        List<Long> projectIds = projects.stream().map(ProjectVO::getId).collect(Collectors.toList());
-        if (projectIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-        List<IssueDTO> issues = issueMapper.selectConflictEstimatedTime(new HashSet<>(projectIds), userIds, null, null, null, null);
         Map<Long, List<IssueDTO>> assigneeMap = issues.stream().collect(Collectors.groupingBy(IssueDTO::getAssigneeId));
         List<EstimatedTimeConflictVO> result = new ArrayList<>();
         userIds.forEach(userId -> {
@@ -188,6 +177,26 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
             vo.setConflicted(isConflicted);
         });
         return result;
+    }
+
+    private List<IssueDTO> queryConflictIssues(Long organizationId,
+                                               SearchVO searchVO,
+                                               Set<Long> userIds) {
+        Long projectId = getTeamProjectId(searchVO);
+        AssertUtilsForCommonException.notNull(projectId, "error.gantt.teamProjectIds.null");
+        SearchVOUtil.setTypeCodes(searchVO, Arrays.asList("story", "bug", "task", "sub_task"));
+        String filterSql = ganttChartService.getFilterSql(searchVO);
+        boardAssembler.handleOtherArgs(searchVO);
+        userIds.addAll(issueMapper.queryAssigneeIdsBySearchVO(new HashSet<>(Arrays.asList(projectId)), searchVO, filterSql, searchVO.getAssigneeFilterIds()));
+        if (ObjectUtils.isEmpty(userIds)) {
+            return Collections.emptyList();
+        }
+        List<ProjectVO> projects = listAgileProjects(organizationId, null, null, null);
+        List<Long> projectIds = projects.stream().map(ProjectVO::getId).collect(Collectors.toList());
+        if (projectIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return issueMapper.selectConflictEstimatedTime(new HashSet<>(projectIds), userIds, null, null, null, null);
     }
 
     @Override
@@ -233,6 +242,13 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         List<IssueDTO> issueList = issueMapper.selectWithSubByIssueIds(filterProjectIds, issueIds, sortMap, false, null);
         List<GanttChartVO> result = ganttChartService.buildGanttList(filterProjectMap, issueIds, issueList, Collections.emptyMap(), Collections.emptyMap(), Collections.emptyList(), organizationId);
         return PageUtils.copyPropertiesAndResetContent(issuePage, result);
+    }
+
+    @Override
+    public Boolean isEstimatedTimeConflicted(Long organizationId, SearchVO searchVO) {
+        Set<Long> userIds = new HashSet<>();
+        List<IssueDTO> issues = queryConflictIssues(organizationId, searchVO, userIds);
+        return !issues.isEmpty();
     }
 
     private void addProjectSortIfNotExisted(PageRequest pageRequest) {

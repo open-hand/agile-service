@@ -26,4 +26,6 @@ public interface OrganizationGanttChartService {
                                                          SearchVO searchVO,
                                                          Long assigneeId,
                                                          PageRequest pageRequest);
+
+    Boolean isEstimatedTimeConflicted(Long organizationId, SearchVO searchVO);
 }
