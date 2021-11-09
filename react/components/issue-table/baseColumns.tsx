@@ -367,6 +367,30 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     dataIndex: 'participants',
     render: (rowData, getDataMethod = get) => getDataMethod(rowData, 'participants') && <UserTag data={getDataMethod(rowData, 'participants')} />,
   }],
+  ['workTime', {
+    title: <Tooltip title="工时">工时</Tooltip>,
+    width: 170,
+    dataIndex: 'workTime',
+    sortable: true,
+  }],
+  ['historyWorkTime', {
+    title: <Tooltip title="历史累计工时">历史累计工时</Tooltip>,
+    width: 170,
+    dataIndex: 'historyWorkTime',
+    sortable: true,
+  }],
+  ['estimatedWorkTime', {
+    title: <Tooltip title="预估总工时">预估总工时</Tooltip>,
+    width: 170,
+    dataIndex: 'estimatedWorkTime',
+    sortable: true,
+  }],
+  ['rate', {
+    title: <Tooltip title="偏差率">偏差率</Tooltip>,
+    width: 170,
+    dataIndex: 'rate',
+    sortable: true,
+  }],
 ]);
 
 const BaseSystemColumnRender = {

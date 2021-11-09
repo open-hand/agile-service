@@ -1,8 +1,8 @@
-import { find } from 'lodash';
+import { find, includes } from 'lodash';
 import { ListLayoutColumnVO } from '@/api';
 import { IFoundationHeader } from '@/common/types';
 
-export default function getListLayoutColumns(listLayoutColumns: ListLayoutColumnVO[] | null, fields: IFoundationHeader[]): ListLayoutColumnVO[] {
+export default function getListLayoutColumns(listLayoutColumns: ListLayoutColumnVO[] | null, fields: IFoundationHeader[], alwaysShowCodes = []): ListLayoutColumnVO[] {
   let res:ListLayoutColumnVO[] = [];
 
   if (listLayoutColumns) {
@@ -10,7 +10,7 @@ export default function getListLayoutColumns(listLayoutColumns: ListLayoutColumn
     res = [...listLayoutColumns];
   }
   fields.forEach(((field) => {
-    if (!find(res, { columnCode: field.code })) {
+    if (!find(res, { columnCode: field.code }) && !includes(alwaysShowCodes, field.code)) {
       res.push({
         width: 0,
         sort: 0,
