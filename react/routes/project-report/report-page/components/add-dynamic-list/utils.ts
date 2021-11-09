@@ -1,8 +1,9 @@
 import { toJS } from 'mobx';
-import { ICustomFieldData, IExportSearch } from '@/api';
-import { IChosenFieldField } from '@/components/chose-field/types';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
+import moment from 'moment';
+import { IChosenFieldField } from '@/components/chose-field/types';
+import { ICustomFieldData, IExportSearch } from '@/api';
 
 function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes'> {
   const {
@@ -67,13 +68,25 @@ const getCustomFieldFilters = (chosenFields: Array<IChosenFieldField>, record: R
     string: [],
     text: [],
   };
+  const dateFormatArr = ['HH:mm:ss', 'YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DD'];
   const systemFilter = {} as any;
   for (let index = 0; index < chosenFields.length; index += 1) {
     const { fieldType, id, code } = chosenFields[index];
+
     const value = toJS(record.get(code));
     if (value === undefined || value === null || value === '') {
       // eslint-disable-next-line no-continue
       continue;
+    }
+    const dateIndex = ['time', 'datetime', 'date'].indexOf(fieldType!);
+    if (dateIndex !== -1) {
+      if (Array.isArray(value)) {
+        for (let j = 0; j < value.length; j += 1) {
+          if (moment.isMoment(value[j])) {
+            value[j] = value[j].format(dateFormatArr[dateIndex]);
+          }
+        }
+      }
     }
     // 系统字段
     if (!id) {
@@ -81,6 +94,7 @@ const getCustomFieldFilters = (chosenFields: Array<IChosenFieldField>, record: R
       // eslint-disable-next-line no-continue
       continue;
     }
+
     switch (fieldType) {
       case 'single':
       case 'multiple':

@@ -103,7 +103,7 @@ class SprintApi extends Api<SprintApi> {
    * @param page
    * @param selectedIds
    */
-  loadSubProjectSprints(param: string, page: number, selectedIds?: number[], size = 10) {
+  loadSubProjectSprints(param: string, page: number, selectedIds?: string[], size = 10) {
     return axios({
       method: 'post',
       url: `${this.prefix}/sprint/sub_project/page_sprints`,
