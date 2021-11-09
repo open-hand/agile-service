@@ -32,11 +32,22 @@ class OrgWorkCalendarApi extends Api<OrgWorkCalendarApi> {
 
   /**
    * 工作日历中获取订阅文件的uuid
-   * @return uuid
+   * @return uuid 或者 null
    */
   loadSubscribeUuid() {
     return this.request({
       method: 'get',
+      url: `${this.prefix}_subscribe/query/subscribe`,
+    });
+  }
+
+  /**
+   * 工作日历中订阅日历
+   * @return uuid
+   */
+  createSubscribeUuid() {
+    return this.request({
+      method: 'post',
       url: `${this.prefix}_subscribe`,
     });
   }

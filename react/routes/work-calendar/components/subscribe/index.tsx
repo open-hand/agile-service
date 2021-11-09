@@ -2,8 +2,10 @@ import React, {
   useCallback, useEffect, useMemo, useState,
 } from 'react';
 import copy from 'copy-to-clipboard';
-import { Modal, Spin, message } from 'choerodon-ui/pro';
-import { Choerodon } from '@choerodon/boot';
+import {
+  Button, message, Modal, Spin,
+} from 'choerodon-ui/pro';
+import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import Style from './index.less';
 import { orgWorkCalendarApi } from '@/api/OrgWorkCalendar';
 import { getOrganizationId } from '@/utils/common';
@@ -42,15 +44,37 @@ const SubscribeContent = () => {
     }
   };
 
+  const handleCreate = useCallback(async () => {
+    const res = await orgWorkCalendarApi.createSubscribeUuid();
+    if (res) {
+      setUuid(res);
+    }
+  }, []);
+
   return (
     <div className={Style.wrap}>
-      <div>
-        <span>将订阅链接添加到您的Outlook等日历应用中，直接点击复制以下链接即可。</span>
-        {/* <span className={Style.more}>了解如何使用？</span> */}
-      </div>
-      <div role="none" className={Style.urlWrap} onClick={handleCopyUrl}>
-        {url ? <span>{url}</span> : <Spin />}
-      </div>
+      {uuid ? ([
+        <div>
+          <span>将订阅链接添加到您的Outlook等日历应用中，直接点击复制以下链接即可。</span>
+          {/* <span className={Style.more}>了解如何使用？</span> */}
+        </div>,
+        <div role="none" className={Style.urlWrap} onClick={handleCopyUrl}>
+          {url ? <span>{url}</span> : <Spin />}
+        </div>,
+      ]) : ([
+        <div>
+          <span>将订阅链接添加到您的Outlook等日历应用中，点击“开启订阅”生成订阅链接。</span>
+        </div>,
+        <div>
+          <Button
+            onClick={handleCreate}
+            color={ButtonColor.primary}
+            className={Style.createBtn}
+          >
+            开启订阅
+          </Button>
+        </div>,
+      ])}
     </div>
   );
 };
