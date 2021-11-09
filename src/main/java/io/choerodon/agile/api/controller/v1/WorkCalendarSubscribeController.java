@@ -24,7 +24,7 @@ public class WorkCalendarSubscribeController {
 
     @Permission(permissionLogin = true, level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "订阅工作日历")
-    @GetMapping
+    @PostMapping
     public ResponseEntity<String> subscribe(@ApiParam(value = "组织ID", required = true)
                                             @PathVariable("organization_id") Long organizationId) {
         return Results.success(workCalendarSubscribeService.subscribe(organizationId));
@@ -39,6 +39,14 @@ public class WorkCalendarSubscribeController {
                                                @PathVariable("uuid") String uuid,
                                                HttpServletResponse httpResponse) {
         return workCalendarSubscribeService.downloadFile(organizationId, uuid, httpResponse);
+    }
+
+    @Permission(permissionLogin = true, level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "订阅查询")
+    @GetMapping("/query/subscribe")
+    public ResponseEntity<String> query(@ApiParam(value = "组织ID", required = true)
+                                        @PathVariable("organization_id") Long organizationId) {
+        return Results.success(workCalendarSubscribeService.query(organizationId));
     }
 
 }

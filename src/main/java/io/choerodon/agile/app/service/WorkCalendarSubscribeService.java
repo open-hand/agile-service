@@ -34,4 +34,11 @@ public interface WorkCalendarSubscribeService {
      * @return 文件内容
      */
     ResponseEntity<byte[]> downloadFile(Long organizationId, String uuid, HttpServletResponse httpResponse);
+
+    /**
+     * 订阅查询
+     * @param organizationId 组织id
+     * @return uuid
+     */
+    String query(Long organizationId);
 }
