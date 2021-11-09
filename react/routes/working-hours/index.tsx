@@ -4,6 +4,7 @@ import {
   PageWrap, PageTab,
 } from '@choerodon/boot';
 import { useTabActiveKey } from '@choerodon/components';
+import styles from './index.less';
 
 const WorkingHoursLog = withRouter(React.lazy(() => (import('./working-hours-log'))));
 const WorkingHoursIssue = withRouter(React.lazy(() => (import('./working-hours-issue'))));
@@ -14,9 +15,10 @@ const WorkingHours = () => {
     <PageWrap
       noHeader={[]}
       onChange={setActiveKey}
+      className={styles.workingHours_pageWrap}
     >
       <PageTab title="工时日历" route="/agile/working-hours/calendar" tabKey="calendar" component={WorkingHoursCalendar} />
-      <PageTab title="工作项" route="/agile/working-hours/issue" tabKey="issue" component={WorkingHoursIssue} />
+      <PageTab title="工作项工时" route="/agile/working-hours/issue" tabKey="issue" component={WorkingHoursIssue} />
       <PageTab title="工时日志" route="/agile/working-hours/log" tabKey="log" component={WorkingHoursLog} />
     </PageWrap>
   );

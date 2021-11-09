@@ -10,7 +10,7 @@ export default ({
   expandField: 'expand',
   idField: 'issueId',
   paging: 'server',
-  cacheSelection: true,
+  cacheSelection: false,
   transport: {
     read: ({ params }) => ({
       url: `/agile/v1/projects/${projectId}/issues/include_sub`,
@@ -27,9 +27,13 @@ export default ({
     }),
   },
   fields: [
-    { name: 'issueId', type: 'string', label: '概要' },
+    { name: 'summary', type: 'string', label: '概要' },
     { name: 'issueTypeId', type: 'object', label: '工作项类型' },
     { name: 'issueNum', type: 'string', label: '任务编号' },
+    { name: 'workTime', type: 'string', label: '工时' },
+    { name: 'historyWorkTime', type: 'string', label: '历史累计工时' },
+    { name: 'estimatedWorkTime', type: 'string', label: '预估总工时' },
+    { name: 'rate', type: 'string', label: '偏差率' },
     { name: 'priorityId', type: 'string', label: '优先级' },
     { name: 'statusId', type: 'object', label: '状态' },
     { name: 'assigneeId', type: 'string', label: '经办人' },

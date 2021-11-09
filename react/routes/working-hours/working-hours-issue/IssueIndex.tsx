@@ -12,7 +12,6 @@ import IssueTable from './components/issue-table';
 import DateSearch from './components/DateSearch';
 import DetailContainer, { useDetail } from '@/components/detail-container';
 import { StoreProvider, useIssueStore } from './stores';
-import { getProjectId, getOrganizationId } from '@/utils/common';
 import NoData from './NoData.svg';
 import styles from './index.less';
 import useIssueTableFields from '@/hooks/data/useIssueTableFields';
@@ -20,15 +19,20 @@ import ModeSwitch from './components/mode-switch';
 import openExportWorkModal from './components/export';
 import useDefaultMyFilter from '@/hooks/useDefaultMyFilter';
 import WorkingHoursIssueSearch from './components/search';
+import { IFoundationHeader } from '@/common/types';
 
 const WorkingHoursIssue = () => {
   const {
     loadData, dateSearchDs, loading, workingHoursIssuesDs, mode, setMode, isProject,
   } = useIssueStore();
-
-  const { data: tableFields } = useIssueTableFields();
+  const { data: tableFields } = useIssueTableFields({
+    extraFields: [{ code: 'workTime', title: '工时' } as IFoundationHeader,
+      { code: 'historyWorkTime', title: '历史累计工时' } as IFoundationHeader,
+      { code: 'estimatedWorkTime', title: '预估总工时' } as IFoundationHeader,
+      { code: 'rate', title: '偏差率' } as IFoundationHeader,
+    ],
+  });
   const [issueDetailProps] = useDetail();
-
   const handleSummaryClick = useCallback((record) => {
     issueDetailProps?.open({
       path: 'issue',
