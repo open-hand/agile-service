@@ -43,7 +43,7 @@ public class WorkGroupUserRelController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("批量移除成员")
-    @DeleteMapping("/batch_delete")
+    @PostMapping("/batch_delete")
     public ResponseEntity batchDelete(@ApiParam(value = "组织Id", required = true)
                                       @PathVariable(name = "organization_id") Long organizationId,
                                       @RequestBody WorkGroupUserRelParamVO workGroupUserRelParamVO) {

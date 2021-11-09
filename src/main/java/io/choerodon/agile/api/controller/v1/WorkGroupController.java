@@ -95,7 +95,7 @@ public class WorkGroupController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("校验名称")
-    @PostMapping("/check_name")
+    @GetMapping("/check_name")
     public ResponseEntity<Boolean> checkName(@ApiParam(value = "组织Id", required = true)
                                              @PathVariable(name = "organization_id") Long organizationId,
                                              @RequestParam @Encrypt(ignoreValue = {"0"}) Long parentId,
