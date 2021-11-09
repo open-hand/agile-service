@@ -63,18 +63,15 @@ const SelectPI: React.FC<SelectPIProps> = forwardRef(({
       }
       return addPi0 ? [{ id: '0', name: '未分配PI', piName: '未分配PI' } as unknown as PI, ...sortPiList] : sortPiList;
     },
-    props: {
-      // @ts-ignore
-      onOption: ({ record }) => {
-        const common = { className: styles.option };
-        if (disabledCurrentPI && record.get('statusCode') === 'doing') {
-          return {
-            disabled: true,
-            ...common,
-          };
-        }
-        return common;
-      },
+    onOption: ({ record }) => {
+      const common = { className: styles.option };
+      if (disabledCurrentPI && record.get('statusCode') === 'doing') {
+        return {
+          disabled: true,
+          ...common,
+        };
+      }
+      return common;
     },
     paging: false,
   }), [JSON.stringify(statusList), disabledCurrentPI]);
