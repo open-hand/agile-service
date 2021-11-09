@@ -225,7 +225,7 @@ export default class ScrumBoardDataController {
     }
     if (noParentIssueIdsSet.size) {
       // parentIssueId 没有值可能为 null，也可能为 0（后端返回数据不可信）
-      otherIssueWithoutParent = combinedIssueArr.filter((issue) => (issue.relateIssueId === 0 || issue.relateIssueId === null) && (issue.parentIssueId === 0 || issue.parentIssueId === null) && noParentIssueIdsSet.has(issue.issueId));
+      otherIssueWithoutParent = combinedIssueArr.filter((issue) => !issue.relateIssueId && (issue.parentIssueId === 0 || issue.parentIssueId === null) && noParentIssueIdsSet.has(issue.issueId));
     }
 
     return {
