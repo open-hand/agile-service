@@ -549,20 +549,21 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
           clearButton={false}
           afterLoad={afterSprintLoad}
           hasUnassign
+          maxTagTextLength={12}
           style={{ marginRight: 16 }}
-          maxTagCount={3}
+          maxTagCount={2}
           searchable={false}
           selectAllButton={false}
         />
 
-        <FlatSelect value={type} onChange={handleTypeChange} clearButton={false} style={{ marginRight: 16 }}>
+        <FlatSelect value={type} onChange={handleTypeChange} clearButton={false} style={{ marginRight: 16, width: 120 }}>
           {typeOptions.map((o) => (
             <Option value={o.value}>
               {o.label}
             </Option>
           ))}
         </FlatSelect>
-        <FlatSelect value={processType} onChange={setProcessType} clearButton={false} style={{ marginRight: 8 }}>
+        <FlatSelect value={processType} onChange={setProcessType} clearButton={false} style={{ marginRight: 8, width: 100 }}>
           {progressOptions.map((o) => (
             <Option value={o.value}>
               {o.label}

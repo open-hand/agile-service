@@ -31,6 +31,7 @@ const SelectSprint: React.FC<SelectSprintProps> = forwardRef(({
   currentSprintOption,
   dataRef,
   flat,
+  maxTagTextLength,
   ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<ISprint> => ({
@@ -44,7 +45,7 @@ const SelectSprint: React.FC<SelectSprintProps> = forwardRef(({
         {renderEllipsisBlockOption(sprint.sprintName, <>活跃</>, { showBlock: sprint.statusCode === 'started', tooltip: true })}
       </FragmentForSearch>
     ),
-    renderer: (sprint) => renderEllipsisBlockOption(sprint.sprintName, <>活跃</>, { showBlock: sprint.statusCode === 'started', tooltip: false }) as JSX.Element,
+    renderer: (sprint) => renderEllipsisBlockOption(sprint.sprintName, <>活跃</>, { showBlock: sprint.statusCode === 'started', maxLength: maxTagTextLength, tooltip: false }) as JSX.Element,
     request: ({ filter, page }) => (isProgram ? sprintApi.loadSubProjectSprints(filter || '', page!, selectSprints, 50)
       : sprintApi.project(projectId).loadSprints(statusList)),
     middleWare: (sprints) => {
