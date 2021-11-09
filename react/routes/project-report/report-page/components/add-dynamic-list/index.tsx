@@ -30,9 +30,9 @@ const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
   const [fields, setFields] = useState<IField[]>([]);
   const allFields = useMemo(() => [...getSystemFields(), ...fields].map((item) => ({ ...item, immutableCheck: item.code === 'sprint' ? true : undefined, otherComponentProps: { range: item.fieldType && ['time', 'datetime', 'date'].includes(item.fieldType) ? true : undefined } })), [fields]);
   const getCustomFieldById = useCallback((id: string) => {
-    const field = find(fields, { id });
+    const field = find(allFields, { id });
     return field || undefined;
-  }, [fields]);
+  }, [allFields]);
   const getSystemFieldByCode = useCallback((code: string) => {
     const field = find(allFields, { code });
     return field;
