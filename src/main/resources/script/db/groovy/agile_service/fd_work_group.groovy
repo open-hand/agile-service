@@ -11,7 +11,7 @@ databaseChangeLog(logicalFilePath:'fd_work_group.groovy') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '主键id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'name', type: 'VARCHAR(30)', remarks: '工作组名称') {
+            column(name: 'name', type: 'VARCHAR(255)', remarks: '工作组名称') {
                 constraints(nullable: false)
             }
             column(name: 'parent_id', type: 'BIGINT UNSIGNED', remarks: '父级工作组id') {
