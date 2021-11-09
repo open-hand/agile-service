@@ -32,13 +32,21 @@ public class WorkCalendarSubscribeController {
 
     @Permission(permissionPublic = true)
     @ApiOperation(value = "获取文件")
-    @GetMapping("/{uuid}")
+    @GetMapping("/uuid/{uuid}")
     public ResponseEntity<byte[]> downloadFile(@ApiParam(value = "组织ID", required = true)
                                                @PathVariable("organization_id") Long organizationId,
                                                @ApiParam(value = "uuid", required = true)
                                                @PathVariable("uuid") String uuid,
                                                HttpServletResponse httpResponse) {
         return workCalendarSubscribeService.downloadFile(organizationId, uuid, httpResponse);
+    }
+
+    @Permission(permissionLogin = true, level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "订阅查询")
+    @GetMapping("/query")
+    public ResponseEntity<String> query(@ApiParam(value = "组织ID", required = true)
+                                        @PathVariable("organization_id") Long organizationId) {
+        return Results.success(workCalendarSubscribeService.query(organizationId));
     }
 
 }

@@ -324,6 +324,18 @@ public class WorkCalendarSubscribeServiceImpl implements WorkCalendarSubscribeSe
                 .body(getFileByteArray(organizationId, realUrl));
     }
 
+    @Override
+    public String query(Long organizationId) {
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        WorkCalendarSubscribeDTO select = new WorkCalendarSubscribeDTO(organizationId, userId, null, null);
+        WorkCalendarSubscribeDTO dto = workCalendarSubscribeMapper.selectOne(select);
+        String uuid = null;
+        if (!Objects.isNull(dto)) {
+            uuid = dto.getUuid();
+        }
+        return uuid;
+    }
+
     private String getRealUrl(String url) {
         return attachmentUrl + "/" + BUCKET_NAME + "/" + url;
     }
