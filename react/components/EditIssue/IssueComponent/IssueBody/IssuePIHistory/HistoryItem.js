@@ -6,7 +6,7 @@ import './HistoryItem.less';
 const prefix = 'c7n-agile-pi-history-item';
 function HistoryItem({ data, featureType }) {
   const [expand, setExpand] = useState(false);
-  const { name, code, teamSprintVOS } = data;
+  const { name, code, teamSprintVOS, fullName } = data;
   const date = data.actualStartDate || data.startDate;
   const renderTeam = (team) => (
     <div className={`${prefix}-team`}>
@@ -37,7 +37,7 @@ function HistoryItem({ data, featureType }) {
       <div className={`${prefix}-content`}>
         <div className={`${prefix}-content-header`}>
           <div className={`${prefix}-name`}>
-            {name}
+            {fullName ?? name}
           </div>
           <div className={`${prefix}-date`}>
             {date && moment(date).format('YYYY-MM-DD')}
