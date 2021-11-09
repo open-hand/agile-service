@@ -11,6 +11,10 @@ import DateSearchDataSet, { formatEndDate, formatStartDate } from './DateSearchD
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { getIsOrganization, getProjectId, getOrganizationId } from '@/utils/common';
 import WorkingHoursIssuesDataSet from './WorkingHoursIssuesDataSet';
+import { useIssueSearchStore } from '@/components/issue-search';
+import { getSystemFields } from '@/stores/project/issue/IssueStore';
+import IssueSearchStore, { ILocalField } from '@/components/issue-search/store';
+import { transformFilter } from '@/routes/Issue/stores/utils';
 
 const Store = createContext({} as Context);
 
@@ -29,11 +33,20 @@ interface Context {
   mode: IMode
   setMode: (mode: IMode) => void
   isProject: string
+  issueSearchStore: IssueSearchStore
+  myDefaultFilter?: any
 }
 
 export type IMode = 'issue' | 'assignee' | 'project' | 'projectAssignee';
 export const StoreProvider: React.FC<Context> = inject('AppState')(observer((props: any) => {
-  const { children, AppState } = props;
+  const { children, AppState, myDefaultFilter } = props;
+  const issueSearchStore = useIssueSearchStore({
+    getSystemFields: () => getSystemFields() as ILocalField[],
+    transformFilter,
+    defaultSearchVO: localPageCacheStore.getItem('agile.working.hours.issue.search') ?? (myDefaultFilter && myDefaultFilter.filterJson ? JSON.parse(myDefaultFilter.filterJson) : undefined) ?? undefined,
+  });
+  useEffect(() => () => { localPageCacheStore.setItem('agile.working.hours.issue.search', issueSearchStore.getCustomFieldFilters()); }, []);
+
   // @ts-ignore
   const workingHoursIssuesDs = useMemo(() => new DataSet(WorkingHoursIssuesDataSet({
     projectId: getProjectId(),
@@ -67,6 +80,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     setLoading,
     mode,
     setMode,
+    issueSearchStore,
     isProject: getProjectId(),
   };
   return (

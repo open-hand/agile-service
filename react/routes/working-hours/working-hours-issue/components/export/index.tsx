@@ -1,12 +1,9 @@
 import React from 'react';
-import { DataSet, Modal, Table } from 'choerodon-ui/pro';
-import { ModalProps } from 'choerodon-ui/pro/lib/modal/Modal';
-import classnames from 'classnames';
+import { Modal } from 'choerodon-ui/pro';
 import { TemplateAction } from '@/api';
-import { IChosenFieldField } from '@/components/chose-field/types';
-import { removeCodeExtraPrefix } from '@/components/issue-export/utils';
-import Index from '@/components/issue-export';
+import IssueExport from '@/components/issue-export';
 import IssueExportStore from '@/components/issue-export/stores/store';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 
 function openExportWorkModal() {
   const store = new IssueExportStore();
@@ -19,11 +16,11 @@ function openExportWorkModal() {
     key: Modal.key(),
     title: '导出工作项工时',
     style: {
-      width: 740,
+      width: MODAL_WIDTH.middle,
     },
     className: 'c7n-agile-export-issue-modal',
     drawer: true,
-    children: <Index
+    children: <IssueExport
       fields={fields}
       chosenFields={chosenFields}
       checkOptions={checkOptions}
@@ -33,8 +30,6 @@ function openExportWorkModal() {
       exportBtnText="导出"
     />,
     footer: (okBtn: any, cancelBtn: any) => cancelBtn,
-    // okText: store.exportButtonConfig?.buttonChildren ?? '导出',
-    // okProps: { ...store.exportButtonConfig?.buttonProps },
     cancelText: '关闭',
     cancelProps: {
       color: 'primary',

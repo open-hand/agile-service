@@ -18,11 +18,14 @@ import styles from './index.less';
 import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 import ModeSwitch from './components/mode-switch';
 import openExportWorkModal from './components/export';
+import useDefaultMyFilter from '@/hooks/useDefaultMyFilter';
+import WorkingHoursIssueSearch from './components/search';
 
 const WorkingHoursIssue = () => {
   const {
     loadData, dateSearchDs, loading, workingHoursIssuesDs, mode, setMode, isProject,
   } = useIssueStore();
+
   const { data: tableFields } = useIssueTableFields();
   const [issueDetailProps] = useDetail();
 
@@ -72,6 +75,9 @@ const WorkingHoursIssue = () => {
             zIndex: 'auto',
           }}
         >
+          <div>
+            <WorkingHoursIssueSearch loadData={() => {}} />
+          </div>
           <IssueTable
             dataSet={workingHoursIssuesDs}
             fields={tableFields || []}
@@ -86,10 +92,14 @@ const WorkingHoursIssue = () => {
 
 const ObserverWorkingHoursIssue = observer(WorkingHoursIssue);
 
-const Index = (props: any) => (
-  <StoreProvider {...props}>
-    <ObserverWorkingHoursIssue />
-  </StoreProvider>
-);
+const Index = (props: any) => {
+  const { data: myFilter, isLoading } = useDefaultMyFilter();
+
+  return !isLoading && (
+    <StoreProvider {...props} myDefaultFilter={myFilter}>
+      <ObserverWorkingHoursIssue />
+    </StoreProvider>
+  );
+};
 
 export default Index;
