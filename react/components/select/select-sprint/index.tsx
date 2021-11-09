@@ -4,6 +4,7 @@ import { Select } from 'choerodon-ui/pro';
 import type { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
 import classNames from 'classnames';
+import { useCreation } from 'ahooks';
 import { sprintApi } from '@/api';
 import useSelect, { SelectConfig, FragmentForSearch } from '@/hooks/useSelect';
 import { ISprint } from '@/common/types';
@@ -25,7 +26,7 @@ const SelectSprint: React.FC<SelectSprintProps> = forwardRef(({
   statusList = ['sprint_planning', 'started'],
   isProgram,
   hasUnassign,
-  selectSprints,
+  selectSprints: propsSelectSprints,
   afterLoad,
   projectId,
   currentSprintOption,
@@ -34,6 +35,7 @@ const SelectSprint: React.FC<SelectSprintProps> = forwardRef(({
   maxTagTextLength,
   ...otherProps
 }, ref: React.Ref<Select>) => {
+  const selectSprints = useCreation(() => propsSelectSprints?.filter((i) => i && !['current', '0'].includes(String(i))) as any[], [propsSelectSprints]);
   const config = useMemo((): SelectConfig<ISprint> => ({
     name: 'sprint',
     textField: 'sprintName',
@@ -63,9 +65,7 @@ const SelectSprint: React.FC<SelectSprintProps> = forwardRef(({
       }
       return newSprint;
     },
-    props: {
-      onOption: () => ({ className: styles.option }),
-    },
+    onOption: () => ({ className: styles.option }),
     paging: !!isProgram,
   }), [isProgram, projectId, selectSprints, JSON.stringify(statusList), currentSprintOption, afterLoad]);
   const props = useSelect(config);
