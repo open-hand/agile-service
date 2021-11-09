@@ -17,6 +17,7 @@ import NoData from './NoData.svg';
 import styles from './index.less';
 import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 import ModeSwitch from './components/mode-switch';
+import openExportWorkModal from './components/export';
 
 const WorkingHoursIssue = () => {
   const {
@@ -49,9 +50,14 @@ const WorkingHoursIssue = () => {
         <HeaderButtons items={[
           {
             display: true,
+            name: '导出',
+            icon: 'unarchive-o',
+            handler: openExportWorkModal,
+          },
+          {
+            display: true,
             element: <ModeSwitch />,
           },
-
         ]}
         />
       </Header>
