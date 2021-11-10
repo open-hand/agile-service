@@ -383,7 +383,7 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
   ), [betweenDate, calendarDs, expandMap, handleExpand, userIssuesMap, userIssuesHeightMap]);
 
   const renderEmptyBlock = useCallback(() => {
-    const blockHeight = (dateTableWrapperSize.height || 0) - ((calendarDs.toData().length) * countHeight + sum([...userIssuesHeightMap.values()]) + (calendarDs.totalPage > calendarDs.currentPage ? 40 : 0)) - 100; // 96
+    const blockHeight = (dateTableWrapperSize.height || 0) - ((calendarDs.toData().length) * countHeight + sum([...userIssuesHeightMap.values()]) + (calendarDs.totalPage > calendarDs.currentPage ? 40 : 0)) - 96; // 96
     return blockHeight > 0 && (
     <div
       className={classNames(styles.row, styles.blockRow, {
@@ -425,21 +425,23 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
   },
   [betweenDate, dateTableWrapperSize.height, userIssuesHeightMap, calendarDs]);
 
-  const renderFooter = useCallback(() => (
-    <div
-      className={classNames(styles.row, styles.footer, {
-        [styles.lastCellHasBorderRow]: betweenDate.length < 7,
-      })}
-      style={{ width: 250 + betweenDate.length * widthPerDay }}
-    >
-      <div className={classNames(styles.firstCell, styles.footer_firstCell, styles.row_cell, styles.footer_cell)}>
-        <div>{`总计实际工时：${sum(Object.values(countData))}小时`}</div>
-      </div>
+  const renderFooter = useCallback(() => {
+    const sumCount = sum(Object.values(countData));
+    return (
       <div
-        className={styles.otherCells}
-        style={{ width: 7 * widthPerDay }}
+        className={classNames(styles.row, styles.footer, {
+          [styles.lastCellHasBorderRow]: betweenDate.length < 7,
+        })}
+        style={{ width: 250 + betweenDate.length * widthPerDay }}
       >
-        {
+        <div className={classNames(styles.firstCell, styles.footer_firstCell, styles.row_cell, styles.footer_cell)}>
+          <div>{`总计实际工时：${sumCount.toString().split('.')[1] && sumCount.toString().split('.')[1].length > 1 ? sumCount.toFixed(1) : sumCount}小时`}</div>
+        </div>
+        <div
+          className={styles.otherCells}
+          style={{ width: 7 * widthPerDay }}
+        >
+          {
           betweenDate.map((date) => (
             <div
               className={classNames(styles.footer_cell, styles.cell, styles.row_cell)}
@@ -449,12 +451,15 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
             </div>
           ))
         }
+        </div>
       </div>
-    </div>
-  ), [betweenDate, countData]);
+    );
+  }, [betweenDate, countData]);
 
-  const handleLoadMore = useCallback(() => {
-    calendarDs.queryMore(calendarDs.currentPage + 1);
+  const handleLoadMore = useCallback(async () => {
+    setLoading(true);
+    await calendarDs.queryMore(calendarDs.currentPage + 1);
+    setLoading(false);
   }, []);
 
   return (
@@ -498,7 +503,7 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
                 calendarDs.totalPage > calendarDs.currentPage && (
                 <div
                   className={styles.more}
-                  style={{ width: 250 + betweenDate.length * widthPerDay }}
+                  style={{ width: 250 + betweenDate.length * widthPerDay, minWidth: 250 + 7 * widthPerDay }}
                   role="none"
                   onClick={handleLoadMore}
                 >
