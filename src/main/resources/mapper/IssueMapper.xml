@@ -602,6 +602,32 @@
         left join lookup_value alv on ai.color_code = alv.value_code
         left join agile_project_info api on api.project_id = ai.project_id
         left join agile_issue_participant_rel aipr on ai.issue_id = aipr.issue_id
+        <if test="sortMap != null and sortMap.sortFieldId != null ">
+            LEFT JOIN
+            (
+            SELECT
+            instance_id,
+            date_value,
+            option_id,
+            string_value,
+            text_value,
+            number_value
+            FROM fd_field_value ffv
+            JOIN agile_issue ai ON ai.issue_id = ffv.instance_id AND ai.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            WHERE ffv.field_id = #{sortMap.sortFieldId}
+            AND ffv.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            AND ai.issue_type_id IN
+            <foreach collection="sortMap.fieldExtendIssueTypeIds" item="issueTypeId" open="(" separator="," close=")">
+                #{issueTypeId}
+            </foreach>
+            ) fv ON ai.issue_id = fv.instance_id
+        </if>
         where ai.project_id in
         <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
             #{projectId}

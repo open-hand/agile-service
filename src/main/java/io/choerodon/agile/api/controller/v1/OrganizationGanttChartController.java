@@ -84,10 +84,11 @@ public class OrganizationGanttChartController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "组织甘特图判断是否有紫云啊冲突接口")
+    @ApiOperation(value = "组织甘特图判断是否有资源冲突接口")
     @PostMapping("/estimated_time/is_conflicted")
     public ResponseEntity<Boolean> isEstimatedTimeConflicted(@PathVariable(name = "organization_id") Long organizationId,
                                                              @RequestBody SearchVO searchVO) {
+        EncryptionUtils.decryptSearchVO(searchVO);
         return new ResponseEntity<>(organizationGanttChartService.isEstimatedTimeConflicted(organizationId, searchVO), HttpStatus.OK);
     }
 
