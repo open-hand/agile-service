@@ -26,9 +26,8 @@ const IssueFilterFormDataSet = ({ fields, systemFields }: Props): DataSetProps =
         if (!v) {
           return true;
         }
-        const value = v[0];
-        if (!value[0] || !value[1]) {
-          record.init(name, []);
+        if (!v[0] || !v[1]) {
+          record.init(name, undefined);
         }
         return true;
       },
