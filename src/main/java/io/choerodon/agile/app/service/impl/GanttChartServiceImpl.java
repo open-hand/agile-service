@@ -541,10 +541,9 @@ public class GanttChartServiceImpl implements GanttChartService {
         PageRequest pageRequest = new PageRequest(1, 0);
         boolean isTreeView = (boolean) searchVO.getSearchArgs().get("tree");
         addDimensionIfNotExisted(searchVO, dimension);
-        Map<String, Object> sortMap = new HashMap<>();
         addGanttDefaultOrder(searchVO, pageRequest);
         boardAssembler.handleOtherArgs(searchVO);
-        processSort(pageRequest, sortMap);
+        Map<String, Object> sortMap = issueService.processSortMap(pageRequest, projectId, ConvertUtil.getOrganizationId(projectId));
         List<Long> issueIds;
         Set<Long> projectIds = new HashSet<>(Arrays.asList(projectId));
         if (GanttDimension.isTask(instanceType) && !Objects.equals(0L, instanceId)) {
@@ -783,7 +782,6 @@ public class GanttChartServiceImpl implements GanttChartService {
                         Optional.ofNullable(searchVO.getSearchArgs())
                                 .map(x -> x.get("tree"))
                                 .orElse(true));
-        Map<String, Object> sortMap = new HashMap<>();
         boolean isDefaultOrder = ObjectUtils.isEmpty(pageRequest.getSort());
         boolean ganttDefaultOrder = false;
         if (isDefaultOrder && orderByRank) {
@@ -791,7 +789,8 @@ public class GanttChartServiceImpl implements GanttChartService {
             addGanttDefaultOrder(searchVO, pageRequest);
             ganttDefaultOrder = true;
         }
-        processSort(pageRequest, sortMap);
+        Long projectId = new ArrayList<>(projectMap.entrySet()).get(0).getKey();
+        Map<String, Object> sortMap = issueService.processSortMap(pageRequest, projectId, organizationId);
         Page<Long> page = issueService.pagedQueryByTreeView(pageRequest, projectIds, searchVO, filterSql, sortMap, isTreeView);
         List<Long> issueIds = page.getContent();
         Map<Long, Long> issueEpicMap = new HashMap<>();
@@ -1340,22 +1339,6 @@ public class GanttChartServiceImpl implements GanttChartService {
             return Collections.emptyList();
         }
         return projects;
-    }
-
-    @Override
-    public void processSort(PageRequest pageRequest, Map<String, Object> sortMap) {
-        Sort sort = pageRequest.getSort();
-        if (ObjectUtils.isEmpty(sort)) {
-            return;
-        }
-        if (ObjectUtils.isEmpty(sort.getOrderFor(ISSUE_ID))) {
-            Sort.Order issueIdOrder = new Sort.Order(Sort.Direction.DESC, ISSUE_ID);
-            sort = sort.and(new Sort(issueIdOrder));
-        }
-        Map<String, String> convertMapping = new HashMap<>();
-        convertMapping.put("issueNum", "issue_num_convert");
-        String sortSql = PageableHelper.getSortSql(PageUtil.sortResetOrder(sort, null, convertMapping));
-        sortMap.put(ORDER_STR, sortSql);
     }
 
     private void getUserIdFromIssueList(List<IssueDTO> issueList, Set<Long> userIds) {

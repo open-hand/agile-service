@@ -39,8 +39,6 @@ public interface GanttChartService {
 
     String getFilterSql(SearchVO searchVO);
 
-    void processSort(PageRequest pageRequest, Map<String, Object> sortMap);
-
     List<GanttChartVO> buildGanttList(Map<Long, ProjectVO> projectMap,
                                       List<Long> issueIds,
                                       List<IssueDTO> issueList,

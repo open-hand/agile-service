@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.GanttChartService;
+import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.OrganizationGanttChartService;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
@@ -49,6 +50,8 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
     private IssueMapper issueMapper;
     @Autowired
     private BoardAssembler boardAssembler;
+    @Autowired
+    private IssueService issueService;
 
     private static final String ERROR_GANTT_DIMENSION_NOT_SUPPORT = "error.gantt.dimension.not.support";
 
@@ -213,9 +216,8 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         SearchVOUtil.setTypeCodes(searchVO, Arrays.asList("story", "bug", "task", "sub_task"));
         String filterSql = ganttChartService.getFilterSql(searchVO);
         boardAssembler.handleOtherArgs(searchVO);
-        Map<String, Object> sortMap = new HashMap<>();
         addProjectSortIfNotExisted(pageRequest);
-        ganttChartService.processSort(pageRequest, sortMap);
+        Map<String, Object> sortMap = issueService.processSortMap(pageRequest, 0L, organizationId);
         if (ObjectUtils.isEmpty(projectIds)) {
             return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }
