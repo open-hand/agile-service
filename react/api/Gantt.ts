@@ -82,6 +82,19 @@ class GanttApi extends Api<GanttApi> {
     });
   }
 
+  /**
+   * 加载除了经办人维度的时间冲突
+   * @param searchVO
+   * @returns
+   */
+  loadTimeConflictExcludeUser(searchVO: any) {
+    return this.request({
+      method: 'post',
+      url: `${this.orgPrefix}/gantt/estimated_time/is_conflicted`,
+      data: searchVO,
+    });
+  }
+
   loadByTaskPage(data: any, page: number, sort?: any) {
     return this.request({
       method: 'post',
