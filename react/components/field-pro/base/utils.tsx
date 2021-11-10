@@ -73,6 +73,9 @@ const filterCodeModeProps: IComponentPropsToFn<IAgileSystemFieldProps> = {
     onlyUnCompleted: false,
     selectIds: props?.value,
   }),
+  label: () => ({
+    placeholder: '标签',
+  }),
 };
 
 /**

@@ -2,6 +2,7 @@ import React, { useMemo, forwardRef } from 'react';
 import { Select, Tooltip } from 'choerodon-ui/pro';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
+import { cloneDeep } from 'lodash';
 import { fieldApi, versionApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { IVersion } from '@/common/types';
@@ -14,7 +15,7 @@ export interface SelectVersionProps extends Partial<SelectProps> {
   valueField?: string
   afterLoad?: (versions: IVersion[]) => void
   request?: Function
-  flat?:boolean
+  flat?: boolean
   hasUnassign?: boolean
   ruleIds?: string[]
   selected?: string[]
@@ -55,7 +56,7 @@ const SelectVersion: React.FC<SelectVersionProps> = forwardRef(({
       return newVersion;
     },
     tooltip: true,
-    paging: hasRule,
+    paging: !!(hasRule && fieldId),
   }), [afterLoad, args, dataRef, fieldId, hasRule, hasUnassign, projectId, request, statusArr, valueField]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;

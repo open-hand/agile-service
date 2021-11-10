@@ -1,10 +1,12 @@
 import { toJS } from 'mobx';
-import { ICustomFieldData, IExportSearch } from '@/api';
-import { IChosenFieldField } from '@/components/chose-field/types';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
+import moment from 'moment';
+import { IChosenFieldField } from '@/components/chose-field/types';
+import { ICustomFieldData, IExportSearch } from '@/api';
+import { getDateValue } from '@/components/issue-search/utils';
 
-function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes'> {
+function transformSystemFilter(data:any) {
   const {
     issueTypeId,
     assigneeId,
@@ -12,8 +14,10 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
     priorityId,
     issueIds,
     quickFilterIds,
-    createDate = [],
-    updateDate = [],
+    createDate,
+    updateDate,
+    estimatedStartTime,
+    estimatedEndTime,
     contents,
     component,
     epic,
@@ -22,10 +26,23 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
     reporterIds,
     sprint,
     summary,
+    version,
     fixVersion,
     influenceVersion,
+    starBeacon,
+    myAssigned,
+    userId,
+    testResponsibleIds,
+    mainResponsibleIds,
     creatorIds,
     updatorIds,
+    environment,
+    appVersion,
+    tags,
+    storyPointsNull,
+    remainingTimeNull,
+    storyPoints,
+    remainingTime,
   } = data;
   return {
     advancedSearchArgs: {
@@ -33,8 +50,15 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
       reporterIds,
       statusId,
       priorityId,
+      storyPointsNull,
+      remainingTimeNull,
+      storyPoints,
+      remainingTime,
     },
     otherArgs: {
+      userId,
+      starBeacon,
+      myAssigned,
       assigneeId,
       issueIds,
       component,
@@ -43,16 +67,26 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
       label,
       sprint,
       summary,
+      version,
       fixVersion,
       influenceVersion,
+      testResponsibleIds,
+      mainResponsibleIds,
+      environment,
       creatorIds,
       updatorIds,
+      appVersion,
+      tags,
     },
     searchArgs: {
-      createStartDate: createDate[0],
-      createEndDate: createDate[1],
-      updateStartDate: updateDate[0],
-      updateEndDate: updateDate[1],
+      estimatedStartTimeScopeStart: getDateValue(estimatedStartTime, 0),
+      estimatedStartTimeScopeEnd: getDateValue(estimatedStartTime, 1),
+      estimatedEndTimeScopeStart: getDateValue(estimatedEndTime, 0),
+      estimatedEndTimeScopeEnd: getDateValue(estimatedEndTime, 1),
+      createStartDate: getDateValue(createDate, 0),
+      createEndDate: getDateValue(createDate, 1),
+      updateStartDate: getDateValue(updateDate, 0),
+      updateEndDate: getDateValue(updateDate, 1),
     },
     quickFilterIds,
     contents,
@@ -67,13 +101,25 @@ const getCustomFieldFilters = (chosenFields: Array<IChosenFieldField>, record: R
     string: [],
     text: [],
   };
+  const dateFormatArr = ['HH:mm:ss', 'YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DD'];
   const systemFilter = {} as any;
   for (let index = 0; index < chosenFields.length; index += 1) {
     const { fieldType, id, code } = chosenFields[index];
+
     const value = toJS(record.get(code));
     if (value === undefined || value === null || value === '') {
       // eslint-disable-next-line no-continue
       continue;
+    }
+    const dateIndex = ['time', 'datetime', 'date'].indexOf(fieldType!);
+    if (dateIndex !== -1) {
+      if (Array.isArray(value)) {
+        for (let j = 0; j < value.length; j += 1) {
+          if (moment.isMoment(value[j])) {
+            value[j] = value[j].format(dateFormatArr[dateIndex]);
+          }
+        }
+      }
     }
     // 系统字段
     if (!id) {
