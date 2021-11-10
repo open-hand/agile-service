@@ -339,10 +339,11 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
       });
     } else {
       const field = find(tableFields, { code: columnCode });
-      merge(baseColumn, field ? {
-        ...getCustomColumn(field),
-        label: field.title,
-      } : {});
+      const column = field ? getCustomColumn(field) : {} as any;
+      merge(baseColumn, {
+        ...column,
+        label: (<GanttSortLabel dataKey={column.dataIndex} onChange={onSortChange}>{column?.title}</GanttSortLabel>),
+      });
     }
     const { render, name } = baseColumn;
     return merge(baseColumn, {
