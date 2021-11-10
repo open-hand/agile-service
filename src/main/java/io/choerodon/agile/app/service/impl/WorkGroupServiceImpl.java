@@ -1,15 +1,19 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.api.vo.AgileUserVO;
 import io.choerodon.agile.api.vo.MoveWorkGroupVO;
 import io.choerodon.agile.api.vo.WorkGroupTreeVO;
 import io.choerodon.agile.api.vo.WorkGroupVO;
 import io.choerodon.agile.app.service.WorkGroupService;
 import io.choerodon.agile.app.service.WorkGroupUserRelService;
+import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.WorkGroupDTO;
-import io.choerodon.agile.infra.dto.WorkLogDTO;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
 import io.choerodon.agile.infra.mapper.WorkGroupMapper;
 import io.choerodon.agile.infra.mapper.WorkGroupUserRelMapper;
 import io.choerodon.agile.infra.utils.RankUtil;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
@@ -42,6 +46,9 @@ public class WorkGroupServiceImpl implements WorkGroupService {
     @Autowired
     private WorkGroupUserRelService workGroupUserRelService;
 
+    @Autowired
+    private BaseFeignClient baseFeignClient;
+
     @Override
     public WorkGroupTreeVO queryWorkGroupTree(Long organizationId) {
         List<WorkGroupDTO> workGroupDTOS = workGroupMapper.selectByOrganiztionId(organizationId);
@@ -60,8 +67,39 @@ public class WorkGroupServiceImpl implements WorkGroupService {
         workGroupTreeVO.setRootIds(rootWorkGroups.stream().map(WorkGroupVO::getId).collect(Collectors.toList()));
         Map<Long, Set<Long>> workGroupUserMap = workGroupUserRelService.getWorkGroupMap(organizationId);
         handlerChildren(rootWorkGroups, workGroupMap, workGroupUserMap);
-        workGroupTreeVO.setWorkGroupVOS(rootWorkGroups);
+        int orgUserCount = 0;
+        Page<UserDTO> userPage = baseFeignClient.pagingUsersOnOrganizationLevel(organizationId, 0, 10, new AgileUserVO()).getBody();
+        orgUserCount = Long.valueOf(userPage.getTotalElements()).intValue();
+        // 构建未分配工作组
+        buildUnAssignee(organizationId, orgUserCount, rootWorkGroups);
+        // 构建组织信息
+        List<WorkGroupVO> root = new ArrayList<>();
+        root.add(buildOrganizationInfo(organizationId, rootWorkGroups, orgUserCount));
+        workGroupTreeVO.setWorkGroupVOS(root);
         return workGroupTreeVO;
+    }
+
+    private WorkGroupVO buildOrganizationInfo(Long organizationId, List<WorkGroupVO> rootWorkGroups, int orgUserCount) {
+        OrganizationInfoVO organizationInfoVO = baseFeignClient.query(organizationId).getBody();
+        WorkGroupVO workGroupVO = new WorkGroupVO();
+        workGroupVO.setUserCount(orgUserCount);
+        workGroupVO.setName(organizationInfoVO.getTenantName());
+        workGroupVO.setChildren(rootWorkGroups);
+        return workGroupVO;
+    }
+
+    private void buildUnAssignee(Long organizationId, int orgUserCount, List<WorkGroupVO> rootWorkGroups) {
+        Set<Long> userIds = workGroupUserRelMapper.queryByWorkGroupId(organizationId, null);
+        WorkGroupVO workGroupVO = new WorkGroupVO();
+        workGroupVO.setName("未分配成员");
+        workGroupVO.setParentId(0L);
+        int userCount = 0;
+        if ((!ObjectUtils.isEmpty(orgUserCount) && orgUserCount > 0) && CollectionUtils.isNotEmpty(userIds)) {
+            int count = orgUserCount - userIds.size();
+            userCount = count >= 0 ? count : 0;
+        }
+        workGroupVO.setUserCount(userCount);
+        rootWorkGroups.add(workGroupVO);
     }
 
     private void handlerChildren(List<WorkGroupVO> rootWorkGroups, Map<Long, List<WorkGroupVO>> workGroupMap, Map<Long, Set<Long>> workGroupUserMap) {
@@ -71,7 +109,7 @@ public class WorkGroupServiceImpl implements WorkGroupService {
             if (!CollectionUtils.isEmpty(workGroupVOList)) {
                 handlerChildren(workGroupVOList, workGroupMap, workGroupUserMap);
                 workGroupVOList.forEach(workGroupVO -> userIds.addAll(workGroupVO.getUserIds()));
-                v.setChildrens(workGroupVOList);
+                v.setChildren(workGroupVOList);
             }
             v.setUserCount(userIds.size());
             v.setUserIds(userIds);

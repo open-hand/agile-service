@@ -24,7 +24,7 @@ public class WorkGroupVO {
 
     private Long objectVersionNumber;
 
-    private List<WorkGroupVO> childrens;
+    private List<WorkGroupVO> children;
 
     @Encrypt
     private Set<Long> userIds;
@@ -79,12 +79,12 @@ public class WorkGroupVO {
         this.objectVersionNumber = objectVersionNumber;
     }
 
-    public List<WorkGroupVO> getChildrens() {
-        return childrens;
+    public List<WorkGroupVO> getChildren() {
+        return children;
     }
 
-    public void setChildrens(List<WorkGroupVO> childrens) {
-        this.childrens = childrens;
+    public void setChildren(List<WorkGroupVO> children) {
+        this.children = children;
     }
 
     public Set<Long> getUserIds() {
