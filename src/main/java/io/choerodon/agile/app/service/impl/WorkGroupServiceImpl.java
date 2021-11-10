@@ -1,9 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.AgileUserVO;
-import io.choerodon.agile.api.vo.MoveWorkGroupVO;
-import io.choerodon.agile.api.vo.WorkGroupTreeVO;
-import io.choerodon.agile.api.vo.WorkGroupVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.WorkGroupService;
 import io.choerodon.agile.app.service.WorkGroupUserRelService;
 import io.choerodon.agile.infra.dto.UserDTO;
@@ -66,25 +63,26 @@ public class WorkGroupServiceImpl implements WorkGroupService {
         }
         workGroupTreeVO.setRootIds(rootWorkGroups.stream().map(WorkGroupVO::getId).collect(Collectors.toList()));
         Map<Long, Set<Long>> workGroupUserMap = workGroupUserRelService.getWorkGroupMap(organizationId);
-        handlerChildren(rootWorkGroups, workGroupMap, workGroupUserMap);
+        List<WorkGroupVO> workGroupVOS = new ArrayList<>();
+        handlerChildren(rootWorkGroups, workGroupMap, workGroupUserMap, workGroupVOS);
+        Collections.sort(workGroupVOS, Comparator.comparing(WorkGroupVO::getRank));
+
         int orgUserCount = 0;
         Page<UserDTO> userPage = baseFeignClient.pagingUsersOnOrganizationLevel(organizationId, 0, 10, new AgileUserVO()).getBody();
         orgUserCount = Long.valueOf(userPage.getTotalElements()).intValue();
         // 构建未分配工作组
-        buildUnAssignee(organizationId, orgUserCount, rootWorkGroups);
+        buildUnAssignee(organizationId, orgUserCount, workGroupVOS);
         // 构建组织信息
-        List<WorkGroupVO> root = new ArrayList<>();
-        root.add(buildOrganizationInfo(organizationId, rootWorkGroups, orgUserCount));
-        workGroupTreeVO.setWorkGroupVOS(root);
+        workGroupVOS.add(buildOrganizationInfo(organizationId, orgUserCount));
+        workGroupTreeVO.setWorkGroupVOS(workGroupVOS);
         return workGroupTreeVO;
     }
 
-    private WorkGroupVO buildOrganizationInfo(Long organizationId, List<WorkGroupVO> rootWorkGroups, int orgUserCount) {
+    private WorkGroupVO buildOrganizationInfo(Long organizationId , int orgUserCount) {
         OrganizationInfoVO organizationInfoVO = baseFeignClient.query(organizationId).getBody();
         WorkGroupVO workGroupVO = new WorkGroupVO();
         workGroupVO.setUserCount(orgUserCount);
         workGroupVO.setName(organizationInfoVO.getTenantName());
-        workGroupVO.setChildren(rootWorkGroups);
         return workGroupVO;
     }
 
@@ -102,17 +100,21 @@ public class WorkGroupServiceImpl implements WorkGroupService {
         rootWorkGroups.add(workGroupVO);
     }
 
-    private void handlerChildren(List<WorkGroupVO> rootWorkGroups, Map<Long, List<WorkGroupVO>> workGroupMap, Map<Long, Set<Long>> workGroupUserMap) {
+    private void handlerChildren(List<WorkGroupVO> rootWorkGroups,
+                                 Map<Long, List<WorkGroupVO>> workGroupMap,
+                                 Map<Long, Set<Long>> workGroupUserMap,
+                                 List<WorkGroupVO> workGroupVOS) {
         rootWorkGroups.forEach(v -> {
             List<WorkGroupVO> workGroupVOList = workGroupMap.get(v.getId());
             Set<Long> userIds = workGroupUserMap.getOrDefault(v.getId(), new HashSet<>());
             if (!CollectionUtils.isEmpty(workGroupVOList)) {
-                handlerChildren(workGroupVOList, workGroupMap, workGroupUserMap);
+                handlerChildren(workGroupVOList, workGroupMap, workGroupUserMap, workGroupVOS);
                 workGroupVOList.forEach(workGroupVO -> userIds.addAll(workGroupVO.getUserIds()));
-                v.setChildren(workGroupVOList);
+                v.setChildren(workGroupVOList.stream().map(WorkGroupVO::getId).collect(Collectors.toList()));
             }
             v.setUserCount(userIds.size());
             v.setUserIds(userIds);
+            workGroupVOS.add(v);
         });
     }
 
