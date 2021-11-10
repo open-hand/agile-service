@@ -6,7 +6,7 @@ import { IChosenFieldField } from '@/components/chose-field/types';
 import { ICustomFieldData, IExportSearch } from '@/api';
 import { getDateValue } from '@/components/issue-search/utils';
 
-function transformSystemFilter(data:any) {
+function transformSystemFilter(data:any):any {
   const {
     issueTypeId,
     assigneeId,
