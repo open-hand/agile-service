@@ -43,6 +43,7 @@ function SprintButton({ data, sprintIndex }) {
   const { isShowFeature, isInProgram } = BacklogStore.getIsInProgramData || {};
 
   const openStartSprint = async () => {
+    setCreateBtnToolTipHidden(true);
     if (!disableStart) {
       const year = moment().year();
       const workSetting = await workCalendarApi.getWorkSetting(year);
@@ -90,11 +91,20 @@ function SprintButton({ data, sprintIndex }) {
     ) {
       setInNewUserGuideStepThree(true);
       setCreateBtnToolTipHidden(false);
+      if (issueCount === 0) { // 还没建工作项之前
+        setCreateBtnToolTipHidden(true);
+      }
     } else {
       setInNewUserGuideStepThree(false);
       setCreateBtnToolTipHidden(true);
     }
   }, [AppState.getUserWizardStatus]);
+
+  useEffect(() => {
+    if (inNewUserGuideStepThree && issueCount === 1) { // 第二步建了工作项
+      setCreateBtnToolTipHidden(false);
+    }
+  }, [issueCount]);
 
   const toHelpDoc = () => {
     window.open(
@@ -144,11 +154,11 @@ function SprintButton({ data, sprintIndex }) {
     return '';
   };
 
-  const getHidden = () => { // 可以开启冲刺时候没有reason
+  const getHidden = () => {
     if (reason) {
       return createBtnToolTipHidden;
     }
-    if (sprintIndex === 0 && !reason && inNewUserGuideStepThree && issueCount > 0) { // 有了冲刺项目并且是新手指引状态
+    if (sprintIndex === 0 && !reason && inNewUserGuideStepThree && issueCount > 0) { // 第一个冲刺项目并且是新手指引状态并且已经有工作项
       return createBtnToolTipHidden;
     }
     return true;
@@ -189,12 +199,12 @@ function SprintButton({ data, sprintIndex }) {
           >
             <Tooltip
               popupClassName={
-                inNewUserGuideStepThree ? 'c7n-pro-popup-open-sprint-guide' : ''
+                inNewUserGuideStepThree && issueCount > 0 ? 'c7n-pro-popup-open-sprint-guide' : ''
               }
               hidden={getHidden()}
               onHiddenBeforeChange={onHiddenBeforeChange}
               title={getCreatBtnTitle}
-              placement="bottom"
+              placement={inNewUserGuideStepThree && issueCount > 0 ? 'bottomLeft' : 'bottom'}
             >
               <p
                 className={classnames(prefix, {

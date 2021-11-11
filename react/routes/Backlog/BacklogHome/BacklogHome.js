@@ -41,13 +41,18 @@ class BacklogHome extends Component {
     this.state = {
       inNewUserGuideStepThree: false,
       createBtnToolTipHidden: true,
+      origin: null,
     };
   }
 
   IssueDetailRef = React.createRef();
 
   componentDidUpdate(prevProps) {
-    if (!isEqual(prevProps.AppState.getUserWizardStatus, this.props.AppState.getUserWizardStatus)) {
+    if (!isEqual(this.state.origin, this.props.AppState.getUserWizardStatus)) {
+      // eslint-disable-next-line react/no-did-update-set-state
+      this.setState({
+        origin: this.props.AppState.getUserWizardStatus,
+      });
       if (
         prevProps.AppState.getUserWizardStatus
       && prevProps.AppState.getUserWizardStatus[2].status === 'uncompleted'
@@ -95,6 +100,9 @@ class BacklogHome extends Component {
    * 创建冲刺
    */
   handleCreateSprint = async () => {
+    this.setState({
+      createBtnToolTipHidden: true,
+    });
     const onCreate = (sprint) => {
       BacklogStore.setCreatedSprint(sprint.sprintId);
       this.refresh();
@@ -284,7 +292,7 @@ class BacklogHome extends Component {
 
   getHidden = () => {
     const sprintData = BacklogStore.getSprintData;
-    if (sprintData.length > 1) {
+    if (sprintData.length > 1) { // >1有冲刺，有了冲刺就不显示了 (按钮本身没有tooltip 不用考虑是不是新手阶段)
       return true;
     }
     return this.state.createBtnToolTipHidden;

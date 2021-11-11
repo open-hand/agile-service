@@ -39,7 +39,9 @@ function IssueList({
       && AppState.getUserWizardStatus[2].status === 'uncompleted'
     ) {
       setInNewUserGuideStepThree(true);
-      setCreateBtnToolTipHidden(false);
+      setTimeout(() => {
+        setCreateBtnToolTipHidden(false);
+      }, 1000);
     } else {
       setInNewUserGuideStepThree(false);
       setCreateBtnToolTipHidden(true);
@@ -141,7 +143,8 @@ function IssueList({
           </div>
           <div style={{ textAlign: 'right' }}>
             <Button
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 setCreateBtnToolTipHidden(true);
               }}
               style={{ color: '#fff', background: '#7E90F1' }}
@@ -161,15 +164,39 @@ function IssueList({
     return '';
   };
 
-  const getHidden = () => { // 第一个冲刺才显示新手提示
-    if (sprintIndex !== 0) {
+  const getHidden = () => {
+    const allSprintData = BacklogStore.getSprintData;
+    if (allSprintData.length <= 1) { // sprintData===1 还没创冲刺不显示
       return true;
     }
-    if (data.length > 0) { // 如果已经有了工作项就不显示
+    if (sprintIndex !== 0) { // 第一个冲刺才显示新手提示
+      return true;
+    }
+    if (data.length > 0) {
       return true;
     }
     return createBtnToolTipHidden;
   };
+
+  const quickCreateIssueBtn = (
+    <Tooltip
+      popupClassName={
+      inNewUserGuideStepThree ? 'c7n-pro-popup-create-issue-guide' : ''
+    }
+      hidden={getHidden()}
+      onHiddenBeforeChange={onHiddenBeforeChange}
+      title={getCreatBtnTitle}
+      placement="bottomLeft"
+    >
+      <Button
+        funcType="flat"
+        icon="playlist_add"
+        onClick={() => { setCreateBtnToolTipHidden(true); }}
+      >
+        创建工作项
+      </Button>
+    </Tooltip>
+  );
 
   return (
     <div className="c7n-backlog-issue-list">
@@ -218,30 +245,22 @@ function IssueList({
           )}
         </WindowScroller>
       )}
+
       <div
         style={{
           padding: '10px 0px 10px 20px',
           borderBottom: '0.01rem solid var(--divider)',
+          position: 'relative',
         }}
       >
-        <Tooltip
-          popupClassName={
-            inNewUserGuideStepThree ? 'c7n-pro-popup-create-issue-guide' : ''
+        <QuickCreateIssue
+          epicId={
+          BacklogStore.getChosenEpic !== 'all'
+          && BacklogStore.getChosenEpic !== 'unset'
+            ? BacklogStore.getChosenEpic
+            : undefined
           }
-          hidden={getHidden()}
-          onHiddenBeforeChange={onHiddenBeforeChange}
-          title={getCreatBtnTitle}
-          placement="bottomLeft"
-        >
-          <div className="c7n-backlog-issue-list-QuickCreateIssue">
-            <QuickCreateIssue
-              epicId={
-              BacklogStore.getChosenEpic !== 'all'
-              && BacklogStore.getChosenEpic !== 'unset'
-                ? BacklogStore.getChosenEpic
-                : undefined
-            }
-              versionIssueRelVOList={
+          versionIssueRelVOList={
               BacklogStore.getChosenVersion !== 'all'
               && BacklogStore.getChosenVersion !== 'unset'
                 ? [
@@ -251,35 +270,33 @@ function IssueList({
                 ]
                 : undefined
             }
-              sprintId={sprintId}
-              chosenFeatureId={
+          sprintId={sprintId}
+          chosenFeatureId={
               BacklogStore.getChosenFeature !== 'all'
               && BacklogStore.getChosenFeature !== 'unset'
                 ? BacklogStore.getChosenFeature
                 : undefined
             }
-              defaultAssignee={BacklogStore.filterSprintAssignUser.get(sprintId)}
-              onCreate={(res) => {
-                BacklogStore.handleCreateIssue(res, String(sprintId));
-                BacklogStore.setShowIssueLoading(false);
-                BacklogStore.refresh(false, false); // 更新侧边框
-              }}
-              cantCreateEvent={openCreateIssueModal}
-              typeIdChange={(id) => {
-                BacklogStore.setDefaultTypeId(id);
-              }}
-              summaryChange={(summary) => {
-                BacklogStore.setDefaultSummary(summary);
-              }}
-              assigneeChange={(assigneeId, assignee) => {
-                BacklogStore.setDefaultAssignee(assignee);
-              }}
-              setDefaultSprint={(value) => {
-                BacklogStore.setDefaultSprint(value);
-              }}
-            />
-          </div>
-        </Tooltip>
+          defaultAssignee={BacklogStore.filterSprintAssignUser.get(sprintId)}
+          onCreate={(res) => {
+            BacklogStore.handleCreateIssue(res, String(sprintId));
+            BacklogStore.setShowIssueLoading(false);
+            BacklogStore.refresh(false, false); // 更新侧边框
+          }}
+          cantCreateEvent={openCreateIssueModal}
+          typeIdChange={(id) => {
+            BacklogStore.setDefaultTypeId(id);
+          }}
+          summaryChange={(summary) => {
+            BacklogStore.setDefaultSummary(summary);
+          }}
+          assigneeChange={(assigneeId, assignee) => {
+            BacklogStore.setDefaultAssignee(assignee);
+          }}
+          setDefaultSprint={(value) => {
+            BacklogStore.setDefaultSprint(value);
+          }}
+        />
       </div>
 
       {total > size ? (
