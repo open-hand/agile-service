@@ -18,6 +18,8 @@ public interface WorkHoursMapper {
 
     List<WorkHoursLogVO> listGroupDataByProjectIds(@Param("projectIds") List<Long> projectIds, @Param("workHoursSearchVO") WorkHoursSearchVO workHoursSearchVO);
 
+    List<WorkHoursLogVO> countUserWorkTime(@Param("projectIds") List<Long> projectIds, @Param("workHoursSearchVO") WorkHoursSearchVO workHoursSearchVO);
+
     Set<Long> selectUserIds(@Param("projectIds") List<Long> projectIds, @Param("workHoursSearchVO") WorkHoursSearchVO workHoursSearchVO);
 
     List<IssueVO> queryIssue(@Param("projectId") Long projectId, @Param("params") String params);

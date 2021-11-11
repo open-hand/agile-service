@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.WorkHoursCalendarVO;
+import io.choerodon.agile.api.vo.WorkHoursCountVO;
 import io.choerodon.agile.api.vo.WorkHoursLogVO;
 import io.choerodon.agile.api.vo.WorkHoursSearchVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
@@ -98,4 +99,6 @@ public interface WorkHoursService {
      * @return
      */
     Map<String, BigDecimal> countWorkHoursOnOrganizationLevel(Long organizationId, WorkHoursSearchVO workHoursSearchVO);
+
+    Map<Long, WorkHoursCountVO> countWorkHoursCalendar(Long organizationId, List<Long> projectIds, WorkHoursSearchVO workHoursSearchVO);
 }

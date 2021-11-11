@@ -84,6 +84,37 @@
             wl.project_id
         order by wl.start_date
     </select>
+
+    <select id="countUserWorkTime"  resultType="io.choerodon.agile.api.vo.WorkHoursLogVO">
+        select
+        SUM(wl.work_time) as work_time,
+        wl.user_id,
+        wl.start_date
+        from
+        (
+        select
+            awl.work_time,
+            awl.created_by as user_id,
+            DATE_FORMAT(awl.start_date,'%Y-%m-%d') as start_date
+        from agile_work_log awl
+        where awl.project_id in
+        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+            #{projectId}
+        </foreach>
+        <if test="workHoursSearchVO.startTime != null and workHoursSearchVO.endTime != null">
+            and awl.start_date between #{workHoursSearchVO.startTime} and #{workHoursSearchVO.endTime}
+        </if>
+        <if test="workHoursSearchVO.userIds != null and workHoursSearchVO.userIds.size > 0">
+            and awl.created_by in
+            <foreach collection="workHoursSearchVO.userIds" item="userId" open="(" close=")" separator=",">
+                #{userId}
+            </foreach>
+        </if>
+        ) wl
+        group by
+        wl.user_id,
+        wl.start_date
+    </select>
     
     <select id="selectUserIds" resultType="java.lang.Long">
         select

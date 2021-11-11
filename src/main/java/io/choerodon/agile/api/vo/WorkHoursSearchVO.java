@@ -20,6 +20,8 @@ public class WorkHoursSearchVO {
 
     private List<Long> projectIds;
 
+    private Boolean exportMonthlyReport;
+
     public Date getStartTime() {
         return startTime;
     }
@@ -50,5 +52,13 @@ public class WorkHoursSearchVO {
 
     public void setProjectIds(List<Long> projectIds) {
         this.projectIds = projectIds;
+    }
+
+    public Boolean getExportMonthlyReport() {
+        return exportMonthlyReport;
+    }
+
+    public void setExportMonthlyReport(Boolean exportMonthlyReport) {
+        this.exportMonthlyReport = exportMonthlyReport;
     }
 }

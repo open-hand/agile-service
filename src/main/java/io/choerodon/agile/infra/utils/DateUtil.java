@@ -55,6 +55,19 @@ public class DateUtil {
         });
     }
 
+    public Set<Date> getWorkDays(Long organizationId, Date startTime, Date endTime) {
+        Set<Date> result = new HashSet<>();
+        if (startTime == null || endTime == null) {
+            throw new IllegalArgumentException("date can't be null");
+        } else {
+            Set<Integer> year = new HashSet<>();
+            TimeZoneWorkCalendarDTO timeZoneWorkCalendarDTO = baseFeignClient.queryTimeZoneDetailByOrganizationId(organizationId).getBody();
+            getWorkDaysInterval(timeZoneWorkCalendarDTO, startTime, endTime, result, year);
+            handleHolidays(result, year, startTime, endTime, timeZoneWorkCalendarDTO);
+        }
+        return result;
+    }
+
     /**
      * 获取2个时间中的工作天数。排除周末和国家法定节假日
      *
