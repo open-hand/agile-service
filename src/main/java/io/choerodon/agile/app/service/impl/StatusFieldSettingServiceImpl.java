@@ -59,6 +59,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     private static final String ADD = "add";
     private static final String[] CLEAR_FIELD = {FieldCode.LABEL, FieldCode.COMPONENT, FieldCode.TAG, FieldCode.PARTICIPANT};
     private static final List<String> MEMBER_FIELD_TYPES = Arrays.asList(FieldType.MEMBER, FieldType.MULTI_MEMBER);
+    private static final List<String> SYSTEM_MULTI_MEMBER_FIELDS = Arrays.asList(PARTICIPANT);
     private static final List<String> OPERATE_TYPE = Arrays.asList(CLEAR, OPERATOR, CREATOR, REPORTOR, ASSIGNEE, MAIN_RESPONSIBLE, PARTICIPANT, SPECIFIER, COPY_CUSTOM_FIELD, CURRENT_TIME, ADD);
     private static final String ERROR_FIELD_VALUE_UPDATE_TO_SELF = "error.fieldValue.cannot.update.to.self";
 
@@ -228,7 +229,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                 throw new CommonException(ERROR_FIELD_VALUE_UPDATE_TO_SELF);
             }
         }
-        if (FieldType.MEMBER.equals(fieldType) && (fieldValueList.size() > 1 || PARTICIPANT.equals(operateType))) {
+        if (FieldType.MEMBER.equals(fieldType) && (fieldValueList.size() > 1 || SYSTEM_MULTI_MEMBER_FIELDS.contains(operateType))) {
             throw new CommonException("error.member.field.cannot.set.to.multiMember");
         }
     }
