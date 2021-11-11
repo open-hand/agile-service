@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, {
-  createContext, useCallback, useContext, useEffect, useMemo, useState,
+  createContext, useCallback, useContext, useEffect, useMemo, useState, useRef,
 } from 'react';
 import { DataSet } from 'choerodon-ui/pro';
 import { inject } from 'mobx-react';
@@ -9,7 +9,9 @@ import moment from 'moment';
 import { AppStateProps, IFoundationHeader, User } from '@/common/types';
 import DateSearchDataSet, { formatEndDate, formatStartDate } from './DateSearchDataSet';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
-import { getIsOrganization, getProjectId, getOrganizationId } from '@/utils/common';
+import {
+  getIsOrganization, getProjectId, getOrganizationId, getMenuType,
+} from '@/utils/common';
 import WorkingHoursIssuesDataSet from './WorkingHoursIssuesDataSet';
 import AssigneeDataSet from './AssigneeDataSet';
 import { useIssueSearchStore } from '@/components/issue-search';
@@ -17,6 +19,7 @@ import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import IssueSearchStore, { ILocalField } from '@/components/issue-search/store';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 import useIssueTableFields from '@/hooks/data/useIssueTableFields';
+import { ListLayoutColumnVO } from '@/api';
 
 const Store = createContext({} as Context);
 
@@ -38,16 +41,18 @@ interface Context {
   issueSearchStore: IssueSearchStore
   myDefaultFilter?: any
   workingHoursAssigneeDs: DataSet
-  tableFields: IFoundationHeader
+  tableFields: IFoundationHeader[]
   isContain: boolean,
   setIsContain: (isContain: false) => void,
   onCloseDetail: () => void
+  defaultListLayoutColumnsRef: React.MutableRefObject<{defaultListLayoutColumns: ListLayoutColumnVO[]}>
 }
 
 export type IMode = 'issue' | 'assignee' | 'project' | 'projectAssignee';
 export const StoreProvider: React.FC<Context> = inject('AppState')(observer((props: any) => {
   const { children, AppState, myDefaultFilter } = props;
   const [loading, setLoading] = useState<boolean>(false);
+  const defaultListLayoutColumnsRef = useRef<{defaultListLayoutColumns: ListLayoutColumnVO[]}>();
   const [mode, setMode] = useState<IMode>(getProjectId() ? 'issue' : 'project');
   const [isContain, setIsContain] = useState<boolean>(false);
   const issueSearchStore = useIssueSearchStore({
@@ -96,12 +101,25 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     loadData();
   }, [loadData]);
 
-  const onCloseDetail = useCallback(() => {
+  const onCloseDetail = useCallback(async () => {
     if (mode === 'assignee') {
+      const expandedRecordsMap = new Map([]);
       workingHoursAssigneeDs.records.forEach((record) => {
-        console.log(record.isExpanded);
+        if (record.getState('issueDs')) {
+          expandedRecordsMap.set(record.get('userId'), record.getState('issueDs'));
+        }
+        return record.getState('issueDs');
       });
-      workingHoursAssigneeDs.query(workingHoursAssigneeDs.currentPage);
+      await workingHoursAssigneeDs.query(workingHoursAssigneeDs.currentPage);
+      workingHoursAssigneeDs.records.forEach((record) => {
+        if (expandedRecordsMap.get(record.get('userId'))) {
+          const issueDs = expandedRecordsMap.get(record.get('userId')) as DataSet;
+          record.setState('issueDs', issueDs);
+          // eslint-disable-next-line no-param-reassign
+          record.isExpanded = true;
+          issueDs.query(issueDs.currentPage);
+        }
+      });
     }
     // 加载总计登记工时
   }, [mode]);
@@ -117,11 +135,12 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     setMode,
     issueSearchStore,
     workingHoursAssigneeDs,
-    isProject: getProjectId(),
+    isProject: getMenuType() === 'project',
     tableFields,
     isContain,
     setIsContain,
     onCloseDetail,
+    defaultListLayoutColumnsRef,
   };
   return (
     <Store.Provider value={value}>
