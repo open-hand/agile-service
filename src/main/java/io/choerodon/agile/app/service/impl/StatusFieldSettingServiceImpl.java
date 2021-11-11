@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.api.validator.StatusFieldSettingValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueUpdateVO;
 import io.choerodon.agile.api.vo.business.TriggerCarrierVO;
@@ -8,6 +9,7 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.FieldType;
+import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -51,6 +53,9 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     private static final String ASSIGNEE = "assignee";
     private static final String MAIN_RESPONSIBLE = "mainResponsible";
     private static final String PARTICIPANT = "participant";
+    private static final String SPECIFIER = "specifier";
+    private static final String COPY_CUSTOM_FIELD = "copy_custom_field";
+    private static final String CURRENT_TIME = "current_time";
     private static final String[] CLEAR_FIELD = {FieldCode.LABEL, FieldCode.COMPONENT, FieldCode.TAG, FieldCode.PARTICIPANT};
 
     @Autowired
@@ -91,6 +96,8 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     private ObjectSchemeFieldMapper objectSchemeFieldMapper;
     @Autowired
     private IssueParticipantRelMapper issueParticipantRelMapper;
+    @Autowired
+    private StatusFieldSettingValidator statusFieldSettingValidator;
     static {
         FIELD_CODE.put(FieldCode.ASSIGNEE, "assigneeId");
         FIELD_CODE.put(FieldCode.REPORTER, "reporterId");
@@ -118,6 +125,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     }
     @Override
     public List<StatusFieldSettingVO> createOrUpdate(Long project, Long issueType, Long statusId, Long objectVersionNumber, String applyType, List<StatusFieldSettingVO> list) {
+        statusFieldSettingValidator.checkStatusFieldSettings(list);
         List<StatusFieldSettingDTO> statusFieldSettingDTOS = listFieldSetting(0L, project, issueType, statusId);
         if (!CollectionUtils.isEmpty(statusFieldSettingDTOS)) {
             deleteStatusFieldSetting(statusFieldSettingDTOS);
@@ -178,7 +186,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                     statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
                     return;
                 }
-                if (!Objects.equals("specifier", statusFieldValueSettingDTOS.get(0).getOperateType())) {
+                if (!Objects.equals(SPECIFIER, statusFieldValueSettingDTOS.get(0).getOperateType())) {
                     statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
                     return;
                 }
@@ -225,6 +233,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             if (ObjectUtils.isEmpty(statusFieldValueSettings)) {
                 return;
             }
+            statusFieldValueSettings = convertCopyMemberFieldToDetail(statusFieldValueSettings, issueDTO, fieldType);
             if (isSystemField) {
                 processSystemFieldValues(issueDTO, issueUpdateVO, field, versionMap, specifyMap, fieldCode, statusFieldValueSettings);
             } else {
@@ -233,6 +242,44 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         });
         // 执行更新
         updateIssue(issueDTO,field,issueUpdateVO,customField,versionMap,specifyMap, false, triggerCarrierVO);
+    }
+
+    private List<StatusFieldValueSettingDTO> convertCopyMemberFieldToDetail(List<StatusFieldValueSettingDTO> statusFieldValueSettings,
+                                                                            IssueDTO issue,
+                                                                            String fieldType) {
+        Set<Long> fieldIds =
+                statusFieldValueSettings
+                        .stream()
+                        .filter(value -> COPY_CUSTOM_FIELD.equals(value.getOperateType()) && !ObjectUtils.isEmpty(value.getCustomFieldId()))
+                        .map(StatusFieldValueSettingDTO::getCustomFieldId)
+                        .collect(Collectors.toSet());
+        if (!CollectionUtils.isEmpty(fieldIds)) {
+            Long issueId = issue.getIssueId();
+            Long projectId = issue.getProjectId();
+            Set<Long> userIds =
+                    fieldValueMapper.selectByFieldIds(projectId, issueId, ObjectSchemeCode.AGILE_ISSUE, fieldIds)
+                            .stream()
+                            .map(FieldValueDTO::getOptionId)
+                            .filter(optionId -> !ObjectUtils.isEmpty(optionId))
+                            .collect(Collectors.toSet());
+            List<StatusFieldValueSettingDTO> result = new ArrayList<>();
+            statusFieldValueSettings.forEach(v -> {
+                if (!COPY_CUSTOM_FIELD.equals(v.getOperateType())) {
+                    result.add(v);
+                }
+            });
+            userIds.forEach(userId -> {
+                StatusFieldValueSettingDTO valueSetting = new StatusFieldValueSettingDTO();
+                valueSetting.setUserId(userId);
+                valueSetting.setProjectId(projectId);
+                valueSetting.setFieldType(fieldType);
+                valueSetting.setOperateType(SPECIFIER);
+                result.add(valueSetting);
+            });
+            return result;
+        } else {
+            return statusFieldValueSettings;
+        }
     }
 
     @Override
@@ -277,6 +324,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
 
     @Override
     public List<StatusFieldSettingVO> saveStatusFieldSettings(Long organizationId, Long issueType, Long statusId, Long objectVersionNumber, List<StatusFieldSettingVO> list) {
+        statusFieldSettingValidator.checkStatusFieldSettings(list);
         List<StatusFieldSettingDTO> statusFieldSettingDTOS = listFieldSetting(organizationId, 0L, issueType, statusId);
         if (!CollectionUtils.isEmpty(statusFieldSettingDTOS)) {
             deleteStatusFieldSetting(statusFieldSettingDTOS);
@@ -327,7 +375,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                     statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
                     return;
                 }
-                if (!Objects.equals("specifier", statusFieldValueSettingDTOS.get(0).getOperateType())) {
+                if (!Objects.equals(SPECIFIER, statusFieldValueSettingDTOS.get(0).getOperateType())) {
                     statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
                     return;
                 }
@@ -554,7 +602,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             Calendar cal = Calendar.getInstance();
             cal.add(Calendar.DAY_OF_MONTH, dateAddValue.intValue());
             date = cal.getTime();
-        } else if ("current_time".equals(fieldValueSettingDTO.getOperateType())) {
+        } else if (CURRENT_TIME.equals(fieldValueSettingDTO.getOperateType())) {
             date = new Date();
         } else {
             date = fieldValueSettingDTO.getDateValue();
@@ -628,25 +676,20 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         if (CLEAR.equals(settingDTO.getOperateType())) {
             return null;
         }
-        List<String> userIds = new ArrayList<>();
+        Set<Long> userIds = new HashSet<>();
         for (StatusFieldValueSettingDTO statusFieldValueSettingDTO : statusFieldValueSettingDTOS) {
-            List<Long> list = new ArrayList<>();
             Long userId = handlerMember(statusFieldValueSettingDTO, issueDTO);
             if (!ObjectUtils.isEmpty(userId)) {
-                list.add(userId);
+                userIds.add(userId);
             }
             if (PARTICIPANT.equals(statusFieldValueSettingDTO.getOperateType())) {
                 List<Long> participants = issueParticipantRelMapper.listByIssueId(issueDTO.getProjectId(), issueDTO.getIssueId());
                 if (!CollectionUtils.isEmpty(participants)) {
-                    list.addAll(participants);
+                    userIds.addAll(participants);
                 }
             }
-            List<String> needAdd = list.stream().filter(v -> !userIds.contains(v)).map(String::valueOf).collect(Collectors.toList());
-            if (!CollectionUtils.isEmpty(needAdd)) {
-                userIds.addAll(needAdd);
-            }
         }
-        return userIds;
+        return userIds.stream().map(String::valueOf).collect(Collectors.toList());
     }
 
     private BigDecimal handlerNumber(Long projectId,
@@ -695,7 +738,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             Calendar cal = Calendar.getInstance();
             cal.add(Calendar.DAY_OF_MONTH, dateAddValue.intValue());
             date = cal.getTime();
-        } else if ("current_time".equals(statusFieldValueSettingDTO.getOperateType())) {
+        } else if (CURRENT_TIME.equals(statusFieldValueSettingDTO.getOperateType())) {
             date = new Date();
         } else {
             date = statusFieldValueSettingDTO.getDateValue();
