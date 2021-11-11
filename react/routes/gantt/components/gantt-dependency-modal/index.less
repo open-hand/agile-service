@@ -1,0 +1,22 @@
+.select {
+  width: 3.02rem;
+}
+
+.item {
+  position: relative;
+
+  .select+.select {
+    margin-top: .2rem;
+    margin-bottom: -.06rem;
+  }
+
+  .del_btn {
+    position: absolute;
+    color: var(--primary-color);
+    font-size: .2rem;
+    margin-left: .17rem;
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}
