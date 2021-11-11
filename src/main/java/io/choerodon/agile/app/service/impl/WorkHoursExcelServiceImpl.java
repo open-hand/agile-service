@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.IssueService;
+import io.choerodon.agile.app.service.WorkGroupService;
 import io.choerodon.agile.app.service.WorkHoursExcelService;
 import io.choerodon.agile.app.service.WorkHoursService;
 import io.choerodon.agile.infra.dto.ExcelCursorDTO;
@@ -13,7 +14,6 @@ import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
 import io.choerodon.agile.infra.mapper.FileOperationHistoryMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.agile.infra.utils.DateUtil;
 import io.choerodon.agile.infra.utils.ExcelUtil;
 import io.choerodon.agile.infra.utils.MultipartExcel;
 import io.choerodon.core.client.MessageClientC7n;
@@ -23,13 +23,13 @@ import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFCell;
 import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hzero.boot.file.FileClient;
 import org.hzero.core.base.BaseConstants;
 import org.slf4j.Logger;
@@ -44,11 +44,12 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -71,6 +72,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
     private static final String DOWNLOAD_CALENDAR_FILE = "download_file_work_hours_calendar";
     private static final List<ExcelTitleVO> WORK_HOURS_LOG_LIST = new ArrayList<>();
     private static final List<ExcelTitleVO> WORK_HOURS_CALENDAR_LIST = new ArrayList<>();
+    private static final List<ExcelTitleVO> WORK_HOURS_CALENDAR_REPORT_LIST = new ArrayList<>();
     private static final String EXPORT_ERROR_WORKBOOK_CLOSE = "error.close.workbook";
 
     @Autowired
@@ -93,7 +95,10 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
 
     @Autowired
     private IssueService issueService;
-
+    
+    @Autowired
+    private WorkGroupService workGroupService;
+    
     static {
         WORK_HOURS_LOG_LIST.add(new ExcelTitleVO("登记人", "userName", 4000));
         WORK_HOURS_LOG_LIST.add(new ExcelTitleVO("耗费时间（单位：小时）", "workTime", 6000));
@@ -105,6 +110,13 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
         WORK_HOURS_LOG_LIST.add(new ExcelTitleVO("所属项目", "projectName", 4000));
         WORK_HOURS_CALENDAR_LIST.add(new ExcelTitleVO("成员", "userName", 6000));
         WORK_HOURS_CALENDAR_LIST.add(new ExcelTitleVO("总计登记工时（单位：小时）", "allEstimateTime", 4000));
+        WORK_HOURS_CALENDAR_REPORT_LIST.add(new ExcelTitleVO("工作组", "workGroupName", 12000));
+        WORK_HOURS_CALENDAR_REPORT_LIST.add(new ExcelTitleVO("成员数量", "userCount", 4000));
+        WORK_HOURS_CALENDAR_REPORT_LIST.add(new ExcelTitleVO("实际登记工时成员数量", "actualUserCount", 8000));
+        WORK_HOURS_CALENDAR_REPORT_LIST.add(new ExcelTitleVO("实际登记工时成员占比", "actualUserProportion", 8000));
+        WORK_HOURS_CALENDAR_REPORT_LIST.add(new ExcelTitleVO("工时登记不饱和人数", "unsaturatedUserCount", 8000));
+        WORK_HOURS_CALENDAR_REPORT_LIST.add(new ExcelTitleVO("不饱和人数占比", "unsaturatedUserProportion", 8000));
+        WORK_HOURS_CALENDAR_REPORT_LIST.add(new ExcelTitleVO("工时登记不饱和人天（次数）", "unsaturatedTimes", 8000));
     }
 
     @Override
@@ -177,18 +189,28 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
         // 构建标题栏
         Map<String, Integer> dateColMap = new HashMap<>();
         SXSSFWorkbook workbook = new SXSSFWorkbook();
-         buildExcelTitle(workbook,"工时日历", WORK_HOURS_CALENDAR_LIST, workHoursSearchVO, dateColMap);
-         buildExcelTitle(workbook,"未饱和", WORK_HOURS_CALENDAR_LIST, workHoursSearchVO, dateColMap);
+        Boolean buildMonthlyReport = Boolean.TRUE.equals(workHoursSearchVO.getExportMonthlyReport()) && Boolean.TRUE.equals(isOrg);
+        if (buildMonthlyReport) {
+            buildMonthlyReportTitle(workbook, "工作组月报", WORK_HOURS_CALENDAR_REPORT_LIST, workHoursSearchVO);
+            setMonthlyReportData(workbook, projectIds, organizationId, workHoursSearchVO);
+        }
+        buildExcelTitle(workbook,"工时日历", WORK_HOURS_CALENDAR_LIST, workHoursSearchVO, dateColMap);
+        buildExcelTitle(workbook,"未饱和", WORK_HOURS_CALENDAR_LIST, workHoursSearchVO, dateColMap);
         ExcelCursorDTO cursor = new ExcelCursorDTO(2, 0, 100);
         double lastProcess = 0D;
         while (true) {
             // 写入数据
+            int sheetNum = 0;
+            if(buildMonthlyReport){
+                sheetNum = 1;
+            }
             PageRequest pageRequest = new PageRequest(cursor.getPage(), cursor.getSize());
             Page<WorkHoursCalendarVO> page = workHoursService.workHoursCalendar(organizationId, projectIds, pageRequest, workHoursSearchVO, isOrg);
             if (!CollectionUtils.isEmpty(page.getContent())) {
                 List<WorkHoursCalendarVO> list = page.getContent();
-                setData(workbook, list, 0, dateColMap, false, cursor.getRow());
-                setData(workbook, list, 1, dateColMap, true, cursor.getRow());
+                setData(workbook, list, sheetNum, dateColMap, false, cursor.getRow());
+                sheetNum += 1;
+                setData(workbook, list, sheetNum, dateColMap, true, cursor.getRow());
                 cursor.setRow(cursor.getRow() + page.getContent().size());
                 double process = getProcess(cursor.getPage(), page.getTotalPages());
                 if (process - lastProcess >= 0.1) {
@@ -203,6 +225,166 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
         }
         // 上传至minio
         downloadExcel(workbook, excelName, organizationId, websocketKey, userId, fileOperationHistoryDTO);
+    }
+
+    private void setMonthlyReportData(SXSSFWorkbook workbook, List<Long> projectIds, Long organizationId, WorkHoursSearchVO workHoursSearchVO) {
+       // 查询工作组
+        WorkGroupTreeVO workGroupTreeVO = workGroupService.queryWorkGroupTree(organizationId);
+        // 查询工时统计数据
+        Map<Long, WorkHoursCountVO> countMap = workHoursService.countWorkHoursCalendar(organizationId, projectIds, workHoursSearchVO);
+        // 构造excel数据
+        List<WorkGroupVO> workGroupVOS = workGroupTreeVO.getWorkGroupVOS().stream()
+                                        .filter(v -> !ObjectUtils.isEmpty(v.getId())).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(workGroupVOS)) {
+            return;
+        }
+        // 构造合计数据
+        WorkGroupVO total = buildTotalData(workGroupVOS);
+        workGroupVOS.add(total);
+        // 转换数据对象
+        List<WorkGroupReportExcelVO> workGroupReportExcelVOS =  buildWorkGroupReportExcelVOS(workGroupVOS, countMap);
+        Map<Long, List<WorkGroupReportExcelVO>> workGroupMap = workGroupReportExcelVOS.stream().collect(Collectors.groupingBy(WorkGroupReportExcelVO::getParentId));
+        ExcelCursorDTO excelCursorDTO = new ExcelCursorDTO(2, 0, 0);
+        SXSSFSheet sheet = workbook.getSheetAt(0);
+        buildData(workbook, workGroupMap.get(0L), sheet, excelCursorDTO, "", workGroupMap);
+        // 填写说明信息
+        SXSSFRow row = sheet.createRow(excelCursorDTO.getRow());
+        SXSSFCell cell = row.createCell(0);
+        CellStyle cellStyle = workbook.createCellStyle();
+        Font font = workbook.createFont();
+        font.setColor(HSSFColor.RED.index);
+        font.setFontHeightInPoints((short) 11);
+        cellStyle.setFont(font);
+        cell.setCellStyle(cellStyle);
+        cell.setCellValue("说明：非工作日不计算工时登记饱和情况");
+    }
+
+    private WorkGroupVO buildTotalData(List<WorkGroupVO> workGroupVOS) {
+        Set<Long> userIds = new HashSet<>();
+        workGroupVOS.stream().filter(v -> ObjectUtils.isEmpty(0L)).forEach(v -> {
+            if(!CollectionUtils.isEmpty(v.getUserIds())){
+                userIds.addAll(v.getUserIds());
+            }
+        });
+        WorkGroupVO workGroupVO = new WorkGroupVO();
+        workGroupVO.setUserCount(userIds.size());
+        workGroupVO.setName("合计");
+        workGroupVO.setUserIds(userIds);
+        workGroupVO.setParentId(0L);
+        return workGroupVO;
+    }
+
+    private List<WorkGroupReportExcelVO> buildWorkGroupReportExcelVOS(List<WorkGroupVO> workGroupVOS, Map<Long, WorkHoursCountVO> countMap) {
+        List<WorkGroupReportExcelVO> workGroupReportExcelVOS = new ArrayList<>();
+        for (WorkGroupVO workGroupVO : workGroupVOS) {
+            WorkGroupReportExcelVO workGroupReportExcelVO = new WorkGroupReportExcelVO(workGroupVO.getId(), workGroupVO.getParentId(),
+                    workGroupVO.getName(), workGroupVO.getUserCount(), workGroupVO.getUserIds());
+            int actualUserCount = 0;
+            int unsaturatedUserCount = 0;
+            int unsaturatedTimes = 0;
+            Set<Long> userIds = workGroupVO.getUserIds();
+            if (!CollectionUtils.isEmpty(userIds)) {
+                for (Long userId : userIds) {
+                    WorkHoursCountVO workHoursCountVO = countMap.get(userId);
+                    if (!ObjectUtils.isEmpty(workHoursCountVO)) {
+                        actualUserCount += workHoursCountVO.getRegisterWorkTimeUserCount();
+                        unsaturatedUserCount += workHoursCountVO.getUnsaturatedUserCount();
+                        unsaturatedTimes += workHoursCountVO.getUnsaturatedTimes();
+                    }
+                }
+            }
+            workGroupReportExcelVO.setActualUserCount(actualUserCount);
+            workGroupReportExcelVO.setUnsaturatedTimes(unsaturatedTimes);
+            workGroupReportExcelVO.setUnsaturatedUserCount(unsaturatedUserCount);
+            workGroupReportExcelVO.setActualUserProportion(devide(actualUserCount, workGroupVO.getUserCount()));
+            workGroupReportExcelVO.setUnsaturatedUserProportion(devide(unsaturatedUserCount, workGroupVO.getUserCount()));
+            workGroupReportExcelVOS.add(workGroupReportExcelVO);
+        }
+        return workGroupReportExcelVOS;
+    }
+
+    private String devide(int number1, int number2){
+        double result = 0.00;
+        if(number2 != 0){
+            BigDecimal devide =BigDecimal.valueOf(number1).divide(BigDecimal.valueOf(number2),4, RoundingMode.HALF_UP);
+            result = devide.doubleValue();
+        }
+        NumberFormat percent = NumberFormat.getPercentInstance();
+        percent.setMaximumFractionDigits(2);
+        return percent.format(result);
+    }
+
+    private void buildData(SXSSFWorkbook workbook,
+                           List<WorkGroupReportExcelVO> root,
+                           SXSSFSheet sheet,
+                           ExcelCursorDTO excelCursorDTO,
+                           String separate,
+                           Map<Long, List<WorkGroupReportExcelVO>> workGroupMap) {
+        if (CollectionUtils.isEmpty(root)) {
+           return;
+        }
+        for (WorkGroupReportExcelVO workGroupReportExcelVO : root) {
+            workGroupReportExcelVO.setWorkGroupName(separate + workGroupReportExcelVO.getWorkGroupName());
+            //样式
+            CellStyle cellStyle = workbook.createCellStyle();
+            cellStyle.setAlignment(HorizontalAlignment.LEFT);
+            if (ObjectUtils.isEmpty(workGroupReportExcelVO.getId())) {
+                Font font = workbook.createFont();
+                font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+                font.setFontHeightInPoints((short) 11);
+                cellStyle.setFont(font);
+            }
+            // 将工作信息填入表格
+            ExcelUtil.writeWorkGroupReport(workbook, "工作组月报", WorkGroupReportExcelVO.class, workGroupReportExcelVO, WORK_HOURS_CALENDAR_REPORT_LIST, cellStyle, excelCursorDTO);
+            excelCursorDTO.increaseRow();
+            List<WorkGroupReportExcelVO> workGroupVOS = workGroupMap.get(workGroupReportExcelVO.getId());
+            if (!CollectionUtils.isEmpty(workGroupVOS)) {
+                buildData(workbook, workGroupVOS, sheet, excelCursorDTO, "  " + separate, workGroupMap);
+            }
+        }
+    }
+
+
+    private void buildMonthlyReportTitle(SXSSFWorkbook workbook, String sheetName, List<ExcelTitleVO> workHoursCalendarReportList, WorkHoursSearchVO workHoursSearchVO) {
+        // 单元格样式
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setAlignment(HorizontalAlignment.LEFT.getCode());
+        cellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        cellStyle.setFillForegroundColor(HSSFColor.HSSFColorPredefined.PALE_BLUE.getIndex());
+        cellStyle.setWrapText(true);
+        Font font = workbook.createFont();
+        font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        font.setFontHeightInPoints((short) 11);
+        cellStyle.setFont(font);
+
+        SXSSFSheet sheet = workbook.createSheet(sheetName);
+        //设置默认列宽
+        sheet.setDefaultColumnWidth(13);
+        SXSSFRow row = sheet.createRow(0);
+        // 设置查询时间范围
+        SXSSFCell cell = row.createCell(0);
+        String dateString = buildDateString(workHoursSearchVO.getStartTime(), workHoursSearchVO.getEndTime());
+        cell.setCellValue("时间范围：" + dateString);
+        // 生成标题
+        SXSSFRow row1 = sheet.createRow(1);
+        for (int i = 0; i < workHoursCalendarReportList.size(); i++) {
+            SXSSFCell cell1 = row1.createCell(i);
+            cell1.setCellStyle(cellStyle);
+            ExcelTitleVO excelTitleVO = workHoursCalendarReportList.get(i);
+            cell1.setCellValue(excelTitleVO.getTitle());
+            sheet.setColumnWidth(i, excelTitleVO.getWidth());
+        }
+    }
+
+    private String buildDateString(Date startTime, Date endTime) {
+        DateFormat df = new SimpleDateFormat(BaseConstants.Pattern.SYS_DATE);
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder
+                .append(df.format(startTime))
+                .append("~")
+                .append(df.format(endTime));
+        return stringBuilder.toString();
     }
 
     private void handlerProject(Long organizationId, List<Long> projectIds, Long userId, WorkHoursSearchVO workHoursSearchVO){

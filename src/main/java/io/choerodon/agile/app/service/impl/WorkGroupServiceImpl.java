@@ -56,23 +56,20 @@ public class WorkGroupServiceImpl implements WorkGroupService {
     public WorkGroupTreeVO queryWorkGroupTree(Long organizationId) {
         List<WorkGroupDTO> workGroupDTOS = workGroupMapper.selectByOrganiztionId(organizationId);
         WorkGroupTreeVO workGroupTreeVO = new WorkGroupTreeVO();
-        if (CollectionUtils.isEmpty(workGroupDTOS)) {
-            return workGroupTreeVO;
-        }
-        List<WorkGroupVO> workGroupVOList = modelMapper.map(workGroupDTOS, new TypeToken<List<WorkGroupVO>>() {
-        }.getType());
-        Map<Long, List<WorkGroupVO>> workGroupMap = workGroupVOList.stream().collect(Collectors.groupingBy(WorkGroupVO::getParentId));
-        // 构造树形结构
-        List<WorkGroupVO> rootWorkGroups = workGroupMap.get(0L);
-        if (CollectionUtils.isEmpty(rootWorkGroups)) {
-            return workGroupTreeVO;
-        }
-        workGroupTreeVO.setRootIds(rootWorkGroups.stream().map(WorkGroupVO::getId).collect(Collectors.toList()));
-        Map<Long, Set<Long>> workGroupUserMap = workGroupUserRelService.getWorkGroupMap(organizationId);
         List<WorkGroupVO> workGroupVOS = new ArrayList<>();
-        handlerChildren(rootWorkGroups, workGroupMap, workGroupUserMap, workGroupVOS);
-        Collections.sort(workGroupVOS, Comparator.comparing(WorkGroupVO::getRank));
-
+        if (CollectionUtils.isNotEmpty(workGroupDTOS)) {
+            List<WorkGroupVO> workGroupVOList = modelMapper.map(workGroupDTOS, new TypeToken<List<WorkGroupVO>>() {
+            }.getType());
+            Map<Long, List<WorkGroupVO>> workGroupMap = workGroupVOList.stream().collect(Collectors.groupingBy(WorkGroupVO::getParentId));
+            // 构造树形结构
+            List<WorkGroupVO> rootWorkGroups = workGroupMap.get(0L);
+            if (CollectionUtils.isNotEmpty(rootWorkGroups)) {
+                workGroupTreeVO.setRootIds(rootWorkGroups.stream().map(WorkGroupVO::getId).collect(Collectors.toList()));
+                Map<Long, Set<Long>> workGroupUserMap = workGroupUserRelService.getWorkGroupMap(organizationId);
+                handlerChildren(rootWorkGroups, workGroupMap, workGroupUserMap, workGroupVOS);
+                Collections.sort(workGroupVOS, Comparator.comparing(WorkGroupVO::getRank));
+            }
+        }
         int orgUserCount = 0;
         Page<UserDTO> userPage = baseFeignClient.pagingUsersOnOrganizationLevel(organizationId, 0, 10, new AgileUserVO()).getBody();
         orgUserCount = Long.valueOf(userPage.getTotalElements()).intValue();

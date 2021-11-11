@@ -8,12 +8,14 @@ import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.WorkHoursMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.DateUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hzero.core.base.BaseConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,6 +50,8 @@ public class WorkHoursServiceImpl implements WorkHoursService {
     private IssueService issueService;
     @Autowired
     private WorkHoursMapper workHoursMapper;
+    @Autowired
+    private DateUtil dateUtil;
 
     @Override
     public Page<WorkHoursLogVO> pageWorkHoursLogByProjectIds(Long organizationId,
@@ -151,7 +155,7 @@ public class WorkHoursServiceImpl implements WorkHoursService {
                                              PageRequest pageRequest,
                                              WorkHoursSearchVO workHoursSearchVO,
                                              Boolean isOrg) {
-        Page<UserMessageDTO> page = new Page<>();
+        Page<UserMessageDTO> page = null;
         if (!CollectionUtils.isEmpty(workHoursSearchVO.getUserIds())){
             page = queryUserAndBuildPage(workHoursSearchVO.getUserIds(), pageRequest);
         } else {
@@ -271,6 +275,62 @@ public class WorkHoursServiceImpl implements WorkHoursService {
         return countWorkHours(organizationId, projectIds, workHoursSearchVO);
     }
 
+    @Override
+    public Map<Long, WorkHoursCountVO> countWorkHoursCalendar(Long organizationId, List<Long> projectIds, WorkHoursSearchVO workHoursSearchVO) {
+        Map<Long, WorkHoursCountVO> resultMap = new HashMap<>();
+        List<WorkHoursLogVO> workHoursLogVOS = workHoursMapper.countUserWorkTime(projectIds, workHoursSearchVO);
+        if (CollectionUtils.isEmpty(workHoursLogVOS)) {
+            return resultMap;
+        }
+        Map<Long, List<WorkHoursLogVO>> workHoursGroup = workHoursLogVOS.stream().collect(Collectors.groupingBy(WorkHoursLogVO::getUserId));
+        // 统计人数
+        List<Long> userIds = workHoursLogVOS.stream().map(WorkHoursLogVO::getUserId).distinct().collect(Collectors.toList());
+        // 根据开始时间和结束时间 计算需要经历的时间，排除节假日日期
+        Set<Date> allDate = dateUtil.getWorkDays(organizationId, workHoursSearchVO.getStartTime(), workHoursSearchVO.getEndTime());
+        DateFormat df = new SimpleDateFormat(BaseConstants.Pattern.DATE);
+        List<String> dataStrings = allDate.stream().map(df::format).collect(Collectors.toList());
+        Long days = diffTime(workHoursSearchVO.getStartTime(), DateUtils.addDays(workHoursSearchVO.getEndTime(), 1));
+        for (Long id : userIds) {
+           handleCountData(days, id, dataStrings, resultMap, workHoursGroup, workHoursSearchVO, df);
+        }
+        return resultMap;
+    }
+
+    private void handleCountData(Long days,
+                                 Long id,
+                                 List<String> dataStrings,
+                                 Map<Long, WorkHoursCountVO> resultMap,
+                                 Map<Long, List<WorkHoursLogVO>> workHoursGroup,
+                                 WorkHoursSearchVO workHoursSearchVO,
+                                 DateFormat df) {
+        WorkHoursCountVO workHoursCountVO = new WorkHoursCountVO(0, 0);
+        List<WorkHoursLogVO> workHoursLogVOList = workHoursGroup.getOrDefault(id, new ArrayList<>());
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(workHoursSearchVO.getStartTime());
+        boolean isUnsaturated = false;
+        int unsaturatedTimes = 0;
+        if (!CollectionUtils.isEmpty(workHoursLogVOList)) {
+            Map<String, BigDecimal> workTimeMap = workHoursLogVOList.stream().collect(Collectors.toMap(v -> df.format(v.getStartDate()), WorkHoursLogVO::getWorkTime));
+            for (int i = 0; i < days; i++) {
+                String dateString = df.format(calendar.getTime());
+                calendar.add(Calendar.DATE, 1);
+                if (dataStrings.contains(dateString)) {
+                    continue;
+                }
+                BigDecimal bigDecimal = workTimeMap.getOrDefault(dateString, BigDecimal.ZERO);
+                if (bigDecimal.intValue() < 8) {
+                    unsaturatedTimes += 1;
+                    if (Boolean.FALSE.equals(isUnsaturated)) {
+                        isUnsaturated = true;
+                    }
+                }
+            }
+        }
+        workHoursCountVO.setUnsaturatedTimes(unsaturatedTimes);
+        workHoursCountVO.setUnsaturatedUserCount(isUnsaturated ? 1 : 0);
+        resultMap.put(id, workHoursCountVO);
+    }
+
     private void handlerProject(Long organizationId, List<Long> projectIds, Long userId, WorkHoursSearchVO workHoursSearchVO){
         if (CollectionUtils.isEmpty(workHoursSearchVO.getProjectIds())) {
             // 查询有权限的项目
@@ -287,7 +347,7 @@ public class WorkHoursServiceImpl implements WorkHoursService {
     }
 
     private void checkTimeRange(WorkHoursSearchVO workHoursSearchVO) {
-        if (ObjectUtils.isEmpty(workHoursSearchVO.getStartTime()) || ObjectUtils.isEmpty(workHoursSearchVO.getStartTime())) {
+        if (ObjectUtils.isEmpty(workHoursSearchVO.getStartTime()) || ObjectUtils.isEmpty(workHoursSearchVO.getEndTime())) {
             throw new CommonException("error.search.time.not.null");
         }
         if (workHoursSearchVO.getStartTime().after(workHoursSearchVO.getEndTime())) {
