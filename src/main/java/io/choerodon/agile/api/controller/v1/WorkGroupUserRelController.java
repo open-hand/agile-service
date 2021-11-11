@@ -64,6 +64,18 @@ public class WorkGroupUserRelController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询工作组未关联的成员")
+    @PostMapping("/unlink")
+    public ResponseEntity<Page<WorkGroupUserRelVO>> pageUnlinkUser(@ApiParam(value = "组织Id", required = true)
+                                                                @PathVariable(name = "organization_id") Long organizationId,
+                                                                PageRequest pageRequest,
+                                                                @RequestBody WorkGroupUserRelParamVO workGroupUserRelParamVO) {
+        return Optional.ofNullable(workGroupUserRelService.pageUnlinkUser(organizationId, pageRequest, workGroupUserRelParamVO))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.work.group.user.rel.query"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询未关联工作组的成员")
     @PostMapping("/page_unassignee")
     public ResponseEntity<Page<WorkGroupUserRelVO>> pageUnAssignee(@ApiParam(value = "组织Id", required = true)

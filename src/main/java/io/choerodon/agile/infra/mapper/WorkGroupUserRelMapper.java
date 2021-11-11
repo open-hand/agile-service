@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.WorkGroupVO;
 import io.choerodon.agile.infra.dto.WorkGroupUserRelDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
@@ -20,4 +21,6 @@ public interface WorkGroupUserRelMapper extends BaseMapper<WorkGroupUserRelDTO> 
     Set<Long> queryByWorkGroupId(@Param("organizationId") Long organizationId, @Param("workGroupId") Long workGroupId);
 
     Set<Long> listUserIdsByWorkGroupIds(@Param("organizationId") Long organizationId, @Param("workGroupIds") List<Long> workGroupIds);
+
+    List<WorkGroupVO> selectWorkGroupByUserId(@Param("organizationId") Long organizationId, @Param("userIds") List<Long> userIds);
 }

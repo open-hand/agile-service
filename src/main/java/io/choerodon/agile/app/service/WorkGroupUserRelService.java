@@ -24,4 +24,6 @@ public interface WorkGroupUserRelService {
     Page<WorkGroupUserRelVO> pageUnAssignee(Long organizationId, PageRequest pageRequest,  WorkGroupUserRelParamVO workGroupUserRelParamVO);
 
     Map<Long, Set<Long>> getWorkGroupMap(Long organizationId);
+
+    Page<WorkGroupUserRelVO> pageUnlinkUser(Long organizationId, PageRequest pageRequest, WorkGroupUserRelParamVO workGroupUserRelParamVO);
 }

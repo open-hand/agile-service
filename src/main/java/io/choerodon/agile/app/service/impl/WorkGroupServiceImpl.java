@@ -5,13 +5,16 @@ import io.choerodon.agile.app.service.WorkGroupService;
 import io.choerodon.agile.app.service.WorkGroupUserRelService;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.WorkGroupDTO;
+import io.choerodon.agile.infra.dto.WorkGroupTreeClosureDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
 import io.choerodon.agile.infra.mapper.WorkGroupMapper;
+import io.choerodon.agile.infra.mapper.WorkGroupTreeClosureMapper;
 import io.choerodon.agile.infra.mapper.WorkGroupUserRelMapper;
 import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -45,6 +48,9 @@ public class WorkGroupServiceImpl implements WorkGroupService {
 
     @Autowired
     private BaseFeignClient baseFeignClient;
+
+    @Autowired
+    private WorkGroupTreeClosureMapper workGroupTreeClosureMapper;
 
     @Override
     public WorkGroupTreeVO queryWorkGroupTree(Long organizationId) {
@@ -89,7 +95,7 @@ public class WorkGroupServiceImpl implements WorkGroupService {
     private void buildUnAssignee(Long organizationId, int orgUserCount, List<WorkGroupVO> rootWorkGroups) {
         Set<Long> userIds = workGroupUserRelMapper.queryByWorkGroupId(organizationId, null);
         WorkGroupVO workGroupVO = new WorkGroupVO();
-        workGroupVO.setName("未分配成员");
+        workGroupVO.setName("未分配工作组");
         workGroupVO.setParentId(0L);
         int userCount = 0;
         if ((!ObjectUtils.isEmpty(orgUserCount) && orgUserCount > 0) && CollectionUtils.isNotEmpty(userIds)) {
@@ -129,7 +135,29 @@ public class WorkGroupServiceImpl implements WorkGroupService {
         String minRank = workGroupMapper.queryMinRank(organizationId, workGroupVO.getParentId());
         groupDTO.setRank(ObjectUtils.isEmpty(minRank) ? RankUtil.mid() : RankUtil.genPre(minRank));
         groupDTO.setOrganizationId(organizationId);
-        return modelMapper.map(baseCreate(groupDTO), WorkGroupVO.class);
+        baseCreate(groupDTO);
+        WorkGroupVO map = modelMapper.map(groupDTO, WorkGroupVO.class);
+        // 保存树形结构
+        buildTreeClosure(map, organizationId);
+        return map;
+    }
+
+    private void buildTreeClosure(WorkGroupVO workGroupVO, Long organizationId) {
+        // 查询祖先
+        List<Long> ancestorIds = workGroupTreeClosureMapper.queryAncestor(organizationId, workGroupVO.getParentId());
+        if (CollectionUtils.isEmpty(ancestorIds)) {
+            ancestorIds = new ArrayList<>();
+        }
+        ancestorIds.add(workGroupVO.getId());
+        List<WorkGroupTreeClosureDTO> workGroupTreeClosureDTOS = new ArrayList<>();
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        for (Long ancestorId : ancestorIds) {
+            WorkGroupTreeClosureDTO workGroupTreeClosureDTO = new WorkGroupTreeClosureDTO();
+            workGroupTreeClosureDTO.setAncestorId(ancestorId);
+            workGroupTreeClosureDTO.setDescendantId(workGroupVO.getId());
+            workGroupTreeClosureDTOS.add(workGroupTreeClosureDTO);
+        }
+        workGroupTreeClosureMapper.batchInsert(organizationId, userId, workGroupTreeClosureDTOS);
     }
 
     private WorkGroupDTO baseCreate(WorkGroupDTO workGroupDTO) {
@@ -153,9 +181,38 @@ public class WorkGroupServiceImpl implements WorkGroupService {
         if (checkName(organizationId, workGroupVO.getParentId(), workGroupVO.getName())) {
             throw new CommonException("error.work.group.name.exist");
         }
+        WorkGroupDTO workGroupDTO = workGroupMapper.selectByPrimaryKey(workGroupVO.getId());
+        // 是否更改层级
+        boolean changeLevel = !Objects.equals(workGroupDTO.getParentId(), workGroupVO.getParentId());
+        if (changeLevel) {
+            changeLevel(organizationId, workGroupDTO, workGroupVO);
+        }
         WorkGroupDTO groupDTO = modelMapper.map(workGroupVO, WorkGroupDTO.class);
         baseUpdate(groupDTO);
         return queryById(organizationId, workGroupVO.getId());
+    }
+
+    private void changeLevel(Long organizationId, WorkGroupDTO workGroupDTO, WorkGroupVO workGroupVO) {
+        List<Long> oldAncestors = workGroupTreeClosureMapper.queryAncestor(organizationId, workGroupDTO.getParentId());
+        List<Long> descendants = workGroupTreeClosureMapper.queryDescendant(organizationId, workGroupDTO.getId());
+        // 删除当前节点以及子节点和原层级的关系
+        if (CollectionUtils.isNotEmpty(oldAncestors)) {
+            workGroupTreeClosureMapper.deleteByAncestorsAndDescendants(organizationId, oldAncestors, descendants);
+        }
+        List<Long> newAncestors = workGroupTreeClosureMapper.queryDescendant(organizationId, workGroupVO.getParentId());
+        if (CollectionUtils.isNotEmpty(newAncestors)) {
+            Long userId = DetailsHelper.getUserDetails().getUserId();
+            List<WorkGroupTreeClosureDTO> workGroupTreeClosureDTOS = new ArrayList<>();
+            for (Long newAncestor : newAncestors) {
+                for (Long descendant : descendants) {
+                    WorkGroupTreeClosureDTO workGroupTreeClosureDTO = new WorkGroupTreeClosureDTO();
+                    workGroupTreeClosureDTO.setAncestorId(newAncestor);
+                    workGroupTreeClosureDTO.setDescendantId(descendant);
+                    workGroupTreeClosureDTOS.add(workGroupTreeClosureDTO);
+                }
+            }
+            workGroupTreeClosureMapper.batchInsert(organizationId, userId, workGroupTreeClosureDTOS);
+        }
     }
 
     private WorkGroupDTO baseUpdate(WorkGroupDTO workGroupDTO) {
@@ -170,23 +227,15 @@ public class WorkGroupServiceImpl implements WorkGroupService {
         // 查询当前工作组下面的所有子工作组
         WorkGroupDTO workGroupDTO = new WorkGroupDTO();
         workGroupDTO.setOrganizationId(organizationId);
-        Map<Long, List<Long>> map = queryMap(workGroupDTO);
-        List<Long> workGroupIds = new ArrayList<>();
-        queryChildrenNode(workGroupIds, workGroupId, map);
-        if (CollectionUtils.isNotEmpty(workGroupIds)) {
+        List<Long> children = workGroupTreeClosureMapper.queryDescendant(organizationId, workGroupId);
+        if (CollectionUtils.isNotEmpty(children)) {
             // 删除工作组下关联的团队成员
-            workGroupUserRelMapper.deleteByWorkGroupIds(organizationId, workGroupIds);
+            workGroupUserRelMapper.deleteByWorkGroupIds(organizationId, children);
+            // 刪除树形关系
+            workGroupTreeClosureMapper.deleteDescendant(organizationId, children);
             // 删除出工作组
-            workGroupMapper.deleteByWorkGroupIds(organizationId, workGroupIds);
+            workGroupMapper.deleteByWorkGroupIds(organizationId, children);
         }
-    }
-
-    private void queryChildrenNode(List<Long> workGroupIds, Long workGroupId, Map<Long, List<Long>> map) {
-        List<Long> list = map.getOrDefault(workGroupId, new ArrayList<>());
-        for (Long workGroup : list) {
-            queryChildrenNode(workGroupIds, workGroup, map);
-        }
-        workGroupIds.add(workGroupId);
     }
 
     @Override
@@ -203,15 +252,6 @@ public class WorkGroupServiceImpl implements WorkGroupService {
         workGroupDTO.setParentId(parentId);
         List<WorkGroupDTO> workGroupDTOS = workGroupMapper.select(workGroupDTO);
         return CollectionUtils.isNotEmpty(workGroupDTOS);
-    }
-
-    private Map<Long, List<Long>> queryMap(WorkGroupDTO workGroupDTO) {
-        List<WorkGroupDTO> workGroupDTOS = workGroupMapper.select(workGroupDTO);
-        if (CollectionUtils.isEmpty(workGroupDTOS)) {
-            return new HashMap<>();
-        }
-        return workGroupDTOS.stream()
-                .collect(Collectors.groupingBy(WorkGroupDTO::getParentId, Collectors.mapping(WorkGroupDTO::getId, Collectors.toList())));
     }
 
     @Override
@@ -231,13 +271,7 @@ public class WorkGroupServiceImpl implements WorkGroupService {
 
     @Override
     public List<Long> listChildrenWorkGroup(Long organizationId, Long workGroupId) {
-        WorkGroupDTO workGroupDTO = new WorkGroupDTO();
-        workGroupDTO.setOrganizationId(organizationId);
-        workGroupDTO.setParentId(workGroupId);
-        Map<Long, List<Long>> map = queryMap(workGroupDTO);
-        List<Long> workGroupIds = new ArrayList<>();
-        queryChildrenNode(workGroupIds, workGroupId, map);
-        return workGroupIds;
+        return workGroupTreeClosureMapper.queryDescendant(organizationId, workGroupId);
     }
 
     private String getAfterRank(Long organizationId, Long parentId, MoveWorkGroupVO moveWorkGroupVO) {
