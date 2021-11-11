@@ -2,12 +2,14 @@ import React from 'react';
 import { Select } from 'choerodon-ui/pro';
 import styles from './index.less';
 import { IMode, useIssueStore } from '../../stores';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 
 const { Option } = Select;
 const ModeSwitch = () => {
   const { isProject, setMode, mode } = useIssueStore();
   const handleChange = (value: IMode) => {
     setMode(value);
+    localPageCacheStore.setItem('workingHours-issue-mode', value);
   };
   return (
     <div className={styles.switch}>

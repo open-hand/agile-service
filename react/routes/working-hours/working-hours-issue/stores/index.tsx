@@ -19,7 +19,7 @@ import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import IssueSearchStore, { ILocalField } from '@/components/issue-search/store';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 import useIssueTableFields from '@/hooks/data/useIssueTableFields';
-import { ListLayoutColumnVO } from '@/api';
+import { ListLayoutColumnVO, workingHoursApi } from '@/api';
 
 const Store = createContext({} as Context);
 
@@ -45,16 +45,16 @@ interface Context {
   isContain: boolean,
   setIsContain: (isContain: false) => void,
   onCloseDetail: () => void
-  defaultListLayoutColumnsRef: React.MutableRefObject<{defaultListLayoutColumns: ListLayoutColumnVO[]}>
+  totalWorkTime: number
 }
 
 export type IMode = 'issue' | 'assignee' | 'project' | 'projectAssignee';
 export const StoreProvider: React.FC<Context> = inject('AppState')(observer((props: any) => {
   const { children, AppState, myDefaultFilter } = props;
   const [loading, setLoading] = useState<boolean>(false);
-  const defaultListLayoutColumnsRef = useRef<{defaultListLayoutColumns: ListLayoutColumnVO[]}>();
-  const [mode, setMode] = useState<IMode>(getProjectId() ? 'issue' : 'project');
+  const [mode, setMode] = useState<IMode>(localPageCacheStore.getItem('workingHours-issue-mode') || (getProjectId() ? 'issue' : 'project'));
   const [isContain, setIsContain] = useState<boolean>(false);
+  const [totalWorkTime, setTotalWorkTime] = useState<number>(5);
   const issueSearchStore = useIssueSearchStore({
     getSystemFields: () => getSystemFields() as ILocalField[],
     transformFilter,
@@ -77,14 +77,18 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
   })), []);
   const workingHoursAssigneeDs = useMemo(() => new DataSet(AssigneeDataSet({ projectId: getProjectId() })), []);
   const dateSearchDs = useMemo(() => new DataSet(DateSearchDataSet({ currentProject: AppState.getCurrentProject })), [AppState.getCurrentProject]);
+  // eslint-disable-next-line no-nested-ternary
+  const startTime = useMemo(() => (dateSearchDs.current?.get('startTime') && formatStartDate(dateSearchDs.current?.get('startTime'))) || localPageCacheStore.getItem('workingHours-issue-startTime') || `${formatStartDate(getIsOrganization() ? moment().subtract(6, 'days') : (
+    moment().subtract(6, 'days').isBefore(moment(AppState.getCurrentProject?.creationDate)) ? moment(AppState.getCurrentProject?.creationDate) : moment().subtract(6, 'days')
+  ), true)}`, [dateSearchDs.current?.get('startTime')]);
+  const endTime = useMemo(() => (dateSearchDs.current?.get('endTime') && formatEndDate(dateSearchDs.current?.get('endTime'))) || localPageCacheStore.getItem('workingHours-issue-endTime') || `${formatEndDate(moment(), true)}`, [dateSearchDs.current?.get('endTime')]);
 
+  const getTotalWorkTime = useCallback(async () => {
+    const res = await workingHoursApi.getTotalWorkTime({ startTime, endTime, isContain });
+    setTotalWorkTime(res || 5);
+  }, []);
   const loadData = useCallback(() => {
     console.log(mode, isContain);
-    // eslint-disable-next-line no-nested-ternary
-    const startTime = (dateSearchDs.current?.get('startTime') && formatStartDate(dateSearchDs.current?.get('startTime'))) || localPageCacheStore.getItem('workingHours-issue-startTime') || `${formatStartDate(getIsOrganization() ? moment().subtract(6, 'days') : (
-      moment().subtract(6, 'days').isBefore(moment(AppState.getCurrentProject?.creationDate)) ? moment(AppState.getCurrentProject?.creationDate) : moment().subtract(6, 'days')
-    ), true)}`;
-    const endTime = (dateSearchDs.current?.get('endTime') && formatEndDate(dateSearchDs.current?.get('endTime'))) || localPageCacheStore.getItem('workingHours-issue-endTime') || `${formatEndDate(moment(), true)}`;
     if (mode === 'issue') {
       workingHoursIssuesDs.setQueryParameter('startTime', startTime);
       workingHoursIssuesDs.setQueryParameter('endTime', endTime);
@@ -95,7 +99,8 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
       workingHoursAssigneeDs.setQueryParameter('endTime', endTime);
       workingHoursAssigneeDs.query();
     }
-  }, [dateSearchDs.current?.get('startTime'), dateSearchDs.current?.get('endTime'), mode, isContain]);
+    getTotalWorkTime();
+  }, [startTime, endTime, mode, isContain]);
 
   useEffect(() => {
     loadData();
@@ -121,6 +126,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
         }
       });
     }
+    getTotalWorkTime();
     // 加载总计登记工时
   }, [mode]);
 
@@ -140,7 +146,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     isContain,
     setIsContain,
     onCloseDetail,
-    defaultListLayoutColumnsRef,
+    totalWorkTime,
   };
   return (
     <Store.Provider value={value}>
