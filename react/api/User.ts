@@ -141,6 +141,22 @@ class UserApi extends Api<UserApi> {
     });
   }
 
+  async getWorkbenchUsers(param?: string, page?: number, userIds?: string[], queryFilterIds?: string[], size?: number): Promise<{
+    list: User[]
+    hasNextPage: boolean
+  }> {
+    return this.request({
+      method: 'post',
+      url: `/agile/v1/organizations/${this.orgId}/work_bench/users`,
+      params: {
+        param,
+        page: page || 1,
+        size: size || 20,
+      },
+      data: queryFilterIds ?? [],
+    });
+  }
+
   /**
    * 在项目层查询用户列表（包括离职用户）
    * @param param

@@ -22,14 +22,16 @@ export interface SelectStatusProps extends Partial<SelectProps> {
   isOrganization?: boolean
   isProgram?: boolean
   isBacklog?: boolean
+  isWorkBench?: boolean
   extraStatus?: IStatusCirculation[]
 }
 
 const SelectStatus: React.FC<SelectStatusProps> = forwardRef(
   ({
-    request, issueTypeId, noIssueTypeIdQuery, excludeStatus = [], isProgram, isBacklog, dataRef, afterLoad, flat, projectId, applyType: propsApplyType, issueTypeIds, selectedIds, isOrganization = false, extraStatus = [], ...otherProps
+    request, issueTypeId, noIssueTypeIdQuery, excludeStatus = [], isProgram, isBacklog, isWorkBench, dataRef, afterLoad, flat, projectId, applyType: propsApplyType, issueTypeIds, selectedIds, isOrganization = false, extraStatus = [], ...otherProps
   }, ref: React.Ref<Select>) => {
     let applyType = propsApplyType;
+
     if (isProgram) {
       applyType = 'program';
     }
@@ -41,6 +43,9 @@ const SelectStatus: React.FC<SelectStatusProps> = forwardRef(
       textField: 'name',
       valueField: 'id',
       request: async () => {
+        if (isWorkBench) {
+          return statusApi.loadAllFromWorkbench();
+        }
         if (noIssueTypeIdQuery) {
           return statusApi.project(projectId).loadByProject(applyType as any);
         }
@@ -77,8 +82,8 @@ const SelectStatus: React.FC<SelectStatusProps> = forwardRef(
         }
         return data;
       },
-      paging: false,
-    }), [issueTypeId, request, isOrganization, projectId, applyType, excludeStatus, extraStatus, issueTypeIds, dataRef, afterLoad, selectedIds]);
+      paging: isWorkBench || false,
+    }), [issueTypeId, request, isOrganization, isWorkBench, projectId, applyType, excludeStatus, extraStatus, issueTypeIds, dataRef, afterLoad, selectedIds]);
     const props = useSelect(config);
     const Component = flat ? FlatSelect : Select;
     return (
