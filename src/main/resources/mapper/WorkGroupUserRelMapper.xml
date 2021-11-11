@@ -44,4 +44,22 @@
             </foreach>
         </if>
     </select>
+
+    <select id="selectWorkGroupByUserId" resultType="io.choerodon.agile.api.vo.WorkGroupVO">
+        select
+          fwg.name,
+          fwg.id,
+          fwg.parent_id,
+          fwg.object_version_number,
+          fwgur.user_id
+        from fd_work_group_user_rel fwgur
+        LEFT JOIN fd_work_group fwg ON fwg.id = fwgur.work_group_id
+        where fwgur.organization_id = #{organizationId}
+        <if test="userIds != null and userIds.size > 0">
+            and user_id in
+            <foreach collection="userIds" item="userId" open="(" close=")" separator=",">
+                #{userId}
+            </foreach>
+        </if>
+    </select>
 </mapper>

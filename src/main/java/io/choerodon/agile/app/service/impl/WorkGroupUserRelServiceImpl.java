@@ -1,9 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.AgileUserVO;
-import io.choerodon.agile.api.vo.UserVO;
-import io.choerodon.agile.api.vo.WorkGroupUserRelParamVO;
-import io.choerodon.agile.api.vo.WorkGroupUserRelVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.WorkGroupService;
 import io.choerodon.agile.app.service.WorkGroupUserRelService;
 import io.choerodon.agile.infra.dto.UserDTO;
@@ -91,11 +88,18 @@ public class WorkGroupUserRelServiceImpl implements WorkGroupUserRelService {
         if (CollectionUtils.isEmpty(content)) {
             return new Page<>();
         }
+        List<Long> users = content.stream().map(UserDTO::getId).collect(Collectors.toList());
+        List<WorkGroupVO> workGroupVOS = workGroupUserRelMapper.selectWorkGroupByUserId(organizationId, users);
+        Map<Long, List<WorkGroupVO>> workGroupMap = new HashMap<>();
+        if (!CollectionUtils.isEmpty(workGroupVOS)) {
+            workGroupMap.putAll(workGroupVOS.stream().collect(Collectors.groupingBy(WorkGroupVO::getUserId)));
+        }
         List<WorkGroupUserRelVO> list = new ArrayList<>();
         content.forEach(v -> {
             WorkGroupUserRelVO workGroupUserRelVO = new WorkGroupUserRelVO();
             workGroupUserRelVO.setUserId(v.getId());
             workGroupUserRelVO.setUserVO(modelMapper.map(v, UserVO.class));
+            workGroupUserRelVO.setWorkGroupVOS(workGroupMap.get(v.getId()));
             list.add(workGroupUserRelVO);
         });
         return PageUtil.buildPageInfoWithPageInfoList(userPage, list);
@@ -135,5 +139,28 @@ public class WorkGroupUserRelServiceImpl implements WorkGroupUserRelService {
             map.putAll(workGroupUserRelDTOS.stream().collect(Collectors.groupingBy(WorkGroupUserRelDTO::getWorkGroupId, Collectors.mapping(WorkGroupUserRelDTO::getUserId, Collectors.toSet()))));
         }
         return map;
+    }
+
+    @Override
+    public Page<WorkGroupUserRelVO> pageUnlinkUser(Long organizationId, PageRequest pageRequest, WorkGroupUserRelParamVO workGroupUserRelParamVO) {
+        AgileUserVO agileUserVO = modelMapper.map(workGroupUserRelParamVO, AgileUserVO.class);
+        if (!ObjectUtils.isEmpty(workGroupUserRelParamVO.getWorkGroupId())) {
+            // 传了工作组id就要忽略工作组已关联的成员
+            Set<Long> userIds = workGroupUserRelMapper.listUserIdsByWorkGroupIds(organizationId, Arrays.asList(workGroupUserRelParamVO.getWorkGroupId()));
+            agileUserVO.setIgnoredUserIds(userIds);
+        }
+        Page<UserDTO> userPage = baseFeignClient.pagingUsersOnOrganizationLevel(organizationId, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
+        List<UserDTO> content = userPage.getContent();
+        if (CollectionUtils.isEmpty(content)) {
+            return new Page<>();
+        }
+        List<WorkGroupUserRelVO> list = new ArrayList<>();
+        content.forEach(v -> {
+            WorkGroupUserRelVO workGroupUserRelVO = new WorkGroupUserRelVO();
+            workGroupUserRelVO.setUserId(v.getId());
+            workGroupUserRelVO.setUserVO(modelMapper.map(v, UserVO.class));
+            list.add(workGroupUserRelVO);
+        });
+        return PageUtil.buildPageInfoWithPageInfoList(userPage, list);
     }
 }

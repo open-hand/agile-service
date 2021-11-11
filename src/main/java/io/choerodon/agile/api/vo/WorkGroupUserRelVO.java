@@ -18,6 +18,8 @@ public class WorkGroupUserRelVO {
 
     private UserVO userVO;
 
+    private List<WorkGroupVO> workGroupVOS;
+
     public List<Long> getWorkGroupIds() {
         return workGroupIds;
     }
@@ -40,5 +42,13 @@ public class WorkGroupUserRelVO {
 
     public void setUserVO(UserVO userVO) {
         this.userVO = userVO;
+    }
+
+    public List<WorkGroupVO> getWorkGroupVOS() {
+        return workGroupVOS;
+    }
+
+    public void setWorkGroupVOS(List<WorkGroupVO> workGroupVOS) {
+        this.workGroupVOS = workGroupVOS;
     }
 }
