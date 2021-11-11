@@ -15,7 +15,7 @@ const WorkingHoursIssueTable = ({
 }) => {
   const [issueDetailProps] = useDetail();
   const {
-    isProject, tableFields: fields, onCloseDetail, mode,
+    tableFields: fields, onCloseDetail, mode,
   } = useIssueStore();
   const detailCallback = useCallback(() => {
     if (mode === 'issue') {
@@ -31,14 +31,13 @@ const WorkingHoursIssueTable = ({
         issueId: get(record, 'issueId'),
         projectId: get(record, 'projectId'),
         applyType: 'agile',
-        disabled: !isProject,
       },
       events: {
         delete: detailCallback,
         close: detailCallback,
       },
     });
-  }, [detailCallback, isProject, issueDetailProps]);
+  }, [detailCallback, issueDetailProps]);
   const visibleColumns = useMemo(() => defaultListLayoutColumns.filter((item) => item.display), [defaultListLayoutColumns]);
   const tableColumns = useMemo(() => getTableColumns({
     listLayoutColumns: visibleColumns, fields, onSummaryClick,

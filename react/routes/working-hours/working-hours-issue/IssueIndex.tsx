@@ -43,7 +43,7 @@ const WorkingHoursIssue = (props = {}) => {
   // @ts-ignore
   const { cached } = props;
   const {
-    loadData, dateSearchDs, loading, workingHoursIssuesDs, workingHoursAssigneeDs, mode, isProject, tableFields, isContain, setIsContain, tableFields: fields, defaultListLayoutColumnsRef,
+    loadData, dateSearchDs, loading, workingHoursIssuesDs, mode, isProject, isContain, setIsContain, tableFields: fields, totalWorkTime,
   } = useIssueStore();
 
   const handleChangeIsContain = useCallback((value) => {
@@ -127,8 +127,15 @@ const WorkingHoursIssue = (props = {}) => {
             overflow: 'auto',
           }}
         >
-          <div>
-            <WorkingHoursIssueSearch loadData={() => {}} />
+          <div className={styles.searchTotalRow}>
+            <div className={styles.search}>
+              <WorkingHoursIssueSearch loadData={() => {}} />
+            </div>
+            {
+              totalWorkTime && (
+                <div className={styles.total}>{`总计登记工时：${totalWorkTime}h`}</div>
+              )
+            }
           </div>
           {
             mode === 'issue' && (
