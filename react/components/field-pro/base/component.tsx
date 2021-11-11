@@ -3,6 +3,9 @@ import React from 'react';
 import {
   TextField, Select, DatePicker, TimePicker, DateTimePicker, NumberField, TextArea, UrlField, DataSet, CheckBox,
 } from 'choerodon-ui/pro';
+import type { TextFieldProps } from 'choerodon-ui/pro/lib/text-field/TextField';
+import type { NumberFieldProps } from 'choerodon-ui/pro/lib/number-field/NumberField';
+import type { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 import { TextAreaProps } from 'choerodon-ui/pro/lib/text-area/TextArea';
 import { FormFieldProps } from 'choerodon-ui/pro/lib/field/FormField';
 import SelectStatus from '@/components/select/select-status';
@@ -77,13 +80,14 @@ export const CustomFieldMap = {
   member: SelectUser,
 };
 export interface CustomClassComponentMapProps {
-  time: IClassComponentType<TimePicker>
-  datetime: IClassComponentType<DateTimePicker>
-  date: IClassComponentType<DatePicker>
-  number: IClassComponentType<NumberField>
-  input: IClassComponentType<TextField>,
-  text: IClassComponentType<TextArea<any>>
+  time: React.ComponentClass<DatePickerProps>
+  datetime: React.ComponentClass<DatePickerProps>
+  date: React.ComponentClass<DatePickerProps>
+  number: React.ComponentClass<NumberFieldProps>
+  input: React.ComponentClass<TextFieldProps>
+  text: React.ComponentClass<TextAreaProps>
 }
+
 export type CustomComponentMapProps = typeof CustomFieldMap & CustomClassComponentMapProps
 
 export type IAgileBaseFieldTypeComponentProps = Partial<IComponentFCWithClassObjectProps<CustomComponentMapProps>>

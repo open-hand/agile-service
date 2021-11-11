@@ -1,44 +1,14 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
-  Modal, DataSet, Form, Select, Button, Icon,
+  Modal, Form, Select, Button, Icon,
 } from 'choerodon-ui/pro';
-
 import { observer } from 'mobx-react-lite';
-import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { IModalProps } from '@/common/types';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import styles from './index.less';
+import useGanntDependencyModal, { IGanttDependencyModalProps, StoreProvider } from './stores';
 
-interface IGanttDependencyModalProps {
-  onOk?: Function
-}
-const options = ['FF', 'FS', 'SF', 'SS'];
-const GanttDependency: React.FC<{ modal?: IModalProps } & IGanttDependencyModalProps> = observer(({
-  modal, onOk,
-}) => {
-  const dataset = useMemo(() => new DataSet({
-    autoCreate: true,
-    selection: false,
-    fields: [
-      {
-        name: 'relationship',
-        label: '依赖关系',
-        required: true,
-        type: 'string' as FieldType,
-        options: new DataSet({
-          paging: false,
-          data: options.map((item) => ({ meaning: item, value: item })),
-        }),
-      },
-      {
-        name: 'issue', label: '工作项', required: true, type: 'string' as FieldType,
-      },
-
-    ],
-    transport: {
-    },
-  }), []);
-
+const GanttDependency: React.FC = observer(() => {
+  const { dataset, modal, onOk } = useGanntDependencyModal();
   return (
     <div>
       <Form dataSet={dataset}>
@@ -54,6 +24,7 @@ const GanttDependency: React.FC<{ modal?: IModalProps } & IGanttDependencyModalP
     </div>
   );
 });
+
 const openGanttDependencyModal = (props: IGanttDependencyModalProps) => {
   Modal.open({
     key: Modal.key(),
@@ -62,7 +33,10 @@ const openGanttDependencyModal = (props: IGanttDependencyModalProps) => {
       width: MODAL_WIDTH.small,
     },
     drawer: true,
-    children: <GanttDependency {...props} />,
+    children: (
+      <StoreProvider {...props}>
+        <GanttDependency />
+      </StoreProvider>),
 
   });
 };
