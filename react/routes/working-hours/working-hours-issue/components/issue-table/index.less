@@ -11,5 +11,15 @@
 }
 
 .workingHoursIssueTable {
-  
+  :global {
+    .c7n-pro-table-body {
+      max-height: unset !important;
+      .c7n-pro-table-cell {
+        .c7n-pro-table-cell-prefix {
+          padding-right: 0 !important;
+        }
+      }
+      
+    }
+  }
 }
