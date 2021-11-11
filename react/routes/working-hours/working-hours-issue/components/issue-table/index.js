@@ -2,42 +2,28 @@ import React, { useMemo, useCallback } from 'react';
 import { Table } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { usePersistFn } from 'ahooks';
-import { includes, get } from 'lodash';
+import { get } from 'lodash';
 import { useUpdateColumnMutation } from '@/hooks/data/useTableColumns';
-import { ColumnManage, TableCache } from './Component';
 import styles from './index.less';
-import { getTableColumns, expandColumn } from '@/components/issue-table/columns';
+import { getTableColumns } from '@/components/issue-table/columns';
 import getListLayoutColumns from '@/routes/Issue/components/issue-table/utils/getListLayoutColumns';
-import AutoSize from '@/components/auto-size';
-import getColumnManageOptions from './utils/getColumnManageOptions';
 import DetailContainer, { useDetail } from '@/components/detail-container';
-import { StoreProvider, useIssueStore } from '../../stores';
-
-const defaultVisibleColumns = [
-  'summary',
-  'issueNum',
-  'status',
-  'workTime',
-  'historyWorkTime',
-  'estimatedWorkTime',
-  'rate',
-];
-
-const disabledSystemOptionsCodes = ['summary', 'workTime', 'historyWorkTime', 'estimatedWorkTime', 'rate'];
-const defaultVisibleListLayoutColumns = defaultVisibleColumns.map((code) => ({
-  columnCode: code,
-  display: true,
-}));
+import { useIssueStore } from '../../stores';
 
 const WorkingHoursIssueTable = ({
   dataSet, defaultListLayoutColumns, handleColumnResize, ...otherProps
 }) => {
   const [issueDetailProps] = useDetail();
-  const { isProject, tableFields: fields, onCloseDetail } = useIssueStore();
+  const {
+    isProject, tableFields: fields, onCloseDetail, mode,
+  } = useIssueStore();
   const detailCallback = useCallback(() => {
-    dataSet.query(dataSet.currentPage);
-    onCloseDetail();
-  }, [dataSet, onCloseDetail]);
+    if (mode === 'issue') {
+      dataSet.query(dataSet.currentPage);
+    } else {
+      onCloseDetail();
+    }
+  }, [dataSet, mode, onCloseDetail]);
   const onSummaryClick = useCallback((record) => {
     issueDetailProps?.open({
       path: 'issue',
@@ -63,7 +49,6 @@ const WorkingHoursIssueTable = ({
       <Table
         queryBar="none"
         autoHeight={{ type: 'maxHeight', diff: 70 }}
-        columnResizable
         className={styles.workingHoursIssueTable}
         dataSet={dataSet}
         columns={[...tableColumns].map((column, i) => ({
@@ -72,6 +57,7 @@ const WorkingHoursIssueTable = ({
           lock: column.fixed,
           name: column.dataIndex,
         }))}
+        columnResizable
         onColumnResize={handleColumnResize}
         mode="tree"
         rowHeight={29}
@@ -82,47 +68,22 @@ const WorkingHoursIssueTable = ({
   );
 };
 
-const ColumnManageComponent = observer(({
-  defaultListLayoutColumns,
-}) => {
-  const { tableFields: fields } = useIssueStore();
-  const options = useMemo(() => getColumnManageOptions(defaultListLayoutColumns, fields), [defaultListLayoutColumns, fields]);
-  const visibleColumns = useMemo(() => (
-    defaultListLayoutColumns.filter((f) => f.display).map((f) => f.columnCode)
-  ), [defaultListLayoutColumns]);
-  return (
-    <div style={{
-      position: 'absolute',
-      zIndex: 1000,
-    }}
-    >
-      <ColumnManage
-        value={visibleColumns}
-        options={options.map((item) => ({
-          code: item.code,
-          title: item.title,
-          disabled: includes(disabledSystemOptionsCodes, item.code),
-        }))}
-      />
-    </div>
-  );
-}, []);
+const ObserverWorkingHoursIssueTable = observer(WorkingHoursIssueTable);
 
 const NewComponent = observer(({
-  dataSet, cached, ...otherProps
+  dataSet, defaultListLayoutColumns, ...otherProps
 }) => {
   const { tableFields: fields } = useIssueStore();
-  const defaultListLayoutColumns = useMemo(() => cached?.listLayoutColumns ?? defaultVisibleListLayoutColumns, [cached?.listLayoutColumns]);
 
   const mutation = useUpdateColumnMutation('workingHoursIssue');
 
   const listLayoutColumns = useMemo(() => getListLayoutColumns(defaultListLayoutColumns, fields), [defaultListLayoutColumns, fields]);
-  const handleColumnResize = usePersistFn(({ name, width }) => {
+  const handleColumnResize = usePersistFn(({ column, width }) => {
     mutation.mutate({
       applyType: 'workingHoursIssue',
       listLayoutColumnRelVOS: listLayoutColumns.map((listLayoutColumn, i) => ({
         ...listLayoutColumn,
-        ...listLayoutColumn.columnCode === name ? {
+        ...listLayoutColumn.columnCode === column.code ? {
           width,
         } : {
           width: listLayoutColumn.width ?? 0,
@@ -133,9 +94,6 @@ const NewComponent = observer(({
   });
   return (
     <>
-      <ColumnManageComponent
-        defaultListLayoutColumns={defaultListLayoutColumns}
-      />
       <ObserverWorkingHoursIssueTable
         dataSet={dataSet}
         defaultListLayoutColumns={listLayoutColumns}
@@ -146,9 +104,4 @@ const NewComponent = observer(({
   );
 }, []);
 
-const ObserverWorkingHoursIssueTable = observer(WorkingHoursIssueTable);
-export default (props) => (
-  <TableCache>
-    {(cacheProps) => <NewComponent {...props} {...cacheProps} />}
-  </TableCache>
-);
+export default NewComponent;

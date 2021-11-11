@@ -1,9 +1,11 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   TabPage as Page, Header, Breadcrumb, Content, HeaderButtons,
 } from '@choerodon/boot';
-import { CheckBox } from 'choerodon-ui/pro';
+import { CheckBox, Button } from 'choerodon-ui/pro';
+import { Icon } from 'choerodon-ui';
+import { includes } from 'lodash';
 import { LoadingProvider } from '@/components/Loading';
 import IssueTable from './components/issue-table';
 import AssigneeIssueTable from './components/assignee-issue-table';
@@ -14,15 +16,52 @@ import ModeSwitch from './components/mode-switch';
 import openExportWorkModal from './components/export';
 import useDefaultMyFilter from '@/hooks/useDefaultMyFilter';
 import WorkingHoursIssueSearch from './components/search';
+import { openCustomColumnManageModal } from '@/components/table-cache/column-manage/Modal';
+import { getProjectId, getMenuType } from '@/utils/common';
+import getColumnManageOptions from './utils/getColumnManageOptions';
+import { ListLayoutColumnVO } from '@/api';
+import TableCache from '@/components/table-cache';
 
-const WorkingHoursIssue = () => {
+const disabledSystemOptionsCodes = ['summary', 'workTime', 'historyWorkTime', 'estimatedWorkTime', 'rate'];
+
+const defaultVisibleColumns = [
+  'summary',
+  'issueNum',
+  'status',
+  'workTime',
+  'historyWorkTime',
+  'estimatedWorkTime',
+  'rate',
+];
+
+const defaultVisibleListLayoutColumns = defaultVisibleColumns.map((code) => ({
+  columnCode: code,
+  display: true,
+}));
+
+const WorkingHoursIssue = (props = {}) => {
+  // @ts-ignore
+  const { cached } = props;
   const {
-    loadData, dateSearchDs, loading, workingHoursIssuesDs, workingHoursAssigneeDs, mode, isProject, tableFields, isContain, setIsContain,
+    loadData, dateSearchDs, loading, workingHoursIssuesDs, workingHoursAssigneeDs, mode, isProject, tableFields, isContain, setIsContain, tableFields: fields, defaultListLayoutColumnsRef,
   } = useIssueStore();
 
   const handleChangeIsContain = useCallback((value) => {
     setIsContain(value);
   }, [setIsContain]);
+
+  if (mode === 'issue' && !defaultVisibleListLayoutColumns.find((item) => item.columnCode === 'assignee')) {
+    defaultVisibleListLayoutColumns.splice(2, 0, {
+      columnCode: 'assignee',
+      display: true,
+    });
+  }
+  const defaultListLayoutColumns = useMemo(() => cached?.listLayoutColumns ?? defaultVisibleListLayoutColumns, [cached?.listLayoutColumns]);
+
+  const options = useMemo(() => getColumnManageOptions(defaultListLayoutColumns, fields), [defaultListLayoutColumns, fields]);
+  const visibleColumns = useMemo(() => (
+    defaultListLayoutColumns.filter((f: ListLayoutColumnVO) => f.display).map((f: ListLayoutColumnVO) => f.columnCode)
+  ), [defaultListLayoutColumns]);
 
   return (
     <Page className={styles.calendarIndex}>
@@ -33,6 +72,34 @@ const WorkingHoursIssue = () => {
             name: '导出',
             icon: 'unarchive-o',
             handler: openExportWorkModal,
+          },
+          {
+            display: isProject,
+            name: '列配置',
+            // icon: 'view_column-o',
+            handler: () => {
+              openCustomColumnManageModal({
+                modelProps: {
+                  title: '设置列显示字段',
+                },
+                projectId: getProjectId(),
+                value: visibleColumns,
+                options: options.map((item) => ({
+                  code: item.code,
+                  title: item.title,
+                  disabled: includes(disabledSystemOptionsCodes, item.code),
+                })),
+                type: 'workingHoursIssue',
+              });
+            },
+            element: (
+              <Button>
+                <Icon
+                  type="view_column-o"
+                  style={{ fontSize: 20, marginBottom: -1 }}
+                />
+                <span>列配置</span>
+              </Button>),
           },
           {
             display: true,
@@ -66,13 +133,15 @@ const WorkingHoursIssue = () => {
           {
             mode === 'issue' && (
             <IssueTable
+             // @ts-ignore
               dataSet={workingHoursIssuesDs}
+              defaultListLayoutColumns={defaultListLayoutColumns}
             />
             )
           }
           {
             mode === 'assignee' && isProject && (
-              <AssigneeIssueTable />
+              <AssigneeIssueTable defaultListLayoutColumns={defaultListLayoutColumns} />
             )
           }
         </LoadingProvider>
@@ -83,12 +152,24 @@ const WorkingHoursIssue = () => {
 
 const ObserverWorkingHoursIssue = observer(WorkingHoursIssue);
 
+const CacheWorkingHoursIssue = (props: any) => (
+  <TableCache type="workingHoursIssue" projectId={getProjectId()}>
+    {(cacheProps) => <ObserverWorkingHoursIssue {...props} {...cacheProps} />}
+  </TableCache>
+);
+
 const Index = (props: any) => {
   const { data: myFilter, isLoading } = useDefaultMyFilter();
 
   return !isLoading && (
     <StoreProvider {...props} myDefaultFilter={myFilter}>
-      <ObserverWorkingHoursIssue />
+      {
+        getMenuType() === 'project' ? (
+          <CacheWorkingHoursIssue />
+        ) : (
+          <ObserverWorkingHoursIssue />
+        )
+      }
     </StoreProvider>
   );
 };

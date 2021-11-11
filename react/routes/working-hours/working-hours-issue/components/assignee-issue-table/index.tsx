@@ -9,13 +9,16 @@ import columnMap from '../columnMap';
 import styles from './index.less';
 import WorkingHoursIssuesDataSet from '../../stores/WorkingHoursIssuesDataSet';
 import { getProjectId, getOrganizationId } from '@/utils/common';
+import { ListLayoutColumnVO } from '@/api';
 
 const { Column } = Table;
 interface Props {
   // eslint-disable-next-line react/require-default-props
   projectId?: string
+  // eslint-disable-next-line react/require-default-props
+  defaultListLayoutColumns?: ListLayoutColumnVO[]
 }
-const AssigneeIssueTable: React.FC<Props> = ({ projectId }) => {
+const AssigneeIssueTable: React.FC<Props> = ({ projectId, defaultListLayoutColumns }) => {
   const {
     loading, workingHoursAssigneeDs, tableFields, setLoading,
   } = useIssueStore();
@@ -47,8 +50,9 @@ const AssigneeIssueTable: React.FC<Props> = ({ projectId }) => {
           }
           return (
             <IssueTable
-              fields={tableFields}
+            // @ts-ignore
               dataSet={recordIssueDs}
+              defaultListLayoutColumns={defaultListLayoutColumns}
               className={styles.assigneeModeIssueTable}
               key={`${projectId || getProjectId()}-${record.get('userId')}`}
             />
