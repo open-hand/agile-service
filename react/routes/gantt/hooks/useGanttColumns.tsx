@@ -31,6 +31,8 @@ import { IGanttPageProps } from '../Gantt';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import openGanttConflictModal from '../components/gannt-conflict-modal';
 import { ganttIsCanQuickCreateIssue } from '../utils';
+import openGanttDependencyModal from '../components/gantt-dependency-modal';
+import TableDropMenu from '@/components/table-drop-menu';
 
 interface IGanttColumnsHookProps extends TableCacheRenderProps {
   menuType: IGanttPageProps['menuType']
@@ -247,6 +249,8 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
         </span>
       );
     }
+    const hasDependency = true;
+    const isShowDependency = !record.group && record.issueTypeVO?.typeCode && !['issue_epic', 'feature'].includes(record.issueTypeVO?.typeCode);
     const isCanCreateIssue = !disable.disableOperate && isCanQuickCreateIssue(record, { disableFeature: disable.disableFeatureCreateIssue });
     return !record.group ? (
       // eslint-disable-next-line no-underscore-dangle
@@ -265,7 +269,14 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
 
           </span>
         </Tooltip>
-        {isCanCreateIssue && (
+        <TableDropMenu
+          showText={false}
+          menuData={[
+            { text: `${hasDependency ? '编辑' : '添加'}前置依赖`, action: openGanttDependencyModal, display: isShowDependency },
+            { text: '添加子工作项', action: () => openCreateSubIssue(record as any), display: isShowDependency && isCanCreateIssue },
+          ]}
+        />
+        {!isShowDependency && isCanCreateIssue && (
           <Icon
             type="add"
             className="c7n-gantt-content-body-parent_create"
