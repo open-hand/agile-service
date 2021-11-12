@@ -6,16 +6,17 @@ import { injectIntl } from 'react-intl';
 import {
   DataSet,
 } from 'choerodon-ui/pro';
+import { useCreation, useUnmount } from 'ahooks';
 import GanntDependencyModalDataSet from './GanntDependencyModalDataSet';
 import { IModalProps } from '@/common/types';
 
-export interface IGanttDependencyModalProps{
-    onOk?:Function
+export interface IGanttDependencyModalProps {
+  onOk?: Function
 
 }
 interface Context extends IGanttDependencyModalProps {
-    dataset: DataSet
-    modal?: IModalProps
+  dataset: DataSet
+  modal?: IModalProps
 }
 const Store = createContext({} as Context);
 
@@ -25,7 +26,8 @@ export default function useGanntDependencyModal() {
 export const StoreProvider = inject('AppState')(injectIntl(
   (props) => {
     const { children } = props;
-    const dataset = useMemo(() => new DataSet(GanntDependencyModalDataSet()), []);
+    const dataset = useCreation(() => new DataSet(GanntDependencyModalDataSet()), []);
+
     return (
       <Store.Provider value={{ ...props, dataset }}>
         {children}
