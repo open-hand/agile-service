@@ -34,6 +34,7 @@ import openCreateLink from './create-link/CreateLink';
           typeCode: link.typeCode,
         }}
         i={i}
+        showAssignee
         projectId={projectId}
         onOpen={(issueId, linkedIssueId) => {
           const rightId = issueId === id ? linkedIssueId : issueId;
