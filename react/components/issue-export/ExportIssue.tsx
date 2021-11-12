@@ -94,7 +94,7 @@ const ExportIssue: React.FC = () => {
       initField: (data) => store.initField(data),
       initFieldFinish: (cField, sField, current) => store.initFieldFinish(cField, sField, current),
       initChosenField: (data) => store.initChosenField(data),
-      choseField: (data) => handleChange(data),
+      // choseField: (data) => handleChange(data),
     },
   });
 
@@ -139,7 +139,6 @@ const ExportIssue: React.FC = () => {
   const [filterData, filterComponentProps] = useIssueFilterForm({
     fields,
     value: choseFieldStore.getAllChosenField,
-    defaultValue: store.getCurrentChosenFieldsArr,
     extraFormItems: store.getExtraFields,
     systemDataSetField: store.dataSetSystemFields,
     extraRenderFields: store.renderField,
@@ -149,9 +148,9 @@ const ExportIssue: React.FC = () => {
       },
     },
   });
-  const handleChange = (value: IChosenFieldField | IChosenFieldField[]) => {
-    Array.isArray(value) ? value.forEach((v) => filterData.actions?.onAdd(v)) : filterData.actions?.onAdd(value);
-  };
+  // const handleChange = (value: IChosenFieldField | IChosenFieldField[]) => {
+  //   Array.isArray(value) ? value.forEach((v) => filterData.actions?.onAdd(v)) : filterData.actions?.onAdd(value);
+  // };
   useEffect(() => {
     store.loadRecordAxios(store).then((res: IDownLoadInfo) => {
       store.setDownloadInfo(res);

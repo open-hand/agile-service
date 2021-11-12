@@ -1,12 +1,14 @@
 import { DataSet } from 'choerodon-ui/pro';
-import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import type { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
+import type { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { IChosenFieldField } from '../chose-field/types';
 import ChooseField, { useChoseField } from '../chose-field';
-import IssueFilterForm, { useIssueFilterFormDataSet, useIssueFilterForm } from './IssueFilterForm';
+import IssueFilterFormConsumer from './IssueFilterForm';
 import IssueFilterFormStoreContextProvider from './stores';
+import useIssueFilterFormDataSet from './hooks/useIssueFilterFormDataSet';
+import useIssueFilterForm from './hooks/useIssueFilterForm';
 
 interface IIssueFilterFormProps {
   dataSet?: DataSet, // 传入外部dataSet 将放弃组件内创建
@@ -29,7 +31,7 @@ function DefaultChooseField(chooseConfig: any) {
   };
 }
 
-const Index: React.FC<IIssueFilterFormProps> = (props) => {
+const IssueFilterForm: React.FC<IIssueFilterFormProps> = (props) => {
   let { children } = props;
   let defaultFooterProps: any = {};
   if (!children && props.defaultVisibleFooterAddBtn) {
@@ -45,9 +47,19 @@ const Index: React.FC<IIssueFilterFormProps> = (props) => {
   }
   return (
     <IssueFilterFormStoreContextProvider footer={children} {...props} {...defaultFooterProps}>
-      <IssueFilterForm />
+      <IssueFilterFormConsumer />
     </IssueFilterFormStoreContextProvider>
   );
 };
-export default observer(Index);
+IssueFilterForm.defaultProps = {
+  dataSet: undefined,
+  fields: undefined,
+  onDelete: undefined,
+  chosenFields: undefined,
+  defaultVisibleFooterAddBtn: undefined,
+  extraRenderFields: undefined,
+  extraFormItems: undefined,
+  formColumns: undefined,
+};
+export default observer(IssueFilterForm);
 export { useIssueFilterFormDataSet, useIssueFilterForm, IIssueFilterFormProps };
