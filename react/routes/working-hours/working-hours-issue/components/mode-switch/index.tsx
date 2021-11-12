@@ -19,6 +19,7 @@ const ModeSwitch = () => {
             <>
               <Option value="issue" key="issue">按工作项查看</Option>
               <Option value="assignee" key="assignee">按经办人查看</Option>
+              <Option value="project" key="list">按项目查看</Option>
             </>
           ) : (
             <>

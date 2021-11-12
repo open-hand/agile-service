@@ -25,15 +25,18 @@ const renderRate = ({ value }: { value: number}) => (
 
 const renderUser = ({ record }: { record: Record}, code: string) => {
   const user = record?.get(code);
-  const showText = user?.ldap ? `${user?.realName}(${user?.loginName})` : `${user?.realName}(${user?.email})`;
-  return (
-    <UserTag
-      data={{
-        ...user || {},
-        textShow: showText,
-      }}
-    />
-  );
+  if (user) {
+    const showText = user?.ldap ? `${user?.realName}(${user?.loginName})` : `${user?.realName}(${user?.email})`;
+    return (
+      <UserTag
+        data={{
+          ...user || {},
+          textShow: showText,
+        }}
+      />
+    );
+  }
+  return null;
 };
 
 const columnRenderMap = new Map([
@@ -98,7 +101,7 @@ const columnRenderMap = new Map([
   [
     'projectId', {
       sortable: true,
-      width: 160,
+      width: 250,
       renderer: ({ record }: { record: Record }) => <ProjectTags data={record.get('projectVO')} />,
     },
   ],

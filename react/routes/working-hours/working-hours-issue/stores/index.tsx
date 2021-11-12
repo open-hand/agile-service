@@ -20,6 +20,7 @@ import IssueSearchStore, { ILocalField } from '@/components/issue-search/store';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 import { ListLayoutColumnVO, workingHoursApi } from '@/api';
+import ProjectDataSet from './ProjectDataSet';
 
 const Store = createContext({} as Context);
 
@@ -41,6 +42,7 @@ interface Context {
   issueSearchStore: IssueSearchStore
   myDefaultFilter?: any
   workingHoursAssigneeDs: DataSet
+  workingHoursProjectDs: DataSet
   tableFields: IFoundationHeader[]
   isContain: boolean,
   setIsContain: (isContain: false) => void,
@@ -76,6 +78,12 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     organizationId: getOrganizationId(),
   })), []);
   const workingHoursAssigneeDs = useMemo(() => new DataSet(AssigneeDataSet({ projectId: getProjectId() })), []);
+  const workingHoursProjectDs = useMemo(() => new DataSet(ProjectDataSet()), []);
+  const dataSetMap = useMemo(() => new Map([
+    ['issue', workingHoursIssuesDs],
+    ['assignee', workingHoursAssigneeDs],
+    ['project', workingHoursProjectDs],
+  ]), []);
   const dateSearchDs = useMemo(() => new DataSet(DateSearchDataSet({ currentProject: AppState.getCurrentProject })), [AppState.getCurrentProject]);
   // eslint-disable-next-line no-nested-ternary
   const startTime = useMemo(() => (dateSearchDs.current?.get('startTime') && formatStartDate(dateSearchDs.current?.get('startTime'))) || localPageCacheStore.getItem('workingHours-issue-startTime') || `${formatStartDate(getIsOrganization() ? moment().subtract(6, 'days') : (
@@ -87,18 +95,12 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     const res = await workingHoursApi.getTotalWorkTime({ startTime, endTime, isContain });
     setTotalWorkTime(res || 5);
   }, []);
+
   const loadData = useCallback(() => {
-    console.log(mode, isContain);
-    if (mode === 'issue') {
-      workingHoursIssuesDs.setQueryParameter('startTime', startTime);
-      workingHoursIssuesDs.setQueryParameter('endTime', endTime);
-      workingHoursIssuesDs.query();
-    }
-    if (mode === 'assignee') {
-      workingHoursAssigneeDs.setQueryParameter('startTime', startTime);
-      workingHoursAssigneeDs.setQueryParameter('endTime', endTime);
-      workingHoursAssigneeDs.query();
-    }
+    const dataSet = dataSetMap.get(mode) as DataSet;
+    dataSet.setQueryParameter('startTime', startTime);
+    dataSet.setQueryParameter('endTime', endTime);
+    dataSet.query();
     getTotalWorkTime();
   }, [startTime, endTime, mode, isContain]);
 
@@ -107,25 +109,24 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
   }, [loadData]);
 
   const onCloseDetail = useCallback(async () => {
-    if (mode === 'assignee') {
-      const expandedRecordsMap = new Map([]);
-      workingHoursAssigneeDs.records.forEach((record) => {
-        if (record.getState('issueDs')) {
-          expandedRecordsMap.set(record.get('userId'), record.getState('issueDs'));
-        }
-        return record.getState('issueDs');
-      });
-      await workingHoursAssigneeDs.query(workingHoursAssigneeDs.currentPage);
-      workingHoursAssigneeDs.records.forEach((record) => {
-        if (expandedRecordsMap.get(record.get('userId'))) {
-          const issueDs = expandedRecordsMap.get(record.get('userId')) as DataSet;
-          record.setState('issueDs', issueDs);
-          // eslint-disable-next-line no-param-reassign
-          record.isExpanded = true;
-          issueDs.query(issueDs.currentPage);
-        }
-      });
-    }
+    const dataSet = dataSetMap.get(mode) as DataSet;
+    const expandedRecordsMap = new Map([]);
+    dataSet.records.forEach((record) => {
+      if (record.getState('issueDs')) {
+        expandedRecordsMap.set(record.get('userId'), record.getState('issueDs'));
+      }
+      return record.getState('issueDs');
+    });
+    await dataSet.query(dataSet.currentPage);
+    dataSet.records.forEach((record) => {
+      if (expandedRecordsMap.get(record.get('userId'))) {
+        const issueDs = expandedRecordsMap.get(record.get('userId')) as DataSet;
+        record.setState('issueDs', issueDs);
+        // eslint-disable-next-line no-param-reassign
+        record.isExpanded = true;
+        issueDs.query(issueDs.currentPage);
+      }
+    });
     getTotalWorkTime();
     // 加载总计登记工时
   }, [mode]);
@@ -141,6 +142,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     setMode,
     issueSearchStore,
     workingHoursAssigneeDs,
+    workingHoursProjectDs,
     isProject: getMenuType() === 'project',
     tableFields,
     isContain,

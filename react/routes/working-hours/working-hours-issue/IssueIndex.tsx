@@ -21,6 +21,7 @@ import { getProjectId, getMenuType } from '@/utils/common';
 import getColumnManageOptions from './utils/getColumnManageOptions';
 import { ListLayoutColumnVO } from '@/api';
 import TableCache from '@/components/table-cache';
+import ProjectIssueTable from './components/project-issue-table';
 
 const disabledSystemOptionsCodes = ['summary', 'workTime', 'historyWorkTime', 'estimatedWorkTime', 'rate'];
 
@@ -147,8 +148,13 @@ const WorkingHoursIssue = (props = {}) => {
             )
           }
           {
-            mode === 'assignee' && isProject && (
+            mode === 'assignee' && (
               <AssigneeIssueTable defaultListLayoutColumns={defaultListLayoutColumns} />
+            )
+          }
+          {
+            mode === 'project' && (
+              <ProjectIssueTable />
             )
           }
         </LoadingProvider>
