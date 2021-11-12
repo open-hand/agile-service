@@ -569,7 +569,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
               {text}
               {isHasConflict.current ? (
                 <Icon
-                  type="info"
+                  type="error"
                   style={{ marginLeft: 2 }}
                   className="c7n-gantt-content-body-summary-conflict"
                 />
