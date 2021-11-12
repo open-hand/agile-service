@@ -48,14 +48,12 @@ class BacklogHome extends Component {
   IssueDetailRef = React.createRef();
 
   componentDidUpdate(prevProps) {
-    if (!isEqual(this.state.origin, this.props.AppState.getUserWizardStatus)) {
+    if (!isEqual(this.state.origin, this.props?.AppState?.getUserWizardStatus)) {
       // eslint-disable-next-line react/no-did-update-set-state
       this.setState({
-        origin: this.props.AppState.getUserWizardStatus,
+        origin: this.props?.AppState?.getUserWizardStatus,
       });
-      if (
-        prevProps.AppState.getUserWizardStatus
-      && prevProps.AppState.getUserWizardStatus[2].status === 'uncompleted'
+      if (prevProps?.AppState?.getUserWizardStatus[2]?.status === 'uncompleted'
       ) {
         // eslint-disable-next-line react/no-did-update-set-state
         this.setState({
@@ -242,7 +240,7 @@ class BacklogHome extends Component {
 
   toHelpDoc = () => {
     window.open(
-      `${this.props.AppState.getUserWizardStatus[2].helpDocs[0]}`,
+      `${this.props?.AppState?.getUserWizardStatus[2]?.helpDocs[0]}`,
       '_blank',
     );
   };

@@ -86,8 +86,7 @@ function SprintButton({ data, sprintIndex }) {
 
   useEffect(() => {
     if (
-      AppState.getUserWizardStatus
-      && AppState.getUserWizardStatus[2].status === 'uncompleted'
+       AppState?.getUserWizardStatus[2]?.status === 'uncompleted'
     ) {
       setInNewUserGuideStepThree(true);
       setCreateBtnToolTipHidden(false);
@@ -108,7 +107,7 @@ function SprintButton({ data, sprintIndex }) {
 
   const toHelpDoc = () => {
     window.open(
-      `${AppState.getUserWizardStatus[2].helpDocs[2]}`,
+      `${AppState?.getUserWizardStatus[2]?.helpDocs[2]}`,
       '_blank',
     );
   };

@@ -35,8 +35,7 @@ function IssueList({
 
   useEffect(() => {
     if (
-      AppState.getUserWizardStatus
-      && AppState.getUserWizardStatus[2].status === 'uncompleted'
+       AppState?.getUserWizardStatus[2]?.status === 'uncompleted'
     ) {
       setInNewUserGuideStepThree(true);
       setTimeout(() => {
@@ -123,7 +122,7 @@ function IssueList({
 
   const toHelpDoc = () => {
     window.open(
-      `${AppState.getUserWizardStatus[2].helpDocs[1]}`,
+      `${AppState?.getUserWizardStatus[2]?.helpDocs[1]}`,
       '_blank',
     );
   };
