@@ -300,7 +300,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
           <span style={{ verticalAlign: 'middle', flex: 1 }} className="c7n-gantt-content-body-summary-text">
             {record.timeConflict && (
               <Icon
-                type="info"
+                type="error"
                 className="c7n-gantt-content-body-summary-conflict"
                 onClick={() => {
                   openGanttConflictModal({ assigneeId: record.assigneeId, assigneeName: record.assignee?.realName });
