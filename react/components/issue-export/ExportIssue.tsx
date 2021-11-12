@@ -227,6 +227,11 @@ const ExportIssue: React.FC = () => {
     modal?.handleOk(exportExcel);
   }, [exportExcel, modal]);
   useEffect(() => {
+    // 不存在模板选择则不显示保存
+    if (!action) {
+      setTemplateIsExist(true);
+      return;
+    }
     const currentFieldCodes = store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps);
     if (!currentFieldCodes.length) { // 没有字段选中时不应该显示保存按钮
       setTemplateIsExist(true);
@@ -241,8 +246,9 @@ const ExportIssue: React.FC = () => {
         return;
       }
     }
+
     setTemplateIsExist(false);
-  }, [checkBoxDataProps, checkOptions, store]);
+  }, [checkBoxDataProps, checkOptions, store, action]);
 
   return (
     <div>
@@ -304,8 +310,8 @@ const ExportIssue: React.FC = () => {
         messageKey={`agile-export-issue-${getProjectId()}`}
         onFinish={handleFinish}
         onStart={() => {
-            modal?.update({ okProps: { loading: true } });
-            store.setExportBtnHidden(true);
+          modal?.update({ okProps: { loading: true } });
+          store.setExportBtnHidden(true);
         }}
         autoDownload={{ fileName: `${getProjectName()}.xlsx` }}
         downloadInfo={store.downloadInfo.id ? {

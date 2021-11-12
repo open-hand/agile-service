@@ -44,7 +44,7 @@ const WorkingHoursIssue = (props = {}) => {
   // @ts-ignore
   const { cached } = props;
   const {
-    loadData, dateSearchDs, loading, workingHoursIssuesDs, mode, isProject, isContain, setIsContain, tableFields: fields, totalWorkTime,
+    loadData, dateSearchDs, loading, workingHoursIssuesDs, mode, isProject, isContain, issueSearchStore, setIsContain, tableFields: fields, totalWorkTime,
   } = useIssueStore();
 
   const handleChangeIsContain = useCallback((value) => {
@@ -72,7 +72,14 @@ const WorkingHoursIssue = (props = {}) => {
             display: true,
             name: '导出',
             icon: 'unarchive-o',
-            handler: openExportWorkModal,
+            handler: () => {
+              openExportWorkModal({
+                fields: issueSearchStore.getAllFields,
+                chosenFields: issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()].filter(((c) => !['issueIds', 'userId'].includes(c.code))) : [],
+                visibleColumns,
+                columns: options,
+              });
+            },
           },
           {
             display: isProject,
@@ -130,7 +137,7 @@ const WorkingHoursIssue = (props = {}) => {
         >
           <div className={styles.searchTotalRow}>
             <div className={styles.search}>
-              <WorkingHoursIssueSearch loadData={() => {}} />
+              <WorkingHoursIssueSearch loadData={() => { }} />
             </div>
             {
               totalWorkTime && (
@@ -140,11 +147,11 @@ const WorkingHoursIssue = (props = {}) => {
           </div>
           {
             mode === 'issue' && (
-            <IssueTable
-             // @ts-ignore
-              dataSet={workingHoursIssuesDs}
-              defaultListLayoutColumns={defaultListLayoutColumns}
-            />
+              <IssueTable
+                // @ts-ignore
+                dataSet={workingHoursIssuesDs}
+                defaultListLayoutColumns={defaultListLayoutColumns}
+              />
             )
           }
           {
