@@ -1,8 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { Table, DataSet } from 'choerodon-ui/pro';
-import { TableColumnTooltip, TableQueryBarType, SelectionMode } from 'choerodon-ui/pro/lib/table/enum';
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
+import { TableQueryBarType, SelectionMode } from 'choerodon-ui/pro/lib/table/enum';
 import { ColumnPropsInner } from 'choerodon-ui/pro/lib/table/Column';
 import IssueTable from '../issue-table';
 import { useIssueStore } from '../../stores';
@@ -20,25 +19,21 @@ interface Props {
   projectId?: string
   // eslint-disable-next-line react/require-default-props
   defaultListLayoutColumns?: ListLayoutColumnVO[]
+  dataSet: DataSet
 }
-const AssigneeIssueTable: React.FC<Props> = ({ projectId, defaultListLayoutColumns }) => {
-  const {
-    workingHoursAssigneeDs, isProject,
-  } = useIssueStore();
-  // const handleExpand = (expand: boolean, record: Record) => {
-  //   console.log(expand, record.isExpanded);
-  // };
+const AssigneeIssueTable: React.FC<Props> = ({ projectId, defaultListLayoutColumns, dataSet }) => {
+  const { isProject, mode } = useIssueStore();
 
   return (
     <div className={styles.assigneeTable}>
       <Table
-        dataSet={workingHoursAssigneeDs}
+        dataSet={dataSet}
         queryBar={'none' as TableQueryBarType}
-        rowHeight={29}
+        rowHeight={mode === 'assignee' ? 29 : 40}
         selectionMode={'none' as SelectionMode}
         expandIconAsCell={false}
         expandedRowRenderer={({ record }) => {
-          let recordIssueDs = record.getState('issueDs');
+          let recordIssueDs = record.getState('recordDs');
           if (!recordIssueDs) {
             const searchData = {
               projectId: (projectId || getProjectId()) as string,
@@ -47,7 +42,7 @@ const AssigneeIssueTable: React.FC<Props> = ({ projectId, defaultListLayoutColum
             // @ts-ignore
             const newDs = new DataSet(!isProject ? SimpleIssueDataSet(searchData) : WorkingHoursIssuesDataSet(searchData));
             recordIssueDs = newDs;
-            record.setState('issueDs', recordIssueDs);
+            record.setState('recordDs', recordIssueDs);
             recordIssueDs.query();
           }
           return (
@@ -64,7 +59,6 @@ const AssigneeIssueTable: React.FC<Props> = ({ projectId, defaultListLayoutColum
             )
           );
         }}
-        // onExpand={handleExpand}
       >
         <Column name="userId" {...columnMap.get('userId') as ColumnPropsInner} />
         <Column name="workTime" {...columnMap.get('workTime') as ColumnPropsInner} />

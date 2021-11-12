@@ -28,10 +28,8 @@ const searchDsUpdate = ({
     if (value) {
       const formateStartDate = formatStartDate(value, true) || adjustedStartDate;
       localPageCacheStore.setItem('workingHours-issue-startTime', formateStartDate);
-      // issueDs.setQueryParameter('startTime', formateStartDate);
     } else {
       localPageCacheStore.setItem('workingHours-issue-startTime', adjustedStartDate);
-      // issueDs.setQueryParameter('startTime', adjustedStartDate);
     }
   }
 
@@ -39,17 +37,13 @@ const searchDsUpdate = ({
     if (value) {
       const formateEndDate = formatEndDate(value, true) || formatEndDate(moment(), true);
       localPageCacheStore.setItem('workingHours-issue-endTime', formateEndDate);
-      // issueDs.setQueryParameter('endTime', formateEndDate);
     } else {
       localPageCacheStore.setItem('workingHours-issue-endTime', formatEndDate(moment(), true));
-      // issueDs.setQueryParameter('endTime', formatEndDate(moment()));
     }
   }
-
-  // issueDs.query();
 };
 
-const LogSearchDataSet = ({ currentProject }: { currentProject: any}) => ({
+const DateSearchDataSet = ({ currentProject }: { currentProject: any}) => ({
   autoCreate: true,
   autoQuery: false,
   fields: [{
@@ -85,4 +79,4 @@ const LogSearchDataSet = ({ currentProject }: { currentProject: any}) => ({
   },
 });
 
-export default LogSearchDataSet;
+export default DateSearchDataSet;

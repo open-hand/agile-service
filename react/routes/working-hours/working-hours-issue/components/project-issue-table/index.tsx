@@ -9,38 +9,42 @@ import styles from './index.less';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import SimpleIssueTable from '../simple-issue-table';
 import SimpleIssueDataSet from '../../stores/SimpleIssueDataSet';
+import AssigneeDataSet from '../../stores/AssigneeDataSet';
+import AssigneeIssueTable from '../assignee-issue-table';
 
 const { Column } = Table;
 interface Props {
 }
 const ProjectIssueTable: React.FC<Props> = () => {
   const {
-    workingHoursProjectDs,
+    workingHoursProjectDs, workingHoursProjectAssigneeDs, mode,
   } = useIssueStore();
 
   return (
     <div className={styles.assigneeTable}>
       <Table
-        dataSet={workingHoursProjectDs}
+        dataSet={mode === 'project' ? workingHoursProjectDs : workingHoursProjectAssigneeDs}
         queryBar={'none' as TableQueryBarType}
         rowHeight={29}
         selectionMode={'none' as SelectionMode}
         expandIconAsCell={false}
         expandedRowRenderer={({ record }) => {
-          let recordIssueDs = record.getState('issueDs');
+          let recordIssueDs = record.getState('recordDs');
           if (!recordIssueDs) {
             const searchData = {
               projectId: getProjectId() as string, // 可去掉
               organizationId: getOrganizationId() as string,
             };
             // @ts-ignore
-            const newDs = new DataSet(SimpleIssueDataSet(searchData));
+            const newDs = mode === 'project' ? new DataSet(SimpleIssueDataSet(searchData)) : new DataSet(AssigneeDataSet({}));
             recordIssueDs = newDs;
-            record.setState('issueDs', recordIssueDs);
+            record.setState('recordDs', recordIssueDs);
             recordIssueDs.query();
           }
-          return (
+          return mode === 'project' ? (
             <SimpleIssueTable dataSet={recordIssueDs} key={record.get('projectId')} />
+          ) : (
+            <AssigneeIssueTable dataSet={recordIssueDs} projectId={record.get('projectId')} key={record.get('projectId')} />
           );
         }}
       >

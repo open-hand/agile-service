@@ -21,8 +21,8 @@ const SimpleIssueTable: React.FC<Props> = ({ dataSet }) => {
   const {
     onCloseDetail, mode,
   } = useIssueStore();
-  const detailCallback = useCallback(() => {
-    onCloseDetail();
+  const detailCallback = useCallback((expandRecordId) => {
+    onCloseDetail(expandRecordId);
   }, [onCloseDetail]);
   const onSummaryClick = useCallback((record) => {
     issueDetailProps?.open({
@@ -33,8 +33,8 @@ const SimpleIssueTable: React.FC<Props> = ({ dataSet }) => {
         applyType: 'agile',
       },
       events: {
-        delete: detailCallback,
-        close: detailCallback,
+        delete: () => detailCallback(record.get('projectId')),
+        close: () => detailCallback(record.get('projectId')),
       },
     });
   }, [detailCallback, issueDetailProps]);
@@ -45,7 +45,7 @@ const SimpleIssueTable: React.FC<Props> = ({ dataSet }) => {
         queryBar={'none' as TableQueryBarType}
         className={styles.workingHoursIssueTable}
         mode={'tree' as TableMode}
-        rowHeight={40}
+        rowHeight={35}
         selectionMode={'none' as SelectionMode}
       >
         <Column

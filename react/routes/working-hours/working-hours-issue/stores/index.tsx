@@ -33,7 +33,7 @@ interface Context {
   workingHoursIssuesDs: DataSet,
   AppState: AppStateProps,
   loadData: () => void
-  issueDs: DataSet
+  recordDs: DataSet
   loading: boolean,
   setLoading: (loading: boolean) => void
   mode: IMode
@@ -43,10 +43,11 @@ interface Context {
   myDefaultFilter?: any
   workingHoursAssigneeDs: DataSet
   workingHoursProjectDs: DataSet
+  workingHoursProjectAssigneeDs: DataSet
   tableFields: IFoundationHeader[]
   isContain: boolean,
   setIsContain: (isContain: false) => void,
-  onCloseDetail: () => void
+  onCloseDetail: (expandRecordId: string) => void
   totalWorkTime: number
 }
 
@@ -79,10 +80,12 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
   })), []);
   const workingHoursAssigneeDs = useMemo(() => new DataSet(AssigneeDataSet({ projectId: getProjectId() })), []);
   const workingHoursProjectDs = useMemo(() => new DataSet(ProjectDataSet()), []);
+  const workingHoursProjectAssigneeDs = useMemo(() => new DataSet(ProjectDataSet()), []);
   const dataSetMap = useMemo(() => new Map([
     ['issue', workingHoursIssuesDs],
     ['assignee', workingHoursAssigneeDs],
     ['project', workingHoursProjectDs],
+    ['projectAssignee', workingHoursProjectAssigneeDs],
   ]), []);
   const dateSearchDs = useMemo(() => new DataSet(DateSearchDataSet({ currentProject: AppState.getCurrentProject })), [AppState.getCurrentProject]);
   // eslint-disable-next-line no-nested-ternary
@@ -108,25 +111,52 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     loadData();
   }, [loadData]);
 
-  const onCloseDetail = useCallback(async () => {
+  const onCloseDetail = useCallback(async (expandRecordId) => {
     const dataSet = dataSetMap.get(mode) as DataSet;
     const expandedRecordsMap = new Map([]);
-    dataSet.records.forEach((record) => {
-      if (record.getState('issueDs')) {
-        expandedRecordsMap.set(record.get('userId'), record.getState('issueDs'));
+    if (mode === 'assignee' || mode === 'project' || mode === 'projectAssignee') {
+      const mapKey = mode === 'assignee' ? 'userId' : 'projectId';
+      dataSet.records.forEach((record) => {
+        if (record.getState('recordDs')) {
+          expandedRecordsMap.set(record.get(mapKey), record.getState('recordDs'));
+        }
+      });
+      const assignExpandedRecordsMap = new Map([]);
+
+      if (mode === 'projectAssignee' && expandedRecordsMap.size) { // 项目经办人维度，打开的有经办人
+        for (const [projectId, assignDs] of expandedRecordsMap) {
+          (assignDs as DataSet).records.forEach((record) => {
+            if (record.getState('recordDs')) {
+              assignExpandedRecordsMap.set(`${projectId}-${record.get('userId')}`, record.getState('recordDs'));
+            }
+          });
+        }
       }
-      return record.getState('issueDs');
-    });
-    await dataSet.query(dataSet.currentPage);
-    dataSet.records.forEach((record) => {
-      if (expandedRecordsMap.get(record.get('userId'))) {
-        const issueDs = expandedRecordsMap.get(record.get('userId')) as DataSet;
-        record.setState('issueDs', issueDs);
-        // eslint-disable-next-line no-param-reassign
-        record.isExpanded = true;
-        issueDs.query(issueDs.currentPage);
-      }
-    });
+      await dataSet.query(dataSet.currentPage);
+      dataSet.records.forEach(async (record) => {
+        if (expandedRecordsMap.get(record.get(mapKey).toString())) {
+          const recordDs = expandedRecordsMap.get(record.get(mapKey)) as DataSet;
+          record.setState('recordDs', recordDs);
+          // eslint-disable-next-line no-param-reassign
+          record.isExpanded = true;
+          if (record.get(mapKey).toString() === expandRecordId.toString()) { // 只刷新打开详情所属record的DataSet当前页
+            await recordDs.query(recordDs.currentPage);
+
+            if (mode === 'projectAssignee' && assignExpandedRecordsMap.size) {
+              recordDs.records.forEach((assignRecord) => {
+                const assignRecordDs = assignExpandedRecordsMap.get(`${expandRecordId}-${assignRecord.get('userId')}`) as DataSet;
+                if (assignRecordDs) {
+                  assignRecord.setState('recordDs', assignRecordDs);
+                  // eslint-disable-next-line no-param-reassign
+                  assignRecord.isExpanded = true;
+                  assignRecordDs.query(assignRecordDs.currentPage);
+                }
+              });
+            }
+          }
+        }
+      });
+    }
     getTotalWorkTime();
     // 加载总计登记工时
   }, [mode]);
@@ -143,6 +173,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     issueSearchStore,
     workingHoursAssigneeDs,
     workingHoursProjectDs,
+    workingHoursProjectAssigneeDs,
     isProject: getMenuType() === 'project',
     tableFields,
     isContain,

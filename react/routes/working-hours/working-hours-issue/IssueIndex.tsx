@@ -44,7 +44,7 @@ const WorkingHoursIssue = (props = {}) => {
   // @ts-ignore
   const { cached } = props;
   const {
-    loadData, dateSearchDs, loading, workingHoursIssuesDs, mode, isProject, isContain, issueSearchStore, setIsContain, tableFields: fields, totalWorkTime,
+    loadData, dateSearchDs, loading, workingHoursIssuesDs, workingHoursAssigneeDs, mode, isProject, isContain, setIsContain, tableFields: fields, totalWorkTime, issueSearchStore,
   } = useIssueStore();
 
   const handleChangeIsContain = useCallback((value) => {
@@ -65,7 +65,7 @@ const WorkingHoursIssue = (props = {}) => {
   ), [defaultListLayoutColumns]);
 
   return (
-    <Page className={styles.calendarIndex}>
+    <Page className={styles.issueIndex}>
       <Header>
         <HeaderButtons items={[
           {
@@ -156,11 +156,11 @@ const WorkingHoursIssue = (props = {}) => {
           }
           {
             mode === 'assignee' && (
-              <AssigneeIssueTable defaultListLayoutColumns={defaultListLayoutColumns} />
+              <AssigneeIssueTable dataSet={workingHoursAssigneeDs} defaultListLayoutColumns={defaultListLayoutColumns} />
             )
           }
           {
-            mode === 'project' && (
+            (mode === 'project' || mode === 'projectAssignee') && (
               <ProjectIssueTable />
             )
           }

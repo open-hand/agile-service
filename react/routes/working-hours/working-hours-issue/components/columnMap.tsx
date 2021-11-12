@@ -66,6 +66,7 @@ const columnRenderMap = new Map([
     renderer: renderRate,
   }],
   ['summary', {
+    lock: true,
     sortable: true,
     width: 400,
     renderer: ({ record }: { record: Record}, onSummaryClick: (record: Record) => void) => (
