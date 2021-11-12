@@ -9,6 +9,8 @@ interface IChosenFieldField extends Omit<Partial<IField>, 'fieldType'> {
     defaultShow?: boolean,
     fieldType?: string,
     noDisplay?: boolean,
+    /** 是否为归档字段 */
+    archive?: boolean,
     immutableCheck?: boolean, // 存在此属性 则不可删除 禁止选择
     otherComponentProps?: Partial<SelectProps> | Partial<DatePickerProps> // 组件的属性
     value?: any,
