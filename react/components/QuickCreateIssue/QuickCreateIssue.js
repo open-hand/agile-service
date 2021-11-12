@@ -330,6 +330,9 @@ class QuickCreateIssue extends Component {
               <span
                 role="none"
                 onClick={() => {
+                  if (this.props.issueTypes.length === 0) {
+                    return;
+                  }
                   this.setState({
                     create: true,
                   }, () => {

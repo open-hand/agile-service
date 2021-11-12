@@ -242,7 +242,7 @@ class BacklogHome extends Component {
 
   toHelpDoc = () => {
     window.open(
-      'https://open.hand-china.com/document-center/doc/product/10177/10419?doc_code=119352&doc_id=124330#1.%20%E6%A6%82%E8%BF%B0',
+      `${this.props.AppState.getUserWizardStatus[2].helpDocs[0]}`,
       '_blank',
     );
   };

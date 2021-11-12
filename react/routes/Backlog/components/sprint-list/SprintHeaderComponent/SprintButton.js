@@ -108,7 +108,7 @@ function SprintButton({ data, sprintIndex }) {
 
   const toHelpDoc = () => {
     window.open(
-      'https://open.hand-china.com/document-center/doc/product/10177/10419?doc_code=119352&doc_id=124330#%E5%86%B2%E5%88%BA',
+      `${AppState.getUserWizardStatus[2].helpDocs[2]}`,
       '_blank',
     );
   };

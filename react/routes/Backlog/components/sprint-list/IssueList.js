@@ -123,7 +123,7 @@ function IssueList({
 
   const toHelpDoc = () => {
     window.open(
-      'https://open.hand-china.com/document-center/doc/product/10177/10419?doc_code=119347&doc_id=124326#2.%20%E5%AD%90%E4%BB%BB%E5%8A%A1',
+      `${AppState.getUserWizardStatus[2].helpDocs[1]}`,
       '_blank',
     );
   };
