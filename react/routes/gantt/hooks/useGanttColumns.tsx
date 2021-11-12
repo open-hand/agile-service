@@ -102,7 +102,14 @@ const ganttColumnMap = new Map<string, any>([['assignee', (onSortChange: any) =>
     </Tooltip>
   ),
 }),
-], ['estimatedStartTime', (onSortChange: any) => ({
+],
+['dependency', (onSortChange: any) => ({
+  width: 120,
+  minWidth: 120,
+  name: 'dependency',
+  label: '前置依赖',
+  render: (record: any) => record.dependency && <Tooltip title={record.dependency}><span>{record.dependency}</span></Tooltip>,
+})], ['estimatedStartTime', (onSortChange: any) => ({
   width: 100,
   minWidth: 100,
   name: 'estimatedStartTime',
@@ -366,6 +373,8 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
       },
     });
   }));
+  //
+  tableColumns.splice(2, 0, ganttColumnMap.get('dependency')!(onSortChange));
   return tableColumns;
 };
 const defaultVisibleColumns = ['assignee', 'estimatedStartTime', 'estimatedEndTime', 'actualStartTime', 'actualEndTime'];
