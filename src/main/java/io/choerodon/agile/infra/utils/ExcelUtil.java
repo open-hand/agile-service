@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.utils;
 
 import io.choerodon.agile.api.vo.ExcelTitleVO;
+import io.choerodon.agile.api.vo.WorkGroupReportExcelVO;
 import io.choerodon.agile.api.vo.WorkHoursExportVO;
 import io.choerodon.agile.api.vo.business.ExportIssuesVO;
 import io.choerodon.agile.infra.dto.ExcelCursorDTO;
@@ -238,6 +239,24 @@ public class ExcelUtil {
                 }
             }
         }
+    }
+
+    public static <T> void  writeWorkGroupReport(Workbook workbook,
+                                                 String sheetName,
+                                                 Class<T> clazz,
+                                                 WorkGroupReportExcelVO workGroupReportExcelVO,
+                                                 List<ExcelTitleVO> excelTitleVOS,
+                                                 CellStyle cellStyle,
+                                                 ExcelCursorDTO cursorDTO) {
+        SXSSFSheet sheet = (SXSSFSheet) workbook.getSheet(sheetName);
+        Integer rowNum = cursorDTO.getRow();
+        SXSSFRow row = sheet.createRow(rowNum);
+        for (int i = 0; i < excelTitleVOS.size(); i++) {
+            ExcelTitleVO excelTitleVO = excelTitleVOS.get(i);
+            sheet.setColumnWidth(i, excelTitleVO.getWidth());
+            handleWriteCell(row, i, workGroupReportExcelVO, cellStyle, excelTitleVO.getCode(), clazz);
+        }
+        sheet.trackAllColumnsForAutoSizing();
     }
 
     public static <T> void  writeWorkHoursLog(Workbook workbook,

@@ -9,10 +9,11 @@ export interface IssueTableFieldsConfig {
   hiddenFieldCodes?: string[]
   projectId?: string
   menuType?: 'project' | 'org'
+  extraFields?: IFoundationHeader[]
 }
 const systemFields = [
   { code: 'summary', title: '概要' },
-  { code: 'issueNum', title: '任务编号' },
+  { code: 'issueNum', title: '编号' },
   { code: 'priority', title: '优先级' },
   { code: 'status', title: '状态' },
   { code: 'assignee', title: '经办人' },
@@ -48,8 +49,8 @@ export default function useIssueTableFields(config?: IssueTableFieldsConfig, opt
   const { isInProgram, loading } = useIsInProgram({ projectId: config?.projectId, menuType: config?.menuType });
   const { data, ...others } = useQuery(key, () => fieldApi.project(config?.projectId).getFoundationHeader(), {
     enabled: !loading,
-    initialData: systemFields,
-    select: (res) => (config?.hiddenFieldCodes ? systemFields.concat(res).filter((field) => !config.hiddenFieldCodes?.includes(field.code)) : systemFields.concat(res)),
+    initialData: [...systemFields, ...(config?.extraFields || [])],
+    select: (res) => (config?.hiddenFieldCodes ? systemFields.concat(config?.extraFields || []).concat(res).filter((field) => !config.hiddenFieldCodes?.includes(field.code)) : systemFields.concat(config?.extraFields || []).concat(res)),
     ...options,
   });
   const fieldData = useCreation(() => (!isInProgram ? data?.filter((f) => f.code !== 'feature') : data), [isInProgram, data]);

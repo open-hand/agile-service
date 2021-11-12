@@ -110,6 +110,7 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const [type, setType] = useState<IGanttDimensionTypeValue>(localPageCacheStore.project(projectId).getItem('gantt.search.type') ?? typeValues[0]);
   const [rankList, setRankList] = useState<string[] | undefined>(undefined);
   const [workCalendar, setWorkCalendar] = useState<any>();
+  const isHasConflict = useRef<boolean>(false);
   const collapsedHistoryRef = useRef<{ [key: string]: IGanttCollapsedHistory }>({});
   const [{ origin: sortedList, data: sorted, loading: sortLoading }, onSortChange] = useGanttSortLabel({ projectId });
   const [projectWorkCalendar, setProjectWorkCalendar] = useState<any>();
@@ -202,11 +203,13 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
       ] : [workCalendarApi.getWorkSetting(year), null, { ids: [] }, ganttApi.loadOrgByTask(searchFilter, 1)];
       const [workCalendarRes, projectWorkCalendarRes, rankListRes, res] = await Promise.all(requestArr);
       const conflictUsers = menuType === 'org' && type === 'assignee' ? await ganttApi.loadTimeConflict(searchFilter) : [];
+      isHasConflict.current = menuType === 'org' && type !== 'assignee' && await ganttApi.loadTimeConflictExcludeUser(searchFilter);
       // setColumns(headers.map((h: any) => ({
       //   width: 100,
       //   name: h.fieldCode,
       //   label: h.name,
       // })));
+
       unstable_batchedUpdates(() => {
         setProjectWorkCalendar(projectWorkCalendarRes);
         setWorkCalendar(workCalendarRes);
@@ -336,8 +339,8 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
     );
   }, []);
   const handleTooltipMouseEnter = useCallback(
-    (e) => Tooltip.show(e.target, {
-      title: '点击并拖动以设置预计开始、结束时间。',
+    (e, title?: string) => Tooltip.show(e.target, {
+      title: title ?? '点击并拖动以设置预计开始、结束时间。',
       placement: 'topLeft',
     }),
     [],
@@ -361,7 +364,6 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const handleCreateIssue = usePersistFn((issue: Issue, issueId?: string, parentId?: string, dontCopyEpic = false) => {
     setData(produce(data, (draft) => {
       const normalizeIssueWidthParentId = Object.assign(ganttNormalizeIssue(issue), { parentId });
-      console.log('normalizeIssueWidthParentId', normalizeIssueWidthParentId, issueId);
       if (!issueId) {
         draft.unshift(normalizeIssueWidthParentId);
       } else {
@@ -377,7 +379,6 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   });
 
   const handleCopyIssue = usePersistFn((issue: Issue, issueId: string, isSubTask?: boolean, dontCopyEpic?: boolean) => {
-    console.log('copy', issue, issueId, isSubTask, dontCopyEpic);
     handleCreateIssue(issue, issueId, isSubTask ? issueId : undefined, dontCopyEpic);
     const subIssues = [...(issue.subIssueVOList ?? []), ...(issue.subBugVOList ?? [])];
     if (subIssues.length > 0) {
@@ -556,7 +557,26 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
           selectAllButton={false}
         />
 
-        <FlatSelect value={type} onChange={handleTypeChange} clearButton={false} style={{ marginRight: 16, width: 120 }}>
+        <FlatSelect
+          value={type}
+          onChange={handleTypeChange}
+          clearButton={false}
+          onMouseLeave={handleTooltipMouseLeave}
+          onMouseEnter={(e) => isHasConflict.current && handleTooltipMouseEnter(e, '存在经办人规划冲突，请使用经办人维度查看详细信息。')}
+          style={{ marginRight: 16 }}
+          renderer={({ text }) => (
+            <span>
+              {text}
+              {isHasConflict.current ? (
+                <Icon
+                  type="info"
+                  style={{ marginLeft: 2 }}
+                  className="c7n-gantt-content-body-summary-conflict"
+                />
+              ) : null}
+            </span>
+          )}
+        >
           {typeOptions.map((o) => (
             <Option value={o.value}>
               {o.label}

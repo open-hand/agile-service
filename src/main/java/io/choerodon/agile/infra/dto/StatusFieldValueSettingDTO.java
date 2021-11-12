@@ -58,7 +58,6 @@ public class StatusFieldValueSettingDTO extends AuditDomain {
 
     private Long organizationId;
 
-    @Transient
     private Long customFieldId;
 
     public Long getCustomFieldId() {

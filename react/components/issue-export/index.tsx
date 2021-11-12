@@ -9,6 +9,7 @@ import './ExportIssue.less';
 import IssueExportStore from './stores/store';
 import { IChosenFieldField } from '../chose-field/types';
 import { removeCodeExtraPrefix } from './utils';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 
 interface IExportIssueProps {
   fields: IChosenFieldField[],
@@ -43,7 +44,7 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     key,
     title: '导出工作项',
     style: {
-      width: 740,
+      width: MODAL_WIDTH.middle,
     },
     className: classnames('c7n-agile-export-issue-modal', className),
     drawer: true,

@@ -93,7 +93,8 @@ class IssueSearchStore {
 
   fieldConfigs: { [key: string]: any } = {}
 
-  menuType: 'project' | 'org' = 'project';
+  // 只有项目层加载个人筛选和自定义字段
+  menuType: 'project' | 'org' | 'workbench' = 'project';
 
   constructor({
     getSystemFields,

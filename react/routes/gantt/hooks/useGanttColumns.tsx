@@ -31,6 +31,8 @@ import { IGanttPageProps } from '../Gantt';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import openGanttConflictModal from '../components/gannt-conflict-modal';
 import { ganttIsCanQuickCreateIssue } from '../utils';
+import openGanttDependencyModal from '../components/gantt-dependency-modal';
+import TableDropMenu from '@/components/table-drop-menu';
 
 interface IGanttColumnsHookProps extends TableCacheRenderProps {
   menuType: IGanttPageProps['menuType']
@@ -100,7 +102,14 @@ const ganttColumnMap = new Map<string, any>([['assignee', (onSortChange: any) =>
     </Tooltip>
   ),
 }),
-], ['estimatedStartTime', (onSortChange: any) => ({
+],
+['dependency', (onSortChange: any) => ({
+  width: 120,
+  minWidth: 120,
+  name: 'dependency',
+  label: '前置依赖',
+  render: (record: any) => record.dependency && <Tooltip title={record.dependency}><span>{record.dependency}</span></Tooltip>,
+})], ['estimatedStartTime', (onSortChange: any) => ({
   width: 100,
   minWidth: 100,
   name: 'estimatedStartTime',
@@ -247,6 +256,8 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
         </span>
       );
     }
+    const hasDependency = true;
+    const isShowDependency = !record.group && record.issueTypeVO?.typeCode && !['issue_epic', 'feature'].includes(record.issueTypeVO?.typeCode);
     const isCanCreateIssue = !disable.disableOperate && isCanQuickCreateIssue(record, { disableFeature: disable.disableFeatureCreateIssue });
     return !record.group ? (
       // eslint-disable-next-line no-underscore-dangle
@@ -265,7 +276,14 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
 
           </span>
         </Tooltip>
-        {isCanCreateIssue && (
+        <TableDropMenu
+          showText={false}
+          menuData={[
+            { text: `${hasDependency ? '编辑' : '添加'}前置依赖`, action: openGanttDependencyModal, display: isShowDependency },
+            { text: '添加子工作项', action: () => openCreateSubIssue(record as any), display: isShowDependency && isCanCreateIssue },
+          ]}
+        />
+        {!isShowDependency && isCanCreateIssue && (
           <Icon
             type="add"
             className="c7n-gantt-content-body-parent_create"
@@ -333,16 +351,17 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
       const column = systemColumnsMap.get(columnCode)!;
       merge(baseColumn, {
         ...column,
-        label: (<GanttSortLabel dataKey={column.dataIndex} onChange={onSortChange}>{column?.title}</GanttSortLabel>),
+        label: column.sortable ? (<GanttSortLabel dataKey={column.dataIndex} onChange={onSortChange}>{column?.title}</GanttSortLabel>) : column?.title,
         name: column?.dataIndex,
         render: fieldMapRender[columnCode as keyof typeof fieldMapRender] ?? column?.render,
       });
     } else {
       const field = find(tableFields, { code: columnCode });
-      merge(baseColumn, field ? {
-        ...getCustomColumn(field),
-        label: field.title,
-      } : {});
+      const column = field ? getCustomColumn(field) : {} as any;
+      merge(baseColumn, {
+        ...column,
+        label: column.sortable ? (<GanttSortLabel dataKey={column.dataIndex} onChange={onSortChange}>{column?.title}</GanttSortLabel>) : column?.title,
+      });
     }
     const { render, name } = baseColumn;
     return merge(baseColumn, {
@@ -354,6 +373,8 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
       },
     });
   }));
+  //
+  tableColumns.splice(2, 0, ganttColumnMap.get('dependency')!(onSortChange));
   return tableColumns;
 };
 const defaultVisibleColumns = ['assignee', 'estimatedStartTime', 'estimatedEndTime', 'actualStartTime', 'actualEndTime'];

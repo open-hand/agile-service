@@ -6,12 +6,15 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.fallback.BaseFeignClientFallback;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.swagger.annotations.ApiParam;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -221,6 +224,12 @@ public interface BaseFeignClient {
                                                           @RequestParam("param") String param,
                                                           @RequestParam int page,
                                                           @RequestParam int size);
+
+    @PostMapping(value = "/choerodon/v1/organizations/{organization_id}/users/page")
+    ResponseEntity<Page<UserDTO>> pagingUsersOnOrganizationLevel(@PathVariable(name = "organization_id") Long organizationId,
+                                                                 @RequestParam int page,
+                                                                 @RequestParam int size,
+                                                                 @RequestBody(required = false) AgileUserVO agileUserVO);
 
     @PostMapping(value = "/choerodon/v1/inner/projects/list_owner")
     ResponseEntity<List<ProjectWithUserVO>> listProjectOwnerByIds(@RequestBody Set<Long> projectIds);

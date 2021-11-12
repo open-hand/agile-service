@@ -89,31 +89,30 @@ const GanttBar: React.FC<GanttBarProps> = ({
     }
     let fragmentWidth = actualEndTime.width - actualStartTime.width;
     let left = actualStartTime.width;
-    let delay = 0;
+    let delay = Math.max(0, actualEndTime.width - estimatedEndTime.width);
+
+    // 不存在预计结束则直接计算此宽度
     if (estimatedEndTime.width === 0) {
       return {
-        width: fragmentWidth, left, delayWidth: 0, processWidth: fragmentWidth,
+        width: fragmentWidth,
+        left: 0,
+        processWidth: fragmentWidth,
       };
     }
+
+    // 不存在实际结束 则直接取预计结束和实际开始
     if (actualEndTime.width === 0) {
       fragmentWidth = estimatedEndTime.width - actualStartTime.width;
-      left = fragmentWidth > 0 ? (actualStartTime as Gantt.DateWithWidth).width : estimatedEndTime.width;
+      left = fragmentWidth < 0 ? estimatedEndTime.width : left;
+      delay = fragmentWidth < 0 ? Math.abs(fragmentWidth) : 0;
     }
-    if (fragmentWidth > 0) {
-      delay = actualEndTime.width - estimatedEndTime.width;
-    }
-    if (fragmentWidth > 0 && actualStartTime.width > estimatedEndTime.width) {
+    // 当实际开始实际不为起点时 开始---结束 之间宽度会缺少一个单位
+    if (actualStartTime.width > 0 && fragmentWidth > 0) {
       fragmentWidth += actualStartTime.unitWidth;
       left -= actualStartTime.unitWidth;
-      delay = fragmentWidth;
     }
-    // if (issue.statusVO.type === 'done') {
-    //   delay = 0;
-    // }
+    delay = actualStartTime.width > estimatedEndTime.width ? fragmentWidth : delay;
 
-    fragmentWidth = Math.abs(fragmentWidth);
-    delay = Math.min(fragmentWidth, delay);
-    delay = Math.max(0, delay);
     return {
       width: fragmentWidth, left, delayWidth: delay, processWidth: fragmentWidth - delay,
     };
@@ -133,8 +132,11 @@ const GanttBar: React.FC<GanttBarProps> = ({
     if (!estimatedEndTime.value || actualEndTime.value || loading) {
       return 0;
     }
-    const dWidth = ganttRef.current?.getWidthByDate(dayjs(estimatedEndTime.value), dayjs());
-    return dWidth && dWidth > 0 ? dWidth - estimatedEndTime.unitWidth / 2 + 5 : 0;
+    let startDay = dayjs(estimatedEndTime.width > actualStartTime.width ? estimatedEndTime.value : actualStartTime.value);
+    startDay = startDay.set('hour', 23).set('minute', 59).set('second', 59);
+    const today = dayjs().set('hour', 12).set('minute', 0).set('second', 0);
+    const dWidth = ganttRef.current?.getWidthByDate(startDay, today);
+    return dWidth && dWidth > 0 ? dWidth : 0;
   })();
   const delayVisible = !(issue.statusVO.type === 'done') && !actualEndTime.width && (stepGesture !== 'moving') && !loading;
   const operateWidth = actualEndTime.value ? width - delayWidth : width;

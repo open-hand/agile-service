@@ -47,4 +47,10 @@ databaseChangeLog(logicalFilePath: 'fd_status_field_value_setting.groovy') {
             column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织Id', defaultValue: "0")
         }
     }
+
+    changeSet(author: 'huaxin.deng@hand-china.com',id: '2021-11-09-fd-status-field-value-setting-add-column'){
+        addColumn(tableName: 'fd_status_field_value_setting') {
+            column(name: 'custom_field_id', type: 'BIGINT UNSIGNED', remarks: '复制自定义字段的id')
+        }
+    }
 }

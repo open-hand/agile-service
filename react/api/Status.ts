@@ -13,7 +13,7 @@ interface UpdateData extends IStatus {
 }
 class StatusApi extends Api<StatusApi> {
   get orgPrefix() {
-    return `/agile/v1/organizations/${getOrganizationId()}`;
+    return `/agile/v1/organizations/${this.orgId}`;
   }
 
   get prefix() {
@@ -97,6 +97,13 @@ class StatusApi extends Api<StatusApi> {
    */
   loadAll() {
     return axios.get(`${this.orgPrefix}/status/query_all`);
+  }
+
+  /**
+   * 在该工作台查询下所有状态
+   */
+  loadAllFromWorkbench() {
+    return axios.get(`${this.orgPrefix}/work_bench/status`);
   }
 
   /**

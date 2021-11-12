@@ -651,6 +651,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                                               Long projectId,
                                               Long organizationId) {
         Map<String, Object> sortMap = new HashMap<>();
+        if (ObjectUtils.isEmpty(pageRequest.getSort())) {
+            return sortMap;
+        }
         if (!handleSortField(pageRequest).equals("")) {
             setSortMap(organizationId, projectId, pageRequest, sortMap, "ai");
         } else {

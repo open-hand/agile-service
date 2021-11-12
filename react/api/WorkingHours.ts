@@ -108,6 +108,17 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
       data,
     });
   }
+
+  getTotalWorkTime(data: any) {
+    return this.request({
+      method: 'post',
+      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/work_hours/count_work_hours`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+      data,
+    });
+  }
 }
 
 const workingHoursApi = new WorkingHoursApi();
