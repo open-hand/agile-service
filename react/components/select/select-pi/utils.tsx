@@ -12,7 +12,7 @@ function renderEllipsisBlockOption(text?: string, block?: React.ReactElement, co
 
   const textBlock = (
     <div className={classNames(styles.option_wrap, { [styles.option_wrap_suffix]: !!maxLength })}>
-      <span className={classNames({ [styles.ellipsis]: !maxLength })} style={{ height: '100%', margin: 0 }}>{text?.slice(0, maxLength)}</span>
+      <span className={classNames({ [styles.ellipsis]: !maxLength })} style={{ height: '100%', margin: 0, verticalAlign: 'unset' }}>{text?.slice(0, maxLength)}</span>
       {suffix}
       {
         showBlock && (

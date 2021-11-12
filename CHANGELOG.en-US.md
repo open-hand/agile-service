@@ -1,6 +1,21 @@
 # Changelog
 All notable changes about agile-service will be documented in this file.
 
+## [1.1.0] - 2021-11-05
+
+### Added
+- Add work calendar function.
+- Gantt chart supports viewing by epic view.
+- Gantt chart supports custom task order.
+- Gantt chart supports custom column fields.
+- Gantt chart supports rapid creation of work items and sub work items.
+- Add system fields "actual start time" and "actual end time" for work item details.
+- The bar chart on the right side of the Gantt chart shows that the delay can be rendered according to the actual start time and actual end time fields.
+- Add Gantt chart at the organizational level.
+- Add the system field "estimated time" for work item details.
+- Add work calendar function.
+- New work log function.
+
 ## [1.1.0-alpha] - 2021-09-18
 
 ### Added

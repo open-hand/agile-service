@@ -101,11 +101,11 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData, linkTo }) => {
       await loadCustomCharts();
       const data = await getOptionalCharts();
       setOptionalCharts(data);
+      editData && dataSet.current?.init({ title: editData.title, chart: editData.chartCode, subProjectId: editData.chartSearchVO.projectId });
     })();
   }, []);
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
-    data: editData ? [{ title: editData.title, chart: editData.chartCode, subProjectId: editData.chartSearchVO.projectId }] : undefined,
     fields: [{
       name: 'title',
       label: '图表标题',
@@ -127,7 +127,7 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData, linkTo }) => {
       }),
     },
     ],
-  }), [editData, isProgram]);
+  }), [isProgram]);
   const projectChanged = dataSet.current?.get('subProjectId') !== initProject;
   const codeChanged = dataSet.current?.get('chart') !== initChartCode;
   const ignoreSearchVO = projectChanged || codeChanged;

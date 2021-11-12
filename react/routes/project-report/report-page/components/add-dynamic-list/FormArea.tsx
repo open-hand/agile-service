@@ -27,7 +27,6 @@ const ExportIssue: React.FC<Props> = ({ innerRef }) => {
   const handleSubmit: ListRefProps['submit'] = useCallback(async () => {
     if (await issueFilterFormDataSet.current?.validate()) {
       const searchVO = getCustomFieldFilters(choseFieldStore.getAllChosenField, issueFilterFormDataSet.current!) as SearchVO;
-
       return {
         searchVO,
       };

@@ -5470,19 +5470,19 @@
                     ai.assignee_id,
                     CONVERT(ai.issue_num,SIGNED) as issue_num_convert,
                     if(
-                        @lastAssigneeId = ai.assignee_id,
-                        @lastStartDate &gt;= ai.estimated_start_time and @lastStartDate &lt; ai.estimated_end_time,
+                        @descLastAssigneeId = ai.assignee_id,
+                        @descLastStartDate &gt;= ai.estimated_start_time and @descLastStartDate &lt; ai.estimated_end_time,
                         0
                     ) as overlap,
-                    @lastAssigneeId := ai.assignee_id as last_assignee,
-                    @lastStartDate := ai.estimated_start_time as last_start,
-                    @lastEndDate := ai.estimated_end_time as last_end
+                    @descLastAssigneeId := ai.assignee_id as last_assignee,
+                    @descLastStartDate := ai.estimated_start_time as last_start,
+                    @descLastEndDate := ai.estimated_end_time as last_end
                     from agile_issue ai,
                     (
                         select
-                        @lastAssigneeId := 0,
-                        @lastStartDate := '1000-01-01 00:00:00',
-                        @lastEndDate := '1000-01-01 00:00:00'
+                        @descLastAssigneeId := 0,
+                        @descLastStartDate := '1000-01-01 00:00:00',
+                        @descLastEndDate := '1000-01-01 00:00:00'
                     ) sqlVars
                     where ai.project_id in
                     <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
