@@ -9,6 +9,7 @@
     "lib"
   ],
   "dependencies": {
+    "@atlaskit/tree": "^8.4.0",
     "@choerodon/gantt": "0.2.0",
     "@emotion/core": "^10.0.28",
     "@emotion/styled": "^10.0.27",
