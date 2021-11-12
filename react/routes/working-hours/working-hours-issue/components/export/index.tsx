@@ -6,38 +6,42 @@ import IssueExportStore from '@/components/issue-export/stores/store';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import { getTransformSystemFilter } from '@/routes/Issue/components/ExportIssue/utils';
+import getSearchWorkbenchFields from '@/components/field-pro/layouts/searchWorkbench';
 
 interface IExportWorkHoursIssueModalProps {
   fields: IChosenFieldField[]
   chosenFields: IChosenFieldField[]
   columns: Array<{ code: string, title: string }>
+  menuType?: 'project' | 'workbench'
   visibleColumns?: string[]
 }
 function openExportWorkHoursIssueModal({
-  fields, columns, chosenFields, visibleColumns = [],
+  fields, columns, chosenFields, visibleColumns = [], menuType = 'project',
 }: IExportWorkHoursIssueModalProps) {
   const store = new IssueExportStore({
-    defaultInitFieldAction: (data, self) => {
-      if (data.code === 'quickFilterIds' || data.code === 'starBeacon' || data.code === 'myAssigned') {
-        data.value && self.setState(data.code, data);
-        return false;
-      }
-      if (data.archive) {
-        return false;
-      }
+    ...menuType === 'project' ? {
+      defaultInitFieldAction: (data, self) => {
+        if (data.code === 'quickFilterIds' || data.code === 'starBeacon' || data.code === 'myAssigned') {
+          data.value && self.setState(data.code, data);
+          return false;
+        }
+        if (data.archive) {
+          return false;
+        }
 
-      return data;
-    },
-    defaultInitFieldFinishAction: (data, self) => {
-      const quickFilterIds = self.getState('quickFilterIds');
-      const starBeacon = self.getState('starBeacon');
-      const myAssigned = self.getState('myAssigned');
-      const value = [];
-      starBeacon && value.push('myStarBeacon');
-      myAssigned && value.push('myAssigned');
-      quickFilterIds && value.push(...quickFilterIds.value);
-      self.addExtraField({ name: '快速筛选', code: 'quickFilterIds', value });
-    },
+        return data;
+      },
+      defaultInitFieldFinishAction: (data, self) => {
+        const quickFilterIds = self.getState('quickFilterIds');
+        const starBeacon = self.getState('starBeacon');
+        const myAssigned = self.getState('myAssigned');
+        const value = [];
+        starBeacon && value.push('myStarBeacon');
+        myAssigned && value.push('myAssigned');
+        quickFilterIds && value.push(...quickFilterIds.value);
+        self.addExtraField({ name: '快速筛选', code: 'quickFilterIds', value });
+      },
+    } : { renderField: (field, otherComponentProps) => getSearchWorkbenchFields([field], { [field.code]: { ...otherComponentProps, placeholder: undefined, flat: false } })[0] as React.ReactElement },
     transformSystemFilter: getTransformSystemFilter,
     events: {
       exportAxios: (searchData, sort) => new Promise((r) => true),
@@ -59,6 +63,7 @@ function openExportWorkHoursIssueModal({
       checkOptions={checkOptions}
       visibleColumns={visibleColumns}
       store={store}
+      visibleCheckField={menuType === 'project'}
       action={action}
       exportBtnText="导出"
     />,
