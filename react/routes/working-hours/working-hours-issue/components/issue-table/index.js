@@ -17,11 +17,11 @@ const WorkingHoursIssueTable = ({
   const {
     tableFields: fields, onCloseDetail, mode,
   } = useIssueStore();
-  const detailCallback = useCallback(() => {
+  const detailCallback = useCallback((expandRecordId) => {
     if (mode === 'issue') {
       dataSet.query(dataSet.currentPage);
     } else {
-      onCloseDetail();
+      onCloseDetail(expandRecordId);
     }
   }, [dataSet, mode, onCloseDetail]);
   const onSummaryClick = useCallback((record) => {
@@ -33,8 +33,8 @@ const WorkingHoursIssueTable = ({
         applyType: 'agile',
       },
       events: {
-        delete: detailCallback,
-        close: detailCallback,
+        delete: () => detailCallback(get(record, 'assigneeId')),
+        close: () => detailCallback(get(record, 'assigneeId')),
       },
     });
   }, [detailCallback, issueDetailProps]);
@@ -59,7 +59,7 @@ const WorkingHoursIssueTable = ({
         columnResizable
         onColumnResize={handleColumnResize}
         mode="tree"
-        rowHeight={29}
+        rowHeight={mode === 'issue' ? 29 : 35}
         selectionMode="none"
       />
       <DetailContainer {...issueDetailProps} />
