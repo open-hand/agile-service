@@ -340,6 +340,8 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
     component: BaseSystemColumnRender.renderTag('components', 'name'),
     fixVersion: BaseSystemColumnRender.renderTag('fixVersion', 'name'),
     influenceVersion: BaseSystemColumnRender.renderTag('influenceVersion', 'name'),
+    sprint: BaseSystemColumnRender.renderTag('sprints', 'sprintName'),
+    reporter: (rowData: any) => <UserTag data={get(rowData, 'reporter')} />,
     // assignee: (rowData: AnyMap) => <UserTag data={get(rowData, 'assignee')} />,
   };
   tableColumns.push(...visibleColumns.map(({ columnCode }) => {

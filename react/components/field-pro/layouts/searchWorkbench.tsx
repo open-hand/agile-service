@@ -3,7 +3,7 @@ import {
   get, merge,
 } from 'lodash';
 import { IFieldProcessConfig } from '../base/type';
-import { getComponentCodeForLocalCode } from '../base/utils';
+import { getComponentCodeForLocalCode, getFieldPropsByMode } from '../base/utils';
 import { getSearchFieldPropsByFieldType, IAgileBaseSearchFieldInstance } from './search';
 import getFieldsInstance from '../base';
 import SelectProject from '@/components/select/select-project';
@@ -17,7 +17,27 @@ function getFieldConfig({
   const { fieldType } = field;
   const { projectId, applyType, value } = props;
   const code = getComponentCodeForLocalCode(field.code);
-  const otherProps = getSearchFieldPropsByFieldType(fieldType, field.id);
+  const otherProps = {
+    ...getFieldPropsByMode({
+      code, outputs: ['config', 'function'], fieldType, props,
+    }),
+    ...getSearchFieldPropsByFieldType(fieldType, field.id),
+  };
+  switch (code) {
+    case 'status':
+      return {
+        ...otherProps,
+        isWorkBench: true,
+      };
+    case 'issueType': {
+      console.log('issueType.');
+      return {
+        ...otherProps,
+        request: () => new Promise((r) => ([])),
+      }; }
+    default:
+      break;
+  }
   switch (fieldType) {
     case 'multiMember':
     case 'member':
@@ -57,12 +77,13 @@ function getSearchWorkbenchFields(fields: any[], fieldCodeProps?: Record<string,
   const { fieldInstance, configInstance } = instance;
   const fieldConfigs = fields.map((field) => {
     const codeProps = get(fieldCodeProps, field.code) || {};
-    const props = merge({
+    const props = {
       key: field.code,
       label: field.name,
       placeholder: field.name,
       flat: true,
-    }, codeProps);
+      ...codeProps,
+    };
     const config = configInstance({ field, props }) as IFieldProcessConfig<any, any>;
     return {
       code: config.code ?? field.code,

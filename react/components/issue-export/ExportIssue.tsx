@@ -71,6 +71,7 @@ interface IDownLoadInfo {
 }
 const ExportIssue: React.FC = () => {
   const [templateIsExist, setTemplateIsExist] = useState(false);
+  const visibleCheckField = useRef<boolean>(true);
   const templateSelectRef = useRef<{
     onOk:(template: ITemplate) => Promise<void>,
     templateList: ITemplate[]
@@ -81,9 +82,9 @@ const ExportIssue: React.FC = () => {
   const selectTemplateOkRef = useRef<(codes: string[]) => void>();
 
   const {
-    prefixCls, checkOptions: propsCheckOptions, store, fields, modal, action, exportBtnText,
+    prefixCls, checkOptions: propsCheckOptions, store, fields, modal, action, exportBtnText, visibleCheckField: propsVisibleCheckField,
   } = useExportIssueStore();
-
+  visibleCheckField.current = !!propsVisibleCheckField;
   const [templateFirstLoaded, setTemplateFirstLoaded] = useState(false);
 
   // 添加筛选配置 数据
@@ -276,10 +277,12 @@ const ExportIssue: React.FC = () => {
           </>
         )
       }
+      { visibleCheckField.current && (
       <FormPart title="选择模板字段" btnOnClick={handleChangeFieldStatus}>
         <TableColumnCheckBoxes {...checkBoxComponentProps} />
-        {renderExport()}
       </FormPart>
+      )}
+      {renderExport()}
       <div className={`${prefixCls}-btns`}>
         <Button
           icon="unarchive-o"

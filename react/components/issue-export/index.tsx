@@ -17,19 +17,24 @@ interface IExportIssueProps {
   checkOptions: Array<{ value: string, label: string, order?: any }>,
   visibleColumns: Array<string>
   store: IssueExportStore,
-  // eslint-disable-next-line react/require-default-props
   action?: TemplateAction
-  // eslint-disable-next-line react/require-default-props
   exportBtnText?: string
+  /** @default true */
+  visibleCheckField?: boolean
+
 }
 export { IExportIssueProps };
-export default function Index(props: IExportIssueProps) {
-  return (
-    <ExportIssueContextProvider {...props}>
-      <ExportIssue />
-    </ExportIssueContextProvider>
-  );
-}
+const Index: React.FC<IExportIssueProps> = (props) => (
+  <ExportIssueContextProvider {...props}>
+    <ExportIssue />
+  </ExportIssueContextProvider>
+);
+Index.defaultProps = {
+  action: undefined,
+  exportBtnText: undefined,
+  visibleCheckField: true,
+};
+export default Index;
 
 function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Array<any>,
   tableDataSet: DataSet, tableRef: React.RefObject<Table>, store: IssueExportStore, action?: TemplateAction, otherModalProps?: ModalProps, exportBtnText?: string) {
