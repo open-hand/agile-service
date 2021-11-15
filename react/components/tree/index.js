@@ -67,7 +67,6 @@ const propTypes = {
   setSelected: PropTypes.func,
   renderTreeNode: PropTypes.func,
   searchAutoFilter: PropTypes.bool,
-  extraTreeNode: PropTypes.node,
 };
 const defaultProps = {
 
@@ -88,7 +87,6 @@ function PureTree({
   onMenuClick,
   getDeleteTitle,
   searchAutoFilter = false,
-  extraTreeNode,
   editNodeProps,
   ...restProps
 }, ref) {
@@ -382,7 +380,6 @@ function PureTree({
               isNestingEnabled
               {...restProps}
             />
-            {extraTreeNode}
           </div>
         )}
       </>

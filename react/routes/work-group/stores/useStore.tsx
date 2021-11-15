@@ -60,14 +60,6 @@ export default function useStore({ ROOT_ID, NOT_ASSIGN_ID }: Props) {
       this.searchValue = data;
     },
 
-    notAssignItem: {},
-    get getNotAssignItem() {
-      return this.notAssignItem;
-    },
-    setNotAssignItem(data: GroupItem) {
-      this.notAssignItem = data;
-    },
-
     treeData: {
       rootIds: [],
       treeFolder: [],
@@ -94,20 +86,22 @@ export default function useStore({ ROOT_ID, NOT_ASSIGN_ID }: Props) {
       }
       this.treeData = {
         rootIds: isEmpty(treeFolder) ? [] : [ROOT_ID],
-        treeFolder: treeFolder.filter((folder) => !(!folder.id && folder.parentId === 0)).map((folder) => {
+        treeFolder: treeFolder.map((folder) => {
           const {
             id, parentId, expanded, children, ...other
           } = folder;
           // 组织信息：id和parentId都为空
-          const newId = id ?? ROOT_ID;
+          // 未分配工作组信息：id为空和parentId为0
+          const newId = id ?? (parentId === 0 ? NOT_ASSIGN_ID : ROOT_ID);
           const newParentId = parentId === 0 ? ROOT_ID : (parentId ?? 0);
+          const newChildren = newId === ROOT_ID ? rootIds.concat([NOT_ASSIGN_ID]) : children || [];
           return ({
             id: newId,
-            children: newId === ROOT_ID ? rootIds : children || [],
+            children: newChildren,
             isExpanded: expanded || includes(expandedKeys, newId),
             selected: newId === selectedId,
-            ...other,
             parentId: newParentId,
+            ...other,
             data: {
               id: newId,
               parentId: newParentId,
@@ -127,19 +121,11 @@ export default function useStore({ ROOT_ID, NOT_ASSIGN_ID }: Props) {
         this.setIsLoading(true);
         const res = await workGroupApi.loadWorkGroup();
         this.setIsLoading(false);
-        const treeFolder = res.workGroupVOS || [];
-        // 过滤未分配工作组（因为未分配工作组不能拖住，不能当做树节点）
-        const notAssignItem = remove(treeFolder, (item: GroupItem) => !item.id && item.parentId === 0);
         const newData = {
           rootIds: res.rootIds || [],
-          treeFolder,
+          treeFolder: res.workGroupVOS || [],
         };
         this.setTreeData(newData);
-        this.setNotAssignItem({
-          ...notAssignItem || {},
-          id: NOT_ASSIGN_ID,
-          parentId: ROOT_ID,
-        });
       } catch (e) {
         // aa
       }
