@@ -169,10 +169,26 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
     store.setIssue(issue);
     store.setProgramId(issue.programId && (String(issue.programId) !== String(getProjectId())) ? String(issue.programId) : null);
   }, [store]);
+
+  const handleIssueUpdate = usePersistFn((issue: GanttIssue | Issue | null) => {
+    if (type === 'epic') {
+      run();
+    } else if (issue) {
+      setData(produce(data, (draft) => {
+        const target = find(draft, { issueId: issue.issueId });
+        if (target) {
+          // 更新属性
+          ganttNormalizeIssue(issue as Issue, target);
+        }
+      }));
+      console.log('issue', issue);
+      updateInfluenceIssues(issue);
+    }
+  });
   const {
     columns, setColumns, visibleColumnCodes, tableWithSortedColumns, listLayoutColumns,
   } = useGanttColumns({
-    ...props, onSortChange, sortedList, projectId, isInProgram, onClickSummary: handleClickSummary, onCreateSubIssue: handleQuickCreateSubIssue, onAfterCreateSubIssue: handleQuickCreateSubIssueAfter,
+    ...props, onSortChange, sortedList, projectId, isInProgram, onUpdate: handleIssueUpdate, onClickSummary: handleClickSummary, onCreateSubIssue: handleQuickCreateSubIssue, onAfterCreateSubIssue: handleQuickCreateSubIssueAfter,
   });
 
   const searchFilter = useComputed(() => {
@@ -234,6 +250,27 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
     run();
     flush();
   }, [sorted, type]);
+
+  const updateIssues = usePersistFn((issues: GanttIssue[]) => {
+    issues.forEach((issue) => {
+      setData(produce(data, (draft) => {
+        const target = find(draft, { issueId: issue.issueId });
+        if (target) {
+          // 更新属性
+          Object.assign(target, omit(issue, 'children'));
+        }
+      }));
+    });
+  });
+  const updateInfluenceIssues = useCallback((res: { influenceIssueIds?: string[], [key: string]: any }) => {
+    // @ts-ignore
+    const { influenceIssueIds } = res;
+    // 更新自身 及影响的issue
+    const updateIssueIds = [res.issueId, ...(influenceIssueIds || [])];
+    ganttApi.project(projectId).loadInfluenceIssues(type, updateIssueIds, searchFilter.displayFields).then((issues: any[]) => {
+      updateIssues(issues);
+    });
+  }, [projectId, searchFilter.displayFields, type, updateIssues]);
 
   const handleUpdate = useCallback<GanttProps<Issue>['onUpdate']>(async (issue, startDate, endDate, middleDates) => {
     try {
@@ -387,41 +424,6 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
       });
     }
   });
-
-  const handleIssueUpdate = usePersistFn((issue: GanttIssue | Issue | null) => {
-    if (type === 'epic') {
-      run();
-    } else if (issue) {
-      setData(produce(data, (draft) => {
-        const target = find(draft, { issueId: issue.issueId });
-        if (target) {
-          // 更新属性
-          ganttNormalizeIssue(issue as Issue, target);
-        }
-      }));
-      updateInfluenceIssues(issue);
-    }
-  });
-  const updateIssues = usePersistFn((issues: GanttIssue[]) => {
-    issues.forEach((issue) => {
-      setData(produce(data, (draft) => {
-        const target = find(draft, { issueId: issue.issueId });
-        if (target) {
-          // 更新属性
-          Object.assign(target, omit(issue, 'children'));
-        }
-      }));
-    });
-  });
-  const updateInfluenceIssues = useCallback((res: { influenceIssueIds?: string[], [key: string]: any }) => {
-    // @ts-ignore
-    const { influenceIssueIds } = res;
-    // 更新自身 及影响的issue
-    const updateIssueIds = [res.issueId, ...(influenceIssueIds || [])];
-    ganttApi.project(projectId).loadInfluenceIssues(type, updateIssueIds, searchFilter.displayFields).then((issues: any[]) => {
-      updateIssues(issues);
-    });
-  }, [projectId, searchFilter.displayFields, type, updateIssues]);
 
   const handleTransformType = usePersistFn((newIssue: Issue, oldIssue: Issue) => {
     const parentTypes = ['story', 'task'];
