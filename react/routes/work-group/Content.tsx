@@ -48,6 +48,8 @@ const WorkGroupContent = observer(() => {
       if (!isEmpty(userIds)) {
         const { id } = mainStore.getSelectedMenu || {};
         await workGroupApi.removeUserByGroup(id, userIds);
+        tableDs.unSelectAll();
+        refresh();
       }
       return true;
     } catch (e) {

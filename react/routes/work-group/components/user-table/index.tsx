@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo} from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Table } from 'choerodon-ui/pro';
 import { StatusTag } from '@choerodon/components';
