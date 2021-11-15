@@ -1,7 +1,7 @@
-import {DataSetProps} from 'choerodon-ui/pro/lib/data-set/DataSet';
-import {FieldType} from 'choerodon-ui/pro/lib/data-set/enum';
+import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
+import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import DataSet from 'choerodon-ui/pro/lib/data-set';
-import {workGroupApi, workGroupApiConfigApi} from '@/api/WorkGroup';
+import { workGroupApi, workGroupApiConfigApi } from '@/api/WorkGroup';
 
 interface TableProps {
   statusDs: DataSet,

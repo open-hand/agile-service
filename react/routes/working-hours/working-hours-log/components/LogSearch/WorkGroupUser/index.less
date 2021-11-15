@@ -1,0 +1,82 @@
+.dropDown_trigger {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  height: 32px;
+  border: 1px solid var(--divider);
+  border-radius: 5px;
+  .clear_icon {
+    position: absolute;
+    right: 10px;
+    top: 15px;
+    color: #ABBCCF;
+    display: none;
+    cursor: pointer;
+  }
+  .iconPicker {
+    color: rgb(171, 188, 207);
+  }
+  &:focus {
+    outline: 0;
+    border-bottom: 2px solid #5365EA;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  &:focus-within {
+    .iconPicker {
+      transform:rotate(180deg);
+      -ms-transform:rotate(180deg); 	/* IE 9 */
+      -moz-transform:rotate(180deg); 	/* Firefox */
+      -webkit-transform:rotate(180deg); /* Safari 和 Chrome */
+      -o-transform:rotate(180deg); 	/* Opera */
+      transition:transform 0.3s, -webkit-transform 0.3s;
+      top: 8px;
+    }
+  }
+  .selected {
+    position: relative;
+    top: 9px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .trigger_label {
+    position: absolute;
+    color: #9EADBE;
+    pointer-events: none;
+    padding: 0 4px;
+    -webkit-transform-origin: 0.1rem -230%;
+    -ms-transform-origin: 0.1rem -230%;
+    transform-origin: 0.1rem -230%;
+    -webkit-transition: all 0.2s cubic-bezier(0.215, 0.61, 0.355, 1);
+    transition: all 0.2s cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  .trigger_tip {
+    display: none;
+    position: absolute;
+    color: rgb(247, 103, 118);
+    font-size: 12px;
+    bottom: -21px;
+    line-height: 18px;
+  }
+  .trigger_tip_visible {
+    display: inline-block;
+  }
+  .dropDown_member_isRequired {
+    &::after {
+      display: inline-block;
+      content: '*';
+      width: 0.08rem;
+      margin-left: 0.04rem;
+      color: rgb(247, 103, 118);
+      line-height: 1;
+      vertical-align: middle;
+    }
+  }
+}
+
+.workGroupUser {
+  width: 200px;
+}
