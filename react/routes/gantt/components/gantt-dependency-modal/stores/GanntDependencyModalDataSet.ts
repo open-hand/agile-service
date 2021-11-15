@@ -1,27 +1,33 @@
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 import {
-  Modal, DataSet, Form, Select, Button, Icon,
+  DataSet,
 } from 'choerodon-ui/pro';
+import { ganttApiConfig } from '@/api';
 
-const options = ['FF', 'FS', 'SF', 'SS'];
-
-const GanntDependencyModalDataSet = ():DataSetProps => ({
-  autoCreate: true,
+const GanntDependencyModalDataSet = (editData?: any[]): DataSetProps => ({
+  autoCreate: !editData?.length,
+  autoQuery: false,
+  data: editData,
   selection: false,
   fields: [
     {
-      name: 'relationship',
+      name: 'predecessorType',
       label: '依赖关系',
       required: true,
       type: 'string' as FieldType,
+      textField: 'name',
+      valueField: 'valueCode',
       options: new DataSet({
         paging: false,
-        data: options.map((item) => ({ meaning: item, value: item })),
+        autoQuery: true,
+        transport: {
+          read: ganttApiConfig.loadIssueDependencyTypes(),
+        },
       }),
     },
     {
-      name: 'issue', label: '工作项', required: true, type: 'string' as FieldType,
+      name: 'predecessorId', label: '工作项', required: true, type: 'string' as FieldType, multiple: true,
     },
 
   ],

@@ -35,6 +35,8 @@ export interface GanttIssue extends Pick<Issue, 'issueId' | 'issueNum' | 'summar
     tags?: any[]
     updateUser?: User
     workTimePercentage: number
+    predecessorType?: string
+    predecessors?: null | GanttIssue[]
 }
 
 export interface IGanttCollapsedHistory {
