@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, {useCallback, useMemo} from 'react';
 import { observer } from 'mobx-react-lite';
 import { Table } from 'choerodon-ui/pro';
 import { StatusTag } from '@choerodon/components';
@@ -11,7 +11,14 @@ const { Column } = Table;
 const UserTable = () => {
   const {
     tableDs,
+    NOT_ASSIGN_ID,
+    mainStore,
   } = useWorkGroupStore();
+
+  const hiddenGroup = useMemo(() => {
+    const { id } = mainStore.getSelectedMenu || {};
+    return id === NOT_ASSIGN_ID;
+  }, [mainStore.getSelectedMenu]);
 
   const renderStatus = useCallback(({ value }) => (
     <StatusTag
@@ -27,6 +34,7 @@ const UserTable = () => {
       <Column
         name="enabled"
         renderer={renderStatus}
+        align={ColumnAlign.left}
         width={100}
       />
       <Column
@@ -35,6 +43,7 @@ const UserTable = () => {
         align={ColumnAlign.left}
         width={150}
       />
+      <Column name="workGroupName" hidden={hiddenGroup} />
     </Table>
   );
 };

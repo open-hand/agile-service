@@ -44,9 +44,9 @@ const AddUserContent = () => {
     tableDs.query();
   }, []);
 
-  const handleLoadMore = useCallback(() => {
+  const handleLoadMore = useCallback(async () => {
     const page = tableDs.currentPage + 1;
-    tableDs.queryMore(page);
+    await tableDs.queryMore(page);
   }, [tableDs.currentPage]);
 
   const handleSelect = useCallback((checked, record: Record) => {

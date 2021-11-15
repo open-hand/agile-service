@@ -60,6 +60,11 @@ export default ({
     name: 'id',
     type: FieldType.string,
     bind: 'userVO.id',
+  }, {
+    name: 'workGroupName',
+    type: FieldType.string,
+    bind: 'workGroupVOS.name',
+    label: '所属工作组',
   }],
   queryFields: [{
     name: 'realName',
