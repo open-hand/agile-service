@@ -4,7 +4,7 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import { find, pickBy } from 'lodash';
-import { Choerodon } from '@choerodon/boot';
+import classnames from 'classnames';
 import { useControllableValue } from 'ahooks';
 import Tree, {
   mutateTree,
@@ -88,6 +88,7 @@ function PureTree({
   getDeleteTitle,
   searchAutoFilter = false,
   editNodeProps,
+  className,
   ...restProps
 }, ref) {
   const [tree, setTree] = useState(mapDataToTree(data));
@@ -180,8 +181,10 @@ function PureTree({
         }
       }
       onAfterDelete && await onAfterDelete(item, target);
+      return true;
     } catch (error) {
-      Choerodon.prompt(error.message);
+      // Choerodon.prompt(error.message);
+      return false;
     }
   }, [onAfterDelete, onDelete, selected.id, setSelected, tree]);
   const handleDelete = useCallback((item) => {
@@ -355,7 +358,7 @@ function PureTree({
 
   const isEmpty = flattenedTree.length === 0;
   return (
-    <div className={Styles.treeWrap}>
+    <div className={classnames(Styles.treeWrap, className)}>
       <>
         <div className={Styles.top}>
           <FilterInput

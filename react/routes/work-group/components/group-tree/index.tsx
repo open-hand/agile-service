@@ -1,8 +1,8 @@
 import React, {
-  useEffect, ReactElement, useRef, MutableRefObject, useMemo,
+  useEffect, ReactElement, useRef, MutableRefObject, useCallback,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { forEach, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import Tree from '@/components/tree';
 import { useWorkGroupStore } from '@/routes/work-group/stores';
 import { EditFormDataProps, workGroupApi } from '@/api/WorkGroup';
@@ -19,6 +19,10 @@ export default observer(() => {
 
   // @ts-ignore
   useEffect(() => mainStore.setTreeRef(treeRef), [treeRef]);
+
+  const refresh = useCallback(() => {
+    mainStore.loadTreeData();
+  }, []);
 
   const handleCreate = async (value: string, parentId: string | number): Promise<object> => {
     const data = {
@@ -95,7 +99,7 @@ export default observer(() => {
     const isLast = parent.children.length === (destination.parentId === ROOT_ID ? index + 2 : index + 1);
     // parent.children获取到的值是按照拖拽后的排序
     const outSetIndex = isLast ? index - 1 : index + 1;
-    const outSetId = parent.children[outSetIndex];
+    const outSetId = parent.children[outSetIndex] ?? 0;
     const data = {
       workGroupId: sourceItem.id,
       before: !isLast,
@@ -104,6 +108,7 @@ export default observer(() => {
     try {
       const parentId = destination.parentId === ROOT_ID ? 0 : destination.parentId;
       const res = await workGroupApi.moveWorkGroup(data, parentId);
+      refresh();
       return {
         data: {
           ...sourceItem.data,
@@ -118,13 +123,10 @@ export default observer(() => {
   };
 
   const handleDelete = async (item: GroupItem): Promise<void> => {
-    try {
-      await workGroupApi.deleteWorkGroup(item.id);
-      // 只移除跟节点，作用是删除目录后可以正确判断是不是没目录了，来显示空插画
-      mainStore.removeRootItem(item.id);
-    } catch (e) {
-      // return false;
-    }
+    await workGroupApi.deleteWorkGroup(item.id);
+    // 只移除跟节点，作用是删除目录后可以正确判断是不是没目录了，来显示空插画
+    mainStore.removeRootItem(item.id);
+    refresh();
   };
 
   const setSelected = (item: GroupItem) => {
@@ -164,7 +166,7 @@ export default observer(() => {
           placeholder: '请输入工作组名称',
           maxLength: 32,
         }}
-        getDeleteTitle={(item: GroupItem) => `删除工作组|确认删除“${item?.name}”工作组？删除后，该工作组的成员不会被删除，工作组下的子工作组将会一并删除。`}
+        getDeleteTitle={(item: GroupItem) => `删除工作组|确认删除“${item.data?.name}”工作组？删除后，该工作组的成员不会被删除，工作组下的子工作组将会一并删除。`}
       />
     </>
   );
