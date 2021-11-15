@@ -3,12 +3,10 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { forEach, isEmpty } from 'lodash';
-import { Icon } from 'choerodon-ui/pro';
 import Tree from '@/components/tree';
 import { useWorkGroupStore } from '@/routes/work-group/stores';
 import { EditFormDataProps, workGroupApi } from '@/api/WorkGroup';
 import { GroupItem } from '@/routes/work-group/types';
-import Styles from './index.less';
 
 export default observer(() => {
   const treeRef: MutableRefObject<ReactElement | undefined> = useRef();
@@ -21,18 +19,6 @@ export default observer(() => {
 
   // @ts-ignore
   useEffect(() => mainStore.setTreeRef(treeRef), [treeRef]);
-
-  const getExtraTreeNode = useMemo(() => (
-    <div
-      role="none"
-      onClick={() => setSelected(mainStore.getNotAssignItem)}
-      className={Styles.notAssign}
-    >
-      <span className={Styles.notAssignDot} />
-      <Icon type="folder_open" />
-      <span>未分配工作组</span>
-    </div>
-  ), [mainStore.getNotAssignItem]);
 
   const handleCreate = async (value: string, parentId: string | number): Promise<object> => {
     const data = {
@@ -85,6 +71,18 @@ export default observer(() => {
     }
   };
 
+  const handleBeforeDrag = (sourceItem: GroupItem, destination: GroupItem) => {
+    // @ts-ignore
+    const { treeData } = treeRef.current;
+    const { parentId, index } = destination;
+    const parent = treeData.items[parentId];
+    const isLast = parent.children.length === index;
+    if ([0, '0', NOT_ASSIGN_ID].includes(parentId) || (parentId === ROOT_ID && isLast)) {
+      return false;
+    }
+    return true;
+  };
+
   const handleDrag = async (sourceItem: GroupItem, destination: GroupItem): Promise<object> => {
     if (sourceItem.parentId === destination.parentId && sourceItem.index === destination.index) {
       return {};
@@ -93,12 +91,10 @@ export default observer(() => {
     const { treeData } = treeRef.current;
     const parent = treeData.items[destination.parentId];
     const { index = parent.children.length } = destination;
-    const isLast = parent.children.length === index;
-    let outSetIndex = index;
-    // 树从上往下拖拽排序，且并非最后一个
-    if (sourceItem.parentId === destination.parentId && sourceItem.index < index && isLast) {
-      outSetIndex = index + 1;
-    }
+    // 如果是组织下的直接树节点，计算是否是最后一个时需要考虑未分配工作组
+    const isLast = parent.children.length === (destination.parentId === ROOT_ID ? index + 2 : index + 1);
+    // parent.children获取到的值是按照拖拽后的排序
+    const outSetIndex = isLast ? index - 1 : index + 1;
     const outSetId = parent.children[outSetIndex];
     const data = {
       workGroupId: sourceItem.id,
@@ -153,22 +149,22 @@ export default observer(() => {
         onCreate={handleCreate}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        beforeDrag={handleBeforeDrag}
         afterDrag={handleDrag}
         selected={mainStore.getSelectedMenu}
         setSelected={setSelected}
         updateItem={setSelected}
-        isDragEnabled={!mainStore.getSearchValue}
+        isDragEnabled={(item: GroupItem) => ![ROOT_ID, NOT_ASSIGN_ID].includes(item.id)}
         treeNodeProps={{
-          enableAddFolder: true,
-          enableAction: (item: GroupItem) => item.id !== ROOT_ID,
-          titleSuffix: (item: GroupItem) => ` (${item.data?.userCount})`,
+          enableAddFolder: (item: GroupItem) => item.id !== NOT_ASSIGN_ID,
+          enableAction: (item: GroupItem) => ![ROOT_ID, NOT_ASSIGN_ID].includes(item.id),
+          titleSuffix: (item: GroupItem) => ` (${item.data?.userCount ?? 0})`,
         }}
         editNodeProps={{
           placeholder: '请输入工作组名称',
           maxLength: 32,
         }}
         getDeleteTitle={(item: GroupItem) => `删除工作组|确认删除“${item?.name}”工作组？删除后，该工作组的成员不会被删除，工作组下的子工作组将会一并删除。`}
-        extraTreeNode={getExtraTreeNode}
       />
     </>
   );
