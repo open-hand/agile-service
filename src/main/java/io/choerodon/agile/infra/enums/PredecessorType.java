@@ -8,19 +8,19 @@ public enum PredecessorType {
     /**
      * 结束到结束
      */
-    FF,
+    PREDECESSOR_FF,
     /**
      * 结束到开始
      */
-    FS,
+    PREDECESSOR_FS,
     /**
      * 开始到开始
      */
-    SS,
+    PREDECESSOR_SS,
     /**
      * 开始到结束
      */
-    SF;
+    PREDECESSOR_SF;
 
     public static boolean contains(String value) {
         for (PredecessorType predecessorType : PredecessorType.values()) {

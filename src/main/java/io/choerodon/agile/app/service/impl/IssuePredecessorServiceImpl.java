@@ -282,7 +282,7 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
             IssuePredecessorDTO dto = new IssuePredecessorDTO();
             dto.setIssueId(issuePredecessor.getIssueId());
             dto.setPredecessorId(issuePredecessor.getPredecessorId());
-            dto.setPredecessorType(issuePredecessor.getPredecessorType().toUpperCase());
+            dto.setPredecessorType(issuePredecessor.getPredecessorType().toLowerCase());
             dto.setProjectId(projectId);
             dto.setOrganizationId(organizationId);
             if (!issuePredecessorList.contains(dto)) {
@@ -409,7 +409,7 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
             }
             Long predecessorId = predecessor.getPredecessorId();
             AssertUtilsForCommonException.notNull(predecessorId, "error.predecessor.id.null");
-            predecessorType = predecessorType.toUpperCase();
+            predecessorType = predecessorType.toLowerCase();
             List<Long> predecessorIds = predecessorMap.computeIfAbsent(predecessorType, x -> new ArrayList<>());
             if (!predecessorIds.contains(predecessorId)) {
                 predecessorIds.add(predecessorId);
