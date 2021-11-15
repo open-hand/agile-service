@@ -76,7 +76,7 @@ public class WorkGroupController {
     @DeleteMapping("/{work_group_id}")
     public ResponseEntity delete(@ApiParam(value = "组织Id", required = true)
                                  @PathVariable(name = "organization_id") Long organizationId,
-                                 @PathVariable(name = "work_group_id") Long workGroupId) {
+                                 @PathVariable(name = "work_group_id") @Encrypt Long workGroupId) {
         workGroupService.delete(organizationId, workGroupId);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }

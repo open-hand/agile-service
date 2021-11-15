@@ -15,7 +15,7 @@ public class MoveWorkGroupVO {
 
     private Boolean before;
 
-    @Encrypt
+    @Encrypt(ignoreValue = {"0"})
     private Long  outSetId;
 
     public Long getParentId() {

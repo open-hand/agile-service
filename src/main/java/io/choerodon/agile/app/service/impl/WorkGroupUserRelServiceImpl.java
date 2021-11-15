@@ -154,11 +154,18 @@ public class WorkGroupUserRelServiceImpl implements WorkGroupUserRelService {
         if (CollectionUtils.isEmpty(content)) {
             return new Page<>();
         }
+        List<Long> userIds = userPage.stream().map(UserDTO::getId).collect(Collectors.toList());
+        List<WorkGroupVO> workGroupVOS = workGroupUserRelMapper.selectWorkGroupByUserId(organizationId, userIds);
+        Map<Long, List<WorkGroupVO>> workGroupMap = new HashMap<>();
+        if (!CollectionUtils.isEmpty(workGroupVOS)) {
+            workGroupMap.putAll(workGroupVOS.stream().collect(Collectors.groupingBy(WorkGroupVO::getUserId)));
+        }
         List<WorkGroupUserRelVO> list = new ArrayList<>();
         content.forEach(v -> {
             WorkGroupUserRelVO workGroupUserRelVO = new WorkGroupUserRelVO();
             workGroupUserRelVO.setUserId(v.getId());
             workGroupUserRelVO.setUserVO(modelMapper.map(v, UserVO.class));
+            workGroupUserRelVO.setWorkGroupVOS(workGroupMap.get(v.getId()));
             list.add(workGroupUserRelVO);
         });
         return PageUtil.buildPageInfoWithPageInfoList(userPage, list);
