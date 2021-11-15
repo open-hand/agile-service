@@ -39,4 +39,22 @@ public class SearchVOUtil {
         }
         advancedSearchArgs.put(TYPE_CODES, typeCodes);
     }
+
+    public static void setOtherArgs(SearchVO searchVO, String key, Object value) {
+        Map<String, Object> otherArgs = searchVO.getOtherArgs();
+        if (otherArgs == null) {
+            otherArgs = new HashMap<>();
+            searchVO.setOtherArgs(otherArgs);
+        }
+        otherArgs.put(key, value);
+    }
+
+    public static void setSearchArgs(SearchVO searchVO, String key, Object value) {
+        Map<String, Object> searchArgs = searchVO.getSearchArgs();
+        if (searchArgs == null) {
+            searchArgs = new HashMap<>();
+            searchVO.setSearchArgs(searchArgs);
+        }
+        searchArgs.put(key, value);
+    }
 }

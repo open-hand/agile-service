@@ -133,6 +133,26 @@ public class GanttChartVO {
 
     private BigDecimal workTimePercentage;
 
+    private List<GanttChartVO> predecessors;
+
+    private String predecessorType;
+
+    public String getPredecessorType() {
+        return predecessorType;
+    }
+
+    public void setPredecessorType(String predecessorType) {
+        this.predecessorType = predecessorType;
+    }
+
+    public List<GanttChartVO> getPredecessors() {
+        return predecessors;
+    }
+
+    public void setPredecessors(List<GanttChartVO> predecessors) {
+        this.predecessors = predecessors;
+    }
+
     public BigDecimal getWorkTimePercentage() {
         return workTimePercentage;
     }
