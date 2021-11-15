@@ -260,6 +260,13 @@ public class WorkGroupServiceImpl implements WorkGroupService {
             rank = getAfterRank(organizationId, parentId, moveWorkGroupVO);
         }
         WorkGroupDTO workGroupDTO = workGroupMapper.selectByPrimaryKey(moveWorkGroupVO.getWorkGroupId());
+        // 是否更改层级
+        boolean changeLevel = !Objects.equals(parentId, workGroupDTO.getParentId());
+        if (changeLevel) {
+            WorkGroupVO workGroupVO = modelMapper.map(workGroupDTO, WorkGroupVO.class);
+            workGroupVO.setParentId(parentId);
+            changeLevel(organizationId, workGroupDTO, workGroupVO);
+        }
         workGroupDTO.setRank(rank);
         workGroupDTO.setParentId(parentId);
         baseUpdate(workGroupDTO);
@@ -287,6 +294,9 @@ public class WorkGroupServiceImpl implements WorkGroupService {
         } else {
             String rightRank = workGroupMapper.queryRank(organizationId, parentId, moveWorkGroupVO.getOutSetId());
             String leftRank = workGroupMapper.queryLeftRank(organizationId, parentId, rightRank);
+            if (ObjectUtils.isEmpty(leftRank)) {
+                return RankUtil.genPre(rightRank);
+            }
             return RankUtil.between(leftRank, rightRank);
         }
     }
