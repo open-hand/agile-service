@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.IssuePredecessorMapper">
+    <insert id="batchInsert">
+        insert into agile_issue_predecessor
+        (issue_id, predecessor_id, predecessor_type, project_id, organization_id, created_by, last_updated_by)
+        values
+        <foreach collection="issuePredecessorList" item="item"  separator=",">
+            (
+            #{item.issueId},
+            #{item.predecessorId},
+            #{item.predecessorType},
+            #{item.projectId},
+            #{item.organizationId},
+            #{operator},
+            #{operator}
+            )
+        </foreach>
+
+    </insert>
+
+    <delete id="deleteByIssueId">
+        delete aip.*
+        from agile_issue_predecessor aip
+        where aip.organization_id = #{organizationId}
+        and aip.project_id = #{projectId}
+        and (aip.issue_id = #{issueId} or aip.predecessor_id = #{issueId})
+    </delete>
+
+    <select id="selectInList" resultType="io.choerodon.agile.infra.dto.IssuePredecessorDTO">
+        select aip.*
+        from agile_issue_predecessor aip
+        where aip.organization_id = #{organizationId}
+        and aip.project_id = #{projectId}
+        and
+        <foreach collection="issuePredecessorList" item="item" open="(" separator="OR" close=")">
+            (
+            aip.issue_id = #{item.issueId}
+            AND aip.predecessor_id = #{item.predecessorId}
+            AND aip.predecessor_type = #{item.predecessorType}
+            )
+        </foreach>
+    </select>
+
+    <select id="selectByIssueIds" resultType="io.choerodon.agile.infra.dto.IssuePredecessorDTO">
+        select *
+        from agile_issue_predecessor
+        where project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="OR" close=")">
+           #{projectId}
+        </foreach>
+        and issue_id in
+        <foreach collection="issueIds" item="issueId" open="(" separator="OR" close=")">
+          #{issueId}
+        </foreach>
+    </select>
+</mapper>

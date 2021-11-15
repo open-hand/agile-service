@@ -9,4 +9,6 @@ public class LookupType {
     }
 
     public static final String CONTEXT = "object_scheme_field_context";
+
+    public static final String PREDECESSOR_TYPE = "predecessor_type";
 }

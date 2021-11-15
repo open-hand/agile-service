@@ -21,7 +21,6 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.core.utils.PageUtils;
-import io.choerodon.core.utils.PageableHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.apache.commons.lang3.StringUtils;
@@ -117,6 +116,8 @@ public class GanttChartServiceImpl implements GanttChartService {
     private WorkLogMapper workLogMapper;
     @Autowired
     private IssuePersonalSortMapper issuePersonalSortMapper;
+    @Autowired
+    private IssuePredecessorMapper issuePredecessorMapper;
 
     @Override
     public Page<GanttChartVO> pagedQuery(Long projectId,
@@ -907,6 +908,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         Map<Long, BigDecimal> workTimeMap = queryWorkTimeByIssueIds(projectIds, issueIds);
         Map<Long, Set<Long>> parentSonMap = new HashMap<>();
         Map<Long, BigDecimal> remainingTimeMap = new HashMap<>();
+        Map<Long, GanttChartVO> ganttMap = new HashMap<>();
         issueList.forEach(i -> {
             Long statusId = i.getStatusId();
             Long issueId = i.getIssueId();
@@ -939,8 +941,9 @@ public class GanttChartServiceImpl implements GanttChartService {
             if (!ObjectUtils.isEmpty(remainingTime)) {
                 remainingTimeMap.put(issueId, remainingTime);
             }
+            ganttMap.put(issueId, ganttChart);
         });
-        postSetGanttInfo(result, issueEpicMap, issueFeatureMap, parentSonMap, workTimeMap, remainingTimeMap);
+        postSetGanttInfo(result, issueEpicMap, issueFeatureMap, parentSonMap, workTimeMap, remainingTimeMap, ganttMap, projectIds);
         return result;
     }
 
@@ -1033,33 +1036,17 @@ public class GanttChartServiceImpl implements GanttChartService {
                                   Map<Long, IssueDTO> issueFeatureMap,
                                   Map<Long, Set<Long>> parentSonMap,
                                   Map<Long, BigDecimal> workTimeMap,
-                                  Map<Long, BigDecimal> remainingTimeMap) {
+                                  Map<Long, BigDecimal> remainingTimeMap,
+                                  Map<Long, GanttChartVO> ganttMap,
+                                  Set<Long> projectIds) {
+        Map<Long, List<IssuePredecessorDTO>> predecessorMap = new HashMap<>();
+        processPredecessors(ganttMap, projectIds, predecessorMap);
         BigDecimal zero = BigDecimal.valueOf(0L, 4);
-        Map<Long, GanttChartVO> ganttMap = new HashMap<>();
         result.forEach(gantt -> {
             Long issueId = gantt.getIssueId();
-            ganttMap.put(issueId, gantt);
-            boolean isParent = parentSonMap.containsKey(issueId);
-            BigDecimal remainingTime = zero;
-            BigDecimal workTime = zero;
-            if (isParent) {
-                Set<Long> sonIds = parentSonMap.get(issueId);
-                List<Long> issueIds = new ArrayList<>(sonIds);
-                issueIds.add(issueId);
-                for (Long thisIssueId : issueIds) {
-                    remainingTime = remainingTime.add(remainingTimeMap.getOrDefault(thisIssueId, zero));
-                    workTime = workTime.add(workTimeMap.getOrDefault(thisIssueId, zero));
-                }
-            } else {
-                remainingTime = remainingTime.add(remainingTimeMap.getOrDefault(issueId, zero));
-                workTime = workTime.add(workTimeMap.getOrDefault(issueId, zero));
-            }
-            BigDecimal total = remainingTime.add(workTime);
-            BigDecimal percentage = zero;
-            if (zero.compareTo(total) != 0) {
-                percentage = workTime.divide(total, 4, BigDecimal.ROUND_HALF_UP);
-            }
-            gantt.setWorkTimePercentage(percentage);
+            calcWorkTimePercentage(parentSonMap, workTimeMap, remainingTimeMap, zero, gantt, issueId);
+            setPredecessors(predecessorMap, gantt, ganttMap);
+
         });
         if (ObjectUtils.isEmpty(issueEpicMap)
                 && ObjectUtils.isEmpty(issueFeatureMap)) {
@@ -1070,6 +1057,83 @@ public class GanttChartServiceImpl implements GanttChartService {
             Long featureId = feature.getIssueId();
             addParentSubProjectIds(ganttMap, issueId, featureId);
         });
+    }
+
+    private void setPredecessors(Map<Long, List<IssuePredecessorDTO>> predecessorMap,
+                                 GanttChartVO gantt,
+                                 Map<Long, GanttChartVO> ganttMap) {
+        Long issueId = gantt.getIssueId();
+        List<IssuePredecessorDTO> predecessors = predecessorMap.get(issueId);
+        if (ObjectUtils.isEmpty(predecessors)) {
+            return;
+        }
+        List<GanttChartVO> ganttPredecessors = new ArrayList<>();
+        gantt.setPredecessors(ganttPredecessors);
+        predecessors.forEach(predecessor -> {
+            Long predecessorId = predecessor.getPredecessorId();
+            GanttChartVO predecessorGantt = ganttMap.get(predecessorId);
+            if (predecessorGantt == null) {
+                return;
+            }
+            predecessorGantt.setPredecessorType(predecessor.getPredecessorType());
+            ganttPredecessors.add(predecessorGantt);
+        });
+    }
+
+    private void calcWorkTimePercentage(Map<Long, Set<Long>> parentSonMap,
+                                        Map<Long, BigDecimal> workTimeMap,
+                                        Map<Long, BigDecimal> remainingTimeMap,
+                                        BigDecimal zero, GanttChartVO gantt,
+                                        Long issueId) {
+        boolean isParent = parentSonMap.containsKey(issueId);
+        BigDecimal remainingTime = zero;
+        BigDecimal workTime = zero;
+        if (isParent) {
+            Set<Long> sonIds = parentSonMap.get(issueId);
+            List<Long> issueIds = new ArrayList<>(sonIds);
+            issueIds.add(issueId);
+            for (Long thisIssueId : issueIds) {
+                remainingTime = remainingTime.add(remainingTimeMap.getOrDefault(thisIssueId, zero));
+                workTime = workTime.add(workTimeMap.getOrDefault(thisIssueId, zero));
+            }
+        } else {
+            remainingTime = remainingTime.add(remainingTimeMap.getOrDefault(issueId, zero));
+            workTime = workTime.add(workTimeMap.getOrDefault(issueId, zero));
+        }
+        BigDecimal total = remainingTime.add(workTime);
+        BigDecimal percentage = zero;
+        if (zero.compareTo(total) != 0) {
+            percentage = workTime.divide(total, 4, BigDecimal.ROUND_HALF_UP);
+        }
+        gantt.setWorkTimePercentage(percentage);
+    }
+
+    private void processPredecessors(Map<Long, GanttChartVO> ganttMap,
+                                     Set<Long> projectIds,
+                                     Map<Long, List<IssuePredecessorDTO>> predecessorMap) {
+        Set<Long> issueIds = ganttMap.keySet();
+        if (issueIds.isEmpty()) {
+            return;
+        }
+        Set<Long> issueNotInGanttMapIds = new HashSet<>();
+        issuePredecessorMapper.selectByIssueIds(projectIds, issueIds)
+                .forEach(predecessor -> {
+                    Long issueId = predecessor.getIssueId();
+                    Long predecessorId = predecessor.getPredecessorId();
+                    if (!issueIds.contains(predecessorId)) {
+                        issueNotInGanttMapIds.add(predecessorId);
+                    }
+                    List<IssuePredecessorDTO> list = predecessorMap.computeIfAbsent(issueId, x -> new ArrayList<>());
+                    list.add(predecessor);
+                });
+        if (!issueNotInGanttMapIds.isEmpty()) {
+            issueMapper.selectWithSubByIssueIds(projectIds, new ArrayList<>(issueNotInGanttMapIds), null, false, null)
+                    .forEach(issue -> {
+                        GanttChartVO ganttChart = new GanttChartVO();
+                        BeanUtils.copyProperties(issue, ganttChart);
+                        ganttMap.put(issue.getIssueId(), ganttChart);
+                    });
+        }
     }
 
     private void addParentSubProjectIds(Map<Long, GanttChartVO> ganttMap, Long issueId, Long parentId) {

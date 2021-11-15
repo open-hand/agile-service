@@ -195,6 +195,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private StatusLinkageExecutionLogService statusLinkageExecutionLogService;
     @Autowired
     private ProjectInfoMapper projectInfoMapper;
+    @Autowired
+    private IssuePredecessorService issuePredecessorService;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -1651,6 +1653,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         issueParticipantRelMapper.deleteByIssueIdAndParticipantIds(projectId, issueId, null);
         // 删除当前issue相关的状态联动执行记录
         statusLinkageExecutionLogService.deleteByIssueId(projectId, ConvertUtil.getOrganizationId(projectId), issueId);
+        issuePredecessorService.deleteNode(projectId, issueId);
     }
 
     private void deleteRuleLogRel(Long projectId, Long issueId, Set<Long> fieldIds) {
