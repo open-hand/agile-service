@@ -46,11 +46,11 @@
         select *
         from agile_issue_predecessor
         where project_id in
-        <foreach collection="projectIds" item="projectId" open="(" separator="OR" close=")">
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
            #{projectId}
         </foreach>
         and issue_id in
-        <foreach collection="issueIds" item="issueId" open="(" separator="OR" close=")">
+        <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
           #{issueId}
         </foreach>
     </select>

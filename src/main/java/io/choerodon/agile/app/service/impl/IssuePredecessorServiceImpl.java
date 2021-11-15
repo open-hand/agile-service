@@ -135,14 +135,27 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
                                                             Long currentIssueId) {
         SearchVOUtil.setTypeCodes(searchVO, ISSUE_TYPE_CODES);
         SearchVOUtil.setSearchArgs(searchVO, "tree", false);
+        Map<String, Object> otherArgs = searchVO.getOtherArgs();
         List<IssuePredecessorTreeClosureDTO> ancestors =
                 issuePredecessorTreeClosureMapper.selectByDescendantIds(organizationId, projectId, new HashSet<>(Arrays.asList(currentIssueId)));
         Set<Long> ignoredIssueIds =
                 ancestors.stream().map(IssuePredecessorTreeClosureDTO::getAncestorId).collect(Collectors.toSet());
+        String issueIdsKey = "issueIds";
+        List<IssueListFieldKVVO> topIssues = new ArrayList<>();
+        if (!ObjectUtils.isEmpty(otherArgs) && !ObjectUtils.isEmpty(otherArgs.get(issueIdsKey))) {
+            List<String> issueIds = (List<String>) otherArgs.get(issueIdsKey);
+            issueIds.forEach(str -> ignoredIssueIds.add(Long.valueOf(str)));
+            PageRequest newPageRequest = new PageRequest(1,0);
+            topIssues.addAll(issueService.listIssueWithSub(projectId, searchVO, newPageRequest, organizationId));
+            otherArgs.remove(issueIdsKey);
+        }
         if (!ignoredIssueIds.isEmpty()) {
             SearchVOUtil.setOtherArgs(searchVO, "excludeIssueIds", ignoredIssueIds);
         }
-        return issueService.listIssueWithSub(projectId, searchVO, pageRequest, organizationId);
+        Page<IssueListFieldKVVO> result = issueService.listIssueWithSub(projectId, searchVO, pageRequest, organizationId);
+        topIssues.addAll(result.getContent());
+        result.setContent(topIssues);
+        return result;
     }
 
     private void deleteTreeNodes(Long projectId,
