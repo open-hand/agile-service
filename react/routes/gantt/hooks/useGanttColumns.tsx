@@ -363,13 +363,13 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
     influenceVersion: BaseSystemColumnRender.renderTag('influenceVersion', 'name'),
     sprint: BaseSystemColumnRender.renderTag('sprints', 'sprintName'),
     reporter: (rowData: any) => <UserTag data={get(rowData, 'reporter')} />,
-    // assignee: (rowData: AnyMap) => <UserTag data={get(rowData, 'assignee')} />,
   };
   tableColumns.push(...visibleColumns.map(({ columnCode }) => {
     const baseColumn = { width: 100 } as any;
     if (ganttColumnMap.has(columnCode)) {
       const field = ganttColumnMap.get(columnCode);
       merge(baseColumn, typeof field === 'function' ? field(onSortChange) as Gantt.Column : field);
+      columnCode === 'predecessor' && merge(baseColumn, { render: renderPredecessor });
     } else if (systemColumnsMap.has(columnCode)) {
       const column = systemColumnsMap.get(columnCode)!;
       merge(baseColumn, {
@@ -396,12 +396,11 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
       },
     });
   }));
-  //
 
-  tableColumns.splice(2, 0, { ...ganttColumnMap.get('predecessor')!(onSortChange), render: renderPredecessor });
   return tableColumns;
 };
-const defaultVisibleColumns = ['assignee', 'estimatedStartTime', 'estimatedEndTime', 'actualStartTime', 'actualEndTime'];
+const ganntSystemFields = [{ title: '前置依赖', code: 'predecessor', fieldType: 'multiple' }];
+const defaultVisibleColumns = ['assignee', 'predecessor', 'estimatedStartTime', 'estimatedEndTime', 'actualStartTime', 'actualEndTime'];
 const defaultListLayoutColumns = defaultVisibleColumns.map((code) => ({
   columnCode: code,
   display: true,
@@ -410,7 +409,9 @@ function useGanttProjectColumns({
   cached, onAfterCreateSubIssue, onCreateSubIssue, onClickSummary, onSortChange, onUpdate, projectId, menuType, isInProgram, sortedList,
 }: IGanttColumnsHookProps) {
   // 恒为 项目层级
-  const { data: tableFields } = useIssueTableFields({ hiddenFieldCodes: ['epicSelfName', 'summary'], projectId, menuType: 'project' });
+  const { data: tableFields } = useIssueTableFields({
+    hiddenFieldCodes: ['epicSelfName', 'summary'], extraFields: ganntSystemFields, projectId, menuType: 'project',
+  });
   const { data: issueTypes, isLoading: issueTypeIsLoading } = useProjectIssueTypes({ projectId, isInProgram });
   const { data: predecessorTypes, isLoading: predecessorTypesLoading } = useProjectPredecessorTypes({ projectId });
   const isLoading = issueTypeIsLoading && predecessorTypesLoading;
