@@ -192,6 +192,15 @@ public class IssueListFieldKVVO {
     @ApiModelProperty("预估时间")
     private BigDecimal estimateTime;
 
+    @ApiModelProperty("工时")
+    private BigDecimal workTime;
+
+    @ApiModelProperty("历史累计工时")
+    private BigDecimal cumulativeWorkTime;
+
+    @ApiModelProperty("偏差率")
+    private BigDecimal deviationRate;
+
     public String getEpicSelfName() {
         return epicSelfName;
     }
@@ -676,5 +685,29 @@ public class IssueListFieldKVVO {
 
     public void setEstimateTime(BigDecimal estimateTime) {
         this.estimateTime = estimateTime;
+    }
+
+    public BigDecimal getWorkTime() {
+        return workTime;
+    }
+
+    public void setWorkTime(BigDecimal workTime) {
+        this.workTime = workTime;
+    }
+
+    public BigDecimal getCumulativeWorkTime() {
+        return cumulativeWorkTime;
+    }
+
+    public void setCumulativeWorkTime(BigDecimal cumulativeWorkTime) {
+        this.cumulativeWorkTime = cumulativeWorkTime;
+    }
+
+    public BigDecimal getDeviationRate() {
+        return deviationRate;
+    }
+
+    public void setDeviationRate(BigDecimal deviationRate) {
+        this.deviationRate = deviationRate;
     }
 }
