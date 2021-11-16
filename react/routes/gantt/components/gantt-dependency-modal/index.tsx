@@ -57,21 +57,31 @@ const GanttDependency: React.FC = observer(() => {
   return (
     <div>
       <Form dataSet={dataset}>
-        {dataset.data.map((record) => (
-          <div className={styles.item}>
-            <Select
-              name="predecessorType"
-              record={record}
-              className={styles.select}
-              optionsFilter={(optionRecord) => {
-                const valueCode = optionRecord.get('valueCode');
-                return !selectTypes.includes(valueCode) || valueCode === record.get('predecessorType');
-              }}
-            />
-            <SelectIssue name="predecessorId" multiple record={record} className={styles.select} issueId={issueId} selectIds={editData[record.get('predecessorType')]} />
-            <Icon type="delete_sweep-o" onClick={() => dataset.delete(record, false)} className={styles.del_btn} />
-          </div>
-        ))}
+        <div>
+          {dataset.data.map((record) => (
+            <div className={styles.item} key={record.id}>
+              <Select
+                name="predecessorType"
+                record={record}
+                className={styles.select}
+                optionsFilter={(optionRecord) => {
+                  const valueCode = optionRecord.get('valueCode');
+                  return !selectTypes.includes(valueCode) || valueCode === record.get('predecessorType');
+                }}
+              />
+              <SelectIssue
+                key={`predecessorType-${record.id}`}
+                name="predecessorId"
+                multiple
+                record={record}
+                className={styles.select}
+                issueId={issueId}
+                selectIds={editData[record.get('predecessorType')]}
+              />
+              <Icon type="delete_sweep-o" onClick={() => dataset.delete(record, false)} className={styles.del_btn} />
+            </div>
+          ))}
+        </div>
       </Form>
       <Button icon="add" disabled={dataset.length >= predecessorTypeLength} onClick={() => dataset.create()}>添加前置依赖</Button>
     </div>
