@@ -54,8 +54,9 @@ interface Context {
 export type IMode = 'issue' | 'assignee' | 'project' | 'projectAssignee';
 export const StoreProvider: React.FC<Context> = inject('AppState')(observer((props: any) => {
   const { children, AppState, myDefaultFilter } = props;
+  const isProject = getMenuType() === 'project';
   const [loading, setLoading] = useState<boolean>(false);
-  const [mode, setMode] = useState<IMode>(localPageCacheStore.getItem('workingHours-issue-mode') || (getProjectId() ? 'issue' : 'project'));
+  const [mode, setMode] = useState<IMode>(localPageCacheStore.getItem('workingHours-issue-mode') || (isProject ? 'issue' : 'project'));
   const [isContain, setIsContain] = useState<boolean>(false);
   const [totalWorkTime, setTotalWorkTime] = useState<number>(5);
   const issueSearchStore = useIssueSearchStore({
@@ -66,9 +67,9 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
 
   const { data: tableFields } = useIssueTableFields({
     extraFields: [{ code: 'workTime', title: '工时' } as IFoundationHeader,
-      { code: 'historyWorkTime', title: '历史累计工时' } as IFoundationHeader,
-      { code: 'estimatedWorkTime', title: '预估总工时' } as IFoundationHeader,
-      { code: 'rate', title: '偏差率' } as IFoundationHeader,
+      { code: 'cumulativeWorkTime', title: '历史累计工时' } as IFoundationHeader,
+      { code: 'estimateTime', title: '原始预估时间' } as IFoundationHeader,
+      { code: 'deviationRate', title: '偏差率' } as IFoundationHeader,
     ],
   });
   useEffect(() => () => { localPageCacheStore.setItem('agile.working.hours.issue.search', issueSearchStore.getCustomFieldFilters()); }, []);
@@ -78,9 +79,19 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     projectId: getProjectId(),
     organizationId: getOrganizationId(),
   })), []);
-  const workingHoursAssigneeDs = useMemo(() => new DataSet(AssigneeDataSet({ projectId: getProjectId() })), []);
-  const workingHoursProjectDs = useMemo(() => new DataSet(ProjectDataSet()), []);
-  const workingHoursProjectAssigneeDs = useMemo(() => new DataSet(ProjectDataSet()), []);
+  // @ts-ignore
+  const workingHoursAssigneeDs = useMemo(() => new DataSet(AssigneeDataSet({
+    projectId: isProject ? getProjectId() : undefined,
+    organizationId: getOrganizationId(),
+  })), []);
+  // @ts-ignore
+  const workingHoursProjectDs = useMemo(() => new DataSet(ProjectDataSet({
+    organizationId: getOrganizationId(),
+  })), []);
+  // @ts-ignore
+  const workingHoursProjectAssigneeDs = useMemo(() => new DataSet(ProjectDataSet({
+    organizationId: getOrganizationId(),
+  })), []);
   const dataSetMap = useMemo(() => new Map([
     ['issue', workingHoursIssuesDs],
     ['assignee', workingHoursAssigneeDs],
@@ -174,7 +185,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     workingHoursAssigneeDs,
     workingHoursProjectDs,
     workingHoursProjectAssigneeDs,
-    isProject: getMenuType() === 'project',
+    isProject,
     tableFields,
     isContain,
     setIsContain,

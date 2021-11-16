@@ -23,16 +23,16 @@ import { ListLayoutColumnVO } from '@/api';
 import TableCache from '@/components/table-cache';
 import ProjectIssueTable from './components/project-issue-table';
 
-const disabledSystemOptionsCodes = ['summary', 'workTime', 'historyWorkTime', 'estimatedWorkTime', 'rate'];
+const disabledSystemOptionsCodes = ['summary', 'workTime', 'cumulativeWorkTime', 'estimateTime', 'deviationRate'];
 
 const defaultVisibleColumns = [
   'summary',
   'issueNum',
   'status',
   'workTime',
-  'historyWorkTime',
-  'estimatedWorkTime',
-  'rate',
+  'cumulativeWorkTime',
+  'estimateTime',
+  'deviationRate',
 ];
 
 const defaultVisibleListLayoutColumns = defaultVisibleColumns.map((code) => ({

@@ -67,9 +67,9 @@ const SimpleIssueTable: React.FC<Props> = ({ dataSet }) => {
           )
         }
         <Column name="workTime" {...columnMap.get('workTime') as ColumnPropsInner} />
-        <Column name="historyWorkTime" {...columnMap.get('historyWorkTime') as ColumnPropsInner} />
-        <Column name="estimatedWorkTime" {...columnMap.get('estimatedWorkTime') as ColumnPropsInner} />
-        <Column name="rate" {...columnMap.get('rate') as ColumnPropsInner} />
+        <Column name="cumulativeWorkTime" {...columnMap.get('cumulativeWorkTime') as ColumnPropsInner} />
+        <Column name="estimateTime" {...columnMap.get('estimateTime') as ColumnPropsInner} />
+        <Column name="deviationRate" {...columnMap.get('deviationRate') as ColumnPropsInner} />
       </Table>
       <DetailContainer {...issueDetailProps} />
     </>
