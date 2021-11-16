@@ -53,6 +53,8 @@ public class GanttChartServiceImpl implements GanttChartService {
     private static final String SPRINT = "sprint";
     private static final String CREATE_USER = "createUser";
     private static final String UPDATE_USER = "updateUser";
+    private static final String SPENT_WORK_TIME = "spentWorkTime";
+    private static final String ALL_ESTIMATE_TIME = "allEstimateTime";
     private static final String MAIN_RESPONSIBLE_USER = "mainResponsibleUser";
     private static final String TAGS = "tags";
     private static final String PARTICIPANTS = "participants";
@@ -71,6 +73,8 @@ public class GanttChartServiceImpl implements GanttChartService {
                     UPDATE_USER,
                     MAIN_RESPONSIBLE_USER,
                     FieldCode.SPRINT,
+                    SPENT_WORK_TIME,
+                    ALL_ESTIMATE_TIME,
                     TAGS,
                     PARTICIPANTS);
 
@@ -877,6 +881,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         Map<String, Object> fieldCodeValues = new HashMap<>();
         Set<Long> systemMemberFieldUserIds = new HashSet<>();
         buildFieldCodeValues(projectIds, issueIds, displayFields, fieldCodeValues, issueList, organizationId, systemMemberFieldUserIds);
+        buildEpicAndFeatureMap(issueIds, issueFeatureMap, projectIds, projectMap, displayFields, fieldCodeValues);
         List<IssueTypeVO> issueTypes = issueTypeMapper.selectByProjectIds(organizationId, new ArrayList<>(projectIds));
         Map<Long, Map<Long, IssueTypeVO>> projectIssueTypeMap = new HashMap<>();
         issueTypes.forEach(issueType -> {
@@ -945,6 +950,30 @@ public class GanttChartServiceImpl implements GanttChartService {
         });
         postSetGanttInfo(result, issueEpicMap, issueFeatureMap, parentSonMap, workTimeMap, remainingTimeMap, ganttMap, projectIds);
         return result;
+    }
+
+    private void buildEpicAndFeatureMap(List<Long> issueIds,
+                                        Map<Long, IssueDTO> issueFeatureMap,
+                                        Set<Long> projectIds,
+                                        Map<Long, ProjectVO> projectMap,
+                                        List<ObjectSchemeFieldVO> displayFields,
+                                        Map<String, Object> fieldCodeValues) {
+        List<String> fieldCodes = displayFields.stream().map(ObjectSchemeFieldVO::getCode).collect(Collectors.toList());
+        List<ProjectVO> programs = queryProgramIds(projectIds);
+        boolean belongProgram = (agilePluginService != null && !ObjectUtils.isEmpty(programs));
+        if (fieldCodes.contains("epic")) {
+            fieldCodeValues.put("epic", issueMapper.selectEpicByLinkIssueIds(projectIds, issueIds)
+                    .stream()
+                    .collect(Collectors.toMap(IssueDTO::getIssueId, Function.identity())));
+        }
+        if (belongProgram && fieldCodes.contains("feature")) {
+            if (CollectionUtils.isEmpty(issueFeatureMap)) {
+                fieldCodeValues.put("feature", issueFeatureMap);
+            } else {
+                programs.forEach(p -> projectMap.put(p.getId(), p));
+                fieldCodeValues.put("feature", agilePluginService.queryIssueFeature(projectIds, issueIds));
+            }
+        }
     }
 
     @Override
@@ -1241,6 +1270,10 @@ public class GanttChartServiceImpl implements GanttChartService {
                     fieldCodeValues.put(fieldCode, issueSprintGroup);
                 }
                 break;
+            case SPENT_WORK_TIME:
+            case ALL_ESTIMATE_TIME:
+                handSpentWorkTimeAndAllEstimateTime(projectIds, issueList, fieldCodeValues);
+                break;
             case FieldCode.FIX_VERSION:
                 handlerVersionList(fieldCode, projectIds, issueIds, fieldCodeValues);
                 break;
@@ -1270,6 +1303,31 @@ public class GanttChartServiceImpl implements GanttChartService {
             default:
                 break;
         }
+    }
+
+    private void handSpentWorkTimeAndAllEstimateTime(Set<Long> projectIds, List<IssueDTO> issueList, Map<String, Object> fieldCodeValues) {
+        List<Long> issueIds = issueList.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+        Map<Long, List<WorkLogVO>> workLogVOMap = workLogMapper.queryByIssueIds(new ArrayList<>(projectIds), issueIds).stream().collect(Collectors.groupingBy(WorkLogVO::getIssueId));
+        Map<Long, BigDecimal> spentWorkTimeMap = new HashMap<>();
+        Map<Long, BigDecimal> allEstimateTimeMap = new HashMap<>();
+        for (IssueDTO issueDTO : issueList) {
+            List<WorkLogVO> workLogVOList = workLogVOMap.get(issueDTO.getIssueId());
+            BigDecimal spentWorkTime = BigDecimal.ZERO;
+            BigDecimal allEstimateTime;
+            if (!CollectionUtils.isEmpty(workLogVOList)) {
+                spentWorkTime = new BigDecimal(0);
+                for (WorkLogVO workLogVO : workLogVOList){
+                    spentWorkTime = spentWorkTime.add(workLogVO.getWorkTime());
+                }
+                allEstimateTime = issueDTO.getRemainingTime() == null ? spentWorkTime : spentWorkTime.add(issueDTO.getRemainingTime());
+            } else {
+                allEstimateTime = issueDTO.getRemainingTime();
+            }
+            spentWorkTimeMap.put(issueDTO.getIssueId(), spentWorkTime);
+            allEstimateTimeMap.put(issueDTO.getIssueId(), allEstimateTime);
+        }
+        fieldCodeValues.put(SPENT_WORK_TIME, spentWorkTimeMap);
+        fieldCodeValues.put(ALL_ESTIMATE_TIME, allEstimateTimeMap);
     }
 
     private void handlerParticipant(Set<Long> userIds, List<IssueDTO> issueList) {
@@ -1487,17 +1545,42 @@ public class GanttChartServiceImpl implements GanttChartService {
             Map<Long, List<IssueSprintVO>> map = (Map<Long, List<IssueSprintVO>>) fieldCodeValues.getOrDefault(FieldCode.SPRINT, new HashMap<>());
             ganttChartVO.setSprints(map.get(issueDTO.getIssueId()));
         }
+        if (fieldCodes.contains(SPENT_WORK_TIME)) {
+            Map<Long, BigDecimal> map = (Map<Long, BigDecimal>) fieldCodeValues.getOrDefault(SPENT_WORK_TIME, new HashMap<>());
+            ganttChartVO.setSpentWorkTime(map.get(issueDTO.getIssueId()));
+        }
+        if (fieldCodes.contains(ALL_ESTIMATE_TIME)) {
+            Map<Long, BigDecimal> map = (Map<Long, BigDecimal>) fieldCodeValues.getOrDefault(ALL_ESTIMATE_TIME, new HashMap<>());
+            ganttChartVO.setAllEstimateTime(map.get(issueDTO.getIssueId()));
+        }
+        if (fieldCodes.contains(FieldCode.EPIC)) {
+            Map<Long, IssueDTO> map = (Map<Long, IssueDTO>) fieldCodeValues.getOrDefault(FieldCode.EPIC, new HashMap<>());
+            IssueDTO epic = map.get(issueDTO.getEpicId());
+            if (!ObjectUtils.isEmpty(epic)) {
+                ganttChartVO.setEpicName(epic.getEpicName());
+            }
+        }
+        if (fieldCodes.contains(FieldCode.FEATURE)) {
+            Map<Long, IssueDTO> map = (Map<Long, IssueDTO>) fieldCodeValues.getOrDefault(FieldCode.FEATURE, new HashMap<>());
+            IssueDTO feature = map.get(issueDTO.getFeatureId());
+            if (!ObjectUtils.isEmpty(feature)) {
+                ganttChartVO.setFeatureName(feature.getSummary());
+            }
+        }
         if (fieldCodes.contains(CREATE_USER) && !ObjectUtils.isEmpty(issueDTO.getCreatedBy())) {
             ganttChartVO.setCreateUser(usersMap.get(issueDTO.getCreatedBy()));
         }
         if (fieldCodes.contains(UPDATE_USER) && !ObjectUtils.isEmpty(issueDTO.getLastUpdatedBy())) {
-            ganttChartVO.setCreateUser(usersMap.get(issueDTO.getLastUpdatedBy()));
+            ganttChartVO.setUpdateUser(usersMap.get(issueDTO.getLastUpdatedBy()));
+        }
+        if (fieldCodes.contains("reporter") && !ObjectUtils.isEmpty(issueDTO.getLastUpdatedBy())) {
+            ganttChartVO.setReporter(usersMap.get(issueDTO.getReporterId()));
         }
         if (fieldCodes.contains(MAIN_RESPONSIBLE_USER) && !ObjectUtils.isEmpty(issueDTO.getMainResponsibleId())) {
-            ganttChartVO.setCreateUser(usersMap.get(issueDTO.getMainResponsibleId()));
+            ganttChartVO.setMainResponsibleUser(usersMap.get(issueDTO.getMainResponsibleId()));
         }
         // 处理环境字段
-        if (fieldCodes.contains(FieldCode.ENVIRONMENT) && !ObjectUtils.isEmpty(issueDTO.getEnvironment())) {
+        if (fieldCodes.contains("environmentName") && !ObjectUtils.isEmpty(issueDTO.getEnvironment())) {
             ganttChartVO.setEnvironment(envMap.get(issueDTO.getEnvironment()));
         }
         // 处理参与人

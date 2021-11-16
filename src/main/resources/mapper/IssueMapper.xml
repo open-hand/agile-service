@@ -350,6 +350,7 @@
         <result property="priorityId" column="priority_id"/>
         <result property="issueTypeId" column="issue_type_id"/>
         <result property="createdBy" column="created_by"/>
+        <result property="lastUpdateDate" column="last_update_date"/>
         <result property="lastUpdatedBy" column="last_updated_by"/>
         <result property="assigneeId" column="assignee_id"/>
         <result property="epicName" column="epic_name"/>
@@ -375,6 +376,7 @@
         <result property="objectVersionNumber" column="object_version_number"/>
         <result property="completed" column="completed"/>
         <result property="mainResponsibleId" column="main_responsible_id"/>
+        <result property="estimateTime" column="estimate_time"/>
         <result property="environment" column="environment"/>
         <result property="epicSelfName" column="epic_self_name"/>
         <collection property="versionIssueRelDTOS"
@@ -561,6 +563,7 @@
         ai.assignee_id,
         ai.estimated_start_time,
         ai.estimated_end_time,
+        ai.estimate_time,
         ai.object_version_number,
         ai.issue_type_id,
         ai.parent_issue_id,
@@ -3342,7 +3345,8 @@
             ai.apply_type,
             ai.epic_id,
             sprint.sprint_id,
-            ai.estimate_time
+            ai.estimate_time,
+            ai.remaining_time
         FROM
             agile_issue ai
             LEFT JOIN (
@@ -5285,6 +5289,29 @@
         </foreach>
         and epic_id is not null
         and epic_id != 0
+    </select>
+
+    <select id="selectEpicByLinkIssueIds" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        select
+           ai.issue_id,
+           ai.summary,
+           ai.epic_name
+        from agile_issue ai
+        where ai.issue_id in (
+            select
+                epic_id
+            from agile_issue
+            where project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            and issue_id in
+            <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
+                #{issueId}
+            </foreach>
+            and epic_id is not null
+            and epic_id != 0
+        )
     </select>
 
     <select id="selectAssigneeIdByIssueIds" resultType="java.lang.Long">
