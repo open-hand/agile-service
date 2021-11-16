@@ -721,29 +721,20 @@ class BacklogStore {
       // 先刷新冲刺信息
       this.updateSprintInfo().then(() => {
         // 拖动完刷新
-        // 如果是同一个冲刺，当前页刷新就行
-        if (sourceId === destinationId) {
-          this.refreshSprint(sourceId, false);
-        } else {
-          // 如果是不同冲刺，那么有两种情况
-          const sourceCount = this.issueMap.get(sourceId).length;
-          // 如果空了，分页减一
-          if (sourceCount === 0) {
-            const pagination = this.getPagination(sourceId);
-            this.updatePagination(sourceId, {
-              // 最小为1
-              page: Math.max(pagination.page - 1, 1),
-            });
-          }
+        // 如果是同一个冲刺，不需要刷新
+        // 如果是不同冲刺，存在分页的冲刺需要刷新
+        if (sourceId !== destinationId) {
+          const pagination = this.getPagination(sourceId);
           const destinationPagination = this.getPagination(destinationId);
-          this.updatePagination(destinationId, {
-            total: destinationPagination.total + count,
-          });
-          this.refreshSprint(sourceId, false);
+          if (pagination && pagination.total > pagination.size) {
+            this.refreshSprint(sourceId, false);
+          }
+          if (destinationPagination && destinationPagination.total + 1 > destinationPagination.size) {
+            this.refreshSprint(destinationId, false);
+          }
         }
         this.spinIf = false;
       }).catch((err) => {
-        console.log(err);
         this.refreshSprint(sourceId, false);
         this.refreshSprint(destinationId, false);
       });
