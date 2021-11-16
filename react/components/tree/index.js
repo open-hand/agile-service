@@ -88,7 +88,9 @@ function PureTree({
   getDeleteTitle,
   searchAutoFilter = false,
   editNodeProps,
-  className,
+  treeWrapCls,
+  topCls,
+  scrollCls,
   ...restProps
 }, ref) {
   const [tree, setTree] = useState(mapDataToTree(data));
@@ -358,7 +360,7 @@ function PureTree({
 
   const isEmpty = flattenedTree.length === 0;
   return (
-    <div className={classnames(Styles.treeWrap, className)}>
+    <div className={classnames(Styles.treeWrap, treeWrapCls)}>
       <>
         <div className={classnames(Styles.top, topCls)}>
           <FilterInput
