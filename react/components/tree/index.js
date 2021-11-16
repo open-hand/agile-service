@@ -88,7 +88,9 @@ function PureTree({
   getDeleteTitle,
   searchAutoFilter = false,
   editNodeProps,
-  className,
+  treeWrapCls,
+  topCls,
+  scrollCls,
   ...restProps
 }, ref) {
   const [tree, setTree] = useState(mapDataToTree(data));
@@ -358,9 +360,9 @@ function PureTree({
 
   const isEmpty = flattenedTree.length === 0;
   return (
-    <div className={classnames(Styles.treeWrap, className)}>
+    <div className={classnames(Styles.treeWrap, treeWrapCls)}>
       <>
-        <div className={Styles.top}>
+        <div className={classnames(Styles.top, topCls)}>
           <FilterInput
             value={search}
             onChange={filterTree}
@@ -371,7 +373,7 @@ function PureTree({
             暂无数据
           </div>
         ) : (
-          <div className={Styles.scroll}>
+          <div className={classnames(Styles.scroll, scrollCls)}>
             <Tree
               tree={filteredTree}
               renderItem={renderItem}
