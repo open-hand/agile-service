@@ -5,7 +5,6 @@ import styles from './LogSearch.less';
 import SelectUser from '@/components/select/select-user';
 import { getIsOrganization } from '@/utils/common';
 import SelectProject from '@/components/select/select-project';
-import WorkGroupUser from './WorkGroupUser';
 
 const LogSearch: React.FC<{ searchDs: DataSet }> = ({ searchDs }) => (
   <div className={styles.logSearch}>
@@ -44,23 +43,17 @@ const LogSearch: React.FC<{ searchDs: DataSet }> = ({ searchDs }) => (
           />
         )
       }
-    {
-        getIsOrganization() ? (
-          <WorkGroupUser />
-        ) : (
-          <SelectUser
-            dataSet={searchDs}
-            name="userIds"
-            placeholder="筛选成员"
-            maxTagCount={2}
-            maxTagTextLength={5}
-            style={{
-              marginLeft: 10,
-            }}
-            clearButton
-          />
-        )
-      }
+    <SelectUser
+      dataSet={searchDs}
+      name="userIds"
+      placeholder="筛选成员"
+      maxTagCount={2}
+      maxTagTextLength={5}
+      style={{
+        marginLeft: 10,
+      }}
+      clearButton
+    />
   </div>
 );
 
