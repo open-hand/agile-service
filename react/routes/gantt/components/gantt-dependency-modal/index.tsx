@@ -19,11 +19,11 @@ const SelectIssue: React.FC<Partial<SelectProps> & { issueId: string, selectIds?
   const config = useMemo((): SelectConfig<any> => ({
     textField: 'summary',
     valueField: 'issueId',
-    request: ({ page, filter }) => ganttApi.loadDependableIssues({ currentIssueId: issueId, page }, { contents: [filter].filter(Boolean) as string[] }),
+    request: ({ page, filter }) => ganttApi.loadDependableIssues({ currentIssueId: issueId, page }, { contents: [filter].filter(Boolean) as string[], otherArgs: { issueIds: selectIds } }),
     optionRenderer: InlineIssueTag.optionRenderer,
     renderer: InlineIssueTag.renderer,
     paging: true,
-  }), [issueId]);
+  }), [issueId, selectIds]);
   const props = useSelect(config);
   return <Select {...props} {...otherProps} />;
 };
@@ -81,7 +81,7 @@ const GanttDependency: React.FC = observer(() => {
 const openGanttDependencyModal = (props: IGanttDependencyModalProps) => {
   Modal.open({
     key: Modal.key(),
-    title: '添加前置依赖',
+    title: `${props.data ? '编辑' : '添加'}前置依赖`,
     style: {
       width: MODAL_WIDTH.small,
     },

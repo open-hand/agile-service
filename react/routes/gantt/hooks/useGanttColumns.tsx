@@ -339,9 +339,6 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
   const predecessorMaps = new Map(predecessorTypes.map((item) => [item.valueCode, item]));
   function renderPredecessor(record: Gantt.Record<any>) {
     const predecessors: any[] = record.predecessors?.map((item: any) => ({ ...item, predecessorName: predecessorMaps.get(item.predecessorType)!.name })) || [];
-    if (predecessors.length > 0) {
-      console.log('predecessors', predecessors);
-    }
     return (
       <Tooltip title={predecessors.map((predecessor: any) => <div>{`${predecessor.predecessorName}：${predecessor.issueNum} ${predecessor.summary}`}</div>)}>
         {predecessors.map<string>((predecessor: any) => `${predecessor.issueNum?.split('-').slice(-1)}${predecessor.predecessorName}`).join('、')}
@@ -410,7 +407,7 @@ const defaultListLayoutColumns = defaultVisibleColumns.map((code) => ({
   display: true,
 }));
 function useGanttProjectColumns({
-  cached, onAfterCreateSubIssue, onCreateSubIssue, onClickSummary, onSortChange, projectId, menuType, isInProgram, sortedList,
+  cached, onAfterCreateSubIssue, onCreateSubIssue, onClickSummary, onSortChange, onUpdate, projectId, menuType, isInProgram, sortedList,
 }: IGanttColumnsHookProps) {
   // 恒为 项目层级
   const { data: tableFields } = useIssueTableFields({ hiddenFieldCodes: ['epicSelfName', 'summary'], projectId, menuType: 'project' });
@@ -423,8 +420,8 @@ function useGanttProjectColumns({
   const visibleColumnCodes = useMemo(() => (listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode)), [listLayoutColumns]);
   const tableWithSortedColumns = useMemo(() => getTableColumns(listLayoutColumns.filter((item) => item.display)
     .map((item) => ({ ...item, disable: true })), tableFields || [], {
-    onClickSummary, onSortChange, openCreateSubIssue: onCreateSubIssue, onAfterCreateSubIssue,
-  }, { disableOperate: menuType !== 'project', disableFeatureCreateIssue }, predecessorTypes), [disableFeatureCreateIssue, listLayoutColumns, menuType, onAfterCreateSubIssue, onClickSummary, onCreateSubIssue, onSortChange, predecessorTypes, tableFields]);
+    onClickSummary, onSortChange, openCreateSubIssue: onCreateSubIssue, onAfterCreateSubIssue, onUpdate,
+  }, { disableOperate: menuType !== 'project', disableFeatureCreateIssue }, predecessorTypes), [disableFeatureCreateIssue, listLayoutColumns, menuType, onAfterCreateSubIssue, onClickSummary, onCreateSubIssue, onSortChange, onUpdate, predecessorTypes, tableFields]);
   const sortedListRef = useRef<IGanttSortLabelSortItem[]>(sortedList);
   sortedListRef.current = sortedList;
 
