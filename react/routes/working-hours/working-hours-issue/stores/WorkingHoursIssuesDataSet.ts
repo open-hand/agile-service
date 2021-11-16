@@ -22,7 +22,7 @@ const WorkingHoursIssuesDataSet = ({
   cacheSelection: false,
   transport: {
     read: ({ params }) => ({
-      url: `/agile/v1/projects/${projectId}/issues/include_sub`,
+      url: `/agile/v1/projects/${projectId}/work_hours/issue_work_hours`,
       method: 'post',
       params: {
         ...params,
@@ -40,9 +40,9 @@ const WorkingHoursIssuesDataSet = ({
     { name: 'issueTypeId', type: 'object' as FieldType, label: '工作项类型' },
     { name: 'issueNum', type: 'string' as FieldType, label: '任务编号' },
     { name: 'workTime', type: 'string' as FieldType, label: '工时' },
-    { name: 'historyWorkTime', type: 'string' as FieldType, label: '历史累计工时' },
-    { name: 'estimatedWorkTime', type: 'string' as FieldType, label: '预估总工时' },
-    { name: 'rate', type: 'string' as FieldType, label: '偏差率' },
+    { name: 'cumulativeWorkTime', type: 'string' as FieldType, label: '历史累计工时' },
+    { name: 'estimateTime', type: 'string' as FieldType, label: '原始预估时间' },
+    { name: 'deviationRate', type: 'string' as FieldType, label: '偏差率' },
     { name: 'priorityId', type: 'string' as FieldType, label: '优先级' },
     { name: 'statusId', type: 'object' as FieldType, label: '状态' },
     { name: 'assigneeId', type: 'string' as FieldType, label: '经办人' },

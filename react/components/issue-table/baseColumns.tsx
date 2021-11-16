@@ -292,6 +292,11 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     width: 170,
     dataIndex: 'estimateTime',
     sortable: true,
+    render: (rowData, getDataMethod = get) => (
+      <div style={{ display: 'inline-flex' }}>
+        {`${getDataMethod(rowData, 'estimateTime')}h`}
+      </div>
+    ),
   }],
   ['label', {
     title: <Tooltip title="标签">标签</Tooltip>,
@@ -372,24 +377,36 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     width: 170,
     dataIndex: 'workTime',
     sortable: true,
+    render: (rowData, getDataMethod = get) => (
+      <div style={{ display: 'inline-flex' }}>
+        {`${getDataMethod(rowData, 'workTime')}h`}
+      </div>
+    ),
   }],
-  ['historyWorkTime', {
+  ['cumulativeWorkTime', {
     title: <Tooltip title="历史累计工时">历史累计工时</Tooltip>,
     width: 170,
-    dataIndex: 'historyWorkTime',
+    dataIndex: 'cumulativeWorkTime',
     sortable: true,
+    render: (rowData, getDataMethod = get) => (
+      <div style={{ display: 'inline-flex' }}>
+        {`${getDataMethod(rowData, 'cumulativeWorkTime')}h`}
+      </div>
+    ),
   }],
-  ['estimatedWorkTime', {
-    title: <Tooltip title="预估总工时">预估总工时</Tooltip>,
-    width: 170,
-    dataIndex: 'estimatedWorkTime',
-    sortable: true,
-  }],
-  ['rate', {
+  ['deviationRate ', {
     title: <Tooltip title="偏差率">偏差率</Tooltip>,
     width: 170,
-    dataIndex: 'rate',
+    dataIndex: 'deviationRate ',
     sortable: true,
+    render: (rowData, getDataMethod = get) => {
+      const numberValue = getDataMethod(rowData, 'deviationRate');
+      return (
+        <div style={{ display: 'inline-flex' }}>
+          {`${numberValue !== 0 ? `${numberValue * 100}%` : 0}`}
+        </div>
+      );
+    },
   }],
 ]);
 

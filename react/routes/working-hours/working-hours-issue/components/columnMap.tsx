@@ -6,27 +6,30 @@ import UserTag from '@/components/tag/user-tag';
 import TypeTag from '@/components/TypeTag';
 import styles from './columnMap.less';
 import StatusTag from '@/components/StatusTag';
-import ProjectTags from '@/components/tag/project-tags';
+import ProjectTag from '@/components/tag/project-tag';
+import { User } from '@/common/types';
 
 const renderWorkTime = ({ value }: { value: string}) => (
   value && `${value}h`
 );
 
-const renderRate = ({ value }: { value: number}) => (
-  <span className={classNames({
-    [styles.zero]: value === 0,
-    [styles.gtZero]: value > 0,
-    [styles.ltZero]: value < 0,
-  })}
-  >
-    {value}
-  </span>
-);
+const renderRate = ({ value }: { value: number}) => {
+  const numberValue = Number(value);
+  return (
+    <span className={classNames({
+      [styles.zero]: numberValue === 0,
+      [styles.gtZero]: numberValue > 0,
+      [styles.ltZero]: numberValue < 0,
+    })}
+    >
+      {numberValue !== 0 ? `${numberValue * 100}%` : 0}
+    </span>
+  );
+};
 
-const renderUser = ({ record }: { record: Record}, code: string) => {
-  const user = record?.get(code);
+const renderUser = (user: User | null) => {
   if (user) {
-    const showText = user?.ldap ? `${user?.realName}(${user?.loginName})` : `${user?.realName}(${user?.email})`;
+    const showText = user.textShow || (user?.ldap ? `${user?.realName}(${user?.loginName})` : `${user?.realName}(${user?.email})`);
     return (
       <UserTag
         data={{
@@ -44,23 +47,23 @@ const columnRenderMap = new Map([
     sortable: true,
     width: 450,
     lock: true,
-    renderer: ({ record }: { record: Record }) => renderUser({ record }, 'user'),
+    renderer: ({ record }: { record: Record }) => renderUser(record.get('userVO')),
   }],
   ['workTime', {
     sortable: true,
     renderer: renderWorkTime,
   }],
-  ['historyWorkTime', {
+  ['cumulativeWorkTime', {
     sortable: true,
     width: 160,
     renderer: renderWorkTime,
   }],
-  ['estimatedWorkTime', {
+  ['estimateTime', {
     sortable: true,
     width: 160,
     renderer: renderWorkTime,
   }],
-  ['rate', {
+  ['deviationRate', {
     sortable: true,
     width: 160,
     renderer: renderRate,
@@ -96,14 +99,21 @@ const columnRenderMap = new Map([
     'assigneeId', {
       sortable: true,
       width: 160,
-      renderer: ({ record }: { record: Record }) => renderUser({ record }, 'assignee'),
+      renderer: ({ record }: { record: Record }) => renderUser({
+        id: record.get('assigneeId'),
+        tooltip: record.get('assigneeName'),
+        loginName: record.get('assigneeLoginName'),
+        realName: record.get('assigneeRealName'),
+        imageUrl: record.get('assigneeImageUrl'),
+        textShow: record.get('assigneeName'),
+      } as unknown as User),
     },
   ],
   [
     'projectId', {
       sortable: true,
       width: 250,
-      renderer: ({ record }: { record: Record }) => <ProjectTags data={record.get('projectVO')} />,
+      renderer: ({ record }: { record: Record }) => <ProjectTag data={record.get('projectVO')} showText />,
     },
   ],
 ]);
