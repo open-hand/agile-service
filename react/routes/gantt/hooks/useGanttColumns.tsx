@@ -9,7 +9,6 @@ import dayjs from 'dayjs';
 import classNames from 'classnames';
 import { GanttProps, Gantt } from '@choerodon/gantt';
 import '@choerodon/gantt/dist/gantt.cjs.production.min.css';
-import { AnyMap } from 'immer/dist/internal';
 import { useMount, useUpdateEffect } from 'ahooks';
 import {
   ganttApi,
@@ -340,8 +339,10 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
   function renderPredecessor(record: Gantt.Record<any>) {
     const predecessors: any[] = record.predecessors?.map((item: any) => ({ ...item, predecessorName: predecessorMaps.get(item.predecessorType)!.name })) || [];
     return (
-      <Tooltip title={predecessors.map((predecessor: any) => <div>{`${predecessor.predecessorName}：${predecessor.issueNum} ${predecessor.summary}`}</div>)}>
-        {predecessors.map<string>((predecessor: any) => `${predecessor.issueNum?.split('-').slice(-1)}${predecessor.predecessorName}`).join('、')}
+      <Tooltip placement="topLeft" title={predecessors.map((predecessor: any) => <div>{`${predecessor.predecessorName}：${predecessor.issueNum} ${predecessor.summary}`}</div>)}>
+        <span>
+          {predecessors.map<string>((predecessor: any) => `${predecessor.issueNum?.split('-').slice(-1)}${predecessor.predecessorName}`).join('、')}
+        </span>
       </Tooltip>
     );
   }
@@ -363,6 +364,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
     influenceVersion: BaseSystemColumnRender.renderTag('influenceVersion', 'name'),
     sprint: BaseSystemColumnRender.renderTag('sprints', 'sprintName'),
     reporter: (rowData: any) => <UserTag data={get(rowData, 'reporter')} />,
+    environmentName: (rowData: any) => get(rowData, 'environment'),
   };
   tableColumns.push(...visibleColumns.map(({ columnCode }) => {
     const baseColumn = { width: 100 } as any;
