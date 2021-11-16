@@ -24,6 +24,8 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -145,17 +147,28 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         if (!ObjectUtils.isEmpty(otherArgs) && !ObjectUtils.isEmpty(otherArgs.get(issueIdsKey))) {
             List<String> issueIds = (List<String>) otherArgs.get(issueIdsKey);
             issueIds.forEach(str -> ignoredIssueIds.add(Long.valueOf(str)));
-            PageRequest newPageRequest = new PageRequest(1,0);
+            PageRequest newPageRequest = new PageRequest(1, 0);
             topIssues.addAll(issueService.listIssueWithSub(projectId, searchVO, newPageRequest, organizationId));
             otherArgs.remove(issueIdsKey);
         }
-        if (!ignoredIssueIds.isEmpty()) {
-            SearchVOUtil.setOtherArgs(searchVO, "excludeIssueIds", ignoredIssueIds);
-        }
+        ignoredIssueIds.add(currentIssueId);
+        SearchVOUtil.setOtherArgs(searchVO, "excludeIssueIds", ignoredIssueIds);
         Page<IssueListFieldKVVO> result = issueService.listIssueWithSub(projectId, searchVO, pageRequest, organizationId);
         topIssues.addAll(result.getContent());
         result.setContent(topIssues);
         return result;
+    }
+
+    @Override
+    public List<IssuePredecessorVO> queryByIssueId(Long projectId, Long currentIssueId) {
+        IssuePredecessorDTO dto = new IssuePredecessorDTO();
+        dto.setOrganizationId(ConvertUtil.getOrganizationId(projectId));
+        dto.setProjectId(projectId);
+        dto.setIssueId(currentIssueId);
+        List<IssuePredecessorDTO> dtoList = issuePredecessorMapper.select(dto);
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(dtoList, new TypeToken<List<IssuePredecessorVO>>() {
+        }.getType());
     }
 
     private void deleteTreeNodes(Long projectId,

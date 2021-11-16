@@ -30,4 +30,6 @@ public interface IssuePredecessorService {
                                                      SearchVO searchVO,
                                                      PageRequest pageRequest,
                                                      Long currentIssueId);
+
+    List<IssuePredecessorVO> queryByIssueId(Long projectId, Long currentIssueId);
 }

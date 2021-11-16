@@ -70,5 +70,14 @@ public class IssuePredecessorController {
         return ResponseEntity.ok(issuePredecessorService.pagedQueryEnabledIssues(organizationId, projectId, searchVO, pageRequest, currentIssueId));
     }
 
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询当前问题项的前置项")
+    @GetMapping(value = "/query")
+    public ResponseEntity<List<IssuePredecessorVO>> queryByIssueId(@ApiParam(value = "项目id", required = true)
+                                                                   @PathVariable(name = "project_id") Long projectId,
+                                                                   @RequestParam @Encrypt Long currentIssueId) {
+        return ResponseEntity.ok(issuePredecessorService.queryByIssueId(projectId, currentIssueId));
+    }
+
 
 }
