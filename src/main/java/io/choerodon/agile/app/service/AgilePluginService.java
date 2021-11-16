@@ -280,10 +280,10 @@ public interface AgilePluginService {
 
     /**
      * do 转issueListFieldKVDTOList 设置特性的属性
-     * @param projectId
+     * @param projectIds
      * @param issueListFieldKVDTOList
      */
-    void doToIssueListFieldKVDTO(Long projectId,List<IssueListFieldKVVO> issueListFieldKVDTOList);
+    void doToIssueListFieldKVDTO(List<Long> projectIds,List<IssueListFieldKVVO> issueListFieldKVDTOList);
 
     /**
      * 项目群子项目下载issue 替换史诗列为特性

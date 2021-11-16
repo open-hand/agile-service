@@ -153,4 +153,202 @@
         ) aii
         order by aii.issue_num_convert desc
     </select>
+
+    <select id="queryParentIssueIdsList" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        select
+        ai.issue_id,
+        ai.project_id,
+        CONVERT(ai.issue_num,SIGNED) as issue_num_convert
+        from (
+          select temp.issue_id
+            from (
+                SELECT
+                    case
+                    when ai.type_code = 'sub_task' then ai.parent_issue_id
+                    when ai.type_code = 'bug' and ai.relate_issue_id is not null and ai.relate_issue_id != 0 then ai.relate_issue_id
+                    else ai.issue_id
+                    end as issue_id
+                FROM agile_issue ai
+                WHERE ai.project_id in
+                <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                    #{projectId}
+                </foreach>
+                AND ai.issue_id in (
+                   select awl.issue_id from agile_work_log awl
+                   where
+                   awl.project_id in
+                   <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                        #{projectId}
+                   </foreach>
+                   <if test="searchVO.searchArgs != null">
+                       <if test="searchVO.searchArgs.startTime != null and searchVO.searchArgs.endTime != null">
+                           and awl.start_date between #{searchVO.searchArgs.startTime} and #{searchVO.searchArgs.endTime}
+                       </if>
+                   </if>
+                 )
+                AND ai.apply_type = 'agile'
+                <include refid="io.choerodon.agile.infra.mapper.IssueMapper.explainSearchVO"/>
+                <include refid="io.choerodon.agile.infra.mapper.IssueMapper.filterSqlAndAssigneeIds"/>
+                <if test='searchVO.searchArgs != null'>
+                    <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
+                        AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+                    </if>
+                </if>
+                <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+                    <foreach collection="searchVO.contents" item="content" index="index">
+                        AND (
+                        ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
+                        OR ai.summary LIKE CONCAT(CONCAT('%', #{content}), '%')
+                        )
+                    </foreach>
+                </if>
+            ) temp
+            group by temp.issue_id
+        ) ai1
+        join agile_issue ai
+        on (
+        ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and ai.apply_type = 'agile'
+        and ai1.issue_id = ai.issue_id
+        )
+        <if test="sortMap != null and sortMap.sortFieldId != null ">
+            LEFT JOIN
+            (
+            SELECT
+            instance_id,
+            date_value,
+            option_id,
+            string_value,
+            text_value,
+            number_value
+            FROM fd_field_value ffv
+            JOIN agile_issue ai ON ai.issue_id = ffv.instance_id AND ai.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            WHERE ffv.field_id = #{sortMap.sortFieldId}
+            AND ffv.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            AND ai.issue_type_id IN
+            <foreach collection="sortMap.fieldExtendIssueTypeIds" item="issueTypeId" open="(" separator="," close=")">
+                #{issueTypeId}
+            </foreach>
+            ) fv ON ai.issue_id = fv.instance_id
+        </if>
+        where ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and ai.apply_type = 'agile'
+        and (
+        ai.type_code in ('issue_epic', 'story', 'task')
+        or (ai.type_code = 'bug' and (ai.relate_issue_id is null or ai.relate_issue_id = 0))
+        )
+        <if test="sortMap != null and sortMap.orderStr != null">
+            ORDER BY ${sortMap.orderStr}
+        </if>
+    </select>
+
+    <select id="countWorkTime" resultType="io.choerodon.agile.infra.dto.WorkLogDTO">
+        select
+          awl.issue_id,
+          SUM(awl.work_time) as work_time
+        from agile_work_log awl
+        where
+        awl.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and awl.issue_id in
+        <foreach collection="allIssueIds" item="allIssueId" open="(" separator="," close=")">
+            #{allIssueId}
+        </foreach>
+        <if test="searchVO != null">
+            <if test="searchVO.searchArgs.startTime != null and searchVO.searchArgs.endTime != null">
+                and awl.start_date between #{searchVO.searchArgs.startTime} and #{searchVO.searchArgs.endTime}
+            </if>
+        </if>
+        group by awl.issue_id
+    </select>
+
+    <select id="queryIds" resultType="java.lang.Long">
+        SELECT temp.id  FROM (
+            SELECT
+               DISTINCT
+               <choose>
+                   <when test="levelType == 'assignee'">
+                       ai.assignee_id as id
+                   </when>
+                   <otherwise>
+                       ai.project_id as id
+                   </otherwise>
+               </choose>
+            FROM agile_issue ai
+            WHERE ai.project_id IN
+            <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+                #{projectId}
+            </foreach>
+            AND ai.issue_id IN
+            <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+                #{issueId}
+            </foreach>
+            <if test="levelType == 'assignee'">
+                AND ai.assignee_id IS NOT NULL
+                AND ai.assignee_id != 0
+            </if>
+        ) temp order by temp.id
+    </select>
+
+    <select id="countAssigneeWorkTime" resultType="io.choerodon.agile.api.vo.IssueWorkHoursVO">
+        select
+        ai.assignee_id as user_id,
+        SUM(awl.work_time) as work_time,
+        SUM(ai.estimate_time) as estimate_time
+        from agile_work_log awl
+        JOIN agile_issue ai on ai.issue_id = awl.issue_id
+        where
+        awl.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and awl.issue_id in
+        <foreach collection="allIssueIds" item="allIssueId" open="(" separator="," close=")">
+            #{allIssueId}
+        </foreach>
+        <if test="searchVO != null">
+            <if test="searchVO.searchArgs.startTime != null and searchVO.searchArgs.endTime != null">
+                and awl.start_date between #{searchVO.searchArgs.startTime} and #{searchVO.searchArgs.endTime}
+            </if>
+        </if>
+        group by ai.assignee_id
+    </select>
+
+    <select id="countProjectWorkTime" resultType="io.choerodon.agile.api.vo.IssueWorkHoursVO">
+        select
+        ai.project_id,
+        SUM(awl.work_time) as work_time,
+        SUM(ai.estimate_time) as estimate_time
+        from agile_work_log awl
+        JOIN agile_issue ai on ai.issue_id = awl.issue_id
+        where
+        awl.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and awl.issue_id in
+        <foreach collection="allIssueIds" item="allIssueId" open="(" separator="," close=")">
+            #{allIssueId}
+        </foreach>
+        <if test="searchVO != null">
+            <if test="searchVO.searchArgs.startTime != null and searchVO.searchArgs.endTime != null">
+                and awl.start_date between #{searchVO.searchArgs.startTime} and #{searchVO.searchArgs.endTime}
+            </if>
+        </if>
+        group by ai.project_id
+    </select>
 </mapper>

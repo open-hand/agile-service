@@ -94,8 +94,8 @@ public class WorkGroupServiceImpl implements WorkGroupService {
         WorkGroupVO workGroupVO = new WorkGroupVO();
         workGroupVO.setName("未分配工作组");
         workGroupVO.setParentId(0L);
-        int userCount = 0;
-        if ((!ObjectUtils.isEmpty(orgUserCount) && orgUserCount > 0) && CollectionUtils.isNotEmpty(userIds)) {
+        int userCount = orgUserCount;
+        if (CollectionUtils.isNotEmpty(userIds)) {
             int count = orgUserCount - userIds.size();
             userCount = count >= 0 ? count : 0;
         }

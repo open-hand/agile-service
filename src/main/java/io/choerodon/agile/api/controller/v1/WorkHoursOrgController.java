@@ -1,9 +1,9 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.agile.api.vo.WorkHoursCalendarVO;
-import io.choerodon.agile.api.vo.WorkHoursLogVO;
-import io.choerodon.agile.api.vo.WorkHoursSearchVO;
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.app.service.WorkHoursService;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
@@ -82,5 +82,45 @@ public class WorkHoursOrgController {
         return Optional.ofNullable(workHoursService.countWorkHoursOnOrganizationLevel(organizationId,  workHoursSearchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.count.work.hours"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("按项目维度统计工时")
+    @PostMapping(value = "/project_work_hours")
+    public ResponseEntity<Page<IssueWorkHoursVO>> pageQueryProject(@ApiParam(value = "组织id", required = true)
+                                                                   @PathVariable(name = "organization_id") Long organizationId,
+                                                                   PageRequest pageRequest,
+                                                                   @RequestBody SearchVO searchVO) {
+        EncryptionUtils.decryptSearchVO(searchVO);
+        return Optional.ofNullable(workHoursService.pageQueryProject(organizationId , pageRequest, searchVO))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.issue.work.hours.query"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("按经办人维度统计工时")
+    @PostMapping(value = "/assignee_work_hours")
+    public ResponseEntity<Page<IssueWorkHoursVO>> pageQueryAssignee(@ApiParam(value = "组织id", required = true)
+                                                                    @PathVariable(name = "organization_id") Long organizationId,
+                                                                    PageRequest pageRequest,
+                                                                    @RequestBody SearchVO searchVO) {
+        EncryptionUtils.decryptSearchVO(searchVO);
+        return Optional.ofNullable(workHoursService.pageQueryAssigneeOnOrganizationLevel(organizationId, pageRequest, searchVO))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.issue.work.hours.query"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("按工作项维度查询")
+    @PostMapping(value = "/issue_work_hours")
+    public ResponseEntity<Page<IssueListFieldKVVO>> pageQueryIssues(@ApiParam(value = "组织id", required = true)
+                                                                    @PathVariable(name = "organization_id") Long organizationId,
+                                                                    @RequestParam(required = false, defaultValue = "false") Boolean containsSubIssue,
+                                                                    PageRequest pageRequest,
+                                                                    @RequestBody SearchVO searchVO) {
+        EncryptionUtils.decryptSearchVO(searchVO);
+        return Optional.ofNullable(workHoursService.pageQueryIssuesOnOrganizationLevel(organizationId, pageRequest, containsSubIssue, searchVO))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.issue.work.hours.query"));
     }
 }
