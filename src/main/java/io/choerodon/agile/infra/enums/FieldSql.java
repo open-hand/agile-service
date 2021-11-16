@@ -6,9 +6,9 @@ package io.choerodon.agile.infra.enums;
  */
 public interface FieldSql {
 
-    String CUSTOM_DEFAULT_ANALYSIS_JOIN = "LEFT JOIN fd_object_scheme_field afosf ON afosf.CODE = '%s' AND afosf.project_id = ai.project_id\n" +
+    String CUSTOM_DEFAULT_ANALYSIS_JOIN = "LEFT JOIN fd_object_scheme_field afosf ON afosf.CODE = '%s' AND (afosf.project_id = ai.project_id or afosf.project_id is null)\n" +
             "LEFT JOIN fd_field_value affv ON affv.instance_id = ai.issue_id AND affv.field_id = afosf.id";
-    String CUSTOM_DEFAULT_COMPARED_JOIN = "LEFT JOIN fd_object_scheme_field cfosf ON cfosf.CODE = '%s' AND cfosf.project_id = ai.project_id\n" +
+    String CUSTOM_DEFAULT_COMPARED_JOIN = "LEFT JOIN fd_object_scheme_field cfosf ON cfosf.CODE = '%s' AND (cfosf.project_id = ai.project_id or cfosf.project_id is null)\n" +
             "LEFT JOIN fd_field_value cffv ON cffv.instance_id = ai.issue_id AND cffv.field_id = cfosf.id";
     String DEFAULT = "default";
     String USER = "user";
