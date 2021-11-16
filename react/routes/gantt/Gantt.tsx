@@ -181,7 +181,6 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
           ganttNormalizeIssue(issue as Issue, target);
         }
       }));
-      console.log('issue', issue);
       updateInfluenceIssues(issue);
     }
   });

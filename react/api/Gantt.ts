@@ -82,7 +82,7 @@ class GanttApi extends Api<GanttApi> {
     return result;
   }
 
-  loadDependableIssues(params: { currentIssueId: string, page?: number, size?: number }, data?: { contents?: string[], [key: string]: any }) {
+  loadDependableIssues(params: { currentIssueId: string, page?: number, size?: number }, data?: { contents?: string[], otherArgs?: { issueIds?: string[] }, [key: string]: any }) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/issue_predecessor/paged_query`,
