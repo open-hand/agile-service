@@ -663,6 +663,11 @@ const CreateIssueBase = observer(({
           disabled: issueTypeCode === 'sub_task',
         };
       }
+      case 'summary': {
+        return {
+          maxLength: 44,
+        };
+      }
       default: break;
     }
     switch (field.fieldType) {
