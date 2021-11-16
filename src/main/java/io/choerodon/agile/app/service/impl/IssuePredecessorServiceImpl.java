@@ -138,10 +138,10 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         SearchVOUtil.setTypeCodes(searchVO, ISSUE_TYPE_CODES);
         SearchVOUtil.setSearchArgs(searchVO, "tree", false);
         Map<String, Object> otherArgs = searchVO.getOtherArgs();
-        List<IssuePredecessorTreeClosureDTO> ancestors =
-                issuePredecessorTreeClosureMapper.selectByDescendantIds(organizationId, projectId, new HashSet<>(Arrays.asList(currentIssueId)));
+        List<IssuePredecessorTreeClosureDTO> descendants =
+                issuePredecessorTreeClosureMapper.selectByAncestorIds(organizationId, projectId, new HashSet<>(Arrays.asList(currentIssueId)));
         Set<Long> ignoredIssueIds =
-                ancestors.stream().map(IssuePredecessorTreeClosureDTO::getAncestorId).collect(Collectors.toSet());
+                descendants.stream().map(IssuePredecessorTreeClosureDTO::getDescendantId).collect(Collectors.toSet());
         String issueIdsKey = "issueIds";
         List<IssueListFieldKVVO> topIssues = new ArrayList<>();
         if (!ObjectUtils.isEmpty(otherArgs) && !ObjectUtils.isEmpty(otherArgs.get(issueIdsKey))) {
