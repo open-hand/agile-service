@@ -68,11 +68,12 @@ class IssueTreeStore {
 
   @action setTreeData(treeData, initCaseSelected) {
     const { rootIds } = treeData;
-    const treeFolder = treeData.workGroupVOS || [];
+    // 过滤组织信息,组织信息：id和parentId都为空
+    const treeFolder = (treeData.workGroupVOS || []).filter((item) => (item.id && (item.parentId || item.parentId === 0)) || (!item.id && item.parentId === 0));
     // 选中之前选中的
     const selectedId = this.currentCycle.id || rootIds[0];
     // 保存根目录 用于后续递归选择时判断根节点
-    rootIds.forEach((r) => {
+    [...rootIds, this.NOT_ASSIGN_ID].forEach((r) => {
       this.treeRootMap.set(r, true);
     });
     let expandedKeys = [];
@@ -89,25 +90,29 @@ class IssueTreeStore {
       const {
         id, name, expanded, parentId, children, userCount, ...other
       } = folder;
+
+      // 组织信息：id和parentId都为空
+      // 未分配工作组信息：id为空和parentId为0
+      const newId = id ?? (parentId === 0 ? this.NOT_ASSIGN_ID : this.ROOT_ID);
       const result = {
         children: children || [],
         data: {
-          folderId: id,
+          folderId: newId,
           name,
           parentId,
         },
-        isExpanded: expanded || includes(expandedKeys, id),
-        selected: id === selectedId,
-        id,
+        isExpanded: expanded || includes(expandedKeys, newId),
+        selected: newId === selectedId,
+        id: newId,
         userCount,
         parentId,
         ...other,
       };
-      this.treeMap.set(id, {
-        id,
+      this.treeMap.set(newId, {
+        id: newId,
         children: children || [],
         data: {
-          folderId: id,
+          folderId: newId,
           name,
           parentId,
         },

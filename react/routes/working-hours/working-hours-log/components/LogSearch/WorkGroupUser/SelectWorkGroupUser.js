@@ -1,16 +1,18 @@
 import React, {
-  useEffect, useCallback, useRef,
+  useEffect, useCallback, useRef, useState,
 } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
+import { CheckBox } from 'choerodon-ui/pro';
 import Tree from '@/components/tree';
-import CheckBox from './CheckBox';
+// import CheckBox from './CheckBox';
 import { autoSelect } from './utils';
 import UserList from './UserList';
 import { useSelectUserStore } from './stores';
 import styles from './SelectWorkGroupUser.less';
 
 function SelectIssue() {
+  const [updateCount, setUpdateCount] = useState(0);
   const treeRef = useRef();
   const { selectUserStore, userListDs } = useSelectUserStore();
   useEffect(() => {
@@ -22,6 +24,8 @@ function SelectIssue() {
     selectUserStore.setCurrentCycle(item);
   }, [selectUserStore]);
   const handleCheckChange = useCallback((checked, item) => {
+    console.log('treeMap, checked, item:');
+    console.log(toJS(treeMap), checked, item, toJS(item));
     selectUserStore.handleCheckChange(checked, item.id);
     // 如果选中，跑一遍自动选中
     if (checked && userListDs) {
@@ -37,20 +41,36 @@ function SelectIssue() {
         autoSelect(userListDs, treeMap);
       }
     }
-  }, [selectUserStore, userListDs, folderId, treeMap]);
-  const renderTreeNode = useCallback((node, { item }) => (
-    <div className={styles.treeNode}>
-      <CheckBox
-        item={treeMap.get(item.id)}
-        onChange={handleCheckChange}
-      />
-      <div style={{ flex: 1, overflow: 'hidden' }}>
-        {node}
+    // setUpdateCount(updateCount + 1);
+    console.log(treeMap.get(item.id));
+  }, [treeMap, selectUserStore, userListDs, folderId]);
+  const renderTreeNode = (node, { item }) => {
+    console.log('renderNode', item, toJS(treeMap.get(item.id)), treeMap.get(item.id).checked);
+    return (
+    // <div className={styles.treeNode}>
+    //   <CheckBox
+    //     item={treeMap.get(item.id)}
+    //     onChange={handleCheckChange}
+    //   />
+    //   <div style={{ flex: 1, overflow: 'hidden' }}>
+    //     {node}
+    //   </div>
+    // </div>
+      <div className={styles.treeNode}>
+        <CheckBox
+          onChange={(value) => handleCheckChange(value, item)}
+          indeterminate={treeMap.get(item.isIndeterminate) || false}
+          checked={treeMap.get(item.id).checked || false}
+        />
+        <div style={{ flex: 1, overflow: 'hidden' }}>
+          {node}
+        </div>
       </div>
-    </div>
-  ), [handleCheckChange, treeMap]);
-  console.log('treeData:');
-  console.log(toJS(treeData));
+    );
+  };
+
+  console.log('render');
+
   return (
     <div className={styles.selectWorkGroupUser}>
       <div className={styles.tree}>

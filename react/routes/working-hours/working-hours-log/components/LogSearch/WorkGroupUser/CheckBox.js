@@ -7,9 +7,11 @@ function CheckBox({ item, onChange }) {
   const handleChange = useCallback((checked) => {
     onChange(checked, item);
   }, [item, onChange]);
+  console.log(item, item.checked);
   return (
     <ProCheckBox
       indeterminate={item.isIndeterminate || false}
+      // checked={item.checked || false}
       checked={item.checked || false}
       onChange={handleChange}
     />

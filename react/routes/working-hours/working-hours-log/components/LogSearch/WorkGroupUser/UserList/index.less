@@ -1,0 +1,53 @@
+.userList {
+  display: flex;
+  flex-direction: column;
+  width: 190px;
+  height: 100%;
+  padding: 0 0 10px 14px;
+  .search {
+    padding: 12px 14px 12px 0;
+  }
+  .list {
+    flex: 1;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+    .user_item {
+      margin-bottom: 10px;
+      :global {
+        .c7n-pro-checkbox-wrapper {
+          width: 100%;
+          .c7n-pro-checkbox-label {
+            :local {
+              .user_item_text {
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+              }
+              .select_all {
+                font-weight: 500;
+              }
+            }
+          }
+        }
+      }
+    }
+    .filterNoData {
+      color: var(--text-color3);
+    }
+  }
+  .loadMore {
+    padding-top: 10px;
+    cursor: pointer;
+    color: var(--primary-color);
+  }
+  .empty {
+    color: var(--text-color3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+  }
+}

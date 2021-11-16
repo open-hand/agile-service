@@ -1,10 +1,11 @@
 import React, {
-  createContext, useCallback, useContext, useEffect, useMemo, useState,
+  createContext, useContext, useEffect, useMemo,
 } from 'react';
 import { DataSet } from 'choerodon-ui/pro';
 import { inject } from 'mobx-react';
 import { observer } from 'mobx-react-lite';
 import moment from 'moment';
+import { toJS } from 'mobx';
 import { AppStateProps } from '@/common/types';
 import SelectUserStore from './SelectUserStore';
 import UserListDataSet from './UserListDataSet';
@@ -50,10 +51,13 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
   useEffect(() => {
     const { currentCycle } = selectUserStore;
     // @ts-ignore
-    const { id: folderId } = currentCycle;
-    userListDs.setQueryParameter('workGroupId', folderId);
+    const { id: workGroupId } = currentCycle;
+    if (workGroupId) {
+      userListDs.setQueryParameter('workGroupId', workGroupId);
+    }
     userListDs.query();
-  }, [selectUserStore, userListDs]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectUserStore.currentCycle, userListDs]);
 
   const value = {
     ...props,
