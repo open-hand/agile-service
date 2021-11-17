@@ -118,7 +118,6 @@
     .footer_cell {
       height: 100%;
       background-color: #FFF;
-      // border-bottom: 1px solid #D9E6F2;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -128,7 +127,6 @@
     position: relative;
     width: 100%;
     overflow: visible;
-    border-bottom: 1px solid #D9E6F2;
     min-width: 100%;
     .row_cell:not(:last-child), .header_cell:not(:last-child) {
       border-right: 1px solid #D9E6F2;
@@ -160,6 +158,16 @@
       }
     }
   }
+  .header, .row:not(:last-child), .footer {
+    border-bottom: 1px solid #D9E6F2;
+  }
+  .row:last-child {
+    .body_cell_count {
+      height: 52px !important;
+      line-height: 52px !important;
+    }
+  }
+  
   .blockRow {
     border-bottom: none;
     min-height: unset;
@@ -171,6 +179,7 @@
     cursor: pointer;
     font-weight: 500;
     position: relative;
+    border-top: 1px solid #D9E6F2;
     .more_span {
       position: -webkit-sticky !important; /* safari 浏览器 */  
       position: sticky !important;
