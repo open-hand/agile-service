@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { isEmpty } from 'lodash';
 import Tree from '@/components/tree';
 import { useWorkGroupStore } from '@/routes/work-group/stores';
-import { EditFormDataProps, workGroupApi } from '@/api/WorkGroup';
+import { EditFormDataProps, workGroupApi } from '@/api';
 import { GroupItem } from '@/routes/work-group/types';
 
 export default observer(() => {

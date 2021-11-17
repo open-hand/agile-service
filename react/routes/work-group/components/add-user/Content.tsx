@@ -9,7 +9,7 @@ import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { useAddUserStore } from '@/routes/work-group/components/add-user/stores';
 import Styles from './index.less';
-import { workGroupApi } from '@/api/WorkGroup';
+import { workGroupApi } from '@/api';
 
 const AddUserContent = () => {
   const {
@@ -65,6 +65,10 @@ const AddUserContent = () => {
     }
   }, []);
 
+  if (!tableDs.length && tableDs.status !== 'loading' && !tableDs.getQueryParameter('param')) {
+    return <div className={Styles.emptyText}>暂无数据</div>;
+  }
+
   return (
     <div className={Styles.addUserWrap}>
       <TextField
@@ -73,37 +77,43 @@ const AddUserContent = () => {
         prefix={<Icon type="search" />}
         className={Styles.searchInput}
       />
-      <div>
-        <CheckBox
-          checked={!!(!indeterminate && tableDs.selected?.length)}
-          indeterminate={indeterminate}
-          onChange={handleSelectAll}
-          className={Styles.checkAll}
-        >
-          全选
-        </CheckBox>
-      </div>
-      <Spin spinning={tableDs.status === 'loading'}>
-        <div className={Styles.list}>
-          {tableDs.map((record: Record) => (
-            <div key={record.id} className={Styles.item}>
-              <CheckBox
-                checked={record.isSelected}
-                onChange={(checked) => handleSelect(checked, record)}
-              />
-              <span className={Styles.realName}>{record.get('realName')}</span>
-              <span>{record.get('loginName')}</span>
+      {!tableDs.length && tableDs.status !== 'loading' ? (
+        <div className={Styles.emptyText}>暂无数据</div>
+      ) : (
+        <>
+          <div>
+            <CheckBox
+              checked={!!(!indeterminate && tableDs.selected?.length)}
+              indeterminate={indeterminate}
+              onChange={handleSelectAll}
+              className={Styles.checkAll}
+            >
+              全选
+            </CheckBox>
+          </div>
+          <Spin spinning={tableDs.status === 'loading'}>
+            <div className={Styles.list}>
+              {tableDs.map((record: Record) => (
+                <div key={record.id} className={Styles.item}>
+                  <CheckBox
+                    checked={record.isSelected}
+                    onChange={(checked) => handleSelect(checked, record)}
+                  />
+                  <span className={Styles.realName}>{record.get('realName')}</span>
+                  <span>{record.get('loginName')}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </Spin>
-      {tableDs.totalPage > tableDs.currentPage && (
-        <Button
-          onClick={handleLoadMore}
-          funcType={FuncType.flat}
-        >
-          加载更多
-        </Button>
+          </Spin>
+          {tableDs.totalPage > tableDs.currentPage && (
+            <Button
+              onClick={handleLoadMore}
+              funcType={FuncType.flat}
+            >
+              加载更多
+            </Button>
+          )}
+        </>
       )}
     </div>
   );

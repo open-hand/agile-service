@@ -11,7 +11,7 @@ import Styles from './index.less';
 import { useWorkGroupStore } from '@/routes/work-group/stores';
 import GroupTree from '@/routes/work-group/components/group-tree';
 import UserTable from '@/routes/work-group/components/user-table';
-import { workGroupApi } from '@/api/WorkGroup';
+import { workGroupApi } from '@/api';
 import openAddUser from '@/routes/work-group/components/add-user';
 
 const { Divider, Section } = ResizeContainer;
@@ -112,9 +112,7 @@ const WorkGroupContent = observer(() => {
               width: 'auto',
             }}
           >
-            <div className={Styles.table}>
-              <UserTable />
-            </div>
+            <UserTable />
           </Section>
         </ResizeContainer>
       </Content>
