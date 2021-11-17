@@ -17,7 +17,7 @@ interface Props {
 }
 const ProjectIssueTable: React.FC<Props> = () => {
   const {
-    workingHoursProjectDs, workingHoursProjectAssigneeDs, mode,
+    workingHoursProjectDs, workingHoursProjectAssigneeDs, mode, startTime, endTime, isContain, issueSearchStore,
   } = useIssueStore();
 
   return (
@@ -31,14 +31,19 @@ const ProjectIssueTable: React.FC<Props> = () => {
         expandedRowRenderer={({ record }) => {
           let recordIssueDs = record.getState('recordDs');
           if (!recordIssueDs) {
-            const searchData = {
-              projectId: getProjectId() as string, // 可去掉
-              organizationId: getOrganizationId() as string,
-            };
             // @ts-ignore
-            const newDs = mode === 'project' ? new DataSet(SimpleIssueDataSet(searchData)) : new DataSet(AssigneeDataSet({}));
+            const newDs = mode === 'project' ? new DataSet(SimpleIssueDataSet({
+              organizationId: getOrganizationId(),
+              issueSearchStore,
+            })) : new DataSet(AssigneeDataSet({ organizationId: getOrganizationId(), issueSearchStore }));
             recordIssueDs = newDs;
             record.setState('recordDs', recordIssueDs);
+            recordIssueDs.setQueryParameter('startTime', startTime);
+            recordIssueDs.setQueryParameter('endTime', endTime);
+            recordIssueDs.setQueryParameter('projectIds', [record.get('projectId')]);
+            if (mode === 'project') {
+              recordIssueDs.setQueryParameter('containsSubIssue', isContain);
+            }
             recordIssueDs.query();
           }
           return mode === 'project' ? (

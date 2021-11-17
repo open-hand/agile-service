@@ -35,6 +35,7 @@ const WorkingHoursIssueTable = ({
       events: {
         delete: () => detailCallback(get(record, 'assigneeId')),
         close: () => detailCallback(get(record, 'assigneeId')),
+        update: () => {},
       },
     });
   }, [detailCallback, issueDetailProps]);

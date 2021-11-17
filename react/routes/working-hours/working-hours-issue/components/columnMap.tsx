@@ -47,7 +47,7 @@ const columnRenderMap = new Map([
     sortable: true,
     width: 450,
     lock: true,
-    renderer: ({ record }: { record: Record }) => renderUser(record.get('userVO')),
+    renderer: ({ record }: { record: Record }) => renderUser(record.get('userDTO')),
   }],
   ['workTime', {
     sortable: true,
@@ -99,14 +99,14 @@ const columnRenderMap = new Map([
     'assigneeId', {
       sortable: true,
       width: 160,
-      renderer: ({ record }: { record: Record }) => renderUser({
+      renderer: ({ record }: { record: Record }) => renderUser(record.get('assigneeId') ? {
         id: record.get('assigneeId'),
         tooltip: record.get('assigneeName'),
         loginName: record.get('assigneeLoginName'),
         realName: record.get('assigneeRealName'),
         imageUrl: record.get('assigneeImageUrl'),
         textShow: record.get('assigneeName'),
-      } as unknown as User),
+      } as unknown as User : null),
     },
   ],
   [

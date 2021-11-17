@@ -49,6 +49,8 @@ interface Context {
   setIsContain: (isContain: false) => void,
   onCloseDetail: (expandRecordId: string) => void
   totalWorkTime: number
+  startTime: string,
+  endTime: string,
 }
 
 export type IMode = 'issue' | 'assignee' | 'project' | 'projectAssignee';
@@ -74,23 +76,23 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
   });
   useEffect(() => () => { localPageCacheStore.setItem('agile.working.hours.issue.search', issueSearchStore.getCustomFieldFilters()); }, []);
 
-  // @ts-ignore
   const workingHoursIssuesDs = useMemo(() => new DataSet(WorkingHoursIssuesDataSet({
     projectId: getProjectId(),
     organizationId: getOrganizationId(),
+    issueSearchStore,
   })), []);
-  // @ts-ignore
   const workingHoursAssigneeDs = useMemo(() => new DataSet(AssigneeDataSet({
     projectId: isProject ? getProjectId() : undefined,
     organizationId: getOrganizationId(),
+    issueSearchStore,
   })), []);
-  // @ts-ignore
   const workingHoursProjectDs = useMemo(() => new DataSet(ProjectDataSet({
     organizationId: getOrganizationId(),
+    issueSearchStore,
   })), []);
-  // @ts-ignore
   const workingHoursProjectAssigneeDs = useMemo(() => new DataSet(ProjectDataSet({
     organizationId: getOrganizationId(),
+    issueSearchStore,
   })), []);
   const dataSetMap = useMemo(() => new Map([
     ['issue', workingHoursIssuesDs],
@@ -100,10 +102,10 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
   ]), []);
   const dateSearchDs = useMemo(() => new DataSet(DateSearchDataSet({ currentProject: AppState.getCurrentProject })), [AppState.getCurrentProject]);
   // eslint-disable-next-line no-nested-ternary
-  const startTime = useMemo(() => (dateSearchDs.current?.get('startTime') && formatStartDate(dateSearchDs.current?.get('startTime'))) || localPageCacheStore.getItem('workingHours-issue-startTime') || `${formatStartDate(getIsOrganization() ? moment().subtract(6, 'days') : (
+  const startTime = useMemo(() => (dateSearchDs.current?.get('startTime') && formatStartDate(dateSearchDs.current?.get('startTime'), true)) || localPageCacheStore.getItem('workingHours-issue-startTime') || `${formatStartDate(getIsOrganization() ? moment().subtract(6, 'days') : (
     moment().subtract(6, 'days').isBefore(moment(AppState.getCurrentProject?.creationDate)) ? moment(AppState.getCurrentProject?.creationDate) : moment().subtract(6, 'days')
   ), true)}`, [dateSearchDs.current?.get('startTime')]);
-  const endTime = useMemo(() => (dateSearchDs.current?.get('endTime') && formatEndDate(dateSearchDs.current?.get('endTime'))) || localPageCacheStore.getItem('workingHours-issue-endTime') || `${formatEndDate(moment(), true)}`, [dateSearchDs.current?.get('endTime')]);
+  const endTime = useMemo(() => (dateSearchDs.current?.get('endTime') && formatEndDate(dateSearchDs.current?.get('endTime'), true)) || localPageCacheStore.getItem('workingHours-issue-endTime') || `${formatEndDate(moment(), true)}`, [dateSearchDs.current?.get('endTime')]);
 
   const getTotalWorkTime = useCallback(async () => {
     const res = await workingHoursApi.getTotalWorkTime({ startTime, endTime, isContain });
@@ -114,6 +116,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     const dataSet = dataSetMap.get(mode) as DataSet;
     dataSet.setQueryParameter('startTime', startTime);
     dataSet.setQueryParameter('endTime', endTime);
+    dataSet.setQueryParameter('containsSubIssue', isContain);
     dataSet.query();
     getTotalWorkTime();
   }, [startTime, endTime, mode, isContain]);
@@ -187,6 +190,8 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     workingHoursProjectAssigneeDs,
     isProject,
     tableFields,
+    startTime,
+    endTime,
     isContain,
     setIsContain,
     onCloseDetail,

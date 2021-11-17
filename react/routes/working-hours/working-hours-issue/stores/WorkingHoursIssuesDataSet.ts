@@ -6,11 +6,10 @@ interface Props {
   projectId: string,
   organizationId: string
   issueSearchStore: any,
-  searchDTO: any
 }
 
 const WorkingHoursIssuesDataSet = ({
-  projectId, organizationId, issueSearchStore, searchDTO,
+  projectId, organizationId, issueSearchStore,
 }: Props): DataSetProps => ({
   primaryKey: 'issueId',
   autoQuery: false,
@@ -21,16 +20,19 @@ const WorkingHoursIssuesDataSet = ({
   paging: 'server',
   cacheSelection: false,
   transport: {
-    read: ({ params }) => ({
+    read: ({ params, data }) => ({
       url: `/agile/v1/projects/${projectId}/work_hours/issue_work_hours`,
       method: 'post',
       params: {
         ...params,
+        containsSubIssue: data.containsSubIssue,
         organizationId,
       },
       transformRequest: () => {
-        const search = searchDTO || issueSearchStore?.getCustomFieldFilters() || {};
+        const search = issueSearchStore?.getCustomFieldFilters() || {};
         set(search, 'searchArgs.tree', true);
+        set(search, 'searchArgs.startTime', data.startTime);
+        set(search, 'searchArgs.endTime', data.endTime);
         return JSON.stringify(search);
       },
     }),

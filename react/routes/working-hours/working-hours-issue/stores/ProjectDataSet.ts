@@ -5,25 +5,25 @@ import { set } from 'lodash';
 interface props {
   organizationId: string
   issueSearchStore: any,
-  searchDTO: any
 }
 
 const ProjectDataSet = ({
-  organizationId, issueSearchStore, searchDTO,
+  organizationId, issueSearchStore,
 }: props) : DataSetProps => ({
   autoQuery: false,
   paging: true,
   cacheSelection: false,
   transport: {
-    read: ({ params }) => ({
+    read: ({ params, data }) => ({
       url: `/agile/v1/organizations/${organizationId}/work_hours/project_work_hours`,
       method: 'post',
       params: {
         ...params,
       },
       transformRequest: () => {
-        const search = searchDTO || issueSearchStore?.getCustomFieldFilters() || {};
-        set(search, 'searchArgs.tree', true);
+        const search = issueSearchStore?.getCustomFieldFilters() || {};
+        set(search, 'searchArgs.startTime', data.startTime);
+        set(search, 'searchArgs.endTime', data.endTime);
         return JSON.stringify(search);
       },
     }),

@@ -35,6 +35,7 @@ const SimpleIssueTable: React.FC<Props> = ({ dataSet }) => {
       events: {
         delete: () => detailCallback(record.get('projectId')),
         close: () => detailCallback(record.get('projectId')),
+        update: () => {},
       },
     });
   }, [detailCallback, issueDetailProps]);
