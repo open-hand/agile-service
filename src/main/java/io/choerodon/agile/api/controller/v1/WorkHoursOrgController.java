@@ -123,4 +123,16 @@ public class WorkHoursOrgController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.issue.work.hours.query"));
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("按经办人维度统计工时")
+    @PostMapping(value = "/count_issue_work_hours")
+    public ResponseEntity<BigDecimal> countIssueWorkHours(@ApiParam(value = "组织id", required = true)
+                                                          @PathVariable(name = "organization_id") Long organizationId,
+                                                          @RequestBody SearchVO searchVO) {
+        EncryptionUtils.decryptSearchVO(searchVO);
+        return Optional.ofNullable(workHoursService.countIssueWorkHoursOnOrganizationLevel(organizationId, searchVO))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.issue.work.hours.query"));
+    }
 }
