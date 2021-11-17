@@ -3,7 +3,7 @@ import { Select, Tooltip } from 'choerodon-ui/pro';
 import classNames from 'classnames';
 import styles from './index.less';
 
-function renderEllipsisBlockOption(text?: string, block?: React.ReactElement, config?: { maxLength?: number, showBlock?: boolean, tooltip?: boolean }) {
+function renderEllipsisBlockOption(text?: string, block?: React.ReactElement, config?: { maxLength?: number, blockClassName?: string, showBlock?: boolean, tooltip?: boolean }) {
   if (!text) {
     return <></>;
   }
@@ -16,7 +16,7 @@ function renderEllipsisBlockOption(text?: string, block?: React.ReactElement, co
       {suffix}
       {
         showBlock && (
-          <div className={styles.current}>{block}</div>
+          <div className={classNames(styles.current, config?.blockClassName)}>{block}</div>
         )
       }
     </div>

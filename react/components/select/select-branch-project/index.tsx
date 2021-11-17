@@ -1,4 +1,6 @@
-import React, { useMemo, forwardRef, useRef } from 'react';
+import React, {
+  useMemo, useCallback, forwardRef, useRef,
+} from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { stores } from '@choerodon/boot';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
@@ -9,60 +11,47 @@ import { uniqBy } from 'lodash';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { projectApi, ganttApi } from '@/api';
 import { ICategoryCode } from '@/hooks/useCategoryCodes';
-import { styles } from '../select-pi/utils';
-
-// 用于查询组织下的项目
+import renderEllipsisBlockOption, { styles } from '../select-pi/utils';
+import projectStyles from './index.less';
+// 用于创建分支 关联分支的项目列表
 
 const { AppState } = stores;
 
-export interface SelectTeamProps extends Omit<Partial<SelectProps>, 'optionRenderer'> {
+export interface SelectBranchProjectProps extends Omit<Partial<SelectProps>, 'optionRenderer'> {
   optionRenderer?: SelectConfig<any>['optionRenderer']
-  projectDataRef?: React.RefObject<Array<any>>,
-  afterLoad?: (projects: any[]) => void
-  /** 只查询组织下敏捷项目 */
-  queryAgile?: boolean
+  flat?: string
+  afterLoad?: SelectConfig<any>['afterLoad']
   extraOptions?: Array<{ id: string, name: string }>
-  flat?: boolean
-  optionData?: any[]
-  userId?: string,
-  category?: ICategoryCode,
+  userId?: string
+  currentProjectId?: string
 }
 
-const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
-  userId, projectDataRef = { current: null }, afterLoad, flat, extraOptions, category, optionData, queryAgile, popupCls, optionRenderer, ...otherProps
+const SelectBranchProject: React.FC<SelectBranchProjectProps> = forwardRef(({
+  flat, popupCls, optionRenderer, afterLoad, currentProjectId, extraOptions, userId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Function>();
   afterLoadRef.current = afterLoad;
-
+  const renderProjectOption = useCallback(
+    (optionData: any) => renderEllipsisBlockOption(optionData?.name, <>本项目</>, { blockClassName: projectStyles.current, showBlock: String(currentProjectId) === String(optionData.id) }),
+    [currentProjectId],
+  );
   const config = useMemo((): SelectConfig<any> => ({
     name: 'team',
     textField: 'name',
     valueField: 'id',
     tooltip: true,
-    request: ({ filter, page }) => {
-      if (optionData) {
-        return optionData;
-      }
-      return queryAgile ? ganttApi.loadProjects() : projectApi.loadProjectByUser({
-        userId: userId ?? AppState?.userInfo?.id,
-        filter,
-        page,
-        size: 50,
-        category,
-      });
-    },
-    optionRenderer,
+    request: ({ filter, page }) => projectApi.loadFromBranch({
+      currentProjectId, page, size: 50, param: filter, userId: userId ?? AppState?.userInfo?.id,
+    }),
+    optionRenderer: optionRenderer || renderProjectOption,
     // @ts-ignore
     afterLoad: afterLoadRef.current,
     middleWare: (projects) => {
       const newProjects = uniqBy([...(extraOptions || []), ...projects].map((item) => ({ ...item, id: String(item.id) })), 'id');
-      // @ts-ignore
-      // eslint-disable-next-line
-      projectDataRef.current = newProjects;
       return newProjects || [];
     },
-    paging: !queryAgile && !optionData,
-  }), [optionData, projectDataRef, queryAgile, userId]);
+    paging: true,
+  }), [currentProjectId, extraOptions, optionRenderer, renderProjectOption, userId]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
   return (
@@ -75,4 +64,4 @@ const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
     />
   );
 });
-export default SelectProject;
+export default SelectBranchProject;
