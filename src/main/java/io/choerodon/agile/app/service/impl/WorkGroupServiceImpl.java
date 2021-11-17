@@ -185,12 +185,12 @@ public class WorkGroupServiceImpl implements WorkGroupService {
 
     private void changeLevel(Long organizationId, WorkGroupDTO workGroupDTO, WorkGroupVO workGroupVO) {
         List<Long> oldAncestors = workGroupTreeClosureMapper.queryAncestor(organizationId, workGroupDTO.getParentId());
-        List<Long> descendants = workGroupTreeClosureMapper.queryDescendant(organizationId, workGroupDTO.getId());
+        List<Long> descendants = workGroupTreeClosureMapper.queryDescendant(organizationId, Collections.singletonList(workGroupDTO.getId()));
         // 删除当前节点以及子节点和原层级的关系
         if (CollectionUtils.isNotEmpty(oldAncestors)) {
             workGroupTreeClosureMapper.deleteByAncestorsAndDescendants(organizationId, oldAncestors, descendants);
         }
-        List<Long> newAncestors = workGroupTreeClosureMapper.queryDescendant(organizationId, workGroupVO.getParentId());
+        List<Long> newAncestors = workGroupTreeClosureMapper.queryDescendant(organizationId, Collections.singletonList(workGroupVO.getParentId()));
         if (CollectionUtils.isNotEmpty(newAncestors)) {
             Long userId = DetailsHelper.getUserDetails().getUserId();
             List<WorkGroupTreeClosureDTO> workGroupTreeClosureDTOS = new ArrayList<>();
@@ -218,7 +218,7 @@ public class WorkGroupServiceImpl implements WorkGroupService {
         // 查询当前工作组下面的所有子工作组
         WorkGroupDTO workGroupDTO = new WorkGroupDTO();
         workGroupDTO.setOrganizationId(organizationId);
-        List<Long> children = workGroupTreeClosureMapper.queryDescendant(organizationId, workGroupId);
+        List<Long> children = workGroupTreeClosureMapper.queryDescendant(organizationId, Collections.singletonList(workGroupId));
         if (CollectionUtils.isNotEmpty(children)) {
             // 删除工作组下关联的团队成员
             workGroupUserRelMapper.deleteByWorkGroupIds(organizationId, children);
@@ -268,8 +268,8 @@ public class WorkGroupServiceImpl implements WorkGroupService {
     }
 
     @Override
-    public List<Long> listChildrenWorkGroup(Long organizationId, Long workGroupId) {
-        return workGroupTreeClosureMapper.queryDescendant(organizationId, workGroupId);
+    public List<Long> listChildrenWorkGroup(Long organizationId, List<Long> workGroupIds) {
+        return workGroupTreeClosureMapper.queryDescendant(organizationId, workGroupIds);
     }
 
     private String getAfterRank(Long organizationId, Long parentId, MoveWorkGroupVO moveWorkGroupVO) {

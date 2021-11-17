@@ -12,6 +12,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.agile.infra.mapper.WorkGroupUserRelMapper;
 import io.choerodon.agile.infra.mapper.WorkHoursMapper;
 import io.choerodon.agile.infra.mapper.WorkLogMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -71,6 +72,8 @@ public class WorkHoursServiceImpl implements WorkHoursService {
     private WorkLogMapper workLogMapper;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
+    @Autowired
+    private WorkGroupUserRelMapper workGroupUserRelMapper;
 
     @Override
     public Page<WorkHoursLogVO> pageWorkHoursLogByProjectIds(Long organizationId,
@@ -79,7 +82,7 @@ public class WorkHoursServiceImpl implements WorkHoursService {
                                                              WorkHoursSearchVO workHoursSearchVO) {
         // 校验时间范围
         checkTimeRange(workHoursSearchVO);
-        //
+        getUserIdsByWorkGroupIds(organizationId, workHoursSearchVO);
         Map<String, String> order = new HashMap<>();
         order.put("issueNum", "issue_num_convert");
         pageRequest.setSort(PageUtil.sortResetOrder(pageRequest.getSort(), null, order));
@@ -115,6 +118,12 @@ public class WorkHoursServiceImpl implements WorkHoursService {
         return PageUtil.buildPageInfoWithPageInfoList(page, workHoursLogVOS);
     }
 
+    private void getUserIdsByWorkGroupIds(Long organizationId, WorkHoursSearchVO workHoursSearchVO) {
+        if (!CollectionUtils.isEmpty(workHoursSearchVO.getWorkGroupIds()) && CollectionUtils.isEmpty(workHoursSearchVO.getUserIds())) {
+            workHoursSearchVO.setUserIds(new ArrayList<>(workGroupUserRelMapper.listUserIdsByWorkGroupIds(organizationId, workHoursSearchVO.getWorkGroupIds())));
+        }
+    }
+
     @Override
     public Page<WorkHoursLogVO> pageWorkHoursLogByOrgId(Long organizationId, PageRequest pageRequest, WorkHoursSearchVO workHoursSearchVO) {
         List<Long> projectIds = new ArrayList<>();
@@ -129,6 +138,7 @@ public class WorkHoursServiceImpl implements WorkHoursService {
     @Override
     public Page<WorkHoursCalendarVO> workHoursCalendar(Long organizationId, List<Long> projectIds, PageRequest pageRequest, WorkHoursSearchVO workHoursSearchVO, Boolean isOrg) {
         checkTimeRange(workHoursSearchVO);
+        getUserIdsByWorkGroupIds(organizationId, workHoursSearchVO);
         Page<UserMessageDTO> page = getUserPage(organizationId, projectIds, pageRequest, workHoursSearchVO, isOrg);
         if (CollectionUtils.isEmpty(page.getContent())) {
             return new Page<>();
@@ -271,6 +281,7 @@ public class WorkHoursServiceImpl implements WorkHoursService {
     @Override
     public Map<String, BigDecimal> countWorkHours(Long organizationId, List<Long> projectIds, WorkHoursSearchVO workHoursSearchVO) {
         checkTimeRange(workHoursSearchVO);
+        getUserIdsByWorkGroupIds(organizationId, workHoursSearchVO);
         List<WorkHoursLogVO> workHoursLogVOS = workHoursMapper.listGroupDataByProjectIds(projectIds, workHoursSearchVO);
         if (CollectionUtils.isEmpty(workHoursLogVOS)) {
             return new HashMap<>();

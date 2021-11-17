@@ -26,5 +26,5 @@ public interface WorkGroupService {
 
     WorkGroupVO moveWorkGroup(Long organizationId, Long parentId, MoveWorkGroupVO moveWorkGroupVO);
 
-    List<Long> listChildrenWorkGroup(Long organizationId, Long workGroupId);
+    List<Long> listChildrenWorkGroup(Long organizationId, List<Long> workGroupIds);
 }
