@@ -140,6 +140,13 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         SearchVOUtil.setTypeCodes(searchVO, ISSUE_TYPE_CODES);
         SearchVOUtil.setSearchArgs(searchVO, "tree", false);
         Map<String, Object> otherArgs = searchVO.getOtherArgs();
+        String excludeIssueIdsKey = "excludeIssueIds";
+        Set<Long> excludeIssueIds = new HashSet<>();
+        if (!ObjectUtils.isEmpty(otherArgs) && !ObjectUtils.isEmpty(otherArgs.get(excludeIssueIdsKey))) {
+            List<String> excludeIssueIdsStr = (List<String>) otherArgs.get(excludeIssueIdsKey);
+            excludeIssueIdsStr.forEach(x -> excludeIssueIds.add(Long.valueOf(x)));
+            otherArgs.remove(excludeIssueIdsKey);
+        }
         List<IssuePredecessorTreeClosureDTO> descendants =
                 issuePredecessorTreeClosureMapper.selectByAncestorIds(organizationId, projectId, new HashSet<>(Arrays.asList(currentIssueId)));
         Set<Long> ignoredIssueIds =
@@ -154,6 +161,7 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
             otherArgs.remove(issueIdsKey);
         }
         ignoredIssueIds.add(currentIssueId);
+        ignoredIssueIds.addAll(excludeIssueIds);
         SearchVOUtil.setOtherArgs(searchVO, "excludeIssueIds", ignoredIssueIds);
         Page<IssueListFieldKVVO> result = issueService.listIssueWithSub(projectId, searchVO, pageRequest, organizationId);
         topIssues.addAll(result.getContent());
@@ -199,7 +207,7 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
             Set<Long> ids = parentSonMap.computeIfAbsent(parentId, y -> new HashSet<>());
             ids.add(x.getIssueId());
             childrenIds.add(x.getIssueId());
-            if(!issueIds.contains(parentId)) {
+            if (!issueIds.contains(parentId)) {
                 rootIds.add(x.getIssueId());
             }
         });
@@ -226,9 +234,9 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         });
         StringBuilder builder = new StringBuilder();
         treeRoots.forEach(x -> {
-                    builder.append(x.toString(0, null));
-                    builder.append("\n");
-                });
+            builder.append(x.toString(0, null));
+            builder.append("\n");
+        });
         return builder.toString();
     }
 
