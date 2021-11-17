@@ -79,5 +79,14 @@ public class IssuePredecessorController {
         return ResponseEntity.ok(issuePredecessorService.queryByIssueId(projectId, currentIssueId));
     }
 
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询当前问题项的前置项")
+    @GetMapping(value = "/test_tree")
+    public ResponseEntity<String> tree(@ApiParam(value = "项目id", required = true)
+                                       @PathVariable(name = "project_id") Long projectId,
+                                       @RequestParam(required = false) @Encrypt Long rootId) {
+        return ResponseEntity.ok(issuePredecessorService.tree(projectId, rootId));
+    }
+
 
 }
