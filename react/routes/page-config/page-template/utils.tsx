@@ -6,6 +6,7 @@ import ToggleFieldValue from '../components/toggle-field-value';
 import openLinkage from '../components/setting-linkage/Linkage';
 
 import openPageRoleConfigModal from './components/role-config';
+import { IPageTemplateStoreIssueType } from './stores/PageTemplateStore';
 
 interface LinkPagePermission {
   include: string[]
@@ -38,7 +39,7 @@ function checkPermissionLinkage(data: any) {
   return res || keyFilters.filter((filter) => filter?.ignoreOtherInclude).some((filter) => filter?.include?.includes(data[filter.key]));
 }
 
-const getColumns = ({ issueTypeId, loadData, disabled }: { issueTypeId: string, loadData: () => void, disabled:boolean }) => ([
+const getColumns = ({ currentIssueType: { id: issueTypeId, typeCode }, loadData, disabled }: { currentIssueType: IPageTemplateStoreIssueType, loadData: () => void, disabled: boolean }) => ([
 
   {
     title: '字段名称',
@@ -115,7 +116,8 @@ const getColumns = ({ issueTypeId, loadData, disabled }: { issueTypeId: string, 
               onOk: loadData,
             });
           },
-          display: checkPermissionLinkage(rowData.toData()),
+          // 暂时禁止 需求 类型配置级联
+          display: typeCode !== 'backlog' && checkPermissionLinkage(rowData.toData()),
         }]}
         defaultMenuIcon="settings-o"
         defaultButtonProps={{ size: 'default' as any }}

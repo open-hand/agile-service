@@ -3,11 +3,11 @@ import {
 } from 'mobx';
 import { findIndex } from 'lodash';
 import moment from 'moment';
+import { DataSet } from 'choerodon-ui/pro';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import {
   PageConfigIssueType, pageConfigApi, IFiledProps, IFiledListItemProps, IFieldOptionProps,
 } from '@/api';
-import { DataSet } from 'choerodon-ui/pro';
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { IFieldPostDataProps } from '../../components/create-field/CreateField';
 import { transformDefaultValue } from '../../page-issue-type/utils';
 
@@ -38,7 +38,7 @@ interface IAddPostData {
   required: boolean,
   localRecordIndexId: number,
 }
-interface IPageTemplateStoreIssueType {
+export interface IPageTemplateStoreIssueType {
   id: string,
   enabled: boolean,
   [x: string]: any
