@@ -124,9 +124,6 @@ public class WorkGroupServiceImpl implements WorkGroupService {
     @Override
     public WorkGroupVO create(Long organizationId, WorkGroupVO workGroupVO) {
         validate(workGroupVO);
-        if (checkName(organizationId, workGroupVO.getParentId(), workGroupVO.getName())) {
-            throw new CommonException("error.work.group.name.exist");
-        }
         WorkGroupDTO groupDTO = modelMapper.map(workGroupVO, WorkGroupDTO.class);
         // 查询最大的rank值
         String minRank = workGroupMapper.queryMinRank(organizationId, workGroupVO.getParentId());
@@ -175,9 +172,6 @@ public class WorkGroupServiceImpl implements WorkGroupService {
 
     @Override
     public WorkGroupVO update(Long organizationId, WorkGroupVO workGroupVO) {
-        if (checkName(organizationId, workGroupVO.getParentId(), workGroupVO.getName())) {
-            throw new CommonException("error.work.group.name.exist");
-        }
         WorkGroupDTO workGroupDTO = workGroupMapper.selectByPrimaryKey(workGroupVO.getId());
         // 是否更改层级
         boolean changeLevel = !Objects.equals(workGroupDTO.getParentId(), workGroupVO.getParentId());

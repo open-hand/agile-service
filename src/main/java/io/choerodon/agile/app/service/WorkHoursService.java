@@ -109,4 +109,8 @@ public interface WorkHoursService {
     Page<IssueWorkHoursVO> pageQueryAssigneeOnOrganizationLevel(Long organizationId, PageRequest pageRequest, SearchVO searchVO);
 
     Page<IssueListFieldKVVO> pageQueryIssuesOnOrganizationLevel(Long organizationId, PageRequest pageRequest, Boolean containsSubIssue, SearchVO searchVO);
+
+    BigDecimal countIssueWorkHours(Long organizationId, List<Long> projetcIds, SearchVO searchVO);
+
+    BigDecimal countIssueWorkHoursOnOrganizationLevel(Long organizationId, SearchVO searchVO);
 }

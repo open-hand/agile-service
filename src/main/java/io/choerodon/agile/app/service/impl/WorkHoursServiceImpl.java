@@ -480,12 +480,20 @@ public class WorkHoursServiceImpl implements WorkHoursService {
 
     @Override
     public Page<IssueWorkHoursVO> pageQueryAssigneeOnOrganizationLevel(Long organizationId, PageRequest pageRequest, SearchVO searchVO) {
-        List<Long> projectIds = (List<Long>) searchVO.getSearchArgs().getOrDefault("projectIds", new ArrayList<>());
+        List<Long> projectIds = transformProjectIds(searchVO);
         if (CollectionUtils.isEmpty(projectIds)) {
             Long userId = DetailsHelper.getUserDetails().getUserId();
             handlePermissionProject(organizationId, projectIds,  new ArrayList<>(),  userId);
         }
         return pageQueryAssignee(organizationId, projectIds, pageRequest, searchVO);
+    }
+
+    private List<Long> transformProjectIds(SearchVO searchVO) {
+        List<String> projectStringList = (List<String>) searchVO.getSearchArgs().getOrDefault("projectIds", new ArrayList<>());
+        if (!CollectionUtils.isEmpty(projectStringList)) {
+            return projectStringList.stream().map(Long::valueOf).collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
 
     private void handlePermissionProject(Long organizationId, List<Long> projectIds, List<ProjectVO> projectVOS, Long userId) {
@@ -501,12 +509,29 @@ public class WorkHoursServiceImpl implements WorkHoursService {
 
     @Override
     public Page<IssueListFieldKVVO> pageQueryIssuesOnOrganizationLevel(Long organizationId, PageRequest pageRequest, Boolean containsSubIssue, SearchVO searchVO) {
-        List<Long> projectIds = (List<Long>) searchVO.getSearchArgs().getOrDefault("projectIds", new ArrayList<>());
+        List<Long> projectIds = transformProjectIds(searchVO);
         if (CollectionUtils.isEmpty(projectIds)) {
             Long userId = DetailsHelper.getUserDetails().getUserId();
             handlePermissionProject(organizationId, projectIds,  new ArrayList<>(),  userId);
         }
         return pageQueryIssues(organizationId, projectIds, pageRequest, containsSubIssue, searchVO);
+    }
+
+    @Override
+    public BigDecimal countIssueWorkHours(Long organizationId, List<Long> projectIds, SearchVO searchVO) {
+        List<Long> allIssueIds = queryAllIssueIds(organizationId, projectIds, searchVO);
+        return workHoursMapper.countWorkTime(projectIds, allIssueIds, searchVO)
+                .stream().map(WorkLogDTO::getWorkTime).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    @Override
+    public BigDecimal countIssueWorkHoursOnOrganizationLevel(Long organizationId, SearchVO searchVO) {
+        List<Long> projectIds = transformProjectIds(searchVO);
+        if (CollectionUtils.isEmpty(projectIds)) {
+            Long userId = DetailsHelper.getUserDetails().getUserId();
+            handlePermissionProject(organizationId, projectIds,  new ArrayList<>(),  userId);
+        }
+        return countIssueWorkHours(organizationId, projectIds, searchVO);
     }
 
     private void statisticalWorkHours(IssueListFieldKVVO issueListFieldKVVO,

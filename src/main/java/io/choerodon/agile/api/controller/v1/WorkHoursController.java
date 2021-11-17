@@ -129,4 +129,17 @@ public class WorkHoursController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.issue.work.hours.query"));
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("按经办人维度统计工时")
+    @PostMapping(value = "/count_issue_work_hours")
+    public ResponseEntity<BigDecimal> countIssueWorkHours(@ApiParam(value = "项目id", required = true)
+                                                          @PathVariable(name = "project_id") Long projectId,
+                                                          @RequestParam(name = "organizationId") Long organizationId,
+                                                          @RequestBody SearchVO searchVO) {
+        EncryptionUtils.decryptSearchVO(searchVO);
+        return Optional.ofNullable(workHoursService.countIssueWorkHours(organizationId, Arrays.asList(projectId), searchVO))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.issue.work.hours.query"));
+    }
 }
