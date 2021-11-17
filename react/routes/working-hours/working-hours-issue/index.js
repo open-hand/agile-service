@@ -11,7 +11,7 @@ const IssueIndex = React.lazy(() => import('./IssueIndex'));
 const WorkingHoursIssue = ({ match }) => (
   <Switch>
     <PermissionRoute
-      service={[]}
+      service={(type) => (type === 'project' ? ['choerodon.code.project.cooperation.working-hours.issue.ps.default'] : [])}
       path={match.url}
       component={IssueIndex}
     />
