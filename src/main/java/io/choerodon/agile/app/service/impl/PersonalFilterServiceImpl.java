@@ -99,8 +99,8 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
             throw new CommonException(NOTFOUND_ERROR);
         }
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        if (Boolean.TRUE.equals(checkName(organizationId, projectId, userId, personalFilterVO.getName(), dto.getFilterTypeCode()))) {
-            throw new CommonException(NAME_EXIST);
+        if (!Objects.isNull(personalFilterVO.getName())) {
+            checkUpdateName(organizationId, projectId, userId, filterId, personalFilterVO.getName(), dto.getFilterTypeCode());
         }
         personalFilterVO.setFilterId(filterId);
         PersonalFilterDTO personalFilterDTO = modelMapper.map(personalFilterVO, PersonalFilterDTO.class);
@@ -112,6 +112,19 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
             throw new CommonException(UPDATE_ERROR);
         }
         return queryById(organizationId, projectId, filterId);
+    }
+
+    private void checkUpdateName(Long organizationId, Long projectId, Long userId, Long filterId, String name, String filterTypeCode) {
+        PersonalFilterDTO personalFilterDTO = new PersonalFilterDTO();
+        personalFilterDTO.setProjectId(projectId);
+        personalFilterDTO.setOrganizationId(organizationId);
+        personalFilterDTO.setUserId(userId);
+        personalFilterDTO.setName(name);
+        personalFilterDTO.setFilterTypeCode(filterTypeCode);
+        List<PersonalFilterDTO> list = personalFilterMapper.select(personalFilterDTO);
+        if (list.size() > 1 || (list.size() == 1 && !list.get(0).getFilterId().equals(filterId))) {
+            throw new CommonException(NAME_EXIST);
+        }
     }
 
     @Override
