@@ -134,9 +134,9 @@ const SelectPageAppService: React.FC<Props> = forwardRef(({
         {renderService(appService)}
       </FragmentForSearch>
     ),
-    request: ({ page, filter, requestArgs }) => devOpsApi.project(projectId).loadPageActiveService({
-      page, size: 50, param: filter, targetProjectId: requestArgs?.pageTargetProjectId!,
-    }),
+    request: ({ page, filter, requestArgs }) => (requestArgs?.pageTargetProjectId! ? devOpsApi.project(projectId).loadPageActiveService({
+      page, size: 10, param: filter, targetProjectId: requestArgs?.pageTargetProjectId!,
+    }) : new Promise((resolve) => resolve({ list: [], hasNextPage: false }))),
     middleWare: (data: any) => {
       if (dataRef) {
         Object.assign(dataRef, {
