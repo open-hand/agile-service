@@ -36,7 +36,7 @@ const IssueWorkLog = observer(({
     <div id="log">
       <div className="c7n-title-wrapper">
         <div className="c7n-title-left">
-          <FormattedMessage id="issue.log" />
+          工作日志
         </div>
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
