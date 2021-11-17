@@ -4,7 +4,7 @@ import React, {
 } from 'react';
 import { DataSet } from 'choerodon-ui/pro';
 import { inject } from 'mobx-react';
-import { observer } from 'mobx-react-lite';
+import { observer, useComputed } from 'mobx-react-lite';
 import moment from 'moment';
 import { AppStateProps, IFoundationHeader, User } from '@/common/types';
 import DateSearchDataSet, { formatEndDate, formatStartDate } from './DateSearchDataSet';
@@ -64,14 +64,15 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
   const issueSearchStore = useIssueSearchStore({
     getSystemFields: () => getSystemFields() as ILocalField[],
     transformFilter,
+    menuType: isProject ? 'project' : 'workbench',
     defaultSearchVO: localPageCacheStore.getItem('agile.working.hours.issue.search') ?? (myDefaultFilter && myDefaultFilter.filterJson ? JSON.parse(myDefaultFilter.filterJson) : undefined) ?? undefined,
   });
 
   const { data: tableFields } = useIssueTableFields({
     extraFields: [{ code: 'workTime', title: '工时' } as IFoundationHeader,
-      { code: 'cumulativeWorkTime', title: '历史累计工时' } as IFoundationHeader,
-      { code: 'estimateTime', title: '原始预估时间' } as IFoundationHeader,
-      { code: 'deviationRate', title: '偏差率' } as IFoundationHeader,
+    { code: 'cumulativeWorkTime', title: '历史累计工时' } as IFoundationHeader,
+    { code: 'estimateTime', title: '原始预估时间' } as IFoundationHeader,
+    { code: 'deviationRate', title: '偏差率' } as IFoundationHeader,
     ],
   });
   useEffect(() => () => { localPageCacheStore.setItem('agile.working.hours.issue.search', issueSearchStore.getCustomFieldFilters()); }, []);
@@ -111,7 +112,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     const res = await workingHoursApi.getTotalWorkTime({ startTime, endTime, isContain });
     setTotalWorkTime(res || 5);
   }, []);
-
+  const search = useComputed(() => issueSearchStore.getCustomFieldFilters(), [issueSearchStore]);
   const loadData = useCallback(() => {
     const dataSet = dataSetMap.get(mode) as DataSet;
     dataSet.setQueryParameter('startTime', startTime);
@@ -119,7 +120,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     dataSet.setQueryParameter('containsSubIssue', isContain);
     dataSet.query();
     getTotalWorkTime();
-  }, [startTime, endTime, mode, isContain]);
+  }, [startTime, endTime, search, mode, isContain]);
 
   useEffect(() => {
     loadData();

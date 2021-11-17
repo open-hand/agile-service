@@ -1,6 +1,6 @@
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { set } from 'lodash';
+import { cloneDeep, set } from 'lodash';
 
 interface props {
   projectId?: string,
@@ -23,7 +23,7 @@ const AssigneeDataSet = ({
         organizationId,
       },
       transformRequest: () => {
-        const search = issueSearchStore?.getCustomFieldFilters() || {};
+        const search = issueSearchStore?.getCustomFieldFilters(true) || {};
         set(search, 'searchArgs.startTime', data.startTime);
         set(search, 'searchArgs.endTime', data.endTime);
         set(search, 'searchArgs.projectIds', data.projectIds);

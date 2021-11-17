@@ -38,7 +38,7 @@ export interface IssueSearchStoreProps {
   defaultSearchVO?: ISearchVO
   projectId?: string
   /** @default project */
-  menuType?: 'project' | 'org'
+  menuType?: 'project' | 'org'| 'workbench'
   fieldConfigs?: { [key: string]: any }
 }
 function isInvalidValue(value: any) {
