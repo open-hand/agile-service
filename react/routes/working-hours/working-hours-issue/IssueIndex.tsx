@@ -139,11 +139,7 @@ const WorkingHoursIssue = (props = {}) => {
             <div className={styles.search}>
               <WorkingHoursIssueSearch loadData={() => { }} />
             </div>
-            {
-              totalWorkTime && (
-                <div className={styles.total}>{`总计登记工时：${totalWorkTime}h`}</div>
-              )
-            }
+            <div className={styles.total}>{`总计登记工时：${totalWorkTime}h`}</div>
           </div>
           {
             mode === 'issue' && (

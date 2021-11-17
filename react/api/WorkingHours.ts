@@ -109,12 +109,13 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
     });
   }
 
-  getTotalWorkTime(data: any) {
+  getTotalWorkTime(data: any, containsSubIssue: boolean) {
     return this.request({
       method: 'post',
-      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/work_hours/count_work_hours`,
+      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/work_hours/count_issue_work_hours`,
       params: {
         organizationId: getOrganizationId(),
+        containsSubIssue,
       },
       data,
     });

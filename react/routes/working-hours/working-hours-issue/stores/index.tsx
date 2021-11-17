@@ -6,7 +6,8 @@ import { DataSet } from 'choerodon-ui/pro';
 import { inject } from 'mobx-react';
 import { observer, useComputed } from 'mobx-react-lite';
 import moment from 'moment';
-import { AppStateProps, IFoundationHeader, User } from '@/common/types';
+import { set } from 'lodash';
+import { AppStateProps, IFoundationHeader } from '@/common/types';
 import DateSearchDataSet, { formatEndDate, formatStartDate } from './DateSearchDataSet';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import {
@@ -51,6 +52,7 @@ interface Context {
   totalWorkTime: number
   startTime: string,
   endTime: string,
+  onCloseDetailTableQuery: (ds: DataSet) => void
 }
 
 export type IMode = 'issue' | 'assignee' | 'project' | 'projectAssignee';
@@ -60,7 +62,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
   const [loading, setLoading] = useState<boolean>(false);
   const [mode, setMode] = useState<IMode>(localPageCacheStore.getItem('workingHours-issue-mode') || (isProject ? 'issue' : 'project'));
   const [isContain, setIsContain] = useState<boolean>(false);
-  const [totalWorkTime, setTotalWorkTime] = useState<number>(5);
+  const [totalWorkTime, setTotalWorkTime] = useState<number>(0);
   const issueSearchStore = useIssueSearchStore({
     getSystemFields: () => getSystemFields() as ILocalField[],
     transformFilter,
@@ -108,23 +110,47 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
   ), true)}`, [dateSearchDs.current?.get('startTime')]);
   const endTime = useMemo(() => (dateSearchDs.current?.get('endTime') && formatEndDate(dateSearchDs.current?.get('endTime'), true)) || localPageCacheStore.getItem('workingHours-issue-endTime') || `${formatEndDate(moment(), true)}`, [dateSearchDs.current?.get('endTime')]);
 
-  const getTotalWorkTime = useCallback(async () => {
-    const res = await workingHoursApi.getTotalWorkTime({ startTime, endTime, isContain });
-    setTotalWorkTime(res || 5);
-  }, []);
   const search = useComputed(() => issueSearchStore.getCustomFieldFilters(), [issueSearchStore]);
+
+  const getTotalWorkTime = useCallback(async () => {
+    set(search, 'searchArgs.startTime', startTime);
+    set(search, 'searchArgs.endTime', endTime);
+    const res = await workingHoursApi.getTotalWorkTime(search, isContain);
+    const totalCount = res.toString().split('.')[1] && res.toString().split('.')[1].length > 1 ? res.toFixed(1) : res;
+    setTotalWorkTime(totalCount);
+  }, [search, isContain]);
+
   const loadData = useCallback(() => {
     const dataSet = dataSetMap.get(mode) as DataSet;
-    dataSet.setQueryParameter('startTime', startTime);
-    dataSet.setQueryParameter('endTime', endTime);
-    dataSet.setQueryParameter('containsSubIssue', isContain);
-    dataSet.query();
-    getTotalWorkTime();
-  }, [startTime, endTime, search, mode, isContain]);
+    if (startTime && endTime) {
+      dataSet.setQueryParameter('startTime', startTime);
+      dataSet.setQueryParameter('endTime', endTime);
+      dataSet.setQueryParameter('containsSubIssue', isContain);
+      dataSet.query();
+      getTotalWorkTime();
+    }
+  }, [startTime, endTime, mode, isContain, search]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  const onCloseDetailTableQuery = useCallback(async (ds: DataSet) => {
+    const expandIssueIds = new Map([]);
+    ds.forEach((record) => {
+      // @ts-ignore
+      if (record.isExpanded) {
+        expandIssueIds.set(record.get('issueId'), true);
+      }
+    });
+    await ds.query(ds.currentPage);
+    ds.forEach((record) => {
+      if (expandIssueIds.get(record.get('issueId'))) {
+        // eslint-disable-next-line no-param-reassign
+        record.isExpanded = true;
+      }
+    });
+  }, []);
 
   const onCloseDetail = useCallback(async (expandRecordId) => {
     const dataSet = dataSetMap.get(mode) as DataSet;
@@ -155,8 +181,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
           // eslint-disable-next-line no-param-reassign
           record.isExpanded = true;
           if (record.get(mapKey).toString() === expandRecordId.toString()) { // 只刷新打开详情所属record的DataSet当前页
-            await recordDs.query(recordDs.currentPage);
-
+            mode === 'projectAssignee' ? await recordDs.query(recordDs.currentPage) : await onCloseDetailTableQuery(recordDs); // 对于IssueTable,记住层级
             if (mode === 'projectAssignee' && assignExpandedRecordsMap.size) {
               recordDs.records.forEach((assignRecord) => {
                 const assignRecordDs = assignExpandedRecordsMap.get(`${expandRecordId}-${assignRecord.get('userId')}`) as DataSet;
@@ -164,7 +189,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
                   assignRecord.setState('recordDs', assignRecordDs);
                   // eslint-disable-next-line no-param-reassign
                   assignRecord.isExpanded = true;
-                  assignRecordDs.query(assignRecordDs.currentPage);
+                  onCloseDetailTableQuery(assignRecordDs);
                 }
               });
             }
@@ -197,6 +222,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     setIsContain,
     onCloseDetail,
     totalWorkTime,
+    onCloseDetailTableQuery,
   };
   return (
     <Store.Provider value={value}>

@@ -15,15 +15,15 @@ const WorkingHoursIssueTable = ({
 }) => {
   const [issueDetailProps] = useDetail();
   const {
-    tableFields: fields, onCloseDetail, mode,
+    tableFields: fields, onCloseDetail, mode, onCloseDetailTableQuery,
   } = useIssueStore();
   const detailCallback = useCallback((expandRecordId) => {
     if (mode === 'issue') {
-      dataSet.query(dataSet.currentPage);
+      onCloseDetailTableQuery(dataSet);
     } else {
       onCloseDetail(expandRecordId);
     }
-  }, [dataSet, mode, onCloseDetail]);
+  }, [dataSet, mode, onCloseDetail, onCloseDetailTableQuery]);
   const onSummaryClick = useCallback((record) => {
     issueDetailProps?.open({
       path: 'issue',
