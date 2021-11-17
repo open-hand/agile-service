@@ -1,6 +1,6 @@
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { cloneDeep, set } from 'lodash';
+import { set } from 'lodash';
 
 interface props {
   projectId?: string,
