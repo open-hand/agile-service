@@ -90,6 +90,7 @@ public class CustomChartServiceImpl implements CustomChartService {
         if (customChartDTO.getAnalysisField() != null && customChartDTO.getAnalysisFieldPredefined() == null) {
             throw new CommonException("error.customChart.analysisFieldPredefinedNotNull");
         }
+        customChartDTO.setProjectId(projectId);
         validAndSetJson(customChartDTO);
         if (customChartMapper.updateByPrimaryKeySelective(customChartDTO) != 1) {
             throw new CommonException("error.CustomChart.update");
