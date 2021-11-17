@@ -3,20 +3,19 @@ import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { set } from 'lodash';
 
 interface props {
-  projectId: string | undefined,
+  projectId?: string,
   organizationId: string
   issueSearchStore: any,
-  searchDTO: any
 }
 
 const AssigneeDataSet = ({
-  projectId, organizationId, issueSearchStore, searchDTO,
+  projectId, organizationId, issueSearchStore,
 }: props) : DataSetProps => ({
   autoQuery: false,
   paging: true,
   cacheSelection: false,
   transport: {
-    read: ({ params }) => ({
+    read: ({ params, data }) => ({
       url: projectId ? `/agile/v1/projects/${projectId}/work_hours/assignee_work_hours` : `/agile/v1/organizations/${organizationId}/work_hours/assignee_work_hours`,
       method: 'post',
       params: {
@@ -24,8 +23,10 @@ const AssigneeDataSet = ({
         organizationId,
       },
       transformRequest: () => {
-        const search = searchDTO || issueSearchStore?.getCustomFieldFilters() || {};
-        set(search, 'searchArgs.tree', true);
+        const search = issueSearchStore?.getCustomFieldFilters() || {};
+        set(search, 'searchArgs.startTime', data.startTime);
+        set(search, 'searchArgs.endTime', data.endTime);
+        set(search, 'searchArgs.projectIds', data.projectIds);
         return JSON.stringify(search);
       },
     }),

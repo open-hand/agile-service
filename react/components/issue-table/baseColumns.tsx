@@ -394,15 +394,22 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
       </div>
     ),
   }],
-  ['deviationRate ', {
+  ['deviationRate', {
     title: <Tooltip title="偏差率">偏差率</Tooltip>,
     width: 170,
-    dataIndex: 'deviationRate ',
+    dataIndex: 'deviationRate',
     sortable: true,
     render: (rowData, getDataMethod = get) => {
-      const numberValue = getDataMethod(rowData, 'deviationRate');
+      const numberValue = Number(getDataMethod(rowData, 'deviationRate'));
       return (
-        <div style={{ display: 'inline-flex' }}>
+        <div style={{
+          display: 'inline-flex',
+          // eslint-disable-next-line no-nested-ternary
+          color: numberValue > 0 ? '#00BFA5' : (
+            numberValue === 0 ? 'var(--text-color)' : '#F76776'
+          ),
+        }}
+        >
           {`${numberValue !== 0 ? `${numberValue * 100}%` : 0}`}
         </div>
       );

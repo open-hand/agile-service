@@ -22,7 +22,9 @@ interface Props {
   dataSet: DataSet
 }
 const AssigneeIssueTable: React.FC<Props> = ({ projectId, defaultListLayoutColumns, dataSet }) => {
-  const { isProject, mode } = useIssueStore();
+  const {
+    isProject, mode, startTime, endTime, isContain, issueSearchStore,
+  } = useIssueStore();
 
   return (
     <div className={styles.assigneeTable}>
@@ -35,14 +37,18 @@ const AssigneeIssueTable: React.FC<Props> = ({ projectId, defaultListLayoutColum
         expandedRowRenderer={({ record }) => {
           let recordIssueDs = record.getState('recordDs');
           if (!recordIssueDs) {
-            const searchData = {
-              projectId: (projectId || getProjectId()) as string,
-              organizationId: getOrganizationId() as string,
-            };
-            // @ts-ignore
-            const newDs = new DataSet(!isProject ? SimpleIssueDataSet(searchData) : WorkingHoursIssuesDataSet(searchData));
+            const newDs = new DataSet(!isProject ? SimpleIssueDataSet({ issueSearchStore, organizationId: getOrganizationId() }) : WorkingHoursIssuesDataSet({ projectId: getProjectId(), organizationId: getOrganizationId(), issueSearchStore }));
             recordIssueDs = newDs;
             record.setState('recordDs', recordIssueDs);
+            recordIssueDs.setQueryParameter('startTime', startTime);
+            recordIssueDs.setQueryParameter('endTime', endTime);
+            recordIssueDs.setQueryParameter('containsSubIssue', isContain);
+            if (!isProject) {
+              recordIssueDs.setQueryParameter('assigneeId', [record.get('userId')]);
+              if (mode === 'projectAssignee') {
+                recordIssueDs.setQueryParameter('projectIds', [projectId]);
+              }
+            }
             recordIssueDs.query();
           }
           return (

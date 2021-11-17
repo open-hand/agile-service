@@ -4,12 +4,11 @@ import { set } from 'lodash';
 
 interface props {
   organizationId: string
-  searchDTO: any,
   issueSearchStore: any
 }
 
 const SimpleIssueDataSet = ({
-  organizationId, searchDTO, issueSearchStore,
+  organizationId, issueSearchStore,
 }: props) : DataSetProps => ({
   primaryKey: 'issueId',
   autoQuery: false,
@@ -20,16 +19,21 @@ const SimpleIssueDataSet = ({
   paging: 'server',
   cacheSelection: false,
   transport: {
-    read: ({ params }) => ({
+    read: ({ params, data }) => ({
       url: `/agile/v1/organizations/${organizationId}/work_hours/issue_work_hours`,
       method: 'post',
       params: {
         ...params,
+        containsSubIssue: data.containsSubIssue,
         organizationId,
       },
       transformRequest: () => {
-        const search = searchDTO || issueSearchStore?.getCustomFieldFilters() || {};
+        const search = issueSearchStore?.getCustomFieldFilters() || {};
         set(search, 'searchArgs.tree', true);
+        set(search, 'searchArgs.startTime', data.startTime);
+        set(search, 'searchArgs.endTime', data.endTime);
+        set(search, 'searchArgs.projectIds', data.projectIds);
+        set(search, 'otherArgs.assigneeId', data.assigneeId);
         return JSON.stringify(search);
       },
     }),
