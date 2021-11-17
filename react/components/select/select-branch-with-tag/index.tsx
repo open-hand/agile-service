@@ -39,7 +39,7 @@ function useGetBranchTagData({
         {branch.branchName}
       </div>
     ),
-    request: ({ page, filter }) => (applicationId ? devOpsApi.project(projectId).loadBranchesByServiceFilterIssue(applicationId, page, 20, {
+    request: ({ page, filter }) => (applicationId ? devOpsApi.project(projectId).loadBranchesByServiceFilterIssue(applicationId, page, 10, {
       searchParam: {
         branchName: filter,
       },
@@ -55,7 +55,7 @@ function useGetBranchTagData({
         {tag.name}
       </div>
     ),
-    request: ({ page, filter }) => (applicationId && enabledTag ? devOpsApi.project(projectId).loadTagsByService(applicationId, page, 20, {
+    request: ({ page, filter }) => (applicationId && enabledTag ? devOpsApi.project(projectId).loadTagsByService(applicationId, page, 10, {
       searchParam: {
         tagName: filter,
       },

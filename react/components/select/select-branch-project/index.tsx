@@ -41,7 +41,7 @@ const SelectBranchProject: React.FC<SelectBranchProjectProps> = forwardRef(({
     valueField: 'id',
     tooltip: true,
     request: ({ filter, page }) => projectApi.loadFromBranch({
-      currentProjectId, page, size: 50, param: filter, userId: userId ?? AppState?.userInfo?.id,
+      currentProjectId, page, size: 10, param: filter, userId: userId ?? AppState?.userInfo?.id,
     }),
     optionRenderer: optionRenderer || renderProjectOption,
     // @ts-ignore
@@ -57,6 +57,7 @@ const SelectBranchProject: React.FC<SelectBranchProjectProps> = forwardRef(({
   return (
     <Component
       ref={ref}
+      clearButton={false}
       popupCls={classNames(styles.popup, popupCls)}
       {...props}
       {...otherProps}
