@@ -7,6 +7,7 @@ import { FlatSelect } from '@choerodon/components';
 import {
   castArray, get, set, uniqBy,
 } from 'lodash';
+import { toJS } from 'mobx';
 import { useComputed } from 'mobx-react-lite';
 import { useCreation } from 'ahooks';
 import { componentApi, fieldApi } from '@/api';
@@ -24,6 +25,8 @@ export interface SelectComponentProps extends Partial<SelectProps> {
   extraOptions?: IComponent[]
   ruleIds?: string[]
   selected?: string[]
+  /** 默认选中的项 仅首次装载的使用 */
+  defaultSelectedIds?: string[]
   fieldId?: string
 }
 function getSelectIds(options: any[], values: any, valueField?: string) {
@@ -33,12 +36,13 @@ function getSelectIds(options: any[], values: any, valueField?: string) {
   return values || [];
 }
 const SelectComponent: React.FC<SelectComponentProps> = forwardRef(({
-  dataRef, afterLoad, valueField, flat, projectId, extraOptions, ruleIds, selected, fieldId, name, ...otherProps
+  dataRef, afterLoad, valueField, flat, projectId, extraOptions, ruleIds, selected, fieldId, name, defaultSelectedIds: propsDefaultSelectedIds, ...otherProps
 }, ref: React.Ref<Select>) => {
   const selectRef = useRef<Select>();
   const optionsRef = useRef<any[]>(extraOptions || []);
   const values = useComputed(() => ((castArray(otherProps.value ?? (selectRef.current?.getValues() || []))).flat(Infinity).map((item: any) => (typeof item === 'object' ? get(item, 'componentId') : item))), [otherProps.value, selectRef.current?.getValues()]);
-  const selectIdsRef = useRef<string[] | undefined>();
+  const defaultSelectedIds = useCreation(() => (castArray(toJS(propsDefaultSelectedIds))), []);
+  const selectIdsRef = useRef<string[] | undefined>(defaultSelectedIds);
   const [forceValue, setFilterWord] = useNoticeSelectUpdateSelected();
   const selectIds = useCreation(() => {
     if (optionsRef.current) {
@@ -89,9 +93,6 @@ const SelectComponent: React.FC<SelectComponentProps> = forwardRef(({
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
 
-  if (selectRef.current && name) {
-    selectRef.current?.dataSet?.getField(name)?.setOptions(props.options);
-  }
   return (
     <Component
       ref={refsBindRef(ref, selectRef)}

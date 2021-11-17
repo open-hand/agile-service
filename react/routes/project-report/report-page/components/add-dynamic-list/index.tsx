@@ -107,7 +107,6 @@ const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
           colList: data.visibleColumns,
           searchVO,
         };
-        console.log('search', block, search);
         return block;
       }
     }

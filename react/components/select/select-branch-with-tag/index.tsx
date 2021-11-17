@@ -85,7 +85,6 @@ function useGetBranchTagData({
     const data = [...branchProps.options.map((r) => ({ ...r.toData(), groupType: '分支' })),
       ...tagProps.options.map((r) => ({ ...r.toData(), groupType: 'Tag' }))];
     handleTransferData(data);
-    console.log('data', data, tagProps.options);
     optionDataSet.loadData(data);
     // return data;
   }, [branchProps.options, handleTransferData, optionDataSet, tagProps.options]);
