@@ -26,8 +26,6 @@ public class IssuePredecessorTreeClosureDTO extends AuditDomain {
 
     private Long descendantId;
 
-    private Long descendantParent;
-
     private Long projectId;
 
     private Long organizationId;
@@ -56,14 +54,6 @@ public class IssuePredecessorTreeClosureDTO extends AuditDomain {
         this.descendantId = descendantId;
     }
 
-    public Long getDescendantParent() {
-        return descendantParent;
-    }
-
-    public void setDescendantParent(Long descendantParent) {
-        this.descendantParent = descendantParent;
-    }
-
     public Long getProjectId() {
         return projectId;
     }
@@ -87,13 +77,12 @@ public class IssuePredecessorTreeClosureDTO extends AuditDomain {
         IssuePredecessorTreeClosureDTO that = (IssuePredecessorTreeClosureDTO) o;
         return Objects.equals(getAncestorId(), that.getAncestorId()) &&
                 Objects.equals(getDescendantId(), that.getDescendantId()) &&
-                Objects.equals(getDescendantParent(), that.getDescendantParent()) &&
                 Objects.equals(getProjectId(), that.getProjectId()) &&
                 Objects.equals(getOrganizationId(), that.getOrganizationId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getAncestorId(), getDescendantId(), getDescendantParent(), getProjectId(), getOrganizationId());
+        return Objects.hash(getAncestorId(), getDescendantId(), getProjectId(), getOrganizationId());
     }
 }

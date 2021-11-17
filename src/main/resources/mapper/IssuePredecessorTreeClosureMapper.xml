@@ -3,13 +3,12 @@
 <mapper namespace="io.choerodon.agile.infra.mapper.IssuePredecessorTreeClosureMapper">
     <insert id="batchInsert">
         insert into agile_issue_predecessor_tree_closure
-        (ancestor_id, descendant_id, descendant_parent, project_id, organization_id, created_by, last_updated_by)
+        (ancestor_id, descendant_id, project_id, organization_id, created_by, last_updated_by)
         values
         <foreach collection="treeNodes" item="item"  separator=",">
             (
             #{item.ancestorId},
             #{item.descendantId},
-            #{item.descendantParent},
             #{item.projectId},
             #{item.organizationId},
             #{operator},
@@ -28,7 +27,6 @@
             (
                 aiptc.ancestor_id = #{item.ancestorId}
                 and aiptc.descendant_id = #{item.descendantId}
-                and aiptc.descendant_parent = #{item.descendantParent}
             )
         </foreach>
     </delete>
@@ -47,9 +45,6 @@
             </if>
             <if test="item.descendantId != null">
                 and aiptc.descendant_id = #{item.descendantId}
-            </if>
-            <if test="item.descendantParent != null">
-                and aiptc.descendant_parent = #{item.descendantParent}
             </if>
             )
         </foreach>

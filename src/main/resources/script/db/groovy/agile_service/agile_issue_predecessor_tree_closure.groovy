@@ -11,9 +11,6 @@ databaseChangeLog(logicalFilePath:'agile_issue_predecessor_tree_closure.groovy')
             column(name: 'descendant_id', type: 'BIGINT UNSIGNED', remarks: '后代id') {
                 constraints(nullable: false)
             }
-            column(name: 'descendant_parent', type: 'BIGINT UNSIGNED', remarks: '后代对应的直属父级id') {
-                constraints(nullable: false)
-            }
             column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
                 constraints(nullable: false)
             }

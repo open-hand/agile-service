@@ -12,10 +12,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.LookupType;
 import io.choerodon.agile.infra.enums.PredecessorType;
-import io.choerodon.agile.infra.mapper.IssueMapper;
-import io.choerodon.agile.infra.mapper.IssuePredecessorMapper;
-import io.choerodon.agile.infra.mapper.IssuePredecessorTreeClosureMapper;
-import io.choerodon.agile.infra.mapper.LookupValueMapper;
+import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.SearchVOUtil;
@@ -88,7 +85,10 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         }
         Set<Long> addPredecessorIds = new HashSet<>();
         Set<Long> deletePredecessorIds = new HashSet<>();
-        processAddAndDeleteIds(addPredecessorIds, deletePredecessorIds, inputPredecessorIds, existedPredecessorIds);
+        Set<Long> intersection =
+                processAddAndDeleteIds(addPredecessorIds, deletePredecessorIds, inputPredecessorIds, existedPredecessorIds);
+        Set<Long> finalExistedPredecessorIds = new HashSet<>(intersection);
+        finalExistedPredecessorIds.addAll(addPredecessorIds);
         List<IssuePredecessorTreeClosureDTO> ancestors =
                 issuePredecessorTreeClosureMapper.selectByDescendantIds(organizationId, projectId, predecessorIds);
         //key直接父级，value为该路径下所有祖先
@@ -103,7 +103,7 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         Set<Long> descendantIds =
                 descendants.stream().map(IssuePredecessorTreeClosureDTO::getDescendantId).collect(Collectors.toSet());
         addTreeNodes(projectId, organizationId, addPredecessorIds, ancestorMap, descendants, descendantIds);
-        deleteTreeNodes(projectId, organizationId, descendants, ancestorMap, deletePredecessorIds);
+        deleteTreeNodes(projectId, organizationId, descendants, ancestorMap, deletePredecessorIds, finalExistedPredecessorIds);
         insertIssPredecessor(organizationId, projectId, issuePredecessors, currentIssueId);
     }
 
@@ -111,7 +111,7 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
     public void addSelfNode(Long projectId, Long issueId) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         IssuePredecessorTreeClosureDTO dto =
-                buildIssuePredecessorTreeClosure(organizationId, projectId, issueId, issueId, 0L);
+                buildIssuePredecessorTreeClosure(organizationId, projectId, issueId, issueId);
         batchInsertIfNotExisted(organizationId, projectId, new HashSet<>(Arrays.asList(dto)));
     }
 
@@ -175,74 +175,21 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
                                  Long organizationId,
                                  List<IssuePredecessorTreeClosureDTO> descendants,
                                  Map<Long, Set<Long>> ancestorMap,
-                                 Set<Long> deletePredecessorIds) {
+                                 Set<Long> deletePredecessorIds,
+                                 Set<Long> finalExistedPredecessorIds) {
         if (ObjectUtils.isEmpty(deletePredecessorIds)) {
             return;
         }
-        Set<IssuePredecessorTreeClosureDTO> treeNodes = buildDescendantByAncestor(descendants, ancestorMap, deletePredecessorIds);
-        Set<Long> ancestorIds = new HashSet<>();
-        deletePredecessorIds.forEach(id -> ancestorIds.addAll(ancestorMap.get(id)));
-        Set<IssuePredecessorTreeClosureDTO> ancestorSearchSet = new HashSet<>();
-        ancestorIds.forEach(id -> {
-            IssuePredecessorTreeClosureDTO dto = new IssuePredecessorTreeClosureDTO();
-            dto.setAncestorId(id);
-            ancestorSearchSet.add(dto);
-        });
-        //获取祖先所有的后代，不包含自己
-        Set<IssuePredecessorTreeClosureDTO> descendantSet =
-                issuePredecessorTreeClosureMapper.selectInList(organizationId, projectId, ancestorSearchSet);
-        Set<Long> descendantIds =
-                descendantSet
-                        .stream()
-                        .filter(x -> !ancestorIds.contains(x.getDescendantId()))
-                        .map(IssuePredecessorTreeClosureDTO::getDescendantId)
-                        .collect(Collectors.toSet());
-        Set<IssuePredecessorTreeClosureDTO> nodeWithParentSearch = new HashSet<>();
-        treeNodes.forEach(node -> {
-            IssuePredecessorTreeClosureDTO dto = new IssuePredecessorTreeClosureDTO();
-            dto.setDescendantId(node.getDescendantId());
-            dto.setDescendantParent(node.getDescendantParent());
-            nodeWithParentSearch.add(dto);
-        });
-        //查询要删除的节点在非祖先节点下是否存在，存在则要忽略
-        Set<IssuePredecessorTreeClosureDTO> ignoredSearch = new HashSet<>();
-        descendantIds.forEach(ancestorId ->
-                nodeWithParentSearch.forEach(node -> {
-                    Long descendantId = node.getDescendantId();
-                    if (descendantId.equals(ancestorId)) {
-                        return;
-                    }
-                    IssuePredecessorTreeClosureDTO dto = new IssuePredecessorTreeClosureDTO();
-                    dto.setDescendantId(node.getDescendantId());
-                    dto.setDescendantParent(node.getDescendantParent());
-                    dto.setAncestorId(ancestorId);
-                    ignoredSearch.add(dto);
-                }));
-        Set<IssuePredecessorTreeClosureDTO> ignoredSet = new HashSet<>();
-        issuePredecessorTreeClosureMapper.selectInList(organizationId, projectId, ignoredSearch)
-                .forEach(node -> {
-                    IssuePredecessorTreeClosureDTO dto = new IssuePredecessorTreeClosureDTO();
-                    dto.setDescendantParent(node.getDescendantParent());
-                    dto.setDescendantId(node.getDescendantId());
-                    ignoredSet.add(dto);
-                });
-        Set<IssuePredecessorTreeClosureDTO> deleteSet = new HashSet<>();
-        treeNodes.forEach(node -> {
-            boolean isDeleted = true;
-            Long descendantId = node.getDescendantId();
-            Long descendantParent = node.getDescendantParent();
-            for (IssuePredecessorTreeClosureDTO ignoredNode : ignoredSet) {
-                Long ignoredDescendantId = ignoredNode.getDescendantId();
-                Long ignoredDescendantParent = ignoredNode.getDescendantParent();
-                isDeleted = isDeleted
-                        && !(Objects.equals(descendantId, ignoredDescendantId) && Objects.equals(descendantParent, ignoredDescendantParent));
-            }
-            if (isDeleted) {
-                deleteSet.add(node);
-            }
-        });
-        if (!deleteSet.isEmpty()) {
-            issuePredecessorTreeClosureMapper.batchDelete(organizationId, projectId, deleteSet);
+        Set<IssuePredecessorTreeClosureDTO> deleteNodes =
+                buildDescendantByAncestor(descendants, ancestorMap, deletePredecessorIds);
+        Set<IssuePredecessorTreeClosureDTO> ignoredNodes = new HashSet<>();
+        if (!finalExistedPredecessorIds.isEmpty()) {
+            ignoredNodes.addAll(buildDescendantByAncestor(descendants, ancestorMap, finalExistedPredecessorIds));
+        }
+        Set<IssuePredecessorTreeClosureDTO> filterDeleteNodes =
+                deleteNodes.stream().filter(x -> !ignoredNodes.contains(x)).collect(Collectors.toSet());
+        if (!filterDeleteNodes.isEmpty()) {
+            issuePredecessorTreeClosureMapper.batchDelete(organizationId, projectId, filterDeleteNodes);
         }
     }
 
@@ -259,10 +206,10 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         }
     }
 
-    private void processAddAndDeleteIds(Set<Long> addPredecessorIds,
-                                        Set<Long> deletePredecessorIds,
-                                        Set<Long> inputPredecessorIds,
-                                        Set<Long> existedPredecessorIds) {
+    private Set<Long> processAddAndDeleteIds(Set<Long> addPredecessorIds,
+                                             Set<Long> deletePredecessorIds,
+                                             Set<Long> inputPredecessorIds,
+                                             Set<Long> existedPredecessorIds) {
         Set<Long> intersection = new HashSet<>();
         inputPredecessorIds.forEach(x -> {
             if (existedPredecessorIds.contains(x)) {
@@ -279,6 +226,7 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
                 deletePredecessorIds.add(x);
             }
         });
+        return intersection;
     }
 
     private Set<Long> queryExistedPredecessorIds(Long organizationId,
@@ -355,22 +303,18 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
                                                                           Map<Long, Set<Long>> ancestorMap,
                                                                           Set<Long> predecessorIds) {
         Set<IssuePredecessorTreeClosureDTO> result = new HashSet<>();
-        descendants.forEach(descendant -> {
-            Long descendantParent = descendant.getDescendantParent();
-            predecessorIds.forEach(predecessorId -> {
-                Set<Long> ancestorIds = ancestorMap.get(predecessorId);
-                ancestorIds.forEach(ancestorId -> {
-                    IssuePredecessorTreeClosureDTO dto = new IssuePredecessorTreeClosureDTO();
-                    BeanUtils.copyProperties(descendant, dto);
-                    dto.setId(null);
-                    dto.setAncestorId(ancestorId);
-                    if (Objects.equals(0L, descendantParent)) {
-                        dto.setDescendantParent(predecessorId);
-                    }
-                    result.add(dto);
-                });
-            });
-        });
+        descendants.forEach(descendant ->
+                predecessorIds.forEach(predecessorId -> {
+                    Set<Long> ancestorIds = ancestorMap.get(predecessorId);
+                    ancestorIds.forEach(ancestorId -> {
+                        IssuePredecessorTreeClosureDTO dto = new IssuePredecessorTreeClosureDTO();
+                        BeanUtils.copyProperties(descendant, dto);
+                        dto.setId(null);
+                        dto.setAncestorId(ancestorId);
+                        result.add(dto);
+                    });
+                })
+        );
         return result;
     }
 
@@ -406,7 +350,7 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
 
         Set<IssuePredecessorTreeClosureDTO> treeNodes = new HashSet<>();
         issueIds.forEach(id ->
-                treeNodes.add(buildIssuePredecessorTreeClosure(organizationId, projectId, id, id, 0L)));
+                treeNodes.add(buildIssuePredecessorTreeClosure(organizationId, projectId, id, id)));
         Set<IssuePredecessorTreeClosureDTO> existedTreeNodes =
                 issuePredecessorTreeClosureMapper.selectInList(organizationId, projectId, treeNodes);
         Set<IssuePredecessorTreeClosureDTO> insertSet = new HashSet<>();
@@ -462,14 +406,12 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
     private IssuePredecessorTreeClosureDTO buildIssuePredecessorTreeClosure(Long organizationId,
                                                                             Long projectId,
                                                                             Long ancestorId,
-                                                                            Long descendantId,
-                                                                            Long descendantParent) {
+                                                                            Long descendantId) {
         IssuePredecessorTreeClosureDTO dto = new IssuePredecessorTreeClosureDTO();
         dto.setProjectId(projectId);
         dto.setOrganizationId(organizationId);
         dto.setAncestorId(ancestorId);
         dto.setDescendantId(descendantId);
-        dto.setDescendantParent(descendantParent);
         return dto;
     }
 }
