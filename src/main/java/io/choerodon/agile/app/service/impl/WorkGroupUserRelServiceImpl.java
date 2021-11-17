@@ -68,7 +68,7 @@ public class WorkGroupUserRelServiceImpl implements WorkGroupUserRelService {
     public void batchDeleteRel(Long organizationId, WorkGroupUserRelParamVO workGroupUserRelParamVO) {
         List<Long> userIds = workGroupUserRelParamVO.getUserIds();
         if (!CollectionUtils.isEmpty(userIds)) {
-            List<Long> workGroupIds = workGroupService.listChildrenWorkGroup(organizationId, workGroupUserRelParamVO.getWorkGroupId());
+            List<Long> workGroupIds = workGroupService.listChildrenWorkGroup(organizationId, Collections.singletonList(workGroupUserRelParamVO.getWorkGroupId()));
             workGroupUserRelMapper.batchDelete(organizationId, workGroupIds, workGroupUserRelParamVO.getUserIds());
         }
     }
@@ -76,7 +76,7 @@ public class WorkGroupUserRelServiceImpl implements WorkGroupUserRelService {
     @Override
     public Page<WorkGroupUserRelVO> pageByQuery(Long organizationId, PageRequest pageRequest, WorkGroupUserRelParamVO workGroupUserRelParamVO) {
         // 查询工作组的所有子级
-        List<Long> workGroupIds = workGroupService.listChildrenWorkGroup(organizationId, workGroupUserRelParamVO.getWorkGroupId());
+        List<Long> workGroupIds = workGroupService.listChildrenWorkGroup(organizationId, workGroupUserRelParamVO.getWorkGroupIds());
         Set<Long> userIds = workGroupUserRelMapper.listUserIdsByWorkGroupIds(organizationId, workGroupIds);
         if (CollectionUtils.isEmpty(userIds)) {
             return new Page<>();

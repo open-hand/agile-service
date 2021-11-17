@@ -19,8 +19,10 @@
         fd_work_group_tree_closure
         where
           organization_id = #{organizationId}
-          and
-          ancestor_id = #{workGroupId}
+          and ancestor_id in
+          <foreach collection="workGroupIds" item="workGroupId" open="(" separator="," close=")">
+              #{workGroupId}
+          </foreach>
     </select>
 
     <select id="batchInsert">

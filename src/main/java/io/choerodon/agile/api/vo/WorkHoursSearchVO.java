@@ -22,6 +22,9 @@ public class WorkHoursSearchVO {
 
     private Boolean exportMonthlyReport;
 
+    @Encrypt
+    private List<Long> workGroupIds;
+
     public Date getStartTime() {
         return startTime;
     }
@@ -60,5 +63,13 @@ public class WorkHoursSearchVO {
 
     public void setExportMonthlyReport(Boolean exportMonthlyReport) {
         this.exportMonthlyReport = exportMonthlyReport;
+    }
+
+    public List<Long> getWorkGroupIds() {
+        return workGroupIds;
+    }
+
+    public void setWorkGroupIds(List<Long> workGroupIds) {
+        this.workGroupIds = workGroupIds;
     }
 }

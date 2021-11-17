@@ -33,6 +33,12 @@ public class PersonalFilterVO {
     @ApiModelProperty(value = "是否是默认")
     private Boolean isDefault;
 
+    @ApiModelProperty(value = "个人筛选类型code")
+    private String filterTypeCode;
+
+    @ApiModelProperty(value = "组织id")
+    private Long organizationId;
+
     public Long getObjectVersionNumber() {
         return objectVersionNumber;
     }
@@ -87,6 +93,22 @@ public class PersonalFilterVO {
 
     public void setDefault(Boolean aDefault) {
         isDefault = aDefault;
+    }
+
+    public String getFilterTypeCode() {
+        return filterTypeCode;
+    }
+
+    public void setFilterTypeCode(String filterTypeCode) {
+        this.filterTypeCode = filterTypeCode;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }
 

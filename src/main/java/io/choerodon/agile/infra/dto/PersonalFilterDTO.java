@@ -26,6 +26,8 @@ public class PersonalFilterDTO extends AuditDomain {
     private String name;
     private String filterJson;
     private Boolean isDefault;
+    private String filterTypeCode;
+    private Long organizationId;
 
     public Long getFilterId() {
         return filterId;
@@ -73,6 +75,22 @@ public class PersonalFilterDTO extends AuditDomain {
 
     public void setDefault(Boolean aDefault) {
         isDefault = aDefault;
+    }
+
+    public String getFilterTypeCode() {
+        return filterTypeCode;
+    }
+
+    public void setFilterTypeCode(String filterTypeCode) {
+        this.filterTypeCode = filterTypeCode;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }
 

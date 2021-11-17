@@ -34,4 +34,15 @@ databaseChangeLog(logicalFilePath:'script/db/agile_personal_filter.groovy') {
             column(name: 'is_default', type: 'TINYINT UNSIGNED', defaultValue: "0", remarks: '是否默认')
         }
     }
+
+    changeSet(id: '2021-11-16-agile-personal-filter-add-column', author: 'huaxin.deng@hand-china.com') {
+        addColumn(tableName: 'agile_personal_filter') {
+            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id', defaultValue: '0') {
+                constraints(nullable: false)
+            }
+            column(name: 'filter_type_code', type: 'VARCHAR(50)', defaultValue: "agile_issue", remarks: '个人筛选类型code') {
+                constraints(nullable: false)
+            }
+        }
+    }
 }

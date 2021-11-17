@@ -14,7 +14,7 @@ public interface WorkGroupTreeClosureMapper extends BaseMapper<WorkGroupTreeClos
 
     List<Long> queryAncestor(@Param("organizationId") Long organizationId, @Param("workGroupId") Long workGroupId);
 
-    List<Long> queryDescendant(@Param("organizationId") Long organizationId, @Param("workGroupId") Long workGroupId);
+    List<Long> queryDescendant(@Param("organizationId") Long organizationId, @Param("workGroupIds") List<Long> workGroupIds);
 
     void batchInsert(@Param("organizationId") Long organizationId, @Param("userId") Long userId, @Param("workGroupTreeClosures") List<WorkGroupTreeClosureDTO> workGroupTreeClosureDTOS);
 

@@ -24,6 +24,9 @@ public class WorkGroupUserRelParamVO {
 
     private Boolean enabled;
 
+    @Encrypt
+    private List<Long> workGroupIds;
+
     public Long getWorkGroupId() {
         return workGroupId;
     }
@@ -70,5 +73,13 @@ public class WorkGroupUserRelParamVO {
 
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public List<Long> getWorkGroupIds() {
+        return workGroupIds;
+    }
+
+    public void setWorkGroupIds(List<Long> workGroupIds) {
+        this.workGroupIds = workGroupIds;
     }
 }
