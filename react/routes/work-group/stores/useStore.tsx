@@ -3,7 +3,7 @@ import { useLocalStore } from 'mobx-react-lite';
 import {
   find, includes, pull, isEmpty, remove,
 } from 'lodash';
-import { workGroupApi } from '@/api/WorkGroup';
+import { workGroupApi } from '@/api';
 import { GroupItem } from '@/routes/work-group/types';
 
 interface Props {

@@ -1,7 +1,7 @@
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import DataSet from 'choerodon-ui/pro/lib/data-set';
-import { workGroupApi, workGroupApiConfigApi } from '@/api/WorkGroup';
+import { workGroupApi, workGroupApiConfigApi } from '@/api';
 
 interface TableProps {
   statusDs: DataSet,
@@ -22,16 +22,16 @@ export default ({
   transport: {
     read: ({ data }) => {
       const {
-        workGroupId = ROOT_ID, ...other
+        workGroupId = ROOT_ID, params, ...other
       } = data || {};
-      const postData: { workGroupId?: string } = { ...other || {} };
+      const postData: { workGroupIds?: string[] } = { param: params, ...other || {} };
       switch (workGroupId) {
         case NOT_ASSIGN_ID:
           return workGroupApiConfigApi.loadUserUnAssignee(postData);
         case ROOT_ID:
           return workGroupApiConfigApi.loadUserUnAssigneeByGroup(postData);
         default:
-          postData.workGroupId = workGroupId;
+          postData.workGroupIds = [workGroupId];
           return workGroupApiConfigApi.loadUserByGroup(postData);
       }
     },
