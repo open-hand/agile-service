@@ -63,6 +63,8 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
     unassignedEpic: undefined,
     clearButton: true,
     primitiveValue: false,
+    /** 模块组件默认选中 */
+    defaultSelectedIds: editDefaultValue.defaultValueArr,
     selected: record.get('_editDataCode') === record.get('fieldCode') ? editDefaultValue.defaultValueArr : undefined,
     style: { width: '100%' },
     afterLoad: record.get('_editData') && record.get('_editDataCode') === record.get('fieldCode') ? handleBindOptions : undefined,

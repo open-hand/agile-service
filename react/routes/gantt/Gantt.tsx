@@ -361,7 +361,6 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   const handleCreateIssue = usePersistFn((issue: Issue, issueId?: string, parentId?: string, dontCopyEpic = false) => {
     setData(produce(data, (draft) => {
       const normalizeIssueWidthParentId = Object.assign(ganttNormalizeIssue(issue), { parentId });
-      console.log('normalizeIssueWidthParentId', normalizeIssueWidthParentId, issueId);
       if (!issueId) {
         draft.unshift(normalizeIssueWidthParentId);
       } else {
@@ -377,7 +376,6 @@ const GanttPage: React.FC<IGanttPageProps> = (props) => {
   });
 
   const handleCopyIssue = usePersistFn((issue: Issue, issueId: string, isSubTask?: boolean, dontCopyEpic?: boolean) => {
-    console.log('copy', issue, issueId, isSubTask, dontCopyEpic);
     handleCreateIssue(issue, issueId, isSubTask ? issueId : undefined, dontCopyEpic);
     const subIssues = [...(issue.subIssueVOList ?? []), ...(issue.subBugVOList ?? [])];
     if (subIssues.length > 0) {
