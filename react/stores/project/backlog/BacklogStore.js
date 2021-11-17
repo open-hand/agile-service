@@ -164,6 +164,16 @@ class BacklogStore {
     this.assigneeProps = data;
   }
 
+  @observable showIssueLoading = true;
+
+  @computed get getShowIssueLoading() {
+    return this.showIssueLoading;
+  }
+
+  @action setShowIssueLoading(flag) {
+    this.showIssueLoading = flag;
+  }
+
   getSprintFilter() {
     const data = {
       advancedSearchArgs: {},
@@ -1406,7 +1416,9 @@ class BacklogStore {
   async refreshSprint(sprintId, resetPage = true) {
     const pagination = this.getPagination(sprintId);
     const sprint = this.getTargetSprint(sprintId);
-    sprint.loading = true;
+    if (this.showIssueLoading) {
+      sprint.loading = true;
+    }
     const { list: issueSearchVOList, number, total } = await sprintApi.getIssuesBySprintId(sprintId, {
       advancedSearchArgs: {
         ...this.filter.advancedSearchArgs,
@@ -1422,6 +1434,7 @@ class BacklogStore {
     this.issueMap.set(sprintId.toString(), issueSearchVOList);
     sprint.loading = false;
     sprint.loaded = true;
+    this.showIssueLoading = true;
   }
 
   getTargetSprint(sprintId) {

@@ -120,6 +120,7 @@ function IssueList({
           defaultAssignee={BacklogStore.filterSprintAssignUser.get(sprintId)}
           onCreate={(res) => {
             BacklogStore.handleCreateIssue(res, String(sprintId));
+            BacklogStore.setShowIssueLoading(false);
             BacklogStore.refresh(false, false); // 更新侧边框
           }}
           cantCreateEvent={openCreateIssueModal}
