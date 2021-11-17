@@ -96,7 +96,7 @@ import SelectComponent from '@/components/select/select-component';
                 projectId={store.projectId}
                 required={required}
                 dataRef={this.dataRef}
-                getPopupContainer={() => document.getElementById('detail')}
+                // getPopupContainer={() => document.getElementById('detail')}
                 style={{ marginTop: 0, paddingTop: 0 }}
                 dropdownMatchSelectWidth={false}
                 extraOptions={componentIssueRelVOList}
