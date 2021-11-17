@@ -444,6 +444,13 @@ public class EncryptionUtils {
                     temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
+        // excludeIssueIds
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("excludeIssueIds"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("excludeIssueIds",
+                    temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
+
         // label
         temp = oaMapOptional.map(ad -> (List<String>) (ad.get("label"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
