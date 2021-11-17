@@ -294,7 +294,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     sortable: true,
     render: (rowData, getDataMethod = get) => (
       <div style={{ display: 'inline-flex' }}>
-        {`${getDataMethod(rowData, 'estimateTime')}h`}
+        {getDataMethod(rowData, 'estimateTime') ? `${getDataMethod(rowData, 'estimateTime')}h` : ''}
       </div>
     ),
   }],
