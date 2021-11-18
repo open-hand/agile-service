@@ -238,4 +238,29 @@
             #{id}
         </foreach>
     </select>
+
+    <select id="queryByStateMachineIdsAndStatusParam" resultType="io.choerodon.agile.infra.dto.StatusDTO">
+        SELECT *
+        FROM fd_status
+        WHERE organization_id = #{organizationId}
+        AND id IN(
+        SELECT
+        smn.status_id
+        FROM fd_status_machine_node smn
+        WHERE smn.state_machine_id IN
+        <foreach item="item" index="index" collection="stateMachineIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        )
+        <if test='statusParamVO.param != null and statusParamVO.param != "" '>
+            AND name LIKE concat('%',#{statusParamVO.param},'%')
+        </if>
+
+        <if test='statusParamVO.ignoredStatusIds != null and statusParamVO.ignoredStatusIds.size > 0'>
+            AND id not in
+            <foreach collection="statusParamVO.ignoredStatusIds" item="ignoredStatusId" open="(" close=")" separator=",">
+                #{ignoredStatusId}
+            </foreach>
+        </if>
+    </select>
 </mapper>

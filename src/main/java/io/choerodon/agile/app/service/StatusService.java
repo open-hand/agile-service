@@ -132,5 +132,5 @@ public interface StatusService {
      */
     StatusVO queryProjectStatusById(Long projectId, Long statusId);
 
-    Page<StatusVO> queryUserProjectStatus(PageRequest pageRequest, Long organizationId, String type, String param);
+    Page<StatusVO> queryUserProjectStatus(PageRequest pageRequest, Long organizationId, String type, StatusParamVO statusParamVO);
 }
