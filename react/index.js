@@ -26,7 +26,7 @@ const StateMachine = React.lazy(() => import('./routes/StateMachine'));
 const TeamPerformance = React.lazy(() => import('./routes/TeamPerformance'));
 const VersionList = React.lazy(() => (import('./routes/version-list')));
 const WorkCalendar = React.lazy(() => (import('./routes/work-calendar')));
-const Workgroup = React.lazy(() => (import('./routes/work-group')));
+const WorkGroup = React.lazy(() => (import('./routes/work-group')));
 // 敏捷设置
 const Component = React.lazy(() => import('./routes/settings/Component'));
 const IssueLink = React.lazy(() => import('./routes/settings/IssueLinkHome'));
@@ -102,7 +102,11 @@ export function getRoutes(match) {
     <Route path={`${match.url}/ui-preview/:uuid`} component={UiPreview} />,
     <Route path={`${match.url}/outside/ui-preview/:uuid`} component={UiPreview} />,
     <Route path={`${match.url}/work-calendar`} component={WorkCalendar} />,
-    <PermissionRoute path={`${match.url}/work-group`} component={Workgroup} />,
+    <PermissionRoute
+      service={['choerodon.code.organization.manager.work-group.default']}
+      path={`${match.url}/work-group`}
+      component={WorkGroup}
+    />,
   ];
 }
 class Agile extends React.Component {
