@@ -203,6 +203,7 @@ export interface IssueCreateFields {
   system: boolean
 }
 export interface IField {
+  createdLevel?: string;
   code: string,
   fieldId: string,
   fieldOptions?: FieldOption[],
