@@ -56,7 +56,6 @@ const SaveFilterModal: React.FC<Props> = (props) => {
       onOk();
       return true;
     } catch (error) {
-      console.log(error);
       Choerodon.prompt('保存失败');
       return false;
     }
