@@ -86,11 +86,15 @@ class WorkGroupApi extends Api<WorkGroupApi> {
    * 查询工作组下成员
    * @param data
    */
-  loadUserByGroup(data: object) {
+  loadUserByGroup(data: object, params?: { page?: number, size?: number }) {
     return this.request({
       method: 'post',
       url: `${this.prefix}_user_rel/page`,
       data,
+      params: params && ({
+        page: params.page || 1,
+        size: params.size || 50,
+      }),
     });
   }
 

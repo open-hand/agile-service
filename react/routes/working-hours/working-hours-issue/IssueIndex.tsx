@@ -44,7 +44,7 @@ const WorkingHoursIssue = (props = {}) => {
   // @ts-ignore
   const { cached } = props;
   const {
-    loadData, dateSearchDs, loading, workingHoursIssuesDs, workingHoursAssigneeDs, mode, isProject, isContain, setIsContain, tableFields: fields, totalWorkTime, issueSearchStore,
+    dateSearchDs, loading, workingHoursIssuesDs, workingHoursAssigneeDs, mode, isProject, isContain, setIsContain, tableFields: fields, totalWorkTime, issueSearchStore,
   } = useIssueStore();
 
   const handleChangeIsContain = useCallback((value) => {

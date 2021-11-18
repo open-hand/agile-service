@@ -6,6 +6,7 @@ export interface IWorkingHoursData {
   projectIds?: string[],
   startTime: string,
   endTime: string,
+  workGroupIds?: string[]
 }
 
 export type WorkingHoursExportAction = 'download_file_work_hours_log' | 'download_file_work_hours_calendar'

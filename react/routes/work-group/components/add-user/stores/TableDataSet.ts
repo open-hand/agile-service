@@ -19,7 +19,7 @@ export default ({
       const {
         param,
       } = data || {};
-      const postData = { workGroupId, param };
+      const postData = { workGroupIds: [workGroupId], param };
       return workGroupApiConfigApi.loadUserUnAssigneeByGroup(postData);
     },
   },

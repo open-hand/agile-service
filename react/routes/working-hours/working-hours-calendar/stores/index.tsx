@@ -43,6 +43,11 @@ interface Context {
   getCountData: (data: IWorkingHoursData) => void
   loading: boolean,
   setLoading: (loading: boolean) => void
+  startTime: string,
+  endTime: string,
+  userIds: undefined | string[],
+  projectIds: undefined | string[],
+  workGroupIds: undefined | string[],
 }
 
 function getIsRestDay(date: string | Moment, workCalendar: any) {
@@ -54,18 +59,24 @@ function getIsRestDay(date: string | Moment, workCalendar: any) {
 
 export const StoreProvider: React.FC<Context> = inject('AppState')(observer((props: any) => {
   const { children, AppState } = props;
+  const projectCreationDate = useMemo(() => AppState.getCurrentProject?.creationDate, [AppState.getCurrentProject]);
   const calendarDs = useMemo(() => new DataSet(CalendarDataSet()), []);
-  const searchDs = useMemo(() => new DataSet(CalendarSearchDataSet({ calendarDs, currentProject: AppState.getCurrentProject })), [AppState.getCurrentProject, calendarDs]);
-  const exportDs = useMemo(() => new DataSet(LogExportDataSet({ currentProject: AppState.getCurrentProject })), [AppState.getCurrentProject]);
+  const searchDs = useMemo(() => new DataSet(CalendarSearchDataSet({ projectCreationDate })), [projectCreationDate]);
+  const exportDs = useMemo(() => new DataSet(LogExportDataSet({ projectCreationDate })), [projectCreationDate]);
   const workCalendarMap = useMemo(() => new Map([]), []);
   const [countData, setCountData] = useState<ICountData>({});
   const [loading, setLoading] = useState<boolean>(false);
-
+  // eslint-disable-next-line no-nested-ternary
+  const startTime = useMemo(() => formatStartDate(searchDs.current?.get('startTime'), true) || localPageCacheStore.getItem('workingHours-calendar-startTime') || (`${formatStartDate(getIsOrganization() ? moment().subtract(6, 'days') : (
+    moment().subtract(6, 'days').isBefore(moment(projectCreationDate)) ? moment(projectCreationDate) : moment().subtract(6, 'days')
+  ), true)}`), [searchDs.current?.get('startTime'), projectCreationDate]);
+  const endTime = useMemo(() => (formatEndDate(searchDs.current?.get('endTime'), true) || localPageCacheStore.getItem('workingHours-calendar-endTime') || `${formatEndDate(moment(), true)}`), [searchDs.current?.get('endTime')]);
+  const userIds = useMemo(() => searchDs.current?.get('userIds') || localPageCacheStore.getItem('workingHours-calendar-userIds'), [searchDs.current?.get('userIds')]);
+  const projectIds = useMemo(() => searchDs.current?.get('projectIds') || localPageCacheStore.getItem('workingHours-calendar-projectIds'), [searchDs.current?.get('projectIds')]);
+  const workGroupIds = useMemo(() => (userIds?.length ? undefined : (searchDs.current?.get('workGroupIds') || localPageCacheStore.getItem('workingHours-calendar-workGroupIds'))), [userIds, searchDs.current?.get('workGroupIds')]);
   const getWorkCalendar = useCallback(() => {
-    const minDate = searchDs.current?.get('startTime');
-    const maxDate = searchDs.current?.get('endTime');
-    if (minDate && maxDate) {
-      const yearRange = [moment(minDate).year(), moment(maxDate).year()];
+    if (startTime && endTime) {
+      const yearRange = [moment(startTime).year(), moment(endTime).year()];
       if (!isNaN(yearRange[0]) && !isNaN(yearRange[1])) {
         if (yearRange[0] === yearRange[1]) {
           workCalendarApi.getWorkSetting(yearRange[0]).then((res: any) => {
@@ -80,7 +91,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
         }
       }
     }
-  }, [searchDs, workCalendarMap]);
+  }, [workCalendarMap, startTime, endTime]);
 
   useEffect(() => {
     getWorkCalendar();
@@ -92,42 +103,21 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     });
   }, []);
 
-  useEffect(() => {
-    const startTime = searchDs.current?.get('startTime');
-    const endTime = searchDs.current?.get('endTime');
-    if (startTime && endTime) {
-      getCountData({
-        startTime: formatStartDate(startTime, true) as string,
-        endTime: formatEndDate(endTime, true) as string,
-        userIds: searchDs.current?.get('userIds'),
-        projectIds: searchDs.current?.get('projectIds'),
-      });
-    }
-  }, [getCountData,
-    searchDs.current?.get('startTime'),
-    searchDs.current?.get('endTime'),
-    searchDs.current?.get('userIds'),
-    searchDs.current?.get('projectIds'),
-  ]);
-
   const loadData = useCallback(() => {
-    // eslint-disable-next-line no-nested-ternary
-    const startTime = localPageCacheStore.getItem('workingHours-calendar-startTime') || `${formatStartDate(getIsOrganization() ? moment().subtract(6, 'days') : (
-      moment().subtract(6, 'days').isBefore(moment(AppState.getCurrentProject?.creationDate)) ? moment(AppState.getCurrentProject?.creationDate) : moment().subtract(6, 'days')
-    ), true)}`;
-    const endTime = localPageCacheStore.getItem('workingHours-calendar-endTime') || `${formatEndDate(moment(), true)}`;
     calendarDs.setQueryParameter('startTime', startTime);
     calendarDs.setQueryParameter('endTime', endTime);
-    calendarDs.setQueryParameter('userIds', localPageCacheStore.getItem('workingHours-calendar-userIds'));
-    calendarDs.setQueryParameter('projectIds', localPageCacheStore.getItem('workingHours-calendar-projectIds'));
+    calendarDs.setQueryParameter('userIds', userIds);
+    calendarDs.setQueryParameter('projectIds', projectIds);
+    calendarDs.setQueryParameter('workGroupIds', workGroupIds);
     calendarDs.query();
     getCountData({
       startTime,
       endTime,
-      userIds: localPageCacheStore.getItem('workingHours-calendar-userIds'),
-      projectIds: localPageCacheStore.getItem('workingHours-calendar-projectIds'),
+      userIds,
+      projectIds,
+      workGroupIds,
     });
-  }, [AppState.getCurrentProject?.creationDate, calendarDs, getCountData]);
+  }, [calendarDs, getCountData, startTime, endTime, userIds, projectIds, workGroupIds]);
 
   useEffect(() => {
     loadData();
@@ -145,6 +135,11 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     countData,
     loading,
     setLoading,
+    startTime,
+    endTime,
+    userIds,
+    projectIds,
+    workGroupIds,
   };
   return (
     <Store.Provider value={value}>
