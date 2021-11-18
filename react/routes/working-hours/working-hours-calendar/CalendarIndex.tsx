@@ -11,21 +11,21 @@ import Calendar from './components/Calendar';
 import { openExportLogModal } from '../working-hours-log/components/export-modal';
 import Search from '../working-hours-log/components/LogSearch';
 import { StoreProvider, useCalendarStore } from './stores';
-import { IWorkingHoursData, workingHoursApi } from '@/api';
+import { workingHoursApi } from '@/api';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import NoData from './NoData.svg';
 import styles from './CalendarIndex.less';
 
 const WorkingHoursCalendar = () => {
   const {
-    loadData, exportDs, searchDs, calendarDs, loading,
+    loadData, exportDs, searchDs, calendarDs, loading, startTime, endTime, userIds, projectIds, workGroupIds,
   } = useCalendarStore();
   const handleOpenExport = useCallback(() => {
-    const search: IWorkingHoursData = searchDs.current?.data as IWorkingHoursData;
-    exportDs.current?.set('userIds', search.userIds?.length ? toJS(search.userIds) : undefined);
-    exportDs.current?.set('projectIds', search.projectIds?.length ? toJS(search.projectIds) : undefined);
-    exportDs.current?.set('startTime', moment(search.startTime).startOf('day'));
-    exportDs.current?.set('endTime', moment(search.endTime).endOf('day'));
+    exportDs.current?.set('userIds', userIds?.length ? toJS(userIds) : undefined);
+    exportDs.current?.set('projectIds', projectIds?.length ? toJS(projectIds) : undefined);
+    exportDs.current?.set('startTime', moment(startTime).startOf('day'));
+    exportDs.current?.set('endTime', moment(endTime).endOf('day'));
+    exportDs.current?.set('workGroupIds', searchDs.current?.get('workGroupIds'));
     openExportLogModal({
       exportDs,
       title: '导出工时日历',
@@ -35,7 +35,7 @@ const WorkingHoursCalendar = () => {
       exportFn: (data) => workingHoursApi.exportCalendar(data),
       fileName: '工时日历',
     });
-  }, [exportDs, searchDs]);
+  }, [endTime, exportDs, projectIds, searchDs, startTime, userIds]);
   const refresh = useCallback(() => {
     loadData();
   }, [loadData]);
@@ -43,7 +43,7 @@ const WorkingHoursCalendar = () => {
   return (
     <Page className={styles.calendarIndex}>
       <Header>
-        <Search searchDs={searchDs} />
+        <Search searchDs={searchDs} showWorkGroup />
         <HeaderButtons items={[{
           name: '导出',
           icon: 'unarchive-o',

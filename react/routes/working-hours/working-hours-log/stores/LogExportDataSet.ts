@@ -1,8 +1,5 @@
-import { DataSet } from 'choerodon-ui/pro';
 import moment, { Moment } from 'moment';
-import { debounce, includes } from 'lodash';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { getIsOrganization } from '@/utils/common';
 
 export const formatStartDate = (date: string | Moment, format = false) => {
@@ -19,7 +16,7 @@ export const formatEndDate = (date: string | Moment, format = false) => {
   return moment(date).endOf('day').format('YYYY-MM-DD HH:mm:ss');
 };
 
-const LogExportDataSet = ({ currentProject }: { currentProject: any}) => ({
+const LogExportDataSet = ({ projectCreationDate }: { projectCreationDate: string | undefined}) => ({
   autoCreate: true,
   autoQuery: false,
   fields: [{
@@ -34,7 +31,7 @@ const LogExportDataSet = ({ currentProject }: { currentProject: any}) => ({
       max: ({ record }: { record: Record}) => moment(record.get('endTime')).startOf('day'),
       // eslint-disable-next-line no-nested-ternary
       min: ({ record }: { record: Record }) => (getIsOrganization() ? formatStartDate(moment(record?.get('endTime')).subtract(31, 'days')) : (
-        moment(record?.get('endTime')).subtract(31, 'days').isAfter(moment(currentProject?.creationDate))) ? (formatStartDate(moment(record?.get('endTime'))) as Moment).subtract(31, 'days') : moment(currentProject?.creationDate).startOf('day')
+        moment(record?.get('endTime')).subtract(31, 'days').isAfter(moment(projectCreationDate))) ? (formatStartDate(moment(record?.get('endTime'))) as Moment).subtract(31, 'days').startOf('day') : moment(projectCreationDate).startOf('day')
       ),
     },
     label: '开始时间',
@@ -42,7 +39,7 @@ const LogExportDataSet = ({ currentProject }: { currentProject: any}) => ({
     name: 'endTime',
     required: true,
     dynamicProps: {
-      max: ({ record }: { record: Record}) => (moment(record?.get('startTime')).add(31, 'days').isBefore(moment()) ? (formatStartDate(moment(record?.get('startTime'))) as Moment).add(31, 'days') : moment().endOf('day')),
+      max: ({ record }: { record: Record}) => (moment(record?.get('startTime')).add(31, 'days').isBefore(moment().endOf('day')) ? (formatStartDate(moment(record?.get('startTime'))) as Moment).add(31, 'days').endOf('day') : moment().endOf('day')),
       min: ({ record }: { record: Record }) => moment(record.get('startTime')).startOf('day'),
     },
     label: '结束时间',
