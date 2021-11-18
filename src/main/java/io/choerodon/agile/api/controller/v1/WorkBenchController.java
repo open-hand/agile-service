@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.controller.v1;
 
+import io.choerodon.agile.api.vo.StatusParamVO;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.app.service.IssueService;
@@ -77,29 +78,28 @@ public class WorkBenchController {
 
     @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation(value = "分页查询权限项目下状态列表")
-    @GetMapping("/status")
+    @PostMapping("/status")
     public ResponseEntity<Page<StatusVO>> queryUserProjectStatus(@ApiIgnore
                                                                  @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
                                                                  @ApiParam(value = "组织id", required = true)
                                                                  @PathVariable("organization_id") Long organizationId,
                                                                  @ApiParam(value = "卡片类型")
                                                                  @RequestParam(required = false) String type,
-                                                                 @ApiParam(value = "状态名称")
-                                                                 @RequestParam(required = false) String param) {
-        return Optional.ofNullable(statusService.queryUserProjectStatus(pageRequest, organizationId, type, param))
+                                                                 @RequestBody StatusParamVO statusParamVO) {
+        return Optional.ofNullable(statusService.queryUserProjectStatus(pageRequest, organizationId, type, statusParamVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.statusList.get"));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("查询项目所有经办人")
-    @GetMapping(value = "/users")
+    @PostMapping(value = "/users")
     public ResponseEntity<Page<UserDTO>> pagingUserProjectUsers(@ApiIgnore
                                                                 @ApiParam(value = "分页信息", required = true) PageRequest pageRequest,
                                                                 @ApiParam(value = "组织id", required = true)
                                                                 @PathVariable(name = "organization_id") Long organizationId,
-                                                                @RequestParam(value = "param", required = false) String param) {
-        return ResponseEntity.ok(issueService.pagingUserProjectUsers(pageRequest, organizationId, param));
+                                                                @RequestBody AgileUserVO agileUserVO) {
+        return ResponseEntity.ok(issueService.pagingUserProjectUsers(pageRequest, organizationId, agileUserVO));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)

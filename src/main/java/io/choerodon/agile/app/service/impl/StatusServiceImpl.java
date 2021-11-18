@@ -200,7 +200,7 @@ public class StatusServiceImpl implements StatusService {
     }
 
     @Override
-    public Page<StatusVO> queryUserProjectStatus(PageRequest pageRequest, Long organizationId, String type, String param) {
+    public Page<StatusVO> queryUserProjectStatus(PageRequest pageRequest, Long organizationId, String type, StatusParamVO statusParamVO) {
         List<Long> projectIds = new ArrayList<>();
         List<ProjectVO> projects = new ArrayList<>();
         Long userId = DetailsHelper.getUserDetails().getUserId();
@@ -223,8 +223,30 @@ public class StatusServiceImpl implements StatusService {
                         .collect(Collectors.toSet());
         List<Long> stateMachineIds = stateMachineSchemeConfigService.queryBySchemeIds(false, organizationId, stateMachineSchemeIds)
                 .stream().map(StatusMachineSchemeConfigVO::getStateMachineId).collect(Collectors.toList());
-        return pagedQueryByStateMachineIds(pageRequest, organizationId, stateMachineIds, param);
+        Page<StatusVO> statusVOS = queryStatusMachineStatus(pageRequest, organizationId, stateMachineIds, statusParamVO);
+        List<StatusVO> result = new ArrayList<>();
+        if (Boolean.TRUE.equals(statusParamVO.getQueryIgnored()) && !CollectionUtils.isEmpty(statusParamVO.getIgnoredStatusIds())) {
+            List<StatusVO> ignoredStatus = statusMapper.queryStatusByIds(organizationId, new HashSet<>(statusParamVO.getIgnoredStatusIds()));
+            result.addAll(ignoredStatus);
+        }
+        if (!CollectionUtils.isEmpty(statusVOS.getContent())) {
+            result.addAll(statusVOS.getContent());
+        }
+        return PageUtil.buildPageInfoWithPageInfoList(statusVOS, result);
     }
+
+    private Page<StatusVO> queryStatusMachineStatus(PageRequest pageRequest, Long organizationId, List<Long> stateMachineIds, StatusParamVO statusParamVO) {
+        if (ObjectUtils.isEmpty(stateMachineIds)) {
+            return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
+        }
+        Page<StatusDTO> status =
+                PageHelper.doPageAndSort(pageRequest, () -> statusMapper.queryByStateMachineIdsAndStatusParam(organizationId, stateMachineIds, statusParamVO));
+        List<StatusVO> statusList =
+                modelMapper.map(status.getContent(), new TypeToken<List<StatusVO>>() {
+                }.getType());
+        return PageUtil.buildPageInfoWithPageInfoList(status, statusList);
+    }
+
 
     @Override
     public List<StatusVO> queryAllStatus(Long organizationId) {

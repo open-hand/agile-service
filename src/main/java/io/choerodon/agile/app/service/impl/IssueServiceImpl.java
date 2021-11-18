@@ -3432,7 +3432,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public Page<UserDTO> pagingUserProjectUsers(PageRequest pageRequest, Long organizationId, String param) {
+    public Page<UserDTO> pagingUserProjectUsers(PageRequest pageRequest, Long organizationId, AgileUserVO agileUserVO) {
         List<Long> projectIds = new ArrayList<>();
         List<ProjectVO> projects = new ArrayList<>();
         Long userId = DetailsHelper.getUserDetails().getUserId();
@@ -3440,11 +3440,18 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (CollectionUtils.isEmpty(projectIds)) {
             return new Page<>();
         }
-        AgileUserVO agileUserVO = new AgileUserVO();
         agileUserVO.setProjectIds(new HashSet<>(projectIds));
         agileUserVO.setOrganizationId(organizationId);
-        agileUserVO.setParam(param);
-        return baseFeignClient.agileUsersByProjectIds(0L, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
+        Page<UserDTO> page = baseFeignClient.agileUsersByProjectIds(0L, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
+        Set<Long> ignoredUserIds = agileUserVO.getIgnoredUserIds();
+        List<UserDTO> result = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(ignoredUserIds)) {
+            result.addAll(baseFeignClient.listUsersByIds(ignoredUserIds.toArray(new Long[ignoredUserIds.size()]), false).getBody());
+        }
+        if (!CollectionUtils.isEmpty(page.getContent())) {
+            result.addAll(page.getContent());
+        }
+        return PageUtil.buildPageInfoWithPageInfoList(page, result);
     }
 
     @Override
