@@ -18,7 +18,7 @@ import useDefaultMyFilter from '@/hooks/useDefaultMyFilter';
 const GanttProject: React.FC<{ projectId: string, menuType?: 'project' | 'org', HeadSelect?: JSX.Element, [key: string]: any }> = ({
   projectId, projects, setCurrentProject, menuType = 'project',
 }) => {
-  const { isInProgram, loading: programLoading } = useIsInProgram();
+  const { isInProgram, loading: programLoading } = useIsInProgram({ projectId });
   const { data: myFilter, isLoading } = useDefaultMyFilter(projectId);
   const loading = programLoading || isLoading;
   if (menuType === 'project') {

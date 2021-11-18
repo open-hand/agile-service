@@ -34,8 +34,8 @@ const SelectProcessType: React.FC<Partial<SelectProps> & { isHasConflict?: boole
   return (
     <FlatSelect
       clearButton={false}
-      onMouseEnter={handleTooltipMouseEnter}
-      onMouseLeave={props.isHasConflict ? handleTooltipMouseLeave : undefined}
+      onMouseEnter={props.isHasConflict ? handleTooltipMouseEnter : undefined}
+      onMouseLeave={handleTooltipMouseLeave}
       renderer={({ text }) => (
         <span>
           {text}

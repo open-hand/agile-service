@@ -14,7 +14,6 @@ import useGanttHeader from './hooks/useGanttHeader';
 import SelectType from './components/gannt-select/SelectType';
 import SelectProcessType from './components/gannt-select/SelectProcessType';
 import GanttBody from './GanttBody';
-import './index.less';
 
 const GanttPage: React.FC = () => {
   const {
@@ -25,6 +24,7 @@ const GanttPage: React.FC = () => {
   }] = useGanttHeader({
     projectId,
     store,
+    menuType,
   });
   // const [loading, setLoading] = useState(false);
 

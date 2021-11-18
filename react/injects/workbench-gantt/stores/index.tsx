@@ -10,6 +10,7 @@ import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { ILocalField } from '@/components/issue-search/store';
 import { IGanttProps } from '@/routes/gantt/stores/context';
 import { StoreProvider as GanntStoreProvider } from '@/routes/gantt/stores';
+import WorkbenchGantt from '../Gantt';
 
 const Context = createContext({});
 export const StoreProvider = inject('AppState')(injectIntl(
@@ -26,7 +27,7 @@ export const StoreProvider = inject('AppState')(injectIntl(
 ));
 const Gantt: React.FC<IGanttProps> = (props) => (
   <GanntStoreProvider {...props}>
-    <div />
+    <WorkbenchGantt />
   </GanntStoreProvider>
 );
 export default Gantt;

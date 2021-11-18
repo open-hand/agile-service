@@ -152,8 +152,11 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
     onCreateSubIssue: handleQuickCreateSubIssue,
     onAfterCreateSubIssue: handleQuickCreateSubIssueAfter,
   });
+  // 装载header 所需方法
   useMount(() => {
-    setConfig('onClickPersonalFilter', setFilterManageVisible);
+    setConfig('onTypeChange', () => setRankList(undefined));
+    setConfig('onRefresh', () => run());
+    setConfig('onClickPersonalFilter', () => setFilterManageVisible(true));
   });
   useEffect(() => {
     setConfig('visibleColumnCodes', visibleColumnCodes);
@@ -455,7 +458,6 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
   const handleResizeWidth: GanttProps['onResizeWidth'] = usePersistFn((tableWidth) => {
     localCacheStore.unPrefix().setItem('agile.gantt.table.width', tableWidth);
   });
-  console.log('columns', columns, sprintIds);
   useEffect(() => () => { localPageCacheStore.project(projectId).setItem('agile.gantt.search', issueSearchStore.getCustomFieldFilters()); }, [projectId]);
   return (
     <Context.Provider value={{
