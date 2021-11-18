@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
+import { LoadingProvider } from '@choerodon/components';
 import SelectProject from '@/components/select/select-project';
 import StatusLinkageWSHandle from '@/components/StatusLinkageWSHandle';
 import styles from './Gantt.less';
@@ -26,7 +27,7 @@ const WorkbenchGantt: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   return (
-    <div className={styles.page}>
+    <LoadingProvider className={styles.page}>
       <div className={styles.header}>
         <div className={styles.header_left}>
           <SelectProject
@@ -35,6 +36,7 @@ const WorkbenchGantt: React.FC = () => {
             clearButton={false}
             style={{ marginRight: 16 }}
             maxTagTextLength={12}
+            placeholder="项目"
             optionData={projects}
             onChange={(val) => {
               setCurrentProject && setCurrentProject((oldValue: string) => {
@@ -58,7 +60,7 @@ const WorkbenchGantt: React.FC = () => {
         <GanttBody {...ganttHeaderData} />
       </div>
       <StatusLinkageWSHandle />
-    </div>
+    </LoadingProvider>
   );
 };
 

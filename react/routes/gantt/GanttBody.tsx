@@ -472,7 +472,7 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
       sortedList,
     }}
     >
-      <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+      <div className="c7n-gantt-content-header">
         <Search issueSearchStore={issueSearchStore} loadData={run} />
         <GanttOperation />
       </div>
