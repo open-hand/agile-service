@@ -1,10 +1,9 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.agile.api.vo.MoveWorkGroupVO;
 import io.choerodon.agile.api.vo.WorkGroupUserRelParamVO;
 import io.choerodon.agile.api.vo.WorkGroupUserRelVO;
-import io.choerodon.agile.api.vo.WorkGroupVO;
 import io.choerodon.agile.app.service.WorkGroupUserRelService;
+import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
@@ -12,8 +11,6 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.apache.ibatis.annotations.Delete;
-import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -85,5 +82,17 @@ public class WorkGroupUserRelController {
         return Optional.ofNullable(workGroupUserRelService.pageUnAssignee(organizationId, pageRequest, workGroupUserRelParamVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.work.group.user.rel.query"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询按工作组筛选的成员")
+    @PostMapping("/page_by_groups")
+    public ResponseEntity<Page<UserDTO>> pageByGroups(@ApiParam(value = "组织Id", required = true)
+                                                      @PathVariable(name = "organization_id") Long organizationId,
+                                                      PageRequest pageRequest,
+                                                      @RequestBody WorkGroupUserRelParamVO workGroupUserRelParamVO) {
+        return Optional.ofNullable(workGroupUserRelService.pageByGroups(organizationId, pageRequest, workGroupUserRelParamVO))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.user.query.by.groups"));
     }
 }

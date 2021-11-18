@@ -24,7 +24,7 @@ public class WorkGroupUserRelParamVO {
 
     private Boolean enabled;
 
-    @Encrypt
+    @Encrypt(ignoreValue = {"0"})
     private List<Long> workGroupIds;
 
     public Long getWorkGroupId() {

@@ -6,6 +6,7 @@ import io.choerodon.agile.app.service.WorkGroupUserRelService;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.WorkGroupUserRelDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.mapper.WorkGroupMapper;
 import io.choerodon.agile.infra.mapper.WorkGroupUserRelMapper;
 import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.core.domain.Page;
@@ -40,6 +41,9 @@ public class WorkGroupUserRelServiceImpl implements WorkGroupUserRelService {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private WorkGroupMapper workGroupMapper;
 
     @Override
     public void batchInsertRel(Long organizationId, WorkGroupUserRelParamVO workGroupUserRelParamVO) {
@@ -76,7 +80,7 @@ public class WorkGroupUserRelServiceImpl implements WorkGroupUserRelService {
     @Override
     public Page<WorkGroupUserRelVO> pageByQuery(Long organizationId, PageRequest pageRequest, WorkGroupUserRelParamVO workGroupUserRelParamVO) {
         // 查询工作组的所有子级
-        List<Long> workGroupIds = workGroupService.listChildrenWorkGroup(organizationId, workGroupUserRelParamVO.getWorkGroupIds());
+        List<Long> workGroupIds = workGroupService.listChildrenWorkGroup(organizationId, Collections.singletonList(workGroupUserRelParamVO.getWorkGroupId()));
         Set<Long> userIds = workGroupUserRelMapper.listUserIdsByWorkGroupIds(organizationId, workGroupIds);
         if (CollectionUtils.isEmpty(userIds)) {
             return new Page<>();
@@ -169,5 +173,57 @@ public class WorkGroupUserRelServiceImpl implements WorkGroupUserRelService {
             list.add(workGroupUserRelVO);
         });
         return PageUtil.buildPageInfoWithPageInfoList(userPage, list);
+    }
+
+    @Override
+    public Page<UserDTO> pageByGroups(Long organizationId, PageRequest pageRequest, WorkGroupUserRelParamVO workGroupUserRelParamVO) {
+        // 选中的用户
+        List<Long> selectedUserIds = workGroupUserRelParamVO.getUserIds();
+        List<Long> selectedWorkGroupIds = workGroupUserRelParamVO.getWorkGroupIds();
+        Page<UserDTO> userPage = new Page<>();
+        AgileUserVO agileUserVO = modelMapper.map(workGroupUserRelParamVO, AgileUserVO.class);
+        agileUserVO.setUserIds(null);
+        Set<Long> ignoredUserIds = new HashSet<>();
+        boolean doPage = true;
+        if (!CollectionUtils.isEmpty(selectedWorkGroupIds)) {
+            List<Long> workGroupIds = workGroupService.listChildrenWorkGroup(organizationId, selectedWorkGroupIds);
+            boolean containsNoGroup = selectedWorkGroupIds.contains(0L);
+            Set<Long> workGroupUserIds = new HashSet<>();
+            if (!CollectionUtils.isEmpty(workGroupIds)) {
+                workGroupUserIds = workGroupUserRelMapper.listUserIdsByWorkGroupIds(organizationId, workGroupIds);
+            }
+            if (containsNoGroup) {
+                // 包含未分配，过滤其他未选中工作组的用户
+                List<Long> unSelectedWorkGroupIds = workGroupMapper.selectIdsByOrganizationId(organizationId, workGroupIds);
+                ignoredUserIds = workGroupUserRelMapper.listUserIdsByWorkGroupIds(organizationId, unSelectedWorkGroupIds);
+                ignoredUserIds.removeIf(workGroupUserIds::contains);
+                agileUserVO.setUserIds(null);
+            } else {
+                // 不包含未分配，选择选中工作组的用户
+                agileUserVO.setUserIds(workGroupUserIds);
+                if (CollectionUtils.isEmpty(workGroupUserIds)) {
+                    doPage = false;
+                }
+            }
+        }
+        // 过滤选中的用户
+        ignoredUserIds.addAll(selectedUserIds);
+        agileUserVO.setIgnoredUserIds(ignoredUserIds);
+        if (doPage) {
+            userPage = baseFeignClient.pagingUsersOnOrganizationLevel(organizationId, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
+        }
+        boolean append = !ObjectUtils.isEmpty(selectedUserIds) && pageRequest.getPage() == 0;
+        if (append) {
+            // 拼接选中的用户
+            List<UserDTO> list = baseFeignClient.listUsersByIds(selectedUserIds.toArray(new Long[1]), true).getBody();
+            if (!CollectionUtils.isEmpty(userPage.getContent())) {
+                list.addAll(userPage.getContent());
+            }
+            userPage.setContent(list);
+        }
+        if (CollectionUtils.isEmpty(userPage.getContent())) {
+            return new Page<>();
+        }
+        return userPage;
     }
 }

@@ -11,11 +11,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.mapper.IssueLinkMapper;
-import io.choerodon.agile.infra.mapper.IssueMapper;
-import io.choerodon.agile.infra.mapper.WorkGroupUserRelMapper;
-import io.choerodon.agile.infra.mapper.WorkHoursMapper;
-import io.choerodon.agile.infra.mapper.WorkLogMapper;
+import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.DateUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
@@ -93,6 +89,8 @@ public class WorkHoursServiceImpl implements WorkHoursService {
     private LookupValueService lookupValueService;
     @Autowired
     private IssueLinkMapper issueLinkMapper;
+    @Autowired
+    private WorkGroupService workGroupService;
 
     @Override
     public Page<WorkHoursLogVO> pageWorkHoursLogByProjectIds(Long organizationId,
@@ -101,7 +99,7 @@ public class WorkHoursServiceImpl implements WorkHoursService {
                                                              WorkHoursSearchVO workHoursSearchVO) {
         // 校验时间范围
         checkTimeRange(workHoursSearchVO);
-        getUserIdsByWorkGroupIds(organizationId, workHoursSearchVO);
+        getUserIdsByWorkGroupIds(organizationId, projectIds, workHoursSearchVO);
         Map<String, String> order = new HashMap<>();
         order.put("issueNum", "issue_num_convert");
         pageRequest.setSort(PageUtil.sortResetOrder(pageRequest.getSort(), null, order));
@@ -137,9 +135,25 @@ public class WorkHoursServiceImpl implements WorkHoursService {
         return PageUtil.buildPageInfoWithPageInfoList(page, workHoursLogVOS);
     }
 
-    private void getUserIdsByWorkGroupIds(Long organizationId, WorkHoursSearchVO workHoursSearchVO) {
+    private void getUserIdsByWorkGroupIds(Long organizationId, List<Long> projectIds, WorkHoursSearchVO workHoursSearchVO) {
         if (!CollectionUtils.isEmpty(workHoursSearchVO.getWorkGroupIds()) && CollectionUtils.isEmpty(workHoursSearchVO.getUserIds())) {
-            workHoursSearchVO.setUserIds(new ArrayList<>(workGroupUserRelMapper.listUserIdsByWorkGroupIds(organizationId, workHoursSearchVO.getWorkGroupIds())));
+            List<Long> workGroupIds = workGroupService.listChildrenWorkGroup(organizationId, workHoursSearchVO.getWorkGroupIds());
+            Set<Long> userIds = new HashSet<>();
+            if (!CollectionUtils.isEmpty(workGroupIds)) {
+                userIds.addAll(workGroupUserRelMapper.listUserIdsByWorkGroupIds(organizationId, workGroupIds));
+            }
+            if (!CollectionUtils.isEmpty(projectIds) && workHoursSearchVO.getWorkGroupIds().contains(0L)) {
+                // 查询登记过工时但未分配工作组的人员
+                Set<Long> noGroupUserIds = workGroupUserRelMapper.selectNoGroupUsers(organizationId, projectIds);
+                List<UserDTO> userDTOS = baseFeignClient.listUsersByIds(noGroupUserIds.toArray(new Long[1]), true).getBody();
+                if (!CollectionUtils.isEmpty(userDTOS)) {
+                    userIds.addAll(userDTOS.stream().map(UserDTO::getId).collect(Collectors.toList()));
+                }
+            }
+            if (CollectionUtils.isEmpty(userIds)) {
+                userIds.add(0L);
+            }
+            workHoursSearchVO.setUserIds(new ArrayList<>(userIds));
         }
     }
 
@@ -157,7 +171,7 @@ public class WorkHoursServiceImpl implements WorkHoursService {
     @Override
     public Page<WorkHoursCalendarVO> workHoursCalendar(Long organizationId, List<Long> projectIds, PageRequest pageRequest, WorkHoursSearchVO workHoursSearchVO, Boolean isOrg) {
         checkTimeRange(workHoursSearchVO);
-        getUserIdsByWorkGroupIds(organizationId, workHoursSearchVO);
+        getUserIdsByWorkGroupIds(organizationId, projectIds, workHoursSearchVO);
         Page<UserMessageDTO> page = getUserPage(organizationId, projectIds, pageRequest, workHoursSearchVO, isOrg);
         if (CollectionUtils.isEmpty(page.getContent())) {
             return new Page<>();
@@ -205,6 +219,10 @@ public class WorkHoursServiceImpl implements WorkHoursService {
                                              Boolean isOrg) {
         Page<UserMessageDTO> page = null;
         if (!CollectionUtils.isEmpty(workHoursSearchVO.getUserIds())){
+            if (Boolean.TRUE.equals(isOrg)) {
+                Set<Long> userIds = workHoursMapper.selectUserIds(projectIds, workHoursSearchVO);
+                workHoursSearchVO.getUserIds().removeIf(v -> !userIds.contains(v));
+            }
             page = queryUserAndBuildPage(workHoursSearchVO.getUserIds(), pageRequest);
         } else {
             if (Boolean.TRUE.equals(isOrg)) {
@@ -300,7 +318,7 @@ public class WorkHoursServiceImpl implements WorkHoursService {
     @Override
     public Map<String, BigDecimal> countWorkHours(Long organizationId, List<Long> projectIds, WorkHoursSearchVO workHoursSearchVO) {
         checkTimeRange(workHoursSearchVO);
-        getUserIdsByWorkGroupIds(organizationId, workHoursSearchVO);
+        getUserIdsByWorkGroupIds(organizationId, projectIds, workHoursSearchVO);
         List<WorkHoursLogVO> workHoursLogVOS = workHoursMapper.listGroupDataByProjectIds(projectIds, workHoursSearchVO);
         if (CollectionUtils.isEmpty(workHoursLogVOS)) {
             return new HashMap<>();
