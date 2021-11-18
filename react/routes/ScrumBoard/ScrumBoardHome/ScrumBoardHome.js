@@ -236,7 +236,6 @@ class ScrumBoardHome extends Component {
         }
       }
     }).catch((error) => {
-      console.error(error);
       ScrumBoardStore.setSwimLaneData(SwimLaneId,
         startStatus,
         startStatusIndex,
