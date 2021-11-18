@@ -10,7 +10,7 @@ import useIsInProgram from '@/hooks/useIsInProgram';
 import { getMenuType, getProjectId } from '@/utils/common';
 import { ganttApi } from '@/api';
 import noDataPic from '@/assets/image/NoData.svg';
-import Gantt from './Gantt';
+import Gantt from './stores';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import useDefaultMyFilter from '@/hooks/useDefaultMyFilter';
 

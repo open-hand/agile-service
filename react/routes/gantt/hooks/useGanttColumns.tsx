@@ -27,7 +27,7 @@ import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 import { getCustomColumn, systemColumnsMap, BaseSystemColumnRender } from '@/components/issue-table/baseColumns';
 import type { GanttIssue } from '../types';
 import UserTag from '@/components/tag/user-tag';
-import { IGanttPageProps } from '../Gantt';
+import type { IGanttProps } from '../stores/context';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import openGanttConflictModal from '../components/gannt-conflict-modal';
 import { ganttIsCanQuickCreateIssue } from '../utils';
@@ -36,7 +36,7 @@ import TableDropMenu from '@/components/table-drop-menu';
 import useProjectPredecessorTypes from '@/hooks/data/useProjectPredecessorTypes';
 
 interface IGanttColumnsHookProps extends TableCacheRenderProps {
-  menuType: IGanttPageProps['menuType']
+  menuType: IGanttProps['menuType']
   projectId?: string
   isInProgram: boolean
   sortedList: IGanttSortLabelSortItem[]

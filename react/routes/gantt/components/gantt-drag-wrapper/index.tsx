@@ -16,7 +16,7 @@ import type {
   DraggableStateSnapshot, DragUpdate, DropResult, ResponderProvided,
 } from 'react-beautiful-dnd';
 import type { Gantt } from '@choerodon/gantt';
-import Context from '../../context';
+import Context from '../../stores/context';
 
 interface IGanttGroupDragWrapperProps {
   renderClone: (record: Gantt.Record) => React.ReactElement
