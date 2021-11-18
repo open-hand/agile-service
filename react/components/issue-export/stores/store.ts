@@ -1,4 +1,3 @@
-import { IChosenFieldField, IChosenFieldFieldEvents } from '@/components/chose-field/types';
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
 import { findIndex } from 'lodash';
 import { observable, action, computed } from 'mobx';
@@ -8,8 +7,9 @@ import { DataSet } from 'choerodon-ui/pro';
 import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import { Observer } from 'mobx-react-lite';
 import { CheckBoxProps } from 'choerodon-ui/pro/lib/check-box/CheckBox';
-import { ITableColumnCheckBoxesDataProps, ITableColumnCheckBoxesOptionData } from '@/components/table-column-check-boxes';
 import { OptionProps } from 'choerodon-ui/lib/select';
+import { ITableColumnCheckBoxesDataProps, ITableColumnCheckBoxesOptionData } from '@/components/table-column-check-boxes';
+import { IChosenFieldField, IChosenFieldFieldEvents } from '@/components/chose-field/types';
 
 interface EventsProps extends IChosenFieldFieldEvents {
   loadRecordAxios?: (store: IssueExportStore) => Promise<any> /** 查询导出记录 */
@@ -32,6 +32,8 @@ interface IssueExportStoreProps {
   transformSystemFilter?: (data: any) => any, /** 提交数据前 对系统筛选字段数据转换 */
   transformExportFieldCodes?: (data: Array<string>, otherData: ITableColumnCheckBoxesDataProps) => Array<string>, /** 提交数据 对系统导出字段数据转换 */
   reverseTransformExportFieldCodes?: (data: Array<string>) => Array<string>
+  /** webSocket message 的key  */
+  wsMessageKey?: string
   events?: EventsProps,
   renderField?: (field: IChosenFieldField, otherComponentProps: Partial<SelectProps> | Partial<DatePickerProps>, { dataSet }: { dataSet: DataSet }) => React.ReactElement | false | null, /** 系统筛选字段项渲染 */
   extraFields?: IChosenFieldField[], /** 额外的筛选字段项  不在下拉菜单中 */
@@ -70,6 +72,8 @@ class IssueExportStore {
 
   checkboxOptionsExtraConfig: IssueExportStoreProps['checkboxOptionsExtraConfig'];
 
+  wsMessageKey?:string;
+
   @observable innerState = observable.map<string, any>();
 
   @observable extraFields: IChosenFieldField[];
@@ -92,6 +96,7 @@ class IssueExportStore {
     this.renderField = props?.renderField;
     this.exportButtonConfig = props?.exportButtonConfig || {};
     this.checkboxOptionsExtraConfig = props?.checkboxOptionsExtraConfig || new Map();
+    this.wsMessageKey = props?.wsMessageKey;
   }
 
   @observable downloadInfo = {} as IDownLoadInfo;

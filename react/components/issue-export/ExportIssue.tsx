@@ -277,10 +277,10 @@ const ExportIssue: React.FC = () => {
           </>
         )
       }
-      { visibleCheckField.current && (
-      <FormPart title="选择模板字段" btnOnClick={handleChangeFieldStatus}>
-        <TableColumnCheckBoxes {...checkBoxComponentProps} />
-      </FormPart>
+      {visibleCheckField.current && (
+        <FormPart title="选择模板字段" btnOnClick={handleChangeFieldStatus}>
+          <TableColumnCheckBoxes {...checkBoxComponentProps} />
+        </FormPart>
       )}
       {renderExport()}
       <div className={`${prefixCls}-btns`}>
@@ -309,7 +309,7 @@ const ExportIssue: React.FC = () => {
       </div>
       <WsProgress
         className={`${prefixCls}-wsProgress-area`}
-        messageKey={`agile-export-issue-${getProjectId()}`}
+        messageKey={store.wsMessageKey ?? `agile-export-issue-${getProjectId()}`}
         onFinish={handleFinish}
         onStart={() => {
           modal?.update({ okProps: { loading: true } });

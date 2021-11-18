@@ -121,6 +121,17 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
       data,
     });
   }
+
+  exportHours(data:any) {
+    return this.request({
+      method: 'post',
+      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/work_hours/export_issue_work_hours`,
+      params: {
+        organizationId: this.orgId,
+      },
+      data,
+    });
+  }
 }
 
 const workingHoursApi = new WorkingHoursApi();
