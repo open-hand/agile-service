@@ -1,0 +1,25 @@
+.page {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .12rem .2rem;
+  padding-bottom: .1rem;
+}
+
+.content {
+  border-top: .01rem solid var(--divider);
+  width: 100%;
+  height: 100%;
+
+  :global {
+    .c7n-gantt-content-body {
+      height: 100%;
+    }
+  }
+}

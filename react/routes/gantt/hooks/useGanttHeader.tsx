@@ -1,10 +1,10 @@
 import React, { useCallback, useState } from 'react';
-import { useCreation, usePersistFn } from 'ahooks';
+import { useCreation, usePersistFn, useWhyDidYouUpdate } from 'ahooks';
 
 import {
   Tooltip, Icon, Button, CheckBox,
 } from 'choerodon-ui/pro';
-import { find } from 'lodash';
+import { find, get, noop } from 'lodash';
 import type { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import openCreateIssue from '@/components/create-issue';
 import { SelectSprintProps } from '@/components/select/select-sprint';
@@ -30,9 +30,8 @@ type IGanttHeaderHookConfigKey = keyof IGanttHeaderHookConfig
 const typeValues = typeOptions.map((t) => t.value);
 
 function useGanttHeader(config: IGanttHeaderHookConfig) {
-  const {
-    projectId, store, onTypeChange, menuType, onRefresh, visibleColumnCodes, columnOptions, onClickPersonalFilter,
-  } = config;
+  const { projectId, store, menuType } = config;
+
   const { sprintIds } = store;
   const [isHasConflict, setIsHasConflict] = useState(false);
   const configMaps = useCreation(() => new Map<IGanttHeaderHookConfigKey, any>(), []);
@@ -46,17 +45,16 @@ function useGanttHeader(config: IGanttHeaderHookConfig) {
       configMaps.set(configItemKey, value);
     }
   }, [configMaps]);
+  const getConfig = useCallback((configItemKey: IGanttHeaderHookConfigKey, defaultValue = noop) => get(config, configItemKey) ?? configMaps.get(configItemKey) ?? defaultValue, [config, configMaps]);
   const handleTypeChange = usePersistFn((newType) => {
-    onTypeChange && onTypeChange(newType);
+    getConfig('onTypeChange')(newType);
     setType(newType);
     localPageCacheStore.project(projectId).setItem('gantt.search.type', newType);
   });
   const handleSprintChange = useCallback((value: string[]) => {
     store.setSprintIds(value);
   }, [store]);
-  console.log('sprintIds', sprintIds);
   const afterSprintLoad = useCallback((sprints) => {
-    console.log('afterSprintLoad', sprints);
     if (!store.sprintIds) {
       const cachedSprintId = localPageCacheStore.project(projectId).getItem('gantt.search.sprints');
       if (cachedSprintId) {
@@ -109,7 +107,7 @@ function useGanttHeader(config: IGanttHeaderHookConfig) {
         handler: () => {
           openCreateIssue({
             defaultValues: { sprint: sprintIds?.length === 1 ? sprintIds.filter((item) => item !== '0')[0] : undefined },
-            onCreate: () => configMaps.get('onRefresh') && configMaps.get('onRefresh')(),
+            onCreate: () => getConfig('onRefresh')(),
           });
         },
       },
@@ -117,7 +115,7 @@ function useGanttHeader(config: IGanttHeaderHookConfig) {
         name: '个人筛选',
         icon: 'settings-o',
         display: true,
-        handler: onClickPersonalFilter,
+        handler: getConfig('onClickPersonalFilter'),
       },
       columnConfig: {
         display: true,
@@ -129,8 +127,8 @@ function useGanttHeader(config: IGanttHeaderHookConfig) {
               title: '设置列显示字段',
             },
             projectId,
-            value: configMaps.get('visibleColumnCodes') || [],
-            options: configMaps.get('columnOptions') || [],
+            value: getConfig('visibleColumnCodes', []),
+            options: getConfig('columnOptions', []),
             type: 'gantt',
           });
         },
@@ -158,7 +156,7 @@ function useGanttHeader(config: IGanttHeaderHookConfig) {
       refresh: {
         icon: 'refresh',
         // funcType: 'flat',
-        handler: onRefresh,
+        handler: getConfig('onRefresh'),
       },
     };
     if (menuType === 'project') {
@@ -171,7 +169,8 @@ function useGanttHeader(config: IGanttHeaderHookConfig) {
       showClassName: false,
       items: ['columnConfig', 'personalFilter'].map((key: keyof typeof itemMap) => itemMap[key]),
     };
-  }, [menuType, columnOptions, visibleColumnCodes]);
+  }, [menuType, getConfig]);
+  useWhyDidYouUpdate('config', { getConfig });
   return [{ type, processType, setConfig }, {
     sprintComponentsProps, processTypeComponentProps, typeComponentProps, headerComponentProps,
   }] as const;

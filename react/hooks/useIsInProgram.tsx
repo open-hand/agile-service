@@ -1,6 +1,8 @@
 import React, { useRef } from 'react';
 import { stores } from '@choerodon/boot';
+import { UseQueryOptions } from 'react-query';
 import { usePersistFn } from 'ahooks';
+import { omit } from 'lodash';
 import { AppStateProps } from '@/common/types';
 import useIsProgram from './useIsProgram';
 import useParentProgram from './data/useParentProgram';
@@ -29,7 +31,7 @@ interface useIsInProgramConfig {
   projectId?: string
   menuType?: 'project' | 'org'
 }
-const useIsInProgram = (config?: useIsInProgramConfig): ChildrenProps => {
+const useIsInProgram = (config?: useIsInProgramConfig, options?: UseQueryOptions<any>): ChildrenProps => {
   const { projectId, menuType } = config ?? {};
   const { isProgram } = useIsProgram();
   const isProject = menuType ? menuType === 'project' : AppState.currentMenuType.type === 'project';
@@ -37,17 +39,19 @@ const useIsInProgram = (config?: useIsInProgramConfig): ChildrenProps => {
   const {
     data: program, isLoading: loading1, refetch: refresh1,
   } = useParentProgram({ projectId }, {
-    enabled: shouldRequest && isProject && !isProgram,
+    enabled: shouldRequest && isProject && !isProgram && options?.enabled,
     onSuccess: () => {
       isFirstMount.current = false;
     },
     onError: () => {
       isFirstMount.current = false;
     },
+    ...omit(options, 'enabled'),
   });
   const isInProgram = Boolean(program);
   const { data: parentArtDoing, isLoading: loading2, refetch: refresh2 } = useParentArtDoing({ projectId }, {
-    enabled: shouldRequest && isInProgram,
+    enabled: shouldRequest && isInProgram && options?.enabled,
+    ...omit(options, 'enabled'),
   });
 
   const refresh = usePersistFn(async () => {
