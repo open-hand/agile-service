@@ -792,7 +792,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
         // 计算偏差率
         BigDecimal deviationRate = BigDecimal.ZERO;
         if (!Objects.equals(BigDecimal.ZERO, estimateTime)) {
-            deviationRate = allWorkTime.subtract(estimateTime).divide(estimateTime);
+            deviationRate = allWorkTime.subtract(estimateTime).divide(estimateTime, 2,BigDecimal.ROUND_HALF_UP);
         }
         exportIssuesVO.setWorkTime(workTime);
         exportIssuesVO.setEstimateTime(estimateTime);
