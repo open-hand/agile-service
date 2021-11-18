@@ -13,7 +13,7 @@ import DateSearch from './components/DateSearch';
 import { StoreProvider, useIssueStore } from './stores';
 import styles from './index.less';
 import ModeSwitch from './components/mode-switch';
-import openExportWorkModal from './components/export';
+import openExportWorkHoursIssueModal from './components/export';
 import useDefaultMyFilter from '@/hooks/useDefaultMyFilter';
 import WorkingHoursIssueSearch from './components/search';
 import { openCustomColumnManageModal } from '@/components/table-cache/column-manage/Modal';
@@ -44,7 +44,8 @@ const WorkingHoursIssue = (props = {}) => {
   // @ts-ignore
   const { cached } = props;
   const {
-    dateSearchDs, loading, workingHoursIssuesDs, workingHoursAssigneeDs, mode, isProject, isContain, setIsContain, tableFields: fields, totalWorkTime, issueSearchStore,
+    dateSearchDs, loading, workingHoursIssuesDs, workingHoursAssigneeDs, mode, isProject, isContain, setIsContain, tableFields: fields, totalWorkTime,
+    issueSearchStore, startTime, endTime,
   } = useIssueStore();
 
   const handleChangeIsContain = useCallback((value) => {
@@ -73,10 +74,12 @@ const WorkingHoursIssue = (props = {}) => {
             name: '导出',
             icon: 'unarchive-o',
             handler: () => {
-              openExportWorkModal({
+              const attachSearchArgs = { startTime, endTime, latitude: mode };
+              openExportWorkHoursIssueModal({
                 fields: issueSearchStore.getAllFields,
                 chosenFields: issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()].filter(((c) => !['issueIds', 'userId'].includes(c.code))) : [],
                 visibleColumns,
+                attachSearchArgs,
                 columns: options,
               });
             },

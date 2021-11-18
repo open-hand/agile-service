@@ -1,22 +1,25 @@
 import React from 'react';
 import { Modal } from 'choerodon-ui/pro';
-import { TemplateAction } from '@/api';
+import { merge, set, unset } from 'lodash';
+import { issueApi, TemplateAction, workingHoursApi } from '@/api';
 import IssueExport from '@/components/issue-export';
 import IssueExportStore from '@/components/issue-export/stores/store';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { IChosenFieldField } from '@/components/chose-field/types';
-import { getTransformSystemFilter } from '@/routes/Issue/components/ExportIssue/utils';
+import { getExportFieldCodes, getTransformSystemFilter } from '@/routes/Issue/components/ExportIssue/utils';
 import getSearchWorkbenchFields from '@/components/field-pro/layouts/searchWorkbench';
+import { getProjectId, getIsOrganization, getOrganizationId } from '@/utils/common';
 
 interface IExportWorkHoursIssueModalProps {
   fields: IChosenFieldField[]
   chosenFields: IChosenFieldField[]
+  attachSearchArgs: any
   columns: Array<{ code: string, title: string }>
   menuType?: 'project' | 'workbench'
   visibleColumns?: string[]
 }
 function openExportWorkHoursIssueModal({
-  fields, columns, chosenFields, visibleColumns = [], menuType = 'project',
+  fields, columns, chosenFields, visibleColumns = [], menuType = 'project', attachSearchArgs,
 }: IExportWorkHoursIssueModalProps) {
   const store = new IssueExportStore({
     ...menuType === 'project' ? {
@@ -43,8 +46,17 @@ function openExportWorkHoursIssueModal({
       },
     } : { renderField: (field, otherComponentProps) => getSearchWorkbenchFields([field], { [field.code]: { ...otherComponentProps, placeholder: undefined, flat: false } })[0] as React.ReactElement },
     transformSystemFilter: getTransformSystemFilter,
+    transformExportFieldCodes: getExportFieldCodes,
+    wsMessageKey: getIsOrganization() ? `agile-export-issue-work-hours-org-${getOrganizationId()}`
+      : `agile-export-issue-work-hours-${getProjectId()}`,
     events: {
-      exportAxios: (searchData, sort) => new Promise((r) => true),
+      exportAxios: (searchData, sort) => {
+        merge(searchData, { searchArgs: attachSearchArgs });
+        set(searchData, 'displayFields', searchData.exportFieldCodes?.map((code: string) => ({ code })));
+        unset(searchData, 'exportFieldCodes');
+        return workingHoursApi.exportHours(searchData);
+      },
+      loadRecordAxios: () => issueApi.loadLastImportOrExport('download_file_issue_work_hours'),
     },
   });
   const checkOptions = columns.map((item) => ({ value: item.code, label: item.title }));
