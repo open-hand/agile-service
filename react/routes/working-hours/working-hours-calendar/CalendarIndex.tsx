@@ -18,14 +18,14 @@ import styles from './CalendarIndex.less';
 
 const WorkingHoursCalendar = () => {
   const {
-    loadData, exportDs, searchDs, calendarDs, loading, startTime, endTime, userIds, projectIds, workGroupIds,
+    loadData, exportDs, searchDs, calendarDs, loading, startTime, endTime, userIds, projectIds,
   } = useCalendarStore();
   const handleOpenExport = useCallback(() => {
     exportDs.current?.set('userIds', userIds?.length ? toJS(userIds) : undefined);
     exportDs.current?.set('projectIds', projectIds?.length ? toJS(projectIds) : undefined);
     exportDs.current?.set('startTime', moment(startTime).startOf('day'));
     exportDs.current?.set('endTime', moment(endTime).endOf('day'));
-    exportDs.current?.set('workGroupIds', searchDs.current?.get('workGroupIds'));
+    exportDs.current?.set('workGroupIds', toJS(searchDs.current?.get('workGroupIds')));
     openExportLogModal({
       exportDs,
       title: '导出工时日历',
@@ -34,6 +34,7 @@ const WorkingHoursCalendar = () => {
       orgMessageKey: `agile-export-work-hours-calendar-org-${getOrganizationId()}`,
       exportFn: (data) => workingHoursApi.exportCalendar(data),
       fileName: '工时日历',
+      showWorkGroup: true,
     });
   }, [endTime, exportDs, projectIds, searchDs, startTime, userIds]);
   const refresh = useCallback(() => {

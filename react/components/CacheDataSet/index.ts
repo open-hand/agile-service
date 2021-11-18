@@ -1,6 +1,6 @@
 import { DataSet } from 'choerodon-ui/pro';
-import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 
 interface DataSetCache {
   pageSize: number,

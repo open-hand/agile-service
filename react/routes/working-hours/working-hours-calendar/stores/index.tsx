@@ -62,7 +62,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
   const projectCreationDate = useMemo(() => AppState.getCurrentProject?.creationDate, [AppState.getCurrentProject]);
   const calendarDs = useMemo(() => new DataSet(CalendarDataSet()), []);
   const searchDs = useMemo(() => new DataSet(CalendarSearchDataSet({ projectCreationDate })), [projectCreationDate]);
-  const exportDs = useMemo(() => new DataSet(LogExportDataSet({ projectCreationDate })), [projectCreationDate]);
+  const exportDs = useMemo(() => new DataSet(LogExportDataSet({ projectCreationDate, showWorkGroup: true })), [projectCreationDate]);
   const workCalendarMap = useMemo(() => new Map([]), []);
   const [countData, setCountData] = useState<ICountData>({});
   const [loading, setLoading] = useState<boolean>(false);
