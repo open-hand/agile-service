@@ -506,4 +506,8 @@ public interface AgilePluginService {
     List<Long> queryNoEpicFeatureIds(List<IssueDTO> issues);
 
     void buildFieldList(List<String> fieldList, IssueUpdateVO issueUpdateVO);
+
+    void handleProgramIssueValueMap(Long organizationId, List<Long> projectIds, List<Long> allIssueIds, Set<Long> featureIds, Map<String, Object> issueValueMap);
+
+    void setExportIssueBusinessArgs(ExportIssuesVO exportIssuesVO, Map<String, Object> issueValueMap, IssueDTO issueDTO);
 }

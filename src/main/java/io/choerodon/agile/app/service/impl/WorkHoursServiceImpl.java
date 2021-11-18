@@ -3,14 +3,15 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.api.vo.business.TagVO;
 import io.choerodon.agile.app.assembler.IssueAssembler;
 import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.dto.UserDTO;
-import io.choerodon.agile.infra.dto.UserMessageDTO;
-import io.choerodon.agile.infra.dto.WorkLogDTO;
+import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.mapper.IssueLinkMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.WorkGroupUserRelMapper;
 import io.choerodon.agile.infra.mapper.WorkHoursMapper;
@@ -46,6 +47,20 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Exception.class)
 public class WorkHoursServiceImpl implements WorkHoursService {
 
+    protected static final String USER_MAP = "userMap";
+    protected static final String ISSUE_TYPE_MAP = "issueTypeMap";
+    protected static final String STATUS_MAP = "statusMap";
+    protected static final String PRIORITY_MAP = "priorityMap";
+    protected static final String CLOSE_SPRINT_MAP = "closeSprintMap";
+    protected static final String FIX_VERSION_MAP = "fixVersionMap";
+    protected static final String INFLUENCE_VERSION_MAP = "influenceVersionMap";
+    protected static final String LABEL_MAP = "labelMap";
+    protected static final String COMPONENT_MAP = "componentMap";
+    protected static final String FOUNDATION_CODE_VALUE_MAP = "foundationCodeValueMap";
+    protected static final String ENV_MAP = "envMap";
+    protected static final String WORK_LOG_MAP = "workLogMap";
+    protected static final String RELATED_ISSUE_MAP = "relatedIssueMap";
+
     @Autowired
     private StatusService statusService;
     @Autowired
@@ -74,6 +89,10 @@ public class WorkHoursServiceImpl implements WorkHoursService {
     private AgilePluginService agilePluginService;
     @Autowired
     private WorkGroupUserRelMapper workGroupUserRelMapper;
+    @Autowired
+    private LookupValueService lookupValueService;
+    @Autowired
+    private IssueLinkMapper issueLinkMapper;
 
     @Override
     public Page<WorkHoursLogVO> pageWorkHoursLogByProjectIds(Long organizationId,
@@ -394,6 +413,159 @@ public class WorkHoursServiceImpl implements WorkHoursService {
     }
 
     @Override
+    public Page<IssueDTO> pageIssue(Long organizationId, List<Long> projectIds, PageRequest pageRequest, SearchVO searchVO){
+        //处理用户搜索
+        Map<String, Object> sortMap = issueService.processSortMap(pageRequest, projectIds.get(0), organizationId);
+        String filterSql = null;
+        //处理自定义搜索
+        if (!CollectionUtils.isEmpty(searchVO.getQuickFilterIds())) {
+            filterSql = issueService.getQuickFilter(searchVO.getQuickFilterIds());
+        }
+        issueService.splitIssueNumProjectCodePrefix(searchVO, new HashSet<>(projectIds));
+        String finalFilterSql = filterSql;
+        Page<IssueDTO> page = PageHelper.doPage(pageRequest, () -> workHoursMapper.queryParentIssueIdsList(new HashSet<>(projectIds), searchVO, finalFilterSql, searchVO.getAssigneeFilterIds(), sortMap));
+        List<IssueDTO> content = page.getContent();
+        if(CollectionUtils.isEmpty(content)){
+            return new Page<>();
+        }
+        List<Long> parentIds = content.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+        List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(parentIds, new HashSet<>(projectIds), searchVO, finalFilterSql, searchVO.getAssigneeFilterIds(), null);
+        Set<Long> childrenIds  = childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet());
+        List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(parentIds, childrenIds, true, true);
+        return PageUtil.buildPageInfoWithPageInfoList(page, issueDTOList);
+    }
+    @Override
+    public void buildIssueValueMap(Long organizationId, List<Long> projectIds, List<IssueDTO> issues, Map<String, Object> issueValueMap, SearchVO searchVO) {
+        List<Long> allIssueIds = issues.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+        Set<Long> userIds = new HashSet<>();
+        Set<Long> featureIds = new HashSet<>();
+        issues.forEach(i -> {
+            Long assigneeId = i.getAssigneeId();
+            Long reporterId = i.getReporterId();
+            Long createdUser = i.getCreatedBy();
+            Long updatedUser = i.getLastUpdatedBy();
+            Long mainResponsibleId = i.getMainResponsibleId();
+            if (!ObjectUtils.isEmpty(assigneeId) && !Objects.equals(assigneeId, 0L)) {
+                userIds.add(assigneeId);
+            }
+            if (!ObjectUtils.isEmpty(reporterId) && !Objects.equals(reporterId, 0L)) {
+                userIds.add(reporterId);
+            }
+            if (!ObjectUtils.isEmpty(i.getFeatureId())) {
+                featureIds.add(i.getFeatureId());
+            }
+            Long parentIssueId = i.getParentIssueId();
+            Long relateIssueId = i.getRelateIssueId();
+            if (!ObjectUtils.isEmpty(parentIssueId)
+                    && !Objects.equals(parentIssueId, 0L)) {
+                featureIds.add(parentIssueId);
+            }
+            if (!ObjectUtils.isEmpty(relateIssueId)
+                    && !Objects.equals(relateIssueId, 0L)) {
+                featureIds.add(relateIssueId);
+            }
+            if (!ObjectUtils.isEmpty(createdUser) && !Objects.equals(createdUser, 0L)) {
+                userIds.add(createdUser);
+            }
+            if (!ObjectUtils.isEmpty(updatedUser) && !Objects.equals(updatedUser, 0L)) {
+                userIds.add(updatedUser);
+            }
+            if (!ObjectUtils.isEmpty(mainResponsibleId) && !Objects.equals(mainResponsibleId, 0L)) {
+                userIds.add(mainResponsibleId);
+            }
+        });
+        Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(new ArrayList<>(userIds), true);
+        Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
+        Map<Long, List<IssueTypeVO>> issueTypeDTOMap = issueTypeService.listIssueTypeMapByProjectIds(organizationId, projectIds);
+        Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
+        Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectIds, allIssueIds, false);
+        Map<Long, List<WorkLogVO>> workLogVOMap = workLogMapper.queryByIssueIds(projectIds, allIssueIds).stream().collect(Collectors.groupingBy(WorkLogVO::getIssueId));
+        Map<Long, List<SprintNameDTO>> closeSprintNames = issueMapper.querySprintNameByIssueIds(projectIds, allIssueIds).stream().collect(Collectors.groupingBy(SprintNameDTO::getIssueId));
+        Map<Long, List<VersionIssueRelDTO>> fixVersionNames = issueMapper.queryVersionNameByIssueIds(projectIds, allIssueIds, "fix").stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
+        Map<Long, List<VersionIssueRelDTO>> influenceVersionNames = issueMapper.queryVersionNameByIssueIds(projectIds, allIssueIds, "influence").stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
+        Map<Long, List<LabelIssueRelDTO>> labelNames = issueMapper.queryLabelIssueByIssueIds(projectIds, allIssueIds).stream().collect(Collectors.groupingBy(LabelIssueRelDTO::getIssueId));
+        Map<Long, List<ComponentIssueRelDTO>> componentMap = issueMapper.queryComponentIssueByIssueIds(projectIds, allIssueIds).stream().collect(Collectors.groupingBy(ComponentIssueRelDTO::getIssueId));
+        Map<String, String> envMap = lookupValueService.queryMapByTypeCode(FieldCode.ENVIRONMENT);
+        Map<Long, Set<TagVO>> tagMap = new HashMap<>();
+        if (agilePluginService != null) {
+            tagMap.putAll(agilePluginService.listTagMap(organizationId, new HashSet<>(projectIds), allIssueIds));
+            agilePluginService.handleProgramIssueValueMap(organizationId, projectIds, allIssueIds, featureIds, issueValueMap);
+        }
+        Map<Long, List<IssueLinkDTO>> relatedIssueMap =
+                issueLinkMapper.queryIssueLinkByIssueId(new HashSet<>(allIssueIds), new HashSet<>(projectIds), false)
+                        .stream()
+                        .collect(Collectors.groupingBy(IssueLinkDTO::getKeyIssueId));
+        List<WorkLogDTO> workTimes = workHoursMapper.countWorkTime(projectIds, allIssueIds, searchVO);
+        Map<Long, BigDecimal> workTimeMap = new HashMap<>();
+        if(!CollectionUtils.isEmpty(workTimes)){
+            workTimeMap = workTimes.stream().collect(Collectors.toMap(WorkLogDTO::getIssueId, WorkLogDTO::getWorkTime));
+        }
+        List<WorkLogDTO> allWorkTimes = workHoursMapper.countWorkTime(projectIds, allIssueIds, null);
+        Map<Long, BigDecimal> allWorkTimeMap = new HashMap<>();
+        if(!CollectionUtils.isEmpty(allWorkTimes)){
+            allWorkTimeMap = allWorkTimes.stream().collect(Collectors.toMap(WorkLogDTO::getIssueId, WorkLogDTO::getWorkTime));
+        }
+        Map<Long, BigDecimal> estimateTimeMap = issues.stream()
+                .filter(v -> !ObjectUtils.isEmpty(v.getEstimateTime()))
+                .collect(Collectors.toMap(IssueDTO::getIssueId, IssueDTO::getEstimateTime));
+        issueValueMap.put(USER_MAP, usersMap);
+        issueValueMap.put("issueTypesMap", issueTypeDTOMap);
+        issueValueMap.put(STATUS_MAP, statusMapDTOMap);
+        issueValueMap.put(PRIORITY_MAP, priorityMap);
+        issueValueMap.put(CLOSE_SPRINT_MAP, closeSprintNames);
+        issueValueMap.put(FIX_VERSION_MAP, fixVersionNames);
+        issueValueMap.put(INFLUENCE_VERSION_MAP, influenceVersionNames);
+        issueValueMap.put(LABEL_MAP, labelNames);
+        issueValueMap.put(COMPONENT_MAP, componentMap);
+        issueValueMap.put(FOUNDATION_CODE_VALUE_MAP, foundationCodeValue);
+        issueValueMap.put(ENV_MAP, envMap);
+        issueValueMap.put(WORK_LOG_MAP, workLogVOMap);
+        issueValueMap.put(RELATED_ISSUE_MAP, relatedIssueMap);
+        issueValueMap.put("workTimeMap", workTimeMap);
+        issueValueMap.put("allWorkTimeMap", allWorkTimeMap);
+        issueValueMap.put("estimateTimeMap", estimateTimeMap);
+        issueValueMap.put("tagMap", tagMap);
+    }
+
+    @Override
+    public List<IssueWorkHoursVO> listProjectAssigneeWorkHours(Long organizationId, List<Long> projects, SearchVO searchVO) {
+        // 查询issue
+        List<Long> allIssueId = queryAllIssueIds(organizationId, projects, searchVO);
+        if (CollectionUtils.isEmpty(allIssueId)) {
+            return new ArrayList<>();
+        }
+        List<IssueWorkHoursVO> projectAssignee = workHoursMapper.queryProjectAssigneeIds(projects, allIssueId);
+        if (CollectionUtils.isEmpty(projectAssignee)) {
+            return new ArrayList<>();
+        }
+        List<Long> userIds = projectAssignee.stream().map(IssueWorkHoursVO::getUserId).collect(Collectors.toList());
+        List<UserDTO> userList = baseFeignClient.listUsersByIds(userIds.toArray(new Long[userIds.size()]), false).getBody();
+        Map<Long, UserDTO> userMap = userList.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity()));
+        // 统计工时
+        List<IssueWorkHoursVO> workTimes = workHoursMapper.countAssigneeWorkTime(projects, allIssueId, searchVO);
+        Map<Long, Map<Long, BigDecimal>> workTimeMap = workTimes.stream().collect(Collectors.groupingBy(IssueWorkHoursVO::getUserId, Collectors.toMap(IssueWorkHoursVO::getProjectId, IssueWorkHoursVO::getWorkTime)));
+        // 统计累计工时
+        List<IssueWorkHoursVO> cumulativeWorkTimes = workHoursMapper.countAssigneeWorkTime(projects, allIssueId, null);
+        Map<Long, Map<Long, BigDecimal>> cumulativeWorkTimeMap = cumulativeWorkTimes.stream().collect(Collectors.groupingBy(IssueWorkHoursVO::getUserId, Collectors.toMap(IssueWorkHoursVO::getProjectId, IssueWorkHoursVO::getWorkTime)));
+        for (IssueWorkHoursVO issueWorkHoursVO : projectAssignee) {
+            Long userId = issueWorkHoursVO.getUserId();
+            issueWorkHoursVO.setUserDTO(userMap.get(userId));
+            Map<Long, BigDecimal> projectWorkTimeMap = workTimeMap.getOrDefault(userId, new HashMap<>());
+            Map<Long, BigDecimal> projectCumulativeWorkTimeMap = cumulativeWorkTimeMap.getOrDefault(userId, new HashMap<>());
+            Long projectId = issueWorkHoursVO.getProjectId();
+            issueWorkHoursVO.setWorkTime(projectWorkTimeMap.getOrDefault(projectId, BigDecimal.ZERO));
+            issueWorkHoursVO.setCumulativeWorkTime(projectCumulativeWorkTimeMap.getOrDefault(projectId, BigDecimal.ZERO));
+            BigDecimal deviationRate = BigDecimal.ZERO;
+            BigDecimal estimateTime = issueWorkHoursVO.getEstimateTime();
+            if (!Objects.equals(BigDecimal.ZERO, estimateTime)) {
+                deviationRate = issueWorkHoursVO.getCumulativeWorkTime().subtract(estimateTime).divide(estimateTime);
+            }
+            issueWorkHoursVO.setDeviationRate(deviationRate);
+        }
+        return projectAssignee;
+    }
+
+    @Override
     public Page<IssueWorkHoursVO> pageQueryAssignee(Long organizationId, List<Long> projectIds, PageRequest pageRequest, SearchVO searchVO) {
         List<Long> allIssueIds = queryAllIssueIds(organizationId, projectIds, searchVO);
         if (CollectionUtils.isEmpty(allIssueIds)) {
@@ -433,11 +605,9 @@ public class WorkHoursServiceImpl implements WorkHoursService {
         BigDecimal estimateTime = BigDecimal.ZERO;
         BigDecimal cumulativeWorkTime = BigDecimal.ZERO;
         IssueWorkHoursVO issueWorkHoursAssignee = cumulativeWorkTimeMap.get(id);
-        if (!ObjectUtils.isEmpty(issueWorkHoursAssignee.getWorkTime())) {
-            cumulativeWorkTime = issueWorkHoursAssignee.getWorkTime();
-        }
-        if (!ObjectUtils.isEmpty(issueWorkHoursAssignee.getEstimateTime())) {
-            estimateTime = issueWorkHoursAssignee.getEstimateTime();
+        if (!ObjectUtils.isEmpty(issueWorkHoursAssignee)) {
+            cumulativeWorkTime = ObjectUtils.isEmpty(issueWorkHoursAssignee.getWorkTime()) ? BigDecimal.ZERO : issueWorkHoursAssignee.getWorkTime();
+            estimateTime = ObjectUtils.isEmpty(issueWorkHoursAssignee.getEstimateTime()) ? BigDecimal.ZERO :issueWorkHoursAssignee.getEstimateTime();
         }
         // 计算偏差率
         BigDecimal deviationRate = BigDecimal.ZERO;
@@ -451,20 +621,25 @@ public class WorkHoursServiceImpl implements WorkHoursService {
     }
 
     @Override
-    public Page<IssueWorkHoursVO> pageQueryProject(Long organizationId, PageRequest pageRequest, SearchVO searchVO) {
+    public Page<IssueWorkHoursVO> pageQueryProject(Long organizationId,
+                                                   List<Long> projectIds,
+                                                   PageRequest pageRequest,
+                                                   SearchVO searchVO) {
         // 查询有权限的项目
-        List<Long> projectIds = new ArrayList<>();
         List<ProjectVO> projectVOS = new ArrayList<>();
-        Long userId = DetailsHelper.getUserDetails().getUserId();
-        handlePermissionProject(organizationId, projectIds,  projectVOS,  userId);
         if (CollectionUtils.isEmpty(projectIds)) {
-            return new Page<>();
+            projectIds = new ArrayList<>();
+            Long userId = DetailsHelper.getUserDetails().getUserId();
+            handlePermissionProject(organizationId, projectIds,  projectVOS,  userId);
+        } else {
+            projectVOS.addAll(baseFeignClient.queryByIds(new HashSet<>(projectIds)).getBody());
         }
         List<Long> allIssueIds = queryAllIssueIds(organizationId, projectIds, searchVO);
         if (CollectionUtils.isEmpty(allIssueIds)) {
             return new Page<>();
         }
-        Page<Long> page = PageHelper.doPage(pageRequest, () -> workHoursMapper.queryIds(projectIds, allIssueIds, "project"));
+        List<Long> finalProjectIds = projectIds;
+        Page<Long> page = PageHelper.doPage(pageRequest, () -> workHoursMapper.queryIds(finalProjectIds, allIssueIds, "project"));
         if(CollectionUtils.isEmpty(page.getContent())) {
             return new Page<>();
         }
@@ -507,11 +682,9 @@ public class WorkHoursServiceImpl implements WorkHoursService {
         return new ArrayList<>();
     }
 
-    private void handlePermissionProject(Long organizationId, List<Long> projectIds, List<ProjectVO> projectVOS, Long userId) {
-        ProjectSearchVO projectSearchVO = new ProjectSearchVO();
-        projectSearchVO.setEnable(true);
-        projectSearchVO.setCategoryCodes(Arrays.asList("N_AGILE"));
-        Page<ProjectVO> page = baseFeignClient.listWithCategoryByOrganizationIds(organizationId, projectSearchVO, 0, 0).getBody();
+    @Override
+    public void handlePermissionProject(Long organizationId, List<Long> projectIds, List<ProjectVO> projectVOS, Long userId) {
+        Page<ProjectVO> page = baseFeignClient.pagingProjectsByUserId(organizationId, userId, 0, 0, true, "N_AGILE").getBody();
         if (!CollectionUtils.isEmpty(page.getContent())) {
             projectIds.addAll(page.getContent().stream().map(ProjectVO::getId).collect(Collectors.toList()));
             projectVOS.addAll(page.getContent());
@@ -531,6 +704,9 @@ public class WorkHoursServiceImpl implements WorkHoursService {
     @Override
     public BigDecimal countIssueWorkHours(Long organizationId, List<Long> projectIds, SearchVO searchVO) {
         List<Long> allIssueIds = queryAllIssueIds(organizationId, projectIds, searchVO);
+        if (CollectionUtils.isEmpty(allIssueIds)) {
+            return BigDecimal.ZERO;
+        }
         return workHoursMapper.countWorkTime(projectIds, allIssueIds, searchVO)
                 .stream().map(WorkLogDTO::getWorkTime).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
@@ -546,11 +722,11 @@ public class WorkHoursServiceImpl implements WorkHoursService {
     }
 
     private void statisticalWorkHours(IssueListFieldKVVO issueListFieldKVVO,
-                                      Map<Long, List<Long>> issueMap,
-                                      Map<Long, BigDecimal> estimateTimeMap,
-                                      Map<Long, BigDecimal> allWorkTimeMap,
-                                      Map<Long, BigDecimal> workTimeMap,
-                                      Boolean containsSubIssue) {
+                                        Map<Long, List<Long>> issueMap,
+                                        Map<Long, BigDecimal> estimateTimeMap,
+                                        Map<Long, BigDecimal> allWorkTimeMap,
+                                        Map<Long, BigDecimal> workTimeMap,
+                                        Boolean containsSubIssue) {
         BigDecimal workTime = workTimeMap.getOrDefault(issueListFieldKVVO.getIssueId(), BigDecimal.ZERO);
         BigDecimal allWorkTime = allWorkTimeMap.getOrDefault(issueListFieldKVVO.getIssueId(), BigDecimal.ZERO);
         BigDecimal estimateTime = issueListFieldKVVO.getEstimateTime();
@@ -634,7 +810,8 @@ public class WorkHoursServiceImpl implements WorkHoursService {
         resultMap.put(id, workHoursCountVO);
     }
 
-    private void handlerProject(Long organizationId, List<Long> projectIds, Long userId, WorkHoursSearchVO workHoursSearchVO){
+    @Override
+    public void handlerProject(Long organizationId, List<Long> projectIds, Long userId, WorkHoursSearchVO workHoursSearchVO){
         if (CollectionUtils.isEmpty(workHoursSearchVO.getProjectIds())) {
             // 查询有权限的项目
             ProjectSearchVO projectSearchVO = new ProjectSearchVO();

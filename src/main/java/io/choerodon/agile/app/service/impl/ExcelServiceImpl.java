@@ -3218,7 +3218,8 @@ public class ExcelServiceImpl implements ExcelService {
         downloadWorkBook(organizationId, workbook, fileName, fileOperationHistoryDTO, userId);
     }
 
-    protected ExportIssuesVO buildExcelIssueFromIssue(String projectName,
+    @Override
+    public ExportIssuesVO buildExcelIssueFromIssue(String projectName,
                                                       Map<Long, Set<Long>> parentSonMap,
                                                       Map<Long, ExportIssuesVO> issueMap,
                                                       Map<String, Object> issueValueMap,

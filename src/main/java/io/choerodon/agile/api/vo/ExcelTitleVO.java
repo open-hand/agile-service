@@ -5,6 +5,8 @@ package io.choerodon.agile.api.vo;
  * @date 2021-10-19 15:09
  */
 public class ExcelTitleVO {
+    private Long fieldId;
+
     private String title;
 
     private String code;
@@ -42,5 +44,13 @@ public class ExcelTitleVO {
 
     public void setWidth(Integer width) {
         this.width = width;
+    }
+
+    public Long getFieldId() {
+        return fieldId;
+    }
+
+    public void setFieldId(Long fieldId) {
+        this.fieldId = fieldId;
     }
 }

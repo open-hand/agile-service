@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.WorkHoursSearchVO;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -66,4 +67,10 @@ public interface WorkHoursExcelService {
      * @param isOrg
      */
     void exportWorkHoursCalendarOnProjectLevel(Long organizationId, Long projectId, WorkHoursSearchVO workHoursSearchVO, ServletRequestAttributes requestAttributes, Boolean isOrg);
+
+    void exportIssueWorkHours(Long organizationId, List<Long> projectIds, ServletRequestAttributes currentRequestAttributes, boolean isOrg, SearchVO searchVO, boolean containsSubIssue);
+
+    void exportIssueWorkHoursOnOrganizationLevel(Long organizationId, ServletRequestAttributes currentRequestAttributes, boolean isOrg, SearchVO searchVO,  Boolean containsSubIssue);
+
+    void exportIssueWorkHoursOnProjectLevel(Long organizationId, Long projectId, ServletRequestAttributes currentRequestAttributes, boolean isOrg, SearchVO searchVO, Boolean containsSubIssue);
 }

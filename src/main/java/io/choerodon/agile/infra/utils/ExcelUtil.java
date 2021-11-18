@@ -259,6 +259,23 @@ public class ExcelUtil {
         sheet.trackAllColumnsForAutoSizing();
     }
 
+    public static <T> void writeIssueWorkHours(SXSSFSheet sheet,
+                                               Class<T> clazz,
+                                               ExportIssuesVO exportIssuesVO,
+                                               List<ExcelTitleVO> excelTitleVOS,
+                                               CellStyle cellStyle,
+                                               ExcelCursorDTO cursorDTO) {
+        Integer rowNum = cursorDTO.getRow();
+        SXSSFRow row = sheet.createRow(rowNum);
+        for (int i = 0; i < excelTitleVOS.size(); i++) {
+            ExcelTitleVO excelTitleVO = excelTitleVOS.get(i);
+            sheet.setColumnWidth(i, excelTitleVO.getWidth());
+            handleWriteCell(row, i, exportIssuesVO, cellStyle, excelTitleVO.getCode(), clazz);
+        }
+        sheet.trackAllColumnsForAutoSizing();
+    }
+
+
     public static <T> void  writeWorkHoursLog(Workbook workbook,
                                              String sheetName,
                                              Class<T> clazz,
