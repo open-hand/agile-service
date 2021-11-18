@@ -121,6 +121,22 @@ public class ExportIssuesVO {
 
     private String participant;
 
+    @ApiModelProperty("工时")
+    private BigDecimal workTime;
+
+    @ApiModelProperty("历史累计工时")
+    private BigDecimal cumulativeWorkTime;
+
+    @ApiModelProperty("偏差率")
+    private String deviationRate;
+
+    private Long projectId;
+
+    private Long parentId;
+
+    private Boolean mergeColumn;
+
+
     public ExportIssuesVO() {
     }
 
@@ -546,5 +562,53 @@ public class ExportIssuesVO {
 
     public void setParticipant(String participant) {
         this.participant = participant;
+    }
+
+    public BigDecimal getWorkTime() {
+        return workTime;
+    }
+
+    public void setWorkTime(BigDecimal workTime) {
+        this.workTime = workTime;
+    }
+
+    public BigDecimal getCumulativeWorkTime() {
+        return cumulativeWorkTime;
+    }
+
+    public void setCumulativeWorkTime(BigDecimal cumulativeWorkTime) {
+        this.cumulativeWorkTime = cumulativeWorkTime;
+    }
+
+    public String getDeviationRate() {
+        return deviationRate;
+    }
+
+    public void setDeviationRate(String deviationRate) {
+        this.deviationRate = deviationRate;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
+    public Boolean getMergeColumn() {
+        return mergeColumn;
+    }
+
+    public void setMergeColumn(Boolean mergeColumn) {
+        this.mergeColumn = mergeColumn;
     }
 }

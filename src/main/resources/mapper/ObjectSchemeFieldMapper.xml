@@ -678,4 +678,66 @@
         </foreach>
     </select>
 
+    <select id="listByProjectIds" resultMap="objectSchemeFieldMap">
+        SELECT  osf.*,
+        flv.name as field_type_name
+        FROM fd_object_scheme_field osf
+        LEFT JOIN lookup_value flv ON flv.value_code = osf.field_type and flv.type_code = 'field_type'
+        WHERE
+        (osf.is_system = 1
+        OR
+        (
+        osf.organization_id = #{organizationId}
+        AND
+        (
+        osf.project_id is null
+        <if test="projectIds != null and projectIds.size > 0">
+            or osf.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+        </if>
+        )
+        <if test='searchVO.issueTypeList != null and searchVO.issueTypeList != ""'>
+            AND osf.id IN (
+            SELECT
+            osfe.field_id
+            FROM
+            fd_object_scheme_field_extend osfe
+            WHERE
+            osfe.field_id = osf.id
+            <choose>
+                <when test="issueTypes != null and issueTypes.size > 0">
+                    and osfe.issue_type in
+                    <foreach item="item" index="index" collection="issueTypes" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </when>
+                <otherwise>
+                    <if test='searchVO.issueTypeList == "agileIssueType"'>
+                        AND osfe.issue_type IN ('issue_epic', 'story', 'bug', 'task', 'sub_task')
+                    </if>
+                    <if test='searchVO.issueTypeList == "programIssueType"'>
+                        AND osfe.issue_type IN ('issue_epic', 'feature')
+                    </if>
+                </otherwise>
+            </choose>
+            )
+        </if>
+        ))
+        <if test="searchVO.context != null">
+            AND osf.context = #{searchVO.context}
+        </if>
+        <if test="searchVO.schemeCode != null">
+            AND osf.scheme_code = #{searchVO.schemeCode}
+        </if>
+        <if test="searchVO.name != null">
+            AND osf.name = #{searchVO.name}
+        </if>
+        <if test="searchVO.code != null">
+            AND osf.code = #{searchVO.code}
+        </if>
+        order by osf.id asc
+    </select>
+
 </mapper>

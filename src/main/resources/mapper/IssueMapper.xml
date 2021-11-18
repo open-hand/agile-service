@@ -991,21 +991,18 @@
             #{projectId}
         </foreach>
         and ai.apply_type = 'agile'
+        and ai.type_code in ('sub_task', 'bug')
         and (
-            (
-            ai.type_code = 'sub_task'
-            and ai.parent_issue_id in
+            ai.parent_issue_id in
             <foreach collection="issueIds" item="id" open="(" separator="," close=")">
                 #{id}
             </foreach>
-            )
-            or (
+            or
             ai.type_code = 'bug'
             and ai.relate_issue_id in
             <foreach collection="issueIds" item="id" open="(" separator="," close=")">
                 #{id}
             </foreach>
-            )
         )
         <include refid="explainSearchVO"/>
         <include refid="filterSqlAndAssigneeIds"/>

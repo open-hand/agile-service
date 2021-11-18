@@ -1,7 +1,9 @@
 package io.choerodon.agile.api.controller.v1;
 
+import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.WorkHoursSearchVO;
 import io.choerodon.agile.app.service.WorkHoursExcelService;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
@@ -46,5 +48,16 @@ public class WorkHoursExcelController {
         workHoursExcelService.exportWorkHoursCalendarOnProjectLevel(organizationId, projectId, workHoursSearchVO, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes(), false);
     }
 
-
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("导出工作项工时")
+    @PostMapping(value = "/export_issue_work_hours")
+    public void exportIssueWorkHours(@ApiParam(value = "项目id", required = true)
+                                     @PathVariable(name = "project_id") Long projectId,
+                                     @ApiParam(value = "组织id", required = true)
+                                     @RequestParam Long organizationId,
+                                     @RequestParam(required = false, defaultValue = "false") Boolean containsSubIssue,
+                                     @RequestBody SearchVO searchVO) {
+        EncryptionUtils.decryptSearchVO(searchVO);
+        workHoursExcelService.exportIssueWorkHoursOnProjectLevel(organizationId, projectId, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes(), false, searchVO, containsSubIssue);
+    }
 }

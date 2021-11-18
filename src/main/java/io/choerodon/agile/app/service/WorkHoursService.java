@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
@@ -104,13 +105,23 @@ public interface WorkHoursService {
 
     Page<IssueWorkHoursVO> pageQueryAssignee(Long organizationId, List<Long> projectIds, PageRequest pageRequest, SearchVO searchVO);
 
-    Page<IssueWorkHoursVO> pageQueryProject(Long organizationId, PageRequest pageRequest, SearchVO searchVO);
+    Page<IssueWorkHoursVO> pageQueryProject(Long organizationId, List<Long> projectIds, PageRequest pageRequest, SearchVO searchVO);
 
     Page<IssueWorkHoursVO> pageQueryAssigneeOnOrganizationLevel(Long organizationId, PageRequest pageRequest, SearchVO searchVO);
 
     Page<IssueListFieldKVVO> pageQueryIssuesOnOrganizationLevel(Long organizationId, PageRequest pageRequest, Boolean containsSubIssue, SearchVO searchVO);
 
+    void handlerProject(Long organizationId, List<Long> projectIds, Long userId, WorkHoursSearchVO workHoursSearchVO);
+
+    void handlePermissionProject(Long organizationId, List<Long> projectIds, List<ProjectVO> projectVOS, Long userId);
+
     BigDecimal countIssueWorkHours(Long organizationId, List<Long> projetcIds, SearchVO searchVO);
 
     BigDecimal countIssueWorkHoursOnOrganizationLevel(Long organizationId, SearchVO searchVO);
+
+    Page<IssueDTO> pageIssue(Long organizationId, List<Long> projectIds, PageRequest pageRequest, SearchVO searchVO);
+
+    void buildIssueValueMap(Long organizationId, List<Long> projectIds, List<IssueDTO> issues, Map<String, Object> issueValueMap, SearchVO searchVO);
+
+    List<IssueWorkHoursVO> listProjectAssigneeWorkHours(Long organizationId, List<Long> projects, SearchVO searchVO);
 }

@@ -20,10 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author zhaotianxin
@@ -92,7 +89,7 @@ public class WorkHoursOrgController {
                                                                    PageRequest pageRequest,
                                                                    @RequestBody SearchVO searchVO) {
         EncryptionUtils.decryptSearchVO(searchVO);
-        return Optional.ofNullable(workHoursService.pageQueryProject(organizationId , pageRequest, searchVO))
+        return Optional.ofNullable(workHoursService.pageQueryProject(organizationId , null, pageRequest, searchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.issue.work.hours.query"));
     }

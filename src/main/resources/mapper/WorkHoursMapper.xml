@@ -304,8 +304,34 @@
         ) temp order by temp.id
     </select>
 
+    <select id="queryProjectAssigneeIds" resultType="io.choerodon.agile.api.vo.IssueWorkHoursVO">
+        SELECT
+            temp.user_id,
+            temp.project_id,
+            SUM(temp.estimate_time) as estimate_time
+        FROM (
+            SELECT
+                ai.assignee_id as user_id,
+                ai.project_id as project_id,
+                IFNULL(ai.estimate_time, 0) as estimate_time
+            FROM agile_issue ai
+            WHERE ai.project_id IN
+            <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+                #{projectId}
+            </foreach>
+            AND ai.issue_id IN
+            <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+                #{issueId}
+            </foreach>
+            AND ai.assignee_id IS NOT NULL
+            AND ai.assignee_id != 0
+        ) temp
+        group by temp.user_id, temp.project_id
+    </select>
+
     <select id="countAssigneeWorkTime" resultType="io.choerodon.agile.api.vo.IssueWorkHoursVO">
         select
+        ai.project_id,
         ai.assignee_id as user_id,
         SUM(awl.work_time) as work_time,
         SUM(ai.estimate_time) as estimate_time
@@ -325,7 +351,31 @@
                 and awl.start_date between #{searchVO.searchArgs.startTime} and #{searchVO.searchArgs.endTime}
             </if>
         </if>
-        group by ai.assignee_id
+        group by ai.project_id,ai.assignee_id
+    </select>
+
+    <select id="countProjectAssigneeWorkTime" resultType="io.choerodon.agile.api.vo.IssueWorkHoursVO">
+        select
+        ai.assignee_id as user_id,
+        ai.project_id as project_id,
+        SUM(awl.work_time) as work_time
+        from agile_work_log awl
+        JOIN agile_issue ai on ai.issue_id = awl.issue_id
+        where
+        awl.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and awl.issue_id in
+        <foreach collection="allIssueIds" item="allIssueId" open="(" separator="," close=")">
+            #{allIssueId}
+        </foreach>
+        <if test="searchVO != null">
+            <if test="searchVO.searchArgs.startTime != null and searchVO.searchArgs.endTime != null">
+                and awl.start_date between #{searchVO.searchArgs.startTime} and #{searchVO.searchArgs.endTime}
+            </if>
+        </if>
+        group by ai.project_id, ai.assignee_id
     </select>
 
     <select id="countProjectWorkTime" resultType="io.choerodon.agile.api.vo.IssueWorkHoursVO">
