@@ -1184,14 +1184,14 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                                      String applyType, IssueDTO triggerIssue, boolean autoTranferFlag) {
         Set<Long> influenceIssueIds = new HashSet<>();
         IssueVO result = this.self().doStateMachineCustomFlowAndRuleNotice(projectId, issueId, applyType, influenceIssueIds, false, transformId, new InputDTO(issueId, "updateStatus", updateTrigger(autoTranferFlag, triggerIssue)));
-        if (result != null) {
-            return result;
-        }
         if (backlogExpandService != null) {
             backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
         }
         IssueVO issueVO = queryIssueByUpdate(projectId, issueId, Collections.singletonList(STATUS_ID));
         issueVO.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
+        if (result != null) {
+            issueVO.setErrorMsg(result.getErrorMsg());
+        }
         return issueVO;
     }
 
@@ -1200,14 +1200,14 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                                      String applyType, IssueDTO triggerIssue, boolean autoTranferFlag) {
         Set<Long> influenceIssueIds = new HashSet<>();
         IssueVO result = doStateMachineTransformAndCustomFlow(projectId, issueId, applyType, influenceIssueIds, new TriggerCarrierVO(), false, transformId, new InputDTO(issueId, "updateStatus", updateTrigger(autoTranferFlag, triggerIssue)));
-        if (result != null) {
-            return result;
-        }
         if (backlogExpandService != null) {
             backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
         }
         IssueVO issueVO = queryIssueByUpdate(projectId, issueId, Collections.singletonList(STATUS_ID));
         issueVO.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
+        if (result != null) {
+            issueVO.setErrorMsg(result.getErrorMsg());
+        }
         return issueVO;
     }
 
