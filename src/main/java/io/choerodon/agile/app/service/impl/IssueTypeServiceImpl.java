@@ -9,11 +9,13 @@ import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.core.utils.PageUtils;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -1126,6 +1128,33 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         example.setIssueTypeId(issueTypeId);
         IssueTypeExtendDTO extend = issueTypeExtendMapper.selectOne(example);
         insertOrUpdateRank(issueTypeVO, extend, rank, projectId);
+    }
+
+    @Override
+    public Page<IssueTypeVO> pagingProjectIssueTypes(PageRequest pageRequest, Long organizationId, IssueTypeSearchVO issueTypeSearchVO) {
+        List<Long> projectIds = issueTypeSearchVO.getProjectIds();
+        if (CollectionUtils.isEmpty(projectIds)) {
+            projectIds = new ArrayList<>();
+            Long userId = DetailsHelper.getUserDetails().getUserId();
+            Page<ProjectVO> page = baseFeignClient.pagingProjectsByUserId(organizationId, userId, 0, 0, true, "N_AGILE").getBody();
+            if (!CollectionUtils.isEmpty(page.getContent())) {
+                projectIds.addAll(page.getContent().stream().map(ProjectVO::getId).collect(Collectors.toList()));
+            }
+        }
+        List<Long> finalProjectIds = projectIds;
+        Page<IssueTypeVO> page = PageHelper.doPage(pageRequest, () -> issueTypeMapper.selectProjectIssueTypeByOptions(organizationId, finalProjectIds, issueTypeSearchVO));
+        List<IssueTypeVO> list = new ArrayList<>();
+        List<Long> filterIssueTypeIds = issueTypeSearchVO.getFilterIssueTypeIds();
+        if (!CollectionUtils.isEmpty(filterIssueTypeIds)) {
+            String ids = filterIssueTypeIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+            List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.selectByIds(ids);
+            list.addAll(modelMapper.map(issueTypeDTOS, new TypeToken<List<IssueTypeDTO>>() {
+            }.getType()));
+        }
+        if (!CollectionUtils.isEmpty(page.getContent())) {
+            list.addAll(page.getContent());
+        }
+        return PageUtil.buildPageInfoWithPageInfoList(page, list);
     }
 
     private String getMaxBackRankIfExisted(String frontRank,

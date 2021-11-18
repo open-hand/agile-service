@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
 
@@ -25,6 +26,11 @@ public class IssueTypeSearchVO {
     private List<String> typeCodes;
     @JsonIgnore
     private List<Long> issueTypeIds;
+
+    @Encrypt
+    private List<Long> filterIssueTypeIds;
+
+    private List<Long> projectIds;
 
     public List<Long> getIssueTypeIds() {
         return issueTypeIds;
@@ -108,5 +114,21 @@ public class IssueTypeSearchVO {
 
     public String getParam() {
         return param;
+    }
+
+    public List<Long> getFilterIssueTypeIds() {
+        return filterIssueTypeIds;
+    }
+
+    public void setFilterIssueTypeIds(List<Long> filterIssueTypeIds) {
+        this.filterIssueTypeIds = filterIssueTypeIds;
+    }
+
+    public List<Long> getProjectIds() {
+        return projectIds;
+    }
+
+    public void setProjectIds(List<Long> projectIds) {
+        this.projectIds = projectIds;
     }
 }
