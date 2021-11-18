@@ -5433,6 +5433,7 @@
                     <foreach collection="assigneeIds" item="assigneeId" open="(" separator="," close=")">
                         #{assigneeId}
                     </foreach>
+                    and ai.type_code in ('story', 'bug', 'task', 'sub_task')
                     and ai.estimated_start_time is not null
                     and ai.estimated_end_time is not null
                     order by ai.assignee_id asc, ai.estimated_start_time asc, ai.issue_id asc
@@ -5466,12 +5467,14 @@
                     <foreach collection="assigneeIds" item="assigneeId" open="(" separator="," close=")">
                         #{assigneeId}
                     </foreach>
+                    and ai.type_code in ('story', 'bug', 'task', 'sub_task')
                     and ai.estimated_start_time is not null
                     and ai.estimated_end_time is not null
                     order by ai.assignee_id asc, ai.estimated_start_time desc, ai.issue_id desc
                 ) t2
             ) temp
             where temp.overlap = 1
+            group by temp.issue_id, temp.assignee_id
         ) conflict_table on conflict_table.issue_id = ai.issue_id
         where 1=1
         and ai.project_id in
