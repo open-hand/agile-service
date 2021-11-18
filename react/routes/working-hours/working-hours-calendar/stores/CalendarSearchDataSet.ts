@@ -105,7 +105,7 @@ const LogSearchDataSet = ({ projectCreationDate }: { projectCreationDate: string
                 const removeOrgItem = data.workGroupVOS.filter((item: WorkGroupItem) => !(item.parentId === null && item.id === null));
                 return removeOrgItem.map((item: WorkGroupItem) => {
                   if (item.id === null && item.parentId === 0) {
-                    return { ...item, id: 'not_assign' };
+                    return { ...item, id: '0' };
                   }
                   return item;
                 });

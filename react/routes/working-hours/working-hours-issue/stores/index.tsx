@@ -118,7 +118,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     const res = await workingHoursApi.getTotalWorkTime(search, isContain);
     const totalCount = res.toString().split('.')[1] && res.toString().split('.')[1].length > 1 ? res.toFixed(1) : res;
     setTotalWorkTime(totalCount);
-  }, [search, isContain]);
+  }, [search, startTime, endTime, isContain]);
 
   const loadData = useCallback(() => {
     const dataSet = dataSetMap.get(mode) as DataSet;
