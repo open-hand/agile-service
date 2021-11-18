@@ -149,8 +149,14 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         }
         List<IssuePredecessorTreeClosureDTO> descendants =
                 issuePredecessorTreeClosureMapper.selectByAncestorIds(organizationId, projectId, new HashSet<>(Arrays.asList(currentIssueId)));
+        Set<Long> predecessorIds =
+                issuePredecessorMapper.selectByIssueIds(new HashSet<>(Arrays.asList(projectId)), new HashSet<>(Arrays.asList(currentIssueId)))
+                        .stream()
+                        .map(IssuePredecessorDTO::getPredecessorId)
+                        .collect(Collectors.toSet());
         Set<Long> ignoredIssueIds =
                 descendants.stream().map(IssuePredecessorTreeClosureDTO::getDescendantId).collect(Collectors.toSet());
+        ignoredIssueIds.addAll(predecessorIds);
         String issueIdsKey = "issueIds";
         List<IssueListFieldKVVO> topIssues = new ArrayList<>();
         if (!ObjectUtils.isEmpty(otherArgs) && !ObjectUtils.isEmpty(otherArgs.get(issueIdsKey))) {
