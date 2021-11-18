@@ -72,6 +72,7 @@ function useGanttHeader(config: IGanttHeaderHookConfig) {
   const sprintComponentsProps = useCreation(() => ({
     key: `SelectSprint-${projectId}`,
     flat: true,
+    value: sprintIds,
     statusList: [],
     projectId,
     placeholder: '冲刺',
@@ -85,7 +86,7 @@ function useGanttHeader(config: IGanttHeaderHookConfig) {
     maxTagCount: 2,
     searchable: false,
     selectAllButton: false,
-  }) as SelectSprintProps, [projectId, handleSprintChange]);
+  }) as SelectSprintProps, [projectId, sprintIds, handleSprintChange]);
   const processTypeComponentProps = {
     value: processType,
     onChange: setProcessType,
@@ -170,7 +171,6 @@ function useGanttHeader(config: IGanttHeaderHookConfig) {
       items: ['columnConfig', 'personalFilter'].map((key: keyof typeof itemMap) => itemMap[key]),
     };
   }, [menuType, getConfig]);
-  useWhyDidYouUpdate('config', { getConfig });
   return [{ type, processType, setConfig }, {
     sprintComponentsProps, processTypeComponentProps, typeComponentProps, headerComponentProps,
   }] as const;
