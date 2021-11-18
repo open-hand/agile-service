@@ -4,6 +4,7 @@ import io.choerodon.agile.api.vo.StatusParamVO;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.app.service.IssueService;
+import io.choerodon.agile.app.service.IssueTypeService;
 import io.choerodon.agile.app.service.StarBeaconService;
 import io.choerodon.agile.app.service.StatusService;
 import io.choerodon.agile.infra.dto.UserDTO;
@@ -40,6 +41,9 @@ public class WorkBenchController {
 
     @Autowired
     private StarBeaconService starBeaconService;
+
+    @Autowired
+    private IssueTypeService issueTypeService;
 
     @Permission(level = ResourceLevel.ORGANIZATION,permissionLogin = true)
     @ApiOperation("查询工作台个人代办事项")
@@ -112,5 +116,16 @@ public class WorkBenchController {
         starBeaconVO.setOrganizationId(organizationId);
         starBeaconService.unStarInstance(starBeaconVO);
         return Results.success();
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
+    @ApiOperation("分页查询有权限项目下的问题类型")
+    @PostMapping(value = "/issue_type")
+    public ResponseEntity<Page<IssueTypeVO>> pagingProjectIssueTypes(@ApiIgnore
+                                                                     @ApiParam(value = "分页信息", required = true) PageRequest pageRequest,
+                                                                     @ApiParam(value = "组织id", required = true)
+                                                                     @PathVariable(name = "organization_id") Long organizationId,
+                                                                     @RequestBody IssueTypeSearchVO issueTypeSearchVO) {
+        return ResponseEntity.ok(issueTypeService.pagingProjectIssueTypes(pageRequest, organizationId, issueTypeSearchVO));
     }
 }

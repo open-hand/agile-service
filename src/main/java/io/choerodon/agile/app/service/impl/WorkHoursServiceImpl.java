@@ -558,7 +558,7 @@ public class WorkHoursServiceImpl implements WorkHoursService {
             BigDecimal deviationRate = BigDecimal.ZERO;
             BigDecimal estimateTime = issueWorkHoursVO.getEstimateTime();
             if (!Objects.equals(BigDecimal.ZERO, estimateTime)) {
-                deviationRate = issueWorkHoursVO.getCumulativeWorkTime().subtract(estimateTime).divide(estimateTime);
+                deviationRate = issueWorkHoursVO.getCumulativeWorkTime().subtract(estimateTime).divide(estimateTime, 2,BigDecimal.ROUND_HALF_UP);
             }
             issueWorkHoursVO.setDeviationRate(deviationRate);
         }
@@ -612,7 +612,7 @@ public class WorkHoursServiceImpl implements WorkHoursService {
         // 计算偏差率
         BigDecimal deviationRate = BigDecimal.ZERO;
         if (!Objects.equals(BigDecimal.ZERO, estimateTime)) {
-            deviationRate = cumulativeWorkTime.subtract(estimateTime).divide(estimateTime);
+            deviationRate = cumulativeWorkTime.subtract(estimateTime).divide(estimateTime, 2, BigDecimal.ROUND_HALF_UP);
         }
         issueWorkHoursVO.setWorkTime(workTime);
         issueWorkHoursVO.setCumulativeWorkTime(cumulativeWorkTime);
@@ -747,7 +747,7 @@ public class WorkHoursServiceImpl implements WorkHoursService {
         // 计算偏差率
         BigDecimal deviationRate = BigDecimal.ZERO;
         if (!Objects.equals(BigDecimal.ZERO, estimateTime)) {
-            deviationRate = allWorkTime.subtract(estimateTime).divide(estimateTime);
+            deviationRate = allWorkTime.subtract(estimateTime).divide(estimateTime, 2,BigDecimal.ROUND_HALF_UP);
         }
         issueListFieldKVVO.setWorkTime(workTime);
         issueListFieldKVVO.setEstimateTime(estimateTime);

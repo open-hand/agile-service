@@ -75,6 +75,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
     private static final String DOING = "doing";
     private static final String DOWNLOAD_FILE = "download_file_work_hours_log";
     private static final String DOWNLOAD_CALENDAR_FILE = "download_file_work_hours_calendar";
+    private static final String DOWNLOAD_ISSUE_WORK_FILE = "download_file_issue_work_hours";
     private static final List<ExcelTitleVO> WORK_HOURS_LOG_LIST = new ArrayList<>();
     private static final List<ExcelTitleVO> WORK_HOURS_CALENDAR_LIST = new ArrayList<>();
     private static final List<ExcelTitleVO> WORK_HOURS_CALENDAR_REPORT_LIST = new ArrayList<>();
@@ -486,7 +487,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
         if (Boolean.FALSE.equals(isOrg)) {
             projectId = projectIds.get(0);
         }
-        FileOperationHistoryDTO fileOperationHistoryDTO = initFileOperationHistory(projectId, organizationId, userId, DOING, DOWNLOAD_CALENDAR_FILE, websocketKey);
+        FileOperationHistoryDTO fileOperationHistoryDTO = initFileOperationHistory(projectId, organizationId, userId, DOING, DOWNLOAD_ISSUE_WORK_FILE, websocketKey);
         sendProcess(fileOperationHistoryDTO, userId, 0.0, websocketKey);
         // 构造标题栏
         List<ObjectSchemeFieldVO> fieldViews = queryFieldViews(organizationId, new HashSet<>(projectIds));
@@ -791,7 +792,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
         // 计算偏差率
         BigDecimal deviationRate = BigDecimal.ZERO;
         if (!Objects.equals(BigDecimal.ZERO, estimateTime)) {
-            deviationRate = allWorkTime.subtract(estimateTime).divide(estimateTime);
+            deviationRate = allWorkTime.subtract(estimateTime).divide(estimateTime, 2,BigDecimal.ROUND_HALF_UP);
         }
         exportIssuesVO.setWorkTime(workTime);
         exportIssuesVO.setEstimateTime(estimateTime);
