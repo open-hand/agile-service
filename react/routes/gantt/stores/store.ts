@@ -9,7 +9,7 @@ import { GanttRef, Gantt } from '@choerodon/gantt';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { DetailContainerProps } from '@/components/detail-container';
 import openDescriptionConfirm from '@/components/detail-container/openDescriptionConfirm';
-import { GanttIssue } from './types';
+import { GanttIssue } from '../types';
 // 视图日视图、周视图、月视图、季视图、年视图
 export const units = [
   {

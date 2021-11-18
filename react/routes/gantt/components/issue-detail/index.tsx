@@ -2,7 +2,7 @@ import React, { useContext, useCallback, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import DetailContainer, { useDetail } from '@/components/detail-container';
 import { Issue } from '@/common/types';
-import Context from '../../context';
+import Context from '../../stores/context';
 
 interface Props {
   refresh: () => void

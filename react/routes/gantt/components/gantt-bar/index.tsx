@@ -11,9 +11,10 @@ import { GanntMoveWrap } from '@choerodon/gantt';
 
 import { TooltipProps } from 'choerodon-ui/pro/lib/tooltip/Tooltip';
 import STATUS_COLOR from '@/constants/STATUS_COLOR';
-import Context from '../../context';
+import Context from '../../stores/context';
 import styles from './index.less';
 import type { GanttIssue } from '../../types';
+import { useGanttBodyContext } from '../../stores/bodyContext';
 
 interface GanttBarProps {
   type: string
@@ -35,7 +36,7 @@ function format(h: number) {
 const GanttBar: React.FC<GanttBarProps> = ({
   type, bar, width, height, onClick, dateKeyRange,
 }) => {
-  const { store, processType } = useContext(Context);
+  const { store, processType } = useGanttBodyContext();
   const { ganttRef } = store;
   const estimateRef = useRef<HTMLDivElement>(null);
   const {

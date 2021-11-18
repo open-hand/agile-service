@@ -5,7 +5,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import minMax from 'dayjs/plugin/minMax';
 import { Gantt } from '@choerodon/gantt';
 import { Issue } from '@/common/types';
-import Context from '../../context';
+import Context from '../../stores/context';
 
 dayjs.extend(minMax);
 interface GanttGroupBarProps {

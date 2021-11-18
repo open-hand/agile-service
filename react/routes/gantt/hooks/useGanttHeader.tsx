@@ -1,0 +1,182 @@
+import React, { useCallback, useState } from 'react';
+import { useCreation, usePersistFn } from 'ahooks';
+
+import {
+  Tooltip, Icon, Button, CheckBox,
+} from 'choerodon-ui/pro';
+import { find } from 'lodash';
+import type { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import openCreateIssue from '@/components/create-issue';
+import { SelectSprintProps } from '@/components/select/select-sprint';
+import GanttStore from '../stores/store';
+import { openCustomColumnManageModal } from '@/components/table-cache/column-manage/Modal';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
+import { typeOptions } from '../components/gannt-select/SelectType';
+import type { IGanttDimensionTypeValue } from '../components/gannt-select/SelectType';
+import useFullScreen from '@/common/useFullScreen';
+
+interface IGanttHeaderHookConfig {
+  projectId?: string
+  visibleColumnCodes?: string[]
+  isHasConflict?: boolean
+  columnOptions?: Array<{ code: string, title: string }>
+  onTypeChange?: (type: IGanttDimensionTypeValue) => void
+  onRefresh?: () => void
+  onClickPersonalFilter?: () => void
+  menuType?: 'project' | 'org'
+  store: GanttStore
+}
+type IGanttHeaderHookConfigKey = keyof IGanttHeaderHookConfig
+const typeValues = typeOptions.map((t) => t.value);
+
+function useGanttHeader(config: IGanttHeaderHookConfig) {
+  const {
+    projectId, store, onTypeChange, menuType, onRefresh, visibleColumnCodes, columnOptions, onClickPersonalFilter,
+  } = config;
+  const { sprintIds } = store;
+  const [isHasConflict, setIsHasConflict] = useState(false);
+  const configMaps = useCreation(() => new Map<IGanttHeaderHookConfigKey, any>(), []);
+  const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
+  const [processType, setProcessType] = useState<'task' | 'workTime'>('task');
+  const [type, setType] = useState<IGanttDimensionTypeValue>(localPageCacheStore.project(projectId).getItem('gantt.search.type') ?? typeValues[0]);
+  const setConfig = useCallback((configItemKey: IGanttHeaderHookConfigKey, value?: any) => {
+    if (configItemKey === 'isHasConflict') {
+      setIsHasConflict(value);
+    } else {
+      configMaps.set(configItemKey, value);
+    }
+  }, [configMaps]);
+  const handleTypeChange = usePersistFn((newType) => {
+    onTypeChange && onTypeChange(newType);
+    setType(newType);
+    localPageCacheStore.project(projectId).setItem('gantt.search.type', newType);
+  });
+  const handleSprintChange = useCallback((value: string[]) => {
+    store.setSprintIds(value);
+  }, [store]);
+  console.log('sprintIds', sprintIds);
+  const afterSprintLoad = useCallback((sprints) => {
+    console.log('afterSprintLoad', sprints);
+    if (!store.sprintIds) {
+      const cachedSprintId = localPageCacheStore.project(projectId).getItem('gantt.search.sprints');
+      if (cachedSprintId) {
+        store.setSprintIds(cachedSprintId);
+      } else {
+        const currentSprint = find(sprints, { statusCode: 'started' });
+        if (currentSprint) {
+          store.setSprintIds([currentSprint.sprintId]);
+        } else {
+          store.setSprintIds([sprints[0]?.sprintId || '0']);
+        }
+      }
+    }
+  }, [projectId, store]);
+  const sprintComponentsProps = useCreation(() => ({
+    key: `SelectSprint-${projectId}`,
+    flat: true,
+    statusList: [],
+    projectId,
+    placeholder: '冲刺',
+    multiple: true,
+    onChange: handleSprintChange,
+    clearButton: false,
+    afterLoad: afterSprintLoad,
+    hasUnassign: true,
+    maxTagTextLength: 12,
+    style: { marginRight: 16 },
+    maxTagCount: 2,
+    searchable: false,
+    selectAllButton: false,
+  }) as SelectSprintProps, [projectId, handleSprintChange]);
+  const processTypeComponentProps = {
+    value: processType,
+    onChange: setProcessType,
+    clearButton: false,
+    style: { marginRight: 8, width: 100 },
+  } as Partial<SelectProps>;
+  const typeComponentProps = {
+    value: type,
+    isHasConflict,
+    onChange: handleTypeChange,
+    style: { marginRight: 16 },
+  } as Partial<SelectProps>;
+  const headerComponentProps = useCreation(() => {
+    const itemMap = {
+      create: {
+        name: '创建工作项',
+        icon: 'playlist_add',
+        display: true,
+        handler: () => {
+          openCreateIssue({
+            defaultValues: { sprint: sprintIds?.length === 1 ? sprintIds.filter((item) => item !== '0')[0] : undefined },
+            onCreate: () => configMaps.get('onRefresh') && configMaps.get('onRefresh')(),
+          });
+        },
+      },
+      personalFilter: {
+        name: '个人筛选',
+        icon: 'settings-o',
+        display: true,
+        handler: onClickPersonalFilter,
+      },
+      columnConfig: {
+        display: true,
+        name: '列配置',
+        // icon: 'view_column-o',
+        handler: () => {
+          openCustomColumnManageModal({
+            modelProps: {
+              title: '设置列显示字段',
+            },
+            projectId,
+            value: configMaps.get('visibleColumnCodes') || [],
+            options: configMaps.get('columnOptions') || [],
+            type: 'gantt',
+          });
+        },
+        element: (
+          <Button>
+            <Icon
+              type="view_column-o"
+              style={{ fontSize: 20, marginBottom: -1 }}
+            />
+            <span>列配置</span>
+          </Button>),
+      },
+      fullScreen: {
+        icon: isFullScreen ? 'fullscreen_exit' : 'zoom_out_map',
+        iconOnly: true,
+        display: true,
+        handler: () => {
+          // @ts-ignore
+          toggleFullScreen();
+        },
+        tooltipsConfig: {
+          title: isFullScreen ? '退出全屏' : '全屏',
+        },
+      },
+      refresh: {
+        icon: 'refresh',
+        // funcType: 'flat',
+        handler: onRefresh,
+      },
+    };
+    if (menuType === 'project') {
+      return {
+        showClassName: false,
+        items: ['create', 'personalFilter', 'columnConfig', 'fullScreen', 'refresh'].map((key: keyof typeof itemMap) => itemMap[key]),
+      };
+    }
+    return {
+      showClassName: false,
+      items: ['columnConfig', 'personalFilter'].map((key: keyof typeof itemMap) => itemMap[key]),
+    };
+  }, [menuType, columnOptions, visibleColumnCodes]);
+  return [{ type, processType, setConfig }, {
+    sprintComponentsProps, processTypeComponentProps, typeComponentProps, headerComponentProps,
+  }] as const;
+}
+type F = ReturnType<typeof useGanttHeader>
+type IGanntHeaderHookData = F[0]
+export type { IGanntHeaderHookData };
+export default useGanttHeader;
