@@ -137,7 +137,7 @@ function useGanttHeader(config: IGanttHeaderHookConfig) {
           <Button>
             <Icon
               type="view_column-o"
-              style={{ fontSize: 20, marginBottom: -1 }}
+              style={{ fontSize: 20 }}
             />
             <span>列配置</span>
           </Button>),

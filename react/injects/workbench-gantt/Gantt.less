@@ -23,6 +23,7 @@
         top: -2px;
         color: #abbccf;
       }
+
       .c7n-pro-select {
         height: 31px;
         min-height: 31px !important;
@@ -40,6 +41,15 @@
   flex: auto;
 
   :global {
+    .c7n-issue-search {
+      margin-top: .08rem;
+      margin-bottom: .06rem;
+    }
+
+    .c7n-issue-search+div {
+      margin-top: .09rem;
+    }
+
     .flat-select {
       height: 32px !important;
       min-height: 32px !important;
@@ -54,11 +64,14 @@
         min-height: 31px !important;
       }
     }
-    .c7n-gantt-content-header{
+
+    .c7n-gantt-content-header {
       padding: 0 .2rem;
     }
+
     .c7n-gantt-content-body {
       margin-bottom: 0;
+      padding: 0 .12rem;
     }
   }
 }

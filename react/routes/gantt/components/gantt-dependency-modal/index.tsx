@@ -145,7 +145,8 @@ const GanttDependency: React.FC = observer(() => {
   );
 });
 
-const openGanttDependencyModal = (props: IGanttDependencyModalProps) => {
+const openGanttDependencyModal = async (props: IGanttDependencyModalProps) => {
+  const editData = await ganttApi.loadDependencyByCurrentIssue(props.issueId);
   Modal.open({
     key: Modal.key(),
     title: `${props.data?.length ? '编辑' : '添加'}前置依赖`,
@@ -154,7 +155,7 @@ const openGanttDependencyModal = (props: IGanttDependencyModalProps) => {
     },
     drawer: true,
     children: (
-      <StoreProvider {...props}>
+      <StoreProvider {...props} data={editData}>
         <GanttDependency />
       </StoreProvider>),
 
