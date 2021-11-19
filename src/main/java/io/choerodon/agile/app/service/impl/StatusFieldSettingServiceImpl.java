@@ -860,10 +860,23 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             List<UserDTO> userDTOS = baseFeignClient.listUsersByIds(userIds.toArray(new Long[userIds.size()]), true).getBody();
             userMap.putAll(userDTOS.stream().collect(Collectors.toMap(UserDTO::getId, UserDTO::getRealName)));
         }
+        Set<Long> customFieldIds = statusFieldValueSetting.stream().
+                filter(v -> COPY_CUSTOM_FIELD.equals(v.getOperateType()) && !Objects.isNull(v.getCustomFieldId()))
+                .map(StatusFieldValueSettingDTO::getCustomFieldId).collect(Collectors.toSet());
+        Map<Long, String> customFiledNameMap = new HashMap<>();
+        if (!CollectionUtils.isEmpty(customFieldIds)) {
+            customFiledNameMap.putAll(
+                    objectSchemeFieldMapper.selectByIds(StringUtils.join(customFieldIds, ","))
+                            .stream()
+                            .collect(Collectors.toMap(ObjectSchemeFieldDTO::getId, ObjectSchemeFieldDTO::getName)));
+        }
         statusFieldValueSetting.forEach(v -> {
             if ((FieldType.MEMBER.equals(v.getFieldType()) || FieldType.MULTI_MEMBER.equals(v.getFieldType())) && !ObjectUtils.isEmpty(v.getUserId())) {
                 v.setName(userMap.get(v.getUserId()));
             }
+           if (COPY_CUSTOM_FIELD.equals(v.getOperateType()) && !Objects.isNull(v.getCustomFieldId())) {
+               v.setName(customFiledNameMap.get(v.getCustomFieldId()));
+           }
         });
     }
 
