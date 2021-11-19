@@ -85,7 +85,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     { code: 'deviationRate', title: '偏差率' } as IFoundationHeader,
     ],
   });
-  useEffect(() => () => { localPageCacheStore.setItem('agile.working.hours.issue.search', issueSearchStore.getCustomFieldFilters()); }, []);
+  useEffect(() => () => { isProject && localPageCacheStore.setItem('agile.working.hours.issue.search', issueSearchStore.getCustomFieldFilters()); }, []);
 
   const workingHoursIssuesDs = useMemo(() => new DataSet(WorkingHoursIssuesDataSet({
     projectId: getProjectId(),

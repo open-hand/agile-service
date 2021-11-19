@@ -2,6 +2,7 @@ import React from 'react';
 import {
   get, merge,
 } from 'lodash';
+import { toJS } from 'mobx';
 import { IFieldProcessConfig } from '../base/type';
 import { getComponentCodeForLocalCode, getFieldPropsByMode } from '../base/utils';
 import { getSearchFieldPropsByFieldType, IAgileBaseSearchFieldInstance } from './search';
@@ -14,8 +15,9 @@ import SelectUser from '@/components/select/select-user';
 function getFieldConfig({
   field, props,
 }: any) {
-  const { fieldType } = field;
-  const { projectId, applyType, value } = props;
+  const { fieldType, value } = field;
+  const defaultValue = toJS(value);
+  const { projectId, applyType } = props;
   const code = getComponentCodeForLocalCode(field.code);
   const otherProps = {
     ...getFieldPropsByMode({
@@ -29,6 +31,7 @@ function getFieldConfig({
         code,
         props: {
           ...otherProps,
+          defaultSelectedIds: defaultValue,
           isWorkBench: true,
         },
       };
@@ -38,6 +41,7 @@ function getFieldConfig({
         code,
         props: {
           ...otherProps,
+          defaultSelectedIds: defaultValue,
           level: 'workbench',
         },
       };
@@ -47,6 +51,7 @@ function getFieldConfig({
         code: 'project',
         props: {
           ...otherProps,
+          defaultSelectedIds: defaultValue,
           level: 'workbench',
         },
       };
@@ -62,6 +67,7 @@ function getFieldConfig({
         code,
         props: {
           ...otherProps,
+          selected: defaultValue,
           level: 'workbench',
           request: undefined,
         },

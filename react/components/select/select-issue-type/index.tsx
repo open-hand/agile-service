@@ -41,7 +41,8 @@ const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
     valueField: valueField || 'id',
     request: request || (({ filter: filterWord, page, requestArgs }) => {
       if (level === 'workbench') {
-        return issueTypeApi.loadPageForWorkbench({ page, param: filterWord, size: 50 }, { filterIssueTypeIds: defaultSelectedIds });
+        return issueTypeApi.loadPageForWorkbench({ page, param: filterWord, size: 50 },
+          { filterIssueTypeIds: defaultSelectedIds });
       }
       return issueTypeApi.loadAllWithStateMachineId(applyType ?? (isProgram ? 'program' : undefined), projectId).then((issueTypes) => {
         if (isProgram) {

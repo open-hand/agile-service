@@ -196,6 +196,7 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
       //   name: h.fieldCode,
       //   label: h.name,
       // })));
+      localPageCacheStore.project(projectId).setItem('agile.gantt.search', searchFilter);
       setConfig('isHasConflict', isHasConflict.current);
       unstable_batchedUpdates(() => {
         setProjectWorkCalendar(projectWorkCalendarRes);
@@ -458,7 +459,6 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
   const handleResizeWidth: GanttProps['onResizeWidth'] = usePersistFn((tableWidth) => {
     localCacheStore.unPrefix().setItem('agile.gantt.table.width', tableWidth);
   });
-  useEffect(() => () => { localPageCacheStore.project(projectId).setItem('agile.gantt.search', issueSearchStore.getCustomFieldFilters()); }, [projectId]);
   return (
     <Context.Provider value={{
       ...context,

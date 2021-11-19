@@ -21,11 +21,12 @@ interface IExportWorkHoursIssueModalProps {
 function openExportWorkHoursIssueModal({
   fields, columns, chosenFields, visibleColumns = [], menuType = 'project', attachSearchArgs,
 }: IExportWorkHoursIssueModalProps) {
-  function transformSystemFilter(data:any) {
+  function transformSystemFilter(data: any) {
     const search = getTransformSystemFilter(data);
     set(search, 'searchArgs.projectIds', [...(data.projectIds || [])]);
     return search;
   }
+  console.log('chosenFields', chosenFields);
   const commonStoreProps = {
     events: {
       exportAxios: (searchData, sort) => {
@@ -68,7 +69,14 @@ function openExportWorkHoursIssueModal({
       },
     } : {
       wsMessageKey: `agile-export-issue-work-hours-org-${getOrganizationId()}`,
-      renderField: (field, otherComponentProps) => getSearchWorkbenchFields([field], { [field.code]: { ...otherComponentProps, placeholder: undefined, flat: false } })[0] as React.ReactElement,
+      renderField: (field, otherComponentProps) => getSearchWorkbenchFields([field], {
+        [field.code]: {
+          ...otherComponentProps,
+          name: field.code,
+          placeholder: undefined,
+          flat: false,
+        },
+      })[0] as React.ReactElement,
     },
   });
   const checkOptions = columns.map((item) => ({ value: item.code, label: item.title }));
