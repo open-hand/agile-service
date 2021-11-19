@@ -89,7 +89,7 @@ public class WorkHoursOrgController {
                                                                    PageRequest pageRequest,
                                                                    @RequestBody SearchVO searchVO) {
         EncryptionUtils.decryptSearchVO(searchVO);
-        return Optional.ofNullable(workHoursService.pageQueryProject(organizationId , null, pageRequest, searchVO))
+        return Optional.ofNullable(workHoursService.pageProjectLatitude(organizationId , pageRequest, searchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.issue.work.hours.query"));
     }
