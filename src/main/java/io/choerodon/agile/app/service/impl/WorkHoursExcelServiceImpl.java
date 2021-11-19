@@ -336,7 +336,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
                 for (Long userId : userIds) {
                     WorkHoursCountVO workHoursCountVO = countMap.get(userId);
                     if (!ObjectUtils.isEmpty(workHoursCountVO)) {
-                        actualUserCount += workHoursCountVO.getRegisterWorkTimeUserCount();
+                        actualUserCount += 1;
                         unsaturatedUserCount += workHoursCountVO.getUnsaturatedUserCount();
                         unsaturatedTimes += workHoursCountVO.getUnsaturatedTimes();
                     }
@@ -439,10 +439,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
     @Override
     @Async
     public void exportWorkHoursCalendarOnOrganizationLevel(Long organizationId, WorkHoursSearchVO workHoursSearchVO, ServletRequestAttributes requestAttributes, Boolean isOrg) {
-        List<Long> projectIds = workHoursSearchVO.getProjectIds();
-        if (CollectionUtils.isEmpty(projectIds)) {
-            projectIds = new ArrayList<>();
-        }
+        List<Long> projectIds = new ArrayList<>();
         Long userId = DetailsHelper.getUserDetails().getUserId();
         workHoursService.handlerProject(organizationId, projectIds, userId, workHoursSearchVO);
         exportWorkHoursCalendar(organizationId, projectIds, workHoursSearchVO, requestAttributes, isOrg);
@@ -1069,7 +1066,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
     @Override
     @Async
     public void exportWorkHoursLogOnOrganizationLevel(Long organizationId, WorkHoursSearchVO workHoursSearchVO, ServletRequestAttributes requestAttributes) {
-        List<Long> projectIds = workHoursSearchVO.getProjectIds();
+        List<Long> projectIds = new ArrayList<>();
         Long userId = DetailsHelper.getUserDetails().getUserId();
         workHoursService.handlerProject(organizationId, projectIds, userId, workHoursSearchVO);
         exportWorkHoursLog(organizationId, projectIds, workHoursSearchVO, requestAttributes,true);
