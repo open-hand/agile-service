@@ -133,7 +133,7 @@ public class WorkGroupServiceImpl implements WorkGroupService {
         WorkGroupVO map = modelMapper.map(groupDTO, WorkGroupVO.class);
         // 保存树形结构
         buildTreeClosure(map, organizationId);
-        return map;
+        return queryById(organizationId, groupDTO.getId());
     }
 
     private void buildTreeClosure(WorkGroupVO workGroupVO, Long organizationId) {
