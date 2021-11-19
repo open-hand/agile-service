@@ -79,7 +79,7 @@ const LogSearch: React.FC<{ searchDs: DataSet, showWorkGroup?: boolean }> = ({ s
         request={workGroupIds?.length ? ({ page, filter, requestArgs }: { page: number, filter: string, requestArgs: { selectedUserIds?: string[]}}) => workGroupApi.loadUserByGroupIds({ workGroupIds, realName: filter, userIds: requestArgs.selectedUserIds }, {
           page,
         }).then((res: any) => {
-          const userList = res.content?.map((item: any) => item.userVO);
+          const userList = res.content || [];
           const noFindUserIds: string[] = [];
           if (userIds.length) {
             userIds.forEach((id: string) => {
