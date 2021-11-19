@@ -640,9 +640,6 @@ public class BoardServiceImpl implements BoardService {
         InputDTO inputDTO = new InputDTO(issueId, UPDATE_STATUS_MOVE, JSON.toJSONString(handleIssueMoveRank(projectId, issueMoveVO)));
         Set<Long> influenceIssueIds = new HashSet<>();
         IssueVO issueVO = issueService.doStateMachineCustomFlowAndRuleNotice(projectId, issueId, SchemeApplyType.AGILE, influenceIssueIds, isDemo, transformId, inputDTO);
-        if (!ObjectUtils.isEmpty(issueVO)) {
-            return modelMapper.map(issueVO, IssueMoveVO.class);
-        }
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         if (backlogExpandService != null) {
             backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
@@ -650,6 +647,9 @@ public class BoardServiceImpl implements BoardService {
         IssueMoveVO result = modelMapper.map(issueDTO, IssueMoveVO.class);
         if (!preStatusId.equals(nowStatusId)) {
             sendMsgUtil.sendMsgByIssueMoveComplete(projectId, issueMoveVO, issueDTO, DetailsHelper.getUserDetails().getUserId());
+        }
+        if (!ObjectUtils.isEmpty(issueVO)) {
+            result.setErrorMsg(issueVO.getErrorMsg());
         }
         return result;
     }

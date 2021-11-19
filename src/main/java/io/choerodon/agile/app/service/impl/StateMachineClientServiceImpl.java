@@ -154,12 +154,12 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         Set<Long> influenceIssueIds = new HashSet<>();
         IssueVO execResult = issueService.doStateMachineCustomFlow(projectId, issueId, applyType, influenceIssueIds, new TriggerCarrierVO());
         statusNoticeSettingService.noticeByChangeStatus(projectId, issueId);
-        if (execResult != null) {
-            return execResult;
-        }
         //前端请求创建issue和创建自定义字段是两个接口，issue创建不走切面，解决issue创建和自定义字段创建都走切面导致某个触发器失败的问题
         IssueVO result = issueService.queryIssueCreateWithoutRuleNotice(issueCreateVO.getProjectId(), issueId);
         result.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
+        if (execResult != null) {
+            result.setErrorMsg(execResult.getErrorMsg());
+        }
         return result;
     }
 
@@ -171,11 +171,11 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         Set<Long> influenceIssueIds = new HashSet<>();
         IssueVO execResult = issueService.doStateMachineCustomFlow(projectId, issueId, applyType, influenceIssueIds, new TriggerCarrierVO());
         statusNoticeSettingService.noticeByChangeStatus(projectId, issueId);
-        if (execResult != null) {
-            return execResult;
-        }
         IssueVO result = issueService.queryIssueCreateWithoutRuleNotice(issueCreateVO.getProjectId(), issueId);
         result.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
+        if (execResult != null) {
+            result.setErrorMsg(execResult.getErrorMsg());
+        }
         return result;
     }
 
