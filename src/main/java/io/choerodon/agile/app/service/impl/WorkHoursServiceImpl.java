@@ -542,10 +542,10 @@ public class WorkHoursServiceImpl implements WorkHoursService {
         List<UserDTO> userList = baseFeignClient.listUsersByIds(userIds.toArray(new Long[userIds.size()]), false).getBody();
         Map<Long, UserDTO> userMap = userList.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity()));
         // 统计工时
-        List<IssueWorkHoursVO> workTimes = workHoursMapper.countAssigneeWorkTime(projects, allIssueId, searchVO);
+        List<IssueWorkHoursVO> workTimes = workHoursMapper.countProjectAssigneeWorkTime(projects, allIssueId, searchVO);
         Map<Long, Map<Long, BigDecimal>> workTimeMap = workTimes.stream().collect(Collectors.groupingBy(IssueWorkHoursVO::getUserId, Collectors.toMap(IssueWorkHoursVO::getProjectId, IssueWorkHoursVO::getWorkTime)));
         // 统计累计工时
-        List<IssueWorkHoursVO> cumulativeWorkTimes = workHoursMapper.countAssigneeWorkTime(projects, allIssueId, null);
+        List<IssueWorkHoursVO> cumulativeWorkTimes = workHoursMapper.countProjectAssigneeWorkTime(projects, allIssueId, null);
         Map<Long, Map<Long, BigDecimal>> cumulativeWorkTimeMap = cumulativeWorkTimes.stream().collect(Collectors.groupingBy(IssueWorkHoursVO::getUserId, Collectors.toMap(IssueWorkHoursVO::getProjectId, IssueWorkHoursVO::getWorkTime)));
         for (IssueWorkHoursVO issueWorkHoursVO : projectAssignee) {
             Long userId = issueWorkHoursVO.getUserId();
