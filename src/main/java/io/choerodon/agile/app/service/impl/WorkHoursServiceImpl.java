@@ -143,7 +143,7 @@ public class WorkHoursServiceImpl implements WorkHoursService {
             }
             if (!CollectionUtils.isEmpty(projectIds) && workHoursSearchVO.getWorkGroupIds().contains(0L)) {
                 // 查询登记过工时但未分配工作组的人员
-                Set<Long> noGroupUserIds = workGroupUserRelMapper.selectNoGroupUsers(organizationId, projectIds);
+                Set<Long> noGroupUserIds = workGroupUserRelMapper.selectNoGroupUsers(organizationId, projectIds, workHoursSearchVO.getStartTime(), workHoursSearchVO.getEndTime());
                 List<UserDTO> userDTOS = baseFeignClient.listUsersByIds(noGroupUserIds.toArray(new Long[1]), true).getBody();
                 if (!CollectionUtils.isEmpty(userDTOS)) {
                     userIds.addAll(userDTOS.stream().map(UserDTO::getId).collect(Collectors.toList()));
