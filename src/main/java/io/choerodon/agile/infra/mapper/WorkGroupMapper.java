@@ -23,4 +23,6 @@ public interface WorkGroupMapper extends BaseMapper<WorkGroupDTO> {
     String queryLeftRank(@Param("organizationId") Long organizationId,@Param("parentId") Long parentId, @Param("rightRank") String rightRank);
 
     String queryRightRank(@Param("organizationId") Long organizationId,@Param("parentId") Long parentId, @Param("leftRank") String leftRank);
+
+    List<Long> selectIdsByOrganizationId(@Param("organizationId")  Long organizationId, @Param("ignoredWorkGroupIds")  List<Long> ignoredWorkGroupIds);
 }

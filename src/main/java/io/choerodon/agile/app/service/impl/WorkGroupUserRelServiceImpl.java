@@ -6,6 +6,7 @@ import io.choerodon.agile.app.service.WorkGroupUserRelService;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.WorkGroupUserRelDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.mapper.WorkGroupMapper;
 import io.choerodon.agile.infra.mapper.WorkGroupUserRelMapper;
 import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.core.domain.Page;
@@ -40,6 +41,9 @@ public class WorkGroupUserRelServiceImpl implements WorkGroupUserRelService {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private WorkGroupMapper workGroupMapper;
 
     @Override
     public void batchInsertRel(Long organizationId, WorkGroupUserRelParamVO workGroupUserRelParamVO) {
@@ -76,7 +80,7 @@ public class WorkGroupUserRelServiceImpl implements WorkGroupUserRelService {
     @Override
     public Page<WorkGroupUserRelVO> pageByQuery(Long organizationId, PageRequest pageRequest, WorkGroupUserRelParamVO workGroupUserRelParamVO) {
         // 查询工作组的所有子级
-        List<Long> workGroupIds = workGroupService.listChildrenWorkGroup(organizationId, workGroupUserRelParamVO.getWorkGroupIds());
+        List<Long> workGroupIds = workGroupService.listChildrenWorkGroup(organizationId, Collections.singletonList(workGroupUserRelParamVO.getWorkGroupId()));
         Set<Long> userIds = workGroupUserRelMapper.listUserIdsByWorkGroupIds(organizationId, workGroupIds);
         if (CollectionUtils.isEmpty(userIds)) {
             return new Page<>();
@@ -169,5 +173,67 @@ public class WorkGroupUserRelServiceImpl implements WorkGroupUserRelService {
             list.add(workGroupUserRelVO);
         });
         return PageUtil.buildPageInfoWithPageInfoList(userPage, list);
+    }
+
+    @Override
+    public Page<UserDTO> pageByGroups(Long organizationId, PageRequest pageRequest, WorkGroupUserRelParamVO workGroupUserRelParamVO) {
+        List<Long> selectedUserIds = workGroupUserRelParamVO.getUserIds();
+        List<Long> selectedWorkGroupIds = workGroupUserRelParamVO.getWorkGroupIds();
+        Page<UserDTO> userPage = new Page<>();
+        AgileUserVO agileUserVO = modelMapper.map(workGroupUserRelParamVO, AgileUserVO.class);
+        agileUserVO.setUserIds(null);
+        Set<Long> ignoredUserIds = new HashSet<>();
+        // 处理分组筛选
+        Boolean doPage = handlerWorkGroupIds(organizationId, selectedWorkGroupIds, ignoredUserIds, agileUserVO);
+        // 过滤选中的用户
+        ignoredUserIds.addAll(selectedUserIds);
+        agileUserVO.setIgnoredUserIds(ignoredUserIds);
+        if (Boolean.TRUE.equals(doPage)) {
+            userPage = baseFeignClient.pagingUsersOnOrganizationLevel(organizationId, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
+        }
+        // 处理选中的用户
+        appendSelectedUsers(userPage, selectedUserIds, pageRequest);
+        return userPage;
+    }
+
+    private Boolean handlerWorkGroupIds(Long organizationId, List<Long> selectedWorkGroupIds, Set<Long> ignoredUserIds, AgileUserVO agileUserVO) {
+        boolean doPage = true;
+        if (!CollectionUtils.isEmpty(selectedWorkGroupIds)) {
+            // 查询选中的工作组及子级
+            List<Long> workGroupIds = workGroupService.listChildrenWorkGroup(organizationId, selectedWorkGroupIds);
+            Set<Long> workGroupUserIds = new HashSet<>();
+            if (!CollectionUtils.isEmpty(workGroupIds)) {
+                workGroupUserIds = workGroupUserRelMapper.listUserIdsByWorkGroupIds(organizationId, workGroupIds);
+            }
+            // 是否包含未分配工作组
+            boolean containsNoGroup = selectedWorkGroupIds.contains(0L);
+            if (containsNoGroup) {
+                // 包含未分配，分页查询时忽略其他未选中工作组的用户但保留已选中工作组的用户
+                List<Long> unSelectedWorkGroupIds = workGroupMapper.selectIdsByOrganizationId(organizationId, workGroupIds);
+                ignoredUserIds.addAll(workGroupUserRelMapper.listUserIdsByWorkGroupIds(organizationId, unSelectedWorkGroupIds));
+                ignoredUserIds.removeIf(workGroupUserIds::contains);
+                agileUserVO.setUserIds(null);
+            } else {
+                // 不包含未分配，分页查询选中工作组的用户
+                agileUserVO.setUserIds(workGroupUserIds);
+                if (CollectionUtils.isEmpty(workGroupUserIds)) {
+                    // 选中工作组无用户时，不分页查询用户
+                    doPage = false;
+                }
+            }
+        }
+        return doPage;
+    }
+
+    private void appendSelectedUsers(Page<UserDTO> userPage, List<Long> selectedUserIds, PageRequest pageRequest) {
+        boolean append = !ObjectUtils.isEmpty(selectedUserIds) && pageRequest.getPage() == 0;
+        if (append) {
+            // 拼接选中的用户
+            List<UserDTO> list = baseFeignClient.listUsersByIds(selectedUserIds.toArray(new Long[selectedUserIds.size()]), true).getBody();
+            if (!CollectionUtils.isEmpty(userPage.getContent())) {
+                list.addAll(userPage.getContent());
+            }
+            userPage.setContent(list);
+        }
     }
 }

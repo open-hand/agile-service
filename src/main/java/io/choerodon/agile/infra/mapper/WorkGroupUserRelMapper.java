@@ -23,4 +23,6 @@ public interface WorkGroupUserRelMapper extends BaseMapper<WorkGroupUserRelDTO> 
     Set<Long> listUserIdsByWorkGroupIds(@Param("organizationId") Long organizationId, @Param("workGroupIds") List<Long> workGroupIds);
 
     List<WorkGroupVO> selectWorkGroupByUserId(@Param("organizationId") Long organizationId, @Param("userIds") List<Long> userIds);
+
+    Set<Long> selectNoGroupUsers(@Param("organizationId") Long organizationId, @Param("projectIds") List<Long> projectIds);
 }

@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.WorkGroupUserRelParamVO;
 import io.choerodon.agile.api.vo.WorkGroupUserRelVO;
+import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
@@ -26,4 +27,6 @@ public interface WorkGroupUserRelService {
     Map<Long, Set<Long>> getWorkGroupMap(Long organizationId);
 
     Page<WorkGroupUserRelVO> pageUnlinkUser(Long organizationId, PageRequest pageRequest, WorkGroupUserRelParamVO workGroupUserRelParamVO);
+
+    Page<UserDTO> pageByGroups(Long organizationId, PageRequest pageRequest, WorkGroupUserRelParamVO workGroupUserRelParamVO);
 }
