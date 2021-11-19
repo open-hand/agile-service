@@ -404,7 +404,9 @@ export default function renderField({
         });
       }
       if (!required || code !== 'reporter') {
-        extraOptionsMap.member.unshift({ id: 'clear', realName: '清空', tooltip: false });
+        extraOptionsMap.member.unshift({
+          id: 'clear', realName: '-清空-', tooltip: false, headerHidden: true,
+        });
       }
       if (fieldType === 'member') {
         extraOptionsMap.member.push(...customMemberData.filter((customMember) => customMember.fieldType === 'member') || []);

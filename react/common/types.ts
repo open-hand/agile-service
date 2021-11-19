@@ -15,6 +15,7 @@ export interface User {
   realName: string
   name?: string
   textShow?: string
+  headerHidden?: boolean
 }
 
 export interface ISprint {

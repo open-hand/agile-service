@@ -108,8 +108,8 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     requestArgs: args,
     onOption,
     request: userRequest,
-    optionRenderer: optionRenderer || ((user: User) => <UserTag data={user as User} />),
-    renderer: optionRenderer || ((user: User) => <UserTag data={user as User} tooltip={!flat} className={Styles.userWrap} textClassName={Styles.userText} />),
+    optionRenderer: optionRenderer || ((user: User) => (user?.headerHidden ? <span>{user?.realName}</span> : <UserTag data={user as User} />)),
+    renderer: optionRenderer || ((user: User) => (user?.headerHidden ? <span>{user?.realName}</span> : <UserTag data={user as User} tooltip={!flat} className={Styles.userWrap} textClassName={Styles.userText} />)),
     middleWare: (data) => {
       let newData = [];
       const temp: User[] = [];
