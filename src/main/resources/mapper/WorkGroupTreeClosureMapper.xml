@@ -3,7 +3,7 @@
 <mapper namespace="io.choerodon.agile.infra.mapper.WorkGroupTreeClosureMapper">
     <select id="queryAncestor" resultType="java.lang.Long">
         select
-          ancestor_id
+          distinct ancestor_id
         from
         fd_work_group_tree_closure
         where
@@ -14,7 +14,7 @@
 
     <select id="queryDescendant" resultType="java.lang.Long">
         select
-          descendant_id
+          distinct descendant_id
         from
         fd_work_group_tree_closure
         where

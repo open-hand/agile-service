@@ -621,6 +621,12 @@ public class WorkHoursServiceImpl implements WorkHoursService {
     }
 
     @Override
+    public Page<IssueWorkHoursVO> pageProjectLatitude(Long organizationId, PageRequest pageRequest, SearchVO searchVO) {
+        List<Long> projectIds = transformProjectIds(searchVO);
+        return pageQueryProject(organizationId, projectIds, pageRequest, searchVO);
+    }
+
+    @Override
     public Page<IssueWorkHoursVO> pageQueryProject(Long organizationId,
                                                    List<Long> projectIds,
                                                    PageRequest pageRequest,

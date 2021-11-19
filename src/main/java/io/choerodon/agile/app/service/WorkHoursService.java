@@ -107,6 +107,8 @@ public interface WorkHoursService {
 
     Page<IssueWorkHoursVO> pageQueryProject(Long organizationId, List<Long> projectIds, PageRequest pageRequest, SearchVO searchVO);
 
+    Page<IssueWorkHoursVO> pageProjectLatitude(Long organizationId,  PageRequest pageRequest, SearchVO searchVO);
+
     Page<IssueWorkHoursVO> pageQueryAssigneeOnOrganizationLevel(Long organizationId, PageRequest pageRequest, SearchVO searchVO);
 
     Page<IssueListFieldKVVO> pageQueryIssuesOnOrganizationLevel(Long organizationId, PageRequest pageRequest, Boolean containsSubIssue, SearchVO searchVO);

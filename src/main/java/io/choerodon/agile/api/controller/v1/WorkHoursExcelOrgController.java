@@ -27,7 +27,7 @@ public class WorkHoursExcelOrgController {
     @Autowired
     private WorkHoursExcelService workHoursExcelService;
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("导出工时日历")
     @PostMapping(value = "/export_work_hours_log")
     public void download(@ApiParam(value = "项目id", required = true)
@@ -36,7 +36,7 @@ public class WorkHoursExcelOrgController {
         workHoursExcelService.exportWorkHoursLogOnOrganizationLevel(organizationId, workHoursSearchVO, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes());
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("导出工时日历")
     @PostMapping(value = "/export_work_hours_calendar")
     public void exportWorkHoursCalendar(@ApiParam(value = "组织id", required = true)
@@ -45,7 +45,7 @@ public class WorkHoursExcelOrgController {
         workHoursExcelService.exportWorkHoursCalendarOnOrganizationLevel(organizationId, workHoursSearchVO, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes(), true);
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("导出工作项工时")
     @PostMapping(value = "/export_issue_work_hours")
     public void exportIssueWorkHours(@ApiParam(value = "组织id", required = true)

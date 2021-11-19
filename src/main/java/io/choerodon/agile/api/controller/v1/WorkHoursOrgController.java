@@ -33,7 +33,7 @@ public class WorkHoursOrgController {
     @Autowired
     private WorkHoursService workHoursService;
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("查询工时日志")
     @PostMapping(value = "/work_hours_log")
     public ResponseEntity<Page<WorkHoursLogVO>> pageWorkHoursLogByOrgId(@ApiParam(value = "组织id", required = true)
@@ -46,7 +46,7 @@ public class WorkHoursOrgController {
                 .orElseThrow(() -> new CommonException("error.workCalendar.get"));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("查询工时日历")
     @PostMapping(value = "/work_hours_calendar")
     public ResponseEntity<Page<WorkHoursCalendarVO>> workHoursCalendarByProjectIds(@ApiParam(value = "组织Id", required = true)
@@ -58,7 +58,7 @@ public class WorkHoursOrgController {
                 .orElseThrow(() -> new CommonException("error.work.hours.calendar.get"));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("工时日历查用户的登记详情")
     @PostMapping(value = "/work_hours_calendar_info")
     public ResponseEntity<Map<String, List<WorkHoursLogVO>>> workHoursCalendarOrgInfoByUserId(@ApiParam(value = "组织id", required = true)
@@ -70,7 +70,7 @@ public class WorkHoursOrgController {
                 .orElseThrow(() -> new CommonException("error.work.hours.calendar.info.get"));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("统计每天的工时总数")
     @PostMapping(value = "/count_work_hours")
     public ResponseEntity<Map<String, BigDecimal>> countWorkHours(@ApiParam(value = "组织id", required = true)
@@ -81,7 +81,7 @@ public class WorkHoursOrgController {
                 .orElseThrow(() -> new CommonException("error.count.work.hours"));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("按项目维度统计工时")
     @PostMapping(value = "/project_work_hours")
     public ResponseEntity<Page<IssueWorkHoursVO>> pageQueryProject(@ApiParam(value = "组织id", required = true)
@@ -89,12 +89,12 @@ public class WorkHoursOrgController {
                                                                    PageRequest pageRequest,
                                                                    @RequestBody SearchVO searchVO) {
         EncryptionUtils.decryptSearchVO(searchVO);
-        return Optional.ofNullable(workHoursService.pageQueryProject(organizationId , null, pageRequest, searchVO))
+        return Optional.ofNullable(workHoursService.pageProjectLatitude(organizationId , pageRequest, searchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.issue.work.hours.query"));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("按经办人维度统计工时")
     @PostMapping(value = "/assignee_work_hours")
     public ResponseEntity<Page<IssueWorkHoursVO>> pageQueryAssignee(@ApiParam(value = "组织id", required = true)
@@ -107,7 +107,7 @@ public class WorkHoursOrgController {
                 .orElseThrow(() -> new CommonException("error.issue.work.hours.query"));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("按工作项维度查询")
     @PostMapping(value = "/issue_work_hours")
     public ResponseEntity<Page<IssueListFieldKVVO>> pageQueryIssues(@ApiParam(value = "组织id", required = true)
@@ -121,7 +121,7 @@ public class WorkHoursOrgController {
                 .orElseThrow(() -> new CommonException("error.issue.work.hours.query"));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("按经办人维度统计工时")
     @PostMapping(value = "/count_issue_work_hours")
     public ResponseEntity<BigDecimal> countIssueWorkHours(@ApiParam(value = "组织id", required = true)
