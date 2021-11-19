@@ -331,7 +331,6 @@
 
     <select id="countAssigneeWorkTime" resultType="io.choerodon.agile.api.vo.IssueWorkHoursVO">
         select
-        ai.project_id,
         ai.assignee_id as user_id,
         SUM(awl.work_time) as work_time,
         SUM(ai.estimate_time) as estimate_time
@@ -351,7 +350,7 @@
                 and awl.start_date between #{searchVO.searchArgs.startTime} and #{searchVO.searchArgs.endTime}
             </if>
         </if>
-        group by ai.project_id,ai.assignee_id
+        group by ai.assignee_id
     </select>
 
     <select id="countProjectAssigneeWorkTime" resultType="io.choerodon.agile.api.vo.IssueWorkHoursVO">
