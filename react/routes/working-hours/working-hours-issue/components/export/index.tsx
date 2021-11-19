@@ -1,6 +1,8 @@
 import React from 'react';
 import { Modal } from 'choerodon-ui/pro';
-import { merge, set, unset } from 'lodash';
+import {
+  merge, set, uniq, unset,
+} from 'lodash';
 import { issueApi, TemplateAction, workingHoursApi } from '@/api';
 import IssueExport from '@/components/issue-export';
 import IssueExportStore, { IssueExportStoreProps } from '@/components/issue-export/stores/store';
@@ -26,16 +28,36 @@ function openExportWorkHoursIssueModal({
     set(search, 'searchArgs.projectIds', [...(data.projectIds || [])]);
     return search;
   }
-  console.log('chosenFields', chosenFields);
   const commonStoreProps = {
     events: {
       exportAxios: (searchData, sort) => {
         merge(searchData, { searchArgs: attachSearchArgs });
-        searchData.exportFieldCodes && set(searchData, 'displayFields', searchData.exportFieldCodes?.map((code: string) => ({ code })));
-        unset(searchData, 'exportFieldCodes');
+        if (menuType === 'project') {
+          const { exportFieldCodes = [] } = searchData;
+          (exportFieldCodes as any[]).splice(0, 0, 'typeName');
+          set(searchData, 'displayFields', uniq(exportFieldCodes).map((code: string) => ({ code })));
+          unset(searchData, 'exportFieldCodes');
+        } else {
+          set(searchData, 'displayFields', [
+            'typeName',
+            'summary',
+            'workTime',
+            'cumulativeWorkTime',
+            'estimateTime',
+            'deviationRate'].map((code) => ({ code })));
+        }
+
         return workingHoursApi.exportHours(searchData);
       },
       loadRecordAxios: () => issueApi.loadLastImportOrExport('download_file_issue_work_hours'),
+    },
+    defaultCheckedExportFields: ['typeName'],
+    defaultInitOptions: ({ options }) => {
+      options.splice(0, 0, {
+        label: '问题类型',
+        value: 'typeName',
+      });
+      return options;
     },
     transformSystemFilter,
   } as IssueExportStoreProps;
@@ -67,6 +89,7 @@ function openExportWorkHoursIssueModal({
         quickFilterIds && value.push(...quickFilterIds.value);
         self.addExtraField({ name: '快速筛选', code: 'quickFilterIds', value });
       },
+
     } : {
       wsMessageKey: `agile-export-issue-work-hours-org-${getOrganizationId()}`,
       renderField: (field, otherComponentProps) => getSearchWorkbenchFields([field], {
