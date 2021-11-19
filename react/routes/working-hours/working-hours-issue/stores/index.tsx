@@ -216,10 +216,8 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
       });
     }
     getTotalWorkTime();
-    // 加载总计登记工时
   }, [mode]);
 
-  console.log('stores');
   const value = {
     ...props,
     workingHoursIssuesDs,
