@@ -65,10 +65,11 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
   const [mode, setMode] = useState<IMode>(localPageCacheStore.getItem('workingHours-issue-mode') || (isProject ? 'issue' : 'project'));
   const [isContain, setIsContain] = useState<boolean>(false);
   const [totalWorkTime, setTotalWorkTime] = useState<number>(0);
-  const issueSearchStoreProps = useCreation(():IssueSearchStoreProps => (isProject ? ({
+  const issueSearchStoreProps = useCreation((): IssueSearchStoreProps => (isProject ? ({
     getSystemFields: () => getSystemFields() as ILocalField[],
     transformFilter,
     menuType: 'project',
+    fieldConfigs: { issueTypeId: { excludeTypeCodes: ['issue_epic'] } },
     defaultSearchVO: localPageCacheStore.getItem('agile.working.hours.issue.search') ?? (myDefaultFilter && myDefaultFilter.filterJson ? JSON.parse(myDefaultFilter.filterJson) : undefined) ?? undefined,
   }) : ({
     getSystemFields: getWorkbenchSystemFields,

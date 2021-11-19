@@ -96,7 +96,7 @@ const GanttDependency: React.FC = observer(() => {
 
   return (
     <Loading type="spin" display={loading} className={styles.loading}>
-      <Form dataSet={dataset}>
+      <Form dataSet={dataset} hidden={!dataset.length}>
         <div>
           {dataset.data.map((record) => (
             <div className={styles.item} key={record.id}>
@@ -119,7 +119,7 @@ const GanttDependency: React.FC = observer(() => {
                 setLoading={setLoading}
                 onPopupHiddenChange={(hidden) => {
                   if (hidden) {
-                    setTimeout(() => setFocusing({ focusing: false, latestFocusRecord: record.id }), 10);
+                    setFocusing({ focusing: false, latestFocusRecord: record.id });
                   }
                 }}
                 isStopRequest={latestFocusRecord === record.id || focusing}
@@ -127,7 +127,15 @@ const GanttDependency: React.FC = observer(() => {
                 excludeIssueIds={excludeIssueIds}
                 selectIds={editData[record.get('predecessorType')]}
               />
-              <Icon type="delete_sweep-o" onClick={() => dataset.delete(record, false)} className={styles.del_btn} />
+              <Icon
+                type="delete_sweep-o"
+                onClick={() => {
+                  setFocusing({ focusing: false, latestFocusRecord: undefined });
+                  dataset.length > 1 && record.get('predecessorId')?.length && setLoading(true);
+                  dataset.delete(record, false);
+                }}
+                className={styles.del_btn}
+              />
             </div>
           ))}
         </div>

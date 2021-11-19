@@ -46,6 +46,9 @@ function openExportWorkHoursIssueModal({
           data.value && self.setState(data.code, data);
           return false;
         }
+        if (data.code === 'issueTypeId') {
+          return { ...data, otherComponentProps: { excludeTypeCodes: ['issue_epic'] } as any };
+        }
         if (data.archive) {
           return false;
         }

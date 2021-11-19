@@ -79,6 +79,7 @@ const WorkingHoursIssue = (props = {}) => {
                 fields: issueSearchStore.getAllFields,
                 chosenFields: issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()].filter(((c) => !['issueIds', 'userId'].includes(c.code))) : [],
                 visibleColumns,
+                menuType: isProject ? 'project' : 'workbench',
                 attachSearchArgs,
                 columns: options,
               });
