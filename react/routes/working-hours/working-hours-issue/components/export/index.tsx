@@ -3,12 +3,12 @@ import { Modal } from 'choerodon-ui/pro';
 import { merge, set, unset } from 'lodash';
 import { issueApi, TemplateAction, workingHoursApi } from '@/api';
 import IssueExport from '@/components/issue-export';
-import IssueExportStore from '@/components/issue-export/stores/store';
+import IssueExportStore, { IssueExportStoreProps } from '@/components/issue-export/stores/store';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import { getExportFieldCodes, getTransformSystemFilter } from '@/routes/Issue/components/ExportIssue/utils';
 import getSearchWorkbenchFields from '@/components/field-pro/layouts/searchWorkbench';
-import { getProjectId, getIsOrganization, getOrganizationId } from '@/utils/common';
+import { getProjectId, getOrganizationId } from '@/utils/common';
 
 interface IExportWorkHoursIssueModalProps {
   fields: IChosenFieldField[]
@@ -21,7 +21,25 @@ interface IExportWorkHoursIssueModalProps {
 function openExportWorkHoursIssueModal({
   fields, columns, chosenFields, visibleColumns = [], menuType = 'project', attachSearchArgs,
 }: IExportWorkHoursIssueModalProps) {
+  function transformSystemFilter(data:any) {
+    const search = getTransformSystemFilter(data);
+    set(search, 'searchArgs.projectIds', [...(data.projectIds || [])]);
+    return search;
+  }
+  const commonStoreProps = {
+    events: {
+      exportAxios: (searchData, sort) => {
+        merge(searchData, { searchArgs: attachSearchArgs });
+        searchData.exportFieldCodes && set(searchData, 'displayFields', searchData.exportFieldCodes?.map((code: string) => ({ code })));
+        unset(searchData, 'exportFieldCodes');
+        return workingHoursApi.exportHours(searchData);
+      },
+      loadRecordAxios: () => issueApi.loadLastImportOrExport('download_file_issue_work_hours'),
+    },
+    transformSystemFilter,
+  } as IssueExportStoreProps;
   const store = new IssueExportStore({
+    ...commonStoreProps,
     ...menuType === 'project' ? {
       defaultInitFieldAction: (data, self) => {
         if (data.code === 'quickFilterIds' || data.code === 'starBeacon' || data.code === 'myAssigned') {
@@ -31,9 +49,10 @@ function openExportWorkHoursIssueModal({
         if (data.archive) {
           return false;
         }
-
         return data;
       },
+      transformExportFieldCodes: getExportFieldCodes,
+      wsMessageKey: `agile-export-issue-work-hours-${getProjectId()}`,
       defaultInitFieldFinishAction: (data, self) => {
         const quickFilterIds = self.getState('quickFilterIds');
         const starBeacon = self.getState('starBeacon');
@@ -44,19 +63,9 @@ function openExportWorkHoursIssueModal({
         quickFilterIds && value.push(...quickFilterIds.value);
         self.addExtraField({ name: '快速筛选', code: 'quickFilterIds', value });
       },
-    } : { renderField: (field, otherComponentProps) => getSearchWorkbenchFields([field], { [field.code]: { ...otherComponentProps, placeholder: undefined, flat: false } })[0] as React.ReactElement },
-    transformSystemFilter: getTransformSystemFilter,
-    transformExportFieldCodes: getExportFieldCodes,
-    wsMessageKey: getIsOrganization() ? `agile-export-issue-work-hours-org-${getOrganizationId()}`
-      : `agile-export-issue-work-hours-${getProjectId()}`,
-    events: {
-      exportAxios: (searchData, sort) => {
-        merge(searchData, { searchArgs: attachSearchArgs });
-        set(searchData, 'displayFields', searchData.exportFieldCodes?.map((code: string) => ({ code })));
-        unset(searchData, 'exportFieldCodes');
-        return workingHoursApi.exportHours(searchData);
-      },
-      loadRecordAxios: () => issueApi.loadLastImportOrExport('download_file_issue_work_hours'),
+    } : {
+      wsMessageKey: `agile-export-issue-work-hours-org-${getOrganizationId()}`,
+      renderField: (field, otherComponentProps) => getSearchWorkbenchFields([field], { [field.code]: { ...otherComponentProps, placeholder: undefined, flat: false } })[0] as React.ReactElement,
     },
   });
   const checkOptions = columns.map((item) => ({ value: item.code, label: item.title }));

@@ -141,7 +141,7 @@ class UserApi extends Api<UserApi> {
     });
   }
 
-  async getWorkbenchUsers(param?: string, page?: number, userIds?: string[], queryFilterIds?: string[], size?: number): Promise<{
+  async getWorkbenchUsers(params?: { param?: string, page?: number, size?: number }, data: {ignoredUserIds?:string} = {}): Promise<{
     list: User[]
     hasNextPage: boolean
   }> {
@@ -149,11 +149,9 @@ class UserApi extends Api<UserApi> {
       method: 'post',
       url: `/agile/v1/organizations/${this.orgId}/work_bench/users`,
       params: {
-        param,
-        page: page || 1,
-        size: size || 20,
+        ...params,
       },
-      data: queryFilterIds ?? [],
+      data,
     });
   }
 

@@ -169,7 +169,7 @@ const ExportIssue: React.FC = () => {
       return false;
     }
     search.exportFieldCodes = store.transformExportFieldCodes(checkBoxDataProps.checkedOptions.sort((a, b) => findIndex(checkOptions, { value: a }) - findIndex(checkOptions, { value: b })), checkBoxDataProps);
-    if (checkBoxDataProps.checkedOptions.length === 0) {
+    if (visibleCheckField.current && checkBoxDataProps.checkedOptions.length === 0) {
       Choerodon.prompt('请至少选择一个字段导出');
       return false;
     }

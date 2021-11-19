@@ -1,7 +1,8 @@
 import { axios } from '@choerodon/boot';
 import { getOrganizationId, getProjectId } from '@/utils/common';
+import Api from './Api';
 
-class ProjectApi {
+class ProjectApi extends Api<ProjectApi> {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
   }
@@ -27,8 +28,31 @@ class ProjectApi {
    */
   loadProjectByUser({
     userId, filter, page, size, category,
-  }:any) {
+  }: any) {
     return axios.get(`iam/choerodon/v1/organizations/${getOrganizationId()}/users/${userId}/projects/paging?enabled=true&page=${page}&size=${size}&onlySucceed=true${filter ? `&name=${filter}` : ''}${category ? `&category=${category}` : ''}`);
+  }
+
+  /**
+   * 工作台加载项目列表 分页
+   * @param param0
+   * @returns
+   */
+  loadProjectForWorkbench({
+    userId, param, page, size, enabled = true, filterProjectIds,
+  }: any) {
+    return this.request({
+      method: 'post',
+      url: `iam/choerodon/v1/organizations/${this.orgId}/users/${userId}/projects/paging_option`,
+      params: {
+        param,
+        page,
+        size,
+      },
+      data: {
+        filterProjectIds,
+        enabled,
+      },
+    });
   }
 }
 

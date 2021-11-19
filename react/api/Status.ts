@@ -102,8 +102,13 @@ class StatusApi extends Api<StatusApi> {
   /**
    * 在该工作台查询下所有状态
    */
-  loadAllFromWorkbench() {
-    return axios.get(`${this.orgPrefix}/work_bench/status`);
+  loadAllFromWorkbench(params?: { page?: number, size?: number, param?: string }, data: { ignoredStatusIds?: string[], queryIgnored?: boolean } = {}) {
+    return this.request({
+      method: 'post',
+      url: `${this.orgPrefix}/work_bench/status`,
+      params,
+      data,
+    });
   }
 
   /**

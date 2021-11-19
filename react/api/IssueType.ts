@@ -19,7 +19,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   }
 
   get OrgPrefix() {
-    return `/agile/v1/organizations/${getOrganizationId()}`;
+    return `/agile/v1/organizations/${this.orgId}`;
   }
 
   load({ params, data }: { params: { page: number, size: number }, data: any }) {
@@ -210,6 +210,22 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   }
 
   /**
+   * 分页加载问题类型 工作台
+   * @param params
+   * @param data
+   * @returns
+   */
+  loadPageForWorkbench(params?: { page?: number, size?: number, param?: string }, data: { projectIds?: string[], filterIssueTypeIds?: string[] } = {}) {
+    return this.request({
+      method: 'post',
+      url: `${this.OrgPrefix}/work_bench/issue_type`,
+      params,
+      data,
+      // cache: true,
+    });
+  }
+
+  /**
    * 加载全部工作项类型
    * @param applyType
    */
@@ -284,7 +300,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
     });
   }
 
-  referenced(typeId: string, data: { name: string, copyStatusMachine:boolean} | {}) {
+  referenced(typeId: string, data: { name: string, copyStatusMachine: boolean } | {}) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/issue_type/reference/${typeId}`,
@@ -301,7 +317,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
    * @param data
    * @returns
    */
-  updateRank(typeId: string, data: { frontId:string, backId?:string} | { frontId?:string, backId:string}) {
+  updateRank(typeId: string, data: { frontId: string, backId?: string } | { frontId?: string, backId: string }) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/issue_type/${typeId}/update_rank`,

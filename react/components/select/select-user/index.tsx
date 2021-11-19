@@ -23,7 +23,7 @@ import { useNoticeSelectUpdateSelected } from '../useNoticeSelectUpdateSelected'
 const toArray = (something: any) => (Array.isArray(something) ? something : [something]);
 export interface SelectUserProps extends Partial<SelectProps> {
   /** 组织层或项目层 或工作台层 */
-  level?: 'org' | 'project' |'workbench'
+  level?: 'org' | 'project' | 'workbench'
   // 由于用户是分页的，有时候已选的用户不在第一页，这时候传id过来，会直接显示id，这里多传一个用户过来，放到options里
   selectedUser?: User | User[],
   selected?: string | string[], /** 需要加载的用户id列表 */
@@ -88,7 +88,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
             break;
           }
           case 'workbench': {
-            res = await userApi.project(projectId).org(organizationId).getOrgUsers(filter, page, requestArgs?.selectedUserIds, requestArgs?.queryFilterIds, 50);
+            res = await userApi.project(projectId).org(organizationId).getWorkbenchUsers({ param: filter, page, size: 50 }, { ignoredUserIds: requestArgs?.selectedUserIds });
           }
         }
 
