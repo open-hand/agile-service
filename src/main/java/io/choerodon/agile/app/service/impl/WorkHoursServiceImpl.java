@@ -99,7 +99,6 @@ public class WorkHoursServiceImpl implements WorkHoursService {
                                                              WorkHoursSearchVO workHoursSearchVO) {
         // 校验时间范围
         checkTimeRange(workHoursSearchVO);
-        getUserIdsByWorkGroupIds(organizationId, projectIds, workHoursSearchVO);
         Map<String, String> order = new HashMap<>();
         order.put("issueNum", "issue_num_convert");
         pageRequest.setSort(PageUtil.sortResetOrder(pageRequest.getSort(), null, order));
