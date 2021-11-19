@@ -1,5 +1,6 @@
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import DataSet from 'choerodon-ui/pro/lib/data-set';
 import { workGroupApiConfigApi } from '@/api';
 
 interface TableProps {
@@ -38,4 +39,9 @@ export default ({
     type: FieldType.string,
     bind: 'userVO.id',
   }],
+  events: {
+    load: ({ dataSet }: { dataSet: DataSet }) => {
+      dataSet.setState('loaded', true);
+    },
+  },
 });
