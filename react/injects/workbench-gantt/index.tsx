@@ -6,7 +6,8 @@ import useIsInProgram from '@/hooks/useIsInProgram';
 import noDataPic from '@/assets/image/NoData.svg';
 import useDefaultMyFilter from '@/hooks/useDefaultMyFilter';
 import Gantt from './stores';
-import { IReactFCGanttProvideProjects, warpGanttProvideProjects } from '@/routes/gantt';
+import type { IReactFCGanttProvideProjects } from '@/routes/gantt';
+import { warpGanttProvideProjects } from '@/routes/gantt';
 
 const WorkbenchGantt: IReactFCGanttProvideProjects = ({ projects, currentProjectId, setCurrentProjectId }) => {
   const { isInProgram, loading: programLoading } = useIsInProgram({ projectId: currentProjectId });
