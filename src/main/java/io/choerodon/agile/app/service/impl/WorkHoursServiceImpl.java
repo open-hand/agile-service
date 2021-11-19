@@ -573,8 +573,9 @@ public class WorkHoursServiceImpl implements WorkHoursService {
             issueWorkHoursVO.setWorkTime(projectWorkTimeMap.getOrDefault(projectId, BigDecimal.ZERO));
             issueWorkHoursVO.setCumulativeWorkTime(projectCumulativeWorkTimeMap.getOrDefault(projectId, BigDecimal.ZERO));
             BigDecimal deviationRate = BigDecimal.ZERO;
-            BigDecimal estimateTime = issueWorkHoursVO.getEstimateTime();
-            if (!Objects.equals(BigDecimal.ZERO, estimateTime)) {
+            BigDecimal estimateTime = ObjectUtils.isEmpty(issueWorkHoursVO.getEstimateTime()) ? BigDecimal.ZERO : issueWorkHoursVO.getEstimateTime();
+            int compare = BigDecimal.ZERO.compareTo(estimateTime);
+            if (!Objects.equals(0, compare)) {
                 deviationRate = issueWorkHoursVO.getCumulativeWorkTime().subtract(estimateTime).divide(estimateTime, 2,BigDecimal.ROUND_HALF_UP);
             }
             issueWorkHoursVO.setDeviationRate(deviationRate);
@@ -628,7 +629,8 @@ public class WorkHoursServiceImpl implements WorkHoursService {
         }
         // 计算偏差率
         BigDecimal deviationRate = BigDecimal.ZERO;
-        if (!Objects.equals(BigDecimal.ZERO, estimateTime)) {
+        int equalZero = BigDecimal.ZERO.compareTo(estimateTime);
+        if (equalZero != 0) {
             deviationRate = cumulativeWorkTime.subtract(estimateTime).divide(estimateTime, 2, BigDecimal.ROUND_HALF_UP);
         }
         issueWorkHoursVO.setWorkTime(workTime);
