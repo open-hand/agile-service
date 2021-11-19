@@ -7,7 +7,7 @@ interface Props {
   loadData: () => void
 }
 const WorkingHoursIssueSearch: React.FC<Props> = ({ loadData }) => {
-  const { issueSearchStore } = useIssueStore();
+  const { issueSearchStore, isProject } = useIssueStore();
   const handleSaveFilter = () => {
     openSaveFilterModal({ searchVO: issueSearchStore.getCustomFieldFilters(), onOk: issueSearchStore.loadMyFilterList });
   };
@@ -17,7 +17,7 @@ const WorkingHoursIssueSearch: React.FC<Props> = ({ loadData }) => {
       store={issueSearchStore}
       onClear={loadData}
       onChange={loadData}
-      onClickSaveFilter={handleSaveFilter}
+      onClickSaveFilter={isProject ? handleSaveFilter : undefined}
       foldedHeight={42}
     />
   );

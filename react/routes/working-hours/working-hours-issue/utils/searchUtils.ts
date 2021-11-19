@@ -1,4 +1,5 @@
 import { set } from 'lodash';
+import { toJS } from 'mobx';
 import { ILocalField } from '@/components/issue-search/store';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 
@@ -32,6 +33,7 @@ export function getWorkbenchSystemFields() {
 }
 export function transformWorkbenchFilter(data: any = {}) {
   const search = transformFilter(data);
-  set(search, 'searchArgs.projectIds', [...(data.get('projectIds') || [])]);
+  const { value: projectIds } = toJS(data.get('projectIds')) || { value: [] };
+  set(search, 'searchArgs.projectIds', projectIds);
   return search;
 }

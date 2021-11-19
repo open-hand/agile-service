@@ -279,6 +279,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
 
           </span>
         </Tooltip>
+        {!disable.disableOperate && (
         <TableDropMenu
           showText={false}
           menuData={[
@@ -294,6 +295,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
             },
           ]}
         />
+        )}
         {!isShowDependency && isCanCreateIssue && (
           <Icon
             type="add"
