@@ -645,7 +645,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
                 exportIssuesVO.setCumulativeWorkTime(issueWorkHoursVO.getCumulativeWorkTime());
                 exportIssuesVO.setDeviationRate(transformBigDecimal(issueWorkHoursVO.getDeviationRate()));
                 exportIssuesVOS.add(exportIssuesVO);
-                exportIssuesVOS.addAll(projectMap.getOrDefault(issueWorkHoursVO.getUserId(), new ArrayList<>()));
+                exportIssuesVOS.addAll(projectMap.getOrDefault(issueWorkHoursVO.getProjectId(), new ArrayList<>()));
             }
         }
     }

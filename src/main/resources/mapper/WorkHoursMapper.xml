@@ -345,6 +345,8 @@
         <foreach collection="allIssueIds" item="allIssueId" open="(" separator="," close=")">
             #{allIssueId}
         </foreach>
+        AND ai.assignee_id IS NOT NULL
+        AND ai.assignee_id != 0
         <if test="searchVO != null">
             <if test="searchVO.searchArgs.startTime != null and searchVO.searchArgs.endTime != null">
                 and awl.start_date between #{searchVO.searchArgs.startTime} and #{searchVO.searchArgs.endTime}
@@ -369,6 +371,8 @@
         <foreach collection="allIssueIds" item="allIssueId" open="(" separator="," close=")">
             #{allIssueId}
         </foreach>
+        AND ai.assignee_id IS NOT NULL
+        AND ai.assignee_id != 0
         <if test="searchVO != null">
             <if test="searchVO.searchArgs.startTime != null and searchVO.searchArgs.endTime != null">
                 and awl.start_date between #{searchVO.searchArgs.startTime} and #{searchVO.searchArgs.endTime}
