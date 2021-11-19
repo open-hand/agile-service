@@ -21,7 +21,7 @@ import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import IssueSearchStore, { ILocalField, IssueSearchStoreProps } from '@/components/issue-search/store';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 import useIssueTableFields from '@/hooks/data/useIssueTableFields';
-import { ListLayoutColumnVO, workingHoursApi } from '@/api';
+import { workingHoursApi } from '@/api';
 import ProjectDataSet from './ProjectDataSet';
 import { getWorkbenchSystemFields, transformWorkbenchFilter } from '../utils/searchUtils';
 
@@ -92,6 +92,16 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     organizationId: getOrganizationId(),
     issueSearchStore,
   })), []);
+
+  useEffect(() => {
+    // @ts-ignore
+    const newFields = (tableFields?.filter((field) => field.sortId?.indexOf('foundation.') > -1) || []).map((customField) => ({ name: customField.sortId, label: customField.title }));
+    newFields.forEach((field) => {
+      if (!workingHoursIssuesDs.fields.get(field.name)) {
+        workingHoursIssuesDs.addField(field.name, field);
+      }
+    });
+  }, [tableFields]);
   const workingHoursAssigneeDs = useMemo(() => new DataSet(AssigneeDataSet({
     projectId: isProject ? getProjectId() : undefined,
     organizationId: getOrganizationId(),
@@ -209,6 +219,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     // 加载总计登记工时
   }, [mode]);
 
+  console.log('stores');
   const value = {
     ...props,
     workingHoursIssuesDs,
