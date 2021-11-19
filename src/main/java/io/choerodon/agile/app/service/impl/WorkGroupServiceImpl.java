@@ -190,7 +190,7 @@ public class WorkGroupServiceImpl implements WorkGroupService {
         if (CollectionUtils.isNotEmpty(oldAncestors)) {
             workGroupTreeClosureMapper.deleteByAncestorsAndDescendants(organizationId, oldAncestors, descendants);
         }
-        List<Long> newAncestors = workGroupTreeClosureMapper.queryDescendant(organizationId, Collections.singletonList(workGroupVO.getParentId()));
+        List<Long> newAncestors = workGroupTreeClosureMapper.queryAncestor(organizationId, workGroupVO.getParentId());
         if (CollectionUtils.isNotEmpty(newAncestors)) {
             Long userId = DetailsHelper.getUserDetails().getUserId();
             List<WorkGroupTreeClosureDTO> workGroupTreeClosureDTOS = new ArrayList<>();
