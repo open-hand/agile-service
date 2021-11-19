@@ -130,8 +130,7 @@ const GanttDependency: React.FC = observer(() => {
               <Icon
                 type="delete_sweep-o"
                 onClick={() => {
-                  setFocusing({ focusing: false, latestFocusRecord: undefined });
-                  dataset.length > 1 && record.get('predecessorId')?.length && setLoading(true);
+                  setFocusing(() => ({ focusing: false, latestFocusRecord: undefined }));
                   dataset.delete(record, false);
                 }}
                 className={styles.del_btn}
