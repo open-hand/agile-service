@@ -7,6 +7,7 @@ import { inject } from 'mobx-react';
 import { observer, useComputed } from 'mobx-react-lite';
 import moment from 'moment';
 import { set } from 'lodash';
+import { useCreation } from 'ahooks';
 import { AppStateProps, IFoundationHeader } from '@/common/types';
 import DateSearchDataSet, { formatEndDate, formatStartDate } from './DateSearchDataSet';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
@@ -17,11 +18,12 @@ import WorkingHoursIssuesDataSet from './WorkingHoursIssuesDataSet';
 import AssigneeDataSet from './AssigneeDataSet';
 import { useIssueSearchStore } from '@/components/issue-search';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
-import IssueSearchStore, { ILocalField } from '@/components/issue-search/store';
+import IssueSearchStore, { ILocalField, IssueSearchStoreProps } from '@/components/issue-search/store';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 import { ListLayoutColumnVO, workingHoursApi } from '@/api';
 import ProjectDataSet from './ProjectDataSet';
+import { getWorkbenchSystemFields, transformWorkbenchFilter } from '../utils/searchUtils';
 
 const Store = createContext({} as Context);
 
@@ -63,12 +65,17 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
   const [mode, setMode] = useState<IMode>(localPageCacheStore.getItem('workingHours-issue-mode') || (isProject ? 'issue' : 'project'));
   const [isContain, setIsContain] = useState<boolean>(false);
   const [totalWorkTime, setTotalWorkTime] = useState<number>(0);
-  const issueSearchStore = useIssueSearchStore({
+  const issueSearchStoreProps = useCreation(():IssueSearchStoreProps => (isProject ? ({
     getSystemFields: () => getSystemFields() as ILocalField[],
     transformFilter,
-    menuType: isProject ? 'project' : 'workbench',
+    menuType: 'project',
     defaultSearchVO: localPageCacheStore.getItem('agile.working.hours.issue.search') ?? (myDefaultFilter && myDefaultFilter.filterJson ? JSON.parse(myDefaultFilter.filterJson) : undefined) ?? undefined,
-  });
+  }) : ({
+    getSystemFields: getWorkbenchSystemFields,
+    transformFilter: transformWorkbenchFilter,
+    menuType: 'workbench',
+  })), [isProject]);
+  const issueSearchStore = useIssueSearchStore(issueSearchStoreProps);
 
   const { data: tableFields } = useIssueTableFields({
     extraFields: [{ code: 'workTime', title: '工时' } as IFoundationHeader,

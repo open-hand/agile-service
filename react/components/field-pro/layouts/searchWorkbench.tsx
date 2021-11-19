@@ -24,17 +24,34 @@ function getFieldConfig({
     ...getSearchFieldPropsByFieldType(fieldType, field.id),
   };
   switch (code) {
-    case 'status':
+    case 'status': {
       return {
-        ...otherProps,
-        isWorkBench: true,
+        code,
+        props: {
+          ...otherProps,
+          isWorkBench: true,
+        },
       };
+    }
     case 'issueType': {
-      console.log('issueType.');
       return {
-        ...otherProps,
-        request: () => new Promise((r) => ([])),
-      }; }
+        code,
+        props: {
+          ...otherProps,
+          level: 'workbench',
+        },
+      };
+    }
+    case 'projectIds': {
+      return {
+        code: 'project',
+        props: {
+          ...otherProps,
+          level: 'workbench',
+        },
+      };
+    }
+
     default:
       break;
   }
@@ -46,6 +63,7 @@ function getFieldConfig({
         props: {
           ...otherProps,
           level: 'workbench',
+          request: undefined,
         },
       };
 
