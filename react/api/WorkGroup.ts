@@ -86,15 +86,11 @@ class WorkGroupApi extends Api<WorkGroupApi> {
    * 查询工作组下成员
    * @param data
    */
-  loadUserByGroup(data: object, params?: { page?: number, size?: number }) {
+  loadUserByGroup(data: object) {
     return this.request({
       method: 'post',
       url: `${this.prefix}_user_rel/page`,
       data,
-      params: params && ({
-        page: params.page || 1,
-        size: params.size || 50,
-      }),
     });
   }
 
@@ -151,6 +147,22 @@ class WorkGroupApi extends Api<WorkGroupApi> {
         workGroupId,
         userIds,
       },
+    });
+  }
+
+  /**
+   * 查询多个工作组下成员(包括未分配工作组)
+   * @param data
+   */
+  loadUserByGroupIds(data: object, params?: { page?: number, size?: number }) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}_user_rel/page_by_groups`,
+      data,
+      params: params && ({
+        page: params.page || 1,
+        size: params.size || 50,
+      }),
     });
   }
 }

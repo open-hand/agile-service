@@ -20,7 +20,7 @@ export default ({
   primaryKey: 'id',
   pageSize: 10,
   transport: {
-    read: ({ data, params: pageInfo }) => {
+    read: ({ data }) => {
       const {
         workGroupId = ROOT_ID, params, ...other
       } = data || {};
@@ -32,7 +32,7 @@ export default ({
           return workGroupApiConfigApi.loadUserUnAssigneeByGroup(postData);
         default:
           postData.workGroupIds = [workGroupId];
-          return workGroupApiConfigApi.loadUserByGroup(postData, pageInfo);
+          return workGroupApiConfigApi.loadUserByGroup(postData);
       }
     },
   },
