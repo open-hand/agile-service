@@ -1,5 +1,5 @@
 import React, {
-  useEffect, ReactElement, useRef, MutableRefObject, useCallback,
+  useEffect, ReactElement, useRef, MutableRefObject, useCallback, ReactNode,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { isEmpty } from 'lodash';
@@ -7,6 +7,7 @@ import Tree from '@/components/tree';
 import { useWorkGroupStore } from '@/routes/work-group/stores';
 import { EditFormDataProps, workGroupApi } from '@/api';
 import { GroupItem } from '@/routes/work-group/types';
+import Styles from './index.less';
 
 export default observer(() => {
   const treeRef: MutableRefObject<ReactElement | undefined> = useRef();
@@ -141,6 +142,18 @@ export default observer(() => {
     }
   };
 
+  const renderTreeNode = (treeNode: ReactNode, { item }: { item: GroupItem }) => {
+    if (item.id === NOT_ASSIGN_ID) {
+      return (
+        <div className={Styles.treeItemWrap}>
+          <div className={Styles.treeItemDot} />
+          {treeNode}
+        </div>
+      );
+    }
+    return treeNode;
+  };
+
   return (
     <>
       <Tree
@@ -156,6 +169,7 @@ export default observer(() => {
         selected={mainStore.getSelectedMenu}
         setSelected={setSelected}
         updateItem={setSelected}
+        renderTreeNode={renderTreeNode}
         isDragEnabled={(item: GroupItem) => ![ROOT_ID, NOT_ASSIGN_ID].includes(item.id)}
         treeNodeProps={{
           enableAddFolder: (item: GroupItem) => item.id !== NOT_ASSIGN_ID,
