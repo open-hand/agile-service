@@ -55,7 +55,7 @@ const searchDsUpdate = ({
   }
 };
 
-const LogSearchDataSet = ({ projectCreationDate }: { projectCreationDate: string | undefined}) => ({
+const LogSearchDataSet = ({ projectCreationDate, cacheFiltersObj }: { projectCreationDate: string | undefined, cacheFiltersObj?: { userIds?: string[], workGroupIds?: string[] }}) => ({
   autoCreate: true,
   autoQuery: false,
   fields: [{
@@ -125,9 +125,9 @@ const LogSearchDataSet = ({ projectCreationDate }: { projectCreationDate: string
     startTime: localPageCacheStore.getItem('workingHours-calendar-startTime') ? moment(localPageCacheStore.getItem('workingHours-calendar-startTime')) : formatStartDate(getIsOrganization() ? moment().subtract(6, 'days') : (
       moment().subtract(6, 'days').isBefore(moment(projectCreationDate)) ? moment(projectCreationDate) : moment().subtract(6, 'days')
     )),
-    userIds: localPageCacheStore.getItem('workingHours-calendar-userIds'),
+    userIds: cacheFiltersObj?.userIds?.length ? cacheFiltersObj?.userIds : localPageCacheStore.getItem('workingHours-calendar-userIds'),
     projectIds: localPageCacheStore.getItem('workingHours-calendar-projectIds'),
-    workGroupIds: localPageCacheStore.getItem('workingHours-calendar-workGroupIds'),
+    workGroupIds: cacheFiltersObj?.workGroupIds?.length ? cacheFiltersObj?.workGroupIds : localPageCacheStore.getItem('workingHours-calendar-workGroupIds'),
   }],
   events: {
     update: debounce((updateData: any) => {

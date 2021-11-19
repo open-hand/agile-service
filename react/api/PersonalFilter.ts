@@ -1,7 +1,13 @@
 import { axios, stores } from '@choerodon/boot';
-import { getProjectId } from '@/utils/common';
+import { getProjectId, getOrganizationId, getIsOrganization } from '@/utils/common';
 import Api from './Api';
 
+export interface IFilterItem {
+  filterJson: string, // 搜索条件json字符串
+  name: string,
+  filterId: string
+  objectVersionNumber: number
+}
 interface IPersonalFilter {
   filterJson: string, // 搜索条件json字符串
   name: string,
@@ -10,11 +16,16 @@ export interface UPersonalFilter {
   name?: string,
   objectVersionNumber: number,
   default?: boolean
+  filterJson?: any
 }
 const { AppState } = stores;
 class PersonalFilterApi extends Api<PersonalFilterApi> {
   get prefix() {
     return `/agile/v1/projects/${this.projectId}`;
+  }
+
+  get orgPrefix() {
+    return `/agile/v1/organizations/${getOrganizationId()}`;
   }
 
   /**
@@ -26,7 +37,7 @@ class PersonalFilterApi extends Api<PersonalFilterApi> {
     // const { userInfo: { id: userId } } = AppState;
     return this.request({
       method: 'get',
-      url: `${this.prefix}/personal_filter/query_all/${userId}`,
+      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/personal_filter/query_all/${userId}`,
       params: {
         filterTypeCode,
       },
@@ -40,7 +51,7 @@ class PersonalFilterApi extends Api<PersonalFilterApi> {
             */
   create(data: IPersonalFilter, filterTypeCode: string = 'agile_issue') {
     return this.request({
-      url: `${this.prefix}/personal_filter`,
+      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/personal_filter`,
       method: 'post',
       data: {
         filterTypeCode,
@@ -56,7 +67,7 @@ class PersonalFilterApi extends Api<PersonalFilterApi> {
            */
   update(filterId: string, updateData: UPersonalFilter):Promise<any> {
     return this.request({
-      url: `${this.prefix}/personal_filter/${filterId}`,
+      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/personal_filter/${filterId}`,
       method: 'put',
       data: updateData,
     });
@@ -68,7 +79,7 @@ class PersonalFilterApi extends Api<PersonalFilterApi> {
     */
   delete(filterId: string) {
     return this.request({
-      url: `${this.prefix}/personal_filter/${filterId}`,
+      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/personal_filter/${filterId}`,
       method: 'delete',
 
     });

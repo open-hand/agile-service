@@ -83,7 +83,11 @@ const WorkingHoursCalendar = () => {
               />
             )
           }
-          <Calendar />
+          {
+            !!calendarDs.totalPage && (
+              <Calendar />
+            )
+          }
         </LoadingProvider>
       </Content>
     </Page>
