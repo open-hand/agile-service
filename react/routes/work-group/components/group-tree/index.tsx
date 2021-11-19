@@ -142,16 +142,16 @@ export default observer(() => {
     }
   };
 
-  const renderTreeNode = (treeNode: ReactNode, { item }: { item: GroupItem }) => {
+  const getFolderIcon = (item: GroupItem, defaultIcon: ReactNode) => {
     if (item.id === NOT_ASSIGN_ID) {
       return (
         <div className={Styles.treeItemWrap}>
           <div className={Styles.treeItemDot} />
-          {treeNode}
+          {defaultIcon}
         </div>
       );
     }
-    return treeNode;
+    return defaultIcon;
   };
 
   return (
@@ -169,12 +169,12 @@ export default observer(() => {
         selected={mainStore.getSelectedMenu}
         setSelected={setSelected}
         updateItem={setSelected}
-        renderTreeNode={renderTreeNode}
         isDragEnabled={(item: GroupItem) => ![ROOT_ID, NOT_ASSIGN_ID].includes(item.id)}
         treeNodeProps={{
           enableAddFolder: (item: GroupItem) => item.id !== NOT_ASSIGN_ID,
           enableAction: (item: GroupItem) => ![ROOT_ID, NOT_ASSIGN_ID].includes(item.id),
           titleSuffix: (item: GroupItem) => ` (${item.data?.userCount ?? 0})`,
+          getFolderIcon,
         }}
         editNodeProps={{
           placeholder: '请输入工作组名称',

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   Button, CheckBox, Icon, TextField, Spin,
@@ -7,6 +7,7 @@ import { message } from 'choerodon-ui';
 import { map } from 'lodash';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { FuncType } from 'choerodon-ui/pro/lib/button/enum';
+import { Loading } from '@choerodon/components';
 import { useAddUserStore } from '@/routes/work-group/components/add-user/stores';
 import Styles from './index.less';
 import { workGroupApi } from '@/api';
@@ -64,6 +65,10 @@ const AddUserContent = () => {
       tableDs.unSelectAll();
     }
   }, []);
+
+  if (!tableDs.getState('loaded')) {
+    return <Loading />;
+  }
 
   if (!tableDs.length && tableDs.status !== 'loading' && !tableDs.getQueryParameter('param')) {
     return <div className={Styles.emptyText}>暂无数据</div>;

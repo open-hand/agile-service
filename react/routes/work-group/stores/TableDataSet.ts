@@ -24,14 +24,14 @@ export default ({
       const {
         workGroupId = ROOT_ID, params, ...other
       } = data || {};
-      const postData: { workGroupIds?: string[] } = { param: params, ...other || {} };
+      const postData: { workGroupId: string[] } = { param: params, ...other || {} };
       switch (workGroupId) {
         case NOT_ASSIGN_ID:
           return workGroupApiConfigApi.loadUserUnAssignee(postData);
         case ROOT_ID:
           return workGroupApiConfigApi.loadUserUnAssigneeByGroup(postData);
         default:
-          postData.workGroupIds = [workGroupId];
+          postData.workGroupId = workGroupId;
           return workGroupApiConfigApi.loadUserByGroup(postData);
       }
     },
