@@ -440,6 +440,9 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
     @Async
     public void exportWorkHoursCalendarOnOrganizationLevel(Long organizationId, WorkHoursSearchVO workHoursSearchVO, ServletRequestAttributes requestAttributes, Boolean isOrg) {
         List<Long> projectIds = workHoursSearchVO.getProjectIds();
+        if (CollectionUtils.isEmpty(projectIds)) {
+            projectIds = new ArrayList<>();
+        }
         Long userId = DetailsHelper.getUserDetails().getUserId();
         workHoursService.handlerProject(organizationId, projectIds, userId, workHoursSearchVO);
         exportWorkHoursCalendar(organizationId, projectIds, workHoursSearchVO, requestAttributes, isOrg);
