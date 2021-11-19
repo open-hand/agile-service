@@ -50,11 +50,9 @@ const columnRenderMap = new Map([
     renderer: ({ record }: { record: Record }) => renderUser(record.get('userDTO')),
   }],
   ['workTime', {
-    sortable: true,
     renderer: renderWorkTime,
   }],
   ['cumulativeWorkTime', {
-    sortable: true,
     width: 160,
     renderer: renderWorkTime,
   }],
@@ -64,7 +62,6 @@ const columnRenderMap = new Map([
     renderer: renderWorkTime,
   }],
   ['deviationRate', {
-    sortable: true,
     width: 160,
     renderer: renderRate,
   }],

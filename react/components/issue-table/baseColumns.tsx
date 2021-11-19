@@ -376,7 +376,6 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     title: <Tooltip title="工时">工时</Tooltip>,
     width: 170,
     dataIndex: 'workTime',
-    sortable: true,
     render: (rowData, getDataMethod = get) => (
       <div style={{ display: 'inline-flex' }}>
         {`${getDataMethod(rowData, 'workTime')}h`}
@@ -387,7 +386,6 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     title: <Tooltip title="历史累计工时">历史累计工时</Tooltip>,
     width: 170,
     dataIndex: 'cumulativeWorkTime',
-    sortable: true,
     render: (rowData, getDataMethod = get) => (
       <div style={{ display: 'inline-flex' }}>
         {`${getDataMethod(rowData, 'cumulativeWorkTime')}h`}
@@ -398,7 +396,6 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     title: <Tooltip title="偏差率">偏差率</Tooltip>,
     width: 170,
     dataIndex: 'deviationRate',
-    sortable: true,
     render: (rowData, getDataMethod = get) => {
       const numberValue = Number(getDataMethod(rowData, 'deviationRate'));
       return (
