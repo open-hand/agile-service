@@ -79,6 +79,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
   const issueSearchStore = useIssueSearchStore(issueSearchStoreProps);
 
   const { data: tableFields } = useIssueTableFields({
+    hiddenFieldCodes: ['epicSelfName'],
     extraFields: [{ code: 'workTime', title: '工时' } as IFoundationHeader,
     { code: 'cumulativeWorkTime', title: '历史累计工时' } as IFoundationHeader,
     { code: 'estimateTime', title: '原始预估时间' } as IFoundationHeader,
