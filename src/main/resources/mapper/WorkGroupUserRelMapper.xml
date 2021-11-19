@@ -76,5 +76,8 @@
         <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
             #{projectId}
         </foreach>
+        <if test="startTime != null and endTime != null">
+            and start_date between #{startTime} and #{endTime}
+        </if>
     </select>
 </mapper>
