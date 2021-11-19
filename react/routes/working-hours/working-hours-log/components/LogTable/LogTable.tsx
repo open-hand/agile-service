@@ -100,8 +100,8 @@ const LogTable = () => {
   ), []);
 
   return (
-    <div>
-      <Table dataSet={logDs} queryBar={'none' as TableQueryBarType}>
+    <div className={styles.logTable}>
+      <Table dataSet={logDs} queryBar={'none' as TableQueryBarType} style={{ height: '100%' }}>
         <Column name="userId" sortable renderer={renderMember} width={150} />
         <Column name="workTime" sortable renderer={renderWorkTime} align={'left' as ColumnAlign} width={110} />
         <Column name="startDate" sortable tooltip={'overflow' as TableColumnTooltip} width={170} />

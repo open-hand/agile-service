@@ -1,0 +1,43 @@
+.workbench_workingHours_pageWrap {
+  :global {
+    .c7n-tabs-bar {
+      margin: 0 12px;
+      top: 30px !important;
+    }
+    .c7ncd-breadcrumb {
+      border-bottom: none;
+    }
+    .page-tab-container {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      .page-head {
+        z-index: 5;
+      }
+      .page-content {
+        margin: 0;
+        padding-top: 34px;
+      }
+      .c7n-working-hours-calendar-content {
+        padding-top: 0!important;
+        .c7n-working-hours-calendar-calendar {
+          padding-top: 18px;
+        }
+      }
+      .c7n-working-hours-issue-content {
+        margin-top: -5px;
+      }
+      .c7nagile-detail-container {
+        z-index: 1000;
+      }
+      .c7n-agile-table-cell-click {
+        color: var(--table-click-color);
+        cursor: pointer;
+        vertical-align: top;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}

@@ -58,7 +58,7 @@ const WorkingHoursCalendar = () => {
         />
       </Header>
       <Breadcrumb />
-      <Content style={{ overflowX: 'hidden' }}>
+      <Content style={{ overflowX: 'hidden' }} className="c7n-working-hours-calendar-content">
         <LoadingProvider
           loading={calendarDs.status === 'loading' || loading}
           globalSingle

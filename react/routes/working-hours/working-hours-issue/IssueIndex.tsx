@@ -129,7 +129,7 @@ const WorkingHoursIssue = (props = {}) => {
         />
       </Header>
       <Breadcrumb />
-      <Content style={{ overflowX: 'hidden' }}>
+      <Content style={{ overflowX: 'hidden' }} className="c7n-working-hours-issue-content">
         <LoadingProvider
           loading={loading}
           globalSingle
