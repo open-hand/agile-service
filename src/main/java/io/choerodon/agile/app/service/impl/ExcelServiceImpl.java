@@ -59,7 +59,6 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.core.utils.PageableHelper;
-import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 
 /**
@@ -106,7 +105,8 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected static final String RELATION_TYPE_FIX = "fix";
     protected static final String IMPORT_TEMPLATE_NAME = "导入模板";
-    private static  final String DATE_CHECK_MSG = "请输入正确的日期格式";
+    private static final String DATE_CHECK_MSG = "请输入正确的日期格式";
+    private static final String DATE_RANGE_CHECK_MSG = "开始时间不能在结束时间之后";
 
     protected static final String EPIC_CN = "史诗";
     protected static final String SUMMARY = "summary";
@@ -1419,7 +1419,7 @@ public class ExcelServiceImpl implements ExcelService {
                 Cell originCell = originRow.getCell(i);
                 if (!isCellEmpty(originCell)) {
                     Cell cell = row.createCell(i);
-                    cell.setCellValue(ExcelUtil.substring(originCell.toString()));
+                        cell.setCellValue(ExcelUtil.substring(originCell.toString()));
                     if (errorCol.contains(i)) {
                         cell.setCellStyle(ztStyle);
                     }
@@ -1796,10 +1796,10 @@ public class ExcelServiceImpl implements ExcelService {
                 validateAndSetLabel(row, col, excelColumn, issueCreateVO, errorRowColMap, projectId);
                 break;
             case FieldCode.ESTIMATED_START_TIME:
-                validateAndSetEstimatedTime(row, col, issueCreateVO, errorRowColMap, FieldCode.ESTIMATED_START_TIME);
+                validateAndSetEstimatedTime(row, col, issueCreateVO, errorRowColMap, FieldCode.ESTIMATED_START_TIME, headerMap);
                 break;
             case FieldCode.ESTIMATED_END_TIME:
-                validateAndSetEstimatedTime(row, col, issueCreateVO, errorRowColMap, FieldCode.ESTIMATED_END_TIME);
+                validateAndSetEstimatedTime(row, col, issueCreateVO, errorRowColMap, FieldCode.ESTIMATED_END_TIME, headerMap);
                 break;
             case ExcelImportTemplate.IssueHeader.RELATE_ISSUE:
                 validateRelateIssue(row, col, issueCreateVO, errorRowColMap, projectId);
@@ -1814,10 +1814,10 @@ public class ExcelServiceImpl implements ExcelService {
                 validateAndSetIssueStatus(row, col, excelColumn, errorRowColMap, issueCreateVO, issueType);
                 break;
             case FieldCode.ACTUAL_START_TIME:
-                validateAndSetActualTime(row, col, issueCreateVO, errorRowColMap, FieldCode.ACTUAL_START_TIME);
+                validateAndSetActualTime(row, col, issueCreateVO, errorRowColMap, FieldCode.ACTUAL_START_TIME, headerMap);
                 break;
             case FieldCode.ACTUAL_END_TIME:
-                validateAndSetActualTime(row, col, issueCreateVO, errorRowColMap, FieldCode.ACTUAL_END_TIME);
+                validateAndSetActualTime(row, col, issueCreateVO, errorRowColMap, FieldCode.ACTUAL_END_TIME, headerMap);
                 break;
             case FieldCode.PARTICIPANT:
                 validateAndSetParticipant(row, col, excelColumn, errorRowColMap, issueCreateVO);
@@ -1956,10 +1956,11 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void validateAndSetEstimatedTime(Row row,
-                                             Integer col,
-                                             IssueCreateVO issueCreateVO,
-                                             Map<Integer, List<Integer>> errorRowColMap,
-                                             String fieldCode) {
+                                               Integer col,
+                                               IssueCreateVO issueCreateVO,
+                                               Map<Integer, List<Integer>> errorRowColMap,
+                                               String fieldCode,
+                                               Map<Integer, ExcelColumnVO> headerMap) {
         Cell cell = row.getCell(col);
         int rowNum = row.getRowNum();
         if (!isCellEmpty(cell)) {
@@ -1972,6 +1973,12 @@ public class ExcelServiceImpl implements ExcelService {
                     addErrorColumn(rowNum, col, errorRowColMap);
                 } else {
                     Date date = cell.getDateCellValue();
+                    boolean illegalDateRange = isStartDateAfterEndDate(date, row, fieldCode, headerMap);
+                    if (illegalDateRange) {
+                        cell.setCellValue(buildWithErrorMsg("", DATE_RANGE_CHECK_MSG));
+                        addErrorColumn(rowNum, col, errorRowColMap);
+                        return;
+                    }
                     if (FieldCode.ESTIMATED_START_TIME.equals(fieldCode)) {
                         issueCreateVO.setEstimatedStartTime(date);
                     }
@@ -1983,11 +1990,61 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
+    private boolean isStartDateAfterEndDate(Date date,
+                                            Row row,
+                                            String fieldCode,
+                                            Map<Integer, ExcelColumnVO> headerMap) {
+        String anotherDateCode = null;
+        switch (fieldCode) {
+            case FieldCode.ESTIMATED_START_TIME:
+                anotherDateCode = FieldCode.ESTIMATED_END_TIME;
+                break;
+            case FieldCode.ESTIMATED_END_TIME:
+                anotherDateCode = FieldCode.ESTIMATED_START_TIME;
+                break;
+            case FieldCode.ACTUAL_START_TIME:
+                anotherDateCode = FieldCode.ACTUAL_END_TIME;
+                break;
+            case FieldCode.ACTUAL_END_TIME:
+                anotherDateCode = FieldCode.ACTUAL_START_TIME;
+                break;
+            default:
+                break;
+        }
+        if (anotherDateCode == null) {
+            return false;
+        }
+        Integer anotherDateCol = getColIndexByFieldCode(headerMap, anotherDateCode);
+        if (anotherDateCol == null) {
+            return false;
+        }
+        Cell anotherEsTimeCell = row.getCell(anotherDateCol);
+        if (!isCellEmpty(anotherEsTimeCell)
+                && anotherEsTimeCell.getCellTypeEnum().equals(CellType.NUMERIC)
+                && DateUtil.isCellDateFormatted(anotherEsTimeCell)) {
+            Date anotherDate = anotherEsTimeCell.getDateCellValue();
+            Date startDate;
+            Date endDate;
+            if (FieldCode.ESTIMATED_START_TIME.equals(fieldCode)
+                    || FieldCode.ACTUAL_START_TIME.equals(fieldCode)) {
+                startDate = date;
+                endDate = anotherDate;
+            } else {
+                startDate = anotherDate;
+                endDate = date;
+            }
+            return !startDate.before(endDate);
+        } else {
+            return false;
+        }
+    }
+
     protected void validateAndSetActualTime(Row row,
                                             Integer col,
                                             IssueCreateVO issueCreateVO,
                                             Map<Integer, List<Integer>> errorRowColMap,
-                                            String fieldCode) {
+                                            String fieldCode,
+                                            Map<Integer, ExcelColumnVO> headerMap) {
         Cell cell = row.getCell(col);
         int rowNum = row.getRowNum();
         if (!isCellEmpty(cell)) {
@@ -2000,6 +2057,12 @@ public class ExcelServiceImpl implements ExcelService {
                     addErrorColumn(rowNum, col, errorRowColMap);
                 } else {
                     Date date = cell.getDateCellValue();
+                    boolean illegalDateRange = isStartDateAfterEndDate(date, row, fieldCode, headerMap);
+                    if (illegalDateRange) {
+                        cell.setCellValue(buildWithErrorMsg("", DATE_RANGE_CHECK_MSG));
+                        addErrorColumn(rowNum, col, errorRowColMap);
+                        return;
+                    }
                     if (FieldCode.ACTUAL_START_TIME.equals(fieldCode)) {
                         issueCreateVO.setActualStartTime(date);
                     }
@@ -2020,7 +2083,7 @@ public class ExcelServiceImpl implements ExcelService {
         Cell cell = row.getCell(col);
         if (!isCellEmpty(cell)) {
             String value = cell.toString();
-            if (value.length() > 10) {
+            if (value.length() > 20) {
                 cell.setCellValue(buildWithErrorMsg(value, "标签名称过长"));
                 addErrorColumn(row.getRowNum(), col, errorRowColMap);
             } else {
