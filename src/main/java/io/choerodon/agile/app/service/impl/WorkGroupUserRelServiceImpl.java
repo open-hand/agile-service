@@ -177,53 +177,63 @@ public class WorkGroupUserRelServiceImpl implements WorkGroupUserRelService {
 
     @Override
     public Page<UserDTO> pageByGroups(Long organizationId, PageRequest pageRequest, WorkGroupUserRelParamVO workGroupUserRelParamVO) {
-        // 选中的用户
         List<Long> selectedUserIds = workGroupUserRelParamVO.getUserIds();
         List<Long> selectedWorkGroupIds = workGroupUserRelParamVO.getWorkGroupIds();
         Page<UserDTO> userPage = new Page<>();
         AgileUserVO agileUserVO = modelMapper.map(workGroupUserRelParamVO, AgileUserVO.class);
         agileUserVO.setUserIds(null);
         Set<Long> ignoredUserIds = new HashSet<>();
+        // 处理分组筛选
+        Boolean doPage = handlerWorkGroupIds(organizationId, selectedWorkGroupIds, ignoredUserIds, agileUserVO);
+        // 过滤选中的用户
+        ignoredUserIds.addAll(selectedUserIds);
+        agileUserVO.setIgnoredUserIds(ignoredUserIds);
+        if (Boolean.TRUE.equals(doPage)) {
+            userPage = baseFeignClient.pagingUsersOnOrganizationLevel(organizationId, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
+        }
+        // 处理选中的用户
+        appendSelectedUsers(userPage, selectedUserIds, pageRequest);
+        return userPage;
+    }
+
+    private Boolean handlerWorkGroupIds(Long organizationId, List<Long> selectedWorkGroupIds, Set<Long> ignoredUserIds, AgileUserVO agileUserVO) {
         boolean doPage = true;
         if (!CollectionUtils.isEmpty(selectedWorkGroupIds)) {
+            // 查询选中的工作组及子级
             List<Long> workGroupIds = workGroupService.listChildrenWorkGroup(organizationId, selectedWorkGroupIds);
-            boolean containsNoGroup = selectedWorkGroupIds.contains(0L);
             Set<Long> workGroupUserIds = new HashSet<>();
             if (!CollectionUtils.isEmpty(workGroupIds)) {
                 workGroupUserIds = workGroupUserRelMapper.listUserIdsByWorkGroupIds(organizationId, workGroupIds);
             }
+            // 是否包含未分配工作组
+            boolean containsNoGroup = selectedWorkGroupIds.contains(0L);
             if (containsNoGroup) {
-                // 包含未分配，过滤其他未选中工作组的用户
+                // 包含未分配，分页查询时忽略其他未选中工作组的用户但保留已选中工作组的用户
                 List<Long> unSelectedWorkGroupIds = workGroupMapper.selectIdsByOrganizationId(organizationId, workGroupIds);
-                ignoredUserIds = workGroupUserRelMapper.listUserIdsByWorkGroupIds(organizationId, unSelectedWorkGroupIds);
+                ignoredUserIds.addAll(workGroupUserRelMapper.listUserIdsByWorkGroupIds(organizationId, unSelectedWorkGroupIds));
                 ignoredUserIds.removeIf(workGroupUserIds::contains);
                 agileUserVO.setUserIds(null);
             } else {
-                // 不包含未分配，选择选中工作组的用户
+                // 不包含未分配，分页查询选中工作组的用户
                 agileUserVO.setUserIds(workGroupUserIds);
                 if (CollectionUtils.isEmpty(workGroupUserIds)) {
+                    // 选中工作组无用户时，不分页查询用户
                     doPage = false;
                 }
             }
         }
-        // 过滤选中的用户
-        ignoredUserIds.addAll(selectedUserIds);
-        agileUserVO.setIgnoredUserIds(ignoredUserIds);
-        if (doPage) {
-            userPage = baseFeignClient.pagingUsersOnOrganizationLevel(organizationId, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
-        }
+        return doPage;
+    }
+
+    private void appendSelectedUsers(Page<UserDTO> userPage, List<Long> selectedUserIds, PageRequest pageRequest) {
         boolean append = !ObjectUtils.isEmpty(selectedUserIds) && pageRequest.getPage() == 0;
         if (append) {
             // 拼接选中的用户
-            List<UserDTO> list = baseFeignClient.listUsersByIds(selectedUserIds.toArray(new Long[1]), true).getBody();
+            List<UserDTO> list = baseFeignClient.listUsersByIds(selectedUserIds.toArray(new Long[selectedUserIds.size()]), true).getBody();
             if (!CollectionUtils.isEmpty(userPage.getContent())) {
                 list.addAll(userPage.getContent());
             }
             userPage.setContent(list);
         }
-        if (CollectionUtils.isEmpty(userPage.getContent())) {
-            return new Page<>();
-        }
-        return userPage;
     }
 }
