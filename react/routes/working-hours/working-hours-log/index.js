@@ -11,11 +11,9 @@ const LogIndex = React.lazy(() => import('./LogIndex'));
 const WorkingHoursLog = ({ match }) => (
   <Switch>
     <PermissionRoute
-      service={(type) => (type === 'organization' ? [
-        'choerodon.code.organization.cooperation.working-hours.log.ps.default',
-      ] : [
+      service={(type) => (type === 'project' ? [
         'choerodon.code.project.cooperation.working-hours.log.ps.default',
-      ])}
+      ] : [])}
       path={match.url}
       component={LogIndex}
     />
