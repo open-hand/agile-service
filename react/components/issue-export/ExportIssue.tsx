@@ -136,7 +136,8 @@ const ExportIssue: React.FC = () => {
   Object.assign(checkBoxDataPropsRef, {
     current: checkBoxDataProps,
   });
-
+  const choseFieldStoreRef = useRef<typeof choseFieldStore>(choseFieldStore);
+  choseFieldStoreRef.current = choseFieldStore;
   const [filterData, filterComponentProps] = useIssueFilterForm({
     fields,
     value: choseFieldStore.getAllChosenField,
@@ -145,7 +146,7 @@ const ExportIssue: React.FC = () => {
     extraRenderFields: store.renderField,
     events: {
       afterDelete: (item) => {
-        choseFieldStore.delChosenFields(item.code);
+        choseFieldStoreRef.current.delChosenFields(item.code);
       },
     },
   });
