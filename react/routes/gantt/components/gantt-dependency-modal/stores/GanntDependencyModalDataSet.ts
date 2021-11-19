@@ -3,8 +3,15 @@ import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 import {
   DataSet,
 } from 'choerodon-ui/pro';
+import { sortBy } from 'lodash';
 import { ganttApiConfig } from '@/api';
 
+function getValueCodeSequence(valueCode: string) {
+  if (valueCode === 'predecessor_fs') {
+    return 10;
+  }
+  return 30;
+}
 const GanntDependencyModalDataSet = (editData?: any[]): DataSetProps => ({
   autoCreate: !editData?.length,
   autoQuery: false,
@@ -17,12 +24,16 @@ const GanntDependencyModalDataSet = (editData?: any[]): DataSetProps => ({
       required: true,
       type: 'string' as FieldType,
       textField: 'name',
+      defaultValue: !editData?.length ? 'predecessor_fs' : undefined,
       valueField: 'valueCode',
       options: new DataSet({
         paging: false,
         autoQuery: true,
         transport: {
-          read: ganttApiConfig.loadIssueDependencyTypes(),
+          read: {
+            ...ganttApiConfig.loadIssueDependencyTypes(),
+            transformResponse: (data) => sortBy(JSON.parse(data), (item) => getValueCodeSequence(item.valueCode)),
+          },
         },
       }),
     },

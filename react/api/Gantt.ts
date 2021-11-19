@@ -259,6 +259,16 @@ class GanttApi extends Api<GanttApi> {
       url: `${this.prefix}/gantt/latest_sort`,
     });
   }
+
+  loadDependencyByCurrentIssue(currentIssueId:string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/issue_predecessor/query`,
+      params: {
+        currentIssueId,
+      },
+    });
+  }
 }
 
 const ganttApi = new GanttApi();
