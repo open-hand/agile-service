@@ -153,7 +153,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     dataIndex: 'assigneeId',
     sortable: true,
     render: (rowData, getDataMethod = get) => (
-      <div style={{ display: 'inline-flex', height: 40 }}>
+      <div style={{ display: 'inline-flex' }}>
         {getDataMethod(rowData, 'assigneeId') && getDataMethod(rowData, 'assigneeId') !== '0' && (
           <UserTag
             data={{
@@ -172,7 +172,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     title: <Tooltip title="创建人">创建人</Tooltip>,
     dataIndex: 'createdBy',
     render: (rowData, getDataMethod = get) => (
-      <div style={{ display: 'inline-flex', height: 40 }}>
+      <div style={{ display: 'inline-flex' }}>
         {getDataMethod(rowData, 'createUser') && (
           <UserTag
             data={getDataMethod(rowData, 'createUser')}
@@ -186,7 +186,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     title: <Tooltip title="更新人">更新人</Tooltip>,
     dataIndex: 'lastUpdatedBy',
     render: (rowData, getDataMethod = get) => (
-      <div style={{ display: 'inline-flex', height: 40 }}>
+      <div style={{ display: 'inline-flex' }}>
         {getDataMethod(rowData, 'updateUser') && (
           <UserTag
             data={getDataMethod(rowData, 'updateUser')}
@@ -220,7 +220,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     dataIndex: 'reporterId',
     sortable: true,
     render: (rowData, getDataMethod = get) => (
-      <div style={{ display: 'inline-flex', height: 40 }}>
+      <div style={{ display: 'inline-flex' }}>
         {getDataMethod(rowData, 'reporterId') && getDataMethod(rowData, 'reporterId') !== '0' && (
           <UserTag
             data={{
@@ -289,7 +289,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   }],
   ['estimateTime', {
     title: <Tooltip title="原始预估时间">原始预估时间</Tooltip>,
-    width: 170,
+    width: 140,
     dataIndex: 'estimateTime',
     sortable: true,
     render: (rowData, getDataMethod = get) => (
@@ -374,7 +374,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   }],
   ['workTime', {
     title: <Tooltip title="工时">工时</Tooltip>,
-    width: 170,
+    width: 90,
     dataIndex: 'workTime',
     render: (rowData, getDataMethod = get) => (
       <div style={{ display: 'inline-flex' }}>
@@ -384,7 +384,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   }],
   ['cumulativeWorkTime', {
     title: <Tooltip title="历史累计工时">历史累计工时</Tooltip>,
-    width: 170,
+    width: 120,
     dataIndex: 'cumulativeWorkTime',
     render: (rowData, getDataMethod = get) => (
       <div style={{ display: 'inline-flex' }}>
@@ -394,7 +394,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   }],
   ['deviationRate', {
     title: <Tooltip title="偏差率">偏差率</Tooltip>,
-    width: 170,
+    width: 100,
     dataIndex: 'deviationRate',
     render: (rowData, getDataMethod = get) => {
       const numberValue = Number(getDataMethod(rowData, 'deviationRate'));

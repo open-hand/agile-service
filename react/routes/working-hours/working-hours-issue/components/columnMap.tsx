@@ -45,7 +45,6 @@ const renderUser = (user: User | null) => {
 const columnRenderMap = new Map([
   ['userId', {
     sortable: true,
-    width: 450,
     lock: true,
     renderer: ({ record }: { record: Record }) => renderUser(record.get('userDTO')),
   }],
@@ -53,22 +52,18 @@ const columnRenderMap = new Map([
     renderer: renderWorkTime,
   }],
   ['cumulativeWorkTime', {
-    width: 160,
     renderer: renderWorkTime,
   }],
   ['estimateTime', {
     sortable: true,
-    width: 160,
     renderer: renderWorkTime,
   }],
   ['deviationRate', {
-    width: 160,
     renderer: renderRate,
   }],
   ['summary', {
     lock: true,
     sortable: true,
-    width: 400,
     renderer: ({ record }: { record: Record}, onSummaryClick: (record: Record) => void) => (
       <>
         <TypeTag data={record.get('issueTypeVO')} style={{ marginRight: 5, marginTop: -2 }} />
@@ -83,7 +78,6 @@ const columnRenderMap = new Map([
   [
     'statusId', {
       sortable: true,
-      width: 160,
       renderer: ({ record }: { record: Record}) => (
         <StatusTag
           data={record.get('statusVO')}
@@ -95,7 +89,6 @@ const columnRenderMap = new Map([
   [
     'assigneeId', {
       sortable: true,
-      width: 160,
       renderer: ({ record }: { record: Record }) => renderUser(record.get('assigneeId') ? {
         id: record.get('assigneeId'),
         tooltip: record.get('assigneeName'),
@@ -109,7 +102,6 @@ const columnRenderMap = new Map([
   [
     'projectId', {
       sortable: true,
-      width: 250,
       renderer: ({ record }: { record: Record }) => <ProjectTag data={record.get('projectVO')} showText />,
     },
   ],

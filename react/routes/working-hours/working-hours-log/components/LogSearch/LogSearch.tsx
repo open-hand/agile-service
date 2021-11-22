@@ -43,7 +43,7 @@ const LogSearch: React.FC<{ searchDs: DataSet, showWorkGroup?: boolean }> = ({ s
             name="projectIds"
             dataSet={searchDs}
             multiple
-            maxTagCount={2}
+            maxTagCount={1}
             maxTagTextLength={5}
           />
         )
@@ -54,7 +54,7 @@ const LogSearch: React.FC<{ searchDs: DataSet, showWorkGroup?: boolean }> = ({ s
             dataSet={searchDs}
             name="workGroupIds"
             placeholder="筛选工作组"
-            maxTagCount={2}
+            maxTagCount={1}
             maxTagTextLength={10}
             maxTagPlaceholder={(restValues) => `+${restValues.length}...`}
             searchable
@@ -69,7 +69,7 @@ const LogSearch: React.FC<{ searchDs: DataSet, showWorkGroup?: boolean }> = ({ s
         name="userIds"
         key={`SLE-${workGroupIds?.length}`}
         placeholder="筛选成员"
-        maxTagCount={2}
+        maxTagCount={1}
         maxTagTextLength={5}
         style={{
           marginLeft: 10,

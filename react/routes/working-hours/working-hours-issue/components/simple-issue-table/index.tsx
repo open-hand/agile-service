@@ -40,7 +40,7 @@ const SimpleIssueTable: React.FC<Props> = ({ dataSet }) => {
     });
   }, [detailCallback, issueDetailProps]);
   return (
-    <>
+    <div className={styles.simpleTable}>
       <Table
         dataSet={dataSet}
         queryBar={'none' as TableQueryBarType}
@@ -48,32 +48,34 @@ const SimpleIssueTable: React.FC<Props> = ({ dataSet }) => {
         mode={'tree' as TableMode}
         rowHeight={35}
         selectionMode={'none' as SelectionMode}
+        pagination={!(dataSet.totalCount < 10) as any}
       >
         <Column
           name="summary"
           {...columnMap.get('summary')}
           // @ts-ignore
           renderer={({ record }) => columnMap.get('summary')?.renderer({ record }, onSummaryClick)}
+          minWidth={420}
         />
-        <Column name="issueNum" {...columnMap.get('issueNum') as ColumnPropsInner} minWidth={150} tooltip={'overflow' as TableColumnTooltip} />
-        <Column name="statusId" {...columnMap.get('statusId') as ColumnPropsInner} />
+        <Column name="issueNum" {...columnMap.get('issueNum') as ColumnPropsInner} width={110} tooltip={'overflow' as TableColumnTooltip} />
+        <Column name="statusId" {...columnMap.get('statusId') as ColumnPropsInner} width={120} />
         {
           mode === 'project' && (
-            <Column name="assigneeId" {...columnMap.get('assigneeId') as ColumnPropsInner} />
+            <Column name="assigneeId" {...columnMap.get('assigneeId') as ColumnPropsInner} width={180} />
           )
         }
         {
           mode === 'assignee' && (
-            <Column name="projectId" {...columnMap.get('projectId') as ColumnPropsInner} />
+            <Column name="projectId" {...columnMap.get('projectId') as ColumnPropsInner} width={210} />
           )
         }
-        <Column name="workTime" {...columnMap.get('workTime') as ColumnPropsInner} />
-        <Column name="cumulativeWorkTime" {...columnMap.get('cumulativeWorkTime') as ColumnPropsInner} />
-        <Column name="estimateTime" {...columnMap.get('estimateTime') as ColumnPropsInner} />
-        <Column name="deviationRate" {...columnMap.get('deviationRate') as ColumnPropsInner} />
+        <Column name="workTime" {...columnMap.get('workTime') as ColumnPropsInner} width={90} />
+        <Column name="cumulativeWorkTime" {...columnMap.get('cumulativeWorkTime') as ColumnPropsInner} width={130} />
+        <Column name="estimateTime" {...columnMap.get('estimateTime') as ColumnPropsInner} width={130} />
+        <Column name="deviationRate" {...columnMap.get('deviationRate') as ColumnPropsInner} width={110} />
       </Table>
       <DetailContainer {...issueDetailProps} />
-    </>
+    </div>
 
   );
 };
