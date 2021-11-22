@@ -136,6 +136,8 @@ public class ExportIssuesVO {
 
     private Boolean mergeColumn;
 
+    private Integer colorIndex;
+
 
     public ExportIssuesVO() {
     }
@@ -610,5 +612,13 @@ public class ExportIssuesVO {
 
     public void setMergeColumn(Boolean mergeColumn) {
         this.mergeColumn = mergeColumn;
+    }
+
+    public Integer getColorIndex() {
+        return colorIndex;
+    }
+
+    public void setColorIndex(Integer colorIndex) {
+        this.colorIndex = colorIndex;
     }
 }

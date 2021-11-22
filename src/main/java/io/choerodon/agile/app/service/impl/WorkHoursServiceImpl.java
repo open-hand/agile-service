@@ -364,6 +364,9 @@ public class WorkHoursServiceImpl implements WorkHoursService {
 
     @Override
     public Page<IssueListFieldKVVO> pageQueryIssues(Long organizationId, List<Long> projectIds, PageRequest pageRequest, Boolean containsSubIssue, SearchVO searchVO) {
+        if (CollectionUtils.isEmpty(projectIds)) {
+            return new Page<>();
+        }
         //处理用户搜索
         Map<String, Object> sortMap = issueService.processSortMap(pageRequest, projectIds.get(0), organizationId);
         String filterSql = null;
@@ -382,8 +385,12 @@ public class WorkHoursServiceImpl implements WorkHoursService {
         List<ProjectVO> projectVOS = baseFeignClient.queryByIds(projects).getBody();
         Map<Long, ProjectVO> projectMap = projectVOS.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
         List<Long> parentIds = content.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-        List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(parentIds, new HashSet<>(projectIds), searchVO, finalFilterSql, searchVO.getAssigneeFilterIds(), null);
+        List<IssueDTO> childIssues = workHoursMapper.queryChildrenIdByParentId(parentIds, new HashSet<>(projectIds), searchVO, finalFilterSql, searchVO.getAssigneeFilterIds(), null);
         Set<Long> childrenIds  = childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet());
+        if (CollectionUtils.isEmpty(childrenIds)) {
+            childrenIds = new HashSet<>();
+            childrenIds.add(0L);
+        }
         List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(parentIds, childrenIds, false, true);
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
         Map<Long, List<IssueTypeVO>> issueTypeDTOMap = issueTypeService.listIssueTypeMapByProjectIds(organizationId, projectIds);
@@ -431,6 +438,9 @@ public class WorkHoursServiceImpl implements WorkHoursService {
 
     @Override
     public Page<IssueDTO> pageIssue(Long organizationId, List<Long> projectIds, PageRequest pageRequest, SearchVO searchVO){
+        if (CollectionUtils.isEmpty(projectIds)) {
+            return new Page<>();
+        }
         //处理用户搜索
         Map<String, Object> sortMap = issueService.processSortMap(pageRequest, projectIds.get(0), organizationId);
         String filterSql = null;
@@ -446,8 +456,12 @@ public class WorkHoursServiceImpl implements WorkHoursService {
             return new Page<>();
         }
         List<Long> parentIds = content.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-        List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(parentIds, new HashSet<>(projectIds), searchVO, finalFilterSql, searchVO.getAssigneeFilterIds(), null);
+        List<IssueDTO> childIssues = workHoursMapper.queryChildrenIdByParentId(parentIds, new HashSet<>(projectIds), searchVO, finalFilterSql, searchVO.getAssigneeFilterIds(), null);
         Set<Long> childrenIds  = childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet());
+        if (CollectionUtils.isEmpty(childrenIds)) {
+            childrenIds = new HashSet<>();
+            childrenIds.add(0L);
+        }
         List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(parentIds, childrenIds, true, true);
         return PageUtil.buildPageInfoWithPageInfoList(page, issueDTOList);
     }
@@ -585,6 +599,9 @@ public class WorkHoursServiceImpl implements WorkHoursService {
 
     @Override
     public Page<IssueWorkHoursVO> pageQueryAssignee(Long organizationId, List<Long> projectIds, PageRequest pageRequest, SearchVO searchVO) {
+        if (CollectionUtils.isEmpty(projectIds)) {
+            return new Page<>();
+        }
         List<Long> allIssueIds = queryAllIssueIds(organizationId, projectIds, searchVO);
         if (CollectionUtils.isEmpty(allIssueIds)) {
             return new Page<>();
@@ -781,6 +798,9 @@ public class WorkHoursServiceImpl implements WorkHoursService {
     }
 
     private List<Long> queryAllIssueIds(Long organizationId, List<Long> projectIds, SearchVO searchVO) {
+        if (CollectionUtils.isEmpty(projectIds)) {
+           return new ArrayList<>();
+        }
         //处理用户搜索
         String filterSql = null;
         //处理自定义搜索
@@ -793,7 +813,7 @@ public class WorkHoursServiceImpl implements WorkHoursService {
             return new ArrayList<>();
         }
         List<Long> parentIds = issueDTOS.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-        List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(parentIds, new HashSet<>(projectIds), searchVO, filterSql, searchVO.getAssigneeFilterIds(), null);
+        List<IssueDTO> childIssues = workHoursMapper.queryChildrenIdByParentId(parentIds, new HashSet<>(projectIds), searchVO, filterSql, searchVO.getAssigneeFilterIds(), null);
         if (!CollectionUtils.isEmpty(childIssues)) {
             parentIds.addAll(childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toList()));
         }

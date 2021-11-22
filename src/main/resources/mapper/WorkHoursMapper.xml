@@ -404,4 +404,94 @@
         </if>
         group by ai.project_id
     </select>
+
+    <select id="queryChildrenIdByParentId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        select
+        ai.issue_id,
+        ai.project_id,
+        <if test="searchVO.ganttDefaultOrder">
+            agir.rank,
+            agir.instance_id,
+            agir.instance_type,
+        </if>
+        CONVERT(ai.issue_num,SIGNED) as issue_num_convert
+        from agile_issue ai
+        <if test="searchVO.ganttDefaultOrder">
+            left join agile_gantt_issue_rank agir on ai.issue_id = agir.issue_id and agir.dimension = #{searchVO.searchArgs.dimension}
+        </if>
+        <if test="sortMap != null and sortMap.sortFieldId != null ">
+            LEFT JOIN
+            (
+            SELECT
+            instance_id,
+            date_value,
+            option_id,
+            string_value,
+            text_value,
+            number_value
+            FROM fd_field_value ffv
+            JOIN agile_issue ai ON ai.issue_id = ffv.instance_id
+            AND ai.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            WHERE ffv.field_id = #{sortMap.sortFieldId}
+            AND ffv.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            AND ai.issue_type_id IN
+            <foreach collection="sortMap.fieldExtendIssueTypeIds" item="issueTypeId" open="(" separator="," close=")">
+                #{issueTypeId}
+            </foreach>
+            ) fv ON ai.issue_id = fv.instance_id
+        </if>
+        where ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and ai.issue_id in (
+            select awl.issue_id from agile_work_log awl
+            where
+            awl.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            <if test="searchVO.searchArgs != null">
+                <if test="searchVO.searchArgs.startTime != null and searchVO.searchArgs.endTime != null">
+                    and awl.start_date between #{searchVO.searchArgs.startTime} and #{searchVO.searchArgs.endTime}
+                </if>
+            </if>
+        )
+        and ai.apply_type = 'agile'
+        and ai.type_code in ('sub_task', 'bug')
+        and (
+        ai.parent_issue_id in
+        <foreach collection="issueIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        or
+        ai.type_code = 'bug'
+        and ai.relate_issue_id in
+        <foreach collection="issueIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        )
+        <include refid="io.choerodon.agile.infra.mapper.IssueMapper.explainSearchVO"/>
+        <include refid="io.choerodon.agile.infra.mapper.IssueMapper.filterSqlAndAssigneeIds"/>
+        <if test='searchVO.searchArgs != null'>
+            <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
+                AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+            </if>
+        </if>
+        <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+            <foreach collection="searchVO.contents" item="content" index="index">
+                AND (ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
+                OR ai.summary LIKE CONCAT(CONCAT('%', #{content}), '%'))
+            </foreach>
+        </if>
+        <if test="sortMap != null and sortMap.orderStr != null">
+            ORDER BY ${sortMap.orderStr}
+        </if>
+    </select>
 </mapper>
