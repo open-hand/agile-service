@@ -368,7 +368,8 @@ public class FieldValueUtil {
                     case FieldType.DATETIME:
                     case FieldType.DATE:
                     case FieldType.TIME:
-                        convertDate(fieldValues, defaultValue, fieldValue);
+                        fieldValue.setDateValue(convertDate(defaultValue));
+                        fieldValues.add(fieldValue);
                         break;
                     case FieldType.INPUT:
                         fieldValue.setStringValue(defaultValue);
@@ -391,7 +392,7 @@ public class FieldValueUtil {
         }
     }
 
-    private static void convertDate(List<FieldValueDTO> fieldValues, String defaultValue, FieldValueDTO fieldValue) throws ParseException {
+    private static Date convertDate(String defaultValue) throws ParseException {
         Date dateValue;
         //兼容Thu Apr 30 2020 00:00:00 GMT+0800和2020-02-13 15:51:22格式的日期
         try {
@@ -402,8 +403,7 @@ public class FieldValueUtil {
             //yyyy-MM-dd HH:mm:ss格式转换失败，直接抛出异常
             dateValue = df.parse(defaultValue);
         }
-        fieldValue.setDateValue(dateValue);
-        fieldValues.add(fieldValue);
+        return dateValue;
     }
 
     /**
@@ -439,7 +439,8 @@ public class FieldValueUtil {
                     case FieldType.DATETIME:
                     case FieldType.DATE:
                     case FieldType.TIME:
-                        convertDate(fieldValues, value.toString(), fieldValue);
+                        fieldValue.setDateValue(convertDate(value.toString()));
+                        fieldValues.add(fieldValue);
                         break;
                     case FieldType.INPUT:
                         String stringValue = (String) value;
@@ -463,6 +464,77 @@ public class FieldValueUtil {
                 throw new CommonException("error.date.parse", e);
             }
         }
+    }
+
+    public static boolean compareNewFieldValueWithOld(List<FieldValueDTO> oldFieldValues, String fieldType, Object value) {
+        boolean same = false;
+        if (value != null && !CollectionUtils.isEmpty(oldFieldValues)) {
+            try {
+                switch (fieldType) {
+                    case FieldType.CHECKBOX:
+                    case FieldType.MULTI_MEMBER:
+                    case FieldType.MULTIPLE:
+                        List<String> values = (List<String>) value;
+                        if (CollectionUtils.isEmpty(values)) {
+                            break;
+                        }
+                        List<Long> oldOptionIds = oldFieldValues.stream().map(FieldValueDTO::getOptionId).collect(Collectors.toList());
+                        List<Long> newOptionIds = new ArrayList<>();
+                        values.forEach(v -> newOptionIds.add(EncryptionUtils.decrypt(v, EncryptionUtils.BLANK_KEY)));
+                        same = compareMulti(oldOptionIds, newOptionIds);
+                        break;
+                    case FieldType.RADIO:
+                    case FieldType.SINGLE:
+                    case FieldType.MEMBER:
+                        Long newOptionId = EncryptionUtils.decrypt(value.toString(), EncryptionUtils.BLANK_KEY);
+                        Long oldOptionId = oldFieldValues.get(0).getOptionId();
+                        same = Objects.equals(newOptionId, oldOptionId);
+                        break;
+                    case FieldType.DATETIME:
+                    case FieldType.DATE:
+                    case FieldType.TIME:
+                        Date newDateValue = convertDate(value.toString());
+                        Date oldDateValue = oldFieldValues.get(0).getDateValue();
+                        same = Objects.equals(newDateValue, oldDateValue);
+                        break;
+                    case FieldType.INPUT:
+                        String newStringValue = (String) value;
+                        String oldStringValue = oldFieldValues.get(0).getStringValue();
+                        same = Objects.equals(newStringValue, oldStringValue);
+                        break;
+                    case FieldType.NUMBER:
+                        String newNumberValue = value.toString();
+                        String oldNumberValue = oldFieldValues.get(0).getNumberValue();
+                        same = Objects.equals(newNumberValue, oldNumberValue);
+                        break;
+                    case FieldType.TEXT:
+                        String newTextValue = (String) value;
+                        String oldTextValue = oldFieldValues.get(0).getTextValue();
+                        same = Objects.equals(newTextValue, oldTextValue);
+                        break;
+                    default:
+                        break;
+                }
+            } catch (Exception e) {
+                throw new CommonException("error.date.compare", e);
+            }
+        }
+        return same;
+    }
+
+    private static boolean compareMulti(List<Long> oldOptionIds, List<Long> newOptionIds) {
+        if ((!CollectionUtils.isEmpty(oldOptionIds) && !CollectionUtils.isEmpty(newOptionIds))
+                || (oldOptionIds.size() != newOptionIds.size())) {
+            oldOptionIds.sort(Long::compareTo);
+            newOptionIds.sort(Long::compareTo);
+            for (int i=0; i<oldOptionIds.size(); i++) {
+                if (!oldOptionIds.get(i).equals(newOptionIds.get(i))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
