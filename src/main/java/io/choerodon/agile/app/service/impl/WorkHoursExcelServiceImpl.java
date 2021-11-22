@@ -522,11 +522,24 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
                                ExcelCursorDTO cursor,
                                String sheetName,
                                Workbook workbook) {
-        CellStyle cellStyle = workbook.createCellStyle();
-        cellStyle.setAlignment(HorizontalAlignment.LEFT);
+
         SXSSFSheet sheet = (SXSSFSheet) workbook.getSheet(sheetName);
         for (ExportIssuesVO exportIssue : exportIssues) {
+            CellStyle cellStyle = workbook.createCellStyle();
+            cellStyle.setAlignment(HorizontalAlignment.LEFT);
+            if (Boolean.TRUE.equals(exportIssue.getMergeColumn())) {
+                Font font = workbook.createFont();
+                font.setBoldweight((short) 700);
+                cellStyle.setFont(font);
+            }
+            //  设置父子级问题项的背景颜色
+            if (!ObjectUtils.isEmpty(exportIssue.getColorIndex())) {
+                cellStyle.setFillForegroundColor(Objects.equals(0, exportIssue.getColorIndex()) ? IndexedColors.LIGHT_TURQUOISE.index : IndexedColors.TAN.index);
+                cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            }
+
             ExcelUtil.writeIssueWorkHours(sheet, exportIssue.getClass(), exportIssue, excelTitleVOS, cellStyle, cursor);
+
             if (Boolean.TRUE.equals(exportIssue.getMergeColumn())) {
                 CellRangeAddress cellRangeAddress = new CellRangeAddress(cursor.getRow(), cursor.getRow(), 0, 1);
                 sheet.addMergedRegion(cellRangeAddress);
@@ -605,12 +618,13 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
 
     private Map<Long, Map<Long, List<ExportIssuesVO>>> buildProjectAssigneeIssue(List<ExportIssuesVO> content) {
         Map<Long, Map<Long, List<ExportIssuesVO>>> result = new HashMap<>();
-        if(!CollectionUtils.isEmpty(content)){
+        if (!CollectionUtils.isEmpty(content)) {
+            List<Integer> colorIndex = new ArrayList<>();
             Map<Long, List<ExportIssuesVO>> projectExportIssueMap = content.stream().collect(Collectors.groupingBy(ExportIssuesVO::getProjectId));
             for (Map.Entry<Long, List<ExportIssuesVO>> entry : projectExportIssueMap.entrySet()) {
                 Long projectId = entry.getKey();
                 List<ExportIssuesVO> value = entry.getValue();
-                Map<Long, List<ExportIssuesVO>> assigneeMap = buildIssue(value, ExportIssuesVO::getAssigneeId);
+                Map<Long, List<ExportIssuesVO>> assigneeMap = buildIssue(value, ExportIssuesVO::getAssigneeId, colorIndex);
                 result.put(projectId, assigneeMap);
             }
         }
@@ -620,9 +634,18 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
     private void sortExportIssueVOS(List<ExportIssuesVO> content, List<ExportIssuesVO> exportIssuesVOS) {
         Map<Long, List<ExportIssuesVO>> parentIssueMap = content.stream().collect(Collectors.groupingBy(ExportIssuesVO::getParentId));
         List<ExportIssuesVO> roots = parentIssueMap.get(0L);
+        Boolean isBlue = true;
         for (ExportIssuesVO root : roots) {
+            List<ExportIssuesVO> childrens = parentIssueMap.getOrDefault(root.getIssueId(), new ArrayList<>());
+            if (!CollectionUtils.isEmpty(childrens)) {
+                int colorIndex = Boolean.TRUE.equals(isBlue) ? 0 : 1;
+                root.setColorIndex(colorIndex);
+                for (ExportIssuesVO children : childrens) {
+                    children.setColorIndex(colorIndex);
+                }
+            }
             exportIssuesVOS.add(root);
-            exportIssuesVOS.addAll(parentIssueMap.getOrDefault(root.getIssueId(), new ArrayList<>()));
+            exportIssuesVOS.addAll(childrens);
         }
     }
 
@@ -635,7 +658,8 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
         if (!CollectionUtils.isEmpty(content)) {
             List<Long> projects = content.stream().map(IssueWorkHoursVO::getProjectId).collect(Collectors.toList());
             Page<ExportIssuesVO> exportIssuesVOPage = pageQueryIssues(organizationId, projects, new PageRequest(0, 0), containsSubIssue, searchVO);
-            Map<Long, List<ExportIssuesVO>> projectMap = buildIssue(exportIssuesVOPage.getContent(), ExportIssuesVO::getProjectId);
+            List<Integer> colorIndex = new ArrayList<>();
+            Map<Long, List<ExportIssuesVO>> projectMap = buildIssue(exportIssuesVOPage.getContent(), ExportIssuesVO::getProjectId, colorIndex);
             for (IssueWorkHoursVO issueWorkHoursVO : content) {
                 ExportIssuesVO exportIssuesVO = new ExportIssuesVO();
                 ProjectVO projectVO = issueWorkHoursVO.getProjectVO();
@@ -681,7 +705,8 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
             otherArgs.put("assigneeId", assigneeIds);
             issueSearchVO.setOtherArgs(otherArgs);
             Page<ExportIssuesVO> exportIssuesVOPage = pageQueryIssues(organizationId, projectIds, new PageRequest(0, 0), containsSubIssue, issueSearchVO);
-            Map<Long, List<ExportIssuesVO>> assigneeMap = buildIssue(exportIssuesVOPage.getContent(), ExportIssuesVO::getAssigneeId);
+            List<Integer> colorIndex = new ArrayList<>();
+            Map<Long, List<ExportIssuesVO>> assigneeMap = buildIssue(exportIssuesVOPage.getContent(), ExportIssuesVO::getAssigneeId, colorIndex);
             for (IssueWorkHoursVO issueWorkHoursVO : content) {
                  ExportIssuesVO exportIssuesVO = new ExportIssuesVO();
                  UserDTO userDTO = issueWorkHoursVO.getUserDTO();
@@ -800,7 +825,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
         exportIssuesVO.setDeviationRate(transformBigDecimal(deviationRate));
     }
 
-    private Map<Long, List<ExportIssuesVO>> buildIssue(List<ExportIssuesVO> list, Function<ExportIssuesVO, Long> function) {
+    private Map<Long, List<ExportIssuesVO>> buildIssue(List<ExportIssuesVO> list, Function<ExportIssuesVO, Long> function, List<Integer> colorIndex) {
         if (CollectionUtils.isEmpty(list)) {
             return new HashMap<>();
         }
@@ -814,11 +839,17 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
             for (ExportIssuesVO value : values) {
                 // 子任务和子缺陷需要把需要添加父任务
                 Boolean isSubIssue = !ObjectUtils.isEmpty(value) && !Objects.equals(0L, value.getParentId());
-                if (isSubIssue && !existIssue.contains(value.getParentId())) {
+                if (isSubIssue) {
                     ExportIssuesVO exportIssuesVO = issueMap.get(value.getParentId());
                     if (!ObjectUtils.isEmpty(exportIssuesVO)) {
-                        exportIssuesVOS.add(exportIssuesVO);
-                        existIssue.add(value.getParentId());
+                        Integer color = !ObjectUtils.isEmpty(exportIssuesVO.getColorIndex()) ? exportIssuesVO.getColorIndex() : getColorIndex(colorIndex);
+                        exportIssuesVO.setColorIndex(color);
+                        if (!existIssue.contains(value.getParentId())) {
+                            exportIssuesVOS.add(exportIssuesVO);
+                            existIssue.add(value.getParentId());
+                        }
+                        issueMap.put(exportIssuesVO.getIssueId(), exportIssuesVO);
+                        value.setColorIndex(exportIssuesVO.getColorIndex());
                     }
                 }
                 if (!existIssue.contains(value.getIssueId())) {
@@ -829,6 +860,17 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
             result.put(entry.getKey(), exportIssuesVOS);
         }
         return result;
+    }
+
+    private Integer getColorIndex(List<Integer> colorIndex) {
+        int index = 0;
+        if (!CollectionUtils.isEmpty(colorIndex)) {
+            int result = colorIndex.size() % 2;
+            index = result > 0 ? 1 : 0;
+        }
+        colorIndex.add(index);
+        return index;
+
     }
 
     private String transformBigDecimal(BigDecimal bigDecimal){

@@ -46,4 +46,11 @@ public interface WorkHoursMapper {
     List<Long> queryIds(@Param("projectIds") List<Long> projectIds, @Param("issueIds") List<Long> issueIds, @Param("levelType") String levelType);
 
     List<IssueWorkHoursVO> queryProjectAssigneeIds(@Param("projectIds") List<Long> projects, @Param("issueIds") List<Long> issueIds);
+
+    List<IssueDTO> queryChildrenIdByParentId(@Param("issueIds") List<Long> issueIds,
+                                             @Param("projectIds") Set<Long> projectIds,
+                                             @Param("searchVO") SearchVO searchVO,
+                                             @Param("filterSql") String filterSql,
+                                             @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
+                                             @Param("sortMap") Map<String, Object> sortMap);
 }
