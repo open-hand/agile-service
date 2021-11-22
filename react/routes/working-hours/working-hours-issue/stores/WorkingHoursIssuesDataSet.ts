@@ -33,6 +33,7 @@ const WorkingHoursIssuesDataSet = ({
         set(search, 'searchArgs.tree', true);
         set(search, 'searchArgs.startTime', data.startTime);
         set(search, 'searchArgs.endTime', data.endTime);
+        set(search, 'otherArgs.assigneeId', data.assigneeId);
         return JSON.stringify(search);
       },
     }),

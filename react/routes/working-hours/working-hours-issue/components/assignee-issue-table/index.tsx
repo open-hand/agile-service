@@ -23,10 +23,10 @@ interface Props {
 }
 const AssigneeIssueTable: React.FC<Props> = ({ projectId, defaultListLayoutColumns, dataSet }) => {
   const {
-    isProject, mode, startTime, endTime, isContain, issueSearchStore,
+    isProject, mode, startTime, endTime, isContain, issueSearchStore, tableFieldsFetched, addCustomFieldToDs,
   } = useIssueStore();
 
-  return (
+  return ((isProject && tableFieldsFetched) || !isProject) ? (
     <div className={styles.assigneeTable}>
       <Table
         dataSet={dataSet}
@@ -39,15 +39,16 @@ const AssigneeIssueTable: React.FC<Props> = ({ projectId, defaultListLayoutColum
           if (!recordIssueDs) {
             const newDs = new DataSet(!isProject ? SimpleIssueDataSet({ issueSearchStore, organizationId: getOrganizationId() }) : WorkingHoursIssuesDataSet({ projectId: getProjectId(), organizationId: getOrganizationId(), issueSearchStore }));
             recordIssueDs = newDs;
+            if (isProject) {
+              addCustomFieldToDs(recordIssueDs);
+            }
             record.setState('recordDs', recordIssueDs);
             recordIssueDs.setQueryParameter('startTime', startTime);
             recordIssueDs.setQueryParameter('endTime', endTime);
             recordIssueDs.setQueryParameter('containsSubIssue', isContain);
-            if (!isProject) {
-              recordIssueDs.setQueryParameter('assigneeId', [record.get('userId')]);
-              if (mode === 'projectAssignee') {
-                recordIssueDs.setQueryParameter('projectIds', [projectId]);
-              }
+            recordIssueDs.setQueryParameter('assigneeId', [record.get('userId')]);
+            if (mode === 'projectAssignee') {
+              recordIssueDs.setQueryParameter('projectIds', [projectId]);
             }
             recordIssueDs.query();
           }
@@ -74,7 +75,7 @@ const AssigneeIssueTable: React.FC<Props> = ({ projectId, defaultListLayoutColum
         <Column name="deviationRate" {...columnMap.get('deviationRate') as ColumnPropsInner} />
       </Table>
     </div>
-  );
+  ) : null;
 };
 
 export default observer(AssigneeIssueTable);
