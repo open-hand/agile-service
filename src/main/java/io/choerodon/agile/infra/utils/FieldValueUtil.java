@@ -468,6 +468,9 @@ public class FieldValueUtil {
 
     public static boolean compareNewFieldValueWithOld(List<FieldValueDTO> oldFieldValues, String fieldType, Object value) {
         boolean same = false;
+        if (value == null && CollectionUtils.isEmpty(oldFieldValues)) {
+            same = true;
+        }
         if (value != null && !CollectionUtils.isEmpty(oldFieldValues)) {
             try {
                 switch (fieldType) {
@@ -481,7 +484,7 @@ public class FieldValueUtil {
                         List<Long> oldOptionIds = oldFieldValues.stream().map(FieldValueDTO::getOptionId).collect(Collectors.toList());
                         List<Long> newOptionIds = new ArrayList<>();
                         values.forEach(v -> newOptionIds.add(EncryptionUtils.decrypt(v, EncryptionUtils.BLANK_KEY)));
-                        same = compareMulti(oldOptionIds, newOptionIds);
+                        same = oldOptionIds.size() == newOptionIds.size() && oldOptionIds.containsAll(newOptionIds);
                         break;
                     case FieldType.RADIO:
                     case FieldType.SINGLE:
@@ -520,21 +523,6 @@ public class FieldValueUtil {
             }
         }
         return same;
-    }
-
-    private static boolean compareMulti(List<Long> oldOptionIds, List<Long> newOptionIds) {
-        if ((!CollectionUtils.isEmpty(oldOptionIds) && !CollectionUtils.isEmpty(newOptionIds))
-                || (oldOptionIds.size() != newOptionIds.size())) {
-            oldOptionIds.sort(Long::compareTo);
-            newOptionIds.sort(Long::compareTo);
-            for (int i=0; i<oldOptionIds.size(); i++) {
-                if (!oldOptionIds.get(i).equals(newOptionIds.get(i))) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -678,19 +666,7 @@ public class FieldValueUtil {
         } catch (Exception e) {
             throw new CommonException("error", e);
         }
-        if (checkCreateFieldDataLog(create)) {
-            fieldDataLogService.createDataLog(projectId, schemeCode, create);
-        }
-    }
-
-    private static boolean checkCreateFieldDataLog(FieldDataLogCreateVO create) {
-        String oldString = create.getOldString();
-        String newString = create.getNewString();
-        if (!(Objects.isNull(oldString) && Objects.isNull(newString))
-                && !Objects.equals(oldString, newString)) {
-            return true;
-        }
-        return false;
+        fieldDataLogService.createDataLog(projectId, schemeCode, create);
     }
 
     private static String handlerStringValue(List<Long> userIds, Map<Long, UserDTO> userMap) {
