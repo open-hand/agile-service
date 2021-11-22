@@ -1137,9 +1137,10 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             projectIds = new ArrayList<>();
             Long userId = DetailsHelper.getUserDetails().getUserId();
             Page<ProjectVO> page = baseFeignClient.pagingProjectsByUserId(organizationId, userId, 0, 0, true, "N_AGILE").getBody();
-            if (!CollectionUtils.isEmpty(page.getContent())) {
-                projectIds.addAll(page.getContent().stream().map(ProjectVO::getId).collect(Collectors.toList()));
+            if (CollectionUtils.isEmpty(page.getContent())) {
+                return new Page<>();
             }
+            projectIds.addAll(page.getContent().stream().map(ProjectVO::getId).collect(Collectors.toList()));
         }
         List<Long> finalProjectIds = projectIds;
         Page<IssueTypeVO> page = PageHelper.doPage(pageRequest, () -> issueTypeMapper.selectProjectIssueTypeByOptions(organizationId, finalProjectIds, issueTypeSearchVO));
