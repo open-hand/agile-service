@@ -65,8 +65,9 @@ const AssigneeIssueTable: React.FC<Props> = ({ projectId, defaultListLayoutColum
             )
           );
         }}
+        pagination={!(dataSet.totalCount < 10) as any}
       >
-        <Column name="userId" {...columnMap.get('userId') as ColumnPropsInner} />
+        <Column name="userId" {...columnMap.get('userId') as ColumnPropsInner} width={400} />
         <Column name="workTime" {...columnMap.get('workTime') as ColumnPropsInner} />
         <Column name="cumulativeWorkTime" {...columnMap.get('cumulativeWorkTime') as ColumnPropsInner} />
         <Column name="estimateTime" {...columnMap.get('estimateTime') as ColumnPropsInner} />

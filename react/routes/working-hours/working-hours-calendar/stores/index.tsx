@@ -66,7 +66,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
   const { children, AppState } = props;
   const projectCreationDate = useMemo(() => AppState.getCurrentProject?.creationDate, [AppState.getCurrentProject]);
   const [cacheFilters, setCacheFilters] = useState<IFilterItem | undefined>();
-  const [filterLoaded, setFilterLoaded] = useState<boolean>(false);
+  const [filterLoaded, setFilterLoaded] = useState<boolean>(!getIsOrganization());
   const cacheFiltersObj = useMemo(() => cacheFilters?.filterId && JSON.parse(cacheFilters.filterJson)?.advancedSearchArgs, [cacheFilters]);
   const calendarDs = useMemo(() => new DataSet(CalendarDataSet()), []);
   const searchDs = useMemo(() => new DataSet(CalendarSearchDataSet({ projectCreationDate, cacheFiltersObj })), [projectCreationDate]);
@@ -143,40 +143,44 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
       setCacheFilters(res?.length && res[0]);
       setFilterLoaded(true);
     };
-    getCacheFilters();
+    if (getIsOrganization()) {
+      getCacheFilters();
+    }
   }, []);
 
   useEffect(debounce(() => {
-    const searchWorkGroupIds = toJS(searchDs.current?.get('workGroupIds'));
-    const searchUserIds = toJS(searchDs.current?.get('userIds'));
-    const newUserIds = workGroupIds?.length ? searchUserIds : undefined;
-    if (filterLoaded) {
-      if (cacheFilters?.filterId) {
-        if (cacheFiltersObj.userIds?.toString() !== newUserIds?.toString() || cacheFiltersObj.workGroupIds?.toString() !== searchWorkGroupIds?.toString()) {
-          personalFilterApi.update(cacheFilters?.filterId, {
-            objectVersionNumber: cacheFilters?.objectVersionNumber,
+    if (getIsOrganization()) {
+      const searchWorkGroupIds = toJS(searchDs.current?.get('workGroupIds'));
+      const searchUserIds = toJS(searchDs.current?.get('userIds'));
+      const newUserIds = workGroupIds?.length ? searchUserIds : undefined;
+      if (filterLoaded) {
+        if (cacheFilters?.filterId) {
+          if (cacheFiltersObj.userIds?.toString() !== newUserIds?.toString() || cacheFiltersObj.workGroupIds?.toString() !== searchWorkGroupIds?.toString()) {
+            personalFilterApi.update(cacheFilters?.filterId, {
+              objectVersionNumber: cacheFilters?.objectVersionNumber,
+              filterJson: JSON.stringify({
+                advancedSearchArgs: {
+                  userIds: newUserIds,
+                  workGroupIds: searchWorkGroupIds,
+                },
+              }),
+            }).then((res: IFilterItem) => {
+              setCacheFilters(res);
+            });
+          }
+        } else {
+          personalFilterApi.create({
+            name: '工时日历筛选',
             filterJson: JSON.stringify({
               advancedSearchArgs: {
                 userIds: newUserIds,
                 workGroupIds: searchWorkGroupIds,
               },
             }),
-          }).then((res: IFilterItem) => {
+          }, 'agile_work_hours').then((res: IFilterItem) => {
             setCacheFilters(res);
           });
         }
-      } else {
-        personalFilterApi.create({
-          name: '工时日历筛选',
-          filterJson: JSON.stringify({
-            advancedSearchArgs: {
-              userIds: newUserIds,
-              workGroupIds: searchWorkGroupIds,
-            },
-          }),
-        }, 'agile_work_hours').then((res: IFilterItem) => {
-          setCacheFilters(res);
-        });
       }
     }
   }, 300), [searchDs.current?.get('workGroupIds'), searchDs.current?.get('userIds'), filterLoaded]);

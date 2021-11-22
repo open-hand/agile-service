@@ -19,11 +19,11 @@ const ProjectIssueTable: React.FC<Props> = () => {
   const {
     workingHoursProjectDs, workingHoursProjectAssigneeDs, mode, startTime, endTime, isContain, issueSearchStore,
   } = useIssueStore();
-
+  const dataSet = mode === 'project' ? workingHoursProjectDs : workingHoursProjectAssigneeDs;
   return (
     <div className={styles.assigneeTable}>
       <Table
-        dataSet={mode === 'project' ? workingHoursProjectDs : workingHoursProjectAssigneeDs}
+        dataSet={dataSet}
         queryBar={'none' as TableQueryBarType}
         rowHeight={29}
         selectionMode={'none' as SelectionMode}
@@ -52,6 +52,7 @@ const ProjectIssueTable: React.FC<Props> = () => {
             <AssigneeIssueTable dataSet={recordIssueDs} projectId={record.get('projectId')} key={record.get('projectId')} />
           );
         }}
+        pagination={!(dataSet.totalCount < 10) as any}
       >
         <Column name="projectId" {...columnMap.get('projectId') as ColumnPropsInner} width={400} />
         <Column name="workTime" {...columnMap.get('workTime') as ColumnPropsInner} />

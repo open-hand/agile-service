@@ -62,6 +62,7 @@ const WorkingHoursIssueTable = ({
         mode="tree"
         rowHeight={mode === 'issue' ? 29 : 35}
         selectionMode="none"
+        pagination={!(dataSet.totalCount < 10)}
       />
       <DetailContainer {...issueDetailProps} />
     </div>
