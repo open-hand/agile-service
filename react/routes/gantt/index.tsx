@@ -7,8 +7,8 @@ import { find } from 'lodash';
 
 import TableCache from '@/components/table-cache';
 import useIsInProgram from '@/hooks/useIsInProgram';
-import { getMenuType, getProjectId } from '@/utils/common';
-import { ganttApi } from '@/api';
+import { getMenuType, getProjectId, getUserId } from '@/utils/common';
+import { ganttApi, projectApi } from '@/api';
 import noDataPic from '@/assets/image/NoData.svg';
 import Gantt from './stores';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
@@ -43,7 +43,7 @@ const GanttProject: React.FC<{ projectId: string, menuType?: 'project' | 'org', 
  * @param Element
  */
 
-export const warpGanttProvideProjects = (Element: React.FC<{ projects: any[], currentProjectId?: string, setCurrentProjectId: (val?: string | ((oldValue?: string) => string | undefined)) => void }>): typeof React.PureComponent => class GanttProjectsProvider extends React.PureComponent<any, { projects: any[], currentProjectId?: string, loading: boolean }> {
+export const warpGanttProvideProjects = (Element: React.FC<{ projects: any[], currentProjectId?: string, setCurrentProjectId: (val?: string | ((oldValue?: string) => string | undefined)) => void }>, level: 'org' | 'workbench' = 'org'): typeof React.PureComponent => class GanttProjectsProvider extends React.PureComponent<any, { projects: any[], currentProjectId?: string, loading: boolean }> {
   constructor(props: any) {
     super(props);
     this.state = {
@@ -53,8 +53,17 @@ export const warpGanttProvideProjects = (Element: React.FC<{ projects: any[], cu
     };
   }
 
+  loadData = async () => {
+    if (level === 'org') {
+      return ganttApi.loadProjects();
+    }
+    return projectApi.loadProjectByUser({
+      userId: getUserId(), page: 1, size: 0, category: 'N_AGILE',
+    }).then((res: any) => res.list);
+  }
+
   componentDidMount() {
-    ganttApi.loadProjects().then((res: any) => {
+    this.loadData().then((res: any) => {
       const cacheProjectId = localPageCacheStore.getItem('org.gantt.projectId');
       const newProjects = res.map((i: any) => ({ ...i, id: String(i.id) }));
       const newProjectId = (find(newProjects, { id: cacheProjectId }) || newProjects[0])?.id;

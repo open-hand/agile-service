@@ -33,4 +33,4 @@ const WorkbenchGantt: IReactFCGanttProvideProjects = ({ projects, currentProject
   ) : null;
 };
 
-export default warpGanttProvideProjects(WorkbenchGantt);
+export default warpGanttProvideProjects(WorkbenchGantt, 'workbench');
