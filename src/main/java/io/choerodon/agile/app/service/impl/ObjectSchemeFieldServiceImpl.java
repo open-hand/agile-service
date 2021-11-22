@@ -1122,19 +1122,18 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     private String tryDecryptDefaultValue(String fieldType, String defaultValue) {
         if (EncryptContext.isEncrypt()) {
-            if (FieldType.multipleFieldType.contains(fieldType) && !ObjectUtils.isEmpty(defaultValue)) {
-                String[] splits = defaultValue.split(",");
-                List<String> list = new ArrayList<>();
-                for (String split : splits) {
-                    list.add(EncryptionUtils.decrypt(split));
-                }
-                return list.stream().collect(Collectors.joining(","));
-            } else {
-                try {
+            try {
+                if (FieldType.multipleFieldType.contains(fieldType) && !ObjectUtils.isEmpty(defaultValue)) {
+                    String[] splits = defaultValue.split(",");
+                    List<String> list = new ArrayList<>();
+                    for (String split : splits) {
+                        list.add(EncryptionUtils.decrypt(split));
+                    }
+                    return list.stream().collect(Collectors.joining(","));
+                } else {
                     return EncryptionUtils.decrypt(defaultValue);
-                } catch (Exception e) {
-                    //do nothing
                 }
+            } catch (Exception e) {
                 return null;
             }
         }
