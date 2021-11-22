@@ -55,6 +55,8 @@ interface Context {
   startTime: string,
   endTime: string,
   onCloseDetailTableQuery: (ds: DataSet) => void
+  tableFieldsFetched: boolean
+  addCustomFieldToDs: (ds: DataSet) => void
 }
 
 export type IMode = 'issue' | 'assignee' | 'project' | 'projectAssignee';
@@ -78,14 +80,16 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
   })), [isProject]);
   const issueSearchStore = useIssueSearchStore(issueSearchStoreProps);
 
-  const { data: tableFields } = useIssueTableFields({
+  const {
+    data: tableFields = [], isFetched = true,
+  } = isProject ? useIssueTableFields({
     hiddenFieldCodes: ['epicSelfName'],
     extraFields: [{ code: 'workTime', title: '工时' } as IFoundationHeader,
     { code: 'cumulativeWorkTime', title: '历史累计工时' } as IFoundationHeader,
     { code: 'estimateTime', title: '原始预估时间' } as IFoundationHeader,
     { code: 'deviationRate', title: '偏差率' } as IFoundationHeader,
     ],
-  });
+  }) : {};
   useEffect(() => () => { isProject && localPageCacheStore.setItem('agile.working.hours.issue.search', issueSearchStore.getCustomFieldFilters()); }, []);
 
   const workingHoursIssuesDs = useMemo(() => new DataSet(WorkingHoursIssuesDataSet({
@@ -94,15 +98,18 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     issueSearchStore,
   })), []);
 
-  useEffect(() => {
+  const addCustomFieldToDs = useCallback((ds: DataSet) => {
     // @ts-ignore
     const newFields = (tableFields?.filter((field) => field.sortId?.indexOf('foundation.') > -1) || []).map((customField) => ({ name: customField.sortId, label: customField.title }));
     newFields.forEach((field) => {
-      if (!workingHoursIssuesDs.fields.get(field.name)) {
-        workingHoursIssuesDs.addField(field.name, field);
+      if (!ds.fields.get(field.name)) {
+        ds.addField(field.name, field);
       }
     });
   }, [tableFields]);
+  useEffect(() => {
+    addCustomFieldToDs(workingHoursIssuesDs);
+  }, [addCustomFieldToDs]);
   const workingHoursAssigneeDs = useMemo(() => new DataSet(AssigneeDataSet({
     projectId: isProject ? getProjectId() : undefined,
     organizationId: getOrganizationId(),
@@ -241,6 +248,8 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     onCloseDetail,
     totalWorkTime,
     onCloseDetailTableQuery,
+    tableFieldsFetched: isFetched,
+    addCustomFieldToDs,
   };
   return (
     <Store.Provider value={value}>
