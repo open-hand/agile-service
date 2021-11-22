@@ -606,7 +606,19 @@ public class FieldValueUtil {
         } catch (Exception e) {
             throw new CommonException("error", e);
         }
-        fieldDataLogService.createDataLog(projectId, schemeCode, create);
+        if (checkCreateFieldDataLog(create)) {
+            fieldDataLogService.createDataLog(projectId, schemeCode, create);
+        }
+    }
+
+    private static boolean checkCreateFieldDataLog(FieldDataLogCreateVO create) {
+        String oldString = create.getOldString();
+        String newString = create.getNewString();
+        if (!(Objects.isNull(oldString) && Objects.isNull(newString))
+                && !Objects.equals(oldString, newString)) {
+            return true;
+        }
+        return false;
     }
 
     private static String handlerStringValue(List<Long> userIds, Map<Long, UserDTO> userMap) {
