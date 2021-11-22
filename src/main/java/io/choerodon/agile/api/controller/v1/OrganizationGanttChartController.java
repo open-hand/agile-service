@@ -47,7 +47,7 @@ public class OrganizationGanttChartController {
     }
 
 
-    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询组织层项目列表数据")
     @GetMapping(value = "/agile_projects")
     public ResponseEntity<List<ProjectVO>> listAgileProjects(@ApiParam(value = "组织id", required = true)
