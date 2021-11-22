@@ -180,6 +180,10 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         }
         //获取原fieldValue
         List<FieldValueDTO> oldFieldValues = fieldValueMapper.queryList(projectId, instanceId, schemeCode, fieldId);
+        // 新值旧值比较
+        if (FieldValueUtil.compareNewFieldValueWithOld(oldFieldValues, updateDTO.getFieldType(), updateDTO.getValue())) {
+            return modelMapper.map(oldFieldValues, new TypeToken<List<FieldValueVO>>() {}.getType());
+        }
         //删除原fieldValue
         if (!oldFieldValues.isEmpty()) {
             fieldValueMapper.deleteList(projectId, instanceId, schemeCode, fieldId);
