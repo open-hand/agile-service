@@ -11,6 +11,8 @@ public class WorkHoursExportVO {
 
     private String userName;
 
+    private String loginName;
+
     private BigDecimal workTime;
 
     private Date workDate;
@@ -87,5 +89,13 @@ public class WorkHoursExportVO {
 
     public void setProjectName(String projectName) {
         this.projectName = projectName;
+    }
+
+    public String getLoginName() {
+        return loginName;
+    }
+
+    public void setLoginName(String loginName) {
+        this.loginName = loginName;
     }
 }

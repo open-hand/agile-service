@@ -33,6 +33,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author dinghuang123@gmail.com
@@ -251,10 +252,11 @@ public class ExcelUtil {
         SXSSFSheet sheet = (SXSSFSheet) workbook.getSheet(sheetName);
         Integer rowNum = cursorDTO.getRow();
         SXSSFRow row = sheet.createRow(rowNum);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         for (int i = 0; i < excelTitleVOS.size(); i++) {
             ExcelTitleVO excelTitleVO = excelTitleVOS.get(i);
             sheet.setColumnWidth(i, excelTitleVO.getWidth());
-            handleWriteCell(row, i, workGroupReportExcelVO, cellStyle, excelTitleVO.getCode(), clazz);
+            handleWriteCell(row, i, workGroupReportExcelVO, cellStyle, excelTitleVO.getCode(), clazz, simpleDateFormat);
         }
         sheet.trackAllColumnsForAutoSizing();
     }
@@ -267,10 +269,13 @@ public class ExcelUtil {
                                                ExcelCursorDTO cursorDTO) {
         Integer rowNum = cursorDTO.getRow();
         SXSSFRow row = sheet.createRow(rowNum);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        List<String> codes = excelTitleVOS.stream().map(ExcelTitleVO::getCode).collect(Collectors.toList());
+        String[] codeArray = codes.toArray(new String[codes.size()]);
         for (int i = 0; i < excelTitleVOS.size(); i++) {
             ExcelTitleVO excelTitleVO = excelTitleVOS.get(i);
             sheet.setColumnWidth(i, excelTitleVO.getWidth());
-            handleWriteCell(row, i, exportIssuesVO, cellStyle, excelTitleVO.getCode(), clazz);
+            handleWriteCell(row, i, exportIssuesVO, cellStyle, codeArray, clazz, null, formatter);
         }
         sheet.trackAllColumnsForAutoSizing();
     }
@@ -286,17 +291,14 @@ public class ExcelUtil {
         CellStyle cellStyle = workbook.createCellStyle();
         SXSSFSheet sheet = (SXSSFSheet) workbook.getSheet(sheetName);
         cellStyle.setAlignment(HorizontalAlignment.LEFT);
-        CellStyle dateCellStyle =workbook.createCellStyle(); //单元格样式类
-        dateCellStyle.setAlignment(HorizontalAlignment.LEFT);
-        dateCellStyle.setDataFormat(workbook.getCreationHelper().createDataFormat().getFormat("yyyy/mm/dd"));
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         for (WorkHoursExportVO workHoursExportVO : workHoursExportVOS) {
             Integer rowNum = cursorDTO.getRow();
             SXSSFRow row = sheet.createRow(rowNum);
             for (int i = 0; i < workHoursLogList.size(); i++) {
                 ExcelTitleVO excelTitleVO = workHoursLogList.get(i);
                 sheet.setColumnWidth(i, excelTitleVO.getWidth());
-                Boolean isDate = "workDate".equals(excelTitleVO.getCode());
-                handleWriteCell(row, i, workHoursExportVO, (isDate ? dateCellStyle : cellStyle), excelTitleVO.getCode(), clazz);
+                handleWriteCell(row, i, workHoursExportVO, cellStyle, excelTitleVO.getCode(), clazz, simpleDateFormat);
             }
             cursorDTO.increaseRow();
         }
@@ -475,7 +477,8 @@ public class ExcelUtil {
                                               Object data,
                                               CellStyle cellStyle,
                                               String field,
-                                              Class<T> clazz) {
+                                              Class<T> clazz,
+                                              SimpleDateFormat simpleDateFormat) {
         SXSSFCell cell = row.createCell(i);
         if (data != null) {
             Method method = null;
@@ -498,7 +501,7 @@ public class ExcelUtil {
                 }
             }
             if (invoke instanceof Date) {
-                cell.setCellValue((Date) invoke);
+                cell.setCellValue(substring(simpleDateFormat.format(invoke)));
             } else if (invoke instanceof Map) {
                 ObjectMapper m = new ObjectMapper();
                 Map<String, String> foundationFieldValue = m.convertValue(invoke, Map.class);
