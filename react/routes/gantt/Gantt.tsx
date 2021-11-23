@@ -5,6 +5,7 @@ import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
+import { LoadingProvider } from '@choerodon/components';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import SelectSprint from '@/components/select/select-sprint';
 import { useGanttContext } from './stores/context';
@@ -57,17 +58,18 @@ const GanttPage: React.FC = () => {
         <HeaderButtons {...headerComponentProps} />
       </Header>
       <Breadcrumb />
-      <Content
-        className="c7n-gantt-content"
-        style={{
-          borderTop: '1px solid var(--divider)',
-          display: 'flex',
-          paddingTop: 7,
-          flexDirection: 'column',
-          paddingBottom: 0,
-        }}
+      <Content style={{
+        display: 'flex',
+        paddingTop: 7,
+        flexDirection: 'column',
+        paddingBottom: 0,
+      }}
       >
-        <GanttBody {...ganttHeaderData} />
+        <LoadingProvider
+          className="c7n-gantt-content"
+        >
+          <GanttBody {...ganttHeaderData} />
+        </LoadingProvider>
       </Content>
       <StatusLinkageWSHandle />
     </Page>

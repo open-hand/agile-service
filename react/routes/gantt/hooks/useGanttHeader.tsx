@@ -1,5 +1,7 @@
-import React, { useCallback, useState } from 'react';
-import { useCreation, usePersistFn, useWhyDidYouUpdate } from 'ahooks';
+import React, { useCallback, useState, useRef } from 'react';
+import {
+  useCreation, usePersistFn, useWhyDidYouUpdate,
+} from 'ahooks';
 
 import {
   Tooltip, Icon, Button, CheckBox,
@@ -23,7 +25,7 @@ interface IGanttHeaderHookConfig {
   onTypeChange?: (type: IGanttDimensionTypeValue) => void
   onRefresh?: () => void
   onClickPersonalFilter?: () => void
-  menuType?: 'project' | 'org'
+  menuType?: 'project' | 'org' | 'workbench'
   store: GanttStore
 }
 type IGanttHeaderHookConfigKey = keyof IGanttHeaderHookConfig
@@ -35,7 +37,9 @@ function useGanttHeader(config: IGanttHeaderHookConfig) {
   const { sprintIds } = store;
   const [isHasConflict, setIsHasConflict] = useState(false);
   const configMaps = useCreation(() => new Map<IGanttHeaderHookConfigKey, any>(), []);
-  const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
+  const fullDomRef = useRef<any>(null);
+  // const [isFullScreen, { toggleFull: toggleFullScreen }] = useFullscreen(fullDomRef, {});
+  const [isFullScreen, toggleFullScreen] = useFullScreen(() => fullDomRef.current || document.body, () => { }, 'c7n-gantt-fullScreen');
   const [processType, setProcessType] = useState<'task' | 'workTime'>('task');
   const [type, setType] = useState<IGanttDimensionTypeValue>(localPageCacheStore.project(projectId).getItem('gantt.search.type') ?? typeValues[0]);
   const setConfig = useCallback((configItemKey: IGanttHeaderHookConfigKey, value?: any) => {
@@ -147,7 +151,6 @@ function useGanttHeader(config: IGanttHeaderHookConfig) {
         iconOnly: true,
         display: true,
         handler: () => {
-          // @ts-ignore
           toggleFullScreen();
         },
         tooltipsConfig: {
@@ -166,12 +169,21 @@ function useGanttHeader(config: IGanttHeaderHookConfig) {
         items: ['create', 'personalFilter', 'columnConfig', 'fullScreen', 'refresh'].map((key: keyof typeof itemMap) => itemMap[key]),
       };
     }
+    if (menuType === 'workbench') {
+      return {
+        showClassName: false,
+        items: ['columnConfig', 'personalFilter', 'fullScreen'].map((key: keyof typeof itemMap) => itemMap[key]),
+
+      };
+    }
     return {
       showClassName: false,
       items: ['columnConfig', 'personalFilter'].map((key: keyof typeof itemMap) => itemMap[key]),
     };
   }, [menuType, getConfig]);
-  return [{ type, processType, setConfig }, {
+  return [{
+    type, processType, setConfig, fullDomRef, isFullScreen,
+  }, {
     sprintComponentsProps, processTypeComponentProps, typeComponentProps, headerComponentProps,
   }] as const;
 }

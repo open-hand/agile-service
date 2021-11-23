@@ -11,12 +11,15 @@ import { openExportLogModal } from './components/export-modal';
 import LogSearch from './components/LogSearch';
 import { StoreProvider, useLogStore } from './stores';
 import { IWorkingHoursData, workingHoursApi } from '@/api';
-import { getProjectId, getOrganizationId } from '@/utils/common';
+import { getProjectId, getOrganizationId, getIsOrganization } from '@/utils/common';
+import { useWorkBenchWorkingHoursContext } from '@/injects/workbench-working-hours/stores';
 
 const WorkingHoursLog = () => {
   const {
     logDs, loadData, exportDs, logSearchDs,
   } = useLogStore();
+  const { fullButtonProps } = useWorkBenchWorkingHoursContext();
+
   const handleOpenExport = useCallback(() => {
     const search: IWorkingHoursData = logSearchDs.current?.data as IWorkingHoursData;
     exportDs.current?.set('userIds', search.userIds?.length ? toJS(search.userIds) : undefined);
@@ -50,7 +53,12 @@ const WorkingHoursLog = () => {
           display: true,
           icon: 'refresh',
           handler: refresh,
-        }]}
+        },
+        {
+          ...fullButtonProps,
+          display: getIsOrganization(),
+        },
+        ]}
         />
       </Header>
       <Breadcrumb />

@@ -22,6 +22,7 @@ import getColumnManageOptions from './utils/getColumnManageOptions';
 import { ListLayoutColumnVO } from '@/api';
 import TableCache from '@/components/table-cache';
 import ProjectIssueTable from './components/project-issue-table';
+import { useWorkBenchWorkingHoursContext } from '@/injects/workbench-working-hours/stores';
 
 const disabledSystemOptionsCodes = ['summary', 'workTime', 'cumulativeWorkTime', 'estimateTime', 'deviationRate'];
 
@@ -47,7 +48,7 @@ const WorkingHoursIssue = (props = {}) => {
     dateSearchDs, loading, workingHoursIssuesDs, workingHoursAssigneeDs, mode, isProject, isContain, setIsContain, tableFields: fields, totalWorkTime,
     issueSearchStore, startTime, endTime,
   } = useIssueStore();
-
+  const { fullButtonProps } = useWorkBenchWorkingHoursContext();
   const handleChangeIsContain = useCallback((value) => {
     setIsContain(value);
   }, [setIsContain]);
@@ -112,6 +113,10 @@ const WorkingHoursIssue = (props = {}) => {
                 />
                 <span>列配置</span>
               </Button>),
+          },
+          {
+            ...fullButtonProps,
+            display: !isProject,
           },
           {
             display: true,
