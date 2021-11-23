@@ -549,7 +549,11 @@ public class EncryptionUtils {
     public static List<String> encryptList(List<Long> parentIds) {
         List<String> list = new ArrayList<>();
         if (!CollectionUtils.isEmpty(parentIds)) {
-            parentIds.forEach(v -> list.add(encryptionService.encrypt(v.toString(), BLANK_KEY)));
+            if (!EncryptContext.isEncrypt()) {
+                parentIds.forEach(v -> list.add(String.valueOf(v)));
+            } else {
+                parentIds.forEach(v -> list.add(encryptionService.encrypt(v.toString(), BLANK_KEY)));
+            }
         }
         return list;
     }
