@@ -29,6 +29,6 @@ function renderEllipsisBlockOption(text?: string, block?: React.ReactElement, co
       </Tooltip>
     ) : textBlock;
 }
-const optionStyles = styles as { popup: string, option: string };
+const optionStyles = { ...styles, optionWrap: styles.option_wrap } as { popup: string, option: string, optionWrap: string };
 export { optionStyles as styles };
 export default renderEllipsisBlockOption;
