@@ -28,61 +28,21 @@ const NoTemplate: React.FC<{ activeKey: string }> = ({ activeKey }) => {
     });
   }, [issueTypeInitedMap, selectedType, setIssueTypeInitedMap]);
 
-  return (
-    <Page>
-      {
-        !readOnly && (
+  const renderContent = useCallback(() => (
+    <Content style={{ borderTop: 'none' }}>
+      <IssueTypeTab
+        selectedType={selectedType}
+        setSelectedType={setSelectedType}
+        excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
+        brighter={readOnly}
+        visibleIssueTypeCategory={visibleIssueTypeCategory}
+      />
+      <EmptyPage
+        image={NoData}
+        description={(
           <>
-            {activeKey !== 'custom' && (
-              <Header>
-                <Tooltip title="请先配置模板">
-                  <Button
-                    icon="playlist_add"
-                    disabled
-                  >
-                    添加已有状态
-                  </Button>
-                </Tooltip>
-                <Tooltip title="请先配置模板">
-                  <Button
-                    icon="playlist_add"
-                    disabled
-                    style={{ marginLeft: 16 }}
-                  >
-                    创建新的状态
-                  </Button>
-                </Tooltip>
-                <Tooltip title="请先配置模板">
-                  <Button
-                    icon="settings-o"
-                    disabled
-                    color={'primary' as ButtonColor}
-                    style={{ marginLeft: 16 }}
-                  >
-                    设置初始状态
-                  </Button>
-                </Tooltip>
-              </Header>
-            )}
-
-          </>
-        )
-      }
-      {!readOnly && <Breadcrumb />}
-      <Content style={{ borderTop: 'none' }}>
-        <IssueTypeTab
-          selectedType={selectedType}
-          setSelectedType={setSelectedType}
-          excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
-          brighter={readOnly}
-          visibleIssueTypeCategory={visibleIssueTypeCategory}
-        />
-        <EmptyPage
-          image={NoData}
-          description={(
-            <>
-              {`当前问题类型暂未配置状态机模板${readOnly ? '请到组织层状态机页面配置模板' : '点击按钮配置模板'}。`}
-              {
+            {`当前问题类型暂未配置状态机模板${readOnly ? '请到组织层状态机页面配置模板' : '点击按钮配置模板'}。`}
+            {
                 !readOnly && (
                   <>
                     <EmptyPage.Button
@@ -93,12 +53,48 @@ const NoTemplate: React.FC<{ activeKey: string }> = ({ activeKey }) => {
                   </>
                 )
               }
-            </>
+          </>
           )}
-        />
-      </Content>
+      />
+    </Content>
+  ), [initTemplate, isOrganization, readOnly, selectedType, setSelectedType, visibleIssueTypeCategory]);
+  return !readOnly ? (
+    <Page>
+      {activeKey !== 'custom' && (
+      <Header>
+        <Tooltip title="请先配置模板">
+          <Button
+            icon="playlist_add"
+            disabled
+          >
+            添加已有状态
+          </Button>
+        </Tooltip>
+        <Tooltip title="请先配置模板">
+          <Button
+            icon="playlist_add"
+            disabled
+            style={{ marginLeft: 16 }}
+          >
+            创建新的状态
+          </Button>
+        </Tooltip>
+        <Tooltip title="请先配置模板">
+          <Button
+            icon="settings-o"
+            disabled
+            color={'primary' as ButtonColor}
+            style={{ marginLeft: 16 }}
+          >
+            设置初始状态
+          </Button>
+        </Tooltip>
+      </Header>
+      )}
+      <Breadcrumb />
+      {renderContent()}
     </Page>
-  );
+  ) : renderContent();
 };
 
 export default observer(NoTemplate);
