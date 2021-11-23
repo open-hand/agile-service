@@ -344,4 +344,4 @@ const zh_CN = {
   'report.code-quality.nclocs': '代码行',
   'report.code-quality.duplicatedLines': '重复行',
 };
-export default zh_CN;
+export { zh_CN as AGILE_ZH_CN };
