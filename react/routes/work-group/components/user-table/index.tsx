@@ -1,6 +1,6 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Table, Tooltip } from 'choerodon-ui/pro';
+import { Table } from 'choerodon-ui/pro';
 import { StatusTag } from '@choerodon/components';
 import { ColumnAlign } from 'choerodon-ui/pro/lib/table/enum';
 import { useWorkGroupStore } from '@/routes/work-group/stores';
@@ -11,14 +11,7 @@ const { Column } = Table;
 const UserTable = () => {
   const {
     tableDs,
-    NOT_ASSIGN_ID,
-    mainStore,
   } = useWorkGroupStore();
-
-  const hiddenGroup = useMemo(() => {
-    const { id } = mainStore.getSelectedMenu || {};
-    return id === NOT_ASSIGN_ID;
-  }, [mainStore.getSelectedMenu]);
 
   const renderStatus = useCallback(({ value }) => (
     <StatusTag
@@ -42,11 +35,6 @@ const UserTable = () => {
         renderer={({ value }) => (value ? 'LDAP用户' : '非LDAP用户')}
         align={ColumnAlign.left}
         width={150}
-      />
-      <Column
-        name="workGroupName"
-        hidden={hiddenGroup}
-        renderer={({ text }) => <Tooltip title={text}>{text}</Tooltip>}
       />
     </Table>
   );
