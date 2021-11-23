@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.IssuePredecessorTreeClosureMapper">
+    <insert id="batchInsert">
+        insert into agile_issue_predecessor_tree_closure
+        (ancestor_id, descendant_id, project_id, organization_id, created_by, last_updated_by)
+        values
+        <foreach collection="treeNodes" item="item"  separator=",">
+            (
+            #{item.ancestorId},
+            #{item.descendantId},
+            #{item.projectId},
+            #{item.organizationId},
+            #{operator},
+            #{operator}
+            )
+        </foreach>
+    </insert>
+
+    <delete id="batchDelete">
+        delete aiptc.*
+        from agile_issue_predecessor_tree_closure aiptc
+        where aiptc.organization_id = #{organizationId}
+        and aiptc.project_id = #{projectId}
+        and
+        <foreach collection="deleteSet" item="item" open="(" separator="OR" close=")">
+            (
+                aiptc.ancestor_id = #{item.ancestorId}
+                and aiptc.descendant_id = #{item.descendantId}
+            )
+        </foreach>
+    </delete>
+
+
+    <select id="selectInList" resultType="io.choerodon.agile.infra.dto.IssuePredecessorTreeClosureDTO">
+        select aiptc.*
+        from agile_issue_predecessor_tree_closure aiptc
+        where aiptc.organization_id = #{organizationId}
+        and aiptc.project_id = #{projectId}
+        and
+        <foreach collection="treeNodes" item="item" open="(" separator="OR" close=")">
+            (1=1
+            <if test="item.ancestorId != null">
+                and aiptc.ancestor_id = #{item.ancestorId}
+            </if>
+            <if test="item.descendantId != null">
+                and aiptc.descendant_id = #{item.descendantId}
+            </if>
+            )
+        </foreach>
+    </select>
+
+    <select id="selectByDescendantIds" resultType="io.choerodon.agile.infra.dto.IssuePredecessorTreeClosureDTO">
+        select aiptc.*
+        from agile_issue_predecessor_tree_closure aiptc
+        where aiptc.organization_id = #{organizationId}
+        and aiptc.project_id = #{projectId}
+        and aiptc.descendant_id in
+        <foreach collection="descendantIds" item="descendantId" open="(" separator="," close=")">
+            #{descendantId}
+        </foreach>
+    </select>
+
+    <select id="selectByAncestorIds" resultType="io.choerodon.agile.infra.dto.IssuePredecessorTreeClosureDTO">
+        select aiptc.*
+        from agile_issue_predecessor_tree_closure aiptc
+        where aiptc.organization_id = #{organizationId}
+        and aiptc.project_id = #{projectId}
+        and aiptc.ancestor_id in
+        <foreach collection="ancestorIds" item="ancestorId" open="(" separator="," close=")">
+            #{ancestorId}
+        </foreach>
+    </select>
+</mapper>

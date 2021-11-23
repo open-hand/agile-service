@@ -35,7 +35,7 @@ public class PersonalFilterController {
                                                    @PathVariable(name = "project_id") Long projectId,
                                                    @ApiParam(value = "personal filter object", required = true)
                                                    @RequestBody @Encrypt PersonalFilterVO personalFilterVO) {
-        return Optional.ofNullable(personalFilterService.create(projectId, personalFilterVO))
+        return Optional.ofNullable(personalFilterService.create(0L, projectId, personalFilterVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.personalFilter.create"));
     }
@@ -49,7 +49,7 @@ public class PersonalFilterController {
                                                    @PathVariable  @Encrypt Long filterId,
                                                    @ApiParam(value = "personal filter object", required = true)
                                                    @RequestBody  @Encrypt PersonalFilterVO personalFilterVO) {
-        return Optional.ofNullable(personalFilterService.update(projectId, filterId, personalFilterVO))
+        return Optional.ofNullable(personalFilterService.update(0L, projectId, filterId, personalFilterVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.personalFilter.create"));
     }
@@ -61,7 +61,7 @@ public class PersonalFilterController {
                                                        @PathVariable(name = "project_id") Long projectId,
                                                        @ApiParam(value = "filter id", required = true)
                                                        @PathVariable  @Encrypt Long filterId) {
-        personalFilterService.deleteById(projectId, filterId);
+        personalFilterService.deleteById(0L, projectId, filterId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -72,8 +72,9 @@ public class PersonalFilterController {
                                                                   @PathVariable(name = "project_id") Long projectId,
                                                                   @ApiParam(value = "用户id", required = true)
                                                                   @PathVariable @Encrypt Long userId,
-                                                                  @RequestParam(name = "searchStr", required = false) String searchStr) {
-        return Optional.ofNullable(personalFilterService.listByProjectId(projectId, userId, searchStr))
+                                                                  @RequestParam(name = "searchStr", required = false) String searchStr,
+                                                                  @RequestParam(name = "filterTypeCode") String filterTypeCode) {
+        return Optional.ofNullable(personalFilterService.listByUserId(0L, projectId, userId, searchStr, filterTypeCode))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.personalFilter.list"));
     }
@@ -85,7 +86,7 @@ public class PersonalFilterController {
                                                       @PathVariable(name = "project_id") Long projectId,
                                                       @ApiParam(value = "filter id", required = true)
                                                       @PathVariable @Encrypt Long filterId) {
-        return Optional.ofNullable(personalFilterService.queryById(projectId, filterId))
+        return Optional.ofNullable(personalFilterService.queryById(0L, projectId, filterId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.personalFilter.queryById"));
     }
@@ -98,8 +99,10 @@ public class PersonalFilterController {
                                              @ApiParam(value = "用户id", required = true)
                                              @RequestParam @Encrypt Long userId,
                                              @ApiParam(value = "name", required = true)
-                                             @RequestParam String name) {
-        return Optional.ofNullable(personalFilterService.checkName(projectId, userId, name))
+                                             @RequestParam String name,
+                                             @ApiParam(value = "filterTypeCode", required = true)
+                                             @RequestParam String filterTypeCode) {
+        return Optional.ofNullable(personalFilterService.checkName(0L, projectId, userId, name, filterTypeCode))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.checkName.get"));
     }
@@ -111,7 +114,7 @@ public class PersonalFilterController {
                                              @PathVariable(name = "project_id") Long projectId,
                                              @ApiParam(value = "filter Id", required = true)
                                              @RequestParam @Encrypt Long filterId) {
-        return Optional.ofNullable(personalFilterService.setDefault(projectId, filterId))
+        return Optional.ofNullable(personalFilterService.setDefault(0L, projectId, filterId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.personal.filter.set.default"));
     }

@@ -6,8 +6,9 @@ import classNames from 'classnames';
 import { find, findIndex, noop } from 'lodash';
 import { useMount, usePersistFn } from 'ahooks';
 import styles from './index.less';
-import Context from '../../context';
+import Context from '../../stores/context';
 import { ganttApi, IGanttSortDataItem } from '@/api';
+import { useGanttBodyContext } from '../../stores/bodyContext';
 
 interface IGanttSortLabelOnChange {
   (dataKeyValues: IGanttSortLabelSortItem[]): void
@@ -74,7 +75,7 @@ const GanttSortLabel: React.FC<IGanttSortLabelProps> = ({
   children, unionSort, dataKey, onChange: propsOnChange,
 }) => {
   const [sorted, setSorted] = useState<'desc' | 'asc' | undefined>();
-  const { sortedList } = useContext(Context);
+  const { sortedList } = useGanttBodyContext();
   const onChange = usePersistFn(propsOnChange || noop);
   useEffect(() => {
     if (!unionSort) {

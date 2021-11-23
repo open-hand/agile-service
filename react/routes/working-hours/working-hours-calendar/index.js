@@ -11,9 +11,7 @@ const CalendarIndex = React.lazy(() => import('./CalendarIndex'));
 const WorkingHoursCalendar = ({ match }) => (
   <Switch>
     <PermissionRoute
-      service={(type) => (type === 'organization' ? [
-        'choerodon.code.organization.cooperation.working-hours.calendar.ps.default',
-      ] : [
+      service={(type) => (type === 'organization' ? [] : [
         'choerodon.code.project.cooperation.working-hours.calendar.ps.default',
       ])}
       path={match.url}

@@ -74,7 +74,7 @@ public class OrganizationGanttChartController {
         return new ResponseEntity<>(organizationGanttChartService.listCustomFields(organizationId), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation(value = "组织甘特图预计时间冲突统计")
     @PostMapping("/estimated_time/conflict")
     public ResponseEntity<List<EstimatedTimeConflictVO>> queryEstimatedTimeConflict(@PathVariable(name = "organization_id") Long organizationId,
@@ -83,8 +83,17 @@ public class OrganizationGanttChartController {
         return new ResponseEntity<>(organizationGanttChartService.queryEstimatedTimeConflict(organizationId, searchVO), HttpStatus.OK);
     }
 
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
+    @ApiOperation(value = "组织甘特图判断是否有资源冲突接口")
+    @PostMapping("/estimated_time/is_conflicted")
+    public ResponseEntity<Boolean> isEstimatedTimeConflicted(@PathVariable(name = "organization_id") Long organizationId,
+                                                             @RequestBody SearchVO searchVO) {
+        EncryptionUtils.decryptSearchVO(searchVO);
+        return new ResponseEntity<>(organizationGanttChartService.isEstimatedTimeConflicted(organizationId, searchVO), HttpStatus.OK);
+    }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation(value = "组织甘特图预计时间冲突统计用户的详情")
     @PostMapping("/estimated_time/conflict/details")
     public ResponseEntity<Page<GanttChartVO>> queryEstimatedTimeConflictDetails(@ApiIgnore

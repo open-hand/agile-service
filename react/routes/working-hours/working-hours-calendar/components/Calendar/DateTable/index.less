@@ -40,6 +40,7 @@
       justify-content: space-between;
       flex-direction: row;
       z-index: 2;
+      padding-left: 17px !important;
     }
   }
   .row {
@@ -111,14 +112,10 @@
     flex-shrink: 0;
     border-top: 1px solid #D9E6F2;
     background-color: #FFF;
-    .footer_firstCell {
-      justify-content: center;
-      align-items: center;
-    }
+    
     .footer_cell {
       height: 100%;
       background-color: #FFF;
-      // border-bottom: 1px solid #D9E6F2;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -128,12 +125,10 @@
     position: relative;
     width: 100%;
     overflow: visible;
-    border-bottom: 1px solid #D9E6F2;
     min-width: 100%;
     .row_cell:not(:last-child), .header_cell:not(:last-child) {
       border-right: 1px solid #D9E6F2;
     }
-    
     .firstCell {
       z-index: 2;
       flex-shrink: 0;
@@ -145,6 +140,11 @@
       position: sticky;
       left: 0;
       background-color: #FFF;
+    }
+    .footer_firstCell {
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: 17px;
     }
     .header_cell {
       position: -webkit-sticky; /* safari 浏览器 */  
@@ -160,6 +160,16 @@
       }
     }
   }
+  .header, .row:not(:last-child), .footer {
+    border-bottom: 1px solid #D9E6F2;
+  }
+  .row:last-child {
+    .body_cell_count {
+      height: 52px !important;
+      line-height: 52px !important;
+    }
+  }
+  
   .blockRow {
     border-bottom: none;
     min-height: unset;
@@ -171,6 +181,7 @@
     cursor: pointer;
     font-weight: 500;
     position: relative;
+    border-top: 1px solid #D9E6F2;
     .more_span {
       position: -webkit-sticky !important; /* safari 浏览器 */  
       position: sticky !important;

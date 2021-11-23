@@ -152,6 +152,14 @@ class IssueApi extends Api<IssueApi> {
     return `/agile/v1/projects/${this.projectId}`;
   }
 
+  get orgPrefix() {
+    return `/agile/v1/organizations/${this.orgId}`;
+  }
+
+  get proOrOrgPrefix() {
+    return this.menuType === 'project' ? this.prefix : this.orgPrefix;
+  }
+
   get outPrefix() {
     return '/agile/v1/backlog_external';
   }
@@ -390,9 +398,9 @@ class IssueApi extends Api<IssueApi> {
  * 查询最新的导入导出记录
  * @returns {V|*}
  */
-  loadLastImportOrExport(action: 'upload_file' | 'download_file' | 'upload_file_customer_field' | 'upload_file_backlog' | 'download_file_publish_version'): Promise<IImportOrExportRecord> {
-    return axios({
-      url: `${this.prefix}/excel/latest`,
+  loadLastImportOrExport(action: 'upload_file' | 'download_file' | 'upload_file_customer_field' | 'upload_file_backlog' | 'download_file_publish_version' | 'download_file_issue_work_hours'): Promise<IImportOrExportRecord> {
+    return this.request({
+      url: `${this.proOrOrgPrefix}/excel/latest`,
       method: 'get',
       params: {
         action,

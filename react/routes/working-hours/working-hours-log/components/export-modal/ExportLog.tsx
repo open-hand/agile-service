@@ -3,10 +3,12 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  DataSet, Form, Button, DatePicker,
+  DataSet, Form, Button, DatePicker, TreeSelect, CheckBox,
 } from 'choerodon-ui/pro';
 import moment from 'moment';
 import { Choerodon } from '@choerodon/boot';
+import { includes, map } from 'lodash';
+import { toJS } from 'mobx';
 import WsProgress from '@/components/ws-progress';
 import styles from './ExportLog.less';
 import SelectUser from '@/components/select/select-user';
@@ -15,7 +17,9 @@ import {
 } from '@/utils/common';
 import SelectProject from '@/components/select/select-project';
 import { IModalProps } from '@/common/types';
-import { IWorkingHoursData, workingHoursApi, WorkingHoursExportAction } from '@/api';
+import {
+  IWorkingHoursData, workGroupApi, workingHoursApi, WorkingHoursExportAction,
+} from '@/api';
 
 interface IDownLoadInfo {
   id: string | null,
@@ -34,13 +38,17 @@ export interface IExportProps {
   proMessageKey: string,
   fileName: string
   exportFn: (data: IWorkingHoursData) => void,
+  showWorkGroup?: boolean
 }
 
 const ExportLog: React.FC<IExportProps> = ({
-  exportDs, action, orgMessageKey, proMessageKey, fileName, exportFn, modal,
+  exportDs, action, orgMessageKey, proMessageKey, fileName, exportFn, showWorkGroup = false,
 }) => {
   const [loading, setLoading] = useState(false);
   const [downloadInfo, setDownloadInfo] = useState({} as IDownLoadInfo);
+  const workGroupIds = exportDs.current?.get('workGroupIds');
+  const userIds = exportDs.current?.get('userIds');
+
   useEffect(() => {
     workingHoursApi.getLatest(action).then((res: IDownLoadInfo) => {
       if (res.id) {
@@ -60,6 +68,7 @@ const ExportLog: React.FC<IExportProps> = ({
       ...search,
       startTime: moment(search.startTime).startOf('day').format('YYYY-MM-DD HH:mm:ss'),
       endTime: moment(search.endTime).endOf('day').format('YYYY-MM-DD HH:mm:ss'),
+      workGroupIds: search.userIds?.length ? undefined : search.workGroupIds,
     });
     return false;
   }, [exportDs, exportFn]);
@@ -102,14 +111,49 @@ const ExportLog: React.FC<IExportProps> = ({
           />
         )
       }
+        {
+        showWorkGroup && getIsOrganization() && (
+          <TreeSelect
+            name="workGroupIds"
+            placeholder="筛选工作组"
+            maxTagCount={2}
+            maxTagTextLength={10}
+            maxTagPlaceholder={(restValues) => `+${restValues.length}...`}
+            searchable
+          />
+        )
+      }
         <SelectUser
           name="userIds"
+          key={`SLE-${workGroupIds?.length}`}
+          placeholder="筛选成员"
           maxTagCount={2}
           maxTagTextLength={5}
           clearButton
+          level={getIsOrganization() ? 'org' : 'project'}
+          request={workGroupIds?.length ? ({ page, filter, requestArgs }: { page: number, filter: string, requestArgs: { selectedUserIds?: string[]}}) => workGroupApi.loadUserByGroupIds({ workGroupIds, realName: filter, userIds: requestArgs.selectedUserIds }, {
+            page,
+          }).then((res: any) => {
+            const userList = res.content || [];
+            const noFindUserIds: string[] = [];
+            if (userIds.length) {
+              userIds.forEach((id: string) => {
+                if (!includes(map(userList, 'id'), id)) {
+                  noFindUserIds.push(id);
+                }
+              });
+            exportDs.current?.set('userIds', userIds.filter((id: string) => !includes(noFindUserIds, id)));
+            }
+            return ({ ...res, content: userList, list: userList });
+          }) : undefined}
           help="不选择成员时，默认为选择全部成员。"
           selected={exportDs.current?.get('userIds')}
         />
+        {
+          showWorkGroup && getIsOrganization() && (
+            <CheckBox name="exportMonthlyReport" />
+          )
+        }
       </Form>
       <Button
         icon="unarchive-o"

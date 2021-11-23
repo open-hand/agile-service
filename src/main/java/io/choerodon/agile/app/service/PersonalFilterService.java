@@ -10,17 +10,17 @@ import java.util.List;
  */
 public interface PersonalFilterService {
 
-    PersonalFilterVO queryById(Long projectId, Long filterId);
+    PersonalFilterVO queryById(Long organizationId, Long projectId, Long filterId);
 
-    PersonalFilterVO create(Long projectId, PersonalFilterVO personalFilterVO);
+    PersonalFilterVO create(Long organizationId, Long projectId, PersonalFilterVO personalFilterVO);
 
-    PersonalFilterVO update(Long projectId, Long filterId, PersonalFilterVO personalFilterVO);
+    PersonalFilterVO update(Long organizationId, Long projectId, Long filterId, PersonalFilterVO personalFilterVO);
 
-    void deleteById(Long projectId, Long filterId);
+    void deleteById(Long organizationId, Long projectId, Long filterId);
 
-    List<PersonalFilterVO> listByProjectId(Long projectId, Long userId, String searchStr);
+    List<PersonalFilterVO> listByUserId(Long organizationId, Long projectId, Long userId, String searchStr, String filterTypeCode);
 
-    Boolean checkName(Long projectId, Long userId, String name);
+    Boolean checkName(Long organizationId, Long projectId, Long userId, String name, String filterTypeCode);
 
-    Boolean setDefault(Long projectId, Long filterId);
+    Boolean setDefault(Long organizationId, Long projectId, Long filterId);
 }

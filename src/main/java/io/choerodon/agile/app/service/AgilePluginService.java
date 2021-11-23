@@ -280,10 +280,10 @@ public interface AgilePluginService {
 
     /**
      * do 转issueListFieldKVDTOList 设置特性的属性
-     * @param projectId
+     * @param projectIds
      * @param issueListFieldKVDTOList
      */
-    void doToIssueListFieldKVDTO(Long projectId,List<IssueListFieldKVVO> issueListFieldKVDTOList);
+    void doToIssueListFieldKVDTO(List<Long> projectIds,List<IssueListFieldKVVO> issueListFieldKVDTOList);
 
     /**
      * 项目群子项目下载issue 替换史诗列为特性
@@ -506,4 +506,8 @@ public interface AgilePluginService {
     List<Long> queryNoEpicFeatureIds(List<IssueDTO> issues);
 
     void buildFieldList(List<String> fieldList, IssueUpdateVO issueUpdateVO);
+
+    void handleProgramIssueValueMap(Long organizationId, List<Long> projectIds, List<Long> allIssueIds, Set<Long> featureIds, Map<String, Object> issueValueMap);
+
+    void setExportIssueBusinessArgs(ExportIssuesVO exportIssuesVO, Map<String, Object> issueValueMap, IssueDTO issueDTO);
 }

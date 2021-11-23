@@ -9,6 +9,7 @@
     "lib"
   ],
   "dependencies": {
+    "@atlaskit/tree": "^8.4.0",
     "@choerodon/gantt": "0.2.0",
     "@emotion/core": "^10.0.28",
     "@emotion/styled": "^10.0.27",
@@ -50,9 +51,9 @@
     "webuploader": "^0.1.8"
   },
   "devDependencies": {
-    "@choerodon/boot": "0.23.3",
+    "@choerodon/boot": "1.2.0",
     "@choerodon/compiler": "^0.0.1",
-    "@choerodon/master": "1.1.0",
+    "@choerodon/master": "1.2.0",
     "@types/classnames": "^2.2.10",
     "@types/echarts": "^4.6.5",
     "@types/file-saver": "^2.0.1",

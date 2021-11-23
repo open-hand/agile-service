@@ -27,7 +27,7 @@ const clearIdMap = new Map([
 const extraOptionsMap = new Map();
 export default function renderField({
   code, fieldType, fieldOptions, required, system,
-}, data, selectedTypeCode, selectUserMap, isProgram, isOrganization, colSpan = 12) {
+}, data, selectedTypeCode, selectUserMap, isProgram, isOrganization, colSpan = 12, customMemberData = []) {
   switch (code) {
     case 'component': {
       return (
@@ -404,7 +404,14 @@ export default function renderField({
         });
       }
       if (!required || code !== 'reporter') {
-        extraOptionsMap.member.unshift({ id: 'clear', realName: '清空', tooltip: false });
+        extraOptionsMap.member.unshift({
+          id: 'clear', realName: '-清空-', tooltip: false, headerHidden: true,
+        });
+      }
+      if (fieldType === 'member') {
+        extraOptionsMap.member.push(...customMemberData.filter((customMember) => customMember.fieldType === 'member') || []);
+      } else {
+        extraOptionsMap.member.push(...customMemberData);
       }
       return (
         <SelectUser

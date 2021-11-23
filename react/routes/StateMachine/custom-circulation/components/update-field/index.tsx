@@ -8,7 +8,9 @@ import {
 } from 'choerodon-ui/pro';
 
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
-import { find, includes } from 'lodash';
+import {
+  find, includes, some,
+} from 'lodash';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import moment from 'moment';
 import { getProjectId, getIsOrganization, getOrganizationId } from '@/utils/common';
@@ -45,6 +47,7 @@ interface IFieldValue {
   dateAddValue: null | number,
   userId: null | string,
   name: null | string
+  customFieldId: null | string,
 }
 export interface ISettingField {
   fieldId: string
@@ -57,12 +60,36 @@ export interface ISettingField {
 
 type ISelectUserMap = Map<string, { id: null | string, realName: null | string }>
 
+const CUSTOM_CODE = 'copy_custom_field';
 const excludeCode = ['summary', 'status', 'issueNum', 'issueType', 'sprint', 'feature', 'epicName', 'epic', 'pi', 'timeTrace', 'lastUpdateDate', 'creationDate', 'created_user', 'last_updated_user', 'tag'];
 const orgExcludeCode: string[] = ['component', 'label', 'fixVersion', 'featureType', 'subProject', 'programVersion', 'tag'];
 const memberIsNotSpecifier = ['reportor', 'clear', 'operator', 'creator', 'assignee', 'mainResponsible', 'participant'];
 // @ts-ignore
-const transformUpdateData = (data) => {
+const transformUpdateData = (data, customMemberFieldsData) => {
   const updateData = [];
+  function getFieldObject(fieldType: string, value: string) {
+    const isCustomMember = some(customMemberFieldsData, ['id', value]);
+    const isSpecifier = !includes(memberIsNotSpecifier, value);
+    const fieldValueObj: {
+      fieldType: string,
+      userId: string | undefined,
+      customFieldId: string | undefined,
+      operateType: string,
+    } = {
+      fieldType,
+      userId: undefined,
+      customFieldId: undefined,
+      operateType: value,
+    };
+    if (isCustomMember) {
+      fieldValueObj.customFieldId = value;
+      fieldValueObj.operateType = CUSTOM_CODE;
+    } else if (isSpecifier) {
+      fieldValueObj.operateType = 'specifier';
+      fieldValueObj.userId = value;
+    }
+    return fieldValueObj;
+  }
   for (const [key, fieldValue] of Object.entries(data)) {
     const {
       // @ts-ignore
@@ -101,15 +128,11 @@ const transformUpdateData = (data) => {
     }
     switch (fieldType) {
       case 'member': {
-        const isSpecifier = !includes(memberIsNotSpecifier, value);
         if (value) {
+          const fieldValueObj = getFieldObject(fieldType, value);
           updateData.push({
             fieldId,
-            fieldValueList: [{
-              operateType: isSpecifier ? 'specifier' : value,
-              userId: isSpecifier ? value : undefined,
-              fieldType,
-            }],
+            fieldValueList: [fieldValueObj],
           });
         }
         break;
@@ -119,14 +142,8 @@ const transformUpdateData = (data) => {
           updateData.push({
             fieldId,
             fieldValueList: (value || []).map((item: string) => {
-              const isSpecifier = !includes(memberIsNotSpecifier, item);
-              return (
-                {
-                  operateType: !isSpecifier ? item : 'specifier',
-                  userId: isSpecifier ? item : undefined,
-                  fieldType,
-                }
-              );
+              const fieldValueObj = getFieldObject(fieldType, item);
+              return fieldValueObj;
             }),
           });
         }
@@ -223,17 +240,29 @@ const setCurrentByFieldType = (current, fieldValue, fieldCode) => {
   const { fieldType } = firstField;
   switch (fieldType) {
     case 'member': {
-      const { operateType, userId } = firstField;
+      const { operateType, userId, customFieldId } = firstField;
+      const isCustomMember = operateType === CUSTOM_CODE && customFieldId;
       const isSpecifier = operateType === 'specifier';
-      current.set(fieldCode, isSpecifier ? userId : operateType);
+      let newFieldValue = operateType;
+      if (isCustomMember) {
+        newFieldValue = customFieldId;
+      } else if (isSpecifier) {
+        newFieldValue = userId;
+      }
+      current.set(fieldCode, newFieldValue);
       break;
     }
     case 'multiMember': {
       const { operateType } = firstField;
       const isClear = operateType === 'clear';
       current.set(fieldCode, isClear ? ['clear'] : fieldValueList.map((item: IFieldValue) => {
-        const { operateType: fieldValueType } = item;
+        const { operateType: fieldValueType, customFieldId } = item;
+        // @ts-ignore
+        const isCustomMember = fieldValueType === CUSTOM_CODE && customFieldId;
         const isSpecifierUser = fieldValueType === 'specifier';
+        if (isCustomMember) {
+          return customFieldId;
+        }
         return isSpecifierUser ? item.userId : fieldValueType;
       }));
       break;
@@ -328,6 +357,14 @@ const UpdateField = ({
     };
   }), [fieldData]);
 
+  const customMemberFieldsData = useMemo(() => (
+    (fieldData || []).filter((item) => (item.fieldType === 'member' || item.fieldType === 'multiMember') && (!(item.system || item.createdLevel === 'system'))).map((item) => ({
+      id: item.id,
+      realName: item.name,
+      fieldType: item.fieldType,
+    }))
+  ), [fieldData]);
+
   const projectFields = useMemo<FieldProps[]>(() => ([{
     name: 'label',
     type: 'array' as FieldType,
@@ -411,7 +448,6 @@ const UpdateField = ({
               }
               return response;
             } catch (error) {
-              console.log(error);
               return response;
             }
           },
@@ -525,7 +561,7 @@ const UpdateField = ({
       const validate = await dataSet.validate();
       if (validate) {
         const data = getData();
-        const updateData = transformUpdateData(data);
+        const updateData = transformUpdateData(data, customMemberFieldsData);
         await statusTransformApi[isOrganization ? 'orgUpdateField' : 'updateField'](selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
         customCirculationDataSet.query(customCirculationDataSet.currentPage);
         return true;
@@ -533,7 +569,7 @@ const UpdateField = ({
       return false;
     };
     modal.handleOk(submit);
-  }, [customCirculationDataSet, getData, modal, record, selectedType, isOrganization, dataSet]);
+  }, [customCirculationDataSet, getData, modal, record, selectedType, isOrganization, dataSet, customMemberFieldsData]);
 
   const data = getData();
 
@@ -549,6 +585,7 @@ const UpdateField = ({
     >
       {fields.map((f: IFieldK) => {
         const { key, id, code } = f;
+        const customMemberData = (customMemberFieldsData || []).filter((member) => member.id !== id) || [];
         return ([
           <Select
             colSpan={12}
@@ -576,7 +613,7 @@ const UpdateField = ({
             }
           </Select>,
           // @ts-ignore
-          renderField(f, data, selectedTypeCode, selectUserMap, isProgram, isOrganization),
+          renderField(f, data, selectedTypeCode, selectUserMap, isProgram, isOrganization, 12, customMemberData),
           <Icon
             onClick={() => {
               // @ts-ignore

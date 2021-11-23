@@ -8,10 +8,10 @@ import {
   findIndex, noop, omit, pick, sortBy,
 } from 'lodash';
 import { IGanttConflictAssignee, IGanttMoveRequestData, IGanttMoveRequestDataPreviousWithNext } from '@/api';
-import type { IGanttDimensionTypeValue } from './Gantt';
 import { Issue, User } from '@/common/types';
 import { list2tree } from '@/utils/tree';
 import { GanttIssue, IGanttCollapsedHistory } from './types';
+import type { IGanttDimensionTypeValue } from './components/gannt-select/SelectType';
 
 /**
  * 获取甘特图移动后待提交到后端数据

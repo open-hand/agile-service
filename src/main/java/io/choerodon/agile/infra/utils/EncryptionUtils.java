@@ -50,7 +50,16 @@ public class EncryptionUtils {
 
     public static final String[] FIELD_VALUE = {"remaining_time","story_points","creation_date","last_update_date","estimated_start_time", "estimated_end_time", "actual_start_time", "actual_end_time"};
 
-    public static final String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","issueTypeList","epicList","piList","issueIds", "statusList","assigneeId","reporterIds","programVersion","mainResponsibleIds","fixVersion","influenceVersion", "creatorIds", "updatorIds", "statusIds","participantIds"};
+    public static final String[] FILTER_FIELD =
+            {
+                "issueTypeId", "statusId", "priorityId", "component",
+                "epic", "feature", "label", "sprint", "version",
+                "issueTypeList","epicList","piList","issueIds",
+                "statusList","assigneeId","reporterIds","programVersion",
+                "mainResponsibleIds","fixVersion","influenceVersion",
+                "creatorIds", "updatorIds", "statusIds","participantIds",
+                "userIds", "workGroupIds"
+            };
     public static final String[] FILTER_SINGLE_FIELD = {"userId"};
     public static final String[] IGNORE_VALUES = {"0","none"};
     public static final String BLANK_KEY = "";
@@ -432,6 +441,13 @@ public class EncryptionUtils {
         temp = oaMapOptional.map(ad -> (List<String>) (ad.get("issueIds"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("issueIds",
+                    temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
+
+        // excludeIssueIds
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("excludeIssueIds"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("excludeIssueIds",
                     temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 

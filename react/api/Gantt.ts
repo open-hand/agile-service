@@ -4,6 +4,23 @@ import { getProjectId, getOrganizationId } from '@/utils/common';
 import Api from './Api';
 
 type IGanttDimension = 'task' | 'assignee' | 'sprint' | 'epic';
+export interface IGanttPredecessorType {
+  createdBy: string
+  creationDate: string
+  description: string
+  lastUpdateDate: string
+  lastUpdatedBy: string
+  name: string
+  objectVersionNumber: number
+  typeCode: 'predecessor_type'
+  valueCode: string
+}
+export interface IGanttUpdateIssueDependencyItem {
+  issueId: string,
+  /** 前置issueId */
+  predecessorId: string,
+  predecessorType: string
+}
 export type IGanttMoveRequestDataPreviousWithNext = {
   previousId?: string
   nextId: string
@@ -65,6 +82,48 @@ class GanttApi extends Api<GanttApi> {
     return result;
   }
 
+  loadDependableIssues(params: { currentIssueId: string, page?: number, size?: number }, data?: { contents?: string[], otherArgs?: { issueIds?: string[], excludeIssueIds?: string[] }, [key: string]: any }) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/issue_predecessor/paged_query`,
+      params: {
+        page: 1,
+        size: 50,
+        organizationId: this.orgId,
+        ...params,
+      },
+      data: data || {},
+    });
+  }
+
+  /**
+   * 加载issue前置依赖类型
+   * @returns
+   */
+  loadIssueDependencyTypes() {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/issue_predecessor/types`,
+    });
+  }
+
+  /**
+   * 更新issue前置依赖
+   * @param currentIssueId
+   * @param dependencyIssues
+   * @returns
+   */
+  updateIssueDependency(currentIssueId: string, dependencyIssues: Array<IGanttUpdateIssueDependencyItem>) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/issue_predecessor/update`,
+      params: {
+        currentIssueId,
+      },
+      data: dependencyIssues,
+    });
+  }
+
   /**
    * 查询组织下所有敏捷项目
    * @param filter
@@ -79,6 +138,19 @@ class GanttApi extends Api<GanttApi> {
         code: '',
         param: filter || '',
       },
+    });
+  }
+
+  /**
+   * 加载除了经办人维度的时间冲突
+   * @param searchVO
+   * @returns
+   */
+  loadTimeConflictExcludeUser(searchVO: any) {
+    return this.request({
+      method: 'post',
+      url: `${this.orgPrefix}/gantt/estimated_time/is_conflicted`,
+      data: searchVO,
     });
   }
 
@@ -185,6 +257,16 @@ class GanttApi extends Api<GanttApi> {
     return this.request({
       method: 'get',
       url: `${this.prefix}/gantt/latest_sort`,
+    });
+  }
+
+  loadDependencyByCurrentIssue(currentIssueId:string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/issue_predecessor/query`,
+      params: {
+        currentIssueId,
+      },
     });
   }
 }

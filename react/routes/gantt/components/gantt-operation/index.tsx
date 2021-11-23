@@ -6,8 +6,8 @@ import { observer } from 'mobx-react-lite';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
 import { find } from 'lodash';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
-import Context from '../../context';
-import { units } from '../../store';
+import Context from '../../stores/context';
+import { units } from '../../stores/store';
 import GanttLegend from '../gantt-legend';
 
 const GanttOperation: React.FC = () => {

@@ -38,7 +38,7 @@ export interface IssueSearchStoreProps {
   defaultSearchVO?: ISearchVO
   projectId?: string
   /** @default project */
-  menuType?: 'project' | 'org'
+  menuType?: 'project' | 'org'| 'workbench'
   fieldConfigs?: { [key: string]: any }
 }
 function isInvalidValue(value: any) {
@@ -93,7 +93,8 @@ class IssueSearchStore {
 
   fieldConfigs: { [key: string]: any } = {}
 
-  menuType: 'project' | 'org' = 'project';
+  // 只有项目层加载个人筛选和自定义字段
+  menuType: 'project' | 'org' | 'workbench' = 'project';
 
   constructor({
     getSystemFields,

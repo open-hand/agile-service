@@ -44,7 +44,7 @@ const HeadTag: React.FC<HeadTagProps> = ({
 
   const content = (
     <div
-      className={classNames(styles.head_tag, className)}
+      className={classNames(styles.head_tag, className, 'c7n-head-tag')}
       style={style}
       {...otherProps}
     >

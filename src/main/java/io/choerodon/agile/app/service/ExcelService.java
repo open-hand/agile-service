@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.ExcelTemplateVO;
 import io.choerodon.agile.api.vo.FileOperationHistoryVO;
 import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.business.ExportIssuesVO;
 import io.choerodon.agile.infra.dto.FileOperationHistoryDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.web.context.request.RequestAttributes;
@@ -15,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/2/25.
@@ -73,4 +76,10 @@ public interface ExcelService {
      */
     void batchImportObjectSchemeField(Long organizationId, Long projectId, InputStream inputStream, RequestAttributes requestAttributes);
 
+
+    ExportIssuesVO buildExcelIssueFromIssue(String projectName,
+                                            Map<Long, Set<Long>> parentSonMap,
+                                            Map<Long, ExportIssuesVO> issueMap,
+                                            Map<String, Object> issueValueMap,
+                                            IssueDTO issue);
 }

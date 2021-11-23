@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { Icon, Tooltip } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import { useSize } from 'ahooks';
+import classNames from 'classnames';
 import DateTable from './DateTable';
 import styles from './index.less';
 
@@ -29,7 +30,7 @@ const Calendar = () => {
   const dateTableWrapperRef = useRef();
   const dateTableWrapperSize = useSize(dateTableWrapperRef);
   return (
-    <div className={styles.calendar}>
+    <div className={classNames(styles.calendar, 'c7n-working-hours-calendar-calendar')}>
       <div className={styles.header}>
         <div className={styles.legend}>
           {
@@ -44,9 +45,6 @@ const Calendar = () => {
             ))
           }
         </div>
-        {/* <div className={styles.backToToday}>
-          返回今日
-        </div> */}
       </div>
       <div
         className={styles.body}

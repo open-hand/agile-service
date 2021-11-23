@@ -1,0 +1,77 @@
+.page {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-flow: column;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .12rem .2rem;
+  padding-bottom: .1rem;
+
+  :global {
+    .flat-select {
+      height: 32px !important;
+      min-height: 32px !important;
+
+      .c7n-pro-select-suffix {
+        top: -2px;
+        color: #abbccf;
+      }
+
+      .c7n-pro-select {
+        height: 31px;
+        min-height: 31px !important;
+      }
+    }
+  }
+}
+
+.content {
+  border-top: .01rem solid var(--divider);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-flow: column;
+  flex: auto;
+
+  :global {
+    .c7n-issue-search {
+      margin-top: .08rem;
+      margin-bottom: .06rem;
+    }
+
+    .c7n-issue-search+div {
+      margin-top: .09rem;
+    }
+
+    .flat-select {
+      height: 32px !important;
+      min-height: 32px !important;
+
+      .c7n-pro-select-suffix {
+        top: -2px;
+        color: #abbccf;
+      }
+
+      .c7n-pro-select {
+        height: 31px;
+        min-height: 31px !important;
+      }
+    }
+
+    .c7n-gantt-content-header {
+      padding: 0 .2rem;
+    }
+
+    .c7n-gantt-content-body {
+      margin-bottom: 0;
+      padding: 0 .12rem;
+    }
+  }
+}

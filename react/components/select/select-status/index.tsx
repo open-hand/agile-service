@@ -2,7 +2,8 @@ import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
-import { includes, intersection } from 'lodash';
+import { castArray, includes, intersection } from 'lodash';
+import { useCreation } from 'ahooks';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { IStatusCirculation, statusApi, statusTransformApi } from '@/api';
 
@@ -19,28 +20,40 @@ export interface SelectStatusProps extends Partial<SelectProps> {
   applyType?: 'program' | 'agile' | 'backlog'
   issueTypeIds?: string[]
   selectedIds?: string[]
+  defaultSelectedIds?: string[]
   isOrganization?: boolean
   isProgram?: boolean
   isBacklog?: boolean
+  isWorkBench?: boolean
   extraStatus?: IStatusCirculation[]
 }
 
 const SelectStatus: React.FC<SelectStatusProps> = forwardRef(
   ({
-    request, issueTypeId, noIssueTypeIdQuery, excludeStatus = [], isProgram, isBacklog, dataRef, afterLoad, flat, projectId, applyType: propsApplyType, issueTypeIds, selectedIds, isOrganization = false, extraStatus = [], ...otherProps
+    request, issueTypeId, noIssueTypeIdQuery, excludeStatus = [], defaultSelectedIds: propsDefaultSelectedIds, isProgram, isBacklog, isWorkBench, dataRef, afterLoad, flat, projectId, applyType: propsApplyType, issueTypeIds, selectedIds, isOrganization = false, extraStatus = [], ...otherProps
   }, ref: React.Ref<Select>) => {
+    const defaultSelectedIds = useCreation(() => castArray(propsDefaultSelectedIds).filter(Boolean), []);
     let applyType = propsApplyType;
+
     if (isProgram) {
       applyType = 'program';
     }
     if (isBacklog) {
       applyType = 'backlog';
     }
+    const args = useMemo(() => ({ selectedIds: defaultSelectedIds }), [defaultSelectedIds]);
     const config = useMemo((): SelectConfig<IStatusCirculation> => ({
       name: 'status',
       textField: 'name',
       valueField: 'id',
-      request: async () => {
+      requestArgs: args,
+      request: async ({ filter, page, requestArgs }) => {
+        if (isWorkBench) {
+          return statusApi.loadAllFromWorkbench({ page, param: filter, size: 50 }, {
+            ignoredStatusIds: requestArgs?.selectedIds,
+            queryIgnored: true,
+          });
+        }
         if (noIssueTypeIdQuery) {
           return statusApi.project(projectId).loadByProject(applyType as any);
         }
@@ -77,8 +90,8 @@ const SelectStatus: React.FC<SelectStatusProps> = forwardRef(
         }
         return data;
       },
-      paging: false,
-    }), [issueTypeId, request, isOrganization, projectId, applyType, excludeStatus, extraStatus, issueTypeIds, dataRef, afterLoad, selectedIds]);
+      paging: isWorkBench || false,
+    }), [issueTypeId, args, request, isOrganization, isWorkBench, projectId, applyType, excludeStatus, extraStatus, issueTypeIds, dataRef, afterLoad, selectedIds]);
     const props = useSelect(config);
     const Component = flat ? FlatSelect : Select;
     return (

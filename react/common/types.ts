@@ -15,6 +15,7 @@ export interface User {
   realName: string
   name?: string
   textShow?: string
+  headerHidden?: boolean
 }
 
 export interface ISprint {
@@ -203,6 +204,7 @@ export interface IssueCreateFields {
   system: boolean
 }
 export interface IField {
+  createdLevel?: string;
   code: string,
   fieldId: string,
   fieldOptions?: FieldOption[],

@@ -57,6 +57,10 @@ public class IssueLabelServiceImpl implements IssueLabelService {
 
     @Override
     public IssueLabelDTO createBase(IssueLabelDTO issueLabelDTO) {
+        String name = issueLabelDTO.getLabelName();
+        if (name.length() > 20) {
+            throw new CommonException("error.label.name.length");
+        }
         if (issueLabelMapper.insert(issueLabelDTO) != 1) {
             throw new CommonException(INSERT_ERROR);
         }

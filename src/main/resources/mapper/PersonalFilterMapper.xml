@@ -7,7 +7,9 @@
         FROM
         agile_personal_filter
         WHERE project_id = #{projectId}
+        AND organization_id = #{organizationId}
         AND user_id = #{userId}
+        AND filter_type_code = #{filterTypeCode}
         <if test='searchStr != null and searchStr != "" '>
             AND name LIKE concat('%',#{searchStr},'%')
         </if>
@@ -16,7 +18,9 @@
     <update id="updateDefault">
         update agile_personal_filter set is_default = #{isDefault}
         where project_id = #{projectId}
+        and organization_id = #{organizationId}
         and user_id = #{userId}
+        and filter_type_code = #{filterTypeCode}
         <if test="filterId != null">
             and filter_id = #{filterId}
         </if>

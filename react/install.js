@@ -10,3 +10,5 @@ set('agile:AgileChartHeaderButtons', () => import('@/injects/custom-report/heade
 set('agile:AgileCustomChartLoadData', loadCustomReportData);
 set('agile:CustomChartSearch', () => import('@/injects/custom-report/custom-search'));
 set('agile:SelectUser', () => import('@/components/select/select-user'));
+set('agile:WorkbenchGantt', () => import('@/injects/workbench-gantt'));
+set('agile:WorkbenchWorkTime', () => import('@/injects/workbench-working-hours'));

@@ -10,6 +10,7 @@ import { FieldProLayout } from '@/components/field-pro';
 
 import ChooseFieldNew, { useChoseField } from '@/components/chose-field';
 import getSearchOrgFields from '@/components/field-pro/layouts/searchOrg';
+import getSearchWorkbenchFields from '@/components/field-pro/layouts/searchWorkbench';
 
 const { getSearchFields } = FieldProLayout;
 export const getValueByFieldType = (fieldType, value) => {
@@ -61,18 +62,27 @@ function CustomField({ field }) {
     ...store.fieldConfigs[field.code],
     onChange: handleChange,
   };
-  const element = store.menuType === 'project' ? getSearchFields([field], {
-    [field.code]: props,
-    statusId: {
-      ...props,
-      issueTypeIds: chosenFields.get('issueTypeId') ? toJS(chosenFields.get('issueTypeId').value) : undefined,
-    },
-    feature: {
-      ...props,
-      featureIds: value,
-    },
-  })[0] : getSearchOrgFields([field])[0];
-  return element;
+  switch (store.menuType) {
+    case 'project':
+      return getSearchFields([field], {
+        [field.code]: props,
+        statusId: {
+          ...props,
+          issueTypeIds: chosenFields.get('issueTypeId') ? toJS(chosenFields.get('issueTypeId').value) : undefined,
+        },
+        feature: {
+          ...props,
+          featureIds: value,
+        },
+      })[0];
+    case 'org':
+      return getSearchOrgFields([field])[0];
+    case 'workbench':
+      return getSearchWorkbenchFields([field], { [field.code]: props });
+    default:
+      break;
+  }
+  return <span>未知层级</span>;
 }
 
 const ObserverCustomField = observer(CustomField);

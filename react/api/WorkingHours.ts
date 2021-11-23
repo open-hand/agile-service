@@ -6,6 +6,7 @@ export interface IWorkingHoursData {
   projectIds?: string[],
   startTime: string,
   endTime: string,
+  workGroupIds?: string[]
 }
 
 export type WorkingHoursExportAction = 'download_file_work_hours_log' | 'download_file_work_hours_calendar'
@@ -104,6 +105,29 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
       url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/work_hours/export_work_hours_calendar`,
       params: {
         organizationId: getOrganizationId(),
+      },
+      data,
+    });
+  }
+
+  getTotalWorkTime(data: any, containsSubIssue: boolean) {
+    return this.request({
+      method: 'post',
+      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/work_hours/count_issue_work_hours`,
+      params: {
+        organizationId: getOrganizationId(),
+        containsSubIssue,
+      },
+      data,
+    });
+  }
+
+  exportHours(data:any) {
+    return this.request({
+      method: 'post',
+      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/work_hours/export_issue_work_hours`,
+      params: {
+        organizationId: this.orgId,
       },
       data,
     });

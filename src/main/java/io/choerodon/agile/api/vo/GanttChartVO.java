@@ -110,6 +110,9 @@ public class GanttChartVO {
     @ApiModelProperty(value = "更新人")
     private UserMessageDTO updateUser;
 
+    @ApiModelProperty(value = "报告人")
+    private UserMessageDTO reporter;
+
     @ApiModelProperty(value = "主要负责人")
     private UserMessageDTO mainResponsibleUser;
 
@@ -132,6 +135,30 @@ public class GanttChartVO {
     private Set<Long> subProjectIds;
 
     private BigDecimal workTimePercentage;
+
+    private BigDecimal spentWorkTime;
+
+    private BigDecimal allEstimateTime;
+
+    private List<GanttChartVO> predecessors;
+
+    private String predecessorType;
+
+    public String getPredecessorType() {
+        return predecessorType;
+    }
+
+    public void setPredecessorType(String predecessorType) {
+        this.predecessorType = predecessorType;
+    }
+
+    public List<GanttChartVO> getPredecessors() {
+        return predecessors;
+    }
+
+    public void setPredecessors(List<GanttChartVO> predecessors) {
+        this.predecessors = predecessors;
+    }
 
     public BigDecimal getWorkTimePercentage() {
         return workTimePercentage;
@@ -483,5 +510,29 @@ public class GanttChartVO {
 
     public void setParticipants(List<UserMessageDTO> participants) {
         this.participants = participants;
+    }
+
+    public UserMessageDTO getReporter() {
+        return reporter;
+    }
+
+    public void setReporter(UserMessageDTO reporter) {
+        this.reporter = reporter;
+    }
+
+    public BigDecimal getSpentWorkTime() {
+        return spentWorkTime;
+    }
+
+    public void setSpentWorkTime(BigDecimal spentWorkTime) {
+        this.spentWorkTime = spentWorkTime;
+    }
+
+    public BigDecimal getAllEstimateTime() {
+        return allEstimateTime;
+    }
+
+    public void setAllEstimateTime(BigDecimal allEstimateTime) {
+        this.allEstimateTime = allEstimateTime;
     }
 }

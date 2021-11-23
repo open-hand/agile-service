@@ -98,9 +98,14 @@ body.c7n-gantt-fullScreen {
     }
   }
 
-  .c7n-issue-search {
-    max-width: 100%;
-    margin-right: 0;
+  &-header {
+    display: flex;
+    flex-wrap: wrap;
+
+    .c7n-issue-search {
+      max-width: 100%;
+      margin-right: 0;
+    }
   }
 }
 
@@ -109,7 +114,9 @@ body.c7n-gantt-fullScreen {
   border: 1px solid var(--divider);
   border-bottom-left-radius: unset;
   border-bottom-right-radius: unset;
-
+  main {
+    border-color: var(--divider);
+  }
   * :not(#ganttBar):not(.gantt-divider_only>hr) {
     border-color: var(--divider) !important;
     stroke: var(--divider) !important;

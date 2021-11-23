@@ -7,18 +7,19 @@ import { find } from 'lodash';
 
 import TableCache from '@/components/table-cache';
 import useIsInProgram from '@/hooks/useIsInProgram';
-import { getMenuType, getProjectId } from '@/utils/common';
-import { ganttApi } from '@/api';
+import { getMenuType, getProjectId, getUserId } from '@/utils/common';
+import { ganttApi, projectApi } from '@/api';
 import noDataPic from '@/assets/image/NoData.svg';
-import Gantt from './Gantt';
+import Gantt from './stores';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import useDefaultMyFilter from '@/hooks/useDefaultMyFilter';
+import { Loading } from '@/components';
 
 // eslint-disable-next-line react/require-default-props
 const GanttProject: React.FC<{ projectId: string, menuType?: 'project' | 'org', HeadSelect?: JSX.Element, [key: string]: any }> = ({
   projectId, projects, setCurrentProject, menuType = 'project',
 }) => {
-  const { isInProgram, loading: programLoading } = useIsInProgram();
+  const { isInProgram, loading: programLoading } = useIsInProgram({ projectId });
   const { data: myFilter, isLoading } = useDefaultMyFilter(projectId);
   const loading = programLoading || isLoading;
   if (menuType === 'project') {
@@ -36,22 +37,75 @@ const GanttProject: React.FC<{ projectId: string, menuType?: 'project' | 'org', 
     </TableCache>
   ) : null;
 };
-const GanttOrg = () => {
-  const [currentProject, setCurrentProject] = useState<any>();
-  const [projectIds, setProjectIds] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    ganttApi.loadProjects().then((res: any) => {
+
+/**
+ * 高阶包裹  当项目加载好  再去装载 Element
+ * @param Element
+ */
+
+export const warpGanttProvideProjects = (Element: React.FC<{ projects: any[], currentProjectId?: string, setCurrentProjectId: (val?: string | ((oldValue?: string) => string | undefined)) => void }>, level: 'org' | 'workbench' = 'org'): typeof React.PureComponent => class GanttProjectsProvider extends React.PureComponent<any, { projects: any[], currentProjectId?: string, loading: boolean }> {
+  constructor(props: any) {
+    super(props);
+    this.state = {
+      projects: [],
+      currentProjectId: undefined,
+      loading: true,
+    };
+  }
+
+  loadData = async () => {
+    if (level === 'org') {
+      return ganttApi.loadProjects();
+    }
+    return projectApi.loadProjectByUser({
+      userId: getUserId(), page: 1, size: 0, category: 'N_AGILE',
+    }).then((res: any) => res.list);
+  }
+
+  componentDidMount() {
+    this.loadData().then((res: any) => {
       const cacheProjectId = localPageCacheStore.getItem('org.gantt.projectId');
       const newProjects = res.map((i: any) => ({ ...i, id: String(i.id) }));
       const newProjectId = (find(newProjects, { id: cacheProjectId }) || newProjects[0])?.id;
       localPageCacheStore.setItem('org.gantt.projectId', newProjectId);
-      setProjectIds(newProjects);
-      setCurrentProject(newProjectId);
-      setLoading(false);
+      this.setState({
+        projects: newProjects,
+        currentProjectId: newProjectId,
+        loading: false,
+      });
     });
-  }, []);
-  if (!loading && projectIds.length === 0) {
+  }
+
+  setCurrentProjectId = (value?: string | ((oldValue?: string) => string | undefined)) => {
+    this.setState((pre) => {
+      let newValue = value as string | undefined;
+      if (typeof value === 'function') {
+        newValue = value(pre.currentProjectId);
+      }
+      return { currentProjectId: newValue };
+    });
+  }
+
+  render() {
+    const { loading, currentProjectId, projects } = this.state;
+    if (loading) {
+      return <Loading loading />;
+    }
+    return <Element currentProjectId={currentProjectId} projects={projects} setCurrentProjectId={this.setCurrentProjectId} />;
+  }
+};
+const GanttProjectOrg = () => {
+  if (getMenuType() === 'project') {
+    return (
+      <GanttProject projectId={getProjectId()} />
+    );
+  }
+  return <GanttOrg />;
+};
+type IReactFCGanttProvideProjects<T = {}> = React.FC<T & { projects: any[], currentProjectId?: string, setCurrentProjectId: (val?: string) => void }>
+export type { IReactFCGanttProvideProjects };
+const GanttOrg = warpGanttProvideProjects(({ projects, currentProjectId, setCurrentProjectId }) => {
+  if (projects.length === 0 || !currentProjectId) {
     return (
       <Page>
         <Header>
@@ -64,15 +118,7 @@ const GanttOrg = () => {
       </Page>
     );
   }
-  return <GanttProject projectId={currentProject} setCurrentProject={setCurrentProject} projects={projectIds} menuType="org" projectIds={projectIds} />;
-};
+  return <GanttProject projectId={currentProjectId} setCurrentProject={setCurrentProjectId} projects={projects} menuType="org" />;
+});
 
-const GanttProjectOrg = () => {
-  if (getMenuType() === 'project') {
-    return (
-      <GanttProject projectId={getProjectId()} />
-    );
-  }
-  return <GanttOrg />;
-};
 export default GanttProjectOrg;

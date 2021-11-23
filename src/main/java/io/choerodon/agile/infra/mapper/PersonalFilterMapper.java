@@ -11,7 +11,16 @@ import java.util.List;
  * @since 2019/2/25
  */
 public interface PersonalFilterMapper extends BaseMapper<PersonalFilterDTO> {
-    List<PersonalFilterDTO> queryByProjectIdAndUserId(@Param("projectId") Long projectId, @Param("userId") Long userId, @Param("searchStr") String searchStr);
+    List<PersonalFilterDTO> queryByProjectIdAndUserId(@Param("organizationId") Long organizationId,
+                                                      @Param("projectId") Long projectId,
+                                                      @Param("userId") Long userId,
+                                                      @Param("searchStr") String searchStr,
+                                                      @Param("filterTypeCode") String filterTypeCode);
 
-    int updateDefault(@Param("projectId") Long projectId, @Param("userId") Long userId, @Param("isDefault") Boolean isDefault, @Param("filterId") Long filterId);
+    int updateDefault(@Param("organizationId") Long organizationId,
+                      @Param("projectId") Long projectId,
+                      @Param("userId") Long userId,
+                      @Param("isDefault") Boolean isDefault,
+                      @Param("filterId") Long filterId,
+                      @Param("filterTypeCode") String filterTypeCode);
 }

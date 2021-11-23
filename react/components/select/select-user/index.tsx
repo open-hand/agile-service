@@ -22,8 +22,8 @@ import { useNoticeSelectUpdateSelected } from '../useNoticeSelectUpdateSelected'
 
 const toArray = (something: any) => (Array.isArray(something) ? something : [something]);
 export interface SelectUserProps extends Partial<SelectProps> {
-  /** 组织层或项目层 */
-  level?: 'org' | 'project'
+  /** 组织层或项目层 或工作台层 */
+  level?: 'org' | 'project' | 'workbench'
   // 由于用户是分页的，有时候已选的用户不在第一页，这时候传id过来，会直接显示id，这里多传一个用户过来，放到options里
   selectedUser?: User | User[],
   selected?: string | string[], /** 需要加载的用户id列表 */
@@ -78,9 +78,20 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
         res = await request(requestData);
       } else {
         const { filter, page, requestArgs } = requestData;
-        res = await (level === 'project'
-          ? userApi.project(projectId).getProjectUsers(filter, page, requestArgs?.selectedUserIds, requestArgs?.queryFilterIds, 50, projectId)
-          : userApi.project(projectId).org(organizationId).getOrgUsers(filter, page, requestArgs?.selectedUserIds, requestArgs?.queryFilterIds, 50));
+        switch (level) {
+          case 'project': {
+            res = await userApi.project(projectId).getProjectUsers(filter, page, requestArgs?.selectedUserIds, requestArgs?.queryFilterIds, 50, projectId);
+            break;
+          }
+          case 'org': {
+            res = await userApi.project(projectId).org(organizationId).getOrgUsers(filter, page, requestArgs?.selectedUserIds, requestArgs?.queryFilterIds, 50);
+            break;
+          }
+          case 'workbench': {
+            res = await userApi.project(projectId).org(organizationId).getWorkbenchUsers({ param: filter, page, size: 50 }, { ignoredUserIds: requestArgs?.selectedUserIds });
+          }
+        }
+
         res.list = res.list.filter((user: User) => user.enabled);
       }
       requestLoading.current = false;
@@ -97,8 +108,8 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     requestArgs: args,
     onOption,
     request: userRequest,
-    optionRenderer: optionRenderer || ((user: User) => <UserTag data={user as User} />),
-    renderer: optionRenderer || ((user: User) => <UserTag data={user as User} tooltip={!flat} className={Styles.userWrap} textClassName={Styles.userText} />),
+    optionRenderer: optionRenderer || ((user: User) => (user?.headerHidden ? <span>{user?.realName}</span> : <UserTag data={user as User} />)),
+    renderer: optionRenderer || ((user: User) => (user?.headerHidden ? <span>{user?.realName}</span> : <UserTag data={user as User} tooltip={!flat} className={Styles.userWrap} textClassName={Styles.userText} />)),
     middleWare: (data) => {
       let newData = [];
       const temp: User[] = [];

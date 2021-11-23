@@ -21,7 +21,6 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.core.utils.PageUtils;
-import io.choerodon.core.utils.PageableHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.apache.commons.lang3.StringUtils;
@@ -54,6 +53,8 @@ public class GanttChartServiceImpl implements GanttChartService {
     private static final String SPRINT = "sprint";
     private static final String CREATE_USER = "createUser";
     private static final String UPDATE_USER = "updateUser";
+    private static final String SPENT_WORK_TIME = "spentWorkTime";
+    private static final String ALL_ESTIMATE_TIME = "allEstimateTime";
     private static final String MAIN_RESPONSIBLE_USER = "mainResponsibleUser";
     private static final String TAGS = "tags";
     private static final String PARTICIPANTS = "participants";
@@ -72,6 +73,8 @@ public class GanttChartServiceImpl implements GanttChartService {
                     UPDATE_USER,
                     MAIN_RESPONSIBLE_USER,
                     FieldCode.SPRINT,
+                    SPENT_WORK_TIME,
+                    ALL_ESTIMATE_TIME,
                     TAGS,
                     PARTICIPANTS);
 
@@ -117,6 +120,8 @@ public class GanttChartServiceImpl implements GanttChartService {
     private WorkLogMapper workLogMapper;
     @Autowired
     private IssuePersonalSortMapper issuePersonalSortMapper;
+    @Autowired
+    private IssuePredecessorMapper issuePredecessorMapper;
 
     @Override
     public Page<GanttChartVO> pagedQuery(Long projectId,
@@ -541,10 +546,9 @@ public class GanttChartServiceImpl implements GanttChartService {
         PageRequest pageRequest = new PageRequest(1, 0);
         boolean isTreeView = (boolean) searchVO.getSearchArgs().get("tree");
         addDimensionIfNotExisted(searchVO, dimension);
-        Map<String, Object> sortMap = new HashMap<>();
         addGanttDefaultOrder(searchVO, pageRequest);
         boardAssembler.handleOtherArgs(searchVO);
-        processSort(pageRequest, sortMap);
+        Map<String, Object> sortMap = issueService.processSortMap(pageRequest, projectId, ConvertUtil.getOrganizationId(projectId));
         List<Long> issueIds;
         Set<Long> projectIds = new HashSet<>(Arrays.asList(projectId));
         if (GanttDimension.isTask(instanceType) && !Objects.equals(0L, instanceId)) {
@@ -783,7 +787,6 @@ public class GanttChartServiceImpl implements GanttChartService {
                         Optional.ofNullable(searchVO.getSearchArgs())
                                 .map(x -> x.get("tree"))
                                 .orElse(true));
-        Map<String, Object> sortMap = new HashMap<>();
         boolean isDefaultOrder = ObjectUtils.isEmpty(pageRequest.getSort());
         boolean ganttDefaultOrder = false;
         if (isDefaultOrder && orderByRank) {
@@ -791,7 +794,8 @@ public class GanttChartServiceImpl implements GanttChartService {
             addGanttDefaultOrder(searchVO, pageRequest);
             ganttDefaultOrder = true;
         }
-        processSort(pageRequest, sortMap);
+        Long projectId = new ArrayList<>(projectMap.entrySet()).get(0).getKey();
+        Map<String, Object> sortMap = issueService.processSortMap(pageRequest, projectId, organizationId);
         Page<Long> page = issueService.pagedQueryByTreeView(pageRequest, projectIds, searchVO, filterSql, sortMap, isTreeView);
         List<Long> issueIds = page.getContent();
         Map<Long, Long> issueEpicMap = new HashMap<>();
@@ -877,6 +881,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         Map<String, Object> fieldCodeValues = new HashMap<>();
         Set<Long> systemMemberFieldUserIds = new HashSet<>();
         buildFieldCodeValues(projectIds, issueIds, displayFields, fieldCodeValues, issueList, organizationId, systemMemberFieldUserIds);
+        buildEpicAndFeatureMap(issueIds, issueFeatureMap, projectIds, projectMap, displayFields, fieldCodeValues);
         List<IssueTypeVO> issueTypes = issueTypeMapper.selectByProjectIds(organizationId, new ArrayList<>(projectIds));
         Map<Long, Map<Long, IssueTypeVO>> projectIssueTypeMap = new HashMap<>();
         issueTypes.forEach(issueType -> {
@@ -908,6 +913,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         Map<Long, BigDecimal> workTimeMap = queryWorkTimeByIssueIds(projectIds, issueIds);
         Map<Long, Set<Long>> parentSonMap = new HashMap<>();
         Map<Long, BigDecimal> remainingTimeMap = new HashMap<>();
+        Map<Long, GanttChartVO> ganttMap = new HashMap<>();
         issueList.forEach(i -> {
             Long statusId = i.getStatusId();
             Long issueId = i.getIssueId();
@@ -940,9 +946,34 @@ public class GanttChartServiceImpl implements GanttChartService {
             if (!ObjectUtils.isEmpty(remainingTime)) {
                 remainingTimeMap.put(issueId, remainingTime);
             }
+            ganttMap.put(issueId, ganttChart);
         });
-        postSetGanttInfo(result, issueEpicMap, issueFeatureMap, parentSonMap, workTimeMap, remainingTimeMap);
+        postSetGanttInfo(result, issueEpicMap, issueFeatureMap, parentSonMap, workTimeMap, remainingTimeMap, ganttMap, projectIds);
         return result;
+    }
+
+    private void buildEpicAndFeatureMap(List<Long> issueIds,
+                                        Map<Long, IssueDTO> issueFeatureMap,
+                                        Set<Long> projectIds,
+                                        Map<Long, ProjectVO> projectMap,
+                                        List<ObjectSchemeFieldVO> displayFields,
+                                        Map<String, Object> fieldCodeValues) {
+        List<String> fieldCodes = displayFields.stream().map(ObjectSchemeFieldVO::getCode).collect(Collectors.toList());
+        List<ProjectVO> programs = queryProgramIds(projectIds);
+        boolean belongProgram = (agilePluginService != null && !ObjectUtils.isEmpty(programs));
+        if (fieldCodes.contains("epic")) {
+            fieldCodeValues.put("epic", issueMapper.selectEpicByLinkIssueIds(projectIds, issueIds)
+                    .stream()
+                    .collect(Collectors.toMap(IssueDTO::getIssueId, Function.identity())));
+        }
+        if (belongProgram && fieldCodes.contains("feature")) {
+            if (CollectionUtils.isEmpty(issueFeatureMap)) {
+                fieldCodeValues.put("feature", issueFeatureMap);
+            } else {
+                programs.forEach(p -> projectMap.put(p.getId(), p));
+                fieldCodeValues.put("feature", agilePluginService.queryIssueFeature(projectIds, issueIds));
+            }
+        }
     }
 
     @Override
@@ -1034,33 +1065,17 @@ public class GanttChartServiceImpl implements GanttChartService {
                                   Map<Long, IssueDTO> issueFeatureMap,
                                   Map<Long, Set<Long>> parentSonMap,
                                   Map<Long, BigDecimal> workTimeMap,
-                                  Map<Long, BigDecimal> remainingTimeMap) {
+                                  Map<Long, BigDecimal> remainingTimeMap,
+                                  Map<Long, GanttChartVO> ganttMap,
+                                  Set<Long> projectIds) {
+        Map<Long, List<IssuePredecessorDTO>> predecessorMap = new HashMap<>();
+        processPredecessors(ganttMap, projectIds, predecessorMap);
         BigDecimal zero = BigDecimal.valueOf(0L, 4);
-        Map<Long, GanttChartVO> ganttMap = new HashMap<>();
         result.forEach(gantt -> {
             Long issueId = gantt.getIssueId();
-            ganttMap.put(issueId, gantt);
-            boolean isParent = parentSonMap.containsKey(issueId);
-            BigDecimal remainingTime = zero;
-            BigDecimal workTime = zero;
-            if (isParent) {
-                Set<Long> sonIds = parentSonMap.get(issueId);
-                List<Long> issueIds = new ArrayList<>(sonIds);
-                issueIds.add(issueId);
-                for (Long thisIssueId : issueIds) {
-                    remainingTime = remainingTime.add(remainingTimeMap.getOrDefault(thisIssueId, zero));
-                    workTime = workTime.add(workTimeMap.getOrDefault(thisIssueId, zero));
-                }
-            } else {
-                remainingTime = remainingTime.add(remainingTimeMap.getOrDefault(issueId, zero));
-                workTime = workTime.add(workTimeMap.getOrDefault(issueId, zero));
-            }
-            BigDecimal total = remainingTime.add(workTime);
-            BigDecimal percentage = zero;
-            if (zero.compareTo(total) != 0) {
-                percentage = workTime.divide(total, 4, BigDecimal.ROUND_HALF_UP);
-            }
-            gantt.setWorkTimePercentage(percentage);
+            calcWorkTimePercentage(parentSonMap, workTimeMap, remainingTimeMap, zero, gantt, issueId);
+            setPredecessors(predecessorMap, gantt, ganttMap);
+
         });
         if (ObjectUtils.isEmpty(issueEpicMap)
                 && ObjectUtils.isEmpty(issueFeatureMap)) {
@@ -1071,6 +1086,83 @@ public class GanttChartServiceImpl implements GanttChartService {
             Long featureId = feature.getIssueId();
             addParentSubProjectIds(ganttMap, issueId, featureId);
         });
+    }
+
+    private void setPredecessors(Map<Long, List<IssuePredecessorDTO>> predecessorMap,
+                                 GanttChartVO gantt,
+                                 Map<Long, GanttChartVO> ganttMap) {
+        Long issueId = gantt.getIssueId();
+        List<IssuePredecessorDTO> predecessors = predecessorMap.get(issueId);
+        if (ObjectUtils.isEmpty(predecessors)) {
+            return;
+        }
+        List<GanttChartVO> ganttPredecessors = new ArrayList<>();
+        gantt.setPredecessors(ganttPredecessors);
+        predecessors.forEach(predecessor -> {
+            Long predecessorId = predecessor.getPredecessorId();
+            GanttChartVO predecessorGantt = ganttMap.get(predecessorId);
+            if (predecessorGantt == null) {
+                return;
+            }
+            predecessorGantt.setPredecessorType(predecessor.getPredecessorType());
+            ganttPredecessors.add(predecessorGantt);
+        });
+    }
+
+    private void calcWorkTimePercentage(Map<Long, Set<Long>> parentSonMap,
+                                        Map<Long, BigDecimal> workTimeMap,
+                                        Map<Long, BigDecimal> remainingTimeMap,
+                                        BigDecimal zero, GanttChartVO gantt,
+                                        Long issueId) {
+        boolean isParent = parentSonMap.containsKey(issueId);
+        BigDecimal remainingTime = zero;
+        BigDecimal workTime = zero;
+        if (isParent) {
+            Set<Long> sonIds = parentSonMap.get(issueId);
+            List<Long> issueIds = new ArrayList<>(sonIds);
+            issueIds.add(issueId);
+            for (Long thisIssueId : issueIds) {
+                remainingTime = remainingTime.add(remainingTimeMap.getOrDefault(thisIssueId, zero));
+                workTime = workTime.add(workTimeMap.getOrDefault(thisIssueId, zero));
+            }
+        } else {
+            remainingTime = remainingTime.add(remainingTimeMap.getOrDefault(issueId, zero));
+            workTime = workTime.add(workTimeMap.getOrDefault(issueId, zero));
+        }
+        BigDecimal total = remainingTime.add(workTime);
+        BigDecimal percentage = zero;
+        if (zero.compareTo(total) != 0) {
+            percentage = workTime.divide(total, 4, BigDecimal.ROUND_HALF_UP);
+        }
+        gantt.setWorkTimePercentage(percentage);
+    }
+
+    private void processPredecessors(Map<Long, GanttChartVO> ganttMap,
+                                     Set<Long> projectIds,
+                                     Map<Long, List<IssuePredecessorDTO>> predecessorMap) {
+        Set<Long> issueIds = ganttMap.keySet();
+        if (issueIds.isEmpty()) {
+            return;
+        }
+        Set<Long> issueNotInGanttMapIds = new HashSet<>();
+        issuePredecessorMapper.selectByIssueIds(projectIds, issueIds)
+                .forEach(predecessor -> {
+                    Long issueId = predecessor.getIssueId();
+                    Long predecessorId = predecessor.getPredecessorId();
+                    if (!issueIds.contains(predecessorId)) {
+                        issueNotInGanttMapIds.add(predecessorId);
+                    }
+                    List<IssuePredecessorDTO> list = predecessorMap.computeIfAbsent(issueId, x -> new ArrayList<>());
+                    list.add(predecessor);
+                });
+        if (!issueNotInGanttMapIds.isEmpty()) {
+            issueMapper.selectWithSubByIssueIds(projectIds, new ArrayList<>(issueNotInGanttMapIds), null, false, null)
+                    .forEach(issue -> {
+                        GanttChartVO ganttChart = new GanttChartVO();
+                        BeanUtils.copyProperties(issue, ganttChart);
+                        ganttMap.put(issue.getIssueId(), ganttChart);
+                    });
+        }
     }
 
     private void addParentSubProjectIds(Map<Long, GanttChartVO> ganttMap, Long issueId, Long parentId) {
@@ -1178,6 +1270,10 @@ public class GanttChartServiceImpl implements GanttChartService {
                     fieldCodeValues.put(fieldCode, issueSprintGroup);
                 }
                 break;
+            case SPENT_WORK_TIME:
+            case ALL_ESTIMATE_TIME:
+                handSpentWorkTimeAndAllEstimateTime(projectIds, issueList, fieldCodeValues);
+                break;
             case FieldCode.FIX_VERSION:
                 handlerVersionList(fieldCode, projectIds, issueIds, fieldCodeValues);
                 break;
@@ -1207,6 +1303,31 @@ public class GanttChartServiceImpl implements GanttChartService {
             default:
                 break;
         }
+    }
+
+    private void handSpentWorkTimeAndAllEstimateTime(Set<Long> projectIds, List<IssueDTO> issueList, Map<String, Object> fieldCodeValues) {
+        List<Long> issueIds = issueList.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+        Map<Long, List<WorkLogVO>> workLogVOMap = workLogMapper.queryByIssueIds(new ArrayList<>(projectIds), issueIds).stream().collect(Collectors.groupingBy(WorkLogVO::getIssueId));
+        Map<Long, BigDecimal> spentWorkTimeMap = new HashMap<>();
+        Map<Long, BigDecimal> allEstimateTimeMap = new HashMap<>();
+        for (IssueDTO issueDTO : issueList) {
+            List<WorkLogVO> workLogVOList = workLogVOMap.get(issueDTO.getIssueId());
+            BigDecimal spentWorkTime = BigDecimal.ZERO;
+            BigDecimal allEstimateTime;
+            if (!CollectionUtils.isEmpty(workLogVOList)) {
+                spentWorkTime = new BigDecimal(0);
+                for (WorkLogVO workLogVO : workLogVOList){
+                    spentWorkTime = spentWorkTime.add(workLogVO.getWorkTime());
+                }
+                allEstimateTime = issueDTO.getRemainingTime() == null ? spentWorkTime : spentWorkTime.add(issueDTO.getRemainingTime());
+            } else {
+                allEstimateTime = issueDTO.getRemainingTime();
+            }
+            spentWorkTimeMap.put(issueDTO.getIssueId(), spentWorkTime);
+            allEstimateTimeMap.put(issueDTO.getIssueId(), allEstimateTime);
+        }
+        fieldCodeValues.put(SPENT_WORK_TIME, spentWorkTimeMap);
+        fieldCodeValues.put(ALL_ESTIMATE_TIME, allEstimateTimeMap);
     }
 
     private void handlerParticipant(Set<Long> userIds, List<IssueDTO> issueList) {
@@ -1342,22 +1463,6 @@ public class GanttChartServiceImpl implements GanttChartService {
         return projects;
     }
 
-    @Override
-    public void processSort(PageRequest pageRequest, Map<String, Object> sortMap) {
-        Sort sort = pageRequest.getSort();
-        if (ObjectUtils.isEmpty(sort)) {
-            return;
-        }
-        if (ObjectUtils.isEmpty(sort.getOrderFor(ISSUE_ID))) {
-            Sort.Order issueIdOrder = new Sort.Order(Sort.Direction.DESC, ISSUE_ID);
-            sort = sort.and(new Sort(issueIdOrder));
-        }
-        Map<String, String> convertMapping = new HashMap<>();
-        convertMapping.put("issueNum", "issue_num_convert");
-        String sortSql = PageableHelper.getSortSql(PageUtil.sortResetOrder(sort, null, convertMapping));
-        sortMap.put(ORDER_STR, sortSql);
-    }
-
     private void getUserIdFromIssueList(List<IssueDTO> issueList, Set<Long> userIds) {
         for (IssueDTO dto : issueList) {
             if (!ObjectUtils.isEmpty(dto.getReporterId()) && !Objects.equals(0L, dto.getReporterId())) {
@@ -1440,17 +1545,42 @@ public class GanttChartServiceImpl implements GanttChartService {
             Map<Long, List<IssueSprintVO>> map = (Map<Long, List<IssueSprintVO>>) fieldCodeValues.getOrDefault(FieldCode.SPRINT, new HashMap<>());
             ganttChartVO.setSprints(map.get(issueDTO.getIssueId()));
         }
+        if (fieldCodes.contains(SPENT_WORK_TIME)) {
+            Map<Long, BigDecimal> map = (Map<Long, BigDecimal>) fieldCodeValues.getOrDefault(SPENT_WORK_TIME, new HashMap<>());
+            ganttChartVO.setSpentWorkTime(map.get(issueDTO.getIssueId()));
+        }
+        if (fieldCodes.contains(ALL_ESTIMATE_TIME)) {
+            Map<Long, BigDecimal> map = (Map<Long, BigDecimal>) fieldCodeValues.getOrDefault(ALL_ESTIMATE_TIME, new HashMap<>());
+            ganttChartVO.setAllEstimateTime(map.get(issueDTO.getIssueId()));
+        }
+        if (fieldCodes.contains(FieldCode.EPIC)) {
+            Map<Long, IssueDTO> map = (Map<Long, IssueDTO>) fieldCodeValues.getOrDefault(FieldCode.EPIC, new HashMap<>());
+            IssueDTO epic = map.get(issueDTO.getEpicId());
+            if (!ObjectUtils.isEmpty(epic)) {
+                ganttChartVO.setEpicName(epic.getEpicName());
+            }
+        }
+        if (fieldCodes.contains(FieldCode.FEATURE)) {
+            Map<Long, IssueDTO> map = (Map<Long, IssueDTO>) fieldCodeValues.getOrDefault(FieldCode.FEATURE, new HashMap<>());
+            IssueDTO feature = map.get(issueDTO.getFeatureId());
+            if (!ObjectUtils.isEmpty(feature)) {
+                ganttChartVO.setFeatureName(feature.getSummary());
+            }
+        }
         if (fieldCodes.contains(CREATE_USER) && !ObjectUtils.isEmpty(issueDTO.getCreatedBy())) {
             ganttChartVO.setCreateUser(usersMap.get(issueDTO.getCreatedBy()));
         }
         if (fieldCodes.contains(UPDATE_USER) && !ObjectUtils.isEmpty(issueDTO.getLastUpdatedBy())) {
-            ganttChartVO.setCreateUser(usersMap.get(issueDTO.getLastUpdatedBy()));
+            ganttChartVO.setUpdateUser(usersMap.get(issueDTO.getLastUpdatedBy()));
+        }
+        if (fieldCodes.contains("reporter") && !ObjectUtils.isEmpty(issueDTO.getLastUpdatedBy())) {
+            ganttChartVO.setReporter(usersMap.get(issueDTO.getReporterId()));
         }
         if (fieldCodes.contains(MAIN_RESPONSIBLE_USER) && !ObjectUtils.isEmpty(issueDTO.getMainResponsibleId())) {
-            ganttChartVO.setCreateUser(usersMap.get(issueDTO.getMainResponsibleId()));
+            ganttChartVO.setMainResponsibleUser(usersMap.get(issueDTO.getMainResponsibleId()));
         }
         // 处理环境字段
-        if (fieldCodes.contains(FieldCode.ENVIRONMENT) && !ObjectUtils.isEmpty(issueDTO.getEnvironment())) {
+        if (fieldCodes.contains("environmentName") && !ObjectUtils.isEmpty(issueDTO.getEnvironment())) {
             ganttChartVO.setEnvironment(envMap.get(issueDTO.getEnvironment()));
         }
         // 处理参与人

@@ -71,6 +71,7 @@ interface IDownLoadInfo {
 }
 const ExportIssue: React.FC = () => {
   const [templateIsExist, setTemplateIsExist] = useState(false);
+  const visibleCheckField = useRef<boolean>(true);
   const templateSelectRef = useRef<{
     onOk:(template: ITemplate) => Promise<void>,
     templateList: ITemplate[]
@@ -81,9 +82,9 @@ const ExportIssue: React.FC = () => {
   const selectTemplateOkRef = useRef<(codes: string[]) => void>();
 
   const {
-    prefixCls, checkOptions: propsCheckOptions, store, fields, modal, action, exportBtnText,
+    prefixCls, checkOptions: propsCheckOptions, store, fields, modal, action, exportBtnText, visibleCheckField: propsVisibleCheckField,
   } = useExportIssueStore();
-
+  visibleCheckField.current = !!propsVisibleCheckField;
   const [templateFirstLoaded, setTemplateFirstLoaded] = useState(false);
 
   // 添加筛选配置 数据
@@ -94,7 +95,7 @@ const ExportIssue: React.FC = () => {
       initField: (data) => store.initField(data),
       initFieldFinish: (cField, sField, current) => store.initFieldFinish(cField, sField, current),
       initChosenField: (data) => store.initChosenField(data),
-      choseField: (data) => handleChange(data),
+      // choseField: (data) => handleChange(data),
     },
   });
 
@@ -135,23 +136,23 @@ const ExportIssue: React.FC = () => {
   Object.assign(checkBoxDataPropsRef, {
     current: checkBoxDataProps,
   });
-
+  const choseFieldStoreRef = useRef<typeof choseFieldStore>(choseFieldStore);
+  choseFieldStoreRef.current = choseFieldStore;
   const [filterData, filterComponentProps] = useIssueFilterForm({
     fields,
     value: choseFieldStore.getAllChosenField,
-    defaultValue: store.getCurrentChosenFieldsArr,
     extraFormItems: store.getExtraFields,
     systemDataSetField: store.dataSetSystemFields,
     extraRenderFields: store.renderField,
     events: {
       afterDelete: (item) => {
-        choseFieldStore.delChosenFields(item.code);
+        choseFieldStoreRef.current.delChosenFields(item.code);
       },
     },
   });
-  const handleChange = (value: IChosenFieldField | IChosenFieldField[]) => {
-    Array.isArray(value) ? value.forEach((v) => filterData.actions?.onAdd(v)) : filterData.actions?.onAdd(value);
-  };
+  // const handleChange = (value: IChosenFieldField | IChosenFieldField[]) => {
+  //   Array.isArray(value) ? value.forEach((v) => filterData.actions?.onAdd(v)) : filterData.actions?.onAdd(value);
+  // };
   useEffect(() => {
     store.loadRecordAxios(store).then((res: IDownLoadInfo) => {
       store.setDownloadInfo(res);
@@ -169,7 +170,7 @@ const ExportIssue: React.FC = () => {
       return false;
     }
     search.exportFieldCodes = store.transformExportFieldCodes(checkBoxDataProps.checkedOptions.sort((a, b) => findIndex(checkOptions, { value: a }) - findIndex(checkOptions, { value: b })), checkBoxDataProps);
-    if (checkBoxDataProps.checkedOptions.length === 0) {
+    if (visibleCheckField.current && checkBoxDataProps.checkedOptions.length === 0) {
       Choerodon.prompt('请至少选择一个字段导出');
       return false;
     }
@@ -227,6 +228,11 @@ const ExportIssue: React.FC = () => {
     modal?.handleOk(exportExcel);
   }, [exportExcel, modal]);
   useEffect(() => {
+    // 不存在模板选择则不显示保存
+    if (!action) {
+      setTemplateIsExist(true);
+      return;
+    }
     const currentFieldCodes = store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps);
     if (!currentFieldCodes.length) { // 没有字段选中时不应该显示保存按钮
       setTemplateIsExist(true);
@@ -241,8 +247,9 @@ const ExportIssue: React.FC = () => {
         return;
       }
     }
+
     setTemplateIsExist(false);
-  }, [checkBoxDataProps, checkOptions, store]);
+  }, [checkBoxDataProps, checkOptions, store, action]);
 
   return (
     <div>
@@ -271,10 +278,12 @@ const ExportIssue: React.FC = () => {
           </>
         )
       }
-      <FormPart title="选择模板字段" btnOnClick={handleChangeFieldStatus}>
-        <TableColumnCheckBoxes {...checkBoxComponentProps} />
-        {renderExport()}
-      </FormPart>
+      {visibleCheckField.current && (
+        <FormPart title="选择模板字段" btnOnClick={handleChangeFieldStatus}>
+          <TableColumnCheckBoxes {...checkBoxComponentProps} />
+        </FormPart>
+      )}
+      {renderExport()}
       <div className={`${prefixCls}-btns`}>
         <Button
           icon="unarchive-o"
@@ -301,11 +310,11 @@ const ExportIssue: React.FC = () => {
       </div>
       <WsProgress
         className={`${prefixCls}-wsProgress-area`}
-        messageKey={`agile-export-issue-${getProjectId()}`}
+        messageKey={store.wsMessageKey ?? `agile-export-issue-${getProjectId()}`}
         onFinish={handleFinish}
         onStart={() => {
-            modal?.update({ okProps: { loading: true } });
-            store.setExportBtnHidden(true);
+          modal?.update({ okProps: { loading: true } });
+          store.setExportBtnHidden(true);
         }}
         autoDownload={{ fileName: `${getProjectName()}.xlsx` }}
         downloadInfo={store.downloadInfo.id ? {

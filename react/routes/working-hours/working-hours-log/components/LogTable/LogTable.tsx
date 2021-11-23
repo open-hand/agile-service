@@ -27,6 +27,7 @@ const LogTable = () => {
           ...user || {},
           textShow: showText,
         }}
+
       />
     );
   }, []);
@@ -100,18 +101,18 @@ const LogTable = () => {
   ), []);
 
   return (
-    <div>
-      <Table dataSet={logDs} queryBar={'none' as TableQueryBarType}>
-        <Column name="userId" sortable renderer={renderMember} width={150} />
+    <div className={styles.logTable}>
+      <Table dataSet={logDs} queryBar={'none' as TableQueryBarType} style={{ height: '100%' }}>
+        <Column name="userId" sortable renderer={renderMember} width={180} />
         <Column name="workTime" sortable renderer={renderWorkTime} align={'left' as ColumnAlign} width={110} />
         <Column name="startDate" sortable tooltip={'overflow' as TableColumnTooltip} width={170} />
         <Column name="issueId" sortable renderer={renderIssue} />
         {
           getIsOrganization() && (
-            <Column name="projectId" sortable tooltip={'overflow' as TableColumnTooltip} renderer={renderProject} width={170} />
+            <Column name="projectId" sortable tooltip={'overflow' as TableColumnTooltip} renderer={renderProject} width={210} />
           )
         }
-        <Column name="statusId" sortable renderer={renderStatus} width={120} />
+        <Column name="statusId" sortable renderer={renderStatus} width={getIsOrganization() ? 120 : 150} />
       </Table>
       <DetailContainer {...issueDetailProps} />
     </div>

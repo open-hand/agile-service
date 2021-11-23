@@ -1,0 +1,36 @@
+.select {
+  width: 3.02rem;
+}
+
+.item {
+  position: relative;
+
+  &:not(:last-child) {
+    margin-bottom: .2rem;
+  }
+
+  &:last-child {
+    margin-bottom: -.06rem;
+  }
+
+  .select +.select {
+    margin-top: .2rem;
+  }
+
+  .del_btn {
+    position: absolute;
+    right: 0;
+    top: ~"calc(50% - .15rem)";
+    color: var(--primary-color);
+    font-size: .2rem;
+    margin-left: .17rem;
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}
+
+.loading {
+    height: 100%;
+}

@@ -182,7 +182,7 @@ const transformFieldValue = (fieldSetting) => {
   switch (fieldType) {
     case 'member': {
       const { operateType } = firstField;
-      const isSpecifier = operateType === 'specifier';
+      const isSpecifier = ['copy_custom_field', 'specifier'].includes(operateType);
       transformedValue = isSpecifier
         // @ts-ignore
         ? fieldValueList.map((item) => item.name) : transformedMember[operateType];
@@ -191,7 +191,7 @@ const transformFieldValue = (fieldSetting) => {
     case 'multiMember': {
       transformedValue = fieldValueList.map((item: IFieldValue) => {
         const { operateType } = item;
-        const isSpecifier = operateType === 'specifier';
+        const isSpecifier = ['copy_custom_field', 'specifier'].includes(operateType);
         // @ts-ignore
         return isSpecifier ? item.name : transformedMember[operateType];
       }).join('、');

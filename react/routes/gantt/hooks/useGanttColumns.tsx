@@ -9,10 +9,10 @@ import dayjs from 'dayjs';
 import classNames from 'classnames';
 import { GanttProps, Gantt } from '@choerodon/gantt';
 import '@choerodon/gantt/dist/gantt.cjs.production.min.css';
-import { AnyMap } from 'immer/dist/internal';
-import { useUpdateEffect } from 'ahooks';
+import { useMount, useUpdateEffect } from 'ahooks';
 import {
   ganttApi,
+  IGanttPredecessorType,
   ListLayoutColumnVO,
 } from '@/api';
 import TypeTag from '@/components/TypeTag';
@@ -27,16 +27,20 @@ import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 import { getCustomColumn, systemColumnsMap, BaseSystemColumnRender } from '@/components/issue-table/baseColumns';
 import type { GanttIssue } from '../types';
 import UserTag from '@/components/tag/user-tag';
-import { IGanttPageProps } from '../Gantt';
+import type { IGanttProps } from '../stores/context';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import openGanttConflictModal from '../components/gannt-conflict-modal';
 import { ganttIsCanQuickCreateIssue } from '../utils';
+import openGanttDependencyModal from '../components/gantt-dependency-modal';
+import TableDropMenu from '@/components/table-drop-menu';
+import useProjectPredecessorTypes from '@/hooks/data/useProjectPredecessorTypes';
 
 interface IGanttColumnsHookProps extends TableCacheRenderProps {
-  menuType: IGanttPageProps['menuType']
+  menuType: IGanttProps['menuType']
   projectId?: string
   isInProgram: boolean
   sortedList: IGanttSortLabelSortItem[]
+  onUpdate: (issue: GanttIssue) => void
   onClickSummary?: (issue: GanttIssue) => void
   onSortChange: IGanttSortLabelProps['onChange']
   onCreateSubIssue?: (parentIssue: GanttIssue) => void
@@ -100,7 +104,14 @@ const ganttColumnMap = new Map<string, any>([['assignee', (onSortChange: any) =>
     </Tooltip>
   ),
 }),
-], ['estimatedStartTime', (onSortChange: any) => ({
+],
+['predecessor', (onSortChange: any) => ({
+  width: 120,
+  minWidth: 120,
+  name: 'predecessor',
+  label: '前置依赖',
+  render: (record: any) => record.predecessors,
+})], ['estimatedStartTime', (onSortChange: any) => ({
   width: 100,
   minWidth: 100,
   name: 'estimatedStartTime',
@@ -177,15 +188,16 @@ function getListLayoutColumns(listLayoutColumns: ListLayoutColumnVO[] | null, fi
   return res;
 }
 interface TableColumnEvent {
+  onUpdate?: IGanttColumnsHookProps['onUpdate']
   onClickSummary?: IGanttColumnsHookProps['onClickSummary']
   onSortChange?: IGanttColumnsHookProps['onSortChange']
   openCreateSubIssue?: IGanttColumnsHookProps['onCreateSubIssue']
   onAfterCreateSubIssue?: IGanttColumnsHookProps['onAfterCreateSubIssue']
 }
 const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: boolean }>,
-  tableFields: IFoundationHeader[], events: TableColumnEvent = {}, disable: { disableOperate: boolean, disableFeatureCreateIssue: boolean } = { disableFeatureCreateIssue: false, disableOperate: false }) => {
+  tableFields: IFoundationHeader[], events: TableColumnEvent = {}, disable: { disableOperate: boolean, disableFeatureCreateIssue: boolean } = { disableFeatureCreateIssue: false, disableOperate: false }, predecessorTypes: IGanttPredecessorType[] = []) => {
   const {
-    onSortChange = noop, onClickSummary = noop,
+    onSortChange = noop, onClickSummary = noop, onUpdate = noop,
     openCreateSubIssue = noop, onAfterCreateSubIssue = noop,
   } = events;
   function renderSummary(record: Gantt.Record<{ createSprintIds?: string[] } & any>) {
@@ -247,6 +259,8 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
         </span>
       );
     }
+    const isShowDependency = !record.group && record.issueTypeVO?.typeCode && !['issue_epic', 'feature'].includes(record.issueTypeVO?.typeCode);
+    const hasDependency = record.predecessors?.length;
     const isCanCreateIssue = !disable.disableOperate && isCanQuickCreateIssue(record, { disableFeature: disable.disableFeatureCreateIssue });
     return !record.group ? (
       // eslint-disable-next-line no-underscore-dangle
@@ -265,7 +279,24 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
 
           </span>
         </Tooltip>
-        {isCanCreateIssue && (
+        {!disable.disableOperate && (
+        <TableDropMenu
+          showText={false}
+          menuData={[
+            { text: '添加子工作项', action: () => openCreateSubIssue(record as any), display: isShowDependency && isCanCreateIssue },
+            {
+              text: `${hasDependency ? '编辑' : '添加'}前置依赖`,
+              action: () => openGanttDependencyModal({
+                issueId: record.issueId,
+                data: record.predecessors || [],
+                onOk: () => onUpdate(record),
+              }),
+              display: isShowDependency,
+            },
+          ]}
+        />
+        )}
+        {!isShowDependency && isCanCreateIssue && (
           <Icon
             type="add"
             className="c7n-gantt-content-body-parent_create"
@@ -282,7 +313,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
           <span style={{ verticalAlign: 'middle', flex: 1 }} className="c7n-gantt-content-body-summary-text">
             {record.timeConflict && (
               <Icon
-                type="info"
+                type="error"
                 className="c7n-gantt-content-body-summary-conflict"
                 onClick={() => {
                   openGanttConflictModal({ assigneeId: record.assigneeId, assigneeName: record.assignee?.realName });
@@ -306,6 +337,17 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
       </Tooltip>
     );
   }
+  const predecessorMaps = new Map(predecessorTypes.map((item) => [item.valueCode, item]));
+  function renderPredecessor(record: Gantt.Record<any>) {
+    const predecessors: any[] = record.predecessors?.map((item: any) => ({ ...item, predecessorName: predecessorMaps.get(item.predecessorType)!.name })) || [];
+    return (
+      <Tooltip placement="topLeft" title={predecessors.map((predecessor: any) => <div>{`${predecessor.predecessorName}：${predecessor.issueNum} ${predecessor.summary}`}</div>)}>
+        <span>
+          {predecessors.map<string>((predecessor: any) => `${predecessor.issueNum?.split('-').slice(-1)}${predecessor.predecessorName}`).join('、')}
+        </span>
+      </Tooltip>
+    );
+  }
   const tableColumns: GanttProps<Issue>['columns'] = [{
     flex: 2,
     minWidth: 300,
@@ -322,27 +364,31 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
     component: BaseSystemColumnRender.renderTag('components', 'name'),
     fixVersion: BaseSystemColumnRender.renderTag('fixVersion', 'name'),
     influenceVersion: BaseSystemColumnRender.renderTag('influenceVersion', 'name'),
-    // assignee: (rowData: AnyMap) => <UserTag data={get(rowData, 'assignee')} />,
+    sprint: BaseSystemColumnRender.renderTag('sprints', 'sprintName'),
+    reporter: (rowData: any) => <UserTag data={get(rowData, 'reporter')} />,
+    environmentName: (rowData: any) => get(rowData, 'environment'),
   };
   tableColumns.push(...visibleColumns.map(({ columnCode }) => {
     const baseColumn = { width: 100 } as any;
     if (ganttColumnMap.has(columnCode)) {
       const field = ganttColumnMap.get(columnCode);
       merge(baseColumn, typeof field === 'function' ? field(onSortChange) as Gantt.Column : field);
+      columnCode === 'predecessor' && merge(baseColumn, { render: renderPredecessor });
     } else if (systemColumnsMap.has(columnCode)) {
       const column = systemColumnsMap.get(columnCode)!;
       merge(baseColumn, {
         ...column,
-        label: (<GanttSortLabel dataKey={column.dataIndex} onChange={onSortChange}>{column?.title}</GanttSortLabel>),
+        label: column.sortable ? (<GanttSortLabel dataKey={column.dataIndex} onChange={onSortChange}>{column?.title}</GanttSortLabel>) : column?.title,
         name: column?.dataIndex,
         render: fieldMapRender[columnCode as keyof typeof fieldMapRender] ?? column?.render,
       });
     } else {
       const field = find(tableFields, { code: columnCode });
-      merge(baseColumn, field ? {
-        ...getCustomColumn(field),
-        label: field.title,
-      } : {});
+      const column = field ? getCustomColumn(field) : {} as any;
+      merge(baseColumn, {
+        ...column,
+        label: column.sortable ? (<GanttSortLabel dataKey={column.dataIndex} onChange={onSortChange}>{column?.title}</GanttSortLabel>) : column?.title,
+      });
     }
     const { render, name } = baseColumn;
     return merge(baseColumn, {
@@ -354,27 +400,33 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
       },
     });
   }));
+
   return tableColumns;
 };
-const defaultVisibleColumns = ['assignee', 'estimatedStartTime', 'estimatedEndTime', 'actualStartTime', 'actualEndTime'];
+const ganntSystemFields = [{ title: '前置依赖', code: 'predecessor', fieldType: 'multiple' }];
+const defaultVisibleColumns = ['assignee', 'predecessor', 'estimatedStartTime', 'estimatedEndTime', 'actualStartTime', 'actualEndTime'];
 const defaultListLayoutColumns = defaultVisibleColumns.map((code) => ({
   columnCode: code,
   display: true,
 }));
 function useGanttProjectColumns({
-  cached, onAfterCreateSubIssue, onCreateSubIssue, onClickSummary, onSortChange, projectId, menuType, isInProgram, sortedList,
+  cached, onAfterCreateSubIssue, onCreateSubIssue, onClickSummary, onSortChange, onUpdate, projectId, menuType, isInProgram, sortedList,
 }: IGanttColumnsHookProps) {
   // 恒为 项目层级
-  const { data: tableFields } = useIssueTableFields({ hiddenFieldCodes: ['epicSelfName', 'summary'], projectId, menuType: 'project' });
-  const { data: issueTypes, isLoading } = useProjectIssueTypes({ projectId, isInProgram });
+  const { data: tableFields } = useIssueTableFields({
+    hiddenFieldCodes: ['epicSelfName', 'summary'], extraFields: ganntSystemFields, projectId, menuType: 'project',
+  });
+  const { data: issueTypes, isLoading: issueTypeIsLoading } = useProjectIssueTypes({ projectId, isInProgram });
+  const { data: predecessorTypes, isLoading: predecessorTypesLoading } = useProjectPredecessorTypes({ projectId });
+  const isLoading = issueTypeIsLoading && predecessorTypesLoading;
   const disableFeatureCreateIssue = !!issueTypes?.some((issueType) => issueType.typeCode === 'story');
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
   const listLayoutColumns = useMemo(() => getListLayoutColumns(cached?.listLayoutColumns || defaultListLayoutColumns as any, tableFields || []), [cached?.listLayoutColumns, tableFields]);
   const visibleColumnCodes = useMemo(() => (listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode)), [listLayoutColumns]);
   const tableWithSortedColumns = useMemo(() => getTableColumns(listLayoutColumns.filter((item) => item.display)
     .map((item) => ({ ...item, disable: true })), tableFields || [], {
-    onClickSummary, onSortChange, openCreateSubIssue: onCreateSubIssue, onAfterCreateSubIssue,
-  }, { disableOperate: menuType !== 'project', disableFeatureCreateIssue }), [disableFeatureCreateIssue, listLayoutColumns, menuType, onAfterCreateSubIssue, onClickSummary, onCreateSubIssue, onSortChange, tableFields]);
+    onClickSummary, onSortChange, openCreateSubIssue: onCreateSubIssue, onAfterCreateSubIssue, onUpdate,
+  }, { disableOperate: menuType !== 'project', disableFeatureCreateIssue }, predecessorTypes), [disableFeatureCreateIssue, listLayoutColumns, menuType, onAfterCreateSubIssue, onClickSummary, onCreateSubIssue, onSortChange, onUpdate, predecessorTypes, tableFields]);
   const sortedListRef = useRef<IGanttSortLabelSortItem[]>(sortedList);
   sortedListRef.current = sortedList;
 

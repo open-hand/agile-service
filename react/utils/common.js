@@ -9,6 +9,7 @@ export const getProjectName = () => (AppState.currentMenuType ? AppState.current
 export const getOrganizationId = () => (AppState.currentMenuType
   ? AppState.currentMenuType.organizationId
   : 0);
+export const getUserId = () => AppState.userInfo?.id || 0;
 export const getApplyType = () => ((AppState.currentMenuType.categories || []).map((c) => c.code).includes('N_PROGRAM') ? 'program' : 'agile');
 export const getMenuType = () => (AppState.currentMenuType ? AppState.currentMenuType.type : '');
 export const getIsProjectMember = () => {

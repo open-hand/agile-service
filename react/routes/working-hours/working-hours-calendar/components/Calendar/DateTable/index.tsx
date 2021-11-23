@@ -53,45 +53,17 @@ interface Props {
 
 const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
   const {
-    searchDs, isRestDay, calendarDs, countData, setLoading, getCountData, AppState,
+    isRestDay, calendarDs, countData, setLoading, getCountData, AppState, startTime, endTime, userIds, projectIds, workGroupIds,
   } = useCalendarStore();
-  const startDate = useMemo(() => searchDs.current?.get('startTime')?.toString(), [searchDs.current?.get('startTime')]);
-  const endDate = useMemo(() => searchDs.current?.get('endTime')?.toString(), [searchDs.current?.get('endTime')]);
-  const startTime = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
-  const endTime = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
-  const dateTableRef = useRef();
-  const dateTableSize = useSize(dateTableRef);
   const [widthPerDay, setWidthPerDay] = useState(0);
   const [expandMap, setExpandMap] = useState<Map<string, boolean>>(new Map([]));
   const [userIssuesMap, setUserIssuesMap] = useState<Map<string, {[date: string]: ICalendarIssue[]}>>(new Map());
   const [userIssuesHeightMap, setUserIssuesHeightMap] = useState<Map<string, number>>(new Map());
-  const [defaultScrolled, setDefaultScrolled] = useState<boolean>(false);
-  const [firstSetDefaultScrolled, setFirstSetDefaultScrolled] = useState<boolean>(false);
-  const appEle = document.querySelector('#app');
-  const menuEle = document.querySelector('#menu');
-  // @ts-ignore
-  const appEleSize = useSize(appEle);
-  // @ts-ignore
-  const menuEleSize = useSize(menuEle);
   const [issueDetailProps] = useDetail();
 
   useEffect(debounce(() => {
-    if (appEleSize.width && menuEleSize.width) {
-      if ((appEleSize.width - menuEleSize.width - 24 - 250) / 7 !== widthPerDay) {
-        setWidthPerDay((appEleSize.width - menuEleSize.width - 24 - 250) / 7);
-      }
-    }
-  }, 300), [appEleSize.width, menuEleSize.width]);
-
-  useEffect(() => {
-    if (!firstSetDefaultScrolled && dateTableSize.height && dateTableWrapperSize.height) {
-      batchedUpdates(() => {
-        // @ts-ignore
-        setDefaultScrolled(dateTableSize.height > dateTableWrapperSize.height);
-        setFirstSetDefaultScrolled(true);
-      });
-    }
-  }, [firstSetDefaultScrolled, dateTableSize.height, dateTableWrapperSize.height]);
+    setWidthPerDay(dateTableWrapperSize.width ? ((dateTableWrapperSize.width - 250)) / 7 : 0);
+  }, 300), [dateTableWrapperSize.width]);
 
   const getBetweenDate = useCallback((start: Moment, end: Moment): {
     date: string,
@@ -119,7 +91,7 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
     return [];
   }, [isRestDay, widthPerDay]);
 
-  const betweenDate = useMemo(() => getBetweenDate(startDate, endDate), [endDate, getBetweenDate, startDate]);
+  const betweenDate = useMemo(() => getBetweenDate(moment(startTime), moment(endTime)), [endTime, getBetweenDate, startTime]);
 
   const renderDate = useCallback(() => betweenDate.map((item) => (
     <div
@@ -141,12 +113,8 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
       setUserIssuesMap(new Map());
       setExpandMap(new Map());
     });
-  }, [
-    searchDs.current?.get('startTime'),
-    searchDs.current?.get('endTime'),
-    searchDs.current?.get('userIds'),
-    searchDs.current?.get('projectIds'),
-  ]);
+  }, [startTime, endTime, userIds, projectIds, workGroupIds]);
+
   const handleExpand = useCallback((item: ICalendarData) => {
     const newMap = cloneDeep(expandMap);
     const newUserIssuesMap = cloneDeep(userIssuesMap);
@@ -157,7 +125,7 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
       workingHoursApi.getUserCalendar(item.userId, {
         startTime,
         endTime,
-        projectIds: searchDs.current?.get('projectIds'),
+        projectIds,
       }).then((data: {[date: string]: ICalendarIssue[]}) => {
         newUserIssuesMap.set(item.userId, data);
         let maxCellIssuesHeight = 0;
@@ -184,7 +152,7 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
       setUserIssuesHeightMap(newUserIssuesHeightMap);
       setUserIssuesMap(newUserIssuesMap);
     });
-  }, [expandMap, userIssuesMap, userIssuesHeightMap, startTime, endTime, searchDs.current?.get('projectIds')]);
+  }, [expandMap, userIssuesMap, userIssuesHeightMap, startTime, endTime, projectIds]);
 
   const detailCallback = useCallback(() => {
     setLoading(true);
@@ -194,7 +162,7 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
     workingHoursApi.getUserCalendar(userId, {
       startTime,
       endTime,
-      projectIds: searchDs.current?.get('projectIds'),
+      projectIds,
     }).then((data: {[date: string]: ICalendarIssue[]}) => {
       if (expandMap.get(userId)) {
         newUserIssuesMap.set(userId, data);
@@ -230,14 +198,16 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
     getCountData({
       startTime,
       endTime,
-      userIds: searchDs.current?.get('userIds'),
-      projectIds: searchDs.current?.get('projectIds'),
+      userIds,
+      projectIds,
+      workGroupIds,
     });
   }, [
-    searchDs.current?.get('userIds'),
-    searchDs.current?.get('projectIds'),
     startTime,
     endTime,
+    userIds,
+    projectIds,
+    workGroupIds,
     expandMap,
     userIssuesMap,
     userIssuesHeightMap,
@@ -261,7 +231,7 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
   }, [issueDetailProps, detailCallback]);
 
   const renderRows = useCallback(() => (
-    <>
+    <div>
       {
         calendarDs.toData().map((item: ICalendarData) => {
           const maxCellIssuesHeight = expandMap.get(item.userId) ? (userIssuesHeightMap.get(item.userId) || 0) : 0;
@@ -379,51 +349,8 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
           );
         })
       }
-    </>
-  ), [betweenDate, calendarDs, expandMap, handleExpand, userIssuesMap, userIssuesHeightMap]);
-
-  const renderEmptyBlock = useCallback(() => {
-    const blockHeight = (dateTableWrapperSize.height || 0) - ((calendarDs.toData().length) * countHeight + sum([...userIssuesHeightMap.values()]) + (calendarDs.totalPage > calendarDs.currentPage ? 40 : 0)) - 96; // 96
-    return blockHeight > 0 && (
-    <div
-      className={classNames(styles.row, styles.blockRow, {
-        [styles.lastCellHasBorderRow]: betweenDate.length < 7,
-      })}
-      style={{
-        width: 250 + betweenDate.length * widthPerDay,
-        height: blockHeight,
-      }}
-    >
-      <div
-        className={classNames(styles.firstCell, styles.row_firstCell, styles.row_cell)}
-        style={{
-          height: blockHeight,
-        }}
-      />
-      <div
-        className={styles.otherCells}
-        style={{
-          width: 7 * widthPerDay,
-          height: blockHeight,
-        }}
-      >
-        {
-          betweenDate.map((date) => (
-            <div
-              className={classNames(styles.row_cell, styles.cell)}
-              style={{
-                left: date.left,
-                width: date.width,
-                height: blockHeight,
-              }}
-            />
-          ))
-        }
-      </div>
     </div>
-    );
-  },
-  [betweenDate, dateTableWrapperSize.height, userIssuesHeightMap, calendarDs]);
+  ), [betweenDate, calendarDs, expandMap, handleExpand, userIssuesMap, userIssuesHeightMap]);
 
   const renderFooter = useCallback(() => {
     const sumCount = sum(Object.values(countData));
@@ -463,18 +390,9 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
   }, []);
 
   return (
-    <div
-      className={styles.dateTable}
-      style={{
-        // width: '100%',
-        width: 250 + 7 * widthPerDay,
-        maxWidth: widthPerDay ? 250 + 7 * widthPerDay - (((dateTableWrapperSize.height || 0) < (dateTableSize.height || 0) && !defaultScrolled) ? 4 : 0) : '100%', // -2,滚动条
-      }}
-    // @ts-ignore
-      ref={dateTableRef}
-    >
+    <div className={styles.dateTable}>
       {
-        startDate && endDate && calendarDs.toData().length > 0 && (
+        startTime && endTime && calendarDs.toData().length > 0 && (
           <>
             <div
               className={classNames(styles.header, { [styles.lastCellHasBorderRow]: betweenDate.length < 7 })}
@@ -523,9 +441,6 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
                 )
               }
             </div>
-            {
-              renderEmptyBlock()
-            }
             {renderFooter()}
           </>
         )

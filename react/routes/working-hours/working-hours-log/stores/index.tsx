@@ -29,8 +29,9 @@ interface Context {
 export const StoreProvider: React.FC<Context> = inject('AppState')(observer((props: any) => {
   const { children, AppState } = props;
   const logDs = useMemo(() => new DataSet(LogDataSet()), []);
-  const logSearchDs = useMemo(() => new DataSet(LogSearchDataSet({ logDs, currentProject: AppState.getCurrentProject })), [AppState.getCurrentProject, logDs]);
-  const exportDs = useMemo(() => new DataSet(LogExportDataSet({ currentProject: AppState.getCurrentProject })), [AppState.getCurrentProject]);
+  const projectCreationDate = useMemo(() => AppState.getCurrentProject?.creationDate, [AppState.getCurrentProject]);
+  const logSearchDs = useMemo(() => new DataSet(LogSearchDataSet({ logDs, projectCreationDate })), [logDs, projectCreationDate]);
+  const exportDs = useMemo(() => new DataSet(LogExportDataSet({ projectCreationDate })), [projectCreationDate]);
   const loadData = useCallback(() => {
     // eslint-disable-next-line no-nested-ternary
     logDs.setQueryParameter('startTime', localPageCacheStore.getItem('workingHours-log-startTime') || `${formatStartDate(getIsOrganization() ? moment().subtract(6, 'days') : (

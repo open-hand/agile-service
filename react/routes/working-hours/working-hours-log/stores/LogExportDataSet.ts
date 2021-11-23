@@ -1,9 +1,10 @@
-import { DataSet } from 'choerodon-ui/pro';
 import moment, { Moment } from 'moment';
-import { debounce, includes } from 'lodash';
+import { DataSet } from 'choerodon-ui/pro';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
-import { getIsOrganization } from '@/utils/common';
+import { DataSetSelection, FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
+
+import { getIsOrganization, getOrganizationId } from '@/utils/common';
 
 export const formatStartDate = (date: string | Moment, format = false) => {
   if (!format) {
@@ -19,7 +20,12 @@ export const formatEndDate = (date: string | Moment, format = false) => {
   return moment(date).endOf('day').format('YYYY-MM-DD HH:mm:ss');
 };
 
-const LogExportDataSet = ({ currentProject }: { currentProject: any}) => ({
+interface WorkGroupItem {
+  parentId: string | null | number,
+  id: string | null
+}
+
+const LogExportDataSet = ({ projectCreationDate, showWorkGroup = false }: { projectCreationDate: string | undefined, showWorkGroup?: boolean}): DataSetProps => ({
   autoCreate: true,
   autoQuery: false,
   fields: [{
@@ -34,7 +40,7 @@ const LogExportDataSet = ({ currentProject }: { currentProject: any}) => ({
       max: ({ record }: { record: Record}) => moment(record.get('endTime')).startOf('day'),
       // eslint-disable-next-line no-nested-ternary
       min: ({ record }: { record: Record }) => (getIsOrganization() ? formatStartDate(moment(record?.get('endTime')).subtract(31, 'days')) : (
-        moment(record?.get('endTime')).subtract(31, 'days').isAfter(moment(currentProject?.creationDate))) ? (formatStartDate(moment(record?.get('endTime'))) as Moment).subtract(31, 'days') : moment(currentProject?.creationDate).startOf('day')
+        moment(record?.get('endTime')).subtract(31, 'days').isAfter(moment(projectCreationDate))) ? (formatStartDate(moment(record?.get('endTime'))) as Moment).subtract(31, 'days').startOf('day') : moment(projectCreationDate).startOf('day')
       ),
     },
     label: '开始时间',
@@ -42,7 +48,7 @@ const LogExportDataSet = ({ currentProject }: { currentProject: any}) => ({
     name: 'endTime',
     required: true,
     dynamicProps: {
-      max: ({ record }: { record: Record}) => (moment(record?.get('startTime')).add(31, 'days').isBefore(moment()) ? (formatStartDate(moment(record?.get('startTime'))) as Moment).add(31, 'days') : moment().endOf('day')),
+      max: ({ record }: { record: Record}) => (moment(record?.get('startTime')).add(31, 'days').isBefore(moment().endOf('day')) ? (formatStartDate(moment(record?.get('startTime'))) as Moment).add(31, 'days').endOf('day') : moment().endOf('day')),
       min: ({ record }: { record: Record }) => moment(record.get('startTime')).startOf('day'),
     },
     label: '结束时间',
@@ -52,6 +58,45 @@ const LogExportDataSet = ({ currentProject }: { currentProject: any}) => ({
     textField: 'realName',
     valueField: 'id',
     label: '筛选成员',
+  }, {
+    name: 'workGroupIds',
+    multiple: true,
+    textField: 'name',
+    valueField: 'id',
+    label: '筛选工作组',
+    options: new DataSet({
+      selection: 'single' as DataSetSelection,
+      autoQuery: showWorkGroup && !!getIsOrganization(),
+      idField: 'id',
+      parentField: 'parentId',
+      transport: {
+        read: () => ({
+          url: `/agile/v1/organizations/${getOrganizationId()}/work_group/query_tree`,
+          method: 'get',
+          transformResponse: (res) => {
+            try {
+              const data = JSON.parse(res);
+              if (data && data.workGroupVOS) {
+                const removeOrgItem = data.workGroupVOS.filter((item: WorkGroupItem) => !(item.parentId === null && item.id === null));
+                return removeOrgItem.map((item: WorkGroupItem) => {
+                  if (item.id === null && item.parentId === 0) {
+                    return { ...item, id: '0' };
+                  }
+                  return item;
+                });
+              }
+              return data;
+            } catch (error) {
+              return res;
+            }
+          },
+        }),
+      },
+    }),
+  }, {
+    name: 'exportMonthlyReport',
+    label: '按工作组统计总量',
+    type: 'boolean' as FieldType,
   }],
 });
 

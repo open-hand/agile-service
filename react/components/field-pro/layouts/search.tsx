@@ -6,35 +6,42 @@ import moment from 'moment';
 import getFieldsInstance, { getAgileFields } from '../base';
 import { IFieldProcessConfig } from '../base/type';
 import { getComponentCodeForLocalCode, getFieldPropsByMode, isCodeInSystemComponents } from '../base/utils';
+import { IFieldType } from '@/common/types';
+import { IAgileBaseFieldTypeComponentProps } from '../base/component';
 
-function getFieldConfig({
-  field, props,
-}: any) {
-  const { fieldType } = field;
-  const { projectId, applyType, value } = props;
-  const code = getComponentCodeForLocalCode(field.code);
-  let newProps: any = {};
+type getSearchFieldPropsByFieldTypeType<T extends IAgileBaseFieldTypeComponentProps = IAgileBaseFieldTypeComponentProps, P extends keyof T = keyof T> = (fieldType: P, fieldId: string) => T[P]
+/**
+ * 根据类型获取高级筛选类组件Props
+ */
+const getSearchFieldPropsByFieldType: getSearchFieldPropsByFieldTypeType = (fieldType: IFieldType, fieldId: string) => {
   switch (fieldType) {
     case 'input': {
-      newProps = { style: { width: 100 } };
-      break;
+      return {
+        style: { width: 100 },
+      };
     }
     case 'number': {
-      newProps = { style: { width: 100 } };
-      break;
+      return {
+        style: { width: 100 },
+      };
     }
     case 'single':
     case 'multiple':
     case 'radio':
     case 'checkbox': {
-      newProps = {
+      return {
         onlyEnabled: false,
-        fieldId: field.id,
-        // 这里不使用selected 字段内部会处理 value 第二页情况
+        fieldId,
       };
-      break;
     }
   }
+  return {};
+};
+function getFieldConfig({
+  field, props,
+}: any) {
+  const { fieldType } = field;
+  const code = getComponentCodeForLocalCode(field.code);
   if (isCodeInSystemComponents(code)) {
     return {
       props: getFieldPropsByMode({
@@ -47,11 +54,11 @@ function getFieldConfig({
       ...getFieldPropsByMode({
         code, outputs: ['config', 'function'], fieldType, props,
       }),
-      ...newProps,
+      ...getSearchFieldPropsByFieldType(fieldType, field.id),
     },
   };
 }
-function wrapDateToFlatDate(fieldConfig: any, wrapElementFn: (config: any) => JSX.Element): JSX.Element {
+export function wrapDateToFlatDate(fieldConfig: any, wrapElementFn: (config: any) => JSX.Element): JSX.Element {
   const { fieldType } = fieldConfig;
   class FlatDateRangePicker extends React.PureComponent<any, any> {
     static getSelectedDate = (value: any[]) => {
@@ -167,5 +174,5 @@ function getSearchFields(fields: any[], fieldCodeProps?: Record<string, any>, in
     return i[1](i[0]);
   }) as React.ReactElement[];
 }
-export { AgileBaseSearchInstance };
+export { AgileBaseSearchInstance, getSearchFieldPropsByFieldType };
 export default getSearchFields;

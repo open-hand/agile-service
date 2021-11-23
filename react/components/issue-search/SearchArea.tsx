@@ -25,7 +25,7 @@ const SearchArea: React.FC = () => {
   const {
     store, onClear, urlFilter, onClickSaveFilter, projectId, foldedHeight, hasMyAssigned,
   } = useContext(IssueSearchContext);
-  const { data: quickFilters } = useQuickFilters({ projectId });
+  const { data: quickFilters } = useQuickFilters({ projectId }, { enabled: store.menuType === 'project' });
   const {
     isHasFilter, chosenFields, overflowLine, folded,
   } = store;

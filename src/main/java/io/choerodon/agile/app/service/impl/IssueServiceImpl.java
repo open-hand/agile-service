@@ -195,6 +195,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private StatusLinkageExecutionLogService statusLinkageExecutionLogService;
     @Autowired
     private ProjectInfoMapper projectInfoMapper;
+    @Autowired
+    private IssuePredecessorService issuePredecessorService;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -631,7 +633,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 Map<Long, List<WorkLogVO>> workLogVOMap = workLogMapper.queryByIssueIds(Collections.singletonList(projectId), allIssueIds).stream().collect(Collectors.groupingBy(WorkLogVO::getIssueId));
                 List<IssueListFieldKVVO> issueListFieldKVVOS = issueAssembler.issueDoToIssueListFieldKVDTO(issueDTOList, priorityMap, statusMapDTOMap, issueTypeDTOMap, foundationCodeValue, workLogVOMap);
                 if (!ObjectUtils.isEmpty(agilePluginService) && !CollectionUtils.isEmpty(issueListFieldKVVOS)) {
-                    agilePluginService.doToIssueListFieldKVDTO(projectId,issueListFieldKVVOS);
+                    agilePluginService.doToIssueListFieldKVDTO(Arrays.asList(projectId) ,issueListFieldKVVOS);
                 }
                 issueListDTOPage = PageUtil.buildPageInfoWithPageInfoList(issueIdPage,issueListFieldKVVOS);
             }
@@ -651,6 +653,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                                               Long projectId,
                                               Long organizationId) {
         Map<String, Object> sortMap = new HashMap<>();
+        if (ObjectUtils.isEmpty(pageRequest.getSort())) {
+            return sortMap;
+        }
         if (!handleSortField(pageRequest).equals("")) {
             setSortMap(organizationId, projectId, pageRequest, sortMap, "ai");
         } else {
@@ -1648,6 +1653,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         issueParticipantRelMapper.deleteByIssueIdAndParticipantIds(projectId, issueId, null);
         // 删除当前issue相关的状态联动执行记录
         statusLinkageExecutionLogService.deleteByIssueId(projectId, ConvertUtil.getOrganizationId(projectId), issueId);
+        issuePredecessorService.deleteNode(projectId, issueId);
     }
 
     private void deleteRuleLogRel(Long projectId, Long issueId, Set<Long> fieldIds) {
@@ -3426,7 +3432,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public Page<UserDTO> pagingUserProjectUsers(PageRequest pageRequest, Long organizationId, String param) {
+    public Page<UserDTO> pagingUserProjectUsers(PageRequest pageRequest, Long organizationId, AgileUserVO agileUserVO) {
         List<Long> projectIds = new ArrayList<>();
         List<ProjectVO> projects = new ArrayList<>();
         Long userId = DetailsHelper.getUserDetails().getUserId();
@@ -3434,11 +3440,18 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (CollectionUtils.isEmpty(projectIds)) {
             return new Page<>();
         }
-        AgileUserVO agileUserVO = new AgileUserVO();
         agileUserVO.setProjectIds(new HashSet<>(projectIds));
         agileUserVO.setOrganizationId(organizationId);
-        agileUserVO.setParam(param);
-        return baseFeignClient.agileUsersByProjectIds(0L, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
+        Page<UserDTO> page = baseFeignClient.agileUsersByProjectIds(0L, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
+        Set<Long> ignoredUserIds = agileUserVO.getIgnoredUserIds();
+        List<UserDTO> result = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(ignoredUserIds)) {
+            result.addAll(baseFeignClient.listUsersByIds(ignoredUserIds.toArray(new Long[ignoredUserIds.size()]), false).getBody());
+        }
+        if (!CollectionUtils.isEmpty(page.getContent())) {
+            result.addAll(page.getContent());
+        }
+        return PageUtil.buildPageInfoWithPageInfoList(page, result);
     }
 
     @Override
