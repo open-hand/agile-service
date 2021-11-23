@@ -994,7 +994,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
             UserMessageDTO userMessageDTO = workHoursCalendarVO.getUserMessageDTO();
             if (!ObjectUtils.isEmpty(userMessageDTO)) {
                 cell.setCellValue(userMessageDTO.getRealName());
-                cell1.setCellValue(Boolean.TRUE.equals(userMessageDTO.getLdap()) ? userMessageDTO.getLoginName() : userMessageDTO.getLoginName());
+                cell1.setCellValue(Boolean.TRUE.equals(userMessageDTO.getLdap()) ? userMessageDTO.getLoginName() : userMessageDTO.getEmail());
             }
             Cell cell2 = row.createCell(2);
             BigDecimal allEstimateTime = workHoursCalendarVO.getAllEstimateTime();
