@@ -12,8 +12,7 @@ import useSelect, { SelectConfig, FragmentForSearch, LoadConfig } from '@/hooks/
 import { piApi } from '@/api';
 
 import type { PI } from '@/common/types';
-import styles from './index.less';
-import renderEllipsisBlockOption from './utils';
+import renderEllipsisBlockOption, { styles } from '../common/utils';
 
 const { AppState } = stores;
 

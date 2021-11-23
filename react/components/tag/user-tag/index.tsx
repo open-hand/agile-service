@@ -101,6 +101,6 @@ const UserTag: React.FC<Props> = ({
         </Tooltip>
       ) : null}
     </div>
-  ) : <UserUniqueTag data={data} {...otherProps} />;
+  ) : <UserUniqueTag data={data} style={style} {...otherProps} />;
 };
 export default UserTag;

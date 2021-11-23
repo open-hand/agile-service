@@ -8,7 +8,7 @@ import { useCreation } from 'ahooks';
 import { sprintApi } from '@/api';
 import useSelect, { SelectConfig, FragmentForSearch } from '@/hooks/useSelect';
 import { ISprint } from '@/common/types';
-import renderEllipsisBlockOption, { styles } from '../select-pi/utils';
+import renderEllipsisBlockOption, { styles } from '../common/utils';
 
 export interface SelectSprintProps extends Partial<SelectProps> {
   hasUnassign?: boolean,

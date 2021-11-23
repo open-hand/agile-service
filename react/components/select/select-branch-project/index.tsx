@@ -11,7 +11,7 @@ import { uniqBy } from 'lodash';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { projectApi, ganttApi } from '@/api';
 import { ICategoryCode } from '@/hooks/useCategoryCodes';
-import renderEllipsisBlockOption, { styles } from '../select-pi/utils';
+import renderEllipsisBlockOption, { styles } from '../common/utils';
 import projectStyles from './index.less';
 // 用于创建分支 关联分支的项目列表
 
