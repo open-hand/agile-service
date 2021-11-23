@@ -176,8 +176,8 @@ const transformUpdateData = (data, customMemberFieldsData) => {
           updateData.push({
             fieldId,
             fieldValueList: [{
-              operateType: value ? 'specifier' : selected,
-              textValue: value,
+              operateType: selected === 'specifier' && value ? 'specifier' : selected,
+              textValue: selected === 'specifier' && value ? value : undefined,
               fieldType,
             }],
           });
@@ -189,8 +189,8 @@ const transformUpdateData = (data, customMemberFieldsData) => {
           updateData.push({
             fieldId,
             fieldValueList: [{
-              operateType: value ? 'specifier' : selected,
-              stringValue: value,
+              operateType: selected === 'specifier' && value ? 'specifier' : selected,
+              stringValue: selected === 'specifier' && value ? value : undefined,
               fieldType,
             }],
           });
