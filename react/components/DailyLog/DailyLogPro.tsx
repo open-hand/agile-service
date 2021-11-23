@@ -20,12 +20,14 @@ import { IModalProps } from '@/common/types';
 import styles from './index.less';
 import { processBeforeData } from './utils';
 import { getProjectId } from '@/utils/common';
+import SelectIssuesDailyLog from '@/components/select/select-issues-dailyLog';
 
 interface RecordWorkModalProps {
-  issueId: string
+  issueId?: string
   projectId?:string
+  defaultStartTime?: string
   onOk?: () => void
-
+  onCancel?: () => void
 }
 const { Option } = SelectBox;
 
@@ -33,7 +35,9 @@ interface SelectTimeWithUnitProps extends Partial<Omit<SelectProps, 'name'>> {
   timeName: string
   unitName: string
 }
-const SelectTimeWithUnit: React.FC<SelectTimeWithUnitProps> = observer(({ timeName, unitName, record }) => {
+const SelectTimeWithUnit: React.FC<SelectTimeWithUnitProps> = observer(({
+  timeName, unitName, record,
+}) => {
   const unitOptions = useMemo(() => new DataSet({
     autoQuery: false,
     autoCreate: false,
@@ -62,13 +66,16 @@ const SelectTimeWithUnit: React.FC<SelectTimeWithUnitProps> = observer(({ timeNa
   );
 });
 const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = ({
-  modal, projectId, issueId, onOk,
+  modal, projectId, issueId, onOk, defaultStartTime, onCancel,
 }) => {
   const [uploading, setUploading] = useState(false);
 
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [
+      {
+        name: 'issueId', label: '选择工作项', required: !issueId, type: 'string' as FieldType,
+      },
       {
         name: 'spendTime', label: '耗费时间', required: true, type: 'number' as FieldType, pattern: /(^\d{1,3}\.{1}\d{1}$)|(^[1-9]\d{0,2}$)/,
       },
@@ -83,7 +90,11 @@ const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = 
       },
       { name: 'description', label: '描述', type: 'string' as FieldType },
     ],
-  }), []);
+    data: [{
+      startDate: defaultStartTime || moment().format('YYYY-MM-DD'),
+      timeUnit: 'H',
+    }],
+  }), [defaultStartTime, issueId]);
   useEffect(() => {
     ['reduce', 'direct'].forEach((item) => {
       dataSet.current?.addField(`${item}_time`, {
@@ -124,15 +135,28 @@ const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = 
       Choerodon.prompt('请等待图片上传完成');
       return false;
     }
-    const data = { issueId, ...processBeforeData(dataSet.toJSONData()[0]), projectId: projectId ?? getProjectId() };
+    const data = { issueId: dataSet.current?.get('issueId') || issueId, ...processBeforeData(dataSet.toJSONData()[0]), projectId: projectId ?? getProjectId() };
     await workLogApi.project(projectId).create(data);
     onOk && onOk();
 
     return true;
   }, [dataSet, issueId, onOk, projectId, uploading]);
   useEffect(() => { modal?.handleOk(handleSubmit); }, [handleSubmit, modal]);
+
+  const handleCancel = useCallback(async () => {
+    onCancel && onCancel();
+    return true;
+  }, [onCancel]);
+  useEffect(() => {
+    modal?.handleCancel(handleCancel);
+  }, [handleCancel, modal]);
   return (
     <Form dataSet={dataSet} className={styles.form}>
+      {
+        !issueId && (
+          <SelectIssuesDailyLog name="issueId" />
+        )
+      }
       <SelectTimeWithUnit timeName="spendTime" unitName="timeUnit" />
       <DateTimePicker name="startDate" />
       <SelectBox

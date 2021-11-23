@@ -1,13 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, {
-  useCallback, useMemo, useState, useRef, useEffect,
+  useCallback, useMemo, useState, useEffect,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import originMoment, { Moment } from 'moment';
 import { Icon, Tooltip } from 'choerodon-ui';
 import { extendMoment } from 'moment-range';
 import classNames from 'classnames';
-import { useSize } from 'ahooks';
 import {
   cloneDeep, debounce, max, sum,
 } from 'lodash';
@@ -19,6 +18,7 @@ import DetailContainer, { useDetail } from '@/components/detail-container';
 import { workingHoursApi } from '@/api';
 import { ConstantNum } from './utils';
 import { getIsOrganization } from '@/utils/common';
+import openRecordWorkLogModal from '@/components/DailyLog/DailyLogPro';
 
 const {
   cardHeight, cardMargin, cardPadding1, cardPadding2, issuePadding1, issuePadding2, countHeight,
@@ -57,9 +57,12 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
   } = useCalendarStore();
   const [widthPerDay, setWidthPerDay] = useState(0);
   const [expandMap, setExpandMap] = useState<Map<string, boolean>>(new Map([]));
+  const [clickCardMap, setClickCardMap] = useState<Map<string, boolean>>(new Map([]));
+
   const [userIssuesMap, setUserIssuesMap] = useState<Map<string, {[date: string]: ICalendarIssue[]}>>(new Map());
   const [userIssuesHeightMap, setUserIssuesHeightMap] = useState<Map<string, number>>(new Map());
   const [issueDetailProps] = useDetail();
+  const userId = useMemo(() => AppState.userInfo.id, [AppState.userInfo]);
 
   useEffect(debounce(() => {
     setWidthPerDay(dateTableWrapperSize.width ? ((dateTableWrapperSize.width - 250)) / 7 : 0);
@@ -156,7 +159,6 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
 
   const detailCallback = useCallback(() => {
     setLoading(true);
-    const userId = AppState.userInfo.id;
     const newUserIssuesMap = cloneDeep(userIssuesMap);
     const newUserIssuesHeightMap = cloneDeep(userIssuesHeightMap);
     workingHoursApi.getUserCalendar(userId, {
@@ -230,6 +232,22 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
     });
   }, [issueDetailProps, detailCallback]);
 
+  const handleClickCard = useCallback((e, item, date: string) => {
+    e.stopPropagation();
+    if (userId === item.userId && !getIsOrganization()) {
+      setClickCardMap(new Map([[`${item.userId}-${date}`, true]]));
+      openRecordWorkLogModal({
+        defaultStartTime: `${date}-${moment().format('HH:mm:ss')}`,
+        onOk: () => {
+          detailCallback();
+          setClickCardMap(new Map([]));
+        },
+        onCancel: () => {
+          setClickCardMap(new Map([]));
+        },
+      });
+    }
+  }, [userId, detailCallback]);
   const renderRows = useCallback(() => (
     <div>
       {
@@ -290,15 +308,23 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
                     }}
                   >
                     <div
-                      className={styles.body_cell_count}
+                      className={classNames(styles.body_cell_count, {
+                        [styles.body_cell_countEnabled]: item.userId === userId && !getIsOrganization(),
+                        [styles.body_cell_countClicked]: clickCardMap.get(`${item.userId}-${date.format}`),
+                      })}
                       style={{
                         background: cellColor,
-                        height: countHeight - 1,
-                        lineHeight: `${countHeight - 1}px`,
+                        height: countHeight - 0.5,
+                        lineHeight: `${countHeight - 0.5}px`,
                         color: date.isRestDay ? 'rgba(15,19,88,0.45)' : 'var(--text-color)',
                       }}
+                      role="none"
+                      onClick={(e) => handleClickCard(e, item, date.format)}
                     >
-                      { `${dateCount}h`}
+                      <span className={styles.body_cell_countEnabled_hoverItem}>
+                        <Icon type="add_circle" />
+                      </span>
+                      <span className={styles.body_cell_countEnabled_hoverCount}>{`${dateCount}h`}</span>
                     </div>
                     {
                       expandMap.get(item.userId) && userIssuesMap.get(item.userId) && (
@@ -350,7 +376,7 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
         })
       }
     </div>
-  ), [betweenDate, calendarDs, expandMap, handleExpand, userIssuesMap, userIssuesHeightMap]);
+  ), [betweenDate, calendarDs, expandMap, handleExpand, userIssuesMap, userIssuesHeightMap, clickCardMap]);
 
   const renderFooter = useCallback(() => {
     const sumCount = sum(Object.values(countData));
