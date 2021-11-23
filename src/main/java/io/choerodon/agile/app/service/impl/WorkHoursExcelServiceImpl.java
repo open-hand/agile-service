@@ -111,7 +111,8 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
     private AgilePluginService agilePluginService;
 
     static {
-        WORK_HOURS_LOG_LIST.add(new ExcelTitleVO("登记人", "userName", 4000));
+        WORK_HOURS_LOG_LIST.add(new ExcelTitleVO("用户名", "userName", 4000));
+        WORK_HOURS_LOG_LIST.add(new ExcelTitleVO("登录名", "loginName", 4000));
         WORK_HOURS_LOG_LIST.add(new ExcelTitleVO("耗费时间（单位：小时）", "workTime", 6000));
         WORK_HOURS_LOG_LIST.add(new ExcelTitleVO("工作日期", "workDate", 4000));
         WORK_HOURS_LOG_LIST.add(new ExcelTitleVO("工作项类型", "issueTypeName", 4000));
@@ -119,7 +120,8 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
         WORK_HOURS_LOG_LIST.add(new ExcelTitleVO("工作项概要", "summary", 10000));
         WORK_HOURS_LOG_LIST.add(new ExcelTitleVO("状态", "statusName", 4000));
         WORK_HOURS_LOG_LIST.add(new ExcelTitleVO("所属项目", "projectName", 4000));
-        WORK_HOURS_CALENDAR_LIST.add(new ExcelTitleVO("成员", "userName", 6000));
+        WORK_HOURS_CALENDAR_LIST.add(new ExcelTitleVO("用户名", "userName", 4000));
+        WORK_HOURS_CALENDAR_LIST.add(new ExcelTitleVO("登录名", "loginName", 4000));
         WORK_HOURS_CALENDAR_LIST.add(new ExcelTitleVO("总计登记工时（单位：小时）", "allEstimateTime", 4000));
         WORK_HOURS_CALENDAR_REPORT_LIST.add(new ExcelTitleVO("工作组", "workGroupName", 12000));
         WORK_HOURS_CALENDAR_REPORT_LIST.add(new ExcelTitleVO("成员数量", "userCount", 4000));
@@ -310,7 +312,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
 
     private WorkGroupVO buildTotalData(List<WorkGroupVO> workGroupVOS) {
         Set<Long> userIds = new HashSet<>();
-        workGroupVOS.stream().filter(v -> ObjectUtils.isEmpty(0L)).forEach(v -> {
+        workGroupVOS.stream().forEach(v -> {
             if(!CollectionUtils.isEmpty(v.getUserIds())){
                 userIds.addAll(v.getUserIds());
             }
@@ -988,13 +990,15 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
             WorkHoursCalendarVO workHoursCalendarVO = list.get(i);
             Row row = sheetAt.createRow(startRow);
             Cell cell = row.createCell(0);
+            Cell cell1 = row.createCell(1);
             UserMessageDTO userMessageDTO = workHoursCalendarVO.getUserMessageDTO();
             if (!ObjectUtils.isEmpty(userMessageDTO)) {
-                cell.setCellValue(userMessageDTO.getName());
+                cell.setCellValue(userMessageDTO.getRealName());
+                cell1.setCellValue(Boolean.TRUE.equals(userMessageDTO.getLdap()) ? userMessageDTO.getLoginName() : userMessageDTO.getLoginName());
             }
-            Cell cell1 = row.createCell(1);
+            Cell cell2 = row.createCell(2);
             BigDecimal allEstimateTime = workHoursCalendarVO.getAllEstimateTime();
-            cell1.setCellValue(ObjectUtils.isEmpty(allEstimateTime) ? null : allEstimateTime.toString());
+            cell2.setCellValue(ObjectUtils.isEmpty(allEstimateTime) ? null : allEstimateTime.toString());
             Map<String, BigDecimal> countMap = workHoursCalendarVO.getCountMap();
             for (Map.Entry<String, Integer> entry : dateColMap.entrySet()) {
                 String key = entry.getKey();
@@ -1129,7 +1133,8 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
         workHoursExportVO.setWorkDate(workHoursLogVO.getStartDate());
         UserMessageDTO user = workHoursLogVO.getUser();
         if (!ObjectUtils.isEmpty(user)) {
-            workHoursExportVO.setUserName(user.getName());
+            workHoursExportVO.setUserName(user.getRealName());
+            workHoursExportVO.setLoginName(Boolean.TRUE.equals(user.getLdap()) ? user.getLoginName() : user.getEmail());
         }
         IssueTypeVO issueTypeVO = workHoursLogVO.getIssueTypeVO();
         if (!ObjectUtils.isEmpty(issueTypeVO)) {
