@@ -137,7 +137,7 @@ interface MenuType {
   orgId: string,
   organizationId: string,
   projectId: string,
-  type: string,
+  type: 'project'|'organization',
 }
 export interface AppStateProps {
   currentProject: CurrentProject,

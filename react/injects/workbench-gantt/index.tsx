@@ -11,7 +11,7 @@ import { warpGanttProvideProjects } from '@/routes/gantt';
 
 const WorkbenchGantt: IReactFCGanttProvideProjects = ({ projects, currentProjectId, setCurrentProjectId }) => {
   const { isInProgram, loading: programLoading } = useIsInProgram({ projectId: currentProjectId });
-  const { data: myFilter, isLoading } = useDefaultMyFilter(currentProjectId);
+  const { data: myFilter, isLoading } = useDefaultMyFilter({ projectId: currentProjectId, menuType: 'project' });
   const loading = programLoading || isLoading;
   if (projects.length === 0) {
     return <EmptyPage image={noDataPic} description="组织下无敏捷项目，请您先创建敏捷项目" />;

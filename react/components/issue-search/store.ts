@@ -132,7 +132,7 @@ class IssueSearchStore {
   }
 
   loadMyFilterList = async () => {
-    const data = this.menuType === 'project' ? await personalFilterApi.project(this.projectId || getProjectId()).loadAll() : [];
+    const data = this.menuType === 'project' ? await personalFilterApi.menu('project').project(this.projectId || getProjectId()).loadAll() : [];
     this.setMyFilters(data);
   };
 
