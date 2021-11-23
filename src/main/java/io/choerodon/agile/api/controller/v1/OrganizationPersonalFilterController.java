@@ -25,7 +25,7 @@ public class OrganizationPersonalFilterController {
     @Autowired
     private PersonalFilterService personalFilterService;
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("组织层创建我的筛选")
     @PostMapping
     public ResponseEntity<PersonalFilterVO> create(@ApiParam(value = "组织id", required = true)
@@ -37,7 +37,7 @@ public class OrganizationPersonalFilterController {
                 .orElseThrow(() -> new CommonException("error.personalFilter.create"));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("组织层修改我的筛选")
     @PutMapping(value = "/{filterId}")
     public ResponseEntity<PersonalFilterVO> update(@ApiParam(value = "组织id", required = true)
@@ -51,7 +51,7 @@ public class OrganizationPersonalFilterController {
                 .orElseThrow(() -> new CommonException("error.personalFilter.create"));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("组织层删除我的筛选")
     @DeleteMapping(value = "/{filterId}")
     public ResponseEntity<PersonalFilterVO> deleteById(@ApiParam(value = "组织id", required = true)
@@ -62,7 +62,7 @@ public class OrganizationPersonalFilterController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("组织层查询我的筛选列表")
     @GetMapping(value = "/query_all/{userId}")
     public ResponseEntity<List<PersonalFilterVO>> listByProjectId(@ApiParam(value = "组织id", required = true)
@@ -78,7 +78,7 @@ public class OrganizationPersonalFilterController {
                 .orElseThrow(() -> new CommonException("error.personalFilter.list"));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("组织层根据id查询我的筛选")
     @GetMapping(value = "/{filterId}")
     public ResponseEntity<PersonalFilterVO> queryById(@ApiParam(value = "组织id", required = true)
@@ -90,7 +90,7 @@ public class OrganizationPersonalFilterController {
                 .orElseThrow(() -> new CommonException("error.personalFilter.queryById"));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("组织层我的筛选重名校验")
     @GetMapping(value = "/check_name")
     public ResponseEntity<Boolean> checkName(@ApiParam(value = "组织id", required = true)
@@ -106,7 +106,7 @@ public class OrganizationPersonalFilterController {
                 .orElseThrow(() -> new CommonException("error.checkName.get"));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("组织层设置默认筛选")
     @PutMapping(value = "/set_default")
     public ResponseEntity<Boolean> setDefault(@ApiParam(value = "组织id", required = true)

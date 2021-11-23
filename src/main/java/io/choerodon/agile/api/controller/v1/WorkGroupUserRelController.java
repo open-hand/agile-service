@@ -84,7 +84,7 @@ public class WorkGroupUserRelController {
                 .orElseThrow(() -> new CommonException("error.work.group.user.rel.query"));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("查询按工作组筛选的成员")
     @PostMapping("/page_by_groups")
     public ResponseEntity<Page<UserDTO>> pageByGroups(@ApiParam(value = "组织Id", required = true)
