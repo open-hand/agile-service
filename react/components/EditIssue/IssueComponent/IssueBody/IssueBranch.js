@@ -34,7 +34,7 @@ const IssueBranch = observer(({
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
             <Tooltip placement="topRight" title="关联分支">
-              <Button onClick={() => openLinkBranchModal({ issueId, projectId, FonOk: () => store.refreshBranch() })}>
+              <Button onClick={() => openLinkBranchModal({ issueId, projectId, onOk: () => store.refreshBranch() })}>
                 <Icon type="add_branch icon" />
               </Button>
             </Tooltip>

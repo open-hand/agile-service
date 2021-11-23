@@ -10,7 +10,9 @@ import { DropDownProps } from 'choerodon-ui/lib/dropdown';
 import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import { observer, useComputed } from 'mobx-react-lite';
 import { toJS, runInAction, observable } from 'mobx';
-import { useCreation, usePersistFn, useWhyDidYouUpdate } from 'ahooks';
+import {
+  useCreation, usePersistFn, useWhyDidYouUpdate, useInViewport, useSafeState,
+} from 'ahooks';
 import { IFiledListItemProps, pageConfigApi } from '@/api';
 import FieldList from './FieldList';
 import ChoseFieldStore from './store';
@@ -198,17 +200,22 @@ function useClickOut(onClickOut: (e?: any) => void) {
 }
 
 const ChooseField: React.FC<Props> = (props) => {
-  const [hidden, setHidden] = useState(true);
+  const [hidden, setHidden] = useSafeState(true);
   const {
     dropDownBtnChildren = '添加筛选', wrapClassName, wrapStyle, store, choseField,
   } = props;
-  const handleClickOut = useCallback(() => {
+  const handleClickOut = usePersistFn(() => {
     setHidden(true);
-  }, []);
+  });
+  const buttonRef = useRef<HTMLDivElement>(null);
   const ref = useClickOut(handleClickOut);
+  const inViewPort = useInViewport(buttonRef);
+  useEffect(() => {
+    !inViewPort && setHidden(true);
+  }, [inViewPort, setHidden]);
   const hiddenComponent = useComputed(() => store.getFields.filter(Boolean).every((item) => !item.length), [store]);
   return (
-    <div className={wrapClassName} style={wrapStyle} hidden={hiddenComponent}>
+    <div ref={buttonRef} className={wrapClassName} style={wrapStyle} hidden={hiddenComponent}>
       <Dropdown
         visible={!hidden}
         overlay={(

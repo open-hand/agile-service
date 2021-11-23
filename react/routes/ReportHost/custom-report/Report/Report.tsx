@@ -56,13 +56,13 @@ const CustomReport: React.FC<Props> = (props) => {
   const [lost, setLost] = useState<boolean>(false);
   const [chartRes, setChartRes] = useState<null | IChartRes>(null);
   const [dimension, setDimension] = useState<IField[]>([]);
-  const [customChartList, setCustomChartList] = useState<{title: string, path: string }[]>([]);
+  const [customChartList, setCustomChartList] = useState<{ title: string, path: string }[]>([]);
   const [customFields, setCustomFields] = useState<IField[]>([]);
   const [hasGetCustomFields, setHasGetCustomFields] = useState<boolean>(false);
   const [expand, setExpand] = useState<boolean>(true);
 
   useEffect(() => {
-    pageConfigApi.load().then((res: { content: IField[]}) => {
+    pageConfigApi.load().then((res: { content: IField[] }) => {
       setDimension(res.content.filter((item) => ['single', 'checkbox', 'multiple', 'radio', 'member', 'multiMember'].includes(item.fieldType) && !(item.contexts.length === 1 && item.contexts[0] === 'backlog')));
     });
   }, []);
@@ -180,7 +180,7 @@ const CustomReport: React.FC<Props> = (props) => {
     getCustomFields();
   }, []);
 
-  const fields = useMemo(() => [...customFields, ...getSystemFields()], [customFields]);
+  const fields = useMemo(() => [...customFields, ...getSystemFields().filter((field) => !field.archive && !field.noDisplay)], [customFields]);
 
   const [choseDataProps, choseComponentProps] = useChoseField({
     fields,
@@ -193,7 +193,7 @@ const CustomReport: React.FC<Props> = (props) => {
     value: choseFieldStore.getAllChosenField,
     events: {
       afterDelete: (item) => {
-        choseFieldStore.delChosenFields(item.id || item.code);
+        choseFieldStore.delChosenFields(item.code);
       },
     },
   });
@@ -228,7 +228,7 @@ const CustomReport: React.FC<Props> = (props) => {
           const field = fields.find((item: IField) => item.code === key || item.id === key);
           if (field && value) {
             if ((Array.isArray(value) && value.length) || !Array.isArray(value)) {
-              choseFieldStore.addChosenFields(key, field, value);
+              choseFieldStore.addChosenFields(field.code, field, value);
             }
           }
         }
@@ -410,24 +410,24 @@ const CustomReport: React.FC<Props> = (props) => {
                         ) : (
                           <>
                             {
-                            (data || []).length > 0 ? (
-                              <>
-                                <Chart {...chartProps} key={`${chartType}-${statisticsType}-${analysisField}-${comparedField}`} />
-                                <Table {...chartProps} analysisField={analysisField} dimension={dimension} />
-                              </>
-                            ) : (
-                              <>
-                                {
-                                  data !== null && (
-                                  <EmptyPage
-                                    image={emptyPic}
-                                    description="当前暂无数据"
-                                  />
-                                  )
-                                }
-                              </>
-                            )
-                          }
+                              (data || []).length > 0 ? (
+                                <>
+                                  <Chart {...chartProps} key={`${chartType}-${statisticsType}-${analysisField}-${comparedField}`} />
+                                  <Table {...chartProps} analysisField={analysisField} dimension={dimension} />
+                                </>
+                              ) : (
+                                <>
+                                  {
+                                    data !== null && (
+                                      <EmptyPage
+                                        image={emptyPic}
+                                        description="当前暂无数据"
+                                      />
+                                    )
+                                  }
+                                </>
+                              )
+                            }
                           </>
                         )
                       }
@@ -437,34 +437,34 @@ const CustomReport: React.FC<Props> = (props) => {
               </div>
               {
                 mode !== 'read' && (
-                <div
-                  className={styles.right}
-                  style={{
-                    width: expand ? 320 : 'unset',
-                  }}
-                >
-                  <div className={styles.expand_btn_container}>
-                    <Button
-                      icon={expand ? 'last_page' : 'first_page'}
-                      className={styles.expand_btn}
-                      onClick={handleExpandChange}
-                    />
+                  <div
+                    className={styles.right}
+                    style={{
+                      width: expand ? 320 : 'unset',
+                    }}
+                  >
+                    <div className={styles.expand_btn_container}>
+                      <Button
+                        icon={expand ? 'last_page' : 'first_page'}
+                        className={styles.expand_btn}
+                        onClick={handleExpandChange}
+                      />
+                    </div>
+                    {
+                      expand && <Condition filterComponentProps={filterComponentProps} choseComponentProps={choseComponentProps} reportDs={reportDs} dimension={dimension} />
+                    }
                   </div>
-                  {
-                    expand && <Condition filterComponentProps={filterComponentProps} choseComponentProps={choseComponentProps} reportDs={reportDs} dimension={dimension} />
-                  }
-                </div>
                 )
               }
             </div>
             {
-            mode !== 'read' && (
-            <div className={styles.footer}>
-              <Button color={'primary' as ButtonColor} onClick={handleSave}>保存</Button>
-              <Button onClick={handleCancel}>取消</Button>
-            </div>
-            )
-          }
+              mode !== 'read' && (
+                <div className={styles.footer}>
+                  <Button color={'primary' as ButtonColor} onClick={handleSave}>保存</Button>
+                  <Button onClick={handleCancel}>取消</Button>
+                </div>
+              )
+            }
           </div>
         </LoadingProvider>
       </Content>

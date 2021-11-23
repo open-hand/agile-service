@@ -66,6 +66,10 @@ class ChoseFieldStore {
     return this.fields;
   }
 
+  @computed get fieldMaps() {
+    return observable.map([...this.fields.get('system')!, ...this.fields.get('custom')!].map((field) => [field.code, field]));
+  }
+
   @computed get getFields() {
     if (this.searchVal && this.searchVal !== '') {
       return [this.fields.get('system')!.filter(this.filterFieldBySearchVal), this.fields.get('custom')!.filter(this.filterFieldBySearchVal)];
@@ -86,8 +90,15 @@ class ChoseFieldStore {
     this.currentOptionStatus = nextOptionStatus;
   }
 
+  /**
+   * @deprecated 将在后续迁移到新方法
+   * @param key
+   * @param data
+   * @param value
+   */
   @action('增添选择字段') addChosenFields(key: string, data: IChosenFieldField, value?: any) {
-    this.chosenFields.set(key, { ...data, value: value || undefined });
+    const field = this.fieldMaps.get(data.code || key) || data;
+    this.chosenFields.set(key, { ...field, value: value || undefined });
     if (this.addFieldCallback) {
       this.addFieldCallback(key);
     }

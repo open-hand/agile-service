@@ -174,6 +174,12 @@ class BoardApi extends Api<BoardApi> {
       },
       data,
       noPrompt: true,
+    }).then((res: any) => {
+      if (typeof (res) === 'object') {
+        const { errorMsg } = res;
+        errorMsg && Choerodon.prompt(errorMsg, 'error');
+      }
+      return res;
     }).catch((err:any) => {
       const { code } = err || {};
       if (code === 'error.stateMachine.executeTransform') {

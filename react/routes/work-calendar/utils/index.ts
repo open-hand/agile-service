@@ -21,7 +21,7 @@ function getInterval(estimatedStartTime: string | undefined, estimatedEndTime: s
   if (estimatedStartTime && estimatedEndTime) {
     const endTime = moment(estimatedEndTime);
     const startTime = moment(estimatedStartTime);
-    return endTime.diff(startTime, 'hours');
+    return endTime.diff(startTime, 'hours', true);
   }
   return 0;
 }

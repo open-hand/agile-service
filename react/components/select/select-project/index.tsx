@@ -5,7 +5,7 @@ import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
 import { useCreation, usePersistFn } from 'ahooks';
 import classNames from 'classnames';
-import { castArray } from 'lodash';
+import { uniqBy, castArray } from 'lodash';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { projectApi, ganttApi } from '@/api';
 import { ICategoryCode } from '@/hooks/useCategoryCodes';
@@ -15,11 +15,13 @@ import { styles } from '../select-pi/utils';
 
 const { AppState } = stores;
 
-export interface SelectTeamProps extends Partial<SelectProps> {
+export interface SelectTeamProps extends Omit<Partial<SelectProps>, 'optionRenderer'> {
+  optionRenderer?: SelectConfig<any>['optionRenderer']
   projectDataRef?: React.RefObject<Array<any>>,
   afterLoad?: (projects: any[]) => void
   /** 只查询组织下敏捷项目 */
   queryAgile?: boolean
+  extraOptions?: Array<{ id: string, name: string }>
   level?: 'workbench'
   defaultSelectedIds?: string[]
   flat?: boolean
@@ -29,7 +31,7 @@ export interface SelectTeamProps extends Partial<SelectProps> {
 }
 
 const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
-  userId, projectDataRef = { current: null }, afterLoad, defaultSelectedIds: propsDefaultSelectedIds, flat, category, optionData, level, queryAgile, popupCls, ...otherProps
+  userId, projectDataRef = { current: null }, afterLoad, defaultSelectedIds: propsDefaultSelectedIds, level, flat, extraOptions, category, optionData, queryAgile, popupCls, optionRenderer, ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Function>();
   afterLoadRef.current = afterLoad;
@@ -53,6 +55,7 @@ const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
           filterProjectIds: defaultSelectedIds,
         });
       }
+
       return queryAgile ? ganttApi.loadProjects() : projectApi.loadProjectByUser({
         userId: userId ?? AppState?.userInfo?.id,
         filter,
@@ -61,10 +64,11 @@ const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
         category,
       });
     },
+    optionRenderer,
     // @ts-ignore
     afterLoad: afterLoadRef.current,
     middleWare: (projects) => {
-      const newProjects = projects.map((item) => ({ ...item, id: String(item.id) }));
+      const newProjects = uniqBy([...(extraOptions || []), ...projects].map((item) => ({ ...item, id: String(item.id) })), 'id');
       // @ts-ignore
       // eslint-disable-next-line
       projectDataRef.current = newProjects;

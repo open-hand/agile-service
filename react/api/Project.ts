@@ -54,6 +54,26 @@ class ProjectApi extends Api<ProjectApi> {
       },
     });
   }
+
+  /**
+   * 查询组织下用户有权限的项目 （创建分支/关联分支处）
+   *
+   */
+  loadFromBranch({
+    currentProjectId, page, size, param, userId,
+  }: { currentProjectId?: string, page?: number, size?: number, param?: string, userId?: string }) {
+    return axios({
+      url: `iam/choerodon/v1/organizations/${getOrganizationId()}/users/${userId}/page_owned_projects`,
+      method: 'get',
+      params: {
+        current_project_id: currentProjectId,
+        page: page || 1,
+        size: size || 50,
+        param,
+
+      },
+    });
+  }
 }
 
 const projectApi = new ProjectApi();

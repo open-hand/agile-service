@@ -82,12 +82,26 @@ class DevOpsApi extends Api<DevOpsApi> {
   /**
    * 加载已经启用的服务列表
    */
-  loadActiveService(checkMember?:boolean) {
+  loadActiveService(checkMember?: boolean) {
     return this.request({
       url: `${this.prefix}/app_service/list_by_active`,
       method: 'get',
       params: {
         checkMember,
+      },
+    });
+  }
+
+  /**
+   * 加载已经启用的服务列表
+   */
+  loadPageActiveService(params: { targetProjectId: string, param?: string, page?: number, size?: number }) {
+    return this.request({
+      url: `${this.prefix}/app_service/page_by_active`,
+      method: 'get',
+      params: {
+        ...params,
+        target_project_id: params.targetProjectId,
       },
     });
   }

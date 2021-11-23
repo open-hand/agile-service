@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import {
-  Modal, Form, Select, DataSet,
+  Modal, Form, DataSet,
 } from 'choerodon-ui/pro';
 import { FieldType, FieldIgnore } from 'choerodon-ui/pro/lib/data-set/enum';
 import { devOpsApi } from '@/api';
@@ -11,8 +11,9 @@ import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { observer } from 'mobx-react-lite';
 import SelectAppService from '../select/select-app-service';
 import SelectBranch from '../select/select-branch-with-tag';
+import { getProjectId } from '@/utils/common';
+import SelectBranchProject from '../select/select-branch-project';
 
-const { Option } = Select;
 interface ILinkBranchModalProps {
   issueId: string,
   onOk?: Function
@@ -25,16 +26,10 @@ const LinkBranch: React.FC<{ modal?: IModalProps } & ILinkBranchModalProps> = ob
     autoCreate: true,
     fields: [
       {
-        name: 'source', label: '服务来源', type: 'string' as FieldType, defaultValue: 'self', ignore: 'always' as FieldIgnore, required: true,
+        name: 'projectId', label: '服务来源', type: 'string' as FieldType, defaultValue: projectId || getProjectId(), required: true,
       },
       {
-        name: 'app', label: '应用服务', type: 'object' as FieldType, ignore: 'always' as FieldIgnore, required: true,
-      },
-      {
-        name: 'projectId', type: 'string' as FieldType, computedProps: { bind: ({ record }: any) => (record.get('source') === 'self' ? 'app.projectId' : 'app.value.projectId') },
-      },
-      {
-        name: 'appServiceId', type: 'string' as FieldType, required: true, dynamicProps: { bind: ({ record }: any) => (record.get('source') === 'self' ? 'app.id' : 'app.value.id') },
+        name: 'appServiceId', label: '应用服务', type: 'string' as FieldType, required: true,
       },
       {
         name: 'branch', label: '分支', type: 'object' as FieldType, ignore: 'always' as FieldIgnore, required: true,
@@ -49,33 +44,31 @@ const LinkBranch: React.FC<{ modal?: IModalProps } & ILinkBranchModalProps> = ob
     ],
     events: {
       update: ({ record, value, name }: any) => {
-        if (name === 'source') {
-          record.init('app', undefined);
+        if (name === 'projectId') {
+          record.init('appServiceId', undefined);
           record.init('branch', undefined);
-        } else if (name === 'app') {
+        } else if (name === 'appServiceId') {
           record.init('branch', undefined);
         }
       },
     },
-  }), []);
+  }), [projectId]);
   const handleSubmit = async () => {
-    const data = formDs.current?.toJSONData();
     if (!await formDs.validate()) {
       return false;
     }
+    const data = formDs.current?.toJSONData();
     await devOpsApi.project(data.projectId).linkBranch(data.appServiceId, { ...data, issueIds: [issueId] }).then(() => {
       onOk && onOk();
     });
     return true;
   };
   modal?.handleOk(handleSubmit);
+
   return (
     <Form dataSet={formDs}>
-      <Select name="source">
-        <Option value="self">本项目</Option>
-        <Option value="other">其他项目</Option>
-      </Select>
-      <SelectAppService name="app" mode={formDs.current?.get('source')} autoFocus projectId={projectId} />
+      <SelectBranchProject name="projectId" currentProjectId={projectId || getProjectId()} />
+      <SelectAppService name="appServiceId" valueField="id" mode="page" autoFocus projectId={projectId} pageTargetProjectId={formDs.current?.get('projectId') ?? projectId} />
       <SelectBranch name="branch" issueId={issueId} projectId={formDs.current?.get('projectId')} applicationId={formDs.current?.get('appServiceId')} enabledTag={false} />
     </Form>
   );

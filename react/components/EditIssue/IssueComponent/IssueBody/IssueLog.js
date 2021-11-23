@@ -80,7 +80,7 @@ const IssueLog = () => {
     <div id="data_log">
       <div className="c7n-title-wrapper">
         <div className="c7n-title-left">
-          <FormattedMessage id="issue.data_log" />
+          操作历史
         </div>
       </div>
       {renderDataLogs()}
