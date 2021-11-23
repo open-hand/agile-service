@@ -6,8 +6,8 @@ import type {
 import useMyFilters from '@/hooks/data/useMyFilters';
 import { IPersonalFilter } from '@/components/quick-search';
 
-export default function useDefaultMyFilter(projectId?: string, options?: UseQueryOptions<IPersonalFilter[]>) {
-  const res = useMyFilters({ type: 'agile', projectId }, {
+export default function useDefaultMyFilter({ projectId, menuType }: { projectId?: string, menuType?: string } = {}, options?: UseQueryOptions<IPersonalFilter[]>) {
+  const res = useMyFilters({ type: 'agile', projectId, menuType }, {
     staleTime: 0,
     ...options,
   });

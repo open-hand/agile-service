@@ -1,5 +1,4 @@
-import { axios, stores } from '@choerodon/boot';
-import { getProjectId, getOrganizationId, getIsOrganization } from '@/utils/common';
+import { stores } from '@choerodon/boot';
 import Api from './Api';
 
 export interface IFilterItem {
@@ -25,7 +24,11 @@ class PersonalFilterApi extends Api<PersonalFilterApi> {
   }
 
   get orgPrefix() {
-    return `/agile/v1/organizations/${getOrganizationId()}`;
+    return `/agile/v1/organizations/${this.orgId}`;
+  }
+
+  get isOrganization() {
+    return this.menuType === 'organization';
   }
 
   /**
@@ -37,7 +40,7 @@ class PersonalFilterApi extends Api<PersonalFilterApi> {
     // const { userInfo: { id: userId } } = AppState;
     return this.request({
       method: 'get',
-      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/personal_filter/query_all/${userId}`,
+      url: `${this.isOrganization ? this.orgPrefix : this.prefix}/personal_filter/query_all/${userId}`,
       params: {
         filterTypeCode,
       },
@@ -51,7 +54,7 @@ class PersonalFilterApi extends Api<PersonalFilterApi> {
             */
   create(data: IPersonalFilter, filterTypeCode: string = 'agile_issue') {
     return this.request({
-      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/personal_filter`,
+      url: `${this.isOrganization ? this.orgPrefix : this.prefix}/personal_filter`,
       method: 'post',
       data: {
         filterTypeCode,
@@ -67,7 +70,7 @@ class PersonalFilterApi extends Api<PersonalFilterApi> {
            */
   update(filterId: string, updateData: UPersonalFilter):Promise<any> {
     return this.request({
-      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/personal_filter/${filterId}`,
+      url: `${this.isOrganization ? this.orgPrefix : this.prefix}/personal_filter/${filterId}`,
       method: 'put',
       data: updateData,
     });
@@ -79,7 +82,7 @@ class PersonalFilterApi extends Api<PersonalFilterApi> {
     */
   delete(filterId: string) {
     return this.request({
-      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/personal_filter/${filterId}`,
+      url: `${this.isOrganization ? this.orgPrefix : this.prefix}/personal_filter/${filterId}`,
       method: 'delete',
 
     });

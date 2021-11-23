@@ -183,7 +183,7 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
       }
       setLoading(true);
       const requestArr = menuType === 'project' || true ? [
-        workCalendarApi.getWorkSetting(year),
+        workCalendarApi.menu('project').project(projectId).getWorkSetting(year),
         workCalendarApi.project(projectId).getYearCalendar(year),
         ['sprint', 'assignee'].includes(type) ? ganttApi.project(projectId).loadDimensionRank(searchFilter) : { ids: [] },
         ganttApi.project(projectId).loadByTask(searchFilter, sorted),
