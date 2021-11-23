@@ -8,7 +8,7 @@ import {
 } from 'lodash';
 import { DropDownProps } from 'choerodon-ui/lib/dropdown';
 import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
-import { observer } from 'mobx-react-lite';
+import { observer, useComputed } from 'mobx-react-lite';
 import { toJS, runInAction, observable } from 'mobx';
 import {
   useCreation, usePersistFn, useWhyDidYouUpdate, useInViewport, useSafeState,
@@ -20,6 +20,8 @@ import { IChosenFieldField, IChosenFieldFieldEvents } from './types';
 
 interface Props {
   store: ChoseFieldStore,
+  /** @default true */
+  autoHiddenWhenEmpty?: boolean
   wrapClassName?: string,
   wrapStyle?: React.CSSProperties
   choseField?: (data: IChosenFieldField | IChosenFieldField[], status: 'add' | 'del') => void,
@@ -211,8 +213,9 @@ const ChooseField: React.FC<Props> = (props) => {
   useEffect(() => {
     !inViewPort && setHidden(true);
   }, [inViewPort, setHidden]);
+  const hiddenComponent = useComputed(() => store.getFields.filter(Boolean).every((item) => !item.length), [store]);
   return (
-    <div ref={buttonRef} className={wrapClassName} style={wrapStyle}>
+    <div ref={buttonRef} className={wrapClassName} style={wrapStyle} hidden={hiddenComponent}>
       <Dropdown
         visible={!hidden}
         overlay={(
@@ -245,5 +248,8 @@ const ChooseField: React.FC<Props> = (props) => {
       </Dropdown>
     </div>
   );
+};
+ChooseField.defaultProps = {
+  autoHiddenWhenEmpty: true,
 };
 export default observer(ChooseField);
