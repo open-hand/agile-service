@@ -20,8 +20,12 @@ interface Props {
   // eslint-disable-next-line react/require-default-props
   defaultListLayoutColumns?: ListLayoutColumnVO[]
   dataSet: DataSet
+  // eslint-disable-next-line react/require-default-props
+  expandRecordId?: string
 }
-const AssigneeIssueTable: React.FC<Props> = ({ projectId, defaultListLayoutColumns, dataSet }) => {
+const AssigneeIssueTable: React.FC<Props> = ({
+  projectId, defaultListLayoutColumns, dataSet, expandRecordId,
+}) => {
   const {
     isProject, mode, startTime, endTime, isContain, issueSearchStore, tableFieldsFetched, addCustomFieldToDs,
   } = useIssueStore();
@@ -54,7 +58,7 @@ const AssigneeIssueTable: React.FC<Props> = ({ projectId, defaultListLayoutColum
           }
           return (
             !isProject ? (
-              <SimpleIssueTable dataSet={recordIssueDs} key={`${projectId || getProjectId()}-${record.get('userId')}`} />
+              <SimpleIssueTable dataSet={recordIssueDs} key={`${projectId || getProjectId()}-${record.get('userId')}`} expandRecordId={expandRecordId || record.get('userId')} />
             ) : (
               <IssueTable
                 // @ts-ignore
@@ -62,6 +66,7 @@ const AssigneeIssueTable: React.FC<Props> = ({ projectId, defaultListLayoutColum
                 defaultListLayoutColumns={defaultListLayoutColumns}
                 className={styles.assigneeModeIssueTable}
                 key={`${projectId || getProjectId()}-${record.get('userId')}`}
+                expandRecordId={record.get('userId')}
               />
             )
           );
