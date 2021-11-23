@@ -967,7 +967,11 @@ class BacklogStore {
       this.notDonePiList = notDonePiList;
       const doingPi = notDonePiList.find((pi) => pi.statusCode === 'doing');
       if (doingPi && setPiIdIf) {
+        const oldSelectedPiId = this.selectedPiId;
         this.setSelectedPiId(doingPi.id);
+        if (oldSelectedPiId && oldSelectedPiId !== doingPi.id && this.getCurrentVisible === 'feature') {
+          this.loadFeature();
+        }
       }
     }
   }
