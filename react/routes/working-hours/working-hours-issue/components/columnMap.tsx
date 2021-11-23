@@ -15,6 +15,9 @@ const renderWorkTime = ({ value }: { value: string}) => (
 
 const renderRate = ({ value }: { value: number}) => {
   const numberValue = Number(value);
+  const percentValue = numberValue * 100;
+  const toFixedNumber = percentValue.toString().split('.')[1] && percentValue.toString().split('.')[1].length > 1 ? percentValue.toFixed(2) : percentValue;
+
   return (
     <span className={classNames({
       [styles.zero]: numberValue === 0,
@@ -22,7 +25,7 @@ const renderRate = ({ value }: { value: number}) => {
       [styles.ltZero]: numberValue < 0,
     })}
     >
-      {numberValue !== 0 ? `${numberValue * 100}%` : 0}
+      {numberValue !== 0 ? `${toFixedNumber}%` : 0}
     </span>
   );
 };

@@ -47,9 +47,9 @@ const ProjectIssueTable: React.FC<Props> = () => {
             recordIssueDs.query();
           }
           return mode === 'project' ? (
-            <SimpleIssueTable dataSet={recordIssueDs} key={record.get('projectId')} />
+            <SimpleIssueTable dataSet={recordIssueDs} key={record.get('projectId')} expandRecordId={record.get('projectId')} />
           ) : (
-            <AssigneeIssueTable dataSet={recordIssueDs} projectId={record.get('projectId')} key={record.get('projectId')} />
+            <AssigneeIssueTable dataSet={recordIssueDs} projectId={record.get('projectId')} key={record.get('projectId')} expandRecordId={record.get('projectId')} />
           );
         }}
         pagination={!(dataSet.totalCount < 10) as any}

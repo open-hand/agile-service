@@ -15,15 +15,16 @@ const { Column } = Table;
 
 interface Props {
   dataSet: DataSet
+  expandRecordId: string
 }
-const SimpleIssueTable: React.FC<Props> = ({ dataSet }) => {
+const SimpleIssueTable: React.FC<Props> = ({ dataSet, expandRecordId }) => {
   const [issueDetailProps] = useDetail();
   const {
     onCloseDetail, mode,
   } = useIssueStore();
-  const detailCallback = useCallback((expandRecordId) => {
+  const detailCallback = useCallback(() => {
     onCloseDetail(expandRecordId);
-  }, [onCloseDetail]);
+  }, [expandRecordId, onCloseDetail]);
   const onSummaryClick = useCallback((record) => {
     issueDetailProps?.open({
       path: 'issue',
@@ -33,8 +34,8 @@ const SimpleIssueTable: React.FC<Props> = ({ dataSet }) => {
         applyType: 'agile',
       },
       events: {
-        delete: () => detailCallback(record.get('projectId')),
-        close: () => detailCallback(record.get('projectId')),
+        delete: detailCallback,
+        close: detailCallback,
         update: () => {},
       },
     });

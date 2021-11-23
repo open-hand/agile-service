@@ -398,6 +398,8 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     dataIndex: 'deviationRate',
     render: (rowData, getDataMethod = get) => {
       const numberValue = Number(getDataMethod(rowData, 'deviationRate'));
+      const percentValue = numberValue * 100;
+      const toFixedNumber = percentValue.toString().split('.')[1] && percentValue.toString().split('.')[1].length > 1 ? percentValue.toFixed(2) : percentValue;
       return (
         <div style={{
           display: 'inline-flex',
@@ -407,7 +409,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
           ),
         }}
         >
-          {`${numberValue !== 0 ? `${numberValue * 100}%` : 0}`}
+          {`${numberValue !== 0 ? `${toFixedNumber}%` : 0}`}
         </div>
       );
     },

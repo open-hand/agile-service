@@ -11,19 +11,19 @@ import DetailContainer, { useDetail } from '@/components/detail-container';
 import { useIssueStore } from '../../stores';
 
 const WorkingHoursIssueTable = ({
-  dataSet, defaultListLayoutColumns, handleColumnResize, ...otherProps
+  dataSet, defaultListLayoutColumns, handleColumnResize, expandRecordId, ...otherProps
 }) => {
   const [issueDetailProps] = useDetail();
   const {
     tableFields: fields, onCloseDetail, mode, onCloseDetailTableQuery,
   } = useIssueStore();
-  const detailCallback = useCallback((expandRecordId) => {
+  const detailCallback = useCallback(() => {
     if (mode === 'issue') {
       onCloseDetailTableQuery(dataSet);
     } else {
       onCloseDetail(expandRecordId);
     }
-  }, [dataSet, mode, onCloseDetail, onCloseDetailTableQuery]);
+  }, [dataSet, expandRecordId, mode, onCloseDetail, onCloseDetailTableQuery]);
   const onSummaryClick = useCallback((record) => {
     issueDetailProps?.open({
       path: 'issue',
@@ -33,8 +33,8 @@ const WorkingHoursIssueTable = ({
         applyType: 'agile',
       },
       events: {
-        delete: () => detailCallback(get(record, 'assigneeId')),
-        close: () => detailCallback(get(record, 'assigneeId')),
+        delete: detailCallback,
+        close: detailCallback,
         update: () => {},
       },
     });
