@@ -12,6 +12,7 @@ import {
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
 import { useComputed } from 'mobx-react-lite';
+import classNames from 'classnames';
 import { userApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import type { User } from '@/common/types';
@@ -19,6 +20,7 @@ import UserTag from '@/components/tag/user-tag';
 import Styles from './index.less';
 import { refsBindRef, wrapRequestCallback } from '../utils';
 import { useNoticeSelectUpdateSelected } from '../useNoticeSelectUpdateSelected';
+import { styles as ellipsisStyles } from '../common/utils';
 
 const toArray = (something: any) => (Array.isArray(something) ? something : [something]);
 export interface SelectUserProps extends Partial<SelectProps> {
@@ -106,9 +108,18 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     textField: 'realName',
     valueField: 'id',
     requestArgs: args,
-    onOption,
+    onOption: (optionData:any) => {
+      const optionProps = onOption ? onOption(optionData) : {};
+      return { ...optionProps, className: classNames(ellipsisStyles.option, optionProps.className) };
+    },
     request: userRequest,
-    optionRenderer: optionRenderer || ((user: User) => (user?.headerHidden ? <span>{user?.realName}</span> : <UserTag data={user as User} />)),
+    optionRenderer: optionRenderer || ((user: User) => (user?.headerHidden ? <span>{user?.realName}</span> : (
+      <UserTag
+        data={user as User}
+        style={{ maxWidth: 'unset', width: 'unset' }}
+        className={ellipsisStyles.optionWrap}
+      />
+    ))),
     renderer: optionRenderer || ((user: User) => (user?.headerHidden ? <span>{user?.realName}</span> : <UserTag data={user as User} tooltip={!flat} className={Styles.userWrap} textClassName={Styles.userText} />)),
     middleWare: (data) => {
       let newData = [];
@@ -143,6 +154,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
       clearButton={false}
       {...props}
       {...otherProps}
+      popupCls={classNames(ellipsisStyles.popup, otherProps.popupCls)}
     />
   );
 });

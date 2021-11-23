@@ -9,7 +9,7 @@ import { uniqBy, castArray } from 'lodash';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { projectApi, ganttApi } from '@/api';
 import { ICategoryCode } from '@/hooks/useCategoryCodes';
-import { styles } from '../select-pi/utils';
+import { styles } from '../common/utils';
 
 // 用于查询组织下的项目
 
