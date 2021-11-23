@@ -79,8 +79,10 @@ public class WorkGroupUserRelServiceImpl implements WorkGroupUserRelService {
 
     @Override
     public Page<WorkGroupUserRelVO> pageByQuery(Long organizationId, PageRequest pageRequest, WorkGroupUserRelParamVO workGroupUserRelParamVO) {
-        // 查询工作组的所有子级
-        List<Long> workGroupIds = workGroupService.listChildrenWorkGroup(organizationId, Collections.singletonList(workGroupUserRelParamVO.getWorkGroupId()));
+        if (ObjectUtils.isEmpty(workGroupUserRelParamVO.getWorkGroupId())) {
+            throw new CommonException("error.work.group.id.null");
+        }
+        List<Long> workGroupIds = Collections.singletonList(workGroupUserRelParamVO.getWorkGroupId());
         Set<Long> userIds = workGroupUserRelMapper.listUserIdsByWorkGroupIds(organizationId, workGroupIds);
         if (CollectionUtils.isEmpty(userIds)) {
             return new Page<>();
