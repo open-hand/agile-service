@@ -12,14 +12,17 @@ import { openExportLogModal } from '../working-hours-log/components/export-modal
 import Search from '../working-hours-log/components/LogSearch';
 import { StoreProvider, useCalendarStore } from './stores';
 import { workingHoursApi } from '@/api';
-import { getProjectId, getOrganizationId } from '@/utils/common';
+import { getProjectId, getOrganizationId, getIsOrganization } from '@/utils/common';
 import NoData from './NoData.svg';
 import styles from './CalendarIndex.less';
+import { useWorkBenchWorkingHoursContext } from '@/injects/workbench-working-hours/stores';
 
 const WorkingHoursCalendar = () => {
   const {
     loadData, exportDs, searchDs, calendarDs, loading, startTime, endTime, userIds, projectIds,
   } = useCalendarStore();
+  const { fullButtonProps } = useWorkBenchWorkingHoursContext();
+
   const handleOpenExport = useCallback(() => {
     exportDs.current?.set('userIds', userIds?.length ? toJS(userIds) : undefined);
     exportDs.current?.set('projectIds', projectIds?.length ? toJS(projectIds) : undefined);
@@ -54,6 +57,9 @@ const WorkingHoursCalendar = () => {
           display: true,
           icon: 'refresh',
           handler: refresh,
+        }, {
+          ...fullButtonProps,
+          display: getIsOrganization(),
         }]}
         />
       </Header>

@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  Page, Header, Content, Breadcrumb, HeaderButtons,
+  HeaderButtons,
 } from '@choerodon/boot';
 import { LoadingProvider } from '@choerodon/components';
+import { useMount } from 'ahooks';
+import classNames from 'classnames';
 import SelectProject from '@/components/select/select-project';
 import StatusLinkageWSHandle from '@/components/StatusLinkageWSHandle';
 import styles from './Gantt.less';
@@ -23,11 +25,13 @@ const WorkbenchGantt: React.FC = () => {
   }] = useGanttHeader({
     projectId,
     store,
-    menuType,
+    menuType: 'workbench',
   });
-  const [loading, setLoading] = useState(false);
+  useMount(() => {
+    // ganttHeaderData.fullDomRef.current = document.getElementsByClassName(styles.page)[0] as any;
+  });
   return (
-    <LoadingProvider className={styles.page}>
+    <LoadingProvider className={classNames(styles.page, { [styles.full]: ganttHeaderData.isFullScreen })}>
       <div className={styles.header}>
         <div className={styles.header_left}>
           <SelectProject

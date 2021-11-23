@@ -5,12 +5,27 @@ body.c7n-gantt-fullScreen {
     display: none;
   }
 
+  .c7n-workbench {
+    & >div:first-child {
+      display: none;
+    }
+
+    .c7n-workbench-page-wrapper-view {
+      height: 100%;
+      padding: 0;
+    }
+  }
+  
   .c7n-gantt-content .c7nagile-detail-container {
     top: 56px !important;
   }
 }
 
 .c7n-gantt-content {
+  display: flex;
+  flex-flow: column;
+  flex: 1;
+
   &-body {
     display: flex;
     flex-flow: column;
@@ -114,9 +129,11 @@ body.c7n-gantt-fullScreen {
   border: 1px solid var(--divider);
   border-bottom-left-radius: unset;
   border-bottom-right-radius: unset;
+
   main {
     border-color: var(--divider);
   }
+
   * :not(#ganttBar):not(.gantt-divider_only>hr) {
     border-color: var(--divider) !important;
     stroke: var(--divider) !important;

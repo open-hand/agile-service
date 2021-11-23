@@ -13,6 +13,7 @@ import { systemColumnsMap } from '@/components/issue-table/baseColumns';
 import ProjectTag from '@/components/tag/project-tag';
 import SelectProject from '@/components/select/select-project';
 import { LINK_URL_TO } from '@/constants/LINK_URL';
+import '@/style/index.less';
 
 interface IGanttConflictModalProps {
     assigneeName:string,
