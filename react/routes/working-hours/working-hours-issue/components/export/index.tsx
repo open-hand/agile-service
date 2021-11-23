@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal } from 'choerodon-ui/pro';
 import {
+  find,
   merge, set, uniq, unset,
 } from 'lodash';
 import { issueApi, TemplateAction, workingHoursApi } from '@/api';
@@ -16,7 +17,7 @@ interface IExportWorkHoursIssueModalProps {
   fields: IChosenFieldField[]
   chosenFields: IChosenFieldField[]
   attachSearchArgs: any
-  columns: Array<{ code: string, title: string }>
+  columns: Array<{ code: string, title: string, sortId?: string }>
   menuType?: 'project' | 'workbench'
   visibleColumns?: string[]
 }
@@ -33,9 +34,14 @@ function openExportWorkHoursIssueModal({
       exportAxios: (searchData, sort) => {
         merge(searchData, { searchArgs: attachSearchArgs });
         if (menuType === 'project') {
+          const checkCustomFieldMap = new Map(fields.map((item) => [item.code, item.id]));
+
           const { exportFieldCodes = [] } = searchData;
           (exportFieldCodes as any[]).splice(0, 0, 'typeName');
-          set(searchData, 'displayFields', uniq(exportFieldCodes).map((code: string) => ({ code })));
+          set(searchData, 'displayFields', uniq(exportFieldCodes).map((code: string) => {
+            const id = checkCustomFieldMap.get(code);
+            return { id, code: id ? undefined : code };
+          }));
           unset(searchData, 'exportFieldCodes');
         } else {
           set(searchData, 'displayFields', [
