@@ -230,7 +230,7 @@ const en_US = {
   'field.member': 'member',
   'field.default': 'defaultValue',
   'field.default.sync': 'sync defaultValue to',
-  'defaultValue.sync':'sync defaultValue',
+  'defaultValue.sync': 'sync defaultValue',
   'field.decimal': 'decimal',
   'field.urlError': 'URL error',
   'field.useCurrentDate': 'Use Current Date',
@@ -243,4 +243,4 @@ const en_US = {
   'dragList.placeholder': 'Please enter an option value',
   'dragList.placeholder.code': 'Please enter an option code',
 };
-export default en_US;
+export { en_US as AGILE_EN_US };
