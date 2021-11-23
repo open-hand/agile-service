@@ -132,6 +132,27 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
       data,
     });
   }
+
+  /**
+    * 分页搜索查询登记工作日志issue列表
+    * @param page
+    * @param size
+    * @param issueId
+    * @param content
+    */
+  loadIssuesDailyLog(page: number = 1, size: number = 20, issueId?: string, content?: string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/work_hours/query_issue`,
+      params: {
+        page,
+        size,
+        issueId,
+        content,
+        self: false,
+      },
+    });
+  }
 }
 
 const workingHoursApi = new WorkingHoursApi();

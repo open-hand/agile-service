@@ -59,7 +59,47 @@
       text-align: center;
       .body_cell_count {
         text-align: center;
+        .body_cell_countEnabled_hoverItem {
+          display: none;
+        }
+        .body_cell_countEnabled_hoverCount {
+          display: inline-block;
+        }
       }
+      .body_cell_countEnabled {
+        cursor: pointer;
+        .body_cell_countEnabled_hoverItem {
+          display: none;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          border: 1px dashed var(--primary-color);
+          height: 100%;
+          background: #EFF1FF;
+          :global {
+            .icon {
+              color: var(--primary-color);
+            }
+          }
+        }
+        &:hover {
+          .body_cell_countEnabled_hoverItem {
+            display: flex;
+          }
+          .body_cell_countEnabled_hoverCount {
+            display: none;
+          }
+        }
+      }
+      .body_cell_countClicked {
+        .body_cell_countEnabled_hoverItem {
+          display: flex;
+        }
+        .body_cell_countEnabled_hoverCount {
+          display: none;
+        }
+      }
+      
       .body_cell_issues {
         display: flex;
         flex-direction: column;
