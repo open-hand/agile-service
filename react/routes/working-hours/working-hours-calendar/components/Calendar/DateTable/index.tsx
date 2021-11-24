@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, {
-  useCallback, useMemo, useState, useEffect,
+  useCallback, useMemo, useState, useEffect, useImperativeHandle,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import originMoment, { Moment } from 'moment';
@@ -49,9 +49,10 @@ interface Props {
     width?: number,
     height?: number,
   }
+  widthPerDayRef: React.MutableRefObject<number | undefined>
 }
 
-const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
+const DateTable: React.FC<Props> = ({ dateTableWrapperSize, widthPerDayRef }) => {
   const {
     isRestDay, calendarDs, countData, setLoading, getCountData, AppState, startTime, endTime, userIds, projectIds, workGroupIds,
   } = useCalendarStore();
@@ -415,6 +416,7 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
     setLoading(false);
   }, []);
 
+  useImperativeHandle(widthPerDayRef, () => widthPerDay, [widthPerDay]);
   return (
     <div className={styles.dateTable}>
       {
