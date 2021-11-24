@@ -34,12 +34,12 @@
         <include refid="io.choerodon.agile.infra.mapper.IssueMapper.filterSqlAndAssigneeIds"/>
         <if test='searchVO.searchArgs != null'>
             <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
-                AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+                AND CONCAT_WS('-', api.project_code, ai.issue_num) LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
             </if>
         </if>
         <if test='searchVO.contents != null and searchVO.contents.size != 0'>
             <foreach collection="searchVO.contents" item="content" index="index">
-                AND (ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR ai.summary LIKE
+                AND (CONCAT_WS('-', api.project_code, ai.issue_num) LIKE CONCAT(CONCAT('%', #{content}), '%') OR ai.summary LIKE
                 CONCAT(CONCAT('%',
                 #{content}), '%'))
             </foreach>
