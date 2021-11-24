@@ -347,4 +347,6 @@ const zh_CN = {
 };
 // appendPrefixObjectKey(Common.localeCommon, commonf);
 export * from './common';
+// export * from './components';
+
 export { zh_CN as AGILE_ZH_CN };
