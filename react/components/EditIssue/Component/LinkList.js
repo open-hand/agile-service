@@ -117,11 +117,12 @@ class LinkList extends Component {
           typeCode !== 'feature' && showAssignee && issue.assigneeId ? (
             <Tooltip mouseEnterDelay={0.5} title={`经办人： ${issue.assigneeName}`}>
               <div style={{
-                marginRight: 29, display: 'flex', justifyContent: 'flex-end',
+                marginRight: 10, display: 'flex', justifyContent: 'flex-end',
               }}
               >
                 <div>
                   <UserTag
+                    showText={false}
                     tooltip={false}
                     data={{
                       id: issue.assigneeId,
