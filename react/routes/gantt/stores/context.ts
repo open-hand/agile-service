@@ -5,8 +5,10 @@ import type GanttStore from './store';
 import type { IGanttDimensionTypeValue } from '../components/gannt-select/SelectType';
 import { TableCacheRenderProps } from '@/components/table-cache';
 import { IPersonalFilter } from '@/components/quick-search';
+import { IHeaderFullScreenButtonComponentProps } from '@/hooks/useHeaderButtons/useHeaderFullScreenButton';
 
 export interface IGanttProps extends TableCacheRenderProps {
+  fullButtonProps?:IHeaderFullScreenButtonComponentProps
   isInProgram: boolean
   /** 组织层禁止编辑 */
   menuType: 'project' | 'org'
