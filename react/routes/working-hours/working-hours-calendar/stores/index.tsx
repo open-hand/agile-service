@@ -53,6 +53,7 @@ interface Context {
   userIds: undefined | string[],
   projectIds: undefined | string[],
   workGroupIds: undefined | string[],
+  projectCreationDate: string
 }
 
 function getIsRestDay(date: string | Moment, workCalendar: any) {
@@ -198,6 +199,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     userIds,
     projectIds,
     workGroupIds,
+    projectCreationDate,
   };
   return (
     <Store.Provider value={value}>
