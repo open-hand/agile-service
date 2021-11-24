@@ -620,12 +620,15 @@ public class WorkHoursServiceImpl implements WorkHoursService {
         // 统计累计工时
         List<IssueWorkHoursVO> cumulativeWorkTimes = workHoursMapper.countAssigneeWorkTime(projectIds, allIssueIds, null);
         Map<Long, IssueWorkHoursVO> cumulativeWorkTimeMap = cumulativeWorkTimes.stream().collect(Collectors.toMap(IssueWorkHoursVO::getUserId, Function.identity()));
+        //  统计原始预估工时
+        List<IssueWorkHoursVO>  estimateTimes = workHoursMapper.countAssigneeEstimateTime(projectIds, allIssueIds);
+        Map<Long, BigDecimal> estimateTimeMap = estimateTimes.stream().collect(Collectors.toMap(IssueWorkHoursVO::getUserId, IssueWorkHoursVO::getEstimateTime));
         List<IssueWorkHoursVO> issueWorkHoursVOS = new ArrayList<>();
         for (Long assigneeId : assigneeIds) {
             IssueWorkHoursVO issueWorkHoursVO = new IssueWorkHoursVO();
             issueWorkHoursVO.setUserId(assigneeId);
             issueWorkHoursVO.setUserDTO(userMap.get(assigneeId));
-            workHoursCount(assigneeId, workTimeMap, cumulativeWorkTimeMap, issueWorkHoursVO);
+            workHoursCount(assigneeId, workTimeMap, cumulativeWorkTimeMap, issueWorkHoursVO, estimateTimeMap);
             issueWorkHoursVOS.add(issueWorkHoursVO);
         }
         return PageUtil.buildPageInfoWithPageInfoList(page, issueWorkHoursVOS);
@@ -634,15 +637,15 @@ public class WorkHoursServiceImpl implements WorkHoursService {
     private void workHoursCount(Long id,
                                 Map<Long, BigDecimal> workTimeMap,
                                 Map<Long, IssueWorkHoursVO> cumulativeWorkTimeMap,
-                                IssueWorkHoursVO issueWorkHoursVO) {
+                                IssueWorkHoursVO issueWorkHoursVO,
+                                Map<Long, BigDecimal> estimateTimeMap) {
         // 计算工时
         BigDecimal workTime = workTimeMap.getOrDefault(id, BigDecimal.ZERO);
-        BigDecimal estimateTime = BigDecimal.ZERO;
+        BigDecimal estimateTime = estimateTimeMap.getOrDefault(id, BigDecimal.ZERO);
         BigDecimal cumulativeWorkTime = BigDecimal.ZERO;
         IssueWorkHoursVO issueWorkHoursAssignee = cumulativeWorkTimeMap.get(id);
         if (!ObjectUtils.isEmpty(issueWorkHoursAssignee)) {
             cumulativeWorkTime = ObjectUtils.isEmpty(issueWorkHoursAssignee.getWorkTime()) ? BigDecimal.ZERO : issueWorkHoursAssignee.getWorkTime();
-            estimateTime = ObjectUtils.isEmpty(issueWorkHoursAssignee.getEstimateTime()) ? BigDecimal.ZERO :issueWorkHoursAssignee.getEstimateTime();
         }
         // 计算偏差率
         BigDecimal deviationRate = BigDecimal.ZERO;
@@ -694,13 +697,16 @@ public class WorkHoursServiceImpl implements WorkHoursService {
         // 统计累计工时
         List<IssueWorkHoursVO> cumulativeWorkTimes = workHoursMapper.countProjectWorkTime(currentProjectIds, allIssueIds, null);
         Map<Long, IssueWorkHoursVO> cumulativeWorkTimeMap = cumulativeWorkTimes.stream().collect(Collectors.toMap(IssueWorkHoursVO::getProjectId, Function.identity()));
+        // 统计原始预估工时
+        List<IssueWorkHoursVO> estimateTimes = workHoursMapper.countProjectEstimateTime(currentProjectIds, allIssueIds);
+        Map<Long, BigDecimal> estimateTimeMap = estimateTimes.stream().collect(Collectors.toMap(IssueWorkHoursVO::getProjectId, IssueWorkHoursVO::getEstimateTime));
         List<IssueWorkHoursVO> issueWorkHoursVOS = new ArrayList<>();
         for (Long currentProjectId : currentProjectIds) {
             IssueWorkHoursVO issueWorkHoursVO = new IssueWorkHoursVO();
             issueWorkHoursVO.setProjectId(currentProjectId);
             issueWorkHoursVO.setProjectVO(projectVOMap.get(currentProjectId));
             // 计算工时
-            workHoursCount(currentProjectId, workTimeMap, cumulativeWorkTimeMap, issueWorkHoursVO);
+            workHoursCount(currentProjectId, workTimeMap, cumulativeWorkTimeMap, issueWorkHoursVO, estimateTimeMap);
             issueWorkHoursVOS.add(issueWorkHoursVO);
         }
         return PageUtil.buildPageInfoWithPageInfoList(page, issueWorkHoursVOS);
