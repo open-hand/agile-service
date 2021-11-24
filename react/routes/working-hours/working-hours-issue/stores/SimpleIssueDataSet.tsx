@@ -20,7 +20,7 @@ const SimpleIssueDataSet = ({
   cacheSelection: false,
   transport: {
     read: ({ params, data }) => ({
-      url: `/agile/v1/organizations/${organizationId}/work_hours/issue_work_hours`,
+      url: `/agile/v1/organizations/${organizationId}/work_bench/work_hours/issue_work_hours`,
       method: 'post',
       params: {
         ...params,

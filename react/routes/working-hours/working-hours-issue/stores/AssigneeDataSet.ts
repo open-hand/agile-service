@@ -16,7 +16,7 @@ const AssigneeDataSet = ({
   cacheSelection: false,
   transport: {
     read: ({ params, data }) => ({
-      url: projectId ? `/agile/v1/projects/${projectId}/work_hours/assignee_work_hours` : `/agile/v1/organizations/${organizationId}/work_hours/assignee_work_hours`,
+      url: projectId ? `/agile/v1/projects/${projectId}/work_hours/assignee_work_hours` : `/agile/v1/organizations/${organizationId}/work_bench/work_hours/assignee_work_hours`,
       method: 'post',
       params: {
         ...params,

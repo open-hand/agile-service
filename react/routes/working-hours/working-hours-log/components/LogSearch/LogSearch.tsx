@@ -76,7 +76,7 @@ const LogSearch: React.FC<{ searchDs: DataSet, showWorkGroup?: boolean }> = ({ s
         }}
         clearButton
         level={getIsOrganization() ? 'org' : 'project'}
-        request={workGroupIds?.length ? ({ page, filter, requestArgs }: { page: number, filter: string, requestArgs: { selectedUserIds?: string[]}}) => workGroupApi.loadUserByGroupIds({ workGroupIds, realName: filter, userIds: requestArgs.selectedUserIds }, {
+        request={getIsOrganization() ? ({ page, filter, requestArgs }: { page: number, filter: string, requestArgs: { selectedUserIds?: string[]}}) => workGroupApi.loadUserByGroupIds({ workGroupIds, realName: filter, userIds: requestArgs.selectedUserIds }, {
           page,
         }).then((res: any) => {
           const userList = res.content || [];

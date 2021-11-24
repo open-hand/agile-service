@@ -88,11 +88,11 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
       const yearRange = [moment(startTime).year(), moment(endTime).year()];
       if (!isNaN(yearRange[0]) && !isNaN(yearRange[1])) {
         if (yearRange[0] === yearRange[1]) {
-          workCalendarApi.getWorkSetting(yearRange[0]).then((res: any) => {
+          workCalendarApi.workBenchGetWorkSetting(yearRange[0]).then((res: any) => {
             workCalendarMap.set(yearRange[0], res);
           });
         } else {
-          Promise.all(yearRange.map((year) => workCalendarApi.getWorkSetting(year))).then((yearCalendars) => {
+          Promise.all(yearRange.map((year) => workCalendarApi.workBenchGetWorkSetting(year))).then((yearCalendars) => {
             yearRange.forEach((year, i) => {
               workCalendarMap.set(year, yearCalendars[i]);
             });
