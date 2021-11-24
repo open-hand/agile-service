@@ -4,7 +4,7 @@ import React, {
 import {
   DataSet,
 } from 'choerodon-ui/pro';
-import { injectIntl, InjectedIntl } from 'react-intl';
+import { injectIntl } from 'react-intl';
 import { observer } from 'mobx-react-lite';
 import { useCreation, usePersistFn } from 'ahooks';
 import { IIssueFilterFormProps } from '..';
@@ -12,7 +12,7 @@ import IssueFilterFormDataSet from './IssueFilterFormDataSet';
 import { initFieldIssueFilterForm } from '../utils';
 
 interface Context extends IIssueFilterFormProps {
-  intl: InjectedIntl,
+  intl: any,
   footer?: React.ReactNode,
   dataSet: DataSet
   extraRenderFields: Required<IIssueFilterFormProps>['extraRenderFields']

@@ -35,6 +35,7 @@ import hooks from './hooks';
 // import getFieldConfig from './fields';
 import getFieldConfig from '@/components/field-pro/layouts/create';
 import { insertField } from './utils';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const { AppState } = stores;
 interface CreateIssueBaseCallbackData {
@@ -211,6 +212,8 @@ const CreateIssueBase = observer(({
   extendRequiredCodes = [],
   menuType = 'project',
 }: CreateIssueBaseProps) => {
+  const formatMessage = useFormatMessage('common');
+  // formatMessage({ id: 'priority' });
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
   const currentTemplateSummary = useRef(defaultValues?.summary || '');

@@ -4,7 +4,7 @@ import { DataSet } from 'choerodon-ui/pro';
 import moment from 'moment';
 import { sortBy } from 'lodash';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { InjectedIntl } from 'react-intl';
+import type { IntlShape } from 'react-intl';
 import { useComputed, observer, useObservable } from 'mobx-react-lite';
 import { AppStateProps, IModalProps } from '@/common/types';
 import { getApplyType } from '@/utils/common';
@@ -14,7 +14,7 @@ import { IFieldPostDataProps } from '../CreateField';
 import ContextOptionsDataSet from './ContextOptionsDataSet';
 
 interface Context {
-  formatMessage: InjectedIntl['formatMessage'],
+  formatMessage: IntlShape['formatMessage'],
   AppState: AppStateProps,
   isEdit?: boolean,
   store: HookStore,
