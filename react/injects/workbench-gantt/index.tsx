@@ -5,12 +5,13 @@ import TableCache from '@/components/table-cache';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import noDataPic from '@/assets/image/NoData.svg';
 import useDefaultMyFilter from '@/hooks/useDefaultMyFilter';
-import Gantt from './stores';
+import Gantt, { StoreProvider } from './stores';
 import type { IReactFCGanttProvideProjects } from '@/routes/gantt';
 import { warpGanttProvideProjects } from '@/routes/gantt';
 
-const WorkbenchGantt: IReactFCGanttProvideProjects = ({ projects, currentProjectId, setCurrentProjectId }) => {
+const WorkbenchProjectGantt: IReactFCGanttProvideProjects = ({ projects, currentProjectId, setCurrentProjectId }) => {
   const { isInProgram, loading: programLoading } = useIsInProgram({ projectId: currentProjectId });
+
   const { data: myFilter, isLoading } = useDefaultMyFilter({ projectId: currentProjectId, menuType: 'project' });
   const loading = programLoading || isLoading;
   if (projects.length === 0) {
@@ -32,5 +33,11 @@ const WorkbenchGantt: IReactFCGanttProvideProjects = ({ projects, currentProject
     </TableCache>
   ) : null;
 };
+
+const WorkbenchGantt = (props: any) => (
+  <StoreProvider {...props}>
+    <WorkbenchProjectGantt {...props} />
+  </StoreProvider>
+);
 
 export default warpGanttProvideProjects(WorkbenchGantt, 'workbench');

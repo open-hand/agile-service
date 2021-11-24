@@ -9,6 +9,6 @@ const localeCommon = {
 const [intlPrefix, exportCommon] = localeAppendPrefixObjectKey({ intlPrefix: 'common' as const, intlObject: localeCommon });
 export { exportCommon };
 type ILocaleCommonType = {
-  [intlPrefix]: Array<keyof typeof localeCommon>[number]
+  ['agile.common']: Array<keyof typeof localeCommon>[number]
 }
 export type { ILocaleCommonType };

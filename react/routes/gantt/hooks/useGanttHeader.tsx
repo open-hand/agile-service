@@ -16,6 +16,7 @@ import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { typeOptions } from '../components/gannt-select/SelectType';
 import type { IGanttDimensionTypeValue } from '../components/gannt-select/SelectType';
 import useFullScreen from '@/common/useFullScreen';
+import { useGanttContext } from '../stores/context';
 
 interface IGanttHeaderHookConfig {
   projectId?: string
@@ -33,7 +34,7 @@ const typeValues = typeOptions.map((t) => t.value);
 
 function useGanttHeader(config: IGanttHeaderHookConfig) {
   const { projectId, store, menuType } = config;
-
+  const { fullButtonProps } = useGanttContext();
   const { sprintIds } = store;
   const [isHasConflict, setIsHasConflict] = useState(false);
   const configMaps = useCreation(() => new Map<IGanttHeaderHookConfigKey, any>(), []);
@@ -156,6 +157,7 @@ function useGanttHeader(config: IGanttHeaderHookConfig) {
         tooltipsConfig: {
           title: isFullScreen ? '退出全屏' : '全屏',
         },
+        ...fullButtonProps,
       },
       refresh: {
         icon: 'refresh',

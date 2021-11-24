@@ -3,9 +3,9 @@ import { BasicTarget } from 'ahooks/lib/utils/dom';
 import useFullScreen from '@/common/useFullScreen';
 
 interface IHeaderFullScreenButtonHookConfig {
-    /** 附加隐藏相关样式 来进行局部全屏，避免依靠在body下的弹窗无法使用 */
-    appendCustomClassName?: string
-    fullDom?: BasicTarget
+  /** 附加隐藏相关样式 来进行局部全屏，避免依靠在body下的弹窗无法使用 */
+  appendCustomClassName?: string
+  fullDom?: BasicTarget
 }
 function useHeaderFullScreenButton<TD extends HTMLElement = any>(config?: IHeaderFullScreenButtonHookConfig) {
   const fullDomRef = useRef<TD>(null);
@@ -27,4 +27,6 @@ function useHeaderFullScreenButton<TD extends HTMLElement = any>(config?: IHeade
     isFullScreen,
   }, componentProps] as const;
 }
+type IHeaderFullScreenButtonComponentProps = ReturnType<typeof useHeaderFullScreenButton>[1]
+export type { IHeaderFullScreenButtonComponentProps };
 export default useHeaderFullScreenButton;
