@@ -314,8 +314,8 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
                       })}
                       style={{
                         background: cellColor,
-                        height: countHeight - 0.5,
-                        lineHeight: `${countHeight - 0.5}px`,
+                        height: countHeight - 1,
+                        lineHeight: `${countHeight - 1}px`,
                         color: date.isRestDay ? 'rgba(15,19,88,0.45)' : 'var(--text-color)',
                       }}
                       role="none"

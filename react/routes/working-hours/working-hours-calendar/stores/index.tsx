@@ -134,10 +134,6 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
   }, [loadData]);
 
   useEffect(() => {
-
-  }, []);
-
-  useEffect(() => {
     const getCacheFilters = async () => {
       const res = await personalFilterApi.loadAll(AppState.userInfo.id, 'agile_work_hours');
       setCacheFilters(res?.length && res[0]);
