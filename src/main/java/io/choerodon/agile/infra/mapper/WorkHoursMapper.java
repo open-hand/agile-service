@@ -43,6 +43,10 @@ public interface WorkHoursMapper {
 
     List<IssueWorkHoursVO> countProjectWorkTime(@Param("projectIds") List<Long> projectIds, @Param("allIssueIds") List<Long> allIssueIds, @Param("searchVO") SearchVO searchVO);
 
+    List<IssueWorkHoursVO> countProjectEstimateTime(@Param("projectIds") List<Long> projectIds, @Param("allIssueIds") List<Long> allIssueIds);
+
+    List<IssueWorkHoursVO> countAssigneeEstimateTime(@Param("projectIds") List<Long> projectIds, @Param("allIssueIds") List<Long> allIssueIds);
+
     List<Long> queryIds(@Param("projectIds") List<Long> projectIds, @Param("issueIds") List<Long> issueIds, @Param("levelType") String levelType);
 
     List<IssueWorkHoursVO> queryProjectAssigneeIds(@Param("projectIds") List<Long> projects, @Param("issueIds") List<Long> issueIds);

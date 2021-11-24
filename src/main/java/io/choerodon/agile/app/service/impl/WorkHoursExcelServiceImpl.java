@@ -679,6 +679,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
                 ProjectVO projectVO = issueWorkHoursVO.getProjectVO();
                 exportIssuesVO.setTypeName(buildProjectName(projectVO));
                 exportIssuesVO.setWorkTime(issueWorkHoursVO.getWorkTime());
+                exportIssuesVO.setEstimateTime(issueWorkHoursVO.getEstimateTime());
                 exportIssuesVO.setMergeColumn(true);
                 exportIssuesVO.setCumulativeWorkTime(issueWorkHoursVO.getCumulativeWorkTime());
                 exportIssuesVO.setDeviationRate(transformBigDecimal(issueWorkHoursVO.getDeviationRate()));
@@ -693,6 +694,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
         exportIssuesVO.setTypeName(typeName);
         exportIssuesVO.setWorkTime(issueWorkHoursVO.getWorkTime());
         exportIssuesVO.setMergeColumn(true);
+        exportIssuesVO.setEstimateTime(issueWorkHoursVO.getEstimateTime());
         exportIssuesVO.setCumulativeWorkTime(issueWorkHoursVO.getCumulativeWorkTime());
         exportIssuesVO.setDeviationRate(transformBigDecimal(issueWorkHoursVO.getDeviationRate()));
         return exportIssuesVO;
@@ -729,6 +731,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
                  exportIssuesVO.setMergeColumn(true);
                  exportIssuesVO.setCumulativeWorkTime(issueWorkHoursVO.getCumulativeWorkTime());
                  exportIssuesVO.setDeviationRate(transformBigDecimal(issueWorkHoursVO.getDeviationRate()));
+                 exportIssuesVO.setEstimateTime(issueWorkHoursVO.getEstimateTime());
                  exportIssuesVOS.add(exportIssuesVO);
                  exportIssuesVOS.addAll(assigneeMap.getOrDefault(issueWorkHoursVO.getUserId(), new ArrayList<>()));
             }
