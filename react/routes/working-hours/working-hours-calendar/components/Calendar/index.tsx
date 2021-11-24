@@ -10,8 +10,8 @@ import { extendMoment } from 'moment-range';
 import DateTable from './DateTable';
 import styles from './index.less';
 import { useCalendarStore } from '../../stores';
-import { formatEndDate, formatStartDate } from '../../stores/CalendarSearchDataSet';
 import { getIsOrganization } from '@/utils/common';
+import { formatEndDate, formatStartDate } from '@/routes/working-hours/utils';
 // @ts-ignore
 const moment = extendMoment(Moment);
 

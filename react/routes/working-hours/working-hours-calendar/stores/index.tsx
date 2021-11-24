@@ -8,8 +8,9 @@ import { observer } from 'mobx-react-lite';
 import moment, { Moment } from 'moment';
 import { toJS } from 'mobx';
 import { debounce } from 'lodash';
+import { useDebounceFn } from 'ahooks';
 import { AppStateProps, User } from '@/common/types';
-import CalendarSearchDataSet, { formatEndDate, formatStartDate } from './CalendarSearchDataSet';
+import CalendarSearchDataSet from './CalendarSearchDataSet';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { getIsOrganization } from '@/utils/common';
 import LogExportDataSet from '../../working-hours-log/stores/LogExportDataSet';
@@ -19,6 +20,7 @@ import {
 } from '@/api';
 import isHoliday from '@/utils/holiday';
 import CalendarDataSet from './CalendarDataSet';
+import { formatEndDate, formatStartDate } from '../../utils';
 
 const Store = createContext({} as Context);
 
@@ -102,8 +104,12 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     }
   }, [workCalendarMap, startTime, endTime]);
 
+  const { run: debounceGetWorkCalendar } = useDebounceFn(getWorkCalendar, {
+    wait: 600,
+  });
+
   useEffect(() => {
-    getWorkCalendar();
+    debounceGetWorkCalendar();
   }, [getWorkCalendar]);
 
   const getCountData = useCallback((data: IWorkingHoursData) => {
@@ -130,8 +136,12 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     }
   }, [calendarDs, getCountData, startTime, endTime, userIds, projectIds, workGroupIds, filterLoaded]);
 
+  const { run: debounceLoadData } = useDebounceFn(loadData, {
+    wait: 600,
+  });
+
   useEffect(() => {
-    loadData();
+    debounceLoadData();
   }, [loadData]);
 
   useEffect(() => {
