@@ -72,6 +72,9 @@ public class WorkBenchController {
     @Autowired
     private BaseFeignClient baseFeignClient;
 
+    @Autowired
+    private ExcelService excelService;
+
     @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("查询工作台个人代办事项")
     @PostMapping("/personal/backlog_issues")
@@ -392,6 +395,17 @@ public class WorkBenchController {
                                                                              @RequestParam(required = false) String param,
                                                                              @RequestBody @Encrypt List<Long> notSelectUserIds) {
         return baseFeignClient.pagingQueryUsersOnOrganizationAgile(organizationId, pageRequest.getPage(), pageRequest.getSize(), userId, email, param, notSelectUserIds);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
+    @ApiOperation("查询最近的上传/下载记录")
+    @GetMapping(value = "/excel/latest")
+    public ResponseEntity<FileOperationHistoryVO> queryLatestRecode(@ApiParam(value = "组织id", required = true)
+                                                                    @PathVariable(name = "organization_id") Long organizationId,
+                                                                    @RequestParam String action) {
+        return Optional.ofNullable(excelService.queryOrgLatestRecode(organizationId, action))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.ImportHistoryRecode.get"));
     }
 
 }
