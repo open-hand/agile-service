@@ -1,4 +1,5 @@
 /* eslint-disable camelcase */
+
 const zh_CN = {
   save: '保存',
   cancel: '取消',
@@ -344,4 +345,6 @@ const zh_CN = {
   'report.code-quality.nclocs': '代码行',
   'report.code-quality.duplicatedLines': '重复行',
 };
+// appendPrefixObjectKey(Common.localeCommon, commonf);
+export * from './common';
 export { zh_CN as AGILE_ZH_CN };

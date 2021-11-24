@@ -1,7 +1,7 @@
 import React, {
   createContext, useContext, useMemo,
 } from 'react';
-import { injectIntl, InjectedIntl } from 'react-intl';
+import { injectIntl } from 'react-intl';
 import { DataSet } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { getMenuType } from '@/utils/common';
@@ -17,7 +17,7 @@ interface Context {
   isInProgram: boolean,
   disabled: boolean,
   isProject: boolean,
-  intl: InjectedIntl,
+  intl: any,
   prefixCls: 'c7n-agile-page-config-page-template',
 }
 

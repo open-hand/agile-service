@@ -1,6 +1,6 @@
 import React, { createContext, useMemo, useContext } from 'react';
 import { inject } from 'mobx-react';
-import { injectIntl, InjectedIntl } from 'react-intl';
+import { injectIntl } from 'react-intl';
 import { DataSet } from 'choerodon-ui/pro';
 import { usePageConfigContext } from '../../stores';
 import SchemeTableDataSet from './SchemeTableDataSet';
@@ -8,7 +8,7 @@ import SchemeTableDataSet from './SchemeTableDataSet';
 interface Context {
   prefixCls: 'issue-object-scheme',
   intlPrefix: 'issue-object-scheme',
-  intl: InjectedIntl,
+  intl: any,
   schemeTableDataSet: DataSet,
   schemeCode: string,
 }
