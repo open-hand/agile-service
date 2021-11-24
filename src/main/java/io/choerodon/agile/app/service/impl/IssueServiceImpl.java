@@ -622,6 +622,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 Set<Long> childrenIds = new HashSet<>();
                 if (isTreeView) {
                     List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(issueIds, new HashSet<>(Arrays.asList(projectId)), searchVO, searchSql, searchVO.getAssigneeFilterIds(), null);
+                    if (CollectionUtils.isEmpty(childIssues)){
+                        childrenIds.add(0L);
+                    }
                     childrenIds.addAll(childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet()));
                 }
                 List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds, false, isTreeView);
