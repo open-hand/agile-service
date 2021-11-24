@@ -212,8 +212,9 @@ const CreateIssueBase = observer(({
   extendRequiredCodes = [],
   menuType = 'project',
 }: CreateIssueBaseProps) => {
-  const formatMessage = useFormatMessage('common');
-  // formatMessage({ id: 'priority' });
+  const formatMessage = useFormatMessage('agile.common');
+  // formatMessage({}
+  // console.log('formatMessage', formatMessage({ id: 'field' }));
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
   const currentTemplateSummary = useRef(defaultValues?.summary || '');
