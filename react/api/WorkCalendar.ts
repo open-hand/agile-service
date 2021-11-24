@@ -59,6 +59,20 @@ class WorkCalendarApi extends Api<WorkCalendarApi> {
   }
 
   /**
+ * 获取冲刺有关于组织层时区设置
+ * @param {*} year
+ */
+  workBenchGetWorkSetting(year: number) {
+    return this.request({
+      method: 'get',
+      url: `/agile/v1/organizations/${this.orgId}/work_bench/time_zone_work_calendars/detail`,
+      params: {
+        year,
+      },
+    });
+  }
+
+  /**
    * 创建工作日历
    * @param sprintId
    * @param data

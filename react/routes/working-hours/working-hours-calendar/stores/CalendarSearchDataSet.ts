@@ -96,7 +96,7 @@ const LogSearchDataSet = ({ projectCreationDate, cacheFiltersObj }: { projectCre
       parentField: 'parentId',
       transport: {
         read: () => ({
-          url: `/agile/v1/organizations/${getOrganizationId()}/work_group/query_tree`,
+          url: `/agile/v1/organizations/${getOrganizationId()}/work_bench/work_group/query_tree`,
           method: 'get',
           transformResponse: (res) => {
             try {
