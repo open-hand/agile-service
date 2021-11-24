@@ -1,66 +1,59 @@
-import { DataSet } from 'choerodon-ui/pro';
 import moment, { Moment } from 'moment';
-import { debounce, includes } from 'lodash';
+import { debounce } from 'lodash';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { getIsOrganization } from '@/utils/common';
-
-export const formatStartDate = (date: string | Moment, format = false) => {
-  if (!format) {
-    return moment(date).startOf('day');
-  }
-  return moment(date).startOf('day').format('YYYY-MM-DD HH:mm:ss');
-};
-
-export const formatEndDate = (date: string | Moment, format = false) => {
-  if (!format) {
-    return moment(date).endOf('day');
-  }
-  return moment(date).endOf('day').format('YYYY-MM-DD HH:mm:ss');
-};
+import { formatEndDate, formatStartDate } from '../../utils';
 
 const searchDsUpdate = ({
   // @ts-ignore
-  name, value,
-}, currentProject: any) => {
+  name, value, record,
+}) => {
   if (name === 'startTime') {
-    const adjustedStartDate = getIsOrganization() ? formatStartDate(moment().subtract(6, 'days'), true) : formatStartDate(moment().subtract(6, 'days').isBefore(moment(currentProject?.creationDate)) ? moment(currentProject?.creationDate) : moment().subtract(6, 'days'), true);
     if (value) {
-      const formateStartDate = formatStartDate(value, true) || adjustedStartDate;
+      const formateStartDate = formatStartDate(value, true);
       localPageCacheStore.setItem('workingHours-issue-startTime', formateStartDate);
-    } else {
-      localPageCacheStore.setItem('workingHours-issue-startTime', adjustedStartDate);
+
+      const endTime = record.get('endTime');
+      if (moment(endTime).endOf('day').diff(value, 'days') > 31) {
+        const newEndTime = moment(value).add(31, 'days');
+        record.set('endTime', newEndTime);
+        localPageCacheStore.setItem('workingHours-issue-endTime', newEndTime);
+        return;
+      }
     }
   }
 
   if (name === 'endTime') {
     if (value) {
-      const formateEndDate = formatEndDate(value, true) || formatEndDate(moment(), true);
+      const formateEndDate = formatEndDate(value, true);
       localPageCacheStore.setItem('workingHours-issue-endTime', formateEndDate);
-    } else {
-      localPageCacheStore.setItem('workingHours-issue-endTime', formatEndDate(moment(), true));
+
+      const startTime = record.get('startTime');
+      if (moment(value).endOf('day').diff(startTime, 'days') > 31) {
+        const newStartTime = moment(value).subtract(31, 'days');
+        record.set('startTime', newStartTime);
+        localPageCacheStore.setItem('workingHours-issue-startTime', newStartTime);
+      }
     }
   }
 };
 
-const DateSearchDataSet = ({ currentProject }: { currentProject: any}) => ({
+const DateSearchDataSet = ({ projectCreationDate }: { projectCreationDate: string}) => ({
   autoCreate: true,
   autoQuery: false,
   fields: [{
     name: 'startTime',
     required: true,
+    min: getIsOrganization() ? undefined : formatStartDate(projectCreationDate),
     dynamicProps: {
       max: ({ record }: { record: Record}) => moment(record.get('endTime')).startOf('day'),
-      // eslint-disable-next-line no-nested-ternary
-      min: ({ record }: { record: Record }) => (getIsOrganization() ? formatStartDate(moment(record?.get('endTime')).subtract(31, 'days')) : (
-        moment(record?.get('endTime')).subtract(31, 'days').isAfter(moment(currentProject?.creationDate))) ? (formatStartDate(moment(record?.get('endTime'))) as Moment).subtract(31, 'days') : moment(currentProject?.creationDate).startOf('day')
-      ),
     },
   }, {
     name: 'endTime',
     required: true,
+    max: moment().endOf('day'),
     dynamicProps: {
-      max: ({ record }: { record: Record}) => (moment(record?.get('startTime')).add(31, 'days').isBefore(moment()) ? (formatStartDate(moment(record?.get('startTime'))) as Moment).add(31, 'days').endOf('day') : moment().endOf('day')),
       min: ({ record }: { record: Record }) => moment(record.get('startTime')).startOf('day'),
     },
   }],
@@ -68,13 +61,13 @@ const DateSearchDataSet = ({ currentProject }: { currentProject: any}) => ({
     endTime: localPageCacheStore.getItem('workingHours-issue-endTime') ? moment(localPageCacheStore.getItem('workingHours-issue-endTime')) : formatEndDate(moment()),
     // eslint-disable-next-line no-nested-ternary
     startTime: localPageCacheStore.getItem('workingHours-issue-startTime') ? moment(localPageCacheStore.getItem('workingHours-issue-startTime')) : formatStartDate(getIsOrganization() ? moment().subtract(6, 'days') : (
-      moment().subtract(6, 'days').isBefore(moment(currentProject?.creationDate)) ? moment(currentProject?.creationDate) : moment().subtract(6, 'days')
+      moment().subtract(6, 'days').isBefore(moment(projectCreationDate)) ? moment(projectCreationDate) : moment().subtract(6, 'days')
     )),
     userIds: localPageCacheStore.getItem('workingHours-issue-userIds'),
   }],
   events: {
     update: debounce((updateData: any) => {
-      searchDsUpdate(updateData, currentProject);
+      searchDsUpdate(updateData);
     }, 500),
   },
 });

@@ -7,9 +7,9 @@ import { inject } from 'mobx-react';
 import { observer, useComputed } from 'mobx-react-lite';
 import moment from 'moment';
 import { set } from 'lodash';
-import { useCreation } from 'ahooks';
+import { useCreation, useDebounceFn } from 'ahooks';
 import { AppStateProps, IFoundationHeader } from '@/common/types';
-import DateSearchDataSet, { formatEndDate, formatStartDate } from './DateSearchDataSet';
+import DateSearchDataSet from './DateSearchDataSet';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import {
   getIsOrganization, getProjectId, getOrganizationId, getMenuType,
@@ -24,6 +24,7 @@ import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 import { workingHoursApi } from '@/api';
 import ProjectDataSet from './ProjectDataSet';
 import { getWorkbenchSystemFields, transformWorkbenchFilter } from '../utils/searchUtils';
+import { formatEndDate, formatStartDate } from '../../utils';
 
 const Store = createContext({} as Context);
 
@@ -129,7 +130,8 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     ['project', workingHoursProjectDs],
     ['projectAssignee', workingHoursProjectAssigneeDs],
   ]), []);
-  const dateSearchDs = useMemo(() => new DataSet(DateSearchDataSet({ currentProject: AppState.getCurrentProject })), [AppState.getCurrentProject]);
+  const projectCreationDate = useMemo(() => AppState.getCurrentProject?.creationDate, [AppState.getCurrentProject]);
+  const dateSearchDs = useMemo(() => new DataSet(DateSearchDataSet({ projectCreationDate })), [projectCreationDate]);
   // eslint-disable-next-line no-nested-ternary
   const startTime = useMemo(() => (dateSearchDs.current?.get('startTime') && formatStartDate(dateSearchDs.current?.get('startTime'), true)) || localPageCacheStore.getItem('workingHours-issue-startTime') || `${formatStartDate(getIsOrganization() ? moment().subtract(6, 'days') : (
     moment().subtract(6, 'days').isBefore(moment(AppState.getCurrentProject?.creationDate)) ? moment(AppState.getCurrentProject?.creationDate) : moment().subtract(6, 'days')
@@ -157,8 +159,11 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     }
   }, [startTime, endTime, mode, isContain, search]);
 
+  const { run: debounceLoadData } = useDebounceFn(loadData, {
+    wait: 600,
+  });
   useEffect(() => {
-    loadData();
+    debounceLoadData();
   }, [loadData]);
 
   const onCloseDetailTableQuery = useCallback(async (ds: DataSet) => {

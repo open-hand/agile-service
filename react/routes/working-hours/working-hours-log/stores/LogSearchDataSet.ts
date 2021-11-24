@@ -1,48 +1,46 @@
 import { DataSet } from 'choerodon-ui/pro';
-import moment, { Moment } from 'moment';
-import { debounce, includes } from 'lodash';
+import moment from 'moment';
+import { debounce } from 'lodash';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { getIsOrganization } from '@/utils/common';
-
-export const formatStartDate = (date: string | Moment, format = false) => {
-  if (!format) {
-    return moment(date).startOf('day');
-  }
-  return moment(date).startOf('day').format('YYYY-MM-DD HH:mm:ss');
-};
-
-export const formatEndDate = (date: string | Moment, format = false) => {
-  if (!format) {
-    return moment(date).endOf('day');
-  }
-  return moment(date).endOf('day').format('YYYY-MM-DD HH:mm:ss');
-};
+import { formatEndDate, formatStartDate } from '../../utils';
 
 const searchDsUpdate = ({
   // @ts-ignore
-  name, value,
-}, logDs: DataSet, projectCreationDate: string) => {
+  name, value, record,
+}, logDs: DataSet) => {
   if (name === 'startTime') {
-    const adjustedStartDate = getIsOrganization() ? formatStartDate(moment().subtract(6, 'days'), true) : formatStartDate(moment().subtract(6, 'days').isBefore(moment(projectCreationDate)) ? moment(projectCreationDate) : moment().subtract(6, 'days'), true);
     if (value) {
-      const formateStartDate = formatStartDate(value, true) || adjustedStartDate;
+      const formateStartDate = formatStartDate(value, true);
       localPageCacheStore.setItem('workingHours-log-startTime', formateStartDate);
       logDs.setQueryParameter('startTime', formateStartDate);
-    } else {
-      localPageCacheStore.setItem('workingHours-log-startTime', adjustedStartDate);
-      logDs.setQueryParameter('startTime', adjustedStartDate);
+
+      const endTime = record.get('endTime');
+      if (moment(endTime).endOf('day').diff(value, 'days') > 31) {
+        const newEndTime = moment(value).add(31, 'days');
+        record.set('endTime', newEndTime);
+        localPageCacheStore.setItem('workingHours-log-endTime', newEndTime);
+        logDs.setQueryParameter('endTime', formatEndDate(newEndTime, true));
+        return;
+      }
     }
   }
 
   if (name === 'endTime') {
     if (value) {
-      const formateEndDate = formatEndDate(value, true) || formatEndDate(moment(), true);
+      const formateEndDate = formatEndDate(value, true);
       localPageCacheStore.setItem('workingHours-log-endTime', formateEndDate);
       logDs.setQueryParameter('endTime', formateEndDate);
-    } else {
-      localPageCacheStore.setItem('workingHours-log-endTime', formatEndDate(moment(), true));
-      logDs.setQueryParameter('endTime', formatEndDate(moment()));
+
+      const startTime = record.get('startTime');
+      if (moment(value).endOf('day').diff(startTime, 'days') > 31) {
+        const newStartTime = moment(value).subtract(31, 'days');
+        record.set('startTime', newStartTime);
+        localPageCacheStore.setItem('workingHours-log-startTime', newStartTime);
+        logDs.setQueryParameter('startTime', formatStartDate(newStartTime, true));
+        return;
+      }
     }
   }
 
@@ -67,18 +65,15 @@ const LogSearchDataSet = ({ logDs, projectCreationDate }: { logDs: DataSet, proj
   }, {
     name: 'startTime',
     required: true,
+    min: getIsOrganization() ? undefined : formatStartDate(projectCreationDate),
     dynamicProps: {
       max: ({ record }: { record: Record}) => moment(record.get('endTime')).startOf('day'),
-      // eslint-disable-next-line no-nested-ternary
-      min: ({ record }: { record: Record }) => (getIsOrganization() ? formatStartDate(moment(record?.get('endTime')).subtract(31, 'days')) : (
-        moment(record?.get('endTime')).subtract(31, 'days').isAfter(moment(projectCreationDate))) ? (formatStartDate(moment(record?.get('endTime'))) as Moment).subtract(31, 'days') : moment(projectCreationDate).startOf('day')
-      ),
     },
   }, {
     name: 'endTime',
     required: true,
+    max: moment().endOf('day'),
     dynamicProps: {
-      max: ({ record }: { record: Record}) => (moment(record?.get('startTime')).add(31, 'days').isBefore(moment().endOf('day')) ? (formatStartDate(moment(record?.get('startTime'))) as Moment).add(31, 'days').endOf('day') : moment().endOf('day')),
       min: ({ record }: { record: Record }) => moment(record.get('startTime')).startOf('day'),
     },
   }, {
@@ -97,7 +92,7 @@ const LogSearchDataSet = ({ logDs, projectCreationDate }: { logDs: DataSet, proj
   }],
   events: {
     update: debounce((updateData: any) => {
-      searchDsUpdate(updateData, logDs, projectCreationDate);
+      searchDsUpdate(updateData, logDs);
     }, 500),
   },
 });
