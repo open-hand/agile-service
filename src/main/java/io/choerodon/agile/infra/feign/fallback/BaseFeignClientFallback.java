@@ -216,4 +216,14 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     public ResponseEntity<List<ProjectVO>> queryProjectByIds(Set<Long> projectIds) {
         throw new CommonException("error.query.project.by.ids");
     }
+
+    @Override
+    public ResponseEntity<Page<UserDTO>> pagingQueryUsersOnOrganizationAgile(Long id, int page, int size, Long userId, String email, String param, List<Long> notSelectUserIds) {
+        throw new CommonException("error.paging.query.users.on.organization");
+    }
+
+    @Override
+    public ResponseEntity<TimeZoneWorkCalendarRefDetailVO> queryTimeZoneWorkCalendarDetail(Long organizationId, Integer year) {
+        throw new CommonException("error.query.timezone.work.calendar.detail");
+    }
 }
