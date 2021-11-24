@@ -35,6 +35,7 @@ import org.hzero.core.base.BaseConstants;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -190,7 +191,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
         Workbook workbook = ExcelUtil.initWorkHoursExportWorkbook("工时日志", WORK_HOURS_LOG_LIST);
         // 查询数据并写入excel
         ExcelCursorDTO cursor = new ExcelCursorDTO(1, 0, 1000);
-        Sort.Order order = new Sort.Order(Sort.Direction.DESC, "creationDate");
+        Sort.Order order = new Sort.Order(Sort.Direction.DESC, "startDate");
         Sort sort = new Sort(order);
         sendProcess(fileOperationHistoryDTO, userId, 0.0, websocketKey);
         double lastProcess = 0D;
@@ -456,10 +457,20 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
     @Override
     @Async
     public void exportIssueWorkHoursOnOrganizationLevel(Long organizationId, ServletRequestAttributes currentRequestAttributes, boolean isOrg, SearchVO searchVO, Boolean containsSubIssue) {
-        List<Long> projectIds = new ArrayList<>();
-        Long userId = DetailsHelper.getUserDetails().getUserId();
-        workHoursService.handlePermissionProject(organizationId, projectIds, new ArrayList<>(), userId);
+        List<Long> projectIds = transformProjectIds(searchVO);
+        if (CollectionUtils.isEmpty(projectIds)) {
+            Long userId = DetailsHelper.getUserDetails().getUserId();
+            workHoursService.handlePermissionProject(organizationId, projectIds, new ArrayList<>(), userId);
+        }
         exportIssueWorkHours(organizationId, projectIds, currentRequestAttributes, isOrg, searchVO, containsSubIssue);
+    }
+
+    private List<Long> transformProjectIds(SearchVO searchVO) {
+        List<String> projectStringList = (List<String>) searchVO.getSearchArgs().getOrDefault("projectIds", new ArrayList<>());
+        if (!CollectionUtils.isEmpty(projectStringList)) {
+            return projectStringList.stream().map(Long::valueOf).collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
 
     @Override
@@ -610,7 +621,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
                 List<IssueWorkHoursVO> assigneeWorkHour = assigneeWorkHourMap.getOrDefault(issueWorkHoursVO.getProjectId(), new ArrayList<>());
                 Map<Long, List<ExportIssuesVO>> issueMap = projectAssigneeIssueMap.getOrDefault(issueWorkHoursVO.getProjectId(), new HashMap<>());
                 for (IssueWorkHoursVO workHoursVO : assigneeWorkHour) {
-                    ExportIssuesVO assignee = buildExportIssue(issueWorkHoursVO, buildUserName(workHoursVO.getUserDTO()));
+                    ExportIssuesVO assignee = buildExportIssue(workHoursVO, buildUserName(workHoursVO.getUserDTO()));
                     exportIssuesVOS.add(assignee);
                     exportIssuesVOS.addAll(issueMap.getOrDefault(workHoursVO.getUserId(), new ArrayList<>()));
                 }
@@ -645,6 +656,7 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
                 for (ExportIssuesVO children : childrens) {
                     children.setColorIndex(colorIndex);
                 }
+                isBlue = !isBlue;
             }
             exportIssuesVOS.add(root);
             exportIssuesVOS.addAll(childrens);
@@ -838,20 +850,26 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
             List<ExportIssuesVO> values = entry.getValue();
             List<Long> existIssue = new ArrayList<>();
             List<ExportIssuesVO> exportIssuesVOS = new ArrayList<>();
+            Map<Long, ExportIssuesVO> exportIssuesMap = new HashMap<>();
             for (ExportIssuesVO value : values) {
                 // 子任务和子缺陷需要把需要添加父任务
                 Boolean isSubIssue = !ObjectUtils.isEmpty(value) && !Objects.equals(0L, value.getParentId());
                 if (isSubIssue) {
-                    ExportIssuesVO exportIssuesVO = issueMap.get(value.getParentId());
+                    ExportIssuesVO exportIssuesVO = exportIssuesMap.get(value.getParentId());
+                    if (ObjectUtils.isEmpty(exportIssuesVO)) {
+                        exportIssuesVO = issueMap.get(value.getParentId());
+                    }
                     if (!ObjectUtils.isEmpty(exportIssuesVO)) {
-                        Integer color = !ObjectUtils.isEmpty(exportIssuesVO.getColorIndex()) ? exportIssuesVO.getColorIndex() : getColorIndex(colorIndex);
-                        exportIssuesVO.setColorIndex(color);
+                        ExportIssuesVO parent = new ExportIssuesVO();
+                        BeanUtils.copyProperties(exportIssuesVO, parent);
+                        Integer color = !ObjectUtils.isEmpty(parent.getColorIndex()) ? parent.getColorIndex() : getColorIndex(colorIndex);
+                        parent.setColorIndex(color);
                         if (!existIssue.contains(value.getParentId())) {
-                            exportIssuesVOS.add(exportIssuesVO);
+                            exportIssuesVOS.add(parent);
                             existIssue.add(value.getParentId());
                         }
-                        issueMap.put(exportIssuesVO.getIssueId(), exportIssuesVO);
-                        value.setColorIndex(exportIssuesVO.getColorIndex());
+                        exportIssuesMap.put(parent.getIssueId(), parent);
+                        value.setColorIndex(parent.getColorIndex());
                     }
                 }
                 if (!existIssue.contains(value.getIssueId())) {
