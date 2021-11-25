@@ -279,6 +279,7 @@ public class WorkBenchController {
     public ResponseEntity<Page<IssueListFieldKVVO>> pageQueryIssues(@ApiParam(value = "组织id", required = true)
                                                                     @PathVariable(name = "organization_id") Long organizationId,
                                                                     @RequestParam(required = false, defaultValue = "false") Boolean containsSubIssue,
+                                                                    @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
                                                                     PageRequest pageRequest,
                                                                     @RequestBody SearchVO searchVO) {
         EncryptionUtils.decryptSearchVO(searchVO);
