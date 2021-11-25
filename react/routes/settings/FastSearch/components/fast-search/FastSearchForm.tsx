@@ -7,6 +7,7 @@ import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import classNames from 'classnames';
 import FastSearchFormItemField from './FastSearchFormItemField';
 import styles from './FastSearchForm.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 interface FastSearchFormItemProps {
   record: Record
@@ -56,11 +57,13 @@ const FastSearchFormItem = memo(FastSearchFormItemOrigin);
 
 function FastSearchForm({ dataSet }: { dataSet: DataSet }) {
   const handleDelete = useCallback((record: Record) => { dataSet.delete(record, false); }, [dataSet]);
-
+  const formatMessage = useFormatMessage('agile.common');
   return (
     <div className={styles.form}>
       {dataSet.map((record) => <FastSearchFormItem record={record} onDelete={handleDelete} key={`FastSearchFormItem-${record.id}`} />)}
-      <Button icon="add" onClick={() => dataSet.create()} style={{ width: 'max-content', marginLeft: 6 }}>添加筛选</Button>
+      <Button icon="add" onClick={() => dataSet.create()} style={{ width: 'max-content', marginLeft: 6 }}>
+        {formatMessage({ id: 'add.filter' })}
+      </Button>
     </div>
   );
 }

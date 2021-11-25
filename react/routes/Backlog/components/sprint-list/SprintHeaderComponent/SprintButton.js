@@ -7,13 +7,14 @@ import {
 import { Permission, stores } from '@choerodon/boot';
 import moment from 'moment';
 import classnames from 'classnames';
+import { Tooltip } from 'choerodon-ui/pro';
 import { sprintApi, workCalendarApi } from '@/api';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import CloseSprint from '@/components/close-sprint';
-import { Tooltip } from 'choerodon-ui/pro';
 import StartSprint from '../../start-sprint';
 import './SprintButton.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const { AppState } = stores;
 
@@ -34,6 +35,7 @@ function SprintButton({
   const {
     statusCode, sprintId, planning, issueCount,
   } = data;
+  const formatMessage = useFormatMessage();
   const hasActiveSprint = BacklogStore.getHasActiveSprint;
   const [disableStart, reason] = judgeDisabled([[hasActiveSprint, '已有活跃冲刺'], [issueCount <= 0, '冲刺下没有工作项'], [planning === true, '非当前PI下冲刺不可开启']]);
   const { isShowFeature, isInProgram } = BacklogStore.getIsInProgramData || {};
@@ -84,7 +86,7 @@ function SprintButton({
             role="none"
             onClick={openCloseSprint}
           >
-            完成冲刺
+            {formatMessage({ id: 'agile.common.complete.sprint' })}
           </p>
         </Permission>
       ) : (
@@ -100,7 +102,7 @@ function SprintButton({
                 role="none"
                 onClick={openStartSprint}
               >
-                开启冲刺
+                {formatMessage({ id: 'agile.backlog.create.sprint' })}
               </p>
             </Tooltip>
           </Permission>

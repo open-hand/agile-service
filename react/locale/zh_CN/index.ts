@@ -1,5 +1,13 @@
 /* eslint-disable camelcase */
-
+export * from './common';
+export * from './scrumBoard';
+export * from './backlog';
+export * from './issue';
+export * from './storyMap';
+export * from './gantt';
+export * from './version';
+export * from './workHours';
+export * from './projectReport';
 const zh_CN = {
   save: '保存',
   cancel: '取消',
@@ -346,7 +354,5 @@ const zh_CN = {
   'report.code-quality.duplicatedLines': '重复行',
 };
 // appendPrefixObjectKey(Common.localeCommon, commonf);
-export * from './common';
-// export * from './components';
 
 export { zh_CN as AGILE_ZH_CN };

@@ -7,12 +7,13 @@ import moment from 'moment';
 import { usePersistFn } from 'ahooks';
 import { Button, Progress, Icon } from 'choerodon-ui/pro';
 import { ProgressStatus, ProgressType } from 'choerodon-ui/lib/progress/enum';
-import { humanizeDuration } from '@/utils/common';
 import { observer } from 'mobx-react-lite';
 import classnames from 'classnames';
+import { humanizeDuration } from '@/utils/common';
 import './index.less';
 import DownLoad from '@/assets/icons/Download';
 import Divider from '../EditIssue/IssueComponent/IssueBody/Divider';
+import useFormatMessage from '@/hooks/useFormatMessage';
 /**
  * @param fieldKey websocket传输信息下载url的key  默认fileUrl
  * @param fileName 下载文件名  默认为url 最后一个‘/’后的名
@@ -66,6 +67,8 @@ function onHumanizeDuration(createDate?: string, lastUpdateDate?: string, timeFo
 type ActionProps = Partial<StateProps> & { type: 'init' | 'transmission' | 'visible' | 'finish' }
 const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
   const { percentKey = 'process', downloadBtn = false } = props;
+  const formatMessage = useFormatMessage();
+
   const downLoadProps = useMemo(() => {
     const tempProps = props.downloadProps;
     if (typeof (props.autoDownload) === 'object') {
@@ -77,15 +80,15 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
     if (props.predefineProgressTextConfig !== 'none') {
       switch (props.predefineProgressTextConfig) {
         case 'import':
-          return '导入';
+          return formatMessage({ id: 'boot.import' });
         case 'export':
-          return '导出';
+          return formatMessage({ id: 'boot.export' });
         default:
-          return '导出';
+          return formatMessage({ id: 'boot.export' });
       }
     }
     return '';
-  }, [props.predefineProgressTextConfig]);
+  }, [formatMessage, props.predefineProgressTextConfig]);
   const onFinish = usePersistFn(props.onFinish || ((d: any) => { }));
   const [stateProgress, dispatch] = useReducer((state: StateProps, action: ActionProps) => {
     switch (action.type) {

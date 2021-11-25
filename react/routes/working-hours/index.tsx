@@ -5,11 +5,13 @@ import {
 } from '@choerodon/boot';
 import { useTabActiveKey } from '@choerodon/components';
 import styles from './index.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const WorkingHoursLog = withRouter(React.lazy(() => (import('./working-hours-log'))));
 const WorkingHoursIssue = withRouter(React.lazy(() => (import('./working-hours-issue'))));
 const WorkingHoursCalendar = withRouter(React.lazy(() => (import('./working-hours-calendar'))));
 const WorkingHours = () => {
+  const formatMessage = useFormatMessage();
   const [, setActiveKey] = useTabActiveKey('calendar');
   return (
     <PageWrap
@@ -19,7 +21,7 @@ const WorkingHours = () => {
     >
       <PageTab title="工时日历" route="/agile/working-hours/calendar" tabKey="calendar" component={WorkingHoursCalendar} />
       <PageTab title="工作项工时" route="/agile/working-hours/issue" tabKey="issue" component={WorkingHoursIssue} />
-      <PageTab title="工时日志" route="/agile/working-hours/log" tabKey="log" component={WorkingHoursLog} />
+      <PageTab title={formatMessage({ id: 'agile.workHours.work.log' })} route="/agile/working-hours/log" tabKey="log" component={WorkingHoursLog} />
     </PageWrap>
   );
 };

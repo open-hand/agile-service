@@ -2,8 +2,10 @@ import React from 'react';
 import { Button, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { useProjectReportContext } from '../../context';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 function CollapseAll({ ...otherProps }) {
+  const formatMessage = useFormatMessage('agile.common');
   const { store } = useProjectReportContext();
   const { hasCollapse } = store;
   // 有需要展开的再显示
@@ -20,7 +22,7 @@ function CollapseAll({ ...otherProps }) {
         store.collapseAll(!hasCollapse);
       }}
     >
-      <span>{!hasCollapse ? '全部收起' : '全部展开' }</span>
+      <span>{formatMessage({ id: !hasCollapse ? 'collapse.all' : 'expand.all' })}</span>
       {/* <Icon
         type="baseline-arrow_drop_up"
         style={{

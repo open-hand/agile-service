@@ -1,17 +1,19 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import './SprintStatus.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const prefix = 'c7n-sprintStatus';
 
 function SprintStatus({
   data: { statusCode, planning },
 }) {
-  let sprintStatusName = '未开始';
+  const formatMessage = useFormatMessage();
+  let sprintStatusName = formatMessage({ id: 'agile.backlog.no.start' });
   if (statusCode === 'started') {
-    sprintStatusName = '活跃';
+    sprintStatusName = formatMessage({ id: 'agile.common.active' });
   } else if (statusCode === 'closed') {
-    sprintStatusName = '已完成';
+    sprintStatusName = formatMessage({ id: 'agile.common.complete' });
   }
   if (planning) {
     sprintStatusName = '规划中';

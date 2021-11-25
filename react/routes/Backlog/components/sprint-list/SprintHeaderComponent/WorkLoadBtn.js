@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { Icon } from 'choerodon-ui/pro';
 import openAssigneeModal from './AssigneeModal';
 import './WorkLoadBtn.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const WorkLoadBtn = ({ data }) => {
   const handleClickBtn = () => {
@@ -11,7 +12,7 @@ const WorkLoadBtn = ({ data }) => {
     });
   };
   const { assigneeIssues } = data;
-
+  const formatMessage = useFormatMessage('agile.backlog');
   return (
     <>
       <span
@@ -23,7 +24,7 @@ const WorkLoadBtn = ({ data }) => {
         }}
       >
         <Icon type="find_in_page-o" />
-        <span>查看经办人工作量</span>
+        <span>{formatMessage({ id: 'assignee.workload' })}</span>
       </span>
     </>
   );

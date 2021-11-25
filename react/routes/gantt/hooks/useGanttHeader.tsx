@@ -17,6 +17,7 @@ import { typeOptions } from '../components/gannt-select/SelectType';
 import type { IGanttDimensionTypeValue } from '../components/gannt-select/SelectType';
 import useFullScreen from '@/common/useFullScreen';
 import { useGanttContext } from '../stores/context';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 interface IGanttHeaderHookConfig {
   projectId?: string
@@ -35,6 +36,7 @@ const typeValues = typeOptions.map((t) => t.value);
 function useGanttHeader(config: IGanttHeaderHookConfig) {
   const { projectId, store, menuType } = config;
   const { fullButtonProps } = useGanttContext();
+  const formatMessage = useFormatMessage();
   const { sprintIds } = store;
   const [isHasConflict, setIsHasConflict] = useState(false);
   const configMaps = useCreation(() => new Map<IGanttHeaderHookConfigKey, any>(), []);
@@ -107,7 +109,7 @@ function useGanttHeader(config: IGanttHeaderHookConfig) {
   const headerComponentProps = useCreation(() => {
     const itemMap = {
       create: {
-        name: '创建工作项',
+        name: formatMessage({ id: 'agile.common.create.issue' }),
         icon: 'playlist_add',
         display: true,
         handler: () => {
@@ -118,14 +120,14 @@ function useGanttHeader(config: IGanttHeaderHookConfig) {
         },
       },
       personalFilter: {
-        name: '个人筛选',
+        name: formatMessage({ id: 'agile.common.personal.filter' }),
         icon: 'settings-o',
         display: true,
         handler: getConfig('onClickPersonalFilter'),
       },
       columnConfig: {
         display: true,
-        name: '列配置',
+        name: formatMessage({ id: 'agile.common.column.config' }),
         // icon: 'view_column-o',
         handler: () => {
           openCustomColumnManageModal({
@@ -144,7 +146,7 @@ function useGanttHeader(config: IGanttHeaderHookConfig) {
               type="view_column-o"
               style={{ fontSize: 20 }}
             />
-            <span>列配置</span>
+            <span>{ formatMessage({ id: 'agile.common.column.config' })}</span>
           </Button>),
       },
       fullScreen: {

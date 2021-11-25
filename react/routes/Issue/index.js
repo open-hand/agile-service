@@ -39,6 +39,7 @@ import CollapseAll from './components/CollapseAll';
 import Modal from './components/Modal';
 import './index.less';
 import StatusLinkageWSHandle from '@/components/StatusLinkageWSHandle';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const defaultVisibleColumns = [
   'summary',
@@ -58,6 +59,7 @@ const Issue = observer(({ cached, updateCache }) => {
   const {
     projectId, issueSearchStore, changeTableListMode, tableListMode, hasBatchDeletePermission,
   } = useContext(Store);
+  const formatMessage = useFormatMessage();
   const [theme] = useTheme();
   const history = useHistory();
   const params = useQueryString();
@@ -315,13 +317,13 @@ const Issue = observer(({ cached, updateCache }) => {
       >
         <HeaderButtons items={[
           {
-            name: '创建工作项',
+            name: formatMessage({ id: 'agile.common.create.issue' }),
             icon: 'playlist_add',
             handler: handleOpenCreateIssue,
             display: true,
           },
           {
-            name: '导入工作项',
+            name: formatMessage({ id: 'agile.issue.import.issue' }),
             icon: 'archive-o',
             handler: () => handleOpenImport({
               onFinish: refresh, action: 'agile_import_issue',
@@ -329,7 +331,7 @@ const Issue = observer(({ cached, updateCache }) => {
             display: true,
           },
           {
-            name: '导出工作项',
+            name: formatMessage({ id: 'agile.issue.export.issue' }),
             icon: 'unarchive-o',
             handler: () => {
               const visibleColumns = (cached?.listLayoutColumns || defaultListLayoutColumns).filter((item) => item.display).map((item) => item.columnCode);
@@ -345,7 +347,7 @@ const Issue = observer(({ cached, updateCache }) => {
             display: true,
           },
           {
-            name: '个人筛选',
+            name: formatMessage({ id: 'agile.common.personal.filter' }),
             icon: 'settings-o',
             handler: handleClickFilterManage,
             display: true,

@@ -4,15 +4,17 @@ import {
 } from 'choerodon-ui/pro';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import SelectUser from '@/components/select/select-user';
 import { Prompt } from 'react-router-dom';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import SelectUser from '@/components/select/select-user';
 import { useProjectReportContext } from '../../context';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const BaseInfo: React.FC = () => {
   const {
     store, baseInfoRef, edit,
   } = useProjectReportContext();
+  const formatMessage = useFormatMessage();
   const initData = useMemo(() => {
     if (edit) {
       const { ccList = [], receiverList = [] } = store.baseInfo || {};
@@ -39,7 +41,7 @@ const BaseInfo: React.FC = () => {
     }, {
       name: 'receiverList',
       type: 'object' as FieldType,
-      label: '收件人',
+      label: formatMessage({ id: 'agile.projectReport.receiver' }),
       required: true,
       textField: 'realName',
       valueField: 'id',

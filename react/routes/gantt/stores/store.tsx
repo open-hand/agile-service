@@ -1,10 +1,11 @@
 /* eslint-disable no-shadow */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
-import { createRef } from 'react';
+import React, { createRef } from 'react';
 import {
   observable, action,
 } from 'mobx';
+import { C7NFormat } from '@choerodon/master';
 import { GanttRef, Gantt } from '@choerodon/gantt';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { DetailContainerProps } from '@/components/detail-container';
@@ -14,31 +15,56 @@ import { GanttIssue } from '../types';
 export const units = [
   {
     type: 'day',
-    label: '日',
+    label: (
+      <C7NFormat
+        intlPrefix="agile.gantt"
+        id="day"
+      />
+    ),
   },
   {
     type: 'week',
-    label: '周',
+    label: (
+      <C7NFormat
+        intlPrefix="agile.gantt"
+        id="week"
+      />
+    ),
   },
   {
     type: 'month',
-    label: '月',
+    label: (
+      <C7NFormat
+        intlPrefix="agile.gantt"
+        id="month"
+      />
+    ),
   },
   {
     type: 'quarter',
-    label: '季',
+    label: (
+      <C7NFormat
+        intlPrefix="agile.gantt"
+        id="quarter"
+      />
+    ),
   },
   {
     type: 'halfYear',
-    label: '年',
+    label: (
+      <C7NFormat
+        intlPrefix="agile.gantt"
+        id="year"
+      />
+    ),
   },
 ];
 class GanttStore {
   ganttRef = createRef<GanttRef>();
 
-  projectId:string|undefined;
+  projectId: string | undefined;
 
-  constructor({ projectId }:{projectId?:string}) {
+  constructor({ projectId }: { projectId?: string }) {
     this.projectId = projectId;
   }
 
@@ -46,7 +72,7 @@ class GanttStore {
 
   @observable issueId: string | null = null
 
-  @observable issue: Pick<GanttIssue, 'issueId'|'projectId'> | null = null
+  @observable issue: Pick<GanttIssue, 'issueId' | 'projectId'> | null = null
 
   @observable sprintIds: string[] | null = null
 
@@ -56,7 +82,7 @@ class GanttStore {
   }
 
   @action
-  setIssue(issue: Pick<GanttIssue, 'issueId'|'projectId'> | null) {
+  setIssue(issue: Pick<GanttIssue, 'issueId' | 'projectId'> | null) {
     const setData = () => {
       this.issueId = issue?.issueId || null;
       this.issue = issue;

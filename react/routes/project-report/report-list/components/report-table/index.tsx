@@ -7,15 +7,16 @@ import {
 import { observer } from 'mobx-react-lite';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
+import { EmptyPage } from '@choerodon/components';
 import { projectReportApiConfig, projectReportApi } from '@/api';
 import TableDropMenu from '@/components/table-drop-menu';
 import Users from '@/components/tag/users';
 import { User } from '@/common/types';
 import to from '@/utils/to';
-import { EmptyPage } from '@choerodon/components';
 import Loading from '@/components/Loading';
 import UserTag from '@/components/tag/user-tag';
 import NoReport from './NoReport.svg';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const { Column } = Table;
 
@@ -23,6 +24,7 @@ interface ReportTableProps {
   onClick: () => void
 }
 const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
+  const formatMessage = useFormatMessage();
   const dataSet = useMemo(() => new DataSet({
     primaryKey: 'id',
     autoQuery: true,
@@ -35,23 +37,23 @@ const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
       {
         name: 'title',
         type: 'string' as FieldType,
-        label: '标题',
+        label: formatMessage({ id: 'agile.common.title' }),
       },
       {
         name: 'receiverList',
         type: 'array' as FieldType,
-        label: '收件人',
+        label: formatMessage({ id: 'agile.projectReport.receiver' }),
       },
       {
         name: 'createdUser',
         type: 'object' as FieldType,
-        label: '创建人',
+        label: formatMessage({ id: 'agile.common.creator' }),
       },
     ],
     queryFields: [{
       name: 'title',
       type: 'string' as FieldType,
-      label: '标题',
+      label: formatMessage({ id: 'agile.common.title' }),
     }],
   }), []);
   const handleMenuClick = useCallback(async (key, record) => {
@@ -120,7 +122,9 @@ const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
           <EmptyPage.Button
             onClick={onClick}
           >
-            【创建项目报告】
+            【
+            {formatMessage({ id: 'agile.projectReport.create' })}
+            】
           </EmptyPage.Button>
         </>
       )}

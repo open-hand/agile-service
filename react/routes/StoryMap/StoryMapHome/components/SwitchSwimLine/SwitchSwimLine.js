@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { FlatSelect } from '@choerodon/components';
+import { C7NFormat } from '@choerodon/master';
 import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
 
 const { Option } = FlatSelect;
@@ -22,9 +23,25 @@ class SwitchSwimLine extends Component {
         onChange={this.handleSwitchSwinLine}
         clearButton={false}
       >
-        <Option key="none" value="none">无泳道</Option>
-        <Option key="version" value="version">版本泳道</Option>
-        <Option key="sprint" value="sprint">冲刺泳道</Option>
+        <Option key="none" value="none">
+          <C7NFormat
+            intlPrefix="agile.storyMap"
+            id="no.swimlane"
+          />
+        </Option>
+        <Option key="version" value="version">
+          <C7NFormat
+            intlPrefix="agile.storyMap"
+            id="version.swimlane"
+          />
+
+        </Option>
+        <Option key="sprint" value="sprint">
+          <C7NFormat
+            intlPrefix="agile.storyMap"
+            id="sprint.swimlane"
+          />
+        </Option>
       </FlatSelect>
     );
   }

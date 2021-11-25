@@ -14,6 +14,7 @@ import { openLinkVersionModal } from '../ReleaseComponent/link-program-vesion';
 import { openCreateReleaseVersionModal, openEditReleaseVersionModal } from '../components/create-edit-release-version';
 import openDeleteReleaseVersionModal from '../components/delete-release-version';
 import openPublishReleaseVersionModal from '../components/publish-release-version';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const { Column } = Table;
 const { AppState } = stores;
@@ -31,6 +32,7 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
   function handleRefresh() {
     tableDataSet.query(tableDataSet.currentPage);
   }
+  const formatMessage = useFormatMessage();
   function handleClickMenu(record: Record, key: string) {
     const recordData = record.toData();
     switch (key) {
@@ -152,11 +154,11 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
   return (
     <Page>
       <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion']}>
-        <Header title="版本管理">
+        <Header>
           <HeaderButtons
             items={[
               {
-                name: '创建规划版本',
+                name: <span>{formatMessage({ id: 'agile.version.create' })}</span>,
                 icon: 'playlist_add',
                 handler: () => {
                   // setCreateVisible(true);
@@ -234,7 +236,7 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
             name="description"
             className="c7n-agile-table-cell"
             renderer={({ text }) => (text ? (
-              <Tooltip mouseEnterDelay={0.5} title={`描述：${text}`}>
+              <Tooltip mouseEnterDelay={0.5} title={formatMessage({ id: 'agile.version.description.tooltip' }, { text })}>
                 {text}
               </Tooltip>
             ) : null)}
