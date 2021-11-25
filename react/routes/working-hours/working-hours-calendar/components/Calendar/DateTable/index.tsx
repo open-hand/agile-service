@@ -224,11 +224,11 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize, widthPerDayRef }) =>
         issueId: issue.issueId,
         projectId: issue.projectId,
         applyType: 'agile',
-        disabled: getIsOrganization(),
       },
       events: {
         delete: detailCallback,
         close: detailCallback,
+        update: () => {},
       },
     });
   }, [issueDetailProps, detailCallback]);
