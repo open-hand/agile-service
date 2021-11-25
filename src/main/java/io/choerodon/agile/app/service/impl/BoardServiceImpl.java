@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
@@ -113,6 +115,10 @@ public class BoardServiceImpl implements BoardService {
     private IssueParticipantRelMapper issueParticipantRelMapper;
     @Autowired
     private ProjectInfoMapper projectInfoMapper;
+    @Autowired
+    private QuickFilterService quickFilterService;
+    @Autowired
+    private BoardQuickFilterRelMapper boardQuickFilterRelMapper;
 
     @Override
     public void create(Long projectId, String boardName) {
@@ -636,6 +642,55 @@ public class BoardServiceImpl implements BoardService {
             throw new CommonException("error.board.insert");
         }
         return boardMapper.selectByPrimaryKey(boardDTO.getBoardId());
+    }
+
+    @Override
+    public Page<QuickFilterVO> pagedQueryQuickFilters(PageRequest pageRequest,
+                                                      Long projectId,
+                                                      Long boardId,
+                                                      QuickFilterSearchVO quickFilterSearchVO) {
+        return quickFilterService.listByProjectId(projectId, quickFilterSearchVO, pageRequest);
+    }
+
+    @Override
+    public void updateBoardQuickFilterRel(Long projectId,
+                                          Long boardId,
+                                          List<Long> quickFilterIds) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        BoardQuickFilterRelDTO example = new BoardQuickFilterRelDTO();
+        example.setProjectId(projectId);
+        example.setOrganizationId(organizationId);
+        example.setBoardId(boardId);
+        boardQuickFilterRelMapper.delete(example);
+        if (!ObjectUtils.isEmpty(quickFilterIds)) {
+            quickFilterIds.forEach(id -> {
+                BoardQuickFilterRelDTO dto = new BoardQuickFilterRelDTO();
+                dto.setProjectId(projectId);
+                dto.setOrganizationId(organizationId);
+                dto.setBoardId(boardId);
+                dto.setQuickFilterId(id);
+                if (boardQuickFilterRelMapper.select(dto).isEmpty()) {
+                    if (boardQuickFilterRelMapper.insert(dto) != 1) {
+                        throw new CommonException("error.board.quickFilter.insert");
+                    }
+                }
+            });
+        }
+    }
+
+    @Override
+    public List<BoardQuickFilterRelVO> listQuickFiltersByBoardId(Long projectId, Long boardId) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        BoardQuickFilterRelDTO example = new BoardQuickFilterRelDTO();
+        example.setProjectId(projectId);
+        example.setOrganizationId(organizationId);
+        example.setBoardId(boardId);
+        List<BoardQuickFilterRelDTO> list = boardQuickFilterRelMapper.select(example);
+        if (list.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return modelMapper.map(list, new TypeToken<List<BoardQuickFilterRelVO>>() {
+        }.getType());
     }
 
     @Override

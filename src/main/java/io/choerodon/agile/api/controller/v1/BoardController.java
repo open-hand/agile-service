@@ -5,7 +5,11 @@ import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.BoardService;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
 import io.swagger.annotations.ApiOperation;
@@ -173,6 +177,41 @@ public class BoardController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.checkName.get"));
 
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("看版配置查询快速筛选列表")
+    @PostMapping(value = "/{boardId}/quick_filter/list")
+    public ResponseEntity<Page<QuickFilterVO>> pagedQueryQuickFilters(@ApiParam(value = "项目id", required = true)
+                                                                      @PathVariable(name = "project_id") Long projectId,
+                                                                      @ApiParam(value = "agile board id", required = true)
+                                                                      @PathVariable @Encrypt Long boardId,
+                                                                      @SortDefault(value = "sequence", direction = Sort.Direction.DESC)
+                                                                              PageRequest pageRequest,
+                                                                      @RequestBody QuickFilterSearchVO quickFilterSearchVO) {
+        return ResponseEntity.ok(boardService.pagedQueryQuickFilters(pageRequest, projectId, boardId, quickFilterSearchVO));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("根据看版id查询快速筛选列表")
+    @GetMapping(value = "/{boardId}/quick_filter")
+    public ResponseEntity<List<BoardQuickFilterRelVO>> listQuickFiltersByBoardId(@ApiParam(value = "项目id", required = true)
+                                                                                 @PathVariable(name = "project_id") Long projectId,
+                                                                                 @ApiParam(value = "agile board id", required = true)
+                                                                                 @PathVariable @Encrypt Long boardId) {
+        return ResponseEntity.ok(boardService.listQuickFiltersByBoardId(projectId, boardId));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("看版配置更新快速筛选列表")
+    @PostMapping(value = "/{boardId}/quick_filter/update")
+    public ResponseEntity updateBoardQuickFilterRel(@ApiParam(value = "项目id", required = true)
+                                                    @PathVariable(name = "project_id") Long projectId,
+                                                    @ApiParam(value = "agile board id", required = true)
+                                                    @PathVariable @Encrypt Long boardId,
+                                                    @RequestBody @Encrypt List<Long> quickFilterIds) {
+        boardService.updateBoardQuickFilterRel(projectId, boardId, quickFilterIds);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
 }

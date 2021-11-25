@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo;
 
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
 
@@ -16,6 +17,26 @@ public class QuickFilterSearchVO {
 
     @ApiModelProperty(value = "搜索内容")
     private List<String> contents;
+    @Encrypt
+    private List<Long> quickFilterIds;
+    @Encrypt
+    private List<Long> ignoredQuickFilterIds;
+
+    public List<Long> getIgnoredQuickFilterIds() {
+        return ignoredQuickFilterIds;
+    }
+
+    public void setIgnoredQuickFilterIds(List<Long> ignoredQuickFilterIds) {
+        this.ignoredQuickFilterIds = ignoredQuickFilterIds;
+    }
+
+    public List<Long> getQuickFilterIds() {
+        return quickFilterIds;
+    }
+
+    public void setQuickFilterIds(List<Long> quickFilterIds) {
+        this.quickFilterIds = quickFilterIds;
+    }
 
     public String getFilterName() {
         return filterName;

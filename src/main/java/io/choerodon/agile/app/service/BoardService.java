@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.StatusPayload;
 import io.choerodon.agile.infra.dto.BoardDTO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 
@@ -77,4 +79,15 @@ public interface BoardService {
     Boolean isLinked(Long projectId, Long issueId, Long statusId);
 
     BoardDTO createBoard(Long organizationId, Long projectId, String boardName);
+
+    Page<QuickFilterVO> pagedQueryQuickFilters(PageRequest pageRequest,
+                                               Long projectId,
+                                               Long boardId,
+                                               QuickFilterSearchVO quickFilterSearchVO);
+
+    void updateBoardQuickFilterRel(Long projectId,
+                                   Long boardId,
+                                   List<Long> quickFilterIds);
+
+    List<BoardQuickFilterRelVO> listQuickFiltersByBoardId(Long projectId, Long boardId);
 }

@@ -50,15 +50,31 @@
         FROM
         agile_quick_filter
         WHERE project_id = #{projectId}
-        <if test='filterName != null and filterName != "" '>
-            and (name LIKE CONCAT(CONCAT('%', #{filterName}), '%'))
-        </if>
-        <if test='contents != null and contents.size != 0'>
-            <foreach collection="contents" item="content" index="index">
-                AND (name LIKE CONCAT(CONCAT('%', #{content}), '%') OR express_query LIKE
-                CONCAT(CONCAT('%', #{content}), '%') OR description LIKE
-                CONCAT(CONCAT('%', #{content}), '%') )
-            </foreach>
+        <if test='quickFilterSearchVO != null'>
+            <if test='quickFilterSearchVO.filterName != null and quickFilterSearchVO.filterName != ""'>
+                and name LIKE CONCAT(CONCAT('%', #{filterName}), '%')
+            </if>
+            <if test='quickFilterSearchVO.quickFilterIds != null and quickFilterSearchVO.quickFilterIds.size() != 0'>
+                and filter_id in
+                <foreach collection="quickFilterSearchVO.quickFilterIds" item="filterId" open="(" separator="," close=")">
+                    #{filterId}
+                </foreach>
+            </if>
+            <if test='quickFilterSearchVO.ignoredQuickFilterIds != null and quickFilterSearchVO.ignoredQuickFilterIds.size() != 0'>
+                and filter_id not in
+                <foreach collection="quickFilterSearchVO.ignoredQuickFilterIds" item="ignoredQuickFilterId" open="(" separator="," close=")">
+                    #{ignoredQuickFilterId}
+                </foreach>
+            </if>
+            <if test='quickFilterSearchVO.contents != null and quickFilterSearchVO.contents.size != 0'>
+                <foreach collection="quickFilterSearchVO.contents" item="content" index="index">
+                    AND (
+                    name LIKE CONCAT(CONCAT('%', #{content}), '%')
+                    OR express_query LIKE CONCAT(CONCAT('%', #{content}), '%')
+                    OR description LIKE CONCAT(CONCAT('%', #{content}), '%')
+                    )
+                </foreach>
+            </if>
         </if>
     </select>
 

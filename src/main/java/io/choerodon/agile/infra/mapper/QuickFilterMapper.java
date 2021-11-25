@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.QuickFilterSearchVO;
 import io.choerodon.agile.infra.dto.QuickFilterDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
@@ -55,9 +56,9 @@ public interface QuickFilterMapper extends BaseMapper<QuickFilterDTO> {
      * 根据项目id查询快速筛选，通过sequence排序
      *
      * @param projectId  projectId
-     * @param filterName filterName
-     * @param contents   contents
+     * @param quickFilterSearchVO quickFilterSearchVO
      * @return QuickFilterDTO
      */
-    List<QuickFilterDTO> queryFiltersByProjectId(@Param("projectId") Long projectId, @Param("filterName") String filterName, @Param("contents") List<String> contents);
+    List<QuickFilterDTO> queryFiltersByProjectId(@Param("projectId") Long projectId,
+                                                 @Param("quickFilterSearchVO") QuickFilterSearchVO quickFilterSearchVO);
 }
