@@ -739,6 +739,10 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
     }
 
     private Page<ExportIssuesVO> pageQueryIssues(Long organizationId, List<Long> projectIds, PageRequest pageRequest, Boolean containsSubIssue, SearchVO searchVO) {
+        // 默认按照issueId倒序导出
+        Sort.Order order = new Sort.Order(Sort.Direction.DESC, "issueId");
+        Sort sort = new Sort(order);
+        pageRequest.setSort(sort);
         Page<IssueDTO> page = workHoursService.pageIssue(organizationId, projectIds, pageRequest, searchVO);
         if(CollectionUtils.isEmpty(page.getContent())){
             return new Page<>();
