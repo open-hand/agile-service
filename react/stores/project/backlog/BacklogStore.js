@@ -5,6 +5,7 @@ import {
 import {
   sortBy, find, uniq, intersection, pick, isObject,
 } from 'lodash';
+import { C7NFormat } from '@choerodon/master';
 import { store } from '@choerodon/boot';
 import { Modal, DataSet } from 'choerodon-ui/pro';
 import Moment from 'moment';
@@ -1148,7 +1149,10 @@ class BacklogStore {
     const defaultValuePrompt = undefined;// defaultValueIsCurrent ? `冲刺${data.sprintName}是默认选项，删除后冲刺字段默认值将清空` : undefined;
     const hasIssue = data.issueSearchVOList && data.issueSearchVOList.length > 0;
     Modal.open({
-      title: '删除冲刺',
+      title: <C7NFormat
+        intlPrefix="agile.backlog"
+        id="delete.sprint"
+      />,
       children: hasIssue ? (
         <div>
           <p style={{ marginBottom: 10 }}>{`确认要删除冲刺“${data.sprintName}”吗？删除冲刺后当前规划的工作项将移动到待办事项。`}</p>

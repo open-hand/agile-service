@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal } from 'choerodon-ui/pro';
+import { C7NFormat } from '@choerodon/master';
 import { Choerodon } from '@choerodon/boot';
 import { set } from 'lodash';
 import ExportIssue, { openExportIssueModal as originOpenExportIssueModal } from '@/components/issue-export';
@@ -109,10 +110,20 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
       visibleColumns={visibleColumns.map((i) => mapper[i as keyof typeof mapper] || i)}
       store={store}
       action={action}
-      exportBtnText="导出"
+      exportBtnText={(
+        <C7NFormat
+          intlPrefix="boot"
+          id="export"
+        />
+      ) as any}
     />,
     footer: (okBtn: any, cancelBtn: any) => cancelBtn,
-    okText: '导出',
+    okText: (
+      <C7NFormat
+        intlPrefix="boot"
+        id="export"
+      />
+    ),
     // okProps: { ...store.exportButtonConfig?.buttonProps },
     cancelText: '关闭',
     cancelProps: {

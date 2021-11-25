@@ -15,7 +15,7 @@ const ProjectDataSet = ({
   cacheSelection: false,
   transport: {
     read: ({ params, data }) => ({
-      url: `/agile/v1/organizations/${organizationId}/work_hours/project_work_hours`,
+      url: `/agile/v1/organizations/${organizationId}/work_bench/work_hours/project_work_hours`,
       method: 'post',
       params: {
         ...params,

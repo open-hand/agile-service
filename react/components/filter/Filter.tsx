@@ -13,6 +13,7 @@ import SelectField, { SelectFieldProps } from '@/components/field/select-field';
 import { ISystemField, ICustomField, IFilterField } from '.';
 import { getFlatElement, renderGroupedFields, renderFields } from './utils';
 import styles from './Filter.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 export interface IFilter {
   [key: string]: any
@@ -61,6 +62,7 @@ const Filter: React.FC<FilterProps> = ({
   selectFieldGroups,
   resetAll,
 }) => {
+  const formatMessage = useFormatMessage('agile.common');
   const [folded, setFolded] = useState<boolean | undefined>();
   const [overflowLine, setOverflowLine] = useState<boolean>(false);
   const filterRef = useRef<HTMLDivElement | null>(null);
@@ -255,7 +257,7 @@ const Filter: React.FC<FilterProps> = ({
               display: 'flex', alignItems: 'center', fontWeight: 500,
             }}
             >
-              添加筛选
+              {formatMessage({ id: 'add.filter' })}
               <Icon type="arrow_drop_down" />
             </span>
           </Button>
@@ -282,7 +284,7 @@ const Filter: React.FC<FilterProps> = ({
     }
     return (
       <Button className={styles.btn} funcType={'flat' as FuncType} onClick={resetFilter}>
-        重置
+        {formatMessage({ id: 'reset' })}
       </Button>
     );
   }, [filter, resetFilter]);

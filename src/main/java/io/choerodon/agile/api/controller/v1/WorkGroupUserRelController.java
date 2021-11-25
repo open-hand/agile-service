@@ -3,7 +3,6 @@ package io.choerodon.agile.api.controller.v1;
 import io.choerodon.agile.api.vo.WorkGroupUserRelParamVO;
 import io.choerodon.agile.api.vo.WorkGroupUserRelVO;
 import io.choerodon.agile.app.service.WorkGroupUserRelService;
-import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
@@ -84,15 +83,4 @@ public class WorkGroupUserRelController {
                 .orElseThrow(() -> new CommonException("error.work.group.user.rel.query"));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("查询按工作组筛选的成员")
-    @PostMapping("/page_by_groups")
-    public ResponseEntity<Page<UserDTO>> pageByGroups(@ApiParam(value = "组织Id", required = true)
-                                                      @PathVariable(name = "organization_id") Long organizationId,
-                                                      PageRequest pageRequest,
-                                                      @RequestBody WorkGroupUserRelParamVO workGroupUserRelParamVO) {
-        return Optional.ofNullable(workGroupUserRelService.pageByGroups(organizationId, pageRequest, workGroupUserRelParamVO))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.user.query.by.groups"));
-    }
 }

@@ -126,7 +126,6 @@ function openExportWorkHoursIssueModal({
       store={store}
       visibleCheckField={menuType === 'project'}
       action={action}
-      exportBtnText="导出"
     />,
     footer: (okBtn: any, cancelBtn: any) => cancelBtn,
     cancelText: '关闭',

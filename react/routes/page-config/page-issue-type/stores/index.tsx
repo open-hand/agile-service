@@ -1,10 +1,10 @@
 import React, {
   createContext, useContext, useMemo,
 } from 'react';
-import { injectIntl, InjectedIntl } from 'react-intl';
-import { getMenuType } from '@/utils/common';
+import { injectIntl } from 'react-intl';
 import { DataSet } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
+import { getMenuType } from '@/utils/common';
 import SortTableDataSet from './SortTableDataSet';
 import AddUnselectedDataSet from './AddUnselectedDataSet';
 import PageIssueTypeStore from './PageIssueTypeStore';
@@ -16,7 +16,7 @@ interface Context {
   pageIssueTypeStore: PageIssueTypeStore,
   isInProgram: boolean,
   isProject: boolean,
-  intl: InjectedIntl,
+  intl: any,
   prefixCls: 'c7n-agile-page-config-page-issue-type',
 }
 

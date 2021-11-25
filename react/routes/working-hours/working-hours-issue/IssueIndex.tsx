@@ -23,6 +23,7 @@ import { ListLayoutColumnVO } from '@/api';
 import TableCache from '@/components/table-cache';
 import ProjectIssueTable from './components/project-issue-table';
 import { useWorkBenchWorkingHoursContext } from '@/injects/workbench-working-hours/stores';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const disabledSystemOptionsCodes = ['summary', 'workTime', 'cumulativeWorkTime', 'estimateTime', 'deviationRate'];
 
@@ -48,6 +49,7 @@ const WorkingHoursIssue = (props = {}) => {
     dateSearchDs, loading, workingHoursIssuesDs, workingHoursAssigneeDs, mode, isProject, isContain, setIsContain, tableFields: fields, totalWorkTime,
     issueSearchStore, startTime, endTime,
   } = useIssueStore();
+  const formatMessage = useFormatMessage();
   const { fullButtonProps } = useWorkBenchWorkingHoursContext();
   const handleChangeIsContain = useCallback((value) => {
     setIsContain(value);
@@ -72,7 +74,7 @@ const WorkingHoursIssue = (props = {}) => {
         <HeaderButtons items={[
           {
             display: true,
-            name: '导出',
+            name: formatMessage({ id: 'boot.export' }),
             icon: 'unarchive-o',
             handler: () => {
               const attachSearchArgs = { startTime, endTime, latitude: mode };
@@ -88,7 +90,7 @@ const WorkingHoursIssue = (props = {}) => {
           },
           {
             display: isProject,
-            name: '列配置',
+            name: formatMessage({ id: 'agile.common.column.config' }),
             // icon: 'view_column-o',
             handler: () => {
               openCustomColumnManageModal({
@@ -111,7 +113,7 @@ const WorkingHoursIssue = (props = {}) => {
                   type="view_column-o"
                   style={{ fontSize: 20, marginBottom: -1 }}
                 />
-                <span>列配置</span>
+                <span>{formatMessage({ id: 'agile.common.column.config' })}</span>
               </Button>),
           },
           {

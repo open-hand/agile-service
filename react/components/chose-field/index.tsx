@@ -17,6 +17,7 @@ import { IFiledListItemProps, pageConfigApi } from '@/api';
 import FieldList from './FieldList';
 import ChoseFieldStore from './store';
 import { IChosenFieldField, IChosenFieldFieldEvents } from './types';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 interface Props {
   store: ChoseFieldStore,
@@ -78,6 +79,8 @@ function valueIsEqualCustomizer(aValue: any, bValue: any) {
 }
 export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps, IChoseFieldComponentProps] {
   const [fields, setFields] = useState<IChosenFieldField[]>([]);
+  const formatMessage = useFormatMessage('agile.common');
+
   const currentFields = useRef([] as any[]);
   const [value, setValue] = useState<string[] | undefined>(undefined);
 
@@ -177,7 +180,7 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
   const componentProps: IChoseFieldComponentProps = {
     store,
     choseField: events.choseField,
-    dropDownBtnChildren: config?.dropDownBtnChildren || '添加筛选',
+    dropDownBtnChildren: config?.dropDownBtnChildren || formatMessage({ id: 'add.filter' }) as any,
     dropDownBtnProps: config?.dropDownBtnProps,
     dropDownProps: config?.dropDownProps,
   };
@@ -201,8 +204,10 @@ function useClickOut(onClickOut: (e?: any) => void) {
 
 const ChooseField: React.FC<Props> = (props) => {
   const [hidden, setHidden] = useSafeState(true);
+  const formatMessage = useFormatMessage('agile.common');
+
   const {
-    dropDownBtnChildren = '添加筛选', wrapClassName, wrapStyle, store, choseField,
+    dropDownBtnChildren = formatMessage({ id: 'add.filter' }), wrapClassName, wrapStyle, store, choseField,
   } = props;
   const handleClickOut = usePersistFn(() => {
     setHidden(true);

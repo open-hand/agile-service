@@ -33,6 +33,7 @@ import StoryMapSearch from './components/Search';
 import useFullScreen from '../../../common/useFullScreen';
 import './StoryMapHome.less';
 import StatusLinkageWSHandle from '@/components/StatusLinkageWSHandle';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const HEX = {
   'c7nagile-StoryMap-EpicCard': '#D9C2FB',
@@ -42,6 +43,7 @@ const HEX = {
 };
 
 const StoryMapHome = observer(() => {
+  const formatMessage = useFormatMessage('agile.storyMap');
   const issueSearchStore = useIssueSearchStore({
     // @ts-ignore
     getSystemFields: () => getSystemFieldsInStoryMap(['issueTypeId', 'quickFilterIds']),
@@ -155,7 +157,7 @@ const StoryMapHome = observer(() => {
       <Page
         className="c7nagile-StoryMap"
       >
-        <Header title="故事地图">
+        <Header>
           <HeaderButtons items={[
             {
               name: '创建史诗',
@@ -164,7 +166,7 @@ const StoryMapHome = observer(() => {
               display: !isInProgram && isEmpty && !loading,
             },
             {
-              name: '未规划列表',
+              name: formatMessage({ id: 'no.plan.list' }),
               icon: 'work_log',
               handler: handleOpenIssueList,
               display: !StoryMapStore.isFullScreen,
@@ -181,10 +183,10 @@ const StoryMapHome = observer(() => {
               element: <SwitchSwimLine />,
             }, {
               display: isInProgram,
-              element: <CheckBox style={{ marginLeft: 16 }} name="hiddenColumn" checked={StoryMapStore.hiddenColumnNoStory} onChange={handleNoStoryCheckBoxChange}>隐藏无故事的列</CheckBox>,
+              element: <CheckBox style={{ marginLeft: 16 }} name="hiddenColumn" checked={StoryMapStore.hiddenColumnNoStory} onChange={handleNoStoryCheckBoxChange}>{formatMessage({ id: 'hide.empty.story' })}</CheckBox>,
             }, {
               display: true,
-              element: <CheckBox name="foldCompletedEpic" style={{ marginLeft: 16 }} checked={StoryMapStore.foldCompletedEpic} onChange={handleCompletedEpicCheckBoxChange}>收起已完成的史诗列</CheckBox>,
+              element: <CheckBox name="foldCompletedEpic" style={{ marginLeft: 16 }} checked={StoryMapStore.foldCompletedEpic} onChange={handleCompletedEpicCheckBoxChange}>{formatMessage({ id: 'collapse.complete.epic' })}</CheckBox>,
             },
           ]}
           />

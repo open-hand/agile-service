@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
+import { C7NFormat } from '@choerodon/master';
 import { TextField } from 'choerodon-ui/pro';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { getProjectId } from '@/utils/common';
@@ -40,7 +41,11 @@ import BacklogStore from '@/stores/project/backlog/BacklogStore';
         <p
           style={{ whiteSpace: 'nowrap' }}
         >
-          冲刺目标：
+          <C7NFormat
+            intlPrefix="agile.backlog"
+            id="global.sprint"
+          />
+          :
         </p>
         <TextEditToggle
           disabled={noPermission}

@@ -27,9 +27,9 @@ const FilterItem: React.FC<Props> = ({
   } = data;
   const [isEditing, setIsEditing] = useState(false);
   const menuConfig = useMemo(() => (menuType === 'project' ? ({
-    update: (updateData: UPersonalFilter) => personalFilterApi.project(projectId).update(filterId, updateData),
-    checkName: (newName: string) => personalFilterApi.project(projectId).checkName(newName),
-    delete: () => personalFilterApi.project(projectId).delete(filterId),
+    update: (updateData: UPersonalFilter) => personalFilterApi.menu(menuType).project(projectId).update(filterId, updateData),
+    checkName: (newName: string) => personalFilterApi.menu(menuType).project(projectId).checkName(newName),
+    delete: () => personalFilterApi.menu(menuType).project(projectId).delete(filterId),
   }) : ({
     update: (updateData: UPersonalFilter) => personalFilterApi.update(filterId, updateData),
     checkName: (newName: string) => personalFilterApi.checkName(newName),

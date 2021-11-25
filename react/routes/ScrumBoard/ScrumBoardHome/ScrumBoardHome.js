@@ -6,8 +6,8 @@ import {
 import {
   Select, Icon, Modal, Form,
 } from 'choerodon-ui';
+import { C7NFormat, HeaderButtons } from '@choerodon/master';
 import screenfull from 'screenfull';
-import { HeaderButtons } from '@choerodon/master';
 import { cloneDeep, set } from 'lodash';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import queryString from 'query-string';
@@ -248,7 +248,10 @@ class ScrumBoardHome extends Component {
 
   handleCreateBoardClick = () => {
     ModalPro.open({
-      title: '创建看板',
+      title: <C7NFormat
+        intlPrefix="agile.scrumBoard"
+        id="create.board"
+      />,
       drawer: true,
       style: {
         width: 380,
@@ -266,7 +269,15 @@ class ScrumBoardHome extends Component {
         color: '#0F1358',
       }}
       >
-        {`${ScrumBoardStore.getDayRemain >= 0 ? `${ScrumBoardStore.getDayRemain} days剩余` : '无剩余时间'}`}
+        {`${ScrumBoardStore.getDayRemain >= 0 ? (
+          <C7NFormat
+            intlPrefix="agile.scrumBoard"
+            id="remain.day"
+            values={{
+              day: ScrumBoardStore.getDayRemain,
+            }}
+          />
+        ) : '无剩余时间'}`}
       </span>
     </div>
   )
@@ -362,7 +373,10 @@ class ScrumBoardHome extends Component {
           <HeaderButtons
             items={[
               {
-                name: '创建工作项',
+                name: <C7NFormat
+                  intlPrefix="agile.common"
+                  id="create.issue"
+                />,
                 icon: 'playlist_add',
                 handler: this.handleCreateIssue,
                 display: true,
@@ -373,7 +387,13 @@ class ScrumBoardHome extends Component {
                 display: true,
                 name: '更多操作',
                 groupBtnItems: [{
-                  name: '配置看板',
+                  name: (
+                    <span>
+                      <C7NFormat
+                        intlPrefix="agile.scrumBoard"
+                        id="column.setting"
+                      />
+                    </span>),
                   handler: () => {
                     to(LINK_URL.scrumboardSetting, {
                       params: {
@@ -382,7 +402,10 @@ class ScrumBoardHome extends Component {
                     });
                   },
                 }, {
-                  name: '个人筛选',
+                  name: <C7NFormat
+                    intlPrefix="agile.common"
+                    id="personal.filter"
+                  />,
                   handler: this.handleClickFilterManage,
                 }],
               },
@@ -397,7 +420,10 @@ class ScrumBoardHome extends Component {
                 handler: () => this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard)),
               },
               {
-                name: '完成冲刺',
+                name: <C7NFormat
+                  intlPrefix="agile.common"
+                  id="complete.sprint"
+                />,
                 icon: 'alarm_on',
                 // funcType: 'flat',
                 handler: this.handleFinishSprint,

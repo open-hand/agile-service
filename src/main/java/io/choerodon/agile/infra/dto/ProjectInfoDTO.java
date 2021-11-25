@@ -46,6 +46,11 @@ public class ProjectInfoDTO extends AuditDomain {
      */
     private String defaultPriorityCode;
 
+    /**
+     * 是否隐藏历史迭代中已完成的子任务
+     */
+    private Boolean isHidePreSprintDoneSubissue;
+
     public Long getInfoId() {
         return infoId;
     }
@@ -113,5 +118,13 @@ public class ProjectInfoDTO extends AuditDomain {
     @Override
     public String toString() {
         return StringUtil.getToString(this);
+    }
+
+    public Boolean getHidePreSprintDoneSubissue() {
+        return isHidePreSprintDoneSubissue;
+    }
+
+    public void setHidePreSprintDoneSubissue(Boolean hidePreSprintDoneSubissue) {
+        isHidePreSprintDoneSubissue = hidePreSprintDoneSubissue;
     }
 }

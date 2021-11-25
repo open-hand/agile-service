@@ -1,11 +1,11 @@
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
-import { InjectedIntl } from 'react-intl';
+import type { IntlShape } from 'react-intl';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { pageConfigApiConfig } from '@/api';
 
 interface Props {
   schemeCode: string,
-  formatMessage: InjectedIntl['formatMessage'],
+  formatMessage: IntlShape['formatMessage'],
 }
 const SchemeTableDataSet = ({
   formatMessage, schemeCode,

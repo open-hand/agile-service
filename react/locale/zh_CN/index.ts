@@ -1,4 +1,13 @@
 /* eslint-disable camelcase */
+export * from './common';
+export * from './scrumBoard';
+export * from './backlog';
+export * from './issue';
+export * from './storyMap';
+export * from './gantt';
+export * from './version';
+export * from './workHours';
+export * from './projectReport';
 const zh_CN = {
   save: '保存',
   cancel: '取消',
@@ -344,4 +353,6 @@ const zh_CN = {
   'report.code-quality.nclocs': '代码行',
   'report.code-quality.duplicatedLines': '重复行',
 };
-export default zh_CN;
+// appendPrefixObjectKey(Common.localeCommon, commonf);
+
+export { zh_CN as AGILE_ZH_CN };

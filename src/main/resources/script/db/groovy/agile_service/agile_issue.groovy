@@ -215,4 +215,10 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_issue.groovy') {
             column(name: 'actual_end_time', type: 'DATETIME', remarks: '实际结束时间')
         }
     }
+
+    changeSet(id: '2021-11-24-agile-issue-add-column', author: 'ztxemail@163.com') {
+        addColumn(tableName: 'agile_issue') {
+            column(name: 'is_pre_sprint_done', type: 'TINYINT UNSIGNED', defaultValue: '0', remarks: '是否是历史迭代已完成')
+        }
+    }
 }

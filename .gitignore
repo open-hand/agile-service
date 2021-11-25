@@ -37,6 +37,7 @@ package-lock.json
 **/lib/dist/
 **/lib/assets/
 **/lib/fonts/
+.vscode
 .yalc
 yarn.lock
 yalc.lock

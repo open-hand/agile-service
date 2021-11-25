@@ -221,6 +221,8 @@ public class IssueDTO extends AuditDomain {
     @Transient
     private List<Long> participantIds;
 
+    private Boolean isPreSprintDone;
+
     public String getEpicSelfName() {
         return epicSelfName;
     }
@@ -723,6 +725,14 @@ public class IssueDTO extends AuditDomain {
 
     public void setParticipantIds(List<Long> participantIds) {
         this.participantIds = participantIds;
+    }
+
+    public Boolean getPreSprintDone() {
+        return isPreSprintDone;
+    }
+
+    public void setPreSprintDone(Boolean preSprintDone) {
+        isPreSprintDone = preSprintDone;
     }
 
     @Override

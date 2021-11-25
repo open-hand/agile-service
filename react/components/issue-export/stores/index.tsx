@@ -1,7 +1,7 @@
 import React, {
   createContext, useContext, useMemo,
 } from 'react';
-import { injectIntl, InjectedIntl } from 'react-intl';
+import { injectIntl } from 'react-intl';
 import { uniq } from 'lodash';
 import { observer } from 'mobx-react-lite';
 import { useCreation } from 'ahooks';
@@ -12,7 +12,7 @@ import { IExportIssueProps } from '..';
 import { removeCodeExtraPrefix } from '../utils';
 
 interface Context extends IExportIssueProps {
-  intl: InjectedIntl,
+  intl: any,
   prefixCls: string,
   modal?: IModalProps,
   checkOptions: Array<ITableColumnCheckBoxesOptionData & { order?: any }>

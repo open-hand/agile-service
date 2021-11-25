@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, {
-  useCallback, useMemo, useState, useEffect,
+  useCallback, useMemo, useState, useEffect, useImperativeHandle,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import originMoment, { Moment } from 'moment';
@@ -49,9 +49,10 @@ interface Props {
     width?: number,
     height?: number,
   }
+  widthPerDayRef: React.MutableRefObject<number | undefined>
 }
 
-const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
+const DateTable: React.FC<Props> = ({ dateTableWrapperSize, widthPerDayRef }) => {
   const {
     isRestDay, calendarDs, countData, setLoading, getCountData, AppState, startTime, endTime, userIds, projectIds, workGroupIds,
   } = useCalendarStore();
@@ -223,11 +224,11 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
         issueId: issue.issueId,
         projectId: issue.projectId,
         applyType: 'agile',
-        disabled: getIsOrganization(),
       },
       events: {
         delete: detailCallback,
         close: detailCallback,
+        update: () => {},
       },
     });
   }, [issueDetailProps, detailCallback]);
@@ -314,8 +315,8 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
                       })}
                       style={{
                         background: cellColor,
-                        height: countHeight - 0.5,
-                        lineHeight: `${countHeight - 0.5}px`,
+                        height: countHeight - 1,
+                        lineHeight: `${countHeight - 1}px`,
                         color: date.isRestDay ? 'rgba(15,19,88,0.45)' : 'var(--text-color)',
                       }}
                       role="none"
@@ -415,6 +416,7 @@ const DateTable: React.FC<Props> = ({ dateTableWrapperSize }) => {
     setLoading(false);
   }, []);
 
+  useImperativeHandle(widthPerDayRef, () => widthPerDay, [widthPerDay]);
   return (
     <div className={styles.dateTable}>
       {

@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { IModalProps } from '@/common/types';
 import { Button, CheckBox } from 'choerodon-ui/pro';
 
-import { InjectedIntl } from 'react-intl';
+import type { IntlShape } from 'react-intl';
 import { observer } from 'mobx-react-lite';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
+import { IModalProps } from '@/common/types';
 import promptStyles from './index.less';
 
 interface Props {
   modal?: IModalProps,
-  formatMessage: InjectedIntl['formatMessage'],
+  formatMessage: IntlShape['formatMessage'],
   onContinue: (secondEntry?: boolean) => void,
   promptText: string,
 }

@@ -405,6 +405,43 @@
         group by ai.project_id
     </select>
 
+
+    <select id="countProjectEstimateTime" resultType="io.choerodon.agile.api.vo.IssueWorkHoursVO">
+        select
+        ai.project_id,
+        IFNULL(SUM(ai.estimate_time), 0) as estimate_time
+        from agile_issue ai
+        where
+         ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and ai.issue_id in
+        <foreach collection="allIssueIds" item="allIssueId" open="(" separator="," close=")">
+            #{allIssueId}
+        </foreach>
+        group by ai.project_id
+    </select>
+
+    <select id="countAssigneeEstimateTime" resultType="io.choerodon.agile.api.vo.IssueWorkHoursVO">
+        select
+        ai.assignee_id as user_id,
+        IFNULL(SUM(ai.estimate_time), 0) as estimate_time
+        from agile_issue ai
+        where
+        ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and ai.issue_id in
+        <foreach collection="allIssueIds" item="allIssueId" open="(" separator="," close=")">
+            #{allIssueId}
+        </foreach>
+        AND ai.assignee_id IS NOT NULL
+        AND ai.assignee_id != 0
+        group by ai.assignee_id
+    </select>
+
     <select id="queryChildrenIdByParentId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         select
         ai.issue_id,

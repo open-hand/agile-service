@@ -48,11 +48,24 @@ class WorkCalendarApi extends Api<WorkCalendarApi> {
  * @param {*} year
  */
   getWorkSetting(year: number) {
-    const orgId = getOrganizationId();
-    return axios({
+    return this.request({
       method: 'get',
-      url: getMenuType() === 'project' ? `/iam/choerodon/v1/projects/${getProjectId()}/time_zone_work_calendars/time_zone_detail/${orgId}`
-        : `/iam/choerodon/v1/organizations/${orgId}/time_zone_work_calendars/detail`,
+      url: this.menuType === 'project' ? `/iam/choerodon/v1/projects/${this.projectId}/time_zone_work_calendars/time_zone_detail/${this.orgId}`
+        : `/iam/choerodon/v1/organizations/${this.orgId}/time_zone_work_calendars/detail`,
+      params: {
+        year,
+      },
+    });
+  }
+
+  /**
+ * 获取冲刺有关于组织层时区设置
+ * @param {*} year
+ */
+  workBenchGetWorkSetting(year: number) {
+    return this.request({
+      method: 'get',
+      url: `/agile/v1/organizations/${this.orgId}/work_bench/time_zone_work_calendars/detail`,
       params: {
         year,
       },

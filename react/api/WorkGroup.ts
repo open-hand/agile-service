@@ -23,6 +23,10 @@ class WorkGroupApi extends Api<WorkGroupApi> {
     return `/agile/v1/organizations/${this.orgId}/work_group`;
   }
 
+  get workBenchPrefix() {
+    return `/agile/v1/organizations/${this.orgId}/work_bench`;
+  }
+
   /**
    * 查询工作组树形数据
    */
@@ -157,7 +161,7 @@ class WorkGroupApi extends Api<WorkGroupApi> {
   loadUserByGroupIds(data: object, params?: { page?: number, size?: number }) {
     return this.request({
       method: 'post',
-      url: `${this.prefix}_user_rel/page_by_groups`,
+      url: `${this.workBenchPrefix}/work_group_user_rel/page_by_groups`,
       data,
       params: params && ({
         page: params.page || 1,

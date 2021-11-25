@@ -441,6 +441,12 @@ public class SprintServiceImpl implements SprintService {
         if (targetSprintId != null && !Objects.equals(targetSprintId, 0L)) {
             issueAccessDataService.issueToDestinationByIdsCloseSprint(projectId, targetSprintId, moveIssueIds, new Date(), customUserDetails.getUserId());
         }
+        // 查询移动到下个迭代中已完成的子任务
+         List<Long> completedSubIssues = issueMapper.selectCompletedSubIssue(projectId, moveIssueIds);
+        // 将已完成的子任务设置为历史迭代完成
+        if (!CollectionUtils.isEmpty(completedSubIssues)) {
+           issueMapper.updateSubIssueHistoryCompleted(projectId, completedSubIssues);
+        }
         issueAccessDataService.batchUpdateIssueRank(projectId, moveIssueDTOS);
     }
 
@@ -787,6 +793,7 @@ public class SprintServiceImpl implements SprintService {
         List<Long> allIssueIds = new ArrayList<>();
         allIssueIds.addAll(parentIssueIds);
         // 查询子任务issueId
+        searchParamMap.put("sprintId", sprintId);
         Set<Long> childrenIds = issueMapper.queryChildrenIds(projectId, null, parentIssueIds, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
         if(!CollectionUtils.isEmpty(childrenIds)){
             allIssueIds.addAll(childrenIds);

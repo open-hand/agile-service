@@ -7,8 +7,9 @@ import {
 import {
   Button, Spin, Tooltip,
 } from 'choerodon-ui';
+import { C7NFormat, HeaderButtons } from '@choerodon/master';
 import { Modal } from 'choerodon-ui/pro';
-import { HeaderButtons } from '@choerodon/master';
+
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import SideNav from '@/components/side-nav';
@@ -89,7 +90,10 @@ class BacklogHome extends Component {
         width: MODAL_WIDTH.small,
       },
       key: createCurrentPiSprintKey,
-      title: '当前PI下创建冲刺',
+      title: <C7NFormat
+        intlPrefix="agile.backlog"
+        id="current.create.sprint"
+      />,
       children: <CreateCurrentPiSprint onCreate={onCreate} sprints={sprints} pi={piInfo} />,
     });
   };
@@ -108,7 +112,13 @@ class BacklogHome extends Component {
     return disabled ? (
       <Tooltip title="无活跃的PI">
         <Button icon="playlist_add" disabled>
-          当前PI下创建冲刺
+          <span>
+            <C7NFormat
+              intlPrefix="agile.backlog"
+              id="current.create.sprint"
+            />
+          </span>
+
         </Button>
       </Tooltip>
     ) : (
@@ -116,7 +126,13 @@ class BacklogHome extends Component {
         service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint']}
       >
         <Button icon="playlist_add" onClick={this.handleCreateCurrentPiSprint}>
-          当前PI下创建冲刺
+          <span>
+            <C7NFormat
+              intlPrefix="agile.backlog"
+              id="current.create.sprint"
+            />
+          </span>
+
         </Button>
       </Permission>
     );
@@ -159,23 +175,47 @@ class BacklogHome extends Component {
     const { isInProgram, isShowFeature, theme } = this.props;
     return (
       <>
-        <Header title="待办事项">
+        <Header title={(
+          <C7NFormat
+            intlPrefix="agile.common"
+            id="backlog"
+          />
+        )}
+        >
           {isInProgram && arr.length && arr.length > 1
             ? <ShowPlanSprint /> : null}
           <HeaderButtons
             items={[{
-              name: '创建工作项',
+              name: (
+                <span>
+                  <C7NFormat
+                    intlPrefix="agile.common"
+                    id="create.issue"
+                  />
+                </span>),
               icon: 'playlist_add',
               handler: this.openCreateIssueModal,
               display: true,
             }, {
-              name: '创建冲刺',
+              name: (
+                <span>
+                  <C7NFormat
+                    intlPrefix="agile.backlog"
+                    id="create.sprint"
+                  />
+                </span>),
               icon: 'playlist_add',
               handler: this.handleCreateSprint,
               display: !isShowFeature,
               permissions: ['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint'],
             }, {
-              name: '当前PI下创建冲刺',
+              name: (
+                <span>
+                  <C7NFormat
+                    intlPrefix="agile.backlog"
+                    id="current.create.sprint"
+                  />
+                </span>),
               icon: 'playlist_add',
               handler: this.handleCreateCurrentPiSprint,
               display: isShowFeature,
@@ -234,7 +274,12 @@ class BacklogHome extends Component {
             <SideNav onChange={this.toggleCurrentVisible} activeKey={BacklogStore.whichVisible}>
               <Panel
                 key="version"
-                title="版本"
+                title={(
+                  <C7NFormat
+                    intlPrefix="agile.common"
+                    id="version"
+                  />
+)}
                 nav={(title) => (BacklogStore.chosenVersion !== 'all'
                   ? (
                     <>
@@ -255,7 +300,12 @@ class BacklogHome extends Component {
               {!isShowFeature ? (
                 <Panel
                   key="epic"
-                  title="史诗"
+                  title={(
+                    <C7NFormat
+                      intlPrefix="agile.common"
+                      id="epic"
+                    />
+)}
                   noHeader
                   nav={(title) => (BacklogStore.chosenEpic !== 'all'
                     ? (
@@ -277,7 +327,12 @@ class BacklogHome extends Component {
               ) : (
                 <Panel
                   key="feature"
-                  title="特性"
+                  title={(
+                    <C7NFormat
+                      intlPrefix="agile.common"
+                      id="feature"
+                    />
+                  )}
                   nav={(title) => (BacklogStore.chosenFeature !== 'all'
                     ? (
                       <>

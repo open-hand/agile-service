@@ -622,6 +622,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 Set<Long> childrenIds = new HashSet<>();
                 if (isTreeView) {
                     List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(issueIds, new HashSet<>(Arrays.asList(projectId)), searchVO, searchSql, searchVO.getAssigneeFilterIds(), null);
+                    if (CollectionUtils.isEmpty(childIssues)){
+                        childrenIds.add(0L);
+                    }
                     childrenIds.addAll(childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet()));
                 }
                 List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds, false, isTreeView);
@@ -1549,7 +1552,22 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (agilePluginService != null) {
             agilePluginService.handlerProgramUpdateIssue(issueType, fieldList, projectId, issueUpdateVO, originIssue);
         }
+        // 处理issue改变状态时，满足条件改变 is_pre_sprint_done 的值
+        handleHistorySprintCompleted(projectId, issueConvertDTO, fieldList, originIssue);
         issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
+    }
+
+    private void handleHistorySprintCompleted(Long projectId, IssueConvertDTO issueConvertDTO, List<String> fieldList, IssueDTO originIssue) {
+        // issue的 is_pre_sprint_done 值为 True, 并且更新了状态
+        if (Boolean.TRUE.equals(originIssue.getPreSprintDone()) && fieldList.contains("statusId")) {
+            // 检查这个issue的当前状态是不是已完成，不是就需要设置 is_pre_sprint_done 为false
+            Long statusId = issueConvertDTO.getStatusId();
+            IssueStatusDTO issueStatusDTO = issueStatusMapper.selectByStatusId(projectId, statusId);
+            if (Boolean.FALSE.equals(issueStatusDTO.getCompleted())) {
+                issueConvertDTO.setPreSprintDone(false);
+                fieldList.add("isPreSprintDone");
+            }
+        }
     }
 
 

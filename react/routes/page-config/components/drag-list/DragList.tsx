@@ -9,7 +9,7 @@ import {
   Card, Tooltip, Button, Input, Popconfirm,
 } from 'choerodon-ui';
 import { TextField } from 'choerodon-ui/pro';
-import { InjectedIntl } from 'react-intl';
+import type { IntlShape } from 'react-intl';
 import { Size } from 'choerodon-ui/lib/_util/enum';
 import './DragList.less';
 import { MAX_LENGTH_FIELD_OPTION_CODE, MAX_LENGTH_FIELD_OPTION_VALUE } from '@/constants/MAX_LENGTH';
@@ -31,7 +31,7 @@ interface Props {
   onActive?: (key: any) => void,
   onCreate?: (code: string, value: string) => void,
   onDelete?: (key: any) => void,
-  formatMessage: InjectedIntl['formatMessage'],
+  formatMessage: IntlShape['formatMessage'],
   title?: string,
   tips: React.ReactNode,
 }

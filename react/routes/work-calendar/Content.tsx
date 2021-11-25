@@ -15,6 +15,7 @@ import openSubscribeModal from '@/routes/work-calendar/components/subscribe';
 import SelectProject from '@/components/select/select-project';
 import DetailContainer, { useDetail } from '@/components/detail-container';
 import { CreateProps, ViewTypeCode } from '@/routes/work-calendar/types';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const { Option } = Select;
 
@@ -28,7 +29,7 @@ const WorkCalendar = observer(() => {
   } = useWorkCalendarStore();
 
   const [issueDetailProps] = useDetail();
-
+  const formatMessage = useFormatMessage();
   const refreshCalendar = useCallback(() => {
     const calendarRef = mainStore.getCalendarRef;
     if (calendarRef.current) {
@@ -108,7 +109,7 @@ const WorkCalendar = observer(() => {
         <HeaderButtons
           items={[{
             display: true,
-            name: '创建工作项',
+            name: formatMessage({ id: 'agile.common.create.issue' }),
             icon: 'playlist_add',
             handler: () => handleCreateIssue(),
           }, {

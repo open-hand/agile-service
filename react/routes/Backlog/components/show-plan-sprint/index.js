@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { CheckBox } from 'choerodon-ui/pro';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 function ShowPlanSprint() {
   useEffect(() => {
@@ -10,6 +11,7 @@ function ShowPlanSprint() {
       BacklogStore.setShowPlanSprint(localPageCacheStore.getItem('backlog.show.sprint'));
     }
   }, []);
+  const formatMessage = useFormatMessage('agile.backlog');
   return (
     <div>
       <CheckBox
@@ -21,7 +23,7 @@ function ShowPlanSprint() {
           BacklogStore.setShowPlanSprint(checked);
         }}
       >
-        显示未开始冲刺
+        {formatMessage({ id: 'show.init.sprint' })}
       </CheckBox>
     </div>
   );

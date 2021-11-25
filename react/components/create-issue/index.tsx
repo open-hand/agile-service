@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Modal, Form } from 'choerodon-ui/pro';
+import { C7NFormat } from '@choerodon/master';
 import { isEmpty, omit } from 'lodash';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { IModalProps, Issue } from '@/common/types';
@@ -91,8 +92,14 @@ const openModal = (props: CreateIssueProps) => {
       overflowX: 'hidden',
     },
     key: 'create-issue',
-    title: '创建工作项',
-    okText: '创建',
+    title: <C7NFormat
+      intlPrefix="agile.common"
+      id="create.issue"
+    />,
+    okText: <C7NFormat
+      intlPrefix="boot"
+      id="create"
+    />,
     children: <CreateContent typeCode={issueTypeCode} onSubmit={handleSubmit} {...omit(props, 'onSubmit')} defaultTypeId={defaultIssueTypeId} />,
   });
 };

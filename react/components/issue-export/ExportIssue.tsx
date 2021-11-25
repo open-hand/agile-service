@@ -20,6 +20,7 @@ import { IChosenFieldField } from '../chose-field/types';
 import TemplateSelect from '../template-select/TemplateSelect';
 import openSaveTemplate from '../template-select/components/save/SaveTemplate';
 import { ITemplate } from '../template-select/components/edit/EditTemplate';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 interface FormPartProps {
   title: string | ReactElement,
@@ -84,6 +85,7 @@ const ExportIssue: React.FC = () => {
   const {
     prefixCls, checkOptions: propsCheckOptions, store, fields, modal, action, exportBtnText, visibleCheckField: propsVisibleCheckField,
   } = useExportIssueStore();
+  const formatMessage = useFormatMessage();
   visibleCheckField.current = !!propsVisibleCheckField;
   const [templateFirstLoaded, setTemplateFirstLoaded] = useState(false);
 
@@ -291,7 +293,7 @@ const ExportIssue: React.FC = () => {
           className="c7n-exportIssue-btn"
           loading={store.exportButtonConfig?.buttonProps?.loading}
         >
-          导出
+          {formatMessage({ id: 'boot.export' })}
         </Button>
         {
           !templateIsExist && (

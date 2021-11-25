@@ -3,6 +3,7 @@ import { DataSet } from 'choerodon-ui/pro';
 import { useDetail } from '@/components/detail-container';
 import { versionApiConfig } from '@/api';
 import ReleaseHome from './ReleaseHome';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 function getSearchObj(values = {}) {
   const searchArgs = {};
@@ -25,25 +26,26 @@ function getSearchObj(values = {}) {
 }
 function ReleaseHomeHoc() {
   const [detailProps] = useDetail();
+  const formatMessage = useFormatMessage();
   const tableDataSet = useMemo(() => new DataSet({
     autoQuery: true,
     paging: true,
     selection: false,
     idField: 'versionId',
     fields: [
-      { name: 'name', label: '版本' },
-      { name: 'status', label: '版本状态' },
-      { name: 'startDate', label: '开始日期' },
-      { name: 'expectReleaseDate', label: '预计发布日期' },
-      { name: 'releaseDate', label: '实际发布日期' },
-      { name: 'description', label: '描述' },
+      { name: 'name', label: formatMessage({ id: 'agile.common.version' }) },
+      { name: 'status', label: formatMessage({ id: 'agile.version.status' }) },
+      { name: 'startDate', label: formatMessage({ id: 'agile.version.state.date' }) },
+      { name: 'expectReleaseDate', label: formatMessage({ id: 'agile.version.expect.release.date' }) },
+      { name: 'releaseDate', label: formatMessage({ id: 'agile.version.actual.release.date' }) },
+      { name: 'description', label: formatMessage({ id: 'agile.common.description' }) },
       { name: 'programVersionInfoVOS', label: '关联项目群' },
     ],
     queryFields: [
-      { name: 'name', label: '版本' },
+      { name: 'name', label: formatMessage({ id: 'agile.common.version' }) },
       {
         name: 'status',
-        label: '版本状态',
+        label: formatMessage({ id: 'agile.version.status' }),
         textField: 'text',
         valueField: 'value',
         multiple: true,
@@ -64,7 +66,7 @@ function ReleaseHomeHoc() {
           ],
         }),
       },
-      { name: 'description', label: '描述' },
+      { name: 'description', label: formatMessage({ id: 'agile.common.description' }) },
 
     ],
     transport: {

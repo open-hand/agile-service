@@ -10,7 +10,8 @@ import {
   Spin, Modal, Tabs,
 } from 'choerodon-ui/pro';
 import { withRouter } from 'react-router-dom';
-import { HeaderButtons } from '@choerodon/master';
+import { C7NFormat, HeaderButtons } from '@choerodon/master';
+
 import './Setting.less';
 import { commonApi, boardApi } from '@/api';
 import to from '@/utils/to';
@@ -83,7 +84,13 @@ class Setting extends Component {
   handleDeleteBoard() {
     const { name } = ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard);
     Modal.open({
-      title: `删除看板"${name}"`,
+      title: <C7NFormat
+        intlPrefix="agile.scrumBoard"
+        id="delete.board"
+        values={{
+          name,
+        }}
+      />,
       children: '确定要删除该看板吗?',
       okText: '删除',
       cancelText: '取消',
@@ -133,21 +140,41 @@ class Setting extends Component {
     const { loading, activeKey } = this.state;
     return (
       <Page>
-        <Header title="配置看板">
+        <Header title={(
+          <C7NFormat
+            intlPrefix="agile.scrumBoard"
+            id="column.setting"
+          />
+        )}
+        >
           <HeaderButtons items={[{
-            name: '添加状态',
+            name: <C7NFormat
+              intlPrefix="agile.common"
+              id="add.status"
+            />,
             icon: 'playlist_add',
             handler: this.handleCreateStatusClick,
             display: activeKey === '1',
             permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.status.create'],
           }, {
-            name: '添加列',
+            name: <C7NFormat
+              intlPrefix="agile.scrumBoard"
+              id="add.column"
+
+            />,
             icon: 'playlist_add',
             handler: this.handleCreateColumnClick,
             display: activeKey === '1',
             permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.column.create'],
           }, {
-            name: '删除看板',
+            name: (
+              <span>
+                <C7NFormat
+                  intlPrefix="agile.scrumBoard"
+                  id="delete.board"
+                  values={{ name: '' }}
+                />
+              </span>),
             icon: 'delete_sweep-o',
             handler: this.handleDeleteBoard,
             display: true,
@@ -167,7 +194,13 @@ class Setting extends Component {
           }]}
           />
         </Header>
-        <Breadcrumb title="配置看板" />
+        <Breadcrumb title={(
+          <C7NFormat
+            intlPrefix="agile.scrumBoard"
+            id="column.setting"
+          />
+        )}
+        />
         <Content className="c7n-scrumboard c7n-pro-form-float" style={{ height: '100%', paddingTop: 0 }}>
           <Tabs
             style={{
@@ -177,25 +210,58 @@ class Setting extends Component {
             activeKey={activeKey}
             onChange={this.handleTabChange}
           >
-            <TabPane className="c7n-scrumboard-columnsetting-panel" tab="列配置" key="1">
+            <TabPane
+              className="c7n-scrumboard-columnsetting-panel"
+              tab={(
+                <C7NFormat
+                  intlPrefix="agile.scrumBoard"
+                  id="column.config"
+                />
+              )}
+              key="1"
+            >
               <Spin spinning={loading}>
                 <SettingColumn
                   refresh={this.refresh}
                 />
               </Spin>
             </TabPane>
-            <TabPane tab="泳道" key="2">
+            <TabPane
+              tab={(
+                <C7NFormat
+                  intlPrefix="agile.scrumBoard"
+                  id="swimlane"
+                />
+              )}
+              key="2"
+            >
               <SwimLanePage />
             </TabPane>
             {ScrumBoardStore.getCalanderCouldUse
               ? (
-                <TabPane tab="工作日历" key="3">
+                <TabPane
+                  tab={(
+                    <C7NFormat
+                      intlPrefix="agile.scrumBoard"
+                      id="working.day"
+                    />
+                  )}
+                  key="3"
+                >
                   <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.work_calendar.update']}>
                     {this.renderWorkCalendarPage}
                   </Permission>
                 </TabPane>
               ) : null}
-            <TabPane tab="看板名称" key="4">
+            <TabPane
+              tab={(
+                <C7NFormat
+                  intlPrefix="agile.scrumBoard"
+                  id="board.name"
+                />
+              )}
+              key="4"
+            >
               <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.board.update']}>
                 {this.renderEditBoardName}
               </Permission>

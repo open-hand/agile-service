@@ -5,20 +5,7 @@ import { DataSetSelection, FieldType } from 'choerodon-ui/pro/lib/data-set/enum'
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 
 import { getIsOrganization, getOrganizationId } from '@/utils/common';
-
-export const formatStartDate = (date: string | Moment, format = false) => {
-  if (!format) {
-    return moment(date).startOf('day');
-  }
-  return moment(date).startOf('day').format('YYYY-MM-DD HH:mm:ss');
-};
-
-export const formatEndDate = (date: string | Moment, format = false) => {
-  if (!format) {
-    return moment(date).endOf('day');
-  }
-  return moment(date).endOf('day').format('YYYY-MM-DD HH:mm:ss');
-};
+import { formatStartDate } from '../../utils';
 
 interface WorkGroupItem {
   parentId: string | null | number,
@@ -36,19 +23,16 @@ const LogExportDataSet = ({ projectCreationDate, showWorkGroup = false }: { proj
   }, {
     name: 'startTime',
     required: true,
+    min: getIsOrganization() ? undefined : formatStartDate(projectCreationDate),
     dynamicProps: {
       max: ({ record }: { record: Record}) => moment(record.get('endTime')).startOf('day'),
-      // eslint-disable-next-line no-nested-ternary
-      min: ({ record }: { record: Record }) => (getIsOrganization() ? formatStartDate(moment(record?.get('endTime')).subtract(31, 'days')) : (
-        moment(record?.get('endTime')).subtract(31, 'days').isAfter(moment(projectCreationDate))) ? (formatStartDate(moment(record?.get('endTime'))) as Moment).subtract(31, 'days').startOf('day') : moment(projectCreationDate).startOf('day')
-      ),
     },
     label: '开始时间',
   }, {
     name: 'endTime',
     required: true,
+    max: moment().endOf('day'),
     dynamicProps: {
-      max: ({ record }: { record: Record}) => (moment(record?.get('startTime')).add(31, 'days').isBefore(moment().endOf('day')) ? (formatStartDate(moment(record?.get('startTime'))) as Moment).add(31, 'days').endOf('day') : moment().endOf('day')),
       min: ({ record }: { record: Record }) => moment(record.get('startTime')).startOf('day'),
     },
     label: '结束时间',
@@ -71,7 +55,7 @@ const LogExportDataSet = ({ projectCreationDate, showWorkGroup = false }: { proj
       parentField: 'parentId',
       transport: {
         read: () => ({
-          url: `/agile/v1/organizations/${getOrganizationId()}/work_group/query_tree`,
+          url: `/agile/v1/organizations/${getOrganizationId()}/work_bench/work_group/query_tree`,
           method: 'get',
           transformResponse: (res) => {
             try {
@@ -98,6 +82,30 @@ const LogExportDataSet = ({ projectCreationDate, showWorkGroup = false }: { proj
     label: '按工作组统计总量',
     type: 'boolean' as FieldType,
   }],
+  events: {
+    update: ({ name, value, record }: { name: string, value: any, record: Record}) => {
+      if (name === 'startTime') {
+        if (value) {
+          const endTime = record.get('endTime');
+          if (moment(endTime).endOf('day').diff(value, 'days') > 31) {
+            const newEndTime = moment(value).add(31, 'days');
+            record.set('endTime', newEndTime);
+            return;
+          }
+        }
+      }
+
+      if (name === 'endTime') {
+        if (value) {
+          const startTime = record.get('startTime');
+          if (moment(value).endOf('day').diff(startTime, 'days') > 31) {
+            const newStartTime = moment(value).subtract(31, 'days');
+            record.set('startTime', newStartTime);
+          }
+        }
+      }
+    },
+  },
 });
 
 export default LogExportDataSet;

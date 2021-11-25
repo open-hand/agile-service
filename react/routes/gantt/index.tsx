@@ -19,8 +19,8 @@ import { Loading } from '@/components';
 const GanttProject: React.FC<{ projectId: string, menuType?: 'project' | 'org', HeadSelect?: JSX.Element, [key: string]: any }> = ({
   projectId, projects, setCurrentProject, menuType = 'project',
 }) => {
-  const { isInProgram, loading: programLoading } = useIsInProgram({ projectId });
-  const { data: myFilter, isLoading } = useDefaultMyFilter(projectId);
+  const { isInProgram, loading: programLoading } = useIsInProgram({ projectId, menuType: 'project' });
+  const { data: myFilter, isLoading } = useDefaultMyFilter({ projectId, menuType: 'project' });
   const loading = programLoading || isLoading;
   if (menuType === 'project') {
     return !loading ? (

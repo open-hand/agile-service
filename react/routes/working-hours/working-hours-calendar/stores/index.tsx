@@ -8,8 +8,9 @@ import { observer } from 'mobx-react-lite';
 import moment, { Moment } from 'moment';
 import { toJS } from 'mobx';
 import { debounce } from 'lodash';
+import { useDebounceFn } from 'ahooks';
 import { AppStateProps, User } from '@/common/types';
-import CalendarSearchDataSet, { formatEndDate, formatStartDate } from './CalendarSearchDataSet';
+import CalendarSearchDataSet from './CalendarSearchDataSet';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { getIsOrganization } from '@/utils/common';
 import LogExportDataSet from '../../working-hours-log/stores/LogExportDataSet';
@@ -19,6 +20,7 @@ import {
 } from '@/api';
 import isHoliday from '@/utils/holiday';
 import CalendarDataSet from './CalendarDataSet';
+import { formatEndDate, formatStartDate } from '../../utils';
 
 const Store = createContext({} as Context);
 
@@ -53,6 +55,7 @@ interface Context {
   userIds: undefined | string[],
   projectIds: undefined | string[],
   workGroupIds: undefined | string[],
+  projectCreationDate: string
 }
 
 function getIsRestDay(date: string | Moment, workCalendar: any) {
@@ -87,11 +90,11 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
       const yearRange = [moment(startTime).year(), moment(endTime).year()];
       if (!isNaN(yearRange[0]) && !isNaN(yearRange[1])) {
         if (yearRange[0] === yearRange[1]) {
-          workCalendarApi.getWorkSetting(yearRange[0]).then((res: any) => {
+          workCalendarApi.workBenchGetWorkSetting(yearRange[0]).then((res: any) => {
             workCalendarMap.set(yearRange[0], res);
           });
         } else {
-          Promise.all(yearRange.map((year) => workCalendarApi.getWorkSetting(year))).then((yearCalendars) => {
+          Promise.all(yearRange.map((year) => workCalendarApi.workBenchGetWorkSetting(year))).then((yearCalendars) => {
             yearRange.forEach((year, i) => {
               workCalendarMap.set(year, yearCalendars[i]);
             });
@@ -101,8 +104,12 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     }
   }, [workCalendarMap, startTime, endTime]);
 
+  const { run: debounceGetWorkCalendar } = useDebounceFn(getWorkCalendar, {
+    wait: 600,
+  });
+
   useEffect(() => {
-    getWorkCalendar();
+    debounceGetWorkCalendar();
   }, [getWorkCalendar]);
 
   const getCountData = useCallback((data: IWorkingHoursData) => {
@@ -129,13 +136,13 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     }
   }, [calendarDs, getCountData, startTime, endTime, userIds, projectIds, workGroupIds, filterLoaded]);
 
+  const { run: debounceLoadData } = useDebounceFn(loadData, {
+    wait: 600,
+  });
+
   useEffect(() => {
-    loadData();
+    debounceLoadData();
   }, [loadData]);
-
-  useEffect(() => {
-
-  }, []);
 
   useEffect(() => {
     const getCacheFilters = async () => {
@@ -202,6 +209,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer((pro
     userIds,
     projectIds,
     workGroupIds,
+    projectCreationDate,
   };
   return (
     <Store.Provider value={value}>

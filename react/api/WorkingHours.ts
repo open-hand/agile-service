@@ -19,6 +19,10 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
     return `/agile/v1/organizations/${getOrganizationId()}`;
   }
 
+  get workBenchPrefix() {
+    return `/agile/v1/organizations/${this.orgId}/work_bench`;
+  }
+
   getLogs(params: any, data: IWorkingHoursData) {
     return this.request({
       method: 'post',
@@ -34,7 +38,7 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
   orgGetLogs(params: any, data: IWorkingHoursData) {
     return this.request({
       method: 'post',
-      url: `${this.orgPrefix}/work_hours/work_hours_log`,
+      url: `${this.workBenchPrefix}/work_hours/work_hours_log`,
       params: {
         ...(params || {}),
       },
@@ -45,7 +49,7 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
   exportLog(data: IWorkingHoursData) {
     return this.request({
       method: 'post',
-      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/work_hours/export_work_hours_log`,
+      url: `${getIsOrganization() ? this.workBenchPrefix : this.prefix}/work_hours/export_work_hours_log`,
       params: {
         organizationId: getOrganizationId(),
       },
@@ -56,7 +60,7 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
   getLatest(action: WorkingHoursExportAction) {
     return this.request({
       method: 'get',
-      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/excel/latest`,
+      url: `${getIsOrganization() ? this.workBenchPrefix : this.prefix}/excel/latest`,
       params: {
         organizationId: getOrganizationId(),
         action,
@@ -67,7 +71,7 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
   getCalendar({ params, data }:{params?: { page: number, size: number }, data: IWorkingHoursData}) {
     return this.request({
       method: 'post',
-      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/work_hours/work_hours_calendar`,
+      url: `${getIsOrganization() ? this.workBenchPrefix : this.prefix}/work_hours/work_hours_calendar`,
       params: {
         organizationId: getOrganizationId(),
         ...params,
@@ -79,7 +83,7 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
   getCount(data: IWorkingHoursData) {
     return this.request({
       method: 'post',
-      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/work_hours/count_work_hours`,
+      url: `${getIsOrganization() ? this.workBenchPrefix : this.prefix}/work_hours/count_work_hours`,
       params: {
         organizationId: getOrganizationId(),
       },
@@ -90,7 +94,7 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
   getUserCalendar(userId: string, data: IWorkingHoursData) {
     return this.request({
       method: 'post',
-      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/work_hours/work_hours_calendar_info`,
+      url: `${getIsOrganization() ? this.workBenchPrefix : this.prefix}/work_hours/work_hours_calendar_info`,
       params: {
         organizationId: getOrganizationId(),
         userId,
@@ -102,7 +106,7 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
   exportCalendar(data: IWorkingHoursData) {
     return this.request({
       method: 'post',
-      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/work_hours/export_work_hours_calendar`,
+      url: `${getIsOrganization() ? this.workBenchPrefix : this.prefix}/work_hours/export_work_hours_calendar`,
       params: {
         organizationId: getOrganizationId(),
       },
@@ -113,7 +117,7 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
   getTotalWorkTime(data: any, containsSubIssue: boolean) {
     return this.request({
       method: 'post',
-      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/work_hours/count_issue_work_hours`,
+      url: `${getIsOrganization() ? this.workBenchPrefix : this.prefix}/work_hours/count_issue_work_hours`,
       params: {
         organizationId: getOrganizationId(),
         containsSubIssue,
@@ -125,7 +129,7 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
   exportHours(data:any) {
     return this.request({
       method: 'post',
-      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/work_hours/export_issue_work_hours`,
+      url: `${getIsOrganization() ? this.workBenchPrefix : this.prefix}/work_hours/export_issue_work_hours`,
       params: {
         organizationId: this.orgId,
       },

@@ -9,11 +9,13 @@ import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
 import Context from '../../stores/context';
 import { units } from '../../stores/store';
 import GanttLegend from '../gantt-legend';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const GanttOperation: React.FC = () => {
   const { store } = useContext(Context);
   const { unit, ganttRef } = store;
   const text = find(units, { type: unit });
+  const formatMessage = useFormatMessage('agile.gantt');
   const handleChangeUnit = useCallback(({ key }) => {
     store.switchUnit(key);
   }, [store]);
@@ -27,7 +29,7 @@ const GanttOperation: React.FC = () => {
           display: 'inline-block', marginRight: 16, marginLeft: 3, lineHeight: '18px',
         }}
         >
-          图例说明
+          {formatMessage({ id: 'legend' })}
           <Icon
             type="help_outline"
             style={{
@@ -47,8 +49,7 @@ const GanttOperation: React.FC = () => {
           height: 26,
         }}
       >
-        返回今日
-
+        {formatMessage({ id: 'today' })}
       </Button>
       <Dropdown
         overlay={(

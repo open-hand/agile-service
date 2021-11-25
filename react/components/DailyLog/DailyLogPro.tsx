@@ -91,8 +91,9 @@ const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = 
       { name: 'description', label: '描述', type: 'string' as FieldType },
     ],
     data: [{
-      startDate: defaultStartTime || moment().format('YYYY-MM-DD'),
+      startDate: defaultStartTime || moment(),
       timeUnit: 'H',
+      remain: 'auto',
     }],
   }), [defaultStartTime, issueId]);
   useEffect(() => {

@@ -65,7 +65,7 @@ class CommonApi extends Api<CommonApi> {
   getProjectsInProgram(projectId?: string) {
     return this.request({
       method: 'get',
-      url: `iam/choerodon/v1/organizations/${getOrganizationId()}/projects/${projectId || getProjectId()}/program`,
+      url: `iam/choerodon/v1/organizations/${this.orgId}/projects/${projectId || getProjectId()}/program`,
       // cache: true,
     });
   }

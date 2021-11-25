@@ -28,7 +28,7 @@ const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
   const listRef = useRef<ListRefProps>({} as ListRefProps);
   const [loading, setLoading] = useState(true);
   const [fields, setFields] = useState<IField[]>([]);
-  const allFields = useMemo(() => [...getSystemFields(), ...fields].map((item) => ({ ...item, immutableCheck: item.code === 'sprint' ? true : undefined, otherComponentProps: { range: item.fieldType && ['time', 'datetime', 'date'].includes(item.fieldType) ? true : undefined } })), [fields]);
+  const allFields = useMemo(() => [...getSystemFields().filter((item) => !item.archive && !item.noDisplay), ...fields].map((item) => ({ ...item, immutableCheck: item.code === 'sprint' ? true : undefined, otherComponentProps: { range: item.fieldType && ['time', 'datetime', 'date'].includes(item.fieldType) ? true : undefined } })), [fields]);
   const getCustomFieldById = useCallback((id: string) => {
     const field = find(allFields, { id });
     return field || undefined;
@@ -44,7 +44,7 @@ const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
     const filterObject = flattenObject(editData.searchVO);
     const result = [];
     for (const [key, value] of Object.entries(filterObject)) {
-      if (value) {
+      if (value && key !== 'quickFilterIds') {
         // 自定义字段保存的时候只保存了id，这里要找到code
         if (value.isCustom) {
           const field = getCustomFieldById(key);
@@ -55,6 +55,14 @@ const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
           result.push({ ...getSystemFieldByCode('createDate'), code: 'createDate', value: [filterObject.createStartDate, filterObject.createEndDate] });
         } else if (key === 'updateEndDate' || key === 'updateStartDate') {
           result.push({ ...getSystemFieldByCode('updateDate'), code: 'updateDate', value: [filterObject.updateStartDate, filterObject.updateEndDate] });
+        } else if (key === 'estimatedStartTimeScopeStart' || key === 'estimatedStartTimeScopeEnd') {
+          result.push({ ...getSystemFieldByCode('estimatedStartTime'), code: 'estimatedStartTime', value: [filterObject.estimatedStartTimeScopeStart, filterObject.estimatedStartTimeScopeEnd] });
+        } else if (key === 'estimatedEndTimeScopeStart' || key === 'estimatedEndTimeScopeEnd') {
+          result.push({ ...getSystemFieldByCode('estimatedEndTime'), code: 'estimatedEndTime', value: [filterObject.estimatedEndTimeScopeStart, filterObject.estimatedEndTimeScopeEnd] });
+        } else if (key === 'actualStartTimeScopeStart' || key === 'actualStartTimeScopeEnd') {
+          result.push({ ...getSystemFieldByCode('actualStartTime'), code: 'actualStartTime', value: [filterObject.actualStartTimeScopeStart, filterObject.actualStartTimeScopeEnd] });
+        } else if (key === 'actualEndTimeScopeStart' || key === 'actualEndTimeScopeEnd') {
+          result.push({ ...getSystemFieldByCode('actualEndTime'), code: 'actualEndTime', value: [filterObject.actualEndTimeScopeStart, filterObject.actualEndTimeScopeEnd] });
         } else {
           result.push({
             ...getSystemFieldByCode(key), code: key, value,

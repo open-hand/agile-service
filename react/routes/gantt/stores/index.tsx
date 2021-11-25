@@ -12,7 +12,7 @@ import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { ILocalField } from '@/components/issue-search/store';
 import GanttPage from '../Gantt';
 
-export const StoreProvider = inject('AppState')(injectIntl(
+export const StoreProvider = inject('AppState')(injectIntl<'intl', any>(
   (props: IGanttProps & { children?: any }) => {
     const {
       children, projectId, myDefaultFilter, menuType,
