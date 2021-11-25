@@ -672,4 +672,8 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                                @Param("filterSql") String filterSql,
                                                @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
                                                @Param("sortMap") Map<String, Object> sortMap);
+
+    List<Long> selectCompletedSubIssue(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
+
+    void updateSubIssueHistoryCompleted(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
 }

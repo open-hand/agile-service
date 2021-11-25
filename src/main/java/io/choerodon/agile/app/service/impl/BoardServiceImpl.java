@@ -111,6 +111,8 @@ public class BoardServiceImpl implements BoardService {
     private IssueService issueService;
     @Autowired
     private IssueParticipantRelMapper issueParticipantRelMapper;
+    @Autowired
+    private ProjectInfoMapper projectInfoMapper;
 
     @Override
     public void create(Long projectId, String boardName) {
@@ -473,6 +475,8 @@ public class BoardServiceImpl implements BoardService {
                 });
             }
         });
+        // 项目是否设置隐藏历史迭代中已完成的子任务
+        addSearchParam(projectId, sprintId, searchVO);
         List<IssueForBoardDO> issueList = boardColumnMapper.selectBoardIssue(new HashSet<>(Arrays.asList(projectId)), sprintId, filterSql, searchVO, assigneeFilterIds, userId, statusIds);
         if (CollectionUtils.isEmpty(issueList)){
             return;
@@ -498,6 +502,18 @@ public class BoardServiceImpl implements BoardService {
             }
         });
         Collections.sort(participantIds);
+    }
+
+    private void addSearchParam(Long projectId, Long sprintId,SearchVO searchVO) {
+        ProjectInfoDTO projectInfoDTO = projectInfoMapper.queryByProjectId(projectId);
+        if (Boolean.TRUE.equals(projectInfoDTO.getHidePreSprintDoneSubissue())) {
+            Map<String, Object> searchArgs = searchVO.getSearchArgs();
+            if (ObjectUtils.isEmpty(searchArgs)) {
+                searchArgs = new HashMap<>();
+            }
+            searchArgs.put("hidePreSprintDoneSubissue", true);
+            searchVO.setSearchArgs(searchArgs);
+        }
     }
 
     private SprintDTO handlerCurrentSprint(Long projectId, SearchVO searchVO) {

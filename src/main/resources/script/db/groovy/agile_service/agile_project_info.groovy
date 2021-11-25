@@ -47,4 +47,10 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_project_info.groovy') {
         }
     }
 
+    changeSet(id: '2021-11-24-agile-project-info-add-column', author: 'ztxemail@163.com') {
+        addColumn(tableName: 'agile_project_info') {
+            column(name: "is_hide_pre_sprint_done_subissue", type: "TINYINT UNSIGNED", defaultValue: "0", remarks: '是否隐藏历史迭代中已完成的子任务')
+        }
+    }
+
 }

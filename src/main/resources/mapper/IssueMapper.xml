@@ -3343,7 +3343,8 @@
             ai.epic_id,
             sprint.sprint_id,
             ai.estimate_time,
-            ai.remaining_time
+            ai.remaining_time,
+            ai.is_pre_sprint_done
         FROM
             agile_issue ai
             LEFT JOIN (
@@ -4604,6 +4605,12 @@
 
     <sql id="filterChildrenSql">
         <if test='advancedSearchArgs != null'>
+            <if test="advancedSearchArgs.sprintId != null">
+                AND ai.issue_id in (
+                   select aisr.issue_id from agile_issue_sprint_rel aisr
+                   where aisr.project_id = #{projectId} and aisr.sprint_id = #{advancedSearchArgs.sprintId}
+                )
+            </if>
             <if test='advancedSearchArgs.versionId != null'>
                 AND ai.issue_id IN (SELECT issue_id FROM agile_version_issue_rel WHERE version_id =
                 #{advancedSearchArgs.versionId} AND relation_type = 'fix')
@@ -5556,6 +5563,30 @@
             ORDER BY ${sortMap.orderStr}
         </if>
     </select>
+
+    <select id="selectCompletedSubIssue" resultType="java.lang.Long">
+        SELECT
+            ai.issue_id
+        FROM agile_issue ai
+        LEFT JOIN agile_issue_status ais ON ais.project_id = ai.project_id AND ais.status_id = ai.status_id
+        WHERE ai.project_id = #{projectId}
+        AND ai.type_code = 'sub_task'
+        AND ai.parent_issue_id IN
+        <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+            #{issueId}
+        </foreach>
+        AND ais.is_completed = 1
+    </select>
+
+    <update id="updateSubIssueHistoryCompleted">
+        update agile_issue
+        set is_pre_sprint_done = 1
+        where project_id = #{projectId}
+        and issue_id in
+        <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+            #{issueId}
+        </foreach>
+    </update>
 
     <sql id="queryAssigneeIssue">
         <if test="workItemSearchVO.assigneeFilter.contains('assignee')">

@@ -502,6 +502,11 @@
                 #{statusId}
             </foreach>
         </if>
+        <if test="searchVO.searchArgs != null">
+            <if test="searchVO.searchArgs.hidePreSprintDoneSubissue">
+                and ai.is_pre_sprint_done = 0
+            </if>
+        </if>
         <include refid="io.choerodon.agile.infra.mapper.IssueMapper.explainSearchVO"/>
         <include refid="io.choerodon.agile.infra.mapper.IssueMapper.filterSqlAndAssigneeIds"/>
         <if test='searchVO.searchArgs != null'>
