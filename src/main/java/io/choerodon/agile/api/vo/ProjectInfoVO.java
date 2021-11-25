@@ -35,6 +35,9 @@ public class ProjectInfoVO {
     @ApiModelProperty(value = "创建时间")
     private Date creationDate;
 
+    @ApiModelProperty(value = "是否隐藏历史迭代中已完成的子任务")
+    private Boolean isHidePreSprintDoneSubissue;
+
     public Long getInfoId() {
         return infoId;
     }
@@ -97,6 +100,14 @@ public class ProjectInfoVO {
 
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
+    }
+
+    public Boolean getHidePreSprintDoneSubissue() {
+        return isHidePreSprintDoneSubissue;
+    }
+
+    public void setHidePreSprintDoneSubissue(Boolean hidePreSprintDoneSubissue) {
+        isHidePreSprintDoneSubissue = hidePreSprintDoneSubissue;
     }
 
     @Override
