@@ -855,38 +855,57 @@ public class WorkHoursExcelServiceImpl implements WorkHoursExcelService {
         Map<Long, List<ExportIssuesVO>> groupMap = list.stream().collect(Collectors.groupingBy(function));
         for (Map.Entry<Long, List<ExportIssuesVO>> entry : groupMap.entrySet()) {
             List<ExportIssuesVO> values = entry.getValue();
-            List<Long> existIssue = new ArrayList<>();
             List<ExportIssuesVO> exportIssuesVOS = new ArrayList<>();
-            Map<Long, ExportIssuesVO> exportIssuesMap = new HashMap<>();
-            for (ExportIssuesVO value : values) {
-                // 子任务和子缺陷需要把需要添加父任务
-                Boolean isSubIssue = !ObjectUtils.isEmpty(value) && !Objects.equals(0L, value.getParentId());
-                if (isSubIssue) {
-                    ExportIssuesVO exportIssuesVO = exportIssuesMap.get(value.getParentId());
-                    if (ObjectUtils.isEmpty(exportIssuesVO)) {
-                        exportIssuesVO = issueMap.get(value.getParentId());
-                    }
-                    if (!ObjectUtils.isEmpty(exportIssuesVO)) {
-                        ExportIssuesVO parent = new ExportIssuesVO();
-                        BeanUtils.copyProperties(exportIssuesVO, parent);
-                        Integer color = !ObjectUtils.isEmpty(parent.getColorIndex()) ? parent.getColorIndex() : getColorIndex(colorIndex);
-                        parent.setColorIndex(color);
-                        if (!existIssue.contains(value.getParentId())) {
-                            exportIssuesVOS.add(parent);
-                            existIssue.add(value.getParentId());
-                        }
-                        exportIssuesMap.put(parent.getIssueId(), parent);
-                        value.setColorIndex(parent.getColorIndex());
-                    }
-                }
-                if (!existIssue.contains(value.getIssueId())) {
-                    exportIssuesVOS.add(value);
-                    existIssue.add(value.getIssueId());
+            Map<Long, List<ExportIssuesVO>> childrenMap = new HashMap<>();
+            Map<Long, ExportIssuesVO> parentIssueMap = new HashMap<>();
+            handleIssueLevel(values, issueMap, colorIndex, parentIssueMap, childrenMap);
+            if (!CollectionUtils.isEmpty(parentIssueMap)) {
+                // 按issueId倒序排列
+                List<Long> parentIds = new ArrayList<>(parentIssueMap.keySet());
+                Collections.sort(parentIds, (o1,o2) -> o2.compareTo(o1));
+                for (Long parentId : parentIds) {
+                    exportIssuesVOS.add(parentIssueMap.get(parentId));
+                    exportIssuesVOS.addAll(childrenMap.getOrDefault(parentId, new ArrayList<>()));
                 }
             }
             result.put(entry.getKey(), exportIssuesVOS);
         }
         return result;
+    }
+
+    private void handleIssueLevel(List<ExportIssuesVO> values,
+                                  Map<Long, ExportIssuesVO> issueMap,
+                                  List<Integer> colorIndex,
+                                  Map<Long, ExportIssuesVO> parentIssueMap,
+                                  Map<Long, List<ExportIssuesVO>> childrenMap) {
+        List<Long> existIssue = new ArrayList<>();
+        for (ExportIssuesVO value : values) {
+            // 子任务和子缺陷需要把需要添加父任务
+            Boolean isSubIssue = !ObjectUtils.isEmpty(value) && !Objects.equals(0L, value.getParentId());
+            if (isSubIssue) {
+                ExportIssuesVO exportIssuesVO = parentIssueMap.get(value.getParentId());
+                if (ObjectUtils.isEmpty(exportIssuesVO)) {
+                    exportIssuesVO = issueMap.get(value.getParentId());
+                }
+                if (!ObjectUtils.isEmpty(exportIssuesVO)) {
+                    ExportIssuesVO parent = new ExportIssuesVO();
+                    BeanUtils.copyProperties(exportIssuesVO, parent);
+                    Integer color = !ObjectUtils.isEmpty(parent.getColorIndex()) ? parent.getColorIndex() : getColorIndex(colorIndex);
+                    parent.setColorIndex(color);
+                    if (!existIssue.contains(value.getParentId())) {
+                        existIssue.add(value.getParentId());
+                    }
+                    parentIssueMap.put(parent.getIssueId(), parent);
+                    value.setColorIndex(parent.getColorIndex());
+                    List<ExportIssuesVO> childrens = childrenMap.getOrDefault(value.getParentId(), new ArrayList<>());
+                    childrens.add(value);
+                    childrenMap.put(value.getParentId(), childrens);
+                }
+            } else if (!existIssue.contains(value.getIssueId())) {
+                parentIssueMap.put(value.getIssueId(), value);
+                existIssue.add(value.getIssueId());
+            }
+        }
     }
 
     private Integer getColorIndex(List<Integer> colorIndex) {
