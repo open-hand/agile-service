@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Tooltip, Icon, Select } from 'choerodon-ui/pro';
 import classnames from 'classnames';
 import styles from './index.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const { Option } = Select;
 const ListIcon = ({ className = '', onClick }: { className: string, onClick: () => void }) => (
@@ -22,6 +23,7 @@ interface Props {
 const TreeListSwitch: React.FC<Props> = ({
   data: propsData, onChange, disabled, className, listText, treeText, ...otherProps
 }) => {
+  const formatMessage = useFormatMessage('agile.common');
   const [data, setData] = useState(() => propsData);
   useEffect(() => {
     if (typeof (propsData) === 'string') {
@@ -37,8 +39,8 @@ const TreeListSwitch: React.FC<Props> = ({
   return (
     <div className={classnames(styles.switch, className)} {...otherProps}>
       <Select onChange={handleChange} value={data} clearButton={false}>
-        <Option value="list" key="list" disabled={disabled}>{listText || '列表视图'}</Option>
-        <Option value="tree" key="tree" disabled={disabled}>{treeText || '树形视图'}</Option>
+        <Option value="list" key="list" disabled={disabled}>{listText || formatMessage({ id: 'list.view' })}</Option>
+        <Option value="tree" key="tree" disabled={disabled}>{treeText || formatMessage({ id: 'tree.view' })}</Option>
       </Select>
     </div>
   );

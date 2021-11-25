@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { C7NFormat } from '@choerodon/master';
 import { Permission } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import { FlatSelect } from '@choerodon/components';
@@ -22,7 +23,10 @@ const SelectBoard: React.FC<SelectBoardProps> = ({
         service={['choerodon.code.project.cooperation.iteration-plan.ps.board.create']}
       >
         <div role="none" onClick={onFooterClick} className={styles.footer}>
-          创建看板
+          <C7NFormat
+            intlPrefix="agile.scrumBoard"
+            id="create.board"
+          />
         </div>
       </Permission>
     ) : null);

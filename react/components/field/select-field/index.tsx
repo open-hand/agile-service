@@ -5,6 +5,7 @@ import { Button, Dropdown } from 'choerodon-ui/pro';
 
 import { pull, uniq } from 'lodash';
 import FieldList from './FieldList';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 function useClickOut(onClickOut: (e?: any) => void) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -46,6 +47,8 @@ const SelectField: React.FC<SelectFieldProps> = ({
   triggerElement,
   ...otherProps
 }) => {
+  const formatMessage = useFormatMessage('agile.common');
+
   const [hidden, setHidden] = useState(true);
   const [value, setValue] = useState<string[]>([]);
   const controlled = 'value' in otherProps;
@@ -114,7 +117,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
               setHidden(false);
             }}
           >
-            添加筛选
+            {formatMessage({ id: 'add.filter' })}
           </Button>
         )}
       </Dropdown>

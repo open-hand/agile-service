@@ -1,12 +1,14 @@
 import React from 'react';
 import { observer } from 'mobx-react';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 function SprintVisibleIssue({
   data: { issueCount },
 }) {
+  const formatMessage = useFormatMessage('agile.backlog');
   return (
     <div style={{ color: 'var(--text-color3)', marginLeft: '0.26rem' }}>
-      {`${issueCount}个工作项可见`}
+      {formatMessage({ id: 'visible.issue' }, { issue: issueCount })}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { useSize } from 'ahooks';
 import classNames from 'classnames';
 import Moment from 'moment';
 import { extendMoment } from 'moment-range';
+import { C7NFormat } from '@choerodon/master';
 import DateTable from './DateTable';
 import styles from './index.less';
 import { useCalendarStore } from '../../stores';
@@ -17,19 +18,28 @@ const moment = extendMoment(Moment);
 
 const legendMapArr = [
   {
-    label: '未饱和',
+    label: <C7NFormat
+      intlPrefix="agile.workHours"
+      id="unsaturate"
+    />,
     key: 'Unsaturated',
     tooltip: '小于8小时',
     color: '#FFB100',
   },
   {
-    label: '饱和',
+    label: <C7NFormat
+      intlPrefix="agile.workHours"
+      id="saturate"
+    />,
     key: 'saturated',
     tooltip: '8小时',
     color: '#00BFA5',
   },
   {
-    label: '过度饱和',
+    label: <C7NFormat
+      intlPrefix="agile.workHours"
+      id="over.saturate"
+    />,
     key: 'overSaturated',
     tooltip: '大于8小时',
     color: '#FF6939',

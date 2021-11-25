@@ -3,9 +3,12 @@ import { observer } from 'mobx-react-lite';
 import { useTaskContext } from '@/routes/project-report/report-preview/taskContext';
 import { useProjectReportContext } from '../../context';
 import styles from './Preview.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const BaseInfoPreview: React.FC = () => {
   const { store } = useProjectReportContext();
+  const formatMessage = useFormatMessage();
+
   const { baseInfo } = store;
   const { register, finish } = useTaskContext();
   register('baseInfo');
@@ -30,7 +33,8 @@ const BaseInfoPreview: React.FC = () => {
       </section>
       <section>
         <div className={styles.label}>
-          收件人:
+          {formatMessage({ id: 'agile.projectReport.receiver' })}
+          :
         </div>
         <div>
           {(baseInfo?.receiverList || []).map((user) => user.realName).join(',')}

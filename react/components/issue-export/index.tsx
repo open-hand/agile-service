@@ -2,6 +2,7 @@ import React from 'react';
 import { DataSet, Modal, Table } from 'choerodon-ui/pro';
 import { ModalProps } from 'choerodon-ui/pro/lib/modal/Modal';
 import classnames from 'classnames';
+import { C7NFormat } from '@choerodon/master';
 import { TemplateAction } from '@/api';
 import ExportIssue from './ExportIssue';
 import ExportIssueContextProvider from './stores';
@@ -47,7 +48,10 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
   const key = Modal.key();
   Modal.open({
     key,
-    title: '导出工作项',
+    title: <C7NFormat
+      intlPrefix="agile.issue"
+      id="export.issue"
+    />,
     style: {
       width: MODAL_WIDTH.middle,
     },

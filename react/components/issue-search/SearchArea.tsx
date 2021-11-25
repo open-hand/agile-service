@@ -16,6 +16,7 @@ import SummaryField from './custom-fields/field/SummaryField';
 import CustomFields from './custom-fields';
 import useQuickFilters from './useQuickFilters';
 import ListenSearchSize from './ListenSearchSize';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const { AppState } = stores;
 const { Option, OptGroup } = FlatSelect;
@@ -25,6 +26,7 @@ const SearchArea: React.FC = () => {
   const {
     store, onClear, urlFilter, onClickSaveFilter, projectId, foldedHeight, hasMyAssigned,
   } = useContext(IssueSearchContext);
+  const formatMessage = useFormatMessage('agile.common');
   const { data: quickFilters } = useQuickFilters({ projectId }, { enabled: store.menuType === 'project' });
   const {
     isHasFilter, chosenFields, overflowLine, folded,
@@ -226,7 +228,8 @@ const SearchArea: React.FC = () => {
             funcType={'flat' as FuncType}
             className={`${prefixCls}-search-right-btn`}
           >
-            重置
+            {formatMessage({ id: 'reset' })}
+
           </Button>
         )}
         {onClickSaveFilter && !findSameFilter() && isHasFilter && !folded && (
@@ -270,7 +273,7 @@ const SearchArea: React.FC = () => {
           funcType={'flat' as FuncType}
           color={'primary' as ButtonColor}
         >
-          重置
+          {formatMessage({ id: 'reset' })}
         </Button>
       </div>
     </>

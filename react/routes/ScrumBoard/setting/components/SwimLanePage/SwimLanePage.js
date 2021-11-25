@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
+import { C7NFormat } from '@choerodon/master';
 import { Content, Choerodon } from '@choerodon/boot';
 import { Select } from 'choerodon-ui/pro';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
@@ -33,7 +34,12 @@ class SwimLanePage extends Component {
       <div>
         <Select
           style={{ width: 512 }}
-          label="基础泳道在"
+          label={(
+            <C7NFormat
+              intlPrefix="agile.scrumBoard"
+              id="board.swimlane.in"
+            />
+          )}
           clearButton={false}
           labelLayout="float"
           defaultValue={ScrumBoardStore.getSwimLaneCode || 'parent_child'}
@@ -45,11 +51,32 @@ class SwimLanePage extends Component {
             });
           }}
         >
-          <Option value="parent_child">故事</Option>
-          <Option value="assignee">经办人</Option>
+          <Option value="parent_child">
+            <C7NFormat
+              intlPrefix="agile.common"
+              id="story"
+            />
+          </Option>
+          <Option value="assignee">
+            <C7NFormat
+              intlPrefix="agile.common"
+              id="assignee"
+            />
+          </Option>
           <Option value="participant">参与人</Option>
-          <Option value="swimlane_epic">史诗</Option>
-          <Option value="swimlane_none">无</Option>
+          <Option value="swimlane_epic">
+            <C7NFormat
+              intlPrefix="agile.common"
+              id="epic"
+            />
+          </Option>
+          <Option value="swimlane_none">
+            <C7NFormat
+              intlPrefix="agile.common"
+              id="none"
+            />
+
+          </Option>
         </Select>
       </div>
     );

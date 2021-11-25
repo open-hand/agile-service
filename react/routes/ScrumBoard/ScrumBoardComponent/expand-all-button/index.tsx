@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import {
   Select, Spin, Icon, Modal, Form, Tooltip, Radio,
 } from 'choerodon-ui';
+import { C7NFormat } from '@choerodon/master';
 import { Button } from 'choerodon-ui/pro';
 import classnames from 'classnames';
-import scrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import { observer } from 'mobx-react-lite';
+import scrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { getProjectId } from '@/utils/common';
 import CustomIcon from '@/components/custom-icon';
 import expandStyles from './index.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 function ExpandAllButton(props: any) {
   const [expandAll, setExpandAll] = useState<boolean>(() => {
@@ -17,6 +19,7 @@ function ExpandAllButton(props: any) {
     return !!isFirstInto;
   });
 
+  const formatMessage = useFormatMessage('agile.common');
   function handleClick() {
     if (scrumBoardStore.currentBindFunctionMaps.has('expandOrUp-epic')) {
       scrumBoardStore.bindFunction('expand-current-status', () => !expandAll);
@@ -35,9 +38,16 @@ function ExpandAllButton(props: any) {
   return scrumBoardStore.currentBindFunctionMaps.get('expandOrUp') || scrumBoardStore.currentBindFunctionMaps.get('expandOrUp-epic') ? (
     <Button {...props} onClick={handleClick}>
       <CustomIcon type="icon-indent" />
-      {expandAll ? <span>全部收起</span> : (
+      {expandAll ? (
+        <span>
+          {formatMessage({ id: 'collapse.all' })}
+
+        </span>
+      ) : (
         <Tooltip title="仅展开前15项">
-          <span>全部展开</span>
+          <span>
+            {formatMessage({ id: 'expand.all' })}
+          </span>
         </Tooltip>
       )}
     </Button>

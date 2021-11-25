@@ -20,6 +20,7 @@ import { IModalProps } from '@/common/types';
 import {
   IWorkingHoursData, workGroupApi, workingHoursApi, WorkingHoursExportAction,
 } from '@/api';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 interface IDownLoadInfo {
   id: string | null,
@@ -48,7 +49,7 @@ const ExportLog: React.FC<IExportProps> = ({
   const [downloadInfo, setDownloadInfo] = useState({} as IDownLoadInfo);
   const workGroupIds = exportDs.current?.get('workGroupIds');
   const userIds = exportDs.current?.get('userIds');
-
+  const formatMessage = useFormatMessage();
   useEffect(() => {
     workingHoursApi.getLatest(action).then((res: IDownLoadInfo) => {
       if (res.id) {
@@ -160,7 +161,7 @@ const ExportLog: React.FC<IExportProps> = ({
         onClick={handleExportExcel}
         loading={loading}
       >
-        导出
+        {formatMessage({ id: 'boot.export' })}
       </Button>
       <WsProgress
         key={getProjectId() || getOrganizationId()}

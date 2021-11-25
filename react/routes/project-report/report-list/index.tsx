@@ -5,8 +5,10 @@ import {
 import { HeaderButtons } from '@choerodon/master';
 import to from '@/utils/to';
 import ReportTable from './components/report-table';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const ReportList: React.FC = () => {
+  const formatMessage = useFormatMessage('agile.projectReport');
   const handleAddClick = useCallback(() => {
     to('/agile/project-report/create');
   }, []);
@@ -14,7 +16,7 @@ const ReportList: React.FC = () => {
     <Page>
       <Header>
         <HeaderButtons items={[{
-          name: '创建报告',
+          name: formatMessage({ id: 'create' }),
           handler: handleAddClick,
           icon: 'playlist_add',
           display: true,

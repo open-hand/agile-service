@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import {
   Form, Select, Input, DatePicker, Icon,
 } from 'choerodon-ui';
+import { C7NFormat } from '@choerodon/master';
 import { Modal } from 'choerodon-ui/pro';
 import { stores } from '@choerodon/boot';
 import { isNull } from 'lodash';
@@ -498,7 +499,10 @@ const FormStartSprintHoc = (props) => {
 export default function (props) {
   Modal.open({
     key: 'sprint',
-    title: '开启冲刺',
+    title: <C7NFormat
+      intlPrefix="agile.backlog"
+      id="start.sprint"
+    />,
     okText: '开启',
     cancelText: '取消',
     drawer: true,

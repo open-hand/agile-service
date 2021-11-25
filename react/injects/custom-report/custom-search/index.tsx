@@ -13,6 +13,7 @@ import { CustomReportSearchProps } from '@/routes/ReportHost/custom-report/compo
 import ChoseField, { useChoseField } from '@/components/chose-field';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import useClickOut from '@/hooks/useClickOut';
+import useFormatMessage from '@/hooks/useFormatMessage';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import useGetIssueSearchData from './useGetIssueSearchData';
 import CustomSearchFields from './Search';
@@ -21,7 +22,7 @@ import './index.less';
 const InjectCustomSearch: React.FC<CustomReportSearchProps> = ({ searchVO, setSearchVO, projectId }) => {
   const prefixCls = 'c7n-agile-inject-custom-search';
   const [fields, setFields] = useState([] as any[]);
-
+  const formatMessage = useFormatMessage('agile.common');
   const issueSearchStore = useIssueSearchStore({
     projectId,
     transformFilter,
@@ -99,7 +100,7 @@ const InjectCustomSearch: React.FC<CustomReportSearchProps> = ({ searchVO, setSe
               >
                 查询
               </Button>
-              <Button onClick={handleClear}>重置</Button>
+              <Button onClick={handleClear}>{formatMessage({ id: 'reset' })}</Button>
               <ChoseField
                 {...choseFiledProps}
               />
