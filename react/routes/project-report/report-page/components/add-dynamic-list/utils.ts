@@ -4,61 +4,8 @@ import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
 import moment from 'moment';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import { ICustomFieldData, IExportSearch } from '@/api';
+import { getTransformSystemFilter } from '@/routes/Issue/components/ExportIssue/utils';
 
-function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes'> {
-  const {
-    issueTypeId,
-    assigneeId,
-    statusId,
-    priorityId,
-    issueIds,
-    quickFilterIds,
-    createDate = [],
-    updateDate = [],
-    contents,
-    component,
-    epic,
-    feature,
-    label,
-    reporterIds,
-    sprint,
-    summary,
-    fixVersion,
-    influenceVersion,
-    creatorIds,
-    updatorIds,
-  } = data;
-  return {
-    advancedSearchArgs: {
-      issueTypeId,
-      reporterIds,
-      statusId,
-      priorityId,
-    },
-    otherArgs: {
-      assigneeId,
-      issueIds,
-      component,
-      epic,
-      feature,
-      label,
-      sprint,
-      summary,
-      fixVersion,
-      influenceVersion,
-      creatorIds,
-      updatorIds,
-    },
-    searchArgs: {
-      createStartDate: createDate[0],
-      createEndDate: createDate[1],
-      updateStartDate: updateDate[0],
-      updateEndDate: updateDate[1],
-    },
-    quickFilterIds,
-    contents,
-  };
-}
 const getCustomFieldFilters = (chosenFields: Array<IChosenFieldField>, record: Record) => {
   const customField: ICustomFieldData = {
     option: [],
@@ -94,7 +41,6 @@ const getCustomFieldFilters = (chosenFields: Array<IChosenFieldField>, record: R
       // eslint-disable-next-line no-continue
       continue;
     }
-
     switch (fieldType) {
       case 'single':
       case 'multiple':
@@ -163,7 +109,7 @@ const getCustomFieldFilters = (chosenFields: Array<IChosenFieldField>, record: R
     systemFilter.sprint = record.get('sprint');
   }
 
-  const filter = transformSystemFilter(systemFilter);
+  const filter = getTransformSystemFilter(systemFilter); // transformSystemFilter(systemFilter);
   filter.otherArgs.customField = customField;
   return filter;
 };
