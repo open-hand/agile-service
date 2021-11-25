@@ -93,6 +93,7 @@ const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = 
     data: [{
       startDate: defaultStartTime || moment().format('YYYY-MM-DD'),
       timeUnit: 'H',
+      remain: 'auto',
     }],
   }), [defaultStartTime, issueId]);
   useEffect(() => {
