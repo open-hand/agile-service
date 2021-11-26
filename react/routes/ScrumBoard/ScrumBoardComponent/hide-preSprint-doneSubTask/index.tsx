@@ -34,7 +34,7 @@ const HideSubTask: React.FC<Props> = ({ refresh }) => {
   const hidden = projectInfo?.hidePreSprintDoneSubissue;
   return (
     <Permission
-      service={['agile-service.project-info.updateProjectInfo']}
+      service={['choerodon.code.project.setting.general-setting.ps.update']}
       noAccessChildren={!hidden ? '' : '已隐藏历史迭代中已完成的子任务'}
     >
       <CheckBox name="hidden" value onChange={handleChange} checked={hidden}>隐藏在历史迭代已完成的子任务</CheckBox>
