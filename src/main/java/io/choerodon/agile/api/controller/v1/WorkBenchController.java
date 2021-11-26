@@ -55,19 +55,8 @@ public class WorkBenchController {
     private PriorityService priorityService;
 
     @Autowired
-    private WorkHoursExcelService workHoursExcelService;
-
-    @Autowired
-    private WorkHoursService workHoursService;
-
-    @Autowired
-    private WorkGroupUserRelService workGroupUserRelService;
-
-    @Autowired
     private PersonalFilterService personalFilterService;
 
-    @Autowired
-    private WorkGroupService workGroupService;
 
     @Autowired
     private BaseFeignClient baseFeignClient;
@@ -170,147 +159,6 @@ public class WorkBenchController {
         return new ResponseEntity<>(priorityService.selectAll(priority, param), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
-    @ApiOperation("导出工时日历")
-    @PostMapping(value = "/work_hours/export_work_hours_log")
-    public void download(@ApiParam(value = "项目id", required = true)
-                         @PathVariable(name = "organization_id") Long organizationId,
-                         @RequestBody WorkHoursSearchVO workHoursSearchVO) {
-        workHoursExcelService.exportWorkHoursLogOnOrganizationLevel(organizationId, workHoursSearchVO, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes());
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
-    @ApiOperation("导出工时日历")
-    @PostMapping(value = "/work_hours/export_work_hours_calendar")
-    public void exportWorkHoursCalendar(@ApiParam(value = "组织id", required = true)
-                                        @PathVariable(name = "organization_id") Long organizationId,
-                                        @RequestBody WorkHoursSearchVO workHoursSearchVO) {
-        workHoursExcelService.exportWorkHoursCalendarOnOrganizationLevel(organizationId, workHoursSearchVO, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes(), true);
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
-    @ApiOperation("导出工作项工时")
-    @PostMapping(value = "/work_hours/export_issue_work_hours")
-    public void exportIssueWorkHours(@ApiParam(value = "组织id", required = true)
-                                     @PathVariable(name = "organization_id") Long organizationId,
-                                     @RequestParam(required = false, defaultValue = "false") Boolean containsSubIssue,
-                                     @RequestBody SearchVO searchVO) {
-        EncryptionUtils.decryptSearchVO(searchVO);
-        workHoursExcelService.exportIssueWorkHoursOnOrganizationLevel(organizationId,(ServletRequestAttributes) RequestContextHolder.currentRequestAttributes(), true, searchVO, containsSubIssue);
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
-    @ApiOperation("查询工时日志")
-    @PostMapping(value = "/work_hours/work_hours_log")
-    public ResponseEntity<Page<WorkHoursLogVO>> pageWorkHoursLogByOrgId(@ApiParam(value = "组织id", required = true)
-                                                                        @PathVariable(name = "organization_id") Long organizationId,
-                                                                        @SortDefault(value = "startDate", direction = Sort.Direction.DESC)
-                                                                                PageRequest pageRequest,
-                                                                        @RequestBody WorkHoursSearchVO workHoursSearchVO) {
-        return Optional.ofNullable(workHoursService.pageWorkHoursLogByOrgId(organizationId, pageRequest, workHoursSearchVO))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.workCalendar.get"));
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
-    @ApiOperation("查询工时日历")
-    @PostMapping(value = "/work_hours/work_hours_calendar")
-    public ResponseEntity<Page<WorkHoursCalendarVO>> workHoursCalendarByProjectIds(@ApiParam(value = "组织Id", required = true)
-                                                                                   @PathVariable(name = "organization_id") Long organizationId,
-                                                                                   PageRequest pageRequest,
-                                                                                   @RequestBody WorkHoursSearchVO workHoursSearchVO) {
-        return Optional.ofNullable(workHoursService.workHoursCalendarByOrg(organizationId, pageRequest, workHoursSearchVO))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.work.hours.calendar.get"));
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
-    @ApiOperation("工时日历查用户的登记详情")
-    @PostMapping(value = "/work_hours/work_hours_calendar_info")
-    public ResponseEntity<Map<String, List<WorkHoursLogVO>>> workHoursCalendarOrgInfoByUserId(@ApiParam(value = "组织id", required = true)
-                                                                                              @PathVariable(name = "organization_id") Long organizationId,
-                                                                                              @RequestParam @Encrypt Long userId,
-                                                                                              @RequestBody WorkHoursSearchVO workHoursSearchVO) {
-        return Optional.ofNullable(workHoursService.workHoursCalendarOrgInfoByUserId(organizationId, userId, workHoursSearchVO))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.work.hours.calendar.info.get"));
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
-    @ApiOperation("统计每天的工时总数")
-    @PostMapping(value = "/work_hours/count_work_hours")
-    public ResponseEntity<Map<String, BigDecimal>> countWorkHours(@ApiParam(value = "组织id", required = true)
-                                                                  @PathVariable(name = "organization_id") Long organizationId,
-                                                                  @RequestBody WorkHoursSearchVO workHoursSearchVO) {
-        return Optional.ofNullable(workHoursService.countWorkHoursOnOrganizationLevel(organizationId,  workHoursSearchVO))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.count.work.hours"));
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
-    @ApiOperation("按项目维度统计工时")
-    @PostMapping(value = "/work_hours/project_work_hours")
-    public ResponseEntity<Page<IssueWorkHoursVO>> pageQueryProject(@ApiParam(value = "组织id", required = true)
-                                                                   @PathVariable(name = "organization_id") Long organizationId,
-                                                                   PageRequest pageRequest,
-                                                                   @RequestBody SearchVO searchVO) {
-        EncryptionUtils.decryptSearchVO(searchVO);
-        return Optional.ofNullable(workHoursService.pageProjectLatitude(organizationId , pageRequest, searchVO))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.issue.work.hours.query"));
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
-    @ApiOperation("按经办人维度统计工时")
-    @PostMapping(value = "/work_hours/assignee_work_hours")
-    public ResponseEntity<Page<IssueWorkHoursVO>> pageQueryAssignee(@ApiParam(value = "组织id", required = true)
-                                                                    @PathVariable(name = "organization_id") Long organizationId,
-                                                                    PageRequest pageRequest,
-                                                                    @RequestBody SearchVO searchVO) {
-        EncryptionUtils.decryptSearchVO(searchVO);
-        return Optional.ofNullable(workHoursService.pageQueryAssigneeOnOrganizationLevel(organizationId, pageRequest, searchVO))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.issue.work.hours.query"));
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
-    @ApiOperation("按工作项维度查询")
-    @PostMapping(value = "/work_hours/issue_work_hours")
-    public ResponseEntity<Page<IssueListFieldKVVO>> pageQueryIssues(@ApiParam(value = "组织id", required = true)
-                                                                    @PathVariable(name = "organization_id") Long organizationId,
-                                                                    @RequestParam(required = false, defaultValue = "false") Boolean containsSubIssue,
-                                                                    @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
-                                                                    PageRequest pageRequest,
-                                                                    @RequestBody SearchVO searchVO) {
-        EncryptionUtils.decryptSearchVO(searchVO);
-        return Optional.ofNullable(workHoursService.pageQueryIssuesOnOrganizationLevel(organizationId, pageRequest, containsSubIssue, searchVO))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.issue.work.hours.query"));
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
-    @ApiOperation("按经办人维度统计工时")
-    @PostMapping(value = "/work_hours/count_issue_work_hours")
-    public ResponseEntity<BigDecimal> countIssueWorkHours(@ApiParam(value = "组织id", required = true)
-                                                          @PathVariable(name = "organization_id") Long organizationId,
-                                                          @RequestBody SearchVO searchVO) {
-        EncryptionUtils.decryptSearchVO(searchVO);
-        return Optional.ofNullable(workHoursService.countIssueWorkHoursOnOrganizationLevel(organizationId, searchVO))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.issue.work.hours.query"));
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
-    @ApiOperation("查询按工作组筛选的成员")
-    @PostMapping("/work_group_user_rel/page_by_groups")
-    public ResponseEntity<Page<UserDTO>> pageByGroups(@ApiParam(value = "组织Id", required = true)
-                                                      @PathVariable(name = "organization_id") Long organizationId,
-                                                      PageRequest pageRequest,
-                                                      @RequestBody WorkGroupUserRelParamVO workGroupUserRelParamVO) {
-        return Optional.ofNullable(workGroupUserRelService.pageByGroups(organizationId, pageRequest, workGroupUserRelParamVO))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.user.query.by.groups"));
-    }
 
     @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("工作台创建我的筛选")
@@ -363,16 +211,6 @@ public class WorkBenchController {
         return Optional.ofNullable(personalFilterService.listByUserId(organizationId, 0L, userId, searchStr, filterTypeCode))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.personalFilter.list"));
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
-    @ApiOperation("查询工作组树形结构")
-    @GetMapping(value = "/work_group/query_tree")
-    public ResponseEntity<WorkGroupTreeVO> pageWorkHoursLogByProjectIds(@ApiParam(value = "组织Id", required = true)
-                                                                        @PathVariable(name = "organization_id") Long organizationId) {
-        return Optional.ofNullable(workGroupService.queryWorkGroupTree(organizationId))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.work.group.tree.get"));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)

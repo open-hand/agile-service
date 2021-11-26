@@ -1,8 +1,4 @@
 package io.choerodon.agile.infra.utils;
-
-import io.choerodon.agile.api.vo.ExcelTitleVO;
-import io.choerodon.agile.api.vo.WorkGroupReportExcelVO;
-import io.choerodon.agile.api.vo.WorkHoursExportVO;
 import io.choerodon.agile.api.vo.business.ExportIssuesVO;
 import io.choerodon.agile.infra.dto.ExcelCursorDTO;
 import io.choerodon.agile.infra.enums.ExcelImportTemplate;
@@ -242,100 +238,7 @@ public class ExcelUtil {
         }
     }
 
-    public static <T> void  writeWorkGroupReport(Workbook workbook,
-                                                 String sheetName,
-                                                 Class<T> clazz,
-                                                 WorkGroupReportExcelVO workGroupReportExcelVO,
-                                                 List<ExcelTitleVO> excelTitleVOS,
-                                                 CellStyle cellStyle,
-                                                 ExcelCursorDTO cursorDTO) {
-        SXSSFSheet sheet = (SXSSFSheet) workbook.getSheet(sheetName);
-        Integer rowNum = cursorDTO.getRow();
-        SXSSFRow row = sheet.createRow(rowNum);
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        for (int i = 0; i < excelTitleVOS.size(); i++) {
-            ExcelTitleVO excelTitleVO = excelTitleVOS.get(i);
-            sheet.setColumnWidth(i, excelTitleVO.getWidth());
-            handleWriteCell(row, i, workGroupReportExcelVO, cellStyle, excelTitleVO.getCode(), clazz, simpleDateFormat);
-        }
-        sheet.trackAllColumnsForAutoSizing();
-    }
 
-    public static <T> void writeIssueWorkHours(SXSSFSheet sheet,
-                                               Class<T> clazz,
-                                               ExportIssuesVO exportIssuesVO,
-                                               List<ExcelTitleVO> excelTitleVOS,
-                                               CellStyle cellStyle,
-                                               ExcelCursorDTO cursorDTO) {
-        Integer rowNum = cursorDTO.getRow();
-        SXSSFRow row = sheet.createRow(rowNum);
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        List<String> codes = excelTitleVOS.stream().map(ExcelTitleVO::getCode).collect(Collectors.toList());
-        String[] codeArray = codes.toArray(new String[codes.size()]);
-        for (int i = 0; i < excelTitleVOS.size(); i++) {
-            ExcelTitleVO excelTitleVO = excelTitleVOS.get(i);
-            sheet.setColumnWidth(i, excelTitleVO.getWidth());
-            handleWriteCell(row, i, exportIssuesVO, cellStyle, codeArray, clazz, null, formatter);
-        }
-        sheet.trackAllColumnsForAutoSizing();
-    }
-
-
-    public static <T> void  writeWorkHoursLog(Workbook workbook,
-                                             String sheetName,
-                                             Class<T> clazz,
-                                             List<WorkHoursExportVO> workHoursExportVOS,
-                                             List<ExcelTitleVO> workHoursLogList,
-                                              ExcelCursorDTO cursorDTO) {
-        //样式
-        CellStyle cellStyle = workbook.createCellStyle();
-        SXSSFSheet sheet = (SXSSFSheet) workbook.getSheet(sheetName);
-        cellStyle.setAlignment(HorizontalAlignment.LEFT);
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        for (WorkHoursExportVO workHoursExportVO : workHoursExportVOS) {
-            Integer rowNum = cursorDTO.getRow();
-            SXSSFRow row = sheet.createRow(rowNum);
-            for (int i = 0; i < workHoursLogList.size(); i++) {
-                ExcelTitleVO excelTitleVO = workHoursLogList.get(i);
-                sheet.setColumnWidth(i, excelTitleVO.getWidth());
-                handleWriteCell(row, i, workHoursExportVO, cellStyle, excelTitleVO.getCode(), clazz, simpleDateFormat);
-            }
-            cursorDTO.increaseRow();
-        }
-        sheet.trackAllColumnsForAutoSizing();
-    }
-
-    public static Workbook initWorkHoursExportWorkbook(String sheetName, List<ExcelTitleVO> list) {
-        //1、创建工作簿
-        SXSSFWorkbook workbook = new SXSSFWorkbook();
-        //1.3、列标题样式
-        CellStyle style2 = createCellStyle(workbook, (short) 13, HorizontalAlignment.LEFT.getCode(), true);
-        //1.4、强制换行
-        CellStyle cellStyle = workbook.createCellStyle();
-        cellStyle.setWrapText(true);
-        //2、创建工作表
-        SXSSFSheet sheet = workbook.createSheet(sheetName);
-        //设置默认列宽
-        sheet.setDefaultColumnWidth(13);
-        //创建标题列
-        SXSSFRow row2 = sheet.createRow(0);
-        row2.setHeight((short) 260);
-        for (int i = 0; i < list.size(); i++) {
-            //3.3设置列标题
-            SXSSFCell cell2 = row2.createCell(i);
-            ExcelTitleVO excelTitleVO = list.get(i);
-            //加载单元格样式
-            style2.setFillForegroundColor(HSSFColor.HSSFColorPredefined.PALE_BLUE.getIndex());
-            style2.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-            cell2.setCellStyle(style2);
-            cell2.setCellValue(excelTitleVO.getTitle());
-            Integer width = excelTitleVO.getWidth();
-            if (width != null) {
-                sheet.setColumnWidth(i, width);
-            }
-        }
-        return workbook;
-    }
 
     public static void writeToResponse(HttpServletResponse response, Workbook workbook) {
         try {
