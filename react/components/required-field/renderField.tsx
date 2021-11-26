@@ -16,6 +16,8 @@ import SelectEnvironment from '@/components/select/select-environment';
 import SelectFeature from '@/components/select/select-feature';
 import SelectCustomField from '@/components/select/select-custom-field';
 import SelectMultiServiceTag from '@/components/select/select-multi-service-tag';
+import DateTimePickerWithFormat from '@/components/date-time-picker/DateTimePickerFormat';
+import { FORMAT_FIELDS } from '@/constants/DATE_FORMAT';
 import SelectComponent from '../select/select-component';
 
 const multipleCodes = ['label', 'component', 'fixVersion', 'influenceVersion'];
@@ -68,6 +70,18 @@ export default function renderField<T extends Partial<SelectProps>>({
       }
       case 'tag': {
         return <SelectMultiServiceTag name={fieldCode} multiple clearButton {...otherComponentProps} defaultValue={defaultValue} />;
+      }
+      case FORMAT_FIELDS[0]:
+      case FORMAT_FIELDS[1]:
+      case FORMAT_FIELDS[2]:
+      case FORMAT_FIELDS[3]: {
+        return (
+          <DateTimePickerWithFormat
+            name={fieldCode}
+            style={{ width: '100%' }}
+            {...otherComponentProps}
+          />
+        );
       }
       default:
         break;

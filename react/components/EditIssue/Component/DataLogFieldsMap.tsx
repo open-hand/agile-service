@@ -1,6 +1,21 @@
 import React from 'react';
 import { difference } from 'lodash';
+import moment from 'moment';
 import { ILog } from '@/common/types';
+import { MINUTE } from '@/constants/DATE_FORMAT';
+
+function formatDate(value: string) {
+  return value && moment(value).isValid() ? moment(value).format(MINUTE) : value;
+}
+
+function transformDate({ oldString, newString }: { oldString?: string, newString?: string }) {
+  if (oldString) {
+    return formatDate(oldString);
+  } if (newString) {
+    return formatDate(newString);
+  }
+  return '';
+}
 
 const fieldsMap = new Map([
   ['Sprint', {
@@ -631,7 +646,7 @@ const fieldsMap = new Map([
             <span className="c7n-Log-operation">由</span>
             <span className="c7n-Log-value">【无】</span>
             <span className="c7n-Log-operation">改变为</span>
-            <span className="c7n-Log-value">{`【${newString}】`}</span>
+            <span className="c7n-Log-value">{`【${formatDate(newString)}】`}</span>
           </span>
         );
       },
@@ -644,12 +659,15 @@ const fieldsMap = new Map([
             <span className="c7n-Log-operation">将</span>
             <span className="c7n-Log-field">【预计开始时间】</span>
             <span className="c7n-Log-operation">由</span>
-            <span className="c7n-Log-value">{`【${oldString}】`}</span>
+            <span className="c7n-Log-value">{`【${formatDate(oldString)}】`}</span>
             <span className="c7n-Log-operation">改变为</span>
             <span className="c7n-Log-value">【无】</span>
           </span>
         );
       },
+    },
+    update: {
+      transform: transformDate,
     },
   }],
   ['Estimated End Time', {
@@ -664,7 +682,7 @@ const fieldsMap = new Map([
             <span className="c7n-Log-operation">由</span>
             <span className="c7n-Log-value">【无】</span>
             <span className="c7n-Log-operation">改变为</span>
-            <span className="c7n-Log-value">{`【${newString}】`}</span>
+            <span className="c7n-Log-value">{`【${formatDate(newString)}】`}</span>
           </span>
         );
       },
@@ -677,12 +695,15 @@ const fieldsMap = new Map([
             <span className="c7n-Log-operation">将</span>
             <span className="c7n-Log-field">【预计结束时间】</span>
             <span className="c7n-Log-operation">由</span>
-            <span className="c7n-Log-value">{`【${oldString}】`}</span>
+            <span className="c7n-Log-value">{`【${formatDate(oldString)}】`}</span>
             <span className="c7n-Log-operation">改变为</span>
             <span className="c7n-Log-value">【无】</span>
           </span>
         );
       },
+    },
+    update: {
+      transform: transformDate,
     },
   }],
   ['Feature Sprint Link', {
@@ -764,7 +785,7 @@ const fieldsMap = new Map([
             <span className="c7n-Log-operation">由</span>
             <span className="c7n-Log-value">【无】</span>
             <span className="c7n-Log-operation">改变为</span>
-            <span className="c7n-Log-value">{`【${newString}】`}</span>
+            <span className="c7n-Log-value">{`【${formatDate(newString)}】`}</span>
           </span>
         );
       },
@@ -777,12 +798,15 @@ const fieldsMap = new Map([
             <span className="c7n-Log-operation">将</span>
             <span className="c7n-Log-field">【实际开始时间】</span>
             <span className="c7n-Log-operation">由</span>
-            <span className="c7n-Log-value">{`【${oldString}】`}</span>
+            <span className="c7n-Log-value">{`【${formatDate(oldString)}】`}</span>
             <span className="c7n-Log-operation">改变为</span>
             <span className="c7n-Log-value">【无】</span>
           </span>
         );
       },
+    },
+    update: {
+      transform: transformDate,
     },
   }],
   ['Actual End Time', {
@@ -797,7 +821,7 @@ const fieldsMap = new Map([
             <span className="c7n-Log-operation">由</span>
             <span className="c7n-Log-value">【无】</span>
             <span className="c7n-Log-operation">改变为</span>
-            <span className="c7n-Log-value">{`【${newString}】`}</span>
+            <span className="c7n-Log-value">{`【${formatDate(newString)}】`}</span>
           </span>
         );
       },
@@ -810,12 +834,15 @@ const fieldsMap = new Map([
             <span className="c7n-Log-operation">将</span>
             <span className="c7n-Log-field">【实际结束时间】</span>
             <span className="c7n-Log-operation">由</span>
-            <span className="c7n-Log-value">{`【${oldString}】`}</span>
+            <span className="c7n-Log-value">{`【${formatDate(oldString)}】`}</span>
             <span className="c7n-Log-operation">改变为</span>
             <span className="c7n-Log-value">【无】</span>
           </span>
         );
       },
+    },
+    update: {
+      transform: transformDate,
     },
   }],
   ['participant', {
