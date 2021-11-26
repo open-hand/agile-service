@@ -102,7 +102,7 @@ function SprintButton({
                 role="none"
                 onClick={openStartSprint}
               >
-                {formatMessage({ id: 'agile.backlog.create.sprint' })}
+                {formatMessage({ id: 'agile.backlog.start.sprint' })}
               </p>
             </Tooltip>
           </Permission>
