@@ -14,12 +14,15 @@ import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.ObjectSchemeFieldService;
 import io.choerodon.agile.app.service.QuickFilterFieldService;
 import io.choerodon.agile.app.service.QuickFilterService;
+import io.choerodon.agile.infra.dto.BoardQuickFilterRelDTO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.QuickFilterDTO;
 import io.choerodon.agile.infra.dto.QuickFilterFieldDTO;
 import io.choerodon.agile.infra.enums.CustomFieldType;
+import io.choerodon.agile.infra.mapper.BoardQuickFilterRelMapper;
 import io.choerodon.agile.infra.mapper.QuickFilterFieldMapper;
 import io.choerodon.agile.infra.mapper.QuickFilterMapper;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.agile.infra.utils.ProjectUtil;
@@ -76,6 +79,8 @@ public class QuickFilterServiceImpl implements QuickFilterService {
     private QuickFilterFieldService quickFilterFieldService;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
+    @Autowired
+    private BoardQuickFilterRelMapper boardQuickFilterRelMapper;
 
     private EncryptionService encryptionService = new EncryptionService(new EncryptProperties());
 
@@ -499,6 +504,20 @@ public class QuickFilterServiceImpl implements QuickFilterService {
         if (quickFilterMapper.deleteByPrimaryKey(filterId) != 1) {
             throw new CommonException("error.quickFilter.delete");
         }
+        deleteBoardQuickFilterRel(projectId, filterId);
+    }
+
+    private void deleteBoardQuickFilterRel(Long projectId, Long filterId) {
+        if (ObjectUtils.isEmpty(projectId)
+                || ObjectUtils.isEmpty(filterId)) {
+            return;
+        }
+        BoardQuickFilterRelDTO rel = new BoardQuickFilterRelDTO();
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        rel.setOrganizationId(organizationId);
+        rel.setProjectId(projectId);
+        rel.setQuickFilterId(filterId);
+        boardQuickFilterRelMapper.delete(rel);
     }
 
     @Override
