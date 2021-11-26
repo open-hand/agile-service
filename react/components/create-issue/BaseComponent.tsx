@@ -97,15 +97,19 @@ const presets = new Map([
   }],
   ['estimatedStartTime', {
     max: 'estimatedEndTime',
+    format: 'YYYY-MM-DD HH:mm',
   }],
   ['estimatedEndTime', {
     min: 'estimatedStartTime',
+    format: 'YYYY-MM-DD HH:mm',
   }],
   ['actualStartTime', {
     max: 'actualEndTime',
+    format: 'YYYY-MM-DD HH:mm',
   }],
   ['actualEndTime', {
     min: 'actualStartTime',
+    format: 'YYYY-MM-DD HH:mm',
   }],
 ]);
 const afterLoadKeyMap = new Map([
@@ -306,6 +310,10 @@ const CreateIssueBase = observer(({
     if (preset) {
       if (preset.type === 'object') {
         return isMultiple(field) ? field.defaultValueObjs : field.defaultValueObj;
+      }
+      // 格式化时间格式
+      if (field.defaultValue && preset.format && field.fieldType === 'datetime') {
+        return moment(field.defaultValue).format(preset.format);
       }
     }
     if (field.defaultValue === '') {
