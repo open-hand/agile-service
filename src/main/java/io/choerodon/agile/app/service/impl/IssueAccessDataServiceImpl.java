@@ -56,7 +56,7 @@ public class IssueAccessDataServiceImpl implements IssueAccessDataService {
         //临时存个优先级code
         issueConvertDTO.setPriorityCode("priority-" + issueConvertDTO.getPriorityId());
         IssueDTO issueDTO = modelMapper.map(issueConvertDTO, IssueDTO.class);
-        if (issueMapper.insert(issueDTO) != 1) {
+        if (issueMapper.insertSelective(issueDTO) != 1) {
             throw new CommonException(INSERT_ERROR);
         }
         return modelMapper.map(issueMapper.selectByPrimaryKey(issueDTO.getIssueId()), IssueConvertDTO.class);

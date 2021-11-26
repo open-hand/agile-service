@@ -504,7 +504,7 @@
         </if>
         <if test="searchVO.searchArgs != null">
             <if test="searchVO.searchArgs.hidePreSprintDoneSubissue">
-                and ai.is_pre_sprint_done = 0
+                and (ai.is_pre_sprint_done = 0  or ai.is_pre_sprint_done IS NULL)
             </if>
         </if>
         <include refid="io.choerodon.agile.infra.mapper.IssueMapper.explainSearchVO"/>
