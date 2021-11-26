@@ -11,7 +11,7 @@ import { FormFieldProps } from 'choerodon-ui/pro/lib/field/FormField';
 import SelectStatus from '@/components/select/select-status';
 import SelectPI from '@/components/select/select-pi';
 import DateTimePickerWithDefault from '@/components/date-time-picker';
-import DateTimePickerWithFormat from '@/components/date-time-picker/DateTimePickerFormat';
+import DateTimePickerWithFormat from '@/components/date-time-picker/date-time-pikcer-format';
 import SelectCustomField from '../../select/select-custom-field';
 import SelectEnvironment from '../../select/select-environment';
 import SelectIssueType from '../../select/select-issue-type';

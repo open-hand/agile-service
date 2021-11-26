@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import moment from 'moment';
-import DateTimePickerWithFormat from '@/components/date-time-picker/DateTimePickerFormat';
+import DateTimePickerWithFormat from '@/components/date-time-picker/date-time-pikcer-format';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { issueApi } from '@/api';
 import { MINUTE } from '@/constants/DATE_FORMAT';

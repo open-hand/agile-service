@@ -1,10 +1,12 @@
 import React from 'react';
+import moment from 'moment';
 import TypeTag from '@/components/TypeTag';
 import StatusTag from '@/components/StatusTag';
 import PriorityTag from '@/components/PriorityTag';
 import { Issue, IIssueColumnName } from '@/common/types';
 import STATUS from '@/constants/STATUS';
 import type { Column } from './table';
+import { MINUTE } from '@/constants/DATE_FORMAT';
 
 type TreeShapeData<T> = T & {
   children: TreeShapeData<T>[]
@@ -37,6 +39,14 @@ export function flat2tree<T extends { [key: string]: any }>(flattered: T[], {
   }
   return result;
 }
+
+const renderFormatDate = (fieldName: string) => (record: { [key: string]: any }) => {
+  const value = record[fieldName];
+  if (value && moment(value).isValid()) {
+    return moment(value).format(MINUTE);
+  }
+  return null;
+};
 const renderTag = (listField: string, nameField: string) => (record: { [key: string]: any }) => {
   const list = record[listField];
   if (list) {
@@ -119,11 +129,13 @@ export function getColumnByName(name: IIssueColumnName): Column<Issue> | undefin
       title: '预计开始时间',
       width: 150,
       dataIndex: 'estimatedStartTime',
+      render: renderFormatDate('estimatedStartTime'),
     }],
     ['estimatedEndTime', {
       title: '预计结束时间',
       width: 150,
       dataIndex: 'estimatedEndTime',
+      render: renderFormatDate('estimatedEndTime'),
     }],
     ['feature', {
       title: '特性',
