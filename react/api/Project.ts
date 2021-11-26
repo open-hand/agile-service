@@ -2,6 +2,11 @@ import { axios } from '@choerodon/boot';
 import { getOrganizationId, getProjectId } from '@/utils/common';
 import Api from './Api';
 
+export interface IProjectInfo {
+  infoId: string,
+  objectVersionNumber: number,
+  hidePreSprintDoneSubissue: boolean
+}
 class ProjectApi extends Api<ProjectApi> {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
@@ -72,6 +77,14 @@ class ProjectApi extends Api<ProjectApi> {
         param,
 
       },
+    });
+  }
+
+  updateProject(data: IProjectInfo) {
+    return this.request({
+      method: 'put',
+      url: `${this.prefix}/project_info`,
+      data,
     });
   }
 }
