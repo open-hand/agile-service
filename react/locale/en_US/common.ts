@@ -40,6 +40,11 @@ const localeCommon = {
   'column.config': 'Column Configuration',
   creator: 'Creator',
   title: 'Title',
+  issue: 'Issue',
+  name: 'Name',
+  system: 'System',
+  organization: 'Organization',
+  issueType: 'IssueType',
 
 } as const;
 const exportCommon = localeAppendPrefixObjectKey({ intlPrefix: 'common' as const, intlObject: localeCommon });

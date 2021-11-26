@@ -5,10 +5,12 @@ import classNames from 'classnames';
 import WYSIWYGEditor from '@/components/CKEditor';
 import { usePageTemplateStore } from '../../stores';
 import styles from './index.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 function PageDescription() {
   const { pageTemplateStore, disabled } = usePageTemplateStore();
   const [hidden, setHidden] = useState(false);
+  const formatMessage = useFormatMessage('agile.page');
   const handleChangeDes = (val: string) => {
     pageTemplateStore.changeTemplate(val);
   };
@@ -16,7 +18,7 @@ function PageDescription() {
   return (
     <div className={classNames(styles.description, { [styles.hidden]: hidden })}>
       <span className={styles.title}>
-        描述信息格式
+        {formatMessage({ id: 'template.description.format' })}
         <Icon type="expand_more" className={classNames(styles.title_btn)} onClick={() => setHidden((oldVal) => !oldVal)} />
       </span>
       <div className={classNames(styles.edit)}>

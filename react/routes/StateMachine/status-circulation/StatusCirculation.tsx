@@ -18,9 +18,11 @@ import { TabComponentProps } from '..';
 import { useStatusCirculationContext } from './index';
 import { useStateMachineContext } from '../context';
 import IssueTypeTab from '../components/issue-type-tab';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const { store } = useStatusCirculationContext();
+  const formatMessage = useFormatMessage('agile.stateMachine');
   const { data: issueTypes } = useIssueTypes();
   const {
     selectedType, setSelectedType, issueTypeInitedMap, readOnly, visibleIssueTypeCategory, noContainer,
@@ -54,7 +56,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
             <Header>
               <HeaderButtons items={[
                 {
-                  name: '添加已有状态',
+                  name: formatMessage({ id: 'flow.add.exist.state' }),
                   display: true,
                   handler: () => {
                     openSelectExistStatus({
@@ -68,7 +70,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
                   icon: 'playlist_add',
                 },
                 {
-                  name: '创建新的状态',
+                  name: formatMessage({ id: 'flow.create.new.state' }),
                   display: true,
                   handler: () => {
                     openCreateStatus({
@@ -80,7 +82,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
                   },
                   icon: 'playlist_add',
                 }, {
-                  name: '设置初始状态',
+                  name: formatMessage({ id: 'flow.init.state' }),
                   display: true,
                   handler: () => {
                     openSetDefaultStatus({

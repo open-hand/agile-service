@@ -40,6 +40,11 @@ const localeCommon = {
   'column.config': '列配置',
   creator: '创建人',
   title: '标题',
+  issue: '工作项', // 2
+  name: '名称',
+  system: '系统',
+  organization: '组织',
+  issueType: '工作项类型',
 } as const;
 const exportCommon = localeAppendPrefixObjectKey({ intlPrefix: 'common' as const, intlObject: localeCommon });
 type ILocaleCommonType = {

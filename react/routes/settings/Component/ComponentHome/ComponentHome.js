@@ -13,6 +13,7 @@ import UserTag from '@/components/tag/user-tag';
 import DeleteComponent from '../ComponentComponent/DeleteComponent';
 import Store from './stores';
 import openComponentModal from '../ComponentComponent/CreateModal';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const { AppState } = stores;
 const deleteKey = Modal.key();
@@ -20,7 +21,7 @@ const { Column } = Table;
 
 function ComponentHome() {
   const { dataSet, history } = useContext(Store);
-
+  const formatMessage = useFormatMessage('agile.setting');
   const menu = AppState.currentMenuType;
   const urlParams = AppState.currentMenuType;
   const {
@@ -140,7 +141,7 @@ function ComponentHome() {
     >
       <Header title="模块管理">
         <HeaderButtons items={[{
-          name: '创建模块',
+          name: formatMessage({ id: 'create.component' }),
           icon: 'playlist_add',
           handler: () => { openComponentModal({ onOk: handleOk }); },
           display: true,

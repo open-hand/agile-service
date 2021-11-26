@@ -1,6 +1,8 @@
+import React from 'react';
 import { DataSet } from 'choerodon-ui/pro';
+import { C7NFormat } from '@choerodon/master';
 
-export default ({ id, intl }) => {
+function ComponentHomeDataSet({ id, intl }) {
   const roleSet = new DataSet({
     data: [{
       meaning: '无',
@@ -37,22 +39,49 @@ export default ({ id, intl }) => {
       {
         name: 'name',
         type: 'string',
-        label: '模块',
+        label: (
+          <span>
+            <C7NFormat
+              intlPrefix="agile.setting"
+              id="component"
+            />
+          </span>),
       },
       {
         name: 'issueCount',
         type: 'string',
-        label: '工作项',
+        label: (
+          <span>
+            <C7NFormat
+              intlPrefix="agile.common"
+              id="issue"
+            />
+          </span>),
       },
       {
         name: 'manager',
         type: 'string',
-        label: '负责人',
+        label: (
+          <span>
+            <C7NFormat
+              intlPrefix="agile.setting"
+              id="responsible"
+            />
+
+          </span>),
       },
       {
         name: 'description',
         type: 'string',
-        label: '模块描述',
+        label: (
+          <span>
+
+            <C7NFormat
+              intlPrefix="agile.setting"
+              id="component.description"
+            />
+
+          </span>),
       },
       {
         name: 'defaultAssigneeRole',
@@ -69,17 +98,26 @@ export default ({ id, intl }) => {
       {
         name: 'name',
         type: 'string',
-        label: '模块',
+        label: <C7NFormat
+          intlPrefix="agile.setting"
+          id="component"
+        />,
       },
       {
         name: 'manager',
         type: 'string',
-        label: '负责人',
+        label: <C7NFormat
+          intlPrefix="agile.setting"
+          id="responsible"
+        />,
       },
       {
         name: 'description',
         type: 'string',
-        label: '模块描述',
+        label: <C7NFormat
+          intlPrefix="agile.setting"
+          id="component.description"
+        />,
       },
       {
         name: 'defaultAssigneeRole',
@@ -89,4 +127,6 @@ export default ({ id, intl }) => {
       },
     ],
   };
-};
+}
+
+export default ComponentHomeDataSet;

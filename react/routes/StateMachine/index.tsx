@@ -6,6 +6,7 @@ import { find, includes } from 'lodash';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import classNames from 'classnames';
+import { useCreation } from 'ahooks';
 import useQueryString from '@/hooks/useQueryString';
 import { getIsOrganization } from '@/utils/common';
 import { statusTransformApi } from '@/api';
@@ -17,34 +18,37 @@ import StateMachineContext from './context';
 import useSelectedType from './useSelectedType';
 import NoTemplate from './no-template';
 import styles from './index.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 export interface TabComponentProps<Params extends { [K in keyof Params]?: string } = {}> {
   tab: ReactNode
 }
 interface ITab {
-  name: string
+  name: React.ReactNode
   key: string
   component: React.ComponentType<TabComponentProps<any>> | React.ComponentType<any>;
 }
-const tabs: ITab[] = [{
-  name: '状态',
-  key: 'status',
-  component: Status,
-}, {
-  name: '状态与流转',
-  key: 'status_change',
-  component: StatusCirculation,
-}, {
-  name: '自定义流转',
-  key: 'custom',
-  component: CustomCirculation,
-}];
 
 const { TabPane } = Tabs;
 const StateMachine: React.FC = ({
   // @ts-ignore
   defaultTabKeys = ['status', 'status_change', 'custom'], readOnly = false, activeKey: propActiveKey, setActiveKey: propSetActiveKey, visibleIssueTypeCategory, noContainer = false, ...otherProps
 }) => {
+  const formatMessage = useFormatMessage('agile.stateMachine');
+  const tabs: ITab[] = useCreation(() => [{
+    name: formatMessage({ id: 'state' }),
+    key: 'status',
+    component: Status,
+  }, {
+    name: formatMessage({ id: 'flow' }),
+    key: 'status_change',
+    component: StatusCirculation,
+  }, {
+    name: formatMessage({ id: 'customFlow' }),
+    key: 'custom',
+    component: CustomCirculation,
+  }], [formatMessage]);
+
   const defaultTabs = tabs.filter((item) => includes(defaultTabKeys, item.key));
   const params = useQueryString();
   const isOrganization = getIsOrganization();

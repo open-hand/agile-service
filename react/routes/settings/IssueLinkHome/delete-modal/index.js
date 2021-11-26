@@ -5,15 +5,15 @@ import {
 } from 'choerodon-ui/pro';
 
 import './index.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 function DeleteModal(props) {
   const {
     id, linkTypeId, issueCount, name,
-    formatMessage,
     modal,
     handleRefresh,
   } = props;
-
+  const formatMessage = useFormatMessage();
   const deleteModalDs = useMemo(() => (new DataSet({
     autoCreate: true,
     fields: [
@@ -27,7 +27,7 @@ function DeleteModal(props) {
         type: 'string',
         textField: 'linkName',
         valueField: 'linkTypeId',
-        label: formatMessage({ id: 'issue_link.other' }),
+        label: formatMessage({ id: 'agile.setting.issue_link.other' }),
         lookupAxiosConfig: {
           url: `/agile/v1/projects/${id}/issue_link_types/query_all?issueLinkTypeId=${linkTypeId}`,
           method: 'POST',
@@ -102,8 +102,8 @@ function DeleteModal(props) {
               </div>
             </div>
             <div>
-              <Radio className="c7n-delete-issueLinkModal-radio" dataSet={deleteModalDs} name="type" value="A">{formatMessage({ id: 'issue_link.delete.only' }, { name: '' })}</Radio>
-              <Radio className="c7n-delete-issueLinkModal-radio" dataSet={deleteModalDs} name="type" value="B">{formatMessage({ id: 'issue_link.delete.link.other' })}</Radio>
+              <Radio className="c7n-delete-issueLinkModal-radio" dataSet={deleteModalDs} name="type" value="A">{formatMessage({ id: 'agile.setting.issue_link.delete.only' }, { name: '' })}</Radio>
+              <Radio className="c7n-delete-issueLinkModal-radio" dataSet={deleteModalDs} name="type" value="B">{formatMessage({ id: 'agile.setting.issue_link.delete.link.other' })}</Radio>
               {deleteModalDs.current && deleteModalDs.current.get('type') === 'B' ? (
                 <Select
                   dataSet={deleteModalDs}

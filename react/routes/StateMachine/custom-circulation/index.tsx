@@ -33,7 +33,8 @@ import { useStateMachineContext } from '../context';
 import styles from './index.less';
 import { TabComponentProps } from '../index';
 import openLogModal from './components/log-modal';
-import {FORMAT_FIELDS, MINUTE} from "@/constants/DATE_FORMAT";
+import { FORMAT_FIELDS, MINUTE } from '@/constants/DATE_FORMAT';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 interface ISetting {
   width: number | string,
@@ -261,7 +262,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const {
     selectedType, setSelectedType, issueTypeInitedMap, readOnly, visibleIssueTypeCategory, noContainer,
   } = useStateMachineContext();
-
+  const formatMessage = useFormatMessage('agile.stateMachine');
   const isOrganization = getIsOrganization();
 
   const customCirculationDataSet = useMemo(() => new DataSet({
@@ -678,7 +679,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           <HeaderButtons
             items={[
               {
-                name: '查看执行日志',
+                name: formatMessage({ id: 'customFlow.log' }),
                 icon: 'find_in_page-o',
                 handler: () => {
                   openLogModal({});

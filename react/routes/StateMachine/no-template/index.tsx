@@ -11,13 +11,14 @@ import { statusTransformApi } from '@/api';
 import NoData from '@/assets/image/NoData.svg';
 import IssueTypeTab from '../components/issue-type-tab';
 import { useStateMachineContext } from '../context';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const NoTemplate: React.FC<{ activeKey: string }> = ({ activeKey }) => {
   const {
     selectedType, setSelectedType, issueTypeInitedMap, setIssueTypeInitedMap, readOnly, visibleIssueTypeCategory,
   } = useStateMachineContext();
   const isOrganization = getIsOrganization();
-
+  const formatMessage = useFormatMessage();
   const initTemplate = useCallback(() => {
     statusTransformApi.initTemplate(selectedType).then((res: any) => {
       if (!res.failed) {
@@ -48,7 +49,7 @@ const NoTemplate: React.FC<{ activeKey: string }> = ({ activeKey }) => {
                     disabled
                     style={{ marginLeft: 16 }}
                   >
-                    创建新的状态
+                    {formatMessage({ id: 'agile.stateMachine.flow.create.new.state' })}
                   </Button>
                 </Tooltip>
                 <Tooltip title="请先配置模板">
@@ -58,7 +59,8 @@ const NoTemplate: React.FC<{ activeKey: string }> = ({ activeKey }) => {
                     color={'primary' as ButtonColor}
                     style={{ marginLeft: 16 }}
                   >
-                    设置初始状态
+                    {formatMessage({ id: 'agile.stateMachine.flow.init.state' })}
+
                   </Button>
                 </Tooltip>
               </Header>

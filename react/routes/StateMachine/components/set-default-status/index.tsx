@@ -4,6 +4,7 @@ import React, {
 import {
   Modal, Form, DataSet, Select,
 } from 'choerodon-ui/pro';
+import { C7NFormat } from '@choerodon/master';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { statusTransformApi, IStatusCirculation } from '@/api';
 import './index.less';
@@ -62,7 +63,10 @@ const SetDefaultStatus: React.FC<Props> = ({
 };
 const openSetDefaultStatus = (props: Omit<Props, 'modal'>) => {
   Modal.open({
-    title: '设置初始状态',
+    title: <C7NFormat
+      intlPrefix="agile.stateMachine"
+      id="flow.init.state"
+    />,
     key,
     children: <SetDefaultStatus {...props} />,
   });

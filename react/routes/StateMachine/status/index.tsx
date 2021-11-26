@@ -15,9 +15,13 @@ import { TabComponentProps } from '../index';
 import openCreateStatus from '../components/create-status';
 import openDeleteStatus from './DeleteStatus';
 import styles from './index.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const { Column } = Table;
 const Status: React.FC<TabComponentProps> = ({ tab }) => {
+  const globalFormatMessage = useFormatMessage();
+
+  const formatMessage = useFormatMessage('agile.stateMachine');
   const dataSet = useMemo(() => new DataSet({
     primaryKey: 'id',
     name: 'status',
@@ -30,32 +34,32 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
       {
         name: 'name',
         type: 'string' as FieldType,
-        label: '名称',
+        label: formatMessage({ id: 'name' }),
       },
       {
         name: 'type',
         type: 'intl' as FieldType,
-        label: '阶段',
+        label: formatMessage({ id: 'stage' }),
       },
       {
         name: 'completed',
         type: 'boolean' as FieldType,
-        label: '是否为已解决',
+        label: formatMessage({ id: 'solve.status' }),
       },
       {
         name: 'usage',
         type: 'string' as FieldType,
-        label: '使用情况',
+        label: formatMessage({ id: 'usage' }),
       },
     ],
     queryFields: [
       {
         name: 'name',
-        label: '名称',
+        label: formatMessage({ id: 'name' }),
       },
     ],
 
-  }), []);
+  }), [formatMessage]);
   const handleCreateStatusClick = () => {
     openCreateStatus({
       onSubmit: () => {
@@ -78,7 +82,7 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
       <Header>
         <HeaderButtons items={[
           {
-            name: '创建状态',
+            name: formatMessage({ id: 'create.state' }),
             display: true,
             handler: handleCreateStatusClick,
             icon: 'playlist_add',
@@ -109,13 +113,13 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
             renderer={({ record, value }) => (
               <Action data={[
                 {
-                  text: '编辑',
+                  text: globalFormatMessage({ id: 'boot.edit' }),
                   action: () => {
                     handleEditStatus({ record });
                   },
                 },
                 {
-                  text: '删除',
+                  text: globalFormatMessage({ id: 'boot.delete' }),
                   action: () => {
                     openDeleteStatus({
                       onSubmit: () => {

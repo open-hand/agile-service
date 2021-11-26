@@ -21,6 +21,7 @@ import './ObjectScheme.less';
 import { disabledEditDefaultFields, orgDisabledEditDefaultFields } from '../page-issue-type/components/sort-table/useTextEditToggle';
 import { openSyncDefaultValueEditForm } from './components/sync-default-value-modal';
 import openImportField from './components/import-field';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const { Column } = Table;
 enum IRequireScopeType {
@@ -38,19 +39,19 @@ const createModelStyle = {
 
 function ObjectScheme() {
   const {
-    prefixCls, schemeTableDataSet, intl: { formatMessage },
+    prefixCls, schemeTableDataSet,
     schemeCode,
   } = useObjectSchemeStore();
   function handleRefresh() {
     schemeTableDataSet.query();
   }
-
+  const formatMessage = useFormatMessage();
   function handleRemove() {
     const record = schemeTableDataSet.current;
     const modalProps = {
-      title: formatMessage({ id: 'field.delete.title' }, { name: record?.get('name') }),
-      children: formatMessage({ id: 'field.delete.msg' }, { name: record?.get('name') }),
-      okText: formatMessage({ id: 'delete' }),
+      title: formatMessage({ id: 'agile.page.field.delete.title' }, { name: record?.get('name') }),
+      children: formatMessage({ id: 'agile.page.agile.page.field.delete.msg' }, { name: record?.get('name') }),
+      okText: formatMessage({ id: 'boot.delete' }),
       onOk: () => schemeTableDataSet.delete(record, false).then(() => handleRefresh()),
     };
     Modal.open(modalProps);
@@ -83,7 +84,7 @@ function ObjectScheme() {
       return false;
     }
     if (required && !defaultValue) {
-      Choerodon.prompt(formatMessage({ id: 'field.required.msg' }));
+      Choerodon.prompt(formatMessage({ id: 'agile.page.field.required.msg' }));
       return false;
     }
     if (secondEntry || !openPromptForRequire(record?.get('name'), required)) {
@@ -95,7 +96,7 @@ function ObjectScheme() {
     return false;
   }
   function openPromptForRequire(fieldName: string, required: boolean) {
-    const isOpen: boolean = !(localStorage.getItem('agile.page.field.setting.required.prompt') === 'false');
+    const isOpen: boolean = !(localStorage.getItem('agile.page.agile.page.field.setting.required.prompt') === 'false');
     if (isOpen) {
       const promptText = `确定要将【${fieldName}】设置为${!required ? '不' : ''}必填项吗？
       设置后${getMenuType() !== 'project' ? '组织下所有' : ''}项目中该字段都将为${!required ? '不' : ''}必填，这将会影响【快速创建】工作项的使用。`;
@@ -104,7 +105,6 @@ function ObjectScheme() {
         className: `${prefixCls}-detail-prompt`,
         title: `确认设置为${!required ? '不' : ''}必填`,
         children: (<RequiredPrompt
-          formatMessage={formatMessage}
           onContinue={handleContinueCheckChange}
           promptText={promptText}
         />),
@@ -121,12 +121,12 @@ function ObjectScheme() {
     };
     Modal.open({
       key: createModelKey,
-      title: formatMessage({ id: 'field.create' }),
+      title: formatMessage({ id: 'agile.page.field.create' }),
       drawer: true,
       children: <CreateField {...values} />,
       style: createModelStyle,
-      okText: formatMessage({ id: 'save' }),
-      cancelText: formatMessage({ id: 'cancel' }),
+      okText: formatMessage({ id: 'boot.save' }),
+      cancelText: formatMessage({ id: 'boot.cancel' }),
     });
   }
 
@@ -142,12 +142,12 @@ function ObjectScheme() {
 
     Modal.open({
       key: editModelKey,
-      title: formatMessage({ id: 'field.edit' }),
+      title: formatMessage({ id: 'agile.page.field.edit' }),
       drawer: true,
       children: <CreateField {...values} />,
       style: createModelStyle,
-      okText: formatMessage({ id: 'save' }),
-      cancelText: formatMessage({ id: 'cancel' }),
+      okText: formatMessage({ id: 'boot.save' }),
+      cancelText: formatMessage({ id: 'boot.cancel' }),
     });
   }
 
@@ -159,13 +159,13 @@ function ObjectScheme() {
     const disabledEditDel = system || (getMenuType() === 'project' && projectId === null);
     const menuItems = [
       <Menu.Item key="sync">
-        <span>{formatMessage({ id: 'defaultValue.sync' })}</span>
+        <span>{formatMessage({ id: 'agile.page.defaultValue.sync' })}</span>
       </Menu.Item>,
     ];
     if (!disabledEditDel) {
       menuItems.push(
         <Menu.Item key="del">
-          <span>{formatMessage({ id: 'delete' })}</span>
+          <span>{formatMessage({ id: 'boot.delete' })}</span>
         </Menu.Item>,
       );
     }
@@ -192,7 +192,7 @@ function ObjectScheme() {
     const system = record?.get('system');
     const projectId = record?.get('projectId');
     if (system) {
-      return <Tag style={{ color: 'var(--text-color3)', borderColor: '#d9d9d9', background: '#fafafa' }}>{formatMessage({ id: 'system' })}</Tag>;
+      return <Tag style={{ color: 'var(--text-color3)', borderColor: '#d9d9d9', background: '#fafafa' }}>{formatMessage({ id: 'agile.common.system' })}</Tag>;
     }
     return projectId
       ? (
@@ -203,7 +203,7 @@ function ObjectScheme() {
             borderColor: '#5CC2F2',
           }}
         >
-          <span>{formatMessage({ id: 'project' })}</span>
+          <span>{formatMessage({ id: 'boot.project' })}</span>
         </Tag>
       )
       : (
@@ -214,7 +214,7 @@ function ObjectScheme() {
             borderColor: '#5365EA',
           }}
         >
-          <span>{formatMessage({ id: 'organization' })}</span>
+          <span>{formatMessage({ id: 'agile.common.organization' })}</span>
         </Tag>
       );
   };
@@ -243,12 +243,12 @@ function ObjectScheme() {
       <Header>
         <HeaderButtons items={[
           {
-            name: formatMessage({ id: 'field.create' }),
+            name: formatMessage({ id: 'agile.page.field.create' }),
             icon: 'playlist_add',
             handler: openCreateFieldModal,
             display: true,
           }, {
-            name: formatMessage({ id: 'field.import' }),
+            name: formatMessage({ id: 'agile.page.field.import' }),
             icon: 'archive-o',
             handler: () => openImportField({ onOk: () => schemeTableDataSet.query() }),
             display: true,
@@ -261,7 +261,7 @@ function ObjectScheme() {
         <Table dataSet={schemeTableDataSet} queryBar={'none' as TableQueryBarType} className={`${prefixCls}-detail-content-table`}>
           <Column name="name" renderer={renderDropDown} />
           <Column name="contextName" tooltip={'overflow' as any} width={245} />
-          <Column name="fieldOrigin" renderer={renderFieldOrigin} header={formatMessage({ id: 'field.origin' })} />
+          <Column name="fieldOrigin" renderer={renderFieldOrigin} header={formatMessage({ id: 'agile.page.field.source' })} />
           <Column name="fieldTypeName" />
           <Column name="required" renderer={renderRequired} />
         </Table>

@@ -4,12 +4,14 @@ import {
   DropResult, ResponderProvided, DragDropContext, DragStart,
 } from 'react-beautiful-dnd';
 import { Icon, Tooltip } from 'choerodon-ui/pro';
-import { IFiledProps, pageConfigApi } from '@/api';
 import classnames from 'classnames';
+import { useCreation } from 'ahooks';
+import { IFiledProps, pageConfigApi } from '@/api';
 import './index.less';
 import { usePageIssueTypeStore } from '../../stores';
 import { useSortTableContext } from './stores';
 import DropContent from './DropContent';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 interface Props {
   disabled: boolean | undefined,
@@ -30,37 +32,39 @@ function renderLabelRequire(value: string | ReactElement) {
 function renderOperate() {
   return <span style={{ position: 'absolute' }}>操作</span>;
 }
-const columns = [
-  { name: 'fieldName', label: '字段名称', type: 'common' },
-  { name: 'fieldOrigin', label: '字段来源', type: 'project' },
-  { name: 'defaultValue', label: '默认值', type: 'organization' },
-
-  {
-    name: 'required', label: '必填', type: 'project', render: renderLabelRequire,
-  },
-  {
-    name: 'required', label: '必填（控制项目）', type: 'organization', render: renderLabelRequire,
-  },
-  { name: 'edited', label: '加入到编辑页', type: 'common' },
-  {
-    name: 'created',
-    label: '加入到创建页',
-    type: 'common',
-    render: (value: any) => (
-      <div>
-        {value}
-        <span style={{ float: 'right', paddingRight: '.3rem' }}>操作</span>
-      </div>
-    ),
-  },
-
-  // {
-  //   name: 'operate', label: '操作', type: 'project', render: renderOperate,
-  // },
-
-];
 
 const SortTable: React.FC = () => {
+  const formatMessage = useFormatMessage('agile.page');
+  const columns: Array<{ name: string, label: React.ReactNode, type?: string, render?: (value: React.ReactNode) => React.ReactNode }> = useCreation(() => [
+    { name: 'fieldName', label: formatMessage({ id: 'field.name' }), type: 'common' },
+    { name: 'fieldOrigin', label: formatMessage({ id: 'field.source' }), type: 'project' },
+    { name: 'defaultValue', label: formatMessage({ id: 'default' }), type: 'organization' },
+
+    {
+      name: 'required', label: formatMessage({ id: 'config.project.require' }), type: 'project', render: renderLabelRequire,
+    },
+    {
+      name: 'required', label: '必填（控制项目）', type: 'organization', render: renderLabelRequire,
+    },
+    { name: 'edited', label: formatMessage({ id: 'field.can.edit' }), type: 'common' },
+    {
+      name: 'created',
+      label: formatMessage({ id: 'field.can.create' }),
+      type: 'common',
+      render: (value: any) => (
+        <div>
+          {value}
+          <span style={{ float: 'right', paddingRight: '.3rem' }}>{ formatMessage({ id: 'field.operate' })}</span>
+        </div>
+      ),
+    },
+
+    // {
+    //   name: 'operate', label: '操作', type: 'project', render: renderOperate,
+    // },
+
+  ], []);
+
   const { sortTableDataSet, pageIssueTypeStore } = usePageIssueTypeStore();
   const { isProject, prefixCls } = useSortTableContext();
   const type = !isProject ? 'organization' : 'project';

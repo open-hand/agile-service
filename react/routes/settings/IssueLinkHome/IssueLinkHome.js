@@ -13,6 +13,7 @@ import DeleteModal from './delete-modal';
 import useLinkHomeStore from './stores';
 
 import './IssueLinkHome.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const { Column } = Table;
 
@@ -25,15 +26,14 @@ const modelStyle = {
 
 function IssueLinkHome() {
   const {
-    formatMessage,
     type, id, orgId,
     issueLinkTableDs,
   } = useLinkHomeStore();
-
+  const formatMessage = useFormatMessage();
   function openCreateEditModal(isEdit) {
     const record = isEdit ? issueLinkTableDs.current : issueLinkTableDs.create();
-    const titleId = !isEdit ? 'issue_link.create.issue_link' : 'issue_link.edit.issue_link';
-    const okTextId = !isEdit ? 'create' : 'save';
+    const titleId = !isEdit ? 'agile.setting.create.issue.link' : 'agile.setting.edit.issue.link';
+    const okTextId = !isEdit ? 'boot.create' : 'boot.save';
     const values = {
       record,
     };
@@ -45,7 +45,7 @@ function IssueLinkHome() {
       children: <CreateEditForm {...values} />,
       style: modelStyle,
       okText: formatMessage({ id: okTextId }),
-      cancelText: formatMessage({ id: 'cancel' }),
+      cancelText: formatMessage({ id: 'boot.cancel' }),
       onOk: async () => {
         if (await issueLinkTableDs.validate()) {
           await issueLinkTableDs.submit();
@@ -75,10 +75,10 @@ function IssueLinkHome() {
 
     Modal.open({
       key: deleteKey,
-      title: formatMessage({ id: 'issue_link.delete.only' }),
+      title: formatMessage({ id: 'agile.setting.issue_link.delete.only' }),
       children: <DeleteModal {...values} />,
-      cancelText: formatMessage({ id: 'cancel' }),
-      okText: formatMessage({ id: 'delete' }),
+      cancelText: formatMessage({ id: 'boot.cancel' }),
+      okText: formatMessage({ id: 'boot.delete' }),
       className: 'c7n-deleteLink-modal',
     });
   }
@@ -86,12 +86,12 @@ function IssueLinkHome() {
   function renderAction() {
     const actionData = [
       {
-        text: formatMessage({ id: 'edit' }),
+        text: formatMessage({ id: 'boot.edit' }),
         action: () => openCreateEditModal(true),
       },
       {
         service: ['choerodon.code.project.setting.issue.ps.deletelink'],
-        text: formatMessage({ id: 'delete' }),
+        text: formatMessage({ id: 'boot.delete' }),
         action: openDeleteModal,
       },
     ];
@@ -108,9 +108,9 @@ function IssueLinkHome() {
       ]}
       className="c7n-issue-link"
     >
-      <Header title={formatMessage({ id: 'issue.link_task' })}>
+      <Header>
         <HeaderButtons items={[{
-          name: formatMessage({ id: 'issue_link.create' }),
+          name: formatMessage({ id: 'agile.setting.create.issue.link' }),
           icon: 'playlist_add',
           handler: () => openCreateEditModal(false),
           display: true,

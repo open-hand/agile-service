@@ -12,6 +12,7 @@ import { quickFilterApi, quickFilterApiConfig } from '@/api';
 import TableDropMenu from '@/components/table-drop-menu';
 import { transformOperation } from './utils';
 import styles from './index.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const { Column } = Table;
 interface FastSearchTableProps {
@@ -19,6 +20,7 @@ interface FastSearchTableProps {
   onMenuClick: (key: string, record: Record) => void
 }
 const FastSearchTable: React.ForwardRefRenderFunction<any, FastSearchTableProps> = ({ onEditClick, onMenuClick }, ref) => {
+  const formatMessage = useFormatMessage();
   const dataSet = useMemo(() => new DataSet({
     autoQuery: true,
     selection: false,
@@ -27,19 +29,19 @@ const FastSearchTable: React.ForwardRefRenderFunction<any, FastSearchTableProps>
     },
     fields: [{
       name: 'name',
-      label: '名称',
+      label: formatMessage({ id: 'agile.common.name' }),
     }, {
       name: 'expressQueryText',
-      label: '筛选器',
+      label: formatMessage({ id: 'agile.setting.filter.column' }),
     }, {
       name: 'descriptionText',
-      label: '描述',
+      label: formatMessage({ id: 'agile.common.description' }),
     }],
     queryFields: [{
       name: 'name',
-      label: '名称',
+      label: formatMessage({ id: 'agile.common.name' }),
     }],
-  }), []);
+  }), [formatMessage]);
   const refresh = useCallback(() => {
     dataSet.query(dataSet.currentPage);
   }, [dataSet]);

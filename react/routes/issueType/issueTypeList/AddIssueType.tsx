@@ -17,6 +17,7 @@ import { IModalProps } from '@/common/types';
 import LINK_URL from '@/constants/LINK_URL';
 import to from '@/utils/to';
 import styles from './AddIssueType.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 interface Props {
   modal?: IModalProps,
@@ -34,7 +35,7 @@ const AddIssueType: React.FC<Props> = ({
   const [pickerDisplay, setPickerDisplay] = useState<boolean>(false);
   const [initType, setInitType] = useState<any>();
   const isSystemType = initType?.source === 'system';
-
+  const formatMessage = useFormatMessage();
   const checkName = useCallback(async (value) => {
     if (typeId && value === initType?.name) {
       return true;
@@ -91,7 +92,7 @@ const AddIssueType: React.FC<Props> = ({
       {
         name: 'name',
         type: 'string' as FieldType,
-        label: '名称',
+        label: formatMessage({ id: 'agile.issueType.name' }),
         required: true,
         maxLength: 6,
         validator: checkName,
@@ -99,7 +100,7 @@ const AddIssueType: React.FC<Props> = ({
       {
         name: 'description',
         type: 'string' as FieldType,
-        label: '工作项类型描述',
+        label: formatMessage({ id: 'agile.issueType.description' }),
         maxLength: 255,
       },
       {
@@ -107,7 +108,7 @@ const AddIssueType: React.FC<Props> = ({
         type: 'string' as FieldType,
         textField: 'name',
         valueField: 'code',
-        label: '标准类型',
+        label: formatMessage({ id: 'agile.issueType.norm.type' }),
         required: !isSystemType,
         disabled: !!typeId,
         options: standardTypeDataSet,
@@ -128,7 +129,7 @@ const AddIssueType: React.FC<Props> = ({
         label: '是否复制自定义字段',
       },
     ],
-  }), [checkIcon, checkName, isSystemType, standardTypeDataSet, typeId]);
+  }), [checkIcon, checkName, formatMessage, isSystemType, standardTypeDataSet, typeId]);
 
   const handleChangeColor = useCallback((newColor: any) => {
     setColor(newColor.hex);

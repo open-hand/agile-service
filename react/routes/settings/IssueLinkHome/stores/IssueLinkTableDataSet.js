@@ -1,4 +1,3 @@
-
 import { issueLinkTypeApiConfig, issueLinkTypeApi } from '@/api';
 
 export default ({ id, formatMessage }) => {
@@ -9,7 +8,7 @@ export default ({ id, formatMessage }) => {
     const res = await issueLinkTypeApi.checkName(value);
     if (!res) {
       // eslint-disable-next-line consistent-return
-      return formatMessage({ id: 'issue_link.checkName.repet' });
+      return formatMessage({ id: 'agile.setting.issue_link.checkName.repeat' });
     }
   }
   return {
@@ -20,7 +19,7 @@ export default ({ id, formatMessage }) => {
       {
         name: 'linkName',
         type: 'string',
-        label: formatMessage({ id: 'issue_link.name' }),
+        label: formatMessage({ id: 'agile.setting.issue_link.name' }),
         required: true,
         maxLength: 30,
         validator: checkLinkName,
@@ -28,20 +27,20 @@ export default ({ id, formatMessage }) => {
       {
         name: 'outWard',
         type: 'string',
-        label: formatMessage({ id: 'issue_link.outWard' }),
+        label: formatMessage({ id: 'agile.setting.issue_link.outWard' }),
         required: true,
         maxLength: 30,
       },
       {
         name: 'inWard',
         type: 'string',
-        label: formatMessage({ id: 'issue_link.inWard' }),
+        label: formatMessage({ id: 'agile.setting.issue_link.inWard' }),
         required: true,
         maxLength: 30,
       },
     ],
     queryFields: [
-      { name: 'linkName', type: 'string', label: formatMessage({ id: 'issue_link.name' }) },
+      { name: 'linkName', type: 'string', label: formatMessage({ id: 'agile.setting.issue_link.name' }) },
     ],
     transport: {
       read: ({ params, data }) => issueLinkTypeApiConfig.getAll({
