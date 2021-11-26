@@ -7,6 +7,7 @@ import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.api.vo.business.IssueListVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.LookupValueService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
@@ -64,6 +65,8 @@ public class IssueAssembler extends AbstractAssembler {
     private IssueStatusMapper issueStatusMapper;
     @Autowired
     private LookupValueService lookupValueService;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     /**
      * issueDetailDO转换到IssueDTO
@@ -511,6 +514,9 @@ public class IssueAssembler extends AbstractAssembler {
         }
         if (predefinedFieldNames.contains("tag")) {
             issueCreateVO.setTags(issueDetailDTO.getTags());
+        }
+        if (agilePluginService != null) {
+            issueCreateVO.setProgramId(issueDetailDTO.getProjectId());
         }
         return issueCreateVO;
     }
