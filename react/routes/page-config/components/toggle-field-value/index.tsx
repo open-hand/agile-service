@@ -4,11 +4,12 @@ import {
 } from 'choerodon-ui/pro';
 import { observer, Observer } from 'mobx-react-lite';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-
+import moment from 'moment';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import useTextEditTogglePropsWithPage from './useTextEditToggle';
 // import CheckBox from './components/Checkbox';
 import styles from './index.less';
+import { FORMAT_FIELDS, MINUTE } from '@/constants/DATE_FORMAT';
 
 export interface IToggleFieldDefaultValueData {
   id: string
@@ -37,6 +38,11 @@ const ToggleFieldValue: React.FC<Pick<Props, 'data' | 'disabled'>> = ({
 }) => {
   const textEditToggleProps = useTextEditTogglePropsWithPage(data);
   const disabled = propsDisabled || textEditToggleProps?.disabled;
+  // 预计开始/结束时间、实际开始/结束时间精确到分
+  let showDefaultValueText = data.get('showDefaultValueText');
+  if (showDefaultValueText && FORMAT_FIELDS.includes(data.get('fieldCode'))) {
+    showDefaultValueText = moment(showDefaultValueText).format(MINUTE);
+  }
   return (
 
     <TextEditToggle
@@ -49,7 +55,7 @@ const ToggleFieldValue: React.FC<Pick<Props, 'data' | 'disabled'>> = ({
         {() => (
           <Tooltip title={data.get('showDefaultValueText') !== '' ? data.get('showDefaultValueText') : undefined}>
             <span className={styles.text}>
-              {(!disabled && (!data.get('showDefaultValueText') || data.get('showDefaultValueText') === '') ? <SpanPlaceholder fieldType={data.get('fieldType')} /> : data.get('showDefaultValueText') || '')}
+              {(!disabled && (!showDefaultValueText || showDefaultValueText === '') ? <SpanPlaceholder fieldType={data.get('fieldType')} /> : showDefaultValueText || '')}
             </span>
           </Tooltip>
         )}

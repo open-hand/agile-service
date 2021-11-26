@@ -33,6 +33,7 @@ import { useStateMachineContext } from '../context';
 import styles from './index.less';
 import { TabComponentProps } from '../index';
 import openLogModal from './components/log-modal';
+import {FORMAT_FIELDS, MINUTE} from "@/constants/DATE_FORMAT";
 
 interface ISetting {
   width: number | string,
@@ -152,7 +153,7 @@ const transformedNoticeType = {
   WEB: '站内信',
 };
 
-const dateTransform = (fieldType: string, d: Date) => {
+const dateTransform = (fieldType: string, d: Date, fieldCode?: string) => {
   let transformed = '';
   switch (fieldType) {
     case 'time': {
@@ -164,7 +165,8 @@ const dateTransform = (fieldType: string, d: Date) => {
       break;
     }
     case 'datetime': {
-      transformed = moment(d).format('YYYY-MM-DD HH:mm:ss');
+      const format = fieldCode && FORMAT_FIELDS.includes(fieldCode) ? MINUTE : 'YYYY-MM-DD HH:mm:ss';
+      transformed = moment(d).format(format);
       break;
     }
     default: {
@@ -241,7 +243,7 @@ const transformFieldValue = (fieldSetting) => {
       } else if (operateType === 'add') {
         transformedValue = `流转后${dateAddValue}天`;
       } else if (operateType === 'specifier') {
-        transformedValue = dateTransform(fieldType, dateValue);
+        transformedValue = dateTransform(fieldType, dateValue, fieldCode);
       } else if (operateType === 'current_time') {
         transformedValue = '当前时间';
       }
