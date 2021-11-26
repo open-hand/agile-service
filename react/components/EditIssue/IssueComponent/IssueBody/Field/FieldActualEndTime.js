@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import moment from 'moment';
-import DateTimePicker from '@/components/date-time-picker';
+import DateTimePickerWithFormat from '@/components/date-time-picker/DateTimePickerFormat';
 import TextEditToggle from '@/components/TextEditTogglePro';
+import { MINUTE } from '@/constants/DATE_FORMAT';
 
 class FieldActualEndTime extends Component {
   updateIssueField = (value) => {
@@ -38,7 +39,7 @@ class FieldActualEndTime extends Component {
             onSubmit={this.updateIssueField}
             alwaysRender={false}
             editor={() => (
-              <DateTimePicker
+              <DateTimePickerWithFormat
                 required={required}
                 min={actualStartTime && moment(actualStartTime).add(1, 's')}
                 defaultPickerValue={moment().endOf('d')}
@@ -48,7 +49,7 @@ class FieldActualEndTime extends Component {
             disabled={disabled}
           >
             {
-              actualEndTime || '无'
+              actualEndTime ? moment(actualEndTime).format(MINUTE) : '无'
             }
           </TextEditToggle>
         </div>

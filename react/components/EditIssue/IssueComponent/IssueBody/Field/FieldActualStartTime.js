@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import moment from 'moment';
-import { DateTimePicker } from 'choerodon-ui/pro';
+import DateTimePickerWithFormat from '@/components/date-time-picker/DateTimePickerFormat';
 import TextEditToggle from '@/components/TextEditTogglePro';
+import { MINUTE } from '@/constants/DATE_FORMAT';
 
 class FieldActualStartTime extends Component {
   updateIssueField = (value) => {
@@ -37,12 +38,12 @@ class FieldActualStartTime extends Component {
             initValue={actualStartTime ? moment(actualStartTime) : undefined}
             onSubmit={this.updateIssueField}
             alwaysRender={false}
-            editor={() => <DateTimePicker required={required} max={actualEndTime && moment(actualEndTime).subtract(1, 's')} />}
+            editor={() => <DateTimePickerWithFormat required={required} max={actualEndTime && moment(actualEndTime).subtract(1, 's')} />}
             submitTrigger={['blur']}
             disabled={disabled}
           >
             {
-              actualStartTime || '无'
+              actualStartTime ? moment(actualStartTime).format(MINUTE) : '无'
             }
           </TextEditToggle>
         </div>
