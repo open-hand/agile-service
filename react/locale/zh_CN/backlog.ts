@@ -1,7 +1,7 @@
 import { localeAppendPrefixObjectKey } from '@/utils/locale';
 
 const locale = {
-  route: '代办事项',
+  route: '待办事项',
   'create.sprint': '创建冲刺',
   'current.create.sprint': '当前PI下创建冲刺',
   'show.init.sprint': '显示未开始冲刺',

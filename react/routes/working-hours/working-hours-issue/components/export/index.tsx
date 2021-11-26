@@ -40,7 +40,7 @@ function openExportWorkHoursIssueModal({
           (exportFieldCodes as any[]).splice(0, 0, 'typeName');
           set(searchData, 'displayFields', uniq(exportFieldCodes).map((code: string) => {
             const id = checkCustomFieldMap.get(code);
-            return { id, code: id ? undefined : code };
+            return { id, code };
           }));
           unset(searchData, 'exportFieldCodes');
         } else {
