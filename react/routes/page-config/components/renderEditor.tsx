@@ -7,6 +7,7 @@ import SelectPickDate from './select-date-pick';
 import { InjectedRenderComponent } from '../page-issue-type/components/sort-table/injectComponent';
 import { getAgileFields } from '@/components/field-pro';
 import { isCodeInSystemComponents } from '@/components/field-pro/base/utils';
+import { FORMAT_FIELDS, MINUTE } from '@/constants/DATE_FORMAT';
 
 interface IRenderFieldProps {
   data: { fieldCode: string, fieldType: IFieldType, defaultValue?: any, fieldOptions?: Array<any>, extraConfig?: boolean }
@@ -67,7 +68,9 @@ function renderEditor({
   }
 
   if (['date', 'time', 'datetime'].includes(fieldType)) {
-    return <SelectPickDate dateType={fieldType as any} style={style} defaultValue={defaultValue} {...otherProps} />;
+    // 预计开始/结束时间、实际开始/结束时间精确到分
+    const format = FORMAT_FIELDS.includes(fieldCode) ? MINUTE : undefined;
+    return <SelectPickDate format={format} dateType={fieldType as any} style={style} defaultValue={defaultValue} {...otherProps} />;
   }
 
   if (['checkbox', 'multiple', 'radio', 'single'].includes(fieldType)) {

@@ -29,6 +29,7 @@ import { getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { ICascadeLinkage } from '@/routes/page-config/components/setting-linkage/Linkage';
 import useDeepMemo from '@/hooks/useDeepMemo';
+import { MINUTE } from '@/constants/DATE_FORMAT';
 import WSJF from './components/wsjf';
 import IssueLink from './components/issue-link';
 import hooks from './hooks';
@@ -97,19 +98,19 @@ const presets = new Map([
   }],
   ['estimatedStartTime', {
     max: 'estimatedEndTime',
-    format: 'YYYY-MM-DD HH:mm',
+    format: MINUTE,
   }],
   ['estimatedEndTime', {
     min: 'estimatedStartTime',
-    format: 'YYYY-MM-DD HH:mm',
+    format: MINUTE,
   }],
   ['actualStartTime', {
     max: 'actualEndTime',
-    format: 'YYYY-MM-DD HH:mm',
+    format: MINUTE,
   }],
   ['actualEndTime', {
     min: 'actualStartTime',
-    format: 'YYYY-MM-DD HH:mm',
+    format: MINUTE,
   }],
 ]);
 const afterLoadKeyMap = new Map([

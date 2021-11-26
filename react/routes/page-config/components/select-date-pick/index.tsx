@@ -1,5 +1,5 @@
 import React, {
-  forwardRef, useState, useRef, useCallback, useEffect,
+  forwardRef, useState, useRef, useCallback, useEffect, useMemo,
 } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import classnames from 'classnames';
@@ -35,6 +35,7 @@ interface IDatePickerPageOption {
 interface DatePickerPageProps extends IBaseComponentProps {
   dateType: 'date' | 'datetime' | 'time'
   defaultValue?: any
+  format?: string
 }
 @observer
 class ObserverDateTimesView extends DateTimesView {
@@ -57,9 +58,10 @@ const SelectDatePickDateFormat = {
   time: 'HH:mm:ss',
 };
 const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
-  value: propsValue, defaultValue, dateType, onBlur, ...otherProps
+  value: propsValue, defaultValue, dateType, onBlur, format: propsFormat = 'YYYY-MM-DD HH:mm:ss', ...otherProps
 }, ref) => {
   const innerRef = useRef<Select>();
+  const format = useMemo(() => propsFormat || SelectDatePickDateFormat[dateType], [dateType, propsFormat]);
   const [value, setValue] = useState<Moment | undefined>(() => {
     const momentValue = moment(propsValue || defaultValue, ['YYYY-MM-DD HH:mm:ss', 'HH:mm:ss']);
     return momentValue.isValid() ? momentValue : moment();
@@ -93,7 +95,7 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
   function handleChangeDate(date: Moment) {
     setValue(date);
     // onChange && onChange(date.format('YYYY-MM-DD HH:mm:ss'));
-    innerRef.current?.choose(new Record({ meaning: date.format(SelectDatePickDateFormat[dateType]), value: date.format(SelectDatePickDateFormat[dateType]) }));
+    innerRef.current?.choose(new Record({ meaning: date.format(format), value: date.format(format) }));
   }
   const DateView = DateViews[mode as DateViewsKey];
   const handleBindRef = useCallback((newRef) => {
@@ -108,7 +110,7 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
   return (
     <Select
       ref={handleBindRef}
-      value={optionValue === 'custom' ? value?.format(SelectDatePickDateFormat[dateType]) : optionValue}
+      value={optionValue === 'custom' ? value?.format(format) : optionValue}
       primitiveValue={false}
       // @ts-ignore
       valueField="value"
@@ -144,7 +146,7 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
               <DateView
                 date={value || moment()}
                 onSelect={(newDate: any) => handleChangeDate(newDate)}
-                format="YYYY-MM-DD HH:mm:ss"
+                format={format}
                 onViewModeChange={(newMode) => {
                   setMode(newMode);
                 }}

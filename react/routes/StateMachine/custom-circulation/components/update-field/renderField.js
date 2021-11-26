@@ -13,6 +13,8 @@ import SelectProgramVersion from '@/components/select/select-program-version';
 import { userApi } from '@/api';
 import styles from './index.less';
 import { getAgileFields } from '@/components/field-pro';
+import DateTimePickerWithFormat from '@/components/date-time-picker/DateTimePickerFormat';
+import { FORMAT_FIELDS } from '../../../../../constants/DATE_FORMAT';
 
 const { Option } = Select;
 const singleList = ['radio', 'single'];
@@ -142,12 +144,21 @@ export default function renderField({
         </Select>,
         data[code].selected && (data[code].selected === 'specifier' || data[code].selected === 'add') ? (
           data[code].selected === 'specifier' ? (
-            <DateTimePicker
-              name={code}
-              label="字段值"
-              colSpan={colSpan / 2}
-              defaultTime={code === 'actualEndTime' || code === 'estimatedEndTime' ? moment().endOf('d') : undefined}
-            />
+            FORMAT_FIELDS.includes(code) ? (
+              <DateTimePickerWithFormat
+                name={code}
+                label="字段值"
+                colSpan={colSpan / 2}
+                defaultTime={code === 'actualEndTime' || code === 'estimatedEndTime' ? moment().endOf('d') : undefined}
+              />
+            ) : (
+              <DateTimePicker
+                name={code}
+                label="字段值"
+                colSpan={colSpan / 2}
+                defaultTime={code === 'actualEndTime' || code === 'estimatedEndTime' ? moment().endOf('d') : undefined}
+              />
+            )
           ) : (
             <NumberField
               name={code}

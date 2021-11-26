@@ -11,6 +11,7 @@ import { FormFieldProps } from 'choerodon-ui/pro/lib/field/FormField';
 import SelectStatus from '@/components/select/select-status';
 import SelectPI from '@/components/select/select-pi';
 import DateTimePickerWithDefault from '@/components/date-time-picker';
+import DateTimePickerWithFormat from '@/components/date-time-picker/DateTimePickerFormat';
 import SelectCustomField from '../../select/select-custom-field';
 import SelectEnvironment from '../../select/select-environment';
 import SelectIssueType from '../../select/select-issue-type';
@@ -55,10 +56,10 @@ export const AgileComponentMap = {
   subProject: SelectSubProject,
   quickFilter: SelectQuickFilterField,
   description: Editor as IClassComponentType<Editor<FormFieldProps>>,
-  estimatedStartTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
-  estimatedEndTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
-  actualStartTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
-  actualEndTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
+  estimatedStartTime: DateTimePickerWithFormat as React.ComponentClass<DateTimePickerProps>,
+  estimatedEndTime: DateTimePickerWithFormat as React.ComponentClass<DateTimePickerProps>,
+  actualStartTime: DateTimePickerWithFormat as React.ComponentClass<DateTimePickerProps>,
+  actualEndTime: DateTimePickerWithFormat as React.ComponentClass<DateTimePickerProps>,
 };
 
 export type AgileComponentMapProps = typeof AgileComponentMap
