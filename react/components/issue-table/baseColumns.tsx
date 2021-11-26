@@ -4,11 +4,13 @@ import {
 } from 'lodash';
 import { Tag } from 'choerodon-ui';
 import { CheckBox, Tooltip } from 'choerodon-ui/pro';
+import moment from 'moment';
 import PriorityTag from '@/components/PriorityTag';
 import TypeTag from '@/components/TypeTag';
 import StatusTag from '@/components/StatusTag';
 import UserTag from '../tag/user-tag';
 import { IFoundationHeader } from '@/common/types';
+import { MINUTE } from '@/constants/DATE_FORMAT';
 
 type IIssueTableBaseColumnRenderGetData<T> = (data: T, nameKey: string) => any
 interface IIssueTableBaseColumn<D extends object = any> {
@@ -54,6 +56,14 @@ function getCustomColumn(field: IFoundationHeader): IIssueTableBaseColumn {
     },
   };
 }
+
+const renderFormatDate = (fieldName: string) => (rowData: any, getDataMethod = get): string => {
+  const date = getDataMethod(rowData, fieldName);
+  if (date && moment(date).isValid()) {
+    return moment(date).format(MINUTE);
+  }
+  return date;
+};
 
 const renderTag = (listField: string, nameField: string) => (rowData: any, getDataMethod = get): React.ReactElement => {
   const list = getDataMethod(rowData, listField);
@@ -252,24 +262,28 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     width: 170,
     dataIndex: 'estimatedStartTime',
     sortable: true,
+    render: renderFormatDate('estimatedStartTime'),
   }],
   ['estimatedEndTime', {
     title: <Tooltip title="预计结束时间">预计结束时间</Tooltip>,
     width: 170,
     dataIndex: 'estimatedEndTime',
     sortable: true,
+    render: renderFormatDate('estimatedEndTime'),
   }],
   ['actualStartTime', {
     title: <Tooltip title="实际开始时间">实际开始时间</Tooltip>,
     width: 170,
     dataIndex: 'actualStartTime',
     sortable: true,
+    render: renderFormatDate('actualStartTime'),
   }],
   ['actualEndTime', {
     title: <Tooltip title="实际结束时间">实际结束时间</Tooltip>,
     width: 170,
     dataIndex: 'actualEndTime',
     sortable: true,
+    render: renderFormatDate('actualEndTime'),
   }],
   ['remainingTime', {
     title: <Tooltip title="剩余预估时间">剩余预估时间</Tooltip>,

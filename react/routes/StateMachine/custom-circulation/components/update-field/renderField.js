@@ -13,7 +13,7 @@ import SelectProgramVersion from '@/components/select/select-program-version';
 import { userApi } from '@/api';
 import styles from './index.less';
 import { getAgileFields } from '@/components/field-pro';
-import DateTimePickerWithFormat from '@/components/date-time-picker/DateTimePickerFormat';
+import DateTimePickerWithFormat from '@/components/date-time-picker/date-time-pikcer-format';
 import { FORMAT_FIELDS } from '../../../../../constants/DATE_FORMAT';
 
 const { Option } = Select;

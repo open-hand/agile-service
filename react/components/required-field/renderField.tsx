@@ -16,7 +16,7 @@ import SelectEnvironment from '@/components/select/select-environment';
 import SelectFeature from '@/components/select/select-feature';
 import SelectCustomField from '@/components/select/select-custom-field';
 import SelectMultiServiceTag from '@/components/select/select-multi-service-tag';
-import DateTimePickerWithFormat from '@/components/date-time-picker/DateTimePickerFormat';
+import DateTimePickerWithFormat from '@/components/date-time-picker/date-time-pikcer-format';
 import { FORMAT_FIELDS } from '@/constants/DATE_FORMAT';
 import SelectComponent from '../select/select-component';
 

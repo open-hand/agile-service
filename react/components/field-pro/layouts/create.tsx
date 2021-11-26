@@ -17,6 +17,7 @@ import SelectTeam from '@/components/select/select-team';
 import SelectUserWithAssigneeMe from '@/components/select/pro/select-user-with-assigneeme';
 import SelectIssueType from '@/components/select/pro/select-issue-type';
 import DateTimePickerWithDefault from '@/components/date-time-picker';
+import DateTimePickerWithFormat from '@/components/date-time-picker/date-time-pikcer-format';
 import type { DateTimePickerProps } from '@/components/date-time-picker/DateTimePicker';
 import getFieldsInstance, { AgileComponentMap, CustomFieldMap, IFieldBaseConfig } from '../base';
 import type { IAgileBaseFieldTypeComponentProps } from '../base/component';
@@ -53,10 +54,10 @@ const AgileComponentMapWithPro = {
   featureType: SelectFeatureType,
   subProject: SelectTeam,
   participant: SelectUser,
-  estimatedStartTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
-  estimatedEndTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
-  actualStartTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
-  actualEndTime: DateTimePickerWithDefault as React.ComponentClass<DateTimePickerProps>,
+  estimatedStartTime: DateTimePickerWithFormat as React.ComponentClass<DateTimePickerProps>,
+  estimatedEndTime: DateTimePickerWithFormat as React.ComponentClass<DateTimePickerProps>,
+  actualStartTime: DateTimePickerWithFormat as React.ComponentClass<DateTimePickerProps>,
+  actualEndTime: DateTimePickerWithFormat as React.ComponentClass<DateTimePickerProps>,
 };
 const CreateCustomFieldMap = {
   ...CustomFieldMap,
