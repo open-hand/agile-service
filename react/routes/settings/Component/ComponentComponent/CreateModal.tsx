@@ -4,6 +4,7 @@ import React, {
 import {
   Modal, TextField, TextArea, DataSet, NumberField, Select, Form,
 } from 'choerodon-ui/pro';
+import { C7NFormat } from '@choerodon/master';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { observer } from 'mobx-react-lite';
 import { IModalProps } from '@/common/types';
@@ -156,7 +157,12 @@ const ObserverCreateComponent = observer(CreateComponent);
 const openComponentModal = (props: Props) => {
   Modal.open({
     key: Modal.key(),
-    title: props.componentId ? '编辑模块' : '创建模块',
+    title: props.componentId ? '编辑模块' : (
+      <C7NFormat
+        intlPrefix="agile.setting"
+        id="create.component"
+      />
+    ),
     style: {
       width: MODAL_WIDTH.small,
     },

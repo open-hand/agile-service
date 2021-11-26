@@ -1,21 +1,21 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button, CheckBox } from 'choerodon-ui/pro';
 
-import type { IntlShape } from 'react-intl';
 import { observer } from 'mobx-react-lite';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { IModalProps } from '@/common/types';
 import promptStyles from './index.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 interface Props {
   modal?: IModalProps,
-  formatMessage: IntlShape['formatMessage'],
   onContinue: (secondEntry?: boolean) => void,
   promptText: string,
 }
 const RequiredPrompt: React.FC<Props> = ({
-  modal, formatMessage, onContinue, promptText,
+  modal, onContinue, promptText,
 }) => {
+  const formatMessage = useFormatMessage('agile.page');
   const [isPrompt, setIsPrompt] = useState<string>('true');
 
   const handleConfirm = useCallback(async () => {

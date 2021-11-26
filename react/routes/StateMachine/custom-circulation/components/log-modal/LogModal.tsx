@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import {
   Table, Modal, DataSet, Form, TextField, Select,
 } from 'choerodon-ui/pro';
+import { C7NFormat } from '@choerodon/master';
 import { Icon, Tooltip } from 'choerodon-ui';
 import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
@@ -173,7 +174,10 @@ const ObserverLogModal = observer(LogTable);
 const openLogModal = (props: Props) => {
   Modal.open({
     key: Modal.key(),
-    title: '查看执行日志',
+    title: <C7NFormat
+      intlPrefix="agile.stateMachine"
+      id="customFlow.log"
+    />,
     style: {
       width: MODAL_WIDTH.large,
     },

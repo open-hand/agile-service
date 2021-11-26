@@ -1,11 +1,11 @@
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
-import type { IntlShape } from 'react-intl';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { pageConfigApiConfig } from '@/api';
+import type { UseFormatMessageFunction } from '@/hooks/useFormatMessage';
 
 interface Props {
   schemeCode: string,
-  formatMessage: IntlShape['formatMessage'],
+  formatMessage: UseFormatMessageFunction<string>,
 }
 const SchemeTableDataSet = ({
   formatMessage, schemeCode,
@@ -18,29 +18,29 @@ const SchemeTableDataSet = ({
     {
       name: 'name',
       type: 'string' as FieldType,
-      label: formatMessage({ id: 'field' }),
+      label: formatMessage({ id: 'agile.common.field' }),
     },
   ],
   fields: [
     {
       name: 'name',
       type: 'string' as FieldType,
-      label: formatMessage({ id: 'field' }),
+      label: formatMessage({ id: 'agile.common.field' }),
     },
     {
       name: 'contextName',
       type: 'string' as FieldType,
-      label: formatMessage({ id: 'field.range' }),
+      label: formatMessage({ id: 'agile.page.field.range' }),
     },
     {
       name: 'fieldTypeName',
       type: 'string' as FieldType,
-      label: formatMessage({ id: 'field.type' }),
+      label: formatMessage({ id: 'agile.page.field.type' }),
     },
     {
       name: 'required',
       type: 'boolean' as FieldType,
-      label: formatMessage({ id: 'field.required' }),
+      label: formatMessage({ id: 'agile.page.field.required' }),
     },
   ],
   transport: {

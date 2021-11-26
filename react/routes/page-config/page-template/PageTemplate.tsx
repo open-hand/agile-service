@@ -280,16 +280,7 @@ function PageTemplate() {
         >
           <PageDescription />
           <PageTemplateTable tableRef={tableRef} />
-          {/* {
-            !isProject ? <SortTable />
-              : [
-                <IssueTypeWrap title="字段配置">
-                  <SortTable />
-                </IssueTypeWrap>,
-                <IssueTypeWrap title="描述信息格式">
-                  <PageDescription />
-                </IssueTypeWrap>]
-          } */}
+
         </div>
         <div className={styles.bottom}>
           <Button funcType={'raised' as FuncType} color={'primary' as ButtonColor} disabled={!pageTemplateStore.getDirty} loading={btnLoading} onClick={handleSubmit}>

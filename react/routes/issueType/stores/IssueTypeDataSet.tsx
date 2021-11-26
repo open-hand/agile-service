@@ -1,6 +1,8 @@
+import React from 'react';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { getIsOrganization } from '@/utils/common';
+import { C7NFormat } from '@choerodon/master';
 import DataSet, { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
+import { getIsOrganization } from '@/utils/common';
 
 import { issueTypeApiConfig } from '@/api';
 
@@ -33,18 +35,28 @@ const sourceDataSet = new DataSet({
   ],
 });
 
-const IssueTypeDataSet = ({ isOrganization }: { isOrganization: boolean}): DataSetProps => {
+const IssueTypeDataSet = ({ isOrganization }: { isOrganization: boolean }): DataSetProps => {
   const getQueryFields = () => {
     const queryFields = [
       {
         name: 'name',
         type: 'string' as FieldType,
-        label: '名称',
+        label: (
+          <C7NFormat
+            intlPrefix="agile.issueType"
+            id="name"
+          />
+        ),
       },
       {
         name: 'source',
         type: 'string' as FieldType,
-        label: '来源',
+        label: (
+          <C7NFormat
+            intlPrefix="boot"
+            id="source"
+          />
+        ),
         textField: 'label',
         valueField: 'code',
         options: sourceDataSet,
@@ -53,7 +65,12 @@ const IssueTypeDataSet = ({ isOrganization }: { isOrganization: boolean}): DataS
     if (!isOrganization) {
       queryFields.push({
         name: 'enabled',
-        label: '状态',
+        label: (
+          <C7NFormat
+            intlPrefix="agile.issueType"
+            id="state"
+          />
+        ),
         type: 'string' as FieldType,
         textField: 'label',
         valueField: 'value',
@@ -77,7 +94,14 @@ const IssueTypeDataSet = ({ isOrganization }: { isOrganization: boolean}): DataS
       {
         name: 'name',
         type: 'string' as FieldType,
-        label: '名称',
+        label: (
+          <span>
+            <C7NFormat
+              intlPrefix="agile.issueType"
+              id="name"
+            />
+          </span>
+        ),
       },
       {
         name: 'action',
@@ -85,12 +109,26 @@ const IssueTypeDataSet = ({ isOrganization }: { isOrganization: boolean}): DataS
       {
         name: 'description',
         type: 'string' as FieldType,
-        label: '描述',
+        label: (
+          <span>
+            <C7NFormat
+              intlPrefix="agile.common"
+              id="description"
+            />
+          </span>
+        ),
       },
       {
         name: 'typeCode',
         type: 'string' as FieldType,
-        label: '标准工作项类型',
+        label: (
+          <span>
+            <C7NFormat
+              intlPrefix="agile.issueType"
+              id="norm.type"
+            />
+          </span>
+        ),
       },
       {
         name: 'usage',
@@ -98,12 +136,26 @@ const IssueTypeDataSet = ({ isOrganization }: { isOrganization: boolean}): DataS
         label: '使用情况',
       },
       {
-        label: '来源',
+        label: (
+          <span>
+            <C7NFormat
+              intlPrefix="boot"
+              id="source"
+            />
+          </span>
+        ),
         name: 'source',
         type: 'string' as FieldType,
       },
       {
-        label: '状态',
+        label: (
+          <span>
+            <C7NFormat
+              intlPrefix="agile.issueType"
+              id="state"
+            />
+          </span>
+        ),
         name: 'enabled',
         type: 'boolean' as FieldType,
       },
@@ -114,7 +166,7 @@ const IssueTypeDataSet = ({ isOrganization }: { isOrganization: boolean}): DataS
       },
     ],
     transport: {
-      read: ({ params, data }: { params: { page: number, size: number}, data: any}) => {
+      read: ({ params, data }: { params: { page: number, size: number }, data: any }) => {
         if (getIsOrganization()) {
           return issueTypeApiConfig.orgLoad({ params, data });
         }

@@ -8,6 +8,11 @@ export * from './gantt';
 export * from './version';
 export * from './workHours';
 export * from './projectReport';
+export * from './issueType';
+export * from './page';
+export * from './setting';
+export * from './stateMachine';
+
 const en_US = {
   refresh: 'Refresh',
   filter: 'Filter',

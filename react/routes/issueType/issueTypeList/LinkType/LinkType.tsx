@@ -4,15 +4,17 @@ import React, {
 import { observer } from 'mobx-react-lite';
 import {
   Modal, DataSet, Form, TextField, Button, IconPicker, CheckBox,
+  Icon,
 } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui/pro';
+
+import { C7NFormat } from '@choerodon/master';
 import { Choerodon } from '@choerodon/boot';
-import { IModalProps, IIssueType } from '@/common/types';
-import { issueTypeApi } from '@/api';
 import Field from 'choerodon-ui/pro/lib/data-set/Field';
 import { debounce } from 'lodash';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { issueTypeApi } from '@/api';
+import { IModalProps, IIssueType } from '@/common/types';
 import { TypeTag } from '@/components';
 import SelectLinkType from './SelectLinkType';
 import styles from './LinkType.less';
@@ -300,7 +302,10 @@ const openLink = (props: Props) => {
       width: 480,
     },
     key: 'link',
-    title: '引用工作项类型',
+    title: <C7NFormat
+      intlPrefix="agile.issueType"
+      id="reference"
+    />,
     children: <ObserverLinkType {...props} />,
     footer: null,
   });

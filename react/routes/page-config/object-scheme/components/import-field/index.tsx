@@ -3,6 +3,7 @@ import React, {
 } from 'react';
 import { Modal, Button } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
+import { C7NFormat } from '@choerodon/master';
 import { Divider } from 'choerodon-ui';
 import { set } from 'lodash';
 import fileSaver from 'file-saver';
@@ -162,7 +163,10 @@ function openImportField({ onOk }: { onOk: Function }) {
     className: importStyles.modal,
     maskClosable: false,
     key: Modal.key(),
-    title: '导入字段',
+    title: <C7NFormat
+      intlPrefix="agile.page"
+      id="field.import"
+    />,
     style: {
       width: MODAL_WIDTH.small,
     },

@@ -12,6 +12,7 @@ import FormDataSet from './FormDataSet';
 import useStore, { Store as HookStore } from './useStore';
 import { IFieldPostDataProps } from '../CreateField';
 import ContextOptionsDataSet from './ContextOptionsDataSet';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 interface Context {
   formatMessage: IntlShape['formatMessage'],
@@ -29,15 +30,16 @@ interface Context {
   modal: IModalProps,
 }
 const Store = createContext({} as Context);
-export type CreateFiledProps = Pick<Context, 'formatMessage' | 'isEdit' | 'onSubmitLocal' |
+export type CreateFiledProps = Pick<Context, 'isEdit' | 'onSubmitLocal' |
   'localCheckCode' | 'localCheckName' | 'schemeCode' | 'handleRefresh' | 'record'>;
 export default Store;
 export const StoreProvider: React.FC<Context> = inject('AppState')(observer(
   (props) => {
     const {
-      formatMessage, AppState: { currentMenuType: { type, id, organizationId } },
+      AppState: { currentMenuType: { type, id, organizationId } },
       schemeCode, record, localCheckCode, localCheckName, defaultContext: propsDefaultContext,
     } = props;
+    const formatMessage = useFormatMessage('agile.page');
     const isEdit = !!record;
     const store = useStore(type, id, organizationId);
     const contextOptionsDataSet = useMemo(() => new DataSet(ContextOptionsDataSet({ isEdit, store, oldRecord: record })), [isEdit, record, store]);

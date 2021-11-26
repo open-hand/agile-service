@@ -20,13 +20,14 @@ import Store from '../stores';
 import styles from './IssueTypeList.less';
 import openUsage from './Usage';
 import openLink from './LinkType';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const { Column } = Table;
 
 function IssueTypeList() {
   const context = useContext(Store);
   const { issueTypeDataSet, isOrganization } = context;
-
+  const formatMessage = useFormatMessage();
   const handleEdit = useCallback(({ record, dataSet }) => {
     Modal.open({
       className: styles.issueType_modal,
@@ -162,10 +163,10 @@ function IssueTypeList() {
     const menu = (
       // eslint-disable-next-line react/jsx-no-bind
       <Menu onClick={handleMenuClick.bind(this)} className={styles.issueType_menu}>
-        <Menu.Item key="edit">编辑</Menu.Item>
+        <Menu.Item key="edit">{formatMessage({ id: 'boot.edit' })}</Menu.Item>
         {
           record?.get('deleted') && (
-            <Menu.Item key="delete">删除</Menu.Item>
+            <Menu.Item key="delete">{formatMessage({ id: 'boot.delete' })}</Menu.Item>
           )
         }
         {
@@ -180,12 +181,14 @@ function IssueTypeList() {
         }
         {
           !isOrganization && record?.get('enabled') && (
-            <Menu.Item key="stop">停用</Menu.Item>
+            <Menu.Item key="stop">
+              {formatMessage({ id: 'boot.disable' })}
+            </Menu.Item>
           )
         }
         {
           !isOrganization && !record?.get('enabled') && (
-            <Menu.Item key="start">启用</Menu.Item>
+            <Menu.Item key="start">{formatMessage({ id: 'boot.enable' })}</Menu.Item>
           )
         }
       </Menu>
@@ -276,12 +279,12 @@ function IssueTypeList() {
       <Header>
         <HeaderButtons items={[
           {
-            name: '添加工作项类型',
+            name: formatMessage({ id: 'agile.issueType.add' }),
             icon: 'playlist_add',
             handler: handleAdd,
             display: true,
           }, {
-            name: '引用工作项类型',
+            name: formatMessage({ id: 'agile.issueType.reference' }),
             icon: 'relate',
             handler: handleOpenRefrenced,
             display: !isOrganization,

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Tooltip } from 'choerodon-ui/pro';
+import { C7NFormat } from '@choerodon/master';
 import TableDropMenu from '@/components/table-drop-menu';
 import { pageConfigApi } from '@/api';
 import ToggleFieldValue from '../components/toggle-field-value';
@@ -42,7 +43,10 @@ function checkPermissionLinkage(data: any) {
 const getColumns = ({ currentIssueType: { id: issueTypeId, typeCode }, loadData, disabled }: { currentIssueType: IPageTemplateStoreIssueType, loadData: () => void, disabled: boolean }) => ([
 
   {
-    title: '字段名称',
+    title: <C7NFormat
+      intlPrefix="agile.page"
+      id="field.name"
+    />,
     dataIndex: 'fieldName',
     key: 'fieldName',
     width: 120,
@@ -52,14 +56,20 @@ const getColumns = ({ currentIssueType: { id: issueTypeId, typeCode }, loadData,
 
   },
   {
-    title: '默认值',
+    title: <C7NFormat
+      intlPrefix="agile.page"
+      id="default"
+    />,
     dataIndex: 'defaultValue',
     key: 'defaultValue',
     width: 200,
     render: ({ rowData }: any) => <div style={{ display: 'inline-flex', alignItems: 'center', width: '99%' }}><ToggleFieldValue data={rowData} disabled={disabled} /></div>,
   },
   {
-    title: '角色权限说明',
+    title: <C7NFormat
+      intlPrefix="agile.page"
+      id="template.role"
+    />,
     dataIndex: 'roleInfo',
     key: 'roleInfo',
     flexGrow: 1,
@@ -75,7 +85,10 @@ const getColumns = ({ currentIssueType: { id: issueTypeId, typeCode }, loadData,
     },
   },
   {
-    title: '级联说明',
+    title: <C7NFormat
+      intlPrefix="agile.page"
+      id="template.cascade"
+    />,
     dataIndex: 'cascadeInfo',
     key: 'cascadeInfo',
     flexGrow: 1,
@@ -87,7 +100,10 @@ const getColumns = ({ currentIssueType: { id: issueTypeId, typeCode }, loadData,
     ) : ''),
   },
   {
-    title: '操作',
+    title: <C7NFormat
+      intlPrefix="agile.page"
+      id="field.operate"
+    />,
     dataIndex: 'action',
     key: 'action',
     width: 80,

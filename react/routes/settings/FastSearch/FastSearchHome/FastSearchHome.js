@@ -2,7 +2,8 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Modal } from 'choerodon-ui/pro';
-import { HeaderButtons } from '@choerodon/master';
+import { HeaderButtons, C7NFormat } from '@choerodon/master';
+
 import {
   TabPage as Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
@@ -85,7 +86,13 @@ class Search extends Component {
       >
         <Header title="快速筛选">
           <HeaderButtons items={[{
-            name: '创建快速筛选',
+            name: (
+              <span>
+                <C7NFormat
+                  intlPrefix="agile.setting"
+                  id="create.filter"
+                />
+              </span>),
             icon: 'playlist_add',
             handler: () => openCreateFastSearch(() => this.loadFilters()),
             display: true,

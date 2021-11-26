@@ -1,4 +1,5 @@
 import React from 'react';
+import { C7NFormat } from '@choerodon/master';
 import { Modal } from 'choerodon-ui/pro';
 import { quickFilterApi } from '@/api';
 import FastSearch from '../fast-search';
@@ -7,7 +8,10 @@ import { transformDataToEditData } from '../fast-search/utils';
 export const openCreateFastSearch = (onOK: () => void) => {
   Modal.open({
     key: Modal.key(),
-    title: '创建快速筛选',
+    title: <C7NFormat
+      intlPrefix="agile.setting"
+      id="create.filter"
+    />,
     style: {
       width: 740,
     },

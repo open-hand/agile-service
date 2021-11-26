@@ -4,6 +4,7 @@ import React, {
 import {
   Modal, Form, DataSet, TextField, Select, SelectBox,
 } from 'choerodon-ui/pro';
+import { C7NFormat } from '@choerodon/master';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { observer } from 'mobx-react-lite';
@@ -19,6 +20,7 @@ import {
 import useDeepCompareEffect from '@/hooks/useDeepCompareEffect';
 import useIsProgram from '@/hooks/useIsProgram';
 import { OldLoading as Loading } from '@/components/Loading';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const { Option } = SelectBox;
 const key = Modal.key();
@@ -31,6 +33,8 @@ interface Props {
 const CreateStatus: React.FC<Props> = ({
   modal, onSubmit, selectedIssueType = [], record: statusRecord,
 }) => {
+  const formatMessage = useFormatMessage();
+
   const [loading, setLoading] = useState<boolean>(false);
   const modalRef = useRef(modal);
   modalRef.current = modal;
@@ -73,7 +77,7 @@ const CreateStatus: React.FC<Props> = ({
       {
         name: 'valueCode',
         type: 'string' as FieldType,
-        label: '阶段',
+        label: formatMessage({ id: 'agile.stateMachine.stage' }),
         required: true,
         lookupAxiosConfig: () => ({
           url: '/agile/v1/lookup_values/status_category',
@@ -85,7 +89,7 @@ const CreateStatus: React.FC<Props> = ({
       {
         name: 'issueTypeIds',
         type: 'string' as FieldType,
-        label: '工作项类型',
+        label: formatMessage({ id: 'agile.common.issueType' }),
         required: true,
         textField: 'name',
         valueField: 'id',
@@ -241,13 +245,21 @@ const CreateStatus: React.FC<Props> = ({
 const ObserverCreateStatus = observer(CreateStatus);
 const openCreateStatus = (props: Omit<Props, 'modal'>) => {
   Modal.open({
-    title: props.record ? '编辑状态' : '创建状态',
+    title: props.record ? '编辑状态' : (
+      <C7NFormat
+        intlPrefix="agile.stateMachine"
+        id="create.state"
+      />
+    ),
     key,
     drawer: true,
     style: {
       width: 380,
     },
-    okText: props.record ? '确定' : '创建',
+    okText: <C7NFormat
+      intlPrefix="agile.stateMachine"
+      id={props.record ? 'boot.save' : 'boot.create'}
+    />,
     children: <ObserverCreateStatus {...props} />,
   });
 };
