@@ -36,6 +36,7 @@ import CreateBoard from '../ScrumBoardComponent/CreateBoard';
 import ExpandAllButton from '../ScrumBoardComponent/expand-all-button';
 import BoardSearch from '../ScrumBoardComponent/board-search';
 import SelectBoard from '../ScrumBoardComponent/select-board';
+import HiddenSubTask from '../ScrumBoardComponent/hide-preSprint-doneSubTask';
 import StatusLinkageWSHandle from '@/components/StatusLinkageWSHandle';
 
 const { AppState } = stores;
@@ -360,8 +361,9 @@ class ScrumBoardHome extends Component {
         className="c7n-scrumboard-page"
       >
         <Header title="活跃冲刺">
+          <HiddenSubTask refresh={() => this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard))} />
           <SelectBoard
-            style={{ marginRight: 8 }}
+            style={{ marginRight: 8, marginLeft: 16 }}
             onFooterClick={this.handleCreateBoardClick}
             onChange={(value) => {
               const selectedBoard = ScrumBoardStore.getBoardList.get(value);
@@ -431,7 +433,6 @@ class ScrumBoardHome extends Component {
                 permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.sprint.finish'],
                 preElement: this.renderRemainDate(),
               },
-
             ]}
           />
         </Header>
