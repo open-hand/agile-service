@@ -11,6 +11,10 @@ const locale = {
   'add.column': '添加列',
   'create.board': '创建看板',
   'remain.day': '{day} days 剩余',
+  filter: '筛选',
+  'create.filter': '创建筛选',
+  'choose.quick.filter': '选择快速筛选',
+  'create.more.filter': '创建更多快速筛选',
 
 } as const;
 const exportScrumBoard = localeAppendPrefixObjectKey({ intlPrefix: 'scrumBoard' as const, intlObject: locale });

@@ -23,9 +23,9 @@ import SwimLanePage from './components/SwimLanePage/SwimLanePage';
 import WorkCalendarPage from './components/WorkCalendarPage/WorkCalendarPage';
 import EditBoardName from './components/EditBoardName/EditBoardName';
 import CreateColumn from './components/create-column';
+import ChooseFilter from './components/choose-filter';
 
 const { TabPane } = Tabs;
-const { confirm } = Modal;
 @observer
 class Setting extends Component {
   constructor(props) {
@@ -236,6 +236,17 @@ class Setting extends Component {
               key="2"
             >
               <SwimLanePage />
+            </TabPane>
+            <TabPane
+              tab={(
+                <C7NFormat
+                  intlPrefix="agile.scrumBoard"
+                  id="filter"
+                />
+              )}
+              key="filter"
+            >
+              <ChooseFilter />
             </TabPane>
             {ScrumBoardStore.getCalanderCouldUse
               ? (

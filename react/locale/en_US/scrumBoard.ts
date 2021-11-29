@@ -11,7 +11,10 @@ const locale = {
   'add.column': 'Add Column',
   'create.board': 'Create Board',
   'remain.day': '{day} days remaining',
-
+  filter: 'Filter',
+  'create.filter': 'Create Filter',
+  'choose.quick.filter': 'Choose Quick Filter',
+  'create.more.filter': 'Create More Filter',
 } as const;
 const exportScrumBoard = localeAppendPrefixObjectKey({ intlPrefix: 'scrumBoard' as const, intlObject: locale });
 type ILocaleScrumBoardType = {
