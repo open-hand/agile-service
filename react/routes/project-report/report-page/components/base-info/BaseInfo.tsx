@@ -20,7 +20,7 @@ const BaseInfo: React.FC = () => {
       const { ccList = [], receiverList = [] } = store.baseInfo || {};
       return [{
         ...store.baseInfo,
-        ccList: ccList.map((user) => user.id),
+        ccList: ccList?.slice(),
         receiverList: receiverList?.slice(),
       }];
     }
@@ -48,6 +48,7 @@ const BaseInfo: React.FC = () => {
       multiple: true,
     }, {
       name: 'ccList',
+      type: 'object' as FieldType,
       label: '抄送人',
       textField: 'realName',
       valueField: 'id',
@@ -66,7 +67,7 @@ const BaseInfo: React.FC = () => {
         title: data.title,
         description: data.description,
         receiverList: data.receiverList,
-        ccList: data.ccList.map((id: string) => ({ id })),
+        ccList: data.ccList,
       };
     }
     return false;
