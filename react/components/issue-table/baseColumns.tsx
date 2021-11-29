@@ -24,7 +24,7 @@ interface IIssueTableBaseColumn<D extends object = any> {
   fixed?: boolean
   /** 能否排序 */
   sortable?: boolean
-  render?: (data: D, getDataMethod?: IIssueTableBaseColumnRenderGetData<D>, ...args: any) => React.ReactElement
+  render?: (data: D, getDataMethod?: IIssueTableBaseColumnRenderGetData<D>, ...args: any) => React.ReactElement | string
 }
 /**
  * 获取自定义列配置
