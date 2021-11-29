@@ -220,6 +220,8 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
       } else if (record.groupType === 'feature') {
         defaultValues.featureId = parentIssue.issueId;
         typeCodes = ['story'];
+      } else if (parentIssue.issueTypeVO?.typeCode === 'bug') {
+        typeCodes = ['sub_task'];
       }
       return (
         <span role="none" onClick={(e) => e.stopPropagation()} className="c7n-gantt-content-body-create">
