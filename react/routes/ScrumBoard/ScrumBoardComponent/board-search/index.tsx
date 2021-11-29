@@ -14,6 +14,7 @@ import './index.less';
 interface Props {
   onRefresh: () => void
   saveStore: (store: IssueSearchStore) => void
+  excludeQuickFilterIds?: string[]
   //   issueSearchStore: IssueSearchStore,
 }
 function getSystemFields() {
@@ -91,7 +92,7 @@ function transformFilter(chosenFields: IChosenFields) {
 const fieldConfigs = {
   issueTypeId: { excludeTypeCodes: ['issue_epic'] },
 };
-const BoardSearch: React.FC<Props> = ({ onRefresh, saveStore }) => {
+const BoardSearch: React.FC<Props> = ({ onRefresh, saveStore, excludeQuickFilterIds }) => {
   const issueSearchStore = useIssueSearchStore({
     // @ts-ignore
     getSystemFields,
@@ -129,10 +130,15 @@ const BoardSearch: React.FC<Props> = ({ onRefresh, saveStore }) => {
           onRefresh();
         }}
         foldedHeight={40}
+        excludeQuickFilterIds={excludeQuickFilterIds}
       />
     </div>
 
   );
+};
+
+BoardSearch.defaultProps = {
+  excludeQuickFilterIds: undefined,
 };
 
 export default observer(BoardSearch);

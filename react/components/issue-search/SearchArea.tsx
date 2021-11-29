@@ -4,7 +4,7 @@ import {
   Button,
 } from 'choerodon-ui/pro';
 import { stores } from '@choerodon/boot';
-import { find } from 'lodash';
+import { find, includes } from 'lodash';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 
@@ -24,7 +24,7 @@ const { Option, OptGroup } = FlatSelect;
 const SearchArea: React.FC = () => {
   const prefixCls = 'c7n-issue';
   const {
-    store, onClear, urlFilter, onClickSaveFilter, projectId, foldedHeight, hasMyAssigned,
+    store, onClear, urlFilter, onClickSaveFilter, projectId, foldedHeight, hasMyAssigned, excludeQuickFilterIds,
   } = useContext(IssueSearchContext);
   const formatMessage = useFormatMessage('agile.common');
   const { data: quickFilters } = useQuickFilters({ projectId }, { enabled: store.menuType === 'project' });
@@ -205,7 +205,7 @@ const SearchArea: React.FC = () => {
                   }
                 </OptGroup>
                 <OptGroup key="quick" label="快速筛选">
-                  {quickFilters.map((filter) => (
+                  {quickFilters.filter((filter) => !includes(excludeQuickFilterIds, filter.filterId)).map((filter) => (
                     <Option value={`quick|${filter.filterId}`}>{filter.name}</Option>
                   ))}
                 </OptGroup>
