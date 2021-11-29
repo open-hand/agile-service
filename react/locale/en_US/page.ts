@@ -27,8 +27,8 @@ const locale = {
 
 } as const;
 const exportPage = localeAppendPrefixObjectKey({ intlPrefix: 'page' as const, intlObject: locale });
-type ILocaleIssueTypeType = {
+type ILocalePageType = {
   ['agile.page']: Array<keyof typeof locale>[number]
 }
 export { exportPage };
-export type { ILocaleIssueTypeType };
+export type { ILocalePageType };
