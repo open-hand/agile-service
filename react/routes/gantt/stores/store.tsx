@@ -15,48 +15,23 @@ import { GanttIssue } from '../types';
 export const units = [
   {
     type: 'day',
-    label: (
-      <C7NFormat
-        intlPrefix="agile.gantt"
-        id="day"
-      />
-    ),
+    label: 'day',
   },
   {
     type: 'week',
-    label: (
-      <C7NFormat
-        intlPrefix="agile.gantt"
-        id="week"
-      />
-    ),
+    label: 'week',
   },
   {
     type: 'month',
-    label: (
-      <C7NFormat
-        intlPrefix="agile.gantt"
-        id="month"
-      />
-    ),
+    label: 'month',
   },
   {
     type: 'quarter',
-    label: (
-      <C7NFormat
-        intlPrefix="agile.gantt"
-        id="quarter"
-      />
-    ),
+    label: 'quarter',
   },
   {
     type: 'halfYear',
-    label: (
-      <C7NFormat
-        intlPrefix="agile.gantt"
-        id="year"
-      />
-    ),
+    label: 'year',
   },
 ];
 class GanttStore {
