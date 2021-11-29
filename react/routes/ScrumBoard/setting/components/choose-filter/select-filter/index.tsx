@@ -49,9 +49,13 @@ const SelectFilter: React.FC<SelectFilterProps> = forwardRef(({
       return data;
     },
     paging: true,
+    optionRenderer: (filter: IFilter) => (
+      <Tooltip title={filter.expressQuery}>
+        <span>{filter.name}</span>
+      </Tooltip>
+    ),
   }), [afterLoad, args, boardId, dataRef]);
   const props = useSelect(config);
-  const processProps = omit(props, ['options', 'onOption', 'optionRenderer']);
   const Component = flat ? FlatSelect : Select;
 
   return (
@@ -60,23 +64,9 @@ const SelectFilter: React.FC<SelectFilterProps> = forwardRef(({
       // @ts-ignore
       label={formatMessage({ id: 'choose.quick.filter' })}
       multiple
-      {...processProps}
+      {...props}
       {...otherProps}
-    >
-      {props.options.map((record) => {
-        const optionProps = props.onOption({ record });
-        if (record.get('loadMoreButton')) {
-          return <Option {...optionProps}>{props.optionRenderer({ record } as any)}</Option>;
-        }
-        return (
-          <Option value={record.get('filterId')} {...optionProps}>
-            <Tooltip title={record.get('expressQuery')}>
-              <span>{record.get('name')}</span>
-            </Tooltip>
-          </Option>
-        );
-      })}
-    </Component>
+    />
   );
 });
 export default SelectFilter;
