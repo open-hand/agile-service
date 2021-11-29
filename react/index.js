@@ -25,7 +25,6 @@ const PageConfig = React.lazy(() => import('./routes/page-config'));
 const StateMachine = React.lazy(() => import('./routes/StateMachine'));
 const TeamPerformance = React.lazy(() => import('./routes/TeamPerformance'));
 const VersionList = React.lazy(() => (import('./routes/version-list')));
-const WorkCalendar = React.lazy(() => (import('./routes/work-calendar')));
 const WorkGroup = React.lazy(() => (import('./routes/work-group')));
 // 敏捷设置
 const Component = React.lazy(() => import('./routes/settings/Component'));
@@ -101,7 +100,6 @@ export function getRoutes(match) {
     />,
     <Route path={`${match.url}/ui-preview/:uuid`} component={UiPreview} />,
     <Route path={`${match.url}/outside/ui-preview/:uuid`} component={UiPreview} />,
-    <Route path={`${match.url}/work-calendar`} component={WorkCalendar} />,
     <PermissionRoute
       service={['choerodon.code.organization.manager.work-group.default']}
       path={`${match.url}/work-group`}
