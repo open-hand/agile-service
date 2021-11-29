@@ -21,14 +21,14 @@ import styles from './index.less';
 import { useProjectReportContext } from '../../context';
 import Export, { IExportProps } from '../export';
 
-const htmlTemplate = (images: { url: String, height: number, width: number }[]) => renderEmail(
+const htmlTemplate = (images: { url: String, height: number, width?: number | string }[]) => renderEmail(
   <Box width="100%">
     {images.map((image) => (
       <Item>
         <Image
           src={image.url}
           style={{
-            maxWidth: 'calc(100% - 310px)',
+            maxWidth: image.width || 'calc(100% - 310px)',
             margin: '0 auto',
           }}
         />
@@ -128,7 +128,7 @@ const Operation: React.FC<Props> = () => {
     // pdf.save(`${store.baseInfo?.title ?? '项目报告'}.pdf`);
     // 导出html
     const urls = canvases.map((canvas) => canvas.canvas.toDataURL('image/png'));
-    const html = htmlTemplate(urls.map((url, i) => ({ url, height: canvases[i].height, width: canvases[i].width })));
+    const html = htmlTemplate(urls.map((url, i) => ({ url, height: canvases[i].height })));
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     fileSaver.saveAs(blob, `${store.baseInfo?.title ?? '项目报告'}.html`);
   }, [store.baseInfo?.title]);
@@ -150,7 +150,7 @@ const Operation: React.FC<Props> = () => {
         formData.append('file', file);
       });
       const urls: string[] = await fileApi.uploadImage(formData);
-      const html = htmlTemplate(urls.map((url, i) => ({ url, height: canvases[i].height, width: canvases[i].width })));
+      const html = htmlTemplate(urls.map((url, i) => ({ url, height: canvases[i].height, width: '100%' })));
       const { objectVersionNumber } = await projectReportApi.send(store.baseInfo?.id, html);
       store.setObjectVersionNumber(objectVersionNumber);
       setSending(false);
