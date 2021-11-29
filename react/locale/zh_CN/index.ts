@@ -357,6 +357,5 @@ const zh_CN = {
   'report.code-quality.nclocs': '代码行',
   'report.code-quality.duplicatedLines': '重复行',
 };
-// appendPrefixObjectKey(Common.localeCommon, commonf);
 
 export { zh_CN as AGILE_ZH_CN };

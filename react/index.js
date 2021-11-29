@@ -125,7 +125,8 @@ class Agile extends React.Component {
     if (language === 'zh_CN') {
       moment.locale('zh-cn');
     }
-    const IntlProviderAsync = asyncLocaleProvider(language, () => import(`./locale/${language}/index.js`));
+
+    const IntlProviderAsync = asyncLocaleProvider(language, () => import(/* webpackInclude: /\index.(ts|js)$/ */ `./locale/${language}`));
     return (
       <div id="agile">
         <IntlProviderAsync>

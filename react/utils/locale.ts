@@ -19,3 +19,31 @@ export function localeAppendPrefixObjectKey<T extends string, P extends string, 
     }), {}) as KeysDistributeObject<typeof intlPrefix>;
   return intlObject;
 }
+/**
+ * 异步加载多个多语言模块
+ * @param servicePrefix
+ * @param args
+ * @returns
+ */
+export async function asyncImportLocales<T extends { [key: string]: string }>(...args: Promise<any>[]): Promise<Record<string, T>> {
+  const localePackages = await Promise.all(args);
+  return Object.values(localePackages).reduce((pre, current, currentIndex) => {
+    // 避免多模块重复覆盖
+    const uniqueCurrentModules = Object.keys(current).reduce((m, key) => ({
+      ...m,
+      [`${key}${currentIndex}`]: current[key],
+    }), {});
+    return ({ ...pre, ...uniqueCurrentModules });
+  }, {});
+}
+/**
+ * 合并多个导入多语言导入模块
+ * @param args
+ * @returns
+ */
+export function mergeLocaleModule(...args: Array<Record<string, Record<string, string>> | Record<string, string>>): Record<string, string> {
+  return args.reduce<Record<string, string>>((p, m) => {
+    const currentModuleValues = Object.values(m);
+    return ({ ...p, ...(currentModuleValues.some((i) => typeof i === 'string') ? [m] : currentModuleValues).reduce((mp, r) => ({ ...mp, ...r }), {}) });
+  }, {});
+}
