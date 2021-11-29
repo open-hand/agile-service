@@ -37,7 +37,9 @@ const DeleteComponent = (props) => {
 
   return (
     <div>
-      删除后将无法使用该快速筛选，如果只是想要改变某些条件可以修改快速筛选。
+      <div style={{ marginBottom: 10 }}>{`确认删除快速筛选“${filter.name}”吗？`}</div>
+      <div style={{ marginBottom: 10 }}>删除后将无法使用此快速筛选，包括在看板配置中的默认筛选。</div>
+      <div>如果只是想要改变某些条件可以修改快速筛选。</div>
     </div>
   );
 };
