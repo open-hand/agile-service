@@ -95,17 +95,22 @@ public class UserServiceImpl implements UserService {
                 userDTOS.forEach(userDO -> {
                     String ldapName = userDO.getRealName() + "（" + userDO.getLoginName() + "）";
                     String noLdapName = userDO.getRealName() + "（" + userDO.getEmail() + "）";
-                    userMessage.add(
-                            new UserMessageDTO(userDO.getLdap() ? ldapName : noLdapName,
-                                    userDO.getLoginName(),
-                                    userDO.getRealName(),
-                                    userDO.getImageUrl(),
-                                    userDO.getEmail(),
-                                    userDO.getLdap(),
-                                    userDO.getId()));
+                    UserMessageDTO userMessageDTO = new UserMessageDTO(userDO.getLdap() ? ldapName : noLdapName,
+                            userDO.getLoginName(),
+                            userDO.getRealName(),
+                            userDO.getImageUrl(),
+                            userDO.getEmail(),
+                            userDO.getLdap(),
+                            userDO.getId());
+                    userMessageDTO.setCreationDate(userDO.getCreationDate());
+                    userMessage.add(userMessageDTO);
                 });
             } else {
-                userDTOS.forEach(userDO -> userMessage.add( new UserMessageDTO(userDO.getRealName(), userDO.getLoginName(), userDO.getRealName(), userDO.getImageUrl(), userDO.getEmail(), userDO.getLdap())));
+                userDTOS.forEach(userDO -> {
+                    UserMessageDTO userMessageDTO = new UserMessageDTO(userDO.getRealName(), userDO.getLoginName(), userDO.getRealName(), userDO.getImageUrl(), userDO.getEmail(), userDO.getLdap());
+                    userMessageDTO.setCreationDate(userDO.getCreationDate());
+                    userMessage.add(userMessageDTO);
+                });
             }
         }
         return userMessage;
@@ -124,19 +129,24 @@ public class UserServiceImpl implements UserService {
                     .map(userDO -> {
                         String ldapName = userDO.getRealName() + "（" + userDO.getLoginName() + "）";
                         String noLdapName = userDO.getRealName() + "（" + userDO.getEmail() + "）";
-
-                              return   new UserMessageDTO(userDO.getLdap() ? ldapName : noLdapName,
-                                        userDO.getLoginName(),
-                                        userDO.getRealName(),
-                                        userDO.getImageUrl(),
-                                        userDO.getEmail(),
-                                        userDO.getLdap(),
-                                        userDO.getId());
+                        UserMessageDTO userMessageDTO = new UserMessageDTO(userDO.getLdap() ? ldapName : noLdapName,
+                                userDO.getLoginName(),
+                                userDO.getRealName(),
+                                userDO.getImageUrl(),
+                                userDO.getEmail(),
+                                userDO.getLdap(),
+                                userDO.getId());
+                        userMessageDTO.setCreationDate(userDO.getCreationDate());
+                        return  userMessageDTO;
                     }).collect(Collectors.toList());
         } else {
             content = pages.getContent().stream()
                     .filter(v -> Boolean.TRUE.equals(v.getEnabled()))
-                    .map(userDO -> new UserMessageDTO(userDO.getRealName(), userDO.getLoginName(), userDO.getRealName(), userDO.getImageUrl(), userDO.getEmail(), userDO.getLdap())).collect(Collectors.toList());
+                    .map(userDO -> {
+                        UserMessageDTO userMessageDTO = new UserMessageDTO(userDO.getRealName(), userDO.getLoginName(), userDO.getRealName(), userDO.getImageUrl(), userDO.getEmail(), userDO.getLdap());
+                        userMessageDTO.setCreationDate(userDO.getCreationDate());
+                        return userMessageDTO;
+                    }).collect(Collectors.toList());
         }
         return PageUtil.buildPageInfoWithPageInfoList(pages, content);
     }
