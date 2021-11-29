@@ -90,7 +90,12 @@ const CreateBranch: React.FC<{ modal?: IModalProps } & ILinkBranchModalProps> = 
           name: 'projectId', label: '服务来源', type: 'string' as FieldType, defaultValue: propsProjectId ?? getProjectId(), required: true,
         },
         {
-          name: 'appServiceId', label: '应用服务', type: 'string' as FieldType, required: true,
+          name: 'appServiceId',
+          label: '应用服务',
+          type: 'string' as FieldType,
+          required: true,
+          computedProps: { disabled: ({ record }) => !record.get('projectId') },
+
         },
         {
           name: 'originBranch', label: '分支来源', type: 'string' as FieldType, required: true,

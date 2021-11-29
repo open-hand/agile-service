@@ -6,7 +6,7 @@ const locale = {
   'current.create.sprint': 'Create Sprint in PI',
   'show.init.sprint': 'Show Unstarted Sprint',
   'assignee.workload': 'Workload By Assignee',
-  'visible.issue': '{issue} visible issues',
+  'visible.issue': '{issue} issues',
   'start.sprint': 'Start Sprint',
   'global.sprint': 'Sprint Goal',
   'delete.sprint': 'Delete Sprint',
