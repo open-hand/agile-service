@@ -78,6 +78,7 @@ class Setting extends Component {
         ScrumBoardStore.axiosGetCalendarData(year);
       });
       ScrumBoardStore.axiosCanAddStatus();
+      ScrumBoardStore.axiosGetSelectedBoardFilterIds();
     }
   }
 

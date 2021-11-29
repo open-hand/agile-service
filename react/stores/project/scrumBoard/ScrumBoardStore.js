@@ -3,7 +3,7 @@ import { createRef } from 'react';
 import {
   observable, action, computed, toJS,
 } from 'mobx';
-import { find, isEmpty, set } from 'lodash';
+import { find, isEmpty, map } from 'lodash';
 import { store, stores, Choerodon } from '@choerodon/boot';
 import { workCalendarApi, statusApi, boardApi } from '@/api';
 import openDescriptionConfirm from '@/components/detail-container/openDescriptionConfirm';
@@ -309,6 +309,12 @@ class ScrumBoardStore {
 
   @action setSelectedBoardId(data) {
     this.selectedBoardId = data;
+  }
+
+  @observable selectedBoardFilterIds = [];
+
+  @action setSelectedBoardFilterIds(data) {
+    this.selectedBoardFilterIds = data;
   }
 
   @action initBoardList(boardListData) {
@@ -987,6 +993,11 @@ class ScrumBoardStore {
   @action setEditRef(ref) {
     this.editRef = ref;
   }
+
+  axiosGetSelectedBoardFilterIds = async () => {
+    const res = await boardApi.getFilterSelected(this.selectedBoardId);
+    this.setSelectedBoardFilterIds(map(res, 'quickFilterId'));
+  };
 }
 
 const scrumBoardStore = new ScrumBoardStore();

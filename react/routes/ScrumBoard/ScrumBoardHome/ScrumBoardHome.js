@@ -320,6 +320,7 @@ class ScrumBoardHome extends Component {
         renderData, headerData,
       );
     });
+    ScrumBoardStore.axiosGetSelectedBoardFilterIds();
   }
 
   handleFilterChange = () => {
@@ -355,6 +356,7 @@ class ScrumBoardHome extends Component {
     const {
       updateParentStatus,
     } = this.state;
+    const { selectedBoardFilterIds } = ScrumBoardStore;
     const currentSprintIsDoing = ScrumBoardStore.didCurrentSprintExist && ScrumBoardStore.sprintNotClosedArray.find((item) => item.statusCode === 'started' && item.sprintId === ScrumBoardStore.sprintId);
     return (
       <Page
@@ -455,7 +457,7 @@ class ScrumBoardHome extends Component {
             }}
           >
 
-            <BoardSearch onRefresh={this.handleFilterChange} saveStore={this.handleSaveSearchStore} />
+            <BoardSearch onRefresh={this.handleFilterChange} saveStore={this.handleSaveSearchStore} excludeQuickFilterIds={selectedBoardFilterIds} />
             <div className="c7n-scrumboard">
               <div style={{ display: 'table', minWidth: '100%' }}>
                 {(!ScrumBoardStore.didCurrentSprintExist

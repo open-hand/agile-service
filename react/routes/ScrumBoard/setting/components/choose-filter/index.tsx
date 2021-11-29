@@ -27,6 +27,7 @@ const ChooseFilter = () => {
       update: async ({ name, value }: { name: string, value: string[] | null }) => {
         if (name === 'filterIds') {
           await boardApi.updateFilterSelected(boardId, value || []);
+          ScrumBoardStore.axiosGetSelectedBoardFilterIds();
         }
       },
     },
