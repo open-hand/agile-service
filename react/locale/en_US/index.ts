@@ -6,7 +6,6 @@ export * from './issue';
 export * from './storyMap';
 export * from './gantt';
 export * from './version';
-export * from './workHours';
 export * from './projectReport';
 export * from './issueType';
 export * from './page';
