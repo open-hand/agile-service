@@ -29,7 +29,11 @@ const LinkBranch: React.FC<{ modal?: IModalProps } & ILinkBranchModalProps> = ob
         name: 'projectId', label: '服务来源', type: 'string' as FieldType, defaultValue: projectId || getProjectId(), required: true,
       },
       {
-        name: 'appServiceId', label: '应用服务', type: 'string' as FieldType, required: true,
+        name: 'appServiceId',
+        label: '应用服务',
+        type: 'string' as FieldType,
+        required: true,
+        computedProps: { disabled: ({ record }) => !record.get('projectId') },
       },
       {
         name: 'branch', label: '分支', type: 'object' as FieldType, ignore: 'always' as FieldIgnore, required: true,
@@ -68,7 +72,7 @@ const LinkBranch: React.FC<{ modal?: IModalProps } & ILinkBranchModalProps> = ob
   return (
     <Form dataSet={formDs}>
       <SelectBranchProject name="projectId" currentProjectId={projectId || getProjectId()} />
-      <SelectAppService name="appServiceId" valueField="id" mode="page" autoFocus projectId={projectId} pageTargetProjectId={formDs.current?.get('projectId') ?? projectId} />
+      <SelectAppService name="appServiceId" valueField="id" mode="page" autoFocus projectId={projectId} pageTargetProjectId={formDs.current?.get('projectId')} />
       <SelectBranch name="branch" issueId={issueId} projectId={formDs.current?.get('projectId')} applicationId={formDs.current?.get('appServiceId')} enabledTag={false} />
     </Form>
   );
