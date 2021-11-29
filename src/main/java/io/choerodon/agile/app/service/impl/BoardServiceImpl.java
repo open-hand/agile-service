@@ -408,10 +408,7 @@ public class BoardServiceImpl implements BoardService {
         JSONObject jsonObject = new JSONObject(true);
         //没有传冲刺id，则使用活跃的冲刺
         SprintDTO currentSprint = handlerCurrentSprint(projectId, searchVO);
-        String filterSql = null;
-        if (searchVO.getQuickFilterIds() != null && !searchVO.getQuickFilterIds().isEmpty()) {
-            filterSql = getQuickFilter(searchVO.getQuickFilterIds());
-        }
+        String filterSql = getFilterSqlFromSearchVO(searchVO, boardId, projectId);
         boardAssembler.handleOtherArgs(searchVO);
         List<Long> assigneeIds = new ArrayList<>();
         List<Long> parentIds = new ArrayList<>();
@@ -461,6 +458,25 @@ public class BoardServiceImpl implements BoardService {
         //处理用户默认看板设置，保存最近一次的浏览
         handleUserSetting(boardId, projectId);
         return jsonObject;
+    }
+
+    private String getFilterSqlFromSearchVO(SearchVO searchVO,
+                                            Long boardId,
+                                            Long projectId) {
+        List<Long> quickFilterIds = searchVO.getQuickFilterIds();
+        Set<Long> defaultQuickFilterIds =
+                listQuickFiltersByBoardId(projectId, boardId)
+                        .stream()
+                        .map(BoardQuickFilterRelVO::getQuickFilterId)
+                        .collect(Collectors.toSet());
+        if (!ObjectUtils.isEmpty(quickFilterIds)) {
+            defaultQuickFilterIds.addAll(quickFilterIds);
+        }
+        if (!defaultQuickFilterIds.isEmpty()) {
+            return getQuickFilter(new ArrayList<>(defaultQuickFilterIds));
+        } else {
+            return null;
+        }
     }
 
     private void setColumnIssue(List<ColumnAndIssueDTO> columns, Long projectId, Long sprintId, String filterSql, SearchVO searchVO, List<Long> assigneeFilterIds, Long userId, List<Long> participantIds) {
