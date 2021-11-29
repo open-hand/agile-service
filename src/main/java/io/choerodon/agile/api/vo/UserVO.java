@@ -4,6 +4,8 @@ import io.choerodon.core.exception.CommonException;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import java.util.Date;
+
 /**
  * @author dinghuang123@gmail.com
  * @since 2018/7/26
@@ -58,6 +60,8 @@ public class UserVO {
 
     @ApiModelProperty(value = "param")
     private String param;
+
+    private Date creationDate;
 
     public String getParam() {
         return param;
@@ -196,4 +200,11 @@ public class UserVO {
         this.password = password;
     }
 
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
 }
