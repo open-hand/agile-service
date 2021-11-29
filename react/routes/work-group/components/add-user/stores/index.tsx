@@ -1,7 +1,6 @@
 import React, {
   createContext, useContext, useEffect, useMemo,
 } from 'react';
-import { injectIntl } from 'react-intl';
 import { inject } from 'mobx-react';
 import { DataSet } from 'choerodon-ui/pro';
 import DataSetProps from 'choerodon-ui/pro/lib/data-set';
@@ -21,7 +20,7 @@ export function useAddUserStore() {
   return useContext(Store);
 }
 
-export const StoreProvider = injectIntl(inject('AppState')((props: any) => {
+export const StoreProvider = inject('AppState')((props: any) => {
   const {
     children,
     workGroupId,
@@ -38,4 +37,4 @@ export const StoreProvider = injectIntl(inject('AppState')((props: any) => {
       {children}
     </Store.Provider>
   );
-}));
+});

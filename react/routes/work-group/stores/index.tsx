@@ -1,7 +1,6 @@
 import React, {
   createContext, useContext, useEffect, useMemo,
 } from 'react';
-import { injectIntl } from 'react-intl';
 import { inject } from 'mobx-react';
 import { DataSet } from 'choerodon-ui/pro';
 import { DataSetSelection } from 'choerodon-ui/pro/lib/data-set/enum';
@@ -26,7 +25,7 @@ export function useWorkGroupStore() {
   return useContext(Store);
 }
 
-export const StoreProvider = injectIntl(inject('AppState')((props: any) => {
+export const StoreProvider = inject('AppState')((props: any) => {
   const {
     children,
     AppState: { currentMenuType: { name, id } },
@@ -70,4 +69,4 @@ export const StoreProvider = injectIntl(inject('AppState')((props: any) => {
       {children}
     </Store.Provider>
   );
-}));
+});

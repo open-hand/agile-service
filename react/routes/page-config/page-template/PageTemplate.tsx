@@ -34,6 +34,7 @@ import { transformDefaultValue, beforeSubmitTransform } from '../page-issue-type
 import PageTemplateTable from './components/template-table';
 import openPageRoleConfigModal from './components/role-config';
 import PageIssueTypeSwitch from '../components/issue-type-switch';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const TooltipButton: React.FC<{ title?: string, buttonIcon: string, buttonDisabled: boolean, clickEvent?: () => void } & Omit<ButtonProps, 'title'>> = ({
   title, children, buttonIcon, buttonDisabled, clickEvent, ...otherProps
@@ -56,8 +57,9 @@ type ILocalFieldPostDataProps = IFieldPostDataProps & { localRecordIndexId?: num
 function PageTemplate() {
   const tableRef = useRef<PerformanceTable>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const formatMessage = useFormatMessage();
   const {
-    sortTableDataSet, addUnselectedDataSet, intl, pageTemplateStore, isProject, prefixCls,
+    sortTableDataSet, addUnselectedDataSet, pageTemplateStore, isProject, prefixCls,
   } = usePageTemplateStore();
   const selectedAllowedEditPermissionFields = useMemo(() => (sortTableDataSet.selected.filter((record) => record.get('allowedEditPermission'))), [sortTableDataSet.selected, sortTableDataSet.selected.length]);
   const [btnLoading, setBtnLoading] = useState<boolean>();
@@ -143,86 +145,6 @@ function PageTemplate() {
     return true;
   };
 
-  /**
-   * 本地提交
-   * @param data 本地所需数据
-   * @param oldField 是否是已有字段
-   */
-  const onSubmitLocal = async (data: ILocalFieldPostDataProps, oldField: boolean = false) => {
-    const newData = Object.assign(data, {
-      local: true,
-      showDefaultValueText: oldField ? transformDefaultValue(data)
-        : transformDefaultValue({
-          ...data, defaultValueObj: data.localDefaultObj, fieldOptions: data.fieldOptions || data.localDefaultObj, optionKey: 'tempKey',
-        }),
-      localSource: oldField ? 'add' : 'created',
-      fieldName: data.name,
-      edited: true,
-      created: true,
-      required: false,
-      rank: undefined, // 本地提交数据如需在列表显示需要一个可靠rank
-    });
-    pageTemplateStore.changeDataStatusCode(PageTemplateStoreStatusCode.add);
-    !oldField && pageTemplateStore.addCreatedField(newData);
-    // 当是增添的已有字段 或是当前类型字段时 增添数据至表格
-    if (oldField
-      || (newData.issueTypeIds.some((item: any) => item === pageTemplateStore.currentIssueType.id))) {
-      const newRank = await pageConfigApi.loadRankValue({
-        previousRank: null,
-        nextRank: sortTableDataSet.data[sortTableDataSet.length - 1].get('rank'),
-      });
-      newData.rank = newRank;
-      oldField && pageTemplateStore.addNewLocalField({
-        fieldId: data.id!,
-        rank: newRank,
-        created: true,
-        edited: true,
-        required: false,
-        localRecordIndexId: data.localRecordIndexId!,
-      });
-      const newRecord = sortTableDataSet.create(newData);
-      !oldField && pageTemplateStore.bindRecordForCreated(newRecord);
-    }
-    return true;
-  };
-
-  const onRestoreLocal = async (record: Record) => {
-    // 移除将要删除id
-    pageTemplateStore.removeDeleteId(record.get('id'));
-    // 移除删除的记录的缓存
-    pageTemplateStore.removeDeleteRecord(record.id);
-    record.reset();
-    const newRank = await pageConfigApi.loadRankValue({
-      previousRank: null,
-      nextRank: sortTableDataSet.data[sortTableDataSet.length - 1].get('rank'),
-    });
-    sortTableDataSet.move(record.index, sortTableDataSet.data[sortTableDataSet.length - 1].index);
-    record.set('rank', newRank);
-    return true;
-  };
-  const checkCodeOrName = (key: 'code' | 'name',
-    name: string) => pageTemplateStore.getCreatedFields.length !== 0
-    && pageTemplateStore.getCreatedFields
-      .some((item) => validKeyReturnValue(key, item).trim() === name);
-  function openCreateFieldModal() {
-    const values = {
-      formatMessage: intl.formatMessage,
-      schemeCode: 'agile_issue',
-      onSubmitLocal,
-      defaultContext: [{ code: pageTemplateStore.getCurrentIssueType, disabled: true }],
-      localCheckCode: async (str: string) => !!checkCodeOrName('code', str),
-      localCheckName: async (str: string) => !!checkCodeOrName('name', str),
-    };
-    Modal.open({
-      key: Modal.key('create'),
-      title: intl.formatMessage({ id: 'field.create' }),
-      drawer: true,
-      children: <CreateField {...values} />,
-      style: { width: 740 },
-      okText: intl.formatMessage({ id: 'save' }),
-      cancelText: intl.formatMessage({ id: 'cancel' }),
-    });
-  }
   // useLayoutEffect(() => {
   //   if (pageTemplateStore.currentIssueType && scrollRef.current) {
   //     // 回到顶部
@@ -284,10 +206,10 @@ function PageTemplate() {
         </div>
         <div className={styles.bottom}>
           <Button funcType={'raised' as FuncType} color={'primary' as ButtonColor} disabled={!pageTemplateStore.getDirty} loading={btnLoading} onClick={handleSubmit}>
-            保存
+            {formatMessage({ id: 'boot.save' })}
           </Button>
           <Button funcType={'raised' as FuncType} disabled={!pageTemplateStore.getDirty} onClick={pageTemplateStore.loadData}>
-            取消
+            {formatMessage({ id: 'boot.cancel' })}
           </Button>
         </div>
 

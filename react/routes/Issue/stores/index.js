@@ -2,7 +2,6 @@ import React, {
   createContext, useEffect, useState, useRef,
 } from 'react';
 import { inject } from 'mobx-react';
-import { injectIntl } from 'react-intl';
 import { useUnmount } from 'ahooks';
 import { fieldApi, permissionApi } from '@/api';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
@@ -15,7 +14,7 @@ const Store = createContext();
 
 export default Store;
 
-export const StoreProvider = inject('AppState')(injectIntl(
+export const StoreProvider = inject('AppState')(
   (props) => {
     const { defaultMyFilter, children, AppState: { currentMenuType: { id: projectId, organizationId }, userInfo: { id: userId } } } = props;
     const [hasBatchDeletePermission, setHasBatchDeletePermission] = useState(false);
@@ -72,4 +71,4 @@ export const StoreProvider = inject('AppState')(injectIntl(
       </Store.Provider>
     );
   },
-));
+);

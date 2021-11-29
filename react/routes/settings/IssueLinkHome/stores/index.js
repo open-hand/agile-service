@@ -1,27 +1,26 @@
 import React, {
-  createContext, useContext, useState, useMemo, 
+  createContext, useContext, useState, useMemo,
 } from 'react';
 import { inject } from 'mobx-react';
-import { injectIntl } from 'react-intl';
 import { DataSet } from 'choerodon-ui/pro';
 
 import IssueLinkTableDataSet from './IssueLinkTableDataSet';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const LinkHomeStore = createContext();
 function useLinkHomeStore() {
   return useContext(LinkHomeStore);
 }
 
-
 function LinkHomeStoreComp(props) {
-  const { intl: { formatMessage }, AppState: { currentMenuType: { type, id, organizationId: orgId } }, children } = props;
-  
-  const issueLinkTableDs = useMemo(() => (new DataSet(IssueLinkTableDataSet({ id, formatMessage }))), [id]);
+  const { AppState: { currentMenuType: { type, id, organizationId: orgId } }, children } = props;
+  const formatMessage = useFormatMessage();
+  const issueLinkTableDs = useMemo(() => (new DataSet(IssueLinkTableDataSet({ id, formatMessage }))), [id, formatMessage]);
   const value = {
     ...props,
     formatMessage,
-    type, 
-    id, 
+    type,
+    id,
     orgId,
     issueLinkTableDs,
   };
@@ -33,6 +32,6 @@ function LinkHomeStoreComp(props) {
 }
 export default useLinkHomeStore;
 
-export const LinkHomeStoreProvider = injectIntl(inject('AppState')(
+export const LinkHomeStoreProvider = inject('AppState')(
   LinkHomeStoreComp,
-));
+);

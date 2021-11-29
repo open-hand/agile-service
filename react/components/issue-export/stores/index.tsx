@@ -1,7 +1,6 @@
 import React, {
   createContext, useContext, useMemo,
 } from 'react';
-import { injectIntl } from 'react-intl';
 import { uniq } from 'lodash';
 import { observer } from 'mobx-react-lite';
 import { useCreation } from 'ahooks';
@@ -12,19 +11,18 @@ import { IExportIssueProps } from '..';
 import { removeCodeExtraPrefix } from '../utils';
 
 interface Context extends IExportIssueProps {
-  intl: any,
   prefixCls: string,
   modal?: IModalProps,
   checkOptions: Array<ITableColumnCheckBoxesOptionData & { order?: any }>
 }
-type Props = Pick<Context, 'intl' | 'visibleColumns' | 'fields' | 'chosenFields' | 'checkOptions'> & { children: React.Component | React.ReactElement, store?: IssueExportStore };
+type Props = Pick<Context, 'visibleColumns' | 'fields' | 'chosenFields' | 'checkOptions'> & { children: React.Component | React.ReactElement, store?: IssueExportStore };
 const ExportIssueContext = createContext({} as Context);
 
 export function useExportIssueStore() {
   return useContext(ExportIssueContext);
 }
 
-const ExportIssueContextProvider = injectIntl(observer(
+const ExportIssueContextProvider = observer(
   (props: Props) => {
     const {
       fields, chosenFields, visibleColumns,
@@ -58,5 +56,5 @@ const ExportIssueContextProvider = injectIntl(observer(
       </ExportIssueContext.Provider>
     );
   },
-));
+);
 export default ExportIssueContextProvider;

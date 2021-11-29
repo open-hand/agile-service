@@ -2,7 +2,6 @@ import React, {
   createContext, useMemo, useContext,
 } from 'react';
 import { inject } from 'mobx-react';
-import { injectIntl } from 'react-intl';
 import {
   DataSet,
 } from 'choerodon-ui/pro';
@@ -29,7 +28,7 @@ const Store = createContext({} as Context);
 export default function useGanntDependencyModal() {
   return useContext(Store);
 }
-export const StoreProvider = inject('AppState')(injectIntl<'intl', any>(
+export const StoreProvider = inject('AppState')(
   (props: IGanttDependencyModalProps & { children: any }) => {
     const { children, data } = props;
     const editData = useCreation(() => Object.entries(groupBy(data || [], (item) => item.predecessorType))
@@ -45,4 +44,4 @@ export const StoreProvider = inject('AppState')(injectIntl<'intl', any>(
       </Store.Provider>
     );
   },
-));
+);

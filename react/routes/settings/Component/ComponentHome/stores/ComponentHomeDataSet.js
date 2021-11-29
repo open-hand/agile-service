@@ -2,7 +2,7 @@ import React from 'react';
 import { DataSet } from 'choerodon-ui/pro';
 import { C7NFormat } from '@choerodon/master';
 
-function ComponentHomeDataSet({ id, intl }) {
+function ComponentHomeDataSet({ id }) {
   const roleSet = new DataSet({
     data: [{
       meaning: '无',

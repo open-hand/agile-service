@@ -1,7 +1,6 @@
 import React, {
   createContext, useContext, useMemo,
 } from 'react';
-import { injectIntl } from 'react-intl';
 import { inject } from 'mobx-react';
 import { User } from '@/common/types';
 import { StatusProps, UserValueCode } from '@/routes/work-calendar/types';
@@ -29,7 +28,6 @@ interface UserItemProps {
 interface ContextProps {
   prefixCls: string,
   intlPrefix: string,
-  formatMessage(arg0: object, arg1?: object): string,
   AppState: { userInfo: User },
   mainStore: StoreProps,
   USER_OPTION: UserItemProps[],
@@ -42,10 +40,9 @@ export function useWorkCalendarStore() {
   return useContext(Store);
 }
 
-export const StoreProvider = injectIntl(inject('AppState')((props: any) => {
+export const StoreProvider = inject('AppState')((props: any) => {
   const {
     children,
-    intl: { formatMessage },
   } = props;
   const intlPrefix = 'c7nag.work.calendar';
 
@@ -63,7 +60,6 @@ export const StoreProvider = injectIntl(inject('AppState')((props: any) => {
     ...props,
     intlPrefix,
     prefixCls: 'c7nag-work-calendar',
-    formatMessage,
     mainStore,
     USER_OPTION,
     DEFAULT_USER,
@@ -73,4 +69,4 @@ export const StoreProvider = injectIntl(inject('AppState')((props: any) => {
       {children}
     </Store.Provider>
   );
-}));
+});

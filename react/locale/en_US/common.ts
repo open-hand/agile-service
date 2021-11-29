@@ -42,6 +42,7 @@ const localeCommon = {
   title: 'Title',
   issue: 'Issue',
   name: 'Name',
+  project: 'Project',
   system: 'System',
   organization: 'Organization',
   issueType: 'IssueType',

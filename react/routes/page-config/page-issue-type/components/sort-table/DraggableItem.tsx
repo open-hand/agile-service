@@ -5,6 +5,7 @@ import ToggleFieldValue from '@/routes/page-config/components/toggle-field-value
 import { usePageIssueTypeStore } from '../../stores';
 import { useSortTableContext } from './stores';
 import DraggableIBaseItem from './DraggableIBaseItem';
+import useFormatMessage from '@/hooks/useFormatMessage';
 // import CheckBox from './components/Checkbox';
 
 interface Props {
@@ -18,7 +19,8 @@ interface Props {
 const DraggableItem: React.FC<Props> = ({
   data, isDragDisabled, virtualizedStyle, provided, draggingClassName,
 }) => {
-  const { pageIssueTypeStore, intl } = usePageIssueTypeStore();
+  const { pageIssueTypeStore } = usePageIssueTypeStore();
+  const formatMessage = useFormatMessage();
   const {
     showSplitLine /** 组织层与项目层都使用表格线 */, isProject, prefixCls: originPrefixCls,
   } = useSortTableContext();
@@ -33,7 +35,7 @@ const DraggableItem: React.FC<Props> = ({
           className={`${prefixCls}-item ${prefixCls}-item-text`}
           {...provided.dragHandleProps}
         >
-          {intl.formatMessage({ id: createdLevel })}
+          {formatMessage({ id: `agile.common.${createdLevel}` })}
         </div>
       );
     }
@@ -46,7 +48,7 @@ const DraggableItem: React.FC<Props> = ({
         <ToggleFieldValue data={data} />
       </div>
     );
-  }, [data, intl, isProject, prefixCls, provided.dragHandleProps]);
+  }, [data, formatMessage, isProject, prefixCls, provided.dragHandleProps]);
 
   const renderColumns = useCallback((nodes: any[]) => {
     nodes.splice(1, 0, renderLastColumn());

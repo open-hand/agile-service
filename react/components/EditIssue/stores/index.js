@@ -2,13 +2,12 @@ import React, {
   createContext, useEffect, useMemo, useRef,
 } from 'react';
 import { inject } from 'mobx-react';
-import { injectIntl } from 'react-intl';
 import EditIssueStore from './EditIssueStore';
 import { getMenuType } from '@/utils/common';
 
 const EditIssueContext = createContext();
 export default EditIssueContext;
-export const EditIssueContextProvider = injectIntl(inject('AppState', 'HeaderStore')((props) => {
+export const EditIssueContextProvider = inject('AppState', 'HeaderStore')((props) => {
   const FieldVersionRef = {
     current: null,
   };
@@ -50,4 +49,4 @@ export const EditIssueContextProvider = injectIntl(inject('AppState', 'HeaderSto
       {props.children}
     </EditIssueContext.Provider>
   );
-}));
+});

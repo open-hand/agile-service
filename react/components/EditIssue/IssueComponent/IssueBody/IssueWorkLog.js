@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Icon, Button, Tooltip } from 'choerodon-ui/pro';
-import { FormattedMessage } from 'react-intl';
 import openRecordWorkLogModal from '@/components/DailyLog/DailyLogPro';
 import Log from '../../Component/Log';
 import EditIssueContext from '../../stores';
