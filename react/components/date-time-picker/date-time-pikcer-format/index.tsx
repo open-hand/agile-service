@@ -16,7 +16,7 @@ export interface DateTimePickerProps extends DatePickerProps {
   /**
    * 日期格式，如 `YYYY-MM-DD HH:mm`
    */
-  format: string,
+  format?: string,
 }
 
 const viewComponents: { [x: string]: typeof DaysView } = {
