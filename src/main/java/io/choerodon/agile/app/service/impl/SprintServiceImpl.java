@@ -793,8 +793,9 @@ public class SprintServiceImpl implements SprintService {
         List<Long> allIssueIds = new ArrayList<>();
         allIssueIds.addAll(parentIssueIds);
         // 查询子任务issueId
-        searchParamMap.put("sprintId", sprintId);
-        Set<Long> childrenIds = issueMapper.queryChildrenIds(projectId, null, parentIssueIds, StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)));
+        Map<String, Object> searchMap = (Map<String, Object>) searchParamMap.getOrDefault(ADVANCED_SEARCH_ARGS, new HashMap<>());
+        searchMap.put("sprintId", sprintId);
+        Set<Long> childrenIds = issueMapper.queryChildrenIds(projectId, null, parentIssueIds, searchMap);
         if(!CollectionUtils.isEmpty(childrenIds)){
             allIssueIds.addAll(childrenIds);
         }
