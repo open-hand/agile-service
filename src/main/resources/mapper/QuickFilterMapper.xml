@@ -52,7 +52,7 @@
         WHERE project_id = #{projectId}
         <if test='quickFilterSearchVO != null'>
             <if test='quickFilterSearchVO.filterName != null and quickFilterSearchVO.filterName != ""'>
-                and name LIKE CONCAT(CONCAT('%', #{filterName}), '%')
+                and name LIKE CONCAT(CONCAT('%', #{quickFilterSearchVO.filterName}), '%')
             </if>
             <if test='quickFilterSearchVO.quickFilterIds != null and quickFilterSearchVO.quickFilterIds.size() != 0'>
                 and filter_id in
