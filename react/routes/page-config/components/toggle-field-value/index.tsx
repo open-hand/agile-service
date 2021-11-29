@@ -40,7 +40,7 @@ const ToggleFieldValue: React.FC<Pick<Props, 'data' | 'disabled'>> = ({
   const disabled = propsDisabled || textEditToggleProps?.disabled;
   // 预计开始/结束时间、实际开始/结束时间精确到分
   let showDefaultValueText = data.get('showDefaultValueText');
-  if (showDefaultValueText && FORMAT_FIELDS.includes(data.get('fieldCode'))) {
+  if (showDefaultValueText && FORMAT_FIELDS.includes(data.get('fieldCode')) && moment(showDefaultValueText).isValid()) {
     showDefaultValueText = moment(showDefaultValueText).format(MINUTE);
   }
   return (
