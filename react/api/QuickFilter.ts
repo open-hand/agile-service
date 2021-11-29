@@ -1,8 +1,7 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId } from '@/utils/common';
 import Api from './Api';
 
-interface ISearchQuickFilter {
+export interface ISearchQuickFilter {
   contents: Array<string>,
   filterName: string
 }
@@ -54,7 +53,7 @@ class QuickFilterApi extends Api<QuickFilterApi> {
     * 加载快速筛选列表
     * @param searchData 理论上可以不传值，但不传值后端抛出错误
     */
-  loadList(searchData: ISearchQuickFilter = { contents: [], filterName: '' }, page: number, size = 10) {
+  loadList(searchData: ISearchQuickFilter = { contents: [], filterName: '' }, page: number = 1, size = 10) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/quick_filter/query_all`,

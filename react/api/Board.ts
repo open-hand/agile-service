@@ -1,9 +1,7 @@
-import { omit } from 'lodash';
-import { axios, stores, Choerodon } from '@choerodon/boot';
-import { getProjectId, getOrganizationId } from '@/utils/common';
+import { axios, Choerodon } from '@choerodon/boot';
+import { getOrganizationId } from '@/utils/common';
 import Api from './Api';
-
-const { AppState } = stores;
+import { ISearchQuickFilter } from './QuickFilter';
 
 interface ICardStatus {
   completed: boolean,
@@ -33,6 +31,10 @@ interface BoardSearchVO {
   sprintId?: number,
   personalFilterIds?: string[]
   priorityIds?: string[]
+}
+
+interface IBoardSearchQuickFilter extends ISearchQuickFilter {
+  quickFilterIds: string[]
 }
 export interface IStatusLinkage {
   issueTypeId: string
@@ -235,6 +237,33 @@ class BoardApi extends Api<BoardApi> {
       params: {
         issueId,
       },
+    });
+  }
+
+  getQuickFilterList(boardId: string, data: IBoardSearchQuickFilter, page: number = 1, size = 10) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/board/${boardId}/quick_filter/list`,
+      data,
+      params: {
+        page,
+        size,
+      },
+    });
+  }
+
+  getFilterSelected(boardId: string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/board/${boardId}/quick_filter`,
+    });
+  }
+
+  updateFilterSelected(boardId: string, filterIds: string[]) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/board/${boardId}/quick_filter/update`,
+      data: filterIds,
     });
   }
 }

@@ -37,6 +37,7 @@ const LINK_URL = {
   pageField: '/agile/page/field',
   status: '/agile/state-machine',
   addCustomReport: '/agile/charts/add',
+  quickFilter: '/agile/quicksearch',
 };
 
 const LINK_URL_TO: IRouterToList = {
