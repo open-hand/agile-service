@@ -15,6 +15,7 @@ const GanttOperation: React.FC = () => {
   const { store } = useContext(Context);
   const { unit, ganttRef } = store;
   const text = find(units, { type: unit });
+
   const formatMessage = useFormatMessage('agile.gantt');
   const handleChangeUnit = useCallback(({ key }) => {
     store.switchUnit(key);
@@ -56,7 +57,7 @@ const GanttOperation: React.FC = () => {
           <Menu onClick={handleChangeUnit}>
             {units.map((u) => (
               <Menu.Item key={u.type}>
-                {u.label}
+                {formatMessage({ id: u.label })}
               </Menu.Item>
             ))}
           </Menu>
@@ -73,7 +74,7 @@ const GanttOperation: React.FC = () => {
             lineHeight: '1.25',
           }}
         >
-          {text?.label}
+          {formatMessage({ id: text?.label!, defaultMessage: text?.type! })}
           <Icon type="arrow_drop_down" style={{ marginTop: -4 }} />
         </Button>
       </Dropdown>
