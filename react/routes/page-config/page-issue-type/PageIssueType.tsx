@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   TabPage as Page, Header, Content, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
@@ -29,6 +29,7 @@ import { PageIssueTypeStoreStatusCode } from './stores/PageIssueTypeStore';
 import { IFieldPostDataProps } from '../components/create-field/CreateField';
 import { transformDefaultValue, beforeSubmitTransform } from './utils';
 import PageIssueTypeSwitch from '../components/issue-type-switch';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const TooltipButton: React.FC<{ title?: string, buttonIcon: string, buttonDisabled: boolean, clickEvent?: () => void } & Omit<ButtonProps, 'title'>> = ({
   title, children, buttonIcon, buttonDisabled, clickEvent, ...otherProps
@@ -47,12 +48,16 @@ const TooltipButton: React.FC<{ title?: string, buttonIcon: string, buttonDisabl
     </Button>
   );
 };
+TooltipButton.defaultProps = {
+  title: undefined,
+  clickEvent: undefined,
+};
 type ILocalFieldPostDataProps = IFieldPostDataProps & { localRecordIndexId?: number, localDefaultObj: any, defaultValueObj: any, };
 function PageIssueType() {
   const {
-    sortTableDataSet, addUnselectedDataSet, intl, pageIssueTypeStore, isProject, prefixCls,
+    sortTableDataSet, addUnselectedDataSet, pageIssueTypeStore, isProject, prefixCls,
   } = usePageIssueTypeStore();
-
+  const formatMessage = useFormatMessage();
   const [btnLoading, setBtnLoading] = useState<boolean>();
   const handleRequest = (data: UIssueTypeConfig) => {
     pageConfigApi.updateConfig(data).then(() => {
@@ -197,9 +202,8 @@ function PageIssueType() {
     name: string) => pageIssueTypeStore.getCreatedFields.length !== 0
     && pageIssueTypeStore.getCreatedFields
       .some((item) => validKeyReturnValue(key, item).trim() === name);
-  function openCreateFieldModal() {
+  const openCreateFieldModal = () => {
     const values = {
-      formatMessage: intl.formatMessage,
       schemeCode: 'agile_issue',
       onSubmitLocal,
       defaultContext: [{ code: pageIssueTypeStore.getCurrentIssueType, disabled: true }],
@@ -208,14 +212,14 @@ function PageIssueType() {
     };
     Modal.open({
       key: Modal.key('create'),
-      title: intl.formatMessage({ id: 'field.create' }),
+      title: formatMessage({ id: 'field.create' }),
       drawer: true,
       children: <CreateField {...values} />,
       style: { width: 740 },
-      okText: intl.formatMessage({ id: 'save' }),
-      cancelText: intl.formatMessage({ id: 'cancel' }),
+      okText: formatMessage({ id: 'save' }),
+      cancelText: formatMessage({ id: 'cancel' }),
     });
-  }
+  };
   return (
     <Page>
       <Prompt message={`是否放弃更改 ${Choerodon.STRING_DEVIDER}页面有未保存的内容,是否放弃更改？`} when={pageIssueTypeStore.getDirty} />
@@ -223,7 +227,15 @@ function PageIssueType() {
         <HeaderButtons items={[
           {
             display: true,
-            element: <TooltipButton title="该工作项类型已停用，无法创建字段" buttonDisabled={!pageIssueTypeStore.currentIssueType.enabled} buttonIcon="playlist_add" clickEvent={openCreateFieldModal}>创建字段</TooltipButton>,
+            element: (
+              <TooltipButton
+                title="该工作项类型已停用，无法创建字段"
+                buttonDisabled={!pageIssueTypeStore.currentIssueType.enabled}
+                buttonIcon="playlist_add"
+                clickEvent={openCreateFieldModal}
+              >
+                {formatMessage({ id: 'agile.page.field.create' })}
+              </TooltipButton>),
           }, {
             display: true,
             element: (
@@ -274,10 +286,10 @@ function PageIssueType() {
         </div>
         <div className={styles.bottom}>
           <Button funcType={'raised' as FuncType} color={'primary' as ButtonColor} disabled={!pageIssueTypeStore.getDirty} loading={btnLoading} onClick={handleSubmit}>
-            保存
+            {formatMessage({ id: 'boot.save' })}
           </Button>
           <Button funcType={'raised' as FuncType} disabled={!pageIssueTypeStore.getDirty} onClick={pageIssueTypeStore.loadData}>
-            取消
+            {formatMessage({ id: 'boot.cancel' })}
           </Button>
         </div>
 

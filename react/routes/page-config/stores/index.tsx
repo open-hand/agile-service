@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext } from 'react';
 import { inject } from 'mobx-react';
-import { injectIntl } from 'react-intl';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { getMenuType, getApplyType } from '@/utils/common';
 
@@ -15,7 +14,7 @@ const PageConfigContext = createContext({} as Context);
 export function usePageConfigContext() {
   return useContext(PageConfigContext);
 }
-const PageConfigProvider = injectIntl(inject('AppState')(
+const PageConfigProvider = inject('AppState')(
   (props: any) => {
     const [reLoad, setReLoad] = useState(false);
     const [objectDetailItem, setObjectDetailItem] = useState({
@@ -47,5 +46,5 @@ const PageConfigProvider = injectIntl(inject('AppState')(
       </PageConfigContext.Provider>
     );
   },
-));
+);
 export default PageConfigProvider;

@@ -1,7 +1,6 @@
 import React, {
   createContext, useContext, useMemo,
 } from 'react';
-import { injectIntl } from 'react-intl';
 import { DataSet } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { getMenuType } from '@/utils/common';
@@ -16,7 +15,6 @@ interface Context {
   pageIssueTypeStore: PageIssueTypeStore,
   isInProgram: boolean,
   isProject: boolean,
-  intl: any,
   prefixCls: 'c7n-agile-page-config-page-issue-type',
 }
 
@@ -26,7 +24,7 @@ export function usePageIssueTypeStore() {
   return useContext(PageIssueTypeContext);
 }
 
-const PageIssueTypeProvider = injectIntl(observer(
+const PageIssueTypeProvider = observer(
   (props: any) => {
     const sortTableDataSet = useMemo(() => new DataSet(SortTableDataSet()), []);
     const { isInProgram } = usePageConfigContext();
@@ -48,5 +46,5 @@ const PageIssueTypeProvider = injectIntl(observer(
       </PageIssueTypeContext.Provider>
     );
   },
-));
+);
 export default PageIssueTypeProvider;

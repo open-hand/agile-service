@@ -40,8 +40,9 @@ const localeCommon = {
   'column.config': '列配置',
   creator: '创建人',
   title: '标题',
-  issue: '工作项', // 2
+  issue: '工作项',
   name: '名称',
+  project: '项目',
   system: '系统',
   organization: '组织',
   issueType: '工作项类型',

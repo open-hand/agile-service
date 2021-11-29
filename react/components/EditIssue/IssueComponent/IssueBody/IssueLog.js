@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 import {
   filter, pick,
 } from 'lodash';
-import { FormattedMessage } from 'react-intl';
 import { randomString } from '@/utils/random';
 import DataLogs from '../../Component/DataLogs';
 import EditIssueContext from '../../stores';

@@ -2,7 +2,6 @@ import React, {
   useMemo, useContext, createContext,
 } from 'react';
 import { inject } from 'mobx-react';
-import { injectIntl } from 'react-intl';
 import { useIssueSearchStore } from '@/components/issue-search';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { transformFilter } from '@/routes/Issue/stores/utils';
@@ -15,7 +14,7 @@ import useHeaderFullScreenButton, { IHeaderFullScreenButtonComponentProps } from
 
 const Context = createContext({ fullButtonProps: undefined } as { fullButtonProps?: IHeaderFullScreenButtonComponentProps });
 
-export const StoreProvider = inject('AppState')(injectIntl(
+export const StoreProvider = inject('AppState')(
   (props: any) => {
     const {
       children,
@@ -28,10 +27,9 @@ export const StoreProvider = inject('AppState')(injectIntl(
       </Context.Provider>
     );
   },
-));
+);
 const Gantt: React.FC<IGanttProps> = (props) => {
   const { fullButtonProps } = useContext(Context);
-  console.log('fullButtonProps', fullButtonProps);
   return (
     <GanntStoreProvider {...props} fullButtonProps={fullButtonProps}>
       <WorkbenchGantt />

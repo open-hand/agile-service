@@ -1,13 +1,12 @@
 import React, { createContext, useMemo } from 'react';
 // import { store, stores } from '@choerodon/boot';
 import { inject } from 'mobx-react';
-import { injectIntl } from 'react-intl';
 import StateStore from './StateStore';
 
 const Store = createContext();
 export default Store;
 
-export const StoreProvider = injectIntl(inject('AppState')(
+export const StoreProvider = inject('AppState')(
   (props) => {
     // const { AppState } = props;
     // const { children } = props;
@@ -24,4 +23,4 @@ export const StoreProvider = injectIntl(inject('AppState')(
       </Store.Provider>
     );
   },
-));
+);

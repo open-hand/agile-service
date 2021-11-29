@@ -7,7 +7,6 @@ import {
   Table, Form, Icon,
 } from 'choerodon-ui';
 import { Dropdown, Menu } from 'choerodon-ui/pro';
-import { FormattedMessage } from 'react-intl';
 import {
   Content, Header, TabPage as Page, Breadcrumb, useTheme,
 } from '@choerodon/boot';
@@ -18,6 +17,7 @@ import openStateModal from './StateModal';
 import openDeleteModal from './components/DeleteModal';
 import { Loading } from '@/components';
 import Style from './index.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const backlogStates = ['backlog_pending_approval', 'backlog_rejected', 'backlog_create', 'backlog_planning', 'backlog_processing', 'backlog_developed', 'backlog_publish'];
 
@@ -27,7 +27,8 @@ const stageList = getStageList();
 function StateList(props) {
   const [theme] = useTheme();
   const context = useContext(Store);
-  const { AppState, stateStore, intl: { formatMessage } } = context;
+  const { AppState, stateStore } = context;
+  const formatMessage = useFormatMessage();
   const {
     organizationId: orgId,
   } = AppState.currentMenuType;
@@ -124,7 +125,7 @@ function StateList(props) {
   };
 
   const getColumn = () => ([{
-    title: <FormattedMessage id="state.name" />,
+    title: formatMessage({ id: 'agile.stateMachine.name' }),
     dataIndex: 'name',
     key: 'name',
     filters: [],
@@ -156,10 +157,10 @@ function StateList(props) {
       const menu = (
         // eslint-disable-next-line react/jsx-no-bind
         <Menu onClick={handleMenuClick.bind(this)}>
-          <Menu.Item key="edit">编辑</Menu.Item>
+          <Menu.Item key="edit">{formatMessage({ id: 'boot.edit' })}</Menu.Item>
           {
             !(record.code || (record.stateMachineInfoList && record.stateMachineInfoList.length)) && (
-              <Menu.Item key="delete">删除</Menu.Item>
+              <Menu.Item key="delete">{formatMessage({ id: 'boot.delete' })}</Menu.Item>
             )
           }
         </Menu>
@@ -182,14 +183,14 @@ function StateList(props) {
     },
   },
   {
-    title: <FormattedMessage id="state.des" />,
+    title: formatMessage({ id: 'agile.common.description' }),
     dataIndex: 'description',
     key: 'description',
     filters: [],
     className: 'issue-table-ellipsis',
   },
   {
-    title: <FormattedMessage id="state.stage" />,
+    title: formatMessage({ id: 'agile.stateMachine.stage' }),
     dataIndex: 'type',
     key: 'type',
     filters: stageList.filter((s) => s.code !== 'none').map((s) => ({ text: s.name, value: s.code })),
@@ -220,10 +221,10 @@ function StateList(props) {
 
     return (
       <Page>
-        <Header title={<FormattedMessage id="state.title" />}>
+        <Header>
           <HeaderButtons items={[
             {
-              name: formatMessage({ id: 'state.create' }),
+              name: formatMessage({ id: 'agile.stateMachine.create.state' }),
               icon: 'playlist_add',
               display: true,
               disabled: !initialTotal,

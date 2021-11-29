@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useMemo } from 'react';
-import { injectIntl } from 'react-intl';
 import { inject } from 'mobx-react';
 import { DataSet } from 'choerodon-ui/pro';
 import { DataSetSelection } from 'choerodon-ui/pro/lib/data-set/enum';
@@ -7,7 +6,6 @@ import FormDataSet from './FormDataSet';
 
 interface ContextProps {
   intlPrefix: string,
-  formatMessage(arg0: object, arg1?: object): string,
   formDs: DataSet,
 }
 
@@ -17,10 +15,9 @@ export function useRemindSettingStore() {
   return useContext(Store);
 }
 
-export const StoreProvider = injectIntl(inject('AppState')((props: any) => {
+export const StoreProvider = inject('AppState')((props: any) => {
   const {
     children,
-    intl: { formatMessage },
     issueId,
   } = props;
   const intlPrefix = 'c7nag.work.calendar.remind';
@@ -69,7 +66,6 @@ export const StoreProvider = injectIntl(inject('AppState')((props: any) => {
   const value = {
     ...props,
     intlPrefix,
-    formatMessage,
     formDs,
   };
   return (
@@ -77,4 +73,4 @@ export const StoreProvider = injectIntl(inject('AppState')((props: any) => {
       {children}
     </Store.Provider>
   );
-}));
+});

@@ -4,7 +4,6 @@ import React, {
 import {
   DataSet,
 } from 'choerodon-ui/pro';
-import { injectIntl } from 'react-intl';
 import { observer } from 'mobx-react-lite';
 import { useCreation, usePersistFn } from 'ahooks';
 import { IIssueFilterFormProps } from '..';
@@ -12,7 +11,6 @@ import IssueFilterFormDataSet from './IssueFilterFormDataSet';
 import { initFieldIssueFilterForm } from '../utils';
 
 interface Context extends IIssueFilterFormProps {
-  intl: any,
   footer?: React.ReactNode,
   dataSet: DataSet
   extraRenderFields: Required<IIssueFilterFormProps>['extraRenderFields']
@@ -23,8 +21,8 @@ const IssueFilterFormStoreContext = createContext({} as Context);
 export function useIssueFilterFormStore() {
   return useContext(IssueFilterFormStoreContext);
 }
-const IssueFilterFormStoreContextProvider = injectIntl(observer(
-  (props: IIssueFilterFormProps & Pick<Context, 'intl'> & { children: React.ReactElement }) => {
+const IssueFilterFormStoreContextProvider = observer(
+  (props: IIssueFilterFormProps & Context & { children: React.ReactElement }) => {
     const currentFormCode = useCreation(() => new Map<'chosenFields' | 'extraFormItems', Set<string>>([['chosenFields', new Set()], ['extraFormItems', new Set()]]), []);
     const dataSet = useMemo(() => {
       if (props.dataSet) {
@@ -64,5 +62,5 @@ const IssueFilterFormStoreContextProvider = injectIntl(observer(
       </IssueFilterFormStoreContext.Provider>
     );
   },
-));
+);
 export default IssueFilterFormStoreContextProvider;

@@ -1,7 +1,6 @@
 import React, {
   createContext, useContext, useMemo,
 } from 'react';
-import { injectIntl } from 'react-intl';
 import { DataSet } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { getMenuType } from '@/utils/common';
@@ -17,7 +16,6 @@ interface Context {
   isInProgram: boolean,
   disabled: boolean,
   isProject: boolean,
-  intl: any,
   prefixCls: 'c7n-agile-page-config-page-template',
 }
 
@@ -27,7 +25,7 @@ export function usePageTemplateStore() {
   return useContext(PageTemplateContext);
 }
 
-const PageTemplateProvider = injectIntl(observer(
+const PageTemplateProvider = observer(
   (props: any) => {
     const sortTableDataSet = useMemo(() => new DataSet(SortTableDataSet()), []);
     const { isInProgram } = usePageConfigContext();
@@ -51,5 +49,5 @@ const PageTemplateProvider = injectIntl(observer(
       </PageTemplateContext.Provider>
     );
   },
-));
+);
 export default PageTemplateProvider;

@@ -39,7 +39,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer(
       AppState: { currentMenuType: { type, id, organizationId } },
       schemeCode, record, localCheckCode, localCheckName, defaultContext: propsDefaultContext,
     } = props;
-    const formatMessage = useFormatMessage('agile.page');
+    const formatMessage = useFormatMessage();
     const isEdit = !!record;
     const store = useStore(type, id, organizationId);
     const contextOptionsDataSet = useMemo(() => new DataSet(ContextOptionsDataSet({ isEdit, store, oldRecord: record })), [isEdit, record, store]);

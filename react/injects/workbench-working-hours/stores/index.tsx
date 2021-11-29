@@ -2,7 +2,6 @@ import React, {
   createContext, useContext,
 } from 'react';
 import { inject } from 'mobx-react';
-import { injectIntl } from 'react-intl';
 import useHeaderFullScreenButton from '@/hooks/useHeaderButtons/useHeaderFullScreenButton';
 
 interface WorkBenchWorkingHoursContext {
@@ -12,7 +11,7 @@ const Context = createContext({ fullButtonProps: {} as any } as WorkBenchWorking
 export function useWorkBenchWorkingHoursContext() {
   return useContext(Context);
 }
-const WorkBenchWorkingHoursProvider = inject('AppState')(injectIntl(
+const WorkBenchWorkingHoursProvider = inject('AppState')(
   (props: any) => {
     const {
       children,
@@ -24,6 +23,6 @@ const WorkBenchWorkingHoursProvider = inject('AppState')(injectIntl(
       </Context.Provider>
     );
   },
-));
+);
 
 export default WorkBenchWorkingHoursProvider;

@@ -2,7 +2,6 @@ import React, {
   useMemo, useContext,
 } from 'react';
 import { inject } from 'mobx-react';
-import { injectIntl } from 'react-intl';
 import Context, { IGanttProps } from './context';
 import GanttStore from './store';
 import { useIssueSearchStore } from '@/components/issue-search';
@@ -12,7 +11,7 @@ import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { ILocalField } from '@/components/issue-search/store';
 import GanttPage from '../Gantt';
 
-export const StoreProvider = inject('AppState')(injectIntl<'intl', any>(
+export const StoreProvider = inject('AppState')(
   (props: IGanttProps & { children?: any }) => {
     const {
       children, projectId, myDefaultFilter, menuType,
@@ -35,7 +34,7 @@ export const StoreProvider = inject('AppState')(injectIntl<'intl', any>(
       </Context.Provider>
     );
   },
-));
+);
 const Gantt: React.FC<IGanttProps> = (props) => (
   <StoreProvider {...props}>
     <GanttPage />
