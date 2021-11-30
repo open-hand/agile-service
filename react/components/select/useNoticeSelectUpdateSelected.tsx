@@ -8,7 +8,7 @@ function transformVal(v: any) {
  * @returns
  */
 
-export function useNoticeSelectUpdateSelected(): [any, ((key: string, val?: string) => void)] {
+export function useNoticeSelectUpdateSelected() {
   const [forceUpdateValue, { inc: notice, set }] = useCounter(0);
   const values = useCreation(() => new Map<string, { old?: any; }>(), []);
   const setValue = usePersistFn((key: string, val?: string) => {
@@ -21,5 +21,5 @@ export function useNoticeSelectUpdateSelected(): [any, ((key: string, val?: stri
       set(0);
     }
   });
-  return [forceUpdateValue, setValue];
+  return [forceUpdateValue, setValue] as const;
 }

@@ -1,16 +1,21 @@
-import React, { useMemo, forwardRef } from 'react';
+import React, { useMemo, forwardRef, useRef } from 'react';
 import { Select, Tooltip, DataSet } from 'choerodon-ui/pro';
-import { omit } from 'lodash';
+import { isEmpty, omit } from 'lodash';
 import classnames from 'classnames';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
+import { useComputed } from 'mobx-react-lite';
+import { useCreation } from 'ahooks';
 import useSelect, { SelectConfig, FragmentForSearch } from '@/hooks/useSelect';
 import { devOpsApi } from '@/api';
 import styles from './index.less';
+import { refsBindRef, wrapRequestCallback } from '../utils';
+import { useNoticeSelectUpdateSelected } from '../useNoticeSelectUpdateSelected';
 
 const { OptGroup, Option } = Select;
 interface Props extends Partial<SelectProps> {
   dataRef?: React.RefObject<Array<any>>
+  /** 分页模式下不适用 */
   valueField?: string
   afterLoad?: (list: any[]) => void
   flat?: boolean
@@ -123,20 +128,32 @@ const SelectTestOtherAppService: React.FC<Props> = forwardRef(({
 const SelectPageAppService: React.FC<Props> = forwardRef(({
   dataRef, valueField, afterLoad, flat, projectId, request, className, pageTargetProjectId, checkMember, ...otherProps
 }, ref: React.Ref<Select>) => {
-  const args = useMemo(() => ({ pageTargetProjectId }), [pageTargetProjectId]);
+  const selectRef = useRef<Select>();
+  const value = useComputed(() => selectRef.current?.getValue(), [selectRef.current]);
+  const [forceUpdateValue, setFilterWord] = useNoticeSelectUpdateSelected();
+  const args = useCreation(() => {
+    console.log('values', value);
+    return ({ pageTargetProjectId, targetAppServiceId: value });
+  }, [pageTargetProjectId, forceUpdateValue]);
   const config = useMemo((): SelectConfig => ({
     name: 'appService',
     textField: 'name',
-    valueField: valueField || 'code',
+    valueField: 'id',
     requestArgs: args,
     optionRenderer: (appService: any) => (
       <FragmentForSearch name={`${appService.name}(${appService.code})`}>
         {renderService(appService)}
       </FragmentForSearch>
     ),
-    request: ({ page, filter, requestArgs }) => (requestArgs?.pageTargetProjectId! ? devOpsApi.project(projectId).loadPageActiveService({
-      page, size: 10, param: filter, targetProjectId: requestArgs?.pageTargetProjectId!,
-    }) : new Promise((resolve) => resolve({ list: [], hasNextPage: false }))),
+    request: wrapRequestCallback(({ page, filter, requestArgs }) => (requestArgs?.pageTargetProjectId! ? devOpsApi.project(projectId).loadPageActiveService({
+      page,
+      size: 10,
+      param: filter,
+      targetProjectId: requestArgs?.pageTargetProjectId!,
+      targetAppServiceId: requestArgs?.targetAppServiceId,
+    }) : new Promise((resolve) => resolve({ list: [], hasNextPage: false }))), ({ filter, requestArgs }) => {
+      requestArgs?.pageTargetProjectId && setFilterWord('filter', filter);
+    }),
     middleWare: (data: any) => {
       if (dataRef) {
         Object.assign(dataRef, {
@@ -155,7 +172,7 @@ const SelectPageAppService: React.FC<Props> = forwardRef(({
 
   return (
     <Component
-      ref={ref}
+      ref={refsBindRef(ref, selectRef)}
       {...props}
       {...otherProps}
       className={classnames(className, styles.wrap)}
