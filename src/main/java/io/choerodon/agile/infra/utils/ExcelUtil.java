@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -337,6 +338,10 @@ public class ExcelUtil {
 
                 String str = foundationFieldValue.get(fields[i]) != null ? foundationFieldValue.get(fields[i]) : "";
                 cell.setCellValue(substring(str));
+            } else if (invoke instanceof BigDecimal) {
+                cell.setCellValue(ObjectUtils.isEmpty(invoke) ? null : ((BigDecimal) invoke).doubleValue());
+            } else if (invoke instanceof Integer) {
+                cell.setCellValue(ObjectUtils.isEmpty(invoke) ? null : ((Integer) invoke).doubleValue());
             } else {
                 String str = invoke == null ? null : invoke.toString();
                 cell.setCellValue(substring(str));
@@ -414,6 +419,10 @@ public class ExcelUtil {
 
                 String str = foundationFieldValue.get(field) != null ? foundationFieldValue.get(field) : "";
                 cell.setCellValue(substring(str));
+            } else if (invoke instanceof BigDecimal) {
+                cell.setCellValue(ObjectUtils.isEmpty(invoke) ? null : ((BigDecimal) invoke).doubleValue());
+            } else if (invoke instanceof Integer) {
+                cell.setCellValue(ObjectUtils.isEmpty(invoke) ? null : ((Integer) invoke).doubleValue());
             } else {
                 String str = invoke == null ? null : invoke.toString();
                 cell.setCellValue(substring(str));

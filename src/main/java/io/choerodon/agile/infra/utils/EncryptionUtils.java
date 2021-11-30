@@ -101,7 +101,7 @@ public class EncryptionUtils {
         if (ObjectUtils.isEmpty(searchArgs)) {
             return;
         }
-        List<String> suffixs = Arrays.asList("ScopeStart", "ScopeEnd", "TimeForm", "TimeTo");
+        List<String> suffixs = Arrays.asList("ScopeStart", "ScopeEnd", "Form", "To");
         for (String suffix : suffixs) {
             validateTimeAndFormat(searchArgs, suffix);
         }
