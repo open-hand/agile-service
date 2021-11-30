@@ -424,7 +424,7 @@ class StoryMapStore {
       const targetEpic = storyData[epicId];
       const { feature, storys } = targetEpic;
       storys.push(story);
-      const targetFeature = feature[featureId || 'none'];
+      const targetFeature = featureId && feature[featureId] ? feature[featureId] : feature.none;
       if (targetFeature) {
         targetFeature.storys.push(story);
         // 故事按照version泳道分类
