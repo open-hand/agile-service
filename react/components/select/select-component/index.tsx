@@ -93,6 +93,10 @@ const SelectComponent: React.FC<SelectComponentProps> = forwardRef(({
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
 
+  if (selectRef.current && name) {
+    selectRef.current?.dataSet?.setState(`${name}-options`, props.options);
+  }
+
   return (
     <Component
       ref={refsBindRef(ref, selectRef)}
