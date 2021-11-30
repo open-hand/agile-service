@@ -257,8 +257,8 @@ const openCreateStatus = (props: Omit<Props, 'modal'>) => {
       width: 380,
     },
     okText: <C7NFormat
-      intlPrefix="agile.stateMachine"
-      id={props.record ? 'boot.save' : 'boot.create'}
+      intlPrefix="boot"
+      id={props.record ? 'save' : 'create'}
     />,
     children: <ObserverCreateStatus {...props} />,
   });
