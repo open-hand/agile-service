@@ -4,8 +4,8 @@ import classNames from 'classnames';
 import styles from './index.less';
 
 export interface PaneProps {
-  title: string
-  nav?: React.ReactElement | ((title: string) => React.ReactElement)
+  title: React.ReactNode
+  nav?: React.ReactElement | ((title: React.ReactNode) => React.ReactElement)
   tabKey: React.Key
   active: boolean
   onClose?: () => void

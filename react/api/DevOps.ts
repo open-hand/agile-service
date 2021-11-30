@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 import { axios } from '@choerodon/boot';
+import { pick } from 'lodash';
 import { getProjectId } from '@/utils/common';
 import Api from './Api';
 
@@ -95,12 +96,13 @@ class DevOpsApi extends Api<DevOpsApi> {
   /**
    * 加载已经启用的服务列表
    */
-  loadPageActiveService(params: { targetProjectId: string, param?: string, page?: number, size?: number }) {
+  loadPageActiveService(params: { targetProjectId: string, targetAppServiceId?:string, param?: string, page?: number, size?: number }) {
     return this.request({
       url: `${this.prefix}/app_service/page_by_active`,
       method: 'get',
       params: {
-        ...params,
+        ...pick(params, ['page', 'size', 'param']),
+        target_app_service_id: params.targetAppServiceId,
         target_project_id: params.targetProjectId,
       },
     });
