@@ -27,7 +27,7 @@ const DraggableItem: React.FC<Props> = ({
   const prefixCls = `${originPrefixCls}-drag`;
 
   const renderLastColumn = useCallback(() => {
-    const createdLevel = data.get('createdLevel');
+    const createdLevel = data.get('createdLevel') as 'system' | 'organization' | 'project';
     if (isProject) {
       return (
         <div
@@ -35,7 +35,7 @@ const DraggableItem: React.FC<Props> = ({
           className={`${prefixCls}-item ${prefixCls}-item-text`}
           {...provided.dragHandleProps}
         >
-          {formatMessage({ id: `agile.common.${createdLevel}` })}
+          {formatMessage({ id: `agile.common.${createdLevel}` as const })}
         </div>
       );
     }

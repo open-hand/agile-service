@@ -212,12 +212,12 @@ function PageIssueType() {
     };
     Modal.open({
       key: Modal.key('create'),
-      title: formatMessage({ id: 'field.create' }),
+      title: formatMessage({ id: 'agile.page.field.create' }),
       drawer: true,
       children: <CreateField {...values} />,
       style: { width: 740 },
-      okText: formatMessage({ id: 'save' }),
-      cancelText: formatMessage({ id: 'cancel' }),
+      okText: formatMessage({ id: 'boot.save' }),
+      cancelText: formatMessage({ id: 'boot.cancel' }),
     });
   };
   return (

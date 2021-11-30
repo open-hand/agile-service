@@ -13,7 +13,7 @@ const progressOptions = [
   {
     value: 'workTime',
     label: 'work.time.count',
-  }];
+  }] as const;
 
 const SelectProcessType: React.FC<Partial<SelectProps>> = (props) => {
   const formateMessage = useFormatMessage('agile.gantt');

@@ -170,7 +170,7 @@ const FormDataSet = ({
       {
         name: 'fieldType',
         type: 'string' as FieldType,
-        label: formatMessage({ id: 'field.type' }),
+        label: formatMessage({ id: 'agile.page.field.type' }),
         required: !isEdit,
         lookupAxiosConfig: getLookupConfig('field_type'),
         valueField: 'valueCode',
@@ -186,7 +186,7 @@ const FormDataSet = ({
       {
         name: 'context',
         type: 'string' as FieldType,
-        label: formatMessage({ id: 'field.context' }),
+        label: formatMessage({ id: 'agile.page.field.context' }),
         required: true,
         multiple: true,
         valueField: 'id',
@@ -195,7 +195,7 @@ const FormDataSet = ({
       },
       {
         name: 'defaultValue',
-        label: formatMessage({ id: 'field.default' }),
+        label: formatMessage({ id: 'agile.page.field.default' }),
         dynamicProps: {
           max: ({ record }: { record: Record }) => {
             const fieldType = record.get('fieldType');
