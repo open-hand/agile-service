@@ -81,7 +81,7 @@ export function transformValue(dataSet: DataSet, key: string, value: any, format
     let lookup = dataSet.getField(key)?.getLookupData(v);
 
     if (key === 'component') {
-      const options = dataSet.getField(key)?.getOptions()?.toData() as any[];
+      const options = dataSet.getState('component-options')?.toData() as any[];
       lookup = typeof v === 'object' ? v : options?.find((r) => r.componentId === v) || v;
     }
 
