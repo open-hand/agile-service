@@ -270,7 +270,7 @@ class ScrumBoardHome extends Component {
         color: '#0F1358',
       }}
       >
-        {`${ScrumBoardStore.getDayRemain >= 0 ? (
+        {ScrumBoardStore.getDayRemain >= 0 ? (
           <C7NFormat
             intlPrefix="agile.scrumBoard"
             id="remain.day"
@@ -278,7 +278,8 @@ class ScrumBoardHome extends Component {
               day: ScrumBoardStore.getDayRemain,
             }}
           />
-        ) : '无剩余时间'}`}
+        ) : '无剩余时间'}
+
       </span>
     </div>
   )
