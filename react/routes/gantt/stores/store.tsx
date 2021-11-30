@@ -33,7 +33,7 @@ export const units = [
     type: 'halfYear',
     label: 'year',
   },
-];
+] as const;
 class GanttStore {
   ganttRef = createRef<GanttRef>();
 

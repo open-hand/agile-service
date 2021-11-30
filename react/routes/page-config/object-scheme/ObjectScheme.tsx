@@ -50,7 +50,7 @@ function ObjectScheme() {
     const record = schemeTableDataSet.current;
     const modalProps = {
       title: formatMessage({ id: 'agile.page.field.delete.title' }, { name: record?.get('name') }),
-      children: formatMessage({ id: 'agile.page.agile.page.field.delete.msg' }, { name: record?.get('name') }),
+      children: formatMessage({ id: 'agile.page.field.delete.msg' }, { name: record?.get('name') }),
       okText: formatMessage({ id: 'boot.delete' }),
       onOk: () => schemeTableDataSet.delete(record, false).then(() => handleRefresh()),
     };
