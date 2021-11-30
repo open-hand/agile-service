@@ -2,6 +2,7 @@ package io.choerodon.agile.infra.utils;
 import io.choerodon.agile.api.vo.business.ExportIssuesVO;
 import io.choerodon.agile.infra.dto.ExcelCursorDTO;
 import io.choerodon.agile.infra.enums.ExcelImportTemplate;
+import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.IssueConstant;
 import io.choerodon.core.exception.CommonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,7 +39,7 @@ import java.util.stream.Collectors;
 public class ExcelUtil {
 
     private static final Integer CELL_MAX_LENGTH = 32767;
-
+    protected static final List<String> dateFormatterFiled = Arrays.asList(FieldCode.ACTUAL_START_TIME, FieldCode.ACTUAL_END_TIME, FieldCode.ESTIMATED_START_TIME, FieldCode.ESTIMATED_END_TIME);
     public enum Mode {
         SXSSF("SXSSF"), HSSF("HSSF"), XSSF("XSSF");
         private String value;
@@ -287,9 +288,11 @@ public class ExcelUtil {
             height = (short) result;
         }
         row.setHeight(height);
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         for (int i = 0; i < fieldsName.length; i++) {
             //4、操作单元格；将数据写入excel
-            handleWriteCell(row, i, data, cellStyle, fields, clazz, foregroundColor, formatter);
+            Boolean formatDate = dateFormatterFiled.contains(fields[i]);
+            handleWriteCell(row, i, data, cellStyle, fields, clazz, foregroundColor, formatDate ? dateFormatter : formatter);
         }
     }
 

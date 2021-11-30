@@ -3,6 +3,8 @@ package io.choerodon.agile.infra.utils;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -22,11 +24,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.choerodon.agile.api.vo.SearchSourceVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.app.service.impl.SprintServiceImpl;
+import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hzero.core.base.BaseConstants;
 import org.hzero.core.jackson.config.ObjectMapperPostProcess;
 import org.hzero.starter.keyencrypt.core.*;
 import org.hzero.starter.keyencrypt.json.EncryptedSerializerModifier;
@@ -63,6 +67,7 @@ public class EncryptionUtils {
     public static final String[] FILTER_SINGLE_FIELD = {"userId"};
     public static final String[] IGNORE_VALUES = {"0","none"};
     public static final String BLANK_KEY = "";
+    private static final List<String> DATE_FORMAT_FIELD_LIST = Arrays.asList(FieldCode.ESTIMATED_START_TIME, FieldCode.ESTIMATED_END_TIME, FieldCode.ACTUAL_START_TIME, FieldCode.ACTUAL_END_TIME);
 
     /**
      * 解密serachVO
@@ -73,6 +78,8 @@ public class EncryptionUtils {
         if (search == null){
             return;
         }
+        // 校验预计、实际时间以及处理时间格式
+        handlerSearchActualOrEstimateTime(search.getSearchArgs());
         if (!EncryptContext.isEncrypt()){
             filterEmptyCustomField(search);
             return;
@@ -85,6 +92,36 @@ public class EncryptionUtils {
         Optional<Map<String, Object>> searchArgs = Optional.ofNullable(search).map(SearchVO::getOtherArgs);
         if (searchArgs.isPresent()) {
             decryptOa(search, searchArgs);
+        }
+    }
+
+
+
+    public static void handlerSearchActualOrEstimateTime(Map<String, Object> searchArgs) {
+        if (ObjectUtils.isEmpty(searchArgs)) {
+            return;
+        }
+        List<String> suffixs = Arrays.asList("ScopeStart", "ScopeEnd", "TimeForm", "TimeTo");
+        for (String suffix : suffixs) {
+            validateTimeAndFormat(searchArgs, suffix);
+        }
+    }
+
+    private static void validateTimeAndFormat(Map<String, Object> searchArgs, String suffix) {
+        DateFormat dateFormat = new SimpleDateFormat(BaseConstants.Pattern.DATETIME_MM);
+        for (String fieldCode : DATE_FORMAT_FIELD_LIST) {
+            String key = fieldCode + suffix;
+            Object value = searchArgs.get(key);
+            if (ObjectUtils.isEmpty(value)) {
+                continue;
+            }
+            Date date = null;
+            try {
+                date = dateFormat.parse(value.toString());
+            } catch (ParseException e) {
+                throw new CommonException("error.time.illegal", e);
+            }
+            searchArgs.put(key, dateFormat.format(date));
         }
     }
 
