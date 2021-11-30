@@ -1245,23 +1245,23 @@
                 AND ail.label_name LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.label}) ,'%') )
             </if>
             <if test='searchVO.searchArgs.estimatedStartTimeScopeStart != null and searchVO.searchArgs.estimatedStartTimeScopeStart != "" and searchVO.searchArgs.estimatedStartTimeScopeEnd != null and searchVO.searchArgs.estimatedStartTimeScopeEnd != ""'>
-                and ai.estimated_start_time &gt;= #{searchVO.searchArgs.estimatedStartTimeScopeStart} and ai.estimated_start_time &lt;=
-                #{searchVO.searchArgs.estimatedStartTimeScopeEnd}
+                and DATE_FORMAT(ai.estimated_start_time, '%Y-%m-%d %H:%i') &gt;= #{searchVO.searchArgs.estimatedStartTimeScopeStart}
+                and DATE_FORMAT(ai.estimated_start_time, '%Y-%m-%d %H:%i') &lt;= #{searchVO.searchArgs.estimatedStartTimeScopeEnd}
             </if>
 
             <if test='searchVO.searchArgs.estimatedEndTimeScopeStart != null and searchVO.searchArgs.estimatedEndTimeScopeStart != "" and searchVO.searchArgs.estimatedEndTimeScopeEnd != null and searchVO.searchArgs.estimatedEndTimeScopeEnd != ""'>
-                and ai.estimated_end_time &gt;= #{searchVO.searchArgs.estimatedEndTimeScopeStart} and ai.estimated_end_time &lt;=
-                #{searchVO.searchArgs.estimatedEndTimeScopeEnd}
+                and DATE_FORMAT(ai.estimated_end_time, '%Y-%m-%d %H:%i') &gt;= #{searchVO.searchArgs.estimatedEndTimeScopeStart}
+                and DATE_FORMAT(ai.estimated_end_time, '%Y-%m-%d %H:%i') &lt;= #{searchVO.searchArgs.estimatedEndTimeScopeEnd}
             </if>
 
             <if test='searchVO.searchArgs.actualStartTimeScopeStart != null and searchVO.searchArgs.actualStartTimeScopeStart != "" and searchVO.searchArgs.actualStartTimeScopeEnd != null and searchVO.searchArgs.actualStartTimeScopeEnd != ""'>
-                and ai.actual_start_time &gt;= #{searchVO.searchArgs.actualStartTimeScopeStart} and ai.actual_start_time &lt;=
-                #{searchVO.searchArgs.actualStartTimeScopeEnd}
+                and DATE_FORMAT(ai.actual_start_time, '%Y-%m-%d %H:%i') &gt;= #{searchVO.searchArgs.actualStartTimeScopeStart}
+                and DATE_FORMAT(ai.actual_start_time, '%Y-%m-%d %H:%i') &lt;= #{searchVO.searchArgs.actualStartTimeScopeEnd}
             </if>
 
             <if test='searchVO.searchArgs.actualEndTimeScopeStart != null and searchVO.searchArgs.actualEndTimeScopeStart != "" and searchVO.searchArgs.actualEndTimeScopeEnd != null and searchVO.searchArgs.actualEndTimeScopeEnd != ""'>
-                and ai.actual_end_time &gt;= #{searchVO.searchArgs.actualEndTimeScopeStart} and ai.actual_end_time &lt;=
-                #{searchVO.searchArgs.actualEndTimeScopeEnd}
+                and DATE_FORMAT(ai.actual_end_time, '%Y-%m-%d %H:%i') &gt;= #{searchVO.searchArgs.actualEndTimeScopeStart}
+                and DATE_FORMAT(ai.actual_end_time, '%Y-%m-%d %H:%i') &lt;= #{searchVO.searchArgs.actualEndTimeScopeEnd}
             </if>
             <if test='searchVO.searchArgs.teamProjectIds != null and searchVO.searchArgs.teamProjectIds.size() > 0'>
                 and ai.project_id in
