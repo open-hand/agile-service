@@ -21,7 +21,7 @@ class WorkingHoursApi extends Api<WorkingHoursApi> {
         page,
         size,
         issueId,
-        content,
+        params: content,
         self: false,
       },
     });
