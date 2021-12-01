@@ -39,6 +39,7 @@ const localeCommon = {
   key: 'Key',
   'column.config': 'Column Configuration',
   creator: 'Creator',
+  'update.user': 'Updated by',
   title: 'Title',
   issue: 'Issue',
   name: 'Name',
