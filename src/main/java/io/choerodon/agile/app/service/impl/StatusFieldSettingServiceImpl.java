@@ -57,7 +57,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     private static final String COPY_CUSTOM_FIELD = "copy_custom_field";
     private static final String CURRENT_TIME = "current_time";
     private static final String[] CLEAR_FIELD = {FieldCode.LABEL, FieldCode.COMPONENT, FieldCode.TAG, FieldCode.PARTICIPANT};
-
+    private static final List<String> DATE_FORMAT_FIELD_LIST = Arrays.asList(FieldCode.ACTUAL_START_TIME, FieldCode.ACTUAL_END_TIME, FieldCode.ESTIMATED_START_TIME, FieldCode.ESTIMATED_END_TIME);
     @Autowired
     private StatusFieldSettingMapper statusFieldSettingMapper;
     @Autowired
@@ -541,7 +541,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             case FieldCode.ESTIMATED_END_TIME:
             case FieldCode.ACTUAL_START_TIME:
             case FieldCode.ACTUAL_END_TIME:
-                field.set(issueUpdateVO, handlerPredefinedTimeField(fieldValueSettingDTO));
+                field.set(issueUpdateVO, handlerPredefinedTimeField(fieldCode, fieldValueSettingDTO));
                 break;
             case FieldCode.EPIC:
             case FieldCode.PRIORITY:
@@ -595,7 +595,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         }
     }
 
-    private Date handlerPredefinedTimeField(StatusFieldValueSettingDTO fieldValueSettingDTO) {
+    private Date handlerPredefinedTimeField(String fieldCode, StatusFieldValueSettingDTO fieldValueSettingDTO) {
         Date date = null;
         if ("add".equals(fieldValueSettingDTO.getOperateType())) {
             BigDecimal dateAddValue = fieldValueSettingDTO.getDateAddValue();
@@ -606,6 +606,13 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             date = new Date();
         } else {
             date = fieldValueSettingDTO.getDateValue();
+        }
+        // 预计、实际时间字段更新属性时需要将时间精确到分
+        if (DATE_FORMAT_FIELD_LIST.contains(fieldCode)) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            calendar.set(Calendar.SECOND, 0);
+            date = calendar.getTime();
         }
         return date;
     }
