@@ -680,29 +680,39 @@ public class QuickFilterServiceImpl implements QuickFilterService {
         }
     }
 
-    public  String handlerFilterEncryptList(String value, boolean encrypt) {
+    public String handlerFilterEncryptList(String value, boolean encrypt) {
         StringBuilder build = new StringBuilder();
-        if(value.contains("(")){
+        if (value.contains("(")) {
             build.append("(");
             String[] split = EncryptionUtils.subString(value);
             if (!ArrayUtils.isEmpty(split)) {
                 List<String> list = Arrays.asList(split);
                 for (String s : list) {
-                    build.append(encrypt ? encryptionService.encrypt(s, EncryptionUtils.BLANK_KEY) : EncryptionUtils.decrypt(s, EncryptionUtils.BLANK_KEY));
+                    build.append(encryptOrDecryptValue(encrypt, s));
                     if (list.indexOf(s) != (list.size() - 1)) {
                         build.append(",");
                     }
                 }
             }
             build.append(")");
-        }
-        else {
-            if (StringUtils.equalsAny(value,"null","'null'" )){
+        } else {
+            if (StringUtils.equalsAny(value, "null", "'null'")) {
                 build.append(value);
-            }else {
-                build.append(encrypt ? encryptionService.encrypt(value, EncryptionUtils.BLANK_KEY) : EncryptionUtils.decrypt(value, EncryptionUtils.BLANK_KEY));
+            } else {
+                build.append(encryptOrDecryptValue(encrypt, value));
             }
         }
         return build.toString();
+    }
+
+    private String encryptOrDecryptValue(boolean encrypt, String value) {
+        if (encrypt) {
+            if (!Arrays.asList(EncryptionUtils.IGNORE_VALUES).contains(value)) {
+                value = encryptionService.encrypt(value, EncryptionUtils.BLANK_KEY);
+            }
+        } else {
+            value = EncryptionUtils.decrypt(value, EncryptionUtils.BLANK_KEY) + "";
+        }
+        return value;
     }
 }
