@@ -149,7 +149,7 @@ export default function renderField({
                 name={code}
                 label="字段值"
                 colSpan={colSpan / 2}
-                defaultTime={code === 'actualEndTime' || code === 'estimatedEndTime' ? moment().endOf('d') : undefined}
+                defaultPickerValue={code === 'actualEndTime' || code === 'estimatedEndTime' ? moment().endOf('d') : undefined}
               />
             ) : (
               <DateTimePicker
