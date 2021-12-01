@@ -15,6 +15,8 @@ const locale = {
   'create.filter': 'Create Filter',
   'choose.quick.filter': 'Choose Quick Filter',
   'create.more.filter': 'Create More Filter',
+  'hidden.sub_task.completed.in.history.sprint': 'Hidden sub_task completed in history sprint',
+  'hide.sub_task.completed.in.history.sprint': 'Hide sub_task completed in history sprint',
 } as const;
 const exportScrumBoard = localeAppendPrefixObjectKey({ intlPrefix: 'scrumBoard' as const, intlObject: locale });
 type ILocaleScrumBoardType = {
