@@ -2,12 +2,10 @@ import React, { forwardRef, useMemo } from 'react';
 import { FlatSelect } from '@choerodon/components';
 import { Select, Tooltip } from 'choerodon-ui/pro';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import { omit } from 'lodash';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { boardApi } from '@/api';
 import useFormatMessage from '@/hooks/useFormatMessage';
-
-const { Option } = FlatSelect;
+import { transformOperation } from '@/routes/settings/FastSearch/components/table/utils';
 
 interface IFilter {
   filterId: string,
@@ -50,7 +48,7 @@ const SelectFilter: React.FC<SelectFilterProps> = forwardRef(({
     },
     paging: true,
     optionRenderer: (filter: IFilter) => (
-      <Tooltip title={filter.expressQuery}>
+      <Tooltip title={filter.expressQuery && transformOperation(filter.expressQuery)}>
         <span>{filter.name}</span>
       </Tooltip>
     ),
