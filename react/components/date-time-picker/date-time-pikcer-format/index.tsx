@@ -1,5 +1,4 @@
 import { createElement } from 'react';
-import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 import DaysView, { DateViewProps } from 'choerodon-ui/pro/lib/date-picker/DaysView';
 // import DateTimesView from 'choerodon-ui/pro/lib/date-picker/DateTimesView';
 import WeeksView from 'choerodon-ui/pro/lib/date-picker/WeeksView';
@@ -9,7 +8,7 @@ import YearsView from 'choerodon-ui/pro/lib/date-picker/YearsView';
 import DecadeYearsView from 'choerodon-ui/pro/lib/date-picker/DecadeYearsView';
 import { ViewMode } from 'choerodon-ui/pro/lib/date-picker/enum';
 import { MINUTE } from '@/constants/DATE_FORMAT';
-import DateTimePicker from '../DateTimePicker';
+import DateTimePicker, { DateTimePickerProps as DatePickerProps } from '../DateTimePicker';
 import DateTimesView from './DateTimesView';
 
 export interface DateTimePickerProps extends DatePickerProps {
