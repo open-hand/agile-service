@@ -1,6 +1,7 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { CheckBox } from 'choerodon-ui/pro';
 import { Permission } from '@choerodon/boot';
+import { C7NFormat } from '@choerodon/master';
 
 import { IProjectInfo, projectApi } from '@/api';
 
@@ -35,9 +36,19 @@ const HideSubTask: React.FC<Props> = ({ refresh }) => {
   return (
     <Permission
       service={['choerodon.code.project.setting.general-setting.ps.update']}
-      noAccessChildren={!hidden ? '' : '已隐藏历史迭代中已完成的子任务'}
+      noAccessChildren={!hidden ? '' : (
+        <C7NFormat
+          intlPrefix="agile.scrumBoard"
+          id="hidden.sub_task.completed.in.history.sprint"
+        />
+      )}
     >
-      <CheckBox name="hidden" value onChange={handleChange} checked={hidden}>隐藏在历史迭代已完成的子任务</CheckBox>
+      <CheckBox name="hidden" value onChange={handleChange} checked={hidden}>
+        <C7NFormat
+          intlPrefix="agile.scrumBoard"
+          id="hide.sub_task.completed.in.history.sprint"
+        />
+      </CheckBox>
     </Permission>
   );
 };

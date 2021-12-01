@@ -15,7 +15,8 @@ const locale = {
   'create.filter': '创建筛选',
   'choose.quick.filter': '选择快速筛选',
   'create.more.filter': '创建更多快速筛选',
-
+  'hidden.sub_task.completed.in.history.sprint': '已隐藏历史迭代中已完成的子任务',
+  'hide.sub_task.completed.in.history.sprint': '隐藏在历史迭代已完成的子任务',
 } as const;
 const exportScrumBoard = localeAppendPrefixObjectKey({ intlPrefix: 'scrumBoard' as const, intlObject: locale });
 type ILocaleScrumBoardType = {

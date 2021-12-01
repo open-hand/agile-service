@@ -62,7 +62,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
                 )
               }
               {
-                !completed && (fieldCode === 'remainingTime' || fieldCode === 'estimateTime') && (
+                ((!completed && fieldCode === 'remainingTime') || fieldCode === 'estimateTime') && (
                   <>
                     {value !== null && value !== undefined ? `${value} 小时` : '无'}
                   </>
