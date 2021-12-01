@@ -396,6 +396,25 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         issueValidator.verifyStoryPoints(issueConvertDTO);
         setRemainingTime(issueConvertDTO);
+        // 处理预计、实际时间
+        handleEstimateTimeAndActualTime(issueConvertDTO);
+    }
+
+    private void handleEstimateTimeAndActualTime(IssueConvertDTO issueConvertDTO) {
+        issueConvertDTO.setActualStartTime(formatDate(issueConvertDTO.getActualStartTime()));
+        issueConvertDTO.setActualEndTime(formatDate(issueConvertDTO.getActualEndTime()));
+        issueConvertDTO.setEstimatedStartTime(formatDate(issueConvertDTO.getEstimatedStartTime()));
+        issueConvertDTO.setEstimatedEndTime(formatDate(issueConvertDTO.getEstimatedEndTime()));
+    }
+
+    private Date formatDate(Date date) {
+        if (ObjectUtils.isEmpty(date)) {
+            return null;
+        }
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.SECOND, 0);
+        return calendar.getTime();
     }
 
     protected void calculationMapRank(IssueConvertDTO issueConvertDTO) {
@@ -1554,6 +1573,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         // 处理issue改变状态时，满足条件改变 is_pre_sprint_done 的值
         handleHistorySprintCompleted(projectId, issueConvertDTO, fieldList, originIssue);
+        // 处理预计、实际时间
+        handleEstimateTimeAndActualTime(issueConvertDTO);
         issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
     }
 
@@ -1733,6 +1754,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             calculationRank(subIssueConvertDTO.getProjectId(), subIssueConvertDTO);
         }
         setRemainingTime(subIssueConvertDTO);
+        // 处理预计、实际时间
+        handleEstimateTimeAndActualTime(subIssueConvertDTO);
     }
 
     private void setRemainingTime(IssueConvertDTO issueConvertDTO) {
