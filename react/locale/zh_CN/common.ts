@@ -39,6 +39,7 @@ const localeCommon = {
   key: '编号',
   'column.config': '列配置',
   creator: '创建人',
+  'update.user': '更新人',
   title: '标题',
   issue: '工作项',
   name: '名称',

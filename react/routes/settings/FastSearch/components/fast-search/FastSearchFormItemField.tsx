@@ -26,7 +26,7 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
    * 编辑进入的数据转换为对象选项
    */
   const handleBindOptions = useCallback((list: any[]) => {
-    if (componentRef.current?.options) {
+    if (componentRef.current?.options && list?.length) {
       optionDataSet.options = componentRef.current?.options;
     }
   }, [optionDataSet]);
