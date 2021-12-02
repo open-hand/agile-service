@@ -9,8 +9,11 @@ import {
 import { Loading } from '@choerodon/components';
 import { usePersonalWorkloadStore } from './stores';
 import './index.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
+import IntlProviderAsync from '@/components/intl-provider-async';
 
 const PersonalWorkload = () => {
+  const formatMessage = useFormatMessage();
   const clsPrefix = 'c7n-project-overview-personalWorkload-chart';
   const {
     startSprintDs,
@@ -23,7 +26,7 @@ const PersonalWorkload = () => {
   } = usePersonalWorkloadStore();
   const renderTitle = () => (
     <div className={`${clsPrefix}-title`}>
-      <span>个人工作量统计</span>
+      <span>{formatMessage({ id: 'agile.projectOverview1.statistics' })}</span>
       {/* {startedRecord && workloadChartDs.length ? <OverviewWrap.Switch defaultValue="issueCount" onChange={setChartOption} options={options} /> : ''} */}
     </div>
   );
@@ -78,7 +81,8 @@ const PersonalWorkload = () => {
         },
       },
       legend: {
-        data: ['未完成', '已完成'],
+        // @ts-ignore
+        data: [formatMessage({ id: 'agile.projectOverview1.incomplete' }), formatMessage({ id: 'agile.projectOverview1.complete' })],
         itemWidth: 20,
         itemHeight: 10,
         itemGap: 14,
@@ -112,8 +116,9 @@ const PersonalWorkload = () => {
           },
         },
       },
+      // @ts-ignore
       yAxis: {
-        name: chartOption === 'issueCount' ? '工作项计数' : '工时',
+        name: chartOption === 'issueCount' ? formatMessage({ id: 'agile.projectOverview1.issueCount' }) : formatMessage({ id: 'agile.projectOverview1.workingHoursCount' }),
         minInterval: 1,
         nameTextStyle: {
           color: 'var(--text-color3)',
@@ -144,7 +149,8 @@ const PersonalWorkload = () => {
       },
       series: [
         {
-          name: '已完成',
+          // @ts-ignore
+          name: formatMessage({ id: 'agile.projectOverview1.complete' }),
           type: 'bar',
           stack: '计数',
           data: doneCountArr,
@@ -162,7 +168,8 @@ const PersonalWorkload = () => {
           },
         },
         {
-          name: '未完成',
+          // @ts-ignore
+          name: formatMessage({ id: 'agile.projectOverview1.incomplete' }),
           type: 'bar',
           stack: '计数',
           data: undoneCountArr,
@@ -222,7 +229,7 @@ const PersonalWorkload = () => {
       }],
     };
     return option;
-  }, [chartOption, getCategoryAndCategoryCount]);
+  }, [chartOption, formatMessage, getCategoryAndCategoryCount]);
 
   function getContent() {
     if (startSprintDs.status === 'loading') {
@@ -252,4 +259,10 @@ const PersonalWorkload = () => {
   );
 };
 
-export default observer(PersonalWorkload);
+const ObserverPersonalWorkload = observer(PersonalWorkload);
+
+export default () => (
+  <IntlProviderAsync>
+    <ObserverPersonalWorkload />
+  </IntlProviderAsync>
+);

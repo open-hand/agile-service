@@ -13,6 +13,7 @@ export * from './setting';
 export * from './stateMachine';
 export * from './performance';
 export * from './chart';
+export * from './projectOverview';
 
 const zh_CN = {
   save: '保存',
