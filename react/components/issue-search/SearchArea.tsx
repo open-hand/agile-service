@@ -239,7 +239,7 @@ const SearchArea: React.FC = () => {
               onClick={archiveFields.length > 0 ? undefined : onClickSaveFilter}
               className={`${prefixCls}-search-right-btn ${prefixCls}-search-right-saveBtn`}
             >
-              保存筛选
+              {formatMessage({ id: 'save.filter' })}
             </Button>
           </Tooltip>
         )}
