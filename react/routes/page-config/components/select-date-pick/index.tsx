@@ -11,6 +11,7 @@ import MonthsView from 'choerodon-ui/pro/lib/date-picker/MonthsView';
 import moment, { Moment } from 'moment';
 import { observer } from 'mobx-react';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
+import DateTimesViewWithFormat from '@/components/date-time-picker/date-time-pikcer-format/DateTimesView';
 import styles from './index.less';
 /**
  * 阻止冒泡以及事件执行
@@ -36,6 +37,7 @@ interface DatePickerPageProps extends IBaseComponentProps {
   dateType: 'date' | 'datetime' | 'time'
   defaultValue?: any
   format?: string
+  isCustomDateTimeView?: boolean,
 }
 @observer
 class ObserverDateTimesView extends DateTimesView {
@@ -58,7 +60,8 @@ const SelectDatePickDateFormat = {
   time: 'HH:mm:ss',
 };
 const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
-  value: propsValue, defaultValue, dateType, onBlur, format: propsFormat = 'YYYY-MM-DD HH:mm:ss', ...otherProps
+  value: propsValue, defaultValue, dateType, onBlur,
+  format: propsFormat = 'YYYY-MM-DD HH:mm:ss', isCustomDateTimeView, ...otherProps
 }, ref) => {
   const innerRef = useRef<Select>();
   const format = useMemo(() => propsFormat || SelectDatePickDateFormat[dateType], [dateType, propsFormat]);
@@ -97,7 +100,7 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
     // onChange && onChange(date.format('YYYY-MM-DD HH:mm:ss'));
     innerRef.current?.choose(new Record({ meaning: date.format(format), value: date.format(format) }));
   }
-  const DateView = DateViews[mode as DateViewsKey];
+  const DateView = isCustomDateTimeView && mode === 'dateTime' ? DateTimesViewWithFormat : DateViews[mode as DateViewsKey];
   const handleBindRef = useCallback((newRef) => {
     if (newRef) {
       ref && Object.assign(ref, { current: newRef });

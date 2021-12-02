@@ -38,22 +38,17 @@ const ToggleFieldValue: React.FC<Pick<Props, 'data' | 'disabled'>> = ({
 }) => {
   const textEditToggleProps = useTextEditTogglePropsWithPage(data);
   const disabled = propsDisabled || textEditToggleProps?.disabled;
-  // 预计开始/结束时间、实际开始/结束时间精确到分
-  let showDefaultValueText = data.get('showDefaultValueText');
-  if (showDefaultValueText && FORMAT_FIELDS.includes(data.get('fieldCode')) && moment(showDefaultValueText).isValid()) {
-    showDefaultValueText = moment(showDefaultValueText).format(MINUTE);
-  }
-  return (
+  const showDefaultValueText = data.get('showDefaultValueText');
 
+  return (
     <TextEditToggle
       {...textEditToggleProps}
       disabled={disabled}
       className={styles.toggle}
     >
-
       <Observer>
         {() => (
-          <Tooltip title={data.get('showDefaultValueText') !== '' ? data.get('showDefaultValueText') : undefined}>
+          <Tooltip title={showDefaultValueText !== '' ? showDefaultValueText : undefined}>
             <span className={styles.text}>
               {(!disabled && (!showDefaultValueText || showDefaultValueText === '') ? <SpanPlaceholder fieldType={data.get('fieldType')} /> : showDefaultValueText || '')}
             </span>
