@@ -118,9 +118,13 @@ export default function useTable(getData: TableRequest, options: Options) {
     query(current);
   }, [current, pageSize, sort, isTree]);
   const onPaginationChange = useCallback((page: number, size: number) => {
-    setCurrent(page);
+    if (size !== pageSize) {
+      setCurrent(defaultPage ?? 1);
+    } else {
+      setCurrent(page);
+    }
     setPageSize(size);
-  }, [setCurrent]);
+  }, [setCurrent, pageSize]);
   const onShowSizeChange = useCallback((page: number, size: number) => {
     setPageSize(size);
   }, [setPageSize]);
