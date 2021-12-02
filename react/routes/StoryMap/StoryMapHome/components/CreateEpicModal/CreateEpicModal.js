@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
+import { C7NFormat } from '@choerodon/master';
 import { Modal, Form, Input } from 'choerodon-ui';
 import { stores, Choerodon } from '@choerodon/boot';
 import { epicApi, issueApi, fieldApi } from '@/api';
@@ -29,7 +30,7 @@ class CreateEpicModal extends Component {
     }
   }
 
-  handleCreateEpic =(e) => {
+  handleCreateEpic = (e) => {
     const {
       form, onOk, epicType, defaultPriority,
     } = this.props;
@@ -103,7 +104,12 @@ class CreateEpicModal extends Component {
     return (
       <Sidebar
         maskClosable={false}
-        title="创建史诗"
+        title={(
+          <C7NFormat
+            intlPrefix="agile.common"
+            id="create.epic"
+          />
+        )}
         visible={visible}
         okText="创建"
         cancelText="取消"

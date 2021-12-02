@@ -44,6 +44,7 @@ const HEX = {
 
 const StoryMapHome = observer(() => {
   const formatMessage = useFormatMessage('agile.storyMap');
+  const globalFormatMessage = useFormatMessage();
   const issueSearchStore = useIssueSearchStore({
     // @ts-ignore
     getSystemFields: () => getSystemFieldsInStoryMap(['issueTypeId', 'quickFilterIds']),
@@ -160,7 +161,7 @@ const StoryMapHome = observer(() => {
         <Header>
           <HeaderButtons items={[
             {
-              name: '创建史诗',
+              name: globalFormatMessage({ id: 'agile.common.create.epic' }),
               icon: 'playlist_add',
               handler: handleCreateEpicClick,
               display: !isInProgram && isEmpty && !loading,

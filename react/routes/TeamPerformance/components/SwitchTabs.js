@@ -3,6 +3,7 @@ import React from 'react';
 import classnames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import './SwitchTabs.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const prefixCls = 'c7n-team-performance-wrap';
 const SwitchTabs = observer((props) => {
@@ -10,7 +11,7 @@ const SwitchTabs = observer((props) => {
     onChange, dataSet, field = 'tab', ...other
   } = props;
   const tabsData = dataSet.getField(field).get('options').toData();
-
+  const formatMessage = useFormatMessage();
   const handleChangeActiveKey = (key) => {
     dataSet.current.set(field, key);
     onChange();
@@ -22,13 +23,13 @@ const SwitchTabs = observer((props) => {
         tabsData.map((tabItem, index) => (
           <>
             <li
-              className={classnames(`${prefixCls}-switch-li`, {'c7n-team-performance-wrap-switch-li-active':  dataSet.current.get(field) === tabItem.value })}
+              className={classnames(`${prefixCls}-switch-li`, { 'c7n-team-performance-wrap-switch-li-active': dataSet.current.get(field) === tabItem.value })}
               onClick={() => handleChangeActiveKey(tabItem.value)}
               key={tabItem.value}
             >
-              {tabItem.meaning}
+              {formatMessage({ id: tabItem.code })}
             </li>
-            { (index !== tabsData.length - 1) && <span className="line" /> }
+            { (index !== tabsData.length - 1) && <span className="line" />}
           </>
         ))
       }

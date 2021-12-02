@@ -39,7 +39,7 @@ const localeCommon = {
   key: 'Key',
   'column.config': 'Column Configuration',
   creator: 'Creator',
-  'update.user': 'Updated by',
+  'update.user': 'Updater',
   title: 'Title',
   issue: 'Issue',
   name: 'Name',
@@ -47,7 +47,9 @@ const localeCommon = {
   system: 'System',
   organization: 'Organization',
   issueType: 'IssueType',
-
+  'issue.work.time': 'Man-hour',
+  'more.operate': 'More Actions',
+  'create.epic': 'Create Epic',
 } as const;
 const exportCommon = localeAppendPrefixObjectKey({ intlPrefix: 'common' as const, intlObject: localeCommon });
 type ILocaleCommonType = {

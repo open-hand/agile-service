@@ -5,14 +5,18 @@ import { EmptyPage } from '@choerodon/components';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
 import EmptyScrumboard from './emptyScrumboard.svg';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const NoneSprint = ({ doingSprintExist, filterItems, hasSetFilter }) => {
-  let tipTitle = '没有活跃的Sprint';
+  let tipTitle = 'empty.description.prefix.sprint';
+  const formatMessage = useFormatMessage();
+
   const { sprint } = filterItems;
+  console.log('....', doingSprintExist, sprint, filterItems, hasSetFilter);
   if ((doingSprintExist || sprint) && Object.keys(filterItems).length === 1) {
-    tipTitle = '当前冲刺下未规划工作项';
+    tipTitle = 'empty.description.prefix.plan';
   } else if (hasSetFilter) {
-    tipTitle = '当前筛选条件下无工作项';
+    tipTitle = 'empty.description.prefix.filter';
   }
 
   const handleLinkToBacklog = useCallback(() => {
@@ -23,15 +27,15 @@ const NoneSprint = ({ doingSprintExist, filterItems, hasSetFilter }) => {
     <>
       <EmptyPage
         image={EmptyScrumboard}
-        description={(
-          <>
-            {tipTitle}
-            ，
-            在工作列表的
-            <EmptyPage.Button style={{ color: '#5365EA' }} onClick={handleLinkToBacklog}>待办事项</EmptyPage.Button>
-            {!doingSprintExist ? '中开启冲刺' : '规划工作项到当前冲刺'}
-          </>
-        )}
+        description={formatMessage({ id: 'agile.scrumBoard.empty.description' }, {
+          prefix: formatMessage({ id: `agile.scrumBoard.${tipTitle}` }),
+          button: (
+            <EmptyPage.Button style={{ color: '#5365EA' }} onClick={handleLinkToBacklog}>
+              {formatMessage({ id: 'agile.backlog.route' })}
+            </EmptyPage.Button>),
+          s1: (chunk) => (!doingSprintExist ? chunk : ''),
+          s2: (chunk) => (doingSprintExist ? chunk : ''),
+        })}
       >
       </EmptyPage>
     </>

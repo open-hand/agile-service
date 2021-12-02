@@ -11,6 +11,10 @@ const locale = {
   'global.sprint': '冲刺目标',
   'delete.sprint': '删除冲刺',
   'no.start': '未开始',
+  'empty.sprint.data.title': '计划您的SPRINT',
+  'empty.sprint.data.description': '这是一个Sprint。将工作项拖拽至此来计划一个Sprint。',
+  'empty.backlog.data.title': '当前项目暂无待办事项',
+  'empty.backlog.data.description': '您可以在此创建并评估工作项，可通过上下拖动来规划工作项的排列顺序',
 
 } as const;
 const exportBacklog = localeAppendPrefixObjectKey({ intlPrefix: 'backlog' as const, intlObject: locale });

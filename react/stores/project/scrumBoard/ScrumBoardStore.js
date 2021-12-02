@@ -775,7 +775,7 @@ class ScrumBoardStore {
     this.quickSearchList = quickSearchList;
     this.allColumnCount = observable.map(allColumnNum.map(({ columnId, issueCount }) => [columnId, issueCount]));
     if (currentSprint) {
-      this.currentSprintExist = true;
+      this.currentSprintExist = Object.values(currentSprint).filter(Boolean).length > 0;
       this.dayRemain = currentSprint.dayRemain;
       this.sprintId = currentSprint.sprintId;
       this.sprintName = currentSprint.sprintName;

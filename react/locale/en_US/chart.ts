@@ -1,7 +1,7 @@
 import { localeAppendPrefixObjectKey } from '@/utils/locale';
 
 const locale = {
-  'custom.chart': '自定义图表',
+  'custom.chart': 'Customize Report',
 } as const;
 const exportChart = localeAppendPrefixObjectKey({ intlPrefix: 'chart' as const, intlObject: locale });
 type ILocaleChartType = {

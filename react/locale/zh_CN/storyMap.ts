@@ -7,6 +7,7 @@ const locale = {
   'no.plan.list': '未规划列表',
   'version.swimlane': '版本泳道',
   'sprint.swimlane': '冲刺泳道',
+  'empty.data.description': '用户故事地图是以史诗为基础，根据版本控制进行管理规划',
 } as const;
 const exportStoryMap = localeAppendPrefixObjectKey({ intlPrefix: 'storyMap' as const, intlObject: locale });
 type ILocaleStoryMapType = {

@@ -11,6 +11,10 @@ const locale = {
   'global.sprint': 'Sprint Goal',
   'delete.sprint': 'Delete Sprint',
   'no.start': 'Unstarted',
+  'empty.sprint.data.title': 'Plan your sprint',
+  'empty.sprint.data.description': 'Sprint：Here is a sprint.Drag issues here to plan the work for this sprint',
+  'empty.backlog.data.title': 'The Backlog is empty',
+  'empty.backlog.data.description': 'You can create and evaluate issues here. You can drag up or drag down to plan the order of issues',
 
 } as const;
 const exportBacklog = localeAppendPrefixObjectKey({ intlPrefix: 'backlog' as const, intlObject: locale });
