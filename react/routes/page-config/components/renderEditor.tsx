@@ -69,8 +69,9 @@ function renderEditor({
 
   if (['date', 'time', 'datetime'].includes(fieldType)) {
     // 预计开始/结束时间、实际开始/结束时间精确到分
-    const format = FORMAT_FIELDS.includes(fieldCode) ? MINUTE : undefined;
-    return <SelectPickDate format={format} dateType={fieldType as any} style={style} defaultValue={defaultValue} {...otherProps} />;
+    const isFormatField = FORMAT_FIELDS.includes(fieldCode);
+    const format = isFormatField ? MINUTE : undefined;
+    return <SelectPickDate format={format} isCustomDateTimeView={isFormatField} dateType={fieldType as any} style={style} defaultValue={defaultValue} {...otherProps} />;
   }
 
   if (['checkbox', 'multiple', 'radio', 'single'].includes(fieldType)) {

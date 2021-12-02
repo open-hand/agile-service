@@ -4,6 +4,7 @@ import { isEmpty } from 'lodash';
 import { toJS } from 'mobx';
 import { IFieldOptionProps } from '@/api';
 import { User } from '@/common/types';
+import { FORMAT_FIELDS, MINUTE } from '@/constants/DATE_FORMAT';
 
 const disabledEditDefaultFields = ['featureType', 'issueType', 'status', 'priority', 'creationDate', 'lastUpdateDate', 'timeTrace', 'belongToBacklog', 'urgent', 'progressFeedback', 'description', 'environment', 'subProject', 'created_user', 'last_updated_user', 'email', 'tag'];
 const orgDisabledEditDefaultFields = [...disabledEditDefaultFields, 'component', 'label', 'influenceVersion', 'fixVersion', 'epic', 'sprint', 'pi', 'subProject', 'backlogClassification', 'backlogType', 'programVersion'];
@@ -30,7 +31,7 @@ function transformDefaultValue({
   const { optionKey = propsOptionKey, textKey = propsTextKey } = fieldTextValueConfig[fieldCode as keyof typeof fieldTextValueConfig] || {};
   switch (fieldType) {
     case 'datetime':
-      return extraConfig ? '当前时间' : moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+      return extraConfig ? '当前时间' : moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format(fieldCode && FORMAT_FIELDS.includes(fieldCode) ? MINUTE : 'YYYY-MM-DD HH:mm:ss');
     case 'time':
       return extraConfig ? '当前时间' : moment(defaultValue, ['YYYY-MM-DD HH:mm:ss', 'HH:mm:ss']).format('HH:mm:ss');
     case 'date':
