@@ -11,6 +11,7 @@ import 'moment/locale/zh-cn';
 import 'moment/locale/en-nz';
 import moment from 'moment';
 import { PermissionRoute } from '@choerodon/master';
+import IntlProviderAsync from '@/components/intl-provider-async';
 import { setHistory } from '@/utils/to';
 import './style/index.less';
 
@@ -102,6 +103,7 @@ export function getRoutes(match) {
     />,
   ];
 }
+
 class Agile extends React.Component {
   constructor(props) {
     super(props);
@@ -119,7 +121,6 @@ class Agile extends React.Component {
       moment.locale('zh-cn');
     }
 
-    const IntlProviderAsync = asyncLocaleProvider(language, () => import(/* webpackInclude: /\index.(ts|js)$/ */ `./locale/${language}`));
     return (
       <div id="agile">
         <IntlProviderAsync>

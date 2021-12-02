@@ -8,6 +8,7 @@ import useDefaultMyFilter from '@/hooks/useDefaultMyFilter';
 import Gantt, { StoreProvider } from './stores';
 import type { IReactFCGanttProvideProjects } from '@/routes/gantt';
 import { warpGanttProvideProjects } from '@/routes/gantt';
+import IntlProviderAsync from '../../components/intl-provider-async';
 
 const WorkbenchProjectGantt: IReactFCGanttProvideProjects = ({ projects, currentProjectId, setCurrentProjectId }) => {
   const { isInProgram, loading: programLoading } = useIsInProgram({ projectId: currentProjectId });
@@ -35,9 +36,11 @@ const WorkbenchProjectGantt: IReactFCGanttProvideProjects = ({ projects, current
 };
 
 const WorkbenchGantt = (props: any) => (
-  <StoreProvider {...props}>
-    <WorkbenchProjectGantt {...props} />
-  </StoreProvider>
+  <IntlProviderAsync>
+    <StoreProvider {...props}>
+      <WorkbenchProjectGantt {...props} />
+    </StoreProvider>
+  </IntlProviderAsync>
 );
 
 export default warpGanttProvideProjects(WorkbenchGantt, 'workbench');
