@@ -13,6 +13,7 @@ export * from './setting';
 export * from './stateMachine';
 export * from './performance';
 export * from './chart';
+export * from './projectOverview';
 
 const en_US = {
   refresh: 'Refresh',
