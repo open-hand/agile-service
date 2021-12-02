@@ -58,6 +58,9 @@ public class QuickFilterServiceImpl implements QuickFilterService {
     protected static final String NULL_STR = "null";
     protected static final String IS = "is";
 
+    private static final List<String> EQUALS_OR_IN_LIST = Arrays.asList("=", "in");
+    private static final List<String> NOT_EQUALS_OR_NOT_IN_LIST = Arrays.asList("!=", "not in");
+
     @Autowired
     private QuickFilterMapper quickFilterMapper;
 
@@ -401,6 +404,9 @@ public class QuickFilterServiceImpl implements QuickFilterService {
             case "participant_id":
                 dealParticipant(field, value, operation, sqlQuery);
                 break;
+            case "assignee_id":
+                dealAssigneeId(field, value, operation, sqlQuery);
+                break;
             default:
                 if(Arrays.asList(EncryptionUtils.FIELD_VALUE).contains(field)){
                     sqlQuery.append(" " + field + " " + quickFilterValueVO.getOperation() + " " + value + " ");
@@ -410,6 +416,54 @@ public class QuickFilterServiceImpl implements QuickFilterService {
                 }
                 break;
         }
+    }
+
+    private void dealAssigneeId(String field,
+                                String value,
+                                String operation,
+                                StringBuilder sqlQuery) {
+        String space = " ";
+        StringBuilder sqlBuilder = new StringBuilder();
+        String sql =
+                sqlBuilder
+                        .append(space)
+                        .append(field)
+                        .append(space)
+                        .append(operation)
+                        .append(space)
+                        .append(inSql(operation, value))
+                        .append(space)
+                        .toString();
+        boolean containZero;
+        if (value.contains("(")) {
+            List<String> valueList = Arrays.asList(EncryptionUtils.subString(value));
+            containZero = valueList.contains("0");
+        } else {
+            containZero = "0".equals(value);
+        }
+        StringBuilder builder = new StringBuilder();
+        if (containZero) {
+            if (EQUALS_OR_IN_LIST.contains(operation.toLowerCase())) {
+                builder
+                        .append(" ( ")
+                        .append(field)
+                        .append(" is null or ")
+                        .append(sql)
+                        .append(" ) ");
+            } else if (NOT_EQUALS_OR_NOT_IN_LIST.contains(operation.toLowerCase())) {
+                builder
+                        .append(" ( ")
+                        .append(field)
+                        .append(" is not null and ")
+                        .append(sql)
+                        .append(" ) ");
+            } else {
+                builder.append(sql);
+            }
+        } else {
+            builder.append(sql);
+        }
+        sqlQuery.append(builder);
     }
 
     private void dealParticipant(String field, String value, String operation, StringBuilder sqlQuery) {
