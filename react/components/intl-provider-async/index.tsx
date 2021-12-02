@@ -1,16 +1,16 @@
-import React from 'react';
+import React, { memo } from 'react';
 import {
   asyncLocaleProvider, stores,
 } from '@choerodon/boot';
-import { useCreation } from 'ahooks';
 
 const { AppState } = stores;
 interface IIntlProviderAsync {
   getMessage?: (language: string) => Promise<any>
+  children?: any
 }
 const IntlProviderAsync: React.FC<IIntlProviderAsync> = ({ children, getMessage }) => {
   const language = AppState.currentLanguage;
-  const Provider = useCreation(() => asyncLocaleProvider(language, () => (getMessage ? getMessage(language) : import(/* webpackInclude: /\index.(ts|js)$/ */ `../../locale/${language}`))), [language]);
+  const Provider = asyncLocaleProvider(language, () => (getMessage ? getMessage(language) : import(/* webpackInclude: /\index.(ts|js)$/ */ `../../locale/${language}`)));
 
   return (
     <Provider>
@@ -20,5 +20,6 @@ const IntlProviderAsync: React.FC<IIntlProviderAsync> = ({ children, getMessage 
 };
 IntlProviderAsync.defaultProps = {
   getMessage: undefined,
+  children: undefined,
 };
-export default IntlProviderAsync;
+export default memo(IntlProviderAsync);
