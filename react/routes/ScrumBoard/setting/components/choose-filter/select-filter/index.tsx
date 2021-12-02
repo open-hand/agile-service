@@ -49,7 +49,7 @@ const SelectFilter: React.FC<SelectFilterProps> = forwardRef(({
     paging: true,
     optionRenderer: (filter: IFilter) => (
       <Tooltip title={filter.expressQuery && transformOperation(filter.expressQuery)}>
-        <span>{filter.name}</span>
+        <span style={{ paddingLeft: 0 }}>{filter.name}</span>
       </Tooltip>
     ),
   }), [afterLoad, args, boardId, dataRef]);
