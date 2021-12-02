@@ -85,6 +85,8 @@ export function getQuickCreateDefaultObj(defaultValues?: IQuickCreateDefaultValu
     reporterId: defaultValues.reporterId || fieldsMap.get('reporter')?.defaultValue,
     estimatedEndTime: defaultValues.estimatedEndTime || fieldsMap.get('estimatedEndTime')?.defaultValue,
     estimatedStartTime: defaultValues.estimatedStartTime || fieldsMap.get('estimatedStartTime')?.defaultValue,
+    actualEndTime: defaultValues.actualEndTime || fieldsMap.get('actualEndTime')?.defaultValue,
+    actualStartTime: defaultValues.actualStartTime || fieldsMap.get('actualStartTime')?.defaultValue,
     storyPoints: fieldsMap.get('storyPoints')?.defaultValue,
     remainingTime: fieldsMap.get('remainingTime')?.defaultValue,
     mainResponsibleId: fieldsMap.get('mainResponsible')?.defaultValue,
