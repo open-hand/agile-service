@@ -148,51 +148,61 @@ class Setting extends Component {
           />
         )}
         >
-          <HeaderButtons items={[{
-            name: <C7NFormat
-              intlPrefix="agile.common"
-              id="add.status"
-            />,
-            icon: 'playlist_add',
-            handler: this.handleCreateStatusClick,
-            display: activeKey === '1',
-            permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.status.create'],
-          }, {
-            name: <C7NFormat
-              intlPrefix="agile.scrumBoard"
-              id="add.column"
-
-            />,
-            icon: 'playlist_add',
-            handler: this.handleCreateColumnClick,
-            display: activeKey === '1',
-            permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.column.create'],
-          }, {
-            name: (
-              <span>
-                <C7NFormat
-                  intlPrefix="agile.scrumBoard"
-                  id="delete.board"
-                  values={{ name: '' }}
-                />
-              </span>),
-            icon: 'delete_sweep-o',
-            handler: this.handleDeleteBoard,
-            display: true,
-            disabled: ScrumBoardStore.getBoardList.size === 1,
-            permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.board.delete'],
-          }, {
-            display: true,
-            element: <SelectBoard
-              createButton={false}
-              onChange={(value) => {
-                const selectedBoard = ScrumBoardStore.getBoardList.get(value);
-                ScrumBoardStore.setSelectedBoard(value);
-                ScrumBoardStore.setSwimLaneCode(selectedBoard.userDefaultBoard);
-                this.refresh(selectedBoard);
-              }}
-            />,
-          }]}
+          <HeaderButtons
+            key={activeKey}
+            items={[
+              ...(activeKey === '1' ? [{
+                name: (
+                  <span>
+                    <C7NFormat
+                      intlPrefix="agile.common"
+                      id="add.status"
+                    />
+                  </span>),
+                icon: 'playlist_add',
+                handler: this.handleCreateStatusClick,
+                display: true,
+                permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.status.create'],
+              },
+              {
+                name: (
+                  <span>
+                    <C7NFormat
+                      intlPrefix="agile.scrumBoard"
+                      id="add.column"
+                    />
+                  </span>),
+                icon: 'playlist_add',
+                handler: this.handleCreateColumnClick,
+                display: true,
+                permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.column.create'],
+              }] : []),
+              {
+                name: (
+                  <span>
+                    <C7NFormat
+                      intlPrefix="agile.scrumBoard"
+                      id="delete.board"
+                      values={{ name: '' }}
+                    />
+                  </span>),
+                icon: 'delete_sweep-o',
+                handler: this.handleDeleteBoard,
+                display: true,
+                disabled: ScrumBoardStore.getBoardList.size === 1,
+                permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.board.delete'],
+              }, {
+                display: true,
+                element: <SelectBoard
+                  createButton={false}
+                  onChange={(value) => {
+                    const selectedBoard = ScrumBoardStore.getBoardList.get(value);
+                    ScrumBoardStore.setSelectedBoard(value);
+                    ScrumBoardStore.setSwimLaneCode(selectedBoard.userDefaultBoard);
+                    this.refresh(selectedBoard);
+                  }}
+                />,
+              }]}
           />
         </Header>
         <Breadcrumb title={(
