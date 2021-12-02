@@ -244,7 +244,8 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         updateIssue(issueDTO,field,issueUpdateVO,customField,versionMap,specifyMap, false, triggerCarrierVO);
     }
 
-    private List<StatusFieldValueSettingDTO> convertCopyMemberFieldToDetail(List<StatusFieldValueSettingDTO> statusFieldValueSettings,
+    @Override
+    public List<StatusFieldValueSettingDTO> convertCopyMemberFieldToDetail(List<StatusFieldValueSettingDTO> statusFieldValueSettings,
                                                                             IssueDTO issue,
                                                                             String fieldType) {
         Set<Long> fieldIds =
@@ -840,7 +841,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                 .map(StatusFieldValueSettingDTO::getOptionId)
                 .collect(Collectors.toList());
         ObjectSchemeFieldDTO fieldDTO = objectSchemeFieldMapper.queryById(fieldId);
-        if (Boolean.FALSE.equals(fieldDTO.getSystem()) && !CollectionUtils.isEmpty(fieldOptionIds)) {
+        if (!Objects.isNull(fieldDTO) && Boolean.FALSE.equals(fieldDTO.getSystem()) && !CollectionUtils.isEmpty(fieldOptionIds)) {
             List<StatusFieldValueSettingDTO> result = new ArrayList<>();
             if (ObjectUtils.isEmpty(organizationId) || Objects.equals(0L, organizationId)) {
                 organizationId = ConvertUtil.getOrganizationId(projectId);

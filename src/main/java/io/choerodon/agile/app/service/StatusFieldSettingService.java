@@ -56,4 +56,8 @@ public interface StatusFieldSettingService {
                     Map<String, Object> specifyMap,
                     boolean doRuleNotice,
                     TriggerCarrierVO triggerCarrierVO);
+
+   List<StatusFieldValueSettingDTO> convertCopyMemberFieldToDetail(List<StatusFieldValueSettingDTO> statusFieldValueSettings,
+                                                                   IssueDTO issue,
+                                                                   String fieldType);
 }
