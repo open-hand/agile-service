@@ -13,8 +13,8 @@ const DimensionDataSet = () => ({
       options: new DataSet({
         selection: 'single',
         data: [
-          { meaning: '故事点', value: 'STORY' },
-          { meaning: '任务工时', value: 'TASK' },
+          { meaning: '故事点', value: 'STORY', code: 'agile.common.stroy.point' },
+          { meaning: '任务工时', value: 'TASK', code: 'agile.common.issue.work.time' },
         ],
       }),
     },

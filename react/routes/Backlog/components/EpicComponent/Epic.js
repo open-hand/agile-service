@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
+import { C7NFormat } from '@choerodon/master';
 import { Icon } from 'choerodon-ui/pro';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { epicApi } from '@/api';
@@ -54,7 +55,13 @@ class Epic extends Component {
       <div className="c7n-backlog-epic">
         <div className="c7n-backlog-epicContent">
           <div className="c7n-backlog-epicTitle">
-            <p style={{ fontWeight: 'bold' }}>史诗</p>
+            <p style={{ fontWeight: 'bold' }}>
+              <C7NFormat
+                intlPrefix="agile.common"
+                id="epic"
+              />
+
+            </p>
             <div className="c7n-backlog-epicRight">
               <p
                 className="primary"
@@ -75,7 +82,10 @@ class Epic extends Component {
                   });
                 }}
               >
-                创建史诗
+                <C7NFormat
+                  intlPrefix="agile.common"
+                  id="create.epic"
+                />
               </p>
               <Icon
                 type="first_page"

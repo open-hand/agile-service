@@ -79,6 +79,7 @@ class ScrumBoardHome extends Component {
         // defaultSearchVO.otherArgs.sprint = [sprintId];
         sprintId && set(defaultSearchVO, 'otherArgs.sprint', [sprintId]);
       }
+      !currentSprint && ScrumBoardStore.resetCurrentSprintExist();
       ScrumBoardStore.setSearchVO(defaultSearchVO);
       this.getBoard(!currentSprint);
     });
@@ -378,10 +379,14 @@ class ScrumBoardHome extends Component {
           <HeaderButtons
             items={[
               {
-                name: <C7NFormat
-                  intlPrefix="agile.common"
-                  id="create.issue"
-                />,
+                name: (
+                  <span>
+                    <C7NFormat
+                      intlPrefix="agile.common"
+                      id="create.issue"
+                    />
+                  </span>
+                ),
                 icon: 'playlist_add',
                 handler: this.handleCreateIssue,
                 display: true,
@@ -390,7 +395,14 @@ class ScrumBoardHome extends Component {
                 element: <ExpandAllButton />,
               }, {
                 display: true,
-                name: '更多操作',
+                name: (
+                  <span>
+                    <C7NFormat
+                      intlPrefix="agile.common"
+                      id="more.operate"
+                    />
+                  </span>
+                ),
                 groupBtnItems: [{
                   name: (
                     <span>

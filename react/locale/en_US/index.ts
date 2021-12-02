@@ -11,6 +11,8 @@ export * from './issueType';
 export * from './page';
 export * from './setting';
 export * from './stateMachine';
+export * from './performance';
+export * from './chart';
 
 const en_US = {
   refresh: 'Refresh',

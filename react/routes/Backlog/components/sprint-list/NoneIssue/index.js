@@ -4,21 +4,26 @@ import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import EmptyBacklog from './emptyBacklog.svg';
 import emptySprint from './emptySprint.svg';
 import './NoneIssue.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 function SprintNoIssue() {
+  const formatMessage = useFormatMessage('agile.backlog');
+
   return (
     <div className="c7n-noissue-wapper">
       <div style={{ display: 'flex', height: 100 }} className="c7n-noissue-notzero">
         <img style={{ width: 80, height: 70 }} alt="空sprint" src={emptySprint} />
         <div style={{ marginLeft: 20 }}>
-          <p>计划您的SPRINT</p>
-          <p>这是一个Sprint。将工作项拖拽至此来计划一个Sprint。</p>
+          <p>{formatMessage({ id: 'empty.sprint.data.title' })}</p>
+          <p>{formatMessage({ id: 'empty.sprint.data.description' })}</p>
         </div>
       </div>
     </div>
   );
 }
 function BacklogNoIssue() {
+  const formatMessage = useFormatMessage('agile.backlog');
+
   return (
     <div
       style={{
@@ -30,9 +35,9 @@ function BacklogNoIssue() {
     >
       <img style={{ width: 172 }} alt="emptybacklog" src={EmptyBacklog} />
       <div style={{ marginLeft: 40 }}>
-        <p style={{ color: 'var(--text-color3)', fontSize: '13px' }}>当前项目暂无待办事项</p>
+        <p style={{ color: 'var(--text-color3)', fontSize: '13px' }}>{formatMessage({ id: 'empty.backlog.data.title' })}</p>
         <p style={{ fontSize: 16, lineHeight: '28px', marginTop: 8 }}>
-          您可以在此创建并评估工作项，可通过上下拖动来规划工作项的排列顺序
+          {formatMessage({ id: 'empty.backlog.data.description' })}
         </p>
       </div>
     </div>

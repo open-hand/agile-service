@@ -11,6 +11,9 @@ export * from './issueType';
 export * from './page';
 export * from './setting';
 export * from './stateMachine';
+export * from './performance';
+export * from './chart';
+
 const zh_CN = {
   save: '保存',
   cancel: '取消',

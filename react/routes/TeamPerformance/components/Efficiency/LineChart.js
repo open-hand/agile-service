@@ -8,12 +8,14 @@ import EmptyBlock from '../EmptyBlock';
 import SwitchTabs from '../SwitchTabs';
 import Store from '../../stores';
 import './index.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const LineChart = observer(() => {
   const { lineDimensionDS, lineEfficiencyStoryDS, lineEfficiencyTaskDS } = useContext(Store);
   const [isLoading, setIsLoading] = useState(true);
   const [show, setShow] = useState(false);
   const [xDatas, setXdatas] = useState(null);
+  const formatMessage = useFormatMessage('agile.performance');
 
   useEffect(() => {
     queryLineData();
@@ -263,7 +265,7 @@ const LineChart = observer(() => {
     <Spin spinning={isLoading}>
       <div className="chart-container chart-container-line">
         <div className="chart-handle">
-          <span className="chart-title">{`${currentTab.substring(0, 2)}完成情况`}</span>
+          <span className="chart-title">{formatMessage({ id: 'story.completed' })}</span>
           <SwitchTabs
             dataSet={lineDimensionDS}
             onChange={handleChangeTab}

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import {
   Form, TextField, Modal, TextArea, DataSet,
 } from 'choerodon-ui/pro';
+import { C7NFormat } from '@choerodon/master';
 import { stores, Choerodon } from '@choerodon/boot';
 import { issueApi, fieldApi, epicApi } from '@/api';
 import { checkCanQuickCreate } from '@/utils/quickCreate';
@@ -106,7 +107,10 @@ const CreateEpic = (props) => {
 export default function openCreateEpic(props) {
   Modal.open({
     key: 'create-epic',
-    title: '创建史诗',
+    title: <C7NFormat
+      intlPrefix="agile.common"
+      id="create.epic"
+    />,
     okText: '创建',
     cancelText: '取消',
     drawer: true,

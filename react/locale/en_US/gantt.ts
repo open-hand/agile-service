@@ -5,7 +5,7 @@ const locale = {
   'view.assignee': 'Assignee View',
   'view.sprint': 'Sprint View',
   'view.epic': 'Epic View',
-  'work.time.count': 'Working Hours Count',
+  'work.time.count': 'Man-hour count',
   'issue.count': 'Issue Count',
   legend: 'Legend',
   day: 'Days',
