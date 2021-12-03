@@ -68,7 +68,7 @@ function SprintButton({
       onClick={() => { BacklogStore.handleDeleteSprint(data, isShowFeature); }}
     >
       <Menu.Item key="0">
-        删除sprint
+        {formatMessage({ id: 'agile.backlog.delete.sprint' })}
       </Menu.Item>
     </Menu>
   );

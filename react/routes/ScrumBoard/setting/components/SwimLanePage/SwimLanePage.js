@@ -63,7 +63,12 @@ class SwimLanePage extends Component {
               id="assignee"
             />
           </Option>
-          <Option value="participant">参与人</Option>
+          <Option value="participant">
+            <C7NFormat
+              intlPrefix="agile.systemField"
+              id="participant"
+            />
+          </Option>
           <Option value="swimlane_epic">
             <C7NFormat
               intlPrefix="agile.common"

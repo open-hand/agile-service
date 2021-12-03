@@ -9,10 +9,12 @@ import { mount, has, get } from '@choerodon/inject';
 import LINK_URL from '@/constants/LINK_URL';
 import useHasDevops from '@/hooks/useHasDevops';
 import useCheckCurrentService from './useCheckServerVerison';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const Release = withRouter(React.lazy(() => import('../Release')));
 const Publish = mount('agile:PublishVersion');
 const VersionList = ({ match }) => {
+  const formatMessage = useFormatMessage('agile.version');
   const hasDevops = useHasDevops();
   if (!hasDevops) {
     return <Release />;
@@ -24,9 +26,9 @@ const VersionList = ({ match }) => {
           <PageWrap
             noHeader={!loading && permission ? [] : ['choerodon.code.project.cooperation.project-version.ps.default']}
           >
-            <PageTab title="规划版本" route={LINK_URL.versionRelease} tabKey="choerodon.code.project.cooperation.project-version.ps.default" component={Release} />
+            <PageTab title={formatMessage({ id: 'route' })} route={LINK_URL.versionRelease} tabKey="choerodon.code.project.cooperation.project-version.ps.default" component={Release} />
 
-            <PageTab title="发布版本" route={LINK_URL.versionPublish} tabKey="choerodon.code.project.cooperation.project-version.ps.publish" component={() => Publish} />
+            <PageTab title={formatMessage({ id: 'publish.route' })} route={LINK_URL.versionPublish} tabKey="choerodon.code.project.cooperation.project-version.ps.publish" component={() => Publish} />
 
           </PageWrap>
         )
