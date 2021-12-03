@@ -26,7 +26,7 @@ const SearchArea: React.FC = () => {
   const {
     store, onClear, urlFilter, onClickSaveFilter, projectId, foldedHeight, hasMyAssigned, excludeQuickFilterIds,
   } = useContext(IssueSearchContext);
-  const formatMessage = useFormatMessage('agile.common');
+  const formatMessage = useFormatMessage();
   const { data: quickFilters } = useQuickFilters({ projectId }, { enabled: store.menuType === 'project' });
   const {
     isHasFilter, chosenFields, overflowLine, folded,
@@ -189,7 +189,8 @@ const SearchArea: React.FC = () => {
           {hasQuickFilterField ? (
             <div style={{ margin: '4px 5px' }}>
               <FlatSelect
-                placeholder="我的筛选"
+                // @ts-ignore
+                placeholder={formatMessage({ id: 'agile.search.myFilter' })}
                 value={myFilterSelectValue}
                 onChange={handlePersonalFilterChange}
                 popupCls={`${prefixCls}-search-hidden_my_filter`}
@@ -228,7 +229,7 @@ const SearchArea: React.FC = () => {
             funcType={'flat' as FuncType}
             className={`${prefixCls}-search-right-btn`}
           >
-            {formatMessage({ id: 'reset' })}
+            {formatMessage({ id: 'agile.common.reset' })}
 
           </Button>
         )}
@@ -239,7 +240,7 @@ const SearchArea: React.FC = () => {
               onClick={archiveFields.length > 0 ? undefined : onClickSaveFilter}
               className={`${prefixCls}-search-right-btn ${prefixCls}-search-right-saveBtn`}
             >
-              {formatMessage({ id: 'save.filter' })}
+              {formatMessage({ id: 'agile.common.save.filter' })}
             </Button>
           </Tooltip>
         )}
@@ -273,7 +274,7 @@ const SearchArea: React.FC = () => {
           funcType={'flat' as FuncType}
           color={'primary' as ButtonColor}
         >
-          {formatMessage({ id: 'reset' })}
+          {formatMessage({ id: 'agile.common.reset' })}
         </Button>
       </div>
     </>

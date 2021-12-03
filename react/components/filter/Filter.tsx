@@ -62,7 +62,7 @@ const Filter: React.FC<FilterProps> = ({
   selectFieldGroups,
   resetAll,
 }) => {
-  const formatMessage = useFormatMessage('agile.common');
+  const formatMessage = useFormatMessage();
   const [folded, setFolded] = useState<boolean | undefined>();
   const [overflowLine, setOverflowLine] = useState<boolean>(false);
   const filterRef = useRef<HTMLDivElement | null>(null);
@@ -124,7 +124,8 @@ const Filter: React.FC<FilterProps> = ({
     ...(systemFieldsWithoutAlwaysRender.length > 0 ? [{
       title: '系统字段',
       options: systemFieldsWithoutAlwaysRender.map((f) => ({
-        title: f.title,
+        // @ts-ignore
+        title: f.nameKey ? formatMessage({ id: f.nameKey }) : f.title,
         code: f.code,
       })),
     }] : []),
@@ -135,7 +136,7 @@ const Filter: React.FC<FilterProps> = ({
         code: f.code,
       })),
     },
-  ], [customFields, selectFieldGroups, systemFieldsWithoutAlwaysRender]);
+  ], [customFields, formatMessage, selectFieldGroups, systemFieldsWithoutAlwaysRender]);
   const renderRemoveButton = useCallback((field: IFilterField) => {
     if (!removeButton || alwaysRenderFields.includes(field.code)) {
       return null;
@@ -193,7 +194,9 @@ const Filter: React.FC<FilterProps> = ({
       'c7n-pro-select-flat': isSelect,
       'c7n-pro-cascader-flat': isSelect,
     }) : undefined;
-    const placeholder = isTime ? ['开始时间', '结束时间'] : field.title;
+    // @ts-ignore
+    // eslint-disable-next-line no-nested-ternary
+    const placeholder = isTime ? [formatMessage({ id: 'agile.search.startTime' }), formatMessage({ id: 'agile.search.endTime' })] : (field.nameKey ? formatMessage({ id: field.nameKey }) : field.title);
     return {
       element: <Field
         style={{
@@ -202,7 +205,8 @@ const Filter: React.FC<FilterProps> = ({
         render={flat ? renderFlatElement : render}
         mode="filter"
         field={field}
-        label={field.title}
+        // @ts-ignore
+        label={field.nameKey ? formatMessage({ id: field.nameKey }) : field.title}
         // @ts-ignore
         flat={flat}
         // @ts-ignore
@@ -241,7 +245,7 @@ const Filter: React.FC<FilterProps> = ({
       />,
       removeButton: renderRemoveButton(field),
     };
-  }, [flat, renderFlatElement, render, getEmptyValue, filter, renderRemoveButton, handleFilterChange]);
+  }, [flat, renderFlatElement, render, formatMessage, getEmptyValue, filter, renderRemoveButton, handleFilterChange]);
   const renderSelectField = useCallback(() => {
     if (groups.length === 0) {
       return null;
@@ -257,14 +261,14 @@ const Filter: React.FC<FilterProps> = ({
               display: 'flex', alignItems: 'center', fontWeight: 500,
             }}
             >
-              {formatMessage({ id: 'add.filter' })}
+              {formatMessage({ id: 'agile.common.add.filter' })}
               <Icon type="arrow_drop_down" />
             </span>
           </Button>
         ) : undefined}
       />
     );
-  }, [flat, groups, handleSelectChange, selected]);
+  }, [flat, formatMessage, groups, handleSelectChange, selected]);
   const resetFilter = useCallback(() => {
     onFilterChange({});
     if (resetAll) {
@@ -284,10 +288,10 @@ const Filter: React.FC<FilterProps> = ({
     }
     return (
       <Button className={styles.btn} funcType={'flat' as FuncType} onClick={resetFilter}>
-        {formatMessage({ id: 'reset' })}
+        {formatMessage({ id: 'agile.common.reset' })}
       </Button>
     );
-  }, [filter, resetFilter]);
+  }, [filter, formatMessage, resetFilter]);
 
   const renderFoldButton = useCallback(() => (
     <>
