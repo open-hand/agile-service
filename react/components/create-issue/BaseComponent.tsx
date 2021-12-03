@@ -546,11 +546,7 @@ const CreateIssueBase = observer(({
         return {
           ...res,
           ...{
-            [config.valueKey ?? field.fieldCode]: formatFieldDateValue({
-              fieldCode: field.fieldCode,
-              value: data[field.fieldCode],
-              format: DATETIME,
-            }),
+            [config.valueKey ?? field.fieldCode]: data[field.fieldCode],
           },
         };
       }, {}) ?? {};

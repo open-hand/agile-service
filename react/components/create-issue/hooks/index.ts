@@ -5,6 +5,7 @@ import dealWithVersionField from './dealWithVersionField';
 import dealWithDefaultZeroFields from './dealWithDefaultZeroFields';
 import dealWithSubBug from './dealWithSubBug';
 import dealWithLabel from './dealWithLabel';
+import dealWithFormatPredefinedDateFields from './dealWithFormatPredefinedDateFields';
 
 const hooks: IssueValueHook[] = [
   dealWithFeatureVO,
@@ -13,5 +14,6 @@ const hooks: IssueValueHook[] = [
   dealWithDefaultZeroFields,
   dealWithSubBug,
   dealWithLabel,
+  dealWithFormatPredefinedDateFields,
 ];
 export default hooks;
