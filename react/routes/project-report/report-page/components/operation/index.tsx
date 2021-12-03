@@ -16,7 +16,7 @@ import to, { linkUrl } from '@/utils/to';
 import {
   Box, Email, Image, Item, renderEmail,
 } from 'react-html-email';
-import uuidV4 from 'uuid/v4';
+import { v4 as uuidV4 } from 'uuid';
 import styles from './index.less';
 import { useProjectReportContext } from '../../context';
 import Export, { IExportProps } from '../export';
