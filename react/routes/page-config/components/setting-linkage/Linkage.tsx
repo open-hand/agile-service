@@ -222,7 +222,7 @@ const Linkage: React.FC<Props> = ({
             fieldId: field.id,
             fieldOptionId: key,
             cascadeFieldId: chosenField?.id,
-            defaultValue: !includes(selectTypes, chosenField?.fieldType) ? toJS(formatFieldDateValue({ fieldCode: chosenField?.fieldCode, value: defaultValue, format: DATETIME })) : undefined,
+            defaultValue: !includes(selectTypes, chosenField?.fieldType) ? toJS(formatFieldDateValue({ fieldCode: chosenField?.fieldCode!, value: defaultValue, format: DATETIME })) : undefined,
             hidden,
             required,
             fieldCascadeRuleOptionList: getFieldCascadeRuleOptionList(chosenField?.fieldType, fieldRelOptionList, defaultValue),

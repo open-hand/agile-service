@@ -16,6 +16,7 @@ import {
 export type ILocalField = {
   code: string,
   name: string,
+  nameKey?: string
   fieldType: IField['fieldType'],
   defaultShow?: boolean
   noDisplay?: boolean
@@ -38,7 +39,7 @@ export interface IssueSearchStoreProps {
   defaultSearchVO?: ISearchVO
   projectId?: string
   /** @default project */
-  menuType?: 'project' | 'org'| 'workbench'
+  menuType?: 'project' | 'org' | 'workbench'
   fieldConfigs?: { [key: string]: any }
 }
 function isInvalidValue(value: any) {

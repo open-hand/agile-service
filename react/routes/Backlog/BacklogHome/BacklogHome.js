@@ -283,11 +283,11 @@ class BacklogHome extends Component {
                 nav={(title) => (BacklogStore.chosenVersion !== 'all'
                   ? (
                     <>
-                      {title}
+                      <span>{title}</span>
                       <span className="c7n-backlog-side-tip" />
                     </>
                   )
-                  : title)}
+                  : <span>{title}</span>)}
               >
                 <Version
                   store={BacklogStore}
@@ -310,11 +310,11 @@ class BacklogHome extends Component {
                   nav={(title) => (BacklogStore.chosenEpic !== 'all'
                     ? (
                       <>
-                        {title}
+                        <span>{title}</span>
                         <span className="c7n-backlog-side-tip" />
                       </>
                     )
-                    : title)}
+                    : <span>{title}</span>)}
                 >
                   <Epic
                     refresh={this.refresh}
@@ -336,11 +336,11 @@ class BacklogHome extends Component {
                   nav={(title) => (BacklogStore.chosenFeature !== 'all'
                     ? (
                       <>
-                        {title}
+                        <span>{title}</span>
                         <span className="c7n-backlog-side-tip" />
                       </>
                     )
-                    : title)}
+                    : <span>{title}</span>)}
                 >
                   <Feature
                     refresh={this.refresh}

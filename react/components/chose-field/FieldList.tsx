@@ -4,9 +4,10 @@ import {
   CheckBox, Button, TextField, Icon, Tooltip,
 } from 'choerodon-ui/pro';
 import './FieldList.less';
-import { useDebounceFn } from 'ahooks';
+import { useDebounceFn, usePersistFn } from 'ahooks';
 import { IChosenFieldField, IUseChoseFieldProps } from './types';
 import ChoseFieldStore from './store';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const prefix = 'c7n-agile-choose-field-list';
 
@@ -21,6 +22,8 @@ interface Props {
 function FieldList({ store, closeMenu, onChose }: Props) {
   const currentOptionStatus = store.getCurrentOptionStatus;
   const [systemFields, customFields] = store.getFields;
+  const formatMessage = useFormatMessage();
+
   function handleChange(value: string | undefined, field: IChosenFieldField) {
     if (value) {
       store.addChosenFields(value, field);
@@ -35,6 +38,16 @@ function FieldList({ store, closeMenu, onChose }: Props) {
   const { run: handleInput } = useDebounceFn((value: string) => {
     store.setSearchVal(value);
   }, { wait: 540 });
+  const handleTooltipMouseEnter = usePersistFn(
+    (e, title: string) => {
+      console.log('handleTooltipMouseEnter', title);
+      return Tooltip.show(e.target, {
+        title,
+        placement: 'topLeft',
+      });
+    },
+  );
+  const handleTooltipMouseLeave = usePersistFn(() => Tooltip.hide());
   return (
     <div
       className={prefix}
@@ -48,7 +61,7 @@ function FieldList({ store, closeMenu, onChose }: Props) {
             store.setSearchVal(v);
           }}
           prefix={<Icon type="search" />}
-          placeholder="输入文字以进行过滤"
+          placeholder={formatMessage({ id: 'agile.common.search.placeholder' }) as string}
           clearButton
         />
       </div>
@@ -67,7 +80,7 @@ function FieldList({ store, closeMenu, onChose }: Props) {
             }
           }}
         >
-          全选
+          {formatMessage({ id: 'agile.common.all' })}
         </CheckBox>
         <Button
           style={{ display: currentOptionStatus !== 'NONE' ? 'inline-block' : 'none' }}
@@ -76,7 +89,7 @@ function FieldList({ store, closeMenu, onChose }: Props) {
             onChose && onChose(data, 'del');
           }}
         >
-          清除筛选项
+          {formatMessage({ id: 'agile.search.clear.filter' })}
         </Button>
       </div>
       <div className={`${prefix}-content`}>
@@ -85,21 +98,20 @@ function FieldList({ store, closeMenu, onChose }: Props) {
             <div className={`${prefix}-title`}>预定义字段</div>
             <div className={`${prefix}-list`}>
               {systemFields.map((field) => {
-                const { name, code } = field;
+                const { code, nameKey } = field;
+                const name = nameKey ? formatMessage({ id: nameKey as any, defaultMessage: field.name }) as string : field.name;
                 const disabled = typeof (field.immutableCheck) !== 'undefined';
                 return (
-                  <Tooltip title={name}>
-                    <div className={`${prefix}-item`} key={code}>
-                      <CheckBox
-                        value={code}
-                        disabled={disabled}
-                        checked={disabled ? field.immutableCheck : !!store.getChosenByCode(code)}
-                        onChange={(value) => handleChange(value, field)}
-                      >
-                        {name}
-                      </CheckBox>
-                    </div>
-                  </Tooltip>
+                  <div className={`${prefix}-item`} key={code} onMouseEnter={(e) => handleTooltipMouseEnter(e, name)} onMouseLeave={handleTooltipMouseLeave}>
+                    <CheckBox
+                      value={code}
+                      disabled={disabled}
+                      checked={disabled ? field.immutableCheck : !!store.getChosenByCode(code)}
+                      onChange={(value) => handleChange(value, field)}
+                    >
+                      {name}
+                    </CheckBox>
+                  </div>
 
                 );
               })}

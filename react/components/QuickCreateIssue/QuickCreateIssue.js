@@ -2,6 +2,7 @@
 /* eslint-disable react/state-in-constructor */
 import React, { Component, createRef } from 'react';
 import PropTypes from 'prop-types';
+import { C7NFormat } from '@choerodon/master';
 import { Choerodon } from '@choerodon/boot';
 import {
   Icon, Dropdown, Input, Menu,
@@ -338,7 +339,14 @@ class QuickCreateIssue extends Component {
               }}
               style={this.props.btnStyle || {}}
             >
-              {buttonShowText || '创建工作项'}
+              {buttonShowText || (
+              <span>
+                <C7NFormat
+                  intlPrefix="agile.common"
+                  id="create.issue"
+                />
+              </span>
+              )}
             </Button>
           )
         }
