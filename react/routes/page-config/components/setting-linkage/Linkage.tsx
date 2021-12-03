@@ -19,6 +19,8 @@ import styles from './Linkage.less';
 import FieldOptions from './components/field-options';
 import ChosenFields from './components/chosen-fields';
 import Rule from './components/Rule';
+import {DATETIME, FORMAT_FIELDS, MINUTE} from '@/constants/DATE_FORMAT';
+import { formatMinute } from '@/utils/formatDate';
 
 interface ColumnProps {
   title: string | ReactElement,
@@ -104,6 +106,13 @@ const Linkage: React.FC<Props> = ({
   const [cascadeRuleList, setCascadeRuleList] = useState<ICascadeRule[]>([]);
   const [hasOptions, setHasOptions] = useState<boolean>(true);
 
+  const formatDate = useCallback(({ fieldCode, defaultValue, format }) => {
+    if (fieldCode && defaultValue && includes(FORMAT_FIELDS, fieldCode)) {
+      return formatMinute({ value: defaultValue, format });
+    }
+    return defaultValue;
+  }, []);
+
   useEffect(() => {
     const getCascadeRuleList = async () => {
       setLoading(true);
@@ -128,7 +137,7 @@ const Linkage: React.FC<Props> = ({
             },
             fieldRelOptionList: (item.fieldCascadeRuleOptionList || [])?.map((option: { cascadeOptionId: string }) => ({ value: option.cascadeOptionId })),
             // eslint-disable-next-line no-nested-ternary
-            defaultValue: item.defaultValue || (includes(singleSelectTypes, item.cascadeFieldType) ? item.defaultIds && item.defaultIds[0] : (item.defaultIds?.length ? item.defaultIds : undefined)),
+            defaultValue: formatDate({ fieldCode: item.cascadeFieldCode, defaultValue: item.defaultValue }) || (includes(singleSelectTypes, item.cascadeFieldType) ? item.defaultIds && item.defaultIds[0] : (item.defaultIds?.length ? item.defaultIds : undefined)),
             hidden: item.hidden,
             required: item.required,
           });
@@ -220,7 +229,7 @@ const Linkage: React.FC<Props> = ({
             fieldId: field.id,
             fieldOptionId: key,
             cascadeFieldId: chosenField?.id,
-            defaultValue: !includes(selectTypes, chosenField?.fieldType) ? toJS(defaultValue) : undefined,
+            defaultValue: !includes(selectTypes, chosenField?.fieldType) ? toJS(formatDate({ fieldCode: chosenField?.fieldCode, defaultValue, format: DATETIME })) : undefined,
             hidden,
             required,
             fieldCascadeRuleOptionList: getFieldCascadeRuleOptionList(chosenField?.fieldType, fieldRelOptionList, defaultValue),
