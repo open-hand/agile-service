@@ -30,91 +30,109 @@ export function getSystemFields(excludeCodes = []) {
   }, {
     code: 'quickFilterIds',
     name: '快速筛选',
+    nameKey: 'agile.systemField.quickFilter',
     defaultShow: true,
     noDisplay: true,
   }, {
     code: 'contents',
     name: '概要',
+    nameKey: 'agile.systemField.summary',
     defaultShow: true,
     noDisplay: true,
   }, {
     code: 'issueTypeId',
     name: '工作项类型',
+    nameKey: 'agile.systemField.issueType',
     defaultShow: true,
     fieldType: 'multiple',
   }, {
     code: 'statusId',
     name: '状态',
+    nameKey: 'agile.systemField.status',
     defaultShow: true,
     fieldType: 'multiple',
   }, {
     code: 'assigneeId',
     name: '经办人',
+    nameKey: 'agile.systemField.assignee',
     defaultShow: true,
     fieldType: 'member',
   }, {
     code: 'reporterIds',
     name: '报告人',
+    nameKey: 'agile.systemField.reporter',
     defaultShow: false,
     fieldType: 'member',
   }, {
     code: 'sprint',
     name: '冲刺',
+    nameKey: 'agile.systemField.sprint',
     defaultShow: true,
     fieldType: 'multiple',
   }, {
     code: 'component',
     name: '模块',
+    nameKey: 'agile.systemField.component',
     defaultShow: false,
     fieldType: 'multiple',
   }, {
     code: 'label',
     name: '标签',
+    nameKey: 'agile.systemField.label',
     defaultShow: false,
     fieldType: 'multiple',
   }, {
     code: 'priorityId',
     name: '优先级',
+    nameKey: 'agile.systemField.priority',
     defaultShow: true,
     fieldType: 'multiple',
   }, {
     code: 'version',
     name: '版本',
+    nameKey: 'agile.systemField.version',
     // 不可选择，这个字段被废弃了，但是可以展示
     archive: true,
     fieldType: 'multiple',
   }, {
     code: 'fixVersion',
     name: '修复的版本',
+    nameKey: 'agile.systemField.fixVersion',
     fieldType: 'multiple',
   }, {
     code: 'influenceVersion',
     name: '影响的版本',
+    nameKey: 'agile.systemField.influenceVersion',
     fieldType: 'multiple',
   }, {
     code: 'epic',
     name: '史诗',
+    nameKey: 'agile.systemField.epic',
     defaultShow: !isInProgram(),
     fieldType: 'multiple',
   }, {
     code: 'feature',
     name: '特性',
+    nameKey: 'agile.systemField.feature',
     defaultShow: true,
     fieldType: 'multiple',
   }, {
     code: 'createDate',
     name: '创建时间',
+    nameKey: 'agile.systemField.createDate',
     defaultShow: false,
     fieldType: 'datetime',
   }, {
     code: 'updateDate',
     name: '更新时间',
+    nameKey: 'agile.systemField.updateDate',
     defaultShow: false,
     fieldType: 'datetime',
   },
   {
     code: 'estimatedStartTime',
     name: '预计开始时间',
+    nameKey: 'agile.systemField.estimatedStartTime',
     defaultShow: false,
     fieldType: 'datetime',
   },
@@ -122,57 +140,67 @@ export function getSystemFields(excludeCodes = []) {
     code: 'estimatedEndTime',
     name: '预计结束时间',
     defaultShow: false,
+    nameKey: 'agile.systemField.estimatedEndTime',
     fieldType: 'datetime',
   },
   {
     code: 'actualStartTime',
     name: '实际开始时间',
     defaultShow: false,
+    nameKey: 'agile.systemField.actualStartTime',
     fieldType: 'datetime',
   },
   {
     code: 'actualEndTime',
     name: '实际结束时间',
     defaultShow: false,
+    nameKey: 'agile.systemField.actualEndTime',
     fieldType: 'datetime',
   },
   {
     code: 'mainResponsibleIds',
     name: '主要负责人',
     defaultShow: false,
+    nameKey: 'agile.systemField.mainResponsible',
     fieldType: 'member',
   }, {
     code: 'environment',
     name: '环境',
+    nameKey: 'agile.systemField.environment',
     defaultShow: false,
     fieldType: 'multiple',
   },
   {
     code: 'creatorIds',
     name: '创建人',
+    nameKey: 'agile.systemField.creator',
     defaultShow: false,
     fieldType: 'member',
   }, {
     code: 'updatorIds',
     name: '更新人',
+    nameKey: 'agile.systemField.updater',
     defaultShow: false,
     fieldType: 'member',
   },
   {
     code: 'participantIds',
     name: '参与人',
+    nameKey: 'agile.systemField.participant',
     defaultShow: false,
     fieldType: 'multiMember',
   },
   {
     code: 'storyPointsNull',
     name: '故事点为空',
+    nameKey: 'agile.systemField.storyPointsNull',
     archive: true,
     defaultShow: false,
   },
   {
     code: 'remainingTimeNull',
     name: '剩余预估时间为空',
+    nameKey: 'agile.systemField.remainingTimeNull',
     archive: true,
     defaultShow: false,
   },
@@ -181,6 +209,7 @@ export function getSystemFields(excludeCodes = []) {
     systemFields.push({
       code: 'tags',
       name: 'Tag',
+      nameKey: 'agile.systemField.tag',
       defaultShow: false,
       fieldType: 'multiple',
     });
@@ -188,23 +217,27 @@ export function getSystemFields(excludeCodes = []) {
   systemFields.push({
     code: 'storyPoints',
     name: '故事点',
+    nameKey: 'agile.systemField.storyPoint',
     defaultShow: false,
     fieldType: 'number',
   });
   systemFields.push({
     code: 'remainingTime',
     name: '剩余预估时间',
+    nameKey: 'agile.systemField.remainingTime',
     defaultShow: false,
     fieldType: 'number',
   });
   systemFields.push({
     code: 'estimateTime',
     name: '原始预估时间',
+    nameKey: 'agile.systemField.estimateTime',
     defaultShow: false,
     fieldType: 'number',
   });
   return isInProgram() ? systemFields.filter((f) => !includes(excludeCodes, f.code)) : systemFields.filter((f) => f.code !== 'feature' && !includes(excludeCodes, f.code));
 }
+
 export function getSystemFieldsInStoryMap(excludeCodes = []) {
   const systemFields = [{
     code: 'issueIds',
@@ -289,6 +322,7 @@ export function getSystemFieldsInStoryMap(excludeCodes = []) {
   }, {
     code: 'feature',
     name: '特性',
+    nameCode: 'agile.common.feature',
     defaultShow: true,
     fieldType: 'multiple',
   }, {

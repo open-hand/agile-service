@@ -31,7 +31,7 @@ const Panel: React.FC<PaneProps> = ({
     >
       {!noHeader && (
         <div className={styles.panel_header}>
-          <div className={styles.panel_title}>{title}</div>
+          <div className={styles.panel_title}><span>{title}</span></div>
           <Icon
             className={styles.panel_close}
             type="first_page"

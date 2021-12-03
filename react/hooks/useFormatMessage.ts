@@ -6,13 +6,13 @@ import type {
   ILocaleGanttType, ILocaleIssueType, ILocaleIssueTypeType,
   ILocalePageType, ILocaleProjectReportType, ILocaleScrumBoardType,
   ILocaleSettingType, ILocaleStateMachineType,
-  ILocaleStoryMapType, ILocaleVersionType, ILocalePerformanceType, ILocaleChartType, ILocaleProjectOverview, ILocaleSearchType,
+  ILocaleStoryMapType, ILocaleVersionType, ILocalePerformanceType, ILocaleChartType, ILocaleProjectOverview, ILocaleSearchType, ILocaleSystemFieldType,
 } from '../locale/zh_CN';
 
 export type IAgilePrefixMapFormatMessageType = ILocaleBacklogType & ILocaleCommonType & ILocaleGanttType & ILocaleIssueType & ILocaleIssueTypeType &
   ILocalePageType & ILocaleProjectReportType & ILocaleScrumBoardType &
   ILocaleSettingType & ILocaleStateMachineType &
-  ILocaleStoryMapType & ILocaleVersionType & ILocalePerformanceType&ILocaleChartType&ILocaleProjectOverview & ILocaleSearchType
+  ILocaleStoryMapType & ILocaleVersionType & ILocalePerformanceType&ILocaleChartType&ILocaleProjectOverview & ILocaleSearchType&ILocaleSystemFieldType
 type ILocaleBaseObject = { [key: string]: string }
 export type IMasterLocaleCode = keyof typeof COMMON_ZH_CN
 // @ts-ignore

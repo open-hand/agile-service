@@ -50,6 +50,9 @@ const localeCommon = {
   'issue.work.time': '任务工时',
   'more.operate': '更多操作',
   'create.epic': '创建史诗',
+  'search.placeholder': '请输入搜索内容',
+  all: '全选',
+  inverse: '反选',
 } as const;
 const exportCommon = localeAppendPrefixObjectKey({ intlPrefix: 'common' as const, intlObject: localeCommon });
 type ILocaleCommonType = {

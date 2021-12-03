@@ -1,11 +1,42 @@
 import { localeAppendPrefixObjectKey } from '@/utils/locale';
 
-const locale = {
-
+const localeField = {
+  quickFilter: '快速筛选',
+  summary: '概要',
+  issueType: '工作项类型',
+  status: '状态',
+  assignee: '经办人',
+  reporter: '报告人',
+  sprint: '冲刺',
+  component: '模块',
+  label: '标签',
+  priority: '优先级',
+  version: '版本',
+  fixVersion: '修复的版本',
+  influenceVersion: '影响的版本',
+  epic: '史诗',
+  feature: '特性',
+  createDate: '创建时间',
+  updateDate: '更新时间',
+  estimatedStartTime: '预计开始时间',
+  estimatedEndTime: '预计结束时间',
+  actualStartTime: '实际开始时间',
+  actualEndTime: '实际结束时间',
+  mainResponsible: '主要负责人',
+  environment: '环境',
+  creator: '创建人',
+  updater: '更新人',
+  participant: '参与人',
+  storyPointsNull: '故事点为空',
+  remainingTimeNull: '剩余预估时间为空',
+  tag: 'Tag',
+  storyPoint: '故事点',
+  remainingTime: '剩余预估时间',
+  estimateTime: '原始预估时间',
 } as const;
-const exportComponents = localeAppendPrefixObjectKey({ intlPrefix: 'scrumBoard' as const, intlObject: locale });
-type ILocaleScrumBoardType = {
-  ['agile.components']: Array<keyof typeof locale>[number]
+const exportSystemField = localeAppendPrefixObjectKey({ intlPrefix: 'systemField' as const, intlObject: localeField });
+type ILocaleSystemFieldType = {
+  ['agile.systemField']: Array<keyof typeof localeField>[number]
 }
-// export { exportComponents };
-// export type { ILocaleScrumBoardType };
+export { exportSystemField };
+export type { ILocaleSystemFieldType };

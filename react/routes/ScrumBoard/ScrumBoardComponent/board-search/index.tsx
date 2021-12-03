@@ -18,7 +18,7 @@ interface Props {
   //   issueSearchStore: IssueSearchStore,
 }
 function getSystemFields() {
-  const systemFields = originGetSystemFields(['quickFilterIds', 'issueIds', 'sprint', 'assigneeId', 'priorityId']);
+  const systemFields = originGetSystemFields(['quickFilterIds', 'issueIds', 'sprint', 'assigneeId', 'priorityId']) as any;
   systemFields.unshift(...[{
     code: 'quickFilterIds',
     name: '快速筛选',

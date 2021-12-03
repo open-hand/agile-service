@@ -6,6 +6,7 @@ interface IChosenFieldField extends Omit<Partial<IField>, 'fieldType'> {
     id?: string,
     code: string,
     name: string,
+    nameKey?:string,
     defaultShow?: boolean,
     fieldType?: string,
     noDisplay?: boolean,

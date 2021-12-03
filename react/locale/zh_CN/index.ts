@@ -15,6 +15,7 @@ export * from './performance';
 export * from './chart';
 export * from './projectOverview';
 export * from './search';
+export * from './components';
 
 const zh_CN = {
   save: '保存',

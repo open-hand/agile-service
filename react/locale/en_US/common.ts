@@ -50,6 +50,9 @@ const localeCommon = {
   'issue.work.time': 'Man-hour',
   'more.operate': 'More Actions',
   'create.epic': 'Create Epic',
+  'search.placeholder': 'Search',
+  all: 'All',
+  inverse: 'Inverse',
 } as const;
 const exportCommon = localeAppendPrefixObjectKey({ intlPrefix: 'common' as const, intlObject: localeCommon });
 type ILocaleCommonType = {

@@ -5,6 +5,11 @@ const locale = {
   endTime: 'End Time',
   myFilter: 'My Filter',
   search: 'Search',
+  'clear.filter': 'Clear',
+  'common.option': 'Common filters',
+  'only.me.issue': 'Only my issues',
+  'my.star': 'Started issues',
+  'my.handle': 'Assigned issues',
 } as const;
 const exportSearch = localeAppendPrefixObjectKey({ intlPrefix: 'search' as const, intlObject: locale });
 type ILocaleSearchType = {
