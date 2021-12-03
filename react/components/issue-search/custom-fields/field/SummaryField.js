@@ -2,8 +2,10 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { TextField, Icon } from 'choerodon-ui/pro';
 import './SummaryField.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 function SummaryField({ value, onChange }) {
+  const formatMessage = useFormatMessage('agile.search');
   return (
     <div className="c7nagile-SummaryField">
       <TextField
@@ -13,7 +15,7 @@ function SummaryField({ value, onChange }) {
         style={{
           width: 180, marginRight: 5,
         }}
-        placeholder="请输入搜索内容"
+        placeholder={formatMessage({ id: 'search' })}
         valueChangeAction="input"
       />
     </div>

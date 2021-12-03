@@ -10,6 +10,7 @@ export interface ISystemField {
   fieldType: IFieldType,
   required?: boolean,
   system: true
+  nameKey?: string
 }
 interface IFieldOption {
   id: string

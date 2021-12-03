@@ -14,6 +14,7 @@ export * from './stateMachine';
 export * from './performance';
 export * from './chart';
 export * from './projectOverview';
+export * from './search';
 
 const en_US = {
   refresh: 'Refresh',
