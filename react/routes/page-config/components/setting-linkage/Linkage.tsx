@@ -19,7 +19,7 @@ import styles from './Linkage.less';
 import FieldOptions from './components/field-options';
 import ChosenFields from './components/chosen-fields';
 import Rule from './components/Rule';
-import {DATETIME, FORMAT_FIELDS, MINUTE} from '@/constants/DATE_FORMAT';
+import { DATETIME, FORMAT_FIELDS } from '@/constants/DATE_FORMAT';
 import { formatMinute } from '@/utils/formatDate';
 
 interface ColumnProps {

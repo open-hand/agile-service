@@ -29,7 +29,7 @@ import { getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { ICascadeLinkage } from '@/routes/page-config/components/setting-linkage/Linkage';
 import useDeepMemo from '@/hooks/useDeepMemo';
-import { MINUTE } from '@/constants/DATE_FORMAT';
+import { DATETIME, MINUTE } from '@/constants/DATE_FORMAT';
 import WSJF from './components/wsjf';
 import IssueLink from './components/issue-link';
 import hooks from './hooks';
@@ -37,6 +37,7 @@ import hooks from './hooks';
 import getFieldConfig from '@/components/field-pro/layouts/create';
 import { insertField } from './utils';
 import useFormatMessage from '@/hooks/useFormatMessage';
+import { formatFieldDateValue } from '@/utils/formatDate';
 
 const { AppState } = stores;
 interface CreateIssueBaseCallbackData {
@@ -301,12 +302,19 @@ const CreateIssueBase = observer(({
     }
     // 通过外部设置的默认值优先
     if (defaultValues && defaultValues[field.fieldCode]) {
-      return defaultValues[field.fieldCode];
+      // 格式化预定义的时间字段
+      return formatFieldDateValue({
+        fieldCode: field.fieldCode,
+        value: defaultValues[field.fieldCode],
+      });
     }
     // 页面字段级联rule的默认值
     const ruleDefaultValue = getRuleDefaultValue(field, rules);
     if (Array.isArray(ruleDefaultValue) ? ruleDefaultValue.length : ruleDefaultValue) {
-      return ruleDefaultValue;
+      return formatFieldDateValue({
+        fieldCode: field.fieldCode,
+        value: ruleDefaultValue,
+      });
     }
     if (preset) {
       if (preset.type === 'object') {
@@ -538,7 +546,11 @@ const CreateIssueBase = observer(({
         return {
           ...res,
           ...{
-            [config.valueKey ?? field.fieldCode]: data[field.fieldCode],
+            [config.valueKey ?? field.fieldCode]: formatFieldDateValue({
+              fieldCode: field.fieldCode,
+              value: data[field.fieldCode],
+              format: DATETIME,
+            }),
           },
         };
       }, {}) ?? {};
