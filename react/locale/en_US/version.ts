@@ -1,6 +1,8 @@
 import { localeAppendPrefixObjectKey } from '@/utils/locale';
 
 const locale = {
+  route: 'Version',
+  'publish.route': 'Release Versions',
   create: 'Create Version',
   status: 'Status',
   'state.date': 'Start Date',

@@ -220,7 +220,7 @@ const StoryMapHome = observer(() => {
               <LoadingHiddenWrap>
                 <EmptyPage
                   image={epicPic}
-                  description="用户故事地图是以史诗为基础，根据版本控制进行管理规划"
+                  description={formatMessage({ id: 'empty.data.description' })}
                 />
               </LoadingHiddenWrap>
             )

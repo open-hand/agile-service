@@ -1,6 +1,8 @@
 import { localeAppendPrefixObjectKey } from '@/utils/locale';
 
 const locale = {
+  route: '规划版本',
+  'publish.route': '发布版本',
   create: '创建规划版本',
   status: '版本状态',
   'state.date': '开始日期',
