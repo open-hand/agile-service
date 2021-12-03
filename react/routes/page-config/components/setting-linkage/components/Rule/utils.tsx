@@ -4,7 +4,7 @@ import {
 import React from 'react';
 import { set } from 'lodash';
 import { getAgileFields } from '@/components/field-pro';
-import {FORMAT_FIELDS} from "@/constants/DATE_FORMAT";
+import { FORMAT_FIELDS } from '@/constants/DATE_FORMAT';
 
 export interface IChosenField {
   name: string,
@@ -58,7 +58,7 @@ export const renderDefaultValue = ({ field, name = 'defaultValue', fieldOptions 
   } = field;
 
   // 预计开始/结束时间、实际开始/结束时间精确到分
-  const code = FORMAT_FIELDS.includes(field.fieldCode) ? field.fieldCode : field.code ?? field.fieldCode as string;
+  const code = field.fieldCode && FORMAT_FIELDS.includes(field.fieldCode) ? field.fieldCode : field.code ?? field.fieldCode as string;
   return getAgileFields([], [], {
     code,
     fieldType: fieldType as any,
