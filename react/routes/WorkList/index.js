@@ -6,6 +6,7 @@ import {
 import { useTabActiveKey } from '@choerodon/components';
 import LINK_URL from '@/constants/LINK_URL';
 import useFormatMessage from '@/hooks/useFormatMessage';
+import './index.less';
 
 const Backlog = withRouter(React.lazy(() => import('../Backlog')));
 const Issue = withRouter(React.lazy(() => (import('../Issue/IssueIndex'))));
@@ -18,6 +19,7 @@ const WorkList = ({ match }) => {
     <PageWrap
       noHeader={[]}
       onChange={setActiveKey}
+      className="c7n-agile-workList-PageWrap"
     >
       <PageTab title={formatMessage({ id: 'agile.backlog.route' })} route={LINK_URL.workListBacklog} tabKey="backlog" component={Backlog} />
       <PageTab title={formatMessage({ id: 'agile.issue.route' })} route={LINK_URL.workListIssue} tabKey="issue" component={Issue} />
