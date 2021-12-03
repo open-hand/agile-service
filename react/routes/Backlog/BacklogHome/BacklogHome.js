@@ -235,7 +235,7 @@ class BacklogHome extends Component {
         </Header>
         <Breadcrumb />
         {/* 盖住tab下面的边框 */}
-        <div style={{
+        {/* <div style={{
           width: '100%',
           position: 'absolute',
           background: 'white',
@@ -244,7 +244,7 @@ class BacklogHome extends Component {
           left: '97px',
           zIndex: 3,
         }}
-        />
+        /> */}
 
         <Content style={{
           display: 'flex',
