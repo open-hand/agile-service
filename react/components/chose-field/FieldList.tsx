@@ -39,13 +39,10 @@ function FieldList({ store, closeMenu, onChose }: Props) {
     store.setSearchVal(value);
   }, { wait: 540 });
   const handleTooltipMouseEnter = usePersistFn(
-    (e, title: string) => {
-      console.log('handleTooltipMouseEnter', title);
-      return Tooltip.show(e.target, {
-        title,
-        placement: 'topLeft',
-      });
-    },
+    (e, title: string) => Tooltip.show(e.target, {
+      title,
+      placement: 'topLeft',
+    }),
   );
   const handleTooltipMouseLeave = usePersistFn(() => Tooltip.hide());
   return (
@@ -127,18 +124,16 @@ function FieldList({ store, closeMenu, onChose }: Props) {
                 const { name, code } = field;
                 const disabled = typeof (field.immutableCheck) !== 'undefined';
                 return (
-                  <Tooltip title={name}>
-                    <div className={`${prefix}-item`} key={code}>
-                      <CheckBox
-                        value={code}
-                        disabled={disabled}
-                        checked={disabled ? field.immutableCheck : !!store.getChosenByCode(code)}
-                        onChange={(value) => handleChange(value, field)}
-                      >
-                        {name}
-                      </CheckBox>
-                    </div>
-                  </Tooltip>
+                  <div className={`${prefix}-item`} key={code} onMouseEnter={(e) => handleTooltipMouseEnter(e, name)} onMouseLeave={handleTooltipMouseLeave}>
+                    <CheckBox
+                      value={code}
+                      disabled={disabled}
+                      checked={disabled ? field.immutableCheck : !!store.getChosenByCode(code)}
+                      onChange={(value) => handleChange(value, field)}
+                    >
+                      {name}
+                    </CheckBox>
+                  </div>
                 );
               })}
             </div>
