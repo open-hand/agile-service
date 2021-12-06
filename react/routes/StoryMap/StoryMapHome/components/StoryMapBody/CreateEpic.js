@@ -5,6 +5,7 @@ import { Choerodon } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
 import { issueApi, fieldApi } from '@/api';
 import { checkCanQuickCreate } from '@/utils/quickCreate';
+import openCreateIssue from '@/components/create-issue';
 import Card from './Card';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 import clickOutSide from '../../../../../components/CommonComponent/ClickOutSide';
@@ -33,6 +34,14 @@ class CreateEpic extends Component {
       const epicType = StoryMapStore.getEpicType;
       const defaultPriority = StoryMapStore.getDefaultPriority;
       const preEpic = StoryMapStore.getEpicList[index - 1];
+      const rankVO = {
+        projectId: getProjectId(),
+        // objectVersionNumber: source.epicRankObjectVersionNumber, // 乐观锁
+        // issueId: source.issueId,
+        type: 'epic',
+        before: false, // 是否拖动到第一个
+        referenceIssueId: preEpic ? preEpic.issueId : 0,
+      };
       const req = {
         projectId: getProjectId(),
         epicName: value,
@@ -41,19 +50,30 @@ class CreateEpic extends Component {
         issueTypeId: epicType.id,
         priorityCode: `priority-${defaultPriority.id}`,
         priorityId: defaultPriority.id,
-        rankVO: {
-          projectId: getProjectId(),
-          // objectVersionNumber: source.epicRankObjectVersionNumber, // 乐观锁
-          // issueId: source.issueId,
-          type: 'epic',
-          before: false, // 是否拖动到第一个
-          referenceIssueId: preEpic ? preEpic.issueId : 0,
-        },
+        rankVO,
       };
       if (!await checkCanQuickCreate(epicType.id)) {
-        Choerodon.prompt('该工作项类型含有必填选项，请使用创建工作项弹框创建');
-        this.canAdd = true;
-        StoryMapStore.removeAddingEpic();
+        if (!openCreateIssue) {
+          Choerodon.prompt('该工作项类型含有必填选项，请使用创建工作项弹框创建');
+          this.canAdd = true;
+          StoryMapStore.removeAddingEpic();
+          return;
+        }
+        Choerodon.prompt('请填写标注的必填字段');
+        openCreateIssue({
+          defaultValues: {
+            summary: value,
+            epicName: value,
+          },
+          defaultTypeId: epicType.id,
+          onCreate: (res) => {
+            this.canAdd = true;
+            onCreate({ ...res, epicName: value });
+          },
+          extraSubmitValue: {
+            rankVO,
+          },
+        });
         return;
       }
       issueApi.create(req).then((res) => {

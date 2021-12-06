@@ -83,6 +83,7 @@ export interface CreateIssueBaseProps {
   showSelectProject?: boolean,
   /** 额外的需要必填的字段建 */
   extendRequiredCodes?: string[]
+  extraSubmitValue?: any
 }
 const defaultDataSet = new DataSet({
   autoCreate: true,
@@ -217,6 +218,7 @@ const CreateIssueBase = observer(({
   showSelectProject = false,
   extendRequiredCodes = [],
   menuType = 'project',
+  extraSubmitValue,
 }: CreateIssueBaseProps) => {
   const formatMessage = useFormatMessage('agile.common');
   // formatMessage({}
@@ -567,7 +569,7 @@ const CreateIssueBase = observer(({
       values = hooks.reduce((result, hook) => hook(result, data), values);
       try {
         await onSubmit({
-          data: values, fieldList, fileList,
+          data: { ...values, ...(extraSubmitValue || {}) }, fieldList, fileList,
         });
       } catch (error) {
         const res = onAfterSubmitError && await onAfterSubmitError({
