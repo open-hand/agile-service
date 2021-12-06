@@ -1,6 +1,6 @@
 // 进度与效率-饼图
 import React, {
-  useContext, useEffect, useState, useRef,
+  useContext, useEffect, useState, useRef, useMemo,
 } from 'react';
 import {
   observer,
@@ -15,6 +15,7 @@ import EmptyBlock from '../EmptyBlock';
 import SwitchTabs from '../SwitchTabs';
 import Store from '../../stores';
 import './index.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 function compare(pro) {
   return (obj1, obj2) => {
@@ -31,6 +32,13 @@ function compare(pro) {
 
 const PieChart = observer(() => {
   const { dimensionDS, efficiencyStoryDS, efficiencyTaskDS } = useContext(Store);
+  const currentTabKey = dimensionDS.current.get('tab');
+  const formatMessage = useFormatMessage();
+  const currentTab = useMemo(() => {
+    const code = dimensionDS.getField('tab').getOptions().find((item) => item.get('value') === currentTabKey)?.get('code');
+    return code ? formatMessage({ id: code }) : dimensionDS.getField('tab').getText(currentTabKey);
+  }, [currentTabKey, dimensionDS, formatMessage]);
+
   const [pieData, setPieData] = useState(null);
   const [colorsArr, setColorsArr] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -119,8 +127,6 @@ const PieChart = observer(() => {
   };
 
   const getOpts = () => {
-    const currentTabKey = dimensionDS.current.get('tab');
-    const currentTab = dimensionDS.getField('tab').getText(currentTabKey);
     const nextPieData = pieData.filter((item) => item.percent >= 2);
     const otherData = {
       name: '其它',
@@ -193,9 +199,6 @@ const PieChart = observer(() => {
     };
   };
 
-  const currentTabKey = dimensionDS.current.get('tab');
-  const currentTab = dimensionDS.getField('tab').getText(currentTabKey);
-
   return (
     <Spin spinning={isLoading}>
       <div className="chart-container chart-container-pie">
@@ -214,7 +217,7 @@ const PieChart = observer(() => {
             <div className="pie-chart-container">
               <div className="pie-chart">
                 <div className="pie-chart-main">
-                  <span className="chart-title">{`${currentTab}分布`}</span>
+                  <span className="chart-title">{formatMessage({ id: 'agile.performance.distribution' }, { name: currentTab })}</span>
                   <ReactEchartsCore
                     echarts={echarts}
                     option={getOpts()}
@@ -270,13 +273,13 @@ const PieChart = observer(() => {
           )
         }
         {
-        (Array.isArray(pieData) && pieData.length === 0) && (
-          <EmptyBlock
-            height={450}
-            des="当前暂无数据"
-          />
-        )
-      }
+          (Array.isArray(pieData) && pieData.length === 0) && (
+            <EmptyBlock
+              height={450}
+              des="当前暂无数据"
+            />
+          )
+        }
       </div>
     </Spin>
   );

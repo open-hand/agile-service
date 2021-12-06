@@ -34,9 +34,21 @@ const localeField = {
   remainingTime: '剩余预估时间',
   estimateTime: '原始预估时间',
 } as const;
+
+const localeColumnField = {
+  lastUpdateDate: '最近更新时间',
+  spentWorkTime: '已耗费时间',
+  allEstimateTime: '当前预估时间',
+  deviationRate: '偏差率',
+  cumulativeWorkTime: '历史累计工时',
+  workTime: '工时',
+  epicSelfName: '史诗名称',
+} as const;
 const exportSystemField = localeAppendPrefixObjectKey({ intlPrefix: 'systemField' as const, intlObject: localeField });
+const exportColumnField = localeAppendPrefixObjectKey({ intlPrefix: 'columnField' as const, intlObject: localeColumnField });
 type ILocaleSystemFieldType = {
+  ['agile.columnField']: Array<keyof typeof localeColumnField>[number]
   ['agile.systemField']: Array<keyof typeof localeField>[number]
 }
-export { exportSystemField };
+export { exportSystemField, exportColumnField };
 export type { ILocaleSystemFieldType };

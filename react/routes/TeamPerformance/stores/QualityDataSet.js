@@ -12,8 +12,8 @@ const BugRankHandleDataSet = () => ({
       options: new DataSet({
         selection: 'single',
         data: [
-          { meaning: '责任人', value: 'dev' },
-          { meaning: '创建人', value: 'test' },
+          { meaning: '责任人', code: 'agile.systemField.mainResponsible', value: 'dev' },
+          { meaning: '创建人', code: 'agile.common.creator', value: 'test' },
         ],
       }),
     },
