@@ -5588,6 +5588,23 @@
         </foreach>
     </update>
 
+    <select id="queryChildrenIssue" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+         select
+           ai.issue_id,
+            CASE WHEN ai.type_code = 'bug'
+            THEN ai.relate_issue_id
+            ELSE ai.parent_issue_id END as parent_issue_id
+         from agile_issue ai
+         where
+          ai.project_id = #{projectId}
+          and ai.type_code in ('sub_task', 'bug')
+          and ai.issue_id in
+          <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+              #{issueId}
+          </foreach>
+          and (ai.parent_issue_id is not null or ai.relate_issue_id is not null)
+    </select>
+
     <sql id="queryAssigneeIssue">
         <if test="workItemSearchVO.assigneeFilter.contains('assignee')">
             select
