@@ -90,6 +90,7 @@ const IssueTable: React.FC<IssueTableProps> = ({
     listLayoutColumns, fields, onSummaryClick, handleColumnResize: onColumnResize,
   }), [fields, listLayoutColumns, onColumnResize, onSummaryClick]);
   const visibleColumns = useMemo(() => columns.filter((column) => column.display), [columns]);
+  console.log('visibleColumns', visibleColumns);
   const checkValuesRef = useRef<string[]>();
   checkValuesRef.current = props.checkValues;
   const checkboxColumn = useMemo(() => checkBoxColumn({

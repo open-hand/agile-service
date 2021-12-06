@@ -2,7 +2,7 @@
 import {
   observable, action, computed, toJS,
 } from 'mobx';
-import { includes } from 'lodash';
+import { includes, omit, sortBy } from 'lodash';
 import { has } from '@choerodon/inject';
 import { isInProgram } from '@/utils/program';
 
@@ -237,184 +237,20 @@ export function getSystemFields(excludeCodes = []) {
   });
   return isInProgram() ? systemFields.filter((f) => !includes(excludeCodes, f.code)) : systemFields.filter((f) => f.code !== 'feature' && !includes(excludeCodes, f.code));
 }
-
+/**
+ * 故事地图的筛选  不可进行保存筛选 里面有个归档字段
+ * @param {*} excludeCodes
+ * @returns
+ */
 export function getSystemFieldsInStoryMap(excludeCodes = []) {
-  const systemFields = [{
-    code: 'issueIds',
-    name: 'issueId',
-    defaultShow: true,
-    noDisplay: true, // 不需要展示，仅作为一个筛选项
-  }, {
-    code: 'starBeacon',
-    name: 'starBeacon',
-    defaultShow: true,
-    noDisplay: true, // 不需要展示，仅作为一个筛选项
-  }, {
-    code: 'myAssigned',
-    name: 'myAssigned',
-    defaultShow: true,
-    noDisplay: true, // 不需要展示，仅作为一个筛选项
-  }, {
-    code: 'userId',
-    name: 'userId',
-    defaultShow: true,
-    noDisplay: true, // 不需要展示，仅作为一个筛选项
-  }, {
-    code: 'quickFilterIds',
-    name: '快速筛选',
-    defaultShow: true,
-    noDisplay: true,
-  }, {
-    code: 'contents',
-    name: '概要',
-    defaultShow: true,
-    noDisplay: true,
-  }, {
-    code: 'sprint',
-    name: '冲刺',
-    defaultShow: true,
-    fieldType: 'multiple',
-  }, {
-    code: 'version',
-    name: '版本',
-    defaultShow: true,
-    fieldType: 'multiple',
-  }, {
-    code: 'issueTypeId',
-    name: '工作项类型',
-    defaultShow: true,
-    fieldType: 'multiple',
-  }, {
-    code: 'statusId',
-    name: '状态',
-    defaultShow: true,
-    fieldType: 'multiple',
-  }, {
-    code: 'assigneeId',
-    name: '经办人',
-    defaultShow: true,
-    fieldType: 'member',
-  }, {
-    code: 'reporterIds',
-    name: '报告人',
-    defaultShow: false,
-    fieldType: 'member',
-  }, {
-    code: 'component',
-    name: '模块',
-    defaultShow: false,
-    fieldType: 'multiple',
-  }, {
-    code: 'label',
-    name: '标签',
-    defaultShow: false,
-    fieldType: 'multiple',
-  }, {
-    code: 'priorityId',
-    name: '优先级',
-    defaultShow: true,
-    fieldType: 'multiple',
-  }, {
-    code: 'epic',
-    name: '史诗',
-    defaultShow: !isInProgram(),
-    fieldType: 'multiple',
-  }, {
-    code: 'feature',
-    name: '特性',
-    nameCode: 'agile.common.feature',
-    defaultShow: true,
-    fieldType: 'multiple',
-  }, {
-    code: 'createDate',
-    name: '创建时间',
-    defaultShow: false,
-    fieldType: 'datetime',
-  }, {
-    code: 'updateDate',
-    name: '更新时间',
-    defaultShow: false,
-    fieldType: 'datetime',
-  },
-  {
-    code: 'estimatedStartTime',
-    name: '预计开始时间',
-    defaultShow: false,
-    fieldType: 'datetime',
-  },
-  {
-    code: 'estimatedEndTime',
-    name: '预计结束时间',
-    defaultShow: false,
-    fieldType: 'datetime',
-  },
-  {
-    code: 'actualStartTime',
-    name: '实际开始时间',
-    defaultShow: false,
-    fieldType: 'datetime',
-  },
-  {
-    code: 'actualEndTime',
-    name: '实际结束时间',
-    defaultShow: false,
-    fieldType: 'datetime',
-  },
-  {
-    code: 'mainResponsibleIds',
-    name: '主要负责人',
-    defaultShow: false,
-    fieldType: 'member',
-  }, {
-    code: 'environment',
-    name: '环境',
-    defaultShow: false,
-    fieldType: 'multiple',
-  },
-  {
-    code: 'creatorIds',
-    name: '创建人',
-    defaultShow: false,
-    fieldType: 'member',
-  }, {
-    code: 'updatorIds',
-    name: '更新人',
-    defaultShow: false,
-    fieldType: 'member',
-  },
-  {
-    code: 'participantIds',
-    name: '参与人',
-    defaultShow: false,
-    fieldType: 'multiMember',
-  }];
-  if (has('agile:PublishVersion')) {
-    systemFields.push({
-      code: 'tags',
-      name: 'Tag',
-      defaultShow: false,
-      fieldType: 'multiple',
-    });
-  }
-  systemFields.push({
-    code: 'storyPoints',
-    name: '故事点',
-    defaultShow: false,
-    fieldType: 'number',
-  });
-  systemFields.push({
-    code: 'remainingTime',
-    name: '剩余预估时间',
-    defaultShow: false,
-    fieldType: 'number',
-  });
-  systemFields.push({
-    code: 'estimateTime',
-    name: '原始预估时间',
-    defaultShow: false,
-    fieldType: 'number',
-  });
-  return isInProgram() ? systemFields.filter((f) => !includes(excludeCodes, f.code)) : systemFields.filter((f) => f.code !== 'feature' && !includes(excludeCodes, f.code));
+  const fields = getSystemFields([...excludeCodes, 'influenceVersion', 'fixVersion']);
+  const archiveField = { ...omit(fields.find((field) => field.code === 'version'), 'archive'), defaultShow: true };
+
+  fields.push(archiveField);
+  const sortFieldValue = {
+    sprint: 10, version: 15, statusId: 20, assigneeId: 25, priorityId: 30, feature: 35, epic: 36,
+  };
+  return sortBy(fields.filter((i) => !i.archive), (field) => sortFieldValue[field.code] || 120);
 }
 class IssueStore {
   // 当前加载状态

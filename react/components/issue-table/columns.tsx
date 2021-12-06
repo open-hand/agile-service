@@ -7,6 +7,7 @@ import { CheckBox, Tooltip } from 'choerodon-ui/pro';
 import TypeTag from '@/components/TypeTag';
 import { systemColumnsMap, getCustomColumn } from './baseColumns';
 import './index.less';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 export const checkBoxColumn = ({
   checkValues, data, handleCheckChange, handleCheckAllChange, checkValuesRef,
@@ -50,23 +51,8 @@ export const expandColumn = {
 };
 
 const getColumnsMap = ({ onSummaryClick }) => {
-  const columnMap = new Map([['summary', {
-    title: <Tooltip title="概要">概要</Tooltip>,
-    dataIndex: 'summary',
-    width: 400,
-    fixed: true,
-    sortable: true,
-    render: ({ rowData }) => (
-      <>
-        <TypeTag data={get(rowData, 'issueTypeVO')} style={{ marginRight: 5, marginTop: -2 }} />
-        <Tooltip mouseEnterDelay={0.5} placement="topLeft" title={`工作项概要： ${get(rowData, 'summary')}`}>
-          <span role="none" className="c7n-agile-table-cell-click" onClick={() => onSummaryClick(rowData)}>
-            {get(rowData, 'summary')}
-          </span>
-        </Tooltip>
-      </>
-    ),
-  }]]);
+  const summaryColumn = systemColumnsMap.get('summary')!;
+  const columnMap = new Map([['summary', { ...summaryColumn, render: ({ rowData }) => summaryColumn.render(rowData, get, { onClick: () => onSummaryClick(rowData) }) }]]);
   systemColumnsMap.forEach((column, key) => {
     if (!columnMap.has(key)) {
       columnMap.set(key, { ...column, render: column.render ? ({ rowData }) => column.render(rowData) : undefined });
@@ -74,7 +60,11 @@ const getColumnsMap = ({ onSummaryClick }) => {
   });
   return columnMap;
 };
-
+const IntlField: React.FC<{ children: React.ReactElement, column: any }> = ({ children, column }) => {
+  const formatMessage = useFormatMessage();
+  const name = column.titleKey ? formatMessage({ id: column.titleKey }) : column.title; // , defaultMessage: column.title
+  return React.isValidElement(name) ? name : <Tooltip title={name}>{name}</Tooltip>;
+};
 export function getTableColumns({
   listLayoutColumns, fields, onSummaryClick, handleColumnResize,
 }) {
@@ -92,6 +82,7 @@ export function getTableColumns({
       const column = columnsMap.has(code) ? columnsMap.get(code) : getCustom(field);
       res.push({
         ...column,
+        title: <IntlField column={column} />,
         code,
         display: layoutColumn.display,
         resizable: true,
