@@ -1,7 +1,9 @@
 package io.choerodon.agile.app.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import io.choerodon.agile.api.validator.SprintValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueUpdateVO;
@@ -22,16 +24,21 @@ import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
+import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
+import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -65,6 +72,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
     private static final String[] FIELD_LIST_NO_RANK = new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, RELATE_ISSUE_ID};
     private static final String FEATURE_ID = "featureId";
     private static final String ERROR_TRANSFER_PROJECT_ILLEGAL = "error.transfer.project.illegal";
+    private static final String ISSUE_PROJECT_BATCH_MOVE = "agile-issue-project-batch-move";
     @Autowired
     private BaseFeignClient baseFeignClient;
     @Autowired
@@ -131,7 +139,8 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
     private FieldValueService fieldValueService;
     @Autowired
     private IssueSprintRelMapper issueSprintRelMapper;
-
+    @Autowired
+    private MessageClientC7n messageClientC7n;
     @Override
     public void issueProjectMove(Long projectId, Long issueId, Long targetProjectId, JSONObject jsonObject) {
         if (ObjectUtils.isEmpty(targetProjectId)) {
@@ -189,6 +198,161 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
                     }).collect(Collectors.toList());
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    @Async
+    public void issueProjectBatchMove(Long projectId,
+                                      Long targetProjectId,
+                                      JSONObject jsonObject,
+                                      ServletRequestAttributes requestAttributes,
+                                      String encryptType) {
+        EncryptContext.setEncryptType(encryptType);
+        RequestContextHolder.setRequestAttributes(requestAttributes);
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        String messageCode = ISSUE_PROJECT_BATCH_MOVE + "-" + projectId;
+        List<Long> issueIds = parsingIssueIdList(jsonObject);
+        // 检验传入的issueIds
+        issueIds = validateIssueIds(projectId, issueIds);
+        if (CollectionUtils.isEmpty(issueIds)) {
+            return;
+        }
+        // 处理问题类型-状态映射
+        Map<Long, Map<Long, Map<Long, Long>>> issueTypeStatusMap = parsingIssueTypeStatusMap(jsonObject);
+        BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
+        try {
+            batchUpdateFieldStatusVO.setLastProcess(0.0);
+            batchUpdateFieldStatusVO.setStatus("doing");
+            batchUpdateFieldStatusVO.setKey(messageCode);
+            batchUpdateFieldStatusVO.setUserId(userId);
+            batchUpdateFieldStatusVO.setProcess(0.0);
+            messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+            if (ObjectUtils.isEmpty(targetProjectId)) {
+                throw new CommonException("error.transfer.project.is.null");
+            }
+            // 两个是否是在同一个组织下,并且项目群项目、普通项目、运维项目不能相互转换
+            ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+            ProjectVO targetProjectVO = baseFeignClient.queryProject(targetProjectId).getBody();
+            if (!Objects.equals(projectVO.getOrganizationId(), targetProjectVO.getOrganizationId())) {
+                throw new CommonException("error.transfer.across.organizations");
+            }
+            List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds, null);
+            double incrementalValue = 1.0 / (issueDTOS.size() == 0 ? 1 : issueDTOS.size());
+            int currentProgress = 1;
+            for (IssueDTO issueDTO : issueDTOS) {
+                JSONObject issueJSONObject = buildJSONObject(issueDTO, issueTypeStatusMap, jsonObject);
+                handlerIssueValue(projectVO, issueDTO.getIssueId(), targetProjectVO, issueJSONObject);
+                double progress = currentProgress / issueDTOS.size() * 1.0;
+                if (progress % incrementalValue == 0) {
+                    batchUpdateFieldStatusVO.setProcess(progress);
+                    messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+                }
+                currentProgress++;
+            }
+            //发送websocket
+            batchUpdateFieldStatusVO.setStatus("success");
+            batchUpdateFieldStatusVO.setProcess(1.0);
+        } catch (Exception e) {
+            batchUpdateFieldStatusVO.setStatus("failed");
+            batchUpdateFieldStatusVO.setError(e.getMessage());
+            throw new CommonException("update field failed, exception: {}", e);
+        } finally {
+            messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+        }
+    }
+
+    private List<Long> validateIssueIds(Long projectId, List<Long> issueIds) {
+        Set<Long> allIssueIds = new HashSet<>();
+        allIssueIds.addAll(issueIds);
+        // 传入的父级issue移动时需要把所有子级带上，issueIds中没有的需要补充上
+        Set<Long> childIssues = issueMapper.queryChildrenIds(projectId, null, issueIds, null);
+        if (!CollectionUtils.isEmpty(childIssues)) {
+            allIssueIds.addAll(childIssues);
+        }
+        // 传入的issueIds中选中了子任务没有带上父级任务需要把子任务去掉
+        List<IssueDTO> childDTOS = issueMapper.queryChildrenIssue(projectId, issueIds);
+        if(!CollectionUtils.isEmpty(childDTOS)){
+            for (IssueDTO childDTO : childDTOS) {
+                if(!allIssueIds.contains(childDTO.getParentIssueId())){
+                    allIssueIds.remove(childDTO.getIssueId());
+                }
+            }
+        }
+        return new ArrayList<>(allIssueIds);
+    }
+
+    @Override
+    public Map<String, List<String>> issueTypeStatusMap(Long projectId, List<Long> issueIds) {
+        Map<String, List<String>> result = new HashMap<>();
+        issueIds = validateIssueIds(projectId, issueIds);
+        if (!CollectionUtils.isEmpty(issueIds)) {
+            List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds, null);
+            Map<Long, List<Long>> map = new HashMap<>();
+            for (IssueDTO issueDTO : issueDTOS) {
+                List<Long> statusIds = map.getOrDefault(issueDTO.getIssueTypeId(), new ArrayList<>());
+                if (!statusIds.contains(issueDTO.getStatusId())) {
+                    statusIds.add(issueDTO.getStatusId());
+                }
+                map.put(issueDTO.getIssueTypeId(), statusIds);
+            }
+            result = EncryptionUtils.encryptMap(map);
+        }
+        return result;
+    }
+
+    private JSONObject buildJSONObject(IssueDTO issueDTO, Map<Long, Map<Long, Map<Long, Long>>> issueTypeStatusMap, JSONObject json) {
+        JSONObject jsonObject = json.getJSONObject("issueInfo");
+        if (ObjectUtils.isEmpty(jsonObject)) {
+            jsonObject = new JSONObject();
+        }
+        jsonObject.put("issueId", issueDTO.getIssueId());
+        Long issueTypeId = issueDTO.getIssueTypeId();
+        Map<Long, Map<Long, Long>> newIssueTypeMap = issueTypeStatusMap.get(issueTypeId);
+        if (!ObjectUtils.isEmpty(newIssueTypeMap)) {
+            issueTypeId = newIssueTypeMap.keySet().stream().findFirst().get();
+        }
+        Long statusId = issueDTO.getStatusId();
+        Map<Long, Long> statusIdMap = newIssueTypeMap.getOrDefault(issueTypeId, new HashMap<>());
+        if (!CollectionUtils.isEmpty(statusIdMap) && !ObjectUtils.isEmpty(statusIdMap.get(statusId))) {
+            statusId = statusIdMap.get(statusId);
+        }
+        jsonObject.put("issueTypeId", issueTypeId);
+        jsonObject.put("statusId", statusId);
+        return jsonObject;
+    }
+
+    private Map<Long, Map<Long, Map<Long, Long>>> parsingIssueTypeStatusMap(JSONObject jsonObject) {
+        Object json = jsonObject.get("issueTypeStatusMap");
+        if (ObjectUtils.isEmpty(json)) {
+            return new HashMap<>();
+        }
+        Map<String, Map<String, Map<String, String>>> issueTypeStatusStringMap = JSONObject.parseObject(JSON.toJSONString(json), new TypeReference<Map<String, Map<String, Map<String, String>>>>() {
+        });
+        Map<Long, Map<Long, Map<Long, Long>>> issueTypeStatusMap = new HashMap<>();
+        for (Map.Entry<String, Map<String, Map<String, String>>> entry : issueTypeStatusStringMap.entrySet()) {
+            Map<Long, Map<Long, Long>> statusMap = new HashMap<>();
+            Map<String, Map<String, String>> value = entry.getValue();
+            for (Map.Entry<String, Map<String, String>> statusEntry : value.entrySet()) {
+                Map<String, String> entryValue = statusEntry.getValue();
+                Map<Long, Long> map = new HashMap<>();
+                for (Map.Entry<String, String> stringEntry : entryValue.entrySet()) {
+                    map.put(Long.valueOf(EncryptionUtils.decrypt(stringEntry.getKey())), Long.valueOf(EncryptionUtils.decrypt(stringEntry.getValue())));
+                }
+                statusMap.put(Long.valueOf(EncryptionUtils.decrypt(statusEntry.getKey())), map);
+            }
+            issueTypeStatusMap.put(Long.valueOf(EncryptionUtils.decrypt(entry.getKey())), statusMap);
+        }
+        return issueTypeStatusMap;
+    }
+
+    private List<Long> parsingIssueIdList(JSONObject jsonObject) {
+        // 获取issueIds
+        Object issueList = jsonObject.get("issueIds");
+        if (ObjectUtils.isEmpty(issueList)) {
+            return new ArrayList<>();
+        }
+        List<String> issueIdStrings = JSONObject.parseObject(JSON.toJSONString(issueList), new TypeReference<List<String>>(){});
+        return EncryptionUtils.decryptList(issueIdStrings, EncryptionUtils.BLANK_KEY, null);
     }
 
     private boolean checkProjectCategory(List<String> codes, String typeCode) {

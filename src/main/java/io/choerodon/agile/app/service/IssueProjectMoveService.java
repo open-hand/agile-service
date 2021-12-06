@@ -3,8 +3,10 @@ package io.choerodon.agile.app.service;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.ObjectSchemeFieldVO;
 import io.choerodon.agile.api.vo.ProjectVO;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author zhaotianxin
@@ -37,4 +39,26 @@ public interface IssueProjectMoveService {
      * @return
      */
     List<ObjectSchemeFieldVO> listLostField(Long projectId, Long issueId, Long targetProject, Long issueTypeId);
+
+    /**
+     * 跨项目批量移动
+     * @param projectId
+     * @param targetProjectId
+     * @param jsonObject
+     * @param requestAttributes
+     * @param encryptType
+     */
+    void issueProjectBatchMove(Long projectId,
+                               Long targetProjectId,
+                               JSONObject jsonObject,
+                               ServletRequestAttributes requestAttributes,
+                               String encryptType);
+
+    /**
+     * 根据issueIds查询并统计问题类型下的状态
+     * @param projectId
+     * @param issueIds
+     * @return
+     */
+    Map<String, List<String>> issueTypeStatusMap(Long projectId, List<Long> issueIds);
 }

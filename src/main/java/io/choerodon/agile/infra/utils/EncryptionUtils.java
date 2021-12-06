@@ -320,7 +320,15 @@ public class EncryptionUtils {
                         List list = jsonToList(valueNode, aClass);
                         field.set(object, list);
                     } else if (field.getType() == Object.class){
-                        field.set(object, valueNode.textValue());
+                        if (valueNode.isArray()) {
+                            List<Object> objects = new ArrayList<>(valueNode.size());
+                            for (JsonNode node : valueNode) {
+                                objects.add(node.textValue());
+                            }
+                            field.set(object, objects);
+                        } else {
+                            field.set(object, valueNode.textValue());
+                        }
                     }
                 } catch (Exception e) {
                     LOGGER.error("reflect error: {}", e);
