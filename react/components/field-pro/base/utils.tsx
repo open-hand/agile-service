@@ -100,7 +100,7 @@ function getProcessFieldConfig<T extends IComponentFCWithClassObject, C extends 
     input: { props: { maxLength: 100, valueChangeAction: 'input' } },
     text: {
       props: {
-        autoSize: true, rows: 3, maxLength: 255, valueChangeAction: 'input',
+        autoSize: true, rows: 3, maxLength: 255,
       },
     },
     url: {},
