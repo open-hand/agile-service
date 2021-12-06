@@ -134,6 +134,7 @@ class Log extends Component {
               <Icon
                 role="none"
                 type="edit-o"
+                style={{ marginRight: 12 }}
                 onClick={() => {
                   this.setState({
                     editLogId: worklog.logId,
