@@ -10,6 +10,7 @@ import { issueApi, fieldApi } from '@/api';
 import { TypeTag } from '@/components';
 import { fields2Map } from '@/utils/defaultValue';
 import { useStoryMapContext } from '@/routes/StoryMap/StoryMapHome';
+import openCreateIssue from '@/components/create-issue';
 import Card from '../Card';
 import './CreateStory.less';
 import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapStore';
@@ -118,12 +119,39 @@ class CreateStory extends Component {
         testResponsibleId: fieldsMap.get('testResponsible')?.defaultValue,
       };
 
-      if (!await checkCanQuickCreate(storyType.id)) {
-        Choerodon.prompt('该工作项类型含有必填选项，请使用创建工作项弹框创建');
-        this.canAdd = true;
-        this.setState({
-          adding: false,
-          value: '',
+      if (!await checkCanQuickCreate(currentTypeId)) {
+        if (!openCreateIssue) {
+          Choerodon.prompt('该工作项类型含有必填选项，请使用创建工作项弹框创建');
+          this.canAdd = true;
+          this.setState({
+            adding: false,
+            value: '',
+          });
+          return;
+        }
+        Choerodon.prompt('请填写标注的必填字段');
+        openCreateIssue({
+          defaultValues: {
+            summary: value.trim(),
+            epicName: currentTypeId === 'issue_epic' ? value.trim() : undefined,
+            epic: epic.issueId,
+            fixVersion: propsVersionIssueRelVOList?.length && propsVersionIssueRelVOList[0].versionId,
+            sprint: sprintId || fieldsMap.get('sprint')?.defaultValue,
+          },
+          defaultTypeId: currentTypeId,
+          defaultFeature: {
+            summary: feature.issueId === 'none' ? '' : feature.summary,
+            issueId: feature.issueId === 'none' ? 0 : feature.issueId,
+          },
+          onCreate: (res) => {
+            this.setState({
+              adding: false,
+              value: '',
+            });
+            this.canAdd = true;
+            const { versionIssueRelVOList: storyMapVersionDTOList } = res;
+            onCreate({ ...res, storyMapVersionDTOList, storyMapSprintList: [{ sprintId: sprintId || fieldsMap.get('sprint')?.defaultValue || 0 }] });
+          },
         });
         return;
       }
@@ -244,10 +272,7 @@ class CreateStory extends Component {
               <div className="c7nagile-StoryMap-CreateStory-btn">
                 {issueTypes.length > 0 ? <span role="none" className="primary" style={{ cursor: 'pointer' }} onClick={this.handleAddStoryClick}>新建工作项</span>
                   : <Tooltip title="工作项类型中所有故事类型被禁用，无法新建工作项"><span role="none" style={{ color: 'rgba(0, 0, 0, 0.26)' }}>新建工作项</span></Tooltip>}
-
-                {' '}
                 或
-                {' '}
                 <span role="none" className="primary" style={{ cursor: 'pointer' }} onClick={this.handleSourceClick}>从未规划列表引入</span>
               </div>
             )
