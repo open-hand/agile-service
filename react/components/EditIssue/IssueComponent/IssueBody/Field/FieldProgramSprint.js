@@ -57,11 +57,12 @@ import SelectTeamSprints from '@/components/select/select-teamSprint';
             formKey="sprint"
             onSubmit={this.updateIssueSprint}
             initValue={sprintIds}
-            editor={(
+            editor={({ hideEditor }) => (
               <SelectTeamSprints
                 label="活跃冲刺"
                 mode="multiple"
                 projectId={store.projectId}
+                onBlur={hideEditor}
                 // getPopupContainer={() => document.getElementById('detail')}
                 allowClear
                 showCheckAll={false}
@@ -86,28 +87,28 @@ import SelectTeamSprints from '@/components/select/select-teamSprint';
             >
               <div>
                 {
-                    closedPiSprints.concat(activePiSprints).length === 0 ? '无' : (
+                  closedPiSprints.concat(activePiSprints).length === 0 ? '无' : (
+                    <div>
                       <div>
-                        <div>
-                          {map(closedPiSprints, 'sprintName').join(' , ')}
-                        </div>
-                        <div>
-                          {activePiSprints.map((sprint) => (
-                            <div
-                              style={{
-                                color: '#4d90fe',
-                                fontSize: '13px',
-                                lineHeight: '20px',
-                                marginTop: closedPiSprints.length ? 5 : 0,
-                              }}
-                            >
-                              {sprint.sprintName}
-                            </div>
-                          ))}
-                        </div>
+                        {map(closedPiSprints, 'sprintName').join(' , ')}
                       </div>
-                    )
-                  }
+                      <div>
+                        {activePiSprints.map((sprint) => (
+                          <div
+                            style={{
+                              color: '#4d90fe',
+                              fontSize: '13px',
+                              lineHeight: '20px',
+                              marginTop: closedPiSprints.length ? 5 : 0,
+                            }}
+                          >
+                            {sprint.sprintName}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                }
               </div>
             </Tooltip>
           </TextEditToggle>

@@ -5,11 +5,12 @@ import { ICascadeLinkage } from '@/routes/page-config/components/setting-linkage
 import useProjectKey from './useProjectKey';
 
 export interface IssueCreateFieldsConfig {
+  issueTypeCode?: string
   issueTypeId: string
   projectId?: string
 }
 export default function useIssueCreateFields(config: IssueCreateFieldsConfig): [UseQueryResult<IssueCreateFields[]>, UseQueryResult<{ template?: string }>, UseQueryResult<ICascadeLinkage[]>, UseQueryResult<any[]>] {
-  const { projectId, issueTypeId } = config;
+  const { projectId, issueTypeId, issueTypeCode } = config;
   const fieldsKey = useProjectKey({ key: ['issue-create-fields', { issueTypeId }], projectId });
   const templateKey = useProjectKey({ key: ['issue-create description-template', { issueTypeId }], projectId });
   const pageCascadeRuleList = useProjectKey({ key: ['issue-create pageCascadeRuleList', { issueTypeId }], projectId });
@@ -23,6 +24,15 @@ export default function useIssueCreateFields(config: IssueCreateFieldsConfig): [
       pageCode: 'agile_issue_create',
     }, projectId),
     initialData: [] as IssueCreateFields[],
+    select: (data: any[]) => (issueTypeCode === 'feature' ? data.map((field) => {
+      // 问题类型为特性时特殊处理某些字段
+      switch (field.fieldCode) {
+        case 'sprint':
+          return { ...field, fieldType: 'multiple', fieldCode: 'subProjectSprint' };
+        default:
+          return field;
+      }
+    }) : data),
     keepPreviousData: true,
     enabled: !!issueTypeId,
   }, {

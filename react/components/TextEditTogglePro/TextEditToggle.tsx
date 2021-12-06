@@ -69,7 +69,7 @@ const TextEditToggle: React.FC<Props> = ({
       if (containerRef.current) {
         containerRef.current.blur();
       }
-      const { popupTask, trigger } = editorRef.current as unknown as TriggerField<any>;
+      const { popupTask, trigger } = editorRef.current as unknown as TriggerField<any> || {};
       // 如果属于下拉框类型组件 则立刻关闭下拉框 避免飘逸现象
       if (popupTask && trigger) {
         popupTask.cancel();

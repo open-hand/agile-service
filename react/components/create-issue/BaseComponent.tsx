@@ -263,7 +263,7 @@ const CreateIssueBase = observer(({
 
   const [{ data: fields, isFetching: isFieldsLoading }, {
     data: templateData,
-  }, { data: cascadeRuleList = [] }] = useIssueCreateFields({ issueTypeId, projectId });
+  }, { data: cascadeRuleList = [] }] = useIssueCreateFields({ issueTypeId, issueTypeCode, projectId });
   const fieldValueArr = usePersistFn((field: IssueCreateFields) => {
     let value = castArray(getValue(dataSet, field.fieldCode));
     const preset = presets.get(field.fieldCode);
@@ -681,6 +681,12 @@ const CreateIssueBase = observer(({
       case 'sprint': {
         return {
           disabled: issueTypeCode === 'sub_task',
+        };
+      }
+      case 'subProjectSprint': {
+        return {
+          piId: getValue(dataSet, 'pi'),
+          teamIds: getValue(dataSet, 'subProject'),
         };
       }
       case 'summary': {
