@@ -6,17 +6,17 @@ import { toJS } from 'mobx';
 import { Button, Modal } from 'choerodon-ui/pro';
 import { omit } from 'lodash';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
+import fileSaver from 'file-saver';
+import {
+  Box, Email, Image, Item, renderEmail,
+} from 'react-html-email';
+import { v4 as uuidV4 } from 'uuid';
 import {
   projectReportApi, IProjectReportCreate, IProjectReportUpdate, fileApi,
 } from '@/api';
 import { getProjectId } from '@/utils/common';
 // import JsPDF from 'jspdf';
-import fileSaver from 'file-saver';
 import to, { linkUrl } from '@/utils/to';
-import {
-  Box, Email, Image, Item, renderEmail,
-} from 'react-html-email';
-import uuidV4 from 'uuid/v4';
 import styles from './index.less';
 import { useProjectReportContext } from '../../context';
 import Export, { IExportProps } from '../export';
