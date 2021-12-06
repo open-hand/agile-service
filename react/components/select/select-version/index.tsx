@@ -55,7 +55,7 @@ const SelectVersion: React.FC<SelectVersionProps> = forwardRef(({
       return newVersion;
     },
     tooltip: true,
-    paging: hasRule,
+    paging: !!(hasRule && fieldId),
   }), [afterLoad, args, dataRef, fieldId, hasRule, hasUnassign, projectId, request, statusArr, valueField]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
