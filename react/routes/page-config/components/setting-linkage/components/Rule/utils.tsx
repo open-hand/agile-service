@@ -2,7 +2,8 @@ import {
   Select,
 } from 'choerodon-ui/pro';
 import React from 'react';
-import { set } from 'lodash';
+import { set, assign } from 'lodash';
+import moment from 'moment';
 import { getAgileFields } from '@/components/field-pro';
 import { FORMAT_FIELDS } from '@/constants/DATE_FORMAT';
 
@@ -59,15 +60,21 @@ export const renderDefaultValue = ({ field, name = 'defaultValue', fieldOptions 
 
   // 预计开始/结束时间、实际开始/结束时间精确到分
   const code = field.fieldCode && FORMAT_FIELDS.includes(field.fieldCode) ? field.fieldCode : field.code ?? field.fieldCode as string;
+  const fieldProps = {
+    name,
+    fieldOptions: fieldOptions.map((i) => ({ id: i.value, value: i.meaning, enabled: true })),
+  };
+  if (field.fieldCode && ['estimatedEndTime', 'actualEndTime'].includes(field.fieldCode)) {
+    assign(fieldProps, {
+      defaultPickerValue: moment().endOf('d'),
+    });
+  }
   return getAgileFields([], [], {
     code,
     fieldType: fieldType as any,
     // 初次进来没有选项显示值时不显示
     // display: !!fieldOptions.filter((i) => i.meaning).length,
     outputs: ['element'],
-    props: {
-      name,
-      fieldOptions: fieldOptions.map((i) => ({ id: i.value, value: i.meaning, enabled: true })),
-    },
+    props: fieldProps,
   })[0][0];
 };
