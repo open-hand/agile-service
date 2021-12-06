@@ -58,7 +58,7 @@ import { issueApi } from '@/api';
                   backgroundColor: `${colour}1F`,
                   color: colour,
                   borderRadius: '2px',
-                  padding: '0 8px',
+                  padding: '0 4px',
                   display: 'inline-block',
                 }}
               >
