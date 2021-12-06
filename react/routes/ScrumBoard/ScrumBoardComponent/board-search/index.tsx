@@ -115,7 +115,11 @@ const BoardSearch: React.FC<Props> = ({ onRefresh, saveStore, excludeQuickFilter
     saveStore(issueSearchStore);
   }, [issueSearchStore, saveStore]);
   const handleClickSaveFilter = () => {
-    openSaveFilterModal({ searchVO: issueSearchStore.getCustomFieldFilters(), onOk: issueSearchStore.loadMyFilterList });
+    openSaveFilterModal({
+      searchVO: issueSearchStore.getCustomFieldFilters(),
+      onOk: issueSearchStore.loadMyFilterList,
+      hiddenDefault: true,
+    });
   };
   useUnmount(() => { localPageCacheStore.setItem('scrumBoard.searchVO', issueSearchStore.getCustomFieldFilters(true)); });
   return (

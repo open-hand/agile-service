@@ -12,6 +12,7 @@ interface Props {
   projectId?: string
   searchVO: any,
   onOk: () => void
+  hiddenDefault?: boolean,
 }
 async function checkName(value: string, projectId?: string) {
   const data: boolean = await personalFilterApi.project(projectId).checkName(value);
@@ -23,7 +24,7 @@ async function checkName(value: string, projectId?: string) {
 }
 const SaveFilterModal: React.FC<Props> = (props) => {
   const {
-    modal, searchVO, onOk, projectId,
+    modal, searchVO, onOk, projectId, hiddenDefault = false,
   } = props;
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
@@ -45,7 +46,7 @@ const SaveFilterModal: React.FC<Props> = (props) => {
     }
     const value = dataSet.toData()[0] as any;
     const data = {
-      default: value.default,
+      default: hiddenDefault ? false : value.default,
       name: value.filterName,
       filterJson: JSON.stringify(searchVO),
       personalFilterSearchVO: searchVO,
@@ -76,7 +77,7 @@ const SaveFilterModal: React.FC<Props> = (props) => {
           dataSet.current?.getField('filterName')?.checkValidity();
         }}
       />
-      <CheckBox name="default">设为默认</CheckBox>
+      {hiddenDefault ? null : <CheckBox name="default">设为默认</CheckBox>}
     </Form>
   );
 };
