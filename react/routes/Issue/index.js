@@ -295,8 +295,9 @@ const Issue = observer(({ cached, updateCache }) => {
     openSaveFilterModal({ searchVO: issueSearchStore.getCustomFieldFilters(), onOk: issueSearchStore.loadMyFilterList });
   };
   const closeBatchModal = useCallback(() => {
+    issueSearchStore.setBatchAction(undefined);
     tableProps.setCheckValues([]);
-  }, [tableProps]);
+  }, [issueSearchStore, tableProps]);
   const handleOpenCreateIssue = usePersistFn(() => {
     openCreateIssue({
       onCreate: handleCreateIssue,
@@ -430,6 +431,9 @@ const Issue = observer(({ cached, updateCache }) => {
             onClickEdit={() => {
               issueSearchStore.setBatchAction('edit');
             }}
+            onClickMove={() => {
+              issueSearchStore.setBatchAction('move');
+            }}
             close={() => {
               closeBatchModal();
             }}
@@ -445,6 +449,10 @@ const Issue = observer(({ cached, updateCache }) => {
               closeBatchModal();
             }}
             onEdit={() => {
+              closeBatchModal();
+              refresh();
+            }}
+            onMove={() => {
               closeBatchModal();
               refresh();
             }}
