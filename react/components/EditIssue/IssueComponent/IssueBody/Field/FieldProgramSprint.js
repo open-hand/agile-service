@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Tooltip } from 'choerodon-ui/pro';
-import { map } from 'lodash';
+import { difference, map } from 'lodash';
 import { featureApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectTeamSprints from '@/components/select/select-teamSprint';
@@ -14,6 +14,11 @@ import SelectTeamSprints from '@/components/select/select-teamSprint';
     const issue = store.getIssue;
     const { issueId } = issue;
     const activePiSprints = issue.activePiSprints || [];
+    const previousSprintIds = activePiSprints.map((s) => s.sprintId);
+    const isEqualValueArray = difference(previousSprintIds, sprintIds || []).length === 0;
+    if (isEqualValueArray) {
+      return;
+    }
     const originSprintIds = activePiSprints.map((sprint) => sprint.sprintId);
     const addSprints = (sprintIds || []).filter((teamId) => !originSprintIds.includes(teamId));
     const removeSprints = sprintIds ? originSprintIds.filter(
@@ -57,12 +62,12 @@ import SelectTeamSprints from '@/components/select/select-teamSprint';
             formKey="sprint"
             onSubmit={this.updateIssueSprint}
             initValue={sprintIds}
-            editor={({ hideEditor }) => (
+            editor={({ submit }) => (
               <SelectTeamSprints
                 label="活跃冲刺"
                 mode="multiple"
                 projectId={store.projectId}
-                onBlur={hideEditor}
+                onBlur={submit}
                 // getPopupContainer={() => document.getElementById('detail')}
                 allowClear
                 showCheckAll={false}
