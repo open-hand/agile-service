@@ -14,6 +14,12 @@ const locale = {
   today: '返回今日',
   quarter: '季',
   year: '年',
+  'column.summary': '名称',
+  'column.estimatedStartTime': '预计开始',
+  'column.estimatedEndTime': '预计结束',
+  'column.actualStartTime': '实际开始',
+  'column.actualEndTime': '实际结束',
+  'column.predecessor': '前置依赖',
 } as const;
 const exportGantt = localeAppendPrefixObjectKey({ intlPrefix: 'gantt' as const, intlObject: locale });
 type ILocaleGanttType = {
