@@ -55,5 +55,7 @@ public interface InitService {
     Long initTEStateMachine(Long organizationId, ProjectEvent projectEvent);
 
     void createStateMachineDetail(Long organizationId, Long stateMachineId, String applyType);
+
+    void initStatusIfNotExisted(Long organizationId);
 }
 

@@ -155,4 +155,6 @@ public interface IssueTypeService {
     void updateRank(Long projectId, Long organizationId, Long issueTypeId, IssueTypeRankVO issueTypeRankVO);
 
     Page<IssueTypeVO> pagingProjectIssueTypes(PageRequest pageRequest, Long organizationId, IssueTypeSearchVO issueTypeSearchVO);
+
+    void initIssueTypeIfNotExisted(Long organizationId);
 }

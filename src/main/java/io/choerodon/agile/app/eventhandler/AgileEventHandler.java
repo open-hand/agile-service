@@ -80,11 +80,11 @@ public class AgileEventHandler {
         OrganizationCreateEventPayload organizationEventPayload = JSON.parseObject(data, OrganizationCreateEventPayload.class);
         Long organizationId = organizationEventPayload.getId();
         //注册组织初始化问题类型
-        issueTypeService.initIssueTypeByConsumeCreateOrganization(organizationId);
+        issueTypeService.initIssueTypeIfNotExisted(organizationId);
         //注册组织初始化优先级
-        priorityService.initProrityByOrganization(Arrays.asList(organizationId));
+        priorityService.initPriorityIfNotExisted(organizationId);
         //初始化状态
-        initService.initStatus(organizationId, InitStatus.listInitStatus());
+        initService.initStatusIfNotExisted(organizationId);
         //初始化默认状态机
         initService.initDefaultStateMachine(organizationId);
         //初始化页面配置数据
