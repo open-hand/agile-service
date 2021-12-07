@@ -1,0 +1,51 @@
+.tip {
+  padding: 10px;
+  background: #FFFBDD;
+  border: 1px solid #FFE965;
+  border-radius: 6px;
+  display: flex;
+  margin-bottom: 14px;
+  :global {
+    .icon {
+      color: #F76776;
+      margin-right: 6px;
+      margin-top: 2px;
+    }
+  }
+  .tipText {
+    margin-bottom: 0;
+    font-size: 12px !important;
+  }
+}
+.form {
+  :global(.c7n-pro-field-wrapper) {
+    margin-top: 0;
+    margin-bottom: 6px !important;
+  }
+}
+
+.dot {
+  display: inline-block;
+  height: 1em;
+  line-height: 1;
+  vertical-align: -.25em;
+  overflow: hidden;
+  text-align: left;
+}
+
+.dot::before {
+  display: block;
+  content: '...\A..\A.';
+  white-space: pre-wrap;
+  animation: dot 3s infinite step-start both;
+}
+
+@keyframes dot {
+  33% {
+    transform: translateY(-2em);
+  }
+
+  66% {
+    transform: translateY(-1em);
+  }
+}

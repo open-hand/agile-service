@@ -1,8 +1,10 @@
 import React from 'react';
 import { Button } from 'choerodon-ui/pro';
+import { observer } from 'mobx-react-lite';
+import classNames from 'classnames';
 
 function Header({
-  selected, close, onClickEdit, onClickDelete, hasBatchDeletePermission,
+  selected, close, onClickEdit, onClickMove, onClickDelete, hasBatchDeletePermission, issueSearchStore,
 }) {
   return (
     <>
@@ -26,17 +28,28 @@ function Header({
             }}
             >
               <Button
-                className="c7n-batch-header-btn"
+                className={classNames('c7n-batch-header-btn', {
+                  'c7n-batch-header-currentActionBtn': issueSearchStore.batchAction === 'edit',
+                })}
                 icon="edit-o"
-                style={{ color: 'white', marginRight: 6 }}
                 onClick={onClickEdit}
               >
                 批量编辑
               </Button>
               <Button
-                className="c7n-batch-header-btn"
+                className={classNames('c7n-batch-header-btn', {
+                  'c7n-batch-header-currentActionBtn': issueSearchStore.batchAction === 'move',
+                })}
+                icon="drive_file_move-o"
+                onClick={onClickMove}
+              >
+                批量移动
+              </Button>
+              <Button
+                className={classNames('c7n-batch-header-btn', {
+                  'c7n-batch-header-currentActionBtn': issueSearchStore.batchAction === 'delete',
+                })}
                 icon="delete_sweep-o"
-                style={{ color: 'white', marginRight: 18 }}
                 onClick={onClickDelete}
               >
                 批量删除
@@ -55,4 +68,4 @@ function Header({
   );
 }
 
-export default Header;
+export default observer(Header);

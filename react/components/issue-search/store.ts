@@ -29,7 +29,7 @@ type IChosenField = (IField | ILocalField) & {
 }
 export type IChosenFields = Map<string, IChosenField>
 
-export type IBatchAction = undefined | 'edit' | 'delete'
+export type IBatchAction = undefined | 'edit' | 'delete' | 'move'
 
 export interface IssueSearchStoreProps {
   getSystemFields: () => ILocalField[]

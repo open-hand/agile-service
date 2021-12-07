@@ -675,6 +675,25 @@ class IssueApi extends Api<IssueApi> {
       },
     });
   }
+
+  getBatchMoveMap(data: string[]) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/project_move/issue_type_status_map`,
+      data,
+    });
+  }
+
+  batchMove(targetProjectId: string, data: any) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/project_move/batch_move`,
+      params: {
+        targetProjectId,
+      },
+      data,
+    });
+  }
 }
 const issueApi = new IssueApi();
 const issueApiConfig = new IssueApi(true);
