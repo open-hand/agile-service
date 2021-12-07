@@ -113,4 +113,6 @@ public interface PriorityService {
      * @param projectIds
      */
     void batchChangeIssuePriority(Long organizationId, Long priorityId, Long changePriorityId, Long userId, List<Long> projectIds);
+
+    void initPriorityIfNotExisted(Long organizationId);
 }

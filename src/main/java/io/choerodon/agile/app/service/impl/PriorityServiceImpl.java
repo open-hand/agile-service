@@ -330,4 +330,14 @@ public class PriorityServiceImpl implements PriorityService {
             issueAccessDataService.batchUpdateIssuePriority(organizationId, priorityId, changePriorityId, userId, projectIds);
         }
     }
+
+    @Override
+    public void initPriorityIfNotExisted(Long organizationId) {
+        PriorityDTO priority = new PriorityDTO();
+        priority.setOrganizationId(organizationId);
+        List<PriorityDTO> priorities = priorityMapper.select(priority);
+        if (!CollectionUtils.isEmpty(priorities)) {
+            initProrityByOrganization(Arrays.asList(organizationId));
+        }
+    }
 }
