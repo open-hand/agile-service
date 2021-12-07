@@ -53,6 +53,7 @@ const localeCommon = {
   'search.placeholder': '请输入搜索内容',
   all: '全选',
   inverse: '反选',
+  current: '当前',
 } as const;
 const exportCommon = localeAppendPrefixObjectKey({ intlPrefix: 'common' as const, intlObject: localeCommon });
 type ILocaleCommonType = {

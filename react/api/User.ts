@@ -83,21 +83,34 @@ class UserApi extends Api<UserApi> {
     });
   }
 
+  /**
+   * 在项目层查询未禁用（不包含离职）用户
+   * 具有过滤人员功能
+   * @param param
+   * @param data 过滤的用户id
+   * @returns
+   */
+  getProjectUsersWithoutDisable(param?: { param?: string, page?: number, size?: number, projectId?: string }, data?: string[]) {
+    return this.request({
+      method: 'post',
+      url: `/iam/choerodon/v1/projects/${param?.projectId ?? this.projectId}/users/agile`,
+      params: {
+        param: param?.param,
+        page: param?.page || 1,
+        size: param?.size ?? 20,
+      },
+      data: data ?? [],
+    });
+  }
+
   async getProjectUsers(param?: string, page?: number, userIds?: string[], queryFilterIds?: string[], size?: number, projectId?: string): Promise<{
     list: User[]
     hasNextPage: boolean
     number: number
   }> {
-    return withSelectedUsers(this.request({
-      method: 'post',
-      url: `/iam/choerodon/v1/projects/${projectId || this.projectId}/users/agile`,
-      params: {
-        param,
-        page: page || 1,
-        size: size ?? 20,
-      },
-      data: queryFilterIds ?? [],
-    }), {
+    return withSelectedUsers(this.getProjectUsersWithoutDisable({
+      param, page, size, projectId,
+    }, queryFilterIds), {
       page: page || 1,
       userIds,
       projectId: projectId || this.projectId,
@@ -141,7 +154,7 @@ class UserApi extends Api<UserApi> {
     });
   }
 
-  async getWorkbenchUsers(params?: { param?: string, page?: number, size?: number }, data: {ignoredUserIds?:string} = {}): Promise<{
+  async getWorkbenchUsers(params?: { param?: string, page?: number, size?: number }, data: { ignoredUserIds?: string } = {}): Promise<{
     list: User[]
     hasNextPage: boolean
   }> {
