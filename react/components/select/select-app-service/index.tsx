@@ -131,10 +131,7 @@ const SelectPageAppService: React.FC<Props> = forwardRef(({
   const selectRef = useRef<Select>();
   const value = useComputed(() => selectRef.current?.getValue(), [selectRef.current]);
   const [forceUpdateValue, setFilterWord] = useNoticeSelectUpdateSelected();
-  const args = useCreation(() => {
-    console.log('values', value);
-    return ({ pageTargetProjectId, targetAppServiceId: value });
-  }, [pageTargetProjectId, forceUpdateValue]);
+  const args = useCreation(() => ({ pageTargetProjectId, targetAppServiceId: value }), [pageTargetProjectId, forceUpdateValue]);
   const config = useMemo((): SelectConfig => ({
     name: 'appService',
     textField: 'name',
