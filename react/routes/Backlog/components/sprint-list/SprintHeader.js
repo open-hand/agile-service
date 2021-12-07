@@ -38,12 +38,12 @@ function BacklogHeader({ data }) {
     </div>
   );
 }
-function SprintHeader({ data }) {
+function SprintHeader({ data, sprintIndex }) {
   const {
     type, expand, sprintId, piId, sprintType,
   } = data;
   const isSprint = type === 'sprint';
-  const { isInProgram } = BacklogStore.getIsInProgramData || {}
+  const { isInProgram } = BacklogStore.getIsInProgramData || {};
   return (
     isSprint ? (
       <div className={prefix}>
@@ -75,6 +75,7 @@ function SprintHeader({ data }) {
           <WorkLoadBtn data={data} />
           <SprintButton
             data={data}
+            sprintIndex={sprintIndex}
           />
         </div>
         <div className={`${prefix}-middle`}>
