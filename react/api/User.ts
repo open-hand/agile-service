@@ -85,19 +85,20 @@ class UserApi extends Api<UserApi> {
 
   /**
    * 在项目层查询未禁用（不包含离职）用户
-   * 具有过滤人员功能
+   *
    * @param param
    * @param data 过滤的用户id
    * @returns
    */
-  getProjectUsersWithoutDisable(param?: { param?: string, page?: number, size?: number, projectId?: string }, data?: string[]) {
+  getProjectUsersWithoutDisable(param?: { param?: string, page?: number, size?: number, projectId?: string, enabled?: boolean }, data?: string[]) {
     return this.request({
       method: 'post',
       url: `/iam/choerodon/v1/projects/${param?.projectId ?? this.projectId}/users/agile`,
       params: {
-        param: param?.param,
+        param: param?.param || '',
         page: param?.page || 1,
         size: param?.size ?? 20,
+        enabled: param?.enabled ?? true,
       },
       data: data ?? [],
     });
