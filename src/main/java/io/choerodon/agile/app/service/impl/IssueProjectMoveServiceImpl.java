@@ -239,9 +239,21 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
             List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds, null);
             double incrementalValue = 1.0 / (issueDTOS.size() == 0 ? 1 : issueDTOS.size());
             int currentProgress = 1;
+            List<Long> transferBug = new ArrayList<>();
+            List<IssueTypeVO> targetProjectIssueType = issueTypeService.queryByOrgId(projectVO.getOrganizationId(), targetProjectVO.getId());
+            Map<Long, String> issueTypeCodeMap = targetProjectIssueType.stream().collect(Collectors.toMap(IssueTypeVO::getId, IssueTypeVO::getTypeCode));
             for (IssueDTO issueDTO : issueDTOS) {
-                JSONObject issueJSONObject = buildJSONObject(issueDTO, issueTypeStatusMap, jsonObject);
-                handlerIssueValue(projectVO, issueDTO.getIssueId(), targetProjectVO, issueJSONObject);
+                Map<String, Object> reuslt = new HashMap<>();
+                buildJSONObject(reuslt, issueDTO, issueTypeStatusMap, jsonObject, transferBug, issueTypeCodeMap);
+                Boolean isMove = (Boolean) reuslt.get("isMove");
+                JSONObject issueJSONObject = JSONObject.parseObject(JSON.toJSONString(reuslt.get("jsonObj")));
+                if (isMove) {
+                    handlerIssueValue(projectVO, issueDTO.getIssueId(), targetProjectVO, issueJSONObject);
+                } else {
+                    IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
+                    List<String> fieldList = verifyUpdateUtil.verifyUpdateData(issueJSONObject, issueUpdateVO);
+                    issueService.handleUpdateIssueWithoutRuleNotice(issueUpdateVO, fieldList, projectId);
+                }
                 double progress = currentProgress / issueDTOS.size() * 1.0;
                 if (progress % incrementalValue == 0) {
                     batchUpdateFieldStatusVO.setProcess(progress);
@@ -249,6 +261,9 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
                 }
                 currentProgress++;
             }
+            // 清除原项目和目标项目的缓存
+            dataLogRedisUtil.handleDeleteRedisByDeleteIssue(projectId);
+            dataLogRedisUtil.handleDeleteRedisByDeleteIssue(targetProjectVO.getId());
             //发送websocket
             batchUpdateFieldStatusVO.setStatus("success");
             batchUpdateFieldStatusVO.setProcess(1.0);
@@ -300,25 +315,51 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         return result;
     }
 
-    private JSONObject buildJSONObject(IssueDTO issueDTO, Map<Long, Map<Long, Map<Long, Long>>> issueTypeStatusMap, JSONObject json) {
+    private void buildJSONObject(Map<String, Object> reuslt,
+                                 IssueDTO issueDTO,
+                                 Map<Long, Map<Long, Map<Long, Long>>> issueTypeStatusMap,
+                                 JSONObject json,
+                                 List<Long> transferBug,
+                                 Map<Long, String> issueTypeCodeMap) {
         JSONObject jsonObject = json.getJSONObject("issueInfo");
         if (ObjectUtils.isEmpty(jsonObject)) {
             jsonObject = new JSONObject();
         }
-        jsonObject.put("issueId", issueDTO.getIssueId());
         Long issueTypeId = issueDTO.getIssueTypeId();
         Map<Long, Map<Long, Long>> newIssueTypeMap = issueTypeStatusMap.get(issueTypeId);
         if (!ObjectUtils.isEmpty(newIssueTypeMap)) {
             issueTypeId = newIssueTypeMap.keySet().stream().findFirst().get();
         }
+        // 父级移动时问题类型改成了bug，需要将它下面的子缺陷解除关联关系，不移动。
+        Boolean isSubIssue = "sub_task".equals(issueDTO.getTypeCode()) || ("bug".equals(issueDTO.getTypeCode()) && !ObjectUtils.isEmpty(issueDTO.getRelateIssueId()) && !Objects.equals(0L, issueDTO.getRelateIssueId()));
+        if (!isSubIssue && "bug".equals(issueTypeCodeMap.get(issueTypeId))) {
+            transferBug.add(issueDTO.getIssueId());
+        }
+
+        if (isSubIssue && "bug".equals(issueDTO.getTypeCode()) && "bug".equals(issueTypeCodeMap.get(issueTypeId))) {
+            Long parentIssue = issueDTO.getRelateIssueId();
+            if (transferBug.contains(parentIssue)) {
+                jsonObject.put("issueId", issueDTO.getIssueId());
+                jsonObject.put("relateIssueId", 0L);
+                jsonObject.put("objectVersionNumber", issueDTO.getObjectVersionNumber());
+
+                reuslt.put("isMove", false);
+                reuslt.put("jsonObj", jsonObject);
+                return;
+            }
+        }
+
         Long statusId = issueDTO.getStatusId();
         Map<Long, Long> statusIdMap = newIssueTypeMap.getOrDefault(issueTypeId, new HashMap<>());
         if (!CollectionUtils.isEmpty(statusIdMap) && !ObjectUtils.isEmpty(statusIdMap.get(statusId))) {
             statusId = statusIdMap.get(statusId);
         }
+        jsonObject.put("issueId", issueDTO.getIssueId());
         jsonObject.put("issueTypeId", issueTypeId);
         jsonObject.put("statusId", statusId);
-        return jsonObject;
+        reuslt.put("isMove", true);
+        reuslt.put("jsonObj", jsonObject);
+        return;
     }
 
     private Map<Long, Map<Long, Map<Long, Long>>> parsingIssueTypeStatusMap(JSONObject jsonObject) {
