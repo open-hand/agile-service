@@ -18,7 +18,7 @@ const localeField = {
   feature: 'Features',
   createDate: 'Creation Time',
   updateDate: 'Update Time',
-  estimatedStartTime: ' Estimated Start Time',
+  estimatedStartTime: 'Estimated Start Time',
   estimatedEndTime: 'Estimated End Time',
   actualStartTime: 'Actual Start Time',
   actualEndTime: 'Actual End Time',
