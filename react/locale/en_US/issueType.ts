@@ -5,8 +5,8 @@ const locale = {
   reference: 'Reference issue type',
   name: 'Scheme Name',
   add: 'Add Issue type',
-  'norm.type': 'Item Types',
-  state: 'States',
+  'norm.type': 'Issue Type',
+  state: 'Status',
   description: 'Description',
 } as const;
 const exportIssueType = localeAppendPrefixObjectKey({ intlPrefix: 'issueType' as const, intlObject: locale });

@@ -86,12 +86,28 @@ function ComponentHomeDataSet({ id }) {
       {
         name: 'defaultAssigneeRole',
         type: 'string',
-        label: '默认经办人',
+        label: (
+          <span>
+
+            <C7NFormat
+              intlPrefix="agile.setting"
+              id="default.assignee"
+            />
+
+          </span>),
       },
       {
         name: 'sequence',
         type: 'string',
-        label: '模块顺序',
+        label: (
+          <span>
+
+            <C7NFormat
+              intlPrefix="agile.setting"
+              id="sequence"
+            />
+
+          </span>),
       },
     ],
     queryFields: [
@@ -122,7 +138,12 @@ function ComponentHomeDataSet({ id }) {
       {
         name: 'defaultAssigneeRole',
         type: 'string',
-        label: '默认经办人',
+        label: (
+          <C7NFormat
+            intlPrefix="agile.setting"
+            id="default.assignee"
+          />
+        ),
         options: roleSet,
       },
     ],
