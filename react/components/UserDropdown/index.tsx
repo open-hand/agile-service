@@ -141,7 +141,7 @@ const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee, proje
     pageSize: 20,
     transport: {
       // @ts-ignore
-      read: ({ params }) => userApiConfig.getAllInProject(params?.param, params.page, undefined, params.size, projectId),
+      read: ({ params }) => userApiConfig.project(projectId).getProjectUsersWithoutDisable(params),
     },
   }), [projectId]);
   useImperativeHandle(userDropDownRef, () => ({
