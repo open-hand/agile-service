@@ -405,7 +405,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
 
   return tableColumns;
 };
-const ganntSystemFields = [{ title: '前置依赖', code: 'predecessor', fieldType: 'multiple' }];
+const ganttSystemFields = [{ title: '前置依赖', code: 'predecessor', fieldType: 'multiple' }];
 const defaultVisibleColumns = ['assignee', 'predecessor', 'estimatedStartTime', 'estimatedEndTime', 'actualStartTime', 'actualEndTime'];
 const defaultListLayoutColumns = defaultVisibleColumns.map((code) => ({
   columnCode: code,
@@ -416,7 +416,7 @@ function useGanttProjectColumns({
 }: IGanttColumnsHookProps) {
   // 恒为 项目层级
   const { data: tableFields } = useIssueTableFields({
-    hiddenFieldCodes: ['epicSelfName', 'summary'], extraFields: ganntSystemFields, projectId, menuType: 'project',
+    hiddenFieldCodes: ['epicSelfName', 'summary'], extraFields: ganttSystemFields, projectId, menuType: 'project',
   });
   const { data: issueTypes, isLoading: issueTypeIsLoading } = useProjectIssueTypes({ projectId, isInProgram });
   const { data: predecessorTypes, isLoading: predecessorTypesLoading } = useProjectPredecessorTypes({ projectId });

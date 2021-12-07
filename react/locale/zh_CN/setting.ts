@@ -17,6 +17,9 @@ const locale = {
   'issue_link.inWard': '链入描述',
   'issue_link.checkName.repeat': '工作项链接名称重复',
   'issue_link.delete.link.other': '删除链接，相关工作项关联到其他链接',
+  'default.assignee': '默认经办人',
+  sequence: '模块顺序',
+
 } as const;
 const exportSetting = localeAppendPrefixObjectKey({ intlPrefix: 'setting' as const, intlObject: locale });
 type ILocaleSettingType = {
