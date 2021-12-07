@@ -26,8 +26,8 @@ function renderEditor({
 }: IRenderFieldProps): React.ReactElement {
   const { fieldType, fieldCode, defaultValue: propsDefaultValue } = data;
   const defaultValue = toJS(propsDefaultValue);
-  // 系统字段的时间类字段这里不取用
-  if (!['date', 'time', 'datetime'].includes(fieldType) && isCodeInSystemComponents(fieldCode)) {
+  // 系统字段的时间类字段、人员类这里不取用
+  if (!['date', 'time', 'datetime', 'multiMember', 'member'].includes(fieldType) && isCodeInSystemComponents(fieldCode)) {
     const el = getAgileFields([], {
       code: fieldCode as any,
       fieldType: fieldType as any,
