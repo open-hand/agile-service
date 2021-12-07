@@ -253,6 +253,7 @@ function IssueList({
         }}
       >
         <QuickCreateIssue
+          button={quickCreateIssueBtn}
           epicId={
           BacklogStore.getChosenEpic !== 'all'
           && BacklogStore.getChosenEpic !== 'unset'
