@@ -15,7 +15,7 @@ import SelectTeamSprints from '@/components/select/select-teamSprint';
     const { issueId } = issue;
     const activePiSprints = issue.activePiSprints || [];
     const previousSprintIds = activePiSprints.map((s) => s.sprintId);
-    const isEqualValueArray = difference(previousSprintIds, sprintIds || []).length === 0;
+    const isEqualValueArray = previousSprintIds.length === sprintIds?.length && difference(previousSprintIds, sprintIds || []).length === 0;
     if (isEqualValueArray) {
       return;
     }
