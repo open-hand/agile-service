@@ -3,6 +3,7 @@ import { Button, Modal, Tabs } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import HostPick from '@/components/host-pick';
 import StatusMachineTemplate from '../../routes/statusMachine-template';
+import IntlProviderAsync from '../../components/intl-provider-async';
 import styles from './index.less';
 import KanbanTemplate from './kanban-template';
 
@@ -60,7 +61,10 @@ const openTemplate = (props: any) => {
     },
     title: '查看模板',
     className: styles['c7nagile-template-modal'],
-    children: <ObserverTemplateContent {...props} />,
+    children: (
+      <IntlProviderAsync>
+        <ObserverTemplateContent {...props} />
+      </IntlProviderAsync>),
     okText: '关闭',
     footer: (okBtn: Button) => okBtn,
   });
