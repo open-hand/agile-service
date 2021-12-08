@@ -38,6 +38,8 @@ const LINK_URL = {
   status: '/agile/state-machine',
   addCustomReport: '/agile/charts/add',
   quickFilter: '/agile/quicksearch',
+  component: '/agile/component',
+  version: '/agile/project-version',
 };
 
 const LINK_URL_TO: IRouterToList = {

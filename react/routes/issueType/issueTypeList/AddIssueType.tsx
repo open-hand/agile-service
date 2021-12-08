@@ -191,7 +191,7 @@ const AddIssueType: React.FC<Props> = ({
         issueTypeApi[isOrganization ? 'orgCreate' : 'create'](data as ICreate).then((res: any) => {
           Choerodon.prompt('创建成功');
           typeTableDataSet.query();
-          setAddLoading(false);
+          // setAddLoading(false);
           modal?.close();
           if (callback) {
             callback(res.id);
@@ -361,11 +361,11 @@ const AddIssueType: React.FC<Props> = ({
         {
           !typeId ? (
             <>
-              <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} loading={addLoading} onClick={handleSave} style={{ marginLeft: 10 }}>保存</Button>
-              <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToPage} loading={addLoading}>保存并配置页面</Button>
+              <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} loading={addLoading} disabled={addLoading} onClick={handleSave} style={{ marginLeft: 10 }}>保存</Button>
+              <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToPage} loading={addLoading} disabled={addLoading}>保存并配置页面</Button>
               {
                 !isOrganization && (
-                  <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToStatus} loading={addLoading}>保存并配置状态机</Button>
+                  <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToStatus} loading={addLoading} disabled={addLoading}>保存并配置状态机</Button>
                 )
               }
               <Button funcType={'raised' as FuncType} onClick={handleCancel}>取消</Button>
@@ -374,7 +374,7 @@ const AddIssueType: React.FC<Props> = ({
             <>
               {
                 !(isOrganization && isSystemType) && (
-                  <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} loading={editLoading} onClick={handleSave} style={{ marginLeft: 10 }}>保存</Button>
+                  <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} loading={editLoading} disabled={editLoading} onClick={handleSave} style={{ marginLeft: 10 }}>保存</Button>
                 )
               }
               <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToPage} disabled={editLoading} style={{ marginLeft: 10 }}>跳转配置页面</Button>
