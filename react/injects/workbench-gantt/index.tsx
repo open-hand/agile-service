@@ -1,6 +1,6 @@
 import React from 'react';
 import { EmptyPage } from '@choerodon/components';
-
+import { ModalProvider } from 'choerodon-ui/pro';
 import TableCache from '@/components/table-cache';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import noDataPic from '@/assets/image/NoData.svg';
@@ -37,9 +37,11 @@ const WorkbenchProjectGantt: IReactFCGanttProvideProjects = ({ projects, current
 
 const WorkbenchGantt = (props: any) => (
   <IntlProviderAsync>
-    <StoreProvider {...props}>
-      <WorkbenchProjectGantt {...props} />
-    </StoreProvider>
+    <ModalProvider>
+      <StoreProvider {...props}>
+        <WorkbenchProjectGantt {...props} />
+      </StoreProvider>
+    </ModalProvider>
   </IntlProviderAsync>
 );
 
