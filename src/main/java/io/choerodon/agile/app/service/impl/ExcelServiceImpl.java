@@ -3483,6 +3483,7 @@ public class ExcelServiceImpl implements ExcelService {
             fileOperationHistoryDTO.setFileUrl(path);
         } catch (Exception e) {
             fileOperationHistoryDTO.setStatus(FAILED);
+            LOGGER.error("upload file error: {}", e);
         } finally {
             try {
                 fileOperationHistoryDTO.setLastUpdateDate(new Date());
