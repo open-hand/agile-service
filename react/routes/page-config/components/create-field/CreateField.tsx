@@ -360,19 +360,21 @@ function CreateField() {
       }
       case 'multiMember':
       case 'member':
-        return getAgileFields([], [], {
+
+        return React.cloneElement(getAgileFields([], [], {
           code: 'defaultValue',
           fieldType: fieldType as 'member' | 'multiMember',
           props: {
             ...commonProps,
             key: `page-config-create-or-edit-member-${fieldType}`,
             style: { width: '100%', marginTop: '20px' },
-            dataRef: userDataRef,
             level: type === 'project' ? 'project' : 'org',
             selectedUser: toJS(current?.get('defaultValueObj')),
           },
           outputs: ['element'],
-        })[0][0];
+        })[0][0] as React.ReactElement, {
+          dataRef: userDataRef,
+        });
 
       default:
         return null;

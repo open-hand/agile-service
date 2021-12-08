@@ -457,9 +457,15 @@ const CreateIssueBase = observer(({
         newValue[name] = oldValue;
       }
     });
+    const isAvailableValue = (fieldName: string, value: any): boolean => {
+      if (fieldName === 'parentIssueId' && isSubIssue) {
+        return issueTypeCode === 'sub_task' || value?.issueTypeVO?.typeCode !== issueTypeCode;
+      }
+      return value;
+    };
     newDataSet.fields.forEach(({ name }) => {
       const oldValue = toJS(oldDataSet.current?.get(name));
-      if (oldValue) {
+      if (isAvailableValue(name, oldValue)) {
         newValue[name] = oldValue;
       }
     });
