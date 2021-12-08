@@ -815,6 +815,7 @@ public class FieldValueUtil {
                         create.setNewString(newFieldValues.get(0).getTextValue());
                     }
                     break;
+                case FieldType.MULTI_MEMBER:
                 case FieldType.MEMBER:
                     //查询用户
                     List<Long> userIds = oldFieldValues.stream().map(FieldValueDTO::getOptionId).collect(Collectors.toList());
