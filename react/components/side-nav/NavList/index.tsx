@@ -24,6 +24,7 @@ const NavList: React.FC<Props> = ({ onTabClick, activeKey }) => {
       {tabs.map((tab) => (
         <div
           role="none"
+          key={tab.key}
           className={classNames(styles.nav_item, {
             [styles.nav_item_active]: activeKey === tab.key,
           })}
