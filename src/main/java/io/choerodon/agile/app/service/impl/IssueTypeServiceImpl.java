@@ -1164,7 +1164,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         query.setOrganizationId(organizationId);
         query.setInitialize(true);
         List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.select(query);
-        if (!CollectionUtils.isEmpty(issueTypeDTOS)) {
+        if (CollectionUtils.isEmpty(issueTypeDTOS)) {
             initIssueTypeByConsumeCreateOrganization(organizationId);
         }
     }

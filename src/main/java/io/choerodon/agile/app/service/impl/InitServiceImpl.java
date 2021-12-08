@@ -203,8 +203,10 @@ public class InitServiceImpl implements InitService {
 
     @Override
     public void initStatusIfNotExisted(Long organizationId) {
-        List<StatusVO> statusVOS = statusMapper.queryByOrgId(organizationId);
-        if (!CollectionUtils.isEmpty(statusVOS)) {
+        StatusDTO statusDTO = new StatusDTO();
+        statusDTO.setOrganizationId(organizationId);
+        List<StatusDTO> statusDTOS = statusMapper.select(statusDTO);
+        if (CollectionUtils.isEmpty(statusDTOS)) {
             initStatus(organizationId, InitStatus.listInitStatus());
         }
     }

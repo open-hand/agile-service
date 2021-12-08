@@ -336,7 +336,7 @@ public class PriorityServiceImpl implements PriorityService {
         PriorityDTO priority = new PriorityDTO();
         priority.setOrganizationId(organizationId);
         List<PriorityDTO> priorities = priorityMapper.select(priority);
-        if (!CollectionUtils.isEmpty(priorities)) {
+        if (CollectionUtils.isEmpty(priorities)) {
             initProrityByOrganization(Arrays.asList(organizationId));
         }
     }
