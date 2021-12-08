@@ -13,7 +13,7 @@ public enum CustomFieldExcelHeader {
     //字段类型
     FIELD_TYPE("字段类型*", 4000),
     //问题类型
-    ISSUE_TYPE("问题类型*", 5000),
+    ISSUE_TYPE("工作项类型*", 5000),
     //字段默认值
     DEFAULT_VALUE("默认值", 6000),
     //字段实际值
