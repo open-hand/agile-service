@@ -272,7 +272,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
             return new ArrayList<>();
         }
         IssueCountDTO issueCountDTO = issueMapper.querySubIssueCount(projectId, issueId);
-        if (Objects.equals(issueCountDTO.getSuccessIssueCount(), issueCountDTO.getIssueCount())) {
+        if (Objects.equals(0, issueCountDTO.getIssueCount()) || Objects.equals(issueCountDTO.getSuccessIssueCount(), issueCountDTO.getIssueCount())) {
             return new ArrayList<>();
         }
         List<StatusDTO> statusList = statusMapper.selectByCondition(Condition.builder(StatusDTO.class)
