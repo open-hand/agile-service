@@ -365,11 +365,11 @@
         <collection property="versionIssueRelDTOS"
                     ofType="io.choerodon.agile.infra.dto.VersionIssueRelDTO">
             <id property="versionId" column="version_id"/>
-            <result property="statusCode" column="version_status_code"/>
-            <result property="relationType" column="relation_type"/>
-            <result property="issueId" column="version_issue_id"/>
-            <result property="projectId" column="version_project_id"/>
-            <result property="name" column="version_name"/>
+            <id property="statusCode" column="version_status_code"/>
+            <id property="relationType" column="relation_type"/>
+            <id property="issueId" column="version_issue_id"/>
+            <id property="projectId" column="version_project_id"/>
+            <id property="name" column="version_name"/>
         </collection>
         <collection property="issueSprintDTOS"
                     ofType="io.choerodon.agile.infra.dto.IssueSprintDTO">
