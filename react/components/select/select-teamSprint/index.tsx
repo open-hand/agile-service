@@ -83,8 +83,8 @@ const SelectSprint: React.FC<Props> = forwardRef(({
   useEffect(() => {
     loadData();
   }, [loadData]);
-  if (!(piId && teamIds?.length)) {
-    const lackParams = [!piId && 'PI', !teamIds.length && '负责的子项目'].filter(Boolean) as string[];
+  const lackParams = [!piId && 'PI', !teamIds?.length && '负责的子项目'].filter(Boolean) as string[];
+  if (lackParams.length > 0) {
     return <SelectSprintDisabled ref={ref} tooltipTitle={`请先选择${lackParams.join('和')}`} {...otherProps} />;
   }
   const Component = flat ? FlatSelect : Select;
