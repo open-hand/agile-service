@@ -28,7 +28,7 @@ interface Team {
   },
   sprints: Sprint[]
 }
-const SelectSprintDisabled: React.FC<{ tooltipTitle: string } & Partial<SelectProps>> = ({ tooltipTitle, onBlur, ...otherProps }) => {
+const SelectSprintDisabled = forwardRef<any, { tooltipTitle: string } & Partial<SelectProps>>(({ tooltipTitle, onBlur, ...otherProps }, originRef: any) => {
   const ref = useRef<any>();
   const firstTriggerClickAway = useRef<boolean>(true);
   useClickAway((e) => {
@@ -43,11 +43,11 @@ const SelectSprintDisabled: React.FC<{ tooltipTitle: string } & Partial<SelectPr
         ref={ref}
 
       >
-        <Select {...otherProps} disabled />
+        <Select ref={originRef} {...otherProps} disabled />
       </div>
     </Tooltip>
   );
-};
+});
 const SelectSprint: React.FC<Props> = forwardRef(({
   teamIds, piId, hasUnassign, afterLoad, flat, dataRef,
   ...otherProps
@@ -85,7 +85,7 @@ const SelectSprint: React.FC<Props> = forwardRef(({
   }, [loadData]);
   if (!(piId && teamIds?.length)) {
     const lackParams = [!piId && 'PI', !teamIds.length && '负责的子项目'].filter(Boolean) as string[];
-    return <SelectSprintDisabled tooltipTitle={`请先选择${lackParams.join('和')}`} {...otherProps} />;
+    return <SelectSprintDisabled ref={ref} tooltipTitle={`请先选择${lackParams.join('和')}`} {...otherProps} />;
   }
   const Component = flat ? FlatSelect : Select;
 
