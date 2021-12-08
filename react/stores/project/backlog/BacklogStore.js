@@ -1147,7 +1147,7 @@ class BacklogStore {
   handleDeleteSprint = async (data, isCurrentPi) => {
     // const defaultValueIsCurrent = await sprintApi.beforeChangeCheck(data.sprintId);
     const defaultValuePrompt = undefined;// defaultValueIsCurrent ? `冲刺${data.sprintName}是默认选项，删除后冲刺字段默认值将清空` : undefined;
-    const hasIssue = data.issueSearchVOList && data.issueSearchVOList.length > 0;
+    const hasIssue = !!data.issueCount;
     Modal.open({
       title: <C7NFormat
         intlPrefix="agile.backlog"

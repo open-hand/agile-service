@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
+import { observer, inject, Observer } from 'mobx-react';
 import {
   TabPage as Page,
   Header,
@@ -299,16 +299,16 @@ class BacklogHome extends Component {
   createSprintBtn = () => (
     <ProTooltip
       popupClassName={
-          this.state.inNewUserGuideStepThree
-            ? 'c7n-pro-popup-create-sprint-guide'
-            : ''
-        }
+        this.state.inNewUserGuideStepThree
+          ? 'c7n-pro-popup-create-sprint-guide'
+          : ''
+      }
       hidden={this.getHidden()}
       onHiddenBeforeChange={this.onHiddenBeforeChange}
       title={this.getCreatBtnTitle}
       placement={
-          this.state.inNewUserGuideStepThree ? 'bottomRight' : 'bottom'
-        }
+        this.state.inNewUserGuideStepThree ? 'bottomRight' : 'bottom'
+      }
     >
       <ProButton icon="playlist_add" onClick={this.handleCreateSprint}>
         <span>
@@ -430,15 +430,17 @@ class BacklogHome extends Component {
                     intlPrefix="agile.common"
                     id="version"
                   />
-)}
-                nav={(title) => (BacklogStore.chosenVersion !== 'all'
-                  ? (
-                    <>
-                      <span>{title}</span>
-                      <span className="c7n-backlog-side-tip" />
-                    </>
-                  )
-                  : <span>{title}</span>)}
+                )}
+                nav={(title) => (
+                  <Observer>
+                    {() => (
+                      <>
+                        <span>{title}</span>
+                        {BacklogStore.chosenVersion !== 'all' && <span className="c7n-backlog-side-tip" />}
+                      </>
+                    )}
+                  </Observer>
+                )}
               >
                 <Version
                   store={BacklogStore}
@@ -456,16 +458,18 @@ class BacklogHome extends Component {
                       intlPrefix="agile.common"
                       id="epic"
                     />
-)}
+                  )}
                   noHeader
-                  nav={(title) => (BacklogStore.chosenEpic !== 'all'
-                    ? (
-                      <>
-                        <span>{title}</span>
-                        <span className="c7n-backlog-side-tip" />
-                      </>
-                    )
-                    : <span>{title}</span>)}
+                  nav={(title) => (
+                    <Observer>
+                      {() => (
+                        <>
+                          <span>{title}</span>
+                          {BacklogStore.chosenEpic !== 'all' && <span className="c7n-backlog-side-tip" />}
+                        </>
+                      )}
+                    </Observer>
+                  )}
                 >
                   <Epic
                     refresh={this.refresh}
@@ -484,14 +488,16 @@ class BacklogHome extends Component {
                       id="feature"
                     />
                   )}
-                  nav={(title) => (BacklogStore.chosenFeature !== 'all'
-                    ? (
-                      <>
-                        <span>{title}</span>
-                        <span className="c7n-backlog-side-tip" />
-                      </>
-                    )
-                    : <span>{title}</span>)}
+                  nav={(title) => (
+                    <Observer>
+                      {() => (
+                        <>
+                          <span>{title}</span>
+                          {BacklogStore.chosenFeature !== 'all' && <span className="c7n-backlog-side-tip" />}
+                        </>
+                      )}
+                    </Observer>
+                  )}
                 >
                   <Feature
                     refresh={this.refresh}
