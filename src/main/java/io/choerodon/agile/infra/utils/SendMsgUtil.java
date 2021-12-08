@@ -271,19 +271,19 @@ public class SendMsgUtil {
         ids[1] = userDetails.getUserId();
         ids[2] = issueDTO.getReporterId();
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(Arrays.asList(ids), true);
+        ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
         Boolean isProgram = Objects.equals(issueDTO.getApplyType(), "program");
         String actionType = Boolean.TRUE.equals(isProgram) ? "报告的" : "经办的";
         UserMessageDTO assignee = Boolean.TRUE.equals(isProgram) ? usersMap.get(issueDTO.getReporterId()) : usersMap.get(issueDTO.getAssigneeId());
         String assigneeName = !Objects.isNull(assignee) ? assignee.getName() : "";
         // 设置概要
-        String summary = issueDTO.getIssueNum() + "-" + issueDTO.getSummary();
+        String summary = projectVO.getCode() + "-" + issueDTO.getIssueNum() + "-" + issueDTO.getSummary();
         // 设置操作人
         UserMessageDTO operator = usersMap.get(userDetails.getUserId());
         String operatorName = !Objects.isNull(operator) ? operator.getName() : "";
         // 设置状态
         String status = ConvertUtil.getIssueStatusMap(projectId).get(issueDTO.getStatusId()).getName();
         // 设置url
-        ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
         String url;
         IssueVO issueVO = modelMapper.map(issueDTO, IssueVO.class);
         if (isProgram) {
