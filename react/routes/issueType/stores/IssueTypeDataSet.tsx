@@ -5,6 +5,7 @@ import DataSet, { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 import { getIsOrganization } from '@/utils/common';
 
 import { issueTypeApiConfig } from '@/api';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const sourceDataSet = new DataSet({
   fields: [
@@ -35,28 +36,18 @@ const sourceDataSet = new DataSet({
   ],
 });
 
-const IssueTypeDataSet = ({ isOrganization }: { isOrganization: boolean }): DataSetProps => {
+const IssueTypeDataSet = ({ isOrganization, formatMessage }: { isOrganization: boolean, formatMessage: ReturnType<typeof useFormatMessage> }): DataSetProps => {
   const getQueryFields = () => {
     const queryFields = [
       {
         name: 'name',
         type: 'string' as FieldType,
-        label: (
-          <C7NFormat
-            intlPrefix="agile.issueType"
-            id="name"
-          />
-        ),
+        label: formatMessage({ id: 'agile.issueType.name' }),
       },
       {
         name: 'source',
         type: 'string' as FieldType,
-        label: (
-          <C7NFormat
-            intlPrefix="boot"
-            id="source"
-          />
-        ),
+        label: formatMessage({ id: 'boot.source' }),
         textField: 'label',
         valueField: 'code',
         options: sourceDataSet,
@@ -65,19 +56,14 @@ const IssueTypeDataSet = ({ isOrganization }: { isOrganization: boolean }): Data
     if (!isOrganization) {
       queryFields.push({
         name: 'enabled',
-        label: (
-          <C7NFormat
-            intlPrefix="agile.issueType"
-            id="state"
-          />
-        ),
+        label: formatMessage({ id: 'agile.issueType.state' }),
         type: 'string' as FieldType,
         textField: 'label',
         valueField: 'value',
         options: new DataSet({
           data: [
-            { label: '启用', value: 'true' },
-            { label: '停用', value: 'false' },
+            { label: formatMessage({ id: 'boot.enable' }), value: 'true' },
+            { label: formatMessage({ id: 'boot.stop' }), value: 'false' },
           ],
         }),
       });
