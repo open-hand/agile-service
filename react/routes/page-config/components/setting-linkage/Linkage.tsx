@@ -259,10 +259,22 @@ const Linkage: React.FC<Props> = ({
 
   const linkToPageField = useCallback(() => {
     modal?.close();
+    if (field.fieldCode === 'component') {
+      to(LINK_URL.component, {
+        type: 'project',
+      });
+      return;
+    }
+    if (field.fieldCode === 'fixVersion' || field.fieldCode === 'influenceVersion') {
+      to(LINK_URL.version, {
+        type: 'project',
+      });
+      return;
+    }
     to(LINK_URL.pageField, {
       type: 'project',
     });
-  }, [modal]);
+  }, [field.fieldCode, modal]);
 
   const currentRecord: Record | undefined = currentSelected ? dataSet?.find((record) => record.get('chosenField')?.id === currentSelected) : undefined;
 

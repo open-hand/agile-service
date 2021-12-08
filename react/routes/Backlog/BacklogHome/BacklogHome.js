@@ -311,10 +311,12 @@ class BacklogHome extends Component {
         }
     >
       <ProButton icon="playlist_add" onClick={this.handleCreateSprint}>
-        <C7NFormat
-          intlPrefix="agile.backlog"
-          id="create.sprint"
-        />
+        <span>
+          <C7NFormat
+            intlPrefix="agile.backlog"
+            id="create.sprint"
+          />
+        </span>
       </ProButton>
     </ProTooltip>
   );

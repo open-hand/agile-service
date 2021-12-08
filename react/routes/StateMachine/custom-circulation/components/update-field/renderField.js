@@ -4,17 +4,17 @@ import React from 'react';
 
 import {
   TextField, Select, DatePicker, TimePicker, DateTimePicker,
-  NumberField, TextArea, Col, Row,
+  NumberField, TextArea,
 } from 'choerodon-ui/pro';
 import moment from 'moment';
 import SelectUser from '@/components/select/select-user';
 import SelectEnvironment from '@/components/select/select-environment';
 import SelectProgramVersion from '@/components/select/select-program-version';
-import { userApi } from '@/api';
 import styles from './index.less';
 import { getAgileFields } from '@/components/field-pro';
 import DateTimePickerWithFormat from '@/components/date-time-picker/date-time-pikcer-format';
 import { FORMAT_FIELDS } from '../../../../../constants/DATE_FORMAT';
+import SelectTeam from '@/components/select/select-team';
 
 const { Option } = Select;
 const singleList = ['radio', 'single'];
@@ -82,6 +82,20 @@ export default function renderField({
           <Option value="business">特性</Option>
           <Option value="enabler">使能</Option>
         </Select>
+      );
+    }
+    case 'subProject': {
+      return (
+        <SelectTeam
+          label="负责的子项目"
+          colSpan={colSpan}
+          name={code}
+          multiple
+          addClear
+          onOption={({ record }) => ({
+            disabled: data[code].value && ((data[code].value.indexOf('clear') > -1 && record.get(clearIdMap.get(code) || 'value') !== 'clear') || (data[code].value.indexOf('clear') === -1 && record.get(clearIdMap.get(code) || 'value') === 'clear')),
+          })}
+        />
       );
     }
     default: break;

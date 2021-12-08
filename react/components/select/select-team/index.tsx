@@ -18,10 +18,11 @@ export interface SelectTeamProps extends Partial<SelectProps> {
   fieldId?: string
   ruleIds?: string[]
   selected?: string[]
+  addClear?: boolean
 }
 
 const SelectTeam: React.FC<SelectTeamProps> = forwardRef(({
-  request, textField, valueField, fieldId, ruleIds, selected, projectDataRef = { current: null }, afterLoad = noop, flat, projectId, noAssign, ...otherProps
+  request, textField, valueField, fieldId, ruleIds, selected, projectDataRef = { current: null }, afterLoad = noop, flat, projectId, noAssign, addClear = false, ...otherProps
 }, ref: React.Ref<Select>) => {
   const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
   const hasRule = Object.keys(args).filter((key: keyof typeof args) => Boolean(args[key])).length > 0;
@@ -55,7 +56,16 @@ const SelectTeam: React.FC<SelectTeamProps> = forwardRef(({
         // @ts-ignore
         // eslint-disable-next-line
         projectDataRef.current = newProjects;
-        return noAssign ? [{ projName: '未分配', projectId: '0' }, ...newProjects] : newProjects || [];
+        const newList = [...(newProjects || [])];
+        if (noAssign) {
+          // @ts-ignore
+          newList.unshift({ projName: '未分配', projectId: '0' });
+        }
+        if (addClear) {
+          // @ts-ignore
+          newList.unshift({ projName: '清空', projectId: 'clear' });
+        }
+        return newList;
       }
       // @ts-ignore
       const newProjects = (projects as any).content?.map((item) => ({ ...item, projectId: item.projectId?.toString() })) || [];
@@ -65,7 +75,7 @@ const SelectTeam: React.FC<SelectTeamProps> = forwardRef(({
 
       return newProjects;
     },
-  }), [args, fieldId, hasRule, noAssign, projectDataRef, projectId, request, textField, valueField]);
+  }), [addClear, args, fieldId, hasRule, noAssign, projectDataRef, projectId, request, textField, valueField]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
   return (
