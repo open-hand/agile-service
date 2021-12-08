@@ -257,7 +257,6 @@ const BatchContent: React.FC<Props> = ({
   const render = () => (
     <Spin spinning={fetching}>
       <div className={styles.tip}>
-        <Icon type="info-o" />
         <p className={styles.tipText}>
           由于目标项目与源项目的字段设置不同，在不同项目之间移动工作项时，您会丢失项目自定义字段、模块、标签、所属史诗（特性）、版本、tag数据信息，如果目标项目缺少源项目的人员，那么您的人员分配信息也将丢失。即使您移回源项目，也无法恢复这些数据。
         </p>
