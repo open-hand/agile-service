@@ -367,7 +367,7 @@ function CreateField() {
           props: {
             ...commonProps,
             key: `page-config-create-or-edit-member-${fieldType}`,
-            style: { width: '100%', marginTop: '20px' },
+            style: { width: '100%' },
             level: type === 'project' ? 'project' : 'org',
             selectedUser: toJS(current?.get('defaultValueObj')),
           },
