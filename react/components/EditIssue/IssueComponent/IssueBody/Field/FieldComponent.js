@@ -39,7 +39,7 @@ import SelectComponent from '@/components/select/select-component';
         } else {
           componentList.push({
             name: component && component.slice(0, 100),
-            projectId: AppState.currentMenuType.id,
+            projectId: store.projectId,
           });
         }
       });
