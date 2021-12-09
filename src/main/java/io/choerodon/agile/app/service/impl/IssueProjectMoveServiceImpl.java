@@ -286,9 +286,9 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         }
         // 传入的issueIds中选中了子任务没有带上父级任务需要把子任务去掉
         List<IssueDTO> childDTOS = issueMapper.queryChildrenIssue(projectId, issueIds);
-        if(!CollectionUtils.isEmpty(childDTOS)){
+        if (!CollectionUtils.isEmpty(childDTOS)) {
             for (IssueDTO childDTO : childDTOS) {
-                if(!allIssueIds.contains(childDTO.getParentIssueId())){
+                if (!allIssueIds.contains(childDTO.getParentIssueId())) {
                     allIssueIds.remove(childDTO.getIssueId());
                 }
             }
