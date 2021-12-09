@@ -1940,6 +1940,10 @@ public class ExcelServiceImpl implements ExcelService {
                             addErrorColumn(rowNum, col, errorRowColMap);
                             break;
                         } else {
+                            Boolean isSubTask = "sub_task".equals(issueVO.getTypeCode());
+                            if (isSubTask){
+                                break;
+                            }
                             relatedIssueIds.add(issueVO.getIssueId());
                         }
                     }
