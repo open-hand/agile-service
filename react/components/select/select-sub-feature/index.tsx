@@ -19,13 +19,14 @@ interface IFeature {
 export interface SelectSubFeatureProps extends Partial<SelectProps> {
   featureIds?: Array<string | number>,
   flat?: boolean
+  projectId?: string
   afterLoad?: (features: any[]) => void
 }
 /**
  * 子项目查询项目群特性
  */
 const SelectSubFeature: React.FC<SelectSubFeatureProps> = forwardRef(({
-  featureIds: propsFeatureIds, afterLoad, flat, ...otherProps
+  featureIds: propsFeatureIds, afterLoad, flat, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const selectRef = useRef<Select>();
   const selectIdsRef = useRef<Array<string | number>>(propsFeatureIds || []);
@@ -50,7 +51,7 @@ const SelectSubFeature: React.FC<SelectSubFeatureProps> = forwardRef(({
     tooltip: true,
     requestArgs: args,
     request: wrapRequestCallback(
-      ({ filter, page, requestArgs }) => featureApi.queryAllInSubProject(requestArgs?.featureIds || [], filter!, page, 50),
+      ({ filter, page, requestArgs }) => featureApi.project(projectId).queryAllInSubProject(requestArgs?.featureIds || [], filter!, page, 50),
       ({ filter }) => setFilterWord('filter', filter),
     ),
     middleWare: (data) => {
@@ -60,7 +61,7 @@ const SelectSubFeature: React.FC<SelectSubFeatureProps> = forwardRef(({
       optionsRef.current = data;
       return data;
     },
-  }), [afterLoad, args]);
+  }), [afterLoad, args, projectId]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
 
