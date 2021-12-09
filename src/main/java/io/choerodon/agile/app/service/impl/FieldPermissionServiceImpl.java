@@ -64,7 +64,13 @@ public class FieldPermissionServiceImpl implements FieldPermissionService {
                     FieldCode.TAG,
                     FieldCode.PI,
                     FieldCode.SUB_PROJECT,
-                    FieldCode.REPORTER
+                    FieldCode.REPORTER,
+                    FieldCode.BELONG_TO_BACKLOG,
+                    FieldCode.BACKLOG_TYPE,
+                    FieldCode.BACKLOG_CLASSIFICATION,
+                    FieldCode.EMAIL,
+                    FieldCode.PROGRESS_FEEDBACK,
+                    FieldCode.URGENT
             );
 
     @Autowired
