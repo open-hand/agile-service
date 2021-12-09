@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.FieldInstanceCountVO;
 import io.choerodon.agile.infra.dto.FieldValueDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
@@ -44,4 +45,9 @@ public interface FieldValueMapper extends BaseMapper<FieldValueDTO> {
                                                     @Param("schemeCode") String schemeCode,
                                                     @Param("fieldId") Long fieldId,
                                                     @Param("issueTypeId") Long issueTypeId);
+
+    List<FieldInstanceCountVO> queryInstanceCountByFieldIds(@Param("projectIds") List<Long> projectIds,
+                                                            @Param("schemeCode") String schemeCode,
+                                                            @Param("fieldIds") List<Long> fieldIds,
+                                                            @Param("issueTypeId") Long issueTypeId);
 }
