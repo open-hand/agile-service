@@ -1560,7 +1560,36 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 result.setIssueTypeFieldVO(modelMapper.map(list.get(0), IssueTypeFieldVO.class));
             }
         }
+        // 统计组织字段项目中的使用情况
+        setInstanceCount(organizationId, projectId, issueTypeId, pageConfigFields);
         return result;
+    }
+
+    private void setInstanceCount(Long organizationId, Long projectId, Long issueTypeId, List<PageConfigFieldVO> pageConfigFields) {
+        boolean editOnProjectLevel = (projectId != null);
+        // 过滤组织字段
+        List<Long> fieldIds = pageConfigFields.stream()
+                .filter(v -> Objects.equals(CREATED_LEVEL_ORGANIZATION, v.getCreatedLevel()))
+                .map(PageConfigFieldVO::getFieldId)
+                .collect(Collectors.toList());
+        if (!editOnProjectLevel && !CollectionUtils.isEmpty(fieldIds)) {
+            // 获取组织下所有项目
+            List<Long> projectIds =
+                    baseFeignClient.listProjectsByOrgId(organizationId)
+                            .getBody()
+                            .stream()
+                            .map(ProjectVO::getId)
+                            .collect(Collectors.toList());
+            String schemeCode = getSchemeCodeByIssueTypeId(issueTypeId);
+            Map<Long, FieldInstanceCountVO> fieldInstanceCountMap =
+                    fieldValueMapper.queryInstanceCountByFieldIds(projectIds, schemeCode, fieldIds, issueTypeId)
+                            .stream().collect(Collectors.toMap(FieldInstanceCountVO::getFieldId, Function.identity()));
+            pageConfigFields.forEach(field -> {
+                if (fieldInstanceCountMap.containsKey(field.getFieldId())) {
+                    field.setInstanceCount(fieldInstanceCountMap.get(field.getFieldId()).getInstanceCount());
+                }
+            });
+        }
     }
 
     @Override

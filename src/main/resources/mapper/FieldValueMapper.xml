@@ -227,6 +227,34 @@
         </if>
     </select>
 
+    <select id="queryInstanceCountByFieldIds" resultType="io.choerodon.agile.api.vo.FieldInstanceCountVO">
+        SELECT
+           fv.field_id,
+           count(fv.instance_id) AS instanceCount
+        FROM fd_field_value fv
+        <if test="schemeCode !=null and schemeCode == 'agile_issue'">
+            LEFT JOIN agile_issue ai ON fv.instance_id = ai.issue_id AND fv.project_id = ai.project_id
+        </if>
+        WHERE 1=1
+        AND fv.field_id IN
+        <foreach collection="fieldIds" item="fieldId" open="(" separator="," close=")">
+            #{fieldId}
+        </foreach>
+        <if test="schemeCode != null">
+            AND fv.scheme_code = #{schemeCode}
+        </if>
+        <if test="schemeCode != null and schemeCode == 'agile_issue' and issueTypeId != null">
+            AND ai.issue_type_id = #{issueTypeId}
+        </if>
+        <if test="projectIds != null and projectIds.size > 0">
+            AND fv.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+        </if>
+        GROUP BY fv.field_id
+    </select>
+
     <update id="updateProjectId">
         update fd_field_value set project_id = #{targetProjectId}
         where project_id = #{projectId}
