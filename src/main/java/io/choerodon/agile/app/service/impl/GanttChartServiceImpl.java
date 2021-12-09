@@ -1289,7 +1289,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             case UPDATE_USER:
                 handlerUser(userIds, issueList, IssueDTO::getLastUpdatedBy);
                 break;
-            case FieldCode.PARTICIPANT:
+            case PARTICIPANTS:
                 handlerParticipant(userIds, issueList);
                 break;
             case MAIN_RESPONSIBLE_USER:
