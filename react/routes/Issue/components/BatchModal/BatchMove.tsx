@@ -26,6 +26,7 @@ import SelectStatus from '@/components/select/select-status';
 import SelectIssueType from '@/components/select/select-issue-type';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
 import styles from './BatchMove.less';
+import useIsInProgram from '@/hooks/useIsInProgram';
 
 const isDEV = process.env.NODE_ENV === 'development';
 // @ts-ignore
@@ -41,6 +42,7 @@ interface Props {
 const BatchContent: React.FC<Props> = ({
   selected, onCancel, onMove, issueSearchStore,
 }) => {
+  const { isInProgram } = useIsInProgram();
   const { data: issueTypesList } = useIssueTypes();
   const [loading, setLoading] = useState<string | boolean>(false);
   const [progress, setProgress] = useState(0);
@@ -258,7 +260,7 @@ const BatchContent: React.FC<Props> = ({
     <Spin spinning={fetching}>
       <div className={styles.tip}>
         <p className={styles.tipText}>
-          由于目标项目与源项目的字段设置不同，在不同项目之间移动工作项时，您会丢失项目自定义字段、模块、标签、所属史诗（特性）、版本、tag数据信息，如果目标项目缺少源项目的人员，那么您的人员分配信息也将丢失。即使您移回源项目，也无法恢复这些数据。
+          {`由于目标项目与源项目的字段设置不同，移动后，将会丢失模块、标签、所属${isInProgram ? '特性' : '史诗'}、版本、tag、项目层自定义字段，若目标项目缺少源项目的成员，人员数据也将丢失。即使移回源项目，也无法恢复这些数据。移动父级工作项，子级也将一并移动，仅勾选子级不勾选父级，子级将不会移动。`}
         </p>
       </div>
       <Form
