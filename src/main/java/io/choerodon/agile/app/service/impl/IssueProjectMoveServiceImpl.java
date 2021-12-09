@@ -215,6 +215,12 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         // 检验传入的issueIds
         issueIds = validateIssueIds(projectId, issueIds);
         if (CollectionUtils.isEmpty(issueIds)) {
+            BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
+            batchUpdateFieldStatusVO.setProcess(1.0);
+            batchUpdateFieldStatusVO.setKey(messageCode);
+            batchUpdateFieldStatusVO.setUserId(userId);
+            batchUpdateFieldStatusVO.setStatus("success");
+            messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
             return;
         }
         // 处理问题类型-状态映射
@@ -286,9 +292,9 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         }
         // 传入的issueIds中选中了子任务没有带上父级任务需要把子任务去掉
         List<IssueDTO> childDTOS = issueMapper.queryChildrenIssue(projectId, issueIds);
-        if(!CollectionUtils.isEmpty(childDTOS)){
+        if (!CollectionUtils.isEmpty(childDTOS)) {
             for (IssueDTO childDTO : childDTOS) {
-                if(!allIssueIds.contains(childDTO.getParentIssueId())){
+                if (!allIssueIds.contains(childDTO.getParentIssueId())) {
                     allIssueIds.remove(childDTO.getIssueId());
                 }
             }
