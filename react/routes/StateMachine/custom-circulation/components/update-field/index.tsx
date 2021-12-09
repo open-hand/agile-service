@@ -153,6 +153,21 @@ const transformUpdateData = (data, customMemberFieldsData) => {
         if (key === 'environment' || key === 'featureType') {
           break;
         }
+        if (key === 'subProject') {
+          if (value?.length > 0) {
+            updateData.push({
+              fieldId,
+              fieldValueList: (value || []).map((item: string) => (
+                {
+                  operateType: item === 'clear' ? 'clear' : 'specifier',
+                  stringValue: item === 'clear' ? undefined : item,
+                  fieldType,
+                }
+              )),
+            });
+          }
+          break;
+        }
         if (value || value?.length > 0) {
           updateData.push({
             fieldId,

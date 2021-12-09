@@ -5,7 +5,7 @@ import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
 import { useCreation, usePersistFn } from 'ahooks';
 import classNames from 'classnames';
-import { uniqBy, castArray } from 'lodash';
+import { uniqBy, castArray, includes } from 'lodash';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { projectApi, ganttApi } from '@/api';
 import { ICategoryCode } from '@/hooks/useCategoryCodes';
@@ -28,10 +28,11 @@ export interface SelectTeamProps extends Omit<Partial<SelectProps>, 'optionRende
   optionData?: any[]
   userId?: string,
   category?: ICategoryCode,
+  excludeIds?: [],
 }
 
 const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
-  userId, projectDataRef = { current: null }, afterLoad, defaultSelectedIds: propsDefaultSelectedIds, level, flat, extraOptions, category, optionData, queryAgile, popupCls, optionRenderer, ...otherProps
+  userId, projectDataRef = { current: null }, afterLoad, defaultSelectedIds: propsDefaultSelectedIds, level, flat, extraOptions, category, optionData, queryAgile, popupCls, excludeIds, optionRenderer, ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Function>();
   afterLoadRef.current = afterLoad;
@@ -68,14 +69,14 @@ const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
     // @ts-ignore
     afterLoad: afterLoadRef.current,
     middleWare: (projects) => {
-      const newProjects = uniqBy([...(extraOptions || []), ...projects].map((item) => ({ ...item, id: String(item.id) })), 'id');
+      const newProjects = uniqBy([...(extraOptions || []), ...projects].map((item) => ({ ...item, id: String(item.id) })), 'id').filter((item) => !includes(excludeIds, item.id));
       // @ts-ignore
       // eslint-disable-next-line
       projectDataRef.current = newProjects;
       return newProjects || [];
     },
     paging: !queryAgile && !optionData,
-  }), [optionData, projectDataRef, queryAgile, userId]);
+  }), [category, defaultSelectedIds, excludeIds, extraOptions, level, optionData, optionRenderer, projectDataRef, queryAgile, userId]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
   return (

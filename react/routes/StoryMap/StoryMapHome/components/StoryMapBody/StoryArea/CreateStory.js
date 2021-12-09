@@ -152,6 +152,13 @@ class CreateStory extends Component {
             const { versionIssueRelVOList: storyMapVersionDTOList } = res;
             onCreate({ ...res, storyMapVersionDTOList, storyMapSprintList: [{ sprintId: sprintId || fieldsMap.get('sprint')?.defaultValue || 0 }] });
           },
+          onCancel: () => {
+            this.canAdd = true;
+            this.setState({
+              adding: false,
+              value: '',
+            });
+          },
         });
         return;
       }
