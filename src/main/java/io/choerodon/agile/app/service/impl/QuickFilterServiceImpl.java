@@ -60,6 +60,12 @@ public class QuickFilterServiceImpl implements QuickFilterService {
 
     private static final List<String> EQUALS_OR_IN_LIST = Arrays.asList("=", "in");
     private static final List<String> NOT_EQUALS_OR_NOT_IN_LIST = Arrays.asList("!=", "not in");
+    private static final String ACTUAL_START_TIME = "actual_start_time";
+    private static final String ACTUAL_END_TIME = "actual_end_time";
+    private static final String ESTIMATED_START_TIME = "estimated_start_time";
+    private static final String ESTIMATED_END_TIME = "estimated_end_time";
+    private static final String CREATION_DATE = "creation_date";
+    private static final String LAST_UPDATE_DATE = "last_update_date";
 
     @Autowired
     private QuickFilterMapper quickFilterMapper;
@@ -395,10 +401,12 @@ public class QuickFilterServiceImpl implements QuickFilterService {
             case "sprint_id":
                 dealCaseSprint(field, value, operation, sqlQuery);
                 break;
-            case "creation_date":
-                sqlQuery.append(" unix_timestamp(" + field + ")" + " " + quickFilterValueVO.getOperation() + " " + "unix_timestamp('" + value + "') ");
-                break;
-            case "last_update_date":
+            case CREATION_DATE:
+            case LAST_UPDATE_DATE:
+            case ESTIMATED_START_TIME:
+            case ESTIMATED_END_TIME:
+            case ACTUAL_START_TIME:
+            case ACTUAL_END_TIME:
                 sqlQuery.append(" unix_timestamp(" + field + ")" + " " + quickFilterValueVO.getOperation() + " " + "unix_timestamp('" + value + "') ");
                 break;
             case "participant_id":
