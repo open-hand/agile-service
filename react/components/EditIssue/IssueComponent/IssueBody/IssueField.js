@@ -28,7 +28,7 @@ const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 't
 
 const IssueField = observer((props) => {
   const {
-    store, applyType, saveFieldVersionRef, saveFieldFixVersionRef, disabled,
+    store, applyType, saveFieldVersionRef, saveFieldFixVersionRef, disabled, isProgram,
   } = useContext(EditIssueContext);
   const { isShowFeature } = useIsInProgram({ projectId: store.projectId });
   const renderNormalField = (field) => (<FieldPro {...props} field={field} />);
@@ -52,7 +52,7 @@ const IssueField = observer((props) => {
         return (<FieldSprint {...props} disabled />);
 
       case 'reporter':
-        return (<FieldReporter {...props} />);
+        return (<FieldReporter {...props} isProgram={isProgram} />);
       case 'priority':
         return (<FieldPriority {...props} />);
       case 'label':
