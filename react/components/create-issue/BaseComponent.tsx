@@ -240,7 +240,7 @@ const CreateIssueBase = observer(({
     isProgram,
   }, {
     onSuccess: ((issueTypes) => {
-      if (!issueTypeId) {
+      if (!issueTypeId || (showSelectProject && !some(issueTypes, { id: issueTypeId }))) {
         setFieldValue('issueType', getDefaultIssueType(issueTypes));
       }
     }),
@@ -266,7 +266,7 @@ const CreateIssueBase = observer(({
 
   const [{ data: fields, isFetching: isFieldsLoading }, {
     data: templateData,
-  }, { data: cascadeRuleList = [] }] = useIssueCreateFields({ issueTypeId, issueTypeCode, projectId });
+  }, { data: cascadeRuleList = [] }] = useIssueCreateFields({ issueTypeId: showSelectProject && isLoading ? undefined : issueTypeId, issueTypeCode, projectId });
   const fieldValueArr = usePersistFn((field: IssueCreateFields) => {
     let value = castArray(getValue(dataSet, field.fieldCode));
     const preset = presets.get(field.fieldCode);
