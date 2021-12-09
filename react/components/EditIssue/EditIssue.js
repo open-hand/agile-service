@@ -425,7 +425,7 @@ function EditIssue() {
           onOpenCreateSubBug={handleOpenCreateSubBug}
         />
         <WSHandler
-          messageKey={`agile-issue-update-by-trigger-${getProjectId()}`}
+          messageKey={`agile-issue-update-by-trigger-${store.projectId}`}
           onMessage={handleMessage}
         >
           <div />

@@ -3,8 +3,8 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { WSHandler, Choerodon } from '@choerodon/boot';
-import { Tooltip } from 'choerodon-ui/pro';
-import { Button } from 'choerodon-ui/pro';
+import { Tooltip, Button } from 'choerodon-ui/pro';
+
 import { getProjectId } from '@/utils/common';
 import SingleFileUpload from '@/components/SingleFileUpload';
 import to from '@/utils/to';
@@ -118,7 +118,7 @@ const IssueUI = (props: any) => {
       {
         issueId && (
           <WSHandler
-            messageKey={`${`agile-static-file-${getProjectId()}-${issueId}`}`}
+            messageKey={`${`agile-static-file-${store.projectId}-${issueId}`}`}
             onMessage={handleMessage}
           >
             <div />

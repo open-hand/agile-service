@@ -37,7 +37,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
         } else {
           labelList.push({
             labelName: label,
-            projectId: AppState.currentMenuType.id,
+            projectId: store.projectId,
           });
         }
       });

@@ -41,7 +41,7 @@ import SelectVersion from '@/components/select/select-version';
           versionList.push({
             name: version,
             relationType: 'fix',
-            projectId: AppState.currentMenuType.id,
+            projectId: store.projectId,
           });
         }
       });

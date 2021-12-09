@@ -42,7 +42,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
           versionList.push({
             name: version,
             relationType: 'influence',
-            projectId: AppState.currentMenuType.id,
+            projectId: store.projectId,
           });
         }
       });
