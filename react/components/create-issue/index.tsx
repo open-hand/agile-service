@@ -18,6 +18,7 @@ export interface CreateIssueProps extends Omit<CreateIssueBaseProps, 'onSubmit'>
   applyType?: 'agile' | 'program'
   request?: (data: any, applyType?: 'agile' | 'program') => Promise<any>
   showSelectProject?: boolean,
+  onCancel?: () => void,
 }
 
 const CreateContent = (props: CreateIssueBaseProps) => {
@@ -66,7 +67,7 @@ const CreateContent = (props: CreateIssueBaseProps) => {
 
 const openModal = (props: CreateIssueProps) => {
   const {
-    projectId, applyType = 'agile', onCreate, request, originFrom,
+    projectId, applyType = 'agile', onCreate, onCancel, request, originFrom,
   } = props;
   const handleSubmit: CreateIssueBaseProps['onSubmit'] = async ({ data, fieldList, fileList }) => {
     const res = request ? await request(data as any, applyType) : await issueApi.create(data as any, applyType);
@@ -100,6 +101,11 @@ const openModal = (props: CreateIssueProps) => {
       intlPrefix="boot"
       id="create"
     />,
+    onCancel: () => {
+      if (onCancel) {
+        onCancel();
+      }
+    },
     children: <CreateContent typeCode={issueTypeCode} onSubmit={handleSubmit} {...omit(props, 'onSubmit')} defaultTypeId={defaultIssueTypeId} />,
   });
 };

@@ -70,6 +70,10 @@ class CreateEpic extends Component {
             this.canAdd = true;
             onCreate({ ...res, epicName: value });
           },
+          onCancel: () => {
+            this.canAdd = true;
+            StoryMapStore.removeAddingEpic();
+          },
           extraSubmitValue: {
             rankVO,
           },

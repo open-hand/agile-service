@@ -273,14 +273,16 @@ const BatchContent: React.FC<Props> = ({
           name="targetProjectId"
           category="N_AGILE"
           style={{ marginBottom: 8 }}
+          popupCls={styles.selectProjectPopup}
+          excludeIds={getProjectId()}
         />
         {
           issueTypeDs.records.map((record) => (
-            <Row key={record.get('originIssueTypeId')} gutter={14} type="flex" align="top">
-              <Col span={6}>
+            <Row key={record.get('originIssueTypeId')} type="flex" align="top">
+              <Col span={6} style={{ paddingRight: 7 }}>
                 <SelectIssueType name="originIssueTypeId" record={record} />
               </Col>
-              <Col span={6}>
+              <Col span={6} style={{ padding: '0 7px' }}>
                 <Select
                   name="issueTypeId"
                   record={record}
@@ -297,7 +299,7 @@ const BatchContent: React.FC<Props> = ({
                   }}
                 />
               </Col>
-              <Col span={12}>
+              <Col span={12} style={{ paddingLeft: 7 }}>
                 {
                   record.getState('statusDs')?.records.map((statusRecord: Record) => (
                     <Row key={statusRecord.get('originStatusId')} gutter={14} style={{ marginBottom: 8 }}>
