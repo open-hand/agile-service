@@ -215,6 +215,12 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         // 检验传入的issueIds
         issueIds = validateIssueIds(projectId, issueIds);
         if (CollectionUtils.isEmpty(issueIds)) {
+            BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
+            batchUpdateFieldStatusVO.setProcess(1.0);
+            batchUpdateFieldStatusVO.setKey(messageCode);
+            batchUpdateFieldStatusVO.setUserId(userId);
+            batchUpdateFieldStatusVO.setStatus("success");
+            messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
             return;
         }
         // 处理问题类型-状态映射
