@@ -88,7 +88,14 @@ const DraggableIBaseItem: React.FC<Props> = ({
       />
     </div>
   ), [disabledEdit, fieldName, handleDelete, isDragDisabled, prefixCls]);
-
+  const handleMouseEnterTooltip = usePersistFn((e:any) => {
+    Tooltip.show(e.target, {
+      title: '该组织字段选项值被使用，不可删除',
+    });
+  });
+  const handleMouseLeaveTooltip = usePersistFn((e:any) => {
+    Tooltip.hide();
+  });
   const renderCheckBox = useCallback((name: string, editDisabled?: boolean) => (
     <CheckBox
       disabled={isDragDisabled || editDisabled}
@@ -138,6 +145,9 @@ const DraggableIBaseItem: React.FC<Props> = ({
                     className={classnames(`${prefixCls}-action-button`, { [`${prefixCls}-action-button-disabled`]: isDragDisabled })}
                     style={{ opacity: showSplitLine ? 1 : undefined }}
                     icon="delete_sweep-o"
+                    onMouseEnter={data.get('instanceCount') ? handleMouseEnterTooltip : undefined}
+                    onMouseLeave={handleMouseLeaveTooltip}
+                    disabled={data.get('instanceCount')}
                     size={'small' as any}
                     onClick={handleDelete}
                   />

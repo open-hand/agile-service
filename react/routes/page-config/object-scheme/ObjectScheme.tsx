@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Table, Modal, Menu,
+  Table, Modal,
 } from 'choerodon-ui/pro';
 import { Tag } from 'choerodon-ui';
 import {
@@ -13,7 +13,7 @@ import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
 import { pageConfigApi } from '@/api/PageConfig';
 import { getMenuType } from '@/utils/common';
 import NewCheckBox from '@/components/check-box';
-import TableDropMenu from '@/components/table-drop-menu';
+import TableDropMenu, { ITableDropMenuItem } from '@/components/table-drop-menu';
 import { useObjectSchemeStore } from './stores';
 import CreateField from '../components/create-field';
 import RequiredPrompt from './components/required-prompt';
@@ -61,14 +61,7 @@ function ObjectScheme() {
     const record = schemeTableDataSet.current!.clone();
     openSyncDefaultValueEditForm(record, prefixCls);
   }
-  function handleClickMenu({ key }: { key: string }) {
-    if (key === 'del') {
-      handleRemove();
-    }
-    if (key === 'sync') {
-      handleSyncDefault();
-    }
-  }
+
   function handleCheckChange(value: boolean) {
     if (handleContinueCheckChange()) {
       return value;
@@ -157,30 +150,30 @@ function ObjectScheme() {
     const disabledFields = getMenuType() === 'project' ? disabledEditDefaultFields : orgDisabledEditDefaultFields;
     // 系统字段 和项目层的组织字段 禁止编辑,禁止删除
     const disabledEditDel = system || (getMenuType() === 'project' && projectId === null);
-    const menuItems = [
-      <Menu.Item key="sync">
-        <span>{formatMessage({ id: 'agile.page.defaultValue.sync' })}</span>
-      </Menu.Item>,
-    ];
+    const menuItems: ITableDropMenuItem[] = [{ key: 'sync', text: formatMessage({ id: 'agile.page.defaultValue.sync' }), action: handleSyncDefault }];
+
     if (!disabledEditDel) {
-      menuItems.push(
-        <Menu.Item key="del">
-          <span>{formatMessage({ id: 'boot.delete' })}</span>
-        </Menu.Item>,
-      );
+      // const disabledOrgDel = getMenuType() === 'organization' && !!record?.get('instanceCount');
+      menuItems.push(...[{ action: openEditFieldModal, text: '编辑' }, {
+        key: 'del',
+        // disabled: disabledOrgDel,
+        text: formatMessage({ id: 'boot.delete' }),
+        // text: disabledEditDel ? (
+        //   <div id="agile-page-del">
+        //     <Tooltip title="该组织字段选项值被使用，不可删除" getPopupContainer={(p) => p.parentNode as any}>
+        //       <span>{formatMessage({ id: 'boot.delete' })}</span>
+        //     </Tooltip>
+        //   </div>
+        // ) : formatMessage({ id: 'boot.delete' }),
+        action: handleRemove,
+      }]);
     }
-    const menu = (
-      <Menu onClick={handleClickMenu}>
-        {menuItems}
-      </Menu>
-    );
 
     return (
       <div className="c7n-table-cell-drop-menu">
         <TableDropMenu
-          oldMenuData={menu}
           tooltip
-          menuData={disabledEditDel ? undefined : [{ action: openEditFieldModal, text: '编辑' }]}
+          menuData={menuItems}
           text={text}
           showMenu={!(system && disabledFields.includes(record?.get('code')))}
         />

@@ -137,7 +137,7 @@ interface MenuType {
   orgId: string,
   organizationId: string,
   projectId: string,
-  type: 'project'|'organization',
+  type: 'project' | 'organization',
 }
 export interface AppStateProps {
   currentProject: CurrentProject,
@@ -499,6 +499,7 @@ export interface ISearchVO {
 export type IVersionStatusCode = 'version_planning' | 'released' | 'archived'
 export interface IBootActionDataItem {
   service?: string[]
+  disabled?: boolean
   text?: React.ReactNode
   action?: Function /** 单独触发 */
   icon?: string

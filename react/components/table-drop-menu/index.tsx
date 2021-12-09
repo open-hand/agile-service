@@ -8,7 +8,7 @@ import { pick } from 'lodash';
 import classNames from 'classnames';
 import { IBootActionDataItem, IBootPermissionProps } from '@/common/types';
 
-interface ITableDropMenuItem extends IBootActionDataItem {
+export interface ITableDropMenuItem extends IBootActionDataItem {
   display?: boolean /** @default 'true' */
   key?: string
 }
