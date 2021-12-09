@@ -126,6 +126,7 @@ const afterLoadKeyMap = new Map([
 const lineField = ['summary', 'description'];
 const reuseFields = ['issueType', 'summary', 'description'];
 const pageCascadeFields = ['component', 'priority', 'fixVersion', 'influenceVersion'];
+const wsjfFields = ['userBusinessValue', 'timeCriticality', 'rrOeValue', 'jobSize'];
 
 function isSelect(field: IssueCreateFields | { fieldType: string }) {
   return includes(['radio', 'multiple', 'checkbox', 'single'], field.fieldType);
@@ -730,7 +731,7 @@ const CreateIssueBase = observer(({
     }
   });
   const renderFields = usePersistFn(() => (
-    [...dataSet.fields.values()].filter((f) => f.get('display') !== false).map((dataSetField) => {
+    [...dataSet.fields.values()].filter((f) => f.get('display') !== false && !wsjfFields.includes(f.name)).map((dataSetField) => {
       const { name, required } = dataSetField;
       const fieldType = dataSetField.get('fieldType');
       const fieldId = dataSetField.get('fieldId');
