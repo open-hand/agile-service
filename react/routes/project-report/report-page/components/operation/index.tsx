@@ -6,17 +6,17 @@ import { toJS } from 'mobx';
 import { Button, Modal } from 'choerodon-ui/pro';
 import { omit } from 'lodash';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
+import fileSaver from 'file-saver';
+import {
+  Box, Email, Image, Item, renderEmail,
+} from 'react-html-email';
+import { v4 as uuidV4 } from 'uuid';
 import {
   projectReportApi, IProjectReportCreate, IProjectReportUpdate, fileApi,
 } from '@/api';
 import { getProjectId } from '@/utils/common';
 // import JsPDF from 'jspdf';
-import fileSaver from 'file-saver';
 import to, { linkUrl } from '@/utils/to';
-import {
-  Box, Email, Image, Item, renderEmail,
-} from 'react-html-email';
-import { v4 as uuidV4 } from 'uuid';
 import styles from './index.less';
 import { useProjectReportContext } from '../../context';
 import Export, { IExportProps } from '../export';
@@ -66,7 +66,7 @@ const Operation: React.FC<Props> = () => {
       const data: IProjectReportCreate = {
         ...baseInfo,
         projectId: getProjectId(),
-        reportUnitList: toJS(store.blockList.map((block) => omit(block, 'key'))),
+        reportUnitList: toJS(store.blockList.map((block) => omit(toJS(block), 'key'))),
       } as IProjectReportCreate;
       return data;
     }
