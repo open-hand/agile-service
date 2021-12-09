@@ -4,6 +4,7 @@ import React, {
 import { inject } from 'mobx-react';
 import EditIssueStore from './EditIssueStore';
 import { getMenuType } from '@/utils/common';
+import useIsProgram from '@/hooks/useIsProgram';
 
 const EditIssueContext = createContext();
 export default EditIssueContext;
@@ -16,6 +17,7 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')((props
   };
   const isProjectLevel = useMemo(() => (props.menuType || getMenuType()) === 'project', [props.menuType, getMenuType]);
   const descriptionEditRef = useRef(false);
+  const { isProgram } = useIsProgram();
   const value = {
     ...props,
     isProjectLevel,
@@ -32,6 +34,7 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')((props
     saveFieldFixVersionRef: (ref) => {
       FieldFixVersionRef.current = ref;
     },
+    isProgram,
   };
 
   useEffect(() => {
