@@ -5604,16 +5604,17 @@
           union
           select
             ai.issue_id,
-            ai.parent_issue_id  as parent_issue_id
+            ai.relate_issue_id  as parent_issue_id
           from agile_issue ai
           where
             ai.project_id = #{projectId}
-          and ai.type_code = 'sub_task'
+          and ai.type_code = 'bug'
           and ai.issue_id in
           <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
                 #{issueId}
           </foreach>
-          and (ai.relate_issue_id is not null or ai.relate_issue_id != 0)
+          and ai.relate_issue_id is not null
+          and ai.relate_issue_id != 0
     </select>
 
     <sql id="queryAssigneeIssue">
