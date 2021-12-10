@@ -292,7 +292,7 @@ const setCurrentByFieldType = (current, fieldValue, fieldCode) => {
         }
       } else {
         // @ts-ignore
-        current.set(fieldCode, isClear ? ['clear'] : fieldValueList.map((item) => item.optionId));
+        current.set(fieldCode, isClear ? ['clear'] : fieldValueList.map((item) => item.optionId || item.stringValue)); // subProject是stringValue
       }
       break;
     }
