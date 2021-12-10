@@ -192,6 +192,12 @@ public class ChartSearchVO {
     private SearchVO searchVO;
 
 
+    /**
+     * 需求统计图维度
+     */
+
+    private BacklogPieChartDimensionVO dimension;
+
     public Long getServiceId() {
         return serviceId;
     }
@@ -446,5 +452,13 @@ public class ChartSearchVO {
 
     public void setSearchVO(SearchVO searchVO) {
         this.searchVO = searchVO;
+    }
+
+    public BacklogPieChartDimensionVO getDimension() {
+        return dimension;
+    }
+
+    public void setDimension(BacklogPieChartDimensionVO dimension) {
+        this.dimension = dimension;
     }
 }
