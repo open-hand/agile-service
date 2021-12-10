@@ -201,6 +201,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
     }
 
     @Override
+    @Async
     public void issueProjectBatchMove(Long projectId,
                                       Long targetProjectId,
                                       JSONObject jsonObject,
