@@ -20,7 +20,7 @@ const SelectParentIssue: React.FC<Props> = forwardRef(({
     textField: 'summary',
     valueField: 'issueId',
     requestArgs: { issueType },
-    request: ({ filter, page, requestArgs }) => issueApi.project(projectId).loadParentIssues(page ?? 0, 20, requestArgs?.issueType, filter), // 故事、任务、缺陷（不能是子缺陷
+    request: ({ filter, page, requestArgs }) => (requestArgs?.issueType ? issueApi.project(projectId).loadParentIssues(page ?? 0, 20, requestArgs?.issueType, filter) : { list: [] }), // 故事、任务、缺陷（不能是子缺陷
     paging: true,
     optionRenderer: InlineIssueTag.optionRenderer,
     renderer: InlineIssueTag.renderer,
