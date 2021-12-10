@@ -259,6 +259,7 @@ const en_US = {
   'dragList.active': 'active',
   'dragList.placeholder': 'Please enter an option value',
   'dragList.placeholder.code': 'Please enter an option code',
+  'agile.projectOverview.empty.current.sprint': 'You haven\'t started a sprint',
 };
 
 
