@@ -260,7 +260,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
                     List<String> fieldList = verifyUpdateUtil.verifyUpdateData(issueJSONObject, issueUpdateVO);
                     issueService.handleUpdateIssueWithoutRuleNotice(issueUpdateVO, fieldList, projectId);
                 }
-                double progress = currentProgress / issueDTOS.size() * 1.0;
+                double progress = currentProgress * 1.0 / issueDTOS.size();
                 if (progress % incrementalValue == 0) {
                     batchUpdateFieldStatusVO.setProcess(progress);
                     messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
