@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { inject } from 'mobx-react';
 import EditIssueStore from './EditIssueStore';
-import { getMenuType } from '@/utils/common';
+import { getMenuType, getProjectId } from '@/utils/common';
 import useIsProgram from '@/hooks/useIsProgram';
 
 const EditIssueContext = createContext();
@@ -24,7 +24,7 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')((props
     menuType: props.menuType || getMenuType(), /** project organization */
     prefixCls: 'c7n-agile-EditIssue',
     intlPrefix: 'agile.EditIssue',
-    store: useMemo(() => new EditIssueStore({ projectId: props.projectId }), [props.projectId]), // 防止update时创建多次store
+    store: useMemo(() => new EditIssueStore({ projectId: props.projectId || getProjectId() }), [props.projectId]), // 防止update时创建多次store
     FieldVersionRef,
     FieldFixVersionRef,
     descriptionEditRef,
@@ -38,7 +38,7 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')((props
   };
 
   useEffect(() => {
-    value.store.initApi(props.outside, props.organizationId, props.projectId);
+    value.store.initApi(props.outside, props.organizationId, props.projectId || getProjectId());
     return () => {
       value.store.destroy();
     };
