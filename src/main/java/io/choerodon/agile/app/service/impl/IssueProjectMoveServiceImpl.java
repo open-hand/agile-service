@@ -201,7 +201,6 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
     }
 
     @Override
-    @Async
     public void issueProjectBatchMove(Long projectId,
                                       Long targetProjectId,
                                       JSONObject jsonObject,
@@ -513,6 +512,9 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
                 //rank值重置
                 calculationRank(issueConvertDTO.getProjectId(), issueConvertDTO);
                 fieldList.add(RANK_FIELD);
+            } else if ("bug".equals(issueDTO.getTypeCode()) && Objects.nonNull(issueDTO.getRelateIssueId())) {
+                issueConvertDTO.setTypeCode(issueTypeVO.getTypeCode());
+                issueConvertDTO.setRelateIssueId(0L);
             } else {
                 issueConvertDTO.setTypeCode(issueTypeVO.getTypeCode());
             }
