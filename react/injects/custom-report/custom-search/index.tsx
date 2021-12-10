@@ -1,9 +1,11 @@
 import {
   Button, Dropdown,
+  ModalProvider,
 } from 'choerodon-ui/pro';
 import classNames from 'classnames';
 import { flatten } from 'lodash';
 import { runInAction } from 'mobx';
+
 import React, {
   useState, useCallback, useEffect, useMemo,
 } from 'react';
@@ -17,6 +19,8 @@ import useFormatMessage from '@/hooks/useFormatMessage';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import useGetIssueSearchData from './useGetIssueSearchData';
 import CustomSearchFields from './Search';
+import IntlProviderAsync from '../../../components/intl-provider-async';
+
 import './index.less';
 
 const InjectCustomSearch: React.FC<CustomReportSearchProps> = ({ searchVO, setSearchVO, projectId }) => {
@@ -122,4 +126,9 @@ const InjectCustomSearch: React.FC<CustomReportSearchProps> = ({ searchVO, setSe
     </div>
   );
 };
-export default InjectCustomSearch;
+const IntlInjectCustomSearch: React.FC<CustomReportSearchProps> = (props) => (
+  <IntlProviderAsync>
+    <InjectCustomSearch {...props} />
+  </IntlProviderAsync>
+);
+export default IntlInjectCustomSearch;
