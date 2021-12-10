@@ -340,6 +340,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
   ['environmentName', {
     title: <Tooltip title="环境">环境</Tooltip>,
     dataIndex: 'environmentName',
+    render: ({ rowData, dataIndex }) => (rowData.issueTypeVO?.typeCode === 'bug' ? rowData[dataIndex] : ''),
   }],
   ['tags', {
     title: <Tooltip title="Tag">Tag</Tooltip>,
