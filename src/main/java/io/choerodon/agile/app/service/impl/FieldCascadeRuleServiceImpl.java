@@ -99,7 +99,10 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
             FieldCode.LABEL,
             FieldCode.FEATURE,
             FieldCode.PI,
-            FieldCode.ENVIRONMENT
+            FieldCode.ENVIRONMENT,
+            FieldCode.BELONG_TO_BACKLOG,
+            FieldCode.PROGRESS_FEEDBACK,
+            FieldCode.EMAIL
     ).collect(Collectors.toSet());
 
     @Override
