@@ -104,7 +104,7 @@ const LinkedTable: React.FC<Props> = ({ issueId, linkedTableRef, projectId }) =>
         setUpdateCount((count) => count + 1);
       },
     },
-  }), [issueId, queryDataSet]);
+  }), [issueId, projectId, queryDataSet]);
   dataSetRef.current = dataSet;
 
   useImperativeHandle(linkedTableRef, () => ({
@@ -125,10 +125,10 @@ const LinkedTable: React.FC<Props> = ({ issueId, linkedTableRef, projectId }) =>
               prefix={<Icon type="search" />}
               valueChangeAction={'input' as any}
             />
-            <SelectIssueType placeholder="工作项类型" flat name="issueType" style={{ marginRight: 10, marginBottom: 10 }} filterList={['issue_epic', 'sub_task', 'feature']} dropdownMatchSelectWidth={false} projectId={projectId} />
-            <SelectStatus placeholder="状态" flat name="status" style={{ marginRight: 10, marginBottom: 10 }} request={() => statusApi.project(projectId).loadByProject('agile')} dropdownMatchSelectWidth={false} />
-            <SelectPriority placeholder="优先级" flat name="priority" style={{ marginRight: 10, marginBottom: 10 }} clearButton dropdownMatchSelectWidth={false} projectId={projectId} />
-            <SelectUser placeholder="经办人" flat name="assignee" style={{ marginRight: 10, marginBottom: 10 }} clearButton dropdownMatchSelectWidth={false} projectId={projectId} />
+            <SelectIssueType placeholder="工作项类型" flat name="issueType" dataSet={queryDataSet} style={{ marginRight: 10, marginBottom: 10 }} filterList={['issue_epic', 'sub_task', 'feature']} dropdownMatchSelectWidth={false} projectId={projectId} />
+            <SelectStatus placeholder="状态" flat name="status" dataSet={queryDataSet} style={{ marginRight: 10, marginBottom: 10 }} request={() => statusApi.project(projectId).loadByProject('agile')} dropdownMatchSelectWidth={false} />
+            <SelectPriority placeholder="优先级" flat name="priority" dataSet={queryDataSet} style={{ marginRight: 10, marginBottom: 10 }} clearButton dropdownMatchSelectWidth={false} projectId={projectId} />
+            <SelectUser placeholder="经办人" flat name="assignee" dataSet={queryDataSet} style={{ marginRight: 10, marginBottom: 10 }} clearButton dropdownMatchSelectWidth={false} projectId={projectId} />
           </div>
         </Form>
       )}
