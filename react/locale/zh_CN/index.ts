@@ -361,6 +361,7 @@ const zh_CN = {
   'report.code-quality.coverLines': '覆盖行',
   'report.code-quality.nclocs': '代码行',
   'report.code-quality.duplicatedLines': '重复行',
+  'agile.projectOverview.empty.current.sprint': '当前暂无活跃冲刺', // 暂时增加
 };
 
 export { zh_CN as AGILE_ZH_CN };
