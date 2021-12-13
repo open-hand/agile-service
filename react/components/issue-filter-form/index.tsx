@@ -20,6 +20,7 @@ interface IIssueFilterFormProps {
   extraRenderFields?: (field: IChosenFieldField, otherComponentProps: Partial<SelectProps> | Partial<DatePickerProps>, { dataSet }: { dataSet: DataSet, useSelectUserForceRefreshHook?: (...other: any) => [any, React.Dispatch<React.SetStateAction<any>>] }) => React.ReactElement | false | null,
   extraFormItems?: IChosenFieldField[],
   formColumns?: number
+  needInit?: boolean
 }
 function DefaultChooseField(chooseConfig: any) {
   const [data, componentProps] = useChoseField({
@@ -60,6 +61,7 @@ IssueFilterForm.defaultProps = {
   extraRenderFields: undefined,
   extraFormItems: undefined,
   formColumns: undefined,
+  needInit: true,
 };
 export default observer(IssueFilterForm);
 export { useIssueFilterFormDataSet, useIssueFilterForm, IIssueFilterFormProps };

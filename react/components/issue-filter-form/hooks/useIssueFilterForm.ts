@@ -51,6 +51,7 @@ function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps, IIssu
   const initialValue = useCreation(() => [...(toJS(config?.defaultValue) || []), ...(toJS(config?.value) || [])], []);
   const extraFormItems = useObservable<Map<string, IChosenFieldField>>(new Map());
   const [chosenFields, setChosenFields] = useSafeState<IChosenFieldField[]>([]);
+  const chosenFieldsSet = useCreation(() => new Set<string>(), []);
   // const [currentFormItems, { setAll, set, remove }] = useMap<string, IChosenFieldField>();
   const systemDataSetFieldConfig = useMemo(() => {
     const localSystemDataSetFieldConfig: Map<string, FieldProps> = new Map();
@@ -79,6 +80,15 @@ function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps, IIssu
       }));
     }
   }, [chosenFields, events, setChosenFields]);
+
+  useEffect(() => {
+    // 初始化值
+    chosenFields?.forEach((field) => {
+      !chosenFieldsSet.has(field.code)
+        && chosenFieldsSet.add(field.code) && initFieldIssueFilterForm(field, dataSet);
+    });
+  }, [chosenFields, chosenFieldsSet, dataSet]);
+
   // 初始化额外form项
   useEffect(() => {
     if (config?.extraFormItems && Array.isArray(config.extraFormItems)) {
@@ -111,6 +121,7 @@ function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps, IIssu
     chosenFields,
     extraRenderFields: config?.extraRenderFields,
     onDelete: handleDelete,
+    needInit: false,
     defaultVisibleFooterAddBtn: config?.defaultVisibleFooterAddBtn,
   };
   return [dataProps, componentProps];
