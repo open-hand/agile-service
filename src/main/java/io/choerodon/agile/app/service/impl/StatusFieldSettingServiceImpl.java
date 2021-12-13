@@ -813,7 +813,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                 default:
                     break;
             }
-            if (agilePluginService != null && PROGRAM_FIELD_CODE.containsValue(statusFieldSettingVO.getFieldCode())) {
+            if (agilePluginService != null) {
                 agilePluginService.handlerProgramFieldValue(statusFieldSettingVO, statusFieldValueSettingDTOS);
             }
         } else {

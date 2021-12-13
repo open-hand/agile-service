@@ -153,6 +153,21 @@ const transformUpdateData = (data, customMemberFieldsData) => {
         if (key === 'environment' || key === 'featureType') {
           break;
         }
+        if (key === 'subProject') {
+          if (value?.length > 0) {
+            updateData.push({
+              fieldId,
+              fieldValueList: (value || []).map((item: string) => (
+                {
+                  operateType: item === 'clear' ? 'clear' : 'specifier',
+                  stringValue: item === 'clear' ? undefined : item,
+                  fieldType,
+                }
+              )),
+            });
+          }
+          break;
+        }
         if (value || value?.length > 0) {
           updateData.push({
             fieldId,
@@ -277,7 +292,7 @@ const setCurrentByFieldType = (current, fieldValue, fieldCode) => {
         }
       } else {
         // @ts-ignore
-        current.set(fieldCode, isClear ? ['clear'] : fieldValueList.map((item) => item.optionId));
+        current.set(fieldCode, isClear ? ['clear'] : fieldValueList.map((item) => item.optionId || item.stringValue)); // subProject是stringValue
       }
       break;
     }

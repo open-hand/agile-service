@@ -4,6 +4,7 @@ import { Permission } from '@choerodon/boot';
 import { C7NFormat } from '@choerodon/master';
 
 import { IProjectInfo, projectApi } from '@/api';
+import styles from './index.less';
 
 interface Props {
   refresh: () => void
@@ -43,7 +44,7 @@ const HideSubTask: React.FC<Props> = ({ refresh }) => {
         />
       )}
     >
-      <CheckBox name="hidden" value onChange={handleChange} checked={hidden}>
+      <CheckBox name="hidden" value onChange={handleChange} checked={hidden} className={styles.checkbox}>
         <C7NFormat
           intlPrefix="agile.scrumBoard"
           id="hide.sub_task.completed.in.history.sprint"

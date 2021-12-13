@@ -34,6 +34,7 @@ import { ganttIsCanQuickCreateIssue } from '../utils';
 import openGanttDependencyModal from '../components/gantt-dependency-modal';
 import TableDropMenu from '@/components/table-drop-menu';
 import useProjectPredecessorTypes from '@/hooks/data/useProjectPredecessorTypes';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 interface IGanttColumnsHookProps extends TableCacheRenderProps {
   menuType: IGanttProps['menuType']
@@ -50,6 +51,11 @@ interface IGanttOrgColumnsHookProps extends TableCacheRenderProps {
   onClickSummary?: (issue: GanttIssue) => void
   projectId?: string
 }
+const IntlField: React.FC<{ column: any }> = ({ children, column }) => {
+  const formatMessage = useFormatMessage();
+  const name = column.titleKey ? formatMessage({ id: column.titleKey }) : column.label ?? column.title; // , defaultMessage: column.title
+  return React.isValidElement(name) ? name : <Tooltip title={name}>{name}</Tooltip>;
+};
 const renderTooltip = (user: User) => {
   const {
     loginName, realName, email, ldap,
@@ -90,74 +96,58 @@ const ganttColumnCodeMapProps: Record<string, { title?: string, width?: number }
     title: '实际结束',
   },
 };
-const ganttColumnMap = new Map<string, any>([['assignee', (onSortChange: any) => ({
+
+const ganttColumnMap = new Map<string, any>([['assignee', {
   width: 85,
   minWidth: 85,
   name: 'assignee',
-  label: (
-    <GanttSortLabel dataKey="assigneeId" onChange={onSortChange}>
-      经办人
-    </GanttSortLabel>) as any,
   render: (record: any) => (
     <Tooltip title={renderTooltip(record.assignee)}>
       <span>{record.assignee?.realName}</span>
     </Tooltip>
   ),
-}),
-],
-['predecessor', (onSortChange: any) => ({
+}],
+['predecessor', {
   width: 120,
   minWidth: 120,
   name: 'predecessor',
+  titleKey: 'agile.gantt.column.predecessor',
   label: '前置依赖',
   render: (record: any) => record.predecessors,
-})], ['estimatedStartTime', (onSortChange: any) => ({
+}], ['estimatedStartTime', {
   width: 100,
   minWidth: 100,
   name: 'estimatedStartTime',
-  label: (
-    <GanttSortLabel dataKey="estimatedStartTime" onChange={onSortChange}>
-      预计开始
-    </GanttSortLabel>) as any,
+  titleKey: 'agile.gantt.column.estimatedStartTime',
   render: (record: any) => record.estimatedStartTime && <Tooltip title={record.estimatedStartTime}><span>{dayjs(record.estimatedStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
-})], ['estimatedEndTime', (onSortChange: any) => ({
+}], ['estimatedEndTime', {
   width: 100,
   minWidth: 100,
   name: 'estimatedEndTime',
-  label: (
-    <GanttSortLabel dataKey="estimatedEndTime" onChange={onSortChange}>
-      预计结束
-    </GanttSortLabel>
-  ),
+  titleKey: 'agile.gantt.column.estimatedEndTime',
   render: (record: any) => record.estimatedEndTime && <Tooltip title={record.estimatedEndTime}><span>{dayjs(record.estimatedEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
-}),
+},
 ],
-['actualStartTime', (onSortChange: any) => ({
+['actualStartTime', {
   width: 100,
   minWidth: 100,
   name: 'actualStartTime',
-  label: (
-    <GanttSortLabel dataKey="actualStartTime" onChange={onSortChange}>
-      实际开始
-    </GanttSortLabel>
-  ),
+  titleKey: 'agile.gantt.column.actualStartTime',
   render: (record: any) => record.actualStartTime && <Tooltip title={record.actualStartTime}><span>{dayjs(record.actualStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
-}),
+},
 ],
-['actualEndTime', (onSortChange: any) => ({
+['actualEndTime', {
   width: 100,
   minWidth: 100,
   name: 'actualEndTime',
-  label: (
-    <GanttSortLabel dataKey="actualEndTime" onChange={onSortChange}>
-      实际结束
-    </GanttSortLabel>
-  ),
+  titleKey: 'agile.gantt.column.actualEndTime',
   render: (record: any) => record.actualEndTime && <Tooltip title={record.actualEndTime}><span>{dayjs(record.actualEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
-}),
+},
 ],
 ]);
-
+function findIntlTitleKey(code: string): string | undefined {
+  return ganttColumnMap.get(code)?.titleKey ?? systemColumnsMap.get(code)?.titleKey;
+}
 function getListLayoutColumns(listLayoutColumns: ListLayoutColumnVO[] | null, fields: IFoundationHeader[]): Array<ListLayoutColumnVO & IFoundationHeader & { label: string }> {
   let res: any[] = [];
   if (listLayoutColumns) {
@@ -171,7 +161,8 @@ function getListLayoutColumns(listLayoutColumns: ListLayoutColumnVO[] | null, fi
       res.push({
         width: 0,
         sort: 0,
-        label: field.title,
+        // 寻找多语言 key
+        label: <IntlField column={{ ...field, titleKey: findIntlTitleKey(field.code) }} />,
         columnCode: field.code,
         display: false,
         ...field,
@@ -180,7 +171,8 @@ function getListLayoutColumns(listLayoutColumns: ListLayoutColumnVO[] | null, fi
     } else {
       res[resIndex] = {
         ...res[resIndex],
-        label: field.title,
+        // 寻找多语言 key
+        label: <IntlField column={{ ...field, titleKey: findIntlTitleKey(field.code) }} />,
         ...field,
       };
     }
@@ -282,21 +274,21 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
           </span>
         </Tooltip>
         {!disable.disableOperate && (
-        <TableDropMenu
-          showText={false}
-          menuData={[
-            { text: '添加子工作项', action: () => openCreateSubIssue(record as any), display: isShowDependency && isCanCreateIssue },
-            {
-              text: `${hasDependency ? '编辑' : '添加'}前置依赖`,
-              action: () => openGanttDependencyModal({
-                issueId: record.issueId,
-                data: record.predecessors || [],
-                onOk: () => onUpdate(record),
-              }),
-              display: isShowDependency,
-            },
-          ]}
-        />
+          <TableDropMenu
+            showText={false}
+            menuData={[
+              { text: '添加子工作项', action: () => openCreateSubIssue(record as any), display: isShowDependency && isCanCreateIssue },
+              {
+                text: `${hasDependency ? '编辑' : '添加'}前置依赖`,
+                action: () => openGanttDependencyModal({
+                  issueId: record.issueId,
+                  data: record.predecessors || [],
+                  onOk: () => onUpdate(record),
+                }),
+                display: isShowDependency,
+              },
+            ]}
+          />
         )}
         {!isShowDependency && isCanCreateIssue && (
           <Icon
@@ -350,14 +342,15 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
       </Tooltip>
     );
   }
-  const tableColumns: GanttProps<Issue>['columns'] = [{
+  const tableColumns: Array<GanttProps<Issue>['columns'][0] & { titleKey: string, }> = [{
     flex: 2,
     minWidth: 300,
     // width: 300,
-    // @ts-ignore
     lock: 'left',
     name: 'summary',
-    label: (<GanttSortLabel dataKey="summary" onChange={onSortChange}>名称</GanttSortLabel>) as any,
+    // label: '名称',
+    label: <GanttSortLabel dataKey="summary" onChange={onSortChange}><IntlField column={{ titleKey: 'agile.gantt.column.summary' }} /></GanttSortLabel> as any,
+    titleKey: 'agile.gantt.column.summary',
     render: renderSummary,
   },
   ];
@@ -372,28 +365,34 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
   };
   tableColumns.push(...visibleColumns.map(({ columnCode }) => {
     const baseColumn = { width: 100 } as any;
-    if (ganttColumnMap.has(columnCode)) {
-      const field = ganttColumnMap.get(columnCode);
-      merge(baseColumn, typeof field === 'function' ? field(onSortChange) as Gantt.Column : field);
-      columnCode === 'predecessor' && merge(baseColumn, { render: renderPredecessor });
-    } else if (systemColumnsMap.has(columnCode)) {
+    if (systemColumnsMap.has(columnCode)) {
       const column = systemColumnsMap.get(columnCode)!;
       merge(baseColumn, {
         ...column,
-        label: column.sortable ? (<GanttSortLabel dataKey={column.dataIndex} onChange={onSortChange}>{column?.title}</GanttSortLabel>) : column?.title,
         name: column?.dataIndex,
         render: fieldMapRender[columnCode as keyof typeof fieldMapRender] ?? column?.render,
       });
     } else {
       const field = find(tableFields, { code: columnCode });
       const column = field ? getCustomColumn(field) : {} as any;
-      merge(baseColumn, {
-        ...column,
-        label: column.sortable ? (<GanttSortLabel dataKey={column.dataIndex} onChange={onSortChange}>{column?.title}</GanttSortLabel>) : column?.title,
-      });
+      merge(baseColumn, column);
+    }
+
+    if (ganttColumnMap.has(columnCode)) {
+      const field = ganttColumnMap.get(columnCode);
+      merge(baseColumn, { ...field, sortable: true });
+      columnCode === 'predecessor' && merge(baseColumn, { render: renderPredecessor });
     }
     const { render, name } = baseColumn;
     return merge(baseColumn, {
+      label: baseColumn.sortable ? (
+        <GanttSortLabel
+          dataKey={baseColumn.dataIndex}
+          onChange={onSortChange}
+        >
+          <IntlField column={baseColumn} />
+        </GanttSortLabel>
+      ) : <IntlField column={baseColumn} />,
       render: (record: any) => {
         if (record?.create) {
           return undefined;
@@ -405,7 +404,9 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
 
   return tableColumns;
 };
-const ganntSystemFields = [{ title: '前置依赖', code: 'predecessor', fieldType: 'multiple' }];
+const ganttSystemFields = [{
+  title: '前置依赖', titleKey: 'agile.gantt.column.predecessor', code: 'predecessor', fieldType: 'multiple',
+}];
 const defaultVisibleColumns = ['assignee', 'predecessor', 'estimatedStartTime', 'estimatedEndTime', 'actualStartTime', 'actualEndTime'];
 const defaultListLayoutColumns = defaultVisibleColumns.map((code) => ({
   columnCode: code,
@@ -416,7 +417,7 @@ function useGanttProjectColumns({
 }: IGanttColumnsHookProps) {
   // 恒为 项目层级
   const { data: tableFields } = useIssueTableFields({
-    hiddenFieldCodes: ['epicSelfName', 'summary'], extraFields: ganntSystemFields, projectId, menuType: 'project',
+    hiddenFieldCodes: ['epicSelfName', 'summary'], extraFields: ganttSystemFields, projectId, menuType: 'project',
   });
   const { data: issueTypes, isLoading: issueTypeIsLoading } = useProjectIssueTypes({ projectId, isInProgram });
   const { data: predecessorTypes, isLoading: predecessorTypesLoading } = useProjectPredecessorTypes({ projectId });

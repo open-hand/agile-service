@@ -7,7 +7,7 @@ const locale = {
   'story.completed': 'Story completion',
   quality: 'Quality Analysis',
   trend: 'Trend Analysis',
-
+  distribution: '{name} Distribution',
 } as const;
 const exportPerformance = localeAppendPrefixObjectKey({ intlPrefix: 'performance' as const, intlObject: locale });
 type ILocalePerformanceType = {

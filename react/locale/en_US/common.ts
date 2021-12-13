@@ -53,6 +53,7 @@ const localeCommon = {
   'search.placeholder': 'Search',
   all: 'All',
   inverse: 'Inverse',
+  current: 'Present',
 } as const;
 const exportCommon = localeAppendPrefixObjectKey({ intlPrefix: 'common' as const, intlObject: localeCommon });
 type ILocaleCommonType = {

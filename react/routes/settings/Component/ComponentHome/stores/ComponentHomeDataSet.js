@@ -2,7 +2,7 @@ import React from 'react';
 import { DataSet } from 'choerodon-ui/pro';
 import { C7NFormat } from '@choerodon/master';
 
-function ComponentHomeDataSet({ id }) {
+function ComponentHomeDataSet({ id, formatMessage }) {
   const roleSet = new DataSet({
     data: [{
       meaning: '无',
@@ -39,90 +39,63 @@ function ComponentHomeDataSet({ id }) {
       {
         name: 'name',
         type: 'string',
-        label: (
-          <span>
-            <C7NFormat
-              intlPrefix="agile.setting"
-              id="component"
-            />
-          </span>),
+        label: formatMessage({ id: 'agile.setting.component' }),
+
       },
       {
         name: 'issueCount',
         type: 'string',
-        label: (
-          <span>
-            <C7NFormat
-              intlPrefix="agile.common"
-              id="issue"
-            />
-          </span>),
+        label: formatMessage({ id: 'agile.common.issue' }),
       },
       {
         name: 'manager',
         type: 'string',
-        label: (
-          <span>
-            <C7NFormat
-              intlPrefix="agile.setting"
-              id="responsible"
-            />
-
-          </span>),
+        label: formatMessage({ id: 'agile.setting.responsible' }),
       },
       {
         name: 'description',
         type: 'string',
+        label: formatMessage({ id: 'agile.setting.component.description' }),
+      },
+      {
+        name: 'defaultAssigneeRole',
+        type: 'string',
+        label: formatMessage({ id: 'agile.setting.default.assignee' }),
+      },
+      {
+        name: 'sequence',
+        type: 'string',
         label: (
           <span>
 
             <C7NFormat
               intlPrefix="agile.setting"
-              id="component.description"
+              id="sequence"
             />
 
           </span>),
-      },
-      {
-        name: 'defaultAssigneeRole',
-        type: 'string',
-        label: '默认经办人',
-      },
-      {
-        name: 'sequence',
-        type: 'string',
-        label: '模块顺序',
       },
     ],
     queryFields: [
       {
         name: 'name',
         type: 'string',
-        label: <C7NFormat
-          intlPrefix="agile.setting"
-          id="component"
-        />,
+        label: formatMessage({ id: 'agile.setting.component' }),
       },
       {
         name: 'manager',
         type: 'string',
-        label: <C7NFormat
-          intlPrefix="agile.setting"
-          id="responsible"
-        />,
+        label: formatMessage({ id: 'agile.setting.responsible' }),
       },
       {
         name: 'description',
         type: 'string',
-        label: <C7NFormat
-          intlPrefix="agile.setting"
-          id="component.description"
-        />,
+        label: formatMessage({ id: 'agile.setting.component.description' }),
       },
       {
         name: 'defaultAssigneeRole',
         type: 'string',
-        label: '默认经办人',
+        label: formatMessage({ id: 'agile.setting.default.assignee' }),
         options: roleSet,
       },
     ],

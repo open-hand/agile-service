@@ -676,4 +676,12 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     List<Long> selectCompletedSubIssue(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
 
     void updateSubIssueHistoryCompleted(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
+
+    /**
+     * 查询issueIds中的子任务和子Bug
+     * @param projectId
+     * @param issueIds
+     * @return
+     */
+    List<IssueDTO> queryChildrenIssue(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
 }

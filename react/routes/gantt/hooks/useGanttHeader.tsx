@@ -135,6 +135,7 @@ function useGanttHeader(config: IGanttHeaderHookConfig) {
               title: '设置列显示字段',
             },
             projectId,
+            tooltip: false,
             value: getConfig('visibleColumnCodes', []),
             options: getConfig('columnOptions', []),
             type: 'gantt',

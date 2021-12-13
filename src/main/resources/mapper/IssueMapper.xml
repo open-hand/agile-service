@@ -382,11 +382,11 @@
         <collection property="versionIssueRelDTOS"
                     ofType="io.choerodon.agile.infra.dto.VersionIssueRelDTO">
             <id property="versionId" column="version_id"/>
-            <result property="statusCode" column="version_status_code"/>
-            <result property="relationType" column="relation_type"/>
-            <result property="issueId" column="version_issue_id"/>
-            <result property="projectId" column="version_project_id"/>
-            <result property="name" column="version_name"/>
+            <id property="statusCode" column="version_status_code"/>
+            <id property="relationType" column="relation_type"/>
+            <id property="issueId" column="version_issue_id"/>
+            <id property="projectId" column="version_project_id"/>
+            <id property="name" column="version_name"/>
         </collection>
         <collection property="issueSprintDTOS"
                     ofType="io.choerodon.agile.infra.dto.IssueSprintDTO">
@@ -4100,6 +4100,7 @@
         ai.object_version_number,
         ai.created_by,
         ai.estimated_start_time,
+        ai.parent_issue_id,
         ai.estimated_end_time
         FROM agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
@@ -5587,6 +5588,34 @@
             #{issueId}
         </foreach>
     </update>
+
+    <select id="queryChildrenIssue" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+         select
+           ai.issue_id,
+           ai.parent_issue_id  as parent_issue_id
+         from agile_issue ai
+         where
+          ai.project_id = #{projectId}
+          and ai.type_code = 'sub_task'
+          and ai.issue_id in
+          <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+              #{issueId}
+          </foreach>
+          union
+          select
+            ai.issue_id,
+            ai.relate_issue_id  as parent_issue_id
+          from agile_issue ai
+          where
+            ai.project_id = #{projectId}
+          and ai.type_code = 'bug'
+          and ai.issue_id in
+          <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+                #{issueId}
+          </foreach>
+          and ai.relate_issue_id is not null
+          and ai.relate_issue_id != 0
+    </select>
 
     <sql id="queryAssigneeIssue">
         <if test="workItemSearchVO.assigneeFilter.contains('assignee')">

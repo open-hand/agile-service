@@ -42,18 +42,17 @@ class FeatureApi extends Api<FeatureApi> {
    * @param page 第几页
    */
   queryAllInSubProject(featureIds: Array<string | number>, param: string, page: number = 1, size: number) {
-    return axios.post(
-      `${this.prefix}/issues/feature/all`,
-      featureIds || [],
-      {
-        params: {
-          organizationId: getOrganizationId(),
-          page,
-          size: !size && size === 0 ? 0 : (size || 10),
-          param,
-        },
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/issues/feature/all`,
+      data: featureIds || [],
+      params: {
+        organizationId: this.orgId,
+        page,
+        size: !size && size === 0 ? 0 : (size || 10),
+        param,
       },
-    );
+    });
   }
 
   /**

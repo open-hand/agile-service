@@ -198,13 +198,13 @@ function EditIssue() {
         comments,
         notAllowedTransferStatus,
       ] = await Promise.all([
-        isProjectLevel && (otherProject || outside) ? null : knowledgeApi.project(projectId).loadByIssue(id),
-        isProjectLevel && (otherProject || outside || programId || applyType === 'program') ? null : workLogApi.project(projectId).loadByIssue(id),
+        (isProjectLevel && otherProject) || outside ? null : knowledgeApi.project(projectId).loadByIssue(id),
+        (isProjectLevel && (otherProject || programId || applyType === 'program')) || outside ? null : workLogApi.project(projectId).loadByIssue(id),
         programId ? dataLogApi.loadUnderProgram(id, programId) : dataLogApi.org(organizationId).outside(outside).project(projectId).loadByIssue(id),
         programId || applyType === 'program' ? null : issueLinkApi.org(organizationId).outside(outside).project(projectId).loadByIssueAndApplyType(id),
         programId ? issueApi.getCommentsUnderProgram(id, programId) : issueApi.org(organizationId).outside(outside).project(projectId).getComments(id),
         // issue中非子任务的工作项需要请求不能流转到的状态数据
-        applyType !== 'program' && issue.typeCode !== 'sub_task' ? boardApi.project(projectId).getNotAllowedTransferStatus(id) : null,
+        !outside && applyType !== 'program' && issue.typeCode !== 'sub_task' ? boardApi.project(projectId).getNotAllowedTransferStatus(id) : null,
       ]);
       if (idRef.current !== id) {
         return;
@@ -425,7 +425,7 @@ function EditIssue() {
           onOpenCreateSubBug={handleOpenCreateSubBug}
         />
         <WSHandler
-          messageKey={`agile-issue-update-by-trigger-${getProjectId()}`}
+          messageKey={`agile-issue-update-by-trigger-${store.projectId}`}
           onMessage={handleMessage}
         >
           <div />

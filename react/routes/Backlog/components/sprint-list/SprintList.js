@@ -11,7 +11,7 @@ function SprintList({ openCreateIssueModal }) {
 
   return (
     <DragDropContext onBeforeCapture={BacklogStore.onBeforeCapture} onDragEnd={BacklogStore.onDragEnd} onDragStart={BacklogStore.onDragStart}>
-      {sprintList.map((sprint) => <Sprint data={sprint} key={sprint.sprintId} openCreateIssueModal={openCreateIssueModal} />)}
+      {sprintList.map((sprint, sprintIndex) => <Sprint sprintIndex={sprintIndex} data={sprint} key={sprint.sprintId} openCreateIssueModal={openCreateIssueModal} />)}
     </DragDropContext>
   );
 }

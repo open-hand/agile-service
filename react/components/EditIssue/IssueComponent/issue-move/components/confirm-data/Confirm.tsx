@@ -63,7 +63,6 @@ const Confirm: React.FC<Props> = ({
             [...Object.entries(loseItems)].filter(([, v]) => !!v).length
           ))) && (
           <div className={styles.tip}>
-            <Icon type="report" />
             <p className={styles.tipText}>
               {issueMapValues.map(({ issue, lostFields }) => (
                 <LostFields

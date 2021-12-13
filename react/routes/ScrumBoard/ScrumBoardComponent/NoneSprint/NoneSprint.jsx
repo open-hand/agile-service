@@ -12,7 +12,6 @@ const NoneSprint = ({ doingSprintExist, filterItems, hasSetFilter }) => {
   const formatMessage = useFormatMessage();
 
   const { sprint } = filterItems;
-  console.log('....', doingSprintExist, sprint, filterItems, hasSetFilter);
   if ((doingSprintExist || sprint) && Object.keys(filterItems).length === 1) {
     tipTitle = 'empty.description.prefix.plan';
   } else if (hasSetFilter) {

@@ -56,6 +56,10 @@ public class FieldCode {
     public static final String BACKLOG_CLASSIFICATION = "backlogClassification";
     public static final String BACKLOG_TYPE = "backlogType";
     public static final String PROCESSOR = "processor";
+    public static final String URGENT = "urgent";
+    public static final String PROGRESS_FEEDBACK = "progressFeedback";
+    public static final String EMAIL = "email";
+    public static final String BELONG_TO_BACKLOG = "belongToBacklog";
 
     public static final String ISSUE_STATUS = "issueStatus";
 

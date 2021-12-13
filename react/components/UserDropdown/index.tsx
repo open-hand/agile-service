@@ -141,7 +141,14 @@ const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee, proje
     pageSize: 20,
     transport: {
       // @ts-ignore
-      read: ({ params }) => userApiConfig.getAllInProject(params?.param, params.page, undefined, params.size, projectId),
+      read: ({ params, data: requestData }) => ({
+        ...userApiConfig.project(projectId).getProjectUsersWithoutDisable({ ...params, ...requestData }),
+        transformResponse: (res) => {
+          const data = JSON.parse(res);
+          const content = data.content?.filter((item: any) => item.enabled);
+          return { ...data, content };
+        },
+      }),
     },
   }), [projectId]);
   useImperativeHandle(userDropDownRef, () => ({

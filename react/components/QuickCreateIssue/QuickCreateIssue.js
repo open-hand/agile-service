@@ -325,30 +325,41 @@ class QuickCreateIssue extends Component {
                 </Button>
               </div>
             </div>
-          ) : (
-            <Button
-              funcType="flat"
-              icon="playlist_add"
-              disabled={this.props.issueTypes.length === 0}
-              onClick={() => {
-                this.setState({
-                  create: true,
-                }, () => {
-                  this.loadInitValue(this.getCurrentType().id);
-                });
-              }}
-              style={this.props.btnStyle || {}}
-            >
-              {buttonShowText || (
-              <span>
-                <C7NFormat
-                  intlPrefix="agile.common"
-                  id="create.issue"
-                />
-              </span>
-              )}
-            </Button>
           )
+            : (
+              <span
+                role="none"
+                onClick={() => {
+                  if (this.props.issueTypes.length === 0) {
+                    return;
+                  }
+                  this.setState({
+                    create: true,
+                  }, () => {
+                    this.loadInitValue(this.getCurrentType().id);
+                  });
+                }}
+              >
+                {this.props.button || (
+                <Button
+                  funcType="flat"
+                  icon="playlist_add"
+                  disabled={this.props.issueTypes.length === 0}
+                  style={this.props.btnStyle || {}}
+                >
+                  {buttonShowText || (
+                    <span>
+                      <C7NFormat
+                        intlPrefix="agile.common"
+                        id="create.issue"
+                      />
+                    </span>
+                  )}
+                </Button>
+                )}
+
+              </span>
+            )
         }
       </div>
     );

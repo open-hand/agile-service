@@ -6,6 +6,7 @@ import { observable } from 'mobx';
 import { includes } from 'lodash';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
+import moment from 'moment';
 import {
   IField,
 } from '@/common/types';
@@ -79,6 +80,7 @@ export default function renderField<T extends Partial<SelectProps>>({
           <DateTimePickerWithFormat
             name={fieldCode}
             style={{ width: '100%' }}
+            defaultPickerValue={fieldCode === 'actualEndTime' || fieldCode === 'estimatedEndTime' ? moment().endOf('d') : undefined}
             {...otherComponentProps}
           />
         );

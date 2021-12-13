@@ -83,6 +83,7 @@ export interface CreateIssueBaseProps {
   showSelectProject?: boolean,
   /** 额外的需要必填的字段建 */
   extendRequiredCodes?: string[]
+  extraSubmitValue?: any
 }
 const defaultDataSet = new DataSet({
   autoCreate: true,
@@ -125,6 +126,7 @@ const afterLoadKeyMap = new Map([
 const lineField = ['summary', 'description'];
 const reuseFields = ['issueType', 'summary', 'description'];
 const pageCascadeFields = ['component', 'priority', 'fixVersion', 'influenceVersion'];
+const wsjfFields = ['userBusinessValue', 'timeCriticality', 'rrOeValue', 'jobSize'];
 
 function isSelect(field: IssueCreateFields | { fieldType: string }) {
   return includes(['radio', 'multiple', 'checkbox', 'single'], field.fieldType);
@@ -217,6 +219,7 @@ const CreateIssueBase = observer(({
   showSelectProject = false,
   extendRequiredCodes = [],
   menuType = 'project',
+  extraSubmitValue,
 }: CreateIssueBaseProps) => {
   const formatMessage = useFormatMessage('agile.common');
   // formatMessage({}
@@ -237,7 +240,7 @@ const CreateIssueBase = observer(({
     isProgram,
   }, {
     onSuccess: ((issueTypes) => {
-      if (!issueTypeId) {
+      if (!issueTypeId || (showSelectProject && !some(issueTypes, { id: issueTypeId }))) {
         setFieldValue('issueType', getDefaultIssueType(issueTypes));
       }
     }),
@@ -263,7 +266,7 @@ const CreateIssueBase = observer(({
 
   const [{ data: fields, isFetching: isFieldsLoading }, {
     data: templateData,
-  }, { data: cascadeRuleList = [] }] = useIssueCreateFields({ issueTypeId, projectId });
+  }, { data: cascadeRuleList = [] }] = useIssueCreateFields({ issueTypeId: showSelectProject && isLoading ? undefined : issueTypeId, issueTypeCode, projectId });
   const fieldValueArr = usePersistFn((field: IssueCreateFields) => {
     let value = castArray(getValue(dataSet, field.fieldCode));
     const preset = presets.get(field.fieldCode);
@@ -455,9 +458,15 @@ const CreateIssueBase = observer(({
         newValue[name] = oldValue;
       }
     });
+    const isAvailableValue = (fieldName: string, value: any): boolean => {
+      if (fieldName === 'parentIssueId' && isSubIssue) {
+        return issueTypeCode === 'sub_task' || value?.issueTypeVO?.typeCode !== issueTypeCode;
+      }
+      return value;
+    };
     newDataSet.fields.forEach(({ name }) => {
       const oldValue = toJS(oldDataSet.current?.get(name));
-      if (oldValue) {
+      if (isAvailableValue(name, oldValue)) {
         newValue[name] = oldValue;
       }
     });
@@ -567,7 +576,7 @@ const CreateIssueBase = observer(({
       values = hooks.reduce((result, hook) => hook(result, data), values);
       try {
         await onSubmit({
-          data: values, fieldList, fileList,
+          data: { ...values, ...(extraSubmitValue || {}) }, fieldList, fileList,
         });
       } catch (error) {
         const res = onAfterSubmitError && await onAfterSubmitError({
@@ -683,6 +692,12 @@ const CreateIssueBase = observer(({
           disabled: issueTypeCode === 'sub_task',
         };
       }
+      case 'subProjectSprint': {
+        return {
+          piId: getValue(dataSet, 'pi'),
+          teamIds: getValue(dataSet, 'subProject'),
+        };
+      }
       case 'summary': {
         return {
           maxLength: 44,
@@ -716,7 +731,7 @@ const CreateIssueBase = observer(({
     }
   });
   const renderFields = usePersistFn(() => (
-    [...dataSet.fields.values()].filter((f) => f.get('display') !== false).map((dataSetField) => {
+    [...dataSet.fields.values()].filter((f) => f.get('display') !== false && !wsjfFields.includes(f.name)).map((dataSetField) => {
       const { name, required } = dataSetField;
       const fieldType = dataSetField.get('fieldType');
       const fieldId = dataSetField.get('fieldId');

@@ -17,6 +17,7 @@ const locale = {
   'field.context': '工作项类型',
   default: '默认值',
   template: '页面模板',
+  'add.exist': '添加已有字段',
   'template.description.format': '描述信息格式',
   'template.role': '角色权限说明',
   'template.cascade': '级联说明',

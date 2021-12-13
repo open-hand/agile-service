@@ -13,6 +13,7 @@ import { piApi } from '@/api';
 
 import type { PI } from '@/common/types';
 import renderEllipsisBlockOption, { styles } from '../common/utils';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 const { AppState } = stores;
 
@@ -32,6 +33,7 @@ const SelectPI: React.FC<SelectPIProps> = forwardRef(({
   dataRef, statusList, disabledCurrentPI = false, afterLoad, request, flat, addPi0, doingIsFirst, popupCls, maxTagTextLength = 10, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<SelectPIProps['afterLoad']>();
+  const formatMessage = useFormatMessage('agile.common');
   afterLoadRef.current = afterLoad;
   const config = useMemo((): SelectConfig<PI & { piName?: string }> => ({
     name: 'all_pi',
@@ -43,11 +45,11 @@ const SelectPI: React.FC<SelectPIProps> = forwardRef(({
       const piName = pi.piName || `${pi.code}-${pi.name}`;
       return (
         <FragmentForSearch name={piName}>
-          {renderEllipsisBlockOption(piName, <>当前</>, { tooltip: true, showBlock: pi.statusCode === 'doing' })}
+          {renderEllipsisBlockOption(piName, <>{formatMessage({ id: 'current' })}</>, { tooltip: true, showBlock: pi.statusCode === 'doing' })}
         </FragmentForSearch>
       );
     },
-    renderer: (pi) => renderEllipsisBlockOption(pi.piName || `${pi.code}-${pi.name}`, <>当前</>, { tooltip: false, maxLength: maxTagTextLength, showBlock: pi.statusCode === 'doing' }),
+    renderer: (pi) => renderEllipsisBlockOption(pi.piName || `${pi.code}-${pi.name}`, <>{formatMessage({ id: 'current' })}</>, { tooltip: false, maxLength: maxTagTextLength, showBlock: pi.statusCode === 'doing' }),
     afterLoad: afterLoadRef.current,
     middleWare: (piList) => {
       let sortPiList = [...piList];

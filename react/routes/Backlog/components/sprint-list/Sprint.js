@@ -6,7 +6,7 @@ import IssueList from './IssueList';
 import SprintHeader from './SprintHeader';
 import IssueItem from './IssueItem';
 
-function Sprint({ data, openCreateIssueModal }) {
+function Sprint({ data, openCreateIssueModal, sprintIndex }) {
   const { sprintId, expand } = data;
   const issueList = BacklogStore.getIssueListBySprintId(sprintId);
   return (
@@ -34,11 +34,12 @@ function Sprint({ data, openCreateIssueModal }) {
                 border: !expand && snapshot.isDraggingOver ? '1px dashed green' : 'none',
               }}
             >
-              <SprintHeader data={data} />
+              <SprintHeader data={data} sprintIndex={sprintIndex} />
             </div>
             {expand && (
               <>
                 <IssueList
+                  sprintIndex={sprintIndex}
                   sprintData={data}
                   data={issueList}
                   sprintId={sprintId}

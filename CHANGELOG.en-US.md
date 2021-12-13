@@ -1,6 +1,26 @@
 # Changelog
 All notable changes about agile-service will be documented in this file.
 
+## [1.2.0-alpha] - 2021-12-10
+
+### Added
+
+- Add a Gantt chart view to the workbench.
+- Batch moving of work items to other projects is supported.
+- Kanban configuration supports custom filter.
+- Kanban supports subtasks that have been completed hidden in historical iterations.
+
+### Changed
+
+- Optimize the expected start, expected end, actual start and actual end time in the format of "year month day hour minute".
+- Optimize the list of all work items, and drag and drop to customize the column width experience.
+
+
+### Fixed
+
+- Fix the problem that the quick filter operator did not allocate data correctly.
+
+
 ## [1.1.0] - 2021-11-05
 
 ### Added

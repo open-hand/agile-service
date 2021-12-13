@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.event.StatusPayload;
 import io.choerodon.agile.app.service.AgilePluginService;
@@ -16,6 +17,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
@@ -197,6 +199,16 @@ public class InitServiceImpl implements InitService {
             }
         }
         statusMachineTransformMapper.batchInsert(list);
+    }
+
+    @Override
+    public void initStatusIfNotExisted(Long organizationId) {
+        StatusDTO statusDTO = new StatusDTO();
+        statusDTO.setOrganizationId(organizationId);
+        List<StatusDTO> statusDTOS = statusMapper.select(statusDTO);
+        if (CollectionUtils.isEmpty(statusDTOS)) {
+            initStatus(organizationId, InitStatus.listInitStatus());
+        }
     }
 
     private void handleNode(Long organizationId, Long stateMachineId, String applyType, Map<String, StatusMachineNodeDTO> nodeMap, Map<String, StatusDTO> statusMap) {

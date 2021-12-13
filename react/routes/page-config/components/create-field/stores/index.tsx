@@ -110,6 +110,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer(
       ...props,
       isEdit,
       store,
+      formatMessage: formatMessage as any,
       formDataSet,
     };
 

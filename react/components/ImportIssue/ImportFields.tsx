@@ -180,8 +180,10 @@ const ImportFields: React.FC<Props> = ({
     }
   }, [fieldsOptionDataSet, fs, systemFields]);
 
+  const fieldsChecked = (chooseDataSet?.current?.get('fields') || requiredFields).filter((code: string) => !includes(['linkIssue', 'parentIssue'], code));
   useImperativeHandle(importFieldsRef, () => ({
-    fields: (chooseDataSet?.current?.get('fields') || requiredFields).filter((code: string) => !includes(['linkIssue', 'parentIssue'], code)),
+    // @ts-ignore
+    fields: fieldsOptionDataSet.toData().filter((item) => includes(fieldsChecked, item.code)).map((item) => item.code),
     // @ts-ignore
     allFields: fieldsOptionDataSet.toData(),
     requiredFields,

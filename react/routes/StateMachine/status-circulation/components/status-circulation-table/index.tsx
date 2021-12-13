@@ -137,8 +137,10 @@ const StatusCirculationTable: React.FC = () => {
       return (
         <div>
           <Tooltip title={disabled[1]}>
-            <Icon
-              type="delete_sweep-o"
+            <Button
+              icon="delete_sweep-o"
+              className={styles.del_btn}
+              disabled={disabled[0]}
               style={{
                 cursor: disabled[0] ? 'not-allowed' : 'pointer',
                 color: disabled[0] ? 'rgba(87,102,121,0.50)' : 'var(--primary-color)',

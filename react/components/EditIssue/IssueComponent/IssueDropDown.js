@@ -26,7 +26,7 @@ const IssueDropDown = ({
   onDeleteIssue, loginUserId, reloadIssue, onIssueRecordTime, testLinkStoreRef, onIssueCopy, onUpdate, onChangeParent, onRelateIssue, onTransformSubIssue, onOpenCreateSubTask, onOpenCreateSubBug,
 }) => {
   const {
-    store, applyType,
+    store, applyType, isProgram,
   } = useContext(EditIssueContext);
   const docs = store.getDoc;
   const hasDevops = useHasDevops();
@@ -247,7 +247,9 @@ const IssueDropDown = ({
       }
       {
         <Permission
-          service={['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
+          service={[isProgram
+            ? 'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.editissue.pro'
+            : 'choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
           noAccessChildren={(
             <Menu.Item
               key="1"

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Tooltip } from 'choerodon-ui/pro';
-import { map } from 'lodash';
+import { difference, map } from 'lodash';
 import { featureApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectTeamSprints from '@/components/select/select-teamSprint';
@@ -14,6 +14,11 @@ import SelectTeamSprints from '@/components/select/select-teamSprint';
     const issue = store.getIssue;
     const { issueId } = issue;
     const activePiSprints = issue.activePiSprints || [];
+    const previousSprintIds = activePiSprints.map((s) => s.sprintId);
+    const isEqualValueArray = previousSprintIds.length === sprintIds?.length && difference(previousSprintIds, sprintIds || []).length === 0;
+    if (isEqualValueArray) {
+      return;
+    }
     const originSprintIds = activePiSprints.map((sprint) => sprint.sprintId);
     const addSprints = (sprintIds || []).filter((teamId) => !originSprintIds.includes(teamId));
     const removeSprints = sprintIds ? originSprintIds.filter(
@@ -57,11 +62,12 @@ import SelectTeamSprints from '@/components/select/select-teamSprint';
             formKey="sprint"
             onSubmit={this.updateIssueSprint}
             initValue={sprintIds}
-            editor={(
+            editor={({ submit }) => (
               <SelectTeamSprints
                 label="活跃冲刺"
                 mode="multiple"
                 projectId={store.projectId}
+                onBlur={submit}
                 // getPopupContainer={() => document.getElementById('detail')}
                 allowClear
                 showCheckAll={false}
@@ -86,28 +92,28 @@ import SelectTeamSprints from '@/components/select/select-teamSprint';
             >
               <div>
                 {
-                    closedPiSprints.concat(activePiSprints).length === 0 ? '无' : (
+                  closedPiSprints.concat(activePiSprints).length === 0 ? '无' : (
+                    <div>
                       <div>
-                        <div>
-                          {map(closedPiSprints, 'sprintName').join(' , ')}
-                        </div>
-                        <div>
-                          {activePiSprints.map((sprint) => (
-                            <div
-                              style={{
-                                color: '#4d90fe',
-                                fontSize: '13px',
-                                lineHeight: '20px',
-                                marginTop: closedPiSprints.length ? 5 : 0,
-                              }}
-                            >
-                              {sprint.sprintName}
-                            </div>
-                          ))}
-                        </div>
+                        {map(closedPiSprints, 'sprintName').join(' , ')}
                       </div>
-                    )
-                  }
+                      <div>
+                        {activePiSprints.map((sprint) => (
+                          <div
+                            style={{
+                              color: '#4d90fe',
+                              fontSize: '13px',
+                              lineHeight: '20px',
+                              marginTop: closedPiSprints.length ? 5 : 0,
+                            }}
+                          >
+                            {sprint.sprintName}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                }
               </div>
             </Tooltip>
           </TextEditToggle>

@@ -210,7 +210,7 @@ const transformFieldValue = (fieldSetting) => {
         }
       } else {
         // @ts-ignore
-        transformedValue = isClear ? '清空' : fieldValueList.map((item) => item.name).join('、');
+        transformedValue = isClear ? '清空' : fieldValueList.filter((item) => item.name).map((item) => item.name).join('、');
       }
       break;
     }

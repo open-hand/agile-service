@@ -1,15 +1,17 @@
 import React, { Component } from 'react';
-import { observer } from 'mobx-react';
+import { observer, inject, Observer } from 'mobx-react';
 import {
-  TabPage as Page, Header, Breadcrumb, Content, useTheme,
+  TabPage as Page,
+  Header,
+  Breadcrumb,
+  Content,
+  useTheme,
   Permission,
 } from '@choerodon/boot';
-import {
-  Button, Spin, Tooltip,
-} from 'choerodon-ui';
+import { Button, Spin, Tooltip } from 'choerodon-ui';
+import { Modal, Button as ProButton, Tooltip as ProTooltip } from 'choerodon-ui/pro';
 import { C7NFormat, HeaderButtons } from '@choerodon/master';
-import { Modal } from 'choerodon-ui/pro';
-
+import { isEqual } from 'lodash';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import SideNav from '@/components/side-nav';
@@ -20,7 +22,9 @@ import Version from '../components/VersionComponent/Version';
 import Epic from '../components/EpicComponent/Epic';
 import Feature from '../components/FeatureComponent/Feature';
 import IssueDetail from '../components/issue-detail';
-import CreateSprint, { CreateCurrentPiSprint } from '../components/create-sprint';
+import CreateSprint, {
+  CreateCurrentPiSprint,
+} from '../components/create-sprint';
 import SprintList from '../components/sprint-list';
 import ShowPlanSprint from '../components/show-plan-sprint';
 import './BacklogHome.less';
@@ -30,8 +34,41 @@ const createSprintKey = Modal.key();
 const createCurrentPiSprintKey = Modal.key();
 const { Panel } = SideNav;
 @observer
+@inject('AppState')
 class BacklogHome extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      inNewUserGuideStepThree: false,
+      createBtnToolTipHidden: true,
+      origin: null,
+    };
+  }
+
   IssueDetailRef = React.createRef();
+
+  componentDidUpdate(prevProps) {
+    if (!isEqual(this.state.origin, this.props?.AppState?.getUserWizardStatus)) {
+      // eslint-disable-next-line react/no-did-update-set-state
+      this.setState({
+        origin: this.props?.AppState?.getUserWizardStatus,
+      });
+      if (prevProps?.AppState?.getUserWizardStatus[2]?.status === 'uncompleted'
+      ) {
+        // eslint-disable-next-line react/no-did-update-set-state
+        this.setState({
+          inNewUserGuideStepThree: true,
+          createBtnToolTipHidden: false,
+        });
+      } else {
+        // eslint-disable-next-line react/no-did-update-set-state
+        this.setState({
+          inNewUserGuideStepThree: false,
+          createBtnToolTipHidden: true,
+        });
+      }
+    }
+  }
 
   componentDidMount() {
     BacklogStore.resetData();
@@ -43,7 +80,10 @@ class BacklogHome extends Component {
   }
 
   componentWillUnmount() {
-    localPageCacheStore.setItem('backlogSprintPageSize', BacklogStore.getSprintPageSize);
+    localPageCacheStore.setItem(
+      'backlogSprintPageSize',
+      BacklogStore.getSprintPageSize,
+    );
     BacklogStore.resetData();
     BacklogStore.clearMultiSelected();
     BacklogStore.resetFilter();
@@ -52,12 +92,15 @@ class BacklogHome extends Component {
 
   refresh = (...args) => {
     BacklogStore.refresh(...args);
-  }
+  };
 
   /**
    * 创建冲刺
    */
   handleCreateSprint = async () => {
+    this.setState({
+      createBtnToolTipHidden: true,
+    });
     const onCreate = (sprint) => {
       BacklogStore.setCreatedSprint(sprint.sprintId);
       this.refresh();
@@ -94,7 +137,13 @@ class BacklogHome extends Component {
         intlPrefix="agile.backlog"
         id="current.create.sprint"
       />,
-      children: <CreateCurrentPiSprint onCreate={onCreate} sprints={sprints} pi={piInfo} />,
+      children: (
+        <CreateCurrentPiSprint
+          onCreate={onCreate}
+          sprints={sprints}
+          pi={piInfo}
+        />
+      ),
     });
   };
 
@@ -123,7 +172,9 @@ class BacklogHome extends Component {
       </Tooltip>
     ) : (
       <Permission
-        service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint']}
+        service={[
+          'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint',
+        ]}
       >
         <Button icon="playlist_add" onClick={this.handleCreateCurrentPiSprint}>
           <span>
@@ -136,25 +187,42 @@ class BacklogHome extends Component {
         </Button>
       </Permission>
     );
-  }
+  };
 
   openCreateIssueModal = (originFrom) => {
     const {
-      chosenEpic, chosenFeature, chosenVersion, featureList, defaultTypeId, defaultSummary, defaultSprint, defaultAssignee, defaultEpicName,
+      chosenEpic,
+      chosenFeature,
+      chosenVersion,
+      featureList,
+      defaultTypeId,
+      defaultSummary,
+      defaultSprint,
+      defaultAssignee,
+      defaultEpicName,
     } = BacklogStore;
     const chosenFeatureItem = featureList.find((feature) => feature.issueId === chosenFeature) || {};
     openCreateIssue({
       defaultValues: {
         summary: defaultSummary,
         epicName: defaultEpicName,
-        epic: chosenEpic !== 'all' && chosenEpic !== 'unset' ? chosenEpic : undefined,
-        fixVersion: chosenVersion !== 'all' && chosenVersion !== 'unset' ? chosenVersion : undefined,
+        epic:
+          chosenEpic !== 'all' && chosenEpic !== 'unset'
+            ? chosenEpic
+            : undefined,
+        fixVersion:
+          chosenVersion !== 'all' && chosenVersion !== 'unset'
+            ? chosenVersion
+            : undefined,
         sprint: defaultSprint,
       },
       originFrom: originFrom || 'Backlog',
       defaultTypeId,
       defaultAssignee,
-      defaultFeature: chosenFeature !== 'all' && chosenFeature !== 'unset' ? chosenFeatureItem : undefined,
+      defaultFeature:
+        chosenFeature !== 'all' && chosenFeature !== 'unset'
+          ? chosenFeatureItem
+          : undefined,
       onCreate: (res) => {
         BacklogStore.setNewIssueVisible(false);
         BacklogStore.setDefaultSummary(undefined);
@@ -168,7 +236,90 @@ class BacklogHome extends Component {
         }
       },
     });
+  };
+
+  toHelpDoc = () => {
+    window.open(
+      `${this.props?.AppState?.getUserWizardStatus[2]?.helpDocs[0]}`,
+      '_blank',
+    );
+  };
+
+  getCreatBtnTitle = () => {
+    if (this.state.inNewUserGuideStepThree) {
+      return (
+        <div style={{ background: '#6E80F1 !important' }}>
+          <div style={{ padding: 8 }}>
+            冲刺是团队处理事务的一段短期迭代周期，通常用冲刺的目标来定义冲刺，每个冲刺都发生在一定的时间期限之内，有明确的开始日期和结束日期，冲刺必须短，长度在一周到一个月之间，长度一般应当保持一致，在这个时间段内，团队需要以稳定的步调完成一组与冲刺目标一致的工作。
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <Button
+              onClick={() => {
+                this.setState({
+                  createBtnToolTipHidden: true,
+                });
+              }}
+              style={{ color: '#fff', background: '#7E90F1' }}
+            >
+              忽略
+            </Button>
+            <Button
+              onClick={this.toHelpDoc}
+              style={{ color: '#5365EA', background: '#fff' }}
+            >
+              查看
+            </Button>
+          </div>
+        </div>
+      );
+    }
+    return '';
+  };
+
+  onHiddenBeforeChange = (hidden) => {
+    if (
+      this.state.inNewUserGuideStepThree
+      && this.state.createBtnToolTipHidden === true
+      && !hidden
+    ) {
+      this.setState({
+        createBtnToolTipHidden: hidden,
+      });
+    }
+  };
+
+  getHidden = () => {
+    const sprintData = BacklogStore.getSprintData;
+    if (sprintData.length > 1) { // >1有冲刺，有了冲刺就不显示了 (按钮本身没有tooltip 不用考虑是不是新手阶段)
+      return true;
+    }
+    return this.state.createBtnToolTipHidden;
   }
+
+  createSprintBtn = () => (
+    <ProTooltip
+      popupClassName={
+        this.state.inNewUserGuideStepThree
+          ? 'c7n-pro-popup-create-sprint-guide'
+          : ''
+      }
+      hidden={this.getHidden()}
+      onHiddenBeforeChange={this.onHiddenBeforeChange}
+      title={this.getCreatBtnTitle}
+      placement={
+        this.state.inNewUserGuideStepThree ? 'bottomRight' : 'bottom'
+      }
+    >
+      <ProButton icon="playlist_add" onClick={this.handleCreateSprint}>
+        <span>
+          <C7NFormat
+            intlPrefix="agile.backlog"
+            id="create.sprint"
+          />
+        </span>
+      </ProButton>
+    </ProTooltip>
+  );
 
   render() {
     const arr = BacklogStore.getSprintData;
@@ -197,17 +348,11 @@ class BacklogHome extends Component {
               handler: this.openCreateIssueModal,
               display: true,
             }, {
-              name: (
-                <span>
-                  <C7NFormat
-                    intlPrefix="agile.backlog"
-                    id="create.sprint"
-                  />
-                </span>),
-              icon: 'playlist_add',
-              handler: this.handleCreateSprint,
+              element: this.createSprintBtn(),
               display: !isShowFeature,
-              permissions: ['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint'],
+              permissions: [
+                'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint',
+              ],
             }, {
               name: (
                 <span>
@@ -246,20 +391,24 @@ class BacklogHome extends Component {
         }}
         /> */}
 
-        <Content style={{
-          display: 'flex',
-          flexDirection: 'column',
-          ...theme === 'theme4' ? {
-            paddingTop: 45,
-            // marginLeft: 0,
-            // marginRight: 0,
-            paddingLeft: 0,
-            paddingRight: 0,
-            paddingBottom: 0,
-          } : {
-            padding: 0, paddingTop: 4,
-          },
-        }}
+        <Content
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            ...(theme === 'theme4'
+              ? {
+                paddingTop: 45,
+                // marginLeft: 0,
+                // marginRight: 0,
+                paddingLeft: 0,
+                paddingRight: 0,
+                paddingBottom: 0,
+              }
+              : {
+                padding: 0,
+                paddingTop: 4,
+              }),
+          }}
         >
           <LoadingProvider
             loading={BacklogStore.getSpinIf}
@@ -270,8 +419,10 @@ class BacklogHome extends Component {
               overflow: 'hidden',
             }}
           >
-
-            <SideNav onChange={this.toggleCurrentVisible} activeKey={BacklogStore.whichVisible}>
+            <SideNav
+              onChange={this.toggleCurrentVisible}
+              activeKey={BacklogStore.whichVisible}
+            >
               <Panel
                 key="version"
                 title={(
@@ -279,15 +430,17 @@ class BacklogHome extends Component {
                     intlPrefix="agile.common"
                     id="version"
                   />
-)}
-                nav={(title) => (BacklogStore.chosenVersion !== 'all'
-                  ? (
-                    <>
-                      <span>{title}</span>
-                      <span className="c7n-backlog-side-tip" />
-                    </>
-                  )
-                  : <span>{title}</span>)}
+                )}
+                nav={(title) => (
+                  <Observer>
+                    {() => (
+                      <>
+                        <span>{title}</span>
+                        {BacklogStore.chosenVersion !== 'all' && <span className="c7n-backlog-side-tip" />}
+                      </>
+                    )}
+                  </Observer>
+                )}
               >
                 <Version
                   store={BacklogStore}
@@ -305,16 +458,18 @@ class BacklogHome extends Component {
                       intlPrefix="agile.common"
                       id="epic"
                     />
-)}
+                  )}
                   noHeader
-                  nav={(title) => (BacklogStore.chosenEpic !== 'all'
-                    ? (
-                      <>
-                        <span>{title}</span>
-                        <span className="c7n-backlog-side-tip" />
-                      </>
-                    )
-                    : <span>{title}</span>)}
+                  nav={(title) => (
+                    <Observer>
+                      {() => (
+                        <>
+                          <span>{title}</span>
+                          {BacklogStore.chosenEpic !== 'all' && <span className="c7n-backlog-side-tip" />}
+                        </>
+                      )}
+                    </Observer>
+                  )}
                 >
                   <Epic
                     refresh={this.refresh}
@@ -333,14 +488,16 @@ class BacklogHome extends Component {
                       id="feature"
                     />
                   )}
-                  nav={(title) => (BacklogStore.chosenFeature !== 'all'
-                    ? (
-                      <>
-                        <span>{title}</span>
-                        <span className="c7n-backlog-side-tip" />
-                      </>
-                    )
-                    : <span>{title}</span>)}
+                  nav={(title) => (
+                    <Observer>
+                      {() => (
+                        <>
+                          <span>{title}</span>
+                          {BacklogStore.chosenFeature !== 'all' && <span className="c7n-backlog-side-tip" />}
+                        </>
+                      )}
+                    </Observer>
+                  )}
                 >
                   <Feature
                     refresh={this.refresh}
@@ -373,9 +530,7 @@ class BacklogHome extends Component {
 export default (props) => {
   const [theme] = useTheme();
   return (
-    <Page
-      className="c7n-backlog-page"
-    >
+    <Page className="c7n-backlog-page">
       <BacklogHome {...props} theme={theme} />
     </Page>
   );

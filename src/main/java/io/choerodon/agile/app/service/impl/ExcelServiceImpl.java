@@ -1394,15 +1394,16 @@ public class ExcelServiceImpl implements ExcelService {
         List<PredefinedDTO> predefinedList = processPredefinedByHeaderMap(headerMap);
         fillInPredefinedValues(workbook, sheet, predefinedList);
         int colNum = headerNames.size() + 1;
-        writeErrorData(errorRowColMap, dataSheet, colNum, sheet);
+        writeErrorData(errorRowColMap, dataSheet, colNum, sheet, headerMap);
         String errorWorkBookUrl = uploadErrorExcel(workbook, organizationId);
         history.setFileUrl(errorWorkBookUrl);
     }
 
     protected void writeErrorData(Map<Integer, List<Integer>> errorRowColMap,
-                                Sheet dataSheet,
-                                int colNum,
-                                Sheet sheet) {
+                                  Sheet dataSheet,
+                                  int colNum,
+                                  Sheet sheet,
+                                  Map<Integer, ExcelColumnVO> headerMap) {
         XSSFWorkbook workbook = (XSSFWorkbook)sheet.getWorkbook();
         XSSFCellStyle ztStyle = workbook.createCellStyle();
         Font ztFont = workbook.createFont();
@@ -1418,8 +1419,20 @@ public class ExcelServiceImpl implements ExcelService {
             for (int i = 0; i < colNum; i++) {
                 Cell originCell = originRow.getCell(i);
                 if (!isCellEmpty(originCell)) {
+                    ExcelColumnVO excelColumnVO = headerMap.get(i);
                     Cell cell = row.createCell(i);
+                    CellStyle cellStyle = workbook.createCellStyle();
+                    cellStyle.cloneStyleFrom(originCell.getCellStyle());
+                    cell.setCellStyle(cellStyle);
+                    if (!errorCol.contains(i) && excelColumnVO.isDateType()){
+                        if (originCell.getCellTypeEnum().equals(CellType.NUMERIC)){
+                            cell.setCellValue(originCell.getDateCellValue());
+                        } else {
+                            cell.setCellValue(originCell.getStringCellValue());
+                        }
+                    } else {
                         cell.setCellValue(ExcelUtil.substring(originCell.toString()));
+                    }
                     if (errorCol.contains(i)) {
                         cell.setCellStyle(ztStyle);
                     }
@@ -1940,6 +1953,10 @@ public class ExcelServiceImpl implements ExcelService {
                             addErrorColumn(rowNum, col, errorRowColMap);
                             break;
                         } else {
+                            Boolean isSubTask = "sub_task".equals(issueVO.getTypeCode());
+                            if (isSubTask){
+                                break;
+                            }
                             relatedIssueIds.add(issueVO.getIssueId());
                         }
                     }
@@ -3483,6 +3500,7 @@ public class ExcelServiceImpl implements ExcelService {
             fileOperationHistoryDTO.setFileUrl(path);
         } catch (Exception e) {
             fileOperationHistoryDTO.setStatus(FAILED);
+            LOGGER.error("upload file error: {}", e);
         } finally {
             try {
                 fileOperationHistoryDTO.setLastUpdateDate(new Date());

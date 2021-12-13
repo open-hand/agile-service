@@ -246,7 +246,7 @@ function PageIssueType() {
                 clickEvent={() => openAddField(addUnselectedDataSet,
                   pageIssueTypeStore, onSubmitLocal, onRestoreLocal)}
               >
-                添加已有字段
+                {formatMessage({ id: 'agile.page.add.exist' })}
               </TooltipButton>),
           },
         ]}

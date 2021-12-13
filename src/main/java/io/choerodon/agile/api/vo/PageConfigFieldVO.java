@@ -51,6 +51,8 @@ public class PageConfigFieldVO {
     @Encrypt
     private Long issueTypeId;
 
+    private Integer instanceCount;
+
     public Object getDefaultValueObj() {
         return defaultValueObj;
     }
@@ -201,5 +203,13 @@ public class PageConfigFieldVO {
 
     public void setIssueTypeId(Long issueTypeId) {
         this.issueTypeId = issueTypeId;
+    }
+
+    public Integer getInstanceCount() {
+        return instanceCount;
+    }
+
+    public void setInstanceCount(Integer instanceCount) {
+        this.instanceCount = instanceCount;
     }
 }

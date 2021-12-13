@@ -6,7 +6,7 @@
         SELECT
             ab.*,
             IF(aus.is_default_board IS NULL, 0, 1) AS user_default,
-            IF(aus2.swimlane_based_code is null ,'assignee',aus2.swimlane_based_code) as userDefaultBoard
+            IF(aus2.swimlane_based_code is null ,'swimlane_none',aus2.swimlane_based_code) as userDefaultBoard
         FROM agile_board ab LEFT JOIN agile_user_setting aus ON ab.board_id = aus.board_id
                                                                 AND aus.project_id = ab.project_id AND
                                                                 aus.type_code = 'board' and

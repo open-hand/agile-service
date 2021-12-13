@@ -3,10 +3,11 @@ import {
   Form, Select, DataSet, Modal,
 } from 'choerodon-ui/pro';
 import { isEmpty } from 'lodash';
+import { C7NFormat } from '@choerodon/master';
 import { observer } from 'mobx-react-lite';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { IModalProps } from '@/common/types';
 import { pageConfigApi } from '@/api';
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import PageTemplateStore from '../../stores/PageTemplateStore';
 
 const { Option } = Select;
@@ -83,7 +84,10 @@ const AddFiled: React.FC<Props> = observer(({
 const openField = (dataSet: DataSet, store: PageTemplateStore, onSubmitLocal: any, onRestoreLocal: Props['onRestoreLocal']) => {
   Modal.open({
     key: Modal.key(),
-    title: '添加已有字段',
+    title: <C7NFormat
+      intlPrefix="agile.page"
+      id="add.exist"
+    />,
     style: {
       width: 340,
     },

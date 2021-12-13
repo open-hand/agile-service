@@ -1158,6 +1158,17 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         return PageUtil.buildPageInfoWithPageInfoList(page, list);
     }
 
+    @Override
+    public void initIssueTypeIfNotExisted(Long organizationId) {
+        IssueTypeDTO query = new IssueTypeDTO();
+        query.setOrganizationId(organizationId);
+        query.setInitialize(true);
+        List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.select(query);
+        if (CollectionUtils.isEmpty(issueTypeDTOS)) {
+            initIssueTypeByConsumeCreateOrganization(organizationId);
+        }
+    }
+
     private String getMaxBackRankIfExisted(String frontRank,
                                            String backRank,
                                            Long organizationId,

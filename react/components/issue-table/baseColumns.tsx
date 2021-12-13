@@ -16,6 +16,8 @@ type IIssueTableBaseColumnRenderGetData<T> = (data: T, nameKey: string) => any
 interface IIssueTableBaseColumn<D extends object = any> {
   /** 标题 */
   title: React.ReactElement
+  /** 对应的多语言 key */
+  titleKey?:string
   // originTitle: string
   dataIndex: string
   // name: string
@@ -123,6 +125,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   ['summary', {
     title: <Tooltip title="概要">概要</Tooltip>,
     dataIndex: 'summary',
+    titleKey: 'agile.systemField.summary',
     width: 400,
     fixed: true,
     sortable: true,
@@ -139,6 +142,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   }],
   ['issueNum', {
     title: <Tooltip title="编号">编号</Tooltip>,
+    titleKey: 'agile.common.key',
     dataIndex: 'issueNum',
     width: 120,
     className: 'c7n-agile-table-cell',
@@ -146,6 +150,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   }],
   ['priority', {
     title: <Tooltip title="优先级">优先级</Tooltip>,
+    titleKey: 'agile.systemField.priority',
     dataIndex: 'priorityId',
     className: 'c7n-agile-table-cell',
     sortable: true,
@@ -160,6 +165,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   }],
   ['assignee', {
     title: <Tooltip title="经办人">经办人</Tooltip>,
+    titleKey: 'agile.systemField.assignee',
     dataIndex: 'assigneeId',
     sortable: true,
     render: (rowData, getDataMethod = get) => (
@@ -180,6 +186,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   }],
   ['createUser', {
     title: <Tooltip title="创建人">创建人</Tooltip>,
+    titleKey: 'agile.systemField.creator',
     dataIndex: 'createdBy',
     render: (rowData, getDataMethod = get) => (
       <div style={{ display: 'inline-flex' }}>
@@ -194,6 +201,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   }],
   ['updateUser', {
     title: <Tooltip title="更新人">更新人</Tooltip>,
+    titleKey: 'agile.systemField.updater',
     dataIndex: 'lastUpdatedBy',
     render: (rowData, getDataMethod = get) => (
       <div style={{ display: 'inline-flex' }}>
@@ -208,6 +216,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   }],
   ['status', {
     title: <Tooltip title="状态">状态</Tooltip>,
+    titleKey: 'agile.systemField.status',
     dataIndex: 'statusId',
     sortable: true,
     render: (rowData, getDataMethod = get) => (
@@ -227,6 +236,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   }],
   ['reporter', {
     title: <Tooltip title="报告人">报告人</Tooltip>,
+    titleKey: 'agile.systemField.reporter',
     dataIndex: 'reporterId',
     sortable: true,
     render: (rowData, getDataMethod = get) => (
@@ -247,18 +257,21 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   }],
   ['lastUpdateDate', {
     title: <Tooltip title="最近更新时间">最近更新时间</Tooltip>,
+    titleKey: 'agile.columnField.lastUpdateDate',
     width: 170,
     dataIndex: 'lastUpdateDate',
     sortable: true,
   }],
   ['creationDate', {
     title: <Tooltip title="创建时间">创建时间</Tooltip>,
+    titleKey: 'agile.systemField.createDate',
     width: 170,
     dataIndex: 'creationDate',
     sortable: true,
   }],
   ['estimatedStartTime', {
     title: <Tooltip title="预计开始时间">预计开始时间</Tooltip>,
+    titleKey: 'agile.systemField.estimatedStartTime',
     width: 170,
     dataIndex: 'estimatedStartTime',
     sortable: true,
@@ -266,6 +279,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   }],
   ['estimatedEndTime', {
     title: <Tooltip title="预计结束时间">预计结束时间</Tooltip>,
+    titleKey: 'agile.systemField.estimatedEndTime',
     width: 170,
     dataIndex: 'estimatedEndTime',
     sortable: true,
@@ -273,6 +287,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   }],
   ['actualStartTime', {
     title: <Tooltip title="实际开始时间">实际开始时间</Tooltip>,
+    titleKey: 'agile.systemField.actualStartTime',
     width: 170,
     dataIndex: 'actualStartTime',
     sortable: true,
@@ -280,6 +295,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   }],
   ['actualEndTime', {
     title: <Tooltip title="实际结束时间">实际结束时间</Tooltip>,
+    titleKey: 'agile.systemField.actualEndTime',
     width: 170,
     dataIndex: 'actualEndTime',
     sortable: true,
@@ -287,22 +303,26 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   }],
   ['remainingTime', {
     title: <Tooltip title="剩余预估时间">剩余预估时间</Tooltip>,
+    titleKey: 'agile.systemField.remainingTime',
     width: 170,
     dataIndex: 'remainingTime',
     sortable: true,
   }],
   ['spentWorkTime', {
     title: <Tooltip title="已耗费时间">已耗费时间</Tooltip>,
+    titleKey: 'agile.columnField.spentWorkTime',
     width: 170,
     dataIndex: 'spentWorkTime',
   }],
   ['allEstimateTime', {
     title: <Tooltip title="当前预估时间">当前预估时间</Tooltip>,
+    titleKey: 'agile.columnField.allEstimateTime',
     width: 170,
     dataIndex: 'allEstimateTime',
   }],
   ['estimateTime', {
     title: <Tooltip title="原始预估时间">原始预估时间</Tooltip>,
+    titleKey: 'agile.systemField.estimateTime',
     width: 140,
     dataIndex: 'estimateTime',
     sortable: true,
@@ -314,61 +334,72 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   }],
   ['label', {
     title: <Tooltip title="标签">标签</Tooltip>,
+    titleKey: 'agile.systemField.label',
     dataIndex: 'label',
     render: renderTag('labelIssueRelVOS', 'labelName'),
   }],
   ['component', {
     title: <Tooltip title="模块">模块</Tooltip>,
+    titleKey: 'agile.systemField.component',
     dataIndex: 'component',
     render: renderTag('issueComponentBriefVOS', 'name'),
   }],
   ['fixVersion', {
     title: <Tooltip title="修复的版本">修复的版本</Tooltip>,
+    titleKey: 'agile.systemField.fixVersion',
     dataIndex: 'fixVersion',
     render: renderTag('fixVersionIssueRelVOS', 'name'),
   }],
   ['influenceVersion', {
     title: <Tooltip title="影响的版本">影响的版本</Tooltip>,
+    titleKey: 'agile.systemField.influenceVersion',
     dataIndex: 'influenceVersion',
     render: renderTag('influenceVersionIssueRelVOS', 'name'),
   }],
   ['sprint', {
     title: <Tooltip title="冲刺">冲刺</Tooltip>,
+    titleKey: 'agile.systemField.sprint',
     dataIndex: 'sprint',
     render: renderTag('issueSprintVOS', 'sprintName'),
   }],
   ['storyPoints', {
     title: <Tooltip title="故事点">故事点</Tooltip>,
+    titleKey: 'agile.systemField.storyPoint',
     dataIndex: 'storyPoints',
     render: (rowData, getDataMethod = get) => getDataMethod(rowData, 'storyPoints') ?? '-',
     sortable: true,
   }],
   ['feature', {
     title: <Tooltip title="特性">特性</Tooltip>,
+    titleKey: 'agile.common.feature',
     dataIndex: 'featureId',
     render: renderEpicOrFeature('featureId'),
     sortable: true,
   }],
   ['epic', {
     title: <Tooltip title="史诗">史诗</Tooltip>,
+    titleKey: 'agile.common.epic',
     dataIndex: 'epicId',
     render: renderEpicOrFeature('epicId'),
     sortable: true,
   }],
   ['mainResponsibleUser', {
     title: <Tooltip title="主要负责人">主要负责人</Tooltip>,
+    titleKey: 'agile.systemField.mainResponsible',
     dataIndex: 'mainResponsibleId',
     render: (rowData, getDataMethod = get) => getDataMethod(rowData, 'mainResponsibleUser') && <UserTag data={getDataMethod(rowData, 'mainResponsibleUser')} />,
     sortable: true,
   }],
   ['environmentName', {
     title: <Tooltip title="环境">环境</Tooltip>,
+    titleKey: 'agile.systemField.environment',
     dataIndex: 'environment',
     render: (rowData) => rowData.environmentName,
     sortable: true,
   }],
   ['tags', {
     title: <Tooltip title="Tag">Tag</Tooltip>,
+    titleKey: 'agile.systemField.tag',
     dataIndex: 'tags',
     render: (rowData, getDataMethod = get) => {
       const tagShowText = getDataMethod(rowData, 'tags')?.map((tag: any) => `${tag.appServiceCode}:${tag.tagName}`).join('、');
@@ -377,17 +408,20 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   }],
   ['epicSelfName', {
     title: <Tooltip title="史诗名称">史诗名称</Tooltip>,
+    titleKey: 'agile.columnField.epicSelfName',
     width: 150,
     dataIndex: 'epicSelfName',
     render: (rowData, getDataMethod = get) => (getDataMethod(rowData, 'epicSelfName') ? <Tooltip title={getDataMethod(rowData, 'epicSelfName')}>{getDataMethod(rowData, 'epicSelfName')}</Tooltip> : <></>),
   }],
   ['participants', {
     title: <Tooltip title="参与人">参与人</Tooltip>,
+    titleKey: 'agile.systemField.participant',
     dataIndex: 'participants',
     render: (rowData, getDataMethod = get) => getDataMethod(rowData, 'participants') && <UserTag data={getDataMethod(rowData, 'participants')} />,
   }],
   ['workTime', {
     title: <Tooltip title="工时">工时</Tooltip>,
+    titleKey: 'agile.columnField.workTime',
     width: 90,
     dataIndex: 'workTime',
     render: (rowData, getDataMethod = get) => (
@@ -398,6 +432,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   }],
   ['cumulativeWorkTime', {
     title: <Tooltip title="历史累计工时">历史累计工时</Tooltip>,
+    titleKey: 'agile.columnField.cumulativeWorkTime',
     width: 120,
     dataIndex: 'cumulativeWorkTime',
     render: (rowData, getDataMethod = get) => (
@@ -408,6 +443,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
   }],
   ['deviationRate', {
     title: <Tooltip title="偏差率">偏差率</Tooltip>,
+    titleKey: 'agile.columnField.deviationRate',
     width: 100,
     dataIndex: 'deviationRate',
     render: (rowData, getDataMethod = get) => {

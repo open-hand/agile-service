@@ -4,6 +4,7 @@ import { DataSet } from 'choerodon-ui/pro';
 import { AppStateProps } from '@/common/types';
 import { getIsOrganization } from '@/utils/common';
 import IssueTypeDataSet from './IssueTypeDataSet';
+import useFormatMessage from '@/hooks/useFormatMessage';
 
 interface Context {
   AppState: AppStateProps,
@@ -17,7 +18,8 @@ export default Store;
 export const StoreProvider: React.FC<Context> = inject('AppState')(
   (props) => {
     const isOrganization = getIsOrganization();
-    const issueTypeDataSet = useMemo(() => new DataSet(IssueTypeDataSet({ isOrganization })), [isOrganization]);
+    const formatMessage = useFormatMessage();
+    const issueTypeDataSet = useMemo(() => new DataSet(IssueTypeDataSet({ isOrganization, formatMessage })), [formatMessage, isOrganization]);
     const value = {
       ...props,
       intlPrefix: 'issue-type',

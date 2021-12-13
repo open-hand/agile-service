@@ -18,6 +18,7 @@ import SelectUserWithAssigneeMe from '@/components/select/pro/select-user-with-a
 import SelectIssueType from '@/components/select/pro/select-issue-type';
 import DateTimePickerWithDefault from '@/components/date-time-picker';
 import DateTimePickerWithFormat from '@/components/date-time-picker/date-time-pikcer-format';
+import SelectTeamSprint from '@/components/select/select-teamSprint';
 import type { DateTimePickerProps } from '@/components/date-time-picker/DateTimePicker';
 import getFieldsInstance, { AgileComponentMap, CustomFieldMap, IFieldBaseConfig } from '../base';
 import type { IAgileBaseFieldTypeComponentProps } from '../base/component';
@@ -54,6 +55,7 @@ const AgileComponentMapWithPro = {
   featureType: SelectFeatureType,
   subProject: SelectTeam,
   participant: SelectUser,
+  subProjectSprint: SelectTeamSprint,
   estimatedStartTime: DateTimePickerWithFormat as React.ComponentClass<DateTimePickerProps>,
   estimatedEndTime: DateTimePickerWithFormat as React.ComponentClass<DateTimePickerProps>,
   actualStartTime: DateTimePickerWithFormat as React.ComponentClass<DateTimePickerProps>,
@@ -119,6 +121,9 @@ const systemFieldConfigMap: ICreateComponentPropsDistributeProRender<typeof Agil
   issueType: {
     props: { showIcon: true, clearButton: false },
     valueKey: 'issueTypeId',
+  },
+  subProjectSprint: {
+    valueKey: 'subProjectSprintId',
   },
   sprint: {
     valueKey: 'sprintId',
