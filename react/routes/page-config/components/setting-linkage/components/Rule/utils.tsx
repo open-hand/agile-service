@@ -4,8 +4,8 @@ import {
 import React from 'react';
 import { set, assign } from 'lodash';
 import moment from 'moment';
-import { getAgileFields } from '@/components/field-pro';
 import { FORMAT_FIELDS } from '@/constants/DATE_FORMAT';
+import { IAgileBaseSearchFieldInstance } from '@/components/field-pro/layouts/search';
 
 export interface IChosenField {
   name: string,
@@ -18,9 +18,10 @@ export interface IChosenField {
 interface Props {
   field: IChosenField
   name?: string
+  getFieldInstance: IAgileBaseSearchFieldInstance['fieldInstance']
 }
 
-export const renderFieldRelSelect = ({ field, name = 'fieldRelOptionList' }: Props) => {
+export const renderFieldRelSelect = ({ field, name = 'fieldRelOptionList', getFieldInstance }: Props) => {
   const { system, id } = field;
   const fieldCode = field.fieldCode as 'priority' | 'component' | 'fixVersion' | 'influenceVersion' | 'subProject';
   if (system) {
@@ -38,10 +39,10 @@ export const renderFieldRelSelect = ({ field, name = 'fieldRelOptionList' }: Pro
       default:
         break;
     }
-    return getAgileFields([], { code: fieldCode, outputs: ['element'], props })[0][0];
+    return getFieldInstance([], { code: fieldCode, outputs: ['element'], props })[0][0];
   }
   if (!system) {
-    return getAgileFields([], [], {
+    return getFieldInstance([], [], {
       fieldType: 'single', outputs: ['element'], props: { key: id, name, fieldId: id },
     })[0][0];
   }
@@ -52,8 +53,12 @@ interface DefaultValueProps {
   field: IChosenField
   name?: string
   fieldOptions: { meaning: string, value: string }[]
+  getFieldInstance: IAgileBaseSearchFieldInstance['fieldInstance']
+
 }
-export const renderDefaultValue = ({ field, name = 'defaultValue', fieldOptions = [] }: DefaultValueProps) => {
+export const renderDefaultValue = ({
+  field, name = 'defaultValue', fieldOptions = [], getFieldInstance,
+}: DefaultValueProps) => {
   const {
     fieldType,
   } = field;
@@ -69,7 +74,7 @@ export const renderDefaultValue = ({ field, name = 'defaultValue', fieldOptions 
       defaultPickerValue: moment().endOf('d'),
     });
   }
-  return getAgileFields([], [], {
+  return getFieldInstance([], [], {
     code,
     fieldType: fieldType as any,
     // 初次进来没有选项显示值时不显示

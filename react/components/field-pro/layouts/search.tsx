@@ -4,7 +4,7 @@ import {
 } from 'lodash';
 import moment from 'moment';
 import getFieldsInstance, { getAgileFields } from '../base';
-import { IFieldProcessConfig } from '../base/type';
+import { IComponentFCWithClassObject, IFieldProcessConfig } from '../base/type';
 import { getComponentCodeForLocalCode, getFieldPropsByMode, isCodeInSystemComponents } from '../base/utils';
 import { IFieldType } from '@/common/types';
 import { IAgileBaseFieldTypeComponentProps } from '../base/component';
@@ -136,7 +136,7 @@ const AgileBaseSearchInstance: IAgileBaseSearchFieldInstance = {
   fieldInstance: getAgileFields,
   configInstance: getFieldConfig,
 };
-const fieldInstanceHelpType = getFieldsInstance<any, any, any>();
+const fieldInstanceHelpType = getFieldsInstance<any, any>();
 export interface IAgileBaseSearchFieldInstance {
   fieldInstance: typeof fieldInstanceHelpType
   configInstance: (field: { field: any, props: any }) => IFieldProcessConfig<any, any> | {}
