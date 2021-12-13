@@ -38,12 +38,14 @@ const IssueFilterFormStoreContextProvider = observer(
       });
     }, [currentFormCode, dataSet, props.extraFormItems]);
     useEffect(() => {
-      // 初始化值
-      props.chosenFields?.forEach((field) => {
-        !currentFormCode.get('chosenFields')?.has(field.code)
-          && currentFormCode.get('chosenFields')?.add(field.code) && initFieldIssueFilterForm(field, dataSet);
-      });
-    }, [currentFormCode, dataSet, props.chosenFields]);
+      if (props.needInit) {
+        // 初始化值
+        props.chosenFields?.forEach((field) => {
+          !currentFormCode.get('chosenFields')?.has(field.code)
+            && currentFormCode.get('chosenFields')?.add(field.code) && initFieldIssueFilterForm(field, dataSet);
+        });
+      }
+    }, [currentFormCode, dataSet, props.chosenFields, props.needInit]);
     const extraRenderFields: Context['extraRenderFields'] = usePersistFn((...args) => {
       if (props.extraRenderFields) {
         return props.extraRenderFields(...args);
