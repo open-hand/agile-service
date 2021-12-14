@@ -41,12 +41,17 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
 
   const listLayoutColumns = useMemo(() => getListLayoutColumns(savedListLayoutColumns, fields), [fields, savedListLayoutColumns]);
 
+  const columns = useMemo(() => getTableColumns({
+    listLayoutColumns, fields, onSummaryClick, handleColumnResize: () => { },
+  }), [fields, listLayoutColumns, onSummaryClick]);
+
   const handleColumnResize = usePersistFn((columnWidth, dataKey) => {
+    const column = columns.find((item) => item.dataIndex === dataKey);
     mutation.mutate({
       applyType: 'agile',
       listLayoutColumnRelVOS: listLayoutColumns.map((listLayoutColumn, i) => ({
         ...listLayoutColumn,
-        ...listLayoutColumn.columnCode === dataKey ? {
+        ...listLayoutColumn.columnCode === column.code ? {
           width: columnWidth,
         } : {
           width: listLayoutColumn.width ?? 0,
@@ -59,9 +64,7 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
   const visibleColumnCodes = useMemo(() => (listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode)), [listLayoutColumns]);
 
   const [theme] = useTheme();
-  const columns = useMemo(() => getTableColumns({
-    listLayoutColumns, fields, onSummaryClick, handleColumnResize: () => { },
-  }), [fields, listLayoutColumns, onSummaryClick]);
+
   const getHeight = usePersistFn((availableHeight:number) => {
     const visibleCount = getVisibleCount(tableProps.data, tableProps.expandedRowKeys);
     const heightFromData = visibleCount * ROW_HEIGHT + HEADER_HEIGHT;

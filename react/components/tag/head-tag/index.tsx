@@ -61,7 +61,7 @@ const HeadTag: React.FC<HeadTagProps> = ({
           ...avatarStyle,
         }}
       >
-        {!src && name}
+        <span style={{ opacity: !src ? 1 : 0 }}>{name}</span>
       </div>
       {
         text && showText && (
