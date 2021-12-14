@@ -77,6 +77,8 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
     private IssueMapper issueMapper;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
+    @Autowired(required = false)
+    private BacklogExpandService backlogExpandService;
 
     private static final Set<String> CANT_CASCADE_FIELD_CODE = Stream.of(
             FieldCode.ISSUE_TYPE,
@@ -259,7 +261,10 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
     }
 
     @Override
-    public Object listCascadeFieldOption(Long projectId, Long cascadeFieldId, CascadeFieldOptionSearchVO cascadeFieldOptionSearchVO, PageRequest pageRequest) {
+    public Object listCascadeFieldOption(Long projectId,
+                                         Long cascadeFieldId,
+                                         CascadeFieldOptionSearchVO cascadeFieldOptionSearchVO,
+                                         PageRequest pageRequest) {
         ObjectSchemeFieldDTO objectSchemeField = objectSchemeFieldMapper.selectByPrimaryKey(cascadeFieldId);
         if (objectSchemeField == null) {
             throw new CommonException("error.field.null");
@@ -306,6 +311,13 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                 break;
             case SUB_PROJECT:
                 result = listProjectCascadeFieldOption(projectId, organizationId, objectSchemeField, cascadeFieldOptionSearchVO, pageRequest);
+                break;
+            case FieldCode.BACKLOG_TYPE:
+            case FieldCode.BACKLOG_CLASSIFICATION:
+            case FieldCode.URGENT:
+                if (backlogExpandService != null) {
+                    result = backlogExpandService.listBacklogFieldOption(optionType, organizationId, projectId, pageRequest, cascadeFieldOptionSearchVO);
+                }
                 break;
             default:
                 break;
@@ -416,7 +428,11 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         return result;
     }
 
-    private Map<Long, String> getOptionNameMapByOptionType(List<FieldCascadeRuleOptionVO> result, String optionType, Long projectId, Long organizationId, Long fieldId) {
+    private Map<Long, String> getOptionNameMapByOptionType(List<FieldCascadeRuleOptionVO> result,
+                                                           String optionType,
+                                                           Long projectId,
+                                                           Long organizationId,
+                                                           Long fieldId) {
         Map<Long, String> optionNameMap = null;
         switch (optionType) {
             case PRIORITY:
@@ -445,6 +461,13 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                 List<ProjectVO> projectVOList = baseFeignClient.queryByIds(result.stream().map(FieldCascadeRuleOptionVO::getCascadeOptionId).collect(Collectors.toSet())).getBody();
                 if (!CollectionUtils.isEmpty(projectVOList)) {
                     optionNameMap = projectVOList.stream().collect(Collectors.toMap(ProjectVO::getId, ProjectVO::getName));
+                }
+                break;
+            case FieldCode.BACKLOG_TYPE:
+            case FieldCode.BACKLOG_CLASSIFICATION:
+            case FieldCode.URGENT:
+                if (backlogExpandService != null) {
+                    optionNameMap = backlogExpandService.getOptionNameMapByOptionType(optionType, organizationId, projectId);
                 }
                 break;
             default:
@@ -554,6 +577,12 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                 return SUB_PROJECT;
             case FieldCode.ENVIRONMENT:
                 return ENVIRONMENT;
+            case FieldCode.BACKLOG_TYPE:
+                return FieldCode.BACKLOG_TYPE;
+            case FieldCode.BACKLOG_CLASSIFICATION:
+                return FieldCode.BACKLOG_CLASSIFICATION;
+            case FieldCode.URGENT:
+                return FieldCode.URGENT;
             default:
                 break;
         }
