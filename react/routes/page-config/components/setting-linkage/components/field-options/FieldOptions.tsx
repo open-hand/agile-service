@@ -132,7 +132,6 @@ const FieldOptions: React.FC<Props> = ({
     const requestPromiseData = injectCascadeRuleConfigData?.getOptionsConfig ? injectCascadeRuleConfigData?.getOptionsConfig(field, defaultRequest, (filter || filter === null) ? filter : search, newPage) : defaultRequest();
     requestPromiseData.then((res: any) => {
       batchedUpdates(() => {
-        console.log('requestPromiseData res...', res);
         if (res.content) {
           if (newPage > 1) { // 大于第一页
             if (field.fieldCode === 'component') {

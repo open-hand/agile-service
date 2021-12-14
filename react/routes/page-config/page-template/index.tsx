@@ -26,6 +26,11 @@ export interface IInjectCascadeRuleConfigData {
    * 获取字段实例
    */
   getFieldInstance?: IAgileBaseSearchFieldInstance['fieldInstance']
+  /**
+   * 获取当前字段所级联的字段配置项
+   * @returns hidden 是否为隐藏字段 required 是否设为必填
+   */
+  getFieldCascadeFieldConfig?: (field: IPageCascadeRuleModalField, cascadeField: IPageCascadeRuleModalField) => { hidden?: boolean, required?: boolean }
 }
 export const InjectCascadeRuleConfig = {} as Record<'backlog' | 'feature', IInjectCascadeRuleConfigData>;
 /**
