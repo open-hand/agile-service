@@ -213,6 +213,8 @@ const Condition: React.FC<Props> = ({
       }
     });
   }
+
+  console.log(conditionDataSet.current, !hidden, !!conditionDataSet.current && !hidden);
   return (
     <div className={styles.condition}>
       <div className={styles.tip}>当工作项流转到此状态应满足的条件设置。</div>
@@ -220,7 +222,7 @@ const Condition: React.FC<Props> = ({
         <p className={styles.memberSelectTip}>仅以下成员可移动工作项到此状态</p>
         <Dropdown
           visible={!!conditionDataSet.current && !hidden}
-          getPopupContainer={() => document.getElementsByClassName(styles.form)[0] as any}
+          getPopupContainer={() => document.getElementsByClassName(styles.condition)[0] as any}
           overlay={(
             <div
               // @ts-ignore
