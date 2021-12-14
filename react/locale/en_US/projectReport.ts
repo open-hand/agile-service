@@ -3,6 +3,7 @@ import { localeAppendPrefixObjectKey } from '@/utils/locale';
 const locale = {
   create: 'Create Report',
   receiver: 'Receiver',
+  noReport: 'No project report，please',
 } as const;
 const exportProjectReport = localeAppendPrefixObjectKey({ intlPrefix: 'projectReport' as const, intlObject: locale });
 type ILocaleProjectReportType = {

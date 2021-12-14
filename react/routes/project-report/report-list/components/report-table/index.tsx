@@ -118,7 +118,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
     <EmptyPage
       description={(
         <>
-          当前项目下无项目报告，请
+          {formatMessage({ id: 'agile.projectReport.noReport' })}
           <EmptyPage.Button
             onClick={onClick}
           >
