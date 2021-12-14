@@ -214,7 +214,6 @@ const Condition: React.FC<Props> = ({
     });
   }
 
-  console.log(conditionDataSet.current, !hidden, !!conditionDataSet.current && !hidden);
   return (
     <div className={styles.condition}>
       <div className={styles.tip}>当工作项流转到此状态应满足的条件设置。</div>
