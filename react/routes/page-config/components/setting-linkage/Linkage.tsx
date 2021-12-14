@@ -1,10 +1,12 @@
 import React, {
-  ReactElement, useCallback, useState, useEffect, useRef,
+  ReactElement, useCallback, useState, useEffect, useRef, useMemo,
 } from 'react';
 import { Modal, Form, DataSet } from 'choerodon-ui/pro';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';
-import { includes, map, find } from 'lodash';
+import {
+  includes, map, find, partial,
+} from 'lodash';
 import { toJS } from 'mobx';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import { EmptyPage } from '@choerodon/components';
@@ -145,7 +147,10 @@ const Linkage: React.FC<Props> = ({
     };
     getCascadeRuleList();
   }, [field.id, issueTypeId]);
-
+  const getChosenFieldConfig = useMemo(() => {
+    const fn: any = injectCascadeRuleConfigData?.getFieldCascadeFieldConfig || ((...args: any[]) => ({}));
+    return partial(fn, field) as (chosenField: IPageCascadeRuleModalField) => ReturnType<Required<IInjectCascadeRuleConfigData>['getFieldCascadeFieldConfig']>;
+  }, [field, injectCascadeRuleConfigData?.getFieldCascadeFieldConfig]);
   const switchOption = useCallback((id: string) => {
     setCurrentOptionId(id);
     setCurrentSelected(undefined);
@@ -164,18 +169,18 @@ const Linkage: React.FC<Props> = ({
       }, {
         name: 'hidden',
         label: '隐藏字段',
-        dynamicProps: {
-          disabled: ({ record }) => record.get('required'),
+        computedProps: {
+          disabled: ({ record }) => getChosenFieldConfig(record.get('chosenField')).hidden ?? record.get('required'),
         },
       }, {
         name: 'required',
         label: '设置为必填字段',
-        dynamicProps: {
-          disabled: ({ record }) => record.get('hidden'),
+        computedProps: {
+          disabled: ({ record }) => getChosenFieldConfig(record.get('chosenField')).required ?? record.get('hidden'),
         },
       }],
     }));
-  }, []);
+  }, [getChosenFieldConfig]);
   const prepareData = useCallback(async () => {
     const hasValue = dataSet?.find((r) => r.get('chosenField')?.id);
     if (hasValue && !await dataSet?.validate()) {
