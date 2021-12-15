@@ -34,7 +34,17 @@ class ProjectApi extends Api<ProjectApi> {
   loadProjectByUser({
     userId, filter, page, size, category,
   }: any) {
-    return axios.get(`iam/choerodon/v1/organizations/${getOrganizationId()}/users/${userId}/projects/paging?enabled=true&page=${page}&size=${size}&onlySucceed=true${filter ? `&name=${filter}` : ''}${category ? `&category=${category}` : ''}`);
+    return this.request({
+      method: 'get',
+      url: `iam/choerodon/v1/organizations/${this.orgId}/users/${userId}/projects/paging`,
+      params: {
+        page,
+        size,
+        onlySucceed: true,
+        name: filter || '',
+        category,
+      },
+    });
   }
 
   /**
