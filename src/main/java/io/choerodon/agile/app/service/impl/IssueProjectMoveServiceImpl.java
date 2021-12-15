@@ -27,12 +27,16 @@ import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
+import org.hzero.core.base.AopProxy;
 import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -49,7 +53,8 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
+public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, AopProxy<IssueProjectMoveService> {
+    protected static final Logger LOGGER = LoggerFactory.getLogger(IssueProjectMoveServiceImpl.class);
     private static final String ISSUE_EPIC = "issue_epic";
     private static final String TYPE_CODE_FIELD = "typeCode";
     private static final String EPIC_ID_FIELD = "epicId";
@@ -141,6 +146,8 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
     private IssueSprintRelMapper issueSprintRelMapper;
     @Autowired
     private MessageClientC7n messageClientC7n;
+    @Autowired
+    private ProjectInfoService projectInfoService;
     @Override
     public void issueProjectMove(Long projectId, Long issueId, Long targetProjectId, JSONObject jsonObject) {
         if (ObjectUtils.isEmpty(targetProjectId)) {
@@ -232,6 +239,8 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
             batchUpdateFieldStatusVO.setKey(messageCode);
             batchUpdateFieldStatusVO.setUserId(userId);
             batchUpdateFieldStatusVO.setProcess(0.0);
+            batchUpdateFieldStatusVO.setSuccessCount(0);
+            batchUpdateFieldStatusVO.setFailedCount(0);
             messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
             if (ObjectUtils.isEmpty(targetProjectId)) {
                 throw new CommonException("error.transfer.project.is.null");
@@ -243,27 +252,20 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
                 throw new CommonException("error.transfer.across.organizations");
             }
             List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds, null);
-            double incrementalValue = 1.0 / (issueDTOS.size() == 0 ? 1 : issueDTOS.size());
             int currentProgress = 1;
+            double lastProcess = 0.0;
             List<Long> transferBug = new ArrayList<>();
             List<IssueTypeVO> targetProjectIssueType = issueTypeService.queryByOrgId(projectVO.getOrganizationId(), targetProjectVO.getId());
             Map<Long, String> issueTypeCodeMap = targetProjectIssueType.stream().collect(Collectors.toMap(IssueTypeVO::getId, IssueTypeVO::getTypeCode));
             for (IssueDTO issueDTO : issueDTOS) {
                 Map<String, Object> reuslt = new HashMap<>();
                 buildJSONObject(reuslt, issueDTO, issueTypeStatusMap, jsonObject, transferBug, issueTypeCodeMap);
-                Boolean isMove = (Boolean) reuslt.get("isMove");
-                JSONObject issueJSONObject = JSONObject.parseObject(JSON.toJSONString(reuslt.get("jsonObj")));
-                if (isMove) {
-                    handlerIssueValue(projectVO, issueDTO.getIssueId(), targetProjectVO, issueJSONObject);
-                } else {
-                    IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
-                    List<String> fieldList = verifyUpdateUtil.verifyUpdateData(issueJSONObject, issueUpdateVO);
-                    issueService.handleUpdateIssueWithoutRuleNotice(issueUpdateVO, fieldList, projectId);
-                }
+                this.self().handleData(reuslt, projectVO, issueDTO, targetProjectVO, projectId, batchUpdateFieldStatusVO);
                 double progress = currentProgress * 1.0 / issueDTOS.size();
-                if (progress % incrementalValue == 0) {
+                if (progress - lastProcess >= 0.1) {
                     batchUpdateFieldStatusVO.setProcess(progress);
                     messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+                    lastProcess = progress;
                 }
                 currentProgress++;
             }
@@ -279,6 +281,31 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
             throw new CommonException("update field failed, exception: {}", e);
         } finally {
             messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+        }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void handleData(Map<String, Object> reuslt,
+                           ProjectVO projectVO,
+                           IssueDTO issueDTO,
+                           ProjectVO targetProjectVO,
+                           Long projectId,
+                           BatchUpdateFieldStatusVO batchUpdateFieldStatusVO) {
+        Boolean isMove = (Boolean) reuslt.get("isMove");
+        JSONObject issueJSONObject = JSONObject.parseObject(JSON.toJSONString(reuslt.get("jsonObj")));
+        try {
+            if (isMove) {
+                this.self().handlerIssueValue(projectVO, issueDTO.getIssueId(), targetProjectVO, issueJSONObject);
+            } else {
+                IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
+                List<String> fieldList = verifyUpdateUtil.verifyUpdateData(issueJSONObject, issueUpdateVO);
+                issueService.handleUpdateIssueWithoutRuleNotice(issueUpdateVO, fieldList, projectId);
+            }
+            batchUpdateFieldStatusVO.setSuccessCount(batchUpdateFieldStatusVO.getSuccessCount() + 1);
+        } catch (Exception e) {
+            LOGGER.error("error.batch.transfer.issue", e);
+            batchUpdateFieldStatusVO.setFailedCount(batchUpdateFieldStatusVO.getFailedCount() + 1);
         }
     }
 
@@ -457,7 +484,8 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         }
     }
 
-    private void handlerIssueValue(ProjectVO projectVO, Long issueId, ProjectVO targetProjectVO, JSONObject jsonObject) {
+    @Override
+    public void handlerIssueValue(ProjectVO projectVO, Long issueId, ProjectVO targetProjectVO, JSONObject jsonObject) {
         IssueDetailDTO issueDTO = issueMapper.queryIssueDetail(projectVO.getId(), issueId);
         if (ObjectUtils.isEmpty(issueDTO)) {
             throw new CommonException(ISSUE_NULL);
@@ -675,7 +703,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         // 设置issueNum
         String newIssueNum = IssueNumUtil.getNewIssueNum(targetProjectId).toString();
         issue.setIssueNum(newIssueNum);
-        projectInfoMapper.updateIssueMaxNum(targetProjectId,newIssueNum);
+        projectInfoService.updateIssueMaxNum(targetProjectId,newIssueNum);
         issue.setObjectVersionNumber(issueDTO.getObjectVersionNumber());
         if (Objects.equals(issueDTO.getTypeCode(), ISSUE_EPIC)) {
             Integer sequence = issueMapper.queryMaxEpicSequenceByProject(targetProjectId);

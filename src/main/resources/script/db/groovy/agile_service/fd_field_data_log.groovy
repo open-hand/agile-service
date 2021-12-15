@@ -35,4 +35,10 @@ databaseChangeLog(logicalFilePath: 'fd_field_data_log.groovy') {
             column(name: "scheme_code", type: "VARCHAR(30)")
         }
     }
+
+    changeSet(id: '2021-12-15-fd-field-data-log-add-index', author: 'ztxemail@163.com') {
+        createIndex(tableName: "fd_field_data_log", indexName: "idx_instance_id") {
+            column(name: "instance_id")
+        }
+    }
 }
