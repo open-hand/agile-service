@@ -260,7 +260,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
             for (IssueDTO issueDTO : issueDTOS) {
                 Map<String, Object> reuslt = new HashMap<>();
                 buildJSONObject(reuslt, issueDTO, issueTypeStatusMap, jsonObject, transferBug, issueTypeCodeMap);
-                this.self().handleData(reuslt, projectVO, issueDTO, targetProjectVO, projectId, batchUpdateFieldStatusVO);
+                issueService.handleData(reuslt, projectVO, issueDTO, targetProjectVO, projectId, batchUpdateFieldStatusVO);
                 double progress = currentProgress * 1.0 / issueDTOS.size();
                 if (progress - lastProcess >= 0.1) {
                     batchUpdateFieldStatusVO.setProcess(progress);
@@ -281,31 +281,6 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
             throw new CommonException("update field failed, exception: {}", e);
         } finally {
             messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
-        }
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void handleData(Map<String, Object> reuslt,
-                           ProjectVO projectVO,
-                           IssueDTO issueDTO,
-                           ProjectVO targetProjectVO,
-                           Long projectId,
-                           BatchUpdateFieldStatusVO batchUpdateFieldStatusVO) {
-        Boolean isMove = (Boolean) reuslt.get("isMove");
-        JSONObject issueJSONObject = JSONObject.parseObject(JSON.toJSONString(reuslt.get("jsonObj")));
-        try {
-            if (isMove) {
-                this.self().handlerIssueValue(projectVO, issueDTO.getIssueId(), targetProjectVO, issueJSONObject);
-            } else {
-                IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
-                List<String> fieldList = verifyUpdateUtil.verifyUpdateData(issueJSONObject, issueUpdateVO);
-                issueService.handleUpdateIssueWithoutRuleNotice(issueUpdateVO, fieldList, projectId);
-            }
-            batchUpdateFieldStatusVO.setSuccessCount(batchUpdateFieldStatusVO.getSuccessCount() + 1);
-        } catch (Exception e) {
-            LOGGER.error("error.batch.transfer.issue", e);
-            batchUpdateFieldStatusVO.setFailedCount(batchUpdateFieldStatusVO.getFailedCount() + 1);
         }
     }
 

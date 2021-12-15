@@ -58,13 +58,6 @@ public interface IssueProjectMoveService {
 
     void handlerIssueValue(ProjectVO projectVO, Long issueId, ProjectVO targetProjectVO, JSONObject jsonObject);
 
-    void handleData(Map<String, Object> reuslt,
-                    ProjectVO projectVO,
-                    IssueDTO issueDTO,
-                    ProjectVO targetProjectVO,
-                    Long projectId,
-                    BatchUpdateFieldStatusVO batchUpdateFieldStatusVO);
-
     /**
      * 根据issueIds查询并统计问题类型下的状态
      * @param projectId

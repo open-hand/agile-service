@@ -486,4 +486,11 @@ public interface IssueService {
     void handleUpdateParticipant(List<Long> participantIds, Long projectId, Long issueId);
 
     void handleUpdateParticipantWithoutRuleNotice(List<Long> participantIds, Long projectId, Long issueId);
+
+    void handleData(Map<String, Object> reuslt,
+                    ProjectVO projectVO,
+                    IssueDTO issueDTO,
+                    ProjectVO targetProjectVO,
+                    Long projectId,
+                    BatchUpdateFieldStatusVO batchUpdateFieldStatusVO);
 }
