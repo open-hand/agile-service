@@ -17,7 +17,7 @@ import styles from './index.less';
  * 阻止冒泡以及事件执行
  * @param e
  */
-function stopEvent(e:React.MouseEvent) {
+function stopEvent(e: React.MouseEvent) {
   e.preventDefault();
   e.stopPropagation();
 }
@@ -39,14 +39,14 @@ interface DatePickerPageProps extends IBaseComponentProps {
   format?: string
   isCustomDateTimeView?: boolean,
 }
-@observer
-class ObserverDateTimesView extends DateTimesView {
-  // @observable mode: 'dateTime' | 'time' | undefined;
+// @observer
+// class ObserverDateTimesView extends DateTimesView<any> {
+//   // @observable mode: 'dateTime' | 'time' | undefined;
 
-}
+// }
 
 const DateViews = {
-  dateTime: ObserverDateTimesView,
+  dateTime: DateTimesView,
   date: DaysView,
   time: TimesView,
   year: YearsView,
@@ -100,7 +100,7 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
     // onChange && onChange(date.format('YYYY-MM-DD HH:mm:ss'));
     innerRef.current?.choose(new Record({ meaning: date.format(format), value: date.format(format) }));
   }
-  const DateView = isCustomDateTimeView && mode === 'dateTime' ? DateTimesViewWithFormat : DateViews[mode as DateViewsKey];
+  const DateView = isCustomDateTimeView && mode === 'dateTime' ? DateTimesViewWithFormat as unknown as React.FC<any> : DateViews[mode as DateViewsKey] as unknown as React.FC<any>;
   const handleBindRef = useCallback((newRef) => {
     if (newRef) {
       ref && Object.assign(ref, { current: newRef });
@@ -136,7 +136,7 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
             {options.map((item) => (
               <li
                 role="menuitem"
-                onKeyDown={() => {}}
+                onKeyDown={() => { }}
                 className={classnames(styles.date_options_item, { [styles.date_options_item_active]: item.value === optionValue })}
                 onClick={() => handleChange(item.value)}
               >
@@ -150,10 +150,10 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
                 date={value || moment()}
                 onSelect={(newDate: any) => handleChangeDate(newDate)}
                 format={format}
-                onViewModeChange={(newMode) => {
+                onViewModeChange={(newMode:any) => {
                   setMode(newMode);
                 }}
-                onSelectedDateChange={(date) => { setValue(date); }}
+                onSelectedDateChange={(date:any) => { setValue(date); }}
                 mode={dateType === 'datetime' ? 'dateTime' : dateType as any}
                 step={{}}
               />
