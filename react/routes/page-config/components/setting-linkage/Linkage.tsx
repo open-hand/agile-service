@@ -5,7 +5,7 @@ import { Modal, Form, DataSet } from 'choerodon-ui/pro';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';
 import {
-  includes, map, find, partial,
+  includes, map, find, partial, intersectionBy, castArray,
 } from 'lodash';
 import { toJS } from 'mobx';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
@@ -180,6 +180,20 @@ const Linkage: React.FC<Props> = ({
           disabled: ({ record }) => getChosenFieldConfig(record.get('chosenField')).required ?? record.get('hidden'),
         },
       }],
+      events: {
+        update: ({ value, record, name }: any) => {
+          // 当可见项变化 对默认值更正
+          if (name === 'fieldRelOptionList' && value?.length) {
+            const defaultValues = castArray(toJS(record.get('defaultValue'))).filter(Boolean);
+            const { fieldType } = record.get('chosenField') || {};
+            let validDefaultValues: any[] | any = intersectionBy(defaultValues, value, (item) => (typeof item === 'object' ? item?.id : item)) as string[];
+            if (singleSelectTypes.includes(fieldType) && validDefaultValues.length > 0) {
+              [validDefaultValues] = validDefaultValues;
+            }
+            record.set('defaultValue', validDefaultValues);
+          }
+        },
+      },
     }));
   }, [getChosenFieldConfig]);
   const prepareData = useCallback(async () => {

@@ -2,7 +2,9 @@ import {
   Select,
 } from 'choerodon-ui/pro';
 import React from 'react';
-import { set, assign } from 'lodash';
+import {
+  set, assign, includes, unset,
+} from 'lodash';
 import moment from 'moment';
 import { FORMAT_FIELDS } from '@/constants/DATE_FORMAT';
 import { IAgileBaseSearchFieldInstance } from '@/components/field-pro/layouts/search';
@@ -20,7 +22,9 @@ interface Props {
   name?: string
   getFieldInstance: IAgileBaseSearchFieldInstance['fieldInstance']
 }
-
+function isSelect(fieldType: string) {
+  return includes(['radio', 'multiple', 'checkbox', 'single'], fieldType);
+}
 export const renderFieldRelSelect = ({ field, name = 'fieldRelOptionList', getFieldInstance }: Props) => {
   const { system, id } = field;
   const fieldCode = field.fieldCode as 'priority' | 'component' | 'fixVersion' | 'influenceVersion' | 'subProject';
@@ -73,6 +77,10 @@ export const renderDefaultValue = ({
     assign(fieldProps, {
       defaultPickerValue: moment().endOf('d'),
     });
+  }
+  if (fieldOptions.length === 0 && isSelect(fieldType)) {
+    unset(fieldProps, 'fieldOptions');
+    set(fieldProps, 'fieldId', field.id);
   }
   return getFieldInstance([], [], {
     code,
