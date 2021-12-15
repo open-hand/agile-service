@@ -68,7 +68,7 @@ export const renderDefaultValue = ({
   } = field;
 
   // 预计开始/结束时间、实际开始/结束时间精确到分
-  const code = field.fieldCode && FORMAT_FIELDS.includes(field.fieldCode) ? field.fieldCode : field.code ?? field.fieldCode as string;
+  let code = field.fieldCode && FORMAT_FIELDS.includes(field.fieldCode) ? field.fieldCode : field.fieldCode as string;
   const fieldProps = {
     name,
     fieldOptions: fieldOptions.map((i) => ({ id: i.value, value: i.meaning, enabled: true })),
@@ -81,6 +81,9 @@ export const renderDefaultValue = ({
   if (fieldOptions.length === 0 && isSelect(fieldType)) {
     unset(fieldProps, 'fieldOptions');
     set(fieldProps, 'fieldId', field.id);
+  } else if (isSelect(fieldType)) {
+    // 切换为id 使得组件切换为自定义组件
+    code = field.id;
   }
   return getFieldInstance([], [], {
     code,
