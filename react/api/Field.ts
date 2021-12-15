@@ -289,12 +289,13 @@ class FieldApi extends Api<FieldApi> {
   }
 
   getCascadeOptions(fieldId: string, selected: string[], fieldCascadeRuleIds: string[], searchParam: string, page: number, size: number, extendParams?: string[]) {
-    return axios({
+    return this.request({
       method: 'post',
-      url: `${this.prefix}/field_cascade_rule/cascade_field/${fieldId}/option`,
+      url: `${this.isOutside ? this.outPrefix : this.prefix}/field_cascade_rule/cascade_field/${fieldId}/option`,
       params: {
         page,
         size,
+        projectId: this.projectId,
       },
       data: {
         selected,
