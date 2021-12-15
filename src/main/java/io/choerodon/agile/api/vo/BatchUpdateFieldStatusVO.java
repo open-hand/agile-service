@@ -25,6 +25,10 @@ public class BatchUpdateFieldStatusVO {
 
     private Map<Object, Object> errorMsgMap;
 
+    private Integer successCount;
+
+    private Integer failedCount;
+
     public String getStatus() {
         return status;
     }
@@ -87,5 +91,21 @@ public class BatchUpdateFieldStatusVO {
 
     public void setLastProcess(Double lastProcess) {
         this.lastProcess = lastProcess;
+    }
+
+    public Integer getSuccessCount() {
+        return successCount;
+    }
+
+    public void setSuccessCount(Integer successCount) {
+        this.successCount = successCount;
+    }
+
+    public Integer getFailedCount() {
+        return failedCount;
+    }
+
+    public void setFailedCount(Integer failedCount) {
+        this.failedCount = failedCount;
     }
 }
