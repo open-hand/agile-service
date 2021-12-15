@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -58,7 +59,20 @@ public class PageTemplateServiceImpl implements PageTemplateService {
 
     private void setPageTemplateFieldCascadeRuleDes(Long issueTypeId, Long projectId, List<PageTemplateFieldVO> pageTemplateFieldList) {
         List<FieldCascadeRuleDesVO> fieldCascadeRuleDesList = fieldCascadeRuleMapper.selectFieldCascadeRuleDesByIssueTypeId(issueTypeId, projectId);
+        fieldCascadeRuleDesList = removeDuplicateObj(fieldCascadeRuleDesList);
         Map<Long, List<FieldCascadeRuleDesVO>> cascadeRuleMap = fieldCascadeRuleDesList.stream().collect(Collectors.groupingBy(FieldCascadeRuleDesVO::getFieldId));
         pageTemplateFieldList.forEach(pageTemplateFieldVO -> pageTemplateFieldVO.setFieldCascadeRuleDesList(cascadeRuleMap.get(pageTemplateFieldVO.getFieldId())));
+    }
+
+    private List<FieldCascadeRuleDesVO> removeDuplicateObj(List<FieldCascadeRuleDesVO> fieldCascadeRuleDesList) {
+        List<FieldCascadeRuleDesVO> result = new ArrayList<>();
+        if (!ObjectUtils.isEmpty(fieldCascadeRuleDesList)) {
+            fieldCascadeRuleDesList.forEach(x -> {
+                if (!result.contains(x)) {
+                    result.add(x);
+                }
+            });
+        }
+        return result;
     }
 }
