@@ -323,6 +323,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private int triggerMaxDepth;
     @Autowired
     private IssueParticipantRelService issueParticipantRelService;
+    @Autowired
+    private IssueProjectMoveService issueProjectMoveService;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -995,6 +997,31 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             issueParticipantRelService.updateParticipantRel(issueId, projectId, participantIds);
         } else {
             issueParticipantRelService.deleteParticipantRel(issueId, projectId);
+        }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void handleData(Map<String, Object> reuslt,
+                           ProjectVO projectVO,
+                           IssueDTO issueDTO,
+                           ProjectVO targetProjectVO,
+                           Long projectId,
+                           BatchUpdateFieldStatusVO batchUpdateFieldStatusVO) {
+        Boolean isMove = (Boolean) reuslt.get("isMove");
+        JSONObject issueJSONObject = JSONObject.parseObject(JSON.toJSONString(reuslt.get("jsonObj")));
+        try {
+            if (isMove) {
+                issueProjectMoveService.handlerIssueValue(projectVO, issueDTO.getIssueId(), targetProjectVO, issueJSONObject);
+            } else {
+                IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
+                List<String> fieldList = verifyUpdateUtil.verifyUpdateData(issueJSONObject, issueUpdateVO);
+                this.self().handleUpdateIssueWithoutRuleNotice(issueUpdateVO, fieldList, projectId);
+            }
+            batchUpdateFieldStatusVO.setSuccessCount(batchUpdateFieldStatusVO.getSuccessCount() + 1);
+        } catch (Exception e) {
+            LOGGER.error("error.batch.transfer.issue", e);
+            batchUpdateFieldStatusVO.setFailedCount(batchUpdateFieldStatusVO.getFailedCount() + 1);
         }
     }
 
