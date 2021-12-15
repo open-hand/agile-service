@@ -3,6 +3,8 @@ package io.choerodon.agile.api.vo;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import java.util.Objects;
+
 /**
  * @author chihao.ran@hand-china.com
  * 2021/07/20 16:00
@@ -69,5 +71,19 @@ public class FieldCascadeRuleDesVO {
 
     public void setCascadeFieldCode(String cascadeFieldCode) {
         this.cascadeFieldCode = cascadeFieldCode;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof FieldCascadeRuleDesVO)) return false;
+        FieldCascadeRuleDesVO that = (FieldCascadeRuleDesVO) o;
+        return Objects.equals(getFieldId(), that.getFieldId()) &&
+                Objects.equals(getCascadeFieldId(), that.getCascadeFieldId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getFieldId(), getCascadeFieldId());
     }
 }
