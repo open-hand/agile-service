@@ -155,6 +155,7 @@ const Linkage: React.FC<Props> = ({
     setCurrentOptionId(id);
     setCurrentSelected(undefined);
     setDataSet(new DataSet({
+      paging: false,
       fields: [{
         name: 'chosenField',
         label: '被关联字段',
