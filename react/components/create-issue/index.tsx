@@ -67,7 +67,7 @@ const CreateContent = (props: CreateIssueBaseProps) => {
 
 const openModal = (props: CreateIssueProps) => {
   const {
-    projectId, applyType = 'agile', onCreate, onCancel, request, originFrom,
+    projectId, applyType = 'agile', onCreate, onCancel, request, originFrom, title,
   } = props;
   const handleSubmit: CreateIssueBaseProps['onSubmit'] = async ({ data, fieldList, fileList }) => {
     const res = request ? await request(data as any, applyType) : await issueApi.create(data as any, applyType);
@@ -93,10 +93,12 @@ const openModal = (props: CreateIssueProps) => {
       overflowX: 'hidden',
     },
     key: 'create-issue',
-    title: <C7NFormat
+    title: title || (
+    <C7NFormat
       intlPrefix="agile.common"
       id="create.issue"
-    />,
+    />
+    ),
     okText: <C7NFormat
       intlPrefix="boot"
       id="create"

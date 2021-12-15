@@ -1,4 +1,5 @@
 import React, {
+  ReactElement,
   useCallback, useEffect, useMemo, useRef, useState,
 } from 'react';
 import { stores } from '@choerodon/boot';
@@ -84,6 +85,7 @@ export interface CreateIssueBaseProps {
   /** 额外的需要必填的字段建 */
   extendRequiredCodes?: string[]
   extraSubmitValue?: any
+  title?: string | ReactElement
 }
 const defaultDataSet = new DataSet({
   autoCreate: true,
