@@ -37,6 +37,7 @@ const Rule: React.FC<Props> = ({ record, getFieldInstance }) => {
       getRelOptionList();
     }
   }, [record]);
+
   return (
     <div className={styles.rule}>
       <Form record={record}>
