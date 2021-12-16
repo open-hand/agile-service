@@ -77,6 +77,8 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
     private IssueMapper issueMapper;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
+    @Autowired(required = false)
+    private BacklogExpandService backlogExpandService;
 
     private static final Set<String> CANT_CASCADE_FIELD_CODE = Stream.of(
             FieldCode.ISSUE_TYPE,
@@ -99,7 +101,11 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
             FieldCode.LABEL,
             FieldCode.FEATURE,
             FieldCode.PI,
-            FieldCode.ENVIRONMENT
+            FieldCode.ENVIRONMENT,
+            FieldCode.BELONG_TO_BACKLOG,
+            FieldCode.PROGRESS_FEEDBACK,
+            FieldCode.EMAIL,
+            FieldCode.PROCESSOR
     ).collect(Collectors.toSet());
 
     @Override
@@ -304,6 +310,13 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
             case SUB_PROJECT:
                 result = listProjectCascadeFieldOption(projectId, organizationId, objectSchemeField, cascadeFieldOptionSearchVO, pageRequest);
                 break;
+            case FieldCode.BACKLOG_TYPE:
+            case FieldCode.BACKLOG_CLASSIFICATION:
+            case FieldCode.URGENT:
+                if (backlogExpandService != null) {
+                    result = backlogExpandService.listBacklogFieldOption(optionType, organizationId, projectId, pageRequest, cascadeFieldOptionSearchVO);
+                }
+                break;
             default:
                 break;
         }
@@ -444,6 +457,13 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                     optionNameMap = projectVOList.stream().collect(Collectors.toMap(ProjectVO::getId, ProjectVO::getName));
                 }
                 break;
+            case FieldCode.BACKLOG_TYPE:
+            case FieldCode.BACKLOG_CLASSIFICATION:
+            case FieldCode.URGENT:
+                if (backlogExpandService != null) {
+                    optionNameMap = backlogExpandService.getOptionNameMapByOptionType(optionType, organizationId, projectId);
+                }
+                break;
             default:
                 break;
         }
@@ -551,6 +571,12 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                 return SUB_PROJECT;
             case FieldCode.ENVIRONMENT:
                 return ENVIRONMENT;
+            case FieldCode.BACKLOG_TYPE:
+                return FieldCode.BACKLOG_TYPE;
+            case FieldCode.BACKLOG_CLASSIFICATION:
+                return FieldCode.BACKLOG_CLASSIFICATION;
+            case FieldCode.URGENT:
+                return FieldCode.URGENT;
             default:
                 break;
         }
