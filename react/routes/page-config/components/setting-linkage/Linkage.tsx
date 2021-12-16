@@ -1,13 +1,16 @@
 import React, {
-  ReactElement, useCallback, useState, useEffect, useRef,
+  ReactElement, useCallback, useState, useEffect, useRef, useMemo,
 } from 'react';
 import { Modal, Form, DataSet } from 'choerodon-ui/pro';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';
-import { includes, map, find } from 'lodash';
+import {
+  includes, map, find, partial, intersectionBy, castArray,
+} from 'lodash';
 import { toJS } from 'mobx';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import { EmptyPage } from '@choerodon/components';
+import { useCreation } from 'ahooks';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { OldLoading as Loading } from '@/components/Loading';
 import { IField, IModalProps } from '@/common/types';
@@ -21,6 +24,8 @@ import ChosenFields from './components/chosen-fields';
 import Rule from './components/Rule';
 import { DATETIME } from '@/constants/DATE_FORMAT';
 import { formatFieldDateValue } from '@/utils/formatDate';
+import { IInjectCascadeRuleConfigData } from '../../page-template';
+import { getAgileFields } from '@/components/field-pro';
 
 interface ColumnProps {
   title: string | ReactElement,
@@ -31,7 +36,7 @@ interface ColumnProps {
   bordered?: boolean
 }
 
-const LinkageColumn:React.FC<ColumnProps> = ({
+const LinkageColumn: React.FC<ColumnProps> = ({
   width, title, children, columnStyle, contentStyle, bordered = true, ...otherProps
 }) => (
   <div
@@ -47,23 +52,24 @@ const LinkageColumn:React.FC<ColumnProps> = ({
     <div className={styles.content} style={{ ...(contentStyle || {}) }}>{children}</div>
   </div>
 );
-
+export interface IPageCascadeRuleModalField {
+  id: string,
+  name: string,
+  fieldCode: string,
+  system: boolean
+}
 interface Props {
-  field: {
-    id: string,
-    name: string,
-    fieldCode: string,
-    system: boolean
-  }
+  field: IPageCascadeRuleModalField
   modal?: IModalProps
   issueTypeId: string
+  injectCascadeRuleConfigData?: IInjectCascadeRuleConfigData
   onOk: () => void
 }
 
 export interface ICascadeLinkageSetting {
   id?: string
   chosenField: IField
-  fieldRelOptionList?: {meaning: string, value: string}[]
+  fieldRelOptionList?: { meaning: string, value: string }[]
   defaultValue?: any
   hidden?: boolean
   required?: boolean
@@ -96,7 +102,7 @@ const selectTypes = ['radio', 'checkbox', 'single', 'multiple', 'member', 'multi
 const singleSelectTypes = ['radio', 'single', 'member'];
 
 const Linkage: React.FC<Props> = ({
-  field, issueTypeId, modal, onOk,
+  field, issueTypeId, modal, onOk, injectCascadeRuleConfigData,
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [currentOptionId, setCurrentOptionId] = useState<string | undefined>(undefined);
@@ -141,11 +147,15 @@ const Linkage: React.FC<Props> = ({
     };
     getCascadeRuleList();
   }, [field.id, issueTypeId]);
-
+  const getChosenFieldConfig = useMemo(() => {
+    const fn: any = injectCascadeRuleConfigData?.getFieldCascadeFieldConfig || ((...args: any[]) => ({}));
+    return partial(fn, field) as (chosenField: IPageCascadeRuleModalField) => ReturnType<Required<IInjectCascadeRuleConfigData>['getFieldCascadeFieldConfig']>;
+  }, [field, injectCascadeRuleConfigData?.getFieldCascadeFieldConfig]);
   const switchOption = useCallback((id: string) => {
     setCurrentOptionId(id);
     setCurrentSelected(undefined);
     setDataSet(new DataSet({
+      paging: false,
       fields: [{
         name: 'chosenField',
         label: '被关联字段',
@@ -160,18 +170,32 @@ const Linkage: React.FC<Props> = ({
       }, {
         name: 'hidden',
         label: '隐藏字段',
-        dynamicProps: {
-          disabled: ({ record }) => record.get('required'),
+        computedProps: {
+          disabled: ({ record }) => getChosenFieldConfig(record.get('chosenField')).hidden ?? record.get('required'),
         },
       }, {
         name: 'required',
         label: '设置为必填字段',
-        dynamicProps: {
-          disabled: ({ record }) => record.get('hidden'),
+        computedProps: {
+          disabled: ({ record }) => getChosenFieldConfig(record.get('chosenField')).required ?? record.get('hidden'),
         },
       }],
+      events: {
+        update: ({ value, record, name }: any) => {
+          // 当可见项变化 对默认值更正
+          if (name === 'fieldRelOptionList' && value?.length) {
+            const defaultValues = castArray(toJS(record.get('defaultValue'))).filter(Boolean);
+            const { fieldType } = record.get('chosenField') || {};
+            let validDefaultValues: any[] | any = intersectionBy(defaultValues, value, (item) => (typeof item === 'object' ? item?.id : item)) as string[];
+            if (singleSelectTypes.includes(fieldType) && validDefaultValues.length > 0) {
+              [validDefaultValues] = validDefaultValues;
+            }
+            record.set('defaultValue', validDefaultValues);
+          }
+        },
+      },
     }));
-  }, []);
+  }, [getChosenFieldConfig]);
   const prepareData = useCallback(async () => {
     const hasValue = dataSet?.find((r) => r.get('chosenField')?.id);
     if (hasValue && !await dataSet?.validate()) {
@@ -183,7 +207,7 @@ const Linkage: React.FC<Props> = ({
   }, [currentOptionId, dataSet, linkagesMap]);
 
   useEffect(() => {
-    const getFieldCascadeRuleOptionList = (fieldType: string, fieldRelOptionList: {meaning: string, value: string}[] | undefined, defaultValue: any) => {
+    const getFieldCascadeRuleOptionList = (fieldType: string, fieldRelOptionList: { meaning: string, value: string }[] | undefined, defaultValue: any) => {
       if (includes(['radio', 'checkbox', 'single', 'multiple'], fieldType) && fieldRelOptionList?.length) {
         return fieldRelOptionList.map((option) => ({
           cascadeOptionId: option.value,
@@ -258,25 +282,33 @@ const Linkage: React.FC<Props> = ({
   }, [currentOptionId, dataSet, linkagesMap]);
 
   const linkToPageField = useCallback(() => {
-    modal?.close();
-    if (field.fieldCode === 'component') {
-      to(LINK_URL.component, {
+    const defaultLinkToPageField = () => {
+      modal?.close();
+      if (field.fieldCode === 'component') {
+        to(LINK_URL.component, {
+          type: 'project',
+        });
+        return;
+      }
+      if (field.fieldCode === 'fixVersion' || field.fieldCode === 'influenceVersion') {
+        to(LINK_URL.version, {
+          type: 'project',
+        });
+        return;
+      }
+      to(LINK_URL.pageField, {
         type: 'project',
       });
+    };
+    if (injectCascadeRuleConfigData?.emptyLinkToPageField) {
+      injectCascadeRuleConfigData?.emptyLinkToPageField(field as any, modal!, defaultLinkToPageField);
       return;
     }
-    if (field.fieldCode === 'fixVersion' || field.fieldCode === 'influenceVersion') {
-      to(LINK_URL.version, {
-        type: 'project',
-      });
-      return;
-    }
-    to(LINK_URL.pageField, {
-      type: 'project',
-    });
-  }, [field.fieldCode, modal]);
+    defaultLinkToPageField();
+  }, [field, injectCascadeRuleConfigData, modal]);
 
   const currentRecord: Record | undefined = currentSelected ? dataSet?.find((record) => record.get('chosenField')?.id === currentSelected) : undefined;
+  const getFieldInstance = useCreation(() => injectCascadeRuleConfigData?.getFieldInstance || getAgileFields, [injectCascadeRuleConfigData]);
 
   return (
     <div className={styles.linkage}>
@@ -295,6 +327,7 @@ const Linkage: React.FC<Props> = ({
                 >
                   <FieldOptions
                     field={field}
+                    injectCascadeRuleConfigData={injectCascadeRuleConfigData}
                     onChange={handleOptionChange}
                     currentOptionId={currentOptionId}
                     setHasOptions={setHasOptions}
@@ -312,7 +345,7 @@ const Linkage: React.FC<Props> = ({
                   />
                 </LinkageColumn>
                 <LinkageColumn key="rule" title="设置级联规则" bordered={false} columnStyle={{ flex: 1, paddingRight: 20 }}>
-                  {currentRecord ? <Rule record={currentRecord} /> : null}
+                  {currentRecord ? <Rule record={currentRecord} getFieldInstance={getFieldInstance} /> : null}
                 </LinkageColumn>
               </>
             ) : (
@@ -326,7 +359,7 @@ const Linkage: React.FC<Props> = ({
                       【设置选项】
                     </EmptyPage.Button>
                   </>
-                  )}
+                )}
                 image={noData}
               />
             )
@@ -336,7 +369,10 @@ const Linkage: React.FC<Props> = ({
     </div>
   );
 };
-
+Linkage.defaultProps = {
+  injectCascadeRuleConfigData: undefined,
+  modal: undefined,
+};
 const ObserverLinkage = observer(Linkage);
 
 const openLinkage = (props: Props) => {

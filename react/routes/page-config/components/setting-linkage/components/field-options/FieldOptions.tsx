@@ -4,19 +4,17 @@ import { TextField, Button, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { axios } from '@choerodon/boot';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
-import { IPriority, IVersion } from '@/common/types';
 import classNames from 'classnames';
-import { getProjectId, getOrganizationId } from '@/utils/common';
 import { uniqBy } from 'lodash';
+import { IPriority, IVersion } from '@/common/types';
+import { getProjectId, getOrganizationId } from '@/utils/common';
 import styles from './FieldOptions.less';
+import { IInjectCascadeRuleConfigData } from '@/routes/page-config/page-template';
+import { IPageCascadeRuleModalField } from '../../Linkage';
 
 interface Props {
-  field: {
-    id: string,
-    name: string,
-    fieldCode: string,
-    system: boolean
-  }
+  field: IPageCascadeRuleModalField
+  injectCascadeRuleConfigData?: IInjectCascadeRuleConfigData
   onChange: (id: string, needPrepare?: boolean) => void
   currentOptionId: string | undefined
   setHasOptions: (has: boolean) => void
@@ -28,7 +26,7 @@ interface IOption {
 
 const getOptionsConfig = ({
   fieldCode, fieldId, search, page = 0, size = 20,
-}: {fieldCode: string, fieldId?: string, search?: string, page?: number, size?: number}) => {
+}: { fieldCode: string, fieldId?: string, search?: string, page?: number, size?: number }) => {
   switch (fieldCode) {
     case 'priority': {
       return ({
@@ -115,7 +113,7 @@ const getOptionsConfig = ({
 };
 
 const FieldOptions: React.FC<Props> = ({
-  field, onChange, currentOptionId, setHasOptions,
+  field, onChange, currentOptionId, setHasOptions, injectCascadeRuleConfigData,
 }) => {
   const [options, setOptions] = useState<IOption[]>([]);
   const [search, setSearch] = useState('');
@@ -125,18 +123,20 @@ const FieldOptions: React.FC<Props> = ({
   const { system } = field;
   const getOptions = useCallback((filter?: string, p?: number) => {
     const newPage = p || page;
-    axios(getOptionsConfig({
+    const defaultRequest = () => axios(getOptionsConfig({
       fieldCode: field.fieldCode as string,
       fieldId: field.id,
       search: (filter || filter === null) ? filter : search,
       page: newPage,
-    })).then((res: any) => {
+    }));
+    const requestPromiseData = injectCascadeRuleConfigData?.getOptionsConfig ? injectCascadeRuleConfigData?.getOptionsConfig(field, defaultRequest, (filter || filter === null) ? filter : search, newPage) : defaultRequest();
+    requestPromiseData.then((res: any) => {
       batchedUpdates(() => {
         if (res.content) {
           if (newPage > 1) { // 大于第一页
             if (field.fieldCode === 'component') {
               setOptions((preOptions) => (
-                uniqBy([...preOptions, ...res.content.map((item: { componentId: string, name: string}) => ({
+                uniqBy([...preOptions, ...res.content.map((item: { componentId: string, name: string }) => ({
                   id: item.componentId,
                   value: item.name,
                 }))], 'id')
@@ -149,7 +149,7 @@ const FieldOptions: React.FC<Props> = ({
               setHasOptions(res.content?.length);
             }
             if (field.fieldCode === 'component') {
-              setOptions(res.content.map((item: { componentId: string, name: string}) => ({
+              setOptions(res.content.map((item: { componentId: string, name: string }) => ({
                 id: item.componentId,
                 value: item.name,
               })));
@@ -168,7 +168,7 @@ const FieldOptions: React.FC<Props> = ({
         setIsFirstLoad(false);
       });
     });
-  }, [field.fieldCode, field.id, isFirstLoad, page, search, setHasOptions]);
+  }, [field, injectCascadeRuleConfigData, isFirstLoad, page, search, setHasOptions]);
 
   useEffect(() => {
     getOptions();
@@ -218,16 +218,16 @@ const FieldOptions: React.FC<Props> = ({
           </div>
         ))}
         {
-        (!system || field.fieldCode === 'component') && page < totalPage && (
-          <Button
-            onClick={handleLoadMore}
-            className={styles.loadMoreBtn}
-          >
-            <span>查看更多</span>
-            <Icon type="baseline-arrow_right icon" style={{ marginRight: 2 }} />
-          </Button>
-        )
-      }
+          (!system || field.fieldCode === 'component') && page < totalPage && (
+            <Button
+              onClick={handleLoadMore}
+              className={styles.loadMoreBtn}
+            >
+              <span>查看更多</span>
+              <Icon type="baseline-arrow_right icon" style={{ marginRight: 2 }} />
+            </Button>
+          )
+        }
         {
           !options?.filter((option) => option.value.indexOf(search || '') > -1).length && (
             <div className={styles.noContent}>{`${search ? '该搜索条件下暂无选项' : '暂无选项'}`}</div>
