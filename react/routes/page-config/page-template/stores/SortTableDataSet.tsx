@@ -7,7 +7,6 @@ const SortTableDataSet = (): DataSetProps => ({
   autoQuery: false,
   // dataKey: 'content',
   paging: false,
-  selection: undefined,
   fields: [
     {
       name: 'fieldName',

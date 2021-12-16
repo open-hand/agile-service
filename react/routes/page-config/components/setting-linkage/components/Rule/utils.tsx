@@ -2,10 +2,12 @@ import {
   Select,
 } from 'choerodon-ui/pro';
 import React from 'react';
-import { set, assign } from 'lodash';
+import {
+  set, assign, includes, unset,
+} from 'lodash';
 import moment from 'moment';
-import { getAgileFields } from '@/components/field-pro';
 import { FORMAT_FIELDS } from '@/constants/DATE_FORMAT';
+import { IAgileBaseSearchFieldInstance } from '@/components/field-pro/layouts/search';
 
 export interface IChosenField {
   name: string,
@@ -18,9 +20,12 @@ export interface IChosenField {
 interface Props {
   field: IChosenField
   name?: string
+  getFieldInstance: IAgileBaseSearchFieldInstance['fieldInstance']
 }
-
-export const renderFieldRelSelect = ({ field, name = 'fieldRelOptionList' }: Props) => {
+function isSelect(fieldType: string) {
+  return includes(['radio', 'multiple', 'checkbox', 'single'], fieldType);
+}
+export const renderFieldRelSelect = ({ field, name = 'fieldRelOptionList', getFieldInstance }: Props) => {
   const { system, id } = field;
   const fieldCode = field.fieldCode as 'priority' | 'component' | 'fixVersion' | 'influenceVersion' | 'subProject';
   if (system) {
@@ -38,10 +43,10 @@ export const renderFieldRelSelect = ({ field, name = 'fieldRelOptionList' }: Pro
       default:
         break;
     }
-    return getAgileFields([], { code: fieldCode, outputs: ['element'], props })[0][0];
+    return getFieldInstance([], { code: fieldCode, outputs: ['element'], props })[0][0];
   }
   if (!system) {
-    return getAgileFields([], [], {
+    return getFieldInstance([], [], {
       fieldType: 'single', outputs: ['element'], props: { key: id, name, fieldId: id },
     })[0][0];
   }
@@ -52,14 +57,18 @@ interface DefaultValueProps {
   field: IChosenField
   name?: string
   fieldOptions: { meaning: string, value: string }[]
+  getFieldInstance: IAgileBaseSearchFieldInstance['fieldInstance']
+
 }
-export const renderDefaultValue = ({ field, name = 'defaultValue', fieldOptions = [] }: DefaultValueProps) => {
+export const renderDefaultValue = ({
+  field, name = 'defaultValue', fieldOptions = [], getFieldInstance,
+}: DefaultValueProps) => {
   const {
     fieldType,
   } = field;
 
   // 预计开始/结束时间、实际开始/结束时间精确到分
-  const code = field.fieldCode && FORMAT_FIELDS.includes(field.fieldCode) ? field.fieldCode : field.code ?? field.fieldCode as string;
+  let code = field.fieldCode && FORMAT_FIELDS.includes(field.fieldCode) ? field.fieldCode : field.fieldCode as string;
   const fieldProps = {
     name,
     fieldOptions: fieldOptions.map((i) => ({ id: i.value, value: i.meaning, enabled: true })),
@@ -69,7 +78,14 @@ export const renderDefaultValue = ({ field, name = 'defaultValue', fieldOptions 
       defaultPickerValue: moment().endOf('d'),
     });
   }
-  return getAgileFields([], [], {
+  if (fieldOptions.length === 0 && isSelect(fieldType)) {
+    unset(fieldProps, 'fieldOptions');
+    set(fieldProps, 'fieldId', field.id);
+  } else if (isSelect(fieldType)) {
+    // 切换为id 使得组件切换为自定义组件
+    code = field.id;
+  }
+  return getFieldInstance([], [], {
     code,
     fieldType: fieldType as any,
     // 初次进来没有选项显示值时不显示

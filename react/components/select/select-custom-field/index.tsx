@@ -15,7 +15,7 @@ export interface SelectCustomFieldBasicProps extends Partial<SelectProps> {
   organizationId?: string
   outside?: boolean
   ruleIds?: string[]
-  menuType?:'project'|'organization'
+  menuType?: 'project' | 'organization'
   /** 是否禁用级联规则相关配置 @default false */
   disabledRuleConfig?: boolean
   afterLoad?: (data: any) => void
@@ -43,7 +43,7 @@ ref: React.Ref<Select>) => {
   const args = useMemo(() => ({ ruleIds, fieldOptions, selected: selected ? castArray(selected).filter(Boolean) : undefined }), [fieldOptions, ruleIds, selected]);
   const hasRule = !disabledRuleConfig && Object.keys(args).filter((key: keyof typeof args) => key !== 'fieldOptions' && Boolean(args[key])).length > 0;
   const needOptions = useMemo(() => [...castArray(otherProps.value), ...(args.selected || [])].filter(Boolean), [otherProps.value, args.selected]);
-  const fakePageRequest = usePersistFn((filter: string = '', page: number = 1, size: number, ensureOptions: string[], enabled: boolean = true, optionData:any = undefined) => {
+  const fakePageRequest = usePersistFn((filter: string = '', page: number = 1, size: number, ensureOptions: string[], enabled: boolean = true, optionData: any = undefined) => {
     if (!optionData) {
       return [];
     }
@@ -62,7 +62,7 @@ ref: React.Ref<Select>) => {
     tooltip: true,
     request: ({ page, filter, requestArgs }) => {
       if (hasRule && fieldId) {
-        return fieldApi.project(projectId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, SIZE);
+        return fieldApi.org(organizationId).project(projectId).outside(outside).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, SIZE);
       }
       return requestArgs?.fieldOptions ? fakePageRequest(filter, page, SIZE, needOptions, onlyEnabled, requestArgs?.fieldOptions) : fieldApi.outside(outside).org(organizationId).project(projectId).menu(menuType)
         .getFieldOptions(fieldId!, filter, page, SIZE, needOptions, onlyEnabled);

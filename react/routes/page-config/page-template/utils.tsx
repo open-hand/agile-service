@@ -8,6 +8,7 @@ import openLinkage from '../components/setting-linkage/Linkage';
 
 import openPageRoleConfigModal from './components/role-config';
 import { IPageTemplateStoreIssueType } from './stores/PageTemplateStore';
+import { InjectCascadeRuleConfig } from '.';
 
 interface LinkPagePermission {
   include: string[]
@@ -24,14 +25,20 @@ const LinkPagePermissionMap = new Map<string, LinkPagePermission>([
   ['fieldType', { include: ['radio', 'single', 'multiple', 'checkbox'] }],
   ['createdLevel', { include: ['project'] }],
   ['fieldCode', { include: ['priority', 'fixVersion', 'component', 'influenceVersion'], ignoreOtherInclude: true }],
-
 ]);
+
 /**
  * 检查级联权限
  * @param data
  * @returns
  */
-function checkPermissionLinkage(data: any) {
+function checkPermissionLinkage(data: any, issueType: IPageTemplateStoreIssueType) {
+  if (Object.prototype.hasOwnProperty.call(InjectCascadeRuleConfig, issueType.typeCode) && InjectCascadeRuleConfig[issueType.typeCode as keyof typeof InjectCascadeRuleConfig].checkPermissionLinkage) {
+    const res = InjectCascadeRuleConfig[issueType.typeCode as keyof typeof InjectCascadeRuleConfig].checkPermissionLinkage!(issueType, data);
+    if (typeof res === 'boolean') {
+      return res;
+    }
+  }
   const keyFilters = Object.keys(data).filter((key) => LinkPagePermissionMap.has(key)).map((key) => ({ key, ...LinkPagePermissionMap.get(key) })) as LinkPagePermissionWithKey[];
   if (keyFilters.length === 0) {
     return true;
@@ -40,7 +47,7 @@ function checkPermissionLinkage(data: any) {
   return res || keyFilters.filter((filter) => filter?.ignoreOtherInclude).some((filter) => filter?.include?.includes(data[filter.key]));
 }
 
-const getColumns = ({ currentIssueType: { id: issueTypeId, typeCode }, loadData, disabled }: { currentIssueType: IPageTemplateStoreIssueType, loadData: () => void, disabled: boolean }) => ([
+const getColumns = ({ currentIssueType: { id: issueTypeId, typeCode, ...otherProps }, loadData, disabled }: { currentIssueType: IPageTemplateStoreIssueType, loadData: () => void, disabled: boolean }) => ([
 
   {
     title: <C7NFormat
@@ -122,6 +129,7 @@ const getColumns = ({ currentIssueType: { id: issueTypeId, typeCode }, loadData,
           text: '设置级联规则',
           action: () => {
             openLinkage({
+              injectCascadeRuleConfigData: InjectCascadeRuleConfig[typeCode as keyof typeof InjectCascadeRuleConfig],
               issueTypeId,
               field: {
                 id: rowData.get('fieldId'),
@@ -132,8 +140,7 @@ const getColumns = ({ currentIssueType: { id: issueTypeId, typeCode }, loadData,
               onOk: loadData,
             });
           },
-          // 暂时禁止 需求 类型配置级联
-          display: typeCode !== 'backlog' && checkPermissionLinkage(rowData.toData()),
+          display: checkPermissionLinkage(rowData.toData(), { id: issueTypeId, typeCode, ...otherProps }), // typeCode !== 'backlog' &&
         }]}
         defaultMenuIcon="settings-o"
         defaultButtonProps={{ size: 'default' as any }}
