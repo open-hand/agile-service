@@ -7,7 +7,9 @@ import io.choerodon.agile.api.vo.business.ConfigurationRuleVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.StarBeaconDTO;
 
+import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.domain.AuditDomain;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -183,4 +185,14 @@ public interface BacklogExpandService {
                               List<String> fieldList,
                               List<PageFieldViewUpdateVO> customFields,
                               Long projectId);
+
+    Map<Long, String> getOptionNameMapByOptionType(String optionType,
+                                                   Long organizationId,
+                                                   Long projectId);
+
+    Page listBacklogFieldOption(String optionType,
+                                Long organizationId,
+                                Long projectId,
+                                PageRequest pageRequest,
+                                CascadeFieldOptionSearchVO cascadeFieldOptionSearchVO);
 }
