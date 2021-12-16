@@ -1238,7 +1238,7 @@ class CreateIssue extends Component {
             {getFieldDecorator('environment', {
               rules: [{ required: field.required, message: '环境为必输项' }],
             })(
-              <SelectEnvironment placeholder="环境" />,
+              <SelectEnvironment placeholder="环境" label="环境" />,
             )}
           </FormItem>
         );
