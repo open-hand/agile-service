@@ -724,7 +724,7 @@ const CreateIssueBase = observer(({
         return {
           ...getOptionsData(rules, dataSet, field),
           hidden: getRuleHidden(field, rules),
-          afterLoad: (res: any) => cascadeFieldAfterLoad(dataSet, res, field as IssueCreateFields, rules),
+          afterFirstRequest: (res: any) => cascadeFieldAfterLoad(dataSet, res, field as IssueCreateFields, rules),
         };
       }
       default: return {
