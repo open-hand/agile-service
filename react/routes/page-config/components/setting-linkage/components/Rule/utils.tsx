@@ -70,6 +70,7 @@ export const renderDefaultValue = ({
   // 预计开始/结束时间、实际开始/结束时间精确到分
   let code = field.fieldCode && FORMAT_FIELDS.includes(field.fieldCode) ? field.fieldCode : field.fieldCode as string;
   const fieldProps = {
+    key: code,
     name,
     fieldOptions: fieldOptions.map((i) => ({ id: i.value, value: i.meaning, enabled: true })),
   };
