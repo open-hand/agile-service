@@ -100,7 +100,9 @@ export interface ICascadeLinkage {
 
 const selectTypes = ['radio', 'checkbox', 'single', 'multiple', 'member', 'multiMember'];
 const singleSelectTypes = ['radio', 'single', 'member'];
-
+function isSelect(fieldType: string) {
+  return includes(['radio', 'multiple', 'checkbox', 'single'], fieldType);
+}
 const Linkage: React.FC<Props> = ({
   field, issueTypeId, modal, onOk, injectCascadeRuleConfigData,
 }) => {
@@ -186,11 +188,15 @@ const Linkage: React.FC<Props> = ({
           if (name === 'fieldRelOptionList' && value?.length) {
             const defaultValues = castArray(toJS(record.get('defaultValue'))).filter(Boolean);
             const { fieldType } = record.get('chosenField') || {};
+            // member multiMember 没可见项设置 不处理
+            if (!isSelect(fieldType)) {
+              return;
+            }
             let validDefaultValues: any[] | any = intersectionBy(defaultValues, value, (item) => (typeof item === 'object' ? item?.id : item)) as string[];
             if (singleSelectTypes.includes(fieldType) && validDefaultValues.length > 0) {
               [validDefaultValues] = validDefaultValues;
             }
-            record.set('defaultValue', validDefaultValues);
+            record.set('defaultValue', toJS(validDefaultValues));
           }
         },
       },
