@@ -131,6 +131,8 @@ class ImportIssue extends Component {
           uploading: false,
         });
         Choerodon.prompt('网络错误');
+      }).finally(() => {
+        this.uploadInput.value = '';
       });
     } else {
       issueApi.import(formData).then((res) => {
@@ -142,6 +144,8 @@ class ImportIssue extends Component {
           uploading: false,
         });
         Choerodon.prompt('网络错误');
+      }).finally(() => {
+        this.uploadInput.value = '';
       });
     }
   };
