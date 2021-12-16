@@ -17,7 +17,7 @@ interface IIntlProviderAsync extends IIntlProviderAsyncExtendProps {
 const IntlProviderAsync: React.FC<IIntlProviderAsync> = ({
   children, getMessage, importer: propsImporter, ...otherProps
 }) => {
-  const importer = usePersistFn(propsImporter || getMessage || ((language: string) => import(/* webpackInclude: /\index.(ts|js)$/ */ `../../locale/${language}`)));
+  const importer = usePersistFn(getMessage || propsImporter || ((language: string) => import(/* webpackInclude: /\index.(ts|js)$/ */ `../../locale/${language}`)));
   return (
     <C7NLocaleProvider importer={importer} {...otherProps}>
       {children}
