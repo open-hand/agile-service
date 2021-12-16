@@ -43,16 +43,17 @@ const SelectEnvironment: React.FC<Props> = forwardRef(({
     </Component>
   );
 });
-const OldSelectEnvironment: React.FC<Partial<OldSelectProps>> = (props) => {
+const OldSelectEnvironment: React.FC<Partial<OldSelectProps>> = forwardRef((props, ref: React.Ref<OldSelect>) => {
   const options = useEnvironmentData();
   return (
     <OldSelect
+      ref={ref}
       allowClear
       {...props}
     >
       {options.map((option) => <OldSelect.Option value={option.valueCode}>{option.name}</OldSelect.Option>)}
     </OldSelect>
   );
-};
+});
 export default SelectEnvironment;
 export { OldSelectEnvironment };
