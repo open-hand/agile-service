@@ -3,13 +3,15 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { DataSet, Icon } from 'choerodon-ui/pro';
-import ChooseField, { useChoseField } from '@/components/chose-field';
 import { FuncType } from 'choerodon-ui/pro/lib/button/interface';
-import { pageConfigApi } from '@/api';
 import classNames from 'classnames';
+import { castArray } from 'lodash';
+import ChooseField, { useChoseField } from '@/components/chose-field';
+import { pageConfigApi } from '@/api';
 import useDeepMemo from '@/hooks/useDeepMemo';
 import styles from './ChosenFields.less';
 import { IChosenField } from '../Rule/utils';
+import { IPageCascadeRuleModalField } from '../../Linkage';
 
 interface Props {
   issueTypeId: string
@@ -48,6 +50,14 @@ const ChosenFields: React.FC<Props> = ({
     fields: chosenFields,
     addFieldCallback: addRecord,
     value: chosenFieldIds,
+    events: {
+      cancelChosenField: (data) => {
+        castArray(data as unknown as IPageCascadeRuleModalField[]).forEach((field) => {
+          const delRecord = dataSet?.find((r) => r.get('chosenField')?.id === field.id);
+          dataSet?.remove(delRecord);
+        });
+      },
+    },
   });
 
   const { store: choseFieldStore } = choseDataProps;
