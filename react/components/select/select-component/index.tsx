@@ -27,6 +27,8 @@ export interface SelectComponentProps extends Partial<SelectProps> {
   selected?: string[]
   /** 默认选中的项 仅首次装载的使用 */
   defaultSelectedIds?: string[]
+  /** 首次请求结束后 */
+  afterFirstRequest?: SelectConfig['afterLoad'],
   fieldId?: string
 }
 function getSelectIds(options: any[], values: any, valueField?: string) {
@@ -36,7 +38,7 @@ function getSelectIds(options: any[], values: any, valueField?: string) {
   return values || [];
 }
 const SelectComponent: React.FC<SelectComponentProps> = forwardRef(({
-  dataRef, afterLoad, valueField, flat, projectId, extraOptions, ruleIds, selected, fieldId, name, defaultSelectedIds: propsDefaultSelectedIds, ...otherProps
+  dataRef, afterLoad, afterFirstRequest, valueField, flat, projectId, extraOptions, ruleIds, selected, fieldId, name, defaultSelectedIds: propsDefaultSelectedIds, ...otherProps
 }, ref: React.Ref<Select>) => {
   const selectRef = useRef<Select>();
   const optionsRef = useRef<any[]>(extraOptions || []);
@@ -54,9 +56,9 @@ const SelectComponent: React.FC<SelectComponentProps> = forwardRef(({
     }
     return [...castArray(selectIdsRef.current || [])].filter(Boolean);
   }, [forceValue, values, valueField]);
-  const ruleArgs = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
+  const ruleArgs = useMemo(() => ({ ruleIds, selected: castArray(selected).map((item:any) => (typeof item === 'object' ? item.componentId : item)) }), [ruleIds, selected]);
 
-  const hasRule = Object.keys(ruleArgs).filter((key: keyof typeof ruleArgs) => Boolean(ruleArgs[key])).length > 0;
+  const hasRule = ruleIds?.length && fieldId;
   const args = useMemo(() => ({ ...ruleArgs, selectIds }), [ruleArgs, selectIds]);
   const config = useMemo((): SelectConfig<IComponent> => ({
     name: 'component',
@@ -66,7 +68,10 @@ const SelectComponent: React.FC<SelectComponentProps> = forwardRef(({
     request: wrapRequestCallback(hasRule && fieldId
       ? ({ requestArgs, filter, page }) => fieldApi.project(projectId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, 50)
       : ({ page, filter, requestArgs }) => componentApi.loadAllComponents(filter, projectId, page, 50, requestArgs?.selectIds),
-    ({ filter }) => setFilterWord('filter', filter)),
+    ({ filter }, res) => {
+      afterFirstRequest && afterFirstRequest(res);
+      setFilterWord('filter', filter);
+    }),
     middleWare: (components) => {
       // @ts-ignore
       let data = components || [];

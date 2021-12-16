@@ -5,10 +5,13 @@ import { FlatSelect } from '@choerodon/components';
 import { noop } from 'lodash';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { commonApi, fieldApi } from '@/api';
+import { wrapRequestCallback } from '../utils';
 
 export interface SelectTeamProps extends Partial<SelectProps> {
   projectDataRef?: React.RefObject<Array<any>>,
   afterLoad?: (projects: any) => void
+  /** 首次请求结束后 */
+  afterFirstRequest?: SelectConfig['afterLoad'],
   noAssign?: boolean
   flat?: boolean
   request?: () => Promise<any>
@@ -22,7 +25,7 @@ export interface SelectTeamProps extends Partial<SelectProps> {
 }
 
 const SelectTeam: React.FC<SelectTeamProps> = forwardRef(({
-  request, textField, valueField, fieldId, ruleIds, selected, projectDataRef = { current: null }, afterLoad = noop, flat, projectId, noAssign, addClear = false, ...otherProps
+  request, textField, valueField, fieldId, ruleIds, selected, projectDataRef = { current: null }, afterLoad = noop, afterFirstRequest, flat, projectId, noAssign, addClear = false, ...otherProps
 }, ref: React.Ref<Select>) => {
   const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
   const hasRule = Object.keys(args).filter((key: keyof typeof args) => Boolean(args[key])).length > 0;
@@ -38,7 +41,7 @@ const SelectTeam: React.FC<SelectTeamProps> = forwardRef(({
     textField: textField || 'projName',
     valueField: valueField || 'projectId',
     requestArgs: args,
-    request: ({ requestArgs, page, filter }) => {
+    request: wrapRequestCallback(({ requestArgs, page, filter }) => {
       if (!request) {
         if (hasRule && fieldId) {
           return fieldApi.project(projectId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, 0);
@@ -46,7 +49,9 @@ const SelectTeam: React.FC<SelectTeamProps> = forwardRef(({
         return commonApi.getSubProjects(true, projectId);
       }
       return request();
-    },
+    }, (_, res) => {
+      afterFirstRequest && afterFirstRequest(res);
+    }),
     paging: false,
     afterLoad: afterLoadRef.current as any,
     middleWare: (projects) => {

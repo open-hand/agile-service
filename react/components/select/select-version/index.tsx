@@ -6,6 +6,7 @@ import { fieldApi, versionApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { IVersion } from '@/common/types';
 import { getProjectId } from '@/utils/common';
+import { wrapRequestCallback } from '../utils';
 
 export interface SelectVersionProps extends Partial<SelectProps> {
   projectId?: string
@@ -13,15 +14,17 @@ export interface SelectVersionProps extends Partial<SelectProps> {
   statusArr?: Array<string>
   valueField?: string
   afterLoad?: (versions: IVersion[]) => void
+  /** 首次请求结束后 */
+  afterFirstRequest?: SelectConfig['afterLoad'],
   request?: Function
-  flat?:boolean
+  flat?: boolean
   hasUnassign?: boolean
   ruleIds?: string[]
   selected?: string[]
   fieldId?: string
 }
 const SelectVersion: React.FC<SelectVersionProps> = forwardRef(({
-  request, projectId, valueField, ruleIds, selected, fieldId, dataRef = { current: null }, afterLoad, statusArr = [], flat, hasUnassign, ...otherProps
+  request, projectId, valueField, ruleIds, selected, fieldId, dataRef = { current: null }, afterLoad, afterFirstRequest, statusArr = [], flat, hasUnassign, ...otherProps
 }, ref: React.Ref<Select>) => {
   const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
   const hasRule = Object.keys(args).filter((key: keyof typeof args) => Boolean(args[key])).length > 0;
@@ -30,7 +33,7 @@ const SelectVersion: React.FC<SelectVersionProps> = forwardRef(({
     textField: 'name',
     valueField: valueField || 'name',
     requestArgs: args,
-    request: ({ requestArgs, filter, page }) => {
+    request: wrapRequestCallback(({ requestArgs, filter, page }) => {
       if (request) {
         return request();
       }
@@ -38,7 +41,9 @@ const SelectVersion: React.FC<SelectVersionProps> = forwardRef(({
         return fieldApi.project(projectId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, 0, statusArr);
       }
       return versionApi.project(projectId || getProjectId()).loadNamesByStatus(statusArr);
-    },
+    }, (_, res) => {
+      afterFirstRequest && afterFirstRequest(res);
+    }),
     middleWare: (versions: IVersion[] = []) => {
       if (dataRef) {
         Object.assign(dataRef, {
