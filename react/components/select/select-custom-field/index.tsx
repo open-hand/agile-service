@@ -19,6 +19,8 @@ export interface SelectCustomFieldBasicProps extends Partial<SelectProps> {
   /** 是否禁用级联规则相关配置 @default false */
   disabledRuleConfig?: boolean
   afterLoad?: (data: any) => void
+  /** 首次请求结束后 */
+  afterFirstRequest?: SelectConfig['afterLoad'],
 }
 // 参数互斥，要么传fieldId，要么传fieldOptions
 export type SelectCustomFieldProps = SelectCustomFieldBasicProps & ({
@@ -37,7 +39,7 @@ export type SelectCustomFieldProps = SelectCustomFieldBasicProps & ({
 })
 const SIZE = 50;
 const SelectCustomField: React.FC<SelectCustomFieldProps> = forwardRef(({
-  fieldId, fieldOptions, flat, afterLoad, projectId, organizationId, disabledRuleConfig, selected, extraOptions, ruleIds, outside = false, onlyEnabled = true, menuType, ...otherProps
+  fieldId, fieldOptions, flat, afterLoad, afterFirstRequest, projectId, organizationId, disabledRuleConfig, selected, extraOptions, ruleIds, outside = false, onlyEnabled = true, menuType, ...otherProps
 },
 ref: React.Ref<Select>) => {
   const args = useMemo(() => ({ ruleIds, fieldOptions, selected: selected ? castArray(selected).filter(Boolean) : undefined }), [fieldOptions, ruleIds, selected]);
@@ -60,12 +62,17 @@ ref: React.Ref<Select>) => {
     valueField: 'id',
     requestArgs: args,
     tooltip: true,
-    request: ({ page, filter, requestArgs }) => {
-      if (hasRule && fieldId) {
-        return fieldApi.org(organizationId).project(projectId).outside(outside).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, SIZE);
+    request: async ({ page, filter, requestArgs }) => {
+      let request = () => (requestArgs?.fieldOptions ? fakePageRequest(filter, page, SIZE, needOptions, onlyEnabled, requestArgs?.fieldOptions) : fieldApi.outside(outside).org(organizationId).project(projectId).menu(menuType)
+        .getFieldOptions(fieldId!, filter, page, SIZE, needOptions, onlyEnabled));
+      if (hasRule) {
+        request = () => (!fieldId ? new Promise(() => ({ content: [], list: [], emptyData: true })) : fieldApi.org(organizationId).project(projectId).outside(outside).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, SIZE));
       }
-      return requestArgs?.fieldOptions ? fakePageRequest(filter, page, SIZE, needOptions, onlyEnabled, requestArgs?.fieldOptions) : fieldApi.outside(outside).org(organizationId).project(projectId).menu(menuType)
-        .getFieldOptions(fieldId!, filter, page, SIZE, needOptions, onlyEnabled);
+      const res = await request();
+      if (!res.emptyData && afterFirstRequest) {
+        afterFirstRequest(res.content);
+      }
+      return res;
     },
     middleWare: (data) => {
       if (!extraOptions) {
@@ -81,7 +88,7 @@ ref: React.Ref<Select>) => {
       return res;
     },
     paging: true,
-  }), [args, hasRule, fieldId, fieldOptions, fakePageRequest, needOptions, onlyEnabled, outside, organizationId, projectId, extraOptions, afterLoad]);
+  }), [args, hasRule, afterFirstRequest, fakePageRequest, needOptions, onlyEnabled, outside, organizationId, projectId, menuType, fieldId, extraOptions, afterLoad]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
   return (

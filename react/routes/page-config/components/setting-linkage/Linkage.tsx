@@ -173,13 +173,13 @@ const Linkage: React.FC<Props> = ({
         name: 'hidden',
         label: '隐藏字段',
         computedProps: {
-          disabled: ({ record }) => getChosenFieldConfig(record.get('chosenField')).hidden ?? record.get('required'),
+          disabled: ({ record }) => getChosenFieldConfig(record.get('chosenField')).hidden || record.get('required'),
         },
       }, {
         name: 'required',
         label: '设置为必填字段',
         computedProps: {
-          disabled: ({ record }) => getChosenFieldConfig(record.get('chosenField')).required ?? record.get('hidden'),
+          disabled: ({ record }) => getChosenFieldConfig(record.get('chosenField')).required || record.get('hidden'),
         },
       }],
       events: {

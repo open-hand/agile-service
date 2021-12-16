@@ -72,6 +72,7 @@ export const renderDefaultValue = ({
   const fieldProps = {
     key: code,
     name,
+    style: { width: '100%' },
     fieldOptions: fieldOptions.map((i) => ({ id: i.value, value: i.meaning, enabled: true })),
   };
   if (field.fieldCode && ['estimatedEndTime', 'actualEndTime'].includes(field.fieldCode)) {
