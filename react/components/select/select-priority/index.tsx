@@ -5,12 +5,15 @@ import { FlatSelect } from '@choerodon/components';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { fieldApi, priorityApi } from '@/api';
 import { Priority } from '@/common/types';
+import { wrapRequestCallback } from '../utils';
 
 export interface SelectPriorityProps extends Partial<SelectProps> {
   priorityId?: number
   fieldId?: string
   dataRef?: React.MutableRefObject<any>
   afterLoad?: (prioritys: Priority[]) => void
+  /** 首次请求结束后 */
+  afterFirstRequest?: SelectConfig['afterLoad'],
   flat?: boolean
   projectId?: string
   ruleIds?: string[]
@@ -18,20 +21,22 @@ export interface SelectPriorityProps extends Partial<SelectProps> {
 }
 
 const SelectPriority: React.FC<SelectPriorityProps> = forwardRef(({
-  priorityId, fieldId, ruleIds, selected, dataRef, afterLoad, flat, projectId, ...otherProps
+  priorityId, fieldId, ruleIds, selected, dataRef, afterLoad, afterFirstRequest, flat, projectId, ...otherProps
 },
 ref: React.Ref<Select>) => {
   const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
-  const hasRule = Object.keys(args).filter((key: keyof typeof args) => Boolean(args[key])).length > 0;
-  const isRequestCascadeOptions = !!(hasRule && fieldId);
+  const hasRule = !!(!!ruleIds?.length && fieldId);
+
   const config = useMemo((): SelectConfig => ({
     name: 'priority',
     textField: 'name',
     valueField: 'id',
     requestArgs: args,
-    request: isRequestCascadeOptions
+    request: wrapRequestCallback(hasRule
       ? ({ requestArgs, filter, page }) => fieldApi.project(projectId).getCascadeOptions(fieldId!, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, 0)
-      : () => priorityApi.loadByProject(projectId, [String(priorityId)]),
+      : () => priorityApi.loadByProject(projectId, [String(priorityId)]), (_, res) => {
+      afterFirstRequest && afterFirstRequest(res);
+    }),
     middleWare: (data: Priority[]) => {
       if (dataRef) {
         Object.assign(dataRef, {
@@ -43,8 +48,8 @@ ref: React.Ref<Select>) => {
       }
       return data;
     },
-    paging: isRequestCascadeOptions,
-  }), [afterLoad, args, dataRef, fieldId, isRequestCascadeOptions, priorityId, projectId]);
+    paging: hasRule,
+  }), [afterLoad, args, dataRef, fieldId, hasRule, priorityId, projectId]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
   return (
