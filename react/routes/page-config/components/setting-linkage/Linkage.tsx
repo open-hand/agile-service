@@ -192,10 +192,11 @@ const Linkage: React.FC<Props> = ({
             if (!isSelect(fieldType)) {
               return;
             }
-            let validDefaultValues: any[] | any = intersectionBy(defaultValues, value, (item) => (typeof item === 'object' ? item?.id : item)) as string[];
+            let validDefaultValues: any[] | any = intersectionBy(defaultValues, value, (item) => (typeof item === 'object' ? item?.id || item?.value : item)) as string[];
             if (singleSelectTypes.includes(fieldType) && validDefaultValues.length > 0) {
               [validDefaultValues] = validDefaultValues;
             }
+
             record.set('defaultValue', toJS(validDefaultValues));
           }
         },
@@ -220,6 +221,13 @@ const Linkage: React.FC<Props> = ({
           defaultOption: Array.isArray(defaultValue) ? includes(defaultValue, option.value) : option.value === defaultValue,
         }));
       }
+      // 为空选项的时候
+      // if (includes(['radio', 'checkbox', 'single', 'multiple'], fieldType)) {
+      //   return ([{
+      //     cascadeOptionId: defaultValue,
+      //     defaultOption: true,
+      //   }]);
+      // }
       if (fieldType === 'member' && defaultValue) {
         return ([{
           cascadeOptionId: defaultValue,
