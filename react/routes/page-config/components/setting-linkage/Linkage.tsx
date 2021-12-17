@@ -185,19 +185,22 @@ const Linkage: React.FC<Props> = ({
       events: {
         update: ({ value, record, name }: any) => {
           // 当可见项变化 对默认值更正
-          if (name === 'fieldRelOptionList' && value?.length) {
-            const defaultValues = castArray(toJS(record.get('defaultValue'))).filter(Boolean);
+          if (name === 'fieldRelOptionList') {
             const { fieldType } = record.get('chosenField') || {};
             // member multiMember 没可见项设置 不处理
             if (!isSelect(fieldType)) {
               return;
             }
-            let validDefaultValues: any[] | any = intersectionBy(defaultValues, value, (item) => (typeof item === 'object' ? item?.id || item?.value : item)) as string[];
-            if (singleSelectTypes.includes(fieldType) && validDefaultValues.length > 0) {
-              [validDefaultValues] = validDefaultValues;
+            if (value?.length) {
+              const defaultValues = castArray(toJS(record.get('defaultValue'))).filter(Boolean);
+              let validDefaultValues: any[] | any = intersectionBy(defaultValues, value, (item) => (typeof item === 'object' ? item?.id || item?.value : item)) as string[];
+              if (singleSelectTypes.includes(fieldType) && validDefaultValues.length > 0) {
+                [validDefaultValues] = validDefaultValues;
+              }
+              record.set('defaultValue', toJS(validDefaultValues));
+            } else {
+              record.set('defaultValue', undefined);
             }
-
-            record.set('defaultValue', toJS(validDefaultValues));
           }
         },
       },
