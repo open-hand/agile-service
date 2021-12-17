@@ -1,8 +1,9 @@
 import React, {
-  useCallback, useEffect, useState,
+  useCallback, useEffect, useRef, useState,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { DataSet, Icon } from 'choerodon-ui/pro';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { FuncType } from 'choerodon-ui/pro/lib/button/interface';
 import classNames from 'classnames';
 import { castArray } from 'lodash';
@@ -26,6 +27,8 @@ const ChosenFields: React.FC<Props> = ({
   dataSet, currentSelected, setCurrentSelected, issueTypeId, fieldId, currentOptionId,
 }) => {
   const [chosenFields, setChosenFields] = useState<IChosenField[]>([]);
+  const currentDataSet = useRef(dataSet);
+  currentDataSet.current = dataSet;
   const chosenFieldIds = useDeepMemo(() => dataSet?.map((record) => record.get('chosenField')?.id));
   useEffect(() => {
     const getChosenFields = async () => {
@@ -53,8 +56,8 @@ const ChosenFields: React.FC<Props> = ({
     events: {
       cancelChosenField: (data) => {
         castArray(data as unknown as IPageCascadeRuleModalField[]).forEach((field) => {
-          const delRecord = dataSet?.find((r) => r.get('chosenField')?.id === field.id);
-          dataSet?.remove(delRecord);
+          const delRecord = currentDataSet.current?.find((r) => r.get('chosenField')?.id === field.id);
+          currentDataSet.current?.remove(delRecord);
         });
       },
     },
