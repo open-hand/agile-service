@@ -9,6 +9,7 @@ import { useIssueSearchStore } from '@/components/issue-search';
 import useQueryString from '@/hooks/useQueryString';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { transformFilter } from './utils';
+import useUnmountSaveCache from '@/hooks/useUnmountSaveCache';
 
 const Store = createContext();
 
@@ -45,9 +46,7 @@ export const StoreProvider = inject('AppState')(
       transformFilter,
       defaultSearchVO: (cachedFilter) ?? (defaultMyFilter && defaultMyFilter.filterJson ? JSON.parse(defaultMyFilter.filterJson) : undefined) ?? undefined,
     });
-    useUnmount(() => {
-      localPageCacheStore.setItem('issues', issueSearchStore.getCustomFieldFilters(true));
-    });
+    useUnmountSaveCache('issues', () => issueSearchStore.getCustomFieldFilters(true));
     /**
     * detail data
     * 详情页数据
