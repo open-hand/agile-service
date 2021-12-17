@@ -30,7 +30,7 @@ const Rule: React.FC<Props> = ({ record, getFieldInstance }) => {
           const meaning = res?.find((option) => option.cascadeOptionId === item.value)?.cascadeOptionName;
           return ({ value: item.value, meaning });
         });
-        record.set('fieldRelOptionList', newRelOptionList);
+        record.init('fieldRelOptionList', newRelOptionList);
       }
     };
     if (record.get('id')) {

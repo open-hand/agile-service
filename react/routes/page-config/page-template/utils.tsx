@@ -23,7 +23,7 @@ interface LinkPagePermissionWithKey extends LinkPagePermission {
  */
 const LinkPagePermissionMap = new Map<string, LinkPagePermission>([
   ['fieldType', { include: ['radio', 'single', 'multiple', 'checkbox'] }],
-  ['createdLevel', { include: ['project'] }],
+  ['createdLevel', { include: ['project', 'organization'] }],
   ['fieldCode', { include: ['priority', 'fixVersion', 'component', 'influenceVersion'], ignoreOtherInclude: true }],
 ]);
 
