@@ -73,7 +73,7 @@ export const renderDefaultValue = ({
   } = field;
 
   // 预计开始/结束时间、实际开始/结束时间精确到分
-  const code = field.fieldCode && FORMAT_FIELDS.includes(field.fieldCode) ? field.fieldCode : field.fieldCode as string;
+  let code = field.fieldCode && FORMAT_FIELDS.includes(field.fieldCode) ? field.fieldCode : field.fieldCode as string;
   const fieldProps = {
     key: code,
     name,
@@ -86,10 +86,12 @@ export const renderDefaultValue = ({
       defaultPickerValue: moment().endOf('d'),
     });
   }
-  if (fieldOptions.length === 0 && isSelect(fieldType)) {
+  if (isSelect(fieldType)) {
     // unset(fieldProps, 'fieldOptions');
+    // 设置为自定义
+    code = field.id;
     // set(fieldProps, 'fieldId', field.id);
-    merge(fieldProps, {
+    fieldOptions.length === 0 && merge(fieldProps, {
       onMouseEnter: handleTooltipMouseEnter,
       disabled: true,
     });
