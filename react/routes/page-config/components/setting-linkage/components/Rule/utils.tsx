@@ -1,9 +1,9 @@
 import {
-  Select,
+  Select, Tooltip,
 } from 'choerodon-ui/pro';
 import React from 'react';
 import {
-  set, assign, includes, unset,
+  set, assign, includes, unset, merge,
 } from 'lodash';
 import moment from 'moment';
 import { FORMAT_FIELDS } from '@/constants/DATE_FORMAT';
@@ -25,6 +25,11 @@ interface Props {
 function isSelect(fieldType: string) {
   return includes(['radio', 'multiple', 'checkbox', 'single'], fieldType);
 }
+const handleTooltipMouseEnter = (e: any) => Tooltip.show(e.target, {
+  title: '请先选择可见选项',
+  // placement: 'topLeft',
+});
+const handleTooltipMouseLeave = () => Tooltip.hide();
 export const renderFieldRelSelect = ({ field, name = 'fieldRelOptionList', getFieldInstance }: Props) => {
   const { system, id } = field;
   const fieldCode = field.fieldCode as 'priority' | 'component' | 'fixVersion' | 'influenceVersion' | 'subProject';
@@ -68,11 +73,12 @@ export const renderDefaultValue = ({
   } = field;
 
   // 预计开始/结束时间、实际开始/结束时间精确到分
-  let code = field.fieldCode && FORMAT_FIELDS.includes(field.fieldCode) ? field.fieldCode : field.fieldCode as string;
+  const code = field.fieldCode && FORMAT_FIELDS.includes(field.fieldCode) ? field.fieldCode : field.fieldCode as string;
   const fieldProps = {
     key: code,
     name,
     style: { width: '100%' },
+    onMouseLeave: handleTooltipMouseLeave,
     fieldOptions: fieldOptions.map((i) => ({ id: i.value, value: i.meaning, enabled: true })),
   };
   if (field.fieldCode && ['estimatedEndTime', 'actualEndTime'].includes(field.fieldCode)) {
@@ -81,12 +87,18 @@ export const renderDefaultValue = ({
     });
   }
   if (fieldOptions.length === 0 && isSelect(fieldType)) {
-    unset(fieldProps, 'fieldOptions');
-    set(fieldProps, 'fieldId', field.id);
-  } else if (isSelect(fieldType)) {
-    // 切换为id 使得组件切换为自定义组件
-    code = field.id;
+    // unset(fieldProps, 'fieldOptions');
+    // set(fieldProps, 'fieldId', field.id);
+    merge(fieldProps, {
+      onMouseEnter: handleTooltipMouseEnter,
+      disabled: true,
+    });
   }
+
+  // else if (isSelect(fieldType)) {
+  //   // 切换为id 使得组件切换为自定义组件
+  //   code = field.id;
+  // }
   return getFieldInstance([], [], {
     code,
     fieldType: fieldType as any,
