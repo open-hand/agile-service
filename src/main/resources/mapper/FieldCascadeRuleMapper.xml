@@ -189,8 +189,13 @@
         </if>
         <if test="fieldIds != null and fieldIds.size() > 0">
             and (
-                <foreach collection="fieldIds" item="fieldId" open="(" separator="and" close=")">
-                    ffcr.field_id = #{fieldId} or ffcr.cascade_field_id = #{fieldId}
+                ffcr.field_id in
+                <foreach collection="fieldIds" item="fieldId" open="(" separator="," close=")">
+                    #{fieldId}
+                </foreach>
+                or ffcr.cascade_field_id in
+                <foreach collection="fieldIds" item="fieldId" open="(" separator="," close=")">
+                    #{fieldId}
                 </foreach>
             )
         </if>
