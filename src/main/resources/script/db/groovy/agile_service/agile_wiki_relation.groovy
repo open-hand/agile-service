@@ -31,4 +31,13 @@ databaseChangeLog(logicalFilePath:'agile_wiki_relation.groovy') {
             column(name: 'space_id', type: 'BIGINT UNSIGNED', remarks: 'kb space id')
         }
     }
+
+    changeSet(id: '2021-12-15-agile-wiki-relation-add-index', author: 'ztxemail@163.com') {
+        createIndex(tableName: 'agile_wiki_relation', indexName: 'idx_project_id') {
+            column(name: 'project_id')
+        }
+        createIndex(tableName: 'agile_wiki_relation', indexName: 'idx_issue_id') {
+            column(name: 'issue_id')
+        }
+    }
 }

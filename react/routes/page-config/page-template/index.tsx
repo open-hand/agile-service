@@ -28,7 +28,7 @@ export interface IInjectCascadeRuleConfigData {
   getFieldInstance?: IAgileBaseSearchFieldInstance['fieldInstance']
   /**
    * 获取当前字段所级联的字段配置项
-   * @returns hidden 是否为隐藏字段 required 是否设为必填
+   * @returns hidden 是否为隐藏字段 required 是否设为必填 当为 属性为 undefined 则使用原有隐藏/必填 逻辑
    */
   getFieldCascadeFieldConfig?: (field: IPageCascadeRuleModalField, cascadeField: IPageCascadeRuleModalField) => { hidden?: boolean, required?: boolean }
 }

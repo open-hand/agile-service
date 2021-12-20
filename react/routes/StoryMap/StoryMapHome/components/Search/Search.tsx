@@ -8,6 +8,7 @@ import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import openSaveFilterModal from '@/components/SaveFilterModal';
 
 import styles from './Search.less';
+import useUnmountSaveCache from '@/hooks/useUnmountSaveCache';
 
 interface Props {
   issueSearchStore: IssueSearchStore,
@@ -22,7 +23,7 @@ const StoryMapSearch: React.FC<Props> = ({ issueSearchStore }) => {
   const handleClickSaveFilter = () => {
     openSaveFilterModal({ searchVO: issueSearchStore.getCustomFieldFilters(), onOk: issueSearchStore.loadMyFilterList });
   };
-  useUnmount(() => { localPageCacheStore.setItem('storyMapSearchVO', issueSearchStore.getCustomFieldFilters(true)); });
+  useUnmountSaveCache('storyMapSearchVO', () => issueSearchStore.getCustomFieldFilters(true));
   return (
     <div className={styles.storyMapSearch}>
       <IssueSearch

@@ -39,6 +39,6 @@ interface IChosenFieldFieldEvents {
     /** 选择字段事件 */
     choseField?: (data: IChosenFieldField | IChosenFieldField[], status: 'add' | 'del') => void,
     /** 取消选择字段事件 */
-    cancelChosenField?: (data: IChosenFieldField) => void,
+    cancelChosenField?: (data: IChosenFieldField | IChosenFieldField[]) => void,
 }
 export { IChosenFieldField, IUseChoseFieldProps, IChosenFieldFieldEvents };

@@ -100,7 +100,9 @@ export interface ICascadeLinkage {
 
 const selectTypes = ['radio', 'checkbox', 'single', 'multiple', 'member', 'multiMember'];
 const singleSelectTypes = ['radio', 'single', 'member'];
-
+function isSelect(fieldType: string) {
+  return includes(['radio', 'multiple', 'checkbox', 'single'], fieldType);
+}
 const Linkage: React.FC<Props> = ({
   field, issueTypeId, modal, onOk, injectCascadeRuleConfigData,
 }) => {
@@ -183,14 +185,22 @@ const Linkage: React.FC<Props> = ({
       events: {
         update: ({ value, record, name }: any) => {
           // 当可见项变化 对默认值更正
-          if (name === 'fieldRelOptionList' && value?.length) {
-            const defaultValues = castArray(toJS(record.get('defaultValue'))).filter(Boolean);
+          if (name === 'fieldRelOptionList') {
             const { fieldType } = record.get('chosenField') || {};
-            let validDefaultValues: any[] | any = intersectionBy(defaultValues, value, (item) => (typeof item === 'object' ? item?.id : item)) as string[];
-            if (singleSelectTypes.includes(fieldType) && validDefaultValues.length > 0) {
-              [validDefaultValues] = validDefaultValues;
+            // member multiMember 没可见项设置 不处理
+            if (!isSelect(fieldType)) {
+              return;
             }
-            record.set('defaultValue', validDefaultValues);
+            if (value?.length) {
+              const defaultValues = castArray(toJS(record.get('defaultValue'))).filter(Boolean);
+              let validDefaultValues: any[] | any = intersectionBy(defaultValues, value, (item) => (typeof item === 'object' ? item?.id || item?.value : item)) as string[];
+              if (singleSelectTypes.includes(fieldType) && validDefaultValues.length > 0) {
+                [validDefaultValues] = validDefaultValues;
+              }
+              record.set('defaultValue', toJS(validDefaultValues));
+            } else {
+              record.set('defaultValue', undefined);
+            }
           }
         },
       },
@@ -214,6 +224,13 @@ const Linkage: React.FC<Props> = ({
           defaultOption: Array.isArray(defaultValue) ? includes(defaultValue, option.value) : option.value === defaultValue,
         }));
       }
+      // 为空选项的时候
+      // if (includes(['radio', 'checkbox', 'single', 'multiple'], fieldType)) {
+      //   return ([{
+      //     cascadeOptionId: defaultValue,
+      //     defaultOption: true,
+      //   }]);
+      // }
       if (fieldType === 'member' && defaultValue) {
         return ([{
           cascadeOptionId: defaultValue,

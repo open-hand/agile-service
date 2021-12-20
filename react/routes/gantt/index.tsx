@@ -43,37 +43,55 @@ const GanttProject: React.FC<{ projectId: string, menuType?: 'project' | 'org', 
  * @param Element
  */
 
-export const warpGanttProvideProjects = (Element: React.FC<{ projects: any[], currentProjectId?: string, setCurrentProjectId: (val?: string | ((oldValue?: string) => string | undefined)) => void }>, level: 'org' | 'workbench' = 'org'): typeof React.PureComponent => class GanttProjectsProvider extends React.PureComponent<any, { projects: any[], currentProjectId?: string, loading: boolean }> {
+export const warpGanttProvideProjects = (Element: React.FC<{ projects: any[], currentProjectId?: string, setCurrentProjectId: (val?: string | ((oldValue?: string) => string | undefined)) => void }>, level: 'org' | 'workbench' = 'org'): typeof React.PureComponent => class GanttProjectsProvider extends React.PureComponent<{ organizationId?: string }, { projects: any[], organizationId?: string, currentProjectId?: string, loading: boolean }> {
   constructor(props: any) {
     super(props);
     this.state = {
       projects: [],
       currentProjectId: undefined,
+      organizationId: props.organizationId,
       loading: true,
     };
   }
 
   loadData = async () => {
+    const { organizationId } = this.props;
+    let projects;
     if (level === 'org') {
-      return ganttApi.loadProjects();
+      projects = await ganttApi.org(organizationId).loadProjects();
+    } else {
+      projects = await projectApi.org(organizationId).loadProjectByUser({
+        userId: getUserId(), page: 1, size: 0, category: 'N_AGILE',
+      }).then((res: any) => res.list);
     }
-    return projectApi.loadProjectByUser({
-      userId: getUserId(), page: 1, size: 0, category: 'N_AGILE',
-    }).then((res: any) => res.list);
+    const cacheProjectId = localPageCacheStore.getItem('org.gantt.projectId');
+    const newProjects = projects.map((i: any) => ({ ...i, id: String(i.id) }));
+    const newProjectId = (find(newProjects, { id: cacheProjectId }) || newProjects[0])?.id;
+    localPageCacheStore.setItem('org.gantt.projectId', newProjectId);
+    this.setState({
+      projects: newProjects,
+      currentProjectId: newProjectId,
+      loading: false,
+    });
+  }
+
+  static getDerivedStateFromProps(nextProps: any, prevState: any) {
+    if (nextProps.organizationId !== prevState.organizationId) {
+      return {
+        organizationId: nextProps.organizationId, loading: true, projects: [], currentProjectId: undefined,
+      };
+    }
+    return null;
+  }
+
+  componentDidUpdate() {
+    if (this.state.loading && !this.state.projects.length) {
+      this.loadData();
+    }
   }
 
   componentDidMount() {
-    this.loadData().then((res: any) => {
-      const cacheProjectId = localPageCacheStore.getItem('org.gantt.projectId');
-      const newProjects = res.map((i: any) => ({ ...i, id: String(i.id) }));
-      const newProjectId = (find(newProjects, { id: cacheProjectId }) || newProjects[0])?.id;
-      localPageCacheStore.setItem('org.gantt.projectId', newProjectId);
-      this.setState({
-        projects: newProjects,
-        currentProjectId: newProjectId,
-        loading: false,
-      });
-    });
+    this.loadData();
   }
 
   setCurrentProjectId = (value?: string | ((oldValue?: string) => string | undefined)) => {

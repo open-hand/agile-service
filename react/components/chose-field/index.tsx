@@ -113,8 +113,12 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
     if (config?.events?.initFieldFinish) {
       initFieldFinish = config?.events?.initFieldFinish;
     }
+    const choseField: IChoseFieldComponentProps['choseField'] = (data, status) => {
+      config?.events?.choseField && config?.events?.choseField(data, status);
+      status === 'del' && config?.events?.cancelChosenField && config?.events?.cancelChosenField(data);
+    };
     return {
-      initField, initChosenField, initFieldFinish, initFieldStart, choseField: config?.events?.choseField || noop,
+      initField, initChosenField, initFieldFinish, initFieldStart, choseField,
     };
   }, []);
   const addFieldCallback = usePersistFn(config?.addFieldCallback || noop);

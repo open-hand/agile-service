@@ -1,8 +1,10 @@
 package io.choerodon.agile.app.service;
 
 import com.alibaba.fastjson.JSONObject;
+import io.choerodon.agile.api.vo.BatchUpdateFieldStatusVO;
 import io.choerodon.agile.api.vo.ObjectSchemeFieldVO;
 import io.choerodon.agile.api.vo.ProjectVO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.List;
@@ -53,6 +55,8 @@ public interface IssueProjectMoveService {
                                JSONObject jsonObject,
                                ServletRequestAttributes requestAttributes,
                                String encryptType);
+
+    void handlerIssueValue(ProjectVO projectVO, Long issueId, ProjectVO targetProjectVO, JSONObject jsonObject);
 
     /**
      * 根据issueIds查询并统计问题类型下的状态

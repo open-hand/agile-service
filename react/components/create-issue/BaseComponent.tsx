@@ -1,4 +1,5 @@
 import React, {
+  ReactElement,
   useCallback, useEffect, useMemo, useRef, useState,
 } from 'react';
 import { stores } from '@choerodon/boot';
@@ -84,6 +85,7 @@ export interface CreateIssueBaseProps {
   /** 额外的需要必填的字段建 */
   extendRequiredCodes?: string[]
   extraSubmitValue?: any
+  title?: string | ReactElement
 }
 const defaultDataSet = new DataSet({
   autoCreate: true,
@@ -185,10 +187,14 @@ function cascadeFieldAfterLoad(dataSet: DataSet, list: any[], field: IssueCreate
   const key = afterLoadKeyMap.get(field.fieldCode) || 'id';
   const fieldCurrentValue = getValue(dataSet, field.fieldCode);
   const currentValueIsArr = Array.isArray(fieldCurrentValue);
+
   if (!hasValue(dataSet, field) || (!currentValueIsArr ? !find(list, { [key]: fieldCurrentValue }) : some(fieldCurrentValue, (id) => !find(list, { [key]: id })))) {
     const defaultValue = getRuleDefaultValue(field as IssueCreateFields, rules);
     if (defaultValue) {
       dataSet.current?.set(field.fieldCode, isSingle(field) ? defaultValue : uniq([...filter(fieldCurrentValue, (id) => find(list, { [key]: id })), ...defaultValue]));
+    } else {
+      // 值不在当前则清空
+      dataSet.current?.init(field.fieldCode, undefined);
     }
   }
 }
@@ -648,19 +654,19 @@ const CreateIssueBase = observer(({
       case 'influenceVersion':
       case 'subProject': {
         return {
-          afterLoad: (res: any) => cascadeFieldAfterLoad(dataSet, res, field as IssueCreateFields, rules),
+          afterFirstRequest: (res: any) => cascadeFieldAfterLoad(dataSetRef.current, res, field as IssueCreateFields, rules),
           hidden: getRuleHidden(field, rules),
           ...getOptionsData(rules, dataSet, field),
         };
       }
       case 'priority': {
         return {
-          afterLoad: (priorities: Priority[]) => {
+          afterFirstRequest: (priorities: Priority[]) => {
             const defaultPriority = find(priorities, { default: true });
             if (defaultPriority && !hasValue(dataSet, field as IssueCreateFields)) {
-              dataSet.current?.set('priority', defaultPriority.id);
+              dataSetRef.current.current?.set('priority', defaultPriority.id);
             }
-            cascadeFieldAfterLoad(dataSet, priorities, field as IssueCreateFields, rules);
+            cascadeFieldAfterLoad(dataSetRef.current, priorities, field as IssueCreateFields, rules);
           },
           hidden: getRuleHidden(field, rules),
           ...getOptionsData(rules, dataSet, field),
@@ -722,7 +728,7 @@ const CreateIssueBase = observer(({
         return {
           ...getOptionsData(rules, dataSet, field),
           hidden: getRuleHidden(field, rules),
-          afterLoad: (res: any) => cascadeFieldAfterLoad(dataSet, res, field as IssueCreateFields, rules),
+          afterFirstRequest: (res: any) => cascadeFieldAfterLoad(dataSetRef.current, res, field as IssueCreateFields, rules),
         };
       }
       default: return {

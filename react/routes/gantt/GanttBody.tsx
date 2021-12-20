@@ -171,7 +171,7 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
     }
     return merge(filter, {
       displayFields: visibleColumnCodes.map((code) => ({ code, projectId })),
-      searchArgs: { tree: type !== 'assignee', dimension: type },
+      searchArgs: { tree: !['assignee', 'sprint'].includes(type), dimension: type },
     });
   }, [sprintIds, visibleColumnCodes, menuType, type, projectId]);
 

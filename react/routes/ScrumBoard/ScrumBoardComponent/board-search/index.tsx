@@ -12,6 +12,7 @@ import { IChosenFields, ILocalField } from '@/components/issue-search/store';
 import SelectSprint from '@/components/select/select-sprint';
 import './index.less';
 import useFormatMessage from '@/hooks/useFormatMessage';
+import useUnmountSaveCache from '@/hooks/useUnmountSaveCache';
 
 interface Props {
   onRefresh: () => void
@@ -116,7 +117,8 @@ const BoardSearch: React.FC<Props> = ({ onRefresh, saveStore, excludeQuickFilter
       hiddenDefault: true,
     });
   };
-  useUnmount(() => { localPageCacheStore.setItem('scrumBoard.searchVO', issueSearchStore.getCustomFieldFilters(true)); });
+  useUnmountSaveCache('scrumBoard.searchVO', () => issueSearchStore.getCustomFieldFilters(true));
+
   return (
     <div className="c7n-agile-scrum-board-search" style={{ display: 'flex' }}>
       <IssueSearch

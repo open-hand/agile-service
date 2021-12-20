@@ -6,7 +6,7 @@ import {
 export const getEmptyValue = (field: any) => (field && field.defaultShow ? undefined : null);
 export const getDateValue = (value: [string, string] | null, index: 0 | 1) => {
   if (value) {
-    return value[index];
+    return value[index] === 'Invalid date' ? undefined : value[index];
   }
   return value;
 };
