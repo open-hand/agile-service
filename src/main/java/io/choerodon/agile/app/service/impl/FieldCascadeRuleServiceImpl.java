@@ -262,7 +262,10 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
     }
 
     @Override
-    public Object listCascadeFieldOption(Long projectId, Long cascadeFieldId, CascadeFieldOptionSearchVO cascadeFieldOptionSearchVO, PageRequest pageRequest) {
+    public Object listCascadeFieldOption(Long projectId,
+                                         Long cascadeFieldId,
+                                         CascadeFieldOptionSearchVO cascadeFieldOptionSearchVO,
+                                         PageRequest pageRequest) {
         ObjectSchemeFieldDTO objectSchemeField = objectSchemeFieldMapper.selectByPrimaryKey(cascadeFieldId);
         if (objectSchemeField == null) {
             throw new CommonException("error.field.null");
@@ -426,7 +429,11 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         return result;
     }
 
-    private Map<Long, String> getOptionNameMapByOptionType(List<FieldCascadeRuleOptionVO> result, String optionType, Long projectId, Long organizationId, Long fieldId) {
+    private Map<Long, String> getOptionNameMapByOptionType(List<FieldCascadeRuleOptionVO> result,
+                                                           String optionType,
+                                                           Long projectId,
+                                                           Long organizationId,
+                                                           Long fieldId) {
         Map<Long, String> optionNameMap = null;
         switch (optionType) {
             case PRIORITY:
