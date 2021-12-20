@@ -5,6 +5,7 @@ import { unionBy, castArray, partition } from 'lodash';
 import { usePersistFn } from 'ahooks';
 import { fieldApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
+import { wrapRequestCallback } from '../utils';
 
 export interface SelectCustomFieldBasicProps extends Partial<SelectProps> {
 
@@ -15,9 +16,10 @@ export interface SelectCustomFieldBasicProps extends Partial<SelectProps> {
   organizationId?: string
   outside?: boolean
   ruleIds?: string[]
-  menuType?:'project'|'organization'
-
+  menuType?: 'project' | 'organization'
   afterLoad?: (data: any) => void
+  /** 首次请求结束后 */
+  afterFirstRequest?: SelectConfig['afterLoad'],
 }
 // 参数互斥，要么传fieldId，要么传fieldOptions
 export type SelectCustomFieldProps = SelectCustomFieldBasicProps & ({
@@ -36,7 +38,7 @@ export type SelectCustomFieldProps = SelectCustomFieldBasicProps & ({
 })
 const SIZE = 0;
 const SelectCustomField: React.FC<SelectCustomFieldProps> = forwardRef(({
-  fieldId, fieldOptions, flat, projectId, afterLoad, organizationId, selected, extraOptions, ruleIds, outside = false, onlyEnabled = true, menuType, ...otherProps
+  fieldId, fieldOptions, flat, projectId, afterLoad, afterFirstRequest, organizationId, selected, extraOptions, ruleIds, outside = false, onlyEnabled = true, menuType, ...otherProps
 },
 ref: React.Ref<SelectBox>) => {
   const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
@@ -58,13 +60,16 @@ ref: React.Ref<SelectBox>) => {
     textField: 'value',
     valueField: 'id',
     requestArgs: args,
-    request: ({ page, filter, requestArgs }) => {
+    request: wrapRequestCallback(({ page, filter, requestArgs }) => {
       if (hasRule && fieldId) {
-        return fieldApi.project(projectId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, SIZE);
+        return fieldApi.project(projectId).outside(outside).org(organizationId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, SIZE);
       }
+
       return fieldOptions ? fakePageRequest(filter, page, SIZE, needOptions, onlyEnabled) : fieldApi.outside(outside).org(organizationId).project(projectId).menu(menuType)
         .getFieldOptions(fieldId!, filter, page, SIZE, needOptions, onlyEnabled);
-    },
+    }, (_, res) => {
+      afterFirstRequest && afterFirstRequest(res);
+    }),
     middleWare: (data) => {
       if (!extraOptions) {
         if (afterLoad) {
@@ -79,7 +84,7 @@ ref: React.Ref<SelectBox>) => {
       return res;
     },
     paging: true,
-  }), [args, hasRule, fieldId, fieldOptions, fakePageRequest, needOptions, onlyEnabled, outside, organizationId, projectId, extraOptions, afterLoad]);
+  }), [args, hasRule, fieldId, fieldOptions, fakePageRequest, needOptions, onlyEnabled, outside, organizationId, projectId, menuType, afterFirstRequest, extraOptions, afterLoad]);
   const props = useSelect(config);
   return (
     <SelectBox
