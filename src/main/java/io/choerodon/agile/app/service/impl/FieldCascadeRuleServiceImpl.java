@@ -735,7 +735,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                     .map(FieldCascadeRuleOptionVO::getCascadeOptionId)
                     .collect(Collectors.toList());
             fieldCascadeRuleVO.setDefaultIds(defaultIds);
-            return (fieldCascadeRuleVO.getCascadeFieldType().equals(FieldType.MEMBER) || fieldCascadeRuleVO.getCascadeFieldType().equals(FieldType.MULTI_MEMBER))
+            return (FieldType.MEMBER.equals(fieldCascadeRuleVO.getCascadeFieldType()) || FieldType.MULTI_MEMBER.equals(fieldCascadeRuleVO.getCascadeFieldType()))
                     && !CollectionUtils.isEmpty(fieldCascadeRuleVO.getDefaultIds());
         }).forEach(fieldCascadeRuleVO -> userIds.addAll(fieldCascadeRuleVO.getDefaultIds()));
         if (CollectionUtils.isEmpty(userIds)) {

@@ -3,6 +3,7 @@ package io.choerodon.agile.infra.mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 import io.choerodon.agile.api.vo.FieldCascadeRuleDesVO;
 import io.choerodon.agile.api.vo.FieldCascadeRuleVO;
@@ -76,7 +77,14 @@ public interface FieldCascadeRuleMapper extends BaseMapper<FieldCascadeRuleDTO> 
      * @param projectId      项目id
      * @param fieldId        字段id
      */
-    void deleteByFieldId(@Param("organizationId") Long organizationId, @Param("projectId") Long projectId, @Param("fieldId") Long fieldId);
+    void deleteByFieldId(@Param("organizationId") Long organizationId,
+                         @Param("projectId") Long projectId,
+                         @Param("fieldId") Long fieldId,
+                         @Param("issueTypeId") Long issueTypeId);
 
     void deleteByCascadeRuleIds(@Param("ids") List<Long> ids);
+
+    List<FieldCascadeRuleDTO> selectByOptions(@Param("projectIds") List<Long> projectIds,
+                                              @Param("fieldIds") Set<Long> fieldIds,
+                                              @Param("issueTypeId") Long issueTypeId);
 }
