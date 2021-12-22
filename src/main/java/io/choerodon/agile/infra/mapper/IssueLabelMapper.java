@@ -18,12 +18,12 @@ import org.apache.ibatis.annotations.Param;
 public interface IssueLabelMapper extends BaseMapper<IssueLabelDTO> {
 
     /**
-     * 回收没有再用且没有设为默认值的issue标签
+     * 回收没有再用的issue标签
      *
      * @param projectId projectId
      * @return int
      */
-    int labelGarbageCollection(@Param("projectId") Long projectId, @Param("defaultValueIds") Set<Long> defaultValueIds);
+    int labelGarbageCollection(@Param("projectId") Long projectId);
 
     /**
      * 重名校验

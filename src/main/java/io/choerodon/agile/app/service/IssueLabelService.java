@@ -31,7 +31,7 @@ public interface IssueLabelService {
     IssueLabelDTO createBase(IssueLabelDTO issueLabelDTO);
 
     /**
-     * 不是使用中的且没有设为默认值issue标签垃圾回收
+     * 不是使用中的issue标签垃圾回收
      *
      * @param projectId projectId
      * @return int

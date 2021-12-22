@@ -17,12 +17,6 @@
                             LEFT JOIN agile_label_issue_rel ali ON ali.label_id = ail.label_id
                         WHERE
                             ali.issue_id IS NULL and ail.project_id = #{projectId}
-                            <if test='defaultValueIds != null and defaultValueIds.size > 0'>
-                                AND ail.label_id NOT IN
-                                <foreach collection="defaultValueIds" item="labelId" open="(" separator="," close=")">
-                                    #{labelId}
-                                </foreach>
-                            </if>
                     ) d
             )
     </delete>
