@@ -9,6 +9,19 @@
         </foreach>
     </delete>
 
+    <delete id="deleteByFieldId">
+        delete ffp.*
+        from fd_field_permission ffp
+        where ffp.organization_id = #{organizationId}
+        <if test="projectId != null">
+            and ffp.project_id = #{projectId}
+        </if>
+        and ffp.field_id = #{fieldId}
+        <if test="issueTypeId != null">
+            and ffp.issue_type_id = #{issueTypeId}
+        </if>
+    </delete>
+
     <select id="selectByFieldIds" resultType="io.choerodon.agile.infra.dto.FieldPermissionDTO">
         select * from fd_field_permission
         where organization_id = #{organizationId}
@@ -117,5 +130,26 @@
         <foreach collection="fieldIds" item="fieldId" index="index" open="(" close=")" separator=",">
             #{fieldId}
         </foreach>
+    </select>
+
+    <select id="selectByOptions" resultType="io.choerodon.agile.infra.dto.FieldPermissionDTO">
+        select ffp.*
+        from fd_field_permission ffp
+        where 1=1
+        <if test="projectIds != null and projectIds.size > 0">
+            AND ffp.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+        </if>
+        <if test="fieldIds != null and fieldIds.size() > 0">
+            and ffp.field_id in
+            <foreach collection="fieldIds" item="fieldId" open="(" separator="," close=")">
+                #{fieldId}
+            </foreach>
+        </if>
+        <if test="issueTypeId != null">
+            and ffp.issue_type_id = #{issueTypeId}
+        </if>
     </select>
 </mapper>

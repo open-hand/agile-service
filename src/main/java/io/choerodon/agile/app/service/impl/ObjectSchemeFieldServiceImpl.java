@@ -96,6 +96,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     private FieldDataLogMapper fieldDataLogMapper;
     @Autowired
     private FieldCascadeRuleMapper fieldCascadeRuleMapper;
+    @Autowired
+    private FieldPermissionMapper fieldPermissionMapper;
 
     @Override
     public ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field,
@@ -804,7 +806,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 isFieldDeleted(projectIds, fieldId, null, null);
             }
         }
-        fieldCascadeRuleMapper.deleteByFieldId(organizationId, projectId, fieldId);
+        fieldCascadeRuleMapper.deleteByFieldId(organizationId, projectId, fieldId, null);
+        fieldPermissionMapper.deleteByFieldId(organizationId, projectId, fieldId, null);
         objectSchemeFieldMapper.cascadeDelete(organizationId, projectId, fieldId);
         //删除字段值
         fieldValueService.deleteByFieldId(fieldId);
@@ -1440,6 +1443,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                     //删除日志
                     fieldDataLogService.deleteByFieldId(projectId, fieldId);
                 }
+                Long issueTypeId = extend.getIssueTypeId();
+                fieldCascadeRuleMapper.deleteByFieldId(organizationId, projectId, fieldId, issueTypeId);
+                fieldPermissionMapper.deleteByFieldId(organizationId, projectId, fieldId, issueTypeId);
                 objectSchemeFieldExtendMapper.deleteByPrimaryKey(d);
             });
         } else {
@@ -1520,7 +1526,13 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             return;
         }
         List<Long> instanceIds = fieldValueMapper.queryInstanceByFieldIdAndIssueTypeId(projectIds, schemeCode, fieldId, issueTypeId);
-        if (!instanceIds.isEmpty()) {
+        List<FieldCascadeRuleDTO> fieldCascadeRules = fieldCascadeRuleMapper.selectByOptions(projectIds, new HashSet<>(Arrays.asList(fieldId)), issueTypeId);
+        List<FieldPermissionDTO> fieldPermissions = fieldPermissionMapper.selectByOptions(projectIds, new HashSet<>(Arrays.asList(fieldId)), issueTypeId);
+        boolean isDeleted =
+                instanceIds.isEmpty()
+                        && fieldCascadeRules.isEmpty()
+                        && fieldPermissions.isEmpty();
+        if (!isDeleted) {
             throw new CommonException("error.organization.field.can.not.delete");
         }
     }
@@ -1584,12 +1596,51 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             Map<Long, FieldInstanceCountVO> fieldInstanceCountMap =
                     fieldValueMapper.queryInstanceCountByFieldIds(projectIds, schemeCode, fieldIds, issueTypeId)
                             .stream().collect(Collectors.toMap(FieldInstanceCountVO::getFieldId, Function.identity()));
+            Map<Long, Integer> fieldCascadeRulesMap = processFieldCascadeRulesMap(issueTypeId, fieldIds, projectIds);
+            Map<Long, Integer> fieldPermissionsMap = processFieldPermissionsMap(issueTypeId, fieldIds, projectIds);
             pageConfigFields.forEach(field -> {
-                if (fieldInstanceCountMap.containsKey(field.getFieldId())) {
-                    field.setInstanceCount(fieldInstanceCountMap.get(field.getFieldId()).getInstanceCount());
+                Long fieldId = field.getFieldId();
+                Integer instanceCount = 0;
+                FieldInstanceCountVO fieldInstanceCountVO = fieldInstanceCountMap.get(field.getFieldId());
+                if (fieldInstanceCountVO != null) {
+                    instanceCount = Optional.ofNullable(fieldInstanceCountVO.getInstanceCount()).orElse(0);
+                }
+                Integer fieldCascadeRuleCount = Optional.ofNullable(fieldCascadeRulesMap.get(fieldId)).orElse(0);
+                Integer fieldPermissionCount = Optional.ofNullable(fieldPermissionsMap.get(fieldId)).orElse(0);
+                int total = instanceCount + fieldCascadeRuleCount + fieldPermissionCount;
+                if (total == 0) {
+                    field.setInstanceCount(null);
+                } else {
+                    field.setInstanceCount(total);
                 }
             });
         }
+    }
+
+    private Map<Long, Integer> processFieldPermissionsMap(Long issueTypeId,
+                                                          List<Long> fieldIds,
+                                                          List<Long> projectIds) {
+        Map<Long, Integer> fieldPermissionsMap = new HashMap<>();
+        List<FieldPermissionDTO> fieldPermissions = fieldPermissionMapper.selectByOptions(projectIds, new HashSet<>(fieldIds), issueTypeId);
+        fieldPermissions.forEach(fieldPermission -> {
+            Long fieldId = fieldPermission.getFieldId();
+            fieldPermissionsMap.put(fieldId, 1);
+        });
+        return fieldPermissionsMap;
+    }
+
+    private Map<Long, Integer> processFieldCascadeRulesMap(Long issueTypeId,
+                                                           List<Long> fieldIds,
+                                                           List<Long> projectIds) {
+        Map<Long, Integer> fieldCascadeRulesMap = new HashMap<>();
+        List<FieldCascadeRuleDTO> fieldCascadeRules = fieldCascadeRuleMapper.selectByOptions(projectIds, new HashSet<>(fieldIds), issueTypeId);
+        fieldCascadeRules.forEach(fieldCascadeRule -> {
+            Long fieldId = fieldCascadeRule.getFieldId();
+            Long cascadeFieldId = fieldCascadeRule.getCascadeFieldId();
+            fieldCascadeRulesMap.put(fieldId, 1);
+            fieldCascadeRulesMap.put(cascadeFieldId, 1);
+        });
+        return fieldCascadeRulesMap;
     }
 
     @Override

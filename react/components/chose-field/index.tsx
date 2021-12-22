@@ -41,6 +41,8 @@ interface IChoseFieldConfig {
   server?: boolean
   defaultValue?: IChosenFieldField[],
   value?: Array<IChosenFieldField | string>, /** 可控value */
+  /** 检测 value 是否在 fields 中 ;开启后 当变化可控值 value 时 会对value进行检查  @default false */
+  checkValueInFields?: boolean
   events?: IChosenFieldFieldEvents,
   addFieldCallback?: (key: string) => void,
   dropDownProps?: Partial<DropDownProps>,
@@ -167,8 +169,8 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
           runInAction(() => {
             store.chosenFields = observable.map(nextValue.map((item) => {
               const temp = find(fields, { code: item })!;
-              return [item, temp];
-            }));
+              return [item, temp] as [string, IChosenFieldField | undefined];
+            }).filter(([_, field]) => (config?.checkValueInFields ? field : true)) as Array<[string, IChosenFieldField]>);
             store.selfUpdateCurrentOptionStatus();
           });
           return nextValue;
@@ -176,7 +178,7 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
         return oldValue;
       });
     }
-  }, [config?.value, fields, fields.length, store]);
+  }, [config?.value, config?.checkValueInFields, fields, fields.length, store]);
   const dataProps = {
     store,
     fields,

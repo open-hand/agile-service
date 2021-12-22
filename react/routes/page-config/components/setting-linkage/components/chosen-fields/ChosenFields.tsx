@@ -53,6 +53,7 @@ const ChosenFields: React.FC<Props> = ({
     fields: chosenFields,
     addFieldCallback: addRecord,
     value: chosenFieldIds,
+    checkValueInFields: true,
     events: {
       cancelChosenField: (data) => {
         castArray(data as unknown as IPageCascadeRuleModalField[]).forEach((field) => {
