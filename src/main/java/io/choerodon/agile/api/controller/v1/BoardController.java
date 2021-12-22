@@ -219,28 +219,4 @@ public class BoardController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @Autowired
-    private StateMachineSchemeService stateMachineSchemeService;
-
-    @Autowired
-    private IssueTypeSchemeService issueTypeSchemeService;
-
-    @Autowired
-    private ProjectConfigService projectConfigService;
-
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("项目群/敏捷项目")
-    @PostMapping(value = "/updateProgram")
-    public ResponseEntity updateProgram(@ApiParam(value = "项目id", required = true)
-                                        @PathVariable(name = "project_id") Long projectId,
-                                        @RequestBody ProjectEvent projectEvent) {
-        //创建项目时创建默认状态机方案
-        stateMachineSchemeService.initByConsumeCreateProject(projectEvent);
-        //创建项目时创建默认问题类型方案
-        issueTypeSchemeService.initByConsumeCreateProject(projectEvent.getProjectId(), projectEvent.getProjectCode());
-        // 初始化问题类型状态机
-        projectConfigService.initIssueTypeStatusMachine(projectEvent.getProjectId(), SchemeApplyType.AGILE);
-        return new ResponseEntity(HttpStatus.OK);
-    }
-
 }
