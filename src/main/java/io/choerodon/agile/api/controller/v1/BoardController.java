@@ -3,7 +3,12 @@ package io.choerodon.agile.api.controller.v1;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.BoardService;
+import io.choerodon.agile.app.service.IssueTypeSchemeService;
+import io.choerodon.agile.app.service.ProjectConfigService;
+import io.choerodon.agile.app.service.StateMachineSchemeService;
+import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
@@ -211,6 +216,30 @@ public class BoardController {
                                                     @PathVariable @Encrypt Long boardId,
                                                     @RequestBody @Encrypt List<Long> quickFilterIds) {
         boardService.updateBoardQuickFilterRel(projectId, boardId, quickFilterIds);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @Autowired
+    private StateMachineSchemeService stateMachineSchemeService;
+
+    @Autowired
+    private IssueTypeSchemeService issueTypeSchemeService;
+
+    @Autowired
+    private ProjectConfigService projectConfigService;
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("项目群/敏捷项目")
+    @PostMapping(value = "/updateProgram")
+    public ResponseEntity updateProgram(@ApiParam(value = "项目id", required = true)
+                                        @PathVariable(name = "project_id") Long projectId,
+                                        @RequestBody ProjectEvent projectEvent) {
+        //创建项目时创建默认状态机方案
+        stateMachineSchemeService.initByConsumeCreateProject(projectEvent);
+        //创建项目时创建默认问题类型方案
+        issueTypeSchemeService.initByConsumeCreateProject(projectEvent.getProjectId(), projectEvent.getProjectCode());
+        // 初始化问题类型状态机
+        projectConfigService.initIssueTypeStatusMachine(projectEvent.getProjectId(), SchemeApplyType.AGILE);
         return new ResponseEntity(HttpStatus.OK);
     }
 
