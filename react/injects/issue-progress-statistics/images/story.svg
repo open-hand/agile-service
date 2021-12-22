@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" class="design-iconfont">
+  <g fill="none" fill-rule="evenodd">
+    <path d="M0,1.91618646 L0,1 C0,0.44771525 0.44771525,0 1,0 L22,0 C22.5522847,0 23,0.44771525 23,1 L23,6 C23,6.55228475 22.5522847,7 22,7 L1,7 C0.44771525,7 0,6.55228475 0,6 L0,3.18276243 L0,3.18276243" stroke="#0F113A" stroke-width="1.2" fill="#FF7E96" transform="translate(1 1)"/>
+    <path stroke="#0F113A" stroke-width="1.2" fill="#FFF" d="M2.61428571 1.9H5.81428571V5.1H2.61428571z" transform="translate(1 1)"/>
+    <path fill="#0F113A" d="M8 2H15V3.2H8z" transform="translate(1 1)"/>
+    <path fill="#FFF" d="M18 2H19.2V3.2H18z" transform="translate(1 1)"/>
+    <path fill="#FFF" d="M20 2H21.2V3.2H20z" transform="translate(1 1)"/>
+    <path fill="#0F113A" d="M8 4L21.2 4 21.2 5.2 8 5.2z" transform="translate(1 1)"/>
+    <g transform="translate(6 11)">
+      <rect stroke="#0F113A" stroke-width="1.2" fill="#AAC9FF" width="23" height="7" rx="1"/>
+      <path stroke="#0F113A" stroke-width="1.2" fill="#FFF" d="M2.61428571 1.9H5.81428571V5.1H2.61428571z"/>
+      <path fill="#0F113A" d="M8 2H15V3.2H8z"/>
+      <path fill="#0F113A" d="M8 4L21.2 4 21.2 5.2 8 5.2z"/>
+    </g>
+    <g>
+      <path d="M17.7478335,7 C17.1469304,7 16.7386397,7 16.5229613,7 M15.1346997,7 C11.9936553,7 7.28208874,7 1,7 C0.44771525,7 0,6.55228475 0,6 L0,1 C0,0.44771525 0.44771525,0 1,0 L22,0 C22.5522847,0 23,0.44771525 23,1 L23,6 C23,6.55228475 22.5522847,7 22,7 L19.0047242,7" stroke="#0F113A" stroke-width="1.2" fill="#FFCE61" transform="translate(1 22)"/>
+      <path stroke="#0F113A" stroke-width="1.2" fill="#FFF" d="M2.61428571 1.9H5.81428571V5.1H2.61428571z" transform="translate(1 22)"/>
+      <path fill="#0F113A" d="M8 2H15V3.2H8z" transform="translate(1 22)"/>
+      <path fill="#0F113A" d="M8 4L21.2 4 21.2 5.2 8 5.2z" transform="translate(1 22)"/>
+    </g>
+  </g>
+</svg>

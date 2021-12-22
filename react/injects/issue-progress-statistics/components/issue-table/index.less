@@ -1,0 +1,23 @@
+@import '../../../../style/root.less';
+@import '../../../../style/performance-table';
+.root();
+
+.c7n-agile-issue-progress-statistics-table {
+  margin-top: .15rem;
+  .performance-table-overload();
+
+  .c7n-performance-table-column-group-cell {
+    .c7n-performance-table-cell-content {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .c7n-performance-table-column-group-header {
+    .c7n-performance-table-column-group-header-content {
+      display: block;
+      bottom: 12px;
+      position: relative;
+    }
+  }
+}

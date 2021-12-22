@@ -1,5 +1,6 @@
 import { useQuery, UseQueryOptions } from 'react-query';
 import { useCreation } from 'ahooks';
+import { unionBy, uniqBy } from 'lodash';
 import { fieldApi } from '@/api';
 import { IFoundationHeader } from '@/common/types';
 import useIsInProgram from '../useIsInProgram';
@@ -49,8 +50,11 @@ export default function useIssueTableFields(config?: IssueTableFieldsConfig, opt
   const { isInProgram, loading } = useIsInProgram({ projectId: config?.projectId, menuType: config?.menuType });
   const { data, ...others } = useQuery(key, () => fieldApi.project(config?.projectId).getFoundationHeader(), {
     enabled: !loading,
-    initialData: [...systemFields, ...(config?.extraFields || [])],
-    select: (res) => (config?.hiddenFieldCodes ? systemFields.concat(config?.extraFields || []).concat(res).filter((field) => !config.hiddenFieldCodes?.includes(field.code)) : systemFields.concat(config?.extraFields || []).concat(res)),
+    initialData: systemFields,
+    select: (res) => {
+      const loadedFields = unionBy(config?.extraFields || [], systemFields, 'code').concat(res);
+      return (config?.hiddenFieldCodes ? loadedFields.filter((field) => !config.hiddenFieldCodes?.includes(field.code)) : loadedFields);
+    },
     ...options,
   });
   const fieldData = useCreation(() => (!isInProgram ? data?.filter((f) => f.code !== 'feature') : data), [isInProgram, data]);

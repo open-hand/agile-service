@@ -1546,32 +1546,40 @@
         <if test='searchVO.otherArgs.sprint != null and searchVO.otherArgs.sprint.size > 0'>
             AND (
             <if test='searchVO.otherArgs.sprintNull != null and searchVO.otherArgs.sprintNull == true'>
-                ai.issue_id in (SELECT ai10.issue_id from agile_issue ai10 left join
-                agile_issue_sprint_rel aisr2
-                on ai10.issue_id = aisr2.issue_id WHERE
-                aisr2.sprint_id is null ) OR
+                ai.issue_id in (
+                  SELECT ai10.issue_id from agile_issue ai10
+                  left join agile_issue_sprint_rel aisr2 on ai10.issue_id = aisr2.issue_id
+                  WHERE
+                  ai10.project_id in
+                  <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                    #{projectId}
+                  </foreach>
+                and aisr2.sprint_id is null ) OR
             </if>
-            <foreach collection="searchVO.otherArgs.sprint" item="id"  separator="or">
-                <if test="id==0">
+            <if test="searchVO.otherArgs.sprint != null and searchVO.otherArgs.sprint.size > 0">
+                <if test='searchVO.otherArgs.sprint.contains(0) or searchVO.otherArgs.sprint.contains("0")'>
                     ai.issue_id not in
                     (
-                    SELECT issue_id
+                    SELECT
+                        aisr.issue_id
                     FROM agile_issue_sprint_rel aisr
-                    WHERE project_id in
+                    WHERE aisr.project_id in
                     <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
                         #{projectId}
                     </foreach>
-                    )
+                    ) OR
                 </if>
-                <if test="id != 0 ">
-                    ai.issue_id in
-                    (
+
+                ai.issue_id in
+                (
                     SELECT aisr2.issue_id
                     FROM agile_issue_sprint_rel aisr2
-                    WHERE aisr2.sprint_id = #{id}
-                    )
-                </if>
-            </foreach>
+                    WHERE aisr2.sprint_id in
+                    <foreach collection="searchVO.otherArgs.sprint" item="sprintId" open="(" close=")" separator=",">
+                        #{sprintId}
+                    </foreach>
+                )
+            </if>
             )
         </if>
         <if test="searchVO.otherArgs.customField != null and searchVO.otherArgs.customField.size > 0">
