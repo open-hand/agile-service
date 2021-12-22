@@ -13,6 +13,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -71,6 +72,9 @@ public class ConvertUtil {
     }
 
     public static ProjectVO queryProject(Long projectId) {
+        if (Objects.isNull(projectId)) {
+            throw new CommonException("error.projectId.not.null");
+        }
         RedisUtil redisUtil = SpringBeanUtil.getBean(RedisUtil.class);
         String key = "projectInfo:"+projectId;
         Object project = redisUtil.get(key);

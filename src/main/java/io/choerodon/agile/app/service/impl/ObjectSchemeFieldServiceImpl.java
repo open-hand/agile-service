@@ -87,8 +87,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     @Autowired
     private ProductVersionMapper productVersionMapper;
     @Autowired
-    private IssueLabelService issueLabelService;
-    @Autowired
     private IssueTypeMapper issueTypeMapper;
     @Autowired
     private FieldValueMapper fieldValueMapper;
@@ -965,11 +963,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                     }
                     objectSchemeFieldExtendMapper.updateByPrimaryKey(i);
                 }
-            }
-            //如果修改了标签，则启动标签垃圾回收
-            ObjectSchemeFieldDTO objectSchemeFieldDTO = getObjectSchemeFieldDTO(FieldCode.LABEL);
-            if (Objects.equals(fieldId, objectSchemeFieldDTO.getId())) {
-                issueLabelService.labelGarbageCollection(projectId);
             }
         }
     }
@@ -1975,10 +1968,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 objectSchemeFieldExtendMapper.insertSelective(dto);
             } else {
                 updateObjectSchemeFieldExtend(f, result);
-                //修改标签，执行标签垃圾回收
-                if (Objects.equals(f.getFieldCode(), FieldCode.LABEL)) {
-                    issueLabelService.labelGarbageCollection(projectId);
-                }
             }
         });
     }
