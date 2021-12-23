@@ -4,6 +4,7 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.AllDataLogVO;
 import io.choerodon.agile.api.vo.business.ConfigurationRuleFieldVO;
 import io.choerodon.agile.api.vo.business.ConfigurationRuleVO;
+import io.choerodon.agile.api.vo.business.IssueBacklogRelVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.StarBeaconDTO;
 
@@ -195,4 +196,6 @@ public interface BacklogExpandService {
                                 Long projectId,
                                 PageRequest pageRequest,
                                 CascadeFieldOptionSearchVO cascadeFieldOptionSearchVO);
+
+    List<IssueBacklogRelVO> selectBacklogRelByIssueIds(Long projectId, List<Long> issueIds);
 }

@@ -493,4 +493,6 @@ public interface IssueService {
                     ProjectVO targetProjectVO,
                     Long projectId,
                     BatchUpdateFieldStatusVO batchUpdateFieldStatusVO);
+
+    void setSortMap(Long organizationId, Long projectId, PageRequest pageRequest, Map<String, Object> sortMap, String mainTableAlias);
 }
