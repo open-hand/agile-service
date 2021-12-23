@@ -62,6 +62,9 @@ function CustomField({ field }) {
     ...store.fieldConfigs[field.code],
     onChange: handleChange,
   };
+  if (store.renderSearchFields) {
+    return store.renderSearchFields([field], { [field.code]: props })[0];
+  }
   switch (store.menuType) {
     case 'project':
       return getSearchFields([field], {
