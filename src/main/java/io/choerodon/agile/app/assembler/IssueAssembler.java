@@ -34,7 +34,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
-import rx.Observable;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -282,9 +281,13 @@ public class IssueAssembler extends AbstractAssembler {
      */
     public List<IssueCompletedStatusVO> issueDTOToIssueCountVO(List<IssueOverviewVO> issueList, Set<Long> priority){
         Set<Long> userIdList = new HashSet<>();
-        Observable.from(priority)
-                .mergeWith(Observable.from(issueList.stream().map(IssueOverviewVO::getCreatedBy).collect(Collectors.toSet())))
-                .toList().subscribe(userIdList::addAll);
+        Set<Long> creatorIds =
+                issueList
+                        .stream()
+                        .map(IssueOverviewVO::getCreatedBy)
+                        .collect(Collectors.toSet());
+        userIdList.addAll(priority);
+        userIdList.addAll(creatorIds);
         Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(new ArrayList<>(userIdList), true);
         // 设置提出list
         List<Map.Entry<Long, Integer>> createdlist = sortAndConvertCreated(issueList, priority, userMap);
