@@ -65,9 +65,15 @@ export const IntlField: React.FC<{ column: any }> = ({ children, column }) => {
   const name = column.titleKey ? formatMessage({ id: column.titleKey }) : column.title; // , defaultMessage: column.title
   return React.isValidElement(name) ? name : <Tooltip title={name}>{name}</Tooltip>;
 };
+interface IIssueTableColumnsProps {
+  listLayoutColumns?: ListLayoutColumnVO[] | null,
+  fields: IFoundationHeader[],
+  onSummaryClick: (data: any) => void, handleColumnResize?: (...args: any) => void
+  // getColumnsMap?:(...args:any[])=>
+}
 export function getTableColumns({
   listLayoutColumns, fields, onSummaryClick, handleColumnResize,
-}: { listLayoutColumns?: ListLayoutColumnVO[] | null, fields: IFoundationHeader[], onSummaryClick: (data: any) => void, handleColumnResize?: (...args: any) => void }) {
+}:IIssueTableColumnsProps) {
   const res: any[] = [];
   const columnsMap = getColumnsMap({ onSummaryClick });
   const getCustom = (field: IFoundationHeader) => {

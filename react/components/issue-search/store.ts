@@ -33,6 +33,7 @@ export type IBatchAction = undefined | 'edit' | 'delete' | 'move'
 
 export interface IssueSearchStoreProps {
   getSystemFields: () => ILocalField[]
+  renderSearchFields?: (fields: any[], fieldCodeProps?: Record<string, any>) => any
   transformFilter: (chosenFields: IChosenFields) => any
   renderField?: (field: IChosenField, props: { onChange: (v: any) => void, value: any, projectId?: string }) => React.ReactElement | React.FunctionComponent | null | void | false
   defaultChosenFields?: IChosenFields,
@@ -82,6 +83,8 @@ class IssueSearchStore {
 
   getSystemFields: () => ILocalField[] = () => []
 
+  renderSearchFields:IssueSearchStoreProps['renderSearchFields']
+
   renderField: IssueSearchStoreProps['renderField']
 
   transformFilter: (chosenFields: IChosenFields) => any = () => { }
@@ -100,6 +103,7 @@ class IssueSearchStore {
   constructor({
     getSystemFields,
     transformFilter,
+    renderSearchFields,
     renderField,
     defaultChosenFields,
     defaultSearchVO,
@@ -109,6 +113,7 @@ class IssueSearchStore {
   }: IssueSearchStoreProps) {
     this.getSystemFields = getSystemFields;
     this.transformFilter = transformFilter;
+    this.renderSearchFields = renderSearchFields;
     this.renderField = renderField || (() => null);
     this.defaultChosenFields = defaultChosenFields;
     this.defaultSearchVO = defaultSearchVO;
