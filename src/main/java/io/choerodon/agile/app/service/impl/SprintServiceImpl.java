@@ -448,6 +448,26 @@ public class SprintServiceImpl implements SprintService {
            issueMapper.updateSubIssueHistoryCompleted(projectId, completedSubIssues);
         }
         issueAccessDataService.batchUpdateIssueRank(projectId, moveIssueDTOS);
+        // 移动完成后重新对冲刺内的重新排序
+        reorderSprintIssue(projectId, targetSprintId);
+    }
+
+    private void reorderSprintIssue(Long projectId, Long targetSprintId) {
+        if (ObjectUtils.isEmpty(targetSprintId) || Objects.equals(targetSprintId, 0L)) {
+            return;
+        }
+        // 按rank值升序查询目标冲刺中所有的issue
+        List<Long> issueIds = sprintMapper.queryIssueIdsOrderByRank(projectId, targetSprintId);
+        if (!CollectionUtils.isEmpty(issueIds)) {
+            List<MoveIssueDTO> moveIssueDTOS = new ArrayList<>();
+            String rank = RankUtil.mid();
+            for (Long issueId : issueIds) {
+                MoveIssueDTO moveIssueDTO = new MoveIssueDTO(issueId, rank);
+                rank = RankUtil.genNext(rank);
+                moveIssueDTOS.add(moveIssueDTO);
+            }
+            issueAccessDataService.batchUpdateIssueRank(projectId, moveIssueDTOS);
+        }
     }
 
     private void beforeRank(Long projectId, Long targetSprintId, List<MoveIssueDTO> moveIssueDTOS, List<Long> moveIssueIds) {

@@ -1239,4 +1239,14 @@
               AND aisr.sprint_id = #{sprintId}
         )
     </select>
+
+    <select id="queryIssueIdsOrderByRank" resultType="java.lang.Long">
+        select
+          aisr.issue_id
+        from agile_issue_sprint_rel aisr
+        join agile_issue ai on ai.issue_id = aisr.issue_id
+        where aisr.project_id = #{projectId}
+        and aisr.sprint_id = #{sprintId}
+        order by rank
+    </select>
 </mapper>
