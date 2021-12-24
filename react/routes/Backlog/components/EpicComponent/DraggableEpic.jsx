@@ -30,7 +30,11 @@ class DraggableEpic extends Component {
   clickMenu = (e) => {
     const { item } = this.props;
 
-    e.domEvent?.stopPropagation();
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    } else if (e && e.domEvent && e.domEvent.stopPropagation) {
+      e.domEvent.stopPropagation();
+    }
     this.toggleClickColor(false);
     if (e.key === '1') {
       this.setState({
