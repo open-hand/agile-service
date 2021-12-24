@@ -16,6 +16,8 @@ interface IExportIssueProps {
   fields: IChosenFieldField[],
   chosenFields: IChosenFieldField[],
   checkOptions: Array<{ value: string, label: string, order?: any }>,
+  /** 禁止checkOptions 拼接自定义字段 */
+  disabledCheckOptionConcatCustom?: boolean
   visibleColumns: Array<string>
   store: IssueExportStore,
   action?: TemplateAction
@@ -34,6 +36,7 @@ Index.defaultProps = {
   action: undefined,
   exportBtnText: undefined,
   visibleCheckField: true,
+  disabledCheckOptionConcatCustom: false,
 };
 export default Index;
 

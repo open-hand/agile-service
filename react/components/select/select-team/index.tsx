@@ -28,7 +28,7 @@ const SelectTeam: React.FC<SelectTeamProps> = forwardRef(({
   request, textField, valueField, fieldId, ruleIds, selected, projectDataRef = { current: null }, afterLoad = noop, afterFirstRequest, flat, projectId, noAssign, addClear = false, ...otherProps
 }, ref: React.Ref<Select>) => {
   const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
-  const hasRule = Object.keys(args).filter((key: keyof typeof args) => Boolean(args[key])).length > 0;
+  const hasRule = !!args.ruleIds?.length;
   const afterLoadRef = useRef<Function>();
   // useSelect 内的 afterLoad 在 middleWare 前调用的，这里先包裹一层处理
   const afterIdStringLoad = (data: any) => {
