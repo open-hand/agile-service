@@ -100,7 +100,7 @@ const renderEpicOrFeature = (fieldName: string) => (rowData: any, getDataMethod 
   return name ? (
     <Tooltip title={name}>
       <span style={{
-        width: '100%',
+        maxWidth: '100%',
         color,
         borderWidth: '1px',
         borderStyle: 'solid',
