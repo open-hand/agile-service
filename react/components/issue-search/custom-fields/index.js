@@ -59,8 +59,8 @@ function CustomField({ field }) {
     projectId,
     applyType,
     value,
-    ...store.fieldConfigs[field.code],
     onChange: handleChange,
+    ...store.fieldConfigs[field.code],
   };
   if (store.renderSearchFields) {
     return store.renderSearchFields([field], { [field.code]: props })[0];
