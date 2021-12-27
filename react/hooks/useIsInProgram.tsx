@@ -29,7 +29,7 @@ interface Props {
 }
 interface useIsInProgramConfig {
   projectId?: string
-  menuType?: 'project' | 'org'
+  menuType?: 'project' | 'org' | 'program'
 }
 const useIsInProgram = (config?: useIsInProgramConfig, options?: UseQueryOptions<any>): ChildrenProps => {
   const { projectId, menuType } = config ?? {};

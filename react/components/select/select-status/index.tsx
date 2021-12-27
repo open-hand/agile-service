@@ -48,6 +48,9 @@ const SelectStatus: React.FC<SelectStatusProps> = forwardRef(
       valueField: 'id',
       requestArgs: args,
       request: async ({ filter, page, requestArgs }) => {
+        if (request) {
+          return request();
+        }
         if (isWorkBench) {
           return statusApi.loadAllFromWorkbench({ page, param: filter, size: 50 }, {
             ignoredStatusIds: requestArgs?.selectedIds,
@@ -59,9 +62,6 @@ const SelectStatus: React.FC<SelectStatusProps> = forwardRef(
         }
         if (issueTypeId && (!applyType || ['program', 'backlog'].includes(applyType))) {
           return isOrganization ? statusTransformApi.orgLoadList(issueTypeId) : statusTransformApi.project(projectId).loadList(issueTypeId, applyType as any);
-        }
-        if (request) {
-          return request();
         }
         return Promise.resolve([]);
       },
