@@ -143,7 +143,7 @@ export interface IAgileBaseSearchFieldInstance {
 }
 const SearchField: React.FC<{ children: React.ReactElement, field: any }> = ({ children, field }) => {
   const formatMessage = useFormatMessage();
-  const name = field.nameKey ? formatMessage({ id: field.nameKey, defaultMessage: field.name }) : field.name;
+  const name = field.nameKey ? formatMessage({ id: field.nameKey, defaultMessage: field.name }) || field.name : field.name;
   return React.cloneElement(children, { label: name, placeholder: name });
 };
 /**

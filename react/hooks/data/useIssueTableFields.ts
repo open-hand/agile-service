@@ -9,7 +9,8 @@ import useProjectKey from './useProjectKey';
 export interface IssueTableFieldsConfig {
   hiddenFieldCodes?: string[]
   projectId?: string
-  menuType?: 'project' | 'org'
+  programId?: string
+  menuType?: 'project' | 'org' | 'program'
   extraFields?: IFoundationHeader[]
 }
 const systemFields = [
@@ -48,7 +49,7 @@ const systemFields = [
 export default function useIssueTableFields(config?: IssueTableFieldsConfig, options?: UseQueryOptions<IFoundationHeader[]>) {
   const key = useProjectKey({ key: ['IssueTableFields'], projectId: config?.projectId });
   const { isInProgram, loading } = useIsInProgram({ projectId: config?.projectId, menuType: config?.menuType });
-  const { data, ...others } = useQuery(key, () => fieldApi.project(config?.projectId).getFoundationHeader(), {
+  const { data, ...others } = useQuery(key, () => fieldApi.program(config?.programId).project(config?.projectId).getFoundationHeader(), {
     enabled: !loading,
     initialData: systemFields,
     select: (res) => {

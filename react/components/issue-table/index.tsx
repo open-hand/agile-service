@@ -31,7 +31,7 @@ export interface IssueTableProps extends Partial<PerformanceTableProps> {
   createIssue?: boolean
   visibleColumns?: IIssueColumnName[]
   listLayoutColumns: ListLayoutColumnVO[] | null
-  onSummaryClick: () => void
+  onSummaryClick?: (data: any) => void
   typeIdChange?: (id: string) => void
   summaryChange?: (summary: string) => void
   setDefaultSprint?: (sprintId: string | undefined) => void,

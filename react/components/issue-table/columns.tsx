@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  get, find, intersection,
+  get, find, intersection, noop,
 } from 'lodash';
 import { CheckBox, Tooltip } from 'choerodon-ui/pro';
 import { systemColumnsMap, getCustomColumn } from './baseColumns';
@@ -50,8 +50,8 @@ export const expandColumn = {
   render: () => null,
 };
 
-const getColumnsMap = ({ onSummaryClick }: { onSummaryClick: (data: any) => void }) => {
-  const summaryColumn = systemColumnsMap.get('summary')!;
+const getColumnsMap = ({ onSummaryClick = noop }: { onSummaryClick?: (data: any) => void }) => {
+  const summaryColumn = systemColumnsMap.get('summary')! || {} as any;
   const columnMap = new Map<string, any>([['summary', { ...summaryColumn, render: ({ rowData }: any) => summaryColumn?.render && summaryColumn?.render(rowData, get, { onClick: () => onSummaryClick(rowData) }) }]]);
   systemColumnsMap.forEach((column, key) => {
     if (!columnMap.has(key)) {
@@ -68,12 +68,12 @@ export const IntlField: React.FC<{ column: any }> = ({ children, column }) => {
 interface IIssueTableColumnsProps {
   listLayoutColumns?: ListLayoutColumnVO[] | null,
   fields: IFoundationHeader[],
-  onSummaryClick: (data: any) => void, handleColumnResize?: (...args: any) => void
+  onSummaryClick?: (data: any) => void, handleColumnResize?: (...args: any) => void
   // getColumnsMap?:(...args:any[])=>
 }
 export function getTableColumns({
   listLayoutColumns, fields, onSummaryClick, handleColumnResize,
-}:IIssueTableColumnsProps) {
+}: IIssueTableColumnsProps) {
   const res: any[] = [];
   const columnsMap = getColumnsMap({ onSummaryClick });
   const getCustom = (field: IFoundationHeader) => {
