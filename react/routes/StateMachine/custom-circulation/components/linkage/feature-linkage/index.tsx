@@ -1,13 +1,12 @@
 import React, {
-  useEffect, useState, useCallback, useMemo,
+  useCallback, useEffect, useMemo, useState,
 } from 'react';
 import { DataSet } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import {
-  statusTransformApi,
-} from '@/api';
+import { DataSetSelection } from 'choerodon-ui/dataset/data-set/enum';
+import { statusTransformApi } from '@/api';
 import { OldLoading as Loading } from '@/components/Loading';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
 import useSubProjects from '@/hooks/data/useSubProjects';
@@ -20,6 +19,7 @@ export interface IFeatureLinkageSetting {
   issueTypeId: string
   projectId: string
   statusId: string
+  type: 'anyone_transfer' | 'all_transfer',
 }
 
 interface IFieldK {
@@ -28,13 +28,25 @@ interface IFieldK {
 
 const FeatureLinkage = ({
   // @ts-ignore
-  modal, record, issueTypeId, customCirculationDataSet,
+  modal, record, issueTypeId, customCirculationDataSet, selectedTypeName,
 }) => {
   const [loading, setLoading] = useState(false);
   const { data: subProjects } = useSubProjects({ onlySelectEnable: true });
   const [fields, Field] = useFields();
   const [currentProject, setCurrentProject] = useState<string | null>(null);
   const [linkagesMap, setLinkagesMap] = useState<Map<string, IFeatureLinkageSetting[]>>(new Map());
+
+  const transferType = useMemo(() => ({
+    all: {
+      key: 'all_transfer',
+      text: '全部故事',
+    },
+    anyone: {
+      key: 'anyone_transfer',
+      text: '任一故事',
+    },
+  }), [record]);
+
   const switchProject = useCallback((id: string) => {
     setCurrentProject(id);
     setDataSet(new DataSet({
@@ -47,6 +59,10 @@ const FeatureLinkage = ({
         name: 'statusId',
         label: '指定状态',
         required: true,
+      }, {
+        name: 'type',
+        required: true,
+        defaultValue: transferType.all.key,
       }],
       events: {
         update: ({ name, record: current }: { name: string, record: Record }) => {
@@ -56,7 +72,7 @@ const FeatureLinkage = ({
         },
       },
     }));
-  }, []);
+  }, [transferType]);
   useEffect(() => {
     if (!currentProject && subProjects && subProjects?.length > 0) {
       switchProject(subProjects[0].projectId);
@@ -77,6 +93,7 @@ const FeatureLinkage = ({
             issueTypeId: item.issueTypeId,
             statusId: item.statusId,
             projectId: item.projectId,
+            type: item.type || 'all_transfer',
           });
         });
         setLinkagesMap(map);
@@ -119,7 +136,7 @@ const FeatureLinkage = ({
   return (
     <div className={`${styles.featureLinkage}`}>
       <Loading loading={loading} />
-      <div className={styles.tip}>{`当子项目的故事全部流转到指定状态时，关联的特性自动流转到${record.get('name')}状态。`}</div>
+      <div className={styles.tip}>{`当子项目的故事流转到指定状态时，关联的特性自动流转到${record.get('name')}状态。`}</div>
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         <div style={{ flex: 1, overflow: 'hidden' }}>
           <ProjectList value={currentProject} onChange={handleProjectChange} />
@@ -132,6 +149,7 @@ const FeatureLinkage = ({
               parentIssueTypeId={issueTypeId}
               dataSet={dataSet}
               linkages={projectLinkages}
+              transferType={transferType}
             />
           )}
         </div>
