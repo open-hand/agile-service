@@ -18,6 +18,7 @@ function CollapseAll({ ...otherProps }) {
       {...otherProps}
       // color="primary"
       // funcType="flat"
+      icon="format_indent_increase"
       onClick={() => {
         store.collapseAll(!hasCollapse);
       }}

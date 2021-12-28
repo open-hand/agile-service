@@ -44,6 +44,10 @@ class FieldApi extends Api<FieldApi> {
     return '/agile/v1/backlog_external';
   }
 
+  get programId() {
+    return undefined;
+  }
+
   get isOutside() {
     return false;
   }
@@ -58,6 +62,10 @@ class FieldApi extends Api<FieldApi> {
 
   outside(outside: boolean) {
     return this.overwrite('isOutside', outside);
+  }
+
+  program(programId?: string) {
+    return this.overwrite('programId', programId);
   }
 
   /**
@@ -123,8 +131,11 @@ class FieldApi extends Api<FieldApi> {
   getCustomFields(issueTypeList?: 'agileIssueType' | 'programIssueType') {
     return this.request({
       method: 'get',
-      url: `${this.prefix}/field_value/list/custom_field`,
+      url: this.programId ? `${this.prefix}/project_invoke_program/program/custom_field`
+        : `${this.prefix}/field_value/list/custom_field`,
       params: {
+        programId: this.programId,
+        organizationId: this.orgId,
         issueTypeList: issueTypeList ?? getApplyType() === 'program' ? 'programIssueType' : 'agileIssueType',
       },
     });
@@ -193,11 +204,13 @@ class FieldApi extends Api<FieldApi> {
    */
   getFoundationHeader(issueTypeList?: 'agileIssueType' | 'programIssueType') {
     return this.request({
-      url: `${this.prefix}/field_value/list/getFields`,
+      url: this.programId ? `${this.prefix}/project_invoke_program/program/getFields`
+        : `${this.prefix}/field_value/list/getFields`,
       method: 'get',
       params: {
+        programId: this.programId,
+        organizationId: this.orgId,
         project_id: getProjectId(),
-        organizationId: getOrganizationId(),
         schemeCode: 'agile_issue',
         issueTypeList: issueTypeList ?? getApplyType() === 'program' ? 'programIssueType' : 'agileIssueType',
       },

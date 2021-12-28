@@ -216,7 +216,7 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
         <IssueTable
           tableProps={tableProps}
           style={{ marginTop: 10 }}
-          queryBar={'none' as TableQueryBarType}
+          queryBar={false}
           fields={data}
           createIssue={false}
           listLayoutColumns={formDataSet.current?.get('visibleColumns')?.map((code: string) => ({

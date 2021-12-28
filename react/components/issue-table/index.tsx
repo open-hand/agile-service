@@ -5,20 +5,25 @@ import { observer } from 'mobx-react-lite';
 import {
   PerformanceTable, Pagination,
 } from 'choerodon-ui/pro';
+import PropTypes from 'prop-types';
 import { TableProps } from 'choerodon-ui/pro/lib/table/Table';
+import { usePersistFn } from 'ahooks';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
 import { IFoundationHeader, IIssueColumnName } from '@/common/types';
 import './index.less';
 import { ListLayoutColumnVO } from '@/api';
 import useTable from '@/hooks/useTable';
-import { checkBoxColumn, expandColumn, getTableColumns } from './columns';
+import { checkBoxColumn, expandColumn, getTableColumns as defaultGetTableColumns } from './columns';
 import { Loading } from '@/components';
+import { IClassComponentType } from '../field-pro/base/type';
 
+type PerformanceTableProps = PropTypes.InferProps<typeof PerformanceTable.propTypes> & Pick<TableProps, 'dataSet'>
 // @ts-ignore
-export interface IssueTableProps extends Partial<TableProps> {
+export interface IssueTableProps extends Partial<PerformanceTableProps> {
   tableRef?: React.RefObject<any>
   onCreateIssue?: () => void
   onOpenCreateIssue?: () => void
+  getTableColumns?: (...args: Parameters<typeof defaultGetTableColumns>) => ReturnType<typeof defaultGetTableColumns>,
   // dataSet: DataSet
   fields: IFoundationHeader[]
   onRowClick?: (record: any) => void
@@ -26,7 +31,7 @@ export interface IssueTableProps extends Partial<TableProps> {
   createIssue?: boolean
   visibleColumns?: IIssueColumnName[]
   listLayoutColumns: ListLayoutColumnVO[] | null
-  onSummaryClick: () => void
+  onSummaryClick?: (data: any) => void
   typeIdChange?: (id: string) => void
   summaryChange?: (summary: string) => void
   setDefaultSprint?: (sprintId: string | undefined) => void,
@@ -34,6 +39,8 @@ export interface IssueTableProps extends Partial<TableProps> {
   tableProps: ReturnType<typeof useTable>
   onColumnResize?: (columnWidth: number, dataKey: string) => void
   isTree?: boolean
+  /** 是否显示checkbox 列  @default true */
+  isShowColumnCheck?: boolean
   height?: number
 }
 // const mapper = (key: IIssueColumnName): string => ({
@@ -61,6 +68,7 @@ const IssueTable: React.FC<IssueTableProps> = ({
   tableRef,
   onCreateIssue,
   onOpenCreateIssue,
+  getTableColumns: propsGetTableColumns,
   dataSet,
   fields,
   listLayoutColumns,
@@ -75,6 +83,7 @@ const IssueTable: React.FC<IssueTableProps> = ({
   onColumnResize,
   isTree = true,
   height,
+  isShowColumnCheck,
   ...otherProps
 }) => {
   const handleOpenCreateIssue = useCallback(() => {
@@ -85,10 +94,10 @@ const IssueTable: React.FC<IssueTableProps> = ({
     pagination,
     ...restProps
   } = props;
-
+  const getTableColumns = usePersistFn(propsGetTableColumns || defaultGetTableColumns);
   const columns = useMemo(() => getTableColumns({
     listLayoutColumns, fields, onSummaryClick, handleColumnResize: onColumnResize,
-  }), [fields, listLayoutColumns, onColumnResize, onSummaryClick]);
+  }), [fields, getTableColumns, listLayoutColumns, onColumnResize, onSummaryClick]);
   const visibleColumns = useMemo(() => columns.filter((column) => column.display), [columns]);
   const checkValuesRef = useRef<string[]>();
   checkValuesRef.current = props.checkValues;
@@ -103,11 +112,12 @@ const IssueTable: React.FC<IssueTableProps> = ({
   return (
     <div className="c7nagile-issue-table">
       <PerformanceTable
+        {...otherProps}
         {...restProps}
         renderLoading={(spinElement: JSX.Element) => <Loading loadId="issue-table" loading={restProps.loading} />}
         virtualized
         bordered={false}
-        columns={[checkboxColumn, ...isTree ? [expandColumn] : [], ...visibleColumns]}
+        columns={[...isShowColumnCheck ? [checkboxColumn] : [], ...isTree ? [expandColumn] : [], ...visibleColumns]}
         height={height ?? 400}
         rowHeight={40}
         shouldUpdateScroll={false}
@@ -140,4 +150,8 @@ const IssueTable: React.FC<IssueTableProps> = ({
     </div>
   );
 };
-export default observer(IssueTable);
+const ObserverIssueTale = observer(IssueTable);
+ObserverIssueTale.defaultProps = {
+  isShowColumnCheck: true,
+};
+export default ObserverIssueTale;

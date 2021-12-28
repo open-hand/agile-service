@@ -763,7 +763,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
     }
 
-    protected void setSortMap(Long organizationId, Long projectId, PageRequest pageRequest, Map<String, Object> sortMap, String mainTableAlias) {
+    @Override
+    public void setSortMap(Long organizationId, Long projectId, PageRequest pageRequest, Map<String, Object> sortMap, String mainTableAlias) {
         Sort.Order issueIdOrder = new Sort.Order(Sort.Direction.DESC, ISSUE_ID);
         Sort sort = PageUtil.sortResetOrder(new Sort(issueIdOrder), mainTableAlias, new HashMap<>());
         String orderStr = PageableHelper.getSortSql(sort);

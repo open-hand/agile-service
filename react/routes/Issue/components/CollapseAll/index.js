@@ -1,8 +1,6 @@
 import React from 'react';
-import { Button } from 'choerodon-ui/pro';
-
+import { Button, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import CustomIcon from '@/components/custom-icon';
 import useFormatMessage from '@/hooks/useFormatMessage';
 
 function CollapseAll({
@@ -19,11 +17,11 @@ function CollapseAll({
     <Button
       {...otherProps}
       // funcType="flat"
+      icon="format_indent_increase"
       onClick={() => {
         expandAll(!isExpandAll);
       }}
     >
-      <CustomIcon type="icon-indent" />
       <span>{formatMessage({ id: isExpandAll ? 'collapse.all' : 'expand.all' })}</span>
     </Button>
 

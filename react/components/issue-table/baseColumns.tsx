@@ -13,9 +13,9 @@ import { IFoundationHeader } from '@/common/types';
 import { MINUTE } from '@/constants/DATE_FORMAT';
 
 type IIssueTableBaseColumnRenderGetData<T> = (data: T, nameKey: string) => any
-interface IIssueTableBaseColumn<D extends object = any> {
+export interface IIssueTableBaseColumn<D extends object = any> {
   /** 标题 */
-  title: React.ReactElement
+  title: React.ReactNode
   /** 对应的多语言 key */
   titleKey?:string
   // originTitle: string
@@ -100,7 +100,7 @@ const renderEpicOrFeature = (fieldName: string) => (rowData: any, getDataMethod 
   return name ? (
     <Tooltip title={name}>
       <span style={{
-        width: '100%',
+        maxWidth: '100%',
         color,
         borderWidth: '1px',
         borderStyle: 'solid',

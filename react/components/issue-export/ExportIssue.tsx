@@ -83,7 +83,7 @@ const ExportIssue: React.FC = () => {
   const selectTemplateOkRef = useRef<(codes: string[]) => void>();
 
   const {
-    prefixCls, checkOptions: propsCheckOptions, store, fields, modal, action, exportBtnText, visibleCheckField: propsVisibleCheckField,
+    prefixCls, checkOptions: propsCheckOptions, store, fields, modal, action, exportBtnText, visibleCheckField: propsVisibleCheckField, disabledCheckOptionConcatCustom,
   } = useExportIssueStore();
   const formatMessage = useFormatMessage();
   visibleCheckField.current = !!propsVisibleCheckField;
@@ -104,9 +104,9 @@ const ExportIssue: React.FC = () => {
   const { store: choseFieldStore } = choseDataProps;
   const checkOptions = useMemo(() => { // checkBokProps
     const newCheckOptions = propsCheckOptions.map((option) => ({ ...option, ...store.checkboxOptionsExtraConfig?.get(option.value) })) || [];
-    newCheckOptions.push(...(choseFieldStore.getOriginalField.get('custom') || []).map((option) => ({ value: option.code, label: option.name, ...store.checkboxOptionsExtraConfig?.get(option.code) })));
+    !disabledCheckOptionConcatCustom && newCheckOptions.push(...(choseFieldStore.getOriginalField.get('custom') || []).map((option) => ({ value: option.code, label: option.name, ...store.checkboxOptionsExtraConfig?.get(option.code) })));
     return uniqBy(newCheckOptions, 'value');
-  }, [choseFieldStore.getOriginalField, propsCheckOptions, store.checkboxOptionsExtraConfig]);
+  }, [choseFieldStore.getOriginalField, disabledCheckOptionConcatCustom, propsCheckOptions, store.checkboxOptionsExtraConfig]);
 
   const handleCheckBoxChangeOk = useCallback((value) => {
     const currentFieldCodes = store.transformExportFieldCodes(value, checkBoxDataPropsRef?.current);

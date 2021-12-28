@@ -36,8 +36,7 @@ function ExpandAllButton(props: any) {
   }
   useEffect(() => () => scrumBoardStore.removeBindFunction('expand-current-status'));
   return scrumBoardStore.currentBindFunctionMaps.get('expandOrUp') || scrumBoardStore.currentBindFunctionMaps.get('expandOrUp-epic') ? (
-    <Button {...props} onClick={handleClick}>
-      <CustomIcon type="icon-indent" />
+    <Button {...props} icon="format_indent_increase" onClick={handleClick}>
       {expandAll ? (
         <span>
           {formatMessage({ id: 'collapse.all' })}

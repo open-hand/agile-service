@@ -1,5 +1,6 @@
 import { useQuery, UseQueryOptions } from 'react-query';
 import { useCreation } from 'ahooks';
+import { unionBy, uniqBy } from 'lodash';
 import { fieldApi } from '@/api';
 import { IFoundationHeader } from '@/common/types';
 import useIsInProgram from '../useIsInProgram';
@@ -8,7 +9,8 @@ import useProjectKey from './useProjectKey';
 export interface IssueTableFieldsConfig {
   hiddenFieldCodes?: string[]
   projectId?: string
-  menuType?: 'project' | 'org'
+  programId?: string
+  menuType?: 'project' | 'org' | 'program'
   extraFields?: IFoundationHeader[]
 }
 const systemFields = [
@@ -47,10 +49,13 @@ const systemFields = [
 export default function useIssueTableFields(config?: IssueTableFieldsConfig, options?: UseQueryOptions<IFoundationHeader[]>) {
   const key = useProjectKey({ key: ['IssueTableFields'], projectId: config?.projectId });
   const { isInProgram, loading } = useIsInProgram({ projectId: config?.projectId, menuType: config?.menuType });
-  const { data, ...others } = useQuery(key, () => fieldApi.project(config?.projectId).getFoundationHeader(), {
+  const { data, ...others } = useQuery(key, () => fieldApi.program(config?.programId).project(config?.projectId).getFoundationHeader(), {
     enabled: !loading,
-    initialData: [...systemFields, ...(config?.extraFields || [])],
-    select: (res) => (config?.hiddenFieldCodes ? systemFields.concat(config?.extraFields || []).concat(res).filter((field) => !config.hiddenFieldCodes?.includes(field.code)) : systemFields.concat(config?.extraFields || []).concat(res)),
+    initialData: systemFields,
+    select: (res) => {
+      const loadedFields = unionBy(config?.extraFields || [], systemFields, 'code').concat(res);
+      return (config?.hiddenFieldCodes ? loadedFields.filter((field) => !config.hiddenFieldCodes?.includes(field.code)) : loadedFields);
+    },
     ...options,
   });
   const fieldData = useCreation(() => (!isInProgram ? data?.filter((f) => f.code !== 'feature') : data), [isInProgram, data]);
