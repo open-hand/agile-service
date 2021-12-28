@@ -2,11 +2,8 @@ package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.dto.IssueTypeExtendDTO;
-import io.choerodon.agile.infra.dto.StatusLinkageExecutionLogDTO;
+import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.dto.StatusLinkageDTO;
-import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
 import io.choerodon.agile.infra.enums.TriggerExecutionStatus;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -33,6 +30,11 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class StatusLinkageServiceImpl implements StatusLinkageService {
+
+    private static final String ANYONE_TRANSFER = "anyone_transfer";
+
+    private static final String ALL_TRANSFER = "all_transfer";
+
     @Autowired
     private StatusLinkageMapper statusLinkageMapper;
 
@@ -80,8 +82,12 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         if (!CollectionUtils.isEmpty(statusLinkageDTOS)) {
             deleteByStatusIdAndIssueTypeId(projectId, issueTypeId, statusId);
         }
+        List<String> typeList = Arrays.asList(ALL_TRANSFER, ANYONE_TRANSFER);
         if (!CollectionUtils.isEmpty(linkageVOS)) {
             for (StatusLinkageVO statusLinkageVO : linkageVOS) {
+                if (!typeList.contains(statusLinkageVO.getType())) {
+                    throw new CommonException("error.status.linkage.type.illegal");
+                }
                 StatusLinkageDTO statusLinkageDTO = modelMapper.map(statusLinkageVO, StatusLinkageDTO.class);
                 statusLinkageDTO.setProjectId(projectId);
                 statusLinkageDTO.setIssueTypeId(issueTypeId);
@@ -482,28 +488,35 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
 
     private void handlerMultiSetting(Map<String, Object> variables, List<StatusLinkageDTO> select, IssueDTO issueDTO, Map<Long, List<IssueDTO>> issueMap, Map<Long, List<StatusLinkageDTO>> linkageDTOMap, List<IssueDTO> issueDTOS) {
         // 判断两种子任务的设置的父级状态是不是相同
-        Boolean isChange = false;
-        Long changeStatus = null;
         Set<Long> ids = select.stream().map(StatusLinkageDTO::getParentIssueStatusSetting).collect(Collectors.toSet());
-        if (ids.size() > 1) {
-            List<StatusLinkageDTO> statusLinkageDTOS = linkageDTOMap.get(issueDTO.getIssueTypeId());
-            isChange = handlerSingleIssueType(statusLinkageDTOS, issueMap, issueDTO.getIssueTypeId());
-            changeStatus = statusLinkageDTOS.get(0).getParentIssueStatusSetting();
-        } else {
-            Map<Long, String> typeCodeMap = issueDTOS.stream().collect(Collectors.toMap(IssueDTO::getIssueTypeId, IssueDTO::getTypeCode,(code1,code2) -> code1));
-            Iterator<Map.Entry<Long, List<StatusLinkageDTO>>> iterator = linkageDTOMap.entrySet().iterator();
+        Map<String, List<StatusLinkageDTO>> statusLinkageGroup = select.stream().collect(Collectors.groupingBy(StatusLinkageDTO::getType));
+        Boolean anySubTaskTransfer = true;
+        Boolean allSubTaskTransfer = true;
+        for (Map.Entry<String, List<StatusLinkageDTO>> entry : statusLinkageGroup.entrySet()) {
+            String type = entry.getKey();
+            List<StatusLinkageDTO> linkageDTOS = entry.getValue();
+            Map<Long, List<StatusLinkageDTO>> linkageMap = linkageDTOS.stream().collect(Collectors.groupingBy(StatusLinkageDTO::getIssueTypeId));
+            Iterator<Map.Entry<Long, List<StatusLinkageDTO>>> iterator = linkageMap.entrySet().iterator();
+            Boolean isChange = true;
             while (iterator.hasNext()) {
                 Map.Entry<Long, List<StatusLinkageDTO>> next = iterator.next();
                 List<StatusLinkageDTO> value = next.getValue();
                 isChange = handlerSingleIssueType(value, issueMap, next.getKey());
-                if (Boolean.FALSE.equals(isChange)) {
+                // 全部转换是有一个为false即为不能转换 任一子任务流转时，有一个可以就返回true
+                boolean isBreak = (ALL_TRANSFER.equals(type) && Boolean.FALSE.equals(isChange)) || (ANYONE_TRANSFER.equals(type) && Boolean.TRUE.equals(isChange));
+                if (isBreak) {
                     break;
                 }
-                changeStatus = ids.iterator().next();
+            }
+            if (ALL_TRANSFER.equals(type)) {
+                allSubTaskTransfer = isChange;
+            } else {
+                anySubTaskTransfer = isChange;
             }
         }
-        variables.put("isChange", isChange);
-        variables.put("changeStatus", changeStatus);
+        boolean change = Boolean.TRUE.equals(allSubTaskTransfer) && Boolean.TRUE.equals(anySubTaskTransfer);
+        variables.put("isChange", change);
+        variables.put("changeStatus", ids.iterator().next());
     }
 
     private Long getParentIssueId(IssueDTO issueDTO) {
@@ -528,9 +541,12 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         if (CollectionUtils.isEmpty(sub)) {
             return Boolean.TRUE;
         }
+        String type = statusLinks.stream().map(StatusLinkageDTO::getType).findAny().get();
         List<Long> statusLinkStatus = statusLinks.stream().map(StatusLinkageDTO::getStatusId).collect(Collectors.toList());
         long count = sub.stream().filter(v -> statusLinkStatus.contains(v.getStatusId())).count();
-        if (Boolean.FALSE.equals((count == sub.size()))) {
+        if (Objects.equals(ALL_TRANSFER, type) && count != sub.size()) {
+            return Boolean.FALSE;
+        } else if(Objects.equals(ANYONE_TRANSFER, type) && count == 0){
             return Boolean.FALSE;
         }
         return Boolean.TRUE;

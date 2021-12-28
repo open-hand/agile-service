@@ -36,6 +36,8 @@ public class StatusLinkageVO {
 
     private String issueTypeName;
 
+    private String type;
+
     public String getIssueTypeName() {
         return issueTypeName;
     }
@@ -130,5 +132,13 @@ public class StatusLinkageVO {
 
     public void setProjectVO(ProjectVO projectVO) {
         this.projectVO = projectVO;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

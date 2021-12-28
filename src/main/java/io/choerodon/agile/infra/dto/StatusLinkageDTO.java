@@ -39,6 +39,8 @@ public class StatusLinkageDTO extends AuditDomain {
 
     private Long organizationId;
 
+    private String type;
+
     public Long getParentIssueTypeId() {
         return parentIssueTypeId;
     }
@@ -101,5 +103,13 @@ public class StatusLinkageDTO extends AuditDomain {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }
