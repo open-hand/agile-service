@@ -109,6 +109,7 @@ interface IStatusLinkageVOS {
   issueTypeVO: IIssueType
   parentIssueStatusSetting: string
   parentIssueTypeCode: 'story' | 'bug' | 'task'
+  type: 'all_transfer' | 'anyone_transfer'
   projectId: number
   statusId: string
   statusVO: IStatus
@@ -516,29 +517,24 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     ) => item.id === selectedType);
     const selectedTypeCode = selectedIssueType?.typeCode;
     if (statusLinkageVOS && statusLinkageVOS.length && (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug')) {
-      const prefixStr = `${selectedIssueType?.name}都在【${record.get('name')}】状态，则将`;
+      const prefixStr = `【${record.get('name')}】状态，则将`;
       const groupData = groupBy(statusLinkageVOS, 'type');
       const allTransfer = getLinkageSettingString(groupData.all_transfer || []);
       const anyoneTransfer = getLinkageSettingString(groupData.anyone_transfer || []);
-      const parentDes = (
-        statusLinkageVOS.map((linkageSetting) => {
-          const { statusVO, issueTypeVO } = linkageSetting;
-          const toStatusName = statusVO?.name;
-          const parentTypeName = issueTypeVO?.name;
-          return `父级【${parentTypeName}】的状态自动流转到【${toStatusName}】`;
-        })).join('、');
       return ([
-        allTransfer ? <div className={`${styles.settingItem} ${styles.linkageSettingItem}`}>{`全部${prefixStr}${allTransfer}`}</div> : null,
-        anyoneTransfer ? <div className={`${styles.settingItem} ${styles.linkageSettingItem}`}>{`任一${prefixStr}${anyoneTransfer}`}</div> : null,
+        allTransfer ? <div className={`${styles.settingItem} ${styles.linkageSettingItem}`}>{`全部${selectedIssueType?.name}都在${prefixStr}${allTransfer}`}</div> : null,
+        anyoneTransfer ? <div className={`${styles.settingItem} ${styles.linkageSettingItem}`}>{`任一${selectedIssueType?.name}在${prefixStr}${anyoneTransfer}`}</div> : null,
       ]);
     }
     if (statusLinkageVOS && statusLinkageVOS.length && selectedTypeCode === 'feature') {
       const prefixStr = '当项目';
       const linkageStr = (
         statusLinkageVOS.map((linkageSetting) => {
-          const { statusVO, projectVO, issueTypeName } = linkageSetting;
+          const {
+            statusVO, projectVO, issueTypeName, type,
+          } = linkageSetting;
           const toStatusName = statusVO?.name;
-          return `【${projectVO?.name}】的${issueTypeName}状态全为【${toStatusName}】`;
+          return `【${projectVO?.name}】的【${type === 'anyone_transfer' ? '任一' : '全部'}】${issueTypeName}状态为【${toStatusName}】`;
         })).join('，');
       const suffixStr = `，则关联的特性自动流转到【${record.get('name')}】状态。`;
       return `${prefixStr}${linkageStr}${suffixStr}`;
