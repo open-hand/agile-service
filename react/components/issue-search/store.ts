@@ -40,7 +40,7 @@ export interface IssueSearchStoreProps {
   defaultSearchVO?: ISearchVO
   projectId?: string
   /** @default project */
-  menuType?: 'project' | 'org' | 'workbench' | 'program'
+  menuType?: 'project' | 'org' | 'workbench' | 'program' | 'programSubProject'
   /** program 模式使用 */
   programId?: string
   fieldConfigs?: { [key: string]: any }
