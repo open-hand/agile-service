@@ -96,7 +96,6 @@ const ProjectConfig: React.FC<ProjectConfigProps> = ({
           style={{ marginTop: -4 }}
           onClick={() => {
             dataSet.create();
-            console.log(dataSet.toData());
           }}
           icon="add"
         >
