@@ -788,12 +788,14 @@ class BacklogStore {
   @action updateEpic(epic) {
     const updateIndex = this.epicList.findIndex((item) => epic.issueId === item.issueId);
     this.epicList[updateIndex].name = epic.name;
+    this.epicList[updateIndex].color = epic.color;
     this.epicList[updateIndex].objectVersionNumber = epic.objectVersionNumber;
   }
 
   @action updateFeature(feature) {
     const updateIndex = this.featureList.findIndex((item) => feature.issueId === item.issueId);
     this.featureList[updateIndex].name = feature.name;
+    this.featureList[updateIndex].color = feature.color;
     this.featureList[updateIndex].objectVersionNumber = feature.objectVersionNumber;
   }
 

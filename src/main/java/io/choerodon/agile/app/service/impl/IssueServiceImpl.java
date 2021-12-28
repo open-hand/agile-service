@@ -1658,7 +1658,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         issueLinkService.deleteByIssueId(issueConvertDTO.getIssueId());
         //删除标签关联
         labelIssueRelService.deleteByIssueId(issueConvertDTO.getIssueId());
-        //没有issue使用且没有设为默认值的标签进行垃圾回收
+        //没有issue使用的标签进行垃圾回收
         issueLabelService.labelGarbageCollection(projectId);
         //删除模块关联
         componentIssueRelService.deleteByIssueId(issueConvertDTO.getIssueId());
@@ -2404,7 +2404,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             } else {
                 labelIssueRelService.batchDeleteByIssueId(issueId);
             }
-            //没有issue使用且没有设为默认值的标签进行垃圾回收
+            //没有issue使用的标签进行垃圾回收
             issueLabelService.labelGarbageCollection(projectId);
         }
     }

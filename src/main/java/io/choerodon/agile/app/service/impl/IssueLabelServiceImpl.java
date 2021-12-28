@@ -3,12 +3,6 @@ package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.IssueLabelVO;
 import io.choerodon.agile.app.service.IssueLabelService;
-import io.choerodon.agile.app.service.ObjectSchemeFieldService;
-import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
-import io.choerodon.agile.infra.dto.ObjectSchemeFieldExtendDTO;
-import io.choerodon.agile.infra.enums.FieldCode;
-import io.choerodon.agile.infra.mapper.ObjectSchemeFieldExtendMapper;
-import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.agile.infra.dto.IssueLabelDTO;
 import io.choerodon.agile.infra.mapper.IssueLabelMapper;
@@ -19,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 敏捷开发Issue标签
@@ -42,10 +35,6 @@ public class IssueLabelServiceImpl implements IssueLabelService {
     private RedisUtil redisUtil;
     @Autowired
     private ModelMapper modelMapper;
-    @Autowired
-    private ObjectSchemeFieldService objectSchemeFieldService;
-    @Autowired
-    private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
 
     @Override
     public List<IssueLabelVO> listIssueLabel(Long projectId) {
@@ -71,30 +60,6 @@ public class IssueLabelServiceImpl implements IssueLabelService {
     @Override
     public int labelGarbageCollection(Long projectId) {
         redisUtil.deleteRedisCache(new String[]{PIE_CHART + projectId + ':' + LABEL + "*"});
-        Set<Long> labelIdsOfDefaultValue = getLabelIdsOfDefaultValue(projectId);
-        return issueLabelMapper.labelGarbageCollection(projectId, labelIdsOfDefaultValue);
-    }
-
-    /**
-     * 获取被设为默认值的标签ids
-     *
-     * @param projectId
-     * @return
-     */
-    private Set<Long> getLabelIdsOfDefaultValue(Long projectId) {
-        ObjectSchemeFieldDTO fieldDTO = objectSchemeFieldService.getObjectSchemeFieldDTO(FieldCode.LABEL);
-
-        Set<Long> labelIdsOfDefaultValue = new HashSet<>();
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtendList = objectSchemeFieldExtendMapper.selectExtendFields(organizationId, fieldDTO.getId(), projectId, null);
-
-        objectSchemeFieldExtendList.forEach(f -> {
-            String defaultValue = f.getDefaultValue();
-            if (!Objects.isNull(defaultValue) && !Objects.equals(defaultValue, "")) {
-                Set<Long> ids = Arrays.stream(defaultValue.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toSet());
-                labelIdsOfDefaultValue.addAll(ids);
-            }
-        });
-        return labelIdsOfDefaultValue;
+        return issueLabelMapper.labelGarbageCollection(projectId);
     }
 }

@@ -17,6 +17,7 @@ class DraggableEpic extends Component {
     this.state = {
       expand: false,
       editName: false,
+      colorVisible: false,
     };
   }
 
@@ -29,7 +30,12 @@ class DraggableEpic extends Component {
   clickMenu = (e) => {
     const { item } = this.props;
 
-    e.domEvent.stopPropagation();
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    } else if (e && e.domEvent && e.domEvent.stopPropagation) {
+      e.domEvent.stopPropagation();
+    }
+    this.toggleClickColor(false);
     if (e.key === '1') {
       this.setState({
         editName: true,
@@ -51,7 +57,7 @@ class DraggableEpic extends Component {
     return (
       // eslint-disable-next-line react/jsx-no-bind
       <Menu onClick={this.clickMenu.bind(this)}>
-        <div style={{ padding: '5px 12px' }}>
+        <div style={{ padding: '5px 12px', marginTop: '10px' }}>
           颜色
           <div className="c7n-backlog-epicColor">
             {BacklogStore.getColorLookupValue.map((color) => (
@@ -67,10 +73,13 @@ class DraggableEpic extends Component {
                     issueId: item.issueId,
                     objectVersionNumber: item.objectVersionNumber,
                   };
+                  this.toggleClickColor(false);
+                  BacklogStore.updateEpic({ ...item || {}, color: color.name });
                   issueApi.update(inputData).then((res) => {
                     BacklogStore.updateEpic(res);
                     refresh();
                   }).catch(() => {
+                    BacklogStore.updateEpic(item);
                   });
                 }}
               />
@@ -130,11 +139,17 @@ class DraggableEpic extends Component {
     });
   }
 
+  toggleClickColor = (visible) => {
+    this.setState({
+      colorVisible: visible,
+    });
+  };
+
   render() {
     const {
       draggableProvided, item,
     } = this.props;
-    const { expand, editName } = this.state;
+    const { expand, editName, colorVisible } = this.state;
 
     return (
       <div
@@ -174,7 +189,13 @@ class DraggableEpic extends Component {
                   <p>{item.epicName}</p>
                 </Tooltip>
               )}
-              <Dropdown onClick={(e) => e.stopPropagation()} overlay={this.getmenu()} trigger={['click']}>
+              <Dropdown
+                onClick={(e) => e.stopPropagation()}
+                overlay={this.getmenu()}
+                trigger={['click']}
+                visible={colorVisible}
+                onVisibleChange={this.toggleClickColor}
+              >
                 <Icon
                   style={{
                     width: 12,

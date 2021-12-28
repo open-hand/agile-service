@@ -170,4 +170,6 @@ public interface SprintMapper extends BaseMapper<SprintDTO> {
     SprintStartMessageVO selectSprintStartMessage(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId);
 
     BigDecimal querySpentWorkTimeBySprintId(@Param("sprintId") Long sprint, @Param("projectId") Long projectId);
+
+    List<Long> queryIssueIdsOrderByRank(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId);
 }
