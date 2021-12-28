@@ -34,66 +34,63 @@ const ProjectConfig: React.FC<ProjectConfigProps> = ({
   const selectedIssueTypeIds = dataSet.map((record) => record.get('issueTypeId'));
   return (
     <Form className={Styles.configForm}>
-      {dataSet.map((record) => {
-        console.log('type===', record.get('type'));
-        return (
-          <Row gutter={20} type="flex" align="middle">
-            <Col span={22}>
-              <span className={Styles.checkLabel}>验证范围：</span>
-              <SelectBox
+      {dataSet.map((record) => (
+        <Row gutter={20} type="flex" align="middle">
+          <Col span={22}>
+            <span className={Styles.checkLabel}>验证范围：</span>
+            <SelectBox
                 // 1.5.0的UI中的SelectBox不支持通过record={record}绑定ds,暂时先用value控制值
-                value={record.get('type')}
-                className={Styles.checkRequire}
-                onChange={(value) => record.set('type', value)}
-              >
-                <Option value={transferType.anyone.key}>{transferType.anyone.text}</Option>
-                <Option value={transferType.all.key}>{transferType.all.text}</Option>
-              </SelectBox>
-            </Col>
-            <Col span={11}>
-              <SelectIssueType
-                record={record}
-                config={{
-                  projectId,
-                  applyType: 'agile',
-                  typeCode: 'story',
-                }}
-                name="issueTypeId"
-                clearButton={false}
-                optionsFilter={(re) => !selectedIssueTypeIds.includes(re.get('id')) || record.get('issueTypeId') === re.get('id')}
-              />
-            </Col>
-            <Col span={11}>
-              <SelectStatus
-                record={record}
-                name="statusId"
-                clearButton={false}
-                disabled={!record.get('issueTypeId')}
-                key={record.get('issueTypeId')}
-                request={async () => {
-                  const issueTypeId = record.get('issueTypeId');
-                  if (issueTypeId) {
-                    return statusTransformApi.getFeatureLinkageStatus({ issueTypeId, projectId }, parentIssueTypeId);
-                  }
-                  return Promise.resolve([]);
-                }}
-              />
-            </Col>
-            <Col span={2}>
-              <Icon
-                onClick={() => {
-                  dataSet.remove(record);
-                }}
-                type="delete_sweep-o"
-                style={{
-                  color: 'var(--primary-color)',
-                  cursor: 'pointer',
-                }}
-              />
-            </Col>
-          </Row>
-        )
-      })}
+              value={record.get('type')}
+              className={Styles.checkRequire}
+              onChange={(value) => record.set('type', value)}
+            >
+              <Option value={transferType.anyone.key}>{transferType.anyone.text}</Option>
+              <Option value={transferType.all.key}>{transferType.all.text}</Option>
+            </SelectBox>
+          </Col>
+          <Col span={11}>
+            <SelectIssueType
+              record={record}
+              config={{
+                projectId,
+                applyType: 'agile',
+                typeCode: 'story',
+              }}
+              name="issueTypeId"
+              clearButton={false}
+              optionsFilter={(re) => !selectedIssueTypeIds.includes(re.get('id')) || record.get('issueTypeId') === re.get('id')}
+            />
+          </Col>
+          <Col span={11}>
+            <SelectStatus
+              record={record}
+              name="statusId"
+              clearButton={false}
+              disabled={!record.get('issueTypeId')}
+              key={record.get('issueTypeId')}
+              request={async () => {
+                const issueTypeId = record.get('issueTypeId');
+                if (issueTypeId) {
+                  return statusTransformApi.getFeatureLinkageStatus({ issueTypeId, projectId }, parentIssueTypeId);
+                }
+                return Promise.resolve([]);
+              }}
+            />
+          </Col>
+          <Col span={2}>
+            <Icon
+              onClick={() => {
+                dataSet.remove(record);
+              }}
+              type="delete_sweep-o"
+              style={{
+                color: 'var(--primary-color)',
+                cursor: 'pointer',
+              }}
+            />
+          </Col>
+        </Row>
+      ))}
       <div>
         <Button
           style={{ marginTop: -4 }}
