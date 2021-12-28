@@ -132,6 +132,9 @@ const ExportIssue: React.FC = () => {
     options: checkOptions,
     defaultValue: store.defaultCheckedExportFields,
     events: { initOptions: store.defaultInitOptions },
+    formProps: {
+      className: `${prefixCls}-check-box`,
+    },
     onChange: handleCheckBoxChangeOk,
   });
 
