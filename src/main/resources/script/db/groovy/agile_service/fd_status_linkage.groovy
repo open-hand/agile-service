@@ -58,4 +58,11 @@ databaseChangeLog(logicalFilePath: 'fd_status_linkage.groovy') {
             column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织Id', defaultValue: "0")
         }
     }
+
+
+    changeSet(author: 'ztxemail@163.com',id: '2021-12-27-fd-status-linkage-add-column'){
+        addColumn(tableName: 'fd_status_linkage') {
+            column(name: 'type', type: 'VARCHAR(255)', defaultValue: "all_transfer" , remarks: '联动校验类型：任一子任务流转（anyone_transfer）,全部子任务流转（all_transfer）')
+        }
+    }
 }
