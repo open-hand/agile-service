@@ -9,7 +9,7 @@ import {
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import {
-  find, filter, includes,
+  find, filter, includes, groupBy,
 } from 'lodash';
 import moment from 'moment';
 import { ColumnProps } from 'choerodon-ui/pro/lib/table/Column';
@@ -347,7 +347,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         />,
       },
       linkage: {
-        width: (selectedTypeCode === 'feature' || (!isOrganization && selectedTypeCode && ['story', 'bug', 'task'].includes(selectedTypeCode))) ? MODAL_WIDTH.middle : MODAL_WIDTH.small,
+        width: (selectedTypeCode === 'feature' || (!isOrganization && selectedTypeCode && ['story', 'bug', 'task', 'sub_task'].includes(selectedTypeCode))) ? MODAL_WIDTH.middle : MODAL_WIDTH.small,
         title: '状态联动',
         children: selectedTypeCode === 'feature' ? (
           // @ts-ignore
@@ -502,6 +502,13 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     return null;
   };
 
+  const getLinkageSettingString = (statusLinkageVOS: IStatusLinkageVOS[]) => (statusLinkageVOS.map((linkageSetting) => {
+    const { statusVO, issueTypeVO } = linkageSetting;
+    const toStatusName = statusVO?.name;
+    const parentTypeName = issueTypeVO?.name;
+    return `父级【${parentTypeName}】的状态自动流转到【${toStatusName}】`;
+  })).join('、');
+
   // @ts-ignore
   const renderStatusLinkageSetting = (statusLinkageVOS: IStatusLinkageVOS[], record) => {
     const selectedIssueType = find(issueTypes, (
@@ -509,7 +516,10 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     ) => item.id === selectedType);
     const selectedTypeCode = selectedIssueType?.typeCode;
     if (statusLinkageVOS && statusLinkageVOS.length && (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug')) {
-      const prefixStr = `全部${selectedIssueType?.name}都在【${record.get('name')}】状态，则将`;
+      const prefixStr = `${selectedIssueType?.name}都在【${record.get('name')}】状态，则将`;
+      const groupData = groupBy(statusLinkageVOS, 'type');
+      const allTransfer = getLinkageSettingString(groupData.all_transfer || []);
+      const anyoneTransfer = getLinkageSettingString(groupData.anyone_transfer || []);
       const parentDes = (
         statusLinkageVOS.map((linkageSetting) => {
           const { statusVO, issueTypeVO } = linkageSetting;
@@ -517,7 +527,10 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           const parentTypeName = issueTypeVO?.name;
           return `父级【${parentTypeName}】的状态自动流转到【${toStatusName}】`;
         })).join('、');
-      return `${prefixStr}${parentDes}`;
+      return ([
+        allTransfer ? <div className={`${styles.settingItem} ${styles.linkageSettingItem}`}>{`全部${prefixStr}${allTransfer}`}</div> : null,
+        anyoneTransfer ? <div className={`${styles.settingItem} ${styles.linkageSettingItem}`}>{`任一${prefixStr}${anyoneTransfer}`}</div> : null,
+      ]);
     }
     if (statusLinkageVOS && statusLinkageVOS.length && selectedTypeCode === 'feature') {
       const prefixStr = '当项目';

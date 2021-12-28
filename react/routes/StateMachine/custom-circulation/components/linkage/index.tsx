@@ -7,6 +7,7 @@ import {
 } from 'choerodon-ui/pro';
 
 import { observer } from 'mobx-react-lite';
+import { has as hasInject, mount as mountInject } from '@choerodon/inject';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
 import SelectStatus from '@/components/select/select-status';
 import { issueLinkTypeApi, statusTransformApi } from '@/api';
@@ -24,6 +25,7 @@ interface IParentIssueStatusSetting {
   parentIssueTypeId: string
   projectId: number
   statusId: string
+  type?: 'anyone_transfer' | 'all_transfer',
 }
 
 interface ILinkIssueStatusSetting {
@@ -64,6 +66,21 @@ const Linkage = ({
       });
     }
   }, [linkageType]);
+
+  const transferType = useMemo(() => {
+    const statusName = record.get('name');
+    return ({
+      all: {
+        key: 'all_transfer',
+        text: `全部${selectedTypeName}流转到${statusName}`,
+      },
+      anyone: {
+        key: 'anyone_transfer',
+        text: `任一${selectedTypeName}流转到${statusName}`,
+      },
+    });
+  }, [record, selectedTypeName]);
+
   const linkageDataSet = useMemo(() => new DataSet({
     autoCreate: true,
   }), []);
@@ -93,6 +110,9 @@ const Linkage = ({
     addField(linkageDataSet, `${key}-status`, {
       required: true,
     });
+    addField(linkageDataSet, `${key}-transfer`, {
+      required: true,
+    }, transferType.all.key);
   }, [addField, linkageDataSet]);
 
   const linkIssueAddFieldRule = useCallback((key) => {
@@ -131,6 +151,7 @@ const Linkage = ({
             if (res.length > 0) {
               setFieldValue(linkageDataSet, `${item.key}-type`, res[i]?.parentIssueTypeId);
               setFieldValue(linkageDataSet, `${item.key}-status`, res[i]?.parentIssueStatusSetting);
+              setFieldValue(linkageDataSet, `${item.key}-transfer`, res[i]?.type || transferType.all.key);
             }
           });
         }
@@ -153,7 +174,6 @@ const Linkage = ({
         }
         setLoading(false);
       } catch (err) {
-        console.log(err);
         setLoading(false);
       }
     };
@@ -172,6 +192,7 @@ const Linkage = ({
             updateData.push({
               parentIssueTypeId: data[`${key}-type`],
               parentIssueStatusSetting: data[`${key}-status`],
+              type: data[`${key}-transfer`],
             });
           });
           // @ts-ignore
@@ -233,7 +254,7 @@ const Linkage = ({
       <Loading loading={loading} />
       {
         linkageType.length === 1 && (
-          <div className={styles.tip}>{linkageType[0] === 'subIssue' ? '当工作项流转到此状态后，关联的父任务状态设置。' : `当工作项流转到${record.get('name')}后，关联的工作项满足下列设置，将自动流转到指定状态。`}</div>
+          <div className={styles.tip}>{linkageType[0] === 'subIssue' ? `当工作项流转到${record.get('name')}后，关联的父任务状态设置。` : `当工作项流转到${record.get('name')}后，关联的工作项满足下列设置，将自动流转到指定状态。`}</div>
         )
       }
       {
@@ -250,7 +271,7 @@ const Linkage = ({
                 text: '关联工作项联动',
               }]}
             />
-            <div className={styles.linkageTip}>{activeKey === 'subIssue' ? '当工作项流转到此状态后，关联的父任务状态设置。' : `当工作项流转到${record.get('name')}后，关联的工作项满足下列设置，将自动流转到指定状态。`}</div>
+            <div className={styles.linkageTip}>{activeKey === 'subIssue' ? `当工作项流转到${record.get('name')}后，关联的父任务状态设置。` : `当工作项流转到${record.get('name')}后，关联的工作项满足下列设置，将自动流转到指定状态。`}</div>
           </div>
         )
       }
@@ -262,9 +283,15 @@ const Linkage = ({
                 const { key, id } = f;
                 const typeName = `${key}-type`;
                 const statusName = `${key}-status`;
+                const transferName = `${key}-transfer`;
                 const issueTypeId = getFieldValue(linkageDataSet, typeName);
                 return (
                   <Row key={key} gutter={20} type="flex" align="middle">
+                    {hasInject('agilePro:transferSelectBox') ? (
+                      <Col span={20}>
+                        {mountInject('agilePro:transferSelectBox', { transferType, name: transferName })}
+                      </Col>
+                    ) : null}
                     <Col span={11}>
                       <Select
                         label="父任务类型"
