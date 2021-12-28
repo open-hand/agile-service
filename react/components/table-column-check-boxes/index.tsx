@@ -33,6 +33,7 @@ interface IConfig {
     initOptions?: (data: { options: Props['options'], checkedOptions: string[], dataSet: DataSet })
       => Props['options'] | void
   }
+  formProps?: Props['formProps'] // Omit<Pick<> , 'dataSet'>
   onChange?: (data: string[] | string) => void | boolean,
   checkBoxProps?: Partial<CheckBoxProps>,
 }
@@ -137,7 +138,7 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
     options,
     defaultValue: config?.defaultValue,
     handleChange,
-    formProps: form,
+    formProps: { ...form, ...config?.formProps },
     otherCheckBoxProps: config?.checkBoxProps,
     name: config?.name || 'exportCodes',
   };
