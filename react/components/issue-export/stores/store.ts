@@ -34,6 +34,8 @@ interface IssueExportStoreProps {
   reverseTransformExportFieldCodes?: (data: Array<string>) => Array<string>
   /** webSocket message 的key  */
   wsMessageKey?: string
+  /** 导出文件文件名称 */
+  exportFileName?: string
   events?: EventsProps,
   renderField?: (field: IChosenFieldField, otherComponentProps: Partial<SelectProps> | Partial<DatePickerProps>, { dataSet }: { dataSet: DataSet }) => React.ReactElement | false | null, /** 系统筛选字段项渲染 */
   extraFields?: IChosenFieldField[], /** 额外的筛选字段项  不在下拉菜单中 */
@@ -72,7 +74,9 @@ class IssueExportStore {
 
   checkboxOptionsExtraConfig: IssueExportStoreProps['checkboxOptionsExtraConfig'];
 
-  wsMessageKey?:string;
+  wsMessageKey?: string;
+
+  exportFileName?: string;
 
   @observable innerState = observable.map<string, any>();
 
@@ -97,6 +101,7 @@ class IssueExportStore {
     this.exportButtonConfig = props?.exportButtonConfig || {};
     this.checkboxOptionsExtraConfig = props?.checkboxOptionsExtraConfig || new Map();
     this.wsMessageKey = props?.wsMessageKey;
+    this.exportFileName = props?.exportFileName;
   }
 
   @observable downloadInfo = {} as IDownLoadInfo;

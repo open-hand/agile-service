@@ -321,7 +321,7 @@ const ExportIssue: React.FC = () => {
           modal?.update({ okProps: { loading: true } });
           store.setExportBtnHidden(true);
         }}
-        autoDownload={{ fileName: `${getProjectName()}.xlsx` }}
+        autoDownload={{ fileName: store.exportFileName ?? `${getProjectName()}.xlsx` }}
         downloadInfo={store.downloadInfo.id ? {
           url: store.downloadInfo.fileUrl!,
           lastUpdateDate: store.downloadInfo.lastUpdateDate!,
