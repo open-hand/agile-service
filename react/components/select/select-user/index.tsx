@@ -120,7 +120,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
         className={ellipsisStyles.optionWrap}
       />
     ))),
-    renderer: optionRenderer || ((user: User) => (user?.headerHidden ? <span>{user?.realName}</span> : <UserTag data={user as User} tooltip={!flat} className={Styles.userWrap} textClassName={Styles.userText} />)),
+    renderer: optionRenderer || ((user: User) => (user?.headerHidden ? <span>{user?.realName}</span> : <UserTag data={user as User} tooltip={!flat} className={Styles.userWrap} textClassName={Styles.userText} avatarClassName={Styles.userAvatar} />)),
     middleWare: (data) => {
       let newData = [];
       const temp: User[] = [];

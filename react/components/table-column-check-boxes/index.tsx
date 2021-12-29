@@ -11,6 +11,7 @@ import { FormProps } from 'choerodon-ui/pro/lib/form/Form';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/interface';
 
 import { OptionProps } from 'choerodon-ui/lib/select';
+import { useCreation, useUpdateEffect } from 'ahooks';
 import { pageConfigApi } from '@/api';
 
 export interface ITableColumnCheckBoxesOptionData {
@@ -51,7 +52,10 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
   const [checkedOptions, setCheckedOptions] = useState<string[]>([]);
 
   const name = useMemo(() => config?.name || 'exportCodes', [config?.name]);
-  const form = useMemo(() => ({} as { dataSet: DataSet }), []);
+  const form = useCreation(() => ({ ...config?.formProps } as { dataSet: DataSet }), []);
+  useUpdateEffect(() => {
+    Object.assign(form, config?.formProps || {});
+  }, [config?.formProps, form]);
   const onChange = useMemo(() => config?.onChange || (() => null), [config?.onChange]);
   const events = useMemo(() => config?.events, []);
   const handleOptions = (newValue: any) => {
@@ -138,7 +142,7 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
     options,
     defaultValue: config?.defaultValue,
     handleChange,
-    formProps: { ...form, ...config?.formProps },
+    formProps: form,
     otherCheckBoxProps: config?.checkBoxProps,
     name: config?.name || 'exportCodes',
   };
