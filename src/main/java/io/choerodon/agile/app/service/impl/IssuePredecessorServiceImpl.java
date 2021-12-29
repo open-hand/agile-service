@@ -1,7 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.IssuePredecessorVO;
-import io.choerodon.agile.api.vo.IssueTreeVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.app.service.IssuePredecessorService;
@@ -9,7 +8,6 @@ import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.infra.dto.IssuePredecessorDTO;
 import io.choerodon.agile.infra.dto.IssuePredecessorTreeClosureDTO;
 import io.choerodon.agile.infra.dto.LookupValueDTO;
-import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.LookupType;
@@ -185,88 +183,6 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         ModelMapper modelMapper = new ModelMapper();
         return modelMapper.map(dtoList, new TypeToken<List<IssuePredecessorVO>>() {
         }.getType());
-    }
-
-    @Autowired
-    private ProjectInfoMapper projectInfoMapper;
-
-    @Override
-    public String tree(Long projectId, Long rootId) {
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        Set<IssuePredecessorTreeClosureDTO> example = new HashSet<>();
-        IssuePredecessorTreeClosureDTO dto = new IssuePredecessorTreeClosureDTO();
-        if (!ObjectUtils.isEmpty(rootId)) {
-            dto.setAncestorId(rootId);
-        }
-        example.add(dto);
-        Set<IssuePredecessorTreeClosureDTO> result =
-                issuePredecessorTreeClosureMapper.selectInList(organizationId, projectId, example);
-        Set<Long> descendantIds = result.stream().map(IssuePredecessorTreeClosureDTO::getDescendantId).collect(Collectors.toSet());
-        List<IssuePredecessorDTO> issuePredecessors =
-                issuePredecessorMapper.selectByIssueIds(new HashSet<>(Arrays.asList(projectId)), descendantIds);
-        Set<Long> issueIds = descendantIds;
-        Map<Long, Set<Long>> parentSonMap = new HashMap<>();
-        Set<Long> childrenIds = new HashSet<>();
-        Set<Long> rootIds = new HashSet<>();
-        issuePredecessors.forEach(x -> {
-            Long parentId = x.getPredecessorId();
-            Set<Long> ids = parentSonMap.computeIfAbsent(parentId, y -> new HashSet<>());
-            ids.add(x.getIssueId());
-            childrenIds.add(x.getIssueId());
-            if (!issueIds.contains(parentId)) {
-                rootIds.add(x.getIssueId());
-            }
-        });
-        rootIds.addAll(issueIds.stream().filter(x -> !childrenIds.contains(x)).collect(Collectors.toSet()));
-        if (issueIds.isEmpty()) {
-            return "";
-        }
-        List<IssueDTO> issues = issueMapper.selectByIds(StringUtils.join(issueIds, ","));
-        ProjectInfoDTO info = projectInfoMapper.queryByProjectId(projectId);
-        String projectCode = info.getProjectCode();
-        Map<Long, IssueTreeVO> issueTreeMap = new HashMap<>();
-        issues.forEach(x -> {
-            IssueTreeVO vo = new IssueTreeVO();
-            Long issueId = x.getIssueId();
-            issueTreeMap.put(issueId, vo);
-            vo.setIssueId(issueId);
-            vo.setSummary(x.getSummary());
-            vo.setIssueNum(projectCode + "-" + x.getIssueNum());
-        });
-        List<IssueTreeVO> treeRoots = new ArrayList<>();
-        rootIds.forEach(root -> {
-            treeRoots.add(issueTreeMap.get(root));
-            digui(parentSonMap, issueTreeMap, root);
-        });
-        StringBuilder builder = new StringBuilder();
-        treeRoots.forEach(x -> {
-            builder.append(x.toString(0, null));
-            builder.append("\n");
-        });
-        return builder.toString();
-    }
-
-    private void digui(Map<Long, Set<Long>> parentSonMap,
-                       Map<Long, IssueTreeVO> issueTreeMap,
-                       Long root) {
-        IssueTreeVO parent = issueTreeMap.get(root);
-        List<IssueTreeVO> children;
-        if (parent.getChildren() == null) {
-            children = new ArrayList<>();
-            parent.setChildren(children);
-        } else {
-            children = parent.getChildren();
-        }
-        Set<Long> sonSet = parentSonMap.get(root);
-        if (!ObjectUtils.isEmpty(sonSet)) {
-            sonSet.forEach(sonId -> {
-                IssueTreeVO son = issueTreeMap.get(sonId);
-                if (!children.contains(son)) {
-                    children.add(son);
-                }
-                digui(parentSonMap, issueTreeMap, son.getIssueId());
-            });
-        }
     }
 
     private void deleteTreeNodes(Long projectId,

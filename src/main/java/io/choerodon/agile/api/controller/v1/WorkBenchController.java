@@ -153,7 +153,7 @@ public class WorkBenchController {
     @ApiOperation(value = "工作台查询优先级")
     @PostMapping(value = "/priority")
     public ResponseEntity<List<PriorityVO>> queryPriorities(@PathVariable("organization_id") Long organizationId,
-                                                            @RequestParam String param,
+                                                            @RequestParam(required = false) String param,
                                                             @RequestBody PriorityVO priority) {
         priority.setOrganizationId(organizationId);
         return new ResponseEntity<>(priorityService.selectAll(priority, param), HttpStatus.OK);
