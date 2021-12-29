@@ -52,9 +52,9 @@ public class OrganizationGanttChartController {
     @GetMapping(value = "/agile_projects")
     public ResponseEntity<List<ProjectVO>> listAgileProjects(@ApiParam(value = "组织id", required = true)
                                                              @PathVariable(name = "organization_id") Long organizationId,
-                                                             @RequestParam String name,
-                                                             @RequestParam String code,
-                                                             @RequestParam String param) {
+                                                             @RequestParam(required = false) String name,
+                                                             @RequestParam(required = false) String code,
+                                                             @RequestParam(required = false) String param) {
         return ResponseEntity.ok(organizationGanttChartService.listAgileProjects(organizationId, name, code, param));
     }
 

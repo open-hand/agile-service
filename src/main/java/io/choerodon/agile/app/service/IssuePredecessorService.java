@@ -33,5 +33,4 @@ public interface IssuePredecessorService {
 
     List<IssuePredecessorVO> queryByIssueId(Long projectId, Long currentIssueId);
 
-    String tree(Long projectId, Long rootId);
 }
