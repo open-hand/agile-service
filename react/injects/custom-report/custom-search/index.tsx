@@ -48,7 +48,7 @@ const InjectCustomSearch: React.FC<CustomReportSearchProps> = ({ searchVO, setSe
     events: {
       choseField: handleChoseField,
     },
-    dropDownProps: { },
+    dropDownProps: { getPopupContainer: (node) => node.parentNode as any },
   });
 
   useEffect(() => {
@@ -91,7 +91,7 @@ const InjectCustomSearch: React.FC<CustomReportSearchProps> = ({ searchVO, setSe
             onMouseDown={(e) => e.stopPropagation()}
             className={`${prefixCls}-menu`}
           >
-            <CustomSearchFields className={`${prefixCls}-menu-top`} fields={issueSearchStore.chosenFields} onChange={handleChange} />
+            <CustomSearchFields className={`${prefixCls}-menu-top`} fields={issueSearchStore.chosenFields} onChange={handleChange} getPopupContainer={() => containerRef.current} />
             <div className={`${prefixCls}-menu-bottom`}>
               <Button
                 color={'primary' as any}

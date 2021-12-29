@@ -9,15 +9,17 @@ import { usePersistFn } from 'ahooks';
 import { noop } from 'lodash';
 import { IChosenFields } from '@/components/issue-search/store';
 import { IChosenFieldField } from '@/components/chose-field/types';
+import { getFilterFields } from '@/components/field-pro/layouts';
 
 interface CustomSearchItemProps {
   fields: IChosenFields// IChosenFields
   className?: string
   onChange?: (field: IChosenFieldField, value: any) => void
+  getPopupContainer: () => any
 }
 const prefixCls = 'c7n-agile-inject-custom-search-fields';
 
-const Field = memo(({ field, onChange }: { field: IChosenFieldField } & Pick<CustomSearchItemProps, 'onChange'>) => {
+const Field = memo(({ field, onChange, getPopupContainer }: { field: IChosenFieldField, } & Pick<CustomSearchItemProps, 'onChange' | 'getPopupContainer'>) => {
   const {
     fieldType, name = '', defaultShow,
   } = field;
@@ -30,23 +32,29 @@ const Field = memo(({ field, onChange }: { field: IChosenFieldField } & Pick<Cus
       <Tooltip title={name}>
         <span className={`${prefixCls}-item-label`}>{`${name.slice(0, 4)}${name.length > 4 ? '...' : ''}`}</span>
       </Tooltip>
-      {renderField(field, {
-        value: field.value,
-        placeholder,
-        style: { width: 'calc(100% - .9rem)' },
-        onChange: (val: any) => onChange && onChange(field, val),
-        className: `${prefixCls}-item-field`,
-      }, {})}
+      {getFilterFields([{
+        field,
+        otherComponentProps: {
+          value: field.value,
+          placeholder,
+          style: { width: 'calc(100% - .9rem)' },
+          onChange: (val: any) => onChange && onChange(field, val),
+          className: `${prefixCls}-item-field`,
+          getPopupContainer,
+        },
+      }])[0]}
       {!defaultShow && <Icon type="delete_sweep-o" className={`${prefixCls}-item-del-btn`} />}
     </div>
   );
 });
-const CustomSearchFields: React.FC<CustomSearchItemProps> = ({ fields, className, onChange: propsOnChange }) => {
+const CustomSearchFields: React.FC<CustomSearchItemProps> = ({
+  fields, className, onChange: propsOnChange, getPopupContainer,
+}) => {
   const onChange = usePersistFn(propsOnChange || noop);
 
   return (
     <div role="none" className={className} onClick={(e) => e.stopPropagation()}>
-      {[...fields.values()].filter((f: any) => !f.noDisplay).map((f) => <Field key={f.code} field={f} onChange={onChange} />)}
+      {[...fields.values()].filter((f: any) => !f.noDisplay).map((f) => <Field key={f.code} field={f} onChange={onChange} getPopupContainer={getPopupContainer} />)}
     </div>
   );
 };
