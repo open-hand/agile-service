@@ -41,6 +41,7 @@ export interface IssueTableProps extends Partial<PerformanceTableProps> {
   isTree?: boolean
   /** 是否显示checkbox 列  @default true */
   isShowColumnCheck?: boolean
+  paginationWrapperClassName?: string
   height?: number
 }
 // const mapper = (key: IIssueColumnName): string => ({
@@ -84,6 +85,7 @@ const IssueTable: React.FC<IssueTableProps> = ({
   isTree = true,
   height,
   isShowColumnCheck,
+  paginationWrapperClassName,
   ...otherProps
 }) => {
   const handleOpenCreateIssue = useCallback(() => {
@@ -134,7 +136,7 @@ const IssueTable: React.FC<IssueTableProps> = ({
           />
         </div>
       )}
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <div className={paginationWrapperClassName} style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <Pagination
           total={pagination.total}
           page={pagination.current}
