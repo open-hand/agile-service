@@ -276,7 +276,7 @@
                 and t2.project_id = #{projectId}
             </if>
         ) t5 on t4.id = t5.id
-        left join fd_object_scheme_field t6
+        join fd_object_scheme_field t6
         on t4.field_id = t6.id
         order by t4.rank desc, t4.id asc
     </select>
