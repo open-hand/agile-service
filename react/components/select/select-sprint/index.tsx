@@ -22,7 +22,7 @@ export interface SelectSprintProps extends Partial<SelectProps> {
   flat?: boolean
 }
 
-const SelectSprint: React.FC<SelectSprintProps> = forwardRef(({
+const SelectSprint = forwardRef<Select, SelectSprintProps>(({
   statusList = ['sprint_planning', 'started'],
   isProgram,
   hasUnassign,
@@ -87,4 +87,5 @@ const SelectSprint: React.FC<SelectSprintProps> = forwardRef(({
     />
   );
 });
+SelectSprint.displayName = 'SelectSprint';
 export default SelectSprint;

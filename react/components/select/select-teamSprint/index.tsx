@@ -9,7 +9,7 @@ import { useClickAway } from 'ahooks';
 import { sprintApi } from '@/api';
 
 const { OptGroup, Option } = Select;
-interface Props extends Partial<SelectProps> {
+export interface SelectTeamSprintProps extends Partial<SelectProps> {
   teamIds: number[],
   piId: number
   hasUnassign?: boolean
@@ -48,7 +48,7 @@ const SelectSprintDisabled = forwardRef<any, { tooltipTitle: string } & Partial<
     </Tooltip>
   );
 });
-const SelectSprint: React.FC<Props> = forwardRef(({
+const SelectTeamSprint = forwardRef<Select, SelectTeamSprintProps>(({
   teamIds, piId, hasUnassign, afterLoad, flat, dataRef,
   ...otherProps
 }, ref: React.Ref<Select>) => {
@@ -113,4 +113,5 @@ const SelectSprint: React.FC<Props> = forwardRef(({
     </Component>
   );
 });
-export default SelectSprint;
+SelectTeamSprint.displayName = 'SelectTeamSprint';
+export default SelectTeamSprint;
