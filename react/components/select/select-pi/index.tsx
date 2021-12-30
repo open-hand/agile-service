@@ -29,7 +29,7 @@ export interface SelectPIProps extends Partial<SelectProps> {
   doingIsFirst?: boolean
   projectId?: string
 }
-const SelectPI: React.FC<SelectPIProps> = forwardRef(({
+const SelectPI = forwardRef<Select, SelectPIProps>(({
   dataRef, statusList, disabledCurrentPI = false, afterLoad, request, flat, addPi0, doingIsFirst, popupCls, maxTagTextLength = 10, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<SelectPIProps['afterLoad']>();
@@ -91,7 +91,7 @@ const SelectPI: React.FC<SelectPIProps> = forwardRef(({
     />
   );
 });
-
+SelectPI.displayName = 'SelectBasePI';
 export interface SelectPIPermissionHOCProps extends SelectPIProps {
   /** 开启权限校验，会自动对涉及权限的选项进行相关操作  @default false */
   openPermission?: boolean
