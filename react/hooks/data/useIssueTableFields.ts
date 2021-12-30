@@ -1,17 +1,22 @@
 import { useQuery, UseQueryOptions } from 'react-query';
-import { useCreation } from 'ahooks';
-import { unionBy, uniqBy } from 'lodash';
+import { useCreation, usePersistFn, useWhyDidYouUpdate } from 'ahooks';
+import { filter, unionBy, uniqBy } from 'lodash';
+import { useCallback } from 'react';
 import { fieldApi } from '@/api';
 import { IFoundationHeader } from '@/common/types';
 import useIsInProgram from '../useIsInProgram';
 import useProjectKey from './useProjectKey';
 
 export interface IssueTableFieldsConfig {
+  /** 隐藏的字段code  可响应 */
   hiddenFieldCodes?: string[]
   projectId?: string
   programId?: string
+  /** 项目(project) 会查询项目层及组织层字段 ; 组织(org) 仅有组织层   */
   menuType?: 'project' | 'org' | 'program'
+  /** 额外字段  可响应  */
   extraFields?: IFoundationHeader[]
+
 }
 const systemFields = [
   { code: 'summary', title: '概要' },
@@ -47,15 +52,18 @@ const systemFields = [
   { code: 'estimateTime', title: '原始预估时间' },
 ] as IFoundationHeader[];
 export default function useIssueTableFields(config?: IssueTableFieldsConfig, options?: UseQueryOptions<IFoundationHeader[]>) {
-  const key = useProjectKey({ key: ['IssueTableFields'], projectId: config?.projectId });
+  const key = useProjectKey({ key: ['IssueTableFields'], projectId: `${config?.menuType}-${config?.projectId}` });
   const { isInProgram, loading } = useIsInProgram({ projectId: config?.projectId, menuType: config?.menuType });
-  const { data, ...others } = useQuery(key, () => fieldApi.program(config?.programId).project(config?.projectId).getFoundationHeader(), {
+  const select: UseQueryOptions<IFoundationHeader[]>['select'] = useCallback((res) => {
+    const loadedFields = unionBy(config?.extraFields || [], systemFields, 'code').concat(res);
+    return (config?.hiddenFieldCodes ? loadedFields.filter((field) => !config.hiddenFieldCodes?.includes(field.code)) : loadedFields);
+  }, [config?.extraFields, config?.hiddenFieldCodes]);
+
+  const { data, ...others } = useQuery(key, () => fieldApi.program(config?.programId).project(config?.projectId)
+    .getFoundationHeader().then((res: any = []) => (config?.menuType === 'org' ? filter(res, (item) => String(item.code).indexOf('org_') === 0) : res)), {
     enabled: !loading,
     initialData: systemFields,
-    select: (res) => {
-      const loadedFields = unionBy(config?.extraFields || [], systemFields, 'code').concat(res);
-      return (config?.hiddenFieldCodes ? loadedFields.filter((field) => !config.hiddenFieldCodes?.includes(field.code)) : loadedFields);
-    },
+    select,
     ...options,
   });
   const fieldData = useCreation(() => (!isInProgram ? data?.filter((f) => f.code !== 'feature') : data), [isInProgram, data]);
