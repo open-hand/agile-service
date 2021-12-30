@@ -115,6 +115,7 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
                   setEditDesShow(true);
                   setEditDes(description);
                 }}
+                disabled={editDesShow}
               >
                 <Icon
                   className="c7n-des-fullEdit"

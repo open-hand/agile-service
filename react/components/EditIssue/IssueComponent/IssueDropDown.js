@@ -23,7 +23,8 @@ import openTransformSubIssue from './TransformSubIssue/TransformSubIssue';
 import openTransformFromSubIssue from './IssueBody/TransformFromSubIssue';
 
 const IssueDropDown = ({
-  onDeleteIssue, loginUserId, reloadIssue, onIssueRecordTime, testLinkStoreRef, onIssueCopy, onUpdate, onChangeParent, onRelateIssue, onTransformSubIssue, onOpenCreateSubTask, onOpenCreateSubBug,
+  onDeleteIssue, loginUserId, reloadIssue, onIssueRecordTime, testLinkStoreRef, onIssueCopy, onUpdate,
+  onChangeParent, onRelateIssue, onTransformSubIssue, onOpenCreateSubTask, onOpenCreateSubBug, checkDescriptionEdit,
 }) => {
   const {
     store, applyType, isProgram,
@@ -76,6 +77,9 @@ const IssueDropDown = ({
   dontCopyEpicRef.current = dontCopyEpic;
 
   const handleClickMenu = async (e) => {
+    if (checkDescriptionEdit && !checkDescriptionEdit()) {
+      return;
+    }
     if (e.key === '0') {
       // store.setWorkLogShow(true);
       openRecordWorkLogModal({

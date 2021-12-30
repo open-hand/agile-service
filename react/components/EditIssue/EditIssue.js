@@ -120,6 +120,14 @@ function EditIssue() {
     }
   }, [issueEvents, store.getIssue]);
 
+  const checkDescriptionEdit = useCallback(() => {
+    if (descriptionEditRef.current) {
+      Choerodon.prompt('请先保存描述！');
+      return false;
+    }
+    return true;
+  }, []);
+
   const loadIssueDetail = async (paramIssueId, callback) => {
     const id = paramIssueId || idRef.current || currentIssueId;
     if (idRef.current !== id && descriptionEditRef.current) {
@@ -282,6 +290,9 @@ function EditIssue() {
   }, [store]);
 
   const handleOpenCreateSubTask = usePersistFn(() => {
+    if (!checkDescriptionEdit()) {
+      return;
+    }
     const {
       issueId: parentIssueId, summary: parentSummary, activeSprint,
     } = store.getIssue;
@@ -307,6 +318,9 @@ function EditIssue() {
     });
   });
   const handleOpenCreateSubBug = usePersistFn(() => {
+    if (!checkDescriptionEdit()) {
+      return;
+    }
     const {
       issueId: parentIssueId, summary: parentSummary, activeSprint,
     } = store.getIssue;
@@ -423,6 +437,7 @@ function EditIssue() {
           onTransformSubIssue={handleTransformSubIssue}
           onOpenCreateSubTask={handleOpenCreateSubTask}
           onOpenCreateSubBug={handleOpenCreateSubBug}
+          checkDescriptionEdit={checkDescriptionEdit}
         />
         <WSHandler
           messageKey={`agile-issue-update-by-trigger-${store.projectId}`}
