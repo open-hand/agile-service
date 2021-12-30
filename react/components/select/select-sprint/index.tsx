@@ -1,10 +1,10 @@
-import React, { useMemo, forwardRef } from 'react';
+import React, { useMemo, forwardRef, useState } from 'react';
 import { Select } from 'choerodon-ui/pro';
 
 import type { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
 import classNames from 'classnames';
-import { useCreation } from 'ahooks';
+import { useCreation, usePersistFn } from 'ahooks';
 import { sprintApi } from '@/api';
 import useSelect, { SelectConfig, FragmentForSearch } from '@/hooks/useSelect';
 import { ISprint } from '@/common/types';
@@ -15,6 +15,7 @@ export interface SelectSprintProps extends Partial<SelectProps> {
   isProgram?: boolean,
   statusList?: string[],
   selectSprints?: number[],
+
   afterLoad?: (sprints: ISprint[]) => void
   projectId?: string
   currentSprintOption?: boolean
@@ -35,6 +36,12 @@ const SelectSprint = forwardRef<Select, SelectSprintProps>(({
   maxTagTextLength,
   ...otherProps
 }, ref: React.Ref<Select>) => {
+  const [cache, setCache] = useState<{ data: any[], projectId?: string, statusList?: string }>();
+  const cacheRequest: SelectConfig<ISprint>['request'] = usePersistFn(async ({ filter, page }) => {
+    const res = await (isProgram ? sprintApi.loadSubProjectSprints(filter || '', page!, selectSprints, 50)
+      : sprintApi.project(projectId).loadSprints(statusList));
+    return res;
+  });
   const selectSprints = useCreation(() => propsSelectSprints?.filter((i) => i && !['current', '0'].includes(String(i))) as any[], [propsSelectSprints]);
   const config = useMemo((): SelectConfig<ISprint> => ({
     name: 'sprint',
@@ -48,8 +55,7 @@ const SelectSprint = forwardRef<Select, SelectSprintProps>(({
       </FragmentForSearch>
     ),
     renderer: (sprint) => renderEllipsisBlockOption(sprint.sprintName, <>活跃</>, { showBlock: sprint.statusCode === 'started', maxLength: maxTagTextLength, tooltip: false }) as JSX.Element,
-    request: ({ filter, page }) => (isProgram ? sprintApi.loadSubProjectSprints(filter || '', page!, selectSprints, 50)
-      : sprintApi.project(projectId).loadSprints(statusList)),
+    request: cacheRequest,
     middleWare: (sprints) => {
       let newSprint = sprints;
       if (hasUnassign) {
@@ -78,12 +84,6 @@ const SelectSprint = forwardRef<Select, SelectSprintProps>(({
       {...props}
       {...otherProps}
       popupCls={classNames(styles.popup, otherProps.popupCls)}
-    // @ts-ignore
-    // optionRenderer={({ record, text, value }) => (
-    //   <Tooltip title={text}>
-    //     <span>{text}</span>
-    //   </Tooltip>
-    // )}
     />
   );
 });

@@ -15,6 +15,7 @@ import { useUpdateColumnMutation } from '@/hooks/data/useTableColumns';
 import ColumnList from './components/column-list';
 import styles from './Modal.less';
 import WarnInfoBlock, { IWarnInfoBlockProps } from '@/components/warn-info-block';
+import { ListLayoutColumnVO } from '@/api';
 
 export interface Option {
   code: string, title: string, disabled?: boolean
@@ -25,12 +26,15 @@ export interface ColumnManageProps {
   options: Option[]
   value?: string[]
   projectId?: string
-  onSaveBefore?: (willSaveData: Option[]) => boolean | Promise<boolean>
+  hiddenColumns?: string[]
+  onSaveBefore?: (willSaveData: ListLayoutColumnVO[]) => Promise<boolean |ListLayoutColumnVO[]> | boolean | ListLayoutColumnVO[]
   onChange?: (value: string[]) => void
   tooltip?: boolean
 }
 function useColumnManageModal(props: ColumnManageProps) {
-  const { modal, type, tooltip = true } = props;
+  const {
+    modal, type, tooltip = true, onSaveBefore,
+  } = props;
 
   const { options } = props;
   const [columns, setColumns] = useState([...options]);
@@ -70,16 +74,21 @@ function useColumnManageModal(props: ColumnManageProps) {
     // 保证选择列之后，列不会到最后一个
     // props.onChange && props.onChange(intersection(allKeys, selectedKeys));
     const codes = intersection(allKeys, selectedKeys);
+    const listLayoutColumnRelVOS = columns.map((column, i) => ({
+      // TODO: 字段id
+      // fieldId:
+      columnCode: column.code,
+      display: selectedKeys.includes(column.code),
+      sort: i,
+      width: 0,
+    }));
+    const res = (onSaveBefore && await onSaveBefore(listLayoutColumnRelVOS));
+    if (typeof res === 'boolean' && !res) {
+      return false;
+    }
     await mutation.mutateAsync({
       applyType: type,
-      listLayoutColumnRelVOS: columns.map((column, i) => ({
-        // TODO: 字段id
-        // fieldId:
-        columnCode: column.code,
-        display: selectedKeys.includes(column.code),
-        sort: i,
-        width: 0,
-      })),
+      listLayoutColumnRelVOS: Array.isArray(res) ? res : listLayoutColumnRelVOS,
     });
     return true;
   });
