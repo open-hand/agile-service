@@ -14,7 +14,7 @@ import './SubTask.less';
 import Divider from './Divider';
 
 const SubTask = observer(({
-  onDeleteSubIssue, reloadIssue, onUpdate, parentSummary, onCreateSubIssue, onOpenCreateSubTask,
+  onDeleteSubIssue, reloadIssue, onUpdate, parentSummary, onCreateSubIssue, onOpenCreateSubTask, checkDescriptionEdit,
 }) => {
   const { store, disabled, projectId } = useContext(EditIssueContext);
   const {
@@ -132,6 +132,7 @@ const SubTask = observer(({
             setDefaultSprint={(value) => {
               store.setDefaultSprint(value);
             }}
+            beforeClick={checkDescriptionEdit}
           />
         )}
       </div>

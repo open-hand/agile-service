@@ -1,3 +1,5 @@
+/* eslint-disable react/require-default-props */
+
 import React, {
   useCallback, useEffect, useRef, useState,
 } from 'react';
@@ -38,10 +40,12 @@ interface QuickCreateSubIssueProps {
   setDefaultSprint?: (sprintId: string | undefined) => void,
   assigneeChange?: (assigneeId: string | undefined, assignee: User | undefined) => void
   isCanQuickCreate?: (createData: any) => boolean
+  beforeClick?:() => boolean // 点击快速创建前函数，如果返回false,则中断操作
 
 }
 const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
-  priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, defaultValues, projectId, cantCreateEvent, isCanQuickCreate, typeCode, summaryChange, typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick,
+  priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, defaultValues, projectId, cantCreateEvent, isCanQuickCreate, typeCode, summaryChange,
+  typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick, beforeClick,
 }) => {
   const { data: issueTypes, isLoading } = useProjectIssueTypes({ typeCode: typeCode || 'sub_task', projectId, onlyEnabled: true });
   const { data: defaultPriority } = useDefaultPriority({ projectId }, { enabled: !priorityId });
@@ -282,6 +286,9 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
             icon="playlist_add"
             funcType={'flat' as FuncType}
             onClick={() => {
+              if (beforeClick && !beforeClick()) {
+                return;
+              }
               setExpand(true);
             }}
           >

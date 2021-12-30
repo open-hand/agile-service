@@ -78,7 +78,7 @@ import openCreateLink from './create-link/CreateLink';
   }
 
   render() {
-    const { store, disabled } = this.props;
+    const { store, disabled, checkDescriptionEdit } = this.props;
     const issue = store.getIssue;
     const { issueId, typeCode } = issue;
 
@@ -92,7 +92,14 @@ import openCreateLink from './create-link/CreateLink';
           {!disabled && (
             <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
               <Tooltip placement="topRight" title={typeCode === 'feature' ? '创建关联Feature' : '创建关联工作项'}>
-                <Button onClick={() => { openCreateLink({ issueId, projectId: store.projectId, onOk: this.onCreateLinkIssue }); }}>
+                <Button
+                  onClick={() => {
+                    if (checkDescriptionEdit && !checkDescriptionEdit()) {
+                      return;
+                    }
+                    openCreateLink({ issueId, projectId: store.projectId, onOk: this.onCreateLinkIssue });
+                  }}
+                >
                   <Icon type="playlist_add icon" />
                 </Button>
               </Tooltip>

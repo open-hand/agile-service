@@ -235,7 +235,9 @@ class QuickCreateIssue extends Component {
     const {
       create, loading, currentTypeId, summary,
     } = this.state;
-    const { issueTypes, buttonShowText, buttonShow = true } = this.props;
+    const {
+      issueTypes, buttonShowText, buttonShow = true, beforeClick,
+    } = this.props;
 
     const typeList = (
       <Menu
@@ -331,6 +333,9 @@ class QuickCreateIssue extends Component {
                 role="none"
                 onClick={() => {
                   if (this.props.issueTypes.length === 0) {
+                    return;
+                  }
+                  if (beforeClick && !beforeClick()) {
                     return;
                   }
                   this.setState({

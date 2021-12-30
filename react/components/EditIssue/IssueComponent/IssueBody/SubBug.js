@@ -8,7 +8,7 @@ import EditIssueContext from '../../stores';
 import Divider from './Divider';
 
 const SubBug = observer(({
-  reloadIssue, onDeleteSubIssue, onUpdate, applyType, onCreateSubIssue, onOpenCreateSubBug,
+  reloadIssue, onDeleteSubIssue, onUpdate, applyType, onCreateSubIssue, onOpenCreateSubBug, checkDescriptionEdit,
 }) => {
   const { store, disabled, projectId } = useContext(EditIssueContext);
   const {
@@ -116,6 +116,7 @@ const SubBug = observer(({
             setDefaultSprint={(value) => {
               store.setDefaultSprint(value);
             }}
+            beforeClick={checkDescriptionEdit}
           />
         </div>
       )}
