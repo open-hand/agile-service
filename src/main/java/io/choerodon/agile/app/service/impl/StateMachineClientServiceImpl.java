@@ -470,7 +470,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         if (!issue.getStatusId().equals(targetStatusId)) {
             issueUpdateVO.setStatusId(targetStatusId);
             issueUpdateVO.setStayDate(new Date());
-            issueService.handleUpdateIssueWithoutRuleNotice(issueUpdateVO, Arrays.asList(STATUS_ID, RANK, STAY_DATE), issue.getProjectId());
+            issueService.handleUpdateIssueWithoutRuleNotice(issueUpdateVO, new ArrayList<>(Arrays.asList(STATUS_ID, RANK, STAY_DATE)), issue.getProjectId());
             logger.info("stateMachine updateStatusMove successful");
         } else {
             issueService.handleUpdateIssueWithoutRuleNotice(issueUpdateVO, Collections.singletonList(RANK), issue.getProjectId());
