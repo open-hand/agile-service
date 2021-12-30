@@ -412,12 +412,13 @@ const defaultListLayoutColumns = defaultVisibleColumns.map((code) => ({
   columnCode: code,
   display: true,
 }));
+const hiddenFieldCodes = ['epicSelfName', 'summary'];
 function useGanttProjectColumns({
   cached, onAfterCreateSubIssue, onCreateSubIssue, onClickSummary, onSortChange, onUpdate, projectId, menuType, isInProgram, sortedList,
 }: IGanttColumnsHookProps) {
   // 恒为 项目层级
   const { data: tableFields } = useIssueTableFields({
-    hiddenFieldCodes: ['epicSelfName', 'summary'], extraFields: ganttSystemFields, projectId, menuType: 'project',
+    hiddenFieldCodes, extraFields: ganttSystemFields, projectId, menuType: 'project',
   });
   const { data: issueTypes, isLoading: issueTypeIsLoading } = useProjectIssueTypes({ projectId, isInProgram });
   const { data: predecessorTypes, isLoading: predecessorTypesLoading } = useProjectPredecessorTypes({ projectId });
