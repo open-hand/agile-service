@@ -17,7 +17,7 @@ export interface IIssueTableBaseColumn<D extends object = any> {
   /** 标题 */
   title: React.ReactNode
   /** 对应的多语言 key */
-  titleKey?:string
+  titleKey?: string
   // originTitle: string
   dataIndex: string
   // name: string
@@ -129,9 +129,9 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     width: 400,
     fixed: true,
     sortable: true,
-    render: (rowData, getDataMethod = get, summaryProps?: any) => (
+    render: (rowData, getDataMethod = get, summaryProps?: any, typeTagProps?: any) => (
       <>
-        <TypeTag data={getDataMethod(rowData, 'issueTypeVO')} style={{ marginRight: 5, marginTop: -2 }} />
+        <TypeTag data={getDataMethod(rowData, 'issueTypeVO')} style={{ marginRight: 5, marginTop: -2 }} {...typeTagProps} />
         <Tooltip mouseEnterDelay={0.5} placement="topLeft" title={`工作项概要： ${getDataMethod(rowData, 'summary')}`}>
           <span role="none" className="c7n-agile-table-cell-click" {...summaryProps}>
             {getDataMethod(rowData, 'summary')}
