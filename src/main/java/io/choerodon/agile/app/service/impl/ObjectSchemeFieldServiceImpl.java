@@ -1455,8 +1455,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 Long fieldId = extend.getFieldId();
                 if (objectSchemeFieldExtendMapper
                         .selectExtendFieldByOptions(null, organizationId, fieldId, null).size() <= 1) {
-                    //删除最后一个关联关系时，同时删除字段
-                    objectSchemeFieldMapper.deleteByPrimaryKey(fieldId);
+                    //删除最后一个组织关联关系时，同时删除字段及项目层关联关系
+                    objectSchemeFieldMapper.cascadeDelete(organizationId, null, fieldId);
                 }
                 ObjectSchemeFieldExtendDTO target = new ObjectSchemeFieldExtendDTO();
                 target.setOrganizationId(organizationId);
