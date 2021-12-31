@@ -144,6 +144,23 @@ function isSingle(field: IssueCreateFields | { fieldType: string }) {
 function getValue(dataSet: DataSet, fieldCode: string) {
   return toJS(dataSet.current?.get(fieldCode));
 }
+function getOptionMapKey(fieldCode: string) {
+  return afterLoadKeyMap.get(fieldCode) || 'id';
+}
+function getObjectValueMapValue(value: any, fieldCode: string) {
+  const key = getOptionMapKey(fieldCode);
+  return typeof value === 'object' ? get(value, key) : value;
+}
+function castNormalValue(value: any, fieldCode: string) {
+  switch (fieldCode) {
+    case 'component':
+    case 'label': {
+      return Array.isArray(value) ? value.map((item) => getObjectValueMapValue(item, fieldCode)) : getObjectValueMapValue(value, fieldCode); }
+    default:
+      break;
+  }
+  return value;
+}
 
 function getRuleDefaultValue(field: IssueCreateFields, rules: ICascadeLinkage[] = []) {
   const fieldRules = filter(rules, { cascadeFieldCode: field.fieldCode });
@@ -184,14 +201,15 @@ function getOptionsData(rules: ICascadeLinkage[] = [], dataSet: DataSet, field: 
 const hasValue = (dataSet: DataSet, field: IssueCreateFields) => (isMultiple(field) ? getValue(dataSet, field.fieldCode)?.length : getValue(dataSet, field.fieldCode));
 
 function cascadeFieldAfterLoad(dataSet: DataSet, list: any[], field: IssueCreateFields, rules: ICascadeLinkage[] = []) {
-  const key = afterLoadKeyMap.get(field.fieldCode) || 'id';
+  const key = getOptionMapKey(field.fieldCode);
   const fieldCurrentValue = getValue(dataSet, field.fieldCode);
+  const castFieldCurrentValue = castNormalValue(fieldCurrentValue, field.fieldCode);
   const currentValueIsArr = Array.isArray(fieldCurrentValue);
 
-  if (!hasValue(dataSet, field) || (!currentValueIsArr ? !find(list, { [key]: fieldCurrentValue }) : some(fieldCurrentValue, (id) => !find(list, { [key]: id })))) {
+  if (!hasValue(dataSet, field) || (!currentValueIsArr ? !find(list, { [key]: castFieldCurrentValue }) : some(castFieldCurrentValue, (id) => !find(list, { [key]: id })))) {
     const defaultValue = getRuleDefaultValue(field as IssueCreateFields, rules);
     if (defaultValue) {
-      dataSet.current?.set(field.fieldCode, isSingle(field) ? defaultValue : uniq([...filter(fieldCurrentValue, (id) => find(list, { [key]: id })), ...defaultValue]));
+      dataSet.current?.set(field.fieldCode, isSingle(field) ? defaultValue : uniq([...filter(fieldCurrentValue, (id) => find(list, { [key]: castNormalValue(id, field.fieldCode) })), ...defaultValue]));
     } else {
       // 值不在当前则清空
       dataSet.current?.init(field.fieldCode, undefined);
