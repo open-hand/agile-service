@@ -409,7 +409,7 @@ const Issue = observer(({ cached, updateCache }) => {
           fields={tableFields}
           listLayoutColumns={cached?.listLayoutColumns ?? defaultListLayoutColumns}
           onCreateIssue={handleCreateIssue}
-          onRowClick={handleRowClick}
+          // onRowClick={handleRowClick}
           typeIdChange={IssueStore.setDefaultTypeId}
           summaryChange={IssueStore.setDefaultSummary}
           assigneeChange={IssueStore.setDefaultAssignee}
