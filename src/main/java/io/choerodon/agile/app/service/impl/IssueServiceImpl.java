@@ -1556,6 +1556,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public void handleUpdateIssueWithoutRuleNotice(IssueUpdateVO issueUpdateVO,
                                                    List<String> fieldList,
                                                    Long projectId) {
+        fieldList = new ArrayList<>(fieldList);
         CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
         IssueDTO originIssue = issueMapper.queryIssueWithNoCloseSprint(issueUpdateVO.getIssueId());
         IssueConvertDTO issueConvertDTO = issueAssembler.toTarget(issueUpdateVO, IssueConvertDTO.class);
