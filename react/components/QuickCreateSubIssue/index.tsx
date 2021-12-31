@@ -76,6 +76,9 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
     setId(key);
   }, []);
   const handleCreate = useLockFn(async () => {
+    if (beforeClick && !beforeClick()) {
+      return false;
+    }
     const assigneeId = userDropDownRef?.current?.selectedUser?.id;
 
     if (currentType && summary && summary.trim()) {

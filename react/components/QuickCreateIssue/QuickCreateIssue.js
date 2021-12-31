@@ -96,8 +96,13 @@ class QuickCreateIssue extends Component {
       return;
     }
     const {
-      issueTypes, relateIssueId, sprintId, epicId, versionIssueRelVOList: propsVersionIssueRelVOList, chosenFeatureId, projectId, isInProgram, cantCreateEvent, isCanQuickCreate,
+      issueTypes, relateIssueId, sprintId, epicId, versionIssueRelVOList: propsVersionIssueRelVOList, chosenFeatureId, projectId,
+      isInProgram, cantCreateEvent, isCanQuickCreate, beforeClick,
     } = this.props;
+
+    if (beforeClick && !beforeClick()) {
+      return;
+    }
 
     const assigneeId = this.userDropDownRef?.current?.selectedUser?.id;
 
