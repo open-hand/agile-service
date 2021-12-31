@@ -1,11 +1,12 @@
 .performance-table-overload() {
+
   // 表格样式覆盖
   .c7n-performance-table {
     border-top: none !important;
   }
 
   .c7n-performance-table-scrollbar-handle {
-    background: rgba(15, 19, 88, 0.26) !important;
+    background: rgba(15, 19, 88, 0.20) !important;
   }
 
   .c7n-performance-table-cell-header-icon-sort {
@@ -44,5 +45,18 @@
 
   .c7n-performance-table-scrollbar-horizontal {
     bottom: 0 !important;
+    height: .08rem !important;
+
+    .c7n-performance-table-scrollbar-handle {
+      height: .06rem !important;
+    }
+  }
+
+  .c7n-performance-table-scrollbar-vertical {
+    width: .08rem !important;
+
+    .c7n-performance-table-scrollbar-handle {
+      width: .06rem !important;
+    }
   }
 }
