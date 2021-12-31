@@ -9,6 +9,7 @@ import TypeTag from '../../TypeTag';
 import EditIssueContext from '../stores';
 import './IssueComponent.less';
 import openRequiredFieldsModal from './required-fields';
+import Styles from './IssueType.less';
 
 const IssueType = observer(({
   reloadIssue, applyType, onTransformType,
@@ -130,17 +131,17 @@ const IssueType = observer(({
         boxShadow: '0 5px 5px -3px rgba(0, 0, 0, 0.20), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px var(--divider)',
         borderRadius: '2px',
       }}
-      className="issue-sidebar-types"
+      className={Styles.sidebarTypeMenu}
       onClick={handleChangeType}
     >
       {
         issueTypeData.map((t) => (
           <Menu.Item key={t.id} typeCode={t.typeCode} value={t.id} featureType={t.featureType}>
             <TypeTag
-              style={{ margin: 0 }}
               data={t}
               showName
               featureType={t.featureType}
+              className={Styles.dropdownMenuTag}
             />
           </Menu.Item>
         ))
@@ -151,15 +152,7 @@ const IssueType = observer(({
   return (
     <div>
       {disabled ? (
-        <div
-          style={{
-            height: 50,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
+        <div className={Styles.issueTypeWrap}>
           <TypeTag
             data={currentIssueType}
             featureType={featureType}
@@ -171,9 +164,7 @@ const IssueType = observer(({
           trigger={['click']}
           disabled={disabled}
         >
-          <div
-            className="issue-nav-narrow"
-          >
+          <div className={Styles.issueNavArrow}>
             <TypeTag
               data={currentIssueType}
               featureType={featureVO && featureVO.featureType}
