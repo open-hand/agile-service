@@ -18,6 +18,7 @@ export const StoreProvider = inject('AppState')(
     } = props;
     const store = useMemo(() => new GanttStore({ projectId }), [projectId]);
     const issueSearchStore = useIssueSearchStore({
+      menuType: 'project',
       projectId,
       fieldConfigs: { issueTypeId: { excludeTypeCodes: ['issue_epic'] } },
       getSystemFields: () => getSystemFields().map((item) => (item.code === 'feature' || item.code === 'epic' ? { ...item, defaultShow: false } : item)).filter((item) => item.code !== 'sprint') as ILocalField[],

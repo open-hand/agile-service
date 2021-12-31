@@ -8,6 +8,7 @@ import { IModalProps } from '@/common/types';
 import { personalFilterApi } from '@/api';
 
 interface Props {
+  menuType?: 'project' | 'organization'
   modal?: IModalProps,
   projectId?: string
   searchVO: any,
@@ -24,7 +25,7 @@ async function checkName(value: string, projectId?: string) {
 }
 const SaveFilterModal: React.FC<Props> = (props) => {
   const {
-    modal, searchVO, onOk, projectId, hiddenDefault = false,
+    modal, searchVO, onOk, projectId, hiddenDefault = false, menuType,
   } = props;
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
@@ -52,7 +53,7 @@ const SaveFilterModal: React.FC<Props> = (props) => {
       personalFilterSearchVO: searchVO,
     };
     try {
-      await personalFilterApi.project(projectId).create(data);
+      await personalFilterApi.menu(menuType).project(projectId).create(data);
       Choerodon.prompt('保存成功');
       onOk();
       return true;
@@ -60,7 +61,7 @@ const SaveFilterModal: React.FC<Props> = (props) => {
       Choerodon.prompt('保存失败');
       return false;
     }
-  }, [dataSet, onOk, projectId, searchVO]);
+  }, [dataSet, hiddenDefault, menuType, onOk, projectId, searchVO]);
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [handleSubmit, modal]);

@@ -15,7 +15,9 @@ const GanttIssueSearch: React.FC<Props> = ({ issueSearchStore, loadData }) => {
   //   transformFilter,
   // });
   const handleSaveFilter = () => {
-    openSaveFilterModal({ searchVO: issueSearchStore.getCustomFieldFilters(), onOk: issueSearchStore.loadMyFilterList, projectId });
+    openSaveFilterModal({
+      menuType: 'project', searchVO: issueSearchStore.getCustomFieldFilters(), onOk: issueSearchStore.loadMyFilterList, projectId,
+    });
   };
 
   return (
