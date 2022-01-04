@@ -17,7 +17,7 @@ const IssueLog = () => {
     } = issue;
     const stateDatalogs = store.getDataLogs;
     // 过滤掉影响的版本(bug)
-    const datalogs = filter(stateDatalogs, (v) => v.field !== 'Version');
+    const datalogs = stateDatalogs;
     const newDataLogs = [];
     let autoTemp = [];
     let initialIssueType = issueTypeVO; // 最初的issue类型  在日志中无任务类型更改则是issueTypeVO

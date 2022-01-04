@@ -43,7 +43,7 @@ export interface SelectUserProps extends Partial<SelectProps> {
   optionRenderer?: (item: User, tooltip?: boolean) => React.ReactElement
   excludeIds?: string[]
 }
-const SelectUser: React.FC<SelectUserProps> = forwardRef(({
+const SelectUser = forwardRef<Select, SelectUserProps>(({
   selectedUser: propsSelectedUser, extraOptions: propExtraOptions, dataRef, request, level = 'project', afterLoad,
   selected, onOption, flat, projectId, organizationId, optionRenderer, excludeIds, ...otherProps
 }, ref: React.Ref<Select>) => {
@@ -108,7 +108,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     textField: 'realName',
     valueField: 'id',
     requestArgs: args,
-    onOption: (optionData:any) => {
+    onOption: (optionData: any) => {
       const optionProps = onOption ? onOption(optionData) : {};
       return { ...optionProps, className: classNames(ellipsisStyles.option, optionProps.className) };
     },
@@ -158,4 +158,5 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     />
   );
 });
+SelectUser.displayName = 'SelectUser';
 export default SelectUser;
