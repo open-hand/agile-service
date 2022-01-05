@@ -7,6 +7,7 @@ import {
 } from 'choerodon-ui/pro';
 import PropTypes from 'prop-types';
 import { TableProps } from 'choerodon-ui/pro/lib/table/Table';
+
 import { usePersistFn } from 'ahooks';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
 import { IFoundationHeader, IIssueColumnName } from '@/common/types';
@@ -114,7 +115,8 @@ const IssueTable: React.FC<IssueTableProps> = ({
   return (
     <div className="c7nagile-issue-table">
       <PerformanceTable
-        {...otherProps}
+        // ui导出的ts 类型错误
+        {...otherProps as any}
         {...restProps}
         renderLoading={(spinElement: JSX.Element) => <Loading loadId="issue-table" loading={restProps.loading} />}
         virtualized
