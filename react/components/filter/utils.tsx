@@ -6,6 +6,7 @@ import { IFilter } from '@/components/filter';
 import { IFilterField, ICustomField } from './index';
 import { IRenderFields } from './Filter';
 import { getSearchFields } from '../field-pro/layouts';
+import { getDateValue } from '../issue-search/utils';
 /* eslint-disable camelcase */
 export function getFlatElement(field: IFilterField, element: React.ReactNode) {
   if (field.system) {
@@ -232,6 +233,10 @@ export function departFilter(filter: IFilter, fields: IFilterField[]) {
         case 'time':
         case 'datetime':
         case 'date': {
+          const isValid = [getDateValue(value, 0), getDateValue(value, 1)].filter(Boolean);
+          if (isValid.length < 2) {
+            break;
+          }
           if (fieldType === 'time') {
             customField.date_hms.push({
               fieldId: id,
