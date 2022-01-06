@@ -844,6 +844,9 @@ public class IssueAssembler extends AbstractAssembler {
         // 生成迭代经办人，报告人list
         Set<Long> userSet = issueList.stream().map(IssueOverviewVO::getAssigneeId).collect(Collectors.toSet());
         userSet.addAll(issueList.stream().map(IssueOverviewVO::getReporterId).collect(Collectors.toSet()));
+        if (CollectionUtils.isNotEmpty(workLogList)) {
+            userSet.addAll(workLogList.stream().map(WorkLogDTO::getCreatedBy).collect(Collectors.toList()));
+        }
         // 移除经办人为null的情况
         userSet.remove(null);
         userSet.remove(0L);
