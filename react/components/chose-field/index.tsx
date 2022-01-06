@@ -224,7 +224,7 @@ const ChooseField: React.FC<Props> = (props) => {
   useEffect(() => {
     !inViewPort && setHidden(true);
   }, [inViewPort, setHidden]);
-  const hiddenComponent = useComputed(() => store.getFields.filter(Boolean).every((item) => !item.length), [store]);
+  const hiddenComponent = !store.fieldCount;
   return (
     <div ref={buttonRef} className={wrapClassName} style={wrapStyle} hidden={hiddenComponent}>
       <Dropdown

@@ -70,6 +70,10 @@ class ChoseFieldStore {
     return observable.map([...this.fields.get('system')!, ...this.fields.get('custom')!].map((field) => [field.code, field]));
   }
 
+  @computed get fieldCount() {
+    return (this.fields.get('system')?.length || 0) + (this.fields.get('custom')?.length || 0);
+  }
+
   @computed get getFields() {
     if (this.searchVal && this.searchVal !== '') {
       return [this.fields.get('system')!.filter(this.filterFieldBySearchVal), this.fields.get('custom')!.filter(this.filterFieldBySearchVal)];
