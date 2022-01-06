@@ -43,7 +43,7 @@ const Field: React.FC<IFieldProps> = ({
       onChange(v);
     }
   }, [fieldType, onChange]);
-  if (element) {
+  if (element && React.isValidElement(element)) {
     return React.cloneElement(element as React.ReactElement, {
       field,
       label: title,
