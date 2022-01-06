@@ -2,7 +2,7 @@ import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import './Cache';
 import { User } from '@/common/types';
-import { unionBy } from 'lodash';
+import { pick, unionBy } from 'lodash';
 import Api from './Api';
 
 export async function getProjectUsersByIds(userIds?: string[], projectId?: string): Promise<User[]> {
@@ -162,10 +162,11 @@ class UserApi extends Api<UserApi> {
     return this.request({
       method: 'post',
       url: `/agile/v1/organizations/${this.orgId}/work_bench/users`,
-      params: {
-        ...params,
+      params,
+      data: {
+        ...data,
+        ...pick(params || {}, 'param'),
       },
-      data,
     });
   }
 

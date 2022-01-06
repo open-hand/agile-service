@@ -1,4 +1,5 @@
 import { axios } from '@choerodon/boot';
+import { pick } from 'lodash';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import { IIssueType } from '@/common/types';
 import Api from './Api';
@@ -222,7 +223,10 @@ class IssueTypeApi extends Api<IssueTypeApi> {
       method: 'post',
       url: `${this.OrgPrefix}/work_bench/issue_type`,
       params,
-      data,
+      data: {
+        ...data,
+        ...pick(params, 'param'),
+      },
       // cache: true,
     });
   }
