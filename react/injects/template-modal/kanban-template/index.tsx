@@ -28,6 +28,7 @@ const KanbanTemplates = () => {
       height: 'calc(100% - 41px)',
       display: 'flex',
       flexDirection: 'column',
+      marginTop: '0.2rem',
     }}
     >
       {
