@@ -5,7 +5,6 @@ import { DataSet } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { DataSetSelection } from 'choerodon-ui/dataset/data-set/enum';
 import { statusTransformApi } from '@/api';
 import { OldLoading as Loading } from '@/components/Loading';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';

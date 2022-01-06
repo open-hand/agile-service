@@ -1,12 +1,9 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { ReactNode } from 'react';
 import UIDateTimesView from 'choerodon-ui/pro/lib/date-picker/DateTimesView';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import moment from 'moment';
 
-export default class DateTimesView extends UIDateTimesView<any> {
+export default class DateTimesView extends UIDateTimesView {
   static displayName = 'DateTimesView';
 
   static type = FieldType.dateTime;
