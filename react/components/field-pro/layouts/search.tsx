@@ -9,6 +9,7 @@ import { getComponentCodeForLocalCode, getFieldPropsByMode, isCodeInSystemCompon
 import { IFieldType } from '@/common/types';
 import { IAgileBaseFieldTypeComponentProps } from '../base/component';
 import useFormatMessage from '@/hooks/useFormatMessage';
+import SearchFieldIntlWrapper from '../base/SearchFieldIntlWrapper';
 
 type getSearchFieldPropsByFieldTypeType<T extends IAgileBaseFieldTypeComponentProps = IAgileBaseFieldTypeComponentProps, P extends keyof T = keyof T> = (fieldType: P, fieldId: string) => T[P]
 /**
@@ -141,11 +142,7 @@ export interface IAgileBaseSearchFieldInstance {
   fieldInstance: typeof fieldInstanceHelpType
   configInstance: (field: { field: any, props: any }) => IFieldProcessConfig<any, any> | {}
 }
-const SearchField: React.FC<{ children: React.ReactElement, field: any }> = ({ children, field }) => {
-  const formatMessage = useFormatMessage();
-  const name = field.nameKey ? formatMessage({ id: field.nameKey, defaultMessage: field.name }) || field.name : field.name;
-  return React.cloneElement(children, { label: name, placeholder: name });
-};
+
 /**
    *  获取搜索的字段
    * @param fields
@@ -176,7 +173,7 @@ function getSearchFields(fields: any[], fieldCodeProps?: Record<string, any>, in
 
   return fieldInstance(fieldConfigs, [], []).map((i: any[], index) => {
     const element = ['date', 'time', 'datetime'].includes(i[0].fieldType) ? wrapDateToFlatDate(i[0], i[1]) : i[1](i[0]);
-    return <SearchField field={fields[index]}>{element}</SearchField>;
+    return <SearchFieldIntlWrapper field={fields[index]}>{element}</SearchFieldIntlWrapper>;
   }) as React.ReactElement[];
 }
 export { AgileBaseSearchInstance, getSearchFieldPropsByFieldType };
