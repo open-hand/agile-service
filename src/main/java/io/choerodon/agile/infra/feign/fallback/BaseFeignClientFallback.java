@@ -226,4 +226,9 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     public ResponseEntity<TimeZoneWorkCalendarRefDetailVO> queryTimeZoneWorkCalendarDetail(Long organizationId, Integer year) {
         throw new CommonException("error.query.timezone.work.calendar.detail");
     }
+
+    @Override
+    public ResponseEntity<List<ProjectVO>> listProjectsByUserIdForSimple(Long organizationId, Long userId, String category, Boolean enabled) {
+        throw new CommonException("error.query.org.projects");
+    }
 }
