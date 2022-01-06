@@ -121,6 +121,8 @@
             adl.issue_id
         FROM
             agile_data_log adl
+            INNER JOIN agile_issue ai on ai.issue_id = adl.issue_id
+            INNER JOIN agile_issue_status ais ON ais.status_id = ai.status_id and ais.project_id = ai.project_id and ais.is_completed = 1
         WHERE
         adl.project_id = #{projectId}
         AND adl.issue_id IN
