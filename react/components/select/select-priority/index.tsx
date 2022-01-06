@@ -2,6 +2,7 @@ import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
+import { filter } from 'lodash';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { fieldApi, priorityApi } from '@/api';
 import { Priority } from '@/common/types';
@@ -33,20 +34,21 @@ ref: React.Ref<Select>) => {
     valueField: 'id',
     requestArgs: args,
     request: wrapRequestCallback(hasRule
-      ? ({ requestArgs, filter, page }) => fieldApi.project(projectId).getCascadeOptions(fieldId!, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, 0)
+      ? ({ requestArgs, filter: param, page }) => fieldApi.project(projectId).getCascadeOptions(fieldId!, requestArgs?.selected, requestArgs?.ruleIds, param ?? '', page ?? 0, 0)
       : () => priorityApi.loadByProject(projectId, [String(priorityId)]), (_, res) => {
       afterFirstRequest && afterFirstRequest(res);
     }),
     middleWare: (data: Priority[]) => {
+      const newData = hasRule ? data : filter(data, (item) => item.enable || item.id === String(priorityId));
       if (dataRef) {
         Object.assign(dataRef, {
-          current: data,
+          current: newData,
         });
       }
       if (afterLoad) {
-        afterLoad(data);
+        afterLoad(newData);
       }
-      return data;
+      return newData;
     },
     paging: hasRule,
   }), [afterLoad, args, dataRef, fieldId, hasRule, priorityId, projectId]);

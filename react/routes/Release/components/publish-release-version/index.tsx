@@ -52,7 +52,7 @@ const PublishVersion: React.FC<{ modal?: IModalProps } & PublishVersionModalWith
     ],
   }), [data.startDate, disabledMoveNewVersion, publishDetailData.fixIssueCount, publishDetailData.versionNames]);
   const handleSubmit = useCallback(async () => {
-    if (!await ds.current?.validate()) {
+    if (!await ds.current?.validate(true)) {
       return false;
     }
 

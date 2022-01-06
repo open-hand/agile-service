@@ -115,6 +115,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
     return this.request({
       method: 'delete',
       url: `${this.prefix}/issue_type/${typeId}`,
+      noPrompt: true,
       params: {
         organizationId: getOrganizationId(),
       },
@@ -186,6 +187,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
     return this.request({
       method: 'delete',
       url: `${this.OrgPrefix}/issue_type/${typeId}`,
+      noPrompt: true,
       params: {
         organizationId: getOrganizationId(),
       },

@@ -6,6 +6,7 @@ import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { Choerodon } from '@choerodon/boot';
 import { IModalProps } from '@/common/types';
 import { personalFilterApi } from '@/api';
+import styles from './index.less';
 
 interface Props {
   menuType?: 'project' | 'organization'
@@ -78,7 +79,7 @@ const SaveFilterModal: React.FC<Props> = (props) => {
           dataSet.current?.getField('filterName')?.checkValidity();
         }}
       />
-      {hiddenDefault ? null : <CheckBox name="default">设为默认</CheckBox>}
+      {hiddenDefault ? null : <CheckBox name="default" className={styles.checkbox}>设为默认</CheckBox>}
     </Form>
   );
 };
