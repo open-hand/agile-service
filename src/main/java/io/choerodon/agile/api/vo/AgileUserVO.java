@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
 
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import java.util.Set;
 
 /**
@@ -9,6 +11,7 @@ import java.util.Set;
  */
 public class AgileUserVO {
 
+    @Encrypt(ignoreValue = {"0"})
     private Set<Long> userIds;
 
     private Set<Long> projectIds;
@@ -17,6 +20,7 @@ public class AgileUserVO {
 
     private Long organizationId;
 
+    @Encrypt(ignoreValue = {"0"})
     private Set<Long> ignoredUserIds;
 
     private String loginName;
