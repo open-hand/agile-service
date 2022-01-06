@@ -356,10 +356,9 @@
                   </foreach>
                </if>
 
-               <if test="issueTypeSearchVO.param != null">
+               <if test="issueTypeSearchVO.param != null and issueTypeSearchVO.param != ''">
                    and (
                         ite.name like concat('%',#{issueTypeSearchVO.param},'%')
-                            or ite.description like concat('%',#{issueTypeSearchVO.param},'%')
                    )
                </if>
             </if>
