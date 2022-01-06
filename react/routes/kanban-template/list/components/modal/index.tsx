@@ -3,11 +3,11 @@ import {
   Modal, Form, DataSet, TextField,
 } from 'choerodon-ui/pro';
 import { ValueChangeAction } from 'choerodon-ui/pro/lib/text-field/interface';
+import { useCreation, usePersistFn } from 'ahooks';
 import { IModalProps } from '@/common/types';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { MAX_LENGTH_KANBAN_NAME } from '@/constants/MAX_LENGTH';
 import { kanbanTemplateApiConfig, IKanbanTemplateEdit, kanbanTemplateApi } from '@/api';
-import { useCreation, usePersistFn } from 'ahooks';
 
 type KanbanTemplateModalProps = {
   modal?: IModalProps,
@@ -36,13 +36,12 @@ const KanbanTemplateModal: React.FC<KanbanTemplateModalProps> = (props) => {
   const dataSet = useCreation(() => new DataSet({
     autoCreate: false,
     transport: {
-      create: ({ data }) => (isEdit(props)
-        ? kanbanTemplateApiConfig.edit(props.data.boardId, {
-          boardId: props.data.boardId,
-          name: data[0].name,
-          objectVersionNumber: props.data.objectVersionNumber,
-        })
-        : kanbanTemplateApiConfig.create(data[0])),
+      update: ({ data }) => props.mode === 'edit' && kanbanTemplateApiConfig.edit(props.data.boardId, {
+        boardId: props.data.boardId,
+        name: data[0].name,
+        objectVersionNumber: props.data.objectVersionNumber,
+      }),
+      create: ({ data }) => kanbanTemplateApiConfig.create(data[0]),
     },
     fields: [{
       name: 'name',
@@ -52,7 +51,11 @@ const KanbanTemplateModal: React.FC<KanbanTemplateModalProps> = (props) => {
     }],
   }), []);
   const handleSubmit = useCallback(async () => {
-    if (await dataSet.submit()) {
+    const submitRes = await dataSet.submit();
+    if (submitRes === undefined) {
+      return true;
+    }
+    if (submitRes) {
       onSubmit();
       return true;
     }
@@ -63,7 +66,7 @@ const KanbanTemplateModal: React.FC<KanbanTemplateModalProps> = (props) => {
   }, [handleSubmit, modal]);
   useEffect(() => {
     if (isEdit(props)) {
-      dataSet.create(props.data);
+      dataSet.loadData([props.data]);
     } else {
       dataSet.create();
     }
