@@ -22,7 +22,7 @@ function escapeValueCode(valueCode: string) {
   return valueMap[valueCode as keyof typeof valueMap] || valueCode;
 }
 const GanntDependencyModalDataSet = (editData?: any[]): DataSetProps => ({
-  autoCreate: !editData?.length,
+  autoCreate: false,
   autoQuery: false,
   data: editData,
   selection: false,
@@ -33,7 +33,6 @@ const GanntDependencyModalDataSet = (editData?: any[]): DataSetProps => ({
       required: true,
       type: 'string' as FieldType,
       textField: 'name',
-      defaultValue: !editData?.length ? 'predecessor_fs' : undefined,
       valueField: 'valueCode',
       options: new DataSet({
         paging: false,

@@ -71,8 +71,8 @@ function IssueTypeList() {
       issueTypeApi[isOrganization ? 'orgDelete' : 'delete'](record?.get('id')).then(() => {
         Choerodon.prompt('删除成功');
         dataSet?.query(dataSet?.toData().length === 1 ? dataSet?.currentPage - 1 : dataSet?.currentPage);
-      }).catch(() => {
-        Choerodon.prompt('删除失败');
+      }).catch((error: any = {}) => {
+        Choerodon.prompt(error.message ?? '删除失败');
       });
     };
 
