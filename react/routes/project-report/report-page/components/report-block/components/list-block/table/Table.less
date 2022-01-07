@@ -1,11 +1,13 @@
+@agile-tbody-divider-color: rgb(238, 244, 249);
+
 .table {
   // table-layout: fixed;
   width: 100%;
 
   thead {
     background: rgb(243, 246, 254);
-    border-top: 1px solid var(--divider);
-    border-bottom: 1px solid var(--divider);
+    border-top: 1px solid @agile-tbody-divider-color;
+    border-bottom: 1px solid @agile-tbody-divider-color;
 
     th {
       height: 30px;
@@ -23,6 +25,6 @@
   td {
     height: 42px;
     padding-left: 10px;
-    border-bottom: 1px solid var(--divider);
+    border-bottom: 1px solid @agile-tbody-divider-color;
   }
 }
