@@ -71,8 +71,8 @@ const SelectUser = forwardRef<Select, SelectUserProps>(({
         idsRef.current = selectedUserIds;
       }
     }
-    return { selectedUserIds: idsRef.current, queryFilterIds: uniq([...idsRef.current, ...selectedUserLoadedIds]) };
-  }, [selectedUserLoadedIds, selectedUserIds, forceUpdateValue]);
+    return { selectedUserIds: idsRef.current, queryFilterIds: uniq([...idsRef.current, ...selectedUserLoadedIds]), projectId };
+  }, [selectedUserIds, selectedUserLoadedIds, projectId, forceUpdateValue]);
   const userRequest: SelectConfig<User>['request'] = useCallback(
     async (requestData) => {
       let res: any;
@@ -82,15 +82,15 @@ const SelectUser = forwardRef<Select, SelectUserProps>(({
         const { filter, page, requestArgs } = requestData;
         switch (level) {
           case 'project': {
-            res = await userApi.project(projectId).getProjectUsers(filter, page, requestArgs?.selectedUserIds, requestArgs?.queryFilterIds, 50, projectId);
+            res = await userApi.project(requestArgs?.projectId).getProjectUsers(filter, page, requestArgs?.selectedUserIds, requestArgs?.queryFilterIds, 50, requestArgs?.projectId);
             break;
           }
           case 'org': {
-            res = await userApi.project(projectId).org(organizationId).getOrgUsers(filter, page, requestArgs?.selectedUserIds, requestArgs?.queryFilterIds, 50);
+            res = await userApi.project(requestArgs?.projectId).org(organizationId).getOrgUsers(filter, page, requestArgs?.selectedUserIds, requestArgs?.queryFilterIds, 50);
             break;
           }
           case 'workbench': {
-            res = await userApi.project(projectId).org(organizationId).getWorkbenchUsers({ param: filter, page, size: 50 }, { ignoredUserIds: requestArgs?.selectedUserIds });
+            res = await userApi.project(requestArgs?.projectId).org(organizationId).getWorkbenchUsers({ param: filter, page, size: 50 }, { ignoredUserIds: requestArgs?.selectedUserIds });
           }
         }
 
@@ -101,7 +101,7 @@ const SelectUser = forwardRef<Select, SelectUserProps>(({
       setFilterWord('filter', requestData.filter);
       return res;
     },
-    [level, organizationId, projectId, request, setFilterWord],
+    [level, organizationId, request, setFilterWord],
   );
   const config = useMemo((): SelectConfig<User> => ({
     name: 'user',
