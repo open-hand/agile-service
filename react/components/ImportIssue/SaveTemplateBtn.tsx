@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { Button, DataSet } from 'choerodon-ui/pro';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { uniq } from 'lodash';
@@ -17,7 +17,7 @@ export const transformTemplateJson = (templateJson: string) => {
 interface Props {
   importFieldsRef: React.MutableRefObject<{
     fields: string[]
-    allFields: { title: string, code: string, system: boolean}[],
+    allFields: { title: string, code: string, system: boolean }[],
     requiredFields: string[]
     chooseDataSet: DataSet
   }>,
@@ -54,6 +54,8 @@ const SaveTemplateBtn: React.FC<Props> = ({
   }, [action, importFieldsRef, templateSelectRef]);
 
   useEffect(() => {
+    // 默认必填字段检查 是否为保存的模块
+    // TODO 此处的检查函数后续需要更换
     if (templateFirstLoaded && importFieldsRef.current?.requiredFields?.length && importFieldsRef.current?.allFields?.length) {
       checkBoxChangeOk(importFieldsRef?.current?.requiredFields);
     }
@@ -63,18 +65,18 @@ const SaveTemplateBtn: React.FC<Props> = ({
     <>
       {
         !templateIsExist && (
-        <Button
-          icon="unarchive"
-          onClick={handleSaveTemplate}
-          className="c7n-importIssue-btn"
-          style={{
-            marginLeft: 16,
-          }}
-        >
-          保存为常用模板
-        </Button>
+          <Button
+            icon="unarchive"
+            onClick={handleSaveTemplate}
+            className="c7n-importIssue-btn"
+            style={{
+              marginLeft: 16,
+            }}
+          >
+            保存为常用模板
+          </Button>
         )
-    }
+      }
     </>
   );
 };

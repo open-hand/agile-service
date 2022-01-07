@@ -10,7 +10,7 @@ import FileSaver from 'file-saver';
 import classnames from 'classnames';
 import './ImportIssue.less';
 import {
-  includes, isEqual, uniq, map,
+  includes, isEqual, uniq, map, isEqualWith, intersection,
 } from 'lodash';
 import { issueApi } from '@/api';
 import { getApplyType, getProjectId } from '@/utils/common';
@@ -19,6 +19,13 @@ import TemplateSelect from '../template-select';
 import openSaveTemplate from '../template-select/components/save/SaveTemplate';
 import SaveTemplateBtn, { transformTemplateJson } from './SaveTemplateBtn';
 
+function customizerFieldCodes(obj1, obj2) {
+  if (Array.isArray(obj1) && Array.isArray(obj2)) {
+    const newArr = intersection(obj1, obj2);
+    return (newArr.length === obj1.length) && (newArr.length === obj2.length);
+  }
+  return undefined;
+}
 const ImportIssueForm = (formProps) => {
   const {
     title, children, bottom, className,
@@ -291,9 +298,8 @@ class ImportIssue extends Component {
     const fields = uniq([...(value || []), ...(this.importFieldsRef.current?.requiredFields || [])]);
     importFieldsData.systemFields = fields.filter((code) => allFields.find((item) => item.code === code && item.system)).sort();
     importFieldsData.customFields = fields.filter((code) => allFields.find((item) => item.code === code && !item.system)).sort();
-
     for (let i = 0; i < templateList.length; i += 1) {
-      if (isEqual(transformTemplateJson(templateList[i].templateJson), importFieldsData)) {
+      if (isEqualWith(JSON.parse(templateList[i].templateJson), importFieldsData, customizerFieldCodes)) {
         this.setState({
           templateIsExist: true,
         });
@@ -342,7 +348,7 @@ class ImportIssue extends Component {
       return;
     }
     for (let i = 0; i < templateList.length; i += 1) {
-      if (isEqual(transformTemplateJson(templateList[i].templateJson), importFieldsData)) {
+      if (isEqualWith(JSON.parse(templateList[i].templateJson), importFieldsData, customizerFieldCodes)) {
         this.setState({
           templateIsExist: true,
         });
@@ -355,6 +361,11 @@ class ImportIssue extends Component {
     });
     this.templateSelectRef?.current?.setTemplate(undefined);
   };
+
+  handleInitCheck = (value) => {
+    this.handleCheckBoxChangeOk(value);
+    this.handleSetTemplateFirstLoaded(false);
+  }
 
   handleSetTemplateFirstLoaded = (loaded) => {
     this.setState({
@@ -381,31 +392,31 @@ class ImportIssue extends Component {
       <div>
         {
           action && (
-          <ImportIssueForm
-            title="选择常用模板"
-            bottom={null}
-            className="c7n-importIssue-templateSelect"
-          >
-            <TemplateSelect
-              templateSelectRef={this.templateSelectRef}
-              action={action}
-              checkOptions={allFields.map((item) => ({
-                label: item.title,
-                value: item.code,
-                system: item.system,
-                optionConfig: includes(requiredFields, item.code) ? {
-                  disabled: includes(requiredFields, item.code),
-                  defaultChecked: includes(requiredFields, item.code),
-                  name: 'required-option',
-                } : undefined,
-              }))}
-              selectTemplateOk={this.selectTemplateOk}
-              transformExportFieldCodes={(data) => data}
-              reverseTransformExportFieldCodes={(data) => data}
-              defaultInitCodes={requiredFields}
-              setTemplateFirstLoaded={this.handleSetTemplateFirstLoaded}
-            />
-          </ImportIssueForm>
+            <ImportIssueForm
+              title="选择常用模板"
+              bottom={null}
+              className="c7n-importIssue-templateSelect"
+            >
+              <TemplateSelect
+                templateSelectRef={this.templateSelectRef}
+                action={action}
+                checkOptions={allFields.map((item) => ({
+                  label: item.title,
+                  value: item.code,
+                  system: item.system,
+                  optionConfig: includes(requiredFields, item.code) ? {
+                    disabled: includes(requiredFields, item.code),
+                    defaultChecked: includes(requiredFields, item.code),
+                    name: 'required-option',
+                  } : undefined,
+                }))}
+                selectTemplateOk={this.selectTemplateOk}
+                transformExportFieldCodes={(data) => data}
+                reverseTransformExportFieldCodes={(data) => data}
+                defaultInitCodes={requiredFields}
+                setTemplateFirstLoaded={this.handleSetTemplateFirstLoaded}
+              />
+            </ImportIssueForm>
           )
         }
         <ImportIssueForm
@@ -426,7 +437,7 @@ class ImportIssue extends Component {
                     action={action}
                     importFieldsRef={this.importFieldsRef}
                     templateSelectRef={this.templateSelectRef}
-                    checkBoxChangeOk={this.handleCheckBoxChangeOk}
+                    checkBoxChangeOk={this.handleInitCheck}
                     templateIsExist={templateIsExist}
                     templateFirstLoaded={templateFirstLoaded}
                   />
