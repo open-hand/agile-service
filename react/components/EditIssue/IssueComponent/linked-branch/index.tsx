@@ -3,7 +3,7 @@ import React, {
   useCallback, useMemo, useImperativeHandle, forwardRef,
 } from 'react';
 import {
-  Table, DataSet, Modal,
+  Table, DataSet, Modal, Spin,
 } from 'choerodon-ui/pro';
 import {
   Popover,
@@ -107,7 +107,7 @@ const LinkedBranch: React.ForwardRefRenderFunction<{
 
   return (
 
-    <Table dataSet={dataSet} queryBar={'none' as TableQueryBarType}>
+    <Table dataSet={dataSet} queryBar={'none' as TableQueryBarType} spin={{ indicator: <Spin spinning /> }}>
       <Column
         width={210}
         name="branchName"
