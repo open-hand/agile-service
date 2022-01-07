@@ -280,5 +280,11 @@ public interface BaseFeignClient {
     ResponseEntity<TimeZoneWorkCalendarRefDetailVO> queryTimeZoneWorkCalendarDetail(@PathVariable(name = "organization_id") Long organizationId,
                                                                                     @RequestParam(name = "year") Integer year);
 
+    @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/users/{user_id}/projects_simple")
+    ResponseEntity<List<ProjectVO>> listProjectsByUserIdForSimple(@PathVariable("organization_id") Long organizationId,
+                                                                  @PathVariable("user_id") Long userId,
+                                                                  @RequestParam(required = false) String category,
+                                                                  @RequestParam(required = false) Boolean enabled);
+
 }
 
