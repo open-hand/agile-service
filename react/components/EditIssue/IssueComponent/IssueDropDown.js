@@ -11,7 +11,6 @@ import { issueApi } from '@/api';
 import useHasDevops from '@/hooks/useHasDevops';
 import useHasTest from '@/hooks/useHasTest';
 import { openEditIssueCopyIssue } from '@/components/CopyIssue';
-import { isInProgram } from '@/utils/program';
 import openRecordWorkLogModal from '@/components/DailyLog/DailyLogPro';
 import openCreateBranchModal from '@/components/CreateBranch/CreateBranchPro';
 import EditIssueContext from '../stores';
@@ -27,7 +26,7 @@ const IssueDropDown = ({
   onChangeParent, onRelateIssue, onTransformSubIssue, onOpenCreateSubTask, onOpenCreateSubBug, checkDescriptionEdit,
 }) => {
   const {
-    store, applyType, isProgram,
+    store, applyType, isProgram, isShowFeature,
   } = useContext(EditIssueContext);
   const docs = store.getDoc;
   const hasDevops = useHasDevops();
@@ -223,7 +222,7 @@ const IssueDropDown = ({
           </Menu.Item>
         )
       }
-      {['feature', ...(isInProgram() ? ['issue_epic'] : [])].indexOf(typeCode) === -1 && (
+      {['feature', ...(isShowFeature ? ['issue_epic'] : [])].indexOf(typeCode) === -1 && (
         <Menu.Item key="3">
           复制工作项
         </Menu.Item>
