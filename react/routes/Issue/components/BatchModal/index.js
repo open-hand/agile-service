@@ -7,7 +7,18 @@ import Modal from '../Modal';
 
 function BatchModal(props) {
   const { issueSearchStore } = props;
-  const ContentComponent = issueSearchStore.batchAction === 'edit' ? Content : BatchMove;
+  let ContentComponent = React.Fragment;
+  switch (issueSearchStore.batchAction) {
+    case 'edit': {
+      ContentComponent = Content;
+      break; }
+    case 'move': {
+      ContentComponent = BatchMove;
+      break;
+    }
+    default:
+      break;
+  }
   return (
     <Modal header={<Header {...props} />} content={<ContentComponent {...props} />} />
   );

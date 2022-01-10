@@ -59,9 +59,9 @@ class ProjectApi extends Api<ProjectApi> {
       method: 'post',
       url: `iam/choerodon/v1/organizations/${this.orgId}/users/${userId}/projects/paging_option`,
       params: {
-        param,
         page,
         size,
+        params: param,
       },
       data: {
         filterProjectIds,

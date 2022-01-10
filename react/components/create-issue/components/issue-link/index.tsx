@@ -36,17 +36,19 @@ const IssueLink: React.FC<IssueLinkProps> = ({
         // @ts-ignore
         colSpan={11}
       />,
-      <Icon
-        onClick={() => {
-          dataSet.remove(record);
-        }}
-        type="delete_sweep-o"
-        style={{
-          color: 'var(--primary-color)',
-          cursor: 'pointer',
-          lineHeight: '0.48rem',
-        }}
-      />,
+      <span>
+        <Icon
+          onClick={() => {
+            dataSet.remove(record);
+          }}
+          type="delete_sweep-o"
+          style={{
+            color: 'var(--primary-color)',
+            cursor: 'pointer',
+            lineHeight: '0.48rem',
+          }}
+        />
+      </span>,
     ]))}
     <div>
       <Button

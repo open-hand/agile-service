@@ -492,7 +492,7 @@ public class DateUtil {
                     timeDistance += 365;
                 }
             }
-            return endDay - startDay > 0 ? timeDistance + (endDay - startDay) : 0;
+            return endDay - startDay > 0 ? 0 : timeDistance + (endDay - startDay);
         } else    //同年
         {
             return endDay - startDay>0 ? endDay-startDay : 0;

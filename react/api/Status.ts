@@ -1,4 +1,5 @@
 import { axios } from '@choerodon/boot';
+import { pick } from 'lodash';
 import { getProjectId, getOrganizationId, getApplyType } from '@/utils/common';
 import Api from './Api';
 
@@ -107,7 +108,10 @@ class StatusApi extends Api<StatusApi> {
       method: 'post',
       url: `${this.orgPrefix}/work_bench/status`,
       params,
-      data,
+      data: {
+        ...data,
+        ...pick(params || {}, 'param'),
+      },
     });
   }
 

@@ -43,7 +43,7 @@ export interface ChangeTypeModalProps {
 const extraFields = ['timeTrace'];
 
 const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
-  const { isInProgram } = useIsInProgram({ projectId: props.projectId });
+  const { isShowFeature } = useIsInProgram({ projectId: props.projectId });
   let { data: issueTypeData = [] } = useProjectIssueTypes({ onlyEnabled: true, projectId: props.projectId });
 
   const {
@@ -151,7 +151,7 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
 
   const { stateMachineId } = find(issueTypeData, { id: issueVO.issueTypeVO?.id }) || {};
   issueTypeData = issueTypeData.filter((item) => item.stateMachineId !== stateMachineId).filter((item) => !['feature', ...(issueVO.typeCode === 'sub_task' ? [] : ['sub_task'])].includes(item.typeCode));
-  if (isInProgram) {
+  if (isShowFeature) {
     issueTypeData = issueTypeData.filter((item) => item.typeCode !== 'issue_epic');
   }
 

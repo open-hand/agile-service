@@ -5,7 +5,7 @@ import { inject } from 'mobx-react';
 import {
   DataSet,
 } from 'choerodon-ui/pro';
-import { useCreation, useUnmount } from 'ahooks';
+import { useCreation, useMount } from 'ahooks';
 import { groupBy, omit } from 'lodash';
 import GanntDependencyModalDataSet from './GanntDependencyModalDataSet';
 import { IModalProps } from '@/common/types';
@@ -37,6 +37,9 @@ export const StoreProvider = inject('AppState')(
       predecessorType,
       predecessorId,
     })))), []);
+    useMount(() => {
+      !data?.length && dataset.create({ predecessorType: 'predecessor_fs' });
+    });
 
     return (
       <Store.Provider value={{ ...omit(props, 'data'), data: editData || {}, dataset }}>

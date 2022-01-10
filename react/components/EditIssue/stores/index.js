@@ -5,6 +5,7 @@ import { inject } from 'mobx-react';
 import EditIssueStore from './EditIssueStore';
 import { getMenuType, getProjectId } from '@/utils/common';
 import useIsProgram from '@/hooks/useIsProgram';
+import useIsInProgram from '@/hooks/useIsInProgram';
 
 const EditIssueContext = createContext();
 export default EditIssueContext;
@@ -18,6 +19,7 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')((props
   const isProjectLevel = useMemo(() => (props.menuType || getMenuType()) === 'project', [props.menuType, getMenuType]);
   const descriptionEditRef = useRef(false);
   const { isProgram } = useIsProgram();
+  const { isShowFeature, loading } = useIsInProgram({ projectId: props.projectId });
   const value = {
     ...props,
     isProjectLevel,
@@ -35,6 +37,7 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')((props
       FieldFixVersionRef.current = ref;
     },
     isProgram,
+    isShowFeature,
   };
 
   useEffect(() => {
@@ -49,7 +52,7 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')((props
   }, [props.tab, value.store]);
   return (
     <EditIssueContext.Provider value={value}>
-      {props.children}
+      {!loading && props.children}
     </EditIssueContext.Provider>
   );
 });

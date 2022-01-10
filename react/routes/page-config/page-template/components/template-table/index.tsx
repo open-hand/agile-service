@@ -62,6 +62,8 @@ const PageTemplateTable: React.FC<IPageTemplateTableProps> = ({ tableRef: propsT
   }), [disabled, handleCheckAllChange, handleCheckChange, sortTableDataSet]);
   const visibleColumns = useMemo(() => [checkBoxColumn, ...getColumns({ currentIssueType: pageTemplateStore.currentIssueType, loadData: handleRefresh, disabled })], [checkBoxColumn, currentIssueTypeId, disabled, handleRefresh]);
   return (
+    // ui 1.5.1-alpha.20 ts校验有问题
+    // @ts-ignore
     <PerformanceTable
       ref={(r) => {
         Object.assign(propsTableRef, { current: r });

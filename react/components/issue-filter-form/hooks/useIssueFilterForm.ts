@@ -1,5 +1,5 @@
 import {
-  useMemo, useEffect, useState, useCallback,
+  useMemo, useEffect, useState, useCallback, useRef,
 } from 'react';
 import { toJS } from 'mobx';
 import { useObservable } from 'mobx-react-lite';
@@ -61,8 +61,9 @@ function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps, IIssu
     return [...localSystemDataSetFieldConfig.values()];
   }, [config?.systemDataSetField]);
   const dataSet = useIssueFilterFormDataSet({ fields, systemFields: systemDataSetFieldConfig });
-
-  const events = useCreation(() => ({ afterDelete: config?.events?.afterDelete || noop }), []);
+  const propsEventsRef = useRef<IConfig['events']>(config?.events);
+  propsEventsRef.current = config?.events;
+  const events = useCreation(() => ({ afterDelete: (v: any) => propsEventsRef.current?.afterDelete && propsEventsRef.current?.afterDelete(v) }), []);
   const handleAdd = usePersistFn((value: IChosenFieldField) => {
     // set(value.code, value);
     setChosenFields((old) => [...old, toJS(value)]);

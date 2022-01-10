@@ -90,7 +90,7 @@ const IssueType = observer(({
     }
   };
   const issue = store.getIssue;
-  const { isInProgram } = useIsInProgram({ projectId: store.projectId });
+  const { isShowFeature } = useIsInProgram({ projectId: store.projectId });
   const { issueTypeVO = {}, featureVO = {}, subIssueVOList = [] } = issue;
   const { typeCode, id } = issueTypeVO;
   const { stateMachineId } = find(issueTypeData, { id }) || {};
@@ -117,7 +117,7 @@ const IssueType = observer(({
     issueTypeData = issueTypeData.filter((item, i) => item.stateMachineId !== stateMachineId && item.typeCode === 'sub_task');
   } else {
     issueTypeData = issueTypeData.filter((item) => item.stateMachineId !== stateMachineId).filter((item) => !['feature', 'sub_task'].includes(item.typeCode));
-    if (isInProgram || menuType === 'org') {
+    if (isShowFeature || menuType === 'org') {
       issueTypeData = issueTypeData.filter((item) => item.typeCode !== 'issue_epic');
     }
   }

@@ -194,7 +194,7 @@ const StoryMapHome = observer(() => {
         </Header>
         <Breadcrumb />
         <Content style={{
-          padding: 0, borderTop: '1px solid var(--divider)', overflow: 'hidden', height: '100%',
+          padding: 0, borderTop: '1px solid var(--divider)', overflow: 'auto', overflowX: 'hidden', height: '100%',
         }}
         >
           <StoryMapSearch issueSearchStore={issueSearchStore} />

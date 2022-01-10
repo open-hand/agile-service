@@ -26,9 +26,8 @@ const { TableRow } = Table;
 const { Option } = Select;
 
 const Priority: React.FC<{
-  priorityTableRef: React.MutableRefObject<{query: () => void } | null>
+  priorityTableRef: React.MutableRefObject<{ query: () => void } | null>
 }> = ({ priorityTableRef }) => {
-  const [priorityId, setPriorityId] = useState<undefined | string>();
   const intl = useIntl();
   const priorityDs = useMemo(() => new DataSet({
     selection: false,
@@ -72,12 +71,16 @@ const Priority: React.FC<{
   }, [intl]);
 
   const renderAction = useCallback(({ dataSet, record }: RenderProps) => {
+    let priorityId: string | undefined;
+    function setPriorityId(val: any) {
+      priorityId = val;
+    }
     // @ts-ignore
     const enableList = priorityDs.toData().filter((item) => item.enable);
     const handleDelete = async () => {
       const count = await priorityApi.checkBeforeDel(record?.get('id'));
       // @ts-ignore
-      const priorityList: {id: string, name: string}[] = priorityDs.toData().filter((item) => item.id !== record?.get('id'));
+      const priorityList: { id: string, name: string }[] = priorityDs.toData().filter((item) => item.id !== record?.get('id'));
 
       const deletePriority = async (id: string, defaultId: string) => {
         try {
@@ -254,7 +257,7 @@ const Priority: React.FC<{
         />
       </Dropdown>
     );
-  }, [intl, priorityDs, priorityId]);
+  }, [intl, priorityDs]);
 
   const renderColor = useCallback(({ record }) => (
     <div style={{

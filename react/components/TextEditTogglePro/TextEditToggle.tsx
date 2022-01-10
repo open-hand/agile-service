@@ -4,7 +4,9 @@ import React, {
 import FormField from 'choerodon-ui/pro/lib/field';
 import TriggerField from 'choerodon-ui/pro/lib/trigger-field';
 import { toJS } from 'mobx';
-import { isEqual } from 'lodash';
+import {
+  isEqual, isEqualWith, isNull, isUndefined,
+} from 'lodash';
 import classNames from 'classnames';
 import { useCreation } from 'ahooks';
 import useClickOut from '@/hooks/useClickOut';
@@ -31,7 +33,21 @@ interface Props {
   onSubmit: (data: any) => void
   initValue: any
 }
-
+/**
+ * 统一化空值
+ * @param val
+ * @returns 空值/未定义值/空字符串 返回 null
+ */
+function uniformEmptyValue(val: any): any {
+  if (isNull(val) || isUndefined(val) || val === '') {
+    return null;
+  }
+  return val;
+}
+function customizer(val1: any, val2: any) {
+  // 空值判断
+  return uniformEmptyValue(val1) === uniformEmptyValue(val2) || undefined;
+}
 const TextEditToggle: React.FC<Props> = ({
   disabled, submitTrigger = ['blur'], editor, editorExtraContent, children: text, className, onSubmit, initValue, alwaysRender = true, mountRenderEditor = true,
 } = {} as Props) => {
@@ -117,7 +133,7 @@ const TextEditToggle: React.FC<Props> = ({
           containerRef.current.blur();
         }
         hideEditor();
-        if (!isEqual(waitSubmitValue, initValue)) {
+        if (!isEqualWith(waitSubmitValue, initValue, customizer)) {
           onSubmit(waitSubmitValue);
         }
       }

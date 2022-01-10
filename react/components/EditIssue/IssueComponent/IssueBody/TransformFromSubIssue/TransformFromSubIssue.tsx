@@ -30,7 +30,7 @@ const TransformFromSubIssue: React.FC<Props> = ({
 }) => {
   const [isEpicType, setIsEpicType] = useState<boolean>(false);
   const issueTypesRef = useRef<IIssueType[]>([]);
-  const { isInProgram, loading } = useIsInProgram();
+  const { isShowFeature, loading } = useIsInProgram();
   const transformFromSubIssueDs = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [{
@@ -126,7 +126,7 @@ const TransformFromSubIssue: React.FC<Props> = ({
             <SelectIssueType
               name="typeId"
               projectId={projectId}
-              filterList={isInProgram ? ['issue_epic', 'feature'] : ['feature']}
+              filterList={isShowFeature ? ['issue_epic', 'feature'] : ['feature']}
               dataRef={issueTypesRef}
               clearButton={false}
               excludeTypeIds={[issueTypeId]}
