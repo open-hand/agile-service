@@ -1,9 +1,8 @@
 import React from 'react';
 import {
-  Modal, Form, TextField, Select, SelectBox,
+  Modal, Form, TextField, Select, SelectBox, CheckBox,
 } from 'choerodon-ui/pro';
 import { C7NFormat } from '@choerodon/master';
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';
 import { MAX_LENGTH_STATUS } from '@/constants/MAX_LENGTH';
 import { IStatus, IIssueType } from '@/common/types';
@@ -20,7 +19,7 @@ const key = Modal.key();
 
 const CreateStatus: React.FC = () => {
   const {
-    dataSet, isOrganization, setType, setHasStatusIssueTypes, type, issueTypes, statusRecord,
+    dataSet, isOrganization, setType, setHasStatusIssueTypes, type, issueTypes, statusRecord, injectConfig,
   } = useStateMachineCreateStatusContext();
   const { isProgram } = useIsProgram();
 
@@ -75,18 +74,14 @@ const CreateStatus: React.FC = () => {
             </SelectBox>
           )
         }
-      {
-          !statusRecord && (
-            <SelectBox name="transferAll">
-              <Option value>是</Option>
-              <Option value={false}>否</Option>
-            </SelectBox>
-          )
-        }
       <SelectBox name="completed" style={{ marginTop: statusRecord ? 13 : 0 }}>
         <Option value>是</Option>
         <Option value={false}>否</Option>
       </SelectBox>
+      {
+          !statusRecord && <CheckBox name="transferAll" />
+        }
+      {injectConfig.extraFormItems}
     </Form>
   );
 };
