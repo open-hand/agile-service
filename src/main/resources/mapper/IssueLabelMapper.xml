@@ -58,4 +58,11 @@
         </foreach>
     </select>
 
+    <select id="listByProjectId" resultType="io.choerodon.agile.api.vo.IssueLabelVO">
+        select
+           *
+        from agile_issue_label
+        where project_id = #{projectId}
+    </select>
+
 </mapper>

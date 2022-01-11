@@ -133,11 +133,10 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
         }
         List<WorkLogDTO> workLogList = workLogMapper.selectWorkTimeBySpring(projectId, sprintId,
                 sprint.getStartDate(), sprint.getActualEndDate());
-        Set<Long> issueIdList = issueList.stream().map(IssueOverviewVO::getIssueId).collect(Collectors.toSet());
         List<DataLogDTO> resolutionLogList = dataLogMapper.selectResolutionIssueBySprint(projectId,
-                issueIdList, "resolution", sprint.getStartDate(), sprint.getActualEndDate());
+                sprint.getSprintId(), "resolution", sprint.getStartDate(), sprint.getActualEndDate());
         List<DataLogDTO> assigneeLogList = dataLogMapper.selectResolutionIssueBySprint(projectId,
-                issueIdList, "assignee", sprint.getStartDate(), sprint.getActualEndDate());
+                sprint.getSprintId(), "assignee", sprint.getStartDate(), sprint.getActualEndDate());
         return issueAssembler.issueToOneJob(sprint, issueList, workLogList, resolutionLogList, assigneeLogList);
     }
 

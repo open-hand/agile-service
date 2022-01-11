@@ -17,4 +17,10 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_issue_label.groovy') {
             column(name: "last_update_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
     }
+
+    changeSet(id: '2022-01-11-agile-issue-label-add-index', author: 'ztxemail@163.com'){
+        createIndex(indexName: 'idx_project_id', tableName: 'agile_issue_label') {
+            column(name: 'project_id')
+        }
+    }
 }
