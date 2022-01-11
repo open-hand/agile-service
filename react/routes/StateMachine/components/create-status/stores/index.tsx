@@ -23,9 +23,10 @@ import {
 import useFormatMessage from '@/hooks/useFormatMessage';
 
 export interface IStateMachineCreateStatusInjectConfig {
-  dataSetConfigProps?: DataSetProps | ((defaultProps: DataSetProps) => DataSetProps)
+  dataSetConfigProps?: DataSetProps | ((defaultProps: DataSetProps, defaultTransformAfterSubmit: (data: any, isCreate?: boolean) => any) => DataSetProps)
   extraFormItems?: (context: IStateMachineCreateStatusContext) => React.ReactElement[]
   issueTypeItemProps?: (context: IStateMachineCreateStatusContext) => Partial<SelectProps>
+  stageItemProps?: (context: IStateMachineCreateStatusContext) => Partial<SelectProps>
 }
 /**
  * 获取注入配置
@@ -98,12 +99,12 @@ const StateMachineCreateStatusProvider: React.FC<IStateMachineCreateStatusProps>
         submit: ({ data: dataArray }) => {
           const isCreate = !statusRecord;
           const data = defaultTransformSubmitData({
-            ...dataArray[0],
             ...editStatus,
+            ...dataArray[0],
           }, isCreate);
 
           return isCreate ? statusTransformApiConfig[isOrganization ? 'orgCreateStatus' : 'createStatus'](data.issueTypeIds, data as any)
-            : boardApiConfig.updateStatus(editStatus?.issueStatusId, data as any);
+            : boardApiConfig.updateStatus(editStatus?.issueTypeIds, data as any);
         },
       },
       fields: [
@@ -163,7 +164,7 @@ const StateMachineCreateStatusProvider: React.FC<IStateMachineCreateStatusProps>
         },
       ],
     };
-    merge(defaultProps, typeof injectConfig.dataSetConfigProps === 'function' ? injectConfig.dataSetConfigProps(defaultProps) : injectConfig.dataSetConfigProps);
+    merge(defaultProps, typeof injectConfig.dataSetConfigProps === 'function' ? injectConfig.dataSetConfigProps(defaultProps, defaultTransformSubmitData) : injectConfig.dataSetConfigProps);
     return new DataSet(defaultProps);
   }, [editStatus?.id, editStatus?.issueStatusId, editStatus?.issueStatusObjectVersionNumberId, isOrganization, statusRecord]);
   useEffect(() => {

@@ -24,6 +24,7 @@ const CreateStatus: React.FC = () => {
     dataSet, isOrganization, setType, setHasStatusIssueTypes, type, issueTypes, statusRecord, injectConfig,
   } = context;
   const { isProgram } = useIsProgram();
+  const stageItemProps = useCreation(() => (typeof injectConfig.stageItemProps === 'function' ? injectConfig.stageItemProps(context) : {}), [context]);
   const issueTypeItemProps = useCreation(() => (injectConfig.issueTypeItemProps ? injectConfig.issueTypeItemProps(context) : {}), [context]);
   return (
     <Form dataSet={dataSet} className="c7n-agile-state-machine-create-status">
@@ -60,6 +61,7 @@ const CreateStatus: React.FC = () => {
         optionRenderer={({ record }) => (<StatusTypeTag code={record?.get('valueCode') as IStatus['valueCode']} />)}
         renderer={({ value }) => (value ? <StatusTypeTag code={value as IStatus['valueCode']} /> : null)}
         disabled={type !== null || !!statusRecord}
+        {...stageItemProps}
       />
       <Select name="issueTypeIds" multiple disabled={!!statusRecord} {...issueTypeItemProps}>
         {(issueTypes || []).map((issueType: IIssueType) => (
