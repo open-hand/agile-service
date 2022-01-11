@@ -11,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
@@ -38,10 +39,11 @@ public class IssueLabelServiceImpl implements IssueLabelService {
 
     @Override
     public List<IssueLabelVO> listIssueLabel(Long projectId) {
-        IssueLabelDTO issueLabelDTO = new IssueLabelDTO();
-        issueLabelDTO.setProjectId(projectId);
-        return modelMapper.map(issueLabelMapper.select(issueLabelDTO), new TypeToken<List<IssueLabelVO>>() {
-        }.getType());
+        List<IssueLabelVO> issueLabelVOS = issueLabelMapper.listByProjectId(projectId);
+        if (CollectionUtils.isEmpty(issueLabelVOS)) {
+            return new ArrayList<>();
+        }
+        return issueLabelVOS;
     }
 
     @Override
