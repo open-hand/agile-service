@@ -5,9 +5,12 @@ import { useCreation } from 'ahooks';
 import {
   Modal, Form, DataSet, TextField, Select, SelectBox,
 } from 'choerodon-ui/pro';
+import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
+import { get } from '@choerodon/inject';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { OldLoading as Loading } from '@/components/Loading';
+import { merge } from 'lodash';
+import { LoadingProvider, OldLoading as Loading } from '@/components/Loading';
 import { IIssueType, IModalProps, IStatus } from '@/common/types';
 import { getIsOrganization, getProjectId } from '@/utils/common';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
@@ -18,6 +21,18 @@ import {
 } from '@/api';
 import useFormatMessage from '@/hooks/useFormatMessage';
 
+interface IStateMachineCreateStatusInjectConfig {
+  dataSetConfigProps?: DataSetProps | ((defaultProps: DataSetProps) => DataSetProps)
+  extraFormItems?: React.ReactElement[]
+}
+/**
+ * 获取注入配置
+ * @param code
+ * @returns
+ */
+function getInjectConfig(code: 'agile:StateMachine.create.status'): IStateMachineCreateStatusInjectConfig {
+  return get(code) || {};
+}
 export interface IStateMachineCreateStatusProps {
   selectedIssueType?: string[]
   onSubmit: Function
@@ -28,9 +43,10 @@ interface IStateMachineCreateStatusContext extends IStateMachineCreateStatusProp
   isOrganization: boolean
   dataSet: DataSet
   setHasStatusIssueTypes: React.Dispatch<React.SetStateAction<IIssueType[]>>
-  type:IStatus['valueCode'] | null
-  issueTypes:any
-  statusRecord?:Record
+  type: IStatus['valueCode'] | null
+  issueTypes: any
+  statusRecord?: Record
+  injectConfig: IStateMachineCreateStatusInjectConfig,
   setType: React.Dispatch<React.SetStateAction<IStatus['valueCode'] | null>>
 }
 const StateMachineCreateStatusContext = createContext({} as IStateMachineCreateStatusContext);
@@ -45,6 +61,7 @@ const StateMachineCreateStatusProvider: React.FC<IStateMachineCreateStatusProps>
   const [loading, setLoading] = useState<boolean>(false);
   const modalRef = useRef(modal);
   modalRef.current = modal;
+  const injectConfig = useCreation(() => getInjectConfig('agile:StateMachine.create.status'), []);
   const isOrganization = getIsOrganization();
   const [type, setType] = useState<IStatus['valueCode'] | null>(null);
   const [editStatus, setEditStatus] = useState<any>(null);
@@ -53,83 +70,87 @@ const StateMachineCreateStatusProvider: React.FC<IStateMachineCreateStatusProps>
   const [hasStatusIssueTypes, setHasStatusIssueTypes] = useState<IIssueType[]>([]);
   const hasStatusIssueTypesRef = useRef<IIssueType[]>([]);
   hasStatusIssueTypesRef.current = hasStatusIssueTypes;
-  const dataSet = useMemo(() => new DataSet({
-    autoCreate: true,
-    transport: {
-      submit: ({ data: dataArray }) => {
-        const data = dataArray[0];
-        return statusRecord ? boardApiConfig.updateStatus(editStatus?.issueStatusId, {
-          objectVersionNumber: editStatus?.issueStatusObjectVersionNumberId,
-          completed: data.completed,
-          statusId: editStatus?.id,
-          id: editStatus?.issueStatusId,
-          projectId: getProjectId(),
-        }) : statusTransformApiConfig[isOrganization ? 'orgCreateStatus' : 'createStatus'](data.issueTypeIds, {
-          name: data.name,
-          type: data.valueCode,
-          defaultStatus: data.default,
-          transferAll: data.transferAll,
-          completed: data.completed,
-        });
-      },
-    },
-    fields: [
-      {
-        name: 'name',
-        type: 'string' as FieldType,
-        label: '状态名称',
-        required: true,
-      },
-      {
-        name: 'valueCode',
-        type: 'string' as FieldType,
-        label: formatMessage({ id: 'agile.stateMachine.stage' }),
-        required: true,
-        lookupAxiosConfig: () => ({
-          url: '/agile/v1/lookup_values/status_category',
-          transformResponse: (data) => (Array.isArray(data) ? data : JSON.parse(data).lookupValues),
-        }),
-        textField: 'name',
-        valueField: 'valueCode',
-      },
-      {
-        name: 'issueTypeIds',
-        type: 'string' as FieldType,
-        label: formatMessage({ id: 'agile.common.issueType' }),
-        required: true,
-        textField: 'name',
-        valueField: 'id',
-        validator: async (value) => {
-          const result = hasStatusIssueTypesRef.current.filter((item) => value && value.some((v: string) => v === item.id));
-          if (result.length > 0) {
-            return `${result.map((i) => i.name).join(',')}下已有同名状态`;
-          }
-          return true;
+  const dataSet = useMemo(() => {
+    const defaultProps: DataSetProps = {
+      autoCreate: true,
+      transport: {
+        submit: ({ data: dataArray }) => {
+          const data = dataArray[0];
+          return statusRecord ? boardApiConfig.updateStatus(editStatus?.issueStatusId, {
+            objectVersionNumber: editStatus?.issueStatusObjectVersionNumberId,
+            completed: data.completed,
+            statusId: editStatus?.id,
+            id: editStatus?.issueStatusId,
+            projectId: getProjectId(),
+          }) : statusTransformApiConfig[isOrganization ? 'orgCreateStatus' : 'createStatus'](data.issueTypeIds, {
+            name: data.name,
+            type: data.valueCode,
+            defaultStatus: data.default,
+            transferAll: data.transferAll,
+            completed: data.completed,
+          });
         },
       },
-      {
-        name: 'default',
-        type: 'boolean' as FieldType,
-        defaultValue: false,
-        label: '是否设置为初始状态?',
-        required: true,
-      },
-      {
-        name: 'transferAll',
-        type: 'boolean' as FieldType,
-        defaultValue: true,
-        label: '是否转换到所有状态?',
-        required: true,
-      },
-      {
-        name: 'completed',
-        type: 'boolean' as FieldType,
-        defaultValue: false,
-        label: '是否为已解决状态？',
-        required: true,
-      },
-    ],
-  }), [editStatus?.id, editStatus?.issueStatusId, editStatus?.issueStatusObjectVersionNumberId, isOrganization, statusRecord]);
+      fields: [
+        {
+          name: 'name',
+          type: 'string' as FieldType,
+          label: '状态名称',
+          required: true,
+        },
+        {
+          name: 'valueCode',
+          type: 'string' as FieldType,
+          label: formatMessage({ id: 'agile.stateMachine.stage' }),
+          required: true,
+          lookupAxiosConfig: () => ({
+            url: '/agile/v1/lookup_values/status_category',
+            transformResponse: (data) => (Array.isArray(data) ? data : JSON.parse(data).lookupValues),
+          }),
+          textField: 'name',
+          valueField: 'valueCode',
+        },
+        {
+          name: 'issueTypeIds',
+          type: 'string' as FieldType,
+          label: formatMessage({ id: 'agile.common.issueType' }),
+          required: true,
+          textField: 'name',
+          valueField: 'id',
+          validator: async (value) => {
+            const result = hasStatusIssueTypesRef.current.filter((item) => value && value.some((v: string) => v === item.id));
+            if (result.length > 0) {
+              return `${result.map((i) => i.name).join(',')}下已有同名状态`;
+            }
+            return true;
+          },
+        },
+        {
+          name: 'default',
+          type: 'boolean' as FieldType,
+          defaultValue: false,
+          label: '是否设置为初始状态',
+          required: true,
+        },
+        {
+          name: 'transferAll',
+          type: 'boolean' as FieldType,
+          defaultValue: true,
+          label: '是否转换到所有状态',
+          required: true,
+        },
+        {
+          name: 'completed',
+          type: 'boolean' as FieldType,
+          defaultValue: false,
+          label: '是否为已解决状态',
+          required: true,
+        },
+      ],
+    };
+    merge(defaultProps, typeof injectConfig.dataSetConfigProps === 'function' ? injectConfig.dataSetConfigProps(defaultProps) : injectConfig.dataSetConfigProps);
+    return new DataSet(defaultProps);
+  }, [editStatus?.id, editStatus?.issueStatusId, editStatus?.issueStatusObjectVersionNumberId, isOrganization, statusRecord]);
   useEffect(() => {
     if (selectedIssueType?.length) {
       dataSet.current?.set('issueTypeIds', selectedIssueType);
@@ -187,12 +208,14 @@ const StateMachineCreateStatusProvider: React.FC<IStateMachineCreateStatusProps>
     issueTypes,
     type,
     statusRecord,
+    injectConfig,
     setHasStatusIssueTypes,
   }), []);
   return (
     <StateMachineCreateStatusContext.Provider value={value}>
-      <Loading loading={loading} />
-      {props.children}
+      <LoadingProvider type="spin" loading={loading}>
+        {props.children}
+      </LoadingProvider>
     </StateMachineCreateStatusContext.Provider>
   );
 };
