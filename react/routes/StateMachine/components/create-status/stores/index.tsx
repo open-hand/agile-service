@@ -24,7 +24,7 @@ import useFormatMessage from '@/hooks/useFormatMessage';
 
 export interface IStateMachineCreateStatusInjectConfig {
   dataSetConfigProps?: DataSetProps | ((defaultProps: DataSetProps) => DataSetProps)
-  extraFormItems?: React.ReactElement[]
+  extraFormItems?: (context: IStateMachineCreateStatusContext) => React.ReactElement[]
   issueTypeItemProps?: (context: IStateMachineCreateStatusContext) => Partial<SelectProps>
 }
 /**
@@ -55,6 +55,25 @@ const StateMachineCreateStatusContext = createContext({} as IStateMachineCreateS
 export function useStateMachineCreateStatusContext() {
   return useContext(StateMachineCreateStatusContext);
 }
+function defaultTransformSubmitData(data: any, isCreate?: boolean) {
+  if (isCreate) {
+    return {
+      issueTypeIds: data.issueTypeIds,
+      name: data.name,
+      type: data.valueCode,
+      defaultStatus: data.default,
+      transferAll: data.transferAll,
+      completed: data.completed,
+    };
+  }
+  return {
+    objectVersionNumber: data?.issueStatusObjectVersionNumberId,
+    completed: data.completed,
+    statusId: data.id,
+    id: data.issueStatusId,
+    projectId: getProjectId(),
+  };
+}
 const StateMachineCreateStatusProvider: React.FC<IStateMachineCreateStatusProps> = (props) => {
   const {
     record: statusRecord, modal, selectedIssueType, onSubmit,
@@ -77,20 +96,14 @@ const StateMachineCreateStatusProvider: React.FC<IStateMachineCreateStatusProps>
       autoCreate: true,
       transport: {
         submit: ({ data: dataArray }) => {
-          const data = dataArray[0];
-          return statusRecord ? boardApiConfig.updateStatus(editStatus?.issueStatusId, {
-            objectVersionNumber: editStatus?.issueStatusObjectVersionNumberId,
-            completed: data.completed,
-            statusId: editStatus?.id,
-            id: editStatus?.issueStatusId,
-            projectId: getProjectId(),
-          }) : statusTransformApiConfig[isOrganization ? 'orgCreateStatus' : 'createStatus'](data.issueTypeIds, {
-            name: data.name,
-            type: data.valueCode,
-            defaultStatus: data.default,
-            transferAll: data.transferAll,
-            completed: data.completed,
-          });
+          const isCreate = !statusRecord;
+          const data = defaultTransformSubmitData({
+            ...dataArray[0],
+            ...editStatus,
+          }, isCreate);
+
+          return isCreate ? statusTransformApiConfig[isOrganization ? 'orgCreateStatus' : 'createStatus'](data.issueTypeIds, data as any)
+            : boardApiConfig.updateStatus(editStatus?.issueStatusId, data as any);
         },
       },
       fields: [
