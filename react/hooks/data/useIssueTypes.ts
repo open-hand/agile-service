@@ -19,7 +19,7 @@ export interface IssueTypeConfig {
   programId?: string | number
 }
 type IUseIssueTypesData = IIssueType[] | { list: IIssueType[], [key: string]: any };
-type IUseIssueTypesQueryOptions = UseQueryOptions<IUseIssueTypesData>;
+type IUseIssueTypesQueryOptions = UseQueryOptions<IUseIssueTypesData, unknown, IIssueType[]>;
 export default function useIssueTypes(config?: IssueTypeConfig, options?: IUseIssueTypesQueryOptions) {
   const isOrganization = getIsOrganization();
   const { isProgram } = useIsProgram();
@@ -38,7 +38,7 @@ export default function useIssueTypes(config?: IssueTypeConfig, options?: IUseIs
     const typeCodes = castArray(config?.typeCode).filter(Boolean);
     return typeCodes.length ? issueTypes.filter((type: IIssueType) => typeCodes.includes(type.typeCode)) : issueTypes;
   }, [config?.excludeTypes, config?.typeCode, isOrganization, isProgram]);
-  return useQuery<IUseIssueTypesData>(queryKey, () => {
+  return useQuery<IUseIssueTypesData, unknown, IIssueType[]>(queryKey, () => {
     if (!isOrganization) {
       return issueTypeApi.loadAllWithStateMachineId(config?.applyType ?? applyType, config?.id, config?.onlyEnabled, config?.programId);
     }

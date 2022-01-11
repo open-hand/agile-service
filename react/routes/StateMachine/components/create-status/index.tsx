@@ -83,7 +83,7 @@ const CreateStatus: React.FC = () => {
       {
         !statusRecord && <CheckBox name="transferAll" />
       }
-      {injectConfig.extraFormItems}
+      {typeof injectConfig.extraFormItems === 'function' ? injectConfig.extraFormItems(context) : null}
     </Form>
   );
 };
