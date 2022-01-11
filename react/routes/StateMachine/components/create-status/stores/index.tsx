@@ -9,6 +9,7 @@ import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 import { get } from '@choerodon/inject';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { merge } from 'lodash';
 import { LoadingProvider, OldLoading as Loading } from '@/components/Loading';
 import { IIssueType, IModalProps, IStatus } from '@/common/types';
@@ -21,9 +22,10 @@ import {
 } from '@/api';
 import useFormatMessage from '@/hooks/useFormatMessage';
 
-interface IStateMachineCreateStatusInjectConfig {
+export interface IStateMachineCreateStatusInjectConfig {
   dataSetConfigProps?: DataSetProps | ((defaultProps: DataSetProps) => DataSetProps)
   extraFormItems?: React.ReactElement[]
+  issueTypeItemProps?: (context: IStateMachineCreateStatusContext) => Partial<SelectProps>
 }
 /**
  * 获取注入配置
@@ -39,7 +41,7 @@ export interface IStateMachineCreateStatusProps {
   modal?: IModalProps
   record?: Record
 }
-interface IStateMachineCreateStatusContext extends IStateMachineCreateStatusProps {
+interface IStateMachineCreateStatusContext extends Omit<IStateMachineCreateStatusProps, 'onSubmit'> {
   isOrganization: boolean
   dataSet: DataSet
   setHasStatusIssueTypes: React.Dispatch<React.SetStateAction<IIssueType[]>>
@@ -201,7 +203,6 @@ const StateMachineCreateStatusProvider: React.FC<IStateMachineCreateStatusProps>
   }, [dataSet, statusRecord]);
 
   const value: IStateMachineCreateStatusContext = useCreation(() => ({
-    ...props,
     isOrganization,
     dataSet,
     setType,
@@ -210,7 +211,7 @@ const StateMachineCreateStatusProvider: React.FC<IStateMachineCreateStatusProps>
     statusRecord,
     injectConfig,
     setHasStatusIssueTypes,
-  }), []);
+  }), [isOrganization, dataSet, issueTypes, type, statusRecord, injectConfig]);
   return (
     <StateMachineCreateStatusContext.Provider value={value}>
       <LoadingProvider type="spin" loading={loading}>
