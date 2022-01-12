@@ -15,6 +15,7 @@
                                                                 and aus2.project_id = ab.project_id and aus2.type_code = 'board'
                                                                 and aus2.user_id = #{userId}
         WHERE ab.project_id = #{projectId}
+        and ab.type = #{type}
     </select>
 
 </mapper>

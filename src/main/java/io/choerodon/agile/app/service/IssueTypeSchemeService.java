@@ -11,6 +11,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author shinan.chen
@@ -95,8 +96,12 @@ public interface IssueTypeSchemeService {
      */
     void initByConsumeCreateProject(Long projectId, String projectCode);
 
+    void initByConsumeCreateProjectByCodes(Long projectId, String projectCode, Set<String> codes);
+
 
     Page<IssueTypeSchemeWithInfoVO> queryIssueTypeSchemeList(PageRequest pageRequest, Long organizationId, IssueTypeSchemeSearchVO issueTypeSchemeVO);
 
     void initScheme(Long projectId, Long organizationId, String name, Long defaultIssueTypeId, String schemeApplyType, Map<String, IssueTypeDTO> issueTypeMap);
+
+    void initSchemeByCodes(Long projectId, Long organizationId, String name, Long defaultIssueTypeId, String schemeApplyType, Map<String, IssueTypeDTO> issueTypeMap, Set<String> codes);
 }
