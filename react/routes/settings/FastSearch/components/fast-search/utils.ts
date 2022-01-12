@@ -59,7 +59,7 @@ const FastSearchAttributeRelations: Array<FastSearchAttributeRelationItem> = [
     name: '包含', value: 'like', escapeCharacter: 'like', includeType: ['text', 'input'], // 文字类专属
   },
   {
-    name: '不包含', value: 'notLike', escapeCharacter: 'notLike', includeType: ['text', 'input'], // 文字类专属
+    name: '不包含', value: 'notLike', escapeCharacter: 'not like', includeType: ['text', 'input'], // 文字类专属
   },
   {
     name: '是', value: 'is', escapeCharacter: 'is', excludeType: ['date', 'datetime', 'time', 'text', 'input'], excludeCode: ['issue_type', 'priority', 'status'],
