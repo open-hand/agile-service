@@ -15,7 +15,7 @@ import java.util.List;
  */
 public interface BoardService {
 
-    void create(Long projectId, String boardName);
+    void create(Long projectId, String boardName, String type);
 
     BoardVO update(Long projectId, Long boardId, BoardVO boardVO);
 
@@ -29,7 +29,7 @@ public interface BoardService {
 
     IssueMoveVO move(Long projectId, Long issueId, Long transformId, IssueMoveVO issueMoveVO, Boolean isDemo);
 
-    List<BoardVO> queryByProjectId(Long projectId);
+    List<BoardVO> queryByProjectId(Long projectId, String type);
 
     /**
      * 查询用户看板设置
@@ -78,7 +78,7 @@ public interface BoardService {
      */
     Boolean isLinked(Long projectId, Long issueId, Long statusId);
 
-    BoardDTO createBoard(Long organizationId, Long projectId, String boardName);
+    BoardDTO createBoard(Long organizationId, Long projectId, String boardName, String type);
 
     Page<QuickFilterVO> pagedQueryQuickFilters(PageRequest pageRequest,
                                                Long projectId,

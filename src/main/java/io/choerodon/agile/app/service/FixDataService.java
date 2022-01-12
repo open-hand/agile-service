@@ -15,4 +15,6 @@ public interface FixDataService {
      * 将type_code关联改为issue_type_id关联
      */
     void fixIssueTypeData();
+
+    void fixAgileAndProgram();
 }

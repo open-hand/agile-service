@@ -52,6 +52,8 @@ public class BoardVO {
 
     private UserDTO creator;
 
+    private String type;
+
     public Long getBoardId() {
         return boardId;
     }
@@ -162,5 +164,13 @@ public class BoardVO {
 
     public void setCreator(UserDTO creator) {
         this.creator = creator;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

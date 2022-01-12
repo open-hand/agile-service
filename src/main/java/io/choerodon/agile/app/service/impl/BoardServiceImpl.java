@@ -121,11 +121,14 @@ public class BoardServiceImpl implements BoardService {
     private BoardQuickFilterRelMapper boardQuickFilterRelMapper;
 
     @Override
-    public void create(Long projectId, String boardName) {
+    public void create(Long projectId, String boardName, String type) {
         if (Boolean.TRUE.equals(checkName(0L, projectId, boardName))) {
             throw new CommonException("error.boardName.exist");
         }
-        BoardDTO boardResult = createBoard(0L, projectId, boardName);
+        if (ObjectUtils.isEmpty(type)) {
+            throw new CommonException("error.board.type.not.exist");
+        }
+        BoardDTO boardResult = createBoard(0L, projectId, boardName, type);
         boardColumnService.createColumnWithRelateStatus(boardResult);
     }
 
@@ -187,7 +190,7 @@ public class BoardServiceImpl implements BoardService {
         userSettingDTO.setUserId(DetailsHelper.getUserDetails().getUserId());
         userSettingMapper.delete(userSettingDTO);
         //更新第一个为默认
-        List<BoardVO> boardVOS = queryByProjectId(projectId);
+        List<BoardVO> boardVOS = queryByProjectId(projectId, "agile");
         if (!boardVOS.isEmpty()) {
             Long defaultBoardId = boardVOS.get(0).getBoardId();
             handleUserSetting(defaultBoardId, projectId);
@@ -645,7 +648,7 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public  BoardDTO createBoard(Long organizationId, Long projectId, String boardName) {
+    public  BoardDTO createBoard(Long organizationId, Long projectId, String boardName, String type) {
         BoardDTO boardDTO = new BoardDTO();
         boardDTO.setProjectId(projectId);
         boardDTO.setOrganizationId(organizationId);
@@ -654,6 +657,7 @@ public class BoardServiceImpl implements BoardService {
         boardDTO.setEstimationStatistic(STORY_POINTS);
         boardDTO.setName(boardName);
         boardDTO.setSwimlaneBasedCode(PARENT_CHILD);
+        boardDTO.setType(type);
         if (boardMapper.insertSelective(boardDTO) != 1) {
             throw new CommonException("error.board.insert");
         }
@@ -711,7 +715,7 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     public void initBoard(Long projectId, String boardName, List<StatusPayload> statusPayloads) {
-        BoardDTO boardResult = createBoard(0L, projectId, boardName);
+        BoardDTO boardResult = createBoard(0L, projectId, boardName, "agile");
         boardColumnService.initBoardColumns(projectId, boardResult.getBoardId(), statusPayloads);
     }
 
@@ -803,9 +807,9 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public List<BoardVO> queryByProjectId(Long projectId) {
+    public List<BoardVO> queryByProjectId(Long projectId, String type) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        return modelMapper.map(boardMapper.queryByProjectIdWithUser(userId, projectId), new TypeToken<List<BoardVO>>() {
+        return modelMapper.map(boardMapper.queryByProjectIdWithUser(userId, projectId, type), new TypeToken<List<BoardVO>>() {
         }.getType());
     }
 

@@ -303,8 +303,6 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
     public void initScheme(String name, String schemeApplyType, ProjectEvent projectEvent) {
         Long projectId = projectEvent.getProjectId();
         Long organizationId = projectUtil.getOrganizationId(projectId);
-        Long stateMachineId = initService.createStateMachineWithCreateProject(organizationId, schemeApplyType, projectEvent);
-
         StateMachineSchemeDTO scheme = new StateMachineSchemeDTO();
         scheme.setStatus(StateMachineSchemeStatus.ACTIVE);
         scheme.setName(name);
@@ -317,6 +315,7 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
             if (isInsert != 1) {
                 throw new CommonException("error.stateMachineScheme.create");
             }
+            Long stateMachineId = initService.createStateMachineWithCreateProject(organizationId, schemeApplyType, projectEvent);
             //创建默认状态机配置
             configService.createDefaultConfig(organizationId, scheme.getId(), stateMachineId);
             //创建与项目的关联关系

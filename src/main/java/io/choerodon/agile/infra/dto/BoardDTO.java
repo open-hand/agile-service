@@ -45,6 +45,8 @@ public class BoardDTO extends AuditDomain {
 
     private Long organizationId;
 
+    private String type;
+
     public Long getBoardId() {
         return boardId;
     }
@@ -131,5 +133,13 @@ public class BoardDTO extends AuditDomain {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

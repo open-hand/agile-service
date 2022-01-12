@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.Arrays;
@@ -139,7 +140,7 @@ public class AgileEventHandler {
         }
     }
 
-    private void handlerOrganizationTemplate(ProjectEvent projectEvent) {
+    public void handlerOrganizationTemplate(ProjectEvent projectEvent) {
         if (!ObjectUtils.isEmpty(projectEvent.getUseTemplate()) && Boolean.TRUE.equals(projectEvent.getUseTemplate())) {
             // 同步状态机模板
             organizationConfigService.syncStatusMachineTemplate(projectEvent, SchemeApplyType.AGILE);
@@ -162,18 +163,17 @@ public class AgileEventHandler {
         ProjectEvent projectEvent = JSON.parseObject(message, ProjectEvent.class);
         LOGGER.info("接受更新项目消息{}", message);
         Long projectId = projectEvent.getProjectId();
-        ProjectInfoDTO dto = new ProjectInfoDTO();
-        dto.setProjectId(projectId);
-        if (projectInfoMapper.select(dto).isEmpty()) {
-            List<ProjectEventCategory> projectEventCategories = projectEvent.getProjectCategoryVOS();
-            if (!ObjectUtils.isEmpty(projectEventCategories)) {
+        List<ProjectEventCategory> projectEventCategories = projectEvent.getProjectCategoryVOS();
+        if (!CollectionUtils.isEmpty(projectEventCategories)) {
+            List<String> codes = projectEventCategories.stream().map(ProjectEventCategory::getCode).collect(Collectors.toList());
+            if (codes.contains(ProjectCategory.MODULE_AGILE) || codes.contains(ProjectCategory.MODULE_PROGRAM)) {
                 initIfAgileProject(projectEvent, projectEventCategories);
             }
         } else {
             LOGGER.info("项目{}已初始化，跳过项目初始化", projectEvent.getProjectCode());
         }
         // 删除redis的缓存
-        SpringBeanUtil.getBean(RedisUtil.class).delete("projectInfo:"+projectId);
+        SpringBeanUtil.getBean(RedisUtil.class).delete("projectInfo:" + projectId);
         return message;
     }
 
