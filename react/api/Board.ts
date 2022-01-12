@@ -61,7 +61,13 @@ class BoardApi extends Api<BoardApi> {
        * 加载看板列表
        */
   loadAll() {
-    return axios.get(`${this.prefix}/board`);
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/board`,
+      params: {
+        type: 'agile',
+      },
+    });
   }
 
   getStatusLinkages(): Promise<IStatusLinkage[]> {
@@ -88,11 +94,12 @@ class BoardApi extends Api<BoardApi> {
    * @param boardName
    */
   create(boardName: string) {
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/board`,
       params: {
         boardName,
+        type: 'agile',
       },
     });
   }
