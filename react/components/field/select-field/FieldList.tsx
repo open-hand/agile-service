@@ -2,7 +2,9 @@ import React, { useCallback, useState, useMemo } from 'react';
 import {
   CheckBox, Button, TextField, Icon,
 } from 'choerodon-ui/pro';
+import { forEach, filter } from 'lodash';
 import './FieldList.less';
+import { useDebounceFn } from 'ahooks';
 
 const prefix = 'c7nagile-choose-field-list';
 
@@ -27,9 +29,23 @@ const FieldList: React.FC<Props> = ({
 }) => {
   const [searchText, setSearchText] = useState('');
   const codes = useMemo(() => groups.reduce((res, current) => [...res, ...current.options.map((o) => o.code)], []), [groups]);
+  const newGroups = useMemo(() => {
+    if (searchText && searchText !== '') {
+      const newArr: Group[] = [];
+      forEach(groups, (group: Group) => {
+        const newOptions = filter(group.options || [], (option) => option?.title?.indexOf(searchText) > -1);
+        newArr.push({ ...group, options: newOptions });
+      });
+      return newArr;
+    }
+    return groups;
+  }, [groups, searchText]);
   const hasSelect = useMemo(() => value.length > 0, [value.length]);
   const hasSelectAll = useMemo(() => value.length === codes.length, [codes.length, value.length]);
   const isChecked = useCallback((code: string) => value.includes(code), [value]);
+  const { run: handleInput } = useDebounceFn((searchValue: string) => {
+    setSearchText(searchValue);
+  }, { wait: 540 });
   const handleChange = useCallback((code: string | string[], select: boolean) => {
     if (select) {
       onSelect(code);
@@ -70,6 +86,7 @@ const FieldList: React.FC<Props> = ({
           onChange={(v) => {
             setSearchText(v);
           }}
+          onInput={(e: any) => handleInput(e.target.value)}
           prefix={<Icon type="search" />}
           placeholder="输入文字以进行过滤"
           clearButton
@@ -101,7 +118,7 @@ const FieldList: React.FC<Props> = ({
         </Button>
       </div>
       <div className={`${prefix}-content`}>
-        {groups.map((group) => renderGroup(group))}
+        {newGroups.map((group) => renderGroup(group))}
       </div>
     </div>
   );
