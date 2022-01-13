@@ -612,7 +612,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         if(CollectionUtils.isEmpty(list)){
             return null;
         }
-        Map<Long, String> map = list.stream().collect(Collectors.toMap(StatusMachineSchemeConfigVO::getIssueTypeId, StatusMachineSchemeConfigVO::getApplyType));
+        Map<Long, String> map = list.stream().filter(v -> !Objects.equals(0L, v.getIssueTypeId())).collect(Collectors.toMap(StatusMachineSchemeConfigVO::getIssueTypeId, StatusMachineSchemeConfigVO::getApplyType));
         return map.getOrDefault(issueTypeId, null);
     }
 
@@ -987,6 +987,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     private Long queryStateMachineIdAndCheck(Long projectId, String applyType, Long issueTypeId) {
+        applyType = getApplyType(projectId, issueTypeId);
         if (Boolean.FALSE.equals(EnumUtil.contain(SchemeApplyType.class, applyType))) {
             throw new CommonException(ERROR_APPLYTYPE_ILLEGAL);
         }

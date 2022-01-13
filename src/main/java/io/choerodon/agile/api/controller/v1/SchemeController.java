@@ -225,8 +225,8 @@ public class SchemeController extends BaseController {
     @ApiOperation(value = "添加新状态")
     @PostMapping(value = "/status/create")
     public ResponseEntity<StatusVO> createStatus(@PathVariable("project_id") Long projectId,
-                                                 @RequestParam(required = false)@Encrypt List<Long> issueTypeIds,
-                                                 @RequestParam String applyType,
+                                                 @RequestParam @Encrypt List<Long> issueTypeIds,
+                                                 @RequestParam(required = false) String applyType,
                                                  @RequestBody StatusVO statusVO) {
 
         return new ResponseEntity(projectConfigService.createStatus(projectId, issueTypeIds,applyType, statusVO), HttpStatus.OK);
