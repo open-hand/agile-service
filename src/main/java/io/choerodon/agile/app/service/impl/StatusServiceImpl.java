@@ -172,7 +172,7 @@ public class StatusServiceImpl implements StatusService {
         example.setId(statusId);
         StatusDTO result = statusMapper.selectOne(example);
         AssertUtilsForCommonException.notNull(result, "error.status.not.existed");
-        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
         AssertUtilsForCommonException.notNull(projectVO, "error.project.not.existed");
         String applyType =
                 ProjectCategory.checkContainProjectCategory(projectVO.getCategories(),ProjectCategory.MODULE_PROGRAM) ? "program" : "agile";
@@ -409,7 +409,7 @@ public class StatusServiceImpl implements StatusService {
 
     @Override
     public Page<ProjectStatusVO> listStatusByProjectId(Long projectId, PageRequest pageRequest, StatusSearchVO statusSearchVO) {
-        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
         Page<ProjectStatusVO> page = PageHelper.doPageAndSort(pageRequest, () -> statusMapper.listStatusByProjectId(projectId, projectVO.getOrganizationId(), statusSearchVO));
         List<ProjectStatusVO> content = page.getContent();
         if (CollectionUtils.isEmpty(content)) {
@@ -417,10 +417,17 @@ public class StatusServiceImpl implements StatusService {
         }
         List<Long> statusIds = content.stream().map(ProjectStatusVO::getId).collect(Collectors.toList());
         // 查询状态在当前项目的状态机的使用情况
-        String applyType = ProjectCategory.checkContainProjectCategory(projectVO.getCategories(),ProjectCategory.MODULE_PROGRAM) ? "program" : "agile";
         ProjectConfigDetailVO projectConfigDetailVO = projectConfigService.queryById(projectId);
-        StateMachineSchemeVO stateMachineSchemeVO = projectConfigDetailVO.getStateMachineSchemeMap().get(applyType);
-        List<IssueCountDTO> countDTOS = nodeDeployMapper.countIssueTypeByStatusIds(projectVO.getOrganizationId(),stateMachineSchemeVO.getId(),statusIds,applyType);
+        List<String> applyTypes = ProjectCategory.getProjectApplyType(projectId);
+        List<Long> schemeIds = new ArrayList<>();
+        applyTypes.forEach(v -> {
+            StateMachineSchemeVO stateMachineSchemeVO = projectConfigDetailVO.getStateMachineSchemeMap().get(v);
+            if (!ObjectUtils.isEmpty(stateMachineSchemeVO)) {
+                schemeIds.add(stateMachineSchemeVO.getId());
+            }
+        });
+        Boolean isAgile = !applyTypes.contains(SchemeApplyType.PROGRAM);
+        List<IssueCountDTO> countDTOS = nodeDeployMapper.countStatusIssueTypeScope(projectVO.getOrganizationId(),schemeIds,statusIds,isAgile);
         Map<Long, List<String>> map = new HashMap<>();
         Map<Long, String> issueTypeMap = issueTypeMapper.selectByOptions(projectVO.getOrganizationId(), projectId, null)
                 .stream().collect(Collectors.toMap(IssueTypeVO::getId, IssueTypeVO::getName));
@@ -435,8 +442,9 @@ public class StatusServiceImpl implements StatusService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteStatus(Long projectId, Long statusId, String applyType, List<DeleteStatusTransferVO> statusTransferVOS) {
+        List<String> applyTypes = ProjectCategory.getProjectApplyType(projectId);
         // 删掉对应问题类型状态机里面的节点和转换
-        projectConfigService.handlerDeleteStatusByProject(projectId, applyType, statusId, statusTransferVOS);
+        projectConfigService.handlerDeleteStatusByProject(projectId, applyTypes, statusId, statusTransferVOS);
         // 解除状态和项目的关联
         IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
         issueStatusDTO.setStatusId(statusId);
@@ -452,10 +460,11 @@ public class StatusServiceImpl implements StatusService {
         Map<String, Object> result = new HashMap<>();
         result.put("checkResult", true);
         try {
+            List<String> applyTypes = ProjectCategory.getProjectApplyType(projectId);
             // 校验是不是初始状态
-            checkInitStatus(projectId,applyType,statusId);
+            checkInitStatus(projectId,applyTypes,statusId);
             // 检查对应问题类型状态机里面的节点和转换
-            projectConfigService.checkDeleteStatusByProject(projectId, applyType, statusId);
+            projectConfigService.checkDeleteStatusByProject(projectId, applyTypes, statusId);
         }catch (Exception e){
             result.put("checkResult", false);
             result.put("errorMsg", MessageAccessor.getMessage(e.getMessage()).getDesc());
@@ -464,10 +473,10 @@ public class StatusServiceImpl implements StatusService {
     }
 
     @Override
-    public List<Long> filterIssueType(Long projectId,String applyType){
+    public List<Long> filterIssueType(Long projectId, List<String> applyTypes){
         List<Long> filterIssueType = new ArrayList<>();
         filterIssueType.add(0L);
-        if (!Objects.equals(applyType, SchemeApplyType.PROGRAM)) {
+        if (applyTypes.contains(SchemeApplyType.AGILE)) {
             Long organizationId = ConvertUtil.getOrganizationId(projectId);
             Long newProjectId = projectId == null ? 0L : projectId;
             IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
@@ -482,12 +491,14 @@ public class StatusServiceImpl implements StatusService {
         return filterIssueType;
     }
 
-    private void checkInitStatus(Long projectId, String applyType, Long statusId) {
+    private void checkInitStatus(Long projectId, List<String> applyTypes, Long statusId) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        ProjectConfigDetailVO projectConfigDetailVO = projectConfigService.queryById(projectId);
-        StateMachineSchemeVO stateMachineSchemeVO = projectConfigDetailVO.getStateMachineSchemeMap().get(applyType);
-        List<Long> filterIssueType = filterIssueType(projectId, applyType);
-        List<StatusMachineNodeDTO> list = nodeDeployMapper.selectInitNode(organizationId, stateMachineSchemeVO.getId(), statusId, filterIssueType);
+        List<Long> filterIssueType = filterIssueType(projectId, applyTypes);
+        List<StatusMachineSchemeConfigVO> list = nodeDeployMapper.selectInitNode(organizationId, projectId, applyTypes, statusId);
+        if(CollectionUtils.isEmpty(list)){
+            return;
+        }
+        list = list.stream().filter(v -> !(Objects.equals(SchemeApplyType.AGILE, v.getApplyType()) && filterIssueType.contains(v.getIssueTypeId()))).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(list)) {
             throw new CommonException("error.delete.init.status");
         }

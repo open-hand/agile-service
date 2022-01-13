@@ -34,6 +34,8 @@ public class IssueTypeDTO extends AuditDomain {
     private Boolean referenced;
     private Long referenceId;
     private String source;
+    @Transient
+    private String applyType;
 
     public IssueTypeDTO(String icon, String name, String description, Long organizationId, String colour, String typeCode, Boolean initialize) {
         this.icon = icon;
@@ -189,6 +191,14 @@ public class IssueTypeDTO extends AuditDomain {
 
     public void setInitialize(Boolean initialize) {
         this.initialize = initialize;
+    }
+
+    public String getApplyType() {
+        return applyType;
+    }
+
+    public void setApplyType(String applyType) {
+        this.applyType = applyType;
     }
 
     @Override

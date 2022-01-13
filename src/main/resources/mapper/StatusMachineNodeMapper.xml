@@ -178,6 +178,32 @@
         group by fsmn.status_id,fit.name,fit.id
     </select>
 
+    <select id="countStatusIssueTypeScope" resultType="io.choerodon.agile.infra.dto.IssueCountDTO">
+        select
+        fsmn.status_id as id,
+        fit.name as name,
+        fit.id as issue_type_id
+        from fd_status_machine_scheme_config fsmsc
+        ,fd_status_machine_node fsmn,fd_issue_type fit
+        where fsmsc.organization_id = #{organizationId}
+        AND fsmsc.scheme_id in
+        <foreach collection="schemeIds" item="schemeId" open="(" close=")" separator=",">
+            #{schemeId}
+        </foreach>
+        AND fsmsc.state_machine_id = fsmn.state_machine_id
+        AND fsmn.status_id in
+        <foreach collection="statusIds" item="statusId" open="(" close=")" separator=",">
+            #{statusId}
+        </foreach>
+        AND fit.id = fsmsc.issue_type_id
+        <if test="isAgile">
+            AND fit.type_code != 'feature'
+        </if>
+        AND fit.type_code not in ('issue_auto_test','issue_auto_test')
+        AND fsmsc.issue_type_id != 0
+        group by fsmn.status_id,fit.name,fit.id
+    </select>
+
     <select id="selectStatusIdsByIssueTypeIds" resultType="java.lang.Long">
         select fsmn.status_id
         from fd_status_machine_scheme_config fsmsc
@@ -200,19 +226,25 @@
     </select>
 
 
-    <select id="selectInitNode" resultType="io.choerodon.agile.infra.dto.StatusMachineNodeDTO">
-        select fsmn.* from fd_status_machine_scheme_config fsmsc
-        ,fd_status_machine_node fsmn
-         where fsmsc.organization_id = #{organizationId}
-         AND fsmsc.scheme_id = #{schemeId}
-         AND fsmsc.issue_type_id NOT IN
-         <foreach collection="filterIssueTypes" item="filterIssueType" open="(" close=")" separator=",">
-            #{filterIssueType}
-         </foreach>
-         AND fsmsc.state_machine_id = fsmn.state_machine_id
-         AND fsmn.status_id = #{statusId}
-         AND fsmn.type = 'node_init'
+    <select id="selectInitNode" resultType="io.choerodon.agile.api.vo.StatusMachineSchemeConfigVO">
+        select
+            fsmsc.state_machine_id,
+            fsmsc.issue_type_id,
+            fpc.apply_type
+        from fd_status_machine_scheme_config fsmsc
+        ,fd_status_machine_node fsmn,fd_project_config fpc
+        where fsmsc.organization_id = #{organizationId}
+        AND fpc.project_id = #{projectId}
+        AND fpc.apply_type in
+        <foreach collection="applyTypes" item="applyType" open="(" close=")" separator=",">
+            #{applyType}
+        </foreach>
+        AND fpc.scheme_id = fsmsc.scheme_id
+        AND fsmsc.state_machine_id = fsmn.state_machine_id
+        AND fsmn.status_id = #{statusId}
+        AND fsmn.type = 'node_init'
     </select>
+
     <select id="existByProjectId" resultType="java.lang.Boolean">
         SELECT
            CASE WHEN count(*)  > 0 THEN 1 ELSE 0 END AS result

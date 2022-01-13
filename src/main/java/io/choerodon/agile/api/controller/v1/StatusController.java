@@ -166,9 +166,9 @@ public class StatusController extends BaseController {
     @DeleteMapping(value = "/projects/{project_id}/status/delete_status")
     public ResponseEntity deleteStatus(@PathVariable("project_id") Long projectId,
                                        @RequestParam @Encrypt Long statusId,
-                                       @RequestParam String applyType,
+                                       @RequestParam(required = false) String applyType,
                                        @RequestBody List<DeleteStatusTransferVO> statusTransferVOS) {
-        statusService.deleteStatus(projectId,statusId,applyType, statusTransferVOS);
+        statusService.deleteStatus(projectId,statusId, applyType, statusTransferVOS);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -176,8 +176,8 @@ public class StatusController extends BaseController {
     @ApiOperation(value = "校验状态删除")
     @GetMapping(value = "/projects/{project_id}/status/check_delete_status")
     public ResponseEntity<Map<String, Object>> checkDeleteStatus(@PathVariable("project_id") Long projectId,
-                                                               @RequestParam String applyType,
-                                                               @RequestParam @Encrypt Long statusId) {
+                                                                 @RequestParam(required = false) String applyType,
+                                                                 @RequestParam @Encrypt Long statusId) {
         return new ResponseEntity<>(statusService.checkDeleteStatus(projectId, applyType, statusId), HttpStatus.OK);
     }
 }

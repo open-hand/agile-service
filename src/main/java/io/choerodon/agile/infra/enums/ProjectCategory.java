@@ -1,10 +1,13 @@
 package io.choerodon.agile.infra.enums;
 
+import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -78,6 +81,22 @@ public class ProjectCategory {
         }
         Set<String> codes = categories.stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toSet());
         return codes.contains(category);
+    }
+
+    public static List<String> getProjectApplyType(Long projectId) {
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
+        if (CollectionUtils.isEmpty(projectVO.getCategories())) {
+            throw new CommonException("error.categories.is.null");
+        }
+        List<String> applyTypes = new ArrayList<>();
+        Set<String> codes = projectVO.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toSet());
+        if (codes.contains(ProjectCategory.MODULE_PROGRAM)) {
+            applyTypes.add(SchemeApplyType.PROGRAM);
+        }
+        if (codes.contains(ProjectCategory.MODULE_AGILE)) {
+            applyTypes.add(SchemeApplyType.AGILE);
+        }
+        return applyTypes;
     }
 
     public static Boolean consumeProjectCreatEvent(Set<String> codes) {
