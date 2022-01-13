@@ -13,6 +13,7 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
@@ -37,11 +38,16 @@ public class ProjectInfoServiceImpl implements ProjectInfoService {
 
     @Override
     public void initializationProjectInfo(ProjectEvent projectEvent) {
+
         ProjectInfoDTO projectInfoDTO = new ProjectInfoDTO();
-        projectInfoDTO.setIssueMaxNum(0L);
-        projectInfoDTO.setProjectCode(projectEvent.getProjectCode());
         projectInfoDTO.setProjectId(projectEvent.getProjectId());
+        List<ProjectInfoDTO> projectDTOS = projectInfoMapper.select(projectInfoDTO);
+        if (!CollectionUtils.isEmpty(projectDTOS)) {
+            return;
+        }
+        projectInfoDTO.setProjectCode(projectEvent.getProjectCode());
         projectInfoDTO.setFeedbackMaxNum(0L);
+        projectInfoDTO.setIssueMaxNum(0L);
         int result = projectInfoMapper.insert(projectInfoDTO);
         if (result != 1) {
             throw new CommonException("error.projectInfo.initializationProjectInfo");

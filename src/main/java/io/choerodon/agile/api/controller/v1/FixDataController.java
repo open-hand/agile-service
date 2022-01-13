@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.app.eventhandler.AgileEventHandler;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.MessageDetailDTO;
 import io.choerodon.agile.infra.dto.TestCaseAttachmentDTO;
@@ -49,6 +50,9 @@ public class FixDataController {
     private NoticeService noticeService;
 //    @Autowired
 //    private NotifyFeignClient notifyFeignClient;
+
+    @Autowired
+    private AgileEventHandler agileEventHandler;
 
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("修复0.19创建项目产生的脏数据【全部】")
@@ -154,6 +158,14 @@ public class FixDataController {
     @GetMapping("/fix_issue_type")
     public ResponseEntity fixIssueType() {
         fixDataService.fixIssueTypeData();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.SITE)
+    @ApiOperation("修复项目群和项目融合数据以及需求状态机数据")
+    @GetMapping("/fix_agile_and_program")
+    public ResponseEntity fixDate() {
+        fixDataService.fixAgileAndProgram();
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

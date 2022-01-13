@@ -89,6 +89,12 @@ public class IssueLinkTypeServiceImpl implements IssueLinkTypeService {
 
     @Override
     public void initIssueLinkType(Long projectId) {
+        IssueLinkTypeDTO issueLinkTypeDTO = new IssueLinkTypeDTO();
+        issueLinkTypeDTO.setProjectId(projectId);
+        List<IssueLinkTypeDTO> issueLinkTypeDTOS = issueLinkTypeMapper.select(issueLinkTypeDTO);
+        if (!CollectionUtils.isEmpty(issueLinkTypeDTOS)) {
+            return;
+        }
         IssueLinkTypeDTO duplicate = new IssueLinkTypeDTO();
         duplicate.initDuplicate(projectId);
         IssueLinkTypeDTO blocks = new IssueLinkTypeDTO();

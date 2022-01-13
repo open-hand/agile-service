@@ -95,6 +95,8 @@ public class FixDataServiceImpl implements FixDataService {
     private StatusLinkageMapper statusLinkageMapper;
     @Autowired(required = false)
     private AgileTriggerService agileTriggerService;
+    @Autowired
+    private FixDataMapper fixDataMapper;
 
     @Override
     public void fixCreateProject() {
@@ -295,6 +297,21 @@ public class FixDataServiceImpl implements FixDataService {
             agileTriggerService.fixRuleIssueTypeRel();
         }
         LOGGER.info("==============================>>>>>>>> AGILE Data Fix End, Success! Version: 0.25.0 <<<<<<<<=================================");
+    }
+
+    @Override
+    public void fixAgileAndProgram() {
+        // 修复看板数据
+        fixAboardType();
+    }
+
+    private void fixAboardType() {
+        // 修复普通敏捷项目的看板类型
+        fixDataMapper.initBoardType("agile");
+        // 修复项目群项目的看板类型
+        fixDataMapper.initBoardType("program");
+        // 修复组织看板模板的类型
+        fixDataMapper.initBoardTemplateType("agile");
     }
 
     private void fixStatusLinkage() {
