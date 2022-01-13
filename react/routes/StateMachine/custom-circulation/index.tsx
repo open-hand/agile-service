@@ -390,6 +390,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         children: <NotifySetting
           record={record}
           memberOptions={memberOptions}
+          selectedTypeItem={selectedTypeItem}
           selectedType={selectedType}
           customCirculationDataSet={customCirculationDataSet}
         />,

@@ -4,7 +4,7 @@ import { usePersistFn } from 'ahooks';
 import { useCallback } from 'react';
 import { issueTypeApi } from '@/api';
 import { IIssueType } from '@/common/types';
-import { getIsOrganization } from '@/utils/common';
+import { getIsOrganization, getApplyType } from '@/utils/common';
 import useIsProgram from '../useIsProgram';
 import useKey from './useKey';
 
@@ -22,8 +22,9 @@ type IUseIssueTypesData = IIssueType[] | { list: IIssueType[], [key: string]: an
 type IUseIssueTypesQueryOptions = UseQueryOptions<IUseIssueTypesData, unknown, IIssueType[]>;
 export default function useIssueTypes(config?: IssueTypeConfig, options?: IUseIssueTypesQueryOptions) {
   const isOrganization = getIsOrganization();
-  const { isProgram } = useIsProgram();
-  const applyType = isProgram ? 'program' : 'agile';
+  // const { isProgram } = useIsProgram();
+  const applyType = config?.applyType ?? getApplyType(true); // 待修 改为==》getApplyType(true)
+  const isProgram = applyType === 'program';
   let key = config?.hasTemplate ? 'orgHasTemplateIssueTypes' : 'orgIssueTypes';
   key = isOrganization ? key : 'projectIssueTypes';
   const queryKey = useKey({ key: [key, { onlyEnabled: config?.onlyEnabled }], id: config?.id });
@@ -40,7 +41,7 @@ export default function useIssueTypes(config?: IssueTypeConfig, options?: IUseIs
   }, [config?.excludeTypes, config?.typeCode, isOrganization, isProgram]);
   return useQuery<IUseIssueTypesData, unknown, IIssueType[]>(queryKey, () => {
     if (!isOrganization) {
-      return issueTypeApi.loadAllWithStateMachineId(config?.applyType ?? applyType, config?.id, config?.onlyEnabled, config?.programId);
+      return issueTypeApi.loadAllWithStateMachineId(applyType, config?.id, config?.onlyEnabled, config?.programId);
     }
     return config?.hasTemplate ? issueTypeApi.orghasTemplateList() : issueTypeApi.orgLoad({ params: { page: 0, size: 0 }, data: {} });
   }, {
