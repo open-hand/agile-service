@@ -44,15 +44,18 @@ const SelectTeam: React.FC<SelectTeamProps> = forwardRef(({
     request: wrapRequestCallback(({ requestArgs, page, filter }) => {
       if (!request) {
         if (hasRule && fieldId) {
-          return fieldApi.project(projectId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, 0);
+          return fieldApi.project(projectId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, 0).then((res:any) => ({
+            ...res,
+            list: res.list?.map((item:any) => ({ ...item, projectId: item.projectId?.toString() })),
+          }));
         }
-        return commonApi.getSubProjects(true, projectId);
+        return commonApi.getSubProjects(true, projectId).then((projects:any) => projects.map((item:any) => ({ ...item, projectId: item.projectId?.toString() })));
       }
       return request();
     }, (_, res) => {
       afterFirstRequest && afterFirstRequest(res);
     }),
-    paging: false,
+    paging: !!(hasRule && fieldId),
     afterLoad: afterLoadRef.current as any,
     middleWare: (projects) => {
       if (Array.isArray(projects)) {
@@ -72,13 +75,7 @@ const SelectTeam: React.FC<SelectTeamProps> = forwardRef(({
         }
         return newList;
       }
-      // @ts-ignore
-      const newProjects = (projects as any).content?.map((item) => ({ ...item, projectId: item.projectId?.toString() })) || [];
-      // @ts-ignore
-      // eslint-disable-next-line no-param-reassign
-      projectDataRef.current = newProjects;
-
-      return newProjects;
+      return [];
     },
   }), [addClear, args, fieldId, hasRule, noAssign, projectDataRef, projectId, request, textField, valueField]);
   const props = useSelect(config);

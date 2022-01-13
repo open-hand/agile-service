@@ -125,10 +125,14 @@
             INNER JOIN agile_issue_status ais ON ais.status_id = ai.status_id and ais.project_id = ai.project_id and ais.is_completed = 1
         WHERE
         adl.project_id = #{projectId}
-        AND adl.issue_id IN
-        <foreach collection="issueIdList" open="(" close=")" item="issueId" separator=",">
-            #{issueId}
-        </foreach>
+        AND adl.issue_id IN (
+            select
+               ai.issue_id
+            from agile_issue_sprint_rel aisr
+            join agile_issue ai on ai.issue_id = aisr.issue_id
+            where aisr.project_id = #{projectId}
+            and aisr.sprint_id = #{sprintId}
+        )
         AND field = #{field}
         <if test="field == 'resolution'">
           AND adl.creation_date >= #{startDate}

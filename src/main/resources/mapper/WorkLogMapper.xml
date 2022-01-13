@@ -16,7 +16,7 @@
             awl.created_by
         FROM
             agile_work_log awl
-        JOIN agile_issue_sprint_rel aisr ON awl.issue_id = aisr.issue_id AND aisr.project_id = #{projectId}
+        JOIN agile_issue_sprint_rel aisr ON awl.issue_id = aisr.issue_id AND aisr.project_id = awl.project_id
         WHERE
             aisr.sprint_id = #{sprintId}
         AND awl.start_date >= #{startDate}
