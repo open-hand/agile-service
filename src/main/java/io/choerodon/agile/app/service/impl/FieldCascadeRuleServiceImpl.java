@@ -120,8 +120,13 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         validLoop(fieldCascadeRule);
         fieldCascadeRuleMapper.insertSelective(fieldCascadeRule);
         if (!CollectionUtils.isEmpty(fieldCascadeCreate.getFieldCascadeRuleOptionList())) {
+            Long cascadeFieldId = fieldCascadeCreate.getCascadeFieldId();
+            ObjectSchemeFieldDTO objectSchemeFieldDTO = objectSchemeFieldMapper.selectByPrimaryKey(cascadeFieldId);
             fieldCascadeCreate.getFieldCascadeRuleOptionList().forEach(fieldCascadeRuleOptionVO -> {
                 FieldCascadeRuleOptionDTO fieldCascadeRuleOptionDTO = modelMapper.map(fieldCascadeRuleOptionVO, FieldCascadeRuleOptionDTO.class);
+                if (Objects.equals(FieldCode.SUB_PROJECT, objectSchemeFieldDTO.getCode())) {
+                    fieldCascadeRuleOptionDTO.setCascadeOptionId(fieldCascadeRuleOptionVO.getProjectId());
+                }
                 fieldCascadeRuleOptionDTO.setFieldCascadeRuleId(fieldCascadeRule.getId());
                 fieldCascadeRuleOptionDTO.setProjectId(projectId);
                 fieldCascadeRuleOptionDTO.setOrganizationId(organizationId);
