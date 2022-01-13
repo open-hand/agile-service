@@ -66,4 +66,19 @@
        select * from fd_state_machine_scheme_config
     </insert>
 
+    <select id="queryStatusMachineMapByAppleTypes" resultType="io.choerodon.agile.api.vo.StatusMachineSchemeConfigVO">
+        select
+        fsmc.*,
+        fpc.apply_type
+        from fd_status_machine_scheme_config fsmc
+        left join fd_project_config fpc on fpc.scheme_id  = fsmc.scheme_id
+        where fpc.project_id = #{projectId}
+        and fsmc.organization_id = #{organizationId}
+        and fpc.scheme_type = 'scheme_state_machine'
+        and fpc.apply_type in
+        <foreach collection="applyTypes" item="applyType"  open="(" close=")" separator=",">
+            #{applyType}
+        </foreach>
+    </select>
+
 </mapper>

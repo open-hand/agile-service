@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.StatusMachineSchemeConfigVO;
 import io.choerodon.agile.infra.dto.StatusMachineSchemeConfigDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
@@ -28,4 +29,8 @@ public interface StatusMachineSchemeConfigMapper extends BaseMapper<StatusMachin
                                             @Param("projectId") Long projectId,
                                             @Param("applyType") String applyType,
                                             @Param("issueTypeId") Long issueTypeId);
+
+    List<StatusMachineSchemeConfigVO> queryStatusMachineMapByAppleTypes(@Param("organizationId") Long organizationId,
+                                                                        @Param("projectId") Long projectId,
+                                                                        @Param("applyTypes")List<String> applyTypes);
 }

@@ -22,6 +22,13 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
                                        @Param("schemeId") Long schemeId,
                                        @Param("onlyEnabled") boolean onlyEnabled);
 
+    List<IssueTypeDTO> queryByApplyTypes(@Param("organizationId") Long organizationId,
+                                         @Param("projectId") Long projectId,
+                                         @Param("applyTypes") List<String> applyTypes,
+                                         @Param("onlyEnabled") boolean onlyEnabled,
+                                         @Param("schemeType") String schemeType);
+
+
     /**
      * 根据id查询issue type
      *

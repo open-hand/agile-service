@@ -6,6 +6,7 @@ import io.choerodon.agile.api.vo.StateMachineSchemeVO;
 import io.choerodon.agile.api.vo.event.StateMachineSchemeChangeItem;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -152,4 +153,6 @@ public interface StateMachineSchemeConfigService {
     Long queryStatusMachineBySchemeIdAndIssueType(Long organizationId, Long stateMachineSchemeId, Long issueTypeId);
 
     Long initStatusMachineAndSchemeConfig(Long organizationId, String name, Long schemeId, Long issueTypeId, ProjectVO projectVO, String applyType, Long statusMachineId);
+
+    Map<String, Map<Long, Long>> queryStatusMachineMapByAppleTypes(Long organizationId, Long projectId, List<String> applyTypes);
 }

@@ -90,10 +90,10 @@ public interface ProjectConfigService {
      * 查询项目下的所有状态
      *
      * @param projectId 项目id
-     * @param applyType 类型
+     * @param applyTypes 类型
      * @return 项目下的所有状态
      */
-    List<StatusVO> queryStatusByProjectIdNotType(Long projectId, String applyType);
+    List<StatusVO> queryStatusByProjectIdNotType(Long projectId, List<String> applyTypes);
 
     /**
      * 根据项目id找到方案返回问题类型对应的状态机
@@ -229,13 +229,13 @@ public interface ProjectConfigService {
      */
     Page<StatusSettingVO> statusTransformSettingList(Long projectId, Long issueTypeId, PageRequest pageRequest, String param, String applyType, String schemeCode);
 
-    void handlerDeleteStatusByProject(Long projectId, String applyType, Long statusId, List<DeleteStatusTransferVO> statusTransferVOS);
+    void handlerDeleteStatusByProject(Long projectId, List<String> applyTypes, Long statusId, List<DeleteStatusTransferVO> statusTransferVOS);
 
     void updateNodeObjectVersionNumber(Long project, Long issueType, Long statusId, Long objectVersionNumber, String applyType);
 
     void initIssueTypeStatusMachine(Long project, String applyType);
 
-    void checkDeleteStatusByProject(Long projectId, String applyType, Long statusId);
+    void checkDeleteStatusByProject(Long projectId, List<String> applyTypes, Long statusId);
 
     void checkDeleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId);
 

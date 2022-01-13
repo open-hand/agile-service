@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
@@ -603,6 +604,16 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
         // 创建状态机方案配置
         insert(organizationId, currentStatusMachineId, schemeId, issueTypeId, false);
         return currentStatusMachineId;
+    }
+
+    @Override
+    public Map<String, Map<Long, Long>> queryStatusMachineMapByAppleTypes(Long organizationId, Long projectId, List<String> applyTypes) {
+        Map<String, Map<Long, Long>> map = new HashMap<>();
+        List<StatusMachineSchemeConfigVO> list =  configMapper.queryStatusMachineMapByAppleTypes(organizationId, projectId, applyTypes);
+        if (!CollectionUtils.isEmpty(list)) {
+           map.putAll(list.stream().collect(Collectors.groupingBy(StatusMachineSchemeConfigVO::getApplyType, Collectors.toMap(StatusMachineSchemeConfigVO::getIssueTypeId, StatusMachineSchemeConfigVO::getStateMachineId))));
+        }
+        return map;
     }
 
     private void createIssueStatus(List<StatusPayload> statusPayloads, ProjectVO projectVO) {
