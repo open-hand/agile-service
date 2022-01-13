@@ -216,6 +216,7 @@ class BacklogHome extends Component {
             : undefined,
         sprint: defaultSprint,
       },
+      isProgram: false,
       originFrom: originFrom || 'Backlog',
       defaultTypeId,
       defaultAssignee,

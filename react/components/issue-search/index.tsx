@@ -17,7 +17,8 @@ export interface IssueSearchProps {
   onChange: () => void
   projectId?: string
   programId?: string
-  applyType?: string
+  /** @default 'agile'  */
+  applyType?: 'agile' | 'program' | ''
   foldedHeight?: number
   hasMyAssigned?: boolean
   excludeQuickFilterIds?: string[]
@@ -28,7 +29,7 @@ export function useIssueSearchStore(props: IssueSearchStoreProps) {
 }
 export { IssueSearchStore };
 const IssueSearch: React.FC<IssueSearchProps> = ({
-  urlFilter, onClear, onClickSaveFilter, store, onChange, projectId, programId, applyType, foldedHeight = 43, hasMyAssigned = true, excludeQuickFilterIds = [],
+  urlFilter, onClear, onClickSaveFilter, store, onChange, projectId, programId, applyType = 'agile', foldedHeight = 43, hasMyAssigned = true, excludeQuickFilterIds = [],
 }) => {
   const mountedRef = useRef<boolean>();
   const { isProgram } = useIsProgram();

@@ -33,14 +33,12 @@ const SelectStatus: React.FC<SelectStatusProps> = forwardRef(
     request, issueTypeId, noIssueTypeIdQuery, excludeStatus = [], defaultSelectedIds: propsDefaultSelectedIds, isProgram, isBacklog, isWorkBench, dataRef, afterLoad, flat, projectId, applyType: propsApplyType, issueTypeIds, selectedIds, isOrganization = false, extraStatus = [], ...otherProps
   }, ref: React.Ref<Select>) => {
     const defaultSelectedIds = useCreation(() => castArray(propsDefaultSelectedIds).filter(Boolean), []);
-    let applyType = propsApplyType;
+    let applyType = isProgram ? 'program' : 'agile';
 
-    if (isProgram) {
-      applyType = 'program';
-    }
     if (isBacklog) {
       applyType = 'backlog';
     }
+    applyType = propsApplyType ?? applyType;
     const args = useMemo(() => ({ selectedIds: defaultSelectedIds }), [defaultSelectedIds]);
     const config = useMemo((): SelectConfig<IStatusCirculation> => ({
       name: 'status',
@@ -103,4 +101,5 @@ const SelectStatus: React.FC<SelectStatusProps> = forwardRef(
     );
   },
 );
+SelectStatus.displayName = 'SelectStatus';
 export default SelectStatus;

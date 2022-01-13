@@ -245,8 +245,6 @@ const CreateIssueBase = observer(({
   menuType = 'project',
   extraSubmitValue,
 }: CreateIssueBaseProps) => {
-  const formatMessage = useFormatMessage('agile.common');
-  // formatMessage({}
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
   const currentTemplateSummary = useRef(defaultValues?.summary || '');
@@ -258,6 +256,7 @@ const CreateIssueBase = observer(({
   const setFieldValue = usePersistFn((name, value) => {
     dataSet.current?.set(name, value);
   });
+
   const { isFetching: isLoading, data: issueTypeList } = useProjectIssueTypes({
     projectId,
     typeCode,
@@ -694,6 +693,7 @@ const CreateIssueBase = observer(({
         return {
           isProgram,
           config: {
+            isProgram,
             typeCode,
             projectId,
             menuType: menuType ?? 'project',
