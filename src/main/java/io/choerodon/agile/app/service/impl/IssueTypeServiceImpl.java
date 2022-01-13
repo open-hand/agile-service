@@ -372,7 +372,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         String typeCode = issueType.getTypeCode();
         String applyType = getApplyTypeByCategoryCodes(categoryCodes, typeCode);
         Long stateMachineSchemeId = getSchemeIdByOption(projectId, applyType, SchemeType.STATE_MACHINE);
-        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
         String stateMachineName = projectVO.getCode() + "-状态机-" + issueType.getName();
         Long statusMachineId = null;
         if (Boolean.TRUE.equals(copyStatusMachine)) {
