@@ -205,7 +205,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
       url: `${this.prefix}/status/create`,
       params: {
         issueTypeIds: issueTypeIds.join(','),
-        applyType: getApplyType(true),
+        // applyType: getApplyType(true),
       },
       data: status,
     });
