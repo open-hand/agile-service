@@ -18,7 +18,6 @@ public class FieldCascadeRuleOptionVO extends AuditDomain {
     @Encrypt
     private Long fieldCascadeRuleId;
     @Encrypt
-    @NotNull(message = "选项id不能为空")
     private Long cascadeOptionId;
     private String cascadeOptionName;
     private Long projectId;
