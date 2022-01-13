@@ -180,12 +180,11 @@ public interface AgilePluginService {
 
     /**
      * 查询项目群的问题类型
-     * @param projectId
      * @param issueTypes
      * @param issueTypeIds
      * @return
      */
-    List<IssueTypeVO> queryProgramIssueType(Long projectId, List<IssueTypeVO> issueTypes, List<Long> issueTypeIds);
+    List<IssueTypeVO> filterProgramIssueTypes(List<IssueTypeVO> issueTypes, List<Long> issueTypeIds);
 
     /**
      * 项目群史诗查询pageConfig
