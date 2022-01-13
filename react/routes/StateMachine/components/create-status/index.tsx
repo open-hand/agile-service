@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   Modal, Form, TextField, Select, SelectBox, CheckBox,
 } from 'choerodon-ui/pro';
-import { useCreation } from 'ahooks';
+import { useCreation, useDebounceFn } from 'ahooks';
 import { C7NFormat } from '@choerodon/master';
 import { observer } from 'mobx-react-lite';
 import { MAX_LENGTH_STATUS } from '@/constants/MAX_LENGTH';
@@ -26,6 +26,24 @@ const CreateStatus: React.FC = () => {
   const { isProgram } = useIsProgram();
   const stageItemProps = useCreation(() => (typeof injectConfig.stageItemProps === 'function' ? injectConfig.stageItemProps(context) : {}), [context]);
   const issueTypeItemProps = useCreation(() => (injectConfig.issueTypeItemProps ? injectConfig.issueTypeItemProps(context) : {}), [context]);
+  const { run: handleInputName } = useDebounceFn((value: any) => {
+    if (value && String(value).trim() !== '') {
+      statusTransformApi[isOrganization ? 'orgCheckStatusName' : 'checkStatusName'](value).then((data: any) => {
+        const { statusExist, type: newType, existIssueTypeVO } = data;
+        if (statusExist) {
+          dataSet.current?.set('valueCode', newType);
+          setHasStatusIssueTypes(existIssueTypeVO || []);
+          setType(newType);
+        } else {
+          setType(null);
+          setHasStatusIssueTypes([]);
+        }
+      });
+    } else {
+      setType(null);
+      setHasStatusIssueTypes([]);
+    }
+  }, { wait: 390 });
   return (
     <Form dataSet={dataSet} className="c7n-agile-state-machine-create-status">
       <TextField
@@ -34,26 +52,7 @@ const CreateStatus: React.FC = () => {
         maxLength={MAX_LENGTH_STATUS}
         valueChangeAction={'input' as any}
         placeholder="请输入状态名称，例如：测试中"
-        onInput={(e) => {
-          // @ts-ignore
-          const { value } = e.target;
-          if (value) {
-            statusTransformApi[isOrganization ? 'orgCheckStatusName' : 'checkStatusName'](value).then((data: any) => {
-              const { statusExist, type: newType, existIssueTypeVO } = data;
-              if (statusExist) {
-                dataSet.current?.set('valueCode', newType);
-                setHasStatusIssueTypes(existIssueTypeVO || []);
-                setType(newType);
-              } else {
-                setType(null);
-                setHasStatusIssueTypes([]);
-              }
-            });
-          } else {
-            setType(null);
-            setHasStatusIssueTypes([]);
-          }
-        }}
+        onChange={handleInputName}
       />
       <Select
         name="valueCode"

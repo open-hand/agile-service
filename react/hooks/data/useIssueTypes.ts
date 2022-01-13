@@ -7,6 +7,7 @@ import { IIssueType } from '@/common/types';
 import { getIsOrganization, getApplyType } from '@/utils/common';
 import useIsProgram from '../useIsProgram';
 import useKey from './useKey';
+import useIsInProgram from '../useIsInProgram';
 
 export interface IssueTypeConfig {
   id?: string
@@ -22,9 +23,8 @@ type IUseIssueTypesData = IIssueType[] | { list: IIssueType[], [key: string]: an
 type IUseIssueTypesQueryOptions = UseQueryOptions<IUseIssueTypesData, unknown, IIssueType[]>;
 export default function useIssueTypes(config?: IssueTypeConfig, options?: IUseIssueTypesQueryOptions) {
   const isOrganization = getIsOrganization();
-  // const { isProgram } = useIsProgram();
+  const { isShowFeature } = useIsInProgram();
   const applyType = config?.applyType ?? getApplyType(true); // 待修 改为==》getApplyType(true)
-  const isProgram = applyType === 'program';
   let key = config?.hasTemplate ? 'orgHasTemplateIssueTypes' : 'orgIssueTypes';
   key = isOrganization ? key : 'projectIssueTypes';
   const queryKey = useKey({ key: [key, { onlyEnabled: config?.onlyEnabled }], id: config?.id });
@@ -34,11 +34,11 @@ export default function useIssueTypes(config?: IssueTypeConfig, options?: IUseIs
     if (isOrganization) {
       issueTypes = ((Array.isArray(res) ? res : res.list) || []).filter((item: IIssueType) => item.typeCode !== 'backlog' && !includes(config?.excludeTypes || [], item.typeCode));
     } else {
-      issueTypes = (!isProgram ? res.filter((item: IIssueType) => item.typeCode !== 'feature' && !includes(config?.excludeTypes || [], item.typeCode)) : res);
+      issueTypes = (isShowFeature ? res.filter((item: IIssueType) => item.typeCode !== 'feature' && !includes(config?.excludeTypes || [], item.typeCode)) : res);
     }
     const typeCodes = castArray(config?.typeCode).filter(Boolean);
     return typeCodes.length ? issueTypes.filter((type: IIssueType) => typeCodes.includes(type.typeCode)) : issueTypes;
-  }, [config?.excludeTypes, config?.typeCode, isOrganization, isProgram]);
+  }, [config?.excludeTypes, config?.typeCode, isOrganization, isShowFeature]);
   return useQuery<IUseIssueTypesData, unknown, IIssueType[]>(queryKey, () => {
     if (!isOrganization) {
       return issueTypeApi.loadAllWithStateMachineId(applyType, config?.id, config?.onlyEnabled, config?.programId);
