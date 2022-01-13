@@ -10,7 +10,14 @@ export const getOrganizationId = () => (AppState.currentMenuType
   ? AppState.currentMenuType.organizationId
   : 0);
 export const getUserId = () => AppState.userInfo?.id || 0;
-export const getApplyType = () => ((AppState.currentMenuType.categories || []).map((c) => c.code).includes('N_PROGRAM') ? 'program' : 'agile');
+export const getApplyType = (mixtureCategory = false) => {
+  const codes = (AppState.currentMenuType.categories || []).map((c) => c.code);
+  let applyType = codes.includes('N_PROGRAM') ? 'program' : 'agile';
+  if (mixtureCategory) {
+    applyType = codes.includes('N_PROGRAM') && codes.includes('N_AGILE') ? '' : applyType;
+  }
+  return applyType;
+};
 export const getMenuType = () => (AppState.currentMenuType ? AppState.currentMenuType.type : '');
 export const getIsProjectMember = () => {
   if (AppState.userInfo.currentRoleLabels && Array.isArray(AppState.userInfo.currentRoleLabels)) {

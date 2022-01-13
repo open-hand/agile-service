@@ -2,7 +2,7 @@ import { axios } from '@choerodon/boot';
 import {
   getProjectId, getApplyType, getOrganizationId, getIsOrganization,
 } from '@/utils/common';
-import { IStatus, IField } from '@/common/types';
+import { IStatus, IField, IIssueType } from '@/common/types';
 import Api from './Api';
 
 export interface IStatusCirculation {
@@ -205,7 +205,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
       url: `${this.prefix}/status/create`,
       params: {
         issueTypeIds: issueTypeIds.join(','),
-        applyType: getApplyType(),
+        applyType: getApplyType(true),
       },
       data: status,
     });
@@ -228,7 +228,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
       url: `${this.prefix}/state_machine/link_status`,
       params: {
         ...statusLink,
-        applyType: getApplyType(),
+        applyType: getApplyType(true),
       },
     });
   }
@@ -250,7 +250,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
       url: `${this.prefix}/status/check_delete_status`,
       params: {
         statusId,
-        applyType: getApplyType(),
+        applyType: getApplyType(true),
       },
       noPrompt: true,
     });
@@ -261,7 +261,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
       method: 'delete',
       url: `${this.prefix}/status/delete_status`,
       params: {
-        applyType: getApplyType(),
+        applyType: getApplyType(true),
         statusId,
       },
       data: [],
@@ -469,14 +469,15 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     });
   }
 
-  getCustomMember(issueTypeId: string, extraOptions: { code: string, name: string }[] = [], schemeCode: string = 'agile_issue') {
+  getCustomMember(issueType: IIssueType, extraOptions: { code: string, name: string }[] = [], schemeCode: string = 'agile_issue') {
     const arr = [
       { code: 'projectOwner', name: '项目所有者' },
       { code: 'reporter', name: '报告人' },
       { code: 'starUser', name: '关注人' },
       ...extraOptions,
     ];
-    if (getApplyType() === 'agile') {
+    const { id: issueTypeId, typeCode } = issueType;
+    if (getApplyType(true) === 'agile' || (getApplyType(true) === '' && !['feature', 'issue_epic'].includes(typeCode))) {
       arr.push({ code: 'assignee', name: '经办人' });
     }
     return this.request({
@@ -756,7 +757,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     });
   }
 
-  getLogList(params: {page: number, size: number}, data: { statusCode?: 'LOOP' | 'SUCCESS', params?: string }) {
+  getLogList(params: { page: number, size: number }, data: { statusCode?: 'LOOP' | 'SUCCESS', params?: string }) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/status_linkage_execution_log/list`,

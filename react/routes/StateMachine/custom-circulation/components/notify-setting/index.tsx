@@ -86,7 +86,7 @@ function useClickOut(onClickOut) {
 
 const NotifySetting = ({
   // @ts-ignore
-  modal, record, selectedType, customCirculationDataSet, memberOptions = [] as Array<{ code: string, name: string }>,
+  modal, record, selectedType, customCirculationDataSet, memberOptions = [] as Array<{ code: string, name: string }>, selectedTypeItem,
 }) => {
   const [loading, setLoading] = useState(false);
   const [hidden, setHidden] = useState(true);
@@ -101,14 +101,14 @@ const NotifySetting = ({
     autoQuery: true,
     paging: false,
     transport: {
-      read: () => statusTransformApiConfig[isOrganization ? 'orgGetCustomMember' : 'getCustomMember'](selectedType, memberOptions),
+      read: () => statusTransformApiConfig[isOrganization ? 'orgGetCustomMember' : 'getCustomMember'](selectedTypeItem, memberOptions),
 
     },
     fields: [
       { name: 'code', type: 'string' as FieldType },
       { name: 'name', type: 'string' as FieldType },
     ],
-  }), [isOrganization, memberOptions, selectedType]);
+  }), [isOrganization, memberOptions, selectedTypeItem]);
 
   const notifyMethodDataSet = useMemo(() => new DataSet({
     data: [
