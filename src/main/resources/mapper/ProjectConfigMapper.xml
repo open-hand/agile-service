@@ -85,7 +85,17 @@
             AND smsc.state_machine_id = smn.state_machine_id
          WHERE
             smsc.organization_id = #{organizationId}
-            AND smsc.scheme_id = #{stateMachineSchemeId}
+            AND smsc.scheme_id in (
+                select
+                  fpc.scheme_id
+                from fd_project_config fpc
+                where fpc.project_id = #{projectId}
+                and fpc.scheme_type = 'scheme_state_machine'
+                and fpc.apply_type in
+                <foreach collection="applyTypes" item="applyType" open="(" close=")" separator=",">
+                    #{applyType}
+                </foreach>
+             )
             AND smn.status_id = #{statusId}
          GROUP BY
             smsc.issue_type_id

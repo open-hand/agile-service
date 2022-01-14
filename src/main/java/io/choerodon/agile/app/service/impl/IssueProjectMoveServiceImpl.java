@@ -154,8 +154,8 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
             throw new CommonException("error.transfer.project.is.null");
         }
         // 两个是否是在同一个组织下,并且项目群项目、普通项目、运维项目不能相互转换
-        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
-        ProjectVO targetProjectVO = baseFeignClient.queryProject(targetProjectId).getBody();
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
+        ProjectVO targetProjectVO = ConvertUtil.queryProject(targetProjectId);
         if (!Objects.equals(projectVO.getOrganizationId(), targetProjectVO.getOrganizationId())) {
             throw new CommonException("error.transfer.across.organizations");
         }
@@ -194,7 +194,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
     @Override
     public List<ProjectVO> listMoveProject(Long projectId, String typeCode) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
         List<ProjectVO> projectVOS = baseFeignClient.queryOrgProjects(projectVO.getOrganizationId(), userId).getBody();
         if (!CollectionUtils.isEmpty(projectVOS)) {
             return projectVOS.stream()
@@ -246,8 +246,8 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
                 throw new CommonException("error.transfer.project.is.null");
             }
             // 两个是否是在同一个组织下,并且项目群项目、普通项目、运维项目不能相互转换
-            ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
-            ProjectVO targetProjectVO = baseFeignClient.queryProject(targetProjectId).getBody();
+            ProjectVO projectVO = ConvertUtil.queryProject(projectId);
+            ProjectVO targetProjectVO = ConvertUtil.queryProject(targetProjectId);
             if (!Objects.equals(projectVO.getOrganizationId(), targetProjectVO.getOrganizationId())) {
                 throw new CommonException("error.transfer.across.organizations");
             }
