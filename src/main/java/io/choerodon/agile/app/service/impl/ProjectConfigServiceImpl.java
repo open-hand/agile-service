@@ -606,7 +606,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         return modelMapper.map(stateMachineNode, StatusMachineNodeVO.class);
     }
 
-    private String getApplyType(Long projectId, Long issueTypeId) {
+    @Override
+    public String getApplyType(Long projectId, Long issueTypeId) {
         List<String> applyTypes = ProjectCategory.getProjectApplyType(projectId);
         List<StatusMachineSchemeConfigVO> list = statusMachineSchemeConfigMapper.queryStatusMachineMapByAppleTypes(ConvertUtil.getOrganizationId(projectId), projectId, applyTypes);
         if(CollectionUtils.isEmpty(list)){

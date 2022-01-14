@@ -124,13 +124,15 @@ public class PersonalTemplateServiceImpl implements PersonalTemplateService {
     }
 
     private void checkAction(Long projectId, String action) {
-        ProjectVO body = ConvertUtil.queryProject(projectId);
-        List<String> actions;
-        Boolean projectCategory = ProjectCategory.checkContainProjectCategory(body.getCategories(), ProjectCategory.MODULE_PROGRAM);
-        if (!ObjectUtils.isEmpty(body) && Boolean.TRUE.equals(projectCategory)) {
-            actions = Arrays.asList(PROGRAM_PERSONAL_TEMPLATE_ACTIONS);
-        }else {
-            actions = Arrays.asList(AGILE_PERSONAL_TEMPLATE_ACTIONS);
+        ProjectVO project = ConvertUtil.queryProject(projectId);
+        List<String> actions = new ArrayList<>();
+        boolean containsAgile = ProjectCategory.checkContainProjectCategory(project.getCategories(), ProjectCategory.MODULE_AGILE);
+        boolean containsProgram = ProjectCategory.checkContainProjectCategory(project.getCategories(), ProjectCategory.MODULE_PROGRAM);
+        if (containsAgile) {
+            actions.addAll(Arrays.asList(AGILE_PERSONAL_TEMPLATE_ACTIONS));
+        }
+        if (containsProgram) {
+            actions.addAll(Arrays.asList(PROGRAM_PERSONAL_TEMPLATE_ACTIONS));
         }
         if (!actions.contains(action)) {
             throw new CommonException("error.action.is.illegal");
