@@ -174,11 +174,18 @@ public class StatusServiceImpl implements StatusService {
         AssertUtilsForCommonException.notNull(result, "error.status.not.existed");
         ProjectVO projectVO = ConvertUtil.queryProject(projectId);
         AssertUtilsForCommonException.notNull(projectVO, "error.project.not.existed");
-        String applyType =
-                ProjectCategory.checkContainProjectCategory(projectVO.getCategories(),ProjectCategory.MODULE_PROGRAM) ? "program" : "agile";
-        Long schemeId = projectConfigService.queryById(projectId).getStateMachineSchemeMap().get(applyType).getId();
+        List<String> applyTypes = ProjectCategory.getProjectApplyType(projectId);
+        ProjectConfigDetailVO projectConfigDetailVO = projectConfigService.queryById(projectId);
+        List<Long> schemeIds = new ArrayList<>();
+        applyTypes.forEach(v -> {
+            StateMachineSchemeVO stateMachineSchemeVO = projectConfigDetailVO.getStateMachineSchemeMap().get(v);
+            if (!ObjectUtils.isEmpty(stateMachineSchemeVO)) {
+                schemeIds.add(stateMachineSchemeVO.getId());
+            }
+        });
+        Boolean isAgile = !applyTypes.contains(SchemeApplyType.PROGRAM);
         Set<Long> issueTypeIdSet=
-                nodeDeployMapper.countIssueTypeByStatusIds(organizationId, schemeId, Arrays.asList(statusId), applyType)
+                nodeDeployMapper.countStatusIssueTypeScope(organizationId, schemeIds, Arrays.asList(statusId), isAgile)
                         .stream()
                         .map(IssueCountDTO::getIssueTypeId)
                         .collect(Collectors.toSet());

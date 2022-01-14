@@ -381,7 +381,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                                          Boolean copyStatusMachine) {
         Long issueTypeId = issueType.getId();
         String typeCode = issueType.getTypeCode();
-        String applyType = getApplyTypeByCategoryCodes(categoryCodes, typeCode);
+        String applyType = projectConfigService.getApplyType(projectId, issueTypeId);
         Long stateMachineSchemeId = getSchemeIdByOption(projectId, applyType, SchemeType.STATE_MACHINE);
         ProjectVO projectVO = ConvertUtil.queryProject(projectId);
         String stateMachineName = projectVO.getCode() + "-状态机-" + issueType.getName();
@@ -447,19 +447,6 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         IssueTypeDTO issueTypeDTO = querySystemIssueTypeByCode(organizationId, typeCode);
         // 查询系统问题类型的状态机
         return stateMachineSchemeConfigService.queryStatusMachineBySchemeIdAndIssueType(organizationId, stateMachineSchemeId, issueTypeDTO.getId());
-    }
-
-    private String getApplyTypeByCategoryCodes(Set<String> categoryCodes, String typeCode) {
-        String applyType;
-        if (categoryCodes.contains(ProjectCategory.MODULE_AGILE)) {
-            applyType = "agile";
-        } else {
-            applyType = "program";
-        }
-        if (IssueTypeCode.BACKLOG.value().equals(typeCode)) {
-            applyType = "backlog";
-        }
-        return applyType;
     }
 
     private void initIssueTypeSchemeConfig(Long organizationId, Long projectId, Long issueTypeId, String applyType) {
@@ -553,9 +540,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         Long issueTypeId = issueTypeDTO.getId();
         deleteIssueStatusIfLastOne(organizationId, projectId, issueTypeId);
 
-        String typeCode = issueTypeDTO.getTypeCode();
-        Set<String> codes = getProjectCategoryCodes(projectId);
-        String applyType = getApplyTypeByCategoryCodes(codes, typeCode);
+        String applyType = projectConfigService.getApplyType(projectId, issueTypeId);
         Long stateMachineSchemeId = getSchemeIdByOption(projectId, applyType, SchemeType.STATE_MACHINE);
         StatusMachineSchemeConfigDTO statusMachineSchemeConfig = new StatusMachineSchemeConfigDTO();
         statusMachineSchemeConfig.setIssueTypeId(issueTypeId);

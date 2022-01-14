@@ -107,13 +107,12 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
         if (CollectionUtils.isEmpty(linkageDTOS)) {
             return new ArrayList<>();
         }
-        return handlerLinkIssueStatusLinkageVO(projectId, linkageDTOS);
+        return handlerLinkIssueStatusLinkageVO(projectId, issueTypeId, linkageDTOS);
     }
 
-    private List<LinkIssueStatusLinkageVO> handlerLinkIssueStatusLinkageVO(Long projectId, List<LinkIssueStatusLinkageDTO> linkageDTOS) {
+    private List<LinkIssueStatusLinkageVO> handlerLinkIssueStatusLinkageVO(Long projectId, Long issueTypeId,List<LinkIssueStatusLinkageDTO> linkageDTOS) {
         // 获取项目的状态
-        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
-        String applyType = ProjectCategory.checkContainProjectCategory(projectVO.getCategories(), ProjectCategory.MODULE_PROGRAM) ? SchemeApplyType.PROGRAM : SchemeApplyType.AGILE;
+        String applyType = projectConfigService.getApplyType(projectId, issueTypeId);
 
         List<StatusVO> statusVOS = projectConfigService.queryStatusByProjectId(projectId, applyType);
         Map<Long, StatusVO> statusMap = new HashMap<>();
@@ -159,7 +158,7 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
         if (CollectionUtils.isEmpty(linkageDTOS)) {
             return new HashMap<>();
         }
-        List<LinkIssueStatusLinkageVO> linkIssueStatusLinkageVOS = handlerLinkIssueStatusLinkageVO(projectId, linkageDTOS);
+        List<LinkIssueStatusLinkageVO> linkIssueStatusLinkageVOS = handlerLinkIssueStatusLinkageVO(projectId, issueTypeId,linkageDTOS);
         return linkIssueStatusLinkageVOS.stream().collect(Collectors.groupingBy(LinkIssueStatusLinkageVO::getStatusId));
     }
 
@@ -228,15 +227,13 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
         if (ObjectUtils.isEmpty(linkageVO.getIssueTypeId()) || ObjectUtils.isEmpty(linkageVO.getLinkIssueTypeId())) {
             throw new CommonException("error.link.issue.filter.illegal");
         }
+        String applyType = projectConfigService.getApplyType(projectId, linkageVO.getIssueTypeId());
         LinkIssueStatusLinkageDTO linkIssueStatusLinkageDTO = new LinkIssueStatusLinkageDTO(projectId, organizationId);
         linkIssueStatusLinkageDTO.setIssueTypeId(linkageVO.getIssueTypeId());
         linkIssueStatusLinkageDTO.setStatusId(linkageVO.getStatusId());
         linkIssueStatusLinkageDTO.setLinkTypeId(linkageVO.getLinkTypeId());
         linkIssueStatusLinkageDTO.setLinkIssueTypeId(linkageVO.getLinkIssueTypeId());
         List<LinkIssueStatusLinkageDTO> dtos = linkIssueStatusLinkageMapper.select(linkIssueStatusLinkageDTO);
-        // 获取项目的状态
-        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
-        String applyType = ProjectCategory.checkContainProjectCategory(projectVO.getCategories(), ProjectCategory.MODULE_PROGRAM) ? SchemeApplyType.PROGRAM : SchemeApplyType.AGILE;
         List<StatusAndTransformVO> statusAndTransformVOS = projectConfigService.statusTransformList(projectId, linkageVO.getLinkIssueTypeId(), applyType);
         List<StatusVO> statusVOS = modelMapper.map(statusAndTransformVOS, new TypeToken<List<StatusVO>>() {
         }.getType());
