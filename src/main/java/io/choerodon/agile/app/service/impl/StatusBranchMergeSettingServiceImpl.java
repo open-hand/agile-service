@@ -132,8 +132,8 @@ public class StatusBranchMergeSettingServiceImpl implements StatusBranchMergeSet
     }
 
     private void updateStatus(IssueDTO issue, Long targetStatusId, Long projectId) {
-        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
-        String applyType = ProjectCategory.checkContainProjectCategory(projectVO.getCategories(), ProjectCategory.MODULE_PROGRAM) ? "program" : "agile";
+        Long issueTypeId = issue.getIssueTypeId();
+        String applyType = projectConfigService.getApplyType(projectId, issueTypeId);
         List<TransformVO> transforms =
                 projectConfigService.queryTransformsByProjectId(projectId, issue.getStatusId(), issue.getIssueId(), issue.getIssueTypeId(), applyType);
         Long transformId = null;

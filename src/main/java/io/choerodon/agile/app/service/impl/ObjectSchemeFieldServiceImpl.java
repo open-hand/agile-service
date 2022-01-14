@@ -381,8 +381,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         addNotSyncedField(objectSchemeFieldDTOS, issueTypeCodes, activeBacklog);
         Collections.sort(objectSchemeFieldDTOS, Comparator.comparing(ObjectSchemeFieldDTO::getId));
         boolean containProgram = issueTypeCodes.contains(IssueTypeCode.FEATURE.value());
-        if(containProgram && agilePluginService != null){
-           return agilePluginService.filterProgramEpic(objectSchemeFieldDTOS);
+        if (containProgram && agilePluginService != null) {
+            objectSchemeFieldDTOS = agilePluginService.filterProgramEpic(objectSchemeFieldDTOS);
         }
         return filterFieldsByProjectCategories(objectSchemeFieldDTOS, projectId);
     }

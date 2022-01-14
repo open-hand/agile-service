@@ -244,4 +244,12 @@ public interface ProjectConfigService {
     NodeSortVO updateSort(Long projectId, Long statusMachineId, NodeSortVO nodeSortVO, String applyType);
 
     void transformAll(List<StatusMachineNodeVO> statusMachineNodeVOS, Long organizationId, Long statusId, Long stateMachineId, Long nodeId);
+
+    /**
+     * 根据问题类型和项目id查询applyType
+     * @param projectId
+     * @param issueTypeId
+     * @return
+     */
+    String getApplyType(Long projectId, Long issueTypeId);
 }
