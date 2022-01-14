@@ -114,6 +114,7 @@ function useGanttHeader(config: IGanttHeaderHookConfig) {
         display: true,
         handler: () => {
           openCreateIssue({
+            isProgram: false,
             defaultValues: { sprint: sprintIds?.length === 1 ? sprintIds.filter((item) => item !== '0')[0] : undefined },
             onCreate: () => getConfig('onRefresh')(),
           });

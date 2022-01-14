@@ -65,6 +65,7 @@ class CreateEpic extends Component {
             summary: value,
             epicName: value,
           },
+          isProgram: false,
           defaultTypeId: epicType.id,
           onCreate: (res) => {
             this.canAdd = true;

@@ -230,6 +230,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
               // 这里延迟打开
               setTimeout(() => {
                 openCreateIssue({
+                  isProgram: false,
                   ...merge(res, {
                     parentIssue: !parentIssue.groupType ? parentIssue : undefined,
                     defaultFeature: parentIssue.groupType === 'feature' ? parentIssue : undefined,

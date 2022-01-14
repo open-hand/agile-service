@@ -212,6 +212,7 @@ const Issue = observer(({ cached, updateCache }) => {
         path: 'issue',
         props: {
           issueId: id,
+          applyType: 'agile',
           tab: detailTab === 'comment' ? 'comment' : undefined,
           // store: detailStore,
         },
@@ -262,6 +263,7 @@ const Issue = observer(({ cached, updateCache }) => {
       path: 'issue',
       props: {
         issueId: get(record, 'issueId'),
+        applyType: 'agile',
         // store: detailStore,
       },
       events: {
@@ -300,6 +302,7 @@ const Issue = observer(({ cached, updateCache }) => {
   }, [issueSearchStore, tableProps]);
   const handleOpenCreateIssue = usePersistFn(() => {
     openCreateIssue({
+      isProgram: false,
       onCreate: handleCreateIssue,
       defaultValues: {
         summary: IssueStore.defaultSummary,

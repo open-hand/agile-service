@@ -21,18 +21,18 @@ export interface ProjectIssueTypesConfig {
   menuType?: 'project' | 'org'
 }
 export default function useProjectIssueTypes(config?: ProjectIssueTypesConfig, options?: UseQueryOptions<IIssueType[]>) {
-  const { isProgram } = useIsProgram(); // 这里对项目群判断 对 config?.projectId 传入项目未做判断
+  const hookIsProgram = useIsProgram(); // 这里对项目群判断 对 config?.projectId 传入项目未做判断
+  const isProgram = config?.isProgram ?? hookIsProgram.isProgram;
   const { isShowFeature } = useIsInProgram({ projectId: config?.projectId });
   const applyType = config?.applyType ?? getApplyType(true);
   const key = useProjectKey({ key: ['issueTypes', { onlyEnabled: config?.onlyEnabled ?? true, applyType }], projectId: config?.projectId });
-
-  const select:UseQueryOptions<IIssueType[]>['select'] = useCallback((data:any[]) => {
-    const issueTypes = (!(config?.isProgram ?? isProgram) ? data.filter((item: IIssueType) => item.typeCode !== 'feature') : data);
+  const select: UseQueryOptions<IIssueType[]>['select'] = useCallback((data: any[]) => {
+    const issueTypes = (!isProgram ? data.filter((item: IIssueType) => item.typeCode !== 'feature') : data);
     const finalIssueTypes = ((config?.isShowFeature ?? isShowFeature) || config?.menuType === 'org') ? issueTypes.filter((item) => item.typeCode !== 'issue_epic') : issueTypes;
     // eslint-disable-next-line no-nested-ternary
     const typeCodes = Array.isArray(config?.typeCode) ? config?.typeCode : (config?.typeCode ? [config?.typeCode] : null);
-    return typeCodes ? finalIssueTypes.filter((type:any) => typeCodes.includes(type.typeCode)) : finalIssueTypes;
-  }, [config?.isProgram, config?.isShowFeature, config?.menuType, config?.typeCode, isProgram, isShowFeature]);
+    return typeCodes ? finalIssueTypes.filter((type: any) => typeCodes.includes(type.typeCode)) : finalIssueTypes;
+  }, [config?.isShowFeature, config?.menuType, config?.typeCode, isProgram, isShowFeature]);
   return useQuery(key, () => issueTypeApi.loadAllWithStateMachineId(applyType, config?.projectId, config?.onlyEnabled ?? true, config?.programId), {
     select,
     initialData: [] as IIssueType[],
