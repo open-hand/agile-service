@@ -2,7 +2,6 @@ import React from 'react';
 import { Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { Permission } from '@choerodon/boot';
-import useIsInProgram from '@/hooks/useIsInProgram';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import SprintStatus from '@/components/tag/sprint-status-tag/SprintStatus';
 import SprintStoryPointInfo from '@/components/SprintStoryPointInfo';

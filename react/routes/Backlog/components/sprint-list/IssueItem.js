@@ -4,7 +4,6 @@ import { usePersistFn } from 'ahooks';
 import { Tooltip, Icon } from 'choerodon-ui/pro';
 import classnames from 'classnames';
 import moment from 'moment';
-import useIsInProgram from '@/hooks/useIsInProgram';
 import TypeTag from '@/components/TypeTag';
 import StatusTag from '@/components/StatusTag';
 import PriorityTag from '@/components/PriorityTag';
