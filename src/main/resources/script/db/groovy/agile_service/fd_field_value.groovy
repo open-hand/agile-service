@@ -47,4 +47,8 @@ databaseChangeLog(logicalFilePath: 'fd_field_value.groovy') {
             column(name: "scheme_code", type: "VARCHAR(30)")
         }
     }
+
+    changeSet(id: '2022-01-17-fd-field-value-drop-index', author: 'huaxin.deng@hand-china.com') {
+        dropIndex(tableName: "fd_field_value", indexName: "pk_field_value_id")
+    }
 }

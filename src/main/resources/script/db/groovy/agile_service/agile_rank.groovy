@@ -40,4 +40,8 @@ databaseChangeLog(logicalFilePath: 'agile_rank.groovy') {
         }
     }
 
+    changeSet(id: '2022-01-17-agile-rank-drop-index', author: 'huaxin.deng@hand-china.com') {
+        dropIndex(tableName: "agile_rank", indexName: "idx_project_id")
+    }
+
 }

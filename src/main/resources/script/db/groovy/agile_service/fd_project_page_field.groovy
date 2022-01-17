@@ -30,4 +30,8 @@ databaseChangeLog(logicalFilePath: 'fd_project_page_field.groovy') {
             column(name: "organization_id", type: "BIGINT UNSIGNED")
         }
     }
+
+    changeSet(id: '2022-01-17-fd-project-page-field-drop-index', author: 'huaxin.deng@hand-china.com') {
+        dropIndex(tableName: "fd_project_page_field", indexName: "pk_project_page_field_id")
+    }
 }

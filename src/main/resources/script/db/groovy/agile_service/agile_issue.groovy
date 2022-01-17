@@ -221,4 +221,8 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_issue.groovy') {
             column(name: 'is_pre_sprint_done', type: 'TINYINT UNSIGNED', defaultValue: '0', remarks: '是否是历史迭代已完成')
         }
     }
+
+    changeSet(id: '2022-01-17-agile-issue-drop-index', author: 'huaxin.deng@hand-china.com') {
+        dropIndex(tableName: "agile_issue", indexName: "idx_project_id")
+    }
 }
