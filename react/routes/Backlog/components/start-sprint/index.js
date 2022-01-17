@@ -16,7 +16,6 @@ import isHoliday from '@/utils/holiday';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import { sprintApi } from '@/api';
 import WorkCalendar from '@/components/WorkCalendar';
-import useIsInProgram from '@/hooks/useIsInProgram';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
 
