@@ -55,4 +55,8 @@ databaseChangeLog(logicalFilePath: 'fd_page_field.groovy') {
 //            "delete FROM fd_page_field where field_id NOT IN (select id from fd_object_scheme_field)"
 //        }
 //    }
+
+    changeSet(id: '2022-01-17-fd-page-field-drop-index', author: 'huaxin.deng@hand-china.com') {
+        dropIndex(tableName: "fd_page_field", indexName: "pk_page_field_id")
+    }
 }

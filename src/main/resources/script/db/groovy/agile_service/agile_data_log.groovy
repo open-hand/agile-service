@@ -68,4 +68,8 @@ databaseChangeLog(logicalFilePath:'agile_data_log.groovy') {
             column(name: 'field')
         }
     }
+
+    changeSet(id: '2022-01-17-agile-data-log-drop-index', author: 'huaxin.deng@hand-china.com') {
+        dropIndex(tableName: "agile_data_log", indexName: "idx_project_id")
+    }
 }
