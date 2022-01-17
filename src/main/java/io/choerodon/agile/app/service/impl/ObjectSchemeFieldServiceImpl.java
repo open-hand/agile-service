@@ -203,7 +203,11 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     private ObjectSchemeFieldDTO selectOneByFieldId(Long organizationId,
                                                     Long projectId,
                                                     Long fieldId) {
-        List<String> issueTypes = getLegalIssueTypes(projectId);
+        List<String> issueTypes =
+                issueTypes(organizationId, projectId)
+                        .stream()
+                        .map(IssueTypeVO::getTypeCode)
+                        .collect(Collectors.toList());
         List<ObjectSchemeFieldDTO> dtoList =
                 objectSchemeFieldMapper.selectByOptions(organizationId, projectId, ObjectSchemeCode.AGILE_ISSUE, fieldId, null, issueTypes);
         if (dtoList.isEmpty()) {
@@ -211,26 +215,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         } else {
             return dtoList.get(0);
         }
-    }
-
-    private List<String> getLegalIssueTypes(Long projectId) {
-        List<String> issueTypes = new ArrayList<>();
-        if (!ObjectUtils.isEmpty(projectId)) {
-            ProjectVO body = ConvertUtil.queryProject(projectId);
-            if (!ObjectUtils.isEmpty(body) && ProjectCategory.checkContainProjectCategory(body.getCategories(),ProjectCategory.MODULE_PROGRAM)) {
-                if(agilePluginService != null){
-                    issueTypes = agilePluginService.addProgramIssueType();
-                }
-            } else {
-                issueTypes = new ArrayList<>(ObjectSchemeFieldContext.NORMAL_PROJECT);
-            }
-            if (backlogExpandService != null && backlogExpandService.enabled(projectId)) {
-                issueTypes.add(ObjectSchemeFieldContext.BACKLOG);
-            }
-        } else {
-            issueTypes = ObjectSchemeFieldContext.getIssueTye();
-        }
-        return issueTypes;
     }
 
     @Override
