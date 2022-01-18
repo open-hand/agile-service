@@ -421,7 +421,7 @@ function useGanttProjectColumns({
   const { data: tableFields } = useIssueTableFields({
     hiddenFieldCodes, extraFields: ganttSystemFields, projectId, menuType: 'project',
   });
-  const { data: issueTypes, isLoading: issueTypeIsLoading } = useProjectIssueTypes({ projectId, isInProgram });
+  const { data: issueTypes, isLoading: issueTypeIsLoading } = useProjectIssueTypes({ projectId, isInProgram, applyType: 'agile' });
   const { data: predecessorTypes, isLoading: predecessorTypesLoading } = useProjectPredecessorTypes({ projectId });
   const isLoading = issueTypeIsLoading && predecessorTypesLoading;
   const disableFeatureCreateIssue = !!issueTypes?.some((issueType) => issueType.typeCode === 'story');

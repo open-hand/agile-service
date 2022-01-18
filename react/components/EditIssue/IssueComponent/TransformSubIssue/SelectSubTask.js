@@ -5,7 +5,9 @@ import TypeTag from '@/components/TypeTag';
 
 const { Option } = Select;
 const SelectSubTask = (props) => {
-  const { data: issueTypes } = useProjectIssueTypes({ typeCode: 'sub_task', onlyEnabled: true, projectId: props.projectId });
+  const { data: issueTypes } = useProjectIssueTypes({
+    typeCode: 'sub_task', onlyEnabled: true, projectId: props.projectId, applyType: 'agile',
+  });
   return (
     <Select {...props} clearButton={false}>
       {issueTypes.map((type) => (
