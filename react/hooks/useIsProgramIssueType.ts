@@ -8,7 +8,7 @@ interface IUseIsProgramIssueTypeProps {
   applyType?: 'agile' | 'program'
 }
 /**
- *  根据问题类型判断是否为子项目问题类型
+ *  判断是否全为项目群问题类型
  * @param config
  * @returns
  */
@@ -17,7 +17,7 @@ function isProgramIssueType(config: IUseIsProgramIssueTypeProps): boolean {
   const typeCodes = [...castArray(config.typeCode), ...map(issueTypes, 'typeCode')].filter(Boolean);
   if (typeCodes.length) {
     const programIssueTypeCodes = (config.applyType ?? getApplyType(true)) === 'agile' ? ['feature'] : ['issue_epic', 'feature'];
-    return issueTypes.some((item) => programIssueTypeCodes.includes(item.typeCode));
+    return typeCodes.some((item) => !programIssueTypeCodes.includes(item));
   }
   return false;
 }
