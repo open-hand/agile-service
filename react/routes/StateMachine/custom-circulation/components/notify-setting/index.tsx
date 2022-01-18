@@ -14,9 +14,9 @@ import { statusTransformApi, IUpdateNotifySetting, statusTransformApiConfig } fr
 import { getProjectId, getIsOrganization, getMenuType } from '@/utils/common';
 import { User } from '@/common/types';
 import { OldLoading } from '@/components/Loading';
-import useIsProgram from '@/hooks/useIsProgram';
 import SelectUser from '@/components/select/select-user';
 import styles from './index.less';
+import useIsProgramIssueType from '@/hooks/useIsProgramIssueType';
 
 const { AppState } = stores;
 interface NotifySelectProps {
@@ -94,7 +94,7 @@ const NotifySetting = ({
     setHidden(true);
   }, []);
   const ref = useClickOut(handleClickOut);
-  const { isProgram } = useIsProgram();
+  const { isProgramIssueType } = useIsProgramIssueType({ issueTypes: selectedTypeItem });
   const isOrganization = getIsOrganization();
 
   const memberOptionsDataSet = useMemo(() => new DataSet({
@@ -326,7 +326,7 @@ const NotifySetting = ({
           </div>
         </Dropdown>
         {
-          !isProgram && (
+          !isProgramIssueType && (
             <div>
               <div style={{ borderTop: '1px solid var(--divider)' }} />
               <CheckBox
