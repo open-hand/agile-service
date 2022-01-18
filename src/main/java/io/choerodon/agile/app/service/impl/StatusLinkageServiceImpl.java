@@ -541,7 +541,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         if (CollectionUtils.isEmpty(sub)) {
             return Boolean.TRUE;
         }
-        String type = statusLinks.stream().map(StatusLinkageDTO::getType).findAny().get();
+        String type = statusLinks.get(0).getType();
         List<Long> statusLinkStatus = statusLinks.stream().map(StatusLinkageDTO::getStatusId).collect(Collectors.toList());
         long count = sub.stream().filter(v -> statusLinkStatus.contains(v.getStatusId())).count();
         if (Objects.equals(ALL_TRANSFER, type) && count != sub.size()) {

@@ -336,7 +336,8 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
         Long issueTypeId = issueDTO.getIssueTypeId();
         Map<Long, Map<Long, Long>> newIssueTypeMap = issueTypeStatusMap.get(issueTypeId);
         if (!ObjectUtils.isEmpty(newIssueTypeMap)) {
-            issueTypeId = newIssueTypeMap.keySet().stream().findFirst().get();
+            List<Long> issueType = newIssueTypeMap.keySet().stream().collect(Collectors.toList());
+            issueTypeId = issueType.get(0);
         }
         // 父级移动时问题类型改成了bug，需要将它下面的子缺陷解除关联关系，不移动。
         Boolean isSubIssue = "sub_task".equals(issueDTO.getTypeCode()) || ("bug".equals(issueDTO.getTypeCode()) && !ObjectUtils.isEmpty(issueDTO.getRelateIssueId()) && !Objects.equals(0L, issueDTO.getRelateIssueId()));

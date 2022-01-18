@@ -96,6 +96,9 @@ public class ProjectCategory {
         if (codes.contains(ProjectCategory.MODULE_AGILE)) {
             applyTypes.add(SchemeApplyType.AGILE);
         }
+        if (codes.contains(ProjectCategory.MODULE_BACKLOG)) {
+            applyTypes.add(SchemeApplyType.BACKLOG);
+        }
         return applyTypes;
     }
 

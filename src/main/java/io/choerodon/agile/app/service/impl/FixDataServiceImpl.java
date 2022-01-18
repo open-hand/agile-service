@@ -18,6 +18,8 @@ import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections.MapIterator;
 import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.commons.collections.map.MultiKeyMap;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -303,13 +305,24 @@ public class FixDataServiceImpl implements FixDataService {
     public void fixAgileAndProgram() {
         // 修复看板数据
         fixAboardType();
+        LOGGER.info("完成修复看板数据");
+        if (backlogExpandService != null) {
+            backlogExpandService.fixStateMachineData();
+        }
+        LOGGER.info("==============================>>>>>>>> AGILE Data Fix End, Success! <<<<<<<<=================================");
     }
 
     private void fixAboardType() {
+        // 查询修复看板逻辑是否执行过
+        List<BoardDTO> list = boardMapper.selectByCondition(Condition.builder(BoardDTO.class).andWhere(Sqls.custom().andIsNull("type")).build());
+        if (CollectionUtils.isEmpty(list)) {
+            return;
+        }
+        Set<Long> projectIds = list.stream().map(BoardDTO::getProjectId).collect(Collectors.toSet());
         // 修复普通敏捷项目的看板类型
-        fixDataMapper.initBoardType("agile");
+        fixDataMapper.initBoardType(projectIds , "agile");
         // 修复项目群项目的看板类型
-        fixDataMapper.initBoardType("program");
+        fixDataMapper.initBoardType(projectIds, "program");
         // 修复组织看板模板的类型
         fixDataMapper.initBoardTemplateType("agile");
     }
