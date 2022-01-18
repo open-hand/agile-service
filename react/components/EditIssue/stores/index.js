@@ -5,9 +5,7 @@ import { inject } from 'mobx-react';
 import { useComputed } from 'mobx-react-lite';
 import EditIssueStore from './EditIssueStore';
 import { getMenuType, getProjectId } from '@/utils/common';
-import useIsProgram from '@/hooks/useIsProgram';
 import useIsInProgram from '@/hooks/useIsInProgram';
-import store from '../IssueComponent/issue-move/store';
 
 const EditIssueContext = createContext();
 export default EditIssueContext;

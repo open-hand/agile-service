@@ -15,7 +15,6 @@ import { LoadingProvider, OldLoading as Loading } from '@/components/Loading';
 import { IIssueType, IModalProps, IStatus } from '@/common/types';
 import { getIsOrganization, getProjectId } from '@/utils/common';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
-import useIsProgram from '@/hooks/useIsProgram';
 import useDeepCompareEffect from '@/hooks/useDeepCompareEffect';
 import {
   boardApiConfig, statusTransformApi, statusTransformApiConfig,

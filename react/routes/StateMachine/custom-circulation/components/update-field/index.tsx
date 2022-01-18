@@ -18,9 +18,9 @@ import useFields from '@/routes/Issue/components/BatchModal/useFields';
 import { pageConfigApi, statusTransformApi } from '@/api';
 import { Priority, IField } from '@/common/types';
 import { OldLoading as Loading } from '@/components/Loading';
-import useIsProgram from '@/hooks/useIsProgram';
 import renderField from './renderField';
 import styles from './index.less';
+import useIsProgramIssueType from '@/hooks/useIsProgramIssueType';
 
 const { Option } = Select;
 
@@ -332,7 +332,7 @@ const UpdateField = ({
   // @ts-ignore
   modal, selectedType, selectedTypeCode, record, customCirculationDataSet,
 }) => {
-  const { isProgram } = useIsProgram();
+  const { isProgramIssueType } = useIsProgramIssueType({ typeCode: selectedTypeCode });
   const [fieldData, setFieldData] = useState<IField[]>([]);
   const [updateCount, setUpdateCount] = useState<number>(0);
   const [fields, Field] = useFields();
@@ -628,7 +628,7 @@ const UpdateField = ({
             }
           </Select>,
           // @ts-ignore
-          renderField(f, data, selectedTypeCode, selectUserMap, isProgram, isOrganization, 12, customMemberData),
+          renderField(f, data, selectedTypeCode, selectUserMap, isProgramIssueType, isOrganization, 12, customMemberData),
           <Icon
             onClick={() => {
               // @ts-ignore
