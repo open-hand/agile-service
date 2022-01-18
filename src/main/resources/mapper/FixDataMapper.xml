@@ -8,7 +8,12 @@
             select
                 project_id
             from fd_project_config
-            where apply_type = #{type}
+            where
+              project_id in
+              <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+                  #{projectId}
+              </foreach>
+              and apply_type = #{type}
         )
     </update>
 

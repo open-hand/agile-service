@@ -11,7 +11,6 @@ import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.exception.RemoveStatusException;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
-import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.domain.Page;
@@ -220,7 +219,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         Long organizationId = projectUtil.getOrganizationId(projectId);
         //根据 applyTypes 查询所有的问题类型
         List<IssueTypeDTO> issueTypes = issueTypeMapper.queryByApplyTypes(organizationId, projectId, applyTypes, onlyEnabled, SchemeType.ISSUE_TYPE);
-        issueTypes = issueTypes.stream().filter(v -> !(Objects.equals(SchemeApplyType.AGILE, v.getApplyType()) && Objects.equals("feature", v.getTypeCode()))).collect(Collectors.toList());
+        issueTypes = issueTypes.stream().filter(v -> !(Objects.equals(SchemeApplyType.AGILE, v.getApplyType()) && Objects.equals(FEATURE_TYPE_CODE, v.getTypeCode()))).collect(Collectors.toList());
         // 查询 appleTypes 所有的问题类型的状态机
         Map<String, Map<Long, Long>> map = stateMachineSchemeConfigService.queryStatusMachineMapByAppleTypes(organizationId, projectId, applyTypes);
         List<IssueTypeWithStateMachineIdVO> issueTypeWithStateMachineIds = modelMapper.map(issueTypes, new TypeToken<List<IssueTypeWithStateMachineIdVO>>() {
@@ -297,7 +296,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         }
         List<Long> stateMachineIds = new ArrayList<>();
         for (StatusMachineSchemeConfigVO statusMachineSchemeConfigVO : list) {
-            Boolean isAgileFeature = Objects.equals(SchemeApplyType.AGILE, statusMachineSchemeConfigVO.getApplyType()) && filterIssueType.contains(statusMachineSchemeConfigVO.getApplyType());
+            Boolean isAgileFeature = Objects.equals(SchemeApplyType.AGILE, statusMachineSchemeConfigVO.getApplyType()) && filterIssueType.contains(statusMachineSchemeConfigVO.getIssueTypeId());
             if (Objects.equals(0L, statusMachineSchemeConfigVO.getIssueTypeId()) || isAgileFeature) {
                 continue;
             }
@@ -715,7 +714,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         if (ObjectUtils.isEmpty(nodeSortVO.getOutSetId())) {
             throw new CommonException("error.outSetId.null");
         }
-        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
         // 对rank值为空的node进行处理
         stateMachineNodeService.handlerNullRankNode(projectVO.getOrganizationId(), statusMachineId, applyType);
         // 进行排序
@@ -982,7 +981,10 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     private Long queryStateMachineIdAndCheck(Long projectId, String applyType, Long issueTypeId) {
-        applyType = getApplyType(projectId, issueTypeId);
+        String actualApplyType = getApplyType(projectId, issueTypeId);
+        if (!Objects.equals(applyType, actualApplyType)) {
+            applyType = actualApplyType;
+        }
         if (Boolean.FALSE.equals(EnumUtil.contain(SchemeApplyType.class, applyType))) {
             throw new CommonException(ERROR_APPLYTYPE_ILLEGAL);
         }

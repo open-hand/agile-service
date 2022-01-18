@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.enums.ProjectCategory;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -192,7 +193,7 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
 
     @Override
     public void initByConsumeCreateProject(Long projectId, String projectCode) {
-        Long organizationId = projectUtil.getOrganizationId(projectId);
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
         //查询系统问题类型，typeCode不重复
         List<IssueTypeDTO> issueTypes = getIssueTypes(organizationId, projectId);
         //处理老的组织没有创建的数据

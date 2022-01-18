@@ -198,4 +198,6 @@ public interface BacklogExpandService {
                                 CascadeFieldOptionSearchVO cascadeFieldOptionSearchVO);
 
     List<IssueBacklogRelVO> selectBacklogRelByIssueIds(Long projectId, List<Long> issueIds);
+
+    void fixStateMachineData();
 }
