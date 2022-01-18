@@ -28,7 +28,7 @@ const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 't
 
 const IssueField = observer((props) => {
   const {
-    store, applyType, saveFieldVersionRef, saveFieldFixVersionRef, disabled, isProgramIssue,
+    store, applyType, saveFieldVersionRef, saveFieldFixVersionRef, disabled, isProgramIssue, isProgram,
   } = useContext(EditIssueContext);
   const { isShowFeature } = useIsInProgram({ projectId: store.projectId });
   const renderNormalField = (field) => (<FieldPro {...props} field={field} />);
@@ -62,7 +62,7 @@ const IssueField = observer((props) => {
       case 'epic': // 包含 feature 当有子项目时 只有特性
         // 子任务、史诗不显示史诗
         if (['issue_epic', 'sub_task'].indexOf(typeCode) === -1) {
-          return (<FieldEpic {...props} />);
+          return (<FieldEpic {...props} isProgram={isProgram} />);
         }
         return '';
       case 'creationDate':
