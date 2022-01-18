@@ -53,7 +53,7 @@ const IssueTypeTab: React.FC<Props> = ({
       }
     }
   }, [handleFilterIssueType, handleSelectType, isFetchedAfterMount, issueTypes, selected, selectedType]);
-
+  console.log('issueTypes', issueTypes);
   return (
     <Switch
       value={selected}

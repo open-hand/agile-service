@@ -5,7 +5,7 @@ import { IsInProgram } from '@/hooks/useIsInProgram';
 import QuickCreateIssue from './QuickCreateIssue';
 
 const QuickCreateIssueWithProvider = (props) => {
-  const { data: issueTypes } = useProjectIssueTypes({ onlyEnabled: true, projectId: props.projectId });
+  const { data: issueTypes } = useProjectIssueTypes({ onlyEnabled: true, projectId: props.projectId, applyType: 'agile' });
   const { data: defaultPriority } = useDefaultPriority({ projectId: props.projectId });
 
   return (

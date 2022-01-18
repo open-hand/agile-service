@@ -7,7 +7,7 @@ export function useStoryMapContext() {
   return useContext(Context);
 }
 function Index(props) {
-  const { data: issueTypes } = useProjectIssueTypes({ onlyEnabled: true, typeCode: 'story' }, {
+  const { data: issueTypes } = useProjectIssueTypes({ onlyEnabled: true, typeCode: 'story', applyType: 'agile' }, {
     notifyOnChangeProps: ['data'],
   });
   return (
