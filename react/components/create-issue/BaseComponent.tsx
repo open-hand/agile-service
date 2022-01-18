@@ -39,6 +39,7 @@ import getFieldConfig from '@/components/field-pro/layouts/create';
 import { insertField } from './utils';
 import useFormatMessage from '@/hooks/useFormatMessage';
 import { formatFieldDateValue } from '@/utils/formatDate';
+import { CreateIssueProps } from '.';
 
 const { AppState } = stores;
 interface CreateIssueBaseCallbackData {
@@ -86,6 +87,7 @@ export interface CreateIssueBaseProps {
   extendRequiredCodes?: string[]
   extraSubmitValue?: any
   title?: string | ReactElement
+  applyType?: CreateIssueProps['applyType']
 }
 const defaultDataSet = new DataSet({
   autoCreate: true,
@@ -155,7 +157,8 @@ function castNormalValue(value: any, fieldCode: string) {
   switch (fieldCode) {
     case 'component':
     case 'label': {
-      return Array.isArray(value) ? value.map((item) => getObjectValueMapValue(item, fieldCode)) : getObjectValueMapValue(value, fieldCode); }
+      return Array.isArray(value) ? value.map((item) => getObjectValueMapValue(item, fieldCode)) : getObjectValueMapValue(value, fieldCode);
+    }
     default:
       break;
   }
@@ -244,6 +247,7 @@ const CreateIssueBase = observer(({
   extendRequiredCodes = [],
   menuType = 'project',
   extraSubmitValue,
+  applyType,
 }: CreateIssueBaseProps) => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
@@ -261,6 +265,7 @@ const CreateIssueBase = observer(({
     projectId,
     typeCode,
     isProgram,
+    applyType,
   }, {
     onSuccess: ((issueTypes) => {
       if (!issueTypeId || (showSelectProject && !some(issueTypes, { id: issueTypeId }))) {
@@ -696,6 +701,7 @@ const CreateIssueBase = observer(({
             isProgram,
             typeCode,
             projectId,
+            applyType,
             menuType: menuType ?? 'project',
           },
         };

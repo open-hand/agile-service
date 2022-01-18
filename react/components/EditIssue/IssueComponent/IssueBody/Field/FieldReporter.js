@@ -24,7 +24,7 @@ import { issueApi } from '@/api';
 
   render() {
     const {
-      store, loginUserId, disabled, isProgram,
+      store, loginUserId, disabled, isProgramIssue,
     } = this.props;
     const issue = store.getIssue;
     const {
@@ -42,7 +42,7 @@ import { issueApi } from '@/api';
           </span>
         </div>
         <div className="c7n-value-wrapper">
-          <Permission service={[isProgram
+          <Permission service={[isProgramIssue
             ? 'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.editissue.pro'
             : 'choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
           >

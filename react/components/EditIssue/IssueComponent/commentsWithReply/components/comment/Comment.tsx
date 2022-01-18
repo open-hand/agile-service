@@ -34,7 +34,7 @@ interface Props {
 const { AppState } = stores;
 
 const Comment: React.FC<Props> = (props) => {
-  const { store, projectId, isProgram } = useContext(EditIssueContext);
+  const { store, projectId, isProgramIssue } = useContext(EditIssueContext);
   const { commentExpandMap, commentReplysMap } = store;
   const { comment, reload, readonly } = props;
   const loginUserId = AppState.userInfo.id;
@@ -63,7 +63,7 @@ const Comment: React.FC<Props> = (props) => {
       className="c7n-comment"
     >
       <Permission
-        service={[isProgram
+        service={[isProgramIssue
           ? 'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.editissue.pro'
           : 'choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
       >

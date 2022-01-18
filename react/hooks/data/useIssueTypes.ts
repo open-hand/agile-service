@@ -5,7 +5,6 @@ import { useCallback } from 'react';
 import { issueTypeApi } from '@/api';
 import { IIssueType } from '@/common/types';
 import { getIsOrganization, getApplyType } from '@/utils/common';
-import useIsProgram from '../useIsProgram';
 import useKey from './useKey';
 import useIsInProgram from '../useIsInProgram';
 

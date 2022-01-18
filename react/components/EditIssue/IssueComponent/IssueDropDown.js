@@ -26,7 +26,7 @@ const IssueDropDown = ({
   onChangeParent, onRelateIssue, onTransformSubIssue, onOpenCreateSubTask, onOpenCreateSubBug, checkDescriptionEdit,
 }) => {
   const {
-    store, applyType, isProgram, isShowFeature,
+    store, applyType, isProgramIssue, isShowFeature,
   } = useContext(EditIssueContext);
   const docs = store.getDoc;
   const hasDevops = useHasDevops();
@@ -250,7 +250,7 @@ const IssueDropDown = ({
       }
       {
         <Permission
-          service={[isProgram
+          service={[isProgramIssue
             ? 'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.editissue.pro'
             : 'choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
           noAccessChildren={(

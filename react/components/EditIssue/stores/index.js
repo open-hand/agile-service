@@ -2,10 +2,12 @@ import React, {
   createContext, useEffect, useMemo, useRef,
 } from 'react';
 import { inject } from 'mobx-react';
+import { useComputed } from 'mobx-react-lite';
 import EditIssueStore from './EditIssueStore';
 import { getMenuType, getProjectId } from '@/utils/common';
 import useIsProgram from '@/hooks/useIsProgram';
 import useIsInProgram from '@/hooks/useIsInProgram';
+import store from '../IssueComponent/issue-move/store';
 
 const EditIssueContext = createContext();
 export default EditIssueContext;
@@ -18,7 +20,6 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')((props
   };
   const isProjectLevel = useMemo(() => (props.menuType || getMenuType()) === 'project', [props.menuType, getMenuType]);
   const descriptionEditRef = useRef(false);
-  const { isProgram } = useIsProgram();
   const { isShowFeature, loading } = useIsInProgram({ projectId: props.projectId });
   const value = {
     ...props,
@@ -36,10 +37,9 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')((props
     saveFieldFixVersionRef: (ref) => {
       FieldFixVersionRef.current = ref;
     },
-    isProgram,
     isShowFeature,
   };
-
+  const isProgramIssue = useComputed(() => value.store.issue?.applyType === 'program' || value.store.issue.typeCode === 'feature', [value.store.issue?.applyType, value.store.issue.typeCode]);
   useEffect(() => {
     value.store.initApi(props.outside, props.organizationId, props.projectId || getProjectId());
     return () => {
@@ -51,7 +51,7 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')((props
     value.store.setTab(props.tab);
   }, [props.tab, value.store]);
   return (
-    <EditIssueContext.Provider value={value}>
+    <EditIssueContext.Provider value={{ ...value, isProgramIssue }}>
       {!loading && props.children}
     </EditIssueContext.Provider>
   );

@@ -110,7 +110,7 @@ const openModal = (props: CreateIssueProps) => {
         onCancel();
       }
     },
-    children: <CreateContent typeCode={issueTypeCode} onSubmit={handleSubmit} {...omit(props, 'onSubmit')} defaultTypeId={defaultIssueTypeId} isProgram={isProgram} />,
+    children: <CreateContent typeCode={issueTypeCode} onSubmit={handleSubmit} {...omit(props, 'onSubmit')} defaultTypeId={defaultIssueTypeId} isProgram={isProgram} applyType={applyType} />,
   });
 };
 export default openModal;
