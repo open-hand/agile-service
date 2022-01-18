@@ -6,6 +6,7 @@ import { useComputed } from 'mobx-react-lite';
 import EditIssueStore from './EditIssueStore';
 import { getMenuType, getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
+import useIsProgram from '@/hooks/useIsProgram';
 
 const EditIssueContext = createContext();
 export default EditIssueContext;
@@ -19,6 +20,7 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')((props
   const isProjectLevel = useMemo(() => (props.menuType || getMenuType()) === 'project', [props.menuType, getMenuType]);
   const descriptionEditRef = useRef(false);
   const { isShowFeature, loading } = useIsInProgram({ projectId: props.projectId });
+  const { isProgram } = useIsProgram();
   const value = {
     ...props,
     isProjectLevel,
@@ -36,6 +38,7 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')((props
       FieldFixVersionRef.current = ref;
     },
     isShowFeature,
+    isProgram,
   };
   const isProgramIssue = useComputed(() => value.store.issue?.applyType === 'program' || value.store.issue.typeCode === 'feature', [value.store.issue?.applyType, value.store.issue.typeCode]);
   useEffect(() => {
