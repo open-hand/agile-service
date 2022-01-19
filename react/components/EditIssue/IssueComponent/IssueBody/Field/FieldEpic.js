@@ -57,7 +57,7 @@ import styles from './FieldEpic.less';
 
   render() {
     const {
-      store, disabled, push, outside, projectId, organizationId, applyType, isProgram,
+      store, disabled, push, outside, projectId, organizationId, applyType, isAgileProgram, showFeatureTypeCodes,
     } = this.props;
     const issue = store.getIssue;
     const {
@@ -71,7 +71,7 @@ import styles from './FieldEpic.less';
         {
           ({ isShowFeature, program }) => (
             <>
-              {typeCode === 'story' && isShowFeature
+              {showFeatureTypeCodes.includes(typeCode) && isShowFeature
                 ? (
                   <div className="line-start mt-10">
                     <div className="c7n-property-wrapper">
@@ -155,7 +155,7 @@ import styles from './FieldEpic.less';
                 </div>
                 <div className="c7n-value-wrapper">
                   <TextEditToggle
-                    disabled={(isShowFeature && !isProgram) || disabled}
+                    disabled={(isShowFeature && (!isAgileProgram || applyType === 'agile')) || disabled}
                     onSubmit={this.updateIssueEpic}
                     initValue={issueEpicName && (applyType === 'program' || some(this.dataRef.current || [], { issueId: epicId })) ? epicId || null : null}
                     editor={({ submit }) => <SelectEpic projectId={store.projectId} required={required} onChange={submit} selectIds={epicId} dataRef={this.dataRef} />}

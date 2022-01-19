@@ -54,7 +54,7 @@ function EditIssue() {
     descriptionEditRef,
     showProjectInfo, // 顶部是否显示所属项目信息
     isShowFeature,
-    isProgram,
+    isAgileProgram,
   } = useContext(EditIssueContext);
   const otherProject = !sameProject(projectId);
   const container = useRef();
@@ -260,7 +260,7 @@ function EditIssue() {
     assigneeId, objectVersionNumber, createdBy, typeCode, issueTypeId,
   } = issue;
 
-  const rightDisabled = disabled || (isShowFeature && !isProgram && (typeCode === 'issue_epic' || typeCode === 'feature'));
+  const rightDisabled = disabled || (isShowFeature && !isAgileProgram && (typeCode === 'issue_epic' || typeCode === 'feature'));
   useEffect(() => {
     function updateBefore() {
       store.setUpdateLoaded(false);
