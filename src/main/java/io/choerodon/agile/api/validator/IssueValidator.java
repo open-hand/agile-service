@@ -2,6 +2,8 @@ package io.choerodon.agile.api.validator;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
@@ -12,7 +14,9 @@ import io.choerodon.agile.infra.enums.IssueFieldMapping;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
@@ -245,7 +249,19 @@ public class IssueValidator {
     }
 
     public void judgeEpicCanUpdateAndExist(Long projectId, Long epicId) {
-        if (agilePluginService != null && agilePluginService.isSubProjectAndArtDoing(projectId)) {
+        ProjectVO project = ConvertUtil.queryProject(projectId);
+        Set<String> categoryCodes =
+                project
+                        .getCategories()
+                        .stream()
+                        .map(ProjectCategoryDTO::getCode)
+                        .collect(Collectors.toSet());
+        boolean isOnlyAgile =
+                categoryCodes.contains(ProjectCategory.MODULE_AGILE)
+                        && !categoryCodes.contains(ProjectCategory.MODULE_PROGRAM);
+        if (agilePluginService != null
+                && isOnlyAgile
+                && agilePluginService.isSubProjectAndArtDoing(projectId)) {
             throw new CommonException("error.issue.can.not.update.epic");
         }
         if (epicId != null && !Objects.equals(epicId, 0L)) {
