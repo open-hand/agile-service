@@ -221,7 +221,6 @@ const Linkage: React.FC<Props> = ({
       cascadeOptionId: string,
       defaultOption?: boolean | undefined
     }>) {
-      console.log('specialField', specialField);
       if (specialField.fieldCode === 'subProject') {
         return options?.map((option) => ({ projectId: option.cascadeOptionId, defaultOption: option.defaultOption }));
       }
