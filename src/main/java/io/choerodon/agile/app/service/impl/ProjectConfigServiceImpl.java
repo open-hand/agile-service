@@ -297,7 +297,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         List<Long> stateMachineIds = new ArrayList<>();
         for (StatusMachineSchemeConfigVO statusMachineSchemeConfigVO : list) {
             Boolean isAgileFeature = Objects.equals(SchemeApplyType.AGILE, statusMachineSchemeConfigVO.getApplyType()) && filterIssueType.contains(statusMachineSchemeConfigVO.getIssueTypeId());
-            if (Objects.equals(0L, statusMachineSchemeConfigVO.getIssueTypeId()) || isAgileFeature) {
+            Boolean isProgram = Objects.equals(SchemeApplyType.PROGRAM, statusMachineSchemeConfigVO.getApplyType()) && Objects.equals(0L, statusMachineSchemeConfigVO.getIssueTypeId());
+            if (isAgileFeature || isProgram) {
                 continue;
             }
             stateMachineIds.add(statusMachineSchemeConfigVO.getStateMachineId());

@@ -306,9 +306,6 @@ public class FixDataServiceImpl implements FixDataService {
         // 修复看板数据
         fixAboardType();
         LOGGER.info("完成修复看板数据");
-        if (backlogExpandService != null) {
-            backlogExpandService.fixStateMachineData();
-        }
         LOGGER.info("==============================>>>>>>>> AGILE Data Fix End, Success! <<<<<<<<=================================");
     }
 
