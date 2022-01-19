@@ -40,7 +40,6 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')((props
     isShowFeature,
     isProgram,
     isAgileProgram,
-    showFeatureTypeCodes: ['story', 'task', 'bug'],
   };
   const { isProgramIssueType: isProgramIssue } = useIsProgramIssueType({ typeCode: value.store.issue.typeCode, applyType: value.store.issue?.applyType });
   useEffect(() => {
