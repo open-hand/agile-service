@@ -9,6 +9,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectEpic from '@/components/select/select-epic';
 import SelectFeature from '@/components/select/select-feature';
 import { IsInProgram } from '@/hooks/useIsInProgram';
+import { SHOW_FEATURE_TYPE_CODES } from '@/constants/SHOW_FEATURE_TYPE_CODE';
 import styles from './FieldEpic.less';
 
 @inject('AppState')
@@ -57,7 +58,7 @@ import styles from './FieldEpic.less';
 
   render() {
     const {
-      store, disabled, push, outside, projectId, organizationId, applyType, isAgileProgram, showFeatureTypeCodes,
+      store, disabled, push, outside, projectId, organizationId, applyType, isAgileProgram,
     } = this.props;
     const issue = store.getIssue;
     const {
@@ -71,7 +72,7 @@ import styles from './FieldEpic.less';
         {
           ({ isShowFeature, program }) => (
             <>
-              {showFeatureTypeCodes.includes(typeCode) && isShowFeature
+              {SHOW_FEATURE_TYPE_CODES.includes(typeCode) && isShowFeature
                 ? (
                   <div className="line-start mt-10">
                     <div className="c7n-property-wrapper">

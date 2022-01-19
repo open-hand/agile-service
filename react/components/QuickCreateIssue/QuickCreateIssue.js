@@ -13,6 +13,7 @@ import { issueApi, fieldApi } from '@/api';
 import { checkCanQuickCreate, getQuickCreateDefaultObj } from '@/utils/quickCreate';
 import { fields2Map } from '@/utils/defaultValue';
 import localCacheStore from '@/stores/common/LocalCacheStore';
+import { SHOW_FEATURE_TYPE_CODES } from '@/constants/SHOW_FEATURE_TYPE_CODE';
 import TypeTag from '../TypeTag';
 import './QuickCreateIssue.less';
 import UserDropdown from '../UserDropdown';
@@ -161,7 +162,7 @@ class QuickCreateIssue extends Component {
 
         const issue = getQuickCreateDefaultObj({
           epicName: currentTypeId === 'issue_epic' ? summary.trim() : undefined,
-          featureId: currentType.typeCode === 'story' ? chosenFeatureId : 0,
+          featureId: SHOW_FEATURE_TYPE_CODES.includes(currentType.typeCode) ? chosenFeatureId : 0,
           assigneeId,
           relateIssueId,
           versionIssueRelVOList: propsVersionIssueRelVOList,
