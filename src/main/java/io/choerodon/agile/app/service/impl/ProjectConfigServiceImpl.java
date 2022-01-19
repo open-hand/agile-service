@@ -618,6 +618,27 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     @Override
+    public String getApplyTypeByTypeCode(Long projectId, String typeCode) {
+        List<String> applyTypes = ProjectCategory.getProjectApplyType(projectId);
+        List<StatusMachineSchemeConfigVO> list =
+                statusMachineSchemeConfigMapper.queryStatusMachineMapByAppleTypes(ConvertUtil.getOrganizationId(projectId), projectId, applyTypes);
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+        for (StatusMachineSchemeConfigVO schemeConfig : list) {
+            Long issueTypeId = schemeConfig.getIssueTypeId();
+            if (Objects.equals(0L, issueTypeId)) {
+                continue;
+            }
+            String issueTypeCode = schemeConfig.getIssueTypeCode();
+            if (Objects.equals(typeCode, issueTypeCode)) {
+                return schemeConfig.getApplyType();
+            }
+        }
+        return null;
+    }
+
+    @Override
     public void transformAll(List<StatusMachineNodeVO> statusMachineNodeVOS, Long organizationId, Long statusId, Long stateMachineId, Long nodeId) {
         if (!CollectionUtils.isEmpty(statusMachineNodeVOS)) {
             StatusVO statusVO = statusService.queryStatusById(organizationId, statusId);
