@@ -131,6 +131,7 @@ const lineField = ['summary', 'description'];
 const reuseFields = ['issueType', 'summary', 'description'];
 const pageCascadeFields = ['component', 'priority', 'fixVersion', 'influenceVersion'];
 const wsjfFields = ['userBusinessValue', 'timeCriticality', 'rrOeValue', 'jobSize'];
+const showFeatureTypeCodes = ['story', 'task', 'bug'];
 
 function isSelect(field: IssueCreateFields | { fieldType: string }) {
   return includes(['radio', 'multiple', 'checkbox', 'single'], field.fieldType);
@@ -321,7 +322,7 @@ const CreateIssueBase = observer(({
     isInProgram,
     isShowFeature,
   } = useIsInProgram({ projectId });
-  const showFeature = !!issueTypeCode && issueTypeCode === 'story' && !!isShowFeature;
+  const showFeature = !!issueTypeCode && showFeatureTypeCodes.includes(issueTypeCode) && !!isShowFeature;
   const getDefaultValue = usePersistFn((field: IssueCreateFields) => {
     const preset = presets.get(field.fieldCode);
     // defaultAssignee优先级更高

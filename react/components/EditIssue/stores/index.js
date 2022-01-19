@@ -20,7 +20,7 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')((props
   const isProjectLevel = useMemo(() => (props.menuType || getMenuType()) === 'project', [props.menuType, getMenuType]);
   const descriptionEditRef = useRef(false);
   const { isShowFeature, loading } = useIsInProgram({ projectId: props.projectId });
-  const { isProgram } = useIsProgram();
+  const { isProgram, isAgileProgram } = useIsProgram();
   const value = {
     ...props,
     isProjectLevel,
@@ -39,6 +39,8 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')((props
     },
     isShowFeature,
     isProgram,
+    isAgileProgram,
+    showFeatureTypeCodes: ['story', 'task', 'bug'],
   };
   const { isProgramIssueType: isProgramIssue } = useIsProgramIssueType({ typeCode: value.store.issue.typeCode, applyType: value.store.issue?.applyType });
   useEffect(() => {
