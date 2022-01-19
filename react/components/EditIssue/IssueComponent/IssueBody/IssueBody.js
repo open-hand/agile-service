@@ -15,7 +15,7 @@ import IssueDes from './IssueDes';
 import IssueAttachment from './IssueAttachment';
 import IssueDoc from './IssueDoc';
 import Comments from '../commentsWithReply';
-import SplitStory from './SplitStory';
+import IssueSplit from './issue-split';
 import IssueWorkLog from './IssueWorkLog';
 import IssueLog from './IssueLog';
 import SubTask from './SubTask';
@@ -152,8 +152,8 @@ function IssueBody(props) {
         {
           issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
             ? (
-              <TabPane tab={`拆分的Story${splitStoryData?.storyList ? `(${(splitStoryData?.storyList?.length || 0) > 99 ? '99+' : (splitStoryData?.storyList?.length || 0)})` : ''}`} key="split_story">
-                <SplitStory {...props} splitStoryData={splitStoryData} />
+              <TabPane tab={`拆分的工作项${splitStoryData?.storyList ? `(${(splitStoryData?.storyList?.length || 0) > 99 ? '99+' : (splitStoryData?.storyList?.length || 0)})` : ''}`} key="split_story">
+                <IssueSplit {...props} splitStoryData={splitStoryData} />
               </TabPane>
             ) : ''
         }
