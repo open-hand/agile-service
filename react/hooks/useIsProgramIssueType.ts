@@ -17,7 +17,7 @@ function isProgramIssueType(config: IUseIsProgramIssueTypeProps): boolean {
   const typeCodes = [...castArray(config.typeCode), ...map(issueTypes, 'typeCode')].filter(Boolean);
   if (typeCodes.length) {
     const programIssueTypeCodes = (config.applyType ?? getApplyType(true)) === 'agile' ? ['feature'] : ['issue_epic', 'feature'];
-    return typeCodes.some((item) => !programIssueTypeCodes.includes(item));
+    return !typeCodes.some((item) => !programIssueTypeCodes.includes(item));
   }
   return false;
 }
