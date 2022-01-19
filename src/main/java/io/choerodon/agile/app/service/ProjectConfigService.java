@@ -252,4 +252,6 @@ public interface ProjectConfigService {
      * @return
      */
     String getApplyType(Long projectId, Long issueTypeId);
+
+    String getApplyTypeByTypeCode(Long projectId, String typeCode);
 }

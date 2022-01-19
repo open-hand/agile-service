@@ -69,9 +69,11 @@
     <select id="queryStatusMachineMapByAppleTypes" resultType="io.choerodon.agile.api.vo.StatusMachineSchemeConfigVO">
         select
         fsmc.*,
-        fpc.apply_type
+        fpc.apply_type,
+        fit.type_code as issue_type_code
         from fd_status_machine_scheme_config fsmc
         left join fd_project_config fpc on fpc.scheme_id  = fsmc.scheme_id
+        left join fd_issue_type fit on fsmc.issue_type_id = fit.id
         where fpc.project_id = #{projectId}
         and fsmc.organization_id = #{organizationId}
         and fpc.scheme_type = 'scheme_state_machine'

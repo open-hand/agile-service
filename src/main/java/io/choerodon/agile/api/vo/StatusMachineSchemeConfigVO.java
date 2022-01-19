@@ -40,6 +40,16 @@ public class StatusMachineSchemeConfigVO {
 
     private String applyType;
 
+    private String issueTypeCode;
+
+    public String getIssueTypeCode() {
+        return issueTypeCode;
+    }
+
+    public void setIssueTypeCode(String issueTypeCode) {
+        this.issueTypeCode = issueTypeCode;
+    }
+
     public Long getId() {
         return id;
     }
