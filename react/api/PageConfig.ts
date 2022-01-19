@@ -101,10 +101,13 @@ export interface ICascadeRule {
   defaultValue?: any,
   hidden?: boolean,
   required?: boolean,
-  fieldCascadeRuleOptionList?: {
+  fieldCascadeRuleOptionList?: Array<{
     cascadeOptionId: string,
     defaultOption?: boolean
-  }[]
+  }> |Array<{
+    projectId: string,
+    defaultOption?: boolean
+  }>
   _status: 'create' | 'update' | 'delete'
   objectVersionNumber?: number
   id?: number
