@@ -2,11 +2,11 @@ import React, {
   createContext, useEffect, useMemo, useRef,
 } from 'react';
 import { inject } from 'mobx-react';
-import { useComputed } from 'mobx-react-lite';
 import EditIssueStore from './EditIssueStore';
 import { getMenuType, getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import useIsProgram from '@/hooks/useIsProgram';
+import useIsProgramIssueType from '@/hooks/useIsProgramIssueType';
 
 const EditIssueContext = createContext();
 export default EditIssueContext;
@@ -40,7 +40,7 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')((props
     isShowFeature,
     isProgram,
   };
-  const isProgramIssue = useComputed(() => value.store.issue?.applyType === 'program' || value.store.issue.typeCode === 'feature', [value.store.issue?.applyType, value.store.issue.typeCode]);
+  const { isProgramIssueType: isProgramIssue } = useIsProgramIssueType({ typeCode: value.store.issue.typeCode, applyType: value.store.issue?.applyType });
   useEffect(() => {
     value.store.initApi(props.outside, props.organizationId, props.projectId || getProjectId());
     return () => {
