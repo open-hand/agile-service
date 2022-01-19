@@ -32,7 +32,7 @@ const CreateStatus: React.FC = () => {
     const currentIssueTypeIds = dataSet.current?.get('issueTypeIds');
     return filter(issueTypes, (item) => currentIssueTypeIds?.includes(item.id));
   }, [issueTypes]);
-  const { isProgramIssueType } = useIsProgramIssueType({ issueTypes: currentSelectedIssueTypes });
+  const { isProgramIssueType } = useIsProgramIssueType({ issueTypes: currentSelectedIssueTypes, matchMode: 'part' });
   const disabledIssueTypeIds = useMemo(() => {
     if (currentSelectedStage === 'prepare') {
       return filter(issueTypes, (item) => !['feature', 'issue_epic'].includes(item.typeCode)).map((item) => item.id);
