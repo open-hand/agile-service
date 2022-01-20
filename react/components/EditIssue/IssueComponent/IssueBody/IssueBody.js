@@ -51,7 +51,7 @@ function IssueBody(props) {
   const hasTest = useHasTest();
   const testLinkStoreRef = useRef();
 
-  const [splitStoryData, setSplitStorytData] = useState();
+  const [splitStoryData, setSplitStoryData] = useState();
 
   useEffect(() => {
     const loadData = async () => {
@@ -61,13 +61,13 @@ function IssueBody(props) {
       } else {
         Data = store.projectId?.toString() !== projectId.toString() ? await featureApi.getSubProjectSplitStory(issueId, projectId) : await featureApi.getSplitStory(issueId);
       }
-      setSplitStorytData(Data);
+      setSplitStoryData(Data);
     };
 
     if (issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature') {
       loadData();
     }
-  }, [issueId, issueTypeVO.typeCode, outside, projectId]);
+  }, [issueId, issueTypeVO.typeCode, outside, projectId, store.projectId]);
 
   return (
     <section className={`${prefixCls}-body`} id="scroll-area" style={{ position: 'relative' }}>
@@ -153,7 +153,7 @@ function IssueBody(props) {
           issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
             ? (
               <TabPane tab={`拆分的工作项${splitStoryData?.storyList ? `(${(splitStoryData?.storyList?.length || 0) > 99 ? '99+' : (splitStoryData?.storyList?.length || 0)})` : ''}`} key="split_story">
-                <IssueSplit {...props} splitStoryData={splitStoryData} />
+                <IssueSplit {...props} issueData={splitStoryData} />
               </TabPane>
             ) : ''
         }

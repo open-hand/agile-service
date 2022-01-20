@@ -2,15 +2,20 @@ import React, { useMemo } from 'react';
 import { Progress, Tooltip, Button } from 'choerodon-ui/pro';
 import IssueItem from '../SplitStory/IssueItem';
 import styles from './index.less';
+import { Issue } from '@/common/types';
 
+interface IIssueDetailIssueSplitData {
+  completedCount: number
+  completedStoryPoints: number
+  storyList: Issue[]
+  totalCount: number
+  totalStoryPoints: number
+}
 interface IIssueDetailIssueSplitProps {
   outside?: boolean
   organizationId?: string
-  issueData?: any
-  /**
-   * @deprecated
-   */
-  splitStoryData?: any
+  issueData?: IIssueDetailIssueSplitData
+
 }
 const IssueSplitProgress: React.FC<{ type: 'story' | 'issue', completedCount?: number, total?: number }> = ({ type, completedCount = 0, total = 0 }) => {
   const progress = parseInt(String(completedCount * 100 / total), 10);
@@ -41,18 +46,20 @@ const IssueSplitProgress: React.FC<{ type: 'story' | 'issue', completedCount?: n
   );
 };
 IssueSplitProgress.defaultProps = { completedCount: 0, total: 0 };
-const IssueSplit: React.FC<IIssueDetailIssueSplitProps> = (props: any) => {
+const IssueSplit: React.FC<IIssueDetailIssueSplitProps> = (props) => {
   const {
-    outside, organizationId, splitStoryData,
+    outside, organizationId, issueData,
   } = props;
 
-  const { totalStoryPoints, completedStoryPoints, storyList = [] } = splitStoryData || {};
+  const {
+    totalStoryPoints, completedStoryPoints, totalCount, completedCount, storyList = [],
+  } = issueData || {};
   return (
     <div className={styles.wrap}>
       <div className={styles.top}>
         <div className={styles.top_left}>
           <IssueSplitProgress type="story" total={totalStoryPoints} completedCount={completedStoryPoints} />
-          <IssueSplitProgress type="issue" total={totalStoryPoints} completedCount={completedStoryPoints} />
+          <IssueSplitProgress type="issue" total={totalCount} completedCount={completedCount} />
         </div>
         {/* <Tooltip title="创建工作项至子项目">
           <Button icon="playlist_add" />
@@ -67,4 +74,5 @@ const IssueSplit: React.FC<IIssueDetailIssueSplitProps> = (props: any) => {
     </div>
   );
 };
+IssueSplit.defaultProps = { outside: undefined, organizationId: undefined, issueData: undefined };
 export default IssueSplit;
