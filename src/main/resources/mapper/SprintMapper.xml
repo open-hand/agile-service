@@ -1139,10 +1139,10 @@
                     AND ai.type_code NOT IN ('sub_task') AND  (ai.epic_id IS NULL OR ai.epic_id = 0)
                 </if>
                 <if test='advancedSearchArgs.featureId != null'>
-                    and ai.type_code = 'story' AND ai.feature_id = #{advancedSearchArgs.featureId}
+                    and ai.type_code IN ('story', 'task', 'bug') AND ai.feature_id = #{advancedSearchArgs.featureId}
                 </if>
                 <if test='advancedSearchArgs.noFeature != "" and advancedSearchArgs.noFeature == "true"'>
-                    and ai.type_code = 'story' AND (ai.feature_id IS NULL OR ai.feature_id = 0)
+                    and ai.type_code IN ('story', 'task', 'bug') AND (ai.feature_id IS NULL OR ai.feature_id = 0)
                 </if>
                 <if test='advancedSearchArgs.onlyStory != "" and advancedSearchArgs.onlyStory == "true"'>
                     AND ai.type_code = 'story'
