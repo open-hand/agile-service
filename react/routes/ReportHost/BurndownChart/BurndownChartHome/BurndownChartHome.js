@@ -193,7 +193,6 @@ class BurndownChartHome extends Component {
       //     type: issues[0].type,
       //   };
       // });
-      // console.log(newData, data2);
       BurndownChartStore.setBurndownList(newData);
       this.setState({
         tableLoading: false,
