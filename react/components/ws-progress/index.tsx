@@ -44,12 +44,15 @@ interface Props {
   downloadProps?: DownloadProps, /** 下载文件配置，当存在自动下载配置时，以自动下载配置为最高优先级 */
   onFinish?: (messageData: any) => void, /** websocket任务完成后回调 */
   onStart?: (messageData: any) => void, /** websocket任务开始时回调 */
+  /** websocket任务失败时回调 */
+  onFailed?: (messageData: any) => void,
   downloadBtn?: boolean
 }
 interface StateProps {
   visible: boolean,
   data: { [propsName: string]: any },
   lastSuccessData: { [propsName: string]: any },
+  lastFailedData:{ [propsName: string]: any },
 }
 function onHumanizeDuration(createDate?: string, lastUpdateDate?: string, timeFormat: string = 'YYYY-MM-DD HH:mm:ss'): string | null {
   if (!createDate || !lastUpdateDate) {
@@ -64,7 +67,7 @@ function onHumanizeDuration(createDate?: string, lastUpdateDate?: string, timeFo
   return humanizeDuration(diff);
 }
 
-type ActionProps = Partial<StateProps> & { type: 'init' | 'transmission' | 'visible' | 'finish' }
+type ActionProps = Partial<StateProps> & { type: 'init' | 'transmission' | 'visible' | 'finish' | 'failed' }
 const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
   const { percentKey = 'process', downloadBtn = false } = props;
   const formatMessage = useFormatMessage();
@@ -90,6 +93,7 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
     return '';
   }, [formatMessage, props.predefineProgressTextConfig]);
   const onFinish = usePersistFn(props.onFinish || ((d: any) => { }));
+  const onFailed = usePersistFn((d: any) => props.onFailed && props.onFailed(d));
   const [stateProgress, dispatch] = useReducer((state: StateProps, action: ActionProps) => {
     switch (action.type) {
       case 'init':
@@ -118,6 +122,14 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
           lastSuccessData: action.data,
         };
       }
+      case 'failed': {
+        onFailed(action.data);
+        return {
+          data: { [percentKey]: 0 },
+          visible: false,
+          lastFailedData: action.data,
+        };
+      }
 
       default:
         return state;
@@ -128,18 +140,17 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
     visible: false,
   });
   const { messageKey } = props;
-  function handleFinish(data: any) {
-    const { autoDownload } = props;
+  const handleFinish = useCallback((data: any) => {
     dispatch({ type: 'finish', data });
     onFinish(data);
-    if (autoDownload) {
-      const autoDownLoadFieldCode = typeof (autoDownload) === 'boolean' ? 'fileUrl' : autoDownload.fieldKey;
+    if (props.autoDownload) {
+      const autoDownLoadFieldCode = typeof (props.autoDownload) === 'boolean' ? 'fileUrl' : props.autoDownload.fieldKey;
       const url = data[autoDownLoadFieldCode || 'fileUrl'];
       const fileName = downLoadProps?.fileName ?? url.substring(url.lastIndexOf('/') + 1);
       fileSever.saveAs(data[autoDownLoadFieldCode || 'fileUrl'], fileName, downLoadProps?.fileSaverOptions);
     }
-  }
-  function handleMessage(data: any) {
+  }, [downLoadProps?.fileName, downLoadProps?.fileSaverOptions, onFinish, props.autoDownload]);
+  const handleMessage = useCallback((data: any) => {
     const newData = JSON.parse(data);
     const { status } = newData;
     if (!stateProgress.visible && stateProgress.data?.[percentKey] === 0) {
@@ -155,7 +166,10 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
     if (status && status === 'success') {
       handleFinish(newData);
     }
-  }
+    if (status && status === 'failed') {
+      dispatch({ type: 'failed', data: newData });
+    }
+  }, [handleFinish, percentKey, props, stateProgress.data, stateProgress.visible]);
   const renderFinish: any = useCallback(() => {
     const { downloadInfo, renderEndProgress } = props;
     if (renderEndProgress && typeof (props.renderEndProgress) === 'function') {

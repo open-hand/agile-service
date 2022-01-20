@@ -200,14 +200,18 @@ const ExportIssue: React.FC = () => {
     }
     return true;
   };
-  const handleFinish = (messageData: any) => {
+  const handleWsFinish = () => {
     store.setExportBtnHidden(false);
     // @ts-ignore
     store.exportButtonConfig.buttonProps.loading = false;
     modal?.update({ okProps: { loading: false } });
+  };
+  const handleFinish = (messageData: any) => {
+    handleWsFinish();
     Choerodon.prompt('导出成功');
     store.setDownloadInfo(messageData);
   };
+
   const renderExport = () => {
     if (store.exportButtonConfig?.component) {
       return typeof (store.exportButtonConfig?.component) === 'function' ? store.exportButtonConfig?.component(exportExcel) : store.exportButtonConfig?.component;
@@ -321,6 +325,7 @@ const ExportIssue: React.FC = () => {
           modal?.update({ okProps: { loading: true } });
           store.setExportBtnHidden(true);
         }}
+        onFailed={handleWsFinish}
         autoDownload={{ fileName: store.exportFileName ?? `${getProjectName()}.xlsx` }}
         downloadInfo={store.downloadInfo.id ? {
           url: store.downloadInfo.fileUrl!,
