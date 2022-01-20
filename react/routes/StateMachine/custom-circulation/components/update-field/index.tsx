@@ -577,14 +577,14 @@ const UpdateField = ({
       if (validate) {
         const data = getData();
         const updateData = transformUpdateData(data, customMemberFieldsData);
-        await statusTransformApi[isOrganization ? 'orgUpdateField' : 'updateField'](selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
+        await statusTransformApi[isOrganization ? 'orgUpdateField' : 'updateField'](selectedType, record.get('id'), record.get('objectVersionNumber'), updateData, isProgramIssueType ? 'program' : 'agile');
         customCirculationDataSet.query(customCirculationDataSet.currentPage);
         return true;
       }
       return false;
     };
     modal.handleOk(submit);
-  }, [customCirculationDataSet, getData, modal, record, selectedType, isOrganization, dataSet, customMemberFieldsData]);
+  }, [customCirculationDataSet, getData, modal, record, selectedType, isOrganization, dataSet, customMemberFieldsData, isProgramIssueType]);
 
   const data = getData();
 
