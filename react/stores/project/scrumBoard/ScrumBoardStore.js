@@ -910,7 +910,6 @@ class ScrumBoardStore {
   }
 
   @computed get getCanDragOnToJS() {
-    // console.log(toJS(this.canDragOn));
     return toJS(this.canDragOn);
   }
 
