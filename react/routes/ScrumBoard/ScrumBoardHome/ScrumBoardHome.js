@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
+import { reaction } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import {
   Page, Header, Content, stores, Breadcrumb, Choerodon, WSHandler,
 } from '@choerodon/boot';
 import {
-  Select, Icon, Modal, Form,
+  Icon, Form,
 } from 'choerodon-ui';
 import { C7NFormat, HeaderButtons } from '@choerodon/master';
 import screenfull from 'screenfull';
-import { cloneDeep, set } from 'lodash';
-import { Modal as ModalPro } from 'choerodon-ui/pro';
+import { cloneDeep, isEqual, set } from 'lodash';
+import { Modal, Select } from 'choerodon-ui/pro';
 import queryString from 'query-string';
 import { LoadingHiddenWrap, LoadingProvider } from '@/components/Loading';
 import CloseSprint from '@/components/close-sprint';
@@ -65,13 +66,12 @@ class ScrumBoardHome extends Component {
     this.dataConverter = new ScrumBoardDataController();
     this.ref = null;
     this.issueSearchStore = null;
-    this.state = {
-      updateParentStatus: null,
-    };
   }
 
   componentDidMount() {
     ScrumBoardStore.setSelectedBoardId('');
+    const r = reaction(() => ScrumBoardStore.getUpdateParent, (isOpen) => isOpen && this.handleOpenChangeParentModal(), { equals: isEqual });
+
     const defaultSearchVO = cloneDeep(localPageCacheStore.getItem('scrumBoard.searchVO') || {});
     ScrumBoardStore.bindFunction('refresh', (sprintId) => {
       const currentSprint = sprintId ?? defaultSearchVO?.otherArgs?.sprint;
@@ -249,7 +249,7 @@ class ScrumBoardHome extends Component {
   };
 
   handleCreateBoardClick = () => {
-    ModalPro.open({
+    Modal.open({
       title: <C7NFormat
         intlPrefix="agile.scrumBoard"
         id="create.board"
@@ -354,10 +354,73 @@ class ScrumBoardHome extends Component {
     ScrumBoardStore.setFilterManageVisible(!filterManageVisible);
   };
 
+  handleOpenChangeParentModal = () => {
+    let updateParentStatus = ScrumBoardStore.getTransformToCompleted.length ? ScrumBoardStore.getTransformToCompleted[0].id : '无';
+    const setUpdateParentStatus = (val) => {
+      updateParentStatus = val;
+    };
+    Modal.open({
+      key: 'finishParentIssueModal',
+      closable: false,
+      maskClosable: false,
+      title: '更新父工作项',
+      onCancel: () => {
+        ScrumBoardStore.setUpdateParent(false);
+      },
+      onOk: () => {
+        // 后端要在后续增加的 parentIssues 上加 objVersionNumber
+        const data = {
+          issueId: ScrumBoardStore.getUpdatedParentIssue.issueId,
+          objectVersionNumber: ScrumBoardStore.getUpdatedParentIssue.objectVersionNumber,
+          transformId: updateParentStatus || ScrumBoardStore.getTransformToCompleted[0].id,
+        };
+        return issueApi.updateStatus(data.transformId, data.issueId,
+          data.objectVersionNumber).then((res) => {
+          ScrumBoardStore.setUpdateParent(false);
+          this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
+        }).catch((err) => {
+          if (err.code === 'error.stateMachine.executeTransform') {
+            Choerodon.prompt('该工作项状态已被修改，请打开父工作项进行状态修改', 'error');
+          }
+        });
+      },
+      okProps: {
+        disabled: !ScrumBoardStore.getTransformToCompleted.length,
+      },
+      children: (
+        <>
+          <p>
+            {'任务'}
+            {ScrumBoardStore.getUpdatedParentIssue?.issueNum}
+            {'全部子任务均为已解决状态'}
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p style={{ marginRight: 20, marginBottom: 0 }}>是否更新父级工作项状态</p>
+            <Select
+              value={updateParentStatus}
+              style={{
+                width: 250,
+              }}
+              onChange={setUpdateParentStatus}
+            >
+              {
+                ScrumBoardStore.getTransformToCompleted.map((item) => (
+                  <Select.Option
+                    key={item.id}
+                    value={item.id}
+                  >
+                    {item.statusVO.name}
+                  </Select.Option>
+                ))
+              }
+            </Select>
+          </div>
+        </>
+      ),
+    });
+  }
+
   render() {
-    const {
-      updateParentStatus,
-    } = this.state;
     const { selectedBoardFilterIds } = ScrumBoardStore;
     const currentSprintIsDoing = ScrumBoardStore.didCurrentSprintExist && ScrumBoardStore.sprintNotClosedArray.find((item) => item.statusCode === 'started' && item.sprintId === ScrumBoardStore.sprintId);
     return (
@@ -521,64 +584,7 @@ class ScrumBoardHome extends Component {
         </Content>
         {
           ScrumBoardStore.getUpdateParent ? (
-            <Modal
-              closable={false}
-              maskClosable={false}
-              title="更新父工作项"
-              visible={ScrumBoardStore.getUpdateParent}
-              onCancel={() => {
-                ScrumBoardStore.setUpdateParent(false);
-              }}
-              onOk={() => {
-                // 后端要在后续增加的 parentIssues 上加 objVersionNumber
-                const data = {
-                  issueId: ScrumBoardStore.getUpdatedParentIssue.issueId,
-                  objectVersionNumber: ScrumBoardStore.getUpdatedParentIssue.objectVersionNumber,
-                  transformId: updateParentStatus || ScrumBoardStore.getTransformToCompleted[0].id,
-                };
-                issueApi.updateStatus(data.transformId, data.issueId,
-                  data.objectVersionNumber).then((res) => {
-                  ScrumBoardStore.setUpdateParent(false);
-                  this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
-                }).catch((err) => {
-                  if (err.code === 'error.stateMachine.executeTransform') {
-                    Choerodon.prompt('该工作项状态已被修改，请打开父工作项进行状态修改', 'error');
-                  }
-                });
-              }}
-              disableOk={!ScrumBoardStore.getTransformToCompleted.length}
-            >
-              <p>
-                {'任务'}
-                {ScrumBoardStore.getUpdatedParentIssue?.issueNum}
-                {'全部子任务均为已解决状态'}
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <p style={{ marginRight: 20, marginBottom: 0 }}>是否更新父级工作项状态</p>
-                <Select
-                  style={{
-                    width: 250,
-                  }}
-                  onChange={(value) => {
-                    this.setState({
-                      updateParentStatus: value,
-                    });
-                  }}
-                  defaultValue={ScrumBoardStore.getTransformToCompleted.length ? ScrumBoardStore.getTransformToCompleted[0].id : '无'}
-                >
-                  {
-                    ScrumBoardStore.getTransformToCompleted.map((item) => (
-                      <Select.Option
-                        key={item.id}
-                        value={item.id}
-                      >
-                        {item.statusVO.name}
-                      </Select.Option>
-                    ))
-                  }
-                </Select>
-              </div>
-            </Modal>
+            <div />
           ) : null
         }
         <StatusLinkageWSHandle />
