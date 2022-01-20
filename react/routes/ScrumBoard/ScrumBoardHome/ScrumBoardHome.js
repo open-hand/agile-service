@@ -65,13 +65,13 @@ class ScrumBoardHome extends Component {
     super(props);
     this.dataConverter = new ScrumBoardDataController();
     this.ref = null;
+    this.reaction = undefined;
     this.issueSearchStore = null;
   }
 
   componentDidMount() {
     ScrumBoardStore.setSelectedBoardId('');
-    const r = reaction(() => ScrumBoardStore.getUpdateParent, (isOpen) => isOpen && this.handleOpenChangeParentModal(), { equals: isEqual });
-
+    this.reaction = reaction(() => ScrumBoardStore.getUpdateParent, (isOpen) => isOpen && this.handleOpenChangeParentModal(), { equals: isEqual });
     const defaultSearchVO = cloneDeep(localPageCacheStore.getItem('scrumBoard.searchVO') || {});
     ScrumBoardStore.bindFunction('refresh', (sprintId) => {
       const currentSprint = sprintId ?? defaultSearchVO?.otherArgs?.sprint;
@@ -96,6 +96,8 @@ class ScrumBoardHome extends Component {
     ScrumBoardStore.resetDataBeforeUnmount();
     // 退出全屏
     screenfull.exit();
+    this.reaction && this.reaction();
+    this.reaction = undefined;
     document.body.classList.remove('c7n-scrumboard-fullScreen');
   }
 

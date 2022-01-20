@@ -549,7 +549,7 @@ class DragList extends Component<Props, StateProps> {
               {!disabled && (
                 <Button
                   onClick={this.addItem}
-                  funcType="flat"
+                  funcType="raised"
                   className="issue-dragList-addBtn"
                 >
                   <i className="icon-playlist_add icon" />
