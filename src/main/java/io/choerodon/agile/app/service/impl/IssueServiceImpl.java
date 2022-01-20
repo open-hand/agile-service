@@ -2864,6 +2864,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 if (!CollectionUtils.isEmpty(issueLinkDTOS)) {
                     issueLinkService.deleteIssueLinkByIssueId(issueConvertDTO,issueLinkDTOS);
                 }
+                if (agilePluginService != null) {
+                    agilePluginService.handlerProgramValueWhenTransferSubTask(issueConvertDTO, projectId, fieldList);
+                }
                 issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
                 Long sprintId = issueMapper.selectUnCloseSprintId(projectId, issueTransformSubTask.getParentIssueId());
                 List<Long> issueIds = new ArrayList<>();
