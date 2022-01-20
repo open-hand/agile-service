@@ -335,7 +335,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
    * @param objectVersionNumber
    */
   updateCondition(
-    issueTypeId: string, statusId: string, objectVersionNumber: number, data: ICondition[],
+    issueTypeId: string, statusId: string, objectVersionNumber: number, data: ICondition[], applyType: 'agile' | 'program',
   ) {
     return axios({
       method: 'post',
@@ -344,7 +344,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
         issueTypeId,
         statusId,
         objectVersionNumber,
-        applyType: getApplyType(),
+        applyType,
       },
       data,
     });
@@ -592,7 +592,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
    * @param updateData
    */
   updateField(
-    issueTypeId: string, statusId: string, objectVersionNumber: number, updateData: IUpdateData[],
+    issueTypeId: string, statusId: string, objectVersionNumber: number, updateData: IUpdateData[], applyType: 'agile' | 'program',
   ) {
     return axios({
       method: 'post',
@@ -602,7 +602,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
         issueTypeId,
         statusId,
         objectVersionNumber,
-        applyType: getApplyType(),
+        applyType,
       },
     });
   }
