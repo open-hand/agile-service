@@ -225,7 +225,7 @@ const NotifySetting = ({
           objectVersionNumber: record.get('objectVersionNumber'),
         };
         try {
-          await statusTransformApi[isOrganization ? 'orgUpdateNotifySetting' : 'updateNotifySetting'](updateData);
+          await statusTransformApi[isOrganization ? 'orgUpdateNotifySetting' : 'updateNotifySetting'](updateData, isProgramIssueType ? 'program' : 'agile');
           customCirculationDataSet.query(customCirculationDataSet.currentPage);
           return true;
         } catch (e) {
@@ -237,7 +237,7 @@ const NotifySetting = ({
     if (modal) {
       modal.handleOk(handleOk);
     }
-  }, [customCirculationDataSet, isOrganization, modal, notifySettingDataSet, record, selectedType]);
+  }, [customCirculationDataSet, isOrganization, isProgramIssueType, modal, notifySettingDataSet, record, selectedType]);
 
   const data = notifySettingDataSet.toData() as any[];
   const selected = [];
