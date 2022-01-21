@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Dropdown, Menu, Icon } from 'choerodon-ui/pro';
 import { find } from 'lodash';
@@ -14,15 +14,35 @@ import Styles from './IssueType.less';
 const IssueType = observer(({
   reloadIssue, applyType, onTransformType,
 }) => {
-  const { store, disabled, menuType } = useContext(EditIssueContext);
-  let { data: issueTypeData } = useProjectIssueTypes({ onlyEnabled: true, applyType, projectId: store.projectId }, { enabled: !disabled });
+  const {
+    store, disabled, menuType, isProgramIssue,
+  } = useContext(EditIssueContext);
+  const { isShowFeature } = useIsInProgram({ projectId: store.projectId });
+  const issue = store.getIssue;
+  const { issueTypeVO = {}, featureVO = {}, subIssueVOList = [] } = issue;
+  const { typeCode, id: issueTypeId } = issueTypeVO;
+  const queryTypeCodes = useMemo(() => {
+    if (subIssueVOList.length > 0) {
+      return ['task', 'story'];
+    }
+    if (typeCode === 'sub_task') {
+      return ['sub_task'];
+    }
+    let codes = ['story', 'bug', 'task', 'issue_epic'];
+    if (isShowFeature || menuType === 'org') {
+      codes = ['story', 'bug', 'task'];
+    }
+
+    return codes;
+  }, [isShowFeature, menuType, subIssueVOList.length, typeCode]);
+  let { data: issueTypeData } = useProjectIssueTypes({
+    onlyEnabled: true, typeCode: queryTypeCodes, applyType, projectId: store.projectId,
+  }, { enabled: !disabled });
   const handleChangeType = async (type) => {
-    const issue = store.getIssue;
     const {
-      issueId, objectVersionNumber, summary, featureVO = {}, issueTypeVO = {},
+      issueId, objectVersionNumber, summary,
     } = issue;
     const { featureType, value } = type.item.props;
-    const { typeCode } = issueTypeVO;
     if (typeCode === 'feature') {
       const { id, objectVersionNumber: featureObjNum } = featureVO;
       const issueUpdateVO = {
@@ -89,11 +109,7 @@ const IssueType = observer(({
       }
     }
   };
-  const issue = store.getIssue;
-  const { isShowFeature } = useIsInProgram({ projectId: store.projectId });
-  const { issueTypeVO = {}, featureVO = {}, subIssueVOList = [] } = issue;
-  const { typeCode, id } = issueTypeVO;
-  const { stateMachineId } = find(issueTypeData, { id }) || {};
+  const { stateMachineId } = find(issueTypeData, { id: issueTypeId }) || {};
   const { featureType } = featureVO || {};
   let currentIssueType = issueTypeVO;
   if (typeCode === 'feature') {
@@ -113,16 +129,10 @@ const IssueType = observer(({
       },
     ];
     currentIssueType = featureType === 'business' ? issueTypeData[0] : issueTypeData[1];
-  } else if (typeCode === 'sub_task') {
-    issueTypeData = issueTypeData.filter((item, i) => item.stateMachineId !== stateMachineId && item.typeCode === 'sub_task');
+  } else if (isProgramIssue && typeCode === 'issue_epic') {
+    issueTypeData = [];
   } else {
-    issueTypeData = issueTypeData.filter((item) => item.stateMachineId !== stateMachineId).filter((item) => !['feature', 'sub_task'].includes(item.typeCode));
-    if (isShowFeature || menuType === 'org') {
-      issueTypeData = issueTypeData.filter((item) => item.typeCode !== 'issue_epic');
-    }
-  }
-  if (subIssueVOList.length > 0) {
-    issueTypeData = issueTypeData.filter((item) => ['task', 'story'].includes(item.typeCode));
+    issueTypeData = issueTypeData.filter((item, i) => item.stateMachineId !== stateMachineId);
   }
   const typeList = (
     <Menu

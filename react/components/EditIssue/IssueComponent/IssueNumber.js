@@ -1,22 +1,22 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { Icon, Tooltip } from 'choerodon-ui';
 import { withRouter } from 'react-router-dom';
 import copy from 'copy-to-clipboard';
 import { Choerodon } from '@choerodon/boot';
-
 import { LINK_URL_TO } from '@/constants/LINK_URL';
 import { issueApi } from '@/api';
 import { linkUrl } from '@/utils/to';
-import useIsProgram from '@/hooks/useIsProgram';
+import EditIssueContext from '../stores';
 import IssueSwitch from './IssueSwitch';
 import styles from './IssueNumber.less';
 
 const IssueNumber = ({
   reloadIssue, typeCode, parentSummary, issue, disabled, otherProject, outside,
 }) => {
-  const { isProgram } = useIsProgram();
-  const { issueId, issueNum } = issue;
-
+  const { issueId, issueNum, applyType } = issue;
+  const {
+    isProgramIssue,
+  } = useContext(EditIssueContext);
   const handleClickIssueNum = useCallback(() => {
     if (disabled) {
       return false;
@@ -35,13 +35,13 @@ const IssueNumber = ({
         paramIssueId: decryptIssueId, paramName: issueNum,
       },
     };
-    if (!isProgram) {
+    if (!isProgramIssue) {
       copy(`${window.location.host}/#/${linkUrl('agile/work-list/issue', queryData)}`);
     } else {
       copy(`${window.location.host}/#/${linkUrl('agile/feature', queryData)}`);
     }
     Choerodon.prompt('复制成功！');
-  }, [isProgram, issueId, issueNum]);
+  }, [isProgramIssue, issueId, issueNum]);
 
   return (
     <div style={{

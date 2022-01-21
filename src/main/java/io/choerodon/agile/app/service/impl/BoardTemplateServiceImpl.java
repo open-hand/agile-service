@@ -111,7 +111,7 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
         if (Boolean.TRUE.equals(boardService.checkName(organizationId, 0L, boardName))) {
             throw new CommonException("error.board.template.name.exist");
         }
-        BoardDTO boardResult = boardService.createBoard(organizationId, 0L, boardName);
+        BoardDTO boardResult = boardService.createBoard(organizationId, 0L, boardName, "agile");
         createTemplateColumnWithRelateStatus(boardResult);
     }
 
@@ -336,6 +336,10 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
 
     @Override
     public void syncBoardTemplate(ProjectEvent projectEvent, String applyType) {
+        List<BoardVO> boardVOList = boardService.queryByProjectId(projectEvent.getProjectId(), applyType);
+        if (CollectionUtils.isNotEmpty(boardVOList)) {
+            return;
+        }
         // 查询组织的看板
         Long projectId = projectEvent.getProjectId();
         Long organizationId = ConvertUtil.getOrganizationId(projectEvent.getProjectId());
@@ -465,7 +469,7 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
 
     private void copyBoardTemplate(Long projectId, Long organizationId, List<BoardVO> boardVOS) {
         for (BoardVO boardVO : boardVOS) {
-            BoardDTO board = boardService.createBoard(0L, projectId, boardVO.getName());
+            BoardDTO board = boardService.createBoard(0L, projectId, boardVO.getName(), "agile");
             // 查询列
             List<BoardColumnVO> boardColumnVOS = listColumnByBoardId(organizationId, boardVO.getBoardId());
             if (!CollectionUtils.isEmpty(boardColumnVOS)) {

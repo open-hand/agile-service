@@ -9,6 +9,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectEpic from '@/components/select/select-epic';
 import SelectFeature from '@/components/select/select-feature';
 import { IsInProgram } from '@/hooks/useIsInProgram';
+import { SHOW_FEATURE_TYPE_CODES } from '@/constants/SHOW_FEATURE_TYPE_CODE';
 import styles from './FieldEpic.less';
 
 @inject('AppState')
@@ -57,12 +58,12 @@ import styles from './FieldEpic.less';
 
   render() {
     const {
-      store, disabled, push, outside, projectId, organizationId, applyType,
+      store, disabled, push, outside, projectId, organizationId, applyType, isAgileProgram,
     } = this.props;
     const issue = store.getIssue;
     const {
       epicColor, epicId, issueEpicName, typeCode,
-      featureId, featureName,
+      featureId, featureName, relateIssueId,
     } = issue;
     const field = store.getFieldByCode('epic');
     const required = field?.required;
@@ -71,7 +72,7 @@ import styles from './FieldEpic.less';
         {
           ({ isShowFeature, program }) => (
             <>
-              {typeCode === 'story' && isShowFeature
+              {(SHOW_FEATURE_TYPE_CODES.includes(typeCode) || (typeCode === 'bug' && !relateIssueId)) && isShowFeature
                 ? (
                   <div className="line-start mt-10">
                     <div className="c7n-property-wrapper">
@@ -84,7 +85,7 @@ import styles from './FieldEpic.less';
                         className={styles.feature}
                         disabled={disabled}
                         onSubmit={this.updateIssueFeature}
-                        initValue={featureName ? featureId || [] : []}
+                        initValue={featureName ? featureId || undefined : undefined}
                         editor={(
                           <SelectFeature
                             featureId={featureId}
@@ -155,7 +156,7 @@ import styles from './FieldEpic.less';
                 </div>
                 <div className="c7n-value-wrapper">
                   <TextEditToggle
-                    disabled={isShowFeature || disabled}
+                    disabled={(isShowFeature && (!isAgileProgram || applyType === 'agile')) || disabled}
                     onSubmit={this.updateIssueEpic}
                     initValue={issueEpicName && (applyType === 'program' || some(this.dataRef.current || [], { issueId: epicId })) ? epicId || null : null}
                     editor={({ submit }) => <SelectEpic projectId={store.projectId} required={required} onChange={submit} selectIds={epicId} dataRef={this.dataRef} />}

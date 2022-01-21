@@ -44,7 +44,8 @@ const extraFields = ['timeTrace'];
 
 const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
   const { isShowFeature } = useIsInProgram({ projectId: props.projectId });
-  let { data: issueTypeData = [] } = useProjectIssueTypes({ onlyEnabled: true, projectId: props.projectId });
+  // 必填只有非特性进行转换时会有此页面
+  let { data: issueTypeData = [] } = useProjectIssueTypes({ onlyEnabled: true, projectId: props.projectId, applyType: 'agile' });
 
   const {
     modal, requiredFields: fields, issueVO, reloadIssue, onUpdate, projectId,

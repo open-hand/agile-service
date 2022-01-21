@@ -79,10 +79,19 @@ public class ConvertUtil {
         String key = "projectInfo:"+projectId;
         Object project = redisUtil.get(key);
         if (project != null) {
-            return JSON.parseObject(project.toString(), ProjectVO.class);
+            ProjectVO projectVO = JSON.parseObject(project.toString(), ProjectVO.class);
+            if (projectVO.getId() == null) {
+                redisUtil.delete(key);
+                throw new CommonException("error.queryProject.notFound");
+            } else {
+                return projectVO;
+            }
         } else {
             ProjectVO projectVO = SpringBeanUtil.getBean(BaseFeignClient.class).queryProject(projectId).getBody();
             if (projectVO != null) {
+                if (projectVO.getId() == null) {
+                    throw new CommonException("error.queryProject.notFound");
+                }
                 redisUtil.set(key, JSON.toJSONString(projectVO));
                 return projectVO;
             } else {

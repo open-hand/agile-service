@@ -40,4 +40,8 @@ databaseChangeLog(logicalFilePath: 'fd_field_option.groovy') {
         }
     }
 
+    changeSet(id: '2022-01-17-fd-field-option-drop-index', author: 'huaxin.deng@hand-china.com') {
+        dropIndex(tableName: "fd_field_option", indexName: "pk_field_option_id")
+    }
+
 }

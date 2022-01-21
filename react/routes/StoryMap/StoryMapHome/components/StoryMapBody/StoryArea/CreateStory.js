@@ -138,6 +138,7 @@ class CreateStory extends Component {
             fixVersion: propsVersionIssueRelVOList?.length && propsVersionIssueRelVOList[0].versionId,
             sprint: sprintId || fieldsMap.get('sprint')?.defaultValue,
           },
+          isProgram: false,
           defaultTypeId: currentTypeId,
           defaultFeature: {
             summary: feature.issueId === 'none' ? '' : feature.summary,

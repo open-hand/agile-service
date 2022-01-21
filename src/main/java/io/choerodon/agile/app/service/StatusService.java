@@ -121,7 +121,7 @@ public interface StatusService {
      */
     StatusCheckVO projectCheckName(Long projectId , Long organizationId, String name);
 
-    List<Long> filterIssueType(Long projectId, String applyType);
+    List<Long> filterIssueType(Long projectId, List<String> applyTypes);
 
     /**
      * 项目层查询状态

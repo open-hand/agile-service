@@ -48,8 +48,9 @@ public class BoardController {
     public ResponseEntity<Void> createScrumBoard(@ApiParam(value = "项目id", required = true)
                                            @PathVariable(name = "project_id") Long projectId,
                                            @ApiParam(value = "board name", required = true)
-                                           @RequestParam String boardName) {
-        boardService.create(projectId, boardName);
+                                           @RequestParam String boardName,
+                                           @RequestParam String type) {
+        boardService.create(projectId, boardName, type);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -123,8 +124,9 @@ public class BoardController {
     @ApiOperation("根据projectId查询项目下的board")
     @GetMapping
     public ResponseEntity<List<BoardVO>> queryByProjectId(@ApiParam(value = "项目id", required = true)
-                                                           @PathVariable(name = "project_id") Long projectId) {
-        return Optional.ofNullable(boardService.queryByProjectId(projectId))
+                                                              @PathVariable(name = "project_id") Long projectId,
+                                                           @RequestParam String type) {
+        return Optional.ofNullable(boardService.queryByProjectId(projectId, type))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.boardList.get"));
     }

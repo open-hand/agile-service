@@ -19,5 +19,5 @@ public interface BoardMapper extends BaseMapper<BoardDTO> {
      * @param projectId projectId
      * @return BoardDTO
      */
-    List<BoardDTO> queryByProjectIdWithUser(@Param("userId") Long userId, @Param("projectId") Long projectId);
+    List<BoardDTO> queryByProjectIdWithUser(@Param("userId") Long userId, @Param("projectId") Long projectId, @Param("type") String type);
 }

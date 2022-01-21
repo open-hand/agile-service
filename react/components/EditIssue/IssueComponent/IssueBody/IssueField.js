@@ -3,6 +3,7 @@ import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { includes } from 'lodash';
 import useIsInProgram from '@/hooks/useIsInProgram';
+import { SHOW_FEATURE_TYPE_CODES } from '@/constants/SHOW_FEATURE_TYPE_CODE';
 import {
   FieldAssignee, FieldVersion, FieldStatus, FieldSprint, FieldText,
   FieldReporter, FieldPriority, FieldLabel, FieldFixVersion, FieldPI,
@@ -28,7 +29,7 @@ const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 't
 
 const IssueField = observer((props) => {
   const {
-    store, applyType, saveFieldVersionRef, saveFieldFixVersionRef, disabled, isProgram,
+    store, applyType, saveFieldVersionRef, saveFieldFixVersionRef, disabled, isProgramIssue, isAgileProgram,
   } = useContext(EditIssueContext);
   const { isShowFeature } = useIsInProgram({ projectId: store.projectId });
   const renderNormalField = (field) => (<FieldPro {...props} field={field} />);
@@ -52,7 +53,7 @@ const IssueField = observer((props) => {
         return (<FieldSprint {...props} disabled />);
 
       case 'reporter':
-        return (<FieldReporter {...props} isProgram={isProgram} />);
+        return (<FieldReporter {...props} isProgramIssue={isProgramIssue} />);
       case 'priority':
         return (<FieldPriority {...props} />);
       case 'label':
@@ -62,7 +63,7 @@ const IssueField = observer((props) => {
       case 'epic': // 包含 feature 当有子项目时 只有特性
         // 子任务、史诗不显示史诗
         if (['issue_epic', 'sub_task'].indexOf(typeCode) === -1) {
-          return (<FieldEpic {...props} />);
+          return (<FieldEpic {...props} isAgileProgram={isAgileProgram} />);
         }
         return '';
       case 'creationDate':
@@ -118,7 +119,7 @@ const IssueField = observer((props) => {
     }
   };
   const issue = store.getIssue;
-  const { issueId, typeCode } = issue;
+  const { issueId, typeCode, relateIssueId } = issue;
   let fields = applyType === 'program' ? toJS(store.customFields).filter((item) => hideFields.indexOf(item.fieldCode) === -1) : toJS(store.customFields);
   // 系统字段单独控制是否显示
   if (typeCode === 'sub_task') {
@@ -131,7 +132,7 @@ const IssueField = observer((props) => {
     // fields.splice(4, 0, { fieldCode: 'programVersion', fieldName: '团队Sprint' });
   }
   if (!store.detailShow) {
-    const isFeatureVisible = isShowFeature && typeCode === 'story';
+    const isFeatureVisible = isShowFeature && (SHOW_FEATURE_TYPE_CODES.includes(typeCode) || (typeCode === 'bug' && !relateIssueId));
     fields = fields.slice(0, isFeatureVisible ? 9 : 10);
   }
 

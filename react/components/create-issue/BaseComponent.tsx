@@ -39,6 +39,7 @@ import getFieldConfig from '@/components/field-pro/layouts/create';
 import { insertField } from './utils';
 import useFormatMessage from '@/hooks/useFormatMessage';
 import { formatFieldDateValue } from '@/utils/formatDate';
+import { CreateIssueProps } from '.';
 
 const { AppState } = stores;
 interface CreateIssueBaseCallbackData {
@@ -86,6 +87,7 @@ export interface CreateIssueBaseProps {
   extendRequiredCodes?: string[]
   extraSubmitValue?: any
   title?: string | ReactElement
+  applyType?: CreateIssueProps['applyType']
 }
 const defaultDataSet = new DataSet({
   autoCreate: true,
@@ -129,6 +131,7 @@ const lineField = ['summary', 'description'];
 const reuseFields = ['issueType', 'summary', 'description'];
 const pageCascadeFields = ['component', 'priority', 'fixVersion', 'influenceVersion'];
 const wsjfFields = ['userBusinessValue', 'timeCriticality', 'rrOeValue', 'jobSize'];
+const showFeatureTypeCodes = ['story', 'task', 'bug'];
 
 function isSelect(field: IssueCreateFields | { fieldType: string }) {
   return includes(['radio', 'multiple', 'checkbox', 'single'], field.fieldType);
@@ -155,7 +158,8 @@ function castNormalValue(value: any, fieldCode: string) {
   switch (fieldCode) {
     case 'component':
     case 'label': {
-      return Array.isArray(value) ? value.map((item) => getObjectValueMapValue(item, fieldCode)) : getObjectValueMapValue(value, fieldCode); }
+      return Array.isArray(value) ? value.map((item) => getObjectValueMapValue(item, fieldCode)) : getObjectValueMapValue(value, fieldCode);
+    }
     default:
       break;
   }
@@ -244,9 +248,8 @@ const CreateIssueBase = observer(({
   extendRequiredCodes = [],
   menuType = 'project',
   extraSubmitValue,
+  applyType,
 }: CreateIssueBaseProps) => {
-  const formatMessage = useFormatMessage('agile.common');
-  // formatMessage({}
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
   const currentTemplateSummary = useRef(defaultValues?.summary || '');
@@ -258,10 +261,12 @@ const CreateIssueBase = observer(({
   const setFieldValue = usePersistFn((name, value) => {
     dataSet.current?.set(name, value);
   });
+
   const { isFetching: isLoading, data: issueTypeList } = useProjectIssueTypes({
     projectId,
     typeCode,
     isProgram,
+    applyType,
   }, {
     onSuccess: ((issueTypes) => {
       if (!issueTypeId || (showSelectProject && !some(issueTypes, { id: issueTypeId }))) {
@@ -317,7 +322,7 @@ const CreateIssueBase = observer(({
     isInProgram,
     isShowFeature,
   } = useIsInProgram({ projectId });
-  const showFeature = !!issueTypeCode && issueTypeCode === 'story' && !!isShowFeature;
+  const showFeature = !!issueTypeCode && showFeatureTypeCodes.includes(issueTypeCode) && !!isShowFeature;
   const getDefaultValue = usePersistFn((field: IssueCreateFields) => {
     const preset = presets.get(field.fieldCode);
     // defaultAssignee优先级更高
@@ -592,7 +597,7 @@ const CreateIssueBase = observer(({
         parentIssueId: data.parentIssueId?.issueId,
         programId: projectId ?? getProjectId(),
         projectId: projectId ?? getProjectId(),
-        featureId: data.feature,
+        featureId: (issueType as IIssueType)?.typeCode === 'bug' && data.parentIssueId?.issueId ? undefined : data.feature,
         issueLinkCreateVOList: enableIssueLinks ? getIssueLinks() : undefined,
         componentIssueRelVOList: data.component ? data.component.map((item: { componentId: string }) => ({ componentId: item.componentId })) : [],
       });
@@ -694,8 +699,10 @@ const CreateIssueBase = observer(({
         return {
           isProgram,
           config: {
+            isProgram,
             typeCode,
             projectId,
+            applyType,
             menuType: menuType ?? 'project',
           },
         };
@@ -704,7 +711,10 @@ const CreateIssueBase = observer(({
         return defaultFeature ? {
           featureId: defaultFeature.issueId,
           featureName: defaultFeature.summary,
-        } : {};
+          hidden: !!getValue(dataSet, 'parentIssueId'),
+        } : {
+          hidden: !!getValue(dataSet, 'parentIssueId'),
+        };
       }
       case 'tag': {
         return {

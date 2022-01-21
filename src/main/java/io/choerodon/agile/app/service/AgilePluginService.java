@@ -180,12 +180,11 @@ public interface AgilePluginService {
 
     /**
      * 查询项目群的问题类型
-     * @param projectId
      * @param issueTypes
      * @param issueTypeIds
      * @return
      */
-    List<IssueTypeVO> queryProgramIssueType(Long projectId, List<IssueTypeVO> issueTypes, List<Long> issueTypeIds);
+    List<IssueTypeVO> filterProgramIssueTypes(List<IssueTypeVO> issueTypes, List<Long> issueTypeIds);
 
     /**
      * 项目群史诗查询pageConfig
@@ -510,4 +509,6 @@ public interface AgilePluginService {
     void handleProgramIssueValueMap(Long organizationId, List<Long> projectIds, List<Long> allIssueIds, Set<Long> featureIds, Map<String, Object> issueValueMap);
 
     void setExportIssueBusinessArgs(ExportIssuesVO exportIssuesVO, Map<String, Object> issueValueMap, IssueDTO issueDTO);
+
+    void handlerProgramValueWhenTransferSubTask(IssueConvertDTO issueConvertDTO, Long projectId, List<String> fieldList);
 }

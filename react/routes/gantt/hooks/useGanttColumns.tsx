@@ -230,6 +230,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
               // 这里延迟打开
               setTimeout(() => {
                 openCreateIssue({
+                  isProgram: false,
                   ...merge(res, {
                     parentIssue: !parentIssue.groupType ? parentIssue : undefined,
                     defaultFeature: parentIssue.groupType === 'feature' ? parentIssue : undefined,
@@ -420,7 +421,7 @@ function useGanttProjectColumns({
   const { data: tableFields } = useIssueTableFields({
     hiddenFieldCodes, extraFields: ganttSystemFields, projectId, menuType: 'project',
   });
-  const { data: issueTypes, isLoading: issueTypeIsLoading } = useProjectIssueTypes({ projectId, isInProgram });
+  const { data: issueTypes, isLoading: issueTypeIsLoading } = useProjectIssueTypes({ projectId, isInProgram, applyType: 'agile' });
   const { data: predecessorTypes, isLoading: predecessorTypesLoading } = useProjectPredecessorTypes({ projectId });
   const isLoading = issueTypeIsLoading && predecessorTypesLoading;
   const disableFeatureCreateIssue = !!issueTypes?.some((issueType) => issueType.typeCode === 'story');

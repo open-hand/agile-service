@@ -1108,10 +1108,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public void executionUpdateStatus(Long projectId, Long issueId, ExecutionUpdateIssueVO executionUpdateIssueVO) {
         Long sprintId = executionUpdateIssueVO.getSprintId();
-        String appleType = getApplyType(projectId);
-        if (StringUtils.isEmpty(appleType)) {
-            return;
-        }
         Map<Long, Long> map = executionUpdateIssueVO.getIssueTypeStatusMap();
         IssueDetailDTO issueDetailDTO = issueMapper.queryIssueDetail(projectId, issueId);
         Long issueTypeId = issueDetailDTO.getIssueTypeId();
@@ -1128,6 +1124,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (ObjectUtils.isEmpty(targetStatusId) || Objects.equals(currentStatusId, targetStatusId)) {
             return;
         }
+        String appleType = projectConfigService.getApplyType(projectId, issueTypeId);
         List<TransformVO> transformVOS = projectConfigService.queryTransformsByProjectId(projectId, currentStatusId, issueId, issueTypeId, appleType);
         if (!CollectionUtils.isEmpty(transformVOS)) {
             Map<Long, TransformVO> transformVOMap = transformVOS.stream().collect(Collectors.toMap(TransformVO::getEndStatusId, Function.identity()));
@@ -1135,18 +1132,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             if (!ObjectUtils.isEmpty(transformVO)) {
                 updateIssueStatus(projectId, issueId, transformVO.getId(), transformVO.getStatusVO().getObjectVersionNumber(), appleType);
             }
-        }
-    }
-
-    private String getApplyType(Long projectId) {
-        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
-        List<String> projectCodes = projectVO.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
-        if (projectCodes.contains(ProjectCategory.MODULE_PROGRAM)) {
-            return SchemeApplyType.PROGRAM;
-        } else if (projectCodes.contains(ProjectCategory.MODULE_AGILE)) {
-            return SchemeApplyType.AGILE;
-        } else {
-            return null;
         }
     }
 
@@ -2878,6 +2863,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 List<IssueLinkDTO> issueLinkDTOS = issueLinkMapper.listIssueLinkByBatch(projectId, Arrays.asList(issueConvertDTO.getIssueId()));
                 if (!CollectionUtils.isEmpty(issueLinkDTOS)) {
                     issueLinkService.deleteIssueLinkByIssueId(issueConvertDTO,issueLinkDTOS);
+                }
+                if (agilePluginService != null) {
+                    agilePluginService.handlerProgramValueWhenTransferSubTask(issueConvertDTO, projectId, fieldList);
                 }
                 issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
                 Long sprintId = issueMapper.selectUnCloseSprintId(projectId, issueTransformSubTask.getParentIssueId());

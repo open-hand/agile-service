@@ -16,10 +16,14 @@ import { useCreation } from 'ahooks';
 import {
   getOrgUsersByIds, getProjectUsersByIds, ICondition, statusTransformApi, userApi,
 } from '@/api';
-import { getProjectId, getIsOrganization, getMenuType } from '@/utils/common';
+import {
+  getProjectId, getIsOrganization, getMenuType,
+} from '@/utils/common';
 import { User } from '@/common/types';
 import styles from './index.less';
 import SelectUser from '@/components/select/select-user';
+
+import useIsProgramIssueType from '@/hooks/useIsProgramIssueType';
 
 interface Props {
   modal: any,
@@ -103,6 +107,7 @@ const Condition: React.FC<Props> = ({
   modal, record, selectedType, customCirculationDataSet, selectedTypeCode,
 }) => {
   const [hidden, setHidden] = useState(true);
+  const { isProgramIssueType } = useIsProgramIssueType({ typeCode: selectedTypeCode });
   const isOrganization = getIsOrganization();
   const handleClickOut = useCallback(() => {
     setHidden(true);
@@ -190,7 +195,8 @@ const Condition: React.FC<Props> = ({
             verifySubissueCompleted: true,
           });
         }
-        await statusTransformApi[isOrganization ? 'orgUpdateCondition' : 'updateCondition'](selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
+
+        await statusTransformApi[isOrganization ? 'orgUpdateCondition' : 'updateCondition'](selectedType, record.get('id'), record.get('objectVersionNumber'), updateData, isProgramIssueType ? 'program' : 'agile');
         customCirculationDataSet.query(customCirculationDataSet.currentPage);
         return true;
       }
@@ -198,7 +204,7 @@ const Condition: React.FC<Props> = ({
       return false;
     };
     modal.handleOk(handleOk);
-  }, [conditionDataSet, customCirculationDataSet, isOrganization, modal, record, selectedType]);
+  }, [conditionDataSet, customCirculationDataSet, isOrganization, isProgramIssueType, modal, record, selectedType]);
 
   const data = conditionDataSet.toData()[0] as any;
   const selected = [];

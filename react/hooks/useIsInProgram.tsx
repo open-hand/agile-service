@@ -7,6 +7,7 @@ import { AppStateProps } from '@/common/types';
 import useIsProgram from './useIsProgram';
 import useParentProgram from './data/useParentProgram';
 import useParentArtDoing from './data/useParentArtDoing';
+import useIsAgile from '@/hooks/useIsAgile';
 
 const { AppState }: { AppState: AppStateProps } = stores;
 // @ts-ignore
@@ -34,12 +35,13 @@ interface useIsInProgramConfig {
 const useIsInProgram = (config?: useIsInProgramConfig, options?: UseQueryOptions<any>): ChildrenProps => {
   const { projectId, menuType } = config ?? {};
   const { isProgram } = useIsProgram();
+  const { isAgile } = useIsAgile();
   const isProject = menuType ? menuType === 'project' : AppState.currentMenuType.type === 'project';
-  const isFirstMount = useRef<boolean>(shouldRequest && isProject && !isProgram);
+  const isFirstMount = useRef<boolean>(shouldRequest && isProject && (!isProgram || isAgile));
   const {
     data: program, isLoading: loading1, refetch: refresh1,
   } = useParentProgram({ projectId }, {
-    enabled: shouldRequest && isProject && !isProgram && options?.enabled,
+    enabled: shouldRequest && isProject && (!isProgram || isAgile) && options?.enabled,
     onSuccess: () => {
       isFirstMount.current = false;
     },

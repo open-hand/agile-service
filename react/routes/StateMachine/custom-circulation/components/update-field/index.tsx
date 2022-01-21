@@ -18,9 +18,9 @@ import useFields from '@/routes/Issue/components/BatchModal/useFields';
 import { pageConfigApi, statusTransformApi } from '@/api';
 import { Priority, IField } from '@/common/types';
 import { OldLoading as Loading } from '@/components/Loading';
-import useIsProgram from '@/hooks/useIsProgram';
 import renderField from './renderField';
 import styles from './index.less';
+import useIsProgramIssueType from '@/hooks/useIsProgramIssueType';
 
 const { Option } = Select;
 
@@ -332,7 +332,7 @@ const UpdateField = ({
   // @ts-ignore
   modal, selectedType, selectedTypeCode, record, customCirculationDataSet,
 }) => {
-  const { isProgram } = useIsProgram();
+  const { isProgramIssueType } = useIsProgramIssueType({ typeCode: selectedTypeCode });
   const [fieldData, setFieldData] = useState<IField[]>([]);
   const [updateCount, setUpdateCount] = useState<number>(0);
   const [fields, Field] = useFields();
@@ -577,14 +577,14 @@ const UpdateField = ({
       if (validate) {
         const data = getData();
         const updateData = transformUpdateData(data, customMemberFieldsData);
-        await statusTransformApi[isOrganization ? 'orgUpdateField' : 'updateField'](selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
+        await statusTransformApi[isOrganization ? 'orgUpdateField' : 'updateField'](selectedType, record.get('id'), record.get('objectVersionNumber'), updateData, isProgramIssueType ? 'program' : 'agile');
         customCirculationDataSet.query(customCirculationDataSet.currentPage);
         return true;
       }
       return false;
     };
     modal.handleOk(submit);
-  }, [customCirculationDataSet, getData, modal, record, selectedType, isOrganization, dataSet, customMemberFieldsData]);
+  }, [customCirculationDataSet, getData, modal, record, selectedType, isOrganization, dataSet, customMemberFieldsData, isProgramIssueType]);
 
   const data = getData();
 
@@ -628,7 +628,7 @@ const UpdateField = ({
             }
           </Select>,
           // @ts-ignore
-          renderField(f, data, selectedTypeCode, selectUserMap, isProgram, isOrganization, 12, customMemberData),
+          renderField(f, data, selectedTypeCode, selectUserMap, isProgramIssueType, isOrganization, 12, customMemberData),
           <Icon
             onClick={() => {
               // @ts-ignore

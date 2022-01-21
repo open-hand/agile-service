@@ -195,7 +195,7 @@ public class PageFieldServiceImpl implements PageFieldService {
         if (projectId == null) {
             return pageFields;
         }
-        ProjectVO project = baseFeignClient.queryProject(projectId).getBody();
+        ProjectVO project = ConvertUtil.queryProject(projectId);
         Set<String> codes =
                 project
                         .getCategories()

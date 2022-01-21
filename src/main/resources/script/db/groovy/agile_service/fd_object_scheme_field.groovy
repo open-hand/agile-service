@@ -60,4 +60,8 @@ databaseChangeLog(logicalFilePath: 'fd_object_scheme_field.groovy') {
             column(name: "organization_id", type: "BIGINT UNSIGNED")
         }
     }
+
+    changeSet(id: '2022-01-17-fd-object-scheme-field-drop-index', author: 'huaxin.deng@hand-china.com') {
+        dropIndex(tableName: "fd_object_scheme_field", indexName: "pk_object_scheme_field_id")
+    }
 }

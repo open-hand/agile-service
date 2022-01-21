@@ -38,6 +38,18 @@ public class StatusMachineSchemeConfigVO {
     @ApiModelProperty(value = "问题类型颜色")
     private String issueTypeColour;
 
+    private String applyType;
+
+    private String issueTypeCode;
+
+    public String getIssueTypeCode() {
+        return issueTypeCode;
+    }
+
+    public void setIssueTypeCode(String issueTypeCode) {
+        this.issueTypeCode = issueTypeCode;
+    }
+
     public Long getId() {
         return id;
     }
@@ -132,5 +144,13 @@ public class StatusMachineSchemeConfigVO {
 
     public void setIssueTypeColour(String issueTypeColour) {
         this.issueTypeColour = issueTypeColour;
+    }
+
+    public String getApplyType() {
+        return applyType;
+    }
+
+    public void setApplyType(String applyType) {
+        this.applyType = applyType;
     }
 }

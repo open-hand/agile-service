@@ -32,6 +32,7 @@ function useQuickCreateIssue({ onCreate = noop, isCanQuickCreate: propsIsCanQuic
   const isCanQuickCreate = usePersistFn((createData: any) => propsIsCanQuickCreate(createData));
   const handleCantCreateEvent = usePersistFn(() => {
     openCreateIssue({
+      isProgram: false,
       ...quickCreateDataRef.current,
       onCreate: (issue) => onCreate(issue, false),
     });

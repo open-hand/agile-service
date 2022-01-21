@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.StatusMachineSchemeConfigVO;
 import io.choerodon.agile.infra.dto.IssueCountDTO;
 import io.choerodon.agile.infra.dto.StatusMachineNodeDTO;
 import io.choerodon.mybatis.common.BaseMapper;
@@ -50,7 +51,9 @@ public interface StatusMachineNodeMapper extends BaseMapper<StatusMachineNodeDTO
 
     List<IssueCountDTO> countIssueTypeByStatusIds(@Param("organizationId") Long organizationId,@Param("schemeId") Long schemeId, @Param("statusIds") List<Long> statusIds,@Param("applyType") String applyType);
 
-    List<StatusMachineNodeDTO> selectInitNode(@Param("organizationId")  Long organizationId, @Param("schemeId") Long schemeId,@Param("statusId") Long statusId, @Param("filterIssueTypes") List<Long> filterIssueTypes);
+    List<IssueCountDTO> countStatusIssueTypeScope(@Param("organizationId") Long organizationId,@Param("schemeIds") List<Long> schemeIds, @Param("statusIds") List<Long> statusIds,@Param("isAgile") Boolean isAgile);
+
+    List<StatusMachineSchemeConfigVO> selectInitNode(@Param("organizationId")  Long organizationId, @Param("projectId")  Long projectId, @Param("applyTypes") List<String> applyTypes, @Param("statusId") Long statusId);
 
     void migrateStatusMachineNode();
 

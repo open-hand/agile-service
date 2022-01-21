@@ -154,8 +154,8 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
             throw new CommonException("error.transfer.project.is.null");
         }
         // 两个是否是在同一个组织下,并且项目群项目、普通项目、运维项目不能相互转换
-        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
-        ProjectVO targetProjectVO = baseFeignClient.queryProject(targetProjectId).getBody();
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
+        ProjectVO targetProjectVO = ConvertUtil.queryProject(targetProjectId);
         if (!Objects.equals(projectVO.getOrganizationId(), targetProjectVO.getOrganizationId())) {
             throw new CommonException("error.transfer.across.organizations");
         }
@@ -194,7 +194,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
     @Override
     public List<ProjectVO> listMoveProject(Long projectId, String typeCode) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
         List<ProjectVO> projectVOS = baseFeignClient.queryOrgProjects(projectVO.getOrganizationId(), userId).getBody();
         if (!CollectionUtils.isEmpty(projectVOS)) {
             return projectVOS.stream()
@@ -246,8 +246,8 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
                 throw new CommonException("error.transfer.project.is.null");
             }
             // 两个是否是在同一个组织下,并且项目群项目、普通项目、运维项目不能相互转换
-            ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
-            ProjectVO targetProjectVO = baseFeignClient.queryProject(targetProjectId).getBody();
+            ProjectVO projectVO = ConvertUtil.queryProject(projectId);
+            ProjectVO targetProjectVO = ConvertUtil.queryProject(targetProjectId);
             if (!Objects.equals(projectVO.getOrganizationId(), targetProjectVO.getOrganizationId())) {
                 throw new CommonException("error.transfer.across.organizations");
             }
@@ -336,7 +336,8 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
         Long issueTypeId = issueDTO.getIssueTypeId();
         Map<Long, Map<Long, Long>> newIssueTypeMap = issueTypeStatusMap.get(issueTypeId);
         if (!ObjectUtils.isEmpty(newIssueTypeMap)) {
-            issueTypeId = newIssueTypeMap.keySet().stream().findFirst().get();
+            List<Long> issueType = newIssueTypeMap.keySet().stream().collect(Collectors.toList());
+            issueTypeId = issueType.get(0);
         }
         // 父级移动时问题类型改成了bug，需要将它下面的子缺陷解除关联关系，不移动。
         Boolean isSubIssue = "sub_task".equals(issueDTO.getTypeCode()) || ("bug".equals(issueDTO.getTypeCode()) && !ObjectUtils.isEmpty(issueDTO.getRelateIssueId()) && !Objects.equals(0L, issueDTO.getRelateIssueId()));

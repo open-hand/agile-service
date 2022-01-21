@@ -202,6 +202,8 @@ export interface IssueCreateFields {
   projectId: string
   required: boolean
   system: boolean
+  /** 是否为前端初始化的字段 */
+  frontInitial?: boolean
 }
 export interface IField {
   createdLevel?: string;

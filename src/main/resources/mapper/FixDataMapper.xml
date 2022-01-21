@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.FixDataMapper">
+    <update id="initBoardType">
+        update agile_board
+        set type = #{type}
+        where project_id in (
+            select
+                project_id
+            from fd_project_config
+            where
+              project_id in
+              <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+                  #{projectId}
+              </foreach>
+              and apply_type = #{type}
+        )
+    </update>
+
+    <update id="initBoardTemplateType">
+        update agile_board
+        set type = #{type}
+        where organization_id != 0
+        and project_id = 0
+    </update>
+</mapper>

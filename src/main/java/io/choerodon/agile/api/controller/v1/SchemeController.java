@@ -62,7 +62,7 @@ public class SchemeController extends BaseController {
     @ApiOperation(value = "查询项目的问题类型列表，带对应的状态机id")
     @GetMapping(value = "/schemes/query_issue_types_with_sm_id")
     public ResponseEntity<List<IssueTypeWithStateMachineIdVO>> queryIssueTypesWithStateMachineIdByProjectId(@PathVariable("project_id") Long projectId,
-                                                                                                            @RequestParam("apply_type") String applyType,
+                                                                                                            @RequestParam(value = "apply_type", required = false) String applyType,
                                                                                                             @RequestParam(value = "only_enabled", defaultValue = "false",
                                                                                                                     required = false) Boolean onlyEnabled) {
         return new ResponseEntity<>(projectConfigService.queryIssueTypesWithStateMachineIdByProjectId(projectId, applyType, onlyEnabled), HttpStatus.OK);
@@ -102,7 +102,7 @@ public class SchemeController extends BaseController {
     @ApiOperation(value = "查询项目下的所有状态")
     @GetMapping(value = "/schemes/query_status_by_project_id")
     public ResponseEntity<List<StatusVO>> queryStatusByProjectId(@PathVariable("project_id") Long projectId,
-                                                                 @RequestParam("apply_type") String applyType) {
+                                                                 @RequestParam(value = "apply_type", required = false) String applyType) {
         return new ResponseEntity<>(projectConfigService.queryStatusByProjectId(projectId, applyType), HttpStatus.OK);
     }
 
@@ -225,8 +225,8 @@ public class SchemeController extends BaseController {
     @ApiOperation(value = "添加新状态")
     @PostMapping(value = "/status/create")
     public ResponseEntity<StatusVO> createStatus(@PathVariable("project_id") Long projectId,
-                                                 @RequestParam(required = false)@Encrypt List<Long> issueTypeIds,
-                                                 @RequestParam String applyType,
+                                                 @RequestParam @Encrypt List<Long> issueTypeIds,
+                                                 @RequestParam(required = false) String applyType,
                                                  @RequestBody StatusVO statusVO) {
 
         return new ResponseEntity(projectConfigService.createStatus(projectId, issueTypeIds,applyType, statusVO), HttpStatus.OK);
@@ -237,7 +237,7 @@ public class SchemeController extends BaseController {
     @GetMapping(value = "/state_machine/link_status")
     public ResponseEntity<StatusMachineNodeVO> linkStatus(@PathVariable("project_id") Long projectId,
                                                           @RequestParam @Encrypt Long issueTypeId,
-                                                          @RequestParam String applyType,
+                                                          @RequestParam(required = false) String applyType,
                                                           @RequestParam @Encrypt Long statusId,
                                                           @RequestParam Boolean defaultStatus,
                                                           @RequestParam(required = false, defaultValue = "true") Boolean transferAll) {

@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Table, DataSet, Modal } from 'choerodon-ui/pro';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
+import BacklogStore from '@/stores/project/backlog/BacklogStore';
 
 const AssigneeModal = ({ data }) => {
   const dataSet = useMemo(() => new DataSet({
@@ -130,6 +131,7 @@ const AssigneeModal = ({ data }) => {
 };
 
 export default function openAssigneeModal(props) {
+  BacklogStore.setModalOpened(true);
   Modal.open({
     title: '经办人工作量',
     style: {
@@ -139,5 +141,6 @@ export default function openAssigneeModal(props) {
     okText: '关闭',
     footer: (ok) => ok,
     children: <AssigneeModal {...props} />,
+    onOk: () => { BacklogStore.setModalOpened(false); return true; },
   });
 }

@@ -77,6 +77,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     private static final String SYSTEM = "system";
 
+    private static final String AGILE_AND_PROGRAM = "agileAndProgram";
+
     private static final String ERROR_ISSUE_TYPE_NAME_EXISTED = "error.issue.type.name.existed";
 
     private static final String ERROR_ISSUE_TYPE_ICON_EXISTED = "error.issue.type.icon.existed";
@@ -108,6 +110,14 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                     IssueTypeCode.SUB_TASK.value(),
                     IssueTypeCode.TASK.value(),
                     IssueTypeCode.BUG.value()
+            );
+
+
+    private static final List<String> IGNORED_ISSUE_TYPES =
+            Arrays.asList(
+                    IssueTypeCode.BACKLOG.value(),
+                    IssueTypeCode.ISSUE_AUTO_TEST.value(),
+                    IssueTypeCode.ISSUE_TEST.value()
             );
 
     private static final List<String> AGILE_ISSUE_TYPES =
@@ -349,18 +359,19 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                 && !issueTypes.contains(typeCode)) {
             throw new CommonException("error.illegal.type.code");
         }
-        if (codes.contains(ProjectCategory.MODULE_PROGRAM)) {
-            throw new CommonException("error.program.can.not.create.custom.issue.type");
-        }
         return codes;
     }
 
     private Set<String> getProjectCategoryCodes(Long projectId) {
-        ProjectVO project = baseFeignClient.queryProject(projectId).getBody();
+        ProjectVO project = ConvertUtil.queryProject(projectId);
         if (project == null) {
             throw new CommonException("error.project.not.existed");
         }
-        return ProjectCategoryUtil.getCategoryCodeAndValidate(project.getCategories());
+        return project
+                .getCategories()
+                .stream()
+                .map(ProjectCategoryDTO::getCode)
+                .collect(Collectors.toSet());
     }
 
     private void initDefaultStateMachine(Long organizationId,
@@ -370,9 +381,9 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                                          Boolean copyStatusMachine) {
         Long issueTypeId = issueType.getId();
         String typeCode = issueType.getTypeCode();
-        String applyType = getApplyTypeByCategoryCodes(categoryCodes, typeCode);
+        String applyType = projectConfigService.getApplyTypeByTypeCode(projectId, typeCode);
         Long stateMachineSchemeId = getSchemeIdByOption(projectId, applyType, SchemeType.STATE_MACHINE);
-        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
         String stateMachineName = projectVO.getCode() + "-状态机-" + issueType.getName();
         Long statusMachineId = null;
         if (Boolean.TRUE.equals(copyStatusMachine)) {
@@ -436,19 +447,6 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         IssueTypeDTO issueTypeDTO = querySystemIssueTypeByCode(organizationId, typeCode);
         // 查询系统问题类型的状态机
         return stateMachineSchemeConfigService.queryStatusMachineBySchemeIdAndIssueType(organizationId, stateMachineSchemeId, issueTypeDTO.getId());
-    }
-
-    private String getApplyTypeByCategoryCodes(Set<String> categoryCodes, String typeCode) {
-        String applyType;
-        if (categoryCodes.contains(ProjectCategory.MODULE_AGILE)) {
-            applyType = "agile";
-        } else {
-            applyType = "program";
-        }
-        if (IssueTypeCode.BACKLOG.value().equals(typeCode)) {
-            applyType = "backlog";
-        }
-        return applyType;
     }
 
     private void initIssueTypeSchemeConfig(Long organizationId, Long projectId, Long issueTypeId, String applyType) {
@@ -542,9 +540,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         Long issueTypeId = issueTypeDTO.getId();
         deleteIssueStatusIfLastOne(organizationId, projectId, issueTypeId);
 
-        String typeCode = issueTypeDTO.getTypeCode();
-        Set<String> codes = getProjectCategoryCodes(projectId);
-        String applyType = getApplyTypeByCategoryCodes(codes, typeCode);
+        String applyType = projectConfigService.getApplyType(projectId, issueTypeId);
         Long stateMachineSchemeId = getSchemeIdByOption(projectId, applyType, SchemeType.STATE_MACHINE);
         StatusMachineSchemeConfigDTO statusMachineSchemeConfig = new StatusMachineSchemeConfigDTO();
         statusMachineSchemeConfig.setIssueTypeId(issueTypeId);
@@ -563,8 +559,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     private void deleteIssueStatusIfLastOne(Long organizationId,
                                             Long projectId,
                                             Long issueTypeId) {
-        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
-        String applyType = ProjectCategory.checkContainProjectCategory(projectVO.getCategories(), ProjectCategory.MODULE_PROGRAM) ? "program" : "agile";
+        String applyType = projectConfigService.getApplyType(projectId, issueTypeId);
         ProjectConfigDetailVO projectConfigDetailVO = projectConfigService.queryById(projectId);
         StateMachineSchemeVO stateMachineSchemeVO = projectConfigDetailVO.getStateMachineSchemeMap().get(applyType);
         Long schemeId = stateMachineSchemeVO.getId();
@@ -623,8 +618,15 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         issueTypeSearchVO.setOrganizationId(organizationId);
         issueTypeSearchVO.setProjectId(projectId);
         if (!ZERO.equals(projectId)) {
-            //项目群暂时不可以配置问题类型，过滤掉测试/自动化测试/特性
-            issueTypeSearchVO.setTypeCodes(AGILE_ISSUE_TYPES);
+            List<IssueTypeVO> issueTypes = objectSchemeFieldService.issueTypes(organizationId, projectId);
+            List<String> typeCodes = new ArrayList<>();
+            issueTypes.forEach(issueType -> {
+                String typeCode = issueType.getTypeCode();
+                if (!IGNORED_ISSUE_TYPES.contains(typeCode)) {
+                    typeCodes.add(typeCode);
+                }
+            });
+            issueTypeSearchVO.setTypeCodes(typeCodes);
         }
         Page<IssueTypeVO> result =
                 PageHelper.doPage(pageRequest, () -> issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO));
@@ -773,8 +775,14 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     @Override
     public Page<IssueTypeVO> pageQueryReference(PageRequest pageRequest, Long organizationId, Long projectId) {
-        Set<String> codes = getProjectCategoryCodes(projectId);
-        if (codes.contains(ProjectCategory.MODULE_AGILE)) {
+        ProjectVO project = ConvertUtil.queryProject(projectId);
+        Set<String> categories =
+                project
+                        .getCategories()
+                        .stream()
+                        .map(ProjectCategoryDTO::getCode)
+                        .collect(Collectors.toSet());
+        if (categories.contains(ProjectCategory.MODULE_AGILE)) {
             return PageHelper.doPage(pageRequest, () -> issueTypeMapper.selectEnableReference(organizationId, projectId));
         } else {
             return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
@@ -881,7 +889,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                                          Map<String, Set<Long>> categoryProjectMap) {
         int agileProjectCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_AGILE)).map(Set::size).orElse(0);
         int programProjectCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_PROGRAM)).map(Set::size).orElse(0);
-        int total = agileProjectCount + programProjectCount;
+        int agileAndProgramCount = Optional.ofNullable(categoryProjectMap.get(AGILE_AND_PROGRAM)).map(Set::size).orElse(0);
+        int total = agileProjectCount + programProjectCount - agileAndProgramCount;
         int backlogProjectCount = queryBacklogProjectCount(categoryProjectMap.get(ProjectCategory.MODULE_BACKLOG));
         result.forEach(x -> {
             if (Boolean.TRUE.equals(x.getInitialize())) {
@@ -922,17 +931,27 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         projects.forEach(p -> {
             Long projectId = p.getId();
             List<ProjectCategoryDTO> categories = p.getCategories();
+
             if (!ObjectUtils.isEmpty(categories)) {
                 Set<String> codes = categories.stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toSet());
-                if (codes.contains(ProjectCategory.MODULE_AGILE)) {
+                boolean containsAgile = codes.contains(ProjectCategory.MODULE_AGILE);
+                if (containsAgile) {
                     Set<Long> projectIds = map.computeIfAbsent(ProjectCategory.MODULE_AGILE, k -> new HashSet<>());
                     projectIds.add(projectId);
-                } else if (codes.contains(ProjectCategory.MODULE_PROGRAM)) {
+                }
+                boolean containsProgram = codes.contains(ProjectCategory.MODULE_PROGRAM);
+                if (codes.contains(ProjectCategory.MODULE_PROGRAM)) {
                     Set<Long> projectIds = map.computeIfAbsent(ProjectCategory.MODULE_PROGRAM, k -> new HashSet<>());
                     projectIds.add(projectId);
                 }
-                if (codes.contains(ProjectCategory.MODULE_BACKLOG)) {
+                boolean containsBacklog = codes.contains(ProjectCategory.MODULE_BACKLOG);
+                if (containsBacklog) {
                     Set<Long> projectIds = map.computeIfAbsent(ProjectCategory.MODULE_BACKLOG, k -> new HashSet<>());
+                    projectIds.add(projectId);
+                }
+                boolean isAgileAndProgram = containsAgile && containsProgram;
+                if (isAgileAndProgram) {
+                    Set<Long> projectIds = map.computeIfAbsent(AGILE_AND_PROGRAM, k -> new HashSet<>());
                     projectIds.add(projectId);
                 }
             }
@@ -1193,12 +1212,11 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
 
     private Map<Long, IssueTypeVO> initRankIfNull(Long organizationId, Long projectId) {
-        IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
-        issueTypeSearchVO.setOrganizationId(organizationId);
-        issueTypeSearchVO.setProjectId(projectId);
-        issueTypeSearchVO.setTypeCodes(AGILE_ISSUE_TYPES);
         List<IssueTypeVO> issueTypes =
-                issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO);
+                objectSchemeFieldService.issueTypes(organizationId, projectId)
+                        .stream()
+                        .filter(x -> !IGNORED_ISSUE_TYPES.contains(x.getTypeCode()))
+                        .collect(Collectors.toList());
         int size = issueTypes.size();
         if (size == 0) {
             return new HashMap<>();

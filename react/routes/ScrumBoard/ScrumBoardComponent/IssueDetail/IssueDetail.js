@@ -28,6 +28,7 @@ const IssueDetail = ({ refresh }) => {
         path: 'issue',
         props: {
           issueId,
+          applyType: 'agile',
           forwardedRef: ScrumBoardStore.editRef,
         },
         events: {

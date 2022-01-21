@@ -4,8 +4,13 @@ import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import BacklogHome from './BacklogHome';
 
 const BacklogHomeHoc = (props) => {
-  const { loading, ...restData } = useIsInProgram();
-  BacklogStore.setIsInProgramData({ loading, ...restData });
+  const {
+    loading, ...restData
+  } = useIsInProgram();
+  BacklogStore.setIsInProgramData({
+    loading,
+    ...restData,
+  });
   return !loading && <BacklogHome {...restData} {...props} />;
 };
 

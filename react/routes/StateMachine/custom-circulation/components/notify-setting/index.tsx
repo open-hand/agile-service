@@ -14,9 +14,9 @@ import { statusTransformApi, IUpdateNotifySetting, statusTransformApiConfig } fr
 import { getProjectId, getIsOrganization, getMenuType } from '@/utils/common';
 import { User } from '@/common/types';
 import { OldLoading } from '@/components/Loading';
-import useIsProgram from '@/hooks/useIsProgram';
 import SelectUser from '@/components/select/select-user';
 import styles from './index.less';
+import useIsProgramIssueType from '@/hooks/useIsProgramIssueType';
 
 const { AppState } = stores;
 interface NotifySelectProps {
@@ -86,7 +86,7 @@ function useClickOut(onClickOut) {
 
 const NotifySetting = ({
   // @ts-ignore
-  modal, record, selectedType, customCirculationDataSet, memberOptions = [] as Array<{ code: string, name: string }>,
+  modal, record, selectedType, customCirculationDataSet, memberOptions = [] as Array<{ code: string, name: string }>, selectedTypeItem,
 }) => {
   const [loading, setLoading] = useState(false);
   const [hidden, setHidden] = useState(true);
@@ -94,21 +94,21 @@ const NotifySetting = ({
     setHidden(true);
   }, []);
   const ref = useClickOut(handleClickOut);
-  const { isProgram } = useIsProgram();
+  const { isProgramIssueType } = useIsProgramIssueType({ issueTypes: selectedTypeItem });
   const isOrganization = getIsOrganization();
 
   const memberOptionsDataSet = useMemo(() => new DataSet({
     autoQuery: true,
     paging: false,
     transport: {
-      read: () => statusTransformApiConfig[isOrganization ? 'orgGetCustomMember' : 'getCustomMember'](selectedType, memberOptions),
+      read: () => statusTransformApiConfig[isOrganization ? 'orgGetCustomMember' : 'getCustomMember'](selectedTypeItem, memberOptions),
 
     },
     fields: [
       { name: 'code', type: 'string' as FieldType },
       { name: 'name', type: 'string' as FieldType },
     ],
-  }), [isOrganization, memberOptions, selectedType]);
+  }), [isOrganization, memberOptions, selectedTypeItem]);
 
   const notifyMethodDataSet = useMemo(() => new DataSet({
     data: [
@@ -225,7 +225,7 @@ const NotifySetting = ({
           objectVersionNumber: record.get('objectVersionNumber'),
         };
         try {
-          await statusTransformApi[isOrganization ? 'orgUpdateNotifySetting' : 'updateNotifySetting'](updateData);
+          await statusTransformApi[isOrganization ? 'orgUpdateNotifySetting' : 'updateNotifySetting'](updateData, isProgramIssueType ? 'program' : 'agile');
           customCirculationDataSet.query(customCirculationDataSet.currentPage);
           return true;
         } catch (e) {
@@ -237,7 +237,7 @@ const NotifySetting = ({
     if (modal) {
       modal.handleOk(handleOk);
     }
-  }, [customCirculationDataSet, isOrganization, modal, notifySettingDataSet, record, selectedType]);
+  }, [customCirculationDataSet, isOrganization, isProgramIssueType, modal, notifySettingDataSet, record, selectedType]);
 
   const data = notifySettingDataSet.toData() as any[];
   const selected = [];
@@ -326,7 +326,7 @@ const NotifySetting = ({
           </div>
         </Dropdown>
         {
-          !isProgram && (
+          !isProgramIssueType && (
             <div>
               <div style={{ borderTop: '1px solid var(--divider)' }} />
               <CheckBox

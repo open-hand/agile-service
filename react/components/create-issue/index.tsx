@@ -69,6 +69,7 @@ const openModal = (props: CreateIssueProps) => {
   const {
     projectId, applyType = 'agile', onCreate, onCancel, request, originFrom, title,
   } = props;
+  let { isProgram } = props;
   const handleSubmit: CreateIssueBaseProps['onSubmit'] = async ({ data, fieldList, fileList }) => {
     const res = request ? await request(data as any, applyType) : await issueApi.create(data as any, applyType);
     await fieldApi.createFieldValue(res.issueId, 'agile_issue', fieldList, data.projectId);
@@ -83,6 +84,7 @@ const openModal = (props: CreateIssueProps) => {
   let issueTypeCode: string | string[] | undefined;
   if (originFrom && ['scrumBoard', 'Backlog'].includes(originFrom)) {
     issueTypeCode = ['bug', 'task', 'story', 'sub_task'];
+    isProgram = props.isProgram ?? false;
   }
   Modal.open({
     drawer: true,
@@ -94,10 +96,10 @@ const openModal = (props: CreateIssueProps) => {
     },
     key: 'create-issue',
     title: title || (
-    <C7NFormat
-      intlPrefix="agile.common"
-      id="create.issue"
-    />
+      <C7NFormat
+        intlPrefix="agile.common"
+        id="create.issue"
+      />
     ),
     okText: <C7NFormat
       intlPrefix="boot"
@@ -108,7 +110,7 @@ const openModal = (props: CreateIssueProps) => {
         onCancel();
       }
     },
-    children: <CreateContent typeCode={issueTypeCode} onSubmit={handleSubmit} {...omit(props, 'onSubmit')} defaultTypeId={defaultIssueTypeId} />,
+    children: <CreateContent typeCode={issueTypeCode} onSubmit={handleSubmit} {...omit(props, 'onSubmit')} defaultTypeId={defaultIssueTypeId} isProgram={isProgram} applyType={applyType} />,
   });
 };
 export default openModal;

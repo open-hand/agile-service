@@ -1,6 +1,8 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.enums.ProjectCategory;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -191,7 +193,7 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
 
     @Override
     public void initByConsumeCreateProject(Long projectId, String projectCode) {
-        Long organizationId = projectUtil.getOrganizationId(projectId);
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
         //查询系统问题类型，typeCode不重复
         List<IssueTypeDTO> issueTypes = getIssueTypes(organizationId, projectId);
         //处理老的组织没有创建的数据
@@ -199,6 +201,20 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
         Map<String, IssueTypeDTO> issueTypeMap = issueTypes.stream().collect(Collectors.toMap(IssueTypeDTO::getTypeCode, x -> x));
         //初始化敏捷问题类型方案
         initScheme(projectId, organizationId, projectCode + "默认类型方案【敏捷】", issueTypeMap.get(InitIssueType.STORY.getTypeCode()).getId(), SchemeApplyType.AGILE, issueTypeMap);
+        //初始化测试问题类型方案
+        initScheme(projectId, organizationId, projectCode + "默认类型方案【测试】", issueTypeMap.get(InitIssueType.TEST.getTypeCode()).getId(), SchemeApplyType.TEST, issueTypeMap);
+    }
+
+    @Override
+    public void initByConsumeCreateProjectByCodes(Long projectId, String projectCode, Set<String> codes) {
+        Long organizationId = projectUtil.getOrganizationId(projectId);
+        //查询系统问题类型，typeCode不重复
+        List<IssueTypeDTO> issueTypes = getIssueTypes(organizationId, projectId);
+        //处理老的组织没有创建的数据
+        issueTypes = initOrganizationIssueType(organizationId, issueTypes);
+        Map<String, IssueTypeDTO> issueTypeMap = issueTypes.stream().collect(Collectors.toMap(IssueTypeDTO::getTypeCode, x -> x));
+        //初始化敏捷问题类型方案
+        initSchemeByCodes(projectId, organizationId, projectCode + "默认类型方案【敏捷】", issueTypeMap.get(InitIssueType.STORY.getTypeCode()).getId(), SchemeApplyType.AGILE, issueTypeMap, codes);
         //初始化测试问题类型方案
         initScheme(projectId, organizationId, projectCode + "默认类型方案【测试】", issueTypeMap.get(InitIssueType.TEST.getTypeCode()).getId(), SchemeApplyType.TEST, issueTypeMap);
     }
@@ -271,6 +287,37 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
             baseCreate(issueTypeScheme);
             Integer sequence = 0;
             for (InitIssueType initIssueType : InitIssueType.listByApplyType(schemeApplyType)) {
+                sequence++;
+                IssueTypeDTO issueType = issueTypeMap.get(initIssueType.getTypeCode());
+                IssueTypeSchemeConfigDTO schemeConfig = new IssueTypeSchemeConfigDTO(issueTypeScheme.getId(), issueType.getId(), organizationId, BigDecimal.valueOf(sequence));
+                if (issueTypeSchemeConfigMapper.insert(schemeConfig) != 1) {
+                    throw new CommonException("error.issueTypeSchemeConfig.create");
+                }
+            }
+            //创建与项目的关联关系
+            projectConfigService.create(projectId, issueTypeScheme.getId(), SchemeType.ISSUE_TYPE, schemeApplyType);
+        }
+    }
+
+    @Override
+    public void initSchemeByCodes(Long projectId, Long organizationId, String name, Long defaultIssueTypeId, String schemeApplyType, Map<String, IssueTypeDTO> issueTypeMap, Set<String> codes) {
+        //初始化敏捷问题类型方案
+        IssueTypeSchemeDTO issueTypeScheme = new IssueTypeSchemeDTO();
+        issueTypeScheme.setName(name);
+        issueTypeScheme.setDefaultIssueTypeId(defaultIssueTypeId);
+        issueTypeScheme.setApplyType(schemeApplyType);
+        issueTypeScheme.setOrganizationId(organizationId);
+        issueTypeScheme.setDescription(name);
+        //保证幂等性
+        List<IssueTypeSchemeDTO> issueTypeSchemes = issueTypeSchemeMapper.select(issueTypeScheme);
+        if (issueTypeSchemes.isEmpty()) {
+            baseCreate(issueTypeScheme);
+            Integer sequence = 0;
+            List<InitIssueType> initIssueTypes = InitIssueType.listByApplyType(schemeApplyType);
+            if (codes.contains(ProjectCategory.MODULE_PROGRAM)) {
+                initIssueTypes = initIssueTypes.stream().filter(v -> !Objects.equals(InitIssueType.EPIC.getTypeCode(), v.getTypeCode())).collect(Collectors.toList());
+            }
+            for (InitIssueType initIssueType : initIssueTypes) {
                 sequence++;
                 IssueTypeDTO issueType = issueTypeMap.get(initIssueType.getTypeCode());
                 IssueTypeSchemeConfigDTO schemeConfig = new IssueTypeSchemeConfigDTO(issueTypeScheme.getId(), issueType.getId(), organizationId, BigDecimal.valueOf(sequence));

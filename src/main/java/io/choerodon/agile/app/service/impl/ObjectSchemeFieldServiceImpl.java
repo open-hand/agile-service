@@ -10,6 +10,7 @@ import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
+import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -202,7 +203,11 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     private ObjectSchemeFieldDTO selectOneByFieldId(Long organizationId,
                                                     Long projectId,
                                                     Long fieldId) {
-        List<String> issueTypes = getLegalIssueTypes(projectId);
+        List<String> issueTypes =
+                issueTypes(organizationId, projectId)
+                        .stream()
+                        .map(IssueTypeVO::getTypeCode)
+                        .collect(Collectors.toList());
         List<ObjectSchemeFieldDTO> dtoList =
                 objectSchemeFieldMapper.selectByOptions(organizationId, projectId, ObjectSchemeCode.AGILE_ISSUE, fieldId, null, issueTypes);
         if (dtoList.isEmpty()) {
@@ -210,26 +215,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         } else {
             return dtoList.get(0);
         }
-    }
-
-    private List<String> getLegalIssueTypes(Long projectId) {
-        List<String> issueTypes = new ArrayList<>();
-        if (!ObjectUtils.isEmpty(projectId)) {
-            ProjectVO body = ConvertUtil.queryProject(projectId);
-            if (!ObjectUtils.isEmpty(body) && ProjectCategory.checkContainProjectCategory(body.getCategories(),ProjectCategory.MODULE_PROGRAM)) {
-                if(agilePluginService != null){
-                    issueTypes = agilePluginService.addProgramIssueType();
-                }
-            } else {
-                issueTypes = new ArrayList<>(ObjectSchemeFieldContext.NORMAL_PROJECT);
-            }
-            if (backlogExpandService != null && backlogExpandService.enabled(projectId)) {
-                issueTypes.add(ObjectSchemeFieldContext.BACKLOG);
-            }
-        } else {
-            issueTypes = ObjectSchemeFieldContext.getIssueTye();
-        }
-        return issueTypes;
     }
 
     @Override
@@ -356,42 +341,32 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                                                String schemeCode,
                                                                Long fieldId,
                                                                Long issueTypeId) {
-        List<String> issueTypes = new ArrayList<>();
-        Boolean isProgram = false;
-        boolean includeBacklogSystemField = false;
+        List<String> issueTypeCodes = new ArrayList<>();
+        boolean activeBacklog;
         if (!ObjectUtils.isEmpty(projectId)) {
-            ProjectVO body = ConvertUtil.queryProject(projectId);
-            if (!ObjectUtils.isEmpty(body) && ProjectCategory.checkContainProjectCategory(body.getCategories(),ProjectCategory.MODULE_PROGRAM)) {
-                isProgram = true;
-                if(agilePluginService != null){
-                    issueTypes = agilePluginService.addProgramIssueType();
-                }
-            } else {
-                issueTypes = new ArrayList<>(ObjectSchemeFieldContext.NORMAL_PROJECT);
-            }
-            if (backlogExpandService != null && backlogExpandService.enabled(projectId)) {
-                issueTypes.add(ObjectSchemeFieldContext.BACKLOG);
-                includeBacklogSystemField = true;
-            }
+            List<IssueTypeVO> issueTypes = issueTypes(organizationId, projectId);
+            issueTypeCodes.addAll(issueTypes.stream().map(IssueTypeVO::getTypeCode).collect(Collectors.toList()));
+            activeBacklog = issueTypeCodes.contains(ObjectSchemeFieldContext.BACKLOG);
         } else {
-            //判断组织下如果没有开启需求池的项目，组织层不展示需求类型的系统字段
-            List<ProjectVO> projectVOList = baseFeignClient.listProjectsByOrgId(organizationId).getBody();
-            if (backlogExpandService != null && !CollectionUtils.isEmpty(projectVOList)) {
-                List<Long> projectIds = projectVOList.stream().map(ProjectVO::getId).collect(Collectors.toList());
-                for (Long id : projectIds) {
-                    if (Boolean.TRUE.equals(backlogExpandService.enabled(id))) {
-                        includeBacklogSystemField = true;
-                        break;
-                    }
-                }
+            Long userId = DetailsHelper.getUserDetails().getUserId();
+            Set<Long> projectIds =
+                    baseFeignClient.listProjectsByUserIdForSimple(organizationId, userId, ProjectCategory.MODULE_BACKLOG, null)
+                            .getBody()
+                            .stream()
+                            .map(ProjectVO::getId)
+                            .collect(Collectors.toSet());
+            if (projectIds.isEmpty()) {
+                activeBacklog = false;
+            } else {
+                activeBacklog = !backlogExpandService.listProjectIdsWhichEnableBacklog(projectIds).isEmpty();
             }
-
         }
-        List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS = objectSchemeFieldMapper.selectByOptions(organizationId, projectId, schemeCode, fieldId, issueTypeId, issueTypes);
-        addNotSyncedField(objectSchemeFieldDTOS, issueTypes, includeBacklogSystemField);
+        List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS = objectSchemeFieldMapper.selectByOptions(organizationId, projectId, schemeCode, fieldId, issueTypeId, issueTypeCodes);
+        addNotSyncedField(objectSchemeFieldDTOS, issueTypeCodes, activeBacklog);
         Collections.sort(objectSchemeFieldDTOS, Comparator.comparing(ObjectSchemeFieldDTO::getId));
-        if(isProgram && agilePluginService != null){
-           return agilePluginService.filterProgramEpic(objectSchemeFieldDTOS);
+        boolean containProgram = issueTypeCodes.contains(IssueTypeCode.FEATURE.value());
+        if (containProgram && agilePluginService != null) {
+            objectSchemeFieldDTOS = agilePluginService.filterProgramEpic(objectSchemeFieldDTOS);
         }
         return filterFieldsByProjectCategories(objectSchemeFieldDTOS, projectId);
     }
@@ -401,10 +376,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (projectId == null || ObjectUtils.isEmpty(list)) {
             return list;
         }
-        Set<String> codes = getProjectCategoryCodes(projectId);
+        List<String> categoryCodes = getProjectCategoryCodes(projectId);
         boolean doFilter =
-                codes.contains(ProjectCategory.MODULE_AGILE)
-                        && !codes.contains(ProjectCategory.MODULE_DEVOPS);
+                categoryCodes.contains(ProjectCategory.MODULE_AGILE)
+                        && !categoryCodes.contains(ProjectCategory.MODULE_DEVOPS);
         if (doFilter) {
             Object obj = list.get(0);
             List result = list;
@@ -721,18 +696,38 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     }
 
     protected List<IssueTypeVO> queryProjectIssueType(Long projectId,
-                                                    List<IssueTypeVO> issueTypes,
-                                                    List<Long> issueTypeIds) {
-            if(agilePluginService != null){
-                return agilePluginService.queryProgramIssueType(projectId, issueTypes, issueTypeIds);
+                                                      List<IssueTypeVO> issueTypes,
+                                                      List<Long> issueTypeIds) {
+        List<IssueTypeVO> issueTypeList = new ArrayList<>();
+        List<String> categoryCodes = getProjectCategoryCodes(projectId);
+        boolean containsProgram = categoryCodes.contains(ProjectCategory.MODULE_PROGRAM);
+        boolean containsAgile = categoryCodes.contains(ProjectCategory.MODULE_AGILE);
+        if (!containsProgram && !containsAgile) {
+            throw new CommonException("error.illegal.project.category");
+        }
+        if (containsProgram && agilePluginService != null) {
+            issueTypeList.addAll(agilePluginService.filterProgramIssueTypes(issueTypes, issueTypeIds));
+        }
+        if (containsAgile) {
+            filterAgileIssueTypes(issueTypeList, issueTypes, issueTypeIds);
+        }
+        return issueTypeList;
+    }
+
+    private void filterAgileIssueTypes(List<IssueTypeVO> issueTypeList,
+                                       List<IssueTypeVO> issueTypes,
+                                       List<Long> issueTypeIds) {
+        Set<Long> issueTypeIdSet = issueTypeList.stream().map(IssueTypeVO::getId).collect(Collectors.toSet());
+        issueTypes.forEach(issueType -> {
+            String typeCode = issueType.getTypeCode();
+            Long issueTypeId = issueType.getId();
+            if (!issueTypeIdSet.contains(issueTypeId)
+                    && ObjectSchemeFieldContext.NORMAL_PROJECT.contains(typeCode)
+                    && issueTypeIds.contains(issueTypeId)) {
+                issueTypeList.add(issueType);
+                issueTypeIdSet.add(issueTypeId);
             }
-            else {
-                return issueTypes
-                        .stream()
-                        .filter(i -> ObjectSchemeFieldContext.NORMAL_PROJECT.contains(i.getTypeCode())
-                                && issueTypeIds.contains(i.getId()))
-                        .collect(Collectors.toList());
-            }
+        });
     }
 
     @Override
@@ -1222,13 +1217,14 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         return filterFieldsByProjectCategories(list, projectId);
     }
 
-    private Set<String> getProjectCategoryCodes(Long projectId) {
-        ProjectVO project = baseFeignClient.queryProject(projectId).getBody();
-        return project
-                .getCategories()
-                .stream()
-                .map(ProjectCategoryDTO::getCode)
-                .collect(Collectors.toSet());
+    private List<String> getProjectCategoryCodes(Long projectId) {
+        ProjectVO project = ConvertUtil.queryProject(projectId);
+        List<String> categoryCodes =
+                project.getCategories()
+                        .stream()
+                        .map(ProjectCategoryDTO::getCode)
+                        .collect(Collectors.toList());
+        return categoryCodes;
     }
 
     private List<String> getIssueTypeFieldCodes(Long issueTypeId, Long organizationId, Long projectId) {

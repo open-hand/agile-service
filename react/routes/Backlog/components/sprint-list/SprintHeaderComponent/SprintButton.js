@@ -7,7 +7,6 @@ import moment from 'moment';
 import classnames from 'classnames';
 import { Tooltip, Button } from 'choerodon-ui/pro';
 import { sprintApi, workCalendarApi } from '@/api';
-import useIsInProgram from '@/hooks/useIsInProgram';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import CloseSprint from '@/components/close-sprint';
 import StartSprint from '../../start-sprint';
@@ -154,6 +153,10 @@ function SprintButton({ data, sprintIndex }) {
   };
 
   const getHidden = () => {
+    const { modalOpened } = BacklogStore;
+    if (modalOpened) {
+      return true;
+    }
     if (reason) {
       return createBtnToolTipHidden;
     }

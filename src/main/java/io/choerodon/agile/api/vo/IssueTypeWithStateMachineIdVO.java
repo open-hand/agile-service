@@ -39,6 +39,8 @@ public class IssueTypeWithStateMachineIdVO {
 
     private Boolean enabled;
 
+    private String applyType;
+
     public Boolean getEnabled() {
         return enabled;
     }
@@ -125,6 +127,14 @@ public class IssueTypeWithStateMachineIdVO {
 
     public void setInitialize(Boolean initialize) {
         this.initialize = initialize;
+    }
+
+    public String getApplyType() {
+        return applyType;
+    }
+
+    public void setApplyType(String applyType) {
+        this.applyType = applyType;
     }
 
     @Override

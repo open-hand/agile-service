@@ -28,7 +28,7 @@ const SelectIssueType: React.FC<Props> = forwardRef(({
     paging: false,
     optionRenderer: showIcon ? (issueType) => (
       <FragmentForSearch name={issueType.name}>
-        <TypeTag data={issueType} showName />
+        <TypeTag data={issueType} showName featureType={issueType.typeCode === 'feature' ? 'business' : undefined} />
       </FragmentForSearch>
     ) : undefined,
   });

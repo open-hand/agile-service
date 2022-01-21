@@ -44,4 +44,10 @@ databaseChangeLog(logicalFilePath:'agile_board.groovyoovy') {
             column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织Id', defaultValue: "0")
         }
     }
+
+    changeSet(author: 'ztxemail@163.com',id: '2022-01-11-agile-board-add-column'){
+        addColumn(tableName: 'agile_board') {
+            column(name: 'type', type: 'VARCHAR(30)', remarks: '看板类型(agile/program)')
+        }
+    }
 }

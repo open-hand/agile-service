@@ -40,14 +40,16 @@ interface QuickCreateSubIssueProps {
   setDefaultSprint?: (sprintId: string | undefined) => void,
   assigneeChange?: (assigneeId: string | undefined, assignee: User | undefined) => void
   isCanQuickCreate?: (createData: any) => boolean
-  beforeClick?:() => boolean // 点击快速创建前函数，如果返回false,则中断操作
+  beforeClick?: () => boolean // 点击快速创建前函数，如果返回false,则中断操作
 
 }
 const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, defaultValues, projectId, cantCreateEvent, isCanQuickCreate, typeCode, summaryChange,
   typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick, beforeClick,
 }) => {
-  const { data: issueTypes, isLoading } = useProjectIssueTypes({ typeCode: typeCode || 'sub_task', projectId, onlyEnabled: true });
+  const { data: issueTypes, isLoading } = useProjectIssueTypes({
+    typeCode: typeCode || 'sub_task', projectId, onlyEnabled: true, applyType: 'agile',
+  });
   const { data: defaultPriority } = useDefaultPriority({ projectId }, { enabled: !priorityId });
 
   const [summary, setSummary] = useState('');

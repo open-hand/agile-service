@@ -164,6 +164,10 @@ function IssueList({
   };
 
   const getHidden = () => {
+    const { modalOpened } = BacklogStore;
+    if (modalOpened) {
+      return true;
+    }
     const allSprintData = BacklogStore.getSprintData;
     if (allSprintData.length <= 1) { // sprintData===1 还没创冲刺不显示
       return true;

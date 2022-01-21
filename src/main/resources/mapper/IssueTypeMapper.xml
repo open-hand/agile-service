@@ -57,6 +57,63 @@
         order by t3.rank desc, t1.id desc
     </select>
 
+    <select id="queryByApplyTypes" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">
+        select
+        t1.id,
+        t1.organization_id,
+        t1.object_version_number,
+        t1.created_by,
+        t1.creation_date,
+        t1.last_updated_by,
+        t1.last_update_date,
+        t1.type_code,
+        t1.project_id,
+        t1.referenced,
+        t1.source,
+        t1.reference_id,
+        t1.is_initialize as initialize,
+        ifnull(t3.enabled, 1) as enabled,
+        ifnull(t3.name, t1.name) as name,
+        ifnull(t3.description, t1.description) as description,
+        ifnull(t3.icon, t1.icon) as icon,
+        ifnull(t3.colour, t1.colour) as colour,
+        t2.sequence,
+        fpc.apply_type
+        from fd_issue_type t1
+        left join fd_issue_type_scheme_config t2 on t2.issue_type_id = t1.id
+        left join fd_project_config fpc on fpc.project_id = #{projectId} and fpc.scheme_type = #{schemeType} and t2.scheme_id = fpc.scheme_id
+        left join fd_issue_type_extend t3 on t1.id = t3.issue_type_id and t3.project_id = #{projectId}
+        WHERE 1=1
+        <choose>
+            <when test="projectId == 0">
+                and t1.organization_id = #{organizationId}
+                and t1.project_id = #{projectId}
+            </when>
+            <otherwise>
+                and t1.id in (
+                select t4.id
+                from fd_issue_type t4
+                where t4.organization_id = #{organizationId}
+                and t4.project_id = #{projectId}
+                union
+                select t5.id
+                from fd_issue_type t5
+                where t5.organization_id = #{organizationId}
+                and t5.project_id = 0
+                and t5.source = 'system'
+                )
+            </otherwise>
+        </choose>
+        and fpc.apply_type in
+        <foreach collection="applyTypes" item="applyType" open="(" close=")" separator=",">
+            #{applyType}
+        </foreach>
+        <if test="onlyEnabled">
+            and ifnull(t3.enabled, 1) = 1
+        </if>
+        order by t3.rank desc, t1.id desc
+    </select>
+
     <select id="selectSystemIssueTypeByOrganizationIds" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">
         select * from fd_issue_type
         where organization_id in
