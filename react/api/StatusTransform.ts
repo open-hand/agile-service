@@ -549,13 +549,13 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     });
   }
 
-  updateNotifySetting(data: IUpdateNotifySetting) {
+  updateNotifySetting(data: IUpdateNotifySetting, applyType: 'agile' | 'program' = getApplyType()) {
     return axios({
       method: 'post',
       url: `${this.prefix}/status_notice_settings`,
       data,
       params: {
-        applyType: getApplyType(),
+        applyType,
       },
     });
   }
