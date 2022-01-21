@@ -120,8 +120,13 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         validLoop(fieldCascadeRule);
         fieldCascadeRuleMapper.insertSelective(fieldCascadeRule);
         if (!CollectionUtils.isEmpty(fieldCascadeCreate.getFieldCascadeRuleOptionList())) {
+            Long cascadeFieldId = fieldCascadeCreate.getCascadeFieldId();
+            ObjectSchemeFieldDTO objectSchemeFieldDTO = objectSchemeFieldMapper.selectByPrimaryKey(cascadeFieldId);
             fieldCascadeCreate.getFieldCascadeRuleOptionList().forEach(fieldCascadeRuleOptionVO -> {
                 FieldCascadeRuleOptionDTO fieldCascadeRuleOptionDTO = modelMapper.map(fieldCascadeRuleOptionVO, FieldCascadeRuleOptionDTO.class);
+                if (Objects.equals(FieldCode.SUB_PROJECT, objectSchemeFieldDTO.getCode())) {
+                    fieldCascadeRuleOptionDTO.setCascadeOptionId(fieldCascadeRuleOptionVO.getProjectId());
+                }
                 fieldCascadeRuleOptionDTO.setFieldCascadeRuleId(fieldCascadeRule.getId());
                 fieldCascadeRuleOptionDTO.setProjectId(projectId);
                 fieldCascadeRuleOptionDTO.setOrganizationId(organizationId);
@@ -761,7 +766,8 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         Map<Long, FieldCascadeRuleOptionDTO> oldOptionIdMap = getRelOptionByRuleId(fieldCascadeRuleId, projectId)
                 .stream()
                 .collect(Collectors.toMap(FieldCascadeRuleOptionDTO::getCascadeOptionId, Function.identity()));
-
+        FieldCascadeRuleDTO fieldCascadeRuleDTO = fieldCascadeRuleMapper.selectByPrimaryKey(fieldCascadeRuleId);
+        ObjectSchemeFieldDTO objectSchemeFieldDTO = objectSchemeFieldMapper.selectByPrimaryKey(fieldCascadeRuleDTO.getCascadeFieldId());
         fieldOptionList.forEach(fieldCascadeRuleOption -> {
             if (oldOptionIdMap.get(fieldCascadeRuleOption.getCascadeOptionId()) != null) {
                 FieldCascadeRuleOptionDTO oldOption = oldOptionIdMap.get(fieldCascadeRuleOption.getCascadeOptionId());
@@ -778,6 +784,9 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                 fieldCascadeRuleOptionDTO.setFieldCascadeRuleId(fieldCascadeRuleId);
                 fieldCascadeRuleOptionDTO.setDefaultOption(fieldCascadeRuleOption.getDefaultOption());
                 fieldCascadeRuleOptionDTO.setCascadeOptionId(fieldCascadeRuleOption.getCascadeOptionId());
+                if (Objects.equals(FieldCode.SUB_PROJECT, objectSchemeFieldDTO.getCode())) {
+                    fieldCascadeRuleOptionDTO.setCascadeOptionId(fieldCascadeRuleOption.getProjectId());
+                }
                 insertOptionList.add(fieldCascadeRuleOptionDTO);
             }
         });

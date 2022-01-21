@@ -217,6 +217,15 @@ const Linkage: React.FC<Props> = ({
   }, [currentOptionId, dataSet, linkagesMap]);
 
   useEffect(() => {
+    function processSpecialField(specialField: IField, options?: Array<{
+      cascadeOptionId: string,
+      defaultOption?: boolean | undefined
+    }>) {
+      if (specialField.fieldCode === 'subProject') {
+        return options?.map((option) => ({ projectId: option.cascadeOptionId, defaultOption: option.defaultOption }));
+      }
+      return options;
+    }
     const getFieldCascadeRuleOptionList = (fieldType: string, fieldRelOptionList: { meaning: string, value: string }[] | undefined, defaultValue: any) => {
       if (includes(['radio', 'checkbox', 'single', 'multiple'], fieldType) && fieldRelOptionList?.length) {
         return fieldRelOptionList.map((option) => ({
@@ -266,7 +275,7 @@ const Linkage: React.FC<Props> = ({
             defaultValue: !includes(selectTypes, chosenField?.fieldType) ? toJS(formatFieldDateValue({ fieldCode: chosenField?.fieldCode!, value: defaultValue, format: DATETIME })) : undefined,
             hidden,
             required,
-            fieldCascadeRuleOptionList: getFieldCascadeRuleOptionList(chosenField?.fieldType, fieldRelOptionList, defaultValue),
+            fieldCascadeRuleOptionList: processSpecialField(chosenField, getFieldCascadeRuleOptionList(chosenField?.fieldType, fieldRelOptionList, defaultValue)),
           });
         });
       }
@@ -385,10 +394,6 @@ const Linkage: React.FC<Props> = ({
       </div>
     </div>
   );
-};
-Linkage.defaultProps = {
-  injectCascadeRuleConfigData: undefined,
-  modal: undefined,
 };
 const ObserverLinkage = observer(Linkage);
 
