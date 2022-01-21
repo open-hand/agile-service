@@ -1,15 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 
-import { CacheStoreInterface } from '@/stores/common/CacheBaseStore';
-
-function useUnmountSaveCache(code: string, data: () => any | any) {
+function useUnmountSaveCache<T>(code: string, data: T extends Function ? () => T : T) {
+  const dataRef = useRef<any>();
+  dataRef.current = data;
   useEffect(() => {
     const projectId = String(localPageCacheStore.projectId);
     return () => {
-      const d = typeof data === 'function' ? data() : data;
+      const d = typeof dataRef.current === 'function' ? dataRef.current() : dataRef.current;
       localPageCacheStore.project(projectId).setItem(code, d);
     };
-  }, [code, data]);
+  }, [code]);
 }
 export default useUnmountSaveCache;
