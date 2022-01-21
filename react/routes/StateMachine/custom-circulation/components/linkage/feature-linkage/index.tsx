@@ -38,11 +38,11 @@ const FeatureLinkage = ({
   const transferType = useMemo(() => ({
     all: {
       key: 'all_transfer',
-      text: '全部故事',
+      text: '全部工作项',
     },
     anyone: {
       key: 'anyone_transfer',
-      text: '任一故事',
+      text: '任一工作项',
     },
   }), [record]);
 

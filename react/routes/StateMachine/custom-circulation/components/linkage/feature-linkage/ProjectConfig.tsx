@@ -39,7 +39,7 @@ const ProjectConfig: React.FC<ProjectConfigProps> = ({
           <Col span={22}>
             <span className={Styles.checkLabel}>验证范围：</span>
             <SelectBox
-                // 1.5.0的UI中的SelectBox不支持通过record={record}绑定ds,暂时先用value控制值
+              // 1.5.0的UI中的SelectBox不支持通过record={record}绑定ds,暂时先用value控制值
               value={record.get('type')}
               className={Styles.checkRequire}
               onChange={(value) => record.set('type', value)}
@@ -54,7 +54,7 @@ const ProjectConfig: React.FC<ProjectConfigProps> = ({
               config={{
                 projectId,
                 applyType: 'agile',
-                typeCode: 'story',
+                typeCode: ['story', 'bug', 'task'],
               }}
               name="issueTypeId"
               clearButton={false}
