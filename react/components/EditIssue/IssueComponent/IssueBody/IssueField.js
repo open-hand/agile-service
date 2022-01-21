@@ -119,7 +119,7 @@ const IssueField = observer((props) => {
     }
   };
   const issue = store.getIssue;
-  const { issueId, typeCode } = issue;
+  const { issueId, typeCode, relateIssueId } = issue;
   let fields = applyType === 'program' ? toJS(store.customFields).filter((item) => hideFields.indexOf(item.fieldCode) === -1) : toJS(store.customFields);
   // 系统字段单独控制是否显示
   if (typeCode === 'sub_task') {
@@ -132,7 +132,7 @@ const IssueField = observer((props) => {
     // fields.splice(4, 0, { fieldCode: 'programVersion', fieldName: '团队Sprint' });
   }
   if (!store.detailShow) {
-    const isFeatureVisible = isShowFeature && SHOW_FEATURE_TYPE_CODES.includes(typeCode);
+    const isFeatureVisible = isShowFeature && (SHOW_FEATURE_TYPE_CODES.includes(typeCode) || (typeCode === 'bug' && !relateIssueId));
     fields = fields.slice(0, isFeatureVisible ? 9 : 10);
   }
 
