@@ -63,7 +63,7 @@ import styles from './FieldEpic.less';
     const issue = store.getIssue;
     const {
       epicColor, epicId, issueEpicName, typeCode,
-      featureId, featureName,
+      featureId, featureName, relateIssueId,
     } = issue;
     const field = store.getFieldByCode('epic');
     const required = field?.required;
@@ -72,7 +72,7 @@ import styles from './FieldEpic.less';
         {
           ({ isShowFeature, program }) => (
             <>
-              {SHOW_FEATURE_TYPE_CODES.includes(typeCode) && isShowFeature
+              {(SHOW_FEATURE_TYPE_CODES.includes(typeCode) || (typeCode === 'bug' && !relateIssueId)) && isShowFeature
                 ? (
                   <div className="line-start mt-10">
                     <div className="c7n-property-wrapper">

@@ -597,7 +597,7 @@ const CreateIssueBase = observer(({
         parentIssueId: data.parentIssueId?.issueId,
         programId: projectId ?? getProjectId(),
         projectId: projectId ?? getProjectId(),
-        featureId: data.feature,
+        featureId: (issueType as IIssueType)?.typeCode === 'bug' && data.parentIssueId?.issueId ? undefined : data.feature,
         issueLinkCreateVOList: enableIssueLinks ? getIssueLinks() : undefined,
         componentIssueRelVOList: data.component ? data.component.map((item: { componentId: string }) => ({ componentId: item.componentId })) : [],
       });
@@ -711,7 +711,10 @@ const CreateIssueBase = observer(({
         return defaultFeature ? {
           featureId: defaultFeature.issueId,
           featureName: defaultFeature.summary,
-        } : {};
+          hidden: !!getValue(dataSet, 'parentIssueId'),
+        } : {
+          hidden: !!getValue(dataSet, 'parentIssueId'),
+        };
       }
       case 'tag': {
         return {
