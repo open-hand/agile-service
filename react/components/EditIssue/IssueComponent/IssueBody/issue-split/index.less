@@ -33,6 +33,12 @@
     display: inline-block;
     position: relative;
     margin-left: .1rem;
+
+    :global {
+      .c7n-progress-line .c7n-progress-inner {
+        background: rgba(15, 19, 88, 0.06) !important;
+      }
+    }
   }
 
   &_bar {
@@ -53,9 +59,10 @@
   }
 }
 
-.progress +.progress {
+.progress+.progress {
   padding-left: .4rem;
 }
+
 .quickCreate {
-    margin-top: .16rem;
+  margin-top: .16rem;
 }
