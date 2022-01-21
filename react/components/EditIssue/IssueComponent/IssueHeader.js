@@ -5,6 +5,7 @@ import { useDetailContainerContext } from '@/components/detail-container/context
 import IssueNumber from './IssueNumber';
 import IssueParentSummary from './IssueParentSummary';
 import IssueParentTip from './IssueParentTip';
+import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import IssueType from './IssueType';
 import './IssueComponent.less';
 import EditIssueContext from '../stores';
@@ -103,6 +104,7 @@ const IssueHeader = (props) => {
             funcType="flat"
             icon="last_page"
             onClick={() => {
+              BacklogStore.setModalOpened(false);
               onCancel();
             }}
           >

@@ -16,7 +16,7 @@ async function sprintNameValidator(value) {
 
 const { Option } = Select;
 
-export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
+export default function CreateSprint({ modal: { handleOk, close, handleCancel }, onCreate }) {
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [
@@ -71,12 +71,20 @@ export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
       if (!sprint.failed) {
         onCreate(sprint);
         close();
+        BacklogStore.setModalOpened(false);
       } else {
         // Choerodon.prompt(sprint.message);
       }
     }
     return false;
   }
+
+  useEffect(() => {
+    handleCancel(() => {
+      BacklogStore.setModalOpened(false);
+    });
+  }, [handleCancel]);
+
   useEffect(() => {
     handleOk(submit);
   }, [handleOk]);

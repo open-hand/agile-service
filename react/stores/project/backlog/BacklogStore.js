@@ -25,6 +25,8 @@ function randomItem(array) {
 }
 @store('BacklogStore')
 class BacklogStore {
+  @observable modalOpened = false; // 处理tooltip和modal的层级关系ui样式
+
   @observable createdSprint = '';
 
   @observable hasActiveSprint = false;
@@ -113,6 +115,10 @@ class BacklogStore {
 
   @computed get getIsInProgramData() {
     return this.isInProgramData;
+  }
+
+  @action setModalOpened(bool) {
+    this.modalOpened = bool;
   }
 
   @action setIsInProgramData(data) {
@@ -580,6 +586,7 @@ class BacklogStore {
   }
 
   @action clickedOnce(sprintId, currentClick, hasExtraKey, isSubIssue) {
+    this.setModalOpened(true);
     const setData = () => {
       if (!isSubIssue) {
         const index = this.issueMap.get(sprintId.toString()).findIndex((issue) => issue.issueId === currentClick.issueId);
