@@ -1143,6 +1143,7 @@
                 </if>
                 <if test='advancedSearchArgs.noFeature != "" and advancedSearchArgs.noFeature == "true"'>
                     and ai.type_code IN ('story', 'task', 'bug') AND (ai.feature_id IS NULL OR ai.feature_id = 0)
+                    AND (ai.relate_issue_id IS NULL OR ai.relate_issue_id = 0)
                 </if>
                 <if test='advancedSearchArgs.onlyStory != "" and advancedSearchArgs.onlyStory == "true"'>
                     AND ai.type_code = 'story'
