@@ -8,7 +8,7 @@ import { Choerodon } from '@choerodon/boot';
 import {
   Card, Tooltip, Button, Input, Popconfirm,
 } from 'choerodon-ui';
-import { TextField } from 'choerodon-ui/pro';
+import { TextField, Button as ButtonPro } from 'choerodon-ui/pro';
 import type { IntlShape } from 'react-intl';
 import { Size } from 'choerodon-ui/lib/_util/enum';
 import './DragList.less';
@@ -547,14 +547,14 @@ class DragList extends Component<Props, StateProps> {
                 )}
               </Droppable>
               {!disabled && (
-                <Button
+                <ButtonPro
                   onClick={this.addItem}
-                  funcType="raised"
+                  // funcType="raised"
                   className="issue-dragList-addBtn"
                 >
                   <i className="icon-playlist_add icon" />
                   {formatMessage({ id: 'add' })}
-                </Button>
+                </ButtonPro>
               )}
             </Card>
           </div>
