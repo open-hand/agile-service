@@ -105,6 +105,7 @@ class BacklogHome extends Component {
       BacklogStore.setCreatedSprint(sprint.sprintId);
       this.refresh();
     };
+    BacklogStore.setModalOpened(true);
     Modal.open({
       drawer: true,
       style: {
@@ -201,6 +202,7 @@ class BacklogHome extends Component {
       defaultAssignee,
       defaultEpicName,
     } = BacklogStore;
+    BacklogStore.setModalOpened(true);
     const chosenFeatureItem = featureList.find((feature) => feature.issueId === chosenFeature) || {};
     openCreateIssue({
       defaultValues: {
@@ -234,7 +236,11 @@ class BacklogHome extends Component {
         // 创建issue后刷新
         if (res) {
           BacklogStore.refresh(false, false);
+          BacklogStore.setModalOpened(false);
         }
+      },
+      onCancel: () => {
+        BacklogStore.setModalOpened(false);
       },
     });
   };
@@ -290,6 +296,10 @@ class BacklogHome extends Component {
   };
 
   getHidden = () => {
+    const { modalOpened } = BacklogStore;
+    if (modalOpened) {
+      return true;
+    }
     const sprintData = BacklogStore.getSprintData;
     if (sprintData.length > 1) { // >1有冲刺，有了冲刺就不显示了 (按钮本身没有tooltip 不用考虑是不是新手阶段)
       return true;

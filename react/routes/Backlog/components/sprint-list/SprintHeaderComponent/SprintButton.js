@@ -153,6 +153,10 @@ function SprintButton({ data, sprintIndex }) {
   };
 
   const getHidden = () => {
+    const { modalOpened } = BacklogStore;
+    if (modalOpened) {
+      return true;
+    }
     if (reason) {
       return createBtnToolTipHidden;
     }
