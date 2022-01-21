@@ -85,7 +85,7 @@ import styles from './FieldEpic.less';
                         className={styles.feature}
                         disabled={disabled}
                         onSubmit={this.updateIssueFeature}
-                        initValue={featureName ? featureId || [] : []}
+                        initValue={featureName ? featureId || undefined : undefined}
                         editor={(
                           <SelectFeature
                             featureId={featureId}
