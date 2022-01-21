@@ -3352,6 +3352,8 @@
             sprint.sprint_id,
             ai.estimate_time,
             ai.remaining_time,
+            ai.relate_issue_id,
+            ai.parent_issue_id,
             ai.is_pre_sprint_done
         FROM
             agile_issue ai
