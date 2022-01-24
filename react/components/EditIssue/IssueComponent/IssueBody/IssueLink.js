@@ -100,7 +100,7 @@ import openCreateLink from './create-link/CreateLink';
                     openCreateLink({ issueId, projectId: store.projectId, onOk: this.onCreateLinkIssue });
                   }}
                 >
-                  <Icon type="playlist_add icon" />
+                  <Icon type="device_hub icon" />
                 </Button>
               </Tooltip>
             </div>
