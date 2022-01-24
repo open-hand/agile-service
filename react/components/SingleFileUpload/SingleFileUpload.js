@@ -115,7 +115,7 @@ function SingleFileUplaod(props) {
           url && (
             <Tooltip title="下载">
               <Icon
-                type="cloud_download-o"
+                type="file_download_black-o"
                 onClick={handleDownLoadFile}
               />
             </Tooltip>
