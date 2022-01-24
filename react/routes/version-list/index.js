@@ -10,6 +10,7 @@ import LINK_URL from '@/constants/LINK_URL';
 import useHasDevops from '@/hooks/useHasDevops';
 import useCheckCurrentService from './useCheckServerVerison';
 import useFormatMessage from '@/hooks/useFormatMessage';
+import './index.less';
 
 const Release = withRouter(React.lazy(() => import('../Release')));
 const Publish = mount('agile:PublishVersion');
@@ -24,6 +25,7 @@ const VersionList = ({ match }) => {
       {
         (permission, loading) => (
           <PageWrap
+            className="c7n-agile-versionList-PageWrap"
             noHeader={!loading && permission ? [] : ['choerodon.code.project.cooperation.project-version.ps.default']}
           >
             <PageTab title={formatMessage({ id: 'route' })} route={LINK_URL.versionRelease} tabKey="choerodon.code.project.cooperation.project-version.ps.default" component={Release} />
