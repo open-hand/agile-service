@@ -163,7 +163,7 @@ public class AgileEventHandler {
         ProjectEvent projectEvent = JSON.parseObject(message, ProjectEvent.class);
         LOGGER.info("接受更新项目消息{}", message);
         Long projectId = projectEvent.getProjectId();
-        List<ProjectEventCategory> projectEventCategories = projectEvent.getProjectCategoryVOS();
+        List<ProjectEventCategory> projectEventCategories = projectEvent.getNewProjectCategoryVOS();
         if (!CollectionUtils.isEmpty(projectEventCategories)) {
             List<String> codes = projectEventCategories.stream().map(ProjectEventCategory::getCode).collect(Collectors.toList());
             if (codes.contains(ProjectCategory.MODULE_AGILE) || codes.contains(ProjectCategory.MODULE_PROGRAM)) {
