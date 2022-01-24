@@ -56,7 +56,7 @@ const IssueDoc = observer(({ reloadIssue }) => {
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
             <Tooltip placement="topRight" title="关联知识">
               <Button onClick={() => setAddDocShow(true)}>
-                <Icon type="playlist_add icon" />
+                <Icon type="device_hub icon" />
               </Button>
             </Tooltip>
           </div>
