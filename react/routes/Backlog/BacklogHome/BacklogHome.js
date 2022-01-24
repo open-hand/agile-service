@@ -430,96 +430,101 @@ class BacklogHome extends Component {
               overflow: 'hidden',
             }}
           >
-            <SideNav
-              onChange={this.toggleCurrentVisible}
-              activeKey={BacklogStore.whichVisible}
-            >
-              <Panel
-                key="version"
-                title={(
-                  <C7NFormat
-                    intlPrefix="agile.common"
-                    id="version"
-                  />
+            <Observer>
+              {() => (
+                <SideNav
+                  onChange={this.toggleCurrentVisible}
+                  activeKey={BacklogStore.whichVisible}
+                >
+                  <Panel
+                    key="version"
+                    title={(
+                      <C7NFormat
+                        intlPrefix="agile.common"
+                        id="version"
+                      />
                 )}
-                nav={(title) => (
-                  <Observer>
-                    {() => (
-                      <>
-                        <span>{title}</span>
-                        {BacklogStore.chosenVersion !== 'all' && <span className="c7n-backlog-side-tip" />}
-                      </>
+                    nav={(title) => (
+                      <Observer>
+                        {() => (
+                          <>
+                            <span>{title}</span>
+                            {BacklogStore.chosenVersion !== 'all' && <span className="c7n-backlog-side-tip" />}
+                          </>
+                        )}
+                      </Observer>
                     )}
-                  </Observer>
-                )}
-              >
-                <Version
-                  store={BacklogStore}
-                  refresh={this.refresh}
-                  issueRefresh={() => {
-                    this.IssueDetailRef.current.refreshIssueDetail();
-                  }}
-                />
-              </Panel>
-              {!isShowFeature ? (
-                <Panel
-                  key="epic"
-                  title={(
-                    <C7NFormat
-                      intlPrefix="agile.common"
-                      id="epic"
+                  >
+                    <Version
+                      store={BacklogStore}
+                      refresh={this.refresh}
+                      issueRefresh={() => {
+                        this.IssueDetailRef.current.refreshIssueDetail();
+                      }}
                     />
+                  </Panel>
+                  {!isShowFeature ? (
+                    <Panel
+                      key="epic"
+                      title={(
+                        <C7NFormat
+                          intlPrefix="agile.common"
+                          id="epic"
+                        />
                   )}
-                  noHeader
-                  nav={(title) => (
-                    <Observer>
-                      {() => (
-                        <>
-                          <span>{title}</span>
-                          {BacklogStore.chosenEpic !== 'all' && <span className="c7n-backlog-side-tip" />}
-                        </>
+                      noHeader
+                      nav={(title) => (
+                        <Observer>
+                          {() => (
+                            <>
+                              <span>{title}</span>
+                              {BacklogStore.chosenEpic !== 'all' && <span className="c7n-backlog-side-tip" />}
+                            </>
+                          )}
+                        </Observer>
                       )}
-                    </Observer>
+                    >
+                      <Epic
+                        refresh={this.refresh}
+                        issueRefresh={() => {
+                          this.IssueDetailRef.current.refreshIssueDetail();
+                        }}
+                        openCreateIssueModal={this.openCreateIssueModal}
+                      />
+                    </Panel>
+                  ) : (
+                    <Panel
+                      key="feature"
+                      title={(
+                        <C7NFormat
+                          intlPrefix="agile.common"
+                          id="feature"
+                        />
                   )}
-                >
-                  <Epic
-                    refresh={this.refresh}
-                    issueRefresh={() => {
-                      this.IssueDetailRef.current.refreshIssueDetail();
-                    }}
-                    openCreateIssueModal={this.openCreateIssueModal}
-                  />
-                </Panel>
-              ) : (
-                <Panel
-                  key="feature"
-                  title={(
-                    <C7NFormat
-                      intlPrefix="agile.common"
-                      id="feature"
-                    />
-                  )}
-                  nav={(title) => (
-                    <Observer>
-                      {() => (
-                        <>
-                          <span>{title}</span>
-                          {BacklogStore.chosenFeature !== 'all' && <span className="c7n-backlog-side-tip" />}
-                        </>
+                      nav={(title) => (
+                        <Observer>
+                          {() => (
+                            <>
+                              <span>{title}</span>
+                              {BacklogStore.chosenFeature !== 'all' && <span className="c7n-backlog-side-tip" />}
+                            </>
+                          )}
+                        </Observer>
                       )}
-                    </Observer>
+                    >
+                      <Feature
+                        refresh={this.refresh}
+                        isInProgram={isShowFeature}
+                        issueRefresh={() => {
+                          this.IssueDetailRef.current.refreshIssueDetail();
+                        }}
+                      />
+                    </Panel>
                   )}
-                >
-                  <Feature
-                    refresh={this.refresh}
-                    isInProgram={isShowFeature}
-                    issueRefresh={() => {
-                      this.IssueDetailRef.current.refreshIssueDetail();
-                    }}
-                  />
-                </Panel>
+                </SideNav>
               )}
-            </SideNav>
+
+            </Observer>
             <div className="c7n-backlog-content">
               <SprintList openCreateIssueModal={this.openCreateIssueModal} />
             </div>
