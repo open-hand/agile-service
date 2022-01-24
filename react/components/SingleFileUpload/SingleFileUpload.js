@@ -93,6 +93,24 @@ function SingleFileUplaod(props) {
           </Tooltip>
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
+          {(hasDeletePermission && onDeleteFile && (url || error)) && (
+          <Tooltip title="删除">
+            <Icon
+              type="delete_sweep-o"
+              onClick={() => { onDeleteFile(); }}
+            />
+          </Tooltip>
+          )}
+          {
+          url && (
+            <Tooltip title="下载">
+              <Icon
+                type="file_download_black-o"
+                onClick={handleDownLoadFile}
+              />
+            </Tooltip>
+          )
+        }
           {
           previewAble && (
           <span
@@ -111,24 +129,7 @@ function SingleFileUplaod(props) {
           </span>
           )
         }
-          {
-          url && (
-            <Tooltip title="下载">
-              <Icon
-                type="file_download_black-o"
-                onClick={handleDownLoadFile}
-              />
-            </Tooltip>
-          )
-        }
-          {(hasDeletePermission && onDeleteFile && (url || error)) && (
-          <Tooltip title="删除">
-            <Icon
-              type="delete_sweep-o"
-              onClick={() => { onDeleteFile(); }}
-            />
-          </Tooltip>
-          )}
+
         </div>
 
       </div>
