@@ -30,6 +30,8 @@ public class ProjectEvent {
 
     private List<ProjectEventCategory> projectCategoryVOS;
 
+    private List<ProjectEventCategory> newProjectCategoryVOS;
+
     private Boolean useTemplate;
 
     public List<ProjectEventCategory> getProjectCategoryVOS() {
@@ -126,5 +128,13 @@ public class ProjectEvent {
 
     public void setUseTemplate(Boolean useTemplate) {
         this.useTemplate = useTemplate;
+    }
+
+    public List<ProjectEventCategory> getNewProjectCategoryVOS() {
+        return newProjectCategoryVOS;
+    }
+
+    public void setNewProjectCategoryVOS(List<ProjectEventCategory> newProjectCategoryVOS) {
+        this.newProjectCategoryVOS = newProjectCategoryVOS;
     }
 }
