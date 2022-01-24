@@ -213,7 +213,7 @@ public interface AgilePluginService {
      * 创建项目群时初始化项目群特有的问题类型和方案
      * @param projectEvent
      */
-    void initProjectIssueTypeSchemeAndArt(ProjectEvent projectEvent);
+    void initProjectIssueTypeSchemeAndArt(ProjectEvent projectEvent, Set<String> codes);
 
     /**
      * 初始化项目群状态机
