@@ -22,7 +22,7 @@ const FieldEpic: React.FC<FieldEpicProps> = ({ target, onChange, fieldWithValue 
       editor={() => (
         <SelectEpic
           dontAddEpic0
-          selectIds={fieldWithValue?.valueStr}
+          selectIds={fieldWithValue?.value}
           primitiveValue={false}
           projectId={target.projectId}
         />
