@@ -127,7 +127,7 @@ public class AgileEventHandler {
             if (codes.contains(ProjectCategory.MODULE_PROGRAM)) {
                 AgilePluginService pluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
                 if (pluginService != null) {
-                    pluginService.initProjectIssueTypeSchemeAndArt(projectEvent);
+                    pluginService.initProjectIssueTypeSchemeAndArt(projectEvent, codes);
                 }
             } else {
                 //创建项目时创建默认状态机方案
