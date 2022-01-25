@@ -306,7 +306,7 @@ public class FixDataServiceImpl implements FixDataService {
         // 修复看板数据
         fixAboardType();
         LOGGER.info("完成修复看板数据");
-        LOGGER.info("==============================>>>>>>>> AGILE Data Fix End, Success! <<<<<<<<=================================");
+        LOGGER.info("==============================>>>>>>>> AGILE Data Fix End, Success! Version: 1.2.0 <<<<<<<<=================================");
     }
 
     private void fixAboardType() {
