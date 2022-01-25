@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @Component
-public class DataFixTask {
+public class AgileDataFixTask {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataFixTask.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AgileDataFixTask.class);
 
     @Autowired
     private FixDataService fixDataService;
