@@ -1300,6 +1300,9 @@ class BacklogStore {
 
   loadPiInfoAndSprint = async () => {
     const artInfo = await commonApi.getIsShowFeature();
+    if (!artInfo?.programId) {
+      return [];
+    }
     const currentPiInfo = await piApi.getCurrent(artInfo?.programId, artInfo?.id);
     if (currentPiInfo.id) {
       const sprints = await sprintApi.getAllByPiId(currentPiInfo.id);

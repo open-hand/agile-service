@@ -7,7 +7,7 @@ import useIsProgram from '@/hooks/useIsProgram';
 const BacklogHomeHoc = (props) => {
   const {
     loading, ...restData
-  } = useIsInProgram();
+  } = useIsInProgram({ menuType: 'project' });
   const { isAgileProgram } = useIsProgram();
   BacklogStore.setIsInProgramData({
     loading,
