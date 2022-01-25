@@ -30,15 +30,15 @@ export interface SelectIssueTypeProps extends Partial<SelectProps> {
 }
 
 const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
-  filterList = ['feature'], isProgram, request, valueField, dataRef, flat, excludeTypeIds = [], showIcon, defaultSelectedIds: propsDefaultSelectedIds,
+  filterList = ['feature'], isProgram, request, valueField: propsValueField, dataRef, flat, excludeTypeIds = [], showIcon, defaultSelectedIds: propsDefaultSelectedIds,
   afterLoad, projectId, applyType, excludeTypeCodes, onlyEnabled = false, level, ...otherProps
 }, ref: React.Ref<Select>) => {
   const defaultSelectedIds = useCreation(() => castArray(propsDefaultSelectedIds).filter(Boolean), []);
-
+  const valueField = useCreation(() => propsValueField || 'id', []);
   const config = useMemo((): SelectConfig<IIssueType> => ({
     name: 'issueType',
     textField: 'name',
-    valueField: valueField || 'id',
+    valueField,
     request: request || (({ filter: filterWord, page, requestArgs }) => {
       if (level === 'workbench') {
         return issueTypeApi.loadPageForWorkbench({ page, param: filterWord, size: 50 },
@@ -74,7 +74,7 @@ const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
     }),
     optionRenderer: showIcon ? (issueType) => <TypeTag data={issueType} showName /> : undefined,
     middleWare: (issueTypes) => {
-      const newData = issueTypes.filter((item) => !(includes(excludeTypeCodes, item.typeCode) || includes(excludeTypeIds, item.id)));
+      const newData = issueTypes.filter((item) => !(includes(excludeTypeCodes, item.typeCode) || includes(excludeTypeIds, item.id))).map((item) => ({ ...item, [valueField]: String(item[valueField as keyof typeof item]) }));
       if (afterLoad) {
         afterLoad(newData);
       }
