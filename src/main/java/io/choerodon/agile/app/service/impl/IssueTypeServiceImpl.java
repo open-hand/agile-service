@@ -1212,11 +1212,17 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
 
     private Map<Long, IssueTypeVO> initRankIfNull(Long organizationId, Long projectId) {
-        List<IssueTypeVO> issueTypes =
+        List<String> typeCodes =
                 objectSchemeFieldService.issueTypes(organizationId, projectId)
                         .stream()
                         .filter(x -> !IGNORED_ISSUE_TYPES.contains(x.getTypeCode()))
+                        .map(IssueTypeVO::getTypeCode)
                         .collect(Collectors.toList());
+        IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
+        issueTypeSearchVO.setOrganizationId(organizationId);
+        issueTypeSearchVO.setProjectId(projectId);
+        issueTypeSearchVO.setTypeCodes(typeCodes);
+        List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO);
         int size = issueTypes.size();
         if (size == 0) {
             return new HashMap<>();
