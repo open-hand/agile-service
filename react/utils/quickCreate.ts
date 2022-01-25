@@ -1,6 +1,6 @@
 import { isEmpty } from 'lodash';
 import { fieldApi } from '@/api';
-import { SHOW_FEATURE_TYPE_CODES } from '@/constants/SHOW_FEATURE_TYPE_CODE';
+import { SHOW_FEATURE_TYPE_CODES_ALL } from '@/constants/SHOW_FEATURE_TYPE_CODE';
 import { getProjectId } from './common';
 
 export async function checkCanQuickCreate(typeId: string, assigneeId?: string, projectId?: string) {
@@ -81,7 +81,7 @@ export function getQuickCreateDefaultObj(defaultValues?: IQuickCreateDefaultValu
     labelIssueRelVOList: fieldsMap.get('label')?.defaultValueObjs || [],
     versionIssueRelVOList,
     // fixVersionIssueRel: fieldsMap.get('fixVersion')?.defaultValue || [],
-    featureId: SHOW_FEATURE_TYPE_CODES.includes(defaultValues.typeCode) ? defaultValues.featureId : 0,
+    featureId: SHOW_FEATURE_TYPE_CODES_ALL.includes(defaultValues.typeCode) ? defaultValues.featureId : 0,
     assigneeId: defaultValues.assigneeId || fieldsMap.get('assignee')?.defaultValue,
     reporterId: defaultValues.reporterId || fieldsMap.get('reporter')?.defaultValue,
     estimatedEndTime: defaultValues.estimatedEndTime || fieldsMap.get('estimatedEndTime')?.defaultValue,
