@@ -2,21 +2,57 @@
 
 .issue-object-scheme-detail {
   &-content {
-
+    padding-bottom: 0;
     .c7n-table-header {
       background: transparent !important;
     }
 
     &-table {
+      overflow: hidden;
+      display: flex;
+      height: 100%;
+
+      .c7n-spin-nested-loading,
+      .c7n-spin-container {
+        height: 100%;
+      }
+
       .@{c7n-pro-prefix}-table {
         border-top: none;
+        height: 100%;
+
+        &-content {
+          height: 100%;
+        }
       }
 
       .@{c7n-pro-prefix}-table-tbody {
         color: var(--text-color3);
       }
+
+      table,
+      tbody {
+        display: block;
+        width: 100%;
+      }
+
+      table {
+        height: 100%;
+
+        tbody {
+          height: calc(100% - 32px);
+          overflow: hidden auto;
+        }
+
+        thead,
+        tbody>.c7n-pro-table-row {
+          display: table;
+          width: 100%;
+          table-layout: fixed;
+        }
+      }
     }
-    
+
   }
 
   &-sync {
@@ -29,13 +65,13 @@
       display: inline-flex;
       align-items: center;
 
-      & >span:first-child {
+      &>span:first-child {
         white-space: nowrap;
         display: inline-block;
         margin-right: .05rem;
       }
 
-      & >div:first-child {
+      &>div:first-child {
         min-width: 2rem;
       }
 

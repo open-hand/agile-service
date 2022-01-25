@@ -550,9 +550,9 @@ class DragList extends Component<Props, StateProps> {
                 <ButtonPro
                   onClick={this.addItem}
                   // funcType="raised"
+                  icon="add"
                   className="issue-dragList-addBtn"
                 >
-                  <i className="icon-playlist_add icon" />
                   {formatMessage({ id: 'add' })}
                 </ButtonPro>
               )}
