@@ -1,6 +1,7 @@
 import React, {
-  useMemo, useCallback, useEffect, useState,
+  useMemo, useCallback, useEffect, useState, useRef,
 } from 'react';
+import ReactDOM from 'react-dom';
 import {
   DataSet, Form, Select, Modal, SelectBox,
 } from 'choerodon-ui/pro';
@@ -31,6 +32,7 @@ interface IRoleWithSelectOption extends IRole {
 const SelectUserWithRole: React.FC<SelectUserProps & { roles: IRoleWithSelectOption[] }> = observer(({
   name, record, roles, ...otherProps
 }) => {
+  const containRef = useRef<any>();
   const rolesMap = useMemo(() => new Map(roles.map((item) => ([`role-${item.id}`, item]))), []);
   const showSelectUser = useComputed(() => {
     const selectedRoles = record?.get(`${name}_Roles`);
@@ -45,17 +47,18 @@ const SelectUserWithRole: React.FC<SelectUserProps & { roles: IRoleWithSelectOpt
       trigger={['click'] as any}
       renderer={({ record: r, value: item }) => (typeof (item) === 'string' ? rolesMap.get(item)?.meaning : <UserTag data={item} size={14} />)}
       popupContent={(
-        <div role="none" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} className={styles.select_content}>
+        <div ref={containRef} role="none" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} className={styles.select_content}>
           <SelectBox name={`${name}_Roles`} vertical multiple />
-          {true && (
+          <Form>
             <SelectUser
               name={`${name}_Users`}
               hidden={!showSelectUser}
+              labelLayout={'float' as any}
               selectedUser={record?.getState(`${name}_defaultSelectUsers`)}
               style={{ marginTop: '.2rem', width: '100%' }}
               getPopupContainer={(node) => node.parentNode as any}
             />
-          )}
+          </Form>
         </div>
 
       )}
