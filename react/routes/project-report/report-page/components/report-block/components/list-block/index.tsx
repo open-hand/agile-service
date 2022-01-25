@@ -66,7 +66,8 @@ const ListBlock: React.FC<Props> = ({
     }
   }, [onFinish, clonedSearchVO]);
   const loadFields = useCallback(async () => {
-    const Fields = await fieldApi.getFoundationHeader();
+    // 这里限定参数为 agileIssueType 代表仅支持敏捷项目表格
+    const Fields = await fieldApi.getFoundationHeader('agileIssueType');
     setFields(Fields);
     loadData();
   }, [loadData]);

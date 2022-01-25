@@ -101,22 +101,23 @@ interface Props {
     chooseDataSet: DataSet
   }>,
   setReRender: Function,
+  applyType?: 'program' | 'agile',
   checkBoxChangeOk: (data: string[]) => void
   requires?: string[]
-  systems?:{code: string, title: string}[]
-  fields?: {code: string, title: string, system: boolean}[]
+  systems?: { code: string, title: string }[]
+  fields?: { code: string, title: string, system: boolean }[]
 }
 
 const ImportFields: React.FC<Props> = ({
-  importFieldsRef, setReRender, checkBoxChangeOk, requires, systems, fields: fs,
+  importFieldsRef, setReRender, checkBoxChangeOk, applyType: propsApplyType, requires, systems, fields: fs,
 }) => {
   const { isInProgram, loading } = useIsInProgram();
   const [updateCount, setUpdateCount] = useState<number>(0);
   const [requiredFields, setRequiredFields] = useState<string[]>(requires || []);
   const [btnStatus, setBtnStatus] = useState<'ALL' | 'NONE'>();
   const [systemFields, setSystemFields] = useState<{ code: string, title: string }[]>(systems || []);
-  const [allFields, setAllFields] = useState<{code: string, title: string, system: boolean}[]>([]);
-  const applyType = getApplyType();
+  const [allFields, setAllFields] = useState<{ code: string, title: string, system: boolean }[]>([]);
+  const applyType = propsApplyType ?? getApplyType();
   useEffect(() => {
     if (!systems && !requires) {
       if (!loading) {
@@ -169,7 +170,7 @@ const ImportFields: React.FC<Props> = ({
 
   useEffect(() => {
     const loadData = async () => {
-      const fields = fs || await fieldApi.getFoundationHeader();
+      const fields = fs || await fieldApi.getFoundationHeader(applyType === 'program' ? 'programIssueType' : 'agileIssueType');
       const allFs = [...(systemFields.map((item) => ({ ...item, system: true }))), ...fields];
       setAllFields(allFs);
       fieldsOptionDataSet.loadData(allFs);
@@ -193,7 +194,7 @@ const ImportFields: React.FC<Props> = ({
     const result = true;
     const nextBtnStatus = btnStatus !== 'NONE' ? 'NONE' : 'ALL';
     if (nextBtnStatus !== 'ALL') {
-      chooseDataSet.current?.set('fields', fieldsOptionDataSet.toData().map((item:any) => item.code));
+      chooseDataSet.current?.set('fields', fieldsOptionDataSet.toData().map((item: any) => item.code));
     } else {
       chooseDataSet.current?.set('fields', requiredFields);
       chooseDataSet.unSelectAll();

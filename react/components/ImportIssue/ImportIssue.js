@@ -378,7 +378,7 @@ class ImportIssue extends Component {
       uploading, latestInfo, wsData, templateIsExist, templateFirstLoaded,
     } = this.state;
     const {
-      action, requires, systems, fields, messageKey,
+      action, requires, systems, fields, messageKey, applyType,
     } = this.props;
 
     const {
@@ -452,6 +452,7 @@ class ImportIssue extends Component {
             setReRender={this.handleSetReRender}
             checkBoxChangeOk={this.handleCheckBoxChangeOk}
             requires={requires}
+            applyType={applyType}
             systems={systems}
             fields={fields}
           />
@@ -512,7 +513,7 @@ const handleOpenImport = (props) => {
     okText: '导入',
     cancelText: '关闭',
     // footer: (okBtn) => okBtn,
-    children: <ObserverImportIssue {...props} />,
+    children: <ObserverImportIssue {...props} applyType="agile" />,
   });
 };
 
