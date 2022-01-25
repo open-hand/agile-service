@@ -1,5 +1,5 @@
 import React, {
-  useEffect, ReactElement, useRef, MutableRefObject, useCallback, ReactNode,
+  MutableRefObject, ReactElement, ReactNode, useCallback, useEffect, useRef,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { isEmpty } from 'lodash';
@@ -134,6 +134,12 @@ export default observer(() => {
     mainStore.setSelectedMenu(item);
     mainStore.setSelectedMenu({ ...item, ...item.data || {} });
     if (item.id) {
+      if ([NOT_ASSIGN_ID, ROOT_ID].includes(item.id)) {
+        tableDs.selection = false;
+      } else if (tableDs.selection === false) {
+        // @ts-ignore
+        tableDs.selection = 'multiple';
+      }
       tableDs.setQueryParameter('workGroupId', item.id);
       tableDs.query();
     }
