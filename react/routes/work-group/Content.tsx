@@ -71,13 +71,13 @@ const WorkGroupContent = observer(() => {
       <Header>
         <HeaderButtons
           items={[{
-            display: true,
+            display: !isDisabled,
             name: '加入成员',
             icon: 'add',
             handler: handleAddMember,
             disabled: isDisabled,
           }, {
-            display: true,
+            display: !isDisabled,
             name: '移除成员',
             icon: 'exit_to_app',
             handler: openRemoveModal,

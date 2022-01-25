@@ -17,6 +17,7 @@ export default ({
   autoCreate: false,
   autoQuery: true,
   cacheSelection: true,
+  selection: false,
   primaryKey: 'id',
   pageSize: 10,
   transport: {
