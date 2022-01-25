@@ -66,7 +66,7 @@ const Issue = observer(({ cached, updateCache }) => {
   const [urlFilter, setUrlFilter] = useState(null);
   const [props] = useDetail();
   const { open } = props;
-  const { data: tableFields } = useIssueTableFields();
+  const { data: tableFields } = useIssueTableFields({ issueTypeList: 'agileIssueType' });
   const handleCheckBefore = useCallback(() => {
     if (!issueSearchStore.batchAction && !hasBatchDeletePermission) {
       issueSearchStore.setBatchAction('edit');
