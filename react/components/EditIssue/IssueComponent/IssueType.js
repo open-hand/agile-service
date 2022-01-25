@@ -10,6 +10,7 @@ import EditIssueContext from '../stores';
 import './IssueComponent.less';
 import openRequiredFieldsModal from './required-fields';
 import Styles from './IssueType.less';
+import useIsProgram from '@/hooks/useIsProgram';
 
 const IssueType = observer(({
   reloadIssue, applyType, onTransformType,
@@ -18,6 +19,7 @@ const IssueType = observer(({
     store, disabled, menuType, isProgramIssue,
   } = useContext(EditIssueContext);
   const { isShowFeature } = useIsInProgram({ projectId: store.projectId });
+  const { isAgileProgram } = useIsProgram();
   const issue = store.getIssue;
   const { issueTypeVO = {}, featureVO = {}, subIssueVOList = [] } = issue;
   const { typeCode, id: issueTypeId } = issueTypeVO;
@@ -29,12 +31,12 @@ const IssueType = observer(({
       return ['sub_task'];
     }
     let codes = ['story', 'bug', 'task', 'issue_epic'];
-    if (isShowFeature || menuType === 'org') {
+    if (isShowFeature || isAgileProgram || menuType === 'org') {
       codes = ['story', 'bug', 'task'];
     }
 
     return codes;
-  }, [isShowFeature, menuType, subIssueVOList.length, typeCode]);
+  }, [isAgileProgram, isShowFeature, menuType, subIssueVOList.length, typeCode]);
   let { data: issueTypeData } = useProjectIssueTypes({
     onlyEnabled: true, typeCode: queryTypeCodes, applyType, projectId: store.projectId,
   }, { enabled: !disabled });

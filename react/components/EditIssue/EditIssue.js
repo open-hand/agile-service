@@ -14,7 +14,6 @@ import './EditIssue.less';
 import {
   issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, pageConfigApi, boardApi,
 } from '@/api';
-import useIsInProgram from '@/hooks/useIsInProgram';
 import { useDetailContainerContext } from '@/components/detail-container/context';
 import { sameProject } from '@/utils/detail';
 import IssueHeader from './IssueComponent/IssueHeader';
