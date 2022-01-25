@@ -16,6 +16,10 @@ export interface IssueTableFieldsConfig {
   menuType?: 'project' | 'org' | 'program'
   /** 额外字段  可响应  */
   extraFields?: IFoundationHeader[]
+  /**
+   * 表头数据来源于
+   */
+  issueTypeList?:'agileIssueType'|'programIssueType'
 
 }
 const systemFields = [
@@ -60,7 +64,7 @@ export default function useIssueTableFields(config?: IssueTableFieldsConfig, opt
   }, [config?.extraFields, config?.hiddenFieldCodes]);
 
   const { data, ...others } = useQuery(key, () => fieldApi.program(config?.programId).project(config?.projectId)
-    .getFoundationHeader().then((res: any = []) => (config?.menuType === 'org' ? filter(res, (item) => String(item.code).indexOf('org_') === 0) : res)), {
+    .getFoundationHeader(config?.issueTypeList).then((res: any = []) => (config?.menuType === 'org' ? filter(res, (item) => String(item.code).indexOf('org_') === 0) : res)), {
     enabled: !loading,
     initialData: systemFields,
     select,

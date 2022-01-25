@@ -419,7 +419,7 @@ function useGanttProjectColumns({
 }: IGanttColumnsHookProps) {
   // 恒为 项目层级
   const { data: tableFields } = useIssueTableFields({
-    hiddenFieldCodes, extraFields: ganttSystemFields, projectId, menuType: 'project',
+    hiddenFieldCodes, extraFields: ganttSystemFields, projectId, menuType: 'project', issueTypeList: 'agileIssueType',
   });
   const { data: issueTypes, isLoading: issueTypeIsLoading } = useProjectIssueTypes({ projectId, isInProgram, applyType: 'agile' });
   const { data: predecessorTypes, isLoading: predecessorTypesLoading } = useProjectPredecessorTypes({ projectId });

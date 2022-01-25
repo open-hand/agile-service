@@ -212,7 +212,7 @@ class FieldApi extends Api<FieldApi> {
         organizationId: this.orgId,
         project_id: getProjectId(),
         schemeCode: 'agile_issue',
-        issueTypeList: issueTypeList ?? getApplyType() === 'program' ? 'programIssueType' : 'agileIssueType',
+        issueTypeList: issueTypeList ?? (getApplyType() === 'program' ? 'programIssueType' : 'agileIssueType'),
       },
     });
   }

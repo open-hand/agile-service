@@ -139,7 +139,7 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
   });
   const refresh = useCallback(() => {
     tableProps.query();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tableProps.query]);
   useEffect(() => {
     refresh();
@@ -179,7 +179,7 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
     }
   }, [isInProgram]);
 
-  const { data } = useIssueTableFields();
+  const { data } = useIssueTableFields({ issueTypeList: 'agileIssueType' });
   if (!data) {
     return null;
   }
