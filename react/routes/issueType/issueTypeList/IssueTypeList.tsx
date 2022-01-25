@@ -21,13 +21,15 @@ import styles from './IssueTypeList.less';
 import openUsage from './Usage';
 import openLink from './LinkType';
 import useFormatMessage from '@/hooks/useFormatMessage';
+import useIsProgram from '@/hooks/useIsProgram';
 
 const { Column } = Table;
 
 function IssueTypeList() {
   const context = useContext(Store);
-  const { issueTypeDataSet, isOrganization } = context;
+  const { issueTypeDataSet, isOrganization, hiddenActionTypeCodes } = context;
   const formatMessage = useFormatMessage();
+  const { isAgileProgram } = useIsProgram();
   const handleEdit = useCallback(({ record, dataSet }) => {
     Modal.open({
       className: styles.issueType_modal,
@@ -67,6 +69,9 @@ function IssueTypeList() {
   }, []);
 
   const renderAction = useCallback(({ dataSet, record }: RenderProps) => {
+    if (!isOrganization && isAgileProgram && hiddenActionTypeCodes.includes(record?.get('typeCode'))) {
+      return null;
+    }
     const handleDelete = () => {
       issueTypeApi[isOrganization ? 'orgDelete' : 'delete'](record?.get('id')).then(() => {
         Choerodon.prompt('删除成功');

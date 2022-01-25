@@ -10,6 +10,7 @@ interface Context {
   AppState: AppStateProps,
   issueTypeDataSet: DataSet,
   isOrganization: boolean,
+  hiddenActionTypeCodes: string[],
 }
 
 const Store = createContext({} as Context);
@@ -25,6 +26,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
       intlPrefix: 'issue-type',
       issueTypeDataSet,
       isOrganization,
+      hiddenActionTypeCodes: ['feature', 'issue_epic'],
     };
     return (
       <Store.Provider value={value}>
