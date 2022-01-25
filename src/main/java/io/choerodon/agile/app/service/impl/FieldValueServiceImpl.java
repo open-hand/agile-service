@@ -410,7 +410,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             issueUpdateVO.setEnvironment(null);
         }
 
-        if ("story".equals(v.getTypeCode()) && agilePluginService != null) {
+        if (Arrays.asList(IssueTypeCode.ISSUE_TYPE_CODE_WITH_FEATURE).contains(v.getTypeCode()) && agilePluginService != null) {
             agilePluginService.setFeatureId(issueUpdateVO,programMap,fieldList);
         }
 

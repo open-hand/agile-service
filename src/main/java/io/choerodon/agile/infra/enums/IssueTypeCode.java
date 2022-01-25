@@ -16,6 +16,8 @@ public enum IssueTypeCode {
     BACKLOG("backlog"),
     ;
 
+    public static final String[] ISSUE_TYPE_CODE_WITH_FEATURE = {STORY.value(), TASK.value(), BUG.value()};
+
     private String value;
 
     IssueTypeCode(String value) {
