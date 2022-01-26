@@ -98,7 +98,7 @@ const StateMachineProvider: React.FC<IStateMachineProps> = (props) => {
   }), [selectedType, issueTypeInitedMap, defaultTabs, isOrganization]);
   return (
     <StateMachineContext.Provider value={{ ...value, componentProps: omit(otherProps, ['setActiveKey', 'activeKey']) }}>
-      <LoadingProvider loading={loading}>
+      <LoadingProvider loading={loading} style={{ width: '100%', height: '100%' }}>
         {props.children}
       </LoadingProvider>
     </StateMachineContext.Provider>
