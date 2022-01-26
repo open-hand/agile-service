@@ -502,10 +502,14 @@ class ScrumBoardHome extends Component {
                 handler: () => this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard)),
               },
               {
-                name: <C7NFormat
-                  intlPrefix="agile.common"
-                  id="complete.sprint"
-                />,
+                name: (
+                  <span>
+                    <C7NFormat
+                      intlPrefix="agile.common"
+                      id="complete.sprint"
+                    />
+
+                  </span>),
                 icon: 'alarm_on',
                 // funcType: 'flat',
                 handler: this.handleFinishSprint,
