@@ -100,7 +100,7 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
     // onChange && onChange(date.format('YYYY-MM-DD HH:mm:ss'));
     innerRef.current?.choose(new Record({ meaning: date.format(format), value: date.format(format) }));
   }
-  const DateView = isCustomDateTimeView && mode === 'dateTime' ? DateTimesViewWithFormat as unknown as React.FC<any> : DateViews[mode as DateViewsKey] as unknown as React.FC<any>;
+  const DateView = DateViews[mode as DateViewsKey] as unknown as React.FC<any>;
   const handleBindRef = useCallback((newRef) => {
     if (newRef) {
       ref && Object.assign(ref, { current: newRef });
