@@ -5459,7 +5459,12 @@
         select
             ai.issue_id,
             ai.assignee_id
-        from (<include refid="listConflictEstimatedTime"/>) ai
+        from (
+            <include refid="listConflictEstimatedTime"/>
+            <if test="sortMap != null and sortMap.orderStr != null">
+                ORDER BY ${sortMap.orderStr}
+            </if>
+        ) ai
     </select>
 
     <select id="selectConflictEstimatedTime_COUNT" resultType="java.lang.Long">
@@ -5583,9 +5588,6 @@
                     )
                 </foreach>
             </if>
-        </if>
-        <if test="sortMap != null and sortMap.orderStr != null">
-            ORDER BY ${sortMap.orderStr}
         </if>
     </sql>
 
