@@ -2,6 +2,7 @@ import React, {
   createContext, useEffect, useMemo, useRef,
 } from 'react';
 import { inject } from 'mobx-react';
+import { observer } from 'mobx-react-lite';
 import EditIssueStore from './EditIssueStore';
 import { getMenuType, getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
@@ -10,7 +11,7 @@ import useIsProgramIssueType from '@/hooks/useIsProgramIssueType';
 
 const EditIssueContext = createContext();
 export default EditIssueContext;
-export const EditIssueContextProvider = inject('AppState', 'HeaderStore')((props) => {
+export const EditIssueContextProvider = inject('AppState', 'HeaderStore')(observer((props) => {
   const FieldVersionRef = {
     current: null,
   };
@@ -57,4 +58,4 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')((props
       {!loading && props.children}
     </EditIssueContext.Provider>
   );
-});
+}));

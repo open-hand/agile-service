@@ -49,12 +49,12 @@ const StateMachineProvider: React.FC<IStateMachineProps> = (props) => {
   }], [formatMessage]);
   const defaultTabs = useCreation(() => tabs.filter((item) => includes(defaultTabKeys, item.key)), [defaultTabKeys]);
 
-  const [activeKey, setActiveKey] = useState<IStateMachineContext['activeKey']>(() => {
+  const [activeKey, setActiveKey] = useState<IStateMachineContext['activeKey']>(():IStateMachineContext['activeKey'] => {
     if (props.activeKey) {
       return props.activeKey;
     }
     if (paramsActiveKey) {
-      return paramsActiveKey;
+      return paramsActiveKey as IStateMachineContext['activeKey'];
     }
     return issueTypeId ? defaultTabs[1].key : defaultTabs[0].key;
   });
