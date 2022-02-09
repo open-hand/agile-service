@@ -31,7 +31,7 @@ export interface TabComponentProps<Params extends { [K in keyof Params]?: string
 }
 interface IStateMachineTab {
     name: React.ReactNode
-    key: string
+    key: IStateMachineContext['activeKey']
     component: React.ComponentType<TabComponentProps<any>> | React.ComponentType<any>;
 }
 export type { IStateMachineProps, IStateMachineContext, IStateMachineTab };
