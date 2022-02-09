@@ -55,7 +55,7 @@ const SelectUserWithRole: React.FC<SelectUserProps & { roles: IRoleWithSelectOpt
               hidden={!showSelectUser}
               labelLayout={'float' as any}
               selectedUser={record?.getState(`${name}_defaultSelectUsers`)}
-              style={{ marginTop: '.2rem', width: '100%' }}
+              style={{ marginTop: '.1rem', marginBottom: '-0.1rem', width: '100%' }}
               getPopupContainer={(node) => node.parentNode as any}
             />
           </Form>

@@ -42,19 +42,19 @@ export default class DateTimePickerWithFormat extends DateTimePicker {
     return format || MINUTE;
   }
 
-  getPopupContent() {
-    const mode = this.getViewMode();
-    return createElement(viewComponents[mode], {
-      ref: (node: any) => (this.view = node),
-      date: this.getSelectedDate(),
-      mode: this.getDefaultViewMode(),
-      renderer: this.getCellRenderer(mode),
-      onSelect: this.handleSelect,
-      onSelectedDateChange: this.handleSelectedDateChange,
-      onViewModeChange: this.handelViewModeChange,
-      isValidDate: this.isValidDate,
-      format: this.getDateFormat(),
-      step: this.getProp('step') || {},
-    } as DateViewProps);
-  }
+  // getPopupContent() {
+  //   const mode = this.getViewMode();
+  //   return createElement(viewComponents[mode], {
+  //     ref: (node: any) => (this.view = node),
+  //     date: this.getSelectedDate(),
+  //     mode: this.getDefaultViewMode(),
+  //     renderer: this.getCellRenderer(mode),
+  //     onSelect: this.handleSelect,
+  //     onSelectedDateChange: this.handleSelectedDateChange,
+  //     onViewModeChange: this.handelViewModeChange,
+  //     isValidDate: this.isValidDate,
+  //     format: this.getDateFormat(),
+  //     step: this.getProp('step') || {},
+  //   } as DateViewProps);
+  // }
 }

@@ -148,7 +148,9 @@ const OptionItem: React.FC<OptionItemProps> = ({
             </div>
           </div>
           <div className={styles.operate} key="read">
-            <Button icon="edit-o" funcType={'flat' as any} onClick={handleEditClick} />
+            <Tooltip title="编辑">
+              <Button icon="edit-o" funcType={'flat' as any} onClick={handleEditClick} />
+            </Tooltip>
             <Tooltip title={data.enabled ? '禁用' : '启用'}>
               <Button
                 icon={data.enabled ? 'block' : 'playlist_add_check'}
@@ -163,7 +165,9 @@ const OptionItem: React.FC<OptionItemProps> = ({
               okText="删除"
               cancelText="取消"
             >
-              <Button icon="delete_sweep-o" funcType={'flat' as any} />
+              <Tooltip title="删除">
+                <Button icon="delete_sweep-o" funcType={'flat' as any} />
+              </Tooltip>
             </Popconfirm>
           </div>
         </>
