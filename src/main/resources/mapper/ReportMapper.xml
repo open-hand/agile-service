@@ -21,26 +21,29 @@
     <select id="queryIssueIdsBeforeSprintStart" resultType="java.lang.Long">
         select t1.issue_id
         from agile_issue t1
-        join (
+        JOIN (
             SELECT adl5.issue_id
-            FROM agile_data_log adl5
-            WHERE adl5.project_id = #{sprintDTO.projectId}
-            and adl5.field = 'Sprint'
-            and adl5.log_id IN (
-                SELECT MAX(adl.log_id) AS log_id
+            FROM  (
+                SELECT
+                    MAX(adl.log_id) AS log_id
                 FROM agile_data_log adl
                 WHERE adl.project_id = #{sprintDTO.projectId}
                 and adl.field = 'Sprint'
+                AND adl.creation_date &gt;= #{sprintDTO.creationDate}
                 AND adl.creation_date &lt;= #{sprintDTO.startDate}
                 GROUP BY adl.issue_id
-            )
+            ) adl2
+            JOIN agile_data_log adl5 on adl2.log_id = adl5.log_id
+            WHERE adl5.project_id = #{sprintDTO.projectId}
+            and adl5.field = 'Sprint'
             AND adl5.new_value REGEXP '^${sprintDTO.sprintId},|,${sprintDTO.sprintId},|^${sprintDTO.sprintId}$|,${sprintDTO.sprintId}$'
             UNION
             SELECT aisr2.issue_id
             FROM agile_issue_sprint_rel aisr2
-            WHERE aisr2.creation_date &lt;= #{sprintDTO.startDate}
-            AND aisr2.sprint_id = #{sprintDTO.sprintId}
-        ) t2 on t1.issue_id = t2.issue_id
+            WHERE
+            aisr2.sprint_id = #{sprintDTO.sprintId}
+            AND aisr2.creation_date &lt;= #{sprintDTO.startDate}
+        ) t2  on t1.issue_id = t2.issue_id
         where 1=1
         <if test='burnDownSearchVO.onlyStory != null and burnDownSearchVO.onlyStory == true'>
             AND t1.type_code = 'story'
@@ -114,8 +117,9 @@
     <select id="queryAddIssueIdsDuringSprint" resultType="java.lang.Long">
         select t1.issue_id
         from agile_issue t1
-        join (
-            SELECT DISTINCT adl2.issue_id
+        JOIN (
+            SELECT
+              adl2.issue_id
             FROM agile_data_log adl2
             WHERE adl2.project_id = #{sprintDTO.projectId}
             and adl2.field = 'Sprint'
@@ -126,6 +130,7 @@
                 adl2.old_value is null
                 or not (adl2.old_value REGEXP '^${sprintDTO.sprintId},|,${sprintDTO.sprintId},|^${sprintDTO.sprintId}$|,${sprintDTO.sprintId}$')
             )
+            group by adl2.issue_id
         ) t2 on t1.issue_id = t2.issue_id
         where 1=1
         <if test='burnDownSearchVO.onlyStory != null and burnDownSearchVO.onlyStory == true'>
@@ -3444,16 +3449,16 @@
     <select id="queryBugIdsBeforeSprintStart" resultType="java.lang.Long">
         SELECT
            adl5.issue_id
-        FROM agile_data_log adl5
+        FROM (SELECT MAX(adl.log_id) AS log_id
+              FROM agile_data_log adl
+              WHERE adl.project_id = #{sprintDTO.projectId}
+                and adl.field = 'Sprint'
+                AND adl.creation_date &gt;= #{sprintDTO.creationDate}
+                AND adl.creation_date &lt;= #{sprintDTO.startDate}
+              GROUP BY adl.issue_id) adl2
+        join agile_data_log adl5 on adl5.log_id = adl2.log_id
         WHERE adl5.project_id = #{sprintDTO.projectId}
           AND adl5.field = 'Sprint'
-          AND adl5.log_id IN
-              (SELECT MAX(adl.log_id) AS log_id
-               FROM agile_data_log adl
-               WHERE adl.project_id = #{sprintDTO.projectId}
-                 and adl.field = 'Sprint'
-                 AND adl.creation_date &lt;= #{sprintDTO.startDate}
-               GROUP BY adl.issue_id)
           AND adl5.new_value REGEXP
               '^${sprintDTO.sprintId},|,${sprintDTO.sprintId},|^${sprintDTO.sprintId}$|,${sprintDTO.sprintId}$'
           AND exists(SELECT 1 FROM agile_issue ai WHERE ai.type_code = 'bug' AND ai.issue_id = adl5.issue_id)
