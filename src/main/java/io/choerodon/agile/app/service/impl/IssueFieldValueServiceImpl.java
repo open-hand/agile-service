@@ -82,21 +82,12 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
             List<PageFieldViewUpdateVO> customFields = batchUpdateFieldsValueVo.getCustomFields();
             // 过滤掉不存在的字段
             customFields = filterNotExistFields(customFields);
-            int customFieldSize = CollectionUtils.isEmpty(customFields) ? 0 :customFields.size();
             JSONObject predefinedFields = batchUpdateFieldsValueVo.getPredefinedFields();
-            int allCount = (ObjectUtils.isEmpty(predefinedFields) ? 0 : issueIds.size()) + customFieldSize;
+            int allCount = (ObjectUtils.isEmpty(predefinedFields) ? 0 : issueIds.size());
             double incrementalValue = 1.0 / (allCount == 0 ? 1 : allCount);
             batchUpdateFieldStatusVO.setIncrementalValue(incrementalValue);
             Map<Long, TriggerCarrierVO> triggerCarrierMap = new HashMap<>();
-            // 批量修改issue自定义字段值
-            if (!CollectionUtils.isEmpty(customFields)) {
-                fieldValueService.handlerCustomFields(projectId, customFields, schemeCode, issueIds,batchUpdateFieldStatusVO, true, triggerCarrierMap);
-            }
-
-            //修改issue预定义字段值
-            if (!CollectionUtils.isEmpty(batchUpdateFieldsValueVo.getPredefinedFields())) {
-                fieldValueService.handlerPredefinedFields(projectId, issueIds, predefinedFields,batchUpdateFieldStatusVO,applyType, true, triggerCarrierMap);
-            }
+            fieldValueService.handlerIssueFields(projectId, issueIds, predefinedFields,batchUpdateFieldStatusVO,applyType, true, schemeCode, customFields, triggerCarrierMap);
             issueService.batchUpdateInvokeTrigger(triggerCarrierMap.values().stream().collect(Collectors.toList()));
              //发送websocket
             batchUpdateFieldStatusVO.setStatus("success");

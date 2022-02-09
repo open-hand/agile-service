@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.TriggerCarrierVO;
 import io.choerodon.agile.infra.dto.FieldValueDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
@@ -122,4 +123,27 @@ public interface FieldValueService {
     void checkCreateCustomFieldWithoutRuleNotice(Long projectId, Long id, String schemeCode, List<FieldValueDTO> fieldValues, List<String> fieldList);
 
     void createFieldValuesWithoutRuleNotice(Long organizationId, Long projectId, Long instanceId, String schemeCode, List<PageFieldViewCreateVO> createDTOs);
+
+    void handlerIssueFields(Long projectId,
+                            List<Long> issueIds,
+                            JSONObject predefinedFields,
+                            BatchUpdateFieldStatusVO batchUpdateFieldStatusVO,
+                            String applyType,
+                            boolean sendMsg,
+                            String schemeCode,
+                            List<PageFieldViewUpdateVO> customFields,
+                            Map<Long, TriggerCarrierVO> triggerCarrierMap);
+
+    void handleIssueField(Long projectId,
+                          IssueDTO issueDTO,
+                          JSONObject predefinedFields,
+                          BatchUpdateFieldStatusVO batchUpdateFieldStatusVO,
+                          String applyType,
+                          boolean sendMsg,
+                          String schemeCode,
+                          Map<Long, List<PageFieldViewUpdateVO>> issueCustomFieldMap,
+                          Map<Long, TriggerCarrierVO> triggerCarrierMap,
+                          Map<String, Object> programMap,
+                          List<VersionIssueRelVO> fixVersion,
+                          List<VersionIssueRelVO> influenceVersion);
 }
