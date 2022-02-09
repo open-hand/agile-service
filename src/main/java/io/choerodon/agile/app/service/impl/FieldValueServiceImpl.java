@@ -27,8 +27,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.AopProxy;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -46,6 +49,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldValueService> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FieldValueServiceImpl.class);
     private static final String ERROR_PAGECODE_ILLEGAL = "error.pageCode.illegal";
     private static final String ERROR_CONTEXT_ILLEGAL = "error.context.illegal";
     protected static final String ERROR_SCHEMECODE_ILLEGAL = "error.schemeCode.illegal";
@@ -350,6 +354,136 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
                 }
             }
         });
+    }
+
+    @Override
+    public void handlerIssueFields(Long projectId,
+                                   List<Long> issueIds,
+                                   JSONObject predefinedFields,
+                                   BatchUpdateFieldStatusVO batchUpdateFieldStatusVO,
+                                   String applyType,
+                                   boolean sendMsg,
+                                   String schemeCode,
+                                   List<PageFieldViewUpdateVO> customFields,
+                                   Map<Long, TriggerCarrierVO> triggerCarrierMap) {
+        List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds, null);
+        if (CollectionUtils.isEmpty(issueDTOS)) {
+            throw new CommonException("error.issues.null");
+        }
+        Map<Long, List<PageFieldViewUpdateVO>> issueCustomFieldMap = buildIssueCustomFieldMap(projectId, customFields, issueDTOS);
+        //史诗校验
+        checkEpic(projectId, predefinedFields);
+        List<VersionIssueRelVO> fixVersion = buildVersionData(predefinedFields.get(FIX_VERSION));
+        List<VersionIssueRelVO> influenceVersion = buildVersionData(predefinedFields.get(INFLUENCE_VERSION));
+        predefinedFields.remove(FIX_VERSION);
+        predefinedFields.remove(INFLUENCE_VERSION);
+        Map<String, Object> programMap = new HashMap<>();
+        if (agilePluginService != null) {
+            agilePluginService.handlerProgramPredefinedFields(projectId, predefinedFields, programMap, applyType);
+        }
+        issueDTOS.forEach(v -> {
+            try {
+                this.self().handleIssueField(projectId, v, predefinedFields, batchUpdateFieldStatusVO, applyType, sendMsg, schemeCode, issueCustomFieldMap, triggerCarrierMap, programMap, fixVersion, influenceVersion);
+            } catch (Exception e) {
+                LOGGER.info("update issue exception:", e);
+                Integer failedCount = ObjectUtils.isEmpty(batchUpdateFieldStatusVO.getFailedCount()) ? 0 : batchUpdateFieldStatusVO.getFailedCount();
+                batchUpdateFieldStatusVO.setFailedCount(failedCount++);
+            }
+        });
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void handleIssueField(Long projectId,
+                                 IssueDTO issueDTO,
+                                 JSONObject predefinedFields,
+                                 BatchUpdateFieldStatusVO batchUpdateFieldStatusVO,
+                                 String applyType,
+                                 boolean sendMsg,
+                                 String schemeCode,
+                                 Map<Long, List<PageFieldViewUpdateVO>> issueCustomFieldMap,
+                                 Map<Long, TriggerCarrierVO> triggerCarrierMap,
+                                 Map<String,Object> programMap,
+                                 List<VersionIssueRelVO> fixVersion,
+                                 List<VersionIssueRelVO> influenceVersion){
+        TriggerCarrierVO triggerCarrierVO = triggerCarrierMap.getOrDefault(issueDTO.getIssueId(), null);
+        if (ObjectUtils.isEmpty(triggerCarrierVO)) {
+            triggerCarrierVO = buildTriggerCarrierVO(issueDTO, projectId);
+        }
+        IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
+        List<String> fieldList = verifyUpdateUtil.verifyUpdateData(predefinedFields, issueUpdateVO);
+        fieldListRemove(issueDTO, fieldList, issueUpdateVO, programMap);
+        if (fixVersion != null) {
+            issueUpdateVO.setVersionType("fix");
+            issueUpdateVO.setVersionIssueRelVOList(fixVersion);
+        }
+        // 获取传入的状态
+        Long statusId = issueUpdateVO.getStatusId();
+        if (!ObjectUtils.isEmpty(statusId)) {
+            fieldList.remove("statusId");
+            issueUpdateVO.setStatusId(null);
+        }
+        issueUpdateVO.setIssueId(issueDTO.getIssueId());
+        issueUpdateVO.setObjectVersionNumber(issueDTO.getObjectVersionNumber());
+        handlerEstimatedTime(issueDTO, issueUpdateVO, fieldList);
+        boolean doCheck = IssueTypeCode.FEATURE.value().equals(issueDTO.getTypeCode()) && fieldList.contains(EPIC_ID);
+        if (doCheck && agilePluginService.checkFeatureSummaryAndReturn(issueUpdateVO, projectId)) {
+            fieldList.remove(EPIC_ID);
+            issueUpdateVO.setEpicId(null);
+            addErrMessage(issueDTO, batchUpdateFieldStatusVO, EPIC_ID);
+        }
+        IssueVO issueVO = issueService.updateIssueWithoutRuleNotice(projectId, issueUpdateVO, fieldList);
+        // 处理影响的版本
+        if (influenceVersion != null) {
+            fieldList.add("versionId");
+            handlerBugInfluenceVersion(projectId, issueDTO, influenceVersion, issueVO);
+        }
+        // 修改issue的状态
+        if (!ObjectUtils.isEmpty(statusId)) {
+            fieldList.add("statusId");
+            updateIssueStatus(projectId, statusId, issueDTO, applyType);
+        }
+        if (agilePluginService != null) {
+            agilePluginService.handlerFeatureField(projectId, issueDTO, programMap, triggerCarrierVO);
+        }
+        issueService.addCollectionFieldIfNotNull(issueUpdateVO, fieldList);
+        List<PageFieldViewUpdateVO> pageFieldViewUpdateVOS = issueCustomFieldMap.get(issueDTO.getIssueId());
+        if (!CollectionUtils.isEmpty(pageFieldViewUpdateVOS)) {
+            for (PageFieldViewUpdateVO pageFieldViewUpdateVO : pageFieldViewUpdateVOS) {
+                batchHandlerCustomFields(projectId, pageFieldViewUpdateVO, schemeCode, new ArrayList<>(Arrays.asList(issueDTO.getIssueId())));
+                if (ObjectUtils.isEmpty(triggerCarrierVO)) {
+                    triggerCarrierVO = buildTriggerCarrierVO(issueDTO, projectId);
+                }
+                triggerCarrierVO.getFieldList().add(pageFieldViewUpdateVO.getFieldCode());
+            }
+        }
+        triggerCarrierVO.getFieldList().addAll(fieldList);
+        triggerCarrierMap.put(issueDTO.getIssueId(), triggerCarrierVO);
+        if (sendMsg) {
+            batchUpdateFieldStatusVO.setProcess(batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
+            if (batchUpdateFieldStatusVO.getProcess() - batchUpdateFieldStatusVO.getLastProcess() >= 0.1) {
+                messageClientC7n.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
+                batchUpdateFieldStatusVO.setLastProcess(batchUpdateFieldStatusVO.getProcess());
+            }
+        }
+    }
+
+    private Map<Long, List<PageFieldViewUpdateVO>> buildIssueCustomFieldMap(Long projectId, List<PageFieldViewUpdateVO> customFields, List<IssueDTO> issueDTOS) {
+        Map<Long, List<PageFieldViewUpdateVO>> map = new HashMap<>();
+        // 根据issueTypeId判断这个字段哪些问题类型可以添加
+        customFields.forEach(v -> {
+            List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtendDTOS = objectSchemeFieldExtendMapper.selectExtendFields(ConvertUtil.getOrganizationId(projectId), v.getFieldId(), projectId, null);
+            List<Long> issueTypeIds = objectSchemeFieldExtendDTOS.stream().map(ObjectSchemeFieldExtendDTO::getIssueTypeId).collect(Collectors.toList());
+            List<Long> needAddIssueIds = issueDTOS.stream().filter(issueDTO -> issueTypeIds.contains(issueDTO.getIssueTypeId())).map(IssueDTO::getIssueId).collect(Collectors.toList());
+            if (!CollectionUtils.isEmpty(needAddIssueIds)) {
+                for (Long needAddIssueId : needAddIssueIds) {
+                    List<PageFieldViewUpdateVO> fieldViewUpdateVOS = map.getOrDefault(needAddIssueId, new ArrayList<>());
+                    fieldViewUpdateVOS.add(v);
+                    map.put(needAddIssueId, fieldViewUpdateVOS);
+                }
+            }
+        });
+        return map;
     }
 
     private void checkEpic(Long projectId, JSONObject predefinedFields) {
