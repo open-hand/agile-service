@@ -12,7 +12,7 @@ import {
   castArray,
   every,
   filter,
-  find, get, includes, map, merge, some, uniq,
+  find, get, includes, map, merge, set, some, uniq,
 } from 'lodash';
 import { toJS } from 'mobx';
 import { UploadFile } from 'choerodon-ui/lib/upload/interface';
@@ -95,7 +95,7 @@ const defaultDataSet = new DataSet({
 });
 const presets = new Map([
   ['component', {
-    type: 'object',
+    type: 'string',
     valueField: 'componentId',
   }],
   ['label', {
@@ -203,8 +203,20 @@ function getOptionsData(rules: ICascadeLinkage[] = [], dataSet: DataSet, field: 
 }
 
 const hasValue = (dataSet: DataSet, field: IssueCreateFields) => (isMultiple(field) ? getValue(dataSet, field.fieldCode)?.length : getValue(dataSet, field.fieldCode));
-
-function cascadeFieldAfterLoad(dataSet: DataSet, list: any[], field: IssueCreateFields, rules: ICascadeLinkage[] = []) {
+/**
+ * 选项加载完成后级联操作的前置行为
+ * (将 field 绑定当前rules)
+ * @param field
+ * @param rules
+ * @returns  是否进行选项加载完成后级联操作
+ */
+function preCascadeFieldAfterLoad(field: IssueCreateFields & { [key: string]: any }, rules: ICascadeLinkage[] = []): boolean {
+  const oldBindRulesFromField: any[] = get(field, '_rules', []);
+  const res = (oldBindRulesFromField.length + rules.length) ? false : !Object.is(oldBindRulesFromField, rules);
+  set(field, '_rules', rules);
+  return res;
+}
+function postCascadeFieldAfterLoad(dataSet: DataSet, list: any[], field: IssueCreateFields, rules: ICascadeLinkage[] = []) {
   const key = getOptionMapKey(field.fieldCode);
   const fieldCurrentValue = getValue(dataSet, field.fieldCode);
   const castFieldCurrentValue = castNormalValue(fieldCurrentValue, field.fieldCode);
@@ -219,6 +231,9 @@ function cascadeFieldAfterLoad(dataSet: DataSet, list: any[], field: IssueCreate
       dataSet.current?.init(field.fieldCode, undefined);
     }
   }
+}
+function cascadeFieldAfterLoad(dataSet: DataSet, list: any[], field: IssueCreateFields, rules: ICascadeLinkage[] = []) {
+  preCascadeFieldAfterLoad(field, rules) && postCascadeFieldAfterLoad(dataSet, list, field, rules);
 }
 
 function transformSubmitFieldValue(field: IssueCreateFields, value: any) {
@@ -579,7 +594,7 @@ const CreateIssueBase = observer(({
         fieldId: field.fieldId,
         fieldCode: field.fieldCode,
       })) ?? [];
-      let values = systemFields?.reduce((res, field) => {
+      let values: { [key: string]: any } = systemFields?.reduce((res, field) => {
         const config = getFieldConfig(field);
         return {
           ...res,
@@ -599,7 +614,7 @@ const CreateIssueBase = observer(({
         projectId: projectId ?? getProjectId(),
         featureId: (issueType as IIssueType)?.typeCode === 'bug' && data.parentIssueId?.issueId ? undefined : data.feature,
         issueLinkCreateVOList: enableIssueLinks ? getIssueLinks() : undefined,
-        componentIssueRelVOList: data.component ? data.component.map((item: { componentId: string }) => ({ componentId: item.componentId })) : [],
+        componentIssueRelVOList: values.componentIssueRelVOList ? values.componentIssueRelVOList.map((item: string) => ({ componentId: item })) : [],
       });
 
       values = hooks.reduce((result, hook) => hook(result, data), values);
