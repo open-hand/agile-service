@@ -79,6 +79,13 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     defaultCheckedExportFields: ['issueTypeId', 'issueNum', 'issueId', 'description'],
     checkboxOptionsExtraConfig: new Map(['issueTypeId', 'issueNum', 'issueId'].map((item) => [item, { optionConfig: { disabled: true }, defaultChecked: true }])),
     defaultInitOptions: ({ options }) => {
+      options.splice(0, 0, {
+        label: '工作项类型',
+        value: 'issueTypeId',
+        optionConfig: {
+          disabled: true,
+        },
+      });
       options.splice(3, 0, {
         label: '描述',
         value: 'description',
