@@ -489,7 +489,7 @@ class ImportIssue extends Component {
           accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         />
         <WSHandler
-          messageKey={messageKey || (applyType || getApplyType() === 'program' ? `agile-import-${getProjectId()}` : `agile-import-issues-${getProjectId()}`)}
+          messageKey={messageKey || ((applyType || getApplyType()) === 'program' ? `agile-import-${getProjectId()}` : `agile-import-issues-${getProjectId()}`)}
           onMessage={this.handleMessage}
         >
           {this.renderProgress()}
