@@ -121,6 +121,7 @@ class BacklogHome extends Component {
    * 当前PI下创建冲刺
    */
   handleCreateCurrentPiSprint = async () => {
+    BacklogStore.setModalOpened(true);
     await BacklogStore.loadPiInfoAndSprint();
     const onCreate = (sprint) => {
       BacklogStore.setCreatedSprint(sprint.sprintId);

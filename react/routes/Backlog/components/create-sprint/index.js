@@ -116,7 +116,7 @@ export default function CreateSprint({ modal: { handleOk, close, handleCancel },
   );
 }
 export function CreateCurrentPiSprint({
-  modal: { handleOk, close }, onCreate, sprints, pi,
+  modal: { handleOk, close, handleCancel }, onCreate, sprints, pi,
 }) {
   function checkDateSame(value, name, record) {
     const startDate = record.get('startDate');
@@ -187,12 +187,19 @@ export function CreateCurrentPiSprint({
       if (!sprint.failed) {
         onCreate(sprint);
         close();
+        BacklogStore.setModalOpened(false);
       } else {
         // Choerodon.prompt(sprint.message);
       }
     }
     return false;
   }
+
+  useEffect(() => {
+    handleCancel(() => {
+      BacklogStore.setModalOpened(false);
+    });
+  }, [handleCancel]);
 
   useEffect(() => {
     handleOk(submit);
