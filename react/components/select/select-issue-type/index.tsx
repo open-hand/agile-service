@@ -64,7 +64,7 @@ const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
             typeCode: '',
           }];
           const epicType: IIssueType = find<IIssueType>(issueTypes, { typeCode: 'issue_epic' }) as IIssueType;
-          return [...featureTypes, epicType];
+          return [...featureTypes, epicType].filter(Boolean);
         }
         if (Array.isArray(filterList) && filterList.length > 0) {
           return issueTypes.filter((issueType) => (onlyEnabled ? issueType.enabled : true && !filterList.some((filter) => filter === issueType.typeCode)));
@@ -98,4 +98,5 @@ const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
     />
   );
 });
+SelectIssueType.displayName = 'SelectIssueType';
 export default SelectIssueType;
