@@ -2,7 +2,8 @@
 
   &:hover {
     .dividerLine {
-      border-color: var(--primary-color);
+      width: 1px;
+      border-right: 2px solid var(--primary-color);
 
       &:before {
         background: var(--primary-color);
@@ -13,10 +14,9 @@
   .dividerLine {
     margin: 0;
     height: 100%;
-    width: 0;
+    width: 2px;
     border: none;
-    border-right: 1px solid transparent;
-    border-color: #A7ADD0;
+    border-right: 1px solid #A7ADD0;
 
     &:before {
       content: '';
@@ -29,6 +29,7 @@
       top: 50%;
       transform: translateY(-50%);
       width: 2px;
+      margin-left: 1px;
     }
   }
 }
@@ -39,8 +40,7 @@
     height: 0;
     width: 100%;
     border: none;
-    border-bottom: 1px solid transparent;
-    border-color: #A7ADD0;
+    border-bottom: 1px solid #A7ADD0;
 
     &:before {
       content: '';
