@@ -1,5 +1,24 @@
 # Changelog
 All notable changes about agile-service will be documented in this file.
+## [1.2.0] - 2022-02-11
+
+### Added
+
+- State machine: it supports the linkage of child tasks to any state and the change of parent task state, so as to improve the ability of automatic flow of work items and improve collaboration efficiency.
+
+### Fixed
+
+- Fixed multilingual display of some input boxes.
+
+- Fixed configuration Kanban drag column interaction issue.
+
+- Fixed the problem that the daily workload calendar per person showed when sprinting across the year.
+
+- Fix the problem that the version affected by the problem item is not logged.
+
+- Fix the problem of continuously modifying epic, feature and version color in the to-do list.
+
+- Fix the problem that the custom chart of project overview cannot be loaded.
 
 ## [1.2.0-alpha] - 2021-12-10
 
