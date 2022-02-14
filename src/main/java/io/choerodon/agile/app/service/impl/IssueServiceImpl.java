@@ -1035,6 +1035,18 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         return fieldPermissionService.filterPageFieldViewVO(projectId, organizationId, issueTypeId, requiredSystemFields);
     }
 
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteIssueOnRequiresNew(Long projectId, Long issueId, BatchUpdateFieldStatusVO batchUpdateFieldStatusVO) {
+        try {
+            deleteIssue(projectId, issueId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            batchUpdateFieldStatusVO.setFailedCount(batchUpdateFieldStatusVO.getFailedCount() + 1);
+        }
+    }
+
     @Override
     public List<PageFieldViewVO> listRequiredFieldByIssueTypeNoFilter(Long projectId,
                                                                       Long organizationId,

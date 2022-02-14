@@ -1,9 +1,12 @@
 import React from 'react';
-import { useLocation, withRouter } from 'react-router-dom';
 import {
-  PageWrap, PageTab,
+  Route, Switch, useLocation, withRouter,
+} from 'react-router-dom';
+import {
+  PageWrap, PageTab, nomatch,
 } from '@choerodon/boot';
 import { useTabActiveKey } from '@choerodon/components';
+import { PermissionRoute } from '@choerodon/master';
 import LINK_URL from '@/constants/LINK_URL';
 import useFormatMessage from '@/hooks/useFormatMessage';
 import './index.less';
@@ -27,4 +30,23 @@ const WorkList = ({ match }) => {
     </PageWrap>
   );
 };
-export default WorkList;
+
+const WorkListIndex = ({ match }) => (
+  <Switch>
+    <PermissionRoute
+      service={[
+        'choerodon.code.project.cooperation.work-list.ps.backlog',
+        'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.feature',
+        'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint',
+        'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.pi',
+        'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint',
+        'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.epic',
+        'choerodon.code.project.cooperation.work-list.ps.issue',
+      ]}
+      path={match.url}
+      component={WorkList}
+    />
+    <Route path="*" component={nomatch} />
+  </Switch>
+);
+export default WorkListIndex;

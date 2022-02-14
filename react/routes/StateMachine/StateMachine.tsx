@@ -44,6 +44,7 @@ const StateMachine: React.FC = () => {
     <div
       style={{
         flex: readOnly ? 1 : 0,
+        height: '100%',
       }}
     >
       {

@@ -121,6 +121,7 @@ class BacklogHome extends Component {
    * 当前PI下创建冲刺
    */
   handleCreateCurrentPiSprint = async () => {
+    BacklogStore.setModalOpened(true);
     await BacklogStore.loadPiInfoAndSprint();
     const onCreate = (sprint) => {
       BacklogStore.setCreatedSprint(sprint.sprintId);
@@ -334,7 +335,9 @@ class BacklogHome extends Component {
 
   render() {
     const arr = BacklogStore.getSprintData;
-    const { isInProgram, isShowFeature, theme } = this.props;
+    const {
+      isInProgram, isAgileProgram, isShowFeature, theme,
+    } = this.props;
     return (
       <>
         <Header title={(
@@ -463,7 +466,8 @@ class BacklogHome extends Component {
                       }}
                     />
                   </Panel>
-                  {!isShowFeature ? (
+                  {!isShowFeature ? (!isAgileProgram
+                    && (
                     <Panel
                       key="epic"
                       title={(
@@ -492,6 +496,7 @@ class BacklogHome extends Component {
                         openCreateIssueModal={this.openCreateIssueModal}
                       />
                     </Panel>
+                    )
                   ) : (
                     <Panel
                       key="feature"

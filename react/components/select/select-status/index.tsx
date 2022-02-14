@@ -58,7 +58,7 @@ const SelectStatus: React.FC<SelectStatusProps> = forwardRef(
         if (noIssueTypeIdQuery) {
           return statusApi.project(projectId).loadByProject(applyType as any);
         }
-        if (issueTypeId && (!applyType || ['program', 'backlog'].includes(applyType))) {
+        if (issueTypeId && (!applyType || ['program', 'backlog', 'agile'].includes(applyType))) {
           return isOrganization ? statusTransformApi.orgLoadList(issueTypeId) : statusTransformApi.project(projectId).loadList(issueTypeId, applyType as any);
         }
         return Promise.resolve([]);

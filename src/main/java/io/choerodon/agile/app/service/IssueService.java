@@ -495,4 +495,6 @@ public interface IssueService {
                     BatchUpdateFieldStatusVO batchUpdateFieldStatusVO);
 
     void setSortMap(Long organizationId, Long projectId, PageRequest pageRequest, Map<String, Object> sortMap, String mainTableAlias);
+
+    void deleteIssueOnRequiresNew(Long projectId, Long issueId, BatchUpdateFieldStatusVO batchUpdateFieldStatusVO);
 }

@@ -414,9 +414,10 @@ class IssueApi extends Api<IssueApi> {
  * @export
  * @returns
  */
-  downloadTemplateForImport(data: { systemFields: string[], customFields: string[] }) {
+  downloadTemplateForImport(data: { systemFields: string[], customFields: string[] }, propsApplyType: 'program' | 'agile') {
     const organizationId = getOrganizationId();
-    if (getApplyType() === 'program') {
+    const applyType = propsApplyType ?? getApplyType();
+    if (applyType === 'program') {
       return axios({
         method: 'post',
         url: `${this.prefix}/issues/template`,

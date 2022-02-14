@@ -103,7 +103,7 @@
 .checkbox:hover,
 .checkbox:focus,
 .checkbox:focus-within {
-  & >:not(input[type="checkbox"]:checked) +label:before {
+  & >:not(input[type="checkbox"]:checked):not(input[type="checkbox"]:disabled) +label:before {
     border-color: rgb(83, 101, 234);
   }
 }

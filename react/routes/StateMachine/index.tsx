@@ -3,9 +3,9 @@ import React, {
 import StateMachineProvider from './stores';
 import StateMachine from './StateMachine';
 
-function StateMachineIndex() {
+function StateMachineIndex(props:any) {
   return (
-    <StateMachineProvider>
+    <StateMachineProvider {...props}>
       <StateMachine />
     </StateMachineProvider>
   );

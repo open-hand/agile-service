@@ -711,7 +711,13 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (containsAgile) {
             filterAgileIssueTypes(issueTypeList, issueTypes, issueTypeIds);
         }
-        return issueTypeList;
+        //保持issueTypes顺序
+        Set<Long> availableIssueTypeIds =
+                issueTypeList
+                        .stream()
+                        .map(IssueTypeVO::getId)
+                        .collect(Collectors.toSet());
+        return issueTypes.stream().filter(x -> availableIssueTypeIds.contains(x.getId())).collect(Collectors.toList());
     }
 
     private void filterAgileIssueTypes(List<IssueTypeVO> issueTypeList,

@@ -72,7 +72,7 @@ public class IssueOperateServiceImpl implements IssueOperateService {
                     i++;
                     // 删除任务会附带删除子任务,因此需要判断问题是否被删除ss
                     if (!subList.contains(issueId)) {
-                        issueService.deleteIssue(projectId, issueId);
+                        issueService.deleteIssueOnRequiresNew(projectId, issueId, batchUpdateFieldStatusVO);
                     }
                     double process = (i * 1.0) / issueIds.size();
                     if (process - lastSendProcess >= 0.1) {

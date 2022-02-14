@@ -87,6 +87,7 @@ class ImportIssue extends Component {
   }
 
   exportExcel = () => {
+    const { applyType } = this.props;
     const importFieldsData = { systemFields: [], customFields: [] };
     const allFields = this.importFieldsRef.current?.allFields || [];
     const fields = this.importFieldsRef.current?.fields || [];
@@ -100,7 +101,7 @@ class ImportIssue extends Component {
       });
       return;
     }
-    issueApi.downloadTemplateForImport(importFieldsData).then((excel) => {
+    issueApi.downloadTemplateForImport(importFieldsData, applyType).then((excel) => {
       const blob = new Blob([excel], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const fileName = `${this.props.name || '工作项'}导入模板.xlsx`;
       FileSaver.saveAs(blob, fileName);
@@ -488,7 +489,7 @@ class ImportIssue extends Component {
           accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         />
         <WSHandler
-          messageKey={messageKey || (getApplyType() === 'program' ? `agile-import-${getProjectId()}` : `agile-import-issues-${getProjectId()}`)}
+          messageKey={messageKey || ((applyType || getApplyType()) === 'program' ? `agile-import-${getProjectId()}` : `agile-import-issues-${getProjectId()}`)}
           onMessage={this.handleMessage}
         >
           {this.renderProgress()}
@@ -513,7 +514,7 @@ const handleOpenImport = (props) => {
     okText: '导入',
     cancelText: '关闭',
     // footer: (okBtn) => okBtn,
-    children: <ObserverImportIssue {...props} applyType="agile" />,
+    children: <ObserverImportIssue {...props} applyType={props.applyType ?? 'agile'} />,
   });
 };
 
