@@ -1,6 +1,9 @@
 .c7nagile-upload-button {
   display: flex;
-
+  .c7n-upload-list.c7n-upload-list-text .c7n-upload-list-item {
+    height: .3rem;
+    line-height: .3rem;
+  }
   .c7n-upload-list {
     display: flex;
     flex-direction: row;
@@ -8,6 +11,7 @@
     margin-right: 0.1rem;
     margin-bottom: -0.1rem;
     overflow: hidden;
+
     .c7n-upload-list-item {
       display: inline-block;
       height: .3rem;
@@ -24,7 +28,7 @@
       .icon-close {
         position: absolute;
         top: unset !important;
-        bottom: .04rem;
+        bottom: 0;
         font-size: 0.14rem;
       }
 
