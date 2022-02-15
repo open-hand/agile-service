@@ -1,48 +1,43 @@
-import React, { useContext, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
   Menu, Dropdown, Icon, Button,
 } from 'choerodon-ui/pro';
-import { observer } from 'mobx-react-lite';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
 import { find } from 'lodash';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
-import Context from '../../stores/context';
+import type { Gantt } from '@choerodon/gantt';
+import { observer } from 'mobx-react-lite';
 import { units } from '../../stores/store';
 import GanttLegend from '../gantt-legend';
-import useFormatMessage from '@/hooks/useFormatMessage';
 
-const GanttOperation: React.FC = () => {
-  const { store } = useContext(Context);
-  const { unit, ganttRef } = store;
-  const text = find(units, { type: unit });
+import useFormatMessage from '@/hooks/useFormatMessage';
+import './index.less';
+
+interface GanttOperationProps {
+  onChangeUnit?: ({ key }: { key: Gantt.Sight }) => void
+  onClickToday?: () => void
+  value?: Gantt.Sight
+}
+const GanttOperation: React.FC<GanttOperationProps> = observer(({ onChangeUnit, value, onClickToday }) => {
+  const text = find(units, { type: value });
 
   const formatMessage = useFormatMessage('agile.gantt');
   const handleChangeUnit = useCallback(({ key }) => {
-    store.switchUnit(key);
-  }, [store]);
+    onChangeUnit && onChangeUnit({ key });
+  }, [onChangeUnit]);
   return (
-    <div style={{
-      display: 'flex', flexShrink: 0, alignItems: 'center', paddingBottom: 8, marginLeft: 'auto',
-    }}
-    >
+    <div className="c7n-gantt-operation">
       <Dropdown overlay={() => <GanttLegend />}>
-        <span style={{
-          display: 'inline-block', marginRight: 16, marginLeft: 3, lineHeight: '18px',
-        }}
-        >
+        <span className="c7n-gantt-operation-legend">
           {formatMessage({ id: 'legend' })}
           <Icon
             type="help_outline"
-            style={{
-              color: 'var(--primary-color)', marginBottom: 2, marginLeft: 4, fontSize: 16,
-            }}
+            className="c7n-gantt-operation-legend-icon"
           />
         </span>
       </Dropdown>
       <Button
-        onClick={() => {
-          ganttRef.current && ganttRef.current.backToday();
-        }}
+        onClick={onClickToday}
         color={'white' as ButtonColor}
         style={{
           borderRadius: '16px',
@@ -81,5 +76,5 @@ const GanttOperation: React.FC = () => {
 
     </div>
   );
-};
-export default observer(GanttOperation);
+});
+export default GanttOperation;
