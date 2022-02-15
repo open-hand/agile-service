@@ -459,6 +459,9 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
   const handleResizeWidth: GanttProps['onResizeWidth'] = usePersistFn((tableWidth) => {
     localCacheStore.unPrefix().setItem('agile.gantt.table.width', tableWidth);
   });
+  const handleChangeUnit = useCallback(({ key }) => {
+    store.switchUnit(key);
+  }, [store]);
   return (
     <Context.Provider value={{
       ...context,
@@ -474,7 +477,13 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
     >
       <div className="c7n-gantt-content-header">
         <Search issueSearchStore={issueSearchStore} loadData={run} />
-        <GanttOperation />
+        <GanttOperation
+          value={store.unit}
+          onChangeUnit={handleChangeUnit}
+          onClickToday={() => {
+            store.ganttRef.current && store.ganttRef.current.backToday();
+          }}
+        />
       </div>
       <Loading loading={sortLoading || loading} />
       {columns.length > 0 && workCalendar && (
