@@ -5,8 +5,8 @@ import { observer } from 'mobx-react-lite';
 import {
   PerformanceTable, Pagination,
 } from 'choerodon-ui/pro';
-import PropTypes from 'prop-types';
-import { TableProps } from 'choerodon-ui/pro/lib/table/Table';
+import type { TableProps } from 'choerodon-ui/pro/lib/table/Table';
+import type { TableProps as PTableProps } from 'choerodon-ui/pro/lib/performance-table/Table';
 
 import { usePersistFn } from 'ahooks';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
@@ -16,10 +16,8 @@ import { ListLayoutColumnVO } from '@/api';
 import useTable from '@/hooks/useTable';
 import { checkBoxColumn, expandColumn, getTableColumns as defaultGetTableColumns } from './columns';
 import { Loading } from '@/components';
-import { IClassComponentType } from '../field-pro/base/type';
 
-type PerformanceTableProps = PropTypes.InferProps<typeof PerformanceTable.propTypes> & Pick<TableProps, 'dataSet'>
-// @ts-ignore
+type PerformanceTableProps = PTableProps & Pick<TableProps, 'dataSet'>
 export interface IssueTableProps extends Partial<PerformanceTableProps> {
   tableRef?: React.RefObject<any>
   onCreateIssue?: () => void
@@ -115,8 +113,7 @@ const IssueTable: React.FC<IssueTableProps> = ({
   return (
     <div className="c7nagile-issue-table">
       <PerformanceTable
-        // ui导出的ts 类型错误
-        {...otherProps as any}
+        {...otherProps}
         {...restProps}
         renderLoading={(spinElement: JSX.Element) => <Loading loadId="issue-table" loading={restProps.loading} />}
         virtualized
