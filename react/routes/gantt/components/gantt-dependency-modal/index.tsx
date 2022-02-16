@@ -68,7 +68,7 @@ SelectIssue.defaultProps = {
 
 const GanttDependency: React.FC = observer(() => {
   const {
-    dataset, modal, onOk: propsOnOk, issueId, data: editData,
+    dataset, modal, onOk: propsOnOk, issueId, data: editData, title,
   } = useGanntDependencyModal();
   const [loading, setLoading] = useState(true);
   const [{ focusing, latestFocusRecord }, setFocusing] = useState({ focusing: false, latestFocusRecord: undefined as number | undefined });
@@ -139,7 +139,7 @@ const GanttDependency: React.FC = observer(() => {
           ))}
         </div>
       </Form>
-      <Button icon="add" disabled={dataset.length >= predecessorTypeLength} onClick={() => dataset.create()}>添加前置依赖</Button>
+      <Button icon="add" disabled={dataset.length >= predecessorTypeLength} onClick={() => dataset.create()}>{`添加${title ?? '前置依赖'}`}</Button>
     </Loading>
 
   );
@@ -149,7 +149,7 @@ const openGanttDependencyModal = async (props: IGanttDependencyModalProps) => {
   const editData = await ganttApi.loadDependencyByCurrentIssue(props.issueId);
   Modal.open({
     key: Modal.key(),
-    title: `${props.data?.length ? '编辑' : '添加'}前置依赖`,
+    title: `${props.data?.length ? '编辑' : '添加'}${props.title ?? '前置依赖'}`,
     style: {
       width: MODAL_WIDTH.small,
     },

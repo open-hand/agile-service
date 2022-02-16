@@ -16,8 +16,9 @@ export interface IGanttDependencyModalProps {
   onOk?: (data: IGanttUpdateIssueDependencyItem[]) => void
   data?: Array<{ id: string, issueId: string, organizationId: string, predecessorId: string } & Required<Pick<GanttIssue, 'predecessorType'>>>
   issueId: string
-
+  title?: string,
 }
+
 interface Context extends Omit<IGanttDependencyModalProps, 'data'> {
   dataset: DataSet
   data: { [key: string]: string[] }
