@@ -161,14 +161,6 @@ export function ganttLocalMove({
   return { success, newData };
 }
 
-/**  甘特图保存收起与否状态 */
-export function ganttSaveCollapsedStatus({ flattenData }: { flattenData: Gantt.Bar[] }): IGanttCollapsedHistory[] {
-  return flattenData.map((item) => ({ path: item.flatPath, collapsed: item._collapsed }));
-}
-export function ganttRestoreCollapsedStatus(ganttData: any, collapseHistory: IGanttCollapsedHistory[]) {
-  return ganttData;
-}
-
 const ganttList2Tree = (data: any[]) => list2tree(data, { valueField: 'issueId', parentField: 'parentId' });
 
 const formatData = (data: any[]) => data.map((item, i, arr) => {

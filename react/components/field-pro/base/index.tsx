@@ -9,9 +9,9 @@ import getElement, {
 import type { AgileComponentMapProps, CustomComponentMapProps } from './component';
 import { IFieldType } from '@/common/types';
 
-interface IFieldsInstanceConfig {
-  SystemComponents?: IComponentFCWithClassObject
-  CustomComponents?: IComponentFCWithClassObject
+interface IFieldsInstanceConfig<S extends IComponentFCWithClassObject, C extends IComponentFCWithClassObject> {
+  SystemComponents?: S
+  CustomComponents?: C
 }
 export interface IFieldBaseConfig {
   code: string
@@ -27,7 +27,7 @@ export interface IFieldBaseConfig {
  *
  */
 function getFieldsInstance<T extends IFieldBaseConfig = IFieldBaseConfig, S extends IComponentFCWithClassObject = AgileComponentMapProps,
-  C extends IComponentFCWithClassObject = CustomComponentMapProps>(config: IFieldsInstanceConfig = {}) {
+  C extends IComponentFCWithClassObject = CustomComponentMapProps>(config: IFieldsInstanceConfig<S, C> = {}) {
   const { SystemComponents = AgileComponentMap, CustomComponents = CustomFieldMap } = config;
   /**
  * 获取字段配置/元素/自定义配置渲染

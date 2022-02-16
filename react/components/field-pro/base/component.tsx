@@ -65,14 +65,7 @@ export const AgileComponentMap = {
 export type AgileComponentMapProps = typeof AgileComponentMap
 
 export type IAgileBaseComponentPartialProps = Partial<IComponentFCWithClassObjectProps<AgileComponentMapProps>>
-
-export const CustomFieldMap = {
-  time: TimePicker,
-  datetime: DateTimePicker,
-  date: DatePicker,
-  number: NumberField,
-  input: TextField,
-  text: TextArea,
+const CustomFunctionFieldMap = {
   radio: SelectCustomField,
   checkbox: SelectCustomField,
   single: SelectCustomField,
@@ -80,6 +73,15 @@ export const CustomFieldMap = {
   multiMember: SelectUser,
   member: SelectUser,
 };
+export const CustomFieldMap = {
+  ...CustomFunctionFieldMap,
+  time: TimePicker,
+  datetime: DateTimePicker,
+  date: DatePicker,
+  number: NumberField,
+  input: TextField,
+  text: TextArea,
+} as CustomComponentMapProps;
 export interface CustomClassComponentMapProps {
   time: React.ComponentClass<DatePickerProps>
   datetime: React.ComponentClass<DatePickerProps>
@@ -89,7 +91,7 @@ export interface CustomClassComponentMapProps {
   text: React.ComponentClass<TextAreaProps>
 }
 
-export type CustomComponentMapProps = typeof CustomFieldMap & CustomClassComponentMapProps
+export type CustomComponentMapProps = typeof CustomFunctionFieldMap & CustomClassComponentMapProps
 
 export type IAgileBaseFieldTypeComponentProps = Partial<IComponentFCWithClassObjectProps<CustomComponentMapProps>>
 
