@@ -1,12 +1,16 @@
 .c7nagile-upload-button {
   display: flex;
-
+  .c7n-upload-list.c7n-upload-list-text .c7n-upload-list-item {
+    height: .3rem;
+    line-height: .3rem;
+  }
   .c7n-upload-list {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     margin-right: 0.1rem;
     margin-bottom: -0.1rem;
+    overflow: hidden;
 
     .c7n-upload-list-item {
       display: inline-block;
@@ -15,6 +19,7 @@
       margin-top: 0;
       margin-bottom: 0.1rem;
       margin-right: 0.14rem;
+      max-width: 100%;
 
       .icon-attach_file {
         top: .08rem;
@@ -23,15 +28,19 @@
       .icon-close {
         position: absolute;
         top: unset !important;
-        bottom: .05rem;
+        bottom: 0;
         font-size: 0.14rem;
       }
 
       .c7n-upload-list-item-info {
+        position: relative;
         padding-right: .22rem;
       }
     }
 
+    .c7n-upload-list-item-span {
+      height: 100%;
+    }
     .c7n-upload-select {
       order: 1;
       // margin-left: 0.05rem;
