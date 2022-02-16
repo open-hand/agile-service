@@ -5,12 +5,12 @@ import {
   Choerodon,
 } from '@choerodon/boot';
 import {
-  findIndex, noop, omit, pick, sortBy,
+  findIndex, pick, sortBy,
 } from 'lodash';
 import { IGanttConflictAssignee, IGanttMoveRequestData, IGanttMoveRequestDataPreviousWithNext } from '@/api';
 import { Issue, User } from '@/common/types';
 import { list2tree } from '@/utils/tree';
-import { GanttIssue, IGanttCollapsedHistory } from './types';
+import type { GanttIssue } from './types';
 import type { IGanttDimensionTypeValue } from './components/gannt-select/SelectType';
 
 /**
