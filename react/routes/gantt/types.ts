@@ -38,8 +38,3 @@ export interface GanttIssue extends Pick<Issue, 'issueId' | 'issueNum' | 'summar
     predecessorType?: string
     predecessors?: null | GanttIssue[]
 }
-
-export interface IGanttCollapsedHistory {
-    path: string
-    collapsed: boolean
-}

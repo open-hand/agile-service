@@ -4,9 +4,6 @@ import React, {
 } from 'react';
 // eslint-disable-next-line camelcase
 import { unstable_batchedUpdates } from 'react-dom';
-import {
-  Tooltip, Icon,
-} from 'choerodon-ui/pro';
 import { observer, useComputed } from 'mobx-react-lite';
 import {
   find, findIndex, flow, merge, noop, omit, pick, remove, set, some,
@@ -46,17 +43,17 @@ import './index.less';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
 import useGanttColumns from './hooks/useGanttColumns';
 import {
-  ganttLocalMove, getGanttMoveDataOrigin, getGanttMoveSubmitData, ganttDataGroupByType, getGanttCreatingSubIssue, ganttNormalizeIssue, ganttRestoreCollapsedStatus, ganttIsCanQuickCreateIssue,
+  ganttLocalMove, getGanttMoveDataOrigin, getGanttMoveSubmitData, ganttDataGroupByType, getGanttCreatingSubIssue, ganttNormalizeIssue, ganttIsCanQuickCreateIssue,
 } from './utils';
 import GanttDragWrapper from './components/gantt-drag-wrapper';
 import useQuickCreateIssue from './hooks/useQuickCreateIssue';
-import { GanttIssue, IGanttCollapsedHistory } from './types';
+import type { GanttIssue } from './types';
 import { getProjectId } from '@/utils/common';
-import localCacheStore from '@/stores/common/LocalCacheStore';
-import { IGanntHeaderHookData } from './hooks/useGanttHeader';
+import { IGanttHeaderHookData } from './hooks/useGanttHeader';
+import useGanttComponentProps from './hooks/useGanttComponentProps';
 
 const middleDateKeys = [{ key: 'actualStartTime', maxDateKey: 'actualEndTime', ignoreCheckDateKeys: ['actualEndTime'] }, { key: 'actualEndTime', minDateKey: 'actualStartTime' }];
-export interface IGanttGanttBodyProps extends IGanntHeaderHookData {
+export interface IGanttGanttBodyProps extends IGanttHeaderHookData {
 
 }
 dayjs.extend(weekday);
@@ -72,7 +69,6 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
   const [rankList, setRankList] = useState<string[] | undefined>(undefined);
   const [workCalendar, setWorkCalendar] = useState<any>();
   const isHasConflict = useRef<boolean>(false);
-  const collapsedHistoryRef = useRef<{ [key: string]: IGanttCollapsedHistory }>({});
   const [{ origin: sortedList, data: sorted, loading: sortLoading }, onSortChange] = useGanttSortLabel({ projectId });
   const [projectWorkCalendar, setProjectWorkCalendar] = useState<any>();
   const [filterManageVisible, setFilterManageVisible] = useState<boolean>();
@@ -275,22 +271,6 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
     return true;
   }), []);
 
-  const getExpandIcon = useCallback(({
-    level, index, collapsed, onClick,
-  }) => (
-    <div
-      role="none"
-      onClick={(event) => {
-        onClick(event);
-        collapsedHistoryRef.current[index] = { path: store.ganttRef.current?.flattenData[index].flatPath!, collapsed: !collapsed };
-      }}
-      className={classNames('c7n-gantt-expand-icon', {
-        'c7n-gantt-expand-icon-expanded': !collapsed,
-      })}
-    >
-      <Icon type="navigate_next" />
-    </div>
-  ), [store.ganttRef]);
   const renderBar: GanttProps['renderBar'] = useCallback((bar, { width, height }, dateKeyRange) => (
     <GanttBar
       type={type}
@@ -320,28 +300,6 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
       />
     );
   }, []);
-  const handleTooltipMouseEnter = useCallback(
-    (e, title?: string) => Tooltip.show(e.target, {
-      title: title ?? '点击并拖动以设置预计开始、结束时间。',
-      placement: 'topLeft',
-    }),
-    [],
-  );
-  const handleTooltipMouseLeave = useCallback(() => Tooltip.hide(), []);
-  const renderInvalidBar: GanttProps['renderInvalidBar'] = useCallback((element, barInfo) => (
-    <span onMouseEnter={handleTooltipMouseEnter} onMouseLeave={handleTooltipMouseLeave}>
-      {element}
-    </span>
-  ), [handleTooltipMouseEnter, handleTooltipMouseLeave]);
-
-  const renderBarThumb: GanttProps['renderBarThumb'] = useCallback((record, t) => (
-    <div
-      role="none"
-      className="c7n-gantt-thumb-icon"
-    >
-      {t === 'left' ? <Icon type="navigate_before" /> : <Icon type="navigate_next" />}
-    </div>
-  ), []);
 
   const handleCreateIssue = usePersistFn((issue: Issue, issueId?: string, parentId?: string, dontCopyEpic = false) => {
     setData(produce(data, (draft) => {
@@ -410,9 +368,9 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
     handleIssueDelete(issue);
   });
 
-  const ganttData = useMemo(() => ganttRestoreCollapsedStatus(ganttDataGroupByType({
+  const ganttData = useMemo(() => ganttDataGroupByType({
     data, type, isInProgram, rankList, conflictAssignees, menuType,
-  }), Object.values(collapsedHistoryRef.current).filter((i) => i.collapsed)), [data, type, isInProgram, rankList, conflictAssignees, menuType]);
+  }), [data, type, isInProgram, rankList, conflictAssignees, menuType]);
   const renderEmpty = usePersistFn(() => {
     if (!sprintIds || sprintIds?.length === 0) {
       return <span>暂无数据，请选择冲刺</span>;
@@ -420,6 +378,21 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
     return <span>暂无数据</span>;
   });
 
+  const [ganttComponentProps] = useGanttComponentProps({
+    onUpdate: handleUpdate,
+    innerRef: store.ganttRef as React.MutableRefObject<GanttRef>,
+    data: ganttData,
+    columns,
+    startDateKey: 'estimatedStartTime',
+    endDateKey: 'estimatedEndTime',
+    isRestDay,
+    isShowBar,
+    unit,
+    middleDateKeys,
+    renderBar,
+    renderGroupBar,
+    renderEmpty,
+  });
   const renderClone = usePersistFn((record: Gantt.Record) => tableWithSortedColumns[0].render!(record) as React.ReactElement);
   const handleDragEnd = useCallback((sourceBar: Gantt.Bar, destinationBar: Gantt.Bar) => {
     const requestData = getGanttMoveSubmitData({
@@ -447,7 +420,6 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
     }
     const moveFn = flow(ganttLocalMove, ({ newData, success }) => {
       if (success) {
-        // collapsedHistoryRef.current = ganttSaveCollapsedStatus({ flattenData: store.ganttRef.current?.flattenData || [] });
         moveConfig.setData(newData);
       }
       return success;
@@ -456,9 +428,7 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
       sourceBar, destinationBar, type, data: moveConfig.data,
     });
   }, [data, projectId, rankList, searchFilter, store.ganttRef, type]);
-  const handleResizeWidth: GanttProps['onResizeWidth'] = usePersistFn((tableWidth) => {
-    localCacheStore.unPrefix().setItem('agile.gantt.table.width', tableWidth);
-  });
+
   const handleChangeUnit = useCallback(({ key }) => {
     store.switchUnit(key);
   }, [store]);
@@ -490,35 +460,7 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
         <div className="c7n-gantt-content-body">
           <GanttDragWrapper renderClone={renderClone} onDragEnd={handleDragEnd}>
             <GanttComponent
-              innerRef={store.ganttRef as React.MutableRefObject<GanttRef>}
-              data={ganttData}
-              columns={columns}
-              onUpdate={handleUpdate}
-              onResizeWidth={handleResizeWidth}
-              defaultTableWidth={Number(localCacheStore.unPrefix().getItem('agile.gantt.table.width')) || undefined}
-              startDateKey="estimatedStartTime"
-              endDateKey="estimatedEndTime"
-              isRestDay={isRestDay}
-              isShowBar={isShowBar}
-              showBackToday={false}
-              showUnitSwitch={false}
-              unit={unit}
-              middleDateKeys={middleDateKeys}
-              tableIndent={20}
-              expandIcon={getExpandIcon}
-              renderBar={renderBar}
-              renderInvalidBar={renderInvalidBar}
-              renderGroupBar={renderGroupBar}
-              renderBarThumb={renderBarThumb}
-              tableCollapseAble={false}
-              scrollTop={{
-                right: -4,
-                bottom: 8,
-              }}
-              rowHeight={34}
-              barHeight={13}
-              // @ts-ignore
-              renderEmpty={renderEmpty}
+              {...ganttComponentProps}
             />
           </GanttDragWrapper>
           {menuType === 'project' && (

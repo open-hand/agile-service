@@ -194,6 +194,6 @@ function useGanttHeader(config: IGanttHeaderHookConfig) {
   }] as const;
 }
 type F = ReturnType<typeof useGanttHeader>
-type IGanntHeaderHookData = F[0]
-export type { IGanntHeaderHookData };
+type IGanttHeaderHookData = F[0]
+export type { IGanttHeaderHookData };
 export default useGanttHeader;
