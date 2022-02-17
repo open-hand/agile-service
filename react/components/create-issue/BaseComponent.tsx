@@ -41,6 +41,7 @@ import { insertField } from './utils';
 import useFormatMessage from '@/hooks/useFormatMessage';
 import { formatFieldDateValue } from '@/utils/formatDate';
 import { CreateIssueProps } from '.';
+import { SHOW_ISSUE_LINK_TYPE_CODES } from '@/constants/TYPE_CODE';
 
 const { AppState } = stores;
 interface CreateIssueBaseCallbackData {
@@ -307,7 +308,7 @@ const CreateIssueBase = observer(({
   const issueTypeCode = find(issueTypeList, {
     id: issueTypeId,
   })?.typeCode;
-  const enableIssueLinks = issueTypeCode && !['sub_task', 'issue_epic', 'feature'].includes(issueTypeCode);
+  const enableIssueLinks = issueTypeCode && SHOW_ISSUE_LINK_TYPE_CODES.includes(issueTypeCode);
   const isSubIssue = issueTypeCode && ['sub_task', 'bug'].includes(issueTypeCode);
 
   const [{ data: fields, isFetching: isFieldsLoading }, {
@@ -585,6 +586,10 @@ const CreateIssueBase = observer(({
     }
     if (await dataSet.validate()) {
       if (enableIssueLinks && !await issueLinkDataSet.validate()) {
+        return false;
+      }
+      // @ts-ignore
+      if (otherLinkRef.current?.dependencyDataSet && !await otherLinkRef.current?.dependencyDataSet?.validate()) {
         return false;
       }
       const data = dataSet.current?.toData();
@@ -870,6 +875,7 @@ const CreateIssueBase = observer(({
       {issueTypeCode === 'feature' ? <WSJF dataSet={dataSet} /> : null}
       {enableIssueLinks ? <IssueLink projectId={projectId} dataSet={issueLinkDataSet} /> : null}
       {hasInject('waterfall:dependency') ? mount('waterfall:dependency', { issueTypeCode, forwardRef: otherLinkRef }) : null}
+      {hasInject('waterfall:deliverable') ? mount('waterfall:deliverable', { issueTypeCode, forwardRef: otherLinkRef }) : null}
     </Spin>
   );
 });
