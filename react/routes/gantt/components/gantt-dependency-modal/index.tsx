@@ -74,7 +74,6 @@ const GanttDependency: React.FC = observer(() => {
   const [loading, setLoading] = useState(!disableAutoCreate);
   const [{ focusing, latestFocusRecord }, setFocusing] = useState({ focusing: false, latestFocusRecord: undefined as number | undefined });
   const onOk = usePersistFn(propsOnOk || noop) as Exclude<typeof propsOnOk, undefined>;
-  const deleteIconStyles = useMemo(() => classnames(styles.del_btn, horizontal ? styles.del_btn_horizontal : ''), [horizontal]);
   const selectTypes = useComputed(() => dataset.data.map((r) => r.get('predecessorType')), [dataset.data]);
   const predecessorTypeLength = dataset.getField('predecessorType')?.getOptions()?.length || 0;
   const getData = useCallback(() => {
@@ -102,10 +101,11 @@ const GanttDependency: React.FC = observer(() => {
 
   useImperativeHandle(forwardRef, () => ({
     getDependencyData: getData,
+    dependencyDataSet: dataset,
   }));
 
   return (
-    <Loading type="spin" display={loading} className={styles.loading}>
+    <Loading type="spin" display={loading} className={classnames(styles.loading, horizontal ? styles.loading_horizontal : '')}>
       <Form dataSet={dataset} hidden={!dataset.length} columns={horizontal ? 2 : 1} className={horizontal ? styles.horizontal : ''}>
         {dataset.data.map((record) => ([
           <Select
