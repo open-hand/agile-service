@@ -325,6 +325,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private IssueParticipantRelService issueParticipantRelService;
     @Autowired
     private IssueProjectMoveService issueProjectMoveService;
+    @Autowired(required = false)
+    private AgileWaterfallService waterfallPluginService;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -533,6 +535,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         IssueVO issueVO = issueAssembler.issueDetailDTOToVO(issue, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
         if (agilePluginService != null) {
             agilePluginService.programIssueDetailDTOToVO(issueVO,issue);
+        }
+        if (waterfallPluginService != null) {
+            waterfallPluginService.waterfallIssueDetailDTOToVO(issueVO);
         }
         //设置星标
         setStarBeacon(issueVO);

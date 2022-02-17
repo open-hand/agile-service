@@ -21,6 +21,8 @@ public enum IssueTypeCode {
 
     public static final String[] ISSUE_TYPE_CODE_WITH_FEATURE = {STORY.value(), TASK.value(), BUG.value()};
 
+    public static final String[] WATERFALL_ISSUE_TYPE_CODE = {STAGE.value(), MILESTONE.value(), ACTIVITY.value()};
+
     private String value;
 
     IssueTypeCode(String value) {
@@ -53,6 +55,18 @@ public enum IssueTypeCode {
 
     public static boolean isSubTask(String value) {
         return SUB_TASK.value.equals(value);
+    }
+
+    public static boolean isStage(String value) {
+        return STAGE.value.equals(value);
+    }
+
+    public static boolean isMilestone(String value) {
+        return MILESTONE.value.equals(value);
+    }
+
+    public static boolean isActivity(String value) {
+        return ACTIVITY.value.equals(value);
     }
 
     public static boolean contains(String typeCode) {

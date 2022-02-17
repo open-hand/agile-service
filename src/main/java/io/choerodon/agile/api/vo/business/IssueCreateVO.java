@@ -145,6 +145,13 @@ public class IssueCreateVO {
     @Encrypt
     private List<Long> participantIds;
 
+    @ApiModelProperty(value = "所属父级")
+    @Encrypt
+    private Long parentId;
+
+    @ApiModelProperty(value = "进度")
+    private Integer progress;
+
     public List<TagVO> getTags() {
         return tags;
     }
@@ -501,5 +508,21 @@ public class IssueCreateVO {
 
     public void setParticipantIds(List<Long> participantIds) {
         this.participantIds = participantIds;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
+    public Integer getProgress() {
+        return progress;
+    }
+
+    public void setProgress(Integer progress) {
+        this.progress = progress;
     }
 }
