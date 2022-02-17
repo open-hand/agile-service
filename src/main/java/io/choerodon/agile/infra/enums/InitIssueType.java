@@ -38,6 +38,20 @@ public enum InitIssueType {
      */
     FEATURE("agile-feature", "特性", "特性", "#3D5AFE", "feature"),
 
+    /**
+     * 阶段
+     */
+    STAGE("agile_view_timeline", "阶段", "阶段", "#FBBC57", "stage"),
+
+    /**
+     * 里程碑
+     */
+    MILESTONE("agile_milestone", "里程碑", "里程碑", "#6ED9C3", "milestone"),
+
+    /**
+     * 活动
+     */
+    ACTIVITY("agile_activity", "活动", "活动", "#4D90FE", "activity")
     ;
 
     private String icon;
@@ -92,6 +106,10 @@ public enum InitIssueType {
                 result.add(InitIssueType.EPIC);
                 result.add(InitIssueType.FEATURE);
                 break;
+            case SchemeApplyType.WATERFALL:
+                result.add(InitIssueType.STAGE);
+                result.add(InitIssueType.MILESTONE);
+                result.add(InitIssueType.ACTIVITY);
             default:
                 break;
         }

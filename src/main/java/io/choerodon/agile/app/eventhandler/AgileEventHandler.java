@@ -3,8 +3,6 @@ package io.choerodon.agile.app.eventhandler;
 import com.alibaba.fastjson.JSON;
 import io.choerodon.agile.api.vo.event.*;
 import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.dto.ProjectInfoDTO;
-import io.choerodon.agile.infra.enums.InitStatus;
 import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
@@ -21,7 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -71,6 +68,10 @@ public class AgileEventHandler {
     private BoardTemplateService boardTemplateService;
     @Autowired
     private StatusBranchMergeSettingService statusBranchMergeSettingService;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
+    @Autowired(required = false)
+    private AgileWaterfallService agileWaterfallService;
 
     @SagaTask(code = TASK_ORG_CREATE,
             description = "创建组织事件",
@@ -125,17 +126,21 @@ public class AgileEventHandler {
             //创建项目初始化issueLinkType
             issueLinkTypeService.initIssueLinkType(projectEvent.getProjectId());
             if (codes.contains(ProjectCategory.MODULE_PROGRAM)) {
-                AgilePluginService pluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
-                if (pluginService != null) {
-                    pluginService.initProjectIssueTypeSchemeAndArt(projectEvent, codes);
+                //program + (program & agile)
+                if (!ObjectUtils.isEmpty(agilePluginService)) {
+                    agilePluginService.initProjectIssueTypeSchemeAndArt(projectEvent, codes);
                 }
-            } else {
+            } else if (codes.contains(ProjectCategory.MODULE_AGILE)) {
                 //创建项目时创建默认状态机方案
                 stateMachineSchemeService.initByConsumeCreateProject(projectEvent);
                 //创建项目时创建默认问题类型方案
                 issueTypeSchemeService.initByConsumeCreateProject(projectEvent.getProjectId(), projectEvent.getProjectCode());
                 // 同步状态机模板和看板模板
                 handlerOrganizationTemplate(projectEvent);
+            } else if (codes.contains(ProjectCategory.MODULE_WATERFALL)) {
+                if (!ObjectUtils.isEmpty(agileWaterfallService)) {
+                    agileWaterfallService.initProject(projectEvent, codes);
+                }
             }
         }
     }

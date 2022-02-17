@@ -45,6 +45,8 @@ public class SystemFieldPageConfig {
         ACTUAL_END_TIME(FieldCode.ACTUAL_END_TIME, false, true),
         PARTICIPANT(FieldCode.PARTICIPANT, true, true),
         ESTIMATE_TIME(FieldCode.ESTIMATE_TIME, true, true),
+        PARENT(FieldCode.PARENT, true, true),
+        PROGRESS(FieldCode.PROGRESS, false, true),
         ;
 
 
