@@ -14,7 +14,7 @@ export const getApplyType = (mixtureCategory = false) => {
   const codes = (AppState.currentMenuType.categories || []).map((c) => c.code);
   let applyType = codes.includes('N_PROGRAM') ? 'program' : 'agile';
   if (mixtureCategory) {
-    applyType = codes.includes('N_PROGRAM') && codes.includes('N_AGILE') ? '' : applyType;
+    applyType = (codes.includes('N_PROGRAM') && codes.includes('N_AGILE')) || codes.includes('N_WATERFALL') ? '' : applyType;
   }
   return applyType;
 };

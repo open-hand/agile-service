@@ -8,7 +8,7 @@ import useIsInProgram from '../useIsInProgram';
 import { getApplyType } from '@/utils/common';
 
 export interface ProjectIssueTypesConfig {
-  applyType?: 'agile' | 'program'
+  applyType?: 'agile' | 'program' | 'waterfall'
   projectId?: string
   /** 只返回某一类的工作项类型 */
   typeCode?: string | string[]

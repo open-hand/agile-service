@@ -1,26 +1,26 @@
 .select {
-  width: 3.02rem;
+  width: calc(100% - 0.4rem);
 }
 
 .item {
   position: relative;
 
-  &:not(:last-child) {
-    margin-bottom: .2rem;
-  }
-
-  &:last-child {
-    margin-bottom: -.06rem;
-  }
-
-  .select +.select {
-    margin-top: .2rem;
-  }
+  //&:not(:last-child) {
+  //  margin-bottom: .2rem;
+  //}
+  //
+  //&:last-child {
+  //  margin-bottom: -.06rem;
+  //}
+  //
+  //.select +.select {
+  //  margin-top: .2rem;
+  //}
 
   .del_btn {
     position: absolute;
     right: 0;
-    top: ~"calc(50% - .15rem)";
+    top: -0.2rem;
     color: var(--primary-color);
     font-size: .2rem;
     margin-left: .17rem;
@@ -28,9 +28,26 @@
     &:hover {
       cursor: pointer;
     }
+
+    //&_horizontal {
+    //  top: .15rem;
+    //  right: -0.35rem;
+    //}
   }
 }
 
 .loading {
     height: 100%;
+}
+
+.horizontal {
+  padding-right: .4rem;
+  .select {
+    width: 100%;
+  }
+
+  .del_btn {
+    top: .15rem;
+    right: -0.35rem;
+  }
 }
