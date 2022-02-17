@@ -18,6 +18,7 @@ import { toJS } from 'mobx';
 import { UploadFile } from 'choerodon-ui/lib/upload/interface';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import moment from 'moment';
+import { has as hasInject, mount } from '@choerodon/inject';
 import UploadButton from '@/components/CommonComponent/UploadButton';
 import validateFile from '@/utils/File';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
@@ -269,6 +270,7 @@ const CreateIssueBase = observer(({
   const dataSetRef = useRef(defaultDataSet);
   const currentTemplateSummary = useRef(defaultValues?.summary || '');
   const currentTemplateDescription = useRef(defaultValues?.description || '');
+  const otherLinkRef = useRef();
   const [templateSummary] = useState(new Map());
   const [dataSet, setDataSet] = useState(defaultDataSet);
   dataSetRef.current = dataSet;
@@ -867,6 +869,7 @@ const CreateIssueBase = observer(({
       </Form>
       {issueTypeCode === 'feature' ? <WSJF dataSet={dataSet} /> : null}
       {enableIssueLinks ? <IssueLink projectId={projectId} dataSet={issueLinkDataSet} /> : null}
+      {hasInject('waterfall:dependency') ? mount('waterfall:dependency', { issueTypeCode, forwardRef: otherLinkRef }) : null}
     </Spin>
   );
 });

@@ -9,14 +9,15 @@ import { uploadAttachment } from '@/utils/richText';
 import localCacheStore from '@/stores/common/LocalCacheStore';
 import BaseComponent, { CreateIssueBaseProps } from './BaseComponent';
 import SelectProject from '@/components/select/select-project';
+import { AGILE_TYPE_CODES } from '@/constants/TYPE_CODE';
 
 export interface CreateIssueProps extends Omit<CreateIssueBaseProps, 'onSubmit'> {
   onCreate: (issue: Issue) => void,
   /** 创建来源 */
   originFrom?: 'scrumBoard' | 'Backlog'
   hiddenTypeCodes?: string[],
-  applyType?: 'agile' | 'program'
-  request?: (data: any, applyType?: 'agile' | 'program') => Promise<any>
+  applyType?: 'agile' | 'program' | 'waterfall',
+  request?: (data: any, applyType?: 'agile' | 'program' | 'waterfall') => Promise<any>
   showSelectProject?: boolean,
   onCancel?: () => void,
 }
@@ -71,7 +72,8 @@ const openModal = (props: CreateIssueProps) => {
   } = props;
   let { isProgram } = props;
   const handleSubmit: CreateIssueBaseProps['onSubmit'] = async ({ data, fieldList, fileList }) => {
-    const res = request ? await request(data as any, applyType) : await issueApi.create(data as any, applyType);
+    const postApplyType = applyType === 'waterfall' && AGILE_TYPE_CODES.includes(data.typeCode) ? 'agile' : applyType;
+    const res = request ? await request(data as any, postApplyType) : await issueApi.create(data as any, postApplyType);
     await fieldApi.createFieldValue(res.issueId, 'agile_issue', fieldList, data.projectId);
     if (fileList && fileList.length > 0) {
       if (fileList.some((one) => !one.url)) {

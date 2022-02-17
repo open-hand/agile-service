@@ -17,6 +17,9 @@ export interface IGanttDependencyModalProps {
   data?: Array<{ id: string, issueId: string, organizationId: string, predecessorId: string } & Required<Pick<GanttIssue, 'predecessorType'>>>
   issueId: string
   title?: string,
+  forwardRef?: any,
+  disableAutoCreate?: boolean,
+  horizontal?: boolean,
 }
 
 interface Context extends Omit<IGanttDependencyModalProps, 'data'> {
@@ -31,7 +34,7 @@ export default function useGanntDependencyModal() {
 }
 export const StoreProvider = inject('AppState')(
   (props: IGanttDependencyModalProps & { children: any }) => {
-    const { children, data } = props;
+    const { children, data, disableAutoCreate = false } = props;
     const editData = useCreation(() => Object.entries(groupBy(data || [], (item) => item.predecessorType))
       .reduce((pre, [predecessorType, issues]) => ({ ...pre, [predecessorType]: issues.flat().map((item) => item.predecessorId) }), {}) as { [key: string]: string[] }, []);
     const dataset = useCreation(() => new DataSet(GanntDependencyModalDataSet(Object.entries(editData).map(([predecessorType, predecessorId]) => ({
@@ -39,7 +42,7 @@ export const StoreProvider = inject('AppState')(
       predecessorId,
     })))), []);
     useMount(() => {
-      !data?.length && dataset.create({ predecessorType: 'predecessor_fs' });
+      !disableAutoCreate && !data?.length && dataset.create({ predecessorType: 'predecessor_fs' });
     });
 
     return (

@@ -1,5 +1,5 @@
 import React, {
-  useMemo, useCallback, useRef, useState, useEffect,
+  useMemo, useCallback, useRef, useState, useEffect, useImperativeHandle,
 } from 'react';
 import {
   Modal, Form, Select, Button, Icon,
@@ -8,6 +8,7 @@ import { observer, useComputed } from 'mobx-react-lite';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { useCreation, usePersistFn } from 'ahooks';
 import { difference, find, noop } from 'lodash';
+import classnames from 'classnames';
 import { Loading } from '@choerodon/components';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import styles from './index.less';
@@ -68,23 +69,28 @@ SelectIssue.defaultProps = {
 
 const GanttDependency: React.FC = observer(() => {
   const {
-    dataset, modal, onOk: propsOnOk, issueId, data: editData, title,
+    dataset, modal, onOk: propsOnOk, issueId, data: editData, title, forwardRef, disableAutoCreate, horizontal = false,
   } = useGanntDependencyModal();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!disableAutoCreate);
   const [{ focusing, latestFocusRecord }, setFocusing] = useState({ focusing: false, latestFocusRecord: undefined as number | undefined });
   const onOk = usePersistFn(propsOnOk || noop) as Exclude<typeof propsOnOk, undefined>;
+  const deleteIconStyles = useMemo(() => classnames(styles.del_btn, horizontal ? styles.del_btn_horizontal : ''), [horizontal]);
   const selectTypes = useComputed(() => dataset.data.map((r) => r.get('predecessorType')), [dataset.data]);
   const predecessorTypeLength = dataset.getField('predecessorType')?.getOptions()?.length || 0;
+  const getData = useCallback(() => {
+    const dependencyData = dataset.toData().map((item: any) => item.predecessorId.map((i: any) => ({
+      issueId,
+      predecessorId: i,
+      predecessorType: item.predecessorType,
+    }))).flat() as IGanttUpdateIssueDependencyItem[];
+    return dependencyData;
+  }, [dataset, issueId]);
   const handleSubmit = useCallback(
     async () => {
       if (!await dataset.validate()) {
         return false;
       }
-      const data = dataset.toData().map((item: any) => item.predecessorId.map((i: any) => ({
-        issueId,
-        predecessorId: i,
-        predecessorType: item.predecessorType,
-      }))).flat() as IGanttUpdateIssueDependencyItem[];
+      const data = getData();
       await ganttApi.updateIssueDependency(issueId, data);
       await onOk(data);
       return true;
@@ -94,56 +100,68 @@ const GanttDependency: React.FC = observer(() => {
   const excludeIssueIds = useComputed(() => (focusing ? [] : difference(dataset.data.map((r) => [...(r.get('predecessorId') || [])]).flat() as string[], defaultSelectedIds)), [dataset.data.length, focusing]);
   modal?.handleOk(handleSubmit);
 
+  useImperativeHandle(forwardRef, () => ({
+    getDependencyData: getData,
+  }));
+
   return (
     <Loading type="spin" display={loading} className={styles.loading}>
-      <Form dataSet={dataset} hidden={!dataset.length}>
-        <div>
-          {dataset.data.map((record) => (
-            <div className={styles.item} key={record.id}>
-              <Select
-                name="predecessorType"
-                record={record}
-                className={styles.select}
-                optionsFilter={(optionRecord) => {
-                  const valueCode = optionRecord.get('valueCode');
-                  return !selectTypes.includes(valueCode) || valueCode === record.get('predecessorType');
-                }}
-              />
-              <SelectIssue
-                key={`predecessorType-${record.id}`}
-                name="predecessorId"
-                multiple
-                record={record}
-                className={styles.select}
-                issueId={issueId}
-                setLoading={setLoading}
-                onPopupHiddenChange={(hidden) => {
-                  if (hidden) {
-                    setFocusing({ focusing: false, latestFocusRecord: record.id });
-                  }
-                }}
-                isStopRequest={latestFocusRecord === record.id || focusing}
-                onFocus={() => setFocusing({ focusing: true, latestFocusRecord: undefined })}
-                excludeIssueIds={excludeIssueIds}
-                selectIds={editData[record.get('predecessorType')]}
-              />
-              <Icon
-                type="delete_sweep-o"
-                onClick={() => {
-                  setFocusing(() => ({ focusing: false, latestFocusRecord: undefined }));
-                  dataset.delete(record, false);
-                }}
-                className={styles.del_btn}
-              />
-            </div>
-          ))}
-        </div>
+      <Form dataSet={dataset} hidden={!dataset.length} columns={horizontal ? 2 : 1} className={horizontal ? styles.horizontal : ''}>
+        {dataset.data.map((record) => ([
+          <Select
+            name="predecessorType"
+            record={record}
+            className={styles.select}
+            optionsFilter={(optionRecord) => {
+              const valueCode = optionRecord.get('valueCode');
+              return !selectTypes.includes(valueCode) || valueCode === record.get('predecessorType');
+            }}
+          />,
+          <div className={styles.item}>
+            <SelectIssue
+              key={`predecessorType-${record.id}`}
+              name="predecessorId"
+              multiple
+              record={record}
+              className={styles.select}
+              issueId={issueId}
+              setLoading={setLoading}
+              onPopupHiddenChange={(hidden) => {
+                if (hidden) {
+                  setFocusing({ focusing: false, latestFocusRecord: record.id });
+                }
+              }}
+              isStopRequest={latestFocusRecord === record.id || focusing}
+              onFocus={() => setFocusing({ focusing: true, latestFocusRecord: undefined })}
+              excludeIssueIds={excludeIssueIds}
+              selectIds={editData[record.get('predecessorType')]}
+            />
+            <Icon
+              type="delete_sweep-o"
+              onClick={() => {
+                setFocusing(() => ({ focusing: false, latestFocusRecord: undefined }));
+                dataset.delete(record, false);
+              }}
+              className={styles.del_btn}
+            />
+          </div>,
+        ]))}
       </Form>
       <Button icon="add" disabled={dataset.length >= predecessorTypeLength} onClick={() => dataset.create()}>{`添加${title ?? '前置依赖'}`}</Button>
     </Loading>
 
   );
 });
+
+export const GanttDependencyIndex = (props: IGanttDependencyModalProps) => {
+  const ref = useRef();
+  const forwardRef = props.forwardRef ?? ref;
+  return (
+    <StoreProvider {...props} forwardRef={forwardRef}>
+      <GanttDependency />
+    </StoreProvider>
+  );
+};
 
 const openGanttDependencyModal = async (props: IGanttDependencyModalProps) => {
   const editData = await ganttApi.loadDependencyByCurrentIssue(props.issueId);
@@ -154,10 +172,7 @@ const openGanttDependencyModal = async (props: IGanttDependencyModalProps) => {
       width: MODAL_WIDTH.small,
     },
     drawer: true,
-    children: (
-      <StoreProvider {...props} data={editData}>
-        <GanttDependency />
-      </StoreProvider>),
+    children: <GanttDependencyIndex {...props} data={editData} />,
 
   });
 };
