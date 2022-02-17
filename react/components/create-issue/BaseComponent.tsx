@@ -41,7 +41,8 @@ import { insertField } from './utils';
 import useFormatMessage from '@/hooks/useFormatMessage';
 import { formatFieldDateValue } from '@/utils/formatDate';
 import { CreateIssueProps } from '.';
-import { SHOW_ISSUE_LINK_TYPE_CODES } from '@/constants/TYPE_CODE';
+import {SHOW_ISSUE_LINK_TYPE_CODES, WATERFALL_TYPE_CODES} from '@/constants/TYPE_CODE';
+import { DELIVERABLE, DEPENDENCY } from '@/constants/WATERFALL_INJECT';
 
 const { AppState } = stores;
 interface CreateIssueBaseCallbackData {
@@ -617,6 +618,7 @@ const CreateIssueBase = observer(({
         typeCode: (issueType as IIssueType)?.typeCode,
         priorityCode: `priority-${data.priority || 0}`,
         parentIssueId: data.parentIssueId?.issueId,
+        parentId: WATERFALL_TYPE_CODES.includes((issueType as IIssueType)?.typeCode) ? data.parent : undefined,
         programId: projectId ?? getProjectId(),
         projectId: projectId ?? getProjectId(),
         featureId: (issueType as IIssueType)?.typeCode === 'bug' && data.parentIssueId?.issueId ? undefined : data.feature,
@@ -874,8 +876,8 @@ const CreateIssueBase = observer(({
       </Form>
       {issueTypeCode === 'feature' ? <WSJF dataSet={dataSet} /> : null}
       {enableIssueLinks ? <IssueLink projectId={projectId} dataSet={issueLinkDataSet} /> : null}
-      {hasInject('waterfall:dependency') ? mount('waterfall:dependency', { issueTypeCode, forwardRef: otherLinkRef }) : null}
-      {hasInject('waterfall:deliverable') ? mount('waterfall:deliverable', { issueTypeCode, forwardRef: otherLinkRef }) : null}
+      {hasInject(DEPENDENCY) ? mount(DEPENDENCY, { issueTypeCode, forwardRef: otherLinkRef }) : null}
+      {hasInject(DELIVERABLE) ? mount(DELIVERABLE, { issueTypeCode, forwardRef: otherLinkRef }) : null}
     </Spin>
   );
 });
