@@ -393,7 +393,7 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
     renderGroupBar,
     renderEmpty,
   });
-  const renderClone = usePersistFn((record: Gantt.Record) => tableWithSortedColumns[0].render!(record) as React.ReactElement);
+  const renderClone = usePersistFn((record: Gantt.Record) => tableWithSortedColumns[0].render!(record, {} as any) as React.ReactElement);
   const handleDragEnd = useCallback((sourceBar: Gantt.Bar, destinationBar: Gantt.Bar) => {
     const requestData = getGanttMoveSubmitData({
       sourceBar, destinationBar, flattenData: store.ganttRef.current?.flattenData || [], type,
