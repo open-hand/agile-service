@@ -739,8 +739,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         List<IssueTypeVO> issueTypeList = new ArrayList<>();
         List<String> categoryCodes = getProjectCategoryCodes(projectId);
         boolean containsProgram = categoryCodes.contains(ProjectCategory.MODULE_PROGRAM);
-        boolean containsAgile = categoryCodes.contains(ProjectCategory.MODULE_AGILE);
-        if (!containsProgram && !containsAgile) {
+        boolean containsAgile = categoryCodes.contains(ProjectCategory.MODULE_AGILE) || categoryCodes.contains(ProjectCategory.MODULE_WATERFALL_AGILE);
+        boolean containsWaterfall = categoryCodes.contains(ProjectCategory.MODULE_WATERFALL);
+        if (!containsProgram && !containsAgile && !containsWaterfall) {
             throw new CommonException("error.illegal.project.category");
         }
         if (containsProgram && agilePluginService != null) {
@@ -748,6 +749,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         }
         if (containsAgile) {
             filterAgileIssueTypes(issueTypeList, issueTypes, issueTypeIds);
+        }
+        if (containsWaterfall && !ObjectUtils.isEmpty(agileWaterfallService)) {
+            issueTypeList.addAll(agileWaterfallService.filterWaterfallIssueTypes(issueTypes, issueTypeIds));
         }
         //保持issueTypes顺序
         Set<Long> availableIssueTypeIds =
