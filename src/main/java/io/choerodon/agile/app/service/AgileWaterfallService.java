@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.business.SystemFieldOverrideConfigVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 
@@ -18,4 +19,6 @@ public interface AgileWaterfallService {
     Map<String, List<SystemFieldOverrideConfigVO>> querySystemFieldOverrideConfig();
 
     void initProject(ProjectEvent projectEvent, Set<String> codes);
+
+    List<IssueTypeVO> filterWaterfallIssueTypes(List<IssueTypeVO> issueTypes, List<Long> issueTypeIds);
 }
