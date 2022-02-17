@@ -132,6 +132,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private LinkIssueStatusLinkageService linkIssueStatusLinkageService;
     @Autowired
     private StatusMachineSchemeConfigMapper statusMachineSchemeConfigMapper;
+    @Autowired
+    private ObjectSchemeFieldService objectSchemeFieldService;
 
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
@@ -275,8 +277,9 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                 schemeIds.add(stateMachineSchemeVO.getId());
             }
         });
-        Boolean isAgile = !applyTypes.contains(SchemeApplyType.PROGRAM);
-        List<IssueCountDTO> issueCounts = nodeDeployMapper.countStatusIssueTypeScope(ConvertUtil.getOrganizationId(projectId), schemeIds, statusIds, isAgile);
+        List<IssueTypeVO> issueTypes = objectSchemeFieldService.issueTypes(ConvertUtil.getOrganizationId(projectId), projectId);
+        List<String> issueTypeCodes = issueTypes.stream().map(IssueTypeVO::getTypeCode).collect(Collectors.toList());
+        List<IssueCountDTO> issueCounts = nodeDeployMapper.countStatusIssueTypeScope(ConvertUtil.getOrganizationId(projectId), schemeIds, statusIds, issueTypeCodes);
         Map<Long, List<Long>> map = new HashMap<>();
         if (!CollectionUtils.isEmpty(issueCounts)) {
             map.putAll(issueCounts.stream().collect(Collectors.groupingBy(IssueCountDTO::getId, Collectors.mapping(IssueCountDTO::getIssueTypeId, Collectors.toList()))));

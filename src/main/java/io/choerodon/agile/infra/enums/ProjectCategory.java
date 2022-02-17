@@ -103,8 +103,12 @@ public class ProjectCategory {
         if (codes.contains(ProjectCategory.MODULE_PROGRAM)) {
             applyTypes.add(SchemeApplyType.PROGRAM);
         }
-        if (codes.contains(ProjectCategory.MODULE_AGILE)) {
+        if (codes.contains(ProjectCategory.MODULE_AGILE)
+                || codes.contains(ProjectCategory.MODULE_WATERFALL_AGILE)) {
             applyTypes.add(SchemeApplyType.AGILE);
+        }
+        if (codes.contains(ProjectCategory.MODULE_WATERFALL)) {
+            applyTypes.add(SchemeApplyType.WATERFALL);
         }
         return applyTypes;
     }

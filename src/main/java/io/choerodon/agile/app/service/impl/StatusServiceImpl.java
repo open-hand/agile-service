@@ -73,6 +73,8 @@ public class StatusServiceImpl implements StatusService {
     private ProjectConfigMapper projectConfigMapper;
     @Autowired
     private StateMachineSchemeConfigService stateMachineSchemeConfigService;
+    @Autowired
+    private ObjectSchemeFieldService objectSchemeFieldService;
 
     @Override
     public Page<StatusWithInfoVO> queryStatusList(PageRequest pageRequest, Long organizationId, StatusSearchVO statusSearchVO) {
@@ -183,9 +185,10 @@ public class StatusServiceImpl implements StatusService {
                 schemeIds.add(stateMachineSchemeVO.getId());
             }
         });
-        Boolean isAgile = !applyTypes.contains(SchemeApplyType.PROGRAM);
+        List<IssueTypeVO> issueTypes = objectSchemeFieldService.issueTypes(projectVO.getOrganizationId(), projectId);
+        List<String> issueTypeCodes = issueTypes.stream().map(IssueTypeVO::getTypeCode).collect(Collectors.toList());
         Set<Long> issueTypeIdSet=
-                nodeDeployMapper.countStatusIssueTypeScope(organizationId, schemeIds, Arrays.asList(statusId), isAgile)
+                nodeDeployMapper.countStatusIssueTypeScope(organizationId, schemeIds, Arrays.asList(statusId), issueTypeCodes)
                         .stream()
                         .map(IssueCountDTO::getIssueTypeId)
                         .collect(Collectors.toSet());
@@ -433,8 +436,9 @@ public class StatusServiceImpl implements StatusService {
                 schemeIds.add(stateMachineSchemeVO.getId());
             }
         });
-        Boolean isAgile = !applyTypes.contains(SchemeApplyType.PROGRAM);
-        List<IssueCountDTO> countDTOS = nodeDeployMapper.countStatusIssueTypeScope(projectVO.getOrganizationId(),schemeIds,statusIds,isAgile);
+        List<IssueTypeVO> issueTypes = objectSchemeFieldService.issueTypes(projectVO.getOrganizationId(), projectId);
+        List<String> issueTypeCodes = issueTypes.stream().map(IssueTypeVO::getTypeCode).collect(Collectors.toList());
+        List<IssueCountDTO> countDTOS = nodeDeployMapper.countStatusIssueTypeScope(projectVO.getOrganizationId(),schemeIds,statusIds, issueTypeCodes);
         Map<Long, List<String>> map = new HashMap<>();
         Map<Long, String> issueTypeMap = issueTypeMapper.selectByOptions(projectVO.getOrganizationId(), projectId, null)
                 .stream().collect(Collectors.toMap(IssueTypeVO::getId, IssueTypeVO::getName));
