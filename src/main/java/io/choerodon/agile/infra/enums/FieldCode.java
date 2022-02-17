@@ -60,6 +60,8 @@ public class FieldCode {
     public static final String PROGRESS_FEEDBACK = "progressFeedback";
     public static final String EMAIL = "email";
     public static final String BELONG_TO_BACKLOG = "belongToBacklog";
+    public static final String PARENT = "parent";
+    public static final String PROGRESS = "progress";
 
     public static final String ISSUE_STATUS = "issueStatus";
 

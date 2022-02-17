@@ -103,6 +103,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     private StatusMachineNodeMapper nodeDeployMapper;
     @Autowired
     private StatusService statusService;
+    @Autowired(required = false)
+    private AgileWaterfallService agileWaterfallService;
 
     private static final List<String> AGILE_CREATE_ISSUE_TYPES =
             Arrays.asList(
@@ -129,6 +131,13 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                     IssueTypeCode.ISSUE_EPIC.value()
             );
 
+    private static final List<String> WATERFALL_ISSUE_TYPES =
+            Arrays.asList(
+                    IssueTypeCode.STAGE.value(),
+                    IssueTypeCode.MILESTONE.value(),
+                    IssueTypeCode.ACTIVITY.value()
+            );
+
     private static final Map<String, List<String>> TYPE_CODE_CATEGORY_MAP;
 
     static {
@@ -140,6 +149,9 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.SUB_TASK.value(), Arrays.asList(ProjectCategory.MODULE_AGILE));
         TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.TASK.value(), Arrays.asList(ProjectCategory.MODULE_AGILE));
         TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.BACKLOG.value(), Arrays.asList(ProjectCategory.MODULE_BACKLOG));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.STAGE.value(), Arrays.asList(ProjectCategory.MODULE_WATERFALL));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.MILESTONE.value(), Arrays.asList(ProjectCategory.MODULE_WATERFALL));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.ACTIVITY.value(), Arrays.asList(ProjectCategory.MODULE_WATERFALL));
     }
 
 
@@ -979,7 +991,11 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     @Override
     public void initIssueTypeByConsumeCreateOrganization(Long organizationId) {
         for (InitIssueType initIssueType : InitIssueType.values()) {
-            if (agilePluginService == null && Objects.equals("feature", initIssueType.getTypeCode())) {
+            String typeCode = initIssueType.getTypeCode();
+            if (agilePluginService == null && Objects.equals("feature", typeCode)) {
+                continue;
+            }
+            if (agileWaterfallService == null && WATERFALL_ISSUE_TYPES.contains(typeCode)) {
                 continue;
             }
             //创建默认问题类型

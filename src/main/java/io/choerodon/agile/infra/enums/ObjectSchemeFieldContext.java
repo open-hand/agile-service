@@ -1,9 +1,11 @@
 package io.choerodon.agile.infra.enums;
 
 import io.choerodon.agile.app.service.AgilePluginService;
+import io.choerodon.agile.app.service.AgileWaterfallService;
 import io.choerodon.agile.app.service.BacklogExpandService;
 import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.core.exception.CommonException;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +35,12 @@ public class ObjectSchemeFieldContext {
     public static final String FEATURE = "feature";
 
     public static final String BACKLOG = "backlog";
+
+    public static final String STAGE = IssueTypeCode.STAGE.value();
+
+    public static final String MILESTONE = IssueTypeCode.MILESTONE.value();
+
+    public static final String ACTIVITY = IssueTypeCode.ACTIVITY.value();
 
     protected static final String[] ISSUE_TYPES = {STORY, EPIC, BUG, TASK, SUB_TASK};
 
@@ -68,6 +76,10 @@ public class ObjectSchemeFieldContext {
         AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
         if (agilePluginService != null) {
             list.add(FEATURE);
+        }
+        AgileWaterfallService agileWaterfallService = SpringBeanUtil.getExpandBean(AgileWaterfallService.class);
+        if (!ObjectUtils.isEmpty(agileWaterfallService)) {
+            list.addAll(Arrays.asList(STAGE, MILESTONE, ACTIVITY));
         }
         return list;
     }

@@ -66,6 +66,16 @@ public class ProjectCategory {
      */
     public static final String MODULE_DEVOPS = "N_DEVOPS";
 
+    /**
+     * 瀑布模块
+     */
+    public static final String MODULE_WATERFALL = "N_WATERFALL";
+
+    /**
+     * 开启冲刺的瀑布模块
+     */
+    public static final String MODULE_WATERFALL_AGILE = "N_WATERFALL_AGILE";
+
     public static String getApplyType(String category){
         if (PROGRAM.equals(category)) {
             return SchemeApplyType.PROGRAM;
@@ -103,11 +113,19 @@ public class ProjectCategory {
         if (ObjectUtils.isEmpty(codes)) {
             return false;
         }
-        if (codes.contains(MODULE_BACKLOG)
-                && !(codes.contains(MODULE_AGILE) || codes.contains(MODULE_PROGRAM))) {
-            throw new CommonException("can not create N_REQUIREMENT without N_AGILE or N_PROGRAM");
+        boolean containsBacklog = codes.contains(MODULE_BACKLOG);
+        boolean containsWaterfall = codes.contains(MODULE_WATERFALL);
+        boolean containsAgile = codes.contains(MODULE_AGILE);
+        boolean containsProgram = codes.contains(MODULE_PROGRAM);
+        if (containsWaterfall && (containsAgile || containsProgram)) {
+            throw new CommonException("can not create N_WATERFALL with N_AGILE or N_PROGRAM");
         }
-        return codes.contains(MODULE_AGILE)
-                || codes.contains(MODULE_PROGRAM);
+        if (containsBacklog
+                && !(containsAgile || containsProgram || containsWaterfall)) {
+            throw new CommonException("can not create N_REQUIREMENT without N_AGILE or N_PROGRAM or N_WATERFALL");
+        }
+        return containsAgile
+                || containsProgram
+                || containsWaterfall;
     }
 }

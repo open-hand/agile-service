@@ -173,6 +173,8 @@ public interface ObjectSchemeFieldService {
      */
     void createSystemFieldIfNotExisted(Long organizationId);
 
+    void initSystemFieldExtendByIssueTypes(Long organizationId, List<IssueTypeVO> issueTypes);
+
     /**
      * 查询组织下支持的问题类型与
      *

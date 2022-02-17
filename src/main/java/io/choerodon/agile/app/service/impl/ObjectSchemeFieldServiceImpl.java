@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import io.choerodon.agile.api.vo.business.SystemFieldOverrideConfigVO;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
@@ -97,6 +98,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     private FieldCascadeRuleMapper fieldCascadeRuleMapper;
     @Autowired
     private FieldPermissionMapper fieldPermissionMapper;
+    @Autowired(required = false)
+    private AgileWaterfallService agileWaterfallService;
 
     @Override
     public ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field,
@@ -446,41 +449,70 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                 null,
                                 null);
         if (result.isEmpty()) {
-            ObjectSchemeFieldDTO dto = new ObjectSchemeFieldDTO();
-            dto.setSystem(true);
-            List<ObjectSchemeFieldDTO> systemFields = objectSchemeFieldMapper.select(dto);
-            systemFields.forEach(field -> {
-                String context = getFieldContext(field.getCode());
-                // 过滤当前字段的问题类型
-                String[] contexts = context.split(",");
-                List<IssueTypeVO> issueTypeVOS = issueTypes.stream().filter(v -> Arrays.asList(contexts).contains(v.getTypeCode())).collect(Collectors.toList());
-                String code = field.getCode();
-                Boolean required = field.getRequired();
-                SystemFieldPageConfig.CommonField commonField = SystemFieldPageConfig.CommonField.queryByField(code);
-                Boolean created;
-                Boolean edited;
-                if (ObjectUtils.isEmpty(commonField)) {
-                    created = false;
-                    edited = false;
-                } else {
-                    created = commonField.created();
-                    edited = commonField.edited();
-                }
-                issueTypeVOS.forEach(issueType -> {
-                    ObjectSchemeFieldExtendDTO extendField = new ObjectSchemeFieldExtendDTO();
-                    extendField.setFieldId(field.getId());
-                    extendField.setOrganizationId(organizationId);
-                    extendField.setIssueType(issueType.getTypeCode());
-                    extendField.setIssueTypeId(issueType.getId());
-                    extendField.setRequired(required);
-                    extendField.setCreated(created);
-                    extendField.setEdited(edited);
-                    extendField.setRank(getMinRank(organizationId, null, issueType.getId(), null));
-                    objectSchemeFieldExtendMapper.insertSelective(extendField);
-                });
-
-            });
+            initSystemFieldExtendByIssueTypes(organizationId, issueTypes);
         }
+    }
+
+    @Override
+    public void initSystemFieldExtendByIssueTypes(Long organizationId, List<IssueTypeVO> issueTypes) {
+        ObjectSchemeFieldDTO dto = new ObjectSchemeFieldDTO();
+        dto.setSystem(true);
+        List<ObjectSchemeFieldDTO> systemFields = objectSchemeFieldMapper.select(dto);
+        Map<String, List<SystemFieldOverrideConfigVO>> overrideConfigMap = new HashMap<>();
+        if (!ObjectUtils.isEmpty(agileWaterfallService)) {
+            overrideConfigMap.putAll(agileWaterfallService.querySystemFieldOverrideConfig());
+        }
+        systemFields.forEach(field -> {
+            String context = getFieldContext(field.getCode());
+            // 过滤当前字段的问题类型
+            String[] contexts = context.split(",");
+            List<IssueTypeVO> issueTypeVOS = issueTypes.stream().filter(v -> Arrays.asList(contexts).contains(v.getTypeCode())).collect(Collectors.toList());
+            String code = field.getCode();
+            Boolean required = field.getRequired();
+            SystemFieldPageConfig.CommonField commonField = SystemFieldPageConfig.CommonField.queryByField(code);
+            Boolean created;
+            Boolean edited;
+            if (ObjectUtils.isEmpty(commonField)) {
+                created = false;
+                edited = false;
+            } else {
+                created = commonField.created();
+                edited = commonField.edited();
+            }
+            Map<String, SystemFieldOverrideConfigVO> issueTypeFieldConfigMap =
+                    queryIssueTypeFieldConfigMap(overrideConfigMap, code);
+            issueTypeVOS.forEach(issueType -> {
+                String typeCode = issueType.getTypeCode();
+                SystemFieldOverrideConfigVO systemFieldOverrideConfig = issueTypeFieldConfigMap.get(typeCode);
+                boolean isRequired = required;
+                boolean isCreated = created;
+                boolean isEdited = edited;
+                if (!ObjectUtils.isEmpty(systemFieldOverrideConfig)) {
+                    isRequired = systemFieldOverrideConfig.getRequired();
+                    isCreated = systemFieldOverrideConfig.getCreated();
+                    isEdited = systemFieldOverrideConfig.getEdited();
+                }
+                ObjectSchemeFieldExtendDTO extendField = new ObjectSchemeFieldExtendDTO();
+                extendField.setFieldId(field.getId());
+                extendField.setOrganizationId(organizationId);
+                extendField.setIssueType(typeCode);
+                extendField.setIssueTypeId(issueType.getId());
+                extendField.setRequired(isRequired);
+                extendField.setCreated(isCreated);
+                extendField.setEdited(isEdited);
+                extendField.setRank(getMinRank(organizationId, null, issueType.getId(), null));
+                objectSchemeFieldExtendMapper.insertSelective(extendField);
+            });
+        });
+    }
+
+    private Map<String, SystemFieldOverrideConfigVO> queryIssueTypeFieldConfigMap(Map<String, List<SystemFieldOverrideConfigVO>> overrideConfigMap, String code) {
+        List<SystemFieldOverrideConfigVO> fieldOverrideConfigs = overrideConfigMap.get(code);
+        Map<String, SystemFieldOverrideConfigVO> issueTypeFieldConfigMap = new HashMap<>();
+        if (!ObjectUtils.isEmpty(fieldOverrideConfigs)) {
+            fieldOverrideConfigs.forEach(x -> issueTypeFieldConfigMap.put(x.getIssueTypeCode(), x));
+        }
+        return issueTypeFieldConfigMap;
     }
 
     @Override
@@ -657,6 +689,12 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             String context = backlogExpandService.getSystemFieldContext(code);
             if (!ObjectUtils.isEmpty(context)) {
                 contexts.add(context);
+            }
+        }
+        if (!ObjectUtils.isEmpty(agileWaterfallService)) {
+            List<String> waterfallContexts = agileWaterfallService.getSystemFieldContext(code);
+            if (!ObjectUtils.isEmpty(waterfallContexts)) {
+                contexts.addAll(waterfallContexts);
             }
         }
         return contexts.stream().collect(Collectors.joining(","));

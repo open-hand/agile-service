@@ -30,4 +30,10 @@ public class SchemeApplyType {
      * 需求池
      */
     public static final String BACKLOG = "backlog";
+
+    /**
+     * 瀑布
+     */
+    public static final String WATERFALL = "waterfall";
+
 }

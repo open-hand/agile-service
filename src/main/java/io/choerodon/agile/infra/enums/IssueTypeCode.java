@@ -14,6 +14,9 @@ public enum IssueTypeCode {
     SUB_TASK("sub_task"),
     TASK("task"),
     BACKLOG("backlog"),
+    STAGE("stage"),
+    MILESTONE("milestone"),
+    ACTIVITY("activity"),
     ;
 
     public static final String[] ISSUE_TYPE_CODE_WITH_FEATURE = {STORY.value(), TASK.value(), BUG.value()};
