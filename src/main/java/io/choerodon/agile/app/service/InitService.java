@@ -45,6 +45,11 @@ public interface InitService {
      */
     Long initAGStateMachine(Long organizationId, ProjectEvent projectEvent);
 
+    Long initStateMachine(Long organizationId,
+                          ProjectEvent projectEvent,
+                          String name,
+                          String applyType);
+
     /**
      * 初始化测试状态机
      *

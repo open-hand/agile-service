@@ -21,4 +21,6 @@ public interface AgileWaterfallService {
     void initProject(ProjectEvent projectEvent, Set<String> codes);
 
     List<IssueTypeVO> filterWaterfallIssueTypes(List<IssueTypeVO> issueTypes, List<Long> issueTypeIds);
+
+    Long initWaterfallStateMachine(Long organizationId, ProjectEvent projectEvent);
 }

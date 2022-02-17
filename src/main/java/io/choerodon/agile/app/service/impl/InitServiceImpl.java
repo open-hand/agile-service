@@ -1,16 +1,11 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.event.StatusPayload;
-import io.choerodon.agile.app.service.AgilePluginService;
-import io.choerodon.agile.app.service.BoardService;
-import io.choerodon.agile.app.service.InitService;
-import io.choerodon.agile.app.service.StateMachineService;
+import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.modelmapper.ModelMapper;
@@ -52,6 +47,10 @@ public class InitServiceImpl implements InitService {
     private StatusMachineNodeMapper statusMachineNodeMapper;
     @Autowired
     private StatusMachineTransformMapper statusMachineTransformMapper;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
+    @Autowired(required = false)
+    private AgileWaterfallService agileWaterfallService;
 
     @Override
     public synchronized List<StatusDTO> initStatus(Long organizationId, List<InitStatus> initStatusList) {
@@ -70,9 +69,12 @@ public class InitServiceImpl implements InitService {
         } else if (applyType.equals(SchemeApplyType.TEST)) {
             stateMachineId = initTEStateMachine(organizationId, projectEvent);
         } else if (applyType.equals(SchemeApplyType.PROGRAM)) {
-            AgilePluginService expandBean = SpringBeanUtil.getExpandBean(AgilePluginService.class);
-            if (expandBean != null) {
-                stateMachineId = expandBean.initPRStateMachine(organizationId, projectEvent);
+            if (!ObjectUtils.isEmpty(agilePluginService)) {
+                stateMachineId = agilePluginService.initPRStateMachine(organizationId, projectEvent);
+            }
+        } else if (applyType.equals(SchemeApplyType.WATERFALL)) {
+            if (!ObjectUtils.isEmpty(agileWaterfallService)) {
+                stateMachineId = agileWaterfallService.initWaterfallStateMachine(organizationId, projectEvent);
             }
         }
         return stateMachineId;
@@ -104,19 +106,27 @@ public class InitServiceImpl implements InitService {
 
     @Override
     public Long initAGStateMachine(Long organizationId, ProjectEvent projectEvent) {
+        return initStateMachine(organizationId, projectEvent, "默认状态机【敏捷】", SchemeApplyType.AGILE);
+    }
+
+    @Override
+    public Long initStateMachine(Long organizationId,
+                                 ProjectEvent projectEvent,
+                                 String name,
+                                 String applyType) {
         String projectCode = projectEvent.getProjectCode();
         //初始化状态机
         StatusMachineDTO statusMachine = new StatusMachineDTO();
         statusMachine.setOrganizationId(organizationId);
-        statusMachine.setName(projectCode + "默认状态机【敏捷】");
-        statusMachine.setDescription(projectCode + "默认状态机【敏捷】");
+        statusMachine.setName(projectCode + name);
+        statusMachine.setDescription(projectCode + name);
         statusMachine.setStatus(StateMachineStatus.ACTIVE);
         statusMachine.setDefault(false);
         if (statusMachineMapper.insert(statusMachine) != 1) {
             throw new CommonException(ERROR_STATEMACHINE_CREATE);
         }
         //创建状态机节点和转换
-        createStateMachineDetail(organizationId, statusMachine.getId(), SchemeApplyType.AGILE);
+        createStateMachineDetail(organizationId, statusMachine.getId(), applyType);
         //发布状态机
         Long stateMachineId = statusMachine.getId();
         //敏捷创建完状态机后需要到敏捷创建列

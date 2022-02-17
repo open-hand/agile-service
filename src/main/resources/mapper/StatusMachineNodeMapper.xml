@@ -196,8 +196,11 @@
             #{statusId}
         </foreach>
         AND fit.id = fsmsc.issue_type_id
-        <if test="isAgile">
-            AND fit.type_code != 'feature'
+        <if test="issueTypeCodes != null and issueTypeCodes.size() > 0">
+            and fit.type_code in
+            <foreach collection="issueTypeCodes" item="issueTypeCode" open="(" close=")" separator=",">
+                #{issueTypeCode}
+            </foreach>
         </if>
         AND fit.type_code not in ('issue_auto_test','issue_auto_test')
         AND fsmsc.issue_type_id != 0

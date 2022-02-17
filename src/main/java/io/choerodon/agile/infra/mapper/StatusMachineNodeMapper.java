@@ -51,7 +51,10 @@ public interface StatusMachineNodeMapper extends BaseMapper<StatusMachineNodeDTO
 
     List<IssueCountDTO> countIssueTypeByStatusIds(@Param("organizationId") Long organizationId,@Param("schemeId") Long schemeId, @Param("statusIds") List<Long> statusIds,@Param("applyType") String applyType);
 
-    List<IssueCountDTO> countStatusIssueTypeScope(@Param("organizationId") Long organizationId,@Param("schemeIds") List<Long> schemeIds, @Param("statusIds") List<Long> statusIds,@Param("isAgile") Boolean isAgile);
+    List<IssueCountDTO> countStatusIssueTypeScope(@Param("organizationId") Long organizationId,
+                                                  @Param("schemeIds") List<Long> schemeIds,
+                                                  @Param("statusIds") List<Long> statusIds,
+                                                  @Param("issueTypeCodes") List<String> issueTypeCodes);
 
     List<StatusMachineSchemeConfigVO> selectInitNode(@Param("organizationId")  Long organizationId, @Param("projectId")  Long projectId, @Param("applyTypes") List<String> applyTypes, @Param("statusId") Long statusId);
 
