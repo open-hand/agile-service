@@ -107,6 +107,8 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     private AgilePluginService agilePluginService;
     @Autowired
     private StatusMachineSchemeConfigMapper statusMachineSchemeConfigMapper;
+    @Autowired(required = false)
+    private AgileWaterfallService agileWaterfallService;
 
     private void insertRank(Long projectId, Long issueId, String type, RankVO rankVO) {
         List<RankDTO> rankDTOList = new ArrayList<>();
@@ -184,6 +186,9 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         if (agilePluginService != null) {
             agilePluginService.checkBeforeCreateIssue(issueCreateVO,applyType);
         }
+        if (agileWaterfallService != null) {
+            agileWaterfallService.checkBeforeCreateIssue(issueCreateVO,applyType);
+        }
         IssueConvertDTO issueConvertDTO = issueAssembler.toTarget(issueCreateVO, IssueConvertDTO.class);
         Long projectId = issueConvertDTO.getProjectId();
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
@@ -224,6 +229,9 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         issueService.afterCreateIssue(issueId, issueConvertDTO, issueCreateVO, projectInfo);
         if (agilePluginService != null) {
             agilePluginService.handlerBusinessAfterCreateIssue(issueConvertDTO,projectId,issueId,issueCreateVO);
+        }
+        if (agileWaterfallService != null) {
+            agileWaterfallService.handlerWaterfallAfterCreateIssue(projectId,issueId,issueCreateVO);
         }
         return issueId;
     }
