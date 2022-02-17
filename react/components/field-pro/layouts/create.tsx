@@ -26,6 +26,7 @@ import type {
   IComponentFCWithClassObject, IClassComponentType, IComponentFCWithClassObjectProps, IComponentFCWithClass,
 } from '../base/type';
 import SelectUser from '@/components/select/select-user';
+import SelectParentWaterfall from '@/components/select/select-parent-waterfall';
 
 const { AppState } = stores;
 
@@ -60,6 +61,7 @@ const AgileComponentMapWithPro = {
   estimatedEndTime: DateTimePickerWithFormat as React.ComponentClass<DateTimePickerProps>,
   actualStartTime: DateTimePickerWithFormat as React.ComponentClass<DateTimePickerProps>,
   actualEndTime: DateTimePickerWithFormat as React.ComponentClass<DateTimePickerProps>,
+  parent: SelectParentWaterfall,
 };
 const CreateCustomFieldMap = {
   ...CustomFieldMap,
