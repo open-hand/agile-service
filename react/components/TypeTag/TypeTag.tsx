@@ -30,7 +30,7 @@ const TypeTag: React.FC<Props> = ({
   if (icon === 'agile-backlog') {
     icon = 'highlight';
   }
-  const reverse = ['agile_epic', 'agile_story', 'agile_fault', 'agile_task', 'agile_subtask', 'test-case', 'test-automation', 'agile-feature'].includes(icon);
+  const reverse = ['agile_activity', 'agile_milestone', 'agile_view_timeline', 'agile_epic', 'agile_story', 'agile_fault', 'agile_task', 'agile_subtask', 'test-case', 'test-automation', 'agile-feature'].includes(icon);
   return (
     <Tooltip
       title={name}
