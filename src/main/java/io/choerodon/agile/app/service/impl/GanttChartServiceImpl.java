@@ -12,7 +12,9 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.GanttDimension;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
+import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
@@ -122,6 +124,8 @@ public class GanttChartServiceImpl implements GanttChartService {
     private IssuePersonalSortMapper issuePersonalSortMapper;
     @Autowired
     private IssuePredecessorMapper issuePredecessorMapper;
+    @Autowired(required = false)
+    private AgileWaterfallService agileWaterfallService;
 
     @Override
     public Page<GanttChartVO> pagedQuery(Long projectId,
@@ -129,7 +133,18 @@ public class GanttChartServiceImpl implements GanttChartService {
                                          PageRequest pageRequest) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Map<Long, ProjectVO> projectMap = queryProjectMap(projectId);
-        return listByProjectIdAndSearch(projectMap, searchVO, pageRequest, organizationId, true);
+        ProjectVO project = projectMap.get(projectId);
+        List<String> categoryCodes =
+                project.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
+        if (categoryCodes.contains(ProjectCategory.MODULE_WATERFALL)) {
+            if (!ObjectUtils.isEmpty(agileWaterfallService)) {
+                return agileWaterfallService.pagedQuery(project, searchVO, pageRequest);
+            }else {
+                return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
+            }
+        } else {
+            return listByProjectIdAndSearch(projectMap, searchVO, pageRequest, organizationId, true);
+        }
     }
 
     private Map<Long, ProjectVO> queryProjectMap(Long projectId) {

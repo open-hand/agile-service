@@ -1,10 +1,15 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.GanttChartVO;
 import io.choerodon.agile.api.vo.IssueTypeVO;
+import io.choerodon.agile.api.vo.ProjectVO;
+import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.business.SystemFieldOverrideConfigVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -31,4 +36,8 @@ public interface AgileWaterfallService {
     void handlerWaterfallAfterCreateIssue(Long projectId, Long issueId, IssueCreateVO issueCreateVO);
 
     void waterfallIssueDetailDTOToVO(IssueVO issueVO);
+
+    Page<GanttChartVO> pagedQuery(ProjectVO project,
+                                  SearchVO searchVO,
+                                  PageRequest pageRequest);
 }
