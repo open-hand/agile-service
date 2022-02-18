@@ -43,6 +43,7 @@ import { formatFieldDateValue } from '@/utils/formatDate';
 import { CreateIssueProps } from '.';
 import {SHOW_ISSUE_LINK_TYPE_CODES, WATERFALL_TYPE_CODES} from '@/constants/TYPE_CODE';
 import { DELIVERABLE, DEPENDENCY } from '@/constants/WATERFALL_INJECT';
+import useIsWaterfall from "@/hooks/useIsWaterfall";
 
 const { AppState } = stores;
 interface CreateIssueBaseCallbackData {
@@ -275,6 +276,7 @@ const CreateIssueBase = observer(({
   const otherLinkRef = useRef();
   const [templateSummary] = useState(new Map());
   const [dataSet, setDataSet] = useState(defaultDataSet);
+  const { isWaterfallAgile } = useIsWaterfall();
   dataSetRef.current = dataSet;
   const issueTypeId = dataSet.current && dataSet.current.get('issueType');
   const setFieldValue = usePersistFn((name, value) => {
@@ -285,7 +287,7 @@ const CreateIssueBase = observer(({
     projectId,
     typeCode,
     isProgram,
-    applyType,
+    applyType: isWaterfallAgile ? undefined : applyType,
   }, {
     onSuccess: ((issueTypes) => {
       if (!issueTypeId || (showSelectProject && !some(issueTypes, { id: issueTypeId }))) {
@@ -726,7 +728,7 @@ const CreateIssueBase = observer(({
             isProgram,
             typeCode,
             projectId,
-            applyType,
+            applyType: isWaterfallAgile ? undefined : applyType,
             menuType: menuType ?? 'project',
           },
         };
