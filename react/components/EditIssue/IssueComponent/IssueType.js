@@ -11,6 +11,8 @@ import './IssueComponent.less';
 import openRequiredFieldsModal from './required-fields';
 import Styles from './IssueType.less';
 import useIsProgram from '@/hooks/useIsProgram';
+import { WATERFALL_TYPE_CODES } from '../../../constants/TYPE_CODE';
+import useIsWaterfall from '@/hooks/useIsWaterfall';
 
 const IssueType = observer(({
   reloadIssue, applyType, onTransformType,
@@ -20,6 +22,7 @@ const IssueType = observer(({
   } = useContext(EditIssueContext);
   const { isShowFeature } = useIsInProgram({ projectId: store.projectId });
   const { isAgileProgram } = useIsProgram();
+  const { isWaterfall } = useIsWaterfall();
   const issue = store.getIssue;
   const { issueTypeVO = {}, featureVO = {}, subIssueVOList = [] } = issue;
   const { typeCode, id: issueTypeId } = issueTypeVO;
@@ -30,9 +33,13 @@ const IssueType = observer(({
     if (typeCode === 'sub_task') {
       return ['sub_task'];
     }
-    let codes = ['story', 'bug', 'task', 'issue_epic'];
+    // let codes = ['story', 'bug', 'task', 'issue_epic'];
+    let codes = isWaterfall ? WATERFALL_TYPE_CODES : ['story', 'bug', 'task', 'issue_epic'];
     if (isShowFeature || isAgileProgram || menuType === 'org') {
       codes = ['story', 'bug', 'task'];
+    }
+    if (WATERFALL_TYPE_CODES.includes(typeCode)) {
+      codes = WATERFALL_TYPE_CODES;
     }
 
     return codes;

@@ -8,6 +8,7 @@ import useIsProgram from './useIsProgram';
 import useParentProgram from './data/useParentProgram';
 import useParentArtDoing from './data/useParentArtDoing';
 import useIsAgile from '@/hooks/useIsAgile';
+import useIsWaterfall from '@/hooks/useIsWaterfall';
 
 const { AppState }: { AppState: AppStateProps } = stores;
 // @ts-ignore
@@ -36,12 +37,13 @@ const useIsInProgram = (config?: useIsInProgramConfig, options?: UseQueryOptions
   const { projectId, menuType } = config ?? {};
   const { isProgram } = useIsProgram();
   const { isAgile } = useIsAgile();
+  const { isWaterfall } = useIsWaterfall();
   const isProject = menuType ? menuType === 'project' : AppState.currentMenuType.type === 'project';
   const isFirstMount = useRef<boolean>(shouldRequest && isProject && (!isProgram || isAgile));
   const {
     data: program, isLoading: loading1, refetch: refresh1,
   } = useParentProgram({ projectId }, {
-    enabled: shouldRequest && isProject && (!isProgram || isAgile) && options?.enabled,
+    enabled: shouldRequest && isProject && (!isProgram || isAgile) && options?.enabled && !isWaterfall,
     onSuccess: () => {
       isFirstMount.current = false;
     },
