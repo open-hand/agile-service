@@ -1,0 +1,47 @@
+.wrap {
+  height: .1rem;
+}
+
+.body {
+  display: flex;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: .02rem;
+  border-radius: 2px;
+
+  &_delay {
+    border-radius: 2px 0 0 2px;
+  }
+}
+
+.fill {
+  display: flex;
+  flex: 0;
+  height: 100%;
+  width: 100%;
+
+  &_progress {
+    display: flex;
+    height: 100%;
+    width: 100%;
+  }
+
+  &_delay {
+    flex-shrink: 0;
+  }
+}
+
+.dash {
+  position: absolute;
+  border: 0.016rem dashed;
+  flex: 0;
+  top: 0;
+  margin: 0 1px;
+}
+
+.delay {
+  position: relative;
+  background: #FF5C6A;
+  border-radius: 0 2px 2px 0;
+}
