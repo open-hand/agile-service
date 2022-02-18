@@ -2,6 +2,7 @@ import React, { useContext, Fragment } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { includes } from 'lodash';
+import { has as hasInject, mount } from '@choerodon/inject';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { SHOW_FEATURE_TYPE_CODES } from '@/constants/SHOW_FEATURE_TYPE_CODE';
 import {
@@ -24,6 +25,7 @@ import FieldActualStartTime from './Field/FieldActualStartTime';
 import FieldActualEndTime from './Field/FieldActualEndTime';
 import FieldParticipant from './Field/FieldParticipant';
 import FieldEstimateTime from './Field/FieldEstimateTime';
+import {FIELD_SELECT_PARENT} from "../../../../constants/WATERFALL_INJECT";
 
 const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 'timeTrace', 'assignee'];
 
@@ -112,6 +114,8 @@ const IssueField = observer((props) => {
         return <FieldTag {...props} field={field} />;
       case 'participant':
         return <FieldParticipant {...props} field={field} />;
+      case 'parent':
+        return hasInject(FIELD_SELECT_PARENT) ? mount(FIELD_SELECT_PARENT, { ...props, field }) : null;
       case 'estimateTime':
         return null;
       default:
