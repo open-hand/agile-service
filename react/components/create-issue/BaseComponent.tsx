@@ -107,20 +107,32 @@ const presets = new Map([
     valueField: 'labelId',
   }],
   ['estimatedStartTime', {
-    max: 'estimatedEndTime',
+    // max: 'estimatedEndTime',
     format: MINUTE,
+    computedProps: {
+      max: ({ record }: { record: Record }) => record.get('estimatedEndTime'),
+    },
   }],
   ['estimatedEndTime', {
-    min: 'estimatedStartTime',
+    // min: 'estimatedStartTime',
     format: MINUTE,
+    computedProps: {
+      min: ({ record }: { record: Record }) => record.get('estimatedStartTime'),
+    },
   }],
   ['actualStartTime', {
-    max: 'actualEndTime',
+    // max: 'actualEndTime',
     format: MINUTE,
+    computedProps: {
+      max: ({ record }: { record: Record }) => record.get('actualEndTime'),
+    },
   }],
   ['actualEndTime', {
-    min: 'actualStartTime',
+    // min: 'actualStartTime',
     format: MINUTE,
+    computedProps: {
+      min: ({ record }: { record: Record }) => record.get('actualStartTime'),
+    },
   }],
 ]);
 const afterLoadKeyMap = new Map([
