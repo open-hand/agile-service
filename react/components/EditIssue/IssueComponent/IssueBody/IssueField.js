@@ -25,7 +25,7 @@ import FieldActualStartTime from './Field/FieldActualStartTime';
 import FieldActualEndTime from './Field/FieldActualEndTime';
 import FieldParticipant from './Field/FieldParticipant';
 import FieldEstimateTime from './Field/FieldEstimateTime';
-import {FIELD_SELECT_PARENT} from "../../../../constants/WATERFALL_INJECT";
+import { FIELD_SELECT_PARENT } from '../../../../constants/WATERFALL_INJECT';
 
 const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 'timeTrace', 'assignee'];
 
