@@ -211,6 +211,9 @@ const systemFieldConfigMap: ICreateComponentPropsDistributeProRender<typeof Agil
   participant: {
     valueKey: 'participantIds',
   },
+  parent: {
+    valueKey: 'parentId',
+  },
 };
 
 const fieldMap = {

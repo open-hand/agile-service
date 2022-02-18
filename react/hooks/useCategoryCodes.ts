@@ -18,7 +18,10 @@ export type ICategoryCode =
   // 项目群
   'N_PROGRAM' |
   // 运维项目
-  'N_OPERATIONS'
+  'N_OPERATIONS' |
+  // 大瀑布小敏捷
+  'N_WATERFALL_AGILE'
+
 const useCategoryCodes = (): ICategoryCode[] => (
   useObserver(() => (AppState.menuType.categories
     ? AppState.menuType.categories.map((c: any) => c.code)

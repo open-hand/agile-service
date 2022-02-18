@@ -134,7 +134,7 @@ function IssueBody(props) {
           {!outside && !otherProject && issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueDoc {...props} /> : ''}
 
-          {issueTypeVO.typeCode && ['issue_epic', 'sub_task', 'feature'].indexOf(issueTypeVO.typeCode) === -1
+          {issueTypeVO.typeCode && ['story', 'task', 'bug'].indexOf(issueTypeVO.typeCode) !== -1
             ? <SubTask {...props} /> : ''}
 
           {issueTypeVO.typeCode && ['story', 'task'].indexOf(issueTypeVO.typeCode) !== -1
@@ -145,7 +145,7 @@ function IssueBody(props) {
               noCreateLink: true,
               ...props,
             }) : ''}
-          {issueTypeVO.typeCode && ['feature', 'sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
+          {issueTypeVO.typeCode && ['story', 'task', 'bug'].indexOf(issueTypeVO.typeCode) !== -1
             ? <IssueLink {...props} /> : ''}
           {!outside && ['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}
         </TabPane>
