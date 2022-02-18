@@ -13,7 +13,7 @@ import {
   useClickAway, useLockFn, useUpdateEffect, useWhyDidYouUpdate,
 } from 'ahooks';
 import { castArray, find } from 'lodash';
-import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
+import useProjectIssueTypes, { ProjectIssueTypesConfig } from '@/hooks/data/useProjectIssueTypes';
 import { IIssueType, Issue, User } from '@/common/types';
 import { checkCanQuickCreate, getQuickCreateDefaultObj, IQuickCreateDefaultValueParams } from '@/utils/quickCreate';
 import { fieldApi, issueApi } from '@/api';
@@ -26,6 +26,7 @@ import useDefaultPriority from '@/hooks/data/useDefaultPriority';
 interface QuickCreateSubIssueProps {
   priorityId?: string
   projectId?: string
+  applyType?: ProjectIssueTypesConfig['applyType']
   parentIssueId?: string
   sprintId: string
   typeCode?: string | string[]
@@ -45,10 +46,10 @@ interface QuickCreateSubIssueProps {
 }
 const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, defaultValues, projectId, cantCreateEvent, isCanQuickCreate, typeCode, summaryChange,
-  typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick, beforeClick,
+  typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick, beforeClick, applyType,
 }) => {
   const { data: issueTypes, isLoading } = useProjectIssueTypes({
-    typeCode: typeCode || 'sub_task', projectId, onlyEnabled: true, applyType: 'agile',
+    typeCode: typeCode || 'sub_task', projectId, onlyEnabled: true, applyType,
   });
   const { data: defaultPriority } = useDefaultPriority({ projectId }, { enabled: !priorityId });
 
@@ -158,9 +159,14 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
         });
         return false;
       }
+      let res: any;
+      if (applyType === 'waterfall' && ['stage', 'milestone', 'activity'].includes(currentType.typeCode)) {
+        res = await issueApi.project(projectId).create(issue, applyType);
+      } else {
+        res = currentType.typeCode === 'sub_task'
+          || issue.parentIssueId || issue.relateIssueId || issue.relateIssueId ? await issueApi.project(projectId).createSubtask(issue) : await issueApi.project(projectId).create(issue);
+      }
 
-      const res = currentType.typeCode === 'sub_task'
-        || issue.parentIssueId || issue.relateIssueId || issue.relateIssueId ? await issueApi.project(projectId).createSubtask(issue) : await issueApi.project(projectId).create(issue);
       await fieldApi.project(projectId).quickCreateDefault(res.issueId, {
         schemeCode: 'agile_issue',
         issueTypeId: currentType.id,
