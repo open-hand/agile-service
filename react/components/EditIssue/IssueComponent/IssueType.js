@@ -33,8 +33,7 @@ const IssueType = observer(({
     if (typeCode === 'sub_task') {
       return ['sub_task'];
     }
-    // let codes = ['story', 'bug', 'task', 'issue_epic'];
-    let codes = isWaterfall ? WATERFALL_TYPE_CODES : ['story', 'bug', 'task', 'issue_epic'];
+    let codes = ['story', 'bug', 'task', 'issue_epic'];
     if (isShowFeature || isAgileProgram || menuType === 'org') {
       codes = ['story', 'bug', 'task'];
     }
