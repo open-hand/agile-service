@@ -32,7 +32,6 @@ export default function useProjectIssueTypes(config?: ProjectIssueTypesConfig, o
     const finalIssueTypes = isFilterEpic ? issueTypes.filter((item) => item.typeCode !== 'issue_epic') : issueTypes;
     // eslint-disable-next-line no-nested-ternary
     const typeCodes = Array.isArray(config?.typeCode) ? config?.typeCode : (config?.typeCode ? [config?.typeCode] : null);
-    console.log('typeCodes', typeCodes);
     return typeCodes ? finalIssueTypes.filter((type: any) => typeCodes.includes(type.typeCode)) : finalIssueTypes;
   }, [config?.applyType, config?.isShowFeature, config?.menuType, config?.typeCode, isProgram, isShowFeature]);
   return useQuery(key, () => issueTypeApi.loadAllWithStateMachineId(applyType, config?.projectId, config?.onlyEnabled ?? true, config?.programId), {
