@@ -4,7 +4,7 @@ import React, {
 } from 'react';
 import { Tabs } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
-import { mount } from '@choerodon/inject';
+import { has as hasInject, mount } from '@choerodon/inject';
 import map from 'lodash/map';
 import { useDetailContainerContext } from '@/components/detail-container/context';
 import useHasDevops from '@/hooks/useHasDevops';
@@ -33,6 +33,8 @@ import IssueUI from './Issue-UI';
 
 import { featureApi } from '@/api';
 import { getProjectId } from '@/utils/common';
+import {DEPENDENCY_TAB} from "../../../../constants/WATERFALL_INJECT";
+import {WATERFALL_TYPE_CODES} from "../../../../constants/TYPE_CODE";
 
 const { TabPane } = Tabs;
 
@@ -149,6 +151,8 @@ function IssueBody(props) {
             ? <IssueLink {...props} /> : ''}
           {!outside && ['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}
         </TabPane>
+        {issueTypeVO.typeCode && WATERFALL_TYPE_CODES.includes(issueTypeVO.typeCode) && hasInject(DEPENDENCY_TAB)
+          ? <TabPane tab="依赖与关联">{mount(DEPENDENCY_TAB, { ...props, issueTypeCode: issueTypeVO.typeCode })}</TabPane> : null}
         {
           issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
             ? (
