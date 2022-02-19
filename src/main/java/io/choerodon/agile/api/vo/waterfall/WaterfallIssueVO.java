@@ -17,7 +17,7 @@ public class WaterfallIssueVO {
     private Long projectId;
 
     @ApiModelProperty(value = "所属父级")
-    @Encrypt
+    @Encrypt(ignoreValue = {"0"})
     private Long parentId;
 
     @ApiModelProperty(value = "所属父级VO")

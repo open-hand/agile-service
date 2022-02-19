@@ -326,7 +326,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Autowired
     private IssueProjectMoveService issueProjectMoveService;
     @Autowired(required = false)
-    private AgileWaterfallService waterfallPluginService;
+    private AgileWaterfallService agileWaterfallService;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -536,8 +536,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (agilePluginService != null) {
             agilePluginService.programIssueDetailDTOToVO(issueVO,issue);
         }
-        if (waterfallPluginService != null) {
-            waterfallPluginService.waterfallIssueDetailDTOToVO(issueVO, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
+        if (agileWaterfallService != null) {
+            agileWaterfallService.waterfallIssueDetailDTOToVO(issueVO, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
         }
         //设置星标
         setStarBeacon(issueVO);
@@ -894,6 +894,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (agilePluginService != null) {
             agilePluginService.buildFieldList(fieldList, issueUpdateVO);
         }
+        if (agileWaterfallService != null) {
+            agileWaterfallService.buildWaterfallFieldList(fieldList, issueUpdateVO);
+        }
         //更新issue表字段，fieldList包含issueId，objectVersionNumber和一个field
         boolean updateRelationField =
                 fieldList.size() == 2
@@ -920,6 +923,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         validateBeforeUpdate(projectId, issueUpdateVO, fieldList);
         if (agilePluginService != null) {
             agilePluginService.buildFieldList(fieldList, issueUpdateVO);
+        }
+        if (agileWaterfallService != null) {
+            agileWaterfallService.buildWaterfallFieldList(fieldList, issueUpdateVO);
         }
         if (!fieldList.isEmpty()) {
             //处理issue自己字段
@@ -950,6 +956,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (issueUpdateVO.getParticipantIds() != null) {
             this.self().handleUpdateParticipant(issueUpdateVO.getParticipantIds(), projectId, issueId);
         }
+        if (agileWaterfallService != null) {
+            agileWaterfallService.handleUpdateWaterfallField(projectId, issueUpdateVO);
+        }
         return issueId;
     }
 
@@ -970,12 +979,18 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if(issueUpdateVO.getParticipantIds() != null){
             this.self().handleUpdateParticipantWithoutRuleNotice(issueUpdateVO.getParticipantIds(), projectId, issueId);
         }
+        if (agileWaterfallService != null) {
+            agileWaterfallService.handleUpdateWaterfallFieldWithoutRuleNotice(projectId, issueUpdateVO);
+        }
         return issueId;
     }
 
     private void validateBeforeUpdate(Long projectId, IssueUpdateVO issueUpdateVO, List<String> fieldList) {
         if (agilePluginService != null) {
             agilePluginService.checkFeatureBeforeUpdateIssue(issueUpdateVO,projectId);
+        }
+        if (agileWaterfallService != null) {
+            agileWaterfallService.checkBeforeUpdateIssue(issueUpdateVO, projectId);
         }
         if (fieldList.contains(EPIC_NAME_FIELD)
                 && issueUpdateVO.getEpicName() != null

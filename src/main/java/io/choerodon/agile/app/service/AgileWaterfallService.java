@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueCreateVO;
+import io.choerodon.agile.api.vo.business.IssueUpdateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.business.SystemFieldOverrideConfigVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
@@ -37,4 +38,12 @@ public interface AgileWaterfallService {
     Page<GanttChartVO> pagedQuery(ProjectVO project,
                                   SearchVO searchVO,
                                   PageRequest pageRequest);
+
+    void checkBeforeUpdateIssue(IssueUpdateVO issueUpdateVO, Long projectId);
+
+    void buildWaterfallFieldList(List<String> fieldList, IssueUpdateVO issueUpdateVO);
+
+    void handleUpdateWaterfallField(Long projectId, IssueUpdateVO issueUpdateVO);
+
+    void handleUpdateWaterfallFieldWithoutRuleNotice(Long projectId, IssueUpdateVO issueUpdateVO);
 }
