@@ -19,10 +19,11 @@ const SubTask = observer(({
 }) => {
   const { store, disabled, projectId } = useContext(EditIssueContext);
   const {
-    issueId: parentIssueId, subIssueVOList = [], priorityId, sprintId, typeCode, relateIssueId, activeSprint,
+    issueId: parentIssueId, subIssueVOList: agileSubIssueVOList = [], priorityId, sprintId, typeCode, relateIssueId, activeSprint, waterfallIssueVO,
   } = store.getIssue;
   const disableCreate = disabled || (typeCode === 'bug' && relateIssueId);
   const isWaterfall = WATERFALL_TYPE_CODES.includes(typeCode);
+  const subIssueVOList = isWaterfall ? (waterfallIssueVO?.childIssueList || []) : agileSubIssueVOList;
   const waterfallProps = {
     applyType: 'waterfall',
     typeCode: WATERFALL_TYPE_CODES,

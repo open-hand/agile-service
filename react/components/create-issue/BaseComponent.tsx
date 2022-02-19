@@ -636,7 +636,6 @@ const CreateIssueBase = observer(({
         typeCode: (issueType as IIssueType)?.typeCode,
         priorityCode: `priority-${data.priority || 0}`,
         parentIssueId: data.parentIssueId?.issueId,
-        parentId: WATERFALL_TYPE_CODES.includes((issueType as IIssueType)?.typeCode) ? data.parent : undefined,
         programId: projectId ?? getProjectId(),
         projectId: projectId ?? getProjectId(),
         featureId: (issueType as IIssueType)?.typeCode === 'bug' && data.parentIssueId?.issueId ? undefined : data.feature,
