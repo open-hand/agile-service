@@ -2,7 +2,7 @@ package io.choerodon.agile.api.vo.business;
 
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.waterfall.IssueParentVO;
+import io.choerodon.agile.api.vo.waterfall.WaterfallIssueVO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
@@ -292,13 +292,7 @@ public class IssueVO {
     @Encrypt
     private Long mainResponsibleId;
 
-    @ApiModelProperty(value = "所属父级")
-    @Encrypt
-    private Long parentId;
-
-    private IssueParentVO issueParentVO;
-
-    private Integer progress;
+    private WaterfallIssueVO waterfallIssueVO;
 
     public List<Long> getInfluenceIssueIds() {
         return influenceIssueIds;
@@ -1025,27 +1019,11 @@ public class IssueVO {
         this.projectVO = projectVO;
     }
 
-    public Long getParentId() {
-        return parentId;
+    public WaterfallIssueVO getWaterfallIssueVO() {
+        return waterfallIssueVO;
     }
 
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
-    }
-
-    public IssueParentVO getIssueParentVO() {
-        return issueParentVO;
-    }
-
-    public void setIssueParentVO(IssueParentVO issueParentVO) {
-        this.issueParentVO = issueParentVO;
-    }
-
-    public Integer getProgress() {
-        return progress;
-    }
-
-    public void setProgress(Integer progress) {
-        this.progress = progress;
+    public void setWaterfallIssueVO(WaterfallIssueVO waterfallIssueVO) {
+        this.waterfallIssueVO = waterfallIssueVO;
     }
 }

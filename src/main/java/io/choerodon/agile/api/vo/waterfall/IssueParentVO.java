@@ -22,6 +22,8 @@ public class IssueParentVO {
     @Encrypt
     private Long issueTypeId;
 
+    private Boolean starBeacon;
+
     public Long getIssueId() {
         return issueId;
     }
@@ -68,5 +70,13 @@ public class IssueParentVO {
 
     public void setIssueTypeId(Long issueTypeId) {
         this.issueTypeId = issueTypeId;
+    }
+
+    public Boolean getStarBeacon() {
+        return starBeacon;
+    }
+
+    public void setStarBeacon(Boolean starBeacon) {
+        this.starBeacon = starBeacon;
     }
 }

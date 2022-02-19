@@ -1,9 +1,6 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.api.vo.GanttChartVO;
-import io.choerodon.agile.api.vo.IssueTypeVO;
-import io.choerodon.agile.api.vo.ProjectVO;
-import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.business.SystemFieldOverrideConfigVO;
@@ -35,7 +32,7 @@ public interface AgileWaterfallService {
 
     void handlerWaterfallAfterCreateIssue(Long projectId, Long issueId, IssueCreateVO issueCreateVO);
 
-    void waterfallIssueDetailDTOToVO(IssueVO issueVO);
+    void waterfallIssueDetailDTOToVO(IssueVO issueVO, Map<Long, IssueTypeVO> issueTypeDTOMap, Map<Long, StatusVO> statusMapDTOMap, Map<Long, PriorityVO> priorityDTOMap);
 
     Page<GanttChartVO> pagedQuery(ProjectVO project,
                                   SearchVO searchVO,

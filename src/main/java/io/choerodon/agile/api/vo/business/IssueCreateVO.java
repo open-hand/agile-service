@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo.business;
 
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.waterfall.WaterfallIssueVO;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -145,12 +146,8 @@ public class IssueCreateVO {
     @Encrypt
     private List<Long> participantIds;
 
-    @ApiModelProperty(value = "所属父级")
-    @Encrypt
-    private Long parentId;
-
-    @ApiModelProperty(value = "进度")
-    private Integer progress;
+    @ApiModelProperty(value = "瀑布工作项")
+    private WaterfallIssueVO waterfallIssueVO;
 
     public List<TagVO> getTags() {
         return tags;
@@ -510,19 +507,11 @@ public class IssueCreateVO {
         this.participantIds = participantIds;
     }
 
-    public Long getParentId() {
-        return parentId;
+    public WaterfallIssueVO getWaterfallIssueVO() {
+        return waterfallIssueVO;
     }
 
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
-    }
-
-    public Integer getProgress() {
-        return progress;
-    }
-
-    public void setProgress(Integer progress) {
-        this.progress = progress;
+    public void setWaterfallIssueVO(WaterfallIssueVO waterfallIssueVO) {
+        this.waterfallIssueVO = waterfallIssueVO;
     }
 }

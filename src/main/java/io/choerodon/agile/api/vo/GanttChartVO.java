@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.choerodon.agile.api.vo.business.TagVO;
+import io.choerodon.agile.api.vo.waterfall.WaterfallIssueVO;
 import io.choerodon.agile.infra.dto.IssueSprintDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.swagger.annotations.ApiModelProperty;
@@ -143,6 +144,8 @@ public class GanttChartVO {
     private List<GanttChartVO> predecessors;
 
     private String predecessorType;
+
+    private WaterfallIssueVO waterfallIssueVO;
 
     public String getPredecessorType() {
         return predecessorType;
@@ -534,5 +537,13 @@ public class GanttChartVO {
 
     public void setAllEstimateTime(BigDecimal allEstimateTime) {
         this.allEstimateTime = allEstimateTime;
+    }
+
+    public WaterfallIssueVO getWaterfallIssueVO() {
+        return waterfallIssueVO;
+    }
+
+    public void setWaterfallIssueVO(WaterfallIssueVO waterfallIssueVO) {
+        this.waterfallIssueVO = waterfallIssueVO;
     }
 }
