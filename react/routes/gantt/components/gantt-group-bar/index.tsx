@@ -3,7 +3,7 @@ import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import dayjs, { Dayjs } from 'dayjs';
 import minMax from 'dayjs/plugin/minMax';
-import { Gantt } from '@choerodon/gantt';
+import { Gantt, GanttRef } from '@choerodon/gantt';
 import { Issue } from '@/common/types';
 import Context from '../../stores/context';
 
@@ -12,6 +12,7 @@ interface GanttGroupBarProps {
   bar: Gantt.Bar<Issue>
   width: number
   height: number
+  ganttRef:React.RefObject<GanttRef>
 }
 function getDelayRange(bar: Gantt.Bar<Issue>) {
   let maxEstimatedEndTime: Dayjs | undefined;
@@ -54,11 +55,8 @@ function getDelayRange(bar: Gantt.Bar<Issue>) {
   };
 }
 const GanttGroupBar: React.FC<GanttGroupBarProps> = ({
-  bar, width: planWidth,
+  bar, width: planWidth, ganttRef,
 }) => {
-  const { store } = useContext(Context);
-
-  const { ganttRef } = store;
   const delayWidth = (() => {
     // eslint-disable-next-line prefer-const
     let { maxEstimatedEndTime, maxActualCompletedDate } = getDelayRange(bar);

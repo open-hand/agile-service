@@ -7,7 +7,7 @@ import {
 import { observable, toJS } from 'mobx';
 import dayjs from 'dayjs';
 import { Tooltip } from 'choerodon-ui/pro';
-import type { GanttProps, Gantt } from '@choerodon/gantt';
+import type { GanttProps, Gantt, GanttRef } from '@choerodon/gantt';
 import { GanntMoveWrap } from '@choerodon/gantt';
 
 import { TooltipProps } from 'choerodon-ui/pro/lib/tooltip/Tooltip';
@@ -25,6 +25,8 @@ interface GanttBarProps {
   height: number
   dateKeyRange: [string, string]
   onClick: GanttProps<GanttIssue>['onBarClick']
+  ganttRef:React.RefObject<GanttRef>
+  processType?:string
 }
 function format(h: number) {
   if (h >= 24) {
@@ -36,10 +38,8 @@ function format(h: number) {
   return `${h}小时`;
 }
 const GanttBar: React.FC<GanttBarProps> = ({
-  type, bar, width, height, onClick, dateKeyRange,
+  type, bar, width, height, onClick, dateKeyRange, ganttRef, processType,
 }) => {
-  const { store, processType } = useGanttBodyContext();
-  const { ganttRef } = store;
   const estimateRef = useRef<HTMLDivElement>(null);
   const {
     record: issue, loading, stepGesture, task, dateMaps, startDateKey,
@@ -50,6 +50,11 @@ const GanttBar: React.FC<GanttBarProps> = ({
   const {
     showPercent, totalCount, completeCount, percent,
   }: any = useComputed(() => {
+    if (!processType) {
+      return {
+        showPercent: false, totalCount: 0, completeCount: 0, percent: 0,
+      };
+    }
     const process = {
       showPercent: type !== 'assignee' && subTasks && subTasks.length > 0,
       totalCount: subTasks?.length || 0,
@@ -167,5 +172,8 @@ const GanttBar: React.FC<GanttBarProps> = ({
       dashDateRange={dashDateRange}
     />
   );
+};
+GanttBar.defaultProps = {
+  processType: undefined,
 };
 export default observer(GanttBar);
