@@ -68,6 +68,10 @@ public class ObjectSchemeFieldContext {
         if (backlogExpandService != null) {
             list.add(BACKLOG);
         }
+        AgileWaterfallService agileWaterfallService = SpringBeanUtil.getExpandBean(AgileWaterfallService.class);
+        if (!ObjectUtils.isEmpty(agileWaterfallService)) {
+            list.addAll(Arrays.asList(STAGE, MILESTONE, ACTIVITY));
+        }
         return list;
     }
 
