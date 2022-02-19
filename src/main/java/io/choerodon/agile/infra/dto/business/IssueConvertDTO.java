@@ -124,10 +124,6 @@ public class IssueConvertDTO {
 
     private Boolean isPreSprintDone;
 
-    private Long parentId;
-
-    private Integer progress;
-
     public Long getRuleId() {
         return ruleId;
     }
@@ -601,19 +597,4 @@ public class IssueConvertDTO {
         isPreSprintDone = preSprintDone;
     }
 
-    public Long getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
-    }
-
-    public Integer getProgress() {
-        return progress;
-    }
-
-    public void setProgress(Integer progress) {
-        this.progress = progress;
-    }
 }
