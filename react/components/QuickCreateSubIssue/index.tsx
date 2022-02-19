@@ -22,6 +22,7 @@ import localCacheStore from '@/stores/common/LocalCacheStore';
 import TypeTag from '../TypeTag';
 import UserDropdown from '../UserDropdown';
 import useDefaultPriority from '@/hooks/data/useDefaultPriority';
+import { WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
 
 interface QuickCreateSubIssueProps {
   priorityId?: string
@@ -160,7 +161,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
         return false;
       }
       let res: any;
-      if (applyType === 'waterfall' && ['stage', 'milestone', 'activity'].includes(currentType.typeCode)) {
+      if (applyType === 'waterfall' && WATERFALL_TYPE_CODES.includes(currentType.typeCode)) {
         res = await issueApi.project(projectId).create(issue, applyType);
       } else {
         res = currentType.typeCode === 'sub_task'
@@ -303,7 +304,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
               setExpand(true);
             }}
           >
-            快速创建子任务
+            {applyType === 'waterfall' ? '快速创建子工作项' : '快速创建子任务'}
           </Button>
         )}
     </div>
