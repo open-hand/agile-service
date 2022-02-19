@@ -52,7 +52,6 @@ import { getProjectId } from '@/utils/common';
 import { IGanttHeaderHookData } from './hooks/useGanttHeader';
 import useGanttComponentProps from './hooks/useGanttComponentProps';
 
-const middleDateKeys = [{ key: 'actualStartTime', maxDateKey: 'actualEndTime', ignoreCheckDateKeys: ['actualEndTime'] }, { key: 'actualEndTime', minDateKey: 'actualStartTime' }];
 export interface IGanttGanttBodyProps extends IGanttHeaderHookData {
 
 }
@@ -386,12 +385,9 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
     innerRef: store.ganttRef as React.MutableRefObject<GanttRef>,
     data: ganttData,
     columns,
-    startDateKey: 'estimatedStartTime',
-    endDateKey: 'estimatedEndTime',
     isRestDay,
     isShowBar,
     unit,
-    middleDateKeys,
     renderBar,
     renderGroupBar,
     renderEmpty,
