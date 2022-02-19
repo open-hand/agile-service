@@ -278,9 +278,11 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
       width={width}
       height={height}
       dateKeyRange={dateKeyRange}
+      ganttRef={store.ganttRef}
+      processType={processType}
       onClick={noop}
     />
-  ), [type]);
+  ), [processType, store.ganttRef, type]);
   const renderGroupBar: GanttProps['renderGroupBar'] = useCallback((bar, { width, height }) => {
     const { record } = bar;
     if (record.groupType === 'sprint') {
@@ -297,9 +299,10 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
         bar={bar}
         width={width}
         height={height}
+        ganttRef={store.ganttRef}
       />
     );
-  }, []);
+  }, [store.ganttRef]);
 
   const handleCreateIssue = usePersistFn((issue: Issue, issueId?: string, parentId?: string, dontCopyEpic = false) => {
     setData(produce(data, (draft) => {
