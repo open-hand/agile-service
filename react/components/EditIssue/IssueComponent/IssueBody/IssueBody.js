@@ -33,7 +33,7 @@ import IssueUI from './Issue-UI';
 
 import { featureApi } from '@/api';
 import { getProjectId } from '@/utils/common';
-import {DEPENDENCY_TAB, SUB_ISSUE} from '../../../../constants/WATERFALL_INJECT';
+import { DEPENDENCY_TAB, SUB_ISSUE } from '../../../../constants/WATERFALL_INJECT';
 import { WATERFALL_TYPE_CODES } from '../../../../constants/TYPE_CODE';
 
 const { TabPane } = Tabs;
