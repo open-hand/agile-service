@@ -20,6 +20,7 @@ import IssueHeader from './IssueComponent/IssueHeader';
 import IssueBody from './IssueComponent/IssueBody/IssueBody';
 import EditIssueContext from './stores';
 import { getProjectId } from '@/utils/common';
+import { WATERFALL_TYPE_CODES } from '../../constants/TYPE_CODE';
 
 const JSONbigString = JSONbig({ storeAsString: true });
 
@@ -294,8 +295,12 @@ function EditIssue() {
       return;
     }
     const {
-      issueId: parentIssueId, summary: parentSummary, activeSprint,
+      issueId: parentIssueId, summary: parentSummary, activeSprint, typeCode: parentTypeCode,
     } = store.getIssue;
+    const waterProps = WATERFALL_TYPE_CODES.includes(parentTypeCode) ? {
+      typeCode: WATERFALL_TYPE_CODES,
+      applyType: 'waterfall',
+    } : {};
     openCreateSubTask({
       onCreate: (subIssue) => {
         resetDefault();
@@ -315,6 +320,7 @@ function EditIssue() {
       projectId: store.projectId,
       defaultAssignee: store.defaultAssignee,
       defaultTypeId: store.defaultTypeId,
+      ...waterProps,
     });
   });
   const handleOpenCreateSubBug = usePersistFn(() => {

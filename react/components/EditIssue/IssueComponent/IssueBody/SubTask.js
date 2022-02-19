@@ -12,6 +12,7 @@ import IssueList from '../../Component/IssueList';
 import EditIssueContext from '../../stores';
 import './SubTask.less';
 import Divider from './Divider';
+import { WATERFALL_TYPE_CODES } from '../../../../constants/TYPE_CODE';
 
 const SubTask = observer(({
   onDeleteSubIssue, reloadIssue, onUpdate, parentSummary, onCreateSubIssue, onOpenCreateSubTask, checkDescriptionEdit,
@@ -21,6 +22,14 @@ const SubTask = observer(({
     issueId: parentIssueId, subIssueVOList = [], priorityId, sprintId, typeCode, relateIssueId, activeSprint,
   } = store.getIssue;
   const disableCreate = disabled || (typeCode === 'bug' && relateIssueId);
+  const isWaterfall = WATERFALL_TYPE_CODES.includes(typeCode);
+  const waterfallProps = {
+    applyType: 'waterfall',
+    typeCode: WATERFALL_TYPE_CODES,
+    defaultValues: {
+      parentId: parentIssueId,
+    },
+  };
   const renderIssueList = (issue, i) => (
     <IssueList
       showAssignee
@@ -92,11 +101,11 @@ const SubTask = observer(({
         <Divider />
         <div className="c7n-title-wrapper">
           <div className="c7n-title-left">
-            <span>子任务</span>
+            <span>{isWaterfall ? '子工作项' : '子任务'}</span>
           </div>
           {!disableCreate && (
             <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
-              <Tooltip placement="topRight" title="创建子任务">
+              <Tooltip placement="topRight" title={`创建${isWaterfall ? '子工作项' : '子任务'}`}>
                 <Button onClick={onOpenCreateSubTask}>
                   <Icon type="playlist_add icon" />
                 </Button>
@@ -104,7 +113,7 @@ const SubTask = observer(({
             </div>
           )}
         </div>
-        {subIssueVOList && subIssueVOList.length
+        {subIssueVOList && subIssueVOList.length && !isWaterfall
           ? (
             <div className="c7n-subTask-progress">
               <Progress percent={getPercent()} style={{ marginRight: 5 }} />
@@ -117,7 +126,7 @@ const SubTask = observer(({
             priorityId={priorityId}
             sprintId={sprintId}
             projectId={projectId}
-            parentIssueId={parentIssueId}
+            // parentIssueId={parentIssueId}
             onCreate={handleCreateSubIssue}
             cantCreateEvent={() => { onOpenCreateSubTask(); }}
             typeIdChange={(id) => {
@@ -133,6 +142,7 @@ const SubTask = observer(({
               store.setDefaultSprint(value);
             }}
             beforeClick={checkDescriptionEdit}
+            {...isWaterfall ? waterfallProps : { parentIssueId }}
           />
         )}
       </div>

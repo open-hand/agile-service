@@ -35,7 +35,9 @@ const IssueNumber = ({
         paramIssueId: decryptIssueId, paramName: issueNum,
       },
     };
-    if (!isProgramIssue) {
+    if (applyType === 'waterfall') {
+      copy(`${window.location.host}/#/${linkUrl('waterfall/wbs', queryData)}`);
+    } else if (!isProgramIssue) {
       copy(`${window.location.host}/#/${linkUrl('agile/work-list/issue', queryData)}`);
     } else {
       copy(`${window.location.host}/#/${linkUrl('agile/feature', queryData)}`);

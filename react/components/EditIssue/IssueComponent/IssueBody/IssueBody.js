@@ -33,7 +33,7 @@ import IssueUI from './Issue-UI';
 
 import { featureApi } from '@/api';
 import { getProjectId } from '@/utils/common';
-import { DEPENDENCY_TAB } from '../../../../constants/WATERFALL_INJECT';
+import { DEPENDENCY_TAB, SUB_ISSUE } from '../../../../constants/WATERFALL_INJECT';
 import { WATERFALL_TYPE_CODES } from '../../../../constants/TYPE_CODE';
 
 const { TabPane } = Tabs;
@@ -136,7 +136,7 @@ function IssueBody(props) {
           {!outside && !otherProject && issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueDoc {...props} /> : ''}
 
-          {issueTypeVO.typeCode && ['story', 'task', 'bug'].indexOf(issueTypeVO.typeCode) !== -1
+          {issueTypeVO.typeCode && ['issue_epic', 'sub_task', 'feature'].indexOf(issueTypeVO.typeCode) === -1
             ? <SubTask {...props} /> : ''}
 
           {issueTypeVO.typeCode && ['story', 'task'].indexOf(issueTypeVO.typeCode) !== -1

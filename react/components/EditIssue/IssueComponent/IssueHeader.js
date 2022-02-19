@@ -20,7 +20,7 @@ const IssueHeader = (props) => {
   const issue = store.getIssue;
   const {
     parentIssueId, relateIssueId, typeCode, parentIssueSummary, parentRelateSummary, parentIssueDescription, parentRelateDescription,
-    parentStarBeacon, relateStarBeacon, projectVO,
+    parentStarBeacon, relateStarBeacon, projectVO, issueParentVO,
   } = issue;
   return (
     <div className={`${prefixCls}-IssueHeader`}>
@@ -32,15 +32,15 @@ const IssueHeader = (props) => {
             </div>
           )}
           {
-            parentIssueSummary || parentRelateSummary ? (
+            parentIssueSummary || parentRelateSummary || issueParentVO?.summary ? (
               <Popover
                 overlayClassName={`${prefixCls}-IssueHeader-top-popover`}
                 placement="leftTop"
                 title="父任务详情"
                 content={(
                   <IssueParentTip
-                    parentSummary={parentIssueSummary || parentRelateSummary}
-                    parentDescription={parentIssueDescription || parentRelateDescription}
+                    parentSummary={parentIssueSummary || parentRelateSummary || issueParentVO?.summary}
+                    parentDescription={parentIssueDescription || parentRelateDescription || issueParentVO?.description}
                     parentStarBeacon={parentStarBeacon || relateStarBeacon}
                   />
                 )}
@@ -55,10 +55,10 @@ const IssueHeader = (props) => {
                 >
                   <IssueType {...props} />
                   <IssueParentSummary
-                    parentIssueId={relateIssueId || parentIssueId}
+                    parentIssueId={relateIssueId || parentIssueId || issueParentVO?.issueId}
                     resetIssue={resetIssue}
                     reloadIssue={reloadIssue}
-                    parentSummary={parentIssueSummary || parentRelateSummary}
+                    parentSummary={parentIssueSummary || parentRelateSummary || issueParentVO?.summary}
                     issue={issue}
                     disabled={disabled}
                   />
@@ -74,10 +74,10 @@ const IssueHeader = (props) => {
               >
                 <IssueType {...props} />
                 <IssueParentSummary
-                  parentIssueId={relateIssueId || parentIssueId}
+                  parentIssueId={relateIssueId || parentIssueId || issueParentVO?.issueId}
                   resetIssue={resetIssue}
                   reloadIssue={reloadIssue}
-                  parentSummary={parentIssueSummary || parentRelateSummary}
+                  parentSummary={parentIssueSummary || parentRelateSummary || issueParentVO?.summary}
                   issue={issue}
                   disabled={disabled}
                 />

@@ -557,7 +557,11 @@ const CreateIssueBase = observer(({
     }
     currentTemplateDescription.current = templateData?.template;
     if (parentIssue) {
-      setValue('parentIssueId', parentIssue);
+      if (issueTypeCode && WATERFALL_TYPE_CODES.includes(issueTypeCode)) {
+        setValue('parent', parentIssue.issueId);
+      } else {
+        setValue('parentIssueId', parentIssue);
+      }
     }
     if (showFeature && defaultFeature) {
       setValue('feature', defaultFeature.issueId);
