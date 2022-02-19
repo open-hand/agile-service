@@ -66,6 +66,9 @@ function useGanttComponentProps(props: IHookUseGanttComponentProps, config?: IHo
     onResizeWidth: handleResizeWidth,
     rowHeight: 34,
     barHeight: 13,
+    startDateKey: 'estimatedStartTime',
+    endDateKey: 'estimatedEndTime',
+    middleDateKeys: [{ key: 'actualStartTime', maxDateKey: 'actualEndTime', ignoreCheckDateKeys: ['actualEndTime'] }, { key: 'actualEndTime', minDateKey: 'actualStartTime' }],
   }), [invalidBarTooltip]);
   return [{
     ...constantProps,
