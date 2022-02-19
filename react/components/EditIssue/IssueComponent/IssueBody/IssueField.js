@@ -25,7 +25,7 @@ import FieldActualStartTime from './Field/FieldActualStartTime';
 import FieldActualEndTime from './Field/FieldActualEndTime';
 import FieldParticipant from './Field/FieldParticipant';
 import FieldEstimateTime from './Field/FieldEstimateTime';
-import { FIELD_SELECT_PARENT } from '../../../../constants/WATERFALL_INJECT';
+import { FIELD_SELECT_PARENT, FIELD_PROGRESS } from '../../../../constants/WATERFALL_INJECT';
 
 const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 'timeTrace', 'assignee'];
 
@@ -116,6 +116,8 @@ const IssueField = observer((props) => {
         return <FieldParticipant {...props} field={field} />;
       case 'parent':
         return hasInject(FIELD_SELECT_PARENT) ? mount(FIELD_SELECT_PARENT, { ...props, field }) : null;
+      case 'progress':
+        return hasInject(FIELD_PROGRESS) ? mount(FIELD_PROGRESS, { ...props, field }) : null;
       case 'estimateTime':
         return null;
       default:
