@@ -12,19 +12,19 @@ import openRequiredFieldsModal from './required-fields';
 import Styles from './IssueType.less';
 import useIsProgram from '@/hooks/useIsProgram';
 import { WATERFALL_TYPE_CODES } from '../../../constants/TYPE_CODE';
-import useIsWaterfall from '@/hooks/useIsWaterfall';
 
 const IssueType = observer(({
-  reloadIssue, applyType, onTransformType,
+  reloadIssue, onTransformType,
 }) => {
   const {
     store, disabled, menuType, isProgramIssue,
   } = useContext(EditIssueContext);
   const { isShowFeature } = useIsInProgram({ projectId: store.projectId });
   const { isAgileProgram } = useIsProgram();
-  const { isWaterfall } = useIsWaterfall();
   const issue = store.getIssue;
-  const { issueTypeVO = {}, featureVO = {}, subIssueVOList = [] } = issue;
+  const {
+    issueTypeVO = {}, featureVO = {}, subIssueVOList = [], applyType,
+  } = issue;
   const { typeCode, id: issueTypeId } = issueTypeVO;
   const queryTypeCodes = useMemo(() => {
     if (subIssueVOList.length > 0) {
