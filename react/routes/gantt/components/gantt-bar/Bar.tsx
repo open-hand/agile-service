@@ -17,6 +17,8 @@ interface IGanttBaseBarProps {
   startDate?: Gantt.DateWithWidth
   ganttRef: React.RefObject<GanttRef>
   progressCount?: { total: number, completed: number }
+  dashMoveDateRange?: Partial<IGanttBaseBarRange>
+  fillMoveDateRange?: Partial<IGanttBaseBarRange>
   dashDateRange?: IGanttBaseBarRange & { color?: string }
   fillDateRange?: IGanttBaseBarRange & { completedColor?: string, unCompletedColor?: string }
   /** 有截止日期才会有延期 */
@@ -34,6 +36,7 @@ interface IGanttBaseBarProps {
 function GanttBaseBar(props: React.PropsWithChildren<IGanttBaseBarProps>) {
   const {
     width, height, tooltipTitle, progressCount, fillDateRange, dashDateRange, startDate, ganttRef, bar,
+    fillMoveDateRange, dashMoveDateRange,
   } = props;
   const isAddUnitDay = useCallback(({ start, end }: IGanttBaseBarRange) => start.key !== startDate?.key, [startDate?.key]);
   const dashStyle = useMemo(() => {
@@ -95,14 +98,18 @@ function GanttBaseBar(props: React.PropsWithChildren<IGanttBaseBarProps>) {
         onMouseEnter={handleTooltipMouseEnter}
         onMouseLeave={handleTooltipMouseLeave}
       >
-        <div id="ganttBar" className={styles.dash} style={dashStyle} />
-        <div className={styles.fill} style={fillStyle}>
-          <div className={styles.fill_progress}>
-            <div style={progressStyle.completed} />
-            <div style={progressStyle.unCompleted} />
+        <GanntMoveWrap data={bar} startDate={dashMoveDateRange?.start} endDate={dashMoveDateRange?.end}>
+          <div id="ganttBar" className={styles.dash} style={dashStyle} />
+        </GanntMoveWrap>
+        <GanntMoveWrap data={bar} startDate={fillMoveDateRange?.start} endDate={fillMoveDateRange?.end}>
+          <div className={styles.fill} style={fillStyle}>
+            <div className={styles.fill_progress}>
+              <div style={progressStyle.completed} />
+              <div style={progressStyle.unCompleted} />
+            </div>
+            <div className={classNames(styles.delay, styles.fill_delay)} style={{ width: deadline?.width || 0 }} />
           </div>
-          <div className={classNames(styles.delay, styles.fill_delay)} style={{ width: deadline?.width || 0 }} />
-        </div>
+        </GanntMoveWrap>
       </div>
       <div className={styles.delay} />
     </div>

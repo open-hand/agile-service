@@ -25,8 +25,8 @@ interface GanttBarProps {
   height: number
   dateKeyRange: [string, string]
   onClick: GanttProps<GanttIssue>['onBarClick']
-  ganttRef:React.RefObject<GanttRef>
-  processType?:string
+  ganttRef: React.RefObject<GanttRef>
+  processType?: string
 }
 function format(h: number) {
   if (h >= 24) {
@@ -170,6 +170,8 @@ const GanttBar: React.FC<GanttBarProps> = ({
       deadline={deadline}
       fillDateRange={fillDateRange}
       dashDateRange={dashDateRange}
+      fillMoveDateRange={{ start: actualStartTime, end: actualEndTime }}
+      dashMoveDateRange={{ start: estimatedStartTime, end: estimatedEndTime }}
     />
   );
 };
