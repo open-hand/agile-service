@@ -537,7 +537,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             agilePluginService.programIssueDetailDTOToVO(issueVO,issue);
         }
         if (waterfallPluginService != null) {
-            waterfallPluginService.waterfallIssueDetailDTOToVO(issueVO);
+            waterfallPluginService.waterfallIssueDetailDTOToVO(issueVO, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
         }
         //设置星标
         setStarBeacon(issueVO);
