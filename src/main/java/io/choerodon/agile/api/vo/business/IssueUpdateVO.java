@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo.business;
 
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.waterfall.WaterfallIssueVO;
 import io.choerodon.agile.infra.annotation.Update;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
@@ -144,6 +145,9 @@ public class IssueUpdateVO {
     @ApiModelProperty(value = "参与人")
     @Encrypt
     private List<Long> participantIds;
+
+    @ApiModelProperty(value = "瀑布工作项")
+    private WaterfallIssueVO waterfallIssueVO;
 
     public List<TagVO> getTags() {
         return tags;
@@ -468,5 +472,13 @@ public class IssueUpdateVO {
 
     public void setParticipantIds(List<Long> participantIds) {
         this.participantIds = participantIds;
+    }
+
+    public WaterfallIssueVO getWaterfallIssueVO() {
+        return waterfallIssueVO;
+    }
+
+    public void setWaterfallIssueVO(WaterfallIssueVO waterfallIssueVO) {
+        this.waterfallIssueVO = waterfallIssueVO;
     }
 }
