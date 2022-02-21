@@ -52,6 +52,7 @@ public class IssueValidator {
     private static final String STORY = "story";
     private static final String STATUS_ID = "status_id";
     private static final String ERROR_ISSUE_ID_NOT_FOUND = "error.IssueRule.issueId";
+    private static final String ERROR_APPLY_TYPE_IS_NULL_OR_ILLEGAL= "error.applyType.isNull.or.illegal";
     private static final String AGILE = "agile";
     private static final String EPIC_ID = "epicId";
     private static final String SPRINT_ID_FIELD = "sprintId";
@@ -300,6 +301,9 @@ public class IssueValidator {
         if (issueUpdateTypeVO.getIssueId() == null) {
             throw new CommonException(ERROR_ISSUE_ID_NOT_FOUND);
         }
+        if (issueUpdateTypeVO.getApplyType() == null || !EnumUtil.contain(SchemeApplyType.class, issueUpdateTypeVO.getApplyType())) {
+            throw new CommonException(ERROR_APPLY_TYPE_IS_NULL_OR_ILLEGAL);
+        }
         if (issueUpdateTypeVO.getIssueTypeId() == null ||
                 Objects.isNull(issueTypeMapper.selectOne(new IssueTypeDTO(ConvertUtil.getOrganizationId(projectId), issueUpdateTypeVO.getIssueTypeId())))) {
             throw new CommonException(ERROR_ISSUE_TYPE_ID_IS_NULL_OR_ILLEGAL);
@@ -311,8 +315,8 @@ public class IssueValidator {
         if (issueConvertDTO == null) {
             throw new CommonException("error.IssueUpdateTypeVO.issueDO");
         }
-        Long originStateMachineId = projectConfigService.queryStateMachineId(projectId, AGILE, issueConvertDTO.getIssueTypeId());
-        Long currentStateMachineId = projectConfigService.queryStateMachineId(projectId, AGILE, issueUpdateTypeVO.getIssueTypeId());
+        Long originStateMachineId = projectConfigService.queryStateMachineId(projectId, issueUpdateTypeVO.getApplyType(), issueConvertDTO.getIssueTypeId());
+        Long currentStateMachineId = projectConfigService.queryStateMachineId(projectId, issueUpdateTypeVO.getApplyType(), issueUpdateTypeVO.getIssueTypeId());
         if (originStateMachineId == null || currentStateMachineId == null) {
             throw new CommonException("error.IssueRule.stateMachineId");
         }

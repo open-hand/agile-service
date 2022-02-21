@@ -6,6 +6,7 @@ import io.choerodon.agile.api.vo.business.IssueUpdateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.business.SystemFieldOverrideConfigVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
@@ -39,11 +40,13 @@ public interface AgileWaterfallService {
                                   SearchVO searchVO,
                                   PageRequest pageRequest);
 
-    void checkBeforeUpdateIssue(IssueUpdateVO issueUpdateVO, Long projectId);
+    void checkBeforeUpdateIssue(IssueUpdateVO issueUpdateVO, Long projectId, List<String> fieldList);
 
     void buildWaterfallFieldList(List<String> fieldList, IssueUpdateVO issueUpdateVO);
 
     void handleUpdateWaterfallField(Long projectId, IssueUpdateVO issueUpdateVO);
 
     void handleUpdateWaterfallFieldWithoutRuleNotice(Long projectId, IssueUpdateVO issueUpdateVO);
+
+    void checkUpdateIssueTypeCode(Long projectId, IssueConvertDTO issueConvertDTO, IssueUpdateTypeVO issueUpdateTypeVO);
 }

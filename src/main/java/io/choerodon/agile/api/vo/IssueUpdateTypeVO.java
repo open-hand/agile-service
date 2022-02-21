@@ -31,6 +31,9 @@ public class IssueUpdateTypeVO {
     @Encrypt
     private Long issueTypeId;
 
+    @ApiModelProperty(value = "类型编码")
+    private String applyType;
+
     private BatchUpdateFieldsValueVo batchUpdateFieldsValueVo;
 
     public BatchUpdateFieldsValueVo getBatchUpdateFieldsValueVo() {
@@ -87,6 +90,14 @@ public class IssueUpdateTypeVO {
 
     public Long getIssueTypeId() {
         return issueTypeId;
+    }
+
+    public String getApplyType() {
+        return applyType;
+    }
+
+    public void setApplyType(String applyType) {
+        this.applyType = applyType;
     }
 
     @Override
