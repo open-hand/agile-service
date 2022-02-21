@@ -38,6 +38,7 @@ export interface ChangeTypeModalProps {
   reloadIssue: Function,
   onUpdate?: Function,
   epicName?: string
+  applyType?: 'waterfall' | 'agile',
 }
 
 const extraFields = ['timeTrace'];
@@ -45,7 +46,7 @@ const extraFields = ['timeTrace'];
 const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
   const { isShowFeature } = useIsInProgram({ projectId: props.projectId });
   // 必填只有非特性进行转换时会有此页面
-  let { data: issueTypeData = [] } = useProjectIssueTypes({ onlyEnabled: true, projectId: props.projectId, applyType: 'agile' });
+  let { data: issueTypeData = [] } = useProjectIssueTypes({ onlyEnabled: true, projectId: props.projectId, applyType: props.applyType || 'agile' });
 
   const {
     modal, requiredFields: fields, issueVO, reloadIssue, onUpdate, projectId,

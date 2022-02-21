@@ -6,6 +6,7 @@ import { toJS } from 'mobx';
 import {
   assign,
 } from 'lodash';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { IField } from '@/common/types';
@@ -129,22 +130,34 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[], projectId?: strin
           }
           if (item.system && item.fieldCode === 'estimatedStartTime') {
             assign(dsField, {
-              max: 'estimatedEndTime',
+              // max: 'estimatedEndTime',
+              computedProps: {
+                max: ({ record }: { record: Record }) => record.get('estimatedEndTime'),
+              },
             });
           }
           if (item.system && item.fieldCode === 'estimatedEndTime') {
             assign(dsField, {
-              min: 'estimatedStartTime',
+              // min: 'estimatedStartTime',
+              computedProps: {
+                min: ({ record }: { record: Record }) => record.get('estimatedStartTime'),
+              },
             });
           }
           if (item.system && item.fieldCode === 'actualStartTime') {
             assign(dsField, {
-              max: 'actualEndTime',
+              // max: 'actualEndTime',
+              computedProps: {
+                max: ({ record }: { record: Record }) => record.get('actualEndTime'),
+              },
             });
           }
           if (item.system && item.fieldCode === 'actualEndTime') {
             assign(dsField, {
-              min: 'actualStartTime',
+              // min: 'actualStartTime',
+              computedProps: {
+                min: ({ record }: { record: Record }) => record.get('actualStartTime'),
+              },
             });
           }
           if (item.system && item.fieldCode === 'component') {
