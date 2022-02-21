@@ -50,6 +50,9 @@ public class ObjectSchemeFieldExtendDTO extends AuditDomain {
 
     private Boolean extraConfig;
 
+    @Transient
+    private String fieldCode;
+
     public ObjectSchemeFieldExtendDTO() {
     }
 
@@ -169,5 +172,13 @@ public class ObjectSchemeFieldExtendDTO extends AuditDomain {
 
     public void setExtraConfig(Boolean extraConfig) {
         this.extraConfig = extraConfig;
+    }
+
+    public String getFieldCode() {
+        return fieldCode;
+    }
+
+    public void setFieldCode(String fieldCode) {
+        this.fieldCode = fieldCode;
     }
 }

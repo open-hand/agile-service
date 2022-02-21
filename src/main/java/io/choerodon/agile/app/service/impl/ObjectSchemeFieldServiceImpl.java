@@ -462,6 +462,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (!ObjectUtils.isEmpty(agileWaterfallService)) {
             overrideConfigMap.putAll(agileWaterfallService.querySystemFieldOverrideConfig());
         }
+        Map<String, List<ObjectSchemeFieldExtendDTO>> issueTypeFieldMap = new HashMap<>();
         systemFields.forEach(field -> {
             String context = getFieldContext(field.getCode());
             // 过滤当前字段的问题类型
@@ -483,6 +484,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                     queryIssueTypeFieldConfigMap(overrideConfigMap, code);
             issueTypeVOS.forEach(issueType -> {
                 String typeCode = issueType.getTypeCode();
+                List<ObjectSchemeFieldExtendDTO> fields = issueTypeFieldMap.computeIfAbsent(typeCode, x -> new ArrayList<>());
                 SystemFieldOverrideConfigVO systemFieldOverrideConfig = issueTypeFieldConfigMap.get(typeCode);
                 boolean isRequired = required;
                 boolean isCreated = created;
@@ -500,10 +502,43 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 extendField.setRequired(isRequired);
                 extendField.setCreated(isCreated);
                 extendField.setEdited(isEdited);
-                extendField.setRank(getMinRank(organizationId, null, issueType.getId(), null));
+                extendField.setFieldCode(code);
+                fields.add(extendField);
+            });
+        });
+        insertObjectFieldExtends(organizationId, issueTypeFieldMap);
+    }
+
+    private void insertObjectFieldExtends(Long organizationId,
+                                          Map<String, List<ObjectSchemeFieldExtendDTO>> issueTypeFieldMap) {
+        issueTypeFieldMap.forEach((issueType, fieldExtends) -> {
+            List<ObjectSchemeFieldExtendDTO> sortedList = new ArrayList<>();
+            List<String> fieldExtendOrderList = queryFieldOrderByIssueType(issueType);
+            if (!ObjectUtils.isEmpty(fieldExtendOrderList)) {
+                Map<String, ObjectSchemeFieldExtendDTO> fieldMap =
+                        fieldExtends.stream().collect(Collectors.toMap(ObjectSchemeFieldExtendDTO::getFieldCode, Function.identity()));
+                fieldExtendOrderList.forEach(x -> {
+                    ObjectSchemeFieldExtendDTO fieldExtend = fieldMap.get(x);
+                    if (!ObjectUtils.isEmpty(fieldExtend)) {
+                        sortedList.add(fieldExtend);
+                    }
+                });
+            } else {
+                sortedList.addAll(fieldExtends);
+            }
+            sortedList.forEach(extendField -> {
+                extendField.setRank(getMinRank(organizationId, null, extendField.getIssueTypeId(), null));
                 objectSchemeFieldExtendMapper.insertSelective(extendField);
             });
         });
+    }
+
+    private List<String> queryFieldOrderByIssueType(String issueType) {
+        if(!ObjectUtils.isEmpty(agileWaterfallService)) {
+            return agileWaterfallService.queryFieldOrderByIssueType(issueType);
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     private Map<String, SystemFieldOverrideConfigVO> queryIssueTypeFieldConfigMap(Map<String, List<SystemFieldOverrideConfigVO>> overrideConfigMap, String code) {
@@ -1802,6 +1837,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         }
         if (backlogExpandService != null) {
             map.putAll(backlogExpandService.fieldEdited(issueType));
+        }
+        if (!ObjectUtils.isEmpty(agileWaterfallService)) {
+            map.putAll(agileWaterfallService.fieldEdited(issueType));
         }
         if (!ObjectUtils.isEmpty(map)) {
             pageConfigFields.forEach(p -> {
