@@ -132,4 +132,20 @@ public class ProjectCategory {
                 || containsProgram
                 || containsWaterfall;
     }
+
+    public static String getProjectIssueTypeList(Long projectId) {
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
+        if (CollectionUtils.isEmpty(projectVO.getCategories())) {
+            throw new CommonException("error.categories.is.null");
+        }
+        String issueTypeList = "agileIssueType";
+        Set<String> codes = projectVO.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toSet());
+        if (codes.contains(ProjectCategory.MODULE_WATERFALL_AGILE)) {
+            return "waterfallAgileIssueType";
+        }
+        if (codes.contains(ProjectCategory.MODULE_WATERFALL)) {
+            return "waterfallIssueType";
+        }
+        return issueTypeList;
+    }
 }

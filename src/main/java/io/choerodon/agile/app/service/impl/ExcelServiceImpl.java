@@ -318,7 +318,8 @@ public class ExcelServiceImpl implements ExcelService {
         List<PredefinedDTO> predefinedList =
                 processSystemFieldPredefinedList(organizationId, projectId, systemFields, withFeature, cursor);
         Map<String, String> customFieldCodeNameMap = new HashMap<>();
-        predefinedList.addAll(processCustomFieldPredefinedList(projectId, customFields, cursor, systemFields.size(), customFieldCodeNameMap, "agileIssueType"));
+        String issueTypeList = ProjectCategory.getProjectIssueTypeList(projectId);
+        predefinedList.addAll(processCustomFieldPredefinedList(projectId, customFields, cursor, systemFields.size(), customFieldCodeNameMap, issueTypeList));
         List<String> headers = generateExcelHeaderTitle(systemFields, customFields, customFieldCodeNameMap);
         Workbook wb = new XSSFWorkbook();
         // copy guide sheet
@@ -2689,7 +2690,8 @@ public class ExcelServiceImpl implements ExcelService {
             }
         }
         if (containsCustomFields) {
-            validateCustomField(headerMap, projectId, history, "agileIssueType", dateTypeColumns, websocketKey);
+            String issueTypeList = ProjectCategory.getProjectIssueTypeList(projectId);
+            validateCustomField(headerMap, projectId, history, issueTypeList, dateTypeColumns, websocketKey);
         }
     }
 
