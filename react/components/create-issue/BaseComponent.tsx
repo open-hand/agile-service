@@ -17,6 +17,7 @@ import {
 import { toJS } from 'mobx';
 import { UploadFile } from 'choerodon-ui/lib/upload/interface';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
+import Field from 'choerodon-ui/pro/lib/data-set/Field';
 import moment from 'moment';
 import { has as hasInject, mount } from '@choerodon/inject';
 import UploadButton from '@/components/CommonComponent/UploadButton';
@@ -805,62 +806,74 @@ const CreateIssueBase = observer(({
       };
     }
   });
-  const renderFields = usePersistFn(() => (
-    [...dataSet.fields.values()].filter((f) => f.get('display') !== false && !wsjfFields.includes(f.name)).map((dataSetField) => {
-      const { name, required } = dataSetField;
-      const fieldType = dataSetField.get('fieldType');
-      const fieldId = dataSetField.get('fieldId');
-      const config = getFieldConfig({
-        fieldCode: name,
-        fieldType,
-      });
-      const field = find(fields, { fieldCode: name });
-
-      const extraProps = getFieldProps({
-        required: required || false,
-        fieldCode: name,
-        fieldType,
-        defaultValueObj: field?.defaultValueObj,
-        defaultValueObjs: field?.defaultValueObjs,
-      });
-      if (extraProps.hidden) {
-        return null;
+  const renderFields = usePersistFn(() => {
+    // 由于经过动态属性的字段会后置，因此需要根据源数据对fields进行排序
+    const cloneFields: Map<string, Field> = dataSet.fields.toJS();
+    const newFields: Field[] = [];
+    (dataSet.props.fields || []).forEach(({ name: fieldName }) => {
+      if (fieldName && cloneFields.get(fieldName)) {
+        // @ts-ignore
+        newFields.push(cloneFields.get(fieldName));
       }
-      return config
-        ? ([
-          config.renderFormItem({
-            name,
-            fieldId,
-            projectId,
-            clearButton: !required,
-            multiple: dataSetField.get('multiple'),
-            style: {
-              width: '100%',
-            },
-            colSpan: lineField.includes(dataSetField.name) ? 2 : 1,
-            newLine: lineField.includes(dataSetField.name),
-            ...extraProps,
-          }),
-          name === 'description' ? (
-            <div
-              // @ts-ignore
-              newLine
-              colSpan={2}
-            >
-              <UploadButton
-                fileList={fileList}
-                onChange={({ fileList: files }) => {
-                  if (validateFile(files)) {
-                    setFileList(files);
-                  }
-                }}
-              />
-            </div>
-          ) : null,
-        ])
-        : null;
-    })
-  ));
+    });
+
+    return (
+      [...newFields].filter((f) => f.get('display') !== false && !wsjfFields.includes(f.name)).map((dataSetField) => {
+        const { name, required } = dataSetField;
+        const fieldType = dataSetField.get('fieldType');
+        const fieldId = dataSetField.get('fieldId');
+        const config = getFieldConfig({
+          fieldCode: name,
+          fieldType,
+        });
+        const field = find(fields, { fieldCode: name });
+
+        const extraProps = getFieldProps({
+          required: required || false,
+          fieldCode: name,
+          fieldType,
+          defaultValueObj: field?.defaultValueObj,
+          defaultValueObjs: field?.defaultValueObjs,
+        });
+        if (extraProps.hidden) {
+          return null;
+        }
+        return config
+          ? ([
+            config.renderFormItem({
+              name,
+              fieldId,
+              projectId,
+              clearButton: !required,
+              multiple: dataSetField.get('multiple'),
+              style: {
+                width: '100%',
+              },
+              colSpan: lineField.includes(dataSetField.name) ? 2 : 1,
+              newLine: lineField.includes(dataSetField.name),
+              ...extraProps,
+            }),
+            name === 'description' ? (
+              <div
+                // @ts-ignore
+                newLine
+                colSpan={2}
+              >
+                <UploadButton
+                  fileList={fileList}
+                  onChange={({ fileList: files }) => {
+                    if (validateFile(files)) {
+                      setFileList(files);
+                    }
+                  }}
+                />
+              </div>
+            ) : null,
+          ])
+          : null;
+      })
+    )
+  });
   const issueLinkDataSet = useMemo(() => new DataSet({
     // autoCreate: true,
     fields: [{
