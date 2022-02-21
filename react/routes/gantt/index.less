@@ -1,3 +1,5 @@
+@import '../../style/gantt';
+
 body.c7n-gantt-fullScreen {
 
   .page-header,.c7ncd-side-menu,
@@ -25,7 +27,8 @@ body.c7n-gantt-fullScreen {
   display: flex;
   flex-flow: column;
   flex: 1;
-
+  // 甘特图样式
+  .gantt();
   &-body {
     display: flex;
     flex-flow: column;
@@ -122,75 +125,4 @@ body.c7n-gantt-fullScreen {
       margin-right: 0;
     }
   }
-}
-
-.gantt-body {
-  flex: 1;
-  border: 1px solid var(--divider);
-  border-bottom-left-radius: unset;
-  border-bottom-right-radius: unset;
-
-  main {
-    border-color: var(--divider);
-    min-height: 3rem;
-  }
-
-  * :not(#ganttBar):not(.gantt-divider_only>hr) {
-    border-color: var(--divider) !important;
-    stroke: var(--divider) !important;
-  }
-
-  .gantt-chart-svg-renderer {
-    rect {
-      opacity: 0.9 !important;
-    }
-  }
-
-  .gantt-scroll_bar {
-    height: .04rem;
-  }
-}
-
-.gantt-time-axis-minor {
-  color: var(--text-color3);
-  font-weight: 400;
-}
-
-.gantt-table-body {
-  &>div {
-    color: var(--text-color3) !important;
-  }
-}
-
-.gantt-today,
-.gantt-today_line,
-.gantt-divider:hover hr {
-  background: var(--primary-color) !important;
-  border-color: var(--primary-color) !important;
-  border-width: 2px;
-}
-
-.gantt-table-body-cell {
-  color: var(--text-color);
-}
-
-.gantt-selection-indicator {
-  background: var(--selection-background);
-}
-
-.gantt-today,
-.gantt-today_line {
-  background: var(--primary-color);
-}
-
-// .gantt-body,
-// .gantt-body main,
-// .gantt-table-header-cell,
-// .gantt-table-body-cell {
-//   border-color: var(--divider);
-// }
-
-.gantt-scroll_top {
-  bottom: 81px !important;
-  right: 0 !important;
 }
