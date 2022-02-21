@@ -19,7 +19,7 @@ export interface IssueTableFieldsConfig {
   /**
    * 表头数据来源于
    */
-  issueTypeList?:'agileIssueType'|'programIssueType'
+  issueTypeList?: 'agileIssueType' | 'programIssueType' | ''
 
 }
 const systemFields = [
