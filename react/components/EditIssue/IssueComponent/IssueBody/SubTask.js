@@ -28,7 +28,9 @@ const SubTask = observer(({
     applyType: 'waterfall',
     typeCode: WATERFALL_TYPE_CODES,
     defaultValues: {
-      parentId: parentIssueId,
+      waterfallIssueVO: {
+        parentId: parentIssueId,
+      },
     },
   };
   const renderIssueList = (issue, i) => (

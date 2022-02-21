@@ -41,9 +41,9 @@ import { insertField } from './utils';
 import useFormatMessage from '@/hooks/useFormatMessage';
 import { formatFieldDateValue } from '@/utils/formatDate';
 import { CreateIssueProps } from '.';
-import {SHOW_ISSUE_LINK_TYPE_CODES, WATERFALL_TYPE_CODES} from '@/constants/TYPE_CODE';
+import { SHOW_ISSUE_LINK_TYPE_CODES, WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
 import { DELIVERABLE, DEPENDENCY } from '@/constants/WATERFALL_INJECT';
-import useIsWaterfall from "@/hooks/useIsWaterfall";
+import useIsWaterfall from '@/hooks/useIsWaterfall';
 
 const { AppState } = stores;
 interface CreateIssueBaseCallbackData {

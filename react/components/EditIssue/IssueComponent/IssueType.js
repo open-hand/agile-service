@@ -95,6 +95,7 @@ const IssueType = observer(({
               onTransformType(newIssue, issue);
             }
           },
+          applyType: WATERFALL_TYPE_CODES.includes(typeCode) ? 'waterfall' : 'agile',
         });
       } else {
         const issueUpdateTypeVO = {
