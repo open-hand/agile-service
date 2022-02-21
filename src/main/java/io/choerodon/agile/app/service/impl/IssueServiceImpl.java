@@ -10,7 +10,6 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
-import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.core.domain.Page;
 import com.google.common.collect.Lists;
 import io.choerodon.agile.api.validator.IssueLinkValidator;
@@ -990,7 +989,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             agilePluginService.checkFeatureBeforeUpdateIssue(issueUpdateVO,projectId);
         }
         if (agileWaterfallService != null) {
-            agileWaterfallService.checkBeforeUpdateIssue(issueUpdateVO, projectId);
+            agileWaterfallService.checkBeforeUpdateIssue(issueUpdateVO, projectId, fieldList);
         }
         if (fieldList.contains(EPIC_NAME_FIELD)
                 && issueUpdateVO.getEpicName() != null
@@ -2106,6 +2105,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 && (!Objects.equals(issueUpdateTypeVO.getTypeCode(), STORY_TYPE) && !Objects.equals(issueUpdateTypeVO.getTypeCode(), "task"))) {
             issueMapper.updateSubBugRelateIssueId(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId());
         }
+        if (agileWaterfallService != null && Objects.equals(SchemeApplyType.WATERFALL, issueUpdateTypeVO.getApplyType())) {
+            agileWaterfallService.checkUpdateIssueTypeCode(projectId, issueConvertDTO, issueUpdateTypeVO);
+        }
         if (issueUpdateTypeVO.getTypeCode().equals(ISSUE_EPIC)) {
             issueConvertDTO.setRank(null);
             fieldList.add(RANK_FIELD);
@@ -2254,7 +2256,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     private void handlerStatus(Long projectId, IssueUpdateTypeVO issueUpdateTypeVO) {
         IssueConvertDTO issueConvertDTO = queryIssueByProjectIdAndIssueId(projectId, issueUpdateTypeVO.getIssueId());
-        Long currentStateMachineId = projectConfigService.queryStateMachineId(projectId, AGILE, issueUpdateTypeVO.getIssueTypeId());
+        Long currentStateMachineId = projectConfigService.queryStateMachineId(projectId, issueUpdateTypeVO.getApplyType(), issueUpdateTypeVO.getIssueTypeId());
         // 查询状态机里面的状态
         List<StatusMachineNodeVO> statusMachineNodeVOS = stateMachineNodeService.queryByStateMachineId(ConvertUtil.getOrganizationId(projectId), currentStateMachineId, false);
         if (CollectionUtils.isEmpty(statusMachineNodeVOS)) {
