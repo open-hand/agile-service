@@ -128,7 +128,7 @@ class FieldApi extends Api<FieldApi> {
   /**
    * 获取项目下自定义的字段
    */
-  getCustomFields(issueTypeList?: 'agileIssueType' | 'programIssueType') {
+  getCustomFields(issueTypeList?: 'agileIssueType' | 'programIssueType'|'') {
     return this.request({
       method: 'get',
       url: this.programId ? `${this.prefix}/project_invoke_program/program/custom_field`
@@ -136,7 +136,7 @@ class FieldApi extends Api<FieldApi> {
       params: {
         programId: this.programId,
         organizationId: this.orgId,
-        issueTypeList: issueTypeList ?? getApplyType() === 'program' ? 'programIssueType' : 'agileIssueType',
+        issueTypeList: issueTypeList ?? (getApplyType() === 'program' ? 'programIssueType' : 'agileIssueType'),
       },
     });
   }
@@ -202,7 +202,7 @@ class FieldApi extends Api<FieldApi> {
   /**
    * 项目层，获取自定义字段表头
    */
-  getFoundationHeader(issueTypeList?: 'agileIssueType' | 'programIssueType') {
+  getFoundationHeader(issueTypeList?: 'agileIssueType' | 'programIssueType'|'') {
     return this.request({
       url: this.programId ? `${this.prefix}/project_invoke_program/program/getFields`
         : `${this.prefix}/field_value/list/getFields`,

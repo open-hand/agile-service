@@ -41,6 +41,7 @@ export interface IssueSearchStoreProps {
   projectId?: string
   /** @default project */
   menuType?: 'project' | 'org' | 'workbench' | 'program' | 'programSubProject'
+  issueTypeList?: 'agileIssueType' | 'programIssueType' | ''
   /** program 模式使用 */
   programId?: string
   fieldConfigs?: { [key: string]: any }
@@ -99,6 +100,8 @@ class IssueSearchStore {
 
   programId?: string;
 
+  issueTypeList?:IssueSearchStoreProps['issueTypeList']
+
   fieldConfigs: { [key: string]: any } = {}
 
   // 只有项目层加载个人筛选和自定义字段
@@ -115,6 +118,7 @@ class IssueSearchStore {
     programId,
     menuType,
     fieldConfigs,
+    issueTypeList,
   }: IssueSearchStoreProps) {
     this.getSystemFields = getSystemFields;
     this.transformFilter = transformFilter;
@@ -126,6 +130,7 @@ class IssueSearchStore {
     this.programId = programId;
     this.menuType = menuType || 'project';
     this.fieldConfigs = fieldConfigs || {};
+    this.issueTypeList = issueTypeList;
   }
 
   setQuery(query: () => void) {
@@ -156,7 +161,7 @@ class IssueSearchStore {
   @observable fields: IField[] = []
 
   async loadCustomFields() {
-    const fields = this.menuType && ['project', 'program'].includes(this.menuType) ? await fieldApi.program(this.programId).project(this.projectId || getProjectId()).getCustomFields() : [];
+    const fields = this.menuType && ['project', 'program'].includes(this.menuType) ? await fieldApi.program(this.programId).project(this.projectId || getProjectId()).getCustomFields(this.issueTypeList) : [];
     this.setFields(fields);
     // 自定义字段加载完，设置默认searchVO的内容
     if (this.defaultSearchVO) {
