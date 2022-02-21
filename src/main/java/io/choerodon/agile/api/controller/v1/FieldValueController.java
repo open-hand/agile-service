@@ -133,7 +133,7 @@ public class FieldValueController {
                                                                        @ApiParam(value = "方案编码", required = true)
                                                                        @RequestParam String schemeCode,
                                                                        @ApiParam(value = "字段类型", required = true)
-                                                                       @RequestParam(defaultValue = "null") String issueTypeList) {
+                                                                       @RequestParam(defaultValue = "null", required = false) String issueTypeList) {
         return new ResponseEntity<>(objectSchemeFieldService.getIssueHeadForAgile(organizationId, projectId, schemeCode, issueTypeList), HttpStatus.OK);
     }
 
@@ -142,7 +142,7 @@ public class FieldValueController {
     @GetMapping("/list/custom_field")
     public ResponseEntity<List<ObjectSchemeFieldDetailVO>> queryCustomFieldList(@ApiParam(value = "项目id", required = true)
                                                                                 @PathVariable("project_id") Long projectId,
-                                                                                @RequestParam(defaultValue = "null") String issueTypeList) {
+                                                                                @RequestParam(defaultValue = "null", required = false) String issueTypeList) {
         return new ResponseEntity<>(objectSchemeFieldService.queryCustomFieldListWithOutOption(projectId, issueTypeList), HttpStatus.OK);
     }
 

@@ -1258,6 +1258,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (!EnumUtil.contain(ObjectSchemeCode.class, schemeCode)) {
             throw new CommonException(ERROR_SCHEMECODE_ILLEGAL);
         }
+        if (Objects.isNull(issueTypeList) || Objects.equals("null", issueTypeList)) {
+            issueTypeList = ProjectCategory.getProjectIssueTypeList(projectId);
+        }
         ObjectSchemeFieldSearchVO searchDTO = new ObjectSchemeFieldSearchVO();
         searchDTO.setSchemeCode(schemeCode);
         searchDTO.setIssueTypeList(issueTypeList);
@@ -1737,6 +1740,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     @Override
     public List<ObjectSchemeFieldDetailVO> queryCustomFieldListWithOutOption(Long projectId, String issueTypeList) {
+        if (Objects.isNull(issueTypeList) || Objects.equals("null", issueTypeList)) {
+            issueTypeList = ProjectCategory.getProjectIssueTypeList(projectId);
+        }
         List<ObjectSchemeFieldDetailVO> objectSchemeFieldDetailVOList = objectSchemeFieldMapper.selectCustomFieldListWithOutOption(ConvertUtil.getOrganizationId(projectId), projectId, issueTypeList);
         if (objectSchemeFieldDetailVOList != null && !objectSchemeFieldDetailVOList.isEmpty()) {
             return objectSchemeFieldDetailVOList;
