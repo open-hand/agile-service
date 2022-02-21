@@ -4,6 +4,7 @@ import {
 } from '@/utils/common';
 import { sameProject } from '@/utils/detail';
 import Api from './Api';
+import { WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
 
 const { AppState } = stores;
 interface IIssue {
@@ -54,6 +55,7 @@ interface UTypeAndStatus {
       value: any,
     }[]
   }
+  applyType?: 'agile' | 'waterfall'
 }
 interface UIssueParent {
   issueId: string,
@@ -256,7 +258,10 @@ class IssueApi extends Api<IssueApi> {
       params: {
         organizationId,
       },
-      data,
+      data: {
+        applyType: WATERFALL_TYPE_CODES.includes(data.typeCode) ? 'waterfall' : 'agile',
+        ...data,
+      } as Required<UTypeAndStatus>,
     });
     // return axios.post(`/agile/v1/projects/${projectId}/issues/update_type?organizationId=${orgId}`, issueUpdateTypeVO);
   }
