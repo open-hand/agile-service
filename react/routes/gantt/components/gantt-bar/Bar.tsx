@@ -57,9 +57,9 @@ function GanttBaseBar(props: React.PropsWithChildren<IGanttBaseBarProps>) {
       return undefined;
     }
     return typeof props.deadline === 'string' ? { width: Math.max(0, ganttRef.current?.getWidthByDate(dayjs(dashDateRange.end.value), dayjs(props.deadline)) || 0), value: props.deadline, today: true } : {
-      width: Math.max(0, props.deadline.width - (dashStyle.width as number || 0)),
+      width: Math.max(0, props.deadline.width - (dashDateRange.end.width as number || 0)),
     };
-  }, [dashDateRange, dashStyle.width, fillDateRange, ganttRef, props.deadline]);
+  }, [dashDateRange, fillDateRange, ganttRef, props.deadline]);
   const fillStyle = useMemo(() => {
     if (!fillDateRange) {
       return { width: 0 };
