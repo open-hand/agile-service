@@ -42,6 +42,12 @@ public class SprintInfoVO {
     @ApiModelProperty(value = "问题数量")
     private Integer issueCount;
 
+    @ApiModelProperty(value = "完成的问题数量")
+    private Integer completedIssueCount;
+
+    @ApiModelProperty(value = "进度")
+    private String progress;
+
     private List<AssigneeIssueVO> assigneeIssueVOList;
 
     public Long getSprintId() {
@@ -122,5 +128,21 @@ public class SprintInfoVO {
 
     public Integer getIssueCount() {
         return issueCount;
+    }
+
+    public Integer getCompletedIssueCount() {
+        return completedIssueCount;
+    }
+
+    public void setCompletedIssueCount(Integer completedIssueCount) {
+        this.completedIssueCount = completedIssueCount;
+    }
+
+    public String getProgress() {
+        return progress;
+    }
+
+    public void setProgress(String progress) {
+        this.progress = progress;
     }
 }
