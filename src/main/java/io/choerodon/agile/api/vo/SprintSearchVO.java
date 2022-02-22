@@ -25,6 +25,7 @@ public class SprintSearchVO {
     private List<IssueSearchVO> issueSearchVOList;
     private List<AssigneeIssueVO> assigneeIssues;
     private String objectVersionNumber;
+    private List<String> statusCodes;
 
     public Long getSprintId() {
         return sprintId;
@@ -130,4 +131,11 @@ public class SprintSearchVO {
         this.doneStoryPoint = doneStoryPoint;
     }
 
+    public List<String> getStatusCodes() {
+        return statusCodes;
+    }
+
+    public void setStatusCodes(List<String> statusCodes) {
+        this.statusCodes = statusCodes;
+    }
 }
