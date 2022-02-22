@@ -22,6 +22,7 @@ import openUsage from './Usage';
 import openLink from './LinkType';
 import useFormatMessage from '@/hooks/useFormatMessage';
 import useIsProgram from '@/hooks/useIsProgram';
+import useIsWaterfall from '@/hooks/useIsWaterfall';
 
 const { Column } = Table;
 
@@ -29,6 +30,7 @@ function IssueTypeList() {
   const context = useContext(Store);
   const { issueTypeDataSet, isOrganization, hiddenActionTypeCodes } = context;
   const formatMessage = useFormatMessage();
+  const { isWaterfall, isWaterfallAgile } = useIsWaterfall();
   const { isAgileProgram } = useIsProgram();
   const handleEdit = useCallback(({ record, dataSet }) => {
     Modal.open({
@@ -287,12 +289,12 @@ function IssueTypeList() {
             name: formatMessage({ id: 'agile.issueType.add' }),
             icon: 'playlist_add',
             handler: handleAdd,
-            display: true,
+            display: isWaterfall ? isWaterfallAgile : true,
           }, {
             name: formatMessage({ id: 'agile.issueType.reference' }),
             icon: 'relate',
             handler: handleOpenRefrenced,
-            display: !isOrganization,
+            display: isWaterfall ? isWaterfallAgile : !isOrganization,
           },
         ]}
         />
