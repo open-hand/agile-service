@@ -202,7 +202,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
     setExpand(false);
   }, []);
   useClickAway((e) => {
-    if (e && (e as MouseEvent).composedPath().some((dom) => (dom as HTMLElement)?.id === 'quickCreateSubIssue-issueType-overlay' || (dom as HTMLElement)?.id === 'agile-userDropdown-overlay')) {
+    if (e && (e as MouseEvent).composedPath().some((dom) => (dom as HTMLElement)?.id === 'quickCreateSubIssue-issueType-overlay' || (dom as HTMLElement)?.classList?.contains('c7n-subTask-quickCreate') || (dom as HTMLElement)?.id === 'agile-userDropdown-overlay')) {
       return;
     }
     !isLoading && createStatus !== 'failed' && onAwayClick && onAwayClick(handleCreate);

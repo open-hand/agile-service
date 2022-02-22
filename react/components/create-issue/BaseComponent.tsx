@@ -66,7 +66,13 @@ export interface CreateIssueBaseProps {
   modal?: IModalProps,
   projectId?: string,
   menuType?: 'project' | 'org',
-  defaultTypeCode?: string
+  /**
+   * 默认选中的问题类型code
+   * @default 'story'
+   *
+   * 当为 `false` 时则默认选择第一个问题类型
+   */
+  defaultTypeCode?: string | false
   defaultTypeId?: string
   defaultAssignee?: {
     id: string,
@@ -872,7 +878,7 @@ const CreateIssueBase = observer(({
           ])
           : null;
       })
-    )
+    );
   });
   const issueLinkDataSet = useMemo(() => new DataSet({
     // autoCreate: true,
