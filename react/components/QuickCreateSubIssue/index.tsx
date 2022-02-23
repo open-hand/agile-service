@@ -34,7 +34,7 @@ interface QuickCreateSubIssueProps {
   defaultValues?: Partial<IQuickCreateDefaultValueParams>
   mountCreate?: boolean
   onCreate?: (issue: Issue) => void
-  onAwayClick?: (createFn: any) => void
+  onAwayClick?: (createFn: any, currentData: any) => void
   defaultAssignee?: User | undefined
   cantCreateEvent?: (data: { defaultValues?: { summary?: string, sprint?: string, [propsName: string]: any }, defaultTypeId?: string, defaultAssignee?: User }) => void
   summaryChange?: (summary: string) => void,
@@ -165,7 +165,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
         res = await issueApi.project(projectId).create(issue, applyType);
       } else {
         res = currentType.typeCode === 'sub_task'
-          || issue.parentIssueId || issue.relateIssueId || issue.relateIssueId ? await issueApi.project(projectId).createSubtask(issue) : await issueApi.project(projectId).create(issue);
+          || issue.parentIssueId || issue.relateIssueId || issue.relateIssueId ? await issueApi.project(projectId).createSubtask(issue) : await issueApi.project(projectId).create(issue, WATERFALL_TYPE_CODES.includes(currentType.typeCode) ? 'waterfall' : 'agile');
       }
 
       await fieldApi.project(projectId).quickCreateDefault(res.issueId, {
@@ -205,7 +205,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
     if (e && (e as MouseEvent).composedPath().some((dom) => (dom as HTMLElement)?.id === 'quickCreateSubIssue-issueType-overlay' || (dom as HTMLElement)?.classList?.contains('c7n-subTask-quickCreate') || (dom as HTMLElement)?.id === 'agile-userDropdown-overlay')) {
       return;
     }
-    !isLoading && createStatus !== 'failed' && onAwayClick && onAwayClick(handleCreate);
+    !isLoading && createStatus !== 'failed' && onAwayClick && onAwayClick(handleCreate, { currentType, currentTemplate, userDropDownRef });
   }, ref);
   useUpdateEffect(() => {
     expand && setCreateStatus('init');
