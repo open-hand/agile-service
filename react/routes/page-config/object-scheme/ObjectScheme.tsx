@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Table, Modal,
+  Table, Modal, useModal,
 } from 'choerodon-ui/pro';
 import { Tag } from 'choerodon-ui';
 import {
@@ -42,6 +42,7 @@ function ObjectScheme() {
     prefixCls, schemeTableDataSet,
     schemeCode,
   } = useObjectSchemeStore();
+  const modal = useModal();
   function handleRefresh() {
     schemeTableDataSet.query();
   }
@@ -54,7 +55,7 @@ function ObjectScheme() {
       okText: formatMessage({ id: 'boot.delete' }),
       onOk: () => schemeTableDataSet.delete(record, false).then(() => handleRefresh()),
     };
-    Modal.open(modalProps);
+    modal.open(modalProps as any);
     // ;
   }
   function handleSyncDefault() {
@@ -93,11 +94,12 @@ function ObjectScheme() {
     if (isOpen) {
       const promptText = `确定要将【${fieldName}】设置为${!required ? '不' : ''}必填项吗？
       设置后${getMenuType() !== 'project' ? '组织下所有' : ''}项目中该字段都将为${!required ? '不' : ''}必填，这将会影响【快速创建】工作项的使用。`;
-      Modal.open({
+      modal.open({
         key: Modal.key(),
         className: `${prefixCls}-detail-prompt`,
         title: `确认设置为${!required ? '不' : ''}必填`,
         children: (<RequiredPrompt
+          // eslint-disable-next-line react/jsx-no-bind
           onContinue={handleContinueCheckChange}
           promptText={promptText}
         />),
@@ -112,7 +114,7 @@ function ObjectScheme() {
       schemeCode,
       handleRefresh,
     };
-    Modal.open({
+    modal.open({
       key: createModelKey,
       title: formatMessage({ id: 'agile.page.field.create' }),
       drawer: true,
@@ -133,7 +135,7 @@ function ObjectScheme() {
       record,
     };
 
-    Modal.open({
+    modal.open({
       key: editModelKey,
       title: formatMessage({ id: 'agile.page.field.edit' }),
       drawer: true,
@@ -225,6 +227,7 @@ function ObjectScheme() {
           record={record}
           name={name!}
           disabled={system || (getMenuType() === 'project' && !projectId)}
+          // eslint-disable-next-line react/jsx-no-bind
           onChange={handleCheckChange}
         />
       </div>
