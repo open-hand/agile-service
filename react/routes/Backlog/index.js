@@ -16,7 +16,11 @@ const BacklogIndex = ({ match }) => (
         'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint',
         'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.pi',
         'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint',
-        'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.epic']}
+        'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.epic',
+        'choerodon.code.project.cooperation.sprint.work-list.ps.backlog',
+        'choerodon.code.project.cooperation.sprint.work-list.ps.backlog.projectupdatesprint',
+        'choerodon.code.project.cooperation.sprint.work-list.ps.epic',
+      ]}
       path={`${match.url}`}
       component={BacklogHome}
     />

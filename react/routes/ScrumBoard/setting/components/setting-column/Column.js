@@ -80,7 +80,10 @@ class Column extends Component {
     return (
       <div className="c7n-scrumsetting-columnStatus">
         <Permission
-          service={['choerodon.code.project.cooperation.iteration-plan.ps.column']}
+          service={[
+            'choerodon.code.project.cooperation.iteration-plan.ps.column',
+            'choerodon.code.project.cooperation.sprint.iteration-plan.ps.column',
+          ]}
           noAccessChildren={data.name}
         >
           <TextEditToggle
@@ -141,7 +144,12 @@ class Column extends Component {
                       {...provided.dragHandleProps}
                     />
                     {deleteAble && (
-                      <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.column.create']}>
+                      <Permission
+                        service={[
+                          'choerodon.code.project.cooperation.iteration-plan.ps.column.create',
+                          'choerodon.code.project.cooperation.sprint.iteration-plan.ps.column.create',
+                        ]}
+                      >
                         <Icon
                           type="delete_sweep-o"
                           style={{
@@ -170,7 +178,10 @@ class Column extends Component {
                     }}
                   >
                     <Permission
-                      service={['choerodon.code.project.cooperation.iteration-plan.ps.column']}
+                      service={[
+                        'choerodon.code.project.cooperation.iteration-plan.ps.column',
+                        'choerodon.code.project.cooperation.sprint.iteration-plan.ps.column',
+                      ]}
                       noAccessChildren={(
                         <span
                           style={{ minWidth: '110px' }}
@@ -205,7 +216,10 @@ class Column extends Component {
                       </TextEditToggle>
                     </Permission>
                     <Permission
-                      service={['choerodon.code.project.cooperation.iteration-plan.ps.column']}
+                      service={[
+                        'choerodon.code.project.cooperation.iteration-plan.ps.column',
+                        'choerodon.code.project.cooperation.sprint.iteration-plan.ps.column',
+                      ]}
                       noAccessChildren={(
                         <span
                           style={{ minWidth: '110px' }}
@@ -243,7 +257,10 @@ class Column extends Component {
                 </div>
               </div>
               <Permission
-                service={['choerodon.code.project.cooperation.iteration-plan.ps.movetocolomn']}
+                service={[
+                  'choerodon.code.project.cooperation.iteration-plan.ps.movetocolomn',
+                  'choerodon.code.project.cooperation.sprint.iteration-plan.ps.movetocolomn',
+                ]}
                 noAccessChildren={(
                   <StatusList data={data} isDragDisabled />
                 )}

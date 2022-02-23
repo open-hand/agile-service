@@ -212,7 +212,12 @@ class VersionItem extends Component {
                 <p>{item.name}</p>
               )}
 
-              <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion']}>
+              <Permission
+                service={[
+                  'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion',
+                  'choerodon.code.project.cooperation.sprint.work-list.ps.createversion',
+                ]}
+              >
                 <Dropdown onClick={(e) => e.stopPropagation()} overlay={this.getmenu()} trigger={['click']}>
                   <Icon
                     style={{
@@ -252,7 +257,10 @@ class VersionItem extends Component {
           <div style={{ paddingLeft: 12 }}>
             <div style={{ marginTop: 12 }}>
               <Permission
-                service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion']}
+                service={[
+                  'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion',
+                  'choerodon.code.project.cooperation.sprint.work-list.ps.updateversion',
+                ]}
                 noAccessChildren={(
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <p className="c7n-backlog-versionItemDes c7n-backlog-versionItemNotStoryPoint" ref={(versionId) => { this[item.versionId] = versionId; }}>
@@ -280,7 +288,10 @@ class VersionItem extends Component {
               <div className="c7n-backlog-versionItemParam">
                 <p style={{ color: 'var(--text-color3)' }}>开始日期</p>
                 <Permission
-                  service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion']}
+                  service={[
+                    'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion',
+                    'choerodon.code.project.cooperation.sprint.work-list.ps.updateversion',
+                  ]}
                   noAccessChildren={<p className="c7n-backlog-versionItemNotStoryPoint">{!_.isNull(item.startDate) ? `${item && item.startDate.split('-')[0]}/${item.startDate.split('-')[1]}/${item.startDate.split('-')[2].substring(0, 2)}` : '无'}</p>}
                 >
                   <EasyEdit
@@ -298,7 +309,10 @@ class VersionItem extends Component {
               <div className="c7n-backlog-versionItemParam">
                 <p style={{ color: 'var(--text-color3)' }}>预计发布日期</p>
                 <Permission
-                  service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion']}
+                  service={[
+                    'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion',
+                    'choerodon.code.project.cooperation.sprint.work-list.ps.updateversion',
+                  ]}
                   noAccessChildren={<p className="c7n-backlog-versionItemNotStoryPoint">{!_.isNull(item.expectReleaseDate) ? `${item && item.expectReleaseDate.split('-')[0]}/${item.expectReleaseDate.split('-')[1]}/${item.expectReleaseDate.split('-')[2].substring(0, 2)}` : '无'}</p>}
                 >
                   <EasyEdit

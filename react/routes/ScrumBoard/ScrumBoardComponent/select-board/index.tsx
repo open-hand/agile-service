@@ -20,7 +20,10 @@ const SelectBoard: React.FC<SelectBoardProps> = ({
   const props = useSelectFooter(ref,
     createButton ? (
       <Permission
-        service={['choerodon.code.project.cooperation.iteration-plan.ps.board.create']}
+        service={[
+          'choerodon.code.project.cooperation.iteration-plan.ps.board.create',
+          'choerodon.code.project.cooperation.sprint.iteration-plan.ps.board.create',
+        ]}
       >
         <div role="none" onClick={onFooterClick} className={styles.footer}>
           <C7NFormat

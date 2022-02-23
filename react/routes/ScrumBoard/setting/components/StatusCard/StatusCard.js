@@ -66,7 +66,15 @@ class StatusCard extends Component {
             <div className={`${prefix}-content`}>
               {data.issues ? `${data.issues.length} issues` : ''}
             </div>
-            <Permission type={type} projectId={projectId} organizationId={orgId} service={['choerodon.code.project.cooperation.iteration-plan.ps.status.update']}>
+            <Permission
+              type={type}
+              projectId={projectId}
+              organizationId={orgId}
+              service={[
+                'choerodon.code.project.cooperation.iteration-plan.ps.status.update',
+                'choerodon.code.project.cooperation.sprint.iteration-plan.ps.status.update',
+              ]}
+            >
               <Radio
                 style={{ marginRight: 0 }}
                 checked={data.completed ? data.completed : false}

@@ -6,6 +6,7 @@ import { IComment } from '@/common/types';
 import { issueCommentApi } from '@/api/IssueComment';
 import CommentItem, { ReplyComment } from './CommentItem';
 import EditIssueContext from '../../../../stores';
+import useIsWaterfall from '@/hooks/useIsWaterfall';
 
 interface Props {
   projectId?: string
@@ -35,6 +36,7 @@ const { AppState } = stores;
 
 const Comment: React.FC<Props> = (props) => {
   const { store, projectId, isProgramIssue } = useContext(EditIssueContext);
+  const { isWaterfall } = useIsWaterfall();
   const { commentExpandMap, commentReplysMap } = store;
   const { comment, reload, readonly } = props;
   const loginUserId = AppState.userInfo.id;
@@ -63,9 +65,11 @@ const Comment: React.FC<Props> = (props) => {
       className="c7n-comment"
     >
       <Permission
-        service={[isProgramIssue
-          ? 'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.editissue.pro'
-          : 'choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
+        service={isWaterfall
+          ? ['choerodon.code.project.cooperation.sprint.iteration-plan.ps.editissue.pro']
+          : [isProgramIssue
+            ? 'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.editissue.pro'
+            : 'choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
       >
         {
             (hasPermission: boolean) => (

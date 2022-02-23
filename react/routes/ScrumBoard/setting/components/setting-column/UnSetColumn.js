@@ -34,7 +34,10 @@ class Column extends Component {
             </div>
           </div>
           <Permission
-            service={['choerodon.code.project.cooperation.iteration-plan.ps.movetocolomn']}
+            service={[
+              'choerodon.code.project.cooperation.iteration-plan.ps.movetocolomn',
+              'choerodon.code.project.cooperation.sprint.iteration-plan.ps.movetocolomn',
+            ]}
             noAccessChildren={(
               <StatusList data={data} isDragDisabled />
                 )}

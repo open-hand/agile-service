@@ -16,6 +16,9 @@ const ScrumBoardIndex = ({ match }) => (
         'choerodon.code.project.cooperation.iteration-plan.ps.default',
         'choerodon.code.project.cooperation.iteration-plan.ps.board.create',
         'choerodon.code.project.cooperation.iteration-plan.ps.sprint.finish',
+        'choerodon.code.project.cooperation.sprint.iteration-plan.ps.default',
+        'choerodon.code.project.cooperation.sprint.iteration-plan.ps.board.create',
+        'choerodon.code.project.cooperation.sprint.iteration-plan.ps.sprint.finish',
       ]}
       exact
       path={`${match.url}`}
@@ -32,6 +35,15 @@ const ScrumBoardIndex = ({ match }) => (
         'choerodon.code.project.cooperation.iteration-plan.ps.status.update',
         'choerodon.code.project.cooperation.iteration-plan.ps.status.delete',
         'choerodon.code.project.cooperation.iteration-plan.ps.work_calendar.update',
+        'choerodon.code.project.cooperation.sprint.iteration-plan.ps.config',
+        'choerodon.code.project.cooperation.sprint.iteration-plan.ps.status.create',
+        'choerodon.code.project.cooperation.sprint.iteration-plan.ps.column.create',
+        'choerodon.code.project.cooperation.sprint.iteration-plan.ps.board.delete',
+        'choerodon.code.project.cooperation.sprint.iteration-plan.ps.board.update',
+        'choerodon.code.project.cooperation.sprint.iteration-plan.ps.column',
+        'choerodon.code.project.cooperation.sprint.iteration-plan.ps.status.update',
+        'choerodon.code.project.cooperation.sprint.iteration-plan.ps.status.delete',
+        'choerodon.code.project.cooperation.sprint.iteration-plan.ps.work_calendar.update',
       ]}
       path={`${match.url}/setting`}
       component={Setting}

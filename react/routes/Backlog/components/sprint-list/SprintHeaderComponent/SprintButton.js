@@ -12,6 +12,7 @@ import CloseSprint from '@/components/close-sprint';
 import StartSprint from '../../start-sprint';
 import './SprintButton.less';
 import useFormatMessage from '@/hooks/useFormatMessage';
+import useIsWaterfall from '../../../../../hooks/useIsWaterfall';
 
 const { AppState } = stores;
 
@@ -31,6 +32,7 @@ function SprintButton({ data, sprintIndex }) {
     statusCode, sprintId, planning, issueCount,
   } = data;
   const formatMessage = useFormatMessage();
+  const { isWaterfallAgile } = useIsWaterfall();
   const hasActiveSprint = BacklogStore.getHasActiveSprint;
 
   const [disableStart, reason] = judgeDisabled([
@@ -176,11 +178,13 @@ function SprintButton({ data, sprintIndex }) {
     <>
       {statusCode === 'started' ? (
         <Permission
-          service={[
-            isInProgram
-              ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint'
-              : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint',
-          ]}
+          service={isWaterfallAgile
+            ? ['choerodon.code.project.cooperation.sprint.work-list.ps.backlog.projectupdatesprint']
+            : [
+              isInProgram
+                ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint'
+                : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint',
+            ]}
         >
           <p
             className={prefix}
@@ -193,11 +197,12 @@ function SprintButton({ data, sprintIndex }) {
       ) : (
         <>
           <Permission
-            service={[
-              isInProgram
+            service={isWaterfallAgile
+              ? ['choerodon.code.project.cooperation.sprint.work-list.ps.backlog.projectupdatesprint']
+              : [isInProgram
                 ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint'
                 : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint',
-            ]}
+              ]}
           >
             <Tooltip
               popupClassName={
@@ -223,11 +228,12 @@ function SprintButton({ data, sprintIndex }) {
             type={type}
             projectId={projectId}
             organizationId={orgId}
-            service={[
-              isInProgram
+            service={isWaterfallAgile
+              ? ['choerodon.code.project.cooperation.sprint.work-list.ps.subprojectupdatesprint']
+              : [isInProgram
                 ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint'
                 : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint',
-            ]}
+              ]}
           >
             {data.sprintType !== 'ip' && (
               <Dropdown overlay={menu} trigger={['click']}>
