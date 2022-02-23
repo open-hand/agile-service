@@ -1,44 +1,43 @@
 import React from 'react';
 import { Tooltip } from 'choerodon-ui/pro';
+import classNames from 'classnames';
 import TypeTag from '@/components/TypeTag';
 import { Issue } from '@/common/types';
+import './index.less';
 
 export interface InlineIssueTagProps {
   data: Issue
+  className?: string
+  multiple?: boolean
+  rendererMode?: boolean
 }
 const InlineIssueTag = ({
-  data,
-}: InlineIssueTagProps) => (
-  <div style={{
-    display: 'inline-flex',
-    width: 'calc(100% - 30px)',
-    alignItems: 'center',
-    verticalAlign: 'middle',
-  }}
-  >
-    <TypeTag
-      data={data.issueTypeVO}
-    />
-    <span style={{
-      paddingLeft: 12, paddingRight: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-    }}
+  data, rendererMode, multiple, className,
+}: InlineIssueTagProps) => {
+  const prefixCls = 'c7n-agile-tag-inline-issue-tag';
+  return (
+    <div
+      className={classNames(prefixCls, { [`${prefixCls}-multiple`]: multiple && !rendererMode }, className)}
     >
-      {data.issueNum}
-    </span>
-    <div style={{ overflow: 'hidden', flex: 1 }}>
-      <Tooltip title={data.summary}>
-        <p style={{
-          paddingRight: '25px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0, maxWidth: 'unset',
-        }}
-        >
-          {data.summary}
-        </p>
+      <TypeTag
+        data={data.issueTypeVO}
+      />
+      <span className={`${prefixCls}-num`}>
+        {data.issueNum}
+      </span>
+      <Tooltip title={data.summary} placement="topLeft">
+        <div className={`${prefixCls}-summary`}>
+          <p>
+            {data.summary}
+          </p>
+        </div>
       </Tooltip>
+
     </div>
-  </div>
-);
+  );
+};
 
-InlineIssueTag.optionRenderer = (data:Issue) => <InlineIssueTag data={data} />;
-InlineIssueTag.renderer = (data:Issue) => <span>{data.issueNum}</span>;
-
+InlineIssueTag.optionRenderer = (data: Issue) => <InlineIssueTag data={data} />;
+InlineIssueTag.renderer = (data: Issue) => <InlineIssueTag data={data} rendererMode />;
+InlineIssueTag.createIssueTag = (props: Pick<InlineIssueTagProps, 'className' | 'multiple' | 'rendererMode'>) => (data: Issue) => <InlineIssueTag data={data} {...props} />;
 export default InlineIssueTag;

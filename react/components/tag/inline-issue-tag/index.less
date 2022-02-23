@@ -1,0 +1,33 @@
+.c7n-agile-tag-inline-issue-tag {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  vertical-align: middle;
+
+  &-multiple {
+    width: calc(100% - 30px);
+  }
+
+  &-num {
+    padding-left: .12rem;
+    padding-right: .12rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &-summary {
+    overflow: hidden;
+    flex: 1;
+    flex-basis: .3rem;
+
+    p {
+      padding: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-bottom: 0;
+      max-width: unset;
+    }
+  }
+}
