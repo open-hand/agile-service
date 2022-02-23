@@ -14,7 +14,7 @@ interface Props extends Partial<SelectProps> {
 }
 
 const SelectParentIssue: React.FC<Props> = forwardRef(({
-  flat, projectId, issueType, ...otherProps
+  flat, projectId, issueType, multiple, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<Issue> => ({
     textField: 'summary',
@@ -22,9 +22,9 @@ const SelectParentIssue: React.FC<Props> = forwardRef(({
     requestArgs: { issueType },
     request: ({ filter, page, requestArgs }) => (requestArgs?.issueType ? issueApi.project(projectId).loadParentIssues(page ?? 0, 20, requestArgs?.issueType, filter) : { list: [] }), // 故事、任务、缺陷（不能是子缺陷
     paging: true,
-    optionRenderer: InlineIssueTag.optionRenderer,
-    renderer: InlineIssueTag.renderer,
-  }), [issueType, projectId]);
+    optionRenderer: InlineIssueTag.createIssueTag({ multiple }),
+    renderer: InlineIssueTag.createIssueTag({ rendererMode: true, multiple }),
+  }), [issueType, multiple, projectId]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
 
