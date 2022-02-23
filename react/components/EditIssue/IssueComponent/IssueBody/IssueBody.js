@@ -33,7 +33,7 @@ import IssueUI from './Issue-UI';
 
 import { featureApi } from '@/api';
 import { getProjectId } from '@/utils/common';
-import { DEPENDENCY_TAB, SUB_ISSUE } from '../../../../constants/WATERFALL_INJECT';
+import {DEPENDENCY_TAB, DETAIL_DELIVERABLE, SUB_ISSUE} from '../../../../constants/WATERFALL_INJECT';
 import { WATERFALL_TYPE_CODES } from '../../../../constants/TYPE_CODE';
 
 const { TabPane } = Tabs;
@@ -122,6 +122,10 @@ function IssueBody(props) {
         <TabPane tab="详情" key="detail">
           <IssueDetail {...props} />
           <IssueDes {...props} />
+          {hasInject(DETAIL_DELIVERABLE) ? mount(DETAIL_DELIVERABLE, {
+            issueTypeCode: issueTypeVO.typeCode,
+            disabled,
+          }) : null}
           <IssueAttachment {...props} />
           {issueTypeVO.typeCode && ['issue_epic', 'feature'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueUI {...props} /> : ''}
