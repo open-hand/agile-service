@@ -35,6 +35,9 @@ public class WaterfallIssueVO {
     @ApiModelProperty(value = "同父级的子级")
     private List<ChildIssueListVO> sameWfParentIssueList;
 
+    @ApiModelProperty(value = "关联的瀑布工作项id")
+    private Long wfIssueRelId;
+
     public Long getIssueId() {
         return issueId;
     }
@@ -97,5 +100,13 @@ public class WaterfallIssueVO {
 
     public void setSameWfParentIssueList(List<ChildIssueListVO> sameWfParentIssueList) {
         this.sameWfParentIssueList = sameWfParentIssueList;
+    }
+
+    public Long getWfIssueRelId() {
+        return wfIssueRelId;
+    }
+
+    public void setWfIssueRelId(Long wfIssueRelId) {
+        this.wfIssueRelId = wfIssueRelId;
     }
 }
