@@ -150,7 +150,10 @@ class SettingColumn extends Component {
           }}
         >
           <Permission
-            service={['choerodon.code.project.cooperation.iteration-plan.ps.column']}
+            service={[
+              'choerodon.code.project.cooperation.iteration-plan.ps.column',
+              'choerodon.code.project.cooperation.sprint.iteration-plan.ps.column',
+            ]}
             noAccessChildren={(
               <Select
                 value={ScrumBoardStore.getCurrentConstraint}
@@ -214,7 +217,12 @@ class SettingColumn extends Component {
                     {...provided.droppableProps}
                   >
                     <Permission
-                      service={['choerodon.code.project.cooperation.iteration-plan.ps.column', 'choerodon.code.project.cooperation.iteration-plan.ps.movetocolomn']}
+                      service={[
+                        'choerodon.code.project.cooperation.iteration-plan.ps.column',
+                        'choerodon.code.project.cooperation.iteration-plan.ps.movetocolomn',
+                        'choerodon.code.project.cooperation.sprint.iteration-plan.ps.column',
+                        'choerodon.code.project.cooperation.sprint.iteration-plan.ps.movetocolomn',
+                      ]}
                       noAccessChildren={this.renderColumns(columns, true)}
                     >
                       {this.renderColumns(columns)}

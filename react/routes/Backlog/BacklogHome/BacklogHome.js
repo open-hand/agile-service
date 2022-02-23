@@ -366,6 +366,7 @@ class BacklogHome extends Component {
               display: !isShowFeature,
               permissions: [
                 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint',
+                'choerodon.code.project.cooperation.sprint.work-list.ps.backlog.projectupdatesprint',
               ],
             }, {
               name: (

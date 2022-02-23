@@ -14,6 +14,7 @@ const StoryMapIndex = ({ match }) => (
     <PermissionRoute
       service={[
         'choerodon.code.project.cooperation.story-map.ps.default',
+        'choerodon.code.project.cooperation.sprint.story-map.ps.default',
       ]}
       exact
       path={`${match.url}`}

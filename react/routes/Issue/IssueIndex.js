@@ -16,6 +16,7 @@ const IssueIndex = ({ match }) => (
     <PermissionRoute
       service={[
         'choerodon.code.project.cooperation.work-list.ps.issue',
+        'choerodon.code.project.cooperation.sprint.work-list.ps.issue',
       ]}
       path={match.url}
       component={issueHome}

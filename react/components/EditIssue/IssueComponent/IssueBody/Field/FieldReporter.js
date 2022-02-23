@@ -42,9 +42,10 @@ import { issueApi } from '@/api';
           </span>
         </div>
         <div className="c7n-value-wrapper">
-          <Permission service={[isProgramIssue
-            ? 'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.editissue.pro'
-            : 'choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
+          <Permission service={isProgramIssue
+            ? ['choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.editissue.pro']
+            : ['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro',
+              'choerodon.code.project.cooperation.sprint.iteration-plan.ps.editissue.pro']}
           >
             {
               (hasPermission) => (

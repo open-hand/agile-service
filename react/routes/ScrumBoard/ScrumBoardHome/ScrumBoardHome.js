@@ -514,7 +514,10 @@ class ScrumBoardHome extends Component {
                 // funcType: 'flat',
                 handler: this.handleFinishSprint,
                 display: !!currentSprintIsDoing,
-                permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.sprint.finish'],
+                permissions: [
+                  'choerodon.code.project.cooperation.iteration-plan.ps.sprint.finish',
+                  'choerodon.code.project.cooperation.sprint.iteration-plan.ps.sprint.finish',
+                ],
                 preElement: this.renderRemainDate(),
               },
             ]}

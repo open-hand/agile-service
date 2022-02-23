@@ -162,7 +162,10 @@ class Setting extends Component {
                 icon: 'playlist_add',
                 handler: this.handleCreateStatusClick,
                 display: true,
-                permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.status.create'],
+                permissions: [
+                  'choerodon.code.project.cooperation.iteration-plan.ps.status.create',
+                  'choerodon.code.project.cooperation.sprint.iteration-plan.ps.status.create',
+                ],
               },
               {
                 name: (
@@ -175,7 +178,10 @@ class Setting extends Component {
                 icon: 'playlist_add',
                 handler: this.handleCreateColumnClick,
                 display: true,
-                permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.column.create'],
+                permissions: [
+                  'choerodon.code.project.cooperation.iteration-plan.ps.column.create',
+                  'choerodon.code.project.cooperation.sprint.iteration-plan.ps.column.create',
+                ],
               }] : []),
               {
                 name: (
@@ -190,7 +196,10 @@ class Setting extends Component {
                 handler: this.handleDeleteBoard,
                 display: true,
                 disabled: ScrumBoardStore.getBoardList.size === 1,
-                permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.board.delete'],
+                permissions: [
+                  'choerodon.code.project.cooperation.iteration-plan.ps.board.delete',
+                  'choerodon.code.project.cooperation.sprint.iteration-plan.ps.board.delete',
+                ],
               }, {
                 display: true,
                 element: <SelectBoard
@@ -270,7 +279,12 @@ class Setting extends Component {
                   )}
                   key="3"
                 >
-                  <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.work_calendar.update']}>
+                  <Permission
+                    service={[
+                      'choerodon.code.project.cooperation.iteration-plan.ps.work_calendar.update',
+                      'choerodon.code.project.cooperation.sprint.iteration-plan.ps.work_calendar.update',
+                    ]}
+                  >
                     {this.renderWorkCalendarPage}
                   </Permission>
                 </TabPane>
@@ -284,7 +298,12 @@ class Setting extends Component {
               )}
               key="4"
             >
-              <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.board.update']}>
+              <Permission
+                service={[
+                  'choerodon.code.project.cooperation.iteration-plan.ps.board.update',
+                  'choerodon.code.project.cooperation.sprint.iteration-plan.ps.board.update',
+                ]}
+              >
                 {this.renderEditBoardName}
               </Permission>
             </TabPane>

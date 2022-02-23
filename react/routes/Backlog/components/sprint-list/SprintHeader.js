@@ -14,6 +14,7 @@ import SprintGoal from './SprintHeaderComponent/SprintGoal';
 import WorkLoadBtn from './SprintHeaderComponent/WorkLoadBtn';
 import SprintIcon from './SprintHeaderComponent/SprintIcon';
 import './SprintHeader.less';
+import useIsWaterfall from '../../../../hooks/useIsWaterfall';
 
 const prefix = 'c7n-backlog-SprintHeader';
 function BacklogHeader({ data }) {
@@ -43,6 +44,7 @@ function SprintHeader({ data, sprintIndex }) {
   } = data;
   const isSprint = type === 'sprint';
   const { isInProgram } = BacklogStore.getIsInProgramData || {};
+  const { isWaterfallAgile } = useIsWaterfall();
   return (
     isSprint ? (
       <div className={prefix}>
@@ -55,7 +57,11 @@ function SprintHeader({ data, sprintIndex }) {
           />
           <SprintIcon sprintType={sprintType} />
           <Permission
-            service={[isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
+            service={isWaterfallAgile
+              ? ['choerodon.code.project.cooperation.sprint.work-list.ps.backlog.projectupdatesprint']
+              : [isInProgram
+                ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint'
+                : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
             noAccessChildren={(
               <SprintName
                 data={data}
@@ -88,7 +94,11 @@ function SprintHeader({ data, sprintIndex }) {
         </div>
         <div className={`${prefix}-bottom`}>
           <Permission
-            service={[isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
+            service={isWaterfallAgile
+              ? ['choerodon.code.project.cooperation.sprint.work-list.ps.backlog.projectupdatesprint']
+              : [isInProgram
+                ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint'
+                : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
             noAccessChildren={(
               <SprintDateRange
                 data={data}
@@ -101,7 +111,11 @@ function SprintHeader({ data, sprintIndex }) {
             />
           </Permission>
           <Permission
-            service={[isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
+            service={isWaterfallAgile
+              ? ['choerodon.code.project.cooperation.sprint.work-list.ps.backlog.projectupdatesprint']
+              : [isInProgram
+                ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint'
+                : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
             noAccessChildren={(
               <SprintGoal
                 data={data}
