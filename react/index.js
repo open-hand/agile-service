@@ -3,7 +3,7 @@ import {
   Route,
   Switch,
 } from 'react-router-dom';
-import { ModalContainer } from 'choerodon-ui/pro';
+import { ModalProvider } from 'choerodon-ui/pro';
 import {
   asyncLocaleProvider, stores, nomatch,
 } from '@choerodon/boot';
@@ -124,12 +124,13 @@ class Agile extends React.Component {
     return (
       <div id="agile">
         <IntlProviderAsync>
-          <Switch>
-            {/* 协作 */}
-            {getRoutes(match)}
-            <Route path="*" component={nomatch} />
-          </Switch>
-          <ModalContainer />
+          <ModalProvider>
+            <Switch>
+              {/* 协作 */}
+              {getRoutes(match)}
+              <Route path="*" component={nomatch} />
+            </Switch>
+          </ModalProvider>
         </IntlProviderAsync>
       </div>
     );

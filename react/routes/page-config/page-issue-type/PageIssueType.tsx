@@ -4,7 +4,7 @@ import {
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
 import {
-  Button, Modal, message, Tooltip,
+  Button, Modal, message, Tooltip, useModal,
 } from 'choerodon-ui/pro';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
@@ -57,6 +57,7 @@ function PageIssueType() {
   const {
     sortTableDataSet, addUnselectedDataSet, pageIssueTypeStore, isProject, prefixCls,
   } = usePageIssueTypeStore();
+  const modal = useModal();
   const formatMessage = useFormatMessage();
   const [btnLoading, setBtnLoading] = useState<boolean>();
   const handleRequest = (data: UIssueTypeConfig) => {
@@ -210,7 +211,7 @@ function PageIssueType() {
       localCheckCode: async (str: string) => !!checkCodeOrName('code', str),
       localCheckName: async (str: string) => !!checkCodeOrName('name', str),
     };
-    Modal.open({
+    modal.open({
       key: Modal.key('create'),
       title: formatMessage({ id: 'agile.page.field.create' }),
       drawer: true,
