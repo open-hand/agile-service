@@ -785,6 +785,14 @@
         <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
             #{projectId}
         </foreach>
+        <choose>
+            <when test="searchVO.waterfallProject">
+                AND ai.apply_type = 'waterfall'
+            </when>
+            <otherwise>
+                AND ai.apply_type = 'agile'
+            </otherwise>
+        </choose>
         <include refid="explainSearchVO"/>
         <include refid="filterSqlAndAssigneeIds"/>
         <if test='searchVO.searchArgs != null'>

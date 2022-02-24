@@ -155,6 +155,7 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         SearchVOUtil.setTypeCodes(searchVO, getPredecessorIssueTypes(projectId));
         SearchVOUtil.setSearchArgs(searchVO, "tree", false);
         Map<String, Object> otherArgs = searchVO.getOtherArgs();
+        searchVO.setWaterfallProject(ProjectCategory.isWaterfallProject(projectId));
         String excludeIssueIdsKey = "excludeIssueIds";
         Set<Long> excludeIssueIds = new HashSet<>();
         if (!ObjectUtils.isEmpty(otherArgs) && !ObjectUtils.isEmpty(otherArgs.get(excludeIssueIdsKey))) {

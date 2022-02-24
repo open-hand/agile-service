@@ -41,6 +41,8 @@ public class SearchVO {
 
     private Boolean ganttDefaultOrder = false;
 
+    private Boolean waterfallProject = false;
+
     private List<ObjectSchemeFieldVO> displayFields;
 
     public List<ObjectSchemeFieldVO> getDisplayFields() {
@@ -129,6 +131,14 @@ public class SearchVO {
 
     public List<Long> getAssigneeFilterIds() {
         return assigneeFilterIds;
+    }
+
+    public Boolean getWaterfallProject() {
+        return waterfallProject;
+    }
+
+    public void setWaterfallProject(Boolean waterfallProject) {
+        this.waterfallProject = waterfallProject;
     }
 
     @Override
