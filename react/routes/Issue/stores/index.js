@@ -10,6 +10,7 @@ import useQueryString from '@/hooks/useQueryString';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { transformFilter } from './utils';
 import useUnmountSaveCache from '@/hooks/useUnmountSaveCache';
+import useIsWaterfall from '../../../hooks/useIsWaterfall';
 
 const Store = createContext();
 
@@ -20,6 +21,7 @@ export const StoreProvider = inject('AppState')(
     const { defaultMyFilter, children, AppState: { currentMenuType: { id: projectId, organizationId }, userInfo: { id: userId } } } = props;
     const [hasBatchDeletePermission, setHasBatchDeletePermission] = useState(false);
     const permissionRef = useRef(false);
+    const { isWaterfallAgile } = useIsWaterfall();
     permissionRef.current = hasBatchDeletePermission;
     const params = useQueryString();
     const [tableListMode, changeTableListMode] = useState(() => {
@@ -35,7 +37,11 @@ export const StoreProvider = inject('AppState')(
 
     useEffect(() => {
       const getBatchDeletePermission = async () => {
-        const res = await permissionApi.check(['choerodon.code.project.cooperation.work-list.ps.issue.batchDelete']);
+        const res = await permissionApi.check([
+          isWaterfallAgile
+            ? 'choerodon.code.project.cooperation.sprint.work-list.ps.issue.batchDelete'
+            : 'choerodon.code.project.cooperation.work-list.ps.issue.batchDelete',
+        ]);
         setHasBatchDeletePermission(res[0] && res[0].approve);
       };
       getBatchDeletePermission();

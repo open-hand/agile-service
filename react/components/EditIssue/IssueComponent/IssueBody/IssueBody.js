@@ -125,6 +125,7 @@ function IssueBody(props) {
           {hasInject(DETAIL_DELIVERABLE) ? mount(DETAIL_DELIVERABLE, {
             issueTypeCode: issueTypeVO.typeCode,
             disabled,
+            issueId,
           }) : null}
           <IssueAttachment {...props} />
           {issueTypeVO.typeCode && ['issue_epic', 'feature'].indexOf(issueTypeVO.typeCode) === -1
