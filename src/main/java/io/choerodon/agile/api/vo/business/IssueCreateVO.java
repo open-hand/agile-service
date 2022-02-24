@@ -3,6 +3,7 @@ package io.choerodon.agile.api.vo.business;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.waterfall.WaterfallIssueVO;
+import io.choerodon.agile.api.vo.waterfall.WfDeliverableVO;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
