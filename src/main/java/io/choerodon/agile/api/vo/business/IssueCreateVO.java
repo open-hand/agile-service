@@ -150,6 +150,9 @@ public class IssueCreateVO {
     @ApiModelProperty(value = "瀑布工作项")
     private WaterfallIssueVO waterfallIssueVO;
 
+    @ApiModelProperty(value = "前置依赖")
+    private List<IssuePredecessorVO> issuePredecessors;
+
     public List<TagVO> getTags() {
         return tags;
     }
@@ -514,5 +517,13 @@ public class IssueCreateVO {
 
     public void setWaterfallIssueVO(WaterfallIssueVO waterfallIssueVO) {
         this.waterfallIssueVO = waterfallIssueVO;
+    }
+
+    public List<IssuePredecessorVO> getIssuePredecessors() {
+        return issuePredecessors;
+    }
+
+    public void setIssuePredecessors(List<IssuePredecessorVO> issuePredecessors) {
+        this.issuePredecessors = issuePredecessors;
     }
 }

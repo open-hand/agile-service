@@ -26,4 +26,7 @@ public interface IssuePredecessorMapper extends BaseMapper<IssuePredecessorDTO> 
 
     List<IssuePredecessorDTO> selectByIssueIds(@Param("projectIds") Set<Long> projectIds,
                                                @Param("issueIds") Set<Long> issueIds);
+
+    List<Long> selectByPredecessorId(@Param("projectId") Long projectId,
+                                     @Param("predecessorId") Long predecessorId);
 }

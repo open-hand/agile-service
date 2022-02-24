@@ -79,4 +79,15 @@ public class IssuePredecessorController {
                                                                    @RequestParam(required = false) boolean withInfo) {
         return ResponseEntity.ok(issuePredecessorService.queryByIssueId(projectId, currentIssueId, withInfo));
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("工作项移除前置项")
+    @DeleteMapping(value = "/delete")
+    public ResponseEntity<Void> deletePredecessor(@ApiParam(value = "项目id", required = true)
+                                                  @PathVariable(name = "project_id") Long projectId,
+                                                  @RequestParam @Encrypt Long predecessorId,
+                                                  @RequestParam @Encrypt Long currentIssueId) {
+        issuePredecessorService.deletePredecessor(projectId, predecessorId, currentIssueId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
