@@ -54,4 +54,11 @@
           #{issueId}
         </foreach>
     </select>
+
+    <select id="selectByPredecessorId" resultType="java.lang.Long">
+        select issue_id
+        from agile_issue_predecessor
+        where project_id = #{projectId}
+        and predecessor_id = #{predecessorId}
+    </select>
 </mapper>

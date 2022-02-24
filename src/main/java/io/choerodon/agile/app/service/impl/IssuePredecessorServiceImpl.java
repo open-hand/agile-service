@@ -216,6 +216,41 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         return result;
     }
 
+    @Override
+    public void deletePredecessor(Long projectId, Long predecessorId, Long currentIssueId) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+
+        List<IssuePredecessorTreeClosureDTO> currentIssueDescendants =
+                issuePredecessorTreeClosureMapper.selectByAncestorIds(organizationId, projectId, new HashSet<>(Collections.singletonList(currentIssueId)));
+
+        List<Long> samePredecessorIssueIds = issuePredecessorMapper.selectByPredecessorId(projectId, predecessorId);
+        List<Long> ignoredDescendantIds = new ArrayList<>();
+        samePredecessorIssueIds.remove(currentIssueId);
+        if (!samePredecessorIssueIds.isEmpty()) {
+            ignoredDescendantIds = issuePredecessorTreeClosureMapper.selectByAncestorIds(organizationId, projectId, new HashSet<>(samePredecessorIssueIds))
+                    .stream().map(IssuePredecessorTreeClosureDTO::getDescendantId).collect(Collectors.toList());
+        }
+        // 过滤其他相同前置依赖的子级
+        Set<IssuePredecessorTreeClosureDTO> deleteDescendants = new HashSet<>();
+        for (IssuePredecessorTreeClosureDTO descendant : currentIssueDescendants) {
+            if (!ignoredDescendantIds.contains(descendant.getDescendantId())) {
+                deleteDescendants.add(descendant);
+                descendant.setAncestorId(predecessorId);
+            }
+        }
+
+        if (!deleteDescendants.isEmpty()) {
+            issuePredecessorTreeClosureMapper.batchDelete(organizationId, projectId, deleteDescendants);
+        }
+
+        IssuePredecessorDTO delete = new IssuePredecessorDTO();
+        delete.setProjectId(projectId);
+        delete.setOrganizationId(organizationId);
+        delete.setIssueId(currentIssueId);
+        delete.setPredecessorId(predecessorId);
+        issuePredecessorMapper.delete(delete);
+    }
+
     private void deleteTreeNodes(Long projectId,
                                  Long organizationId,
                                  List<IssuePredecessorTreeClosureDTO> descendants,
