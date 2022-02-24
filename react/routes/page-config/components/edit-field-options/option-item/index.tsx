@@ -158,17 +158,17 @@ const OptionItem: React.FC<OptionItemProps> = ({
                 onClick={data.enabled ? handleDisableClick : handleEnableClick}
               />
             </Tooltip>
-            <Popconfirm
-              placement="top"
-              title={`确认要删除 ${data.value} 吗？工作项上该字段值也会被清空。`}
-              onConfirm={handleDeleteClick}
-              okText="删除"
-              cancelText="取消"
-            >
-              <Tooltip title="删除">
+            <Tooltip title="删除">
+              <Popconfirm
+                placement="top"
+                title={`确认要删除 ${data.value} 吗？工作项上该字段值也会被清空。`}
+                onConfirm={handleDeleteClick}
+                okText="删除"
+                cancelText="取消"
+              >
                 <Button icon="delete_sweep-o" funcType={'flat' as any} />
-              </Tooltip>
-            </Popconfirm>
+              </Popconfirm>
+            </Tooltip>
           </div>
         </>
       )}
