@@ -785,7 +785,6 @@
         <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
             #{projectId}
         </foreach>
-        AND ai.apply_type = 'agile'
         <include refid="explainSearchVO"/>
         <include refid="filterSqlAndAssigneeIds"/>
         <if test='searchVO.searchArgs != null'>
