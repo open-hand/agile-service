@@ -345,6 +345,18 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         handleCreateTagIssueRel(issueCreateVO.getTags(), projectInfoDTO.getProjectId(), issueId);
         // 处理参与人
         handlerParticipantRel(issueConvertDTO, projectInfoDTO.getProjectId(), issueId);
+        // 处理前置依赖
+        handlerIssuePredecessors(issueConvertDTO, issueCreateVO.getIssuePredecessors(), projectInfoDTO.getProjectId(), issueId);
+    }
+
+    private void handlerIssuePredecessors(IssueConvertDTO issueConvertDTO, List<IssuePredecessorVO> issuePredecessors, Long projectId, Long issueId) {
+        // 仅创建瀑布工作项时可选
+        if (agileWaterfallService != null || !Arrays.asList(IssueTypeCode.WATERFALL_ISSUE_TYPE_CODE).contains(issueConvertDTO.getTypeCode())) {
+            return;
+        }
+        if(!CollectionUtils.isEmpty(issuePredecessors)) {
+            issuePredecessorService.updatePredecessors(projectId, issuePredecessors, issueId);
+        }
     }
 
     private void handlerParticipantRel(IssueConvertDTO issueConvertDTO, Long projectId, Long issueId) {
