@@ -11,6 +11,7 @@ import StatusTag from '@/components/StatusTag';
 import UserTag from '../tag/user-tag';
 import { IFoundationHeader } from '@/common/types';
 import { MINUTE } from '@/constants/DATE_FORMAT';
+import GanttPredecessor from '@/routes/gantt/components/gantt-predecessor';
 
 type IIssueTableBaseColumnRenderGetData<T> = (data: T, nameKey: string) => any
 export interface IIssueTableBaseColumn<D extends object = any> {
@@ -429,6 +430,17 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
         {`${getDataMethod(rowData, 'workTime')}h`}
       </div>
     ),
+  }],
+  ['predecessor', {
+    title: <Tooltip title="前置依赖">前置依赖</Tooltip>,
+    titleKey: 'agile.gantt.column.predecessor',
+    width: 120,
+    dataIndex: 'predecessors',
+    render: (rowData, getDataMethod = get) => {
+      const predecessors = getDataMethod(rowData, 'predecessors');
+      const projectId = getDataMethod(rowData, 'projectId');
+      return predecessors?.length ? <GanttPredecessor data={predecessors} projectId={projectId} /> : <></>;
+    },
   }],
   ['cumulativeWorkTime', {
     title: <Tooltip title="历史累计工时">历史累计工时</Tooltip>,
