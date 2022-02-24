@@ -242,8 +242,9 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         // 创建交付物
         if (agileWaterfallService != null
                 && issueCreateVO.getTypeCode().equals(IssueTypeCode.MILESTONE.value())
-                && !CollectionUtils.isEmpty(issueCreateVO.getWfDeliverableVOS())) {
-            agileWaterfallService.createDeliverableService(issueId, issueCreateVO.getWfDeliverableVOS());
+                && !ObjectUtils.isEmpty(issueCreateVO.getWaterfallIssueVO())
+                && !CollectionUtils.isEmpty(issueCreateVO.getWaterfallIssueVO().getWfDeliverableVOS())) {
+            agileWaterfallService.createDeliverableService(issueId, issueCreateVO.getWaterfallIssueVO().getWfDeliverableVOS());
         }
         return issueId;
     }

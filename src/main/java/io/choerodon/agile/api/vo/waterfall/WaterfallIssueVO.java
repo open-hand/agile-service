@@ -38,6 +38,9 @@ public class WaterfallIssueVO {
     @ApiModelProperty(value = "关联的瀑布工作项id")
     private Long wfIssueRelId;
 
+    @ApiModelProperty(value = "交付物")
+    private List<WfDeliverableVO> wfDeliverableVOS;
+
     public Long getIssueId() {
         return issueId;
     }
@@ -108,5 +111,13 @@ public class WaterfallIssueVO {
 
     public void setWfIssueRelId(Long wfIssueRelId) {
         this.wfIssueRelId = wfIssueRelId;
+    }
+
+    public List<WfDeliverableVO> getWfDeliverableVOS() {
+        return wfDeliverableVOS;
+    }
+
+    public void setWfDeliverableVOS(List<WfDeliverableVO> wfDeliverableVOS) {
+        this.wfDeliverableVOS = wfDeliverableVOS;
     }
 }

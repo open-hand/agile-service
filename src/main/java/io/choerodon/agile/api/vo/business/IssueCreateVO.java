@@ -108,9 +108,6 @@ public class IssueCreateVO {
     @ApiModelProperty(value = "featureVO")
     private FeatureVO featureVO;
 
-    @ApiModelProperty(value = "交付物")
-    private List<WfDeliverableVO> wfDeliverableVOS;
-
     private WsjfVO wsjfVO;
 
     private Long teamProjectId;
@@ -517,13 +514,5 @@ public class IssueCreateVO {
 
     public void setWaterfallIssueVO(WaterfallIssueVO waterfallIssueVO) {
         this.waterfallIssueVO = waterfallIssueVO;
-    }
-
-    public List<WfDeliverableVO> getWfDeliverableVOS() {
-        return wfDeliverableVOS;
-    }
-
-    public void setWfDeliverableVOS(List<WfDeliverableVO> wfDeliverableVOS) {
-        this.wfDeliverableVOS = wfDeliverableVOS;
     }
 }
