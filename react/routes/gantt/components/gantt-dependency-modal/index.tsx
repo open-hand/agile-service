@@ -1,5 +1,5 @@
 import React, {
-  useMemo, useCallback, useRef, useState, useEffect, useImperativeHandle,
+  useMemo, useCallback, useRef, useState, useImperativeHandle,
 } from 'react';
 import {
   Modal, Form, Select, Button, Icon,
@@ -20,7 +20,7 @@ import InlineIssueTag from '@/components/tag/inline-issue-tag';
 import { wrapRequestCallback } from '@/components/select/utils';
 
 const SelectIssue: React.FC<Partial<SelectProps> & { issueId: string, setLoading: React.Dispatch<React.SetStateAction<boolean>>, selectIds?: string[], isStopRequest: boolean, excludeIssueIds?: string[] }> = ({
-  issueId, selectIds: propsSelectIds, record, name, excludeIssueIds: propsExcludeIssueIds, setLoading, isStopRequest, ...otherProps
+  issueId, selectIds: propsSelectIds, record, name, excludeIssueIds: propsExcludeIssueIds, setLoading, multiple, isStopRequest, ...otherProps
 }) => {
   const optionDataRef = useRef<any[]>([]);
   const excludeIssueIdsRef = useRef<string[]>();
@@ -55,10 +55,10 @@ const SelectIssue: React.FC<Partial<SelectProps> & { issueId: string, setLoading
     afterLoad: (data) => {
       optionDataRef.current = data;
     },
-    optionRenderer: InlineIssueTag.optionRenderer,
-    renderer: InlineIssueTag.renderer,
+    optionRenderer: InlineIssueTag.createIssueTag({ multiple }),
+    renderer: InlineIssueTag.createIssueTag({ multiple, rendererMode: true }),
     paging: true,
-  }), [args, issueId, setLoading]);
+  }), [args, issueId, multiple, setLoading]);
   const props = useSelect(config);
   return <Select name={name} record={record} {...props} {...otherProps} />;
 };
