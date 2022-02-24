@@ -618,6 +618,10 @@ const CreateIssueBase = observer(({
       if (otherLinkRef.current?.dependencyDataSet && !await otherLinkRef.current?.dependencyDataSet?.validate()) {
         return false;
       }
+      // @ts-ignore
+      if (otherLinkRef.current?.deliverableDataSet && !await otherLinkRef.current?.deliverableDataSet?.validate()) {
+        return false;
+      }
       const data = dataSet.current?.toData();
       const customFields = fields?.filter((f) => !f.system).filter((f) => !getRuleHidden(f, rules));
       const systemFields = fields?.filter((f) => f.system).filter((f) => !getRuleHidden(f, rules));
@@ -648,6 +652,8 @@ const CreateIssueBase = observer(({
         featureId: (issueType as IIssueType)?.typeCode === 'bug' && data.parentIssueId?.issueId ? undefined : data.feature,
         issueLinkCreateVOList: enableIssueLinks ? getIssueLinks() : undefined,
         componentIssueRelVOList: values.componentIssueRelVOList ? values.componentIssueRelVOList.map((item: string) => ({ componentId: item })) : [],
+        // @ts-ignore
+        deliverableData: otherLinkRef.current?.getDeliverableData && otherLinkRef.current?.getDeliverableData() ? otherLinkRef.current?.getDeliverableData() : undefined,
       });
 
       values = hooks.reduce((result, hook) => hook(result, data), values);
