@@ -20,8 +20,9 @@ import InlineIssueTag from '@/components/tag/inline-issue-tag';
 import { wrapRequestCallback } from '@/components/select/utils';
 
 const SelectIssue: React.FC<Partial<SelectProps> & { issueId: string, setLoading: React.Dispatch<React.SetStateAction<boolean>>, selectIds?: string[], isStopRequest: boolean, excludeIssueIds?: string[] }> = ({
-  issueId, selectIds: propsSelectIds, record, name, excludeIssueIds: propsExcludeIssueIds, setLoading, multiple, isStopRequest, ...otherProps
+  issueId, selectIds: propsSelectIds, record, name, excludeIssueIds: propsExcludeIssueIds, setLoading, isStopRequest, ...otherProps
 }) => {
+  const { multiple } = otherProps;
   const optionDataRef = useRef<any[]>([]);
   const excludeIssueIdsRef = useRef<string[]>();
   const selectIdsRef = useRef<string[]>();

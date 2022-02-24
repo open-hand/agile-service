@@ -7,8 +7,11 @@ export interface ProjectIssueTypesConfig {
 }
 export default function useProjectPredecessorTypes(config?: ProjectIssueTypesConfig, options?: UseQueryOptions<IGanttPredecessorType[]>) {
   const key = useProjectKey({ key: ['predecessorTypes'], projectId: config?.projectId });
-  return useQuery(key, () => ganttApi.project(config?.projectId).loadIssueDependencyTypes(), {
-    initialData: [] as IGanttPredecessorType[],
+  return useQuery('predecessorTypes', () => ganttApi.project(config?.projectId).loadIssueDependencyTypes(), {
+    // initialData: [] as IGanttPredecessorType[],
+    staleTime: 3000000,
+    keepPreviousData: true,
+    refetchOnWindowFocus: false,
     ...options,
   });
 }

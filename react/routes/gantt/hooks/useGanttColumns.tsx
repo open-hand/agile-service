@@ -11,8 +11,6 @@ import { GanttProps, Gantt } from '@choerodon/gantt';
 import '@choerodon/gantt/dist/gantt.cjs.production.min.css';
 import { useMount, useUpdateEffect } from 'ahooks';
 import {
-  ganttApi,
-  IGanttPredecessorType,
   ListLayoutColumnVO,
 } from '@/api';
 import TypeTag from '@/components/TypeTag';
@@ -33,8 +31,8 @@ import openGanttConflictModal from '../components/gannt-conflict-modal';
 import { ganttIsCanQuickCreateIssue } from '../utils';
 import openGanttDependencyModal from '../components/gantt-dependency-modal';
 import TableDropMenu from '@/components/table-drop-menu';
-import useProjectPredecessorTypes from '@/hooks/data/useProjectPredecessorTypes';
 import useFormatMessage from '@/hooks/useFormatMessage';
+import GanttPredecessor from '../components/gantt-predecessor';
 
 interface IGanttColumnsHookProps extends TableCacheRenderProps {
   menuType: IGanttProps['menuType']
@@ -113,7 +111,7 @@ const ganttColumnMap = new Map<string, any>([['assignee', {
   name: 'predecessor',
   titleKey: 'agile.gantt.column.predecessor',
   label: '前置依赖',
-  render: (record: any) => record.predecessors,
+  render: (record: any) => (record.predecessors?.length ? <GanttPredecessor data={record.predecessors} projectId={get(record, 'projectId')} /> : <></>),
 }], ['estimatedStartTime', {
   width: 100,
   minWidth: 100,
@@ -187,7 +185,7 @@ interface TableColumnEvent {
   onAfterCreateSubIssue?: IGanttColumnsHookProps['onAfterCreateSubIssue']
 }
 const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: boolean }>,
-  tableFields: IFoundationHeader[], events: TableColumnEvent = {}, disable: { disableOperate: boolean, disableFeatureCreateIssue: boolean } = { disableFeatureCreateIssue: false, disableOperate: false }, predecessorTypes: IGanttPredecessorType[] = []) => {
+  tableFields: IFoundationHeader[], events: TableColumnEvent = {}, disable: { disableOperate: boolean, disableFeatureCreateIssue: boolean } = { disableFeatureCreateIssue: false, disableOperate: false }) => {
   const {
     onSortChange = noop, onClickSummary = noop, onUpdate = noop,
     openCreateSubIssue = noop, onAfterCreateSubIssue = noop,
@@ -332,17 +330,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
       </Tooltip>
     );
   }
-  const predecessorMaps = new Map(predecessorTypes.map((item) => [item.valueCode, item]));
-  function renderPredecessor(record: Gantt.Record<any>) {
-    const predecessors: any[] = record.predecessors?.map((item: any) => ({ ...item, predecessorName: predecessorMaps.get(item.predecessorType)!.name })) || [];
-    return (
-      <Tooltip placement="topLeft" title={predecessors.map((predecessor: any) => <div>{`${predecessor.predecessorName}：${predecessor.issueNum} ${predecessor.summary}`}</div>)}>
-        <span>
-          {predecessors.map<string>((predecessor: any) => `${predecessor.issueNum?.split('-').slice(-1)}${predecessor.predecessorName}`).join('、')}
-        </span>
-      </Tooltip>
-    );
-  }
+
   const tableColumns: Array<GanttProps<Issue>['columns'][0] & { titleKey: string, }> = [{
     flex: 2,
     minWidth: 300,
@@ -382,7 +370,6 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
     if (ganttColumnMap.has(columnCode)) {
       const field = ganttColumnMap.get(columnCode);
       merge(baseColumn, { ...field, sortable: true });
-      columnCode === 'predecessor' && merge(baseColumn, { render: renderPredecessor });
     }
     const { render, name } = baseColumn;
     return merge(baseColumn, {
@@ -421,9 +408,7 @@ function useGanttProjectColumns({
   const { data: tableFields } = useIssueTableFields({
     hiddenFieldCodes, extraFields: ganttSystemFields, projectId, menuType: 'project', issueTypeList: 'agileIssueType',
   });
-  const { data: issueTypes, isLoading: issueTypeIsLoading } = useProjectIssueTypes({ projectId, isInProgram, applyType: 'agile' });
-  const { data: predecessorTypes, isLoading: predecessorTypesLoading } = useProjectPredecessorTypes({ projectId });
-  const isLoading = issueTypeIsLoading && predecessorTypesLoading;
+  const { data: issueTypes, isLoading: issueTypeIsLoading } = useProjectIssueTypes({ projectId, isInProgram, applyType: 'agile' }); const isLoading = issueTypeIsLoading;
   const disableFeatureCreateIssue = !!issueTypes?.some((issueType) => issueType.typeCode === 'story');
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
   const listLayoutColumns = useMemo(() => getListLayoutColumns(cached?.listLayoutColumns || defaultListLayoutColumns as any, tableFields || []), [cached?.listLayoutColumns, tableFields]);
@@ -431,7 +416,7 @@ function useGanttProjectColumns({
   const tableWithSortedColumns = useMemo(() => getTableColumns(listLayoutColumns.filter((item) => item.display)
     .map((item) => ({ ...item, disable: true })), tableFields || [], {
     onClickSummary, onSortChange, openCreateSubIssue: onCreateSubIssue, onAfterCreateSubIssue, onUpdate,
-  }, { disableOperate: menuType !== 'project', disableFeatureCreateIssue }, predecessorTypes), [disableFeatureCreateIssue, listLayoutColumns, menuType, onAfterCreateSubIssue, onClickSummary, onCreateSubIssue, onSortChange, onUpdate, predecessorTypes, tableFields]);
+  }, { disableOperate: menuType !== 'project', disableFeatureCreateIssue }), [disableFeatureCreateIssue, listLayoutColumns, menuType, onAfterCreateSubIssue, onClickSummary, onCreateSubIssue, onSortChange, onUpdate, tableFields]);
   const sortedListRef = useRef<IGanttSortLabelSortItem[]>(sortedList);
   sortedListRef.current = sortedList;
 

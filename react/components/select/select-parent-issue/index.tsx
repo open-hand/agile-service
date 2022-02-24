@@ -14,8 +14,9 @@ interface Props extends Partial<SelectProps> {
 }
 
 const SelectParentIssue: React.FC<Props> = forwardRef(({
-  flat, projectId, issueType, multiple, ...otherProps
+  flat, projectId, issueType, ...otherProps
 }, ref: React.Ref<Select>) => {
+  const { multiple } = otherProps;
   const config = useMemo((): SelectConfig<Issue> => ({
     textField: 'summary',
     valueField: 'issueId',
