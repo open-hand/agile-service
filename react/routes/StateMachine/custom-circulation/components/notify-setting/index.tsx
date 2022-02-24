@@ -17,6 +17,7 @@ import { OldLoading } from '@/components/Loading';
 import SelectUser from '@/components/select/select-user';
 import styles from './index.less';
 import useIsProgramIssueType from '@/hooks/useIsProgramIssueType';
+import {WATERFALL_TYPE_CODES} from "@/constants/TYPE_CODE";
 
 const { AppState } = stores;
 interface NotifySelectProps {
@@ -225,7 +226,10 @@ const NotifySetting = ({
           objectVersionNumber: record.get('objectVersionNumber'),
         };
         try {
-          await statusTransformApi[isOrganization ? 'orgUpdateNotifySetting' : 'updateNotifySetting'](updateData, isProgramIssueType ? 'program' : 'agile');
+          await statusTransformApi[isOrganization ? 'orgUpdateNotifySetting' : 'updateNotifySetting'](
+            updateData,
+            selectedTypeItem?.typeCode && WATERFALL_TYPE_CODES.includes(selectedTypeItem?.typeCode) ? 'waterfall' : (isProgramIssueType ? 'program' : 'agile'),
+          );
           customCirculationDataSet.query(customCirculationDataSet.currentPage);
           return true;
         } catch (e) {

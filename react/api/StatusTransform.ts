@@ -335,7 +335,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
    * @param objectVersionNumber
    */
   updateCondition(
-    issueTypeId: string, statusId: string, objectVersionNumber: number, data: ICondition[], applyType: 'agile' | 'program',
+    issueTypeId: string, statusId: string, objectVersionNumber: number, data: ICondition[], applyType: 'agile' | 'program' | 'waterfall',
   ) {
     return axios({
       method: 'post',
@@ -549,7 +549,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     });
   }
 
-  updateNotifySetting(data: IUpdateNotifySetting, applyType: 'agile' | 'program' = getApplyType()) {
+  updateNotifySetting(data: IUpdateNotifySetting, applyType: 'agile' | 'program' | 'waterfall' = getApplyType()) {
     return axios({
       method: 'post',
       url: `${this.prefix}/status_notice_settings`,
@@ -592,7 +592,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
    * @param updateData
    */
   updateField(
-    issueTypeId: string, statusId: string, objectVersionNumber: number, updateData: IUpdateData[], applyType: 'agile' | 'program',
+    issueTypeId: string, statusId: string, objectVersionNumber: number, updateData: IUpdateData[], applyType: 'agile' | 'program' | 'waterfall',
   ) {
     return axios({
       method: 'post',

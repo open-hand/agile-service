@@ -21,6 +21,7 @@ import { OldLoading as Loading } from '@/components/Loading';
 import renderField from './renderField';
 import styles from './index.less';
 import useIsProgramIssueType from '@/hooks/useIsProgramIssueType';
+import {WATERFALL_TYPE_CODES} from "@/constants/TYPE_CODE";
 
 const { Option } = Select;
 
@@ -577,7 +578,14 @@ const UpdateField = ({
       if (validate) {
         const data = getData();
         const updateData = transformUpdateData(data, customMemberFieldsData);
-        await statusTransformApi[isOrganization ? 'orgUpdateField' : 'updateField'](selectedType, record.get('id'), record.get('objectVersionNumber'), updateData, isProgramIssueType ? 'program' : 'agile');
+        await statusTransformApi[isOrganization ? 'orgUpdateField' : 'updateField'](
+          selectedType,
+          record.get('id'),
+          record.get('objectVersionNumber'),
+          updateData,
+          // eslint-disable-next-line no-nested-ternary
+          selectedTypeCode && WATERFALL_TYPE_CODES.includes(selectedTypeCode) ? 'waterfall' : isProgramIssueType ? 'program' : 'agile',
+        );
         customCirculationDataSet.query(customCirculationDataSet.currentPage);
         return true;
       }
