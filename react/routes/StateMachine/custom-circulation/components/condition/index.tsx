@@ -24,6 +24,7 @@ import styles from './index.less';
 import SelectUser from '@/components/select/select-user';
 
 import useIsProgramIssueType from '@/hooks/useIsProgramIssueType';
+import {WATERFALL_TYPE_CODES} from "@/constants/TYPE_CODE";
 
 interface Props {
   modal: any,
@@ -196,7 +197,14 @@ const Condition: React.FC<Props> = ({
           });
         }
 
-        await statusTransformApi[isOrganization ? 'orgUpdateCondition' : 'updateCondition'](selectedType, record.get('id'), record.get('objectVersionNumber'), updateData, isProgramIssueType ? 'program' : 'agile');
+        await statusTransformApi[isOrganization ? 'orgUpdateCondition' : 'updateCondition'](
+          selectedType,
+          record.get('id'),
+          record.get('objectVersionNumber'),
+          updateData,
+          // eslint-disable-next-line no-nested-ternary
+          selectedTypeCode && WATERFALL_TYPE_CODES.includes(selectedTypeCode) ? 'waterfall' : (isProgramIssueType ? 'program' : 'agile'),
+        );
         customCirculationDataSet.query(customCirculationDataSet.currentPage);
         return true;
       }
