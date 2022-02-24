@@ -6,6 +6,7 @@ import io.choerodon.agile.api.vo.business.IssueUpdateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.business.SystemFieldOverrideConfigVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
+import io.choerodon.agile.api.vo.waterfall.WfDeliverableVO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -53,4 +54,11 @@ public interface AgileWaterfallService {
     List<String> queryFieldOrderByIssueType(String issueType);
 
     Map<String, PageConfigFieldEditedVO> fieldEdited(String issueType);
+
+    /**
+     * 创建交付物
+     * @param issueId
+     * @param wfDeliverableVOS
+     */
+    void createDeliverableService(Long issueId, List<WfDeliverableVO> wfDeliverableVOS);
 }

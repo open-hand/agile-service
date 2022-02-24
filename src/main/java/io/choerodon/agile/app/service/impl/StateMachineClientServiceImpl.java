@@ -1,9 +1,21 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.validator.IssueValidator;
-import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.IssueSubCreateVO;
+import io.choerodon.agile.api.vo.IssueSubVO;
+import io.choerodon.agile.api.vo.RankVO;
 import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.api.vo.business.IssueUpdateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
@@ -13,21 +25,17 @@ import io.choerodon.agile.api.vo.event.CreateSubIssuePayload;
 import io.choerodon.agile.app.assembler.IssueAssembler;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.cache.InstanceCache;
-import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.ProjectInfoDTO;
+import io.choerodon.agile.infra.dto.RankDTO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.agile.infra.mapper.RankMapper;
 import io.choerodon.agile.infra.mapper.StatusMachineSchemeConfigMapper;
-import io.choerodon.agile.infra.utils.BaseFieldUtil;
-import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.agile.infra.utils.EnumUtil;
-import io.choerodon.agile.infra.utils.RankUtil;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.agile.infra.statemachineclient.annotation.Condition;
 import io.choerodon.agile.infra.statemachineclient.annotation.PostAction;
 import io.choerodon.agile.infra.statemachineclient.annotation.UpdateStatus;
@@ -37,14 +45,12 @@ import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import io.choerodon.agile.infra.statemachineclient.dto.StateMachineConfigDTO;
 import io.choerodon.agile.infra.statemachineclient.dto.StateMachineTransformDTO;
-import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
-
-import java.util.*;
+import io.choerodon.agile.infra.utils.BaseFieldUtil;
+import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.EnumUtil;
+import io.choerodon.agile.infra.utils.RankUtil;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
 
 /**
  * @author shinan.chen
@@ -184,10 +190,10 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     private Long handlerIssue(IssueCreateVO issueCreateVO, String applyType) {
         issueValidator.checkIssueCreate(issueCreateVO, applyType);
         if (agilePluginService != null) {
-            agilePluginService.checkBeforeCreateIssue(issueCreateVO,applyType);
+            agilePluginService.checkBeforeCreateIssue(issueCreateVO, applyType);
         }
         if (agileWaterfallService != null) {
-            agileWaterfallService.checkBeforeCreateIssue(issueCreateVO,applyType);
+            agileWaterfallService.checkBeforeCreateIssue(issueCreateVO, applyType);
         }
         IssueConvertDTO issueConvertDTO = issueAssembler.toTarget(issueCreateVO, IssueConvertDTO.class);
         Long projectId = issueConvertDTO.getProjectId();
@@ -232,6 +238,12 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         }
         if (agileWaterfallService != null) {
             agileWaterfallService.handlerWaterfallAfterCreateIssue(projectId,issueId,issueCreateVO);
+        }
+        // 创建交付物
+        if (agileWaterfallService != null
+                && issueCreateVO.getTypeCode().equals(IssueTypeCode.MILESTONE.value())
+                && !CollectionUtils.isEmpty(issueCreateVO.getWfDeliverableVOS())) {
+            agileWaterfallService.createDeliverableService(issueId, issueCreateVO.getWfDeliverableVOS());
         }
         return issueId;
     }
@@ -451,7 +463,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         }
         IssueUpdateVO issueUpdateVO = issueAssembler.toTarget(issue, IssueUpdateVO.class);
         issueUpdateVO.setStatusId(targetStatusId);
-        if (Objects.nonNull(triggerIssueId)){
+        if (Objects.nonNull(triggerIssueId)) {
             IssueDTO issueDTO = issueMapper.selectByPrimaryKey(triggerIssueId);
             issueUpdateVO.setAutoTranferFlag(autoTranferFlag);
             issueUpdateVO.setAutoTriggerId(triggerIssueId);

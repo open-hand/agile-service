@@ -3,6 +3,7 @@ package io.choerodon.agile.api.vo.business;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.waterfall.WaterfallIssueVO;
+import io.choerodon.agile.api.vo.waterfall.WfDeliverableVO;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -106,6 +107,9 @@ public class IssueCreateVO {
 
     @ApiModelProperty(value = "featureVO")
     private FeatureVO featureVO;
+
+    @ApiModelProperty(value = "交付物")
+    private List<WfDeliverableVO> wfDeliverableVOS;
 
     private WsjfVO wsjfVO;
 
@@ -513,5 +517,13 @@ public class IssueCreateVO {
 
     public void setWaterfallIssueVO(WaterfallIssueVO waterfallIssueVO) {
         this.waterfallIssueVO = waterfallIssueVO;
+    }
+
+    public List<WfDeliverableVO> getWfDeliverableVOS() {
+        return wfDeliverableVOS;
+    }
+
+    public void setWfDeliverableVOS(List<WfDeliverableVO> wfDeliverableVOS) {
+        this.wfDeliverableVOS = wfDeliverableVOS;
     }
 }
