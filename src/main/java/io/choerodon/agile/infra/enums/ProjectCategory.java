@@ -76,6 +76,8 @@ public class ProjectCategory {
      */
     public static final String MODULE_WATERFALL_AGILE = "N_WATERFALL_AGILE";
 
+    private static final String ERROR_CATEGORIES_IS_NULL = "error.categories.is.null";
+
     public static String getApplyType(String category){
         if (PROGRAM.equals(category)) {
             return SchemeApplyType.PROGRAM;
@@ -87,7 +89,7 @@ public class ProjectCategory {
     }
     public static Boolean checkContainProjectCategory(List<ProjectCategoryDTO> categories, String category){
         if (CollectionUtils.isEmpty(categories)) {
-            throw new CommonException("error.categories.is.null");
+            throw new CommonException(ERROR_CATEGORIES_IS_NULL);
         }
         Set<String> codes = categories.stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toSet());
         return codes.contains(category);
@@ -96,7 +98,7 @@ public class ProjectCategory {
     public static List<String> getProjectApplyType(Long projectId) {
         ProjectVO projectVO = ConvertUtil.queryProject(projectId);
         if (CollectionUtils.isEmpty(projectVO.getCategories())) {
-            throw new CommonException("error.categories.is.null");
+            throw new CommonException(ERROR_CATEGORIES_IS_NULL);
         }
         List<String> applyTypes = new ArrayList<>();
         Set<String> codes = projectVO.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toSet());
@@ -136,7 +138,7 @@ public class ProjectCategory {
     public static String getProjectIssueTypeList(Long projectId) {
         ProjectVO projectVO = ConvertUtil.queryProject(projectId);
         if (CollectionUtils.isEmpty(projectVO.getCategories())) {
-            throw new CommonException("error.categories.is.null");
+            throw new CommonException(ERROR_CATEGORIES_IS_NULL);
         }
         String issueTypeList = "agileIssueType";
         Set<String> codes = projectVO.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toSet());
@@ -147,5 +149,15 @@ public class ProjectCategory {
             return "waterfallIssueType";
         }
         return issueTypeList;
+    }
+
+    public static boolean isWaterfallProject(Long projectId) {
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
+        List<ProjectCategoryDTO> categories = projectVO.getCategories();
+        if (CollectionUtils.isEmpty(categories)) {
+            throw new CommonException(ERROR_CATEGORIES_IS_NULL);
+        }
+        Set<String> codes = categories.stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toSet());
+        return codes.contains(MODULE_WATERFALL) || codes.contains(MODULE_WATERFALL_AGILE);
     }
 }

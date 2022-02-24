@@ -1,10 +1,10 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.IssuePredecessorVO;
-import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
-import io.choerodon.agile.app.service.IssuePredecessorService;
-import io.choerodon.agile.app.service.IssueService;
+import io.choerodon.agile.api.vo.business.IssueListVO;
+import io.choerodon.agile.app.assembler.IssueAssembler;
+import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.IssuePredecessorDTO;
 import io.choerodon.agile.infra.dto.IssuePredecessorTreeClosureDTO;
 import io.choerodon.agile.infra.dto.LookupValueDTO;
@@ -12,6 +12,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.LookupType;
 import io.choerodon.agile.infra.enums.PredecessorType;
+import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -27,9 +28,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -50,6 +53,14 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
     private IssuePredecessorMapper issuePredecessorMapper;
     @Autowired
     private IssueService issueService;
+    @Autowired
+    private IssueAssembler issueAssembler;
+    @Autowired
+    private PriorityService priorityService;
+    @Autowired
+    private StatusService statusService;
+    @Autowired
+    private IssueTypeService issueTypeService;
 
     private static final List<String> ISSUE_TYPE_CODES =
             Arrays.asList(
@@ -57,6 +68,12 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
                     IssueTypeCode.BUG.value(),
                     IssueTypeCode.TASK.value(),
                     IssueTypeCode.SUB_TASK.value());
+
+    private static final List<String> WATERFALL_ISSUE_TYPE_CODES =
+            Arrays.asList(
+                    IssueTypeCode.STAGE.value(),
+                    IssueTypeCode.MILESTONE.value(),
+                    IssueTypeCode.ACTIVITY.value());
 
     @Override
     public List<LookupValueDTO> queryPredecessorTypes(Long projectId) {
@@ -72,7 +89,7 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Map<String, List<Long>> predecessorMap = new LinkedHashMap<>();
         validateIssuePredecessors(issuePredecessors, predecessorMap, currentIssueId);
-        Set<Long> issueIds = validateIssueExisted(currentIssueId, predecessorMap);
+        Set<Long> issueIds = validateIssueExisted(projectId, currentIssueId, predecessorMap);
         addSelfClosureIfNotExisted(issueIds, projectId, organizationId);
         //移除自身节点，返回所有直接父级
         issueIds.remove(currentIssueId);
@@ -135,9 +152,10 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
                                                             SearchVO searchVO,
                                                             PageRequest pageRequest,
                                                             Long currentIssueId) {
-        SearchVOUtil.setTypeCodes(searchVO, ISSUE_TYPE_CODES);
+        SearchVOUtil.setTypeCodes(searchVO, getPredecessorIssueTypes(projectId));
         SearchVOUtil.setSearchArgs(searchVO, "tree", false);
         Map<String, Object> otherArgs = searchVO.getOtherArgs();
+        searchVO.setWaterfallProject(ProjectCategory.isWaterfallProject(projectId));
         String excludeIssueIdsKey = "excludeIssueIds";
         Set<Long> excludeIssueIds = new HashSet<>();
         if (!ObjectUtils.isEmpty(otherArgs) && !ObjectUtils.isEmpty(otherArgs.get(excludeIssueIdsKey))) {
@@ -174,15 +192,28 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
     }
 
     @Override
-    public List<IssuePredecessorVO> queryByIssueId(Long projectId, Long currentIssueId) {
+    public List<IssuePredecessorVO> queryByIssueId(Long projectId, Long currentIssueId, boolean withInfo) {
         IssuePredecessorDTO dto = new IssuePredecessorDTO();
         dto.setOrganizationId(ConvertUtil.getOrganizationId(projectId));
         dto.setProjectId(projectId);
         dto.setIssueId(currentIssueId);
         List<IssuePredecessorDTO> dtoList = issuePredecessorMapper.select(dto);
         ModelMapper modelMapper = new ModelMapper();
-        return modelMapper.map(dtoList, new TypeToken<List<IssuePredecessorVO>>() {
+        List<IssuePredecessorVO> result = modelMapper.map(dtoList, new TypeToken<List<IssuePredecessorVO>>() {
         }.getType());
+        if (Boolean.TRUE.equals(withInfo) && !CollectionUtils.isEmpty(result)) {
+            Long organizationId = ConvertUtil.getOrganizationId(projectId);
+            List<Long> issueIds = result.stream().map(IssuePredecessorVO::getPredecessorId).collect(Collectors.toList());
+            // 类型、概要、编号、优先级、状态、经办人
+            List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, null, false, false);
+            Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
+            Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
+            Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
+            List<IssueListVO> issueList = issueAssembler.issueDoToIssueListDto(issueDTOList, priorityMap, statusMapDTOMap, issueTypeDTOMap);
+            Map<Long, IssueListVO> issueMap = issueList.stream().collect(Collectors.toMap(IssueListVO::getIssueId, Function.identity()));
+            result.forEach(vo -> vo.setPredecessorIssueVO(issueMap.get(vo.getPredecessorId())));
+        }
+        return result;
     }
 
     private void deleteTreeNodes(Long projectId,
@@ -332,7 +363,8 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         return result;
     }
 
-    private Set<Long> validateIssueExisted(Long currentIssueId,
+    private Set<Long> validateIssueExisted(Long projectId,
+                                           Long currentIssueId,
                                            Map<String, List<Long>> predecessorMap) {
         Set<Long> issueIds = new HashSet<>();
         issueIds.add(currentIssueId);
@@ -340,7 +372,8 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         List<IssueDTO> issues = issueMapper.selectByIds(StringUtils.join(issueIds, ","));
         issues.forEach(issue -> {
             String typeCode = issue.getTypeCode();
-            if (!ISSUE_TYPE_CODES.contains(typeCode)) {
+            List<String> issueTypeCodes = getPredecessorIssueTypes(projectId);
+            if (!issueTypeCodes.contains(typeCode)) {
                 throw new CommonException("error.predecessor.illegal.issue.type");
             }
         });
@@ -427,5 +460,12 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         dto.setAncestorId(ancestorId);
         dto.setDescendantId(descendantId);
         return dto;
+    }
+
+    private List<String> getPredecessorIssueTypes(Long projectId) {
+        if (ProjectCategory.isWaterfallProject(projectId)) {
+            return WATERFALL_ISSUE_TYPE_CODES;
+        }
+        return ISSUE_TYPE_CODES;
     }
 }

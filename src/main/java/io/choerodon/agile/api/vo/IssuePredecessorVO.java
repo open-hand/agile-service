@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.api.vo.business.IssueListVO;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -22,6 +23,8 @@ public class IssuePredecessorVO {
     private Long projectId;
 
     private Long organizationId;
+
+    private IssueListVO predecessorIssueVO;
 
     public Long getId() {
         return id;
@@ -69,5 +72,13 @@ public class IssuePredecessorVO {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public IssueListVO getPredecessorIssueVO() {
+        return predecessorIssueVO;
+    }
+
+    public void setPredecessorIssueVO(IssueListVO predecessorIssueVO) {
+        this.predecessorIssueVO = predecessorIssueVO;
     }
 }

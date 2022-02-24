@@ -75,7 +75,8 @@ public class IssuePredecessorController {
     @GetMapping(value = "/query")
     public ResponseEntity<List<IssuePredecessorVO>> queryByIssueId(@ApiParam(value = "项目id", required = true)
                                                                    @PathVariable(name = "project_id") Long projectId,
-                                                                   @RequestParam @Encrypt Long currentIssueId) {
-        return ResponseEntity.ok(issuePredecessorService.queryByIssueId(projectId, currentIssueId));
+                                                                   @RequestParam @Encrypt Long currentIssueId,
+                                                                   @RequestParam(required = false) boolean withInfo) {
+        return ResponseEntity.ok(issuePredecessorService.queryByIssueId(projectId, currentIssueId, withInfo));
     }
 }
