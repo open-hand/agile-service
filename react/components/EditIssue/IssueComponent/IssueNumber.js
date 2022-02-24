@@ -1,4 +1,4 @@
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { Icon, Tooltip } from 'choerodon-ui';
 import { withRouter } from 'react-router-dom';
 import copy from 'copy-to-clipboard';
@@ -9,6 +9,7 @@ import { linkUrl } from '@/utils/to';
 import EditIssueContext from '../stores';
 import IssueSwitch from './IssueSwitch';
 import styles from './IssueNumber.less';
+import { WATERFALL_TYPE_CODES } from '../../../constants/TYPE_CODE';
 
 const IssueNumber = ({
   reloadIssue, typeCode, parentSummary, issue, disabled, otherProject, outside,
@@ -17,6 +18,7 @@ const IssueNumber = ({
   const {
     isProgramIssue,
   } = useContext(EditIssueContext);
+  const isWaterfallIssue = useMemo(() => WATERFALL_TYPE_CODES.includes(typeCode), [typeCode]);
   const handleClickIssueNum = useCallback(() => {
     if (disabled) {
       return false;
@@ -51,7 +53,7 @@ const IssueNumber = ({
     }}
     >
       {
-        ((['sub_task', 'bug'].includes(typeCode) && parentSummary) || typeCode === 'feature') ? (
+        ((['sub_task', 'bug'].includes(typeCode) && parentSummary) || typeCode === 'feature' || isWaterfallIssue) ? (
           <span>
             {issueNum}
           </span>
@@ -66,7 +68,7 @@ const IssueNumber = ({
         )
       }
       {
-        issueId && !otherProject && !outside && (
+        issueId && !otherProject && !outside && !isWaterfallIssue && (
           <Tooltip title="复制链接">
             <Icon type="link2" role="none" className={styles.copyLinkIcon} style={{ cursor: 'pointer' }} onClick={handleCopyLink} />
           </Tooltip>
