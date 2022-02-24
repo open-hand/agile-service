@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo.waterfall;
 
+import io.choerodon.agile.api.vo.IssueTypeVO;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -23,6 +24,8 @@ public class IssueParentVO {
     private Long issueTypeId;
 
     private Boolean starBeacon;
+
+    private IssueTypeVO issueTypeVO;
 
     public Long getIssueId() {
         return issueId;
@@ -78,5 +81,13 @@ public class IssueParentVO {
 
     public void setStarBeacon(Boolean starBeacon) {
         this.starBeacon = starBeacon;
+    }
+
+    public IssueTypeVO getIssueTypeVO() {
+        return issueTypeVO;
+    }
+
+    public void setIssueTypeVO(IssueTypeVO issueTypeVO) {
+        this.issueTypeVO = issueTypeVO;
     }
 }
