@@ -65,7 +65,7 @@ public class IssuePredecessorController {
                                                                             @RequestBody(required = false) SearchVO searchVO,
                                                                             @ApiParam(value = "查询参数", required = true)
                                                                             @RequestParam Long organizationId,
-                                                                            @RequestParam @Encrypt Long currentIssueId) {
+                                                                            @RequestParam(required = false) @Encrypt Long currentIssueId) {
         EncryptionUtils.decryptSearchVO(searchVO);
         return ResponseEntity.ok(issuePredecessorService.pagedQueryEnabledIssues(organizationId, projectId, searchVO, pageRequest, currentIssueId));
     }

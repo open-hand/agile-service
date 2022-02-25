@@ -163,16 +163,20 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
             excludeIssueIdsStr.forEach(x -> excludeIssueIds.add(Long.valueOf(x)));
             otherArgs.remove(excludeIssueIdsKey);
         }
-        List<IssuePredecessorTreeClosureDTO> descendants =
-                issuePredecessorTreeClosureMapper.selectByAncestorIds(organizationId, projectId, new HashSet<>(Arrays.asList(currentIssueId)));
-        Set<Long> predecessorIds =
-                issuePredecessorMapper.selectByIssueIds(new HashSet<>(Arrays.asList(projectId)), new HashSet<>(Arrays.asList(currentIssueId)))
-                        .stream()
-                        .map(IssuePredecessorDTO::getPredecessorId)
-                        .collect(Collectors.toSet());
-        Set<Long> ignoredIssueIds =
-                descendants.stream().map(IssuePredecessorTreeClosureDTO::getDescendantId).collect(Collectors.toSet());
-        ignoredIssueIds.addAll(predecessorIds);
+
+        Set<Long> ignoredIssueIds = new HashSet<>();
+        if (!Objects.isNull(currentIssueId)) {
+            List<IssuePredecessorTreeClosureDTO> descendants =
+                    issuePredecessorTreeClosureMapper.selectByAncestorIds(organizationId, projectId, new HashSet<>(Arrays.asList(currentIssueId)));
+            Set<Long> predecessorIds =
+                    issuePredecessorMapper.selectByIssueIds(new HashSet<>(Arrays.asList(projectId)), new HashSet<>(Arrays.asList(currentIssueId)))
+                    .stream()
+                    .map(IssuePredecessorDTO::getPredecessorId)
+                    .collect(Collectors.toSet());
+            ignoredIssueIds.addAll(descendants.stream().map(IssuePredecessorTreeClosureDTO::getDescendantId).collect(Collectors.toSet()));
+            ignoredIssueIds.addAll(predecessorIds);
+            ignoredIssueIds.add(currentIssueId);
+        }
         String issueIdsKey = "issueIds";
         List<IssueListFieldKVVO> topIssues = new ArrayList<>();
         if (!ObjectUtils.isEmpty(otherArgs) && !ObjectUtils.isEmpty(otherArgs.get(issueIdsKey))) {
@@ -182,7 +186,6 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
             topIssues.addAll(issueService.listIssueWithSub(projectId, searchVO, newPageRequest, organizationId));
             otherArgs.remove(issueIdsKey);
         }
-        ignoredIssueIds.add(currentIssueId);
         ignoredIssueIds.addAll(excludeIssueIds);
         SearchVOUtil.setOtherArgs(searchVO, "excludeIssueIds", ignoredIssueIds);
         Page<IssueListFieldKVVO> result = issueService.listIssueWithSub(projectId, searchVO, pageRequest, organizationId);
