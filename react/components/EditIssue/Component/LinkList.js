@@ -8,7 +8,12 @@ import TypeTag from '../../TypeTag';
 
 class LinkList extends Component {
   confirm(issueId) {
-    this.handleDeleteIssue(issueId);
+    const { onDeleteConfirm } = this.props;
+    if (onDeleteConfirm) {
+      onDeleteConfirm(issueId);
+    } else {
+      this.handleDeleteIssue(issueId);
+    }
   }
 
   handleDeleteIssue(linkId) {
@@ -30,17 +35,16 @@ class LinkList extends Component {
   render() {
     const {
       issue, i, showAssignee, showProject,
-      canDelete = true, onOpen,
+      canDelete = true, onOpen, deleteTipTitle: propsDeleteTipTitle,
     } = this.props;
 
     const { typeCode, starBeacon } = issue;
-    let deleteTipTitle;
+    let deleteTipTitle = propsDeleteTipTitle || '确认删除该工作项的关联关系吗';
 
-    if (typeCode !== 'feature') {
-      deleteTipTitle = '确认删除该工作项的关联关系吗?';
-    } else {
+    if (typeCode === 'feature') {
       deleteTipTitle = '确认要删除该特性关联关系吗?';
     }
+
     return (
       <div
         style={{
