@@ -79,7 +79,7 @@ const GanttDependency: React.FC = observer(() => {
   const predecessorTypeLength = dataset.getField('predecessorType')?.getOptions()?.length || 0;
   const getData = useCallback(() => {
     const dependencyData = dataset.toData().map((item: any) => item.predecessorId.map((i: any) => ({
-      issueId,
+      issueId: issueId === '0' ? undefined : issueId,
       predecessorId: i,
       predecessorType: item.predecessorType,
     }))).flat() as IGanttUpdateIssueDependencyItem[];

@@ -654,6 +654,8 @@ const CreateIssueBase = observer(({
         componentIssueRelVOList: values.componentIssueRelVOList ? values.componentIssueRelVOList.map((item: string) => ({ componentId: item })) : [],
         // @ts-ignore
         deliverableData: otherLinkRef.current?.getDeliverableData && otherLinkRef.current?.getDeliverableData() ? otherLinkRef.current?.getDeliverableData() : undefined,
+        // @ts-ignore
+        issuePredecessors: otherLinkRef.current?.getDependencyData && otherLinkRef.current?.getDependencyData() ? otherLinkRef.current?.getDependencyData() : undefined,
       });
 
       values = hooks.reduce((result, hook) => hook(result, data), values);
