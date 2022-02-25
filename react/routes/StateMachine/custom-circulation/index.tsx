@@ -35,6 +35,8 @@ import { TabComponentProps } from '../index';
 import openLogModal from './components/log-modal';
 import { FORMAT_FIELDS, MINUTE } from '@/constants/DATE_FORMAT';
 import useFormatMessage from '@/hooks/useFormatMessage';
+import useIsWaterfall from '@/hooks/useIsWaterfall';
+import { WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
 
 interface ISetting {
   width: number | string,
@@ -260,6 +262,7 @@ const transformFieldValue = (fieldSetting) => {
 
 const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const { data: issueTypes } = useIssueTypes();
+  const { isWaterfall } = useIsWaterfall();
   const {
     selectedType, setSelectedType, issueTypeInitedMap, readOnly, visibleIssueTypeCategory, noContainer,
   } = useStateMachineContext();
@@ -721,7 +724,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
             <IssueTypeTab
               selectedType={selectedType}
               setSelectedType={setSelectedType}
-              excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
+              excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : (isWaterfall ? WATERFALL_TYPE_CODES : [])}
               brighter={readOnly}
               visibleIssueTypeCategory={visibleIssueTypeCategory}
             />
