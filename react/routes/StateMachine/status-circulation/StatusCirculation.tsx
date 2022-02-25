@@ -6,6 +6,7 @@ import {
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
 import { Divider } from 'choerodon-ui';
+import { find } from 'lodash';
 import { getIsOrganization } from '@/utils/common';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
 import { IIssueType } from '@/common/types';
@@ -19,6 +20,7 @@ import { useStatusCirculationContext } from './index';
 import { useStateMachineContext } from '../context';
 import IssueTypeTab from '../components/issue-type-tab';
 import useFormatMessage from '@/hooks/useFormatMessage';
+import { WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
 
 const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const { store } = useStatusCirculationContext();
@@ -59,7 +61,9 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
                   name: formatMessage({ id: 'flow.add.exist.state' }),
                   display: true,
                   handler: () => {
+                    const issueType = find(issueTypes, (item) => item.id === selectedType);
                     openSelectExistStatus({
+                      applyType: issueType?.typeCode && WATERFALL_TYPE_CODES.includes(issueType?.typeCode) ? 'waterfall' : undefined,
                       statusList: store.statusList,
                       issueTypeId: selectedType,
                       onSubmit: () => {

@@ -9,7 +9,6 @@ interface IGanttPredecessorProps {
 const GanttPredecessor: React.FC<IGanttPredecessorProps> = ({ projectId, data }) => {
   const { data: predecessorTypes = [], isStale } = useProjectPredecessorTypes({ projectId });
   const predecessorMaps = useMemo(() => new Map(predecessorTypes.map((item) => [item.valueCode, item])), [predecessorTypes]);
-  console.log('predecessorTypes', predecessorTypes, isStale);
   const predecessors: any[] = useMemo(() => data?.map((item: any) => ({ ...item, predecessorName: predecessorMaps.get(item.predecessorType)?.name })) || [], [data, predecessorMaps]);
 
   return (
