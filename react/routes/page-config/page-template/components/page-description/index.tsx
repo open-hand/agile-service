@@ -19,7 +19,7 @@ function PageDescription() {
     <div className={classNames(styles.description, { [styles.hidden]: hidden })}>
       <span className={styles.title}>
         {formatMessage({ id: 'template.description.format' })}
-        <Icon type="expand_more" className={classNames(styles.title_btn)} onClick={() => setHidden((oldVal) => !oldVal)} />
+        <Icon type={hidden ? 'expand_less' : 'expand_more'} className={classNames(styles.title_btn)} onClick={() => setHidden((oldVal) => !oldVal)} />
       </span>
       <div className={classNames(styles.edit)}>
         <WYSIWYGEditor
