@@ -242,7 +242,7 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         });
         List<Long> issueIds = issues.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
         List<IssueDTO> issueList = issueMapper.selectWithSubByIssueIds(filterProjectIds, issueIds, sortMap, false, null);
-        List<GanttChartVO> result = ganttChartService.buildGanttList(filterProjectMap, issueIds, issueList, Collections.emptyMap(), Collections.emptyMap(), Collections.emptyList(), organizationId);
+        List<GanttChartVO> result = ganttChartService.buildGanttList(filterProjectMap, issueIds, issueList, Collections.emptyMap(), Collections.emptyMap(), Collections.emptyList(), organizationId, null);
         return PageUtils.copyPropertiesAndResetContent(issuePage, result);
     }
 

@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.choerodon.agile.api.vo.business.TagVO;
+import io.choerodon.agile.api.vo.waterfall.GanttParentVO;
 import io.choerodon.agile.api.vo.waterfall.WaterfallIssueVO;
 import io.choerodon.agile.infra.dto.IssueSprintDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
@@ -146,6 +147,16 @@ public class GanttChartVO {
     private String predecessorType;
 
     private WaterfallIssueVO waterfallIssueVO;
+
+    private List<GanttParentVO> parents;
+
+    public List<GanttParentVO> getParents() {
+        return parents;
+    }
+
+    public void setParents(List<GanttParentVO> parents) {
+        this.parents = parents;
+    }
 
     public String getPredecessorType() {
         return predecessorType;
