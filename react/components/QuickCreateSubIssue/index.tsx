@@ -24,6 +24,7 @@ import UserDropdown from '../UserDropdown';
 import useDefaultPriority from '@/hooks/data/useDefaultPriority';
 import { WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
 
+type FilterCacheThumbnailKey = 'agile.issue.type.sub.selected'| 'agile.issue.type.common.selected';
 interface QuickCreateSubIssueProps {
   priorityId?: string
   projectId?: string
@@ -43,11 +44,13 @@ interface QuickCreateSubIssueProps {
   assigneeChange?: (assigneeId: string | undefined, assignee: User | undefined) => void
   isCanQuickCreate?: (createData: any) => boolean
   beforeClick?: () => boolean // 点击快速创建前函数，如果返回false,则中断操作
+  /** 自定义保存到缓存的key */
+  saveFilterToCache?: ((issueType: IIssueType) => FilterCacheThumbnailKey) | FilterCacheThumbnailKey
 
 }
 const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, defaultValues, projectId, cantCreateEvent, isCanQuickCreate, typeCode, summaryChange,
-  typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick, beforeClick, applyType,
+  typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick, beforeClick, applyType, saveFilterToCache,
 }) => {
   const { data: issueTypes, isLoading } = useProjectIssueTypes({
     typeCode: typeCode || 'sub_task', projectId, onlyEnabled: true, applyType,
@@ -177,11 +180,11 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
       setSummary('');
       handleCancel();
       onCreate && onCreate(res);
-      if (castArray(typeCode || 'sub_task').includes(currentType.typeCode)) {
-        localCacheStore.setItem('agile.issue.type.sub.selected', currentType.id);
-      } else {
-        localCacheStore.setItem('agile.issue.type.common.selected', currentType.id);
-      }
+      const defaultSaveFilterToCache = () => (currentType.typeCode === 'sub_task' ? 'agile.issue.type.sub.selected' : 'agile.issue.type.common.selected');
+      const getSaveFilterToCacheFn = (fn: QuickCreateSubIssueProps['saveFilterToCache']) => (typeof fn === 'function' ? fn : () => fn);
+      const cacheKey = saveFilterToCache ? getSaveFilterToCacheFn(saveFilterToCache) : defaultSaveFilterToCache;
+      currentType && localCacheStore.setItem(cacheKey(currentType)!, currentType.id);
+
       setCreateStatus('success');
       return true;
     }
