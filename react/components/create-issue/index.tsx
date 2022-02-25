@@ -81,6 +81,7 @@ const openModal = (props: CreateIssueProps) => {
       }
     }
     onCreate(res);
+    localCacheStore.setItem('agile.issue.type.common.selected', data.issueTypeId);
   };
   const defaultIssueTypeId = isEmpty(props.defaultTypeId) ? localCacheStore.getItem('agile.issue.type.common.selected') : props.defaultTypeId;
   let issueTypeCode: string | string[] | undefined;
