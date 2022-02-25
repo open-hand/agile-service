@@ -14,12 +14,13 @@ const { Option } = SelectBox;
 const key = Modal.key();
 interface Props {
   statusList?: IStatusCirculation[]
+  applyType?: 'agile' | 'waterfall'
   onSubmit: Function
   issueTypeId: string
   modal?: any
 }
 const SelectExistStatus: React.FC<Props> = ({
-  modal, onSubmit, issueTypeId, statusList = [],
+  modal, onSubmit, issueTypeId, statusList = [], applyType,
 }) => {
   const isOrganization = getIsOrganization();
   const dataSet = useMemo(() => new DataSet({
@@ -80,7 +81,7 @@ const SelectExistStatus: React.FC<Props> = ({
   return (
     <>
       <Form dataSet={dataSet}>
-        <SelectStatus name="statusId" isOrganization={isOrganization} expectStatusIds={statusList.map((status) => status.id)} />
+        <SelectStatus name="statusId" isOrganization={isOrganization} expectStatusIds={statusList.map((status) => status.id)} applyType={applyType} />
         <SelectBox name="default" style={{ marginTop: 13 }}>
           <Option value>是</Option>
           <Option value={false}>否</Option>

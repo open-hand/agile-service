@@ -7,12 +7,14 @@ import { IStatus } from '@/common/types';
 
 export interface SelectStatusProps extends Partial<SelectProps> {
   expectStatusIds?: string[]
+  applyType?: 'agile' | 'waterfall'
   isOrganization?: boolean
 }
 
 const SelectStatus: React.FC<SelectStatusProps> = forwardRef(({
   expectStatusIds,
   isOrganization = false,
+  applyType,
   ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<IStatus> => ({
@@ -21,15 +23,15 @@ const SelectStatus: React.FC<SelectStatusProps> = forwardRef(({
     valueField: 'id',
     request: ({ page, filter }) => (isOrganization ? statusApi.loadList(page, 20, '', {
       name: filter,
-    }) : statusApi.loadByProject()),
-    middleWare: (res: IStatus[] | { list: IStatus[]}) => {
+    }) : statusApi.loadByProject(applyType)),
+    middleWare: (res: IStatus[] | { list: IStatus[] }) => {
       const statusList: IStatus[] = (Array.isArray(res) ? res : res.list) || [];
       return (expectStatusIds && expectStatusIds.length > 0
         ? statusList.filter((status) => !expectStatusIds.includes(status.id))
         : statusList);
     },
     paging: !!isOrganization,
-  }), [expectStatusIds, isOrganization]);
+  }), [applyType, expectStatusIds, isOrganization]);
   const props = useSelect(config);
   return (
     <Select
