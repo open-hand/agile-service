@@ -299,6 +299,7 @@ const AddIssueType: React.FC<Props> = ({
           <div className={styles.icon}>
             <IconPicker
               name="icon"
+              clearButton={false}
               style={{
                 width: '100%',
               }}
