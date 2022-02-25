@@ -29,6 +29,16 @@ public class SprintNameVO {
 
     @ApiModelProperty(value = "冲刺实际结束时间")
     private Date actualEndDate;
+    @Encrypt
+    private Long parentId;
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
 
     public Long getSprintId() {
         return sprintId;

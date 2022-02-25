@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.TagVO;
+import io.choerodon.agile.api.vo.waterfall.GanttParentVO;
 import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
@@ -12,9 +13,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.GanttDimension;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
-import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
@@ -124,8 +123,6 @@ public class GanttChartServiceImpl implements GanttChartService {
     private IssuePersonalSortMapper issuePersonalSortMapper;
     @Autowired
     private IssuePredecessorMapper issuePredecessorMapper;
-    @Autowired(required = false)
-    private AgileWaterfallService agileWaterfallService;
 
     @Override
     public Page<GanttChartVO> pagedQuery(Long projectId,
@@ -133,18 +130,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                                          PageRequest pageRequest) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Map<Long, ProjectVO> projectMap = queryProjectMap(projectId);
-        ProjectVO project = projectMap.get(projectId);
-        List<String> categoryCodes =
-                project.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
-        if (categoryCodes.contains(ProjectCategory.MODULE_WATERFALL)) {
-            if (!ObjectUtils.isEmpty(agileWaterfallService)) {
-                return agileWaterfallService.pagedQuery(project, searchVO, pageRequest);
-            }else {
-                return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
-            }
-        } else {
-            return listByProjectIdAndSearch(projectMap, searchVO, pageRequest, organizationId, true);
-        }
+        return listByProjectIdAndSearch(projectMap, searchVO, pageRequest, organizationId, true);
     }
 
     private Map<Long, ProjectVO> queryProjectMap(Long projectId) {
@@ -197,7 +183,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         Map<Long, Long> issueEpicMap = new HashMap<>();
         Map<Long, IssueDTO> issueFeatureMap = new HashMap<>();
         addEpicIdOrFeatureIds(dimension, new ArrayList<>(issueIds), issueEpicMap, issueFeatureMap, projectIds, projectMap);
-        return buildGanttList(projectMap, new ArrayList<>(issueIds), issueList, issueEpicMap, issueFeatureMap, displayFields, organizationId);
+        return buildGanttList(projectMap, new ArrayList<>(issueIds), issueList, issueEpicMap, issueFeatureMap, displayFields, organizationId, null);
     }
 
     @Override
@@ -825,7 +811,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             issueIds.addAll(childrenIds);
             List<IssueDTO> issueList = issueMapper.selectWithSubByIssueIds(projectIds, issueIds, sortMap, ganttDefaultOrder, dimension);
             List<ObjectSchemeFieldVO> displayFieldCodes = searchVO.getDisplayFields();
-            List<GanttChartVO> result = buildGanttList(projectMap, issueIds, issueList, issueEpicMap, issueFeatureMap, displayFieldCodes, organizationId);
+            List<GanttChartVO> result = buildGanttList(projectMap, issueIds, issueList, issueEpicMap, issueFeatureMap, displayFieldCodes, organizationId, null);
             return PageUtils.copyPropertiesAndResetContent(page, result);
         } else {
             return emptyPage;
@@ -884,7 +870,8 @@ public class GanttChartServiceImpl implements GanttChartService {
                                              Map<Long, Long> issueEpicMap,
                                              Map<Long, IssueDTO> issueFeatureMap,
                                              List<ObjectSchemeFieldVO> displayFields,
-                                             Long organizationId) {
+                                             Long organizationId,
+                                             Map<Long, List<GanttParentVO>> sonParentMap) {
         if (ObjectUtils.isEmpty(projectMap) || ObjectUtils.isEmpty(issueList)) {
             return Collections.emptyList();
         }
@@ -929,6 +916,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         Map<Long, Set<Long>> parentSonMap = new HashMap<>();
         Map<Long, BigDecimal> remainingTimeMap = new HashMap<>();
         Map<Long, GanttChartVO> ganttMap = new HashMap<>();
+        boolean isCustomParent = !ObjectUtils.isEmpty(sonParentMap);
         issueList.forEach(i -> {
             Long statusId = i.getStatusId();
             Long issueId = i.getIssueId();
@@ -956,7 +944,12 @@ public class GanttChartServiceImpl implements GanttChartService {
             setGanttChartAssignee(usersMap, ganttChart, assigneeId);
             setGanttChartEpicOrFeatureInfo(epicIds, featureIds, i, issueId, ganttChart, thisProjectId, featureMap);
             handlerFieldValue(fieldCodes, fieldCodeValues, ganttChart, i, usersMap, envMap);
-            setParentId(ganttChart, i, parentSonMap);
+            if (isCustomParent) {
+                List<GanttParentVO> parents = sonParentMap.get(issueId);
+                ganttChart.setParents(parents);
+            } else {
+                setParentId(ganttChart, i, parentSonMap);
+            }
             BigDecimal remainingTime = i.getRemainingTime();
             if (!ObjectUtils.isEmpty(remainingTime)) {
                 remainingTimeMap.put(issueId, remainingTime);
@@ -1227,12 +1220,12 @@ public class GanttChartServiceImpl implements GanttChartService {
     }
 
     private void buildFieldCodeValues(Set<Long> projectIds,
-                                      List<Long> issueIds,
-                                      List<ObjectSchemeFieldVO> displayFields,
-                                      Map<String, Object> fieldCodeValues,
-                                      List<IssueDTO> issueList,
-                                      Long organizationId,
-                                      Set<Long> systemMemberFieldUserIds) {
+                                     List<Long> issueIds,
+                                     List<ObjectSchemeFieldVO> displayFields,
+                                     Map<String, Object> fieldCodeValues,
+                                     List<IssueDTO> issueList,
+                                     Long organizationId,
+                                     Set<Long> systemMemberFieldUserIds) {
         // 过滤出自定义字段
         handlerCustomFiledValue(fieldCodeValues, displayFields, projectIds, issueIds, organizationId);
         // 处理预定义字段的值
@@ -1427,7 +1420,7 @@ public class GanttChartServiceImpl implements GanttChartService {
     }
 
     private Map<Long, IssueSprintDTO> queryIssueSprint(Set<Long> projectIds,
-                                                       List<Long> issueIds) {
+                                                      List<Long> issueIds) {
         if (ObjectUtils.isEmpty(issueIds)) {
             return Collections.emptyMap();
         }

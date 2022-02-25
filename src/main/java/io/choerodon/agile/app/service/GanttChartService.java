@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.waterfall.GanttParentVO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -45,7 +46,8 @@ public interface GanttChartService {
                                       Map<Long, Long> issueEpicMap,
                                       Map<Long, IssueDTO> issueFeatureMap,
                                       List<ObjectSchemeFieldVO> displayFields,
-                                      Long organizationId);
+                                      Long organizationId,
+                                      Map<Long, List<GanttParentVO>> sonParentMap);
 
     void saveSort(Long projectId, List<IssuePersonalSortVO> issuePersonalSorts);
 

@@ -37,10 +37,6 @@ public interface AgileWaterfallService {
 
     void waterfallIssueDetailDTOToVO(IssueVO issueVO, Map<Long, IssueTypeVO> issueTypeDTOMap, Map<Long, StatusVO> statusMapDTOMap, Map<Long, PriorityVO> priorityDTOMap);
 
-    Page<GanttChartVO> pagedQuery(ProjectVO project,
-                                  SearchVO searchVO,
-                                  PageRequest pageRequest);
-
     void checkBeforeUpdateIssue(IssueUpdateVO issueUpdateVO, Long projectId, List<String> fieldList);
 
     void buildWaterfallFieldList(List<String> fieldList, IssueUpdateVO issueUpdateVO);
