@@ -128,6 +128,11 @@ function IssueBody(props) {
             issueId,
           }) : null}
           <IssueAttachment {...props} />
+          {issueTypeVO.typeCode && ['issue_epic', 'sub_task', 'feature'].indexOf(issueTypeVO.typeCode) === -1
+            ? <SubTask {...props} /> : ''}
+
+          {issueTypeVO.typeCode && ['story', 'task'].indexOf(issueTypeVO.typeCode) !== -1
+            ? <SubBug {...props} /> : ''}
           {issueTypeVO.typeCode && ['issue_epic', 'feature'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueUI {...props} /> : ''}
           {
@@ -140,12 +145,6 @@ function IssueBody(props) {
           }
           {!outside && !otherProject && issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueDoc {...props} /> : ''}
-
-          {issueTypeVO.typeCode && ['issue_epic', 'sub_task', 'feature'].indexOf(issueTypeVO.typeCode) === -1
-            ? <SubTask {...props} /> : ''}
-
-          {issueTypeVO.typeCode && ['story', 'task'].indexOf(issueTypeVO.typeCode) !== -1
-            ? <SubBug {...props} /> : ''}
           {hasTest && issueTypeVO.typeCode && ['feature', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
             ? mount('testmanager:IssueLinkedTestCase', {
               testLinkStoreRef,
