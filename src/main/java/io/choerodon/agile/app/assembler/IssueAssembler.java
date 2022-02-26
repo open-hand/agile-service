@@ -400,7 +400,7 @@ public class IssueAssembler extends AbstractAssembler {
             if (!ObjectUtils.isEmpty(assigneeUserDO)) {
                 issueListVO.setAssigneeName(assigneeUserDO.getName());
                 issueListVO.setAssigneeLoginName(assigneeUserDO.getLoginName());
-                issueListVO.setAssigneeRealName(assigneeUserDO.getLoginName());
+                issueListVO.setAssigneeRealName(assigneeUserDO.getRealName());
                 issueListVO.setAssigneeImageUrl(assigneeUserDO.getImageUrl());
             }
             if (!ObjectUtils.isEmpty(reporterUserDO)) {
