@@ -8,7 +8,7 @@ import {
 import { Choerodon } from '@choerodon/boot';
 import { issueApi, uiApi } from '@/api';
 
-const hiddenFields = ['issueType', 'summary', 'description', 'remainingTime', 'storyPoints'];
+const hiddenFields = ['issueType', 'summary', 'description', 'remainingTime', 'storyPoints', 'estimateTime'];
 const copyHiddenFields = ['issueType', 'summary', 'description', 'timeTrace', 'creationDate', 'lastUpdateDate', 'created_user', 'last_updated_user', 'epicName'];
 const pageCascadeFields = ['component', 'priority', 'fixVersion', 'influenceVersion'];
 const ruleControlSystemFields = ['component', 'priority', 'fixVersion', 'influenceVersion', 'assignee', 'reporter', 'mainResponsible', 'estimatedStartTime', 'estimatedEndTime', 'benfitHypothesis', 'acceptanceCritera', 'subProject'];
