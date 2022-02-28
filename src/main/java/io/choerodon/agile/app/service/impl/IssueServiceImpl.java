@@ -1629,6 +1629,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (agilePluginService != null) {
             agilePluginService.handlerProgramUpdateIssue(issueType, fieldList, projectId, issueUpdateVO, originIssue);
         }
+        if (agileWaterfallService != null) {
+            agileWaterfallService.handlerWaterfallUpdateIssue(issueType, fieldList, projectId, issueUpdateVO, originIssue);
+        }
         // 处理issue改变状态时，满足条件改变 is_pre_sprint_done 的值
         handleHistorySprintCompleted(projectId, issueConvertDTO, fieldList, originIssue);
         // 处理预计、实际时间
@@ -1733,6 +1736,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         if (backlogExpandService != null) {
             backlogExpandService.deleteIssueBacklogRel(issueId);
+        }
+        if (agileWaterfallService != null) {
+            agileWaterfallService.deleteIssueForWaterfall(projectId, issueId);
         }
         //删除日志信息
         dataLogDeleteByIssueId(projectId, issueId);
@@ -2152,6 +2158,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         handlerStatus(issueConvertDTO.getProjectId(),issueUpdateTypeVO);
         //更新字段值
         updateIssueFieldValue(issueUpdateTypeVO, issueUpdateTypeVO.getIssueId(), projectId, organizationId);
+        if (agileWaterfallService != null) {
+            agileWaterfallService.handlerUpdateIssueTypeCode(projectId, originType, issueUpdateTypeVO);
+        }
         IssueVO result = queryIssue(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId(), organizationId);
         setCompletedAndActualCompletedDate(result);
         return result;
@@ -2576,6 +2585,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 });
             }
             this.self().batchCreateIssueInvokeTrigger(triggerCarrierVOS);
+            if (agileWaterfallService != null) {
+                agileWaterfallService.handlerCopyIssue(issueDetailDTO, newIssueId, projectId);
+            }
             return result;
         } else {
             throw new CommonException("error.issue.copyIssueByIssueId");
@@ -2914,6 +2926,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 if (agilePluginService != null) {
                     agilePluginService.handlerProgramValueWhenTransferSubTask(issueConvertDTO, projectId, fieldList);
                 }
+                if (agileWaterfallService != null) {
+                    agileWaterfallService.handlerTransferSubTask(issueConvertDTO, projectId, fieldList);
+                }
                 issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
                 Long sprintId = issueMapper.selectUnCloseSprintId(projectId, issueTransformSubTask.getParentIssueId());
                 List<Long> issueIds = new ArrayList<>();
@@ -3177,6 +3192,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         // update sprint
         updateSubTaskSprint(projectId, issueUpdateParentIdVO);
         issueAccessDataService.updateSelective(updateIssue);
+        if (agileWaterfallService != null) {
+            agileWaterfallService.handlerSubIssueUpdateParent(projectId, issueId, parentIssueId);
+        }
         return queryIssueCreateWithoutRuleNotice(projectId, issueId);
     }
 
