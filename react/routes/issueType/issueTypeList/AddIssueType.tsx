@@ -318,7 +318,7 @@ const AddIssueType: React.FC<Props> = ({
               )
             }
             <div className={styles.iconPicker}>
-              <Icon type="baseline-arrow_drop_down" />
+              <Icon type="expand_more" />
             </div>
           </div>
           <div className={styles.colorPicker}>
