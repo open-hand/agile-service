@@ -886,18 +886,21 @@ public class GanttChartServiceImpl implements GanttChartService {
         buildEpicAndFeatureMap(issueIds, issueFeatureMap, projectIds, projectMap, displayFields, fieldCodeValues);
         List<IssueTypeVO> issueTypes = issueTypeMapper.selectByProjectIds(organizationId, new ArrayList<>(projectIds));
         Map<Long, Map<Long, IssueTypeVO>> projectIssueTypeMap = new HashMap<>();
-        issueTypes.forEach(issueType -> {
-            Long projectId = issueType.getProjectId();
-            Long issueTypeId = issueType.getId();
-            Set<Long> projectIdSet = new HashSet<>();
-            if (Objects.equals(0L, projectId)) {
-                projectIdSet.addAll(projectIds);
-            } else {
-                projectIdSet.add(projectId);
-            }
-            projectIdSet.forEach(id -> {
-                Map<Long, IssueTypeVO> issueTypeMap = projectIssueTypeMap.computeIfAbsent(id, x -> new HashMap<>());
-                issueTypeMap.put(issueTypeId, issueType);
+        issueTypes.forEach(x -> {
+            Long projectId = x.getProjectId();
+            Long issueTypeId = x.getId();
+            Map<Long, IssueTypeVO> issueTypeMap = projectIssueTypeMap.computeIfAbsent(projectId, y -> new HashMap<>());
+            issueTypeMap.put(issueTypeId, x);
+        });
+        Long zero = 0L;
+        Map<Long, IssueTypeVO> organizationIssueTypes = projectIssueTypeMap.get(zero);
+        projectIds.forEach(projectId -> {
+            Map<Long, IssueTypeVO> issueTypeMap = projectIssueTypeMap.computeIfAbsent(projectId, y -> new HashMap<>());
+            organizationIssueTypes.forEach((issueTypeId, issueType) -> {
+                IssueTypeVO vo = issueTypeMap.get(issueTypeId);
+                if (ObjectUtils.isEmpty(vo)) {
+                    issueTypeMap.put(issueTypeId, issueType);
+                }
             });
         });
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
