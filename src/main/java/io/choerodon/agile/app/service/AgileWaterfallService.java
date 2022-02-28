@@ -8,8 +8,8 @@ import io.choerodon.agile.api.vo.business.SystemFieldOverrideConfigVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.waterfall.WfDeliverableVO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
-import io.choerodon.core.domain.Page;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -57,4 +57,18 @@ public interface AgileWaterfallService {
      * @param wfDeliverableVOS
      */
     void createDeliverableService(Long issueId, List<WfDeliverableVO> wfDeliverableVOS);
+
+    void handlerTransferSubTask(IssueConvertDTO issueConvertDTO, Long projectId, List<String> fieldList);
+
+    void handlerCopyIssue(IssueDetailDTO issueDetailDTO, Long newIssueId, Long projectId);
+
+    void handlerAfterCreateSubIssue(Long projectId, Long issueId, IssueSubCreateVO issueSubCreateVO);
+
+    void deleteIssueForWaterfall(Long projectId, Long issueId);
+
+    void handlerSubIssueUpdateParent(Long projectId, Long issueId, Long parentIssueId);
+
+    void handlerWaterfallUpdateIssue(String issueType, List<String> fieldList, Long projectId, IssueUpdateVO issueUpdateVO, IssueDTO originIssue);
+
+    void handlerUpdateIssueTypeCode(Long projectId, String originType, IssueUpdateTypeVO issueUpdateTypeVO);
 }
