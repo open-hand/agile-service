@@ -19,8 +19,8 @@ import type { IGanttUpdateIssueDependencyItem } from '@/api';
 import InlineIssueTag from '@/components/tag/inline-issue-tag';
 import { wrapRequestCallback } from '@/components/select/utils';
 
-const SelectIssue: React.FC<Partial<SelectProps> & { issueId: string, setLoading: React.Dispatch<React.SetStateAction<boolean>>, selectIds?: string[], isStopRequest: boolean, excludeIssueIds?: string[] }> = ({
-  issueId, selectIds: propsSelectIds, record, name, excludeIssueIds: propsExcludeIssueIds, setLoading, isStopRequest, ...otherProps
+const SelectIssue: React.FC<Partial<SelectProps> & { issueId: string, setLoading: React.Dispatch<React.SetStateAction<boolean>>, selectIds?: string[], isStopRequest: boolean, excludeIssueIds?: string[], otherArgs: object }> = ({
+  issueId, selectIds: propsSelectIds, record, name, excludeIssueIds: propsExcludeIssueIds, setLoading, isStopRequest, otherArgs, ...otherProps
 }) => {
   const { multiple } = otherProps;
   const optionDataRef = useRef<any[]>([]);
@@ -50,7 +50,7 @@ const SelectIssue: React.FC<Partial<SelectProps> & { issueId: string, setLoading
     valueField: 'issueId',
     requestArgs: args,
     request: wrapRequestCallback(({ page, filter, requestArgs }) => ganttApi.loadDependableIssues({ currentIssueId: issueId, page },
-      { contents: [filter].filter(Boolean) as string[], otherArgs: { issueIds: requestArgs?.selectIds, excludeIssueIds: requestArgs?.excludeIssueIds } }), () => {
+      { contents: [filter].filter(Boolean) as string[], otherArgs: { issueIds: requestArgs?.selectIds, excludeIssueIds: requestArgs?.excludeIssueIds, ...otherArgs || {} } }), () => {
       setLoading(false);
     }),
     afterLoad: (data) => {
@@ -70,7 +70,7 @@ SelectIssue.defaultProps = {
 
 const GanttDependency: React.FC = observer(() => {
   const {
-    dataset, modal, onOk: propsOnOk, issueId, data: editData, title, forwardRef, disableAutoCreate, horizontal = false,
+    dataset, modal, onOk: propsOnOk, issueId, data: editData, title, forwardRef, disableAutoCreate, horizontal = false, otherArgs = {},
   } = useGanntDependencyModal();
   const [loading, setLoading] = useState(!disableAutoCreate);
   const [{ focusing, latestFocusRecord }, setFocusing] = useState({ focusing: false, latestFocusRecord: undefined as number | undefined });
@@ -136,6 +136,7 @@ const GanttDependency: React.FC = observer(() => {
               onFocus={() => setFocusing({ focusing: true, latestFocusRecord: undefined })}
               excludeIssueIds={excludeIssueIds}
               selectIds={editData[record.get('predecessorType')]}
+              otherArgs={otherArgs}
             />
             <Icon
               type="delete_sweep-o"
