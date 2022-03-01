@@ -9,10 +9,7 @@ import io.choerodon.agile.infra.dto.IssuePredecessorDTO;
 import io.choerodon.agile.infra.dto.IssuePredecessorTreeClosureDTO;
 import io.choerodon.agile.infra.dto.LookupValueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.enums.IssueTypeCode;
-import io.choerodon.agile.infra.enums.LookupType;
-import io.choerodon.agile.infra.enums.PredecessorType;
-import io.choerodon.agile.infra.enums.ProjectCategory;
+import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -89,7 +86,8 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Map<String, List<Long>> predecessorMap = new LinkedHashMap<>();
         validateIssuePredecessors(issuePredecessors, predecessorMap, currentIssueId);
-        Set<Long> issueIds = validateIssueExisted(projectId, currentIssueId, predecessorMap);
+        IssueDTO issueDTO = issueMapper.selectByPrimaryKey(currentIssueId);
+        Set<Long> issueIds = validateIssueExisted(issueDTO.getApplyType(), currentIssueId, predecessorMap);
         addSelfClosureIfNotExisted(issueIds, projectId, organizationId);
         //移除自身节点，返回所有直接父级
         issueIds.remove(currentIssueId);
@@ -152,10 +150,9 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
                                                             SearchVO searchVO,
                                                             PageRequest pageRequest,
                                                             Long currentIssueId) {
-        SearchVOUtil.setTypeCodes(searchVO, getPredecessorIssueTypes(projectId));
+        SearchVOUtil.setTypeCodes(searchVO, getPredecessorIssueTypes(searchVO.getApplyType()));
         SearchVOUtil.setSearchArgs(searchVO, "tree", false);
         Map<String, Object> otherArgs = searchVO.getOtherArgs();
-        searchVO.setWaterfallProject(ProjectCategory.isWaterfallProject(projectId));
         String excludeIssueIdsKey = "excludeIssueIds";
         Set<Long> excludeIssueIds = new HashSet<>();
         if (!ObjectUtils.isEmpty(otherArgs) && !ObjectUtils.isEmpty(otherArgs.get(excludeIssueIdsKey))) {
@@ -401,7 +398,7 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         return result;
     }
 
-    private Set<Long> validateIssueExisted(Long projectId,
+    private Set<Long> validateIssueExisted(String applyType,
                                            Long currentIssueId,
                                            Map<String, List<Long>> predecessorMap) {
         Set<Long> issueIds = new HashSet<>();
@@ -410,7 +407,7 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         List<IssueDTO> issues = issueMapper.selectByIds(StringUtils.join(issueIds, ","));
         issues.forEach(issue -> {
             String typeCode = issue.getTypeCode();
-            List<String> issueTypeCodes = getPredecessorIssueTypes(projectId);
+            List<String> issueTypeCodes = getPredecessorIssueTypes(applyType);
             if (!issueTypeCodes.contains(typeCode)) {
                 throw new CommonException("error.predecessor.illegal.issue.type");
             }
@@ -500,8 +497,8 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         return dto;
     }
 
-    private List<String> getPredecessorIssueTypes(Long projectId) {
-        if (ProjectCategory.isWaterfallProject(projectId)) {
+    private List<String> getPredecessorIssueTypes(String applyType) {
+        if (Objects.equals(SchemeApplyType.WATERFALL, applyType)) {
             return WATERFALL_ISSUE_TYPE_CODES;
         }
         return ISSUE_TYPE_CODES;
