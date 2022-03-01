@@ -50,7 +50,11 @@ const SelectIssue: React.FC<Partial<SelectProps> & { issueId: string, setLoading
     valueField: 'issueId',
     requestArgs: args,
     request: wrapRequestCallback(({ page, filter, requestArgs }) => ganttApi.loadDependableIssues({ currentIssueId: issueId, page },
-      { contents: [filter].filter(Boolean) as string[], otherArgs: { issueIds: requestArgs?.selectIds, excludeIssueIds: requestArgs?.excludeIssueIds, ...otherArgs || {} } }), () => {
+      {
+        contents: [filter].filter(Boolean) as string[],
+        otherArgs: { issueIds: requestArgs?.selectIds, excludeIssueIds: requestArgs?.excludeIssueIds },
+        ...otherArgs || {},
+      }), () => {
       setLoading(false);
     }),
     afterLoad: (data) => {
