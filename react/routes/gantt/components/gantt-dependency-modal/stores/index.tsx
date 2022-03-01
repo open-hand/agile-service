@@ -20,6 +20,7 @@ export interface IGanttDependencyModalProps {
   forwardRef?: any,
   disableAutoCreate?: boolean,
   horizontal?: boolean,
+  otherArgs?: object,
 }
 
 interface Context extends Omit<IGanttDependencyModalProps, 'data'> {
