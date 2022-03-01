@@ -9,7 +9,7 @@ const IssueDetail = observer((props) => {
   const detailShow = store.getDetailShow;
   return (
     <div className="c7n-details">
-      <div id="detail" style={{ position: 'relative' }}>
+      <div id="detail" style={{ position: 'relative', paddingBottom: '6px' }}>
         <IssueField {...props} />
         <Button onClick={() => store.setDetailShow(!detailShow)}>
           <span>{detailShow ? '收起' : '展开'}</span>
