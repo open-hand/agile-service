@@ -148,6 +148,8 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
     private MessageClientC7n messageClientC7n;
     @Autowired
     private ProjectInfoService projectInfoService;
+    @Autowired(required = false)
+    private AgileWaterfallService agileWaterfallService;
     @Override
     public void issueProjectMove(Long projectId, Long issueId, Long targetProjectId, JSONObject jsonObject) {
         if (ObjectUtils.isEmpty(targetProjectId)) {
@@ -752,6 +754,10 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
         // 处理项目群需要清空的值
         if (agilePluginService != null) {
             agilePluginService.handlerFeatureCleanValue(projectVO.getId(), issueDTO);
+        }
+        // 处理瀑布项目需要清空的值
+        if (agileWaterfallService != null) {
+            agileWaterfallService.deleteIssueForWaterfall(projectVO.getId(), issueDTO.getIssueId(), modelMapper.map(issueDTO, IssueConvertDTO.class));
         }
         // 清空自定义字段的值
         handlerCustomFieldValue(projectVO, issueDTO, issueTypeVO, targetProjectVO);

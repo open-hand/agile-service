@@ -120,6 +120,8 @@ public class SprintServiceImpl implements SprintService {
     private ModelMapper modelMapper;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
+    @Autowired(required = false)
+    private AgileWaterfallService agileWaterfallService;
 
     @Override
     public synchronized SprintDetailVO createSprint(Long projectId) {
@@ -193,6 +195,9 @@ public class SprintServiceImpl implements SprintService {
         sprintConvertDTO.judgeDelete();
         moveIssueToBacklog(projectId, sprintId);
         issueAccessDataService.batchRemoveFromSprint(projectId, sprintId);
+        if (agileWaterfallService != null) {
+            agileWaterfallService.handlerDeleteSprint(projectId, sprintId);
+        }
         delete(sprintConvertDTO);
         return true;
     }

@@ -1738,7 +1738,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             backlogExpandService.deleteIssueBacklogRel(issueId);
         }
         if (agileWaterfallService != null) {
-            agileWaterfallService.deleteIssueForWaterfall(projectId, issueId);
+            agileWaterfallService.deleteIssueForWaterfall(projectId, issueId, issueConvertDTO);
         }
         //删除日志信息
         dataLogDeleteByIssueId(projectId, issueId);
