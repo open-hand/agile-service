@@ -64,11 +64,13 @@ public interface AgileWaterfallService {
 
     void handlerAfterCreateSubIssue(Long projectId, Long issueId, IssueSubCreateVO issueSubCreateVO);
 
-    void deleteIssueForWaterfall(Long projectId, Long issueId);
+    void deleteIssueForWaterfall(Long projectId, Long issueId, IssueConvertDTO issueConvertDTO);
 
     void handlerSubIssueUpdateParent(Long projectId, Long issueId, Long parentIssueId);
 
     void handlerWaterfallUpdateIssue(String issueType, List<String> fieldList, Long projectId, IssueUpdateVO issueUpdateVO, IssueDTO originIssue);
 
     void handlerUpdateIssueTypeCode(Long projectId, String originType, IssueUpdateTypeVO issueUpdateTypeVO);
+
+    void handlerDeleteSprint(Long projectId, Long sprintId);
 }
