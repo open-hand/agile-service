@@ -9,6 +9,7 @@ import map from 'lodash/map';
 import { useDetailContainerContext } from '@/components/detail-container/context';
 import useHasDevops from '@/hooks/useHasDevops';
 import useHasTest from '@/hooks/useHasTest';
+import useHasBacklog from '@/hooks/useHasBacklog';
 import FieldStar from './Field/FieldStar';
 import IssueDetail from './IssueDetail';
 import IssueDes from './IssueDes';
@@ -50,6 +51,7 @@ function IssueBody(props) {
   } = issue;
   const { otherProject, outside } = props;
   const hasDevops = useHasDevops(projectVO?.categories ? map(projectVO.categories, 'code') : null);
+  const hasBacklog = useHasBacklog(projectVO?.categories ? map(projectVO.categories, 'code') : null);
   const hasTest = useHasTest();
   const testLinkStoreRef = useRef();
 
@@ -153,7 +155,7 @@ function IssueBody(props) {
             }) : ''}
           {issueTypeVO.typeCode && ['story', 'task', 'bug'].indexOf(issueTypeVO.typeCode) !== -1
             ? <IssueLink {...props} /> : ''}
-          {!outside && ['sub_task', 'issue_epic', ...WATERFALL_TYPE_CODES].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}
+          {!outside && ['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && hasBacklog && <InjectedComponent.Backlog {...props} />}
         </TabPane>
         {issueTypeVO.typeCode && WATERFALL_TYPE_CODES.includes(issueTypeVO.typeCode) && hasInject(DEPENDENCY_TAB)
           ? <TabPane tab="依赖与关联">{mount(DEPENDENCY_TAB, { ...props, issueTypeCode: issueTypeVO.typeCode })}</TabPane> : null}
