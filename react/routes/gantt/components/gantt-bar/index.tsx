@@ -1,21 +1,16 @@
 import React, {
-  useContext, useRef, useCallback, useMemo, useEffect,
+  useRef, useMemo,
 } from 'react';
 import {
-  observer, useComputed, useObservable, useObserver,
+  observer, useComputed,
 } from 'mobx-react-lite';
-import { observable, toJS } from 'mobx';
+import { toJS } from 'mobx';
 import dayjs from 'dayjs';
-import { Tooltip } from 'choerodon-ui/pro';
 import type { GanttProps, Gantt, GanttRef } from '@choerodon/gantt';
-import { GanntMoveWrap } from '@choerodon/gantt';
 
-import { TooltipProps } from 'choerodon-ui/pro/lib/tooltip/Tooltip';
 import { useCreation } from 'ahooks';
 import STATUS_COLOR from '@/constants/STATUS_COLOR';
-import styles from './index.less';
 import type { GanttIssue } from '../../types';
-import { useGanttBodyContext } from '../../stores/bodyContext';
 import Bar from './Bar';
 
 interface GanttBarProps {
@@ -144,18 +139,28 @@ const GanttBar: React.FC<GanttBarProps> = ({
     end: toJS(estimatedEndTime || estimatedStartTime),
     color: color1,
   } : undefined), [estimatedEndTime?.width, estimatedStartTime?.width, estimatedEndTime?.value, estimatedStartTime?.value]);
-  const fillDateRange = useCreation(() => (actualStartTime ? {
-    start: toJS(actualStartTime),
-    end: toJS(actualEndTime || dashDateRange?.end || actualStartTime),
-    completedColor: color1,
-    unCompletedColor: color2,
-    color: color1,
-  } : undefined), [dashDateRange?.end, actualEndTime?.width, actualEndTime?.value, actualStartTime?.width, actualStartTime?.value]);
+  const fillDateRange = useCreation(() => {
+    if (actualStartTime) {
+      const start = toJS(actualStartTime);
+      const end = toJS(actualEndTime || dashDateRange?.end || actualStartTime);
+      const startKey = start.width > end.width ? 'end' : 'start';
+
+      return {
+        [startKey as 'start']: start,
+        [startKey === 'start' ? 'end' : 'start' as 'end']: end,
+        completedColor: color1,
+        unCompletedColor: color2,
+        color: color1,
+      };
+    }
+
+    return undefined;
+  }, [dashDateRange?.end, actualEndTime?.width, actualEndTime?.value, actualStartTime?.width, actualStartTime?.value]);
   const deadline = useCreation(() => {
     if (actualEndTime?.value) {
       return toJS(actualEndTime);
     }
-    return (estimatedStartTime && estimatedEndTime ? dayjs().set('hour', 12).set('minute', 0).set('second', 0)
+    return (estimatedStartTime && estimatedEndTime ? dayjs().set('hour', 10).set('minute', 0).set('second', 0)
       .format('YYYY-MM-DD HH:mm:ss') : undefined);
   }, [actualEndTime, estimatedEndTime, estimatedStartTime, actualEndTime?.value]);
   return (
@@ -170,6 +175,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
       deadline={deadline}
       fillDateRange={fillDateRange}
       dashDateRange={dashDateRange}
+      dragging={stepGesture === 'moving'}
       fillMoveDateRange={{ start: actualStartTime, end: actualEndTime }}
       dashMoveDateRange={{ start: estimatedStartTime, end: estimatedEndTime }}
     />
