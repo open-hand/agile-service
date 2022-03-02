@@ -1,15 +1,20 @@
 /* eslint-disable react/require-default-props */
 import type { Gantt, GanttRef } from '@choerodon/gantt';
 import { GanntMoveWrap } from '@choerodon/gantt';
-
+import { toJS } from 'mobx';
 import classNames from 'classnames';
 import React, { useCallback, useMemo } from 'react';
 import { Tooltip } from 'choerodon-ui/pro';
 import { merge, set } from 'lodash';
 import dayjs from 'dayjs';
 import { observer, useComputed } from 'mobx-react-lite';
+import { useCreation } from 'ahooks';
 import styles from './Bar.less';
+import STATUS_COLOR from '@/constants/STATUS_COLOR';
 
+interface IWrapGanttBaseBarFindOptions {
+  type: 'issue'
+}
 interface IGanttBaseBarRange {
   start: Gantt.DateWithWidth, end: Gantt.DateWithWidth,
 }
@@ -118,5 +123,72 @@ function GanttBaseBar(props: React.PropsWithChildren<IGanttBaseBarProps>) {
       <div className={styles.delay} />
     </div>
   );
+}
+/**
+ * 为甘特图配置快速配置时间条
+ * 会使用issue下的时间条展示规则进行问题展示（不包含进度 progressCount 的配置）
+ * @param Element
+ * @param options
+ */
+export function wrapGanttBaseBarFindDate(Element: React.FC<IGanttBaseBarProps>, options?: IWrapGanttBaseBarFindOptions) {
+  function GanttBaseBarHOC(props: React.PropsWithChildren<IGanttBaseBarProps>) {
+    const { bar } = props;
+    const {
+      record: issue, loading, stepGesture, dateMaps, startDateKey,
+    } = bar;
+    const statusType = issue.statusVO.type;
+    const [color1, color2] = STATUS_COLOR[statusType as keyof typeof STATUS_COLOR];
+    const estimatedStartTime = dateMaps.get('estimatedStartTime');
+    const estimatedEndTime = dateMaps.get('estimatedEndTime');
+    const actualStartTime = dateMaps.get('actualStartTime');
+    const actualEndTime = dateMaps.get('actualEndTime');
+    const dashDateRange = useCreation(() => (estimatedStartTime ? {
+      start: toJS(estimatedStartTime),
+      end: toJS(estimatedEndTime || estimatedStartTime),
+      color: color1,
+    } : undefined), [estimatedEndTime?.width, estimatedStartTime?.width, estimatedEndTime?.value, estimatedStartTime?.value]);
+    const fillDateRange = useCreation(() => {
+      if (actualStartTime) {
+        const start = toJS(actualStartTime);
+        const end = toJS(actualEndTime || dashDateRange?.end || actualStartTime);
+        const startKey = start.width > end.width ? 'end' : 'start';
+
+        return {
+          [startKey as 'start']: start,
+          [startKey === 'start' ? 'end' : 'start' as 'end']: end,
+          completedColor: color1,
+          unCompletedColor: color2,
+          color: color1,
+        };
+      }
+
+      return undefined;
+    }, [dashDateRange?.end, actualEndTime?.width, actualEndTime?.value, actualStartTime?.width, actualStartTime?.value]);
+    const deadline = useCreation(() => {
+      if (actualEndTime?.value) {
+        return toJS(actualEndTime);
+      }
+      return (estimatedStartTime && estimatedEndTime ? dayjs().set('hour', 10).set('minute', 0).set('second', 0)
+        .format('YYYY-MM-DD HH:mm:ss') : undefined);
+    }, [actualEndTime, estimatedEndTime, estimatedStartTime, actualEndTime?.value]);
+    return (
+      <Element
+        startDate={dateMaps.get(startDateKey)}
+        deadline={deadline}
+        fillDateRange={fillDateRange}
+        dashDateRange={dashDateRange}
+        dragging={stepGesture === 'moving'}
+        fillMoveDateRange={{ start: actualStartTime, end: actualEndTime }}
+        dashMoveDateRange={{ start: estimatedStartTime, end: estimatedEndTime }}
+        {...props}
+      />
+    );
+  }
+  if (options?.type === 'issue') {
+    const ObserverGanttBaseBarHOC = observer(GanttBaseBarHOC);
+    ObserverGanttBaseBarHOC.displayName = `${Element.displayName}For${options?.type}`;
+    return ObserverGanttBaseBarHOC;
+  }
+  return Element;
 }
 export default observer(GanttBaseBar);
