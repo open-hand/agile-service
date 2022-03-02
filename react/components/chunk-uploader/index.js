@@ -35,6 +35,7 @@ const FragmentUpload = inject('AppState')(observer((props) => {
     beforeUploadCallback = () => {},
     cRef,
     children,
+    isMultiple,
     ...others
   } = props;
   const organizationId = props.organizationId ?? props.AppState.currentMenuType.organizationId;
@@ -188,7 +189,7 @@ const FragmentUpload = inject('AppState')(observer((props) => {
   };
 
   const uploadProps = {
-    multiple: true,
+    multiple: isMultiple === undefined ? true : isMultiple,
     action,
     method,
     headers,
@@ -209,7 +210,7 @@ const FragmentUpload = inject('AppState')(observer((props) => {
       >
         {
           children || (
-            <Button disabled={disabled}>
+            <Button disabled={disabled} className="c7n-chunk-upload-btn">
               <Icon type="file_upload_black-o" />
             </Button>
           )
