@@ -136,8 +136,10 @@ export function wrapGanttBaseBarFindDate(Element: React.FC<IGanttBaseBarProps>, 
     const {
       record: issue, loading, stepGesture, dateMaps, startDateKey,
     } = bar;
-    const statusType = issue.statusVO.type;
-    const [color1, color2] = STATUS_COLOR[statusType as keyof typeof STATUS_COLOR];
+    const [color1, color2] = useComputed(() => {
+      const statusType = issue.statusVO.type;
+      return STATUS_COLOR[statusType as keyof typeof STATUS_COLOR];
+    }, [issue.statusVO.type]);
     const estimatedStartTime = dateMaps.get('estimatedStartTime');
     const estimatedEndTime = dateMaps.get('estimatedEndTime');
     const actualStartTime = dateMaps.get('actualStartTime');
@@ -146,7 +148,7 @@ export function wrapGanttBaseBarFindDate(Element: React.FC<IGanttBaseBarProps>, 
       start: toJS(estimatedStartTime),
       end: toJS(estimatedEndTime || estimatedStartTime),
       color: color1,
-    } : undefined), [estimatedEndTime?.width, estimatedStartTime?.width, estimatedEndTime?.value, estimatedStartTime?.value]);
+    } : undefined), [estimatedStartTime, estimatedStartTime?.value, estimatedEndTime, estimatedEndTime?.value, color1]);
     const fillDateRange = useCreation(() => {
       if (actualStartTime) {
         const start = toJS(actualStartTime);
@@ -163,7 +165,7 @@ export function wrapGanttBaseBarFindDate(Element: React.FC<IGanttBaseBarProps>, 
       }
 
       return undefined;
-    }, [dashDateRange?.end, actualEndTime?.width, actualEndTime?.value, actualStartTime?.width, actualStartTime?.value]);
+    }, [actualStartTime?.value, actualEndTime?.value, dashDateRange?.end, color1, color2, dashDateRange]);
     const deadline = useCreation(() => {
       if (actualEndTime?.value) {
         return toJS(actualEndTime);
