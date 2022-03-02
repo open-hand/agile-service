@@ -168,7 +168,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
         res = await issueApi.project(projectId).create(issue, applyType);
       } else {
         res = currentType.typeCode === 'sub_task'
-          || issue.parentIssueId || issue.relateIssueId || issue.relateIssueId ? await issueApi.project(projectId).createSubtask(issue) : await issueApi.project(projectId).create(issue, WATERFALL_TYPE_CODES.includes(currentType.typeCode) ? 'waterfall' : 'agile');
+          && (issue.parentIssueId || issue.relateIssueId || issue.relateIssueId) ? await issueApi.project(projectId).createSubtask(issue) : await issueApi.project(projectId).create(issue, WATERFALL_TYPE_CODES.includes(currentType.typeCode) ? 'waterfall' : 'agile');
       }
 
       await fieldApi.project(projectId).quickCreateDefault(res.issueId, {
