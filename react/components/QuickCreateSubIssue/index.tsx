@@ -24,7 +24,7 @@ import UserDropdown from '../UserDropdown';
 import useDefaultPriority from '@/hooks/data/useDefaultPriority';
 import { WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
 
-type FilterCacheThumbnailKey = 'agile.issue.type.sub.selected'| 'agile.issue.type.common.selected';
+type FilterCacheThumbnailKey = 'agile.issue.type.sub.selected' | 'agile.issue.type.common.selected';
 interface QuickCreateSubIssueProps {
   priorityId?: string
   projectId?: string
@@ -140,8 +140,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
         summary,
         projectId,
         priorityId: priorityId || defaultPriority?.id,
-        parentIssueId,
-        relateIssueId: currentType.typeCode === 'bug' ? parentIssueId : undefined,
+        [currentType.typeCode === 'bug' ? 'relateIssueId' : 'parentIssueId']: parentIssueId,
         issueTypeId: currentType.id,
         typeCode: currentType.typeCode,
         sprintId,

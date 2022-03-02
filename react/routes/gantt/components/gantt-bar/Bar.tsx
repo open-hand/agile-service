@@ -27,6 +27,7 @@ interface IGanttBaseBarProps {
   bar: Gantt.Bar
   width: number
   height: number
+  dragging?: boolean
 }
 /**
  * 甘特图基础Bar
@@ -35,7 +36,7 @@ interface IGanttBaseBarProps {
  */
 function GanttBaseBar(props: React.PropsWithChildren<IGanttBaseBarProps>) {
   const {
-    width, height, tooltipTitle, progressCount, fillDateRange, dashDateRange, startDate, ganttRef, bar,
+    width, height, tooltipTitle, progressCount, fillDateRange, dashDateRange, startDate, ganttRef, bar, dragging,
     fillMoveDateRange, dashMoveDateRange,
   } = props;
   const isAddUnitDay = useCallback(({ start, end }: IGanttBaseBarRange) => start.key !== startDate?.key, [startDate?.key]);
@@ -56,16 +57,19 @@ function GanttBaseBar(props: React.PropsWithChildren<IGanttBaseBarProps>) {
     if (!props.deadline || !fillDateRange || !dashDateRange) {
       return undefined;
     }
-    return typeof props.deadline === 'string' ? { width: Math.max(0, ganttRef.current?.getWidthByDate(dayjs(dashDateRange.end.value), dayjs(props.deadline)) || 0), value: props.deadline, today: true } : {
-      width: Math.max(0, props.deadline.width - (dashDateRange.end.width as number || 0)),
+    if (typeof props.deadline === 'string') {
+      return dragging ? undefined : { width: Math.max(0, ganttRef.current?.getWidthByDate(dayjs(fillDateRange.end.value).set('hour', 23).set('minute', 59).set('second', 59), dayjs(props.deadline)) || 0), value: props.deadline, today: true };
+    }
+    return {
+      width: fillDateRange.start.dragLeft > dashDateRange.end.width ? '100%' : Math.max(0, props.deadline.width - (dashDateRange.end.width as number || 0)),
     };
-  }, [dashDateRange, fillDateRange, ganttRef, props.deadline]);
+  }, [dashDateRange, dragging, fillDateRange, ganttRef, props.deadline]);
   const fillStyle = useMemo(() => {
     if (!fillDateRange) {
       return { width: 0 };
     }
-    const endWidth = fillDateRange.end.width + (deadline?.today ? deadline?.width || 0 : 0);
-    const fillWidth = endWidth - fillDateRange.start.width + (isAddUnitDay(fillDateRange) && fillDateRange.end.dragFloat === 'right' ? fillDateRange.end.unitWidth : 0);
+    const fillWidth = fillDateRange.end.width - fillDateRange.start.width + (deadline?.today ? deadline?.width || 0 : 0)
+      + (!deadline?.today && isAddUnitDay(fillDateRange) && fillDateRange.end.dragFloat === 'right' ? fillDateRange.end.unitWidth : 0);
     return {
       width: fillWidth, minWidth: fillWidth, marginLeft: Math.max(0, fillDateRange.start.dragLeft), backgroundColor: fillDateRange.unCompletedColor,
     } as React.CSSProperties;
