@@ -36,7 +36,7 @@ public class GanttParentVO {
         if (this == o) return true;
         if (!(o instanceof GanttParentVO)) return false;
         GanttParentVO that = (GanttParentVO) o;
-        return getId().equals(that.getId()) && getType().equals(that.getType());
+        return Objects.equals(getId(), that.getId()) && Objects.equals(getType(), that.getType());
     }
 
     @Override
