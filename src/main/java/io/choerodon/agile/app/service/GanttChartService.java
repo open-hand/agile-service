@@ -1,14 +1,13 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.waterfall.GanttParentVO;
+import io.choerodon.agile.api.vo.waterfall.GanttParentInfoVO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author superlee
@@ -48,7 +47,7 @@ public interface GanttChartService {
                                       Map<Long, IssueDTO> issueFeatureMap,
                                       List<ObjectSchemeFieldVO> displayFields,
                                       Long organizationId,
-                                      Map<Long, Set<GanttParentVO>> sonParentMap);
+                                      GanttParentInfoVO ganttParentInfoVO);
 
     void saveSort(Long projectId, List<IssuePersonalSortVO> issuePersonalSorts);
 

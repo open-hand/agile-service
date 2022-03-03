@@ -149,6 +149,16 @@ public class GanttChartVO {
     private WaterfallIssueVO waterfallIssueVO;
 
     private Set<GanttParentVO> parents;
+    @Encrypt
+    private Set<Long> parentSprintIds;
+
+    public Set<Long> getParentSprintIds() {
+        return parentSprintIds;
+    }
+
+    public void setParentSprintIds(Set<Long> parentSprintIds) {
+        this.parentSprintIds = parentSprintIds;
+    }
 
     public Set<GanttParentVO> getParents() {
         return parents;
