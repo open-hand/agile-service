@@ -871,7 +871,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                                              Map<Long, IssueDTO> issueFeatureMap,
                                              List<ObjectSchemeFieldVO> displayFields,
                                              Long organizationId,
-                                             Map<Long, List<GanttParentVO>> sonParentMap) {
+                                             Map<Long, Set<GanttParentVO>> sonParentMap) {
         if (ObjectUtils.isEmpty(projectMap) || ObjectUtils.isEmpty(issueList)) {
             return Collections.emptyList();
         }
@@ -948,7 +948,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             setGanttChartEpicOrFeatureInfo(epicIds, featureIds, i, issueId, ganttChart, thisProjectId, featureMap);
             handlerFieldValue(fieldCodes, fieldCodeValues, ganttChart, i, usersMap, envMap);
             if (isCustomParent) {
-                List<GanttParentVO> parents = sonParentMap.get(issueId);
+                Set<GanttParentVO> parents = sonParentMap.get(issueId);
                 ganttChart.setParents(parents);
             } else {
                 setParentId(ganttChart, i, parentSonMap);
