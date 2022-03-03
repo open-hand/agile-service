@@ -170,10 +170,7 @@ public class AgileEventHandler {
         Long projectId = projectEvent.getProjectId();
         List<ProjectEventCategory> projectEventCategories = projectEvent.getNewProjectCategoryVOS();
         if (!CollectionUtils.isEmpty(projectEventCategories)) {
-            List<String> codes = projectEventCategories.stream().map(ProjectEventCategory::getCode).collect(Collectors.toList());
-            if (codes.contains(ProjectCategory.MODULE_AGILE) || codes.contains(ProjectCategory.MODULE_PROGRAM)) {
-                initIfAgileProject(projectEvent, projectEventCategories);
-            }
+            initIfAgileProject(projectEvent, projectEventCategories);
         } else {
             LOGGER.info("项目{}已初始化，跳过项目初始化", projectEvent.getProjectCode());
         }
