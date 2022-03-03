@@ -144,12 +144,12 @@ export function wrapGanttBaseBarFindDate(Element: React.FC<IGanttBaseBarProps>, 
     const estimatedEndTime = dateMaps.get('estimatedEndTime');
     const actualStartTime = dateMaps.get('actualStartTime');
     const actualEndTime = dateMaps.get('actualEndTime');
-    const dashDateRange = useCreation(() => (estimatedStartTime ? {
+    const dashDateRange = useComputed(() => (estimatedStartTime ? {
       start: toJS(estimatedStartTime),
       end: toJS(estimatedEndTime || estimatedStartTime),
       color: color1,
     } : undefined), [estimatedStartTime, estimatedStartTime?.value, estimatedEndTime, estimatedEndTime?.value, color1]);
-    const fillDateRange = useCreation(() => {
+    const fillDateRange = useComputed(() => {
       if (actualStartTime) {
         const start = toJS(actualStartTime);
         const end = toJS(actualEndTime || dashDateRange?.end || actualStartTime);
@@ -166,7 +166,7 @@ export function wrapGanttBaseBarFindDate(Element: React.FC<IGanttBaseBarProps>, 
 
       return undefined;
     }, [actualStartTime?.value, actualEndTime?.value, dashDateRange?.end, color1, color2, dashDateRange]);
-    const deadline = useCreation(() => {
+    const deadline = useComputed(() => {
       if (actualEndTime?.value) {
         return toJS(actualEndTime);
       }
