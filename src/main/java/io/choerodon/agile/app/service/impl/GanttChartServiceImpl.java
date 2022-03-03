@@ -920,7 +920,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         Map<Long, Set<Long>> parentSonMap = new HashMap<>();
         Map<Long, BigDecimal> remainingTimeMap = new HashMap<>();
         Map<Long, GanttChartVO> ganttMap = new HashMap<>();
-        boolean isCustomParent = !(ObjectUtils.isEmpty(ganttParentInfoVO) && !ganttParentInfoVO.isEmpty());
+        boolean isCustomParent = !(ObjectUtils.isEmpty(ganttParentInfoVO) || ganttParentInfoVO.isEmpty());
         issueList.forEach(i -> {
             Long statusId = i.getStatusId();
             Long issueId = i.getIssueId();
