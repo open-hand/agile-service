@@ -148,13 +148,13 @@ public class GanttChartVO {
 
     private WaterfallIssueVO waterfallIssueVO;
 
-    private List<GanttParentVO> parents;
+    private Set<GanttParentVO> parents;
 
-    public List<GanttParentVO> getParents() {
+    public Set<GanttParentVO> getParents() {
         return parents;
     }
 
-    public void setParents(List<GanttParentVO> parents) {
+    public void setParents(Set<GanttParentVO> parents) {
         this.parents = parents;
     }
 

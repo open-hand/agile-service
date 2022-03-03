@@ -8,6 +8,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author superlee
@@ -47,7 +48,7 @@ public interface GanttChartService {
                                       Map<Long, IssueDTO> issueFeatureMap,
                                       List<ObjectSchemeFieldVO> displayFields,
                                       Long organizationId,
-                                      Map<Long, List<GanttParentVO>> sonParentMap);
+                                      Map<Long, Set<GanttParentVO>> sonParentMap);
 
     void saveSort(Long projectId, List<IssuePersonalSortVO> issuePersonalSorts);
 
