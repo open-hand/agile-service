@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.TagVO;
+import io.choerodon.agile.api.vo.waterfall.GanttParentInfoVO;
 import io.choerodon.agile.api.vo.waterfall.GanttParentVO;
 import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.*;
@@ -871,7 +872,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                                              Map<Long, IssueDTO> issueFeatureMap,
                                              List<ObjectSchemeFieldVO> displayFields,
                                              Long organizationId,
-                                             Map<Long, Set<GanttParentVO>> sonParentMap) {
+                                             GanttParentInfoVO ganttParentInfoVO) {
         if (ObjectUtils.isEmpty(projectMap) || ObjectUtils.isEmpty(issueList)) {
             return Collections.emptyList();
         }
@@ -919,7 +920,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         Map<Long, Set<Long>> parentSonMap = new HashMap<>();
         Map<Long, BigDecimal> remainingTimeMap = new HashMap<>();
         Map<Long, GanttChartVO> ganttMap = new HashMap<>();
-        boolean isCustomParent = !ObjectUtils.isEmpty(sonParentMap);
+        boolean isCustomParent = !(ObjectUtils.isEmpty(ganttParentInfoVO) || ganttParentInfoVO.isEmpty());
         issueList.forEach(i -> {
             Long statusId = i.getStatusId();
             Long issueId = i.getIssueId();
@@ -948,8 +949,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             setGanttChartEpicOrFeatureInfo(epicIds, featureIds, i, issueId, ganttChart, thisProjectId, featureMap);
             handlerFieldValue(fieldCodes, fieldCodeValues, ganttChart, i, usersMap, envMap);
             if (isCustomParent) {
-                Set<GanttParentVO> parents = sonParentMap.get(issueId);
-                ganttChart.setParents(parents);
+                processCustomParent(ganttParentInfoVO, issueId, ganttChart);
             } else {
                 setParentId(ganttChart, i, parentSonMap);
             }
@@ -961,6 +961,20 @@ public class GanttChartServiceImpl implements GanttChartService {
         });
         postSetGanttInfo(result, issueEpicMap, issueFeatureMap, parentSonMap, workTimeMap, remainingTimeMap, ganttMap, projectIds);
         return result;
+    }
+
+    private void processCustomParent(GanttParentInfoVO ganttParentInfoVO,
+                                     Long issueId,
+                                     GanttChartVO ganttChart) {
+        Map<Long, Set<GanttParentVO>> sonParentMap = ganttParentInfoVO.getSonParentMap();
+        if (!ObjectUtils.isEmpty(sonParentMap)) {
+            Set<GanttParentVO> parents = sonParentMap.get(issueId);
+            ganttChart.setParents(parents);
+        }
+        Map<Long, Set<Long>> sonSprintMap = ganttParentInfoVO.getSonSprintMap();
+        if (!ObjectUtils.isEmpty(sonSprintMap)) {
+            ganttChart.setParentSprintIds(sonSprintMap.get(issueId));
+        }
     }
 
     private void buildEpicAndFeatureMap(List<Long> issueIds,
