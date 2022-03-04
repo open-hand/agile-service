@@ -1,6 +1,7 @@
 import { set } from '@choerodon/inject';
 import { loadCustomReportData } from '@/injects/custom-report/inject';
 import openTemplate from './injects/template-modal';
+import to from '@/utils/to';
 
 set('agile:openTemplate', openTemplate);
 set('agile:SelectSprint', () => import('@/components/select/select-sprint'));
@@ -13,3 +14,4 @@ set('agile:SelectUser', () => import('@/components/select/select-user'));
 set('agile:WorkbenchGantt', () => import('@/injects/workbench-gantt'));
 set('agile:ChunkUploader', () => import('@/components/chunk-uploader'));
 set('agile:Preview', () => import('@/components/Preview'));
+set('agile:to', to);
