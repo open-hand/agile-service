@@ -1,5 +1,19 @@
 .select {
   width: calc(100% - 0.4rem);
+
+  :global {
+    .c7n-pro-select-multiple-block {
+      height: 0.25rem !important;
+
+      & > .icon-cancel {
+        line-height: 0.25rem !important;
+      }
+
+      .c7n-typeTag-icon-normal {
+        margin-top: 3.5px;
+      }
+    }
+  }
 }
 
 .item {
