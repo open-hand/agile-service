@@ -16,7 +16,8 @@ export interface IGanttDependencyModalProps {
   onOk?: (data: IGanttUpdateIssueDependencyItem[]) => void
   data?: Array<{ id: string, issueId: string, organizationId: string, predecessorId: string } & Required<Pick<GanttIssue, 'predecessorType'>>>
   issueId: string
-  title?: string,
+  btnText?: string,
+  modalTitle?: string,
   forwardRef?: any,
   disableAutoCreate?: boolean,
   horizontal?: boolean,
