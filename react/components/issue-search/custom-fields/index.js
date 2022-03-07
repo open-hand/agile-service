@@ -116,11 +116,9 @@ function CustomFields({
   });
 
   for (const [, field] of chosenFields) {
-    if (['single', 'multiple', 'radio', 'checkbox', 'member', 'multiMember'].includes(field.fieldType)) {
+    if (['single', 'multiple', 'radio', 'checkbox', 'member', 'multiMember', 'input', 'number', 'time', 'datetime', 'date'].includes(field.fieldType)) {
       selectTypes.push(field);
-    } else if (['time', 'datetime', 'date'].includes(field.fieldType)) {
-      dateTypes.push(field);
-    } else if (['input', 'text', 'number'].includes(field.fieldType)) {
+    } else if (['text'].includes(field.fieldType)) {
       inputTypes.push(field);
     }
   }
