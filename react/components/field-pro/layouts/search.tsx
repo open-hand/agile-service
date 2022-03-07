@@ -98,7 +98,7 @@ export function wrapDateToFlatDate(fieldConfig: any, wrapElementFn: (config: any
       }
     }
 
-    static getDateProps() {
+    static getDateProps(label?: string) {
       let width: number = 0;
       if (fieldType === 'datetime') {
         width = 380;
@@ -109,22 +109,26 @@ export function wrapDateToFlatDate(fieldConfig: any, wrapElementFn: (config: any
       }
 
       return {
-        labelLayout: 'float',
-        style: { width, margin: '6px 0' },
-        placeholder: ['开始时间', '结束时间'],
+        // labelLayout: 'float',
+        // style: { width, margin: '6px 0' },
+        placeholder: [label ?? '开始时间', label ? '' : '结束时间'],
         range: ['start', 'end'],
+        label: '',
+        height: '0.3rem',
       };
     }
 
     render() {
       return (
-        <div className="c7n-pro-form-float">
+        <div>
           {wrapElementFn(merge(omit(fieldConfig, 'props'), {
             props: {
               ...this.props,
-              ...FlatDateRangePicker.getDateProps(),
+              ...FlatDateRangePicker.getDateProps(this.props.label),
               value: FlatDateRangePicker.getSelectedDate(this.props.value),
               onChange: this.handleChange,
+              isFlat: true,
+              className: FlatDateRangePicker.getSelectedDate(this.props.value)?.start || FlatDateRangePicker.getSelectedDate(this.props.value)?.end ? 'c7nagile-calendar-range-icon-show' : 'c7nagile-calendar-range-icon-hidden',
             },
           }))}
         </div>
