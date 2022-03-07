@@ -15,7 +15,8 @@ import {
 import type {
   DraggableStateSnapshot, DragUpdate, DropResult, ResponderProvided,
 } from 'react-beautiful-dnd';
-import type { Gantt } from '@choerodon/gantt';
+import type { Gantt, GanttProps } from '@choerodon/gantt';
+import GanttStore from '@choerodon/gantt/dist/store';
 import Context from '../../stores/context';
 
 interface IGanttGroupDragWrapperProps {
@@ -66,7 +67,7 @@ const GanttGroupDragWrapper: React.FC<IGanttGroupDragWrapperProps> = ({
   const [{ source: draggingBar, destination: draggingBarDestinationBar }, setDraggingBar] = useState<{ source?: Gantt.Bar, destination?: Gantt.Bar }>({} as any);
   const draggingBarDestinationBarRef = useRef<Gantt.Bar>();
   const draggingStyle = useRef<React.CSSProperties>();
-  const renderTableBody = useCallback((Component: React.ReactElement, ganttStore: any) => (
+  const renderTableBody = useCallback((Component: React.ReactElement, ganttStore:GanttStore) => (
     <Droppable
       droppableId="table"
       direction="vertical"
@@ -86,7 +87,7 @@ const GanttGroupDragWrapper: React.FC<IGanttGroupDragWrapperProps> = ({
     >
       {(provided, dropSnapshot) => {
         if (dropSnapshot.isDraggingOver) {
-          ganttStore.setTableTranslateX(0);
+          ganttStore.uiStore.setTableTranslateX(0);
         }
         return React.cloneElement(Component, {
           ref: (r: any) => {
