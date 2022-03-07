@@ -47,7 +47,7 @@ function GanttBaseBar(props: React.PropsWithChildren<IGanttBaseBarProps>) {
   const isAddUnitDay = useCallback(({ start, end }: IGanttBaseBarRange) => start.key !== startDate?.key, [startDate?.key]);
   const dashStyle = useMemo(() => {
     if (!dashDateRange) {
-      return {};
+      return { display: 'none' };
     }
     const dashWidth = dashDateRange.end.width - dashDateRange.start.width + (isAddUnitDay(dashDateRange) && dashDateRange.end.dragFloat === 'right' ? dashDateRange.end.unitWidth : 0);
     return {
