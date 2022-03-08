@@ -28,6 +28,12 @@ public class WfDeliverableVO {
     private String actualDeliverable;
     @ApiModelProperty(value = "提交人")
     private String userName;
+    @Encrypt
+    @ApiModelProperty(value = "提交人Id")
+    private Long userId;
+    @Encrypt
+    @ApiModelProperty(value = "里程碑状态id")
+    private Long milestoneStatusId;
 
     public String getName() {
         return name;
@@ -83,5 +89,21 @@ public class WfDeliverableVO {
 
     public void setMilestoneStatus(String milestoneStatus) {
         this.milestoneStatus = milestoneStatus;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getMilestoneStatusId() {
+        return milestoneStatusId;
+    }
+
+    public void setMilestoneStatusId(Long milestoneStatusId) {
+        this.milestoneStatusId = milestoneStatusId;
     }
 }
