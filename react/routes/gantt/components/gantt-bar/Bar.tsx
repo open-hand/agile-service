@@ -92,13 +92,18 @@ function GanttBaseBar(props: React.PropsWithChildren<IGanttBaseBarProps>) {
   }, [fillDateRange?.completedColor, progressCount?.completed, progressCount?.total]);
 
   const handleTooltipMouseLeave = useCallback(() => Tooltip.hide(), []);
-  const handleTooltipMouseEnter = useCallback((e) => Tooltip.show(e.target, {
-    onPopupAlign: (source: HTMLDivElement) => {
-      // eslint-disable-next-line no-param-reassign
-      source.style.left = `${e.clientX}px`;
-    },
-    title: tooltipTitle,
-  }), [tooltipTitle]);
+  const handleTooltipMouseEnter = useCallback((e) => {
+    Tooltip.show(e.target, {
+      onPopupAlign: (source: HTMLDivElement, align: object, target: Node | Window, translate: { x: number; y: number }) => {
+        const left = Math.max(0, (e.clientX || 0) - 21);
+        left && source.style.setProperty('left', `${left}px`);
+      },
+      autoAdjustOverflow: true,
+      arrowPointAtCenter: true,
+      title: tooltipTitle,
+      placement: 'topLeft',
+    });
+  }, [tooltipTitle]);
   return (
     <div className={styles.wrap} style={{ width, height }}>
       <div
