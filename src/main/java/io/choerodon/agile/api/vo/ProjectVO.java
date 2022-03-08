@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo;
 
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.utils.StringUtil;
+
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -40,6 +41,17 @@ public class ProjectVO {
     private Date creationDate;
 
     private String projectStatus;
+
+    @ApiModelProperty("项目状态的名称")
+    private String statusName;
+
+    public String getStatusName() {
+        return statusName;
+    }
+
+    public void setStatusName(String statusName) {
+        this.statusName = statusName;
+    }
 
     public String getProjectStatus() {
         return projectStatus;
