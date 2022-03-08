@@ -16,9 +16,12 @@ import './index.less';
 interface GanttOperationProps {
   onChangeUnit?: ({ key }: { key: Gantt.Sight }) => void
   onClickToday?: () => void
+  hiddenLegendKeys?:Array<'progress'>
   value?: Gantt.Sight
 }
-const GanttOperation: React.FC<GanttOperationProps> = observer(({ onChangeUnit, value, onClickToday }) => {
+const GanttOperation: React.FC<GanttOperationProps> = observer(({
+  onChangeUnit, value, onClickToday, hiddenLegendKeys = [],
+}) => {
   const text = find(units, { type: value });
 
   const formatMessage = useFormatMessage('agile.gantt');
@@ -27,7 +30,7 @@ const GanttOperation: React.FC<GanttOperationProps> = observer(({ onChangeUnit, 
   }, [onChangeUnit]);
   return (
     <div className="c7n-gantt-operation">
-      <Dropdown overlay={() => <GanttLegend />}>
+      <Dropdown overlay={() => <GanttLegend hiddenLegendKeys={hiddenLegendKeys} />}>
         <span className="c7n-gantt-operation-legend">
           {formatMessage({ id: 'legend' })}
           <Icon

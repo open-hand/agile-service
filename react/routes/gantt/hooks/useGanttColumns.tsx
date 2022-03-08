@@ -95,10 +95,11 @@ const ganttColumnCodeMapProps: Record<string, { title?: string, width?: number }
   },
 };
 
-const ganttColumnMap = new Map<string, any>([['assignee', {
+export const ganttColumnMap = new Map<string, Gantt.Column & { titleKey?: string }>([['assignee', {
   width: 85,
   minWidth: 85,
   name: 'assignee',
+  label: '经办人',
   render: (record: any) => (
     <Tooltip title={renderTooltip(record.assignee)}>
       <span>{record.assignee?.realName}</span>
@@ -116,12 +117,14 @@ const ganttColumnMap = new Map<string, any>([['assignee', {
   width: 100,
   minWidth: 100,
   name: 'estimatedStartTime',
+  label: '预计开始',
   titleKey: 'agile.gantt.column.estimatedStartTime',
   render: (record: any) => record.estimatedStartTime && <Tooltip title={record.estimatedStartTime}><span>{dayjs(record.estimatedStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
 }], ['estimatedEndTime', {
   width: 100,
   minWidth: 100,
   name: 'estimatedEndTime',
+  label: '预计结束',
   titleKey: 'agile.gantt.column.estimatedEndTime',
   render: (record: any) => record.estimatedEndTime && <Tooltip title={record.estimatedEndTime}><span>{dayjs(record.estimatedEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
 },
@@ -130,6 +133,7 @@ const ganttColumnMap = new Map<string, any>([['assignee', {
   width: 100,
   minWidth: 100,
   name: 'actualStartTime',
+  label: '实际开始',
   titleKey: 'agile.gantt.column.actualStartTime',
   render: (record: any) => record.actualStartTime && <Tooltip title={record.actualStartTime}><span>{dayjs(record.actualStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
 },
@@ -138,6 +142,7 @@ const ganttColumnMap = new Map<string, any>([['assignee', {
   width: 100,
   minWidth: 100,
   name: 'actualEndTime',
+  label: '实际结束',
   titleKey: 'agile.gantt.column.actualEndTime',
   render: (record: any) => record.actualEndTime && <Tooltip title={record.actualEndTime}><span>{dayjs(record.actualEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
 },
