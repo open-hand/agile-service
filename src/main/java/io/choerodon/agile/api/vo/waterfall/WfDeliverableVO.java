@@ -28,6 +28,8 @@ public class WfDeliverableVO {
     private String actualDeliverable;
     @ApiModelProperty(value = "提交人")
     private String userName;
+    @ApiModelProperty(value = "提交日期")
+    private String submitDate;
     @Encrypt
     @ApiModelProperty(value = "提交人Id")
     private Long userId;
@@ -105,5 +107,13 @@ public class WfDeliverableVO {
 
     public void setMilestoneStatusId(Long milestoneStatusId) {
         this.milestoneStatusId = milestoneStatusId;
+    }
+
+    public String getSubmitDate() {
+        return submitDate;
+    }
+
+    public void setSubmitDate(String submitDate) {
+        this.submitDate = submitDate;
     }
 }
