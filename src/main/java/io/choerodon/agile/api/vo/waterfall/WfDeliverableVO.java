@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo.waterfall;
 
+import java.util.Date;
 import javax.validation.constraints.NotNull;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -29,7 +30,7 @@ public class WfDeliverableVO {
     @ApiModelProperty(value = "提交人")
     private String userName;
     @ApiModelProperty(value = "提交日期")
-    private String submitDate;
+    private Date submitDate;
     @Encrypt
     @ApiModelProperty(value = "提交人Id")
     private Long userId;
@@ -109,11 +110,11 @@ public class WfDeliverableVO {
         this.milestoneStatusId = milestoneStatusId;
     }
 
-    public String getSubmitDate() {
+    public Date getSubmitDate() {
         return submitDate;
     }
 
-    public void setSubmitDate(String submitDate) {
+    public void setSubmitDate(Date submitDate) {
         this.submitDate = submitDate;
     }
 }
