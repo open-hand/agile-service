@@ -41,7 +41,7 @@ const { TabPane } = Tabs;
 
 function IssueBody(props) {
   const {
-    prefixCls, disabled, store, applyType,
+    prefixCls, disabled, store, applyType, refreshDeliverablesList,
   } = useContext(EditIssueContext);
   const { match } = useDetailContainerContext();
   const { comments } = store;
@@ -128,6 +128,7 @@ function IssueBody(props) {
             issueTypeCode: issueTypeVO.typeCode,
             disabled,
             issueId,
+            refreshDeliverablesList,
           }) : null}
           <IssueAttachment {...props} />
           {issueTypeVO.typeCode && ['issue_epic', 'sub_task', 'feature'].indexOf(issueTypeVO.typeCode) === -1
