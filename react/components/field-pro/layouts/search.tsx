@@ -3,6 +3,7 @@ import {
   get, merge, omit,
 } from 'lodash';
 import moment from 'moment';
+import { Tooltip } from 'choerodon-ui/pro';
 import getFieldsInstance, { getAgileFields } from '../base';
 import { IComponentFCWithClassObject, IFieldProcessConfig } from '../base/type';
 import { getComponentCodeForLocalCode, getFieldPropsByMode, isCodeInSystemComponents } from '../base/utils';
@@ -120,18 +121,20 @@ export function wrapDateToFlatDate(fieldConfig: any, wrapElementFn: (config: any
 
     render() {
       return (
-        <div>
-          {wrapElementFn(merge(omit(fieldConfig, 'props'), {
-            props: {
-              ...this.props,
-              ...FlatDateRangePicker.getDateProps(this.props.label),
-              value: FlatDateRangePicker.getSelectedDate(this.props.value),
-              onChange: this.handleChange,
-              isFlat: true,
-              className: FlatDateRangePicker.getSelectedDate(this.props.value)?.start || FlatDateRangePicker.getSelectedDate(this.props.value)?.end ? 'c7nagile-calendar-range-icon-show' : 'c7nagile-calendar-range-icon-hidden',
-            },
-          }))}
-        </div>
+        <Tooltip title={this.props.label}>
+          <div>
+            {wrapElementFn(merge(omit(fieldConfig, 'props'), {
+              props: {
+                ...this.props,
+                ...FlatDateRangePicker.getDateProps(this.props.label),
+                value: FlatDateRangePicker.getSelectedDate(this.props.value),
+                onChange: this.handleChange,
+                isFlat: true,
+                className: FlatDateRangePicker.getSelectedDate(this.props.value)?.start || FlatDateRangePicker.getSelectedDate(this.props.value)?.end ? 'c7nagile-calendar-range-icon-show' : 'c7nagile-calendar-range-icon-hidden',
+              },
+            }))}
+          </div>
+        </Tooltip>
       );
     }
   }

@@ -153,7 +153,14 @@ const GanttDependency: React.FC = observer(() => {
           </div>,
         ]))}
       </Form>
-      <Button icon="add" disabled={dataset.length >= predecessorTypeLength} onClick={() => dataset.create()}>{btnText ?? '添加前置依赖'}</Button>
+      <Button
+        icon="add"
+        disabled={dataset.length >= predecessorTypeLength}
+        onClick={() => dataset.create()}
+        className={styles.addBtn}
+      >
+        {btnText ?? '添加前置依赖'}
+      </Button>
     </Loading>
 
   );
