@@ -11,6 +11,7 @@ import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -73,4 +74,6 @@ public interface AgileWaterfallService {
     void handlerUpdateIssueTypeCode(Long projectId, String originType, IssueUpdateTypeVO issueUpdateTypeVO);
 
     void handlerDeleteSprint(Long projectId, Long sprintId);
+
+    void handleUpdateEstimatedTime(Long projectId, Long issueId, Date estimatedStartTime, Date estimatedEndTime);
 }

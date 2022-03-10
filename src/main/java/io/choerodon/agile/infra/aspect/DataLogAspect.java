@@ -212,6 +212,8 @@ public class DataLogAspect {
     private IssueParticipantRelMapper issueParticipantRelMapper;
     @Autowired
     private WorkCalendarSubscribeService workCalendarSubscribeService;
+    @Autowired(required = false)
+    private AgileWaterfallService agileWaterfallService;
 
     /**
      * 定义拦截规则：拦截Spring管理的后缀为ServiceImpl的bean中带有@DataLog注解的方法。
@@ -1656,6 +1658,9 @@ public class DataLogAspect {
         }
         if (estimatedTimeChanged) {
             workCalendarSubscribeService.handleWorkCalendarSubscribeChanged(projectId, issueId, estimatedTimeChanged, new ArrayList<>());
+            if (agileWaterfallService != null) {
+                agileWaterfallService.handleUpdateEstimatedTime(projectId, issueId, issueConvertDTO.getEstimatedStartTime(), issueConvertDTO.getEstimatedEndTime());
+            }
         }
     }
 
