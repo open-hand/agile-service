@@ -1,8 +1,8 @@
-import useCategoryCodes from './useCategoryCodes';
+import useCategoryCodes, { ICategoryCode } from './useCategoryCodes';
 
-const useHasBacklog = () => {
+const useHasBacklog = (propCodes?: ICategoryCode[]) => {
   const codes = useCategoryCodes();
-  return codes.includes('N_REQUIREMENT');
+  return (propCodes || codes).includes('N_REQUIREMENT');
 };
 
 export default useHasBacklog;

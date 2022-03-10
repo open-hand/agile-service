@@ -156,7 +156,8 @@ function IssueBody(props) {
             }) : ''}
           {issueTypeVO.typeCode && ['story', 'task', 'bug'].indexOf(issueTypeVO.typeCode) !== -1
             ? <IssueLink {...props} /> : ''}
-          {!outside && ['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && hasBacklog && <InjectedComponent.Backlog {...props} />}
+          {!outside && ['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && hasBacklog && hasInject('backlog:issueLinkedBacklog')
+            ? mount('backlog:issueLinkedBacklog', props) : ''}
         </TabPane>
         {issueTypeVO.typeCode && WATERFALL_TYPE_CODES.includes(issueTypeVO.typeCode) && hasInject(DEPENDENCY_TAB)
           ? <TabPane tab="依赖与关联">{mount(DEPENDENCY_TAB, { ...props, issueTypeCode: issueTypeVO.typeCode })}</TabPane> : null}
