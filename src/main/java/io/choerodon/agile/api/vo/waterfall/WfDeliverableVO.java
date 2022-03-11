@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo.waterfall;
 
 import java.util.Date;
+import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -37,7 +38,7 @@ public class WfDeliverableVO {
     private Date endDate;
     @Encrypt
     @ApiModelProperty(value = "提交人Id")
-    private String userId;
+    private List<Long> userIds;
     @Encrypt
     @ApiModelProperty(value = "里程碑状态id")
     private Long milestoneStatusId;
@@ -140,11 +141,11 @@ public class WfDeliverableVO {
         this.params = params;
     }
 
-    public String getUserId() {
-        return userId;
+    public List<Long> getUserIds() {
+        return userIds;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setUserIds(List<Long> userIds) {
+        this.userIds = userIds;
     }
 }
