@@ -151,7 +151,7 @@ class Doc extends Component {
         visible={visible || false}
         onOk={this.handleCreateDoc}
         onCancel={onCancel}
-        okText="创建"
+        okText="确定"
         cancelText="取消"
         confirmLoading={createLoading}
         width={MODAL_WIDTH.middle}
