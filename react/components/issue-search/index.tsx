@@ -22,6 +22,8 @@ export interface IssueSearchProps {
   foldedHeight?: number
   hasMyAssigned?: boolean
   excludeQuickFilterIds?: string[]
+  hiddenQuickFilters?: boolean, // 隐藏快速筛选
+  hiddenCustomFields?: boolean, // 隐藏自定义字段
 }
 export function useIssueSearchStore(props: IssueSearchStoreProps) {
   const store = useMemo(() => new IssueSearchStore(props), []);
@@ -29,7 +31,8 @@ export function useIssueSearchStore(props: IssueSearchStoreProps) {
 }
 export { IssueSearchStore };
 const IssueSearch: React.FC<IssueSearchProps> = ({
-  urlFilter, onClear, onClickSaveFilter, store, onChange, projectId, programId, applyType = 'agile', foldedHeight = 43, hasMyAssigned = true, excludeQuickFilterIds = [],
+  urlFilter, onClear, onClickSaveFilter, store, onChange, projectId, programId, applyType = 'agile', foldedHeight = 43,
+  hasMyAssigned = true, excludeQuickFilterIds = [], hiddenQuickFilters = false, hiddenCustomFields = false,
 }) => {
   const mountedRef = useRef<boolean>();
   const { isProgram } = useIsProgram();
@@ -49,8 +52,8 @@ const IssueSearch: React.FC<IssueSearchProps> = ({
       }
       default: {
         if (!mountedRef.current) {
-          store.loadMyFilterList();
-          store.loadCustomFields();
+          !hiddenQuickFilters && store.loadMyFilterList();
+          !hiddenCustomFields && store.loadCustomFields();
           mountedRef.current = true;
         }
         break;
@@ -70,6 +73,8 @@ const IssueSearch: React.FC<IssueSearchProps> = ({
         foldedHeight,
         hasMyAssigned,
         excludeQuickFilterIds,
+        hiddenQuickFilters,
+        hiddenCustomFields,
       }}
     >
       <SearchArea />

@@ -24,10 +24,10 @@ const { Option, OptGroup } = FlatSelect;
 const SearchArea: React.FC = () => {
   const prefixCls = 'c7n-issue';
   const {
-    store, onClear, urlFilter, onClickSaveFilter, projectId, foldedHeight, hasMyAssigned, excludeQuickFilterIds,
+    store, onClear, urlFilter, onClickSaveFilter, projectId, foldedHeight, hasMyAssigned, excludeQuickFilterIds, hiddenQuickFilters,
   } = useContext(IssueSearchContext);
   const formatMessage = useFormatMessage();
-  const { data: quickFilters } = useQuickFilters({ projectId }, { enabled: store.menuType === 'project' });
+  const { data: quickFilters } = useQuickFilters({ projectId }, { enabled: store.menuType === 'project' && !hiddenQuickFilters });
   const {
     isHasFilter, chosenFields, overflowLine, folded,
   } = store;
