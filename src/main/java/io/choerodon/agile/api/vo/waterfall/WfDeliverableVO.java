@@ -37,10 +37,12 @@ public class WfDeliverableVO {
     private Date endDate;
     @Encrypt
     @ApiModelProperty(value = "提交人Id")
-    private Long userId;
+    private String userId;
     @Encrypt
     @ApiModelProperty(value = "里程碑状态id")
     private Long milestoneStatusId;
+    @ApiModelProperty(value = "模糊搜索")
+    private String params;
 
     public String getName() {
         return name;
@@ -98,14 +100,6 @@ public class WfDeliverableVO {
         this.milestoneStatus = milestoneStatus;
     }
 
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
     public Long getMilestoneStatusId() {
         return milestoneStatusId;
     }
@@ -136,5 +130,21 @@ public class WfDeliverableVO {
 
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
+    }
+
+    public String getParams() {
+        return params;
+    }
+
+    public void setParams(String params) {
+        this.params = params;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }
