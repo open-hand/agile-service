@@ -31,6 +31,10 @@ public class WfDeliverableVO {
     private String userName;
     @ApiModelProperty(value = "提交日期")
     private Date submitDate;
+    @ApiModelProperty(value = "开始日期")
+    private Date startDate;
+    @ApiModelProperty(value = "结束日期")
+    private Date endDate;
     @Encrypt
     @ApiModelProperty(value = "提交人Id")
     private Long userId;
@@ -116,5 +120,21 @@ public class WfDeliverableVO {
 
     public void setSubmitDate(Date submitDate) {
         this.submitDate = submitDate;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
     }
 }
