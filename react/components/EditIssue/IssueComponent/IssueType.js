@@ -1,6 +1,6 @@
 import React, { useContext, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Dropdown, Menu, Icon } from 'choerodon-ui/pro';
+import { Dropdown, Menu, Icon, Modal } from 'choerodon-ui/pro';
 import { find } from 'lodash';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { issueApi } from '@/api';
@@ -46,6 +46,21 @@ const IssueType = observer(({
   let { data: issueTypeData } = useProjectIssueTypes({
     onlyEnabled: true, typeCode: queryTypeCodes, applyType, projectId: store.projectId,
   }, { enabled: !disabled });
+
+  const handleBeforeChangeType = (type) => {
+    if (typeCode === 'milestone' || type.item.props.typeCode === 'milestone') {
+      Modal.open({
+        title: '修改工作项类型',
+        children: typeCode === 'milestone'
+          ? '里程碑转化为其他工作项将导致交付物清空，请谨慎操作！'
+          : `${issueTypeVO?.name || '工作项'}转换为里程碑后，将清空进度、预计开始时间、实际开始时间这三个字段的数据。`,
+        onOk: () => handleChangeType(type),
+      });
+    } else {
+      handleChangeType(type);
+    }
+  };
+
   const handleChangeType = async (type) => {
     const {
       issueId, objectVersionNumber, summary,
@@ -151,7 +166,7 @@ const IssueType = observer(({
         borderRadius: '2px',
       }}
       className={Styles.sidebarTypeMenu}
-      onClick={handleChangeType}
+      onClick={handleBeforeChangeType}
     >
       {
         issueTypeData.map((t) => (
