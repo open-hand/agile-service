@@ -891,6 +891,9 @@ const fieldsMap = new Map([
       },
     },
   }],
+  ['progress', {
+    name: '进度',
+  }],
 ]);
 
 export default fieldsMap;
