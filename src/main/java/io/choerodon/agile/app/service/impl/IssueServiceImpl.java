@@ -2125,7 +2125,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             issueMapper.updateSubBugRelateIssueId(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId());
         }
         if (agileWaterfallService != null && Objects.equals(SchemeApplyType.WATERFALL, issueUpdateTypeVO.getApplyType())) {
-            agileWaterfallService.checkUpdateIssueTypeCode(projectId, issueConvertDTO, issueUpdateTypeVO);
+            agileWaterfallService.checkUpdateIssueTypeCode(projectId, issueConvertDTO, issueUpdateTypeVO, fieldList);
         }
         if (issueUpdateTypeVO.getTypeCode().equals(ISSUE_EPIC)) {
             issueConvertDTO.setRank(null);
