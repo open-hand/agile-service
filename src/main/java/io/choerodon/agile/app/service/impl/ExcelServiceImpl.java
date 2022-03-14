@@ -70,7 +70,6 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(ExcelServiceImpl.class);
 
-    protected static final String BACKETNAME = "agile-service";
     protected static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
     protected static final String UPLOAD_FILE = "upload_file";
@@ -973,7 +972,7 @@ public class ExcelServiceImpl implements ExcelService {
     protected String uploadErrorExcel(Workbook errorWorkbook, Long organizationId) {
         // 上传错误的excel
         MultipartFile multipartFile = new MultipartExcelUtil(MULTIPART_NAME, ORIGINAL_FILE_NAME, errorWorkbook);
-        return fileClient.uploadFile(organizationId, BACKETNAME, null, FILE_NAME, multipartFile);
+        return fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, FILE_NAME, multipartFile);
     }
 
     protected Boolean checkEpicNameExist(Long projectId, String epicName) {
@@ -3497,7 +3496,7 @@ public class ExcelServiceImpl implements ExcelService {
             MultipartFile file = new MultipartExcel("file", fileName, EXCELCONTENTTYPE, content);
 
             //返回上载结果
-            String path = fileClient.uploadFile(organizationId,APPLY_TYPE_AGILE,null, fileName, file);
+            String path = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(),null, fileName, file);
             fileOperationHistoryDTO.setStatus(SUCCESS);
             fileOperationHistoryDTO.setFileUrl(path);
         } catch (Exception e) {

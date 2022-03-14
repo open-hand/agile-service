@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.infra.enums.FileUploadBucket;
 import org.apache.commons.compress.utils.IOUtils;
 import org.hzero.boot.file.FileClient;
 import org.modelmapper.ModelMapper;
@@ -61,7 +62,6 @@ public class StaticFileServiceImpl implements StaticFileService {
     private static final String HTML_CONTENT_TYPE = "text/html";
     private static final String SVG_CONTENT_TYPE = "image/svg+xml";
     private static final String INDEX = "index";
-    private static final String BUCKET_NAME = "agile-service";
 
     private static final String IO_EXCEPTION_CODE = "error.uncompressed.io";
     private static final String DELETE_NULL_EXCEPTION_CODE = "error.delete.staticFileHeader.null";
@@ -106,7 +106,7 @@ public class StaticFileServiceImpl implements StaticFileService {
         if (!CollectionUtils.isEmpty(files)) {
             staticFileCompressService.validFileType(files);
             for (MultipartFile multipartFile : files) {
-                String headerUrl = fileClient.uploadFile(organizationId, BUCKET_NAME, null, multipartFile.getOriginalFilename(), multipartFile);
+                String headerUrl = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, multipartFile.getOriginalFilename(), multipartFile);
                 StaticFileHeaderDTO staticFileHeader = createStaticFileHeader(projectId, organizationId, issueId, dealUrl(headerUrl), multipartFile.getOriginalFilename());
                 issueMapper.updateIssueLastUpdateInfo(issueId, projectId, DetailsHelper.getUserDetails().getUserId());
                 if (!ObjectUtils.isEmpty(staticFileHeader)) {
@@ -392,19 +392,19 @@ public class StaticFileServiceImpl implements StaticFileService {
 
     private byte[] getFileByteArray(StaticFileLineDTO file) throws IOException {
         InputStream inputStream =
-                fileClient.downloadFile(file.getOrganizationId(), BUCKET_NAME, getRealUrl(file.getUrl()));
+                fileClient.downloadFile(file.getOrganizationId(), FileUploadBucket.AGILE_BUCKET.bucket(), getRealUrl(file.getUrl()));
         return IOUtils.toByteArray(inputStream);
     }
 
     private String getRealUrl(String url) {
-        return attachmentUrl + "/" + BUCKET_NAME + "/" + url;
+        return attachmentUrl + "/" + FileUploadBucket.AGILE_BUCKET.bucket() + "/" + url;
     }
 
     private String dealUrl(String url) {
         String dealUrl;
         try {
             URL netUrl = new URL(url);
-            dealUrl = netUrl.getFile().substring(BUCKET_NAME.length() + 2);
+            dealUrl = netUrl.getFile().substring(FileUploadBucket.AGILE_BUCKET.bucket().length() + 2);
         } catch (MalformedURLException e) {
             throw new CommonException(MALFORMED_EXCEPTION_CODE, e);
         }

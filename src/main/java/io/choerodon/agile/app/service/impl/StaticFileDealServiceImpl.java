@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.infra.enums.FileUploadBucket;
 import org.hzero.boot.file.FileClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -30,7 +31,6 @@ import io.choerodon.core.exception.CommonException;
 public class StaticFileDealServiceImpl implements StaticFileDealService {
 
     private static final String INSERT_ERROR = "error.StaticFile.create";
-    private static final String BUCKET_NAME = "agile-service";
     private static final String DELETE_FAILED = "delete_failed";
     private static final String FAILED = "failed";
     private static final String SUCCESS = "success";
@@ -109,7 +109,7 @@ public class StaticFileDealServiceImpl implements StaticFileDealService {
                 lastIndex = size * (i + 1);
             }
             if (!fileUrls.subList(size * i, lastIndex).isEmpty()) {
-                fileClient.deleteFileByUrl(organizationId, BUCKET_NAME, fileUrls.subList(size * i, lastIndex));
+                fileClient.deleteFileByUrl(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), fileUrls.subList(size * i, lastIndex));
             }
         }
     }
