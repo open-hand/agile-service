@@ -429,7 +429,7 @@ public class IssueAssembler extends AbstractAssembler {
      * @param issueDTOList issueDTOList
      * @return SubIssueDTO
      */
-    protected List<IssueSubListVO> issueDoToSubIssueDto(List<IssueDTO> issueDTOList, Map<Long, IssueTypeVO> issueTypeDTOMap, Map<Long, StatusVO> statusMapDTOMap, Map<Long, PriorityVO> priorityDTOMap) {
+    public List<IssueSubListVO> issueDoToSubIssueDto(List<IssueDTO> issueDTOList, Map<Long, IssueTypeVO> issueTypeDTOMap, Map<Long, StatusVO> statusMapDTOMap, Map<Long, PriorityVO> priorityDTOMap) {
         if (CollectionUtils.isEmpty(issueDTOList)){
             return Collections.emptyList();
         }
