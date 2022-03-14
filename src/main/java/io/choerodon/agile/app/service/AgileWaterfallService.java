@@ -46,7 +46,7 @@ public interface AgileWaterfallService {
 
     void handleUpdateWaterfallFieldWithoutRuleNotice(Long projectId, IssueUpdateVO issueUpdateVO);
 
-    void checkUpdateIssueTypeCode(Long projectId, IssueConvertDTO issueConvertDTO, IssueUpdateTypeVO issueUpdateTypeVO);
+    void checkUpdateIssueTypeCode(Long projectId, IssueConvertDTO issueConvertDTO, IssueUpdateTypeVO issueUpdateTypeVO, List<String> fieldList);
 
     List<String> queryFieldOrderByIssueType(String issueType);
 
