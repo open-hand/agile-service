@@ -35,7 +35,7 @@ const IssueDropDown = ({
   const docs = store.getDoc;
   const hasDevops = useHasDevops();
   const hasTest = useHasTest();
-  const { isWaterfallAgile } = useIsWaterfall();
+  const { isWaterfall } = useIsWaterfall();
   const [copyHasEpic, setCopyHasEpic] = useState(store.copyFields.find((item) => item.fieldCode === 'epic'));
   const dontCopyEpicRef = useRef();
   const handleCopyIssue = (issueId, isSubTask, dontCopyEpic, issue) => {
@@ -239,7 +239,7 @@ const IssueDropDown = ({
       {
         (includes(['story', 'task', 'bug'], typeCode) && !parentRelateSummary) && ( // 故事、任务、缺陷能移 子缺陷不能移
           <Permission
-            service={isWaterfallAgile
+            service={isWaterfall
               ? ['choerodon.code.project.cooperation.sprint.iteration-plan.ps.editissue.pro']
               : ['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
             noAccessChildren={(
@@ -261,7 +261,7 @@ const IssueDropDown = ({
       }
       {
         <Permission
-          service={isWaterfallAgile
+          service={isWaterfall
             ? ['choerodon.code.project.cooperation.sprint.iteration-plan.ps.editissue.pro']
             : [isProgramIssue
               ? 'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.editissue.pro'
