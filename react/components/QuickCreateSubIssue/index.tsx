@@ -242,6 +242,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
                                 <TypeTag
                                   data={type}
                                   showName
+                                  tooltip={false}
                                 />
                               </div>
                             </Menu.Item>

@@ -261,6 +261,7 @@ class QuickCreateIssue extends Component {
                 <TypeTag
                   data={type}
                   showName
+                  tooltip={false}
                 />
               </div>
             </Menu.Item>
