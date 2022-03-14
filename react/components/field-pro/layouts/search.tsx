@@ -111,11 +111,11 @@ export function wrapDateToFlatDate(fieldConfig: any, wrapElementFn: (config: any
 
       return {
         // labelLayout: 'float',
-        // style: { width, margin: '6px 0' },
+        style: { height: '0.3rem' },
         placeholder: [label ?? '开始时间', label ? '' : '结束时间'],
         range: ['start', 'end'],
         label: '',
-        height: '0.3rem',
+        // height: '0.32rem',
       };
     }
 
