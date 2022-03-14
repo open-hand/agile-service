@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.infra.enums.FileUploadBucket;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hzero.boot.file.FileClient;
@@ -68,7 +69,6 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
     private static final String CODE = "code_";
     private static final String VALUE = "value_";
 
-    protected static final String BACKETNAME = "agile-service";
     protected static final String MULTIPART_NAME = "file";
     protected static final String ORIGINAL_FILE_NAME = ".xlsx";
     protected static final String FILE_NAME = "error.xlsx";
@@ -119,7 +119,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
             });
         }
         MultipartFile multipartFile = new MultipartExcelUtil(MULTIPART_NAME, ORIGINAL_FILE_NAME, workbook);
-        String errorWorkBookUrl = fileClient.uploadFile(organizationId, BACKETNAME, null, FILE_NAME, multipartFile);
+        String errorWorkBookUrl = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, FILE_NAME, multipartFile);
         history.setFileUrl(errorWorkBookUrl);
     }
 

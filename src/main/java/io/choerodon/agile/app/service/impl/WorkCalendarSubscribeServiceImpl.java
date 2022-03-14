@@ -5,6 +5,7 @@ import io.choerodon.agile.api.vo.WorkItemSearchVO;
 import io.choerodon.agile.api.vo.WorkItemVO;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.FileUploadBucket;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.IssueParticipantRelMapper;
 import io.choerodon.agile.infra.utils.ICal4jUtil;
@@ -58,7 +59,6 @@ public class WorkCalendarSubscribeServiceImpl implements WorkCalendarSubscribeSe
 
     private static final String MULTIPART_NAME = "file";
     private static final String ORIGINAL_FILE_NAME = ".ics";
-    private static final String BUCKET_NAME = "agile-service";
     private static final String CALENDAR_CONTENT_TYPE = "text/calendar";
     private static final String ASSIGNEE = "assignee";
     private static final String PARTICIPANT = "participant";
@@ -106,7 +106,7 @@ public class WorkCalendarSubscribeServiceImpl implements WorkCalendarSubscribeSe
         MultipartFile multipartFile = createMultipartICalendar(organizationId, userId);
         try {
             // 文件上传到minio
-            url = fileClient.uploadFile(organizationId, BUCKET_NAME, null, ORIGINAL_FILE_NAME, multipartFile);
+            url = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, ORIGINAL_FILE_NAME, multipartFile);
         } catch (Exception e) {
             throw new CommonException("error.generateCalendarFile.uploadFile");
         }
@@ -131,7 +131,7 @@ public class WorkCalendarSubscribeServiceImpl implements WorkCalendarSubscribeSe
 
     private String getRelativeUrl(String url) {
         // 获取相对路径
-        String relativeUrl = url.substring(url.indexOf(BUCKET_NAME) + BUCKET_NAME.length() + 1);
+        String relativeUrl = url.substring(url.indexOf(FileUploadBucket.AGILE_BUCKET.bucket()) + FileUploadBucket.AGILE_BUCKET.bucket().length() + 1);
         if (relativeUrl.length() < 1) {
             throw new CommonException("error.illegal.url");
         }
@@ -311,7 +311,7 @@ public class WorkCalendarSubscribeServiceImpl implements WorkCalendarSubscribeSe
         if (Boolean.TRUE.equals(dto.getChanged())) {
             MultipartFile multipartFile = createMultipartICalendar(organizationId, dto.getUserId());
             try {
-                fileClient.updateFile(organizationId, BUCKET_NAME, realUrl, null, multipartFile);
+                fileClient.updateFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), realUrl, null, multipartFile);
             } catch (Exception e) {
                 throw new CommonException("error.generateCalendarFile.updateFile");
             }
@@ -337,12 +337,12 @@ public class WorkCalendarSubscribeServiceImpl implements WorkCalendarSubscribeSe
     }
 
     private String getRealUrl(String url) {
-        return attachmentUrl + "/" + BUCKET_NAME + "/" + url;
+        return attachmentUrl + "/" + FileUploadBucket.AGILE_BUCKET.bucket() + "/" + url;
     }
 
     private byte[] getFileByteArray(Long organizationId, String url){
         InputStream inputStream =
-                fileClient.downloadFile(organizationId, BUCKET_NAME, url);
+                fileClient.downloadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), url);
         try {
             return IOUtils.toByteArray(inputStream);
         } catch (IOException e) {
