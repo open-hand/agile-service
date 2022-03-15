@@ -4,13 +4,12 @@ import { GanntMoveWrap } from '@choerodon/gantt';
 import { toJS } from 'mobx';
 import classNames from 'classnames';
 import React, { useCallback, useMemo } from 'react';
-import { Tooltip } from 'choerodon-ui/pro';
-import { merge, set } from 'lodash';
+import { merge } from 'lodash';
 import dayjs from 'dayjs';
 import { observer, useComputed } from 'mobx-react-lite';
-import { useCreation } from 'ahooks';
 import styles from './Bar.less';
 import STATUS_COLOR from '@/constants/STATUS_COLOR';
+import useFollowMouseTooltip from '@/hooks/useFollowMouseTooltip';
 
 interface IWrapGanttBaseBarFindOptions {
   type: 'issue'
@@ -91,26 +90,12 @@ function GanttBaseBar(props: React.PropsWithChildren<IGanttBaseBarProps>) {
     return progress;
   }, [fillDateRange?.completedColor, progressCount?.completed, progressCount?.total]);
 
-  const handleTooltipMouseLeave = useCallback(() => Tooltip.hide(), []);
-  const handleTooltipMouseEnter = useCallback((e) => {
-    Tooltip.show(e.target, {
-      onPopupAlign: (source: HTMLDivElement, align: object, target: Node | Window, translate: { x: number; y: number }) => {
-        const left = Math.max(0, (e.clientX || 0) - 21);
-        left && source.style.setProperty('left', `${left}px`);
-      },
-      autoAdjustOverflow: true,
-      arrowPointAtCenter: true,
-      title: tooltipTitle,
-      placement: 'topLeft',
-    });
-  }, [tooltipTitle]);
+  const [, targetProps] = useFollowMouseTooltip({ tooltipTitle });
   return (
     <div className={styles.wrap} style={{ width, height }}>
       <div
         className={styles.body}
-        onMouseMove={handleTooltipMouseEnter}
-        onMouseEnter={handleTooltipMouseEnter}
-        onMouseLeave={handleTooltipMouseLeave}
+        {...targetProps}
       >
         <GanntMoveWrap data={bar} startDate={dashMoveDateRange?.start} endDate={dashMoveDateRange?.end}>
           <div id="ganttBar" className={styles.dash} style={dashStyle} />
