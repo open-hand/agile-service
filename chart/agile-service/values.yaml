@@ -104,7 +104,7 @@ env:
     # 状态机问题联动最大链深度
     SERVICES_CHAIN_MAX_DEPTH: 20
     # bucket前缀
-    SERVICES_bucket_prefix: prefix
+    SERVICES_BUCKET_PREFIX: prefix
 
 
     ## Skywalking 配置参数
