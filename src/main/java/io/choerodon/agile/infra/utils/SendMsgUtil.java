@@ -13,6 +13,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -88,6 +89,8 @@ public class SendMsgUtil {
     private ModelMapper modelMapper;
     @Autowired
     private StarBeaconMapper starBeaconMapper;
+    @Value("${services.domain.url}")
+    private String domainUrl;
 
     private String convertProjectName(ProjectVO projectVO) {
         String projectName = projectVO.getName();
@@ -297,6 +300,7 @@ public class SendMsgUtil {
         templateArgsMap.put("operatorName", operatorName);
         templateArgsMap.put("status", status);
         templateArgsMap.put("url", url);
+        templateArgsMap.put("link", domainUrl + "/" + url);
         siteMsgUtil.sendChangeIssueStatus(projectId, userSet, noticeTypeList, templateArgsMap, userDetails.getUserId(), onlyWebHook);
     }
 
