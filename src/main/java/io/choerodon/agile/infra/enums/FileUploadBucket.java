@@ -6,7 +6,7 @@ package io.choerodon.agile.infra.enums;
  */
 public enum FileUploadBucket {
 
-    AGILE_BUCKET("zkc7n-agile-service");
+    AGILE_BUCKET("agile-service");
 
     private String bucket;
 
