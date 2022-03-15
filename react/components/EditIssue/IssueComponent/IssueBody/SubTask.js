@@ -36,7 +36,7 @@ const SubTask = observer(({
   const renderIssueList = (issue, i) => (
     <IssueList
       showAssignee
-      showDelete={!disabled}
+      showDelete={!disabled && !isWaterfall}
       showPriority
       key={issue.issueId}
       issue={{
