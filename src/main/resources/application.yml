@@ -143,13 +143,13 @@ mybatis:
 
 services:
   attachment:
-    url: example.com
+    url: ${SERVICES_ATTACHMENT_URL:example.com}
   bucket:
-    prefix: prefix
+    prefix: ${SERVICES_BUCKET_PREFIX:prefix}
   domain:
-    url: example.com
+    url: ${SERVICES_DOMAIN_URL:example.com}
   chain:
-    max-depth: 20
+    max-depth: ${SERVICES_CHAIN_MAX_DEPTH:20}
 
 logging:
   level:
