@@ -129,6 +129,8 @@ class StoryMapStore {
       searchArgs: {},
     };
     this.versionList = [];
+    this.allVersion = null;
+    this.allSprints = null;
     this.sprintList = [];
     this.selectedIssueMap.clear();
     this.hiddenColumnNoStory = false;
