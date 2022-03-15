@@ -3,6 +3,7 @@
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.WorkItemSearchVO;
 import io.choerodon.agile.api.vo.WorkItemVO;
+import io.choerodon.agile.app.service.FilePathService;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.FileUploadBucket;
@@ -80,9 +81,11 @@ public class WorkCalendarSubscribeServiceImpl implements WorkCalendarSubscribeSe
 
     @Value("${services.domain.url}")
     private String domainUrl;
+    @Autowired
+    private FilePathService filePathService;
 
-    @Value("${services.attachment.url}")
-    private String attachmentUrl;
+//    @Value("${services.attachment.url}")
+//    private String attachmentUrl;
 
     @Override
     public String subscribe(Long organizationId) {
@@ -337,7 +340,7 @@ public class WorkCalendarSubscribeServiceImpl implements WorkCalendarSubscribeSe
     }
 
     private String getRealUrl(String url) {
-        return attachmentUrl + "/" + FileUploadBucket.AGILE_BUCKET.bucket() + "/" + url;
+        return filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), url);
     }
 
     private byte[] getFileByteArray(Long organizationId, String url){

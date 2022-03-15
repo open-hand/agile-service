@@ -196,6 +196,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private ProjectInfoMapper projectInfoMapper;
     @Autowired
     private IssuePredecessorService issuePredecessorService;
+    @Autowired
+    private FilePathService filePathService;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -240,7 +242,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String SEARCH = "search";
     private static final String STORYMAP = "storymap";
     private static final String AGILE = "agile";
-    private static final String BACKETNAME = "agile-service";
+//    private static final String BACKETNAME = "agile-service";
     private static final String TRIGGER_ISSUE_ID = "triggerIssueId";
     private static final String AUTO_TRANFER_FLAG = "autoTranferFlag";
     private static final String STAR_BEACON_TYPE_ISSUE = "issue";
@@ -263,8 +265,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String INFLUENCE_VERSION = "influenceVersion";
     private static final String ORDER_STR = "orderStr";
 
-    @Value("${services.attachment.url}")
-    private String attachmentUrl;
+//    @Value("${services.attachment.url}")
+//    private String attachmentUrl;
 
     private SagaClient sagaClient;
 
@@ -462,7 +464,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public IssueVO queryIssueCreateWithoutRuleNotice(Long projectId, Long issueId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
-            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(attachmentUrl + "/" + BACKETNAME + "/" + issueAttachmentDO.getUrl()));
+            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(
+                    filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), issueAttachmentDO.getUrl())));
         }
         Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, issue.getApplyType());
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
@@ -534,7 +537,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         issue.setSameParentBugDOList(Objects.nonNull(issue.getRelateIssueId()) && !Objects.equals(issue.getRelateIssueId(), 0L)?
                 issueMapper.querySubBugByIssueId(issue.getRelateIssueId()): null);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
-            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(attachmentUrl + "/" + BACKETNAME + "/" + issueAttachmentDO.getUrl()));
+            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(
+                    filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), issueAttachmentDO.getUrl())));
         }
         if (agilePluginService != null) {
             agilePluginService.setBusinessAttributes(issue);
@@ -617,7 +621,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     protected IssueVO queryIssueByUpdate(Long projectId, Long issueId, List<String> fieldList) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
-            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(attachmentUrl + issueAttachmentDO.getUrl()));
+            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(
+                    filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), issueAttachmentDO.getUrl())));
         }
         Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, issue.getApplyType());
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
@@ -2075,7 +2080,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         issue.setIssueTypeVO(issueTypeService.queryById(issue.getIssueTypeId(), projectId));
         issue.setStatusVO(statusService.queryStatusById(organizationId, issue.getStatusId()));
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
-            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(attachmentUrl + issueAttachmentDO.getUrl()));
+            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), issueAttachmentDO.getUrl())));
         }
         return issueAssembler.issueDetailDoToIssueSubDto(issue);
     }
@@ -2090,7 +2095,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public IssueSubVO queryIssueSubByCreateWithoutRuleNotice(Long projectId, Long issueId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
-            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(attachmentUrl + issueAttachmentDO.getUrl()));
+            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), issueAttachmentDO.getUrl())));
         }
         IssueSubVO result = issueAssembler.issueDetailDoToIssueSubDto(issue);
         sendMsgUtil.sendMsgBySubIssueCreate(projectId, result, DetailsHelper.getUserDetails().getUserId());
