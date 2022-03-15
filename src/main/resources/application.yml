@@ -144,6 +144,8 @@ mybatis:
 services:
   attachment:
     url: example.com
+  bucket:
+    prefix: prefix
   domain:
     url: example.com
   chain:
