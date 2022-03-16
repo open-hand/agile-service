@@ -100,7 +100,7 @@ class IssueSearchStore {
 
   programId?: string;
 
-  issueTypeList?:IssueSearchStoreProps['issueTypeList']
+  issueTypeList?: IssueSearchStoreProps['issueTypeList']
 
   fieldConfigs: { [key: string]: any } = {}
 
@@ -221,6 +221,10 @@ class IssueSearchStore {
     return noDisplayChosenFields;
   }
 
+  @computed get chosenDefaultDisplaySet() {
+    return new Set([...this.chosenFields.values()].filter((field: ILocalField) => field.defaultShow || !field.noDisplay).map((i) => i.code));
+  }
+
   @action initChosenFields() {
     const chosenFields = new Map(this.chosenFields);
 
@@ -330,7 +334,7 @@ class IssueSearchStore {
     const filter: IChosenField[] = [];
     for (const [, field] of this.chosenFields) {
       const value = toJS(field.value);
-      if (value === undefined || value === null || value === '') {
+      if (value === undefined || value === null || value === '' || (Array.isArray(value) && !value.length)) {
         // eslint-disable-next-line no-continue
         continue;
       }
@@ -352,6 +356,11 @@ class IssueSearchStore {
   get isHasFilter() {
     const currentFilterDTO = this.getCustomFieldFilters()
       ? flattenObject(this.getCustomFieldFilters()) : {};
+    Object.keys(currentFilterDTO).forEach((code) => {
+      if (Array.isArray(currentFilterDTO[code]) && !currentFilterDTO[code].length && this.chosenDefaultDisplaySet.has(code)) {
+        unset(currentFilterDTO, code);
+      }
+    });
     return !isFilterSame({}, currentFilterDTO);
   }
 
