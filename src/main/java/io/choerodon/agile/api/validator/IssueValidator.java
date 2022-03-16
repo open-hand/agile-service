@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.validator;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -251,12 +252,7 @@ public class IssueValidator {
 
     public void judgeEpicCanUpdateAndExist(Long projectId, Long epicId) {
         ProjectVO project = ConvertUtil.queryProject(projectId);
-        Set<String> categoryCodes =
-                project
-                        .getCategories()
-                        .stream()
-                        .map(ProjectCategoryDTO::getCode)
-                        .collect(Collectors.toSet());
+        Set<String> categoryCodes = new HashSet<>(ProjectCategory.getProjectCategoryCodes(project));
         boolean isOnlyAgile =
                 categoryCodes.contains(ProjectCategory.MODULE_AGILE)
                         && !categoryCodes.contains(ProjectCategory.MODULE_PROGRAM);

@@ -1305,12 +1305,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     private List<String> getProjectCategoryCodes(Long projectId) {
         ProjectVO project = ConvertUtil.queryProject(projectId);
-        List<String> categoryCodes =
-                project.getCategories()
-                        .stream()
-                        .map(ProjectCategoryDTO::getCode)
-                        .collect(Collectors.toList());
-        return categoryCodes;
+        return ProjectCategory.getProjectCategoryCodes(project);
     }
 
     private List<String> getIssueTypeFieldCodes(Long issueTypeId, Long organizationId, Long projectId) {
