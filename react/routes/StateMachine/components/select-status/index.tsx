@@ -7,7 +7,7 @@ import { IStatus } from '@/common/types';
 
 export interface SelectStatusProps extends Partial<SelectProps> {
   expectStatusIds?: string[]
-  applyType?: 'agile' | 'waterfall'
+  applyType?: 'agile' | 'waterfall'|''
   isOrganization?: boolean
 }
 
