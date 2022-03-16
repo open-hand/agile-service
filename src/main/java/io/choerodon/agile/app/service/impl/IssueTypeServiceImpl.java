@@ -794,7 +794,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                         .stream()
                         .map(ProjectCategoryDTO::getCode)
                         .collect(Collectors.toSet());
-        if (categories.contains(ProjectCategory.MODULE_AGILE)) {
+        if (categories.contains(ProjectCategory.MODULE_AGILE) || categories.contains(ProjectCategory.MODULE_WATERFALL_AGILE)) {
             return PageHelper.doPage(pageRequest, () -> issueTypeMapper.selectEnableReference(organizationId, projectId));
         } else {
             return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
