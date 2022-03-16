@@ -107,6 +107,7 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
             setDefaultSprint={setDefaultSprint}
             onSummaryClick={onSummaryClick}
             onColumnResize={handleColumnResize}
+            paginationWrapperClassName="c7nagile-issue-content-table-pagination"
           />
         )}
       </AutoSize>
