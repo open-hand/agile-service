@@ -1155,7 +1155,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (CollectionUtils.isEmpty(projectIds)) {
             projectIds = new ArrayList<>();
             Long userId = DetailsHelper.getUserDetails().getUserId();
-            List<ProjectVO> list = baseFeignClient.listProjectsByUserIdForSimple(organizationId, userId,  "N_AGILE", true).getBody();
+            List<ProjectVO> list = baseFeignClient.listProjectsByUserIdForSimple(organizationId, userId,  null, true).getBody();
             if (CollectionUtils.isEmpty(list)) {
                 return new Page<>();
             }

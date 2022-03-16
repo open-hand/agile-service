@@ -3537,9 +3537,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public void queryUserProjects(Long organizationId, Long projectId, List<Long> projectIds, List<ProjectVO> projects, Long userId, String type) {
         if (ObjectUtils.isEmpty(projectId)) {
-            Boolean startBeacon = !Objects.isNull(type) && Objects.equals(MY_START_BEACON, type);
-            String category = startBeacon ? null : ProjectCategory.MODULE_AGILE;
-            List<ProjectVO> projectVOS = baseFeignClient.listProjectsByUserIdForSimple(organizationId,userId, category, true).getBody();
+            List<ProjectVO> projectVOS = baseFeignClient.listProjectsByUserIdForSimple(organizationId,userId, null, true).getBody();
             if (!CollectionUtils.isEmpty(projectVOS)) {
                 projectIds.addAll(projectVOS.stream().map(ProjectVO::getId).collect(Collectors.toList()));
                 projects.addAll(projectVOS);
