@@ -90,7 +90,7 @@ public class ProjectCategory {
     }
     public static Boolean checkContainProjectCategory(List<ProjectCategoryDTO> categories, String category){
         if (CollectionUtils.isEmpty(categories)) {
-            throw new CommonException(ERROR_CATEGORIES_IS_NULL);
+            categories = new ArrayList<>();
         }
         Set<String> codes = categories.stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toSet());
         return codes.contains(category);
@@ -168,7 +168,7 @@ public class ProjectCategory {
         }
         List<ProjectCategoryDTO> categories = projectVO.getCategories();
         if (CollectionUtils.isEmpty(categories)) {
-            throw new CommonException(ERROR_CATEGORIES_IS_NULL);
+            return new ArrayList<>();
         }
         return categories.stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
     }
