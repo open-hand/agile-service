@@ -11,7 +11,7 @@ function SummaryField({ value, onChange }) {
       <TextField
         value={value}
         onChange={(v) => onChange(v)}
-        prefix={<Icon type="search" style={{ color: 'rgba(0, 0, 0, 0.45)', marginLeft: 2 }} />}
+        prefix={<Icon type="search" style={{ color: 'rgb(158, 173, 190)', marginLeft: 2 }} />}
         style={{
           width: 180, marginRight: 5,
         }}
