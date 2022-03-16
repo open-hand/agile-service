@@ -33,13 +33,13 @@
         case when aa.issue_count is null then 0 else aa.issue_count end as issue_count
         from agile_issue_component aic left join (
         select acir.component_id,count(*) as issue_count from agile_component_issue_rel acir
-        LEFT JOIN agile_issue ai ON ai.issue_id = acir.issue_id
+        LEFT JOIN agile_issue ai ON ai.issue_id = acir.issue_id and ai.project_id = acir.project_id
         where acir.project_id in
         <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
             #{projectId}
         </foreach>
         <if test="noIssueTest">
-            AND ai.apply_type = 'agile'
+            AND ai.apply_type != 'test'
         </if>
         GROUP BY
         acir.component_id
