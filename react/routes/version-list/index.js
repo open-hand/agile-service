@@ -21,7 +21,12 @@ const VersionList = ({ match }) => {
     return <Release />;
   }
   return (
-    <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion']}>
+    <Permission
+      service={[
+        'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion',
+        'choerodon.code.project.cooperation.sprint.work-list.ps.createversion',
+      ]}
+    >
       {
         (permission, loading) => (
           <PageWrap
