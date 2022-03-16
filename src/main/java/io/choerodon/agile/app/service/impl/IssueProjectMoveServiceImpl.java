@@ -21,7 +21,6 @@ import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
-import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.client.MessageClientC7n;
@@ -36,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -179,7 +177,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
     }
 
     private void checkProject(String typeCode, ProjectVO targetProjectVO) {
-        List<String> codes = targetProjectVO.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
+        List<String> codes = ProjectCategory.getProjectCategoryCodes(targetProjectVO);
         if (Objects.equals(typeCode, ISSUE_EPIC)) {
             if (!(codes.contains(ProjectCategory.MODULE_AGILE) || codes.contains(ProjectCategory.MODULE_PROGRAM))) {
                 throw new CommonException(ERROR_TRANSFER_PROJECT_ILLEGAL);
@@ -202,7 +200,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
             return projectVOS.stream()
                     .filter(v -> Boolean.TRUE.equals(v.getEnabled()) && !Objects.equals(v.getId(), projectId))
                     .filter(v -> {
-                        List<String> codes = v.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
+                        List<String> codes = ProjectCategory.getProjectCategoryCodes(v);
                         return checkProjectCategory(codes, typeCode);
                     }).collect(Collectors.toList());
         }
@@ -637,7 +635,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
     }
 
     private String getApplyType(ProjectVO targetProjectVO) {
-        List<String> codes = targetProjectVO.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
+        List<String> codes = ProjectCategory.getProjectCategoryCodes(targetProjectVO);
         if (codes.contains(ProjectCategory.MODULE_AGILE)) {
             return SchemeApplyType.AGILE;
         } else {

@@ -9,6 +9,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -159,5 +160,16 @@ public class ProjectCategory {
         }
         Set<String> codes = categories.stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toSet());
         return codes.contains(MODULE_WATERFALL) || codes.contains(MODULE_WATERFALL_AGILE);
+    }
+
+    public static List<String> getProjectCategoryCodes(ProjectVO projectVO) {
+        if (Objects.isNull(projectVO)) {
+            throw new CommonException("error.project.not.existed");
+        }
+        List<ProjectCategoryDTO> categories = projectVO.getCategories();
+        if (CollectionUtils.isEmpty(categories)) {
+            throw new CommonException(ERROR_CATEGORIES_IS_NULL);
+        }
+        return categories.stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
     }
 }

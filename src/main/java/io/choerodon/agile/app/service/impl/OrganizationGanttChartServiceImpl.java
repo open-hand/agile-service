@@ -88,8 +88,7 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
                 projects
                         .stream()
                         .filter(x -> {
-                            Set<String> categories =
-                                    x.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toSet());
+                            Set<String> categories = new HashSet<>(ProjectCategory.getProjectCategoryCodes(x));
                             return categories.contains(ProjectCategory.MODULE_AGILE);
                         })
                         .filter(x -> "success".equalsIgnoreCase(x.getProjectStatus()))
