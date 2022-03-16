@@ -185,7 +185,7 @@ const IssueType = observer(({
 
   return (
     <div>
-      {disabled ? (
+      {disabled || !issueTypeData?.length ? (
         <div className={Styles.issueTypeWrap}>
           <TypeTag
             data={currentIssueType}

@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import {
   Form, Select, DataSet, Radio, Icon,
 } from 'choerodon-ui/pro';
+import { v4 as uuidV4 } from 'uuid';
 
 import './index.less';
 import useFormatMessage from '@/hooks/useFormatMessage';
@@ -14,6 +15,8 @@ function DeleteModal(props) {
     handleRefresh,
   } = props;
   const formatMessage = useFormatMessage();
+  // 避免lookup缓存，保证每次打开弹窗都会请求问题链接
+  const frontUuid = useMemo(() => uuidV4(), []);
   const deleteModalDs = useMemo(() => (new DataSet({
     autoCreate: true,
     fields: [
@@ -31,7 +34,7 @@ function DeleteModal(props) {
         lookupAxiosConfig: {
           url: `/agile/v1/projects/${id}/issue_link_types/query_all?issueLinkTypeId=${linkTypeId}`,
           method: 'POST',
-          data: { contents: [], linkName: '' },
+          data: { contents: [], linkName: '', frontUuid },
           transformResponse: (response) => {
             try {
               const data = JSON.parse(response);
