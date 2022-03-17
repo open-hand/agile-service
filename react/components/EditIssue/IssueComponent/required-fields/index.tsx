@@ -113,32 +113,36 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
   resetDataRef.current = resetData;
 
   const handleSubmit = usePersistFn(async () => {
-    const issueTypeIdValidate = await issueTypeIdDataSet.validate();
-    const validate = requiredFieldDsArr[0]?.dataSet ? await requiredFieldDsArr[0]?.dataSet.current?.validate() : true;
-    if (issueTypeIdValidate && validate) {
-      const submitData = requiredFields.length ? {
-        issueId: issueVO.issueId,
-        objectVersionNumber: issueVO.objectVersionNumber,
-        typeCode: find(issueTypeData, { id: issueTypeIdDataSet.current?.get('issueTypeId') })?.typeCode as string,
-        issueTypeId: issueTypeIdDataSet.current?.get('issueTypeId') as string,
-        batchUpdateFieldsValueVo: requiredFieldDsArr[0]?.getData(),
-      } : {
-        epicName: issueVO.typeCode === 'issue_epic' ? issueVO.summary : undefined,
-        issueId: issueVO.issueId,
-        objectVersionNumber: issueVO.objectVersionNumber,
-        typeCode: find(issueTypeData, { id: issueTypeIdDataSet.current?.get('issueTypeId') })?.typeCode as string,
-        issueTypeId: issueTypeIdDataSet.current?.get('issueTypeId') as string,
-      };
-      const res = await issueApi.project(projectId).updateType(submitData);
-      if (reloadIssue && res.issueId) {
-        reloadIssue(res?.issueId);
+    try {
+      const issueTypeIdValidate = await issueTypeIdDataSet.validate();
+      const validate = requiredFieldDsArr[0]?.dataSet ? await requiredFieldDsArr[0]?.dataSet.current?.validate() : true;
+      if (issueTypeIdValidate && validate) {
+        const submitData = requiredFields.length ? {
+          issueId: issueVO.issueId,
+          objectVersionNumber: issueVO.objectVersionNumber,
+          typeCode: find(issueTypeData, { id: issueTypeIdDataSet.current?.get('issueTypeId') })?.typeCode as string,
+          issueTypeId: issueTypeIdDataSet.current?.get('issueTypeId') as string,
+          batchUpdateFieldsValueVo: requiredFieldDsArr[0]?.getData(),
+        } : {
+          epicName: issueVO.typeCode === 'issue_epic' ? issueVO.summary : undefined,
+          issueId: issueVO.issueId,
+          objectVersionNumber: issueVO.objectVersionNumber,
+          typeCode: find(issueTypeData, { id: issueTypeIdDataSet.current?.get('issueTypeId') })?.typeCode as string,
+          issueTypeId: issueTypeIdDataSet.current?.get('issueTypeId') as string,
+        };
+        const res = await issueApi.project(projectId).updateType(submitData);
+        if (reloadIssue && res.issueId) {
+          reloadIssue(res?.issueId);
+        }
+        if (onUpdate) {
+          onUpdate(res);
+        }
+        return true;
       }
-      if (onUpdate) {
-        onUpdate(res);
-      }
-      return true;
+      return false;
+    } catch (e) {
+      return false;
     }
-    return false;
   });
 
   useEffect(() => {
