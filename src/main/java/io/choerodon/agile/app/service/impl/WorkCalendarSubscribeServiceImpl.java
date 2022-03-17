@@ -125,20 +125,11 @@ public class WorkCalendarSubscribeServiceImpl implements WorkCalendarSubscribeSe
     }
 
     private String create(Long organizationId, Long userId, String url) {
-        WorkCalendarSubscribeDTO dto = new WorkCalendarSubscribeDTO(organizationId, userId, getRelativeUrl(url), getUuid());
+        WorkCalendarSubscribeDTO dto = new WorkCalendarSubscribeDTO(organizationId, userId, filePathService.generateRelativePath(url), getUuid());
         if (workCalendarSubscribeMapper.insertSelective(dto) != 1) {
             throw new CommonException("error.workCalendarSubscribe.insert");
         }
         return dto.getUuid();
-    }
-
-    private String getRelativeUrl(String url) {
-        // 获取相对路径
-        String relativeUrl = url.substring(url.indexOf(FileUploadBucket.AGILE_BUCKET.bucket()) + FileUploadBucket.AGILE_BUCKET.bucket().length() + 1);
-        if (relativeUrl.length() < 1) {
-            throw new CommonException("error.illegal.url");
-        }
-        return relativeUrl;
     }
 
     private String getUuid() {
