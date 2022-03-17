@@ -198,6 +198,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private IssuePredecessorService issuePredecessorService;
     @Autowired
     private FilePathService filePathService;
+    @Autowired
+    private WorkCalendarSubscribeService workCalendarSubscribeService;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -1692,6 +1694,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (issueConvertDTO == null) {
             throw new CommonException(ERROR_ISSUE_NOT_FOUND);
         }
+        // 更新订阅
+        workCalendarSubscribeService.handleWorkCalendarSubscribeChanged(projectId, issueId, false, new ArrayList<>());
         //删除issueLink
         issueLinkService.deleteByIssueId(issueConvertDTO.getIssueId());
         //删除标签关联
