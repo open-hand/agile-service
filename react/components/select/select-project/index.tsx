@@ -13,7 +13,7 @@ import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { projectApi, ganttApi } from '@/api';
 import { ICategoryCode } from '@/hooks/useCategoryCodes';
 import { styles } from '../common/utils';
-
+import projectStyles from './index.less';
 // 用于查询组织下的项目
 
 const { AppState } = stores;
@@ -85,7 +85,7 @@ const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
   return (
     <Component
       ref={ref}
-      popupCls={classNames({ [styles.popup]: !context.formNode }, popupCls)}
+      popupCls={classNames({ [styles.popup]: !context.formNode }, projectStyles.popup, popupCls)}
       {...props}
       {...otherProps}
 
