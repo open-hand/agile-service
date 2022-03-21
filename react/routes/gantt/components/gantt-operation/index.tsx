@@ -8,7 +8,7 @@ import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
 import type { Gantt } from '@choerodon/gantt';
 import { observer } from 'mobx-react-lite';
 import { units } from '../../stores/store';
-import GanttLegend from '../gantt-legend';
+import GanttLegend, { IGanttLegendKey } from '../gantt-legend';
 
 import useFormatMessage from '@/hooks/useFormatMessage';
 import './index.less';
@@ -16,7 +16,7 @@ import './index.less';
 interface GanttOperationProps {
   onChangeUnit?: ({ key }: { key: Gantt.Sight }) => void
   onClickToday?: () => void
-  hiddenLegendKeys?:Array<'progress'>
+  hiddenLegendKeys?:Array<IGanttLegendKey>
   value?: Gantt.Sight
 }
 const GanttOperation: React.FC<GanttOperationProps> = observer(({

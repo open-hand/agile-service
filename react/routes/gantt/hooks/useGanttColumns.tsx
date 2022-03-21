@@ -148,6 +148,18 @@ export const ganttColumnMap = new Map<string, Gantt.Column & { titleKey?: string
 },
 ],
 ]);
+/**
+ * 甘特图特有渲染map
+ */
+export const ganttColumRenderMap = {
+  label: BaseSystemColumnRender.renderTag('labels', 'labelName'),
+  component: BaseSystemColumnRender.renderTag('components', 'name'),
+  fixVersion: BaseSystemColumnRender.renderTag('fixVersion', 'name'),
+  influenceVersion: BaseSystemColumnRender.renderTag('influenceVersion', 'name'),
+  sprint: BaseSystemColumnRender.renderTag('sprints', 'sprintName'),
+  reporter: (rowData: any) => <UserTag data={get(rowData, 'reporter')} />,
+  environmentName: (rowData: any) => get(rowData, 'environment'),
+};
 function findIntlTitleKey(code: string): string | undefined {
   return ganttColumnMap.get(code)?.titleKey ?? systemColumnsMap.get(code)?.titleKey;
 }
@@ -348,15 +360,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
     render: renderSummary,
   },
   ];
-  const fieldMapRender = {
-    label: BaseSystemColumnRender.renderTag('labels', 'labelName'),
-    component: BaseSystemColumnRender.renderTag('components', 'name'),
-    fixVersion: BaseSystemColumnRender.renderTag('fixVersion', 'name'),
-    influenceVersion: BaseSystemColumnRender.renderTag('influenceVersion', 'name'),
-    sprint: BaseSystemColumnRender.renderTag('sprints', 'sprintName'),
-    reporter: (rowData: any) => <UserTag data={get(rowData, 'reporter')} />,
-    environmentName: (rowData: any) => get(rowData, 'environment'),
-  };
+  const fieldMapRender = ganttColumRenderMap;
   tableColumns.push(...visibleColumns.map(({ columnCode }) => {
     const baseColumn = { width: 100 } as any;
     if (systemColumnsMap.has(columnCode)) {

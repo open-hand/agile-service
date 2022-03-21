@@ -36,7 +36,6 @@ const IssueSplitProgress: React.FC<{ type: 'story' | 'issue', completedCount?: n
           <Progress
             percent={isNaN(progress) ? 0 : progress}
             showInfo={false}
-            strokeWidth={66}
             className={styles.progress_bar}
           />
           <span className={styles.progress_contrast}>{`${completedCount}/${total}`}</span>

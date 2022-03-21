@@ -196,6 +196,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private ProjectInfoMapper projectInfoMapper;
     @Autowired
     private IssuePredecessorService issuePredecessorService;
+    @Autowired
+    private FilePathService filePathService;
+    @Autowired
+    private WorkCalendarSubscribeService workCalendarSubscribeService;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -240,7 +244,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String SEARCH = "search";
     private static final String STORYMAP = "storymap";
     private static final String AGILE = "agile";
-    private static final String BACKETNAME = "agile-service";
+//    private static final String BACKETNAME = "agile-service";
     private static final String TRIGGER_ISSUE_ID = "triggerIssueId";
     private static final String AUTO_TRANFER_FLAG = "autoTranferFlag";
     private static final String STAR_BEACON_TYPE_ISSUE = "issue";
@@ -263,8 +267,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String INFLUENCE_VERSION = "influenceVersion";
     private static final String ORDER_STR = "orderStr";
 
-    @Value("${services.attachment.url}")
-    private String attachmentUrl;
+//    @Value("${services.attachment.url}")
+//    private String attachmentUrl;
 
     private SagaClient sagaClient;
 
@@ -462,7 +466,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public IssueVO queryIssueCreateWithoutRuleNotice(Long projectId, Long issueId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
-            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(attachmentUrl + "/" + BACKETNAME + "/" + issueAttachmentDO.getUrl()));
+            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(
+                    filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), issueAttachmentDO.getUrl())));
         }
         Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, issue.getApplyType());
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
@@ -534,7 +539,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         issue.setSameParentBugDOList(Objects.nonNull(issue.getRelateIssueId()) && !Objects.equals(issue.getRelateIssueId(), 0L)?
                 issueMapper.querySubBugByIssueId(issue.getRelateIssueId()): null);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
-            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(attachmentUrl + "/" + BACKETNAME + "/" + issueAttachmentDO.getUrl()));
+            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(
+                    filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), issueAttachmentDO.getUrl())));
         }
         if (agilePluginService != null) {
             agilePluginService.setBusinessAttributes(issue);
@@ -617,7 +623,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     protected IssueVO queryIssueByUpdate(Long projectId, Long issueId, List<String> fieldList) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
-            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(attachmentUrl + issueAttachmentDO.getUrl()));
+            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(
+                    filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), issueAttachmentDO.getUrl())));
         }
         Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, issue.getApplyType());
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
@@ -1687,6 +1694,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (issueConvertDTO == null) {
             throw new CommonException(ERROR_ISSUE_NOT_FOUND);
         }
+        // 更新订阅
+        workCalendarSubscribeService.handleWorkCalendarSubscribeChanged(projectId, issueId, false, new ArrayList<>());
         //删除issueLink
         issueLinkService.deleteByIssueId(issueConvertDTO.getIssueId());
         //删除标签关联
@@ -2075,7 +2084,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         issue.setIssueTypeVO(issueTypeService.queryById(issue.getIssueTypeId(), projectId));
         issue.setStatusVO(statusService.queryStatusById(organizationId, issue.getStatusId()));
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
-            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(attachmentUrl + issueAttachmentDO.getUrl()));
+            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), issueAttachmentDO.getUrl())));
         }
         return issueAssembler.issueDetailDoToIssueSubDto(issue);
     }
@@ -2090,7 +2099,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public IssueSubVO queryIssueSubByCreateWithoutRuleNotice(Long projectId, Long issueId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
-            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(attachmentUrl + issueAttachmentDO.getUrl()));
+            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), issueAttachmentDO.getUrl())));
         }
         IssueSubVO result = issueAssembler.issueDetailDoToIssueSubDto(issue);
         sendMsgUtil.sendMsgBySubIssueCreate(projectId, result, DetailsHelper.getUserDetails().getUserId());
@@ -2125,7 +2134,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             issueMapper.updateSubBugRelateIssueId(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId());
         }
         if (agileWaterfallService != null && Objects.equals(SchemeApplyType.WATERFALL, issueUpdateTypeVO.getApplyType())) {
-            agileWaterfallService.checkUpdateIssueTypeCode(projectId, issueConvertDTO, issueUpdateTypeVO);
+            agileWaterfallService.checkUpdateIssueTypeCode(projectId, issueConvertDTO, issueUpdateTypeVO, fieldList);
         }
         if (issueUpdateTypeVO.getTypeCode().equals(ISSUE_EPIC)) {
             issueConvertDTO.setRank(null);
@@ -3532,9 +3541,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public void queryUserProjects(Long organizationId, Long projectId, List<Long> projectIds, List<ProjectVO> projects, Long userId, String type) {
         if (ObjectUtils.isEmpty(projectId)) {
-            Boolean startBeacon = !Objects.isNull(type) && Objects.equals(MY_START_BEACON, type);
-            String category = startBeacon ? null : ProjectCategory.MODULE_AGILE;
-            List<ProjectVO> projectVOS = baseFeignClient.listProjectsByUserIdForSimple(organizationId,userId, category, true).getBody();
+            List<ProjectVO> projectVOS = baseFeignClient.listProjectsByUserIdForSimple(organizationId,userId, null, true).getBody();
             if (!CollectionUtils.isEmpty(projectVOS)) {
                 projectIds.addAll(projectVOS.stream().map(ProjectVO::getId).collect(Collectors.toList()));
                 projects.addAll(projectVOS);

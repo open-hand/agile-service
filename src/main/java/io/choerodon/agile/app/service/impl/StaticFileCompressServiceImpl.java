@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.junrar.Archive;
 import com.github.junrar.exception.RarException;
 import com.github.junrar.rarfile.FileHeader;
+import io.choerodon.agile.app.service.FilePathService;
+import io.choerodon.agile.infra.enums.FileUploadBucket;
 import io.choerodon.core.client.MessageClientC7n;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -73,8 +75,6 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
 
     private static final String PATH_SPLIT = "/";
 
-    private static final String BUCKET_NAME = "agile-service";
-
     private static final String IO_EXCEPTION_CODE = "error.uncompressed.io";
     private static final String INDEX_NULL_EXCEPTION_CODE = "error.staticFile.index.null";
     private static final String INDEX_EMPTY_EXCEPTION_CODE = "error.staticFile.index.empty";
@@ -104,6 +104,8 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
     @Autowired
     @Lazy
     private SnowflakeHelper snowflakeHelper;
+    @Autowired
+    private FilePathService filePathService;
 
     @Override
     public void validFileType(List<MultipartFile> files) {
@@ -220,13 +222,14 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
                         //跳过冗余文件和空文件
                         continue;
                     }
-                    String url = fileClient.uploadFile(organizationId, BUCKET_NAME, null, getEntryFileName(fileHeader.getFileName()), bytes);
+                    String url = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, getEntryFileName(fileHeader.getFileName()), bytes);
                     urls.add(url);
+                    String relativePath = filePathService.generateRelativePath(url);
                     StaticFileLineDTO staticFileLine = new StaticFileLineDTO(
                             projectId,
                             organizationId,
                             staticFileCompress.getId(),
-                            dealUrl(url),
+                            relativePath,
                             dealRelativePathSlash(fileHeader.getFileName(), prefixPath));
                     lineList.add(staticFileLine);
                     process = updateProcess(staticFileCompressHistoryList, staticFileCompress.getStaticFileCompressHistory(), size, nowSize, process, staticFileCompress.getIssueId());
@@ -236,8 +239,8 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
             throw new CommonException(RAR4_EXCEPTION_CODE);
         }
         //获取上传的文件信息
-        List<FileDTO> files = fileClient.getFiles(organizationId, BUCKET_NAME, urls);
-        Map<String, FileDTO> fileMap = files.stream().collect(Collectors.toMap(file -> dealUrl(file.getFileUrl()), file -> file));
+        List<FileDTO> files = fileClient.getFiles(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), urls);
+        Map<String, FileDTO> fileMap = files.stream().collect(Collectors.toMap(file -> filePathService.generateRelativePath(file.getFileUrl()), file -> file));
         lineList.forEach(line -> {
             //设置行的文件类型及其记录其他信息
             line.setId(snowflakeHelper.next());
@@ -287,21 +290,22 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
                         continue;
                     }
                     //文件上传
-                    String url = fileClient.uploadFile(organizationId, BUCKET_NAME, null, getEntryFileName(entry.getName()), bytes);
+                    String url = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, getEntryFileName(entry.getName()), bytes);
                     urls.add(url);
+                    String relativePath = filePathService.generateRelativePath(url);
                     StaticFileLineDTO staticFileLine = new StaticFileLineDTO(
                             projectId,
                             organizationId,
                             staticFileCompress.getId(),
-                            dealUrl(url),
+                            relativePath,
                             dealRelativePath(entry.getName(), prefixPath));
                     lineList.add(staticFileLine);
                 }
                 process = updateProcess(staticFileCompressHistoryList, staticFileCompress.getStaticFileCompressHistory(), size, (size - availableSize), process, staticFileCompress.getIssueId());
             }
             //获取上传的文件信息
-            List<FileDTO> files = fileClient.getFiles(organizationId, BUCKET_NAME, urls);
-            Map<String, FileDTO> fileMap = files.stream().collect(Collectors.toMap(file -> dealUrl(file.getFileUrl()), file -> file));
+            List<FileDTO> files = fileClient.getFiles(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), urls);
+            Map<String, FileDTO> fileMap = files.stream().collect(Collectors.toMap(file -> filePathService.generateRelativePath(file.getFileUrl()), file -> file));
             lineList.forEach(line -> {
                 //设置行的文件类型及其记录其他信息
                 line.setId(snowflakeHelper.next());
@@ -426,16 +430,16 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         return "";
     }
 
-    private String dealUrl(String url) {
-        String dealUrl;
-        try {
-            URL netUrl = new URL(url);
-            dealUrl = netUrl.getFile().substring(BUCKET_NAME.length() + 2);
-        } catch (MalformedURLException e) {
-            throw new CommonException(MALFORMED_EXCEPTION_CODE, e);
-        }
-        return dealUrl;
-    }
+//    private String dealUrl(String url) {
+//        String dealUrl;
+//        try {
+//            URL netUrl = new URL(url);
+//            dealUrl = netUrl.getFile().substring(FileUploadBucket.AGILE_BUCKET.bucket().length() + 2);
+//        } catch (MalformedURLException e) {
+//            throw new CommonException(MALFORMED_EXCEPTION_CODE, e);
+//        }
+//        return dealUrl;
+//    }
 
     private byte[] inputToByte(InputStream inStream) throws IOException {
         ByteArrayOutputStream swapStream = new ByteArrayOutputStream();

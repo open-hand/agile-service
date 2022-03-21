@@ -293,6 +293,7 @@ const CreateIssueBase = observer(({
   const currentTemplateSummary = useRef(defaultValues?.summary || '');
   const currentTemplateDescription = useRef(defaultValues?.description || '');
   const otherLinkRef = useRef();
+  const deliverableRef = useRef();
   const [templateSummary] = useState(new Map());
   const [dataSet, setDataSet] = useState(defaultDataSet);
   const { isWaterfallAgile } = useIsWaterfall();
@@ -619,7 +620,7 @@ const CreateIssueBase = observer(({
         return false;
       }
       // @ts-ignore
-      if (otherLinkRef.current?.deliverableDataSet && !await otherLinkRef.current?.deliverableDataSet?.validate()) {
+      if (deliverableRef.current?.deliverableDataSet && !await deliverableRef.current?.deliverableDataSet?.validate()) {
         return false;
       }
       const data = dataSet.current?.toData();
@@ -653,7 +654,7 @@ const CreateIssueBase = observer(({
         issueLinkCreateVOList: enableIssueLinks ? getIssueLinks() : undefined,
         componentIssueRelVOList: values.componentIssueRelVOList ? values.componentIssueRelVOList.map((item: string) => ({ componentId: item })) : [],
         // @ts-ignore
-        deliverableData: otherLinkRef.current?.getDeliverableData && otherLinkRef.current?.getDeliverableData() ? otherLinkRef.current?.getDeliverableData() : undefined,
+        deliverableData: deliverableRef.current?.getDeliverableData && deliverableRef.current?.getDeliverableData() ? deliverableRef.current?.getDeliverableData() : undefined,
         // @ts-ignore
         issuePredecessors: otherLinkRef.current?.getDependencyData && otherLinkRef.current?.getDependencyData() ? otherLinkRef.current?.getDependencyData() : undefined,
       });
@@ -921,7 +922,7 @@ const CreateIssueBase = observer(({
       {issueTypeCode === 'feature' ? <WSJF dataSet={dataSet} /> : null}
       {enableIssueLinks ? <IssueLink projectId={projectId} dataSet={issueLinkDataSet} /> : null}
       {hasInject(DEPENDENCY) ? mount(DEPENDENCY, { issueTypeCode, forwardRef: otherLinkRef }) : null}
-      {hasInject(DELIVERABLE) ? mount(DELIVERABLE, { issueTypeCode, forwardRef: otherLinkRef }) : null}
+      {hasInject(DELIVERABLE) ? mount(DELIVERABLE, { issueTypeCode, forwardRef: deliverableRef }) : null}
     </Spin>
   );
 });

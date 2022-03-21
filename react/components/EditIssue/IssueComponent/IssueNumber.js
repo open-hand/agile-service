@@ -53,7 +53,7 @@ const IssueNumber = ({
     }}
     >
       {
-        ((['sub_task', 'bug'].includes(typeCode) && parentSummary) || typeCode === 'feature' || isWaterfallIssue) ? (
+        ((['sub_task', 'bug'].includes(typeCode) && parentSummary) || typeCode === 'feature' || isProgramIssue || isWaterfallIssue) ? (
           <span>
             {issueNum}
           </span>

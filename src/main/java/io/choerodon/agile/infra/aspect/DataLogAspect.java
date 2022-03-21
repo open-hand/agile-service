@@ -1629,6 +1629,8 @@ public class DataLogAspect {
         Long issueId = originIssueDTO.getIssueId();
         SimpleDateFormat smf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         boolean estimatedTimeChanged = false;
+        Date latestEstimatedStartTime = originIssueDTO.getEstimatedStartTime();
+        Date latestEstimatedEndTime = originIssueDTO.getEstimatedEndTime();
         if (field.contains(ESTIMATED_START_TIME)
                 && !Objects.equals(originIssueDTO.getEstimatedStartTime(), issueConvertDTO.getEstimatedStartTime())) {
             String originEstimatedStartTime = null;
@@ -1641,6 +1643,7 @@ public class DataLogAspect {
             }
             createDataLog(projectId, issueId, FIELD_ESTIMATED_START_TIME, originEstimatedStartTime, convertEstimatedStartTime, originEstimatedStartTime, convertEstimatedStartTime);
             estimatedTimeChanged = true;
+            latestEstimatedStartTime = issueConvertDTO.getEstimatedStartTime();
         }
 
         if (field.contains(ESTIMATED_END_TIME)
@@ -1655,11 +1658,12 @@ public class DataLogAspect {
             }
             createDataLog(projectId, issueId, FIELD_ESTIMATED_END_TIME, originEstimatedEndTime, convertEstimatedEndTime, originEstimatedEndTime, convertEstimatedEndTime);
             estimatedTimeChanged = true;
+            latestEstimatedEndTime = issueConvertDTO.getEstimatedEndTime();
         }
         if (estimatedTimeChanged) {
             workCalendarSubscribeService.handleWorkCalendarSubscribeChanged(projectId, issueId, estimatedTimeChanged, new ArrayList<>());
             if (agileWaterfallService != null) {
-                agileWaterfallService.handleUpdateEstimatedTime(projectId, issueId, issueConvertDTO.getEstimatedStartTime(), issueConvertDTO.getEstimatedEndTime());
+                agileWaterfallService.handleUpdateEstimatedTime(projectId, issueId, latestEstimatedStartTime, latestEstimatedEndTime);
             }
         }
     }

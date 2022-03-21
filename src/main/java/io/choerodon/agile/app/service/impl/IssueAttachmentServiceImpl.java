@@ -1,10 +1,12 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.IssueAttachmentCombineVO;
+import io.choerodon.agile.app.service.FilePathService;
 import io.choerodon.agile.app.service.IIssueAttachmentService;
 import io.choerodon.agile.infra.dto.IssueAttachmentDTO;
 import io.choerodon.agile.infra.dto.TestCaseAttachmentDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.FileUploadBucket;
 import io.choerodon.agile.infra.feign.CustomFileRemoteService;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
@@ -21,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -30,8 +31,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.util.*;
 
@@ -45,7 +44,6 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IssueAttachmentServiceImpl.class);
 
-    private static final String BACKETNAME = "agile-service";
 
     @Autowired
     private IssueAttachmentMapper issueAttachmentMapper;
@@ -54,8 +52,8 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
     @Autowired
     private IIssueAttachmentService iIssueAttachmentService;
 
-    @Value("${services.attachment.url}")
-    private String attachmentUrl;
+//    @Value("${services.attachment.url}")
+//    private String attachmentUrl;
 
     @Autowired
     private FileClient fileClient;
@@ -65,6 +63,8 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
 
     @Autowired
     private ProjectUtil projectUtil;
+    @Autowired
+    private FilePathService filePathService;
 
     @Override
     public IssueAttachmentDTO dealIssue(Long projectId, Long issueId, String fileName, String url) {
@@ -109,7 +109,7 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
     public IssueAttachmentVO attachmentCombineUpload(Long projectId, IssueAttachmentCombineVO issueAttachmentCombineVO) {
         Long organizationId = projectUtil.getOrganizationId(projectId);
         Map<String, String> args = new HashMap<>(1);
-        args.put("bucketName", BACKETNAME);
+        args.put("bucketName", FileUploadBucket.AGILE_BUCKET.bucket());
         String url = ResponseUtils.getResponse(customFileRemoteService.fragmentCombineBlock(
                 organizationId,
                 issueAttachmentCombineVO.getGuid(),
@@ -124,24 +124,26 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         if (url == null) {
             throw new CommonException("error.attachment.combine.failed");
         }
+        String relativePath = filePathService.generateRelativePath(url);
         IssueAttachmentDTO result = dealIssue(projectId, issueAttachmentCombineVO.getIssueId(),
-                issueAttachmentCombineVO.getFileName(), dealUrl(url));
+                issueAttachmentCombineVO.getFileName(), relativePath);
         IssueAttachmentVO issueAttachmentVO = new IssueAttachmentVO();
         BeanUtils.copyProperties(result, issueAttachmentVO);
-        issueAttachmentVO.setUrl(attachmentUrl + "/" + BACKETNAME + "/" + result.getUrl());
+        String fullPath = filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), result.getUrl());
+        issueAttachmentVO.setUrl(fullPath);
         return issueAttachmentVO;
     }
 
-    private String dealUrl(String url) {
-        String dealUrl = null;
-        try {
-            URL netUrl = new URL(url);
-            dealUrl = netUrl.getFile().substring(BACKETNAME.length() + 2);
-        } catch (MalformedURLException e) {
-            throw new CommonException("error.malformed.url", e);
-        }
-        return dealUrl;
-    }
+//    private String dealUrl(String url) {
+//        String dealUrl = null;
+//        try {
+//            URL netUrl = new URL(url);
+//            dealUrl = netUrl.getFile().substring(FileUploadBucket.AGILE_BUCKET.bucket().length() + 2);
+//        } catch (MalformedURLException e) {
+//            throw new CommonException("error.malformed.url", e);
+//        }
+//        return dealUrl;
+//    }
 
     @Override
     public List<IssueAttachmentVO> create(Long projectId, Long issueId, HttpServletRequest request) {
@@ -150,8 +152,9 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
             for (MultipartFile multipartFile : files) {
                 String fileName = multipartFile.getOriginalFilename();
                 Long organizationId = projectUtil.getOrganizationId(projectId);
-                String url = fileClient.uploadFile(organizationId, BACKETNAME, null, fileName, multipartFile);
-                dealIssue(projectId, issueId, fileName, dealUrl(url));
+                String url = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, fileName, multipartFile);
+                String relativePath = filePathService.generateRelativePath(url);
+                dealIssue(projectId, issueId, fileName, relativePath);
             }
         }
         IssueAttachmentDTO issueAttachmentDTO = new IssueAttachmentDTO();
@@ -162,7 +165,8 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
             issueAttachmentDTOList.forEach(attachment -> {
                 IssueAttachmentVO issueAttachmentVO = new IssueAttachmentVO();
                 BeanUtils.copyProperties(attachment, issueAttachmentVO);
-                issueAttachmentVO.setUrl(attachmentUrl + "/" + BACKETNAME + "/" + attachment.getUrl());
+                String fullPath = filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), attachment.getUrl());
+                issueAttachmentVO.setUrl(fullPath);
                 result.add(issueAttachmentVO);
             });
         }
@@ -183,9 +187,9 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         String url = null;
         try {
             url = URLDecoder.decode(issueAttachmentDTO.getUrl(), "UTF-8");
-            String deleteUrl = attachmentUrl + "/" + BACKETNAME + "/" + url;
+            String fullPath = filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), url);
             Long organizationId = projectUtil.getOrganizationId(projectId);
-            ResponseUtils.getResponse(customFileRemoteService.deleteFileByUrl(organizationId, BACKETNAME, Arrays.asList(deleteUrl)), String.class);
+            ResponseUtils.getResponse(customFileRemoteService.deleteFileByUrl(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), Arrays.asList(fullPath)), String.class);
         } catch (Exception e) {
             LOGGER.error("error.attachment.delete", e);
         }
@@ -202,8 +206,9 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         for (MultipartFile multipartFile : files) {
             String fileName = multipartFile.getOriginalFilename();
             Long organizationId = projectUtil.getOrganizationId(projectId);
-            String url = fileClient.uploadFile(organizationId, BACKETNAME, null, fileName, multipartFile);
-            result.add(attachmentUrl + "/" + BACKETNAME + "/" + dealUrl(url));
+            String url = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, fileName, multipartFile);
+            String relativePath = filePathService.generateRelativePath(url);
+            result.add(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), relativePath));
         }
         return result;
     }

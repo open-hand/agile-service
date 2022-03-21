@@ -123,18 +123,27 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
             action: () => handleClickMenu(record!, 'releaseStatus'),
             text: statusCode === 'version_planning' ? '发布' : '撤销发布',
             display: statusCode !== 'archived',
-            service: ['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus'],
+            service: [
+              'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus',
+              'choerodon.code.project.cooperation.sprint.work-list.ps.updateversionstatus',
+            ],
           },
           {
             action: () => handleClickMenu(record!, 'archivedStatus'),
             text: statusCode === 'archived' ? '撤销归档' : '归档',
-            service: ['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus'],
+            service: [
+              'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus',
+              'choerodon.code.project.cooperation.sprint.work-list.ps.updateversionstatus',
+            ],
           },
           {
             action: () => handleClickMenu(record!, 'del'),
             text: '删除',
             display: statusCode !== 'archived',
-            service: ['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.deleteversion'],
+            service: [
+              'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.deleteversion',
+              'choerodon.code.project.cooperation.sprint.work-list.ps.deleteversion',
+            ],
           },
         ]}
         permissionType={type}
@@ -144,6 +153,8 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
           service: [
             'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.deleteversion',
             'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus',
+            'choerodon.code.project.cooperation.sprint.work-list.ps.deleteversion',
+            'choerodon.code.project.cooperation.sprint.work-list.ps.updateversionstatus',
           ],
         }}
 
@@ -153,7 +164,12 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
 
   return (
     <Page>
-      <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion']}>
+      <Permission
+        service={[
+          'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion',
+          'choerodon.code.project.cooperation.sprint.work-list.ps.createversion',
+        ]}
+      >
         <Header>
           <HeaderButtons
             items={[

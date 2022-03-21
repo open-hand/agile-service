@@ -8,23 +8,23 @@ public enum InitIssueType {
     /**
      * 史诗
      */
-    EPIC("agile_epic", "史诗", "史诗", "#743be7", "issue_epic"),
+    EPIC("agile_epic", "史诗", "可以是公司的关键战略举措，可以是重大的业务方向，也可以是重大的技术演讲。通常和公司的经营、竞争力、市场环境紧密相关", "#743be7", "issue_epic"),
     /**
      * 故事
      */
-    STORY("agile_story", "故事", "故事", "#00bfa5", "story"),
+    STORY("agile_story", "故事", "是从用户角度出发，对所需要的一个小功能的简短描述", "#00bfa5", "story"),
     /**
      * 缺陷
      */
-    BUG("agile_fault", "缺陷", "缺陷", "#f44336", "bug"),
+    BUG("agile_fault", "缺陷", "指影响功能正常运行的问题、错误或者隐藏缺陷", "#f44336", "bug"),
     /**
      * 任务
      */
-    TASK("agile_task", "任务", "任务", "#4d90fe", "task"),
+    TASK("agile_task", "任务", "是敏捷开发下，完成用户需求的过程性的工作，表示用户故事开发任务的完成", "#4d90fe", "task"),
     /**
      * 子任务
      */
-    SUB_TASK("agile_subtask", "子任务", "子任务", "#4d90fe", "sub_task"),
+    SUB_TASK("agile_subtask", "子任务", "通常是故事或任务的具体拆分，由单人承接，且通常能在短时间内完成", "#4d90fe", "sub_task"),
     /**
      * 测试
      */
@@ -36,22 +36,22 @@ public enum InitIssueType {
     /**
      * 特性
      */
-    FEATURE("agile-feature", "特性", "特性", "#3D5AFE", "feature"),
+    FEATURE("agile-feature", "特性", "用于描述满足用户需求的大型系统行为", "#3D5AFE", "feature"),
 
     /**
      * 阶段
      */
-    STAGE("agile_view_timeline", "阶段", "阶段", "#FBBC57", "stage"),
+    STAGE("agile_view_timeline", "阶段", "一组具有逻辑关系的项目活动的集合", "#FBBC57", "stage"),
 
     /**
      * 里程碑
      */
-    MILESTONE("agile_milestone", "里程碑", "里程碑", "#6ED9C3", "milestone"),
+    MILESTONE("agile_milestone", "里程碑", "项目中的重要时点或事件，里程碑的持续时间为零，因为它们代表的是一个重要时间点或事件", "#6ED9C3", "milestone"),
 
     /**
      * 活动
      */
-    ACTIVITY("agile_activity", "活动", "活动", "#4D90FE", "activity")
+    ACTIVITY("agile_activity", "活动", "在进度计划中所列，并在项目过程中实施的工作组成部分", "#4D90FE", "activity")
     ;
 
     private String icon;

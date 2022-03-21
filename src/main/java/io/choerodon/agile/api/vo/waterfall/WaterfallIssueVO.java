@@ -36,6 +36,7 @@ public class WaterfallIssueVO {
     private List<ChildIssueListVO> sameWfParentIssueList;
 
     @ApiModelProperty(value = "关联的瀑布工作项id")
+    @Encrypt
     private Long wfIssueRelId;
 
     @ApiModelProperty(value = "交付物")

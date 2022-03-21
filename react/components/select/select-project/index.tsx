@@ -1,7 +1,10 @@
-import React, { useMemo, forwardRef, useRef } from 'react';
+import React, {
+  useMemo, forwardRef, useRef, useContext,
+} from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { stores } from '@choerodon/boot';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import FormContext from 'choerodon-ui/pro/lib/form/FormContext';
 import { FlatSelect } from '@choerodon/components';
 import { useCreation, usePersistFn } from 'ahooks';
 import classNames from 'classnames';
@@ -10,7 +13,7 @@ import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { projectApi, ganttApi } from '@/api';
 import { ICategoryCode } from '@/hooks/useCategoryCodes';
 import { styles } from '../common/utils';
-
+import projectStyles from './index.less';
 // 用于查询组织下的项目
 
 const { AppState } = stores;
@@ -37,7 +40,7 @@ const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
   const afterLoadRef = useRef<Function>();
   afterLoadRef.current = afterLoad;
   const defaultSelectedIds = useCreation(() => castArray(propsDefaultSelectedIds).filter(Boolean), []);
-
+  const context = useContext(FormContext);
   const config = useMemo((): SelectConfig<any> => ({
     name: 'team',
     textField: 'name',
@@ -82,7 +85,7 @@ const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
   return (
     <Component
       ref={ref}
-      popupCls={classNames(styles.popup, popupCls)}
+      popupCls={classNames({ [styles.popup]: !context.formNode }, projectStyles.popup, popupCls)}
       {...props}
       {...otherProps}
 

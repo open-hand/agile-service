@@ -1,5 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.app.service.FilePathService;
+import io.choerodon.agile.infra.enums.FileUploadBucket;
 import org.apache.commons.compress.utils.IOUtils;
 import org.hzero.boot.file.FileClient;
 import org.modelmapper.ModelMapper;
@@ -61,7 +63,6 @@ public class StaticFileServiceImpl implements StaticFileService {
     private static final String HTML_CONTENT_TYPE = "text/html";
     private static final String SVG_CONTENT_TYPE = "image/svg+xml";
     private static final String INDEX = "index";
-    private static final String BUCKET_NAME = "agile-service";
 
     private static final String IO_EXCEPTION_CODE = "error.uncompressed.io";
     private static final String DELETE_NULL_EXCEPTION_CODE = "error.delete.staticFileHeader.null";
@@ -72,8 +73,8 @@ public class StaticFileServiceImpl implements StaticFileService {
     private static final String MALFORMED_EXCEPTION_CODE = "error.malformed.url";
     private static final String RELATED_EXCEPTION_CODE = "error.file.issue.related.exist";
 
-    @Value("${services.attachment.url}")
-    private String attachmentUrl;
+//    @Value("${services.attachment.url}")
+//    private String attachmentUrl;
     @Autowired
     private StaticFileDealService staticFileDealService;
     @Autowired
@@ -94,6 +95,8 @@ public class StaticFileServiceImpl implements StaticFileService {
     private FileClient fileClient;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private FilePathService filePathService;
 
     @Override
     public List<StaticFileHeaderVO> uploadStaticFile(Long projectId, Long issueId, HttpServletRequest request) {
@@ -106,12 +109,13 @@ public class StaticFileServiceImpl implements StaticFileService {
         if (!CollectionUtils.isEmpty(files)) {
             staticFileCompressService.validFileType(files);
             for (MultipartFile multipartFile : files) {
-                String headerUrl = fileClient.uploadFile(organizationId, BUCKET_NAME, null, multipartFile.getOriginalFilename(), multipartFile);
-                StaticFileHeaderDTO staticFileHeader = createStaticFileHeader(projectId, organizationId, issueId, dealUrl(headerUrl), multipartFile.getOriginalFilename());
+                String headerUrl = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, multipartFile.getOriginalFilename(), multipartFile);
+                String relativePath = filePathService.generateRelativePath(headerUrl);
+                StaticFileHeaderDTO staticFileHeader = createStaticFileHeader(projectId, organizationId, issueId, relativePath, multipartFile.getOriginalFilename());
                 issueMapper.updateIssueLastUpdateInfo(issueId, projectId, DetailsHelper.getUserDetails().getUserId());
                 if (!ObjectUtils.isEmpty(staticFileHeader)) {
                     StaticFileHeaderVO staticFileHeaderVO = modelMapper.map(staticFileHeader, StaticFileHeaderVO.class);
-                    staticFileHeaderVO.setUrl(getRealUrl(staticFileHeaderVO.getUrl()));
+                    staticFileHeaderVO.setUrl(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), staticFileHeaderVO.getUrl()));
                     result.add(staticFileHeaderVO);
 
                     StaticFileOperationHistoryDTO staticFileCompressHistory = createStaticFileCompressHistory(staticFileHeader);
@@ -259,7 +263,7 @@ public class StaticFileServiceImpl implements StaticFileService {
         }.getType());
         if (!CollectionUtils.isEmpty(result)) {
             result.forEach(staticFileHeaderVO ->
-                    staticFileHeaderVO.setUrl(getRealUrl(staticFileHeaderVO.getUrl()))
+                    staticFileHeaderVO.setUrl(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), staticFileHeaderVO.getUrl()))
             );
         }
         return result;
@@ -272,7 +276,7 @@ public class StaticFileServiceImpl implements StaticFileService {
         }.getType());
         if (!CollectionUtils.isEmpty(result)) {
             result.forEach(staticFileHeaderVO ->
-                    staticFileHeaderVO.setUrl(getRealUrl(staticFileHeaderVO.getUrl()))
+                    staticFileHeaderVO.setUrl(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), staticFileHeaderVO.getUrl()))
             );
         }
         return result;
@@ -306,10 +310,10 @@ public class StaticFileServiceImpl implements StaticFileService {
         StaticFileLineDTO lineRecord = new StaticFileLineDTO();
         lineRecord.setHeaderId(fileHeaderId);
         List<StaticFileLineDTO> fileLineList = staticFileLineMapper.select(lineRecord);
-        fileUrls.add(getRealUrl(staticFileHeader.getUrl()));
+        fileUrls.add(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), staticFileHeader.getUrl()));
         if (!CollectionUtils.isEmpty(fileLineList)) {
             fileLineList.forEach(staticFileLineDTO ->
-                    fileUrls.add(getRealUrl(staticFileLineDTO.getUrl()))
+                    fileUrls.add(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), staticFileLineDTO.getUrl()))
             );
         }
 
@@ -363,7 +367,7 @@ public class StaticFileServiceImpl implements StaticFileService {
             staticFileDealService.updateStaticFileRelatedIssue(newRelDTO, staticFileHeaderDTO);
 
             StaticFileHeaderVO staticFileHeaderVO = modelMapper.map(staticFileHeaderDTO, StaticFileHeaderVO.class);
-            staticFileHeaderVO.setUrl(getRealUrl(staticFileHeaderVO.getUrl()));
+            staticFileHeaderVO.setUrl(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), staticFileHeaderVO.getUrl()));
             staticFileHeaderVOList.add(staticFileHeaderVO);
         });
         issueMapper.updateIssueLastUpdateInfo(staticFileRelatedVO.getIssueId(), projectId, DetailsHelper.getUserDetails().getUserId());
@@ -376,7 +380,7 @@ public class StaticFileServiceImpl implements StaticFileService {
         List<StaticFileHeaderDTO> staticFileHeaderList = staticFileHeaderMapper.selectFileListExcludeIssue(projectId, issueId);
         staticFileHeaderList.forEach(staticFileHeaderDTO -> {
             StaticFileHeaderVO staticFileHeaderVO = modelMapper.map(staticFileHeaderDTO, StaticFileHeaderVO.class);
-            staticFileHeaderVO.setUrl(getRealUrl(staticFileHeaderVO.getUrl()));
+            staticFileHeaderVO.setUrl(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), staticFileHeaderVO.getUrl()));
             staticFileHeaderVOList.add(staticFileHeaderVO);
         });
         return staticFileHeaderVOList;
@@ -386,29 +390,29 @@ public class StaticFileServiceImpl implements StaticFileService {
     public StaticFileHeaderVO selectFileHeaderById(Long fileHeaderId) {
         StaticFileHeaderDTO staticFileHeaderDTO = staticFileHeaderMapper.selectByPrimaryKey(fileHeaderId);
         StaticFileHeaderVO staticFileHeaderVO = modelMapper.map(staticFileHeaderDTO, StaticFileHeaderVO.class);
-        staticFileHeaderVO.setUrl(getRealUrl(staticFileHeaderVO.getUrl()));
+        staticFileHeaderVO.setUrl(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), staticFileHeaderVO.getUrl()));
         return staticFileHeaderVO;
     }
 
     private byte[] getFileByteArray(StaticFileLineDTO file) throws IOException {
         InputStream inputStream =
-                fileClient.downloadFile(file.getOrganizationId(), BUCKET_NAME, getRealUrl(file.getUrl()));
+                fileClient.downloadFile(file.getOrganizationId(), FileUploadBucket.AGILE_BUCKET.bucket(), filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), file.getUrl()));
         return IOUtils.toByteArray(inputStream);
     }
 
-    private String getRealUrl(String url) {
-        return attachmentUrl + "/" + BUCKET_NAME + "/" + url;
-    }
+//    private String getRealUrl(String url) {
+//        return attachmentUrl + "/" + FileUploadBucket.AGILE_BUCKET.bucket() + "/" + url;
+//    }
 
-    private String dealUrl(String url) {
-        String dealUrl;
-        try {
-            URL netUrl = new URL(url);
-            dealUrl = netUrl.getFile().substring(BUCKET_NAME.length() + 2);
-        } catch (MalformedURLException e) {
-            throw new CommonException(MALFORMED_EXCEPTION_CODE, e);
-        }
-        return dealUrl;
-    }
+//    private String dealUrl(String url) {
+//        String dealUrl;
+//        try {
+//            URL netUrl = new URL(url);
+//            dealUrl = netUrl.getFile().substring(FileUploadBucket.AGILE_BUCKET.bucket().length() + 2);
+//        } catch (MalformedURLException e) {
+//            throw new CommonException(MALFORMED_EXCEPTION_CODE, e);
+//        }
+//        return dealUrl;
+//    }
 
 }

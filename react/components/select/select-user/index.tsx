@@ -1,11 +1,12 @@
 import React, {
-  useMemo, forwardRef, useRef, useCallback,
+  useMemo, forwardRef, useRef, useCallback, useContext,
 } from 'react';
 import { toJS } from 'mobx';
 import {
   useCreation, useSafeState,
 } from 'ahooks';
 import { Select, DataSet } from 'choerodon-ui/pro';
+import FormContext from 'choerodon-ui/pro/lib/form/FormContext';
 import {
   unionBy, castArray, uniq, includes,
 } from 'lodash';
@@ -48,6 +49,7 @@ const SelectUser = forwardRef<Select, SelectUserProps>(({
   selected, onOption, flat, projectId, organizationId, optionRenderer, excludeIds, ...otherProps
 }, ref: React.Ref<Select>) => {
   const selectRef = useRef<Select>();
+  const context = useContext(FormContext);
   const { selectedUser, extraOptions } = useCreation(() => ({ selectedUser: propsSelectedUser, extraOptions: propExtraOptions }), [propsSelectedUser]);
   const selectDataRef = useRef<DataSet>();
   const requestLoading = useRef<boolean>(true);
@@ -154,7 +156,8 @@ const SelectUser = forwardRef<Select, SelectUserProps>(({
       clearButton={false}
       {...props}
       {...otherProps}
-      popupCls={classNames(ellipsisStyles.popup, otherProps.popupCls)}
+      // 在form下 不进行限定
+      popupCls={classNames({ [ellipsisStyles.popup]: !context.formNode }, otherProps.popupCls)}
     />
   );
 });

@@ -6,6 +6,8 @@ import { IIssueType, IFeatureType } from '@/common/types';
 
 interface Props {
   data: IIssueType
+  /** 是否开启tooltip 手动传入tooltip内容 */
+  tooltip?: boolean | string
   showName?: boolean
   className?: string
   style?: React.CSSProperties
@@ -13,7 +15,7 @@ interface Props {
   iconSize?: number
 }
 const TypeTag: React.FC<Props> = ({
-  data, showName, style, featureType, iconSize = 24, className,
+  data, showName, style, featureType, iconSize = 24, className, tooltip = true,
 }) => {
   let {
     colour, name = '', icon,
@@ -31,9 +33,10 @@ const TypeTag: React.FC<Props> = ({
     icon = 'highlight';
   }
   const reverse = ['agile_activity', 'agile_milestone', 'agile_view_timeline', 'agile_epic', 'agile_story', 'agile_fault', 'agile_task', 'agile_subtask', 'test-case', 'test-automation', 'agile-feature'].includes(icon);
+  const tooltipTitle = typeof tooltip === 'boolean' && tooltip ? name : tooltip;
   return (
     <Tooltip
-      title={name}
+      title={tooltipTitle}
     >
       <div className={classNames('c7n-typeTag', className)} style={style}>
         {!reverse ? (

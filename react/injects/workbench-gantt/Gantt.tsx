@@ -60,7 +60,7 @@ const WorkbenchGantt: React.FC = () => {
         <HeaderButtons {...headerComponentProps} />
 
       </div>
-      <div className={styles.content}>
+      <div className={classNames(styles.content, 'c7n-gantt-content')}>
         <GanttBody {...ganttHeaderData} />
       </div>
       <StatusLinkageWSHandle />

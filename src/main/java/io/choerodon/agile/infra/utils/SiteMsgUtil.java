@@ -67,6 +67,7 @@ public class SiteMsgUtil {
         map.put(ASSIGNEENAME, userName);
         map.put(SUMMARY, summary);
         map.put(URL, url);
+        map.put(LINK, domainUrl + "/" + url);
         map.put(PROJECT_NAME, projectVO.getName());
         setLoginNameAndRealName(operatorId, map);
         // 设置额外参数
@@ -149,6 +150,7 @@ public class SiteMsgUtil {
         map.put(ASSIGNEENAME, assigneeName);
         map.put(SUMMARY, summary);
         map.put(URL, url);
+        map.put(LINK, domainUrl + "/" + url);
         map.put(PROJECT_NAME, projectVO.getName());
         map.put(OPERATOR_NAME, operatorName);
         setLoginNameAndRealName(operatorId, map);
@@ -174,6 +176,7 @@ public class SiteMsgUtil {
         map.put(OPERATOR_NAME, operatorName);
         map.put(SUMMARY, summary);
         map.put(URL, url);
+        map.put(LINK, domainUrl + "/" + url);
         map.put(PROJECT_NAME, projectVO.getName());
         setLoginNameAndRealName(operatorId, map);
         // 额外参数
@@ -251,6 +254,7 @@ public class SiteMsgUtil {
         map.put(ASSIGNEENAME, userName);
         map.put(SUMMARY, summary);
         map.put(URL, url);
+        map.put(LINK, domainUrl + "/" + url);
         map.put(PROJECT_NAME, projectVO.getName());
         setLoginNameAndRealName(operatorId, map);
         // 设置额外参数
@@ -275,6 +279,7 @@ public class SiteMsgUtil {
         map.put(ASSIGNEENAME, assigneeName);
         map.put(SUMMARY, summary);
         map.put(URL, url);
+        map.put(LINK, domainUrl + "/" + url);
         map.put(PROJECT_NAME, projectVO.getName());
         map.put(OPERATOR_NAME, operatorName);
         setLoginNameAndRealName(operatorId, map);
@@ -300,6 +305,7 @@ public class SiteMsgUtil {
         map.put(OPERATOR_NAME, operatorName);
         map.put(SUMMARY, summary);
         map.put(URL, url);
+        map.put(LINK, domainUrl + "/" + url);
         map.put(PROJECT_NAME, projectVO.getName());
         setLoginNameAndRealName(operatorId, map);
         // 额外参数

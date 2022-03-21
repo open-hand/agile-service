@@ -35,9 +35,13 @@ class EditRelease extends Component {
   }
 
   componentDidMount() {
-    permissionApi.check(['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion']).then((res) => {
+    const codes = (AppState.currentMenuType.categories || []).map((c) => c.code);
+    const permissions = codes.includes('N_WATERFALL')
+      ? 'choerodon.code.project.cooperation.sprint.work-list.ps.updateversion'
+      : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion';
+    permissionApi.check([permissions]).then((res) => {
       this.setState({
-        editPermission: res.find((item) => item.code === 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion').approve,
+        editPermission: res.find((item) => item.code === permissions).approve,
       });
     });
   }

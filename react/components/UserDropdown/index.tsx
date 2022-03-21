@@ -1,11 +1,15 @@
 import React, {
-  useMemo, useCallback, useState, useImperativeHandle, useRef, useEffect,
+  useMemo, useCallback, useState, useImperativeHandle, useRef, useEffect, isValidElement, cloneElement, ReactNode, useContext,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { filter, find } from 'lodash';
 import {
-  DataSet, TextField, Icon, Dropdown, Menu, Tooltip, Spin, Button,
+  DataSet, TextField, Icon, Menu, Tooltip, Spin, Button,
 } from 'choerodon-ui/pro';
+import Trigger from 'choerodon-ui/pro/lib/trigger';
+import builtinPlacements from 'choerodon-ui/pro/lib/dropdown/placements';
+import ConfigContext from 'choerodon-ui/lib/config-provider/ConfigContext';
+import { useDebounceFn, useWhyDidYouUpdate } from 'ahooks';
 import UserTag from '@/components/tag/user-tag';
 
 import { User } from '@/common/types';
@@ -14,8 +18,9 @@ import styles from './index.less';
 
 interface OverlayProps {
   userListDs: DataSet
+  inputRef: React.MutableRefObject<TextField | undefined>
   defaultAssignee: User | undefined,
-  setDataMount: (newValue: any) => any
+  onSearch: (value: string) => void,
   setVisible: (visible: boolean) => void
   setSelectedUser: (user: User | undefined) => void
   selectedUser: User | undefined
@@ -27,23 +32,8 @@ interface Props {
 }
 
 const Overlay: React.FC<OverlayProps> = ({
-  setVisible, defaultAssignee, setSelectedUser, selectedUser, userListDs, setDataMount,
+  setVisible, defaultAssignee, setSelectedUser, selectedUser, userListDs, onSearch, inputRef,
 }) => {
-  const [filterStr, setFilterStr] = useState<string | null | undefined>();
-
-  const handleSearchUser = useCallback((value) => {
-    setFilterStr(value);
-    userListDs.setQueryParameter('param', value);
-    setDataMount((oldValue: any) => ({ ...oldValue, dataLoading: true }));
-    setVisible(false);
-    const startTime = new Date().getTime();
-    userListDs.query().then((res) => {
-      setDataMount((oldValue: any) => ({ ...oldValue, dataLoading: false }));
-      const diff = new Date().getTime() - startTime;
-      setTimeout(() => setVisible(true), Math.max(0, diff - 250));
-    });
-  }, [setDataMount, setVisible, userListDs]);
-
   const handleClick = useCallback((e) => {
     e.stopPropagation();
   }, []);
@@ -58,7 +48,7 @@ const Overlay: React.FC<OverlayProps> = ({
     setVisible(false);
     setSelectedUser(find([...(defaultAssignee ? [defaultAssignee] : []), ...userListDs.toData()] as User[], { id: key }));
   }, [defaultAssignee, setSelectedUser, setVisible, userListDs]);
-
+  const { run: handleInput } = useDebounceFn((value) => onSearch(value), { wait: 410 });
   return (
     <div
       role="none"
@@ -71,7 +61,7 @@ const Overlay: React.FC<OverlayProps> = ({
     >
       <div style={{ background: '#FFF' }}>
         <div role="none" onClick={handleClick} className={styles.searchDiv}>
-          <TextField clearButton placeholder="输入文字以进行过滤" value={filterStr} onChange={handleSearchUser} />
+          <TextField ref={inputRef as any} clearButton placeholder="输入文字以进行过滤" onChange={handleInput} autoFocus valueChangeAction={'input' as any} />
         </div>
       </div>
       <Menu
@@ -114,7 +104,6 @@ const Overlay: React.FC<OverlayProps> = ({
               <Button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setVisible(true);
                   userListDs.queryMore(userListDs.currentPage + 1);
                 }}
                 style={{ margin: '-4px -12px', width: 'calc(100% + 24px)' }}
@@ -133,7 +122,12 @@ const Overlay: React.FC<OverlayProps> = ({
 const ObserverOverlay = observer(Overlay);
 
 const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee, projectId }) => {
+  const { getProPrefixCls } = useContext(ConfigContext);
+  const prefixCls = getProPrefixCls('dropdown');
+  const inputRef = useRef<TextField>();
+  const timeoutIdRef = useRef<number>();
   const [visible, setVisible] = useState<boolean>(false);
+  const triggerRef = useRef<any>();
   const [{ dataLoading, isFirstLoad }, setDataMount] = useState({ dataLoading: false, isFirstLoad: true });
   const [selectedUser, setSelectedUser] = useState<User | undefined>(defaultAssignee);
   const userListDs = useMemo(() => new DataSet({
@@ -167,39 +161,71 @@ const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee, proje
     setSelectedUser(undefined);
   }, []);
 
-  const handleVisibleChange = useCallback((flag) => {
-    setVisible(flag);
+  const handleHiddenChange = useCallback((newHidden) => {
+    setVisible(!newHidden);
+    if (!newHidden) {
+      timeoutIdRef.current = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 120) as unknown as number;
+    } else {
+      clearTimeout(timeoutIdRef.current);
+    }
   }, []);
 
+  const handleSearchUser = useCallback((value) => {
+    userListDs.setQueryParameter('param', value);
+    setDataMount((oldValue: any) => ({ ...oldValue, dataLoading: true }));
+    userListDs.query().then((res) => {
+      setDataMount((oldValue: any) => ({ ...oldValue, dataLoading: false }));
+      triggerRef.current?.forcePopupAlign();
+    });
+  }, [userListDs]);
+  const handleClick = useCallback((e) => {
+    setVisible(true);
+  }, []);
+  const getContent = useCallback((...popupProps): ReactNode => (
+    <ObserverOverlay
+      inputRef={inputRef}
+      userListDs={userListDs}
+      setVisible={setVisible}
+      defaultAssignee={defaultAssignee}
+      setSelectedUser={setSelectedUser}
+      selectedUser={selectedUser}
+      onSearch={handleSearchUser}
+    />
+  ), [defaultAssignee, handleSearchUser, selectedUser, userListDs]);
+  const renderPopupContent = useCallback((...popupProps) => {
+    const content = getContent(...popupProps);
+    if (isValidElement<any>(content)) {
+      return cloneElement<any>(content, {
+        onClick: handleClick,
+      });
+    }
+    return null;
+  }, [getContent, handleClick]);
+  const hidden = !visible;
   return (
     <div id="userDropdown-container">
-      <Dropdown
-        overlay={(
-          <ObserverOverlay
-            userListDs={userListDs}
-            setDataMount={setDataMount}
-            setVisible={setVisible}
-            defaultAssignee={defaultAssignee}
-            setSelectedUser={setSelectedUser}
-            selectedUser={selectedUser}
-          />
-        )}
-        trigger={['click'] as any}
-        visible={visible}
-        // @ts-ignore
-        onHiddenBeforeChange={(hidden) => {
-          if (!hidden && dataLoading) {
+      <Trigger
+        prefixCls={prefixCls}
+        ref={triggerRef}
+        popupContent={renderPopupContent}
+        builtinPlacements={builtinPlacements}
+        action={['click'] as any}
+        popupHidden={hidden}
+        onPopupHiddenBeforeChange={(newHidden) => {
+          if (!newHidden && dataLoading) {
             return false;
           }
           // 初次打开，等待数据加载完成后再打开下拉框
-          if (!hidden && isFirstLoad) {
+          if (!newHidden && isFirstLoad) {
             setDataMount((oldValue) => ({ ...oldValue, dataLoading: true }));
             return false;
           }
           return true;
         }}
-        placement={'topCenter' as any}
-        onVisibleChange={handleVisibleChange}
+        popupPlacement="topCenter"
+        onPopupHiddenChange={handleHiddenChange}
       >
         <Spin spinning={dataLoading} size={'small' as any} style={{ width: '50%' }} wrapperClassName={styles.loading}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -220,7 +246,7 @@ const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee, proje
             />
           </div>
         </Spin>
-      </Dropdown>
+      </Trigger>
 
     </div>
 

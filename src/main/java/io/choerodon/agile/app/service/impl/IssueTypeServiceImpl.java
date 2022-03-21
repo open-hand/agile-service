@@ -365,25 +365,14 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (ZERO.equals(projectId)) {
             return new HashSet<>();
         }
-        Set<String> codes = getProjectCategoryCodes(projectId);
+        ProjectVO project = ConvertUtil.queryProject(projectId);
+        Set<String> codes = new HashSet<>(ProjectCategory.getProjectCategoryCodes(project));
         List<String> issueTypes = new ArrayList<>(AGILE_CREATE_ISSUE_TYPES);
         if (codes.contains(ProjectCategory.MODULE_AGILE)
                 && !issueTypes.contains(typeCode)) {
             throw new CommonException("error.illegal.type.code");
         }
         return codes;
-    }
-
-    private Set<String> getProjectCategoryCodes(Long projectId) {
-        ProjectVO project = ConvertUtil.queryProject(projectId);
-        if (project == null) {
-            throw new CommonException("error.project.not.existed");
-        }
-        return project
-                .getCategories()
-                .stream()
-                .map(ProjectCategoryDTO::getCode)
-                .collect(Collectors.toSet());
     }
 
     private void initDefaultStateMachine(Long organizationId,
@@ -788,13 +777,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     @Override
     public Page<IssueTypeVO> pageQueryReference(PageRequest pageRequest, Long organizationId, Long projectId) {
         ProjectVO project = ConvertUtil.queryProject(projectId);
-        Set<String> categories =
-                project
-                        .getCategories()
-                        .stream()
-                        .map(ProjectCategoryDTO::getCode)
-                        .collect(Collectors.toSet());
-        if (categories.contains(ProjectCategory.MODULE_AGILE)) {
+        Set<String> categories = new HashSet<>(ProjectCategory.getProjectCategoryCodes(project));
+        if (categories.contains(ProjectCategory.MODULE_AGILE) || categories.contains(ProjectCategory.MODULE_WATERFALL_AGILE)) {
             return PageHelper.doPage(pageRequest, () -> issueTypeMapper.selectEnableReference(organizationId, projectId));
         } else {
             return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
@@ -1171,7 +1155,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (CollectionUtils.isEmpty(projectIds)) {
             projectIds = new ArrayList<>();
             Long userId = DetailsHelper.getUserDetails().getUserId();
-            List<ProjectVO> list = baseFeignClient.listProjectsByUserIdForSimple(organizationId, userId,  "N_AGILE", true).getBody();
+            List<ProjectVO> list = baseFeignClient.listProjectsByUserIdForSimple(organizationId, userId,  null, true).getBody();
             if (CollectionUtils.isEmpty(list)) {
                 return new Page<>();
             }
