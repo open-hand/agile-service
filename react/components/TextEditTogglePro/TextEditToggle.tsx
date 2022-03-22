@@ -1,5 +1,5 @@
 import React, {
-  useState, useRef, cloneElement, useEffect, Fragment,
+  useState, useRef, cloneElement, useEffect, Fragment, useMemo, useCallback,
 } from 'react';
 import FormField from 'choerodon-ui/pro/lib/field';
 import TriggerField from 'choerodon-ui/pro/lib/trigger-field';
@@ -20,9 +20,20 @@ interface EditorRender {
   submit: () => void
   hideEditor: () => void
 }
+interface TextEditToggleLatestState {
+  editing: boolean
+}
+interface TextEditToggleInnerEditorConfig {
+  click: boolean,
+  focus: boolean
+}
 export type Action = 'click' | 'blur' | 'change'
+export type EditorTriggerAction = 'click' | 'focus'
+
 interface Props {
   disabled?: boolean
+  /** 编辑状态触发方式 */
+  editorTrigger?: EditorTriggerAction[]
   submitTrigger?: Action[] // 触发提交的动作
   alwaysRender?: boolean // 查看模式也挂载编辑器
   mountRenderEditor?: boolean // 第一次mount就挂载编辑器，设为false就会在第一次编辑时再挂载，相当于懒加载了
@@ -49,9 +60,19 @@ function customizer(val1: any, val2: any) {
   return uniformEmptyValue(val1) === uniformEmptyValue(val2) || undefined;
 }
 const TextEditToggle: React.FC<Props> = ({
-  disabled, submitTrigger = ['blur'], editor, editorExtraContent, children: text, className, onSubmit, initValue, alwaysRender = true, mountRenderEditor = true,
+  disabled, submitTrigger = ['blur'], editor, editorTrigger = ['focus'], editorExtraContent, children: text, className, onSubmit, initValue, alwaysRender = true, mountRenderEditor = true,
 } = {} as Props) => {
+  const editTriggerConfigRef = useRef<TextEditToggleInnerEditorConfig>();
+  const editTriggerConfig: TextEditToggleInnerEditorConfig = useMemo(() => {
+    const newConfig = { click: editorTrigger.includes('click'), focus: editorTrigger.includes('focus') };
+    if (!isEqual(editTriggerConfigRef.current, newConfig)) {
+      editTriggerConfigRef.current = newConfig;
+    }
+    return editTriggerConfigRef.current || { click: false, focus: false };
+  }, [editorTrigger]);
   const [editing, setEditing] = useState(false);
+  const latestState: TextEditToggleLatestState = useCreation(() => ({ editing: false }), []);
+  latestState.editing = editing;
   const [value, setValue] = useState(initValue);
   const editingRef = useRef(editing);
   const dataRef = useRef(initValue);
@@ -95,12 +116,13 @@ const TextEditToggle: React.FC<Props> = ({
       setEditing(false);
     }
   };
-  const showEditor = () => {
+  const showEditor = useCallback(() => {
     firstRenderEditorRef.current = false;
-    if (!editing) {
+    if (!latestState.editing) {
+      latestState.editing = true;
       setEditing(() => true);
     }
-  };
+  }, [latestState]);
   const handleChange = (originOnChange: Function | undefined) => (newValue: any) => {
     dataRef.current = newValue;
     setValue(newValue);
@@ -193,11 +215,35 @@ const TextEditToggle: React.FC<Props> = ({
       </div>
     </>
   );
-  const handleFocus = () => {
-    if (!disabled) {
-      showEditor();
+
+  const triggerEditorProps: React.DOMAttributes<HTMLDivElement> = useMemo(() => {
+    if (disabled) {
+      return {};
     }
-  };
+    // const currentPosition = {
+    //   start: false, x: 0, y: 0, offset: 0,
+    // };
+    // let limitOffset = 0;
+    return {
+      tabIndex: 0,
+      onClick: editTriggerConfig.click ? (e) => {
+        if (e.target && containerRef.current.contains(e.target as any)) {
+          showEditor();
+        }
+      } : undefined,
+      // onMouseDown: (e) => {
+      //   currentPosition.start = true;
+      //   currentPosition.x = e.clientX;
+      //   currentPosition.y = e.clientY;
+      //   limitOffset = containerRef.current?.clientWidth;
+      // },
+      // onMouseUp: (e) => {
+      //   currentPosition.start = false;
+      // },
+      onFocus: editTriggerConfig.focus ? showEditor : undefined,
+    };
+  }, [containerRef, disabled, editTriggerConfig.click, editTriggerConfig.focus, showEditor]);
+
   return (
     <div
       ref={containerRef}
@@ -206,9 +252,7 @@ const TextEditToggle: React.FC<Props> = ({
         { [styles.disabled]: disabled },
         className,
       )}
-      // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
-      tabIndex={0}
-      onFocus={handleFocus}
+      {...triggerEditorProps}
     >
       {getCellRenderer()}
     </div>
