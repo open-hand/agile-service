@@ -4,6 +4,7 @@ import React, {
 import { Modal } from 'choerodon-ui/pro';
 import { FieldOption, IModalProps } from '@/common/types';
 import OptionList, { OptionListRef } from './option-list';
+import styles from './index.less';
 
 interface EditFieldOptionsModalProps {
   modal?: IModalProps,
@@ -43,6 +44,7 @@ const openEditFieldOptionsModal = (props: EditFieldOptionsModalProps) => {
     // @ts-ignore
     footer: (ok, cancel) => ok,
     okText: '关闭',
+    className: styles.modal,
     children: <EditFieldOptionsModal {...props} />,
   });
 };
