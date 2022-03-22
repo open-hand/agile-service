@@ -467,7 +467,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
             issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(
-                    filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), issueAttachmentDO.getUrl())));
+                    filePathService.generateFullPath(issueAttachmentDO.getUrl())));
         }
         Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, issue.getApplyType());
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
@@ -540,7 +540,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 issueMapper.querySubBugByIssueId(issue.getRelateIssueId()): null);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
             issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(
-                    filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), issueAttachmentDO.getUrl())));
+                    filePathService.generateFullPath(issueAttachmentDO.getUrl())));
         }
         if (agilePluginService != null) {
             agilePluginService.setBusinessAttributes(issue);
@@ -624,7 +624,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
             issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(
-                    filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), issueAttachmentDO.getUrl())));
+                    filePathService.generateFullPath(issueAttachmentDO.getUrl())));
         }
         Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, issue.getApplyType());
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
@@ -2084,7 +2084,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         issue.setIssueTypeVO(issueTypeService.queryById(issue.getIssueTypeId(), projectId));
         issue.setStatusVO(statusService.queryStatusById(organizationId, issue.getStatusId()));
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
-            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), issueAttachmentDO.getUrl())));
+            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(filePathService.generateFullPath(issueAttachmentDO.getUrl())));
         }
         return issueAssembler.issueDetailDoToIssueSubDto(issue);
     }
@@ -2099,7 +2099,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public IssueSubVO queryIssueSubByCreateWithoutRuleNotice(Long projectId, Long issueId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
-            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), issueAttachmentDO.getUrl())));
+            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(filePathService.generateFullPath(issueAttachmentDO.getUrl())));
         }
         IssueSubVO result = issueAssembler.issueDetailDoToIssueSubDto(issue);
         sendMsgUtil.sendMsgBySubIssueCreate(projectId, result, DetailsHelper.getUserDetails().getUserId());

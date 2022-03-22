@@ -115,7 +115,7 @@ public class StaticFileServiceImpl implements StaticFileService {
                 issueMapper.updateIssueLastUpdateInfo(issueId, projectId, DetailsHelper.getUserDetails().getUserId());
                 if (!ObjectUtils.isEmpty(staticFileHeader)) {
                     StaticFileHeaderVO staticFileHeaderVO = modelMapper.map(staticFileHeader, StaticFileHeaderVO.class);
-                    staticFileHeaderVO.setUrl(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), staticFileHeaderVO.getUrl()));
+                    staticFileHeaderVO.setUrl(filePathService.generateFullPath(staticFileHeaderVO.getUrl()));
                     result.add(staticFileHeaderVO);
 
                     StaticFileOperationHistoryDTO staticFileCompressHistory = createStaticFileCompressHistory(staticFileHeader);
@@ -263,7 +263,7 @@ public class StaticFileServiceImpl implements StaticFileService {
         }.getType());
         if (!CollectionUtils.isEmpty(result)) {
             result.forEach(staticFileHeaderVO ->
-                    staticFileHeaderVO.setUrl(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), staticFileHeaderVO.getUrl()))
+                    staticFileHeaderVO.setUrl(filePathService.generateFullPath(staticFileHeaderVO.getUrl()))
             );
         }
         return result;
@@ -276,7 +276,7 @@ public class StaticFileServiceImpl implements StaticFileService {
         }.getType());
         if (!CollectionUtils.isEmpty(result)) {
             result.forEach(staticFileHeaderVO ->
-                    staticFileHeaderVO.setUrl(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), staticFileHeaderVO.getUrl()))
+                    staticFileHeaderVO.setUrl(filePathService.generateFullPath(staticFileHeaderVO.getUrl()))
             );
         }
         return result;
@@ -310,10 +310,10 @@ public class StaticFileServiceImpl implements StaticFileService {
         StaticFileLineDTO lineRecord = new StaticFileLineDTO();
         lineRecord.setHeaderId(fileHeaderId);
         List<StaticFileLineDTO> fileLineList = staticFileLineMapper.select(lineRecord);
-        fileUrls.add(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), staticFileHeader.getUrl()));
+        fileUrls.add(filePathService.generateFullPath(staticFileHeader.getUrl()));
         if (!CollectionUtils.isEmpty(fileLineList)) {
             fileLineList.forEach(staticFileLineDTO ->
-                    fileUrls.add(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), staticFileLineDTO.getUrl()))
+                    fileUrls.add(filePathService.generateFullPath(staticFileLineDTO.getUrl()))
             );
         }
 
@@ -367,7 +367,7 @@ public class StaticFileServiceImpl implements StaticFileService {
             staticFileDealService.updateStaticFileRelatedIssue(newRelDTO, staticFileHeaderDTO);
 
             StaticFileHeaderVO staticFileHeaderVO = modelMapper.map(staticFileHeaderDTO, StaticFileHeaderVO.class);
-            staticFileHeaderVO.setUrl(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), staticFileHeaderVO.getUrl()));
+            staticFileHeaderVO.setUrl(filePathService.generateFullPath(staticFileHeaderVO.getUrl()));
             staticFileHeaderVOList.add(staticFileHeaderVO);
         });
         issueMapper.updateIssueLastUpdateInfo(staticFileRelatedVO.getIssueId(), projectId, DetailsHelper.getUserDetails().getUserId());
@@ -380,7 +380,7 @@ public class StaticFileServiceImpl implements StaticFileService {
         List<StaticFileHeaderDTO> staticFileHeaderList = staticFileHeaderMapper.selectFileListExcludeIssue(projectId, issueId);
         staticFileHeaderList.forEach(staticFileHeaderDTO -> {
             StaticFileHeaderVO staticFileHeaderVO = modelMapper.map(staticFileHeaderDTO, StaticFileHeaderVO.class);
-            staticFileHeaderVO.setUrl(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), staticFileHeaderVO.getUrl()));
+            staticFileHeaderVO.setUrl(filePathService.generateFullPath(staticFileHeaderVO.getUrl()));
             staticFileHeaderVOList.add(staticFileHeaderVO);
         });
         return staticFileHeaderVOList;
@@ -390,13 +390,13 @@ public class StaticFileServiceImpl implements StaticFileService {
     public StaticFileHeaderVO selectFileHeaderById(Long fileHeaderId) {
         StaticFileHeaderDTO staticFileHeaderDTO = staticFileHeaderMapper.selectByPrimaryKey(fileHeaderId);
         StaticFileHeaderVO staticFileHeaderVO = modelMapper.map(staticFileHeaderDTO, StaticFileHeaderVO.class);
-        staticFileHeaderVO.setUrl(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), staticFileHeaderVO.getUrl()));
+        staticFileHeaderVO.setUrl(filePathService.generateFullPath(staticFileHeaderVO.getUrl()));
         return staticFileHeaderVO;
     }
 
     private byte[] getFileByteArray(StaticFileLineDTO file) throws IOException {
         InputStream inputStream =
-                fileClient.downloadFile(file.getOrganizationId(), FileUploadBucket.AGILE_BUCKET.bucket(), filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), file.getUrl()));
+                fileClient.downloadFile(file.getOrganizationId(), FileUploadBucket.AGILE_BUCKET.bucket(), filePathService.generateFullPath(file.getUrl()));
         return IOUtils.toByteArray(inputStream);
     }
 
