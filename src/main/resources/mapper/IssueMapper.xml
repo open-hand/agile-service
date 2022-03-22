@@ -786,8 +786,11 @@
             #{projectId}
         </foreach>
         <choose>
-            <when test="searchVO.applyType != null">
-                AND ai.apply_type = #{searchVO.applyType}
+            <when test="searchVO.applyTypes != null and searchVO.applyTypes.size > 0">
+                AND ai.apply_type IN
+                <foreach collection="searchVO.applyTypes" item="applyType" open="(" separator="," close=")">
+                    #{applyType}
+                </foreach>
             </when>
             <otherwise>
                 AND ai.apply_type = 'agile'

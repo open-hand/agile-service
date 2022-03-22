@@ -41,7 +41,7 @@ public class SearchVO {
 
     private Boolean ganttDefaultOrder = false;
 
-    private String applyType;
+    private List<String> applyTypes;
 
     private List<ObjectSchemeFieldVO> displayFields;
 
@@ -133,12 +133,12 @@ public class SearchVO {
         return assigneeFilterIds;
     }
 
-    public String getApplyType() {
-        return applyType;
+    public List<String> getApplyTypes() {
+        return applyTypes;
     }
 
-    public void setApplyType(String applyType) {
-        this.applyType = applyType;
+    public void setApplyTypes(List<String> applyTypes) {
+        this.applyTypes = applyTypes;
     }
 
     @Override
