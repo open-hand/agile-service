@@ -129,7 +129,7 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
                 issueAttachmentCombineVO.getFileName(), relativePath);
         IssueAttachmentVO issueAttachmentVO = new IssueAttachmentVO();
         BeanUtils.copyProperties(result, issueAttachmentVO);
-        String fullPath = filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), result.getUrl());
+        String fullPath = filePathService.generateFullPath(result.getUrl());
         issueAttachmentVO.setUrl(fullPath);
         return issueAttachmentVO;
     }
@@ -165,7 +165,7 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
             issueAttachmentDTOList.forEach(attachment -> {
                 IssueAttachmentVO issueAttachmentVO = new IssueAttachmentVO();
                 BeanUtils.copyProperties(attachment, issueAttachmentVO);
-                String fullPath = filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), attachment.getUrl());
+                String fullPath = filePathService.generateFullPath(attachment.getUrl());
                 issueAttachmentVO.setUrl(fullPath);
                 result.add(issueAttachmentVO);
             });
@@ -187,7 +187,7 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         String url = null;
         try {
             url = URLDecoder.decode(issueAttachmentDTO.getUrl(), "UTF-8");
-            String fullPath = filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), url);
+            String fullPath = filePathService.generateFullPath(url);
             Long organizationId = projectUtil.getOrganizationId(projectId);
             ResponseUtils.getResponse(customFileRemoteService.deleteFileByUrl(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), Arrays.asList(fullPath)), String.class);
         } catch (Exception e) {
@@ -208,7 +208,7 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
             Long organizationId = projectUtil.getOrganizationId(projectId);
             String url = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, fileName, multipartFile);
             String relativePath = filePathService.generateRelativePath(url);
-            result.add(filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), relativePath));
+            result.add(filePathService.generateFullPath(relativePath));
         }
         return result;
     }

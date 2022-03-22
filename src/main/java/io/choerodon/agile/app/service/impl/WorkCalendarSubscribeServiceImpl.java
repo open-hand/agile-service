@@ -331,7 +331,7 @@ public class WorkCalendarSubscribeServiceImpl implements WorkCalendarSubscribeSe
     }
 
     private String getRealUrl(String url) {
-        return filePathService.generateFullPath(FileUploadBucket.AGILE_BUCKET.bucket(), url);
+        return filePathService.generateFullPath(url);
     }
 
     private byte[] getFileByteArray(Long organizationId, String url){

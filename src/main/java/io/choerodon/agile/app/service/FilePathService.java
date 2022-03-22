@@ -8,6 +8,5 @@ public interface FilePathService {
 
     String generateRelativePath(String fullPath);
 
-    String generateFullPath(String bucketName,
-                            String relativePath);
+    String generateFullPath(String relativePath);
 }

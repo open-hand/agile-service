@@ -144,8 +144,6 @@ mybatis:
 services:
   attachment:
     url: ${SERVICES_ATTACHMENT_URL:example.com}
-  bucket:
-    prefix: ${SERVICES_BUCKET_PREFIX:prefix}
   domain:
     url: ${SERVICES_DOMAIN_URL:example.com}
   chain:
