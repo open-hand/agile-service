@@ -150,7 +150,7 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
                                                             SearchVO searchVO,
                                                             PageRequest pageRequest,
                                                             Long currentIssueId) {
-        SearchVOUtil.setTypeCodes(searchVO, getPredecessorIssueTypes(searchVO.getApplyType()));
+        SearchVOUtil.setTypeCodes(searchVO, getPredecessorIssueTypes(searchVO.getApplyTypes()));
         SearchVOUtil.setSearchArgs(searchVO, "tree", false);
         Map<String, Object> otherArgs = searchVO.getOtherArgs();
         String excludeIssueIdsKey = "excludeIssueIds";
@@ -407,7 +407,7 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         List<IssueDTO> issues = issueMapper.selectByIds(StringUtils.join(issueIds, ","));
         issues.forEach(issue -> {
             String typeCode = issue.getTypeCode();
-            List<String> issueTypeCodes = getPredecessorIssueTypes(applyType);
+            List<String> issueTypeCodes = getPredecessorIssueTypes(Collections.singletonList(applyType));
             if (!issueTypeCodes.contains(typeCode)) {
                 throw new CommonException("error.predecessor.illegal.issue.type");
             }
@@ -497,8 +497,8 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         return dto;
     }
 
-    private List<String> getPredecessorIssueTypes(String applyType) {
-        if (Objects.equals(SchemeApplyType.WATERFALL, applyType)) {
+    private List<String> getPredecessorIssueTypes(List<String> applyTypes) {
+        if (!ObjectUtils.isEmpty(applyTypes) && Objects.equals(SchemeApplyType.WATERFALL, applyTypes.get(0))) {
             return WATERFALL_ISSUE_TYPE_CODES;
         }
         return ISSUE_TYPE_CODES;
