@@ -41,6 +41,7 @@ interface Props {
   editorExtraContent?: () => JSX.Element
   children: (({ value, editing }: RenderProps) => React.ReactNode) | React.ReactNode
   className?: string
+  textClassName?: string
   onSubmit: (data: any) => void
   initValue: any
 }
@@ -60,7 +61,8 @@ function customizer(val1: any, val2: any) {
   return uniformEmptyValue(val1) === uniformEmptyValue(val2) || undefined;
 }
 const TextEditToggle: React.FC<Props> = ({
-  disabled, submitTrigger = ['blur'], editor, editorTrigger = ['focus'], editorExtraContent, children: text, className, onSubmit, initValue, alwaysRender = true, mountRenderEditor = true,
+  disabled, submitTrigger = ['blur'], editor, editorTrigger = ['focus'], editorExtraContent, children: text,
+  className, onSubmit, initValue, alwaysRender = true, mountRenderEditor = true, textClassName = '',
 } = {} as Props) => {
   const editTriggerConfigRef = useRef<TextEditToggleInnerEditorConfig>();
   const editTriggerConfig: TextEditToggleInnerEditorConfig = useMemo(() => {
@@ -207,9 +209,11 @@ const TextEditToggle: React.FC<Props> = ({
           {renderEditor()}
         </div>
       )}
-      <div className={classNames(styles.text, {
-        [styles.hidden]: editing,
-      })}
+      <div
+        className={classNames(
+          styles.text,
+          { [styles.hidden]: editing, [textClassName]: !disabled },
+        )}
       >
         {renderText()}
       </div>
