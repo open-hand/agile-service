@@ -97,8 +97,8 @@ env:
 
     # 清理permission表中的旧接口和role_permission表中角色和权限层级不匹配的脏数据
     CHOERODON_CLEANPERMISSION: false
-    # minio地址
-    SERVICES_ATTACHMENT_URL: http://minio.example.choerodon.io
+    # obs地址+bucket
+    SERVICES_ATTACHMENT_URL: http://minio.example.choerodon.io/agile-service
     # 域名地址
     SERVICES_DOMAIN_URL: http://example.com
     # 状态机问题联动最大链深度
