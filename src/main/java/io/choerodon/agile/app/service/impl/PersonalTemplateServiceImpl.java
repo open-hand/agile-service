@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -126,8 +125,10 @@ public class PersonalTemplateServiceImpl implements PersonalTemplateService {
     private void checkAction(Long projectId, String action) {
         ProjectVO project = ConvertUtil.queryProject(projectId);
         List<String> actions = new ArrayList<>();
-        boolean containsAgile = ProjectCategory.checkContainProjectCategory(project.getCategories(), ProjectCategory.MODULE_AGILE);
-        boolean containsProgram = ProjectCategory.checkContainProjectCategory(project.getCategories(), ProjectCategory.MODULE_PROGRAM);
+        List<String> categories = ProjectCategory.getProjectCategoryCodes(project);
+        boolean containsAgile =
+                categories.contains(ProjectCategory.MODULE_AGILE) || categories.contains(ProjectCategory.MODULE_WATERFALL_AGILE);
+        boolean containsProgram = categories.contains(ProjectCategory.MODULE_PROGRAM);
         if (containsAgile) {
             actions.addAll(Arrays.asList(AGILE_PERSONAL_TEMPLATE_ACTIONS));
         }
