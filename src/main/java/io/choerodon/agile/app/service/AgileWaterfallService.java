@@ -76,4 +76,6 @@ public interface AgileWaterfallService {
     void handlerDeleteSprint(Long projectId, Long sprintId);
 
     void handleUpdateEstimatedTime(Long projectId, Long issueId, Date estimatedStartTime, Date estimatedEndTime);
+
+    void appendWaterfallFiledSql(StringBuilder sqlQuery, QuickFilterValueVO quickFilterValueVO, String value, String operation, Long projectId);
 }
