@@ -174,7 +174,7 @@ public class ProjectCategory {
     }
 
     public static boolean containsAgile(List<String> categories) {
-        if (CollectionUtils.isEmpty(categories)) {
+        if (ObjectUtils.isEmpty(categories)) {
             return false;
         }
         return categories.contains(MODULE_AGILE) || categories.contains(MODULE_WATERFALL_AGILE);
