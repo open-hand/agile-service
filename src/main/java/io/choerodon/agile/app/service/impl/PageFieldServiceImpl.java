@@ -196,8 +196,8 @@ public class PageFieldServiceImpl implements PageFieldService {
             return pageFields;
         }
         ProjectVO project = ConvertUtil.queryProject(projectId);
-        Set<String> codes = new HashSet<>(ProjectCategory.getProjectCategoryCodes(project));
-        if (codes.contains(ProjectCategory.MODULE_AGILE)
+        List<String> codes = ProjectCategory.getProjectCategoryCodes(project);
+        if (ProjectCategory.containsAgile(codes)
                 && !codes.contains(ProjectCategory.MODULE_DEVOPS)) {
             return pageFields.stream().filter(x -> !FieldCode.TAG.equals(x.getFieldCode())).collect(Collectors.toList());
         } else {

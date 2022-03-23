@@ -172,4 +172,11 @@ public class ProjectCategory {
         }
         return categories.stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
     }
+
+    public static boolean containsAgile(List<String> categories) {
+        if (CollectionUtils.isEmpty(categories)) {
+            return false;
+        }
+        return categories.contains(MODULE_AGILE) || categories.contains(MODULE_WATERFALL_AGILE);
+    }
 }
