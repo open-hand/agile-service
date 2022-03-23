@@ -152,6 +152,8 @@ public class GanttChartVO {
     @Encrypt
     private Set<Long> parentSprintIds;
 
+    private String applyType;
+
     public Set<Long> getParentSprintIds() {
         return parentSprintIds;
     }
@@ -566,5 +568,13 @@ public class GanttChartVO {
 
     public void setWaterfallIssueVO(WaterfallIssueVO waterfallIssueVO) {
         this.waterfallIssueVO = waterfallIssueVO;
+    }
+
+    public String getApplyType() {
+        return applyType;
+    }
+
+    public void setApplyType(String applyType) {
+        this.applyType = applyType;
     }
 }

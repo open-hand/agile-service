@@ -378,6 +378,7 @@
         <result property="mainResponsibleId" column="main_responsible_id"/>
         <result property="estimateTime" column="estimate_time"/>
         <result property="environment" column="environment"/>
+        <result property="applyType" column="apply_type"/>
         <result property="epicSelfName" column="epic_self_name"/>
         <collection property="versionIssueRelDTOS"
                     ofType="io.choerodon.agile.infra.dto.VersionIssueRelDTO">
@@ -589,6 +590,7 @@
         ai.main_responsible_id,
         ai.remaining_time,
         ai.environment,
+        ai.apply_type,
         ai.created_by,
         ai.last_updated_by,
         ai.reporter_id,
