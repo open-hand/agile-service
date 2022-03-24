@@ -2,7 +2,7 @@ import React, { useCallback, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { withRouter } from 'react-router-dom';
 import {
-  Dropdown, Icon, Menu, Modal, Table, Tooltip,
+  Dropdown, Icon, Menu, Modal, Table,
 } from 'choerodon-ui/pro';
 import {
   Breadcrumb, Choerodon, Content, Header, Page,
@@ -11,6 +11,7 @@ import { HeaderButtons } from '@choerodon/master';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
 import { ColumnAlign } from 'choerodon-ui/pro/lib/table/enum';
+import { Tooltip } from 'choerodon-ui/pro/lib/core/enum';
 import { IIssueType } from '@/common/types';
 import { issueTypeApi } from '@/api';
 import TypeTag from '../../../components/TypeTag/TypeTag';
@@ -260,12 +261,6 @@ function IssueTypeList() {
     </div>
   ), []);
 
-  const renderTooltip = useCallback(({ value }) => (
-    <Tooltip title={value}>
-      {value}
-    </Tooltip>
-  ), []);
-
   const handleAdd = () => {
     Modal.open({
       className: styles.issueType_modal,
@@ -331,7 +326,7 @@ function IssueTypeList() {
         >
           <Column name="name" width={150} renderer={renderName} />
           <Column name="action" width={50} renderer={renderAction} />
-          <Column name="description" renderer={renderTooltip} />
+          <Column name="description" tooltip={Tooltip.overflow} />
           <Column name="typeCode" renderer={renderTypeCode} width={150} />
           {
             isOrganization && (

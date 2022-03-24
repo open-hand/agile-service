@@ -1,21 +1,21 @@
 import React, { useCallback, useMemo } from 'react';
 import {
-  Page, Header, Content, Breadcrumb,
+  Breadcrumb, Content, Header, Page,
 } from '@choerodon/boot';
-import { HeaderButtons, Action } from '@choerodon/master';
-import { Table, DataSet } from 'choerodon-ui/pro';
-import { Divider, Icon } from 'choerodon-ui';
+import { Action, HeaderButtons } from '@choerodon/master';
+import { DataSet, Table } from 'choerodon-ui/pro';
+import { Divider } from 'choerodon-ui';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { TableAutoHeightType, ColumnAlign } from 'choerodon-ui/pro/lib/table/enum';
-import { statusTransformApiConfig, ITotalStatus } from '@/api';
+import { ColumnAlign, TableAutoHeightType } from 'choerodon-ui/pro/lib/table/enum';
+import { Tooltip } from 'choerodon-ui/pro/lib/core/enum';
+import { ITotalStatus, statusTransformApiConfig } from '@/api';
 import StatusTypeTag from '@/components/tag/status-type-tag';
 import { IStatus } from '@/common/types';
-
+import useFormatMessage from '@/hooks/useFormatMessage';
 import { TabComponentProps } from '../index';
 import openCreateStatus from '../components/create-status';
 import openDeleteStatus from './DeleteStatus';
 import styles from './index.less';
-import useFormatMessage from '@/hooks/useFormatMessage';
 
 const { Column } = Table;
 const Status: React.FC<TabComponentProps> = ({ tab }) => {
@@ -135,6 +135,7 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
           />
           <Column
             name="type"
+            width={150}
             renderer={({ record }) => (
               <StatusTypeTag
                 mode="tag"
@@ -142,7 +143,13 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
               />
             )}
           />
-          <Column name="completed" align={'left' as ColumnAlign} renderer={({ value }) => <span className={styles.gray}>{value ? '是' : '否'}</span>} />
+          <Column
+            name="completed"
+            width={150}
+            align={'left' as ColumnAlign}
+            tooltip={Tooltip.overflow}
+            renderer={({ value }) => <span className={styles.gray}>{value ? '是' : '否'}</span>}
+          />
           <Column name="usage" renderer={({ value }) => <span className={styles.gray}>{value}</span>} />
         </Table>
       </Content>
