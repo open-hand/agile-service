@@ -1,9 +1,6 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.agile.api.vo.FieldPermissionVO;
-import io.choerodon.agile.api.vo.PageFieldViewParamVO;
-import io.choerodon.agile.api.vo.PageFieldViewVO;
-import io.choerodon.agile.api.vo.PermissionVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.FieldPermissionIssueService;
 import io.choerodon.agile.app.service.FieldPermissionService;
 import io.choerodon.core.iam.ResourceLevel;
@@ -81,6 +78,16 @@ public class FieldPermissionController {
                                                                                 @ApiParam(value = "参数对象", required = true)
                                                                                 @RequestBody PageFieldViewParamVO paramDTO) {
         return new ResponseEntity<>(fieldPermissionIssueService.listNoPermissionRequiredFields(organizationId, projectId, paramDTO, issueId), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "查询当前用户问题类型下没有权限的字段")
+    @GetMapping("/no_permission_fields")
+    public ResponseEntity<List<IssueTypeNoPermissionFields>> listNoPermissionFieldsByIssueType(@ApiParam(value = "项目id", required = true)
+                                                                                               @PathVariable("project_id") Long projectId,
+                                                                                               @ApiParam(value = "组织id", required = true)
+                                                                                               @RequestParam Long organizationId) {
+        return new ResponseEntity<>(fieldPermissionIssueService.listNoPermissionFieldsByIssueType(organizationId, projectId), HttpStatus.OK);
     }
 
 }

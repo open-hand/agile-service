@@ -3,10 +3,12 @@ package io.choerodon.agile.infra.dto;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * @author superlee
@@ -34,6 +36,10 @@ public class FieldPermissionDTO extends AuditDomain {
     private Long projectId;
 
     private Long organizationId;
+
+    @Transient
+    @ApiModelProperty(value = "字段编码")
+    private String fieldCode;
 
     public FieldPermissionDTO() {}
 
@@ -117,5 +123,13 @@ public class FieldPermissionDTO extends AuditDomain {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public String getFieldCode() {
+        return fieldCode;
+    }
+
+    public void setFieldCode(String fieldCode) {
+        this.fieldCode = fieldCode;
     }
 }

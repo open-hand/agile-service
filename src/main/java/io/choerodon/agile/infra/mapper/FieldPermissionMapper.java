@@ -45,4 +45,8 @@ public interface FieldPermissionMapper extends BaseMapper<FieldPermissionDTO> {
                          @Param("projectId") Long projectId,
                          @Param("fieldId") Long fieldId,
                          @Param("issueTypeId") Long issueTypeId);
+
+    List<FieldPermissionDTO> listPermissionsConfigured(@Param("projectId") Long projectId,
+                                                       @Param("organizationId") Long organizationId,
+                                                       @Param("issueTypeIds") Set<Long> issueTypeIds);
 }
