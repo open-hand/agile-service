@@ -11,6 +11,7 @@ import renderSummary from '@/components/column-renderer/summary';
 import renderStatus from '@/components/column-renderer/status';
 import renderPriority from '@/components/column-renderer/priority';
 import renderSprint from '@/components/column-renderer/sprint';
+import renderUser from '@/components/column-renderer/user';
 import SelectStatus from '@/components/select/select-status';
 import SelectPriority from '@/components/select/select-priority';
 import SelectUser from '@/components/select/select-user';
@@ -71,6 +72,9 @@ const LinkedTable: React.FC<Props> = ({ issueId, linkedTableRef, projectId }) =>
     }, {
       name: 'sprintId',
       label: '冲刺',
+    }, {
+      name: 'assigneeId',
+      label: '经办人',
     }],
     transport: {
       read: ({ params, data }) => issueApiConfig.project(projectId).getUnLinkedIssues(issueId, {
@@ -136,6 +140,7 @@ const LinkedTable: React.FC<Props> = ({ issueId, linkedTableRef, projectId }) =>
       <Column name="summary" renderer={({ record }) => renderSummary({ record, clickable: false })} />
       <Column name="issueNum" sortable width={135} />
       <Column name="statusId" sortable width={135} renderer={renderStatus} />
+      <Column name="assigneeId" sortable width={135} renderer={renderUser} />
       <Column name="priorityId" sortable width={95} renderer={renderPriority} />
       <Column name="sprintId" sortable width={135} renderer={renderSprint} />
     </Table>
