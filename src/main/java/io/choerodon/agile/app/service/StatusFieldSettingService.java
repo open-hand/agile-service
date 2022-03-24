@@ -58,6 +58,8 @@ public interface StatusFieldSettingService {
                     TriggerCarrierVO triggerCarrierVO);
 
    List<StatusFieldValueSettingDTO> convertCopyMemberFieldToDetail(List<StatusFieldValueSettingDTO> statusFieldValueSettings,
-                                                                   IssueDTO issue,
-                                                                   String fieldType);
+                                                                   Long instanceId,
+                                                                   String schemeCode,
+                                                                   String fieldType,
+                                                                   Long projectId);
 }

@@ -233,7 +233,8 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             if (ObjectUtils.isEmpty(statusFieldValueSettings)) {
                 return;
             }
-            statusFieldValueSettings = convertCopyMemberFieldToDetail(statusFieldValueSettings, issueDTO, fieldType);
+            statusFieldValueSettings =
+                    convertCopyMemberFieldToDetail(statusFieldValueSettings, issueId, ObjectSchemeCode.AGILE_ISSUE, fieldType, projectId);
             if (isSystemField) {
                 processSystemFieldValues(issueDTO, issueUpdateVO, field, versionMap, specifyMap, fieldCode, statusFieldValueSettings);
             } else {
@@ -246,8 +247,10 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
 
     @Override
     public List<StatusFieldValueSettingDTO> convertCopyMemberFieldToDetail(List<StatusFieldValueSettingDTO> statusFieldValueSettings,
-                                                                            IssueDTO issue,
-                                                                            String fieldType) {
+                                                                           Long instanceId,
+                                                                           String schemeCode,
+                                                                           String fieldType,
+                                                                           Long projectId) {
         Set<Long> fieldIds =
                 statusFieldValueSettings
                         .stream()
@@ -255,10 +258,8 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                         .map(StatusFieldValueSettingDTO::getCustomFieldId)
                         .collect(Collectors.toSet());
         if (!CollectionUtils.isEmpty(fieldIds)) {
-            Long issueId = issue.getIssueId();
-            Long projectId = issue.getProjectId();
             Set<Long> userIds =
-                    fieldValueMapper.selectByFieldIds(projectId, issueId, ObjectSchemeCode.AGILE_ISSUE, fieldIds)
+                    fieldValueMapper.selectByFieldIds(projectId, instanceId, schemeCode, fieldIds)
                             .stream()
                             .map(FieldValueDTO::getOptionId)
                             .filter(optionId -> !ObjectUtils.isEmpty(optionId))
