@@ -9,9 +9,11 @@ import './index.less';
 import { useCreation } from 'ahooks';
 import { transformFieldToRenderProps } from './utils';
 import { getFilterFields } from '@/components/field-pro/layouts';
+import useIsWaterfall from '@/hooks/useIsWaterfall';
 
 const { Option } = Select;
 const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ record, ...otherProps }) => {
+  const { isWaterfallAgile } = useIsWaterfall();
   const isRenderNullSelect = useMemo(() => !!['is', 'notIs'].includes(record.get('relation')), [record, record.get('relation')]);
   const optionDataSet = useObservable<{ dataSet: null, options?: DataSet }>({ dataSet: null, options: undefined });
   const editDefaultValue = useCreation(() => {
@@ -67,9 +69,10 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
     defaultSelectedIds: editDefaultValue.defaultValueArr,
     selected: record.get('_editDataCode') === record.get('fieldCode') ? editDefaultValue.defaultValueArr : undefined,
     style: { width: '100%' },
+    applyType: isWaterfallAgile ? '' : undefined,
     afterLoad: record.get('_editData') && record.get('_editDataCode') === record.get('fieldCode') ? handleBindOptions : undefined,
     ...otherProps,
-  }), [editDefaultValue.defaultValueArr, handleBindOptions, otherProps, record, selectStatusConfig]);
+  }), [editDefaultValue.defaultValueArr, handleBindOptions, isWaterfallAgile, otherProps, record, selectStatusConfig]);
   const chosenField = useMemo(() => transformFieldToRenderProps(record.toData(), record.get('_editData') ? [] : undefined), [record, record.get('fieldCode')]);
   const render = useCallback(() => {
     if (isRenderNullSelect) {
