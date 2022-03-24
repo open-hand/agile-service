@@ -152,4 +152,20 @@
             and ffp.issue_type_id = #{issueTypeId}
         </if>
     </select>
+
+    <select id="listPermissionsConfigured" resultType="io.choerodon.agile.infra.dto.FieldPermissionDTO">
+        select
+            ffp.*,
+            fosf.code as field_code
+        from fd_field_permission ffp
+        join fd_object_scheme_field fosf on ffp.field_id = fosf.id
+        where ffp.organization_id = #{organizationId}
+        and ffp.project_id = #{projectId}
+        <if test="issueTypeIds != null and issueTypeIds.size() > 0">
+            and ffp.issue_type_id in
+            <foreach collection="issueTypeIds" item="issueTypeId" index="index" open="(" close=")" separator=",">
+                #{issueTypeId}
+            </foreach>
+        </if>
+    </select>
 </mapper>
