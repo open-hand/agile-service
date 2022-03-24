@@ -15,6 +15,7 @@ import { IReportListBlock } from '../../store';
 import { RefProps } from '../add-modal';
 import ExportIssueContextProvider from './stores';
 import FormArea from './FormArea';
+import useIsWaterfall from '@/hooks/useIsWaterfall';
 
 const { Option } = Select;
 interface Props {
@@ -25,6 +26,7 @@ export interface ListRefProps {
   submit: () => Promise<boolean | Pick<IReportListBlock, 'searchVO'>>
 }
 const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
+  const { isWaterfallAgile } = useIsWaterfall();
   const listRef = useRef<ListRefProps>({} as ListRefProps);
   const [loading, setLoading] = useState(true);
   const [fields, setFields] = useState<IField[]>([]);
@@ -94,10 +96,10 @@ const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
   }), [editData]);
   const refresh = useCallback(async () => {
     setLoading(true);
-    const res = await fieldApi.getCustomFields();
+    const res = await fieldApi.getCustomFields(isWaterfallAgile ? '' : undefined);
     setFields(res);
     setLoading(false);
-  }, []);
+  }, [isWaterfallAgile]);
   useEffect(() => {
     refresh();
   }, [refresh]);
