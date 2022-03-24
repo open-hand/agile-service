@@ -7,7 +7,6 @@ import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import type { IntlShape } from 'react-intl';
 import { useComputed, observer, useObservable } from 'mobx-react-lite';
 import { AppStateProps, IModalProps } from '@/common/types';
-import { getApplyType } from '@/utils/common';
 import FormDataSet from './FormDataSet';
 import useStore, { Store as HookStore } from './useStore';
 import { IFieldPostDataProps } from '../CreateField';
