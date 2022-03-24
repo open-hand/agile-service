@@ -3,6 +3,7 @@ import {
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react';
 import moment from 'moment';
+import classnames from 'classnames';
 import React, { Component } from 'react';
 import { fieldApi } from '@/api';
 import SelectUser from '@/components/select/select-user';
@@ -133,7 +134,7 @@ const EditorMap = new Map([
       submitTrigger.push('click');
     }
     return (
-      <div className="line-start mt-10">
+      <div className={classnames('line-start mt-10', { 'line-start-100': fieldType === 'text' })}>
         <div className="c7n-property-wrapper">
           <span className="c7n-property">
             {`${fieldName}`}
@@ -148,7 +149,7 @@ const EditorMap = new Map([
             editor={this.renderEditor}
             submitTrigger={submitTrigger}
           >
-            <div style={{ maxWidth: 200, wordBreak: 'break-all', whiteSpace: 'pre-line' }}>
+            <div style={{ maxWidth: fieldType === 'text' ? '100%' : 200, wordBreak: 'break-all', whiteSpace: 'pre-line' }}>
               {['member', 'multiMember'].includes(fieldType) && valueStr
                 ? <UserTag data={valueStr} /> : (valueStr || '无')}
             </div>
