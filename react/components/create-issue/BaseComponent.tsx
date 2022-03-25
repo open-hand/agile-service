@@ -235,7 +235,7 @@ const hasValue = (dataSet: DataSet, field: IssueCreateFields) => (isMultiple(fie
  */
 function preCascadeFieldAfterLoad(field: IssueCreateFields & { [key: string]: any }, rules: ICascadeLinkage[] = []): boolean {
   const oldBindRulesFromField: any[] = get(field, '_rules', []);
-  const res = (oldBindRulesFromField.length + rules.length) ? false : !Object.is(oldBindRulesFromField, rules);
+  const res = !(oldBindRulesFromField.length + rules.length) ? false : !Object.is(oldBindRulesFromField, rules);
   set(field, '_rules', rules);
   return res;
 }
