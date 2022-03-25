@@ -8,6 +8,7 @@ import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.api.vo.business.IssueListVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.app.service.AgilePluginService;
+import io.choerodon.agile.app.service.IssueTypeService;
 import io.choerodon.agile.app.service.LookupValueService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
@@ -66,6 +67,8 @@ public class IssueAssembler extends AbstractAssembler {
     private LookupValueService lookupValueService;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
+    @Autowired
+    private IssueTypeService issueTypeService;
 
     /**
      * issueDetailDO转换到IssueDTO
@@ -756,8 +759,7 @@ public class IssueAssembler extends AbstractAssembler {
     public  List<IssueLinkVO> issueDTOTOVO(Long projectId, List<IssueDTO> issueDTOs){
         List<IssueLinkVO> issueLinkVOList = new ArrayList<>(issueDTOs.size());
         if (!issueDTOs.isEmpty()) {
-            Map<Long, IssueTypeVO> testIssueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.TEST);
-            Map<Long, IssueTypeVO> agileIssueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.AGILE);
+            Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(ConvertUtil.getOrganizationId(projectId), projectId);
             Map<Long, StatusVO> statusMapDTOMap =
                     issueStatusMapper.listWithCompleted(projectId, ConvertUtil.getOrganizationId(projectId)).stream()
                             .collect(Collectors.toMap(StatusVO::getId, Function.identity()));
@@ -769,11 +771,7 @@ public class IssueAssembler extends AbstractAssembler {
                 String imageUrl = assigneeName != null ? usersMap.get(issueLinkDO.getAssigneeId()).getImageUrl() : null;
                 io.choerodon.agile.api.vo.IssueLinkVO issueLinkVO = new io.choerodon.agile.api.vo.IssueLinkVO();
                 BeanUtils.copyProperties(issueLinkDO, issueLinkVO);
-                if (issueLinkDO.getApplyType().equals(SchemeApplyType.TEST)) {
-                    issueLinkVO.setIssueTypeVO(testIssueTypeDTOMap.get(issueLinkDO.getIssueTypeId()));
-                } else {
-                    issueLinkVO.setIssueTypeVO(agileIssueTypeDTOMap.get(issueLinkDO.getIssueTypeId()));
-                }
+                issueLinkVO.setIssueTypeVO(issueTypeDTOMap.get(issueLinkDO.getIssueTypeId()));
                 issueLinkVO.setStatusVO(statusMapDTOMap.get(issueLinkDO.getStatusId()));
                 issueLinkVO.setPriorityVO(priorityDTOMap.get(issueLinkDO.getPriorityId()));
                 issueLinkVO.setAssigneeName(assigneeName);
