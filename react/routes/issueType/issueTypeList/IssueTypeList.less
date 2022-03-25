@@ -5,22 +5,22 @@
       color: var(--text-color);
     }
   
-  .status {
-    display: inline-block;
-    color: #FFFFFF;
-    font-size: 12px;
-    padding: 0 7px;
-    height: 18px;
-    line-height: 18px;
-    border-radius: 2px;
-    margin-top: -4px;
-  }
-  .status_true {
-    background-color: #00BFA5;
-  }
-  .status_false {
-    background-color: #C6C6C6;
-  }
+    .status {
+      display: inline-block;
+      color: #FFFFFF;
+      font-size: 12px;
+      padding: 0 7px;
+      height: 18px;
+      line-height: 18px;
+      border-radius: 2px;
+      margin-top: -4px;
+    }
+    .status_true {
+      background-color: #00BFA5;
+    }
+    .status_false {
+      background-color: #C6C6C6;
+    }
   
     :global {
       table {
@@ -29,6 +29,15 @@
             color: var(--text-color3);
           }
         }
+      }
+    }
+
+    .name {
+      &_drag {
+        color: var(--text-color3);
+        vertical-align: sub;
+        margin-right: .04rem;
+        margin-left: -0.04rem;
       }
     }
   }
