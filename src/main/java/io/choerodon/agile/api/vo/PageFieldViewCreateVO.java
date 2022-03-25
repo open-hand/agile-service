@@ -49,4 +49,14 @@ public class PageFieldViewCreateVO {
     public void setValue(Object value) {
         this.value = value;
     }
+
+    @Override
+    public String toString() {
+        return "PageFieldViewCreateVO{" +
+                "fieldId=" + fieldId +
+                ", fieldType='" + fieldType + '\'' +
+                ", value=" + value +
+                ", fieldCode='" + fieldCode + '\'' +
+                '}';
+    }
 }
