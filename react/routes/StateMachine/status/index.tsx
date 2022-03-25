@@ -3,11 +3,10 @@ import {
   Breadcrumb, Content, Header, Page,
 } from '@choerodon/boot';
 import { Action, HeaderButtons } from '@choerodon/master';
-import { DataSet, Table } from 'choerodon-ui/pro';
+import { DataSet, Table, Tooltip } from 'choerodon-ui/pro';
 import { Divider } from 'choerodon-ui';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { ColumnAlign, TableAutoHeightType } from 'choerodon-ui/pro/lib/table/enum';
-import { Tooltip } from 'choerodon-ui/pro/lib/core/enum';
 import { ITotalStatus, statusTransformApiConfig } from '@/api';
 import StatusTypeTag from '@/components/tag/status-type-tag';
 import { IStatus } from '@/common/types';
@@ -147,10 +146,9 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
             name="completed"
             width={150}
             align={'left' as ColumnAlign}
-            tooltip={Tooltip.overflow}
             renderer={({ value }) => <span className={styles.gray}>{value ? '是' : '否'}</span>}
           />
-          <Column name="usage" renderer={({ value }) => <span className={styles.gray}>{value}</span>} />
+          <Column name="usage" renderer={({ value }) => <Tooltip title={value}><span className={styles.gray}>{value}</span></Tooltip>} />
         </Table>
       </Content>
     </Page>
