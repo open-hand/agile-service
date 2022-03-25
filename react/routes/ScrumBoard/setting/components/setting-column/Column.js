@@ -202,7 +202,7 @@ class Column extends Component {
                         editor={() => (
                           <NumberField
                             autoFocus
-                            min={0}
+                            min={data.minNum || 0}
                             step={1}
                             style={{ width: '160px' }}
                           />
@@ -241,6 +241,7 @@ class Column extends Component {
                           <NumberField
                             autoFocus
                             min={0}
+                            max={data.maxNum}
                             step={1}
                             style={{ width: '160px' }}
                           />
