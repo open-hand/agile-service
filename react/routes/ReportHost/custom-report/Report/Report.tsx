@@ -182,7 +182,14 @@ const CustomReport: React.FC<Props> = (props) => {
     getCustomFields();
   }, [isWaterfallAgile]);
 
-  const fields = useMemo(() => [...customFields, ...getSystemFields().filter((field) => !field.archive && !field.noDisplay)], [customFields]);
+  const fields = useMemo(() => {
+    const allField = [...customFields, ...getSystemFields().filter((field) => !field.archive && !field.noDisplay)];
+    if (isWaterfallAgile) {
+      const issueTypeField = allField.find((field) => field.code === 'issueTypeId');
+      issueTypeField && Object.assign(issueTypeField, { otherComponentProps: { applyType: '' } });
+    }
+    return allField;
+  }, [customFields, isWaterfallAgile]);
 
   const [choseDataProps, choseComponentProps] = useChoseField({
     fields,
