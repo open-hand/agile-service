@@ -579,6 +579,7 @@ const CreateIssueBase = observer(({
     }
     // 创建一个新的
     newDataSet.create(newValue);
+    newDataSet.current && oldDataSet.current && set(newDataSet.current, 'state', oldDataSet.current?.state);
     setDataSet(newDataSet);
     setSummaryValue(newDataSet);
   }, [defaultFeature, fields, getDefaultValue, handleUpdate, isInProgram, isShowFeature, isSubIssue, issueTypeCode, issueTypeId, parentIssue, rules, setSummaryValue, showFeature, templateData, templateSummary]);
