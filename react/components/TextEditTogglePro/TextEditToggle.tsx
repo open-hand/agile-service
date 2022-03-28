@@ -4,11 +4,12 @@ import React, {
 import FormField from 'choerodon-ui/pro/lib/field';
 import TriggerField from 'choerodon-ui/pro/lib/trigger-field';
 import { toJS } from 'mobx';
+import { noop } from 'lodash';
 import {
   isEqual, isEqualWith, isNull, isUndefined,
 } from 'lodash';
 import classNames from 'classnames';
-import { useCreation } from 'ahooks';
+import { useCreation, useUpdateEffect } from 'ahooks';
 import useClickOut from '@/hooks/useClickOut';
 import styles from './TextEditToggle.less';
 
@@ -44,6 +45,8 @@ interface Props {
   textClassName?: string
   onSubmit: (data: any) => void
   initValue: any
+  showEdit?: boolean // 手动进入编辑状态
+  setShowEdit?: () => void,
 }
 /**
  * 统一化空值
@@ -62,7 +65,7 @@ function customizer(val1: any, val2: any) {
 }
 const TextEditToggle: React.FC<Props> = ({
   disabled, submitTrigger = ['blur'], editor, editorTrigger = ['focus'], editorExtraContent, children: text,
-  className, onSubmit, initValue, alwaysRender = true, mountRenderEditor = true, textClassName = '',
+  className, onSubmit, initValue, alwaysRender = true, mountRenderEditor = true, textClassName = '', showEdit, setShowEdit = noop,
 } = {} as Props) => {
   const editTriggerConfigRef = useRef<TextEditToggleInnerEditorConfig>();
   const editTriggerConfig: TextEditToggleInnerEditorConfig = useMemo(() => {
@@ -92,6 +95,11 @@ const TextEditToggle: React.FC<Props> = ({
     height: containerRef.current?.getBoundingClientRect().height,
   }), [editing]);
   editingRef.current = editing;
+  useUpdateEffect(() => {
+    if (showEdit && !editing) {
+      setEditing(true);
+    }
+  }, [showEdit]);
   useEffect(() => {
     dataRef.current = initValue;
     setValue(initValue);
@@ -116,6 +124,7 @@ const TextEditToggle: React.FC<Props> = ({
       }
       // 延迟一会隐藏
       setEditing(false);
+      setShowEdit!();
     }
   };
   const showEditor = useCallback(() => {
