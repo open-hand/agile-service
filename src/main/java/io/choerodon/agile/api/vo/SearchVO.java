@@ -45,6 +45,8 @@ public class SearchVO {
 
     private List<ObjectSchemeFieldVO> displayFields;
 
+    private Boolean spentWorkTimeWithSub;
+
     public List<ObjectSchemeFieldVO> getDisplayFields() {
         return displayFields;
     }
@@ -139,6 +141,14 @@ public class SearchVO {
 
     public void setApplyTypes(List<String> applyTypes) {
         this.applyTypes = applyTypes;
+    }
+
+    public Boolean getSpentWorkTimeWithSub() {
+        return spentWorkTimeWithSub;
+    }
+
+    public void setSpentWorkTimeWithSub(Boolean spentWorkTimeWithSub) {
+        this.spentWorkTimeWithSub = spentWorkTimeWithSub;
     }
 
     @Override
