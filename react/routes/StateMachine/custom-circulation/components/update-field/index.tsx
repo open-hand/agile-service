@@ -351,7 +351,7 @@ const UpdateField = ({
   })), [fieldData]);
 
   const numberFields = useMemo(() => fieldData.filter((field) => field.fieldType === 'number').map((field) => {
-    if (field.code === 'storyPoints' || field.code === 'remainingTime' || field.code === 'estimateTime') {
+    if (field.code === 'storyPoints' || field.code === 'remainingTime' || field.code === 'estimateTime' || field.code === 'progress') {
       return {
         name: field.code,
         type: 'number' as FieldType,
