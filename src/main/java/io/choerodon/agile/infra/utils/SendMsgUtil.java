@@ -100,7 +100,7 @@ public class SendMsgUtil {
     @Async
     public void sendMsgByIssueCreate(Long projectId, IssueVO result, Long operatorId) {
         //发送消息
-        if (SchemeApplyType.AGILE.equals(result.getApplyType())) {
+        if (checkApplyType(result.getApplyType())) {
             List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_CREATE, result);
             String summary = result.getIssueNum() + "-" + result.getSummary();
             String reporterName = result.getReporterName();
@@ -170,7 +170,7 @@ public class SendMsgUtil {
                                        List<String> fieldList,
                                        IssueVO result,
                                        Long operatorId) {
-        if (fieldList.contains("assigneeId") && result.getAssigneeId() != null && SchemeApplyType.AGILE.equals(result.getApplyType())) {
+        if (fieldList.contains("assigneeId") && result.getAssigneeId() != null && checkApplyType(result.getApplyType())) {
             List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUEASSIGNEE", result);
             String summary = result.getIssueNum() + "-" + result.getSummary();
             String assigneeName = result.getAssigneeName();
@@ -207,7 +207,7 @@ public class SendMsgUtil {
                                        IssueVO result,
                                        Long operatorId) {
         Boolean completed = issueStatusMapper.selectByStatusId(projectId, result.getStatusId()).getCompleted();
-        if (fieldList.contains(STATUS_ID) && completed != null && completed && result.getAssigneeId() != null && SchemeApplyType.AGILE.equals(result.getApplyType())) {
+        if (fieldList.contains(STATUS_ID) && completed != null && completed && result.getAssigneeId() != null && checkApplyType(result.getApplyType())) {
             List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_SOLVE, result);
             ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
             String projectName = convertProjectName(projectVO);
@@ -519,7 +519,7 @@ public class SendMsgUtil {
     @Async
     public void sendMsgToCustomFieldUsersByIssueCreate(Long projectId, IssueVO result, Long operatorId) {
         //问题创建通知自定义字段人员（普通创建、快速创建、问题导入）
-        if (SchemeApplyType.AGILE.equals(result.getApplyType())) {
+        if (checkApplyType(result.getApplyType())) {
             List<Long> userIds = noticeService.queryCustomFieldUserIdsByProjectId(projectId, ISSUE_CREATE, result);
             if (CollectionUtils.isEmpty(userIds)) {
                 return;
@@ -534,7 +534,7 @@ public class SendMsgUtil {
 
     @Async
     public void sendMsgByIssueParticipant(Long projectId, List<String> fieldList, IssueVO result, Long operatorId) {
-        if (fieldList.contains("participantIds") && SchemeApplyType.AGILE.equals(result.getApplyType())) {
+        if (fieldList.contains("participantIds") && checkApplyType(result.getApplyType())) {
             if (CollectionUtils.isEmpty(result.getParticipants())){
               return;
             }
@@ -552,5 +552,9 @@ public class SendMsgUtil {
             List<Long> participantIds = result.getParticipants().stream().map(UserMessageDTO::getId).collect(Collectors.toList());
             siteMsgUtil.issueParticipant(summary, url.toString(), projectId, operatorId, userIds, reporterName, participantIds);
         }
+    }
+
+    private boolean checkApplyType(String applyType) {
+        return SchemeApplyType.AGILE.equals(applyType) || SchemeApplyType.WATERFALL.equals(applyType);
     }
 }
