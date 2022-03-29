@@ -378,7 +378,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
 
     if (ganttColumnMap.has(columnCode)) {
       const field = ganttColumnMap.get(columnCode);
-      merge(baseColumn, { ...field, sortable: true });
+      merge(baseColumn, { ...field, sortable: columnCode !== 'predecessor' });
     }
     const { render, name } = baseColumn;
     return merge(baseColumn, {
