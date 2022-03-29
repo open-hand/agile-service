@@ -381,7 +381,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         }
         List<String> categoryCodes = getProjectCategoryCodes(projectId);
         boolean doFilter =
-                categoryCodes.contains(ProjectCategory.MODULE_AGILE)
+                ProjectCategory.containsAgile(categoryCodes)
                         && !categoryCodes.contains(ProjectCategory.MODULE_DEVOPS);
         if (doFilter) {
             Object obj = list.get(0);

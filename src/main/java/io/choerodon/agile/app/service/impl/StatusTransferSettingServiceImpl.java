@@ -4,16 +4,15 @@ import io.choerodon.agile.api.vo.StatusTransferSettingCreateVO;
 import io.choerodon.agile.api.vo.StatusTransferSettingVO;
 import io.choerodon.agile.api.vo.UserVO;
 import io.choerodon.agile.app.assembler.StatusTransferSettingAssembler;
-import io.choerodon.agile.app.service.OrganizationConfigService;
-import io.choerodon.agile.app.service.ProjectConfigService;
-import io.choerodon.agile.app.service.StatusTransferSettingService;
-import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.StatusMapper;
 import io.choerodon.agile.infra.mapper.StatusTransferSettingMapper;
+import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -58,6 +57,11 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
     private IssueMapper issueMapper;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired(required = false)
+    private AgileWaterfallService agileWaterfallService;
+
+    private static final List<String> WATERFALL_ISSUE_TYPES = Arrays.asList(IssueTypeCode.WATERFALL_ISSUE_TYPE_CODE);
+
 
     @Override
     public void createOrUpdate(Long projectId, Long issueTypeId, Long statusId,Long objectVersionNumber,String applyType,List<StatusTransferSettingCreateVO> list) {
@@ -263,6 +267,22 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
     @Override
     public List<StatusDTO> queryNotAllowedTransferStatus(Long projectId, Long issueId) {
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
+        AssertUtilsForCommonException.notNull(issueDTO, "error.issue.not.existed");
+        String typeCode = issueDTO.getTypeCode();
+        if (WATERFALL_ISSUE_TYPES.contains(typeCode)) {
+            if (!ObjectUtils.isEmpty(agileWaterfallService)) {
+                return agileWaterfallService.queryWaterfallNotAllowedTransferStatus(issueDTO);
+            } else {
+                return Collections.emptyList();
+            }
+        } else {
+            return queryAgileNotAllowedTransferStatus(issueDTO);
+        }
+    }
+
+    private List<StatusDTO> queryAgileNotAllowedTransferStatus(IssueDTO issueDTO) {
+        Long projectId = issueDTO.getProjectId();
+        Long issueId = issueDTO.getIssueId();
         Boolean subIssue = ("sub_task".equals(issueDTO.getTypeCode())) || ("bug".equals(issueDTO.getTypeCode()) && !ObjectUtils.isEmpty(issueDTO.getRelateIssueId()) && !Objects.equals(0L, issueDTO.getRelateIssueId()));
         if (Boolean.TRUE.equals(subIssue)) {
             return new ArrayList<>();

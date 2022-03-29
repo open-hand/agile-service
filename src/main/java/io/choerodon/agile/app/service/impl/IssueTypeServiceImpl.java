@@ -142,12 +142,12 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     static {
         TYPE_CODE_CATEGORY_MAP = new HashMap<>();
-        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.BUG.value(), Arrays.asList(ProjectCategory.MODULE_AGILE));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.BUG.value(), Arrays.asList(ProjectCategory.MODULE_AGILE, ProjectCategory.MODULE_WATERFALL_AGILE));
         TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.FEATURE.value(), Arrays.asList(ProjectCategory.MODULE_PROGRAM));
         TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.ISSUE_EPIC.value(), Arrays.asList(ProjectCategory.MODULE_PROGRAM, ProjectCategory.MODULE_AGILE));
-        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.STORY.value(), Arrays.asList(ProjectCategory.MODULE_AGILE));
-        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.SUB_TASK.value(), Arrays.asList(ProjectCategory.MODULE_AGILE));
-        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.TASK.value(), Arrays.asList(ProjectCategory.MODULE_AGILE));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.STORY.value(), Arrays.asList(ProjectCategory.MODULE_AGILE, ProjectCategory.MODULE_WATERFALL_AGILE));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.SUB_TASK.value(), Arrays.asList(ProjectCategory.MODULE_AGILE, ProjectCategory.MODULE_WATERFALL_AGILE));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.TASK.value(), Arrays.asList(ProjectCategory.MODULE_AGILE, ProjectCategory.MODULE_WATERFALL_AGILE));
         TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.BACKLOG.value(), Arrays.asList(ProjectCategory.MODULE_BACKLOG));
         TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.STAGE.value(), Arrays.asList(ProjectCategory.MODULE_WATERFALL));
         TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.MILESTONE.value(), Arrays.asList(ProjectCategory.MODULE_WATERFALL));
@@ -368,7 +368,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         ProjectVO project = ConvertUtil.queryProject(projectId);
         Set<String> codes = new HashSet<>(ProjectCategory.getProjectCategoryCodes(project));
         List<String> issueTypes = new ArrayList<>(AGILE_CREATE_ISSUE_TYPES);
-        if (codes.contains(ProjectCategory.MODULE_AGILE)
+        if (ProjectCategory.containsAgile(new ArrayList<>(codes))
                 && !issueTypes.contains(typeCode)) {
             throw new CommonException("error.illegal.type.code");
         }
@@ -886,7 +886,9 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         int agileProjectCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_AGILE)).map(Set::size).orElse(0);
         int programProjectCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_PROGRAM)).map(Set::size).orElse(0);
         int agileAndProgramCount = Optional.ofNullable(categoryProjectMap.get(AGILE_AND_PROGRAM)).map(Set::size).orElse(0);
-        int total = agileProjectCount + programProjectCount - agileAndProgramCount;
+        int waterfallCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_WATERFALL)).map(Set::size).orElse(0);
+        int waterfallAndAgileCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_WATERFALL_AGILE)).map(Set::size).orElse(0);
+        int total = agileProjectCount + programProjectCount - agileAndProgramCount - waterfallAndAgileCount;
         int backlogProjectCount = queryBacklogProjectCount(categoryProjectMap.get(ProjectCategory.MODULE_BACKLOG));
         result.forEach(x -> {
             if (Boolean.TRUE.equals(x.getInitialize())) {
@@ -902,6 +904,9 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                 }
                 if (IssueTypeCode.FEATURE.value().equals(typeCode)) {
                     x.setUsageCount(programProjectCount);
+                }
+                if (WATERFALL_ISSUE_TYPES.contains(typeCode)) {
+                    x.setUsageCount(waterfallCount);
                 }
             }
         });
@@ -930,7 +935,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
             if (!ObjectUtils.isEmpty(categories)) {
                 Set<String> codes = categories.stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toSet());
-                boolean containsAgile = codes.contains(ProjectCategory.MODULE_AGILE);
+                boolean containsAgile = ProjectCategory.containsAgile(new ArrayList<>(codes));
                 if (containsAgile) {
                     Set<Long> projectIds = map.computeIfAbsent(ProjectCategory.MODULE_AGILE, k -> new HashSet<>());
                     projectIds.add(projectId);
@@ -948,6 +953,16 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                 boolean isAgileAndProgram = containsAgile && containsProgram;
                 if (isAgileAndProgram) {
                     Set<Long> projectIds = map.computeIfAbsent(AGILE_AND_PROGRAM, k -> new HashSet<>());
+                    projectIds.add(projectId);
+                }
+                boolean isWaterfall = codes.contains(ProjectCategory.MODULE_WATERFALL);
+                if (isWaterfall) {
+                    Set<Long> projectIds = map.computeIfAbsent(ProjectCategory.MODULE_WATERFALL, k -> new HashSet<>());
+                    projectIds.add(projectId);
+                }
+                boolean isWaterfallAndAgile = codes.contains(ProjectCategory.MODULE_WATERFALL_AGILE);
+                if (isWaterfallAndAgile) {
+                    Set<Long> projectIds = map.computeIfAbsent(ProjectCategory.MODULE_WATERFALL_AGILE, k -> new HashSet<>());
                     projectIds.add(projectId);
                 }
             }

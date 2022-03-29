@@ -151,6 +151,7 @@ const afterLoadKeyMap = new Map([
 ]);
 
 const lineField = ['summary', 'description'];
+const lineFieldType = ['text'];
 const reuseFields = ['issueType', 'summary', 'description'];
 const pageCascadeFields = ['component', 'priority', 'fixVersion', 'influenceVersion'];
 const wsjfFields = ['userBusinessValue', 'timeCriticality', 'rrOeValue', 'jobSize'];
@@ -851,6 +852,7 @@ const CreateIssueBase = observer(({
           defaultValueObj: field?.defaultValueObj,
           defaultValueObjs: field?.defaultValueObjs,
         });
+        const isLineField = lineField.includes(dataSetField.name) || lineFieldType.includes(fieldType);
         if (extraProps.hidden) {
           return null;
         }
@@ -865,8 +867,8 @@ const CreateIssueBase = observer(({
               style: {
                 width: '100%',
               },
-              colSpan: lineField.includes(dataSetField.name) ? 2 : 1,
-              newLine: lineField.includes(dataSetField.name),
+              colSpan: isLineField ? 2 : 1,
+              newLine: isLineField,
               ...extraProps,
             }),
             name === 'description' ? (

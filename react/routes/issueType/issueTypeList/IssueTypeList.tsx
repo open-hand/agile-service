@@ -1,17 +1,17 @@
-import React, {
-  useContext, useCallback,
-} from 'react';
+import React, { useCallback, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { withRouter } from 'react-router-dom';
 import {
-  Table, Dropdown, Icon, Menu, Modal,
+  Dropdown, Icon, Menu, Modal, Table,
 } from 'choerodon-ui/pro';
 import {
-  Content, Page, Breadcrumb, Choerodon, Header,
+  Breadcrumb, Choerodon, Content, Header, Page,
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
+import { ColumnAlign } from 'choerodon-ui/pro/lib/table/enum';
+import { Tooltip } from 'choerodon-ui/pro/lib/core/enum';
 import { IIssueType } from '@/common/types';
 import { issueTypeApi } from '@/api';
 import TypeTag from '../../../components/TypeTag/TypeTag';
@@ -61,6 +61,7 @@ function IssueTypeList() {
     };
     return (
       <div className={styles.name}>
+        <Icon type="baseline-drag_indicator" className={styles.name_drag} />
         <TypeTag
           data={data as IIssueType}
           showName
@@ -326,8 +327,8 @@ function IssueTypeList() {
         >
           <Column name="name" width={150} renderer={renderName} />
           <Column name="action" width={50} renderer={renderAction} />
-          <Column name="description" />
-          <Column name="typeCode" renderer={renderTypeCode} />
+          <Column name="description" tooltip={Tooltip.overflow} />
+          <Column name="typeCode" renderer={renderTypeCode} width={150} />
           {
             isOrganization && (
               <Column name="usage" renderer={renderUsage} />
@@ -345,7 +346,7 @@ function IssueTypeList() {
           }
           {
             !isOrganization && (
-              <Column name="enabled" renderer={renderStatus} />
+              <Column name="enabled" renderer={renderStatus} width={150} align={ColumnAlign.left} />
             )
           }
         </Table>

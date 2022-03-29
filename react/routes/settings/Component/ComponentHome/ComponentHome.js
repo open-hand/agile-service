@@ -14,6 +14,9 @@ import DeleteComponent from '../ComponentComponent/DeleteComponent';
 import Store from './stores';
 import openComponentModal from '../ComponentComponent/CreateModal';
 import useFormatMessage from '@/hooks/useFormatMessage';
+import useIsWaterfall from '@/hooks/useIsWaterfall';
+import { linkUrl } from '@/utils/to';
+import LINK_URL from '@/constants/LINK_URL';
 
 const { AppState } = stores;
 const deleteKey = Modal.key();
@@ -21,6 +24,7 @@ const { Column } = Table;
 
 function ComponentHome() {
   const { dataSet, history } = useContext(Store);
+  const { isWaterfallAgile } = useIsWaterfall();
   const formatMessage = useFormatMessage('agile.setting');
   const menu = AppState.currentMenuType;
   const urlParams = AppState.currentMenuType;
@@ -97,7 +101,13 @@ function ComponentHome() {
         renderer={({ text: issueCount, record }) => (
           issueCount ? (
             <Link
-              to={`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramType=component&paramId=${encodeURIComponent(record.get('componentId'))}&paramName=${encodeURIComponent(`模块"${record.get('name')}"下的工作项`)}`}
+              to={linkUrl(isWaterfallAgile ? '/waterfall/wbs' : LINK_URL.workListIssue, {
+                params: {
+                  paramId: record.get('componentId'),
+                  paramType: 'component',
+                  paramName: `模块"${record.get('name')}"下的工作项`,
+                },
+              })}
             >
               {issueCount}
               {'issues'}

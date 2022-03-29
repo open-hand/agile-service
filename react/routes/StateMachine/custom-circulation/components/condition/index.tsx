@@ -278,7 +278,7 @@ const Condition: React.FC<Props> = ({
           </div>
         </Dropdown>
         {
-          includes(['story', 'task', 'bug'], selectedTypeCode) && (
+          includes(['story', 'task', 'bug', ...WATERFALL_TYPE_CODES], selectedTypeCode) && (
             <>
               <Divider className={styles.divider} />
               <Form dataSet={conditionDataSet}>

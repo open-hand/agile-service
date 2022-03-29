@@ -15,6 +15,7 @@ import {
 import FastSearchForm from './FastSearchForm';
 import { IFastSearchEditData } from './types';
 import styles from './index.less';
+import useIsWaterfall from '@/hooks/useIsWaterfall';
 
 interface FastSearchProps {
   modal?: IModalProps,
@@ -27,6 +28,7 @@ const FastSearch: React.FC<FastSearchProps> = ({
   modal, data: originData, isInProgram, onOK,
 }) => {
   const isEditMode = !!originData;
+  const { isWaterfallAgile } = useIsWaterfall();
   const handleCheckName = useCallback(async (value: any) => {
     if (originData?.name === value) {
       return true;
@@ -58,10 +60,12 @@ const FastSearch: React.FC<FastSearchProps> = ({
     paging: false,
   }), []);
   const loadAttributeData = useCallback(async () => {
-    const data = await Promise.all<any[], any[]>([quickFilterApi.loadField(), fieldApi.getCustomFields()])
-      .then(([preDefinedField, customField]) => ([...preDefinedField, ...isInProgram ? [{ fieldCode: 'feature', type: 'long', name: '特性' }] : [], ...customField].map(getFastSearchAttribute) || []));
+    const data = await Promise.all<[any[], any[]]>([quickFilterApi.loadField(), fieldApi.getCustomFields(isWaterfallAgile ? '' : undefined)])
+      .then(([preDefinedField, customField]) => ([...preDefinedField, ...isWaterfallAgile ? [{
+        fieldCode: 'progress', fieldType: 'number', type: 'long', name: '进度',
+      }] : [], ...isInProgram ? [{ fieldCode: 'feature', type: 'long', name: '特性' }] : [], ...customField].map(getFastSearchAttribute) || []));
     return data;
-  }, [isInProgram]);
+  }, [isInProgram, isWaterfallAgile]);
   const searchConditionDs = useMemo(() => new DataSet({
     autoCreate: false,
     autoQuery: false,

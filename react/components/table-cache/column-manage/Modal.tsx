@@ -129,6 +129,7 @@ const openColumnManageModal = (props: ColumnManageProps) => {
       width: MODAL_WIDTH.small,
     },
     children: <ColumnManageModal {...props} />,
+    className: styles.columnModal,
   });
 };
 interface CustomColumnManageProps extends ColumnManageProps {

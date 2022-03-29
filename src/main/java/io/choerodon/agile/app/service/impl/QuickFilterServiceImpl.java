@@ -10,15 +10,13 @@ import io.choerodon.agile.api.vo.QuickFilterSearchVO;
 import io.choerodon.agile.api.vo.QuickFilterSequenceVO;
 import io.choerodon.agile.api.vo.QuickFilterVO;
 import io.choerodon.agile.api.vo.QuickFilterValueVO;
-import io.choerodon.agile.app.service.AgilePluginService;
-import io.choerodon.agile.app.service.ObjectSchemeFieldService;
-import io.choerodon.agile.app.service.QuickFilterFieldService;
-import io.choerodon.agile.app.service.QuickFilterService;
+import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.BoardQuickFilterRelDTO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.QuickFilterDTO;
 import io.choerodon.agile.infra.dto.QuickFilterFieldDTO;
 import io.choerodon.agile.infra.enums.CustomFieldType;
+import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.mapper.BoardQuickFilterRelMapper;
 import io.choerodon.agile.infra.mapper.QuickFilterFieldMapper;
 import io.choerodon.agile.infra.mapper.QuickFilterMapper;
@@ -88,6 +86,8 @@ public class QuickFilterServiceImpl implements QuickFilterService {
     private QuickFilterFieldService quickFilterFieldService;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
+    @Autowired(required = false)
+    private AgileWaterfallService agileWaterfallService;
     @Autowired
     private BoardQuickFilterRelMapper boardQuickFilterRelMapper;
 
@@ -380,6 +380,9 @@ public class QuickFilterServiceImpl implements QuickFilterService {
         String operation = quickFilterValueVO.getOperation();
         if (agilePluginService != null && "feature".equals(quickFilterValueVO.getFieldCode())) {
             agilePluginService.appendProgramFieldSql(sqlQuery, quickFilterValueVO, value, operation, projectId);
+        }
+        if (agileWaterfallService != null && FieldCode.PROGRESS.equals(quickFilterValueVO.getFieldCode())) {
+            agileWaterfallService.appendWaterfallFiledSql(sqlQuery, quickFilterValueVO, value, operation, projectId);
         }
         else {
             processPredefinedField(sqlQuery, quickFilterValueVO, value, operation);

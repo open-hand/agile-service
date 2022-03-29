@@ -41,9 +41,11 @@ public class SearchVO {
 
     private Boolean ganttDefaultOrder = false;
 
-    private String applyType;
+    private List<String> applyTypes;
 
     private List<ObjectSchemeFieldVO> displayFields;
+
+    private Boolean spentWorkTimeWithSub;
 
     public List<ObjectSchemeFieldVO> getDisplayFields() {
         return displayFields;
@@ -133,12 +135,20 @@ public class SearchVO {
         return assigneeFilterIds;
     }
 
-    public String getApplyType() {
-        return applyType;
+    public List<String> getApplyTypes() {
+        return applyTypes;
     }
 
-    public void setApplyType(String applyType) {
-        this.applyType = applyType;
+    public void setApplyTypes(List<String> applyTypes) {
+        this.applyTypes = applyTypes;
+    }
+
+    public Boolean getSpentWorkTimeWithSub() {
+        return spentWorkTimeWithSub;
+    }
+
+    public void setSpentWorkTimeWithSub(Boolean spentWorkTimeWithSub) {
+        this.spentWorkTimeWithSub = spentWorkTimeWithSub;
     }
 
     @Override

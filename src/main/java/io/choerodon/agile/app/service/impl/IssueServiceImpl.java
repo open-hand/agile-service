@@ -1167,17 +1167,25 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Long sprintId = executionUpdateIssueVO.getSprintId();
         Map<Long, Long> map = executionUpdateIssueVO.getIssueTypeStatusMap();
         IssueDetailDTO issueDetailDTO = issueMapper.queryIssueDetail(projectId, issueId);
+        String issueTypeCode = issueDetailDTO.getIssueTypeCode();
+        List<String> waterfallIssueTypes = Arrays.asList(IssueTypeCode.WATERFALL_ISSUE_TYPE_CODE);
+        if (!waterfallIssueTypes.contains(issueTypeCode)) {
+            //敏捷问题需要测试计划关联冲刺才可执行
+            if (ObjectUtils.isEmpty(sprintId)) {
+                return;
+            }
+            IssueSprintRelDTO issueSprintRelDTO = new IssueSprintRelDTO();
+            issueSprintRelDTO.setProjectId(projectId);
+            issueSprintRelDTO.setSprintId(sprintId);
+            issueSprintRelDTO.setIssueId(issueId);
+            List<IssueSprintRelDTO> sprintRelDTOS = issueSprintRelMapper.select(issueSprintRelDTO);
+            if (CollectionUtils.isEmpty(sprintRelDTOS)) {
+                return;
+            }
+        }
         Long issueTypeId = issueDetailDTO.getIssueTypeId();
         Long currentStatusId = issueDetailDTO.getStatusId();
         Long targetStatusId = map.get(issueDetailDTO.getIssueTypeId());
-        IssueSprintRelDTO issueSprintRelDTO = new IssueSprintRelDTO();
-        issueSprintRelDTO.setProjectId(projectId);
-        issueSprintRelDTO.setSprintId(sprintId);
-        issueSprintRelDTO.setIssueId(issueId);
-        List<IssueSprintRelDTO> sprintRelDTOS = issueSprintRelMapper.select(issueSprintRelDTO);
-        if (CollectionUtils.isEmpty(sprintRelDTOS)) {
-            return;
-        }
         if (ObjectUtils.isEmpty(targetStatusId) || Objects.equals(currentStatusId, targetStatusId)) {
             return;
         }

@@ -3,10 +3,11 @@ import { observer } from 'mobx-react';
 import { Draggable } from 'react-beautiful-dnd';
 import { stores, Permission, Choerodon } from '@choerodon/boot';
 import { Icon, Input } from 'choerodon-ui';
-import { Modal } from 'choerodon-ui/pro';
+import { Modal, NumberField } from 'choerodon-ui/pro';
 import './Column.less';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import TextEditToggle from '@/components/TextEditToggle';
+import TextEditTogglePro from '@/components/TextEditTogglePro';
 import { boardColumnApi } from '@/api';
 import StatusList from './StatusList';
 
@@ -191,29 +192,29 @@ class Column extends Component {
                         </span>
                       )}
                     >
-                      <TextEditToggle
+                      <TextEditTogglePro
                         formKey="name"
                         onSubmit={(value) => {
                           this.updateColumnMaxMin('maxNum', value);
                         }}
-                        originData={data.maxNum}
-                      >
-                        <Text>
-                          {(text) => (
-                            <span
-                              style={{ cursor: 'pointer', minWidth: '110px' }}
-                            >
-                              {'最大值：'}
-                              {typeof text === 'number' ? text : '没有最大'}
-                            </span>
-                          )}
-                        </Text>
-                        <Edit>
-                          <Input
+                        initValue={data.maxNum}
+                        className="c7nagile-column-number-input"
+                        editor={() => (
+                          <NumberField
                             autoFocus
+                            min={data.minNum || 0}
+                            step={1}
+                            style={{ width: '160px' }}
                           />
-                        </Edit>
-                      </TextEditToggle>
+                        )}
+                      >
+                        <span
+                          style={{ cursor: 'pointer', minWidth: '110px' }}
+                        >
+                          {'最大值：'}
+                          {typeof data.maxNum === 'number' ? data.maxNum : '没有最大'}
+                        </span>
+                      </TextEditTogglePro>
                     </Permission>
                     <Permission
                       service={[
@@ -229,29 +230,30 @@ class Column extends Component {
                         </span>
                       )}
                     >
-                      <TextEditToggle
+                      <TextEditTogglePro
                         formKey="name"
                         onSubmit={(value) => {
                           this.updateColumnMaxMin('minNum', value);
                         }}
-                        originData={data.minNum}
-                      >
-                        <Text>
-                          {(text) => (
-                            <span
-                              style={{ cursor: 'pointer', minWidth: '110px' }}
-                            >
-                              {'最小值：'}
-                              {typeof text === 'number' ? text : '没有最小'}
-                            </span>
-                          )}
-                        </Text>
-                        <Edit>
-                          <Input
+                        initValue={data.minNum}
+                        className="c7nagile-column-number-input"
+                        editor={() => (
+                          <NumberField
                             autoFocus
+                            min={0}
+                            max={data.maxNum}
+                            step={1}
+                            style={{ width: '160px' }}
                           />
-                        </Edit>
-                      </TextEditToggle>
+                        )}
+                      >
+                        <span
+                          style={{ cursor: 'pointer', minWidth: '110px' }}
+                        >
+                          {'最小值：'}
+                          {typeof data.minNum === 'number' ? data.minNum : '没有最小'}
+                        </span>
+                      </TextEditTogglePro>
                     </Permission>
                   </div>
                 </div>

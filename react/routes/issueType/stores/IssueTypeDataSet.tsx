@@ -81,7 +81,7 @@ const IssueTypeDataSet = ({ isOrganization, formatMessage }: { isOrganization: b
         name: 'name',
         type: 'string' as FieldType,
         label: (
-          <span>
+          <span style={{ marginLeft: '0.2rem' }}>
             <C7NFormat
               intlPrefix="agile.issueType"
               id="name"

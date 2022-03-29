@@ -48,6 +48,7 @@ import io.choerodon.core.oauth.DetailsHelper;
 public class SendMsgUtil {
 
     private static final String URL_TEMPLATE1 = "#/agile/work-list/issue?type=project&id=";
+    private static final String URL_TEMPLATE9 = "#/waterfall/wbs?type=project&id=";
     private static final String URL_TEMPLATE2 = "&name=";
     private static final String URL_TEMPLATE3 = "&paramName=";
     private static final String URL_TEMPLATE4 = "&paramIssueId=";
@@ -100,12 +101,12 @@ public class SendMsgUtil {
     @Async
     public void sendMsgByIssueCreate(Long projectId, IssueVO result, Long operatorId) {
         //发送消息
-        if (SchemeApplyType.AGILE.equals(result.getApplyType())) {
+        if (checkApplyType(result.getApplyType())) {
             List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_CREATE, result);
             String summary = result.getIssueNum() + "-" + result.getSummary();
             String reporterName = result.getReporterName();
             ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
-            String url = getIssueCreateUrl(result, projectVO, result.getIssueId());
+            String url = getIssueUrl(result, projectVO, result.getIssueId());
             siteMsgUtil.issueCreate(userIds, reporterName, summary, url, operatorId, projectId, false);
             if (result.getAssigneeId() != null) {
                 List<Long> assigneeIds = new ArrayList<>();
@@ -120,14 +121,21 @@ public class SendMsgUtil {
         }
     }
 
-    public String getIssueCreateUrl(IssueVO result, ProjectVO projectVO, Long paramIssueId) {
-        return URL_TEMPLATE1 + projectVO.getId() 
-                + URL_TEMPLATE2 + convertProjectName(projectVO) 
-                + URL_TEMPLATE6 + projectVO.getOrganizationId() 
-                + URL_TEMPLATE7 + projectVO.getOrganizationId() 
-                + URL_TEMPLATE3 + result.getIssueNum() 
-                + URL_TEMPLATE4 + paramIssueId
-                + URL_TEMPLATE5 + result.getIssueId();
+    public String getIssueUrl(IssueVO result, ProjectVO projectVO, Long paramIssueId) {
+        StringBuilder url = new StringBuilder();
+        if (SchemeApplyType.WATERFALL.equals(result.getApplyType())) {
+            url.append(URL_TEMPLATE9);
+        } else {
+            url.append(URL_TEMPLATE1);
+        }
+        url.append(projectVO.getId())
+            .append(URL_TEMPLATE2).append(convertProjectName(projectVO))
+            .append(URL_TEMPLATE6).append(projectVO.getOrganizationId())
+            .append(URL_TEMPLATE7).append(projectVO.getOrganizationId())
+            .append(URL_TEMPLATE3).append(result.getIssueNum())
+            .append(URL_TEMPLATE4).append(paramIssueId)
+            .append(URL_TEMPLATE5).append(result.getIssueId());
+        return url.toString();
     }
 
     public String getFeatureUrl(IssueVO result, ProjectVO projectVO, Long paramIssueId) {
@@ -170,17 +178,16 @@ public class SendMsgUtil {
                                        List<String> fieldList,
                                        IssueVO result,
                                        Long operatorId) {
-        if (fieldList.contains("assigneeId") && result.getAssigneeId() != null && SchemeApplyType.AGILE.equals(result.getApplyType())) {
+        if (fieldList.contains("assigneeId") && result.getAssigneeId() != null && checkApplyType(result.getApplyType())) {
             List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUEASSIGNEE", result);
             String summary = result.getIssueNum() + "-" + result.getSummary();
             String assigneeName = result.getAssigneeName();
             ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
-            String projectName = convertProjectName(projectVO);
             StringBuilder url = new StringBuilder();
             if (SUB_TASK.equals(result.getTypeCode())) {
-                url.append(URL_TEMPLATE1 + projectId + URL_TEMPLATE2 + projectName + URL_TEMPLATE6 + projectVO.getOrganizationId() + URL_TEMPLATE7 + projectVO.getOrganizationId() + URL_TEMPLATE3 + result.getIssueNum() + URL_TEMPLATE4 + result.getParentIssueId() + URL_TEMPLATE5 + result.getIssueId());
+                url.append(getIssueUrl(result, projectVO, result.getParentIssueId()));
             } else {
-                url.append(URL_TEMPLATE1 + projectId + URL_TEMPLATE2 + projectName + URL_TEMPLATE6 + projectVO.getOrganizationId() + URL_TEMPLATE7 + projectVO.getOrganizationId() + URL_TEMPLATE3 + result.getIssueNum() + URL_TEMPLATE4 + result.getIssueId() + URL_TEMPLATE5 + result.getIssueId());
+                url.append(getIssueUrl(result, projectVO, result.getIssueId()));
             }
             siteMsgUtil.issueAssignee(userIds, assigneeName, summary, url.toString(), projectId, getOperatorNameFromUserDetail(), operatorId);
         }
@@ -207,15 +214,14 @@ public class SendMsgUtil {
                                        IssueVO result,
                                        Long operatorId) {
         Boolean completed = issueStatusMapper.selectByStatusId(projectId, result.getStatusId()).getCompleted();
-        if (fieldList.contains(STATUS_ID) && completed != null && completed && result.getAssigneeId() != null && SchemeApplyType.AGILE.equals(result.getApplyType())) {
+        if (fieldList.contains(STATUS_ID) && completed != null && completed && result.getAssigneeId() != null && checkApplyType(result.getApplyType())) {
             List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_SOLVE, result);
             ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
-            String projectName = convertProjectName(projectVO);
             StringBuilder url = new StringBuilder();
             if (SUB_TASK.equals(result.getTypeCode())) {
-                url.append(URL_TEMPLATE1 + projectId + URL_TEMPLATE2 + projectName + URL_TEMPLATE6 + projectVO.getOrganizationId() + URL_TEMPLATE7 + projectVO.getOrganizationId() + URL_TEMPLATE3 + result.getIssueNum() + URL_TEMPLATE4 + result.getParentIssueId() + URL_TEMPLATE5 + result.getIssueId());
+                url.append(getIssueUrl(result, projectVO, result.getParentIssueId()));
             } else {
-                url.append(URL_TEMPLATE1 + projectId + URL_TEMPLATE2 + projectName + URL_TEMPLATE6 + projectVO.getOrganizationId() + URL_TEMPLATE7 + projectVO.getOrganizationId() + URL_TEMPLATE3 + result.getIssueNum() + URL_TEMPLATE4 + result.getIssueId() + URL_TEMPLATE5 + result.getIssueId());
+                url.append(getIssueUrl(result, projectVO, result.getIssueId()));
             }
             String userName = result.getAssigneeName();
             String summary = result.getIssueNum() + "-" + result.getSummary();
@@ -234,7 +240,6 @@ public class SendMsgUtil {
             List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_SOLVE, modelMapper.map(issueDTO, IssueVO.class));
             ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
             StringBuilder url = new StringBuilder();
-            String projectName = convertProjectName(projectVO);
             ProjectInfoDTO projectInfoDTO = new ProjectInfoDTO();
             projectInfoDTO.setProjectId(projectId);
             List<ProjectInfoDTO> pioList = projectInfoMapper.select(projectInfoDTO);
@@ -243,12 +248,14 @@ public class SendMsgUtil {
                 pio = pioList.get(0);
             }
             String pioCode = (pio == null ? "" : pio.getProjectCode());
+            issueDTO.setIssueNum(pioCode + "-" + issueDTO.getIssueNum());
+            IssueVO issueVO = modelMapper.map(issueDTO, IssueVO.class);
             if (SUB_TASK.equals(issueDTO.getTypeCode())) {
-                url.append(URL_TEMPLATE1 + projectId + URL_TEMPLATE2 + projectName + URL_TEMPLATE6 + projectVO.getOrganizationId() + URL_TEMPLATE7 + projectVO.getOrganizationId() + URL_TEMPLATE3 + pioCode + "-" + issueDTO.getIssueNum() + URL_TEMPLATE4 + issueDTO.getParentIssueId() + URL_TEMPLATE5 + issueDTO.getIssueId());
+                url.append(getIssueUrl(issueVO, projectVO, issueVO.getParentIssueId()));
             } else {
-                url.append(URL_TEMPLATE1 + projectId + URL_TEMPLATE2 + projectName + URL_TEMPLATE6 + projectVO.getOrganizationId() + URL_TEMPLATE7 + projectVO.getOrganizationId() + URL_TEMPLATE3 + pioCode + "-" + issueDTO.getIssueNum() + URL_TEMPLATE4 + issueDTO.getIssueId() + URL_TEMPLATE5 + issueDTO.getIssueId());
+                url.append(getIssueUrl(issueVO, projectVO, issueVO.getIssueId()));
             }
-            String summary = pioCode + "-" + issueDTO.getIssueNum() + "-" + issueDTO.getSummary();
+            String summary = issueDTO.getIssueNum() + "-" + issueDTO.getSummary();
             List<Long> assigneeIds = new ArrayList<>();
             assigneeIds.add(issueDTO.getAssigneeId());
             Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(assigneeIds, true);
@@ -292,7 +299,7 @@ public class SendMsgUtil {
         if (isProgram) {
             url = getFeatureUrl(issueVO, projectVO, issueDTO.getIssueId());
         } else {
-            url = getIssueCreateUrl(issueVO, projectVO, issueDTO.getIssueId());
+            url = getIssueUrl(issueVO, projectVO, issueDTO.getIssueId());
         }
         templateArgsMap.put("actionType", Objects.equals("", assigneeName) ? "" : actionType);
         templateArgsMap.put("assigneeName", assigneeName);
@@ -329,7 +336,7 @@ public class SendMsgUtil {
         String reporterName = queryUserName(result.getReporterId());
         String assigneeName = queryUserName(result.getAssigneeId());
         ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
-        String url = getIssueCreateUrl(result, projectVO, result.getIssueId());
+        String url = getIssueUrl(result, projectVO, result.getIssueId());
         return siteMsgUtil.issueAssigneeSender(Collections.singletonList(result.getAssigneeId()),
                 assigneeName, summary, url, projectId, reporterName, operatorId);
     }
@@ -351,9 +358,9 @@ public class SendMsgUtil {
         ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
         StringBuilder url = new StringBuilder();
         if (SUB_TASK.equals(result.getTypeCode())) {
-            url.append(getIssueCreateUrl(result, projectVO, result.getParentIssueId()));
+            url.append(getIssueUrl(result, projectVO, result.getParentIssueId()));
         } else {
-            url.append(getIssueCreateUrl(result, projectVO, result.getIssueId()));
+            url.append(getIssueUrl(result, projectVO, result.getIssueId()));
         }
         String userName = queryUserName(result.getAssigneeId());
         String summary = result.getIssueNum() + "-" + result.getSummary();
@@ -414,7 +421,7 @@ public class SendMsgUtil {
             url = getFeatureUrl(issueVO, projectVO, issueVO.getIssueId()) + URL_TEMPLATE8;
         } else {
             issueType = IssueConstant.ISSUE_CN;
-            url = getIssueCreateUrl(issueVO, projectVO, issueVO.getIssueId()) + URL_TEMPLATE8;
+            url = getIssueUrl(issueVO, projectVO, issueVO.getIssueId()) + URL_TEMPLATE8;
         }
         //设置动作与发送人
         List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUE_COMMENT", issueVO);
@@ -470,7 +477,7 @@ public class SendMsgUtil {
             url = getFeatureUrl(issueVO, projectVO, issueVO.getIssueId()) + URL_TEMPLATE8;
         } else {
             issueType = IssueConstant.ISSUE_CN;
-            url = getIssueCreateUrl(issueVO, projectVO, issueVO.getIssueId()) + URL_TEMPLATE8;
+            url = getIssueUrl(issueVO, projectVO, issueVO.getIssueId()) + URL_TEMPLATE8;
         }
 
         String summary = String.join("-", issueVO.getIssueNum(), issueVO.getSummary());
@@ -519,7 +526,7 @@ public class SendMsgUtil {
     @Async
     public void sendMsgToCustomFieldUsersByIssueCreate(Long projectId, IssueVO result, Long operatorId) {
         //问题创建通知自定义字段人员（普通创建、快速创建、问题导入）
-        if (SchemeApplyType.AGILE.equals(result.getApplyType())) {
+        if (checkApplyType(result.getApplyType())) {
             List<Long> userIds = noticeService.queryCustomFieldUserIdsByProjectId(projectId, ISSUE_CREATE, result);
             if (CollectionUtils.isEmpty(userIds)) {
                 return;
@@ -527,14 +534,14 @@ public class SendMsgUtil {
             String summary = result.getIssueNum() + "-" + result.getSummary();
             String reporterName = result.getReporterName();
             ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
-            String url = getIssueCreateUrl(result, projectVO, result.getIssueId());
+            String url = getIssueUrl(result, projectVO, result.getIssueId());
             siteMsgUtil.issueCreate(userIds, reporterName, summary, url, operatorId, projectId, true);
         }
     }
 
     @Async
     public void sendMsgByIssueParticipant(Long projectId, List<String> fieldList, IssueVO result, Long operatorId) {
-        if (fieldList.contains("participantIds") && SchemeApplyType.AGILE.equals(result.getApplyType())) {
+        if (fieldList.contains("participantIds") && checkApplyType(result.getApplyType())) {
             if (CollectionUtils.isEmpty(result.getParticipants())){
               return;
             }
@@ -542,15 +549,18 @@ public class SendMsgUtil {
             String summary = result.getIssueNum() + "-" + result.getSummary();
             String reporterName = result.getReporterName();
             ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
-            String projectName = convertProjectName(projectVO);
             StringBuilder url = new StringBuilder();
             if (SUB_TASK.equals(result.getTypeCode())) {
-                url.append(URL_TEMPLATE1 + projectId + URL_TEMPLATE2 + projectName + URL_TEMPLATE6 + projectVO.getOrganizationId() + URL_TEMPLATE7 + projectVO.getOrganizationId() + URL_TEMPLATE3 + result.getIssueNum() + URL_TEMPLATE4 + result.getParentIssueId() + URL_TEMPLATE5 + result.getIssueId());
+                url.append(getIssueUrl(result, projectVO, result.getParentIssueId()));
             } else {
-                url.append(URL_TEMPLATE1 + projectId + URL_TEMPLATE2 + projectName + URL_TEMPLATE6 + projectVO.getOrganizationId() + URL_TEMPLATE7 + projectVO.getOrganizationId() + URL_TEMPLATE3 + result.getIssueNum() + URL_TEMPLATE4 + result.getIssueId() + URL_TEMPLATE5 + result.getIssueId());
+                url.append(getIssueUrl(result, projectVO, result.getIssueId()));
             }
             List<Long> participantIds = result.getParticipants().stream().map(UserMessageDTO::getId).collect(Collectors.toList());
             siteMsgUtil.issueParticipant(summary, url.toString(), projectId, operatorId, userIds, reporterName, participantIds);
         }
+    }
+
+    private boolean checkApplyType(String applyType) {
+        return SchemeApplyType.AGILE.equals(applyType) || SchemeApplyType.WATERFALL.equals(applyType);
     }
 }

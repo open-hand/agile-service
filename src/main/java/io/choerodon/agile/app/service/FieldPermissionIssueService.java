@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.IssueTypeNoPermissionFields;
 import io.choerodon.agile.api.vo.PageFieldViewParamVO;
 import io.choerodon.agile.api.vo.PageFieldViewVO;
 
@@ -24,4 +25,13 @@ public interface FieldPermissionIssueService {
                                                          Long projectId,
                                                          PageFieldViewParamVO paramDTO,
                                                          Long issueId);
+
+    /**
+     * 查询当前用户在所有问题类型下没有权限的字段
+     *
+     * @param organizationId
+     * @param projectId
+     * @return
+     */
+    List<IssueTypeNoPermissionFields> listNoPermissionFieldsByIssueType(Long organizationId, Long projectId);
 }

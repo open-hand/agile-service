@@ -120,6 +120,7 @@ const FilterItem: React.FC<Props> = ({
             validator={checkName}
             autoFocus
             defaultValue={name}
+            onEnterDown={handleSave}
             onChange={(newValue) => {
               valueRef.current = newValue;
             }}

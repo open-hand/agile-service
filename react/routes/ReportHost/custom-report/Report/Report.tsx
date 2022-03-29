@@ -38,6 +38,7 @@ import { IChartData } from '../components/Chart/utils';
 import Table from '../components/Table';
 import ChartSearch from '../components/ChartSearch';
 import { LoadingProvider } from '@/components/Loading';
+import useIsWaterfall from '@/hooks/useIsWaterfall';
 
 interface Props {
   chartId?: string
@@ -49,6 +50,7 @@ export interface IChartRes extends ICreateData {
 }
 
 const CustomReport: React.FC<Props> = (props) => {
+  const { isWaterfallAgile } = useIsWaterfall();
   // @ts-ignore
   const chartId = props.match.params.id;
   const [mode, setMode] = useState<'create' | 'edit' | 'read'>(chartId ? 'read' : 'create');
@@ -173,14 +175,21 @@ const CustomReport: React.FC<Props> = (props) => {
 
   useEffect(() => {
     const getCustomFields = async () => {
-      const fields = await fieldApi.getCustomFields();
+      const fields = await fieldApi.getCustomFields(isWaterfallAgile ? '' : undefined);
       setCustomFields(fields);
       setHasGetCustomFields(true);
     };
     getCustomFields();
-  }, []);
+  }, [isWaterfallAgile]);
 
-  const fields = useMemo(() => [...customFields, ...getSystemFields().filter((field) => !field.archive && !field.noDisplay)], [customFields]);
+  const fields = useMemo(() => {
+    const allField = [...customFields, ...getSystemFields().filter((field) => !field.archive && !field.noDisplay)];
+    if (isWaterfallAgile) {
+      const issueTypeField = allField.find((field) => field.code === 'issueTypeId');
+      issueTypeField && Object.assign(issueTypeField, { otherComponentProps: { applyType: '' } });
+    }
+    return allField;
+  }, [customFields, isWaterfallAgile]);
 
   const [choseDataProps, choseComponentProps] = useChoseField({
     fields,
