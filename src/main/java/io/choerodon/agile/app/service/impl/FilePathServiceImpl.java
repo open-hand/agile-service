@@ -1,13 +1,11 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.app.service.FilePathService;
+import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.net.MalformedURLException;
-import java.net.URL;
 
 /**
  * @author superlee
@@ -19,36 +17,26 @@ public class FilePathServiceImpl implements FilePathService {
 
     @Value("${services.attachment.url}")
     private String attachmentUrl;
-    @Value("${services.bucket.prefix}")
-    private String bucketPrefix;
 
-    private static final String HTTPS = "https://";
+    private static final String DIVIDING_LINE = "/";
 
     @Override
     public String generateRelativePath(String fullPath) {
-        URL url = null;
-        try {
-            url = new URL(fullPath);
-        } catch (MalformedURLException e) {
-            throw new CommonException("error.malformed.url", e);
+        AssertUtilsForCommonException.notEmpty(fullPath, "error.file.full.url.empty");
+        if (!fullPath.startsWith(attachmentUrl)) {
+            throw new CommonException("error.fullPath.not.match.attachmentUrl");
         }
-        return url.getFile();
+        return fullPath.substring(attachmentUrl.length());
     }
 
     @Override
-    public String generateFullPath(String bucketName, String relativePath) {
+    public String generateFullPath(String relativePath) {
+        AssertUtilsForCommonException.notEmpty(relativePath, "error.file.relativePath.empty");
         StringBuilder builder = new StringBuilder();
-        builder
-                .append(HTTPS)
-                .append(bucketPrefix)
-                .append("-")
-                .append(bucketName)
-                .append(".")
-                .append(attachmentUrl);
-        if (!relativePath.startsWith("/")) {
-            builder.append("/");
+        if (!relativePath.startsWith(DIVIDING_LINE)) {
+            relativePath = DIVIDING_LINE + relativePath;
         }
-        builder.append(relativePath);
+        builder.append(attachmentUrl).append(relativePath);
         return builder.toString();
     }
 }

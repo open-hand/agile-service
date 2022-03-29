@@ -236,7 +236,7 @@ const hasValue = (dataSet: DataSet, field: IssueCreateFields) => (isMultiple(fie
  */
 function preCascadeFieldAfterLoad(field: IssueCreateFields & { [key: string]: any }, rules: ICascadeLinkage[] = []): boolean {
   const oldBindRulesFromField: any[] = get(field, '_rules', []);
-  const res = (oldBindRulesFromField.length + rules.length) ? false : !Object.is(oldBindRulesFromField, rules);
+  const res = !(oldBindRulesFromField.length + rules.length) ? false : !Object.is(oldBindRulesFromField, rules);
   set(field, '_rules', rules);
   return res;
 }
@@ -580,6 +580,7 @@ const CreateIssueBase = observer(({
     }
     // 创建一个新的
     newDataSet.create(newValue);
+    newDataSet.current && oldDataSet.current && set(newDataSet.current, 'state', oldDataSet.current?.state);
     setDataSet(newDataSet);
     setSummaryValue(newDataSet);
   }, [defaultFeature, fields, getDefaultValue, handleUpdate, isInProgram, isShowFeature, isSubIssue, issueTypeCode, issueTypeId, parentIssue, rules, setSummaryValue, showFeature, templateData, templateSummary]);

@@ -64,13 +64,14 @@ const GanttBar: React.FC<GanttBarProps> = ({
 
   // const percent = totalCount ? completeCount / totalCount : 0;
   let diff = 0;
-  const delayDiff = 0;
+  let delayDiff = 0;
   if (issue.estimatedStartTime && issue.estimatedEndTime) {
     // 延期
     // if (dayjs(issue.estimatedEndTime).isBefore(dayjs()) && !issue.completed) {
     //   color1 = '#FF5C6A';
     //   color2 = '#FFBAC0';
     // }
+    delayDiff = issue.actualStartTime ? dayjs(issue.actualEndTime || dayjs()).diff(issue.actualStartTime, 'hour') : 0;
     diff = dayjs(issue.estimatedEndTime).diff(issue.estimatedStartTime, 'hour');
   }
 

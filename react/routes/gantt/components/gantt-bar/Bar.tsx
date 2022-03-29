@@ -62,7 +62,7 @@ function GanttBaseBar(props: React.PropsWithChildren<IGanttBaseBarProps>) {
       return undefined;
     }
     if (typeof props.deadline === 'string') {
-      return dragging ? undefined : { width: Math.max(0, ganttRef.current?.getWidthByDate(dayjs(fillDateRange.end.value).set('hour', 23).set('minute', 59).set('second', 59), dayjs(props.deadline)) || 0), value: props.deadline, today: true };
+      return dragging ? { today: true } : { width: Math.max(0, ganttRef.current?.getWidthByDate(dayjs(fillDateRange.end.value).set('hour', 23).set('minute', 59).set('second', 59), dayjs(props.deadline)) || 0), value: props.deadline, today: true };
     }
     return {
       width: fillDateRange.start.dragLeft > dashDateRange.end.width ? '100%' : Math.max(0, props.deadline.width - (dashDateRange.end.width as number || 0)),
@@ -140,22 +140,31 @@ export function wrapGanttBaseBarFindDate(Element: React.FC<IGanttBaseBarProps>, 
       color: color1,
     } : undefined), [estimatedStartTime, estimatedStartTime?.value, estimatedEndTime, estimatedEndTime?.value, color1]);
     const fillDateRange = useComputed(() => {
-      if (actualStartTime) {
+      if (actualStartTime && estimatedEndTime) {
         const start = toJS(actualStartTime);
-        const end = toJS(actualEndTime || dashDateRange?.end || actualStartTime);
+        const end = toJS(actualEndTime || estimatedEndTime);
         const startKey = start.width > end.width ? 'end' : 'start';
-
+        if (startKey === 'start') {
+          return {
+            start,
+            end,
+            completedColor: color1,
+            unCompletedColor: color2,
+            color: color1,
+          };
+        }
+        const delayColor = '#FF5C6A';
         return {
-          [startKey as 'start']: start,
-          [startKey === 'start' ? 'end' : 'start' as 'end']: end,
-          completedColor: color1,
-          unCompletedColor: color2,
-          color: color1,
+          end: start,
+          start: end,
+          completedColor: delayColor,
+          unCompletedColor: delayColor,
+          color: delayColor,
         };
       }
 
       return undefined;
-    }, [actualStartTime?.value, actualEndTime?.value, dashDateRange?.end, color1, color2, dashDateRange]);
+    }, [actualStartTime?.value, actualEndTime?.value, estimatedEndTime, estimatedEndTime?.value, color1, color2]);
     const deadline = useComputed(() => {
       if (actualEndTime?.value) {
         return toJS(actualEndTime);
