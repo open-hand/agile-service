@@ -122,25 +122,20 @@ public class SendMsgUtil {
     }
 
     public String getIssueUrl(IssueVO result, ProjectVO projectVO, Long paramIssueId) {
-        String url;
+        StringBuilder url = new StringBuilder();
         if (SchemeApplyType.WATERFALL.equals(result.getApplyType())) {
-            url = URL_TEMPLATE9 + projectVO.getId()
-                    + URL_TEMPLATE2 + convertProjectName(projectVO)
-                    + URL_TEMPLATE6 + projectVO.getOrganizationId()
-                    + URL_TEMPLATE7 + projectVO.getOrganizationId()
-                    + URL_TEMPLATE3 + result.getIssueNum()
-                    + URL_TEMPLATE4 + result.getIssueId()
-                    + URL_TEMPLATE5 + result.getIssueId();
+            url.append(URL_TEMPLATE9);
         } else {
-            url = URL_TEMPLATE1 + projectVO.getId()
-                    + URL_TEMPLATE2 + convertProjectName(projectVO)
-                    + URL_TEMPLATE6 + projectVO.getOrganizationId()
-                    + URL_TEMPLATE7 + projectVO.getOrganizationId()
-                    + URL_TEMPLATE3 + result.getIssueNum()
-                    + URL_TEMPLATE4 + paramIssueId
-                    + URL_TEMPLATE5 + result.getIssueId();
+            url.append(URL_TEMPLATE1);
         }
-        return url;
+        url.append(projectVO.getId())
+            .append(URL_TEMPLATE2).append(convertProjectName(projectVO))
+            .append(URL_TEMPLATE6).append(projectVO.getOrganizationId())
+            .append(URL_TEMPLATE7).append(projectVO.getOrganizationId())
+            .append(URL_TEMPLATE3).append(result.getIssueNum())
+            .append(URL_TEMPLATE4).append(paramIssueId)
+            .append(URL_TEMPLATE5).append(result.getIssueId());
+        return url.toString();
     }
 
     public String getFeatureUrl(IssueVO result, ProjectVO projectVO, Long paramIssueId) {
