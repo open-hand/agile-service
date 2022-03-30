@@ -4,10 +4,10 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.TriggerExecutionStatus;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +34,8 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
     private static final String ANYONE_TRANSFER = "anyone_transfer";
 
     private static final String ALL_TRANSFER = "all_transfer";
+
+    private static final List<String> WATERFALL_ISSUE_TYPES = Arrays.asList(IssueTypeCode.WATERFALL_ISSUE_TYPE_CODE);
 
     @Autowired
     private StatusLinkageMapper statusLinkageMapper;
@@ -75,6 +77,10 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
 
     @Autowired
     private StatusTransferSettingService statusTransferSettingService;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
+    @Autowired(required = false)
+    private AgileWaterfallService agileWaterfallService;
 
     @Override
     public List<StatusLinkageVO> createOrUpdate(Long projectId, Long issueTypeId, Long statusId, Long objectVersionNumber, String applyType, List<StatusLinkageVO> linkageVOS) {
@@ -114,7 +120,8 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         statusLinkageMapper.delete(statusLinkageDTO);
     }
 
-    private List<StatusLinkageDTO> queryByStatusIdAndIssueTypeId(Long projectId, Long issueTypeId, Long statusId) {
+    @Override
+    public List<StatusLinkageDTO> queryByStatusIdAndIssueTypeId(Long projectId, Long issueTypeId, Long statusId) {
         StatusLinkageDTO statusLinkageDTO = new StatusLinkageDTO();
         statusLinkageDTO.setProjectId(projectId);
         statusLinkageDTO.setIssueTypeId(issueTypeId);
@@ -195,7 +202,18 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         if (ObjectUtils.isEmpty(issueDTO)) {
             throw new CommonException("error.issue.null");
         }
-        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        String typeCode = issueDTO.getTypeCode();
+        if (WATERFALL_ISSUE_TYPES.contains(typeCode)) {
+            return agileWaterfallService.updateWaterfallParentStatus(issueDTO, influenceIssueIds, applyType);
+        } else {
+            return updateAgileParentStatus(projectId, applyType, influenceIssueIds, issueDTO);
+        }
+    }
+
+    private boolean updateAgileParentStatus(Long projectId,
+                                            String applyType,
+                                            Set<Long> influenceIssueIds,
+                                            IssueDTO issueDTO) {
         if (agilePluginService != null) {
             agilePluginService.storyLinkageFeature(projectId,issueDTO,applyType);
         }
@@ -215,21 +233,33 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         if (ObjectUtils.isEmpty(statusLinkageDTO)) {
             return true;
         }
+        // 查询父任务的子任务
+        List<IssueDTO> childrenIssueOfParentIssue = issueMapper.querySubIssueByParentIssueId(projectId, parentIssueId);
+        return updateParentStatusByStatusLinkage(applyType, influenceIssueIds, issueDTO, parentIssue, statusLinkageDTO, childrenIssueOfParentIssue);
+    }
+
+    @Override
+    public boolean updateParentStatusByStatusLinkage(String applyType,
+                                                     Set<Long> influenceIssueIds,
+                                                     IssueDTO sourceIssue,
+                                                     IssueDTO parentIssue,
+                                                     StatusLinkageDTO statusLinkageDTO,
+                                                     List<IssueDTO> childrenIssueOfParentIssue) {
+        Long projectId = sourceIssue.getProjectId();
+        Long parentIssueId = parentIssue.getIssueId();
         // 统计子任务的状态
         Boolean isChange = false;
         Long changeStatus = null;
-        // 查询父任务的子任务
-        List<IssueDTO> issueDTOS = issueMapper.querySubIssueByParentIssueId(projectId, parentIssueId);
-        List<Long> issueTypeIds = issueDTOS.stream().map(IssueDTO::getIssueTypeId).collect(Collectors.toList());
+        List<Long> issueTypeIds = childrenIssueOfParentIssue.stream().map(IssueDTO::getIssueTypeId).collect(Collectors.toList());
         List<StatusLinkageDTO> select = statusLinkageMapper.listByIssueTypeIdsParentTypeId(projectId,parentIssue.getIssueTypeId(),issueTypeIds,statusLinkageDTO.getParentIssueStatusSetting());
         Map<Long, List<StatusLinkageDTO>> linkageDTOMap = select.stream().collect(Collectors.groupingBy(StatusLinkageDTO::getIssueTypeId));
-        Map<Long, List<IssueDTO>> issueMap = issueDTOS.stream().collect(Collectors.groupingBy(IssueDTO::getIssueTypeId));
-        if (select.size() == 1 && statusLinkageDTO.getIssueTypeId().equals(issueDTO.getIssueTypeId())) {
-            isChange = handlerSingleIssueType(Arrays.asList(statusLinkageDTO), issueMap, issueDTO.getIssueTypeId());
+        Map<Long, List<IssueDTO>> issueMap = childrenIssueOfParentIssue.stream().collect(Collectors.groupingBy(IssueDTO::getIssueTypeId));
+        if (select.size() == 1 && statusLinkageDTO.getIssueTypeId().equals(sourceIssue.getIssueTypeId())) {
+            isChange = handlerSingleIssueType(Arrays.asList(statusLinkageDTO), issueMap, sourceIssue.getIssueTypeId());
             changeStatus = getChangeStatus(isChange, statusLinkageDTO);
         } else {
             Map<String, Object> variables = new HashMap<>();
-            handlerMultiSetting(variables, select, issueDTO, issueMap, linkageDTOMap, issueDTOS);
+            handlerMultiSetting(variables, select, sourceIssue, issueMap, linkageDTOMap, childrenIssueOfParentIssue);
             isChange = BooleanUtils.toBoolean(variables.get("isChange").toString());
             Object statusId = variables.get("changeStatus");
             changeStatus = !ObjectUtils.isEmpty(statusId) ? Long.valueOf(statusId.toString()) : null;
@@ -239,15 +269,15 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
             //收集受影响的issueId
             influenceIssueIds.add(parentIssueId);
             if (Objects.equals(changeStatus, parentIssue.getStatusId())) {
-                statusLinkageExecutionLog(projectId, statusLinkageDTO.getId(), parentIssue.getIssueId(), issueDTO, TriggerExecutionStatus.STOP.getValue(), "same_status");
+                statusLinkageExecutionLog(projectId, statusLinkageDTO.getId(), parentIssue.getIssueId(), sourceIssue, TriggerExecutionStatus.STOP.getValue(), "same_status");
                 return true;
             }
-            if (statusTransferSettingService.verifyStatusTransferSetting(projectId, issueDTO, changeStatus)) {
-                statusLinkageExecutionLog(projectId, statusLinkageDTO.getId(), parentIssue.getIssueId(), issueDTO, TriggerExecutionStatus.STOP.getValue(), "condition_limit");
+            if (statusTransferSettingService.verifyStatusTransferSetting(projectId, sourceIssue, changeStatus)) {
+                statusLinkageExecutionLog(projectId, statusLinkageDTO.getId(), parentIssue.getIssueId(), sourceIssue, TriggerExecutionStatus.STOP.getValue(), "condition_limit");
                 return true;
             }
-            boolean result = changeParentStatus(projectId, applyType, parentIssue, changeStatus, issueDTO);
-            statusLinkageExecutionLog(projectId, statusLinkageDTO.getId(), parentIssue.getIssueId(), issueDTO, TriggerExecutionStatus.SUCCESS.getValue(), null);
+            boolean result = changeParentStatus(projectId, applyType, parentIssue, changeStatus, sourceIssue);
+            statusLinkageExecutionLog(projectId, statusLinkageDTO.getId(), parentIssue.getIssueId(), sourceIssue, TriggerExecutionStatus.SUCCESS.getValue(), null);
             return result;
         }
         return true;
@@ -528,12 +558,15 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
     }
 
     private boolean checkIsSubBugOrSubTask(IssueDTO issueDTO) {
-        Boolean isSubTask = "sub_task".equals(issueDTO.getTypeCode());
-        Boolean isSubBug = "bug".equals(issueDTO.getTypeCode()) && (!ObjectUtils.isEmpty(issueDTO.getRelateIssueId()) && issueDTO.getRelateIssueId() != 0);
+        String typeCode = issueDTO.getTypeCode();
+        Boolean isSubTask = IssueTypeCode.isSubTask(typeCode);
+        Boolean isSubBug =
+                IssueTypeCode.isBug(typeCode)
+                        && (!ObjectUtils.isEmpty(issueDTO.getRelateIssueId()) && issueDTO.getRelateIssueId() != 0);
         if (isSubTask || isSubBug) {
-            return Boolean.TRUE;
+            return true;
         }
-        return Boolean.FALSE;
+        return false;
     }
 
     private Boolean handlerSingleIssueType(List<StatusLinkageDTO> statusLinks, Map<Long, List<IssueDTO>> issueMap, Long issueTypeId) {
