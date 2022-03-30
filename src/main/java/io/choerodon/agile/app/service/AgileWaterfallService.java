@@ -8,6 +8,7 @@ import io.choerodon.agile.api.vo.business.SystemFieldOverrideConfigVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.waterfall.WfDeliverableVO;
 import io.choerodon.agile.infra.dto.StatusDTO;
+import io.choerodon.agile.infra.dto.StatusFieldValueSettingDTO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
@@ -81,4 +82,6 @@ public interface AgileWaterfallService {
     void appendWaterfallFiledSql(StringBuilder sqlQuery, QuickFilterValueVO quickFilterValueVO, String value, String operation, Long projectId);
 
     List<StatusDTO> queryWaterfallNotAllowedTransferStatus(IssueDTO issueDTO);
+
+    void handlerWaterfallFieldValue(String fieldCode, IssueUpdateVO issueUpdateVO, Map<String, Object> specifyMap, List<StatusFieldValueSettingDTO> statusFieldValueSettings, IssueDTO issueDTO, List<String> field);
 }

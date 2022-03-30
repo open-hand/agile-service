@@ -44,6 +44,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
 
     private static final String[] FILTER_FIELD_TYPE = {"checkbox", "multiple", "member", "radio", "single"};
     private static final String[] FEATURE_FIELD = {FieldCode.ACCEPTANCE_CRITERA, FieldCode.BENFIT_HYPOTHESIS, FieldCode.PROGRAM_VERSION, FieldCode.SUB_PROJECT, FieldCode.FEATURE_TYPE};
+    private static final List<String> WATERFALL_FIELD_LIST = Arrays.asList(FieldCode.PROGRESS, FieldCode.PARENT);
     public static final Map<String, String> FIELD_CODE = new LinkedHashMap<>();
     public static final Map<String, String> PROGRAM_FIELD_CODE = new LinkedHashMap<>();
     private static final String CLEAR = "clear";
@@ -88,6 +89,8 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     private FieldValueService fieldValueService;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
+    @Autowired(required = false)
+    private AgileWaterfallService agileWaterfallService;
     @Autowired
     private LookupValueService lookupValueService;
     @Autowired
@@ -318,6 +321,10 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         } else if (Arrays.asList(FEATURE_FIELD).contains(fieldCode)) {
             if (agilePluginService != null) {
                 agilePluginService.handlerFeatureFieldValue(fieldCode, issueUpdateVO, specifyMap, statusFieldValueSettings, issueDTO, field);
+            }
+        } else if (WATERFALL_FIELD_LIST.contains(fieldCode)) {
+            if (agileWaterfallService != null) {
+                agileWaterfallService.handlerWaterfallFieldValue(fieldCode, issueUpdateVO, specifyMap, statusFieldValueSettings, issueDTO, field);
             }
         } else {
             handlerPredefinedValue(issueUpdateVO, field, issueDTO, fieldCode, statusFieldValueSettings);
