@@ -10,7 +10,9 @@ import { observer } from 'mobx-react-lite';
 import { has as hasInject, mount as mountInject } from '@choerodon/inject';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
 import SelectStatus from '@/components/select/select-status';
-import { issueLinkTypeApi, statusTransformApi } from '@/api';
+import {
+  ganttApi, ganttApiConfig, issueLinkTypeApi, statusTransformApi,
+} from '@/api';
 import { OldLoading as Loading } from '@/components/Loading';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
 import { getIsOrganization } from '@/utils/common';
@@ -18,6 +20,7 @@ import { IIssueType } from '@/common/types';
 import HostPick from '@/components/host-pick';
 import styles from './index.less';
 import { WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
+import { transformDependencyData, DependencyItem } from '@/utils/transformDependencyData';
 
 interface IParentIssueStatusSetting {
   id: string
@@ -56,16 +59,32 @@ const Linkage = ({
   const [loading, setLoading] = useState(false);
   const [activeKey, setActiveKey] = useState<'subIssue' | 'linkIssue'>(linkageType[0]);
   const [linkTypes, setLinkTypes] = useState<ILinkType[]>([]);
+  const [dependencyTypes, setDependencyTypes] = useState<DependencyItem[]>([]);
   const [linkIssueStatusSettings, setLinkIssueStatusSettings] = useState<ILinkIssueStatusSetting[]>([]);
+
+  const loadDependencyTypes = useCallback(async () => {
+    const res = await ganttApi.loadIssueDependencyTypes();
+    if (res && res.length) {
+      const newRes = transformDependencyData(res);
+      (newRes || []).forEach((item: DependencyItem) => {
+        linkTypeHasIssueTypeMap.set(item.valueCode, []);
+      });
+      setDependencyTypes(newRes);
+    }
+  }, []);
 
   useEffect(() => {
     if (linkageType.includes('linkIssue')) {
-      issueLinkTypeApi.getAll().then((res: { content: ILinkType[]}) => {
-        setLinkTypes(res.content || []);
-        (res.content || []).forEach((item) => {
-          linkTypeHasIssueTypeMap.set(item.linkTypeId.toString(), []);
+      if (isWaterfallTypeCode) {
+        loadDependencyTypes();
+      } else {
+        issueLinkTypeApi.getAll().then((res: { content: ILinkType[]}) => {
+          setLinkTypes(res.content || []);
+          (res.content || []).forEach((item) => {
+            linkTypeHasIssueTypeMap.set(item.linkTypeId.toString(), []);
+          });
         });
-      });
+      }
     }
   }, [linkageType]);
 
@@ -198,7 +217,7 @@ const Linkage = ({
             });
           });
           // @ts-ignore
-          await statusTransformApi[isOrganization ? 'orgUpdateLinkage' : 'updateLinkage'](selectedType, record.get('id'), record.get('objectVersionNumber'), updateData, isWaterfallTypeCode ? 'waterfall' : undefined);
+          await statusTransformApi[isOrganization ? 'orgUpdateLinkage' : 'updateLinkage'](selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
         }
         if (linkageType.includes('linkIssue')) {
           const data: any = linkIssueLinkageDataSet.current?.toData();
@@ -371,25 +390,47 @@ const Linkage = ({
                   <>
                     <Row key={key} gutter={20} type="flex" align="middle">
                       <Col span={8}>
-                        <Select
-                          label="关联类型"
-                          name={linkTypeName}
-                          onChange={(value, oldValue) => {
-                          getField(linkIssueLinkageDataSet, typeName)?.reset();
-                          getField(linkIssueLinkageDataSet, statusName)?.reset();
-                          if (oldValue && linkTypeHasIssueTypeMap.get(oldValue.toString()) && issueTypeId) {
-                            linkTypeHasIssueTypeMap.set(oldValue.toString(), (linkTypeHasIssueTypeMap.get(oldValue.toString()) as string[]).filter((item: string) => item !== issueTypeId));
-                          }
-                          linkIssueLinkageDataSet.current?.init(typeName, undefined);
-                          linkIssueLinkageDataSet.current?.init(statusName, undefined);
-                          }}
-                        >
-                          {(linkTypes || []).map((type: ILinkType) => (
-                            <Option value={type.linkTypeId}>
-                              {type.linkName}
-                            </Option>
-                          ))}
-                        </Select>
+                        {isWaterfallTypeCode ? (
+                          <Select
+                            label="依赖关系"
+                            name={linkTypeName}
+                            onChange={(value, oldValue) => {
+                              getField(linkIssueLinkageDataSet, typeName)?.reset();
+                              getField(linkIssueLinkageDataSet, statusName)?.reset();
+                              if (oldValue && linkTypeHasIssueTypeMap.get(oldValue.toString()) && issueTypeId) {
+                                linkTypeHasIssueTypeMap.set(oldValue.toString(), (linkTypeHasIssueTypeMap.get(oldValue.toString()) as string[]).filter((item: string) => item !== issueTypeId));
+                              }
+                              linkIssueLinkageDataSet.current?.init(typeName, undefined);
+                              linkIssueLinkageDataSet.current?.init(statusName, undefined);
+                            }}
+                          >
+                            {(dependencyTypes || []).map((type: DependencyItem) => (
+                              <Option value={type.valueCode}>
+                                {type.name}
+                              </Option>
+                            ))}
+                          </Select>
+                        ) : (
+                          <Select
+                            label="关联类型"
+                            name={linkTypeName}
+                            onChange={(value, oldValue) => {
+                              getField(linkIssueLinkageDataSet, typeName)?.reset();
+                              getField(linkIssueLinkageDataSet, statusName)?.reset();
+                              if (oldValue && linkTypeHasIssueTypeMap.get(oldValue.toString()) && issueTypeId) {
+                                linkTypeHasIssueTypeMap.set(oldValue.toString(), (linkTypeHasIssueTypeMap.get(oldValue.toString()) as string[]).filter((item: string) => item !== issueTypeId));
+                              }
+                              linkIssueLinkageDataSet.current?.init(typeName, undefined);
+                              linkIssueLinkageDataSet.current?.init(statusName, undefined);
+                            }}
+                          >
+                            {(linkTypes || []).map((type: ILinkType) => (
+                              <Option value={type.linkTypeId}>
+                                {type.linkName}
+                              </Option>
+                            ))}
+                          </Select>
+                        )}
                       </Col>
                       <Col span={7}>
                         <Select
@@ -404,11 +445,11 @@ const Linkage = ({
                               linkTypeHasIssueTypeMap.set(linkTypeId.toString(), (linkTypeHasIssueTypeMap.get(linkTypeId.toString()) as string[]).filter((item: string) => item !== oldValue));
                             }
 
-                          getField(linkIssueLinkageDataSet, statusName)?.reset();
-                          linkIssueLinkageDataSet.current?.init(statusName, undefined);
+                            getField(linkIssueLinkageDataSet, statusName)?.reset();
+                            linkIssueLinkageDataSet.current?.init(statusName, undefined);
                           }}
                         >
-                          {issueTypes?.filter((type: IIssueType) => ['story', 'task', 'bug'].includes(type.typeCode)).filter((issueType: IIssueType) => issueType.id === issueTypeId || !(linkTypeId ? linkTypeHasIssueTypeMap.get(linkTypeId.toString()) as string[] : []).includes(issueType.id)).map((type: IIssueType) => (
+                          {issueTypes?.filter((type: IIssueType) => (isWaterfallTypeCode ? WATERFALL_TYPE_CODES : ['story', 'task', 'bug']).includes(type.typeCode)).filter((issueType: IIssueType) => issueType.id === issueTypeId || !(linkTypeId ? linkTypeHasIssueTypeMap.get(linkTypeId.toString()) as string[] : []).includes(issueType.id)).map((type: IIssueType) => (
                             <Option value={type.id}>
                               {type.name}
                             </Option>
