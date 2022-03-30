@@ -319,6 +319,8 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         issueService.afterCreateSubIssue(issueId, subIssueConvertDTO, issueSubCreateVO, projectInfo);
         if (agileWaterfallService != null) {
             agileWaterfallService.handlerAfterCreateSubIssue(projectId, issueId, issueSubCreateVO);
+        }
+        if (agilePluginService != null) {
             agilePluginService.issueSyncByIssueId(organizationId, issueId, OpenAppIssueSyncConstant.AppType.DIND.getValue(), OpenAppIssueSyncConstant.OperationType.CREATE);
         }
         return issueId;
