@@ -10,6 +10,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
+import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
 import io.choerodon.core.domain.Page;
 import com.google.common.collect.Lists;
 import io.choerodon.agile.api.validator.IssueLinkValidator;
@@ -1756,6 +1757,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         if (agilePluginService != null) {
             agilePluginService.deleteIssueForBusiness(issueConvertDTO);
+            agilePluginService.issueSyncByIssueId(ConvertUtil.getOrganizationId(projectId), issueId, OpenAppIssueSyncConstant.AppType.DIND.getValue(), OpenAppIssueSyncConstant.OperationType.DELETE);
         }
         if (backlogExpandService != null) {
             backlogExpandService.deleteIssueBacklogRel(issueId);

@@ -45,6 +45,7 @@ import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import io.choerodon.agile.infra.statemachineclient.dto.StateMachineConfigDTO;
 import io.choerodon.agile.infra.statemachineclient.dto.StateMachineTransformDTO;
+import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EnumUtil;
@@ -234,7 +235,9 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         stateMachineClient.createInstance(initTransform, inputDTO);
         issueService.afterCreateIssue(issueId, issueConvertDTO, issueCreateVO, projectInfo);
         if (agilePluginService != null) {
-            agilePluginService.handlerBusinessAfterCreateIssue(issueConvertDTO,projectId,issueId,issueCreateVO);
+            agilePluginService.handlerBusinessAfterCreateIssue(issueConvertDTO, projectId, issueId, issueCreateVO);
+            // 同步工作项到第三方
+            agilePluginService.issueSyncByIssueId(organizationId, issueId, OpenAppIssueSyncConstant.AppType.DIND.getValue(), OpenAppIssueSyncConstant.OperationType.CREATE);
         }
         if (agileWaterfallService != null) {
             agileWaterfallService.handlerWaterfallAfterCreateIssue(projectId,issueId,issueCreateVO);
@@ -316,6 +319,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         issueService.afterCreateSubIssue(issueId, subIssueConvertDTO, issueSubCreateVO, projectInfo);
         if (agileWaterfallService != null) {
             agileWaterfallService.handlerAfterCreateSubIssue(projectId, issueId, issueSubCreateVO);
+            agilePluginService.issueSyncByIssueId(organizationId, issueId, OpenAppIssueSyncConstant.AppType.DIND.getValue(), OpenAppIssueSyncConstant.OperationType.CREATE);
         }
         return issueId;
     }
