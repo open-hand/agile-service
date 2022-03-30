@@ -1650,6 +1650,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         if (agilePluginService != null) {
             agilePluginService.handlerProgramUpdateIssue(issueType, fieldList, projectId, issueUpdateVO, originIssue);
+            agilePluginService.issueSyncByIssueId(ConvertUtil.getOrganizationId(projectId), issueConvertDTO.getIssueId(), OpenAppIssueSyncConstant.AppType.DIND.getValue(), OpenAppIssueSyncConstant.OperationType.UPDATE);
         }
         if (agileWaterfallService != null) {
             agileWaterfallService.handlerWaterfallUpdateIssue(issueType, fieldList, projectId, issueUpdateVO, originIssue);
