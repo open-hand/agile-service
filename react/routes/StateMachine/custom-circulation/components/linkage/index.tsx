@@ -17,6 +17,7 @@ import { getIsOrganization } from '@/utils/common';
 import { IIssueType } from '@/common/types';
 import HostPick from '@/components/host-pick';
 import styles from './index.less';
+import { WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
 
 interface IParentIssueStatusSetting {
   id: string
@@ -48,7 +49,8 @@ const Linkage = ({
   modal, record, selectedType, customCirculationDataSet, linkageType, selectedTypeName, selectedTypeCode,
 }) => {
   const isOrganization = getIsOrganization();
-  const { data: issueTypes } = useIssueTypes({ typeCode: ['story', 'task', 'bug'] });
+  const isWaterfallTypeCode = WATERFALL_TYPE_CODES.includes(selectedTypeCode);
+  const { data: issueTypes } = useIssueTypes({ typeCode: isWaterfallTypeCode ? WATERFALL_TYPE_CODES : ['story', 'task', 'bug'] });
   const [fields, Field] = useFields();
   const [linkFields, LinkField] = useFields();
   const [loading, setLoading] = useState(false);
@@ -196,7 +198,7 @@ const Linkage = ({
             });
           });
           // @ts-ignore
-          await statusTransformApi[isOrganization ? 'orgUpdateLinkage' : 'updateLinkage'](selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
+          await statusTransformApi[isOrganization ? 'orgUpdateLinkage' : 'updateLinkage'](selectedType, record.get('id'), record.get('objectVersionNumber'), updateData, isWaterfallTypeCode ? 'waterfall' : undefined);
         }
         if (linkageType.includes('linkIssue')) {
           const data: any = linkIssueLinkageDataSet.current?.toData();
