@@ -388,9 +388,10 @@ class StatusTransformApi extends Api<StatusTransformApi> {
    * @param statusId
    * @param objectVersionNumber
    * @param data
+   * @param applyType
    */
   updateLinkage(
-    issueTypeId: string, statusId: string, objectVersionNumber: number, data: ILinkage[],
+    issueTypeId: string, statusId: string, objectVersionNumber: number, data: ILinkage[], applyType?: 'agile' | 'program' | 'waterfall',
   ) {
     return axios({
       method: 'post',
@@ -399,7 +400,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
         issueTypeId,
         statusId,
         objectVersionNumber,
-        applyType: getApplyType(),
+        applyType: applyType || getApplyType(),
       },
       data,
     });
