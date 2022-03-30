@@ -273,11 +273,16 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     autoQuery: false,
     paging: true,
     transport: {
-      read: ({ data, params }) => (
-        statusTransformApiConfig.getCustomCirculationList(
-          selectedType, data.name, params.page, params.size,
-        )
-      ),
+      read: ({ data, params }) => {
+        const selectedTypeCode = find(issueTypes, (
+          item: IIssueType,
+        ) => item.id === selectedType)?.typeCode;
+        return (
+          statusTransformApiConfig.getCustomCirculationList(
+            selectedType, data.name, params.page, params.size, 'agile_issue', selectedTypeCode && WATERFALL_TYPE_CODES.includes(selectedTypeCode) ? 'waterfall' : undefined,
+          )
+        );
+      },
     },
     feedback: {
       // @ts-ignore

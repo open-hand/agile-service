@@ -298,14 +298,14 @@ class StatusTransformApi extends Api<StatusTransformApi> {
    * @param size
    */
   getCustomCirculationList(
-    issueTypeId: string, param: string, page: number = 0, size: number = 10, schemeCode: string = 'agile_issue',
+    issueTypeId: string, param: string, page: number = 0, size: number = 10, schemeCode: string = 'agile_issue', applyType?: 'agile' | 'program' | 'waterfall',
   ) {
     return this.request({
       method: 'get',
       url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/status_transform_setting/list`,
       params: {
         issueTypeId,
-        applyType: getApplyType(),
+        applyType: applyType || getApplyType(),
         page,
         size,
         param,
