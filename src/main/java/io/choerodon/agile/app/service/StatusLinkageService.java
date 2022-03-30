@@ -4,6 +4,7 @@ import io.choerodon.agile.api.vo.InfluenceIssueVO;
 import io.choerodon.agile.api.vo.IssueLinkChangeVO;
 import io.choerodon.agile.api.vo.LinkIssueStatusLinkageVO;
 import io.choerodon.agile.api.vo.StatusLinkageVO;
+import io.choerodon.agile.infra.dto.StatusLinkageDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 
 import java.util.List;
@@ -34,4 +35,13 @@ public interface StatusLinkageService {
     List<StatusLinkageVO> listStatusLinkage(Long projectId, Long issueTypeId, List<Long> statusIds);
 
     LinkIssueStatusLinkageVO queryById(Long projectId, Long id);
+
+    List<StatusLinkageDTO> queryByStatusIdAndIssueTypeId(Long projectId, Long issueTypeId, Long statusId);
+
+    boolean updateParentStatusByStatusLinkage(String applyType,
+                                              Set<Long> influenceIssueIds,
+                                              IssueDTO sourceIssue,
+                                              IssueDTO parentIssue,
+                                              StatusLinkageDTO statusLinkageDTO,
+                                              List<IssueDTO> childrenIssueOfParentIssue);
 }

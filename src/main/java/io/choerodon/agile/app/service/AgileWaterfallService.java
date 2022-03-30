@@ -84,4 +84,6 @@ public interface AgileWaterfallService {
     List<StatusDTO> queryWaterfallNotAllowedTransferStatus(IssueDTO issueDTO);
 
     void handlerWaterfallFieldValue(String fieldCode, IssueUpdateVO issueUpdateVO, Map<String, Object> specifyMap, List<StatusFieldValueSettingDTO> statusFieldValueSettings, IssueDTO issueDTO, List<String> field);
+
+    boolean updateWaterfallParentStatus(IssueDTO issueDTO, Set<Long> influenceIssueIds, String applyType);
 }
