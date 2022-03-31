@@ -35,7 +35,6 @@ import { TabComponentProps } from '../index';
 import openLogModal from './components/log-modal';
 import { FORMAT_FIELDS, MINUTE } from '@/constants/DATE_FORMAT';
 import useFormatMessage from '@/hooks/useFormatMessage';
-import useIsWaterfall from '@/hooks/useIsWaterfall';
 import { WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
 
 interface ISetting {
@@ -262,27 +261,23 @@ const transformFieldValue = (fieldSetting) => {
 
 const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const { data: issueTypes } = useIssueTypes();
-  const { isWaterfall } = useIsWaterfall();
   const {
     selectedType, setSelectedType, issueTypeInitedMap, readOnly, visibleIssueTypeCategory, noContainer,
   } = useStateMachineContext();
   const formatMessage = useFormatMessage('agile.stateMachine');
   const isOrganization = getIsOrganization();
+  const selectedTypeItem = useMemo(() => (find(issueTypes, ['id', selectedType])), [issueTypes, selectedType]);
+  const selectedTypeCode = useMemo(() => (selectedTypeItem?.typeCode), [selectedTypeItem]);
 
   const customCirculationDataSet = useMemo(() => new DataSet({
     autoQuery: false,
     paging: true,
     transport: {
-      read: ({ data, params }) => {
-        const selectedTypeCode = find(issueTypes, (
-          item: IIssueType,
-        ) => item.id === selectedType)?.typeCode;
-        return (
-          statusTransformApiConfig.getCustomCirculationList(
-            selectedType, data.name, params.page, params.size, 'agile_issue', selectedTypeCode && WATERFALL_TYPE_CODES.includes(selectedTypeCode) ? 'waterfall' : undefined,
-          )
-        );
-      },
+      read: ({ data, params }) => (
+        statusTransformApiConfig.getCustomCirculationList(
+          selectedType, data.name, params.page, params.size, 'agile_issue', selectedTypeCode && WATERFALL_TYPE_CODES.includes(selectedTypeCode) ? 'waterfall' : undefined,
+        )
+      ),
     },
     feedback: {
       // @ts-ignore
@@ -317,10 +312,6 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
 
   // @ts-ignore
   const getModalSetting = (key: 'autoTransform' | 'condition' | 'linkage' | 'updateField' | 'notifySetting', record) => {
-    const selectedTypeItem = find(issueTypes, (
-      item: IIssueType,
-    ) => item.id === selectedType);
-    const selectedTypeCode = selectedTypeItem?.typeCode;
     const selectedTypeName = selectedTypeItem?.name;
     const memberOptions = [];
     if (selectedTypeCode && !['issue_epic', 'feature'].includes(selectedTypeCode)) {
@@ -426,9 +417,6 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     // @ts-ignore
     value, text, name, record, dataSet,
   }) => {
-    const selectedTypeCode = find(issueTypes, (
-      item: IIssueType,
-    ) => item.id === selectedType)?.typeCode;
     const menu = (
       // eslint-disable-next-line react/jsx-no-bind
       <Menu onClick={handleMenuClick.bind(this, record)} selectable={false}>
@@ -524,21 +512,17 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
 
   // @ts-ignore
   const renderStatusLinkageSetting = (statusLinkageVOS: IStatusLinkageVOS[], record) => {
-    const selectedIssueType = find(issueTypes, (
-      item: IIssueType,
-    ) => item.id === selectedType);
-    const selectedTypeCode = selectedIssueType?.typeCode;
-    if (statusLinkageVOS && statusLinkageVOS.length && (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug')) {
+    if (selectedTypeCode !== 'feature') {
       const prefixStr = `【${record.get('name')}】状态，则将`;
       const groupData = groupBy(statusLinkageVOS, 'type');
       const allTransfer = getLinkageSettingString(groupData.all_transfer || []);
       const anyoneTransfer = getLinkageSettingString(groupData.anyone_transfer || []);
       return ([
-        allTransfer ? <div className={`${styles.settingItem} ${styles.linkageSettingItem}`}>{`全部${selectedIssueType?.name}都在${prefixStr}${allTransfer}`}</div> : null,
-        anyoneTransfer ? <div className={`${styles.settingItem} ${styles.linkageSettingItem}`}>{`任一${selectedIssueType?.name}在${prefixStr}${anyoneTransfer}`}</div> : null,
+        allTransfer ? <div className={`${styles.settingItem} ${styles.linkageSettingItem}`}>{`全部${selectedTypeItem?.name}都在${prefixStr}${allTransfer}`}</div> : null,
+        anyoneTransfer ? <div className={`${styles.settingItem} ${styles.linkageSettingItem}`}>{`任一${selectedTypeItem?.name}在${prefixStr}${anyoneTransfer}`}</div> : null,
       ]);
     }
-    if (statusLinkageVOS && statusLinkageVOS.length && selectedTypeCode === 'feature') {
+    if (selectedTypeCode === 'feature') {
       const prefixStr = '当项目';
       const linkageStr = (
         statusLinkageVOS.map((linkageSetting) => {
@@ -590,9 +574,6 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     const {
       statusTransferSettingVOS, statusNoticeSettingVOS, statusFieldSettingVOS, statusLinkageVOS, linkIssueStatusLinkageVOS,
     } = record.data;
-    const selectedTypeCode = find(issueTypes, (
-      item: IIssueType,
-    ) => item.id === selectedType)?.typeCode;
     const verifySubissueCompleted = statusTransferSettingVOS && find(statusTransferSettingVOS, (item) => item.userType === 'other' && item.verifySubissueCompleted);
     const isProjectOwnerExist = statusTransferSettingVOS && find(statusTransferSettingVOS, (item: IStatusTransferSettingVOS) => item.userType === 'projectOwner');
     const assigners = filter((statusTransferSettingVOS || []), (item: IStatusTransferSettingVOS) => item.userType === 'specifier')?.map((item: IStatusTransferSettingVOS) => item.user?.realName) || [];
@@ -622,7 +603,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           )
         }
         {
-          (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug' || selectedTypeCode === 'feature') && statusLinkageVOS && statusLinkageVOS.length > 0 && (
+          selectedTypeCode && ['sub_task', 'bug', 'feature', ...WATERFALL_TYPE_CODES].includes(selectedTypeCode) && statusLinkageVOS && statusLinkageVOS.length > 0 && (
             <div className={`${styles.settingItem} ${styles.linkageSettingItem}`}>
               <Tooltip title={renderStatusLinkageSetting(statusLinkageVOS, record)}>
                 {renderStatusLinkageSetting(statusLinkageVOS, record)}
