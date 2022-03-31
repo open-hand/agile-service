@@ -1,16 +1,17 @@
 import React from 'react';
 import {
-  get, merge,
+  get, pick,
 } from 'lodash';
 import { toJS } from 'mobx';
 import { IFieldProcessConfig } from '../base/type';
 import { getComponentCodeForLocalCode, getFieldPropsByMode } from '../base/utils';
-import { getSearchFieldPropsByFieldType, IAgileBaseSearchFieldInstance } from './search';
-import getFieldsInstance from '../base';
+import { getSearchFieldPropsByFieldType, IAgileBaseSearchFieldInstance, wrapDateToFlatDate } from './search';
+import getFieldsInstance, { AgileComponentMap } from '../base';
 import SelectProject from '@/components/select/select-project';
 import SelectIssueType from '@/components/select/select-issue-type';
 import SelectStatus from '@/components/select/select-status';
 import SelectUser from '@/components/select/select-user';
+import SelectWorkbenchPriority from '@/components/select/select-workbench-priority';
 
 function getFieldConfig({
   field, props,
@@ -83,6 +84,8 @@ const AgileWorkBenchComponents = {
   issueType: SelectIssueType,
   status: SelectStatus,
   assignee: SelectUser,
+  priority: SelectWorkbenchPriority,
+  ...pick(AgileComponentMap, ['estimatedStartTime', 'estimatedEndTime', 'actualStartTime', 'actualEndTime']),
 };
 const getAgileWorkBenchFields = getFieldsInstance<any, {}>({ SystemComponents: AgileWorkBenchComponents });
 const AgileBaseSearchInstance: IAgileBaseSearchFieldInstance = {
@@ -119,7 +122,10 @@ function getSearchWorkbenchFields(fields: any[], fieldCodeProps?: Record<string,
       },
     };
   });
-  return fieldInstance(fieldConfigs, [], []).map((i: any[]) => i[1](i[0])) as React.ReactElement[];
+  return fieldInstance(fieldConfigs, [], []).map((i: any[]) => {
+    const element = ['date', 'time', 'datetime'].includes(i[0].fieldType) && i[0].props.flat ? wrapDateToFlatDate(i[0], i[1]) : i[1](i[0]);
+    return element;
+  }) as React.ReactElement[];
 }
 export { AgileBaseSearchInstance };
 export default getSearchWorkbenchFields;
