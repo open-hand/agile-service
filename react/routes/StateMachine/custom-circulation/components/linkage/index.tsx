@@ -217,7 +217,7 @@ const Linkage = ({
             });
           });
           // @ts-ignore
-          await statusTransformApi[isOrganization ? 'orgUpdateLinkage' : 'updateLinkage'](selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
+          await statusTransformApi[isOrganization ? 'orgUpdateLinkage' : 'updateLinkage'](selectedType, record.get('id'), record.get('objectVersionNumber'), updateData, isWaterfallTypeCode ? 'waterfall' : undefined);
         }
         if (linkageType.includes('linkIssue')) {
           const data: any = linkIssueLinkageDataSet.current?.toData();
