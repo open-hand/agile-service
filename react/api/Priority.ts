@@ -17,11 +17,11 @@ export interface ISequence {
 }
 class PriorityApi extends Api<PriorityApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   get orgPrefix() {
-    return `/agile/v1/organizations/${getOrganizationId()}`;
+    return `/agile/v1/organizations/${this.orgId}`;
   }
 
   /**
@@ -36,6 +36,17 @@ class PriorityApi extends Api<PriorityApi> {
         name: data?.name,
         description: data?.description,
       },
+    });
+  }
+
+  loadWorkbench(params?: { param?: string }) {
+    return this.request({
+      method: 'post',
+      url: `${this.orgPrefix}/work_bench/priority`,
+      params: {
+        ...params,
+      },
+      data: {},
     });
   }
 
@@ -57,8 +68,8 @@ class PriorityApi extends Api<PriorityApi> {
     // 进行一层处理，过滤掉禁用的优先级
     return axios.get(`/agile/v1/projects/${projectId || getProjectId()}/priority/list_by_org`)
       .then((data: any) => Array.isArray(data)
-       && data.filter((v) => v.enable
-       || (Array.isArray(priorityIds) && priorityIds.some((id) => id === v.id))));
+        && data.filter((v) => v.enable
+          || (Array.isArray(priorityIds) && priorityIds.some((id) => id === v.id))));
   }
 
   /**
