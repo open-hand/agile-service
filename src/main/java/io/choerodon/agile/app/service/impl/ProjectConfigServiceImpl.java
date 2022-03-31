@@ -134,6 +134,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private StatusMachineSchemeConfigMapper statusMachineSchemeConfigMapper;
     @Autowired
     private ObjectSchemeFieldService objectSchemeFieldService;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
@@ -870,7 +872,6 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             }
             statusSettingVO.setLinkIssueStatusLinkageVOS(linkIssueMap.getOrDefault(statusSettingVO.getId(), new ArrayList<>()));
         }
-        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
         if (agilePluginService != null) {
             agilePluginService.listStatusLinkageByStatusIds(projectId, issueTypeId, statusIds, applyType, list);
         }
