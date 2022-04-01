@@ -60,7 +60,7 @@ function CreateField() {
     if (isEdit && formDataSet.status === 'ready') {
       setFieldOptions(formDataSet.current?.get('fieldOptions') || []);
     }
-  }, [formDataSet && formDataSet.status]);
+  }, [formDataSet, formDataSet.status, isEdit, formDataSet.current?.id]);
 
   const fieldTypeOptionRender = ({ text, value }: RenderProps) => (
     <>
