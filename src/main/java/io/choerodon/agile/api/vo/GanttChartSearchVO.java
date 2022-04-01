@@ -16,8 +16,6 @@ public class GanttChartSearchVO {
 
     private List<ObjectSchemeFieldVO> displayFields;
 
-    private Boolean spentWorkTimeWithSub;
-
     public Set<Long> getIssueIds() {
         return issueIds;
     }
@@ -34,11 +32,4 @@ public class GanttChartSearchVO {
         this.displayFields = displayFields;
     }
 
-    public Boolean getSpentWorkTimeWithSub() {
-        return spentWorkTimeWithSub;
-    }
-
-    public void setSpentWorkTimeWithSub(Boolean spentWorkTimeWithSub) {
-        this.spentWorkTimeWithSub = spentWorkTimeWithSub;
-    }
 }

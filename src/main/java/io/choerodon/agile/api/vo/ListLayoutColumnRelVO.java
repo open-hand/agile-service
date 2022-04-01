@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotNull;
@@ -32,6 +33,9 @@ public class ListLayoutColumnRelVO {
     private Long organizationId;
 
     private Long objectVersionNumber;
+
+    @ApiModelProperty(value = "额外配置：工时包含子任务")
+    private Boolean extraConfig;
 
     public String getFieldProjectName() {
         return fieldProjectName;
@@ -119,5 +123,13 @@ public class ListLayoutColumnRelVO {
 
     public void setFieldId(Long fieldId) {
         this.fieldId = fieldId;
+    }
+
+    public Boolean getExtraConfig() {
+        return extraConfig;
+    }
+
+    public void setExtraConfig(Boolean extraConfig) {
+        this.extraConfig = extraConfig;
     }
 }

@@ -44,4 +44,10 @@ databaseChangeLog(logicalFilePath:'fd_list_layout_column_rel.groovy') {
             column(name: "last_update_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
     }
+
+    changeSet(id: '2022-04-01-fd-list-layout-column-rel-add-column', author: 'huaxin.deng@hand-china.com') {
+        addColumn(tableName: 'fd_list_layout_column_rel') {
+            column(name: 'extra_config', type: 'TINYINT UNSIGNED(1)', remarks: '额外配置')
+        }
+    }
 }
