@@ -434,7 +434,9 @@ public interface IssueService {
 
     void handlerInfluenceMap(Map<Long, List<Long>> influenceMap, Long issueId, Long statusId, Map<Long, List<IssueLinkChangeVO>> issueLinkChangeGroup, Long influenceId, InfluenceIssueVO influenceIssueVO, Boolean autoTriggered);
 
-    void updateInfluenceIssueStatus(Long projectId, Long issueId, IssueDTO issueDTO, String applyType, Set<Long> influenceIssueIds);
+    void updateLinkIssueStatus(Long projectId, Long issueId, IssueDTO issueDTO, String applyType, Set<Long> influenceIssueIds);
+
+    void statusLinkageExecutionLog(InfluenceIssueVO influenceIssueVO, Long issueId, IssueDTO influenceIssue, Boolean isSub, Map<Long, IssueStatusLinkageVO> issueStatusLinkageMap, String statusCode, String remark);
 
     IssueVO updateIssueWithoutRuleNotice(Long projectId,
                                          IssueUpdateVO issueUpdateVO,
@@ -444,11 +446,11 @@ public interface IssueService {
                                             List<String> fieldList,
                                             Long projectId);
 
-    String buildStatusLinkageContent(LinkIssueStatusLinkageVO linkIssueStatusLinkageVO);
+    String buildStatusLinkageContent(IssueStatusLinkageVO issueStatusLinkageVO);
 
-    void handlerInfluenceIssue(Long projectId, String applyType, InfluenceIssueVO influenceIssueVO, Long linkIssueId,  Map<Long, LinkIssueStatusLinkageVO> linkIssueStatusMap, Set<Long> influenceIssueIds);
+    void handlerInfluenceIssue(Long projectId, String applyType, InfluenceIssueVO influenceIssueVO, Long linkIssueId,  Map<Long, IssueStatusLinkageVO> issueStatusLinkageMap, Set<Long> influenceIssueIds);
 
-    Boolean executionUpdateInfluenceIssue(Long issueId, Long executionStatusId, IssueDTO influenceIssue, Long projectId, String applyType, InfluenceIssueVO influenceIssueVO, Boolean isSub, Map<Long, LinkIssueStatusLinkageVO> linkIssueStatusMap, TriggerCarrierVO triggerCarrierVO);
+    Boolean executionUpdateInfluenceIssue(Long issueId, Long executionStatusId, IssueDTO influenceIssue, Long projectId, String applyType, InfluenceIssueVO influenceIssueVO, Boolean isSub, Map<Long, IssueStatusLinkageVO> issueStatusLinkageMap, TriggerCarrierVO triggerCarrierVO);
 
     void handleUpdateLabelIssueWithoutRuleNotice(List<LabelIssueRelVO> labelIssueRelVOList, Long issueId, Long projectId);
 

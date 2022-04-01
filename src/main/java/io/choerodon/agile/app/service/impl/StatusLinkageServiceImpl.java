@@ -284,12 +284,12 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
     }
 
     private void statusLinkageExecutionLog(Long projectId, Long linkSettingId, Long issueId, IssueDTO influenceIssue, String statusCode, String remark) {
-        LinkIssueStatusLinkageVO linkIssueStatusLinkageVO = statusLinkageService.queryById(projectId, linkSettingId);
-        if (ObjectUtils.isEmpty(linkIssueStatusLinkageVO)) {
+        IssueStatusLinkageVO issueStatusLinkageVO = statusLinkageService.queryById(projectId, linkSettingId);
+        if (ObjectUtils.isEmpty(issueStatusLinkageVO)) {
             throw new CommonException("error.link.issue.status.linkage.empty");
         }
         // 记录联动的执行日志
-        String content = issueService.buildStatusLinkageContent(linkIssueStatusLinkageVO);
+        String content = issueService.buildStatusLinkageContent(issueStatusLinkageVO);
         StatusLinkageExecutionLogDTO statusLinkageExecutionLogDTO = new StatusLinkageExecutionLogDTO();
         statusLinkageExecutionLogDTO.setPreIssueId(influenceIssue.getIssueId());
         statusLinkageExecutionLogDTO.setCurIssueId(issueId);
@@ -353,7 +353,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
             influenceIssue.setIssueId(parentIssueId);
             influenceIssue.setStatusId(changeStatus);
             influenceIssue.setLoop(false);
-            influenceIssue.setLinkSettingId(statusLinkageDTO.getId());
+            influenceIssue.setLinkageSettingId(statusLinkageDTO.getId());
             influenceIssue.setChildrenTriggered(true);
             if(statusIds.contains(changeStatus)){
                 allInfluenceMap.put(0L, new ArrayList<>());
@@ -465,12 +465,12 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
     }
 
     @Override
-    public LinkIssueStatusLinkageVO queryById(Long projectId, Long id) {
+    public IssueStatusLinkageVO queryById(Long projectId, Long id) {
         StatusLinkageDTO statusLinkageDTO = statusLinkageMapper.selectByPrimaryKey(id);
         if (ObjectUtils.isEmpty(statusLinkageDTO)) {
             return null;
         }
-        LinkIssueStatusLinkageVO linkIssueStatusLinkageVO = new LinkIssueStatusLinkageVO();
+        IssueStatusLinkageVO issueStatusLinkageVO = new IssueStatusLinkageVO();
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         // 获取项目的状态
         Map<Long, StatusVO> statusVOMap = statusService.queryAllStatusMap(organizationId);
@@ -483,14 +483,14 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         if (!CollectionUtils.isEmpty(statusVOMap)) {
             typeVOMap.putAll(issueTypeVOS.stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity())));
         }
-        linkIssueStatusLinkageVO.setIssueTypeVO(typeVOMap.getOrDefault(statusLinkageDTO.getIssueTypeId(), null));
-        linkIssueStatusLinkageVO.setStatusVO(statusVOMap.getOrDefault(statusLinkageDTO.getStatusId(), null));
-        linkIssueStatusLinkageVO.setLinkIssueType(typeVOMap.getOrDefault(statusLinkageDTO.getParentIssueTypeId(), null));
-        linkIssueStatusLinkageVO.setLinkIssueStatus(statusVOMap.getOrDefault(statusLinkageDTO.getParentIssueStatusSetting(), null));
+        issueStatusLinkageVO.setIssueTypeVO(typeVOMap.getOrDefault(statusLinkageDTO.getIssueTypeId(), null));
+        issueStatusLinkageVO.setStatusVO(statusVOMap.getOrDefault(statusLinkageDTO.getStatusId(), null));
+        issueStatusLinkageVO.setLinkageIssueType(typeVOMap.getOrDefault(statusLinkageDTO.getParentIssueTypeId(), null));
+        issueStatusLinkageVO.setLinkageIssueStatus(statusVOMap.getOrDefault(statusLinkageDTO.getParentIssueStatusSetting(), null));
         IssueLinkTypeVO issueLinkTypeVO = new IssueLinkTypeVO();
         issueLinkTypeVO.setLinkName("父级");
-        linkIssueStatusLinkageVO.setLinkTypeVO(issueLinkTypeVO);
-        return linkIssueStatusLinkageVO;
+        issueStatusLinkageVO.setLinkTypeVO(issueLinkTypeVO);
+        return issueStatusLinkageVO;
     }
 
     protected boolean changeParentStatus(Long projectId, String applyType, IssueDTO parentIssue, Long changeStatus, IssueDTO triggerIssue) {

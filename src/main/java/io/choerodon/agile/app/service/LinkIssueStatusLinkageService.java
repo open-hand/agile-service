@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.IssueStatusLinkageVO;
 import io.choerodon.agile.api.vo.LinkIssueStatusLinkageVO;
 import io.choerodon.agile.api.vo.StatusVO;
 
@@ -25,5 +26,5 @@ public interface LinkIssueStatusLinkageService {
 
     List<StatusVO> queryStatus(Long projectId, Long organizationId, LinkIssueStatusLinkageVO linkageVO);
 
-    Map<Long, LinkIssueStatusLinkageVO> queryMapByProject(Long projectId, Long organizationId);
+    Map<Long, IssueStatusLinkageVO> queryMapByProject(Long projectId, Long organizationId);
 }

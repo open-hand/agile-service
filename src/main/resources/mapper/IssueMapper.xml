@@ -4110,6 +4110,7 @@
         ai.issue_id as issue_id,
         ai.summary,
         CONCAT(api.project_code,'-', ai.issue_num) as issue_num,
+        ai.project_id,
         ai.reporter_id,
         ai.last_update_date,
         ai.priority_id,

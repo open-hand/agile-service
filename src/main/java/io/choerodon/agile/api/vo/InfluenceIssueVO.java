@@ -13,7 +13,7 @@ public class InfluenceIssueVO {
 
     private Boolean loop;
 
-    private Long linkSettingId;
+    private Long linkageSettingId;
 
     private Integer level;
 
@@ -55,12 +55,12 @@ public class InfluenceIssueVO {
         this.loop = loop;
     }
 
-    public Long getLinkSettingId() {
-        return linkSettingId;
+    public Long getLinkageSettingId() {
+        return linkageSettingId;
     }
 
-    public void setLinkSettingId(Long linkSettingId) {
-        this.linkSettingId = linkSettingId;
+    public void setLinkageSettingId(Long linkageSettingId) {
+        this.linkageSettingId = linkageSettingId;
     }
 
     public Boolean getChildrenTriggered() {

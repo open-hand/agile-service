@@ -248,7 +248,7 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
     }
 
     @Override
-    public Map<Long, LinkIssueStatusLinkageVO> queryMapByProject(Long projectId, Long organizationId) {
+    public Map<Long, IssueStatusLinkageVO> queryMapByProject(Long projectId, Long organizationId) {
         LinkIssueStatusLinkageDTO linkageDTO = new LinkIssueStatusLinkageDTO();
         linkageDTO.setProjectId(projectId);
         linkageDTO.setOrganizationId(organizationId);
@@ -275,14 +275,16 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
             }.getType());
             issueLinkTypeVOMap.putAll(issueLinkTypeVOS.stream().collect(Collectors.toMap(IssueLinkTypeVO::getLinkTypeId, Function.identity())));
         }
-        Map<Long, LinkIssueStatusLinkageVO> map = new HashMap<>();
+        Map<Long, IssueStatusLinkageVO> map = new HashMap<>();
         for (LinkIssueStatusLinkageDTO dto : linkageDTOS) {
-            LinkIssueStatusLinkageVO linkageVO = modelMapper.map(dto, LinkIssueStatusLinkageVO.class);
+            IssueStatusLinkageVO linkageVO = modelMapper.map(dto, IssueStatusLinkageVO.class);
+            linkageVO.setLinkageIssueTypeId(dto.getLinkIssueTypeId());
+            linkageVO.setLinkageIssueStatusId(dto.getLinkIssueStatusId());
             linkageVO.setLinkTypeVO(issueLinkTypeVOMap.getOrDefault(dto.getLinkTypeId(), null));
-            linkageVO.setLinkIssueType(typeVOMap.getOrDefault(dto.getLinkIssueTypeId(), null));
+            linkageVO.setLinkageIssueType(typeVOMap.getOrDefault(dto.getLinkIssueTypeId(), null));
             linkageVO.setIssueTypeVO(typeVOMap.getOrDefault(dto.getIssueTypeId(), null));
             linkageVO.setStatusVO(statusMap.getOrDefault(dto.getStatusId(), null));
-            linkageVO.setLinkIssueStatus(statusMap.getOrDefault(dto.getLinkIssueStatusId(), null));
+            linkageVO.setLinkageIssueStatus(statusMap.getOrDefault(dto.getLinkIssueStatusId(), null));
             map.put(dto.getId(), linkageVO);
         }
         return map;

@@ -1342,7 +1342,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             if (EncryptContext.isEncrypt()) {
                 requestAttributes = RequestContextHolder.currentRequestAttributes();
             }
-            issueOperateService.updateLinkIssue(projectId, issueId, issueDTO, applyType, encryptType, requestAttributes);
+            issueOperateService.updateIssueStatusLinkage(projectId, issueId, issueDTO, applyType, encryptType, requestAttributes);
             triggerCarrierVO.setAuditDomain(issueDTO);
             triggerCarrierVO.setProjectId(projectId);
             triggerCarrierVO.setIssueTypeId(issueDTO.getIssueTypeId());
@@ -1360,7 +1360,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public void updateInfluenceIssueStatus(Long projectId, Long issueId, IssueDTO issueDTO, String applyType, Set<Long> influenceIssueIds) {
+    public void updateLinkIssueStatus(Long projectId, Long issueId, IssueDTO issueDTO, String applyType, Set<Long> influenceIssueIds) {
         Map<Long, List<Long>> allInfluenceMap = new HashMap<>();
         InfluenceIssueVO influenceIssueVO = new InfluenceIssueVO();
         influenceIssueVO.setIssueId(issueId);
@@ -1385,16 +1385,16 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         issueDTOMap.putAll(issueDTOS.stream().collect(Collectors.toMap(IssueDTO::getIssueId, Function.identity())));
         List<InfluenceIssueVO> childrenVO = influenceIssueVO.getChildrenVO();
-        Map<Long, LinkIssueStatusLinkageVO> linkIssueStatusMap = linkIssueStatusLinkageService.queryMapByProject(projectId, ConvertUtil.getOrganizationId(projectId));
+        Map<Long, IssueStatusLinkageVO> issueStatusLinkageMap = linkIssueStatusLinkageService.queryMapByProject(projectId, ConvertUtil.getOrganizationId(projectId));
         if (!CollectionUtils.isEmpty(childrenVO)) {
             // 处理需要联动的issue
             for (InfluenceIssueVO influenceVO : childrenVO) {
                 try {
-                    this.self().handlerInfluenceIssue(projectId, applyType, influenceVO, issueId, linkIssueStatusMap, influenceIssueIds);
+                    this.self().handlerInfluenceIssue(projectId, applyType, influenceVO, issueId, issueStatusLinkageMap, influenceIssueIds);
                 } catch (Exception e) {
                     // 返回受影响的issue
                     influenceIssueIds.add(influenceVO.getIssueId());
-                    statusLinkageExecutionLog(influenceVO, influenceVO.getIssueId(), issueDTOMap.get(issueId), false, linkIssueStatusMap, TriggerExecutionStatus.ERROR.getValue(), null);
+                    statusLinkageExecutionLog(influenceVO, influenceVO.getIssueId(), issueDTOMap.get(issueId), false, issueStatusLinkageMap, TriggerExecutionStatus.ERROR.getValue(), null);
                     LOGGER.info("error update link issue", e);
                 }
             }
@@ -1402,7 +1402,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public void handlerInfluenceIssue(Long projectId, String applyType, InfluenceIssueVO influenceIssueVO, Long linkIssueId,  Map<Long, LinkIssueStatusLinkageVO> linkIssueStatusMap, Set<Long> influenceIssueIds) {
+    public void handlerInfluenceIssue(Long projectId, String applyType, InfluenceIssueVO influenceIssueVO, Long linkIssueId, Map<Long, IssueStatusLinkageVO> issueStatusLinkageMap, Set<Long> influenceIssueIds) {
         Long issueId = influenceIssueVO.getIssueId();
         Long statusId = influenceIssueVO.getStatusId();
         IssueDTO influenceIssue = issueMapper.selectByPrimaryKey(linkIssueId);
@@ -1410,27 +1410,28 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Boolean isSub = Objects.equals("sub_task",influenceIssue.getTypeCode()) || (Objects.equals("bug",influenceIssue.getTypeCode()) && !ObjectUtils.isEmpty(influenceIssue.getRelateIssueId()) && !Objects.equals(influenceIssue.getRelateIssueId(), 0L));
         // 变更issue的状态和更新属性
         TriggerCarrierVO triggerCarrierVO = new TriggerCarrierVO();
-        this.self().executionUpdateInfluenceIssue(issueId, statusId, influenceIssue, projectId, applyType, influenceIssueVO, isSub, linkIssueStatusMap, triggerCarrierVO);
+        this.self().executionUpdateInfluenceIssue(issueId, statusId, influenceIssue, projectId, applyType, influenceIssueVO, isSub, issueStatusLinkageMap, triggerCarrierVO);
         // 处理当前issue会影响的issue
         List<InfluenceIssueVO> childrenVO = influenceIssueVO.getChildrenVO();
         if (!CollectionUtils.isEmpty(childrenVO)) {
             for (InfluenceIssueVO issueVO : childrenVO) {
                 try {
-                    this.self().handlerInfluenceIssue(projectId, applyType, issueVO, issueId, linkIssueStatusMap, influenceIssueIds);
+                    this.self().handlerInfluenceIssue(projectId, applyType, issueVO, issueId, issueStatusLinkageMap, influenceIssueIds);
                 } catch (Exception e) {
                     influenceIssueIds.add(issueVO.getIssueId());
-                    statusLinkageExecutionLog(issueVO, issueVO.getIssueId(), issue, false, linkIssueStatusMap, TriggerExecutionStatus.ERROR.getValue(), null);
+                    statusLinkageExecutionLog(issueVO, issueVO.getIssueId(), issue, false, issueStatusLinkageMap, TriggerExecutionStatus.ERROR.getValue(), null);
                     LOGGER.info("error.update.link.issue",e);
                 }
             }
         }
     }
 
-    private void statusLinkageExecutionLog(InfluenceIssueVO influenceIssueVO, Long issueId, IssueDTO influenceIssue, Boolean isSub, Map<Long, LinkIssueStatusLinkageVO> linkIssueStatusMap, String statusCode, String remark) {
+    @Override
+    public void statusLinkageExecutionLog(InfluenceIssueVO influenceIssueVO, Long issueId, IssueDTO influenceIssue, Boolean isSub, Map<Long, IssueStatusLinkageVO> issueStatusLinkageMap, String statusCode, String remark) {
         // 记录联动的执行日志
         Long projectId = influenceIssue.getProjectId();
-        if (!ObjectUtils.isEmpty(influenceIssueVO.getLinkSettingId())) {
-            LinkIssueStatusLinkageVO linkIssueStatusLinkageVO = isSub && Boolean.TRUE.equals(influenceIssueVO.getChildrenTriggered()) ? statusLinkageService.queryById(projectId, influenceIssueVO.getLinkSettingId()) : linkIssueStatusMap.getOrDefault(influenceIssueVO.getLinkSettingId(), null);
+        if (!ObjectUtils.isEmpty(influenceIssueVO.getLinkageSettingId())) {
+            IssueStatusLinkageVO linkIssueStatusLinkageVO = isSub && Boolean.TRUE.equals(influenceIssueVO.getChildrenTriggered()) ? statusLinkageService.queryById(projectId, influenceIssueVO.getLinkageSettingId()) : issueStatusLinkageMap.getOrDefault(influenceIssueVO.getLinkageSettingId(), null);
             if (ObjectUtils.isEmpty(linkIssueStatusLinkageVO)) {
                 throw new CommonException("error.link.issue.status.linkage.empty");
             }
@@ -1456,34 +1457,61 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public String buildStatusLinkageContent(LinkIssueStatusLinkageVO linkIssueStatusLinkageVO) {
+    public String buildStatusLinkageContent(IssueStatusLinkageVO issueStatusLinkageVO) {
         StringBuilder stringBuilder = new StringBuilder();
-        IssueTypeVO issueTypeVO = linkIssueStatusLinkageVO.getIssueTypeVO();
-        StatusVO statusVO = linkIssueStatusLinkageVO.getStatusVO();
+        IssueTypeVO issueTypeVO = issueStatusLinkageVO.getIssueTypeVO();
+        StatusVO statusVO = issueStatusLinkageVO.getStatusVO();
         if (!ObjectUtils.isEmpty(statusVO) && !ObjectUtils.isEmpty(issueTypeVO)) {
             stringBuilder.append(issueTypeVO.getName())
                     .append(": 当前" + IssueConstant.ISSUE_CN + "状态为")
                     .append(statusVO.getName())
-                    .append("时 ");
+                    .append("时");
         }
-        IssueLinkTypeVO linkTypeVO = linkIssueStatusLinkageVO.getLinkTypeVO();
-        IssueTypeVO linkIssueType = linkIssueStatusLinkageVO.getLinkIssueType();
-        StatusVO linkIssueStatus = linkIssueStatusLinkageVO.getLinkIssueStatus();
-        stringBuilder.append("【")
-                .append(ObjectUtils.isEmpty(linkTypeVO) ? "关联" : linkTypeVO.getLinkName())
-                .append("】的");
-        if (!ObjectUtils.isEmpty(linkIssueType) && !ObjectUtils.isEmpty(linkIssueStatus)) {
-            stringBuilder.append("【" + linkIssueType.getName() + "】")
+        IssueLinkTypeVO linkTypeVO = issueStatusLinkageVO.getLinkTypeVO();
+        IssueTypeVO linkageIssueType = issueStatusLinkageVO.getLinkageIssueType();
+        StatusVO linkageIssueStatus = issueStatusLinkageVO.getLinkageIssueStatus();
+        if (Arrays.asList(IssueTypeCode.WATERFALL_ISSUE_TYPE_CODE).contains(linkageIssueType.getTypeCode())) {
+            stringBuilder.append("，存在【")
+                    .append(ObjectUtils.isEmpty(issueStatusLinkageVO.getPredecessorType()) ? "依赖" : getPredecessorType(issueStatusLinkageVO.getPredecessorType()))
+                    .append("】依赖关系的");
+        } else {
+            stringBuilder.append(" 【")
+                    .append(ObjectUtils.isEmpty(linkTypeVO) ? "关联" : linkTypeVO.getLinkName())
+                    .append("】的");
+        }
+        if (!ObjectUtils.isEmpty(linkageIssueType) && !ObjectUtils.isEmpty(linkageIssueStatus)) {
+            stringBuilder.append("【" + linkageIssueType.getName() + "】")
                     .append("流转状态到")
-                    .append("【" + linkIssueStatus.getName() + "】");
+                    .append("【" + linkageIssueStatus.getName() + "】");
         }
         return stringBuilder.toString();
+    }
+
+    private String getPredecessorType(String predecessorType) {
+        String result = "";
+        switch(predecessorType) {
+            case "predecessor_fs":
+                result = "完成-开始（FS）";
+                break;
+            case "predecessor_ff":
+                result = "完成-完成（FF）";
+                break;
+            case "predecessor_ss":
+                result = "开始-开始（SS）";
+                break;
+            case "predecessor_sf":
+                result = "开始-完成（SF）";
+                break;
+            default:
+                break;
+        }
+        return result;
     }
 
 
     @Override
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
-    public Boolean executionUpdateInfluenceIssue(Long issueId, Long executionStatusId, IssueDTO influenceIssue, Long projectId, String applyType, InfluenceIssueVO influenceIssueVO, Boolean isSub,  Map<Long, LinkIssueStatusLinkageVO> linkIssueStatusMap, TriggerCarrierVO triggerCarrierVO) {
+    public Boolean executionUpdateInfluenceIssue(Long issueId, Long executionStatusId, IssueDTO influenceIssue, Long projectId, String applyType, InfluenceIssueVO influenceIssueVO, Boolean isSub,  Map<Long, IssueStatusLinkageVO> issueStatusLinkageMap, TriggerCarrierVO triggerCarrierVO) {
         IssueDTO issue = issueMapper.selectByPrimaryKey(issueId);
         triggerCarrierVO.setInstanceId(issue.getIssueId());
         triggerCarrierVO.setProjectId(projectId);
@@ -1493,19 +1521,19 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         triggerCarrierVO.setFieldList(Collections.singletonList("statusId"));
         triggerCarrierVO.setMemberFieldIds(new HashSet<>());
         if (Boolean.TRUE.equals(influenceIssueVO.getLoop()) || Boolean.TRUE.equals(influenceIssueVO.getMaxDepth())) {
-            statusLinkageExecutionLog(influenceIssueVO, issue.getIssueId(), influenceIssue, isSub, linkIssueStatusMap, null, null);
+            statusLinkageExecutionLog(influenceIssueVO, issue.getIssueId(), influenceIssue, isSub, issueStatusLinkageMap, null, null);
             return Boolean.TRUE;
         }
         if (Objects.equals("bug", issue.getTypeCode()) && !ObjectUtils.isEmpty(issue.getRelateIssueId()) && !Objects.equals(issue.getRelateIssueId(), 0L)) {
             return Boolean.TRUE;
         }
         if (Objects.equals(issue.getStatusId(), executionStatusId)) {
-            statusLinkageExecutionLog(influenceIssueVO, issue.getIssueId(), influenceIssue, isSub, linkIssueStatusMap, TriggerExecutionStatus.STOP.getValue(), "same_status");
+            statusLinkageExecutionLog(influenceIssueVO, issue.getIssueId(), influenceIssue, isSub, issueStatusLinkageMap, TriggerExecutionStatus.STOP.getValue(), "same_status");
             return Boolean.TRUE;
         }
         Boolean verifyStatusTransferSetting = transferSettingService.verifyStatusTransferSetting(projectId, issue, executionStatusId);
         if (Boolean.TRUE.equals(verifyStatusTransferSetting)) {
-            statusLinkageExecutionLog(influenceIssueVO, issue.getIssueId(), influenceIssue, isSub, linkIssueStatusMap, TriggerExecutionStatus.STOP.getValue(), "condition_limit");
+            statusLinkageExecutionLog(influenceIssueVO, issue.getIssueId(), influenceIssue, isSub, issueStatusLinkageMap, TriggerExecutionStatus.STOP.getValue(), "condition_limit");
             return Boolean.TRUE;
         }
         // 获取当前状态对应的transformId
@@ -1534,7 +1562,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             agilePluginService.storyLinkageFeature(projectId, issue,applyType);
         }
         // 记录联动的执行日志
-        statusLinkageExecutionLog(influenceIssueVO, issueId, influenceIssue, isSub, linkIssueStatusMap, null, null);
+        statusLinkageExecutionLog(influenceIssueVO, issueId, influenceIssue, isSub, issueStatusLinkageMap, null, null);
         LOGGER.info("项目{}下状态联动触发{}编号为{}的issue状态变更", issue.getProjectId(), IssueConstant.ISSUE_CN, issue.getIssueNum());
         triggerCarrierVO.setAuditDomain(issueMapper.selectByPrimaryKey(issueId));
         this.self().batchUpdateInvokeTrigger(Collections.singletonList(triggerCarrierVO));
@@ -1575,7 +1603,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 influenceIssue.setMaxDepth(level > triggerMaxDepth);
                 influenceIssue.setLoop(false);
                 influenceIssue.setLevel(level);
-                influenceIssue.setLinkSettingId(linkChangeVO.getLinkSettingId());
+                influenceIssue.setLinkageSettingId(linkChangeVO.getLinkSettingId());
                 if (linkIssueStatusIds.contains(linkChangeVO.getLinkIssueStatusId())) {
                     influenceIssue.setLoop(true);
                 }
