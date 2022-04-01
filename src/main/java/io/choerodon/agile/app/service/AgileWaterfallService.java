@@ -6,6 +6,7 @@ import io.choerodon.agile.api.vo.business.IssueUpdateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.business.SystemFieldOverrideConfigVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
+import io.choerodon.agile.api.vo.waterfall.PredecessorIssueStatusLinkageVO;
 import io.choerodon.agile.api.vo.waterfall.WfDeliverableVO;
 import io.choerodon.agile.infra.dto.StatusDTO;
 import io.choerodon.agile.infra.dto.StatusFieldValueSettingDTO;
@@ -88,4 +89,6 @@ public interface AgileWaterfallService {
     boolean updateWaterfallParentStatus(IssueDTO issueDTO, Set<Long> influenceIssueIds, String applyType);
 
     void updatePredecessorIssueStatus(Long projectId, Long issueId, IssueDTO issueDTO, String applyType, Set<Long> influenceIssueIds);
+
+    Map<Long, List<PredecessorIssueStatusLinkageVO>> listPredecessorIssueMapByIssueTypeAndStatusIds(Long projectId, Long organizationId, Long issueTypeId, List<Long> statusIds);
 }
