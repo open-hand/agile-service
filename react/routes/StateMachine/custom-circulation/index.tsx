@@ -36,6 +36,7 @@ import openLogModal from './components/log-modal';
 import { FORMAT_FIELDS, MINUTE } from '@/constants/DATE_FORMAT';
 import useFormatMessage from '@/hooks/useFormatMessage';
 import { WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
+import { escapeValueCode } from '@/utils/transformDependencyData';
 
 interface ISetting {
   width: number | string,
@@ -136,6 +137,17 @@ interface ILinkIssueLinkageVOS {
     linkName: string
     linkTypeId: string
   }
+}
+
+interface IPredecessorLinkageVOS {
+  predecessorType: string,
+  predecessorIssueStatus: {
+    name: string,
+  },
+  predecessorIssueType: {
+    name: string,
+    typeCode: string,
+  },
 }
 
 const transformedMember = {
@@ -540,6 +552,12 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
 
   const renderLinkIssueLinkageSetting = (linkIssueStatusLinkageVOS: ILinkIssueLinkageVOS[]) => linkIssueStatusLinkageVOS.map((item) => `关联关系为【${item.linkTypeVO.linkName}】，且工作项类型为【${item.linkIssueType.name}】的关联工作项将自动流转到【${item.linkIssueStatus.name}】状态`).join('；');
 
+  const renderPredecessorLinkageSetting = (predecessorIssueStatusLinkageVOS: IPredecessorLinkageVOS[]) => (
+    predecessorIssueStatusLinkageVOS.map((item) => (
+      `依赖关系为【${escapeValueCode(item?.predecessorType)}】，且工作项类型为【${item?.predecessorIssueType?.name}】的关联工作项将自动流转到【${item?.predecessorIssueStatus?.name}】状态`
+    )).join('；')
+  );
+
   const renderConditionSetting = (statusTransferSettingVOS: IStatusTransferSettingVOS[], record: Record) => {
     const verifySubissueCompleted = statusTransferSettingVOS && find(statusTransferSettingVOS, (item) => item.userType === 'other' && item.verifySubissueCompleted);
     const isProjectOwnerExist = statusTransferSettingVOS && find(statusTransferSettingVOS, (item: IStatusTransferSettingVOS) => item.userType === 'projectOwner');
@@ -572,7 +590,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     value, text, name, record, dataSet,
   }) => {
     const {
-      statusTransferSettingVOS, statusNoticeSettingVOS, statusFieldSettingVOS, statusLinkageVOS, linkIssueStatusLinkageVOS,
+      statusTransferSettingVOS, statusNoticeSettingVOS, statusFieldSettingVOS, statusLinkageVOS, linkIssueStatusLinkageVOS, predecessorIssueStatusLinkageVOS,
     } = record.data;
     const verifySubissueCompleted = statusTransferSettingVOS && find(statusTransferSettingVOS, (item) => item.userType === 'other' && item.verifySubissueCompleted);
     const isProjectOwnerExist = statusTransferSettingVOS && find(statusTransferSettingVOS, (item: IStatusTransferSettingVOS) => item.userType === 'projectOwner');
@@ -616,6 +634,15 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
             <div className={styles.settingItem}>
               <Tooltip title={renderLinkIssueLinkageSetting(linkIssueStatusLinkageVOS)}>
                 {renderLinkIssueLinkageSetting(linkIssueStatusLinkageVOS)}
+              </Tooltip>
+            </div>
+          )
+        }
+        {
+          !isOrganization && selectedTypeCode && WATERFALL_TYPE_CODES.includes(selectedTypeCode) && predecessorIssueStatusLinkageVOS && predecessorIssueStatusLinkageVOS.length > 0 && (
+            <div className={styles.settingItem}>
+              <Tooltip title={renderPredecessorLinkageSetting(predecessorIssueStatusLinkageVOS)}>
+                {renderPredecessorLinkageSetting(predecessorIssueStatusLinkageVOS)}
               </Tooltip>
             </div>
           )

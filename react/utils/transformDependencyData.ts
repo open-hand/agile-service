@@ -13,7 +13,7 @@ function getValueCodeSequence(valueCode: string) {
   return 30;
 }
 
-function escapeValueCode(valueCode: string) {
+export function escapeValueCode(valueCode: string) {
   const valueMap = {
     predecessor_fs: '完成-开始（FS）',
     predecessor_ff: '完成-完成（FF）',
