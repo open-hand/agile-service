@@ -86,7 +86,7 @@ const FastSearchTable: React.ForwardRefRenderFunction<any, FastSearchTableProps>
           <TableDropMenu
             onMenuClick={({ key }: { key: string }) => record && onMenuClick(key, record)}
             menuData={[
-              { action: () => record && onEditClick(record), text: '编辑' },
+              { action: () => record && onEditClick(record), text: '修改' },
               {
                 key: 'delete',
                 text: '删除',

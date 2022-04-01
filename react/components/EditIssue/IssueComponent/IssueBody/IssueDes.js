@@ -108,7 +108,7 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
         /> */}
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px', position: 'relative' }}>
-            <Tooltip placement="topRight" autoAdjustOverflow={false} title="编辑">
+            <Tooltip placement="topRight" autoAdjustOverflow={false} title="修改">
               <Button
                 style={{ padding: '0 6px' }}
                 onClick={() => {

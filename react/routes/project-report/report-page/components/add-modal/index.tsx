@@ -79,12 +79,13 @@ const openAddModal = (props: Props) => {
   const type = props.type || props.data?.type;
   Modal.open({
     key: 'modal',
-    title: isEdit ? `编辑${TEXTS[type as string] || ''}` : `添加${TEXTS[type as string] || ''}`,
+    title: isEdit ? `修改${TEXTS[type as string] || ''}` : `添加${TEXTS[type as string] || ''}`,
     style: {
       width: type === 'text' || type === 'dynamic_list' ? MODAL_WIDTH.middle : MODAL_WIDTH.large,
     },
     drawer: true,
     children: <AddModal {...props} />,
+    okText: isEdit ? '保存' : '确定',
   });
 };
 export default openAddModal;

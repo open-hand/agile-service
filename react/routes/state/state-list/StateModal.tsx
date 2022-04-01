@@ -137,7 +137,7 @@ const ObserverCreateState = observer(CreateState);
 const openStateModal = (props: Props) => {
   Modal.open({
     key: Modal.key(),
-    title: props.statusId ? '编辑状态' : '创建状态',
+    title: props.statusId ? '修改状态' : '创建状态',
     style: {
       width: MODAL_WIDTH.small,
     },

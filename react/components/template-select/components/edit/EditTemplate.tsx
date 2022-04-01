@@ -209,7 +209,7 @@ const openEditTemplate = (props: Props) => {
   Modal.open({
     drawer: true,
     key: Modal.key(),
-    title: '编辑模板',
+    title: '修改模板',
     style: {
       width: 740,
     },

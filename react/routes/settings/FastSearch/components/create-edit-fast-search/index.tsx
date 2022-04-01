@@ -32,7 +32,7 @@ export const openEditFastSearch = async (id: string, onOK: () => void) => {
       width: 740,
     },
     drawer: true,
-    okText: '修改',
+    okText: '保存',
     cancelText: '取消',
     children: (
       <FastSearch data={data} onOK={onOK} />

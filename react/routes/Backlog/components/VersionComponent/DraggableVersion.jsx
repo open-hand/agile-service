@@ -34,7 +34,7 @@ class VersionItem extends Component {
   getmenu() {
     return (
       <Menu onClick={this.clickMenu.bind(this)}>
-        <Menu.Item key="0">编辑名称</Menu.Item>
+        <Menu.Item key="0">修改名称</Menu.Item>
       </Menu>
     );
   }

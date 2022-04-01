@@ -118,7 +118,7 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
         text={text}
         style={{ lineHeight: 'inherit' }}
         menuData={[
-          { action: () => handleClickMenu(record!, 'edit'), text: '编辑' },
+          { action: () => handleClickMenu(record!, 'edit'), text: '修改' },
           {
             action: () => handleClickMenu(record!, 'releaseStatus'),
             text: statusCode === 'version_planning' ? '发布' : '撤销发布',

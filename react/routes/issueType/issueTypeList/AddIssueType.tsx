@@ -149,7 +149,7 @@ const AddIssueType: React.FC<Props> = ({
     setEditLoading(true);
     // eslint-disable-next-line no-nested-ternary
     issueTypeApi[isOrganization ? 'orgUpdate' : (isSystemType ? 'systemUpdate' : 'update')](typeId as string, data).then((res: any) => {
-      Choerodon.prompt('编辑成功');
+      Choerodon.prompt('修改成功');
       setEditLoading(false);
       typeTableDataSet.query(typeTableDataSet.currentPage);
       modal?.close();
@@ -158,7 +158,7 @@ const AddIssueType: React.FC<Props> = ({
       }
     }).catch(() => {
       setEditLoading(false);
-      Choerodon.prompt('编辑失败');
+      Choerodon.prompt('修改失败');
     });
   }, [isOrganization, isSystemType, modal, typeId, typeTableDataSet]);
 

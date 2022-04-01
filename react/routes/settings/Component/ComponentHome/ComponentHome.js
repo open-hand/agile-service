@@ -58,7 +58,7 @@ function ComponentHome() {
       menuData={[
         {
           action: () => { openComponentModal({ componentId: record?.get('componentId'), name: record?.get('name'), onOk: handleOk }); },
-          text: '编辑',
+          text: '修改',
         },
         {
           key: 'delete',

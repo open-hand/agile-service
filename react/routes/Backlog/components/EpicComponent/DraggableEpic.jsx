@@ -87,7 +87,7 @@ class DraggableEpic extends Component {
           </div>
         </div>
         <Menu.Divider />
-        <Menu.Item key="1">编辑名称</Menu.Item>
+        <Menu.Item key="1">修改名称</Menu.Item>
         <Menu.Item key="2">查看史诗详情</Menu.Item>
       </Menu>
     );

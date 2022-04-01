@@ -205,7 +205,7 @@ class IssueApi extends Api<IssueApi> {
       });
     } catch (error) {
       if (error.code === 'error.dataLogEpic.methodExecute') {
-        Choerodon.prompt('该工作项详情信息已被锁定，请重新打开工作项详情进行编辑。', 'error');
+        Choerodon.prompt('该工作项详情信息已被锁定，请重新打开工作项详情进行修改。', 'error');
       } else {
         Choerodon.prompt(error.message);
       }

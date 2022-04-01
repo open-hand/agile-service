@@ -112,7 +112,7 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
             renderer={({ record, value }) => (
               <Action data={[
                 {
-                  text: globalFormatMessage({ id: 'boot.edit' }),
+                  text: globalFormatMessage({ id: 'boot.modify' }),
                   action: () => {
                     handleEditStatus({ record });
                   },

@@ -148,7 +148,7 @@ const OptionItem: React.FC<OptionItemProps> = ({
             </div>
           </div>
           <div className={styles.operate} key="read">
-            <Tooltip title="编辑">
+            <Tooltip title="修改">
               <Button icon="edit-o" funcType={'flat' as any} onClick={handleEditClick} />
             </Tooltip>
             <Tooltip title={data.enabled ? '禁用' : '启用'}>

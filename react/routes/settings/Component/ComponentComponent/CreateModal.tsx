@@ -157,7 +157,7 @@ const ObserverCreateComponent = observer(CreateComponent);
 const openComponentModal = (props: Props) => {
   Modal.open({
     key: Modal.key(),
-    title: props.componentId ? '编辑模块' : (
+    title: props.componentId ? '修改模块' : (
       <C7NFormat
         intlPrefix="agile.setting"
         id="create.component"
@@ -172,6 +172,7 @@ const openComponentModal = (props: Props) => {
         {...props}
       />
     ),
+    okText: props.componentId ? '保存' : '创建',
   });
 };
 

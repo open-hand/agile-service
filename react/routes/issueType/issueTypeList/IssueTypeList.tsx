@@ -40,7 +40,7 @@ function IssueTypeList() {
         width: 480,
       },
       key: Modal.key(),
-      title: '编辑工作项类型',
+      title: '修改工作项类型',
       children: <AddIssueType typeId={record?.get('id')} typeTableDataSet={dataSet} isOrganization={isOrganization} />,
       okText: '保存',
       footer: null,
@@ -171,7 +171,7 @@ function IssueTypeList() {
     const menu = (
       // eslint-disable-next-line react/jsx-no-bind
       <Menu onClick={handleMenuClick.bind(this)} className={styles.issueType_menu}>
-        <Menu.Item key="edit">{formatMessage({ id: 'boot.edit' })}</Menu.Item>
+        <Menu.Item key="edit">{formatMessage({ id: 'boot.modify' })}</Menu.Item>
         {
           record?.get('deleted') && (
             <Menu.Item key="delete">{formatMessage({ id: 'boot.delete' })}</Menu.Item>

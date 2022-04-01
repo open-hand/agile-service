@@ -295,7 +295,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
             menuData={[
               { text: '添加子工作项', action: () => openCreateSubIssue(record as any), display: isShowDependency && isCanCreateIssue },
               {
-                text: `${hasDependency ? '编辑' : '添加'}前置依赖`,
+                text: `${hasDependency ? '修改' : '添加'}前置依赖`,
                 action: () => openGanttDependencyModal({
                   issueId: record.issueId,
                   data: record.predecessors || [],

@@ -18,7 +18,7 @@ const TableAction = (props) => {
   }, [clickable, onEditClick, onMenuClick]);
   const renderMenu = () => (
     <Menu onClick={handleClickMenu}>
-      {clickable ? <Menu.Item key="menuEdit">编辑</Menu.Item> : null}
+      {clickable ? <Menu.Item key="menuEdit">修改</Menu.Item> : null}
       {menus.map((menu) => (
         <Menu.Item key={menu.key}>
           {menu.text}
