@@ -7,6 +7,7 @@ import { transformFilter } from '@/routes/Issue/stores/utils';
 import { ISearchVO } from '@/common/types';
 
 import styles from './ChartSearch.less';
+import useIsWaterfall from '@/hooks/useIsWaterfall';
 
 export interface CustomReportSearchProps {
   projectId?: string
@@ -18,6 +19,7 @@ export interface CustomReportSearchProps {
 const ChartSearch: React.FC<CustomReportSearchProps> = ({
   searchVO, setSearchVO, projectId, searchCls,
 }) => {
+  const { isWaterfall } = useIsWaterfall();
   const issueSearchStore = useIssueSearchStore({
     projectId,
     transformFilter,
@@ -29,7 +31,7 @@ const ChartSearch: React.FC<CustomReportSearchProps> = ({
     <div className={classNames(styles.chartSearch, searchCls)}>
       <IssueSearch
         projectId={projectId}
-        applyType="agile"
+        applyType={isWaterfall ? '' : 'agile'}
         store={issueSearchStore}
         onClear={() => {
           const newSearchVO = issueSearchStore.getCustomFieldFilters();
