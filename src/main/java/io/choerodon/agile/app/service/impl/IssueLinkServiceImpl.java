@@ -79,7 +79,7 @@ public class IssueLinkServiceImpl implements IssueLinkService {
         });
         // 创建链接时候触发关联问题联动
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
-        issueOperateService.updateLinkIssue(projectId, issueId, issueDTO, SchemeApplyType.AGILE, EncryptContext.encryptType().name(), RequestContextHolder.currentRequestAttributes());
+        issueOperateService.updateIssueStatusLinkage(projectId, issueId, issueDTO, SchemeApplyType.AGILE, EncryptContext.encryptType().name(), RequestContextHolder.currentRequestAttributes());
         IssueLinkResponseVO response = new IssueLinkResponseVO();
         response.setIssueLinks(listIssueLinkByIssueId(issueId, projectId, false));
         return response;

@@ -12,5 +12,5 @@ import java.util.List;
 public interface IssueOperateService {
     void batchDeleteIssue(Long projectId, List<Long> issueIds);
 
-    void updateLinkIssue(Long projectId, Long issueId, IssueDTO issueDTO, String applyType, String encryptType, RequestAttributes requestAttributes);
+    void updateIssueStatusLinkage(Long projectId, Long issueId, IssueDTO issueDTO, String applyType, String encryptType, RequestAttributes requestAttributes);
 }

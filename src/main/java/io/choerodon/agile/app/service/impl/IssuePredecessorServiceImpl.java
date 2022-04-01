@@ -19,6 +19,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import java.util.*;
 import java.util.function.Function;
@@ -58,6 +60,8 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
     private StatusService statusService;
     @Autowired
     private IssueTypeService issueTypeService;
+    @Autowired
+    private IssueOperateService issueOperateService;
 
     private static final List<String> ISSUE_TYPE_CODES =
             Arrays.asList(
@@ -120,6 +124,10 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         addTreeNodes(projectId, organizationId, addPredecessorIds, ancestorMap, descendants, descendantIds);
         deleteTreeNodes(projectId, organizationId, descendants, ancestorMap, deletePredecessorIds, finalExistedPredecessorIds);
         insertIssPredecessor(organizationId, projectId, issuePredecessors, currentIssueId);
+        // 瀑布工作项添加依赖触发前置依赖工作项联动
+        if (WATERFALL_ISSUE_TYPE_CODES.contains(issueDTO.getTypeCode())) {
+            issueOperateService.updateIssueStatusLinkage(projectId, currentIssueId, issueDTO, SchemeApplyType.AGILE, EncryptContext.encryptType().name(), RequestContextHolder.currentRequestAttributes());
+        }
     }
 
     @Override

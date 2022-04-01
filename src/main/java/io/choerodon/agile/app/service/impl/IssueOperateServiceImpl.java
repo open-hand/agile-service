@@ -3,10 +3,12 @@ package io.choerodon.agile.app.service.impl;
 import com.alibaba.fastjson.JSON;
 import io.choerodon.agile.api.vo.BatchUpdateFieldStatusVO;
 import io.choerodon.agile.api.vo.LinkIssueLinkageMessageVO;
+import io.choerodon.agile.app.service.AgileWaterfallService;
 import io.choerodon.agile.app.service.IssueOperateService;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.exception.CommonException;
@@ -41,6 +43,8 @@ public class IssueOperateServiceImpl implements IssueOperateService {
     private UserService userService;
     @Autowired
     private IssueMapper issueMapper;
+    @Autowired(required = false)
+    private AgileWaterfallService agileWaterfallService;
 
     @Async
     @Override
@@ -95,7 +99,7 @@ public class IssueOperateServiceImpl implements IssueOperateService {
 
     @Async
     @Override
-    public void updateLinkIssue(Long projectId, Long issueId, IssueDTO issueDTO, String applyType, String encryptType, RequestAttributes requestAttributes) {
+    public void updateIssueStatusLinkage(Long projectId, Long issueId, IssueDTO issueDTO, String applyType, String encryptType, RequestAttributes requestAttributes) {
         EncryptContext.setEncryptType(encryptType);
         RequestContextHolder.setRequestAttributes(requestAttributes);
         Boolean isSub = Objects.equals("sub_task",issueDTO.getTypeCode()) || (Objects.equals("bug",issueDTO.getTypeCode()) && !ObjectUtils.isEmpty(issueDTO.getRelateIssueId()) && !Objects.equals(issueDTO.getRelateIssueId(), 0L));
@@ -109,7 +113,11 @@ public class IssueOperateServiceImpl implements IssueOperateService {
         LinkIssueLinkageMessageVO linkIssueLinkageMessageVO = new LinkIssueLinkageMessageVO();
         linkIssueLinkageMessageVO.setKey(websocketKey);
         try {
-            issueService.updateInfluenceIssueStatus(projectId, issueId, issueDTO, applyType, influenceIssueIds);
+            if (agileWaterfallService != null && Arrays.asList(IssueTypeCode.WATERFALL_ISSUE_TYPE_CODE).contains(issueDTO.getTypeCode())) {
+                agileWaterfallService.updatePredecessorIssueStatus(projectId, issueId, issueDTO, applyType, influenceIssueIds);
+            } else {
+                issueService.updateLinkIssueStatus(projectId, issueId, issueDTO, applyType, influenceIssueIds);
+            }
             String statusCode = CollectionUtils.isEmpty(influenceIssueIds) ? "success" : "failed";
             linkIssueLinkageMessageVO.setStatusCode(statusCode);
         } catch (Exception e) {

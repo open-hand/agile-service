@@ -86,4 +86,6 @@ public interface AgileWaterfallService {
     void handlerWaterfallFieldValue(String fieldCode, IssueUpdateVO issueUpdateVO, Map<String, Object> specifyMap, List<StatusFieldValueSettingDTO> statusFieldValueSettings, IssueDTO issueDTO, List<String> field);
 
     boolean updateWaterfallParentStatus(IssueDTO issueDTO, Set<Long> influenceIssueIds, String applyType);
+
+    void updatePredecessorIssueStatus(Long projectId, Long issueId, IssueDTO issueDTO, String applyType, Set<Long> influenceIssueIds);
 }
