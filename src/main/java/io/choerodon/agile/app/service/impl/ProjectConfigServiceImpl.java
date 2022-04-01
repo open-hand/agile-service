@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.TransformInfo;
+import io.choerodon.agile.api.vo.waterfall.PredecessorIssueStatusLinkageVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.cache.InstanceCache;
 import io.choerodon.agile.infra.dto.*;
@@ -136,6 +137,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private ObjectSchemeFieldService objectSchemeFieldService;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
+    @Autowired(required = false)
+    private AgileWaterfallService agileWaterfallService;
 
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
@@ -853,6 +856,10 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         Map<Long, List<StatusLinkageVO>> statusLinkageMap = linkageVOS.stream()
                 .collect(Collectors.groupingBy(StatusLinkageVO::getStatusId));
         Map<Long, List<LinkIssueStatusLinkageVO>> linkIssueMap = linkIssueStatusLinkageService.listByIssueTypeAndStatusIds(projectId, organizationId, issueTypeId, statusIds);
+        Map<Long, List<PredecessorIssueStatusLinkageVO>> predecessorIssueMap = new HashMap<>();
+        if (agileWaterfallService != null) {
+            predecessorIssueMap = agileWaterfallService.listPredecessorIssueMapByIssueTypeAndStatusIds(projectId, organizationId, issueTypeId, statusIds);
+        }
         if (!CollectionUtils.isEmpty(transferSettingVOS)) {
             transferSettingMap.putAll(transferSettingVOS.stream().collect(Collectors.groupingBy(StatusTransferSettingVO::getStatusId)));
         }
@@ -871,6 +878,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                 statusSettingVO.setStatusBranchMergeSettingVO(statusBranchMergeSettingList.get(0));
             }
             statusSettingVO.setLinkIssueStatusLinkageVOS(linkIssueMap.getOrDefault(statusSettingVO.getId(), new ArrayList<>()));
+            statusSettingVO.setPredecessorIssueStatusLinkageVOS(predecessorIssueMap.getOrDefault(statusSettingVO.getId(), new ArrayList<>()));
         }
         if (agilePluginService != null) {
             agilePluginService.listStatusLinkageByStatusIds(projectId, issueTypeId, statusIds, applyType, list);

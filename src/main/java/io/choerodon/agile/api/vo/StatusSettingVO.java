@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.api.vo.waterfall.PredecessorIssueStatusLinkageVO;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -33,6 +34,8 @@ public class StatusSettingVO {
     private ExecutionCaseStatusChangeSettingVO executionCaseStatusChangeSettingVO;
 
     private List<LinkIssueStatusLinkageVO> linkIssueStatusLinkageVOS;
+
+    private List<PredecessorIssueStatusLinkageVO> predecessorIssueStatusLinkageVOS;
 
     public StatusBranchMergeSettingVO getStatusBranchMergeSettingVO() {
         return statusBranchMergeSettingVO;
@@ -128,5 +131,13 @@ public class StatusSettingVO {
 
     public void setLinkIssueStatusLinkageVOS(List<LinkIssueStatusLinkageVO> linkIssueStatusLinkageVOS) {
         this.linkIssueStatusLinkageVOS = linkIssueStatusLinkageVOS;
+    }
+
+    public List<PredecessorIssueStatusLinkageVO> getPredecessorIssueStatusLinkageVOS() {
+        return predecessorIssueStatusLinkageVOS;
+    }
+
+    public void setPredecessorIssueStatusLinkageVOS(List<PredecessorIssueStatusLinkageVO> predecessorIssueStatusLinkageVOS) {
+        this.predecessorIssueStatusLinkageVOS = predecessorIssueStatusLinkageVOS;
     }
 }
