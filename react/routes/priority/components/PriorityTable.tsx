@@ -6,10 +6,7 @@ import {
   Table, DataSet, Dropdown, Menu, Modal, Form, Select,
 } from 'choerodon-ui/pro';
 import { Icon, message } from 'choerodon-ui';
-import {
-  Content, Header, TabPage as Page, stores, Breadcrumb,
-} from '@choerodon/boot';
-// @ts-ignore
+
 import { useIntl } from 'react-intl';
 import update from 'immutability-helper';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
@@ -22,7 +19,6 @@ import styles from './PriorityTable.less';
 import openPriorityModal from './PriorityModal';
 
 const { Column } = Table;
-const { TableRow } = Table;
 const { Option } = Select;
 
 const Priority: React.FC<{
@@ -260,13 +256,16 @@ const Priority: React.FC<{
   }, [intl, priorityDs]);
 
   const renderColor = useCallback(({ record }) => (
-    <div style={{
-      width: 16,
-      height: 16,
-      borderRadius: 3,
-      backgroundColor: record?.get('colour'),
-    }}
-    />
+    <span style={{ display: 'inline-flex', alignItems: 'center', height: '100%' }}>
+      <div style={{
+        flexGrow: 0,
+        width: 16,
+        height: 16,
+        borderRadius: 3,
+        backgroundColor: record?.get('colour'),
+      }}
+      />
+    </span>
   ), []);
 
   const handleDragEnd = useCallback((dataSet, columns, resultDrag, provided) => {
