@@ -653,9 +653,7 @@ public class IssueAssembler extends AbstractAssembler {
             userIds.addAll(issueComponentDetailInfoDTOS.stream().filter(issue -> issue.getReporterId() != null && !Objects.equals(issue.getReporterId(), 0L)).
                     map(IssueComponentDetailInfoDTO::getReporterId).collect(Collectors.toList()));
             Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(userIds.stream().distinct().collect(Collectors.toList()), true);
-            Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.TEST);
-            Map<Long, IssueTypeVO> issueTypeDTOMapAgile = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.AGILE);
-            issueTypeDTOMap.putAll(issueTypeDTOMapAgile);
+            Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(ConvertUtil.getOrganizationId(projectId), projectId);
             Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
             Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
             issueComponentDetailInfoDTOS.parallelStream().forEachOrdered(issueDO -> {
