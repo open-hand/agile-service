@@ -7,11 +7,13 @@ import {
 } from 'choerodon-ui/pro';
 
 import { observer } from 'mobx-react-lite';
+import { map } from 'lodash';
 import { has as hasInject, mount as mountInject } from '@choerodon/inject';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
 import SelectStatus from '@/components/select/select-status';
 import {
-  ganttApi, ganttApiConfig, issueLinkTypeApi, statusTransformApi,
+  ganttApi, issueLinkTypeApi, statusTransformApi,
+  predecessorApi,
 } from '@/api';
 import { OldLoading as Loading } from '@/components/Loading';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
@@ -37,6 +39,14 @@ interface ILinkIssueStatusSetting {
   linkIssueTypeId: string
   linkIssueStatusId: string
   linkIssueStatus: any
+  triggered: boolean
+}
+
+interface IPredecessorLinkStatusSetting {
+  predecessorType: string
+  predecessorIssueTypeId: string
+  predecessorIssueStatusId: string
+  predecessorIssueStatus: any
   triggered: boolean
 }
 
@@ -177,7 +187,16 @@ const Linkage = ({
           });
         }
         if (linkageType.includes('linkIssue')) {
-          const res: ILinkIssueStatusSetting[] = await statusTransformApi.getLinkIssueLinkage(selectedType, record.get('id'));
+          const oldRes = isWaterfallTypeCode
+            ? await predecessorApi.loadLinkage(selectedType, record.get('id'))
+            : await statusTransformApi.getLinkIssueLinkage(selectedType, record.get('id'));
+          const res: ILinkIssueStatusSetting[] = isWaterfallTypeCode ? map(oldRes || [], (item: IPredecessorLinkStatusSetting) => ({
+            ...item,
+            linkTypeId: item.predecessorType,
+            linkIssueTypeId: item.predecessorIssueTypeId,
+            linkIssueStatusId: item.predecessorIssueStatusId,
+            linkIssueStatus: item.predecessorIssueStatus,
+          })) : oldRes;
           setLinkIssueStatusSettings(res || []);
           const initFields = linkageType.length > 1 && !res.length ? [] : LinkField.init(new Array(Math.max(res.length, 1)).fill({}));
           initFields.forEach((item: { key: number }, i: number) => {
@@ -222,17 +241,31 @@ const Linkage = ({
         if (linkageType.includes('linkIssue')) {
           const data: any = linkIssueLinkageDataSet.current?.toData();
           const updateData: any[] = [];
-          linkFields.forEach((f: any) => {
-            const { key } = f;
-            updateData.push({
-              linkTypeId: data[`${key}-linkTypeId`],
-              linkIssueTypeId: data[`${key}-linkIssueTypeId`],
-              linkIssueStatusId: data[`${key}-linkIssueStatusId`],
-              triggered: data[`${key}-triggered`],
+          if (isWaterfallTypeCode) {
+            linkFields.forEach((f: any) => {
+              const { key } = f;
+              updateData.push({
+                predecessorType: data[`${key}-linkTypeId`],
+                predecessorIssueTypeId: data[`${key}-linkIssueTypeId`],
+                predecessorIssueStatusId: data[`${key}-linkIssueStatusId`],
+                triggered: data[`${key}-triggered`],
+              });
             });
-          });
-          // @ts-ignore
-          await statusTransformApi.updateLinkIssueLinkage(selectedType, record.get('id'), updateData);
+            // @ts-ignore
+            await predecessorApi.createLinkage(selectedType, record.get('id'), updateData);
+          } else {
+            linkFields.forEach((f: any) => {
+              const { key } = f;
+              updateData.push({
+                linkTypeId: data[`${key}-linkTypeId`],
+                linkIssueTypeId: data[`${key}-linkIssueTypeId`],
+                linkIssueStatusId: data[`${key}-linkIssueStatusId`],
+                triggered: data[`${key}-triggered`],
+              });
+            });
+            // @ts-ignore
+            await statusTransformApi.updateLinkIssueLinkage(selectedType, record.get('id'), updateData);
+          }
         }
         customCirculationDataSet.query(customCirculationDataSet.currentPage);
         return true;
@@ -462,12 +495,20 @@ const Linkage = ({
                           key={`${key}-${selectedType}-${issueTypeId}`}
                           name={statusName}
                           disabled={!issueTypeId}
-                          request={selectedType && issueTypeId ? () => statusTransformApi.getLinkageStatus({
-                            issueTypeId: selectedType,
-                            linkIssueTypeId: issueTypeId,
-                            linkTypeId,
-                            statusId: record.get('id'),
-                          }) : () => {}}
+                          // eslint-disable-next-line no-nested-ternary
+                          request={selectedType && issueTypeId ? (isWaterfallTypeCode
+                            ? () => predecessorApi.loadLinkageStatus({
+                              issueTypeId: selectedType,
+                              predecessorIssueTypeId: issueTypeId,
+                              predecessorType: linkTypeId,
+                              statusId: record.get('id'),
+                            })
+                            : () => statusTransformApi.getLinkageStatus({
+                              issueTypeId: selectedType,
+                              linkIssueTypeId: issueTypeId,
+                              linkTypeId,
+                              statusId: record.get('id'),
+                            })) : () => {}}
                         // @ts-ignore
                           extraStatus={extraStatus ? [extraStatus] : undefined}
                         />

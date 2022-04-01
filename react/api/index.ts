@@ -44,3 +44,4 @@ export * from './CacheColumn';
 export * from './CustomReport';
 export * from './WorkingHours';
 export * from './WorkGroup';
+export * from './Predecessor';
