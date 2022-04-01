@@ -3,6 +3,7 @@ package io.choerodon.agile.infra.dto;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.persistence.GeneratedValue;
@@ -39,6 +40,9 @@ public class ListLayoutColumnRelDTO extends AuditDomain {
     private Long projectId;
 
     private Long organizationId;
+
+    @ApiModelProperty(value = "额外配置：工时包含子任务")
+    private Boolean extraConfig;
 
     public ListLayoutColumnRelDTO() {
     }
@@ -119,5 +123,13 @@ public class ListLayoutColumnRelDTO extends AuditDomain {
 
     public void setFieldId(Long fieldId) {
         this.fieldId = fieldId;
+    }
+
+    public Boolean getExtraConfig() {
+        return extraConfig;
+    }
+
+    public void setExtraConfig(Boolean extraConfig) {
+        this.extraConfig = extraConfig;
     }
 }
