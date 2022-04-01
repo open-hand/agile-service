@@ -45,4 +45,32 @@
 .del_btn {
   width: 26px !important;
   height: 26px !important;
+
+  &>button>i {
+    font-size: 18px !important;
+    line-height: unset !important;
+  }
+}
+
+.name {
+  display: inline-flex;
+  overflow: hidden;
+  align-items: center;
+  flex-wrap: nowrap;
+  font-weight: 500;
+
+  &>div:first-child {
+    flex-shrink: 0;
+  }
+
+  &_text {
+    flex: auto;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .default_status {
+    flex-shrink: 0;
+  }
 }

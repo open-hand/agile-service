@@ -48,7 +48,7 @@ const StatusCirculationTable: React.FC = () => {
     dataIndex: status.name,
     width: 150,
     title: (
-      <span style={{ color: STATUS[status.type], fontWeight: 500 }}>
+      <span className={styles.name} style={{ color: STATUS[status.type], maxWidth: 150 }}>
         <Observer>
           {() => {
             // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -71,7 +71,9 @@ const StatusCirculationTable: React.FC = () => {
           }}
 
         </Observer>
-        {status.name}
+        <Tooltip title={status.name} placement="topLeft">
+          <span className={styles.name_text}>{status.name}</span>
+        </Tooltip>
       </span>),
     render: ((text: string, record) => (
       <Checkbox store={store} status={status} record={record} disabled={readOnly} selectedType={selectedType} />
@@ -84,7 +86,7 @@ const StatusCirculationTable: React.FC = () => {
     fixed: true,
     title: null,
     render: ((text: string, record) => (
-      <span style={{ color: STATUS[record.type], fontWeight: 500 }}>
+      <div className={styles.name} style={{ color: STATUS[record.type], maxWidth: 150 }}>
         <Observer>
           {() => {
             // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -105,9 +107,11 @@ const StatusCirculationTable: React.FC = () => {
             );
           }}
         </Observer>
-        {record.name}
+        <Tooltip title={record.name} placement="topLeft">
+          <span className={styles.name_text}>{record.name}</span>
+        </Tooltip>
         {record.defaultStatus && <span className={styles.default_status}>初始</span>}
-      </span>
+      </div>
     )),
   }, {
     dataIndex: 'operate',
