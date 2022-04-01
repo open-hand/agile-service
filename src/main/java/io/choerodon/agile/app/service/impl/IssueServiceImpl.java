@@ -2548,6 +2548,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public Page<IssueNumVO> queryIssueByOption(Long projectId, IssueFilterParamVO issueFilterParamVO, PageRequest pageRequest) {
+        List<String> typeCodes = queryTypeCodesFromProject(projectId);
         //连表查询需要设置主表别名
         Map<String,String> orders = new HashMap<>();
         orders.put(ISSUE_NUM,ISSUE_NUM_CONVERT);
@@ -2561,13 +2562,27 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             }
         }
         Long activeSprintId = issueFilterParamVO.getOnlyActiveSprint() ? getActiveSprintId(projectId) : null;
-        Page<IssueNumDTO> issueDOPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryIssueByOption(projectId, activeSprintId, issueFilterParamVO));
+        Page<IssueNumDTO> issueDOPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryIssueByOption(projectId, activeSprintId, issueFilterParamVO, typeCodes));
         if (issueFilterParamVO.getSelf() && issueNumDTO != null) {
             issueDOPage.getContent().add(0, issueNumDTO);
             issueDOPage.setSize(issueDOPage.getSize() + 1);
         }
 
         return PageUtil.buildPageInfoWithPageInfoList(issueDOPage, issueAssembler.issueNumDoToDto(issueDOPage.getContent(), projectId));
+    }
+
+    private List<String> queryTypeCodesFromProject(Long projectId) {
+        List<String> typeCodes = new ArrayList<>();
+        typeCodes.addAll(Arrays.asList(
+                IssueTypeCode.STORY.value(),
+                IssueTypeCode.TASK.value(),
+                IssueTypeCode.BUG.value(),
+                IssueTypeCode.SUB_TASK.value()));
+        boolean isWaterfallProject = ProjectCategory.isWaterfallProject(projectId);
+        if (isWaterfallProject) {
+            typeCodes.addAll(Arrays.asList(IssueTypeCode.WATERFALL_ISSUE_TYPE_CODE));
+        }
+        return typeCodes;
     }
 
     @Override

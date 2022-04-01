@@ -120,7 +120,8 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     List queryIssueByOption(@Param("projectId") Long projectId,
                             @Param("activeSprintId") Long activeSprintId,
-                            @Param("issueFilterParamVO") IssueFilterParamVO issueFilterParamVO);
+                            @Param("issueFilterParamVO") IssueFilterParamVO issueFilterParamVO,
+                            @Param("typeCodes") List<String> typeCodes);
 
     /**
      * 根据参数查询issue列表，不对外开放
