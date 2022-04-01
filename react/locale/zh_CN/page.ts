@@ -5,7 +5,7 @@ const locale = {
   'field.name': '字段名称',
   'field.import': '导入字段',
   'field.create': '创建字段',
-  'field.edit': '编辑字段',
+  'field.edit': '修改字段',
   'field.range': '字段范围',
   'field.source': '字段来源',
   'field.type': '字段类型',

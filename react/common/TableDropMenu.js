@@ -44,7 +44,7 @@ const TableDropMenu = (props) => {
   }, [onClickEdit]);
   const renderDropdown = useCallback((hasPermission) => {
     let showMenu = hasPermission && isHasMenu && menu ? menu : undefined;
-    const editItem = onClickEdit ? <Menu.Item key="menuEdit">编辑</Menu.Item> : null;
+    const editItem = onClickEdit ? <Menu.Item key="menuEdit">修改</Menu.Item> : null;
     if (showMenu && React.isValidElement(showMenu)) {
       const { children: menuItems, onClick } = pick(showMenu.props, ['children', 'onClick']);
       const children = [editItem, ...(menuItems || [])].filter(Boolean);

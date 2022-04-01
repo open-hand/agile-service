@@ -86,7 +86,7 @@ function IssueLinkHome() {
   function renderAction() {
     const actionData = [
       {
-        text: formatMessage({ id: 'boot.edit' }),
+        text: formatMessage({ id: 'boot.modify' }),
         action: () => openCreateEditModal(true),
       },
       {

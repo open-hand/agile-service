@@ -85,7 +85,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
         tooltip={'overflow' as TableColumnTooltip}
         renderer={({ record }) => (
           <TableDropMenu
-            menuData={[{ action: () => to(`/agile/project-report/edit/${record?.get('id')}`), text: '编辑' },
+            menuData={[{ action: () => to(`/agile/project-report/edit/${record?.get('id')}`), text: '修改' },
               {
                 key: 'delete',
                 text: '删除',

@@ -327,7 +327,7 @@ const CustomReport: React.FC<Props> = (props) => {
           })),
         }] : []), {
           display: true,
-          name: '编辑图表',
+          name: '修改图表',
           icon: 'edit-o',
           handler: handleClickEdit,
         }, {
@@ -350,7 +350,7 @@ const CustomReport: React.FC<Props> = (props) => {
         }]}
         />
       </Header>
-      <Breadcrumb title={chartId ? (mode === 'read' ? chartRes?.name : '编辑自定义图表') : '创建自定义图表'} />
+      <Breadcrumb title={chartId ? (mode === 'read' ? chartRes?.name : '修改自定义图表') : '创建自定义图表'} />
       <Content style={{ padding: 0 }} className={styles.content}>
         <LoadingProvider loading={loading} style={{ height: '100%' }}>
           <div

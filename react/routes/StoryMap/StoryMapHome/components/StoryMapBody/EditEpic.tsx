@@ -52,7 +52,7 @@ const EditEpic: React.FC<Props> = ({
           }).catch((e) => {
             setEditing(false);
             setValue(epic.epicName);
-            Choerodon.prompt('编辑史诗失败');
+            Choerodon.prompt('修改史诗失败');
           });
         }
       }).finally(() => {
@@ -82,7 +82,7 @@ const EditEpic: React.FC<Props> = ({
         justifyContent: 'center',
       }}
       >
-        <Input autoFocus onPressEnter={() => handleEditEpic(value)} placeholder="编辑史诗名称" maxLength={22} value={value} onChange={handleChange} />
+        <Input autoFocus onPressEnter={() => handleEditEpic(value)} placeholder="修改史诗名称" maxLength={22} value={value} onChange={handleChange} />
       </Card>
     </div>
   );

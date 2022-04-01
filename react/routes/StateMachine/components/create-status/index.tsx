@@ -124,7 +124,7 @@ const CreateStatus: React.FC = () => {
 const ObserverCreateStatus = observer(CreateStatus);
 const openCreateStatus = (props: Omit<IStateMachineCreateStatusProps, 'modal'>) => {
   Modal.open({
-    title: props.record ? '编辑状态' : (
+    title: props.record ? '修改状态' : (
       <C7NFormat
         intlPrefix="agile.stateMachine"
         id="create.state"

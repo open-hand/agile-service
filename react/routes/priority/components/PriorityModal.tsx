@@ -122,7 +122,7 @@ const ObserverCreatePriority = observer(CreatePriority);
 const openPriorityModal = (props: Props) => {
   Modal.open({
     key: Modal.key(),
-    title: props.priorityId ? '编辑优先级' : '创建优先级',
+    title: props.priorityId ? '修改优先级' : '创建优先级',
     style: {
       width: MODAL_WIDTH.small,
     },
@@ -132,6 +132,7 @@ const openPriorityModal = (props: Props) => {
         {...props}
       />
     ),
+    okText: props.priorityId ? '保存' : '创建',
   });
 };
 

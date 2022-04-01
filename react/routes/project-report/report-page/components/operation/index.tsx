@@ -165,7 +165,7 @@ const Operation: React.FC<Props> = () => {
   const handleCancelClick = useCallback(() => {
     Modal.open({
       title: '确认退出？',
-      children: `确认退出${edit ? '编辑' : '创建'}？`,
+      children: `确认退出${edit ? '修改' : '创建'}？`,
       onOk: () => {
         // 确认退出后不需要保存提示
         store.setDirty(false);

@@ -157,7 +157,7 @@ function StateList(props) {
       const menu = (
         // eslint-disable-next-line react/jsx-no-bind
         <Menu onClick={handleMenuClick.bind(this)}>
-          <Menu.Item key="edit">{formatMessage({ id: 'boot.edit' })}</Menu.Item>
+          <Menu.Item key="edit">{formatMessage({ id: 'boot.modify' })}</Menu.Item>
           {
             !(record.code || (record.stateMachineInfoList && record.stateMachineInfoList.length)) && (
               <Menu.Item key="delete">{formatMessage({ id: 'boot.delete' })}</Menu.Item>

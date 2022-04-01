@@ -103,13 +103,13 @@ function openEditReleaseVersionModal(props: PublishVersionModalWithEditProps) {
   const key = Modal.key();
   Modal.open({
     key,
-    title: '编辑规划版本',
+    title: '修改规划版本',
     style: {
       width: MODAL_WIDTH.small,
     },
     drawer: true,
     children: <CreatePublishVersion {...props} />,
-
+    okText: '保存',
   });
 }
 export { openCreateReleaseVersionModal, openEditReleaseVersionModal };

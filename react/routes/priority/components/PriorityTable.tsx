@@ -220,7 +220,7 @@ const Priority: React.FC<{
     const menu = (
       // eslint-disable-next-line react/jsx-no-bind
       <Menu onClick={handleMenuClick.bind(this)}>
-        <Menu.Item key="edit">编辑</Menu.Item>
+        <Menu.Item key="edit">修改</Menu.Item>
         {
           enableList.length > 1 && (
             <Menu.Item key="delete">删除</Menu.Item>

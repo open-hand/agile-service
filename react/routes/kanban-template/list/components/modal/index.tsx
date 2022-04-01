@@ -81,7 +81,7 @@ const KanbanTemplateModal: React.FC<KanbanTemplateModalProps> = (props) => {
 const openKanbanTemplateModal = (props: KanbanTemplateModalProps) => {
   Modal.open({
     key: 'KanbanTemplateModal',
-    title: props.mode === 'create' ? '创建看板模板' : '编辑看板模板',
+    title: props.mode === 'create' ? '创建看板模板' : '修改看板模板',
     drawer: true,
     style: {
       width: MODAL_WIDTH.small,

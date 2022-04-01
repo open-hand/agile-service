@@ -120,7 +120,7 @@ function ObjectScheme() {
       drawer: true,
       children: <CreateField {...values} />,
       style: createModelStyle,
-      okText: formatMessage({ id: 'boot.save' }),
+      // okText: formatMessage({ id: 'boot.save' }),
       cancelText: formatMessage({ id: 'boot.cancel' }),
     });
   }
@@ -156,7 +156,7 @@ function ObjectScheme() {
 
     if (!disabledEditDel) {
       // const disabledOrgDel = getMenuType() === 'organization' && !!record?.get('instanceCount');
-      menuItems.push(...[{ action: openEditFieldModal, text: '编辑' }, {
+      menuItems.push(...[{ action: openEditFieldModal, text: '修改' }, {
         key: 'del',
         // disabled: disabledOrgDel,
         text: formatMessage({ id: 'boot.delete' }),

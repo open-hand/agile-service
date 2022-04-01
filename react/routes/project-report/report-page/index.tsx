@@ -90,7 +90,7 @@ const ReportPage: React.FC<Props> = ({
             }]}
             />
           </Header>
-          <Breadcrumb title={edit ? '编辑项目报告' : '创建项目报告'} />
+          <Breadcrumb title={edit ? '修改项目报告' : '创建项目报告'} />
           <Content style={{
             paddingBottom: 0,
             // paddingTop: 0,
