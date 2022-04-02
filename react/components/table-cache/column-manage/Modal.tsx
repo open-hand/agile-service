@@ -1,5 +1,5 @@
 import React, {
-  useEffect, useCallback, useMemo, useState,
+  useEffect, useCallback, useMemo, useState, useRef,
 } from 'react';
 import {
   Modal,
@@ -27,7 +27,7 @@ export interface ColumnManageProps {
   value?: string[]
   projectId?: string
   hiddenColumns?: string[]
-  onSaveBefore?: (willSaveData: ListLayoutColumnVO[]) => Promise<boolean |ListLayoutColumnVO[]> | boolean | ListLayoutColumnVO[]
+  onSaveBefore?: (willSaveData: ListLayoutColumnVO[]) => Promise<boolean | ListLayoutColumnVO[]> | boolean | ListLayoutColumnVO[]
   onChange?: (value: string[]) => void
   tooltip?: boolean
 }
@@ -107,12 +107,15 @@ function useColumnManageModal(props: ColumnManageProps) {
 }
 const ColumnManageModal: React.FC<ColumnManageProps> = (props) => {
   const { onDragEnd, columListProps } = useColumnManageModal(props);
+  const renderItem: Exclude<CustomColumnManageProps['renderItem'], undefined> = usePersistFn((dragDom) => dragDom);
+
   return (
     <div>
       <DragDropContext
         onDragEnd={onDragEnd}
       >
         <ColumnList
+          renderItem={renderItem}
           {...columListProps}
         />
       </DragDropContext>
@@ -132,12 +135,16 @@ const openColumnManageModal = (props: ColumnManageProps) => {
     className: styles.columnModal,
   });
 };
-interface CustomColumnManageProps extends ColumnManageProps {
+export interface CustomColumnManageProps extends ColumnManageProps {
   modelProps?: Omit<ModalProps, 'children'>
   warnInfoProps?: IWarnInfoBlockProps
+  renderItem?: (dragDom: React.ReactElement, itemData: { data: Option, index: number, selected: boolean, tooltip: boolean }) => React.ReactElement
 }
 const CustomColumnManageModal: React.FC<CustomColumnManageProps> = (props) => {
   const { onDragEnd, columListProps } = useColumnManageModal(props);
+  const renderItemRef = useRef<CustomColumnManageProps['renderItem']>();
+  renderItemRef.current = props.renderItem;
+  const renderItem: Exclude<CustomColumnManageProps['renderItem'], undefined> = usePersistFn((dragDom, item) => (renderItemRef.current ? renderItemRef.current(dragDom, item) : dragDom));
   return (
     <div>
       <WarnInfoBlock
@@ -154,6 +161,7 @@ const CustomColumnManageModal: React.FC<CustomColumnManageProps> = (props) => {
           onDragEnd={onDragEnd}
         >
           <ColumnList
+            renderItem={renderItem}
             {...columListProps}
           />
         </DragDropContext>

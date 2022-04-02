@@ -1,18 +1,19 @@
 import classNames from 'classnames';
 import React from 'react';
 import { Droppable } from 'react-beautiful-dnd';
-import { ColumnManageProps } from '../../Modal';
+import { ColumnManageProps, CustomColumnManageProps } from '../../Modal';
 import ColumnItem from '../column-item';
 import styles from './index.less';
 
 export interface ColumnListProps {
   columns: ColumnManageProps['options']
   selectedKeys: string[]
+  renderItem: Exclude<CustomColumnManageProps['renderItem'], undefined>
   onSelectChange: (key: string, value: boolean) => void
   tooltip: boolean
 }
 const ColumnList: React.FC<ColumnListProps> = ({
-  columns, selectedKeys, onSelectChange, tooltip,
+  columns, selectedKeys, onSelectChange, tooltip, renderItem,
 }) => (
 
   <Droppable droppableId="list" direction="vertical" type="status_drop">
@@ -29,6 +30,7 @@ const ColumnList: React.FC<ColumnListProps> = ({
           const selected = selectedKeys.includes(item.code);
           return (
             <ColumnItem
+              renderItem={renderItem}
               tooltip={tooltip}
               selected={selected}
               onSelectChange={onSelectChange}
