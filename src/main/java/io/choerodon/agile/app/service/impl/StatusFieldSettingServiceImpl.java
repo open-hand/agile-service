@@ -45,7 +45,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
 
     private static final String[] FILTER_FIELD_TYPE = {"checkbox", "multiple", "member", "radio", "single"};
     private static final String[] FEATURE_FIELD = {FieldCode.ACCEPTANCE_CRITERA, FieldCode.BENFIT_HYPOTHESIS, FieldCode.PROGRAM_VERSION, FieldCode.SUB_PROJECT, FieldCode.FEATURE_TYPE};
-    private static final List<String> WATERFALL_FIELD_LIST = Arrays.asList(FieldCode.PROGRESS, FieldCode.PARENT);
+    private static final List<String> WATERFALL_FIELD_LIST = Arrays.asList(FieldCode.PROGRESS);
     public static final Map<String, String> FIELD_CODE = new LinkedHashMap<>();
     public static final Map<String, String> PROGRAM_FIELD_CODE = new LinkedHashMap<>();
     private static final String CLEAR = "clear";
