@@ -22,7 +22,6 @@ import Styles from './index.less';
 import { refsBindRef, wrapRequestCallback } from '../utils';
 import { useNoticeSelectUpdateSelected } from '../useNoticeSelectUpdateSelected';
 import { styles as ellipsisStyles } from '../common/utils';
-import {multiple} from "@/routes/page-config/images";
 
 const toArray = (something: any) => (Array.isArray(something) ? something : [something]);
 export interface SelectUserProps extends Partial<SelectProps> {
