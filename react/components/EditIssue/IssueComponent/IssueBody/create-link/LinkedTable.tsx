@@ -138,8 +138,8 @@ const LinkedTable: React.FC<Props> = ({ issueId, linkedTableRef, projectId }) =>
       )}
     >
       <Column name="summary" renderer={({ record }) => renderSummary({ record, clickable: false })} />
-      <Column name="issueNum" sortable width={120} />
-      <Column name="statusId" sortable width={105} renderer={renderStatus} />
+      <Column name="issueNum" sortable width={105} />
+      <Column name="statusId" sortable width={95} renderer={renderStatus} />
       <Column name="assigneeId" sortable width={105} renderer={renderUser} />
       <Column name="priorityId" sortable width={95} renderer={renderPriority} />
       <Column name="sprintId" sortable width={135} renderer={renderSprint} />
