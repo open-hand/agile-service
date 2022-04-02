@@ -22,6 +22,7 @@ import Styles from './index.less';
 import { refsBindRef, wrapRequestCallback } from '../utils';
 import { useNoticeSelectUpdateSelected } from '../useNoticeSelectUpdateSelected';
 import { styles as ellipsisStyles } from '../common/utils';
+import {multiple} from "@/routes/page-config/images";
 
 const toArray = (something: any) => (Array.isArray(something) ? something : [something]);
 export interface SelectUserProps extends Partial<SelectProps> {
@@ -122,7 +123,16 @@ const SelectUser = forwardRef<Select, SelectUserProps>(({
         className={ellipsisStyles.optionWrap}
       />
     ))),
-    renderer: optionRenderer || ((user: User) => (user?.headerHidden ? <span>{user?.realName}</span> : <UserTag data={user as User} tooltip={!flat} className={Styles.userWrap} textClassName={Styles.userText} avatarClassName={Styles.userAvatar} />)),
+    renderer: optionRenderer || ((user: User) => (user?.headerHidden ? <span>{user?.realName}</span> : (
+      <UserTag
+        data={user as User}
+        tooltip={!flat}
+        className={Styles.userWrap}
+        textClassName={Styles.userText}
+        avatarClassName={Styles.userAvatar}
+        style={otherProps.multiple ? {} : { maxWidth: '100%' }}
+      />
+    ))),
     middleWare: (data) => {
       let newData = [];
       const temp: User[] = [];
