@@ -5,7 +5,7 @@ import { Tooltip } from 'choerodon-ui/pro';
 import { Draggable, DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
 import { observer } from 'mobx-react-lite';
 import { useLockFn } from 'ahooks';
-import { Option } from '../../Modal';
+import { CustomColumnManageProps, Option } from '../../Modal';
 import styles from './index.less';
 
 const grid = 0;
@@ -19,6 +19,7 @@ interface ColumnProps extends React.HTMLAttributes<HTMLDivElement> {
   data: Option
   tooltip: boolean
   selected: boolean
+  renderItem: Exclude<CustomColumnManageProps['renderItem'], undefined>
   onSelectChange: (key: string, value: boolean) => void
 }
 const ColumnItem: React.FC<Pick<ColumnProps, 'data' | 'selected' | 'onSelectChange' | 'tooltip'>> = ({
@@ -48,6 +49,7 @@ const DragableColumnItem: React.FC<ColumnProps> = ({
   selected,
   onSelectChange,
   tooltip,
+  renderItem,
   ...otherProps
 }) => {
   const draggableId = data.code;
@@ -60,22 +62,27 @@ const DragableColumnItem: React.FC<ColumnProps> = ({
       index={index}
       draggableId={draggableId}
     >
-      {(provided, snapshot) => (
-        <div
-          className={classNames(styles.item, className)}
-          {...otherProps}
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          style={getItemStyle(
-            snapshot.isDragging,
-            provided.draggableProps.style,
-          )}
-        >
-          <Icon type="baseline-drag_indicator" className={styles.handle} />
-          {item}
-        </div>
-      )}
+      {(provided, snapshot) => {
+        const dom = (
+          <div
+            className={classNames(styles.item, className)}
+            {...otherProps}
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+            style={getItemStyle(
+              snapshot.isDragging,
+              provided.draggableProps.style,
+            )}
+          >
+            <Icon type="baseline-drag_indicator" className={styles.handle} />
+            {item}
+          </div>
+        );
+        return renderItem(dom, {
+          data, selected, tooltip, index,
+        });
+      }}
     </Draggable>
   );
 };
