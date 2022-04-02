@@ -62,7 +62,7 @@ export interface ISettingField {
 type ISelectUserMap = Map<string, { id: null | string, realName: null | string }>
 
 const CUSTOM_CODE = 'copy_custom_field';
-const excludeCode = ['summary', 'status', 'issueNum', 'issueType', 'sprint', 'feature', 'epicName', 'epic', 'pi', 'timeTrace', 'lastUpdateDate', 'creationDate', 'created_user', 'last_updated_user', 'tag'];
+const excludeCode = ['summary', 'status', 'issueNum', 'issueType', 'sprint', 'feature', 'epicName', 'epic', 'pi', 'timeTrace', 'lastUpdateDate', 'creationDate', 'created_user', 'last_updated_user', 'tag', 'parent'];
 const orgExcludeCode: string[] = ['component', 'label', 'fixVersion', 'featureType', 'subProject', 'programVersion', 'tag'];
 const memberIsNotSpecifier = ['reportor', 'clear', 'operator', 'creator', 'assignee', 'mainResponsible', 'participant'];
 // @ts-ignore
