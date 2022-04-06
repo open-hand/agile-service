@@ -1,11 +1,11 @@
 import React, {
-  useState, useRef, cloneElement, useEffect, Fragment, useMemo, useCallback,
+  useState, useRef, cloneElement, useEffect, Fragment, useMemo, useCallback, useImperativeHandle, MutableRefObject,
 } from 'react';
 import FormField from 'choerodon-ui/pro/lib/field';
 import TriggerField from 'choerodon-ui/pro/lib/trigger-field';
 import { toJS } from 'mobx';
-import { noop } from 'lodash';
 import {
+  noop,
   isEqual, isEqualWith, isNull, isUndefined,
 } from 'lodash';
 import classNames from 'classnames';
@@ -47,6 +47,7 @@ interface Props {
   initValue: any
   showEdit?: boolean // 手动进入编辑状态
   setShowEdit?: () => void,
+  toggleRef?: MutableRefObject<any>,
 }
 /**
  * 统一化空值
@@ -64,7 +65,7 @@ function customizer(val1: any, val2: any) {
   return uniformEmptyValue(val1) === uniformEmptyValue(val2) || undefined;
 }
 const TextEditToggle: React.FC<Props> = ({
-  disabled, submitTrigger = ['blur'], editor, editorTrigger = ['focus'], editorExtraContent, children: text,
+  disabled, submitTrigger = ['blur'], editor, editorTrigger = ['focus'], editorExtraContent, children: text, toggleRef,
   className, onSubmit, initValue, alwaysRender = true, mountRenderEditor = true, textClassName = '', showEdit, setShowEdit = noop,
 } = {} as Props) => {
   const editTriggerConfigRef = useRef<TextEditToggleInnerEditorConfig>();
@@ -83,6 +84,11 @@ const TextEditToggle: React.FC<Props> = ({
   const dataRef = useRef(initValue);
   const editorRef = useRef<JSX.Element | FormField<any>>(null);
   const firstRenderEditorRef = useRef(true);
+
+  // useImperativeHandle(propsToggleRef || toggleRef, () => ({
+  //   hideEditor,
+  //   showEditor,
+  // }));
 
   const handleClickOut = () => {
     if (submitTrigger.includes('click')) {
@@ -111,6 +117,7 @@ const TextEditToggle: React.FC<Props> = ({
       editorRef.current.focus();
     }
   });
+
   const hideEditor = () => {
     if (editing) {
       if (containerRef.current) {
@@ -134,6 +141,16 @@ const TextEditToggle: React.FC<Props> = ({
       setEditing(() => true);
     }
   }, [latestState]);
+
+  useEffect(() => {
+    if (toggleRef) {
+      toggleRef.current = {
+        hideEditor,
+        showEditor,
+      };
+    }
+  }, [toggleRef, hideEditor, showEditor]);
+
   const handleChange = (originOnChange: Function | undefined) => (newValue: any) => {
     dataRef.current = newValue;
     setValue(newValue);
