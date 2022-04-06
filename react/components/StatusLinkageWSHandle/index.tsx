@@ -2,11 +2,14 @@ import React, { useCallback } from 'react';
 import { WSHandler, Choerodon } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
 
-const StatusLinkageWSHandle = () => {
+// eslint-disable-next-line react/require-default-props
+const StatusLinkageWSHandle = ({ afterSuccess }: { afterSuccess?: () => void }) => {
   const handleMessage = useCallback((message: string) => {
     const data = JSON.parse(message);
     const { statusCode } = data;
-    if (statusCode !== 'success') {
+    if (statusCode === 'success') {
+      afterSuccess && afterSuccess();
+    } else {
       Choerodon.prompt('状态联动失败');
     }
   }, []);
