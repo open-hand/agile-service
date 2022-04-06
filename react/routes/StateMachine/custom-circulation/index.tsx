@@ -344,6 +344,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         children: <AutoTransform
           record={record}
           selectedType={selectedType}
+          selectedTypeCode={selectedTypeCode}
           customCirculationDataSet={customCirculationDataSet}
         />,
       },

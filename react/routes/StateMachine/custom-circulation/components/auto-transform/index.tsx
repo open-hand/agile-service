@@ -3,26 +3,27 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  DataSet, CheckBox, Form, Select,
+  DataSet, CheckBox,
 } from 'choerodon-ui/pro';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { Divider } from 'choerodon-ui';
-import { mount } from '@choerodon/inject';
+import { mount, has as hasInject } from '@choerodon/inject';
 import { Choerodon } from '@choerodon/boot';
 import { IModalProps } from '@/common/types';
 import { statusTransformApi } from '@/api';
 import useHasTest from '@/hooks/useHasTest';
 import styles from './index.less';
+import { WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
 
 interface Props {
   modal: IModalProps,
   record: Record,
   selectedType: string,
   customCirculationDataSet: DataSet,
+  selectedTypeCode: string,
 }
 
 const AutoTransform: React.FC<Props> = ({
-  modal, record, selectedType, customCirculationDataSet,
+  modal, record, selectedType, customCirculationDataSet, selectedTypeCode,
 }) => {
   const testTransformRef = useRef<{
     testTransform:(data: {
@@ -71,33 +72,27 @@ const AutoTransform: React.FC<Props> = ({
     <div className={styles.autoTransform}>
       <div className={styles.tip}>满足以下条件后工作项将自动流转到当前状态。</div>
       <div className={styles.setting}>
-        {
-          hasTest && (
-            <>
-              <div style={{
-                fontSize: 12,
-                color: 'var(--text-color3)',
-                marginLeft: 2,
-                marginBottom: 10,
-              }}
-              >
-                {`工作项关联的用例的测试执行处于下方状态，工作项将自动流转到${record.get('name')}。`}
-              </div>
-            </>
-          )
-        }
-        {
-          hasTest ? mount('testmanager:StatusAutoTransform', {
-            testTransformRef,
-            issueTypeId: selectedType,
-            statusId: record.get('id'),
-          }) : ''
-        }
-        {
-          hasTest && (
+        {!WATERFALL_TYPE_CODES.includes(selectedTypeCode) && hasTest ? (
+          <>
+            <div style={{
+              fontSize: 12,
+              color: 'var(--text-color3)',
+              marginLeft: 2,
+              marginBottom: 10,
+            }}
+            >
+              {`工作项关联的用例的测试执行处于下方状态，工作项将自动流转到${record.get('name')}。`}
+            </div>
+            {
+              hasInject('testmanager:StatusAutoTransform') ? mount('testmanager:StatusAutoTransform', {
+                testTransformRef,
+                issueTypeId: selectedType,
+                statusId: record.get('id'),
+              }) : ''
+            }
             <div className={styles.divider} />
-          )
-        }
+          </>
+        ) : null}
         <CheckBox checked={checked} onChange={handleChange}>{`分支合并后自动将状态流转到${record.get('name')}`}</CheckBox>
       </div>
 
