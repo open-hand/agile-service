@@ -1,5 +1,5 @@
 import React, {
-  useState, useRef, cloneElement, useEffect, Fragment, useMemo, useCallback, useImperativeHandle, MutableRefObject,
+  useState, useRef, cloneElement, useEffect, useMemo, useCallback, MutableRefObject,
 } from 'react';
 import FormField from 'choerodon-ui/pro/lib/field';
 import TriggerField from 'choerodon-ui/pro/lib/trigger-field';
@@ -84,11 +84,6 @@ const TextEditToggle: React.FC<Props> = ({
   const dataRef = useRef(initValue);
   const editorRef = useRef<JSX.Element | FormField<any>>(null);
   const firstRenderEditorRef = useRef(true);
-
-  // useImperativeHandle(propsToggleRef || toggleRef, () => ({
-  //   hideEditor,
-  //   showEditor,
-  // }));
 
   const handleClickOut = () => {
     if (submitTrigger.includes('click')) {
