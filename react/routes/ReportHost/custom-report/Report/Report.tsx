@@ -62,12 +62,13 @@ const CustomReport: React.FC<Props> = (props) => {
   const [customFields, setCustomFields] = useState<IField[]>([]);
   const [hasGetCustomFields, setHasGetCustomFields] = useState<boolean>(false);
   const [expand, setExpand] = useState<boolean>(true);
-
   useEffect(() => {
     pageConfigApi.load().then((res: { content: IField[] }) => {
-      setDimension(res.content.filter((item) => ['single', 'checkbox', 'multiple', 'radio', 'member', 'multiMember'].includes(item.fieldType) && !(item.contexts.length === 1 && item.contexts[0] === 'backlog')));
+      let newDimension = res.content.filter((item) => ['single', 'checkbox', 'multiple', 'radio', 'member', 'multiMember'].includes(item.fieldType) && !(item.contexts.length === 1 && item.contexts[0] === 'backlog'));
+      newDimension = isWaterfallAgile ? newDimension.filter((item) => item.code !== 'parent') : newDimension;
+      setDimension(newDimension);
     });
-  }, []);
+  }, [isWaterfallAgile]);
 
   useEffect(() => {
     if (chartId) {
