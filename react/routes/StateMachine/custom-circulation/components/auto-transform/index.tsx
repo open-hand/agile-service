@@ -19,7 +19,8 @@ interface Props {
   record: Record,
   selectedType: string,
   customCirculationDataSet: DataSet,
-  selectedTypeCode: string,
+  // eslint-disable-next-line react/require-default-props
+  selectedTypeCode?: string,
 }
 
 const AutoTransform: React.FC<Props> = ({
@@ -72,7 +73,7 @@ const AutoTransform: React.FC<Props> = ({
     <div className={styles.autoTransform}>
       <div className={styles.tip}>满足以下条件后工作项将自动流转到当前状态。</div>
       <div className={styles.setting}>
-        {!WATERFALL_TYPE_CODES.includes(selectedTypeCode) && hasTest ? (
+        {selectedTypeCode && !WATERFALL_TYPE_CODES.includes(selectedTypeCode) && hasTest ? (
           <>
             <div style={{
               fontSize: 12,
