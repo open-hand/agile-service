@@ -1471,9 +1471,18 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         IssueTypeVO linkageIssueType = issueStatusLinkageVO.getLinkageIssueType();
         StatusVO linkageIssueStatus = issueStatusLinkageVO.getLinkageIssueStatus();
         if (Arrays.asList(IssueTypeCode.WATERFALL_ISSUE_TYPE_CODE).contains(linkageIssueType.getTypeCode())) {
-            stringBuilder.append("，存在【")
-                    .append(ObjectUtils.isEmpty(issueStatusLinkageVO.getPredecessorType()) ? "依赖" : getPredecessorType(issueStatusLinkageVO.getPredecessorType()))
-                    .append("】依赖关系的");
+            String predecessorType = issueStatusLinkageVO.getPredecessorType();
+            if (ObjectUtils.isEmpty(predecessorType)) {
+                stringBuilder
+                        .append(" 【")
+                        .append(ObjectUtils.isEmpty(linkTypeVO) ? "关联" : linkTypeVO.getLinkName())
+                        .append("】的");
+            } else {
+                stringBuilder
+                        .append("，存在【")
+                        .append(getPredecessorType(issueStatusLinkageVO.getPredecessorType()))
+                        .append("】依赖关系的");
+            }
         } else {
             stringBuilder.append(" 【")
                     .append(ObjectUtils.isEmpty(linkTypeVO) ? "关联" : linkTypeVO.getLinkName())
