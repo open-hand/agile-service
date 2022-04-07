@@ -34,8 +34,8 @@ function getStatus(mergeRequests: any[]) {
   return '关闭';
 }
 const LinkedBranch: React.ForwardRefRenderFunction<{
-  issueId: string, projectId?: string
-}> = ({ issueId, projectId: propsProjectId }, ref) => {
+  issueId: string, projectId?: string, onRemoveBranch:(() => void)
+}> = ({ issueId, projectId: propsProjectId, onRemoveBranch }, ref) => {
   const dataSet = useMemo(() => new DataSet({
     autoQuery: true,
     selection: false,
@@ -84,6 +84,7 @@ const LinkedBranch: React.ForwardRefRenderFunction<{
           okText: '移除',
           onOk: async () => {
             await devOpsApi.project(record.projectId).removeLinkBranch(record.appServiceId, record.id, issueId);
+            onRemoveBranch();
             dataSet.query();
           },
         });

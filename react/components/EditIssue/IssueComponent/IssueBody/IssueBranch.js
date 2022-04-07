@@ -9,7 +9,7 @@ import openCreateBranchModal from '@/components/CreateBranch/CreateBranchPro';
 import LinkedBranch from '../linked-branch';
 
 const IssueBranch = observer(({
-  store, disabled, projectId, reloadIssue, otherProject, outside, programId, applyType, issueId,
+  store, disabled, projectId, reloadIssue, otherProject, outside, programId, applyType, issueId, onCreateBranch, onLinkBranch, onRemoveBranch,
 }) => {
   const commitsRef = useRef();
   const issue = store.getIssue;
@@ -34,13 +34,13 @@ const IssueBranch = observer(({
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
             <Tooltip placement="topRight" title="关联分支">
-              <Button onClick={() => openLinkBranchModal({ issueId, projectId, onOk: () => store.refreshBranch() })}>
+              <Button onClick={() => openLinkBranchModal({ issueId, projectId, onOk: onLinkBranch })}>
                 <Icon type="add_branch icon" />
               </Button>
             </Tooltip>
             <Tooltip placement="topRight" title="创建分支">
               <Button onClick={() => openCreateBranchModal({
-                issueId, projectId, onOk: () => store.refreshBranch(), typeCode, defaultBranchSuffixName: issueNum,
+                issueId, projectId, onOk: onCreateBranch, typeCode, defaultBranchSuffixName: issueNum,
               })}
               >
                 <Icon type="playlist_add icon" />
@@ -49,7 +49,7 @@ const IssueBranch = observer(({
           </div>
         )}
       </div>
-      <LinkedBranch ref={commitsRef} issueId={issueId} projectId={projectId} />
+      <LinkedBranch ref={commitsRef} issueId={issueId} projectId={projectId} onRemoveBranch={onRemoveBranch} />
       <div className="c7n-title-wrapper">
         <div className="c7n-title-left">
           合并请求

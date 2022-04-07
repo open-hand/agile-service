@@ -122,6 +122,26 @@ function EditIssue() {
     }
   }, [issueEvents, store.getIssue]);
 
+  const onCreateBranch = useCallback(() => {
+    if (issueEvents?.createBranch) {
+      issueEvents?.createBranch();
+    }
+    store.refreshBranch();
+  }, [issueEvents, store]);
+
+  const onLinkBranch = useCallback(() => {
+    if (issueEvents?.linkBranch) {
+      issueEvents?.linkBranch();
+    }
+    store.refreshBranch();
+  }, [issueEvents, store]);
+
+  const onRemoveBranch = useCallback(() => {
+    if (issueEvents?.removeBranch) {
+      issueEvents?.removeBranch();
+    }
+  }, [issueEvents]);
+
   const checkDescriptionEdit = useCallback(() => {
     if (descriptionEditRef.current) {
       Choerodon.prompt('请先保存描述！');
@@ -413,6 +433,7 @@ function EditIssue() {
           onIssueRecordTime={onIssueRecordTime}
           onOpenCreateSubTask={handleOpenCreateSubTask}
           onOpenCreateSubBug={handleOpenCreateSubBug}
+          onCreateBranch={onCreateBranch}
           showProjectInfo={showProjectInfo}
         />
         <IssueBody
@@ -432,6 +453,9 @@ function EditIssue() {
           onCreateSubIssue={onCreateSubIssue}
           onDeleteSubIssue={onDeleteSubIssue}
           onLinkIssue={onLinkIssue}
+          onCreateBranch={onCreateBranch}
+          onLinkBranch={onLinkBranch}
+          onRemoveBranch={onRemoveBranch}
           loginUserId={AppState.userInfo.id}
           applyType={applyType}
           onDeleteIssue={onDeleteIssue}

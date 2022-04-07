@@ -27,7 +27,7 @@ import useIsWaterfall from '../../../hooks/useIsWaterfall';
 
 const IssueDropDown = ({
   onDeleteIssue, loginUserId, reloadIssue, onIssueRecordTime, testLinkStoreRef, onIssueCopy, onUpdate,
-  onChangeParent, onRelateIssue, onTransformSubIssue, onOpenCreateSubTask, onOpenCreateSubBug, checkDescriptionEdit,
+  onChangeParent, onRelateIssue, onTransformSubIssue, onOpenCreateSubTask, onOpenCreateSubBug, checkDescriptionEdit, onCreateBranch,
 }) => {
   const {
     store, applyType, isProgramIssue, isShowFeature,
@@ -125,7 +125,7 @@ const IssueDropDown = ({
       });
     } else if (e.key === '6') {
       openCreateBranchModal({
-        issueId, onOk: () => store.refreshBranch(), typeCode, defaultBranchSuffixName: issueNum, projectId: store.projectId,
+        issueId, onOk: onCreateBranch, typeCode, defaultBranchSuffixName: issueNum, projectId: store.projectId,
       });
       store.setCreateBranchShow(true);
     } else if (e.key === '7') {
