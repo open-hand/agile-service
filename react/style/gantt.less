@@ -36,10 +36,6 @@
       fill: var(--selection-background);
     }
 
-    .gantt-scroll_bar {
-      height: .04rem;
-    }
-
     .gantt-time-axis-minor {
       color: var(--text-color3);
       font-weight: 400;
@@ -85,5 +81,45 @@
     .gantt-table-header-resize::after {
       background: var(--divider);
     }
+  }
+
+  .gantt-scroll_bar-thumb {
+    background: rgba(15, 19, 88, 0.2);
+    opacity: 1;
+  }
+
+  .gantt-scroll_bar {
+    background: rgba(45, 45, 45, 0.05);
+    height: .06rem !important;
+
+    opacity: 1;
+  }
+
+  .gantt-scroll_bar:hover,
+  .gantt-scroll_bar:focus,
+  .gantt-scroll_bar:active {
+    height: .08rem !important;
+  }
+
+  .gantt-main-thumb {
+    background: rgba(15, 19, 88, 0.2);
+    opacity: 1;
+  }
+
+  .gantt-main-track {
+    background: rgba(45, 45, 45, 0.05);
+    opacity: unset;
+  }
+
+  .gantt-main-trackY {
+    top: 0;
+    width: .06rem;
+    height: calc(100% - .08rem);
+  }
+
+  .gantt-main-trackY:hover,
+  .gantt-main-trackY:active,
+  .gantt-main-trackY:focus {
+    width: .08rem;
   }
 }
