@@ -235,7 +235,7 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
         } else {
             AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
             if (agilePluginService != null) {
-                agilePluginService.initFeatureType(organizationId, issueTypes);
+                agilePluginService.initBusinessType(organizationId, issueTypes);
             }
         }
         IssueTypeDTO query = new IssueTypeDTO();

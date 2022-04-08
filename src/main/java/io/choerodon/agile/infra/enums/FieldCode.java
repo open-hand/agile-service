@@ -62,6 +62,16 @@ public class FieldCode {
     public static final String BELONG_TO_BACKLOG = "belongToBacklog";
     public static final String PARENT = "parent";
     public static final String PROGRESS = "progress";
+    // 风险字段：风险分类、影响度、发生概率、临近度、应对策略、预计解决日期、实际解决日期、相关方、发现日期
+    public static final String RISK_CATEGORY = "riskCategory";
+    public static final String RISK_INFLUENCE = "riskInfluence";
+    public static final String RISK_PROBABILITY = "riskProbability";
+    public static final String RISK_PROXIMITY = "riskProximity";
+    public static final String COPING_STRATEGY = "copingStrategy";
+    public static final String ESTIMATED_RESOLUTION_DATE = "estimatedResolutionDate";
+    public static final String ACTUAL_RESOLUTION_DATE = "actualResolutionDate";
+    public static final String RELATED_PARTIES = "relatedParties";
+    public static final String DISCOVERY_DATE = "discoveryDate";
 
     public static final String ISSUE_STATUS = "issueStatus";
 

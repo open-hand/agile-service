@@ -47,6 +47,15 @@ public class SystemFieldPageConfig {
         ESTIMATE_TIME(FieldCode.ESTIMATE_TIME, true, true),
         PARENT(FieldCode.PARENT, true, true),
         PROGRESS(FieldCode.PROGRESS, false, true),
+        RISK_CLASSIFICATION(FieldCode.RISK_CATEGORY, true, true),
+        RISK_INFLUENCE(FieldCode.RISK_INFLUENCE, true, true),
+        RISK_PROBABILITY(FieldCode.RISK_PROBABILITY, true, true),
+        RISK_PROXIMITY(FieldCode.RISK_PROXIMITY, true, true),
+        COPING_STRATEGY(FieldCode.COPING_STRATEGY, true, true),
+        ESTIMATED_RESOLUTION_DATE(FieldCode.ESTIMATED_RESOLUTION_DATE, true, true),
+        ACTUAL_RESOLUTION_DATE(FieldCode.ACTUAL_RESOLUTION_DATE, false, true),
+        RELATED_PARTIES(FieldCode.RELATED_PARTIES, true, true),
+        DISCOVERY_DATE(FieldCode.DISCOVERY_DATE, true, true),
         ;
 
 

@@ -138,6 +138,12 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                     IssueTypeCode.ACTIVITY.value()
             );
 
+    private static final List<String> BUSINESS_ISSUE_TYPES =
+            Arrays.asList(
+                    IssueTypeCode.FEATURE.value(),
+                    IssueTypeCode.RISK.value()
+            );
+
     private static final Map<String, List<String>> TYPE_CODE_CATEGORY_MAP;
 
     static {
@@ -152,6 +158,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.STAGE.value(), Arrays.asList(ProjectCategory.MODULE_WATERFALL));
         TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.MILESTONE.value(), Arrays.asList(ProjectCategory.MODULE_WATERFALL));
         TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.ACTIVITY.value(), Arrays.asList(ProjectCategory.MODULE_WATERFALL));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.RISK.value(), Arrays.asList(ProjectCategory.MODULE_AGILE, ProjectCategory.MODULE_PROGRAM, ProjectCategory.MODULE_WATERFALL));
     }
 
 
@@ -991,7 +998,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     public void initIssueTypeByConsumeCreateOrganization(Long organizationId) {
         for (InitIssueType initIssueType : InitIssueType.values()) {
             String typeCode = initIssueType.getTypeCode();
-            if (agilePluginService == null && Objects.equals("feature", typeCode)) {
+            if (agilePluginService == null && BUSINESS_ISSUE_TYPES.contains(typeCode)) {
                 continue;
             }
             if (agileWaterfallService == null && WATERFALL_ISSUE_TYPES.contains(typeCode)) {

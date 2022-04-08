@@ -76,6 +76,10 @@ public class InitServiceImpl implements InitService {
             if (!ObjectUtils.isEmpty(agileWaterfallService)) {
                 stateMachineId = agileWaterfallService.initWaterfallStateMachine(organizationId, projectEvent);
             }
+        } else if (applyType.equals(SchemeApplyType.RISK)) {
+            if (!ObjectUtils.isEmpty(agilePluginService)) {
+                stateMachineId = agilePluginService.initRiskStateMachine(organizationId, projectEvent);
+            }
         }
         return stateMachineId;
     }

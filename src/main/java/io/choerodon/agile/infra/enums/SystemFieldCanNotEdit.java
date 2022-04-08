@@ -40,6 +40,7 @@ public class SystemFieldCanNotEdit {
     private static Map<String, PageConfigFieldEditedVO> taskMap;
     private static Map<String, PageConfigFieldEditedVO> bugMap;
     private static Map<String, PageConfigFieldEditedVO> featureMap;
+    private static Map<String, PageConfigFieldEditedVO> riskMap;
 
     static {
         epicMap = new HashMap<>();
@@ -118,6 +119,19 @@ public class SystemFieldCanNotEdit {
         bugMap.put(FieldCode.REMAINING_TIME, new PageConfigFieldEditedVO(false, false, true));
         bugMap.put(FieldCode.TIME_TRACE, new PageConfigFieldEditedVO(true, true, false));
         bugMap.put(FieldCode.ESTIMATE_TIME, new PageConfigFieldEditedVO(false, false, true));
+
+        riskMap = new HashMap<>();
+        riskMap.put(FieldCode.ISSUE_TYPE, new PageConfigFieldEditedVO(true, true, true));
+        riskMap.put(FieldCode.SUMMARY, new PageConfigFieldEditedVO(true, true, true));
+        riskMap.put(FieldCode.PRIORITY, new PageConfigFieldEditedVO(true, true, true));
+        riskMap.put(FieldCode.STATUS, new PageConfigFieldEditedVO(true, false, true));
+        riskMap.put(FieldCode.DESCRIPTION, new PageConfigFieldEditedVO(false, true, true));
+        riskMap.put(FieldCode.COPING_STRATEGY, new PageConfigFieldEditedVO(false, true, true));
+        riskMap.put(FieldCode.CREATION_DATE, new PageConfigFieldEditedVO(true, true, true));
+        riskMap.put(FieldCode.LAST_UPDATE_DATE, new PageConfigFieldEditedVO(true, true, true));
+        riskMap.put(FieldCode.REPORTER, new PageConfigFieldEditedVO(true, false, true));
+        riskMap.put(FieldCode.CREATOR, new PageConfigFieldEditedVO(true, true, true));
+        riskMap.put(FieldCode.UPDATOR, new PageConfigFieldEditedVO(true, true, true));
     }
 
 }

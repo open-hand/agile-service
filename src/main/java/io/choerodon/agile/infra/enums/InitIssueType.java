@@ -52,7 +52,12 @@ public enum InitIssueType {
      * 活动
      */
     ACTIVITY("agile_activity", "活动", "在进度计划中所列，并在项目过程中实施的工作组成部分", "#4D90FE", "activity")
-    ;
+    ,
+
+    /**
+     * 风险
+     */
+    RISK("agile_epic", "风险", "项目过程中出现某种影响项目正常开展或对项目造成直接损失的可能性", "#F76776", "risk");
 
     private String icon;
     private String name;
@@ -110,6 +115,8 @@ public enum InitIssueType {
                 result.add(InitIssueType.STAGE);
                 result.add(InitIssueType.MILESTONE);
                 result.add(InitIssueType.ACTIVITY);
+            case SchemeApplyType.RISK:
+                result.add(InitIssueType.RISK);
             default:
                 break;
         }

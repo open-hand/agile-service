@@ -65,6 +65,7 @@ public enum InitNode {
             case SchemeApplyType.AGILE:
             case SchemeApplyType.TEST:
             case SchemeApplyType.WATERFALL:
+            case SchemeApplyType.RISK:
                 result.add(InitNode.START);
                 result.add(InitNode.INIT);
                 result.add(InitNode.DEFAULT2);
