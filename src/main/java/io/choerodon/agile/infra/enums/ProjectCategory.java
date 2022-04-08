@@ -1,8 +1,10 @@
 package io.choerodon.agile.infra.enums;
 
 import io.choerodon.agile.api.vo.ProjectVO;
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -112,6 +114,10 @@ public class ProjectCategory {
         }
         if (codes.contains(ProjectCategory.MODULE_WATERFALL)) {
             applyTypes.add(SchemeApplyType.WATERFALL);
+        }
+        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        if (agilePluginService != null) {
+            applyTypes.add(SchemeApplyType.RISK);
         }
         return applyTypes;
     }

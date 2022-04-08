@@ -790,6 +790,13 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (containsWaterfall && !ObjectUtils.isEmpty(agileWaterfallService)) {
             issueTypeList.addAll(agileWaterfallService.filterWaterfallIssueTypes(issueTypes, issueTypeIds));
         }
+        if (agilePluginService != null) {
+            issueTypes.forEach(issueType -> {
+                if (Objects.equals(IssueTypeCode.RISK.value(), issueType.getTypeCode()) && issueTypeIds.contains(issueType.getId())) {
+                    issueTypeList.add(issueType);
+                }
+            });
+        }
         //保持issueTypes顺序
         Set<Long> availableIssueTypeIds =
                 issueTypeList
