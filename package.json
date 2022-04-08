@@ -76,7 +76,8 @@
   },
   "resolutions": {
     "react": "16.14.0",
-    "react-dom": "16.14.0"
+    "react-dom": "16.14.0",
+    "@types/react":"^16.9.35"
   },
   "scripts": {
     "start": "node --max_old_space_size=4096 node_modules/@choerodon/boot/bin/choerodon-front-boot-start --config ./react/config.js",
