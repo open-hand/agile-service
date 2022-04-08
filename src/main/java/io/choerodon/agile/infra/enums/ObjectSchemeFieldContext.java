@@ -42,6 +42,8 @@ public class ObjectSchemeFieldContext {
 
     public static final String ACTIVITY = IssueTypeCode.ACTIVITY.value();
 
+    public static final String RISK = IssueTypeCode.RISK.value();
+
     protected static final String[] ISSUE_TYPES = {STORY, EPIC, BUG, TASK, SUB_TASK};
 
     protected static final String[] FIX_DATA_ISSUE_TYPES = {STORY, EPIC, BUG, TASK, SUB_TASK};
@@ -80,6 +82,7 @@ public class ObjectSchemeFieldContext {
         AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
         if (agilePluginService != null) {
             list.add(FEATURE);
+            list.add(RISK);
         }
         AgileWaterfallService agileWaterfallService = SpringBeanUtil.getExpandBean(AgileWaterfallService.class);
         if (!ObjectUtils.isEmpty(agileWaterfallService)) {

@@ -25,7 +25,7 @@ public interface AgilePluginService {
      * @param code
      * @return
      */
-    String getSystemFieldContext(String code);
+    List<String> getSystemFieldContext(String code);
 
     /**
      * 删除issue时,商业版要执行的逻辑
@@ -420,11 +420,11 @@ public interface AgilePluginService {
     void handlerFeatureFieldValue(String fieldCode, IssueUpdateVO issueUpdateVO, Map<String, Object> specifyMap, List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS, IssueDTO issueDTO, List<String> fieldList);
 
     /**
-     * 如果是开源版升级到商业版，需要补充feature问题类型
+     * 如果是开源版升级到商业版，需要补充feature、risk问题类型
      * @param organizationId
      * @param issueTypes
      */
-    void initFeatureType(Long organizationId, List<IssueTypeDTO> issueTypes);
+    void initBusinessType(Long organizationId, List<IssueTypeDTO> issueTypes);
 
     /**
      * 删除publishVersion关联数据
@@ -522,4 +522,18 @@ public interface AgilePluginService {
      */
     void issueSyncByIssueId(Long tenantId, Long issueId, String openAppType, OpenAppIssueSyncConstant.OperationType operationType);
 
+    Long initRiskStateMachine(Long organizationId, ProjectEvent projectEvent);
+
+    /**
+     * 商业版创建项目时初始化风险问题类型和方案
+     * @param projectEvent
+     */
+    void initProjectRiskIssueTypeScheme(ProjectEvent projectEvent, Set<String> codes);
+
+    /**
+     * 风险问题类型字段默认顺序
+     * @param issueType
+     * @return
+     */
+    List<String> queryFieldOrderByIssueType(String issueType);
 }

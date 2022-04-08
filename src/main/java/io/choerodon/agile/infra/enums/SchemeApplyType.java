@@ -36,4 +36,9 @@ public class SchemeApplyType {
      */
     public static final String WATERFALL = "waterfall";
 
+    /**
+     * 风险
+     */
+    public static final String RISK = "risk";
+
 }

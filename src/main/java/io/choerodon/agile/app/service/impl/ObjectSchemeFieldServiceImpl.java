@@ -536,6 +536,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     private List<String> queryFieldOrderByIssueType(String issueType) {
         if(!ObjectUtils.isEmpty(agileWaterfallService)) {
             return agileWaterfallService.queryFieldOrderByIssueType(issueType);
+        } if(!ObjectUtils.isEmpty(agilePluginService)) {
+            return agilePluginService.queryFieldOrderByIssueType(issueType);
         } else {
             return Collections.emptyList();
         }
@@ -715,9 +717,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             contexts.addAll(Arrays.asList(context.split(",")));
         }
         if (agilePluginService != null) {
-            String context = agilePluginService.getSystemFieldContext(code);
-            if (!ObjectUtils.isEmpty(context)) {
-                contexts.add(context);
+            List<String> businessContext = agilePluginService.getSystemFieldContext(code);
+            if (!ObjectUtils.isEmpty(businessContext)) {
+                contexts.addAll(businessContext);
             }
         }
         if (backlogExpandService != null) {
