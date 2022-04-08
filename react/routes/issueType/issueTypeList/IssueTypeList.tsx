@@ -61,7 +61,7 @@ function IssueTypeList() {
     };
     return (
       <div className={styles.name}>
-        <Icon type="baseline-drag_indicator" className={styles.name_drag} />
+        {isOrganization ? null : <Icon type="baseline-drag_indicator" className={styles.name_drag} />}
         <TypeTag
           data={data as IIssueType}
           showName
