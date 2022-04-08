@@ -65,6 +65,7 @@ public class ObjectSchemeFieldContext {
         AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
         if (agilePluginService != null) {
             list.add(FEATURE);
+            list.add(RISK);
         }
         BacklogExpandService backlogExpandService = SpringBeanUtil.getExpandBean(BacklogExpandService.class);
         if (backlogExpandService != null) {
