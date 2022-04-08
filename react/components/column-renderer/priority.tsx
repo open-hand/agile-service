@@ -7,7 +7,7 @@ const renderPriority = ({ record }: { record: Record }) => (
   <Tooltip mouseEnterDelay={0.5} title={`优先级： ${record.get('priorityDTO') ? record.get('priorityDTO').name : ''}`}>
     <PriorityTag
       priority={record.get('priorityVO')}
-      style={{ display: 'inline-block' }}
+      style={{ display: 'inline-flex' }}
     />
   </Tooltip>
 );
