@@ -62,7 +62,11 @@ function GanttBaseBar(props: React.PropsWithChildren<IGanttBaseBarProps>) {
       return undefined;
     }
     if (typeof props.deadline === 'string') {
-      return dragging ? { today: true } : { width: Math.max(0, ganttRef.current?.getWidthByDate(dayjs(fillDateRange.end.value).set('hour', 23).set('minute', 59).set('second', 59), dayjs(props.deadline)) || 0), value: props.deadline, today: true };
+      return dragging ? { today: true } : {
+        width: Math.max(0, ganttRef.current?.getWidthByDate(dayjs(fillDateRange.end.value).set('hour', 23).set('minute', 59).set('second', 59), dayjs(props.deadline)) || 0),
+        value: props.deadline,
+        today: true,
+      };
     }
     return {
       width: fillDateRange.start.dragLeft > dashDateRange.end.width ? '100%' : Math.max(0, props.deadline.width - (dashDateRange.end.width as number || 0)),
@@ -72,12 +76,15 @@ function GanttBaseBar(props: React.PropsWithChildren<IGanttBaseBarProps>) {
     if (!fillDateRange) {
       return { width: 0 };
     }
-    const fillWidth = fillDateRange.end.width - fillDateRange.start.width + (deadline?.today ? deadline?.width || 0 : 0)
-      + (!deadline?.today && isAddUnitDay(fillDateRange) && fillDateRange.end.dragFloat === 'right' ? fillDateRange.end.unitWidth : 0);
+
+    let fillWidth = fillDateRange.end.width - fillDateRange.start.width + (deadline?.today ? deadline?.width || 0 : 0);
+    if (isAddUnitDay(fillDateRange) && (!deadline?.today || fillDateRange.end.key === dashDateRange?.end.key)) {
+      fillWidth += fillDateRange.end.unitWidth;
+    }
     return {
       width: fillWidth, minWidth: fillWidth, marginLeft: Math.max(0, fillDateRange.start.dragLeft), backgroundColor: fillDateRange.unCompletedColor,
     } as React.CSSProperties;
-  }, [deadline?.today, deadline?.width, fillDateRange, isAddUnitDay]);
+  }, [dashDateRange?.end.key, deadline?.today, deadline?.width, fillDateRange, isAddUnitDay]);
   const progressStyle = useMemo(() => {
     const progress = ({
       completed: { flex: 1, backgroundColor: fillDateRange?.completedColor } as React.CSSProperties,
@@ -140,23 +147,26 @@ export function wrapGanttBaseBarFindDate(Element: React.FC<IGanttBaseBarProps>, 
       color: color1,
     } : undefined), [estimatedStartTime, estimatedStartTime?.value, estimatedEndTime, estimatedEndTime?.value, color1]);
     const fillDateRange = useComputed(() => {
-      if (actualStartTime && estimatedEndTime) {
-        const start = toJS(actualStartTime);
-        const end = toJS(actualEndTime || estimatedEndTime);
-        const startKey = start.width > end.width ? 'end' : 'start';
-        if (startKey === 'start') {
-          return {
-            start,
-            end,
-            completedColor: color1,
-            unCompletedColor: color2,
-            color: color1,
-          };
-        }
+      const start = toJS(actualStartTime);
+      const end = toJS(actualEndTime || estimatedEndTime);
+      if (!start || !end) {
+        return undefined;
+      }
+      //  有完整的实际开始--结束  或者预计结束在实际开始之后
+      if (actualEndTime || (estimatedEndTime && estimatedEndTime.width > start.width)) {
+        return {
+          start: start!,
+          end: end!,
+          completedColor: color1,
+          unCompletedColor: color2,
+          color: color1,
+        };
+      }
+      if (estimatedEndTime) {
         const delayColor = '#FF5C6A';
         return {
-          end: start,
           start: end,
+          end: start,
           completedColor: delayColor,
           unCompletedColor: delayColor,
           color: delayColor,
