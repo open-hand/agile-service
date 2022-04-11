@@ -534,9 +534,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     }
 
     private List<String> queryFieldOrderByIssueType(String issueType) {
-        if(!ObjectUtils.isEmpty(agileWaterfallService)) {
+        if(!ObjectUtils.isEmpty(agileWaterfallService) && Arrays.asList(IssueTypeCode.WATERFALL_ISSUE_TYPE_CODE).contains(issueType)) {
             return agileWaterfallService.queryFieldOrderByIssueType(issueType);
-        } if(!ObjectUtils.isEmpty(agilePluginService)) {
+        } else if(!ObjectUtils.isEmpty(agilePluginService) && Objects.equals(IssueTypeCode.RISK.value(), issueType)) {
             return agilePluginService.queryFieldOrderByIssueType(issueType);
         } else {
             return Collections.emptyList();
