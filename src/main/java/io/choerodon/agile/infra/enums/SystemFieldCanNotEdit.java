@@ -29,6 +29,8 @@ public class SystemFieldCanNotEdit {
             return bugMap;
         } else if (ObjectSchemeFieldContext.FEATURE.equals(issueType)) {
             return featureMap;
+        } else if (ObjectSchemeFieldContext.FEATURE.equals(issueType)) {
+            return riskMap;
         }
         else {
             return null;
