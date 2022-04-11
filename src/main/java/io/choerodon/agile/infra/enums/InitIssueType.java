@@ -115,6 +115,7 @@ public enum InitIssueType {
                 result.add(InitIssueType.STAGE);
                 result.add(InitIssueType.MILESTONE);
                 result.add(InitIssueType.ACTIVITY);
+                break;
             case SchemeApplyType.RISK:
                 result.add(InitIssueType.RISK);
             default:
