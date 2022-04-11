@@ -297,7 +297,11 @@
         <foreach collection="fieldCodes" item="fieldCode" open="(" close=")" separator=",">
            #{fieldCode}
         </foreach>
-        order by field_id
+        order by CASE fosf.code
+        <foreach collection="fieldCodes" item="fieldCode" index="index">
+            when #{fieldCode} then #{index}
+        </foreach>
+        END
     </select>
 
     <select id="selectProjectIdsByOrganizationId" resultType="java.lang.Long">
