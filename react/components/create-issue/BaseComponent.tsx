@@ -150,7 +150,7 @@ const afterLoadKeyMap = new Map([
   ['subProject', 'projectId'],
 ]);
 
-const lineField = ['summary', 'description'];
+const lineField = ['summary', 'description', 'copingStrategy'];
 const lineFieldType = ['text'];
 const reuseFields = ['issueType', 'summary', 'description'];
 const pageCascadeFields = ['component', 'priority', 'fixVersion', 'influenceVersion'];
@@ -871,7 +871,7 @@ const CreateIssueBase = observer(({
               newLine: isLineField,
               ...extraProps,
             }),
-            name === 'description' ? (
+            name === 'copingStrategy' || (name === 'description' && !some(newFields, (eachField) => eachField.name === 'copingStrategy')) ? (
               <div
                 // @ts-ignore
                 newLine

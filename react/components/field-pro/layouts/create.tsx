@@ -214,6 +214,11 @@ const systemFieldConfigMap: ICreateComponentPropsDistributeProRender<typeof Agil
   parent: {
     valueKey: 'parentId',
   },
+  copingStrategy: {
+    props: {
+      placeholder: '应对策略',
+    },
+  },
 };
 
 const fieldMap = {

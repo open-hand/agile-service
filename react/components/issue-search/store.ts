@@ -41,7 +41,8 @@ export interface IssueSearchStoreProps {
   projectId?: string
   /** @default project */
   menuType?: 'project' | 'org' | 'workbench' | 'program' | 'programSubProject'
-  issueTypeList?: 'agileIssueType' | 'programIssueType' | ''
+  issueTypeList?: 'agileIssueType' | 'programIssueType' | 'riskIssueType' | ''
+  filterTypeCode?: 'agile_issue' | 'program_issue' | 'risk_issue' | ''
   /** program 模式使用 */
   programId?: string
   fieldConfigs?: { [key: string]: any }
@@ -102,6 +103,8 @@ class IssueSearchStore {
 
   issueTypeList?: IssueSearchStoreProps['issueTypeList']
 
+  filterTypeCode?: IssueSearchStoreProps['filterTypeCode']
+
   fieldConfigs: { [key: string]: any } = {}
 
   // 只有项目层加载个人筛选和自定义字段
@@ -119,6 +122,7 @@ class IssueSearchStore {
     menuType,
     fieldConfigs,
     issueTypeList,
+    filterTypeCode,
   }: IssueSearchStoreProps) {
     this.getSystemFields = getSystemFields;
     this.transformFilter = transformFilter;
@@ -131,6 +135,7 @@ class IssueSearchStore {
     this.menuType = menuType || 'project';
     this.fieldConfigs = fieldConfigs || {};
     this.issueTypeList = issueTypeList;
+    this.filterTypeCode = filterTypeCode;
   }
 
   setQuery(query: () => void) {
@@ -153,7 +158,7 @@ class IssueSearchStore {
   }
 
   loadMyFilterList = async () => {
-    const data = this.menuType === 'project' ? await personalFilterApi.menu('project').project(this.projectId || getProjectId()).loadAll() : [];
+    const data = this.menuType === 'project' ? await personalFilterApi.menu('project').project(this.projectId || getProjectId()).loadAll(undefined, this.filterTypeCode) : [];
     this.setMyFilters(data);
   };
 

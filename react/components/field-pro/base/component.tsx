@@ -60,6 +60,7 @@ export const AgileComponentMap = {
   estimatedEndTime: DateTimePickerWithFormat as React.ComponentClass<DateTimePickerProps>,
   actualStartTime: DateTimePickerWithFormat as React.ComponentClass<DateTimePickerProps>,
   actualEndTime: DateTimePickerWithFormat as React.ComponentClass<DateTimePickerProps>,
+  copingStrategy: Editor as IClassComponentType<Editor<FormFieldProps>>,
 };
 
 export type AgileComponentMapProps = typeof AgileComponentMap

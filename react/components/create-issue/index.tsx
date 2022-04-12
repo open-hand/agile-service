@@ -16,8 +16,8 @@ export interface CreateIssueProps extends Omit<CreateIssueBaseProps, 'onSubmit'>
   /** 创建来源 */
   originFrom?: 'scrumBoard' | 'Backlog'
   hiddenTypeCodes?: string[],
-  applyType?: 'agile' | 'program' | 'waterfall',
-  request?: (data: any, applyType?: 'agile' | 'program' | 'waterfall') => Promise<any>
+  applyType?: 'agile' | 'program' | 'waterfall' | 'risk',
+  request?: (data: any, applyType?: 'agile' | 'program' | 'waterfall' | 'risk') => Promise<any>
   showSelectProject?: boolean,
   onCancel?: () => void,
 }

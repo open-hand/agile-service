@@ -128,7 +128,7 @@ class FieldApi extends Api<FieldApi> {
   /**
    * 获取项目下自定义的字段
    */
-  getCustomFields(issueTypeList?: 'agileIssueType' | 'programIssueType'|'') {
+  getCustomFields(issueTypeList?: 'agileIssueType' | 'programIssueType' | 'riskIssueType' | '') {
     return this.request({
       method: 'get',
       url: this.programId ? `${this.prefix}/project_invoke_program/program/custom_field`

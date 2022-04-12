@@ -18,7 +18,7 @@ export interface IssueSearchProps {
   projectId?: string
   programId?: string
   /** @default 'agile'  */
-  applyType?: 'agile' | 'program' | ''
+  applyType?: 'agile' | 'program' | 'risk' | ''
   foldedHeight?: number
   hasMyAssigned?: boolean
   excludeQuickFilterIds?: string[]

@@ -15,9 +15,10 @@ interface Props {
   searchVO: any,
   onOk: () => void
   hiddenDefault?: boolean,
+  filterTypeCode?: string,
 }
-async function checkName(value: string, projectId?: string) {
-  const data: boolean = await personalFilterApi.project(projectId).checkName(value);
+async function checkName(value: string, projectId?: string, filterTypeCode?: string) {
+  const data: boolean = await personalFilterApi.project(projectId).checkName(value, filterTypeCode);
   if (data) {
     return '筛选名称重复';
   }
@@ -26,7 +27,7 @@ async function checkName(value: string, projectId?: string) {
 }
 const SaveFilterModal: React.FC<Props> = (props) => {
   const {
-    modal, searchVO, onOk, projectId, hiddenDefault = false, menuType,
+    modal, searchVO, onOk, projectId, hiddenDefault = false, menuType, filterTypeCode = 'agile_issue',
   } = props;
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
@@ -36,7 +37,7 @@ const SaveFilterModal: React.FC<Props> = (props) => {
       type: 'string' as FieldType,
       maxLength: 10,
       required: true,
-      validator: (v) => checkName(v, projectId),
+      validator: (v) => checkName(v, projectId, filterTypeCode),
     }, {
       name: 'default',
       label: '设为默认',
@@ -54,7 +55,7 @@ const SaveFilterModal: React.FC<Props> = (props) => {
       personalFilterSearchVO: searchVO,
     };
     try {
-      await personalFilterApi.menu(menuType).project(projectId).create(data);
+      await personalFilterApi.menu(menuType).project(projectId).create(data, filterTypeCode);
       Choerodon.prompt('保存成功');
       onOk();
       return true;
@@ -62,7 +63,7 @@ const SaveFilterModal: React.FC<Props> = (props) => {
       Choerodon.prompt('保存失败');
       return false;
     }
-  }, [dataSet, hiddenDefault, menuType, onOk, projectId, searchVO]);
+  }, [dataSet, hiddenDefault, menuType, onOk, projectId, searchVO, filterTypeCode]);
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [handleSubmit, modal]);
