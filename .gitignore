@@ -42,3 +42,5 @@ package-lock.json
 yarn.lock
 yalc.lock
 yarn-error.log
+.npm
+.npmrc
