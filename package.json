@@ -84,7 +84,7 @@
     "start": "node --max_old_space_size=4096 node_modules/@choerodon/boot/bin/choerodon-front-boot-start --config ./react/config.js",
     "dist": "choerodon-front-boot dist --config ./react/config.js",
     "watch": "compiler compile --watch --ignore-error",
-    "compile": "compiler compile --ignore-error",
+    "compile": "choerodon-front-boot compile",
     "fix": "eslint --ext .jsx,.js,tsx,ts react/ --fix",
     "lint-staged": "lint-staged",
     "lint-staged:es": "eslint"
