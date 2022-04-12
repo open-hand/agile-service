@@ -81,6 +81,7 @@
     "@types/react-dom": "16.9.14"
   },
   "scripts": {
+    "preinstall": "npm install --package-lock-only --ignore-scripts && npx npm-force-resolutions",
     "start": "node --max_old_space_size=4096 node_modules/@choerodon/boot/bin/choerodon-front-boot-start --config ./react/config.js",
     "dist": "choerodon-front-boot dist --config ./react/config.js",
     "watch": "compiler compile --watch --ignore-error",
