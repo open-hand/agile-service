@@ -52,6 +52,7 @@ function EditIssue() {
     setSelect,
     isProjectLevel,
     descriptionEditRef,
+    copingStrategyEditRef,
     showProjectInfo, // 顶部是否显示所属项目信息
     isShowFeature,
     isAgileProgram,
@@ -147,6 +148,10 @@ function EditIssue() {
       Choerodon.prompt('请先保存描述！');
       return false;
     }
+    if (copingStrategyEditRef.current) {
+      Choerodon.prompt('请先保存应对策略！');
+      return false;
+    }
     return true;
   }, []);
 
@@ -154,6 +159,11 @@ function EditIssue() {
     const id = paramIssueId || idRef.current || currentIssueId;
     if (idRef.current !== id && descriptionEditRef.current) {
       Choerodon.prompt('有未保存的描述');
+      return;
+    }
+
+    if (idRef.current !== id && copingStrategyEditRef.current) {
+      Choerodon.prompt('有未保存的应对策略');
       return;
     }
 

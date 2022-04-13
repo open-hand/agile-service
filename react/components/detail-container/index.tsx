@@ -21,6 +21,7 @@ export const useDetail = (): [DetailContainerProps] => {
   const [filePreview, setFilePreview] = useState<IPreview>();
   const [hidden, setHidden] = useState(true);
   const [descriptionChanged, setDescriptionChanged] = useState<boolean>(false);
+  const [copingStrategyChanged, setCopingStrategyChanged] = useState<boolean>(false);
   const eventsMap = useRef<Map<string, DetailEvents>>(new Map());
   const updateEventsMap = useCallback((path: string, events?: DetailEvents) => {
     if (events) {
@@ -35,12 +36,14 @@ export const useDetail = (): [DetailContainerProps] => {
       updateEventsMap(routeWithKey.path, routeWithKey.events);
       setVisible(true);
       setDescriptionChanged(false);
+      setCopingStrategyChanged(false);
     };
-    if (!descriptionChanged) {
+    if (!descriptionChanged && !copingStrategyChanged) {
       pushDetail();
     } else {
       openDescriptionConfirm({
         onOk: pushDetail,
+        type: copingStrategyChanged ? '应对策略' : '',
       });
     }
   });
@@ -51,17 +54,19 @@ export const useDetail = (): [DetailContainerProps] => {
       updateEventsMap(routeWithKey.path, routeWithKey.events);
       setVisible(true);
       setDescriptionChanged(false);
+      setCopingStrategyChanged(false);
     };
-    if (!descriptionChanged) {
+    if (!descriptionChanged && !copingStrategyChanged) {
       openDetail();
     } else {
       openDescriptionConfirm({
         onOk: openDetail,
+        type: copingStrategyChanged ? '应对策略' : '',
       });
     }
   });
   const pop = usePersistFn(() => {
-    if (!descriptionChanged) {
+    if (!descriptionChanged && !copingStrategyChanged) {
       setRoutes((r) => {
         const clone = [...r];
         clone.pop();
@@ -76,13 +81,15 @@ export const useDetail = (): [DetailContainerProps] => {
             return clone;
           });
           setDescriptionChanged(false);
+          setCopingStrategyChanged(false);
         },
+        type: copingStrategyChanged ? '应对策略' : '',
       });
     }
   });
   const close = usePersistFn(() => {
     // setRoutes([]);
-    if (!descriptionChanged) {
+    if (!descriptionChanged && !copingStrategyChanged) {
       if (filePreview) {
         setHidden(true);
       } else {
@@ -97,7 +104,9 @@ export const useDetail = (): [DetailContainerProps] => {
             setVisible(false);
           }
           setDescriptionChanged(false);
+          setCopingStrategyChanged(false);
         },
+        type: copingStrategyChanged ? '应对策略' : '',
       });
     }
   });
@@ -126,12 +135,16 @@ export const useDetail = (): [DetailContainerProps] => {
     setHidden,
     descriptionChanged,
     setDescriptionChanged,
+    copingStrategyChanged,
+    setCopingStrategyChanged,
     // setVisible,
   }];
 };
 export interface DetailContainerProps {
   descriptionChanged: boolean
   setDescriptionChanged: (changed: boolean) => void
+  copingStrategyChanged: boolean
+  setCopingStrategyChanged: (changed: boolean) => void
   visible: boolean
   routes: IRouteWithKey[]
   match: IRouteWithKey

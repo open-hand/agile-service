@@ -20,6 +20,7 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')(observ
   };
   const isProjectLevel = useMemo(() => (props.menuType || getMenuType()) === 'project', [props.menuType, getMenuType]);
   const descriptionEditRef = useRef(false);
+  const copingStrategyEditRef = useRef(false);
   const { isShowFeature, loading } = useIsInProgram({ projectId: props.projectId });
   const { isProgram, isAgileProgram } = useIsProgram();
   const value = {
@@ -32,6 +33,7 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')(observ
     FieldVersionRef,
     FieldFixVersionRef,
     descriptionEditRef,
+    copingStrategyEditRef,
     saveFieldVersionRef: (ref) => {
       FieldVersionRef.current = ref;
     },
