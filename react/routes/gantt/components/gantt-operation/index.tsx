@@ -34,7 +34,7 @@ const GanttOperation: React.FC<GanttOperationProps> = observer(({
         <span className="c7n-gantt-operation-legend">
           {formatMessage({ id: 'legend' })}
           <Icon
-            type="help_outline"
+            type="help"
             className="c7n-gantt-operation-legend-icon"
           />
         </span>
