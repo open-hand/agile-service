@@ -53,7 +53,7 @@ const IssueNumber = ({
     }}
     >
       {
-        ((['sub_task', 'bug'].includes(typeCode) && parentSummary) || typeCode === 'feature' || isProgramIssue || isWaterfallIssue) ? (
+        ((['sub_task', 'bug'].includes(typeCode) && parentSummary) || ['feature', 'risk'].includes(typeCode) || isProgramIssue || isWaterfallIssue) ? (
           <span>
             {issueNum}
           </span>
@@ -68,7 +68,7 @@ const IssueNumber = ({
         )
       }
       {
-        issueId && !otherProject && !outside && !isWaterfallIssue && (
+        issueId && !otherProject && !outside && !isWaterfallIssue && typeCode !== 'risk' && (
           <Tooltip title="复制链接">
             <Icon type="link2" role="none" className={styles.copyLinkIcon} style={{ cursor: 'pointer' }} onClick={handleCopyLink} />
           </Tooltip>

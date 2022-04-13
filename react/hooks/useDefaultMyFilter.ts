@@ -6,8 +6,19 @@ import type {
 import useMyFilters from '@/hooks/data/useMyFilters';
 import { IPersonalFilter } from '@/components/quick-search';
 
-export default function useDefaultMyFilter({ projectId, menuType }: { projectId?: string, menuType?: string } = {}, options?: UseQueryOptions<IPersonalFilter[]>) {
-  const res = useMyFilters({ type: 'agile', projectId, menuType }, {
+interface Props {
+  projectId?: string,
+  menuType?: string,
+  filterTypeCode?: 'agile_issue' | 'risk_issue',
+  type?: string,
+}
+
+export default function useDefaultMyFilter({
+  projectId, menuType, filterTypeCode, type,
+}: Props = {}, options?: UseQueryOptions<IPersonalFilter[]>) {
+  const res = useMyFilters({
+    type: type || 'agile', projectId, menuType, filterTypeCode,
+  }, {
     staleTime: 0,
     ...options,
   });

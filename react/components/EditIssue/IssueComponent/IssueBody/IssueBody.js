@@ -36,12 +36,13 @@ import { featureApi } from '@/api';
 import { getProjectId } from '@/utils/common';
 import { DEPENDENCY_TAB, DETAIL_DELIVERABLE } from '../../../../constants/WATERFALL_INJECT';
 import { WATERFALL_TYPE_CODES } from '../../../../constants/TYPE_CODE';
+import { COPINGSTRATEGY } from '../../../../constants/AGILEPRO_INJECT';
 
 const { TabPane } = Tabs;
 
 function IssueBody(props) {
   const {
-    prefixCls, disabled, store, applyType, refreshDeliverablesList,
+    prefixCls, disabled, store, applyType, refreshDeliverablesList, copingStrategyEditRef,
   } = useContext(EditIssueContext);
   const { match } = useDetailContainerContext();
   const { comments } = store;
@@ -99,14 +100,14 @@ function IssueBody(props) {
             ) : null
           }
           {
-            issueId && ['issue_epic', 'feature'].indexOf(typeCode) === -1 && (
+            issueId && ['issue_epic', 'feature', 'risk'].indexOf(typeCode) === -1 && (
               <div style={{ display: 'flex', marginRight: 15 }}>
                 <FieldStoryPoint {...props} field={{ fieldCode: 'estimateTime', fieldName: '原始预估时间' }} />
               </div>
             )
           }
           {
-            issueId && ['issue_epic', 'feature'].indexOf(typeCode) === -1 ? (
+            issueId && ['issue_epic', 'feature', 'risk'].indexOf(typeCode) === -1 ? (
               <div style={{ display: 'flex' }}>
                 <FieldStoryPoint {...props} field={{ fieldCode: 'remainingTime', fieldName: '剩余预估时间' }} />
               </div>
@@ -124,6 +125,13 @@ function IssueBody(props) {
         <TabPane tab="详情" key="detail">
           <IssueDetail {...props} />
           <IssueDes {...props} />
+          {issueTypeVO.typeCode === 'risk' && hasInject(COPINGSTRATEGY) ? mount(COPINGSTRATEGY, {
+            reloadIssue: props.reloadIssue,
+            disabled,
+            store,
+            copingStrategyEditRef,
+            useDetailContainerContext,
+          }) : null}
           {hasInject(DETAIL_DELIVERABLE) ? mount(DETAIL_DELIVERABLE, {
             issueTypeCode: issueTypeVO.typeCode,
             disabled,
@@ -131,12 +139,12 @@ function IssueBody(props) {
             refreshDeliverablesList,
           }) : null}
           <IssueAttachment {...props} />
-          {issueTypeVO.typeCode && ['issue_epic', 'sub_task', 'feature'].indexOf(issueTypeVO.typeCode) === -1
+          {issueTypeVO.typeCode && ['issue_epic', 'sub_task', 'feature', 'risk'].indexOf(issueTypeVO.typeCode) === -1
             ? <SubTask {...props} /> : ''}
 
           {issueTypeVO.typeCode && ['story', 'task'].indexOf(issueTypeVO.typeCode) !== -1
             ? <SubBug {...props} /> : ''}
-          {issueTypeVO.typeCode && ['issue_epic', 'feature'].indexOf(issueTypeVO.typeCode) === -1
+          {issueTypeVO.typeCode && ['issue_epic', 'feature', 'risk'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueUI {...props} /> : ''}
           {
             !outside && issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature' && (
@@ -148,7 +156,7 @@ function IssueBody(props) {
           }
           {!outside && !otherProject && issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueDoc {...props} /> : ''}
-          {hasTest && issueTypeVO.typeCode && ['feature', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
+          {hasTest && issueTypeVO.typeCode && ['feature', 'issue_epic', 'risk'].indexOf(issueTypeVO.typeCode) === -1
             ? mount('testmanager:IssueLinkedTestCase', {
               testLinkStoreRef,
               noCreateLink: true,
@@ -156,7 +164,7 @@ function IssueBody(props) {
             }) : ''}
           {issueTypeVO.typeCode && ['story', 'task', 'bug'].indexOf(issueTypeVO.typeCode) !== -1
             ? <IssueLink {...props} /> : ''}
-          {!outside && ['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && hasBacklog && hasInject('backlog:issueLinkedBacklog')
+          {!outside && ['sub_task', 'issue_epic', 'risk'].indexOf(issueTypeVO.typeCode) === -1 && hasBacklog && hasInject('backlog:issueLinkedBacklog')
             ? mount('backlog:issueLinkedBacklog', props) : ''}
         </TabPane>
         {issueTypeVO.typeCode && WATERFALL_TYPE_CODES.includes(issueTypeVO.typeCode) && hasInject(DEPENDENCY_TAB)
@@ -178,7 +186,7 @@ function IssueBody(props) {
             ? <IssueWorkLog {...props} /> : ''}
           <IssueLog {...props} />
         </TabPane>
-        {applyType !== 'program' && hasDevops
+        {applyType !== 'program' && hasDevops && issueTypeVO?.typeCode !== 'risk'
           ? <TabPane tab="开发" key="development"><IssueBranch {...props} /></TabPane> : ''}
       </Tabs>
 

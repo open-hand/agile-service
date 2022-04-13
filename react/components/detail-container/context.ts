@@ -16,6 +16,8 @@ export interface IPreview {
 interface DetailContainerContext {
   descriptionChanged: boolean
   setDescriptionChanged: (changed: boolean) => void
+  copingStrategyChanged: boolean
+  setCopingStrategyChanged: (changed: boolean) => void
   outside: boolean
   /** css 变量的高度  */
   topAnnouncementHeight: string

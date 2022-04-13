@@ -169,13 +169,13 @@ const IssueDropDown = ({
   };
   const getMenu = () => (
     <Menu onClick={handleClickMenu} selectable={false}>
-      {!['feature', 'issue_epic'].includes(typeCode) && (
+      {!['feature', 'issue_epic', 'risk'].includes(typeCode) && (
         <Menu.Item key="0">
           登记工作日志
         </Menu.Item>
       )}
       {
-        ['sub_task', 'feature', 'issue_epic', ...WATERFALL_TYPE_CODES].indexOf(typeCode) === -1 && !(typeCode === 'bug' && issue.relateIssueId) ? (
+        ['sub_task', 'feature', 'issue_epic', 'risk', ...WATERFALL_TYPE_CODES].indexOf(typeCode) === -1 && !(typeCode === 'bug' && issue.relateIssueId) ? (
           <Menu.Item key="2">
             创建子任务
           </Menu.Item>
@@ -189,7 +189,7 @@ const IssueDropDown = ({
         )
       }
       {
-        ['feature', 'issue_epic', ...WATERFALL_TYPE_CODES].indexOf(typeCode) === -1 && (
+        ['feature', 'issue_epic', 'risk', ...WATERFALL_TYPE_CODES].indexOf(typeCode) === -1 && (
           <Menu.Item key="7">
             分配工作项
           </Menu.Item>
@@ -203,14 +203,14 @@ const IssueDropDown = ({
         )
       }
       {
-        applyType !== 'program' && hasDevops && (
+        applyType !== 'program' && hasDevops && typeCode !== 'risk' && (
           <Menu.Item key="6">
             创建分支
           </Menu.Item>
         )
       }
       {
-        ['sub_task', 'feature', 'issue_epic', ...WATERFALL_TYPE_CODES].indexOf(typeCode) === -1 && subIssueVOList.length === 0 && (
+        ['sub_task', 'feature', 'issue_epic', 'risk', ...WATERFALL_TYPE_CODES].indexOf(typeCode) === -1 && subIssueVOList.length === 0 && (
           <Menu.Item key="4">
             转化为子任务
           </Menu.Item>
@@ -231,7 +231,7 @@ const IssueDropDown = ({
           </Menu.Item>
         )
       }
-      {['feature', ...(isShowFeature ? ['issue_epic'] : []), ...WATERFALL_TYPE_CODES].indexOf(typeCode) === -1 && (
+      {['feature', ...(isShowFeature ? ['issue_epic'] : []), 'risk', ...WATERFALL_TYPE_CODES].indexOf(typeCode) === -1 && (
         <Menu.Item key="3">
           复制工作项
         </Menu.Item>
