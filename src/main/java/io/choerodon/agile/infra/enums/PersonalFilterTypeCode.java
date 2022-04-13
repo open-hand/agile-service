@@ -16,4 +16,9 @@ public class PersonalFilterTypeCode {
      * 工时日历个人筛选
      */
     public static final String AGILE_WORK_HOURS = "agile_work_hours";
+
+    /**
+     * 风险个人筛选
+     */
+    public static final String RISK_ISSUE = "risk_issue";
 }
