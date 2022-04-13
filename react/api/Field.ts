@@ -202,7 +202,7 @@ class FieldApi extends Api<FieldApi> {
   /**
    * 项目层，获取自定义字段表头
    */
-  getFoundationHeader(issueTypeList?: 'agileIssueType' | 'programIssueType'|'') {
+  getFoundationHeader(issueTypeList?: 'agileIssueType' | 'programIssueType' | 'riskIssueType' | '') {
     return this.request({
       url: this.programId ? `${this.prefix}/project_invoke_program/program/getFields`
         : `${this.prefix}/field_value/list/getFields`,
