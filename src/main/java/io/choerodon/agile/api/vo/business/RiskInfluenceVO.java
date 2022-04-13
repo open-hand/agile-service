@@ -3,6 +3,8 @@ package io.choerodon.agile.api.vo.business;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import javax.validation.constraints.NotEmpty;
+
 /**
  * @author huaxin.deng@hand-china.com
  * @since 2022/4/12
@@ -14,12 +16,14 @@ public class RiskInfluenceVO {
     private Long id;
 
     @ApiModelProperty(value = "名称")
+    @NotEmpty(message = "error.risk.influence.name.empty")
     private String name;
 
     @ApiModelProperty(value = "描述")
     private String description;
 
     @ApiModelProperty(value = "颜色")
+    @NotEmpty(message = "error.risk.influence.color.empty")
     private String color;
 
     @ApiModelProperty(value = "项目id")
@@ -36,6 +40,16 @@ public class RiskInfluenceVO {
 
     @ApiModelProperty(value = "排序")
     private String rank;
+
+    private Long objectVersionNumber;
+
+    public Long getObjectVersionNumber() {
+        return objectVersionNumber;
+    }
+
+    public void setObjectVersionNumber(Long objectVersionNumber) {
+        this.objectVersionNumber = objectVersionNumber;
+    }
 
     public Long getId() {
         return id;
@@ -121,6 +135,7 @@ public class RiskInfluenceVO {
                 ", isDefault=" + isDefault +
                 ", isEnabled=" + isEnabled +
                 ", rank='" + rank + '\'' +
+                ", objectVersionNumber=" + objectVersionNumber +
                 '}';
     }
 }
