@@ -90,7 +90,7 @@ public interface AgilePluginService {
      * @param issueUpdateVO
      * @param originIssue
      */
-    void handlerProgramUpdateIssue(String issueType, List<String> fieldList, Long projectId, IssueUpdateVO issueUpdateVO, IssueDTO originIssue);
+    void handlerBusinessUpdateIssue(String issueType, List<String> fieldList, Long projectId, IssueUpdateVO issueUpdateVO, IssueDTO originIssue);
 
     /**
      * 修改issue时,校验特性
@@ -128,7 +128,7 @@ public interface AgilePluginService {
      * @param issueVO
      * @param issue
      */
-    void programIssueDetailDTOToVO(IssueVO issueVO,IssueDetailDTO issue);
+    void businessIssueDetailDTOToVO(IssueVO issueVO, IssueDetailDTO issue, Map<Long, IssueTypeVO> issueTypeDTOMap, Map<Long, StatusVO> statusMapDTOMap, Map<Long, PriorityVO> priorityDTOMap);
 
     /**
      * 创建issue之前校验特性是否合法

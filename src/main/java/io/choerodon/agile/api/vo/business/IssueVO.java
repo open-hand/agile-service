@@ -294,6 +294,8 @@ public class IssueVO {
 
     private WaterfallIssueVO waterfallIssueVO;
 
+    private RiskVO riskVO;
+
     public List<Long> getInfluenceIssueIds() {
         return influenceIssueIds;
     }
@@ -1025,5 +1027,13 @@ public class IssueVO {
 
     public void setWaterfallIssueVO(WaterfallIssueVO waterfallIssueVO) {
         this.waterfallIssueVO = waterfallIssueVO;
+    }
+
+    public RiskVO getRiskVO() {
+        return riskVO;
+    }
+
+    public void setRiskVO(RiskVO riskVO) {
+        this.riskVO = riskVO;
     }
 }

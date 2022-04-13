@@ -553,7 +553,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
         IssueVO issueVO = issueAssembler.issueDetailDTOToVO(issue, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
         if (agilePluginService != null) {
-            agilePluginService.programIssueDetailDTOToVO(issueVO,issue);
+            agilePluginService.businessIssueDetailDTOToVO(issueVO, issue, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
         }
         if (agileWaterfallService != null) {
             agileWaterfallService.waterfallIssueDetailDTOToVO(issueVO, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
@@ -1686,7 +1686,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             issueConvertDTO.setRemainingTime(issueConvertDTO.getEstimateTime());
         }
         if (agilePluginService != null) {
-            agilePluginService.handlerProgramUpdateIssue(issueType, fieldList, projectId, issueUpdateVO, originIssue);
+            agilePluginService.handlerBusinessUpdateIssue(issueType, fieldList, projectId, issueUpdateVO, originIssue);
             agilePluginService.issueSyncByIssueId(ConvertUtil.getOrganizationId(projectId), issueConvertDTO.getIssueId(), OpenAppIssueSyncConstant.AppType.DIND.getValue(), OpenAppIssueSyncConstant.OperationType.UPDATE);
         }
         if (agileWaterfallService != null) {

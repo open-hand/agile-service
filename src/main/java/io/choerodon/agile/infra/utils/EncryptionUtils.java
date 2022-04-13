@@ -309,7 +309,7 @@ public class EncryptionUtils {
                         }
                     } else if (field.getType() == Date.class) {
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        field.set(object, valueNode != null ? sdf.parse(valueNode.toString()) : null);
+                        field.set(object, valueNode != null ? sdf.parse(valueNode.textValue()) : null);
                     } else if (field.getType() == Integer.class) {
                         field.set(object, valueNode == null ? null : Integer.valueOf(valueNode.toString()));
                     } else if (field.getType() == BigDecimal.class) {
