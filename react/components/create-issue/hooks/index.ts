@@ -7,6 +7,7 @@ import dealWithSubBug from './dealWithSubBug';
 import dealWithLabel from './dealWithLabel';
 import dealWithFormatPredefinedDateFields from './dealWithFormatPredefinedDateFields';
 import dealWithWaterfallIssueVO from './dealWithWaterfallIssueVO';
+import dealWithRiskVO from './dealWithRiskVO';
 
 const hooks: IssueValueHook[] = [
   dealWithFeatureVO,
@@ -17,5 +18,6 @@ const hooks: IssueValueHook[] = [
   dealWithLabel,
   dealWithFormatPredefinedDateFields,
   dealWithWaterfallIssueVO,
+  dealWithRiskVO,
 ];
 export default hooks;
