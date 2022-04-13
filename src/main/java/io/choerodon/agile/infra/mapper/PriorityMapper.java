@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author cong.cheng
@@ -52,4 +53,6 @@ public interface PriorityMapper extends BaseMapper<PriorityDTO> {
      * @param organizationId
      */
     void updateMinSeqAsDefault(@Param("organizationId") Long organizationId);
+
+    Set<Long> selectAllOrganizationIds();
 }

@@ -85,6 +85,9 @@ public class AgileEventHandler {
         issueTypeService.initIssueTypeIfNotExisted(organizationId);
         //注册组织初始化优先级
         priorityService.initPriorityIfNotExisted(organizationId);
+        if (agilePluginService != null) {
+            agilePluginService.initBusinessOrganization(organizationId);
+        }
         //初始化状态
         initService.initStatusIfNotExisted(organizationId);
         //初始化默认状态机

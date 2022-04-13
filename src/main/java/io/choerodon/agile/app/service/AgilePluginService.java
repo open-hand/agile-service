@@ -536,4 +536,6 @@ public interface AgilePluginService {
      * @return
      */
     List<String> queryFieldOrderByIssueType(String issueType);
+
+    void initBusinessOrganization(Long organizationId);
 }
