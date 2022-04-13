@@ -662,6 +662,9 @@
                 <if test='issueTypeList == "waterfallAgileIssueType"'>
                     AND osfe.issue_type IN ('issue_epic', 'story', 'bug', 'task', 'sub_task', 'stage', 'milestone', 'activity')
                 </if>
+                <if test='issueTypeList == "riskIssueType" '>
+                    AND osfe.issue_type IN ('risk')
+                </if>
                 )
             </if>
         ORDER BY osf.id DESC

@@ -33,6 +33,11 @@
       SELECT IFNULL(MAX(P.sequence),0) FROM fd_priority P WHERE P.organization_id = #{organizationId}
     </select>
 
+    <select id="selectAllOrganizationIds" resultType="java.lang.Long">
+        SELECT DISTINCT organization_id
+        FROM fd_priority
+    </select>
+
     <update id="updateSequenceById" parameterType="io.choerodon.agile.infra.dto.PriorityDTO">
         UPDATE fd_priority SET sequence = #{priority.sequence}
         WHERE id= #{priority.id}
