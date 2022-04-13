@@ -3,7 +3,6 @@ package io.choerodon.agile.api.vo.business;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.waterfall.WaterfallIssueVO;
-import io.choerodon.agile.api.vo.waterfall.WfDeliverableVO;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -149,6 +148,9 @@ public class IssueCreateVO {
 
     @ApiModelProperty(value = "瀑布工作项")
     private WaterfallIssueVO waterfallIssueVO;
+
+    @ApiModelProperty(value = "风险工作项")
+    private RiskVO riskVO;
 
     @ApiModelProperty(value = "前置依赖")
     private List<IssuePredecessorVO> issuePredecessors;
@@ -525,5 +527,13 @@ public class IssueCreateVO {
 
     public void setIssuePredecessors(List<IssuePredecessorVO> issuePredecessors) {
         this.issuePredecessors = issuePredecessors;
+    }
+
+    public RiskVO getRiskVO() {
+        return riskVO;
+    }
+
+    public void setRiskVO(RiskVO riskVO) {
+        this.riskVO = riskVO;
     }
 }

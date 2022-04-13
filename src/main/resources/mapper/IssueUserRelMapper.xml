@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="io.choerodon.agile.infra.mapper.IssueUserRelMapper">
+
+    <delete id="deleteByIssueIdAndUserIdsWithType">
+        delete from issue_user_rel
+        where
+        project_id = #{projectId}
+        and issue_id = #{issueId}
+        <if test="userType != null ">
+            and user_type = #{userType}
+        </if>
+        <if test="userIds != null and userIds.size > 0">
+            and participant_id in
+            <foreach collection="userIds" item="userId" open="(" close=")" separator=",">
+                #{userId}
+            </foreach>
+        </if>
+    </delete>
+</mapper>

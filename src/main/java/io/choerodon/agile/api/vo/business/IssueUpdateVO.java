@@ -149,6 +149,9 @@ public class IssueUpdateVO {
     @ApiModelProperty(value = "瀑布工作项")
     private WaterfallIssueVO waterfallIssueVO;
 
+    @ApiModelProperty(value = "风险工作项")
+    private RiskVO riskVO;
+
     public List<TagVO> getTags() {
         return tags;
     }
@@ -480,5 +483,13 @@ public class IssueUpdateVO {
 
     public void setWaterfallIssueVO(WaterfallIssueVO waterfallIssueVO) {
         this.waterfallIssueVO = waterfallIssueVO;
+    }
+
+    public RiskVO getRiskVO() {
+        return riskVO;
+    }
+
+    public void setRiskVO(RiskVO riskVO) {
+        this.riskVO = riskVO;
     }
 }

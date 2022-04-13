@@ -526,7 +526,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         if (agilePluginService != null) {
             agilePluginService.setBusinessAttributes(issueDetailDTO);
             IssueVO issueVO = modelMapper.map(issueDetailDTO, IssueVO.class);
-            agilePluginService.programIssueDetailDTOToVO(issueVO, issueDetailDTO);
+            agilePluginService.businessIssueDetailDTOToVO(issueVO, issueDetailDTO, new HashMap<>(), new HashMap<>(), new HashMap<>());
             Optional.ofNullable(issueVO.getProgramVersionFeatureRelVOS())
                     .ifPresent(programVersionList -> programVersionList.forEach(
                             programVersion -> programVersionIds.add(programVersion.getProgramVersionId())));
