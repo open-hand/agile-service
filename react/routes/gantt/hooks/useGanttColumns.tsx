@@ -260,7 +260,12 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
             }}
             onCreate={onCreate}
             defaultAssignee={parentIssue.assignee ?? undefined}
-            onAwayClick={(createFn) => {
+            createStatusTriggerAwayClick
+            onAwayClick={(createFn, { createStatus }) => {
+              if (createStatus === 'failed') {
+                onAfterCreateSubIssue(record.createId, undefined, true);
+                return;
+              }
               createFn().then((res: boolean) => {
                 !res && onAfterCreateSubIssue(record.createId, undefined, true);
               });

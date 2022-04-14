@@ -12,7 +12,9 @@ import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
 import {
   useClickAway, useLockFn, useUpdateEffect, useWhyDidYouUpdate,
 } from 'ahooks';
-import { castArray, find } from 'lodash';
+import {
+  castArray, find, isBoolean, isString,
+} from 'lodash';
 import useProjectIssueTypes, { ProjectIssueTypesConfig } from '@/hooks/data/useProjectIssueTypes';
 import { IIssueType, Issue, User } from '@/common/types';
 import { checkCanQuickCreate, getQuickCreateDefaultObj, IQuickCreateDefaultValueParams } from '@/utils/quickCreate';
@@ -24,6 +26,7 @@ import UserDropdown from '../UserDropdown';
 import useDefaultPriority from '@/hooks/data/useDefaultPriority';
 import { WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
 
+type QuickCreateStatus = 'init' | 'success' | 'failed'
 type FilterCacheThumbnailKey = 'agile.issue.type.sub.selected' | 'agile.issue.type.common.selected';
 interface QuickCreateSubIssueProps {
   priorityId?: string
@@ -35,7 +38,18 @@ interface QuickCreateSubIssueProps {
   defaultValues?: Partial<IQuickCreateDefaultValueParams>
   mountCreate?: boolean
   onCreate?: (issue: Issue) => void
-  onAwayClick?: (createFn: any, currentData: any) => void
+  onAwayClick?: (createFn: ()=>Promise<any>, currentData: { createStatus: QuickCreateStatus, [key: string]: any }, event: MouseEvent | TouchEvent) => void
+  /**
+   *什么创建状态触发鼠标离开点击事件
+   * @default 'success'
+   *
+   * 'success': 成功时
+   * 'failed': 失败时
+   * 'init': 初始化时
+   *  true: 总是触发
+   *  false: 不去触发
+   */
+  createStatusTriggerAwayClick?: QuickCreateStatus | boolean
   defaultAssignee?: User | undefined
   cantCreateEvent?: (data: { defaultValues?: { summary?: string, sprint?: string, [propsName: string]: any }, defaultTypeId?: string, defaultAssignee?: User }) => void
   summaryChange?: (summary: string) => void,
@@ -50,7 +64,7 @@ interface QuickCreateSubIssueProps {
 }
 const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, defaultValues, projectId, cantCreateEvent, isCanQuickCreate, typeCode, summaryChange,
-  typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick, beforeClick, applyType, saveFilterToCache,
+  typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick, beforeClick, applyType, saveFilterToCache, createStatusTriggerAwayClick = 'success',
 }) => {
   const { data: issueTypes, isLoading } = useProjectIssueTypes({
     typeCode: typeCode || 'sub_task', projectId, onlyEnabled: true, applyType,
@@ -207,7 +221,17 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
     if (e && (e as MouseEvent).composedPath().some((dom) => (dom as HTMLElement)?.id === 'quickCreateSubIssue-issueType-overlay' || (dom as HTMLElement)?.classList?.contains('c7n-subTask-quickCreate') || (dom as HTMLElement)?.id === 'agile-userDropdown-overlay')) {
       return;
     }
-    !isLoading && createStatus !== 'failed' && onAwayClick && onAwayClick(handleCreate, { currentType, currentTemplate, userDropDownRef });
+    if (!isLoading && onAwayClick) {
+      if (isBoolean(createStatusTriggerAwayClick) && createStatusTriggerAwayClick) {
+        onAwayClick(handleCreate, {
+          createStatus, currentType, currentTemplate, userDropDownRef,
+        }, e);
+      } else if (isString(createStatusTriggerAwayClick) && createStatusTriggerAwayClick === createStatus) {
+        onAwayClick(handleCreate, {
+          createStatus, currentType, currentTemplate, userDropDownRef,
+        }, e);
+      }
+    }
   }, ref);
   useUpdateEffect(() => {
     expand && setCreateStatus('init');
