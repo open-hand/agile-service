@@ -204,7 +204,11 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         }
         String typeCode = issueDTO.getTypeCode();
         if (WATERFALL_ISSUE_TYPES.contains(typeCode)) {
-            return agileWaterfallService.updateWaterfallParentStatus(issueDTO, influenceIssueIds, applyType);
+            if (!ObjectUtils.isEmpty(agileWaterfallService)) {
+                return agileWaterfallService.updateWaterfallParentStatus(issueDTO, influenceIssueIds, applyType);
+            } else {
+                return true;
+            }
         } else {
             return updateAgileParentStatus(projectId, applyType, influenceIssueIds, issueDTO);
         }
