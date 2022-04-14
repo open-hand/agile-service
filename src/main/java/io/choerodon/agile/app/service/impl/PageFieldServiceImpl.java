@@ -217,7 +217,12 @@ public class PageFieldServiceImpl implements PageFieldService {
             return;
         }
         String issueTypeCode = issueTypeService.getIssueTypeById(issueTypeId);
-        String endRank = pageFields.get(pageFields.size() - 1).getRank();
+        String endRank;
+        if (!ObjectUtils.isEmpty(pageFields)) {
+            endRank = pageFields.get(pageFields.size() - 1).getRank();
+        } else {
+            endRank = RankUtil.mid();
+        }
         for (ObjectSchemeFieldDTO objectSchemeFieldDTO : objectSchemeFieldDTOS) {
             String fieldContext = objectSchemeFieldService.getFieldContext(objectSchemeFieldDTO.getCode());
             List<String> context = Arrays.asList(fieldContext.split(","));
