@@ -19,6 +19,8 @@ public class ConfigurationRuleSettingVO {
     @Encrypt
     private Set<Long> linkTypeIds;
 
+    private Set<String> predecessorTypes;
+
     private String action;
 
     private Long projectId;
@@ -26,6 +28,14 @@ public class ConfigurationRuleSettingVO {
     private Long organizationId;
 
     private Integer sequence;
+
+    public Set<String> getPredecessorTypes() {
+        return predecessorTypes;
+    }
+
+    public void setPredecessorTypes(Set<String> predecessorTypes) {
+        this.predecessorTypes = predecessorTypes;
+    }
 
     public Integer getSequence() {
         return sequence;
