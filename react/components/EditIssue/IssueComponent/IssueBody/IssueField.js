@@ -24,8 +24,8 @@ import FieldTag from './Field/FieldTag';
 import FieldActualStartTime from './Field/FieldActualStartTime';
 import FieldActualEndTime from './Field/FieldActualEndTime';
 import FieldParticipant from './Field/FieldParticipant';
-import FieldEstimateTime from './Field/FieldEstimateTime';
-import { FIELD_SELECT_PARENT, FIELD_PROGRESS } from '../../../../constants/WATERFALL_INJECT';
+import { FIELD_SELECT_PARENT, FIELD_PROGRESS } from '@/constants/WATERFALL_INJECT';
+import { FIELD_RISK } from '@/constants/AGILEPRO_INJECT';
 
 const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 'timeTrace', 'assignee'];
 
@@ -120,6 +120,15 @@ const IssueField = observer((props) => {
         return hasInject(FIELD_PROGRESS) ? mount(FIELD_PROGRESS, { ...props, field }) : null;
       case 'estimateTime':
         return null;
+      case 'riskCategory':
+      case 'riskInfluence':
+      case 'riskProbability':
+      case 'riskProximity':
+      case 'estimatedResolutionDate':
+      case 'actualResolutionDate':
+      case 'relatedParties':
+      case 'discoveryDate':
+        return hasInject(FIELD_RISK) ? mount(FIELD_RISK, { ...props, field }) : null;
       default:
         return renderNormalField(field);
     }
