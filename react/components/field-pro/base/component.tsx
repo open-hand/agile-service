@@ -36,6 +36,9 @@ import type { DateTimePickerProps } from '@/components/date-time-picker/DateTime
 import { validKeyReturnValue } from '@/common/commonValid';
 import SelectSubFeature from '@/components/select/select-sub-feature';
 import Editor from '@/components/Editor';
+import {
+  SelectRiskCategory, SelectRiskInfluence, SelectRiskProbability, SelectRiskProximity,
+} from '@/components/select/select-risk';
 
 export const AgileComponentMap = {
   sprint: SelectSprint,
@@ -61,6 +64,10 @@ export const AgileComponentMap = {
   actualStartTime: DateTimePickerWithFormat as React.ComponentClass<DateTimePickerProps>,
   actualEndTime: DateTimePickerWithFormat as React.ComponentClass<DateTimePickerProps>,
   copingStrategy: Editor as IClassComponentType<Editor<FormFieldProps>>,
+  riskCategory: SelectRiskCategory,
+  riskInfluence: SelectRiskInfluence,
+  riskProbability: SelectRiskProbability,
+  riskProximity: SelectRiskProximity,
 };
 
 export type AgileComponentMapProps = typeof AgileComponentMap
