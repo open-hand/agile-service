@@ -8,6 +8,7 @@ const renderStatus = ({ record }: { record: Record }) => (
     <div style={{
       display: 'inline-flex',
       overflow: 'hidden',
+      maxWidth: '100%',
     }}
     >
       <StatusTag

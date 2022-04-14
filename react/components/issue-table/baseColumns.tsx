@@ -225,6 +225,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
         <div style={{
           display: 'inline-flex',
           overflow: 'hidden',
+          maxWidth: '100%',
         }}
         >
           <StatusTag
