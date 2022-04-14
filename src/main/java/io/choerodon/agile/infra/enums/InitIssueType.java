@@ -57,7 +57,7 @@ public enum InitIssueType {
     /**
      * 风险
      */
-    RISK("agile_epic", "风险", "项目过程中出现某种影响项目正常开展或对项目造成直接损失的可能性", "#F76776", "risk");
+    RISK("agile_risk", "风险", "对项目目标产生消极或积极影响的不确定性事件", "#F76776", "risk");
 
     private String icon;
     private String name;
