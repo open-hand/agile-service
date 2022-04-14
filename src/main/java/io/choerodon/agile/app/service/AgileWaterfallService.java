@@ -93,4 +93,6 @@ public interface AgileWaterfallService {
     Map<Long, List<PredecessorIssueStatusLinkageVO>> listPredecessorIssueMapByIssueTypeAndStatusIds(Long projectId, Long organizationId, Long issueTypeId, List<Long> statusIds);
 
     List<FieldTableVO> getWaterfallField();
+
+    Map<String, Set<Long>> queryPredecessorIssues(Long projectId, Long issueId, Set<String> predecessorTypes);
 }
