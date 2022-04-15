@@ -99,6 +99,7 @@ export interface CreateIssueBaseProps {
   extraSubmitValue?: any
   title?: string | ReactElement
   applyType?: CreateIssueProps['applyType']
+  hiddenIssueType?: boolean
 }
 const defaultDataSet = new DataSet({
   autoCreate: true,
@@ -288,6 +289,7 @@ const CreateIssueBase = observer(({
   menuType = 'project',
   extraSubmitValue,
   applyType,
+  hiddenIssueType = false,
 }: CreateIssueBaseProps) => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
@@ -764,6 +766,7 @@ const CreateIssueBase = observer(({
             applyType: isWaterfallAgile && applyType === 'waterfall' ? undefined : applyType,
             menuType: menuType ?? 'project',
           },
+          hidden: hiddenIssueType,
         };
       }
       case 'feature': {
