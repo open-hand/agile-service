@@ -46,6 +46,8 @@ export interface IssueSearchStoreProps {
   /** program 模式使用 */
   programId?: string
   fieldConfigs?: { [key: string]: any }
+  defaultTransformKeyMap?: Map<string, string>, // 将转换数据转为筛选可用字段时code映射
+  customUpdateFilter?: (key: string, filter: any, fun: (code: string, value: any) => void) => any, // 更新筛选数据方法
 }
 function isInvalidValue(value: any) {
   if (value === undefined || isNull(value) || (isObject(value) && isEmpty(value))) {
@@ -110,6 +112,10 @@ class IssueSearchStore {
   // 只有项目层加载个人筛选和自定义字段
   menuType: IssueSearchStoreProps['menuType'] = 'project';
 
+  defaultTransformKeyMap: IssueSearchStoreProps['defaultTransformKeyMap'];
+
+  customUpdateFilter: IssueSearchStoreProps['customUpdateFilter'];
+
   constructor({
     getSystemFields,
     transformFilter,
@@ -123,6 +129,8 @@ class IssueSearchStore {
     fieldConfigs,
     issueTypeList,
     filterTypeCode,
+    defaultTransformKeyMap,
+    customUpdateFilter,
   }: IssueSearchStoreProps) {
     this.getSystemFields = getSystemFields;
     this.transformFilter = transformFilter;
@@ -136,6 +144,8 @@ class IssueSearchStore {
     this.fieldConfigs = fieldConfigs || {};
     this.issueTypeList = issueTypeList;
     this.filterTypeCode = filterTypeCode;
+    this.defaultTransformKeyMap = defaultTransformKeyMap;
+    this.customUpdateFilter = customUpdateFilter;
   }
 
   setQuery(query: () => void) {
@@ -206,6 +216,9 @@ class IssueSearchStore {
         } else {
           this.handleFilterChange(key, value);
         }
+        if (this.customUpdateFilter) {
+          this.customUpdateFilter(key, filter, this.handleFilterChange);
+        }
       }
     }
   }
@@ -266,7 +279,8 @@ class IssueSearchStore {
   }
 
   handleFilterChange = (code: string, value: any) => {
-    this.setFieldFilter(code, value);
+    const realCode = this.defaultTransformKeyMap?.get(code) || code;
+    this.setFieldFilter(realCode, value);
     this.query();
   }
 
