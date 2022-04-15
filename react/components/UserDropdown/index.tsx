@@ -1,7 +1,7 @@
 import React, {
   useMemo, useCallback, useState, useImperativeHandle, useRef, useEffect, isValidElement, cloneElement, ReactNode, useContext,
 } from 'react';
-import { observer } from 'mobx-react-lite';
+import { observer, useComputed } from 'mobx-react-lite';
 import { filter, find } from 'lodash';
 import {
   DataSet, TextField, Icon, Menu, Tooltip, Spin, Button,
@@ -9,7 +9,7 @@ import {
 import Trigger from 'choerodon-ui/pro/lib/trigger';
 import builtinPlacements from 'choerodon-ui/pro/lib/dropdown/placements';
 import ConfigContext from 'choerodon-ui/lib/config-provider/ConfigContext';
-import { useDebounceFn, useWhyDidYouUpdate } from 'ahooks';
+import { useCreation, useDebounceFn, useWhyDidYouUpdate } from 'ahooks';
 import UserTag from '@/components/tag/user-tag';
 
 import { User } from '@/common/types';
@@ -19,20 +19,22 @@ import styles from './index.less';
 interface OverlayProps {
   userListDs: DataSet
   inputRef: React.MutableRefObject<TextField | undefined>
-  defaultAssignee: User | undefined,
+  // defaultAssignee: User | undefined,
   onSearch: (value: string) => void,
   setVisible: (visible: boolean) => void
-  setSelectedUser: (user: User | undefined) => void
-  selectedUser: User | undefined
+  // selectedUser: User | undefined
 }
-interface Props {
-  userDropDownRef: React.MutableRefObject<{ selectedUser: User | undefined } | null>
+export interface IUserDropDownProps {
+  userDropDownRef: React.MutableRefObject<{ selectedUser: User | undefined, changeSelect: (user?: Partial<User> & { id: string }) => void } | null>
   defaultAssignee: User | undefined,
+  /** 选中的经办人 受控值 */
+  assigneeSelected?: Partial<User> & { id: string },
+  onChange?: (user?: User) => void
   projectId?: string
 }
 
 const Overlay: React.FC<OverlayProps> = ({
-  setVisible, defaultAssignee, setSelectedUser, selectedUser, userListDs, onSearch, inputRef,
+  setVisible, userListDs, onSearch, inputRef,
 }) => {
   const handleClick = useCallback((e) => {
     e.stopPropagation();
@@ -46,8 +48,11 @@ const Overlay: React.FC<OverlayProps> = ({
       return;
     }
     setVisible(false);
-    setSelectedUser(find([...(defaultAssignee ? [defaultAssignee] : []), ...userListDs.toData()] as User[], { id: key }));
-  }, [defaultAssignee, setSelectedUser, setVisible, userListDs]);
+    const newSelectRecord = userListDs.find((r) => r.get('id') === key);
+    newSelectRecord && userListDs.select(newSelectRecord);
+
+    // setSelectedUser(find([...(defaultAssignee ? [defaultAssignee] : []), ...userListDs.toData()] as User[], { id: key }));
+  }, [setVisible, userListDs]);
   const { run: handleInput } = useDebounceFn((value) => onSearch(value), { wait: 410 });
   return (
     <div
@@ -75,25 +80,28 @@ const Overlay: React.FC<OverlayProps> = ({
         selectable={false}
       >
         {
-          !filter(userListDs.toData(), (user: User) => user.id !== selectedUser?.id).length && (
+          !userListDs.filter((r) => !r.isSelected).length && (
             <Menu.Item key="noContentTip" className={styles.dropdown_menu_noContentTipItem}>
               <div className={styles.dropdown_menu_noContentTipItem_tip}>无匹配结果</div>
             </Menu.Item>
           )
         }
         {
-          filter(userListDs.toData(), (user: User) => user.id !== selectedUser?.id).map((user: User) => (
-            <Menu.Item key={user.id}>
-              <Tooltip title={`${user.ldap ? `${user.realName}(${user.loginName})` : `${user.realName}(${user.email})`}`}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <UserTag
-                    data={user}
-                    tooltip={false}
-                  />
-                </div>
-              </Tooltip>
-            </Menu.Item>
-          ))
+          userListDs.filter((r) => !r.isSelected).map((record) => {
+            const user: User = record.toData();
+            return (
+              <Menu.Item key={user.id}>
+                <Tooltip title={`${user.ldap ? `${user.realName}(${user.loginName})` : `${user.realName}(${user.email})`}`}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <UserTag
+                      data={user}
+                      tooltip={false}
+                    />
+                  </div>
+                </Tooltip>
+              </Menu.Item>
+            );
+          })
         }
         {
           userListDs.totalPage > userListDs.currentPage && (
@@ -121,32 +129,65 @@ const Overlay: React.FC<OverlayProps> = ({
 
 const ObserverOverlay = observer(Overlay);
 
-const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee, projectId }) => {
+const UserDropDown: React.FC<IUserDropDownProps> = ({
+  userDropDownRef, projectId, onChange, ...props
+}) => {
   const { getProPrefixCls } = useContext(ConfigContext);
   const prefixCls = getProPrefixCls('dropdown');
   const inputRef = useRef<TextField>();
   const timeoutIdRef = useRef<number>();
   const [visible, setVisible] = useState<boolean>(false);
   const triggerRef = useRef<any>();
+  const defaultAssignee = useCreation(() => props.defaultAssignee, []);
   const [{ dataLoading, isFirstLoad }, setDataMount] = useState({ dataLoading: false, isFirstLoad: true });
-  const [selectedUser, setSelectedUser] = useState<User | undefined>(defaultAssignee);
+  const events = useCreation(() => ({}) as Pick<IUserDropDownProps, 'onChange'>, []);
+  events.onChange = onChange;
   const userListDs = useMemo(() => new DataSet({
     autoQuery: false,
     pageSize: 20,
+    selection: 'single' as any,
+    data: [defaultAssignee].filter(Boolean) as User[],
     transport: {
       // @ts-ignore
       read: ({ params, data: requestData }) => ({
         ...userApiConfig.project(projectId).getProjectUsersWithoutDisable({ ...params, ...requestData }),
         transformResponse: (res) => {
           const data = JSON.parse(res);
-          const content = data.content?.filter((item: any) => item.enabled);
+          let content = data.content?.filter((item: any) => item.enabled);
+          content = defaultAssignee ? [defaultAssignee, ...content] : content;
           return { ...data, content };
         },
       }),
     },
-  }), [projectId]);
+    events: {
+      select: ({ dataSet, record }: { dataSet: DataSet, record: any }) => {
+        if (!dataSet.getState('init')) {
+          dataSet.created.length && dataSet.delete(dataSet.created[0], false);
+          events.onChange && events.onChange(record.toData());
+        }
+        dataSet.setState('init', false);
+      },
+      unSelect: ({ dataSet, record }: { dataSet: DataSet, record: any }) => {
+        dataSet.created.length && dataSet.delete(dataSet.created[0], false);
+        events.onChange && events.onChange();
+      },
+    },
+  }), [defaultAssignee, events, projectId]);
+  const selectedUser = useComputed(() => userListDs.selected.length && userListDs.selected[0].toData(), []);
+  const handleChangeSelect = useCallback((user?: IUserDropDownProps['assigneeSelected']) => {
+    if (user) {
+      const record = userListDs.find((r) => r.get('id') === user.id) || userListDs.create(user);
+      record.status === 'add' && userListDs.setState('init', true);
+      userListDs.select(record);
+      return;
+    }
+    const record = userListDs.selected.length && userListDs.selected[0];
+    record && userListDs.unSelect(record);
+  }, [userListDs]);
+
   useImperativeHandle(userDropDownRef, () => ({
     selectedUser,
+    changeSelect: handleChangeSelect,
   }));
   useEffect(() => {
     if (dataLoading && isFirstLoad) {
@@ -158,8 +199,9 @@ const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee, proje
   }, [dataLoading, isFirstLoad, userListDs]);
   const handleClear = useCallback((e) => {
     e.stopPropagation();
-    setSelectedUser(undefined);
-  }, []);
+    const record = userListDs.selected.length && userListDs.selected[0];
+    record && userListDs.unSelect(record);
+  }, [userListDs]);
 
   const handleHiddenChange = useCallback((newHidden) => {
     setVisible(!newHidden);
@@ -175,25 +217,26 @@ const UserDropDown: React.FC<Props> = ({ userDropDownRef, defaultAssignee, proje
   const handleSearchUser = useCallback((value) => {
     userListDs.setQueryParameter('param', value);
     setDataMount((oldValue: any) => ({ ...oldValue, dataLoading: true }));
+    const currentSelected = userListDs.selected.length && userListDs.selected[0].toData();
     userListDs.query().then((res) => {
       setDataMount((oldValue: any) => ({ ...oldValue, dataLoading: false }));
       triggerRef.current?.forcePopupAlign();
+      userListDs.setState('init', true);
+      handleChangeSelect(currentSelected);
     });
-  }, [userListDs]);
+  }, [handleChangeSelect, userListDs]);
   const handleClick = useCallback((e) => {
     setVisible(true);
   }, []);
+  useEffect(() => { }, [userListDs.selected.length]);
   const getContent = useCallback((...popupProps): ReactNode => (
     <ObserverOverlay
       inputRef={inputRef}
       userListDs={userListDs}
       setVisible={setVisible}
-      defaultAssignee={defaultAssignee}
-      setSelectedUser={setSelectedUser}
-      selectedUser={selectedUser}
       onSearch={handleSearchUser}
     />
-  ), [defaultAssignee, handleSearchUser, selectedUser, userListDs]);
+  ), [handleSearchUser, userListDs]);
   const renderPopupContent = useCallback((...popupProps) => {
     const content = getContent(...popupProps);
     if (isValidElement<any>(content)) {

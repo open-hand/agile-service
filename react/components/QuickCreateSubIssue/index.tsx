@@ -10,7 +10,7 @@ import {
 import { Button, Spin } from 'choerodon-ui/pro';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
 import {
-  useClickAway, useLockFn, useUpdateEffect, useWhyDidYouUpdate,
+  useClickAway, useLockFn, useUpdateEffect,
 } from 'ahooks';
 import {
   castArray, find, isBoolean, isString,
@@ -22,13 +22,13 @@ import { fieldApi, issueApi } from '@/api';
 import { fields2Map } from '@/utils/defaultValue';
 import localCacheStore from '@/stores/common/LocalCacheStore';
 import TypeTag from '../TypeTag';
-import UserDropdown from '../UserDropdown';
+import UserDropdown, { IUserDropDownProps } from '../UserDropdown';
 import useDefaultPriority from '@/hooks/data/useDefaultPriority';
 import { WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
 
 type QuickCreateStatus = 'init' | 'success' | 'failed'
 type FilterCacheThumbnailKey = 'agile.issue.type.sub.selected' | 'agile.issue.type.common.selected';
-interface QuickCreateSubIssueProps {
+interface QuickCreateSubIssueProps extends Pick<IUserDropDownProps, 'assigneeSelected'> {
   priorityId?: string
   projectId?: string
   applyType?: ProjectIssueTypesConfig['applyType']
@@ -38,7 +38,8 @@ interface QuickCreateSubIssueProps {
   defaultValues?: Partial<IQuickCreateDefaultValueParams>
   mountCreate?: boolean
   onCreate?: (issue: Issue) => void
-  onAwayClick?: (createFn: ()=>Promise<any>, currentData: { createStatus: QuickCreateStatus, [key: string]: any }, event: MouseEvent | TouchEvent) => void
+  onUserChange?: IUserDropDownProps['onChange']
+  onAwayClick?: (createFn: () => Promise<any>, currentData: { createStatus: QuickCreateStatus, [key: string]: any }, event: MouseEvent | TouchEvent) => void
   /**
    *什么创建状态触发鼠标离开点击事件
    * @default 'success'
@@ -64,7 +65,8 @@ interface QuickCreateSubIssueProps {
 }
 const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, defaultValues, projectId, cantCreateEvent, isCanQuickCreate, typeCode, summaryChange,
-  typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick, beforeClick, applyType, saveFilterToCache, createStatusTriggerAwayClick = 'success',
+  typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick, beforeClick, applyType, saveFilterToCache, createStatusTriggerAwayClick = 'success', onUserChange,
+  assigneeSelected,
 }) => {
   const { data: issueTypes, isLoading } = useProjectIssueTypes({
     typeCode: typeCode || 'sub_task', projectId, onlyEnabled: true, applyType,
@@ -78,9 +80,11 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   const [loading, setLoading] = useState(false);
   const currentTemplate = useRef<string>('');
   const currentType = issueTypes?.find((t) => t.id === id);
-  const userDropDownRef = useRef<{ selectedUser: User | undefined }>(null);
+  const userDropDownRef = useRef(null) as IUserDropDownProps['userDropDownRef'];
   const ref = useRef<any>();
-
+  useEffect(() => {
+    userDropDownRef.current?.changeSelect(assigneeSelected);
+  }, [assigneeSelected]);
   useEffect(() => {
     if (issueTypes && issueTypes.length > 0) {
       const typeCodes = castArray(typeCode || 'sub_task');
@@ -287,7 +291,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
                     </div>
                   </Dropdown>
                 )}
-                <UserDropdown userDropDownRef={userDropDownRef} defaultAssignee={defaultAssignee} key={defaultAssignee?.id} projectId={projectId} />
+                <UserDropdown userDropDownRef={userDropDownRef} defaultAssignee={defaultAssignee} key={defaultAssignee?.id} projectId={projectId} onChange={onUserChange} />
 
                 <Input
                   className="hidden-label"
