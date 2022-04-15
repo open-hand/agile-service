@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.app.service.IssueUserRelService;
+import io.choerodon.agile.infra.annotation.DataLog;
 import io.choerodon.agile.infra.dto.IssueUserRelDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Exception.class)
 public class IssueUserRelServiceImpl implements IssueUserRelService {
 
-    private static final String RELATED_PARTY = "relatedParty";
+    private static final String RELATED_PARTIES = "relatedParties";
 
     @Autowired
     private IssueMapper issueMapper;
@@ -34,8 +35,9 @@ public class IssueUserRelServiceImpl implements IssueUserRelService {
     private IssueUserRelMapper issueUserRelMapper;
 
     @Override
+    @DataLog(type = "createUserRel")
     public void createUserRel(Long projectId, Long issueId, List<Long> userIds, String userType) {
-        if (!RELATED_PARTY.equals(userType)) {
+        if (!RELATED_PARTIES.equals(userType)) {
             throw new CommonException("error.issue.user.rel.type.illegal");
         }
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
@@ -64,6 +66,7 @@ public class IssueUserRelServiceImpl implements IssueUserRelService {
     }
 
     @Override
+    @DataLog(type = "updateUserRel")
     public void updateUserRel(Long projectId, Long issueId, List<Long> userIds, String userType) {
         // 清空人员关联
         if (ObjectUtils.isEmpty(userIds)) {
@@ -91,11 +94,11 @@ public class IssueUserRelServiceImpl implements IssueUserRelService {
             Long organizationId = ConvertUtil.getOrganizationId(projectId);
             needAdd.forEach(userId -> {
                 IssueUserRelDTO userRelDTO = new IssueUserRelDTO();
-                issueUserRelDTO.setIssueId(issueId);
-                issueUserRelDTO.setUserType(userType);
-                issueUserRelDTO.setUserId(userId);
-                issueUserRelDTO.setProjectId(projectId);
-                issueUserRelDTO.setOrganizationId(organizationId);
+                userRelDTO.setIssueId(issueId);
+                userRelDTO.setUserType(userType);
+                userRelDTO.setUserId(userId);
+                userRelDTO.setProjectId(projectId);
+                userRelDTO.setOrganizationId(organizationId);
                 baseCreate(userRelDTO);
             });
         }

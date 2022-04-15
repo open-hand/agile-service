@@ -18,4 +18,14 @@
             </foreach>
         </if>
     </delete>
+
+    <select id="listUserIdsByIssueId" resultType="java.lang.Long">
+        select user_id
+        from issue_user_rel
+        where issue_id = #{issueId}
+        and project_id = #{projectId}
+        <if test="userType != null">
+            and user_type = #{userType}
+        </if>
+    </select>
 </mapper>
