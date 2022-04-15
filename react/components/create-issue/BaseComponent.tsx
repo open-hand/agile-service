@@ -685,7 +685,6 @@ const CreateIssueBase = observer(({
 
   // hidden, 可见项
   const getFieldProps = usePersistFn((field?: Pick<IssueCreateFields, 'fieldType' | 'fieldCode' | 'defaultValueObj' | 'defaultValueObjs' | 'required'>): { [key: string]: any } => {
-    console.log('hiddenIssueType', hiddenIssueType);
     if (!field) {
       return {};
     }
