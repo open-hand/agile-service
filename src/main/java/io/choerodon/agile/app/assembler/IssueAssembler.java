@@ -13,10 +13,7 @@ import io.choerodon.agile.app.service.LookupValueService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
-import io.choerodon.agile.infra.enums.FieldCode;
-import io.choerodon.agile.infra.enums.IssueTypeCode;
-import io.choerodon.agile.infra.enums.SchemeApplyType;
-import io.choerodon.agile.infra.enums.StatusType;
+import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.mapper.IssueStatusMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.dto.*;
@@ -707,7 +704,7 @@ public class IssueAssembler extends AbstractAssembler {
     public List<IssueNumVO> issueNumDoToDto(List<IssueNumDTO> issueNumDTOList, Long projectId) {
         List<IssueNumVO> issueNumVOS = new ArrayList<>(issueNumDTOList.size());
         if (!issueNumDTOList.isEmpty()) {
-            Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.AGILE);
+            Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(ConvertUtil.getOrganizationId(projectId), projectId);
             issueNumDTOList.forEach(issueDO -> {
                 IssueNumVO issueNumVO = new IssueNumVO();
                 BeanUtils.copyProperties(issueDO, issueNumVO);
