@@ -16,4 +16,8 @@ public interface IssueUserRelMapper extends BaseMapper<IssueUserRelDTO> {
                                            @Param("issueId") Long issueId,
                                            @Param("userIds") List<Long> userIds,
                                            @Param("userType") String userType);
+
+    List<Long> listUserIdsByIssueId(@Param("projectId") Long projectId,
+                                    @Param("issueId") Long issueId,
+                                    @Param("userType") String userType);
 }
