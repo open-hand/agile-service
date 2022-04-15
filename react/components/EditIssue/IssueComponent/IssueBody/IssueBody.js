@@ -182,7 +182,7 @@ function IssueBody(props) {
         </TabPane>
         <TabPane tab="记录" key="record">
           {!disabled && issueTypeVO.typeCode === 'feature' && <IssuePIHistory {...props} />}
-          {issueTypeVO.typeCode && ['feature', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
+          {issueTypeVO.typeCode && ['feature', 'issue_epic', 'risk'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueWorkLog {...props} /> : ''}
           <IssueLog {...props} />
         </TabPane>
