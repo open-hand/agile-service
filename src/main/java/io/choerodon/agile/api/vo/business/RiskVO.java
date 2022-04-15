@@ -89,6 +89,12 @@ public class RiskVO {
     @ApiModelProperty(value = "组织id")
     private Long organizationId;
 
+    @ApiModelProperty(value = "关联的风险id")
+    private Long riskRelId;
+
+    @ApiModelProperty(value = "关联类型")
+    private String issueRelType;
+
     public Long getId() {
         return id;
     }
@@ -263,5 +269,21 @@ public class RiskVO {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Long getRiskRelId() {
+        return riskRelId;
+    }
+
+    public void setRiskRelId(Long riskRelId) {
+        this.riskRelId = riskRelId;
+    }
+
+    public String getIssueRelType() {
+        return issueRelType;
+    }
+
+    public void setIssueRelType(String issueRelType) {
+        this.issueRelType = issueRelType;
     }
 }
