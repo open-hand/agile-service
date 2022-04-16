@@ -1,5 +1,12 @@
 package io.choerodon.agile.app.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.collections.map.MultiKeyMap;
+import org.apache.poi.ss.usermodel.Workbook;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.AllDataLogVO;
 import io.choerodon.agile.api.vo.business.ConfigurationRuleFieldVO;
@@ -7,16 +14,9 @@ import io.choerodon.agile.api.vo.business.ConfigurationRuleVO;
 import io.choerodon.agile.api.vo.business.IssueBacklogRelVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.StarBeaconDTO;
-
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import org.apache.commons.collections.map.MultiKeyMap;
-import org.apache.poi.ss.usermodel.Workbook;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author zhaotianxin
@@ -25,41 +25,47 @@ import java.util.Set;
 public interface BacklogExpandService {
     /**
      * 删除issue和backlog的关联关系
-      * @param issueId
+     *
+     * @param issueId
      */
-   void deleteIssueBacklogRel(Long issueId);
+    void deleteIssueBacklogRel(Long issueId);
 
     /**
      * 自动变更backlog的状态
+     *
      * @param issueId
      * @param projectId
      * @param organizationId
      */
-   void changeDetection(Long issueId,Long projectId,Long organizationId);
+    void changeDetection(Long issueId, Long projectId, Long organizationId);
 
     /**
      * 是否启用需求池
+     *
      * @param projectId
      * @return
      */
-   Boolean enabled(Long projectId);
+    Boolean enabled(Long projectId);
 
     /**
      * 查询需求的页面字段
+     *
      * @param issueType
      * @return
      */
-   Map<String, PageConfigFieldEditedVO> fieldEdited(String issueType);
+    Map<String, PageConfigFieldEditedVO> fieldEdited(String issueType);
 
     /**
      * 返回需求的context
+     *
      * @param code
      * @return
      */
-   String getSystemFieldContext(String code);
+    String getSystemFieldContext(String code);
 
     /**
      * 处理需求的字段
+     *
      * @param editPageId
      * @param dataMap
      * @param rankMap
@@ -69,6 +75,7 @@ public interface BacklogExpandService {
 
     /**
      * 初始化需求的maxNum
+     *
      * @param projectId
      * @param maxNum
      */
@@ -76,35 +83,40 @@ public interface BacklogExpandService {
 
     /**
      * 获取需求字段与表名的映射
+     *
      * @return list
      */
     List<FieldTableVO> getBacklogField();
 
     /**
      * 判断需求是否存在
+     *
      * @param starBeaconDTO
      */
     void selectBacklogByStar(StarBeaconDTO starBeaconDTO);
 
     /**
      * 删除项目群版本和需求的关联关系
+     *
      * @param programId
      * @param organizationId
      * @param programVersionId
      * @param targetProgramVersion
      */
-    void deleteVersionBacklogRelByProgramVersionId(Long programId,Long organizationId,Long programVersionId, Long targetProgramVersion);
+    void deleteVersionBacklogRelByProgramVersionId(Long programId, Long organizationId, Long programVersionId, Long targetProgramVersion);
 
     /**
      * 发布项目群版本时,将关联的需求置为已发布
+     *
      * @param programId
      * @param organizationId
      * @param programVersionId
      */
-    void releaseProgramVersion(Long programId,Long organizationId,Long programVersionId);
+    void releaseProgramVersion(Long programId, Long organizationId, Long programVersionId);
 
     /**
      * 获取需求的字段code集合
+     *
      * @param fieldCodeS
      * @param issueTypeId
      */
@@ -114,6 +126,7 @@ public interface BacklogExpandService {
 
     /**
      * 设置需求预定义字段的默认值对象
+     *
      * @param pageFieldViews
      * @param projectId
      * @param organizationId
@@ -156,14 +169,16 @@ public interface BacklogExpandService {
 
     /**
      * 查询需求操作记录
-     * @param projectId 项目id
+     *
+     * @param projectId      项目id
      * @param dataLogQueryVO 查询参数
      * @return 需求操作记录
-    */
+     */
     List<AllDataLogVO> listBacklogDataLogByProjectId(Long projectId, DataLogQueryVO dataLogQueryVO);
 
     /**
      * 设置需求操作记录的需求信息
+     *
      * @param backlogDataLog 需求操作记录
      */
     void setDataLogBacklogInfo(List<AllDataLogVO> backlogDataLog);
@@ -198,4 +213,8 @@ public interface BacklogExpandService {
                                 CascadeFieldOptionSearchVO cascadeFieldOptionSearchVO);
 
     List<IssueBacklogRelVO> selectBacklogRelByIssueIds(Long projectId, List<Long> issueIds);
+
+    List<BacklogInfoVO> listBacklogByProjectIds(List<Long> projectIds);
+
+    List<BacklogDataVO> listBacklogStatus(List<Long> backlogIds);
 }
