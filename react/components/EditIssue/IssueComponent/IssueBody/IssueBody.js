@@ -36,7 +36,7 @@ import { featureApi } from '@/api';
 import { getProjectId } from '@/utils/common';
 import { DEPENDENCY_TAB, DETAIL_DELIVERABLE } from '../../../../constants/WATERFALL_INJECT';
 import { WATERFALL_TYPE_CODES } from '../../../../constants/TYPE_CODE';
-import { COPINGSTRATEGY } from '../../../../constants/AGILEPRO_INJECT';
+import { COPINGSTRATEGY, RISK_ISSUE_LINK } from '../../../../constants/AGILEPRO_INJECT';
 
 const { TabPane } = Tabs;
 
@@ -125,13 +125,23 @@ function IssueBody(props) {
         <TabPane tab="详情" key="detail">
           <IssueDetail {...props} />
           <IssueDes {...props} />
-          {issueTypeVO.typeCode === 'risk' && hasInject(COPINGSTRATEGY) ? mount(COPINGSTRATEGY, {
-            reloadIssue: props.reloadIssue,
-            disabled,
-            store,
-            copingStrategyEditRef,
-            useDetailContainerContext,
-          }) : null}
+          {issueTypeVO.typeCode === 'risk' ? ([
+            hasInject(COPINGSTRATEGY) ? mount(COPINGSTRATEGY, {
+              reloadIssue: props.reloadIssue,
+              disabled,
+              store,
+              copingStrategyEditRef,
+              useDetailContainerContext,
+            }) : null,
+            hasInject(RISK_ISSUE_LINK) ? mount(RISK_ISSUE_LINK, {
+              ...props,
+              type: 'execute',
+            }) : null,
+            hasInject(RISK_ISSUE_LINK) ? mount(RISK_ISSUE_LINK, {
+              ...props,
+              type: 'source',
+            }) : null,
+          ]) : null}
           {hasInject(DETAIL_DELIVERABLE) ? mount(DETAIL_DELIVERABLE, {
             issueTypeCode: issueTypeVO.typeCode,
             disabled,

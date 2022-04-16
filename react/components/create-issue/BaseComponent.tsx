@@ -45,6 +45,7 @@ import { CreateIssueProps } from '.';
 import { SHOW_ISSUE_LINK_TYPE_CODES, WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
 import { DELIVERABLE, DEPENDENCY } from '@/constants/WATERFALL_INJECT';
 import useIsWaterfall from '@/hooks/useIsWaterfall';
+import { RISK_SELECT_LINK } from '@/constants/AGILEPRO_INJECT';
 
 const { AppState } = stores;
 interface CreateIssueBaseCallbackData {
@@ -661,6 +662,7 @@ const CreateIssueBase = observer(({
         deliverableData: deliverableRef.current?.getDeliverableData && deliverableRef.current?.getDeliverableData() ? deliverableRef.current?.getDeliverableData() : undefined,
         // @ts-ignore
         issuePredecessors: otherLinkRef.current?.getDependencyData && otherLinkRef.current?.getDependencyData() ? otherLinkRef.current?.getDependencyData() : undefined,
+        sourceIssueIds: data.sourceIssueIds,
       });
 
       values = hooks.reduce((result, hook) => hook(result, data), values);
@@ -929,6 +931,7 @@ const CreateIssueBase = observer(({
       {enableIssueLinks ? <IssueLink projectId={projectId} dataSet={issueLinkDataSet} /> : null}
       {hasInject(DEPENDENCY) ? mount(DEPENDENCY, { issueTypeCode, forwardRef: otherLinkRef }) : null}
       {hasInject(DELIVERABLE) ? mount(DELIVERABLE, { issueTypeCode, forwardRef: deliverableRef }) : null}
+      {hasInject(RISK_SELECT_LINK) ? mount(RISK_SELECT_LINK, { issueTypeCode, dataSet }) : null}
     </Spin>
   );
 });
