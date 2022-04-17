@@ -1,4 +1,4 @@
-import React, { useContext, useState, useRef } from 'react';
+import React, {useContext, useState, useRef, useMemo} from 'react';
 import {
   Button,
   Modal as ModalPro, Dropdown, Menu,
@@ -167,6 +167,18 @@ const IssueDropDown = ({
       });
     }
   };
+  const getDeletePermissions = () => {
+    if (typeCode === 'risk') {
+      return ['choerodon.code.project.cooperation.risk.delete'];
+    }
+    if (isWaterfall) {
+      return ['choerodon.code.project.cooperation.sprint.iteration-plan.ps.editissue.pro'];
+    }
+    if (isProgramIssue) {
+      return ['choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.editissue.pro'];
+    }
+    return ['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro'];
+  };
   const getMenu = () => (
     <Menu onClick={handleClickMenu} selectable={false}>
       {!['feature', 'issue_epic', 'risk'].includes(typeCode) && (
@@ -261,11 +273,7 @@ const IssueDropDown = ({
       }
       {
         <Permission
-          service={isWaterfall
-            ? ['choerodon.code.project.cooperation.sprint.iteration-plan.ps.editissue.pro']
-            : [isProgramIssue
-              ? 'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.editissue.pro'
-              : 'choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
+          service={getDeletePermissions()}
           noAccessChildren={(
             <Menu.Item
               key="1"
