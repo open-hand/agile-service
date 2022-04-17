@@ -434,6 +434,7 @@
         SELECT
         ai.issue_id,
         ai.type_code,
+        ai.apply_type,
         ai.summary,
         ai.priority_code,
         ai.assignee_id,
