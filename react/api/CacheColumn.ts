@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
 import Api from './Api';
+import { getIsOrganization } from '@/utils/common';
 
 export interface ListLayoutColumnVO {
   fieldId?: string,
@@ -14,7 +15,7 @@ export interface IListLayout {
 }
 class CacheColumnApi extends Api<CacheColumnApi> {
   get prefix() {
-    return `/agile/v1/projects/${this.projectId}`;
+    return getIsOrganization() ? `/agile/v1/organizations/${this.orgId}` : `/agile/v1/projects/${this.projectId}`;
   }
 
   getDefault(code: string): Promise<IListLayout> {
