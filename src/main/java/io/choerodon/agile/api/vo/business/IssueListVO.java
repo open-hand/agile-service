@@ -119,6 +119,8 @@ public class IssueListVO implements Serializable {
 
     private BigDecimal totalCount;
 
+    private String applyType;
+
     public List<IssueSprintVO> getIssueSprintVOS() {
         return issueSprintVOS;
     }
@@ -395,5 +397,13 @@ public class IssueListVO implements Serializable {
 
     public void setTotalCount(BigDecimal totalCount) {
         this.totalCount = totalCount;
+    }
+
+    public String getApplyType() {
+        return applyType;
+    }
+
+    public void setApplyType(String applyType) {
+        this.applyType = applyType;
     }
 }
