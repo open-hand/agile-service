@@ -80,6 +80,8 @@ public class IssueSubListVO {
 
     private Date actualCompletedDate;
 
+    private String applyType;
+
     public Date getActualCompletedDate() {
         return actualCompletedDate;
     }
@@ -248,6 +250,14 @@ public class IssueSubListVO {
 
     public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public String getApplyType() {
+        return applyType;
+    }
+
+    public void setApplyType(String applyType) {
+        this.applyType = applyType;
     }
 
     @Override
