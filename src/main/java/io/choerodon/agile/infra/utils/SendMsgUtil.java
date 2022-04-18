@@ -49,6 +49,7 @@ public class SendMsgUtil {
 
     private static final String URL_TEMPLATE1 = "#/agile/work-list/issue?type=project&id=";
     private static final String URL_TEMPLATE9 = "#/waterfall/wbs?type=project&id=";
+    private static final String URL_TEMPLATE10 = "#/agile/pro-risk?type=project&id=";
     private static final String URL_TEMPLATE2 = "&name=";
     private static final String URL_TEMPLATE3 = "&paramName=";
     private static final String URL_TEMPLATE4 = "&paramIssueId=";
@@ -125,6 +126,8 @@ public class SendMsgUtil {
         StringBuilder url = new StringBuilder();
         if (SchemeApplyType.WATERFALL.equals(result.getApplyType())) {
             url.append(URL_TEMPLATE9);
+        } else if (SchemeApplyType.RISK.equals(result.getApplyType())) {
+            url.append(URL_TEMPLATE10);
         } else {
             url.append(URL_TEMPLATE1);
         }
@@ -561,6 +564,6 @@ public class SendMsgUtil {
     }
 
     private boolean checkApplyType(String applyType) {
-        return SchemeApplyType.AGILE.equals(applyType) || SchemeApplyType.WATERFALL.equals(applyType);
+        return SchemeApplyType.AGILE.equals(applyType) || SchemeApplyType.WATERFALL.equals(applyType) || SchemeApplyType.RISK.equals(applyType);
     }
 }
