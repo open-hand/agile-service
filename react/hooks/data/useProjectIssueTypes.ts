@@ -30,7 +30,6 @@ export default function useProjectIssueTypes(config?: ProjectIssueTypesConfig, o
   const key = useProjectKey({ key: ['issueTypes', { onlyEnabled: config?.onlyEnabled ?? true, applyType, typeCode: config?.typeCode }], projectId: config?.projectId });
   const select: UseQueryOptions<IIssueType[]>['select'] = useCallback((data: any[]) => {
     const filterData = data.filter((item: IIssueType) => !(config?.excludeTypes || []).includes(item.typeCode));
-    console.log('filterData', filterData);
     const issueTypes = (!isProgram ? filterData.filter((item: IIssueType) => item.typeCode !== 'feature') : filterData);
     const isFilterEpic = config?.applyType !== 'program' && ((config?.isShowFeature ?? isShowFeature) || config?.menuType === 'org');
     const finalIssueTypes = isFilterEpic ? issueTypes.filter((item) => item.typeCode !== 'issue_epic') : issueTypes;
