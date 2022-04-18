@@ -436,6 +436,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     title: <Tooltip title="前置依赖">前置依赖</Tooltip>,
     titleKey: 'agile.gantt.column.predecessor',
     width: 120,
+    sortable: false,
     dataIndex: 'predecessors',
     render: (rowData, getDataMethod = get) => {
       const predecessors = getDataMethod(rowData, 'predecessors');

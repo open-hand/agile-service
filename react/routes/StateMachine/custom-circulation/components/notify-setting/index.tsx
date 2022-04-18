@@ -102,7 +102,7 @@ const NotifySetting = ({
     autoQuery: true,
     paging: false,
     transport: {
-      read: () => statusTransformApiConfig[isOrganization ? 'orgGetCustomMember' : 'getCustomMember'](selectedTypeItem, memberOptions),
+      read: () => statusTransformApiConfig[isOrganization ? 'orgGetCustomMember' : 'getCustomMember'](isOrganization ? selectedTypeItem?.id : selectedTypeItem, memberOptions),
 
     },
     fields: [
