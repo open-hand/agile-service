@@ -49,6 +49,7 @@ const filterCodeModeProps: IComponentPropsToFn<IAgileSystemFieldProps> = {
   issueType: ({ props }) => ({
     applyType: props?.applyType,
     projectId: props?.projectId,
+    excludeTypeCodes: ['risk'],
   }),
   status: ({ props }) => ({
     applyType: props?.applyType,
