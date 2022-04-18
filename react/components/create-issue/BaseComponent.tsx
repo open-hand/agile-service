@@ -311,6 +311,7 @@ const CreateIssueBase = observer(({
     projectId,
     typeCode,
     isProgram,
+    excludeTypes: applyType === 'risk' ? undefined : ['risk'],
     applyType: isWaterfallAgile && applyType === 'waterfall' ? undefined : applyType,
   }, {
     onSuccess: ((issueTypes) => {
@@ -765,6 +766,7 @@ const CreateIssueBase = observer(({
             isProgram,
             typeCode,
             projectId,
+            excludeTypes: applyType === 'risk' ? undefined : ['risk'],
             applyType: isWaterfallAgile && applyType === 'waterfall' ? undefined : applyType,
             menuType: menuType ?? 'project',
           },

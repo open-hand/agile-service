@@ -8,10 +8,12 @@ import useIsInProgram from '../useIsInProgram';
 import { getApplyType } from '@/utils/common';
 
 export interface ProjectIssueTypesConfig {
-  applyType?: 'agile' | 'program' | 'waterfall' | 'risk'
+  applyType?: 'agile' | 'program' | 'waterfall' | 'risk' | ''
   projectId?: string
   /** 只返回某一类的工作项类型 */
   typeCode?: string | string[]
+  /** 需要隐藏的工作项类型 */
+  excludeTypes?: string[]
   /** 只查询启用的 */
   onlyEnabled?: boolean
   programId?: string | number
@@ -27,7 +29,9 @@ export default function useProjectIssueTypes(config?: ProjectIssueTypesConfig, o
   const applyType = config?.applyType ?? getApplyType(true);
   const key = useProjectKey({ key: ['issueTypes', { onlyEnabled: config?.onlyEnabled ?? true, applyType, typeCode: config?.typeCode }], projectId: config?.projectId });
   const select: UseQueryOptions<IIssueType[]>['select'] = useCallback((data: any[]) => {
-    const issueTypes = (!isProgram ? data.filter((item: IIssueType) => item.typeCode !== 'feature') : data);
+    const filterData = data.filter((item: IIssueType) => !(config?.excludeTypes || []).includes(item.typeCode));
+    console.log('filterData', filterData);
+    const issueTypes = (!isProgram ? filterData.filter((item: IIssueType) => item.typeCode !== 'feature') : filterData);
     const isFilterEpic = config?.applyType !== 'program' && ((config?.isShowFeature ?? isShowFeature) || config?.menuType === 'org');
     const finalIssueTypes = isFilterEpic ? issueTypes.filter((item) => item.typeCode !== 'issue_epic') : issueTypes;
     // eslint-disable-next-line no-nested-ternary
