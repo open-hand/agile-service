@@ -112,7 +112,7 @@ export function wrapDateToFlatDate(fieldConfig: any, wrapElementFn: (config: any
       return {
         // labelLayout: 'float',
         style: { height: '0.3rem' },
-        placeholder: [label ?? '开始时间', label ? '' : '结束时间'],
+        placeholder: [`${label} 从`, '至'],
         range: ['start', 'end'],
         label: '',
         // height: '0.32rem',
@@ -130,7 +130,7 @@ export function wrapDateToFlatDate(fieldConfig: any, wrapElementFn: (config: any
                 value: FlatDateRangePicker.getSelectedDate(this.props.value),
                 onChange: this.handleChange,
                 isFlat: true,
-                className: FlatDateRangePicker.getSelectedDate(this.props.value)?.start || FlatDateRangePicker.getSelectedDate(this.props.value)?.end ? 'c7nagile-calendar-range-icon-show' : 'c7nagile-calendar-range-icon-hidden',
+                // className: FlatDateRangePicker.getSelectedDate(this.props.value)?.start || FlatDateRangePicker.getSelectedDate(this.props.value)?.end ? 'c7nagile-calendar-range-icon-show' : 'c7nagile-calendar-range-icon-hidden',
               },
             }))}
           </div>
