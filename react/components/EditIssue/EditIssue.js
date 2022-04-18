@@ -478,6 +478,7 @@ function EditIssue() {
           onOpenCreateSubTask={handleOpenCreateSubTask}
           onOpenCreateSubBug={handleOpenCreateSubBug}
           checkDescriptionEdit={checkDescriptionEdit}
+          resetDefault={resetDefault}
         />
         <WSHandler
           messageKey={`agile-issue-update-by-trigger-${store.projectId}`}

@@ -17,6 +17,7 @@ import { SHOW_FEATURE_TYPE_CODES_ALL } from '@/constants/SHOW_FEATURE_TYPE_CODE'
 import TypeTag from '../TypeTag';
 import './QuickCreateIssue.less';
 import UserDropdown from '../UserDropdown';
+import {WATERFALL_TYPE_CODES} from "../../constants/TYPE_CODE";
 
 const propTypes = {
   defaultPriority: PropTypes.number,
@@ -98,7 +99,7 @@ class QuickCreateIssue extends Component {
     }
     const {
       issueTypes, relateIssueId, sprintId, epicId, versionIssueRelVOList: propsVersionIssueRelVOList, chosenFeatureId, projectId,
-      isInProgram, cantCreateEvent, isCanQuickCreate, beforeClick,
+      isInProgram, cantCreateEvent, isCanQuickCreate, beforeClick, defaultValues,
     } = this.props;
 
     if (beforeClick && !beforeClick()) {
@@ -161,6 +162,7 @@ class QuickCreateIssue extends Component {
         const fieldsMap = fields2Map(fields);
 
         const issue = getQuickCreateDefaultObj({
+          ...defaultValues || {},
           epicName: currentTypeId === 'issue_epic' ? summary.trim() : undefined,
           featureId: SHOW_FEATURE_TYPE_CODES_ALL.includes(currentType.typeCode) ? chosenFeatureId : 0,
           assigneeId,
@@ -184,7 +186,7 @@ class QuickCreateIssue extends Component {
           this.setState({ summary: this.currentTemplate || '' });
           return;
         }
-        await issueApi.project(projectId).create(issue).then((res) => {
+        await issueApi.project(projectId).create(issue, WATERFALL_TYPE_CODES.includes(currentType.typeCode) ? 'waterfall' : 'agile').then((res) => {
           this.setState({
             loading: false,
             create: false,

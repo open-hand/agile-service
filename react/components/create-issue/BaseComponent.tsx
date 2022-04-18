@@ -101,6 +101,7 @@ export interface CreateIssueBaseProps {
   title?: string | ReactElement
   applyType?: CreateIssueProps['applyType']
   hiddenIssueType?: boolean
+  defaultPostData?: object,
 }
 const defaultDataSet = new DataSet({
   autoCreate: true,
@@ -291,6 +292,7 @@ const CreateIssueBase = observer(({
   extraSubmitValue,
   applyType,
   hiddenIssueType = false,
+  defaultPostData,
 }: CreateIssueBaseProps) => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
@@ -664,6 +666,7 @@ const CreateIssueBase = observer(({
         // @ts-ignore
         issuePredecessors: otherLinkRef.current?.getDependencyData && otherLinkRef.current?.getDependencyData() ? otherLinkRef.current?.getDependencyData() : undefined,
         sourceIssueIds: data.sourceIssueIds,
+        ...defaultPostData || {},
       });
 
       values = hooks.reduce((result, hook) => hook(result, data), values);
