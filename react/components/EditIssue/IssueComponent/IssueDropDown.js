@@ -1,4 +1,4 @@
-import React, {useContext, useState, useRef, useMemo} from 'react';
+import React, { useContext, useState, useRef } from 'react';
 import {
   Button,
   Modal as ModalPro, Dropdown, Menu,
@@ -6,7 +6,6 @@ import {
 import { Permission } from '@choerodon/boot';
 
 import { includes } from 'lodash';
-import { toJS } from 'mobx';
 import { has as hasInject, get as getInject } from '@choerodon/inject';
 import { issueApi } from '@/api';
 import useHasDevops from '@/hooks/useHasDevops';
