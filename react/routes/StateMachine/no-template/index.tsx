@@ -74,7 +74,7 @@ const NoTemplate: React.FC<{ activeKey: string }> = ({ activeKey }) => {
         <IssueTypeTab
           selectedType={selectedType}
           setSelectedType={setSelectedType}
-          excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test', 'risk'] : ['risk']}
+          excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test', 'risk'] : []}
           brighter={readOnly}
           visibleIssueTypeCategory={visibleIssueTypeCategory}
         />
