@@ -127,7 +127,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
                 setSelectedType(newType);
               }
             }}
-            excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test', 'risk'] : []}
+            excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test', 'risk', ...WATERFALL_TYPE_CODES] : []}
             brighter={readOnly}
             visibleIssueTypeCategory={visibleIssueTypeCategory}
           />
