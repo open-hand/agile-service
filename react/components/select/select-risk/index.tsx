@@ -18,7 +18,7 @@ const COMPONENT_CODE = {
 const SelectRisk = ({ code, ...other }: Props) => {
   const componentCode = COMPONENT_CODE[code];
   if (componentCode && has(componentCode)) {
-    return mount(componentCode, other);
+    return mount(componentCode, { onlyEnabled: true, ...other });
   }
   return <></>;
 };
