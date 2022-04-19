@@ -741,7 +741,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
             <IssueTypeTab
               selectedType={selectedType}
               setSelectedType={setSelectedType}
-              excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test', 'risk'] : ['risk']}
+              excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test', 'risk', ...WATERFALL_TYPE_CODES] : ['risk']}
               brighter={readOnly}
               visibleIssueTypeCategory={visibleIssueTypeCategory}
             />
