@@ -33,7 +33,7 @@ const IssueTypeTab: React.FC<Props> = ({
   }, [excludeTypes, hiddenCustomType, visibleIssueTypeCategory]);
   const {
     data: issueTypes, isFetchedAfterMount,
-  } = useIssueTypes(undefined);
+  } = useIssueTypes({ applyType: '' });
   const handleSelectType = useCallback((id: string) => {
     if (setSelectedType) {
       setSelectedType(id);
