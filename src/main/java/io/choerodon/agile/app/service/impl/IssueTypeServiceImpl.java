@@ -892,6 +892,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                                          Map<String, Set<Long>> categoryProjectMap) {
         int agileProjectCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_AGILE)).map(Set::size).orElse(0);
         int programProjectCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_PROGRAM)).map(Set::size).orElse(0);
+        int riskProjectCount = Optional.ofNullable(categoryProjectMap.get("risk")).map(Set::size).orElse(0);
         int agileAndProgramCount = Optional.ofNullable(categoryProjectMap.get(AGILE_AND_PROGRAM)).map(Set::size).orElse(0);
         int waterfallCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_WATERFALL)).map(Set::size).orElse(0);
         int waterfallAndAgileCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_WATERFALL_AGILE)).map(Set::size).orElse(0);
@@ -914,6 +915,9 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                 }
                 if (WATERFALL_ISSUE_TYPES.contains(typeCode)) {
                     x.setUsageCount(waterfallCount);
+                }
+                if (IssueTypeCode.RISK.value().equals(typeCode)) {
+                    x.setUsageCount(riskProjectCount);
                 }
             }
         });
@@ -970,6 +974,11 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                 boolean isWaterfallAndAgile = codes.contains(ProjectCategory.MODULE_WATERFALL_AGILE);
                 if (isWaterfallAndAgile) {
                     Set<Long> projectIds = map.computeIfAbsent(ProjectCategory.MODULE_WATERFALL_AGILE, k -> new HashSet<>());
+                    projectIds.add(projectId);
+                }
+                boolean containsRisk = containsAgile || containsProgram || isWaterfall;
+                if (containsRisk) {
+                    Set<Long> projectIds = map.computeIfAbsent("risk", k -> new HashSet<>());
                     projectIds.add(projectId);
                 }
             }
