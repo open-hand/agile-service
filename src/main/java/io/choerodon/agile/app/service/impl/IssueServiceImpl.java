@@ -1470,7 +1470,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         IssueLinkTypeVO linkTypeVO = issueStatusLinkageVO.getLinkTypeVO();
         IssueTypeVO linkageIssueType = issueStatusLinkageVO.getLinkageIssueType();
         StatusVO linkageIssueStatus = issueStatusLinkageVO.getLinkageIssueStatus();
-        if (Arrays.asList(IssueTypeCode.WATERFALL_ISSUE_TYPE_CODE).contains(linkageIssueType.getTypeCode())) {
+        if (!ObjectUtils.isEmpty(linkageIssueType) && Arrays.asList(IssueTypeCode.WATERFALL_ISSUE_TYPE_CODE).contains(linkageIssueType.getTypeCode())) {
             String predecessorType = issueStatusLinkageVO.getPredecessorType();
             if (ObjectUtils.isEmpty(predecessorType)) {
                 stringBuilder
