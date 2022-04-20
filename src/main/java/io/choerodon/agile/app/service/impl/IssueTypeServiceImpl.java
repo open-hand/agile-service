@@ -79,6 +79,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     private static final String AGILE_AND_PROGRAM = "agileAndProgram";
 
+    private static final String RISK = "risk";
+
     private static final String ERROR_ISSUE_TYPE_NAME_EXISTED = "error.issue.type.name.existed";
 
     private static final String ERROR_ISSUE_TYPE_ICON_EXISTED = "error.issue.type.icon.existed";
@@ -892,7 +894,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                                          Map<String, Set<Long>> categoryProjectMap) {
         int agileProjectCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_AGILE)).map(Set::size).orElse(0);
         int programProjectCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_PROGRAM)).map(Set::size).orElse(0);
-        int riskProjectCount = Optional.ofNullable(categoryProjectMap.get("risk")).map(Set::size).orElse(0);
+        int riskProjectCount = Optional.ofNullable(categoryProjectMap.get(RISK)).map(Set::size).orElse(0);
         int agileAndProgramCount = Optional.ofNullable(categoryProjectMap.get(AGILE_AND_PROGRAM)).map(Set::size).orElse(0);
         int waterfallCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_WATERFALL)).map(Set::size).orElse(0);
         int waterfallAndAgileCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_WATERFALL_AGILE)).map(Set::size).orElse(0);
@@ -978,7 +980,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                 }
                 boolean containsRisk = containsAgile || containsProgram || isWaterfall;
                 if (containsRisk) {
-                    Set<Long> projectIds = map.computeIfAbsent("risk", k -> new HashSet<>());
+                    Set<Long> projectIds = map.computeIfAbsent(RISK, k -> new HashSet<>());
                     projectIds.add(projectId);
                 }
             }
