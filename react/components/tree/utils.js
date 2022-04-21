@@ -123,8 +123,6 @@ export function expandTreeBySearch(tree, search) {
       newTree = mutateTree(newTree, itemId, { isMatch: true, isExpanded: item.children && item.children.length > 0 });
       // 展开父级
       newTree = autoExpandParent(newTree, item.id);
-    } else if (item.isMatch) {
-      newTree = mutateTree(newTree, itemId, { isMatch: false, isExpanded: false });
     }
   });
 
