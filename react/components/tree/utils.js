@@ -112,8 +112,12 @@ export function createItem(tree, path, item) {
 // 根据搜索的值，展开父元素
 export function expandTreeBySearch(tree, search) {
   let newTree = tree;
+  let finalTree = tree;
   Object.keys(tree.items).forEach((itemId) => {
-    const item = tree.items[itemId];
+    finalTree = mutateTree(newTree, itemId, { isMatch: false, isExpanded: false });
+  });
+  Object.keys(tree.items).forEach((itemId) => {
+    const item = finalTree.items[itemId];
     // 更新数据，使tree的组件会更新
     if (search && item.data.name.indexOf(search) > -1) {
       newTree = mutateTree(newTree, itemId, { isMatch: true, isExpanded: item.children && item.children.length > 0 });
