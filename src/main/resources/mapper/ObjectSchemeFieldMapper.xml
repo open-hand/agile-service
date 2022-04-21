@@ -85,6 +85,9 @@
                         <if test='searchVO.issueTypeList == "waterfallAgileIssueType"'>
                             AND osfe.issue_type IN ('issue_epic', 'story', 'bug', 'task', 'sub_task', 'stage', 'milestone', 'activity')
                         </if>
+                        <if test='searchVO.issueTypeList == "riskIssueType"'>
+                            AND osfe.issue_type IN ('risk')
+                        </if>
                     </otherwise>
                 </choose>
             )
