@@ -104,7 +104,7 @@ const transformUpdateData = (data, customMemberFieldsData) => {
             fieldValueList: [{
               operateType: value ? 'specifier' : selected,
               stringValue: value,
-              fieldType: 'input',
+              fieldType,
             }],
           });
         }
@@ -254,6 +254,12 @@ const setCurrentByFieldType = (current, fieldValue, fieldCode) => {
   const { fieldValueList } = fieldValue;
   const firstField = (fieldValueList && fieldValueList[0]) || {};
   const { fieldType } = firstField;
+  if (fieldCode === 'environment') {
+    const { operateType, stringValue } = firstField;
+    current.set(`${fieldCode}-select`, operateType);
+    current.set(fieldCode, stringValue);
+    return;
+  }
   switch (fieldType) {
     case 'member': {
       const { operateType, userId, customFieldId } = firstField;
