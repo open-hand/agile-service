@@ -834,6 +834,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         }
         // 获取状态加Id
         Long stateMachineId = queryStateMachineIdAndCheck(projectId, applyType, issueTypeId);
+        stateMachineNodeService.handlerNullRankNode(ConvertUtil.getOrganizationId(projectId), stateMachineId, applyType);
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Page<StatusSettingVO> page = PageHelper.doPageAndSort(pageRequest, () -> statusMapper.listStatusTransferByStateMachineId(organizationId, stateMachineId,param));
         List<StatusSettingVO> list = page.getContent();

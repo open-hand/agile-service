@@ -6,6 +6,7 @@ import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.modelmapper.ModelMapper;
@@ -226,6 +227,7 @@ public class InitServiceImpl implements InitService {
     }
 
     private void handleNode(Long organizationId, Long stateMachineId, String applyType, Map<String, StatusMachineNodeDTO> nodeMap, Map<String, StatusDTO> statusMap) {
+        String rank = RankUtil.mid();
         for (InitNode initNode : InitNode.list(applyType)) {
             StatusMachineNodeDTO node = new StatusMachineNodeDTO();
             node.setStateMachineId(stateMachineId);
@@ -240,6 +242,8 @@ public class InitServiceImpl implements InitService {
             node.setHeight(initNode.getHeight());
             node.setType(initNode.getType());
             node.setOrganizationId(organizationId);
+            node.setRank(rank);
+            rank = RankUtil.genNext(rank);
             int isNodeInsert = statusMachineNodeMapper.insert(node);
             if (isNodeInsert != 1) {
                 throw new CommonException("error.stateMachineNode.create");
