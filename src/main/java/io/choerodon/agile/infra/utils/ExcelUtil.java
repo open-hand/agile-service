@@ -188,6 +188,8 @@ public class ExcelUtil {
         CellStyle cellStyle = workbook.createCellStyle();
         SXSSFSheet sheet = (SXSSFSheet) workbook.getSheet(sheetName);
         cellStyle.setWrapText(true);
+        cellStyle.setAlignment(HorizontalAlignment.LEFT);
+        cellStyle.setVerticalAlignment(VerticalAlignment.TOP);
 
         CellStyle tanForegroundColor = createForegroundColor(workbook, IndexedColors.TAN);
         CellStyle lightTurquoiseForegroundColor = createForegroundColor(workbook, IndexedColors.LIGHT_TURQUOISE);
@@ -263,6 +265,8 @@ public class ExcelUtil {
     protected static CellStyle createForegroundColor(Workbook workbook, IndexedColors colors) {
         CellStyle cellStyle = workbook.createCellStyle();
         cellStyle.setFillForegroundColor(colors.getIndex());
+        cellStyle.setWrapText(true);
+        cellStyle.setVerticalAlignment(VerticalAlignment.TOP);
         cellStyle.setAlignment(HorizontalAlignment.LEFT);
         cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         return cellStyle;
