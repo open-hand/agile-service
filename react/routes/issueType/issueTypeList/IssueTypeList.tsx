@@ -171,7 +171,7 @@ function IssueTypeList() {
     const menu = (
       // eslint-disable-next-line react/jsx-no-bind
       <Menu onClick={handleMenuClick.bind(this)} className={styles.issueType_menu}>
-        <Menu.Item key="edit">{formatMessage({ id: 'boot.modify' })}</Menu.Item>
+        {record?.get('source') === 'system' && isOrganization ? null : <Menu.Item key="edit">{formatMessage({ id: 'boot.modify' })}</Menu.Item>}
         {
           record?.get('deleted') && (
             <Menu.Item key="delete">{formatMessage({ id: 'boot.delete' })}</Menu.Item>
@@ -201,6 +201,10 @@ function IssueTypeList() {
         }
       </Menu>
     );
+    const menuChildren = menu.props.children?.filter((item: any) => item) || [];
+    if (!menuChildren.length) {
+      return null;
+    }
     return (
       <Dropdown
         overlay={menu}
