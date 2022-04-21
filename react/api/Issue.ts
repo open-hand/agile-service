@@ -368,7 +368,7 @@ class IssueApi extends Api<IssueApi> {
  * @param data
  * @returns {*}
  */
-  import(data: any) {
+  import(data: any, applyType?: 'program' | 'agile') {
     // const headers = {
     //   'content-type': 'multipart/form-data',
     // };
@@ -377,7 +377,7 @@ class IssueApi extends Api<IssueApi> {
     return axios({
       headers: { 'Content-Type': 'multipart/form-data' },
       method: 'post',
-      url: getApplyType() === 'program' ? `${this.prefix}/issues/import` : `${this.prefix}/excel/import`,
+      url: (applyType || getApplyType()) === 'program' ? `${this.prefix}/issues/import` : `${this.prefix}/excel/import`,
       params: {
         organizationId,
         userId,
