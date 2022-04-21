@@ -24,7 +24,7 @@ import UploadButton from '@/components/CommonComponent/UploadButton';
 import validateFile from '@/utils/File';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import {
-  IIssueType, IModalProps, IssueCreateFields, Priority, User,
+  IIssueType, IModalProps, IssueCreateFields, Priority, User, RiskInfluence,
 } from '@/common/types';
 import useIssueCreateFields from '@/hooks/data/useIssueCreateFields';
 import { fieldApi, issueApi } from '@/api';
@@ -804,6 +804,19 @@ const CreateIssueBase = observer(({
       case 'summary': {
         return {
           maxLength: 44,
+        };
+      }
+      case 'riskInfluence':
+      case 'riskProximity':
+      case 'riskProbability': {
+        return {
+          afterFirstRequest: (riskInfluence: RiskInfluence[]) => {
+            const defaultRiskInfluence = find(riskInfluence, { default: true });
+            if (defaultRiskInfluence && !hasValue(dataSet, field as IssueCreateFields)) {
+              dataSetRef.current.current?.set(field.fieldCode, defaultRiskInfluence.id);
+            }
+            cascadeFieldAfterLoad(dataSetRef.current, riskInfluence, field as IssueCreateFields, rules);
+          },
         };
       }
       default: break;
