@@ -483,6 +483,10 @@ class ScrumBoardHome extends Component {
                       },
                     });
                   },
+                  permissions: [
+                    'choerodon.code.project.cooperation.iteration-plan.ps.config',
+                    'choerodon.code.project.cooperation.sprint.iteration-plan.ps.config',
+                  ],
                 }, {
                   name: <C7NFormat
                     intlPrefix="agile.common"
