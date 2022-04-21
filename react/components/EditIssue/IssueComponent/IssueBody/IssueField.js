@@ -3,7 +3,6 @@ import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { includes } from 'lodash';
 import { has as hasInject, mount } from '@choerodon/inject';
-import useIsInProgram from '@/hooks/useIsInProgram';
 import { SHOW_FEATURE_TYPE_CODES } from '@/constants/SHOW_FEATURE_TYPE_CODE';
 import {
   FieldAssignee, FieldVersion, FieldStatus, FieldSprint, FieldText,
@@ -31,9 +30,8 @@ const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 't
 
 const IssueField = observer((props) => {
   const {
-    store, applyType, saveFieldVersionRef, saveFieldFixVersionRef, disabled, isProgramIssue, isAgileProgram,
+    store, applyType, saveFieldVersionRef, saveFieldFixVersionRef, disabled, isProgramIssue, isAgileProgram, isShowFeature,
   } = useContext(EditIssueContext);
-  const { isShowFeature } = useIsInProgram({ projectId: store.projectId });
   const renderNormalField = (field) => (<FieldPro {...props} field={field} />);
   const getFieldComponent = (field) => {
     const issue = store.getIssue;

@@ -22,9 +22,15 @@ export type ICategoryCode =
   // 大瀑布小敏捷
   'N_WATERFALL_AGILE'
 
-const useCategoryCodes = (): ICategoryCode[] => (
-  useObserver(() => (AppState.menuType.categories
-    ? AppState.menuType.categories.map((c: any) => c.code)
-    : [])));
+export interface IHookCategoryCodesConfig {
+  categories?: Array<{ code: string, [key: string]: any }>
+}
+const useCategoryCodes = (config?: IHookCategoryCodesConfig): ICategoryCode[] => (
+  useObserver(() => {
+    const categories = config?.categories || AppState.menuType.categories;
+    return (categories
+      ? categories.map((c: any) => c.code)
+      : []);
+  }));
 
 export default useCategoryCodes;

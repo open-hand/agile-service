@@ -30,7 +30,7 @@ const TransformFromSubIssue: React.FC<Props> = ({
 }) => {
   const [isEpicType, setIsEpicType] = useState<boolean>(false);
   const issueTypesRef = useRef<IIssueType[]>([]);
-  const { isShowFeature, loading } = useIsInProgram();
+  const { isShowFeature, loading } = useIsInProgram({ projectId: store.projectId, categories: store.issueProjectCategories });
   const transformFromSubIssueDs = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [{
@@ -89,6 +89,7 @@ const TransformFromSubIssue: React.FC<Props> = ({
         modal?.close();
         openRequiredFieldsModal({
           projectId,
+          isShowFeature,
           requiredFields: res,
           issueVO: {
             summary,

@@ -21,7 +21,9 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')(observ
   const isProjectLevel = useMemo(() => (props.menuType || getMenuType()) === 'project', [props.menuType, getMenuType]);
   const descriptionEditRef = useRef(false);
   const copingStrategyEditRef = useRef(false);
-  const { isShowFeature, loading } = useIsInProgram({ projectId: props.projectId });
+  const store = useMemo(() => new EditIssueStore({ projectId: props.projectId || getProjectId() }), [props.projectId]);
+  // 防止update时创建多次store
+  const { isShowFeature, loading } = useIsInProgram({ projectId: props.projectId, categories: store.issueProjectCategories });
   const { isProgram, isAgileProgram } = useIsProgram();
   const value = {
     ...props,
@@ -29,7 +31,7 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')(observ
     menuType: props.menuType || getMenuType(), /** project organization */
     prefixCls: 'c7n-agile-EditIssue',
     intlPrefix: 'agile.EditIssue',
-    store: useMemo(() => new EditIssueStore({ projectId: props.projectId || getProjectId() }), [props.projectId]), // 防止update时创建多次store
+    store,
     FieldVersionRef,
     FieldFixVersionRef,
     descriptionEditRef,

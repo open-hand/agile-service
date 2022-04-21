@@ -5,8 +5,9 @@ import {
   every,
   filter, find, includes, map, castArray, reverse,
 } from 'lodash';
-import { Choerodon } from '@choerodon/boot';
+import { Choerodon, stores } from '@choerodon/boot';
 import { issueApi, uiApi } from '@/api';
+import { getProjectId } from '@/utils/common';
 
 const hiddenFields = ['issueType', 'summary', 'description', 'remainingTime', 'storyPoints', 'estimateTime', 'copingStrategy'];
 const copyHiddenFields = ['issueType', 'summary', 'description', 'timeTrace', 'creationDate', 'lastUpdateDate', 'created_user', 'last_updated_user', 'epicName'];
@@ -43,6 +44,7 @@ function getValue(issue, field) {
     }
   }
 }
+const { AppState } = stores;
 
 const hasValue = (issue, field) => (isMultiple(field) ? getValue(issue, field)?.length : getValue(issue, field));
 
@@ -62,6 +64,10 @@ class EditIssueStore {
 
   @computed get getIssue() {
     return this.issue;
+  }
+
+  @computed get issueProjectCategories() {
+    return !this.getIssue.projectVO?.id || String(AppState.menuType?.id) === String(this.issue.projectVO.id) ? AppState.menuType?.categories || [] : this.issue.projectVO?.categories || AppState.menuType.categories || [];
   }
 
   // fields
@@ -298,6 +304,10 @@ class EditIssueStore {
   @observable organizationId;
 
   @observable projectId;
+
+  @computed get isCurrentProject() {
+    return this.outside ? false : getProjectId() && this.projectId && String(getProjectId()) === String(this.projectId);
+  }
 
   /**
    * api初始化， 外部与内部调用的接口在此进行判断
