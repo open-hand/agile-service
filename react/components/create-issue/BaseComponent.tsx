@@ -144,6 +144,9 @@ const presets = new Map([
       min: ({ record }: { record: Record }) => record.get('actualStartTime'),
     },
   }],
+  ['discoveryDate', {
+    max: moment(),
+  }],
 ]);
 const afterLoadKeyMap = new Map([
   ['component', 'componentId'],
