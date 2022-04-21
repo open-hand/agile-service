@@ -15,7 +15,7 @@ export async function uploadAttachment(propFileList, issueId, projectId) {
   const fileList = propFileList.filter((i) => !i.url);
   const formData = new FormData();
   fileList.forEach((file) => {
-    formData.append('file', file);
+    formData.append('file', file?.originFileObj || file);
   });
   await fileApi.uploadFile(formData, issueId, projectId);
 }
