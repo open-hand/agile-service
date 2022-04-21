@@ -9,6 +9,7 @@ import useParentProgram from './data/useParentProgram';
 import useParentArtDoing from './data/useParentArtDoing';
 import useIsAgile from '@/hooks/useIsAgile';
 import useIsWaterfall from '@/hooks/useIsWaterfall';
+import { IHookCategoryCodesConfig } from './useCategoryCodes';
 
 const { AppState }: { AppState: AppStateProps } = stores;
 // @ts-ignore
@@ -25,19 +26,21 @@ interface ChildrenProps {
   loading: boolean,
   refresh: () => Promise<void>,
 }
-interface Props {
+interface Props extends useIsInProgramConfig {
   projectId?: string
   children: (data: ChildrenProps) => React.ReactElement,
 }
-interface useIsInProgramConfig {
+interface useIsInProgramConfig extends IHookCategoryCodesConfig {
   projectId?: string
   menuType?: 'project' | 'org' | 'program'
 }
 const useIsInProgram = (config?: useIsInProgramConfig, options?: UseQueryOptions<any>): ChildrenProps => {
   const { projectId, menuType } = config ?? {};
-  const { isProgram } = useIsProgram();
-  const { isAgile } = useIsAgile();
-  const { isWaterfall } = useIsWaterfall();
+  // 非当前项目 下列判断都是无效结果 临时传入 categories 配置
+  const { isProgram } = useIsProgram(config);
+  const { isAgile } = useIsAgile(config);
+  const { isWaterfall } = useIsWaterfall(config);
+
   const isProject = menuType ? menuType === 'project' : AppState.currentMenuType.type === 'project';
   const isFirstMount = useRef<boolean>(shouldRequest && isProject && (!isProgram || isAgile));
   const {
@@ -72,8 +75,8 @@ const useIsInProgram = (config?: useIsInProgramConfig, options?: UseQueryOptions
   };
 };
 
-const IsInProgram: React.FC<Props> = ({ children, projectId }) => {
-  const data = useIsInProgram({ projectId });
+const IsInProgram: React.FC<Props> = ({ children, ...otherConfig }) => {
+  const data = useIsInProgram(otherConfig);
   return children(data);
 };
 

@@ -35,6 +35,7 @@ export interface ChangeTypeModalProps {
     typeCode: string,
     issueTypeId: string,
   }
+  isShowFeature?: boolean
   reloadIssue: Function,
   onUpdate?: Function,
   epicName?: string
@@ -44,7 +45,7 @@ export interface ChangeTypeModalProps {
 const extraFields = ['timeTrace'];
 
 const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
-  const { isShowFeature } = useIsInProgram({ projectId: props.projectId });
+  const { isShowFeature } = props;
   // 必填只有非特性进行转换时会有此页面
   let { data: issueTypeData = [] } = useProjectIssueTypes({ onlyEnabled: true, projectId: props.projectId, applyType: props.applyType || 'agile' });
 
@@ -195,7 +196,9 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
 };
 
 const ObserverChangeTypeModal = observer(ChangeTypeModal);
-
+ObserverChangeTypeModal.defaultProps = {
+  isShowFeature: false,
+};
 const openRequiredFieldsModal = (props: ChangeTypeModalProps) => {
   Modal.open({
     key: 'changeTypeModal',
