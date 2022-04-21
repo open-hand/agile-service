@@ -435,6 +435,7 @@ class PageConfigApi extends Api<PageConfigApi> {
       params: {
         issue_type_id: issueTypeId,
         field_id: fieldId,
+        projectId: this.projectId,
       },
     });
   }
