@@ -532,8 +532,13 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public IssueVO queryIssue(Long projectId, Long issueId, Long organizationId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
-        if (Objects.isNull(issue)) {
-            throw new CommonException("error.issue.null");
+        IssueDTO issueById = issueMapper.selectByPrimaryKey(issueId);
+        if (ObjectUtils.isEmpty(issue)) {
+            if (ObjectUtils.isEmpty(issueById)) {
+                throw new CommonException("error.issue.null");
+            } else {
+                throw new CommonException("error.issue.not.existed.in.project");
+            }
         }
         issue.setSameParentIssueDTOList(Objects.nonNull(issue.getParentIssueId()) && !Objects.equals(issue.getParentIssueId(), 0L)?
                 issueMapper.querySubIssueByIssueId(issue.getParentIssueId()): null);
