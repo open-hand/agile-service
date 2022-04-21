@@ -311,8 +311,9 @@ class IssueApi extends Api<IssueApi> {
    * 项目层中加载工作项（项目群）
    * @param issueId 工作项id
    * @param programId 项目群id
+   * @param noPrompt
    */
-  loadUnderProgram(issueId: number, programId: number) {
+  loadUnderProgram(issueId: number, programId: number, noPrompt: boolean = false) {
     const organizationId = getOrganizationId();
     return this.request({
       method: 'get',
@@ -321,6 +322,7 @@ class IssueApi extends Api<IssueApi> {
         programId,
         organizationId,
       },
+      noPrompt,
     });
   }
 
