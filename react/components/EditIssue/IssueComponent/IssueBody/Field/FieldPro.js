@@ -2,6 +2,7 @@ import {
   DatePicker, DateTimePicker, NumberField, TextArea, TextField, TimePicker,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react';
+import { toJS } from 'mobx';
 import moment from 'moment';
 import classnames from 'classnames';
 import React, { Component } from 'react';
@@ -71,11 +72,20 @@ const EditorMap = new Map([
     return value;
   };
 
+  get value() {
+    const {
+      value: observableValue,
+    } = this.props.field;
+    const value = toJS(observableValue);
+    return value;
+  }
+
   renderEditor = () => {
     const { field, store } = this.props;
     const {
-      value, fieldType, valueStr, extraConfig, fieldId,
+      fieldType, valueStr, extraConfig, fieldId,
     } = field;
+    const { value } = this;
     const required = field?.required || store.getRuleRequired(field);
     const Editor = EditorMap.get(fieldType);
     if (Editor) {
@@ -92,12 +102,12 @@ const EditorMap = new Map([
               required={required}
               fieldId={fieldId}
               projectId={store.projectId}
-              // 始终为项目层查询接口
+                // 始终为项目层查询接口
               menuType="project"
               multiple={fieldType === 'multiple' || fieldType === 'checkbox'}
               {
                 ...store.getOptionsData(field, value)
-              }
+                }
             />
           );
         }
@@ -122,7 +132,7 @@ const EditorMap = new Map([
   render() {
     const { field, disabled } = this.props;
     const {
-      fieldName, value, fieldType, valueStr,
+      fieldName, fieldType, valueStr,
     } = field;
     const submitTrigger = ['blur'];
     const submitOnChange = ['member', 'single', 'radio'].includes(fieldType);
@@ -145,7 +155,7 @@ const EditorMap = new Map([
             disabled={disabled}
             alwaysRender={!['time', 'date', 'datetime'].includes(fieldType)}
             onSubmit={this.updateIssueField}
-            initValue={this.transform(fieldType, value)}
+            initValue={this.transform(fieldType, this.value)}
             editor={this.renderEditor}
             submitTrigger={submitTrigger}
           >
