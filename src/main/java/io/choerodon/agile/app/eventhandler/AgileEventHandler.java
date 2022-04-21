@@ -128,10 +128,6 @@ public class AgileEventHandler {
             projectInfoService.initializationProjectInfo(projectEvent);
             //创建项目初始化issueLinkType
             issueLinkTypeService.initIssueLinkType(projectEvent.getProjectId());
-            // 创建项目初始化风险状态机及问题类型方案
-            if (!ObjectUtils.isEmpty(agilePluginService)) {
-                agilePluginService.initProjectRiskIssueTypeScheme(projectEvent, codes);
-            }
             if (codes.contains(ProjectCategory.MODULE_PROGRAM)) {
                 //program + (program & agile)
                 if (!ObjectUtils.isEmpty(agilePluginService)) {
@@ -148,6 +144,10 @@ public class AgileEventHandler {
                 if (!ObjectUtils.isEmpty(agileWaterfallService)) {
                     agileWaterfallService.initProject(projectEvent, codes);
                 }
+            }
+            // 创建项目初始化风险状态机及问题类型方案
+            if (!ObjectUtils.isEmpty(agilePluginService)) {
+                agilePluginService.initProjectRiskIssueTypeScheme(projectEvent, codes);
             }
         }
     }

@@ -97,11 +97,11 @@ public enum InitIssueType {
         List<InitIssueType> result = new ArrayList<>();
         switch (applyType) {
             case SchemeApplyType.AGILE:
-                result.add(InitIssueType.EPIC);
                 result.add(InitIssueType.STORY);
                 result.add(InitIssueType.BUG);
                 result.add(InitIssueType.TASK);
                 result.add(InitIssueType.SUB_TASK);
+                result.add(InitIssueType.EPIC);
                 break;
             case SchemeApplyType.TEST:
                 result.add(InitIssueType.TEST);
