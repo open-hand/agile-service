@@ -1009,8 +1009,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     public void initIssueTypeByConsumeCreateOrganization(Long organizationId) {
         List<InitIssueType> initIssueTypes = Arrays.asList(InitIssueType.values());
         int size = initIssueTypes.size();
-        for (int i = size; i <= 1; i--) {
-            InitIssueType initIssueType = initIssueTypes.get(i - 1);
+        for (int i = 0; i < size; i++) {
+            InitIssueType initIssueType = initIssueTypes.get(size - i - 1);
             String typeCode = initIssueType.getTypeCode();
             if (agilePluginService == null && BUSINESS_ISSUE_TYPES.contains(typeCode)) {
                 continue;
