@@ -5,7 +5,6 @@ import io.choerodon.agile.api.vo.ProjectMessageVO;
 import io.choerodon.agile.app.service.DelayTaskService;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.asgard.schedule.annotation.JobTask;
@@ -138,8 +137,6 @@ public class IssueDailyWorkSendMessageTask {
     }
 
     @Autowired
-    private NotifyFeignClient notifyFeignClient;
-    @Autowired
     private BaseFeignClient baseFeignClient;
     @Autowired
     private DelayTaskService delayTaskService;
@@ -172,17 +169,8 @@ public class IssueDailyWorkSendMessageTask {
         List<MessageSender> messageSenders = new ArrayList<>();
 
         processSenders(messageSenders, projectMap);
-        if (!CollectionUtils.isEmpty(messageSenders)) {
-            int step = 500;
-            for (int i = 0; i < messageSenders.size(); i += step) {
-                int end = i + step;
-                if (end >= messageSenders.size()) {
-                    end = messageSenders.size();
-                }
-                List<MessageSender> messageSenderList = messageSenders.subList(i, end);
-                notifyFeignClient.batchSendMessage(messageSenderList);
-            }
-        }
+        // 批量发送通知
+        delayTaskService.batchSendMessage(messageSenders, 100);
         LOGGER.info("===> 每日工作提醒发送消息定时任务完成");
     }
 

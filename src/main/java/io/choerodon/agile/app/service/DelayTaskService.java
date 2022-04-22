@@ -20,4 +20,6 @@ public interface DelayTaskService {
                               String messageCode,
                               Map<String, String> paramMap,
                               List<UserDTO> users);
+
+    void batchSendMessage(List<MessageSender> messageSenders, int step);
 }
