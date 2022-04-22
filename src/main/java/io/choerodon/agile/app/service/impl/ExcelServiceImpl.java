@@ -1569,6 +1569,8 @@ public class ExcelServiceImpl implements ExcelService {
                 addErrorColumn(rowNum, parentCol, errorRowColMap);
                 return;
             }
+            IssueDTO issueDTO = issueMapper.queryIssueSprintNotClosed(projectId, parentIssue.getIssueId());
+            parentIssue.setSprintId(issueDTO.getSprintId());
         }
         for (Map.Entry<Integer, ExcelColumnVO> entry : headerMap.entrySet()) {
             Integer col = entry.getKey();
