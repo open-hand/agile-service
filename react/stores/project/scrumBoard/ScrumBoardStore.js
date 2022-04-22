@@ -14,6 +14,9 @@ const { AppState } = stores;
 class ScrumBoardStore {
   editRef = createRef();
 
+  // 当前选中的看板
+  selectedBoard;
+
   @observable searchVO = {};
 
   @observable filterManageVisible = false;
@@ -532,6 +535,20 @@ class ScrumBoardStore {
 
   @action setCurrentConstraint(data) {
     this.currentConstraint = data;
+  }
+
+  /**
+   * 选择看板
+   */
+  @action switchBoard(value) {
+    const selectedBoard = this.getBoardList.get(value);
+    this.setSelectedBoard(value);
+    this.selectedBoard = selectedBoard;
+    if (!selectedBoard) {
+      return;
+    }
+    this.setCurrentConstraint(selectedBoard.columnConstraint);
+    this.setSwimLaneCode(selectedBoard.userDefaultBoard);
   }
 
   @computed get getLookupValue() {

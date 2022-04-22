@@ -205,10 +205,8 @@ class Setting extends Component {
                 element: <SelectBoard
                   createButton={false}
                   onChange={(value) => {
-                    const selectedBoard = ScrumBoardStore.getBoardList.get(value);
-                    ScrumBoardStore.setSelectedBoard(value);
-                    ScrumBoardStore.setSwimLaneCode(selectedBoard.userDefaultBoard);
-                    this.refresh(selectedBoard);
+                    ScrumBoardStore.switchBoard(value);
+                    this.refresh(ScrumBoardStore.selectedBoard);
                   }}
                 />,
               }]}
