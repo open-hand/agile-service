@@ -53,7 +53,7 @@ public class IssueListFieldKVVO {
     private String assigneeRealName;
 
     @ApiModelProperty(value = "经办人用户标签")
-    private List<String> assigneeLabels;
+    private List<String> userLabels;
 
     @ApiModelProperty(value = "报告人名称")
     private String reporterName;
@@ -714,12 +714,12 @@ public class IssueListFieldKVVO {
         this.deviationRate = deviationRate;
     }
 
-    public List<String> getAssigneeLabels() {
-        return assigneeLabels;
+    public List<String> getUserLabels() {
+        return userLabels;
     }
 
-    public void setAssigneeLabels(List<String> assigneeLabels) {
-        this.assigneeLabels = assigneeLabels;
+    public void setUserLabels(List<String> userLabels) {
+        this.userLabels = userLabels;
     }
 
     public StatusVO getStatusMapVO() {
