@@ -54,6 +54,20 @@ public class DelayTaskServiceImpl implements DelayTaskService {
         return messageSender;
     }
 
+    @Override
+    public void batchSendMessage(List<MessageSender> messageSenders, int step) {
+        if (!ObjectUtils.isEmpty(messageSenders)) {
+            for (int i = 0; i < messageSenders.size(); i += step) {
+                int end = i + step;
+                if (end >= messageSenders.size()) {
+                    end = messageSenders.size();
+                }
+                List<MessageSender> messageSenderList = messageSenders.subList(i, end);
+                notifyFeignClient.batchSendMessage(messageSenderList);
+            }
+        }
+    }
+
     private List<Receiver> buildReceivers(List<UserDTO> users) {
         List<Receiver> receivers = new ArrayList<>();
         if (ObjectUtils.isEmpty(users)) {
