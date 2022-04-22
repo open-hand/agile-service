@@ -329,23 +329,23 @@ function IssueTypeList() {
             handleRefresh();
           }}
         >
-          <Column name="name" width={150} renderer={renderName} />
+          <Column name="name" width={170} renderer={renderName} />
           <Column name="action" width={50} renderer={renderAction} />
           <Column name="description" tooltip={Tooltip.overflow} />
           <Column name="typeCode" renderer={renderTypeCode} width={150} />
           {
             isOrganization && (
-              <Column name="usage" renderer={renderUsage} />
+              <Column name="usage" width={110} renderer={renderUsage} tooltip={Tooltip.overflow} />
             )
           }
           <Column
             name="source"
             renderer={renderSource}
-            width={100}
+            width={80}
           />
           {
             isOrganization && (
-              <Column name="referenced" renderer={renderReferenced} />
+              <Column name="referenced" align={'left' as any} width={120} renderer={renderReferenced} />
             )
           }
           {
