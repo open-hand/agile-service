@@ -46,8 +46,8 @@ const IssueLog = () => {
           autoTemp = [];
         }
       }
-      if (!initialIssueType.isInitial && log.field === 'issuetype') {
-        initialIssueType = { name: log.oldString, isInitial: true };
+      if (log.field === 'issuetype') {
+        initialIssueType = { name: log.oldString };
       }
     });
 
