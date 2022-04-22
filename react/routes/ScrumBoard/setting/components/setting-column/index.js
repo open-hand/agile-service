@@ -158,6 +158,7 @@ class SettingColumn extends Component {
               <Select
                 value={ScrumBoardStore.getCurrentConstraint}
                 label="列约束"
+                labelLayout="float"
                 style={{ width: 512 }}
                 disabled
               >
