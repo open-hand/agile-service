@@ -18,6 +18,8 @@ import UserTag from '@/components/tag/user-tag';
 import NoReport from './NoReport.svg';
 import useFormatMessage from '@/hooks/useFormatMessage';
 
+import styles from './index.less';
+
 const { Column } = Table;
 
 interface ReportTableProps {
@@ -97,7 +99,14 @@ const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
       />
       <Column
         name="receiverList"
-        renderer={({ value: receiverList }) => <Users data={receiverList} />}
+        renderer={({ value: receiverList }) => (
+          <div className={styles.userTagWrap}>
+            <Users data={receiverList} />
+            {receiverList?.length === 1 && (
+              <span>{receiverList[0]?.realName}</span>
+            )}
+          </div>
+        )}
       />
       <Column
         name="createdUser"
