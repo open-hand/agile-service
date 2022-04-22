@@ -1,4 +1,6 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, {
+  useCallback, useMemo, useRef,
+} from 'react';
 import {
   Modal, Form, TextField, Select, SelectBox, CheckBox, DataSet,
 } from 'choerodon-ui/pro';
@@ -21,6 +23,7 @@ const { Option } = SelectBox;
 const key = Modal.key();
 
 const CreateStatus: React.FC = () => {
+  const valueCodeSelectRef = useRef<Select>(null);
   const context = useStateMachineCreateStatusContext();
   const {
     dataSet, isOrganization, setType, setHasStatusIssueTypes, type, issueTypes, statusRecord, injectConfig,
@@ -71,6 +74,14 @@ const CreateStatus: React.FC = () => {
       setHasStatusIssueTypes([]);
     }
   }, { wait: 390 });
+  const disabledValueCode = useMemo(() => {
+    const newValue = type !== null || !!statusRecord;
+    if (newValue && valueCodeSelectRef.current) {
+      valueCodeSelectRef.current.blur();
+      valueCodeSelectRef.current.collapse();
+    }
+    return type !== null || !!statusRecord;
+  }, [statusRecord, type]);
 
   return (
     <Form dataSet={dataSet} className="c7n-agile-state-machine-create-status">
@@ -83,11 +94,12 @@ const CreateStatus: React.FC = () => {
         onChange={handleInputName}
       />
       <Select
+        ref={valueCodeSelectRef}
         name="valueCode"
         optionsFilter={isProgram ? undefined : (record) => record.get('valueCode') !== 'prepare'}
         optionRenderer={({ record }) => (<StatusTypeTag code={record?.get('valueCode') as IStatus['valueCode']} />)}
         renderer={({ value }) => (value ? <StatusTypeTag code={value as IStatus['valueCode']} /> : null)}
-        disabled={type !== null || !!statusRecord}
+        disabled={disabledValueCode}
         onChange={(val) => {
           if (val === 'prepare' && !isProgramIssueType) {
             dataSet.current?.init('issueTypeIds', []);
