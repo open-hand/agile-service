@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Draggable } from 'react-beautiful-dnd';
 import { stores, Permission, Choerodon } from '@choerodon/boot';
-import { Icon, Input } from 'choerodon-ui';
-import { Modal, NumberField } from 'choerodon-ui/pro';
+import {
+  Icon, Modal, NumberField, TextField,
+} from 'choerodon-ui/pro';
 import './Column.less';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import TextEditToggle from '@/components/TextEditToggle';
@@ -87,20 +88,15 @@ class Column extends Component {
           ]}
           noAccessChildren={data.name}
         >
-          <TextEditToggle
-            formKey="name"
+          <TextEditTogglePro
+            editor={() => <TextField style={{ height: '32px', padding: 0 }} />}
+            initValue={data.name}
+            alwaysRender
+            className="c7nagile-column-text-input"
             onSubmit={this.handleSaveColumnName}
-            originData={data.name}
           >
-            <Text>
-              {(text) => text}
-            </Text>
-            <Edit>
-              <Input
-                autoFocus
-              />
-            </Edit>
-          </TextEditToggle>
+            {({ value: text }) => text}
+          </TextEditTogglePro>
         </Permission>
       </div>
     );

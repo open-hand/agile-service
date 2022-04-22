@@ -148,6 +148,7 @@ class SettingColumn extends Component {
             alignItems: 'center',
             justifyContent: 'space-between',
           }}
+          className="c7n-pro-form-float"
         >
           <Permission
             service={[

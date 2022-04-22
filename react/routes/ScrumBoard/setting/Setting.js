@@ -219,7 +219,7 @@ class Setting extends Component {
           />
         )}
         />
-        <Content className="c7n-scrumboard c7n-pro-form-float" style={{ height: '100%', paddingTop: 0 }}>
+        <Content className="c7n-scrumboard" style={{ height: '100%', paddingTop: 0 }}>
           <Tabs
             style={{
               display: 'flex', flexDirection: 'column', height: '100%', overflow: 'auto',

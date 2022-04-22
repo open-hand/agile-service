@@ -190,7 +190,7 @@ function IssueTypeList() {
         {
           !isOrganization && record?.get('enabled') && (
             <Menu.Item key="stop">
-              {formatMessage({ id: 'boot.disable' })}
+              {formatMessage({ id: 'boot.stop' })}
             </Menu.Item>
           )
         }
