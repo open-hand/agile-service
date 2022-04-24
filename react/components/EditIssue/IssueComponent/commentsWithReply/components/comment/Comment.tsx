@@ -65,6 +65,8 @@ const Comment: React.FC<Props> = (props) => {
       className="c7n-comment"
     >
       <Permission
+        type="project"
+        projectId={store.projectId}
         service={isWaterfall
           ? ['choerodon.code.project.cooperation.sprint.iteration-plan.ps.editissue.pro']
           : [isProgramIssue

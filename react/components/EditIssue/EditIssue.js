@@ -251,9 +251,9 @@ function EditIssue() {
       ] = await Promise.all([
         (isProjectLevel && otherProject) || outside ? null : knowledgeApi.project(projectId).loadByIssue(id),
         (isProjectLevel && (otherProject || programId || applyType === 'program')) || outside || issue.typeCode === 'risk' ? null : workLogApi.project(projectId).loadByIssue(id),
-        programId ? dataLogApi.loadUnderProgram(id, programId) : dataLogApi.org(organizationId).outside(outside).project(projectId).loadByIssue(id),
+        programId ? dataLogApi.project(projectId).loadUnderProgram(id, programId) : dataLogApi.org(organizationId).outside(outside).project(projectId).loadByIssue(id),
         programId || applyType === 'program' || issue.typeCode === 'risk' ? null : issueLinkApi.org(organizationId).outside(outside).project(projectId).loadByIssueAndApplyType(id),
-        programId ? issueApi.getCommentsUnderProgram(id, programId) : issueApi.org(organizationId).outside(outside).project(projectId).getComments(id),
+        programId ? issueApi.project(projectId).getCommentsUnderProgram(id, programId) : issueApi.org(organizationId).outside(outside).project(projectId).getComments(id),
         // issue中非子任务的工作项需要请求不能流转到的状态数据
         !outside && applyType !== 'program' && issue.typeCode !== 'sub_task' ? boardApi.project(projectId).getNotAllowedTransferStatus(id) : null,
       ]);

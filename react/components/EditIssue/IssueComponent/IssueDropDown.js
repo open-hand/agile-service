@@ -250,6 +250,8 @@ const IssueDropDown = ({
       {
         (includes(['story', 'task', 'bug'], typeCode) && !parentRelateSummary) && ( // 故事、任务、缺陷能移 子缺陷不能移
           <Permission
+            type="project"
+            projectId={store.projectId}
             service={isWaterfall
               ? ['choerodon.code.project.cooperation.sprint.iteration-plan.ps.editissue.pro']
               : ['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
@@ -272,6 +274,8 @@ const IssueDropDown = ({
       }
       {
         <Permission
+          type="project"
+          projectId={store.projectId}
           service={getDeletePermissions()}
           noAccessChildren={(
             <Menu.Item
