@@ -77,6 +77,8 @@ public class GanttChartVO {
 
     private String featureName;
 
+    private String featureColor;
+
     @ApiModelProperty(value = "创建时间")
     private Date creationDate;
 
@@ -576,5 +578,13 @@ public class GanttChartVO {
 
     public void setApplyType(String applyType) {
         this.applyType = applyType;
+    }
+
+    public String getFeatureColor() {
+        return featureColor;
+    }
+
+    public void setFeatureColor(String featureColor) {
+        this.featureColor = featureColor;
     }
 }
