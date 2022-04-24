@@ -85,12 +85,16 @@ class PiApi extends Api<PiApi> {
    */
   addFeatures(issueIds: Array<number>, sourceId: number = 0, destinationId: number = 0,
     before: boolean = false, outsetIssueId: number = 0, rankIndex: number = 0) {
-    return axios.post(`${this.prefix}/pi/to_pi/${destinationId}`, {
-      before,
-      issueIds,
-      outsetIssueId,
-      rankIndex,
-      currentPiId: sourceId,
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/pi/to_pi/${destinationId}`,
+      data: {
+        before,
+        issueIds,
+        outsetIssueId,
+        rankIndex,
+        currentPiId: sourceId,
+      },
     });
   }
 }

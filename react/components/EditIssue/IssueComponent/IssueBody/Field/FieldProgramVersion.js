@@ -33,7 +33,7 @@ class FieldProgramVersion extends Component {
     const issue = store.getIssue;
     const { issueId, objectVersionNumber } = issue;
     setIssueLoading(true);
-    await featureApi.updateVersions(issueId, value);
+    await featureApi.project(store.projectId).updateVersions(issueId, value);
     if (onUpdate) {
       onUpdate();
     }

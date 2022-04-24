@@ -142,9 +142,13 @@ class FeatureApi extends Api<FeatureApi> {
    * @param epicId
    */
   hasSameInEpicById(featureId: number, epicId: number) {
-    return axios.post(`${this.prefix}/issues/check_feature_summary`, {
-      epicId,
-      featureIds: [featureId],
+    return this.request({
+      url: `${this.prefix}/issues/check_feature_summary`,
+      method: 'post',
+      data: {
+        epicId,
+        featureIds: [featureId],
+      },
     });
   }
 
@@ -193,7 +197,7 @@ class FeatureApi extends Api<FeatureApi> {
   }
 
   getSubProjectSplitStory(featureId: number, programId: string) {
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/project_invoke_program/list_story_by_feature_id`,
       params: {
@@ -204,7 +208,7 @@ class FeatureApi extends Api<FeatureApi> {
   }
 
   getSplitStoryOutside(featureId: number, projectId: string) {
-    return axios({
+    return this.request({
       method: 'post',
       url: 'agile/v1/program_external/list_story_by_feature_id',
       params: {
@@ -227,12 +231,12 @@ class FeatureApi extends Api<FeatureApi> {
    * 更新特性版本
    */
   updateVersions(featureId: string, programVersionIds?: string[]) {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/program_version/feature_link_program_version`,
       params: {
         featureId,
-        organizationId: getOrganizationId(),
+        organizationId: this.orgId,
         programVersionIds: programVersionIds ? String(programVersionIds) : '',
       },
     });

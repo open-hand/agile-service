@@ -16,7 +16,7 @@ class FieldPI extends Component {
     const { issueId, activePi } = issue;
     const { id } = activePi || {};
     setIssueLoading(true);
-    await piApi.addFeatures([issueId], id || 0, value || 0);
+    await piApi.project(store.projectId).addFeatures([issueId], id || 0, value || 0);
     if (onUpdate) {
       onUpdate();
     }
@@ -40,11 +40,14 @@ class FieldPI extends Component {
           </span>
         </div>
         <div className="c7n-value-wrapper">
-          <Permission service={[
-            'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.completepi',
-            'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.startpi',
-            'choerodon.code.project.plan.feature.ps.pi.plan',
-          ]}
+          <Permission
+            type="project"
+            projectId={store.projectId}
+            service={[
+              'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.completepi',
+              'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.startpi',
+              'choerodon.code.project.plan.feature.ps.pi.plan',
+            ]}
           >
             {(hasPermission) => (
               <TextEditToggle
