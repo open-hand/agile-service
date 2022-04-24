@@ -826,18 +826,21 @@ public class GanttChartServiceImpl implements GanttChartService {
                                        Map<Long, IssueDTO> issueFeatureMap,
                                        Set<Long> projectIds,
                                        Map<Long, ProjectVO> projectMap) {
-        if (GanttDimension.isEpic(dimension)
-                && !ObjectUtils.isEmpty(issueIds)) {
+        if (!ObjectUtils.isEmpty(issueIds)) {
             List<ProjectVO> programs = queryProgramIds(projectIds);
             boolean belongProgram = (agilePluginService != null && !ObjectUtils.isEmpty(programs));
             issueEpicMap.putAll(issueMapper.listIssueWithEpicId(projectIds, issueIds)
                     .stream()
                     .collect(Collectors.toMap(IssueDTO::getIssueId, IssueDTO::getEpicId)));
-            issueIds.addAll(issueEpicMap.values());
+            if (GanttDimension.isEpic(dimension)) {
+                issueIds.addAll(issueEpicMap.values());
+            }
             if (belongProgram) {
                 programs.forEach(p -> projectMap.put(p.getId(), p));
                 issueFeatureMap.putAll(agilePluginService.queryIssueFeature(projectIds, issueIds));
-                issueFeatureMap.forEach((issueId, feature) -> issueIds.add(feature.getIssueId()));
+                if (GanttDimension.isEpic(dimension)) {
+                    issueFeatureMap.forEach((issueId, feature) -> issueIds.add(feature.getIssueId()));
+                }
             }
         }
     }
@@ -940,7 +943,10 @@ public class GanttChartServiceImpl implements GanttChartService {
             ganttChart.setProjectId(thisProjectId);
             ganttChart.setProject(projectMap.get(thisProjectId));
             ganttChart.setEpicId(issueEpicMap.get(issueId));
-            ganttChart.setFeatureId(Optional.ofNullable(issueFeatureMap.get(issueId)).map(IssueDTO::getIssueId).orElse(null));
+            IssueDTO feature = issueFeatureMap.get(issueId);
+            ganttChart.setFeatureId(Optional.ofNullable(feature).map(IssueDTO::getIssueId).orElse(null));
+            ganttChart.setFeatureName(Optional.ofNullable(feature).map(IssueDTO::getSummary).orElse(null));
+            ganttChart.setFeatureColor(Optional.ofNullable(feature).map(IssueDTO::getFeatureColor).orElse(null));
             ganttChart.setEpicName(i.getEpicName());
             ganttChart.setColor(i.getEpicColor());
             ganttChart.setPriorityVO(priorityMap.get(i.getPriorityId()));
