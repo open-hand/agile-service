@@ -34,10 +34,8 @@ const IssueDetail: React.FC<Props> = ({
 
   const visible = issueId;
   useEffect(() => {
-    console.log('useEffect', store.projectId);
     const { programId } = store;
     if (visible) {
-      console.log('store.projectId', store.projectId);
       open({
         path: 'issue',
         props: {
