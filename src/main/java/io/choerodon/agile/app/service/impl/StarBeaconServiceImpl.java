@@ -75,7 +75,7 @@ public class StarBeaconServiceImpl implements StarBeaconService {
         starBeaconDTO.setUserId(userId);
         starBeaconDTO = starBeaconMapper.selectOne(starBeaconDTO);
         if (Objects.isNull(starBeaconDTO)){
-            throw new CommonException(ERROR_INSTANCE_IS_NULL);
+            return;
         }
         if (starBeaconMapper.deleteByPrimaryKey(starBeaconDTO.getId()) != 1) {
             throw new CommonException(ERROR_DELETE_STAR_INSTANCE_FAILED);
