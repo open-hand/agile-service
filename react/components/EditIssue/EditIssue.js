@@ -6,7 +6,7 @@ import React, {
 import { observer } from 'mobx-react-lite';
 import { stores, Choerodon, WSHandler } from '@choerodon/boot';
 import { usePersistFn } from 'ahooks';
-import { Spin } from 'choerodon-ui/pro';
+import { Spin, message } from 'choerodon-ui/pro';
 import JSONbig from 'json-bigint';
 import { reverse } from 'lodash';
 import openCreateSubTask from '@/components/create-sub-task';
@@ -60,7 +60,9 @@ function EditIssue() {
   const otherProject = !sameProject(projectId);
   const container = useRef();
   const idRef = useRef();
-  const { push, close, eventsMap } = useDetailContainerContext();
+  const {
+    push, close, eventsMap, pop, routes,
+  } = useDetailContainerContext();
   const issueEvents = eventsMap.get(applyType === 'program' ? 'program_issue' : 'issue');
   const onUpdate = useCallback((issue) => {
     issueEvents?.update(issue);
@@ -176,10 +178,19 @@ function EditIssue() {
       let issue;
       try {
         issue = await (programId
-          ? issueApi.project(projectId).loadUnderProgram(id, programId) : issueApi.org(organizationId).outside(outside).project(projectId).load(id, isProjectLevel ? undefined : projectId));
+          ? issueApi.project(projectId).loadUnderProgram(id, programId, true) : issueApi.org(organizationId).outside(outside).project(projectId).load(id, isProjectLevel ? undefined : projectId));
       } catch (error) {
         if (error.code === 'error.issue.null') {
           close();
+          return;
+        }
+        if (programId && error.code === 'error.issue.not.existed.in.project') {
+          message.info('当前项目已离开特性所在的项目群');
+          if (routes.length > 1 && pop) {
+            pop();
+          } else {
+            close();
+          }
           return;
         }
       }
@@ -239,9 +250,9 @@ function EditIssue() {
         notAllowedTransferStatus,
       ] = await Promise.all([
         (isProjectLevel && otherProject) || outside ? null : knowledgeApi.project(projectId).loadByIssue(id),
-        (isProjectLevel && (otherProject || programId || applyType === 'program')) || outside ? null : workLogApi.project(projectId).loadByIssue(id),
+        (isProjectLevel && (otherProject || programId || applyType === 'program')) || outside || issue.typeCode === 'risk' ? null : workLogApi.project(projectId).loadByIssue(id),
         programId ? dataLogApi.loadUnderProgram(id, programId) : dataLogApi.org(organizationId).outside(outside).project(projectId).loadByIssue(id),
-        programId || applyType === 'program' ? null : issueLinkApi.org(organizationId).outside(outside).project(projectId).loadByIssueAndApplyType(id),
+        programId || applyType === 'program' || issue.typeCode === 'risk' ? null : issueLinkApi.org(organizationId).outside(outside).project(projectId).loadByIssueAndApplyType(id),
         programId ? issueApi.getCommentsUnderProgram(id, programId) : issueApi.org(organizationId).outside(outside).project(projectId).getComments(id),
         // issue中非子任务的工作项需要请求不能流转到的状态数据
         !outside && applyType !== 'program' && issue.typeCode !== 'sub_task' ? boardApi.project(projectId).getNotAllowedTransferStatus(id) : null,
@@ -478,6 +489,7 @@ function EditIssue() {
           onOpenCreateSubTask={handleOpenCreateSubTask}
           onOpenCreateSubBug={handleOpenCreateSubBug}
           checkDescriptionEdit={checkDescriptionEdit}
+          resetDefault={resetDefault}
         />
         <WSHandler
           messageKey={`agile-issue-update-by-trigger-${store.projectId}`}

@@ -79,6 +79,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     private static final String AGILE_AND_PROGRAM = "agileAndProgram";
 
+    private static final String RISK = "risk";
+
     private static final String ERROR_ISSUE_TYPE_NAME_EXISTED = "error.issue.type.name.existed";
 
     private static final String ERROR_ISSUE_TYPE_ICON_EXISTED = "error.issue.type.icon.existed";
@@ -892,6 +894,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                                          Map<String, Set<Long>> categoryProjectMap) {
         int agileProjectCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_AGILE)).map(Set::size).orElse(0);
         int programProjectCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_PROGRAM)).map(Set::size).orElse(0);
+        int riskProjectCount = Optional.ofNullable(categoryProjectMap.get(RISK)).map(Set::size).orElse(0);
         int agileAndProgramCount = Optional.ofNullable(categoryProjectMap.get(AGILE_AND_PROGRAM)).map(Set::size).orElse(0);
         int waterfallCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_WATERFALL)).map(Set::size).orElse(0);
         int waterfallAndAgileCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_WATERFALL_AGILE)).map(Set::size).orElse(0);
@@ -914,6 +917,9 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                 }
                 if (WATERFALL_ISSUE_TYPES.contains(typeCode)) {
                     x.setUsageCount(waterfallCount);
+                }
+                if (IssueTypeCode.RISK.value().equals(typeCode)) {
+                    x.setUsageCount(riskProjectCount);
                 }
             }
         });
@@ -972,6 +978,11 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                     Set<Long> projectIds = map.computeIfAbsent(ProjectCategory.MODULE_WATERFALL_AGILE, k -> new HashSet<>());
                     projectIds.add(projectId);
                 }
+                boolean containsRisk = containsAgile || containsProgram || isWaterfall;
+                if (containsRisk) {
+                    Set<Long> projectIds = map.computeIfAbsent(RISK, k -> new HashSet<>());
+                    projectIds.add(projectId);
+                }
             }
         });
         return map;
@@ -996,7 +1007,10 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     @Override
     public void initIssueTypeByConsumeCreateOrganization(Long organizationId) {
-        for (InitIssueType initIssueType : InitIssueType.values()) {
+        List<InitIssueType> initIssueTypes = Arrays.asList(InitIssueType.values());
+        int size = initIssueTypes.size();
+        for (int i = 0; i < size; i++) {
+            InitIssueType initIssueType = initIssueTypes.get(size - i - 1);
             String typeCode = initIssueType.getTypeCode();
             if (agilePluginService == null && BUSINESS_ISSUE_TYPES.contains(typeCode)) {
                 continue;

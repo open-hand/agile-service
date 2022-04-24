@@ -132,7 +132,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     sortable: true,
     render: (rowData, getDataMethod = get, summaryProps?: any, typeTagProps?: any) => (
       <>
-        <TypeTag data={getDataMethod(rowData, 'issueTypeVO')} style={{ marginRight: 5, marginTop: -2 }} {...typeTagProps} />
+        <TypeTag data={getDataMethod(rowData, 'issueTypeVO')} style={{ marginRight: 5, marginTop: -1 }} {...typeTagProps} />
         <Tooltip mouseEnterDelay={0.5} placement="topLeft" title={`工作项概要： ${getDataMethod(rowData, 'summary')}`}>
           <span role="none" className="c7n-agile-table-cell-click" {...summaryProps}>
             {getDataMethod(rowData, 'summary')}
@@ -436,6 +436,7 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     title: <Tooltip title="前置依赖">前置依赖</Tooltip>,
     titleKey: 'agile.gantt.column.predecessor',
     width: 120,
+    sortable: false,
     dataIndex: 'predecessors',
     render: (rowData, getDataMethod = get) => {
       const predecessors = getDataMethod(rowData, 'predecessors');

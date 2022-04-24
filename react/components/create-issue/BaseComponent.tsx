@@ -24,7 +24,7 @@ import UploadButton from '@/components/CommonComponent/UploadButton';
 import validateFile from '@/utils/File';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import {
-  IIssueType, IModalProps, IssueCreateFields, Priority, User,
+  IIssueType, IModalProps, IssueCreateFields, Priority, User, RiskInfluence,
 } from '@/common/types';
 import useIssueCreateFields from '@/hooks/data/useIssueCreateFields';
 import { fieldApi, issueApi } from '@/api';
@@ -101,6 +101,7 @@ export interface CreateIssueBaseProps {
   title?: string | ReactElement
   applyType?: CreateIssueProps['applyType']
   hiddenIssueType?: boolean
+  defaultPostData?: object,
 }
 const defaultDataSet = new DataSet({
   autoCreate: true,
@@ -142,6 +143,9 @@ const presets = new Map([
     computedProps: {
       min: ({ record }: { record: Record }) => record.get('actualStartTime'),
     },
+  }],
+  ['discoveryDate', {
+    max: moment(),
   }],
 ]);
 const afterLoadKeyMap = new Map([
@@ -291,6 +295,7 @@ const CreateIssueBase = observer(({
   extraSubmitValue,
   applyType,
   hiddenIssueType = false,
+  defaultPostData,
 }: CreateIssueBaseProps) => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
@@ -311,6 +316,7 @@ const CreateIssueBase = observer(({
     projectId,
     typeCode,
     isProgram,
+    excludeTypes: applyType === 'risk' ? undefined : ['risk'],
     applyType: isWaterfallAgile && applyType === 'waterfall' ? undefined : applyType,
   }, {
     onSuccess: ((issueTypes) => {
@@ -663,6 +669,7 @@ const CreateIssueBase = observer(({
         // @ts-ignore
         issuePredecessors: otherLinkRef.current?.getDependencyData && otherLinkRef.current?.getDependencyData() ? otherLinkRef.current?.getDependencyData() : undefined,
         sourceIssueIds: data.sourceIssueIds,
+        ...defaultPostData || {},
       });
 
       values = hooks.reduce((result, hook) => hook(result, data), values);
@@ -765,6 +772,7 @@ const CreateIssueBase = observer(({
             isProgram,
             typeCode,
             projectId,
+            excludeTypes: applyType === 'risk' ? undefined : ['risk'],
             applyType: isWaterfallAgile && applyType === 'waterfall' ? undefined : applyType,
             menuType: menuType ?? 'project',
           },
@@ -799,6 +807,19 @@ const CreateIssueBase = observer(({
       case 'summary': {
         return {
           maxLength: 44,
+        };
+      }
+      case 'riskInfluence':
+      case 'riskProximity':
+      case 'riskProbability': {
+        return {
+          afterFirstRequest: (riskInfluence: RiskInfluence[]) => {
+            const defaultRiskInfluence = find(riskInfluence, { default: true });
+            if (defaultRiskInfluence && !hasValue(dataSet, field as IssueCreateFields)) {
+              dataSetRef.current.current?.set(field.fieldCode, defaultRiskInfluence.id);
+            }
+            cascadeFieldAfterLoad(dataSetRef.current, riskInfluence, field as IssueCreateFields, rules);
+          },
         };
       }
       default: break;

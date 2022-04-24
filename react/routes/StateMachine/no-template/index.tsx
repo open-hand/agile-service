@@ -12,6 +12,7 @@ import NoData from '@/assets/image/NoData.svg';
 import IssueTypeTab from '../components/issue-type-tab';
 import { useStateMachineContext } from '../context';
 import useFormatMessage from '@/hooks/useFormatMessage';
+import { WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
 
 const NoTemplate: React.FC<{ activeKey: string }> = ({ activeKey }) => {
   const {
@@ -74,7 +75,7 @@ const NoTemplate: React.FC<{ activeKey: string }> = ({ activeKey }) => {
         <IssueTypeTab
           selectedType={selectedType}
           setSelectedType={setSelectedType}
-          excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
+          excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test', 'risk', ...WATERFALL_TYPE_CODES] : []}
           brighter={readOnly}
           visibleIssueTypeCategory={visibleIssueTypeCategory}
         />

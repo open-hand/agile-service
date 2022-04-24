@@ -63,12 +63,12 @@ import styles from './FieldEpic.less';
     const issue = store.getIssue;
     const {
       epicColor, epicId, issueEpicName, typeCode,
-      featureId, featureName, relateIssueId,
+      featureId, featureName, relateIssueId, projectVO,
     } = issue;
     const field = store.getFieldByCode('epic');
     const required = field?.required;
     return (
-      <IsInProgram projectId={store.projectId}>
+      <IsInProgram projectId={store.projectId} categories={store.issueProjectCategories}>
         {
           ({ isShowFeature, program }) => (
             <>

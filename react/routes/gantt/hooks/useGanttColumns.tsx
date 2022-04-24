@@ -95,11 +95,12 @@ const ganttColumnCodeMapProps: Record<string, { title?: string, width?: number }
   },
 };
 
-export const ganttColumnMap = new Map<string, Gantt.Column & { titleKey?: string }>([['assignee', {
+export const ganttColumnMap = new Map<string, Gantt.Column & { titleKey?: string, sortable?: boolean }>([['assignee', {
   width: 85,
   minWidth: 85,
   name: 'assignee',
   label: '经办人',
+  sortable: true,
   render: (record: any) => (
     <Tooltip title={renderTooltip(record.assignee)}>
       <span>{record.assignee?.realName}</span>
@@ -110,6 +111,7 @@ export const ganttColumnMap = new Map<string, Gantt.Column & { titleKey?: string
   width: 120,
   minWidth: 120,
   name: 'predecessor',
+  sortable: false,
   titleKey: 'agile.gantt.column.predecessor',
   label: '前置依赖',
   render: (record: any) => (record.predecessors?.length ? <GanttPredecessor data={record.predecessors} projectId={get(record, 'projectId')} /> : <></>),
@@ -118,6 +120,7 @@ export const ganttColumnMap = new Map<string, Gantt.Column & { titleKey?: string
   minWidth: 100,
   name: 'estimatedStartTime',
   label: '预计开始',
+  sortable: true,
   titleKey: 'agile.gantt.column.estimatedStartTime',
   render: (record: any) => record.estimatedStartTime && <Tooltip title={record.estimatedStartTime}><span>{dayjs(record.estimatedStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
 }], ['estimatedEndTime', {
@@ -125,6 +128,7 @@ export const ganttColumnMap = new Map<string, Gantt.Column & { titleKey?: string
   minWidth: 100,
   name: 'estimatedEndTime',
   label: '预计结束',
+  sortable: true,
   titleKey: 'agile.gantt.column.estimatedEndTime',
   render: (record: any) => record.estimatedEndTime && <Tooltip title={record.estimatedEndTime}><span>{dayjs(record.estimatedEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
 },
@@ -134,6 +138,7 @@ export const ganttColumnMap = new Map<string, Gantt.Column & { titleKey?: string
   minWidth: 100,
   name: 'actualStartTime',
   label: '实际开始',
+  sortable: true,
   titleKey: 'agile.gantt.column.actualStartTime',
   render: (record: any) => record.actualStartTime && <Tooltip title={record.actualStartTime}><span>{dayjs(record.actualStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
 },
@@ -143,6 +148,7 @@ export const ganttColumnMap = new Map<string, Gantt.Column & { titleKey?: string
   minWidth: 100,
   name: 'actualEndTime',
   label: '实际结束',
+  sortable: true,
   titleKey: 'agile.gantt.column.actualEndTime',
   render: (record: any) => record.actualEndTime && <Tooltip title={record.actualEndTime}><span>{dayjs(record.actualEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
 },
@@ -383,7 +389,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
 
     if (ganttColumnMap.has(columnCode)) {
       const field = ganttColumnMap.get(columnCode);
-      merge(baseColumn, { ...field, sortable: columnCode !== 'predecessor' });
+      merge(baseColumn, { ...field });
     }
     const { render, name } = baseColumn;
     return merge(baseColumn, {
@@ -437,7 +443,12 @@ function useGanttProjectColumns({
   useUpdateEffect(() => {
     // 检查排序是否有效
     if (sortedListRef.current.length > 0) {
-      const sortKeyMapSystemKey = [...systemColumnsMap.entries()].filter(([_, value]) => sortedListRef.current.some((sorted) => sorted.dataKey === value.dataIndex)).map(([key]) => key);
+      const sortKeyMapSystemKey = [...systemColumnsMap.entries()].filter(([_, value]) => sortedListRef.current.some((sorted) => sorted.dataKey === value.dataIndex)).map(([key]) => key).filter((code) => {
+        if (ganttColumnMap.has(code)) {
+          return ganttColumnMap.get(code)?.sortable;
+        }
+        return systemColumnsMap.get(code)?.sortable;
+      });
       const sortedCodes = intersection(sortKeyMapSystemKey, visibleColumnCodes).map((key) => systemColumnsMap.get(key)?.dataIndex!);
       const newSortedList = sortedListRef.current
         .map((item) => (sortedCodes.includes(item.dataKey) ? item : { ...item, sorted: undefined }));

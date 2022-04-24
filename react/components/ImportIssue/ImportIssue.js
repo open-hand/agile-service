@@ -143,7 +143,8 @@ class ImportIssue extends Component {
         this.uploadInput.value = '';
       });
     } else {
-      issueApi.import(formData).then((res) => {
+      const { applyType } = this.props;
+      issueApi.import(formData, applyType).then((res) => {
         this.setState({
           uploading: false,
         });

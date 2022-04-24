@@ -86,7 +86,7 @@ const StateMachineCreateStatusProvider: React.FC<IStateMachineCreateStatusProps>
   const isOrganization = getIsOrganization();
   const [type, setType] = useState<IStatus['valueCode'] | null>(null);
   const [editStatus, setEditStatus] = useState<any>(null);
-  const { data: issueTypes } = useIssueTypes({ hasTemplate: true, excludeTypes: ['feature', 'issue_auto_test', 'issue_test', ...(isOrganization ? ['issue_epic'] : [])] });
+  const { data: issueTypes } = useIssueTypes({ applyType: '', hasTemplate: true, excludeTypes: ['feature', 'issue_auto_test', 'issue_test', ...(isOrganization ? ['issue_epic'] : [])] });
   // 记录哪些类型下已经有同名状态
   const [hasStatusIssueTypes, setHasStatusIssueTypes] = useState<IIssueType[]>([]);
   const hasStatusIssueTypesRef = useRef<IIssueType[]>([]);

@@ -110,7 +110,7 @@ class ScrumBoardHome extends Component {
     ScrumBoardStore.setStatusLinkages(statusLinkages);
     const defaultBoard = boardListData.find((item) => item.userDefault) || boardListData[0];
     if (defaultBoard.boardId) {
-      ScrumBoardStore.setSelectedBoardId(defaultBoard.boardId);
+      ScrumBoardStore.switchBoard(defaultBoard.boardId);
       noRefresh ? ScrumBoardStore.setSpinIf(false) : this.refresh(defaultBoard, url, boardListData);
     }
   }
@@ -435,10 +435,8 @@ class ScrumBoardHome extends Component {
             style={{ marginRight: 8, marginLeft: 16 }}
             onFooterClick={this.handleCreateBoardClick}
             onChange={(value) => {
-              const selectedBoard = ScrumBoardStore.getBoardList.get(value);
-              ScrumBoardStore.setSelectedBoard(value);
-              ScrumBoardStore.setSwimLaneCode(selectedBoard.userDefaultBoard);
-              this.refresh(selectedBoard);
+              ScrumBoardStore.switchBoard(value);
+              this.refresh(ScrumBoardStore.selectedBoard);
             }}
           />
           <HeaderButtons
@@ -483,6 +481,10 @@ class ScrumBoardHome extends Component {
                       },
                     });
                   },
+                  permissions: [
+                    'choerodon.code.project.cooperation.iteration-plan.ps.config',
+                    'choerodon.code.project.cooperation.sprint.iteration-plan.ps.config',
+                  ],
                 }, {
                   name: <C7NFormat
                     intlPrefix="agile.common"

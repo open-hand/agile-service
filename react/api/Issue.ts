@@ -311,8 +311,9 @@ class IssueApi extends Api<IssueApi> {
    * 项目层中加载工作项（项目群）
    * @param issueId 工作项id
    * @param programId 项目群id
+   * @param noPrompt
    */
-  loadUnderProgram(issueId: number, programId: number) {
+  loadUnderProgram(issueId: number, programId: number, noPrompt: boolean = false) {
     const organizationId = getOrganizationId();
     return this.request({
       method: 'get',
@@ -321,6 +322,7 @@ class IssueApi extends Api<IssueApi> {
         programId,
         organizationId,
       },
+      noPrompt,
     });
   }
 
@@ -366,7 +368,7 @@ class IssueApi extends Api<IssueApi> {
  * @param data
  * @returns {*}
  */
-  import(data: any) {
+  import(data: any, applyType?: 'program' | 'agile') {
     // const headers = {
     //   'content-type': 'multipart/form-data',
     // };
@@ -375,7 +377,7 @@ class IssueApi extends Api<IssueApi> {
     return axios({
       headers: { 'Content-Type': 'multipart/form-data' },
       method: 'post',
-      url: getApplyType() === 'program' ? `${this.prefix}/issues/import` : `${this.prefix}/excel/import`,
+      url: (applyType || getApplyType()) === 'program' ? `${this.prefix}/issues/import` : `${this.prefix}/excel/import`,
       params: {
         organizationId,
         userId,

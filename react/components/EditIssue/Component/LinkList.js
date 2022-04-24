@@ -56,7 +56,7 @@ class LinkList extends Component {
           borderTop: !i ? '1px solid var(--divider)' : '',
         }}
       >
-        <Tooltip mouseEnterDelay={0.5} title={`任务类型： ${issue.typeCode}`}>
+        <Tooltip mouseEnterDelay={0.5} title={issue.typeCode ? `任务类型： ${issue.typeCode}` : ''}>
           <div>
             <TypeTag
               data={issue.issueTypeVO}

@@ -60,6 +60,8 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
     private StarBeaconMapper starBeaconMapper;
     @Autowired
     private IssueParticipantRelMapper issueParticipantRelMapper;
+    @Autowired
+    private IssueUserRelMapper issueUserRelMapper;
 
     @Override
     public StatusNoticeSettingVO detail(Long projectId, Long issueTypeId, Long statusId, String schemeCode) {
@@ -262,6 +264,9 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
                 List<Long> participantIds = issueParticipantRelMapper.listByIssueId(projectId, issue.getIssueId());
                 userSet.addAll(participantIds);
                 break;
+            case StatusNoticeUserType.RELATED_PARTIES:
+                List<Long> relatedParties = issueUserRelMapper.listUserIdsByIssueId(projectId, issue.getIssueId(), "relatedParties");
+                userSet.addAll(relatedParties);
             default:
                 // 不在默认配置里，则检索自定义字段，有则加入，没有则忽略
                 userSet.addAll(fieldValueMapper.selectUserIdByField(projectId, Collections.singletonList(noticeDTO.getUserType()), issue.getIssueId()));

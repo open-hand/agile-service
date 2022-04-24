@@ -223,6 +223,12 @@ public class IssueDTO extends AuditDomain {
 
     private Boolean isPreSprintDone;
 
+    @Transient
+    private Date estimatedResolutionDate;
+
+    @Transient
+    private Date actualResolutionDate;
+
     public String getEpicSelfName() {
         return epicSelfName;
     }
@@ -733,6 +739,22 @@ public class IssueDTO extends AuditDomain {
 
     public void setPreSprintDone(Boolean preSprintDone) {
         isPreSprintDone = preSprintDone;
+    }
+
+    public Date getEstimatedResolutionDate() {
+        return estimatedResolutionDate;
+    }
+
+    public void setEstimatedResolutionDate(Date estimatedResolutionDate) {
+        this.estimatedResolutionDate = estimatedResolutionDate;
+    }
+
+    public Date getActualResolutionDate() {
+        return actualResolutionDate;
+    }
+
+    public void setActualResolutionDate(Date actualResolutionDate) {
+        this.actualResolutionDate = actualResolutionDate;
     }
 
     @Override

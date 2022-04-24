@@ -52,6 +52,9 @@ public class IssueListFieldKVVO {
     @ApiModelProperty(value = "经办人真实名称")
     private String assigneeRealName;
 
+    @ApiModelProperty(value = "经办人用户标签")
+    private List<String> userLabels;
+
     @ApiModelProperty(value = "报告人名称")
     private String reporterName;
 
@@ -709,5 +712,21 @@ public class IssueListFieldKVVO {
 
     public void setDeviationRate(BigDecimal deviationRate) {
         this.deviationRate = deviationRate;
+    }
+
+    public List<String> getUserLabels() {
+        return userLabels;
+    }
+
+    public void setUserLabels(List<String> userLabels) {
+        this.userLabels = userLabels;
+    }
+
+    public StatusVO getStatusMapVO() {
+        return statusMapVO;
+    }
+
+    public void setStatusMapVO(StatusVO statusMapVO) {
+        this.statusMapVO = statusMapVO;
     }
 }

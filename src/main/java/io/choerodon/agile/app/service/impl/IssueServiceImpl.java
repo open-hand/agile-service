@@ -532,8 +532,13 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public IssueVO queryIssue(Long projectId, Long issueId, Long organizationId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
-        if (Objects.isNull(issue)) {
-            throw new CommonException("error.issue.null");
+        IssueDTO issueById = issueMapper.selectByPrimaryKey(issueId);
+        if (ObjectUtils.isEmpty(issue)) {
+            if (ObjectUtils.isEmpty(issueById)) {
+                throw new CommonException("error.issue.null");
+            } else {
+                throw new CommonException("error.issue.not.existed.in.project");
+            }
         }
         issue.setSameParentIssueDTOList(Objects.nonNull(issue.getParentIssueId()) && !Objects.equals(issue.getParentIssueId(), 0L)?
                 issueMapper.querySubIssueByIssueId(issue.getParentIssueId()): null);
@@ -1470,7 +1475,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         IssueLinkTypeVO linkTypeVO = issueStatusLinkageVO.getLinkTypeVO();
         IssueTypeVO linkageIssueType = issueStatusLinkageVO.getLinkageIssueType();
         StatusVO linkageIssueStatus = issueStatusLinkageVO.getLinkageIssueStatus();
-        if (Arrays.asList(IssueTypeCode.WATERFALL_ISSUE_TYPE_CODE).contains(linkageIssueType.getTypeCode())) {
+        if (!ObjectUtils.isEmpty(linkageIssueType) && Arrays.asList(IssueTypeCode.WATERFALL_ISSUE_TYPE_CODE).contains(linkageIssueType.getTypeCode())) {
             String predecessorType = issueStatusLinkageVO.getPredecessorType();
             if (ObjectUtils.isEmpty(predecessorType)) {
                 stringBuilder

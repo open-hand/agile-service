@@ -1,6 +1,8 @@
 import React, { useContext, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Dropdown, Menu, Icon, Modal } from 'choerodon-ui/pro';
+import {
+  Dropdown, Menu, Icon, Modal,
+} from 'choerodon-ui/pro';
 import { find } from 'lodash';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { issueApi } from '@/api';
@@ -17,10 +19,9 @@ const IssueType = observer(({
   reloadIssue, onTransformType,
 }) => {
   const {
-    store, disabled, menuType, isProgramIssue,
+    store, disabled, menuType, isProgramIssue, isShowFeature,
   } = useContext(EditIssueContext);
-  const { isShowFeature } = useIsInProgram({ projectId: store.projectId });
-  const { isAgileProgram } = useIsProgram();
+  const { isAgileProgram } = useIsProgram({ categories: store.issueProjectCategories });
   const issue = store.getIssue;
   const {
     issueTypeVO = {}, featureVO = {}, subIssueVOList = [], applyType,
@@ -92,6 +93,7 @@ const IssueType = observer(({
       if (res && res.length) {
         openRequiredFieldsModal({
           projectId: store.projectId,
+          isShowFeature,
           requiredFields: res,
           issueVO: {
             summary,

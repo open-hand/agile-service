@@ -81,6 +81,14 @@ export interface Priority {
   id: string,
   name: string,
 }
+export interface RiskInfluence {
+  color: string,
+  default: boolean
+  description: string,
+  enable: boolean,
+  id: string,
+  name: string,
+}
 export interface IProgramVersion {
   id: string,
   name: string,

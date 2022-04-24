@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.infra.enums.StatusNoticeUserType;
 import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.agile.api.vo.*;
@@ -55,6 +56,12 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Autowired
     private IssueParticipantRelMapper issueParticipantRelMapper;
+
+    @Autowired
+    private IssueUserRelMapper issueUserRelMapper;
+
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     private void getIds(List<MessageDTO> result, List<Long> ids) {
         for (MessageDTO messageDTO : result) {
@@ -218,7 +225,19 @@ public class NoticeServiceImpl implements NoticeService {
         addUsersByParticipants(projectId, res, code, result, issueVO);
         //通知增加自定义人员字段选项
         addUsersByCustomUserTypes(projectId, res, result, issueVO);
+        if (agilePluginService != null) {
+            addUsersByRelatedParties(projectId, res, code, result, issueVO);
+        }
         return result;
+    }
+
+    private void addUsersByRelatedParties(Long projectId, List<String> res, String code, List<Long> result, IssueVO issueVO) {
+        if (res.contains("relatedParties")) {
+            List<Long> relatedParties = issueUserRelMapper.listUserIdsByIssueId(projectId, issueVO.getIssueId(), "relatedParties");
+            if (!ObjectUtils.isEmpty(relatedParties)) {
+                result.addAll(relatedParties);
+            }
+        }
     }
 
     private void addUsersByParticipants(Long projectId, List<String> res, String code, List<Long> result, IssueVO issueVO) {

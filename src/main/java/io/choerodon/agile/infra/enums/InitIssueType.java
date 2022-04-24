@@ -6,10 +6,6 @@ import java.util.List;
 
 public enum InitIssueType {
     /**
-     * 史诗
-     */
-    EPIC("agile_epic", "史诗", "可以是公司的关键战略举措，可以是重大的业务方向，也可以是重大的技术演讲。通常和公司的经营、竞争力、市场环境紧密相关", "#743be7", "issue_epic"),
-    /**
      * 故事
      */
     STORY("agile_story", "故事", "是从用户角度出发，对所需要的一个小功能的简短描述", "#00bfa5", "story"),
@@ -26,6 +22,14 @@ public enum InitIssueType {
      */
     SUB_TASK("agile_subtask", "子任务", "通常是故事或任务的具体拆分，由单人承接，且通常能在短时间内完成", "#4d90fe", "sub_task"),
     /**
+     * 特性
+     */
+    FEATURE("agile-feature", "特性", "用于描述满足用户需求的大型系统行为", "#3D5AFE", "feature"),
+    /**
+     * 史诗
+     */
+    EPIC("agile_epic", "史诗", "可以是公司的关键战略举措，可以是重大的业务方向，也可以是重大的技术演讲。通常和公司的经营、竞争力、市场环境紧密相关", "#743be7", "issue_epic"),
+    /**
      * 测试
      */
     TEST("test-case", "测试", "测试", "#4D90FE", "issue_test"),
@@ -33,11 +37,6 @@ public enum InitIssueType {
      * 自动化测试
      */
     AUTO_TEST("test-automation", "自动化测试", "自动化测试", "#FA8C16", "issue_auto_test"),
-    /**
-     * 特性
-     */
-    FEATURE("agile-feature", "特性", "用于描述满足用户需求的大型系统行为", "#3D5AFE", "feature"),
-
     /**
      * 阶段
      */

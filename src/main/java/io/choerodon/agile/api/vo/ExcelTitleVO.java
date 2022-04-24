@@ -13,6 +13,8 @@ public class ExcelTitleVO {
 
     private Integer width;
 
+    private boolean number;
+
     public ExcelTitleVO() {
     }
 
@@ -20,6 +22,13 @@ public class ExcelTitleVO {
         this.title = title;
         this.code = code;
         this.width = width;
+    }
+
+    public ExcelTitleVO(String title, String code, Integer width, boolean number) {
+        this.title = title;
+        this.code = code;
+        this.width = width;
+        this.number = number;
     }
 
     public String getTitle() {
@@ -52,5 +61,13 @@ public class ExcelTitleVO {
 
     public void setFieldId(Long fieldId) {
         this.fieldId = fieldId;
+    }
+
+    public boolean getNumber() {
+        return number;
+    }
+
+    public void setNumber(boolean number) {
+        this.number = number;
     }
 }

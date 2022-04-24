@@ -49,6 +49,7 @@ const filterCodeModeProps: IComponentPropsToFn<IAgileSystemFieldProps> = {
   issueType: ({ props }) => ({
     applyType: props?.applyType,
     projectId: props?.projectId,
+    excludeTypeCodes: ['risk'],
   }),
   status: ({ props }) => ({
     applyType: props?.applyType,
@@ -97,7 +98,7 @@ function getProcessFieldConfig<T extends IComponentFCWithClassObject, C extends 
     datetime: {},
     date: {},
     number: {},
-    input: { props: { maxLength: 100, valueChangeAction: 'input' } },
+    input: { props: { maxLength: 100 } },
     text: {
       props: {
         autoSize: true, rows: 3, maxLength: 255,

@@ -202,7 +202,9 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
         setData(res.map((item: any) => ({ ...item, onlyShow: menuType === 'org' })));
         setLoading(false);
       });
-    })();
+    })().catch(() => {
+      setLoading(false);
+    });
   });
 
   const [{ isCreate }, quickCreateProps] = useQuickCreateIssue({
@@ -392,7 +394,7 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
     renderGroupBar,
     renderEmpty,
   });
-    // @ts-ignore
+  // @ts-ignore
   const renderClone = usePersistFn((record: Gantt.Record) => tableWithSortedColumns[0].render!(record, {} as any) as React.ReactElement);
 
   const handleDragEnd = useCallback((sourceBar: Gantt.Bar, destinationBar: Gantt.Bar) => {

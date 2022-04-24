@@ -104,7 +104,7 @@ export interface ICascadeRule {
   fieldCascadeRuleOptionList?: Array<{
     cascadeOptionId: string,
     defaultOption?: boolean
-  }> |Array<{
+  }> | Array<{
     projectId: string,
     defaultOption?: boolean
   }>
@@ -140,6 +140,18 @@ export interface IPageFieldPermissionItem {
 class PageConfigApi extends Api<PageConfigApi> {
   get prefix() {
     return `/agile/v1/projects/${this.projectId}`;
+  }
+
+  get outPrefix() {
+    return '/agile/v1/backlog_external';
+  }
+
+  get isOutside() {
+    return false;
+  }
+
+  outside(outside: boolean) {
+    return this.overwrite('isOutside', outside);
   }
 
   get prefixOrgOrPro() {
@@ -419,10 +431,11 @@ class PageConfigApi extends Api<PageConfigApi> {
   getCascadeRuleList(issueTypeId: string, fieldId?: string) {
     return this.request({
       method: 'get',
-      url: `${this.prefix}/field_cascade_rule`,
+      url: this.isOutside ? `${this.outPrefix}/field_cascade_rule` : `${this.prefix}/field_cascade_rule`,
       params: {
         issue_type_id: issueTypeId,
         field_id: fieldId,
+        projectId: this.projectId,
       },
     });
   }

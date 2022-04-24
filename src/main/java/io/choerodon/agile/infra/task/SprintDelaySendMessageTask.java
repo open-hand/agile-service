@@ -7,7 +7,6 @@ import io.choerodon.agile.app.service.DelayTaskService;
 import io.choerodon.agile.infra.dto.SprintDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.agile.infra.mapper.SprintMapper;
 import io.choerodon.asgard.schedule.annotation.JobTask;
 import io.choerodon.asgard.schedule.annotation.TimedTask;
@@ -50,8 +49,6 @@ public class SprintDelaySendMessageTask {
 
     private  SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    @Autowired
-    private NotifyFeignClient notifyFeignClient;
     @Autowired
     private SprintMapper sprintMapper;
     @Autowired
@@ -114,17 +111,8 @@ public class SprintDelaySendMessageTask {
         Map<Long, Set<Long>> projectOwnerMap = new HashMap<>();
         processUsers(userMap, sprintDelayCarrierList, projectMap, projectOwnerMap);
         List<MessageSender> messageSenders = buildMessageSender(sprintDelayCarrierList, userMap, projectOwnerMap);
-        if(!messageSenders.isEmpty()) {
-            int step = 500;
-            for (int i = 0; i < messageSenders.size(); i += step) {
-                int end = i + step;
-                if (end >= messageSenders.size()) {
-                    end = messageSenders.size();
-                }
-                List<MessageSender> messageSenderList = messageSenders.subList(i, end);
-                notifyFeignClient.batchSendMessage(messageSenderList);
-            }
-        }
+        // 批量发送通知
+        delayTaskService.batchSendMessage(messageSenders, 500);
         LOGGER.info("===> 冲刺延期发送消息定时任务完成");
     }
 

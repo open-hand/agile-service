@@ -11,7 +11,7 @@ export interface IssueTypeConfig {
   id?: string
   /** 只返回某一类的工作项类型 */
   typeCode?: string | string[]
-  applyType?: 'agile' | 'program'
+  applyType?: 'agile' | 'program' | ''
   onlyEnabled?: boolean
   hasTemplate?: boolean
   excludeTypes?: string[]

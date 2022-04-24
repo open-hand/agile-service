@@ -148,6 +148,7 @@ class SettingColumn extends Component {
             alignItems: 'center',
             justifyContent: 'space-between',
           }}
+          className="c7n-pro-form-float"
         >
           <Permission
             service={[
@@ -158,6 +159,7 @@ class SettingColumn extends Component {
               <Select
                 value={ScrumBoardStore.getCurrentConstraint}
                 label="列约束"
+                labelLayout="float"
                 style={{ width: 512 }}
                 disabled
               >

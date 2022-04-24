@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Tooltip } from 'choerodon-ui/pro';
 import './PriorityTag.less';
 
 const PRIORITY_MAP = {
@@ -37,22 +38,24 @@ class PriorityTag extends Component {
   }
 
   render() {
-    const { priority, style } = this.props;
+    const { priority, style, showTooltip = false } = this.props;
     return (
-      <div
-        style={style}
-        className="c7n-priorityTag-container"
-      >
+      <Tooltip title={showTooltip ? priority?.name || '' : ''}>
         <div
-          className="c7n-priorityTag"
-          style={{
-            backgroundColor: `${priority ? priority.colour || priority.color : '#FFFFFF'}1F`,
-            color: priority ? priority.colour || priority.color : '#FFFFFF',
-          }}
+          style={style}
+          className="c7n-priorityTag-container"
         >
-          {priority ? priority.name : ''}
+          <div
+            className="c7n-priorityTag"
+            style={{
+              backgroundColor: `${priority ? priority.colour || priority.color : '#FFFFFF'}1F`,
+              color: priority ? priority.colour || priority.color : '#FFFFFF',
+            }}
+          >
+            {priority ? priority.name : ''}
+          </div>
         </div>
-      </div>
+      </Tooltip>
     );
   }
 }

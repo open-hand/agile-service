@@ -6,7 +6,6 @@ import {
 import { Permission } from '@choerodon/boot';
 
 import { includes } from 'lodash';
-import { toJS } from 'mobx';
 import { has as hasInject, get as getInject } from '@choerodon/inject';
 import { issueApi } from '@/api';
 import useHasDevops from '@/hooks/useHasDevops';
@@ -167,6 +166,18 @@ const IssueDropDown = ({
       });
     }
   };
+  const getDeletePermissions = () => {
+    if (typeCode === 'risk') {
+      return ['choerodon.code.project.cooperation.risk.delete'];
+    }
+    if (isWaterfall) {
+      return ['choerodon.code.project.cooperation.sprint.iteration-plan.ps.editissue.pro'];
+    }
+    if (isProgramIssue) {
+      return ['choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.editissue.pro'];
+    }
+    return ['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro'];
+  };
   const getMenu = () => (
     <Menu onClick={handleClickMenu} selectable={false}>
       {!['feature', 'issue_epic', 'risk'].includes(typeCode) && (
@@ -261,11 +272,7 @@ const IssueDropDown = ({
       }
       {
         <Permission
-          service={isWaterfall
-            ? ['choerodon.code.project.cooperation.sprint.iteration-plan.ps.editissue.pro']
-            : [isProgramIssue
-              ? 'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.editissue.pro'
-              : 'choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
+          service={getDeletePermissions()}
           noAccessChildren={(
             <Menu.Item
               key="1"

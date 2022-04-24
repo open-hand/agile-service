@@ -142,6 +142,7 @@ const openStateModal = (props: Props) => {
       width: MODAL_WIDTH.small,
     },
     drawer: true,
+    okText: props.statusId ? '保存' : '创建',
     children: (
       <ObserverCreateState
         {...props}
