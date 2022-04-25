@@ -39,6 +39,7 @@ import Editor from '@/components/Editor';
 import {
   SelectRiskCategory, SelectRiskInfluence, SelectRiskProbability, SelectRiskProximity,
 } from '@/components/select/select-risk';
+import ComponentCompatibleWrapper from './ComponentStableWrap';
 
 export const AgileComponentMap = {
   sprint: SelectSprint,
@@ -135,7 +136,12 @@ function getElement<T extends IComponentFCWithClassObject,
   } else if (Object.keys(customComponents).includes(filedProcessConfig.fieldType!)) {
     element = getCustomElement<C>(filedProcessConfig as IFieldCustomComponentConfig<C>, customComponents);
   }
-  return React.createElement(element, { ...filedProcessConfig.props });
+
+  return (
+    <ComponentCompatibleWrapper key={(filedProcessConfig.props as any)?.key}>
+      {React.createElement(element, { ...filedProcessConfig.props })}
+    </ComponentCompatibleWrapper>
+  );
 }
 
 export default getElement;
