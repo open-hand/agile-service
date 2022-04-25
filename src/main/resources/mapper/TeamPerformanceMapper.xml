@@ -13,9 +13,6 @@
             JOIN agile_issue ai ON ai.issue_id = aisr.issue_id AND ai.project_id = aisr.project_id AND ai.type_code =
             'story'
             WHERE asp.project_id = #{projectId} AND asp.status_code = 'started'
-            <if test="isPlugin">
-                AND (asp.type = 'pi' OR asp.type IS NULL)
-            </if>
 
             UNION ALL
 
@@ -27,9 +24,6 @@
             JOIN agile_issue_status ais ON ais.status_id = ai.status_id AND ais.is_completed = 1 AND ais.project_id =
             ai.project_id
             WHERE asp.project_id = #{projectId} AND asp.status_code = 'started'
-            <if test="isPlugin">
-                AND (asp.type = 'pi' OR asp.type IS NULL)
-            </if>
         ) ai
         GROUP BY ai.main_responsible_id
     </select>
@@ -51,9 +45,6 @@
                 GROUP BY adl.issue_id
             ) adlm ON adlm.issue_id = ai.issue_id
             WHERE asp.project_id = #{projectId} AND asp.status_code = 'started'
-            <if test="isPlugin">
-                AND (asp.type = 'pi' OR asp.type IS NULL)
-            </if>
 
             UNION ALL
 
@@ -70,9 +61,6 @@
                 GROUP BY adl.issue_id
             ) adlm ON adlm.issue_id = ai.issue_id
             WHERE asp.project_id = #{projectId} AND asp.status_code = 'started'
-            <if test="isPlugin">
-                AND (asp.type = 'pi' OR asp.type IS NULL)
-            </if>
         ) ai
         GROUP BY ai.main_responsible_id
     </select>
@@ -91,9 +79,6 @@
         JOIN agile_issue ai ON ai.issue_id = aisr.issue_id AND ai.project_id = aisr.project_id AND ai.type_code =
         'bug' AND ai.environment = #{environment}
         WHERE asp.project_id = #{projectId} AND asp.status_code = 'started'
-        <if test="isPlugin">
-            AND (asp.type = 'pi' OR asp.type IS NULL)
-        </if>
         <if test="type != null and type == 'dev'">
             GROUP BY ai.main_responsible_id
         </if>
@@ -115,9 +100,6 @@
             LEFT JOIN agile_issue ai ON ai.issue_id = aisr.issue_id AND ai.project_id = aisr.project_id AND ai.type_code =
             'story'
             WHERE asp.project_id = #{projectId}
-            <if test="isPlugin">
-                AND (asp.type = 'pi' OR asp.type IS NULL)
-            </if>
 
             UNION ALL
 
@@ -130,9 +112,6 @@
             JOIN agile_issue_status ais ON ais.status_id = ai.status_id AND ais.is_completed = 1 AND ais.project_id =
             ai.project_id
             WHERE asp.project_id = #{projectId}
-            <if test="isPlugin">
-                AND (asp.type = 'pi' OR asp.type IS NULL)
-            </if>
         ) ai
         GROUP BY ai.sprint_id, ai.sprint_name
         ORDER BY ai.sprint_id ASC
@@ -158,9 +137,6 @@
                 GROUP BY adl.issue_id
             ) adlm ON adlm.issue_id = ai.issue_id
             WHERE asp.project_id = #{projectId}
-            <if test="isPlugin">
-                AND (asp.type = 'pi' OR asp.type IS NULL)
-            </if>
 
             UNION ALL
 
@@ -179,9 +155,6 @@
                 GROUP BY adl.issue_id
             ) adlm ON adlm.issue_id = ai.issue_id
 			WHERE asp.project_id = #{projectId}
-            <if test="isPlugin">
-                AND (asp.type = 'pi' OR asp.type IS NULL)
-            </if>
         ) ai
         GROUP BY ai.sprint_id, ai.sprint_name
 		ORDER BY ai.sprint_id ASC
@@ -205,9 +178,6 @@
             LEFT JOIN agile_issue ai ON ai.issue_id = aisr.issue_id AND ai.project_id = aisr.project_id AND ai.type_code IN
             ('story', 'task', 'sub_task', 'bug')
             WHERE asp.project_id = #{projectId}
-            <if test="isPlugin">
-                AND (asp.type = 'pi' OR asp.type IS NULL)
-            </if>
         ) aspi
         LEFT JOIN agile_issue ai ON ai.issue_id = aspi.issue_id AND ai.project_id = aspi.project_id AND ai.type_code =
         'bug'
@@ -254,9 +224,6 @@
                 JOIN agile_issue ai ON ai.issue_id = aisr.issue_id AND ai.project_id = aisr.project_id AND ai.type_code IN
                 ('story', 'task', 'sub_task', 'bug')
                 WHERE asp.project_id = #{projectId}
-                <if test="isPlugin">
-                    AND (asp.type = 'pi' OR asp.type IS NULL)
-                </if>
 
                 UNION ALL
 
@@ -266,9 +233,6 @@
                 JOIN agile_issue ai ON ai.issue_id = aisr.issue_id AND ai.project_id = aisr.project_id AND ai.type_code IN
                 ('story', 'task', 'sub_task', 'bug')
                 WHERE asp.project_id = #{projectId}
-                <if test="isPlugin">
-                    AND (asp.type = 'pi' OR asp.type IS NULL)
-                </if>
 		) aspi
 		GROUP BY aspi.responsible_id
     </select>
