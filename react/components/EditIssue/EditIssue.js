@@ -60,6 +60,7 @@ function EditIssue() {
   const otherProject = !sameProject(projectId);
   const container = useRef();
   const idRef = useRef();
+  const messageRef = useRef();
   const {
     push, close, eventsMap, pop, routes,
   } = useDetailContainerContext();
@@ -262,6 +263,11 @@ function EditIssue() {
       }
       store.initIssueAttribute(doc, workLogs, dataLogs, linkIssues, comments);
       store.setNotAllowedTransferStatus(notAllowedTransferStatus);
+      if (messageRef.current) {
+        store.setUpdateLoaded(true);
+        handleMessage(messageRef.current);
+        messageRef.current = null;
+      }
     } catch (error) {
       Choerodon.prompt(error.message, 'error');
     }
@@ -411,7 +417,11 @@ function EditIssue() {
         store.setIssueFields({ ...issue, ...store.updateMessage }, newFields);
         store.setUpdateMessage({});
         store.setUpdateFieldsAndValue([]);
+      } else {
+        messageRef.current = message;
       }
+    } else {
+      messageRef.current = message;
     }
   });
 
