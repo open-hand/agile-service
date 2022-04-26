@@ -16,6 +16,7 @@ databaseChangeLog(logicalFilePath: 'agile_product.groovy') {
                 constraints(nullable: false)
             }
             column(name: 'description', type: 'text', remarks: '描述')
+            column(name: 'image_url', type: 'VARCHAR(255)', remarks: '图标')
             column(name: 'product_owner', type: 'BIGINT UNSIGNED', remarks: '产品负责人')
             column(name: 'start_date', type: 'DATETIME', remarks: '开始时间')
             column(name: 'end_date', type: 'DATETIME', remarks: '结束时间')
