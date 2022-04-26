@@ -26,7 +26,7 @@ import styles from './FieldEpic.less';
     } = issue;
     if (epicId !== newEpicId) {
       if (typeCode === 'feature' && newEpicId) {
-        const hasSame = await featureApi.hasSameInEpicById(issueId, newEpicId);
+        const hasSame = await featureApi.project(store.projectId).hasSameInEpicById(issueId, newEpicId);
         if (hasSame) {
           Choerodon.prompt('史诗下已含有同名特性');
           done();

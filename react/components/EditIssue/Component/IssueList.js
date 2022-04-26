@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Icon, Popconfirm, Tooltip } from 'choerodon-ui';
 import { stores, Permission } from '@choerodon/boot';
 import { withRouter } from 'react-router-dom';
+import EditIssueContext from '../stores';
 import { issueApi } from '@/api';
 import Star from '@/components/tag/star';
 import UserTag from '@/components/tag/user-tag';
@@ -17,6 +18,7 @@ class IssueList extends Component {
   };
 
   handleDeleteIssue(issueId) {
+    const { store } = this.context;
     const { onRefresh, issue: { objectVersionNumber, typeCode, createdBy } } = this.props;
     const data = {
       issueId,
@@ -24,14 +26,14 @@ class IssueList extends Component {
       objectVersionNumber,
     };
     if (typeCode === 'sub_task') {
-      issueApi.delete(issueId, createdBy)
+      issueApi.project(store.projectId).delete(issueId, createdBy)
         .then(() => {
           if (onRefresh) {
             onRefresh();
           }
         });
     } else {
-      issueApi.update(data).then(() => {
+      issueApi.project(store.projectId).update(data).then(() => {
         if (onRefresh) {
           onRefresh(issueId);
         }
@@ -54,6 +56,7 @@ class IssueList extends Component {
     const {
       issue, i, showAssignee, showDelete, showPriority, onOpen, style,
     } = this.props;
+    const { store } = this.context;
     const { typeCode, starBeacon } = issue;
     const menu = AppState.currentMenuType;
     const { type, id: projectId, organizationId: orgId } = menu;
@@ -96,15 +99,15 @@ class IssueList extends Component {
         <Star disabled active={starBeacon} style={{ margin: '0 8px' }} />
         {
           showPriority && (
-          <div style={{ marginRight: '8px', overflow: 'hidden' }}>
-            <Tooltip mouseEnterDelay={0.5} title={`优先级： ${issue.priorityVO?.name}`}>
-              <div>
-                <PriorityTag
-                  priority={issue.priorityVO}
-                />
-              </div>
-            </Tooltip>
-          </div>
+            <div style={{ marginRight: '8px', overflow: 'hidden' }}>
+              <Tooltip mouseEnterDelay={0.5} title={`优先级： ${issue.priorityVO?.name}`}>
+                <div>
+                  <PriorityTag
+                    priority={issue.priorityVO}
+                  />
+                </div>
+              </Tooltip>
+            </div>
           )
         }
         {
@@ -139,33 +142,33 @@ class IssueList extends Component {
         </div>
         {
           showDelete && (
-          <Permission service={['agile-service.issue.deleteIssue']}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                fontSize: '16px',
-              }}
-            >
-              <Popconfirm
-                title={`确认要删除该${issueTypeName}吗?`}
-                placement="left"
-                // eslint-disable-next-line react/jsx-no-bind
-                onConfirm={this.confirm.bind(this, issue.issueId)}
-                onCancel={this.cancel}
-                okText="删除"
-                cancelText="取消"
-                okType="danger"
+            <Permission type="project" projectId={store.projectId} service={['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  fontSize: '16px',
+                }}
               >
-                <Icon type="delete_sweep-o" />
-              </Popconfirm>
-            </div>
-          </Permission>
+                <Popconfirm
+                  title={`确认要删除该${issueTypeName}吗?`}
+                  placement="left"
+                  // eslint-disable-next-line react/jsx-no-bind
+                  onConfirm={this.confirm.bind(this, issue.issueId)}
+                  onCancel={this.cancel}
+                  okText="删除"
+                  cancelText="取消"
+                  okType="danger"
+                >
+                  <Icon type="delete_sweep-o" />
+                </Popconfirm>
+              </div>
+            </Permission>
           )
         }
       </div>
     );
   }
 }
-
+IssueList.contextType = EditIssueContext;
 export default withRouter(IssueList);

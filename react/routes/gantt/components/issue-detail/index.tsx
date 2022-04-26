@@ -20,7 +20,7 @@ const IssueDetail: React.FC<Props> = ({
   refresh, onUpdate, onDelete, onDeleteSubIssue, onCreateSubIssue, onRecordTime, onCopyIssue, onTransformType, onChangeParent, onLinkIssue,
 }) => {
   const { store, menuType } = useContext(Context);
-  const { issueId, programId } = store;
+  const { issueId } = store;
   const handleResetIssue = useCallback((newIssueId) => {
     store.setIssue({ issueId: newIssueId, projectId: store.issue?.projectId });
     store.setProgramId(null);
@@ -34,13 +34,14 @@ const IssueDetail: React.FC<Props> = ({
 
   const visible = issueId;
   useEffect(() => {
+    const { programId } = store;
     if (visible) {
       open({
         path: 'issue',
         props: {
           issueId,
           programId,
-          projectId: store.issue?.projectId,
+          projectId: store.projectId,
           disabled: programId,
           applyType: programId ? 'program' : 'agile',
         },
@@ -65,7 +66,7 @@ const IssueDetail: React.FC<Props> = ({
     } else {
       close();
     }
-  }, [visible, issueId, open, refresh, handleResetIssue, close, onUpdate, onDelete, onDeleteSubIssue, onCreateSubIssue, onCopyIssue, onTransformType, onChangeParent, onLinkIssue, programId, menuType, store.issue?.projectId]);
+  }, [visible, issueId, open, refresh, handleResetIssue, close, onUpdate, onDelete, onDeleteSubIssue, onCreateSubIssue, onCopyIssue, onTransformType, onChangeParent, onLinkIssue, menuType, store, onRecordTime]);
   return (
     <DetailContainer {...detailProps} />
   );

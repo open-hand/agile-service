@@ -16,7 +16,7 @@ const IssueNumber = ({
 }) => {
   const { issueId, issueNum, applyType } = issue;
   const {
-    isProgramIssue,
+    isProgramIssue, store,
   } = useContext(EditIssueContext);
   const isWaterfallIssue = useMemo(() => WATERFALL_TYPE_CODES.includes(typeCode), [typeCode]);
   const handleClickIssueNum = useCallback(() => {
@@ -30,7 +30,7 @@ const IssueNumber = ({
   const handleCopyLink = useCallback(async () => {
     let decryptIssueId = issueId;
     if (!/^[0-9]+$/.test(issueId)) {
-      decryptIssueId = await issueApi.decrypt(issueId);
+      decryptIssueId = await issueApi.project(store.projectId).decrypt(issueId);
     }
     const queryData = {
       params: {
