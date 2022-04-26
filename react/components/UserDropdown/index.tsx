@@ -9,7 +9,9 @@ import {
 import Trigger from 'choerodon-ui/pro/lib/trigger';
 import builtinPlacements from 'choerodon-ui/pro/lib/dropdown/placements';
 import ConfigContext from 'choerodon-ui/lib/config-provider/ConfigContext';
-import { useCreation, useDebounceFn, useWhyDidYouUpdate } from 'ahooks';
+import {
+  useCreation, useDebounceFn, useMount, useWhyDidYouUpdate,
+} from 'ahooks';
 import UserTag from '@/components/tag/user-tag';
 
 import { User } from '@/common/types';
@@ -24,8 +26,9 @@ interface OverlayProps {
   setVisible: (visible: boolean) => void
   // selectedUser: User | undefined
 }
+export type IUserDropDownChangeSelectUser = (user?: Partial<User> & { id: string }) => void;
 export interface IUserDropDownProps {
-  userDropDownRef: React.MutableRefObject<{ selectedUser: User | undefined, changeSelect: (user?: Partial<User> & { id: string }) => void } | null>
+  userDropDownRef: React.MutableRefObject<{ selectedUser: User | undefined, changeSelect: IUserDropDownChangeSelectUser } | null>
   defaultAssignee: User | undefined,
   /** 选中的经办人 受控值 */
   assigneeSelected?: Partial<User> & { id: string },
@@ -88,10 +91,10 @@ const Overlay: React.FC<OverlayProps> = ({
         }
         {
           userListDs.filter((r) => !r.isSelected).map((record) => {
-            const user: User = record.toData();
+            const user: User & { tooltip?: string } = record.toData();
             return (
               <Menu.Item key={user.id}>
-                <Tooltip title={`${user.ldap ? `${user.realName}(${user.loginName})` : `${user.realName}(${user.email})`}`}>
+                <Tooltip title={user.tooltip || `${user.ldap ? `${user.realName}(${user.loginName})` : `${user.realName}(${user.email})`}`}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <UserTag
                       data={user}
@@ -128,7 +131,16 @@ const Overlay: React.FC<OverlayProps> = ({
 };
 
 const ObserverOverlay = observer(Overlay);
-
+function changeDatasetSelect(dataset: DataSet, user?: IUserDropDownProps['assigneeSelected']) {
+  if (user) {
+    const record = dataset.find((r) => r.get('id') === user.id) || dataset.create(user);
+    record.status === 'add' && dataset.setState('init', true);
+    dataset.select(record);
+    return;
+  }
+  const record = dataset.selected.length && dataset.selected[0];
+  record && dataset.unSelect(record);
+}
 const UserDropDown: React.FC<IUserDropDownProps> = ({
   userDropDownRef, projectId, onChange, ...props
 }) => {
@@ -142,61 +154,55 @@ const UserDropDown: React.FC<IUserDropDownProps> = ({
   const [{ dataLoading, isFirstLoad }, setDataMount] = useState({ dataLoading: false, isFirstLoad: true });
   const events = useCreation(() => ({}) as Pick<IUserDropDownProps, 'onChange'>, []);
   events.onChange = onChange;
-  const userListDs = useMemo(() => new DataSet({
-    autoQuery: false,
-    pageSize: 20,
-    selection: 'single' as any,
-    data: [defaultAssignee].filter(Boolean) as User[],
-    transport: {
-      // @ts-ignore
-      read: ({ params, data: requestData }) => ({
-        ...userApiConfig.project(projectId).getProjectUsersWithoutDisable({ ...params, ...requestData }),
-        transformResponse: (res) => {
-          const data = JSON.parse(res);
-          let content = data.content?.filter((item: any) => item.enabled);
-          content = defaultAssignee ? [defaultAssignee, ...content] : content;
-          return { ...data, content };
+  const userListDs = useMemo(() => {
+    let init = true;
+    const ds = new DataSet({
+      autoQuery: false,
+      pageSize: 20,
+      selection: 'single' as any,
+      data: [defaultAssignee].filter(Boolean) as User[],
+      transport: {
+        read: ({ params, data: requestData }: any) => ({
+          ...userApiConfig.project(projectId).getProjectUsersWithoutDisable({ ...params, ...requestData }),
+          transformResponse: (res) => {
+            const data = JSON.parse(res);
+            const content = data.content?.filter((item: any) => item.enabled);
+            return { ...data, content };
+          },
+        }),
+      },
+      events: {
+        load: ({ dataSet }: any) => {
+          if (init && defaultAssignee) {
+            changeDatasetSelect(dataSet, defaultAssignee);
+          }
+          init = false;
         },
-      }),
-    },
-    events: {
-      select: ({ dataSet, record }: { dataSet: DataSet, record: any }) => {
-        if (!dataSet.getState('init')) {
+        select: ({ dataSet, record }: { dataSet: DataSet, record: any }) => {
+          if (!dataSet.getState('init')) {
+            dataSet.created.length && dataSet.delete(dataSet.created[0], false);
+            events.onChange && events.onChange(record.toData());
+          }
+          dataSet.setState('init', false);
+        },
+        unSelect: ({ dataSet, record }: { dataSet: DataSet, record: any }) => {
           dataSet.created.length && dataSet.delete(dataSet.created[0], false);
-          events.onChange && events.onChange(record.toData());
-        }
-        dataSet.setState('init', false);
+          events.onChange && events.onChange();
+        },
       },
-      unSelect: ({ dataSet, record }: { dataSet: DataSet, record: any }) => {
-        dataSet.created.length && dataSet.delete(dataSet.created[0], false);
-        events.onChange && events.onChange();
-      },
-    },
-  }), [defaultAssignee, events, projectId]);
+    });
+    return ds;
+  }, [defaultAssignee, events, projectId]);
+
   const selectedUser = useComputed(() => userListDs.selected.length && userListDs.selected[0].toData(), []);
   const handleChangeSelect = useCallback((user?: IUserDropDownProps['assigneeSelected']) => {
-    if (user) {
-      const record = userListDs.find((r) => r.get('id') === user.id) || userListDs.create(user);
-      record.status === 'add' && userListDs.setState('init', true);
-      userListDs.select(record);
-      return;
-    }
-    const record = userListDs.selected.length && userListDs.selected[0];
-    record && userListDs.unSelect(record);
+    changeDatasetSelect(userListDs, user);
   }, [userListDs]);
-
   useImperativeHandle(userDropDownRef, () => ({
     selectedUser,
     changeSelect: handleChangeSelect,
   }));
-  useEffect(() => {
-    if (dataLoading && isFirstLoad) {
-      userListDs.query().then(() => {
-        setDataMount((oldValue) => ({ ...oldValue, isFirstLoad: false, dataLoading: false }));
-        setVisible(true);
-      });
-    }
-  }, [dataLoading, isFirstLoad, userListDs]);
+
   const handleClear = useCallback((e) => {
     e.stopPropagation();
     const record = userListDs.selected.length && userListDs.selected[0];
@@ -213,22 +219,29 @@ const UserDropDown: React.FC<IUserDropDownProps> = ({
       clearTimeout(timeoutIdRef.current);
     }
   }, []);
-
   const handleSearchUser = useCallback((value) => {
     userListDs.setQueryParameter('param', value);
     setDataMount((oldValue: any) => ({ ...oldValue, dataLoading: true }));
     const currentSelected = userListDs.selected.length && userListDs.selected[0].toData();
-    userListDs.query().then((res) => {
-      setDataMount((oldValue: any) => ({ ...oldValue, dataLoading: false }));
+    return userListDs.query().then((res) => {
+      setDataMount((oldValue: any) => ({ ...oldValue, isFirstLoad: false, dataLoading: false }));
       triggerRef.current?.forcePopupAlign();
       userListDs.setState('init', true);
       handleChangeSelect(currentSelected);
     });
   }, [handleChangeSelect, userListDs]);
+
+  useEffect(() => {
+    if (dataLoading && isFirstLoad) {
+      handleSearchUser(undefined).then(() => {
+        setVisible(true);
+      });
+    }
+  }, [dataLoading, handleSearchUser, isFirstLoad]);
+
   const handleClick = useCallback((e) => {
     setVisible(true);
   }, []);
-  useEffect(() => { }, [userListDs.selected.length]);
   const getContent = useCallback((...popupProps): ReactNode => (
     <ObserverOverlay
       inputRef={inputRef}
