@@ -45,6 +45,12 @@ public class ProjectVO {
     @ApiModelProperty("项目状态的名称")
     private String statusName;
 
+    @ApiModelProperty(value = "描述")
+    private String description;
+
+    @ApiModelProperty(value = "项目类型")
+    private List<String> types;
+
     public String getStatusName() {
         return statusName;
     }
@@ -152,5 +158,21 @@ public class ProjectVO {
 
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public List<String> getTypes() {
+        return types;
+    }
+
+    public void setTypes(List<String> types) {
+        this.types = types;
     }
 }
