@@ -16,4 +16,5 @@ const ComponentCompatibleWrapper: React.FC<any> = forwardRef(({ children, ...oth
   }
   return React.cloneElement(children, newProps);
 });
+ComponentCompatibleWrapper.displayName = 'ComponentCompatibleUIWrapper';
 export default ComponentCompatibleWrapper;
