@@ -12,9 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -500,5 +505,49 @@ public class DateUtil {
 
     }
 
+    public static LocalDate StringToLocalDate(String dateStr, String formatter) {
+        if (ObjectUtils.isEmpty(dateStr)) {
+            return null;
+        }
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(formatter);
+        dateTimeFormatter = dateTimeFormatter.withLocale(Locale.getDefault());
+        return LocalDate.parse(dateStr, dateTimeFormatter);
+    }
 
+    public static LocalDateTime StringToLocalDateTime(String dateStr, String formatter) {
+        if (ObjectUtils.isEmpty(dateStr)) {
+            return null;
+        }
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(formatter);
+        dateTimeFormatter = dateTimeFormatter.withLocale(Locale.getDefault());
+        return LocalDateTime.parse(dateStr, dateTimeFormatter);
+    }
+
+    public static LocalDate dateToLocalDate(Date date) {
+        if (ObjectUtils.isEmpty(date)) {
+            return null;
+        }
+        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    }
+
+    public static LocalDateTime dateToLocalDateTime(Date date) {
+        if (ObjectUtils.isEmpty(date)) {
+            return null;
+        }
+        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+    }
+
+    public static Date localDateToDate(LocalDate localDate) {
+        if (ObjectUtils.isEmpty(localDate)) {
+            return null;
+        }
+        return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    public static Date localDateTimeToDate(LocalDateTime localDateTime) {
+        if (ObjectUtils.isEmpty(localDateTime)) {
+            return null;
+        }
+        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+    }
 }
