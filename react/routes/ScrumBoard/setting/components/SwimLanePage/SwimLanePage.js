@@ -31,7 +31,14 @@ class SwimLanePage extends Component {
   render() {
     const defaultSelect = ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard);
     return (
-      <div>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+        className="c7n-pro-form-float"
+      >
         <Select
           style={{ width: 512 }}
           label={(
