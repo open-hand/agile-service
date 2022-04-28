@@ -35,11 +35,16 @@
     </select>
 
 
-    <select id="selectEffectiveHolidays" resultType="java.lang.String">
-        select t.work_day
+    <select id="selectEffectiveHolidays" resultType="io.choerodon.agile.infra.dto.WorkCalendarRefDTO">
+        select
+        t.work_day,
+        t.calendar_id,
+        t.status
         from (
             select
             awcf.work_day,
+            awcf.status,
+            awcf.calendar_id,
             sprint.start_date,
             case
                 when sprint.status_code = 'closed'
@@ -49,7 +54,6 @@
             from agile_work_calendar_ref awcf
             join agile_sprint sprint on awcf.sprint_id = sprint.sprint_id
             where awcf.project_id = #{projectId}
-            and awcf.status = 0
         ) t
         where date(t.work_day) &gt;= t.start_date
         and date(t.work_day) &lt;= t.end_date
