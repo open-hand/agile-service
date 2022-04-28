@@ -51,8 +51,8 @@ public interface WorkCalendarRefMapper extends BaseMapper<WorkCalendarRefDTO> {
      */
     List<WorkCalendarRefDTO> listByProjectId(@Param("projectId") Long projectId, @Param("year") Integer year);
 
-    Set<String> selectEffectiveHolidays(@Param("projectId") Long projectId,
-                                        @Param("startDate") Date startDate,
-                                        @Param("endDate") Date endDate);
+    List<WorkCalendarRefDTO> selectEffectiveHolidays(@Param("projectId") Long projectId,
+                                                     @Param("startDate") Date startDate,
+                                                     @Param("endDate") Date endDate);
 
 }
