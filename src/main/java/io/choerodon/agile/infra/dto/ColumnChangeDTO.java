@@ -1,14 +1,16 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.agile.infra.utils.StringUtil;
-
 import java.util.Date;
+
+import io.choerodon.agile.infra.utils.StringUtil;
 
 /**
  * @author dinghuang123@gmail.com
  * @since 2018/7/2
  */
 public class ColumnChangeDTO {
+
+    private Long logId;
 
     private Long issueId;
 
@@ -25,6 +27,14 @@ public class ColumnChangeDTO {
     private String newValue;
 
     private Date date;
+
+    public Long getLogId() {
+        return logId;
+    }
+
+    public void setLogId(Long logId) {
+        this.logId = logId;
+    }
 
     public String getOldValue() {
         return oldValue;
