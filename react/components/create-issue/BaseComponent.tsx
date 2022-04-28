@@ -147,6 +147,12 @@ const presets = new Map([
   ['discoveryDate', {
     max: moment(),
   }],
+  ['benfitHypothesis', {
+    maxLength: 100,
+  }],
+  ['acceptanceCritera', {
+    maxLength: 100,
+  }],
 ]);
 const afterLoadKeyMap = new Map([
   ['component', 'componentId'],
