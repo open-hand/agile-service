@@ -56,6 +56,7 @@ public class SystemFieldPageConfig {
         ACTUAL_RESOLUTION_DATE(FieldCode.ACTUAL_RESOLUTION_DATE, false, true),
         RELATED_PARTIES(FieldCode.RELATED_PARTIES, true, true),
         DISCOVERY_DATE(FieldCode.DISCOVERY_DATE, true, true),
+        PRODUCT(FieldCode.PRODUCT, true, true),
         ;
 
 
