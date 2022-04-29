@@ -152,6 +152,10 @@ public class IssueUpdateVO {
     @ApiModelProperty(value = "风险工作项")
     private RiskVO riskVO;
 
+    @ApiModelProperty(value = "产品")
+    @Encrypt
+    private List<Long> productIds;
+
     public List<TagVO> getTags() {
         return tags;
     }
@@ -491,5 +495,13 @@ public class IssueUpdateVO {
 
     public void setRiskVO(RiskVO riskVO) {
         this.riskVO = riskVO;
+    }
+
+    public List<Long> getProductIds() {
+        return productIds;
+    }
+
+    public void setProductIds(List<Long> productIds) {
+        this.productIds = productIds;
     }
 }

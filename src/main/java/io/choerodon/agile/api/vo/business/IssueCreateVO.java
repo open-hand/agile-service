@@ -155,6 +155,10 @@ public class IssueCreateVO {
     @ApiModelProperty(value = "前置依赖")
     private List<IssuePredecessorVO> issuePredecessors;
 
+    @ApiModelProperty(value = "产品")
+    @Encrypt
+    private List<Long> productIds;
+
     public List<TagVO> getTags() {
         return tags;
     }
@@ -535,5 +539,13 @@ public class IssueCreateVO {
 
     public void setRiskVO(RiskVO riskVO) {
         this.riskVO = riskVO;
+    }
+
+    public List<Long> getProductIds() {
+        return productIds;
+    }
+
+    public void setProductIds(List<Long> productIds) {
+        this.productIds = productIds;
     }
 }

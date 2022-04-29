@@ -538,4 +538,8 @@ public interface AgilePluginService {
     List<String> queryFieldOrderByIssueType(String issueType);
 
     void initBusinessOrganization(Long organizationId);
+
+    void createIssueProductRel(List<Long> productIds, Long projectId, Long issueId);
+
+    void updateIssueProductRel(List<Long> productIds, Long projectId, Long issueId);
 }

@@ -499,4 +499,6 @@ public interface IssueService {
     void setSortMap(Long organizationId, Long projectId, PageRequest pageRequest, Map<String, Object> sortMap, String mainTableAlias);
 
     void deleteIssueOnRequiresNew(Long projectId, Long issueId, BatchUpdateFieldStatusVO batchUpdateFieldStatusVO);
+
+    void handleUpdateIssueProductRel(List<Long> productIds, Long projectId, Long issueId);
 }
