@@ -1,10 +1,12 @@
 package io.choerodon.agile.app.service;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.IssueCreateVO;
-import io.choerodon.agile.api.vo.business.IssueUpdateVO;
-import io.choerodon.agile.api.vo.business.IssueVO;
-import io.choerodon.agile.api.vo.business.SystemFieldOverrideConfigVO;
+import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.waterfall.PredecessorIssueStatusLinkageVO;
 import io.choerodon.agile.api.vo.waterfall.WfDeliverableVO;
@@ -13,11 +15,6 @@ import io.choerodon.agile.infra.dto.StatusFieldValueSettingDTO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
-
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author superlee
@@ -57,6 +54,7 @@ public interface AgileWaterfallService {
 
     /**
      * 创建交付物
+     *
      * @param issueId
      * @param wfDeliverableVOS
      */
@@ -95,4 +93,6 @@ public interface AgileWaterfallService {
     List<FieldTableVO> getWaterfallField();
 
     Map<String, Set<Long>> queryPredecessorIssues(Long projectId, Long issueId, Set<String> predecessorTypes);
+
+    void setProgress(Long projectId, List<IssueListFieldKVVO> issueListFieldKVVOS);
 }

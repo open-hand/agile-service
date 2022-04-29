@@ -1,15 +1,16 @@
 package io.choerodon.agile.api.vo.business;
 
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.infra.dto.UserMessageDTO;
-import io.choerodon.agile.infra.utils.StringUtil;
-import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.agile.infra.utils.StringUtil;
 
 /**
  * Created by WangZhe@choerodon.io on 2019-06-28.
@@ -203,6 +204,17 @@ public class IssueListFieldKVVO {
 
     @ApiModelProperty("偏差率")
     private BigDecimal deviationRate;
+
+    @ApiModelProperty(value = "瀑布工作项的完成进度")
+    private Integer progress;
+
+    public Integer getProgress() {
+        return progress;
+    }
+
+    public void setProgress(Integer progress) {
+        this.progress = progress;
+    }
 
     public String getEpicSelfName() {
         return epicSelfName;
