@@ -27,7 +27,12 @@ export default function useProjectIssueTypes(config?: ProjectIssueTypesConfig, o
   const isProgram = config?.isProgram ?? hookIsProgram.isProgram;
   const { isShowFeature } = useIsInProgram({ projectId: config?.projectId });
   const applyType = config?.applyType ?? getApplyType(true);
-  const key = useProjectKey({ key: ['issueTypes', { onlyEnabled: config?.onlyEnabled ?? true, applyType, typeCode: config?.typeCode }], projectId: config?.projectId });
+  const key = useProjectKey({
+    key: ['issueTypes', {
+      onlyEnabled: config?.onlyEnabled ?? true, applyType, typeCode: config?.typeCode, excludeTypes: config?.excludeTypes,
+    }],
+    projectId: config?.projectId,
+  });
   const select: UseQueryOptions<IIssueType[]>['select'] = useCallback((data: any[]) => {
     const filterData = data.filter((item: IIssueType) => !(config?.excludeTypes || []).includes(item.typeCode));
     const issueTypes = (!isProgram ? filterData.filter((item: IIssueType) => item.typeCode !== 'feature') : filterData);
@@ -36,7 +41,7 @@ export default function useProjectIssueTypes(config?: ProjectIssueTypesConfig, o
     // eslint-disable-next-line no-nested-ternary
     const typeCodes = Array.isArray(config?.typeCode) ? config?.typeCode : (config?.typeCode ? [config?.typeCode] : null);
     return typeCodes ? finalIssueTypes.filter((type: any) => typeCodes.includes(type.typeCode)) : finalIssueTypes;
-  }, [config?.applyType, config?.isShowFeature, config?.menuType, config?.typeCode, isProgram, isShowFeature]);
+  }, [config?.applyType, config?.isShowFeature, config?.menuType, config?.typeCode, isProgram, isShowFeature, config?.excludeTypes]);
   return useQuery(key, () => issueTypeApi.loadAllWithStateMachineId(applyType, config?.projectId, config?.onlyEnabled ?? true, config?.programId), {
     select,
     initialData: [] as IIssueType[],
