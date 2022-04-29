@@ -137,8 +137,8 @@ function getElement<T extends IComponentFCWithClassObject,
     element = getCustomElement<C>(filedProcessConfig as IFieldCustomComponentConfig<C>, customComponents);
   }
   return (
-    <ComponentCompatibleWrapper>
-      {React.createElement(element, { ...filedProcessConfig.props })}
+    <ComponentCompatibleWrapper {...filedProcessConfig.props}>
+      {React.createElement(element)}
     </ComponentCompatibleWrapper>
   );
 }
