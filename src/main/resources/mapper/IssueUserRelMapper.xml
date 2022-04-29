@@ -12,7 +12,7 @@
             and user_type = #{userType}
         </if>
         <if test="userIds != null and userIds.size > 0">
-            and participant_id in
+            and user_id in
             <foreach collection="userIds" item="userId" open="(" close=")" separator=",">
                 #{userId}
             </foreach>
