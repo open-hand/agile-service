@@ -34,6 +34,8 @@ const transformValue = ({ issue, field, fieldsWithValue }: {issue: any, field: I
       return issue.mainResponsible?.realName || '无';
     case 'epicName':
       return issue.epicName || '无';
+    case 'estimateTime':
+      return issue.estimateTime !== null && issue.estimateTime !== undefined ? `${issue.estimateTime} 小时` : '无';
     default:
       break;
   }
