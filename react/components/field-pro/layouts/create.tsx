@@ -219,6 +219,9 @@ const systemFieldConfigMap: ICreateComponentPropsDistributeProRender<typeof Agil
       placeholder: '应对策略',
     },
   },
+  product: {
+    valueKey: 'productIds',
+  },
 };
 
 const fieldMap = {
