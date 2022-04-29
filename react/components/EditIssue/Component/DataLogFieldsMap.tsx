@@ -930,6 +930,9 @@ const fieldsMap = new Map([
   ['discoveryDate', {
     name: '发现日期',
   }],
+  ['product', {
+    name: '产品',
+  }],
 ]);
 
 export default fieldsMap;
