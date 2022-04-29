@@ -8,8 +8,7 @@ import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
  */
 const ComponentCompatibleWrapper: React.FC<any> = forwardRef(({ children, ...otherProps }, ref: any) => {
   const formContext = useContext(FormContext);
-  const newProps = otherProps;
-  newProps.ref = ref;
+  const newProps = { ...otherProps, ref };
   const isFilterPlaceholder = useMemo(() => formContext.formNode && (children?.props?.labelLayout === LabelLayout.float || formContext.labelLayout === LabelLayout.float), [children?.props?.labelLayout, formContext.formNode, formContext.labelLayout]);
   if (isFilterPlaceholder) {
     return React.cloneElement(children, { ...newProps, placeholder: undefined });
