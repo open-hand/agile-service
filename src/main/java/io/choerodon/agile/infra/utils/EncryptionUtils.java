@@ -432,6 +432,34 @@ public class EncryptionUtils {
         if (StringUtils.isNotBlank(tempStr)) {
             handlerPrimaryKey(tempStr, "priorityId", search.getAdvancedSearchArgs());
         }
+
+        // categoryIds
+        temp = adMapOptional.map(ad -> (List<String>) (ad.get("categoryIds"))).orElse(null);
+        if (!ObjectUtils.isEmpty(temp)) {
+            search.getAdvancedSearchArgs().put("categoryIds",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
+
+        // influenceIds
+        temp = adMapOptional.map(ad -> (List<String>) (ad.get("influenceIds"))).orElse(null);
+        if (!ObjectUtils.isEmpty(temp)) {
+            search.getAdvancedSearchArgs().put("influenceIds",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
+
+        // probabilityIds
+        temp = adMapOptional.map(ad -> (List<String>) (ad.get("probabilityIds"))).orElse(null);
+        if (!ObjectUtils.isEmpty(temp)) {
+            search.getAdvancedSearchArgs().put("probabilityIds",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
+
+        // proximityIds
+        temp = adMapOptional.map(ad -> (List<String>) (ad.get("proximityIds"))).orElse(null);
+        if (!ObjectUtils.isEmpty(temp)) {
+            search.getAdvancedSearchArgs().put("proximityIds",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
     }
 
     /**
@@ -572,6 +600,13 @@ public class EncryptionUtils {
         temp = oaMapOptional.map(ad -> (List<String>) (ad.get("stage"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("stage",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
+
+        // relatedPartyIds
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("relatedPartyIds"))).orElse(null);
+        if (!ObjectUtils.isEmpty(temp)) {
+            search.getOtherArgs().put("relatedPartyIds",
                     temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
     }
