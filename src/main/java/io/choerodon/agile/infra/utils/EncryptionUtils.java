@@ -317,7 +317,18 @@ public class EncryptionUtils {
                     } else if (field.getType() == List.class) {
                         String className = field.getGenericType().getTypeName().substring(15, field.getGenericType().getTypeName().length() - 1);
                         Class<?> aClass = Class.forName(className);
-                        List list = jsonToList(valueNode, aClass);
+                        List list;
+                        if (aClass.isPrimitive() || EncryptionUtils.isWrapClass(aClass) || aClass.newInstance() instanceof String) {
+                            Encrypt encrypt = field.getDeclaredAnnotation(Encrypt.class);
+                            if (aClass == Long.class && encrypt != null) {
+                                String[] ignoreValue = encrypt.ignoreValue();
+                                list = EncryptionUtils.decryptList(JSON.parseArray(valueNode.toString(), String.class), encrypt.value(),ignoreValue);
+                            } else {
+                                list = JSON.parseArray(valueNode.toString(), aClass);
+                            }
+                        } else {
+                            list = jsonToList(valueNode, aClass);
+                        }
                         field.set(object, list);
                     } else if (field.getType() == Object.class){
                         if (valueNode.isArray()) {
