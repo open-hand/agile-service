@@ -90,6 +90,7 @@ public class RiskVO {
     private Long organizationId;
 
     @ApiModelProperty(value = "关联的风险id")
+    @Encrypt
     private Long riskRelId;
 
     @ApiModelProperty(value = "关联类型")
