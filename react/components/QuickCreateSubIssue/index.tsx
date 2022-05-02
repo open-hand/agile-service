@@ -124,7 +124,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
           assigneeChange(assigneeId, currentAssignee);
         }
       };
-      if (!await checkCanQuickCreate(currentType.id, assigneeId, projectId)) {
+      if (!await checkCanQuickCreate(currentType.id, assigneeId, projectId, defaultValues)) {
         if (!cantCreateEvent) {
           Choerodon.prompt('该工作项类型含有必填选项，请使用弹框创建');
           setLoading(false);

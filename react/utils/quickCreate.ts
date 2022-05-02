@@ -1,17 +1,29 @@
-import { isEmpty } from 'lodash';
+import {
+  get, isEmpty, isNumber, pick,
+} from 'lodash';
 import { fieldApi } from '@/api';
 import { SHOW_FEATURE_TYPE_CODES_ALL } from '@/constants/SHOW_FEATURE_TYPE_CODE';
 import { getProjectId } from './common';
 
-export async function checkCanQuickCreate(typeId: string, assigneeId?: string, projectId?: string) {
+function hasAvailableValue(field: any, value: any) {
+  if (field.fieldType === 'multiple' || field.fieldType === 'checkbox' || field.fieldType === 'multiMember') {
+    return !!value?.length;
+  }
+  return !!value;
+}
+export async function checkCanQuickCreate(typeId: string, assigneeId?: string, projectId?: string, defaultValues?: Record<string, any>) {
   const param = {
     schemeCode: 'agile_issue',
     issueTypeId: typeId,
     pageCode: 'agile_issue_create',
   };
+  const checkDefaultValueKeys = ['estimatedStartTime', 'estimatedEndTime', 'actualStartTime', 'actualEndTime'];
   const whiteList = ['summary', 'status', 'reporter', 'issueType', 'priority', 'epicName'];
   const fields = await fieldApi.getFields(param, projectId);
-  const requiredButNullFields = fields.filter((field: any) => !whiteList.includes(field.fieldCode) && field.required && !field.defaultValue);
+  let requiredButNullFields = fields.filter((field: any) => !whiteList.includes(field.fieldCode) && field.required && !field.defaultValue);
+  // 过滤已经有填充值
+  const values = defaultValues && pick(defaultValues, checkDefaultValueKeys);
+  requiredButNullFields = values && Object.keys(values).length > 0 ? requiredButNullFields.filter((field: any) => !hasAvailableValue(field, get(values, field.fieldCode))) : requiredButNullFields;
   if (!requiredButNullFields.length || (requiredButNullFields.length === 1 && requiredButNullFields[0].fieldCode === 'assignee' && assigneeId)) {
     return true;
   }
