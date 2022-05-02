@@ -538,4 +538,6 @@ public interface AgilePluginService {
     List<String> queryFieldOrderByIssueType(String issueType);
 
     void initBusinessOrganization(Long organizationId);
+
+    void verifyUpdateData(JSONObject issueUpdate, List<String> fieldList);
 }
