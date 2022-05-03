@@ -13,7 +13,7 @@ import {
   useClickAway, useLockFn, useUpdateEffect,
 } from 'ahooks';
 import {
-  castArray, find, isBoolean, isString,
+  castArray, find, isBoolean, isString, pick,
 } from 'lodash';
 import useProjectIssueTypes, { ProjectIssueTypesConfig } from '@/hooks/data/useProjectIssueTypes';
 import { IIssueType, Issue, User } from '@/common/types';
@@ -124,11 +124,12 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
           assigneeChange(assigneeId, currentAssignee);
         }
       };
-      if (!await checkCanQuickCreate(currentType.id, assigneeId, projectId)) {
+      if (!await checkCanQuickCreate(currentType.id, assigneeId, projectId, defaultValues)) {
         if (!cantCreateEvent) {
           Choerodon.prompt('该工作项类型含有必填选项，请使用弹框创建');
           setLoading(false);
         } else {
+          const pickDefaultValueKeys = ['estimatedStartTime', 'estimatedEndTime', 'actualStartTime', 'actualEndTime'];
           Choerodon.prompt('请填写标注的必填字段');
           setDefaultValues();
           setLoading(false);
@@ -139,6 +140,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
               summary,
               sprint: sprintId,
               priority: priorityId,
+              ...pick(defaultValues || {}, pickDefaultValueKeys),
             },
             defaultTypeId: currentType.id,
             defaultAssignee: currentAssignee,

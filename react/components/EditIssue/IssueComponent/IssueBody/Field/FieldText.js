@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
+import classnames from 'classnames';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import TextArea from '@/components/TextArea';
 
@@ -47,13 +48,15 @@ import TextArea from '@/components/TextArea';
     const {
       store, field, feature, showTitle = true, disabled,
     } = this.props;
-    const { fieldCode, fieldName, textStyle } = field;
+    const {
+      fieldCode, fieldName, textStyle, fieldType,
+    } = field;
     const issue = store.getIssue;
     const { featureVO = {} } = issue;
     const required = field?.required || store.getRuleRequired(field);
     const value = feature ? featureVO && featureVO[fieldCode] : issue[fieldCode];
     return (
-      <div className="line-start mt-10">
+      <div className={classnames('line-start mt-10', { 'line-start-100': fieldType === 'text' })}>
         {showTitle
           ? (
             <div className="c7n-property-wrapper">
@@ -77,7 +80,8 @@ import TextArea from '@/components/TextArea';
           >
             <div style={{
               ...textStyle,
-              maxWidth: feature ? 200 : '',
+              // eslint-disable-next-line no-nested-ternary
+              maxWidth: feature ? (fieldType === 'text' ? '100%' : 200) : '',
               wordBreak: 'break-all',
               whiteSpace: 'pre-line',
             }}

@@ -6,7 +6,7 @@ import { IFieldOptionProps } from '@/api';
 import { User } from '@/common/types';
 import { FORMAT_FIELDS, MINUTE } from '@/constants/DATE_FORMAT';
 
-const disabledEditDefaultFields = ['featureType', 'issueType', 'status', 'priority', 'creationDate', 'lastUpdateDate', 'timeTrace', 'belongToBacklog', 'urgent', 'progressFeedback', 'description', 'environment', 'subProject', 'created_user', 'last_updated_user', 'email', 'tag'];
+const disabledEditDefaultFields = ['featureType', 'issueType', 'status', 'priority', 'creationDate', 'lastUpdateDate', 'timeTrace', 'belongToBacklog', 'urgent', 'progressFeedback', 'description', 'environment', 'subProject', 'created_user', 'last_updated_user', 'email', 'tag', 'riskCategory', 'riskInfluence', 'riskProbability', 'riskProximity', 'copingStrategy'];
 const orgDisabledEditDefaultFields = [...disabledEditDefaultFields, 'component', 'label', 'influenceVersion', 'fixVersion', 'epic', 'sprint', 'pi', 'subProject', 'backlogClassification', 'backlogType', 'programVersion'];
 const fieldTextValueConfig = {
   epic: { optionKey: 'issueId', textKey: 'epicName' },

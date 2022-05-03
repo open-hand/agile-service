@@ -86,6 +86,7 @@ export interface CreateIssueBaseProps {
   parentIssue?: {
     summary: string
     issueId: string
+    typeCode?: string
   }
   defaultValues?: {
     [key: string]: any
@@ -146,6 +147,12 @@ const presets = new Map([
   }],
   ['discoveryDate', {
     max: moment(),
+  }],
+  ['benfitHypothesis', {
+    maxLength: 100,
+  }],
+  ['acceptanceCritera', {
+    maxLength: 100,
   }],
 ]);
 const afterLoadKeyMap = new Map([
@@ -312,11 +319,20 @@ const CreateIssueBase = observer(({
     dataSet.current?.set(name, value);
   });
 
+  const excludeTypes = useMemo(() => {
+    if (applyType === 'risk') {
+      return undefined;
+    }
+    if (parentIssue?.typeCode && WATERFALL_TYPE_CODES.includes(parentIssue?.typeCode)) {
+      return ['sub_task', 'risk'];
+    }
+    return ['risk'];
+  }, [applyType, parentIssue?.typeCode]);
   const { isFetching: isLoading, data: issueTypeList } = useProjectIssueTypes({
     projectId,
     typeCode,
     isProgram,
-    excludeTypes: applyType === 'risk' ? undefined : ['risk'],
+    excludeTypes,
     applyType: isWaterfallAgile && applyType === 'waterfall' ? undefined : applyType,
   }, {
     onSuccess: ((issueTypes) => {
@@ -342,6 +358,7 @@ const CreateIssueBase = observer(({
     id: issueTypeId,
   })?.typeCode;
   const enableIssueLinks = issueTypeCode && SHOW_ISSUE_LINK_TYPE_CODES.includes(issueTypeCode);
+  const showParentIssueSummary = parentIssue && issueTypeCode && !WATERFALL_TYPE_CODES.includes(issueTypeCode);
   const isSubIssue = issueTypeCode && ['sub_task', 'bug'].includes(issueTypeCode);
 
   const [{ data: fields, isFetching: isFieldsLoading }, {
@@ -576,6 +593,7 @@ const CreateIssueBase = observer(({
     currentTemplateDescription.current = templateData?.template;
     if (parentIssue) {
       if (issueTypeCode && WATERFALL_TYPE_CODES.includes(issueTypeCode)) {
+        // 所属父级字段
         setValue('parent', parentIssue.issueId);
       } else {
         setValue('parentIssueId', parentIssue);
@@ -772,7 +790,7 @@ const CreateIssueBase = observer(({
             isProgram,
             typeCode,
             projectId,
-            excludeTypes: applyType === 'risk' ? undefined : ['risk'],
+            excludeTypes,
             applyType: isWaterfallAgile && applyType === 'waterfall' ? undefined : applyType,
             menuType: menuType ?? 'project',
           },
@@ -945,7 +963,7 @@ const CreateIssueBase = observer(({
         dataSet={dataSet}
         columns={2}
       >
-        {parentIssue ? <TextField label="父任务概要" value={parentIssue.summary} disabled colSpan={2} /> : null}
+        {showParentIssueSummary ? <TextField label="父任务概要" value={parentIssue!.summary} disabled colSpan={2} /> : null}
         {renderFields()}
       </Form>
       {issueTypeCode === 'feature' ? <WSJF dataSet={dataSet} /> : null}

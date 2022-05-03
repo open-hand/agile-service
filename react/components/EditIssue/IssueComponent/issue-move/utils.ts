@@ -1,5 +1,5 @@
-import { IField, Issue } from '@/common/types';
 import { find, includes } from 'lodash';
+import { IField, Issue } from '@/common/types';
 import { MoveTargetIssue } from './store';
 
 export function initTargetIssue(sourceIssue: Issue): MoveTargetIssue {
@@ -13,7 +13,7 @@ export function initTargetIssue(sourceIssue: Issue): MoveTargetIssue {
 }
 
 const filterFields = (arr: IField[], typeCode: string) => {
-  const excludeCodes: string[] = ['summary', 'issueType', 'description', 'remainingTime', 'storyPoints', 'priority', 'estimatedStartTime', 'estimatedEndTime', 'benfitHypothesis', 'acceptanceCritera', 'environment', 'tag'];
+  const excludeCodes: string[] = ['summary', 'issueType', 'description', 'remainingTime', 'storyPoints', 'priority', 'estimatedStartTime', 'estimatedEndTime', 'benfitHypothesis', 'acceptanceCritera', 'environment', 'tag', 'participant'];
   if (typeCode === 'feature') {
     excludeCodes.push('sprint');
   }

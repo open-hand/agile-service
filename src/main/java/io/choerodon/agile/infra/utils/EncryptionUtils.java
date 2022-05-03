@@ -317,7 +317,18 @@ public class EncryptionUtils {
                     } else if (field.getType() == List.class) {
                         String className = field.getGenericType().getTypeName().substring(15, field.getGenericType().getTypeName().length() - 1);
                         Class<?> aClass = Class.forName(className);
-                        List list = jsonToList(valueNode, aClass);
+                        List list;
+                        if (aClass.isPrimitive() || EncryptionUtils.isWrapClass(aClass) || aClass.newInstance() instanceof String) {
+                            Encrypt encrypt = field.getDeclaredAnnotation(Encrypt.class);
+                            if (aClass == Long.class && encrypt != null) {
+                                String[] ignoreValue = encrypt.ignoreValue();
+                                list = EncryptionUtils.decryptList(JSON.parseArray(valueNode.toString(), String.class), encrypt.value(),ignoreValue);
+                            } else {
+                                list = JSON.parseArray(valueNode.toString(), aClass);
+                            }
+                        } else {
+                            list = jsonToList(valueNode, aClass);
+                        }
                         field.set(object, list);
                     } else if (field.getType() == Object.class){
                         if (valueNode.isArray()) {
@@ -431,6 +442,34 @@ public class EncryptionUtils {
         }).orElse(null);
         if (StringUtils.isNotBlank(tempStr)) {
             handlerPrimaryKey(tempStr, "priorityId", search.getAdvancedSearchArgs());
+        }
+
+        // categoryIds
+        temp = adMapOptional.map(ad -> (List<String>) (ad.get("categoryIds"))).orElse(null);
+        if (!ObjectUtils.isEmpty(temp)) {
+            search.getAdvancedSearchArgs().put("categoryIds",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
+
+        // influenceIds
+        temp = adMapOptional.map(ad -> (List<String>) (ad.get("influenceIds"))).orElse(null);
+        if (!ObjectUtils.isEmpty(temp)) {
+            search.getAdvancedSearchArgs().put("influenceIds",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
+
+        // probabilityIds
+        temp = adMapOptional.map(ad -> (List<String>) (ad.get("probabilityIds"))).orElse(null);
+        if (!ObjectUtils.isEmpty(temp)) {
+            search.getAdvancedSearchArgs().put("probabilityIds",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
+
+        // proximityIds
+        temp = adMapOptional.map(ad -> (List<String>) (ad.get("proximityIds"))).orElse(null);
+        if (!ObjectUtils.isEmpty(temp)) {
+            search.getAdvancedSearchArgs().put("proximityIds",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
     }
 
@@ -572,6 +611,13 @@ public class EncryptionUtils {
         temp = oaMapOptional.map(ad -> (List<String>) (ad.get("stage"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("stage",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
+
+        // relatedPartyIds
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("relatedPartyIds"))).orElse(null);
+        if (!ObjectUtils.isEmpty(temp)) {
+            search.getOtherArgs().put("relatedPartyIds",
                     temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
     }

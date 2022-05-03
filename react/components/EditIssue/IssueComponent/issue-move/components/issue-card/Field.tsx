@@ -12,6 +12,7 @@ import FieldProgramVersion from './fields/FieldProgramVersion';
 import FieldPI from './fields/FieldPI';
 // import FieldSubProject from './fields/FieldSubProject';
 import FieldVersion from './fields/FieldVersion';
+import FieldEstimateTime from './fields/FieldEstimateTime';
 import store, { FieldWithValue, MoveTarget } from '../../store';
 
 export interface FieldCommonProps {
@@ -58,6 +59,9 @@ function getFieldComponent(field: IField) {
     // }
     case 'fixVersion': {
       return FieldVersion;
+    }
+    case 'estimateTime': {
+      return FieldEstimateTime;
     }
     default: break;
   }
