@@ -31,6 +31,7 @@ import SelectPriority from '../../select/select-priority';
 import SelectComponent from '../../select/select-component';
 import SelectVersion from '../../select/select-version';
 import SelectQuickFilterField from '@/components/select/select-quick-filter';
+import SelectProduct from '@/components/select/select-product';
 import { IFieldType } from '@/common/types';
 import type { DateTimePickerProps } from '@/components/date-time-picker/DateTimePicker';
 import { validKeyReturnValue } from '@/common/commonValid';
@@ -39,6 +40,7 @@ import Editor from '@/components/Editor';
 import {
   SelectRiskCategory, SelectRiskInfluence, SelectRiskProbability, SelectRiskProximity,
 } from '@/components/select/select-risk';
+import ComponentCompatibleWrapper from './ComponentStableWrap';
 
 export const AgileComponentMap = {
   sprint: SelectSprint,
@@ -68,6 +70,7 @@ export const AgileComponentMap = {
   riskInfluence: SelectRiskInfluence,
   riskProbability: SelectRiskProbability,
   riskProximity: SelectRiskProximity,
+  product: SelectProduct,
 };
 
 export type AgileComponentMapProps = typeof AgileComponentMap
@@ -135,7 +138,11 @@ function getElement<T extends IComponentFCWithClassObject,
   } else if (Object.keys(customComponents).includes(filedProcessConfig.fieldType!)) {
     element = getCustomElement<C>(filedProcessConfig as IFieldCustomComponentConfig<C>, customComponents);
   }
-  return React.createElement(element, { ...filedProcessConfig.props });
+  return (
+    <ComponentCompatibleWrapper {...filedProcessConfig.props}>
+      {React.createElement(element)}
+    </ComponentCompatibleWrapper>
+  );
 }
 
 export default getElement;

@@ -539,5 +539,9 @@ public interface AgilePluginService {
 
     void initBusinessOrganization(Long organizationId);
 
+    void createIssueProductRel(List<Long> productIds, Long projectId, Long issueId);
+
+    void updateIssueProductRel(List<Long> productIds, Long projectId, Long issueId);
+
     void verifyUpdateData(JSONObject issueUpdate, List<String> fieldList);
 }

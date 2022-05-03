@@ -352,6 +352,14 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         handlerParticipantRel(issueConvertDTO, projectInfoDTO.getProjectId(), issueId);
         // 处理前置依赖
         handlerIssuePredecessors(issueConvertDTO, issueCreateVO.getIssuePredecessors(), projectInfoDTO.getProjectId(), issueId);
+        // 处理产品关联
+        handleCreateIssueProductRel(issueCreateVO.getProductIds(), projectInfoDTO.getProjectId(), issueId);
+    }
+
+    private void handleCreateIssueProductRel(List<Long> productIds, Long projectId, Long issueId) {
+        if (agilePluginService != null) {
+            agilePluginService.createIssueProductRel(productIds, projectId, issueId);
+        }
     }
 
     private void handlerIssuePredecessors(IssueConvertDTO issueConvertDTO, List<IssuePredecessorVO> issuePredecessors, Long projectId, Long issueId) {
@@ -990,6 +998,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (agileWaterfallService != null) {
             agileWaterfallService.handleUpdateWaterfallField(projectId, issueUpdateVO);
         }
+        if (issueUpdateVO.getProductIds() != null) {
+            this.self().handleUpdateIssueProductRel(issueUpdateVO.getProductIds(), projectId, issueId);
+        }
         return issueId;
     }
 
@@ -1012,6 +1023,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         if (agileWaterfallService != null) {
             agileWaterfallService.handleUpdateWaterfallFieldWithoutRuleNotice(projectId, issueUpdateVO);
+        }
+        if (issueUpdateVO.getProductIds() != null) {
+            this.self().handleUpdateIssueProductRel(issueUpdateVO.getProductIds(), projectId, issueId);
         }
         return issueId;
     }
@@ -1095,6 +1109,13 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             batchUpdateFieldStatusVO.setFailedCount(batchUpdateFieldStatusVO.getFailedCount() + 1);
+        }
+    }
+
+    @Override
+    public void handleUpdateIssueProductRel(List<Long> productIds, Long projectId, Long issueId) {
+        if (agilePluginService != null) {
+            agilePluginService.updateIssueProductRel(productIds, projectId, issueId);
         }
     }
 

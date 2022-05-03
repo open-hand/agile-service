@@ -34,4 +34,29 @@
         and (year = #{year} or year = (#{year}+1))
     </select>
 
+
+    <select id="selectEffectiveHolidays" resultType="io.choerodon.agile.infra.dto.WorkCalendarRefDTO">
+        select
+        t.work_day,
+        t.calendar_id,
+        t.status
+        from (
+            select
+            awcf.work_day,
+            awcf.status,
+            awcf.calendar_id,
+            sprint.start_date,
+            case
+                when sprint.status_code = 'closed'
+                then sprint.actual_end_date
+                else sprint.end_date
+            end as end_date
+            from agile_work_calendar_ref awcf
+            join agile_sprint sprint on awcf.sprint_id = sprint.sprint_id
+            where awcf.project_id = #{projectId}
+        ) t
+        where date(t.work_day) &gt;= t.start_date
+        and date(t.work_day) &lt;= t.end_date
+    </select>
+
 </mapper>

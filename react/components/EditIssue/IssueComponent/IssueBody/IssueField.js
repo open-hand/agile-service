@@ -24,7 +24,7 @@ import FieldActualStartTime from './Field/FieldActualStartTime';
 import FieldActualEndTime from './Field/FieldActualEndTime';
 import FieldParticipant from './Field/FieldParticipant';
 import { FIELD_SELECT_PARENT, FIELD_PROGRESS } from '@/constants/WATERFALL_INJECT';
-import { FIELD_RISK } from '@/constants/AGILEPRO_INJECT';
+import { FIELD_RISK, FIELD_PRODUCT } from '@/constants/AGILEPRO_INJECT';
 
 const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 'timeTrace', 'assignee'];
 
@@ -127,6 +127,8 @@ const IssueField = observer((props) => {
       case 'relatedParties':
       case 'discoveryDate':
         return hasInject(FIELD_RISK) ? mount(FIELD_RISK, { ...props, field }) : null;
+      case 'product':
+        return hasInject(FIELD_PRODUCT) ? mount(FIELD_PRODUCT, { ...props, field }) : null;
       default:
         return renderNormalField(field);
     }
