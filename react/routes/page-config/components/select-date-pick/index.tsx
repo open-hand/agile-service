@@ -13,6 +13,7 @@ import { observer } from 'mobx-react';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import DateTimesViewWithFormat from '@/components/date-time-picker/date-time-pikcer-format/DateTimesView';
 import styles from './index.less';
+import { refsBindRef } from '@/components/select/utils';
 /**
  * 阻止冒泡以及事件执行
  * @param e
@@ -101,18 +102,13 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
     innerRef.current?.choose(new Record({ meaning: date.format(format), value: date.format(format) }));
   }
   const DateView = DateViews[mode as DateViewsKey] as unknown as React.FC<any>;
-  const handleBindRef = useCallback((newRef) => {
-    if (newRef) {
-      ref && Object.assign(ref, { current: newRef });
-      Object.assign(innerRef, { current: newRef });
-    }
-  }, [ref]);
+
   useEffect(() => {
     setVisible(optionValue === 'custom');
   }, [optionValue]);
   return (
     <Select
-      ref={handleBindRef}
+      ref={refsBindRef(ref, innerRef)}
       value={optionValue === 'custom' ? value?.format(format) : optionValue}
       primitiveValue={false}
       // @ts-ignore
