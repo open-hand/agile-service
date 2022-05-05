@@ -117,7 +117,7 @@ function useTextEditTogglePropsWithPage(record: Record): ITextEditToggleConfigPr
     //   submitTrigger.push('click');
     // }
     return {
-      alwaysRender: false,
+      alwaysRender: record.get('fieldCode') === 'product',
       submitTrigger,
       onSubmit: handleSubmit,
       key,
