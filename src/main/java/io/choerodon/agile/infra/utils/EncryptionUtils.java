@@ -62,7 +62,7 @@ public class EncryptionUtils {
                 "statusList","assigneeId","reporterIds","programVersion",
                 "mainResponsibleIds","fixVersion","influenceVersion",
                 "creatorIds", "updatorIds", "statusIds","participantIds",
-                "userIds", "workGroupIds"
+                "userIds", "workGroupIds", "productIds"
             };
     public static final String[] FILTER_SINGLE_FIELD = {"userId"};
     public static final String[] IGNORE_VALUES = {"0","none"};
@@ -618,6 +618,13 @@ public class EncryptionUtils {
         temp = oaMapOptional.map(ad -> (List<String>) (ad.get("relatedPartyIds"))).orElse(null);
         if (!ObjectUtils.isEmpty(temp)) {
             search.getOtherArgs().put("relatedPartyIds",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
+
+        // productIds
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("productIds"))).orElse(null);
+        if (!ObjectUtils.isEmpty(temp)) {
+            search.getOtherArgs().put("productIds",
                     temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
     }

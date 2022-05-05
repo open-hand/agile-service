@@ -124,6 +124,8 @@ public class IssueConvertDTO {
 
     private Boolean isPreSprintDone;
 
+    private List<Long> productIds;
+
     public Long getRuleId() {
         return ruleId;
     }
@@ -597,4 +599,11 @@ public class IssueConvertDTO {
         isPreSprintDone = preSprintDone;
     }
 
+    public List<Long> getProductIds() {
+        return productIds;
+    }
+
+    public void setProductIds(List<Long> productIds) {
+        this.productIds = productIds;
+    }
 }

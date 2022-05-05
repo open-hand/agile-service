@@ -544,4 +544,10 @@ public interface AgilePluginService {
     void updateIssueProductRel(List<Long> productIds, Long projectId, Long issueId);
 
     void verifyUpdateData(JSONObject issueUpdate, List<String> fieldList);
+
+    void handlerProducts(Set<Long> projectIds, List<Long> issueIds, Map<String, Object> fieldCodeValues);
+
+    Map<Long, List<ProductVO>> listProductMap(Long organizationId, List<Long> projectIds, List<Long> issueIds);
+
+    List<ProductVO> listProductByProjectId(Long organizationId, Long projectId);
 }

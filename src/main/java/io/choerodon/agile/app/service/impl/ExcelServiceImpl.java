@@ -143,6 +143,7 @@ public class ExcelServiceImpl implements ExcelService {
     protected static final String RELATED_ISSUE = "relatedIssue";
     protected static final String EPIC_SELF_NAME = "epicSelfName";
     protected static final String PARTICIPANT = "participant";
+    protected static final String PRODUCT = "product";
 
     protected static final String USER_MAP = "userMap";
     protected static final String ISSUE_TYPE_MAP = "issueTypeMap";
@@ -158,6 +159,7 @@ public class ExcelServiceImpl implements ExcelService {
     protected static final String WORK_LOG_MAP = "workLogMap";
     protected static final String TAG_MAP = "tagMap";
     protected static final String RELATED_ISSUE_MAP = "relatedIssueMap";
+    protected static final String PRODUCT_MAP = "productMap";
 
     private static final String SUB_BUG_CN = "子缺陷";
 
@@ -289,6 +291,7 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put(RELATED_ISSUE, "关联" + IssueConstant.ISSUE_CN);
         FIELD_MAP.put(EPIC_SELF_NAME, "史诗名称");
         FIELD_MAP.put(PARTICIPANT, "参与人");
+        FIELD_MAP.put(PRODUCT, "产品");
         FIELDS = new ArrayList<>(FIELD_MAP.keySet()).toArray(new String[FIELD_MAP.keySet().size()]);
         FIELDS_NAMES = new ArrayList<>(FIELD_MAP.values()).toArray(new String[FIELD_MAP.values().size()]);
     }
@@ -491,7 +494,29 @@ public class ExcelServiceImpl implements ExcelService {
         Optional
                 .ofNullable(buildPredefinedByFieldCodeAndValues(cursor, systemFields, userNameList, FieldCode.PARTICIPANT))
                 .ifPresent(result::add);
+        Optional.ofNullable(processIssueProductPredefined(organizationId, projectId, cursor, systemFields))
+                .ifPresent(result::add);
         return result;
+    }
+
+    protected PredefinedDTO processIssueProductPredefined(Long organizationId, Long projectId, ExcelImportTemplate.Cursor cursor, List<String> fieldCodes) {
+        int col = fieldCodes.indexOf(FieldCode.PRODUCT);
+        if (col == -1) {
+            return null;
+        }
+        List<ProductVO> productVOList  = new ArrayList<>();
+        if (agilePluginService != null) {
+            productVOList = agilePluginService.listProductByProjectId(organizationId, projectId);
+        }
+        List<String> values = new ArrayList<>();
+        productVOList.forEach(i -> values.add(i.getName()));
+        return new PredefinedDTO(values,
+                PREDEFINED_VALUE_START_ROW,
+                PREDEFINED_VALUE_END_ROW,
+                col,
+                col,
+                FieldCode.PRODUCT,
+                cursor.getAndIncreaseSheetNum());
     }
 
     protected PredefinedDTO processIssueStatusPredefined(Long organizationId, Long projectId, ExcelImportTemplate.Cursor cursor, List<String> fieldCodes) {
@@ -1840,8 +1865,36 @@ public class ExcelServiceImpl implements ExcelService {
             case FieldCode.ESTIMATE_TIME:
                 validateAndSetEstimateTime(row, col, errorRowColMap, issueCreateVO);
                 break;
+            case FieldCode.PRODUCT:
+                validateAndSetProduct(row, col, excelColumn, errorRowColMap, issueCreateVO);
+                break;
             default:
                 break;
+        }
+    }
+
+    private void validateAndSetProduct(Row row,
+                                       Integer col,
+                                       ExcelColumnVO excelColumn,
+                                       Map<Integer, List<Integer>> errorRowColMap,
+                                       IssueCreateVO issueCreateVO) {
+        Cell cell = row.getCell(col);
+        if (!isCellEmpty(cell)) {
+            String value = cell.toString();
+            List<Long> productIds = new ArrayList<>();
+            List<String> list = splitByRegex(value);
+            for (String product : list) {
+                List<String> values = excelColumn.getPredefinedValues();
+                Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
+                if (!values.contains(product)) {
+                    cell.setCellValue(buildWithErrorMsg(product, "请输入正确的产品"));
+                    addErrorColumn(row.getRowNum(), col, errorRowColMap);
+                    break;
+                } else {
+                    productIds.add(valueIdMap.get(product));
+                }
+            }
+            issueCreateVO.setProductIds(productIds);
         }
     }
 
@@ -2826,9 +2879,29 @@ public class ExcelServiceImpl implements ExcelService {
             case FieldCode.ISSUE_STATUS:
                 processIssueStatus(projectId, excelColumnVO);
                 break;
+            case FieldCode.PRODUCT:
+                processIssueProduct(projectId, excelColumnVO);
+                break;
             default:
                 break;
         }
+    }
+
+    private void processIssueProduct(Long projectId, ExcelColumnVO excelColumnVO) {
+        List<ProductVO> productVOList = new ArrayList<>();
+        if (agilePluginService != null) {
+            productVOList.addAll(agilePluginService.listProductByProjectId(ConvertUtil.getOrganizationId(projectId), projectId));
+        }
+        List<String> values = new ArrayList<>();
+        Map<String, Long> map = new HashMap<>();
+        if (!ObjectUtils.isEmpty(productVOList)) {
+            productVOList.forEach(v -> {
+                values.add(v.getName());
+                map.put(v.getName(), v.getId());
+            });
+        }
+        excelColumnVO.setPredefinedValues(values);
+        excelColumnVO.setValueIdMap(map);
     }
 
     protected void processIssueStatus(Long projectId, ExcelColumnVO excelColumnVO) {
@@ -3246,8 +3319,10 @@ public class ExcelServiceImpl implements ExcelService {
                     Map<Long, List<WorkLogVO>> workLogVOMap = workLogMapper.queryByIssueIds(Collections.singletonList(projectId), issueIds).stream().collect(Collectors.groupingBy(WorkLogVO::getIssueId));
                     Map<String, String> envMap = lookupValueService.queryMapByTypeCode(FieldCode.ENVIRONMENT);
                     Map<Long, Set<TagVO>> tagMap = new HashMap<>();
+                    Map<Long, List<ProductVO>> productMap = new HashMap<>();
                     if (agilePluginService != null) {
                         tagMap.putAll(agilePluginService.listTagMap(ConvertUtil.getOrganizationId(projectId), new HashSet<>(Arrays.asList(projectId)), issueIds));
+                        productMap.putAll(agilePluginService.listProductMap(ConvertUtil.getOrganizationId(projectId), Arrays.asList(projectId), issueIds));
                     }
                     Map<Long, List<IssueLinkDTO>> relatedIssueMap =
                             issueLinkMapper.queryIssueLinkByIssueId(new HashSet<>(issueIds), new HashSet<>(Arrays.asList(projectId)), false)
@@ -3269,6 +3344,7 @@ public class ExcelServiceImpl implements ExcelService {
                     issueValueMap.put(WORK_LOG_MAP, workLogVOMap);
                     issueValueMap.put(TAG_MAP, tagMap);
                     issueValueMap.put(RELATED_ISSUE_MAP, relatedIssueMap);
+                    issueValueMap.put(PRODUCT_MAP, productMap);
                     issueValueMap.forEach((k, v) -> cursor.addCollections(v));
                     issues.forEach(issue ->
                             buildExcelIssueFromIssue(
@@ -3321,7 +3397,7 @@ public class ExcelServiceImpl implements ExcelService {
         Map<Long, List<WorkLogVO>> workLogVOMap = (Map<Long, List<WorkLogVO>>) issueValueMap.get(WORK_LOG_MAP);
         Map<Long, Set<TagVO>> tagMap = (Map<Long, Set<TagVO>>) issueValueMap.get(TAG_MAP);
         Map<Long, List<IssueLinkDTO>> relatedIssueMap = (Map<Long, List<IssueLinkDTO>>) issueValueMap.get(RELATED_ISSUE_MAP);
-
+        Map<Long, List<ProductVO>> productMap = (Map<Long, List<ProductVO>>) issueValueMap.get(PRODUCT_MAP);
         Long issueId = issue.getIssueId();
         ExportIssuesVO exportIssuesVO = new ExportIssuesVO();
         BeanUtils.copyProperties(issue, exportIssuesVO);
@@ -3355,7 +3431,17 @@ public class ExcelServiceImpl implements ExcelService {
         setTag(tagMap, exportIssuesVO);
         setRelatedIssue(exportIssuesVO, relatedIssueMap);
         setParticipant(exportIssuesVO, issue, usersMap);
+        setProduct(exportIssuesVO, issue, productMap);
         return exportIssuesVO;
+    }
+
+    private void setProduct(ExportIssuesVO exportIssuesVO, IssueDTO issue, Map<Long, List<ProductVO>> productMap) {
+        List<ProductVO> productVOList = productMap.get(issue.getIssueId());
+        String productNames = "";
+        if (!ObjectUtils.isEmpty(productVOList)) {
+            productNames = productVOList.stream().map(ProductVO::getName).collect(Collectors.joining(","));
+        }
+        exportIssuesVO.setProduct(productNames);
     }
 
     private void setParticipant(ExportIssuesVO exportIssuesVO, IssueDTO issue, Map<Long, UserMessageDTO> usersMap) {

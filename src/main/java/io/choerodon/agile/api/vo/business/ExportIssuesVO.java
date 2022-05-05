@@ -138,6 +138,7 @@ public class ExportIssuesVO {
 
     private Integer colorIndex;
 
+    private String product;
 
     public ExportIssuesVO() {
     }
@@ -620,5 +621,13 @@ public class ExportIssuesVO {
 
     public void setColorIndex(Integer colorIndex) {
         this.colorIndex = colorIndex;
+    }
+
+    public String getProduct() {
+        return product;
+    }
+
+    public void setProduct(String product) {
+        this.product = product;
     }
 }
