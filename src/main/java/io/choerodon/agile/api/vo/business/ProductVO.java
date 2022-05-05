@@ -22,6 +22,10 @@ public class ProductVO {
     @Encrypt
     @ApiModelProperty(value = "产品id")
     private Long id;
+
+    @Encrypt
+    @ApiModelProperty(value = "issueId")
+    private Long issueId;
     
     @ApiModelProperty(value = "图标url")
     private String imageUrl;
@@ -73,6 +77,14 @@ public class ProductVO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getIssueId() {
+        return issueId;
+    }
+
+    public void setIssueId(Long issueId) {
+        this.issueId = issueId;
     }
 
     public String getImageUrl() {

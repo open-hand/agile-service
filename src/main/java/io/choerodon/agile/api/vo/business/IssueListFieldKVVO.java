@@ -208,6 +208,9 @@ public class IssueListFieldKVVO {
     @ApiModelProperty(value = "瀑布工作项的完成进度")
     private Integer progress;
 
+    @ApiModelProperty(value = "产品")
+    private List<ProductVO> productVOList;
+
     public Integer getProgress() {
         return progress;
     }
@@ -740,5 +743,13 @@ public class IssueListFieldKVVO {
 
     public void setStatusMapVO(StatusVO statusMapVO) {
         this.statusMapVO = statusMapVO;
+    }
+
+    public List<ProductVO> getProductVOList() {
+        return productVOList;
+    }
+
+    public void setProductVOList(List<ProductVO> productVOList) {
+        this.productVOList = productVOList;
     }
 }

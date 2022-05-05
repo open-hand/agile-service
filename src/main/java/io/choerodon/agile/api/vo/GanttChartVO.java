@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.api.vo.business.ProductVO;
 import io.choerodon.agile.api.vo.business.TagVO;
 import io.choerodon.agile.api.vo.waterfall.GanttParentVO;
 import io.choerodon.agile.api.vo.waterfall.WaterfallIssueVO;
@@ -155,6 +156,8 @@ public class GanttChartVO {
     private Set<Long> parentSprintIds;
 
     private String applyType;
+
+    private List<ProductVO> productVOList;
 
     public Set<Long> getParentSprintIds() {
         return parentSprintIds;
@@ -586,5 +589,13 @@ public class GanttChartVO {
 
     public void setFeatureColor(String featureColor) {
         this.featureColor = featureColor;
+    }
+
+    public List<ProductVO> getProductVOList() {
+        return productVOList;
+    }
+
+    public void setProductVOList(List<ProductVO> productVOList) {
+        this.productVOList = productVOList;
     }
 }
