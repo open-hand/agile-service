@@ -150,6 +150,7 @@ const IssueStoreSystemMapComponentCode = {
   tags: 'tag',
   assigneeId: 'assignee',
   reporterIds: 'reporter',
+  productIds: 'product',
 };
 /**
  * 对于本地前端写的code转换为组件code （针对IssueStore的)

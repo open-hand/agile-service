@@ -5,6 +5,7 @@ import {
 import { includes, omit, sortBy } from 'lodash';
 import { has } from '@choerodon/inject';
 import { isInProgram } from '@/utils/program';
+import { SELECT_PRODUCT } from '../../../constants/AGILEPRO_INJECT';
 
 export function getSystemFields(excludeCodes = []) {
   const systemFields = [{
@@ -235,6 +236,15 @@ export function getSystemFields(excludeCodes = []) {
     defaultShow: false,
     fieldType: 'number',
   });
+  if (has(SELECT_PRODUCT)) {
+    systemFields.push({
+      code: 'productIds',
+      name: '产品',
+      nameKey: 'agile.systemField.product',
+      defaultShow: false,
+      fieldType: 'multiple',
+    });
+  }
   return isInProgram() ? systemFields.filter((f) => !includes(excludeCodes, f.code)) : systemFields.filter((f) => f.code !== 'feature' && !includes(excludeCodes, f.code));
 }
 /**

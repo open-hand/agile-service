@@ -33,6 +33,7 @@ const localeField = {
   storyPoint: '故事点',
   remainingTime: '剩余预估时间',
   estimateTime: '原始预估时间',
+  product: '产品',
 } as const;
 
 const localeColumnField = {
