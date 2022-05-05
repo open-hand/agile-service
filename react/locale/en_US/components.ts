@@ -33,6 +33,7 @@ const localeField = {
   storyPoint: 'Story Points',
   remainingTime: 'Remaining Estimate',
   estimateTime: 'Original Estimate',
+  product: 'Product',
 } as const;
 const localeColumnField = {
   lastUpdateDate: 'Update Time',
