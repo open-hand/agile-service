@@ -108,6 +108,13 @@ const TextEditToggle: React.FC<Props> = ({
     dataRef.current = initValue;
     setValue(initValue);
   }, [initValue]);
+  useUpdateEffect(() => {
+    // 自动聚焦
+    if (editing && editorRef.current && !latestState.isFocus) {
+      (editorRef.current as FormField<any>).focus();
+      latestState.isFocus = true;
+    }
+  }, [editing, latestState]);
 
   const hideEditor = () => {
     if (editing) {
@@ -195,9 +202,11 @@ const TextEditToggle: React.FC<Props> = ({
         if (r) {
           // 保存ref
           Object.assign(editorRef, { current: r });
-          // 自动聚焦
-          latestState.editing && !latestState.isFocus && typeof r?.focus === 'function' && r.focus();
-          latestState.isFocus = true;
+          // 编辑状态则自动聚焦
+          if (editing && !latestState.isFocus && typeof r?.focus === 'function') {
+            r.focus();
+            latestState.isFocus = true;
+          }
         }
       },
     };
