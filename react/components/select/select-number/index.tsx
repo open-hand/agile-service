@@ -1,10 +1,11 @@
 import React, {
-  forwardRef, useState, useCallback, useRef,
+  forwardRef, useState, useCallback,
 } from 'react';
 import type { ChangeEvent } from 'react';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { Select } from 'choerodon-ui/pro';
 import { useCreation, usePersistFn } from 'ahooks';
+import { refsBindRef } from '../utils';
 
 const { Option } = Select;
 
@@ -57,15 +58,12 @@ const SelectNumber: React.FC<Props> = forwardRef(({
   };
 
   const handBindRef = useCallback((r: Select) => {
-    ref && Object.assign(ref, {
-      current: r,
-    });
     // 为解决dataset 下组件上设置的正则无效
     name && r?.dataSet?.getField(name)?.set('pattern', pattern);
-  }, [name, pattern, ref]);
+  }, [name, pattern]);
   return (
     <Select
-      ref={handBindRef}
+      ref={refsBindRef(ref, handBindRef)}
       name={name}
       value={value}
       combo
