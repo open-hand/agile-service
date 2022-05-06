@@ -5,6 +5,7 @@ import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -70,6 +71,14 @@ public class ProductVO {
 
     @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
+
+    @Encrypt
+    @ApiModelProperty(value = "产品标签ids")
+    private List<Long> productLabelIds;
+
+    @ApiModelProperty(value = "产品标签ids")
+    @Valid
+    private List<ProductLabelRelVO> productLabelRelVOList;
 
     public Long getId() {
         return id;
@@ -189,5 +198,21 @@ public class ProductVO {
 
     public void setObjectVersionNumber(Long objectVersionNumber) {
         this.objectVersionNumber = objectVersionNumber;
+    }
+
+    public List<Long> getProductLabelIds() {
+        return productLabelIds;
+    }
+
+    public void setProductLabelIds(List<Long> productLabelIds) {
+        this.productLabelIds = productLabelIds;
+    }
+
+    public List<ProductLabelRelVO> getProductLabelRelVOList() {
+        return productLabelRelVOList;
+    }
+
+    public void setProductLabelRelVOList(List<ProductLabelRelVO> productLabelRelVOList) {
+        this.productLabelRelVOList = productLabelRelVOList;
     }
 }
