@@ -1319,7 +1319,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     private List<String> getIssueTypeFieldCodes(Long issueTypeId, Long organizationId, Long projectId) {
         Long newProjectId = projectId == null ? 0L : projectId;
-        List<String> fieldCodeS = new ArrayList<>();
+        List<String> fieldCodes = new ArrayList<>();
         List<AgileSystemFieldContext> agileSystemFieldContexts = Arrays.asList(AgileSystemFieldContext.values());
         agileSystemFieldContexts.forEach(v -> {
             IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
@@ -1328,19 +1328,19 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                     issueTypeMapper.selectByOptions(organizationId, newProjectId, issueTypeSearchVO)
                             .stream().map(IssueTypeVO::getId).collect(Collectors.toList());
             if (issueTypeIds.contains(issueTypeId)) {
-                fieldCodeS.add(v.getFieldCode());
+                fieldCodes.add(v.getFieldCode());
             }
         });
         if (agilePluginService != null) {
-            agilePluginService.getIssueTypeFieldCodes(fieldCodeS,issueTypeId);
+            agilePluginService.getIssueTypeFieldCodes(fieldCodes,issueTypeId);
         }
         if (backlogExpandService != null) {
-            backlogExpandService.getBacklogFieldCodes(fieldCodeS,issueTypeId);
+            backlogExpandService.getBacklogFieldCodes(fieldCodes,issueTypeId);
         }
         if (agileWaterfallService != null) {
-            agileWaterfallService.getWaterfallFieldCodes(fieldCodeS, issueTypeId);
+            agileWaterfallService.getWaterfallFieldCodes(fieldCodes, issueTypeId);
         }
-        return fieldCodeS;
+        return fieldCodes;
     }
 
     @Override
