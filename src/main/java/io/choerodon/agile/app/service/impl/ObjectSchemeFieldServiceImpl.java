@@ -1337,6 +1337,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (backlogExpandService != null) {
             backlogExpandService.getBacklogFieldCodes(fieldCodeS,issueTypeId);
         }
+        if (agileWaterfallService != null) {
+            agileWaterfallService.getWaterfallFieldCodes(fieldCodeS, issueTypeId);
+        }
         return fieldCodeS;
     }
 
@@ -1946,6 +1949,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                         setDefaultValueObjsOfSingle(epicDataMap, view);
                         break;
                     case FieldCode.PROGRAM_VERSION:
+                    case FieldCode.PRODUCT:
                         if (agilePluginService != null) {
                             agilePluginService.setBussinessDefaultValueObjs(pageFieldViews, projectId, organizationId);
                         }
