@@ -64,7 +64,7 @@ const CustomReport: React.FC<Props> = (props) => {
   const [expand, setExpand] = useState<boolean>(true);
   useEffect(() => {
     pageConfigApi.load().then((res: { content: IField[] }) => {
-      let newDimension = res.content.filter((item) => ['single', 'checkbox', 'multiple', 'radio', 'member', 'multiMember'].includes(item.fieldType) && !(item.contexts.length === 1 && item.contexts[0] === 'backlog'));
+      let newDimension = res.content.filter((item) => ['single', 'checkbox', 'multiple', 'radio', 'member', 'multiMember'].includes(item.fieldType) && !(item.contexts.length === 1 && ['backlog', 'risk'].includes(item.contexts[0])));
       newDimension = isWaterfallAgile ? newDimension.filter((item) => item.code !== 'parent') : newDimension;
       setDimension(newDimension);
     });

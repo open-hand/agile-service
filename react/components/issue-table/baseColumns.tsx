@@ -12,6 +12,7 @@ import UserTag from '../tag/user-tag';
 import { IFoundationHeader } from '@/common/types';
 import { MINUTE } from '@/constants/DATE_FORMAT';
 import GanttPredecessor from '@/routes/gantt/components/gantt-predecessor';
+import renderProduct from '@/components/column-renderer/product';
 
 type IIssueTableBaseColumnRenderGetData<T> = (data: T, nameKey: string) => any
 export interface IIssueTableBaseColumn<D extends object = any> {
@@ -477,6 +478,13 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
         </div>
       );
     },
+  }],
+  ['product', {
+    title: '产品',
+    titleKey: 'agile.systemField.product',
+    width: 120,
+    dataIndex: 'product',
+    render: (rowData, getDataMethod = get) => renderProduct({ productVOList: getDataMethod(rowData, 'productVOList') }),
   }],
 ]);
 
