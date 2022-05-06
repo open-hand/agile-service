@@ -341,10 +341,10 @@ public interface AgilePluginService {
 
     /**
      * 获取字段Code
-     * @param fieldCodeS
+     * @param fieldCodes
      * @param issueTypeId
      */
-    void getIssueTypeFieldCodes(List<String> fieldCodeS, Long issueTypeId);
+    void getIssueTypeFieldCodes(List<String> fieldCodes, Long issueTypeId);
 
     /**
      * 处理冲刺是否是规划中
