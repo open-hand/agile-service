@@ -34,6 +34,7 @@ const programSystemFields = [
   { code: 'benfitHypothesis', title: '特性价值' },
   { code: 'acceptanceCritera', title: '验收标准' },
   { code: 'programVersion', title: '版本' },
+  { code: 'product', title: '产品' },
 ];
 
 const projectSystemFields = [
@@ -63,6 +64,7 @@ const projectSystemFields = [
   { code: 'environment', title: '环境' },
   { code: 'participant', title: '参与人' },
   { code: 'estimateTime', title: '原始预估时间' },
+  { code: 'product', title: '产品' },
 ];
 
 const subProjectSystemFields = [
@@ -91,6 +93,7 @@ const subProjectSystemFields = [
   { code: 'environment', title: '环境' },
   { code: 'participant', title: '参与人' },
   { code: 'estimateTime', title: '原始预估时间' },
+  { code: 'product', title: '产品' },
 ];
 
 interface Props {

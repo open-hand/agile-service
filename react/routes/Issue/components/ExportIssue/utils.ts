@@ -39,6 +39,7 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
     estimateTime,
     remainingTime,
     storyPoints,
+    productIds,
   } = data;
   const starBeaconIndex = findIndex(quickFilterIds, (item) => item === 'myStarBeacon');
   let starBeacon;
@@ -81,6 +82,7 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
       updatorIds,
       tags,
       participantIds,
+      productIds,
     },
     searchArgs: {
       estimatedStartTimeScopeStart: estimatedStartTime[0],
@@ -231,6 +233,11 @@ function getFilterFormSystemFields(): FieldProps[] {
     name: 'influenceVersion',
     label: '影响的版本',
     valueField: 'versionId',
+    textField: 'name',
+  }, {
+    name: 'productIds',
+    label: '产品',
+    valueField: 'id',
     textField: 'name',
   }]);
 }
