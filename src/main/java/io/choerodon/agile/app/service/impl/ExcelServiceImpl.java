@@ -79,7 +79,7 @@ public class ExcelServiceImpl implements ExcelService {
     protected static final String SUCCESS = "success";
     protected static final String FAILED = "failed";
     protected static final String WEBSOCKET_IMPORT_CODE = "agile-import-issues";
-    protected static final String FEATURE = "feature";
+
     protected static final String FILE_NAME = "error.xlsx";
     protected static final String MULTIPART_NAME = "file";
     protected static final String ORIGINAL_FILE_NAME = ".xlsx";
@@ -108,42 +108,6 @@ public class ExcelServiceImpl implements ExcelService {
     private static final String DATE_RANGE_CHECK_MSG = "开始时间不能在结束时间之后";
 
     protected static final String EPIC_CN = "史诗";
-    protected static final String SUMMARY = "summary";
-    protected static final String ISSUE_NUM = "issueNum";
-    protected static final String EPIC_NAME = "epicName";
-    protected static final String TYPE_NAME = "typeName";
-    protected static final String DESCRIPTION = "description";
-    protected static final String PRIORITY_NAME = "priorityName";
-    protected static final String STATUS_NAME = "statusName";
-    protected static final String RESOLUTION = "resolution";
-    protected static final String SPRINT_NAME = "sprintName";
-    protected static final String ASSIGNEE_NAME = "assigneeName";
-    protected static final String REPORTER_NAME = "reporterName";
-    protected static final String STORY_POINTS = "storyPoints";
-    protected static final String REMAINING_TIME = "remainingTime";
-    protected static final String ESTIMATE_TIME = "estimateTime";
-    protected static final String VERSION_NAME = "versionName";
-    protected static final String FIX_VERSION_NAME = "fixVersionName";
-    protected static final String INFLUENCE_VERSION_NAME = "influenceVersionName";
-    protected static final String LABEL_NAME = "labelName";
-    protected static final String COMPONENT_NAME = "componentName";
-    protected static final String CREATION_DATE = "creationDate";
-    protected static final String LAST_UPDATE_DATE = "lastUpdateDate";
-    protected static final String ESTIMATED_START_TIME = "estimatedStartTime";
-    protected static final String ACTUAL_START_TIME = "actualStartTime";
-    protected static final String ESTIMATED_END_TIME = "estimatedEndTime";
-    protected static final String ACTUAL_END_TIME = "actualEndTime";
-    protected static final String CREATED_USER_NAME = "createdUserName";
-    protected static final String LAST_UPDATE_USER_NAME = "lastUpdatedUserName";
-    protected static final String MAIN_RESPONSIBLE_NAME = "mainResponsibleName";
-    protected static final String ENVIRONMENT_NAME = "environmentName";
-    protected static final String SPENT_WORK_TIME = "spentWorkTime";
-    protected static final String ALL_ESTIMATE_TIME = "allEstimateTime";
-    protected static final String TAGS = "tags";
-    protected static final String RELATED_ISSUE = "relatedIssue";
-    protected static final String EPIC_SELF_NAME = "epicSelfName";
-    protected static final String PARTICIPANT = "participant";
-    protected static final String PRODUCT = "product";
 
     protected static final String USER_MAP = "userMap";
     protected static final String ISSUE_TYPE_MAP = "issueTypeMap";
@@ -252,46 +216,51 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected static Map<String, String> FIELD_MAP = new LinkedHashMap<>();
 
-    protected static String[] AUTO_SIZE_WIDTH = {SUMMARY, EPIC_NAME, FEATURE,
-            CREATION_DATE, LAST_UPDATE_DATE, SPRINT_NAME};
+    protected static String[] AUTO_SIZE_WIDTH = {
+            ExportIssuesVO.SUMMARY,
+            ExportIssuesVO.EPIC_NAME,
+            ExportIssuesVO.FEATURE,
+            ExportIssuesVO.CREATION_DATE,
+            ExportIssuesVO.LAST_UPDATE_DATE,
+            ExportIssuesVO.SPRINT_NAME};
 
     static {
-        FIELD_MAP.put(TYPE_NAME, IssueConstant.ISSUE_TYPE_CN);
-        FIELD_MAP.put(ISSUE_NUM, IssueConstant.ISSUE_CN + "编号");
-        FIELD_MAP.put(SUMMARY, "概要");
-        FIELD_MAP.put(DESCRIPTION, "描述");
-        FIELD_MAP.put(PRIORITY_NAME, "优先级");
-        FIELD_MAP.put(STATUS_NAME, "状态");
-        FIELD_MAP.put(RESOLUTION, "解决状态");
-        FIELD_MAP.put(SPRINT_NAME, "冲刺");
-        FIELD_MAP.put(ASSIGNEE_NAME, "经办人");
-        FIELD_MAP.put(REPORTER_NAME, "报告人");
-        FIELD_MAP.put(STORY_POINTS, "故事点");
-        FIELD_MAP.put(REMAINING_TIME, "剩余预估时间");
-        FIELD_MAP.put(ESTIMATE_TIME, "原始预估时间");
-        FIELD_MAP.put(VERSION_NAME, "版本");
-        FIELD_MAP.put(FIX_VERSION_NAME, "修复的版本");
-        FIELD_MAP.put(INFLUENCE_VERSION_NAME, "影响的版本");
-        FIELD_MAP.put(EPIC_NAME, "所属史诗");
-        FIELD_MAP.put(LABEL_NAME, "标签");
-        FIELD_MAP.put(COMPONENT_NAME, "模块");
-        FIELD_MAP.put(CREATION_DATE, "创建时间");
-        FIELD_MAP.put(LAST_UPDATE_DATE, "最后更新时间");
-        FIELD_MAP.put(ESTIMATED_START_TIME, "预计开始时间");
-        FIELD_MAP.put(ESTIMATED_END_TIME, "预计结束时间");
-        FIELD_MAP.put(ACTUAL_START_TIME, "实际开始时间");
-        FIELD_MAP.put(ACTUAL_END_TIME, "实际结束时间");
-        FIELD_MAP.put(CREATED_USER_NAME, "创建人");
-        FIELD_MAP.put(LAST_UPDATE_USER_NAME, "更新人");
-        FIELD_MAP.put(MAIN_RESPONSIBLE_NAME, "主要负责人");
-        FIELD_MAP.put(ENVIRONMENT_NAME, "环境");
-        FIELD_MAP.put(SPENT_WORK_TIME, "已耗费时间");
-        FIELD_MAP.put(ALL_ESTIMATE_TIME, "当前预估时间");
-        FIELD_MAP.put(TAGS, "Tag");
-        FIELD_MAP.put(RELATED_ISSUE, "关联" + IssueConstant.ISSUE_CN);
-        FIELD_MAP.put(EPIC_SELF_NAME, "史诗名称");
-        FIELD_MAP.put(PARTICIPANT, "参与人");
-        FIELD_MAP.put(PRODUCT, "产品");
+        FIELD_MAP.put(ExportIssuesVO.TYPE_NAME, IssueConstant.ISSUE_TYPE_CN);
+        FIELD_MAP.put(ExportIssuesVO.ISSUE_NUM, IssueConstant.ISSUE_CN + "编号");
+        FIELD_MAP.put(ExportIssuesVO.SUMMARY, "概要");
+        FIELD_MAP.put(ExportIssuesVO.DESCRIPTION, "描述");
+        FIELD_MAP.put(ExportIssuesVO.PRIORITY_NAME, "优先级");
+        FIELD_MAP.put(ExportIssuesVO.STATUS_NAME, "状态");
+        FIELD_MAP.put(ExportIssuesVO.RESOLUTION, "解决状态");
+        FIELD_MAP.put(ExportIssuesVO.SPRINT_NAME, "冲刺");
+        FIELD_MAP.put(ExportIssuesVO.ASSIGNEE_NAME, "经办人");
+        FIELD_MAP.put(ExportIssuesVO.REPORTER_NAME, "报告人");
+        FIELD_MAP.put(ExportIssuesVO.STORY_POINTS, "故事点");
+        FIELD_MAP.put(ExportIssuesVO.REMAINING_TIME, "剩余预估时间");
+        FIELD_MAP.put(ExportIssuesVO.ESTIMATE_TIME, "原始预估时间");
+        FIELD_MAP.put(ExportIssuesVO.VERSION_NAME, "版本");
+        FIELD_MAP.put(ExportIssuesVO.FIX_VERSION_NAME, "修复的版本");
+        FIELD_MAP.put(ExportIssuesVO.INFLUENCE_VERSION_NAME, "影响的版本");
+        FIELD_MAP.put(ExportIssuesVO.EPIC_NAME, "所属史诗");
+        FIELD_MAP.put(ExportIssuesVO.LABEL_NAME, "标签");
+        FIELD_MAP.put(ExportIssuesVO.COMPONENT_NAME, "模块");
+        FIELD_MAP.put(ExportIssuesVO.CREATION_DATE, "创建时间");
+        FIELD_MAP.put(ExportIssuesVO.LAST_UPDATE_DATE, "最后更新时间");
+        FIELD_MAP.put(ExportIssuesVO.ESTIMATED_START_TIME, "预计开始时间");
+        FIELD_MAP.put(ExportIssuesVO.ESTIMATED_END_TIME, "预计结束时间");
+        FIELD_MAP.put(ExportIssuesVO.ACTUAL_START_TIME, "实际开始时间");
+        FIELD_MAP.put(ExportIssuesVO.ACTUAL_END_TIME, "实际结束时间");
+        FIELD_MAP.put(ExportIssuesVO.CREATED_USER_NAME, "创建人");
+        FIELD_MAP.put(ExportIssuesVO.LAST_UPDATE_USER_NAME, "更新人");
+        FIELD_MAP.put(ExportIssuesVO.MAIN_RESPONSIBLE_NAME, "主要负责人");
+        FIELD_MAP.put(ExportIssuesVO.ENVIRONMENT_NAME, "环境");
+        FIELD_MAP.put(ExportIssuesVO.SPENT_WORK_TIME, "已耗费时间");
+        FIELD_MAP.put(ExportIssuesVO.ALL_ESTIMATE_TIME, "当前预估时间");
+        FIELD_MAP.put(ExportIssuesVO.TAGS, "Tag");
+        FIELD_MAP.put(ExportIssuesVO.RELATED_ISSUE, "关联" + IssueConstant.ISSUE_CN);
+        FIELD_MAP.put(ExportIssuesVO.EPIC_SELF_NAME, "史诗名称");
+        FIELD_MAP.put(ExportIssuesVO.PARTICIPANT, "参与人");
+        FIELD_MAP.put(ExportIssuesVO.PRODUCT, "产品");
         FIELDS = new ArrayList<>(FIELD_MAP.keySet()).toArray(new String[FIELD_MAP.keySet().size()]);
         FIELDS_NAMES = new ArrayList<>(FIELD_MAP.values()).toArray(new String[FIELD_MAP.values().size()]);
     }
@@ -714,7 +683,7 @@ public class ExcelServiceImpl implements ExcelService {
             if (withFeature && ISSUE_EPIC.equals(typeCode)) {
                 return;
             }
-            if (!FEATURE.equals(typeCode)) {
+            if (!ExportIssuesVO.FEATURE.equals(typeCode)) {
                 values.add(typeName);
             }
             if ("bug".equals(typeCode) && "system".equals(i.getSource())) {
@@ -3038,7 +3007,7 @@ public class ExcelServiceImpl implements ExcelService {
             if (withFeature && ISSUE_EPIC.equals(typeCode)) {
                 return;
             }
-            if (!FEATURE.equals(typeCode)) {
+            if (!ExportIssuesVO.FEATURE.equals(typeCode)) {
                 values.add(typeName);
             }
             if ("bug".equals(typeCode)) {
@@ -3767,9 +3736,9 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected String[] sortFieldCodes(String[] fieldCodes) {
         List<String> result = new ArrayList<>();
-        result.add(TYPE_NAME);
-        result.add(SUMMARY);
-        result.add(ISSUE_NUM);
+        result.add(ExportIssuesVO.TYPE_NAME);
+        result.add(ExportIssuesVO.SUMMARY);
+        result.add(ExportIssuesVO.ISSUE_NUM);
         for (String str : fieldCodes) {
             if (result.get(0).equals(str)
                     || result.get(1).equals(str)
