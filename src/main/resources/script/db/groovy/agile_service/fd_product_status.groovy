@@ -32,13 +32,5 @@ databaseChangeLog(logicalFilePath: 'fd_product_status.groovy') {
             column(name: 'name')
             column(name: 'organization_id')
         }
-
-        sql(stripComments: true, splitStatements: true, endDelimiter: ';') {
-            "INSERT IGNORE INTO `fd_product_status`(name, source, is_enabled, organization_id) VALUES ('启用', 'system', '1', '0');\n" +
-            "INSERT IGNORE INTO `fd_product_status`(name, source, is_enabled, organization_id) VALUES ('停用', 'system', '1', '0');\n" +
-            "UPDATE agile_product ap, fd_product_status fps \n" +
-                    "SET ap.status_id = fps.id \n" +
-                    "WHERE fps.source = 'system' AND fps. NAME = '启用'";
-        }
     }
 }
