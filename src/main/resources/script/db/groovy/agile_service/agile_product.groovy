@@ -15,6 +15,9 @@ databaseChangeLog(logicalFilePath: 'agile_product.groovy') {
             column(name: 'code', type: 'VARCHAR(255)', remarks: '产品编码') {
                 constraints(nullable: false)
             }
+            column(name: 'status_id', type: 'BIGINT UNSIGNED', remarks: '产品状态id') {
+                constraints(nullable: false)
+            }
             column(name: 'description', type: 'text', remarks: '描述')
             column(name: 'image_url', type: 'VARCHAR(255)', remarks: '图标')
             column(name: 'product_owner', type: 'BIGINT UNSIGNED', remarks: '产品负责人')
@@ -33,6 +36,9 @@ databaseChangeLog(logicalFilePath: 'agile_product.groovy') {
 
         createIndex(tableName: "agile_product", indexName: "idx_organization_id") {
             column(name: "organization_id")
+        }
+        createIndex(tableName: "agile_product", indexName: "idx_status_id") {
+            column(name: "status_id")
         }
         createIndex(tableName: "agile_product", indexName: "uk_organization_name", unique: true) {
             column(name: "organization_id")
