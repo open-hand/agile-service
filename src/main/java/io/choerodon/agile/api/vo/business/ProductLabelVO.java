@@ -11,7 +11,7 @@ public class ProductLabelVO {
 
     @ApiModelProperty(value = "标签id")
     @Encrypt
-    private Long id;
+    private Long labelId;
 
     @ApiModelProperty(value = "标签名称")
     private String labelName;
@@ -19,12 +19,12 @@ public class ProductLabelVO {
     @ApiModelProperty(value = "组织id")
     private Long organizationId;
 
-    public Long getId() {
-        return id;
+    public Long getLabelId() {
+        return labelId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setLabelId(Long labelId) {
+        this.labelId = labelId;
     }
 
     public String getLabelName() {
