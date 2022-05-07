@@ -1,0 +1,140 @@
+@import '~choerodon-ui/lib/style/themes/default';
+@circle-trail-stroke: rgba(207, 212, 245, 0.90);
+@circle-path-stroke: rgba(48, 63, 159, 0.64);
+@progress-text-color: var(--text-color3);
+@progress-area-background: #FFF;
+@progress-area-box-shadow1: rgba(0, 0, 0, 0.20);
+@progress-area-box-shadow2: rgba(0, 0, 0, 0.14);
+@progress-area-box-shadow3: var(--divider);
+@progress-area-text: var(--text-color);
+@fileName-background: #F3F3F3;
+@fileName-color: rgba(0, 0, 0, 0.54);
+
+.c7n-agile-import-issue-modal {
+
+
+  &-record-normal-text {
+    margin-top: 0.1rem;
+  }
+
+  &-fileName {
+    background-color: @fileName-background;
+    border-radius: 0.02rem;
+    height: 0.32rem;
+    width: 1.48rem;
+    display: inline-block;
+    padding: 0.07rem 0.09rem;
+    margin-right: 0.1rem;
+    color: @fileName-color;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &-text {
+    margin-right: 0.1rem;
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 0.07rem;
+    font-size: 13px;
+    color: var(--text-color3);
+    line-height: 18px;
+
+    span {
+      color: var(--text-color);
+    }
+
+    &-down-load {
+      color: @primary-color;
+      margin-top: .17rem;
+    }
+  }
+  &-fileName {
+    background-color: #F3F3F3;
+    border-radius: 0.02rem;
+    height: 0.32rem;
+    width: 1.48rem;
+    display: inline-block;
+    padding: 0.07rem 0.09rem;
+    margin-right: 0.1rem;
+    color: rgba(0, 0, 0, 0.54);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &-text {
+    margin-right: 0.1rem;
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 0.07rem;
+  }
+
+  &-progress {
+    width: 2rem;
+    vertical-align: top;
+    margin-top: 0.07rem;
+    border: none !important;
+  }
+
+  &-icon {
+    vertical-align: sub;
+    margin-right: 0.05rem;
+  }
+  &-form {
+    .c7n-divider {
+      width: 3.74rem;
+      margin-left: -.24rem;
+      margin-bottom: .195rem;
+    }
+
+    &-one {
+      &-block {
+        display: inline-block;
+        margin-right: 6px;
+        width: 3px;
+        height: 16px;
+        background: #798DFB;
+        border-radius: 2px;
+      }
+      &-title {
+        font-size: 14px;
+        color: var(--text-color);
+        line-height: 16px;
+      }
+
+      &-content {
+        display: block;
+        margin: .16rem 0;
+        font-size: 13px;
+        color: var(--text-color3);
+        // line-height: 20px;
+      }
+    }
+
+    // &-modal-footer {
+    //   position: absolute;
+    //   bottom: 0;
+    //   left: 0;
+    //   width: 100%;
+    //   text-align: left;
+    //   padding: 0.12rem 0.24rem;
+    //   border-radius: 0 0 0.02rem 0.02rem;
+    //   background: white;
+    //   border-top: 0.01rem solid var(--divider);
+    // }
+
+  }
+  &-templateSelect {
+    margin-bottom: 35px;
+  }
+  .c7n-importIssue-btn {
+    background: rgba(83, 101, 234, 0.14);
+    border-radius: 4px;
+    padding-left: 8px;
+    color: #5365EA;
+    & > i.icon + span, & > span + i.icon {
+      margin-left: 0;
+    }
+  }
+}

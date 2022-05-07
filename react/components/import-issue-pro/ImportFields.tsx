@@ -1,13 +1,17 @@
+/* eslint-disable react/require-default-props */
 import React, {
-  useMemo, useEffect, useImperativeHandle, useState, useCallback,
+  useMemo, useEffect, useImperativeHandle, useState, useCallback, useRef, forwardRef,
 } from 'react';
-import { observer } from 'mobx-react-lite';
+import { useObserver } from 'mobx-react-lite';
 import {
   SelectBox, DataSet, Button, TextField, Icon,
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { FuncType } from 'choerodon-ui/pro/lib/button/interface';
-import { includes } from 'lodash';
+import { includes, noop, set } from 'lodash';
+import {
+  useBoolean, useCounter, useCreation, useToggle, useUpdateEffect, useWhyDidYouUpdate,
+} from 'ahooks';
 import { fieldApi } from '@/api';
 import { getApplyType } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
@@ -95,126 +99,137 @@ const subProjectSystemFields = [
   { code: 'estimateTime', title: '原始预估时间' },
   { code: 'product', title: '产品' },
 ];
-
-interface Props {
-  importFieldsRef: React.MutableRefObject<{
-    fields: string[]
-    allFields: { title: string, code: string, system: boolean }[],
-    requiredFields: string[]
-    chooseDataSet: DataSet
-  }>,
-  setReRender: Function,
+export interface IIortIssueFieldsRef {
+  setValue: (codes: string[]) => void
+}
+export interface IImportIssueFieldsEvents {
+  /**
+* 值更新事件
+* @param 是否是初始化值
+*/
+  onUpdate?: (filterCodes: string[], init: boolean) => void
+  /**
+   * 选项加载完成事件
+   */
+  onOptionLoad?: (allFields: Array<{ code: string, title: string, system: boolean }>) => void
+  /**
+   * 必填选项加载完成事件
+   */
+  onRequiredFieldLoad?: (requiredFieldCodes: string[]) => void
+}
+interface IImportIssueFieldsProps {
   applyType?: 'program' | 'agile',
-  checkBoxChangeOk: (data: string[]) => void
   requires?: string[]
   systems?: { code: string, title: string }[]
   fields?: { code: string, title: string, system: boolean }[]
+  events?: IImportIssueFieldsEvents
 }
 
-const ImportFields: React.FC<Props> = ({
-  importFieldsRef, setReRender, checkBoxChangeOk, applyType: propsApplyType, requires, systems, fields: fs,
-}) => {
+const ImportFields = forwardRef<IIortIssueFieldsRef, IImportIssueFieldsProps>(({
+  applyType: propsApplyType, requires, systems, fields: fs, events: propsEvents,
+}, ref) => {
+  const fieldFormItemRef = useRef<SelectBox>(null);
   const { isInProgram, loading } = useIsInProgram();
-  const [updateCount, setUpdateCount] = useState<number>(0);
-  const [requiredFields, setRequiredFields] = useState<string[]>(requires || []);
-  const [btnStatus, setBtnStatus] = useState<'ALL' | 'NONE'>();
+  const [requiredFields, setRequiredFields] = useState<string[]>(() => requires || []);
+  const [btnStatus, { toggle: toggleBtnStatus }] = useToggle('NONE', 'ALL');
   const [systemFields, setSystemFields] = useState<{ code: string, title: string }[]>(systems || []);
   const [allFields, setAllFields] = useState<{ code: string, title: string, system: boolean }[]>([]);
   const applyType = propsApplyType ?? getApplyType();
-  useEffect(() => {
-    if (!systems && !requires) {
-      if (!loading) {
-        if (applyType === 'program') {
-          setRequiredFields(programImportRequiresFields);
-          setSystemFields(programSystemFields);
-        } else if (isInProgram) {
-          setRequiredFields(subProjectImportRequiredFields);
-          setSystemFields(subProjectSystemFields);
-        } else {
-          setRequiredFields(projectImportRequiresFields);
-          setSystemFields(projectSystemFields);
-        }
-      }
-    }
-  }, [applyType, isInProgram, loading, requires, systems]);
+  const events = useCreation(() => ({ ...propsEvents }) as Required<NonNullable<IImportIssueFieldsProps['events']>>, []);
+
+  events.onUpdate = propsEvents?.onUpdate || noop;
+  events.onOptionLoad = propsEvents?.onOptionLoad || noop;
+  events.onRequiredFieldLoad = propsEvents?.onRequiredFieldLoad || noop;
 
   const fieldsOptionDataSet = useMemo(() => new DataSet({
     paging: false,
-    events: {
-      load: () => {
-        setUpdateCount((count) => count + 1);
-        setReRender();
-      },
-    },
-  }), [setReRender]);
+  }), []);
 
-  const chooseDataSet = useMemo(() => new DataSet({
-    autoCreate: true,
-    autoQuery: true,
-    fields: [{
-      name: 'fields',
-      type: 'string' as FieldType,
-      textField: 'title',
-      valueField: 'code',
-      multiple: true,
-      options: fieldsOptionDataSet,
-    }],
-    data: [{
-      fields: requiredFields,
-    }],
-    events: {
-      update: ({ value }: { value: string[] }) => {
-        checkBoxChangeOk(value);
-        console.log('value', value);
-        setUpdateCount((count) => count + 1);
-        setReRender();
+  const chooseDataSet = useMemo(() => {
+    let firstUpdate = true;
+    return new DataSet({
+      autoCreate: true,
+      autoQuery: false,
+      fields: [{
+        name: 'fields',
+        type: 'string' as FieldType,
+        textField: 'title',
+        valueField: 'code',
+        multiple: true,
+        options: fieldsOptionDataSet,
+      }],
+      events: {
+        update: ({ value }: { value: string[] }) => {
+          events.onUpdate((value || []).filter((code) => !['linkIssue', 'parentIssue'].includes(code)), firstUpdate);
+          firstUpdate = false;
+        },
       },
-    },
-  }), [checkBoxChangeOk, fieldsOptionDataSet, requiredFields, setReRender]);
+    });
+  }, [events, fieldsOptionDataSet]);
 
+  useEffect(() => {
+    if (!systems && !requires) {
+      if (!loading) {
+        const newFieldConfig = { required: [] as any[], system: [] as any[] };
+        if (applyType === 'program') {
+          Object.assign(newFieldConfig, {
+            required: programImportRequiresFields,
+            system: programSystemFields,
+          });
+        } else if (isInProgram) {
+          Object.assign(newFieldConfig, {
+            required: subProjectImportRequiredFields,
+            system: subProjectSystemFields,
+          });
+        } else {
+          Object.assign(newFieldConfig, {
+            required: projectImportRequiresFields,
+            system: projectSystemFields,
+          });
+        }
+        // 设置必填值
+        chooseDataSet.current?.set('fields', newFieldConfig.required);
+        setRequiredFields(newFieldConfig.required);
+        setSystemFields(newFieldConfig.system);
+        events.onRequiredFieldLoad(newFieldConfig.required);
+      }
+    }
+  }, [applyType, chooseDataSet, events, isInProgram, loading, requires, systems]);
   useEffect(() => {
     const loadData = async () => {
       const fields = fs || await fieldApi.getFoundationHeader(applyType === 'program' ? 'programIssueType' : 'agileIssueType');
       const allFs = [...(systemFields.map((item) => ({ ...item, system: true }))), ...fields];
       setAllFields(allFs);
+      events.onOptionLoad(allFs);
       fieldsOptionDataSet.loadData(allFs);
     };
 
     if ((systemFields && systemFields.length) || fs?.length) {
       loadData();
     }
-  }, [fieldsOptionDataSet, fs, systemFields]);
+  }, [applyType, events, fieldsOptionDataSet, fs, systemFields]);
+  const setValue = useCallback((codes: string[]) => {
+    chooseDataSet.current?.init('fields', codes);
+  }, [chooseDataSet]);
+  useImperativeHandle(ref, () => ({ setValue }));
 
-  const fieldsChecked = (chooseDataSet?.current?.get('fields') || requiredFields).filter((code: string) => !includes(['linkIssue', 'parentIssue'], code));
-  useImperativeHandle(importFieldsRef, () => ({
-    // @ts-ignore
-    fields: fieldsOptionDataSet.toData().filter((item) => includes(fieldsChecked, item.code)).map((item) => item.code),
-    // @ts-ignore
-    allFields: fieldsOptionDataSet.toData(),
-    requiredFields,
-    chooseDataSet,
-  }));
-  function handleClick() {
-    const result = true;
-    const nextBtnStatus = btnStatus !== 'NONE' ? 'NONE' : 'ALL';
-    if (nextBtnStatus !== 'ALL') {
-      chooseDataSet.current?.set('fields', fieldsOptionDataSet.toData().map((item: any) => item.code));
+  useUpdateEffect(() => {
+    if (btnStatus === 'ALL') {
+      fieldFormItemRef.current?.chooseAll();
     } else {
-      chooseDataSet.current?.set('fields', requiredFields);
-      chooseDataSet.unSelectAll();
+      fieldFormItemRef.current?.chooseRe();
     }
-    result && setBtnStatus(nextBtnStatus);
-  }
+  }, [btnStatus]);
   const handleSearch = useCallback((value) => {
     // @ts-ignore
     fieldsOptionDataSet.loadData(allFields.filter((item) => item.title.indexOf(value || '') > -1));
   }, [allFields, fieldsOptionDataSet]);
 
-  return (
+  return useObserver(() => (
     <div className={styles.importFields}>
       <div className={styles.importFields_title}>
         <span>选择字段</span>
-        <Button funcType={'flat' as FuncType} className={styles.importFields_btn} onClick={handleClick}>{btnStatus !== 'NONE' ? '全选' : '全不选'}</Button>
+        <Button funcType={'flat' as FuncType} className={styles.importFields_btn} onClick={() => toggleBtnStatus()}>{btnStatus === 'NONE' ? '全选' : '全不选'}</Button>
       </div>
       <div className={styles.importFields_content}>
         <TextField
@@ -225,6 +240,7 @@ const ImportFields: React.FC<Props> = ({
           clearButton
         />
         <SelectBox
+          ref={fieldFormItemRef}
           dataSet={chooseDataSet}
           name="fields"
           onOption={({ record }) => ({
@@ -233,7 +249,7 @@ const ImportFields: React.FC<Props> = ({
         />
       </div>
     </div>
-  );
-};
+  ));
+});
 
-export default observer(ImportFields);
+export default ImportFields;

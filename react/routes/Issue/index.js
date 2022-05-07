@@ -40,6 +40,7 @@ import Modal from './components/Modal';
 import './index.less';
 import StatusLinkageWSHandle from '@/components/StatusLinkageWSHandle';
 import useFormatMessage from '@/hooks/useFormatMessage';
+import { openImportIssueModal } from '@/components/import-issue-pro';
 
 const defaultVisibleColumns = [
   'summary',
@@ -333,6 +334,14 @@ const Issue = observer(({ cached, updateCache }) => {
               onFinish: refresh, action: 'agile_import_issue',
             }),
             display: true,
+          },
+          {
+            name: '导入工作项新',
+            icon: 'archive-o',
+            handler: () => openImportIssueModal({
+              onFinish: refresh, action: 'agile_import_issue',
+            }),
+            display: false,
           },
           {
             name: formatMessage({ id: 'agile.issue.export.issue' }),
