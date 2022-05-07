@@ -7,6 +7,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.Date;
@@ -79,6 +80,12 @@ public class ProductVO {
     @ApiModelProperty(value = "产品标签ids")
     @Valid
     private List<ProductLabelRelVO> productLabelRelVOList;
+
+    @ApiModelProperty(value = "产品状态id")
+    @NotNull(message = "error.product.statusId.notNull")
+    private Long statusId;
+
+    private ProductStatusVO productStatusVO;
 
     public Long getId() {
         return id;
@@ -214,5 +221,21 @@ public class ProductVO {
 
     public void setProductLabelRelVOList(List<ProductLabelRelVO> productLabelRelVOList) {
         this.productLabelRelVOList = productLabelRelVOList;
+    }
+
+    public Long getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(Long statusId) {
+        this.statusId = statusId;
+    }
+
+    public ProductStatusVO getProductStatusVO() {
+        return productStatusVO;
+    }
+
+    public void setProductStatusVO(ProductStatusVO productStatusVO) {
+        this.productStatusVO = productStatusVO;
     }
 }
