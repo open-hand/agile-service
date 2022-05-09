@@ -17,7 +17,7 @@ import { SHOW_FEATURE_TYPE_CODES_ALL } from '@/constants/SHOW_FEATURE_TYPE_CODE'
 import TypeTag from '../TypeTag';
 import './QuickCreateIssue.less';
 import UserDropdown from '../UserDropdown';
-import {WATERFALL_TYPE_CODES} from "../../constants/TYPE_CODE";
+import { WATERFALL_TYPE_CODES } from '../../constants/TYPE_CODE';
 
 const propTypes = {
   defaultPriority: PropTypes.number,
