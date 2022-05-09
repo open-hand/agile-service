@@ -8,14 +8,14 @@ import {
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { FuncType } from 'choerodon-ui/pro/lib/button/interface';
-import { includes, noop, set } from 'lodash';
+import { includes, noop } from 'lodash';
 import {
-  useBoolean, useCounter, useCreation, useToggle, useUpdateEffect, useWhyDidYouUpdate,
+  useCreation, useToggle, useUpdateEffect,
 } from 'ahooks';
 import { fieldApi } from '@/api';
-import { getApplyType } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import styles from './ImportFields.less';
+import { ImportIssueContextProps } from './stores';
 
 const programImportRequiresFields = ['issueType', 'summary', 'description', 'reporter', 'epic', 'epicName', 'pi'];
 const projectImportRequiresFields = ['issueType', 'parentIssue', 'epic', 'component', 'sprint', 'summary', 'description', 'epicName', 'assignee', 'reporter', 'priority', 'remainingTime', 'storyPoints', 'linkIssue'];
@@ -117,16 +117,12 @@ export interface IImportIssueFieldsEvents {
    */
   onRequiredFieldLoad?: (requiredFieldCodes: string[]) => void
 }
-interface IImportIssueFieldsProps {
-  applyType?: 'program' | 'agile',
-  requires?: string[]
-  systems?: { code: string, title: string }[]
-  fields?: { code: string, title: string, system: boolean }[]
+interface IImportIssueFieldsProps extends Pick<ImportIssueContextProps, 'requires' | 'systems' | 'fields' | 'applyType'> {
   events?: IImportIssueFieldsEvents
 }
 
 const ImportFields = forwardRef<IIortIssueFieldsRef, IImportIssueFieldsProps>(({
-  applyType: propsApplyType, requires, systems, fields: fs, events: propsEvents,
+  applyType, requires, systems, fields: fs, events: propsEvents,
 }, ref) => {
   const fieldFormItemRef = useRef<SelectBox>(null);
   const { isInProgram, loading } = useIsInProgram();
@@ -134,7 +130,6 @@ const ImportFields = forwardRef<IIortIssueFieldsRef, IImportIssueFieldsProps>(({
   const [btnStatus, { toggle: toggleBtnStatus }] = useToggle('NONE', 'ALL');
   const [systemFields, setSystemFields] = useState<{ code: string, title: string }[]>(systems || []);
   const [allFields, setAllFields] = useState<{ code: string, title: string, system: boolean }[]>([]);
-  const applyType = propsApplyType ?? getApplyType();
   const events = useCreation(() => ({ ...propsEvents }) as Required<NonNullable<IImportIssueFieldsProps['events']>>, []);
 
   events.onUpdate = propsEvents?.onUpdate || noop;
@@ -242,6 +237,7 @@ const ImportFields = forwardRef<IIortIssueFieldsRef, IImportIssueFieldsProps>(({
         <SelectBox
           ref={fieldFormItemRef}
           dataSet={chooseDataSet}
+          checkValueOnOptionsChange={false}
           name="fields"
           onOption={({ record }) => ({
             disabled: includes(requiredFields, record.get('code')),

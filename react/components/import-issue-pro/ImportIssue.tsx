@@ -1,23 +1,22 @@
 import React, {
-  Component, useRef, useEffect, useState, useCallback,
+  useRef, useEffect, useState,
 } from 'react';
-import { WSHandler, Choerodon } from '@choerodon/boot';
+import { Choerodon } from '@choerodon/boot';
 import {
-  Progress, Divider,
+  Divider,
 } from 'choerodon-ui';
 import { observer } from 'mobx-react';
-import { Modal, Button } from 'choerodon-ui/pro';
+import { Button } from 'choerodon-ui/pro';
 import FileSaver from 'file-saver';
 import classnames from 'classnames';
 import {
-  includes, isEqual, uniq, map, isEqualWith, intersection,
+  includes, uniq, map, isEqualWith, intersection,
 } from 'lodash';
 import { usePersistFn } from 'ahooks';
 import { issueApi } from '@/api';
 import { getApplyType, getProjectId } from '@/utils/common';
 import ImportFields, { IImportIssueFieldsEvents, IIortIssueFieldsRef } from './ImportFields';
 import TemplateSelect from '../template-select';
-import openSaveTemplate from '../template-select/components/save/SaveTemplate';
 import SaveTemplateBtn from './SaveTemplateBtn';
 import { useImportIssueContext } from './stores';
 import WsProgress, { IWsProgressProps } from '../ws-progress';
@@ -78,29 +77,7 @@ const ImportIssueContent: React.FC = observer(() => {
     }
     return false;
   });
-  const handleCheckBoxChangeOk: NonNullable<IImportIssueFieldsEvents['onUpdate']> = (value: string[], init) => {
-    setCheckOptions(value);
-    init ? setFirstCheckOptions(value) : setFirstCheckOptions(undefined);
-    const templateList = templateSelectRef?.current?.templateList || [];
-    const importFieldsData = { systemFields: [], customFields: [] } as any;
-    const fields = uniq([...(value || []), ...requiredFields]).filter((code) => map(allFields, 'code').includes(code));
 
-    importFieldsData.systemFields = fields.filter((code) => allFields.find((item: any) => item.code === code && item.system)).sort();
-    importFieldsData.customFields = fields.filter((code) => allFields.find((item: any) => item.code === code && !item.system)).sort();
-    if (!fields.length) {
-      setTemplateIsExist(true);
-      return;
-    }
-    for (let i = 0; i < templateList.length; i += 1) {
-      if (isEqualWith(JSON.parse(templateList[i].templateJson), importFieldsData, customizerFieldCodes)) {
-        setTemplateIsExist(true);
-        templateSelectRef?.current?.setTemplate(templateList[i]);
-        return;
-      }
-    }
-    setTemplateIsExist(false);
-    templateSelectRef?.current?.setTemplate(undefined);
-  };
   const checkTemplateExist = usePersistFn((value: string[]) => {
     const templateList = templateSelectRef?.current?.templateList || [];
     const importFieldsData = { systemFields: [], customFields: [] } as any;
@@ -115,7 +92,13 @@ const ImportIssueContent: React.FC = observer(() => {
       }
     }
     setTemplateIsExist(false);
+    templateSelectRef?.current?.setTemplate(undefined);
   });
+  const handleCheckBoxChangeOk: NonNullable<IImportIssueFieldsEvents['onUpdate']> = (value: string[], init) => {
+    setCheckOptions(value);
+    init ? setFirstCheckOptions(value) : setFirstCheckOptions(undefined);
+    checkTemplateExist(value);
+  };
   const selectTemplateOk = (fieldCodes: any[] | any) => {
     const newFields = Array.isArray(fieldCodes) ? fieldCodes : [...(fieldCodes.systemFields || []), ...(fieldCodes.customFields || [])];
     importFieldsRef.current?.setValue(newFields);
@@ -135,37 +118,19 @@ const ImportIssueContent: React.FC = observer(() => {
     }
     const formData = new FormData();
     formData.append('file', file);
+    importRequest(formData).then(() => {
 
-    if (importRequest) {
-      importRequest(formData).then((res) => {
-
-      }).catch((e) => {
-        Choerodon.prompt('网络错误');
-      }).finally(() => {
-        uploadInputRef.current?.setAttribute('value', '');
-      });
-    } else {
-      issueApi.import(formData, applyType as any).then((res: any) => {
-
-      }).catch((e: any) => {
-        Choerodon.prompt('网络错误');
-      }).finally(() => {
-        uploadInputRef.current?.setAttribute('value', '');
-      });
-    }
+    }).catch((e) => {
+      Choerodon.prompt('网络错误');
+    }).finally(() => {
+      uploadInputRef.current?.setAttribute('value', '');
+    });
   };
   const exportExcel = async () => {
     const importFieldsData = { systemFields: [] as string[], customFields: [] as string[] };
     importFieldsData.systemFields = checkOptions.filter((code: any) => allFields.find((item: any) => item.code === code && item.system));
     importFieldsData.customFields = checkOptions.filter((code: any) => allFields.find((item: any) => item.code === code && !item.system));
-    if (downloadTemplateRequest) {
-      return downloadTemplateRequest(importFieldsData).then((excel) => {
-        const blob = new Blob([excel], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const fileName = `${name || '工作项'}导入模板.xlsx`;
-        FileSaver.saveAs(blob, fileName);
-      });
-    }
-    return issueApi.downloadTemplateForImport(importFieldsData, applyType).then((excel: any) => {
+    return downloadTemplateRequest(importFieldsData).then((excel) => {
       const blob = new Blob([excel], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const fileName = `${name || '工作项'}导入模板.xlsx`;
       FileSaver.saveAs(blob, fileName);
@@ -251,7 +216,7 @@ const ImportIssueContent: React.FC = observer(() => {
     const {
       id,
     } = latestInfo || {};
-    fileUrl = latestInfo?.fileUrl || latestInfo;
+    fileUrl = latestInfo?.fileUrl || fileUrl;
     successCount = latestInfo?.successCount || successCount || 0;
     failCount = latestInfo?.failCount || failCount || 0;
     return (
@@ -279,7 +244,10 @@ const ImportIssueContent: React.FC = observer(() => {
       </>
     );
   };
-
+  modal?.handleOk(async () => {
+    uploadInputRef.current?.click();
+    return false;
+  });
   return (
     <div>
       {
@@ -367,7 +335,7 @@ const ImportIssueContent: React.FC = observer(() => {
         onStart={() => modal?.update({ okProps: { loading: true } })}
         onFinish={() => modal?.update({ okProps: { loading: false } })}
         onFailed={() => modal?.update({ okProps: { loading: false } })}
-        messageKey={messageKey || ((applyType || getApplyType()) === 'program' ? `agile-import-${getProjectId()}` : `agile-import-issues-${getProjectId()}`)}
+        messageKey={messageKey}
         renderEndProgress={renderEndProgress}
       />
     </div>

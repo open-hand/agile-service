@@ -1,14 +1,16 @@
 import React, {
-  createContext, useContext, useMemo, useEffect, useState, MutableRefObject, useRef,
+  createContext, useContext, useMemo, useState,
 } from 'react';
-import { uniq } from 'lodash';
 import { observer } from 'mobx-react-lite';
-import { useCreation, useMount } from 'ahooks';
+import { useCreation, useMount, useUnmount } from 'ahooks';
+import { pick } from 'lodash';
 import { IModalProps } from '@/common/types';
-import { ITableColumnCheckBoxesOptionData } from '@/components/table-column-check-boxes';
 import { issueApi } from '@/api';
+import { IImportIssueProps } from '..';
+import { getApplyType, getProjectId } from '@/utils/common';
 
-interface ImportIssueContextProps {
+type IImportIssuePropsInContext = Omit<IImportIssueProps, 'applyType'> & Required<Pick<IImportIssueProps, 'applyType' | 'messageKey' | 'importRequest' | 'downloadTemplateRequest'>>
+export interface ImportIssueContextProps extends Omit<IImportIssuePropsInContext, 'importHistoryAction'> {
   prefixCls: string,
   modal?: IModalProps,
   latestInfo?: {
@@ -20,17 +22,7 @@ interface ImportIssueContextProps {
     failCount?: number
   }
   latestData: { checkOptions: string[], allFields: any[], requiredFields: string[] }
-  downloadTemplateRequest?: (data: any) => Promise<any>
-  importRequest?: (data: any) => Promise<any>
-  requires?: string[]
-  systems?: any
-  fields?: any
-  onSuccess?: () => void
-  name?: string
-  action?: string
-  applyType: 'program' | 'agile'
-  messageKey?: string
-  checkOptions: Array<ITableColumnCheckBoxesOptionData & { order?: any }>
+  applyType: NonNullable<IImportIssueProps['applyType']>
 }
 const ImportIssueContext = createContext({} as ImportIssueContextProps);
 
@@ -38,27 +30,42 @@ export function useImportIssueContext() {
   return useContext(ImportIssueContext);
 }
 
-const ImportIssueContextProvider = observer(
-  (props: any) => {
+const ImportIssueContextProvider: React.FC<IImportIssueProps> = observer(
+  (props) => {
     const {
-      fields, chosenFields, visibleColumns, importHistoryAction,
+      importHistoryAction = 'upload_file', applyType = 'agile',
     } = props;
-    const latestData = useCreation(() => ({}), []);
+    const latestData = useCreation(() => ({}) as ImportIssueContextProps['latestData'], []);
     const [latestInfo, setLatestInfo] = useState<any>();
     useMount(() => {
-      importHistoryAction && issueApi.loadLastImportOrExport(importHistoryAction).then((res) => {
+      importHistoryAction && issueApi.loadLastImportOrExport(importHistoryAction as any).then((res) => {
         if (res) {
           setLatestInfo(res);
         }
       });
     });
+    useUnmount(() => {
+      props.onClose && props.onClose();
+    });
     const store = useMemo(() => [], []);
+    const messageKey = useMemo(() => props.messageKey || ((applyType || getApplyType()) === 'program' ? `agile-import-${getProjectId()}` : `agile-import-issues-${getProjectId()}`), [applyType, props.messageKey]);
+    const propsRequestMap = useCreation(() => pick(props, ['importRequest', 'downloadTemplateRequest']), []);
+
+    propsRequestMap.downloadTemplateRequest = props.downloadTemplateRequest;
+    propsRequestMap.importRequest = props.importRequest;
+
+    const downloadTemplateRequest = useMemo(() => propsRequestMap.downloadTemplateRequest ?? ((data: any) => issueApi.downloadTemplateForImport(data, applyType)), [applyType, propsRequestMap]);
+    const importRequest = useMemo(() => propsRequestMap.importRequest ?? ((data: any) => issueApi.import(data, applyType)), [applyType, propsRequestMap]);
     const value = {
       ...props,
       store,
       latestInfo,
       latestData,
-      applyType: props.applyType ?? 'agile',
+      applyType,
+      importHistoryAction,
+      messageKey,
+      downloadTemplateRequest,
+      importRequest,
       prefixCls: 'c7n-agile-import-issue-modal',
     };
     return (
