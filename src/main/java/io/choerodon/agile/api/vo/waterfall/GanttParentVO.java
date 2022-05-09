@@ -60,4 +60,13 @@ public class GanttParentVO {
     public int hashCode() {
         return Objects.hash(getId(), getType());
     }
+
+    @Override
+    public String toString() {
+        return "GanttParentVO{" +
+                "id=" + id +
+                ", type='" + type + '\'' +
+                ", parentSprintIds=" + parentSprintIds +
+                '}';
+    }
 }

@@ -18,8 +18,6 @@ public class ExcelCursorDTO {
 
     private boolean previousBorderBold = true;
 
-    private Integer sequence;
-
     public ExcelCursorDTO() {
         this.collections = new ArrayList<>();
     }
@@ -29,25 +27,6 @@ public class ExcelCursorDTO {
         this.page = page;
         this.size = size;
         this.collections = new ArrayList<>();
-    }
-
-    public ExcelCursorDTO(Integer row,
-                          Integer page,
-                          Integer size,
-                          Integer sequence) {
-        this.row = row;
-        this.page = page;
-        this.size = size;
-        this.sequence = sequence;
-        this.collections = new ArrayList<>();
-    }
-
-    public Integer getSequence() {
-        return sequence;
-    }
-
-    public void setSequence(Integer sequence) {
-        this.sequence = sequence;
     }
 
     public boolean isPreviousBorderBold() {
