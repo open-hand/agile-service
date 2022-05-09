@@ -384,7 +384,7 @@ public interface AgilePluginService {
      * @param projectId
      * @param issueDTO
      */
-    void handlerFeatureCleanValue(Long projectId, IssueDetailDTO issueDTO);
+    void handlerBusinessCleanValue(Long projectId, IssueDetailDTO issueDTO);
 
     /**
      * 项目群子项目需要清空逻辑

@@ -81,6 +81,7 @@ public class ProductVO {
     @Valid
     private List<ProductLabelRelVO> productLabelRelVOList;
 
+    @Encrypt
     @ApiModelProperty(value = "产品状态id")
     @NotNull(message = "error.product.statusId.notNull")
     private Long statusId;
