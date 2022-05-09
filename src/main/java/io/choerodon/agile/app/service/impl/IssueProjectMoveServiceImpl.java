@@ -749,9 +749,9 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
         if (backlogExpandService != null) {
             backlogExpandService.deleteIssueBacklogRel(issueDTO.getIssueId());
         }
-        // 处理项目群需要清空的值
+        // 处理商业版需要清空的值
         if (agilePluginService != null) {
-            agilePluginService.handlerFeatureCleanValue(projectVO.getId(), issueDTO);
+            agilePluginService.handlerBusinessCleanValue(projectVO.getId(), issueDTO);
         }
         // 处理瀑布项目需要清空的值
         if (agileWaterfallService != null) {
