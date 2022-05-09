@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="18px" height="18px" viewBox="0 0 18 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>切片</title>
+    <defs>
+        <linearGradient x1="75.50908%" y1="14.4000373%" x2="13.2653061%" y2="100%" id="linearGradient-1">
+            <stop stop-color="#FFBD77" offset="0%"></stop>
+            <stop stop-color="#FF9B30" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="在线预览-文件夹-列表视图" transform="translate(-330.000000, -537.000000)">
+            <g id="知识库tree" transform="translate(276.000000, 128.000000)">
+                <g id="tree-item/1" transform="translate(30.000000, 400.000000)">
+                    <g id="ic/check_box_outline" transform="translate(24.000000, 9.000000)">
+                        <polygon id="路径" points="0 0 18 0 18 18 0 18"></polygon>
+                        <g id="编组" transform="translate(1.285714, 0.000000)" fill-rule="nonzero">
+                            <path d="M10.2857143,0 L15.4285714,4.39285714 L15.4285714,16.0714286 C15.4285714,17.1365492 14.5651206,18 13.5,18 L1.92857143,18 C0.86345084,18 0,17.1365492 0,16.0714286 L0,1.92857143 C0,0.86345084 0.86345084,0 1.92857143,0 L10.2857143,0 Z" id="路径" fill="url(#linearGradient-1)"></path>
+                            <polygon id="路径" fill="#FF9B30" points="10.2857143 4.39285714 15.4285714 4.39285714 10.2857143 0"></polygon>
+                        </g>
+                        <g id="T" transform="translate(6.121216, 6.750000)" fill="#FFFFFF" fill-rule="nonzero">
+                            <polygon id="路径" points="5.75756836 0.999755859 3.50170898 0.999755859 3.50170898 7.46484375 2.25585938 7.46484375 2.25585938 0.999755859 0 0.999755859 0 0 5.75756836 0"></polygon>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
