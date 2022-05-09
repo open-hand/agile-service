@@ -25,7 +25,7 @@ import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import FilterManage from '@/components/FilterManage';
 import DetailContainer, { useDetail } from '@/components/detail-container';
 import TableModeSwitch from '@/components/tree-list-switch';
-import handleOpenImport from '@/components/ImportIssue/ImportIssue';
+import handleOpenImport from '@/components/ImportIssue';
 import { TableCache } from '@/components/issue-table/Component';
 import useTable from '@/hooks/useTable';
 import useDefaultMyFilter from '@/hooks/useDefaultMyFilter';
@@ -331,17 +331,9 @@ const Issue = observer(({ cached, updateCache }) => {
             name: formatMessage({ id: 'agile.issue.import.issue' }),
             icon: 'archive-o',
             handler: () => handleOpenImport({
-              onFinish: refresh, action: 'agile_import_issue',
+              onClose: refresh, action: 'agile_import_issue',
             }),
             display: true,
-          },
-          {
-            name: '导入工作项新',
-            icon: 'archive-o',
-            handler: () => openImportIssueModal({
-              onFinish: refresh, action: 'agile_import_issue',
-            }),
-            display: false,
           },
           {
             name: formatMessage({ id: 'agile.issue.export.issue' }),

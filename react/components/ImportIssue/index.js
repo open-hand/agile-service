@@ -1,3 +1,4 @@
-import ImportIssue from './ImportIssue';
+// import ImportIssue from './ImportIssue';
+import { openImportIssueModal } from '../import-issue-pro';
 
-export default ImportIssue;
+export default openImportIssueModal;
