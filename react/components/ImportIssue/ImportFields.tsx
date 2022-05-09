@@ -165,8 +165,7 @@ const ImportFields: React.FC<Props> = ({
     events: {
       update: ({ value }: { value: string[] }) => {
         checkBoxChangeOk(value);
-        console.log('value', value);
-        setUpdateCount((count) => count + 1);
+=        setUpdateCount((count) => count + 1);
         setReRender();
       },
     },
