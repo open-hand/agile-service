@@ -25,7 +25,6 @@ import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import FilterManage from '@/components/FilterManage';
 import DetailContainer, { useDetail } from '@/components/detail-container';
 import TableModeSwitch from '@/components/tree-list-switch';
-import handleOpenImport from '@/components/ImportIssue';
 import { TableCache } from '@/components/issue-table/Component';
 import useTable from '@/hooks/useTable';
 import useDefaultMyFilter from '@/hooks/useDefaultMyFilter';
@@ -330,7 +329,7 @@ const Issue = observer(({ cached, updateCache }) => {
           {
             name: formatMessage({ id: 'agile.issue.import.issue' }),
             icon: 'archive-o',
-            handler: () => handleOpenImport({
+            handler: () => openImportIssueModal({
               onClose: refresh, action: 'agile_import_issue',
             }),
             display: true,
