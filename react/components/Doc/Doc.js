@@ -8,9 +8,27 @@ import './Doc.less';
 import { produce } from 'immer';
 import { knowledgeApi } from '@/api';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
+import folderIcon from '@/assets/icons/folder.svg';
+import documentIcon from '@/assets/icons/document.svg';
+import docxIcon from '@/assets/icons/docx.svg';
+import pdfIcon from '@/assets/icons/pdf.svg';
+import pptxIcon from '@/assets/icons/pptx.svg';
+import txtIcon from '@/assets/icons/txt.svg';
+import xlsxIcon from '@/assets/icons/xlsx.svg';
+import unknownIcon from '@/assets/icons/unknown.svg';
 
 const { AppState } = stores;
 const { Sidebar } = Modal;
+const FILE_ICON = {
+  folder: folderIcon,
+  document: documentIcon,
+  docx: docxIcon,
+  pptx: pptxIcon,
+  pdf: pdfIcon,
+  txt: txtIcon,
+  xlsx: xlsxIcon,
+  unknown: unknownIcon,
+};
 
 class Doc extends Component {
   constructor(props) {
@@ -52,6 +70,15 @@ class Doc extends Component {
       title: '知识名称',
       dataIndex: 'name',
       key: 'name',
+      render: (value, rowData) => {
+        const fileIcon = FILE_ICON[rowData.type === 'file' ? rowData.fileType : (rowData.type || 'folder')] || unknownIcon;
+        return (
+          <div className="c7n-agile-doc-file-name">
+            <img src={fileIcon} className="c7n-agile-doc-file-icon" />
+            <span>{value}</span>
+          </div>
+        );
+      },
     },
   ];
 
