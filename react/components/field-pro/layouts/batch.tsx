@@ -38,6 +38,8 @@ function getFieldConfig({
       return { code: 'priority', props: {} };
     case 'pi':
       return { code: 'pi', props: { openPermission: true } };
+    case 'productIds':
+      return { code: 'product' };
   }
   return {};
 }
