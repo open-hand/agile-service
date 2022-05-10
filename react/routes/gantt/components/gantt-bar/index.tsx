@@ -71,7 +71,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
     //   color1 = '#FF5C6A';
     //   color2 = '#FFBAC0';
     // }
-    delayDiff = issue.actualStartTime ? dayjs(issue.actualEndTime || dayjs()).diff(issue.actualStartTime, 'hour') : 0;
+    delayDiff = issue.estimatedEndTime ? Math.max(0, dayjs(issue.actualEndTime || dayjs()).diff(issue.estimatedEndTime, 'hour')) : 0;
     diff = dayjs(issue.estimatedEndTime).diff(issue.estimatedStartTime, 'hour');
   }
 
