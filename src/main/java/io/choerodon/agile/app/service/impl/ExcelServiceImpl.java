@@ -125,12 +125,12 @@ public class ExcelServiceImpl implements ExcelService {
     protected static final String RELATED_ISSUE_MAP = "relatedIssueMap";
     protected static final String PRODUCT_MAP = "productMap";
 
-    private static final String SUB_BUG_CN = "子缺陷";
+    protected static final String SUB_BUG_CN = "子缺陷";
 
     protected static final String COLON_CN = "：";
 
-    private static final int PREDEFINED_VALUE_START_ROW = 1;
-    private static final int PREDEFINED_VALUE_END_ROW = 500;
+    protected static final int PREDEFINED_VALUE_START_ROW = 1;
+    protected static final int PREDEFINED_VALUE_END_ROW = 500;
     private static final String INSERT = "insert";
 
     protected static final String[] SYSTEM_DATE_FIELD_LIST = {FieldCode.ACTUAL_START_TIME, FieldCode.ACTUAL_END_TIME, FieldCode.ESTIMATED_START_TIME, FieldCode.ESTIMATED_END_TIME};
@@ -505,9 +505,9 @@ public class ExcelServiceImpl implements ExcelService {
                 cursor.getAndIncreaseSheetNum());
     }
 
-    private PredefinedDTO processLabelPredefined(Long projectId,
-                                                 ExcelImportTemplate.Cursor cursor,
-                                                 List<String> fieldCodes) {
+    protected PredefinedDTO processLabelPredefined(Long projectId,
+                                                   ExcelImportTemplate.Cursor cursor,
+                                                   List<String> fieldCodes) {
         int col = fieldCodes.indexOf(FieldCode.LABEL);
         if (col == -1) {
             return null;
@@ -528,11 +528,11 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
 
-    private PredefinedDTO processEpicOrFeaturePredefined(Long organizationId,
-                                                         Long projectId,
-                                                         boolean withFeature,
-                                                         ExcelImportTemplate.Cursor cursor,
-                                                         List<String> fieldCodes) {
+    protected PredefinedDTO processEpicOrFeaturePredefined(Long organizationId,
+                                                           Long projectId,
+                                                           boolean withFeature,
+                                                           ExcelImportTemplate.Cursor cursor,
+                                                           List<String> fieldCodes) {
         if (withFeature) {
             int col = fieldCodes.indexOf(FieldCode.FEATURE);
             if (col == -1) {
@@ -564,10 +564,10 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private PredefinedDTO buildPredefinedByFieldCodeAndValues(ExcelImportTemplate.Cursor cursor,
-                                                              List<String> fieldCodes,
-                                                              List<String> values,
-                                                              String fieldCode) {
+    protected PredefinedDTO buildPredefinedByFieldCodeAndValues(ExcelImportTemplate.Cursor cursor,
+                                                                List<String> fieldCodes,
+                                                                List<String> values,
+                                                                String fieldCode) {
         int col = fieldCodes.indexOf(fieldCode);
         if (col == -1) {
             return null;
@@ -581,9 +581,9 @@ public class ExcelServiceImpl implements ExcelService {
                 cursor.getAndIncreaseSheetNum());
     }
 
-    private PredefinedDTO processSprintPredefined(Long projectId,
-                                                  ExcelImportTemplate.Cursor cursor,
-                                                  List<String> fieldCodes) {
+    protected PredefinedDTO processSprintPredefined(Long projectId,
+                                                    ExcelImportTemplate.Cursor cursor,
+                                                    List<String> fieldCodes) {
         int col = fieldCodes.indexOf(FieldCode.SPRINT);
         if (col == -1) {
             return null;
@@ -602,9 +602,9 @@ public class ExcelServiceImpl implements ExcelService {
                 cursor.getAndIncreaseSheetNum());
     }
 
-    private PredefinedDTO processComponentPredefined(Long projectId,
-                                                     ExcelImportTemplate.Cursor cursor,
-                                                     List<String> fieldCodes) {
+    protected PredefinedDTO processComponentPredefined(Long projectId,
+                                                       ExcelImportTemplate.Cursor cursor,
+                                                       List<String> fieldCodes) {
         int col = fieldCodes.indexOf(FieldCode.COMPONENT);
         if (col == -1) {
             return null;
@@ -623,9 +623,9 @@ public class ExcelServiceImpl implements ExcelService {
                 cursor.getAndIncreaseSheetNum());
     }
 
-    private PredefinedDTO processVersionPredefined(Long projectId,
-                                                   ExcelImportTemplate.Cursor cursor,
-                                                   List<String> fieldCodes) {
+    protected PredefinedDTO processVersionPredefined(Long projectId,
+                                                     ExcelImportTemplate.Cursor cursor,
+                                                     List<String> fieldCodes) {
         int col = fieldCodes.indexOf(FieldCode.FIX_VERSION);
         if (col == -1) {
             return null;
@@ -647,9 +647,9 @@ public class ExcelServiceImpl implements ExcelService {
                 cursor.getAndIncreaseSheetNum());
     }
 
-    private PredefinedDTO processInfluenceVersionPredefined(Long projectId,
-                                                   ExcelImportTemplate.Cursor cursor,
-                                                   List<String> fieldCodes) {
+    protected PredefinedDTO processInfluenceVersionPredefined(Long projectId,
+                                                              ExcelImportTemplate.Cursor cursor,
+                                                              List<String> fieldCodes) {
         int col = fieldCodes.indexOf(FieldCode.INFLUENCE_VERSION);
         if (col == -1) {
             return null;
@@ -722,9 +722,13 @@ public class ExcelServiceImpl implements ExcelService {
                 cursor.getAndIncreaseSheetNum());
     }
 
-    private PredefinedDTO processPriorityPredefined(Long organizationId,
-                                           ExcelImportTemplate.Cursor cursor,
-                                           List<String> fieldCodes) {
+    protected PredefinedDTO processPriorityPredefined(Long organizationId,
+                                                      ExcelImportTemplate.Cursor cursor,
+                                                      List<String> fieldCodes) {
+        int col = fieldCodes.indexOf(FieldCode.PRIORITY);
+        if (col == -1) {
+            return null;
+        }
         List<PriorityVO> priorityVOList = priorityService.queryByOrganizationIdList(organizationId);
         List<String> priorityList =
                 priorityVOList
@@ -732,7 +736,6 @@ public class ExcelServiceImpl implements ExcelService {
                         .filter(p -> Boolean.TRUE.equals(p.getEnable()))
                         .map(PriorityVO::getName)
                         .collect(Collectors.toList());
-        int col = getColByFieldCode(fieldCodes, FieldCode.PRIORITY);
         return new PredefinedDTO(priorityList,
                 PREDEFINED_VALUE_START_ROW,
                 PREDEFINED_VALUE_END_ROW,
@@ -742,7 +745,7 @@ public class ExcelServiceImpl implements ExcelService {
                 cursor.getAndIncreaseSheetNum());
     }
 
-    private int getColByFieldCode(List<String> fieldCodes, String fieldCode) {
+    protected int getColByFieldCode(List<String> fieldCodes, String fieldCode) {
         int col = fieldCodes.indexOf(fieldCode);
         if (col == -1) {
             String msg = "error.fieldCodes." + fieldCode + ".not.exist";
