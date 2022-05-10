@@ -99,6 +99,24 @@ const subProjectSystemFields = [
   { code: 'estimateTime', title: '原始预估时间' },
   { code: 'product', title: '产品' },
 ];
+/**
+ * 获取导入时字段配置
+ * @param type
+ * @returns
+ */
+export function getImportIssueProSystemWithRequiresFields(type: 'project' | 'subProject' | 'program') {
+  switch (type) {
+    case 'project':
+      return { systemFields: projectSystemFields, requiresFields: projectImportRequiresFields };
+    case 'program':
+      return { systemFields: programSystemFields, requiresFields: programImportRequiresFields };
+    case 'subProject':
+      return { systemFields: subProjectSystemFields, requiresFields: subProjectImportRequiredFields };
+    default:
+      break;
+  }
+  return { systemFields: [], requiresFields: [] };
+}
 export interface IIortIssueFieldsRef {
   setValue: (codes: string[]) => void
 }
@@ -165,29 +183,24 @@ const ImportFields = forwardRef<IIortIssueFieldsRef, IImportIssueFieldsProps>(({
   useEffect(() => {
     if (!systems && !requires) {
       if (!loading) {
-        const newFieldConfig = { required: [] as any[], system: [] as any[] };
-        if (applyType === 'program') {
-          Object.assign(newFieldConfig, {
-            required: programImportRequiresFields,
-            system: programSystemFields,
-          });
-        } else if (isInProgram) {
-          Object.assign(newFieldConfig, {
-            required: subProjectImportRequiredFields,
-            system: subProjectSystemFields,
-          });
-        } else {
-          Object.assign(newFieldConfig, {
-            required: projectImportRequiresFields,
-            system: projectSystemFields,
-          });
-        }
+        const currentFieldType = (() => {
+          if (applyType === 'program') {
+            return 'program';
+          }
+          return isInProgram ? 'subProject' : 'project';
+        })();
+
+        const newFieldConfig = getImportIssueProSystemWithRequiresFields(currentFieldType);
         // 设置必填值
-        chooseDataSet.current?.set('fields', newFieldConfig.required);
-        setRequiredFields(newFieldConfig.required);
-        setSystemFields(newFieldConfig.system);
-        events.onRequiredFieldLoad(newFieldConfig.required);
+        chooseDataSet.current?.set('fields', newFieldConfig.requiresFields);
+        events.onRequiredFieldLoad(newFieldConfig.requiresFields);
+        setRequiredFields(newFieldConfig.requiresFields);
+        setSystemFields(newFieldConfig.systemFields);
       }
+    } else if (systems && requires) {
+      // 设置必填值
+      chooseDataSet.current?.set('fields', requires);
+      events.onRequiredFieldLoad(requires);
     }
   }, [applyType, chooseDataSet, events, isInProgram, loading, requires, systems]);
   useEffect(() => {
