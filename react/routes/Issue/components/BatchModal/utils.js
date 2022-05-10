@@ -156,6 +156,13 @@ export const systemFields = new Map([
     fieldType: 'multiMember',
     emptyValue: EMPTY_VALUE.value_arr,
   }],
+  ['productIds', {
+    id: 'productIds',
+    code: 'productIds',
+    name: '产品',
+    fieldType: 'multiple',
+    emptyValue: EMPTY_VALUE.value_arr,
+  }],
 ]);
 
 function transformValue(dataSet, key, value, format) {
