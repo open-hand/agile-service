@@ -17,6 +17,7 @@ import CustomFields from './custom-fields';
 import useQuickFilters from './useQuickFilters';
 import ListenSearchSize from './ListenSearchSize';
 import useFormatMessage from '@/hooks/useFormatMessage';
+import isEqualNonNullable from '@/utils/isEqualNonNullable';
 
 const { AppState } = stores;
 const { Option, OptGroup } = FlatSelect;
@@ -109,7 +110,10 @@ const SearchArea: React.FC = () => {
       reset();
     }
   };
-  const handlePersonalFilterChange = (values: string[] | null) => {
+  const handlePersonalFilterChange = (values: string[] | null, oldValue: any) => {
+    if (isEqualNonNullable(values, oldValue)) {
+      return;
+    }
     if (!values) {
       handleClearFilter();
       return;
