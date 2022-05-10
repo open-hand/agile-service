@@ -307,7 +307,7 @@ public class ExcelServiceImpl implements ExcelService {
         systemFields = ExcelImportTemplate.IssueHeader.addFields(systemFields);
         ExcelImportTemplate.Cursor cursor = new ExcelImportTemplate.Cursor();
         List<PredefinedDTO> predefinedList =
-                processSystemFieldPredefinedList(organizationId, projectId, systemFields, withFeature, cursor);
+                processSystemFieldPredefinedList(projectId, systemFields, withFeature, cursor);
         Map<String, String> customFieldCodeNameMap = new HashMap<>();
         String issueTypeList = ProjectCategory.getProjectIssueTypeList(projectId);
         predefinedList.addAll(excelCommonService.processCustomFieldPredefinedList(projectId, customFields, cursor, systemFields.size(), customFieldCodeNameMap, issueTypeList));
@@ -373,8 +373,7 @@ public class ExcelServiceImpl implements ExcelService {
         return result;
     }
 
-    private List<PredefinedDTO> processSystemFieldPredefinedList(Long organizationId,
-                                                                 Long projectId,
+    private List<PredefinedDTO> processSystemFieldPredefinedList(Long projectId,
                                                                  List<String> systemFields,
                                                                  boolean withFeature,
                                                                  ExcelImportTemplate.Cursor cursor) {

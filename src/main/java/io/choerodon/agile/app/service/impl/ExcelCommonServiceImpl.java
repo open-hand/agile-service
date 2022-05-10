@@ -83,8 +83,15 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 List<String> userNameList = new ArrayList<>(getManagers(projectId).keySet());
                 return buildPredefinedByFieldCodeAndValues(cursor, fieldCodes, userNameList, fieldCode);
             case FieldCode.FEATURE:
+                if (withFeature) {
+                    return processEpicOrFeaturePredefined(organizationId, projectId, withFeature, cursor, fieldCodes);
+                }
+                break;
             case FieldCode.EPIC:
-                return processEpicOrFeaturePredefined(organizationId, projectId, withFeature, cursor, fieldCodes);
+                if (!withFeature) {
+                    return processEpicOrFeaturePredefined(organizationId, projectId, withFeature, cursor, fieldCodes);
+                }
+                break;
             case FieldCode.LABEL:
                 return processLabelPredefined(projectId, cursor, fieldCodes);
             case FieldCode.ENVIRONMENT:
@@ -96,6 +103,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             default:
                 return null;
         }
+        return null;
     }
 
     private PredefinedDTO processLabelPredefined(Long projectId,
