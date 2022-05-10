@@ -16,6 +16,7 @@ import { fieldApi } from '@/api';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import styles from './ImportFields.less';
 import { ImportIssueContextProps } from './stores';
+import useIsWaterfall from '@/hooks/useIsWaterfall';
 
 const programImportRequiresFields = ['issueType', 'summary', 'description', 'reporter', 'epic', 'epicName', 'pi'];
 const projectImportRequiresFields = ['issueType', 'parentIssue', 'epic', 'component', 'sprint', 'summary', 'description', 'epicName', 'assignee', 'reporter', 'priority', 'remainingTime', 'storyPoints', 'linkIssue'];
@@ -144,6 +145,7 @@ const ImportFields = forwardRef<IIortIssueFieldsRef, IImportIssueFieldsProps>(({
 }, ref) => {
   const fieldFormItemRef = useRef<SelectBox>(null);
   const { isInProgram, loading } = useIsInProgram();
+  const { isWaterfall } = useIsWaterfall();
   const [requiredFields, setRequiredFields] = useState<string[]>(() => requires || []);
   const [btnStatus, { toggle: toggleBtnStatus }] = useToggle('NONE', 'ALL');
   const [systemFields, setSystemFields] = useState<{ code: string, title: string }[]>(systems || []);
@@ -205,7 +207,13 @@ const ImportFields = forwardRef<IIortIssueFieldsRef, IImportIssueFieldsProps>(({
   }, [applyType, chooseDataSet, events, isInProgram, loading, requires, systems]);
   useEffect(() => {
     const loadData = async () => {
-      const fields = fs || await fieldApi.getFoundationHeader(applyType === 'program' ? 'programIssueType' : 'agileIssueType');
+      const issueTypeList = (() => {
+        if (isWaterfall) {
+          return '';
+        }
+        return applyType === 'program' ? 'programIssueType' : 'agileIssueType';
+      })();
+      const fields = fs || await fieldApi.getFoundationHeader(issueTypeList);
       const allFs = [...(systemFields.map((item) => ({ ...item, system: true }))), ...fields];
       setAllFields(allFs);
       events.onOptionLoad(allFs);
@@ -215,7 +223,7 @@ const ImportFields = forwardRef<IIortIssueFieldsRef, IImportIssueFieldsProps>(({
     if ((systemFields && systemFields.length) || fs?.length) {
       loadData();
     }
-  }, [applyType, events, fieldsOptionDataSet, fs, systemFields]);
+  }, [applyType, events, fieldsOptionDataSet, fs, isWaterfall, systemFields]);
   const setValue = useCallback((codes: string[]) => {
     chooseDataSet.current?.init('fields', codes);
   }, [chooseDataSet]);
