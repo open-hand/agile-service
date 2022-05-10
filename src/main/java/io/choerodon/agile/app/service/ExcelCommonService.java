@@ -14,49 +14,13 @@ import java.util.Map;
  */
 public interface ExcelCommonService {
 
-    PredefinedDTO processLabelPredefined(Long projectId,
-                                         ExcelImportTemplate.Cursor cursor,
-                                         List<String> fieldCodes);
-
-    PredefinedDTO processEpicOrFeaturePredefined(Long organizationId,
-                                                 Long projectId,
-                                                 boolean withFeature,
-                                                 ExcelImportTemplate.Cursor cursor,
-                                                 List<String> fieldCodes);
+    PredefinedDTO processSystemFieldPredefined(Long projectId,
+                                               ExcelImportTemplate.Cursor cursor,
+                                               boolean withFeature,
+                                               List<String> fieldCodes,
+                                               String fieldCode);
 
     Map<String, Long> getEpicMap(Long projectId);
-
-    PredefinedDTO buildPredefinedByFieldCodeAndValues(ExcelImportTemplate.Cursor cursor,
-                                                      List<String> fieldCodes,
-                                                      List<String> values,
-                                                      String fieldCode);
-
-    PredefinedDTO processSprintPredefined(Long projectId,
-                                          ExcelImportTemplate.Cursor cursor,
-                                          List<String> fieldCodes);
-
-    PredefinedDTO processComponentPredefined(Long projectId,
-                                             ExcelImportTemplate.Cursor cursor,
-                                             List<String> fieldCodes);
-
-    PredefinedDTO processVersionPredefined(Long projectId,
-                                           ExcelImportTemplate.Cursor cursor,
-                                           List<String> fieldCodes);
-
-    PredefinedDTO processInfluenceVersionPredefined(Long projectId,
-                                                    ExcelImportTemplate.Cursor cursor,
-                                                    List<String> fieldCodes);
-
-    PredefinedDTO processPriorityPredefined(Long organizationId,
-                                            ExcelImportTemplate.Cursor cursor,
-                                            List<String> fieldCodes);
-
-    PredefinedDTO processIssueStatusPredefined(Long organizationId,
-                                               Long projectId,
-                                               ExcelImportTemplate.Cursor cursor,
-                                               List<String> fieldCodes);
-
-    PredefinedDTO processIssueProductPredefined(Long organizationId, Long projectId, ExcelImportTemplate.Cursor cursor, List<String> fieldCodes);
 
     int getColByFieldCode(List<String> fieldCodes, String fieldCode);
 

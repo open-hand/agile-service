@@ -9,6 +9,7 @@ import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.FieldType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.ExcelUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -62,9 +63,44 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private BaseFeignClient baseFeignClient;
 
     @Override
-    public PredefinedDTO processLabelPredefined(Long projectId,
-                                                ExcelImportTemplate.Cursor cursor,
-                                                List<String> fieldCodes) {
+    public PredefinedDTO processSystemFieldPredefined(Long projectId, ExcelImportTemplate.Cursor cursor, boolean withFeature, List<String> fieldCodes, String fieldCode) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        switch (fieldCode) {
+            case FieldCode.PRIORITY:
+                return processPriorityPredefined(organizationId, cursor, fieldCodes);
+            case FieldCode.FIX_VERSION:
+                return processVersionPredefined(projectId, cursor, fieldCodes);
+            case FieldCode.INFLUENCE_VERSION:
+                return processInfluenceVersionPredefined(projectId, cursor, fieldCodes);
+            case FieldCode.COMPONENT:
+                return processComponentPredefined(projectId, cursor, fieldCodes);
+            case FieldCode.SPRINT:
+                return processSprintPredefined(projectId, cursor, fieldCodes);
+            case FieldCode.ASSIGNEE:
+            case FieldCode.REPORTER:
+            case FieldCode.MAIN_RESPONSIBLE:
+            case FieldCode.PARTICIPANT:
+                List<String> userNameList = new ArrayList<>(getManagers(projectId).keySet());
+                return buildPredefinedByFieldCodeAndValues(cursor, fieldCodes, userNameList, fieldCode);
+            case FieldCode.FEATURE:
+            case FieldCode.EPIC:
+                return processEpicOrFeaturePredefined(organizationId, projectId, withFeature, cursor, fieldCodes);
+            case FieldCode.LABEL:
+                return processLabelPredefined(projectId, cursor, fieldCodes);
+            case FieldCode.ENVIRONMENT:
+                return buildPredefinedByFieldCodeAndValues(cursor, fieldCodes, Arrays.asList("非生产环境", "生产环境"), FieldCode.ENVIRONMENT);
+            case FieldCode.STATUS:
+                return processIssueStatusPredefined(organizationId, projectId, cursor, fieldCodes);
+            case FieldCode.PRODUCT:
+                return processIssueProductPredefined(organizationId, projectId, cursor, fieldCodes);
+            default:
+                return null;
+        }
+    }
+
+    private PredefinedDTO processLabelPredefined(Long projectId,
+                                                 ExcelImportTemplate.Cursor cursor,
+                                                 List<String> fieldCodes) {
         int col = fieldCodes.indexOf(FieldCode.LABEL);
         if (col == -1) {
             return null;
@@ -84,12 +120,11 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 cursor.getAndIncreaseSheetNum());
     }
 
-    @Override
-    public PredefinedDTO processEpicOrFeaturePredefined(Long organizationId,
-                                                        Long projectId,
-                                                        boolean withFeature,
-                                                        ExcelImportTemplate.Cursor cursor,
-                                                        List<String> fieldCodes) {
+    private PredefinedDTO processEpicOrFeaturePredefined(Long organizationId,
+                                                         Long projectId,
+                                                         boolean withFeature,
+                                                         ExcelImportTemplate.Cursor cursor,
+                                                         List<String> fieldCodes) {
         if (withFeature) {
             int col = fieldCodes.indexOf(FieldCode.FEATURE);
             if (col == -1) {
@@ -134,11 +169,10 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         return epicMap;
     }
 
-    @Override
-    public PredefinedDTO buildPredefinedByFieldCodeAndValues(ExcelImportTemplate.Cursor cursor,
-                                                             List<String> fieldCodes,
-                                                             List<String> values,
-                                                             String fieldCode) {
+    private PredefinedDTO buildPredefinedByFieldCodeAndValues(ExcelImportTemplate.Cursor cursor,
+                                                              List<String> fieldCodes,
+                                                              List<String> values,
+                                                              String fieldCode) {
         int col = fieldCodes.indexOf(fieldCode);
         if (col == -1) {
             return null;
@@ -152,10 +186,9 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 cursor.getAndIncreaseSheetNum());
     }
 
-    @Override
-    public PredefinedDTO processSprintPredefined(Long projectId,
-                                                 ExcelImportTemplate.Cursor cursor,
-                                                 List<String> fieldCodes) {
+    private PredefinedDTO processSprintPredefined(Long projectId,
+                                                  ExcelImportTemplate.Cursor cursor,
+                                                  List<String> fieldCodes) {
         int col = fieldCodes.indexOf(FieldCode.SPRINT);
         if (col == -1) {
             return null;
@@ -174,10 +207,9 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 cursor.getAndIncreaseSheetNum());
     }
 
-    @Override
-    public PredefinedDTO processComponentPredefined(Long projectId,
-                                                    ExcelImportTemplate.Cursor cursor,
-                                                    List<String> fieldCodes) {
+    private PredefinedDTO processComponentPredefined(Long projectId,
+                                                     ExcelImportTemplate.Cursor cursor,
+                                                     List<String> fieldCodes) {
         int col = fieldCodes.indexOf(FieldCode.COMPONENT);
         if (col == -1) {
             return null;
@@ -196,10 +228,9 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 cursor.getAndIncreaseSheetNum());
     }
 
-    @Override
-    public PredefinedDTO processVersionPredefined(Long projectId,
-                                                  ExcelImportTemplate.Cursor cursor,
-                                                  List<String> fieldCodes) {
+    private PredefinedDTO processVersionPredefined(Long projectId,
+                                                   ExcelImportTemplate.Cursor cursor,
+                                                   List<String> fieldCodes) {
         int col = fieldCodes.indexOf(FieldCode.FIX_VERSION);
         if (col == -1) {
             return null;
@@ -221,10 +252,9 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 cursor.getAndIncreaseSheetNum());
     }
 
-    @Override
-    public PredefinedDTO processInfluenceVersionPredefined(Long projectId,
-                                                           ExcelImportTemplate.Cursor cursor,
-                                                           List<String> fieldCodes) {
+    private PredefinedDTO processInfluenceVersionPredefined(Long projectId,
+                                                            ExcelImportTemplate.Cursor cursor,
+                                                            List<String> fieldCodes) {
         int col = fieldCodes.indexOf(FieldCode.INFLUENCE_VERSION);
         if (col == -1) {
             return null;
@@ -246,10 +276,9 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 cursor.getAndIncreaseSheetNum());
     }
 
-    @Override
-    public PredefinedDTO processPriorityPredefined(Long organizationId,
-                                                   ExcelImportTemplate.Cursor cursor,
-                                                   List<String> fieldCodes) {
+    private PredefinedDTO processPriorityPredefined(Long organizationId,
+                                                    ExcelImportTemplate.Cursor cursor,
+                                                    List<String> fieldCodes) {
         int col = fieldCodes.indexOf(FieldCode.PRIORITY);
         if (col == -1) {
             return null;
@@ -270,11 +299,10 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 cursor.getAndIncreaseSheetNum());
     }
 
-    @Override
-    public PredefinedDTO processIssueStatusPredefined(Long organizationId,
-                                                      Long projectId,
-                                                      ExcelImportTemplate.Cursor cursor,
-                                                      List<String> fieldCodes) {
+    private PredefinedDTO processIssueStatusPredefined(Long organizationId,
+                                                       Long projectId,
+                                                       ExcelImportTemplate.Cursor cursor,
+                                                       List<String> fieldCodes) {
         int col = fieldCodes.indexOf(FieldCode.ISSUE_STATUS);
         if (col == -1) {
             return null;
@@ -291,11 +319,10 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 cursor.getAndIncreaseSheetNum());
     }
 
-    @Override
-    public PredefinedDTO processIssueProductPredefined(Long organizationId,
-                                                       Long projectId,
-                                                       ExcelImportTemplate.Cursor cursor,
-                                                       List<String> fieldCodes) {
+    private PredefinedDTO processIssueProductPredefined(Long organizationId,
+                                                        Long projectId,
+                                                        ExcelImportTemplate.Cursor cursor,
+                                                        List<String> fieldCodes) {
         int col = fieldCodes.indexOf(FieldCode.PRODUCT);
         if (col == -1) {
             return null;
@@ -363,8 +390,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         List<String> customFieldCodes = new ArrayList<>();
         List<String> fieldTypes = Arrays.asList(FieldType.MULTIPLE, FieldType.SINGLE, FieldType.CHECKBOX, FieldType.RADIO);
         List<String> userNames =
-                baseFeignClient.listUsersByProjectId(projectId, 1, 0, null)
-                        .getBody()
+                Optional.ofNullable(baseFeignClient.listUsersByProjectId(projectId, 1, 0, null)
+                        .getBody()).orElse(new Page<>())
                         .getContent()
                         .stream()
                         .map(UserDTO::getRealName)
@@ -435,7 +462,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     public Map<String, Long> getManagers(Long projectId) {
         Map<String, Long> managerMap = new HashMap<>();
         ResponseEntity<Page<UserDTO>> response = baseFeignClient.listUsersByProjectId(projectId, 1, 0, null);
-        List<UserDTO> users = response.getBody().getContent();
+        List<UserDTO> users = Optional.ofNullable(response.getBody()).orElse(new Page<>()).getContent();
         users.forEach(u -> {
             if (Boolean.TRUE.equals(u.getEnabled())) {
                 String realName = u.getRealName();

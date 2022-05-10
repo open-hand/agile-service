@@ -134,6 +134,24 @@ public class ExcelServiceImpl implements ExcelService {
     private static final String INSERT = "insert";
 
     protected static final String[] SYSTEM_DATE_FIELD_LIST = {FieldCode.ACTUAL_START_TIME, FieldCode.ACTUAL_END_TIME, FieldCode.ESTIMATED_START_TIME, FieldCode.ESTIMATED_END_TIME};
+    private static final List<String> PROCESS_PREDEFINED_SYSTEM_FIELDS =
+            Arrays.asList (
+                    FieldCode.PRIORITY,
+                    FieldCode.FIX_VERSION,
+                    FieldCode.INFLUENCE_VERSION,
+                    FieldCode.COMPONENT,
+                    FieldCode.SPRINT,
+                    FieldCode.ASSIGNEE,
+                    FieldCode.REPORTER,
+                    FieldCode.MAIN_RESPONSIBLE,
+                    FieldCode.PARTICIPANT,
+                    FieldCode.FEATURE,
+                    FieldCode.EPIC,
+                    FieldCode.LABEL,
+                    FieldCode.ENVIRONMENT,
+                    FieldCode.STATUS,
+                    FieldCode.PRODUCT
+            );
 
     @Autowired
     protected StateMachineClientService stateMachineClientService;
@@ -361,45 +379,12 @@ public class ExcelServiceImpl implements ExcelService {
                                                                  boolean withFeature,
                                                                  ExcelImportTemplate.Cursor cursor) {
         List<PredefinedDTO> result = new ArrayList<>();
-        result.add(excelCommonService.processPriorityPredefined(organizationId, cursor, systemFields));
         result.add(processIssueTypePredefined(withFeature, projectId, cursor, systemFields));
         result.add(processParentIssuePredefined(projectId, cursor, systemFields));
-        Optional
-                .ofNullable(excelCommonService.processVersionPredefined(projectId, cursor, systemFields))
-                .ifPresent(result::add);
-        Optional
-                .ofNullable(excelCommonService.processInfluenceVersionPredefined(projectId, cursor, systemFields))
-                .ifPresent(result::add);
-        Optional
-                .ofNullable(excelCommonService.processComponentPredefined(projectId, cursor, systemFields))
-                .ifPresent(result::add);
-        Optional
-                .ofNullable(excelCommonService.processSprintPredefined(projectId, cursor, systemFields))
-                .ifPresent(result::add);
-        List<String> userNameList = new ArrayList<>(excelCommonService.getManagers(projectId).keySet());
-        Optional
-                .ofNullable(excelCommonService.buildPredefinedByFieldCodeAndValues(cursor, systemFields, userNameList, FieldCode.ASSIGNEE))
-                .ifPresent(result::add);
-        Optional
-                .ofNullable(excelCommonService.buildPredefinedByFieldCodeAndValues(cursor, systemFields, userNameList, FieldCode.REPORTER))
-                .ifPresent(result::add);
-        Optional
-                .ofNullable(excelCommonService.processEpicOrFeaturePredefined(organizationId, projectId, withFeature, cursor, systemFields))
-                .ifPresent(result::add);
-        Optional.ofNullable(excelCommonService.processLabelPredefined(projectId, cursor, systemFields))
-                .ifPresent(result::add);
-
-        Optional.ofNullable(excelCommonService.buildPredefinedByFieldCodeAndValues(cursor, systemFields, userNameList, FieldCode.MAIN_RESPONSIBLE))
-                .ifPresent(result::add);
-        Optional.ofNullable(excelCommonService.buildPredefinedByFieldCodeAndValues(cursor, systemFields, Arrays.asList("非生产环境", "生产环境"), FieldCode.ENVIRONMENT))
-                .ifPresent(result::add);
-        Optional.ofNullable(excelCommonService.processIssueStatusPredefined(organizationId, projectId, cursor, systemFields))
-                .ifPresent(result::add);
-        Optional
-                .ofNullable(excelCommonService.buildPredefinedByFieldCodeAndValues(cursor, systemFields, userNameList, FieldCode.PARTICIPANT))
-                .ifPresent(result::add);
-        Optional.ofNullable(excelCommonService.processIssueProductPredefined(organizationId, projectId, cursor, systemFields))
-                .ifPresent(result::add);
+        PROCESS_PREDEFINED_SYSTEM_FIELDS.forEach(fieldCode ->
+            Optional.ofNullable(excelCommonService.processSystemFieldPredefined(projectId, cursor, withFeature, systemFields, fieldCode))
+                .ifPresent(result::add)
+        );
         return result;
     }
 
