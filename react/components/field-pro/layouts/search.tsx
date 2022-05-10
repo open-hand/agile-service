@@ -122,18 +122,16 @@ export function wrapDateToFlatDate(fieldConfig: any, wrapElementFn: (config: any
     render() {
       return (
         <Tooltip title={this.props.label}>
-          <div>
-            {wrapElementFn(merge(omit(fieldConfig, 'props'), {
-              props: {
-                ...this.props,
-                ...FlatDateRangePicker.getDateProps(this.props.label),
-                value: FlatDateRangePicker.getSelectedDate(this.props.value),
-                onChange: this.handleChange,
-                isFlat: true,
-                // className: FlatDateRangePicker.getSelectedDate(this.props.value)?.start || FlatDateRangePicker.getSelectedDate(this.props.value)?.end ? 'c7nagile-calendar-range-icon-show' : 'c7nagile-calendar-range-icon-hidden',
-              },
-            }))}
-          </div>
+          {wrapElementFn(merge(omit(fieldConfig, 'props'), {
+            props: {
+              ...this.props,
+              ...FlatDateRangePicker.getDateProps(this.props.label),
+              value: FlatDateRangePicker.getSelectedDate(this.props.value),
+              onChange: this.handleChange,
+              isFlat: true,
+              // className: FlatDateRangePicker.getSelectedDate(this.props.value)?.start || FlatDateRangePicker.getSelectedDate(this.props.value)?.end ? 'c7nagile-calendar-range-icon-show' : 'c7nagile-calendar-range-icon-hidden',
+            },
+          }))}
         </Tooltip>
       );
     }
