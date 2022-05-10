@@ -14,9 +14,9 @@ import {
 } from 'ahooks';
 import { fieldApi } from '@/api';
 import useIsInProgram from '@/hooks/useIsInProgram';
+import useIsWaterfall from '@/hooks/useIsWaterfall';
 import styles from './ImportFields.less';
 import { ImportIssueContextProps } from './stores';
-import useIsWaterfall from '@/hooks/useIsWaterfall';
 
 const programImportRequiresFields = ['issueType', 'summary', 'description', 'reporter', 'epic', 'epicName', 'pi'];
 const projectImportRequiresFields = ['issueType', 'parentIssue', 'epic', 'component', 'sprint', 'summary', 'description', 'epicName', 'assignee', 'reporter', 'priority', 'remainingTime', 'storyPoints', 'linkIssue'];
@@ -144,8 +144,8 @@ const ImportFields = forwardRef<IIortIssueFieldsRef, IImportIssueFieldsProps>(({
   applyType, requires, systems, fields: fs, events: propsEvents,
 }, ref) => {
   const fieldFormItemRef = useRef<SelectBox>(null);
-  const { isInProgram, loading } = useIsInProgram();
   const { isWaterfall } = useIsWaterfall();
+  const { isInProgram, loading } = useIsInProgram();
   const [requiredFields, setRequiredFields] = useState<string[]>(() => requires || []);
   const [btnStatus, { toggle: toggleBtnStatus }] = useToggle('NONE', 'ALL');
   const [systemFields, setSystemFields] = useState<{ code: string, title: string }[]>(systems || []);
@@ -207,6 +207,7 @@ const ImportFields = forwardRef<IIortIssueFieldsRef, IImportIssueFieldsProps>(({
   }, [applyType, chooseDataSet, events, isInProgram, loading, requires, systems]);
   useEffect(() => {
     const loadData = async () => {
+      // 兼容性处理
       const issueTypeList = (() => {
         if (isWaterfall) {
           return '';
