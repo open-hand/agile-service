@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 
 
 import io.choerodon.agile.api.vo.business.*;
-import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.IssueOperateService;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
@@ -57,8 +56,6 @@ public class IssueController {
     private StateMachineClientService stateMachineClientService;
     @Autowired
     private IssueOperateService issueOperateService;
-    @Autowired
-    private AgilePluginService agilePluginService;
 
     public IssueController(IssueService issueService) {
         this.issueService = issueService;
@@ -115,7 +112,6 @@ public class IssueController {
         issueValidator.verifyUpdateData(issueUpdate, projectId);
         IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
         List<String> fieldList = verifyUpdateUtil.verifyUpdateData(issueUpdate,issueUpdateVO);
-        agilePluginService.verifyUpdateData(issueUpdate, fieldList);
         return Optional.ofNullable(issueService.updateIssue(projectId, issueUpdateVO, fieldList))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.Issue.updateIssue"));
