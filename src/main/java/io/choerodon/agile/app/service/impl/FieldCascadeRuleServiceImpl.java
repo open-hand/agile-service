@@ -503,7 +503,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         }
 
         if (pageFieldView.getValue() instanceof List) {
-            Set<Long> ids = new HashSet<>(EncryptionUtils.decryptList((List<String>) pageFieldView.getValue(), null, null));
+            Set<Long> ids = new HashSet<>(EncryptionUtils.decryptList((List<String>) pageFieldView.getValue(), EncryptionUtils.BLANK_KEY, null));
             processHiddenAndRequiredByIds(ids, fieldCascadeRuleVO, hiddenFieldIds, requiredIds);
         } else {
             Long id = EncryptionUtils.decrypt((String) pageFieldView.getValue(), "");
