@@ -142,6 +142,7 @@ function TreeNode(props) {
     >
       <div
         role="none"
+
         className={classNames(Styles.item, { [Styles.selected]: item.selected })}
         onClick={() => { onSelect(item); }}
       >
@@ -150,6 +151,7 @@ function TreeNode(props) {
           {renderTitle()}
           {callFunction(titleSuffix, item)}
         </span>
+        {item.data.openType === 'ding_talk' && <div className={Styles.dingflag}>钉钉同步 </div>}
         {(callFunction(enableAction, item) || callFunction(enableAddFolder, item)) && getAction({ ...item, path }, menuItems, enableAddFolder, onMenuClick, enableAction)}
       </div>
     </div>
