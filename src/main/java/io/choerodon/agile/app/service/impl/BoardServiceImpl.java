@@ -321,7 +321,7 @@ public class BoardServiceImpl implements BoardService {
             boardSprintVO.setSprintName(activeSprint.getSprintName());
             if (activeSprint.getEndDate() != null) {
                 Date startDate = new Date();
-                if (activeSprint.getStartDate().after(startDate)) {
+                if (activeSprint.getStartDate() != null && activeSprint.getStartDate().after(startDate)) {
                     startDate = activeSprint.getStartDate();
                 }
                 boardSprintVO.setDayRemain(dateUtil.getDaysBetweenDifferentDate(startDate, activeSprint.getEndDate(),

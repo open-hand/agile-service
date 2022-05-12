@@ -127,7 +127,7 @@ function getCustomElement<T extends IComponentFCWithClassObject>(filedProcessCon
  * @returns
  */
 function getElement<T extends IComponentFCWithClassObject,
-  C extends IComponentFCWithClassObject = IComponentFCWithClassObject>(filedProcessConfig: IFieldProcessConfig<T, C>,
+ C extends IComponentFCWithClassObject = IComponentFCWithClassObject>(filedProcessConfig: IFieldProcessConfig<T, C>,
   systemComponents: T, customComponents: C) {
   let element: IComponentFCWithClass<any, any> = getDefaultEmptyElement();
   if (!filedProcessConfig.display) {
