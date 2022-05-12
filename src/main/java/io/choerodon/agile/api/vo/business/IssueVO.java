@@ -296,6 +296,11 @@ public class IssueVO {
 
     private RiskVO riskVO;
 
+    private List<ProductVO> productVOList;
+
+    @Encrypt
+    private List<Long> productIds;
+
     public List<Long> getInfluenceIssueIds() {
         return influenceIssueIds;
     }
@@ -1035,5 +1040,21 @@ public class IssueVO {
 
     public void setRiskVO(RiskVO riskVO) {
         this.riskVO = riskVO;
+    }
+
+    public List<ProductVO> getProductVOList() {
+        return productVOList;
+    }
+
+    public void setProductVOList(List<ProductVO> productVOList) {
+        this.productVOList = productVOList;
+    }
+
+    public List<Long> getProductIds() {
+        return productIds;
+    }
+
+    public void setProductIds(List<Long> productIds) {
+        this.productIds = productIds;
     }
 }

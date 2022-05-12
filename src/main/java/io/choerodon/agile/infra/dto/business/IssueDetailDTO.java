@@ -147,6 +147,8 @@ public class IssueDetailDTO {
 
     private List<Long> participantIds;
 
+    private List<Long> productIds;
+
     public String getPriorityCode() {
         return priorityCode;
     }
@@ -678,5 +680,13 @@ public class IssueDetailDTO {
 
     public void setParticipantIds(List<Long> participantIds) {
         this.participantIds = participantIds;
+    }
+
+    public List<Long> getProductIds() {
+        return productIds;
+    }
+
+    public void setProductIds(List<Long> productIds) {
+        this.productIds = productIds;
     }
 }

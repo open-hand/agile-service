@@ -7,6 +7,49 @@ import java.util.Date;
 import java.util.Map;
 
 public class ExportIssuesVO {
+
+    public static final String SUMMARY = "summary";
+    public static final String ISSUE_NUM = "issueNum";
+    public static final String EPIC_NAME = "epicName";
+    public static final String TYPE_NAME = "typeName";
+    public static final String DESCRIPTION = "description";
+    public static final String PRIORITY_NAME = "priorityName";
+    public static final String STATUS_NAME = "statusName";
+    public static final String RESOLUTION = "resolution";
+    public static final String SPRINT_NAME = "sprintName";
+    public static final String ASSIGNEE_NAME = "assigneeName";
+    public static final String REPORTER_NAME = "reporterName";
+    public static final String STORY_POINTS = "storyPoints";
+    public static final String REMAINING_TIME = "remainingTime";
+    public static final String ESTIMATE_TIME = "estimateTime";
+    public static final String VERSION_NAME = "versionName";
+    public static final String FIX_VERSION_NAME = "fixVersionName";
+    public static final String INFLUENCE_VERSION_NAME = "influenceVersionName";
+    public static final String LABEL_NAME = "labelName";
+    public static final String COMPONENT_NAME = "componentName";
+    public static final String CREATION_DATE = "creationDate";
+    public static final String LAST_UPDATE_DATE = "lastUpdateDate";
+    public static final String ESTIMATED_START_TIME = "estimatedStartTime";
+    public static final String ACTUAL_START_TIME = "actualStartTime";
+    public static final String ESTIMATED_END_TIME = "estimatedEndTime";
+    public static final String ACTUAL_END_TIME = "actualEndTime";
+    public static final String CREATED_USER_NAME = "createdUserName";
+    public static final String LAST_UPDATE_USER_NAME = "lastUpdatedUserName";
+    public static final String MAIN_RESPONSIBLE_NAME = "mainResponsibleName";
+    public static final String ENVIRONMENT_NAME = "environmentName";
+    public static final String SPENT_WORK_TIME = "spentWorkTime";
+    public static final String ALL_ESTIMATE_TIME = "allEstimateTime";
+    public static final String TAGS = "tags";
+    public static final String RELATED_ISSUE = "relatedIssue";
+    public static final String EPIC_SELF_NAME = "epicSelfName";
+    public static final String PARTICIPANT = "participant";
+    public static final String PRODUCT = "product";
+    public static final String FEATURE = "feature";
+    public static final String PROGRESS = "progress";
+    public static final String SEQUENCE = "sequence";
+
+
+
     @ApiModelProperty("问题id")
     private Long issueId;
     @ApiModelProperty("问题编号")
@@ -134,12 +177,54 @@ public class ExportIssuesVO {
 
     private Long parentId;
 
+    private String parentType;
+
     private Boolean mergeColumn;
 
     private Integer colorIndex;
 
+    private String product;
+
+    private String type;
+
+    @ApiModelProperty("进度")
+    private String progress;
+
+    private String sequence;
 
     public ExportIssuesVO() {
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(String sequence) {
+        this.sequence = sequence;
+    }
+
+    public String getParentType() {
+        return parentType;
+    }
+
+    public void setParentType(String parentType) {
+        this.parentType = parentType;
+    }
+
+    public String getProgress() {
+        return progress;
+    }
+
+    public void setProgress(String progress) {
+        this.progress = progress;
     }
 
     public String getEpicSelfName() {
@@ -620,5 +705,13 @@ public class ExportIssuesVO {
 
     public void setColorIndex(Integer colorIndex) {
         this.colorIndex = colorIndex;
+    }
+
+    public String getProduct() {
+        return product;
+    }
+
+    public void setProduct(String product) {
+        this.product = product;
     }
 }

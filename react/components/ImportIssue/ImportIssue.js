@@ -45,6 +45,9 @@ const ImportIssueForm = (formProps) => {
     </div>
   );
 };
+/**
+ * @deprecated 移至 import-issue-pro
+ */
 class ImportIssue extends Component {
   constructor(props) {
     super(props);
@@ -501,7 +504,10 @@ class ImportIssue extends Component {
 }
 
 const ObserverImportIssue = observer(ImportIssue);
-
+/**
+ *
+ * @deprecated 更新为 import-issue-pro
+ */
 const handleOpenImport = (props) => {
   Modal.open({
     drawer: true,

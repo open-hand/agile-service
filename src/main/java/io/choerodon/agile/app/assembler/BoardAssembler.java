@@ -27,6 +27,7 @@ public class BoardAssembler extends AbstractAssembler {
             assertNull(args, "feature");
             assertNull(args, "participantIds");
             assertNull(args, "mainResponsibleIds");
+            assertNull(args, "productIds");
         }
     }
 

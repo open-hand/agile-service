@@ -18,6 +18,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,7 +32,6 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author dinghuang123@gmail.com
@@ -242,6 +242,25 @@ public class ExcelUtil {
         }
     }
 
+    public static CellStyle addIndentToCellStyle(CellStyle sourceCellStyle,
+                                                 Workbook workbook,
+                                                 Short indent) {
+        CellStyle cellStyle = null;
+        if (sourceCellStyle == null) {
+            if (indent != null) {
+                cellStyle = workbook.createCellStyle();
+                cellStyle.setIndention(indent);
+            }
+        } else {
+            cellStyle = workbook.createCellStyle();
+            BeanUtils.copyProperties(sourceCellStyle, cellStyle);
+            if (indent != null) {
+                cellStyle.setIndention(indent);
+            }
+        }
+        return cellStyle;
+    }
+
 
 
     public static void writeToResponse(HttpServletResponse response, Workbook workbook) {
@@ -301,7 +320,7 @@ public class ExcelUtil {
         }
     }
 
-    protected static <T> void handleWriteCell(SXSSFRow row,
+    protected static <T> void handleWriteCell(Row row,
                                               int i,
                                               Object data,
                                               CellStyle cellStyle,
@@ -309,7 +328,7 @@ public class ExcelUtil {
                                               Class<T> clazz,
                                               CellStyle foregroundColor,
                                               SimpleDateFormat formatter) {
-        SXSSFCell cell = row.createCell(i);
+        Cell cell = row.createCell(i);
         cell.setCellStyle(cellStyle);
         if (!ObjectUtils.isEmpty(foregroundColor)) {
             cell.setCellStyle(foregroundColor);

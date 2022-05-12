@@ -25,7 +25,6 @@ import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import FilterManage from '@/components/FilterManage';
 import DetailContainer, { useDetail } from '@/components/detail-container';
 import TableModeSwitch from '@/components/tree-list-switch';
-import handleOpenImport from '@/components/ImportIssue/ImportIssue';
 import { TableCache } from '@/components/issue-table/Component';
 import useTable from '@/hooks/useTable';
 import useDefaultMyFilter from '@/hooks/useDefaultMyFilter';
@@ -40,6 +39,7 @@ import Modal from './components/Modal';
 import './index.less';
 import StatusLinkageWSHandle from '@/components/StatusLinkageWSHandle';
 import useFormatMessage from '@/hooks/useFormatMessage';
+import { openImportIssueModal } from '@/components/import-issue-pro';
 
 const defaultVisibleColumns = [
   'summary',
@@ -329,8 +329,8 @@ const Issue = observer(({ cached, updateCache }) => {
           {
             name: formatMessage({ id: 'agile.issue.import.issue' }),
             icon: 'archive-o',
-            handler: () => handleOpenImport({
-              onFinish: refresh, action: 'agile_import_issue',
+            handler: () => openImportIssueModal({
+              onClose: refresh, action: 'agile_import_issue',
             }),
             display: true,
           },

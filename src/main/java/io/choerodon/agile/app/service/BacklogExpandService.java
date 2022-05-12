@@ -117,10 +117,10 @@ public interface BacklogExpandService {
     /**
      * 获取需求的字段code集合
      *
-     * @param fieldCodeS
+     * @param fieldCodes
      * @param issueTypeId
      */
-    void getBacklogFieldCodes(List<String> fieldCodeS, Long issueTypeId);
+    void getBacklogFieldCodes(List<String> fieldCodes, Long issueTypeId);
 
     Boolean checkFieldPageConfig(String issueType, String code, Boolean created, Boolean edited);
 

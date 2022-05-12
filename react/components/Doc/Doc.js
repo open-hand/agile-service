@@ -8,6 +8,7 @@ import './Doc.less';
 import { produce } from 'immer';
 import { knowledgeApi } from '@/api';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
+import KnowledgeName from '@/components/knowledge-name';
 
 const { AppState } = stores;
 const { Sidebar } = Modal;
@@ -52,6 +53,9 @@ class Doc extends Component {
       title: '知识名称',
       dataIndex: 'name',
       key: 'name',
+      render: (value, rowData) => (
+        <KnowledgeName type={rowData.type} fileType={rowData.fileType} name={value} />
+      ),
     },
   ];
 

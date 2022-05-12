@@ -13,7 +13,7 @@ export function initTargetIssue(sourceIssue: Issue): MoveTargetIssue {
 }
 
 const filterFields = (arr: IField[], typeCode: string) => {
-  const excludeCodes: string[] = ['summary', 'issueType', 'description', 'remainingTime', 'storyPoints', 'priority', 'estimatedStartTime', 'estimatedEndTime', 'benfitHypothesis', 'acceptanceCritera', 'environment', 'tag', 'participant'];
+  const excludeCodes: string[] = ['summary', 'issueType', 'description', 'remainingTime', 'storyPoints', 'priority', 'estimatedStartTime', 'estimatedEndTime', 'benfitHypothesis', 'acceptanceCritera', 'environment', 'tag', 'participant', 'product'];
   if (typeCode === 'feature') {
     excludeCodes.push('sprint');
   }

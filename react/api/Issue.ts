@@ -115,6 +115,7 @@ interface IExportSearch {
     updatorIds?: string[]
     tags?: any[]
     participantIds?: []
+    productIds?: string[]
   },
   searchArgs?: {
     estimatedStartTimeScopeStart?: string,

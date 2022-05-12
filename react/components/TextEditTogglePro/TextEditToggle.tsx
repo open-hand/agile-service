@@ -1,5 +1,5 @@
 import React, {
-  useState, useRef, cloneElement, useEffect, useMemo, useCallback, MutableRefObject,
+  useState, useRef, cloneElement, useEffect, useMemo, useCallback, MutableRefObject, useImperativeHandle,
 } from 'react';
 import FormField from 'choerodon-ui/pro/lib/field';
 import TriggerField from 'choerodon-ui/pro/lib/trigger-field';
@@ -23,6 +23,7 @@ interface EditorRender {
 }
 interface TextEditToggleLatestState {
   editing: boolean
+  isFocus: boolean
 }
 interface TextEditToggleInnerEditorConfig {
   click: boolean,
@@ -30,7 +31,10 @@ interface TextEditToggleInnerEditorConfig {
 }
 export type Action = 'click' | 'blur' | 'change'
 export type EditorTriggerAction = 'click' | 'focus'
-
+interface TextEditToggleToggleRefHandle {
+  hideEditor: () => void
+  showEditor: () => void
+}
 interface Props {
   disabled?: boolean
   /** 编辑状态触发方式 */
@@ -47,7 +51,7 @@ interface Props {
   initValue: any
   showEdit?: boolean // 手动进入编辑状态
   setShowEdit?: () => void,
-  toggleRef?: MutableRefObject<any>,
+  toggleRef?: MutableRefObject<TextEditToggleToggleRefHandle>,
 }
 /**
  * 统一化空值
@@ -77,10 +81,9 @@ const TextEditToggle: React.FC<Props> = ({
     return editTriggerConfigRef.current || { click: false, focus: false };
   }, [editorTrigger]);
   const [editing, setEditing] = useState(false);
-  const latestState: TextEditToggleLatestState = useCreation(() => ({ editing: false }), []);
+  const latestState: TextEditToggleLatestState = useCreation(() => ({ editing: false, isFocus: false }), []);
   latestState.editing = editing;
   const [value, setValue] = useState(initValue);
-  const editingRef = useRef(editing);
   const dataRef = useRef(initValue);
   const editorRef = useRef<JSX.Element | FormField<any>>(null);
   const firstRenderEditorRef = useRef(true);
@@ -95,23 +98,23 @@ const TextEditToggle: React.FC<Props> = ({
     width: containerRef.current?.getBoundingClientRect().width,
     height: containerRef.current?.getBoundingClientRect().height,
   }), [editing]);
-  editingRef.current = editing;
   useUpdateEffect(() => {
-    if (showEdit && !editing) {
+    if (showEdit && !latestState.editing) {
+      latestState.isFocus = false;
       setEditing(true);
     }
-  }, [showEdit]);
+  }, [showEdit, latestState]);
   useEffect(() => {
     dataRef.current = initValue;
     setValue(initValue);
   }, [initValue]);
-  useEffect(() => {
+  useUpdateEffect(() => {
     // 自动聚焦
-    if (editing && editorRef.current) {
-      // @ts-ignore
-      editorRef.current.focus();
+    if (editing && editorRef.current && !latestState.isFocus) {
+      (editorRef.current as FormField<any>).focus();
+      latestState.isFocus = true;
     }
-  });
+  }, [editing, latestState]);
 
   const hideEditor = () => {
     if (editing) {
@@ -124,6 +127,7 @@ const TextEditToggle: React.FC<Props> = ({
         // trigger.cancelPopupTask();
         trigger.setPopupHidden(true);
       }
+      latestState.isFocus = false;
       // 延迟一会隐藏
       setEditing(false);
       setShowEdit!();
@@ -137,14 +141,10 @@ const TextEditToggle: React.FC<Props> = ({
     }
   }, [latestState]);
 
-  useEffect(() => {
-    if (toggleRef) {
-      toggleRef.current = {
-        hideEditor,
-        showEditor,
-      };
-    }
-  }, [toggleRef, hideEditor, showEditor]);
+  useImperativeHandle(toggleRef, () => ({
+    hideEditor,
+    showEditor,
+  }));
 
   const handleChange = (originOnChange: Function | undefined) => (newValue: any) => {
     dataRef.current = newValue;
@@ -173,7 +173,7 @@ const TextEditToggle: React.FC<Props> = ({
     // 延缓submit，因为有时候blur之后才会onchange，保证拿到的值是最新的
     setTimeout(async () => {
       // @ts-ignore
-      if (editingRef.current && editorRef.current && await editorRef.current?.validate(waitSubmitValue)) {
+      if (latestState.editing && editorRef.current && await editorRef.current?.validate(waitSubmitValue)) {
         if (containerRef.current) {
           containerRef.current.blur();
         }
@@ -198,7 +198,17 @@ const TextEditToggle: React.FC<Props> = ({
       value,
       onChange: handleChange(originProps.onChange),
       onBlur: handleEditorBlur(originProps.onBlur),
-      ref: editorRef,
+      ref: (r: any) => {
+        if (r) {
+          // 保存ref
+          Object.assign(editorRef, { current: r });
+          // 编辑状态则自动聚焦
+          if (editing && !latestState.isFocus && typeof r?.focus === 'function') {
+            r.focus();
+            latestState.isFocus = true;
+          }
+        }
+      },
     };
     if (containerRef.current) {
       editorProps.style = {

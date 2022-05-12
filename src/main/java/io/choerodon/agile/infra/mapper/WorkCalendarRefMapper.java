@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author dinghuang123@gmail.com
@@ -49,4 +50,9 @@ public interface WorkCalendarRefMapper extends BaseMapper<WorkCalendarRefDTO> {
      * @return
      */
     List<WorkCalendarRefDTO> listByProjectId(@Param("projectId") Long projectId, @Param("year") Integer year);
+
+    List<WorkCalendarRefDTO> selectEffectiveHolidays(@Param("projectId") Long projectId,
+                                                     @Param("startDate") Date startDate,
+                                                     @Param("endDate") Date endDate);
+
 }

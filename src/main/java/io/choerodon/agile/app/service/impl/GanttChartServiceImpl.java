@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.ProductVO;
 import io.choerodon.agile.api.vo.business.TagVO;
 import io.choerodon.agile.api.vo.waterfall.GanttParentInfoVO;
 import io.choerodon.agile.api.vo.waterfall.GanttParentVO;
@@ -60,6 +61,7 @@ public class GanttChartServiceImpl implements GanttChartService {
     private static final String MAIN_RESPONSIBLE_USER = "mainResponsibleUser";
     private static final String TAGS = "tags";
     private static final String PARTICIPANTS = "participants";
+    private static final String PRODUCT = "product";
     private static final String ERROR_SPRINT_EMPTY = "error.otherArgs.sprint.empty";
     private static final String ERROR_GANTT_DIMENSION_NOT_SUPPORT = "error.gantt.dimension.not.support";
     private static final String ERROR_GANTT_MOVE_NULL_DATA = "error.gantt.move.null.data";
@@ -78,7 +80,8 @@ public class GanttChartServiceImpl implements GanttChartService {
                     SPENT_WORK_TIME,
                     ALL_ESTIMATE_TIME,
                     TAGS,
-                    PARTICIPANTS);
+                    PARTICIPANTS,
+                    PRODUCT);
 
     @Autowired
     private IssueService issueService;
@@ -1331,6 +1334,11 @@ public class GanttChartServiceImpl implements GanttChartService {
                     agilePluginService.handlerTags(projectIds, issueIds, fieldCodeValues);
                 }
                 break;
+            case PRODUCT:
+                if (agilePluginService != null) {
+                    agilePluginService.handlerProducts(projectIds, issueIds, fieldCodeValues);
+                }
+                break;
             default:
                 break;
         }
@@ -1635,6 +1643,10 @@ public class GanttChartServiceImpl implements GanttChartService {
         Map<String, Object> fieldCodeValue = (Map<String, Object>) customFieldMap.getOrDefault(issueDTO.getIssueId(), new HashMap<>());
         if (!CollectionUtils.isEmpty(fieldCodeValue)) {
             ganttChartVO.setFoundationFieldValue(fieldCodeValue);
+        }
+        if (fieldCodes.contains(PRODUCT) && !ObjectUtils.isEmpty(issueDTO.getProductIds())) {
+            Map<Long, List<ProductVO>> productMap = (Map<Long, List<ProductVO>>) fieldCodeValues.getOrDefault(PRODUCT, new HashMap<>());
+            ganttChartVO.setProductVOList(productMap.get(issueDTO.getIssueId()));
         }
     }
 }

@@ -54,6 +54,7 @@ const systemFields = [
   { code: 'tags', title: 'Tag' },
   { code: 'participants', title: '参与人' },
   { code: 'estimateTime', title: '原始预估时间' },
+  { code: 'product', title: '产品' },
 ] as IFoundationHeader[];
 export default function useIssueTableFields(config?: IssueTableFieldsConfig, options?: UseQueryOptions<IFoundationHeader[]>) {
   const key = useProjectKey({ key: ['IssueTableFields'], projectId: `${config?.menuType}-${config?.projectId}` });

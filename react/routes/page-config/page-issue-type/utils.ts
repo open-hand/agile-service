@@ -20,6 +20,7 @@ const fieldTextValueConfig = {
   pi: { optionKey: 'id', textKey: 'piName' },
   programVersion: { optionKey: 'id', textKey: 'name' },
   subProject: { optionKey: 'projectId', textKey: 'projName' },
+  product: { optionKey: 'id', textKey: 'name' },
 
 };
 function transformDefaultValue({

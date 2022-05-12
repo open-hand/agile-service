@@ -24,26 +24,35 @@ interface DownloadProps {
   fileName?: string,
   fileSaverOptions?: FileSaverOptions,
 }
-interface Props {
-  handleMessage?: (messageData: any) => void | boolean, /** 当回调返回true时代表websocket任务完成 */
-  percentKey?: string, /** 在websocket 信息中进程属性的key 默认为 process */
+export interface IWsProgressProps {
+  /** 当回调返回true时代表websocket任务完成 */
+  handleMessage?: (messageData: Record<string, any>) => void | boolean,
+  /** 在websocket 信息中进程属性的key 默认为 process */
+  percentKey?: string,
   downloadInfo?: {
     url: string | null,
     timeLine?: any,
     createDate?: string,
     lastUpdateDate?: string,
-    timeFormat?: string, /** 默认时间解析格式  YYYY-MM-DD HH:mm:ss */
+    /** 默认时间解析格式  YYYY-MM-DD HH:mm:ss */
+    timeFormat?: string,
     children?: React.ReactElement
   } | null,
-  renderEndProgress?: (messageData: any) => React.ReactElement | React.ReactElement[] | null | string,
-  visible?: boolean, /**  可控类型 控制进度条是否显示 */
+  renderEndProgress?: (messageData?: Record<string, any>) => React.ReactElement | React.ReactElement[] | null | string,
+  /**  可控类型 控制进度条是否显示 */
+  visible?: boolean,
   messageKey: string,
   className?: string,
-  predefineProgressTextConfig?: 'export' | 'import' | 'none' /** 预定义配置 ws进行时的下方提示文字的配置 默认export */
-  autoDownload?: boolean | DownloadProps, /** 完成后是否自动下载 */
-  downloadProps?: DownloadProps, /** 下载文件配置，当存在自动下载配置时，以自动下载配置为最高优先级 */
-  onFinish?: (messageData: any) => void, /** websocket任务完成后回调 */
-  onStart?: (messageData: any) => void, /** websocket任务开始时回调 */
+  /** 预定义配置 ws进行时的下方提示文字的配置 默认export */
+  predefineProgressTextConfig?: 'export' | 'import' | 'none'
+  /** 完成后是否自动下载 */
+  autoDownload?: boolean | DownloadProps,
+  /** 下载文件配置，当存在自动下载配置时，以自动下载配置为最高优先级 */
+  downloadProps?: DownloadProps,
+  /** websocket任务完成后回调 */
+  onFinish?: (messageData: any) => void,
+  /** websocket任务开始时回调 */
+  onStart?: (messageData: any) => void,
   /** websocket任务失败时回调 */
   onFailed?: (messageData: any) => void,
   downloadBtn?: boolean
@@ -51,8 +60,9 @@ interface Props {
 interface StateProps {
   visible: boolean,
   data: { [propsName: string]: any },
+  lastData: { [propsName: string]: any },
   lastSuccessData: { [propsName: string]: any },
-  lastFailedData:{ [propsName: string]: any },
+  lastFailedData: { [propsName: string]: any },
 }
 function onHumanizeDuration(createDate?: string, lastUpdateDate?: string, timeFormat: string = 'YYYY-MM-DD HH:mm:ss'): string | null {
   if (!createDate || !lastUpdateDate) {
@@ -68,7 +78,7 @@ function onHumanizeDuration(createDate?: string, lastUpdateDate?: string, timeFo
 }
 
 type ActionProps = Partial<StateProps> & { type: 'init' | 'transmission' | 'visible' | 'finish' | 'failed' }
-const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
+const WsProgress: React.FC<IWsProgressProps> = observer((props) => { // <StateProps, ActionProps>
   const { percentKey = 'process', downloadBtn = false } = props;
   const formatMessage = useFormatMessage();
 
@@ -113,12 +123,14 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
       case 'transmission':
         return {
           ...state,
+          lastData: action.data,
           data: action.data,
         };
       case 'finish': {
         return {
           data: { [percentKey]: 0 },
           visible: false,
+          lastData: action.data,
           lastSuccessData: action.data,
         };
       }
@@ -127,6 +139,7 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
         return {
           data: { [percentKey]: 0 },
           visible: false,
+          lastData: action.data,
           lastFailedData: action.data,
         };
       }
@@ -137,6 +150,8 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
   }, {
     data: { [percentKey]: 0 },
     lastSuccessData: {},
+    lastData: {},
+    lastFailedData: {},
     visible: false,
   });
   const { messageKey } = props;
@@ -174,7 +189,7 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
     const { downloadInfo, renderEndProgress } = props;
     if (renderEndProgress && typeof (props.renderEndProgress) === 'function') {
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      return renderEndProgress(stateProgress.data);
+      return renderEndProgress(stateProgress.lastData);
     }
     const fileName = downLoadProps?.fileName ?? downloadInfo?.url?.substring(downloadInfo.url.lastIndexOf('/') + 1);
     return downloadInfo ? (
@@ -203,7 +218,7 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
         </div>
       </div>
     ) : <></>;
-  }, [doingTextTemplate, downLoadProps?.fileName, downLoadProps?.fileSaverOptions, downloadBtn, props, stateProgress.data]);
+  }, [doingTextTemplate, downLoadProps?.fileName, downLoadProps?.fileSaverOptions, downloadBtn, props, stateProgress.lastData]);
   useEffect(() => {
     if (typeof (props.visible) !== 'undefined') {
       dispatch({ type: 'visible', visible: props.visible });
@@ -235,6 +250,6 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
       ) : renderFinish()}
     </WSHandler>
   );
-};
-export default observer(WsProgress);
+});
+export default WsProgress;
 export { onHumanizeDuration as calculateHumanizeDuration };

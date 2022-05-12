@@ -1,8 +1,10 @@
 package io.choerodon.agile.api.vo.waterfall;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author superlee
@@ -10,10 +12,25 @@ import java.util.Objects;
  */
 public class GanttParentVO {
 
+    public static final String ISSUE = "issue";
+
+    public static final String SPRINT = "sprint";
+
     @Encrypt
     private Long id;
 
     private String type;
+
+    @JsonIgnore
+    private Set<Long> parentSprintIds;
+
+    public Set<Long> getParentSprintIds() {
+        return parentSprintIds;
+    }
+
+    public void setParentSprintIds(Set<Long> parentSprintIds) {
+        this.parentSprintIds = parentSprintIds;
+    }
 
     public Long getId() {
         return id;
@@ -42,5 +59,14 @@ public class GanttParentVO {
     @Override
     public int hashCode() {
         return Objects.hash(getId(), getType());
+    }
+
+    @Override
+    public String toString() {
+        return "GanttParentVO{" +
+                "id=" + id +
+                ", type='" + type + '\'' +
+                ", parentSprintIds=" + parentSprintIds +
+                '}';
     }
 }

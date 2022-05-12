@@ -43,6 +43,7 @@ function transformSystemFilter(data) {
     remainingTime,
     participantIds,
     estimateTime,
+    productIds,
   } = data;
   return {
     advancedSearchArgs: {
@@ -79,6 +80,7 @@ function transformSystemFilter(data) {
       appVersion,
       tags,
       participantIds,
+      productIds,
     },
     searchArgs: {
       estimatedStartTimeScopeStart: getDateValue(estimatedStartTime, 0),

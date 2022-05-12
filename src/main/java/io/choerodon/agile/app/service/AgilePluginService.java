@@ -341,10 +341,10 @@ public interface AgilePluginService {
 
     /**
      * 获取字段Code
-     * @param fieldCodeS
+     * @param fieldCodes
      * @param issueTypeId
      */
-    void getIssueTypeFieldCodes(List<String> fieldCodeS, Long issueTypeId);
+    void getIssueTypeFieldCodes(List<String> fieldCodes, Long issueTypeId);
 
     /**
      * 处理冲刺是否是规划中
@@ -384,7 +384,7 @@ public interface AgilePluginService {
      * @param projectId
      * @param issueDTO
      */
-    void handlerFeatureCleanValue(Long projectId, IssueDetailDTO issueDTO);
+    void handlerBusinessCleanValue(Long projectId, IssueDetailDTO issueDTO);
 
     /**
      * 项目群子项目需要清空逻辑
@@ -539,5 +539,15 @@ public interface AgilePluginService {
 
     void initBusinessOrganization(Long organizationId);
 
+    void createIssueProductRel(List<Long> productIds, Long projectId, Long issueId);
+
+    void updateIssueProductRel(List<Long> productIds, Long projectId, Long issueId);
+
     void verifyUpdateData(JSONObject issueUpdate, List<String> fieldList);
+
+    void handlerProducts(Set<Long> projectIds, List<Long> issueIds, Map<String, Object> fieldCodeValues);
+
+    Map<Long, List<ProductVO>> listProductMap(Long organizationId, List<Long> projectIds, List<Long> issueIds);
+
+    List<ProductVO> listProductByProjectId(Long organizationId, Long projectId);
 }

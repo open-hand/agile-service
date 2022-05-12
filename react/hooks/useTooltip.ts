@@ -1,19 +1,30 @@
 import { usePersistFn } from 'ahooks';
 import { Tooltip } from 'choerodon-ui/pro';
 import type { TooltipProps } from 'choerodon-ui/pro/lib/tooltip/Tooltip';
-import { useRef } from 'react';
+import { isEqual } from 'lodash';
+import { useRef, useMemo } from 'react';
 
 function useTooltip(config?: { tooltip: TooltipProps }) {
-  const titleRef = useRef<TooltipProps['title']>(config?.tooltip.title);
-  titleRef.current = config?.tooltip.title;
+  const tooltipPropsRef = useRef<TooltipProps>();
+  const targetRef = useRef<any>();
+  tooltipPropsRef.current = config?.tooltip;
   const handleTooltipMouseEnter = usePersistFn(
-    (e) => Tooltip.show(e.target, {
-      title: titleRef.current,
-      placement: 'topLeft',
-      ...config?.tooltip,
-    }),
+    (e, tooltipProps?: TooltipProps, duration = 100) => {
+      targetRef.current = e.target;
+      return Tooltip.show(targetRef.current, {
+        placement: 'topLeft',
+        ...tooltipPropsRef.current,
+        ...tooltipProps,
+      }, duration);
+    },
   );
-  const handleTooltipMouseLeave = usePersistFn(() => Tooltip.hide());
-  return { onMouseEnter: handleTooltipMouseEnter, onMouseLeave: handleTooltipMouseLeave };
+  const handleTooltipMouseLeave = usePersistFn((duration = 100) => Tooltip.hide(duration));
+  const handleUpdateTooltip = usePersistFn((tooltipProps: Partial<TooltipProps>) => {
+    if (!isEqual(tooltipProps, tooltipPropsRef.current)) {
+      tooltipPropsRef.current = tooltipProps;
+      targetRef.current && handleTooltipMouseEnter(targetRef.current);
+    }
+  });
+  return useMemo(() => ({ onMouseEnter: handleTooltipMouseEnter, onMouseLeave: handleTooltipMouseLeave, updateTooltipProps: handleUpdateTooltip }), [handleTooltipMouseEnter, handleTooltipMouseLeave, handleUpdateTooltip]);
 }
 export default useTooltip;

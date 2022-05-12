@@ -229,6 +229,9 @@ public class IssueDTO extends AuditDomain {
     @Transient
     private Date actualResolutionDate;
 
+    @Transient
+    private List<Long> productIds;
+
     public String getEpicSelfName() {
         return epicSelfName;
     }
@@ -762,4 +765,11 @@ public class IssueDTO extends AuditDomain {
         return StringUtil.getToString(this);
     }
 
+    public List<Long> getProductIds() {
+        return productIds;
+    }
+
+    public void setProductIds(List<Long> productIds) {
+        this.productIds = productIds;
+    }
 }

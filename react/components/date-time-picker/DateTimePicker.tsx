@@ -1,5 +1,6 @@
 /* eslint-disable react/static-property-placement */
 import moment, { Moment, isMoment } from 'moment';
+import { isNil } from 'lodash';
 import DateTimePicker from 'choerodon-ui/pro/lib/date-time-picker/DateTimePicker';
 import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 
@@ -31,15 +32,18 @@ export default class DateTimePickerWithConfig extends DateTimePicker {
     return newData;
   }
 
-  getSelectedDate(): Moment {
+  getCursorDate(): Moment {
     const {
       range, multiple, rangeTarget, rangeValue,
     } = this;
-    const selectedDate = this.selectedDate
-      || (range && !multiple && rangeTarget !== undefined && rangeValue && rangeValue[rangeTarget])
+    let cursorDate = this.cursorDate
+      || (range && rangeTarget !== undefined && rangeValue && rangeValue[rangeTarget])
       || (!multiple && this.getValue());
-    if (isMoment(selectedDate) && selectedDate.isValid()) {
-      return selectedDate.clone();
+    if (range && !multiple && rangeTarget !== undefined && !isNil(cursorDate) && !isMoment(cursorDate)) {
+      cursorDate = typeof range === 'object' ? cursorDate[range[rangeTarget]] : cursorDate[rangeTarget];
+    }
+    if (isMoment(cursorDate) && cursorDate.isValid()) {
+      return cursorDate.clone();
     }
     const { defaultPickerValue } = this.props;
     // 先得到合规时间
