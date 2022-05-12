@@ -547,18 +547,15 @@ class ScrumBoardHome extends Component {
             <BoardSearch onRefresh={this.handleFilterChange} saveStore={this.handleSaveSearchStore} excludeQuickFilterIds={selectedBoardFilterIds} />
             <div className="c7n-scrumboard">
               <div style={{ display: 'table', minWidth: '100%' }}>
-                {(!ScrumBoardStore.didCurrentSprintExist
-                  || ((!ScrumBoardStore.otherIssue || ScrumBoardStore.otherIssue.length === 0)
-                    && (!ScrumBoardStore.interconnectedData
-                      || ScrumBoardStore.interconnectedData.size === 0))) ? (
-                        <LoadingHiddenWrap>
-                          <NoneSprint
-                            doingSprintExist={ScrumBoardStore.didCurrentSprintExist}
-                            hasSetFilter={this.issueSearchStore?.isHasFilter}
-                            filterItems={this.issueSearchStore?.currentFlatFilter ?? {}}
-                          />
-                        </LoadingHiddenWrap>
-                  )
+                {(!ScrumBoardStore.didCurrentSprintExist) ? (
+                  <LoadingHiddenWrap>
+                    <NoneSprint
+                      doingSprintExist={ScrumBoardStore.didCurrentSprintExist}
+                      hasSetFilter={this.issueSearchStore?.isHasFilter}
+                      filterItems={this.issueSearchStore?.currentFlatFilter ?? {}}
+                    />
+                  </LoadingHiddenWrap>
+                )
                   : (
                     <>
                       <div className="c7n-scrumboard-header">
