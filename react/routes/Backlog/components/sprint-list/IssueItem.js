@@ -4,11 +4,13 @@ import { usePersistFn } from 'ahooks';
 import { Tooltip, Icon } from 'choerodon-ui/pro';
 import classnames from 'classnames';
 import moment from 'moment';
+import { OverflowWrap } from '@choerodon/components';
 import TypeTag from '@/components/TypeTag';
 import StatusTag from '@/components/StatusTag';
 import PriorityTag from '@/components/PriorityTag';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import UserTag from '@/components/tag/user-tag';
+import C7NTooltip from '@/components/c7n-tooltip';
 import { ISSUE_HEIGHT } from './constant';
 import './IssueItem.less';
 
@@ -93,9 +95,11 @@ const Item = observer(({
         <div className={`${prefix}-issueNum`} style={{ textDecoration: issue.statusVO && issue.statusVO.completed ? 'line-through' : 'none' }}>
           {`${issue.issueNum}`}
         </div>
-        <Tooltip title={issue.summary} placement="topLeft">
-          <div className={`${prefix}-summary`}>{issue.summary}</div>
-        </Tooltip>
+        <div className={`${prefix}-summary`}>
+          <C7NTooltip>
+            {issue.summary}
+          </C7NTooltip>
+        </div>
       </div>
       <div
         className={`${prefix}-right`}

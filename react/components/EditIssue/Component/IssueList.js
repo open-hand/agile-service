@@ -6,6 +6,7 @@ import EditIssueContext from '../stores';
 import { issueApi } from '@/api';
 import Star from '@/components/tag/star';
 import UserTag from '@/components/tag/user-tag';
+import C7NTooltip from '@/components/c7n-tooltip';
 import PriorityTag from '../../PriorityTag';
 import StatusTag from '../../StatusTag';
 import TypeTag from '../../TypeTag';
@@ -80,22 +81,20 @@ class IssueList extends Component {
             />
           </div>
         </Tooltip>
-        <Tooltip title={`${issueTypeName}编号概要： ${issue.issueNum} ${issue.summary}`}>
-          <div style={{ marginLeft: 8, flex: 1, overflow: 'hidden' }}>
-            <p
-              className="c7n-issueList-summary"
-              style={{
-                color: '#5365EA', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
-              }}
-              role="none"
-              onClick={() => {
-                onOpen(issue.issueId);
-              }}
-            >
-              {`${issue.summary}`}
-            </p>
-          </div>
-        </Tooltip>
+        <div style={{ marginLeft: 8, flex: 1, overflow: 'hidden' }}>
+          <C7NTooltip
+            className="c7n-issueList-summary"
+            style={{
+              color: '#5365EA', marginBottom: 0,
+            }}
+            role="none"
+            onClick={() => {
+              onOpen(issue.issueId);
+            }}
+          >
+            {`${issue.summary}`}
+          </C7NTooltip>
+        </div>
         <Star disabled active={starBeacon} style={{ margin: '0 8px' }} />
         {
           showPriority && (
