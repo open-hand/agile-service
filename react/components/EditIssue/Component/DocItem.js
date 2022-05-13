@@ -5,6 +5,7 @@ import './DocItem.less';
 import to from '@/utils/to';
 
 import LINK_URL from '@/constants/LINK_URL';
+import KnowledgeName from "../../knowledge-name";
 
 class DocItem extends Component {
   paramConverter = (url) => {
@@ -38,7 +39,13 @@ class DocItem extends Component {
       <div
         className="c7n-docItem"
       >
-        <Icon type="filter_none" className="c7n-docItem-icon" />
+        <KnowledgeName
+          type={doc.workSpaceVO?.type}
+          fileType={doc.workSpaceVO?.fileType}
+          name={doc.workSpaceVO?.name}
+          showName={false}
+          className="c7n-docItem-icon"
+        />
         {doc.workSpaceVO
           ? (
             <a
