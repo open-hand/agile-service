@@ -123,7 +123,9 @@ const ImportIssueContent: React.FC = observer(() => {
     }).catch((e) => {
       Choerodon.prompt('网络错误');
     }).finally(() => {
-      uploadInputRef.current?.setAttribute('value', '');
+      if (uploadInputRef.current) {
+        uploadInputRef.current!.value = '';
+      }
     });
   };
   const exportExcel = async () => {
@@ -324,11 +326,12 @@ const ImportIssueContent: React.FC = observer(() => {
         ref={uploadInputRef}
         type="file"
         onChange={(e) => {
+          console.log('e', e);
           if (e.target.files && e.target.files[0]) {
             upload(e.target.files[0]);
           }
         }}
-        style={{ display: 'none' }}
+        // style={{ display: 'none' }}
         accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       />
       <WsProgress
