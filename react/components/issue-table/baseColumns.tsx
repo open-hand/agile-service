@@ -13,6 +13,7 @@ import { IFoundationHeader } from '@/common/types';
 import { MINUTE } from '@/constants/DATE_FORMAT';
 import GanttPredecessor from '@/routes/gantt/components/gantt-predecessor';
 import renderProduct from '@/components/column-renderer/product';
+import C7NTooltip from '@/components/c7n-tooltip';
 
 type IIssueTableBaseColumnRenderGetData<T> = (data: T, nameKey: string) => any
 export interface IIssueTableBaseColumn<D extends object = any> {
@@ -132,14 +133,15 @@ const systemColumnsMap = new Map<string, IIssueTableBaseColumn>([
     fixed: true,
     sortable: true,
     render: (rowData, getDataMethod = get, summaryProps?: any, typeTagProps?: any) => (
-      <>
+      <div style={{
+        display: 'inline-flex', alignItems: 'center', width: '100%', verticalAlign: 'middle',
+      }}
+      >
         <TypeTag data={getDataMethod(rowData, 'issueTypeVO')} style={{ marginRight: 5, marginTop: -1 }} {...typeTagProps} />
-        <Tooltip mouseEnterDelay={0.5} placement="topLeft" title={`工作项概要： ${getDataMethod(rowData, 'summary')}`}>
-          <span role="none" className="c7n-agile-table-cell-click" {...summaryProps}>
-            {getDataMethod(rowData, 'summary')}
-          </span>
-        </Tooltip>
-      </>
+        <C7NTooltip role="none" className="c7n-agile-table-cell-click" style={{ paddingBottom: 2 }} {...summaryProps}>
+          {getDataMethod(rowData, 'summary')}
+        </C7NTooltip>
+      </div>
     ),
   }],
   ['issueNum', {
