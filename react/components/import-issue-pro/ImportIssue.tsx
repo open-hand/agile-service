@@ -10,7 +10,7 @@ import { Button } from 'choerodon-ui/pro';
 import FileSaver from 'file-saver';
 import classnames from 'classnames';
 import {
-  includes, uniq, map, isEqualWith, intersection,
+  includes, uniq, map, isEqualWith, intersection, sortBy,
 } from 'lodash';
 import { usePersistFn } from 'ahooks';
 import { issueApi } from '@/api';
@@ -128,8 +128,10 @@ const ImportIssueContent: React.FC = observer(() => {
   };
   const exportExcel = async () => {
     const importFieldsData = { systemFields: [] as string[], customFields: [] as string[] };
-    importFieldsData.systemFields = checkOptions.filter((code: any) => allFields.find((item: any) => item.code === code && item.system));
-    importFieldsData.customFields = checkOptions.filter((code: any) => allFields.find((item: any) => item.code === code && !item.system));
+    const rankMap = new Map(allFields.map((item, index) => [item.code, index]));
+    const rankCheckOptions = sortBy(checkOptions, (item) => rankMap.get(item) || 0);
+    importFieldsData.systemFields = rankCheckOptions.filter((code: any) => allFields.find((item: any) => item.code === code && item.system));
+    importFieldsData.customFields = rankCheckOptions.filter((code: any) => allFields.find((item: any) => item.code === code && !item.system));
     return downloadTemplateRequest(importFieldsData).then((excel) => {
       const blob = new Blob([excel], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const fileName = `${name || '工作项'}导入模板.xlsx`;
