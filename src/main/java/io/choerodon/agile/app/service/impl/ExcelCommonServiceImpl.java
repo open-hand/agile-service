@@ -799,7 +799,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         int colNum = headerNames.size() + 1;
         writeErrorData(errorRowColMap, dataSheet, colNum, sheet, headerMap);
         String errorWorkBookUrl = uploadErrorExcel(workbook, organizationId);
-        history.setFileUrl("errorWorkBookUrl");
+        history.setFileUrl(errorWorkBookUrl);
     }
 
     private void writeErrorData(Map<Integer, List<Integer>> errorRowColMap,
