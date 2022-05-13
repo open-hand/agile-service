@@ -104,6 +104,6 @@ export function getQuickCreateDefaultObj(defaultValues?: IQuickCreateDefaultValu
     remainingTime: fieldsMap.get('remainingTime')?.defaultValue,
     mainResponsibleId: fieldsMap.get('mainResponsible')?.defaultValue,
     testResponsibleId: fieldsMap.get('testResponsible')?.defaultValue,
-    productIds: fieldsMap.get('product')?.defaultValue,
+    productIds: fieldsMap.get('product')?.defaultValue || [],
   };
 }
