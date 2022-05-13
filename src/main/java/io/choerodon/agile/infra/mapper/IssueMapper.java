@@ -566,6 +566,9 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     IssueVO selectByIssueNum(@Param("projectId") Long projectId,
                              @Param("issueNum") String issueNum);
 
+    IssueVO selectByIssueId(@Param("projectId") Long projectId,
+                            @Param("issueId") Long issueId);
+
     List<Long> selectSubListByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
 
     List<GanttChartVO> selectActuatorCompletedDateByIssueIds(@Param("issueIds") List<Long> issueIds,
