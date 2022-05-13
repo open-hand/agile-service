@@ -1,5 +1,8 @@
 package io.choerodon.agile.infra.enums;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * @author superlee
  * @since 2020-04-07
@@ -23,6 +26,10 @@ public enum IssueTypeCode {
     public static final String[] ISSUE_TYPE_CODE_WITH_FEATURE = {STORY.value(), TASK.value(), BUG.value()};
 
     public static final String[] WATERFALL_ISSUE_TYPE_CODE = {STAGE.value(), MILESTONE.value(), ACTIVITY.value()};
+
+    public static List<String> AGILE_ISSUE_TYPE_CODE_NO_EPIC = Arrays.asList(STORY.value, TASK.value, BUG.value, SUB_TASK.value);
+
+    public static List<String> AGILE_PARENT_ISSUE_TYPES = Arrays.asList(STORY.value, TASK.value, BUG.value);
 
     private String value;
 

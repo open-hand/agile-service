@@ -1871,6 +1871,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             throw new CommonException(ERROR_ISSUE_TYPE_NOT_ISSUE_TEST);
         }
         issueMapper.batchDeleteIssues(projectId, issueIds);
+        if (agilePluginService != null) {
+            agilePluginService.deleteIssueProductRel(projectId, issueIds);
+        }
         dataLogRedisUtil.deleteByDeleteIssueInfo(projectId);
     }
 

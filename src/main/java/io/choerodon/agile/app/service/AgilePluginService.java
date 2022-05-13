@@ -550,4 +550,6 @@ public interface AgilePluginService {
     Map<Long, List<ProductVO>> listProductMap(Long organizationId, List<Long> projectIds, List<Long> issueIds);
 
     List<ProductVO> listProductByProjectId(Long organizationId, Long projectId);
+
+    void deleteIssueProductRel(Long projectId, List<Long> issueIds);
 }

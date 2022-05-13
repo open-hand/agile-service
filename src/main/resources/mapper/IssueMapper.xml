@@ -2738,6 +2738,7 @@
         LEFT JOIN agile_issue_attachment aia on aia.issue_id=ai.issue_id
         LEFT JOIN agile_data_log adl on adl.issue_id=ai.issue_id and adl.project_id=ai.project_id
         left join fd_field_value t1 on (t1.project_id = ai.project_id and t1.instance_id = ai.issue_id and t1.scheme_code = 'agile_issue')
+        LEFT JOIN agile_issue_participant_rel aipr ON ai.issue_id = aipr.issue_id
         WHERE ai.project_id = #{projectId} AND ai.issue_id IN
         <foreach collection="issueIds" item="issueId" open="("
                  separator="," close=")">
@@ -3904,7 +3905,7 @@
     <select id="queryIssueIdsIsNotTest" resultType="java.lang.Integer">
         select count(1)
         from agile_issue ai
-        where ai.apply_type = 'agile'
+        where ai.project_id = #{projectId}
         AND ai.issue_id IN
         <foreach collection="issueIds" item="issueId" open="("
                  separator="," close=")">
@@ -5686,6 +5687,20 @@
           </foreach>
           and ai.relate_issue_id is not null
           and ai.relate_issue_id != 0
+    </select>
+
+    <select id="selectByIssueId" resultMap="issueCreateVOWithComponent">
+        select
+            t1.issue_id,
+            t1.type_code,
+            t4.sprint_id,
+            t3.component_id
+        from agile_issue t1
+        left join agile_project_info t2 on t1.project_id = t2.project_id
+        left join agile_component_issue_rel t3 on (t3.project_id = #{projectId} and t3.issue_id = t1.issue_id)
+        left join agile_issue_sprint_rel t4 on t1.issue_id = t4.issue_id
+        left join agile_sprint t5 on (t4.sprint_id = t5.sprint_id and t5.status_code != 'closed')
+        where t1.project_id = #{projectId} and t1.issue_id = #{issueId}
     </select>
 
     <sql id="queryAssigneeIssue">
