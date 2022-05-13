@@ -248,10 +248,10 @@
             <if test='issueTypeList == "backlogIssueType" '>
                 AND osfe.issue_type IN ('backlog')
             </if>
-            <if test='searchVO.issueTypeList == "waterfallIssueType"'>
+            <if test='issueTypeList == "waterfallIssueType"'>
                 AND osfe.issue_type IN ('stage', 'milestone', 'activity')
             </if>
-            <if test='searchVO.issueTypeList == "waterfallAgileIssueType"'>
+            <if test='issueTypeList == "waterfallAgileIssueType"'>
                 AND osfe.issue_type IN ('issue_epic', 'story', 'bug', 'task', 'sub_task', 'stage', 'milestone', 'activity')
             </if>
             )
