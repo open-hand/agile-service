@@ -220,6 +220,18 @@ class StatusApi extends Api<StatusApi> {
       },
     });
   }
+
+  /**
+   * 组织层加载状态列表
+   */
+  loadStatusList({ params, data }: { params: { page: number, size: number }, data: object }) {
+    return this.request({
+      method: 'post',
+      url: `${this.orgPrefix}/status/list`,
+      params,
+      data,
+    });
+  }
 }
 
 const statusApi = new StatusApi();
