@@ -26,16 +26,17 @@ interface Props {
   fileType: 'docx' | 'pptx' | 'pdf' | 'txt' | 'xlsx' | 'unknown'
   name: string,
   className?: string,
+  showName?: boolean,
 }
 
 const KnowledgeName = ({
-  type, fileType, name, className = '',
+  type, fileType, name, className = '', showName = true,
 }: Props) => {
   const fileIcon = FILE_ICON[type === 'file' ? fileType : (type || 'folder')] || unknownIcon;
   return (
     <div className={`${styles.knowledgeName} ${className}`}>
-      <img src={fileIcon} className={styles.icon} />
-      <span>{name}</span>
+      <img src={fileIcon} />
+      {showName && <span className={styles.name}>{name}</span>}
     </div>
   );
 };
