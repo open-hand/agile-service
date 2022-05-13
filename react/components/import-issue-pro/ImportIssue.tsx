@@ -10,11 +10,9 @@ import { Button } from 'choerodon-ui/pro';
 import FileSaver from 'file-saver';
 import classnames from 'classnames';
 import {
-  includes, uniq, map, isEqualWith, intersection, sortBy,
+  includes, uniq, isEqualWith, intersection, sortBy,
 } from 'lodash';
 import { usePersistFn } from 'ahooks';
-import { issueApi } from '@/api';
-import { getApplyType, getProjectId } from '@/utils/common';
 import ImportFields, { IImportIssueFieldsEvents, IIortIssueFieldsRef } from './ImportFields';
 import TemplateSelect from '../template-select';
 import SaveTemplateBtn from './SaveTemplateBtn';
@@ -326,12 +324,11 @@ const ImportIssueContent: React.FC = observer(() => {
         ref={uploadInputRef}
         type="file"
         onChange={(e) => {
-          console.log('e', e);
           if (e.target.files && e.target.files[0]) {
             upload(e.target.files[0]);
           }
         }}
-        // style={{ display: 'none' }}
+        style={{ display: 'none' }}
         accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       />
       <WsProgress
