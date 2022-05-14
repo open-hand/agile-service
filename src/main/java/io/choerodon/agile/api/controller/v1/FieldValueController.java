@@ -142,6 +142,7 @@ public class FieldValueController {
     @GetMapping("/list/custom_field")
     public ResponseEntity<List<ObjectSchemeFieldDetailVO>> queryCustomFieldList(@ApiParam(value = "项目id", required = true)
                                                                                 @PathVariable("project_id") Long projectId,
+                                                                                @ApiParam(value = "问题类型")
                                                                                 @RequestParam(defaultValue = "null", required = false) String issueTypeList) {
         return new ResponseEntity<>(objectSchemeFieldService.queryCustomFieldListWithOutOption(projectId, issueTypeList), HttpStatus.OK);
     }
@@ -151,7 +152,9 @@ public class FieldValueController {
     @GetMapping("/list/fields")
     public ResponseEntity<List<ObjectSchemeFieldDetailVO>> listFieldsWithOptionals(@ApiParam(value = "项目id", required = true)
                                                                                    @PathVariable("project_id") Long projectId,
+                                                                                   @ApiParam(value = "问题类型id", required = true)
                                                                                    @RequestParam @Encrypt Long issueTypeId,
+                                                                                   @ApiParam(value = "组织id", required = true)
                                                                                    @RequestParam Long organizationId) {
         return new ResponseEntity<>(objectSchemeFieldService.listFieldsWithOptionals(projectId, issueTypeId, organizationId), HttpStatus.OK);
     }
@@ -160,13 +163,15 @@ public class FieldValueController {
     @ApiOperation(value = "批量修改预定义字段值和自定义字段值")
     @PostMapping("/batch_update_fields_value")
     public ResponseEntity batchUpdateFieldsValue(@ApiParam(value = "项目id", required = true)
-                                                   @PathVariable("project_id") Long projectId,
-                                                   @ApiParam(value = "方案编码", required = true)
-                                                   @RequestParam String schemeCode,
-                                                   @RequestParam String applyType,
-                                                   @RequestBody @Encrypt BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
+                                                 @PathVariable("project_id") Long projectId,
+                                                 @ApiParam(value = "方案编码", required = true)
+                                                 @RequestParam String schemeCode,
+                                                 @ApiParam(value = "应用类型", required = true)
+                                                 @RequestParam String applyType,
+                                                 @ApiParam(value = "批量修改字段集合")
+                                                 @RequestBody @Encrypt BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
         issueValidator.verifybatchUpdateFieldsValue(projectId, batchUpdateFieldsValueVo, applyType);
-        issueFieldValueService.asyncUpdateFields(projectId,schemeCode,batchUpdateFieldsValueVo,applyType, (ServletRequestAttributes)RequestContextHolder.currentRequestAttributes(), EncryptContext.encryptType().name());
+        issueFieldValueService.asyncUpdateFields(projectId, schemeCode, batchUpdateFieldsValueVo, applyType, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes(), EncryptContext.encryptType().name());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -177,6 +182,7 @@ public class FieldValueController {
                                                               @PathVariable("project_id") Long projectId,
                                                               @ApiParam(value = "组织id", required = true)
                                                               @RequestParam Long organizationId,
+                                                              @ApiParam(value = "问题类型id", required = true)
                                                               @RequestParam @Encrypt Long issueTypeId) {
         return new ResponseEntity<>(objectSchemeFieldService.getIssueSummaryDefaultValue(organizationId, projectId, issueTypeId), HttpStatus.OK);
     }
@@ -186,13 +192,13 @@ public class FieldValueController {
     @ApiOperation(value = "界面获取字段表头(包含系统字段和自定义字段)")
     @GetMapping("/list/get_fields")
     public ResponseEntity<List<ObjectSchemeFieldVO>> getFields(@ApiParam(value = "项目id", required = true)
-                                                                       @PathVariable("project_id") Long projectId,
-                                                                       @ApiParam(value = "组织id", required = true)
-                                                                       @RequestParam Long organizationId,
-                                                                       @ApiParam(value = "方案编码", required = true)
-                                                                       @RequestParam String schemeCode,
-                                                                       @ApiParam(value = "字段类型", required = true)
-                                                                       @RequestParam String issueTypeList) {
+                                                               @PathVariable("project_id") Long projectId,
+                                                               @ApiParam(value = "组织id", required = true)
+                                                               @RequestParam Long organizationId,
+                                                               @ApiParam(value = "方案编码", required = true)
+                                                               @RequestParam String schemeCode,
+                                                               @ApiParam(value = "字段类型", required = true)
+                                                               @RequestParam String issueTypeList) {
         return new ResponseEntity<>(objectSchemeFieldService.getAllField(organizationId, projectId, schemeCode, issueTypeList), HttpStatus.OK);
     }
 
@@ -220,7 +226,9 @@ public class FieldValueController {
     @PostMapping("/filter_require_field")
     public ResponseEntity<List<PageFieldViewVO>> filterRequireFieldByFieldCodes(@ApiParam(value = "项目id", required = true)
                                                                               @PathVariable("project_id") Long projectId,
+                                                                                @ApiParam(value = "问题类型id", required = true)
                                                                               @RequestParam @Encrypt Long issueTypeId,
+                                                                                @ApiParam(value = "字段编码集合", required = true)
                                                                               @RequestBody List<String> fieldCodes) {
         return new ResponseEntity<>(pageFieldService.filterRequireFieldByFieldCodes(projectId, issueTypeId, fieldCodes), HttpStatus.OK);
     }

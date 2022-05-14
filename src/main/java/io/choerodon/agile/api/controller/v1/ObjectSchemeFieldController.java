@@ -70,6 +70,7 @@ public class ObjectSchemeFieldController {
     @DeleteMapping(value = "/{field_id}")
     public ResponseEntity delete(@ApiParam(value = "组织id", required = true)
                                  @PathVariable("organization_id") Long organizationId,
+                                 @ApiParam(value = "字段id", required = true)
                                  @PathVariable("field_id") @Encrypt Long fieldId) {
         objectSchemeFieldService.delete(organizationId, null, fieldId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -82,6 +83,7 @@ public class ObjectSchemeFieldController {
                                                              @PathVariable("organization_id") Long organizationId,
                                                             @ApiParam(value = "字段id", required = true)
                                                              @PathVariable("field_id") @Encrypt Long fieldId,
+                                                            @ApiParam(value = "更新对象", required = true)
                                                             @RequestBody @Valid  ObjectSchemeFieldUpdateVO updateDTO) {
         return new ResponseEntity<>(objectSchemeFieldService.update(organizationId, null, fieldId, updateDTO), HttpStatus.CREATED);
     }
@@ -115,6 +117,7 @@ public class ObjectSchemeFieldController {
     @PostMapping(value = "/configs")
     public ResponseEntity config(@ApiParam(value = "组织id", required = true)
                                  @PathVariable("organization_id") Long organizationId,
+                                 @ApiParam(value = "页面配置对象", required = true)
                                  @RequestBody PageConfigUpdateVO pageConfigUpdateVO) {
         objectSchemeFieldService.config(organizationId, null, pageConfigUpdateVO);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -123,7 +126,9 @@ public class ObjectSchemeFieldController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询字段的页面配置数据")
     @GetMapping(value = "/configs")
-    public ResponseEntity<PageConfigVO> listConfigs(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<PageConfigVO> listConfigs(@ApiParam(value = "组织id", required = true)
+                                                    @PathVariable("organization_id") Long organizationId,
+                                                    @ApiParam(value = "问题类型id", required = true)
                                                     @RequestParam @Encrypt Long issueTypeId) {
         return new ResponseEntity<>(objectSchemeFieldService.listConfigs(organizationId, null, issueTypeId), HttpStatus.OK);
     }
@@ -131,8 +136,11 @@ public class ObjectSchemeFieldController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "更新字段是否必填")
     @PostMapping(value = "/update_required")
-    public ResponseEntity updateRequired(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity updateRequired(@ApiParam(value = "组织id", required = true)
+                                         @PathVariable("organization_id") Long organizationId,
+                                         @ApiParam(value = "字段id", required = true)
                                          @RequestParam @Encrypt Long fieldId,
+                                         @ApiParam(value = "是否为必填", required = true)
                                          @RequestParam Boolean required) {
         objectSchemeFieldService.updateRequired(organizationId, null, fieldId, required);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -141,7 +149,9 @@ public class ObjectSchemeFieldController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "拖动查询rank值接口")
     @PostMapping(value = "/rank")
-    public ResponseEntity<String> queryRank(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<String> queryRank(@ApiParam(value = "组织id", required = true)
+                                            @PathVariable("organization_id") Long organizationId,
+                                            @ApiParam(value = "拖动顺序对象", required = true)
                                             @RequestBody AdjustOrderVO adjustOrderVO) {
         return new ResponseEntity<>(objectSchemeFieldService.queryRank(adjustOrderVO.getPreviousRank(), adjustOrderVO.getNextRank()), HttpStatus.OK);
     }
@@ -149,7 +159,9 @@ public class ObjectSchemeFieldController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "页面配置根据问题类型查询未选择的字段")
     @GetMapping(value = "/unselected")
-    public ResponseEntity<List<ObjectSchemeFieldVO>> unselected(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<List<ObjectSchemeFieldVO>> unselected(@ApiParam(value = "组织id", required = true)
+                                                                @PathVariable("organization_id") Long organizationId,
+                                                                @ApiParam(value = "问题类型id", required = true)
                                                                 @RequestParam @Encrypt Long issueTypeId) {
         return new ResponseEntity<>(objectSchemeFieldService.unselected(organizationId, null, issueTypeId), HttpStatus.OK);
     }
@@ -157,7 +169,8 @@ public class ObjectSchemeFieldController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "页面配置类型查询接口")
     @GetMapping(value = "/configs/issue_types")
-    public ResponseEntity<List<IssueTypeVO>> issueTypes(@PathVariable("organization_id") Long organizationId) {
+    public ResponseEntity<List<IssueTypeVO>> issueTypes(@ApiParam(value = "组织id", required = true)
+                                                        @PathVariable("organization_id") Long organizationId) {
         return new ResponseEntity<>(objectSchemeFieldService.issueTypes(organizationId, null), HttpStatus.OK);
     }
 
@@ -168,6 +181,7 @@ public class ObjectSchemeFieldController {
                                            @PathVariable("organization_id") Long organizationId,
                                            @ApiParam(value = "字段id", required = true)
                                            @RequestParam("field_id") @Encrypt Long fieldId,
+                                           @ApiParam(value = "同步默认值对象", required = true)
                                            @RequestBody @Valid  ObjectSchemeFieldUpdateVO updateDTO) {
         objectSchemeFieldService.syncDefaultValue(organizationId, null, fieldId, updateDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
@@ -181,6 +195,7 @@ public class ObjectSchemeFieldController {
             @PathVariable("organization_id") Long organizationId,
             @ApiParam(value = "字段id", required = true)
             @PathVariable("field_id") @Encrypt Long fieldId,
+            @ApiParam(value = "字段选项对象", required = true)
             @RequestBody @Valid FieldOptionUpdateVO fieldOptionUpdateVO) {
         return new ResponseEntity<>(fieldOptionService.insertOption(fieldOptionUpdateVO, fieldId, organizationId), HttpStatus.CREATED);
     }
@@ -195,6 +210,7 @@ public class ObjectSchemeFieldController {
             @PathVariable("field_id") @Encrypt Long fieldId,
             @ApiParam(value = "选项id", required = true)
             @PathVariable("option_id") @Encrypt Long optionId,
+            @ApiParam(value = "字段选项对象", required = true)
             @RequestBody @Valid FieldOptionUpdateVO fieldOptionUpdateVO) {
         fieldOptionUpdateVO.setId(optionId);
         return new ResponseEntity<>(fieldOptionService.updateOption(fieldOptionUpdateVO, fieldId, organizationId), HttpStatus.CREATED);

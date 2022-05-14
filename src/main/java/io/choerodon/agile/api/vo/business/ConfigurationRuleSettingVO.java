@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo.business;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Set;
@@ -10,23 +11,25 @@ import java.util.Set;
  */
 public class ConfigurationRuleSettingVO {
     @Encrypt
+    @ApiModelProperty(value = "主键")
     private Long id;
-
+    @ApiModelProperty(value = "规则id")
     private Long ruleId;
-
+    @ApiModelProperty(value = "目标")
     private String target;
 
     @Encrypt
+    @ApiModelProperty(value = "关联关系id集合")
     private Set<Long> linkTypeIds;
-
+    @ApiModelProperty(value = "前置项类型")
     private Set<String> predecessorTypes;
-
+    @ApiModelProperty(value = "行为")
     private String action;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "组织id")
     private Long organizationId;
-
+    @ApiModelProperty(value = "序列")
     private Integer sequence;
 
     public Set<String> getPredecessorTypes() {

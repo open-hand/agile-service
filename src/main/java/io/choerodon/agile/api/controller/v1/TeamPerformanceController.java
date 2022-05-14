@@ -75,8 +75,7 @@ public class TeamPerformanceController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "团队绩效-所有冲刺故事点统计")
     @GetMapping(value = "/history_story_point")
-    public ResponseEntity<List<SprintStoryPointVO>> queryHistorySprintStoryPoint(@ApiParam(value = "项目id",
-            required = true)
+    public ResponseEntity<List<SprintStoryPointVO>> queryHistorySprintStoryPoint(@ApiParam(value = "项目id", required = true)
                                                                                  @PathVariable(name = "project_id") Long projectId) {
         return ResponseEntity.ok(teamPerformanceService.queryHistorySprintStoryPoint(projectId));
     }
@@ -113,7 +112,7 @@ public class TeamPerformanceController {
     @ApiOperation(value = "团队绩效-所有冲刺负责人")
     @GetMapping(value = "/responsible")
     public ResponseEntity<List<UserDTO>> queryResponsible(@ApiParam(value = "项目id", required = true)
-                                                                        @PathVariable(name = "project_id") Long projectId) {
+                                                          @PathVariable(name = "project_id") Long projectId) {
         return ResponseEntity.ok(teamPerformanceService.queryResponsible(projectId));
     }
 }

@@ -80,6 +80,7 @@ public class FieldCascadeRuleController {
     public ResponseEntity<List<FieldCascadeRuleVO>> batchMutationFieldCascadeRule(
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "级联规则集合")
             @RequestBody List<FieldCascadeRuleVO> fieldCascadeRuleList) {
         return new ResponseEntity<>(fieldCascadeRuleService.batchMutationFieldCascadeRule(projectId, fieldCascadeRuleList), HttpStatus.CREATED);
     }

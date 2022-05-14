@@ -49,7 +49,9 @@ public class GanttChartController {
     @PostMapping(value = "/list_by_ids")
     public ResponseEntity<List<GanttChartVO>> listByIds(@ApiParam(value = "项目id", required = true)
                                                         @PathVariable(name = "project_id") Long projectId,
+                                                        @ApiParam(value = "查询参数", required = true)
                                                         @RequestBody GanttChartSearchVO ganttChartSearchVO,
+                                                        @ApiParam(value = "纬度", required = true)
                                                         @RequestParam String dimension) {
         return ResponseEntity.ok(ganttChartService.listByIds(projectId, ganttChartSearchVO, dimension));
     }
@@ -59,6 +61,7 @@ public class GanttChartController {
     @PostMapping(value = "/move")
     public ResponseEntity move(@ApiParam(value = "项目id", required = true)
                                @PathVariable(name = "project_id") Long projectId,
+                               @ApiParam(value = "移动的甘特图对象", required = true)
                                @RequestBody @Validated GanttMoveVO ganttMoveVO) {
         EncryptionUtils.decryptSearchVO(ganttMoveVO.getSearchVO());
         ganttChartService.move(projectId, ganttMoveVO);
@@ -82,6 +85,7 @@ public class GanttChartController {
     @PostMapping(value = "/move_dimension")
     public ResponseEntity moveDimension(@ApiParam(value = "项目id", required = true)
                                         @PathVariable(name = "project_id") Long projectId,
+                                        @ApiParam(value = "移动的冲刺/经办人对象", required = true)
                                         @RequestBody @Validated GanttDimensionMoveVO ganttDimensionMoveVO) {
         EncryptionUtils.decryptSearchVO(ganttDimensionMoveVO.getSearchVO());
         ganttChartService.moveDimension(projectId, ganttDimensionMoveVO);
@@ -93,6 +97,7 @@ public class GanttChartController {
     @PostMapping(value = "/save/sort")
     public ResponseEntity saveSort(@ApiParam(value = "项目id", required = true)
                                    @PathVariable(name = "project_id") Long projectId,
+                                   @ApiParam(value = "上次查询甘特图的排序规则", required = true)
                                    @RequestBody @Validated List<IssuePersonalSortVO> issuePersonalSorts) {
         ganttChartService.saveSort(projectId, issuePersonalSorts);
         return new ResponseEntity(HttpStatus.OK);

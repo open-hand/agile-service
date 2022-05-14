@@ -52,7 +52,9 @@ public class ExcelController {
                          @PathVariable(name = "project_id") Long projectId,
                          @ApiParam(value = "组织id", required = true)
                          @RequestParam Long organizationId,
+                         @ApiParam(value = "响应体")
                          HttpServletResponse response,
+                         @ApiParam(value = "模版下载筛选参数")
                          @RequestBody ExcelTemplateVO excelTemplateVO) {
         excelService.download(projectId, organizationId, response, excelTemplateVO);
     }
@@ -89,6 +91,7 @@ public class ExcelController {
     @GetMapping(value = "/latest")
     public ResponseEntity<FileOperationHistoryVO> queryLatestRecode(@ApiParam(value = "项目id", required = true)
                                                                      @PathVariable(name = "project_id") Long projectId,
+                                                                    @ApiParam(value = "历史记录行为")
                                                                     @RequestParam String action) {
         return Optional.ofNullable(excelService.queryLatestRecode(projectId, action))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
@@ -109,7 +112,9 @@ public class ExcelController {
                              @RequestParam Long organizationId,
                              @ApiParam(value = "查询参数", required = true)
                              @RequestBody(required = false) SearchVO searchVO,
+                             @ApiParam(value = "http请求")
                              HttpServletRequest request,
+                             @ApiParam(value = "http响应")
                              HttpServletResponse response) {
         EncryptionUtils.decryptSearchVO(searchVO);
         //处理未匹配的筛选
@@ -121,10 +126,11 @@ public class ExcelController {
     @ApiOperation("下载自定义字段导入模版")
     @GetMapping(value = "/object_scheme_field/download")
     public void downloadObjectSchemeField(@ApiParam(value = "项目id", required = true)
-                         @PathVariable(name = "project_id") Long projectId,
-                         @ApiParam(value = "组织id", required = true)
-                         @RequestParam Long organizationId,
-                         HttpServletResponse response) {
+                                          @PathVariable(name = "project_id") Long projectId,
+                                          @ApiParam(value = "组织id", required = true)
+                                          @RequestParam Long organizationId,
+                                          @ApiParam(value = "http响应")
+                                                  HttpServletResponse response) {
         excelService.downloadObjectSchemeField(organizationId, projectId, response);
     }
 

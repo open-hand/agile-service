@@ -33,6 +33,7 @@ public class ListLayoutController {
                                              @PathVariable(name = "project_id") Long projectId,
                                              @ApiParam(value = "组织id", required = true)
                                              @RequestParam Long organizationId,
+                                             @ApiParam(value = "布局配置", required = true)
                                              @RequestBody @Validated ListLayoutVO listLayoutVO) {
         return Optional.ofNullable(listLayoutService.save(organizationId, projectId, listLayoutVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))

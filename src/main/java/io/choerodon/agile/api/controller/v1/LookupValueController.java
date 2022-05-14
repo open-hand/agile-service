@@ -32,6 +32,7 @@ public class LookupValueController {
     @GetMapping(value = "/{typeCode}")
     public ResponseEntity<LookupTypeWithValuesVO> queryLookupValueByCode(@ApiParam(value = "type code", required = true)
                                                                          @PathVariable String typeCode,
+                                                                         @ApiParam(value = "项目id")
                                                                          @RequestParam(required = false) Long projectId) {
         return Optional.ofNullable(lookupValueService.queryLookupValueByCode(typeCode, projectId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))

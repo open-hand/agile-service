@@ -28,10 +28,12 @@ public class ConfigurationRuleNoticeVO extends ConfigurationRuleSettingVO {
     @ApiModelProperty("通知自定义人员对象")
     private Set<Long> memberFieldIds;
     @Encrypt
+    @ApiModelProperty(value = "抄送人id集合")
     private Set<Long> ccUserIds;
     @Encrypt
+    @ApiModelProperty(value = "接受人id集合")
     private Set<Long> receiverUserIds;
-
+    @ApiModelProperty(value = "接受类型集合")
     private Set<String> receiverTypes;
 
     public Set<String> getReceiverTypes() {

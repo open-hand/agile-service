@@ -46,7 +46,9 @@ public class IssuePredecessorController {
     @PostMapping(value = "/update")
     public ResponseEntity updatePredecessorTypes(@ApiParam(value = "项目id", required = true)
                                                  @PathVariable(name = "project_id") Long projectId,
+                                                 @ApiParam(value = "前置项集合", required = true)
                                                  @RequestBody List<IssuePredecessorVO> issuePredecessors,
+                                                 @ApiParam(value = "当前issueId", required = true)
                                                  @RequestParam @Encrypt Long currentIssueId) {
         issuePredecessorService.updatePredecessors(projectId, issuePredecessors, currentIssueId);
         return new ResponseEntity(HttpStatus.OK);
@@ -65,6 +67,7 @@ public class IssuePredecessorController {
                                                                             @RequestBody(required = false) SearchVO searchVO,
                                                                             @ApiParam(value = "查询参数", required = true)
                                                                             @RequestParam Long organizationId,
+                                                                            @ApiParam(value = "当前issueId")
                                                                             @RequestParam(required = false) @Encrypt Long currentIssueId) {
         EncryptionUtils.decryptSearchVO(searchVO);
         return ResponseEntity.ok(issuePredecessorService.pagedQueryEnabledIssues(organizationId, projectId, searchVO, pageRequest, currentIssueId));
@@ -75,7 +78,9 @@ public class IssuePredecessorController {
     @GetMapping(value = "/query")
     public ResponseEntity<List<IssuePredecessorVO>> queryByIssueId(@ApiParam(value = "项目id", required = true)
                                                                    @PathVariable(name = "project_id") Long projectId,
+                                                                   @ApiParam(value = "当前issueId", required = true)
                                                                    @RequestParam @Encrypt Long currentIssueId,
+                                                                   @ApiParam(value = "包含额外信息")
                                                                    @RequestParam(required = false) boolean withInfo) {
         return ResponseEntity.ok(issuePredecessorService.queryByIssueId(projectId, currentIssueId, withInfo));
     }
@@ -85,7 +90,9 @@ public class IssuePredecessorController {
     @DeleteMapping(value = "/delete")
     public ResponseEntity<Void> deletePredecessor(@ApiParam(value = "项目id", required = true)
                                                   @PathVariable(name = "project_id") Long projectId,
+                                                  @ApiParam(value = "前置项id", required = true)
                                                   @RequestParam @Encrypt Long predecessorId,
+                                                  @ApiParam(value = "当前问题id", required = true)
                                                   @RequestParam @Encrypt Long currentIssueId) {
         issuePredecessorService.deletePredecessor(projectId, predecessorId, currentIssueId);
         return new ResponseEntity<>(HttpStatus.OK);

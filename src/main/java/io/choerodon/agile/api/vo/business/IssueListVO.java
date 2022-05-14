@@ -112,13 +112,13 @@ public class IssueListVO implements Serializable {
 
     @ApiModelProperty(value = "评论列表")
     private List<IssueComponentBriefVO> issueComponentBriefVOS;
-
+    @ApiModelProperty(value = "项目")
     private ProjectVO projectVO;
-
+    @ApiModelProperty(value = "完成的问题数量")
     private BigDecimal completedCount;
-
+    @ApiModelProperty(value = "总数")
     private BigDecimal totalCount;
-
+    @ApiModelProperty(value = "应用类型")
     private String applyType;
 
     public List<IssueSprintVO> getIssueSprintVOS() {

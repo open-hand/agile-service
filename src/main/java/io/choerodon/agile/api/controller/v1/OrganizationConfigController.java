@@ -74,6 +74,7 @@ public class OrganizationConfigController {
                                                                                             @PathVariable("organization_id") Long organizationId,
                                                                                             @ApiParam(value = "问题类型Id", required = true)
                                                                                             @RequestParam @Encrypt Long issueTypeId,
+                                                                                            @ApiParam(value = "状态转换更新对象", required = true)
                                                                                             @RequestBody List<StateMachineTransformUpdateVO> list) {
         return Optional.ofNullable(organizationConfigService.updateTransform(organizationId, issueTypeId, list))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
@@ -101,6 +102,7 @@ public class OrganizationConfigController {
                                                  @PathVariable("organization_id") Long organizationId,
                                                  @ApiParam(value = "问题类型Id", required = true)
                                                  @RequestParam @Encrypt List<Long> issueTypeId,
+                                                 @ApiParam(value = "状态对象", required = true)
                                                  @RequestBody StatusVO statusVO) {
         return Optional.ofNullable(organizationConfigService.createStatus(organizationId, issueTypeId, statusVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
@@ -114,8 +116,11 @@ public class OrganizationConfigController {
                                                           @PathVariable("organization_id") Long organizationId,
                                                           @ApiParam(value = "问题类型Id", required = true)
                                                           @RequestParam @Encrypt Long issueTypeId,
+                                                          @ApiParam(value = "状态id", required = true)
                                                           @RequestParam @Encrypt Long statusId,
+                                                          @ApiParam(value = "是否为默认状态", required = true)
                                                           @RequestParam Boolean defaultStatus,
+                                                          @ApiParam(value = "是否转换为其他全部状态", required = true)
                                                           @RequestParam Boolean transferAll) {
         return Optional.ofNullable(organizationConfigService.linkStatus(organizationId, issueTypeId, statusId, defaultStatus, transferAll))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
@@ -151,7 +156,9 @@ public class OrganizationConfigController {
     @ApiOperation(value = "组织层状态机模板保存消息通知")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/status_notice_settings/save")
-    public ResponseEntity<Void> saveStatusNotice(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<Void> saveStatusNotice(@ApiParam(value = "组织id", required = true)
+                                                 @PathVariable("organization_id") Long organizationId,
+                                                 @ApiParam(value = "状态消息通知配置", required = true)
                                                  @RequestBody StatusNoticeSettingVO statusNoticeSettingVO) {
         statusNoticeSettingService.saveStatusNotice(organizationId, statusNoticeSettingVO);
         return Results.success();
@@ -177,10 +184,15 @@ public class OrganizationConfigController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "为问题类型的状态创建流转条件")
     @PostMapping("/status_transfer_setting/create")
-    public ResponseEntity createOrUpdate(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity createOrUpdate(@ApiParam(value = "组织id", required = true)
+                                         @PathVariable("organization_id") Long organizationId,
+                                         @ApiParam(value = "问题类型id", required = true)
                                          @RequestParam @Encrypt Long issueTypeId,
+                                         @ApiParam(value = "状态id", required = true)
                                          @RequestParam @Encrypt Long statusId,
+                                         @ApiParam(value = "乐观锁", required = true)
                                          @RequestParam Long objectVersionNumber,
+                                         @ApiParam(value = "流转条件", required = true)
                                          @RequestBody List<StatusTransferSettingCreateVO> list) {
         statusTransferSettingService.saveStatusTransfer(organizationId, issueTypeId, statusId, objectVersionNumber, list);
         return new ResponseEntity(HttpStatus.OK);
@@ -189,8 +201,11 @@ public class OrganizationConfigController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询流转条件")
     @GetMapping(value = "/status_transfer_setting/query_transfer")
-    public ResponseEntity<List<StatusTransferSettingDTO>> queryStatusTransferSetting(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<List<StatusTransferSettingDTO>> queryStatusTransferSetting(@ApiParam(value = "组织id", required = true)
+                                                                                     @PathVariable("organization_id") Long organizationId,
+                                                                                     @ApiParam(value = "问题类型id", required = true)
                                                                                      @RequestParam @Encrypt Long issueTypeId,
+                                                                                     @ApiParam(value = "状态id", required = true)
                                                                                      @RequestParam @Encrypt Long statusId) {
         return Optional.ofNullable(statusTransferSettingService.listByOptions(organizationId, issueTypeId, statusId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
@@ -208,6 +223,7 @@ public class OrganizationConfigController {
                                                                    @RequestParam @Encrypt Long statusId,
                                                                    @ApiParam(value = "node的乐观锁", required = true)
                                                                    @RequestParam Long objectVersionNumber,
+                                                                   @ApiParam(value = "父子联动集合", required = true)
                                                                    @RequestBody List<StatusLinkageVO> list) {
         return Optional.ofNullable(statusLinkageService.saveStatusLinkage(organizationId, issueTypeId, statusId, objectVersionNumber, list))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
@@ -239,6 +255,7 @@ public class OrganizationConfigController {
                                                                               @RequestParam @Encrypt Long statusId,
                                                                               @ApiParam(value = "node的乐观锁", required = true)
                                                                               @RequestParam Long objectVersionNumber,
+                                                                              @ApiParam(value = "状态流转更改属性配置", required = true)
                                                                               @RequestBody List<StatusFieldSettingVO> list) {
         return Optional.ofNullable(statusFieldSettingService.saveStatusFieldSettings(organizationId, issueTypeId, statusId, objectVersionNumber, list))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
@@ -311,8 +328,11 @@ public class OrganizationConfigController {
     @ApiOperation(value = "分支合并状态流转配置")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/status_branch_merge_setting/query")
-    public ResponseEntity<StatusBranchMergeSettingVO> queryStatusBranchMergeSetting(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<StatusBranchMergeSettingVO> queryStatusBranchMergeSetting(@ApiParam(value = "组织id", required = true)
+                                                                                    @PathVariable("organization_id") Long organizationId,
+                                                                                    @ApiParam(value = "问题类型id", required = true)
                                                                                     @RequestParam @Encrypt Long issueTypeId,
+                                                                                    @ApiParam(value = "状态id", required = true)
                                                                                     @RequestParam @Encrypt Long statusId) {
         return Results.success(organizationConfigService.queryStatusBranchMergeSetting(organizationId, issueTypeId, statusId));
     }
@@ -320,9 +340,13 @@ public class OrganizationConfigController {
     @ApiOperation(value = "分支合并状态流转配置")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/status_branch_merge_setting/update")
-    public ResponseEntity updateAutoTransform(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity updateAutoTransform(@ApiParam(value = "组织", required = true)
+                                              @PathVariable("organization_id") Long organizationId,
+                                              @ApiParam(value = "问题类型id", required = true)
                                               @RequestParam @Encrypt Long issueTypeId,
+                                              @ApiParam(value = "状态id", required = true)
                                               @RequestParam @Encrypt Long statusId,
+                                              @ApiParam(value = "是否允许自动流转", required = true)
                                               @RequestParam Boolean autoTransform) {
         organizationConfigService.updateAutoTransform(organizationId, issueTypeId, statusId, autoTransform);
         return Results.success();
@@ -331,8 +355,11 @@ public class OrganizationConfigController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "支持对状态机-状态与流转进行排序")
     @PutMapping(value = "/status_transform/sort")
-    public ResponseEntity<NodeSortVO> updateSort(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<NodeSortVO> updateSort(@ApiParam(value = "组织id", required = true)
+                                                 @PathVariable("organization_id") Long organizationId,
+                                                 @ApiParam(value = "状态机id", required = true)
                                                  @Encrypt Long statusMachineId,
+                                                 @ApiParam(value = "节点", required = true)
                                                  @RequestBody NodeSortVO nodeSortVO) {
         return new ResponseEntity<>(organizationConfigService.updateSort(organizationId, statusMachineId, nodeSortVO), HttpStatus.OK);
     }

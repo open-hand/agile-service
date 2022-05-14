@@ -7,6 +7,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.api.vo.ConfigCodeVO;
 import io.choerodon.agile.app.service.ConfigCodeService;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,8 +31,11 @@ public class ConfigCodeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "获取未配置的条件，验证，后置动作等列表")
     @GetMapping(value = "/{transform_id}")
-    public ResponseEntity<List<ConfigCodeVO>> queryByTransformId(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<List<ConfigCodeVO>> queryByTransformId(@ApiParam(value = "组织id", required = true)
+                                                                 @PathVariable("organization_id") Long organizationId,
+                                                                 @ApiParam(value = "转换id", required = true)
                                                                  @PathVariable("transform_id") @Encrypt Long transformId,
+                                                                 @ApiParam(value = "状态机类型", required = true)
                                                                  @RequestParam String type) {
         return Optional.ofNullable(configCodeService.queryByTransformId(organizationId, transformId, type))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))

@@ -30,6 +30,7 @@ public class StarBeaconController extends BaseController {
     @PostMapping("/instance/{instance_id}/star")
     public ResponseEntity<Void> starInstance(@ApiParam(value = "项目id", required = true)
                                              @PathVariable(name = "project_id") Long projectId,
+                                             @ApiParam(value = "实例id", required = true)
                                              @PathVariable("instance_id") @Encrypt Long instanceId,
                                              @ApiParam(value = "instance信息", required = true)
                                              @RequestBody StarBeaconVO starBeaconVO) {
@@ -44,7 +45,9 @@ public class StarBeaconController extends BaseController {
     @PostMapping("/instance/{instance_id}/unstar")
     public ResponseEntity<Void> unStarInstance(@ApiParam(value = "项目id", required = true)
                                                @PathVariable(name = "project_id") Long projectId,
+                                               @ApiParam(value = "实例id", required = true)
                                                @PathVariable("instance_id") @Encrypt Long instanceId,
+                                               @ApiParam(value = "星标对象", required = true)
                                                @RequestBody StarBeaconVO starBeaconVO) {
         starBeaconVO.setInstanceId(instanceId);
         starBeaconVO.setProjectId(projectId);

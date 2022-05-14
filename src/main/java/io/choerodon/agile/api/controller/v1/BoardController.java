@@ -46,10 +46,11 @@ public class BoardController {
     @ApiOperation("创建scrum board,创建默认列，关联项目状态")
     @PostMapping
     public ResponseEntity<Void> createScrumBoard(@ApiParam(value = "项目id", required = true)
-                                           @PathVariable(name = "project_id") Long projectId,
-                                           @ApiParam(value = "board name", required = true)
-                                           @RequestParam String boardName,
-                                           @RequestParam String type) {
+                                                 @PathVariable(name = "project_id") Long projectId,
+                                                 @ApiParam(value = "board name", required = true)
+                                                 @RequestParam String boardName,
+                                                 @ApiParam(value = "看板类型", required = true)
+                                                 @RequestParam String type) {
         boardService.create(projectId, boardName, type);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -115,6 +116,7 @@ public class BoardController {
                                             @PathVariable(name = "project_id") Long projectId,
                                             @ApiParam(value = "issue id", required = true)
                                             @PathVariable @Encrypt Long issueId,
+                                            @ApiParam(value = "状态id", required = true)
                                             @RequestParam @Encrypt Long statusId) {
         return ResponseEntity.ok(boardService.isLinked(projectId, issueId, statusId));
     }
@@ -124,8 +126,9 @@ public class BoardController {
     @ApiOperation("根据projectId查询项目下的board")
     @GetMapping
     public ResponseEntity<List<BoardVO>> queryByProjectId(@ApiParam(value = "项目id", required = true)
-                                                              @PathVariable(name = "project_id") Long projectId,
-                                                           @RequestParam String type) {
+                                                          @PathVariable(name = "project_id") Long projectId,
+                                                          @ApiParam(value = "看板类型", required = true)
+                                                          @RequestParam String type) {
         return Optional.ofNullable(boardService.queryByProjectId(projectId, type))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.boardList.get"));
@@ -166,6 +169,7 @@ public class BoardController {
                                                      @PathVariable @Encrypt Long boardId,
                                                      @ApiParam(value = "组织id", required = true)
                                                      @PathVariable(name = "organization_id") Long organizationId,
+                                                     @ApiParam(value = "筛选条件")
                                                      @RequestBody SearchVO searchVO) {
         EncryptionUtils.decryptSearchVO(searchVO);
         return Optional.ofNullable(boardService.queryAllData(projectId, boardId, organizationId, searchVO))
@@ -195,6 +199,7 @@ public class BoardController {
                                                                       @PathVariable @Encrypt Long boardId,
                                                                       @SortDefault(value = "sequence", direction = Sort.Direction.DESC)
                                                                               PageRequest pageRequest,
+                                                                      @ApiParam(value = "快速筛选条件")
                                                                       @RequestBody QuickFilterSearchVO quickFilterSearchVO) {
         return ResponseEntity.ok(boardService.pagedQueryQuickFilters(pageRequest, projectId, boardId, quickFilterSearchVO));
     }
@@ -216,6 +221,7 @@ public class BoardController {
                                                     @PathVariable(name = "project_id") Long projectId,
                                                     @ApiParam(value = "agile board id", required = true)
                                                     @PathVariable @Encrypt Long boardId,
+                                                    @ApiParam(value = "快速筛选id集合", required = true)
                                                     @RequestBody @Encrypt List<Long> quickFilterIds) {
         boardService.updateBoardQuickFilterRel(projectId, boardId, quickFilterIds);
         return new ResponseEntity(HttpStatus.OK);

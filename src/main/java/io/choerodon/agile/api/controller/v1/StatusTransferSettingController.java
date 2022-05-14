@@ -7,6 +7,7 @@ import io.choerodon.agile.infra.dto.StatusTransferSettingDTO;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,30 +29,41 @@ public class StatusTransferSettingController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "为问题类型的状态创建流转条件")
     @PostMapping
-    public ResponseEntity createOrUpdate(@PathVariable("project_id") Long projectId,
-                                          @RequestParam @Encrypt Long issueTypeId,
-                                          @RequestParam @Encrypt Long statusId,
-                                          @RequestParam Long objectVersionNumber,
-                                          @RequestParam String applyType,
-                                          @RequestBody List<StatusTransferSettingCreateVO>list) {
-        statusTransferSettingService.createOrUpdate(projectId,issueTypeId,statusId,objectVersionNumber,applyType,list);
+    public ResponseEntity createOrUpdate(@ApiParam(value = "项目id", required = true)
+                                         @PathVariable("project_id") Long projectId,
+                                         @ApiParam(value = "问题类型id", required = true)
+                                         @RequestParam @Encrypt Long issueTypeId,
+                                         @ApiParam(value = "状态id", required = true)
+                                         @RequestParam @Encrypt Long statusId,
+                                         @ApiParam(value = "乐观锁", required = true)
+                                         @RequestParam Long objectVersionNumber,
+                                         @ApiParam(value = "应用类型", required = true)
+                                         @RequestParam String applyType,
+                                         @ApiParam(value = "状态转换配置", required = true)
+                                         @RequestBody List<StatusTransferSettingCreateVO> list) {
+        statusTransferSettingService.createOrUpdate(projectId, issueTypeId, statusId, objectVersionNumber, applyType, list);
         return new ResponseEntity(HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询流转条件")
     @GetMapping(value = "/query_transfer")
-    public ResponseEntity<List<StatusTransferSettingDTO>> queryStatusTransferSetting(@PathVariable("project_id") Long projectId,
+    public ResponseEntity<List<StatusTransferSettingDTO>> queryStatusTransferSetting(@ApiParam(value = "项目id", required = true)
+                                                                                     @PathVariable("project_id") Long projectId,
+                                                                                     @ApiParam(value = "问题类型id", required = true)
                                                                                      @RequestParam @Encrypt Long issueTypeId,
+                                                                                     @ApiParam(value = "状态id", required = true)
                                                                                      @RequestParam @Encrypt Long statusId) {
-        return new ResponseEntity(statusTransferSettingService.query(projectId,issueTypeId,statusId),HttpStatus.OK);
+        return new ResponseEntity(statusTransferSettingService.query(projectId, issueTypeId, statusId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询当前issue不能流转到的状态")
     @GetMapping(value = "/not_allowed_transfer")
-    public ResponseEntity<List<StatusDTO>> queryNotAllowedTransferStatus(@PathVariable("project_id") Long projectId,
-                                                                         @RequestParam @Encrypt Long issueId){
-        return new ResponseEntity<>(statusTransferSettingService.queryNotAllowedTransferStatus(projectId, issueId),HttpStatus.OK);
+    public ResponseEntity<List<StatusDTO>> queryNotAllowedTransferStatus(@ApiParam(value = "项目id", required = true)
+                                                                         @PathVariable("project_id") Long projectId,
+                                                                         @ApiParam(value = "问题id", required = true)
+                                                                         @RequestParam @Encrypt Long issueId) {
+        return new ResponseEntity<>(statusTransferSettingService.queryNotAllowedTransferStatus(projectId, issueId), HttpStatus.OK);
     }
 }

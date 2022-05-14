@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,8 +28,11 @@ public class PageTemplateController {
     @ApiOperation(value = "查询字段的页面模板数据")
     @GetMapping
     public ResponseEntity<PageTemplateVO> queryPageTemplate(
+            @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "组织id", required = true)
             @RequestParam Long organizationId,
+            @ApiParam(value = "问题类型id", required = true)
             @RequestParam @Encrypt Long issueTypeId) {
         return new ResponseEntity<>(pageTemplateService.queryPageTemplate(organizationId, projectId, issueTypeId), HttpStatus.OK);
     }

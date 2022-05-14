@@ -27,7 +27,8 @@ public class InnerFeignController {
     @Permission(permissionWithin = true)
     @PostMapping(value = "/issues/by_ids")
     @ApiOperation(value = "根据issueIds查询issue")
-    public ResponseEntity<List<IssueDTO>> listIssueByIds(@RequestBody List<Long> issueIds) {
+    public ResponseEntity<List<IssueDTO>> listIssueByIds(@ApiParam(value = "问题id集合", required = true)
+                                                         @RequestBody List<Long> issueIds) {
         return new ResponseEntity<>(innerFeignService.listIssueByIds(issueIds), HttpStatus.OK);
     }
 
@@ -36,6 +37,7 @@ public class InnerFeignController {
     @PostMapping(value = "/projects/{project_id}/delete_tag_by_branch")
     public ResponseEntity deleteTagByBranch(@ApiParam(value = "项目id", required = true)
                                             @PathVariable(name = "project_id") Long projectId,
+                                            @ApiParam(value = "问题和分支查询参数", required = true)
                                             @RequestBody IssueWithBranchVO issueWithBranchVO) {
         innerFeignService.deleteTagByBranch(projectId, issueWithBranchVO);
         return new ResponseEntity(HttpStatus.OK);

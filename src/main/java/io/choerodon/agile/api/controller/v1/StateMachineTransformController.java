@@ -10,6 +10,7 @@ import io.choerodon.agile.api.validator.StateMachineTransformValidator;
 import io.choerodon.agile.api.vo.StatusMachineTransformVO;
 import io.choerodon.agile.app.service.StateMachineTransformService;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +36,11 @@ public class StateMachineTransformController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建转换（草稿）")
     @PostMapping
-    public ResponseEntity<StatusMachineTransformVO> create(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<StatusMachineTransformVO> create(@ApiParam(value = "组织id", required = true)
+                                                           @PathVariable("organization_id") Long organizationId,
+                                                           @ApiParam(value = "状态机id", required = true)
                                                            @RequestParam @Encrypt Long stateMachineId,
+                                                           @ApiParam(value = "状态机转换", required = true)
                                                            @RequestBody StatusMachineTransformVO transformDTO) {
         transformValidator.createValidate(transformDTO);
         return new ResponseEntity<>(transformService.create(organizationId, stateMachineId, transformDTO), HttpStatus.CREATED);
@@ -45,9 +49,13 @@ public class StateMachineTransformController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "更新转换（草稿）")
     @PutMapping(value = "/{transform_id}")
-    public ResponseEntity<StatusMachineTransformVO> update(@PathVariable("organization_id") Long organizationId,
-                                                           @PathVariable("transform_id")  @Encrypt Long transformId,
-                                                           @RequestParam @Encrypt  Long stateMachineId,
+    public ResponseEntity<StatusMachineTransformVO> update(@ApiParam(value = "组织id", required = true)
+                                                           @PathVariable("organization_id") Long organizationId,
+                                                           @ApiParam(value = "转换id", required = true)
+                                                           @PathVariable("transform_id") @Encrypt Long transformId,
+                                                           @ApiParam(value = "状态机id", required = true)
+                                                           @RequestParam @Encrypt Long stateMachineId,
+                                                           @ApiParam(value = "状态机转换", required = true)
                                                            @RequestBody StatusMachineTransformVO transformDTO) {
         transformValidator.updateValidate(transformDTO);
         return new ResponseEntity<>(transformService.update(organizationId, stateMachineId, transformId, transformDTO), HttpStatus.CREATED);
@@ -56,8 +64,11 @@ public class StateMachineTransformController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除转换（草稿）")
     @DeleteMapping(value = "/{transform_id}")
-    public ResponseEntity<Boolean> delete(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<Boolean> delete(@ApiParam(value = "组织id", required = true)
+                                          @PathVariable("organization_id") Long organizationId,
+                                          @ApiParam(value = "状态机id", required = true)
                                           @RequestParam @Encrypt Long stateMachineId,
+                                          @ApiParam(value = "转换id", required = true)
                                           @PathVariable("transform_id") @Encrypt Long transformId) {
         return new ResponseEntity<>(transformService.delete(organizationId, stateMachineId, transformId), HttpStatus.NO_CONTENT);
     }
@@ -65,7 +76,9 @@ public class StateMachineTransformController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据id获取转换（草稿）")
     @GetMapping(value = "/{transform_id}")
-    public ResponseEntity<StatusMachineTransformVO> queryById(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<StatusMachineTransformVO> queryById(@ApiParam(value = "组织id", required = true)
+                                                              @PathVariable("organization_id") Long organizationId,
+                                                              @ApiParam(value = "转换id", required = true)
                                                               @PathVariable("transform_id") @Encrypt Long transformId) {
         return new ResponseEntity<>(transformService.queryById(organizationId, transformId), HttpStatus.OK);
     }
@@ -73,8 +86,11 @@ public class StateMachineTransformController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建【全部】转换，所有节点均可转换到当前节点（草稿）")
     @PostMapping(value = "/create_type_all")
-    public ResponseEntity<StatusMachineTransformVO> createAllStatusTransform(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<StatusMachineTransformVO> createAllStatusTransform(@ApiParam(value = "组织id", required = true)
+                                                                             @PathVariable("organization_id") Long organizationId,
+                                                                             @ApiParam(value = "状态机id", required = true)
                                                                              @RequestParam("state_machine_id") @Encrypt Long stateMachineId,
+                                                                             @ApiParam(value = "结束节点id", required = true)
                                                                              @RequestParam("end_node_id") @Encrypt Long endNodeId) {
         return new ResponseEntity<>(transformService.createAllStatusTransform(organizationId, stateMachineId, endNodeId), HttpStatus.CREATED);
     }
@@ -82,7 +98,9 @@ public class StateMachineTransformController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除【全部】转换（草稿）")
     @DeleteMapping(value = "/delete_type_all/{transform_id}")
-    public ResponseEntity<Boolean> deleteAllStatusTransform(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<Boolean> deleteAllStatusTransform(@ApiParam(value = "组织id", required = true)
+                                                            @PathVariable("organization_id") Long organizationId,
+                                                            @ApiParam(value = "转换id", required = true)
                                                             @PathVariable("transform_id") @Encrypt Long transformId) {
         return new ResponseEntity<>(transformService.deleteAllStatusTransform(organizationId, transformId), HttpStatus.OK);
     }
@@ -90,8 +108,11 @@ public class StateMachineTransformController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "更改条件策略")
     @GetMapping(value = "/update_condition_strategy/{transform_id}")
-    public ResponseEntity<Boolean> updateConditionStrategy(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<Boolean> updateConditionStrategy(@ApiParam(value = "组织id", required = true)
+                                                           @PathVariable("organization_id") Long organizationId,
+                                                           @ApiParam(value = "转换id", required = true)
                                                            @PathVariable("transform_id") @Encrypt Long transformId,
+                                                           @ApiParam(value = "条件策略", required = true)
                                                            @RequestParam("condition_strategy") String conditionStrategy) {
         return new ResponseEntity<>(transformService.updateConditionStrategy(organizationId, transformId, conditionStrategy), HttpStatus.CREATED);
     }
@@ -99,10 +120,15 @@ public class StateMachineTransformController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION, roles = {InitRoleCode.ORGANIZATION_ADMINISTRATOR, InitRoleCode.ORGANIZATION_MEMBER})
     @ApiOperation(value = "校验转换名字在起始终点相同条件下是否未被使用")
     @GetMapping(value = "/check_name")
-    public ResponseEntity<Boolean> checkName(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<Boolean> checkName(@ApiParam(value = "组织id", required = true)
+                                             @PathVariable("organization_id") Long organizationId,
+                                             @ApiParam(value = "开始节点id", required = true)
                                              @RequestParam("startNodeId") @Encrypt Long startNodeId,
+                                             @ApiParam(value = "结束节点id", required = true)
                                              @RequestParam("endNodeId") @Encrypt Long endNodeId,
+                                             @ApiParam(value = "状态机id", required = true)
                                              @RequestParam("stateMachineId") @Encrypt Long stateMachineId,
+                                             @ApiParam(value = "名称", required = true)
                                              @RequestParam("name") String name) {
         return Optional.ofNullable(transformService.checkName(organizationId, stateMachineId, startNodeId, endNodeId, name))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))

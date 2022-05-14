@@ -6,6 +6,7 @@ import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.hzero.core.util.Results;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +27,11 @@ public class StatusBranchMergeSettingController {
     @ApiOperation(value = "分支合并状态流转配置")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/issue_type/{issue_type_id}/status/{status_id}")
-    public ResponseEntity<StatusBranchMergeSettingVO> query(@PathVariable("project_id") Long projectId,
+    public ResponseEntity<StatusBranchMergeSettingVO> query(@ApiParam(value = "项目id", required = true)
+                                                            @PathVariable("project_id") Long projectId,
+                                                            @ApiParam(value = "问题类型id", required = true)
                                                             @PathVariable("issue_type_id") @Encrypt Long issueTypeId,
+                                                            @ApiParam(value = "状态id", required = true)
                                                             @PathVariable("status_id") @Encrypt Long statusId) {
         return Results.success(statusBranchMergeSettingService.query(projectId, ConvertUtil.getOrganizationId(projectId), issueTypeId, statusId));
     }
@@ -35,10 +39,14 @@ public class StatusBranchMergeSettingController {
     @ApiOperation(value = "分支合并状态流转配置")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/issue_type/{issue_type_id}/status/{status_id}/update_auto_transform")
-    public ResponseEntity updateAutoTransform(@PathVariable("project_id") Long projectId,
-                                                                          @PathVariable("issue_type_id") @Encrypt Long issueTypeId,
-                                                                          @PathVariable("status_id") @Encrypt Long statusId,
-                                                                          @RequestParam Boolean autoTransform) {
+    public ResponseEntity updateAutoTransform(@ApiParam(value = "项目id", required = true)
+                                              @PathVariable("project_id") Long projectId,
+                                              @ApiParam(value = "问题类型id", required = true)
+                                              @PathVariable("issue_type_id") @Encrypt Long issueTypeId,
+                                              @ApiParam(value = "状态id", required = true)
+                                              @PathVariable("status_id") @Encrypt Long statusId,
+                                              @ApiParam(value = "是否自动转换", required = true)
+                                              @RequestParam Boolean autoTransform) {
         statusBranchMergeSettingService.updateAutoTransform(projectId, ConvertUtil.getOrganizationId(projectId), issueTypeId, statusId, autoTransform);
         return Results.success();
     }

@@ -34,6 +34,7 @@ public class CustomChartController {
     @ApiOperation(value = "查询项目下所有的自定义报表")
     @GetMapping
     public ResponseEntity<List<CustomChartVO>> queryListByProject(
+            @ApiParam(value = "项目id", required = true)
             @PathVariable("project_id") Long projectId) {
         return Optional.ofNullable(customChartService.queryListByProject(projectId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
