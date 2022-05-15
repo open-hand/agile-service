@@ -1,8 +1,13 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
+
 public class BacklogDataVO {
+    @ApiModelProperty("需求id")
     private Long backlogId;
+    @ApiModelProperty("需求数据id")
     private Long backlogDataId;
+    @ApiModelProperty("新值")
     private String newValue;
 
     public Long getBacklogDataId() {

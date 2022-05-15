@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -9,16 +10,19 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 public class BoardQuickFilterRelVO {
 
     @Encrypt
+    @ApiModelProperty("id")
     private Long id;
     @Encrypt
+    @ApiModelProperty("看版id")
     private Long boardId;
     @Encrypt
+    @ApiModelProperty("快查id")
     private Long quickFilterId;
-
+    @ApiModelProperty("项目id")
     private Long projectId;
-
+    @ApiModelProperty("组织id")
     private Long organizationId;
-
+    @ApiModelProperty("乐观锁")
     private Long objectVersionNumber;
 
     public Long getId() {

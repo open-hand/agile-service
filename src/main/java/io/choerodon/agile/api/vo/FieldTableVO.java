@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * 字段与表名映射vo
  * @author jiaxu.cui@hand-china.com 2020/10/27 上午9:25
@@ -14,9 +16,11 @@ public class FieldTableVO {
         this.field = field;
         this.table = table;
     }
-
+    @ApiModelProperty(value = "名称")
     private String name;
+    @ApiModelProperty(value = "字段")
     private String field;
+    @ApiModelProperty(value = "表")
     private String table;
 
     public String getName() {

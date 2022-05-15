@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotNull;
@@ -14,14 +15,21 @@ import io.choerodon.mybatis.domain.AuditDomain;
 public class FieldCascadeRuleOptionVO extends AuditDomain {
 
     @Encrypt
+    @ApiModelProperty("id")
     private Long id;
     @Encrypt
+    @ApiModelProperty("字段级联规则id")
     private Long fieldCascadeRuleId;
     @Encrypt
+    @ApiModelProperty("级联选项id")
     private Long cascadeOptionId;
+    @ApiModelProperty("级联选项名")
     private String cascadeOptionName;
+    @ApiModelProperty("项目id")
     private Long projectId;
+    @ApiModelProperty("默认选项")
     private Boolean defaultOption;
+    @ApiModelProperty("组织id")
     private Long organizationId;
 
     public Long getId() {

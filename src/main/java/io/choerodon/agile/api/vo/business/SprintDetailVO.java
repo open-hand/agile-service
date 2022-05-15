@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo.business;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Date;
@@ -9,25 +10,35 @@ import java.util.Date;
  */
 public class SprintDetailVO {
     @Encrypt
+    @ApiModelProperty(value = "冲刺id")
     private Long sprintId;
+    @ApiModelProperty(value = "问题数量")
     private Integer issueCount;
+    @ApiModelProperty(value = "冲刺名称")
     private String sprintName;
+    @ApiModelProperty(value = "冲刺目标")
     private String sprintGoal;
+    @ApiModelProperty(value = "开始时间")
     private Date startDate;
+    @ApiModelProperty(value = "结束时间")
     private Date endDate;
+    @ApiModelProperty(value = "实际开始时间")
     private Date actualEndDate;
+    @ApiModelProperty(value = "状态编码")
     private String statusCode;
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
-
+    @ApiModelProperty(value = "看版特性id")
     private Long boardFeatureId;
-
+    @ApiModelProperty(value = "类型")
     private String type;
-
+    @ApiModelProperty(value = "特性id")
     private Long featureId;
-
+    @ApiModelProperty(value = "pi id")
     private Long piId;
-
+    @ApiModelProperty(value = "pi名称")
     private PiNameVO piName;
 
     public PiNameVO getPiName() {

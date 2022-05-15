@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Date;
@@ -12,12 +13,17 @@ import javax.validation.constraints.NotNull;
  */
 public class DataLogQueryVO {
     @NotNull(message = "error.startDate.not.null")
+    @ApiModelProperty("开始时间")
     private Date startDate;
+    @ApiModelProperty("结束时间")
     private Date endDate;
     @Encrypt
+    @ApiModelProperty("类型id")
     private List<Long> typeIds;
     @Encrypt
+    @ApiModelProperty("创建人集合")
     private List<Long> createdByIds;
+    @ApiModelProperty("其他类型")
     private List<String> otherTypes;
     public Date getStartDate() {
         return startDate;

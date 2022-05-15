@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo.business;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -8,19 +9,21 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 public class PiTargetInfoVO {
     @Encrypt
+    @ApiModelProperty("主键")
     private Long id;
-
+    @ApiModelProperty("名称")
     private String name;
-
+    @ApiModelProperty("计划")
     private Long planBv;
-
+    @ApiModelProperty("实际")
     private Long actualBv;
 
     @Encrypt
+    @ApiModelProperty("pi id")
     private Long piId;
-
+    @ApiModelProperty("策略")
     private Boolean stretch;
-
+    @ApiModelProperty("项目群id")
     private Long programId;
 
     public Long getId() {

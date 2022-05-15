@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.agile.api.vo.SearchVO;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -16,6 +17,7 @@ public class ChartSearchVO {
     /**
      * 项目id(必选)
      */
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
 
     /**
@@ -28,11 +30,13 @@ public class ChartSearchVO {
      * 缺陷累计趋势图： 冲刺id(必选)
      */
     @Encrypt
+    @ApiModelProperty(value = "冲刺id")
     private Long sprintId;
     /**
      * 燃尽图： 是否为当前冲刺(可选)
      * 冲刺报告图： 是否为当前冲刺(可选)
      */
+    @ApiModelProperty(value = "是否为当前冲刺")
     private Boolean currentSprint;
     /**
      * 燃尽图： 类型(必选)
@@ -43,50 +47,60 @@ public class ChartSearchVO {
      * 史诗燃耗图： 必为Epic
      * 版本燃耗图： 必为Version
      */
+    @ApiModelProperty(value = "类型")
     private String type;
     /**
      * 燃尽图： 仅故事(可选)
      */
+    @ApiModelProperty(value = "仅故事")
     private Boolean onlyStory;
     /**
      * 燃尽图： 快速筛选(可选)
      * 累积流量图： 快速筛选(可选)
      */
     @Encrypt
+    @ApiModelProperty(value = "产品状态id")
     private List<Long> quickFilterIds;
     /**
      * 燃尽图： 个人筛选(可选)
      */
     @Encrypt
+    @ApiModelProperty(value = "个人筛选")
     private List<Long> personalFilterIds;
     /**
      * 燃尽图： 经办人Id(可选)
      */
     @Encrypt
+    @ApiModelProperty(value = "经办人Id")
     private Long assigneeId;
     /**
      * 燃尽图： displayNonWorkingDay(可选)
      * 冲刺报告图: displayNonWorkingDay(可选)
      */
+    @ApiModelProperty(value = "展示非工作日")
     private Boolean displayNonWorkingDay;
 
     /**
      * 累积流量图：面板id(必选)
      */
     @Encrypt
+    @ApiModelProperty(value = "面板id")
     private Long boardId;
     /**
      * 累积流量图：列id(必选)
      */
     @Encrypt
+    @ApiModelProperty(value = "列id")
     private List<Long> columnIds;
     /**
      * 累积流量图：起始时间(必选)
      */
+    @ApiModelProperty(value = "起始时间")
     private Date startDate;
     /**
      * 累积流量图：结束时间(必选)
      */
+    @ApiModelProperty(value = "结束时间")
     private Date endDate;
     
     /**
@@ -95,12 +109,14 @@ public class ChartSearchVO {
      * 统计图： 版本id(可选)
      */
     @Encrypt
+    @ApiModelProperty(value = "版本id")
     private Long versionId;
 
     /**
      * 统计图： 状态id(可选)
      */
     @Encrypt
+    @ApiModelProperty(value = "状态id")
     private Long statusId;
 
     /**
@@ -108,21 +124,25 @@ public class ChartSearchVO {
      * 史诗燃耗图： 史诗id(必选)
      */
     @Encrypt
+    @ApiModelProperty(value = "史诗id")
     private Long epicId;
 
     /**
      * 版本燃耗图: 根据图表校准冲刺(可选)
      * 史诗燃耗图： 根据图表校准冲刺(可选)
      */
+    @ApiModelProperty(value = "根据图表校准冲刺")
     private Boolean calibrationSprint;
 
     /**
      * 统计图：组织id(必选)
      */
+    @ApiModelProperty(value = "组织id")
     private Long organizationId;
     /**
      * 统计图：统计类型(必选)
      */
+    @ApiModelProperty(value = "统计类型")
     private String fieldName;
 
     /**
@@ -130,72 +150,84 @@ public class ChartSearchVO {
      * 子项目工作量： piId(必填)
      */
     @Encrypt
+    @ApiModelProperty(value = "piId")
     private Long piId;
 
     /**
      * 子项目燃尽图：子项目id(必填)
      */
+    @ApiModelProperty(value = "子项目id")
     private Long subProjectId;
 
     /**
      * 与其余图表的type字段意义等同
      * 子项目工作量： 单位(必填)
      */
+    @ApiModelProperty(value = "单位")
     private String latitude;
-
+    @ApiModelProperty(value = "搜索条件")
     private SearchVO currentSearchVO;
 
     /**
      * 代码质量图近多少天
      */
+    @ApiModelProperty(value = "代码质量图近多少天")
     private Integer days;
 
     /**
      * 服务id
      */
     @Encrypt
+    @ApiModelProperty(value = "服务id")
     private Long serviceId;
 
     /**
      * 自定义报表类型
      */
+    @ApiModelProperty(value = "自定义报表类型")
     private String chartType;
 
     /**
      * 自定义报表统计数据类型
      */
+    @ApiModelProperty(value = "自定义报表统计数据类型")
     private String statisticsType;
 
     /**
      * 自定义报表统计字段
      */
+    @ApiModelProperty(value = "自定义报表统计字段")
     private String analysisField;
 
     /**
      * 自定义报表对比字段
      */
+    @ApiModelProperty(value = "自定义报表对比字段")
     private String comparedField;
 
     /**
      * 自定义报表统计字段是否系统字段
      */
+    @ApiModelProperty(value = "自定义报表统计字段是否系统字段")
     private Boolean analysisFieldPredefined;
 
     /**
      * 自定义报表对比字段是否系统字段
      */
+    @ApiModelProperty(value = "自定义报表对比字段是否系统字段")
     private Boolean comparedFieldPredefined;
 
     /**
      * 自定义报表查询参数
      */
+    @ApiModelProperty(value = "自定义报表查询参数")
     private SearchVO searchVO;
 
 
     /**
      * 需求统计图维度
      */
-
+    @ApiModelProperty(value = "需求统计图维度")
     private BacklogPieChartDimensionVO dimension;
 
     public Long getServiceId() {

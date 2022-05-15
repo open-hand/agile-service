@@ -57,9 +57,9 @@ public class EpicDataVO {
 
     @ApiModelProperty(value = "项目群id")
     private Long programId;
-
+    @ApiModelProperty("成功故事点")
     private BigDecimal successStoryPoint;
-
+    @ApiModelProperty("总故事点")
     private BigDecimal totalStoryPoint;
 
     public Integer getEpicSequence() {

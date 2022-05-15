@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.util.ObjectUtils;
@@ -16,22 +17,27 @@ import java.util.List;
 public class BurnDownSearchVO {
 
     @NotEmpty(message = "error.query.type.empty")
+    @ApiModelProperty("类型")
     private String type;
     @Encrypt
+    @ApiModelProperty("经办人")
     private Long assigneeId;
+    @ApiModelProperty("只查询故事")
     private Boolean onlyStory;
     @Encrypt
+    @ApiModelProperty("快查id")
     private List<Long> quickFilterIds;
     @Encrypt
+    @ApiModelProperty("个人筛选")
     private List<Long> personalFilterIds;
-
+    @ApiModelProperty("原始类型")
     private String ordinalType;
 
     @JsonIgnore
     private String filterSql;
     @JsonIgnore
     private List<SearchVO> searchList;
-    
+    @ApiModelProperty("搜索条件")
     private SearchVO currentSearchVO;
 
     public SearchVO getCurrentSearchVO() {

@@ -17,7 +17,7 @@ public class AppServiceSimpleVO {
     private String appServiceCode;
     @ApiModelProperty("应用服务类型")
     private String type;
-
+    @ApiModelProperty("项目id")
     private Long projectId;
 
     public AppServiceSimpleVO() {

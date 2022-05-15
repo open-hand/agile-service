@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo.business;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.springframework.context.ApplicationEvent;
 
 import java.util.List;
@@ -28,10 +29,11 @@ public class NoticeBatchEventVO extends ApplicationEvent {
         this.event = event;
     }
 
+    @ApiModelProperty("触发器负载器")
     private List<TriggerCarrierVO> triggerCarriers;
-
+    @ApiModelProperty("模块")
     private String component;
-
+    @ApiModelProperty("事件")
     private String event;
 
     public String getEvent() {

@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.ibatis.annotations.Param;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -9,10 +10,11 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 public class CountVO {
     @Encrypt
+    @ApiModelProperty("id")
     private Long id;
-
+    @ApiModelProperty("完成数量")
     private Integer completedCount;
-
+    @ApiModelProperty("总数量")
     private Integer totalCount;
 
     public Long getId() {

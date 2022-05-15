@@ -38,8 +38,9 @@ public class AppServiceRepVO {
 
     @ApiModelProperty("应用服务是否启用")
     private Boolean isActive;
-
+    @ApiModelProperty(value = "发布等级")
     private String publishLevel;
+    @ApiModelProperty(value = "贡献者")
     private String contributor;
 
     @ApiModelProperty("应用服务描述")
@@ -90,9 +91,9 @@ public class AppServiceRepVO {
     @ApiModelProperty("事务实例id")
     @Encrypt
     private Long sagaInstanceId;
-
+    @ApiModelProperty(value = "artifactId")
     private String artifactId;
-
+    @ApiModelProperty(value = "groupId")
     private String groupId;
 
     public String getArtifactId() {

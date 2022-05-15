@@ -130,10 +130,11 @@ public class IssueUpdateVO {
     private String autoTriggerNum;
 
     @Encrypt
+    @ApiModelProperty(value = "主要负责人id")
     private Long mainResponsibleId;
-
+    @ApiModelProperty(value = "环境")
     private String environment;
-
+    @ApiModelProperty(value = "标记")
     private List<TagVO> tags;
 
     @ApiModelProperty(value = "实际开始时间")

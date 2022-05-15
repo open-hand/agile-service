@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo.waterfall;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Objects;
@@ -17,11 +18,13 @@ public class GanttParentVO {
     public static final String SPRINT = "sprint";
 
     @Encrypt
+    @ApiModelProperty(value = "主键")
     private Long id;
-
+    @ApiModelProperty(value = "类型")
     private String type;
 
     @JsonIgnore
+    @ApiModelProperty(value = "父级冲刺集合")
     private Set<Long> parentSprintIds;
 
     public Set<Long> getParentSprintIds() {

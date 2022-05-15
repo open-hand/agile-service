@@ -12,8 +12,9 @@ import java.util.List;
 public class WaterfallIssueVO {
 
     @Encrypt
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
 
     @ApiModelProperty(value = "所属父级")

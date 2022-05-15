@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -9,19 +10,23 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 public class ExecutionCaseStatusChangeSettingVO {
 
     @Encrypt
+    @ApiModelProperty("id")
     private Long id;
 
     @Encrypt
+    @ApiModelProperty("敏捷问题类型id")
     private Long agileIssueTypeId;
 
     @Encrypt
+    @ApiModelProperty("敏捷状态id")
     private Long agileStatusId;
 
     @Encrypt
+    @ApiModelProperty("测试状态id")
     private Long testStatusId;
-
+    @ApiModelProperty("乐观锁")
     private Long objectVersionNumber;
-
+    @ApiModelProperty("测试状态")
     private TestStatusVO testStatusVO;
 
     public Long getId() {

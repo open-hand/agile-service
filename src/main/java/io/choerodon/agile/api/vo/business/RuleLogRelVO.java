@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo.business;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.Set;
 
 /**
@@ -7,23 +9,23 @@ import java.util.Set;
  * @since 2020-12-17
  */
 public class RuleLogRelVO {
-
+    @ApiModelProperty(value = "主键")
     private Long id;
-
+    @ApiModelProperty(value = "日志id")
     private Long logId;
-
+    @ApiModelProperty(value = "规则id")
     private Long ruleId;
-
+    @ApiModelProperty(value = "业务类型")
     private String businessType;
-
+    @ApiModelProperty(value = "实例id")
     private Long instanceId;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "组织id")
     private Long organizationId;
-
+    @ApiModelProperty(value = "规则名称")
     private String ruleName;
-
+    @ApiModelProperty(value = "搜索日志id集合")
     private Set<Long> searchLogIds;
 
     public RuleLogRelVO() {}

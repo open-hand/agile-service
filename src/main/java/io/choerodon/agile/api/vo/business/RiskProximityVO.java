@@ -40,7 +40,7 @@ public class RiskProximityVO {
 
     @ApiModelProperty(value = "排序")
     private String rank;
-
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
 
     public Long getObjectVersionNumber() {

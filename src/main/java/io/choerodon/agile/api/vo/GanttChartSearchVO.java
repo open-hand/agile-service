@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -12,8 +13,9 @@ import java.util.Set;
 public class GanttChartSearchVO {
 
     @Encrypt
+    @ApiModelProperty(value = "问题id集合")
     private Set<Long> issueIds;
-
+    @ApiModelProperty(value = "展示的字段")
     private List<ObjectSchemeFieldVO> displayFields;
 
     public Set<Long> getIssueIds() {

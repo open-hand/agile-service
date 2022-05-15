@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo.business;
 
 import io.choerodon.mybatis.domain.AuditDomain;
+import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 import java.util.Set;
@@ -10,23 +11,23 @@ import java.util.Set;
  * @since 2021-08-23
  */
 public class TriggerCarrierVO {
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "实例id")
     private Long instanceId;
-
+    @ApiModelProperty(value = "成员字段id")
     private Set<Long> memberFieldIds;
-
+    @ApiModelProperty(value = "字段编码集合")
     private List<String> fieldList;
-
+    @ApiModelProperty(value = "执行过的规则")
     private List<String> executedRules;
-
+    @ApiModelProperty(value = "问题类型id")
     private Long issueTypeId;
-
+    @ApiModelProperty(value = "检查模式")
     private boolean checkMode;
-
+    @ApiModelProperty(value = "审计域")
     private AuditDomain auditDomain;
-
+    @ApiModelProperty(value = "通知实例id")
     private Long noticeInstanceId;
 
     public Long getProjectId() {

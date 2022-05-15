@@ -118,14 +118,15 @@ public class IssueSearchVO {
 
     @ApiModelProperty(value = "经办人真实名称")
     private String assigneeRealName;
-
+    @ApiModelProperty(value = "预计开始时间")
     private Date estimatedStartTime;
-
+    @ApiModelProperty(value = "预计结束时间")
     private Date estimatedEndTime;
 
     @Encrypt
+    @ApiModelProperty(value = "父级")
     private Long parentId;
-
+    @ApiModelProperty(value = "子级")
     private List<IssueSearchVO> children;
 
     public Long getIssueId() {

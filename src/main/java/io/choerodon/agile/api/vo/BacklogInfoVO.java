@@ -1,15 +1,17 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 public class BacklogInfoVO {
     @Encrypt
+    @ApiModelProperty("需求id")
     private Long backlogId;
-
+    @ApiModelProperty("组织id")
     private Long organizationId;
-
+    @ApiModelProperty("项目id")
     private Long projectId;
-
+    @ApiModelProperty("状态id")
     private Long statusId;
 
     public BacklogInfoVO() {

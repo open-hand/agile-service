@@ -23,9 +23,9 @@ public class PiNameVO {
 
     @ApiModelProperty(value = "pi状态")
     private String statusCode;
-
+    @ApiModelProperty("冲刺")
     private List<SprintDetailVO> sprints;
-
+    @ApiModelProperty("冲刺全名")
     private String fullName;
 
     public List<SprintDetailVO> getSprints() {

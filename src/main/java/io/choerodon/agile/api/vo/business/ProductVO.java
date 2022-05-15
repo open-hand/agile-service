@@ -85,7 +85,7 @@ public class ProductVO {
     @ApiModelProperty(value = "产品状态id")
     @NotNull(message = "error.product.statusId.notNull")
     private Long statusId;
-
+    @ApiModelProperty(value = "产品状态")
     private ProductStatusVO productStatusVO;
 
     public Long getId() {

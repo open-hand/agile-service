@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo.waterfall;
 
 import io.choerodon.agile.api.vo.IssueTypeVO;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -10,21 +11,23 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 public class IssueParentVO {
 
     @Encrypt
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
-
+    @ApiModelProperty(value = "概要")
     private String summary;
-
+    @ApiModelProperty(value = "问题编码")
     private String issueNum;
-
+    @ApiModelProperty(value = "描述")
     private String description;
-
+    @ApiModelProperty(value = "问题类型编码")
     private String typeCode;
 
     @Encrypt
+    @ApiModelProperty(value = "问题类型id")
     private Long issueTypeId;
-
+    @ApiModelProperty(value = "是否为星标")
     private Boolean starBeacon;
-
+    @ApiModelProperty(value = "问题类型")
     private IssueTypeVO issueTypeVO;
 
     public Long getIssueId() {

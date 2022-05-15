@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.List;
 
 /**
@@ -7,9 +9,9 @@ import java.util.List;
  * @since 2020-11-11
  */
 public class ExcelTemplateVO {
-
+    @ApiModelProperty("系统字段")
     private List<String> systemFields;
-
+    @ApiModelProperty("自定义字段")
     private List<String> customFields;
 
     public List<String> getSystemFields() {

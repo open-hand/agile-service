@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.List;
 
 /**
@@ -7,11 +9,11 @@ import java.util.List;
  * @since 2020-11-25
  */
 public class GanttChartTreeVO {
-
+    @ApiModelProperty(value = "概要")
     private String summary;
-
+    @ApiModelProperty(value = "是否为组")
     private Boolean isGroup;
-
+    @ApiModelProperty(value = "子级")
     private List<GanttChartVO> children;
 
     public Boolean getGroup() {

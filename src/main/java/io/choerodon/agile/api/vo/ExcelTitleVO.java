@@ -1,18 +1,21 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * @author zhaotianxin
  * @date 2021-10-19 15:09
  */
 public class ExcelTitleVO {
+    @ApiModelProperty("字段id")
     private Long fieldId;
-
+    @ApiModelProperty("标题")
     private String title;
-
+    @ApiModelProperty("编码")
     private String code;
-
+    @ApiModelProperty("宽度")
     private Integer width;
-
+    @ApiModelProperty("数字")
     private boolean number;
 
     public ExcelTitleVO() {
