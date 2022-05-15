@@ -246,9 +246,10 @@ public class SprintController {
     @PostMapping(value = "/unclose_sprint")
     public ResponseEntity<List<SprintSearchVO>> unCloseSprint(@ApiParam(value = "项目id", required = true)
                                                               @PathVariable(name = "project_id") Long projectId,
+                                                              @ApiParam(value = "搜索参数", required = true)
                                                               @RequestBody Map<String, Object> searchParamMap) {
         EncryptionUtils.decryptSearchParamMap(searchParamMap);
-        return Optional.ofNullable(sprintService.unCloseSprint(projectId,searchParamMap))
+        return Optional.ofNullable(sprintService.unCloseSprint(projectId, searchParamMap))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.sprint.query"));
     }
@@ -260,6 +261,7 @@ public class SprintController {
                                                                  @PathVariable(name = "project_id") Long projectId,
                                                                  @RequestParam @Encrypt Long sprintId,
                                                                  PageRequest pageRequest,
+                                                                 @ApiParam(value = "搜索参数", required = true)
                                                                  @RequestBody Map<String, Object> searchParamMap) {
         EncryptionUtils.decryptSearchParamMap(searchParamMap);
         return Optional.ofNullable(sprintService.issuePageBySprint(projectId, sprintId, pageRequest, searchParamMap))
@@ -273,6 +275,7 @@ public class SprintController {
     public ResponseEntity<Page<IssueSearchVO>> todoIssuePage(@ApiParam(value = "项目id", required = true)
                                                                  @PathVariable(name = "project_id") Long projectId,
                                                                  PageRequest pageRequest,
+                                                             @ApiParam(value = "搜索参数", required = true)
                                                                  @RequestBody Map<String, Object> searchParamMap) {
         EncryptionUtils.decryptSearchParamMap(searchParamMap);
         return Optional.ofNullable(sprintService.todoIssuePage(projectId, pageRequest, searchParamMap))
@@ -285,6 +288,7 @@ public class SprintController {
     @GetMapping(value = "/sprint_start_message")
     public ResponseEntity<SprintStartMessageVO> selectSprintStartMessage(@ApiParam(value = "项目id", required = true)
                                                                          @PathVariable(name = "project_id") Long projectId,
+                                                                         @ApiParam(value = "冲刺id", required = true)
                                                                          @RequestParam @Encrypt Long sprintId){
         return Optional.ofNullable(sprintService.selectSprintStartMessage(projectId, sprintId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))

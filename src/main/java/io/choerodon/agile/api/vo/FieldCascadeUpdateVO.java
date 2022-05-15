@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author chihao.ran@hand-china.com
@@ -12,10 +13,15 @@ import io.choerodon.mybatis.annotation.VersionAudit;
 @ModifyAudit
 @VersionAudit
 public class FieldCascadeUpdateVO {
+    @ApiModelProperty(value = "是否隐藏")
     private Boolean hidden;
+    @ApiModelProperty(value = "是否必填")
     private Boolean required;
+    @ApiModelProperty(value = "默认值")
     private String defaultValue;
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
+    @ApiModelProperty(value = "字段级联规则选项")
     private List<FieldCascadeRuleOptionVO> fieldCascadeRuleOptionList;
 
     public Boolean getHidden() {

@@ -29,8 +29,11 @@ public class StatusNoticeSettingController extends BaseController {
     @ApiOperation(value = "消息通知明细")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/issue_type/{issue_type_id}/status/{status_id}")
-    public ResponseEntity<StatusNoticeSettingVO> detail(@PathVariable("project_id") Long projectId,
+    public ResponseEntity<StatusNoticeSettingVO> detail(@ApiParam(value = "项目id", required = true)
+                                                        @PathVariable("project_id") Long projectId,
+                                                        @ApiParam(value = "问题类型id", required = true)
                                                         @PathVariable("issue_type_id") @Encrypt Long issueTypeId,
+                                                        @ApiParam(value = "状态id", required = true)
                                                         @PathVariable("status_id") @Encrypt Long statusId,
                                                         @ApiParam(value = "方案编码", required = true)
                                                         @RequestParam(required = false) String schemeCode) {
@@ -40,7 +43,9 @@ public class StatusNoticeSettingController extends BaseController {
     @ApiOperation(value = "保存消息通知")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<Void> save(@PathVariable("project_id") Long projectId,
+    public ResponseEntity<Void> save(@ApiParam(value = "项目id", required = true)
+                                     @PathVariable("project_id") Long projectId,
+                                     @ApiParam(value = "状态通知配置", required = true)
                                      @RequestBody StatusNoticeSettingVO statusNoticeSettingVO,
                                      @ApiParam(value = "方案编码", required = true)
                                      @RequestParam String applyType) {

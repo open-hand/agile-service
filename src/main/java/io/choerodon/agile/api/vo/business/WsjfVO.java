@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo.business;
 
 import io.choerodon.agile.api.vo.StatusVO;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.math.BigDecimal;
@@ -12,32 +13,42 @@ import java.math.BigDecimal;
 public class WsjfVO {
 
     @Encrypt
+    @ApiModelProperty(value = "主键")
     private Long id;
 
     @Encrypt
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
-
+    @ApiModelProperty(value = "问题名称")
     private String issueName;
-
+    @ApiModelProperty(value = "pi名称")
     private String piName;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "用户/业务价值")
     private Long userBusinessValue;
-
+    @ApiModelProperty(value = "时间紧迫性")
     private Long timeCriticality;
-
+    @ApiModelProperty(value = "产品状态id")
     private Long rrOeValue;
-
+    @ApiModelProperty(value = "工作规模")
     private Long jobSize;
-
+    @ApiModelProperty(value = "延迟成本")
     private Long costDelay;
-
+    @ApiModelProperty(value = "wsjf")
     private BigDecimal wsjf;
-
+    @ApiModelProperty(value = "状态")
     private StatusVO statusVO;
-
+    @ApiModelProperty(value = "产品状态id")
     private Long objectVersionNumber;
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
 
     public Long getId() {
         return id;

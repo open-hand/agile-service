@@ -24,9 +24,12 @@ public class MoveIssueVO {
     @ApiModelProperty("是否生成移动日志")
     private Boolean rankIndex;
     @Encrypt
+    @ApiModelProperty("更新状态id")
     private Long updateStatusId;
+    @ApiModelProperty("状态类别编码")
     private String statusCategoryCode;
     @Encrypt(ignoreValue = {"0"})
+    @ApiModelProperty("是否生成移动日志")
     private Long currentPiId;
 
     public void setUpdateStatusId(Long updateStatusId) {

@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo.business;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -8,14 +9,17 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 public class ProgramVersionFeatureRelVO {
     @Encrypt
+    @ApiModelProperty(value = "主键")
     private Long id;
 
     @Encrypt
+    @ApiModelProperty(value = "特性id")
     private Long featureId;
 
     @Encrypt
+    @ApiModelProperty(value = "项目群版本id")
     private Long programVersionId;
-
+    @ApiModelProperty(value = "名称")
     private String name;
 
     public Long getId() {

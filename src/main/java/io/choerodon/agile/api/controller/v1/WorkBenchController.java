@@ -71,6 +71,7 @@ public class WorkBenchController {
                                                                                  @PathVariable(name = "organization_id") Long organizationId,
                                                                                  @RequestParam(required = false) Long projectId,
                                                                                  PageRequest pageRequest,
+                                                                                 @ApiParam(value = "工作台搜索条件", required = true)
                                                                                  @RequestBody WorkBenchIssueSearchVO workBenchIssueSearchVO) {
         return Optional.ofNullable(issueService.queryBackLogIssuesByPersonal(organizationId, projectId, pageRequest, workBenchIssueSearchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
@@ -82,8 +83,10 @@ public class WorkBenchController {
     @PostMapping("/personal/my_reported")
     public ResponseEntity<Page<IssueListFieldKVVO>> pagedQueryMyReported(@ApiParam(value = "组织id", required = true)
                                                                          @PathVariable(name = "organization_id") Long organizationId,
+                                                                         @ApiParam(value = "项目id")
                                                                          @RequestParam(required = false) Long projectId,
                                                                          PageRequest pageRequest,
+                                                                         @ApiParam(value = "工作台搜索条件", required = true)
                                                                          @RequestBody WorkBenchIssueSearchVO workBenchIssueSearchVO) {
         return ResponseEntity.ok(issueService.pagedQueryMyReported(organizationId, projectId, pageRequest, workBenchIssueSearchVO));
     }
@@ -93,8 +96,10 @@ public class WorkBenchController {
     @PostMapping("/personal/my_assigned")
     public ResponseEntity<Page<IssueListFieldKVVO>> pagedQueryMyAssigned(@ApiParam(value = "组织id", required = true)
                                                                          @PathVariable(name = "organization_id") Long organizationId,
+                                                                         @ApiParam(value = "项目id")
                                                                          @RequestParam(required = false) Long projectId,
                                                                          PageRequest pageRequest,
+                                                                         @ApiParam(value = "工作台搜索条件", required = true)
                                                                          @RequestBody WorkBenchIssueSearchVO workBenchIssueSearchVO) {
         return ResponseEntity.ok(issueService.pagedQueryMyAssigned(organizationId, projectId, pageRequest, workBenchIssueSearchVO));
     }
@@ -108,6 +113,7 @@ public class WorkBenchController {
                                                                  @PathVariable("organization_id") Long organizationId,
                                                                  @ApiParam(value = "卡片类型")
                                                                  @RequestParam(required = false) String type,
+                                                                 @ApiParam(value = "状态参数", required = true)
                                                                  @RequestBody StatusParamVO statusParamVO) {
         return Optional.ofNullable(statusService.queryUserProjectStatus(pageRequest, organizationId, type, statusParamVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
@@ -121,6 +127,7 @@ public class WorkBenchController {
                                                                 @ApiParam(value = "分页信息", required = true) PageRequest pageRequest,
                                                                 @ApiParam(value = "组织id", required = true)
                                                                 @PathVariable(name = "organization_id") Long organizationId,
+                                                                @ApiParam(value = "敏捷用户搜索", required = true)
                                                                 @RequestBody AgileUserVO agileUserVO) {
         return ResponseEntity.ok(issueService.pagingUserProjectUsers(pageRequest, organizationId, agileUserVO));
     }
@@ -152,8 +159,11 @@ public class WorkBenchController {
     @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation(value = "工作台查询优先级")
     @PostMapping(value = "/priority")
-    public ResponseEntity<List<PriorityVO>> queryPriorities(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<List<PriorityVO>> queryPriorities(@ApiParam(value = "组织id", required = true)
+                                                            @PathVariable("organization_id") Long organizationId,
+                                                            @ApiParam(value = "模糊搜索")
                                                             @RequestParam(required = false) String param,
+                                                            @ApiParam(value = "优先级", required = true)
                                                             @RequestBody PriorityVO priority) {
         priority.setOrganizationId(organizationId);
         return new ResponseEntity<>(priorityService.selectAll(priority, param), HttpStatus.OK);
@@ -192,7 +202,7 @@ public class WorkBenchController {
     public ResponseEntity<PersonalFilterVO> deleteById(@ApiParam(value = "组织id", required = true)
                                                        @PathVariable(name = "organization_id") Long organizationId,
                                                        @ApiParam(value = "filter id", required = true)
-                                                       @PathVariable  @Encrypt Long filterId) {
+                                                       @PathVariable @Encrypt Long filterId) {
         personalFilterService.deleteById(organizationId, 0L, filterId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -227,11 +237,16 @@ public class WorkBenchController {
     @ApiOperation(value = "分页模糊查询组织下的用户")
     @PostMapping(value = "/organizations/users")
     @CustomPageRequest
-    public ResponseEntity<Page<UserDTO>> pagingQueryUsersOnOrganizationAgile(@PathVariable(name = "organization_id") Long organizationId,
+    public ResponseEntity<Page<UserDTO>> pagingQueryUsersOnOrganizationAgile(@ApiParam(value = "组织id", required = true)
+                                                                             @PathVariable(name = "organization_id") Long organizationId,
                                                                              @SortDefault(value = "organizationId", direction = Sort.Direction.DESC) PageRequest pageRequest,
+                                                                             @ApiParam(value = "用户id")
                                                                              @Encrypt @RequestParam(required = false, name = "id") Long userId,
+                                                                             @ApiParam(value = "邮箱")
                                                                              @RequestParam(required = false) String email,
+                                                                             @ApiParam(value = "模糊查询参数")
                                                                              @RequestParam(required = false) String param,
+                                                                             @ApiParam(value = "忽略的用户id")
                                                                              @RequestBody @Encrypt List<Long> notSelectUserIds) {
         return baseFeignClient.pagingQueryUsersOnOrganizationAgile(organizationId, pageRequest.getPage(), pageRequest.getSize(), userId, email, param, notSelectUserIds);
     }
@@ -241,6 +256,7 @@ public class WorkBenchController {
     @GetMapping(value = "/excel/latest")
     public ResponseEntity<FileOperationHistoryVO> queryLatestRecode(@ApiParam(value = "组织id", required = true)
                                                                     @PathVariable(name = "organization_id") Long organizationId,
+                                                                    @ApiParam(value = "行为", required = true)
                                                                     @RequestParam String action) {
         return Optional.ofNullable(excelService.queryOrgLatestRecode(organizationId, action))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))

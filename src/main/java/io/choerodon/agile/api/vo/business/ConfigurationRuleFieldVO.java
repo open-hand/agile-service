@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo.business;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -12,8 +13,9 @@ import java.util.Objects;
 public class ConfigurationRuleFieldVO {
 
     @Encrypt
+    @ApiModelProperty(value = "字段id")
     private Long fieldId;
-
+    @ApiModelProperty(value = "配置字段值集合")
     private List<ConfigurationRuleFieldValueVO> fieldValues;
 
     public Long getFieldId() {

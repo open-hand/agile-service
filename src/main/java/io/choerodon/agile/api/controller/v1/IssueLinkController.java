@@ -122,9 +122,11 @@ public class IssueLinkController {
     @PostMapping(value = "/check_link_issue_cycle")
     public ResponseEntity<List<Long>> checkLinkIssueCycle(@ApiParam(value = "项目id", required = true)
                                                           @PathVariable(name = "project_id") Long projectId,
-                                                          @ApiParam(value = "项目id", required = true)
+                                                          @ApiParam(value = "问题id", required = true)
                                                           @RequestParam @Encrypt Long issueId,
+                                                          @ApiParam(value = "问题关联id", required = true)
                                                           @RequestParam @Encrypt Long linkTypeId,
+                                                          @ApiParam(value = "问题关联集合", required = true)
                                                           @RequestBody List<Long> linkIssueIds) {
         return new ResponseEntity<>(issueLinkService.checkLinkIssueCycle(projectId, issueId, linkTypeId, linkIssueIds), HttpStatus.OK);
     }

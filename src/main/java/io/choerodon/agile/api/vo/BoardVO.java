@@ -30,28 +30,28 @@ public class BoardVO {
 
     @ApiModelProperty(value = "列约束")
     private String columnConstraint;
-
+    @ApiModelProperty("列中的天数")
     private Boolean dayInColumn;
 
     @ApiModelProperty(value = "泳道")
     private String swimlaneBasedCode;
-
+    @ApiModelProperty("预期统计")
     private String estimationStatistic;
 
     @ApiModelProperty(value = "版本号")
     private Long objectVersionNumber;
-
+    @ApiModelProperty("是否为用户默认")
     private Boolean userDefault;
 
     @ApiModelProperty(value = "用户默认看板")
     private String userDefaultBoard;
-
+    @ApiModelProperty("组织id")
     private Long organizationId;
-
+    @ApiModelProperty("创建日期")
     private Date creationDate;
-
+    @ApiModelProperty("创建人")
     private UserDTO creator;
-
+    @ApiModelProperty("类型")
     private String type;
 
     public Long getBoardId() {

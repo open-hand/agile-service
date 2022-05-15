@@ -39,6 +39,7 @@ public class PageFieldController {
                                                          @RequestParam String pageCode,
                                                          @ApiParam(value = "显示层级")
                                                          @RequestParam(required = false) String context,
+                                                         @ApiParam(value = "问题类型id")
                                                          @RequestParam(required = false) @Encrypt Long issueTypeId) {
         return new ResponseEntity<>(pageFieldService.listQuery(organizationId, null, pageCode, context, issueTypeId), HttpStatus.OK);
     }

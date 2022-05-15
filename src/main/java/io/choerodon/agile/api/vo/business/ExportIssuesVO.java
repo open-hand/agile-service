@@ -153,15 +153,15 @@ public class ExportIssuesVO {
 
     @ApiModelProperty("总预估时间")
     private BigDecimal allEstimateTime;
-
+    @ApiModelProperty(value = "标记")
     private String tags;
-
+    @ApiModelProperty(value = "关联的问题")
     private String relatedIssue;
-
+    @ApiModelProperty(value = "关联问题数量")
     private Integer relatedIssueCount = 1;
-
+    @ApiModelProperty(value = "史诗自己的名称")
     private String epicSelfName;
-
+    @ApiModelProperty(value = "参与人")
     private String participant;
 
     @ApiModelProperty("工时")
@@ -172,24 +172,24 @@ public class ExportIssuesVO {
 
     @ApiModelProperty("偏差率")
     private String deviationRate;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "父级id")
     private Long parentId;
-
+    @ApiModelProperty(value = "父级类型")
     private String parentType;
-
+    @ApiModelProperty(value = "是否合并列")
     private Boolean mergeColumn;
-
+    @ApiModelProperty(value = "颜色")
     private Integer colorIndex;
-
+    @ApiModelProperty(value = "产品")
     private String product;
-
+    @ApiModelProperty(value = "类型")
     private String type;
 
     @ApiModelProperty("进度")
     private String progress;
-
+    @ApiModelProperty(value = "序列")
     private String sequence;
 
     public ExportIssuesVO() {

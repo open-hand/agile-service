@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo.business;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import javax.validation.constraints.NotEmpty;
 import java.util.Objects;
 
@@ -10,6 +12,7 @@ import java.util.Objects;
 public class ConfigurationRuleCommentVO extends ConfigurationRuleSettingVO {
 
     @NotEmpty(message = "error.rule.comment.empty")
+    @ApiModelProperty(value = "评论")
     private String comment;
 
     public String getComment() {

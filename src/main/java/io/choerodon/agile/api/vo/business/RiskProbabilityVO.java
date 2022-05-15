@@ -33,9 +33,9 @@ public class RiskProbabilityVO {
 
     @ApiModelProperty(value = "排序")
     private String rank;
-
+    @ApiModelProperty(value = "是否为默认")
     private Boolean isDefault;
-
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
 
     public Boolean getDefault() {

@@ -65,7 +65,8 @@ public class FixDataController {
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("修复0.19创建项目产生的脏数据【单个】")
     @GetMapping(value = "/fix_create_project_0.19_single")
-    public ResponseEntity fixCreateProjectSingle(@RequestParam("projectId") Long projectId) {
+    public ResponseEntity fixCreateProjectSingle(@ApiParam(value = "项目id", required = true)
+                                                 @RequestParam("projectId") Long projectId) {
         fixDataService.fixCreateProjectSingle(projectId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -80,7 +81,8 @@ public class FixDataController {
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("【0.20】【迁移数据专用】根据projectId分批次将测试用例数据传递给test_manager")
     @GetMapping(value = "/migrate_issue/{project_id}")
-    public ResponseEntity<List<TestCaseDTO>> migrateIssue(@PathVariable("project_id")Long projectId){
+    public ResponseEntity<List<TestCaseDTO>> migrateIssue(@ApiParam(value = "组织项目id", required = true)
+                                                          @PathVariable("project_id") Long projectId) {
         return new ResponseEntity<>(issueService.migrateTestCaseByProjectId(projectId), HttpStatus.OK);
     }
 

@@ -31,58 +31,62 @@ public class GanttChartVO {
     public static final String FIELD_PARENT_ID ="parentId";
 
     @Encrypt
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
-
+    @ApiModelProperty(value = "问题编码")
     private String issueNum;
-
+    @ApiModelProperty(value = "概要")
     private String summary;
-
+    @ApiModelProperty(value = "经办人")
     private UserMessageDTO assignee;
-
+    @ApiModelProperty(value = "预计开始时间")
     private Date estimatedStartTime;
-
+    @ApiModelProperty(value = "预计结束时间")
     private Date estimatedEndTime;
-
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
-
+    @ApiModelProperty(value = "问题类型")
     private IssueTypeVO issueTypeVO;
-
+    @ApiModelProperty(value = "优先级")
     private PriorityVO priorityVO;
 
     @Encrypt
+    @ApiModelProperty(value = "父级")
     private Long parentId;
-
+    @ApiModelProperty(value = "状态")
     private StatusVO statusVO;
-
+    @ApiModelProperty(value = "是否已完成")
     private Boolean completed;
-
+    @ApiModelProperty(value = "实际完成时间")
     private Date actualCompletedDate;
-
+    @ApiModelProperty(value = "冲刺")
     private IssueSprintDTO sprint;
-
+    @ApiModelProperty(value = "实际开始时间")
     private Date actualStartTime;
-
+    @ApiModelProperty(value = "实际结束时间")
     private Date actualEndTime;
-
+    @ApiModelProperty(value = "史诗名称")
     private String epicName;
-
+    @ApiModelProperty(value = "颜色")
     private String color;
-
+    @ApiModelProperty(value = "项目群id")
     private Long programId;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
     @Encrypt
+    @ApiModelProperty(value = "特性id")
     private Long featureId;
     @Encrypt
+    @ApiModelProperty(value = "史诗id")
     private Long epicId;
-
+    @ApiModelProperty(value = "特性名称")
     private String featureName;
-
+    @ApiModelProperty(value = "特性颜色")
     private String featureColor;
 
     @ApiModelProperty(value = "创建时间")
     private Date creationDate;
-
+    @ApiModelProperty(value = "故事点")
     private BigDecimal storyPoints;
 
     @ApiModelProperty(value = "最后更新时间")
@@ -129,34 +133,35 @@ public class GanttChartVO {
 
     @ApiModelProperty(value = "环境")
     private String environment;
-
+    @ApiModelProperty(value = "特性类型")
     private String featureType;
 
     @ApiModelProperty(value = "参与人")
     private List<UserMessageDTO> participants;
-
+    @ApiModelProperty(value = "项目")
     private ProjectVO project;
-
+    @ApiModelProperty(value = "子项目id集")
     private Set<Long> subProjectIds;
-
+    @ApiModelProperty(value = "工时百分比")
     private BigDecimal workTimePercentage;
-
+    @ApiModelProperty(value = "消耗的工时")
     private BigDecimal spentWorkTime;
-
+    @ApiModelProperty(value = "全部预计时间")
     private BigDecimal allEstimateTime;
-
+    @ApiModelProperty(value = "前置项")
     private List<GanttChartVO> predecessors;
-
+    @ApiModelProperty(value = "前置项类型")
     private String predecessorType;
-
+    @ApiModelProperty(value = "瀑布问题")
     private WaterfallIssueVO waterfallIssueVO;
-
+    @ApiModelProperty(value = "父级")
     private Set<GanttParentVO> parents;
     @Encrypt
+    @ApiModelProperty(value = "父级冲刺")
     private Set<Long> parentSprintIds;
-
+    @ApiModelProperty(value = "应用类型")
     private String applyType;
-
+    @ApiModelProperty(value = "产品")
     private List<ProductVO> productVOList;
 
     public Set<Long> getParentSprintIds() {

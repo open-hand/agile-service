@@ -157,8 +157,9 @@ public class IssueListFieldKVVO {
     private Boolean starBeacon;
 
     @Encrypt
+    @ApiModelProperty(value = "主要负责人id")
     private Long mainResponsibleId;
-
+    @ApiModelProperty(value = "环境")
     private String environment;
 
     @ApiModelProperty("主要负责人")
@@ -172,9 +173,9 @@ public class IssueListFieldKVVO {
 
     @ApiModelProperty(value = "影响的版本")
     private List<VersionIssueRelVO> influenceVersionIssueRelVOS;
-
+    @ApiModelProperty(value = "创建人")
     private UserMessageDTO createUser;
-
+    @ApiModelProperty(value = "更新人")
     private UserMessageDTO updateUser;
 
     @ApiModelProperty("已耗费时间")
@@ -185,9 +186,9 @@ public class IssueListFieldKVVO {
 
     @ApiModelProperty("tags")
     private List<TagVO> tags;
-
+    @ApiModelProperty(value = "项目集")
     private List<ProjectVO> projectVOList;
-
+    @ApiModelProperty(value = "史诗自己的名字")
     private String epicSelfName;
 
     @ApiModelProperty("参与人")

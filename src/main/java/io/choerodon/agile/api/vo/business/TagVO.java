@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo.business;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotEmpty;
@@ -13,22 +14,27 @@ import java.util.Objects;
 public class TagVO {
 
     @NotEmpty(message = "error.tag.app.service.code")
+    @ApiModelProperty(value = "应用服务编码")
     private String appServiceCode;
     @NotEmpty(message = "error.tag.name")
+    @ApiModelProperty(value = "标记名称")
     private String tagName;
     @NotNull(message = "error.tag.project.id")
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "应用服务名称")
     private String appServiceName;
-
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
 
     @Encrypt
+    @ApiModelProperty(value = "主键")
     private Long id;
-
+    @ApiModelProperty(value = "别名")
     private String alias;
 
     @Encrypt
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
 
     public String getAlias() {

@@ -84,7 +84,7 @@ public class IssueCreateVO {
 
     @Encrypt(ignoreValue = {"0"})
     private Long parentIssueId;
-
+    @ApiModelProperty(value = "排序对象")
     private RankVO rankVO;
 
     @ApiModelProperty(value = "featureId")
@@ -106,34 +106,37 @@ public class IssueCreateVO {
 
     @ApiModelProperty(value = "featureVO")
     private FeatureVO featureVO;
-
+    @ApiModelProperty(value = "wsjf")
     private WsjfVO wsjfVO;
-
+    @ApiModelProperty(value = "团队项目id")
     private Long teamProjectId;
-
+    @ApiModelProperty(value = "是否为史诗")
     private Boolean isEpic;
-
+    @ApiModelProperty(value = "团队项目id集合")
     private List<Long> teamProjectIds;
-
+    @ApiModelProperty(value = "预计开始时间")
     private Date estimatedStartTime;
-
+    @ApiModelProperty(value = "预计结束时间")
     private Date estimatedEndTime;
-
+    @ApiModelProperty(value = "自定义字段")
     private List<PageFieldViewUpdateVO> customFields;
-
+    @ApiModelProperty(value = "关联的问题")
     private RelatedIssueVO relatedIssueVO;
 
     @Encrypt
+    @ApiModelProperty(value = "主要负责人id")
     private Long mainResponsibleId;
-
+    @ApiModelProperty(value = "环境")
     private String environment;
 
     @Encrypt
+    @ApiModelProperty(value = "项目群版本id集合")
     private List<Long> programVersionIds;
 
     @Encrypt
+    @ApiModelProperty(value = "状态id")
     private Long statusId;
-
+    @ApiModelProperty(value = "标记")
     private List<TagVO> tags;
 
     @ApiModelProperty(value = "实际开始时间")

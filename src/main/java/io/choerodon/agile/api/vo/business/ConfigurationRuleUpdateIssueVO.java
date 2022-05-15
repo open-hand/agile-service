@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo.business;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -9,6 +11,7 @@ import java.util.Objects;
  */
 public class ConfigurationRuleUpdateIssueVO extends ConfigurationRuleSettingVO {
 
+    @ApiModelProperty(value = "规则字段集合")
     private List<ConfigurationRuleFieldVO> fields;
 
     public List<ConfigurationRuleFieldVO> getFields() {

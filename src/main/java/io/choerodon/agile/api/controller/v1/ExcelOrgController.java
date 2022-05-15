@@ -37,6 +37,7 @@ public class ExcelOrgController {
     @GetMapping(value = "/latest")
     public ResponseEntity<FileOperationHistoryVO> queryLatestRecode(@ApiParam(value = "项目id", required = true)
                                                                      @PathVariable(name = "organization_id") Long organizationId,
+                                                                    @ApiParam(value = "历史记录行为")
                                                                     @RequestParam String action) {
         return Optional.ofNullable(excelService.queryOrgLatestRecode(organizationId, action))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
@@ -60,8 +61,9 @@ public class ExcelOrgController {
     @ApiOperation("下载自定义字段导入模版")
     @GetMapping(value = "/object_scheme_field/download")
     public void downloadObjectSchemeField(@ApiParam(value = "项目id", required = true)
-                         @PathVariable(name = "organization_id") Long organizationId,
-                         HttpServletResponse response) {
+                                          @PathVariable(name = "organization_id") Long organizationId,
+                                          @ApiParam(value = "http响应")
+                                                  HttpServletResponse response) {
         excelService.downloadObjectSchemeField(organizationId, null, response);
     }
 

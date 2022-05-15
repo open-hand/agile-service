@@ -15,30 +15,41 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 public class ConfigurationRuleVO extends AuditDomain {
 
     @Encrypt
+    @ApiModelProperty(value = "主键")
     private Long id;
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
+    @ApiModelProperty(value = "sql语句")
     private String sqlQuery;
+    @ApiModelProperty(value = "表达式")
     private String expressQuery;
+    @ApiModelProperty(value = "表达式格式")
     private String expressFormat;
+    @ApiModelProperty(value = "名称")
     private String name;
+    @ApiModelProperty(value = "启停用")
     private Boolean enabled;
+    @ApiModelProperty(value = "来源")
     private String source;
     @ApiModelProperty("快速搜索创建传值")
     private List<RuleExpressVO> expressList;
+    @ApiModelProperty(value = "序列")
     private Integer sequence;
     @Encrypt
+    @ApiModelProperty(value = "问题类型id集合")
     private List<Long> issueTypeIds;
+    @ApiModelProperty(value = "问题类型id")
     @Encrypt
     private Long issueTypeId;
-
+    @ApiModelProperty(value = "问题类型名称")
     private String issueTypeNames;
-
+    @ApiModelProperty(value = "规则评论配置")
     private List<ConfigurationRuleCommentVO> configurationRuleComments;
-
+    @ApiModelProperty(value = "规则字段更新配置")
     private List<ConfigurationRuleUpdateIssueVO> configurationRuleUpdateIssue;
-
+    @ApiModelProperty(value = "规则通知配置")
     private List<ConfigurationRuleNoticeVO> configurationRuleNotices;
-
+    @ApiModelProperty(value = "是否允许被其他触发器触发")
     private Boolean triggered;
 
     public List<ConfigurationRuleCommentVO> getConfigurationRuleComments() {

@@ -38,7 +38,7 @@ public class PageController extends BaseController {
                                                        @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
                                                   @ApiParam(value = "组织id", required = true)
                                                        @PathVariable("organization_id") Long organizationId,
-                                                  @ApiParam(value = "search dto", required = true)
+                                                  @ApiParam(value = "search dto")
                                                        @RequestBody(required = false) PageSearchVO searchDTO) {
         return new ResponseEntity<>(pageService.pageQuery(organizationId, pageRequest, searchDTO), HttpStatus.OK);
     }

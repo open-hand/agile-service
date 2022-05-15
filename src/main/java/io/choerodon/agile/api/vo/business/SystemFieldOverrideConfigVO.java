@@ -1,19 +1,21 @@
 package io.choerodon.agile.api.vo.business;
 
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * @author superlee
  * @since 2022-02-16
  */
 public class SystemFieldOverrideConfigVO {
-
+    @ApiModelProperty(value = "字段编码")
     private String fieldCode;
-
+    @ApiModelProperty(value = "问题类型编码")
     private String issueTypeCode;
-
+    @ApiModelProperty(value = "是否为必填")
     private Boolean required;
-
+    @ApiModelProperty(value = "是否在编辑页面")
     private Boolean edited;
-
+    @ApiModelProperty(value = "是否在创建页面")
     private Boolean created;
 
     public String getFieldCode() {

@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.choerodon.agile.infra.enums.IssueConstant;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -14,21 +15,29 @@ import javax.validation.constraints.NotNull;
 public class FieldCascadeCreateVO {
     @Encrypt
     @NotNull(message = IssueConstant.ISSUE_CN + "类型不能为空")
+    @ApiModelProperty("问题类型id")
     private Long issueTypeId;
     @Encrypt
     @NotNull(message = "字段不能为空")
+    @ApiModelProperty("字段id")
     private Long fieldId;
     @Encrypt
     @NotNull(message = "字段选项值不能为空")
+    @ApiModelProperty("字段选项id")
     private Long fieldOptionId;
     @Encrypt
     @NotNull(message = "级联字段不能为空")
+    @ApiModelProperty("级联字段id")
     private Long cascadeFieldId;
     @Column(name = "is_hidden")
+    @ApiModelProperty("是否隐藏")
     private Boolean hidden;
     @Column(name = "is_required")
+    @ApiModelProperty("是否必填")
     private Boolean required;
+    @ApiModelProperty("默认值")
     private String defaultValue;
+    @ApiModelProperty("字段级联规则选项")
     private List<FieldCascadeRuleOptionVO> fieldCascadeRuleOptionList;
 
     public Long getIssueTypeId() {

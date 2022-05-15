@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotEmpty;
@@ -17,7 +18,7 @@ public class FieldPermissionVO {
     @Encrypt
     @NotEmpty(message = "error.issueTypeIds.empty")
     private Set<Long> issueTypeIds;
-
+    @ApiModelProperty(value = "权限")
     private List<PermissionVO> permissions;
 
     public Set<Long> getIssueTypeIds() {

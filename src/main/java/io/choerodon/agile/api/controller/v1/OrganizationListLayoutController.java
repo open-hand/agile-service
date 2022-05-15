@@ -39,6 +39,7 @@ public class OrganizationListLayoutController {
     @PostMapping
     public ResponseEntity<ListLayoutVO> save(@ApiParam(value = "组织id", required = true)
                                              @PathVariable(name = "organization_id") Long organizationId,
+                                             @ApiParam(value = "列表布局对象", required = true)
                                              @RequestBody ListLayoutVO listLayoutVO) {
         return new ResponseEntity<>(organizationListLayoutService.save(organizationId, listLayoutVO), HttpStatus.OK);
     }

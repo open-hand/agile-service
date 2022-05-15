@@ -36,7 +36,8 @@ public class StatusLinkageExecutionLogController {
     public ResponseEntity<Page<StatusLinkageExecutionLogVO>> pageExecutionLogS(@ApiParam(value = "项目id", required = true)
                                                                                @PathVariable(name = "project_id") Long projectId,
                                                                                @SortDefault(value = "id", direction = Sort.Direction.DESC)
-                                                                               PageRequest pageRequest,
+                                                                                       PageRequest pageRequest,
+                                                                               @ApiParam(value = "执行记录查询条件", required = true)
                                                                                @RequestBody ExecutionLogQueryVO executionLogQueryVO) {
         return Optional.ofNullable(statusLinkageExecutionLogService.pageExecutionLogS(projectId, pageRequest, executionLogQueryVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))

@@ -15,11 +15,11 @@ public class AgileIssueHeadVO {
     private String sortId;
     @ApiModelProperty(value = "字段类型")
     private String fieldType;
-
+    @ApiModelProperty(value = "项目名")
     private String projectName;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "主键")
     private Long id;
 
     public String getProjectName() {

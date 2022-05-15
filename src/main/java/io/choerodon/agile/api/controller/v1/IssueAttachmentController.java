@@ -61,6 +61,7 @@ public class IssueAttachmentController {
     @PostMapping(value = "/upload_for_address")
     public ResponseEntity<List<String>> uploadForAddress(@ApiParam(value = "project id", required = true)
                                                           @PathVariable(name = "project_id") Long projectId,
+                                                         @ApiParam(value = "http请求")
                                                           HttpServletRequest request) {
         return Optional.ofNullable(issueAttachmentService.uploadForAddress(projectId, request))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))

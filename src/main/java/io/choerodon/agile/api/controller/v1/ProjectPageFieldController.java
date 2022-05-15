@@ -41,6 +41,7 @@ public class ProjectPageFieldController {
                                                          @RequestParam String pageCode,
                                                          @ApiParam(value = "显示层级")
                                                          @RequestParam(required = false) String context,
+                                                         @ApiParam(value = "问题类型id")
                                                          @RequestParam(required = false) @Encrypt Long issueTypeId) {
         return new ResponseEntity<>(pageFieldService.listQuery(organizationId, projectId, pageCode, context, issueTypeId), HttpStatus.OK);
     }
@@ -70,6 +71,7 @@ public class ProjectPageFieldController {
                                                @RequestParam String pageCode,
                                               @ApiParam(value = "页面字段id", required = true)
                                                @PathVariable("field_id") @Encrypt Long fieldId,
+                                              @ApiParam(value = "页面配置对象", required = true)
                                               @RequestBody @Valid PageFieldUpdateVO updateDTO) {
         return new ResponseEntity<>(pageFieldService.update(organizationId, projectId, pageCode, fieldId, updateDTO), HttpStatus.CREATED);
     }

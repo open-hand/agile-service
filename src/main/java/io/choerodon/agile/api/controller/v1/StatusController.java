@@ -49,11 +49,11 @@ public class StatusController extends BaseController {
     @CustomPageRequest
     @PostMapping("/organizations/{organization_id}/status/list")
     public ResponseEntity<Page<StatusWithInfoVO>> queryStatusList(@ApiIgnore
-                                                                      @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
+                                                                  @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
                                                                   @ApiParam(value = "组织id", required = true)
-                                                                      @PathVariable("organization_id") Long organizationId,
+                                                                  @PathVariable("organization_id") Long organizationId,
                                                                   @ApiParam(value = "status search dto", required = true)
-                                                                      @RequestBody StatusSearchVO statusSearchVO) {
+                                                                  @RequestBody StatusSearchVO statusSearchVO) {
         return Optional.ofNullable(statusService.queryStatusList(pageRequest, organizationId, statusSearchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.statusList.get"));
@@ -62,7 +62,9 @@ public class StatusController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建状态")
     @PostMapping("/organizations/{organization_id}/status")
-    public ResponseEntity<StatusVO> create(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<StatusVO> create(@ApiParam(value = "组织id", required = true)
+                                           @PathVariable("organization_id") Long organizationId,
+                                           @ApiParam(value = "状态", required = true)
                                            @RequestBody StatusVO statusVO) {
         stateValidator.validate(statusVO);
         return new ResponseEntity<>(statusService.create(organizationId, statusVO), HttpStatus.CREATED);
@@ -71,9 +73,12 @@ public class StatusController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "更新状态")
     @PutMapping(value = "/organizations/{organization_id}/status/{status_id}")
-    public ResponseEntity<StatusVO> update(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<StatusVO> update(@ApiParam(value = "项目id", required = true)
+                                           @PathVariable("organization_id") Long organizationId,
+                                           @ApiParam(value = "状态id", required = true)
                                            @PathVariable("status_id") @Encrypt Long statusId,
-                                           @RequestBody @Valid  StatusVO statusVO) {
+                                           @ApiParam(value = "状态", required = true)
+                                           @RequestBody @Valid StatusVO statusVO) {
         statusVO.setId(statusId);
         statusVO.setOrganizationId(organizationId);
         stateValidator.validate(statusVO);
@@ -83,7 +88,9 @@ public class StatusController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除状态")
     @DeleteMapping(value = "/organizations/{organization_id}/status/{status_id}")
-    public ResponseEntity<Boolean> delete(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<Boolean> delete(@ApiParam(value = "组织id", required = true)
+                                          @PathVariable("organization_id") Long organizationId,
+                                          @ApiParam(value = "状态id", required = true)
                                           @PathVariable("status_id") @Encrypt Long statusId) {
         return new ResponseEntity<>(statusService.delete(organizationId, statusId), HttpStatus.NO_CONTENT);
     }
@@ -91,15 +98,19 @@ public class StatusController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据id查询状态对象")
     @GetMapping(value = "/organizations/{organization_id}/status/{status_id}")
-    public ResponseEntity<StatusVO> queryStatusById(@PathVariable("organization_id") Long organizationId,
-                                                        @PathVariable("status_id") @Encrypt Long statusId) {
+    public ResponseEntity<StatusVO> queryStatusById(@ApiParam(value = "组织id", required = true)
+                                                    @PathVariable("organization_id") Long organizationId,
+                                                    @ApiParam(value = "状态id", required = true)
+                                                    @PathVariable("status_id") @Encrypt Long statusId) {
         return new ResponseEntity<>(statusService.queryStatusById(organizationId, statusId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询状态机下的所有状态")
     @PostMapping(value = "/organizations/{organization_id}/status/query_by_state_machine_id")
-    public ResponseEntity<List<StatusVO>> queryByStateMachineIds(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<List<StatusVO>> queryByStateMachineIds(@ApiParam(value = "组织id", required = true)
+                                                                 @PathVariable("organization_id") Long organizationId,
+                                                                 @ApiParam(value = "状态机id集合", required = true)
                                                                  @RequestBody @Valid List<Long> stateMachineIds) {
         return new ResponseEntity<>(statusService.queryByStateMachineIds(organizationId, stateMachineIds), HttpStatus.OK);
     }
@@ -107,7 +118,8 @@ public class StatusController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询组织下的所有状态")
     @GetMapping(value = "/organizations/{organization_id}/status/query_all")
-    public ResponseEntity<List<StatusVO>> queryAllStatus(@PathVariable("organization_id") Long organizationId) {
+    public ResponseEntity<List<StatusVO>> queryAllStatus(@ApiParam(value = "组织id", required = true)
+                                                         @PathVariable("organization_id") Long organizationId) {
         return new ResponseEntity<>(statusService.queryAllStatus(organizationId), HttpStatus.OK);
     }
 
@@ -123,7 +135,9 @@ public class StatusController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "校验状态名字是否未被使用")
     @GetMapping(value = "/organizations/{organization_id}/status/check_name")
-    public ResponseEntity<StatusCheckVO> checkName(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<StatusCheckVO> checkName(@ApiParam(value = "组织id", required = true)
+                                                   @PathVariable("organization_id") Long organizationId,
+                                                   @ApiParam(value = "名称", required = true)
                                                    @RequestParam("name") String name) {
         return Optional.ofNullable(statusService.checkName(organizationId, name))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
@@ -134,10 +148,13 @@ public class StatusController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "校验状态名字是否未被使用,项目层")
     @GetMapping(value = "/projects/{project_id}/status/project_check_name")
-    public ResponseEntity<StatusCheckVO> checkNameOnPro(@PathVariable("project_id") Long projectId,
+    public ResponseEntity<StatusCheckVO> checkNameOnPro(@ApiParam(value = "项目id", required = true)
+                                                        @PathVariable("project_id") Long projectId,
+                                                        @ApiParam(value = "组织id", required = true)
                                                         @RequestParam("organization_id") Long organizationId,
+                                                        @ApiParam(value = "名称", required = true)
                                                         @RequestParam("name") String name) {
-        return Optional.ofNullable(statusService.projectCheckName(projectId,organizationId, name))
+        return Optional.ofNullable(statusService.projectCheckName(projectId, organizationId, name))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.statusName.check"));
     }
@@ -146,7 +163,8 @@ public class StatusController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查看项目拥有的状态")
     @PostMapping(value = "/projects/{project_id}/status/list_status")
-    public ResponseEntity<Page<ProjectStatusVO>> listStatusByProjectId(@PathVariable("project_id") Long projectId,
+    public ResponseEntity<Page<ProjectStatusVO>> listStatusByProjectId(@ApiParam(value = "项目id", required = true)
+                                                                       @PathVariable("project_id") Long projectId,
                                                                        @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
                                                                        @ApiParam(value = "status search dto", required = true)
                                                                        @RequestBody StatusSearchVO statusSearchVO) {
@@ -156,7 +174,9 @@ public class StatusController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据状态id查看项目下的状态")
     @GetMapping(value = "/projects/{project_id}/status/{status_id}")
-    public ResponseEntity<StatusVO> queryByStatusId(@PathVariable("project_id") Long projectId,
+    public ResponseEntity<StatusVO> queryByStatusId(@ApiParam(value = "项目id", required = true)
+                                                    @PathVariable("project_id") Long projectId,
+                                                    @ApiParam(value = "状态id", required = true)
                                                     @PathVariable("status_id") @Encrypt Long statusId) {
         return new ResponseEntity<>(statusService.queryProjectStatusById(projectId, statusId), HttpStatus.OK);
     }
@@ -164,19 +184,26 @@ public class StatusController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除项目的状态")
     @DeleteMapping(value = "/projects/{project_id}/status/delete_status")
-    public ResponseEntity deleteStatus(@PathVariable("project_id") Long projectId,
+    public ResponseEntity deleteStatus(@ApiParam(value = "项目id", required = true)
+                                       @PathVariable("project_id") Long projectId,
+                                       @ApiParam(value = "状态id", required = true)
                                        @RequestParam @Encrypt Long statusId,
+                                       @ApiParam(value = "应用类型")
                                        @RequestParam(required = false) String applyType,
+                                       @ApiParam(value = "状态转换", required = true)
                                        @RequestBody List<DeleteStatusTransferVO> statusTransferVOS) {
-        statusService.deleteStatus(projectId,statusId, applyType, statusTransferVOS);
+        statusService.deleteStatus(projectId, statusId, applyType, statusTransferVOS);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "校验状态删除")
     @GetMapping(value = "/projects/{project_id}/status/check_delete_status")
-    public ResponseEntity<Map<String, Object>> checkDeleteStatus(@PathVariable("project_id") Long projectId,
+    public ResponseEntity<Map<String, Object>> checkDeleteStatus(@ApiParam(value = "项目id", required = true)
+                                                                 @PathVariable("project_id") Long projectId,
+                                                                 @ApiParam(value = "应用类型")
                                                                  @RequestParam(required = false) String applyType,
+                                                                 @ApiParam(value = "状态id", required = true)
                                                                  @RequestParam @Encrypt Long statusId) {
         return new ResponseEntity<>(statusService.checkDeleteStatus(projectId, applyType, statusId), HttpStatus.OK);
     }

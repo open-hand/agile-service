@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.List;
 import java.util.Map;
 
@@ -13,43 +15,50 @@ public class ExcelColumnVO {
     /**
      * 是否为自定义字段
      */
+    @ApiModelProperty("是否为自定义字段")
     private boolean customField;
 
     /**
      * 是否为日期类型
      */
+    @ApiModelProperty("是否为日期类型")
     private boolean dateType;
 
     /**
      * 自定义字段是否允许保存多个值
      */
+    @ApiModelProperty("自定义字段是否允许保存多个值")
     private boolean multiValue;
 
     /**
      * 系统字段 {@link io.choerodon.agile.infra.enums.FieldCode}
      * 和自定义字段code
      */
+    @ApiModelProperty("字段code")
     private String fieldCode;
 
     /**
      * 合法的预选值，用于excel校验
      */
+    @ApiModelProperty("预定义值")
     private List<String> predefinedValues;
 
     /**
      * 下拉框中值与id映射
      */
+    @ApiModelProperty("下拉框中值与id映射")
     private Map<String, Long> valueIdMap;
-
+    @ApiModelProperty("问题类型map")
     private Map<String, IssueTypeVO> issueTypeMap;
-
+    @ApiModelProperty("状态map")
     private Map<String, StatusVO> issueStatusMap;
 
     /**
      * 环境名称和code的映射
      */
+    @ApiModelProperty("环境名称和code的映射")
     private Map<String, String> envNameCodeMap;
-
+    @ApiModelProperty("自定义字段")
     private PageFieldViewUpdateVO customFieldDetail;
 
     public boolean isDateType() {

@@ -83,6 +83,7 @@ public class IssueController {
                                                  @PathVariable(name = "project_id") Long projectId,
                                                  @ApiParam(value = "史诗名称", required = true)
                                                  @RequestParam String epicName,
+                                                 @ApiParam(value = "史诗id")
                                                  @RequestParam(required = false) @Encrypt Long epicId) {
         return Optional.ofNullable(issueService.checkEpicName(projectId, epicName, epicId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
@@ -143,7 +144,7 @@ public class IssueController {
                                                @PathVariable(name = "project_id") Long projectId,
                                               @ApiParam(value = "issueId", required = true)
                                                @PathVariable @Encrypt Long issueId,
-                                              @ApiParam(value = "组织id", required = true)
+                                              @ApiParam(value = "组织id")
                                                @RequestParam(required = false) Long organizationId) {
         return Optional.ofNullable(issueService.queryIssue(projectId, issueId, organizationId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
@@ -194,6 +195,7 @@ public class IssueController {
                                                                         PageRequest pageRequest,
                                                                @ApiParam(value = "项目id", required = true)
                                                                 @PathVariable(name = "project_id") Long projectId,
+                                                               @ApiParam(value = "筛选条件")
                                                                 @RequestBody IssueFilterParamVO issueFilterParamVO) {
         return Optional.ofNullable(issueService.queryIssueByOption(projectId, issueFilterParamVO, pageRequest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
@@ -217,6 +219,7 @@ public class IssueController {
                                                                        @RequestParam() Boolean self,
                                                                        @ApiParam(value = "搜索内容")
                                                                        @RequestParam(required = false) String content,
+                                                                       @ApiParam(value = "不包含的issueId")
                                                                        @RequestBody(required = false) @Encrypt
                                                                             List<Long> excludeIssueIds) {
         return Optional.ofNullable(issueService.queryIssueByOptionForAgile(projectId, issueId, issueNum, self, content, pageRequest, excludeIssueIds))
@@ -352,6 +355,7 @@ public class IssueController {
                                                                               @PathVariable @Encrypt Long issueId,
                                                                               @ApiParam(value = "组织id", required = true)
                                                                               @RequestParam Long organizationId,
+                                                                              @ApiParam(value = "问题类型id", required = true)
                                                                               @RequestParam @Encrypt Long issueTypeId) {
         return ResponseEntity.ok(issueService.listRequiredFieldByIssueType(projectId, organizationId, issueId, issueTypeId));
     }
@@ -570,15 +574,15 @@ public class IssueController {
     }
 
 
-
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询项目下的故事和任务(不包含子任务以及子bug)")
     @PostMapping(value = "/query_story_task")
     public ResponseEntity<Page<IssueListFieldKVVO>> queryStoryAndTask(@ApiParam(value = "项目id", required = true)
-                                                         @PathVariable(name = "project_id") Long projectId,
-                                                         @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
-                                                         PageRequest pageRequest,
-                                                         @RequestBody(required = false) SearchVO searchVO) {
+                                                                      @PathVariable(name = "project_id") Long projectId,
+                                                                      @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
+                                                                              PageRequest pageRequest,
+                                                                      @ApiParam(value = "筛选条件")
+                                                                      @RequestBody(required = false) SearchVO searchVO) {
         return Optional.ofNullable(issueService.queryStoryAndTask(projectId, pageRequest, searchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.issue.queryIssueByIssueIds"));
@@ -594,7 +598,9 @@ public class IssueController {
                                                           PageRequest pageRequest,
                                                           @ApiParam(value = "项目id", required = true)
                                                           @PathVariable(name = "project_id") Long projectId,
+                                                          @ApiParam(value = "用户筛选条件")
                                                           @RequestParam(value = "param", required = false) String param,
+                                                          @ApiParam(value = "忽略的用户id")
                                                           @RequestBody(required = false) @Encrypt Set<Long> ignoredUserIds) {
         return ResponseEntity.ok(issueService.pagingQueryUsers(pageRequest, projectId, param, ignoredUserIds));
     }
@@ -608,7 +614,9 @@ public class IssueController {
                                                               PageRequest pageRequest,
                                                               @ApiParam(value = "项目id", required = true)
                                                               @PathVariable(name = "project_id") Long projectId,
+                                                              @ApiParam(value = "用户筛选条件")
                                                               @RequestParam(value = "param", required = false) String param,
+                                                              @ApiParam(value = "忽略的用户id")
                                                               @RequestBody(required = false) @Encrypt Set<Long> ignoredUserIds) {
         return ResponseEntity.ok(issueService.pagingQueryReporters(pageRequest, projectId, param, ignoredUserIds));
     }
@@ -622,7 +630,9 @@ public class IssueController {
                                                                              PageRequest pageRequest,
                                                                      @ApiParam(value = "项目id", required = true)
                                                                      @PathVariable(name = "project_id") Long projectId,
+                                                                     @ApiParam(value = "问题类型", required = true)
                                                                      @RequestParam String issueType,
+                                                                     @ApiParam(value = "模糊查询参数")
                                                                      @RequestParam(value = "param", required = false) String param) {
         return ResponseEntity.ok(issueService.pagingQueryAvailableParents(pageRequest, projectId, issueType, param));
     }
@@ -646,6 +656,7 @@ public class IssueController {
                                                 @PathVariable(name = "project_id") Long projectId,
                                                 @ApiParam(value = "issueId", required = true)
                                                 @RequestParam @Encrypt Long issueId,
+                                                @ApiParam(value = "更新的issue状态")
                                                 @RequestBody ExecutionUpdateIssueVO executionUpdateIssueVO) {
         issueService.executionUpdateStatus(projectId, issueId, executionUpdateIssueVO);
         return new ResponseEntity(HttpStatus.NO_CONTENT);

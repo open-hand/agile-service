@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.Map;
 
 /**
@@ -8,25 +10,25 @@ import java.util.Map;
  * @date 2020-05-08 10:44
  */
 public class BatchUpdateFieldStatusVO {
-
+    @ApiModelProperty("key")
     private String key;
-
+    @ApiModelProperty("用户id")
     private Long userId;
-
+    @ApiModelProperty("状态")
     private String status;
-
+    @ApiModelProperty("进度")
     private Double process;
-
+    @ApiModelProperty("错误信息")
     private String error;
-
+    @ApiModelProperty("增量")
     private Double incrementalValue;
-
+    @ApiModelProperty("上一个进度")
     private Double lastProcess;
-
+    @ApiModelProperty("错误信息map")
     private Map<Object, Object> errorMsgMap;
-
+    @ApiModelProperty("成功数量")
     private Integer successCount;
-
+    @ApiModelProperty("失败数量")
     private Integer failedCount;
 
     public String getStatus() {

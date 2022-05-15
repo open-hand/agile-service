@@ -22,10 +22,11 @@ public class AdjustOrderVO {
     @Encrypt
     private Long outsetFieldId;
     @NotEmpty(message = "error.field.issueType.null")
+    @ApiModelProperty(value = "问题类型")
     private String issueType;
-
+    @ApiModelProperty(value = "前一个rank值")
     private String previousRank;
-
+    @ApiModelProperty(value = "后一个rank值")
     private String nextRank;
 
     public String getPreviousRank() {

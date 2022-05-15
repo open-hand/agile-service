@@ -37,7 +37,9 @@ public class IssueProjectMoveController {
                                            @PathVariable(name = "project_id") Long projectId,
                                            @ApiParam(value = "问题Id", required = true)
                                            @PathVariable(name = "issue_id") @Encrypt Long issueId,
+                                           @ApiParam(value = "目标项目id", required = true)
                                            @RequestParam  Long targetProjectId,
+                                           @ApiParam(value = "请求数据", required = true)
                                            @RequestBody JSONObject jsonObject) {
         issueProjectMoveService.issueProjectMove(projectId, issueId, targetProjectId,jsonObject);
         return new ResponseEntity(HttpStatus.CREATED);
@@ -48,6 +50,7 @@ public class IssueProjectMoveController {
     @GetMapping(value = "/list_move_projects")
     public ResponseEntity<List<ProjectVO>> listMoveProject(@ApiParam(value = "项目id", required = true)
                                                            @PathVariable(name = "project_id") Long projectId,
+                                                           @ApiParam(value = "问题类型编码", required = true)
                                                            @RequestParam String typeCode) {
         return new ResponseEntity(issueProjectMoveService.listMoveProject(projectId, typeCode), HttpStatus.OK);
     }
@@ -57,8 +60,11 @@ public class IssueProjectMoveController {
     @GetMapping(value = "/list_lost_field")
     public ResponseEntity<List<ObjectSchemeFieldVO>> listLostField(@ApiParam(value = "项目id", required = true)
                                                                    @PathVariable(name = "project_id") Long projectId,
+                                                                   @ApiParam(value = "目标项目id", required = true)
                                                                    @RequestParam Long targetProject,
+                                                                   @ApiParam(value = "问题id", required = true)
                                                                    @RequestParam @Encrypt Long issueId,
+                                                                   @ApiParam(value = "问题类型id", required = true)
                                                                    @RequestParam @Encrypt Long issueTypeId) {
         return new ResponseEntity(issueProjectMoveService.listLostField(projectId, issueId, targetProject, issueTypeId), HttpStatus.OK);
     }
@@ -68,7 +74,9 @@ public class IssueProjectMoveController {
     @PostMapping(value = "/batch_move")
     public ResponseEntity issueProjectBatchMove(@ApiParam(value = "项目id", required = true)
                                                 @PathVariable(name = "project_id") Long projectId,
+                                                @ApiParam(value = "目标项目id", required = true)
                                                 @RequestParam Long targetProjectId,
+                                                @ApiParam(value = "请求数据", required = true)
                                                 @RequestBody JSONObject jsonObject) {
         issueProjectMoveService.issueProjectBatchMove(projectId, targetProjectId, jsonObject, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes(), EncryptContext.encryptType().name());
         return new ResponseEntity(HttpStatus.CREATED);
@@ -79,6 +87,7 @@ public class IssueProjectMoveController {
     @PostMapping(value = "/issue_type_status_map")
     public ResponseEntity<Map<String, List<String>>> issueTypeStatusMap(@ApiParam(value = "项目id", required = true)
                                                                     @PathVariable(name = "project_id") Long projectId,
+                                                                    @ApiParam(value = "问题id集合", required = true)
                                                                     @RequestBody @Encrypt List<Long> issueIds) {
         return new ResponseEntity(issueProjectMoveService.issueTypeStatusMap(projectId, issueIds), HttpStatus.OK);
     }

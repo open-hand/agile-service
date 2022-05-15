@@ -58,7 +58,7 @@ public class StoryMapController {
                                                                      @ApiParam(value = "search DTO", required = true)
                                                                      @RequestBody SearchVO searchVO,
                                                                      @ApiParam(value = "分页信息", required = true)
-                                                                     PageRequest pageRequest) {
+                                                                             PageRequest pageRequest) {
         EncryptionUtils.decryptSearchVO(searchVO);
         return Optional.ofNullable(storyMapService.queryStoryMapDemand(projectId, searchVO, pageRequest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
@@ -69,9 +69,9 @@ public class StoryMapController {
     @ApiOperation("故事地图移动卡片")
     @PostMapping(value = "/move")
     public ResponseEntity<Void> storyMapMove(@ApiParam(value = "项目id", required = true)
-                                       @PathVariable(name = "project_id") Long projectId,
-                                       @ApiParam(value = "story map drag DTO", required = true)
-                                       @RequestBody @Encrypt StoryMapDragVO storyMapDragVO) {
+                                             @PathVariable(name = "project_id") Long projectId,
+                                             @ApiParam(value = "story map drag DTO", required = true)
+                                             @RequestBody @Encrypt StoryMapDragVO storyMapDragVO) {
         storyMapService.storyMapMove(projectId, storyMapDragVO);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -80,22 +80,23 @@ public class StoryMapController {
     @ApiOperation("故事地图冲刺泳道查询冲刺的问题计数信息")
     @PostMapping(value = "/sprint_info")
     public ResponseEntity<List<SprintSearchVO>> storyMapSprintInfo(@ApiParam(value = "项目id", required = true)
-                                             @PathVariable(name = "project_id") Long projectId,
-                                             @RequestBody @Encrypt(ignoreValue = {"0"}) List<Long> sprintIds) {
-        return new ResponseEntity<>(storyMapService.storyMapSprintInfo(projectId,sprintIds),HttpStatus.OK);
+                                                                   @PathVariable(name = "project_id") Long projectId,
+                                                                   @ApiParam(value = "冲刺id集合", required = true)
+                                                                   @RequestBody @Encrypt(ignoreValue = {"0"}) List<Long> sprintIds) {
+        return new ResponseEntity<>(storyMapService.storyMapSprintInfo(projectId, sprintIds), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询故事地图整体(分页)")
     @PostMapping("/page_main")
     public ResponseEntity<StoryMapVO> pageStoryMap(@ApiParam(value = "项目id", required = true)
-                                                    @PathVariable(name = "project_id") Long projectId,
-                                                    @ApiParam(value = "组织id", required = true)
-                                                    @RequestParam Long organizationId,
-                                                    @RequestParam Integer page,
-                                                    @RequestParam Integer size,
-                                                    @ApiParam(value = "search DTO", required = true)
-                                                    @RequestBody SearchVO searchVO) {
+                                                   @PathVariable(name = "project_id") Long projectId,
+                                                   @ApiParam(value = "组织id", required = true)
+                                                   @RequestParam Long organizationId,
+                                                   @RequestParam Integer page,
+                                                   @RequestParam Integer size,
+                                                   @ApiParam(value = "search DTO", required = true)
+                                                   @RequestBody SearchVO searchVO) {
         EncryptionUtils.decryptSearchVO(searchVO);
         return Optional.ofNullable(storyMapService.pageStoryMap(projectId, organizationId, searchVO, page, size))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))

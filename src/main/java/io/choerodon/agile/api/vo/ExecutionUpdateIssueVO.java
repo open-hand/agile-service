@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Map;
@@ -10,8 +11,9 @@ import java.util.Map;
  */
 public class ExecutionUpdateIssueVO {
     @Encrypt
+    @ApiModelProperty("冲刺id")
     private Long sprintId;
-
+    @ApiModelProperty("问题类型状态map")
     private Map<Long, Long> issueTypeStatusMap;
 
     public Long getSprintId() {

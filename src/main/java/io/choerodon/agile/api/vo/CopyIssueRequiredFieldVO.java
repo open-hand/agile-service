@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import com.alibaba.fastjson.JSONObject;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -12,10 +13,11 @@ import java.util.List;
 public class CopyIssueRequiredFieldVO {
 
     @Encrypt
+    @ApiModelProperty("问题id")
     private Long issueId;
-
+    @ApiModelProperty("预定义字段")
     private JSONObject predefinedFields;
-
+    @ApiModelProperty("自定义字段")
     private List<PageFieldViewCreateVO> customFields;
 
     public Long getIssueId() {

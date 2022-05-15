@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -10,10 +11,14 @@ import java.util.List;
  */
 public class CascadeFieldOptionSearchVO {
     @Encrypt
+    @ApiModelProperty("字段级联规则id")
     private List<Long> fieldCascadeRuleIds;
     @Encrypt
+    @ApiModelProperty("选择值")
     private List<Long> selected;
+    @ApiModelProperty("搜索参数")
     private String searchParam;
+    @ApiModelProperty("继承参数")
     private List<String> extendParams;
 
     public List<Long> getFieldCascadeRuleIds() {

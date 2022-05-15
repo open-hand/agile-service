@@ -38,6 +38,7 @@ public class FieldPermissionController {
                                  @PathVariable("project_id") Long projectId,
                                  @ApiParam(value = "组织id", required = true)
                                  @RequestParam Long organizationId,
+                                 @ApiParam(value = "字段权限体")
                                  @RequestBody @Validated FieldPermissionVO fieldPermissionVO) {
         fieldPermissionService.create(projectId, organizationId, fieldPermissionVO);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -50,6 +51,7 @@ public class FieldPermissionController {
                                       @PathVariable("project_id") Long projectId,
                                       @ApiParam(value = "组织id", required = true)
                                       @RequestParam Long organizationId,
+                                      @ApiParam(value = "字段权限体")
                                       @RequestBody @Validated FieldPermissionVO fieldPermissionVO) {
         fieldPermissionService.batchCreate(projectId, organizationId, fieldPermissionVO);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -63,6 +65,7 @@ public class FieldPermissionController {
                                                              @PathVariable("filed_id") @Encrypt Long fieldId,
                                                              @ApiParam(value = "组织id", required = true)
                                                              @RequestParam Long organizationId,
+                                                             @ApiParam(value = "问题类型id", required = true)
                                                              @RequestParam @Encrypt Long issueTypeId) {
         return ResponseEntity.ok(fieldPermissionService.queryByFieldId(projectId, organizationId, fieldId, issueTypeId));
     }

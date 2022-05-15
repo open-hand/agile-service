@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -8,8 +9,10 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 public class DeleteStatusTransferVO {
     @Encrypt
+    @ApiModelProperty("问题类型id")
     private Long issueTypeId;
     @Encrypt
+    @ApiModelProperty("状态id")
     private Long statusId;
 
     public Long getIssueTypeId() {

@@ -160,6 +160,7 @@ public class ReportController {
                                                            @RequestParam(required = false) @Encrypt Long sprintId,
                                                            @ApiParam(value = "版本id")
                                                            @RequestParam(required = false) @Encrypt Long versionId,
+                                                          @ApiParam(value = "自定义字段id")
                                                            @RequestParam(required = false) @Encrypt Long customFieldId,
                                                            @ApiParam(value = "状态id") @RequestParam(required = false) @Encrypt Long statusId) {
         return Optional.ofNullable(reportService.queryPieChart(projectId, fieldName, organizationId, startDate, endDate, sprintId, versionId, statusId, customFieldId))
@@ -293,6 +294,7 @@ public class ReportController {
             @PathVariable(name = "project_id") Long projectId,
             @ApiParam(value = "组织id", required = true)
             @RequestParam Long organizationId,
+            @ApiParam(value = "自定义报表条件", required = true)
             @Validated @RequestBody CustomChartSearchVO customChartSearchVO) {
         EncryptionUtils.decryptSearchVO(customChartSearchVO.getExtendSearchVO());
         EncryptionUtils.decryptSearchVO(customChartSearchVO.getSearchVO());

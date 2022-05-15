@@ -72,7 +72,9 @@ public class PersonalFilterController {
                                                                   @PathVariable(name = "project_id") Long projectId,
                                                                   @ApiParam(value = "用户id", required = true)
                                                                   @PathVariable @Encrypt Long userId,
+                                                                  @ApiParam(value = "筛选条件")
                                                                   @RequestParam(name = "searchStr", required = false) String searchStr,
+                                                                  @ApiParam(value = "问题类型编码")
                                                                   @RequestParam(name = "filterTypeCode") String filterTypeCode) {
         return Optional.ofNullable(personalFilterService.listByUserId(0L, projectId, userId, searchStr, filterTypeCode))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))

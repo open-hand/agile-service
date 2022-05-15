@@ -27,9 +27,9 @@ public class CopyConditionVO {
 
     @ApiModelProperty(value = "需要复制的预定义字段")
     private List<String> predefinedFieldNames;
-
+    @ApiModelProperty("史诗名称")
     private String epicName;
-
+    @ApiModelProperty("复制问题必填字段集合")
     private List<CopyIssueRequiredFieldVO> copyIssueRequiredFieldVOS;
 
     public String getEpicName() {

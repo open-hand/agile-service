@@ -5,6 +5,7 @@ import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.agile.api.vo.ProjectConfigDetailVO;
 import io.choerodon.agile.app.service.ProjectConfigService;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,8 @@ public class ProjectConfigController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "获取项目配置方案信息")
     @GetMapping
-    public ResponseEntity<ProjectConfigDetailVO> queryById(@PathVariable("project_id") Long projectId) {
+    public ResponseEntity<ProjectConfigDetailVO> queryById(@ApiParam(value = "项目id", required = true)
+                                                           @PathVariable("project_id") Long projectId) {
         return new ResponseEntity<>(projectConfigService.queryById(projectId), HttpStatus.OK);
     }
 }

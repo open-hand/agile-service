@@ -55,7 +55,7 @@ public class DataLogVO {
     private String email;
     @ApiModelProperty(value = "是否自定义字段日志")
     private Boolean isCusLog;
-
+    @ApiModelProperty(value = "规则名称")
     private String ruleName;
 
     public String getRuleName() {

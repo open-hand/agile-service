@@ -136,9 +136,9 @@ public class IssueVO {
 
     @ApiModelProperty(value = "父任务问题概要")
     private String parentIssueSummary;
-
+    @ApiModelProperty(value = "父级问题描述")
     private String parentIssueDescription;
-
+    @ApiModelProperty(value = "父级关联问题描述")
     private String parentRelateDescription;
 
     @ApiModelProperty(value = "经办人图标")
@@ -223,26 +223,26 @@ public class IssueVO {
 
     @ApiModelProperty(value = "已关闭的pi列表")
     private List<PiNameVO> closePi;
-
+    @ApiModelProperty(value = "活跃的pi团队")
     private List<ProjectVO> activePiTeams;
-
+    @ApiModelProperty(value = "活页的pi冲刺")
     private List<SprintDetailVO>  activePiSprints;
-
+    @ApiModelProperty(value = "关闭的pi冲刺")
     private List<SprintDetailVO>  closedPiSprints;
-
+    @ApiModelProperty(value = "wsjf")
     private WsjfVO wsjf;
-
+    @ApiModelProperty(value = "预计开始时间")
     private Date estimatedStartTime;
-
+    @ApiModelProperty(value = "预计结束时间")
     private Date estimatedEndTime;
-
+    @ApiModelProperty(value = "冲刺id")
     private Long sprintId;
-
+    @ApiModelProperty(value = "pi目标信息")
     private List<PiTargetInfoVO> piTargetInfoVOS;
 
     @ApiModelProperty(value = "更新人图标")
     private String updaterImageUrl;
-
+    @ApiModelProperty(value = "更新人")
     private UserMessageDTO updater;
 
     @ApiModelProperty(value = "实际开始时间")
@@ -261,44 +261,46 @@ public class IssueVO {
     public void setSprintId(Long sprintId) {
         this.sprintId = sprintId;
     }
-
+    @ApiModelProperty(value = "是否为星标")
     private Boolean starBeacon;
-
+    @ApiModelProperty(value = "父级是否为星标")
     private Boolean parentStarBeacon;
-
+    @ApiModelProperty(value = "关联为题是否为星标")
     private Boolean relateStarBeacon;
-
+    @ApiModelProperty(value = "项目群版本关联关系")
     private List<ProgramVersionFeatureRelVO> programVersionFeatureRelVOS;
-
+    @ApiModelProperty(value = "错误消息")
     private String errorMsg;
-
+    @ApiModelProperty(value = "主要负责人")
     private UserMessageDTO mainResponsible;
 
     @ApiModelProperty(value = "参与人")
     private List<UserMessageDTO> participants;
-
+    @ApiModelProperty(value = "环境")
     private String environment;
-
+    @ApiModelProperty(value = "标记")
     private List<TagVO> tags;
-
+    @ApiModelProperty(value = "是否已完成")
     private Boolean completed;
-
+    @ApiModelProperty(value = "实际完成时间")
     private Date actualCompletedDate;
 
     @Encrypt
+    @ApiModelProperty(value = "影响的问题id集合")
     private List<Long> influenceIssueIds;
 
     @ApiModelProperty(value = "主要负责人id")
     @Encrypt
     private Long mainResponsibleId;
-
+    @ApiModelProperty(value = "瀑布问题对象")
     private WaterfallIssueVO waterfallIssueVO;
-
+    @ApiModelProperty(value = "风险对象")
     private RiskVO riskVO;
-
+    @ApiModelProperty(value = "产品集合")
     private List<ProductVO> productVOList;
 
     @Encrypt
+    @ApiModelProperty(value = "产品id")
     private List<Long> productIds;
 
     public List<Long> getInfluenceIssueIds() {

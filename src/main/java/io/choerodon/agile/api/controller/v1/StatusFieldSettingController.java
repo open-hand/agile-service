@@ -31,10 +31,15 @@ public class StatusFieldSettingController {
     @PostMapping
     public ResponseEntity<List<StatusFieldSettingVO>> createOrUpdate(@ApiParam(value = "项目id", required = true)
                                                                      @PathVariable(name = "project_id") Long projectId,
+                                                                     @ApiParam(value = "问题类型id", required = true)
                                                                      @RequestParam @Encrypt Long issueTypeId,
+                                                                     @ApiParam(value = "状态id", required = true)
                                                                      @RequestParam @Encrypt Long statusId,
+                                                                     @ApiParam(value = "乐观锁", required = true)
                                                                      @RequestParam Long objectVersionNumber,
+                                                                     @ApiParam(value = "应用类型", required = true)
                                                                      @RequestParam String applyType,
+                                                                     @ApiParam(value = "状态流转字段配置", required = true)
                                                                      @RequestBody List<StatusFieldSettingVO> list) {
         return Optional.ofNullable(statusFieldSettingService.createOrUpdate(projectId, issueTypeId, statusId, objectVersionNumber, applyType, list))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
@@ -46,7 +51,9 @@ public class StatusFieldSettingController {
     @GetMapping("/list")
     public ResponseEntity<List<StatusFieldSettingVO>> listFieldSetting(@ApiParam(value = "项目id", required = true)
                                                                        @PathVariable(name = "project_id") Long projectId,
+                                                                       @ApiParam(value = "问题类型id", required = true)
                                                                        @RequestParam @Encrypt Long issueTypeId,
+                                                                       @ApiParam(value = "状态id", required = true)
                                                                        @RequestParam @Encrypt Long statusId) {
         return Optional.ofNullable(statusFieldSettingService.list(projectId, issueTypeId, statusId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))

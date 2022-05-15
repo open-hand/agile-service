@@ -31,9 +31,11 @@ public class EncryptionController {
     @ApiOperation("加密")
     @GetMapping("/encrypt")
     public ResponseEntity<String> encrypt(@ApiParam(value = "项目id", required = true)
-                                           @PathVariable(name = "project_id") Long projectId,
-                                           @RequestParam(required = false) Long issueId,
-                                           @RequestParam(required = false) Long id) {
+                                          @PathVariable(name = "project_id") Long projectId,
+                                          @ApiParam(value = "issueId")
+                                          @RequestParam(required = false) Long issueId,
+                                          @ApiParam(value = "需要加密的id")
+                                          @RequestParam(required = false) Long id) {
         if (issueId != null) {
             id = issueId;
         }
@@ -46,6 +48,7 @@ public class EncryptionController {
     public ResponseEntity<Long> decrypt(
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "issue id")
             @RequestParam @Encrypt Long issueId) {
         IssueDTO issueDTO = new IssueDTO();
         issueDTO.setProjectId(projectId);

@@ -51,6 +51,7 @@ public class ForTestManagerController {
     public ResponseEntity<Page<IssueLinkVO>> pagedQueryByOptions(@ApiParam(value = "项目id", required = true)
                                                                  @PathVariable(name = "project_id") Long projectId,
                                                                  @ApiIgnore @SortDefault PageRequest pageRequest,
+                                                                 @ApiParam(value = "查询条件", required = true)
                                                                  @RequestBody IssueQueryVO issueQueryVO) {
         return ResponseEntity.ok(issueService.pagedQueryByOptions(projectId, pageRequest, issueQueryVO));
     }
