@@ -2,6 +2,7 @@ import React, {
   useEffect, useMemo, useRef,
 } from 'react';
 import { observer } from 'mobx-react-lite';
+import { uniq } from 'lodash';
 import SearchArea from './SearchArea';
 import IssueSearchContext from './context';
 import IssueSearchStore, { IssueSearchStoreProps } from './store';
@@ -9,6 +10,7 @@ import './index.less';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import useIsProgram from '@/hooks/useIsProgram';
 
+export type IIssueSearchCommonFilterOption = 'onlyMe' | 'starBeacon' | 'myAssignee'
 export interface IssueSearchProps {
   store: IssueSearchStore
   onClear: () => void
@@ -20,7 +22,15 @@ export interface IssueSearchProps {
   /** @default 'agile'  */
   applyType?: 'agile' | 'program' | 'risk' | ''
   foldedHeight?: number
+  /**
+   * 是否有我的筛选-通用选项 【我经办的】
+   * @deprecated 使用 hiddenMyCommonFilterOption
+   */
   hasMyAssigned?: boolean
+  /**
+   * 隐藏我的筛选通用选项
+   */
+  hiddenMyCommonFilterOption?: IIssueSearchCommonFilterOption[]
   excludeQuickFilterIds?: string[]
   hiddenQuickFilters?: boolean, // 隐藏快速筛选
   hiddenCustomFields?: boolean, // 隐藏自定义字段
@@ -32,7 +42,8 @@ export function useIssueSearchStore(props: IssueSearchStoreProps) {
 export { IssueSearchStore };
 const IssueSearch: React.FC<IssueSearchProps> = ({
   urlFilter, onClear, onClickSaveFilter, store, onChange, projectId, programId, applyType = 'agile', foldedHeight = 43,
-  hasMyAssigned = true, excludeQuickFilterIds = [], hiddenQuickFilters = false, hiddenCustomFields = false,
+  hasMyAssigned: propsHasMyAssigned, excludeQuickFilterIds = [], hiddenQuickFilters = false, hiddenCustomFields = false,
+  hiddenMyCommonFilterOption: propsHiddenMyCommonFilterOption,
 }) => {
   const mountedRef = useRef<boolean>();
   const { isProgram } = useIsProgram();
@@ -60,7 +71,10 @@ const IssueSearch: React.FC<IssueSearchProps> = ({
       }
     }
   }, [artInfo, isInProgram, isProgram, programId, store]);
-
+  const hiddenMyCommonFilterOption = useMemo(() => {
+    const hiddenOptions = [...(propsHiddenMyCommonFilterOption || []), propsHasMyAssigned ? 'myAssignee' : false].filter(Boolean);
+    return uniq(hiddenOptions) as IIssueSearchCommonFilterOption[];
+  }, [propsHasMyAssigned, propsHiddenMyCommonFilterOption]);
   return (
     <IssueSearchContext.Provider
       value={{
@@ -71,7 +85,7 @@ const IssueSearch: React.FC<IssueSearchProps> = ({
         projectId,
         applyType,
         foldedHeight,
-        hasMyAssigned,
+        hiddenMyCommonFilterOption,
         excludeQuickFilterIds,
         hiddenQuickFilters,
         hiddenCustomFields,
