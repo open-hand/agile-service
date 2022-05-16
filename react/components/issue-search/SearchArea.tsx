@@ -10,6 +10,7 @@ import { observer } from 'mobx-react-lite';
 
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { FlatSelect } from '@choerodon/components';
+import classNames from 'classnames';
 import { flattenObject, isFilterSame } from './utils';
 import IssueSearchContext from './context';
 import SummaryField from './custom-fields/field/SummaryField';
@@ -294,7 +295,7 @@ const SearchArea: React.FC = () => {
   );
   return (
     <div
-      className={`${prefixCls}-search`}
+      className={classNames(`${prefixCls}-search`, { [`${prefixCls}-url-search`]: urlFilter })}
       style={{
         height: folded ? foldedHeight : 'unset',
         overflow: 'hidden',
