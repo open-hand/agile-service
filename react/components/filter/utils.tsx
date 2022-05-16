@@ -25,7 +25,6 @@ export function getFlatElement(field: IFilterField, element: React.ReactNode) {
 }
 export function renderFlatField(field: IFilterField, { element, removeButton }: { element: React.ReactElement, removeButton: React.ReactElement | null }) {
   const isSelect = ['single', 'multiple', 'radio', 'checkbox', 'member'].includes(field.fieldType);
-  const isDate = ['datetime', 'date', 'time'].includes(field.fieldType);
   const className = classNames({
     'c7n-pro-select-flat': isSelect,
     'c7n-pro-cascader-flat': isSelect,
@@ -36,7 +35,6 @@ export function renderFlatField(field: IFilterField, { element, removeButton }: 
       style={{
         display: 'flex', alignItems: 'center', marginBottom: 10,
       }}
-      className={isDate ? 'c7n-pro-form-float' : undefined}
     >
       {React.cloneElement(element, {
         style: {
@@ -94,13 +92,7 @@ export const renderGroupedFields: IRenderFields = ({
       contentField = field;
       return;
     }
-    if (['single', 'multiple', 'radio', 'checkbox', 'member', 'multiMember'].includes(field.fieldType)) {
-      selectTypes.push(field);
-    } else if (['time', 'datetime', 'date'].includes(field.fieldType)) {
-      dateTypes.push(field);
-    } else if (['input', 'text', 'number'].includes(field.fieldType)) {
-      inputTypes.push(field);
-    }
+    selectTypes.push(field);
   });
   const types = [selectTypes, inputTypes, dateTypes].filter((arr) => arr.length > 0);
 
@@ -118,7 +110,7 @@ export const renderGroupedFields: IRenderFields = ({
     </div>
   ));
   if (result.length > 0) {
-    result[result.length - 1].props.children.push(<div style={{ marginLeft: 10 }}>{selectField}</div>);
+    result[result.length - 1].props.children.push(<div style={{ marginLeft: 10 }} key="selectField">{selectField}</div>);
   }
   return (
     <div

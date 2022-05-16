@@ -1,9 +1,10 @@
 import React, {
   useState, useCallback, useRef, useEffect,
 } from 'react';
-import { Button, Dropdown } from 'choerodon-ui/pro';
-
+import { Button } from 'choerodon-ui/pro';
+import { Dropdown } from 'choerodon-ui';
 import { pull, uniq } from 'lodash';
+import { useInViewport } from 'ahooks';
 import FieldList from './FieldList';
 import useFormatMessage from '@/hooks/useFormatMessage';
 
@@ -47,7 +48,9 @@ const SelectField: React.FC<SelectFieldProps> = ({
   triggerElement,
   ...otherProps
 }) => {
+  const buttonRef = useRef<HTMLDivElement>(null);
   const formatMessage = useFormatMessage('agile.common');
+  const inViewPort = useInViewport(buttonRef);
 
   const [hidden, setHidden] = useState(true);
   const [value, setValue] = useState<string[]>([]);
@@ -80,9 +83,12 @@ const SelectField: React.FC<SelectFieldProps> = ({
       return newValues;
     });
   }, [controlled, onChange]);
-
+  useEffect(() => {
+    !inViewPort && setHidden(true);
+  }, [inViewPort, setHidden]);
   return (
-    <div>
+    <div ref={buttonRef}>
+      {/** 这里不使用1.5.4 -UI pro Dropdown,pro Dropdown 弹窗位置不会自动更新  */}
       <Dropdown
         visible={!hidden}
         overlay={(
@@ -90,6 +96,9 @@ const SelectField: React.FC<SelectFieldProps> = ({
             role="none"
             ref={ref}
             onMouseDown={(e) => {
+              e.stopPropagation();
+            }}
+            onClick={(e) => {
               e.stopPropagation();
             }}
           >
