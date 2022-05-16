@@ -46,6 +46,8 @@ const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
       }
       return issueTypeApi.loadAllWithStateMachineId(applyType ?? (isProgram ? 'program' : undefined), projectId).then((issueTypes) => {
         if (isProgram) {
+          const featureType: IIssueType = find<IIssueType>(issueTypes, { typeCode: 'feature' }) as IIssueType;
+
           const featureTypes: any = [{
             id: 'business',
             name: '特性',
@@ -54,6 +56,8 @@ const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
             icon: '',
             stateMachineId: '',
             typeCode: '',
+            featureId: featureType.id,
+            featureType,
           }, {
             id: 'enabler',
             name: '使能',
@@ -62,6 +66,9 @@ const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
             icon: '',
             stateMachineId: '',
             typeCode: '',
+            featureId: featureType.id,
+            featureType,
+
           }];
           const epicType: IIssueType = find<IIssueType>(issueTypes, { typeCode: 'issue_epic' }) as IIssueType;
           return [...featureTypes, epicType].filter(Boolean);
