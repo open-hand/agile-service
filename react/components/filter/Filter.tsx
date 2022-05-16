@@ -238,7 +238,6 @@ const Filter: React.FC<FilterProps> = ({
           maxTagCount: 3,
           maxTagTextLength: 5,
         } : {}}
-        labelLayout={!flat || isTime ? 'float' as LabelLayout : 'none' as LabelLayout}
         {...isUser ? {
           selected: filter[field.code],
         } : {}}

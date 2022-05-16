@@ -1,13 +1,13 @@
 import React from 'react';
 import moment, { Moment } from 'moment';
 import { IFilterField } from '../filter';
-import { getFilterFields } from '../field-pro/layouts';
+import { getFilterFields, getSearchFields } from '../field-pro/layouts';
 
 export function getFieldElement(field: IFilterField, flat?: boolean): React.ReactNode {
   const {
     code, fieldType, system,
   } = field;
-  return getFilterFields([{ field, otherComponentProps: { flat } }])[0];
+  return getSearchFields([field], { [field.code]: { flat } })[0];
 }
 function encodeDate(date: string, isTime: boolean): Moment
 function encodeDate(date: string[], isTime: boolean): Moment[]
