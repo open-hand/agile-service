@@ -37,9 +37,9 @@ public class StatusMachineSchemeConfigVO {
     private String issueTypeIcon;
     @ApiModelProperty(value = "问题类型颜色")
     private String issueTypeColour;
-
+    @ApiModelProperty(value = "应用编码")
     private String applyType;
-
+    @ApiModelProperty(value = "问题类型编码")
     private String issueTypeCode;
 
     public String getIssueTypeCode() {

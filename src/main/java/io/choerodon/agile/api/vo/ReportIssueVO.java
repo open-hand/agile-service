@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo;
 
 
 import io.choerodon.agile.infra.utils.StringUtil;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.io.Serializable;
@@ -13,25 +14,27 @@ import java.util.Date;
  * @since 2018/6/20
  */
 public class ReportIssueVO implements Serializable {
-
+    @ApiModelProperty(value = "问题编号")
     private String issueNum;
 
     @Encrypt
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
-
+    @ApiModelProperty(value = "日期")
     private Date date;
-
+    @ApiModelProperty(value = "旧值")
     private BigDecimal oldValue;
-
+    @ApiModelProperty(value = "类型")
     private String type;
-
+    @ApiModelProperty(value = "新值")
     private BigDecimal newValue;
-
+    @ApiModelProperty(value = "是否统计")
     private Boolean statistical;
 
     @Encrypt
+    @ApiModelProperty(value = "父级问题id")
     private String parentIssueId;
-
+    @ApiModelProperty(value = "父级问题编号")
     private String parentIssueNum;
 
     public Long getIssueId() {

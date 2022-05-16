@@ -38,6 +38,7 @@ public class StatusMachineNodeVO {
     private Long organizationId;
     @ApiModelProperty(value = "状态对象")
     private StatusVO statusVO;
+    @ApiModelProperty(value = "rank")
     private String rank;
     /**
      * 前端要用到

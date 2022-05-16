@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.boot.message.entity.MessageSender;
 import org.hzero.boot.message.entity.Receiver;
 
@@ -26,23 +27,28 @@ public class MessageSenderUniqueVO {
     /**
      * 租户Id
      */
+    @ApiModelProperty(value = "租户Id")
     private Long tenantId;
     /**
      * 消息代码
      */
+    @ApiModelProperty(value = "消息代码")
     private String msgCode;
     /**
      * 通知类型
      */
+    @ApiModelProperty(value = "通知类型")
     private Set<String> noticeTypeList;
     
     /**
      * 接收人
      */
+    @ApiModelProperty(value = "接收人")
     private Set<Receiver> receiverList;
     /**
      * 抄送人
      */
+    @ApiModelProperty(value = "抄送人")
     private Set<String> ccList;
 
 

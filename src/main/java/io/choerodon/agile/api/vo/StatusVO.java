@@ -33,15 +33,16 @@ public class StatusVO {
     private Boolean canDelete;
     @ApiModelProperty(value = "状态是否已完成")
     private Boolean completed;
-
+    @ApiModelProperty(value = "默认状态")
     private Boolean defaultStatus;
-
+    @ApiModelProperty(value = "是否转换为其他")
     private Boolean transferAll;
 
     @ApiModelProperty("关联的问题类型")
     @Encrypt
     private List<Long> issueTypeIds;
     @Encrypt
+    @ApiModelProperty(value = "状态id")
     private Long issueStatusId;
 
     private Long issueStatusObjectVersionNumberId;

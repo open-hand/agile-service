@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -8,39 +9,45 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 public class IssueStatusLinkageVO {
     @Encrypt
+    @ApiModelProperty(value = "id")
     private Long id;
 
     @Encrypt
+    @ApiModelProperty(value = "问题类型id")
     private Long issueTypeId;
 
     @Encrypt
+    @ApiModelProperty(value = "状态id")
     private Long statusId;
 
     @Encrypt
+    @ApiModelProperty(value = "关联类型id")
     private Long linkTypeId;
-
+    @ApiModelProperty(value = "关联类型")
     private IssueLinkTypeVO linkTypeVO;
-
+    @ApiModelProperty(value = "前置项类型")
     private String predecessorType;
 
     @Encrypt
+    @ApiModelProperty(value = "关联的问题id")
     private Long linkageIssueTypeId;
-
+    @ApiModelProperty(value = "关联的问题类型")
     private IssueTypeVO linkageIssueType;
 
     @Encrypt
+    @ApiModelProperty(value = "关联的问题状态id")
     private Long linkageIssueStatusId;
-
+    @ApiModelProperty(value = "关联的问题状态")
     private StatusVO linkageIssueStatus;
-
+    @ApiModelProperty(value = "状态")
     private StatusVO statusVO;
-
+    @ApiModelProperty(value = "问题类型")
     private IssueTypeVO issueTypeVO;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "组织id")
     private Long organizationId;
-
+    @ApiModelProperty(value = "是否被触发器修改")
     private Boolean isTriggered;
 
     public Long getId() {

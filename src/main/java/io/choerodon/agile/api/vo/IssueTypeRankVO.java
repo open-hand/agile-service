@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -10,8 +11,10 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 public class IssueTypeRankVO {
 
     @Encrypt
+    @ApiModelProperty(value = "前一个id")
     private Long frontId;
     @Encrypt
+    @ApiModelProperty(value = "后一个id")
     private Long backId;
 
     public Long getFrontId() {

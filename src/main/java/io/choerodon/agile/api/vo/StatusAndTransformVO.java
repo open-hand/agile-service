@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Set;
@@ -10,24 +11,28 @@ import java.util.Set;
  */
 public class StatusAndTransformVO {
     @Encrypt
+    @ApiModelProperty(value = "id")
     private Long id;
-
+    @ApiModelProperty(value = "名称")
     private String name;
-
+    @ApiModelProperty(value = "编码")
     private String code;
-
+    @ApiModelProperty(value = "类型")
     private String type;
     @Encrypt
+    @ApiModelProperty(value = "节点id")
     private Long nodeId;
     @Encrypt
+    @ApiModelProperty(value = "可以转换的状态")
     private Set<Long> canTransformStatus;
     @Encrypt
+    @ApiModelProperty(value = "状态机id")
     private Long stateMachineId;
-
+    @ApiModelProperty(value = "默认状态")
     private Boolean defaultStatus;
-
+    @ApiModelProperty(value = "是否有子级")
     private Boolean hasIssue;
-
+    @ApiModelProperty(value = "是否已完成")
     private Boolean completed;
 
     public Boolean getCompleted() {

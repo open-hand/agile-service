@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.choerodon.agile.api.vo.waterfall.PredecessorIssueStatusLinkageVO;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -11,30 +12,31 @@ import java.util.List;
  */
 public class StatusSettingVO {
     @Encrypt
+    @ApiModelProperty(value = "id")
     private Long id;
-
+    @ApiModelProperty(value = "名称")
     private String name;
-
+    @ApiModelProperty(value = "编码")
     private String code;
-
+    @ApiModelProperty(value = "类型")
     private String type;
-
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
-
+    @ApiModelProperty(value = "状态转换配置")
     private List<StatusTransferSettingVO> statusTransferSettingVOS;
-
+    @ApiModelProperty(value = "状态字段配置")
     private List<StatusFieldSettingVO> statusFieldSettingVOS;
-
+    @ApiModelProperty(value = "状态通知配置")
     private List<StatusNoticeSettingVO> statusNoticeSettingVOS;
-
+    @ApiModelProperty(value = "状态联动")
     private List<StatusLinkageVO> statusLinkageVOS;
-
+    @ApiModelProperty(value = "状态分支合并配置")
     private StatusBranchMergeSettingVO statusBranchMergeSettingVO;
-
+    @ApiModelProperty(value = "执行状态配置")
     private ExecutionCaseStatusChangeSettingVO executionCaseStatusChangeSettingVO;
-
+    @ApiModelProperty(value = "关联问题状态")
     private List<LinkIssueStatusLinkageVO> linkIssueStatusLinkageVOS;
-
+    @ApiModelProperty(value = "前置问题状态联动")
     private List<PredecessorIssueStatusLinkageVO> predecessorIssueStatusLinkageVOS;
 
     public StatusBranchMergeSettingVO getStatusBranchMergeSettingVO() {

@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -11,12 +12,13 @@ import java.util.List;
 public class IssueTypeNoPermissionFields {
 
     @Encrypt
+    @ApiModelProperty(value = "问题类型id")
     private Long issueTypeId;
-
+    @ApiModelProperty(value = "问题类型名称")
     private String issueTypeName;
-
+    @ApiModelProperty(value = "问题类型编码")
     private String typeCode;
-
+    @ApiModelProperty(value = "没有权限的字段编码")
     private List<String> noPermissionFieldCodes;
 
     public Long getIssueTypeId() {

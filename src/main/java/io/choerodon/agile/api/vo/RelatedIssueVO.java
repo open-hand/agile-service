@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.Set;
 
 /**
@@ -7,13 +9,13 @@ import java.util.Set;
  * @since 2020-11-16
  */
 public class RelatedIssueVO {
-
+    @ApiModelProperty(value = "行")
     private Integer row;
-
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
-
+    @ApiModelProperty(value = "关联的id")
     private Set<Long> relatedIds;
-
+    @ApiModelProperty(value = "关联的行数")
     private Set<Integer> relatedRows;
 
     public Integer getRow() {

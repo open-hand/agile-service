@@ -47,7 +47,7 @@ public class SprintInfoVO {
 
     @ApiModelProperty(value = "进度")
     private String progress;
-
+    @ApiModelProperty(value = "分配的问题")
     private List<AssigneeIssueVO> assigneeIssueVOList;
 
     public Long getSprintId() {

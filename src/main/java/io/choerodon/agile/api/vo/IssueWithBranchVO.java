@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.List;
 
 /**
@@ -7,9 +9,9 @@ import java.util.List;
  * @since 2021-06-25
  */
 public class IssueWithBranchVO {
-
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
-
+    @ApiModelProperty(value = "分支")
     private List<BranchVO> branches;
 
     public Long getIssueId() {

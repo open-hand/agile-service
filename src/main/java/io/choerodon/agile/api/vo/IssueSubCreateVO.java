@@ -69,19 +69,21 @@ public class IssueSubCreateVO {
 
     @ApiModelProperty(value = "关联的问题链接列表")
     private List<IssueLinkCreateVO> issueLinkCreateVOList;
-
+    @ApiModelProperty(value = "预计开始时间")
     private Date estimatedStartTime;
-
+    @ApiModelProperty(value = "预计结束时间")
     private Date estimatedEndTime;
 
     @Encrypt
+    @ApiModelProperty(value = "主要负责人id")
     private Long mainResponsibleId;
-
+    @ApiModelProperty(value = "环境")
     private String environment;
-
+    @ApiModelProperty(value = "标记")
     private List<TagVO> tags;
 
     @Encrypt
+    @ApiModelProperty(value = "状态id")
     private Long statusId;
 
     @ApiModelProperty(value = "实际开始时间")

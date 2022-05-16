@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.List;
 
 /**
@@ -7,11 +9,12 @@ import java.util.List;
  * 2021/07/20 16:35
  */
 public class PageTemplateVO {
+    @ApiModelProperty(value = "页面模版字段")
     private List<PageTemplateFieldVO> fields;
-
+    @ApiModelProperty(value = "页面模版问题类型字段")
     private IssueTypeFieldVO issueTypeFieldVO;
 
-    public java.util.List<PageTemplateFieldVO> getFields() {
+    public List<PageTemplateFieldVO> getFields() {
         return fields;
     }
 

@@ -1,14 +1,16 @@
 package io.choerodon.agile.api.vo;
 
 
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * @author superlee
  * @since 2020-10-22
  */
 public class WorkBenchIssueSearchVO {
-
+    @ApiModelProperty(value = "类型")
     private String type;
-
+    @ApiModelProperty(value = "搜索参数")
     private SearchVO searchVO;
 
     public String getType() {

@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -12,32 +13,37 @@ import java.util.List;
 public class StoryMapStoryVO {
 
     @Encrypt
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
-
+    @ApiModelProperty(value = "问题编号")
     private String issueNum;
-
+    @ApiModelProperty(value = "概要")
     private String summary;
 
     @Encrypt
+    @ApiModelProperty(value = "史诗id")
     private Long epicId;
 
     @Encrypt
+    @ApiModelProperty(value = "特性id")
     private Long featureId;
-
+    @ApiModelProperty(value = "是否已完成")
     private Boolean completed;
 
     @Encrypt
+    @ApiModelProperty(value = "问题类型id")
     private Long issueTypeId;
 
     @Encrypt
+    @ApiModelProperty(value = "状态id")
     private Long statusId;
-
+    @ApiModelProperty(value = "问题类型")
     private IssueTypeVO issueTypeVO;
-
+    @ApiModelProperty(value = "状态mao")
     private StatusVO statusMapVO;
-
+    @ApiModelProperty(value = "故事地图")
     private List<StoryMapVersionVO> storyMapVersionVOList;
-
+    @ApiModelProperty(value = "冲刺")
     private List<SprintNameVO> storyMapSprintList;
 
     public Long getIssueId() {

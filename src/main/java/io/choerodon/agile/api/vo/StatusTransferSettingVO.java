@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.choerodon.agile.infra.dto.UserDTO;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -9,20 +10,24 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 public class StatusTransferSettingVO {
     @Encrypt
+    @ApiModelProperty(value = "id")
     private Long id;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
     @Encrypt
+    @ApiModelProperty(value = "状态id")
     private Long statusId;
     @Encrypt
+    @ApiModelProperty(value = "问题类型id")
     private Long issueTypeId;
-
+    @ApiModelProperty(value = "用户类型")
     private String userType;
     @Encrypt
+    @ApiModelProperty(value = "用户id")
     private Long userId;
-
+    @ApiModelProperty(value = "用户")
     private UserDTO user;
-
+    @ApiModelProperty(value = "是否验证订阅完成")
     private Boolean isVerifySubissueCompleted;
 
     public Long getId() {

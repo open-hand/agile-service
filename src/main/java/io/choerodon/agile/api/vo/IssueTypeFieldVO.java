@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 
@@ -10,14 +11,15 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 public class IssueTypeFieldVO {
     @Encrypt
+    @ApiModelProperty(value = "id")
     private Long id;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "问题类型id")
     private Long issueTypeId;
-
+    @ApiModelProperty(value = "模版")
     private String template;
-
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
 
     public Long getObjectVersionNumber() {

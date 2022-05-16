@@ -18,9 +18,9 @@ public class RoleAssignmentSearchVO {
 
     @ApiModelProperty(value = "参数")
     private String[] param;
-
+    @ApiModelProperty(value = "是否启用")
     private Boolean enabled;
-
+    @ApiModelProperty(value = "角色id")
     private Set<Long> roleIds;
 
     public Boolean getEnabled() {

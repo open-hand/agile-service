@@ -24,6 +24,7 @@ public class IssueSprintVO implements Serializable {
     private Long sprintId;
 
     @Encrypt
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
 
     public String getSprintName() {

@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.Date;
 
 /**
@@ -8,30 +10,31 @@ import java.util.Date;
  * @description:
  */
 public class ProjectInfoFixVO {
+    @ApiModelProperty(value = "id")
     private Long infoId;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "项目编码")
     private String projectCode;
-
+    @ApiModelProperty(value = "问题最大编号")
     private Long issueMaxNum;
-
+    @ApiModelProperty(value = "反馈最大编号")
     private Long feedbackMaxNum;
-
+    @ApiModelProperty(value = "默认分配人")
     private Long defaultAssigneeId;
-
+    @ApiModelProperty(value = "默认经办人类型")
     private String defaultAssigneeType;
-
+    @ApiModelProperty(value = "默认优先级编码")
     private String defaultPriorityCode;
-
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
-
+    @ApiModelProperty(value = "创建人")
     private Long createdBy;
-
+    @ApiModelProperty(value = "创建时间")
     private Date creationDate;
-
+    @ApiModelProperty(value = "更新人")
     private Long lastUpdatedBy;
-
+    @ApiModelProperty(value = "更新时间")
     private Date lastUpdateDate;
 
     public Long getInfoId() {

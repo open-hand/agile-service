@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.choerodon.agile.api.vo.business.IssueSearchVO;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.math.BigDecimal;
@@ -12,19 +13,33 @@ import java.util.List;
  */
 public class SprintSearchVO {
     @Encrypt(ignoreValue = {"0"})
+    @ApiModelProperty(value = "冲刺id")
     private Long sprintId;
+    @ApiModelProperty(value = "冲刺名称")
     private String sprintName;
+    @ApiModelProperty(value = "冲刺目标")
     private String sprintGoal;
+    @ApiModelProperty(value = "开始时间")
     private Date startDate;
+    @ApiModelProperty(value = "结束时间")
     private Date endDate;
+    @ApiModelProperty(value = "状态编码")
     private String statusCode;
+    @ApiModelProperty(value = "问题数量")
     private Integer issueCount;
+    @ApiModelProperty(value = "待处理故事点")
     private BigDecimal todoStoryPoint;
+    @ApiModelProperty(value = "处理中故事点")
     private BigDecimal doingStoryPoint;
+    @ApiModelProperty(value = "已完成故事点")
     private BigDecimal doneStoryPoint;
+    @ApiModelProperty(value = "问题搜索条件")
     private List<IssueSearchVO> issueSearchVOList;
+    @ApiModelProperty(value = "分配的问题")
     private List<AssigneeIssueVO> assigneeIssues;
+    @ApiModelProperty(value = "乐观锁")
     private String objectVersionNumber;
+    @ApiModelProperty(value = "状态编码")
     private List<String> statusCodes;
 
     public Long getSprintId() {

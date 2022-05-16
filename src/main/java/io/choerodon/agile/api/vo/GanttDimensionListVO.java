@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
  */
 public class GanttDimensionListVO {
     @Encrypt
+    @ApiModelProperty(value = "纬度id集合")
     private List<Long> ids;
 
     public List<Long> getIds() {

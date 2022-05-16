@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -12,17 +13,22 @@ import org.springframework.format.annotation.DateTimeFormat;
  * @author jiaxu.cui@hand-china.com 2020/7/23 下午7:59
  */
 public class SearchSourceVO {
-
+    @ApiModelProperty(value = "高级搜索参数")
     private AdvancedSearchArgs advancedSearchArgs;
+    @ApiModelProperty(value = "其他搜索")
     private OtherArgs otherArgs;
+    @ApiModelProperty(value = "搜索")
     private SearchArgs searchArgs;
 
     public class AdvancedSearchArgs{
         @Encrypt
+        @ApiModelProperty(value = "问题类型id")
         private List<Long> issueTypeId;
         @Encrypt
+        @ApiModelProperty(value = "状态id")
         private List<Long> statusId;
         @Encrypt
+        @ApiModelProperty(value = "优先级id")
         private List<Long> priorityId;
 
         public List<Long> getIssueTypeId() {
@@ -52,15 +58,21 @@ public class SearchSourceVO {
 
     public class OtherArgs{
         @Encrypt
+        @ApiModelProperty(value = "经办人id")
         private List<Long> assigneeId;
         @Encrypt
+        @ApiModelProperty(value = "史诗")
         private List<Long> epic;
         @Encrypt
+        @ApiModelProperty(value = "冲刺")
         private List<Long> sprint;
         @Encrypt
+        @ApiModelProperty(value = "版本")
         private List<Long> version;
         @Encrypt
+        @ApiModelProperty(value = "模块")
         private List<Long> component;
+        @ApiModelProperty(value = "自定义字段")
         private CustomField customField;
 
         public CustomField getCustomField() {

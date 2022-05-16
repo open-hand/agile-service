@@ -1,26 +1,29 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * @author zhaotianxin
  * @date 2021-07-14 22:54
  */
 public class IssueLinkChangeVO {
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
-
+    @ApiModelProperty(value = "问题类型id")
     private Long  issueTypeId;
-
+    @ApiModelProperty(value = "状态id")
     private Long statusId;
-
+    @ApiModelProperty(value = "关联类型id")
     private Long linkTypeId;
-
+    @ApiModelProperty(value = "关联问题id")
     private Long linkedIssueId;
-
+    @ApiModelProperty(value = "关联问题类型id")
     private Long linkIssueTypeId;
-
+    @ApiModelProperty(value = "关联问题状态id")
     private Long linkIssueStatusId;
-
+    @ApiModelProperty(value = "是否可以被触发")
     private Boolean isTriggered;
-
+    @ApiModelProperty(value = "状态联动设置id")
     private Long linkSettingId;
 
     public Long getIssueId() {

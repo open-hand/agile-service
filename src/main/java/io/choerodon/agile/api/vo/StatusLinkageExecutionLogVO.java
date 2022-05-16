@@ -13,6 +13,7 @@ import java.util.Date;
 public class StatusLinkageExecutionLogVO {
 
     @Encrypt
+    @ApiModelProperty(value = "id")
     private Long id;
 
     @ApiModelProperty(value = "执行状态(LOOP/SUCCESS)")
@@ -24,21 +25,21 @@ public class StatusLinkageExecutionLogVO {
     @Encrypt
     @ApiModelProperty(value = "上一个issue")
     private Long preIssueId;
-
+    @ApiModelProperty(value = "前一个问题信息")
     private IssueLinkVO preIssueInfo;
 
     @Encrypt
     @ApiModelProperty(value = "当前的issue")
     private Long curIssueId;
-
+    @ApiModelProperty(value = "当前问题信息")
     private IssueLinkVO curIssueInfo;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "组织id")
     private Long organizationId;
-
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
-
+    @ApiModelProperty(value = "创建日期")
     private Date creationDate;
 
     @ApiModelProperty(value = "备注(same_status/sub_bug/condition_limit)")

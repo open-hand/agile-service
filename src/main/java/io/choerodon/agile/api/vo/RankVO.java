@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -8,19 +9,21 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  * Email: fuqianghuang01@gmail.com
  */
 public class RankVO {
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "类型")
     private String type;
-
+    @ApiModelProperty(value = "是否在之前")
     private Boolean before;
 
     @Encrypt
+    @ApiModelProperty(value = "引用的问题id")
     private Long referenceIssueId;
 
     @Encrypt
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
-
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
 
     public Long getProjectId() {

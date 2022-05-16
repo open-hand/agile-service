@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -8,11 +9,15 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 public class IssueIdSprintIdVO {
     @Encrypt
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
+    @ApiModelProperty(value = "问题类型编码")
     private String typeCode;
     @Encrypt
+    @ApiModelProperty(value = "经办人id")
     private Long assigneeId;
     @Encrypt
+    @ApiModelProperty(value = "冲刺id")
     private Long sprintId;
 
     public Long getIssueId() {

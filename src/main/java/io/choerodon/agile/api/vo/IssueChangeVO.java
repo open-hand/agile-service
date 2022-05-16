@@ -1,19 +1,30 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.Date;
 
 /**
  * Created by jian_zhang02@163.com on 2018/7/5.
  */
 public class IssueChangeVO {
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
+    @ApiModelProperty(value = "问题编码")
     private String issueNum;
+    @ApiModelProperty(value = "旧值")
     private String oldValue;
+    @ApiModelProperty(value = "新值")
     private String newValue;
+    @ApiModelProperty(value = "状态")
     private String status;
+    @ApiModelProperty(value = "修改的字段")
     private String changeField;
+    @ApiModelProperty(value = "修改日期")
     private Date changeDate;
+    @ApiModelProperty(value = "问题类型编码")
     private String typeCode;
+    @ApiModelProperty(value = "是否已完成")
     private Boolean completed;
 
     public Long getIssueId() {

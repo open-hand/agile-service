@@ -1,14 +1,16 @@
 package io.choerodon.agile.api.vo;
 
 
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * @author superlee
  * @since 2021-10-26
  */
 public class IssuePersonalSortVO {
-
+    @ApiModelProperty(value = "属性")
     private String property;
-
+    @ApiModelProperty(value = "排序规则")
     private String direction;
 
     public String getProperty() {

@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.Date;
 
 /**
@@ -8,24 +10,33 @@ import java.util.Date;
  * @description:
  */
 public class TestVersionFixVO {
-
+    @ApiModelProperty(value = "版本id")
     private Long versionId;
+    @ApiModelProperty(value = "名称")
     private String name;
+    @ApiModelProperty(value = "描述")
     private String description;
+    @ApiModelProperty(value = "开始时间")
     private Date startDate;
+    @ApiModelProperty(value = "期望发布时间")
     private Date expectReleaseDate;
+    @ApiModelProperty(value = "发布日期")
     private Date releaseDate;
+    @ApiModelProperty(value = "状态编码")
     private String statusCode;
+    @ApiModelProperty(value = "旧的状态编码")
     private String oldStatusCode;
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
-
+    @ApiModelProperty(value = "创建人")
     private Long createdBy;
-
+    @ApiModelProperty(value = "创建时间")
     private Date creationDate;
-
+    @ApiModelProperty(value = "更新人")
     private Long lastUpdatedBy;
-
+    @ApiModelProperty(value = "更新时间")
     private Date lastUpdateDate;
 
     public Long getVersionId() {

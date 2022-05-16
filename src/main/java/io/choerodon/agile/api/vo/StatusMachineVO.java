@@ -29,7 +29,7 @@ public class StatusMachineVO {
     private List<StatusMachineNodeVO> nodeVOS;
     @ApiModelProperty(value = "状态机转换列表")
     private List<StatusMachineTransformVO> transformVOS;
-
+    @ApiModelProperty(value = "应用类型")
     private Set<String> applyTypes;
 
     public Set<String> getApplyTypes() {

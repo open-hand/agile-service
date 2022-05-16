@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.choerodon.agile.infra.utils.StringUtil;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -12,37 +13,41 @@ import java.util.Map;
  * @since 2018/5/31
  */
 public class SearchVO {
-
+    @ApiModelProperty(value = "导出字段")
     private List<String> exportFieldCodes;
     /**
      * 输入查询参数
      */
+    @ApiModelProperty(value = "搜索参数")
     private Map<String, Object> searchArgs;
 
     /**
      * 过滤查询参数
      */
+    @ApiModelProperty(value = "搜索参数")
     private Map<String, Object> advancedSearchArgs;
 
     /**
      * 关联查询参数
      */
+    @ApiModelProperty(value = "搜索参数")
     private Map<String, Object> otherArgs;
     @Encrypt
+    @ApiModelProperty(value = "快查id")
     private List<Long> quickFilterIds;
-
+    @ApiModelProperty(value = "经办人过滤id")
     private List<Long> assigneeFilterIds;
-
+    @ApiModelProperty(value = "仅故事")
     private Boolean onlyStory;
-
+    @ApiModelProperty(value = "内容")
     private String content;
-
+    @ApiModelProperty(value = "内容")
     private List<String> contents;
-
+    @ApiModelProperty(value = "甘特图默认排序")
     private Boolean ganttDefaultOrder = false;
-
+    @ApiModelProperty(value = "应用类型")
     private List<String> applyTypes;
-
+    @ApiModelProperty(value = "展示的字段")
     private List<ObjectSchemeFieldVO> displayFields;
 
     public List<ObjectSchemeFieldVO> getDisplayFields() {

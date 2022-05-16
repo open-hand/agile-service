@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotNull;
@@ -11,20 +12,23 @@ import java.util.List;
  */
 public class ListLayoutVO {
     @Encrypt
+    @ApiModelProperty(value = "id")
     private Long id;
 
     @NotNull(message = "error.layout.applyType.null")
+    @ApiModelProperty(value = "应用类型")
     private String applyType;
 
     @Encrypt
+    @ApiModelProperty(value = "用户id")
     private Long userId;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "组织id")
     private Long organizationId;
-
+    @ApiModelProperty(value = "列布局")
     private List<ListLayoutColumnRelVO> listLayoutColumnRelVOS;
-
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
 
     public Long getId() {

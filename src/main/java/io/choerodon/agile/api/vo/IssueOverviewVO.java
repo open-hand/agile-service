@@ -3,20 +3,31 @@ package io.choerodon.agile.api.vo;
 import java.math.BigDecimal;
 
 import io.choerodon.mybatis.domain.AuditDomain;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author jiaxu.cui@hand-china.com 2020/7/1 下午3:07
  */
 public class IssueOverviewVO extends AuditDomain {
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
+    @ApiModelProperty(value = "是否已完成")
     private Boolean completed;
+    @ApiModelProperty(value = "报告人id")
     private Long reporterId;
+    @ApiModelProperty(value = "经办人id")
     private Long assigneeId;
+    @ApiModelProperty(value = "类别编码")
     private String categoryCode;
+    @ApiModelProperty(value = "问题类型编码")
     private String typeCode;
+    @ApiModelProperty(value = "故事点")
     private BigDecimal storyPoints;
+    @ApiModelProperty(value = "预计时间")
     private BigDecimal remainingTime;
+    @ApiModelProperty(value = "状态id")
     private Long statusId;
+    @ApiModelProperty(value = "问题类型id")
     private Long issueTypeId;
 
     public BigDecimal getStoryPoints() {

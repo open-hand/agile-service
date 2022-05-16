@@ -22,12 +22,13 @@ public class IssueEpicVO {
     private String epicColor;
 
     @Encrypt
+    @ApiModelProperty(value = "问题类型id")
     private Long issueTypeId;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "问题类型")
     private IssueTypeVO issueTypeVO;
-
+    @ApiModelProperty(value = "项目群id")
     private Long programId;
 
     public Long getProgramId() {
