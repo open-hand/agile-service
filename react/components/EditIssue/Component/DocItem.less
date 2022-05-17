@@ -1,32 +1,27 @@
 @import '~choerodon-ui/lib/style/themes/default';
 
 .c7n-docItem {
-  // background: #F3F3F3;
-  border-radius: 0.02rem;
-  margin-bottom: 0.1rem;
-  color: @primary-color;
-  padding: 0.05rem 0.1rem;
+  color: var(--primary-color);
+  padding: 0.05rem 0;
+  border-bottom: 1px solid var(--divider);
+  display: flex;
+  align-items: center;
+  line-height: .24rem;
 
   &-icon {
-    vertical-align: text-top;
-    font-size: 0.16rem;
-    margin-right: 0.05rem;
+    margin-right: 0.1rem;
   }
 
   &-delete {
-    vertical-align: text-top;
-    font-size: 0.16rem;
-    float: right;
     cursor: pointer;
-    color: #fff;
+    margin-left: auto;
+    color: var(--text-color);
   }
 
   &-text {
-    display: inline-block;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    vertical-align: top;
   }
 
   &-narrow {
@@ -35,13 +30,5 @@
 
   &-wide {
     max-width: 5rem;
-  }
-
-  &:hover {
-    background: #F3F3F3;
-
-    .c7n-docItem-delete {
-      color: @primary-color;
-    }
   }
 }
