@@ -2,10 +2,12 @@ package io.choerodon.agile.infra.utils;
 
 import io.choerodon.agile.api.vo.IssueCommentVO;
 import io.choerodon.agile.api.vo.ProjectVO;
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.ProjectReportReceiverDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.agile.infra.enums.OpenAppCode;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.core.enums.MessageAdditionalType;
 import org.apache.commons.collections4.CollectionUtils;
@@ -54,6 +56,8 @@ public class SiteMsgUtil {
     private MessageClient messageClient;
     @Value("${services.domain.url}")
     private String domainUrl;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     public void issueCreate(List<Long> userIds,
                             String userName,
@@ -80,6 +84,10 @@ public class SiteMsgUtil {
         if (customFieldUsers) {
             messageClient.async().sendWebMessage("ISSUE_CREATE.WEB", messageSender.getReceiverAddressList(), messageSender.getArgs());
             messageClient.async().sendEmail("CHOERODON-EMAIL", "ISSUE_CREATE.EMAIL", messageSender.getReceiverAddressList(), messageSender.getArgs());
+            if (agilePluginService != null) {
+                List<String> openUserIds = agilePluginService.getOpenUserIdsByUserIds(userIds, OpenAppCode.DING_TALK);
+                messageClient.async().sendDingTalkMessage(0L, "DING_TALK", "ISSUE_CREATE.DT", messageSender.getArgs(), null, openUserIds);
+            }
         } else {
             messageClient.async().sendMessage(messageSender);
         }
@@ -238,6 +246,10 @@ public class SiteMsgUtil {
         sender.setMessageCode("PROJECT_REPORT");
         sender.setTenantId(ConvertUtil.getOrganizationId(projectId));
         sender.setReceiverAddressList(toReceiver);
+        // 额外参数
+        Map<String,Object> objectMap=new HashMap<>();
+        objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
+        sender.setAdditionalInformation(objectMap);
         sender.setCcList(ccReceiver.stream().map(Receiver::getEmail).collect(Collectors.toList()));
         sender.setArgs(argsMap);
         messageClient.async().sendMessage(sender);
@@ -388,6 +400,11 @@ public class SiteMsgUtil {
                 //向接收人发送邮件和站内信消息
                 messageClient.async().sendWebMessage("ISSUE_COMMENT_NOTICE.WEB", sender.getReceiverAddressList(), sender.getArgs());
                 messageClient.async().sendEmail("CHOERODON-EMAIL", "ISSUE_COMMENT_NOTICE.EMAIL", sender.getReceiverAddressList(), sender.getArgs());
+                if (agilePluginService != null) {
+                    List<Long> userIds = sender.getReceiverAddressList().stream().map(Receiver::getUserId).collect(Collectors.toList());
+                    List<String> openUserIds = agilePluginService.getOpenUserIdsByUserIds(userIds, OpenAppCode.DING_TALK);
+                    messageClient.async().sendDingTalkMessage(0L, "DING_TALK", "ISSUE_COMMENT_NOTICE.DT", sender.getArgs(), null, openUserIds);
+                }
             } else {
                 //发送无接收人的消息(webhook等)
                 messageClient.async().sendMessage(sender);

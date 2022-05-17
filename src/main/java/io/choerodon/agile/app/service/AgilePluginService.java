@@ -552,4 +552,6 @@ public interface AgilePluginService {
     List<ProductVO> listProductByProjectId(Long organizationId, Long projectId);
 
     void deleteIssueProductRel(Long projectId, List<Long> issueIds);
+
+    List<String> getOpenUserIdsByUserIds(List<Long> userIds, String openAppCode);
 }
