@@ -107,7 +107,7 @@ export const renderGroupedFields: IRenderFields = ({
 
   const result = types.map((type, i) => (
     <div style={{
-      display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', marginBottom: 4, marginTop: i === hasDateTypeIndex ? 11 : 0,
+      display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', marginBottom: 4,
     }}
     >
       {type.map((f) => renderFlatField(f, getFieldElement(f)))}
