@@ -92,7 +92,11 @@ export const renderGroupedFields: IRenderFields = ({
       contentField = field;
       return;
     }
-    selectTypes.push(field);
+    if (['text'].includes(field.fieldType)) {
+      inputTypes.push(field);
+    } else {
+      selectTypes.push(field);
+    }
   });
   const types = [selectTypes, inputTypes, dateTypes].filter((arr) => arr.length > 0);
 
