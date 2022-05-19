@@ -1262,7 +1262,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 validateAndSetEpicName(row, col, errorRowColMap, issueCreateVO, issueTypeCode, projectId, headerMap);
                 break;
             case FieldCode.FEATURE:
-                validateAndSetFeature(row, col, excelColumn, errorRowColMap, issueCreateVO, issueTypeCode);
+                validateAndSetFeature(row, col, excelColumn, errorRowColMap, issueCreateVO, issueTypeCode, issueType);
                 break;
             case FieldCode.EPIC:
                 validateAndSetEpic(row, col, excelColumn, errorRowColMap, issueCreateVO, issueTypeCode, parentIssue, issueType);
@@ -1608,8 +1608,9 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                        ExcelColumnVO excelColumn,
                                        Map<Integer, List<Integer>> errorRowColMap,
                                        IssueCreateVO issueCreateVO,
-                                       String issueTypeCode) {
-        if (IssueTypeCode.isStory(issueTypeCode)) {
+                                       String issueTypeCode,
+                                       String issueType) {
+        if(IssueTypeCode.AGILE_PARENT_ISSUE_TYPES.contains(issueTypeCode) && !SUB_BUG_CN.equals(issueType)) {
             Cell cell = row.getCell(col);
             if (!isCellEmpty(cell)) {
                 int rowNum = row.getRowNum();
