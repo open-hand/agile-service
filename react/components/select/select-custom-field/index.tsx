@@ -6,6 +6,7 @@ import { unionBy, castArray, partition } from 'lodash';
 import { usePersistFn } from 'ahooks';
 import { fieldApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
+import useDeepCompareCreation from '@/hooks/useDeepCompareCreation';
 
 export interface SelectCustomFieldBasicProps extends Partial<SelectProps> {
   selected?: string[] | string
@@ -42,7 +43,7 @@ const SelectCustomField: React.FC<SelectCustomFieldProps> = forwardRef(({
   fieldId, fieldOptions, flat, afterLoad, afterFirstRequest, projectId, organizationId, disabledRuleConfig, selected, extraOptions, ruleIds, outside = false, onlyEnabled = true, menuType, ...otherProps
 },
 ref: React.Ref<Select>) => {
-  const args = useMemo(() => ({ ruleIds, fieldOptions, selected: selected ? castArray(selected).filter(Boolean) : undefined }), [fieldOptions, ruleIds, selected]);
+  const args = useDeepCompareCreation(() => ({ ruleIds, fieldOptions, selected: selected ? castArray(selected).filter(Boolean) : undefined }), [fieldOptions, ruleIds, selected]);
   const hasRule = !disabledRuleConfig && Object.keys(args).filter((key: keyof typeof args) => key !== 'fieldOptions' && Boolean(args[key])).length > 0;
   const needOptions = useMemo(() => [...castArray(otherProps.value), ...(args.selected || [])].filter(Boolean), [otherProps.value, args.selected]);
   const fakePageRequest = usePersistFn((filter: string = '', page: number = 1, size: number, ensureOptions: string[], enabled: boolean = true, optionData: any = undefined) => {
