@@ -1,19 +1,21 @@
 import React, {
-  useCallback, useMemo, useState, useRef, useEffect,
+  useCallback, useMemo, useState, useRef, useEffect, useLayoutEffect,
 } from 'react';
 import { find, uniq, pull } from 'lodash';
 import { Button, Icon } from 'choerodon-ui/pro';
 import classNames from 'classnames';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import { FuncType } from 'choerodon-ui/pro/lib/button/enum';
-import { BasicTarget } from 'ahooks/lib/utils/dom';
-import { usePersistFn, useSize } from 'ahooks';
+import {
+  usePersistFn,
+} from 'ahooks';
 import Field from '@/components/field';
 import SelectField, { SelectFieldProps } from '@/components/field/select-field';
 import { ISystemField, ICustomField, IFilterField } from '.';
 import { getFlatElement, renderGroupedFields, renderFields } from './utils';
 import styles from './Filter.less';
 import useFormatMessage from '@/hooks/useFormatMessage';
+import useObserverSize from '@/hooks/useObserverSize';
 
 export interface IFilter {
   [key: string]: any
@@ -137,6 +139,7 @@ const Filter: React.FC<FilterProps> = ({
       })),
     },
   ], [customFields, formatMessage, selectFieldGroups, systemFieldsWithoutAlwaysRender]);
+
   const renderRemoveButton = useCallback((field: IFilterField) => {
     if (!removeButton || alwaysRenderFields.includes(field.code)) {
       return null;
@@ -144,6 +147,7 @@ const Filter: React.FC<FilterProps> = ({
     if (removeButton === true) {
       return (
         <Button
+          key={`re-${field.code}`}
           funcType={'flat' as any}
           icon="delete_sweep-o"
           style={{ marginLeft: 10, flexShrink: 0 }}
@@ -155,6 +159,7 @@ const Filter: React.FC<FilterProps> = ({
     }
     if (React.isValidElement(removeButton)) {
       return React.cloneElement(removeButton, {
+        key: `re-${field.code}`,
         onClick: () => {
           handleSelectChange([field.code], false);
         },
@@ -199,6 +204,7 @@ const Filter: React.FC<FilterProps> = ({
     const placeholder = isTime ? [formatMessage({ id: 'agile.search.startTime' }), formatMessage({ id: 'agile.search.endTime' })] : (field.nameKey ? formatMessage({ id: field.nameKey }) : field.title);
     return {
       element: <Field
+        key={`el-${field.code}`}
         style={{
           marginRight: 10, marginTop: flat ? 0 : 10, flex: 1, flexShrink: 1,
         }}
@@ -251,6 +257,7 @@ const Filter: React.FC<FilterProps> = ({
     }
     return (
       <SelectField
+        key="agile-filter-SelectField"
         groups={groups}
         value={selected}
         onChange={handleSelectChange}
@@ -304,15 +311,17 @@ const Filter: React.FC<FilterProps> = ({
     </>
   ), [expandFilter, folded, overflowLine]);
 
-  const selectField = renderSelectField();
+  const selectField = useMemo(() => renderSelectField(), [renderSelectField]);
   const resetButton = renderResetButton();
   const foldButton = renderFoldButton();
 
-  const searchSize = useSize(filterRef as BasicTarget);
-
-  useEffect(() => {
-    setOverflowLine((searchSize.height || 0) > 50);
-  }, [searchSize]);
+  useObserverSize(filterRef, {
+    updateSize: (_, nextSize) => {
+      const nextOverFlowLine = (nextSize.height || 0) > 50;
+      overflowLine !== nextOverFlowLine && setOverflowLine(nextOverFlowLine);
+      return false;
+    },
+  });
 
   if (renderer) {
     return renderer({
