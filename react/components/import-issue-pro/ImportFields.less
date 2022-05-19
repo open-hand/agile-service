@@ -1,19 +1,33 @@
 .importFields {
-  margin-top: 16px;
+  margin-top: -2px;
+
   &_title {
     display: inline-flex;
     align-items: center;
     margin-bottom: 5px;
-  }
-  &_content {
 
+    &>span:first-child {
+      color: var(--text-color);
+    }
   }
+
+  &_content {}
+
   &_btn {
     color: #5365EA;
     font-size: .12rem;
 
-    & >span {
+    &>span {
       font-weight: 500;
+    }
+  }
+}
+
+.selectBox {
+  :global {
+    .c7n-pro-checkbox-label {
+      padding-left: .04rem !important;
+      padding-right: .1rem !important;
     }
   }
 }

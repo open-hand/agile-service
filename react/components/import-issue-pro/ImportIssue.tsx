@@ -283,6 +283,7 @@ const ImportIssueContent: React.FC = observer(() => {
       }
       <ImportIssueForm
         title="选择模板字段"
+        className={`${prefixCls}-form-field`}
         bottom={(
           <>
             <Button
