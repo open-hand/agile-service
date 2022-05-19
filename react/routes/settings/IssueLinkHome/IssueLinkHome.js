@@ -31,6 +31,9 @@ function IssueLinkHome() {
   } = useLinkHomeStore();
   const formatMessage = useFormatMessage();
   function openCreateEditModal(isEdit) {
+    issueLinkTableDs.getField('linkName')?.set('required', true);
+    issueLinkTableDs.getField('outWard')?.set('required', true);
+    issueLinkTableDs.getField('inWard')?.set('required', true);
     const record = isEdit ? issueLinkTableDs.current : issueLinkTableDs.create();
     const titleId = !isEdit ? 'agile.setting.create.issue.link' : 'agile.setting.edit.issue.link';
     const okTextId = !isEdit ? 'boot.create' : 'boot.save';
