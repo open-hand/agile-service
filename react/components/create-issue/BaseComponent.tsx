@@ -524,7 +524,9 @@ const CreateIssueBase = observer(({
     }
     if (!oldSummary || currentTemplateSummary.current === oldSummary) {
       let prefix: string | undefined = '';
-      if (templateSummary.has(newIssueTypeId)) {
+      if (defaultValues?.summary) {
+        prefix = defaultValues?.summary;
+      } else if (templateSummary.has(newIssueTypeId)) {
         prefix = templateSummary.get(newIssueTypeId);
       } else {
         prefix = await fieldApi.project(projectId).getSummaryDefaultValue(newIssueTypeId);
