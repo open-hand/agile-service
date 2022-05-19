@@ -260,6 +260,7 @@ const ImportFields = forwardRef<IIortIssueFieldsRef, IImportIssueFieldsProps>(({
           ref={fieldFormItemRef}
           dataSet={chooseDataSet}
           checkValueOnOptionsChange={false}
+          className={styles.selectBox}
           name="fields"
           onOption={({ record }) => ({
             disabled: includes(requiredFields, record.get('code')),
