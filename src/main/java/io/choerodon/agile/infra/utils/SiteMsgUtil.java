@@ -86,7 +86,7 @@ public class SiteMsgUtil {
             messageClient.async().sendEmail("CHOERODON-EMAIL", "ISSUE_CREATE.EMAIL", messageSender.getReceiverAddressList(), messageSender.getArgs());
             if (agilePluginService != null) {
                 List<String> openUserIds = agilePluginService.getOpenUserIdsByUserIds(userIds, OpenAppCode.DING_TALK);
-                messageClient.async().sendDingTalkMessage(0L, "DING_TALK", "ISSUE_CREATE.DT", messageSender.getArgs(), null, openUserIds);
+                messageClient.async().sendDingTalkMessage(projectVO.getOrganizationId(), "DING_TALK", "ISSUE_CREATE.DT", messageSender.getArgs(), null, openUserIds);
             }
         } else {
             messageClient.async().sendMessage(messageSender);
@@ -403,7 +403,7 @@ public class SiteMsgUtil {
                 if (agilePluginService != null) {
                     List<Long> userIds = sender.getReceiverAddressList().stream().map(Receiver::getUserId).collect(Collectors.toList());
                     List<String> openUserIds = agilePluginService.getOpenUserIdsByUserIds(userIds, OpenAppCode.DING_TALK);
-                    messageClient.async().sendDingTalkMessage(0L, "DING_TALK", "ISSUE_COMMENT_NOTICE.DT", sender.getArgs(), null, openUserIds);
+                    messageClient.async().sendDingTalkMessage(projectVO.getOrganizationId(), "DING_TALK", "ISSUE_COMMENT_NOTICE.DT", sender.getArgs(), null, openUserIds);
                 }
             } else {
                 //发送无接收人的消息(webhook等)
