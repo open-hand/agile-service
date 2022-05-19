@@ -44,6 +44,7 @@ export function renderFlatField(field: IFilterField, { element, removeButton }: 
       })}
       {removeButton && (
         <div
+          key={`re-${field.code}`}
           role="none"
           style={{
             cursor: 'pointer',
