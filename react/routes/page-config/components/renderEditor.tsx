@@ -84,6 +84,7 @@ function renderEditor({
         dataRef,
         selected: data.defaultValue,
         style,
+        disabledRuleConfig: true,
         fieldOptions: fieldOptions.map((item: any) => ({ ...item, id: item.id ?? item.tempKey })),
         ...otherProps,
       } as any,

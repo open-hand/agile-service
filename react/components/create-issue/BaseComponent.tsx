@@ -202,7 +202,30 @@ function castNormalValue(value: any, fieldCode: string) {
   }
   return value;
 }
-
+/**
+ * 获取字段加载完成（选项加载完）清空值的字段 列表
+ * @param dataSet
+ * @returns
+ */
+function getCurrentClearValueFieldList(dataSet: DataSet): string[] {
+  return toJS(dataSet.current?.getState('fieldClearValueFields')) || [];
+}
+/**
+ * 设置字段加载完选项清空当前值
+ * @description 设置的字段 都是当前value不在选项内的字段
+ * @param dataSet
+ * @param fieldCode
+ */
+function setFieldClearValueFields(dataSet: DataSet, fieldCode: string) {
+  dataSet.current?.setState('fieldClearValueFields', [...(toJS(dataSet.current?.getState('cascadeFieldClearValueFields')) || []), fieldCode]);
+}
+/**
+ * 清空字段加载完成完选项后清空值的字段 列表
+ * @param dataSet
+ */
+function clearFieldClearValueFields(dataSet: DataSet) {
+  dataSet.current?.setState('fieldClearValueFields', undefined);
+}
 function getRuleDefaultValue(field: IssueCreateFields, rules: ICascadeLinkage[] = []) {
   const fieldRules = filter(rules, { cascadeFieldCode: field.fieldCode });
   if (filter(fieldRules, (rule) => rule.defaultValue || rule.defaultIds?.length).length === 1) { // 所有规则中只有1条设置了默认值
@@ -266,6 +289,7 @@ function postCascadeFieldAfterLoad(dataSet: DataSet, list: any[], field: IssueCr
     } else {
       // 值不在当前则清空
       dataSet.current?.init(field.fieldCode, undefined);
+      setFieldClearValueFields(dataSet, field.fieldCode);
     }
   }
 }
@@ -479,6 +503,7 @@ const CreateIssueBase = observer(({
         break;
       }
       case 'issueType': {
+        clearFieldClearValueFields(record.dataSet);
         if (!value) {
           // 工作项类型不能置空
           record.set('issueType', oldValue);
@@ -576,7 +601,8 @@ const CreateIssueBase = observer(({
     // 设置默认值
     fields?.forEach((field) => {
       const defaultValue = getDefaultValue(field);
-      if (defaultValue !== null && defaultValue !== undefined) {
+      const clearValueFieldList = getCurrentClearValueFieldList(oldDataSet);
+      if (!clearValueFieldList.includes(field.fieldCode) && defaultValue !== null && defaultValue !== undefined) {
         // 没有值的时候再设置
         setValue(field.fieldCode, defaultValue);
         if (field.fieldCode === 'summary' && !currentTemplateSummary.current) {
