@@ -49,7 +49,7 @@ class StartSprint extends Component {
     this.loadSprintData();
   }
 
-  loadSprintData=async () => {
+  loadSprintData = async () => {
     const { data } = this.props;
     const res = await sprintApi.checkSprintBeforeStart(data.sprintId);
     this.setState({
@@ -95,7 +95,7 @@ class StartSprint extends Component {
   };
 
   getWorkDays = (startDate, endDate) => {
-    if (moment(startDate).isAfter(moment(endDate))) {
+    if (!startDate || !endDate || moment(startDate).isAfter(moment(endDate))) {
       return 0;
     }
     // 是否显示非工作日
@@ -188,7 +188,7 @@ class StartSprint extends Component {
           <span>该冲刺中包含了</span>
           {
             !isNull(sprintDetail) && (
-              <span>{ sprintDetail.issueCount }</span>
+              <span>{sprintDetail.issueCount}</span>
             )
           }
           {
