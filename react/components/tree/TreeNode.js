@@ -142,7 +142,6 @@ function TreeNode(props) {
     >
       <div
         role="none"
-
         className={classNames(Styles.item, { [Styles.selected]: item.selected })}
         onClick={() => { onSelect(item); }}
       >

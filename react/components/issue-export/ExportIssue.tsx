@@ -8,7 +8,7 @@ import {
 } from 'lodash';
 import classnames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
-import { FuncType } from 'choerodon-ui/pro/lib/button/enum';
+import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import IssueFilterForm, { useIssueFilterForm } from '@/components/issue-filter-form';
 import ChooseField, { useChoseField } from '@/components/chose-field';
 import TableColumnCheckBoxes, { ITableColumnCheckBoxesDataProps, useTableColumnCheckBoxes } from '@/components/table-column-check-boxes';
@@ -16,7 +16,6 @@ import WsProgress from '@/components/ws-progress';
 import { getProjectName, getProjectId } from '@/utils/common';
 import { useExportIssueStore } from './stores';
 import { getCustomFieldFilters } from './utils';
-import { IChosenFieldField } from '../chose-field/types';
 import TemplateSelect from '../template-select/TemplateSelect';
 import openSaveTemplate from '../template-select/components/save/SaveTemplate';
 import { ITemplate } from '../template-select/components/edit/EditTemplate';
@@ -299,6 +298,7 @@ const ExportIssue: React.FC = () => {
           onClick={exportExcel}
           className="c7n-exportIssue-btn"
           loading={store.exportButtonConfig?.buttonProps?.loading}
+          color={ButtonColor.primary}
         >
           {formatMessage({ id: 'boot.export' })}
         </Button>

@@ -58,7 +58,7 @@ export const StoreProvider = inject('AppState')((props: any) => {
   const value = {
     ...props,
     mainStore,
-    MIN_WIDTH: 240,
+    MIN_WIDTH: 320,
     MAX_WIDTH: 600,
     ROOT_ID,
     NOT_ASSIGN_ID,
