@@ -160,7 +160,7 @@ class FeatureApi extends Api<FeatureApi> {
    * @param content
    */
   loadFeaturesInLink(page: number = 1, size: number = 10, issueId: number, content: string) {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/issues/agile/feature`,
       params: {
@@ -187,7 +187,7 @@ class FeatureApi extends Api<FeatureApi> {
    * @param issueId
    */
   getSplitStory(issueId: number) {
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/issues/list_story_by_feature_id`,
       params: {
