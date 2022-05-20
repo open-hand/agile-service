@@ -4,7 +4,7 @@ import { find } from 'lodash';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import SelectSprint from '@/components/select/select-sprint';
 import { ISprint } from '@/common/types';
-import { IChartSearchAdditionalProps } from '../types.';
+import { IChartSearchAdditionalProps } from '../types';
 
 export interface SprintSearchProps extends IChartSearchAdditionalProps {
   sprintId: string | undefined

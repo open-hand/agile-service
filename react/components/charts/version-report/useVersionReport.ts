@@ -5,7 +5,7 @@ import { getProjectId } from '@/utils/common';
 import { VersionReportProps, IVersionReportChart, IVersionReportTable } from './index';
 import { VersionReportSearchProps, IVersion } from './search';
 import { IUnit } from '../iteration-speed/search';
-import { IChartSearchHookAdditionalConfig } from '../types.';
+import { IChartSearchHookAdditionalConfig } from '../types';
 import useDataSet from '../useGetChartSearchDataSet';
 import tree from '@/components/tree';
 import useGetChartSearchDataSet from '../useGetChartSearchDataSet';

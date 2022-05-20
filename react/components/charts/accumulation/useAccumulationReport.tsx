@@ -10,7 +10,7 @@ import { getProjectId } from '@/utils/common';
 import { AccumulationSearchProps } from './search';
 import { AccumulationChartProps } from '.';
 import { IAccumulationData } from './utils';
-import { IChartSearchHookAdditionalConfig } from '../types.';
+import { IChartSearchHookAdditionalConfig } from '../types';
 
 export interface AccumulationConfig extends IChartSearchHookAdditionalConfig {
   boardId?: string

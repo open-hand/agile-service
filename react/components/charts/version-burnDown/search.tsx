@@ -5,7 +5,7 @@ import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import seeChangeRange from './image/seeChangeRange.svg';
 import seeProgress from './image/seeProgress.svg';
 import styles from './index.less';
-import { IChartSearchAdditionalProps } from '../types.';
+import { IChartSearchAdditionalProps } from '../types';
 
 export interface IVersion {
  versionId: string,

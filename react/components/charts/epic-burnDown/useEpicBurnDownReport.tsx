@@ -7,7 +7,7 @@ import { reportApi, epicApi } from '@/api';
 import useControlledDefaultValue from '@/hooks/useControlledDefaultValue';
 import { getProjectId } from '@/utils/common';
 import { getChartDataFromServerData } from './utils';
-import { IChartSearchHookAdditionalConfig } from '../types.';
+import { IChartSearchHookAdditionalConfig } from '../types';
 import useGetChartSearchDataSet from '../useGetChartSearchDataSet';
 
 export interface EpicBurnConfig extends IChartSearchHookAdditionalConfig {

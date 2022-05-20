@@ -4,7 +4,7 @@ import { Moment } from 'moment';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import SelectBoard from './SelectBoard';
 import SelectQuickFilterField from '@/components/select/select-quick-filter';
-import { IChartSearchAdditionalProps } from '../../types.';
+import { IChartSearchAdditionalProps } from '../../types';
 
 export interface AccumulationSearchProps extends IChartSearchAdditionalProps{
   range: [Moment, Moment]
