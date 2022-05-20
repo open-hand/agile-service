@@ -51,7 +51,7 @@ const ImportIssueForm = (formProps: any) => {
 
 const ImportIssueContent: React.FC = observer(() => {
   const {
-    action, modal, onSuccess, latestInfo, latestData,
+    action, modal, onSuccess, latestInfo, latestData, importFinishUnitName,
     messageKey, applyType, name, requires, systems, fields: propsFields, importRequest, prefixCls, downloadTemplateRequest,
   } = useImportIssueContext();
   const [templateFirstLoaded, setTemplateFirstLoaded] = useState<boolean>(false);
@@ -160,7 +160,7 @@ const ImportIssueContent: React.FC = observer(() => {
               <span className="c7n-importIssue-text">
                 导入失败
                 <span style={{ color: '#FF0000' }}>{failCount}</span>
-                {`${name || '工作项'} `}
+                {`${importFinishUnitName} `}
                 <a href={fileUrl}>
                   点击下载失败详情
                 </a>
@@ -173,7 +173,7 @@ const ImportIssueContent: React.FC = observer(() => {
               <span className="c7n-importIssue-text">
                 导入成功
                 <span style={{ color: '#0000FF' }}>{successCount}</span>
-                {`${name || '工作项'}`}
+                {`${importFinishUnitName}`}
               </span>
             </div>
           );
