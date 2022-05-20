@@ -8,13 +8,13 @@ databaseChangeLog(logicalFilePath:'agile_issue_status.groovyoovy') {
             column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
-            column(name: 'name', type: 'VARCHAR(255)', remarks: 'name') {
+            column(name: 'name', type: 'VARCHAR(255)', remarks: '名称') {
                 constraints(nullable: false)
             }
-            column(name: 'is_enable', type: 'TINYINT UNSIGNED', remarks: 'enabled flag') {
+            column(name: 'is_enable', type: 'TINYINT UNSIGNED', remarks: '启停用标志') {
                 constraints(nullable: false)
             }
-            column(name: 'category_code', type: 'VARCHAR(255)', remarks: 'category code') {
+            column(name: 'category_code', type: 'VARCHAR(255)', remarks: '类别编码') {
                 constraints(nullable: false)
             }
 
@@ -28,7 +28,7 @@ databaseChangeLog(logicalFilePath:'agile_issue_status.groovyoovy') {
 
     changeSet(id: '2018-06-05-agile-issue-status-add-column', author: 'fuqianghuang01@gmail.com') {
         addColumn(tableName: 'agile_issue_status') {
-            column(name: 'is_completed', type: 'TINYINT UNSIGNED', remarks: 'is completed')
+            column(name: 'is_completed', type: 'TINYINT UNSIGNED', remarks: '是否已完成')
         }
     }
 
@@ -49,7 +49,7 @@ databaseChangeLog(logicalFilePath:'agile_issue_status.groovyoovy') {
 
     changeSet(id: '2018-10-23-status-add-column-status-id', author: 'fuqianghuang01@gmail.com') {
         addColumn(tableName: 'agile_issue_status') {
-            column(name: 'status_id', type: 'BIGINT UNSIGNED', remarks: 'status id')
+            column(name: 'status_id', type: 'BIGINT UNSIGNED', remarks: '状态id')
         }
     }
 

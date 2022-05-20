@@ -6,16 +6,16 @@ databaseChangeLog(logicalFilePath: 'agile_issue_static_file_rel.groovy') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'static_file_id', type: 'BIGINT UNSIGNED', remarks: 'static file header id') {
+            column(name: 'static_file_id', type: 'BIGINT UNSIGNED', remarks: '静态文件头id') {
                 constraints(nullable: false)
             }
-            column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: 'issue id') {
+            column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: '问题id') {
                 constraints(nullable: false)
             }
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
-            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: 'organization id') {
+            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
                 constraints(nullable: false)
             }
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")

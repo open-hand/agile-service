@@ -17,10 +17,10 @@ databaseChangeLog(logicalFilePath:'fd_list_layout.groovy') {
             column(name: 'user_id', type: 'BIGINT UNSIGNED', remarks: '用户id') {
                 constraints(nullable: false)
             }
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
-            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: 'organization id') {
+            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
                 constraints(nullable: false)
             }
 

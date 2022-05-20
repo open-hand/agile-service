@@ -17,10 +17,10 @@ databaseChangeLog(logicalFilePath:'agile_tag_issue_rel.groovy') {
             column(name: 'tag_project_id', type: 'BIGINT UNSIGNED', remarks: 'tag的项目id') {
                 constraints(nullable: false)
             }
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
-            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: 'organization id') {
+            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
                 constraints(nullable: false)
             }
 

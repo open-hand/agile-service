@@ -2,21 +2,21 @@ package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_board_column.groovyoovy') {
     changeSet(id: '2018-05-14-agile-board-column', author: 'fuqianghuang01@gmail.com') {
         createTable(tableName: "agile_board_column") {
-            column(name: 'column_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'column id') {
+            column(name: 'column_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '列id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'status_code', type: 'VARCHAR(30)', remarks: 'status code') {
+            column(name: 'status_code', type: 'VARCHAR(30)', remarks: '状态编码') {
                 constraints(nullable: false)
             }
-            column(name: 'name', type: 'VARCHAR(255)', remarks: 'name') {
+            column(name: 'name', type: 'VARCHAR(255)', remarks: '名称') {
                 constraints(nullable: false)
             }
-            column(name: 'board_id', type: 'BIGINT UNSIGNED', remarks: 'board id') {
+            column(name: 'board_id', type: 'BIGINT UNSIGNED', remarks: '看板id') {
                 constraints(nullable: false)
             }
-            column(name: 'min_num', type: 'BIGINT UNSIGNED', remarks: 'min num')
-            column(name: 'max_num', type: 'BIGINT UNSIGNED', remarks: 'max num')
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'min_num', type: 'BIGINT UNSIGNED', remarks: '最小值')
+            column(name: 'max_num', type: 'BIGINT UNSIGNED', remarks: '最大值')
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
 

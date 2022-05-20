@@ -3,22 +3,22 @@ package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath: 'agile_issue_attachment.groovyoovy') {
     changeSet(id: '2018-05-14-agile-issue-attachment', author: 'fuqianghuang01@gmail.com') {
         createTable(tableName: "agile_issue_attachment") {
-            column(name: 'attachment_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'attachment id') {
+            column(name: 'attachment_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '附件id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: 'issue id') {
+            column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: '问题id') {
                 constraints(nullable: false)
             }
-            column(name: 'comment_id', type: 'BIGINT UNSIGNED', remarks: 'comment id') {
+            column(name: 'comment_id', type: 'BIGINT UNSIGNED', remarks: '评论id') {
                 constraints(nullable: false)
             }
             column(name: 'url', type: 'VARCHAR(255)', remarks: 'url') {
                 constraints(nullable: false)
             }
-            column(name: 'file_name', type: 'VARCHAR(255)', remarks: 'file name') {
+            column(name: 'file_name', type: 'VARCHAR(255)', remarks: '文件名称') {
                 constraints(nullable: false)
             }
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")

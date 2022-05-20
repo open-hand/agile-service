@@ -29,8 +29,8 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_issue_link.groovy') {
     changeSet(id: '2018-06-14-agile-issue-link-change', author: 'dinghuang123@gmail.com') {
         dropIndex(tableName: 'agile_issue_link', indexName: 'uk_issue_id_linked_issue_id')
         addColumn(tableName: 'agile_issue_link') {
-            column(name: 'link_id', type: 'BIGINT UNSIGNED', remarks: 'link id')
-            column(name: 'link_type_id', type: 'BIGINT UNSIGNED', remarks: 'link类型id')
+            column(name: 'link_id', type: 'BIGINT UNSIGNED', remarks: '链接id')
+            column(name: 'link_type_id', type: 'BIGINT UNSIGNED', remarks: '链接类型id')
         }
         dropColumn(tableName: 'agile_issue_link') {
             column(name: 'issue_link_type_code')

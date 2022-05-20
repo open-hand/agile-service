@@ -11,7 +11,7 @@ databaseChangeLog(logicalFilePath:'fd_list_layout_column_rel.groovy') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'layout_id', type: 'BIGINT UNSIGNED', remarks: 'layout id') {
+            column(name: 'layout_id', type: 'BIGINT UNSIGNED', remarks: '布局id') {
                 constraints(nullable: false)
             }
 
@@ -30,10 +30,10 @@ databaseChangeLog(logicalFilePath:'fd_list_layout_column_rel.groovy') {
                 constraints(nullable: false)
             }
 
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
-            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: 'organization id') {
+            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
                 constraints(nullable: false)
             }
 

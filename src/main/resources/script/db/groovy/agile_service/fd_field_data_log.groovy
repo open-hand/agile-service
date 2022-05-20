@@ -10,10 +10,10 @@ databaseChangeLog(logicalFilePath: 'fd_field_data_log.groovy') {
             column(name: 'field_id', type: 'BIGINT UNSIGNED', remarks: '字段id') {
                 constraints(nullable: false)
             }
-            column(name: 'old_value', type: 'text', remarks: 'old value')
-            column(name: 'old_string', type: 'text', remarks: 'old string')
-            column(name: 'new_value', type: 'text', remarks: 'new value')
-            column(name: 'new_string', type: 'text', remarks: 'new string')
+            column(name: 'old_value', type: 'text', remarks: '旧值id')
+            column(name: 'old_string', type: 'text', remarks: '旧值')
+            column(name: 'new_value', type: 'text', remarks: '新值id')
+            column(name: 'new_string', type: 'text', remarks: '新值')
             column(name: 'instance_id', type: 'BIGINT UNSIGNED', remarks: '实体id')
             column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)

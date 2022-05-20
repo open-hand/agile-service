@@ -5,13 +5,13 @@ databaseChangeLog(logicalFilePath:'agile_wiki_relation.groovy') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
-            column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: 'issue id') {
+            column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: '问题id') {
                 constraints(nullable: false)
             }
-            column(name: 'wiki_name', type: 'text', remarks: 'wiki name') {
+            column(name: 'wiki_name', type: 'text', remarks: 'wiki名称') {
                 constraints(nullable: false)
             }
             column(name: 'wiki_url', type: 'text', remarks: 'wiki url') {
@@ -28,7 +28,7 @@ databaseChangeLog(logicalFilePath:'agile_wiki_relation.groovy') {
 
     changeSet(id: '2019-06-25-agile-wiki-relation-add-column', author: 'fuqianghuang01@gmail.com') {
         addColumn(tableName: 'agile_wiki_relation') {
-            column(name: 'space_id', type: 'BIGINT UNSIGNED', remarks: 'kb space id')
+            column(name: 'space_id', type: 'BIGINT UNSIGNED', remarks: '空间id')
         }
     }
 
