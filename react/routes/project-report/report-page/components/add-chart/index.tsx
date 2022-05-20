@@ -71,7 +71,7 @@ interface Props {
   linkTo: (url: string) => void
 }
 export interface ChartRefProps {
-  submit: () => Promise<ChartSearchVO>
+  submit: () => Promise<ChartSearchVO | false>
 }
 const AddChart: React.FC<Props> = ({ innerRef, data: editData, linkTo }) => {
   const initProject = useMemo(() => editData?.chartSearchVO.projectId, [editData?.chartSearchVO.projectId]);
@@ -132,9 +132,9 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData, linkTo }) => {
   const codeChanged = dataSet.current?.get('chart') !== initChartCode;
   const ignoreSearchVO = projectChanged || codeChanged;
   const handleSubmit = useCallback(async () => {
-    if (await dataSet.validate()) {
+    const search = await chartRef.current.submit();
+    if (await dataSet.validate() && search !== false) {
       const data = dataSet.current?.toData();
-      const search = await chartRef.current.submit();
       const block: IReportChartBlock = {
         key: String(Math.random()),
         title: data.title,

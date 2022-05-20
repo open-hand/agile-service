@@ -1,5 +1,8 @@
-import { useEffect, useState, useCallback } from 'react';
+import {
+  useEffect, useState, useCallback, useMemo,
+} from 'react';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
+import { DataSet } from 'choerodon-ui/pro';
 import moment from 'moment';
 import { stores } from '@choerodon/boot';
 import { BurnDownProps, IBurndownChartType } from '@/components/charts/burn-down';
@@ -21,6 +24,7 @@ export interface BurnDownConfig {
   projectId?: string
   useCurrentSprint?: boolean
   searchVO?: ISearchVO
+  openValidate?: boolean
 }
 
 function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnDownSearchProps, BurnDownProps] {
@@ -78,7 +82,26 @@ function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnD
   useEffect(() => {
     loadData();
   }, [loadData]);
+  /**
+   * 与 hook控制筛选值暂时共存
+   *
+   * TODO: 需要优化
+  */
+  const searchDataSet = useMemo(() => new DataSet({
+    autoCreate: true,
+    fields: [
+      { name: 'sprint', label: '迭代冲刺', required: true },
+      { name: 'unit', label: '单位', required: true },
+    ],
+  }), []);
 
+  useEffect(() => {
+    searchDataSet.current?.set('unit', type);
+  }, [searchDataSet, type]);
+  useEffect(() => {
+    const newSprint = useCurrentSprint ? 'current' : sprintId;
+    searchDataSet.current?.get('sprint') !== newSprint && searchDataSet.current?.set('sprint', newSprint);
+  }, [searchDataSet, sprintId, useCurrentSprint]);
   const searchProps: BurnDownSearchProps = {
     projectId,
     sprintId,
@@ -97,6 +120,7 @@ function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnD
     setRestDayShow,
     searchVO,
     setSearchVO,
+    searchDataSet: config?.openValidate ? searchDataSet : undefined,
   };
   const props: BurnDownProps = {
     loading,

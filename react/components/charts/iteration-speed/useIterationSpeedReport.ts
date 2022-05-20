@@ -4,8 +4,10 @@ import useControlledDefaultValue from '@/hooks/useControlledDefaultValue';
 import { getProjectId } from '@/utils/common';
 import { IterationSpeedProps, ISprintSpeed } from './index';
 import { IterationSpeedSearchProps, IUnit } from './search';
+import { IChartSearchHookAdditionalConfig } from '../types.';
+import useGetChartSearchDataSet from '../useGetChartSearchDataSet';
 
-export interface IterationSpeedConfig {
+export interface IterationSpeedConfig extends IChartSearchHookAdditionalConfig{
   unit?: IUnit
   projectId?: string
 }
@@ -33,9 +35,18 @@ const useIterationSpeedReport = (config?: IterationSpeedConfig, onFinish?: Funct
   const props = {
     loading, unit, data,
   };
+  const searchDataSet = useGetChartSearchDataSet({
+    enabled: config?.openValidate,
+    fields: [
+      { name: 'unit', label: '单位', required: true },
+    ],
+    valueChangeDataSetValue: {
+      unit,
+    },
+  });
 
   const searchProps = {
-    unit, setUnit, projectId,
+    unit, setUnit, projectId, searchDataSet,
   };
   return [props, searchProps];
 };

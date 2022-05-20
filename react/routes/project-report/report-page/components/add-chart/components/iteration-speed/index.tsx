@@ -6,6 +6,7 @@ import useIterationSpeedReport, { IterationSpeedConfig } from '@/components/char
 import { IReportChartBlock, IterationSpeedSearchVO } from '@/routes/project-report/report-page/store';
 import { getProjectId } from '@/utils/common';
 import { ChartRefProps } from '../..';
+import { validateSearchDataBySearchProps } from '../../utils';
 
 export const transformIterationSpeedSearch = (searchVO: IterationSpeedSearchVO | undefined) : IterationSpeedConfig | undefined => {
   if (!searchVO) {
@@ -25,14 +26,15 @@ const IterationSpeedComponent:React.FC<Props> = ({ innerRef, projectId, data }) 
   const config = useMemo(() => ({
     ...transformIterationSpeedSearch(data?.chartSearchVO as IterationSpeedSearchVO),
     projectId,
+    openValidate: true,
   }), [data?.chartSearchVO, projectId]);
   const [props, searchProps] = useIterationSpeedReport(config);
 
-  const handleSubmit = useCallback(async (): Promise<IterationSpeedSearchVO> => ({
+  const handleSubmit = useCallback(async (): Promise<IterationSpeedSearchVO> => validateSearchDataBySearchProps(searchProps, ({
     type: searchProps.unit,
     projectId: searchProps.projectId || getProjectId(),
-  }),
-  [searchProps.projectId, searchProps.unit]);
+  })),
+  [searchProps]);
 
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,

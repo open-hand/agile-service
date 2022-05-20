@@ -5,8 +5,12 @@ import { getProjectId } from '@/utils/common';
 import { VersionReportProps, IVersionReportChart, IVersionReportTable } from './index';
 import { VersionReportSearchProps, IVersion } from './search';
 import { IUnit } from '../iteration-speed/search';
+import { IChartSearchHookAdditionalConfig } from '../types.';
+import useDataSet from '../useGetChartSearchDataSet';
+import tree from '@/components/tree';
+import useGetChartSearchDataSet from '../useGetChartSearchDataSet';
 
-export interface VersionReportConfig {
+export interface VersionReportConfig extends IChartSearchHookAdditionalConfig {
   unit?: IUnit,
   versionId?: string
   projectId?: string
@@ -71,11 +75,22 @@ const useVersionReport = (config?: VersionReportConfig, onFinish?: Function): [V
     loadTableData();
   }, [loadTableData]);
 
+  const searchDataSet = useGetChartSearchDataSet({
+    fields: [
+      { name: 'version', label: '版本', required: true },
+      { name: 'unit', label: '单位', required: true },
+    ],
+    enabled: config?.openValidate,
+    valueChangeDataSetValue: {
+      version: versionId,
+      unit,
+    },
+  });
   const props: VersionReportProps = {
     loading, data, tableData, unit,
   };
   const searchProps: VersionReportSearchProps = {
-    unit, setUnit, versions, versionId, setVersionId, projectId,
+    unit, setUnit, versions, versionId, setVersionId, projectId, searchDataSet,
   };
   return [props, searchProps];
 };

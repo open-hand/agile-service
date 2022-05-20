@@ -6,6 +6,7 @@ import useVersionReport, { VersionReportConfig } from '@/components/charts/versi
 import { getProjectId } from '@/utils/common';
 import { IReportChartBlock, VersionReportSearchVO } from '@/routes/project-report/report-page/store';
 import { ChartRefProps } from '../..';
+import { validateSearchDataBySearchProps } from '../../utils';
 
 export const transformVersionReportSearch = (searchVO: VersionReportSearchVO | undefined) : VersionReportConfig | undefined => {
   if (!searchVO) {
@@ -26,15 +27,15 @@ const VersionReportComponent:React.FC<Props> = ({ innerRef, projectId, data }) =
   const config = useMemo(() => ({
     ...transformVersionReportSearch(data?.chartSearchVO as VersionReportSearchVO),
     projectId,
+    openValidate: true,
   }), [data?.chartSearchVO, projectId]);
   const [props, searchProps] = useVersionReport(config);
   const { unit, versionId } = searchProps;
-  const handleSubmit = useCallback(async (): Promise<VersionReportSearchVO> => ({
+  const handleSubmit = useCallback(async (): Promise<VersionReportSearchVO> => validateSearchDataBySearchProps(searchProps, ({
     versionId,
     type: unit,
     projectId: searchProps.projectId || getProjectId(),
-  }),
-  [searchProps.projectId, unit, versionId]);
+  })), [unit, versionId, searchProps]);
 
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,

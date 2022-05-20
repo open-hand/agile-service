@@ -19,7 +19,8 @@ interface Props {
   index?: number
 }
 export interface RefProps {
-  submit: () => Promise<any>
+  /** 图表数据提交，返回 `false` 表示此次图表数据非法 */
+  submit: () => Promise<any |false>
 }
 const Components = new Map<IReportContentType, React.FC<{
   innerRef: React.MutableRefObject<RefProps>
