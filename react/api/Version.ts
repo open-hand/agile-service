@@ -85,10 +85,12 @@ class VersionApi extends Api<VersionApi> {
    */
   loadProgramVersion(selectAll: boolean = false, teamProjectIds?: string[]) {
     return this.request({
-      method: 'get',
+      method: 'post',
       url: `${this.prefix}/program_version/list_program_version`,
       params: {
         organizationId: getOrganizationId(),
+      },
+      data: {
         teamProjectIds: teamProjectIds ? String(teamProjectIds) : undefined,
         selectAll,
       },
