@@ -7,9 +7,9 @@ import { useDeepCompareEffectNoCheck } from '@/hooks/useDeepCompareEffect';
 import isEqualNonNullable from '@/utils/isEqualNonNullable';
 
 interface IHookGetChartSearchDataSetConfig<T extends boolean> {
-    fields: NonNullable<DataSetProps['fields']>
-    enabled?: T
-    valueChangeDataSetValue?: { [fieldName: string]: any }
+  fields: NonNullable<DataSetProps['fields']>
+  enabled?: T
+  valueChangeDataSetValue?: { [fieldName: string]: any }
 }
 
 function useGetChartSearchDataSet<T extends boolean = true>(config: IHookGetChartSearchDataSetConfig<T>): T extends true ? DataSet : undefined {
@@ -19,7 +19,7 @@ function useGetChartSearchDataSet<T extends boolean = true>(config: IHookGetChar
   }), []);
   const fieldNames = useMemo(() => config.fields.map((field) => field.name), [config.fields]);
   useDeepCompareEffectNoCheck(() => {
-    if (config.valueChangeDataSetValue !== undefined) {
+    if (config.valueChangeDataSetValue !== undefined && config.enabled) {
       fieldNames.forEach((name) => {
         const path = name!;
         const newValue = get(config.valueChangeDataSetValue, path);

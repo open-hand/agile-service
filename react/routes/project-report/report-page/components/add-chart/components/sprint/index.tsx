@@ -5,6 +5,7 @@ import useSprintReport, { SprintConfig } from '@/components/charts/sprint/useSpr
 import { IReportChartBlock, SprintSearchVO } from '@/routes/project-report/report-page/store';
 import { getProjectId } from '@/utils/common';
 import { ChartRefProps } from '../..';
+import { validateSearchDataBySearchProps } from '../../utils';
 
 export const transformSprintSearch = (searchVO: SprintSearchVO | undefined): SprintConfig | undefined => {
   if (!searchVO) {
@@ -26,13 +27,14 @@ const SprintComponent: React.FC<Props> = ({ innerRef, projectId, data }) => {
   const [searchProps, props] = useSprintReport({
     ...transformSprintSearch(data?.chartSearchVO as SprintSearchVO),
     projectId,
+    openValidate: true,
   });
-  const handleSubmit = useCallback(async (): Promise<SprintSearchVO> => ({
+  const handleSubmit = useCallback(async (): Promise<SprintSearchVO> => validateSearchDataBySearchProps(searchProps, ({
     displayNonWorkingDay: searchProps.restDayShow,
     sprintId: searchProps.sprintId,
     currentSprint: searchProps.useCurrentSprint,
     projectId: searchProps.projectId || getProjectId(),
-  }),
+  })),
   [searchProps]);
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,

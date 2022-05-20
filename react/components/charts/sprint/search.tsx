@@ -1,11 +1,12 @@
 import React, { useRef } from 'react';
 import { CheckBox } from 'choerodon-ui/pro';
 import { find } from 'lodash';
-import SelectSprint from '@/components/select/select-sprint';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
+import SelectSprint from '@/components/select/select-sprint';
 import { ISprint } from '@/common/types';
+import { IChartSearchAdditionalProps } from '../types.';
 
-export interface SprintSearchProps {
+export interface SprintSearchProps extends IChartSearchAdditionalProps {
   sprintId: string | undefined
   setSprintId: (sprintId: string | undefined) => void
   currentSprintId: string | undefined
@@ -30,6 +31,7 @@ const SprintSearch: React.FC<SprintSearchProps> = ({
   setUseCurrentSprint,
   projectId,
   onEmpty,
+  searchDataSet,
 }) => {
   const sprintsRef = useRef<ISprint[]>([]);
   return (
@@ -42,6 +44,8 @@ const SprintSearch: React.FC<SprintSearchProps> = ({
         projectId={projectId}
         statusList={['started', 'closed']}
         currentSprintOption
+        name="sprint"
+        dataSet={searchDataSet}
       // onOption={({ record }) => ({
       //   disabled: record.get('sprintId') === '0' && !currentSprintId,
       // })}

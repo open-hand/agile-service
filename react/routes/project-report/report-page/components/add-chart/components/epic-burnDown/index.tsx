@@ -28,12 +28,14 @@ export const transformEpicBurndownSearch = (searchVO: EpicBurndownSearchVO | und
   });
 };
 
-const EpicBurnDownComponent:React.FC<Props> = ({
+const EpicBurnDownComponent: React.FC<Props> = ({
   innerRef, projectId, data, isProgram, linkTo,
 }) => {
   const config = useMemo(() => ({
     ...transformEpicBurndownSearch(data?.chartSearchVO as EpicBurndownSearchVO),
     projectId,
+    /** 史诗燃耗图内部有判断必填 */
+    openValidate: false,
   }), [data?.chartSearchVO, projectId]);
   const [searchProps, props] = useEpicBurnDownReport(config);
   const { epics, currentEpicId, checked } = searchProps;

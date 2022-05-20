@@ -63,7 +63,7 @@ const EpicReportSearch:React.FC<EpicReportSearchProps> = ({
           style={{ width: 240, marginLeft: 20 }}
           label="单位"
           value={unit}
-          name="init"
+          name="unit"
           dataSet={searchDataSet}
           onChange={handleChangeUnit}
         >

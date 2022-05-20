@@ -6,6 +6,7 @@ import useEpicReport, { EpicReportConfig } from '@/components/charts/epic-report
 import { getProjectId } from '@/utils/common';
 import { IReportChartBlock, EpicReportSearchVO } from '@/routes/project-report/report-page/store';
 import { ChartRefProps } from '../..';
+import { validateSearchDataBySearchProps } from '../../utils';
 
 export const transformEpicReportSearch = (searchVO: EpicReportSearchVO | undefined): EpicReportConfig | undefined => {
   if (!searchVO) {
@@ -26,15 +27,16 @@ const EpicReportComponent:React.FC<Props> = ({ innerRef, projectId, data }) => {
   const config = useMemo(() => ({
     ...transformEpicReportSearch(data?.chartSearchVO as EpicReportSearchVO),
     projectId,
+    openValidate: true,
   }), [data?.chartSearchVO, projectId]);
   const [props, searchProps] = useEpicReport(config);
   const { unit, epicId } = searchProps;
-  const handleSubmit = useCallback(async (): Promise<EpicReportSearchVO> => ({
+  const handleSubmit = useCallback(async (): Promise<EpicReportSearchVO> => validateSearchDataBySearchProps(searchProps, ({
     epicId,
     type: unit,
     projectId: searchProps.projectId || getProjectId(),
-  }),
-  [epicId, unit, searchProps.projectId]);
+  })),
+  [searchProps, epicId, unit]);
 
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,
