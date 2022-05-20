@@ -33,7 +33,7 @@ export function useImportIssueContext() {
 const ImportIssueContextProvider: React.FC<IImportIssueProps> = observer(
   (props) => {
     const {
-      importHistoryAction = 'upload_file', applyType = 'agile',
+      importHistoryAction = 'upload_file', applyType = 'agile', importFinishUnitName,
     } = props;
     const latestData = useCreation(() => ({}) as ImportIssueContextProps['latestData'], []);
     const [latestInfo, setLatestInfo] = useState<any>();
@@ -59,6 +59,7 @@ const ImportIssueContextProvider: React.FC<IImportIssueProps> = observer(
     const value = {
       ...props,
       store,
+      importFinishUnitName: importFinishUnitName || props.name || '工作项',
       latestInfo,
       latestData,
       applyType,
