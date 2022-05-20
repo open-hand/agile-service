@@ -19,6 +19,7 @@ export interface SelectProgramVersionProps extends Partial<SelectProps> {
   optionFlat?: boolean
   filterSelected?: boolean
   projectId?: string
+  selectedIds?: string[],
 }
 interface OldProps extends Partial<OldSelectProps> {
   teamProjectIds?: string[],
@@ -36,9 +37,10 @@ interface VersionDataConfigProps {
   teamProjectIds?: string[]
   afterLoad?: (versions: any[]) => void | Array<any>
   projectId?: string
+  selectedIds?: string[],
 }
 function useGetVersionData({
-  dataRef, afterLoad, teamProjectIds, projectId,
+  dataRef, afterLoad, teamProjectIds, projectId, selectedIds,
 }: VersionDataConfigProps): [StateProps, any] {
   const [versionData, dispatch] = useReducer<(state: StateProps, action: ActionProps) => StateProps>((state, action) => {
     const { type } = action;
@@ -82,19 +84,19 @@ function useGetVersionData({
   }, { data: [], option: new Map(), headOptions: [] });
 
   const loadData = useCallback(async () => {
-    versionApi.project(projectId).loadProgramVersion(false, teamProjectIds).then((res: any) => {
+    versionApi.project(projectId).loadProgramVersion(false, teamProjectIds, selectedIds).then((res: any) => {
       dispatch({ type: 'change', data: res });
     });
-  }, [projectId, teamProjectIds]);
+  }, [projectId, teamProjectIds, selectedIds]);
   useEffect(() => { loadData(); }, [loadData]);
   return [versionData, { loadData, dispatch }];
 }
 const SelectProgramVersion: React.FC<SelectProgramVersionProps> = forwardRef(({
-  teamProjectIds, dataRef, afterLoad, flat, optionFlat, projectId, ...otherProps
+  teamProjectIds, dataRef, afterLoad, flat, optionFlat, projectId, selectedIds, ...otherProps
 }, ref: React.Ref<Select>) => {
   const Component = flat ? FlatSelect : Select;
   const [versionData, method] = useGetVersionData({
-    teamProjectIds, dataRef, afterLoad, projectId,
+    teamProjectIds, dataRef, afterLoad, projectId, selectedIds,
   });
   const OptionComponent = optionFlat ? versionData.data.map((option) => (
     <Component.Option value={option.id}>
