@@ -3,20 +3,20 @@ package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath: 'agile_work_log.groovyoovy') {
     changeSet(id: '2018-05-18-agile-work-log', author: 'fuqianghuang01@gmail.com') {
         createTable(tableName: "agile_work_log") {
-            column(name: 'log_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'log id') {
+            column(name: 'log_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '日志id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'work_time', type: 'DECIMAL', remarks: 'work time') {
+            column(name: 'work_time', type: 'DECIMAL', remarks: '工作时间') {
                 constraints(nullable: false)
             }
-            column(name: 'start_date', type: 'DATETIME', remarks: 'start date') {
+            column(name: 'start_date', type: 'DATETIME', remarks: '开始日期') {
                 constraints(nullable: false)
             }
-            column(name: 'description', type: 'VARCHAR(5000)', remarks: 'description')
-            column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: 'issue id') {
+            column(name: 'description', type: 'VARCHAR(5000)', remarks: '描述')
+            column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: '问题id') {
                 constraints(nullable: false)
             }
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
 

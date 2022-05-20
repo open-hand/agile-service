@@ -18,7 +18,7 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_label_issue_rel.groovy') {
     }
     changeSet(id: '2018-09-03-agile-label-issue-rel-add-project-id', author: 'changpingshi0213@gmail.com') {
         addColumn(tableName: 'agile_label_issue_rel') {
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
         }

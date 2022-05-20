@@ -5,7 +5,7 @@ databaseChangeLog(logicalFilePath:'agile_gantt_issue_rank.groovy') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: 'issue id') {
+            column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: '问题id') {
                 constraints(nullable: false)
             }
             column(name: 'dimension', type: 'VARCHAR(128)', remarks: '业务维度，任务/经办人/冲刺/史诗') {
@@ -20,10 +20,10 @@ databaseChangeLog(logicalFilePath:'agile_gantt_issue_rank.groovy') {
             column(name: 'rank', type: 'VARCHAR(255)', remarks: 'rank') {
                 constraints(nullable: false)
             }
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
-            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: 'organization id') {
+            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
                 constraints(nullable: false)
             }
 

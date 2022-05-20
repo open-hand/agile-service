@@ -2,19 +2,19 @@ package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_message.groovy') {
     changeSet(id: '2018-08-14-agile-message', author: 'fuqianghuang01@gmail.com') {
         createTable(tableName: "agile_message") {
-            column(name: 'event', type: 'VARCHAR(255)', remarks: 'event') {
+            column(name: 'event', type: 'VARCHAR(255)', remarks: '事件') {
                 constraints(nullable: false)
             }
-            column(name: 'notice_type', type: 'VARCHAR(255)', remarks: 'notice type') {
+            column(name: 'notice_type', type: 'VARCHAR(255)', remarks: '通知类型') {
                 constraints(nullable: false)
             }
-            column(name: 'notice_name', type: 'VARCHAR(255)', remarks: 'notice name') {
+            column(name: 'notice_name', type: 'VARCHAR(255)', remarks: '通知名称名称') {
                 constraints(nullable: false)
             }
-            column(name: 'is_enable', type: 'TINYINT UNSIGNED', remarks: 'is enable') {
+            column(name: 'is_enable', type: 'TINYINT UNSIGNED', remarks: '是否启停用') {
                 constraints(nullable: false)
             }
-            column(name: 'user', type: 'VARCHAR(1000)', remarks: 'users')
+            column(name: 'user', type: 'VARCHAR(1000)', remarks: '用户')
 
 
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")

@@ -2,16 +2,16 @@ package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_board_column_status_rel.groovyoovy') {
     changeSet(id: '2018-05-14-agile-board-column-status-rel', author: 'fuqianghuang01@gmail.com') {
         createTable(tableName: "agile_board_column_status_rel") {
-            column(name: 'position', type: 'INTEGER UNSIGNED', remarks: 'position') {
+            column(name: 'position', type: 'INTEGER UNSIGNED', remarks: '位置') {
                 constraints(nullable: false)
             }
-            column(name: 'status_id', type: 'BIGINT UNSIGNED', remarks: 'status id') {
+            column(name: 'status_id', type: 'BIGINT UNSIGNED', remarks: '状态id') {
                 constraints(nullable: false)
             }
-            column(name: 'column_id', type: 'BIGINT UNSIGNED', remarks: 'column id') {
+            column(name: 'column_id', type: 'BIGINT UNSIGNED', remarks: '列id') {
                 constraints(nullable: false)
             }
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
 

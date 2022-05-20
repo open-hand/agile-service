@@ -2,16 +2,16 @@ package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_quick_filter.groovy') {
     changeSet(id: '2018-06-14-agile-quick-filter', author: 'fuqianghuang01@gmail.com') {
         createTable(tableName: "agile_quick_filter") {
-            column(name: 'filter_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'board id') {
+            column(name: 'filter_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
-            column(name: 'name', type: 'VARCHAR(255)', remarks: 'name')
-            column(name: 'sql_query', type: 'VARCHAR(1000)', remarks: 'long query')
-            column(name: 'express_query', type: 'VARCHAR(1000)', remarks: 'express query')
-            column(name: 'is_child_included', type: 'TINYINT UNSIGNED', remarks: 'is child included')
+            column(name: 'name', type: 'VARCHAR(255)', remarks: '名称')
+            column(name: 'sql_query', type: 'VARCHAR(1000)', remarks: '查询sql')
+            column(name: 'express_query', type: 'VARCHAR(1000)', remarks: '查询表达式')
+            column(name: 'is_child_included', type: 'TINYINT UNSIGNED', remarks: '是否包含子级')
 
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")
             column(name: "created_by", type: "BIGINT UNSIGNED", defaultValue: "0")

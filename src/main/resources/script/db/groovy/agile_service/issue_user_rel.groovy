@@ -9,7 +9,7 @@ package script.db.groovy.agile_service
             column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目Id') {
                 constraints(nullable: false)
             }
-            column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: 'issue id') {
+            column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: '问题id') {
                 constraints(nullable: false)
             }
             column(name: 'user_id', type: 'BIGINT UNSIGNED', remarks: '用户id'){

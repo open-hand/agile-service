@@ -3,24 +3,24 @@ package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath: 'script/db/agile_sprint.groovy') {
     changeSet(id: '2018-05-14-agile-sprint', author: 'jian_zhang02@163.com') {
         createTable(tableName: "agile_sprint") {
-            column(name: 'sprint_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'sprint id') {
+            column(name: 'sprint_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '冲刺id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'sprint_name', type: 'VARCHAR(255)', remarks: 'sprint name') {
+            column(name: 'sprint_name', type: 'VARCHAR(255)', remarks: '冲刺名称') {
                 constraints(nullable: false)
             }
-            column(name: 'sprint_goal', type: 'VARCHAR(255)', remarks: 'sprint goal')
-            column(name: 'duration', type: 'SMALLINT UNSIGNED', remarks: 'duration') {
+            column(name: 'sprint_goal', type: 'VARCHAR(255)', remarks: '冲刺目标')
+            column(name: 'duration', type: 'SMALLINT UNSIGNED', remarks: '间隔') {
                 constraints(nullable: false)
             }
-            column(name: 'start_date', type: 'DATETIME', remarks: 'start date')
-            column(name: 'end_date', type: 'DATETIME', remarks: 'end date')
-            column(name: 'actual_end_date', type: 'DATETIME', remarks: 'actual end date')
-            column(name: 'status_code', type: 'VARCHAR(10)', remarks: 'status code') {
+            column(name: 'start_date', type: 'DATETIME', remarks: '开始日期')
+            column(name: 'end_date', type: 'DATETIME', remarks: '结束日期')
+            column(name: 'actual_end_date', type: 'DATETIME', remarks: '实际结束日期')
+            column(name: 'status_code', type: 'VARCHAR(10)', remarks: '状态编码') {
                 constraints(nullable: false)
             }
 
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")

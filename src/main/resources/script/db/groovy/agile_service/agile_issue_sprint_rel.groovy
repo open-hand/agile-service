@@ -3,13 +3,13 @@ package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath: 'script/db/agile_issue_sprint_rel.groovy') {
     changeSet(id: '2018-06-15-agile_issue_sprint_rel', author: 'jian_zhang02@163.com') {
         createTable(tableName: "agile_issue_sprint_rel") {
-            column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: 'issue id') {
+            column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: '问题id') {
                 constraints(nullable: false)
             }
-            column(name: 'sprint_id', type: 'BIGINT UNSIGNED', remarks: 'sprint id') {
+            column(name: 'sprint_id', type: 'BIGINT UNSIGNED', remarks: '冲刺id') {
                 constraints(nullable: false)
             }
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")

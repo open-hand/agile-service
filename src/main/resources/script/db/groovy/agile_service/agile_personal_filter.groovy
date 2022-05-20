@@ -8,7 +8,7 @@ databaseChangeLog(logicalFilePath:'script/db/agile_personal_filter.groovy') {
             column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
-            column(name: 'name', type: 'VARCHAR(255)', remarks: 'name') {
+            column(name: 'name', type: 'VARCHAR(255)', remarks: '名称') {
                 constraints(nullable: false)
             }
             column(name: 'user_id', type: 'BIGINT UNSIGNED', remarks: '用户id') {

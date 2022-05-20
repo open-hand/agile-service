@@ -14,7 +14,7 @@ databaseChangeLog(logicalFilePath:'agile_work_calendar_subscribe.groovy') {
             column(name: 'uuid', type: 'VARCHAR(255)', remarks: 'uuid') {
                 constraints(nullable: false)
             }
-            column(name: 'file_url', type: 'VARCHAR(255)', remarks: 'file_url') {
+            column(name: 'file_url', type: 'VARCHAR(255)', remarks: '文件url') {
                 constraints(nullable: false)
             }
             column(name: 'is_changed', type: 'TINYINT UNSIGNED(3)', remarks: '是否发生改变', defaultValue: "0") {

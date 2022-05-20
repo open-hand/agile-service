@@ -5,13 +5,13 @@ databaseChangeLog(logicalFilePath:'agile_issue_component.groovyoovy') {
             column(name: 'component_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
-            column(name: 'name', type: 'VARCHAR(255)', remarks: 'name') {
+            column(name: 'name', type: 'VARCHAR(255)', remarks: '名称') {
                 constraints(nullable: false)
             }
-            column(name: 'description', type: 'VARCHAR(5000)', remarks: 'description')
+            column(name: 'description', type: 'VARCHAR(5000)', remarks: '描述')
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")
             column(name: "created_by", type: "BIGINT UNSIGNED", defaultValue: "0")
             column(name: "creation_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
@@ -21,8 +21,8 @@ databaseChangeLog(logicalFilePath:'agile_issue_component.groovyoovy') {
     }
     changeSet(id:  '2018-05-31-agile-issue-component-add-column', author: 'fuqianghuang01@gmail.com') {
         addColumn(tableName: 'agile_issue_component') {
-            column(name: 'manager_id', type: 'BIGINT UNSIGNED', remarks: 'manager id')
-            column(name: 'default_assignee_role', type: 'VARCHAR(255)', remarks: 'default assignee role')
+            column(name: 'manager_id', type: 'BIGINT UNSIGNED', remarks: '管理人id')
+            column(name: 'default_assignee_role', type: 'VARCHAR(255)', remarks: '默认经办人角色')
         }
     }
 

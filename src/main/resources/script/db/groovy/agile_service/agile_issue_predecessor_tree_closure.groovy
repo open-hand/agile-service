@@ -11,10 +11,10 @@ databaseChangeLog(logicalFilePath:'agile_issue_predecessor_tree_closure.groovy')
             column(name: 'descendant_id', type: 'BIGINT UNSIGNED', remarks: '后代id') {
                 constraints(nullable: false)
             }
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
-            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: 'organization id') {
+            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
                 constraints(nullable: false)
             }
 
