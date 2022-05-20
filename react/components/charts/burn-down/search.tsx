@@ -1,12 +1,14 @@
-import React, { useMemo, useRef } from 'react';
-import { Select, CheckBox } from 'choerodon-ui/pro';
+import React, {
+  MutableRefObject, useMemo, useRef, useImperativeHandle, useEffect,
+} from 'react';
+import { Select, CheckBox, DataSet } from 'choerodon-ui/pro';
 import { find } from 'lodash';
+import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import { IQuickSearchValue } from '@/components/quick-search';
 import SelectSprint from '@/components/select/select-sprint';
 import IssueSearch, { IssueSearchStore } from '@/components/issue-search';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
-import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import { ISearchVO, ISprint } from '@/common/types';
 import { IBurndownChartType } from '.';
 
@@ -30,6 +32,10 @@ export interface BurnDownSearchProps {
   searchVO?: ISearchVO
   setSearchVO: (searchVO: ISearchVO) => void
   onEmpty: () => void
+  /**
+   * 当前图表搜索 的DataSet
+   */
+   searchDataSet?:DataSet
 }
 const BurndownSearch: React.FC<BurnDownSearchProps> = ({
   projectId,
@@ -49,6 +55,7 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
   searchVO,
   setSearchVO,
   onEmpty,
+  searchDataSet,
 }) => {
   const sprintsRef = useRef<ISprint[]>([]);
   const issueSearchStore = useMemo(() => new IssueSearchStore({
@@ -64,6 +71,8 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
       <SelectSprint
         style={{ width: 280 }}
         label="迭代冲刺"
+        dataSet={searchDataSet}
+        name="sprint"
         labelLayout={'float' as LabelLayout}
         clearButton={false}
         projectId={projectId}
@@ -124,9 +133,11 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
       />
       <Select
         clearButton={false}
+        dataSet={searchDataSet}
         labelLayout={'float' as LabelLayout}
         style={{ width: 200, marginLeft: 20 }}
         label="单位"
+        name="unit"
         value={type}
         onChange={setType}
       >

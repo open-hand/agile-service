@@ -2,6 +2,7 @@ import {
   useEffect, useState, useCallback, useMemo,
 } from 'react';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
+import { DataSet } from 'choerodon-ui/pro';
 import moment, { Moment } from 'moment';
 import { reportApi, boardApi } from '@/api';
 import useControlledDefaultValue from '@/hooks/useControlledDefaultValue';
@@ -9,8 +10,9 @@ import { getProjectId } from '@/utils/common';
 import { AccumulationSearchProps } from './search';
 import { AccumulationChartProps } from '.';
 import { IAccumulationData } from './utils';
+import { IChartSearchHookAdditionalConfig } from '../types.';
 
-export interface AccumulationConfig {
+export interface AccumulationConfig extends IChartSearchHookAdditionalConfig {
   boardId?: string
   defaultLoading?: boolean
   quickFilterIds?: string[]
@@ -63,6 +65,19 @@ function useAccumulationReport(config?: AccumulationConfig, onFinish?: Function)
       handleBoardChange(config.boardId);
     }
   }, [config?.boardId, handleBoardChange]);
+  const searchDataSet = useMemo(() => new DataSet({
+    autoCreate: true,
+    fields: [
+      { name: 'range', label: '范围', required: true },
+      { name: 'board', required: true },
+    ],
+  }), []);
+  useEffect(() => {
+    boardId && searchDataSet.current?.set('board', boardId);
+  }, [boardId, searchDataSet]);
+  useEffect(() => {
+    range !== searchDataSet.current?.get('range') && searchDataSet.current?.set('range', range);
+  }, [range, searchDataSet]);
   const searchProps: AccumulationSearchProps = {
     range,
     onRangeChange: (value) => {
@@ -75,6 +90,7 @@ function useAccumulationReport(config?: AccumulationConfig, onFinish?: Function)
       setQuickFilterIds(value);
     },
     projectId,
+    searchDataSet: config?.openValidate ? searchDataSet : undefined,
   };
   const props: AccumulationChartProps = {
     loading,

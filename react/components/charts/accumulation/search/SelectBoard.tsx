@@ -2,19 +2,21 @@ import React, {
   useState, useEffect, useCallback, useRef,
 } from 'react';
 import { Select } from 'choerodon-ui/pro';
+import type { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+
 import { find } from 'lodash';
 import { IBoard } from '@/common/types';
 import { boardApi } from '@/api';
 
 const { Option } = Select;
-interface Props {
+interface Props extends Partial<SelectProps>{
   onChange: (boardId: string) => void
   value: string
   // eslint-disable-next-line react/require-default-props
   projectId?: string
 }
 const SelectBoard: React.FC<Props> = ({
-  onChange, value, projectId,
+  onChange, value, projectId, ...otherProps
 }) => {
   const [boardList, setBoardList] = useState<IBoard[]>([]);
   const valueRef = useRef(value);
@@ -41,6 +43,7 @@ const SelectBoard: React.FC<Props> = ({
       onChange={(boardId) => {
         onChange(boardId);
       }}
+      {...otherProps}
     >
       {boardList.map((board) => (
         <Option
