@@ -5,7 +5,7 @@ import { getProjectId } from '@/utils/common';
 import { EpicReportProps, IEpicReportChart, IEpicReportTable } from './index';
 import { EpicReportSearchProps, IEpic } from './search';
 import { IUnit } from '../iteration-speed/search';
-import { IChartSearchHookAdditionalConfig } from '../types.';
+import { IChartSearchHookAdditionalConfig } from '../types';
 import useGetChartSearchDataSet from '../useGetChartSearchDataSet';
 
 interface IOriginChartData {

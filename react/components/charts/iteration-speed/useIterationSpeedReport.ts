@@ -4,7 +4,7 @@ import useControlledDefaultValue from '@/hooks/useControlledDefaultValue';
 import { getProjectId } from '@/utils/common';
 import { IterationSpeedProps, ISprintSpeed } from './index';
 import { IterationSpeedSearchProps, IUnit } from './search';
-import { IChartSearchHookAdditionalConfig } from '../types.';
+import { IChartSearchHookAdditionalConfig } from '../types';
 import useGetChartSearchDataSet from '../useGetChartSearchDataSet';
 
 export interface IterationSpeedConfig extends IChartSearchHookAdditionalConfig{

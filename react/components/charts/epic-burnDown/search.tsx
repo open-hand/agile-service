@@ -8,7 +8,7 @@ import seeChangeRange from './image/seeChangeRange.svg';
 import seeProgress from './image/seeProgress.svg';
 import styles from './index.less';
 import useIsProgram from '@/hooks/useIsProgram';
-import { IChartSearchAdditionalProps } from '../types.';
+import { IChartSearchAdditionalProps } from '../types';
 
 export interface IEpic {
   issueId: string,

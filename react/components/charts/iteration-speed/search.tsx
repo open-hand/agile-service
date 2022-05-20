@@ -2,7 +2,7 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { Select } from 'choerodon-ui/pro';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
-import { IChartSearchAdditionalProps } from '../types.';
+import { IChartSearchAdditionalProps } from '../types';
 
 const { Option } = Select;
 export type IUnit = 'story_point' | 'issue_count' | 'remain_time';

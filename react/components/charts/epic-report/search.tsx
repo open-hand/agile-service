@@ -6,7 +6,7 @@ import { find } from 'lodash';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
-import { IChartSearchAdditionalProps } from '../types.';
+import { IChartSearchAdditionalProps } from '../types';
 
 const { Option } = Select;
 
