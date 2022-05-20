@@ -13,10 +13,12 @@ import { IQuickSearchValue } from '@/components/quick-search';
 import useControlledDefaultValue from '@/hooks/useControlledDefaultValue';
 import { getProjectId } from '@/utils/common';
 import { ISearchVO } from '@/common/types';
+import useGetChartSearchDataSet from '../useGetChartSearchDataSet';
+import { IChartSearchHookAdditionalConfig } from '../types.';
 
 const { AppState } = stores;
 
-export interface BurnDownConfig {
+export interface BurnDownConfig extends IChartSearchHookAdditionalConfig{
   type?: IBurndownChartType
   restDayShow?: boolean
   sprintId?: string
@@ -87,21 +89,18 @@ function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnD
    *
    * TODO: 需要优化
   */
-  const searchDataSet = useMemo(() => new DataSet({
-    autoCreate: true,
+  const searchDataSet = useGetChartSearchDataSet({
+    enabled: config?.openValidate,
     fields: [
       { name: 'sprint', label: '迭代冲刺', required: true },
       { name: 'unit', label: '单位', required: true },
     ],
-  }), []);
+    valueChangeDataSetValue: {
+      unit: type,
+      sprint: useCurrentSprint ? 'current' : sprintId,
+    },
+  });
 
-  useEffect(() => {
-    searchDataSet.current?.set('unit', type);
-  }, [searchDataSet, type]);
-  useEffect(() => {
-    const newSprint = useCurrentSprint ? 'current' : sprintId;
-    searchDataSet.current?.get('sprint') !== newSprint && searchDataSet.current?.set('sprint', newSprint);
-  }, [searchDataSet, sprintId, useCurrentSprint]);
   const searchProps: BurnDownSearchProps = {
     projectId,
     sprintId,

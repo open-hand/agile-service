@@ -92,7 +92,7 @@ const useEpicReport = (config?: EpicReportConfig, onFinish?: Function): [EpicRep
   useEffect(() => {
     loadTableData();
   }, [loadTableData]);
-  useGetChartSearchDataSet({
+  const searchDataSet = useGetChartSearchDataSet({
     enabled: config?.openValidate,
     fields: [
       { name: 'epicId', label: '史诗', required: true },
@@ -107,7 +107,7 @@ const useEpicReport = (config?: EpicReportConfig, onFinish?: Function): [EpicRep
     loading, data, tableData, unit, epicId, epics,
   };
   const searchProps: EpicReportSearchProps = {
-    unit, setUnit, epics, epicId, setEpicId, projectId,
+    unit, setUnit, epics, epicId, setEpicId, projectId, searchDataSet,
   };
   return [props, searchProps];
 };

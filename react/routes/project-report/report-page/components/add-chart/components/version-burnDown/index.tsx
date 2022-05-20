@@ -28,12 +28,14 @@ export const transformVersionBurndownSearch = (searchVO: VersionBurndownSearchVO
   });
 };
 
-const EpicBurnDownComponent:React.FC<Props> = ({
+const EpicBurnDownComponent: React.FC<Props> = ({
   innerRef, projectId, data, isProgram, linkTo,
 }) => {
   const config = useMemo(() => ({
     ...transformVersionBurndownSearch(data?.chartSearchVO as VersionBurndownSearchVO),
     projectId,
+    /** 版本燃耗图有判断必填 此处不校验 */
+    openValidate: false,
   }), [data?.chartSearchVO, projectId]);
   const [searchProps, props] = useVersionBurnDownReport(config);
   const { versions, currentVersionId, checked } = searchProps;
@@ -78,7 +80,7 @@ const EpicBurnDownComponent:React.FC<Props> = ({
                   </>
                 )}
               </div>
-          )}
+            )}
           />
         )
       }
