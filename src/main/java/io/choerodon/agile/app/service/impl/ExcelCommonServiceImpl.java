@@ -68,6 +68,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private static final String DATE_CHECK_MSG = "请输入正确的日期格式";
     private static final String DATE_RANGE_CHECK_MSG = "开始时间不能在结束时间之后";
     private static final String[] SYSTEM_DATE_FIELD_LIST = {FieldCode.ACTUAL_START_TIME, FieldCode.ACTUAL_END_TIME, FieldCode.ESTIMATED_START_TIME, FieldCode.ESTIMATED_END_TIME};
+    private static final List<String> SYSTEM_FIELD_HEADER_NOT_SORT = Arrays.asList(FieldCode.PARENT, FieldCode.ISSUE_TYPE);
     public static final List<String> COMMON_PREDEFINED_SYSTEM_FIELD =
             Arrays.asList(
                     FieldCode.PRIORITY,
@@ -517,7 +518,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     public void fillInPredefinedValues(Workbook wb, Sheet sheet, List<PredefinedDTO> predefinedList) {
         for (PredefinedDTO predefined : predefinedList) {
             //父级保持issueId倒序
-            if (!Objects.equals(ExcelImportTemplate.IssueHeader.PARENT, predefined.hidden())) {
+            if (!SYSTEM_FIELD_HEADER_NOT_SORT.contains(predefined.hidden())) {
                 Collections.sort(predefined.values());
             }
             wb = ExcelUtil
