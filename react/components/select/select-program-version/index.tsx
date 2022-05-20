@@ -109,7 +109,7 @@ const SelectProgramVersion: React.FC<SelectProgramVersionProps> = forwardRef(({
           <span className={versionStyles.OptGroup}>{item.name}</span>
         </Tooltip>) as unknown as string}
       >
-        { options.map((option) => (
+        {options.map((option) => (
           <Component.Option value={option.id}>
             {option.name}
           </Component.Option>
@@ -132,6 +132,7 @@ const SelectProgramVersion: React.FC<SelectProgramVersionProps> = forwardRef(({
     </Component>
   );
 });
+SelectProgramVersion.displayName = 'SelectProgramVersion';
 export default SelectProgramVersion;
 const OldSelectProgramVersion: React.FC<OldProps> = ({ teamProjectIds, ...restProps }) => {
   const [versionData, method] = useGetVersionData({ teamProjectIds });
@@ -146,7 +147,7 @@ const OldSelectProgramVersion: React.FC<OldProps> = ({ teamProjectIds, ...restPr
             <span className={versionStyles.OptGroup}>{item.name}</span>
           </Tooltip>) as unknown as string}
       >
-        { options.map((option) => (
+        {options.map((option) => (
           <OldSelect.Option value={option.id}>
             {option.name}
           </OldSelect.Option>

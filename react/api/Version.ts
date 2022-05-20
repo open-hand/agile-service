@@ -88,10 +88,10 @@ class VersionApi extends Api<VersionApi> {
       method: 'post',
       url: `${this.prefix}/program_version/list_program_version`,
       params: {
-        organizationId: getOrganizationId(),
+        organizationId: this.orgId,
       },
       data: {
-        teamProjectIds: teamProjectIds ? String(teamProjectIds) : undefined,
+        teamProjectIds,
         selectAll,
       },
     });
@@ -105,11 +105,11 @@ class VersionApi extends Api<VersionApi> {
   linkProgramVersion(programVersionId: string, productVersionId: string) {
     return this.request({
       method: 'get',
-      url: `/agile/v1/projects/${getProjectId()}/program_version/link_program_version`,
+      url: `/agile/v1/projects/${this.projectId}/program_version/link_program_version`,
       params: {
         programVersionId,
         productVersionId,
-        organizationId: getOrganizationId(),
+        organizationId: this.orgId,
       },
     });
   }

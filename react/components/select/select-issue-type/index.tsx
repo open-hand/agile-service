@@ -19,7 +19,7 @@ export interface SelectIssueTypeProps extends Partial<SelectProps> {
   dataRef?: React.MutableRefObject<any>
   valueField?: string
   defaultSelectedIds?: string[]
-
+  programId?: string
   flat?: boolean
   projectId?: string
   applyType?: string
@@ -31,7 +31,7 @@ export interface SelectIssueTypeProps extends Partial<SelectProps> {
 
 const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
   filterList = ['feature'], isProgram, request, valueField: propsValueField, dataRef, flat, excludeTypeIds = [], showIcon, defaultSelectedIds: propsDefaultSelectedIds,
-  afterLoad, projectId, applyType, excludeTypeCodes, onlyEnabled = false, level, ...otherProps
+  afterLoad, projectId, applyType, excludeTypeCodes, onlyEnabled = false, level, programId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const defaultSelectedIds = useCreation(() => castArray(propsDefaultSelectedIds).filter(Boolean), []);
   const valueField = useCreation(() => propsValueField || 'id', []);
@@ -44,7 +44,7 @@ const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
         return issueTypeApi.loadPageForWorkbench({ page, param: filterWord, size: 50 },
           { filterIssueTypeIds: defaultSelectedIds });
       }
-      return issueTypeApi.loadAllWithStateMachineId(applyType ?? (isProgram ? 'program' : undefined), projectId).then((issueTypes) => {
+      return issueTypeApi.loadAllWithStateMachineId(applyType ?? (isProgram ? 'program' : undefined), projectId, undefined, programId).then((issueTypes) => {
         if (isProgram) {
           const featureType: IIssueType = find<IIssueType>(issueTypes, { typeCode: 'feature' }) as IIssueType;
 
@@ -56,7 +56,7 @@ const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
             icon: '',
             stateMachineId: '',
             typeCode: '',
-            featureId: featureType.id,
+            featureId: featureType?.id,
             featureType,
           }, {
             id: 'enabler',
@@ -66,7 +66,7 @@ const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
             icon: '',
             stateMachineId: '',
             typeCode: '',
-            featureId: featureType.id,
+            featureId: featureType?.id,
             featureType,
 
           }];
