@@ -29,7 +29,7 @@ function customizerFieldCodes(obj1: Record<string, any>, obj2: Record<string, an
 }
 const ImportIssueForm = (formProps: any) => {
   const {
-    title, children, bottom, className, contentStyle,
+    title, children, bottom, className, contentStyle, titleStyle,
   } = formProps;
   const context = useImportIssueContext();
   const prefixCls = `${context.prefixCls}-form-one`;
@@ -284,7 +284,7 @@ const ImportIssueContent: React.FC = observer(() => {
       <ImportIssueForm
         title="选择模板字段"
         className={classnames({ [`${prefixCls}-form-field`]: action })}
-        contentStyle={{ marginTop: 5 }}
+        contentStyle={{ marginTop: 12 }}
         bottom={(
           <>
             <Button
