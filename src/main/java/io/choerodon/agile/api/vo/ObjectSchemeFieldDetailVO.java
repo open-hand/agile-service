@@ -52,7 +52,7 @@ public class ObjectSchemeFieldDetailVO {
     @ApiModelProperty(value = "问题类型id")
     @Encrypt
     private List<Long> issueTypeIds;
-
+    @ApiModelProperty(value = "项目名称")
     private String projectName;
 
     public String getProjectName() {

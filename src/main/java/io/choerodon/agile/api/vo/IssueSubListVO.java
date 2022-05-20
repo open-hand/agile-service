@@ -77,9 +77,9 @@ public class IssueSubListVO {
 
     @ApiModelProperty(value = "星标")
     private Boolean starBeacon;
-
+    @ApiModelProperty(value = "实际结束日期")
     private Date actualCompletedDate;
-
+    @ApiModelProperty(value = "应用类型")
     private String applyType;
 
     public Date getActualCompletedDate() {

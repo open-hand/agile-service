@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.List;
 
 /**
@@ -7,11 +9,11 @@ import java.util.List;
  * @since 2021-01-21
  */
 public class ProjectSearchVO {
-
+    @ApiModelProperty(value = "类别id集合")
     private List<Long> categoryIds;
-
+    @ApiModelProperty(value = "是否启用")
     private Boolean enable;
-
+    @ApiModelProperty(value = "类别编码")
     private List<String> categoryCodes;
 
     public List<Long> getCategoryIds() {

@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -8,11 +9,16 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 public class StarBeaconVO {
 
     @Encrypt
+    @ApiModelProperty(value = "实例id")
     private Long instanceId;
+    @ApiModelProperty(value = "组织id")
     private Long organizationId;
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
     @Encrypt
+    @ApiModelProperty(value = "用户id")
     private Long userId;
+    @ApiModelProperty(value = "类型")
     private String type;
 
     public Long getUserId() {

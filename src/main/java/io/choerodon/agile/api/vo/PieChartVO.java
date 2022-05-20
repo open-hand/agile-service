@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo;
 
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.infra.utils.StringUtil;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.io.Serializable;
@@ -11,22 +12,23 @@ import java.io.Serializable;
  * @since 2018/7/26
  */
 public class PieChartVO implements Serializable {
-
+    @ApiModelProperty(value = "名称")
     private String name;
-
+    @ApiModelProperty(value = "登录名")
     private String loginName;
-
+    @ApiModelProperty(value = "真实名")
     private String realName;
 
     @Encrypt(ignoreValue = {"0"})
+    @ApiModelProperty(value = "类型名称")
     private String typeName;
-
+    @ApiModelProperty(value = "值")
     private Integer value;
-
+    @ApiModelProperty(value = "百分比")
     private Double percent;
-
+    @ApiModelProperty(value = "json数据")
     private JSONObject jsonObject;
-
+    @ApiModelProperty(value = "优先级")
     private PriorityVO priorityVO;
 
     public String getName() {

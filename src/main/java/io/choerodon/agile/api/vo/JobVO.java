@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.core.base.BaseConstants;
 
 /**
@@ -24,12 +25,19 @@ public class JobVO {
     public JobVO() {
     }
 
+    @ApiModelProperty(value = "人")
     private String worker;
+    @ApiModelProperty(value = "任务数量")
     private Integer taskCount = 0;
+    @ApiModelProperty(value = "故事数量")
     private Integer storyCount = 0;
+    @ApiModelProperty(value = "故事点统计")
     private BigDecimal storyPointCount = BigDecimal.ZERO;
+    @ApiModelProperty(value = "缺陷创建数量")
     private Integer bugCreatedCount = 0;
+    @ApiModelProperty(value = "缺陷修复数量")
     private Integer bugFixCount = 0;
+    @ApiModelProperty(value = "工时")
     private BigDecimal workTime = BigDecimal.ZERO;
 
     public String getWorker() {

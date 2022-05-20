@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -9,16 +10,17 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 public class StatusTemplateVO {
 
     @Encrypt
+    @ApiModelProperty(value = "状态id")
     private Long statusId;
-
+    @ApiModelProperty(value = "名称")
     private String name;
-
+    @ApiModelProperty(value = "类别编码")
     private String categoryCode;
-
+    @ApiModelProperty(value = "位置")
     private Integer position;
-
+    @ApiModelProperty(value = "模版是否完成")
     private Boolean templateCompleted;
-
+    @ApiModelProperty(value = "组织id")
     private Long organizationId;
 
     public Long getStatusId() {

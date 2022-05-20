@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.choerodon.agile.infra.utils.StringUtil;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotNull;
@@ -16,13 +17,15 @@ public class QuickFilterSequenceVO {
 
     @NotNull(message = FILTER_ID_NOT_NULL_ERROR)
     @Encrypt
+    @ApiModelProperty(value = "过滤id")
     private Long filterId;
 
     @NotNull(message = OBJECT_VERSION_NUMBER_NULL_ERROR)
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
-
+    @ApiModelProperty(value = "前一个序列")
     private Integer beforeSequence;
-
+    @ApiModelProperty(value = "后一个序列")
     private Integer afterSequence;
 
     public Long getFilterId() {

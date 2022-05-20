@@ -17,10 +17,11 @@ public class IssueTypeSearchVO {
     private String description;
     @ApiModelProperty(value = "其他参数")
     private String param;
+    @ApiModelProperty(value = "是否启用")
     private Boolean enabled;
-
+    @ApiModelProperty(value = "是否引用")
     private Boolean referenced;
-
+    @ApiModelProperty(value = "来源")
     private String source;
     @JsonIgnore
     private List<String> typeCodes;
@@ -28,8 +29,9 @@ public class IssueTypeSearchVO {
     private List<Long> issueTypeIds;
 
     @Encrypt
+    @ApiModelProperty(value = "过滤的问题类型id")
     private List<Long> filterIssueTypeIds;
-
+    @ApiModelProperty(value = "项目id集合")
     private List<Long> projectIds;
 
     public List<Long> getIssueTypeIds() {

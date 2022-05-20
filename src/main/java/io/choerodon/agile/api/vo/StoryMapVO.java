@@ -5,18 +5,26 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.agile.infra.dto.EpicWithInfoDTO;
 import io.choerodon.agile.infra.dto.business.StoryMapStoryDTO;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author jiaxu.cui@hand-china.com 2020/6/22 下午3:13
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StoryMapVO {
+    @ApiModelProperty(value = "史诗")
     private List<EpicWithInfoDTO> epics;
+    @ApiModelProperty(value = "故事")
     private List<StoryMapStoryDTO> storyList;
+    @ApiModelProperty(value = "故事地图宽度")
     private List<StoryMapWidthVO> storyMapWidth;
+    @ApiModelProperty(value = "故事地图")
     private List<StoryMapStoryVO> demandStoryList;
+    @ApiModelProperty(value = "总页数")
     private Integer totalPage;
+    @ApiModelProperty(value = "开始页")
     private Integer page;
+    @ApiModelProperty(value = "每页数量")
     private Integer size;
 
     public List<StoryMapStoryVO> getDemandStoryList() {

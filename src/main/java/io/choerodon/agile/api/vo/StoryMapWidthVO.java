@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -10,17 +11,19 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 
 public class StoryMapWidthVO {
     @Encrypt
+    @ApiModelProperty(value = "id")
     private Long id;
-
+    @ApiModelProperty(value = "类型")
     private String type;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
 
     @Encrypt
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
-
+    @ApiModelProperty(value = "宽度")
     private Long width;
-
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
 
     public Long getId() {

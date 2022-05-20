@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -8,14 +9,16 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 public class StateMachineTransformUpdateVO {
     @Encrypt
+    @ApiModelProperty(value = "开始节点id")
     private Long startNodeId;
     @Encrypt
+    @ApiModelProperty(value = "结束节点id")
     private Long endNodeId;
-
+    @ApiModelProperty(value = "开始状态名")
     private String startStatusName;
-
+    @ApiModelProperty(value = "结束状态名")
     private String endStatusName;
-
+    @ApiModelProperty(value = "是否被选择")
     private Boolean select;
 
     public Long getStartNodeId() {

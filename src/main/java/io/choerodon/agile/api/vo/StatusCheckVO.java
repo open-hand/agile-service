@@ -19,7 +19,7 @@ public class StatusCheckVO {
     private String name;
     @ApiModelProperty(value = "状态类型（todo/doing/done/none/prepare）")
     private String type;
-
+    @ApiModelProperty(value = "存在的问题类型")
     private List<IssueTypeVO> existIssueTypeVO;
 
     public void setStatusExist(Boolean statusExist) {

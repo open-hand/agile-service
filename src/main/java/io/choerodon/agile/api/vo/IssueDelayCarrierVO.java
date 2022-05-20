@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.swagger.annotations.ApiModelProperty;
 
 import java.util.Objects;
 
@@ -9,13 +10,13 @@ import java.util.Objects;
  * @since 2021-03-08
  */
 public class IssueDelayCarrierVO {
-
+    @ApiModelProperty(value = "问题")
     private IssueDTO issueDTO;
-
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
-
+    @ApiModelProperty(value = "延期天数")
     private Long delayDay;
-
+    @ApiModelProperty(value = "组织id")
     private Long organizationId;
 
     public IssueDelayCarrierVO(IssueDTO issueDTO,

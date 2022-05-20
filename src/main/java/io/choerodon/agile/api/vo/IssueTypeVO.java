@@ -32,7 +32,7 @@ public class IssueTypeVO {
     private Boolean initialize;
     @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
-
+    @ApiModelProperty(value = "引用问题类型")
     private IssueTypeVO referenceIssueType;
 
     /**
@@ -43,28 +43,29 @@ public class IssueTypeVO {
     @ApiModelProperty(value = "状态机id")
     @Encrypt
     private Long stateMachineId;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "是否启用")
     private Boolean enabled;
-
+    @ApiModelProperty(value = "是否可以被引用")
     private Boolean referenced;
-
+    @ApiModelProperty(value = "使用数量")
     private Integer usageCount;
-
+    @ApiModelProperty(value = "来源")
     private String source;
 
     /**
      * 是否可以被删除
      */
+    @ApiModelProperty(value = "是否可以被删除")
     private Boolean deleted;
-
+    @ApiModelProperty(value = "引用id")
     private Long referenceId;
-
+    @ApiModelProperty(value = "是否复制状态机")
     private Boolean copyStatusMachine;
-
+    @ApiModelProperty(value = "是否复制自定义字段配置")
     private Boolean copyCustomField;
-
+    @ApiModelProperty(value = "排序值")
     private String rank;
 
     public String getRank() {

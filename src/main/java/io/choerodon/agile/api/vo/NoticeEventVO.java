@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo;
 
 import java.util.Set;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.springframework.context.ApplicationEvent;
 
 /**
@@ -34,14 +35,19 @@ public class NoticeEventVO extends ApplicationEvent {
         this.allFieldCheck = allFieldCheck;
         this.memberFieldIds = memberFieldIds;
     }
-
+    @ApiModelProperty(value = "模块")
     private String component;
+    @ApiModelProperty(value = "事件")
     private String event;
+    @ApiModelProperty(value = "实例id")
     private Long instanceId;
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
+    @ApiModelProperty(value = "字段")
     private Set<String> fieldList;
+    @ApiModelProperty(value = "是否全字段检查")
     private Boolean allFieldCheck = false;
-
+    @ApiModelProperty(value = "成员字段id")
     private Set<Long> memberFieldIds;
 
     public Set<Long> getMemberFieldIds() {

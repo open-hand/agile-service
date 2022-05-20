@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -9,16 +10,19 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 public class StatusBranchMergeSettingVO {
 
     @Encrypt
+    @ApiModelProperty(value = "id")
     private Long id;
     @Encrypt
+    @ApiModelProperty(value = "问题类型id")
     private Long issueTypeId;
     @Encrypt
+    @ApiModelProperty(value = "状态id")
     private Long statusId;
-
+    @ApiModelProperty(value = "是否可以转换")
     private Boolean autoTransform;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "组织id")
     private Long organizationId;
 
     public Long getId() {

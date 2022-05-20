@@ -60,7 +60,7 @@ public class UserVO {
 
     @ApiModelProperty(value = "param")
     private String param;
-
+    @ApiModelProperty(value = "创建时间")
     private Date creationDate;
 
     public String getParam() {

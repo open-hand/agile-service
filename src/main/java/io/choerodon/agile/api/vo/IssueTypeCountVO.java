@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -9,10 +10,11 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 public class IssueTypeCountVO {
 
     @Encrypt
+    @ApiModelProperty(value = "问题类型id")
     private Long issueTypeId;
-
+    @ApiModelProperty(value = "数量")
     private Integer count;
-
+    @ApiModelProperty(value = "问题类型名称")
     private String issueTypeName;
 
     public String getIssueTypeName() {
