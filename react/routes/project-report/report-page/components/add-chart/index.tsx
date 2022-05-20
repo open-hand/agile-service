@@ -132,7 +132,7 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData, linkTo }) => {
   const codeChanged = dataSet.current?.get('chart') !== initChartCode;
   const ignoreSearchVO = projectChanged || codeChanged;
   const handleSubmit = useCallback(async () => {
-    const search = await chartRef.current.submit();
+    const search = chartRef.current?.submit && await chartRef.current.submit();
     if (await dataSet.validate() && search !== false) {
       const data = dataSet.current?.toData();
       const block: IReportChartBlock = {
