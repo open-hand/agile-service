@@ -83,7 +83,7 @@ class VersionApi extends Api<VersionApi> {
    * 查询可关联的项目群版本
    * @param programId
    */
-  loadProgramVersion(selectAll: boolean = false, teamProjectIds?: string[]) {
+  loadProgramVersion(selectAll: boolean = false, teamProjectIds?: string[], filterIds?: string[]) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/program_version/list_program_version`,
@@ -93,6 +93,7 @@ class VersionApi extends Api<VersionApi> {
       data: {
         teamProjectIds,
         selectAll,
+        filterIds,
       },
     });
   }
