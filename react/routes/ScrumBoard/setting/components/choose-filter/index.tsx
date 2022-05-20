@@ -35,7 +35,7 @@ const ChooseFilter = () => {
   useEffect(() => {
     const getSelectedFilters = async () => {
       const res = await boardApi.getFilterSelected(boardId);
-      filterDs.current?.set('filterIds', map(res, 'quickFilterId'));
+      filterDs.current?.init('filterIds', map(res, 'quickFilterId'));
       setHasGetted(true);
     };
     getSelectedFilters();
