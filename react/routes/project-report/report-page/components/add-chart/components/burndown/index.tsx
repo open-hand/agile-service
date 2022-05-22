@@ -1,4 +1,6 @@
-import React, { useCallback, useImperativeHandle, useMemo } from 'react';
+import React, {
+  useCallback, useImperativeHandle, useMemo, useRef,
+} from 'react';
 import { observer } from 'mobx-react-lite';
 import { stores } from '@choerodon/boot';
 import BurnDown from '@/components/charts/burn-down';
@@ -38,21 +40,25 @@ const BurnDownComponent: React.FC<Props> = ({ innerRef, projectId, data }) => {
   const config = useMemo(() => ({
     ...transformBurnDownSearch(data?.chartSearchVO as BurnDownSearchVO),
     projectId,
+    openValidate: true,
   }),
   [data?.chartSearchVO, projectId]);
   const [searchProps, props] = useBurnDownReport(config);
-  const handleSubmit = useCallback(async (): Promise<BurnDownSearchVO> => ({
-    type: searchProps.type,
-    displayNonWorkingDay: searchProps.restDayShow,
-    projectId: searchProps.projectId || getProjectId(),
-    sprintId: searchProps.sprintId,
-    currentSprint: searchProps.useCurrentSprint,
-    quickFilterIds: searchProps.quickFilter.quickFilters,
-    onlyStory: searchProps.quickFilter.onlyStory,
-    assigneeId: searchProps.quickFilter.onlyMe ? AppState.userInfo.id : undefined,
-    personalFilterIds: searchProps.quickFilter.personalFilters,
-    currentSearchVO: searchProps.searchVO,
-  }),
+  const handleSubmit = useCallback(async (): Promise<BurnDownSearchVO | false> => {
+    const searchDataSet = searchProps.searchDataSet!;
+    return (await searchDataSet.validate() ? ({
+      type: searchProps.type,
+      displayNonWorkingDay: searchProps.restDayShow,
+      projectId: searchProps.projectId || getProjectId(),
+      sprintId: searchProps.sprintId,
+      currentSprint: searchProps.useCurrentSprint,
+      quickFilterIds: searchProps.quickFilter.quickFilters,
+      onlyStory: searchProps.quickFilter.onlyStory,
+      assigneeId: searchProps.quickFilter.onlyMe ? AppState.userInfo.id : undefined,
+      personalFilterIds: searchProps.quickFilter.personalFilters,
+      currentSearchVO: searchProps.searchVO,
+    }) : false);
+  },
   [searchProps]);
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,

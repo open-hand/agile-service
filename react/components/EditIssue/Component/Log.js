@@ -1,14 +1,15 @@
 /* eslint-disable react/jsx-no-bind */
-import React, { Component } from 'react';
+import React, { Component, PureComponent } from 'react';
 import { Icon, Popconfirm } from 'choerodon-ui';
+import { Permission } from '@choerodon/boot';
 import { workLogApi } from '@/api';
 import UserTag from '@/components/tag/user-tag';
-
+import EditIssueContext from '../stores';
 import WYSIWYGEditor from '../../CKEditor';
 import WYSIWYGViewer from '../../CKEditorViewer';
 import './Log.less';
 
-class Log extends Component {
+class Log extends PureComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -61,15 +62,16 @@ class Log extends Component {
 
   render() {
     const {
-      worklog, isWide, disabled,
+      worklog, isWide, disabled, loginUserId,
     } = this.props;
+    const { getDeletePermissions, store } = this.context;
     const { editLog, editLogId, expand } = this.state;
     const {
       realName, loginName,
       userName, createdBy, userImageUrl,
     } = worklog;
     const deltaEdit = editLog;
-
+    const isCanDel = createdBy && loginUserId && String(createdBy) === String(loginUserId);
     return (
       <div
         className={`c7n-log ${worklog.logId === editLogId ? 'c7n-log-focus' : ''}`}
@@ -131,36 +133,43 @@ class Log extends Component {
           <div className="c7n-action">
             {
               !disabled && (
-              <Icon
-                role="none"
-                type="edit-o"
-                onClick={() => {
-                  this.setState({
-                    editLogId: worklog.logId,
-                    editLog: worklog.description,
-                    expand: true,
-                  });
-                }}
-              />
+                <Icon
+                  role="none"
+                  type="edit-o"
+                  onClick={() => {
+                    this.setState({
+                      editLogId: worklog.logId,
+                      editLog: worklog.description,
+                      expand: true,
+                    });
+                  }}
+                />
               )
             }
+            <Permission
+              type="project"
+              projectId={store.projectId}
+              service={getDeletePermissions()}
+            >
+              {(permission) => (!disabled && (permission || isCanDel)
+                ? (
+                  <Popconfirm
+                    title="确认要删除该工作日志吗?"
+                    placement="left"
+                    onConfirm={this.confirm.bind(this, worklog.logId)}
+                    onCancel={this.cancel}
+                    okText="删除"
+                    cancelText="取消"
+                    okType="danger"
+                  >
+                    <Icon
+                      type="delete_sweep-o"
+                    />
+                  </Popconfirm>
+                ) : null)}
 
-            {!disabled
-              ? (
-                <Popconfirm
-                  title="确认要删除该工作日志吗?"
-                  placement="left"
-                  onConfirm={this.confirm.bind(this, worklog.logId)}
-                  onCancel={this.cancel}
-                  okText="删除"
-                  cancelText="取消"
-                  okType="danger"
-                >
-                  <Icon
-                    type="delete_sweep-o"
-                  />
-                </Popconfirm>
-              ) : ''}
+            </Permission>
+
           </div>
         </div>
         <div className="line-start" style={{ color: 'var(--text-color3)', marginTop: '10px' }}>
@@ -213,5 +222,5 @@ class Log extends Component {
     );
   }
 }
-
+Log.contextType = EditIssueContext;
 export default Log;

@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -25,10 +26,15 @@ public class IssueCompletedStatusVO {
     public IssueCompletedStatusVO() {
     }
     @Encrypt
+    @ApiModelProperty(value = "用户id")
     private Long userId;
+    @ApiModelProperty(value = "用户详情")
     private UserMessageDTO userMessage;
+    @ApiModelProperty(value = "工作人")
     private String worker;
+    @ApiModelProperty(value = "是否已完成")
     private Integer completed;
+    @ApiModelProperty(value = "创建id")
     private Integer created;
 
     public String getWorker() {

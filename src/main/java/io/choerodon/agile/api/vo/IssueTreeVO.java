@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
@@ -10,13 +11,13 @@ import java.util.Objects;
  * @since 2021-11-17
  */
 public class IssueTreeVO {
-
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
-
+    @ApiModelProperty(value = "概要")
     private String summary;
-
+    @ApiModelProperty(value = "问题编号")
     private String issueNum;
-
+    @ApiModelProperty(value = "子级")
     private List<IssueTreeVO> children;
 
     public Long getIssueId() {

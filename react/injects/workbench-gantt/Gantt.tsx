@@ -61,7 +61,7 @@ const WorkbenchGantt: React.FC = () => {
 
       </div>
       <div className={classNames(styles.content, 'c7n-gantt-content')}>
-        <GanttBody {...ganttHeaderData} />
+        <GanttBody {...ganttHeaderData} key={projectId} />
       </div>
       <StatusLinkageWSHandle />
     </LoadingProvider>

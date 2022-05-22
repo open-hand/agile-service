@@ -20,11 +20,13 @@ public class QuickFilterValueVO {
     /**
      * 是否为预定义字段，必填
      */
+    @ApiModelProperty(value = "是否为预定义字段")
     private Boolean predefined;
 
     /**
      * 自定义字段的字段类型
      */
+    @ApiModelProperty(value = "自定义字段的字段类型")
     private String customFieldType;
 
     public String getCustomFieldType() {

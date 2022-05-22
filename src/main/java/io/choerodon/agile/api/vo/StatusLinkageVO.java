@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -8,34 +9,39 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 public class StatusLinkageVO {
     @Encrypt
+    @ApiModelProperty(value = "id")
     private Long id;
 
     @Encrypt
+    @ApiModelProperty(value = "问题类型id")
     private Long issueTypeId;
 
     @Encrypt
+    @ApiModelProperty(value = "状态id")
     private Long statusId;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "父级问题类型编码")
     private String  parentIssueTypeCode;
 
     @Encrypt
+    @ApiModelProperty(value = "父级问题状态联动配置")
     private Long parentIssueStatusSetting;
-
+    @ApiModelProperty(value = "问题类型")
     private IssueTypeVO issueTypeVO;
-
+    @ApiModelProperty(value = "状态")
     private StatusVO statusVO;
-
+    @ApiModelProperty(value = "项目群id")
     private Long programId;
-
+    @ApiModelProperty(value = "项目")
     private ProjectVO projectVO;
 
     @Encrypt
+    @ApiModelProperty(value = "父级问题类型id")
     private Long parentIssueTypeId;
-
+    @ApiModelProperty(value = "问题类型名")
     private String issueTypeName;
-
+    @ApiModelProperty(value = "类型")
     private String type;
 
     public String getIssueTypeName() {

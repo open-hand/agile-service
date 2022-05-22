@@ -7,7 +7,7 @@ import EditIssueContext from '../../stores';
 import Divider from './Divider';
 
 const IssueWorkLog = observer(({
-  reloadIssue, issueId, onIssueRecordTime,
+  reloadIssue, issueId, onIssueRecordTime, loginUserId,
 }) => {
   const { store, disabled, projectId } = useContext(EditIssueContext);
 
@@ -24,6 +24,7 @@ const IssueWorkLog = observer(({
               onUpdateLog={reloadIssue}
               disabled={disabled}
               projectId={projectId}
+              loginUserId={loginUserId}
             />
           ))
         }

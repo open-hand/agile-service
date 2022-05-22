@@ -83,14 +83,17 @@ class VersionApi extends Api<VersionApi> {
    * 查询可关联的项目群版本
    * @param programId
    */
-  loadProgramVersion(selectAll: boolean = false, teamProjectIds?: string[]) {
+  loadProgramVersion(selectAll: boolean = false, teamProjectIds?: string[], filterIds?: string[]) {
     return this.request({
-      method: 'get',
+      method: 'post',
       url: `${this.prefix}/program_version/list_program_version`,
       params: {
-        organizationId: getOrganizationId(),
-        teamProjectIds: teamProjectIds ? String(teamProjectIds) : undefined,
+        organizationId: this.orgId,
+      },
+      data: {
+        teamProjectIds,
         selectAll,
+        filterIds,
       },
     });
   }
@@ -103,11 +106,11 @@ class VersionApi extends Api<VersionApi> {
   linkProgramVersion(programVersionId: string, productVersionId: string) {
     return this.request({
       method: 'get',
-      url: `/agile/v1/projects/${getProjectId()}/program_version/link_program_version`,
+      url: `/agile/v1/projects/${this.projectId}/program_version/link_program_version`,
       params: {
         programVersionId,
         productVersionId,
-        organizationId: getOrganizationId(),
+        organizationId: this.orgId,
       },
     });
   }

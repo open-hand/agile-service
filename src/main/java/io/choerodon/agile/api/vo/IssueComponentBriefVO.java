@@ -21,6 +21,7 @@ public class IssueComponentBriefVO implements Serializable {
     private String name;
 
     @Encrypt
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
 
 

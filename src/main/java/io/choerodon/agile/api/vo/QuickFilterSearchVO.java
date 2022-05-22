@@ -18,8 +18,10 @@ public class QuickFilterSearchVO {
     @ApiModelProperty(value = "搜索内容")
     private List<String> contents;
     @Encrypt
+    @ApiModelProperty(value = "快查id")
     private List<Long> quickFilterIds;
     @Encrypt
+    @ApiModelProperty(value = "忽略的快查id")
     private List<Long> ignoredQuickFilterIds;
 
     public List<Long> getIgnoredQuickFilterIds() {

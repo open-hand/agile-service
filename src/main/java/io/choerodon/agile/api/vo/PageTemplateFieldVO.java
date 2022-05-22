@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -10,50 +11,53 @@ import java.util.List;
  */
 public class PageTemplateFieldVO {
     @Encrypt
+    @ApiModelProperty(value = "id")
     private Long id;
 
     @Encrypt
+    @ApiModelProperty(value = "字段id")
     private Long fieldId;
-
+    @ApiModelProperty(value = "字段名称")
     private String fieldName;
-
+    @ApiModelProperty(value = "默认值")
     private Object defaultValue;
-
+    @ApiModelProperty(value = "默认值")
     private Object defaultValueObj;
-
+    @ApiModelProperty(value = "字段类型")
     private String fieldType;
-
+    @ApiModelProperty(value = "是否必填")
     private Boolean required;
-
+    @ApiModelProperty(value = "是否在创建页")
     private Boolean created;
-
+    @ApiModelProperty(value = "是否在编辑页")
     private Boolean edited;
-
+    @ApiModelProperty(value = "问题类型")
     private String issueType;
-
+    @ApiModelProperty(value = "rank")
     private String rank;
-
+    @ApiModelProperty(value = "创建层级")
     private String createdLevel;
-
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
-
+    @ApiModelProperty(value = "页面配置编辑的对象")
     private PageConfigFieldEditedVO pageConfigFieldEdited;
-
+    @ApiModelProperty(value = "字段编码")
     private String fieldCode;
-
+    @ApiModelProperty(value = "是否有额外配置")
     private Boolean extraConfig;
-
+    @ApiModelProperty(value = "字段选项")
     private List<FieldOptionVO> fieldOptions;
-
+    @ApiModelProperty(value = "默认值")
     private List<Object> defaultValueObjs;
-
+    @ApiModelProperty(value = "字段级联")
     private List<FieldCascadeRuleDesVO> fieldCascadeRuleDesList;
-
+    @ApiModelProperty(value = "字段权限")
     private List<PermissionVO> permissionList;
 
     @Encrypt
+    @ApiModelProperty(value = "问题类型id")
     private Long issueTypeId;
-
+    @ApiModelProperty(value = "是否允许编辑权限")
     private Boolean allowedEditPermission;
 
     public List<PermissionVO> getPermissionList() {

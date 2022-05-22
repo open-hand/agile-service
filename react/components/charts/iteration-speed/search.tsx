@@ -2,17 +2,18 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { Select } from 'choerodon-ui/pro';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
+import { IChartSearchAdditionalProps } from '../types';
 
 const { Option } = Select;
 export type IUnit = 'story_point' | 'issue_count' | 'remain_time';
 
-export interface IterationSpeedSearchProps {
+export interface IterationSpeedSearchProps extends IChartSearchAdditionalProps {
   unit: IUnit,
   setUnit: Function,
   projectId: string,
 }
 
-const IterationSpeedSearch: React.FC<IterationSpeedSearchProps> = ({ unit, setUnit }) => {
+const IterationSpeedSearch: React.FC<IterationSpeedSearchProps> = ({ unit, setUnit, searchDataSet }) => {
   const handleChangeCurrentUnit = (value: IUnit) => {
     setUnit(value);
   };
@@ -25,6 +26,7 @@ const IterationSpeedSearch: React.FC<IterationSpeedSearchProps> = ({ unit, setUn
         style={{ width: 500, marginBottom: 20 }}
         label="单位选择"
         value={unit}
+        dataSet={searchDataSet}
         onChange={handleChangeCurrentUnit}
       >
         <Option key="story_point" value="story_point">

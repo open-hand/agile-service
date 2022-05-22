@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.choerodon.agile.api.vo.business.IssueListVO;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -10,20 +11,23 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 public class IssuePredecessorVO {
 
     @Encrypt
+    @ApiModelProperty(value = "id")
     private Long id;
 
     @Encrypt
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
 
     @Encrypt
+    @ApiModelProperty(value = "前置id")
     private Long predecessorId;
-
+    @ApiModelProperty(value = "前置类型")
     private String predecessorType;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "组织id")
     private Long organizationId;
-
+    @ApiModelProperty(value = "前置问题")
     private IssueListVO predecessorIssueVO;
 
     public Long getId() {

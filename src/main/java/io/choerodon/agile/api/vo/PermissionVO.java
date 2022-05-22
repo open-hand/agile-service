@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -11,15 +12,17 @@ import java.util.Set;
  * @since 2021-07-20
  */
 public class PermissionVO {
-
+    @ApiModelProperty(value = "范围")
     private String scope;
     @Encrypt
+    @ApiModelProperty(value = "用户id")
     private Set<Long> userIds;
     @Encrypt
+    @ApiModelProperty(value = "角色id")
     private Set<Long> roleIds;
-
+    @ApiModelProperty(value = "用户")
     private List<UserMessageDTO> userList;
-
+    @ApiModelProperty(value = "角色")
     private List<RoleVO> roleList;
 
     public List<UserMessageDTO> getUserList() {

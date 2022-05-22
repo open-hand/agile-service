@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Tooltip } from 'choerodon-ui/pro';
+import { map } from 'lodash';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { featureApi } from '@/api';
 import SelectProgramVersion from '@/components/select/select-program-version';
@@ -63,6 +64,7 @@ class FieldProgramVersion extends Component {
                 multiple
                 projectId={store.projectId}
                 required={required}
+                selectedIds={map(programVersionFeatureRelVOS, 'programVersionId')}
               />
             )}
             submitTrigger={['blur']}

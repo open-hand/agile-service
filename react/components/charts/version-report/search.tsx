@@ -1,12 +1,13 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { Icon } from 'choerodon-ui/pro';
-import { Select } from 'choerodon-ui/pro';
+import { Icon, Select } from 'choerodon-ui/pro';
+
 import { find } from 'lodash';
+import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
-import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
-import useIsProgram from "@/hooks/useIsProgram";
+import useIsProgram from '@/hooks/useIsProgram';
+import { IChartSearchAdditionalProps } from '../types';
 
 const { Option } = Select;
 
@@ -19,7 +20,7 @@ export interface IVersion {
 
 export type IUnit = 'story_point' | 'issue_count' | 'remain_time';
 
-export interface VersionReportSearchProps {
+export interface VersionReportSearchProps extends IChartSearchAdditionalProps {
   unit: IUnit
   setUnit: Function
   versions: IVersion[]
@@ -29,7 +30,7 @@ export interface VersionReportSearchProps {
 }
 
 const VersionReportSearch:React.FC<VersionReportSearchProps> = ({
-  unit, setUnit, versions, versionId, setVersionId,
+  unit, setUnit, versions, versionId, setVersionId, searchDataSet,
 }) => {
   const currentVersion = find(versions, { versionId });
   const { isProgram } = useIsProgram();
@@ -50,6 +51,8 @@ const VersionReportSearch:React.FC<VersionReportSearchProps> = ({
           clearButton={false}
           style={{ width: 240 }}
           label="版本"
+          name="version"
+          dataSet={searchDataSet}
           value={versionId}
           onChange={handleChangeVersion}
         >
@@ -70,6 +73,8 @@ const VersionReportSearch:React.FC<VersionReportSearchProps> = ({
           style={{ width: 240, marginLeft: 20 }}
           label="单位"
           value={unit}
+          name="unit"
+          dataSet={searchDataSet}
           onChange={handleChangeUnit}
         >
           <Option key="story_point" value="story_point">故事点</Option>

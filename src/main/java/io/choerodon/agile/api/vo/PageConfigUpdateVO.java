@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -11,21 +12,23 @@ import java.util.Set;
  * @since 2020-08-10
  */
 public class PageConfigUpdateVO {
-
+    @ApiModelProperty(value = "问题类型")
     private String issueType;
-
+    @ApiModelProperty(value = "字段")
     private List<PageConfigFieldVO> fields;
-
+    @ApiModelProperty(value = "问题类型字段")
     private IssueTypeFieldVO issueTypeFieldVO;
 
     @Encrypt
+    @ApiModelProperty(value = "删除的id")
     private Set<Long> deleteIds;
-
+    @ApiModelProperty(value = "创建页面字段")
     private List<ObjectSchemeFieldCreateVO> createdFields;
-
+    @ApiModelProperty(value = "添加的字段")
     private List<PageConfigFieldVO> addFields;
 
     @Encrypt
+    @ApiModelProperty(value = "问题类型")
     private Long issueTypeId;
 
     public List<PageConfigFieldVO> getAddFields() {

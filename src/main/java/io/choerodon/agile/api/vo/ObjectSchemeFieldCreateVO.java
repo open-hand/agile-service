@@ -37,13 +37,13 @@ public class ObjectSchemeFieldCreateVO {
     @NotNull(message = "error.field.issueTypeIdNotNull")
     @Encrypt
     private List<Long> issueTypeIds;
-
+    @ApiModelProperty(value = "是否必填")
     private Boolean required;
-
+    @ApiModelProperty(value = "是否在创建页面")
     private Boolean created;
-
+    @ApiModelProperty(value = "是否在编辑页面")
     private Boolean edited;
-
+    @ApiModelProperty(value = "排序值")
     private String rank;
 
     public String getRank() {

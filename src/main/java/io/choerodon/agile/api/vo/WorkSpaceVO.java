@@ -5,10 +5,12 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 
 public class WorkSpaceVO {
     @Encrypt
+    @ApiModelProperty(value = "id")
     private Long id;
-
+    @ApiModelProperty(value = "名称")
     private String name;
     @Encrypt
+    @ApiModelProperty(value = "库id")
     private Long baseId;
 
     @ApiModelProperty("WorkSpace的类型")

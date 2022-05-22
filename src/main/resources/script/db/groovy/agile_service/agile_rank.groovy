@@ -6,9 +6,9 @@ databaseChangeLog(logicalFilePath: 'agile_rank.groovy') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id')
-            column(name: 'type', type: 'VARCHAR(255)', remarks: 'rank type')
-            column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: 'issue id')
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id')
+            column(name: 'type', type: 'VARCHAR(255)', remarks: '类型')
+            column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: '问题id')
             column(name: 'rank', type: 'VARCHAR(765)', remarks: 'rank')
 
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")

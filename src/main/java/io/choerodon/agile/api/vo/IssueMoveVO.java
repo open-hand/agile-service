@@ -49,7 +49,7 @@ public class IssueMoveVO {
 
     @ApiModelProperty(value = "是否排序")
     private Long projectId;
-
+    @ApiModelProperty(value = "错误信息")
     private String errorMsg;
 
     public String getErrorMsg() {

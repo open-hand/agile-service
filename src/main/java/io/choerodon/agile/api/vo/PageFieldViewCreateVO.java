@@ -16,6 +16,7 @@ public class PageFieldViewCreateVO {
     private String fieldType;
     @ApiModelProperty(value = "字段值")
     private Object value;
+    @ApiModelProperty(value = "字段编码")
     private String fieldCode;
 
     public String getFieldCode() {

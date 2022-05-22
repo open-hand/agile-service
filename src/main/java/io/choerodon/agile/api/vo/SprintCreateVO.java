@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.Date;
 
 /**
@@ -7,13 +9,13 @@ import java.util.Date;
  * Email: fuqianghuang01@gmail.com
  */
 public class SprintCreateVO {
-
+    @ApiModelProperty(value = "冲刺名称")
     private String sprintName;
-
+    @ApiModelProperty(value = "冲刺目标")
     private String sprintGoal;
-
+    @ApiModelProperty(value = "开始时间")
     private Date startDate;
-
+    @ApiModelProperty(value = "结束时间")
     private Date endDate;
 
     public String getSprintName() {

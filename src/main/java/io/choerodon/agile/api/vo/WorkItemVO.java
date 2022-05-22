@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Date;
@@ -11,35 +12,39 @@ import java.util.Date;
  */
 public class WorkItemVO {
     @Encrypt
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
-
+    @ApiModelProperty(value = "概要")
     private String summary;
-
+    @ApiModelProperty(value = "预计开始时间")
     private Date estimatedStartTime;
 
     @Encrypt
+    @ApiModelProperty(value = "优先级id")
     private Long priorityId;
 
     @Encrypt
+    @ApiModelProperty(value = "状态id")
     private Long statusId;
-
+    @ApiModelProperty(value = "状态")
     private StatusVO statusVO;
-
+    @ApiModelProperty(value = "优先级")
     private PriorityVO priorityVO;
 
     @Encrypt
+    @ApiModelProperty(value = "经办人id")
     private Long assigneeId;
-
+    @ApiModelProperty(value = "预计结束时间")
     private Date estimatedEndTime;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "统计数量")
     private CountVO countVO;
-
+    @ApiModelProperty(value = "经办人")
     private UserMessageDTO assignee;
-
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
-
+    @ApiModelProperty(value = "问题编号")
     private String issueNum;
 
     public Long getIssueId() {

@@ -15,6 +15,11 @@ export type IImportIssueFieldProps = {
 export interface IImportIssueBaseProps {
   modal?: IModalProps
   name?: string
+  /**
+   * 导入完成后的数据单位名称
+   * @default '工作项'
+   */
+  importFinishUnitName?: string
   applyType?: 'program' | 'agile'
   /** 最后一次历史记录查询 */
   importHistoryAction?: string
@@ -89,6 +94,7 @@ ImportIssue.defaultProps = {
   onSuccess: undefined,
   action: undefined,
   onClose: undefined,
+  importFinishUnitName: undefined,
 };
 export default ImportIssue;
 export { openImportIssueModal };

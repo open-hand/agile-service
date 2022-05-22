@@ -6,22 +6,22 @@ databaseChangeLog(logicalFilePath: 'agile_static_file_line.groovy') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'header_id', type: 'BIGINT UNSIGNED', remarks: 'header id') {
+            column(name: 'header_id', type: 'BIGINT UNSIGNED', remarks: '头id') {
                 constraints(nullable: false)
             }
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
-            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: 'organization id') {
+            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
                 constraints(nullable: false)
             }
             column(name: 'url', type: 'VARCHAR(500)', remarks: 'url') {
                 constraints(nullable: false)
             }
-            column(name: 'relative_path', type: 'VARCHAR(500)', remarks: 'file name') {
+            column(name: 'relative_path', type: 'VARCHAR(500)', remarks: '文件名称') {
                 constraints(nullable: false)
             }
-            column(name: 'file_type', type: 'VARCHAR(255)', remarks: 'file type') {
+            column(name: 'file_type', type: 'VARCHAR(255)', remarks: '文件类型') {
                 constraints(nullable: false)
             }
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")

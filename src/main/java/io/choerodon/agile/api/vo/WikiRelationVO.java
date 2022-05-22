@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -9,20 +10,23 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 public class WikiRelationVO {
 
     @Encrypt
+    @ApiModelProperty(value = "id")
     private Long id;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
 
     @Encrypt
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
-
+    @ApiModelProperty(value = "wiki名称")
     private String wikiName;
-
+    @ApiModelProperty(value = "wiki url")
     private String wikiUrl;
 
     @Encrypt
+    @ApiModelProperty(value = "空间id")
     private Long spaceId;
-
+    @ApiModelProperty(value = "工作空间")
     private WorkSpaceVO workSpaceVO;
 
     public Long getId() {

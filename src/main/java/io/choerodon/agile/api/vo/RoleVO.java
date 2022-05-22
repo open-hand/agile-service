@@ -40,16 +40,16 @@ public class RoleVO {
 
     @ApiModelProperty(value = "是否内置角色/非必填")
     private Boolean builtIn;
-
+    @ApiModelProperty(value = "组织名")
     private String organizationName;
-
+    @ApiModelProperty(value = "项目名")
     private String projectName;
-
+    @ApiModelProperty(value = "用户")
     private List<UserDTO> users;
 
-    @ApiModelProperty(value = "已分配用户数量/非必填")
+    @ApiModelProperty(value = "用户数量")
     private Integer userCount;
-
+    @ApiModelProperty(value = "角色id")
     private List<Long> roleIds;
 
 

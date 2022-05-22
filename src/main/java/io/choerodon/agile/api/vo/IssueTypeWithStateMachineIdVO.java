@@ -36,9 +36,9 @@ public class IssueTypeWithStateMachineIdVO {
     @ApiModelProperty(value = "初始状态id")
     @Encrypt
     private Long initStatusId;
-
+    @ApiModelProperty(value = "是否启用")
     private Boolean enabled;
-
+    @ApiModelProperty(value = "应用类型")
     private String applyType;
 
     public Boolean getEnabled() {

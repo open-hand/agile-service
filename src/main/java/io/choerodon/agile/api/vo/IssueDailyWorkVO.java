@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.Date;
 import java.util.List;
 
@@ -7,43 +9,43 @@ import java.util.List;
  * @author huaxin.deng@hand-china.com 2021-08-02 20:55:16
  */
 public class IssueDailyWorkVO {
-
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
-
+    @ApiModelProperty(value = "概要")
     private String summary;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "问题类型编码")
     private String typeCode;
-
+    @ApiModelProperty(value = "问题编码")
     private String issueNum;
-
+    @ApiModelProperty(value = "报告人id")
     private Long reporterId;
-
+    @ApiModelProperty(value = "经办人id")
     private Long assigneeId;
-
+    @ApiModelProperty(value = "优先级id")
     private Long priorityId;
-
+    @ApiModelProperty(value = "优先级名称")
     private String priorityName;
-
+    @ApiModelProperty(value = "优先级颜色")
     private String priorityColour;
-
+    @ApiModelProperty(value = "问题类型id")
     private Long issueTypeId;
-
+    @ApiModelProperty(value = "问题类型名称")
     private String typeName;
-
+    @ApiModelProperty(value = "状态id")
     private Long statusId;
-
+    @ApiModelProperty(value = "状态名称")
     private String statusName;
-
+    @ApiModelProperty(value = "状态编码")
     private String statusCode;
-
+    @ApiModelProperty(value = "父级问题id")
     private Long parentIssueId;
-
+    @ApiModelProperty(value = "关联的问题id")
     private Long relateIssueId;
-
+    @ApiModelProperty(value = "预计结束时间")
     private Date estimatedEndTime;
-
+    @ApiModelProperty(value = "子级")
     private List<IssueDailyWorkVO> childIssues;
 
     public Long getIssueId() {

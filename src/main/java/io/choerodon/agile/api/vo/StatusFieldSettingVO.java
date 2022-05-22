@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.choerodon.agile.infra.dto.StatusFieldValueSettingDTO;
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -10,27 +11,31 @@ import java.util.List;
  */
 public class StatusFieldSettingVO {
     @Encrypt
+    @ApiModelProperty(value = "id")
     private Long id;
 
     @Encrypt
+    @ApiModelProperty(value = "问题类型id")
     private Long issueTypeId;
 
     @Encrypt
+    @ApiModelProperty(value = "状态id")
     private Long statusId;
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
 
     @Encrypt
+    @ApiModelProperty(value = "字段id")
     private Long fieldId;
-
+    @ApiModelProperty(value = "字段名称")
     private String fieldName;
-
+    @ApiModelProperty(value = "字段编码")
     private String fieldCode;
-
+    @ApiModelProperty(value = "字段类型")
     private String fieldType;
-
+    @ApiModelProperty(value = "是否为系统字段")
     private Boolean isSystem;
-
+    @ApiModelProperty(value = "字段值")
     private List<StatusFieldValueSettingDTO> fieldValueList;
 
     public Long getId() {

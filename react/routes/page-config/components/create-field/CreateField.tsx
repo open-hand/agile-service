@@ -347,8 +347,8 @@ function CreateField() {
               fieldType,
               props: {
                 ...commonProps,
-                key: JSON.stringify(fieldOptions.filter((f) => f.enabled)),
                 style: { width: '100%', marginTop: '20px' },
+                disabledRuleConfig: true,
                 fieldOptions: fieldOptions.filter((f) => f.enabled).map((f) => ({ ...f, id: f.id ?? f.tempKey })),
                 selected: toJS(current?.get('defaultValue')),
               },

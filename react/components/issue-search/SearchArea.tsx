@@ -10,6 +10,7 @@ import { observer } from 'mobx-react-lite';
 
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { FlatSelect } from '@choerodon/components';
+import classNames from 'classnames';
 import { flattenObject, isFilterSame } from './utils';
 import IssueSearchContext from './context';
 import SummaryField from './custom-fields/field/SummaryField';
@@ -18,6 +19,7 @@ import useQuickFilters from './useQuickFilters';
 import ListenSearchSize from './ListenSearchSize';
 import useFormatMessage from '@/hooks/useFormatMessage';
 import isEqualNonNullable from '@/utils/isEqualNonNullable';
+import { IIssueSearchCommonFilterOption } from '.';
 
 const { AppState } = stores;
 const { Option, OptGroup } = FlatSelect;
@@ -25,7 +27,7 @@ const { Option, OptGroup } = FlatSelect;
 const SearchArea: React.FC = () => {
   const prefixCls = 'c7n-issue';
   const {
-    store, onClear, urlFilter, onClickSaveFilter, projectId, foldedHeight, hasMyAssigned, excludeQuickFilterIds, hiddenQuickFilters,
+    store, onClear, urlFilter, onClickSaveFilter, projectId, foldedHeight, excludeQuickFilterIds, hiddenQuickFilters, hiddenMyCommonFilterOption,
   } = useContext(IssueSearchContext);
   const formatMessage = useFormatMessage();
   const { data: quickFilters } = useQuickFilters({ projectId }, { enabled: store.menuType === 'project' && !hiddenQuickFilters });
@@ -178,6 +180,22 @@ const SearchArea: React.FC = () => {
   const myFilterSelectValue = getMyFilterSelectValue();
   const hasSummaryField = useMemo(() => store.getAllFields.some((f) => f.code === 'contents'), [store.getAllFields]);
   const hasQuickFilterField = useMemo(() => store.getAllFields.some((f) => f.code === 'quickFilterIds'), [store.getAllFields]);
+  const myFilterCommonGroup = useMemo(() => {
+    if (hiddenMyCommonFilterOption?.length === 3) {
+      return <></>;
+    }
+    const showCommon: Record<IIssueSearchCommonFilterOption, any> = {
+      onlyMe: <Option value="commonly|onlyMe">{formatMessage({ id: 'agile.search.only.me.issue' })}</Option>,
+      starBeacon: <Option value="commonly|starBeacon">{formatMessage({ id: 'agile.search.my.star' })}</Option>,
+      myAssignee: <Option value="commonly|myAssigned">{formatMessage({ id: 'agile.search.my.handle' })}</Option>,
+    };
+    const group = (
+      <OptGroup key="commonly" label={formatMessage({ id: 'agile.search.common.option' }) as string}>
+        {Object.entries(showCommon).filter(([key, el]) => !hiddenMyCommonFilterOption?.includes(key as IIssueSearchCommonFilterOption)).map(([_, el]) => el)}
+      </OptGroup>
+    );
+    return group;
+  }, [formatMessage, hiddenMyCommonFilterOption]);
   const renderSearch = () => (
     <>
       {hasSummaryField && (
@@ -200,15 +218,7 @@ const SearchArea: React.FC = () => {
                 popupCls={`${prefixCls}-search-hidden_my_filter`}
                 multiple
               >
-                <OptGroup key="commonly" label={formatMessage({ id: 'agile.search.common.option' }) as string}>
-                  <Option value="commonly|onlyMe">{formatMessage({ id: 'agile.search.only.me.issue' })}</Option>
-                  <Option value="commonly|starBeacon">{formatMessage({ id: 'agile.search.my.star' })}</Option>
-                  {
-                    hasMyAssigned && (
-                      <Option value="commonly|myAssigned">{formatMessage({ id: 'agile.search.my.handle' })}</Option>
-                    )
-                  }
-                </OptGroup>
+                {myFilterCommonGroup}
                 <OptGroup key="quick" label={formatMessage({ id: 'agile.systemField.quickFilter' }) as string}>
                   {quickFilters.filter((filter) => !includes(excludeQuickFilterIds, filter.filterId)).map((filter) => (
                     <Option value={`quick|${filter.filterId}`}>{filter.name}</Option>
@@ -285,7 +295,7 @@ const SearchArea: React.FC = () => {
   );
   return (
     <div
-      className={`${prefixCls}-search`}
+      className={classNames(`${prefixCls}-search`, { [`${prefixCls}-url-search`]: urlFilter })}
       style={{
         height: folded ? foldedHeight : 'unset',
         overflow: 'hidden',

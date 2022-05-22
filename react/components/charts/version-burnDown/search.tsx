@@ -5,13 +5,14 @@ import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import seeChangeRange from './image/seeChangeRange.svg';
 import seeProgress from './image/seeProgress.svg';
 import styles from './index.less';
+import { IChartSearchAdditionalProps } from '../types';
 
 export interface IVersion {
  versionId: string,
  name: string,
  releaseDate: null | string,
 }
-export interface VersionBurnDownSearchProps {
+export interface VersionBurnDownSearchProps extends IChartSearchAdditionalProps{
   versions: IVersion[]
   versionIsLoading: boolean,
   checked: 'checked' | undefined,
@@ -24,7 +25,7 @@ export interface VersionBurnDownSearchProps {
 const { Option } = Select;
 
 const VersionBurnDownSearch:React.FC<VersionBurnDownSearchProps> = ({
-  versions, versionIsLoading, checked, currentVersionId, setCurrentVersionId, setChecked,
+  versions, versionIsLoading, checked, currentVersionId, setCurrentVersionId, setChecked, searchDataSet,
 }) => {
   const handleChangeCurrentVersion = (versionId: string) => {
     setCurrentVersionId(versionId);
@@ -70,6 +71,8 @@ const VersionBurnDownSearch:React.FC<VersionBurnDownSearchProps> = ({
               clearButton={false}
               style={{ width: 500, marginRight: 33 }}
               label="版本"
+              name="version"
+              dataSet={searchDataSet}
               value={currentVersionId}
               onChange={handleChangeCurrentVersion}
             >

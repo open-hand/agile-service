@@ -1,15 +1,17 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * @author superlee
  * @since 2020-08-19
  */
 public class PageConfigFieldEditedVO {
-
+    @ApiModelProperty(value = "必填字段是否可编辑")
     private Boolean requiredFieldCanNotEdit;
-
+    @ApiModelProperty(value = "创建页面字段是否可编辑")
     private Boolean createdFieldCanNotEdit;
-
+    @ApiModelProperty(value = "编辑页面字段是否可编辑")
     private Boolean editedFieldCanNotEdit;
 
     public PageConfigFieldEditedVO() {

@@ -1,5 +1,8 @@
-import { useEffect, useState, useCallback } from 'react';
+import {
+  useEffect, useState, useCallback, useMemo,
+} from 'react';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
+import { DataSet } from 'choerodon-ui/pro';
 import moment from 'moment';
 import { stores } from '@choerodon/boot';
 import { BurnDownProps, IBurndownChartType } from '@/components/charts/burn-down';
@@ -10,10 +13,12 @@ import { IQuickSearchValue } from '@/components/quick-search';
 import useControlledDefaultValue from '@/hooks/useControlledDefaultValue';
 import { getProjectId } from '@/utils/common';
 import { ISearchVO } from '@/common/types';
+import useGetChartSearchDataSet from '../useGetChartSearchDataSet';
+import { IChartSearchHookAdditionalConfig } from '../types';
 
 const { AppState } = stores;
 
-export interface BurnDownConfig {
+export interface BurnDownConfig extends IChartSearchHookAdditionalConfig{
   type?: IBurndownChartType
   restDayShow?: boolean
   sprintId?: string
@@ -21,6 +26,7 @@ export interface BurnDownConfig {
   projectId?: string
   useCurrentSprint?: boolean
   searchVO?: ISearchVO
+  openValidate?: boolean
 }
 
 function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnDownSearchProps, BurnDownProps] {
@@ -78,6 +84,22 @@ function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnD
   useEffect(() => {
     loadData();
   }, [loadData]);
+  /**
+   * 与 hook控制筛选值暂时共存
+   *
+   * TODO: 需要优化
+  */
+  const searchDataSet = useGetChartSearchDataSet({
+    enabled: config?.openValidate,
+    fields: [
+      { name: 'sprint', label: '迭代冲刺', required: true },
+      { name: 'unit', label: '单位', required: true },
+    ],
+    valueChangeDataSetValue: {
+      unit: type,
+      sprint: useCurrentSprint ? 'current' : sprintId,
+    },
+  });
 
   const searchProps: BurnDownSearchProps = {
     projectId,
@@ -97,6 +119,7 @@ function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnD
     setRestDayShow,
     searchVO,
     setSearchVO,
+    searchDataSet: config?.openValidate ? searchDataSet : undefined,
   };
   const props: BurnDownProps = {
     loading,

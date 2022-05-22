@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.List;
 
 /**
@@ -7,20 +9,21 @@ import java.util.List;
  * @date 2021-07-13 15:34
  */
 public class InfluenceIssueVO {
+    @ApiModelProperty(value = "问题id")
     private Long issueId;
-
+    @ApiModelProperty(value = "状态id")
     private Long statusId;
-
+    @ApiModelProperty(value = "是否成环")
     private Boolean loop;
-
+    @ApiModelProperty(value = "关联的配置id")
     private Long linkageSettingId;
-
+    @ApiModelProperty(value = "层级")
     private Integer level;
-
+    @ApiModelProperty(value = "最大的链路深度")
     private Boolean maxDepth;
-
+    @ApiModelProperty(value = "是否触发子级")
     private Boolean childrenTriggered;
-
+    @ApiModelProperty(value = "筛选条件")
     private List<InfluenceIssueVO> childrenVO;
 
     public Long getIssueId() {

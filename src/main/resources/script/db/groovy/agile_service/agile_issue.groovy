@@ -52,7 +52,7 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_issue.groovy') {
     changeSet(id: '2018-05-28-add-column', author: 'jian_zhang02@163.com') {
         addColumn(tableName: 'agile_issue') {
             column(name: 'rank', type: 'VARCHAR(255)', remarks: 'rank')
-            column(name: 'epic_name', type: 'VARCHAR(255)', remarks: 'epic name')
+            column(name: 'epic_name', type: 'VARCHAR(255)', remarks: '史诗name')
         }
     }
 
@@ -146,7 +146,7 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_issue.groovy') {
 
     changeSet(id: '2019-01-14-add-column-issue-stay-date', author: 'fuqianghuang01@gmail.com') {
         addColumn(tableName: 'agile_issue') {
-            column(name: 'stay_date', type: 'DATETIME', remarks: 'stay date')
+            column(name: 'stay_date', type: 'DATETIME', remarks: '驻留时间')
         }
     }
 
@@ -158,10 +158,10 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_issue.groovy') {
 
     changeSet(id: '2019-03-12-add-column-program', author: 'fuqianghuang01@gmail.com') {
         addColumn(tableName: 'agile_issue') {
-            column(name: 'feature_id', type: 'BIGINT UNSIGNED', remarks: 'feature id')
-            column(name: 'start_date', type: 'DATETIME', remarks: 'start date')
-            column(name: 'end_date', type: 'DATETIME', remarks: 'end date')
-            column(name: 'program_id', type: 'BIGINT UNSIGNED', remarks: 'program id')
+            column(name: 'feature_id', type: 'BIGINT UNSIGNED', remarks: '特性id')
+            column(name: 'start_date', type: 'DATETIME', remarks: '开始时间')
+            column(name: 'end_date', type: 'DATETIME', remarks: '结束时间')
+            column(name: 'program_id', type: 'BIGINT UNSIGNED', remarks: '项目群id')
         }
     }
 
@@ -173,7 +173,7 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_issue.groovy') {
 
     changeSet(id: '2019-04-30-agile-issue-add-column', author: 'fuqianghuang01@gmail.com') {
         addColumn(tableName: 'agile_issue') {
-            column(name: 'relate_issue_id', type: 'BIGINT UNSIGNED', remarks: 'relate issue id')
+            column(name: 'relate_issue_id', type: 'BIGINT UNSIGNED', remarks: '关联的问题id')
         }
     }
 

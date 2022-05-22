@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -7,16 +8,19 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  * @date 2021-03-02 14:09
  */
 public class NodeSortVO {
-
+    @ApiModelProperty(value = "是否在前面")
     private Boolean before;
 
     @Encrypt
+    @ApiModelProperty(value = "outSetId")
     private Long outSetId;
 
     @Encrypt
+    @ApiModelProperty(value = "问题类型id")
     private Long issueTypeId;
 
     @Encrypt
+    @ApiModelProperty(value = "节点id")
     private Long nodeId;
 
     public Boolean getBefore() {

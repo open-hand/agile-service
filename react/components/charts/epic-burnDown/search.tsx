@@ -8,6 +8,7 @@ import seeChangeRange from './image/seeChangeRange.svg';
 import seeProgress from './image/seeProgress.svg';
 import styles from './index.less';
 import useIsProgram from '@/hooks/useIsProgram';
+import { IChartSearchAdditionalProps } from '../types';
 
 export interface IEpic {
   issueId: string,
@@ -15,7 +16,7 @@ export interface IEpic {
   issueNum: string,
   summary: string,
 }
-export interface EpicBurnDownSearchProps {
+export interface EpicBurnDownSearchProps extends IChartSearchAdditionalProps {
   epics: IEpic[]
   epicIsLoading: boolean,
   checked: 'checked' | undefined,
@@ -28,7 +29,7 @@ export interface EpicBurnDownSearchProps {
 const { Option } = Select;
 
 const EpicBurnDownSearch:React.FC<EpicBurnDownSearchProps> = ({
-  epics, epicIsLoading, checked, currentEpicId, setCurrentEpicId, setChecked,
+  epics, epicIsLoading, checked, currentEpicId, setCurrentEpicId, setChecked, searchDataSet,
 }) => {
   const { isProgram } = useIsProgram();
 
@@ -102,6 +103,8 @@ const EpicBurnDownSearch:React.FC<EpicBurnDownSearchProps> = ({
               clearButton={false}
               style={{ width: 500, marginRight: 33 }}
               label="史诗"
+              name="epic"
+              dataSet={searchDataSet}
               value={currentEpicId}
               onChange={handleChangeCurrentEpic}
             >

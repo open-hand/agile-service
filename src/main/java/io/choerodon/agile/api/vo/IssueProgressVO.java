@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -8,12 +9,13 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 public class IssueProgressVO {
     @Encrypt
+    @ApiModelProperty(value = "id")
     private Long id;
-
+    @ApiModelProperty(value = "未完成数量")
     private Integer unCompletedCount;
-
+    @ApiModelProperty(value = "已完成数量")
     private Integer completedCount;
-
+    @ApiModelProperty(value = "总数")
     private Integer totalCount;
 
     public Long getId() {

@@ -7,8 +7,10 @@ import { reportApi, versionApi } from '@/api';
 import useControlledDefaultValue from '@/hooks/useControlledDefaultValue';
 import { getProjectId } from '@/utils/common';
 import { getChartDataFromServerData } from './utils';
+import { IChartSearchHookAdditionalConfig } from '../types';
+import useGetChartSearchDataSet from '../useGetChartSearchDataSet';
 
-export interface VersionBurnConfig {
+export interface VersionBurnConfig extends IChartSearchHookAdditionalConfig {
   versionId?: string
   checked?: 'checked' | undefined
   projectId?: string
@@ -75,7 +77,15 @@ function useVersionBurnDownReport(config?: VersionBurnConfig, onFinish?: Functio
   useEffect(() => {
     loadData();
   }, [loadData]);
-
+  const searchDataSet = useGetChartSearchDataSet({
+    enabled: config?.openValidate,
+    fields: [
+      { name: 'version', label: '版本', required: true },
+    ],
+    valueChangeDataSetValue: {
+      version: currentVersionId,
+    },
+  });
   const searchProps: VersionBurnDownSearchProps = {
     versions,
     versionIsLoading,
@@ -84,6 +94,7 @@ function useVersionBurnDownReport(config?: VersionBurnConfig, onFinish?: Functio
     projectId,
     setCurrentVersionId,
     setChecked,
+    searchDataSet,
   };
   const props: VersionBurnDownChartProps = {
     data,

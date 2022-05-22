@@ -60,7 +60,7 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
             <WYSIWYGEditor
               autoFocus
               footer
-              value={editDes ?? descriptionTemplate}
+              value={editDes || descriptionTemplate}
               style={{
                 height: 'auto', width: '100%', minHeight: 300,
               }}

@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.choerodon.agile.infra.dto.SprintDTO;
+import io.swagger.annotations.ApiModelProperty;
 
 import java.util.Set;
 
@@ -9,17 +10,17 @@ import java.util.Set;
  * @since 2021-03-03
  */
 public class SprintDelayCarrierVO {
-
+    @ApiModelProperty(value = "项目id")
     private Long projectId;
-
+    @ApiModelProperty(value = "冲刺")
     private SprintDTO sprintDTO;
-
+    @ApiModelProperty(value = "延期天数")
     private Long delayDay;
-
+    @ApiModelProperty(value = "项目名称")
     private String projectName;
-
+    @ApiModelProperty(value = "用户id")
     private Set<Long> userIds;
-
+    @ApiModelProperty(value = "组织id")
     private Long organizationId;
 
     public SprintDelayCarrierVO(Long projectId,

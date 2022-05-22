@@ -6,20 +6,20 @@ databaseChangeLog(logicalFilePath: 'script/db/fd_status_notice_setting.groovy') 
             column(name: "id", type: "BIGINT UNSIGNED", autoIncrement: true, remarks: "id") {
                 constraints(primaryKey: true)
             }
-            column(name: "issue_type_id", type: "BIGINT UNSIGNED",  remarks: "issue_type_id") {
+            column(name: "issue_type_id", type: "BIGINT UNSIGNED",  remarks: "问题类型id") {
                 constraints(nullable:"false")
             }
-            column(name: "project_id", type: "BIGINT UNSIGNED",  remarks: "project_id") {
+            column(name: "project_id", type: "BIGINT UNSIGNED",  remarks: "项目id") {
                 constraints(nullable:"false")
             }
-            column(name: "status_id", type: "BIGINT UNSIGNED",  remarks: "status_id") {
+            column(name: "status_id", type: "BIGINT UNSIGNED",  remarks: "状态id") {
                 constraints(nullable:"false")
             }
             column(name: "user_type", type: "varchar(255)",  remarks: "projectOwner, assignee, reporter, specifier") {
                 constraints(nullable:"false")
             }
-            column(name: "user_id", type: "BIGINT UNSIGNED",  remarks: "user_id")
-            column(name: "notice_type", type: "varchar(255)",  remarks: "notice_type") {
+            column(name: "user_id", type: "BIGINT UNSIGNED",  remarks: "用户id")
+            column(name: "notice_type", type: "varchar(255)",  remarks: "通知类型") {
                 constraints(nullable:"false")
             }
 

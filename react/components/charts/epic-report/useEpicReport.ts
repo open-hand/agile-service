@@ -5,6 +5,8 @@ import { getProjectId } from '@/utils/common';
 import { EpicReportProps, IEpicReportChart, IEpicReportTable } from './index';
 import { EpicReportSearchProps, IEpic } from './search';
 import { IUnit } from '../iteration-speed/search';
+import { IChartSearchHookAdditionalConfig } from '../types';
+import useGetChartSearchDataSet from '../useGetChartSearchDataSet';
 
 interface IOriginChartData {
   allRemainTimes: number
@@ -17,7 +19,7 @@ interface IOriginChartData {
   unEstimateIssueCount: number
 }
 
-export interface EpicReportConfig {
+export interface EpicReportConfig extends IChartSearchHookAdditionalConfig {
   unit?: IUnit,
   epicId?: string
   projectId?: string
@@ -90,12 +92,22 @@ const useEpicReport = (config?: EpicReportConfig, onFinish?: Function): [EpicRep
   useEffect(() => {
     loadTableData();
   }, [loadTableData]);
-
+  const searchDataSet = useGetChartSearchDataSet({
+    enabled: config?.openValidate,
+    fields: [
+      { name: 'epicId', label: '史诗', required: true },
+      { name: 'unit', label: '单位', required: true },
+    ],
+    valueChangeDataSetValue: {
+      epicId,
+      unit,
+    },
+  });
   const props: EpicReportProps = {
     loading, data, tableData, unit, epicId, epics,
   };
   const searchProps: EpicReportSearchProps = {
-    unit, setUnit, epics, epicId, setEpicId, projectId,
+    unit, setUnit, epics, epicId, setEpicId, projectId, searchDataSet,
   };
   return [props, searchProps];
 };

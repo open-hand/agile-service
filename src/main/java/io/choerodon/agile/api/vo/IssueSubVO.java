@@ -135,18 +135,19 @@ public class IssueSubVO {
 
     @ApiModelProperty(value = "创建人邮箱")
     private String createrEmail;
-
+    @ApiModelProperty(value = "是否已完成")
     private Boolean completed;
-
+    @ApiModelProperty(value = "实际完成日期")
     private Date actualCompletedDate;
-
+    @ApiModelProperty(value = "影响的问题id集合")
     private List<Long> influenceIssueIds;
-
+    @ApiModelProperty(value = "预计开始时间")
     private Date estimatedStartTime;
-
+    @ApiModelProperty(value = "预计结束时间")
     private Date estimatedEndTime;
 
     @Encrypt
+    @ApiModelProperty(value = "参与人id集合")
     private List<Long> participantIds;
 
     public Date getEstimatedStartTime() {

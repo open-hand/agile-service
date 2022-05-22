@@ -9,9 +9,9 @@ import java.util.Set;
  * @since 2021-03-04
  */
 public class ProjectMessageVO extends ProjectVO {
-
+    @ApiModelProperty(value = "用户id")
     private Set<Long> userIds;
-
+    @ApiModelProperty(value = "接受人类型")
     private Set<String> receiverTypes;
 
     @ApiModelProperty("是否发送站内信")

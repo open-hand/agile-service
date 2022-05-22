@@ -5,22 +5,22 @@ databaseChangeLog(logicalFilePath:'agile_message_detail.groovy') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
-            column(name: 'event', type: 'VARCHAR(255)', remarks: 'event') {
+            column(name: 'event', type: 'VARCHAR(255)', remarks: '事件') {
                 constraints(nullable: false)
             }
-            column(name: 'notice_type', type: 'VARCHAR(255)', remarks: 'notice type') {
+            column(name: 'notice_type', type: 'VARCHAR(255)', remarks: '统计类型') {
                 constraints(nullable: false)
             }
-            column(name: 'notice_name', type: 'VARCHAR(255)', remarks: 'notice name') {
+            column(name: 'notice_name', type: 'VARCHAR(255)', remarks: '通知名称') {
                 constraints(nullable: false)
             }
-            column(name: 'is_enable', type: 'TINYINT UNSIGNED', remarks: 'is enable') {
+            column(name: 'is_enable', type: 'TINYINT UNSIGNED', remarks: '是否启停用') {
                 constraints(nullable: false)
             }
-            column(name: 'user', type: 'VARCHAR(1000)', remarks: 'users')
+            column(name: 'user', type: 'VARCHAR(1000)', remarks: '用户')
 
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")
             column(name: "created_by", type: "BIGINT UNSIGNED", defaultValue: "0")

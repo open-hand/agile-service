@@ -3,13 +3,13 @@ package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath: 'script/db/agile_version_issue_rel.groovy') {
     changeSet(id: '2018-05-14-agile-version-issue-rel', author: 'jian_zhang02@163.com') {
         createTable(tableName: "agile_version_issue_rel") {
-            column(name: 'version_id', type: 'BIGINT UNSIGNED', remarks: 'version id') {
+            column(name: 'version_id', type: 'BIGINT UNSIGNED', remarks: '版本id') {
                 constraints(nullable: false)
             }
-            column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: 'issue id') {
+            column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: '问题id') {
                 constraints(nullable: false)
             }
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")

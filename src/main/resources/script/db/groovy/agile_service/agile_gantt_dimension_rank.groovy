@@ -5,7 +5,7 @@ databaseChangeLog(logicalFilePath:'agile_gantt_dimension_rank.groovy') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'instance_id', type: 'BIGINT UNSIGNED', remarks: 'user id/sprint id') {
+            column(name: 'instance_id', type: 'BIGINT UNSIGNED', remarks: '用户id/冲刺id') {
                 constraints(nullable: false)
             }
             column(name: 'instance_type', type: 'VARCHAR(128)', remarks: 'instance_id的类型，assignee/冲刺') {
@@ -14,13 +14,13 @@ databaseChangeLog(logicalFilePath:'agile_gantt_dimension_rank.groovy') {
             column(name: 'dimension', type: 'VARCHAR(128)', remarks: '业务维度，经办人/冲刺') {
                 constraints(nullable: false)
             }
-            column(name: 'rank', type: 'VARCHAR(255)', remarks: 'rank') {
+            column(name: 'rank', type: 'VARCHAR(255)', remarks: 'rank排序值') {
                 constraints(nullable: false)
             }
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
-            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: 'organization id') {
+            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
                 constraints(nullable: false)
             }
 

@@ -2,26 +2,26 @@ package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_board.groovyoovy') {
     changeSet(id: '2018-05-14-agile-board', author: 'fuqianghuang01@gmail.com') {
         createTable(tableName: "agile_board") {
-            column(name: 'board_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'board id') {
+            column(name: 'board_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '看板id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'name', type: 'VARCHAR(255)', remarks: 'name') {
+            column(name: 'name', type: 'VARCHAR(255)', remarks: '名称') {
                 constraints(nullable: false)
             }
-            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
-            column(name: 'administrator_id', type: 'BIGINT UNSIGNED', remarks: 'administrator id')
-            column(name: 'column_constraint', type: 'VARCHAR(30)', remarks: 'column constraint') {
+            column(name: 'administrator_id', type: 'BIGINT UNSIGNED', remarks: '管理员id')
+            column(name: 'column_constraint', type: 'VARCHAR(30)', remarks: '列约束') {
                 constraints(nullable: false)
             }
-            column(name: 'is_day_in_column', type: 'TINYINT UNSIGNED', remarks: 'is day in column') {
+            column(name: 'is_day_in_column', type: 'TINYINT UNSIGNED', remarks: '是否为列中的天') {
                 constraints(nullable: false)
             }
-            column(name: 'swimlane_based_code', type: 'VARCHAR(30)', remarks: 'swimlane based code') {
+            column(name: 'swimlane_based_code', type: 'VARCHAR(30)', remarks: '基于code的泳道') {
                 constraints(nullable: false)
             }
-            column(name: 'estimation_statistic', type: 'VARCHAR(30)', remarks: 'estimation statistic') {
+            column(name: 'estimation_statistic', type: 'VARCHAR(30)', remarks: '预估统计') {
                 constraints(nullable: false)
             }
 

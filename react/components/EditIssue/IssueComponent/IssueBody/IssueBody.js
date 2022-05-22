@@ -64,7 +64,7 @@ function IssueBody(props) {
       if (outside) {
         Data = await await featureApi.getSplitStoryOutside(issueId, projectId);
       } else {
-        Data = store.projectId?.toString() !== projectId.toString() ? await featureApi.project(store.projectId).getSubProjectSplitStory(issueId, projectId) : await featureApi.getSplitStory(issueId);
+        Data = store.projectId?.toString() !== projectId.toString() ? await featureApi.project(store.projectId).getSubProjectSplitStory(issueId, projectId) : await featureApi.project(store.projectId).getSplitStory(issueId);
       }
       setSplitStoryData(Data);
     };

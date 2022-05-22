@@ -30,6 +30,7 @@ public class SprintNameVO {
     @ApiModelProperty(value = "冲刺实际结束时间")
     private Date actualEndDate;
     @Encrypt
+    @ApiModelProperty(value = "父级id")
     private Long parentId;
 
     public Long getParentId() {

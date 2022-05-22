@@ -34,12 +34,12 @@ public class ProjectVO {
     @ApiModelProperty("创建人")
     @Encrypt
     private Long createdBy;
-
+    @ApiModelProperty(value = "图像url")
     private String imageUrl;
 
     @ApiModelProperty("创建时间")
     private Date creationDate;
-
+    @ApiModelProperty(value = "项目状态")
     private String projectStatus;
 
     @ApiModelProperty("项目状态的名称")

@@ -56,7 +56,7 @@ public class StatusNoticeSettingVO extends AuditDomain {
 
     @ApiModelProperty(value = "用户list")
     private List<UserDTO> userList;
-
+    @ApiModelProperty(value = "成员列表")
     private List<ObjectSchemeFieldVO> memberList;
 
     @ApiModelProperty(value = "组织Id")

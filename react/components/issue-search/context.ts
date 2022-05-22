@@ -2,7 +2,7 @@ import { createContext } from 'react';
 import IssueSearchStore from './store';
 import { IssueSearchProps } from './index';
 
-export interface IIssueSearchContext extends Omit<IssueSearchProps, 'onChange'> {
+export interface IIssueSearchContext extends Omit<IssueSearchProps, 'onChange' | 'hasMyAssigned'> {
   store: IssueSearchStore
   projectId?: string
 }

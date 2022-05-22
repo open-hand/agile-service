@@ -9,6 +9,7 @@ import total from './image/total.svg';
 import noEstimated from './image/noEstimated.svg';
 import finish from './image/finish.svg';
 import { useFontSize } from '../context';
+import { IChartSearchAdditionalProps } from '../types';
 
 const UNIT_STATUS = {
   issue_count: {

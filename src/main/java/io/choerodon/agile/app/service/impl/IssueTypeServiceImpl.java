@@ -1204,7 +1204,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (!CollectionUtils.isEmpty(filterIssueTypeIds)) {
             String ids = filterIssueTypeIds.stream().map(String::valueOf).collect(Collectors.joining(","));
             List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.selectByIds(ids);
-            list.addAll(modelMapper.map(issueTypeDTOS, new TypeToken<List<IssueTypeDTO>>() {
+            list.addAll(modelMapper.map(issueTypeDTOS, new TypeToken<List<IssueTypeVO>>() {
             }.getType()));
         }
         if (!CollectionUtils.isEmpty(page.getContent())) {

@@ -29,7 +29,7 @@ function customizerFieldCodes(obj1: Record<string, any>, obj2: Record<string, an
 }
 const ImportIssueForm = (formProps: any) => {
   const {
-    title, children, bottom, className,
+    title, children, bottom, className, contentStyle, titleStyle,
   } = formProps;
   const context = useImportIssueContext();
   const prefixCls = `${context.prefixCls}-form-one`;
@@ -43,7 +43,7 @@ const ImportIssueForm = (formProps: any) => {
         <span className={`${prefixCls}-block`} />
         <span className={`${prefixCls}-title`}>{title}</span>
       </div>
-      <span className={`${prefixCls}-content`}>{children}</span>
+      <span className={`${prefixCls}-content`} style={contentStyle}>{children}</span>
       {bottom}
     </div>
   );
@@ -51,7 +51,7 @@ const ImportIssueForm = (formProps: any) => {
 
 const ImportIssueContent: React.FC = observer(() => {
   const {
-    action, modal, onSuccess, latestInfo, latestData,
+    action, modal, onSuccess, latestInfo, latestData, importFinishUnitName,
     messageKey, applyType, name, requires, systems, fields: propsFields, importRequest, prefixCls, downloadTemplateRequest,
   } = useImportIssueContext();
   const [templateFirstLoaded, setTemplateFirstLoaded] = useState<boolean>(false);
@@ -160,7 +160,7 @@ const ImportIssueContent: React.FC = observer(() => {
               <span className="c7n-importIssue-text">
                 导入失败
                 <span style={{ color: '#FF0000' }}>{failCount}</span>
-                {`${name || '工作项'} `}
+                {`${importFinishUnitName} `}
                 <a href={fileUrl}>
                   点击下载失败详情
                 </a>
@@ -173,7 +173,7 @@ const ImportIssueContent: React.FC = observer(() => {
               <span className="c7n-importIssue-text">
                 导入成功
                 <span style={{ color: '#0000FF' }}>{successCount}</span>
-                {`${name || '工作项'}`}
+                {`${importFinishUnitName}`}
               </span>
             </div>
           );
@@ -283,6 +283,8 @@ const ImportIssueContent: React.FC = observer(() => {
       }
       <ImportIssueForm
         title="选择模板字段"
+        className={classnames({ [`${prefixCls}-form-field`]: action })}
+        contentStyle={{ marginTop: 12 }}
         bottom={(
           <>
             <Button
