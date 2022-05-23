@@ -21,9 +21,17 @@ export interface IAgileEditIssueProps {
    */
   disabledQuickCreate?: boolean
   /**
+   *禁止子issue 相关操作
+   */
+  disabledSubIssueActions?: boolean
+  /**
+   * 禁止问题链接相关操作
+   */
+  disabledIssueLinkActions?:boolean
+  /**
    * 禁止（非详情字段内）按钮类型操作
    * 左上角更多， 删除操作
-   * @todo
+   * @todo 待判断是否去实现
    */
   disabledDetailActionButtons?: boolean
   /**

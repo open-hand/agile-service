@@ -10,11 +10,13 @@ import Divider from './Divider';
 const SubBug = observer(({
   reloadIssue, onDeleteSubIssue, onUpdate, applyType, onCreateSubIssue, onOpenCreateSubBug, checkDescriptionEdit,
 }) => {
-  const { store, disabled, projectId } = useContext(EditIssueContext);
+  const {
+    store, disabled, projectId, disabledQuickCreate, disabledSubIssueActions,
+  } = useContext(EditIssueContext);
   const {
     issueId: relateIssueId, priorityId,
   } = store.getIssue;
-  const disableCreate = disabled;
+  const disableCreate = disabled || disabledQuickCreate;
   const { data: issueTypeData } = useProjectIssueTypes({
     onlyEnabled: true, typeCode: 'bug', applyType, projectId,
   }, { enabled: !disabled });
@@ -25,7 +27,7 @@ const SubBug = observer(({
   const renderIssueList = (issue, i) => (
     <IssueList
       showAssignee
-      showDelete={!disabled}
+      showDelete={!disabled && !disabledSubIssueActions}
       showPriority
       key={issue.issueId}
       issue={{
