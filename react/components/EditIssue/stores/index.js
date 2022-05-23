@@ -47,6 +47,7 @@ export const EditIssueContextProvider = inject('AppState', 'HeaderStore')(observ
   }, [isProgramIssue, isWaterfall, store.issue]);
   const value = {
     ...props,
+    applyType: props.applyType ?? 'agile',
     isProjectLevel,
     menuType: props.menuType || getMenuType(), /** project organization */
     prefixCls: 'c7n-agile-EditIssue',

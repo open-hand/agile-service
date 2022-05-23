@@ -178,7 +178,7 @@ function IssueBody(props) {
             ? mount('backlog:issueLinkedBacklog', props) : ''}
         </TabPane>
         {issueTypeVO.typeCode && WATERFALL_TYPE_CODES.includes(issueTypeVO.typeCode) && hasInject(DEPENDENCY_TAB)
-          ? <TabPane tab="依赖与关联">{mount(DEPENDENCY_TAB, { ...props, issueTypeCode: issueTypeVO.typeCode })}</TabPane> : null}
+          ? <TabPane tab="依赖与关联" key="depend_link">{mount(DEPENDENCY_TAB, { ...props, issueTypeCode: issueTypeVO.typeCode })}</TabPane> : null}
         {
           issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
             ? (
