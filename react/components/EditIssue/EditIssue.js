@@ -27,10 +27,6 @@ const JSONbigString = JSONbig({ storeAsString: true });
 // 项目加入群之后，不关联自己的史诗和特性，只能关联项目群的，不能改关联的史诗
 const { AppState } = stores;
 
-const defaultProps = {
-  applyType: 'agile',
-};
-
 function EditIssue() {
   const [issueLoading, setIssueLoading] = useState(false);
   const {
@@ -511,5 +507,4 @@ function EditIssue() {
     </div>
   );
 }
-EditIssue.defaultProps = defaultProps;
 export default observer(EditIssue);
