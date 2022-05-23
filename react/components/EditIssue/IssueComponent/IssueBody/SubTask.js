@@ -17,11 +17,13 @@ import { WATERFALL_TYPE_CODES } from '../../../../constants/TYPE_CODE';
 const SubTask = observer(({
   onDeleteSubIssue, reloadIssue, onUpdate, parentSummary, onCreateSubIssue, onOpenCreateSubTask, checkDescriptionEdit,
 }) => {
-  const { store, disabled, projectId } = useContext(EditIssueContext);
+  const {
+    store, disabled, projectId, disabledQuickCreate, disabledSubIssueActions,
+  } = useContext(EditIssueContext);
   const {
     issueId: parentIssueId, subIssueVOList: agileSubIssueVOList = [], priorityId, sprintId, typeCode, relateIssueId, activeSprint, waterfallIssueVO,
   } = store.getIssue;
-  const disableCreate = disabled || (typeCode === 'bug' && relateIssueId);
+  const disableCreate = disabled || disabledQuickCreate || (typeCode === 'bug' && relateIssueId);
   const isWaterfall = WATERFALL_TYPE_CODES.includes(typeCode);
   const subIssueVOList = isWaterfall ? (waterfallIssueVO?.childIssueList || []) : agileSubIssueVOList;
   const waterfallProps = {
@@ -36,7 +38,7 @@ const SubTask = observer(({
   const renderIssueList = (issue, i) => (
     <IssueList
       showAssignee
-      showDelete={!disabled && !isWaterfall}
+      showDelete={!disabled && !disabledSubIssueActions && !isWaterfall}
       showPriority
       key={issue.issueId}
       issue={{

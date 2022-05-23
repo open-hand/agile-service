@@ -9,7 +9,8 @@ import Divider from './Divider';
 
 const IssueDoc = observer(({ reloadIssue }) => {
   const [addDocShow, setAddDocShow] = useState(false);
-  const { store, disabled } = useContext(EditIssueContext);
+  const { store, disabled: contextDisabled, disabledKnowledgeActions } = useContext(EditIssueContext);
+  const disabled = contextDisabled || disabledKnowledgeActions;
   const { issueId } = store.getIssue;
   const docs = store.getDoc;
   const onDeleteDoc = async (id) => {
@@ -65,17 +66,17 @@ const IssueDoc = observer(({ reloadIssue }) => {
       <div className="c7n-content-container">
         {renderDoc()}
         {
-        addDocShow ? (
-          <Doc
-            issueId={issueId}
-            visible={addDocShow}
-            projectId={store.projectId}
-            onCancel={() => setAddDocShow(false)}
-            onOk={onDocCreate}
-            checkIds={docs && docs.knowledgeRelationList ? docs.knowledgeRelationList.map((doc) => doc.spaceId) : []}
-          />
-        ) : null
-      }
+          addDocShow ? (
+            <Doc
+              issueId={issueId}
+              visible={addDocShow}
+              projectId={store.projectId}
+              onCancel={() => setAddDocShow(false)}
+              onOk={onDocCreate}
+              checkIds={docs && docs.knowledgeRelationList ? docs.knowledgeRelationList.map((doc) => doc.spaceId) : []}
+            />
+          ) : null
+        }
       </div>
     </div>
   );
