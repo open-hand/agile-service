@@ -23,7 +23,7 @@ interface ITableDropMenuProps {
   textStyle?: React.CSSProperties
   tooltip?: boolean | React.ReactNode /** 文字部分tooltip */
   // clickableText?: boolean
-   /** @default 'true' */
+  /** @default 'true' */
   showText?: boolean
   /**
    * 是否展示菜单，当菜单列表为空时不会展示
@@ -36,7 +36,7 @@ interface ITableDropMenuProps {
   menuData?: ITableDropMenuItem[]
   /** 点击没有action菜单项会触发此事件 */
   onMenuClick?: (data: ITableDropMenuItem) => void
-   /** @deprecated 后续将废弃此接口  旧的TableDropMenu 传入内容将自动拼接到menuData上 */
+  /** @deprecated 后续将废弃此接口  旧的TableDropMenu 传入内容将自动拼接到menuData上 */
   oldMenuData?: React.ReactElement
   /** 权限校验时组织 */
   organizationId?: string
@@ -46,7 +46,7 @@ interface ITableDropMenuProps {
   permission?: IBootPermissionProps
   /** 菜单权限配置 会覆盖全局 */
   permissionMenu?: IBootPermissionProps
-   /** 文字部分操作权限配置 会覆盖全局 */
+  /** 文字部分操作权限配置 会覆盖全局 */
   permissionText?: IBootPermissionProps
 
 }
@@ -57,7 +57,7 @@ interface ITableDropMenuProps {
  */
 const TableDropMenu: React.FC<ITableDropMenuProps> = ({
   text, className, style, menuData: propsMenuData, oldMenuData, showMenu: propsShowMenu, organizationId, showText = true, defaultButtonProps,
-  permissionType, tooltip, permissionText, textClassName, textStyle, permission, permissionMenu, onMenuClick, defaultMenuIcon = 'more_vert', textClick,
+  permissionType, tooltip, permissionText, textClassName, textStyle, permission, permissionMenu, onMenuClick, defaultMenuIcon = 'more_vert', onTextClick,
 }) => {
   const prefixCls = 'c7n-agile-table-drop-menu';
   // 渲染文本
@@ -96,7 +96,7 @@ const TableDropMenu: React.FC<ITableDropMenuProps> = ({
       style={style}
     >
       {showText && (
-        <span role="none" className={classNames(`${prefixCls}-text`, { [`${prefixCls}-text-click`]: textClick }, textClassName)} style={textStyle} onClick={textClick}>
+        <span role="none" className={classNames(`${prefixCls}-text`, { [`${prefixCls}-text-click`]: onTextClick }, textClassName)} style={textStyle} onClick={onTextClick}>
           {permissionText
             ? (
               <Permission
