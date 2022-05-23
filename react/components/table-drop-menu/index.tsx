@@ -1,12 +1,11 @@
 import React, { useCallback, useMemo } from 'react';
 import { Tooltip } from 'choerodon-ui/pro';
-import { ButtonProps } from 'choerodon-ui/lib/button';
 import { Action, Permission } from '@choerodon/boot';
-
-import './index.less';
 import { pick } from 'lodash';
 import classNames from 'classnames';
-import { IBootActionDataItem, IBootPermissionProps } from '@/common/types';
+import type { ButtonProps } from 'choerodon-ui/lib/button';
+import type { IBootActionDataItem, IBootPermissionProps } from '../../common/types';
+import './index.less';
 
 export interface ITableDropMenuItem extends IBootActionDataItem {
   display?: boolean /** @default 'true' */
@@ -17,21 +16,38 @@ interface ITableDropMenuProps {
   style?: React.CSSProperties
   text?: React.ReactNode
   textClassName?: string
+  /**
+   *  文本点击事件 当配置时 则启动文本可点击
+   */
+  onTextClick?: React.MouseEventHandler<HTMLSpanElement>
   textStyle?: React.CSSProperties
   tooltip?: boolean | React.ReactNode /** 文字部分tooltip */
   // clickableText?: boolean
-  showText?: boolean /** @default 'true' */
-  showMenu?: boolean /** @default 'true' */
+   /** @default 'true' */
+  showText?: boolean
+  /**
+   * 是否展示菜单，当菜单列表为空时不会展示
+   * 设置为 `true` 则会常展示
+   *  @default 'true'
+   *  */
+  showMenu?: boolean
   defaultMenuIcon?: string /** @default 'more_vert' */
-  defaultButtonProps?: Partial<Pick<ButtonProps, 'className'|'style'|'shape'|'size'|'disabled'|'icon'>>
+  defaultButtonProps?: Partial<Pick<ButtonProps, 'className' | 'style' | 'shape' | 'size' | 'disabled' | 'icon'>>
   menuData?: ITableDropMenuItem[]
-  onMenuClick?: (data: ITableDropMenuItem) => void /** 点击没有action菜单项会触发此事件 */
-  oldMenuData?: React.ReactElement /** @deprecated 后续将废弃此接口  旧的TableDropMenu 传入内容将自动拼接到menuData上 */
-  organizationId?: string /** 权限校验时组织 */
-  permissionType?: string /** 权限校验时类型 */
-  permission?: IBootPermissionProps /** 全局权限配置 */
-  permissionMenu?: IBootPermissionProps /** 菜单权限配置 会覆盖全局 */
-  permissionText?: IBootPermissionProps /** 文字部分操作权限配置 会覆盖全局 */
+  /** 点击没有action菜单项会触发此事件 */
+  onMenuClick?: (data: ITableDropMenuItem) => void
+   /** @deprecated 后续将废弃此接口  旧的TableDropMenu 传入内容将自动拼接到menuData上 */
+  oldMenuData?: React.ReactElement
+  /** 权限校验时组织 */
+  organizationId?: string
+  /** 权限校验时类型 */
+  permissionType?: string
+  /** 全局权限配置 */
+  permission?: IBootPermissionProps
+  /** 菜单权限配置 会覆盖全局 */
+  permissionMenu?: IBootPermissionProps
+   /** 文字部分操作权限配置 会覆盖全局 */
+  permissionText?: IBootPermissionProps
 
 }
 /**
@@ -41,7 +57,7 @@ interface ITableDropMenuProps {
  */
 const TableDropMenu: React.FC<ITableDropMenuProps> = ({
   text, className, style, menuData: propsMenuData, oldMenuData, showMenu: propsShowMenu, organizationId, showText = true, defaultButtonProps,
-  permissionType, tooltip, permissionText, textClassName, textStyle, permission, permissionMenu, onMenuClick, defaultMenuIcon = 'more_vert',
+  permissionType, tooltip, permissionText, textClassName, textStyle, permission, permissionMenu, onMenuClick, defaultMenuIcon = 'more_vert', textClick,
 }) => {
   const prefixCls = 'c7n-agile-table-drop-menu';
   // 渲染文本
@@ -80,7 +96,7 @@ const TableDropMenu: React.FC<ITableDropMenuProps> = ({
       style={style}
     >
       {showText && (
-        <span className={classNames(`${prefixCls}-text`, textClassName)} style={textStyle}>
+        <span role="none" className={classNames(`${prefixCls}-text`, { [`${prefixCls}-text-click`]: textClick }, textClassName)} style={textStyle} onClick={textClick}>
           {permissionText
             ? (
               <Permission
