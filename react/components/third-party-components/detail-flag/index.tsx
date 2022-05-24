@@ -1,15 +1,24 @@
 import React from 'react';
 import { Tooltip } from 'choerodon-ui/pro';
 import './index.less';
+import classNames from 'classnames';
 
 interface IIssueDetailHeaderFlagProps {
-    data?: any
+  data?: any
+  hidden?: boolean
+  className?: string
+  style?: React.CSSProperties
 }
-const IssueDetailHeaderFlag: React.FC<IIssueDetailHeaderFlagProps> = () => {
+const IssueDetailHeaderFlag: React.FC<IIssueDetailHeaderFlagProps> = ({
+  data, hidden, className, style,
+}) => {
   const prefix = 'c7n-agile-third-components-detail-flag';
+  if (hidden) {
+    return <></>;
+  }
   return (
     <Tooltip title="数据">
-      <div className={prefix}>
+      <div className={classNames(prefix, className)} style={style}>
         <svg width="20px" height="28px" viewBox="0 0 54 38" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
           <g id="页面-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
             <g id="燕千云logo" transform="translate(-0.000000, 0.000000)" fillRule="nonzero">
@@ -21,5 +30,11 @@ const IssueDetailHeaderFlag: React.FC<IIssueDetailHeaderFlagProps> = () => {
       </div>
     </Tooltip>
   );
+};
+IssueDetailHeaderFlag.defaultProps = {
+  data: undefined,
+  hidden: false,
+  className: undefined,
+  style: undefined,
 };
 export default IssueDetailHeaderFlag;
