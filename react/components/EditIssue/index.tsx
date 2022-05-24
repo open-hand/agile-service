@@ -1,9 +1,12 @@
 /* eslint-disable react/require-default-props */
-import React from 'react';
+import React, { MutableRefObject } from 'react';
 import ErrorBoundary from '../ErrorBoundary';
 import EditIssue from './EditIssue';
 import { EditIssueContextProvider } from './stores';
 
+interface IAgileEditIssueRef {
+
+}
 export interface IAgileEditIssueProps {
   /**
    * @default 'agile'
@@ -15,6 +18,10 @@ export interface IAgileEditIssueProps {
    * @default 'detail'
    */
   tab?: 'detail' | 'split_story' | 'comment' | 'record' | 'development' | 'depend_link' | string
+  // /**
+  //  * 详情内部ref
+  //  */
+  // innerRef?: MutableRefObject<IAgileEditIssueRef | undefined>
   disabled?: boolean
   /**
    * 禁止快速创建
@@ -27,7 +34,7 @@ export interface IAgileEditIssueProps {
   /**
    * 禁止问题链接相关操作
    */
-  disabledIssueLinkActions?:boolean
+  disabledIssueLinkActions?: boolean
   /**
    * 禁止（非详情字段内）按钮类型操作
    * 左上角更多， 删除操作
@@ -46,6 +53,14 @@ export interface IAgileEditIssueProps {
    * 禁止需求相关操作
    */
   disabledDemandActions?: boolean
+  /**
+   * 禁止WSJF操作
+   */
+  disabledWSJFActions?: boolean
+  /**
+   * 禁止PIAim 操作
+   */
+  disabledPIAimActions?:boolean
   /**
    * 禁止头部按钮类型操作 （右侧更多操作)
    */
