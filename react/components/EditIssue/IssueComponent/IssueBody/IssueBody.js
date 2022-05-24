@@ -44,6 +44,7 @@ function IssueBody(props) {
   const {
     prefixCls, disabled, store, applyType, refreshDeliverablesList, copingStrategyEditRef,
     disabledIssueLinkActions, disabledTestActions, disabledDemandActions, disabledDevelopmentTab, disabledHeaderActionButtons,
+    disabledWSJFActions, disabledPIAimActions,
   } = useContext(EditIssueContext);
   const { match } = useDetailContainerContext();
   const { comments } = store;
@@ -160,8 +161,8 @@ function IssueBody(props) {
           {
             !outside && issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature' && (
               <>
-                <IssueWSJF {...props} />
-                <InjectedComponent.PIAim {...props} />
+                <IssueWSJF {...props} disabled={disabledWSJFActions || disabled} />
+                <InjectedComponent.PIAim {...props} disabled={disabledPIAimActions || disabled} />
               </>
             )
           }
