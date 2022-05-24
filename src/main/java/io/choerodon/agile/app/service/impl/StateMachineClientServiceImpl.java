@@ -4,6 +4,7 @@ import java.util.*;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import io.choerodon.agile.infra.enums.InstanceType;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -238,6 +239,8 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
             agilePluginService.handlerBusinessAfterCreateIssue(issueConvertDTO, projectId, issueId, issueCreateVO);
             // 同步工作项到第三方
             agilePluginService.issueSyncByIssueId(organizationId, issueId, OpenAppIssueSyncConstant.AppType.DIND.getValue(), OpenAppIssueSyncConstant.OperationType.CREATE);
+            // 第三方实例关联:yqcloud等
+            agilePluginService.createInstanceOpenRel(projectId, issueId, InstanceType.ISSUE, issueCreateVO.getInstanceOpenRelVO());
         }
         if (agileWaterfallService != null) {
             agileWaterfallService.handlerWaterfallAfterCreateIssue(projectId,issueId,issueCreateVO);
