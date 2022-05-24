@@ -1,5 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Modal, Form } from 'choerodon-ui/pro';
+import React, {
+  useEffect, useMemo, useRef, useState,
+} from 'react';
+import { Modal, Form, Select } from 'choerodon-ui/pro';
 import { C7NFormat } from '@choerodon/master';
 import { isEmpty, omit } from 'lodash';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
@@ -10,23 +12,33 @@ import localCacheStore from '@/stores/common/LocalCacheStore';
 import BaseComponent, { CreateIssueBaseProps } from './BaseComponent';
 import SelectProject from '@/components/select/select-project';
 import { AGILE_TYPE_CODES } from '@/constants/TYPE_CODE';
+import { ICategoryCode } from '@/hooks/useCategoryCodes';
 
-export interface CreateIssueProps extends Omit<CreateIssueBaseProps, 'onSubmit'> {
+export interface CreateIssueSelectProjectProps {
+  showSelectProject?: boolean,
+  /**
+   * 查询的项目类别 仅在 `showSelectProject` 有效
+   * @default 'N_AGILE'
+   */
+  queryProjectCategories?: ICategoryCode[]
+}
+export type CreateIssueBase0Props =CreateIssueBaseProps& CreateIssueSelectProjectProps;
+export interface CreateIssueProps extends Omit<CreateIssueBase0Props, 'onSubmit'> {
   onCreate: (issue: Issue) => void,
   /** 创建来源 */
   originFrom?: 'scrumBoard' | 'Backlog'
   hiddenTypeCodes?: string[],
   applyType?: 'agile' | 'program' | 'waterfall' | 'risk',
   request?: (data: any, applyType?: 'agile' | 'program' | 'waterfall' | 'risk') => Promise<any>
-  showSelectProject?: boolean,
   onCancel?: () => void,
 }
 
-export const CreateContent = (props: CreateIssueBaseProps) => {
+export const CreateContent = (props: CreateIssueBase0Props) => {
   const {
-    showSelectProject = false, projectId, modal,
+    showSelectProject = false, projectId, modal, queryProjectCategories,
   } = props;
-  const selectProjectRef = useRef();
+  const selectProjectRef = useRef<Select>();
+  const category: ICategoryCode[] = useMemo(() => (!queryProjectCategories?.length ? ['N_AGILE'] : queryProjectCategories), [queryProjectCategories]);
   const [currentProjectId, setCurrentProjectId] = useState<string | never>();
   const handleProjectChange = (value: string) => {
     setCurrentProjectId(value);
@@ -36,7 +48,6 @@ export const CreateContent = (props: CreateIssueBaseProps) => {
       // @ts-ignore
       modal?.handleOk(() => {
         if (!projectId) {
-          // @ts-ignore
           selectProjectRef?.current?.validate();
         }
         return false;
@@ -49,13 +60,12 @@ export const CreateContent = (props: CreateIssueBaseProps) => {
       {showSelectProject && (
         <Form>
           <SelectProject
-            // @ts-ignore
             ref={selectProjectRef}
             onChange={handleProjectChange}
             label="所属项目"
             required
             clearButton={false}
-            category="N_AGILE"
+            category={category}
           />
         </Form>
       )}

@@ -30,11 +30,11 @@ export interface SelectTeamProps extends Omit<Partial<SelectProps>, 'optionRende
   flat?: boolean
   optionData?: any[]
   userId?: string,
-  category?: ICategoryCode,
+  category?: ICategoryCode | ICategoryCode[],
   excludeIds?: [],
 }
 
-const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
+const SelectProject = forwardRef<Select | undefined, SelectTeamProps>(({
   userId, projectDataRef = { current: null }, afterLoad, defaultSelectedIds: propsDefaultSelectedIds, level, flat, extraOptions, category, optionData, queryAgile, popupCls, excludeIds, optionRenderer, ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Function>();
@@ -65,7 +65,7 @@ const SelectProject: React.FC<SelectTeamProps> = forwardRef(({
         filter,
         page,
         size: 50,
-        category,
+        category: castArray(category || []).join(','),
       });
     },
     optionRenderer,
