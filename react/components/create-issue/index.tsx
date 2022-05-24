@@ -22,7 +22,7 @@ export interface CreateIssueProps extends Omit<CreateIssueBaseProps, 'onSubmit'>
   onCancel?: () => void,
 }
 
-const CreateContent = (props: CreateIssueBaseProps) => {
+export const CreateContent = (props: CreateIssueBaseProps) => {
   const {
     showSelectProject = false, projectId, modal,
   } = props;
