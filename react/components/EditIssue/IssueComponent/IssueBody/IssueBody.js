@@ -43,6 +43,8 @@ const { TabPane } = Tabs;
 function IssueBody(props) {
   const {
     prefixCls, disabled, store, applyType, refreshDeliverablesList, copingStrategyEditRef,
+    disabledIssueLinkActions, disabledTestActions, disabledDemandActions, disabledDevelopmentTab, disabledHeaderActionButtons,
+    disabledWSJFActions, disabledPIAimActions,
   } = useContext(EditIssueContext);
   const { match } = useDetailContainerContext();
   const { comments } = store;
@@ -85,7 +87,7 @@ function IssueBody(props) {
           />
           <FieldStar {...props} />
           <div style={{ flexShrink: 0, marginLeft: 'auto', color: 'var(--text-color3)' }}>
-            {!disabled && (
+            {!disabled && !disabledHeaderActionButtons && (
               <IssueDropDown {...props} testLinkStoreRef={testLinkStoreRef} />
             )}
           </div>
@@ -159,8 +161,8 @@ function IssueBody(props) {
           {
             !outside && issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature' && (
               <>
-                <IssueWSJF {...props} />
-                <InjectedComponent.PIAim {...props} />
+                <IssueWSJF {...props} disabled={disabledWSJFActions || disabled} />
+                <InjectedComponent.PIAim {...props} disabled={disabledPIAimActions || disabled} />
               </>
             )
           }
@@ -171,14 +173,15 @@ function IssueBody(props) {
               testLinkStoreRef,
               noCreateLink: true,
               ...props,
+              disabled: disabled || disabledTestActions,
             }) : ''}
           {issueTypeVO.typeCode && ['story', 'task', 'bug'].indexOf(issueTypeVO.typeCode) !== -1
-            ? <IssueLink {...props} /> : ''}
+            ? <IssueLink {...props} disabled={disabled || disabledIssueLinkActions} /> : ''}
           {!outside && ['sub_task', 'issue_epic', 'risk'].indexOf(issueTypeVO.typeCode) === -1 && hasBacklog && hasInject('backlog:issueLinkedBacklog')
-            ? mount('backlog:issueLinkedBacklog', props) : ''}
+            ? mount('backlog:issueLinkedBacklog', { ...props, disabled: disabled || disabledDemandActions }) : ''}
         </TabPane>
         {issueTypeVO.typeCode && WATERFALL_TYPE_CODES.includes(issueTypeVO.typeCode) && hasInject(DEPENDENCY_TAB)
-          ? <TabPane tab="依赖与关联">{mount(DEPENDENCY_TAB, { ...props, issueTypeCode: issueTypeVO.typeCode })}</TabPane> : null}
+          ? <TabPane tab="依赖与关联" key="depend_link">{mount(DEPENDENCY_TAB, { ...props, issueTypeCode: issueTypeVO.typeCode })}</TabPane> : null}
         {
           issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
             ? (
@@ -197,7 +200,7 @@ function IssueBody(props) {
           <IssueLog {...props} />
         </TabPane>
         {applyType !== 'program' && hasDevops && issueTypeVO?.typeCode !== 'risk'
-          ? <TabPane tab="开发" key="development"><IssueBranch {...props} /></TabPane> : ''}
+          ? <TabPane tab="开发" key="development"><IssueBranch {...props} disabled={disabled || disabledDevelopmentTab} /></TabPane> : ''}
       </Tabs>
 
     </section>
