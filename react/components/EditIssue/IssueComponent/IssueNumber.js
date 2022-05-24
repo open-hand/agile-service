@@ -6,6 +6,7 @@ import { Choerodon } from '@choerodon/boot';
 import { LINK_URL_TO } from '@/constants/LINK_URL';
 import { issueApi } from '@/api';
 import { linkUrl } from '@/utils/to';
+import { IssueDetailHeaderFlag } from '@/components/third-party-components';
 import EditIssueContext from '../stores';
 import IssueSwitch from './IssueSwitch';
 import styles from './IssueNumber.less';
@@ -74,6 +75,7 @@ const IssueNumber = ({
           </Tooltip>
         )
       }
+      <IssueDetailHeaderFlag />
       <IssueSwitch issue={issue} reloadIssue={reloadIssue} />
     </div>
   );
