@@ -162,6 +162,9 @@ public class IssueCreateVO {
     @Encrypt
     private List<Long> productIds;
 
+    @ApiModelProperty(value = "第三方实例关联")
+    private InstanceOpenRelVO instanceOpenRelVO;
+
     public List<TagVO> getTags() {
         return tags;
     }
@@ -550,5 +553,13 @@ public class IssueCreateVO {
 
     public void setProductIds(List<Long> productIds) {
         this.productIds = productIds;
+    }
+
+    public InstanceOpenRelVO getInstanceOpenRelVO() {
+        return instanceOpenRelVO;
+    }
+
+    public void setInstanceOpenRelVO(InstanceOpenRelVO instanceOpenRelVO) {
+        this.instanceOpenRelVO = instanceOpenRelVO;
     }
 }
