@@ -6,6 +6,9 @@ export interface IRoute {
   props?: Object
   events?: DetailEvents
 }
+export interface IDetailPushRouteOptions {
+  [path: string]: Omit<IRoute, 'path'>
+}
 export interface IRouteWithKey extends IRoute {
   key: React.Key
 }
