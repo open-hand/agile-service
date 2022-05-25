@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { stores } from '@choerodon/boot';
 import {
-  Button, DataSet, Form, Spin, TextField,
+  DataSet, Form, Spin, TextField,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { usePersistFn } from 'ahooks';
@@ -16,7 +16,6 @@ import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import Field from 'choerodon-ui/pro/lib/data-set/Field';
 import moment from 'moment';
 import { has as hasInject, mount } from '@choerodon/inject';
-import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import UploadButton from '@/components/CommonComponent/UploadButton';
 import validateFile from '@/utils/File';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
@@ -99,9 +98,7 @@ export interface CreateIssueBaseProps {
   applyType?: CreateIssueProps['applyType']
   hiddenIssueType?: boolean
   defaultPostData?: object,
-  showFooterButton?: boolean,
   footerEvents?: { handleSubmit: () => any },
-  onCancel?: () => void,
 }
 const defaultDataSet = new DataSet({
   autoCreate: true,
@@ -326,8 +323,7 @@ const CreateIssueBase = observer(({
   applyType,
   hiddenIssueType = false,
   defaultPostData,
-  showFooterButton = false,
-                                    footerEvents,
+  footerEvents,
 }: CreateIssueBaseProps) => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);

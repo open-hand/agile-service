@@ -25,17 +25,19 @@ export interface SelectTeamProps extends Omit<Partial<SelectProps>, 'optionRende
   /** 只查询组织下敏捷项目 */
   queryAgile?: boolean
   extraOptions?: Array<{ id: string, name: string }>
-  level?: 'workbench'
+  level?: 'workbench' | 'outside'
   defaultSelectedIds?: string[]
   flat?: boolean
   optionData?: any[]
   userId?: string,
   category?: ICategoryCode | ICategoryCode[],
   excludeIds?: [],
+  onlyBacklog?: boolean // level为outside时生效
 }
 
 const SelectProject = forwardRef<Select | undefined, SelectTeamProps>(({
-  userId, projectDataRef = { current: null }, afterLoad, defaultSelectedIds: propsDefaultSelectedIds, level, flat, extraOptions, category, optionData, queryAgile, popupCls, excludeIds, optionRenderer, ...otherProps
+  userId, projectDataRef = { current: null }, afterLoad, defaultSelectedIds: propsDefaultSelectedIds, level, flat,
+  extraOptions, category, optionData, queryAgile, popupCls, excludeIds, optionRenderer, onlyBacklog, ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Function>();
   afterLoadRef.current = afterLoad;
@@ -57,6 +59,15 @@ const SelectProject = forwardRef<Select | undefined, SelectTeamProps>(({
           param: filter,
           userId: userId ?? AppState?.userInfo?.id,
           filterProjectIds: defaultSelectedIds,
+        });
+      }
+
+      if (level === 'outside') {
+        return projectApi.loadProjectByCategory({
+          page,
+          size: 50,
+          param: filter,
+          onlyBacklog,
         });
       }
 

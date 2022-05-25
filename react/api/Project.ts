@@ -97,6 +97,27 @@ class ProjectApi extends Api<ProjectApi> {
       data,
     });
   }
+
+  /**
+   * 查询组织下有权限的项目
+   * @param onlyBacklog true 需求 false 敏捷/项目群/瀑布
+   */
+  loadProjectByCategory({
+    onlyBacklog = false, page, size, param,
+  }: { onlyBacklog?: boolean, page?: number, size?: number, param?: string }) {
+    return this.request({
+      method: 'post',
+      url: `agile/v1/organizations/${this.orgId}/projects/list_by_category`,
+      params: {
+        page: page || 1,
+        size: size || 50,
+        param,
+      },
+      data: {
+        enabled: true,
+      },
+    });
+  }
 }
 
 const projectApi = new ProjectApi();
