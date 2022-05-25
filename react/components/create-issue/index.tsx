@@ -1,11 +1,14 @@
 import React, {
+  useCallback,
   useEffect, useMemo, useRef, useState,
 } from 'react';
-import { Modal, Form, Select } from 'choerodon-ui/pro';
+import { Modal, Form, Select, Button } from 'choerodon-ui/pro';
 import { C7NFormat } from '@choerodon/master';
 import { isEmpty, omit } from 'lodash';
+import { usePersistFn } from 'ahooks';
+import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
-import { IModalProps, Issue } from '@/common/types';
+import { Issue } from '@/common/types';
 import { fieldApi, issueApi } from '@/api';
 import { uploadAttachment } from '@/utils/richText';
 import localCacheStore from '@/stores/common/LocalCacheStore';
@@ -13,6 +16,7 @@ import BaseComponent, { CreateIssueBaseProps } from './BaseComponent';
 import SelectProject from '@/components/select/select-project';
 import { AGILE_TYPE_CODES } from '@/constants/TYPE_CODE';
 import { ICategoryCode } from '@/hooks/useCategoryCodes';
+import styles from './index.less';
 
 export interface CreateIssueSelectProjectProps {
   showSelectProject?: boolean,
@@ -35,29 +39,42 @@ export interface CreateIssueProps extends Omit<CreateIssueBase0Props, 'onSubmit'
 
 export const CreateContent = (props: CreateIssueBase0Props) => {
   const {
-    showSelectProject = false, projectId, modal, queryProjectCategories,
+    showSelectProject = false, projectId, modal, queryProjectCategories, showFooterButton, onCancel,
   } = props;
   const selectProjectRef = useRef<Select>();
   const category: ICategoryCode[] = useMemo(() => (!queryProjectCategories?.length ? ['N_AGILE'] : queryProjectCategories), [queryProjectCategories]);
   const [currentProjectId, setCurrentProjectId] = useState<string | never>();
+  const footerEvents = useMemo(() => ({ handleSubmit: () => handleSubmit() }), []);
   const handleProjectChange = (value: string) => {
     setCurrentProjectId(value);
   };
+  const handleCancel = usePersistFn(() => {
+    onCancel && onCancel();
+  });
+
+  const handleSubmit = usePersistFn(() => {
+    if (!projectId) {
+      // @ts-ignore
+      selectProjectRef?.current?.validate();
+    }
+    return false;
+  });
+
+  const handleOk = useCallback(() => {
+    footerEvents.handleSubmit();
+  }, [footerEvents.handleSubmit]);
+
   useEffect(() => {
     if (showSelectProject) {
       // @ts-ignore
-      modal?.handleOk(() => {
-        if (!projectId) {
-          selectProjectRef?.current?.validate();
-        }
-        return false;
-      });
+      modal?.handleOk(handleSubmit);
     }
-  }, []);
+  }, [handleSubmit]);
 
   return (
-    <>
-      {showSelectProject && (
+    <div className={styles.createWrap}>
+      <div className={styles.content}>
+        {showSelectProject && (
         <Form>
           <SelectProject
             ref={selectProjectRef}
@@ -68,11 +85,22 @@ export const CreateContent = (props: CreateIssueBase0Props) => {
             category={category}
           />
         </Form>
+        )}
+        {(!showSelectProject || currentProjectId) && (
+        <BaseComponent {...props} projectId={showSelectProject ? currentProjectId : projectId} footerEvents={footerEvents} />
+        )}
+      </div>
+      {showFooterButton && (
+        <div className={styles.footer}>
+          <Button onClick={handleCancel}>
+            取消
+          </Button>
+          <Button onClick={handleOk} color={ButtonColor.primary}>
+            创建
+          </Button>
+        </div>
       )}
-      {(!showSelectProject || currentProjectId) && (
-        <BaseComponent {...props} projectId={showSelectProject ? currentProjectId : projectId} />
-      )}
-    </>
+    </div>
   );
 };
 
