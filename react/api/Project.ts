@@ -112,6 +112,7 @@ class ProjectApi extends Api<ProjectApi> {
         page: page || 1,
         size: size || 50,
         param,
+        onlyBacklog,
       },
       data: {
         enabled: true,
