@@ -3,12 +3,14 @@ import React, {
 } from 'react';
 
 import { Animate } from 'choerodon-ui/pro';
-import { usePersistFn } from 'ahooks';
+import { useCreation, usePersistFn } from 'ahooks';
 import { observer } from 'mobx-react-lite';
 import useGetAnnouncementHeight from '@/hooks/useGetAnnouncementHeight';
 import Container, { registerPath } from './Container';
 import PreviewIssueFile from './PreviewIssueFile';
-import DetailContainerContext, { IPreview, IRoute, IRouteWithKey } from './context';
+import DetailContainerContext, {
+  IDetailPushRouteOptions, IPreview, IRoute, IRouteWithKey,
+} from './context';
 import openDescriptionConfirm from './openDescriptionConfirm';
 // 默认展示children，push之后再匹配
 export { registerPath };
@@ -22,6 +24,7 @@ export const useDetail = (): [DetailContainerProps] => {
   const [hidden, setHidden] = useState(true);
   const [descriptionChanged, setDescriptionChanged] = useState<boolean>(false);
   const [copingStrategyChanged, setCopingStrategyChanged] = useState<boolean>(false);
+  const currentDetailRouteOptions = useCreation(() => ({}) as IDetailPushRouteOptions, []);
   const eventsMap = useRef<Map<string, DetailEvents>>(new Map());
   const updateEventsMap = useCallback((path: string, events?: DetailEvents) => {
     if (events) {
@@ -31,7 +34,7 @@ export const useDetail = (): [DetailContainerProps] => {
   const match = routes[routes.length - 1];
   const push = usePersistFn((nextRoute: IRoute) => {
     const pushDetail = () => {
-      const routeWithKey = { ...nextRoute, key: Math.random() };
+      const routeWithKey = { ...currentDetailRouteOptions[nextRoute.path], ...nextRoute, key: Math.random() };
       setRoutes((r) => ([...r, routeWithKey]));
       updateEventsMap(routeWithKey.path, routeWithKey.events);
       setVisible(true);
@@ -47,7 +50,8 @@ export const useDetail = (): [DetailContainerProps] => {
       });
     }
   });
-  const open = usePersistFn((route: IRoute) => {
+
+  const open = usePersistFn((route: IRoute, pushRouteOptions?: IDetailPushRouteOptions) => {
     const openDetail = () => {
       const routeWithKey = { ...route, key: Math.random() };
       setRoutes([routeWithKey]);
@@ -56,6 +60,7 @@ export const useDetail = (): [DetailContainerProps] => {
       setDescriptionChanged(false);
       setCopingStrategyChanged(false);
     };
+    pushRouteOptions && Object.assign(currentDetailRouteOptions, pushRouteOptions);
     if (!descriptionChanged && !copingStrategyChanged) {
       openDetail();
     } else {
@@ -148,7 +153,12 @@ export interface DetailContainerProps {
   visible: boolean
   routes: IRouteWithKey[]
   match: IRouteWithKey
-  open: (route: IRoute) => void
+  /**
+   * 打开一个新的详情侧边栏（会清空当前详情路由信息）
+  * @param route 当前打开的路由
+  * @param pushRouteOptions 在当前路由进行push操作时附加的属性
+  */
+  open: (route: IRoute, pushRouteOptions?: IDetailPushRouteOptions) => void
   push: (nextRoute: IRoute) => void
   pop: () => void
   close: () => void
