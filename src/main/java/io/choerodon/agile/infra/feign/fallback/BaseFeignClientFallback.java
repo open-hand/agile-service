@@ -231,4 +231,9 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     public ResponseEntity<List<ProjectVO>> listProjectsByUserIdForSimple(Long organizationId, Long userId, String category, Boolean enabled) {
         throw new CommonException("error.query.org.projects");
     }
+
+    @Override
+    public ResponseEntity<Page<ProjectVO>> pagingQueryProjectsByUserId(Long organizationId, Long userId, Integer page, Integer size, ProjectVO projectVO) {
+        throw new CommonException("error.query.org.projects.by.userId");
+    }
 }
