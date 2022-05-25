@@ -71,7 +71,10 @@ class PiApi extends Api<PiApi> {
    * @param issueId
    */
   getFeatureLog(issueId: number) {
-    return axios.get(`${this.prefix}/pi/${issueId}/list_feature_pi_log`);
+    return this.request({
+      url: `${this.prefix}/pi/${issueId}/list_feature_pi_log`,
+      method: 'get',
+    });
   }
 
   /**
