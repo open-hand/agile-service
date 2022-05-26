@@ -76,7 +76,7 @@ const IssueNumber = ({
           </Tooltip>
         )
       }
-      <IssueDetailHeaderFlag className={classNames(styles.flag, { [styles.flag_noCopyLinkIcon]: !showCopyLinkBtn })} />
+      <IssueDetailHeaderFlag className={classNames(styles.flag, { [styles.flag_noCopyLinkIcon]: !showCopyLinkBtn })} data={issue} />
       <IssueSwitch issue={issue} reloadIssue={reloadIssue} />
     </div>
   );
