@@ -25,12 +25,15 @@ export interface SelectTeamProps extends Omit<Partial<SelectProps>, 'optionRende
   /** 只查询组织下敏捷项目 */
   queryAgile?: boolean
   extraOptions?: Array<{ id: string, name: string }>
+  /**
+   * `outside` ：外部客户端访问
+   */
   level?: 'workbench' | 'outside'
   defaultSelectedIds?: string[]
   flat?: boolean
   optionData?: any[]
   userId?: string,
-  category?: ICategoryCode | ICategoryCode[],
+  category?: ICategoryCode,
   excludeIds?: [],
   onlyBacklog?: boolean // level为outside时生效
 }
@@ -76,7 +79,7 @@ const SelectProject = forwardRef<Select | undefined, SelectTeamProps>(({
         filter,
         page,
         size: 50,
-        category: castArray(category || []).join(','),
+        category,
       });
     },
     optionRenderer,

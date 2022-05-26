@@ -12,15 +12,11 @@ import localCacheStore from '@/stores/common/LocalCacheStore';
 import BaseComponent, { CreateIssueBaseProps } from './BaseComponent';
 import SelectProject from '@/components/select/select-project';
 import { AGILE_TYPE_CODES } from '@/constants/TYPE_CODE';
-import { ICategoryCode } from '@/hooks/useCategoryCodes';
 
 export interface CreateIssueSelectProjectProps {
   showSelectProject?: boolean,
-  /**
-   * 查询的项目类别 仅在 `showSelectProject` 有效
-   * @default 'N_AGILE'
-   */
-  queryProjectCategories?: ICategoryCode[]
+  /** 限定查询层级为 `outside` */
+  queryLevelOutside?:boolean
 }
 export type CreateIssueBase0Props =CreateIssueBaseProps& CreateIssueSelectProjectProps;
 export interface CreateIssueProps extends Omit<CreateIssueBase0Props, 'onSubmit'> {
@@ -35,10 +31,9 @@ export interface CreateIssueProps extends Omit<CreateIssueBase0Props, 'onSubmit'
 
 export const CreateContent = (props: CreateIssueBase0Props) => {
   const {
-    showSelectProject = false, projectId, modal, queryProjectCategories,
+    showSelectProject = false, projectId, modal, queryLevelOutside,
   } = props;
   const selectProjectRef = useRef<Select>();
-  const category: ICategoryCode[] = useMemo(() => (!queryProjectCategories?.length ? ['N_AGILE'] : queryProjectCategories), [queryProjectCategories]);
   const [currentProjectId, setCurrentProjectId] = useState<string | never>();
   const handleProjectChange = (value: string) => {
     setCurrentProjectId(value);
@@ -66,7 +61,8 @@ export const CreateContent = (props: CreateIssueBase0Props) => {
             label="所属项目"
             required
             clearButton={false}
-            category={category}
+            level={queryLevelOutside ? 'outside' : undefined}
+            category="N_AGILE"
           />
         </Form>
       )}
