@@ -1,6 +1,6 @@
 import { axios } from '@choerodon/boot';
 import { IFieldType } from '@/common/types';
-import { getProjectId, getOrganizationId, getMenuType } from '@/utils/common';
+import { getOrganizationId } from '@/utils/common';
 import { sameProject } from '@/utils/detail';
 import Api from './Api';
 import { IImportOrExportRecord } from './Issue';
@@ -155,7 +155,7 @@ class PageConfigApi extends Api<PageConfigApi> {
   }
 
   get prefixOrgOrPro() {
-    return `/agile/v1/${getMenuType() === 'project' ? `projects/${this.projectId}` : `organizations/${this.projectId}`}`;
+    return `/agile/v1/${this.menuType === 'project' ? `projects/${this.projectId}` : `organizations/${this.orgId}`}`;
   }
 
   /**
@@ -226,7 +226,7 @@ class PageConfigApi extends Api<PageConfigApi> {
       method: 'get',
       url: `${this.prefixOrgOrPro}/object_scheme_field/configs/issue_types`,
       params: {
-        organizationId: getOrganizationId(),
+        organizationId: this.orgId,
       },
     });
   }
