@@ -2,6 +2,7 @@ import React from 'react';
 import { Tooltip } from 'choerodon-ui/pro';
 import './index.less';
 import classNames from 'classnames';
+import { observer } from 'mobx-react';
 
 interface IIssueDetailHeaderFlagProps {
   data?: { instanceOpenRelVO?: { source: 'yqcloud' | string, openInstanceNum: string, openInstanceId: string } }
@@ -9,7 +10,7 @@ interface IIssueDetailHeaderFlagProps {
   className?: string
   style?: React.CSSProperties
 }
-const IssueDetailHeaderFlag: React.FC<IIssueDetailHeaderFlagProps> = ({
+const IssueDetailHeaderFlag: React.FC<IIssueDetailHeaderFlagProps> = observer(({
   data, hidden, className, style,
 }) => {
   const prefix = 'c7n-agile-third-components-detail-flag';
@@ -31,7 +32,7 @@ const IssueDetailHeaderFlag: React.FC<IIssueDetailHeaderFlagProps> = ({
       </div>
     </Tooltip>
   );
-};
+});
 IssueDetailHeaderFlag.defaultProps = {
   data: undefined,
   hidden: false,
