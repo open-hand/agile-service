@@ -1,7 +1,19 @@
+.margin() {
+  margin-left: 6px;
+  margin-right: 8px;
+}
+
 .copyLinkIcon {
   cursor: pointer;
-    font-size: 20px;
-    color: #5365EA;
-    margin-left: 6px;
-    margin-right: 8px;
+  font-size: 20px;
+  color: #5365EA;
+  .margin();
+}
+
+.flag {
+  margin-right: .08rem;
+
+  &_noCopyLinkIcon {
+    .margin();
+  }
 }

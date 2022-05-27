@@ -8,6 +8,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author dinghuang123@gmail.com
@@ -50,6 +51,26 @@ public class ProjectVO {
 
     @ApiModelProperty(value = "项目类型")
     private List<String> types;
+    @ApiModelProperty(value = "项目id集合")
+    private Set<Long> topProjectIds;
+    @ApiModelProperty(value = "模糊搜索参数")
+    private String param;
+
+    public String getParam() {
+        return param;
+    }
+
+    public void setParam(String param) {
+        this.param = param;
+    }
+
+    public Set<Long> getTopProjectIds() {
+        return topProjectIds;
+    }
+
+    public void setTopProjectIds(Set<Long> topProjectIds) {
+        this.topProjectIds = topProjectIds;
+    }
 
     public String getStatusName() {
         return statusName;

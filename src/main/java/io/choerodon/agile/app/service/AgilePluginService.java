@@ -554,4 +554,8 @@ public interface AgilePluginService {
     void deleteIssueProductRel(Long projectId, List<Long> issueIds);
 
     List<String> getOpenUserIdsByUserIds(List<Long> userIds, String openAppCode);
+
+    void createInstanceOpenRel(Long projectId, Long instanceId, String instanceType, InstanceOpenRelVO instanceOpenRelVO);
+
+    InstanceOpenRelVO queryInstanceOpenRel(Long projectId, Long instanceId, String instanceType, String source);
 }

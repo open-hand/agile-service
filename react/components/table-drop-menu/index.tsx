@@ -22,7 +22,6 @@ interface ITableDropMenuProps {
   // clickableText?: boolean
   /** @default 'true' */
   showText?: boolean
-
   onTextClick?:(event:any)=>void
   /**
    * 是否展示菜单，当菜单列表为空时不会展示

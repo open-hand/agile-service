@@ -3,9 +3,11 @@ import { Icon, Tooltip } from 'choerodon-ui';
 import { withRouter } from 'react-router-dom';
 import copy from 'copy-to-clipboard';
 import { Choerodon } from '@choerodon/boot';
+import classNames from 'classnames';
 import { LINK_URL_TO } from '@/constants/LINK_URL';
 import { issueApi } from '@/api';
 import { linkUrl } from '@/utils/to';
+import { IssueDetailHeaderFlag } from '@/components/third-party-components';
 import EditIssueContext from '../stores';
 import IssueSwitch from './IssueSwitch';
 import styles from './IssueNumber.less';
@@ -46,7 +48,7 @@ const IssueNumber = ({
     }
     Choerodon.prompt('复制成功！');
   }, [isProgramIssue, issueId, issueNum]);
-
+  const showCopyLinkBtn = issueId && !otherProject && !outside && !isWaterfallIssue && typeCode !== 'risk';
   return (
     <div style={{
       fontSize: 16, lineHeight: '28px', fontWeight: 500, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center',
@@ -68,12 +70,13 @@ const IssueNumber = ({
         )
       }
       {
-        issueId && !otherProject && !outside && !isWaterfallIssue && typeCode !== 'risk' && (
+        showCopyLinkBtn && (
           <Tooltip title="复制链接">
             <Icon type="link2" role="none" className={styles.copyLinkIcon} style={{ cursor: 'pointer' }} onClick={handleCopyLink} />
           </Tooltip>
         )
       }
+      <IssueDetailHeaderFlag className={classNames(styles.flag, { [styles.flag_noCopyLinkIcon]: !showCopyLinkBtn })} data={issue} />
       <IssueSwitch issue={issue} reloadIssue={reloadIssue} />
     </div>
   );
