@@ -3,9 +3,18 @@
   align-items: center;
   justify-content: space-between;
   height: 100%;
+
   &-text {
     display: inline-block;
     text-overflow: ellipsis;
     overflow: hidden;
+
+    &-click {
+      color: var(--table-click-color);
+      cursor: pointer;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
 }
