@@ -1,9 +1,9 @@
 import { SelectConfig } from '@/hooks/useSelect';
 
-export function wrapRequestCallback<T = any>(request: SelectConfig<T>['request'], callback?: (val: Parameters<SelectConfig['request']>[0], res: T[]) => void): SelectConfig<any>['request'] {
+export function wrapRequestCallback<T = any>(request: SelectConfig<T>['request'], callback?: (val: Parameters<SelectConfig['request']>[0], res: T[], originRes: any) => void): SelectConfig<any>['request'] {
   return async (requestData) => {
     const res = await request(requestData);
-    callback && await callback(requestData, Array.isArray(res) ? res : res.list);
+    callback && await callback(requestData, Array.isArray(res) ? res : res.list, res);
     return res;
   };
 }

@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { toJS } from 'mobx';
 import {
-  useCreation, useSafeState,
+  useCreation, useWhyDidYouUpdate,
 } from 'ahooks';
 import { Select, DataSet } from 'choerodon-ui/pro';
 import FormContext from 'choerodon-ui/pro/lib/form/FormContext';
@@ -22,6 +22,7 @@ import Styles from './index.less';
 import { refsBindRef, wrapRequestCallback } from '../utils';
 import { useNoticeSelectUpdateSelected } from '../useNoticeSelectUpdateSelected';
 import { styles as ellipsisStyles } from '../common/utils';
+import useSelectRequestArgsValue from '../useSelectRequestArgsValue';
 
 const toArray = (something: any) => (Array.isArray(something) ? something : [something]);
 export interface SelectUserProps extends Partial<SelectProps> {
@@ -48,33 +49,23 @@ const SelectUser = forwardRef<Select, SelectUserProps>(({
   selectedUser: propsSelectedUser, extraOptions: propExtraOptions, dataRef, request, level = 'project', afterLoad,
   selected, onOption, flat, projectId, organizationId, optionRenderer, excludeIds, ...otherProps
 }, ref: React.Ref<Select>) => {
+  const innerDataRef = useRef<any>();
   const selectRef = useRef<Select>();
   const context = useContext(FormContext);
   const { selectedUser, extraOptions } = useCreation(() => ({ selectedUser: propsSelectedUser, extraOptions: propExtraOptions }), [propsSelectedUser]);
   const selectDataRef = useRef<DataSet>();
   const requestLoading = useRef<boolean>(true);
   const values = useComputed(() => (selectRef.current?.getValues() || []).flat(Infinity).map((item) => (typeof item === 'object' ? item.id : item)), [selectRef.current?.getValues()]);
-  const [forceUpdateValue, setFilterWord] = useNoticeSelectUpdateSelected();
   const selectedUserLoadedIds = useCreation(() => toArray(selectedUser)?.filter((i) => i && typeof (i) === 'object' && i.id).map((i) => i.id), [selectedUser]); // 已经存在的用户查询接口会过滤，避免第二页恰好全是选中的数据，但页面无反应
+  const extraOptionIds = useMemo(() => extraOptions?.map((i) => i.id) || [], [extraOptions]);
   const selectedUserIds = useMemo(() => {
     const ids: string[] | string | undefined = toJS(selected);
-    const extraOptionIds = extraOptions?.map((i) => i.id) || [];
-
     // 避免value是对象的情况
     const valueArray: string[] = castArray(otherProps.value).map((i) => (typeof (i) === 'object' ? i?.id : i)).filter(Boolean);
     return uniq(castArray(ids).concat(valueArray).concat(values).filter((i) => i && !(i === '0' || extraOptionIds.includes(i))));
   }, [JSON.stringify(selected), JSON.stringify(otherProps.value), values, extraOptions]);
-  const idsRef = useRef(selectedUserIds);
-  const args = useMemo(() => {
-    if (selectDataRef.current && selectedUserIds) {
-      // 有新的未加载的值，就重新加载，以区分用户选择和自动选择（比如选中了个人筛选）
-      const hasNewUnExistValue = selectedUserIds.some((v) => !selectDataRef.current?.find((record) => record.get('id') === v));
-      if (hasNewUnExistValue || forceUpdateValue) {
-        idsRef.current = selectedUserIds;
-      }
-    }
-    return { selectedUserIds: idsRef.current, queryFilterIds: uniq([...idsRef.current, ...selectedUserLoadedIds]), projectId };
-  }, [selectedUserIds, selectedUserLoadedIds, projectId, forceUpdateValue]);
+  const selectIdsArg = useSelectRequestArgsValue({ dataRef: innerDataRef, value: selectedUserIds });
+  const args = useMemo(() => ({ selectedUserIds: selectIdsArg, queryFilterIds: uniq([...selectIdsArg, ...selectedUserLoadedIds]), projectId }), [selectIdsArg, selectedUserLoadedIds, projectId]);
   const userRequest: SelectConfig<User>['request'] = useCallback(
     async (requestData) => {
       let res: any;
@@ -100,15 +91,16 @@ const SelectUser = forwardRef<Select, SelectUserProps>(({
       }
       requestLoading.current = false;
       // 临时解决组件筛选时
-      setFilterWord('filter', requestData.filter);
+      // setFilterWord('filter', requestData.filter);
       return res;
     },
-    [level, organizationId, request, setFilterWord],
+    [level, organizationId, request],
   );
   const config = useMemo((): SelectConfig<User> => ({
     name: 'user',
     textField: 'realName',
     valueField: 'id',
+    dataRef: innerDataRef,
     requestArgs: args,
     onOption: (optionData: any) => {
       const optionProps = onOption ? onOption(optionData) : {};
