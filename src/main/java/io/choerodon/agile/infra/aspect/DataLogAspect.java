@@ -405,6 +405,7 @@ public class DataLogAspect {
                     null,
                     newValue);
             workCalendarSubscribeService.handleWorkCalendarSubscribeChanged(projectId, issueId, false, new ArrayList<>());
+            dataLogRedisUtil.deleteCustomChartAndPieChart(projectId);
         }
     }
 
@@ -440,6 +441,7 @@ public class DataLogAspect {
                     oldValue,
                     newValue);
             workCalendarSubscribeService.handleWorkCalendarSubscribeChanged(projectId, issueId, false, oldParticipants);
+            dataLogRedisUtil.deleteCustomChartAndPieChart(projectId);
         }
     }
 
@@ -462,6 +464,7 @@ public class DataLogAspect {
                     oldValue,
                     null);
             workCalendarSubscribeService.handleWorkCalendarSubscribeChanged(projectId, issueId, false, oldParticipants);
+            dataLogRedisUtil.deleteCustomChartAndPieChart(projectId);
         }
     }
 
@@ -816,7 +819,6 @@ public class DataLogAspect {
         }
         if (issueComment != null) {
             IssueCommentDTO issueCommentDTO = issueCommentMapper.selectByPrimaryKey(issueComment.getCommentId());
-            dataLogRedisUtil.deleteByComponentChange(issueCommentDTO.getProjectId());
             createDataLog(issueCommentDTO.getProjectId(), issueCommentDTO.getIssueId(), FIELD_COMMENT,
                     issueCommentDTO.getCommentText(), issueComment.getCommentText(), issueComment.getCommentId().toString(),
                     issueComment.getCommentId().toString());
@@ -1002,7 +1004,7 @@ public class DataLogAspect {
             List<IssueLabelDTO> curLabels = issueMapper.selectLabelNameByIssueId(issueId);
             createDataLog(projectId, issueId, FIELD_LABELS, getOriginLabelNames(originLabels),
                     getOriginLabelNames(curLabels), null, null);
-            dataLogRedisUtil.deleteByLabelDataLog(projectId);
+            dataLogRedisUtil.deleteCustomChartAndPieChart(projectId);
         } catch (Throwable e) {
             throw new CommonException(ERROR_METHOD_EXECUTE, e);
         }
@@ -1036,7 +1038,7 @@ public class DataLogAspect {
             List<IssueLabelDTO> originLabels = issueMapper.selectLabelNameByIssueId(issueId);
             createDataLog(issueDTO.getProjectId(), issueId, FIELD_LABELS, getOriginLabelNames(originLabels),
                     null, null, null);
-            dataLogRedisUtil.deleteByLabelDataLog(issueDTO.getProjectId());
+            dataLogRedisUtil.deleteCustomChartAndPieChart(issueDTO.getProjectId());
         }
     }
 
@@ -1135,7 +1137,7 @@ public class DataLogAspect {
             createDataLog(componentIssueRelDTO.getProjectId(), componentIssueRelDTO.getIssueId(),
                     FIELD_COMPONENT, issueComponentMapper.selectByPrimaryKey(componentIssueRelDTO.getComponentId()).getName(), null,
                     componentIssueRelDTO.getComponentId().toString(), null);
-            dataLogRedisUtil.deleteByComponentChange(componentIssueRelDTO.getProjectId());
+            dataLogRedisUtil.deleteCustomChartAndPieChart(componentIssueRelDTO.getProjectId());
         }
     }
 
@@ -1154,7 +1156,7 @@ public class DataLogAspect {
                 componentIssueRelDTOList.forEach(componentIssueRel -> createDataLog(componentIssueRel.getProjectId(), componentIssueRel.getIssueId(),
                         FIELD_COMPONENT, issueComponentMapper.selectByPrimaryKey(componentIssueRel.getComponentId()).getName(), null,
                         componentIssueRel.getComponentId().toString(), null));
-                dataLogRedisUtil.deleteByComponentChange(componentIssueRelDTOList.get(0).getProjectId());
+                dataLogRedisUtil.deleteCustomChartAndPieChart(componentIssueRelDTOList.get(0).getProjectId());
             }
         }
     }
@@ -1170,7 +1172,7 @@ public class DataLogAspect {
             createDataLog(componentIssueRelDTO.getProjectId(), componentIssueRelDTO.getIssueId(), FIELD_COMPONENT,
                     null, issueComponentMapper.selectByPrimaryKey(componentIssueRelDTO.getComponentId()).getName(),
                     null, componentIssueRelDTO.getComponentId().toString());
-            dataLogRedisUtil.deleteByComponentChange(componentIssueRelDTO.getProjectId());
+            dataLogRedisUtil.deleteCustomChartAndPieChart(componentIssueRelDTO.getProjectId());
         }
     }
 
@@ -1280,8 +1282,8 @@ public class DataLogAspect {
             if (issueConvertDTO != null) {
                 //若创建issue的初始状态为已完成，生成日志
                 IssueStatusDTO issueStatusDTO = issueStatusMapper.selectByStatusId(issueConvertDTO.getProjectId(), issueConvertDTO.getStatusId());
-                Boolean condition = (issueStatusDTO.getCompleted() != null && issueStatusDTO.getCompleted());
-                if (condition) {
+                Boolean completed = (issueStatusDTO.getCompleted() != null && issueStatusDTO.getCompleted());
+                if (completed) {
                     StatusVO statusVO = statusService.queryStatusById(ConvertUtil.getOrganizationId(issueConvertDTO.getProjectId()), issueConvertDTO.getStatusId());
                     createDataLog(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId(), FIELD_RESOLUTION, null,
                             statusVO.getName(), null, issueStatusDTO.getStatusId().toString());
@@ -1313,7 +1315,7 @@ public class DataLogAspect {
                     }
                 }
                 workCalendarSubscribeService.handleWorkCalendarSubscribeChanged(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId(), false, new ArrayList<>());
-                dataLogRedisUtil.deleteByHandleIssueCreateDataLog(issueConvertDTO, condition);
+                dataLogRedisUtil.deleteByHandleIssueCreateDataLog(issueConvertDTO, completed);
                 handleMilestoneProgressByStatusId(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId(), issueConvertDTO.getStatusId(), issueConvertDTO.getTypeCode());
             }
         } catch (Throwable e) {
@@ -1563,7 +1565,7 @@ public class DataLogAspect {
             }
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_REPORTER, oldString, newString, oldValue, newValue);
-            dataLogRedisUtil.deleteCustomChart(originIssueDTO.getProjectId());
+            dataLogRedisUtil.deleteCustomChartAndPieChart(originIssueDTO.getProjectId());
         }
     }
 
@@ -1584,7 +1586,7 @@ public class DataLogAspect {
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_ASSIGNEE, oldString, newString, oldValue, newValue);
             workCalendarSubscribeService.handleWorkCalendarSubscribeChanged(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), false, Collections.singletonList(originIssueDTO.getAssigneeId()));
-            dataLogRedisUtil.deleteByHandleAssignee(originIssueDTO.getProjectId());
+            dataLogRedisUtil.deleteCustomChartAndPieChart(originIssueDTO.getProjectId());
         }
     }
 
@@ -1604,7 +1606,7 @@ public class DataLogAspect {
             }
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_MAIN_RESPONSIBLE, oldString, newString, oldValue, newValue);
-            dataLogRedisUtil.deleteCustomChart(originIssueDTO.getProjectId());
+            dataLogRedisUtil.deleteCustomChartAndPieChart(originIssueDTO.getProjectId());
         }
     }
 
@@ -1615,7 +1617,7 @@ public class DataLogAspect {
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_PRIORITY, originPriorityVO.getName()
                     , currentPriorityVO.getName(), originIssueDTO.getPriorityId().toString(), issueConvertDTO.getPriorityId().toString());
-            dataLogRedisUtil.deleteByHandlePriority(originIssueDTO.getProjectId());
+            dataLogRedisUtil.deleteCustomChartAndPieChart(originIssueDTO.getProjectId());
         }
     }
 
@@ -1720,7 +1722,7 @@ public class DataLogAspect {
             }
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_ENVIRONMENT, oldString, newString, originIssueDTO.getEnvironment(), issueConvertDTO.getEnvironment());
-            dataLogRedisUtil.deleteCustomChart(originIssueDTO.getProjectId());
+            dataLogRedisUtil.deleteCustomChartAndPieChart(originIssueDTO.getProjectId());
         }
     }
 
