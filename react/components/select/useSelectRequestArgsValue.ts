@@ -38,9 +38,17 @@ function getSelectIds(value: string[], options: any[], dataValueKey: string, pre
 interface IHookSelectRequestArgsSelectedOptions {
   /**
    * 数据列表引用
+   *
    * 默认取 key 为`value`
+   * 这里的 `dataRef` 最终传入 `useSelect`
+   * @example
+   * import { priorityApi } from '@/api'
+   * const dataRef = useRef();
+   * const values = ['2'];
+   * const selected = useSelectRequestArgsValue({ dataRef, value : values });
+   * const config = useSelect({ dataRef ,request:() => priorityApi.loadByProject(), paging:false});
    */
-  dataRef: MutableRefObject<any>
+  dataRef: MutableRefObject<((data: any[]) => void) | undefined>
   /**
    * @default 'value'
    */

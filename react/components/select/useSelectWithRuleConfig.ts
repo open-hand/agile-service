@@ -40,7 +40,7 @@ function useSelectWithRuleConfig<T extends {}>(config: SelectConfigWithRule<T>, 
   const { requestArgs } = config;
   const ruleBaseRequestArg = useMemo(() => ({ hasRule: false, fieldId }), [fieldId]);
   const hasRule = !!(!disabledRuleConfig && ruleBaseRequestArg.fieldId && (ruleIds?.length || propsSelected?.length));
-  const dataRef = useRef<any[]>();
+  const dataRef = useRef<(data:any[])=>void>();
   const requestArgsOmit = omit(requestArgs, ['selected', 'ruleIds']);
   const selected = useSelectRequestArgsValue({ dataRef, value: propsSelected });
   const requestArgsConfig = useDeepCompareCreation(() => {
@@ -52,7 +52,7 @@ function useSelectWithRuleConfig<T extends {}>(config: SelectConfigWithRule<T>, 
     return ruleBaseRequestArg;
   }, [requestArgsOmit, hasRule, ruleIds, selected, ruleBaseRequestArg]);
   const dataFnRef = useRef<any>();
-  dataFnRef.current = refsBindRef(dataRef, config.dataRef);
+  dataFnRef.current = refsBindRef(dataRef.current, config.dataRef);
   const configWithRuleConfig = useCreation(() => ({
     ...config,
     dataRef: dataFnRef,
