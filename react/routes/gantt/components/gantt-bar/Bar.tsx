@@ -99,10 +99,13 @@ function GanttBaseBar(props: React.PropsWithChildren<IGanttBaseBarProps>) {
 
   const [, targetProps] = useFollowMouseTooltip({ tooltipTitle });
   return (
-    <div className={styles.wrap} style={{ width, height }}>
+    <div
+      className={styles.wrap}
+      style={{ width, height }}
+      {...targetProps}
+    >
       <div
         className={styles.body}
-        {...targetProps}
       >
         <GanntMoveWrap data={bar} startDate={dashMoveDateRange?.start} endDate={dashMoveDateRange?.end}>
           <div id="ganttBar" className={styles.dash} style={dashStyle} />
@@ -117,7 +120,6 @@ function GanttBaseBar(props: React.PropsWithChildren<IGanttBaseBarProps>) {
           </div>
         </GanntMoveWrap>
       </div>
-      <div className={styles.delay} />
     </div>
   );
 }
