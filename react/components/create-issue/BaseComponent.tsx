@@ -989,6 +989,10 @@ const CreateIssueBase = observer(({
     },
   }), []);
 
+  useUpdateEffect(() => {
+    issueLinkDataSet.reset();
+  }, [projectId]);
+
   return (
     <Spin spinning={isLoading || isFieldsLoading}>
       <Form
