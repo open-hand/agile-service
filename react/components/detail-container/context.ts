@@ -43,6 +43,10 @@ interface DetailContainerContext {
    * @default  false 当 `disableResizeWidth` 设置为 `true`时，`noBorder=true`
    */
   noBorder?: boolean
+  /**
+   * 禁止附件预览中查看工作项详情按钮
+   */
+  disabledPreviewIssueButton?: boolean,
 }
 const DetailContainerContext = createContext({} as DetailContainerContext);
 
