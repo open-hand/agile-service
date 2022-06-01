@@ -1004,9 +1004,9 @@ const CreateIssueBase = observer(({
       </Form>
       {issueTypeCode === 'feature' ? <WSJF dataSet={dataSet} /> : null}
       {enableIssueLinks ? <IssueLink projectId={projectId} dataSet={issueLinkDataSet} /> : null}
-      {hasInject(DEPENDENCY) ? mount(DEPENDENCY, { issueTypeCode, forwardRef: otherLinkRef }) : null}
-      {hasInject(DELIVERABLE) ? mount(DELIVERABLE, { issueTypeCode, forwardRef: deliverableRef }) : null}
-      {hasInject(RISK_SELECT_LINK) ? mount(RISK_SELECT_LINK, { issueTypeCode, dataSet }) : null}
+      {hasInject(DEPENDENCY) ? mount(DEPENDENCY, { issueTypeCode, forwardRef: otherLinkRef, projectId }) : null}
+      {hasInject(DELIVERABLE) ? mount(DELIVERABLE, { issueTypeCode, forwardRef: deliverableRef, projectId }) : null}
+      {hasInject(RISK_SELECT_LINK) ? mount(RISK_SELECT_LINK, { issueTypeCode, dataSet, projectId }) : null}
     </Spin>
   );
 });
