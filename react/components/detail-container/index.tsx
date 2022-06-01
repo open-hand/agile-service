@@ -171,6 +171,7 @@ export interface DetailContainerProps {
   hidden: boolean
   setHidden: (hidden: boolean) => void
   disableResizeWidth?: boolean
+  disabledPreviewIssueButton?: boolean,
 }
 const DetailContainer: React.FC<DetailContainerProps> = ({ children, visible, ...props }) => {
   const resizeRef = useRef();
