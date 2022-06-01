@@ -5,12 +5,13 @@ import { inject } from 'mobx-react';
 import {
   DataSet,
 } from 'choerodon-ui/pro';
-import { useCreation, useMount } from 'ahooks';
+import { useCreation, useMount, useUpdateEffect } from 'ahooks';
 import { groupBy, omit } from 'lodash';
 import GanntDependencyModalDataSet from './GanntDependencyModalDataSet';
 import { IModalProps } from '@/common/types';
 import type { IGanttUpdateIssueDependencyItem } from '@/api';
 import { GanttIssue } from '@/routes/gantt/types';
+import PredecessorTypeDataSet from './PredecessorTypeDataSet';
 
 export interface IGanttDependencyModalProps {
   onOk?: (data: IGanttUpdateIssueDependencyItem[]) => void
@@ -22,6 +23,7 @@ export interface IGanttDependencyModalProps {
   disableAutoCreate?: boolean,
   horizontal?: boolean,
   otherArgs?: object,
+  projectId?: string,
 }
 
 interface Context extends Omit<IGanttDependencyModalProps, 'data'> {
@@ -36,16 +38,26 @@ export default function useGanntDependencyModal() {
 }
 export const StoreProvider = inject('AppState')(
   (props: IGanttDependencyModalProps & { children: any }) => {
-    const { children, data, disableAutoCreate = false } = props;
+    const {
+      children, data, disableAutoCreate = false, projectId,
+    } = props;
+    const predecessorTypeDs = useCreation(() => new DataSet(PredecessorTypeDataSet(projectId)), []);
     const editData = useCreation(() => Object.entries(groupBy(data || [], (item) => item.predecessorType))
       .reduce((pre, [predecessorType, issues]) => ({ ...pre, [predecessorType]: issues.flat().map((item) => item.predecessorId) }), {}) as { [key: string]: string[] }, []);
-    const dataset = useCreation(() => new DataSet(GanntDependencyModalDataSet(Object.entries(editData).map(([predecessorType, predecessorId]) => ({
+    const dataset = useCreation(() => new DataSet(GanntDependencyModalDataSet(predecessorTypeDs, Object.entries(editData).map(([predecessorType, predecessorId]) => ({
       predecessorType,
       predecessorId,
     })))), []);
     useMount(() => {
       !disableAutoCreate && !data?.length && dataset.create({ predecessorType: 'predecessor_fs' });
     });
+
+    useUpdateEffect(() => {
+      if (projectId) {
+        predecessorTypeDs.setQueryParameter('projectId', projectId);
+        predecessorTypeDs.query();
+      }
+    }, [projectId]);
 
     return (
       <Store.Provider value={{ ...omit(props, 'data'), data: editData || {}, dataset }}>
