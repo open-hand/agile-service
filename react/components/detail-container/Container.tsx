@@ -34,7 +34,7 @@ function getStoredWidth() {
 }
 const Container: React.FC = () => {
   const {
-    outside, topAnnouncementHeight, match, routes, close, pop, push, fullPage, resizeRef, filePreview,
+    outside, topAnnouncementHeight, match, routes, close, pop, push, fullPage, resizeRef, filePreview, disableResizeWidth, noBorder = null,
   } = useDetailContainerContext();
   const container = useRef<HTMLDivElement>(null);
   const maxWidth = window.innerWidth * 0.6;
@@ -68,6 +68,8 @@ const Container: React.FC = () => {
     }
     return null;
   }, [match.key, match.path, match.props]);
+  const boundaryElement = filePreview ? <div className={`${prefixCls}-border`} /> : <div className={`${prefixCls}-divider`} />;
+  const leftElement = disableResizeWidth && (noBorder === null || noBorder) ? <></> : boundaryElement;
   const element = (
     <div
       className={`${prefixCls}-resize`}
@@ -76,7 +78,7 @@ const Container: React.FC = () => {
         paddingTop: routes.length > 1 ? 34 : 0,
       }}
     >
-      {filePreview ? <div className={`${prefixCls}-border`} /> : <div className={`${prefixCls}-divider`} />}
+      {leftElement}
       {routes.length > 1 && (
         <div
           role="none"
@@ -99,7 +101,7 @@ const Container: React.FC = () => {
       }}
     >
       <ResizeAble
-        disabled={!!filePreview}
+        disabled={!!filePreview || disableResizeWidth}
         ref={resizeRef}
         modes={['left']}
         size={{

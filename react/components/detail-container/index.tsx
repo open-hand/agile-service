@@ -5,6 +5,7 @@ import React, {
 import { Animate } from 'choerodon-ui/pro';
 import { useCreation, usePersistFn } from 'ahooks';
 import { observer } from 'mobx-react-lite';
+import { merge } from 'lodash';
 import useGetAnnouncementHeight from '@/hooks/useGetAnnouncementHeight';
 import Container, { registerPath } from './Container';
 import PreviewIssueFile from './PreviewIssueFile';
@@ -34,7 +35,7 @@ export const useDetail = (): [DetailContainerProps] => {
   const match = routes[routes.length - 1];
   const push = usePersistFn((nextRoute: IRoute) => {
     const pushDetail = () => {
-      const routeWithKey = { ...currentDetailRouteOptions[nextRoute.path], ...nextRoute, key: Math.random() };
+      const routeWithKey = { ...merge(nextRoute, currentDetailRouteOptions[nextRoute.path]), key: Math.random() };
       setRoutes((r) => ([...r, routeWithKey]));
       updateEventsMap(routeWithKey.path, routeWithKey.events);
       setVisible(true);
@@ -169,6 +170,7 @@ export interface DetailContainerProps {
   setFilePreview: (filePreview?: IPreview) => void
   hidden: boolean
   setHidden: (hidden: boolean) => void
+  disableResizeWidth?: boolean
 }
 const DetailContainer: React.FC<DetailContainerProps> = ({ children, visible, ...props }) => {
   const resizeRef = useRef();

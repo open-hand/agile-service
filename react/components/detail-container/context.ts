@@ -37,6 +37,12 @@ interface DetailContainerContext {
   setFilePreview: (filePreview?: IPreview) => void
   hidden: boolean
   setHidden: (hidden: boolean) => void
+  disableResizeWidth?: boolean
+  /**
+   * 没有边框
+   * @default  false 当 `disableResizeWidth` 设置为 `true`时，`noBorder=true`
+   */
+  noBorder?: boolean
 }
 const DetailContainerContext = createContext({} as DetailContainerContext);
 
