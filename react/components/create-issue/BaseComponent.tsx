@@ -6,7 +6,7 @@ import {
   DataSet, Form, Spin, TextField,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import { usePersistFn } from 'ahooks';
+import { usePersistFn, useUpdateEffect } from 'ahooks';
 import {
   castArray, every, filter, find, get, includes, map, merge, set, some, uniq,
 } from 'lodash';
