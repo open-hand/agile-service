@@ -15,8 +15,15 @@ export interface IHookSelectWithRuleOptions {
    *  @default false
    * */
   disabledRuleConfig?: boolean
+  /**
+   * 存在规则时启用级联规则
+   * @default true
+   */
+  existRuleEnabled?: boolean
 }
-export type IHookSelectRuleRequestArgs = Pick<IHookSelectWithRuleOptions, 'fieldId' | 'ruleIds'> & { hasRule: boolean, selected?: string[] }
+export type IHookSelectRuleRequestArgs0 = Pick<IHookSelectWithRuleOptions, 'fieldId' | 'ruleIds'> & { selected: string[] }
+
+export type IHookSelectRuleRequestArgs = ({ hasRule: true } & Required<IHookSelectRuleRequestArgs0>) | ({ hasRule?: false } & IHookSelectRuleRequestArgs0)
 export type LoadConfigWithRule = Omit<LoadConfig, 'requestArgs'> & {
   requestArgs: IHookSelectRuleRequestArgs & {
     [key: string]: any
@@ -35,22 +42,22 @@ export type SelectConfigWithRule<T = {}> = Omit<SelectConfig<T>, 'request' | 'mi
  * @param config
  */
 function useSelectWithRuleConfig<T extends {}>(config: SelectConfigWithRule<T>, {
-  selected: propsSelected, ruleIds, fieldId, disabledRuleConfig,
+  selected: propsSelected, ruleIds, fieldId, disabledRuleConfig, existRuleEnabled = true,
 }: IHookSelectWithRuleOptions = {}) {
   const { requestArgs } = config;
-  const ruleBaseRequestArg = useMemo(() => ({ hasRule: false, fieldId }), [fieldId]);
-  const hasRule = !!(!disabledRuleConfig && ruleBaseRequestArg.fieldId && (ruleIds?.length || propsSelected?.length));
-  const dataRef = useRef<(data:any[])=>void>();
+  const dataRef = useRef<(data: any[]) => void>();
   const requestArgsOmit = omit(requestArgs, ['selected', 'ruleIds']);
   const selected = useSelectRequestArgsValue({ dataRef, value: propsSelected });
+  const ruleBaseRequestArg = useMemo(() => ({ hasRule: false, fieldId, selected }), [fieldId, selected]);
+  const hasRule = !!(!disabledRuleConfig && ruleBaseRequestArg.fieldId && (propsSelected?.length && (!existRuleEnabled || ruleIds?.length)));
   const requestArgsConfig = useDeepCompareCreation(() => {
     if (hasRule) {
       return {
-        ...requestArgsOmit, ...ruleBaseRequestArg, ruleIds, hasRule: true, selected,
+        ...requestArgsOmit, ...ruleBaseRequestArg, ruleIds: ruleIds || [], hasRule: true,
       };
     }
     return ruleBaseRequestArg;
-  }, [requestArgsOmit, hasRule, ruleIds, selected, ruleBaseRequestArg]);
+  }, [requestArgsOmit, hasRule, ruleIds, ruleBaseRequestArg]);
   const dataFnRef = useRef<any>();
   dataFnRef.current = refsBindRef(dataRef.current, config.dataRef);
   const configWithRuleConfig = useCreation(() => ({

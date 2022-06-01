@@ -1,15 +1,14 @@
 import {
-  useCounter,
-  useCreation, usePersistFn, usePrevious, useSafeState,
+  useCreation, usePersistFn,
 } from 'ahooks';
 import {
-  castArray, difference, get, values,
+  castArray, difference, get,
 } from 'lodash';
-import React, {
-  MutableRefObject, useEffect, useMemo, useRef, useState,
+import {
+  MutableRefObject, useMemo, useRef,
 } from 'react';
-import useDeepCompareCreation from '@/hooks/useDeepCompareCreation';
 import useDeepCompareEffect from '@/hooks/useDeepCompareEffect';
+import { useNoticeSelectUpdateSelected } from './useNoticeSelectUpdateSelected';
 
 function valueTypeSync(targetValueType: 'string' | 'array', value?: any[]): string[] | string {
   if (value === undefined) {
@@ -76,15 +75,15 @@ function useSelectRequestArgsValue(options: IHookSelectRequestArgsSelectedOption
   const ids = useCreation(() => ({ current: [] as string[] }), []);
   const valueArr = useMemo(() => castArray(value).filter(Boolean), [value]);
   latestValueRef.current = valueArr;
-  const [, { inc: update }] = useCounter();
+  const [, update] = useNoticeSelectUpdateSelected();
   const loadData = usePersistFn((d: any[]) => {
     latestDataRef.current = d;
     const newIds = getSelectIds(latestValueRef.current || [], d, dataValueKey, ids.current);
-    const isUpdate = (newIds.length || ids.current?.length) && !Object.is(newIds, ids.current);
-    if (isUpdate) {
-      ids.current = newIds;
-      update();
-    }
+    update('ids', newIds, (isUpdate) => {
+      if (isUpdate) {
+        ids.current = newIds;
+      }
+    });
   });
   if (!dataRef.current) {
     dataRef.current = loadData;

@@ -3,13 +3,14 @@ import { Select } from 'choerodon-ui/pro';
 import { toJS } from 'mobx';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
-import { castArray } from 'lodash';
+import { castArray, uniq } from 'lodash';
 import { useComputed } from 'mobx-react-lite';
 import { epicApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { IEpic } from '@/components/charts/epic-report/search';
-import { useNoticeSelectUpdateSelected } from '../useNoticeSelectUpdateSelected';
-import { refsBindRef, wrapRequestCallback } from '../utils';
+import { refsBindRef } from '../utils';
+import { useRefsBindRef } from '@/hooks/useRefsBindRef';
+import useSelectRequestArgsValue from '../useSelectRequestArgsValue';
 
 export interface SelectEpicProps extends Partial<SelectProps> {
   isProgram?: boolean
@@ -29,33 +30,22 @@ export interface SelectEpicProps extends Partial<SelectProps> {
 }
 
 const SelectEpic: React.FC<SelectEpicProps> = forwardRef(({
-  isProgram, afterLoad, dataRef, dontAddEpic0, unassignedEpic, request, flat, projectId, defaultSelectedIds, onlyUnCompleted = true, selectIds: propsSelectIds, ...otherProps
+  isProgram, afterLoad, dataRef: propsDataRef, dontAddEpic0, unassignedEpic, request, flat, projectId, defaultSelectedIds, onlyUnCompleted = true, selectIds: propsSelectIds, ...otherProps
 }, ref: React.Ref<Select>) => {
+  const innerDataRef = useRef<any>();
   const selectRef = useRef<Select>();
   const values = useComputed(() => (selectRef.current?.getValues() || []).flat(Infinity).map((item) => (typeof item === 'object' ? item.issueId : item)), [selectRef.current?.getValues()]);
+  const selectIds = useMemo(() => uniq([...castArray(toJS(propsSelectIds)), ...castArray(toJS(defaultSelectedIds)), ...values].filter(Boolean)), [propsSelectIds, values]);
+  const selected = useSelectRequestArgsValue({ dataRef: innerDataRef, value: selectIds });
+  const args = useMemo(() => ({ selectIds: selected }), [selected]);
+  const dataRef = useRefsBindRef(propsDataRef, innerDataRef);
 
-  const selectIds = useMemo(() => [...castArray(toJS(propsSelectIds)), ...castArray(toJS(defaultSelectedIds)), ...values].filter(Boolean), [propsSelectIds, values]);
-  const selectIdsRef = useRef<string[]>(selectIds);
-
-  const [forceValue, setFilterWord] = useNoticeSelectUpdateSelected();
-  const optionsRef = useRef<any[]>();
-  const args = useMemo(() => {
-    if (optionsRef.current && selectIds) {
-      // 有新的未加载的值，就重新加载
-      const hasNewUnExistValue = selectIds.some((v) => !optionsRef.current?.find((item) => item.issueId === v));
-      if (hasNewUnExistValue || forceValue) {
-        selectIdsRef.current = selectIds;
-      }
-      selectIdsRef.current = selectIds;
-    }
-    return { selectIds: selectIdsRef.current };
-  }, [forceValue, selectIds]);
   const config = useMemo((): SelectConfig => ({
     name: 'epic',
     textField: 'epicName',
     valueField: 'issueId',
     requestArgs: args,
-    request: wrapRequestCallback(request || (({ page, filter, requestArgs }) => (isProgram ? epicApi.project(projectId).loadProgramEpics({
+    request: request || (({ page, filter, requestArgs }) => (isProgram ? epicApi.project(projectId).loadProgramEpics({
       page,
       onlyUnCompleted,
       param: filter,
@@ -63,23 +53,18 @@ const SelectEpic: React.FC<SelectEpicProps> = forwardRef(({
       page,
       onlyUnCompleted,
       param: filter,
-    }, requestArgs?.selectIds))), ({ filter }) => setFilterWord('filter', filter)),
+    }, requestArgs?.selectIds))),
     middleWare: (epicList: IEpic[]) => {
       const temp = [...epicList];
       if (unassignedEpic || (isProgram && !dontAddEpic0)) {
         temp.unshift({ issueId: '0', epicName: '未分配史诗' });
       }
-      if (dataRef) {
-        Object.assign(dataRef, {
-          current: (unassignedEpic || (isProgram && !dontAddEpic0)) ? temp.unshift({ issueId: '0', epicName: '未分配史诗' }) : temp,
-        });
-      }
       if (afterLoad) {
         afterLoad(temp);
       }
-      optionsRef.current = temp;
       return temp;
     },
+    dataRef,
     paging: true,
   }), [afterLoad, args, dataRef, dontAddEpic0, isProgram, onlyUnCompleted, projectId, request, unassignedEpic]);
   const props = useSelect(config);
