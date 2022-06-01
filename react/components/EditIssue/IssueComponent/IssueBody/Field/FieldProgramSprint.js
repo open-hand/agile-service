@@ -25,7 +25,7 @@ import SelectTeamSprints from '@/components/select/select-teamSprint';
       (sprintId) => !sprintIds.includes(sprintId),
     ) : originSprintIds;
     setIssueLoading(true);
-    await featureApi.updateTeamAndSprint({
+    await featureApi.project(store.projectId).updateTeamAndSprint({
       piId: issue.activePi ? issue.activePi.id : null,
       deleteSprintIds: removeSprints,
       featureId: issue.issueId,
