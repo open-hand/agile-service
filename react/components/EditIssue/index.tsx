@@ -69,6 +69,10 @@ export interface IAgileEditIssueProps {
    * 禁止开发页操作
    */
   disabledDevelopmentTab?: boolean
+  /**
+   * UI/UX打开新窗口预览
+   */
+  uiPreviewOutside?: boolean,
   [key: string]: any
 }
 export default function Index(props: IAgileEditIssueProps) {
