@@ -1,3 +1,4 @@
+import { createRef } from 'react';
 import { SelectConfig } from '@/hooks/useSelect';
 
 export function wrapRequestCallback<T = any>(request: SelectConfig<T>['request'], callback?: (val: Parameters<SelectConfig['request']>[0], res: T[], originRes: any) => void): SelectConfig<any>['request'] {
@@ -13,10 +14,17 @@ export function refsBindRef(...refs: any[]) {
       if (typeof r === 'function') {
         r(originRef);
       } else if (r && typeof r === 'object' && Object.keys(r).includes('current')) {
-        Object.assign(r, {
+        typeof r.current === 'function' ? r.current(originRef) : Object.assign(r, {
           current: originRef,
         });
       }
     });
   };
+}
+export function createRefsBindRef<RT>(...refs: any[]) {
+  const ref = createRef<(r: RT) => void>();
+  Object.assign(ref, {
+    current: refsBindRef(...refs),
+  });
+  return ref;
 }

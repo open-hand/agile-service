@@ -9,8 +9,9 @@ import { useCreation } from 'ahooks';
 import useSelect, { SelectConfig, FragmentForSearch } from '@/hooks/useSelect';
 import { devOpsApi } from '@/api';
 import styles from './index.less';
-import { refsBindRef, wrapRequestCallback } from '../utils';
-import { useNoticeSelectUpdateSelected } from '../useNoticeSelectUpdateSelected';
+import { refsBindRef } from '../utils';
+import useSelectRequestArgsValue from '../useSelectRequestArgsValue';
+import { useRefsBindRef } from '@/hooks/useRefsBindRef';
 
 const { OptGroup, Option } = Select;
 interface Props extends Partial<SelectProps> {
@@ -126,12 +127,14 @@ const SelectTestOtherAppService: React.FC<Props> = forwardRef(({
   );
 });
 const SelectPageAppService: React.FC<Props> = forwardRef(({
-  dataRef, valueField, afterLoad, flat, projectId, request, className, pageTargetProjectId, checkMember, ...otherProps
+  dataRef: propsDataRef, valueField, afterLoad, flat, projectId, request, className, pageTargetProjectId, checkMember, ...otherProps
 }, ref: React.Ref<Select>) => {
+  const innerDataRef = useRef<any>();
   const selectRef = useRef<Select>();
   const value = useComputed(() => selectRef.current?.getValue(), [selectRef.current]);
-  const [forceUpdateValue, setFilterWord] = useNoticeSelectUpdateSelected();
-  const args = useCreation(() => ({ pageTargetProjectId, targetAppServiceId: value }), [pageTargetProjectId, forceUpdateValue]);
+  const targetAppServiceId = useSelectRequestArgsValue({ dataRef: innerDataRef, value });
+  const args = useCreation(() => ({ pageTargetProjectId, targetAppServiceId }), [pageTargetProjectId, targetAppServiceId]);
+  const dataRef = useRefsBindRef(innerDataRef, propsDataRef);
   const config = useMemo((): SelectConfig => ({
     name: 'appService',
     textField: 'name',
@@ -142,28 +145,17 @@ const SelectPageAppService: React.FC<Props> = forwardRef(({
         {renderService(appService)}
       </FragmentForSearch>
     ),
-    request: wrapRequestCallback(({ page, filter, requestArgs }) => (requestArgs?.pageTargetProjectId! ? devOpsApi.project(projectId).loadPageActiveService({
+    request: ({ page, filter, requestArgs }) => (requestArgs?.pageTargetProjectId! ? devOpsApi.project(projectId).loadPageActiveService({
       page,
       size: 10,
       param: filter,
       targetProjectId: requestArgs?.pageTargetProjectId!,
       targetAppServiceId: requestArgs?.targetAppServiceId,
-    }) : new Promise((resolve) => resolve({ list: [], hasNextPage: false }))), ({ filter, requestArgs }) => {
-      requestArgs?.pageTargetProjectId && setFilterWord('filter', filter);
-    }),
-    middleWare: (data: any) => {
-      if (dataRef) {
-        Object.assign(dataRef, {
-          current: data,
-        });
-      }
-      if (afterLoad) {
-        afterLoad(data);
-      }
-      return data;
-    },
+    }) : new Promise((resolve) => resolve({ list: [], hasNextPage: false }))),
+    dataRef,
+    afterLoad,
     paging: true,
-  }), [projectId, args]);
+  }), [args, projectId, dataRef, afterLoad]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
 

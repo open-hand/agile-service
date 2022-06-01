@@ -9,8 +9,8 @@ import {
   featureApi,
 } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
-import { useNoticeSelectUpdateSelected } from '../useNoticeSelectUpdateSelected';
-import { refsBindRef, wrapRequestCallback } from '../utils';
+import { refsBindRef } from '../utils';
+import useSelectRequestArgsValue from '../useSelectRequestArgsValue';
 
 interface IFeature {
   issueId: string
@@ -28,39 +28,22 @@ export interface SelectSubFeatureProps extends Partial<SelectProps> {
 const SelectSubFeature: React.FC<SelectSubFeatureProps> = forwardRef(({
   featureIds: propsFeatureIds, afterLoad, flat, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
+  const dataRef = useRef<any>();
   const selectRef = useRef<Select>();
-  const selectIdsRef = useRef<Array<string | number>>(propsFeatureIds || []);
   const values = useComputed(() => (selectRef.current?.getValues() || []).flat(Infinity).map((item) => (typeof item === 'object' ? item.issueId : item)), [selectRef.current?.getValues()]);
-  const optionsRef = useRef<any[]>();
   const featureIds = useMemo(() => uniq([...values, ...(propsFeatureIds || [])]).filter(Boolean), [values, propsFeatureIds]);
-  const [forceValue, setFilterWord] = useNoticeSelectUpdateSelected();
-  const args = useMemo(() => {
-    if (optionsRef.current && featureIds) {
-      // 有新的未加载的值，就重新加载
-      const hasNewUnExistValue = featureIds.some((v) => !optionsRef.current?.find((item) => item.issueId === v));
-      if (hasNewUnExistValue || forceValue) {
-        selectIdsRef.current = featureIds;
-      }
-    }
-    return { featureIds: selectIdsRef.current };
-  }, [featureIds, forceValue]);
+
+  const selected = useSelectRequestArgsValue({ dataRef, value: featureIds });
+  const args = useMemo(() => ({ featureIds: selected }), [selected]);
   const config = useMemo((): SelectConfig<IFeature> => ({
     name: 'featureId',
     textField: 'summary',
     valueField: 'issueId',
     tooltip: true,
     requestArgs: args,
-    request: wrapRequestCallback(
-      ({ filter, page, requestArgs }) => featureApi.project(projectId).queryAllInSubProject(requestArgs?.featureIds || [], filter!, page, 50),
-      ({ filter }) => setFilterWord('filter', filter),
-    ),
-    middleWare: (data) => {
-      if (afterLoad) {
-        afterLoad(data);
-      }
-      optionsRef.current = data;
-      return data;
-    },
+    request: ({ filter, page, requestArgs }) => featureApi.project(projectId)
+      .queryAllInSubProject(requestArgs?.featureIds || [], filter!, page, 50),
+    afterLoad,
   }), [afterLoad, args, projectId]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;

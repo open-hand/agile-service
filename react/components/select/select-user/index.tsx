@@ -19,8 +19,7 @@ import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import type { User } from '@/common/types';
 import UserTag from '@/components/tag/user-tag';
 import Styles from './index.less';
-import { refsBindRef, wrapRequestCallback } from '../utils';
-import { useNoticeSelectUpdateSelected } from '../useNoticeSelectUpdateSelected';
+import { refsBindRef } from '../utils';
 import { styles as ellipsisStyles } from '../common/utils';
 import useSelectRequestArgsValue from '../useSelectRequestArgsValue';
 
