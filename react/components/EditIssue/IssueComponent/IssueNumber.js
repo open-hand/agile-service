@@ -18,7 +18,7 @@ const IssueNumber = ({
 }) => {
   const { issueId, issueNum, applyType } = issue;
   const {
-    isProgramIssue, store,
+    isProgramIssue, store, disabledIssueNumLink,
   } = useContext(EditIssueContext);
   const isWaterfallIssue = useMemo(() => WATERFALL_TYPE_CODES.includes(typeCode), [typeCode]);
   const handleClickIssueNum = useCallback(() => {
@@ -55,7 +55,7 @@ const IssueNumber = ({
     }}
     >
       {
-        ((['sub_task', 'bug'].includes(typeCode) && parentSummary) || ['feature', 'risk'].includes(typeCode) || isProgramIssue || isWaterfallIssue) ? (
+        ((['sub_task', 'bug'].includes(typeCode) && parentSummary) || ['feature', 'risk'].includes(typeCode) || isProgramIssue || isWaterfallIssue || disabledIssueNumLink) ? (
           <span>
             {issueNum}
           </span>

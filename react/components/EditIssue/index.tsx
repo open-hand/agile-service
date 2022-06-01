@@ -73,6 +73,10 @@ export interface IAgileEditIssueProps {
    * UI/UX打开新窗口预览
    */
   uiPreviewOutside?: boolean,
+  /**
+   * issue编码禁止跳转
+   */
+  disabledIssueNumLink?: boolean,
   [key: string]: any
 }
 export default function Index(props: IAgileEditIssueProps) {
