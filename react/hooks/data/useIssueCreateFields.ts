@@ -1,4 +1,5 @@
 import { useQueries, UseQueryResult } from 'react-query';
+import { useCreation } from 'ahooks';
 import { fieldApi, pageConfigApi } from '@/api';
 import { IssueCreateFields } from '@/common/types';
 import { ICascadeLinkage } from '@/routes/page-config/components/setting-linkage/Linkage';
@@ -14,7 +15,8 @@ export default function useIssueCreateFields(config: IssueCreateFieldsConfig): [
   const fieldsKey = useProjectKey({ key: ['issue-create-fields', { issueTypeId }], projectId });
   const templateKey = useProjectKey({ key: ['issue-create description-template', { issueTypeId }], projectId });
   const pageCascadeRuleList = useProjectKey({ key: ['issue-create pageCascadeRuleList', { issueTypeId }], projectId });
-
+  const dataUpdateInfo = useCreation(() => ({ projectId }), []);
+  dataUpdateInfo.projectId = projectId;
   // @ts-ignore
   return useQueries([{
     queryKey: fieldsKey,
@@ -29,10 +31,13 @@ export default function useIssueCreateFields(config: IssueCreateFieldsConfig): [
       switch (field.fieldCode) {
         case 'sprint':
           return { ...field, fieldType: 'multiple', fieldCode: 'subProjectSprint' };
+        case 'programVersion': {
+          return { ...field, currentProjectId: dataUpdateInfo.projectId };
+        }
         default:
           return field;
       }
-    }) : data),
+    }) : data.map((field) => (field.fieldCode === 'programVersion' ? { ...field, currentProjectId: dataUpdateInfo.projectId } : field))),
     keepPreviousData: true,
     enabled: !!issueTypeId,
   }, {

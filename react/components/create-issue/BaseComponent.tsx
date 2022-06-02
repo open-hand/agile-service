@@ -331,6 +331,9 @@ const CreateIssueBase = observer(({
   const currentTemplateDescription = useRef(defaultValues?.description || '');
   const otherLinkRef = useRef();
   const deliverableRef = useRef();
+  const formIsLoadingRef = useRef<boolean>();
+  const currentProjectIdRef = useRef<string>();
+  currentProjectIdRef.current = projectId;
   const [templateSummary] = useState(new Map());
   const [dataSet, setDataSet] = useState(defaultDataSet);
   const { isWaterfallAgile } = useIsWaterfall();
@@ -385,6 +388,7 @@ const CreateIssueBase = observer(({
   const [{ data: fields, isFetching: isFieldsLoading }, {
     data: templateData,
   }, { data: cascadeRuleList = [] }] = useIssueCreateFields({ issueTypeId: showSelectProject && isLoading ? undefined : issueTypeId, issueTypeCode, projectId });
+  formIsLoadingRef.current = isLoading || isFieldsLoading;
   const fieldValueArr = usePersistFn((field: IssueCreateFields) => {
     let value = castArray(getValue(dataSet, field.fieldCode));
     const preset = presets.get(field.fieldCode);
@@ -872,6 +876,13 @@ const CreateIssueBase = observer(({
           },
         };
       }
+      case 'programVersion': {
+        // @ts-ignore
+        const sameProject = field.currentProjectId === currentProjectIdRef.current;
+        return {
+          enabledQuery: sameProject && !formIsLoadingRef.current,
+        };
+      }
       default: break;
     }
     switch (field.fieldType) {
@@ -925,6 +936,9 @@ const CreateIssueBase = observer(({
           required: required || false,
           fieldCode: name,
           fieldType,
+          // 临时修复
+          // @ts-ignore
+          currentProjectId: field?.currentProjectId,
           defaultValueObj: field?.defaultValueObj,
           defaultValueObjs: field?.defaultValueObjs,
         });
