@@ -27,6 +27,7 @@ export const useDetail = (): [DetailContainerProps] => {
   const [copingStrategyChanged, setCopingStrategyChanged] = useState<boolean>(false);
   const currentDetailRouteOptions = useCreation(() => ({}) as IDetailPushRouteOptions, []);
   const eventsMap = useRef<Map<string, DetailEvents>>(new Map());
+  const routesRef = useRef<IRouteWithKey[]>();
   const updateEventsMap = useCallback((path: string, events?: DetailEvents) => {
     if (events) {
       eventsMap.current.set(path, events);
@@ -125,6 +126,9 @@ export const useDetail = (): [DetailContainerProps] => {
     });
     setRoutes([]);
   }, []);
+  routesRef.current = routes;
+  const query = useCallback((routeIndex: number) => (routesRef.current?.length ? routesRef.current[routeIndex] : undefined), []);
+
   return [{
     visible,
     routes,
@@ -134,6 +138,7 @@ export const useDetail = (): [DetailContainerProps] => {
     pop,
     close,
     clear,
+    query,
     eventsMap: eventsMap.current,
     filePreview,
     setFilePreview,
@@ -164,6 +169,7 @@ export interface DetailContainerProps {
   pop: () => void
   close: () => void
   clear: () => void
+  query: (routeIndex: number) => IRouteWithKey | undefined
   eventsMap: Map<string, DetailEvents>
   fullPage?: boolean
   filePreview?: IPreview
@@ -171,7 +177,7 @@ export interface DetailContainerProps {
   hidden: boolean
   setHidden: (hidden: boolean) => void
   disableResizeWidth?: boolean
-  disabledPreviewIssueButton?: boolean,
+  disabledPreviewIssueButton?: boolean
 }
 const DetailContainer: React.FC<DetailContainerProps> = ({ children, visible, ...props }) => {
   const resizeRef = useRef();
