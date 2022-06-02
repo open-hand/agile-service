@@ -91,6 +91,10 @@ export interface IAgileEditIssueProps {
    * 禁止依赖与关联tab内所有操作
    */
   disabledTabDependLink?:boolean
+  /**
+   * 禁止交付物的操作
+   */
+  disabledDeliverable?:boolean
   [key: string]: any
 }
 export default function Index(props: IAgileEditIssueProps) {
