@@ -57,6 +57,7 @@ export const StoreProvider = inject('AppState')(
         predecessorTypeDs.setQueryParameter('projectId', projectId);
         predecessorTypeDs.query();
       }
+      dataset.reset();
     }, [projectId]);
 
     return (
