@@ -2260,7 +2260,7 @@
                         <if test='searchVO.contents != null and searchVO.contents.size != 0'>
                             and (
                             <foreach collection="searchVO.contents" item="content" index="index">
-                                (CONCAT_WS('—', api.project_code, ai.issue_num) LIKE CONCAT(CONCAT('%', #{content}), '%')
+                                (CONCAT_WS('-', api.project_code, ai.issue_num) LIKE CONCAT(CONCAT('%', #{content}), '%')
                                 OR ai.summary LIKE CONCAT(CONCAT('%',#{content}), '%'))
                             </foreach>
                             )
@@ -4376,7 +4376,7 @@
                             <if test='searchVO.contents != null and searchVO.contents.size != 0'>
                                 and (
                                 <foreach collection="searchVO.contents" item="content" index="index">
-                                    (CONCAT_WS('—', api.project_code, ai.issue_num) LIKE CONCAT(CONCAT('%', #{content}), '%')
+                                    (CONCAT_WS('-', api.project_code, ai.issue_num) LIKE CONCAT(CONCAT('%', #{content}), '%')
                                     OR ai.summary LIKE CONCAT(CONCAT('%',#{content}), '%'))
                                 </foreach>
                                 )
