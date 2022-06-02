@@ -18,6 +18,16 @@ export interface IAgileEditIssueProps {
    * @default 'detail'
    */
   tab?: 'detail' | 'split_story' | 'comment' | 'record' | 'development' | 'depend_link' | string
+  /**
+   * 强制启用级联
+   * `currentOpenProject` 与当前open时传入props的projectId一致的issue启用启用
+   *
+   * `always` 总是使用级联
+   *
+   *  @description 当设置 `outside=true` 'currentOpenProject' | 'always' 失效
+   * @default false  自动根据当前路由信息判断是否使用级联
+   */
+  forceEnableCascadeRules?: 'currentOpenProject' | 'always' | false
   // /**
   //  * 详情内部ref
   //  */
@@ -60,7 +70,7 @@ export interface IAgileEditIssueProps {
   /**
    * 禁止PIAim 操作
    */
-  disabledPIAimActions?:boolean
+  disabledPIAimActions?: boolean
   /**
    * 禁止头部按钮类型操作 （右侧更多操作)
    */

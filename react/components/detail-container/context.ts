@@ -30,6 +30,7 @@ interface DetailContainerContext {
   push: (nextRoute: IRoute) => void
   pop: () => void
   close: () => void
+  query: (routeIndex: number) => IRouteWithKey | undefined
   eventsMap: Map<string, DetailEvents>
   fullPage?: boolean
   resizeRef: React.MutableRefObject<any>
