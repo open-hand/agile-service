@@ -87,6 +87,10 @@ export interface IAgileEditIssueProps {
    * issue编码禁止跳转
    */
   disabledIssueNumLink?: boolean,
+  /**
+   * 禁止依赖与关联tab内所有操作
+   */
+  disabledTabDependLink?:boolean
   [key: string]: any
 }
 export default function Index(props: IAgileEditIssueProps) {
