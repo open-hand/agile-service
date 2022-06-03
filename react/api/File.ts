@@ -32,7 +32,7 @@ class FileApi extends Api<FileApi> {
     */
   uploadImage(data: FormData, outside?: boolean, projectId?: string, onUploadProgress?: (progressEvent: ProgressEvent) => void) {
     const headers = { 'content-type': 'multipart/form-data' };
-    return axios({
+    return this.request({
       headers,
       method: 'post',
       url: outside ? '/agile/v1/backlog_external/attachment/upload_for_address' : `${this.prefix}/issue_attachment/upload_for_address`,

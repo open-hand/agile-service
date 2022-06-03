@@ -143,7 +143,14 @@ const Comments: React.FC<Props> = ({
       {
         (!disabled || !readonly) && (
           <div className={styles.add}>
-            <AddComment onSubmit={handleCreateCommit} addingRef={addingRef} editingRef={editingRef} replyingRef={replyingRef} commentsHeight={commentsSize.height} />
+            <AddComment
+              onSubmit={handleCreateCommit}
+              addingRef={addingRef}
+              editingRef={editingRef}
+              replyingRef={replyingRef}
+              commentsHeight={commentsSize.height}
+              projectId={projectId}
+            />
           </div>
         )
       }
