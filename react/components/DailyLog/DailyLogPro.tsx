@@ -197,6 +197,7 @@ const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = 
         onUploadChange={(v) => {
           setUploading(v);
         }}
+        projectId={projectId}
       />
     </Form>
   );

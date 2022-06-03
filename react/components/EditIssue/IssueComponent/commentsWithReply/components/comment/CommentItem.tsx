@@ -255,6 +255,7 @@ const CommentItem: React.FC<Props> = ({
                   setEditing(false);
                 }}
                 onOk={handleUpdate}
+                projectId={projectId}
               />
             </div>
           ) : (
@@ -279,6 +280,7 @@ const CommentItem: React.FC<Props> = ({
               }}
               onOk={handleReply}
               okText="回复"
+              projectId={projectId}
             />
           </div>
         )
