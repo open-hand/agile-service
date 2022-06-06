@@ -72,6 +72,8 @@ public class AgileEventHandler {
     private AgilePluginService agilePluginService;
     @Autowired(required = false)
     private AgileWaterfallService agileWaterfallService;
+    @Autowired(required = false)
+    private BacklogExpandService backlogExpandService;
 
     @SagaTask(code = TASK_ORG_CREATE,
             description = "创建组织事件",
@@ -148,6 +150,11 @@ public class AgileEventHandler {
                 if (!ObjectUtils.isEmpty(agileWaterfallService)) {
                     agileWaterfallService.initProject(projectEvent, codes);
                 }
+            }
+
+            if (codes.contains(ProjectCategory.MODULE_BACKLOG)) {
+                // 选择需求管理后默认开启需求池
+                backlogExpandService.startBacklog(projectEvent.getProjectId());
             }
         }
     }
