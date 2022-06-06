@@ -216,4 +216,6 @@ public interface BacklogExpandService {
     List<BacklogDataVO> listBacklogStatus(List<Long> backlogIds);
 
     List<BacklogInfoVO> listBacklogByIdsWithOption(List<Long> backlogIds, String param);
+
+    void startBacklog(Long projectId);
 }
