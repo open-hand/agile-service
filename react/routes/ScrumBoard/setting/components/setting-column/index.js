@@ -208,7 +208,7 @@ class SettingColumn extends Component {
             onDragEnd={this.handleDragEnd}
           >
             <div style={{
-              overflow: 'hidden', marginRight: 12, flex: 1,
+              overflowX: 'hidden', overflowY: 'auto', marginRight: 12, flex: 1,
             }}
             >
               <Droppable droppableId="columndrop" direction="horizontal" type="columndrop">
@@ -218,8 +218,8 @@ class SettingColumn extends Component {
                     style={{
                       display: 'flex',
                       flex: BoardData.length,
-                      overflow: 'auto',
-                      height: '100%',
+                      overflowX: 'auto',
+                      overflowY: 'hidden',
                     }}
                     {...provided.droppableProps}
                   >
