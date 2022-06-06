@@ -152,7 +152,7 @@ public class AgileEventHandler {
                 }
             }
 
-            if (codes.contains(ProjectCategory.MODULE_BACKLOG)) {
+            if (backlogExpandService != null && codes.contains(ProjectCategory.MODULE_BACKLOG)) {
                 // 选择需求管理后默认开启需求池
                 backlogExpandService.startBacklog(projectEvent.getProjectId());
             }
