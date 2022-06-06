@@ -44,6 +44,7 @@ ref: React.Ref<Select>) => {
       }
       return newData;
     },
+    paging: false,
   }), [afterFirstRequest, afterLoad, dataRef, priorityId, projectId]);
   const config = useSelectWithRuleConfig(configWithRule, otherProps);
   const props = useSelect(config);
